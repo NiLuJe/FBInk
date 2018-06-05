@@ -212,11 +212,12 @@ char* font8x8_render_x2(int ascii)
 	static char glyph_pixmap[FONTW*2 * FONTH*2] = { 0 };
 	for (i=0; i < FONTW*2;  i++) {
 		// x: input row, i: output row
+		x = i / 2;
 		for (y=0; y < FONTH; y++) {
 			// y: input & output column
 			set = bitmap[x] & 1 << y;
 			// 'Flatten' our pixmap into a 1D array (0 = 0,0; 1=0,1; 2=0,2; 8=1,0)
-			int idx = y + (x * FONTW);
+			int idx = y + (i * FONTW*2);
 			printf("idx: %d @ x: %d & y: %d vs. i: %d\n", idx, x, y, i);
 			glyph_pixmap[idx] = set ? 1 : 0;
 			glyph_pixmap[idx+1] = set ? 1 : 0;
