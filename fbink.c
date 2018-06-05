@@ -163,12 +163,13 @@ void
     draw(char* arg)
 {
 
-	fill_rect(0, 0, vinfo.xres, vinfo.yres, 1);
+	//fill_rect(0, 0, vinfo.xres, vinfo.yres, 1);
 
 	char* text  = (arg != 0) ? arg : "AB\"01\"C'D'E+-=/!?";
 	int   textX = FONTW;
 	int   textY = FONTH;
-	int   textC = 15;
+	int   textC = 0;
+	int   bgC = 15;
 
 	int i, l, x, y;
 
@@ -188,36 +189,12 @@ void
 				if (b > 0) {    // plot the pixel
 					put_pixel(textX + i * FONTW + x, textY + y, textC);
 				} else {
-					// leave empty (or maybe plot 'text backgr color')
+					put_pixel(textX + i * FONTW + x, textY + y, bgC); // plot 'text backgr color'
 				}
 			}    // end "for x"
 		}            // end "for y"
 	}                    // end "for i"
 
-	// demo all (printable ASCII) characters
-	textY = 3 * FONTH;
-	for (i = 32; i <= 126; i++) {
-		// get the 'image' index for this character
-		int ix = font_index((char) i);
-		// get the font 'image'
-		char* img = fontImg[ix];
-
-		// loop through pixel rows
-		for (y = 0; y < FONTH; y++) {
-			// loop through pixel columns
-			for (x = 0; x < FONTW; x++) {
-				// get the pixel value
-				char b = img[y * FONTW + x];
-				if (b > 0) {    // plot the pixel
-					put_pixel(FONTW + i % 16 * FONTW + x, textY + i / 16 * FONTH + y, textC);
-				} else {
-					// leave empty
-				}
-			}    // end "for x"
-		}            // end "for y"
-	}                    // end "for i"
-
-	sleep(5);
 }
 
 // application entry point
