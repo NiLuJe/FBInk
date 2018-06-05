@@ -195,7 +195,7 @@ char* font8x8_render(int ascii)
 }
 
 // Render a specific font8x8 glyph into a 16x16 pixmap
-char* font8x8_render_x2(int ascii)
+void font8x8_render_x2(int ascii, char* glyph_pixmap)
 {
 	// Get the bitmap for that ASCII character
 	// TODO: Proper validation (w/ the right array depending on the range, to pickup non-basic stuff)
@@ -206,28 +206,27 @@ char* font8x8_render_x2(int ascii)
 
 	char *bitmap = font8x8_basic[ascii];
 
-	int x, y, i = 0;
+	int x, y, i, j = 0;
 	bool set = false;
-	// FIXME: static for now because I'm lazy. Move to let the caller alloc (on stack, obv.) & pass a pointer.
-	static char glyph_pixmap[FONTW*2 * FONTH*2] = { 0 };
 	for (i=0; i < FONTW*2;  i++) {
 		// x: input row, i: output row
 		x = i / 2;
-		for (y=0; y < FONTH; y++) {
-			// y: input & output column
+		for (j=0; j < FONTH*2; j++) {
+			// y: input column, j: output column
+			y = j / 2;
 			set = bitmap[x] & 1 << y;
 			// 'Flatten' our pixmap into a 1D array (0 = 0,0; 1=0,1; 2=0,2; 8=1,0)
-			int idx = y + (i * FONTW*2);
-			printf("idx: %d @ x: %d & y: %d vs. i: %d\n", idx, x, y, i);
-			glyph_pixmap[idx] = set ? 1 : 0;
-			glyph_pixmap[idx+1] = set ? 1 : 0;
-		}
-		if (i % 2) {
-			x++;
+			int idx = j + (i * FONTW*2);
+			printf("idx: %d @ x: %d & y: %d vs. i: %d & j: %d\n", idx, x, y, i, j);
+			if (glyph_pixmap[idx] != 1)
+				glyph_pixmap[idx] = set ? 1 : 0;
+			//glyph_pixmap[idx+1] = set ? 1 : 0;
+			idx = j + 1 + (i * FONTW*2);
+			printf("idx: %d\n", idx);
+			if (glyph_pixmap[idx] != 1)
+				glyph_pixmap[idx] = set ? 1 : 0;
 		}
 	}
-
-	return glyph_pixmap;
 }
 
 // helper function for drawing - no more need to go mess with
@@ -258,7 +257,8 @@ void
 		// get the font 'image'
 		//char* img = fontImg[ix];
 		//char* img = font8x8_render(text[i]);
-		char* img = font8x8_render_x2(text[i]);
+		char img[FONTW*2 * FONTH*2] = { 0 };
+		font8x8_render_x2(text[i], img);
 		// loop through pixel rows
 		for (y = 0; y < FONTH*2; y++) {
 			// loop through pixel columns
