@@ -24,6 +24,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
+#include "eink/mxcfb-kobo.h"
 #include "fbink.h"
 
 // default framebuffer palette
@@ -169,7 +170,7 @@ void
 	int   textX = FONTW;
 	int   textY = FONTH;
 	int   textC = 0;
-	int   bgC = 15;
+	int   bgC   = 15;
 
 	// Row/Column offsets
 	int row_off = 1;
@@ -191,14 +192,36 @@ void
 				// get the pixel value
 				char b = img[y * FONTW + x];
 				if (b > 0) {    // plot the pixel
-					put_pixel(textX + (i * FONTW) + x + (row_off * FONTW), textY + y + (col_off * FONTH), textC);
+					put_pixel(textX + (i * FONTW) + x + (row_off * FONTW),
+						  textY + y + (col_off * FONTH),
+						  textC);
 				} else {
-					put_pixel(textX + (i * FONTW) + x + (row_off * FONTW), textY + y + (col_off * FONTH), bgC); // plot 'text backgr color'
+					put_pixel(textX + (i * FONTW) + x + (row_off * FONTW),
+						  textY + y + (col_off * FONTH),
+						  bgC);    // plot 'text backgr color'
 				}
 			}    // end "for x"
 		}            // end "for y"
 	}                    // end "for i"
+}
 
+// handle eink updates
+void
+    refresh(int fbfd)
+{
+	struct mxcfb_update_data update = {
+		.temp                 = TEMP_USE_AMBIENT,
+		.update_marker        = getpid(),
+		.update_mode          = UPDATE_MODE_FULL,
+		.update_region.height = vinfo.yres,
+		.update_region.width  = vinfo.xres,
+		.waveform_mode        = WAVEFORM_MODE_AUTO,
+	};
+
+	if (ioctl(fbfd, MXCFB_SEND_UPDATE, &update) < 0) {
+		perror("MXCFB_SEND_UPDATE");
+		exit(EXIT_FAILURE);
+	}
 }
 
 // application entry point
@@ -241,9 +264,12 @@ int
 		draw(argv[1]);
 	}
 
+	// Refresh screen
+	refresh(fbfd);
+
 	// cleanup
 	munmap(fbp, screensize);
 	close(fbfd);
 
-	return 0;
+	return EXIT_SUCCESS;
 }
