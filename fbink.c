@@ -218,13 +218,9 @@ void font8x8_render_x2(int ascii, char* glyph_pixmap)
 			// 'Flatten' our pixmap into a 1D array (0 = 0,0; 1=0,1; 2=0,2; 8=1,0)
 			int idx = j + (i * FONTW*2);
 			printf("idx: %d @ x: %d & y: %d vs. i: %d & j: %d\n", idx, x, y, i, j);
-			if (glyph_pixmap[idx] != 1)
-				glyph_pixmap[idx] = set ? 1 : 0;
-			//glyph_pixmap[idx+1] = set ? 1 : 0;
-			idx = j + 1 + (i * FONTW*2);
-			printf("idx: %d\n", idx);
-			if (glyph_pixmap[idx] != 1)
-				glyph_pixmap[idx] = set ? 1 : 0;
+			//if (glyph_pixmap[idx] != 1)
+			glyph_pixmap[idx] = set ? 1 : 0;
+			glyph_pixmap[idx+1] = set ? 1 : 0;
 		}
 	}
 }
