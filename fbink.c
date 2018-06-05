@@ -56,21 +56,6 @@ char*                    fbp = 0;
 struct fb_var_screeninfo vinfo;
 struct fb_fix_screeninfo finfo;
 
-// handle various bpp...
-void
-    put_pixel(int x, int y, int c)
-{
-	if (vinfo.bits_per_pixel == 8) {
-		put_pixel_Gray8(x, y, c);
-	} else if (vinfo.bits_per_pixel == 16) {
-		put_pixel_RGB565(x, y, def_r[c], def_g[c], def_b[c]);
-	} else if (vinfo.bits_per_pixel == 24) {
-		put_pixel_RGB24(x, y, def_r[c], def_g[c], def_b[c]);
-	} else if (vinfo.bits_per_pixel == 32) {
-		put_pixel_RGB32(x, y, def_r[c], def_g[c], def_b[c]);
-	}
-}
-
 // helper function to 'plot' a pixel in given color
 void
     put_pixel_Gray8(int x, int y, int c)
@@ -135,6 +120,21 @@ void
 	// or: c = ((r / 8) * 2048) + ((g / 4) * 32) + (b / 8);
 	// write 'two bytes at once'
 	*((unsigned short*) (fbp + pix_offset)) = c;
+}
+
+// handle various bpp...
+void
+    put_pixel(int x, int y, int c)
+{
+	if (vinfo.bits_per_pixel == 8) {
+		put_pixel_Gray8(x, y, c);
+	} else if (vinfo.bits_per_pixel == 16) {
+		put_pixel_RGB565(x, y, def_r[c], def_g[c], def_b[c]);
+	} else if (vinfo.bits_per_pixel == 24) {
+		put_pixel_RGB24(x, y, def_r[c], def_g[c], def_b[c]);
+	} else if (vinfo.bits_per_pixel == 32) {
+		put_pixel_RGB32(x, y, def_r[c], def_g[c], def_b[c]);
+	}
 }
 
 // helper function to draw a rectangle in given color
