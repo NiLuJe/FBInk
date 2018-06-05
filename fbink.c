@@ -26,6 +26,36 @@
 
 #include "fbink.h"
 
+// default framebuffer palette
+typedef enum {
+    BLACK        =  0, /*   0,   0,   0 */
+    BLUE         =  1, /*   0,   0, 172 */
+    GREEN        =  2, /*   0, 172,   0 */
+    CYAN         =  3, /*   0, 172, 172 */
+    RED          =  4, /* 172,   0,   0 */
+    PURPLE       =  5, /* 172,   0, 172 */
+    ORANGE       =  6, /* 172,  84,   0 */
+    LTGREY       =  7, /* 172, 172, 172 */
+    GREY         =  8, /*  84,  84,  84 */
+    LIGHT_BLUE   =  9, /*  84,  84, 255 */
+    LIGHT_GREEN  = 10, /*  84, 255,  84 */
+    LIGHT_CYAN   = 11, /*  84, 255, 255 */
+    LIGHT_RED    = 12, /* 255,  84,  84 */
+    LIGHT_PURPLE = 13, /* 255,  84, 255 */
+    YELLOW       = 14, /* 255, 255,  84 */
+    WHITE        = 15  /* 255, 255, 255 */
+} COLOR_INDEX_T;
+
+static unsigned short def_r[] =
+    { 0,   0,   0,   0, 172, 172, 172, 168,
+     84,  84,  84,  84, 255, 255, 255, 255};
+static unsigned short def_g[] =
+    { 0,   0, 168, 168,   0,   0,  84, 168,
+     84,  84, 255, 255,  84,  84, 255, 255};
+static unsigned short def_b[] =
+    { 0, 172,   0, 168,   0, 172,   0, 168,
+     84, 255,  84, 255,  84, 255,  84, 255};
+
 // 'global' variables to store screen info
 char *fbp = 0;
 struct fb_var_screeninfo vinfo;
@@ -39,6 +69,43 @@ void put_pixel(int x, int y, int c)
 
     // now this is about the same as 'fbp[pix_offset] = value'
     *((char*)(fbp + pix_offset)) = c;
+
+}
+
+void put_pixel_RGB24(int x, int y, int r, int g, int b)
+{
+    // remember to change main(): vinfo.bits_per_pixel = 24;
+    // and: screensize = vinfo.xres * vinfo.yres *
+    //                   vinfo.bits_per_pixel / 8;
+
+    // calculate the pixel's byte offset inside the buffer
+    // note: x * 3 as every pixel is 3 consecutive bytes
+    unsigned int pix_offset = x * 3 + y * finfo.line_length;
+
+    // now this is about the same as 'fbp[pix_offset] = value'
+    *((char*)(fbp + pix_offset)) = b;
+    *((char*)(fbp + pix_offset + 1)) = g;
+    *((char*)(fbp + pix_offset + 2)) = r;
+
+}
+
+void put_pixel_RGB565(int x, int y, int r, int g, int b)
+{
+    // remember to change main(): vinfo.bits_per_pixel = 16;
+    // or on RPi just comment out the whole 'Change vinfo'
+    // and: screensize = vinfo.xres * vinfo.yres *
+    //                   vinfo.bits_per_pixel / 8;
+
+    // calculate the pixel's byte offset inside the buffer
+    // note: x * 2 as every pixel is 2 consecutive bytes
+    unsigned int pix_offset = x * 2 + y * finfo.line_length;
+
+    // now this is about the same as 'fbp[pix_offset] = value'
+    // but a bit more complicated for RGB565
+    unsigned short c = ((r / 8) << 11) + ((g / 4) << 5) + (b / 8);
+    // or: c = ((r / 8) * 2048) + ((g / 4) * 32) + (b / 8);
+    // write 'two bytes at once'
+    *((unsigned short*)(fbp + pix_offset)) = c;
 
 }
 
