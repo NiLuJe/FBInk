@@ -19,12 +19,14 @@
 #include <linux/kd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <unistd.h>
 
 #include "eink/mxcfb-kobo.h"
+#include "font8x8/font8x8_latin.h"
 #include "fbink.h"
 
 // default framebuffer palette
@@ -158,6 +160,39 @@ void
 	memset(fbp, c, vinfo.xres * vinfo.yres);
 }
 
+// Render a specific font8x8 glyph into a 8x8 pixmap
+char* font8x8_render(int ascii)
+{
+	// Get the bitmap for that ASCII character
+	// TODO: Validate!
+	if (ascii > 127 || ascii < 0) {
+		// Default to space when OOR
+		ascii = 0;
+	}
+
+	char *bitmap = font8x8_basic[ascii];
+
+	int x,y = 0;
+	bool set = false;
+	static char glyph_pixmap[FONTW * FONTH] = { 0 };
+	for (x=0; x < 8;  x++) {
+		// x: input & output row
+		for (y=0; y < 8; y++) {
+			// y: input & output column
+			set = bitmap[x] & 1 << y;
+			// 'Flatten' our pixmap into a 1D array (0 = 0,0; 1=0,1; 2=0,2; 8=1,0)
+			//int idx = x + (y * FONTH);	// 90° Left rotattion ;).
+			int idx = y + (x * FONTW);
+			printf("idx: %d @ x: %d & y: %d\n", idx, x, y);
+			glyph_pixmap[idx] = set ? 1 : 0;
+			//printf("%c", set ? 'X' : ' '); // y
+		}
+		//printf("\n");
+	}
+
+	return glyph_pixmap;
+}
+
 // helper function for drawing - no more need to go mess with
 // the main function when just want to change what to draw...
 void
@@ -166,7 +201,7 @@ void
 
 	//fill_rect(0, 0, vinfo.xres, vinfo.yres, 1);
 
-	char* text  = (arg != 0) ? arg : "AB\"01\"C'D'E+-=/!?";
+	char* text  = (arg != 0) ? arg : "Hello World!";
 	int   textX = FONTW;
 	int   textY = FONTH;
 	int   textC = 0;
@@ -182,9 +217,10 @@ void
 	l = strlen(text);
 	for (i = 0; i < l; i++) {
 		// get the 'image' index for this character
-		int ix = font_index(text[i]);
+		//int ix = font_index(text[i]);
 		// get the font 'image'
-		char* img = fontImg[ix];
+		//char* img = fontImg[ix];
+		char* img = font8x8_render(text[i]);
 		// loop through pixel rows
 		for (y = 0; y < FONTH; y++) {
 			// loop through pixel columns
