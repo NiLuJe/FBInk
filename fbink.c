@@ -164,7 +164,7 @@ void
 char* font8x8_render(int ascii)
 {
 	// Get the bitmap for that ASCII character
-	// TODO: Validate!
+	// TODO: Proper validation (w/ the right array depending on the range, to pickup non-basic stuff)
 	if (ascii > 127 || ascii < 0) {
 		// Default to space when OOR
 		ascii = 0;
@@ -174,6 +174,7 @@ char* font8x8_render(int ascii)
 
 	int x,y = 0;
 	bool set = false;
+	// FIXME: static for now because I'm lazy. Move to let the caller alloc (on stack, obv.) & pass a pointer.
 	static char glyph_pixmap[FONTW * FONTH] = { 0 };
 	for (x=0; x < 8;  x++) {
 		// x: input & output row
