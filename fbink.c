@@ -58,6 +58,9 @@ static unsigned short def_b[] = { 0, 172, 0, 168, 0, 172, 0, 168, 84, 255, 84, 2
 char*                    fbp = 0;
 struct fb_var_screeninfo vinfo;
 struct fb_fix_screeninfo finfo;
+unsigned int FONTW = 8;
+unsigned int FONTH = 8;
+unsigned int FONTSIZE_MULT = 1;
 
 // helper function to 'plot' a pixel in given color
 void
@@ -161,7 +164,7 @@ void
 }
 
 // Render a specific font8x8 glyph into a 8x8 pixmap
-char* font8x8_render(int ascii)
+void font8x8_render(int ascii, char* glyph_pixmap)
 {
 	// Get the bitmap for that ASCII character
 	// TODO: Proper validation (w/ the right array depending on the range, to pickup non-basic stuff)
@@ -174,8 +177,6 @@ char* font8x8_render(int ascii)
 
 	int x, y = 0;
 	bool set = false;
-	// FIXME: static for now because I'm lazy. Move to let the caller alloc (on stack, obv.) & pass a pointer.
-	static char glyph_pixmap[FONTW * FONTH] = { 0 };
 	for (x=0; x < FONTW;  x++) {
 		// x: input & output row
 		for (y=0; y < FONTH; y++) {
@@ -190,8 +191,6 @@ char* font8x8_render(int ascii)
 		}
 		//printf("\n");
 	}
-
-	return glyph_pixmap;
 }
 
 // Render a specific font8x8 glyph into a 16x16 pixmap
@@ -208,17 +207,16 @@ void font8x8_render_x2(int ascii, char* glyph_pixmap)
 
 	int x, y, i, j = 0;
 	bool set = false;
-	for (i=0; i < FONTW*2;  i++) {
+	for (i=0; i < FONTW;  i++) {
 		// x: input row, i: output row
-		x = i / 2;
-		for (j=0; j < FONTH*2; j++) {
+		x = i / FONTSIZE_MULT;
+		for (j=0; j < FONTH; j++) {
 			// y: input column, j: output column
-			y = j / 2;
+			y = j / FONTSIZE_MULT;
 			set = bitmap[x] & 1 << y;
 			// 'Flatten' our pixmap into a 1D array (0 = 0,0; 1=0,1; 2=0,2; 8=1,0)
-			int idx = j + (i * FONTW*2);
+			int idx = j + (i * FONTW);
 			printf("idx: %d @ x: %d & y: %d vs. i: %d & j: %d\n", idx, x, y, i, j);
-			//if (glyph_pixmap[idx] != 1)
 			glyph_pixmap[idx] = set ? 1 : 0;
 			glyph_pixmap[idx+1] = set ? 1 : 0;
 		}
@@ -234,8 +232,8 @@ void
 	//fill_rect(0, 0, vinfo.xres, vinfo.yres, 1);
 
 	char* text  = (arg != 0) ? arg : "Hello World!";
-	int   textX = FONTW*2;
-	int   textY = FONTH*2;
+	int   textX = FONTW;
+	int   textY = FONTH;
 	int   textC = 0;
 	int   bgC   = 15;
 
@@ -253,21 +251,23 @@ void
 		// get the font 'image'
 		//char* img = fontImg[ix];
 		//char* img = font8x8_render(text[i]);
-		char img[FONTW*2 * FONTH*2] = { 0 };
+		//char img[FONTW * FONTH] = { 0 };
+		char img[FONTW * FONTH];
+		// FIXME: Make sure it's 0-initialized? Seems to be the case ATM.
 		font8x8_render_x2(text[i], img);
 		// loop through pixel rows
-		for (y = 0; y < FONTH*2; y++) {
+		for (y = 0; y < FONTH; y++) {
 			// loop through pixel columns
-			for (x = 0; x < FONTW*2; x++) {
+			for (x = 0; x < FONTW; x++) {
 				// get the pixel value
-				char b = img[y * FONTW*2 + x];
+				char b = img[y * FONTW + x];
 				if (b > 0) {    // plot the pixel
-					put_pixel(textX + (i * FONTW*2) + x + (row_off * FONTW*2),
-						  textY + y + (col_off * FONTH*2),
+					put_pixel(textX + (i * FONTW) + x + (row_off * FONTW),
+						  textY + y + (col_off * FONTH),
 						  textC);
 				} else {
-					put_pixel(textX + (i * FONTW*2) + x + (row_off * FONTW*2),
-						  textY + y + (col_off * FONTH*2),
+					put_pixel(textX + (i * FONTW) + x + (row_off * FONTW),
+						  textY + y + (col_off * FONTH),
 						  bgC);    // plot 'text backgr color'
 				}
 			}    // end "for x"
@@ -316,6 +316,19 @@ int
 		printf("Error reading variable information.\n");
 	}
 	printf("Original %dx%d, %dbpp\n", vinfo.xres, vinfo.yres, vinfo.bits_per_pixel);
+
+	// Set font-size based on screen resolution
+	if (vinfo.yres <= 800) {
+		FONTSIZE_MULT = 1;	// 8x8
+	} else if (vinfo.yres <= 1024) {
+		FONTSIZE_MULT = 2;	// 16x16
+	} else {
+		FONTSIZE_MULT = 2;	// 32x32
+	}
+	// Go!
+	FONTW = FONTW * FONTSIZE_MULT;
+	FONTH = FONTH * FONTSIZE_MULT;
+	printf("Fontsize set to %dx%d.\n", FONTW, FONTH);
 
 	// Get fixed screen information
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo)) {
