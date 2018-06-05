@@ -171,6 +171,10 @@ void
 	int   textC = 0;
 	int   bgC = 15;
 
+	// Row/Column offsets
+	int row_off = 1;
+	int col_off = 1;
+
 	int i, l, x, y;
 
 	// loop through all characters in the text string
@@ -187,9 +191,9 @@ void
 				// get the pixel value
 				char b = img[y * FONTW + x];
 				if (b > 0) {    // plot the pixel
-					put_pixel(textX + i * FONTW + x, textY + y, textC);
+					put_pixel(textX + (i * FONTW) + x + (row_off * FONTW), textY + y + (col_off * FONTH), textC);
 				} else {
-					put_pixel(textX + i * FONTW + x, textY + y, bgC); // plot 'text backgr color'
+					put_pixel(textX + (i * FONTW) + x + (row_off * FONTW), textY + y + (col_off * FONTH), bgC); // plot 'text backgr color'
 				}
 			}    // end "for x"
 		}            // end "for y"
