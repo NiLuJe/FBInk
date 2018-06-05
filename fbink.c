@@ -1,7 +1,7 @@
 /*
  * fbtestfnt.c
  *
- * http://raspberrycompote.blogspot.com/2014/04/low-level-graphics-on-raspberry-pi-text.html 
+ * http://raspberrycompote.blogspot.com/2014/04/low-level-graphics-on-raspberry-pi-text.html
  *
  * Original work by J-P Rosti (a.k.a -rst- and 'Raspberry Compote')
  *
@@ -22,8 +22,9 @@
 #include <linux/fb.h>
 #include <sys/mman.h>
 #include <linux/kd.h>
+#include <sys/ioctl.h>
 
-#include "fbtestfnt.h"
+#include "fbink.h"
 
 // 'global' variables to store screen info
 char *fbp = 0;
@@ -51,7 +52,7 @@ void fill_rect(int x, int y, int w, int h, int c) {
     }
 }
 
-// helper function to clear the screen - fill whole 
+// helper function to clear the screen - fill whole
 // screen with given color
 void clear_screen(int c) {
     memset(fbp, c, vinfo.xres * vinfo.yres);
@@ -67,7 +68,7 @@ void draw(char *arg) {
     int textX = FONTW;
     int textY = FONTH;
     int textC = 15;
-    
+
     int i, l, x, y;
 
     // loop through all characters in the text string
@@ -76,7 +77,7 @@ void draw(char *arg) {
         // get the 'image' index for this character
         int ix = font_index(text[i]);
         // get the font 'image'
-        char *img = fontImg[ix]; 
+        char *img = fontImg[ix];
         // loop through pixel rows
         for (y = 0; y < FONTH; y++) {
             // loop through pixel columns
@@ -86,7 +87,7 @@ void draw(char *arg) {
                 if (b > 0) { // plot the pixel
                     put_pixel(textX + i * FONTW + x, textY + y, textC);
                 }
-                else { 
+                else {
                     // leave empty (or maybe plot 'text backgr color')
                 }
             } // end "for x"
@@ -99,8 +100,8 @@ void draw(char *arg) {
         // get the 'image' index for this character
         int ix = font_index((char)i);
         // get the font 'image'
-        char *img = fontImg[ix]; 
-        
+        char *img = fontImg[ix];
+
         // loop through pixel rows
         for (y = 0; y < FONTH; y++) {
             // loop through pixel columns
@@ -110,14 +111,14 @@ void draw(char *arg) {
                 if (b > 0) { // plot the pixel
                     put_pixel(FONTW + i % 16 * FONTW + x, textY + i / 16 * FONTH + y, textC);
                 }
-                else { 
+                else {
                     // leave empty
                 }
             } // end "for x"
         } // end "for y"
     } // end "for i"
-    
-    sleep(5); 
+
+    sleep(5);
 }
 
 // application entry point
@@ -150,7 +151,7 @@ int main(int argc, char* argv[])
     if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo)) {
       printf("Error reading variable information.\n");
     }
-    printf("Original %dx%d, %dbpp\n", vinfo.xres, vinfo.yres, 
+    printf("Original %dx%d, %dbpp\n", vinfo.xres, vinfo.yres,
        vinfo.bits_per_pixel );
 
     // Store for reset (copy vinfo to vinfo_orig)
@@ -170,13 +171,13 @@ int main(int argc, char* argv[])
     }
     //printf("Fixed info: smem_len %d, line_length %d\n", finfo.smem_len, finfo.line_length);
 
-    // map fb to user mem 
+    // map fb to user mem
     screensize = finfo.smem_len;
-    fbp = (char*)mmap(0, 
-              screensize, 
-              PROT_READ | PROT_WRITE, 
-              MAP_SHARED, 
-              fbfd, 
+    fbp = (char*)mmap(0,
+              screensize,
+              PROT_READ | PROT_WRITE,
+              MAP_SHARED,
+              fbfd,
               0);
 
     if ((int)fbp == -1) {
@@ -201,5 +202,5 @@ int main(int argc, char* argv[])
     }
 
     return 0;
-  
+
 }
