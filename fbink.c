@@ -172,13 +172,13 @@ char* font8x8_render(int ascii)
 
 	char *bitmap = font8x8_basic[ascii];
 
-	int x,y = 0;
+	int x, y = 0;
 	bool set = false;
 	// FIXME: static for now because I'm lazy. Move to let the caller alloc (on stack, obv.) & pass a pointer.
 	static char glyph_pixmap[FONTW * FONTH] = { 0 };
-	for (x=0; x < 8;  x++) {
+	for (x=0; x < FONTW;  x++) {
 		// x: input & output row
-		for (y=0; y < 8; y++) {
+		for (y=0; y < FONTH; y++) {
 			// y: input & output column
 			set = bitmap[x] & 1 << y;
 			// 'Flatten' our pixmap into a 1D array (0 = 0,0; 1=0,1; 2=0,2; 8=1,0)
@@ -194,6 +194,41 @@ char* font8x8_render(int ascii)
 	return glyph_pixmap;
 }
 
+// Render a specific font8x8 glyph into a 16x16 pixmap
+char* font8x8_render_x2(int ascii)
+{
+	// Get the bitmap for that ASCII character
+	// TODO: Proper validation (w/ the right array depending on the range, to pickup non-basic stuff)
+	if (ascii > 127 || ascii < 0) {
+		// Default to space when OOR
+		ascii = 0;
+	}
+
+	char *bitmap = font8x8_basic[ascii];
+
+	int x, y, i = 0;
+	bool set = false;
+	// FIXME: static for now because I'm lazy. Move to let the caller alloc (on stack, obv.) & pass a pointer.
+	static char glyph_pixmap[FONTW*2 * FONTH*2] = { 0 };
+	for (i=0; i < FONTW*2;  i++) {
+		// x: input row, i: output row
+		for (y=0; y < FONTH; y++) {
+			// y: input & output column
+			set = bitmap[x] & 1 << y;
+			// 'Flatten' our pixmap into a 1D array (0 = 0,0; 1=0,1; 2=0,2; 8=1,0)
+			int idx = y + (x * FONTW);
+			printf("idx: %d @ x: %d & y: %d vs. i: %d\n", idx, x, y, i);
+			glyph_pixmap[idx] = set ? 1 : 0;
+			glyph_pixmap[idx+1] = set ? 1 : 0;
+		}
+		if (i % 2) {
+			x++;
+		}
+	}
+
+	return glyph_pixmap;
+}
+
 // helper function for drawing - no more need to go mess with
 // the main function when just want to change what to draw...
 void
@@ -203,8 +238,8 @@ void
 	//fill_rect(0, 0, vinfo.xres, vinfo.yres, 1);
 
 	char* text  = (arg != 0) ? arg : "Hello World!";
-	int   textX = FONTW;
-	int   textY = FONTH;
+	int   textX = FONTW*2;
+	int   textY = FONTH*2;
 	int   textC = 0;
 	int   bgC   = 15;
 
@@ -221,20 +256,21 @@ void
 		//int ix = font_index(text[i]);
 		// get the font 'image'
 		//char* img = fontImg[ix];
-		char* img = font8x8_render(text[i]);
+		//char* img = font8x8_render(text[i]);
+		char* img = font8x8_render_x2(text[i]);
 		// loop through pixel rows
-		for (y = 0; y < FONTH; y++) {
+		for (y = 0; y < FONTH*2; y++) {
 			// loop through pixel columns
-			for (x = 0; x < FONTW; x++) {
+			for (x = 0; x < FONTW*2; x++) {
 				// get the pixel value
-				char b = img[y * FONTW + x];
+				char b = img[y * FONTW*2 + x];
 				if (b > 0) {    // plot the pixel
-					put_pixel(textX + (i * FONTW) + x + (row_off * FONTW),
-						  textY + y + (col_off * FONTH),
+					put_pixel(textX + (i * FONTW*2) + x + (row_off * FONTW*2),
+						  textY + y + (col_off * FONTH*2),
 						  textC);
 				} else {
-					put_pixel(textX + (i * FONTW) + x + (row_off * FONTW),
-						  textY + y + (col_off * FONTH),
+					put_pixel(textX + (i * FONTW*2) + x + (row_off * FONTW*2),
+						  textY + y + (col_off * FONTH*2),
 						  bgC);    // plot 'text backgr color'
 				}
 			}    // end "for x"
