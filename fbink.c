@@ -223,6 +223,38 @@ void font8x8_render_x2(int ascii, char* glyph_pixmap)
 	}
 }
 
+// Render a specific font8x8 glyph into a 32x32 pixmap
+void font8x8_render_x4(int ascii, char* glyph_pixmap)
+{
+	// Get the bitmap for that ASCII character
+	// TODO: Proper validation (w/ the right array depending on the range, to pickup non-basic stuff)
+	if (ascii > 127 || ascii < 0) {
+		// Default to space when OOR
+		ascii = 0;
+	}
+
+	char *bitmap = font8x8_basic[ascii];
+
+	int x, y, i, j = 0;
+	bool set = false;
+	for (i=0; i < FONTW;  i++) {
+		// x: input row, i: output row
+		x = i / FONTSIZE_MULT;
+		for (j=0; j < FONTH; j++) {
+			// y: input column, j: output column
+			y = j / FONTSIZE_MULT;
+			set = bitmap[x] & 1 << y;
+			// 'Flatten' our pixmap into a 1D array (0 = 0,0; 1=0,1; 2=0,2; 8=1,0)
+			int idx = j + (i * FONTW);
+			printf("idx: %d @ x: %d & y: %d vs. i: %d & j: %d\n", idx, x, y, i, j);
+			glyph_pixmap[idx] = set ? 1 : 0;
+			glyph_pixmap[idx+1] = set ? 1 : 0;
+			glyph_pixmap[idx+2] = set ? 1 : 0;
+			glyph_pixmap[idx+3] = set ? 1 : 0;
+		}
+	}
+}
+
 // helper function for drawing - no more need to go mess with
 // the main function when just want to change what to draw...
 void
@@ -250,11 +282,21 @@ void
 		//int ix = font_index(text[i]);
 		// get the font 'image'
 		//char* img = fontImg[ix];
-		//char* img = font8x8_render(text[i]);
 		//char img[FONTW * FONTH] = { 0 };
 		char img[FONTW * FONTH];
 		// FIXME: Make sure it's 0-initialized? Seems to be the case ATM.
-		font8x8_render_x2(text[i], img);
+		switch(FONTSIZE_MULT) {
+			case 4:
+				font8x8_render_x4(text[i], img);
+				break;
+			case 2:
+				font8x8_render_x2(text[i], img);
+				break;
+			case 1:
+			default:
+				font8x8_render(text[i], img);
+				break;
+		}
 		// loop through pixel rows
 		for (y = 0; y < FONTH; y++) {
 			// loop through pixel columns
@@ -323,7 +365,7 @@ int
 	} else if (vinfo.yres <= 1024) {
 		FONTSIZE_MULT = 2;	// 16x16
 	} else {
-		FONTSIZE_MULT = 2;	// 32x32
+		FONTSIZE_MULT = 4;	// 32x32
 	}
 	// Go!
 	FONTW = FONTW * FONTSIZE_MULT;
