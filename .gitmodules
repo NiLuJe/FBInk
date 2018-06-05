@@ -1,0 +1,3 @@
+[submodule "font8x8"]
+	path = font8x8
+	url = https://github.com/dhepper/font8x8.git
