@@ -56,9 +56,24 @@ char*                    fbp = 0;
 struct fb_var_screeninfo vinfo;
 struct fb_fix_screeninfo finfo;
 
-// helper function to 'plot' a pixel in given color
+// handle various bpp...
 void
     put_pixel(int x, int y, int c)
+{
+	if (vinfo.bits_per_pixel == 8) {
+		put_pixel_Gray8(x, y, c);
+	} else if (vinfo.bits_per_pixel == 16) {
+		put_pixel_RGB565(x, y, def_r[c], def_g[c], def_b[c]);
+	} else if (vinfo.bits_per_pixel == 24) {
+		put_pixel_RGB24(x, y, def_r[c], def_g[c], def_b[c]);
+	} else if (vinfo.bits_per_pixel == 32) {
+		put_pixel_RGB32(x, y, def_r[c], def_g[c], def_b[c]);
+	}
+}
+
+// helper function to 'plot' a pixel in given color
+void
+    put_pixel_Gray8(int x, int y, int c)
 {
 	// calculate the pixel's byte offset inside the buffer
 	unsigned int pix_offset = x + y * finfo.line_length;
@@ -82,6 +97,24 @@ void
 	*((char*) (fbp + pix_offset))     = b;
 	*((char*) (fbp + pix_offset + 1)) = g;
 	*((char*) (fbp + pix_offset + 2)) = r;
+}
+
+void
+    put_pixel_RGB32(int x, int y, int r, int g, int b)
+{
+	// remember to change main(): vinfo.bits_per_pixel = 32;
+	// and: screensize = vinfo.xres * vinfo.yres *
+	//                   vinfo.bits_per_pixel / 8;
+
+	// calculate the pixel's byte offset inside the buffer
+	// note: x * 4 as every pixel is 4 consecutive bytes
+	unsigned int pix_offset = x * 4 + y * finfo.line_length;
+
+	// now this is about the same as 'fbp[pix_offset] = value'
+	*((char*) (fbp + pix_offset))     = b;
+	*((char*) (fbp + pix_offset + 1)) = g;
+	*((char*) (fbp + pix_offset + 2)) = r;
+	*((char*) (fbp + pix_offset + 3)) = 0xFF;    // Opaque, always.
 }
 
 void
@@ -204,37 +237,17 @@ int
 	}
 	printf("The framebuffer device was opened successfully.\n");
 
-	// hide cursor
-	char* kbfds = "/dev/tty";
-	int   kbfd  = open(kbfds, O_WRONLY);
-	if (kbfd >= 0) {
-		ioctl(kbfd, KDSETMODE, KD_GRAPHICS);
-	} else {
-		printf("Could not open %s.\n", kbfds);
-	}
-
 	// Get variable screen information
 	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo)) {
 		printf("Error reading variable information.\n");
 	}
 	printf("Original %dx%d, %dbpp\n", vinfo.xres, vinfo.yres, vinfo.bits_per_pixel);
 
-	// Store for reset (copy vinfo to vinfo_orig)
-	memcpy(&orig_vinfo, &vinfo, sizeof(struct fb_var_screeninfo));
-
-	// Change variable info
-	vinfo.bits_per_pixel = 8;
-	vinfo.xres           = (960 > vinfo.xres) ? vinfo.xres : 960;
-	vinfo.yres           = (540 > vinfo.yres) ? vinfo.yres : 540;
-	if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vinfo)) {
-		printf("Error setting variable information.\n");
-	}
-
 	// Get fixed screen information
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo)) {
 		printf("Error reading fixed information.\n");
 	}
-	//printf("Fixed info: smem_len %d, line_length %d\n", finfo.smem_len, finfo.line_length);
+	printf("Fixed info: smem_len %d, line_length %d\n", finfo.smem_len, finfo.line_length);
 
 	// map fb to user mem
 	screensize = finfo.smem_len;
@@ -245,20 +258,11 @@ int
 	} else {
 		// draw...
 		draw(argv[1]);
-		//sleep(5);
 	}
 
 	// cleanup
 	munmap(fbp, screensize);
-	if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &orig_vinfo)) {
-		printf("Error re-setting variable information.\n");
-	}
 	close(fbfd);
-
-	// reset cursor
-	if (kbfd >= 0) {
-		ioctl(kbfd, KDSETMODE, KD_TEXT);
-	}
 
 	return 0;
 }
