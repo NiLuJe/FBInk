@@ -163,7 +163,7 @@ void
 			put_pixel(x + cx, y + cy, c);
 		}
 	}
-	//printf("filled %dx%d rectangle @ %d, %d\n", w, h, x, y);
+	printf("filled %dx%d rectangle @ %d, %d\n", w, h, x, y);
 }
 
 // helper function to clear the screen - fill whole
@@ -296,6 +296,28 @@ struct mxcfb_rect
 	};
 
 	printf("Region: top=%u, left=%u, width=%u, height=%u\n", region.top, region.left, region.width, region.height);
+
+	// NOTE: eInk framebuffers are weird...,
+	//       we should be computing the length of a line (MAXCOLS) based on xres_virtual,
+	//       not xres (because it's guranteed to be a multiple of 16).
+	//       Unfortunately, that means this last block of the line is partly offscreen.
+	//       Also, it CANNOT be part of the region passed to the eInk controller...
+	//       So, since this this last block is basically unusable because unreadable,
+	//       don't count it as "available" (i.e., by including it in MAXCOLS),
+	//       since that would wreak havoc in a number of our heuristics,
+	//       just fudge printing a blank square 'til the edge of the screen if we're filling a line completely.
+	if (len == MAXCOLS) {
+		printf("xres %d vs. width %u\n", vinfo.xres, region.width);
+		fill_rect(region.left + (len * FONTW), region.top + (multiline_offset * FONTH), (vinfo.xres - region.width), FONTH, bgC);
+		printf("Fill: %d, %d with %dx%d rectangle\n", region.left + (len * FONTW), region.top + (multiline_offset * FONTH), (vinfo.xres - region.width), FONTH);
+		region.width = vinfo.xres;
+		printf("Region: top=%u, left=%u, width=%u, height=%u\n", region.top, region.left, region.width, region.height);
+	}
+	// Don't forget about our tweaked width on the final line...
+	// NOTE: We can't fudge it directly in the region initialization, since we use the non-fudged one to compute the size of our rectangle...
+	if (multiline_offset > 0) {
+		region.width = vinfo.xres;
+	}
 
 	// Fill our bounding box with our background color, so that we'll be visible no matter what's already on screen.
 	// NOTE: Unneeded, we already plot the background when handling font glyphs ;).
