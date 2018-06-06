@@ -157,6 +157,7 @@ void
 			put_pixel(x + cx, y + cy, c);
 		}
 	}
+	//printf("filled %dx%d rectangle @ %d, %d\n", w, h, x, y);
 }
 
 // helper function to clear the screen - fill whole
@@ -198,6 +199,7 @@ void
 			//int idx = x + (y * FONTH);	// 90° Left rotattion ;).
 			int idx           = y + (x * FONTW);
 			glyph_pixmap[idx] = set ? 1 : 0;
+			// Pixmap format is pretty simple, since we're doing monochrome: 1 means fg, and 0 for bg
 		}
 	}
 }
@@ -256,14 +258,12 @@ struct mxcfb_rect
     draw(char* arg)
 {
 
-	//fill_rect(0, 0, vinfo.xres, vinfo.yres, 1);
-
 	char* text  = (arg != 0) ? arg : "Hello World!";
 	int   textC = BLACK;
 	int   bgC   = WHITE;
 
 	// Row/Column offsets
-	int row_off = 3;
+	int row_off = 24;
 	int col_off = 1;
 
 	int i, l, x, y;
@@ -291,6 +291,10 @@ struct mxcfb_rect
 		return region;
 	}
 
+	// Fill our bounding box with our background color, so that we'll be visible no matter what's already on screen.
+	// NOTE: Unneeded, we already plot the background when handling font glyphs ;).
+	//fill_rect(region.left, region.top, region.width, region.height, bgC);
+
 	for (i = 0; i < l; i++) {
 		// get the 'image' index for this character
 		//int ix = font_index(text[i]);
@@ -316,12 +320,12 @@ struct mxcfb_rect
 			for (x = 0; x < FONTW; x++) {
 				// get the pixel value
 				char b = img[y * FONTW + x];
-				if (b > 0) {    // plot the pixel
+				if (b > 0) {
+					// plot the pixel (fg, text)
 					put_pixel((col_off * FONTW) + (i * FONTW) + x, (row_off * FONTH) + y, textC);
 				} else {
-					put_pixel((col_off * FONTW) + (i * FONTW) + x,
-						  (row_off * FONTH) + y,
-						  bgC);    // plot 'text backgr color'
+					// this is background, fill it so that we'll be visible no matter what was on screen behind us.
+					put_pixel((col_off * FONTW) + (i * FONTW) + x, (row_off * FONTH) + y, bgC);
 				}
 			}    // end "for x"
 		}            // end "for y"
@@ -334,12 +338,14 @@ struct mxcfb_rect
 void
     refresh(int fbfd, struct mxcfb_rect region)
 {
+	// NOTE: While we'd be perfect candidates for using A2 waveform mode, it's all kinds of fucked up on Kobos,
+	//       and may lead to disappearing text or weird blending depending on the surrounding fb content...
 	struct mxcfb_update_data update = {
 		.temp          = TEMP_USE_AMBIENT,
 		.update_marker = getpid(),
 		.update_mode   = UPDATE_MODE_PARTIAL,
 		.update_region = region,
-		.waveform_mode = WAVEFORM_MODE_A2,
+		.waveform_mode = WAVEFORM_MODE_AUTO,
 	};
 
 	if (ioctl(fbfd, MXCFB_SEND_UPDATE, &update) < 0) {
@@ -391,6 +397,7 @@ int
 	printf("Fixed info: smem_len %d, line_length %d\n", finfo.smem_len, finfo.line_length);
 
 	// map fb to user mem
+	// NOTE: Beware of smem_len on Kobos? c.f., https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer_linux.lua#L36
 	screensize = finfo.smem_len;
 	fbp        = (char*) mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
 
