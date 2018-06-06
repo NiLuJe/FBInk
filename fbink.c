@@ -163,9 +163,9 @@ void
 	memset(fbp, c, vinfo.xres * vinfo.yres);
 }
 
-// Render a specific font8x8 glyph into a 8x8 pixmap
-void
-    font8x8_render(int ascii, char* glyph_pixmap)
+// Return the font8x8 bitmap for a specifric ascii character
+char*
+    font8x8_get_bitmap(int ascii)
 {
 	// Get the bitmap for that ASCII character
 	// TODO: Proper validation (w/ the right array depending on the range, to pickup non-basic stuff)
@@ -174,7 +174,14 @@ void
 		ascii = 0;
 	}
 
-	char* bitmap = font8x8_basic[ascii];
+	return font8x8_basic[ascii];
+}
+
+// Render a specific font8x8 glyph into a 8x8 pixmap
+void
+    font8x8_render(int ascii, char* glyph_pixmap)
+{
+	char* bitmap = font8x8_get_bitmap(ascii);
 
 	int  x, y = 0;
 	bool set = false;
@@ -195,14 +202,7 @@ void
 void
     font8x8_render_x2(int ascii, char* glyph_pixmap)
 {
-	// Get the bitmap for that ASCII character
-	// TODO: Proper validation (w/ the right array depending on the range, to pickup non-basic stuff)
-	if (ascii > 127 || ascii < 0) {
-		// Default to space when OOR
-		ascii = 0;
-	}
-
-	char* bitmap = font8x8_basic[ascii];
+	char* bitmap = font8x8_get_bitmap(ascii);
 
 	int  x, y, i, j = 0;
 	bool set = false;
@@ -225,14 +225,7 @@ void
 void
     font8x8_render_x4(int ascii, char* glyph_pixmap)
 {
-	// Get the bitmap for that ASCII character
-	// TODO: Proper validation (w/ the right array depending on the range, to pickup non-basic stuff)
-	if (ascii > 127 || ascii < 0) {
-		// Default to space when OOR
-		ascii = 0;
-	}
-
-	char* bitmap = font8x8_basic[ascii];
+	char* bitmap = font8x8_get_bitmap(ascii);
 
 	int  x, y, i, j = 0;
 	bool set = false;
@@ -425,11 +418,12 @@ int
  * TODO: Library
  * TODO: eInk palette
  * TODO: CLI
- * 	* [row] [col] [-h] string
+ * 	* [-y, --row] [-x, --col] [-h] string
  * 		-h inverts fg/bg colors
  * TODO: A2 waveform mode? (user-selection? -w)
  * TODO: -f for full update?
  * TODO: -c to clear screen?
  * TODO: ioctl only (i.e., refresh current fb data, don't paint)
  *       -s w=758,h=1024 -f
+ * TODO: Centered text, padded/non-padded
  */
