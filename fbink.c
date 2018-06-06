@@ -254,6 +254,15 @@ static struct mxcfb_rect
 	 unsigned short int multiline_offset)
 {
 
+	/*
+	char text[MAXCOLS];
+	memcpy(text, arg, MAXCOLS);
+	*/
+	/*
+	char* text;
+	text = strdup(arg);
+	*/
+
 	printf("Printing '%s' @ line offset %hu\n", text, multiline_offset);
 	unsigned short int fgC = is_inverted ? WHITE : BLACK;
 	unsigned short int bgC = is_inverted ? BLACK : WHITE;
@@ -302,14 +311,16 @@ static struct mxcfb_rect
 	//fill_rect(region.left, region.top, region.width, region.height, bgC);
 
 	// Loop through all characters in the text string
+	//char pixmap[FONTW * FONTH];
 	for (i = 0U; i < len; i++) {
 		// get the glyph's pixmap
-		char pixmap[FONTW * FONTH];
+		//char pixmap[FONTW * FONTH];
+		char* pixmap = malloc(sizeof(*pixmap)*(FONTW * FONTH));
 		// Make sure the array is zero-initialized...
 		// NOTE: That sizeof may feel weird, but in C99, it does get evaluated at runtime :).
 		//       Otherwise, we'd need to do memset(pixmap, 0, (FONTW * FONTH) * sizeof(*pixmap));
 		//       Which, granted, should be equal to simply memset(pixmap, 0, FONTW * FONTH);
-		memset(pixmap, 0, sizeof(pixmap));
+		//memset(pixmap, 0, sizeof(pixmap));
 		switch (FONTSIZE_MULT) {
 			case 4:
 				font8x8_render_x4(text[i], pixmap);
@@ -322,12 +333,18 @@ static struct mxcfb_rect
 				font8x8_render(text[i], pixmap);
 				break;
 		}
+		//if (i == 1 || i == 2) {
+		//	printf("i: %d (%c) & pixmap: %s\n", i, text[i], pixmap);
+		//}
 		// loop through pixel rows
 		for (y = 0U; y < FONTH; y++) {
 			// loop through pixel columns
 			for (x = 0U; x < FONTW; x++) {
 				// get the pixel value
 				char b = pixmap[(y * FONTW) + x];
+				if (i == 1 || i == 2) {
+					//printf("b: %d\n", b);
+				}
 				if (b > 0) {
 					// plot the pixel (fg, text)
 					put_pixel((unsigned short int) ((col * FONTW) + (i * FONTW) + x),
@@ -429,12 +446,12 @@ void
 	// NOTE: Beware of smem_len on Kobos?
 	//       c.f., https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer_linux.lua#L36
 	screensize = finfo.smem_len;
-	fbp        = (char*) mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
+	fbp        = (char*) mmap(NULL, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
 
 	struct mxcfb_rect region;
 
-	if ((int) fbp == -1) {
-		printf("Failed to mmap.\n");
+	if (fbp == MAP_FAILED) {
+		perror("mmap");
 	} else {
 		// Clear screen?
 		if (is_cleared) {
@@ -451,7 +468,8 @@ void
 		printf("Adjusted position: column %hu, row %hu\n", col, row);
 
 		// See if we need to break our string down into multiple lines...
-		char   line[MAXCOLS];
+		//char   line[MAXCOLS+1];
+		char* line = malloc(sizeof(*line)*(MAXCOLS));
 		size_t len = strlen(string);
 		// Compute the amount of characters (i.e., rows) needed to print that string...
 		unsigned short int rows             = (unsigned short int) ((unsigned short int) col + len);
