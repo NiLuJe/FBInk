@@ -134,7 +134,7 @@ static void
 	unsigned short int cy;
 	for (cy = 0U; cy < h; cy++) {
 		for (cx = 0U; cx < w; cx++) {
-			put_pixel(x + cx, y + cy, c);
+			put_pixel((unsigned short int) (x + cx),(unsigned short int) (y + cy), c);
 		}
 	}
 	printf("filled %hux%hu rectangle @ %hu, %hu\n", w, h, x, y);
@@ -182,7 +182,7 @@ static void
 			// y: input & output column
 			set = bitmap[x] & 1 << y;
 			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTH=1,0)
-			unsigned short int idx = y + (x * FONTW);
+			unsigned short int idx = (unsigned short int) (y + (x * FONTW));
 			glyph_pixmap[idx]      = set ? 1 : 0;
 			// Pixmap format is pretty simple, since we're doing monochrome: 1 means fg, and 0 for bg
 		}
@@ -208,7 +208,7 @@ static void
 			y   = j / FONTSIZE_MULT;
 			set = bitmap[x] & 1 << y;
 			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTH=1,0)
-			unsigned short int idx = j + (i * FONTW);
+			unsigned short int idx = (unsigned short int) (j + (i * FONTW));
 			glyph_pixmap[idx]      = set ? 1 : 0;
 			glyph_pixmap[idx + 1]  = set ? 1 : 0;
 		}
@@ -234,7 +234,7 @@ static void
 			y   = j / FONTSIZE_MULT;
 			set = bitmap[x] & 1 << y;
 			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTH=1,0)
-			unsigned short int idx = j + (i * FONTW);
+			unsigned short int idx = (unsigned short int) (j + (i * FONTW));
 			glyph_pixmap[idx]      = set ? 1 : 0;
 			glyph_pixmap[idx + 1]  = set ? 1 : 0;
 			glyph_pixmap[idx + 2]  = set ? 1 : 0;
@@ -261,7 +261,7 @@ static struct mxcfb_rect
 	unsigned short int x;
 	unsigned short int y;
 	// Adjust row in case we're a continuation of a multi-line print...
-	row += multiline_offset;
+	row = (unsigned short int) (row + multiline_offset);
 
 	// Compute the length of our actual string
 	// NOTE: We already took care in fbink_print() of making sure that the string passed in text
@@ -271,10 +271,10 @@ static struct mxcfb_rect
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
-		.top    = (row - multiline_offset) * FONTH,
-		.left   = col * FONTW,
-		.width  = multiline_offset > 0 ? vinfo.xres : len * FONTW,
-		.height = (multiline_offset + 1) * FONTH,
+		.top    = (uint32_t) ((row - multiline_offset) * FONTH),
+		.left   = (uint32_t) (col * FONTW),
+		.width  = multiline_offset > 0 ? vinfo.xres : (uint32_t) (len * FONTW),
+		.height = (uint32_t) ((multiline_offset + 1) * FONTH),
 	};
 
 	printf("Region: top=%u, left=%u, width=%u, height=%u\n", region.top, region.left, region.width, region.height);
@@ -289,9 +289,9 @@ static struct mxcfb_rect
 	//       since that would happen to also wreak havoc in a number of our heuristics,
 	//       just fudge printing a blank square 'til the edge of the screen if we're filling a line completely.
 	if (len == MAXCOLS) {
-		fill_rect(region.left + (len * FONTW),
-			  region.top + (multiline_offset * FONTH),
-			  (vinfo.xres - (len * FONTW)),
+		fill_rect((unsigned short int) (region.left + (len * FONTW)),
+			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
+			  (unsigned short int) (vinfo.xres - (len * FONTW)),
 			  FONTH,
 			  bgC);
 	}
