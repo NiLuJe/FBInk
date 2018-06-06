@@ -451,6 +451,19 @@ void
 		if (rows > MAXCOLS) {
 			lines = ceilf((float) rows / (float) MAXCOLS);
 		}
+
+		// Truncate to a single screen...
+		if (lines > MAXROWS) {
+			printf("Can only print %hu out of %hu lines, truncating!\n", MAXROWS, lines);
+			lines = MAXROWS;
+		}
+
+		// Move our initial row up if we add so much line that some of it goes off-screen...
+		if (row + lines > MAXROWS) {
+			row = MIN(row - ((row + lines) - MAXROWS), MAXROWS);
+		}
+		printf("Final position: column %hu, row %hu\n", col, row);
+
 		printf("Need %hu lines to print %zu characters in %zu rows\n", lines, len, rows);
 		// If we have multiple lines to print, draw 'em line per line
 		for (multiline_offset = 0; multiline_offset < lines; multiline_offset++) {
@@ -460,10 +473,6 @@ void
 			line[MAXCOLS - col] = '\0';
 			region              = draw(line, row, col, is_inverted, multiline_offset);
 		}
-		// Support negative col/row, meaning MAXCOL-/MAXROW- (start from the end)
-		// Adjust row if row + line_number > MAXROW
-		// If adjusted row + line_number > MAXROW -> truncate
-		// Make sure adjusted row/col >= 0
 	}
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
