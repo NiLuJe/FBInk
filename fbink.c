@@ -415,3 +415,21 @@ int
 
 	return EXIT_SUCCESS;
 }
+
+/*
+ * TODO: Truncate/Multi-Line
+ * TODO: Header
+ * TODO: Makefile
+ * TODO: License
+ * TODO: DOC
+ * TODO: Library
+ * TODO: eInk palette
+ * TODO: CLI
+ * 	* [row] [col] [-h] string
+ * 		-h inverts fg/bg colors
+ * TODO: A2 waveform mode? (user-selection? -w)
+ * TODO: -f for full update?
+ * TODO: -c to clear screen?
+ * TODO: ioctl only (i.e., refresh current fb data, don't paint)
+ *       -s w=758,h=1024 -f
+ */
