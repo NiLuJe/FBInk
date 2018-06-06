@@ -46,6 +46,7 @@
 #include <sys/mman.h>
 #include <sys/param.h>
 #include <unistd.h>
+#include <stdint.h>
 
 #include "eink/mxcfb-kobo.h"
 #include "font8x8/font8x8_latin.h"

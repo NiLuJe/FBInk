@@ -114,13 +114,14 @@ static void
 static void
     fill_rect(unsigned short int x, unsigned short int y, unsigned short int w, unsigned short int h, unsigned short int c)
 {
-	unsigned short int cx, cy;
-	for (cy = 0; cy < h; cy++) {
-		for (cx = 0; cx < w; cx++) {
+	unsigned short int cx;
+	unsigned short int cy;
+	for (cy = 0U; cy < h; cy++) {
+		for (cx = 0U; cx < w; cx++) {
 			put_pixel(x + cx, y + cy, c);
 		}
 	}
-	printf("filled %dx%d rectangle @ %d, %d\n", w, h, x, y);
+	printf("filled %hux%hu rectangle @ %hu, %hu\n", w, h, x, y);
 }
 
 // helper function to clear the screen - fill whole
@@ -156,17 +157,17 @@ static void
 {
 	char* bitmap = font8x8_get_bitmap(ascii);
 
-	int  x, y = 0;
+	unsigned short int x;
+	unsigned short int y;
 	bool set = false;
-	for (x = 0; x < FONTW; x++) {
+	for (x = 0U; x < FONTW; x++) {
 		// x: input & output row
-		for (y = 0; y < FONTH; y++) {
+		for (y = 0U; y < FONTH; y++) {
 			// y: input & output column
 			set = bitmap[x] & 1 << y;
 			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTH=1,0)
-			//int idx = x + (y * FONTH);	// 90° Left rotattion ;).
-			int idx           = y + (x * FONTW);
-			glyph_pixmap[idx] = set ? 1 : 0;
+			unsigned short int idx = y + (x * FONTW);
+			glyph_pixmap[idx]      = set ? 1 : 0;
 			// Pixmap format is pretty simple, since we're doing monochrome: 1 means fg, and 0 for bg
 		}
 	}
@@ -178,17 +179,20 @@ static void
 {
 	char* bitmap = font8x8_get_bitmap(ascii);
 
-	int  x, y, i, j = 0;
+	unsigned short int x;
+	unsigned short int y;
+	unsigned short int i;
+	unsigned short int j;
 	bool set = false;
-	for (i = 0; i < FONTW; i++) {
+	for (i = 0U; i < FONTW; i++) {
 		// x: input row, i: output row
 		x = i / FONTSIZE_MULT;
-		for (j = 0; j < FONTH; j++) {
+		for (j = 0U; j < FONTH; j++) {
 			// y: input column, j: output column
 			y   = j / FONTSIZE_MULT;
 			set = bitmap[x] & 1 << y;
 			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTH=1,0)
-			int idx               = j + (i * FONTW);
+			unsigned short int idx               = j + (i * FONTW);
 			glyph_pixmap[idx]     = set ? 1 : 0;
 			glyph_pixmap[idx + 1] = set ? 1 : 0;
 		}
@@ -201,17 +205,20 @@ static void
 {
 	char* bitmap = font8x8_get_bitmap(ascii);
 
-	int  x, y, i, j = 0;
+	unsigned short int x;
+	unsigned short int y;
+	unsigned short int i;
+	unsigned short int j;
 	bool set = false;
-	for (i = 0; i < FONTW; i++) {
+	for (i = 0U; i < FONTW; i++) {
 		// x: input row, i: output row
 		x = i / FONTSIZE_MULT;
-		for (j = 0; j < FONTH; j++) {
+		for (j = 0U; j < FONTH; j++) {
 			// y: input column, j: output column
 			y   = j / FONTSIZE_MULT;
 			set = bitmap[x] & 1 << y;
 			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTH=1,0)
-			int idx               = j + (i * FONTW);
+			unsigned short int idx               = j + (i * FONTW);
 			glyph_pixmap[idx]     = set ? 1 : 0;
 			glyph_pixmap[idx + 1] = set ? 1 : 0;
 			glyph_pixmap[idx + 2] = set ? 1 : 0;
@@ -231,10 +238,12 @@ static struct mxcfb_rect
 {
 
 	printf("Printing '%s' @ line offset %hu\n", text, multiline_offset);
-	int fgC = is_inverted ? WHITE : BLACK;
-	int bgC = is_inverted ? BLACK : WHITE;
+	unsigned short int fgC = is_inverted ? WHITE : BLACK;
+	unsigned short int bgC = is_inverted ? BLACK : WHITE;
 
-	unsigned short int i, x, y;
+	unsigned short int i;
+	unsigned short int x;
+	unsigned short int y;
 	// Adjust row in case we're a continuation of a multi-line print...
 	row += multiline_offset;
 
@@ -332,7 +341,7 @@ static void
 	//       so request GC16 if we want a flash...
 	struct mxcfb_update_data update = {
 		.temp          = TEMP_USE_AMBIENT,
-		.update_marker = getpid(),
+		.update_marker = (uint32_t) getpid(),
 		.update_mode   = is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL,
 		.update_region = region,
 		.waveform_mode = is_flashing ? WAVEFORM_MODE_GC16 : WAVEFORM_MODE_AUTO,
@@ -383,13 +392,13 @@ void
 		FONTSIZE_MULT = 4;    // 32x32
 	}
 	// Go!
-	FONTW = FONTW * FONTSIZE_MULT;
-	FONTH = FONTH * FONTSIZE_MULT;
+	FONTW = (unsigned short int) (FONTW * FONTSIZE_MULT);
+	FONTH = (unsigned short int) (FONTH * FONTSIZE_MULT);
 	printf("Fontsize set to %dx%d.\n", FONTW, FONTH);
 
 	// Compute MAX* values now that we know the screen & font resolution
-	MAXCOLS = vinfo.xres / FONTW;
-	MAXROWS = vinfo.yres / FONTH;
+	MAXCOLS = (unsigned short int) (vinfo.xres / FONTW);
+	MAXROWS = (unsigned short int) (vinfo.yres / FONTH);
 	printf("Line length: %hu, Column length: %hu.\n", MAXCOLS, MAXROWS);
 
 	// Get fixed screen information
