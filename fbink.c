@@ -18,6 +18,7 @@
 #include <getopt.h>
 #include <linux/fb.h>
 #include <linux/kd.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,7 +26,6 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <unistd.h>
-#include <math.h>
 
 #include "eink/mxcfb-kobo.h"
 #include "fbink.h"
@@ -272,7 +272,7 @@ struct mxcfb_rect
 	int fgC = is_inverted ? WHITE : BLACK;
 	int bgC = is_inverted ? BLACK : WHITE;
 
-	unsigned short int                i, x, y;
+	unsigned short int i, x, y;
 	// Adjust row in case we're a continuation of a multi-line print...
 	row += line_offset;
 
@@ -346,13 +346,16 @@ void
 {
 	// NOTE: While we'd be perfect candidates for using A2 waveform mode, it's all kinds of fucked up on Kobos,
 	//       and may lead to disappearing text or weird blending depending on the surrounding fb content...
-	// FIXME: Except I'd forgotten the MONOCHROME flag, dumbass...
+	//       It only shows up properly when FULL, which isn't great...
+	//       Also, we need to set the EPDC_FLAG_FORCE_MONOCHROME flag to do it right.
+	// NOTE: And while we're on the fun quirks train: FULL doesn't flash w/ AUTO on some Kobos...
 	struct mxcfb_update_data update = {
 		.temp          = TEMP_USE_AMBIENT,
 		.update_marker = getpid(),
 		.update_mode   = is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL,
 		.update_region = region,
-		.waveform_mode = WAVEFORM_MODE_AUTO,
+		.waveform_mode = is_flashing ? WAVEFORM_MODE_GC16 : WAVEFORM_MODE_AUTO,
+		.flags         = 0,
 	};
 
 	if (ioctl(fbfd, MXCFB_SEND_UPDATE, &update) < 0) {
@@ -363,7 +366,12 @@ void
 
 // Magic happens here!
 void
-    fbink_print(char* string, unsigned short int row, unsigned short int col, bool is_inverted, bool is_flashing, bool is_cleared)
+    fbink_print(char*              string,
+		unsigned short int row,
+		unsigned short int col,
+		bool               is_inverted,
+		bool               is_flashing,
+		bool               is_cleared)
 {
 	int      fbfd       = 0;
 	long int screensize = 0;
@@ -423,15 +431,15 @@ void
 		}
 
 		// See if we need to break our string down into multiple lines...
-		char line[MAXCOLS];
+		char   line[MAXCOLS];
 		size_t len = strlen(string);
 		// Compute the amount of characters (i.e., rows) needed to print that string...
-		size_t rows = col + len;
-		unsigned short int lines = 1;
+		size_t             rows             = col + len;
+		unsigned short int lines            = 1;
 		unsigned short int multiline_offset = 0;
 		// NOTE: The maximum length of a single row is the total amount of columns in a row (i.e., line)!
 		if (rows > MAXCOLS) {
-			lines = ceilf((float) rows / (float)MAXCOLS);
+			lines = ceilf((float) rows / (float) MAXCOLS);
 		}
 		printf("Need %hu lines to print %zu characters in %zu rows\n", lines, len, rows);
 		// If we have multiple lines to print, draw 'em line per line
@@ -440,7 +448,7 @@ void
 			strncpy(line, string + (multiline_offset * (MAXCOLS - col)), (MAXCOLS - col) * sizeof(char));
 			// Ensure line is NULL terminated so that stuff stays sane later :).
 			line[MAXCOLS - col] = '\0';
-			region = draw(line, row, col, is_inverted, multiline_offset);
+			region              = draw(line, row, col, is_inverted, multiline_offset);
 		}
 		// draw...
 		// FIXME: Fuck it , and chunk the draw calls from here...
@@ -456,9 +464,9 @@ void
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
 	if (is_cleared) {
-		region.top = 0;
-		region.left = 0;
-		region.width = vinfo.xres;
+		region.top    = 0;
+		region.left   = 0;
+		region.width  = vinfo.xres;
 		region.height = vinfo.yres;
 	}
 
