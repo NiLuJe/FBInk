@@ -270,7 +270,7 @@ void
 	int   bgC   = 15;
 
 	// Row/Column offsets
-	int row_off = 1;
+	int row_off = 3;
 	int col_off = 1;
 
 	int i, l, x, y;
@@ -282,8 +282,8 @@ void
 		//int ix = font_index(text[i]);
 		// get the font 'image'
 		//char* img = fontImg[ix];
-		//char img[FONTW * FONTH] = { 0 };
 		char img[FONTW * FONTH];
+		memset(img, 0, sizeof(img));
 		// FIXME: Make sure it's 0-initialized? Seems to be the case ATM.
 		switch(FONTSIZE_MULT) {
 			case 4:
@@ -304,12 +304,12 @@ void
 				// get the pixel value
 				char b = img[y * FONTW + x];
 				if (b > 0) {    // plot the pixel
-					put_pixel(textX + (i * FONTW) + x + (row_off * FONTW),
-						  textY + y + (col_off * FONTH),
+					put_pixel(textX + (i * FONTW) + x + (col_off * FONTW),
+						  textY + y + (row_off * FONTH),
 						  textC);
 				} else {
-					put_pixel(textX + (i * FONTW) + x + (row_off * FONTW),
-						  textY + y + (col_off * FONTH),
+					put_pixel(textX + (i * FONTW) + x + (col_off * FONTW),
+						  textY + y + (row_off * FONTH),
 						  bgC);    // plot 'text backgr color'
 				}
 			}    // end "for x"
