@@ -427,6 +427,13 @@ void fbink_print(char* string, unsigned short int row, unsigned short int col, b
 	} else {
 		// draw...
 		// FIXME: Fuck it , and chunk the draw calls from here...
+		// MACOL/MAXROW
+		// multiline_offset
+		// count line_number, for multiline_offset < line_number
+		// Support negative col/row, meaning MAXCOL-/MAXROW- (start from the end)
+		// Adjust row if row + line_number > MAXROW
+		// If adjusted row + line_number > MAXROW -> truncate
+		// Make sure adjusted row/col >= 0
 		region = draw(string, row, col, is_inverted, 0);
 	}
 
@@ -501,7 +508,7 @@ int
  * TODO: Makefile
  * TODO: License
  * TODO: DOC
- * TODO: Library
+ * TODO: Library (thread safety: fbinlk_init to setup globals? /!\ fb fd?)
  * TODO: waveform mode user-selection? -w
  * TODO: ioctl only (i.e., refresh current fb data, don't paint)
  *       -s w=758,h=1024 -f
