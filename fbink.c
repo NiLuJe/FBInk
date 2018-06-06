@@ -489,9 +489,12 @@ void
 			// When centered & padded, we need to split the padding in two, left & right.
 			if (is_centered && is_padded) {
 				size_t pad_len = (MAXCOLS - line_len) / 2;
-				snprintf(line, MAXCOLS, "%*s%*s%*s", pad_len, " ", line_len, string + (multiline_offset * (MAXCOLS - col)), pad_len, " ");
+				// If we're not at the edge of the screen because of rounding errors, add extra padding on the right
+				size_t extra_pad = MAXCOLS - line_len - (pad_len * 2);
+				printf("Total size: %zu + %zu + %zu + %zu = %zu\n", pad_len, line_len, pad_len, extra_pad, (pad_len * 2) + line_len + extra_pad);
+				snprintf(line, MAXCOLS+1, "%*s%*s%*s", pad_len, " ", line_len, string + (multiline_offset * (MAXCOLS - col)), pad_len + extra_pad, " ");
 			} else {
-				snprintf(line, MAXCOLS, "%*s", line_len, string + (multiline_offset * (MAXCOLS - col)));
+				snprintf(line, MAXCOLS+1, "%*s", line_len, string + (multiline_offset * (MAXCOLS - col)));
 			}
 
 			region = draw(line, row, col, is_inverted, multiline_offset);
