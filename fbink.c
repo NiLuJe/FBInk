@@ -162,6 +162,7 @@ static char*
 	if (ascii > 127 || ascii < 0) {
 		// Default to space when OOR
 		ascii = 0;
+		printf("ASCII %d is OOR!\n", ascii);
 	}
 
 	return font8x8_basic[ascii];
@@ -301,35 +302,32 @@ static struct mxcfb_rect
 	//fill_rect(region.left, region.top, region.width, region.height, bgC);
 
 	// Loop through all characters in the text string
-	for (i = 0; i < len; i++) {
-		// get the 'image' index for this character
-		//int ix = font_index(text[i]);
-		// get the font 'image'
-		//char* img = fontImg[ix];
-		char img[FONTW * FONTH];
+	for (i = 0U; i < len; i++) {
+		// get the glyph's pixmap
+		char pixmap[FONTW * FONTH];
 		// Make sure the array is zero-initialized...
 		// NOTE: That sizeof may feel weird, but in C99, it does get evaluated at runtime :).
-		//       Otherwise, we'd need to do memset(img, 0, (FONTW * FONTH) * sizeof(*img));
-		//       Which, granted, should be equal to simply memset(img, 0, FONTW * FONTH);
-		memset(img, 0, sizeof(img));
+		//       Otherwise, we'd need to do memset(pixmap, 0, (FONTW * FONTH) * sizeof(*pixmap));
+		//       Which, granted, should be equal to simply memset(pixmap, 0, FONTW * FONTH);
+		memset(pixmap, 0, sizeof(pixmap));
 		switch (FONTSIZE_MULT) {
 			case 4:
-				font8x8_render_x4(text[i], img);
+				font8x8_render_x4(text[i], pixmap);
 				break;
 			case 2:
-				font8x8_render_x2(text[i], img);
+				font8x8_render_x2(text[i], pixmap);
 				break;
 			case 1:
 			default:
-				font8x8_render(text[i], img);
+				font8x8_render(text[i], pixmap);
 				break;
 		}
 		// loop through pixel rows
-		for (y = 0; y < FONTH; y++) {
+		for (y = 0U; y < FONTH; y++) {
 			// loop through pixel columns
-			for (x = 0; x < FONTW; x++) {
+			for (x = 0U; x < FONTW; x++) {
 				// get the pixel value
-				char b = img[y * FONTW + x];
+				char b = pixmap[(y * FONTW) + x];
 				if (b > 0) {
 					// plot the pixel (fg, text)
 					put_pixel((unsigned short int) ((col * FONTW) + (i * FONTW) + x),
@@ -476,7 +474,7 @@ void
 		}
 		printf("Final position: column %hu, row %hu\n", col, row);
 
-		printf("Need %hu lines to print %zu characters in %hu rows\n", lines, len, rows);
+		printf("Need %hu lines to print %zu characters over %hu rows\n", lines, len, rows);
 		// If we have multiple lines to print, draw 'em line per line
 		for (multiline_offset = 0; multiline_offset < lines; multiline_offset++) {
 			// Compute the amount of characters left to print...
