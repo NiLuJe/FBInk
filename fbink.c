@@ -265,8 +265,9 @@ struct mxcfb_rect
 	int   bgC   = is_inverted ? BLACK : WHITE;
 
 	int i, l, x, y;
-	unsigned short int maxlen = vinfo.xres / FONTW;
-	char remains[256] = { 0 };
+	unsigned short int maxcol = vinfo.xres / FONTW;
+	unsigned short int maxrow = vinfo.yres / FONTH;
+	char remains[512] = { 0 };
 	// Adjust row in case we're a continuation of a multi-line print...
 	row += line_offset;
 
@@ -276,7 +277,7 @@ struct mxcfb_rect
 	struct mxcfb_rect region = {
 		.top    = (row - line_offset) * FONTH,
 		.left   = col * FONTW,
-		.width  = line_offset > 0 ? (maxlen - col) * FONTW : l * FONTW,
+		.width  = line_offset > 0 ? (maxcol - col) * FONTW : l * FONTW,
 		.height = (line_offset + 1) * FONTH,
 	};
 
@@ -288,10 +289,10 @@ struct mxcfb_rect
 		       col,
 		       (region.left + region.width) / FONTW,
 		       region.left + region.width,
-		       maxlen,
+		       maxcol,
 		       vinfo.xres);
 		// Truncate current line to max printable length, and queue remainder for next line
-		l = maxlen - col;
+		l = maxcol - col;
 		//remains = text + l;
 		strncpy(remains, text + l, sizeof(remains));
 		printf("Remainder: '%s'\n", remains);
@@ -341,14 +342,14 @@ struct mxcfb_rect
 	}                    // end "for i"
 
 	// If we've got stuff left to print, keep going...
-	if (*remains != '\0') {
+	if (*remains) {
 		printf("Re-entering draw for string '%s'\n", remains);
 		draw(remains, row, col, is_inverted, ++line_offset);
-	} else {
-		printf("Returning from draw()\n");
 	}
 
-	// Re-adjust region from when we return from nested draws...
+	printf("Returning from draw()\n");
+
+	// Re-adjust region from when we resume our original draw call after our nested draws...
 	// FIXME: Don't do that, and handle the returns differently?
 	region.height = (line_offset + 1) * FONTH;
 	printf("Final region: top=%u, left=%u, width=%u, height=%u\n", region.top, region.left, region.width, region.height);
@@ -425,6 +426,7 @@ void fbink_print(char* string, unsigned short int row, unsigned short int col, b
 		printf("Failed to mmap.\n");
 	} else {
 		// draw...
+		// FIXME: Fuck it , and chunk the draw calls from here...
 		region = draw(string, row, col, is_inverted, 0);
 	}
 
