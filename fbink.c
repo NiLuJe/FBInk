@@ -309,7 +309,8 @@ static struct mxcfb_rect
 					// plot the pixel (fg, text)
 					put_pixel((col * FONTW) + (i * FONTW) + x, (row * FONTH) + y, fgC);
 				} else {
-					// this is background, fill it so that we'll be visible no matter what was on screen behind us.
+					// this is background,
+					// fill it so that we'll be visible no matter what was on screen behind us.
 					put_pixel((col * FONTW) + (i * FONTW) + x, (row * FONTH) + y, bgC);
 				}
 			}    // end "for x"
@@ -398,7 +399,8 @@ void
 	printf("Fixed info: smem_len %d, line_length %d\n", finfo.smem_len, finfo.line_length);
 
 	// map fb to user mem
-	// NOTE: Beware of smem_len on Kobos? c.f., https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer_linux.lua#L36
+	// NOTE: Beware of smem_len on Kobos?
+	//       c.f., https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer_linux.lua#L36
 	screensize = finfo.smem_len;
 	fbp        = (char*) mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
 
@@ -473,7 +475,8 @@ void
 			// When centered & padded, we need to split the padding in two, left & right.
 			if (is_centered && is_padded) {
 				size_t pad_len = (MAXCOLS - line_len) / 2;
-				// If we're not at the edge of the screen because of rounding errors, add extra padding on the right
+				// If we're not at the edge of the screen because of rounding errors,
+				// add extra padding on the right
 				size_t extra_pad = MAXCOLS - line_len - (pad_len * 2);
 				printf("Total size: %zu + %zu + %zu + %zu = %zu\n",
 				       pad_len,
