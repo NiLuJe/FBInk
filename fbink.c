@@ -473,9 +473,15 @@ void
 			size_t line_len = MIN(left, (MAXCOLS - col));
 			printf("Size to print: %zu out of %zu (left: %zu)\n", line_len, (MAXCOLS - col) * sizeof(char), left);
 
-			// Just fudge the line_length for free padding :).
+			// Just fudge the column for centering...
+			if (is_centered) {
+				col = (MAXCOLS / 2) - (line_len / 2);
+				printf("Adjusted column to %hu for centering\n", col);
+			}
+			// Just fudge the (formatted) line length for free padding :).
 			if (is_padded) {
 				line_len = (MAXCOLS - col);
+				printf("Adjusted line_len to %zu for centering\n", line_len);
 			}
 
 			snprintf(line, MAXCOLS, "%*s", line_len, string + (multiline_offset * (MAXCOLS - col)));
