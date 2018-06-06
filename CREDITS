@@ -1,0 +1,6 @@
+This project makes use of a number of third-party libraries, which we'll acknowledge here:
+
+	* font8x8 (8x8 monochrome bitmap fonts for rendering), by Daniel Hepper <daniel@hepper.net>,
+		Released under the public domain.
+		(https://github.com/dhepper/font8x8)
+
