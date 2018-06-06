@@ -586,7 +586,6 @@ int
 }
 
 /*
- * TODO: Makefile
  * TODO: DOC
  * TODO: Library (thread safety: fbinlk_init to setup globals? /!\ fb fd?)
  * TODO: waveform mode user-selection? -w
