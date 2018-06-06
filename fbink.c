@@ -25,6 +25,7 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <unistd.h>
+#include <math.h>
 
 #include "eink/mxcfb-kobo.h"
 #include "fbink.h"
@@ -439,12 +440,13 @@ void
 		unsigned short int multiline_offset = 0;
 		// NOTE: The maximum length of a single row is the total amount of columns in a line!
 		if (rows > MAXCOLS) {
-			lines = rows / MAXCOLS;
+			lines = ceilf((float) rows / (float)MAXCOLS);
 		}
 		printf("Need %hu lines to print %zu characters in %zu rows\n", lines, len, rows);
 		// If we have multiple lines to print, draw 'em line per line
 		for (multiline_offset = 0; multiline_offset < lines; multiline_offset++) {
-			strncpy(line, string + (multiline_offset * MAXCOLS), sizeof(line));
+			printf("Size to print: %zu\n", (MAXCOLS - col) * sizeof(char));
+			strncpy(line, string + (multiline_offset * (MAXCOLS - col)), (MAXCOLS - col) * sizeof(char));
 			region = draw(line, row, col, is_inverted, multiline_offset);
 		}
 		// draw...
