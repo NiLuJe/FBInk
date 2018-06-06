@@ -17,17 +17,17 @@
 #include <fcntl.h>
 #include <linux/fb.h>
 #include <linux/kd.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <unistd.h>
 
 #include "eink/mxcfb-kobo.h"
-#include "font8x8/font8x8_latin.h"
 #include "fbink.h"
+#include "font8x8/font8x8_latin.h"
 
 // default framebuffer palette
 typedef enum
@@ -58,9 +58,9 @@ static unsigned short def_b[] = { 0, 172, 0, 168, 0, 172, 0, 168, 84, 255, 84, 2
 char*                    fbp = 0;
 struct fb_var_screeninfo vinfo;
 struct fb_fix_screeninfo finfo;
-unsigned int FONTW = 8;
-unsigned int FONTH = 8;
-unsigned int FONTSIZE_MULT = 1;
+unsigned int             FONTW         = 8;
+unsigned int             FONTH         = 8;
+unsigned int             FONTSIZE_MULT = 1;
 
 // helper function to 'plot' a pixel in given color
 void
@@ -164,7 +164,8 @@ void
 }
 
 // Render a specific font8x8 glyph into a 8x8 pixmap
-void font8x8_render(int ascii, char* glyph_pixmap)
+void
+    font8x8_render(int ascii, char* glyph_pixmap)
 {
 	// Get the bitmap for that ASCII character
 	// TODO: Proper validation (w/ the right array depending on the range, to pickup non-basic stuff)
@@ -173,25 +174,26 @@ void font8x8_render(int ascii, char* glyph_pixmap)
 		ascii = 0;
 	}
 
-	char *bitmap = font8x8_basic[ascii];
+	char* bitmap = font8x8_basic[ascii];
 
-	int x, y = 0;
+	int  x, y = 0;
 	bool set = false;
-	for (x=0; x < FONTW;  x++) {
+	for (x = 0; x < FONTW; x++) {
 		// x: input & output row
-		for (y=0; y < FONTH; y++) {
+		for (y = 0; y < FONTH; y++) {
 			// y: input & output column
 			set = bitmap[x] & 1 << y;
 			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTH=1,0)
 			//int idx = x + (y * FONTH);	// 90° Left rotattion ;).
-			int idx = y + (x * FONTW);
+			int idx           = y + (x * FONTW);
 			glyph_pixmap[idx] = set ? 1 : 0;
 		}
 	}
 }
 
 // Render a specific font8x8 glyph into a 16x16 pixmap
-void font8x8_render_x2(int ascii, char* glyph_pixmap)
+void
+    font8x8_render_x2(int ascii, char* glyph_pixmap)
 {
 	// Get the bitmap for that ASCII character
 	// TODO: Proper validation (w/ the right array depending on the range, to pickup non-basic stuff)
@@ -200,27 +202,28 @@ void font8x8_render_x2(int ascii, char* glyph_pixmap)
 		ascii = 0;
 	}
 
-	char *bitmap = font8x8_basic[ascii];
+	char* bitmap = font8x8_basic[ascii];
 
-	int x, y, i, j = 0;
+	int  x, y, i, j = 0;
 	bool set = false;
-	for (i=0; i < FONTW;  i++) {
+	for (i = 0; i < FONTW; i++) {
 		// x: input row, i: output row
 		x = i / FONTSIZE_MULT;
-		for (j=0; j < FONTH; j++) {
+		for (j = 0; j < FONTH; j++) {
 			// y: input column, j: output column
-			y = j / FONTSIZE_MULT;
+			y   = j / FONTSIZE_MULT;
 			set = bitmap[x] & 1 << y;
 			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTH=1,0)
-			int idx = j + (i * FONTW);
-			glyph_pixmap[idx] = set ? 1 : 0;
-			glyph_pixmap[idx+1] = set ? 1 : 0;
+			int idx               = j + (i * FONTW);
+			glyph_pixmap[idx]     = set ? 1 : 0;
+			glyph_pixmap[idx + 1] = set ? 1 : 0;
 		}
 	}
 }
 
 // Render a specific font8x8 glyph into a 32x32 pixmap
-void font8x8_render_x4(int ascii, char* glyph_pixmap)
+void
+    font8x8_render_x4(int ascii, char* glyph_pixmap)
 {
 	// Get the bitmap for that ASCII character
 	// TODO: Proper validation (w/ the right array depending on the range, to pickup non-basic stuff)
@@ -229,23 +232,23 @@ void font8x8_render_x4(int ascii, char* glyph_pixmap)
 		ascii = 0;
 	}
 
-	char *bitmap = font8x8_basic[ascii];
+	char* bitmap = font8x8_basic[ascii];
 
-	int x, y, i, j = 0;
+	int  x, y, i, j = 0;
 	bool set = false;
-	for (i=0; i < FONTW;  i++) {
+	for (i = 0; i < FONTW; i++) {
 		// x: input row, i: output row
 		x = i / FONTSIZE_MULT;
-		for (j=0; j < FONTH; j++) {
+		for (j = 0; j < FONTH; j++) {
 			// y: input column, j: output column
-			y = j / FONTSIZE_MULT;
+			y   = j / FONTSIZE_MULT;
 			set = bitmap[x] & 1 << y;
 			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTH=1,0)
-			int idx = j + (i * FONTW);
-			glyph_pixmap[idx] = set ? 1 : 0;
-			glyph_pixmap[idx+1] = set ? 1 : 0;
-			glyph_pixmap[idx+2] = set ? 1 : 0;
-			glyph_pixmap[idx+3] = set ? 1 : 0;
+			int idx               = j + (i * FONTW);
+			glyph_pixmap[idx]     = set ? 1 : 0;
+			glyph_pixmap[idx + 1] = set ? 1 : 0;
+			glyph_pixmap[idx + 2] = set ? 1 : 0;
+			glyph_pixmap[idx + 3] = set ? 1 : 0;
 		}
 	}
 }
@@ -272,17 +275,21 @@ struct mxcfb_rect
 	l = strlen(text);
 	// Compute the dimension of the screen region we'll paint to
 	struct mxcfb_rect region = {
-		.top = row_off * FONTH,
-		.left = col_off * FONTW,
-		.width = l * FONTW,
+		.top    = row_off * FONTH,
+		.left   = col_off * FONTW,
+		.width  = l * FONTW,
 		.height = FONTH,
 	};
 
 	// Warn if what we want to print doesn't fit in a single line
 	if (region.left + region.width > vinfo.xres) {
-		printf("Trying to fit %d pixels in a %d px line\n", region.left + region.width, vinfo.xres);
+		printf("Trying to fit %d characters (%dpx) in a single %d characters line (%dpx)\n",
+		       (region.left + region.width) / FONTW,
+		       region.left + region.width,
+		       vinfo.xres / FONTW,
+		       vinfo.xres);
 		// Abort & return an empty region.
-		// TODO: Multi-line?
+		// TODO: Multi-line? Or truncate to max-supported length?
 		region.top = region.left = region.width = region.height = 0;
 		return region;
 	}
@@ -294,8 +301,7 @@ struct mxcfb_rect
 		//char* img = fontImg[ix];
 		char img[FONTW * FONTH];
 		memset(img, 0, sizeof(img));
-		// FIXME: Make sure it's 0-initialized? Seems to be the case ATM.
-		switch(FONTSIZE_MULT) {
+		switch (FONTSIZE_MULT) {
 			case 4:
 				font8x8_render_x4(text[i], img);
 				break;
@@ -314,9 +320,7 @@ struct mxcfb_rect
 				// get the pixel value
 				char b = img[y * FONTW + x];
 				if (b > 0) {    // plot the pixel
-					put_pixel((col_off * FONTW) + (i * FONTW) + x,
-						  (row_off * FONTH) + y,
-						  textC);
+					put_pixel((col_off * FONTW) + (i * FONTW) + x, (row_off * FONTH) + y, textC);
 				} else {
 					put_pixel((col_off * FONTW) + (i * FONTW) + x,
 						  (row_off * FONTH) + y,
@@ -334,11 +338,11 @@ void
     refresh(int fbfd, struct mxcfb_rect region)
 {
 	struct mxcfb_update_data update = {
-		.temp                 = TEMP_USE_AMBIENT,
-		.update_marker        = getpid(),
-		.update_mode          = UPDATE_MODE_PARTIAL,
-		.update_region        = region,
-		.waveform_mode        = WAVEFORM_MODE_AUTO,
+		.temp          = TEMP_USE_AMBIENT,
+		.update_marker = getpid(),
+		.update_mode   = UPDATE_MODE_PARTIAL,
+		.update_region = region,
+		.waveform_mode = WAVEFORM_MODE_AUTO,
 	};
 
 	if (ioctl(fbfd, MXCFB_SEND_UPDATE, &update) < 0) {
@@ -372,11 +376,11 @@ int
 
 	// Set font-size based on screen resolution
 	if (vinfo.yres <= 800) {
-		FONTSIZE_MULT = 1;	// 8x8
+		FONTSIZE_MULT = 1;    // 8x8
 	} else if (vinfo.yres <= 1024) {
-		FONTSIZE_MULT = 2;	// 16x16
+		FONTSIZE_MULT = 2;    // 16x16
 	} else {
-		FONTSIZE_MULT = 4;	// 32x32
+		FONTSIZE_MULT = 4;    // 32x32
 	}
 	// Go!
 	FONTW = FONTW * FONTSIZE_MULT;
