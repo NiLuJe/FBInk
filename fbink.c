@@ -377,7 +377,7 @@ int
 	}
 	printf("Original %dx%d, %dbpp\n", vinfo.xres, vinfo.yres, vinfo.bits_per_pixel);
 
-	// Set font-size based on screen resolution
+	// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD)
 	if (vinfo.yres <= 800) {
 		FONTSIZE_MULT = 1;    // 8x8
 	} else if (vinfo.yres <= 1024) {
