@@ -29,30 +29,34 @@
 #include "fbink.h"
 #include "font8x8/font8x8_latin.h"
 
-// default framebuffer palette
+// default eInk framebuffer palette
+// c.f. linux/drivers/video/mxc/cmap_lab126.h
 typedef enum
 {
-	BLACK        = 0,  /*   0,   0,   0 */
-	BLUE         = 1,  /*   0,   0, 172 */
-	GREEN        = 2,  /*   0, 172,   0 */
-	CYAN         = 3,  /*   0, 172, 172 */
-	RED          = 4,  /* 172,   0,   0 */
-	PURPLE       = 5,  /* 172,   0, 172 */
-	ORANGE       = 6,  /* 172,  84,   0 */
-	LTGREY       = 7,  /* 172, 172, 172 */
-	GREY         = 8,  /*  84,  84,  84 */
-	LIGHT_BLUE   = 9,  /*  84,  84, 255 */
-	LIGHT_GREEN  = 10, /*  84, 255,  84 */
-	LIGHT_CYAN   = 11, /*  84, 255, 255 */
-	LIGHT_RED    = 12, /* 255,  84,  84 */
-	LIGHT_PURPLE = 13, /* 255,  84, 255 */
-	YELLOW       = 14, /* 255, 255,  84 */
-	WHITE        = 15  /* 255, 255, 255 */
+	BLACK  = 0,     // 0x00
+	GRAY1  = 1,     // 0x11
+	GRAY2  = 2,     // 0x22
+	GRAY3  = 3,     // 0x33
+	GRAY4  = 4,     // 0x44
+	GRAY5  = 5,     // 0x55
+	GRAY6  = 6,     // 0x66
+	GRAY7  = 7,     // 0x77
+	GRAY8  = 8,     // 0x88
+	GRAY9  = 9,     // 0x99
+	GRAY10 = 10,    // 0xAA
+	GRAY11 = 11,    // 0xBB
+	GRAY12 = 12,    // 0xCC
+	GRAY13 = 13,    // 0xDD
+	GRAY14 = 14,    // 0xEE
+	WHITE  = 15     // 0xFF
 } COLOR_INDEX_T;
 
-static unsigned short def_r[] = { 0, 0, 0, 0, 172, 172, 172, 168, 84, 84, 84, 84, 255, 255, 255, 255 };
-static unsigned short def_g[] = { 0, 0, 168, 168, 0, 0, 84, 168, 84, 84, 255, 255, 84, 84, 255, 255 };
-static unsigned short def_b[] = { 0, 172, 0, 168, 0, 172, 0, 168, 84, 255, 84, 255, 84, 255, 84, 255 };
+static unsigned short def_r[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+				  0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
+static unsigned short def_g[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+				  0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
+static unsigned short def_b[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+				  0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
 
 // 'global' variables to store screen info
 char*                    fbp = 0;
@@ -416,7 +420,6 @@ int
  * TODO: License
  * TODO: DOC
  * TODO: Library
- * TODO: eInk palette
  * TODO: CLI
  * 	* [-y, --row] [-x, --col] [-h] string
  * 		-h inverts fg/bg colors
