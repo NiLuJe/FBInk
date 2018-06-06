@@ -307,7 +307,11 @@ struct mxcfb_rect
 	//       since that would happen to also wreak havoc in a number of our heuristics,
 	//       just fudge printing a blank square 'til the edge of the screen if we're filling a line completely.
 	if (len == MAXCOLS) {
-		fill_rect(region.left + (len * FONTW), region.top + (multiline_offset * FONTH), (vinfo.xres - (len * FONTW)), FONTH, bgC);
+		fill_rect(region.left + (len * FONTW),
+			  region.top + (multiline_offset * FONTH),
+			  (vinfo.xres - (len * FONTW)),
+			  FONTH,
+			  bgC);
 	}
 
 	// Fill our bounding box with our background color, so that we'll be visible no matter what's already on screen.
@@ -385,7 +389,14 @@ void
 
 // Magic happens here!
 void
-    fbink_print(char* string, short int row, short int col, bool is_inverted, bool is_flashing, bool is_cleared, bool is_centered, bool is_padded)
+    fbink_print(char*     string,
+		short int row,
+		short int col,
+		bool      is_inverted,
+		bool      is_flashing,
+		bool      is_cleared,
+		bool      is_centered,
+		bool      is_padded)
 {
 	int      fbfd       = 0;
 	long int screensize = 0;
@@ -484,7 +495,10 @@ void
 			size_t left = len - ((multiline_offset) * (MAXCOLS - col));
 			// And use it to compute the amount of characters to print on *this* line
 			size_t line_len = MIN(left, (MAXCOLS - col));
-			printf("Size to print: %zu out of %zu (left: %zu)\n", line_len, (MAXCOLS - col) * sizeof(char), left);
+			printf("Size to print: %zu out of %zu (left: %zu)\n",
+			       line_len,
+			       (MAXCOLS - col) * sizeof(char),
+			       left);
 
 			// Just fudge the column for centering...
 			if (is_centered) {
@@ -504,10 +518,24 @@ void
 				size_t pad_len = (MAXCOLS - line_len) / 2;
 				// If we're not at the edge of the screen because of rounding errors, add extra padding on the right
 				size_t extra_pad = MAXCOLS - line_len - (pad_len * 2);
-				printf("Total size: %zu + %zu + %zu + %zu = %zu\n", pad_len, line_len, pad_len, extra_pad, (pad_len * 2) + line_len + extra_pad);
-				snprintf(line, MAXCOLS+1, "%*s%*s%*s", pad_len, " ", line_len, string + (multiline_offset * (MAXCOLS - col)), pad_len + extra_pad, " ");
+				printf("Total size: %zu + %zu + %zu + %zu = %zu\n",
+				       pad_len,
+				       line_len,
+				       pad_len,
+				       extra_pad,
+				       (pad_len * 2) + line_len + extra_pad);
+				snprintf(line,
+					 MAXCOLS + 1,
+					 "%*s%*s%*s",
+					 pad_len,
+					 " ",
+					 line_len,
+					 string + (multiline_offset * (MAXCOLS - col)),
+					 pad_len + extra_pad,
+					 " ");
 			} else {
-				snprintf(line, MAXCOLS+1, "%*s", line_len, string + (multiline_offset * (MAXCOLS - col)));
+				snprintf(
+				    line, MAXCOLS + 1, "%*s", line_len, string + (multiline_offset * (MAXCOLS - col)));
 			}
 
 			region = draw(line, row, col, is_inverted, multiline_offset);
@@ -539,18 +567,17 @@ int
 	static const struct option opts[] = {
 		{ "row", required_argument, NULL, 'y' }, { "col", required_argument, NULL, 'x' },
 		{ "invert", no_argument, NULL, 'h' },    { "flash", no_argument, NULL, 'f' },
-		{ "clear", no_argument, NULL, 'c' },
-		{ "centered", no_argument, NULL, 'm' },
-		{ "padded", no_argument, NULL, 'p' },{ NULL, 0, NULL, 0 }
+		{ "clear", no_argument, NULL, 'c' },     { "centered", no_argument, NULL, 'm' },
+		{ "padded", no_argument, NULL, 'p' },    { NULL, 0, NULL, 0 }
 	};
 
 	short int row         = 0;
 	short int col         = 0;
 	bool      is_inverted = false;
-	bool is_flashing = false;
-	bool is_cleared = false;
-	bool is_centered = false;
-	bool is_padded = false;
+	bool      is_flashing = false;
+	bool      is_cleared  = false;
+	bool      is_centered = false;
+	bool      is_padded   = false;
 
 	while ((opt = getopt_long(argc, argv, "y:x:hfcmp", opts, &opt_index)) != -1) {
 		switch (opt) {
