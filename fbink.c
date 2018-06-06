@@ -475,16 +475,24 @@ void
 
 			// Just fudge the column for centering...
 			if (is_centered) {
-				col = (MAXCOLS / 2) - (line_len / 2);
+				// When also padding, begin at the edge, since we'll want full padding anyway.
+				col = is_padded ? 0 : (MAXCOLS / 2) - (line_len / 2);
 				printf("Adjusted column to %hu for centering\n", col);
 			}
 			// Just fudge the (formatted) line length for free padding :).
 			if (is_padded) {
-				line_len = (MAXCOLS - col);
+				// Don't fudge if also centered, we'll need the original value to split padding in two.
+				line_len = is_centered ? line_len : (MAXCOLS - col);
 				printf("Adjusted line_len to %zu for centering\n", line_len);
 			}
 
-			snprintf(line, MAXCOLS, "%*s", line_len, string + (multiline_offset * (MAXCOLS - col)));
+			// When centered & padded, we need to split the padding in two, left & right.
+			if (is_centered && is_padded) {
+				size_t pad_len = (MAXCOLS - line_len) / 2;
+				snprintf(line, MAXCOLS, "%*s%*s%*s", pad_len, " ", line_len, string + (multiline_offset * (MAXCOLS - col)), pad_len, " ");
+			} else {
+				snprintf(line, MAXCOLS, "%*s", line_len, string + (multiline_offset * (MAXCOLS - col)));
+			}
 
 			region = draw(line, row, col, is_inverted, multiline_offset);
 		}
@@ -584,6 +592,5 @@ int
  * TODO: ioctl only (i.e., refresh current fb data, don't paint)
  *       -s w=758,h=1024 -f
  *       NOTE: Don't bother w/ getsubopt() and always make it full-screen?
- * TODO: Centered text, padded/non-padded
  * TODO: Move all option flags in a struct to keep the sigs in check...
  */
