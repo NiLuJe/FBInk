@@ -367,6 +367,7 @@ void
 {
 	// NOTE: While we'd be perfect candidates for using A2 waveform mode, it's all kinds of fucked up on Kobos,
 	//       and may lead to disappearing text or weird blending depending on the surrounding fb content...
+	// FIXME: Except I'd forgotten the MONOCHROME flag, dumbass...
 	struct mxcfb_update_data update = {
 		.temp          = TEMP_USE_AMBIENT,
 		.update_marker = getpid(),
