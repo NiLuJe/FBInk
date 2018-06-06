@@ -259,8 +259,6 @@ struct mxcfb_rect
 	//fill_rect(0, 0, vinfo.xres, vinfo.yres, 1);
 
 	char* text  = (arg != 0) ? arg : "Hello World!";
-	int   textX = FONTW;
-	int   textY = FONTH;
 	int   textC = 0;
 	int   bgC   = 15;
 
@@ -274,8 +272,8 @@ struct mxcfb_rect
 	l = strlen(text);
 	// Compute the dimension of the screen region we'll paint to
 	struct mxcfb_rect region = {
-		.top = textY + row_off * FONTH,
-		.left = textX + col_off * FONTW,
+		.top = row_off * FONTH,
+		.left = col_off * FONTW,
 		.width = l * FONTW,
 		.height = FONTH,			// TODO: Multi-line?
 	};
@@ -307,12 +305,12 @@ struct mxcfb_rect
 				// get the pixel value
 				char b = img[y * FONTW + x];
 				if (b > 0) {    // plot the pixel
-					put_pixel(textX + (i * FONTW) + x + (col_off * FONTW),
-						  textY + y + (row_off * FONTH),
+					put_pixel((col_off * FONTW) + (i * FONTW) + x,
+						  (row_off * FONTH) + y,
 						  textC);
 				} else {
-					put_pixel(textX + (i * FONTW) + x + (col_off * FONTW),
-						  textY + y + (row_off * FONTH),
+					put_pixel((col_off * FONTW) + (i * FONTW) + x,
+						  (row_off * FONTH) + y,
 						  bgC);    // plot 'text backgr color'
 				}
 			}    // end "for x"
