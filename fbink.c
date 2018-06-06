@@ -24,6 +24,7 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <unistd.h>
+#include <getopt.h>
 
 #include "eink/mxcfb-kobo.h"
 #include "fbink.h"
@@ -354,11 +355,9 @@ void
 	}
 }
 
-// application entry point
-int
-    main(int argc, char* argv[])
+// Magic happens here!
+void fbink_print(char* string)
 {
-
 	int                      fbfd = 0;
 	struct fb_var_screeninfo orig_vinfo;
 	long int                 screensize = 0;
@@ -367,7 +366,7 @@ int
 	fbfd = open("/dev/fb0", O_RDWR);
 	if (!fbfd) {
 		printf("Error: cannot open framebuffer device.\n");
-		return (1);
+		return;
 	}
 	printf("The framebuffer device was opened successfully.\n");
 
@@ -407,7 +406,7 @@ int
 		printf("Failed to mmap.\n");
 	} else {
 		// draw...
-		region = draw(argv[1]);
+		region = draw(string);
 	}
 
 	// Refresh screen
@@ -416,6 +415,59 @@ int
 	// cleanup
 	munmap(fbp, screensize);
 	close(fbfd);
+}
+
+// application entry point
+int
+    main(int argc, char* argv[])
+{
+	int                        opt;
+	int                        opt_index;
+	static const struct option opts[] = { { "row", required_argument, NULL, 'y' },
+					      { "col", required_argument, NULL, 'x' },
+					      { "invert", no_argument, NULL, 'h' },
+					      { "flash", no_argument, NULL, 'f' },
+					      { "clear", no_argument, NULL, 'c' },
+					      { NULL, 0, NULL, 0 } };
+
+	unsigned short int row = 0;
+	unsigned short int col = 0;
+	bool is_inverted = false;
+	bool is_flashing = false;
+	bool is_cleared = false;
+
+	while ((opt = getopt_long(argc, argv, "y:x:hfc", opts, &opt_index)) != -1) {
+		switch (opt) {
+			case 'y':
+				row = atoi(optarg);
+				break;
+			case 'x':
+				col = atoi(optarg);
+				break;
+			case 'h':
+				is_inverted = true;
+				break;
+			case 'f':
+				is_flashing = true;
+				break;
+			case 'c':
+				is_cleared = true;
+				break;
+			default:
+				fprintf(stderr, "?? Unknown option code 0%o ??\n", opt);
+				return EXIT_FAILURE;
+				break;
+		}
+	}
+
+	char* string;
+	if (optind < argc) {
+		while (optind < argc) {
+			string = argv[optind++];
+			printf("Printing string '%s'\n", string);
+			fbink_print(string);
+		}
+	}
 
 	return EXIT_SUCCESS;
 }
