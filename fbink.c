@@ -134,7 +134,7 @@ static void
 	unsigned short int cy;
 	for (cy = 0U; cy < h; cy++) {
 		for (cx = 0U; cx < w; cx++) {
-			put_pixel((unsigned short int) (x + cx),(unsigned short int) (y + cy), c);
+			put_pixel((unsigned short int) (x + cx), (unsigned short int) (y + cy), c);
 		}
 	}
 	printf("filled %hux%hu rectangle @ %hu, %hu\n", w, h, x, y);
@@ -271,10 +271,10 @@ static struct mxcfb_rect
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
-		.top    = (uint32_t) ((row - multiline_offset) * FONTH),
-		.left   = (uint32_t) (col * FONTW),
-		.width  = multiline_offset > 0 ? vinfo.xres : (uint32_t) (len * FONTW),
-		.height = (uint32_t) ((multiline_offset + 1) * FONTH),
+		.top    = (uint32_t)((row - multiline_offset) * FONTH),
+		.left   = (uint32_t)(col * FONTW),
+		.width  = multiline_offset > 0 ? vinfo.xres : (uint32_t)(len * FONTW),
+		.height = (uint32_t)((multiline_offset + 1) * FONTH),
 	};
 
 	printf("Region: top=%u, left=%u, width=%u, height=%u\n", region.top, region.left, region.width, region.height);
@@ -332,11 +332,15 @@ static struct mxcfb_rect
 				char b = img[y * FONTW + x];
 				if (b > 0) {
 					// plot the pixel (fg, text)
-					put_pixel((unsigned short int) ((col * FONTW) + (i * FONTW) + x), (unsigned short int) ((row * FONTH) + y), fgC);
+					put_pixel((unsigned short int) ((col * FONTW) + (i * FONTW) + x),
+						  (unsigned short int) ((row * FONTH) + y),
+						  fgC);
 				} else {
 					// this is background,
 					// fill it so that we'll be visible no matter what was on screen behind us.
-					put_pixel((unsigned short int) ((col * FONTW) + (i * FONTW) + x), (unsigned short int) ((row * FONTH) + y), bgC);
+					put_pixel((unsigned short int) ((col * FONTW) + (i * FONTW) + x),
+						  (unsigned short int) ((row * FONTH) + y),
+						  bgC);
 				}
 			}    // end "for x"
 		}            // end "for y"
@@ -476,12 +480,12 @@ void
 		// If we have multiple lines to print, draw 'em line per line
 		for (multiline_offset = 0; multiline_offset < lines; multiline_offset++) {
 			// Compute the amount of characters left to print...
-			size_t left = len - (size_t) ((multiline_offset) * (MAXCOLS - col));
+			size_t left = len - (size_t)((multiline_offset) * (MAXCOLS - col));
 			// And use it to compute the amount of characters to print on *this* line
-			size_t line_len = MIN(left, (size_t) (MAXCOLS - col));
+			size_t line_len = MIN(left, (size_t)(MAXCOLS - col));
 			printf("Size to print: %zu out of %zu (left: %zu)\n",
 			       line_len,
-			       (size_t) (MAXCOLS - col) * sizeof(char),
+			       (size_t)(MAXCOLS - col) * sizeof(char),
 			       left);
 
 			// Just fudge the column for centering...
@@ -493,7 +497,7 @@ void
 			// Just fudge the (formatted) line length for free padding :).
 			if (is_padded) {
 				// Don't fudge if also centered, we'll need the original value to split padding in two.
-				line_len = is_centered ? line_len : (size_t) (MAXCOLS - col);
+				line_len = is_centered ? line_len : (size_t)(MAXCOLS - col);
 				printf("Adjusted line_len to %zu for centering\n", line_len);
 			}
 
@@ -510,7 +514,7 @@ void
 				       extra_pad,
 				       (pad_len * 2) + line_len + extra_pad);
 				snprintf(line,
-					 (size_t) (MAXCOLS + 1),
+					 (size_t)(MAXCOLS + 1),
 					 "%*s%*s%*s",
 					 (int) pad_len,
 					 " ",
@@ -520,7 +524,7 @@ void
 					 " ");
 			} else {
 				snprintf(line,
-					 (size_t) (MAXCOLS + 1),
+					 (size_t)(MAXCOLS + 1),
 					 "%*s",
 					 (int) line_len,
 					 string + (multiline_offset * (MAXCOLS - col)));
