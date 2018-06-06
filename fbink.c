@@ -265,16 +265,16 @@ void
 // helper function for drawing - no more need to go mess with
 // the main function when just want to change what to draw...
 struct mxcfb_rect
-    draw(char* text, unsigned short int row, unsigned short int col, bool is_inverted, unsigned short int line_offset)
+    draw(char* text, unsigned short int row, unsigned short int col, bool is_inverted, unsigned short int multiline_offset)
 {
 
-	printf("Printing '%s' @ line offset %hu\n", text, line_offset);
+	printf("Printing '%s' @ line offset %hu\n", text, multiline_offset);
 	int fgC = is_inverted ? WHITE : BLACK;
 	int bgC = is_inverted ? BLACK : WHITE;
 
 	unsigned short int i, x, y;
 	// Adjust row in case we're a continuation of a multi-line print...
-	row += line_offset;
+	row += multiline_offset;
 
 	// Compute the length of our actual string
 	// NOTE: We already took care in fbink_print() of making sure that the string passed in text
@@ -284,10 +284,10 @@ struct mxcfb_rect
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
-		.top    = (row - line_offset) * FONTH,
+		.top    = (row - multiline_offset) * FONTH,
 		.left   = col * FONTW,
-		.width  = line_offset > 0 ? (MAXCOLS - col) * FONTW : len * FONTW,
-		.height = (line_offset + 1) * FONTH,
+		.width  = multiline_offset > 0 ? (MAXCOLS - col) * FONTW : len * FONTW,
+		.height = (multiline_offset + 1) * FONTH,
 	};
 
 	printf("Region: top=%u, left=%u, width=%u, height=%u\n", region.top, region.left, region.width, region.height);
