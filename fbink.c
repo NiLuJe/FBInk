@@ -431,7 +431,7 @@ int
 	bool is_inverted = false;
 	// NOTE: Not terribly useful for text-only, it's often optimized out by the driver for small regions (i.e., us).
 	bool is_flashing = false;
-	// NOTE: Unimplemented (because fairly useless for text only).
+	// TODO: Unimplemented (because fairly useless for text only).
 	bool is_cleared = false;
 
 	while ((opt = getopt_long(argc, argv, "y:x:hfc", opts, &opt_index)) != -1) {
@@ -478,8 +478,8 @@ int
  * TODO: DOC
  * TODO: Library
  * TODO: waveform mode user-selection? -w
- * TODO: -c to clear screen?
  * TODO: ioctl only (i.e., refresh current fb data, don't paint)
  *       -s w=758,h=1024 -f
+ *       NOTE: Don't bother w/ getsubopt() and always make it full-screen?
  * TODO: Centered text, padded/non-padded
  */
