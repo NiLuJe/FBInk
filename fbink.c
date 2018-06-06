@@ -499,6 +499,8 @@ void
 				printf("Adjusted line_len to %zu for centering\n", line_len);
 			}
 
+			// FIXME: Blank characters 2, 3, 4 when building with optimization? :D.
+			// FIXME: Fix the whole MAXCOLS as field length to snprintf... (plus fix col > 0).
 			// When centered & padded, we need to split the padding in two, left & right.
 			if (is_centered && is_padded) {
 				size_t pad_len = (MAXCOLS - line_len) / 2;
@@ -512,7 +514,7 @@ void
 				       extra_pad,
 				       (pad_len * 2) + line_len + extra_pad);
 				snprintf(line,
-					 (size_t)(MAXCOLS + 1),
+					 MAXCOLS,
 					 "%*s%*s%*s",
 					 (int) pad_len,
 					 " ",
@@ -522,7 +524,7 @@ void
 					 " ");
 			} else {
 				snprintf(line,
-					 (size_t)(MAXCOLS + 1),
+					 MAXCOLS,
 					 "%*s",
 					 (int) line_len,
 					 string + (multiline_offset * (MAXCOLS - col)));
