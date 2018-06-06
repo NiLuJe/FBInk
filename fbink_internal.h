@@ -30,7 +30,7 @@
 
 // Because we're pretty much Linux-bound ;).
 #ifndef _GNU_SOURCE
-#       define _GNU_SOURCE
+#	define _GNU_SOURCE
 #endif
 
 #include <fcntl.h>
@@ -39,6 +39,7 @@
 #include <linux/kd.h>
 #include <math.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -46,7 +47,6 @@
 #include <sys/mman.h>
 #include <sys/param.h>
 #include <unistd.h>
-#include <stdint.h>
 
 #include "eink/mxcfb-kobo.h"
 #include "font8x8/font8x8_latin.h"
@@ -92,12 +92,28 @@ unsigned short int MAXROWS = 45;
 unsigned short int MAXCOLS = 32;
 
 static void put_pixel_Gray8(unsigned short int, unsigned short int, unsigned short int);
-static void put_pixel_RGB24(unsigned short int, unsigned short int, unsigned short int, unsigned short int, unsigned short int);
-static void put_pixel_RGB32(unsigned short int, unsigned short int, unsigned short int, unsigned short int, unsigned short int);
-static void put_pixel_RGB565(unsigned short int, unsigned short int, unsigned short int, unsigned short int, unsigned short int);
+static void put_pixel_RGB24(unsigned short int,
+			    unsigned short int,
+			    unsigned short int,
+			    unsigned short int,
+			    unsigned short int);
+static void put_pixel_RGB32(unsigned short int,
+			    unsigned short int,
+			    unsigned short int,
+			    unsigned short int,
+			    unsigned short int);
+static void put_pixel_RGB565(unsigned short int,
+			     unsigned short int,
+			     unsigned short int,
+			     unsigned short int,
+			     unsigned short int);
 static void put_pixel(unsigned short int, unsigned short int, unsigned short int);
 
-static void fill_rect(unsigned short int, unsigned short int, unsigned short int, unsigned short int, unsigned short int);
+static void fill_rect(unsigned short int,
+		      unsigned short int,
+		      unsigned short int,
+		      unsigned short int,
+		      unsigned short int);
 static void clear_screen(unsigned short int);
 
 static char* font8x8_get_bitmap(int);

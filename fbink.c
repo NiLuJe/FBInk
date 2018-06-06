@@ -41,7 +41,11 @@ static void
 }
 
 static void
-    put_pixel_RGB24(unsigned short int x, unsigned short int y, unsigned short int r, unsigned short int g, unsigned short int b)
+    put_pixel_RGB24(unsigned short int x,
+		    unsigned short int y,
+		    unsigned short int r,
+		    unsigned short int g,
+		    unsigned short int b)
 {
 	// remember to change main(): vinfo.bits_per_pixel = 24;
 	// and: screensize = vinfo.xres * vinfo.yres *
@@ -58,7 +62,11 @@ static void
 }
 
 static void
-    put_pixel_RGB32(unsigned short int x, unsigned short int y, unsigned short int r, unsigned short int g, unsigned short int b)
+    put_pixel_RGB32(unsigned short int x,
+		    unsigned short int y,
+		    unsigned short int r,
+		    unsigned short int g,
+		    unsigned short int b)
 {
 	// remember to change main(): vinfo.bits_per_pixel = 32;
 	// and: screensize = vinfo.xres * vinfo.yres *
@@ -76,7 +84,11 @@ static void
 }
 
 static void
-    put_pixel_RGB565(unsigned short int x, unsigned short int y, unsigned short int r, unsigned short int g, unsigned short int b)
+    put_pixel_RGB565(unsigned short int x,
+		     unsigned short int y,
+		     unsigned short int r,
+		     unsigned short int g,
+		     unsigned short int b)
 {
 	// remember to change main(): vinfo.bits_per_pixel = 16;
 	// or on RPi just comment out the whole 'Change vinfo'
@@ -112,7 +124,11 @@ static void
 
 // helper function to draw a rectangle in given color
 static void
-    fill_rect(unsigned short int x, unsigned short int y, unsigned short int w, unsigned short int h, unsigned short int c)
+    fill_rect(unsigned short int x,
+	      unsigned short int y,
+	      unsigned short int w,
+	      unsigned short int h,
+	      unsigned short int c)
 {
 	unsigned short int cx;
 	unsigned short int cy;
@@ -159,7 +175,7 @@ static void
 
 	unsigned short int x;
 	unsigned short int y;
-	bool set = false;
+	bool               set = false;
 	for (x = 0U; x < FONTW; x++) {
 		// x: input & output row
 		for (y = 0U; y < FONTH; y++) {
@@ -183,7 +199,7 @@ static void
 	unsigned short int y;
 	unsigned short int i;
 	unsigned short int j;
-	bool set = false;
+	bool               set = false;
 	for (i = 0U; i < FONTW; i++) {
 		// x: input row, i: output row
 		x = i / FONTSIZE_MULT;
@@ -192,9 +208,9 @@ static void
 			y   = j / FONTSIZE_MULT;
 			set = bitmap[x] & 1 << y;
 			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTH=1,0)
-			unsigned short int idx               = j + (i * FONTW);
-			glyph_pixmap[idx]     = set ? 1 : 0;
-			glyph_pixmap[idx + 1] = set ? 1 : 0;
+			unsigned short int idx = j + (i * FONTW);
+			glyph_pixmap[idx]      = set ? 1 : 0;
+			glyph_pixmap[idx + 1]  = set ? 1 : 0;
 		}
 	}
 }
@@ -209,7 +225,7 @@ static void
 	unsigned short int y;
 	unsigned short int i;
 	unsigned short int j;
-	bool set = false;
+	bool               set = false;
 	for (i = 0U; i < FONTW; i++) {
 		// x: input row, i: output row
 		x = i / FONTSIZE_MULT;
@@ -218,11 +234,11 @@ static void
 			y   = j / FONTSIZE_MULT;
 			set = bitmap[x] & 1 << y;
 			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTH=1,0)
-			unsigned short int idx               = j + (i * FONTW);
-			glyph_pixmap[idx]     = set ? 1 : 0;
-			glyph_pixmap[idx + 1] = set ? 1 : 0;
-			glyph_pixmap[idx + 2] = set ? 1 : 0;
-			glyph_pixmap[idx + 3] = set ? 1 : 0;
+			unsigned short int idx = j + (i * FONTW);
+			glyph_pixmap[idx]      = set ? 1 : 0;
+			glyph_pixmap[idx + 1]  = set ? 1 : 0;
+			glyph_pixmap[idx + 2]  = set ? 1 : 0;
+			glyph_pixmap[idx + 3]  = set ? 1 : 0;
 		}
 	}
 }
@@ -365,8 +381,8 @@ void
 		bool      is_centered,
 		bool      is_padded)
 {
-	int      fbfd       = 0;
-	long int screensize = 0;
+	int    fbfd       = 0;
+	size_t screensize = 0;
 
 	// Open the framebuffer file for reading and writing
 	fbfd = open("/dev/fb0", O_RDWR);
@@ -425,10 +441,10 @@ void
 
 		// See if want to position our text relative to the edge of the screen, and not the beginning
 		if (col < 0) {
-			col = MAX(MAXCOLS + col, 0);
+			col = (short int) MAX(MAXCOLS + col, 0);
 		}
 		if (row < 0) {
-			row = MAX(MAXROWS + row, 0);
+			row = (short int) MAX(MAXROWS + row, 0);
 		}
 		printf("Adjusted position: column %hu, row %hu\n", col, row);
 
@@ -436,12 +452,12 @@ void
 		char   line[MAXCOLS];
 		size_t len = strlen(string);
 		// Compute the amount of characters (i.e., rows) needed to print that string...
-		size_t             rows             = col + len;
+		unsigned short int rows             = (unsigned short int) (col + len);
 		unsigned short int lines            = 1;
 		unsigned short int multiline_offset = 0;
 		// NOTE: The maximum length of a single row is the total amount of columns in a row (i.e., line)!
 		if (rows > MAXCOLS) {
-			lines = ceilf((float) rows / (float) MAXCOLS);
+			lines = (unsigned short int) ceilf((float) rows / (float) MAXCOLS);
 		}
 
 		// Truncate to a single screen...
@@ -452,26 +468,26 @@ void
 
 		// Move our initial row up if we add so much line that some of it goes off-screen...
 		if (row + lines > MAXROWS) {
-			row = MIN(row - ((row + lines) - MAXROWS), MAXROWS);
+			row = (short int) MIN(row - ((row + lines) - MAXROWS), MAXROWS);
 		}
 		printf("Final position: column %hu, row %hu\n", col, row);
 
-		printf("Need %hu lines to print %zu characters in %zu rows\n", lines, len, rows);
+		printf("Need %hu lines to print %zu characters in %hu rows\n", lines, len, rows);
 		// If we have multiple lines to print, draw 'em line per line
 		for (multiline_offset = 0; multiline_offset < lines; multiline_offset++) {
 			// Compute the amount of characters left to print...
-			size_t left = len - ((multiline_offset) * (MAXCOLS - col));
+			size_t left = (size_t)(len - ((multiline_offset) * (MAXCOLS - col)));
 			// And use it to compute the amount of characters to print on *this* line
-			size_t line_len = MIN(left, (MAXCOLS - col));
+			size_t line_len = (size_t) MIN(left, (MAXCOLS - col));
 			printf("Size to print: %zu out of %zu (left: %zu)\n",
 			       line_len,
-			       (MAXCOLS - col) * sizeof(char),
+			       (size_t)((MAXCOLS - col) * sizeof(char)),
 			       left);
 
 			// Just fudge the column for centering...
 			if (is_centered) {
 				// When also padding, begin at the edge, since we'll want full padding anyway.
-				col = is_padded ? 0 : (MAXCOLS / 2) - (line_len / 2);
+				col = is_padded ? 0 : (short int) ((MAXCOLS / 2) - (line_len / 2));
 				printf("Adjusted column to %hu for centering\n", col);
 			}
 			// Just fudge the (formatted) line length for free padding :).
@@ -494,20 +510,24 @@ void
 				       extra_pad,
 				       (pad_len * 2) + line_len + extra_pad);
 				snprintf(line,
-					 MAXCOLS + 1,
+					 (size_t)(MAXCOLS + 1),
 					 "%*s%*s%*s",
-					 pad_len,
+					 (int) pad_len,
 					 " ",
-					 line_len,
+					 (int) line_len,
 					 string + (multiline_offset * (MAXCOLS - col)),
-					 pad_len + extra_pad,
+					 (int) (pad_len + extra_pad),
 					 " ");
 			} else {
-				snprintf(
-				    line, MAXCOLS + 1, "%*s", line_len, string + (multiline_offset * (MAXCOLS - col)));
+				snprintf(line,
+					 (size_t)(MAXCOLS + 1),
+					 "%*s",
+					 (int) line_len,
+					 string + (multiline_offset * (MAXCOLS - col)));
 			}
 
-			region = draw(line, row, col, is_inverted, multiline_offset);
+			region = draw(
+			    line, (unsigned short int) row, (unsigned short int) col, is_inverted, multiline_offset);
 		}
 	}
 
@@ -551,10 +571,10 @@ int
 	while ((opt = getopt_long(argc, argv, "y:x:hfcmp", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
-				row = atoi(optarg);
+				row = (short int) atoi(optarg);
 				break;
 			case 'x':
-				col = atoi(optarg);
+				col = (short int) atoi(optarg);
 				break;
 			case 'h':
 				is_inverted = true;
