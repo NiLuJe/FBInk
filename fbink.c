@@ -256,26 +256,31 @@ void
 // helper function for drawing - no more need to go mess with
 // the main function when just want to change what to draw...
 struct mxcfb_rect
-    draw(char* arg, unsigned short int row, unsigned short int col, bool is_inverted)
+    draw(char* arg, unsigned short int row, unsigned short int col, bool is_inverted, unsigned short int line_offset)
 {
 
 	char* text  = (arg != 0) ? arg : "Hello World!";
+	printf("Printing '%s' @ line offset %hu\n", text, line_offset);
 	int   fgC   = is_inverted ? WHITE : BLACK;
 	int   bgC   = is_inverted ? BLACK : WHITE;
 
 	int i, l, x, y;
 	unsigned short int maxlen = vinfo.xres / FONTW;
-	char* remains = NULL;
+	char remains[256] = { 0 };
+	// Adjust row in case we're a continuation of a multi-line print...
+	row += line_offset;
 
 	// loop through all characters in the text string
 	l = strlen(text);
-	// Compute the dimension of the screen region we'll paint to
+	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
-		.top    = row * FONTH,
+		.top    = (row - line_offset) * FONTH,
 		.left   = col * FONTW,
-		.width  = l * FONTW,
-		.height = FONTH,
+		.width  = line_offset > 0 ? (maxlen - col) * FONTW : l * FONTW,
+		.height = (line_offset + 1) * FONTH,
 	};
+
+	printf("Region: top=%u, left=%u, width=%u, height=%u\n", region.top, region.left, region.width, region.height);
 
 	// Warn if what we want to print doesn't fit in a single line
 	if (region.left + region.width > vinfo.xres) {
@@ -287,7 +292,8 @@ struct mxcfb_rect
 		       vinfo.xres);
 		// Truncate current line to max printable length, and queue remainder for next line
 		l = maxlen - col;
-		remains = text + l;
+		//remains = text + l;
+		strncpy(remains, text + l, sizeof(remains));
 		printf("Remainder: '%s'\n", remains);
 		// Truncate region too, so we don't send an ovalid one to MXCFB_SEND_UPDATE (which would fail)
 		region.width = l * FONTW;
@@ -334,6 +340,18 @@ struct mxcfb_rect
 		}            // end "for y"
 	}                    // end "for i"
 
+	// If we've got stuff left to print, keep going...
+	if (*remains != '\0') {
+		printf("Re-entering draw for string '%s'\n", remains);
+		draw(remains, row, col, is_inverted, ++line_offset);
+	} else {
+		printf("Returning from draw()\n");
+	}
+
+	// Re-adjust region from when we return from nested draws...
+	// FIXME: Don't do that, and handle the returns differently?
+	region.height = (line_offset + 1) * FONTH;
+	printf("Final region: top=%u, left=%u, width=%u, height=%u\n", region.top, region.left, region.width, region.height);
 	return region;
 }
 
@@ -361,7 +379,6 @@ void
 void fbink_print(char* string, unsigned short int row, unsigned short int col, bool is_inverted, bool is_flashing)
 {
 	int                      fbfd = 0;
-	struct fb_var_screeninfo orig_vinfo;
 	long int                 screensize = 0;
 
 	// Open the framebuffer file for reading and writing
@@ -408,7 +425,7 @@ void fbink_print(char* string, unsigned short int row, unsigned short int col, b
 		printf("Failed to mmap.\n");
 	} else {
 		// draw...
-		region = draw(string, row, col, is_inverted);
+		region = draw(string, row, col, is_inverted, 0);
 	}
 
 	// Refresh screen
