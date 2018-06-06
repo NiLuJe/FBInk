@@ -31,17 +31,17 @@
 
 // helper function to 'plot' a pixel in given color
 static void
-    put_pixel_Gray8(int x, int y, int c)
+    put_pixel_Gray8(unsigned short int x, unsigned short int y, unsigned short int c)
 {
 	// calculate the pixel's byte offset inside the buffer
-	unsigned int pix_offset = x + y * finfo.line_length;
+	size_t pix_offset = x + y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((char*) (fbp + pix_offset)) = c;
+	*((char*) (fbp + pix_offset)) = (char) c;
 }
 
 static void
-    put_pixel_RGB24(int x, int y, int r, int g, int b)
+    put_pixel_RGB24(unsigned short int x, unsigned short int y, unsigned short int r, unsigned short int g, unsigned short int b)
 {
 	// remember to change main(): vinfo.bits_per_pixel = 24;
 	// and: screensize = vinfo.xres * vinfo.yres *
@@ -49,16 +49,16 @@ static void
 
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 3 as every pixel is 3 consecutive bytes
-	unsigned int pix_offset = x * 3 + y * finfo.line_length;
+	size_t pix_offset = x * 3U + y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((char*) (fbp + pix_offset))     = b;
-	*((char*) (fbp + pix_offset + 1)) = g;
-	*((char*) (fbp + pix_offset + 2)) = r;
+	*((char*) (fbp + pix_offset))     = (char) b;
+	*((char*) (fbp + pix_offset + 1)) = (char) g;
+	*((char*) (fbp + pix_offset + 2)) = (char) r;
 }
 
 static void
-    put_pixel_RGB32(int x, int y, int r, int g, int b)
+    put_pixel_RGB32(unsigned short int x, unsigned short int y, unsigned short int r, unsigned short int g, unsigned short int b)
 {
 	// remember to change main(): vinfo.bits_per_pixel = 32;
 	// and: screensize = vinfo.xres * vinfo.yres *
@@ -66,17 +66,17 @@ static void
 
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 4 as every pixel is 4 consecutive bytes
-	unsigned int pix_offset = x * 4 + y * finfo.line_length;
+	size_t pix_offset = x * 4U + y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((char*) (fbp + pix_offset))     = b;
-	*((char*) (fbp + pix_offset + 1)) = g;
-	*((char*) (fbp + pix_offset + 2)) = r;
+	*((char*) (fbp + pix_offset))     = (char) b;
+	*((char*) (fbp + pix_offset + 1)) = (char) g;
+	*((char*) (fbp + pix_offset + 2)) = (char) r;
 	*((char*) (fbp + pix_offset + 3)) = 0xFF;    // Opaque, always.
 }
 
 static void
-    put_pixel_RGB565(int x, int y, int r, int g, int b)
+    put_pixel_RGB565(unsigned short int x, unsigned short int y, unsigned short int r, unsigned short int g, unsigned short int b)
 {
 	// remember to change main(): vinfo.bits_per_pixel = 16;
 	// or on RPi just comment out the whole 'Change vinfo'
@@ -85,19 +85,19 @@ static void
 
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 2 as every pixel is 2 consecutive bytes
-	unsigned int pix_offset = x * 2 + y * finfo.line_length;
+	size_t pix_offset = x * 2U + y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	// but a bit more complicated for RGB565
-	unsigned short c = ((r / 8) << 11) + ((g / 4) << 5) + (b / 8);
+	unsigned int c = ((r / 8U) << 11) + ((g / 4U) << 5) + (b / 8U);
 	// or: c = ((r / 8) * 2048) + ((g / 4) * 32) + (b / 8);
 	// write 'two bytes at once'
-	*((unsigned short*) (fbp + pix_offset)) = c;
+	*((char*) (fbp + pix_offset)) = (char) c;
 }
 
 // handle various bpp...
 static void
-    put_pixel(int x, int y, int c)
+    put_pixel(unsigned short int x, unsigned short int y, unsigned short int c)
 {
 	if (vinfo.bits_per_pixel == 8) {
 		put_pixel_Gray8(x, y, c);
@@ -112,9 +112,9 @@ static void
 
 // helper function to draw a rectangle in given color
 static void
-    fill_rect(int x, int y, int w, int h, int c)
+    fill_rect(unsigned short int x, unsigned short int y, unsigned short int w, unsigned short int h, unsigned short int c)
 {
-	int cx, cy;
+	unsigned short int cx, cy;
 	for (cy = 0; cy < h; cy++) {
 		for (cx = 0; cx < w; cx++) {
 			put_pixel(x + cx, y + cy, c);
@@ -126,7 +126,7 @@ static void
 // helper function to clear the screen - fill whole
 // screen with given color
 static void
-    clear_screen(int c)
+    clear_screen(unsigned short int c)
 {
 	if (vinfo.bits_per_pixel == 8) {
 		memset(fbp, c, finfo.smem_len);
