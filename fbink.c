@@ -472,15 +472,15 @@ void
 			// And use it to compute the amount of characters to print on *this* line
 			size_t line_len = MIN(left, (MAXCOLS - col));
 			printf("Size to print: %zu out of %zu (left: %zu)\n", line_len, (MAXCOLS - col) * sizeof(char), left);
-			// Left-padding:
-			//snprintf(line, MAXCOLS, "%*s", (MAXCOLS - col), string + (multiline_offset * (MAXCOLS - col)));
+
+			// Just fudge the line_length for free padding :).
+			if (is_padded) {
+				line_len = (MAXCOLS - col);
+			}
+
 			snprintf(line, MAXCOLS, "%*s", line_len, string + (multiline_offset * (MAXCOLS - col)));
-			/*
-			strncpy(line, string + (multiline_offset * (MAXCOLS - col)), (MAXCOLS - col) * sizeof(char));
-			// Ensure line is NULL terminated so that stuff stays sane later :).
-			line[MAXCOLS - col] = '\0';
-			*/
-			region              = draw(line, row, col, is_inverted, multiline_offset);
+
+			region = draw(line, row, col, is_inverted, multiline_offset);
 		}
 	}
 
