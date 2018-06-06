@@ -261,21 +261,21 @@ void
 // helper function for drawing - no more need to go mess with
 // the main function when just want to change what to draw...
 struct mxcfb_rect
-    draw(char* arg, unsigned short int row, unsigned short int col, bool is_inverted, unsigned short int line_offset)
+    draw(char* text, unsigned short int row, unsigned short int col, bool is_inverted, unsigned short int line_offset)
 {
 
-	char* text = (arg != 0) ? arg : "Hello World!";
 	printf("Printing '%s' @ line offset %hu\n", text, line_offset);
 	int fgC = is_inverted ? WHITE : BLACK;
 	int bgC = is_inverted ? BLACK : WHITE;
 
-	int                i, l, x, y;
+	int                i, x, y;
 	char               remains[512] = { 0 };
 	// Adjust row in case we're a continuation of a multi-line print...
 	row += line_offset;
 
 	// loop through all characters in the text string
-	l = strlen(text);
+	size_t l = strnlen(text, MAXCOLS);
+	printf("StrLen: %zu\n", l);
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
 		.top    = (row - line_offset) * FONTH,
@@ -288,9 +288,9 @@ struct mxcfb_rect
 
 	// Warn if what we want to print doesn't fit in a single line
 	if (region.left + region.width > vinfo.xres) {
-		printf("Trying to fit %hu + %d characters (%dpx) in a single %hu characters line (%dpx)\n",
+		printf("Trying to fit %hu + %zu characters (%dpx) in a single %hu characters line (%dpx)\n",
 		       col,
-		       (region.left + region.width) / FONTW,
+		       l,
 		       region.left + region.width,
 		       MAXCOLS,
 		       vinfo.xres);
@@ -447,6 +447,8 @@ void
 		for (multiline_offset = 0; multiline_offset < lines; multiline_offset++) {
 			printf("Size to print: %zu\n", (MAXCOLS - col) * sizeof(char));
 			strncpy(line, string + (multiline_offset * (MAXCOLS - col)), (MAXCOLS - col) * sizeof(char));
+			// Ensure line is NULL terminated so that strnlen doesn't do something stupid in draw ;).
+			line[MAXCOLS - col] = '\0';
 			region = draw(line, row, col, is_inverted, multiline_offset);
 		}
 		// draw...
