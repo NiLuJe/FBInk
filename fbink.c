@@ -257,7 +257,7 @@ void font8x8_render_x4(int ascii, char* glyph_pixmap)
 
 // helper function for drawing - no more need to go mess with
 // the main function when just want to change what to draw...
-void
+struct mxcfb_rect
     draw(char* arg)
 {
 
@@ -277,6 +277,14 @@ void
 
 	// loop through all characters in the text string
 	l = strlen(text);
+	// Compute the dimension of the screen region we'll paint to
+	struct mxcfb_rect region = {
+		.top = textY + row_off * FONTH,
+		.left = textX + col_off * FONTW,
+		.width = l * FONTW,
+		.height = FONTH,			// TODO: Multi-line?
+	};
+
 	for (i = 0; i < l; i++) {
 		// get the 'image' index for this character
 		//int ix = font_index(text[i]);
@@ -315,18 +323,19 @@ void
 			}    // end "for x"
 		}            // end "for y"
 	}                    // end "for i"
+
+	return region;
 }
 
 // handle eink updates
 void
-    refresh(int fbfd)
+    refresh(int fbfd, struct mxcfb_rect region)
 {
 	struct mxcfb_update_data update = {
 		.temp                 = TEMP_USE_AMBIENT,
 		.update_marker        = getpid(),
-		.update_mode          = UPDATE_MODE_FULL,
-		.update_region.height = vinfo.yres,
-		.update_region.width  = vinfo.xres,
+		.update_mode          = UPDATE_MODE_PARTIAL,
+		.update_region        = region,
 		.waveform_mode        = WAVEFORM_MODE_AUTO,
 	};
 
@@ -382,15 +391,17 @@ int
 	screensize = finfo.smem_len;
 	fbp        = (char*) mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
 
+	struct mxcfb_rect region;
+
 	if ((int) fbp == -1) {
 		printf("Failed to mmap.\n");
 	} else {
 		// draw...
-		draw(argv[1]);
+		region = draw(argv[1]);
 	}
 
 	// Refresh screen
-	refresh(fbfd);
+	refresh(fbfd, region);
 
 	// cleanup
 	munmap(fbp, screensize);
