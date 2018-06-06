@@ -170,8 +170,12 @@ void
 void
     clear_screen(int c)
 {
-	// FIXME: Mmmhh, smem_len instead for >8bpp?
-	memset(fbp, c, vinfo.xres * vinfo.yres);
+	if (vinfo.bits_per_pixel == 8) {
+		memset(fbp, c, finfo.smem_len);
+	} else {
+		// NOTE: Grayscale palette, we could have used def_r or def_g ;).
+		memset(fbp, def_b[c], finfo.smem_len);
+	}
 }
 
 // Return the font8x8 bitmap for a specifric ascii character
@@ -359,7 +363,7 @@ void
 
 // Magic happens here!
 void
-    fbink_print(char* string, unsigned short int row, unsigned short int col, bool is_inverted, bool is_flashing)
+    fbink_print(char* string, unsigned short int row, unsigned short int col, bool is_inverted, bool is_flashing, bool is_cleared)
 {
 	int      fbfd       = 0;
 	long int screensize = 0;
@@ -413,6 +417,11 @@ void
 	if ((int) fbp == -1) {
 		printf("Failed to mmap.\n");
 	} else {
+		// Clear screen?
+		if (is_cleared) {
+			clear_screen(is_inverted ? BLACK : WHITE);
+		}
+
 		// See if we need to break our string down into multiple lines...
 		char line[MAXCOLS];
 		size_t len = strlen(string);
@@ -443,6 +452,14 @@ void
 		// If adjusted row + line_number > MAXROW -> truncate
 		// Make sure adjusted row/col >= 0
 		//region = draw(string, row, col, is_inverted, 0);
+	}
+
+	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
+	if (is_cleared) {
+		region.top = 0;
+		region.left = 0;
+		region.width = vinfo.xres;
+		region.height = vinfo.yres;
 	}
 
 	// Refresh screen
@@ -506,7 +523,7 @@ int
 			       string,
 			       col,
 			       row);
-			fbink_print(string, row, col, is_inverted, is_flashing);
+			fbink_print(string, row, col, is_inverted, is_flashing, is_cleared);
 		}
 	}
 
