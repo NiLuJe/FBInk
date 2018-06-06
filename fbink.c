@@ -619,6 +619,9 @@ int
 			       col,
 			       row);
 			fbink_print(string, row, col, is_inverted, is_flashing, is_cleared, is_centered, is_padded);
+			// NOTE: Don't clobber previous entries if multiple strings were passed...
+			//row++;
+			// FIXME: Actually handle this sanely... :D
 		}
 	}
 
@@ -635,5 +638,5 @@ int
  * TODO: ioctl only (i.e., refresh current fb data, don't paint)
  *       -s w=758,h=1024 -f
  *       NOTE: Don't bother w/ getsubopt() and always make it full-screen?
- * TODO: Move all option flags in a struct to keep the sigs in check...
+ * TODO: Move all option flags in a struct to keep the sigs in check... (or not? library...)
  */
