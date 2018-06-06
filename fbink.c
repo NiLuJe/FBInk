@@ -299,17 +299,15 @@ struct mxcfb_rect
 
 	// NOTE: eInk framebuffers are weird...,
 	//       we should be computing the length of a line (MAXCOLS) based on xres_virtual,
-	//       not xres (because it's guranteed to be a multiple of 16).
+	//       not xres (because it's guaranteed to be a multiple of 16).
 	//       Unfortunately, that means this last block of the line is partly offscreen.
 	//       Also, it CANNOT be part of the region passed to the eInk controller...
-	//       So, since this this last block is basically unusable because unreadable,
-	//       don't count it as "available" (i.e., by including it in MAXCOLS),
-	//       since that would wreak havoc in a number of our heuristics,
+	//       So, since this this last block is basically unusable because partly unreadable,
+	//       and partly unrefreshable, don't count it as "available" (i.e., by including it in MAXCOLS),
+	//       since that would happen to also wreak havoc in a number of our heuristics,
 	//       just fudge printing a blank square 'til the edge of the screen if we're filling a line completely.
 	if (len == MAXCOLS) {
-		printf("xres %d vs. width %u\n", vinfo.xres, region.width);
-		fill_rect(region.left + (len * FONTW), region.top + (multiline_offset * FONTH), (vinfo.xres - ((MAXCOLS - col) * FONTW)), FONTH, bgC);
-		printf("Fill: %d, %d with %dx%d rectangle\n", region.left + (len * FONTW), region.top + (multiline_offset * FONTH), (vinfo.xres - ((MAXCOLS - col) * FONTW)), FONTH);
+		fill_rect(region.left + (len * FONTW), region.top + (multiline_offset * FONTH), (vinfo.xres - (len * FONTW)), FONTH, bgC);
 	}
 
 	// Fill our bounding box with our background color, so that we'll be visible no matter what's already on screen.
