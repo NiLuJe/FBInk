@@ -268,45 +268,32 @@ struct mxcfb_rect
 	int fgC = is_inverted ? WHITE : BLACK;
 	int bgC = is_inverted ? BLACK : WHITE;
 
-	int                i, x, y;
-	char               remains[512] = { 0 };
+	unsigned short int                i, x, y;
 	// Adjust row in case we're a continuation of a multi-line print...
 	row += line_offset;
 
-	// loop through all characters in the text string
-	size_t l = strnlen(text, MAXCOLS);
-	printf("StrLen: %zu\n", l);
+	// Compute the length of our actual string
+	// NOTE: We already took care in fbink_print() of making sure that the string passed in text
+	//       wouldn't exceed the maximum printable length, MAXCOLS - col
+	size_t len = strnlen(text, MAXCOLS);
+	printf("StrLen: %zu\n", len);
+
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
 		.top    = (row - line_offset) * FONTH,
 		.left   = col * FONTW,
-		.width  = line_offset > 0 ? (MAXCOLS - col) * FONTW : l * FONTW,
+		.width  = line_offset > 0 ? (MAXCOLS - col) * FONTW : len * FONTW,
 		.height = (line_offset + 1) * FONTH,
 	};
 
 	printf("Region: top=%u, left=%u, width=%u, height=%u\n", region.top, region.left, region.width, region.height);
 
-	// Warn if what we want to print doesn't fit in a single line
-	if (region.left + region.width > vinfo.xres) {
-		printf("Trying to fit %hu + %zu characters (%dpx) in a single %hu characters line (%dpx)\n",
-		       col,
-		       l,
-		       region.left + region.width,
-		       MAXCOLS,
-		       vinfo.xres);
-		// Truncate current line to max printable length, and queue remainder for next line
-		l = MAXCOLS - col;
-		printf("Remainder: '%s'\n", text + l);
-		// Truncate region too, so we don't send an ovalid one to MXCFB_SEND_UPDATE (which would fail)
-		region.width = l * FONTW;
-		printf("Truncated width: %u\n", region.width);
-	}
-
 	// Fill our bounding box with our background color, so that we'll be visible no matter what's already on screen.
 	// NOTE: Unneeded, we already plot the background when handling font glyphs ;).
 	//fill_rect(region.left, region.top, region.width, region.height, bgC);
 
-	for (i = 0; i < l; i++) {
+	// Loop through all characters in the text string
+	for (i = 0; i < len; i++) {
 		// get the 'image' index for this character
 		//int ix = font_index(text[i]);
 		// get the font 'image'
@@ -346,11 +333,6 @@ struct mxcfb_rect
 		}            // end "for y"
 	}                    // end "for i"
 
-	printf("Final region: top=%u, left=%u, width=%u, height=%u\n",
-	       region.top,
-	       region.left,
-	       region.width,
-	       region.height);
 	return region;
 }
 
@@ -447,7 +429,7 @@ void
 		for (multiline_offset = 0; multiline_offset < lines; multiline_offset++) {
 			printf("Size to print: %zu\n", (MAXCOLS - col) * sizeof(char));
 			strncpy(line, string + (multiline_offset * (MAXCOLS - col)), (MAXCOLS - col) * sizeof(char));
-			// Ensure line is NULL terminated so that strnlen doesn't do something stupid in draw ;).
+			// Ensure line is NULL terminated so that stuff stays sane later :).
 			line[MAXCOLS - col] = '\0';
 			region = draw(line, row, col, is_inverted, multiline_offset);
 		}
