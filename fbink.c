@@ -499,7 +499,7 @@ void
 				printf("Adjusted line_len to %zu for centering\n", line_len);
 			}
 
-			// FIXME: Blank characters 2, 3, 4 when building with optimization? :D.
+			// FIXME: Second & third characters of the line are blank when building with optimization? (Even -O1) o_O.
 			// FIXME: Fix the whole MAXCOLS as field length to snprintf... (plus fix col > 0).
 			// When centered & padded, we need to split the padding in two, left & right.
 			if (is_centered && is_padded) {
