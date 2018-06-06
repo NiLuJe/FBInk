@@ -332,11 +332,11 @@ static struct mxcfb_rect
 				char b = img[y * FONTW + x];
 				if (b > 0) {
 					// plot the pixel (fg, text)
-					put_pixel((col * FONTW) + (i * FONTW) + x, (row * FONTH) + y, fgC);
+					put_pixel((unsigned short int) ((col * FONTW) + (i * FONTW) + x), (unsigned short int) ((row * FONTH) + y), fgC);
 				} else {
 					// this is background,
 					// fill it so that we'll be visible no matter what was on screen behind us.
-					put_pixel((col * FONTW) + (i * FONTW) + x, (row * FONTH) + y, bgC);
+					put_pixel((unsigned short int) ((col * FONTW) + (i * FONTW) + x), (unsigned short int) ((row * FONTH) + y), bgC);
 				}
 			}    // end "for x"
 		}            // end "for y"
