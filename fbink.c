@@ -166,6 +166,7 @@ void
 void
     clear_screen(int c)
 {
+	// FIXME: Mmmhh, smem_len instead for >8bpp?
 	memset(fbp, c, vinfo.xres * vinfo.yres);
 }
 
@@ -311,6 +312,10 @@ struct mxcfb_rect
 		// get the font 'image'
 		//char* img = fontImg[ix];
 		char img[FONTW * FONTH];
+		// Make sure the array is zero-initialized...
+		// NOTE: That sizeof may feel weird, but in C99, it does get evaluated at runtime :).
+		//       Otherwise, we'd need to do memset(img, 0, (FONTW * FONTH) * sizeof(*img));
+		//       Which, granted, should be equal to simply memset(img, 0, FONTW * FONTH);
 		memset(img, 0, sizeof(img));
 		switch (FONTSIZE_MULT) {
 			case 4:
