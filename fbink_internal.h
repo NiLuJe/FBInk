@@ -24,3 +24,83 @@
 	You should have received a copy of the GNU Affero General Public License
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+#ifndef __FBINK_INTERNAL_H
+#define __FBINK_INTERNAL_H
+
+#include <fcntl.h>
+#include <getopt.h>
+#include <linux/fb.h>
+#include <linux/kd.h>
+#include <math.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <sys/param.h>
+#include <unistd.h>
+
+#include "eink/mxcfb-kobo.h"
+#include "font8x8/font8x8_latin.h"
+
+// default eInk framebuffer palette
+// c.f., linux/drivers/video/mxc/cmap_lab126.h
+typedef enum
+{
+	BLACK  = 0,     // 0x00
+	GRAY1  = 1,     // 0x11
+	GRAY2  = 2,     // 0x22
+	GRAY3  = 3,     // 0x33
+	GRAY4  = 4,     // 0x44
+	GRAY5  = 5,     // 0x55
+	GRAY6  = 6,     // 0x66
+	GRAY7  = 7,     // 0x77
+	GRAY8  = 8,     // 0x88
+	GRAY9  = 9,     // 0x99
+	GRAY10 = 10,    // 0xAA
+	GRAY11 = 11,    // 0xBB
+	GRAY12 = 12,    // 0xCC
+	GRAY13 = 13,    // 0xDD
+	GRAY14 = 14,    // 0xEE
+	WHITE  = 15     // 0xFF
+} COLOR_INDEX_T;
+
+static unsigned short def_r[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+				  0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
+static unsigned short def_g[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+				  0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
+static unsigned short def_b[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+				  0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
+
+// 'global' variables to store screen info
+char*                    fbp = 0;
+struct fb_var_screeninfo vinfo;
+struct fb_fix_screeninfo finfo;
+unsigned short int       FONTW         = 8;
+unsigned short int       FONTH         = 8;
+unsigned short int       FONTSIZE_MULT = 1;
+// Slightly arbitrary-ish fallback values
+unsigned short int MAXROWS = 45;
+unsigned short int MAXCOLS = 32;
+
+static void put_pixel_Gray8(int, int, int);
+static void put_pixel_RGB24(int, int, int, int, int);
+static void put_pixel_RGB32(int, int, int, int, int);
+static void put_pixel_RGB565(int, int, int, int, int);
+static void put_pixel(int, int, int);
+
+static void fill_rect(int, int, int, int, int);
+static void clear_screen(int);
+
+static char* font8x8_get_bitmap(int);
+static void  font8x8_render(int, char*);
+static void  font8x8_render_x2(int, char*);
+static void  font8x8_render_x4(int, char*);
+
+static struct mxcfb_rect draw(char*, unsigned short int, unsigned short int, bool, unsigned short int);
+
+static void refresh(int, struct mxcfb_rect, bool);
+
+#endif

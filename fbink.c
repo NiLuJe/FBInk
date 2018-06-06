@@ -25,66 +25,11 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <fcntl.h>
-#include <getopt.h>
-#include <linux/fb.h>
-#include <linux/kd.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/ioctl.h>
-#include <sys/mman.h>
-#include <sys/param.h>
-#include <unistd.h>
-
-#include "eink/mxcfb-kobo.h"
 #include "fbink.h"
-#include "font8x8/font8x8_latin.h"
-
-// default eInk framebuffer palette
-// c.f., linux/drivers/video/mxc/cmap_lab126.h
-typedef enum
-{
-	BLACK  = 0,     // 0x00
-	GRAY1  = 1,     // 0x11
-	GRAY2  = 2,     // 0x22
-	GRAY3  = 3,     // 0x33
-	GRAY4  = 4,     // 0x44
-	GRAY5  = 5,     // 0x55
-	GRAY6  = 6,     // 0x66
-	GRAY7  = 7,     // 0x77
-	GRAY8  = 8,     // 0x88
-	GRAY9  = 9,     // 0x99
-	GRAY10 = 10,    // 0xAA
-	GRAY11 = 11,    // 0xBB
-	GRAY12 = 12,    // 0xCC
-	GRAY13 = 13,    // 0xDD
-	GRAY14 = 14,    // 0xEE
-	WHITE  = 15     // 0xFF
-} COLOR_INDEX_T;
-
-static unsigned short def_r[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
-				  0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
-static unsigned short def_g[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
-				  0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
-static unsigned short def_b[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
-				  0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
-
-// 'global' variables to store screen info
-char*                    fbp = 0;
-struct fb_var_screeninfo vinfo;
-struct fb_fix_screeninfo finfo;
-unsigned short int       FONTW         = 8;
-unsigned short int       FONTH         = 8;
-unsigned short int       FONTSIZE_MULT = 1;
-// Slightly arbitrary-ish fallback values
-unsigned short int MAXROWS = 45;
-unsigned short int MAXCOLS = 32;
+#include "fbink_internal.h"
 
 // helper function to 'plot' a pixel in given color
-void
+static void
     put_pixel_Gray8(int x, int y, int c)
 {
 	// calculate the pixel's byte offset inside the buffer
@@ -94,7 +39,7 @@ void
 	*((char*) (fbp + pix_offset)) = c;
 }
 
-void
+static void
     put_pixel_RGB24(int x, int y, int r, int g, int b)
 {
 	// remember to change main(): vinfo.bits_per_pixel = 24;
@@ -111,7 +56,7 @@ void
 	*((char*) (fbp + pix_offset + 2)) = r;
 }
 
-void
+static void
     put_pixel_RGB32(int x, int y, int r, int g, int b)
 {
 	// remember to change main(): vinfo.bits_per_pixel = 32;
@@ -129,7 +74,7 @@ void
 	*((char*) (fbp + pix_offset + 3)) = 0xFF;    // Opaque, always.
 }
 
-void
+static void
     put_pixel_RGB565(int x, int y, int r, int g, int b)
 {
 	// remember to change main(): vinfo.bits_per_pixel = 16;
@@ -150,7 +95,7 @@ void
 }
 
 // handle various bpp...
-void
+static void
     put_pixel(int x, int y, int c)
 {
 	if (vinfo.bits_per_pixel == 8) {
@@ -165,7 +110,7 @@ void
 }
 
 // helper function to draw a rectangle in given color
-void
+static void
     fill_rect(int x, int y, int w, int h, int c)
 {
 	int cx, cy;
@@ -179,7 +124,7 @@ void
 
 // helper function to clear the screen - fill whole
 // screen with given color
-void
+static void
     clear_screen(int c)
 {
 	if (vinfo.bits_per_pixel == 8) {
@@ -191,7 +136,7 @@ void
 }
 
 // Return the font8x8 bitmap for a specifric ascii character
-char*
+static char*
     font8x8_get_bitmap(int ascii)
 {
 	// Get the bitmap for that ASCII character
@@ -205,7 +150,7 @@ char*
 }
 
 // Render a specific font8x8 glyph into a 8x8 pixmap
-void
+static void
     font8x8_render(int ascii, char* glyph_pixmap)
 {
 	char* bitmap = font8x8_get_bitmap(ascii);
@@ -227,7 +172,7 @@ void
 }
 
 // Render a specific font8x8 glyph into a 16x16 pixmap
-void
+static void
     font8x8_render_x2(int ascii, char* glyph_pixmap)
 {
 	char* bitmap = font8x8_get_bitmap(ascii);
@@ -250,7 +195,7 @@ void
 }
 
 // Render a specific font8x8 glyph into a 32x32 pixmap
-void
+static void
     font8x8_render_x4(int ascii, char* glyph_pixmap)
 {
 	char* bitmap = font8x8_get_bitmap(ascii);
@@ -276,7 +221,7 @@ void
 
 // helper function for drawing - no more need to go mess with
 // the main function when just want to change what to draw...
-struct mxcfb_rect
+static struct mxcfb_rect
     draw(char*              text,
 	 unsigned short int row,
 	 unsigned short int col,
@@ -374,7 +319,7 @@ struct mxcfb_rect
 }
 
 // handle eink updates
-void
+static void
     refresh(int fbfd, struct mxcfb_rect region, bool is_flashing)
 {
 	// NOTE: While we'd be perfect candidates for using A2 waveform mode, it's all kinds of fucked up on Kobos,

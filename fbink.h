@@ -24,3 +24,10 @@
 	You should have received a copy of the GNU Affero General Public License
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+#ifndef __FBINK_H
+#define __FBINK_H
+
+void fbink_print(char*, short int, short int, bool, bool, bool, bool, bool);
+
+#endif
