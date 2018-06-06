@@ -335,7 +335,7 @@ void
 		.update_marker = getpid(),
 		.update_mode   = UPDATE_MODE_PARTIAL,
 		.update_region = region,
-		.waveform_mode = WAVEFORM_MODE_AUTO,
+		.waveform_mode = WAVEFORM_MODE_A2,
 	};
 
 	if (ioctl(fbfd, MXCFB_SEND_UPDATE, &update) < 0) {
@@ -420,7 +420,7 @@ int
  * TODO: CLI
  * 	* [-y, --row] [-x, --col] [-h] string
  * 		-h inverts fg/bg colors
- * TODO: A2 waveform mode? (user-selection? -w)
+ * TODO: waveform mode user-selection? -w
  * TODO: -f for full update?
  * TODO: -c to clear screen?
  * TODO: ioctl only (i.e., refresh current fb data, don't paint)
