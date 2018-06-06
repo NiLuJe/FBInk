@@ -15,6 +15,7 @@
  */
 
 #include <fcntl.h>
+#include <getopt.h>
 #include <linux/fb.h>
 #include <linux/kd.h>
 #include <stdbool.h>
@@ -24,7 +25,6 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <unistd.h>
-#include <getopt.h>
 
 #include "eink/mxcfb-kobo.h"
 #include "fbink.h"
@@ -63,9 +63,12 @@ static unsigned short def_b[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77
 char*                    fbp = 0;
 struct fb_var_screeninfo vinfo;
 struct fb_fix_screeninfo finfo;
-unsigned int             FONTW         = 8;
-unsigned int             FONTH         = 8;
-unsigned int             FONTSIZE_MULT = 1;
+unsigned short int       FONTW         = 8;
+unsigned short int       FONTH         = 8;
+unsigned short int       FONTSIZE_MULT = 1;
+// Slightly arbitrary-ish fallback values
+unsigned short int MAXROWS = 45;
+unsigned short int MAXCOLS = 32;
 
 // helper function to 'plot' a pixel in given color
 void
@@ -260,15 +263,13 @@ struct mxcfb_rect
     draw(char* arg, unsigned short int row, unsigned short int col, bool is_inverted, unsigned short int line_offset)
 {
 
-	char* text  = (arg != 0) ? arg : "Hello World!";
+	char* text = (arg != 0) ? arg : "Hello World!";
 	printf("Printing '%s' @ line offset %hu\n", text, line_offset);
-	int   fgC   = is_inverted ? WHITE : BLACK;
-	int   bgC   = is_inverted ? BLACK : WHITE;
+	int fgC = is_inverted ? WHITE : BLACK;
+	int bgC = is_inverted ? BLACK : WHITE;
 
-	int i, l, x, y;
-	unsigned short int maxcol = vinfo.xres / FONTW;
-	unsigned short int maxrow = vinfo.yres / FONTH;
-	char remains[512] = { 0 };
+	int                i, l, x, y;
+	char               remains[512] = { 0 };
 	// Adjust row in case we're a continuation of a multi-line print...
 	row += line_offset;
 
@@ -278,7 +279,7 @@ struct mxcfb_rect
 	struct mxcfb_rect region = {
 		.top    = (row - line_offset) * FONTH,
 		.left   = col * FONTW,
-		.width  = line_offset > 0 ? (maxcol - col) * FONTW : l * FONTW,
+		.width  = line_offset > 0 ? (MAXCOLS - col) * FONTW : l * FONTW,
 		.height = (line_offset + 1) * FONTH,
 	};
 
@@ -290,13 +291,11 @@ struct mxcfb_rect
 		       col,
 		       (region.left + region.width) / FONTW,
 		       region.left + region.width,
-		       maxcol,
+		       MAXCOLS,
 		       vinfo.xres);
 		// Truncate current line to max printable length, and queue remainder for next line
-		l = maxcol - col;
-		//remains = text + l;
-		strncpy(remains, text + l, sizeof(remains));
-		printf("Remainder: '%s'\n", remains);
+		l = MAXCOLS - col;
+		printf("Remainder: '%s'\n", text + l);
 		// Truncate region too, so we don't send an ovalid one to MXCFB_SEND_UPDATE (which would fail)
 		region.width = l * FONTW;
 		printf("Truncated width: %u\n", region.width);
@@ -346,18 +345,11 @@ struct mxcfb_rect
 		}            // end "for y"
 	}                    // end "for i"
 
-	// If we've got stuff left to print, keep going...
-	if (*remains) {
-		printf("Re-entering draw for string '%s'\n", remains);
-		draw(remains, row, col, is_inverted, ++line_offset);
-	}
-
-	printf("Returning from draw()\n");
-
-	// Re-adjust region from when we resume our original draw call after our nested draws...
-	// FIXME: Don't do that, and handle the returns differently?
-	region.height = (line_offset + 1) * FONTH;
-	printf("Final region: top=%u, left=%u, width=%u, height=%u\n", region.top, region.left, region.width, region.height);
+	printf("Final region: top=%u, left=%u, width=%u, height=%u\n",
+	       region.top,
+	       region.left,
+	       region.width,
+	       region.height);
 	return region;
 }
 
@@ -383,10 +375,11 @@ void
 }
 
 // Magic happens here!
-void fbink_print(char* string, unsigned short int row, unsigned short int col, bool is_inverted, bool is_flashing)
+void
+    fbink_print(char* string, unsigned short int row, unsigned short int col, bool is_inverted, bool is_flashing)
 {
-	int                      fbfd = 0;
-	long int                 screensize = 0;
+	int      fbfd       = 0;
+	long int screensize = 0;
 
 	// Open the framebuffer file for reading and writing
 	fbfd = open("/dev/fb0", O_RDWR);
@@ -403,6 +396,7 @@ void fbink_print(char* string, unsigned short int row, unsigned short int col, b
 	printf("Variable info: %dx%d, %dbpp\n", vinfo.xres, vinfo.yres, vinfo.bits_per_pixel);
 
 	// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD)
+	// FIXME: Even on 600x800 screens, 8x8 might be too small...
 	if (vinfo.yres <= 800) {
 		FONTSIZE_MULT = 1;    // 8x8
 	} else if (vinfo.yres <= 1024) {
@@ -414,6 +408,11 @@ void fbink_print(char* string, unsigned short int row, unsigned short int col, b
 	FONTW = FONTW * FONTSIZE_MULT;
 	FONTH = FONTH * FONTSIZE_MULT;
 	printf("Fontsize set to %dx%d.\n", FONTW, FONTH);
+
+	// Compute MAX* values now that we know the screen & font resolution
+	MAXCOLS = vinfo.xres / FONTW;
+	MAXROWS = vinfo.yres / FONTH;
+	printf("Line length: %hu, Column length: %hu.\n", MAXCOLS, MAXROWS);
 
 	// Get fixed screen information
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo)) {
@@ -431,6 +430,23 @@ void fbink_print(char* string, unsigned short int row, unsigned short int col, b
 	if ((int) fbp == -1) {
 		printf("Failed to mmap.\n");
 	} else {
+		// See if we need to break our string down into multiple lines...
+		char line[MAXCOLS];
+		size_t len = strlen(string);
+		// Compute the amount of characters (i.e., rows) needed to print that string...
+		size_t rows = col + len;
+		unsigned short int lines = 1;
+		unsigned short int multiline_offset = 0;
+		// NOTE: The maximum length of a single row is the total amount of columns in a line!
+		if (rows > MAXCOLS) {
+			lines = rows / MAXCOLS;
+		}
+		printf("Need %hu lines to print %zu characters in %zu rows\n", lines, len, rows);
+		// If we have multiple lines to print, draw 'em line per line
+		for (multiline_offset = 0; multiline_offset < lines; multiline_offset++) {
+			strncpy(line, string + (multiline_offset * MAXCOLS), sizeof(line));
+			region = draw(line, row, col, is_inverted, multiline_offset);
+		}
 		// draw...
 		// FIXME: Fuck it , and chunk the draw calls from here...
 		// MACOL/MAXROW
@@ -440,7 +456,7 @@ void fbink_print(char* string, unsigned short int row, unsigned short int col, b
 		// Adjust row if row + line_number > MAXROW
 		// If adjusted row + line_number > MAXROW -> truncate
 		// Make sure adjusted row/col >= 0
-		region = draw(string, row, col, is_inverted, 0);
+		//region = draw(string, row, col, is_inverted, 0);
 	}
 
 	// Refresh screen
@@ -457,16 +473,15 @@ int
 {
 	int                        opt;
 	int                        opt_index;
-	static const struct option opts[] = { { "row", required_argument, NULL, 'y' },
-					      { "col", required_argument, NULL, 'x' },
-					      { "invert", no_argument, NULL, 'h' },
-					      { "flash", no_argument, NULL, 'f' },
-					      { "clear", no_argument, NULL, 'c' },
-					      { NULL, 0, NULL, 0 } };
+	static const struct option opts[] = {
+		{ "row", required_argument, NULL, 'y' }, { "col", required_argument, NULL, 'x' },
+		{ "invert", no_argument, NULL, 'h' },    { "flash", no_argument, NULL, 'f' },
+		{ "clear", no_argument, NULL, 'c' },     { NULL, 0, NULL, 0 }
+	};
 
-	unsigned short int row = 0;
-	unsigned short int col = 0;
-	bool is_inverted = false;
+	unsigned short int row         = 0;
+	unsigned short int col         = 0;
+	bool               is_inverted = false;
 	// NOTE: Not terribly useful for text-only, it's often optimized out by the driver for small regions (i.e., us).
 	bool is_flashing = false;
 	// TODO: Unimplemented (because fairly useless for text only).
@@ -500,7 +515,11 @@ int
 	if (optind < argc) {
 		while (optind < argc) {
 			string = argv[optind++];
-			printf("Printing%sstring '%s' @ column %hu, row %hu\n", is_inverted ? " inverted " : " ", string, col, row);
+			printf("Printing%sstring '%s' @ column %hu, row %hu\n",
+			       is_inverted ? " inverted " : " ",
+			       string,
+			       col,
+			       row);
 			fbink_print(string, row, col, is_inverted, is_flashing);
 		}
 	}
