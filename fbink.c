@@ -452,7 +452,7 @@ void
 		char   line[MAXCOLS];
 		size_t len = strlen(string);
 		// Compute the amount of characters (i.e., rows) needed to print that string...
-		unsigned short int rows             = (unsigned short int) (col + len);
+		unsigned short int rows             = (unsigned short int) ((unsigned short int) col + len);
 		unsigned short int lines            = 1;
 		unsigned short int multiline_offset = 0;
 		// NOTE: The maximum length of a single row is the total amount of columns in a row (i.e., line)!
@@ -476,12 +476,12 @@ void
 		// If we have multiple lines to print, draw 'em line per line
 		for (multiline_offset = 0; multiline_offset < lines; multiline_offset++) {
 			// Compute the amount of characters left to print...
-			size_t left = (size_t)(len - ((multiline_offset) * (MAXCOLS - col)));
+			size_t left = len - (size_t) ((multiline_offset) * (MAXCOLS - col));
 			// And use it to compute the amount of characters to print on *this* line
-			size_t line_len = (size_t) MIN(left, (MAXCOLS - col));
+			size_t line_len = MIN(left, (size_t) (MAXCOLS - col));
 			printf("Size to print: %zu out of %zu (left: %zu)\n",
 			       line_len,
-			       (size_t)((MAXCOLS - col) * sizeof(char)),
+			       (size_t) (MAXCOLS - col) * sizeof(char),
 			       left);
 
 			// Just fudge the column for centering...
@@ -493,7 +493,7 @@ void
 			// Just fudge the (formatted) line length for free padding :).
 			if (is_padded) {
 				// Don't fudge if also centered, we'll need the original value to split padding in two.
-				line_len = is_centered ? line_len : (MAXCOLS - col);
+				line_len = is_centered ? line_len : (size_t) (MAXCOLS - col);
 				printf("Adjusted line_len to %zu for centering\n", line_len);
 			}
 
@@ -510,7 +510,7 @@ void
 				       extra_pad,
 				       (pad_len * 2) + line_len + extra_pad);
 				snprintf(line,
-					 (size_t)(MAXCOLS + 1),
+					 (size_t) (MAXCOLS + 1),
 					 "%*s%*s%*s",
 					 (int) pad_len,
 					 " ",
@@ -520,7 +520,7 @@ void
 					 " ");
 			} else {
 				snprintf(line,
-					 (size_t)(MAXCOLS + 1),
+					 (size_t) (MAXCOLS + 1),
 					 "%*s",
 					 (int) line_len,
 					 string + (multiline_offset * (MAXCOLS - col)));
