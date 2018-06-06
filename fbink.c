@@ -275,8 +275,17 @@ struct mxcfb_rect
 		.top = row_off * FONTH,
 		.left = col_off * FONTW,
 		.width = l * FONTW,
-		.height = FONTH,			// TODO: Multi-line?
+		.height = FONTH,
 	};
+
+	// Warn if what we want to print doesn't fit in a single line
+	if (region.left + region.width > vinfo.xres) {
+		printf("Trying to fit %d pixels in a %d px line\n", region.left + region.width, vinfo.xres);
+		// Abort & return an empty region.
+		// TODO: Multi-line?
+		region.top = region.left = region.width = region.height = 0;
+		return region;
+	}
 
 	for (i = 0; i < l; i++) {
 		// get the 'image' index for this character
