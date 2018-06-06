@@ -33,7 +33,7 @@
 #include "font8x8/font8x8_latin.h"
 
 // default eInk framebuffer palette
-// c.f. linux/drivers/video/mxc/cmap_lab126.h
+// c.f., linux/drivers/video/mxc/cmap_lab126.h
 typedef enum
 {
 	BLACK  = 0,     // 0x00
@@ -372,7 +372,7 @@ void
 
 // Magic happens here!
 void
-    fbink_print(char* string, short int row, short int col, bool is_inverted, bool is_flashing, bool is_cleared)
+    fbink_print(char* string, short int row, short int col, bool is_inverted, bool is_flashing, bool is_cleared, bool is_centered, bool is_padded)
 {
 	int      fbfd       = 0;
 	long int screensize = 0;
@@ -467,10 +467,19 @@ void
 		printf("Need %hu lines to print %zu characters in %zu rows\n", lines, len, rows);
 		// If we have multiple lines to print, draw 'em line per line
 		for (multiline_offset = 0; multiline_offset < lines; multiline_offset++) {
-			printf("Size to print: %zu\n", (MAXCOLS - col) * sizeof(char));
+			// Compute the amount of characters left to print...
+			size_t left = len - ((multiline_offset) * (MAXCOLS - col));
+			// And use it to compute the amount of characters to print on *this* line
+			size_t line_len = MIN(left, (MAXCOLS - col));
+			printf("Size to print: %zu out of %zu (left: %zu)\n", line_len, (MAXCOLS - col) * sizeof(char), left);
+			// Left-padding:
+			//snprintf(line, MAXCOLS, "%*s", (MAXCOLS - col), string + (multiline_offset * (MAXCOLS - col)));
+			snprintf(line, MAXCOLS, "%*s", line_len, string + (multiline_offset * (MAXCOLS - col)));
+			/*
 			strncpy(line, string + (multiline_offset * (MAXCOLS - col)), (MAXCOLS - col) * sizeof(char));
 			// Ensure line is NULL terminated so that stuff stays sane later :).
 			line[MAXCOLS - col] = '\0';
+			*/
 			region              = draw(line, row, col, is_inverted, multiline_offset);
 		}
 	}
@@ -500,18 +509,20 @@ int
 	static const struct option opts[] = {
 		{ "row", required_argument, NULL, 'y' }, { "col", required_argument, NULL, 'x' },
 		{ "invert", no_argument, NULL, 'h' },    { "flash", no_argument, NULL, 'f' },
-		{ "clear", no_argument, NULL, 'c' },     { NULL, 0, NULL, 0 }
+		{ "clear", no_argument, NULL, 'c' },
+		{ "centered", no_argument, NULL, 'm' },
+		{ "padded", no_argument, NULL, 'p' },{ NULL, 0, NULL, 0 }
 	};
 
 	short int row         = 0;
 	short int col         = 0;
 	bool      is_inverted = false;
-	// NOTE: Not terribly useful for text-only, it's often optimized out by the driver for small regions (i.e., us).
 	bool is_flashing = false;
-	// TODO: Unimplemented (because fairly useless for text only).
 	bool is_cleared = false;
+	bool is_centered = false;
+	bool is_padded = false;
 
-	while ((opt = getopt_long(argc, argv, "y:x:hfc", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "y:x:hfcmp", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				row = atoi(optarg);
@@ -527,6 +538,12 @@ int
 				break;
 			case 'c':
 				is_cleared = true;
+				break;
+			case 'm':
+				is_centered = true;
+				break;
+			case 'p':
+				is_padded = true;
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", opt);
@@ -544,7 +561,7 @@ int
 			       string,
 			       col,
 			       row);
-			fbink_print(string, row, col, is_inverted, is_flashing, is_cleared);
+			fbink_print(string, row, col, is_inverted, is_flashing, is_cleared, is_centered, is_padded);
 		}
 	}
 
@@ -552,8 +569,7 @@ int
 }
 
 /*
- * TODO: Truncate/Multi-Line
- * TODO: Header
+ * TODO: Header (+ _internal.h)
  * TODO: Makefile
  * TODO: License
  * TODO: DOC
@@ -563,4 +579,5 @@ int
  *       -s w=758,h=1024 -f
  *       NOTE: Don't bother w/ getsubopt() and always make it full-screen?
  * TODO: Centered text, padded/non-padded
+ * TODO: Move all option flags in a struct to keep the sigs in check...
  */
