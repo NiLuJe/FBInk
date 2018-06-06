@@ -182,14 +182,11 @@ void font8x8_render(int ascii, char* glyph_pixmap)
 		for (y=0; y < FONTH; y++) {
 			// y: input & output column
 			set = bitmap[x] & 1 << y;
-			// 'Flatten' our pixmap into a 1D array (0 = 0,0; 1=0,1; 2=0,2; 8=1,0)
+			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTH=1,0)
 			//int idx = x + (y * FONTH);	// 90° Left rotattion ;).
 			int idx = y + (x * FONTW);
-			printf("idx: %d @ x: %d & y: %d\n", idx, x, y);
 			glyph_pixmap[idx] = set ? 1 : 0;
-			//printf("%c", set ? 'X' : ' '); // y
 		}
-		//printf("\n");
 	}
 }
 
@@ -214,9 +211,8 @@ void font8x8_render_x2(int ascii, char* glyph_pixmap)
 			// y: input column, j: output column
 			y = j / FONTSIZE_MULT;
 			set = bitmap[x] & 1 << y;
-			// 'Flatten' our pixmap into a 1D array (0 = 0,0; 1=0,1; 2=0,2; 8=1,0)
+			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTH=1,0)
 			int idx = j + (i * FONTW);
-			printf("idx: %d @ x: %d & y: %d vs. i: %d & j: %d\n", idx, x, y, i, j);
 			glyph_pixmap[idx] = set ? 1 : 0;
 			glyph_pixmap[idx+1] = set ? 1 : 0;
 		}
@@ -244,9 +240,8 @@ void font8x8_render_x4(int ascii, char* glyph_pixmap)
 			// y: input column, j: output column
 			y = j / FONTSIZE_MULT;
 			set = bitmap[x] & 1 << y;
-			// 'Flatten' our pixmap into a 1D array (0 = 0,0; 1=0,1; 2=0,2; 8=1,0)
+			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTH=1,0)
 			int idx = j + (i * FONTW);
-			printf("idx: %d @ x: %d & y: %d vs. i: %d & j: %d\n", idx, x, y, i, j);
 			glyph_pixmap[idx] = set ? 1 : 0;
 			glyph_pixmap[idx+1] = set ? 1 : 0;
 			glyph_pixmap[idx+2] = set ? 1 : 0;
