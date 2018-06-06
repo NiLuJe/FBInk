@@ -256,16 +256,12 @@ void
 // helper function for drawing - no more need to go mess with
 // the main function when just want to change what to draw...
 struct mxcfb_rect
-    draw(char* arg)
+    draw(char* arg, unsigned short int row, unsigned short int col, bool is_inverted)
 {
 
 	char* text  = (arg != 0) ? arg : "Hello World!";
-	int   textC = BLACK;
-	int   bgC   = WHITE;
-
-	// Row/Column offsets
-	int row_off = 24;
-	int col_off = 1;
+	int   textC = is_inverted ? WHITE : BLACK;
+	int   bgC   = is_inverted ? BLACK : WHITE;
 
 	int i, l, x, y;
 
@@ -273,8 +269,8 @@ struct mxcfb_rect
 	l = strlen(text);
 	// Compute the dimension of the screen region we'll paint to
 	struct mxcfb_rect region = {
-		.top    = row_off * FONTH,
-		.left   = col_off * FONTW,
+		.top    = row * FONTH,
+		.left   = col * FONTW,
 		.width  = l * FONTW,
 		.height = FONTH,
 	};
@@ -323,10 +319,10 @@ struct mxcfb_rect
 				char b = img[y * FONTW + x];
 				if (b > 0) {
 					// plot the pixel (fg, text)
-					put_pixel((col_off * FONTW) + (i * FONTW) + x, (row_off * FONTH) + y, textC);
+					put_pixel((col * FONTW) + (i * FONTW) + x, (row * FONTH) + y, textC);
 				} else {
 					// this is background, fill it so that we'll be visible no matter what was on screen behind us.
-					put_pixel((col_off * FONTW) + (i * FONTW) + x, (row_off * FONTH) + y, bgC);
+					put_pixel((col * FONTW) + (i * FONTW) + x, (row * FONTH) + y, bgC);
 				}
 			}    // end "for x"
 		}            // end "for y"
@@ -337,14 +333,14 @@ struct mxcfb_rect
 
 // handle eink updates
 void
-    refresh(int fbfd, struct mxcfb_rect region)
+    refresh(int fbfd, struct mxcfb_rect region, bool is_flashing)
 {
 	// NOTE: While we'd be perfect candidates for using A2 waveform mode, it's all kinds of fucked up on Kobos,
 	//       and may lead to disappearing text or weird blending depending on the surrounding fb content...
 	struct mxcfb_update_data update = {
 		.temp          = TEMP_USE_AMBIENT,
 		.update_marker = getpid(),
-		.update_mode   = UPDATE_MODE_PARTIAL,
+		.update_mode   = is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL,
 		.update_region = region,
 		.waveform_mode = WAVEFORM_MODE_AUTO,
 	};
@@ -356,7 +352,7 @@ void
 }
 
 // Magic happens here!
-void fbink_print(char* string)
+void fbink_print(char* string, unsigned short int row, unsigned short int col, bool is_inverted, bool is_flashing)
 {
 	int                      fbfd = 0;
 	struct fb_var_screeninfo orig_vinfo;
@@ -406,11 +402,11 @@ void fbink_print(char* string)
 		printf("Failed to mmap.\n");
 	} else {
 		// draw...
-		region = draw(string);
+		region = draw(string, row, col, is_inverted);
 	}
 
 	// Refresh screen
-	refresh(fbfd, region);
+	refresh(fbfd, region, is_flashing);
 
 	// cleanup
 	munmap(fbp, screensize);
@@ -433,7 +429,9 @@ int
 	unsigned short int row = 0;
 	unsigned short int col = 0;
 	bool is_inverted = false;
+	// NOTE: Not terribly useful for text-only, it's often optimized out by the driver for small regions (i.e., us).
 	bool is_flashing = false;
+	// NOTE: Unimplemented (because fairly useless for text only).
 	bool is_cleared = false;
 
 	while ((opt = getopt_long(argc, argv, "y:x:hfc", opts, &opt_index)) != -1) {
@@ -464,8 +462,8 @@ int
 	if (optind < argc) {
 		while (optind < argc) {
 			string = argv[optind++];
-			printf("Printing string '%s'\n", string);
-			fbink_print(string);
+			printf("Printing%sstring '%s' @ column %hu, row %hu\n", is_inverted ? " inverted " : " ", string, col, row);
+			fbink_print(string, row, col, is_inverted, is_flashing);
 		}
 	}
 
@@ -479,11 +477,7 @@ int
  * TODO: License
  * TODO: DOC
  * TODO: Library
- * TODO: CLI
- * 	* [-y, --row] [-x, --col] [-h] string
- * 		-h inverts fg/bg colors
  * TODO: waveform mode user-selection? -w
- * TODO: -f for full update?
  * TODO: -c to clear screen?
  * TODO: ioctl only (i.e., refresh current fb data, don't paint)
  *       -s w=758,h=1024 -f
