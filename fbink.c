@@ -420,7 +420,7 @@ void
 		size_t rows = col + len;
 		unsigned short int lines = 1;
 		unsigned short int multiline_offset = 0;
-		// NOTE: The maximum length of a single row is the total amount of columns in a line!
+		// NOTE: The maximum length of a single row is the total amount of columns in a row (i.e., line)!
 		if (rows > MAXCOLS) {
 			lines = ceilf((float) rows / (float)MAXCOLS);
 		}
