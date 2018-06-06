@@ -260,10 +260,12 @@ struct mxcfb_rect
 {
 
 	char* text  = (arg != 0) ? arg : "Hello World!";
-	int   textC = is_inverted ? WHITE : BLACK;
+	int   fgC   = is_inverted ? WHITE : BLACK;
 	int   bgC   = is_inverted ? BLACK : WHITE;
 
 	int i, l, x, y;
+	unsigned short int maxlen = vinfo.xres / FONTW;
+	char* remains = NULL;
 
 	// loop through all characters in the text string
 	l = strlen(text);
@@ -277,15 +279,19 @@ struct mxcfb_rect
 
 	// Warn if what we want to print doesn't fit in a single line
 	if (region.left + region.width > vinfo.xres) {
-		printf("Trying to fit %d characters (%dpx) in a single %d characters line (%dpx)\n",
+		printf("Trying to fit %hu + %d characters (%dpx) in a single %hu characters line (%dpx)\n",
+		       col,
 		       (region.left + region.width) / FONTW,
 		       region.left + region.width,
-		       vinfo.xres / FONTW,
+		       maxlen,
 		       vinfo.xres);
-		// Abort & return an empty region.
-		// TODO: Multi-line? Or truncate to max-supported length?
-		region.top = region.left = region.width = region.height = 0;
-		return region;
+		// Truncate current line to max printable length, and queue remainder for next line
+		l = maxlen - col;
+		remains = text + l;
+		printf("Remainder: '%s'\n", remains);
+		// Truncate region too, so we don't send an ovalid one to MXCFB_SEND_UPDATE (which would fail)
+		region.width = l * FONTW;
+		printf("Truncated width: %u\n", region.width);
 	}
 
 	// Fill our bounding box with our background color, so that we'll be visible no matter what's already on screen.
@@ -319,7 +325,7 @@ struct mxcfb_rect
 				char b = img[y * FONTW + x];
 				if (b > 0) {
 					// plot the pixel (fg, text)
-					put_pixel((col * FONTW) + (i * FONTW) + x, (row * FONTH) + y, textC);
+					put_pixel((col * FONTW) + (i * FONTW) + x, (row * FONTH) + y, fgC);
 				} else {
 					// this is background, fill it so that we'll be visible no matter what was on screen behind us.
 					put_pixel((col * FONTW) + (i * FONTW) + x, (row * FONTH) + y, bgC);
