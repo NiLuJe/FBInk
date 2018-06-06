@@ -1,0 +1,6 @@
+# Ignore build output directories
+Release/
+Debug/
+# KDevelop
+fbink.kdev4
+.kdev4/
