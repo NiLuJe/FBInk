@@ -259,8 +259,8 @@ struct mxcfb_rect
 	//fill_rect(0, 0, vinfo.xres, vinfo.yres, 1);
 
 	char* text  = (arg != 0) ? arg : "Hello World!";
-	int   textC = 0;
-	int   bgC   = 15;
+	int   textC = BLACK;
+	int   bgC   = WHITE;
 
 	// Row/Column offsets
 	int row_off = 3;
