@@ -529,7 +529,7 @@ void
 					 " ");
 			} else {
 				snprintf(line,
-					 (size_t) MAXCOLS + 1,
+					 (size_t) line_len + 1,
 					 "%*s",
 					 (int) line_len,
 					 string + (multiline_offset * (MAXCOLS - col)));
