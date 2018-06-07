@@ -454,13 +454,14 @@ void
 
 		// See if we need to break our string down into multiple lines...
 		size_t len = strlen(string);
-		// Compute the amount of characters (i.e., rows) needed to print that string...
-		unsigned short int rows             = (unsigned short int) ((unsigned short int) col + len);
+
+		// Compute the amount of characters we can actually print on *one* line given the column we start on...
+		unsigned short int available_cols = MAXCOLS - col;
+		// Given that, compute how many lines it'll take to print all that in these constraints...
 		unsigned short int lines            = 1;
 		unsigned short int multiline_offset = 0;
-		// NOTE: The maximum length of a single row is the total amount of columns in a row (i.e., line)!
-		if (rows > MAXCOLS) {
-			lines = (unsigned short int) ceilf((float) rows / (float) MAXCOLS);
+		if (len > available_cols) {
+			lines = (unsigned short int) ceilf((float) len / (float) available_cols);
 		}
 
 		// Truncate to a single screen...
@@ -480,7 +481,7 @@ void
 		char* line;
 		line = malloc(sizeof(*line) * (size_t) (MAXCOLS + 1));
 
-		printf("Need %hu lines to print %zu characters over %hu rows\n", lines, len, rows);
+		printf("Need %hu lines to print %zu characters over %hu available columns\n", lines, len, available_cols);
 		// If we have multiple lines to print, draw 'em line per line
 		for (multiline_offset = 0; multiline_offset < lines; multiline_offset++) {
 			// Compute the amount of characters left to print...
