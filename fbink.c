@@ -273,7 +273,7 @@ static struct mxcfb_rect
 	struct mxcfb_rect region = {
 		.top    = (uint32_t)((row - multiline_offset) * FONTH),
 		.left   = (uint32_t)(col * FONTW),
-		.width  = multiline_offset > 0 ? vinfo.xres : (uint32_t)(len * FONTW),
+		.width  = multiline_offset > 0 ? (vinfo.xres - (uint32_t)(col * FONTW)) : (uint32_t)(len * FONTW),
 		.height = (uint32_t)((multiline_offset + 1) * FONTH),
 	};
 
@@ -478,7 +478,7 @@ void
 		// We'll copy our text in chunks of formatted line...
 		// NOTE: Store that on the heap, we've had some wonky adventures with automatic VLAs...
 		char* line;
-		line = malloc(sizeof(*line) * (size_t) (MAXCOLS));
+		line = malloc(sizeof(*line) * (size_t) (MAXCOLS + 1));
 
 		printf("Need %hu lines to print %zu characters over %hu rows\n", lines, len, rows);
 		// If we have multiple lines to print, draw 'em line per line
@@ -519,7 +519,7 @@ void
 				       extra_pad,
 				       (pad_len * 2) + line_len + extra_pad);
 				snprintf(line,
-					 MAXCOLS,
+					 (size_t) (MAXCOLS + 1),
 					 "%*s%*s%*s",
 					 (int) pad_len,
 					 " ",
@@ -529,7 +529,7 @@ void
 					 " ");
 			} else {
 				snprintf(line,
-					 MAXCOLS,
+					 (size_t) MAXCOLS + 1,
 					 "%*s",
 					 (int) line_len,
 					 string + (multiline_offset * (MAXCOLS - col)));
