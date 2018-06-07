@@ -508,7 +508,8 @@ void
 				printf("Adjusted line_len to %zu for centering\n", line_len);
 			}
 
-			// FIXME: Fix the whole MAXCOLS as field length to snprintf... (plus fix 'scrolling' when col > 0).
+			// FIXME: Fix centered & padded 'eating' col? chars per line,
+			//        and adding padding on the left of full lines...
 			// When centered & padded, we need to split the padding in two, left & right.
 			if (is_centered && is_padded) {
 				size_t pad_len = (MAXCOLS - line_len) / 2;
@@ -532,7 +533,7 @@ void
 					 " ");
 			} else {
 				snprintf(line,
-					 (size_t) line_len + 1,
+					 line_len + 1,
 					 "%*s",
 					 (int) line_len,
 					 string + (multiline_offset * (MAXCOLS - col)));
