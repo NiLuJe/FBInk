@@ -305,7 +305,7 @@ static struct mxcfb_rect
 	// NOTE: We tried using automatic VLAs, but that... didn't go well.
 	//       (as in, subtle (or not so) memory and/or stack corruption).
 	char* pixmap;
-	pixmap = malloc(sizeof(*pixmap) * (size_t) (FONTW * FONTH));
+	pixmap = malloc(sizeof(*pixmap) * (size_t)(FONTW * FONTH));
 
 	// Loop through all characters in the text string
 	for (i = 0U; i < len; i++) {
@@ -480,9 +480,10 @@ void
 		// We'll copy our text in chunks of formatted line...
 		// NOTE: Store that on the heap, we've had some wonky adventures with automatic VLAs...
 		char* line;
-		line = malloc(sizeof(*line) * (size_t) (MAXCOLS + 1));
+		line = malloc(sizeof(*line) * (size_t)(MAXCOLS + 1));
 
-		printf("Need %hu lines to print %zu characters over %hu available columns\n", lines, len, available_cols);
+		printf(
+		    "Need %hu lines to print %zu characters over %hu available columns\n", lines, len, available_cols);
 		// If we have multiple lines to print, draw 'em line per line
 		for (multiline_offset = 0; multiline_offset < lines; multiline_offset++) {
 			// Compute the amount of characters left to print...
@@ -521,7 +522,7 @@ void
 				       extra_pad,
 				       (pad_len * 2) + line_len + extra_pad);
 				snprintf(line,
-					 (size_t) (MAXCOLS + 1),
+					 (size_t)(MAXCOLS + 1),
 					 "%*s%*s%*s",
 					 (int) pad_len,
 					 " ",
