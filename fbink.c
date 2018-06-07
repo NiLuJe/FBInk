@@ -287,7 +287,8 @@ static struct mxcfb_rect
 	//       So, since this this last block is basically unusable because partly unreadable,
 	//       and partly unrefreshable, don't count it as "available" (i.e., by including it in MAXCOLS),
 	//       since that would happen to also wreak havoc in a number of our heuristics,
-	//       just fudge printing a blank square 'til the edge of the screen if we're filling a line completely.
+	//       just fudge printing a blank square 'til the edge of the screen if we're filling a line *completely*.
+	// NOTE: Use len + col if we want to do that everytime we simply *hit* the edge...
 	if (len == MAXCOLS) {
 		fill_rect((unsigned short int) (region.left + (len * FONTW)),
 			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
@@ -456,7 +457,7 @@ void
 		size_t len = strlen(string);
 
 		// Compute the amount of characters we can actually print on *one* line given the column we start on...
-		unsigned short int available_cols = MAXCOLS - col;
+		unsigned short int available_cols = (unsigned short int) (MAXCOLS - col);
 		// Given that, compute how many lines it'll take to print all that in these constraints...
 		unsigned short int lines            = 1;
 		unsigned short int multiline_offset = 0;
