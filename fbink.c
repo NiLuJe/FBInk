@@ -253,16 +253,6 @@ static struct mxcfb_rect
 	 bool               is_inverted,
 	 unsigned short int multiline_offset)
 {
-
-	/*
-	char text[MAXCOLS];
-	memcpy(text, arg, MAXCOLS);
-	*/
-	/*
-	char* text;
-	text = strdup(arg);
-	*/
-
 	printf("Printing '%s' @ line offset %hu\n", text, multiline_offset);
 	unsigned short int fgC = is_inverted ? WHITE : BLACK;
 	unsigned short int bgC = is_inverted ? BLACK : WHITE;
@@ -310,17 +300,15 @@ static struct mxcfb_rect
 	// NOTE: Unneeded, we already plot the background when handling font glyphs ;).
 	//fill_rect(region.left, region.top, region.width, region.height, bgC);
 
+	// Alloc our pixmap on the heap, and re-use it.
+	// NOTE: We tried using automatic VLAs, but that... didn't go well.
+	//       (as in, subtle (or not so) memory and/or stack corruption).
+	char* pixmap;
+	pixmap = malloc(sizeof(*pixmap) * (size_t) (FONTW * FONTH));
+
 	// Loop through all characters in the text string
-	//char pixmap[FONTW * FONTH];
 	for (i = 0U; i < len; i++) {
 		// get the glyph's pixmap
-		//char pixmap[FONTW * FONTH];
-		char* pixmap = malloc(sizeof(*pixmap)*(FONTW * FONTH));
-		// Make sure the array is zero-initialized...
-		// NOTE: That sizeof may feel weird, but in C99, it does get evaluated at runtime :).
-		//       Otherwise, we'd need to do memset(pixmap, 0, (FONTW * FONTH) * sizeof(*pixmap));
-		//       Which, granted, should be equal to simply memset(pixmap, 0, FONTW * FONTH);
-		//memset(pixmap, 0, sizeof(pixmap));
 		switch (FONTSIZE_MULT) {
 			case 4:
 				font8x8_render_x4(text[i], pixmap);
@@ -333,18 +321,12 @@ static struct mxcfb_rect
 				font8x8_render(text[i], pixmap);
 				break;
 		}
-		//if (i == 1 || i == 2) {
-		//	printf("i: %d (%c) & pixmap: %s\n", i, text[i], pixmap);
-		//}
 		// loop through pixel rows
 		for (y = 0U; y < FONTH; y++) {
 			// loop through pixel columns
 			for (x = 0U; x < FONTW; x++) {
 				// get the pixel value
 				char b = pixmap[(y * FONTW) + x];
-				if (i == 1 || i == 2) {
-					//printf("b: %d\n", b);
-				}
 				if (b > 0) {
 					// plot the pixel (fg, text)
 					put_pixel((unsigned short int) ((col * FONTW) + (i * FONTW) + x),
@@ -360,6 +342,9 @@ static struct mxcfb_rect
 			}    // end "for x"
 		}            // end "for y"
 	}                    // end "for i"
+
+	// Cleanup
+	free(pixmap);
 
 	return region;
 }
@@ -468,8 +453,6 @@ void
 		printf("Adjusted position: column %hu, row %hu\n", col, row);
 
 		// See if we need to break our string down into multiple lines...
-		//char   line[MAXCOLS+1];
-		char* line = malloc(sizeof(*line)*(MAXCOLS));
 		size_t len = strlen(string);
 		// Compute the amount of characters (i.e., rows) needed to print that string...
 		unsigned short int rows             = (unsigned short int) ((unsigned short int) col + len);
@@ -491,6 +474,11 @@ void
 			row = (short int) MIN(row - ((row + lines) - MAXROWS), MAXROWS);
 		}
 		printf("Final position: column %hu, row %hu\n", col, row);
+
+		// We'll copy our text in chunks of formatted line...
+		// NOTE: Store that on the heap, we've had some wonky adventures with automatic VLAs...
+		char* line;
+		line = malloc(sizeof(*line) * (size_t) (MAXCOLS));
 
 		printf("Need %hu lines to print %zu characters over %hu rows\n", lines, len, rows);
 		// If we have multiple lines to print, draw 'em line per line
@@ -517,8 +505,7 @@ void
 				printf("Adjusted line_len to %zu for centering\n", line_len);
 			}
 
-			// FIXME: Second & third characters of the line are blank when building with optimization? (Even -O1) o_O.
-			// FIXME: Fix the whole MAXCOLS as field length to snprintf... (plus fix col > 0).
+			// FIXME: Fix the whole MAXCOLS as field length to snprintf... (plus fix 'scrolling' when col > 0).
 			// When centered & padded, we need to split the padding in two, left & right.
 			if (is_centered && is_padded) {
 				size_t pad_len = (MAXCOLS - line_len) / 2;
@@ -551,6 +538,9 @@ void
 			region = draw(
 			    line, (unsigned short int) row, (unsigned short int) col, is_inverted, multiline_offset);
 		}
+
+		// Cleanup
+		free(line);
 	}
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
