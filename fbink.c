@@ -347,6 +347,7 @@ void
 
 	// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD)
 	// FIXME: Even on 600x800 screens, 8x8 might be too small...
+	// NOTE: Using an odd number as scaling mutliplier works, too.
 	if (vinfo.yres <= 800) {
 		FONTSIZE_MULT = 1;    // 8x8
 	} else if (vinfo.yres <= 1024) {
