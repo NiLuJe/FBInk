@@ -475,6 +475,16 @@ void
 			//        and adding padding on the left of full lines...
 			// When centered & padded, we need to split the padding in two, left & right.
 			if (is_centered && is_padded) {
+				// We need to recompute left, because col is now 0.
+				left = len - (size_t)((multiline_offset) * (MAXCOLS - 1));
+				// We need to recompute line_len, because col is now 0.
+				line_len = MIN(left, (size_t) MAXCOLS - 1);
+				// AND, as we enforce a single padding space on the left,
+				// to match the nearly full block that we fudge on the right in draw())
+				// We crop 1 slot off MAXCOLS when doing these calculations,
+				// but only when we'd be printing a full line,
+				// to avoid shifting the centering to the left in other cases...
+				printf("Adjusted line_len to %zu for padding & centering\n", line_len);
 				size_t pad_len = (MAXCOLS - line_len) / 2;
 				// If we're not at the edge of the screen because of rounding errors,
 				// add extra padding on the right
@@ -491,9 +501,9 @@ void
 					 (int) pad_len,
 					 " ",
 					 (int) line_len,
-					 string + (multiline_offset * (MAXCOLS - col)),
+					 string + (multiline_offset * (MAXCOLS - 1)),
 					 (int) (pad_len + extra_pad),
-					 " ");
+					 "");
 			} else {
 				snprintf(line,
 					 line_len + 1,
