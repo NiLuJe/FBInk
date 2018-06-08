@@ -191,7 +191,7 @@ static void
 			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTH=1,0)
 			unsigned short int idx = (unsigned short int) (j + (i * FONTW));
 			for (k = 0U; k < FONTSIZE_MULT; k++) {
-				glyph_pixmap[idx + k]      = set ? 1 : 0;
+				glyph_pixmap[idx + k] = set ? 1 : 0;
 			}
 		}
 	}
