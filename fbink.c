@@ -404,7 +404,6 @@ void
 			row = (short int) MIN(row, MAXROWS - 1);
 			printf("Clamped position: column %hu, row %hu\n", col, row);
 		}
-		// FIXME: Ensure we never center to col 0 even without padding?
 
 		// See if we need to break our string down into multiple lines...
 		size_t len = strlen(string);
@@ -453,6 +452,7 @@ void
 		printf(
 		    "Need %hu lines to print %zu characters over %hu available columns\n", lines, len, available_cols);
 
+		// Do the initial computation outside the loop, so we can re-use left when looping.
 		size_t left     = len - (size_t)((multiline_offset) * (MAXCOLS - col));
 		size_t line_len = 0U;
 		// If we have multiple lines to print, draw 'em line per line
@@ -472,6 +472,10 @@ void
 				// but we still enforce column 0 later, as we always want full padding.
 				col = is_padded ? col : (short int) ((MAXCOLS / 2U) - (line_len / 2U));
 				if (!is_padded) {
+					// Much like when both centering & padding, ensure we never write in column 0
+					if (col == 0) {
+						col = 1;
+					}
 					printf("Adjusted column to %hu for centering\n", col);
 					// Recompute line_len since col has been updated.
 					line_len = MIN(left, (size_t)(MAXCOLS - col));
