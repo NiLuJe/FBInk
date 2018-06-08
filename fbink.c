@@ -404,7 +404,6 @@ void
 			row = (short int) MIN(row, MAXROWS - 1);
 			printf("Clamped position: column %hu, row %hu\n", col, row);
 		}
-		// FIXME: Don't print empry lines.
 		// FIXME: Ensure we never center to col 0 even without padding?
 
 		// See if we need to break our string down into multiple lines...
@@ -416,7 +415,7 @@ void
 		// NOTE: In the same vein, when only centered, col will fluctuate,
 		//       so we'll often end-up with a smaller amount of lines than originally calculated.
 		//       Doing the computation with the initial col value ensures we'll have MORE lines than necessary,
-		//       though, which is mostly harmless (it'll just enlarge the refresh region).
+		//       though, which is mostly harmless, since we'll skip trailing blank lines in this case.
 		unsigned short int available_cols;
 		if (is_centered && is_padded) {
 			available_cols = (unsigned short int) (MAXCOLS - 1U);
@@ -477,6 +476,11 @@ void
 					// Recompute line_len since col has been updated.
 					line_len = MIN(left, (size_t)(MAXCOLS - col));
 					printf("Adjusted line_len to %zu for centering\n", line_len);
+					// Don't print trailing blank lines...
+					if (multiline_offset > 0 && line_len == 0) {
+						printf("Skipping trailing blank line @ offset %hu\n", multiline_offset);
+						continue;
+					}
 				}
 			}
 			// Just fudge the (formatted) line length for free padding :).
