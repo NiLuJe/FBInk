@@ -450,7 +450,7 @@ void
 		// We'll copy our text in chunks of formatted line...
 		// NOTE: Store that on the heap, we've had some wonky adventures with automatic VLAs...
 		char* line;
-		line = malloc(sizeof(*line) * (size_t)(MAXCOLS + 1));
+		line = malloc(sizeof(*line) * (MAXCOLS + 1U));
 
 		printf(
 		    "Need %hu lines to print %zu characters over %hu available columns\n", lines, len, available_cols);
@@ -469,7 +469,7 @@ void
 			if (is_centered) {
 				// Don't fudge if also padded, we'll need the original value for heuristics,
 				// but we still enforce column 0 later, as we always want full padding.
-				col = is_padded ? col : (short int) ((MAXCOLS / 2) - (line_len / 2));
+				col = is_padded ? col : (short int) ((MAXCOLS / 2U) - (line_len / 2U));
 				if (!is_padded) {
 					printf("Adjusted column to %hu for centering\n", col);
 				}
@@ -491,8 +491,8 @@ void
 				// but only when we'd be printing a full line,
 				// to avoid shifting the centering to the left in other cases...
 				short unsigned int available_maxcols = MAXCOLS;
-				if (line_len + col == MAXCOLS) {
-					available_maxcols = MAXCOLS - 1;
+				if (line_len + (short unsigned int) col == MAXCOLS) {
+					available_maxcols = (short unsigned int) (MAXCOLS - 1U);
 					printf("Setting available_maxcols to %hu\n", available_maxcols);
 				}
 				// We always want full padding
@@ -505,19 +505,19 @@ void
 				if (available_maxcols != MAXCOLS) {
 					printf("Adjusted line_len to %zu for padding & centering\n", line_len);
 				}
-				size_t pad_len = (MAXCOLS - line_len) / 2;
+				size_t pad_len = (MAXCOLS - line_len) / 2U;
 				// If we're not at the edge of the screen because of rounding errors,
 				// add extra padding on the right.
 				// It'll get cropped out by snprintf if it turns out to be extraneous.
-				size_t extra_pad = MAXCOLS - line_len - (pad_len * 2);
+				size_t extra_pad = MAXCOLS - line_len - (pad_len * 2U);
 				printf("Total size: %zu + %zu + %zu + %zu = %zu\n",
-				       1 + pad_len,
+				       1U + pad_len,
 				       line_len,
 				       pad_len,
 				       extra_pad,
-				       1 + (pad_len * 2) + line_len + extra_pad);
+				       1U + (pad_len * 2U) + line_len + extra_pad);
 				snprintf(line,
-					 (size_t)(MAXCOLS + 1),
+					 MAXCOLS + 1U,
 					 "%*s%*s%*s",
 					 (int) pad_len + 1,
 					 "",
@@ -527,7 +527,7 @@ void
 					 "");
 			} else {
 				snprintf(line,
-					 line_len + 1,
+					 line_len + 1U,
 					 "%*s",
 					 (int) line_len,
 					 string + (multiline_offset * (MAXCOLS - col)));
