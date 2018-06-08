@@ -407,6 +407,7 @@ void
 		}
 		printf("Adjusted position: column %hu, row %hu\n", col, row);
 
+		// Clamp coordinates to the screen, to avoid blowing up ;).
 		if (col >= MAXCOLS || row >= MAXROWS) {
 			col = (short int) MIN(col, MAXCOLS - 1);
 			row = (short int) MIN(row, MAXROWS - 1);
@@ -422,7 +423,7 @@ void
 		// NOTE: In the same vein, when only centered, col will fluctuate,
 		//       so we'll often end-up with a smaller amount of lines than originally calculated.
 		//       Doing the computation with the initial col value ensures we'll have MORE lines than necessary,
-		//       though, which is mostly harmless, since we'll skip trailing blank lines in this case.
+		//       though, which is mostly harmless, since we'll skip trailing blank lines in this case :).
 		unsigned short int available_cols;
 		if (is_centered && is_padded) {
 			available_cols = (unsigned short int) (MAXCOLS - 1U);
@@ -453,14 +454,15 @@ void
 		printf("Final position: column %hu, row %hu\n", col, row);
 
 		// We'll copy our text in chunks of formatted line...
-		// NOTE: Store that on the heap, we've had some wonky adventures with automatic VLAs...
+		// NOTE: Store that on the heap, we've had some wacky adventures with automatic VLAs...
 		char* line;
 		line = malloc(sizeof(*line) * (MAXCOLS + 1U));
 
 		printf(
 		    "Need %hu lines to print %zu characters over %hu available columns\n", lines, len, available_cols);
 
-		// Do the initial computation outside the loop, so we can re-use left when looping.
+		// Do the initial computation outside the loop,
+		// so we'll be able to re-use line_len to accurately compute left when looping.
 		size_t left     = len - (size_t)((multiline_offset) * (MAXCOLS - col));
 		size_t line_len = 0U;
 		// If we have multiple lines to print, draw 'em line per line
