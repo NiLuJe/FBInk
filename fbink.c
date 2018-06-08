@@ -399,7 +399,11 @@ void
 		}
 		printf("Adjusted position: column %hu, row %hu\n", col, row);
 
-		// FIXME: Clamp row & col to screen.
+		if (col >= MAXCOLS || row >= MAXROWS) {
+			col = (short int) MIN(col, MAXCOLS - 1);
+			row = (short int) MIN(row, MAXROWS - 1);
+			printf("Clamped position: column %hu, row %hu\n", col, row);
+		}
 		// FIXME: Don't print empry lines.
 		// FIXME: Ensure we never center to col 0 even without padding?
 
@@ -450,7 +454,7 @@ void
 		printf(
 		    "Need %hu lines to print %zu characters over %hu available columns\n", lines, len, available_cols);
 
-		size_t left = len - (size_t)((multiline_offset) * (MAXCOLS - col));
+		size_t left     = len - (size_t)((multiline_offset) * (MAXCOLS - col));
 		size_t line_len = 0U;
 		// If we have multiple lines to print, draw 'em line per line
 		for (multiline_offset = 0U; multiline_offset < lines; multiline_offset++) {
@@ -527,11 +531,7 @@ void
 					 (int) (pad_len + extra_pad),
 					 "");
 			} else {
-				snprintf(line,
-					 line_len + 1U,
-					 "%*s",
-					 (int) line_len,
-					 string + (len - left));
+				snprintf(line, line_len + 1U, "%*s", (int) line_len, string + (len - left));
 			}
 
 			region = draw(
