@@ -452,6 +452,7 @@ void
 			       (size_t)(MAXCOLS - col) * sizeof(char),
 			       left);
 
+			// FIXME: Centered alone going wonky...
 			// Just fudge the column for centering...
 			if (is_centered) {
 				// Don't fudge if also padded, we'll need the original value for heuristics,
