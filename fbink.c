@@ -169,7 +169,7 @@ static char*
 }
 
 // Render a specific font8x8 glyph into a pixmap
-// (base size: 8x8, may be scaled to 16x16 or 32x32 depending on screen resolution)
+// (base size: 8x8, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
 static void
     font8x8_render(int ascii, char* glyph_pixmap)
 {
@@ -188,7 +188,7 @@ static void
 			// y: input column, j: output column
 			y   = j / FONTSIZE_MULT;
 			set = bitmap[x] & 1 << y;
-			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTH=1,0)
+			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTW=1,0)
 			unsigned short int idx = (unsigned short int) (j + (i * FONTW));
 			for (k = 0U; k < FONTSIZE_MULT; k++) {
 				glyph_pixmap[idx + k] = set ? 1 : 0;
@@ -311,9 +311,25 @@ static void
 		.flags         = 0,
 	};
 
+	// NOTE: Make sure update_marker is valid, an invalid marker *may* hang the kernel instead of failing gracefully,
+	//       depending on the device/FW...
+	if (update.update_marker == 0) {
+		update.update_marker = (70 + 66 + 73 + 78 + 75);
+	}
+
 	if (ioctl(fbfd, MXCFB_SEND_UPDATE, &update) < 0) {
 		perror("MXCFB_SEND_UPDATE");
+		// FIXME: Mmmh, maybe don't exit to be nicer when used as a lib?
 		exit(EXIT_FAILURE);
+	}
+
+	// NOTE: Let's be extremely thorough, and wait for completion on flashing updates
+	if (is_flashing) {
+		if (ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update.update_marker) < 0) {
+			{
+				perror("MXCFB_WAIT_FOR_UPDATE_COMPLETE");
+			}
+		}
 	}
 }
 
@@ -588,4 +604,5 @@ int
  *       -s w=758,h=1024 -f
  *       NOTE: Don't bother w/ getsubopt() and always make it full-screen?
  * TODO: Move all option flags in a struct to keep the sigs in check... (or not? library...)
+ * TODO: Kindle ifdeffery and testing.
  */
