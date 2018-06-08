@@ -118,8 +118,7 @@ static void clear_screen(unsigned short int);
 
 static char* font8x8_get_bitmap(int);
 static void  font8x8_render(int, char*);
-static void  font8x8_render_x2(int, char*);
-static void  font8x8_render_x4(int, char*);
+static void  font8x8_render_mult(int, char*);
 
 static struct mxcfb_rect draw(char*, unsigned short int, unsigned short int, bool, unsigned short int);
 

@@ -190,9 +190,9 @@ static void
 	}
 }
 
-// Render a specific font8x8 glyph into a 16x16 pixmap
+// Render a specific font8x8 glyph into a larger than 8x8 pixmap (16x16 or 32x32)
 static void
-    font8x8_render_x2(int ascii, char* glyph_pixmap)
+    font8x8_render_mult(int ascii, char* glyph_pixmap)
 {
 	char* bitmap = font8x8_get_bitmap(ascii);
 
@@ -200,6 +200,7 @@ static void
 	unsigned short int y;
 	unsigned short int i;
 	unsigned short int j;
+	unsigned short int k;
 	bool               set = false;
 	for (i = 0U; i < FONTW; i++) {
 		// x: input row, i: output row
@@ -210,36 +211,9 @@ static void
 			set = bitmap[x] & 1 << y;
 			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTH=1,0)
 			unsigned short int idx = (unsigned short int) (j + (i * FONTW));
-			glyph_pixmap[idx]      = set ? 1 : 0;
-			glyph_pixmap[idx + 1]  = set ? 1 : 0;
-		}
-	}
-}
-
-// Render a specific font8x8 glyph into a 32x32 pixmap
-static void
-    font8x8_render_x4(int ascii, char* glyph_pixmap)
-{
-	char* bitmap = font8x8_get_bitmap(ascii);
-
-	unsigned short int x;
-	unsigned short int y;
-	unsigned short int i;
-	unsigned short int j;
-	bool               set = false;
-	for (i = 0U; i < FONTW; i++) {
-		// x: input row, i: output row
-		x = i / FONTSIZE_MULT;
-		for (j = 0U; j < FONTH; j++) {
-			// y: input column, j: output column
-			y   = j / FONTSIZE_MULT;
-			set = bitmap[x] & 1 << y;
-			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTH=1,0)
-			unsigned short int idx = (unsigned short int) (j + (i * FONTW));
-			glyph_pixmap[idx]      = set ? 1 : 0;
-			glyph_pixmap[idx + 1]  = set ? 1 : 0;
-			glyph_pixmap[idx + 2]  = set ? 1 : 0;
-			glyph_pixmap[idx + 3]  = set ? 1 : 0;
+			for (k = 0U; k < FONTSIZE_MULT; k++) {
+				glyph_pixmap[idx + k]      = set ? 1 : 0;
+			}
 		}
 	}
 }
@@ -310,17 +284,10 @@ static struct mxcfb_rect
 	// Loop through all characters in the text string
 	for (i = 0U; i < len; i++) {
 		// get the glyph's pixmap
-		switch (FONTSIZE_MULT) {
-			case 4:
-				font8x8_render_x4(text[i], pixmap);
-				break;
-			case 2:
-				font8x8_render_x2(text[i], pixmap);
-				break;
-			case 1:
-			default:
-				font8x8_render(text[i], pixmap);
-				break;
+		if (FONTSIZE_MULT > 1) {
+			font8x8_render_mult(text[i], pixmap);
+		} else {
+			font8x8_render(text[i], pixmap);
 		}
 		// loop through pixel rows
 		for (y = 0U; y < FONTH; y++) {
