@@ -462,7 +462,11 @@ void
 		unsigned short int lines            = 1;
 		unsigned short int multiline_offset = 0;
 		if (len > available_cols) {
-			lines = (unsigned short int) ceilf((float) len / (float) available_cols);
+			lines = (unsigned short int) (len / available_cols);
+			// If there's a remainder, we'll need an extra line ;).
+			if (len % available_cols) {
+				lines++;
+			}
 		}
 
 		// Truncate to a single screen...

@@ -16,9 +16,6 @@ DEBUG_CFLAGS=-Og -fno-omit-frame-pointer -pipe -g
 # Fallback CFLAGS, we honor the env first and foremost!
 OPT_CFLAGS=-O2 -fomit-frame-pointer -pipe
 
-# We need -lm for ceilf()
-LIBS:=-lm
-
 ifeq "$(DEBUG)" "true"
 	OUT_DIR=Debug
 	CFLAGS:=$(DEBUG_CFLAGS)
