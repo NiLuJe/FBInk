@@ -145,14 +145,22 @@ static char*
     font8x8_get_bitmap(int ascii)
 {
 	// Get the bitmap for that ASCII character
-	// TODO: Proper validation (w/ the right array depending on the range, to pickup non-basic stuff)
-	if (ascii > 127 || ascii < 0) {
-		// Default to space when OOR
-		ascii = 0;
+	if (ascii >= 0 && ascii <= 0x7F) {
+		return font8x8_basic[ascii];
+	} else if (ascii >= 0x80 && ascii <= 0x9F) {
+		return font8x8_control[ascii];
+	} else if (ascii >= 0xA0 && ascii <= 0xFF) {
+		return font8x8_ext_latin[ascii];
+	} else if (ascii >= 0x390 && ascii <= 0x3C9) {
+		return font8x8_greek[ascii - 0x390];
+	} else if (ascii >= 0x2500 && ascii <= 0x257F) {
+		return font8x8_box[ascii - 0x2500];
+	} else if (ascii >= 0x2580 && ascii <= 0x259F) {
+		return font8x8_block[ascii - 0x2580];
+	} else {
 		printf("ASCII %d is OOR!\n", ascii);
+		return font8x8_basic[0];
 	}
-
-	return font8x8_basic[ascii];
 }
 
 // Render a specific font8x8 glyph into a pixmap
@@ -223,7 +231,7 @@ static struct mxcfb_rect
 	//       we should be computing the length of a line (MAXCOLS) based on xres_virtual,
 	//       not xres (because it's guaranteed to be a multiple of 16).
 	//       Unfortunately, that means this last block of the line is partly offscreen.
-	//       Also, it CANNOT be part of the region passed to the eInk controller...
+	//       Also, it CANNOT be part of the region passed to the eInk controller for a screen update...
 	//       So, since this this last block is basically unusable because partly unreadable,
 	//       and partly unrefreshable, don't count it as "available" (i.e., by including it in MAXCOLS),
 	//       since that would happen to also wreak havoc in a number of our heuristics,
@@ -310,7 +318,7 @@ static void
 		exit(EXIT_FAILURE);
 	}
 
-	// NOTE: Let's be extremely thorough, and wait for completion on flashing updates
+	// NOTE: Let's be extremely thorough, and wait for completion on flashing updates ;)
 	if (is_flashing) {
 		if (ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update.update_marker) < 0) {
 			{

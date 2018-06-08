@@ -49,6 +49,9 @@
 #include <unistd.h>
 
 #include "eink/mxcfb-kobo.h"
+#include "font8x8/font8x8_block.h"
+#include "font8x8/font8x8_box.h"
+#include "font8x8/font8x8_greek.h"
 #include "font8x8/font8x8_latin.h"
 
 // default eInk framebuffer palette
