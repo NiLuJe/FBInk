@@ -47,10 +47,6 @@ static void
 		    unsigned short int g,
 		    unsigned short int b)
 {
-	// remember to change main(): vinfo.bits_per_pixel = 24;
-	// and: screensize = vinfo.xres * vinfo.yres *
-	//                   vinfo.bits_per_pixel / 8;
-
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 3 as every pixel is 3 consecutive bytes
 	size_t pix_offset = x * 3U + y * finfo.line_length;
@@ -68,10 +64,6 @@ static void
 		    unsigned short int g,
 		    unsigned short int b)
 {
-	// remember to change main(): vinfo.bits_per_pixel = 32;
-	// and: screensize = vinfo.xres * vinfo.yres *
-	//                   vinfo.bits_per_pixel / 8;
-
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 4 as every pixel is 4 consecutive bytes
 	size_t pix_offset = x * 4U + y * finfo.line_length;
@@ -90,11 +82,6 @@ static void
 		     unsigned short int g,
 		     unsigned short int b)
 {
-	// remember to change main(): vinfo.bits_per_pixel = 16;
-	// or on RPi just comment out the whole 'Change vinfo'
-	// and: screensize = vinfo.xres * vinfo.yres *
-	//                   vinfo.bits_per_pixel / 8;
-
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 2 as every pixel is 2 consecutive bytes
 	size_t pix_offset = x * 2U + y * finfo.line_length;
@@ -226,8 +213,8 @@ static struct mxcfb_rect
 	struct mxcfb_rect region = {
 		.top    = (uint32_t)((row - multiline_offset) * FONTH),
 		.left   = (uint32_t)(col * FONTW),
-		.width  = multiline_offset > 0 ? (vinfo.xres - (uint32_t)(col * FONTW)) : (uint32_t)(len * FONTW),
-		.height = (uint32_t)((multiline_offset + 1) * FONTH),
+		.width  = multiline_offset > 0U ? (vinfo.xres - (uint32_t)(col * FONTW)) : (uint32_t)(len * FONTW),
+		.height = (uint32_t)((multiline_offset + 1U) * FONTH),
 	};
 
 	printf("Region: top=%u, left=%u, width=%u, height=%u\n", region.top, region.left, region.width, region.height);
@@ -308,13 +295,13 @@ static void
 		.update_mode   = is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL,
 		.update_region = region,
 		.waveform_mode = is_flashing ? WAVEFORM_MODE_GC16 : WAVEFORM_MODE_AUTO,
-		.flags         = 0,
+		.flags         = 0U,
 	};
 
 	// NOTE: Make sure update_marker is valid, an invalid marker *may* hang the kernel instead of failing gracefully,
 	//       depending on the device/FW...
-	if (update.update_marker == 0) {
-		update.update_marker = (70 + 66 + 73 + 78 + 75);
+	if (update.update_marker == 0U) {
+		update.update_marker = (70U + 66U + 73U + 78U + 75U);
 	}
 
 	if (ioctl(fbfd, MXCFB_SEND_UPDATE, &update) < 0) {
@@ -345,7 +332,7 @@ void
 		bool      is_padded)
 {
 	int    fbfd       = 0;
-	size_t screensize = 0;
+	size_t screensize = 0U;
 
 	// Open the framebuffer file for reading and writing
 	fbfd = open("/dev/fb0", O_RDWR);
@@ -364,12 +351,12 @@ void
 	// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD)
 	// FIXME: Even on 600x800 screens, 8x8 might be too small...
 	// NOTE: Using an odd number as scaling mutliplier works, too.
-	if (vinfo.yres <= 800) {
-		FONTSIZE_MULT = 1;    // 8x8
+	if (vinfo.yres <= 800U) {
+		FONTSIZE_MULT = 1U;    // 8x8
 	} else if (vinfo.yres <= 1024) {
-		FONTSIZE_MULT = 2;    // 16x16
+		FONTSIZE_MULT = 2U;    // 16x16
 	} else {
-		FONTSIZE_MULT = 4;    // 32x32
+		FONTSIZE_MULT = 4U;    // 32x32
 	}
 	// Go!
 	FONTW = (unsigned short int) (FONTW * FONTSIZE_MULT);
@@ -420,13 +407,13 @@ void
 		//       so fudge it here...
 		unsigned short int available_cols;
 		if (is_centered && is_padded) {
-			available_cols = (unsigned short int) (MAXCOLS - 1);
+			available_cols = (unsigned short int) (MAXCOLS - 1U);
 		} else {
 			available_cols = (unsigned short int) (MAXCOLS - col);
 		}
 		// Given that, compute how many lines it'll take to print all that in these constraints...
-		unsigned short int lines            = 1;
-		unsigned short int multiline_offset = 0;
+		unsigned short int lines            = 1U;
+		unsigned short int multiline_offset = 0U;
 		if (len > available_cols) {
 			lines = (unsigned short int) (len / available_cols);
 			// If there's a remainder, we'll need an extra line ;).
@@ -455,7 +442,7 @@ void
 		printf(
 		    "Need %hu lines to print %zu characters over %hu available columns\n", lines, len, available_cols);
 		// If we have multiple lines to print, draw 'em line per line
-		for (multiline_offset = 0; multiline_offset < lines; multiline_offset++) {
+		for (multiline_offset = 0U; multiline_offset < lines; multiline_offset++) {
 			// Compute the amount of characters left to print...
 			size_t left = len - (size_t)((multiline_offset) * (MAXCOLS - col));
 			// And use it to compute the amount of characters to print on *this* line
@@ -543,8 +530,8 @@ void
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
 	if (is_cleared) {
-		region.top    = 0;
-		region.left   = 0;
+		region.top    = 0U;
+		region.left   = 0U;
 		region.width  = vinfo.xres;
 		region.height = vinfo.yres;
 	}
