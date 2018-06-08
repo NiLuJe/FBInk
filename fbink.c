@@ -399,12 +399,20 @@ void
 		}
 		printf("Adjusted position: column %hu, row %hu\n", col, row);
 
+		// FIXME: Clamp row & col to screen.
+		// FIXME: Don't print empry lines.
+		// FIXME: Ensure we never center to col 0 even without padding?
+
 		// See if we need to break our string down into multiple lines...
 		size_t len = strlen(string);
 
 		// Compute the amount of characters we can actually print on *one* line given the column we start on...
 		// NOTE: When centered & padded, col will effectively be zero, but we still reserve one slot to the left,
 		//       so fudge it here...
+		// NOTE: In the same vein, when only centered, col will fluctuate,
+		//       so we'll often end-up with a smaller amount of lines than originally calculated.
+		//       Doing the computation with the initial col value ensures we'll have MORE lines than necessary,
+		//       though, which is mostly harmless (it'll just enlarge the refresh region).
 		unsigned short int available_cols;
 		if (is_centered && is_padded) {
 			available_cols = (unsigned short int) (MAXCOLS - 1U);
@@ -441,18 +449,20 @@ void
 
 		printf(
 		    "Need %hu lines to print %zu characters over %hu available columns\n", lines, len, available_cols);
+
+		size_t left = len - (size_t)((multiline_offset) * (MAXCOLS - col));
+		size_t line_len = 0U;
 		// If we have multiple lines to print, draw 'em line per line
 		for (multiline_offset = 0U; multiline_offset < lines; multiline_offset++) {
 			// Compute the amount of characters left to print...
-			size_t left = len - (size_t)((multiline_offset) * (MAXCOLS - col));
+			left -= line_len;
 			// And use it to compute the amount of characters to print on *this* line
-			size_t line_len = MIN(left, (size_t)(MAXCOLS - col));
+			line_len = MIN(left, (size_t)(MAXCOLS - col));
 			printf("Size to print: %zu out of %zu (left: %zu)\n",
 			       line_len,
 			       (size_t)(MAXCOLS - col) * sizeof(char),
 			       left);
 
-			// FIXME: Centered alone going wonky...
 			// Just fudge the column for centering...
 			if (is_centered) {
 				// Don't fudge if also padded, we'll need the original value for heuristics,
@@ -460,6 +470,9 @@ void
 				col = is_padded ? col : (short int) ((MAXCOLS / 2U) - (line_len / 2U));
 				if (!is_padded) {
 					printf("Adjusted column to %hu for centering\n", col);
+					// Recompute line_len since col has been updated.
+					line_len = MIN(left, (size_t)(MAXCOLS - col));
+					printf("Adjusted line_len to %zu for centering\n", line_len);
 				}
 			}
 			// Just fudge the (formatted) line length for free padding :).
@@ -467,7 +480,7 @@ void
 				// Don't fudge if also centered, we'll need the original value to split padding in two.
 				line_len = is_centered ? line_len : (size_t)(MAXCOLS - col);
 				if (!is_centered) {
-					printf("Adjusted line_len to %zu for centering\n", line_len);
+					printf("Adjusted line_len to %zu for padding\n", line_len);
 				}
 			}
 
@@ -518,7 +531,7 @@ void
 					 line_len + 1U,
 					 "%*s",
 					 (int) line_len,
-					 string + (multiline_offset * (MAXCOLS - col)));
+					 string + (len - left));
 			}
 
 			region = draw(
