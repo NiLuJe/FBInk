@@ -168,31 +168,10 @@ static char*
 	return font8x8_basic[ascii];
 }
 
-// Render a specific font8x8 glyph into a 8x8 pixmap
+// Render a specific font8x8 glyph into a pixmap
+// (base size: 8x8, may be scaled to 16x16 or 32x32 depending on screen resolution)
 static void
     font8x8_render(int ascii, char* glyph_pixmap)
-{
-	char* bitmap = font8x8_get_bitmap(ascii);
-
-	unsigned short int x;
-	unsigned short int y;
-	bool               set = false;
-	for (x = 0U; x < FONTW; x++) {
-		// x: input & output row
-		for (y = 0U; y < FONTH; y++) {
-			// y: input & output column
-			set = bitmap[x] & 1 << y;
-			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTH=1,0)
-			unsigned short int idx = (unsigned short int) (y + (x * FONTW));
-			glyph_pixmap[idx]      = set ? 1 : 0;
-			// Pixmap format is pretty simple, since we're doing monochrome: 1 means fg, and 0 for bg
-		}
-	}
-}
-
-// Render a specific font8x8 glyph into a larger than 8x8 pixmap (16x16 or 32x32)
-static void
-    font8x8_render_mult(int ascii, char* glyph_pixmap)
 {
 	char* bitmap = font8x8_get_bitmap(ascii);
 
@@ -284,11 +263,7 @@ static struct mxcfb_rect
 	// Loop through all characters in the text string
 	for (i = 0U; i < len; i++) {
 		// get the glyph's pixmap
-		if (FONTSIZE_MULT > 1) {
-			font8x8_render_mult(text[i], pixmap);
-		} else {
-			font8x8_render(text[i], pixmap);
-		}
+		font8x8_render(text[i], pixmap);
 		// loop through pixel rows
 		for (y = 0U; y < FONTH; y++) {
 			// loop through pixel columns
