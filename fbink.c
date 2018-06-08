@@ -416,7 +416,14 @@ void
 		size_t len = strlen(string);
 
 		// Compute the amount of characters we can actually print on *one* line given the column we start on...
-		unsigned short int available_cols = (unsigned short int) (MAXCOLS - col);
+		// NOTE: When centered & padded, col will effectively be zero, but we still reserve one slot to the left,
+		//       so fudge it here...
+		unsigned short int available_cols;
+		if (is_centered && is_padded) {
+			available_cols = (unsigned short int) (MAXCOLS - 1);
+		} else {
+			available_cols = (unsigned short int) (MAXCOLS - col);
+		}
 		// Given that, compute how many lines it'll take to print all that in these constraints...
 		unsigned short int lines            = 1;
 		unsigned short int multiline_offset = 0;
@@ -460,48 +467,62 @@ void
 
 			// Just fudge the column for centering...
 			if (is_centered) {
-				// When also padding, begin at the edge, since we'll want full padding anyway.
-				col = is_padded ? 0 : (short int) ((MAXCOLS / 2) - (line_len / 2));
-				printf("Adjusted column to %hu for centering\n", col);
+				// Don't fudge if also padded, we'll need the original value for heuristics,
+				// but we still enforce column 0 later, as we always want full padding.
+				col = is_padded ? col : (short int) ((MAXCOLS / 2) - (line_len / 2));
+				if (!is_padded) {
+					printf("Adjusted column to %hu for centering\n", col);
+				}
 			}
 			// Just fudge the (formatted) line length for free padding :).
 			if (is_padded) {
 				// Don't fudge if also centered, we'll need the original value to split padding in two.
 				line_len = is_centered ? line_len : (size_t)(MAXCOLS - col);
-				printf("Adjusted line_len to %zu for centering\n", line_len);
+				if (!is_centered) {
+					printf("Adjusted line_len to %zu for centering\n", line_len);
+				}
 			}
 
-			// FIXME: Fix centered & padded 'eating' col? chars per line,
-			//        and adding padding on the left of full lines...
 			// When centered & padded, we need to split the padding in two, left & right.
 			if (is_centered && is_padded) {
-				// We need to recompute left, because col is now 0.
-				left = len - (size_t)((multiline_offset) * (MAXCOLS - 1));
-				// We need to recompute line_len, because col is now 0.
-				line_len = MIN(left, (size_t) MAXCOLS - 1);
-				// AND, as we enforce a single padding space on the left,
+				// NOTE: As we enforce a single padding space on the left,
 				// to match the nearly full block that we fudge on the right in draw())
 				// We crop 1 slot off MAXCOLS when doing these calculations,
 				// but only when we'd be printing a full line,
 				// to avoid shifting the centering to the left in other cases...
-				printf("Adjusted line_len to %zu for padding & centering\n", line_len);
+				short unsigned int available_maxcols = MAXCOLS;
+				if (line_len + col == MAXCOLS) {
+					available_maxcols = MAXCOLS - 1;
+					printf("Setting available_maxcols to %hu\n", available_maxcols);
+				}
+				// We always want full padding
+				col = 0;
+				// We need to recompute left, because col is now 0.
+				left = len - (size_t)((multiline_offset) * (MAXCOLS) - (multiline_offset));
+				printf("Adjusted left to %zu for padding & centering\n", left);
+				// We need to recompute line_len, because col is now 0.
+				line_len = MIN(left, (size_t) available_maxcols);
+				if (available_maxcols != MAXCOLS) {
+					printf("Adjusted line_len to %zu for padding & centering\n", line_len);
+				}
 				size_t pad_len = (MAXCOLS - line_len) / 2;
 				// If we're not at the edge of the screen because of rounding errors,
-				// add extra padding on the right
+				// add extra padding on the right.
+				// It'll get cropped out by snprintf if it turns out to be extraneous.
 				size_t extra_pad = MAXCOLS - line_len - (pad_len * 2);
 				printf("Total size: %zu + %zu + %zu + %zu = %zu\n",
-				       pad_len,
+				       1 + pad_len,
 				       line_len,
 				       pad_len,
 				       extra_pad,
-				       (pad_len * 2) + line_len + extra_pad);
+				       1 + (pad_len * 2) + line_len + extra_pad);
 				snprintf(line,
 					 (size_t)(MAXCOLS + 1),
 					 "%*s%*s%*s",
-					 (int) pad_len,
-					 " ",
+					 (int) pad_len + 1,
+					 "",
 					 (int) line_len,
-					 string + (multiline_offset * (MAXCOLS - 1)),
+					 string + (len - left),
 					 (int) (pad_len + extra_pad),
 					 "");
 			} else {
