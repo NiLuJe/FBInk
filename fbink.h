@@ -33,18 +33,17 @@ int fbink_open(void);
 
 // Initialize the global variables.
 // If fd is -1, open it
-// If keep_fd is true, don't close it on return
-int fbink_init(int, bool);
+int fbink_init(int);
 
 // Print a string on screen.
 // if fd is -1, open fb device and close it on return
 void fbink_print(int, char*, short int, short int, bool, bool, bool, bool, bool);
 
 // When you intend to keep fd open for the lifecycle of your program:
-// fd = open() -> init(fd, true) -> print(fd, ...)
+// fd = open() -> init(fd) -> print(fd, ...)
 //
 // Otherwise:
-// init(-1, false)
+// init(-1)
 // And then whenever you want to print something:
 // print(-1, ...)
 

@@ -345,10 +345,13 @@ int fbink_open(void)
 }
 
 // Get the various fb info & setup global variables
-int fbink_init(int fbfd, bool keep_fd)
+int fbink_init(int fbfd)
 {
 	// Open the framebuffer if need be...
+	bool keep_fd = true;
 	if (fbfd == -1) {
+		// If we're opening a fd now, don't keep it around.
+		keep_fd = false;
 		if (-1 == (fbfd = fbink_open())) {
 			fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
 			return EXIT_FAILURE;
@@ -415,7 +418,7 @@ void
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
 	if (fbfd == -1) {
-		// If we open one now, we'll only keep it open for this single print call!
+		// If we open a fd now, we'll only keep it open for this single print call!
 		// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
 		keep_fd = false;
 		if (-1 == (fbfd = fbink_open())) {
@@ -677,7 +680,7 @@ int
 		fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
 		return EXIT_FAILURE;
 	}
-	if (EXIT_FAILURE == (fbfd = fbink_init(fbfd, true))) {
+	if (EXIT_FAILURE == (fbfd = fbink_init(fbfd))) {
 		fprintf(stderr, "Failed to initialize FBInk, aborting . . .\n");
 		return EXIT_FAILURE;
 	}
@@ -693,8 +696,8 @@ int
 			       row);
 			fbink_print(fbfd, string, row, col, is_inverted, is_flashing, is_cleared, is_centered, is_padded);
 			// NOTE: Don't clobber previous entries if multiple strings were passed...
-			//row++;
-			// FIXME: Actually handle this sanely... :D
+			row++;
+			// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
 		}
 	} else {
 		printf("Usage!\n");
