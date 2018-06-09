@@ -28,7 +28,24 @@
 #ifndef __FBINK_H
 #define __FBINK_H
 
-int fbink_init(bool);
-void fbink_print(char*, short int, short int, bool, bool, bool, bool, bool);
+// Open the framebuffer device and returns its fd
+int fbink_open(void);
+
+// Initialize the global variables.
+// If fd is -1, open it
+// If keep_fd is true, don't close it on return
+int fbink_init(int, bool);
+
+// Print a string on screen.
+// if fd is -1, open fb device and close it on return
+void fbink_print(int, char*, short int, short int, bool, bool, bool, bool, bool);
+
+// When you intend to keep fd open for the lifecycle of your program:
+// fd = open() -> init(fd, true) -> print(fd, ...)
+//
+// Otherwise:
+// init(-1, false)
+// And then whenever you want to print something:
+// print(-1, ...)
 
 #endif

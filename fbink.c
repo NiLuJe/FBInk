@@ -328,10 +328,10 @@ static void
 	}
 }
 
-// Get the various fb info & setup global variables
-int fbink_init(bool keep_fd)
+// Open the framebuffer file & return the opened fd
+int fbink_open(void)
 {
-	int fbfd = 0;
+	int fbfd = -1;
 
 	// Open the framebuffer file for reading and writing
 	fbfd = open("/dev/fb0", O_RDWR);
@@ -340,6 +340,20 @@ int fbink_init(bool keep_fd)
 		return EXIT_FAILURE;
 	}
 	printf("The framebuffer device was opened successfully.\n");
+
+	return fbfd;
+}
+
+// Get the various fb info & setup global variables
+int fbink_init(int fbfd, bool keep_fd)
+{
+	// Open the framebuffer if need be...
+	if (fbfd == -1) {
+		if (-1 == (fbfd = fbink_open())) {
+			fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
+			return EXIT_FAILURE;
+		}
+	}
 
 	// Get variable screen information
 	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo)) {
@@ -386,7 +400,8 @@ int fbink_init(bool keep_fd)
 
 // Magic happens here!
 void
-    fbink_print(char*     string,
+    fbink_print(int       fbfd,
+		char*     string,
 		short int row,
 		short int col,
 		bool      is_inverted,
@@ -395,12 +410,18 @@ void
 		bool      is_centered,
 		bool      is_padded)
 {
-	int    fbfd       = 0;
 	size_t screensize = 0U;
 
-	if (EXIT_FAILURE == (fbfd = fbink_init(true))) {
-		fprintf(stderr, "Failed to open FrameBuffer, aborting . . .\n");
-		return;
+	// Open the framebuffer if need be...
+	bool keep_fd = true;
+	if (fbfd == -1) {
+		// If we open one now, we'll only keep it open for this single print call!
+		// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
+		keep_fd = false;
+		if (-1 == (fbfd = fbink_open())) {
+			fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
+			return;
+		}
 	}
 
 	// map fb to user mem
@@ -594,7 +615,9 @@ void
 
 	// cleanup
 	munmap(fbp, screensize);
-	close(fbfd);
+	if (!keep_fd) {
+		close(fbfd);
+	}
 }
 
 // application entry point
@@ -648,6 +671,17 @@ int
 		}
 	}
 
+	// Open framebuffer and keep it around, then setup globals.
+	int fbfd = -1;
+	if (-1 == (fbfd = fbink_open())) {
+		fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
+		return EXIT_FAILURE;
+	}
+	if (EXIT_FAILURE == (fbfd = fbink_init(fbfd, true))) {
+		fprintf(stderr, "Failed to initialize FBInk, aborting . . .\n");
+		return EXIT_FAILURE;
+	}
+
 	char* string;
 	if (optind < argc) {
 		while (optind < argc) {
@@ -657,7 +691,7 @@ int
 			       string,
 			       col,
 			       row);
-			fbink_print(string, row, col, is_inverted, is_flashing, is_cleared, is_centered, is_padded);
+			fbink_print(fbfd, string, row, col, is_inverted, is_flashing, is_cleared, is_centered, is_padded);
 			// NOTE: Don't clobber previous entries if multiple strings were passed...
 			//row++;
 			// FIXME: Actually handle this sanely... :D
@@ -671,7 +705,7 @@ int
 
 /*
  * TODO: DOC
- * TODO: Library (thread safety?)
+ * TODO: Library (thread safety?) (Match keep_fd w/ keep_mmap to avoid mmap/unmap in CLI?)
  * TODO: waveform mode user-selection? -w
  * TODO: ioctl only (i.e., refresh current fb data, don't paint)
  *       -s w=758,h=1024 -f
