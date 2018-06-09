@@ -29,6 +29,12 @@
 #define __FBINK_H
 
 #include <stdbool.h>
+#include <stdio.h>
+
+// The few externs we might need...
+extern char*  fbp;
+extern size_t screensize;
+extern bool   fb_is_mapped;
 
 // What a FBInk Print config should look like
 typedef struct

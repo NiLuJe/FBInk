@@ -25,9 +25,9 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "fbink_internal.h"
-
 #include "fbink.h"
+
+#include "fbink_internal.h"
 
 // Helper function to 'plot' a pixel in given color
 static void

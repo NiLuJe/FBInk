@@ -37,7 +37,6 @@
 #include <linux/fb.h>
 #include <linux/kd.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -81,9 +80,11 @@ static unsigned short def_b[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77
 				  0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
 
 // 'global' variables to store screen info
-char*                    fbp          = 0;
-size_t                   screensize   = 0U;
-bool                     fb_is_mapped = false;
+// With our externs, first...
+char*  fbp          = 0;
+size_t screensize   = 0U;
+bool   fb_is_mapped = false;
+// And those stay purely inside the library
 struct fb_var_screeninfo vinfo;
 struct fb_fix_screeninfo finfo;
 unsigned short int       FONTW         = 8;

@@ -28,10 +28,10 @@
 #ifndef __FBINK_CMD_H
 #define __FBINK_CMD_H
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <unistd.h>
-#include <getopt.h>
 
 #endif
