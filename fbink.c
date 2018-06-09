@@ -200,7 +200,7 @@ static void
 
 // Helper function for drawing
 static struct mxcfb_rect
-    draw(char*              text,
+    draw(const char*        text,
 	 unsigned short int row,
 	 unsigned short int col,
 	 bool               is_inverted,
@@ -417,7 +417,7 @@ int
 
 // Magic happens here!
 int
-    fbink_print(int fbfd, char* string, FBInkConfig* fbink_config)
+    fbink_print(int fbfd, const char* string, FBInkConfig* fbink_config)
 {
 	// Open the framebuffer if need be...
 	bool keep_fd = true;

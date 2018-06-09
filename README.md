@@ -25,6 +25,9 @@ The tool is available both as a commandline utility, and as a shared or static l
 See the [public header](fbink.h) for basic API usage.
 Launch the `fbink` tool with no argument for a quick manual.
 
+NOTE: It currently makes absolutely *NO* attempt at handling rotation, because that currently appears to be the right thing to do with current Kobo FW versions.
+YMMV on older FW, or if something else is fudging with fb rotation.
+
 # How does it look?
 
 Like this :).
