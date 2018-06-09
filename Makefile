@@ -42,14 +42,13 @@ EXTRA_CFLAGS+=-Wconversion
 ifeq "$(DEBUG)" "true"
 	EXTRA_CFLAGS+=-Wpadded
 endif
+
 # We need to build PIC to support running as/with a shared library
 # NOTE: We should be safe with -fpic instead of -fPIC ;).
-# And we handle symbol visibility properly...
-ifeq "$(SHARED)" "true"
-	SHARED_CFLAGS+=-fpic
-	SHARED_CFLAGS+=-fvisibility=hidden
-	SHARED_CFLAGS+=-DFBINK_SHAREDLIB
-endif
+# And we also handle symbol visibility properly...
+SHARED_CFLAGS+=-fpic
+SHARED_CFLAGS+=-fvisibility=hidden
+SHARED_CFLAGS+=-DFBINK_SHAREDLIB
 
 # A version tag...
 FBINK_VERSION=$(shell git describe)
@@ -64,7 +63,11 @@ ifeq "$(DEBUG)" "true"
 else
 	EXTRA_LDFLAGS+=-L./Release
 endif
-LIBS:=-lfbink
+ifeq "$(SHARED)" "true"
+	LIBS:=-lfbink
+else
+	LIBS:=-l:libfbink.a
+endif
 
 ##
 # Now that we're done fiddling with flags, let's build stuff!
