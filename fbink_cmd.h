@@ -34,4 +34,6 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
+static void show_helpmsg(void);
+
 #endif

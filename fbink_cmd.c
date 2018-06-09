@@ -29,6 +29,45 @@
 
 #include "fbink_cmd.h"
 
+// Help message
+static void
+    show_helpmsg(void)
+{
+	printf(
+	    "\n"
+	    "FBInk %s\n"
+	    "\n"
+	    "Usage: fbink [OPTIONS] [STRING]\n"
+	    "\n"
+	    "Print STRING on your device's screen.\n"
+	    "\n"
+	    "Example: fbink -x 1 -y 10 \"Hello World!\"\n"
+	    "\n"
+	    "Options affecting the message's position on screen:\n"
+	    "\t-x, --col NUM\tBegin printing STRING @ column NUM (Default: 0).\n"
+	    "\t\t\tBeginning at column 1 instead of 0 is recommended, because column 0 is often half-obscured by a bezel.\n"
+	    "\t-y, --row NUM\tBegin printing STRING @ row NUM (Default: 0).\n"
+	    "\t\t\tBeginning at row 1 instead of 0 is recommended, because row 0 is often half-obscured by a bezel, especially on Kobos.\n"
+	    "\t-m, --centered\tDynamically override col to print STRING at the center of the screen.\n"
+	    "\t-p, --padded\tLeft pad STRING with blank spaces.\n"
+	    "\t\t\tMost useful when combined with --centered to ensure a line will be completely filled, while still centering STRING.\n"
+	    "\n"
+	    "Options affecting the message's appearance:\n"
+	    "\t-h, --invert\tPrint STRING in white over a black background instead of the reverse.\n"
+	    "\t-f, --flash\tAsk the eInk driver to do a black flash when refreshing the area of the screen where STRING will be printed.\n"
+	    "\t-c, --clear\tFully clear the screen before printing STRING (obeys --invert).\n"
+	    "\n"
+	    "NOTE:\n"
+	    "\tYou can specify multiple STRINGs in a single invocation of fbink, each consecutive one will be printed on consecutive lines.\n"
+	    "\t\tAlthough it's worth mentioning that this will lead to undesirable results with multi-line STRINGs,\n"
+	    "\t\tas well as in combination with --clear, because the screen is cleared before each STRING, meaning you'll only get to see the final one.\n"
+	    "\tIf you want to properly print a long string, better do it in a single argument, fbink will do its best to spread it over multiple lines sanely.\n"
+	    "\n",
+	    fbink_version());
+
+	return;
+}
+
 // Application entry point
 int
     main(int argc, char* argv[])
@@ -74,9 +113,6 @@ int
 		}
 	}
 
-	// Say hello
-	printf("This is FBInk %s\n", fbink_version());
-
 	// Open framebuffer and keep it around, then setup globals.
 	int fbfd = -1;
 	if (-1 == (fbfd = fbink_open())) {
@@ -110,7 +146,7 @@ int
 			// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
 		}
 	} else {
-		printf("Usage!\n");
+		show_helpmsg();
 	}
 
 	// Cleanup

@@ -164,7 +164,7 @@ static char*
 	} else if (ascii >= 0x2580 && ascii <= 0x259F) {
 		return font8x8_block[ascii - 0x2580];
 	} else {
-		printf("ASCII %d is OOR!\n", ascii);
+		fprintf(stderr, "ASCII %d is OOR!\n", ascii);
 		return font8x8_basic[0];
 	}
 }
@@ -349,10 +349,9 @@ int
 	// Open the framebuffer file for reading and writing
 	fbfd = open("/dev/fb0", O_RDWR);
 	if (!fbfd) {
-		printf("Error: cannot open framebuffer device.\n");
+		fprintf(stderr, "Error: cannot open framebuffer device.\n");
 		return EXIT_FAILURE;
 	}
-	printf("The framebuffer device was opened successfully.\n");
 
 	return fbfd;
 }
@@ -374,7 +373,8 @@ int
 
 	// Get variable screen information
 	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo)) {
-		printf("Error reading variable information.\n");
+		fprintf(stderr, "Error reading variable information.\n");
+		return EXIT_FAILURE;
 	}
 	printf("Variable info: %dx%d, %dbpp\n", vinfo.xres, vinfo.yres, vinfo.bits_per_pixel);
 
@@ -396,11 +396,11 @@ int
 	// Compute MAX* values now that we know the screen & font resolution
 	MAXCOLS = (unsigned short int) (vinfo.xres / FONTW);
 	MAXROWS = (unsigned short int) (vinfo.yres / FONTH);
-	printf("Line length: %hu, Column length: %hu.\n", MAXCOLS, MAXROWS);
+	printf("Line length: %hu cols, Page size: %hu rows.\n", MAXCOLS, MAXROWS);
 
 	// Get fixed screen information
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo)) {
-		printf("Error reading fixed information.\n");
+		fprintf(stderr, "Error reading fixed information.\n");
 	}
 	printf("Fixed info: smem_len %d, line_length %d\n", finfo.smem_len, finfo.line_length);
 
