@@ -413,8 +413,6 @@ void
 		bool      is_centered,
 		bool      is_padded)
 {
-	size_t screensize = 0U;
-
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
 	if (fbfd == -1) {
@@ -430,14 +428,20 @@ void
 	// map fb to user mem
 	// NOTE: Beware of smem_len on Kobos?
 	//       c.f., https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer_linux.lua#L36
-	screensize = finfo.smem_len;
-	fbp        = (char*) mmap(NULL, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
+	// NOTE: If we're keeping the fb's fd open, keep this mmap around, too.
+	if (!fb_is_mapped) {
+		screensize = finfo.smem_len;
+		fbp        = (char*) mmap(NULL, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
+		if (fbp == MAP_FAILED) {
+			perror("mmap");
+		} else {
+			fb_is_mapped = true;
+		}
+	}
 
 	struct mxcfb_rect region;
 
-	if (fbp == MAP_FAILED) {
-		perror("mmap");
-	} else {
+	if (fb_is_mapped) {
 		// Clear screen?
 		if (is_cleared) {
 			clear_screen(is_inverted ? BLACK : WHITE);
@@ -617,7 +621,9 @@ void
 	refresh(fbfd, region, is_flashing);
 
 	// cleanup
-	munmap(fbp, screensize);
+	if (fb_is_mapped && !keep_fd) {
+		munmap(fbp, screensize);
+	}
 	if (!keep_fd) {
 		close(fbfd);
 	}
@@ -703,12 +709,18 @@ int
 		printf("Usage!\n");
 	}
 
+	// Cleanup
+	if (fb_is_mapped) {
+		munmap(fbp, screensize);
+	}
+	close(fbfd);
+
 	return EXIT_SUCCESS;
 }
 
 /*
  * TODO: DOC
- * TODO: Library (thread safety?) (Match keep_fd w/ keep_mmap to avoid mmap/unmap in CLI?)
+ * TODO: Library (thread safety?)
  * TODO: waveform mode user-selection? -w
  * TODO: ioctl only (i.e., refresh current fb data, don't paint)
  *       -s w=758,h=1024 -f
