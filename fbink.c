@@ -407,7 +407,7 @@ int
 void
     fbink_print(int       fbfd,
 		char*     string,
-		FBInkConfig fbink_config)
+		FBInkConfig* fbink_config)
 {
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
@@ -435,16 +435,17 @@ void
 		}
 	}
 
-	// Make copies of these so we don't wreck our original struct, because we'll heavily mangle them...
-	short int col = fbink_config.col;
-	short int row = fbink_config.row;
+	// NOTE: Make copies of these so we don't wreck our original struct, since we passed it by reference,
+	//       and we *will* heavily mangle these two...
+	short int col = fbink_config->col;
+	short int row = fbink_config->row;
 
 	struct mxcfb_rect region;
 
 	if (fb_is_mapped) {
 		// Clear screen?
-		if (fbink_config.is_cleared) {
-			clear_screen(fbink_config.is_inverted ? BLACK : WHITE);
+		if (fbink_config->is_cleared) {
+			clear_screen(fbink_config->is_inverted ? BLACK : WHITE);
 		}
 
 		// See if want to position our text relative to the edge of the screen, and not the beginning
@@ -477,7 +478,7 @@ void
 		//       Doing the computation with the initial col value ensures we'll have MORE lines than necessary,
 		//       though, which is mostly harmless, since we'll skip trailing blank lines in this case :).
 		unsigned short int available_cols;
-		if (fbink_config.is_centered && fbink_config.is_padded) {
+		if (fbink_config->is_centered && fbink_config->is_padded) {
 			available_cols = (unsigned short int) (MAXCOLS - 1U);
 		} else {
 			available_cols = (unsigned short int) (MAXCOLS - col);
@@ -529,11 +530,11 @@ void
 			       left);
 
 			// Just fudge the column for centering...
-			if (fbink_config.is_centered) {
+			if (fbink_config->is_centered) {
 				// Don't fudge if also padded, we'll need the original value for heuristics,
 				// but we still enforce column 0 later, as we always want full padding.
-				col = fbink_config.is_padded ? col : (short int) ((MAXCOLS / 2U) - (line_len / 2U));
-				if (!fbink_config.is_padded) {
+				col = fbink_config->is_padded ? col : (short int) ((MAXCOLS / 2U) - (line_len / 2U));
+				if (!fbink_config->is_padded) {
 					// Much like when both centering & padding, ensure we never write in column 0
 					if (col == 0) {
 						col = 1;
@@ -550,16 +551,16 @@ void
 				}
 			}
 			// Just fudge the (formatted) line length for free padding :).
-			if (fbink_config.is_padded) {
+			if (fbink_config->is_padded) {
 				// Don't fudge if also centered, we'll need the original value to split padding in two.
-				line_len = fbink_config.is_centered ? line_len : (size_t)(MAXCOLS - col);
-				if (!fbink_config.is_centered) {
+				line_len = fbink_config->is_centered ? line_len : (size_t)(MAXCOLS - col);
+				if (!fbink_config->is_centered) {
 					printf("Adjusted line_len to %zu for padding\n", line_len);
 				}
 			}
 
 			// When centered & padded, we need to split the padding in two, left & right.
-			if (fbink_config.is_centered && fbink_config.is_padded) {
+			if (fbink_config->is_centered && fbink_config->is_padded) {
 				// NOTE: As we enforce a single padding space on the left,
 				// to match the nearly full block that we fudge on the right in draw())
 				// We crop 1 slot off MAXCOLS when doing these calculations,
@@ -605,7 +606,7 @@ void
 			}
 
 			region = draw(
-			    line, (unsigned short int) row, (unsigned short int) col, fbink_config.is_inverted, multiline_offset);
+			    line, (unsigned short int) row, (unsigned short int) col, fbink_config->is_inverted, multiline_offset);
 		}
 
 		// Cleanup
@@ -613,7 +614,7 @@ void
 	}
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
-	if (fbink_config.is_cleared) {
+	if (fbink_config->is_cleared) {
 		region.top    = 0U;
 		region.left   = 0U;
 		region.width  = vinfo.xres;
@@ -621,7 +622,7 @@ void
 	}
 
 	// Refresh screen
-	refresh(fbfd, region, fbink_config.is_flashing);
+	refresh(fbfd, region, fbink_config->is_flashing);
 
 	// cleanup
 	if (fb_is_mapped && !keep_fd) {
@@ -698,7 +699,7 @@ int
 			       fbink_config.col,
 			       fbink_config.row);
 			fbink_print(
-			    fbfd, string, fbink_config);
+			    fbfd, string, &fbink_config);
 			// NOTE: Don't clobber previous entries if multiple strings were passed...
 			fbink_config.row++;
 			// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).

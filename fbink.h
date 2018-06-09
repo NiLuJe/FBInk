@@ -48,7 +48,7 @@ int fbink_init(int);
 
 // Print a string on screen.
 // if fd is -1, the fb is opened for the duration of this call
-void fbink_print(int, char*, FBInkConfig);
+void fbink_print(int, char*, FBInkConfig*);
 
 // When you intend to keep fd open for the lifecycle of your program:
 // fd = open() -> init(fd) -> print(fd, ...)
