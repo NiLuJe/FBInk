@@ -29,7 +29,7 @@
 
 #include "fbink.h"
 
-// helper function to 'plot' a pixel in given color
+// Helper function to 'plot' a pixel in given color
 static void
     put_pixel_Gray8(unsigned short int x, unsigned short int y, unsigned short int c)
 {
@@ -94,7 +94,7 @@ static void
 	*((char*) (fbp + pix_offset)) = (char) c;
 }
 
-// handle various bpp...
+// Handle various bpp...
 static void
     put_pixel(unsigned short int x, unsigned short int y, unsigned short int c)
 {
@@ -109,7 +109,7 @@ static void
 	}
 }
 
-// helper function to draw a rectangle in given color
+// Helper function to draw a rectangle in given color
 static void
     fill_rect(unsigned short int x,
 	      unsigned short int y,
@@ -127,8 +127,7 @@ static void
 	printf("filled %hux%hu rectangle @ %hu, %hu\n", w, h, x, y);
 }
 
-// helper function to clear the screen - fill whole
-// screen with given color
+// Helper function to clear the screen - fill whole screen with given color
 static void
     clear_screen(unsigned short int c)
 {
@@ -192,8 +191,7 @@ static void
 	}
 }
 
-// helper function for drawing - no more need to go mess with
-// the main function when just want to change what to draw...
+// Helper function for drawing
 static struct mxcfb_rect
     draw(char*              text,
 	 unsigned short int row,
@@ -287,7 +285,7 @@ static struct mxcfb_rect
 	return region;
 }
 
-// handle eink updates
+// Handle eInk updates
 static void
     refresh(int fbfd, struct mxcfb_rect region, bool is_flashing)
 {
@@ -632,94 +630,6 @@ void
 	if (!keep_fd) {
 		close(fbfd);
 	}
-}
-
-// application entry point
-int
-    main(int argc, char* argv[])
-{
-	int                        opt;
-	int                        opt_index;
-	static const struct option opts[] = {
-		{ "row", required_argument, NULL, 'y' }, { "col", required_argument, NULL, 'x' },
-		{ "invert", no_argument, NULL, 'h' },    { "flash", no_argument, NULL, 'f' },
-		{ "clear", no_argument, NULL, 'c' },     { "centered", no_argument, NULL, 'm' },
-		{ "padded", no_argument, NULL, 'p' },    { NULL, 0, NULL, 0 }
-	};
-
-	FBInkConfig fbink_config = { 0 };
-
-	while ((opt = getopt_long(argc, argv, "y:x:hfcmp", opts, &opt_index)) != -1) {
-		switch (opt) {
-			case 'y':
-				fbink_config.row = (short int) atoi(optarg);
-				break;
-			case 'x':
-				fbink_config.col = (short int) atoi(optarg);
-				break;
-			case 'h':
-				fbink_config.is_inverted = true;
-				break;
-			case 'f':
-				fbink_config.is_flashing = true;
-				break;
-			case 'c':
-				fbink_config.is_cleared = true;
-				break;
-			case 'm':
-				fbink_config.is_centered = true;
-				break;
-			case 'p':
-				fbink_config.is_padded = true;
-				break;
-			default:
-				fprintf(stderr, "?? Unknown option code 0%o ??\n", opt);
-				return EXIT_FAILURE;
-				break;
-		}
-	}
-
-	// Open framebuffer and keep it around, then setup globals.
-	int fbfd = -1;
-	if (-1 == (fbfd = fbink_open())) {
-		fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
-		return EXIT_FAILURE;
-	}
-	if (EXIT_FAILURE == (fbfd = fbink_init(fbfd))) {
-		fprintf(stderr, "Failed to initialize FBInk, aborting . . .\n");
-		return EXIT_FAILURE;
-	}
-
-	char* string;
-	if (optind < argc) {
-		while (optind < argc) {
-			string = argv[optind++];
-			printf(
-			    "Printing string '%s' @ column %hu, row %hu (inverted: %s, flashing: %s, centered: %s, left padded: %s, clear screen: %s)\n",
-			    string,
-			    fbink_config.col,
-			    fbink_config.row,
-			    fbink_config.is_inverted ? "true" : "false",
-			    fbink_config.is_flashing ? "true" : "false",
-			    fbink_config.is_centered ? "true" : "false",
-			    fbink_config.is_padded ? "true" : "false",
-			    fbink_config.is_cleared ? "true" : "false");
-			fbink_print(fbfd, string, &fbink_config);
-			// NOTE: Don't clobber previous entries if multiple strings were passed...
-			fbink_config.row++;
-			// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
-		}
-	} else {
-		printf("Usage!\n");
-	}
-
-	// Cleanup
-	if (fb_is_mapped) {
-		munmap(fbp, screensize);
-	}
-	close(fbfd);
-
-	return EXIT_SUCCESS;
 }
 
 /*

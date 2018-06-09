@@ -34,7 +34,6 @@
 #endif
 
 #include <fcntl.h>
-#include <getopt.h>
 #include <linux/fb.h>
 #include <linux/kd.h>
 #include <math.h>

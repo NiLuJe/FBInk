@@ -7,9 +7,13 @@
 ifdef CROSS_TC
 	CC=$(CROSS_TC)-gcc
 	STRIP=$(CROSS_TC)-strip
+	AR=$(CROSS_TC)-gcc-ar
+	RANLIB=$(CROSS_TC)-gcc-ranlib
 else
 	CC?=gcc
 	STRIP?=strip
+	AR?=gcc-ar
+	RANLIB?=gcc-ranlib
 endif
 
 DEBUG_CFLAGS=-Og -fno-omit-frame-pointer -pipe -g
@@ -38,6 +42,11 @@ EXTRA_CFLAGS+=-Wconversion
 ifeq "$(DEBUG)" "true"
 	EXTRA_CFLAGS+=-Wpadded
 endif
+# We need to build PIC to support running as/with a shared library
+# NOTE: We should be safe with -fpic instead of -fPIC ;).
+ifeq "$(SHARED)" "true"
+	EXTRA_CFLAGS+=-fpic
+endif
 
 # A version tag...
 FBINK_VERSION=$(shell git describe)
@@ -46,13 +55,28 @@ EXTRA_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION)"'
 # NOTE: Always use as-needed to avoid unecessary DT_NEEDED entries :)
 LDFLAGS?=-Wl,--as-needed
 
+# And we want to link against our own library ;).
+ifeq "$(DEBUG)" "true"
+	EXTRA_LDFLAGS+=-L./Debug
+else
+	EXTRA_LDFLAGS+=-L./Release
+endif
+LIBS:=-lfbink
+
 ##
 # Now that we're done fiddling with flags, let's build stuff!
-SRCS=fbink.c
+LIB_SRCS=fbink.c
+CMD_SRCS=fbink_cmd.c
+
+# How we handle our library creation
+FBINK_SHARED:=-shared -Wl,-soname,libfbink.so.1
+FBINK_AR_FLAGS:=rc
+FBINK_AR_NAME:=libfbink.a
 
 default: all
 
-OBJS:=$(SRCS:%.c=$(OUT_DIR)/%.o)
+LIB_OBJS:=$(LIB_SRCS:%.c=$(OUT_DIR)/%.o)
+CMD_OBJS:=$(CMD_SRCS:%.c=$(OUT_DIR)/%.o)
 
 $(OUT_DIR)/%.o: %.c
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -o $@ -c $<
@@ -62,14 +86,24 @@ outdir:
 
 all: outdir fbink
 
-fbink: $(OBJS)
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/$@$(BINEXT) $(OBJS) $(LIBS)
+staticlib: $(LIB_OBJS)
+	$(AR) $(FBINK_AR_FLAGS) $(OUT_DIR)/$(FBINK_AR_NAME) $(LIB_OBJS)
+	$(RANLIB) $(OUT_DIR)/$(FBINK_AR_NAME)
+
+sharedlib: $(LIB_OBJS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED) -o$(OUT_DIR)/$@$(BINEXT) $(LIB_OBJS)
+
+fbink: $(CMD_OBJS) staticlib
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/$@$(BINEXT) $(CMD_OBJS) $(LIBS)
 
 strip: all
 	$(STRIP) --strip-unneeded $(OUT_DIR)/fbink
 
 debug:
 	$(MAKE) all DEBUG=true
+
+shared:
+	$(MAKE) all SHARED=true
 
 clean:
 	rm -rf Release/*.o
