@@ -6,10 +6,11 @@ Housed [here on GitHub](https://github.com/NiLuJe/FBInk).
 
 # What's it for?
 
-This is intended to fill the void felt by developpers and tinkerers when they realized they do not have a builtin way to print stuff on the device's screen!
+This is intended to fill the void felt by Kobo developpers and tinkerers when they realize they do not have a builtin way to print stuff on the device's screen!
 It's especially cruel when moving to a Kobo, after being used to the ubiquity of `eips` on Kindles...
 
 In short, it prints messages on your screen, handling the low-level tinkering with both the Linux framebuffer interface, and the iMX EPD driver.
+It's been tested on Kobos and Kindles, but porting it to other Linux, iMX eInk devices should be trivial.
 
 # How do I install this?
 
@@ -20,7 +21,7 @@ For exampke, I plan on using it in [KFMon](https://github.com/NiLuJe/kfmon) to p
 
 # How can I tinker with it?
 
-The tool is available both as a commandline utility, and as a shared or static library for C projects.
+The tool is available both as a commandline utility, and as a shared or static library for C projects (beware, though, it's licensed under the AGPLv3, not the LGPL).
 See the [public header](fbink.h) for basic API usage.
 Launch the `fbink` tool with no argument for a quick manual.
 
