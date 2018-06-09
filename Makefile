@@ -44,8 +44,11 @@ ifeq "$(DEBUG)" "true"
 endif
 # We need to build PIC to support running as/with a shared library
 # NOTE: We should be safe with -fpic instead of -fPIC ;).
+# And we handle symbol visibility properly...
 ifeq "$(SHARED)" "true"
-	EXTRA_CFLAGS+=-fpic
+	SHARED_CFLAGS+=-fpic
+	SHARED_CFLAGS+=-fvisibility=hidden
+	SHARED_CFLAGS+=-DFBINK_SHAREDLIB
 endif
 
 # A version tag...
@@ -78,14 +81,18 @@ FBINK_STATIC_NAME:=libfbink.a
 
 default: all
 
+SHAREDLIB_OBJS:=$(LIB_SRCS:%.c=$(OUT_DIR)/shared/%.o)
 LIB_OBJS:=$(LIB_SRCS:%.c=$(OUT_DIR)/%.o)
 CMD_OBJS:=$(CMD_SRCS:%.c=$(OUT_DIR)/%.o)
+
+$(OUT_DIR)/shared/%.o: %.c
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) -o $@ -c $<
 
 $(OUT_DIR)/%.o: %.c
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -o $@ -c $<
 
 outdir:
-	mkdir -p $(OUT_DIR)
+	mkdir -p $(OUT_DIR)/shared
 
 all: outdir fbink
 
@@ -93,8 +100,8 @@ staticlib: $(LIB_OBJS)
 	$(AR) $(FBINK_STATIC_FLAGS) $(OUT_DIR)/$(FBINK_STATIC_NAME) $(LIB_OBJS)
 	$(RANLIB) $(OUT_DIR)/$(FBINK_STATIC_NAME)
 
-sharedlib: $(LIB_OBJS)
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(LIB_OBJS)
+sharedlib: $(SHAREDLIB_OBJS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(SHAREDLIB_OBJS)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME_VER)
 
@@ -113,10 +120,12 @@ shared:
 clean:
 	rm -rf Release/*.a
 	rm -rf Release/*.so*
+	rm -rf Release/shared/*.o
 	rm -rf Release/*.o
 	rm -rf Release/fbink
 	rm -rf Debug/*.a
 	rm -rf Debug/*.so*
+	rm -rf Debug/shared/*.o
 	rm -rf Debug/*.o
 	rm -rf Debug/fbink
 

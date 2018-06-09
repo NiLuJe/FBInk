@@ -31,10 +31,29 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+// Symbol visibility shenanigans...
+// c.f., https://gcc.gnu.org/wiki/Visibility
+#if __GNUC__ >= 4
+#	define DLL_PUBLIC __attribute__((visibility("default")))
+#	define DLL_LOCAL __attribute__((visibility("hidden")))
+#else
+#	define DLL_PUBLIC
+#	define DLL_LOCAL
+#endif
+
+// Are we actually building the shared lib?
+#ifdef FBINK_SHAREDLIB
+#	define FBINK_API DLL_PUBLIC
+#	define FBINK_LOCAL DLL_LOCAL
+#else
+#	define FBINK_API
+#	define FBINK_LOCAL
+#endif
+
 // The few externs we might need...
-extern char*  fbp;
-extern size_t screensize;
-extern bool   fb_is_mapped;
+extern FBINK_API char* fbp;
+extern FBINK_API size_t screensize;
+extern FBINK_API bool   fb_is_mapped;
 
 // What a FBInk Print config should look like
 typedef struct
@@ -49,15 +68,15 @@ typedef struct
 } FBInkConfig;
 
 // Open the framebuffer device and returns its fd
-int fbink_open(void);
+FBINK_API int fbink_open(void);
 
 // Initialize the global variables.
 // If fd is -1, the fb is opened for the duration of this call
-int fbink_init(int);
+FBINK_API int fbink_init(int);
 
 // Print a string on screen.
 // if fd is -1, the fb is opened for the duration of this call
-void fbink_print(int, char*, FBInkConfig*);
+FBINK_API void fbink_print(int, char*, FBInkConfig*);
 
 // When you intend to keep fd open for the lifecycle of your program:
 // fd = open() -> init(fd) -> print(fd, ...)
