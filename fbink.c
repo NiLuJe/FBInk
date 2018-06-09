@@ -311,6 +311,7 @@ static void
 	}
 
 	if (ioctl(fbfd, MXCFB_SEND_UPDATE, &update) < 0) {
+		// FIXME: Not thread-safe!
 		perror("MXCFB_SEND_UPDATE");
 		// FIXME: Mmmh, maybe don't exit to be nicer when used as a lib?
 		exit(EXIT_FAILURE);
@@ -320,6 +321,7 @@ static void
 	if (is_flashing) {
 		if (ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update.update_marker) < 0) {
 			{
+				// FIXME: Not thread-safe!
 				perror("MXCFB_WAIT_FOR_UPDATE_COMPLETE");
 			}
 		}
@@ -425,6 +427,7 @@ void
 		screensize = finfo.smem_len;
 		fbp        = (char*) mmap(NULL, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
 		if (fbp == MAP_FAILED) {
+			// FIXME: Not thread-safe!
 			perror("mmap");
 		} else {
 			fb_is_mapped = true;
@@ -634,7 +637,6 @@ void
 
 /*
  * TODO: DOC
- * TODO: Library (thread safety?)
  * TODO: waveform mode user-selection? -w
  * TODO: ioctl only (i.e., refresh current fb data, don't paint)
  *       -s w=758,h=1024 -f

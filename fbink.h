@@ -77,6 +77,8 @@ FBINK_API int fbink_open(void);
 
 // Initialize the global variables.
 // If fd is -1, the fb is opened for the duration of this call
+// NOTE: By virtue of, well, setting global variables, do NOT consider this thread-safe.
+//       The rest of the API should be, though, so make sure you init in your main thread *before* threading begins...
 FBINK_API int fbink_init(int);
 
 // Print a string on screen.
