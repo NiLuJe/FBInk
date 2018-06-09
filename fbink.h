@@ -29,7 +29,8 @@
 #define __FBINK_H
 
 // What a FBInk Print config should look like
-typedef struct {
+typedef struct
+{
 	short int row;
 	short int col;
 	bool      is_inverted;

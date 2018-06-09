@@ -405,9 +405,7 @@ int
 
 // Magic happens here!
 void
-    fbink_print(int       fbfd,
-		char*     string,
-		FBInkConfig* fbink_config)
+    fbink_print(int fbfd, char* string, FBInkConfig* fbink_config)
 {
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
@@ -605,8 +603,11 @@ void
 				snprintf(line, line_len + 1U, "%*s", (int) line_len, string + (len - left));
 			}
 
-			region = draw(
-			    line, (unsigned short int) row, (unsigned short int) col, fbink_config->is_inverted, multiline_offset);
+			region = draw(line,
+				      (unsigned short int) row,
+				      (unsigned short int) col,
+				      fbink_config->is_inverted,
+				      multiline_offset);
 		}
 
 		// Cleanup
@@ -693,13 +694,17 @@ int
 	if (optind < argc) {
 		while (optind < argc) {
 			string = argv[optind++];
-			printf("Printing%sstring '%s' @ column %hu, row %hu\n",
-			       fbink_config.is_inverted ? " inverted " : " ",
-			       string,
-			       fbink_config.col,
-			       fbink_config.row);
-			fbink_print(
-			    fbfd, string, &fbink_config);
+			printf(
+			    "Printing string '%s' @ column %hu, row %hu (inverted: %s, flashing: %s, centered: %s, left padded: %s, clear screen: %s)\n",
+			    string,
+			    fbink_config.col,
+			    fbink_config.row,
+			    fbink_config.is_inverted ? "true" : "false",
+			    fbink_config.is_flashing ? "true" : "false",
+			    fbink_config.is_centered ? "true" : "false",
+			    fbink_config.is_padded ? "true" : "false",
+			    fbink_config.is_cleared ? "true" : "false");
+			fbink_print(fbfd, string, &fbink_config);
 			// NOTE: Don't clobber previous entries if multiple strings were passed...
 			fbink_config.row++;
 			// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
