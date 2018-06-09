@@ -69,9 +69,10 @@ LIB_SRCS=fbink.c
 CMD_SRCS=fbink_cmd.c
 
 # How we handle our library creation
-FBINK_SHARED:=-shared -Wl,-soname,libfbink.so.1
-FBINK_AR_FLAGS:=rc
-FBINK_AR_NAME:=libfbink.a
+FBINK_SHARED_FLAGS:=-shared -Wl,-soname,libfbink.so.1
+FBINK_SHARED_NAME:=libfbink.so
+FBINK_STATIC_FLAGS:=rc
+FBINK_STATIC_NAME:=libfbink.a
 
 default: all
 
@@ -87,17 +88,17 @@ outdir:
 all: outdir fbink
 
 staticlib: $(LIB_OBJS)
-	$(AR) $(FBINK_AR_FLAGS) $(OUT_DIR)/$(FBINK_AR_NAME) $(LIB_OBJS)
-	$(RANLIB) $(OUT_DIR)/$(FBINK_AR_NAME)
+	$(AR) $(FBINK_STATIC_FLAGS) $(OUT_DIR)/$(FBINK_STATIC_NAME) $(LIB_OBJS)
+	$(RANLIB) $(OUT_DIR)/$(FBINK_STATIC_NAME)
 
 sharedlib: $(LIB_OBJS)
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED) -o$(OUT_DIR)/$@$(BINEXT) $(LIB_OBJS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/$(FBINK_SHARED_NAME) $(LIB_OBJS)
 
-fbink: $(CMD_OBJS) staticlib
+fbink: $(CMD_OBJS) sharedlib staticlib
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/$@$(BINEXT) $(CMD_OBJS) $(LIBS)
 
 strip: all
-	$(STRIP) --strip-unneeded $(OUT_DIR)/fbink
+	$(STRIP) --strip-unneeded $(OUT_DIR)/$(FBINK_SHARED_NAME) $(OUT_DIR)/fbink
 
 debug:
 	$(MAKE) all DEBUG=true
@@ -106,9 +107,13 @@ shared:
 	$(MAKE) all SHARED=true
 
 clean:
+	rm -rf Release/*.a
+	rm -rf Release/*.so*
 	rm -rf Release/*.o
 	rm -rf Release/fbink
+	rm -rf Debug/*.a
+	rm -rf Debug/*.so*
 	rm -rf Debug/*.o
 	rm -rf Debug/fbink
 
-.PHONY: default outdir all fbink strip debug clean
+.PHONY: default outdir all staticlib sharedlib fbink strip debug shared clean
