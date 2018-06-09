@@ -84,9 +84,9 @@ static unsigned short def_b[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77
 				  0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
 
 // 'global' variables to store screen info
-char*                    fbp = 0;
-size_t            screensize = 0U;
-bool            fb_is_mapped = false;
+char*                    fbp          = 0;
+size_t                   screensize   = 0U;
+bool                     fb_is_mapped = false;
 struct fb_var_screeninfo vinfo;
 struct fb_fix_screeninfo finfo;
 unsigned short int       FONTW         = 8;

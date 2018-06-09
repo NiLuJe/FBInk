@@ -329,7 +329,8 @@ static void
 }
 
 // Open the framebuffer file & return the opened fd
-int fbink_open(void)
+int
+    fbink_open(void)
 {
 	int fbfd = -1;
 
@@ -345,7 +346,8 @@ int fbink_open(void)
 }
 
 // Get the various fb info & setup global variables
-int fbink_init(int fbfd)
+int
+    fbink_init(int fbfd)
 {
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
@@ -700,7 +702,8 @@ int
 			       string,
 			       col,
 			       row);
-			fbink_print(fbfd, string, row, col, is_inverted, is_flashing, is_cleared, is_centered, is_padded);
+			fbink_print(
+			    fbfd, string, row, col, is_inverted, is_flashing, is_cleared, is_centered, is_padded);
 			// NOTE: Don't clobber previous entries if multiple strings were passed...
 			row++;
 			// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
