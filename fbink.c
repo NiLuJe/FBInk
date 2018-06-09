@@ -30,7 +30,7 @@
 #include "fbink_internal.h"
 
 // Return the library version as devised at library compile-time
-char*
+const char*
     fbink_version(void)
 {
 	return FBINK_VERSION;
@@ -654,7 +654,6 @@ int
 }
 
 /*
- * TODO: DOC
  * TODO: waveform mode user-selection? -w
  * TODO: ioctl only (i.e., refresh current fb data, don't paint)
  *       -s w=758,h=1024 -f
