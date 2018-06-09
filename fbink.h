@@ -28,6 +28,7 @@
 #ifndef __FBINK_H
 #define __FBINK_H
 
+int fbink_init(bool);
 void fbink_print(char*, short int, short int, bool, bool, bool, bool, bool);
 
 #endif

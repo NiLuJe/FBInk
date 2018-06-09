@@ -328,25 +328,16 @@ static void
 	}
 }
 
-// Magic happens here!
-void
-    fbink_print(char*     string,
-		short int row,
-		short int col,
-		bool      is_inverted,
-		bool      is_flashing,
-		bool      is_cleared,
-		bool      is_centered,
-		bool      is_padded)
+// Get the various fb info & setup global variables
+int fbink_init(bool keep_fd)
 {
-	int    fbfd       = 0;
-	size_t screensize = 0U;
+	int fbfd = 0;
 
 	// Open the framebuffer file for reading and writing
 	fbfd = open("/dev/fb0", O_RDWR);
 	if (!fbfd) {
 		printf("Error: cannot open framebuffer device.\n");
-		return;
+		return EXIT_FAILURE;
 	}
 	printf("The framebuffer device was opened successfully.\n");
 
@@ -381,6 +372,36 @@ void
 		printf("Error reading fixed information.\n");
 	}
 	printf("Fixed info: smem_len %d, line_length %d\n", finfo.smem_len, finfo.line_length);
+
+	// NOTE: Do we want to keep the fb0 fd open and pass it to our caller, or simply close it for now?
+	//       Useful because we probably want to close it to keep open fds to a minimum when used as a library,
+	//       while wanting to avoid a useless open/close/open/close cycle when used as a standalone tool.
+	if (keep_fd) {
+		return fbfd;
+	} else {
+		close(fbfd);
+		return EXIT_SUCCESS;
+	}
+}
+
+// Magic happens here!
+void
+    fbink_print(char*     string,
+		short int row,
+		short int col,
+		bool      is_inverted,
+		bool      is_flashing,
+		bool      is_cleared,
+		bool      is_centered,
+		bool      is_padded)
+{
+	int    fbfd       = 0;
+	size_t screensize = 0U;
+
+	if (EXIT_FAILURE == (fbfd = fbink_init(true))) {
+		fprintf(stderr, "Failed to open FrameBuffer, aborting . . .\n");
+		return;
+	}
 
 	// map fb to user mem
 	// NOTE: Beware of smem_len on Kobos?
@@ -641,6 +662,8 @@ int
 			//row++;
 			// FIXME: Actually handle this sanely... :D
 		}
+	} else {
+		printf("Usage!\n");
 	}
 
 	return EXIT_SUCCESS;
@@ -648,7 +671,7 @@ int
 
 /*
  * TODO: DOC
- * TODO: Library (thread safety: fbinlk_init to setup globals? /!\ fb fd?)
+ * TODO: Library (thread safety?)
  * TODO: waveform mode user-selection? -w
  * TODO: ioctl only (i.e., refresh current fb data, don't paint)
  *       -s w=758,h=1024 -f
