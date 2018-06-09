@@ -407,13 +407,7 @@ int
 void
     fbink_print(int       fbfd,
 		char*     string,
-		short int row,
-		short int col,
-		bool      is_inverted,
-		bool      is_flashing,
-		bool      is_cleared,
-		bool      is_centered,
-		bool      is_padded)
+		FBInkConfig fbink_config)
 {
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
@@ -441,12 +435,16 @@ void
 		}
 	}
 
+	// Make copies of these so we don't wreck our original struct, because we'll heavily mangle them...
+	short int col = fbink_config.col;
+	short int row = fbink_config.row;
+
 	struct mxcfb_rect region;
 
 	if (fb_is_mapped) {
 		// Clear screen?
-		if (is_cleared) {
-			clear_screen(is_inverted ? BLACK : WHITE);
+		if (fbink_config.is_cleared) {
+			clear_screen(fbink_config.is_inverted ? BLACK : WHITE);
 		}
 
 		// See if want to position our text relative to the edge of the screen, and not the beginning
@@ -459,10 +457,13 @@ void
 		printf("Adjusted position: column %hu, row %hu\n", col, row);
 
 		// Clamp coordinates to the screen, to avoid blowing up ;).
-		if (col >= MAXCOLS || row >= MAXROWS) {
-			col = (short int) MIN(col, MAXCOLS - 1);
-			row = (short int) MIN(row, MAXROWS - 1);
-			printf("Clamped position: column %hu, row %hu\n", col, row);
+		if (col >= MAXCOLS) {
+			col = (short int) (MAXCOLS - 1);
+			printf("Clamped column to %hu\n", col);
+		}
+		if (row >= MAXROWS) {
+			row = (short int) (MAXROWS - 1);
+			printf("Clamped row to %hu\n", row);
 		}
 
 		// See if we need to break our string down into multiple lines...
@@ -476,7 +477,7 @@ void
 		//       Doing the computation with the initial col value ensures we'll have MORE lines than necessary,
 		//       though, which is mostly harmless, since we'll skip trailing blank lines in this case :).
 		unsigned short int available_cols;
-		if (is_centered && is_padded) {
+		if (fbink_config.is_centered && fbink_config.is_padded) {
 			available_cols = (unsigned short int) (MAXCOLS - 1U);
 		} else {
 			available_cols = (unsigned short int) (MAXCOLS - col);
@@ -528,11 +529,11 @@ void
 			       left);
 
 			// Just fudge the column for centering...
-			if (is_centered) {
+			if (fbink_config.is_centered) {
 				// Don't fudge if also padded, we'll need the original value for heuristics,
 				// but we still enforce column 0 later, as we always want full padding.
-				col = is_padded ? col : (short int) ((MAXCOLS / 2U) - (line_len / 2U));
-				if (!is_padded) {
+				col = fbink_config.is_padded ? col : (short int) ((MAXCOLS / 2U) - (line_len / 2U));
+				if (!fbink_config.is_padded) {
 					// Much like when both centering & padding, ensure we never write in column 0
 					if (col == 0) {
 						col = 1;
@@ -549,16 +550,16 @@ void
 				}
 			}
 			// Just fudge the (formatted) line length for free padding :).
-			if (is_padded) {
+			if (fbink_config.is_padded) {
 				// Don't fudge if also centered, we'll need the original value to split padding in two.
-				line_len = is_centered ? line_len : (size_t)(MAXCOLS - col);
-				if (!is_centered) {
+				line_len = fbink_config.is_centered ? line_len : (size_t)(MAXCOLS - col);
+				if (!fbink_config.is_centered) {
 					printf("Adjusted line_len to %zu for padding\n", line_len);
 				}
 			}
 
 			// When centered & padded, we need to split the padding in two, left & right.
-			if (is_centered && is_padded) {
+			if (fbink_config.is_centered && fbink_config.is_padded) {
 				// NOTE: As we enforce a single padding space on the left,
 				// to match the nearly full block that we fudge on the right in draw())
 				// We crop 1 slot off MAXCOLS when doing these calculations,
@@ -604,7 +605,7 @@ void
 			}
 
 			region = draw(
-			    line, (unsigned short int) row, (unsigned short int) col, is_inverted, multiline_offset);
+			    line, (unsigned short int) row, (unsigned short int) col, fbink_config.is_inverted, multiline_offset);
 		}
 
 		// Cleanup
@@ -612,7 +613,7 @@ void
 	}
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
-	if (is_cleared) {
+	if (fbink_config.is_cleared) {
 		region.top    = 0U;
 		region.left   = 0U;
 		region.width  = vinfo.xres;
@@ -620,7 +621,7 @@ void
 	}
 
 	// Refresh screen
-	refresh(fbfd, region, is_flashing);
+	refresh(fbfd, region, fbink_config.is_flashing);
 
 	// cleanup
 	if (fb_is_mapped && !keep_fd) {
@@ -644,36 +645,30 @@ int
 		{ "padded", no_argument, NULL, 'p' },    { NULL, 0, NULL, 0 }
 	};
 
-	short int row         = 0;
-	short int col         = 0;
-	bool      is_inverted = false;
-	bool      is_flashing = false;
-	bool      is_cleared  = false;
-	bool      is_centered = false;
-	bool      is_padded   = false;
+	FBInkConfig fbink_config = { 0 };
 
 	while ((opt = getopt_long(argc, argv, "y:x:hfcmp", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
-				row = (short int) atoi(optarg);
+				fbink_config.row = (short int) atoi(optarg);
 				break;
 			case 'x':
-				col = (short int) atoi(optarg);
+				fbink_config.col = (short int) atoi(optarg);
 				break;
 			case 'h':
-				is_inverted = true;
+				fbink_config.is_inverted = true;
 				break;
 			case 'f':
-				is_flashing = true;
+				fbink_config.is_flashing = true;
 				break;
 			case 'c':
-				is_cleared = true;
+				fbink_config.is_cleared = true;
 				break;
 			case 'm':
-				is_centered = true;
+				fbink_config.is_centered = true;
 				break;
 			case 'p':
-				is_padded = true;
+				fbink_config.is_padded = true;
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", opt);
@@ -698,14 +693,14 @@ int
 		while (optind < argc) {
 			string = argv[optind++];
 			printf("Printing%sstring '%s' @ column %hu, row %hu\n",
-			       is_inverted ? " inverted " : " ",
+			       fbink_config.is_inverted ? " inverted " : " ",
 			       string,
-			       col,
-			       row);
+			       fbink_config.col,
+			       fbink_config.row);
 			fbink_print(
-			    fbfd, string, row, col, is_inverted, is_flashing, is_cleared, is_centered, is_padded);
+			    fbfd, string, fbink_config);
 			// NOTE: Don't clobber previous entries if multiple strings were passed...
-			row++;
+			fbink_config.row++;
 			// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
 		}
 	} else {
@@ -728,6 +723,5 @@ int
  * TODO: ioctl only (i.e., refresh current fb data, don't paint)
  *       -s w=758,h=1024 -f
  *       NOTE: Don't bother w/ getsubopt() and always make it full-screen?
- * TODO: Move all option flags in a struct to keep the sigs in check... (or not? library...)
  * TODO: Kindle ifdeffery and testing.
  */

@@ -28,16 +28,27 @@
 #ifndef __FBINK_H
 #define __FBINK_H
 
+// What a FBInk Print config should look like
+typedef struct {
+	short int row;
+	short int col;
+	bool      is_inverted;
+	bool      is_flashing;
+	bool      is_cleared;
+	bool      is_centered;
+	bool      is_padded;
+} FBInkConfig;
+
 // Open the framebuffer device and returns its fd
 int fbink_open(void);
 
 // Initialize the global variables.
-// If fd is -1, open it
+// If fd is -1, the fb is opened for the duration of this call
 int fbink_init(int);
 
 // Print a string on screen.
-// if fd is -1, open fb device and close it on return
-void fbink_print(int, char*, short int, short int, bool, bool, bool, bool, bool);
+// if fd is -1, the fb is opened for the duration of this call
+void fbink_print(int, char*, FBInkConfig);
 
 // When you intend to keep fd open for the lifecycle of your program:
 // fd = open() -> init(fd) -> print(fd, ...)
