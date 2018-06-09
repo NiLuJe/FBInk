@@ -28,11 +28,6 @@
 #ifndef __FBINK_INTERNAL_H
 #define __FBINK_INTERNAL_H
 
-// Because we're pretty much Linux-bound ;).
-#ifndef _GNU_SOURCE
-#	define _GNU_SOURCE
-#endif
-
 #include <fcntl.h>
 #include <linux/fb.h>
 #include <linux/kd.h>

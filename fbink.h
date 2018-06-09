@@ -28,6 +28,11 @@
 #ifndef __FBINK_H
 #define __FBINK_H
 
+// Because we're pretty much Linux-bound ;).
+#ifndef _GNU_SOURCE
+#	define _GNU_SOURCE
+#endif
+
 #include <stdbool.h>
 #include <stdio.h>
 
