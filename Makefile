@@ -50,6 +50,9 @@ SHARED_CFLAGS+=-fpic
 SHARED_CFLAGS+=-fvisibility=hidden
 SHARED_CFLAGS+=-DFBINK_SHAREDLIB
 
+# Assume we'll be safe to use by threaded applications...
+EXTRA_CPPFLAGS+=-D_REENTRANT=1
+
 # A version tag...
 FBINK_VERSION=$(shell git describe)
 EXTRA_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION)"'

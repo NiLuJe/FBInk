@@ -28,6 +28,7 @@
 #ifndef __FBINK_INTERNAL_H
 #define __FBINK_INTERNAL_H
 
+#include <errno.h>
 #include <fcntl.h>
 #include <linux/fb.h>
 #include <linux/kd.h>
@@ -119,6 +120,6 @@ static void  font8x8_render(int, char*);
 
 static struct mxcfb_rect draw(char*, unsigned short int, unsigned short int, bool, unsigned short int);
 
-static void refresh(int, struct mxcfb_rect, bool);
+static int refresh(int, struct mxcfb_rect, bool);
 
 #endif

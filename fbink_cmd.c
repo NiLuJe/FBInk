@@ -99,7 +99,9 @@ int
 			    fbink_config.is_centered ? "true" : "false",
 			    fbink_config.is_padded ? "true" : "false",
 			    fbink_config.is_cleared ? "true" : "false");
-			fbink_print(fbfd, string, &fbink_config);
+			if (fbink_print(fbfd, string, &fbink_config) < 0) {
+				fprintf(stderr, "Failed to print that string!\n");
+			}
 			// NOTE: Don't clobber previous entries if multiple strings were passed...
 			fbink_config.row++;
 			// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).

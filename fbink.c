@@ -286,7 +286,7 @@ static struct mxcfb_rect
 }
 
 // Handle eInk updates
-static void
+static int
     refresh(int fbfd, struct mxcfb_rect region, bool is_flashing)
 {
 	// NOTE: While we'd be perfect candidates for using A2 waveform mode, it's all kinds of fucked up on Kobos,
@@ -311,21 +311,26 @@ static void
 	}
 
 	if (ioctl(fbfd, MXCFB_SEND_UPDATE, &update) < 0) {
-		// FIXME: Not thread-safe!
-		perror("MXCFB_SEND_UPDATE");
-		// FIXME: Mmmh, maybe don't exit to be nicer when used as a lib?
-		exit(EXIT_FAILURE);
+		// NOTE: perror() is not thread-safe...
+		char  buf[256];
+		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		fprintf(stderr, "MXCFB_SEND_UPDATE: %s\n", errstr);
+		return EXIT_FAILURE;
 	}
 
 	// NOTE: Let's be extremely thorough, and wait for completion on flashing updates ;)
 	if (is_flashing) {
 		if (ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update.update_marker) < 0) {
 			{
-				// FIXME: Not thread-safe!
-				perror("MXCFB_WAIT_FOR_UPDATE_COMPLETE");
+				char  buf[256];
+				char* errstr = strerror_r(errno, buf, sizeof(buf));
+				fprintf(stderr, "MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s\n", errstr);
+				return EXIT_FAILURE;
 			}
 		}
 	}
+
+	return EXIT_SUCCESS;
 }
 
 // Open the framebuffer file & return the opened fd
@@ -404,7 +409,7 @@ int
 }
 
 // Magic happens here!
-void
+int
     fbink_print(int fbfd, char* string, FBInkConfig* fbink_config)
 {
 	// Open the framebuffer if need be...
@@ -415,7 +420,7 @@ void
 		keep_fd = false;
 		if (-1 == (fbfd = fbink_open())) {
 			fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
-			return;
+			return EXIT_FAILURE;
 		}
 	}
 
@@ -427,8 +432,10 @@ void
 		screensize = finfo.smem_len;
 		fbp        = (char*) mmap(NULL, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
 		if (fbp == MAP_FAILED) {
-			// FIXME: Not thread-safe!
-			perror("mmap");
+			char  buf[256];
+			char* errstr = strerror_r(errno, buf, sizeof(buf));
+			fprintf(stderr, "mmap: %s\n", errstr);
+			return EXIT_FAILURE;
 		} else {
 			fb_is_mapped = true;
 		}
@@ -624,7 +631,9 @@ void
 	}
 
 	// Refresh screen
-	refresh(fbfd, region, fbink_config->is_flashing);
+	if (refresh(fbfd, region, fbink_config->is_flashing) < 0) {
+		fprintf(stderr, "Failed to refresh the screen!\n");
+	}
 
 	// cleanup
 	if (fb_is_mapped && !keep_fd) {
@@ -633,6 +642,8 @@ void
 	if (!keep_fd) {
 		close(fbfd);
 	}
+
+	return EXIT_SUCCESS;
 }
 
 /*
