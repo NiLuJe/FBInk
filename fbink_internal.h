@@ -46,6 +46,11 @@
 #include "font8x8/font8x8_greek.h"
 #include "font8x8/font8x8_latin.h"
 
+// Fallback version tag...
+#ifndef FBINK_VERSION
+#       define FBINK_VERSION "v0.5.0"
+#endif
+
 // default eInk framebuffer palette
 // c.f., linux/drivers/video/mxc/cmap_lab126.h
 typedef enum

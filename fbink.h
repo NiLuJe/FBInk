@@ -72,6 +72,9 @@ typedef struct
 	bool      is_padded;
 } FBInkConfig;
 
+// Return the version of the currently loaded FBInk library
+FBINK_API char* fbink_version(void);
+
 // Open the framebuffer device and returns its fd
 FBINK_API int fbink_open(void);
 

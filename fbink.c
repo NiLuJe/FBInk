@@ -29,6 +29,13 @@
 
 #include "fbink_internal.h"
 
+// Return the library version as devised at library compile-time
+char*
+    fbink_version(void)
+{
+	return FBINK_VERSION;
+}
+
 // Helper function to 'plot' a pixel in given color
 static void
     put_pixel_Gray8(unsigned short int x, unsigned short int y, unsigned short int c)

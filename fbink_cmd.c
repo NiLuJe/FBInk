@@ -74,6 +74,9 @@ int
 		}
 	}
 
+	// Say hello
+	printf("This is FBInk %s\n", fbink_version());
+
 	// Open framebuffer and keep it around, then setup globals.
 	int fbfd = -1;
 	if (-1 == (fbfd = fbink_open())) {

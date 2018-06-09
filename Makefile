@@ -55,7 +55,7 @@ EXTRA_CPPFLAGS+=-D_REENTRANT=1
 
 # A version tag...
 FBINK_VERSION=$(shell git describe)
-EXTRA_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION)"'
+LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION)"'
 
 # NOTE: Always use as-needed to avoid unecessary DT_NEEDED entries :)
 LDFLAGS?=-Wl,--as-needed
@@ -88,26 +88,29 @@ FBINK_STATIC_NAME:=libfbink.a
 default: all
 
 SHAREDLIB_OBJS:=$(LIB_SRCS:%.c=$(OUT_DIR)/shared/%.o)
-LIB_OBJS:=$(LIB_SRCS:%.c=$(OUT_DIR)/%.o)
+STATICLIB_OBJS:=$(LIB_SRCS:%.c=$(OUT_DIR)/static/%.o)
 CMD_OBJS:=$(CMD_SRCS:%.c=$(OUT_DIR)/%.o)
 
 $(OUT_DIR)/shared/%.o: %.c
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) -o $@ -c $<
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LIB_CFLAGS) $(SHARED_CFLAGS) -o $@ -c $<
+
+$(OUT_DIR)/static/%.o: %.c
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LIB_CFLAGS) -o $@ -c $<
 
 $(OUT_DIR)/%.o: %.c
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -o $@ -c $<
 
 outdir:
-	mkdir -p $(OUT_DIR)/shared
+	mkdir -p $(OUT_DIR)/shared $(OUT_DIR)/static
 
 all: outdir fbink
 
-staticlib: $(LIB_OBJS)
-	$(AR) $(FBINK_STATIC_FLAGS) $(OUT_DIR)/$(FBINK_STATIC_NAME) $(LIB_OBJS)
+staticlib: $(STATICLIB_OBJS)
+	$(AR) $(FBINK_STATIC_FLAGS) $(OUT_DIR)/$(FBINK_STATIC_NAME) $(STATICLIB_OBJS)
 	$(RANLIB) $(OUT_DIR)/$(FBINK_STATIC_NAME)
 
 sharedlib: $(SHAREDLIB_OBJS)
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(SHAREDLIB_OBJS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LIB_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(SHAREDLIB_OBJS)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME_VER)
 
@@ -127,11 +130,13 @@ clean:
 	rm -rf Release/*.a
 	rm -rf Release/*.so*
 	rm -rf Release/shared/*.o
+	rm -rf Release/static/*.o
 	rm -rf Release/*.o
 	rm -rf Release/fbink
 	rm -rf Debug/*.a
 	rm -rf Debug/*.so*
 	rm -rf Debug/shared/*.o
+	rm -rf Debug/static/*.o
 	rm -rf Debug/*.o
 	rm -rf Debug/fbink
 
