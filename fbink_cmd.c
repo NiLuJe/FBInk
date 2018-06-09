@@ -25,7 +25,6 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "fbink_internal.h"
 #include "fbink_cmd.h"
 
 #include "fbink.h"

@@ -28,6 +28,8 @@
 #ifndef __FBINK_H
 #define __FBINK_H
 
+#include <stdbool.h>
+
 // What a FBInk Print config should look like
 typedef struct
 {
