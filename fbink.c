@@ -205,6 +205,7 @@ static struct mxcfb_rect
 	 unsigned short int row,
 	 unsigned short int col,
 	 bool               is_inverted,
+	 bool               is_centered,
 	 unsigned short int multiline_offset)
 {
 	printf("Printing '%s' @ line offset %hu\n", text, multiline_offset);
@@ -257,6 +258,16 @@ static struct mxcfb_rect
 		}
 		printf("Updated region.width to %u\n", region.width);
 	}
+
+	// NOTE: In case of a multi-line centered print, we can't really trust the final col,
+	//       it might be significantly different than the others, and as such, we'd be computing a cropped region.
+	//       Make the region cover the full-width of the screen to make sure we won't miss anything.
+	if (multiline_offset > 0 && is_centered) {
+		region.left  = 0;
+		region.width = vinfo.xres;
+		printf("Updated region.left to %u & region.width to %u because of multi-line centering\n", region.left, region.width);
+	}
+
 
 	// Fill our bounding box with our background color, so that we'll be visible no matter what's already on screen.
 	// NOTE: Unneeded, we already plot the background when handling font glyphs ;).
@@ -682,6 +693,7 @@ int
 				      (unsigned short int) row,
 				      (unsigned short int) col,
 				      fbink_config->is_inverted,
+				      fbink_config->is_centered,
 				      multiline_offset);
 		}
 
