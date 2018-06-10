@@ -336,7 +336,7 @@ static int
 	// NOTE: Let's be extremely thorough, and wait for completion on flashing updates ;)
 	if (is_flashing) {
 #ifdef FBINK_FOR_KINDLE
-		// FIXME: Handle the Carta/Pearl switch...
+		// FIXME: Handle the Carta/Pearl switch in a saner way...
 		struct mxcfb_update_marker_data update_marker = {
 			.update_marker  = update.update_marker,
 			.collision_test = 0,
@@ -348,7 +348,7 @@ static int
 			fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s\n", errstr);
 			failed = true;
 			// NOTE: See FIXME. Because right now that's very, very cheap.
-			//       And trusting that the kernel won't barf :D.
+			//       And trusts that the Kernel won't barf. Which seems to hold true on my Touch.
 			if (ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL, &update.update_marker) < 0) {
 				errstr = strerror_r(errno, buf, sizeof(buf));
 				fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL: %s\n", errstr);
