@@ -337,7 +337,13 @@ static int
 		.update_region = region,
 		.waveform_mode =
 		    (is_flashing && waveform_mode == WAVEFORM_MODE_AUTO) ? WAVEFORM_MODE_GC16 : waveform_mode,
+#ifndef FBINK_FOR_KINDLE
+		.flags = (waveform_mode == WAVEFORM_MODE_REAGLD)
+			     ? EPDC_FLAG_USE_AAD
+			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
+#else
 		.flags = 0U,
+#endif
 #ifdef FBINK_FOR_KINDLE
 		.hist_bw_waveform_mode   = WAVEFORM_MODE_DU,
 		.hist_gray_waveform_mode = WAVEFORM_MODE_GC16_FAST,
@@ -388,7 +394,7 @@ static int
 #else
 		if (ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update.update_marker) < 0) {
 			{
-				char  buf[256];
+				char buf[256];
 				char* errstr = strerror_r(errno, buf, sizeof(buf));
 				fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s\n", errstr);
 				return EXIT_FAILURE;
