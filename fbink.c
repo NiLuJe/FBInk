@@ -164,7 +164,7 @@ static char*
 	} else if (ascii >= 0x2580 && ascii <= 0x259F) {
 		return font8x8_block[ascii - 0x2580];
 	} else {
-		fprintf(stderr, "ASCII %d is OOR!\n", ascii);
+		fprintf(stderr, "[FBInk] ASCII code %d is OOR!\n", ascii);
 		return font8x8_basic[0];
 	}
 }
@@ -324,7 +324,7 @@ static int
 		// NOTE: perror() is not thread-safe...
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
-		fprintf(stderr, "MXCFB_SEND_UPDATE: %s\n", errstr);
+		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE: %s\n", errstr);
 		return EXIT_FAILURE;
 	}
 
@@ -334,7 +334,7 @@ static int
 			{
 				char  buf[256];
 				char* errstr = strerror_r(errno, buf, sizeof(buf));
-				fprintf(stderr, "MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s\n", errstr);
+				fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s\n", errstr);
 				return EXIT_FAILURE;
 			}
 		}
@@ -352,7 +352,7 @@ int
 	// Open the framebuffer file for reading and writing
 	fbfd = open("/dev/fb0", O_RDWR);
 	if (!fbfd) {
-		fprintf(stderr, "Error: cannot open framebuffer device.\n");
+		fprintf(stderr, "[FBInk] Error: cannot open framebuffer device.\n");
 		return EXIT_FAILURE;
 	}
 
@@ -369,14 +369,14 @@ int
 		// If we're opening a fd now, don't keep it around.
 		keep_fd = false;
 		if (-1 == (fbfd = fbink_open())) {
-			fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
+			fprintf(stderr, "[FBInk] Failed to open the framebuffer, aborting . . .\n");
 			return EXIT_FAILURE;
 		}
 	}
 
 	// Get variable screen information
 	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo)) {
-		fprintf(stderr, "Error reading variable information.\n");
+		fprintf(stderr, "[FBInk] Error reading variable information.\n");
 		return EXIT_FAILURE;
 	}
 	printf("Variable info: %dx%d, %dbpp\n", vinfo.xres, vinfo.yres, vinfo.bits_per_pixel);
@@ -403,7 +403,7 @@ int
 
 	// Get fixed screen information
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo)) {
-		fprintf(stderr, "Error reading fixed information.\n");
+		fprintf(stderr, "[FBInk] Error reading fixed information.\n");
 	}
 	printf("Fixed info: smem_len %d, line_length %d\n", finfo.smem_len, finfo.line_length);
 
@@ -429,7 +429,7 @@ int
 		// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
 		keep_fd = false;
 		if (-1 == (fbfd = fbink_open())) {
-			fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
+			fprintf(stderr, "[FBInk] Failed to open the framebuffer, aborting . . .\n");
 			return EXIT_FAILURE;
 		}
 	}
@@ -444,7 +444,7 @@ int
 		if (fbp == MAP_FAILED) {
 			char  buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
-			fprintf(stderr, "mmap: %s\n", errstr);
+			fprintf(stderr, "[FBInk] mmap: %s\n", errstr);
 			return EXIT_FAILURE;
 		} else {
 			fb_is_mapped = true;
@@ -642,7 +642,7 @@ int
 
 	// Refresh screen
 	if (refresh(fbfd, region, fbink_config->is_flashing) < 0) {
-		fprintf(stderr, "Failed to refresh the screen!\n");
+		fprintf(stderr, "[FBInk] Failed to refresh the screen!\n");
 	}
 
 	// cleanup
