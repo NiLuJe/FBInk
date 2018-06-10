@@ -1,6 +1,7 @@
 # Ignore build output directories
 Release/
 Debug/
+Kobo/
 # KDevelop
 FBInk.kdev4
 .kdev4/

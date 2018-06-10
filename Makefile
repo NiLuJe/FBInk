@@ -80,6 +80,10 @@ ifeq "$(SHARED)" "true"
 else
 	LIBS:=-l:libfbink.a
 endif
+# And with our own rpath for standalone distribution
+ifeq "$(STANDALONE)" "true"
+	EXTRA_LDFLAGS+=-Wl,-rpath=/usr/local/fbink/lib
+endif
 
 ##
 # Now that we're done fiddling with flags, let's build stuff!
@@ -127,7 +131,7 @@ fbink: $(CMD_OBJS) sharedlib staticlib
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/$@$(BINEXT) $(CMD_OBJS) $(LIBS)
 
 strip: all
-	$(STRIP) --strip-unneeded $(OUT_DIR)/$(FBINK_SHARED_NAME) $(OUT_DIR)/fbink
+	$(STRIP) --strip-unneeded $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/fbink
 
 debug:
 	$(MAKE) all DEBUG=true
@@ -135,10 +139,32 @@ debug:
 shared:
 	$(MAKE) all SHARED=true
 
+release:
+	$(MAKE) strip SHARED=true STANDALONE=true
+
 kindle:
 	$(MAKE) strip KINDLE=true
 
+kobo: release
+	mkdir -p Kobo/usr/local/fbink/bin Kobo/usr/local/fbink/lib
+	cp -av $(CURDIR)/Release/fbink Kobo/usr/local/fbink/bin
+	cp -av $(CURDIR)/Release/$(FBINK_SHARED_NAME_FILE) Kobo/usr/local/fbink/lib
+	ln -sf $(FBINK_SHARED_NAME_FILE) Kobo/usr/local/fbink/lib/$(FBINK_SHARED_NAME)
+	ln -sf $(FBINK_SHARED_NAME_FILE) Kobo/usr/local/fbink/lib/$(FBINK_SHARED_NAME_VER)
+	cp -av $(CURDIR)/README.md Kobo/usr/local/fbink/README.md
+	cp -av $(CURDIR)/LICENSE Kobo/usr/local/fbink/LICENSE
+	cp -av $(CURDIR)/CREDITS Kobo/usr/local/fbink/CREDITS
+	tar --exclude="./mnt" --exclude="FBInk-*.zip" --owner=root --group=root -cvzf Release/KoboRoot.tgz -C Kobo .
+	rm -rf Kobo/usr
+	mv -v Release/KoboRoot.tgz Kobo/KoboRoot.tgz
+	cp -av $(CURDIR)/README.md Kobo/README.md
+	cp -av $(CURDIR)/LICENSE Kobo/LICENSE
+	cp -av $(CURDIR)/CREDITS Kobo/CREDITS
+	pushd Kobo && zip -r ../Release/FBInk-$(FBINK_VERSION).zip . && popd
+	mv -v Release/FBInk-$(FBINK_VERSION).zip Kobo/
+
 clean:
+	rm -rf Kobo/
 	rm -rf Release/*.a
 	rm -rf Release/*.so*
 	rm -rf Release/shared/*.o
@@ -152,4 +178,4 @@ clean:
 	rm -rf Debug/*.o
 	rm -rf Debug/fbink
 
-.PHONY: default outdir all staticlib sharedlib fbink strip debug shared kindle clean
+.PHONY: default outdir all staticlib sharedlib fbink strip debug shared release kindle kobo clean
