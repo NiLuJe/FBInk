@@ -250,7 +250,7 @@ static struct mxcfb_rect
 			  bgC);
 		// Update region to the full width, no matter the circumstances
 		region.width += (vinfo.xres - (len * FONTW));
-		printf("Upated region.width to %u\n", region.width);
+		printf("Updated region.width to %u\n", region.width);
 	}
 
 	// Fill our bounding box with our background color, so that we'll be visible no matter what's already on screen.
