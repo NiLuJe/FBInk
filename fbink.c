@@ -565,10 +565,6 @@ int
 		// Compute the amount of characters we can actually print on *one* line given the column we start on...
 		// NOTE: When centered, we enforce one padding character on the left,
 		//       as well as one padding character on the right when we have a perfect fit.
-		// NOTE: It's also worth noting that, since col will fluctuate,
-		//       we'll often end-up with a smaller amount of lines than originally calculated.
-		//       Doing the computation with the initial col value ensures we'll have MORE lines than necessary,
-		//       though, which is mostly harmless, since we'll skip trailing blank lines in this case :).
 		unsigned short int available_cols = MAXCOLS;
 		if (fbink_config->is_centered) {
 			available_cols -= 1U; // Left padding
@@ -636,11 +632,6 @@ int
 						col = 1;
 					}
 					printf("Adjusted column to %hd for centering\n", col);
-					// Don't print trailing blank lines...
-					if (multiline_offset > 0 && line_len == 0) {
-						printf("Skipping trailing blank line @ offset %hu\n", multiline_offset);
-						continue;
-					}
 				}
 			}
 			// Just fudge the (formatted) line length for free padding :).
@@ -657,31 +648,18 @@ int
 				// We always want full padding
 				col = 0;
 
-				// Compute a balanced padding length, and then split it in two,
-				// because we want to enforce different constraints on the left than on the right.
-				size_t pad_len = (MAXCOLS - line_len) / 2U;
-				size_t left_pad = pad_len;
-				size_t right_pad = pad_len;
+				// Compute our padding length
+				size_t left_pad = (MAXCOLS - line_len) / 2U;
 				// We want to enforce at least a single character of padding on the left.
 				if (left_pad < 1) {
 					left_pad = 1;
 				}
-				// When we have a perfect fit,
-				// we add one character of padding on the right to avoid the final column...
-				if (is_perfect_fit) {
-					right_pad++;
-				}
-				// If we're not at the edge of the screen because of rounding errors,
-				// add extra padding on the right.
-				// It'll get cropped out by snprintf if it turns out to be extraneous.
-				size_t extra_pad = MIN(0, MAXCOLS - right_pad - len - left_pad);
 
-				printf("Total size: %zu + %zu + %zu + %zu = %zu\n",
+				printf("Total size: %zu + %zu + %zu = %zu\n",
 				       left_pad,
 				       line_len,
-				       right_pad,
-				       extra_pad,
-				       left_pad + line_len + right_pad + extra_pad);
+				       MAXCOLS - line_len - left_pad,
+				       left_pad + line_len + (MAXCOLS - line_len - left_pad));
 				snprintf(line,
 					 MAXCOLS + 1U,
 					 "%*s%.*s%-*s",
@@ -689,7 +667,7 @@ int
 					 "",
 					 (int) line_len,
 					 string + (len - left),
-					 (int) (right_pad + extra_pad),
+					 (int) (MAXCOLS),
 					 "");
 			} else {
 				snprintf(line, line_len + 1U, "%*s", (int) line_len, string + (len - left));
