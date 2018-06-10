@@ -129,6 +129,6 @@ static void  font8x8_render(int, char*);
 
 static struct mxcfb_rect draw(const char*, unsigned short int, unsigned short int, bool, bool, unsigned short int);
 
-static int refresh(int, struct mxcfb_rect, bool);
+static int refresh(int, struct mxcfb_rect, uint32_t, bool);
 
 #endif

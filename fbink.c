@@ -322,7 +322,7 @@ static struct mxcfb_rect
 
 // Handle eInk updates
 static int
-    refresh(int fbfd, struct mxcfb_rect region, bool is_flashing)
+    refresh(int fbfd, struct mxcfb_rect region, uint32_t waveform_mode, bool is_flashing)
 {
 	// NOTE: While we'd be perfect candidates for using A2 waveform mode, it's all kinds of fucked up on Kobos,
 	//       and may lead to disappearing text or weird blending depending on the surrounding fb content...
@@ -335,7 +335,7 @@ static int
 		.update_marker = (uint32_t) getpid(),
 		.update_mode   = is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL,
 		.update_region = region,
-		.waveform_mode = is_flashing ? WAVEFORM_MODE_GC16 : WAVEFORM_MODE_AUTO,
+		.waveform_mode = is_flashing ? WAVEFORM_MODE_GC16 : waveform_mode,
 		.flags         = 0U,
 #ifdef FBINK_FOR_KINDLE
 		.hist_bw_waveform_mode   = WAVEFORM_MODE_DU,
@@ -715,7 +715,7 @@ int
 	}
 
 	// Refresh screen
-	if (refresh(fbfd, region, fbink_config->is_flashing) != EXIT_SUCCESS) {
+	if (refresh(fbfd, region, WAVEFORM_MODE_AUTO, fbink_config->is_flashing) != EXIT_SUCCESS) {
 		fprintf(stderr, "[FBInk] Failed to refresh the screen!\n");
 	}
 
@@ -818,7 +818,7 @@ int
 	};
 
 	int ret;
-	if (EXIT_SUCCESS != (ret = refresh(fbfd, region, is_flashing))) {
+	if (EXIT_SUCCESS != (ret = refresh(fbfd, region, region_wfm, is_flashing))) {
 		fprintf(stderr, "[FBInk] Failed to refresh the screen!\n");
 	}
 
