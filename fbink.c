@@ -718,5 +718,4 @@ int
  * TODO: ioctl only (i.e., refresh current fb data, don't paint)
  *       -s w=758,h=1024 -f
  *       NOTE: Don't bother w/ getsubopt() and always make it full-screen?
- * TODO: Kindle ifdeffery and testing.
  */
