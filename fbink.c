@@ -658,22 +658,22 @@ int
 				if (left_pad < 1) {
 					left_pad = 1;
 				}
+				// As for the right padding, we basically just have to print 'til the edge of the screen
+				size_t right_pad = MAXCOLS - line_len - left_pad;
 
 				// Compute the effective right padding value for science!
 				printf("Total size: %zu + %zu + %zu = %zu\n",
 				       left_pad,
 				       line_len,
-				       MAXCOLS - line_len - left_pad,
-				       left_pad + line_len + (MAXCOLS - line_len - left_pad));
+				       right_pad,
+				       left_pad + line_len + right_pad);
 				// NOTE: To recap:
 				//       Print at least MAXCOLS + 1 (to ensure it's NULL-terminated)
 				//       Left-pad a blank with spaces for left_pad characters
 				//       Print line_len characters of our string at the correct position for this line
-				//       Right pad a blank with spaces for MAXCOLS characters
-				//           see the printf above for the real value, but this works just as well,
-				//           because it'll hit the MAXCOLS + 1U limit ;).
-				//           Also, given that we split this in three section,
-				//           left-padding would have a similar effect.
+				//       Right pad a blank with spaces for right_pad characters
+				//           Given that we split this in three section,
+				//           left-padding would have had a similar effect.
 				snprintf(line,
 					 MAXCOLS + 1U,
 					 "%*s%.*s%-*s",
@@ -681,7 +681,7 @@ int
 					 "",
 					 (int) line_len,
 					 string + (len - left),
-					 (int) (MAXCOLS),
+					 (int) right_pad,
 					 "");
 			} else {
 				// NOTE: We use a field width and not a precision flag to get free padding when asked.
