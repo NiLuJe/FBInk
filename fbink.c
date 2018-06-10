@@ -317,6 +317,10 @@ static int
 		.update_region = region,
 		.waveform_mode = is_flashing ? WAVEFORM_MODE_GC16 : WAVEFORM_MODE_AUTO,
 		.flags         = 0U,
+#ifdef FBINK_FOR_KINDLE
+		.hist_bw_waveform_mode   = WAVEFORM_MODE_DU,
+		.hist_gray_waveform_mode = WAVEFORM_MODE_GC16_FAST,
+#endif
 	};
 
 	// NOTE: Make sure update_marker is valid, an invalid marker *may* hang the kernel instead of failing gracefully,
@@ -426,6 +430,9 @@ int
 	if (vinfo.xres > vinfo.yres) {
 		// NOTE: vinfo.rotate == 2 (vs. 3 in Portrait mode) on my PW2
 		//       My Touch, which doesn't propose Landscape mode, defaults to vinfo.rotate == 1
+		//       My K4, which supports the four possible rotations,
+		//          is always using vinfo.rotate == 0 (but xres & yres do switch).
+		//          It's also using the old eink_fb driver, which we do not support anyway :D.
 		screen_height = vinfo.xres;
 	}
 	if (screen_height <= 600U) {
