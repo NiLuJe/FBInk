@@ -109,6 +109,7 @@ static void
 		// NOTE: Grayscale palette, we could have used def_r or def_g ;).
 		put_pixel_Gray8(x, y, def_b[c]);
 	} else if (vinfo.bits_per_pixel == 16) {
+		// FIXME: Colors *may* actually be inverted on 16bpp Kobos...
 		put_pixel_RGB565(x, y, def_r[c], def_g[c], def_b[c]);
 	} else if (vinfo.bits_per_pixel == 24) {
 		put_pixel_RGB24(x, y, def_r[c], def_g[c], def_b[c]);
