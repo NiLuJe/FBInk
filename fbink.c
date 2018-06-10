@@ -383,7 +383,7 @@ int
 
 	// NOTE: Reset original font resolution, in case we're re-init'ing,
 	//       since we're relying on the default value to calculate the scaled value,
-	//       and we're using this value set MAXCOLS & MAXROWS...
+	//       and we're using this value to set MAXCOLS & MAXROWS, which we *need* to be sane.
 	FONTW = 8;
 	FONTH = 8;
 
