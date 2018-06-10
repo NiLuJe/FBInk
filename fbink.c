@@ -282,8 +282,8 @@ static struct mxcfb_rect
 	// Alloc our pixmap on the heap, and re-use it.
 	// NOTE: We tried using automatic VLAs, but that... didn't go well.
 	//       (as in, subtle (or not so) memory and/or stack corruption).
-	char* pixmap;
-	pixmap = malloc(sizeof(*pixmap) * (size_t)(FONTW * FONTH));
+	char* pixmap = NULL;
+	pixmap       = malloc(sizeof(*pixmap) * (size_t)(FONTW * FONTH));
 
 	// Loop through all characters in the text string
 	for (i = 0U; i < len; i++) {
@@ -607,8 +607,8 @@ int
 
 		// We'll copy our text in chunks of formatted line...
 		// NOTE: Store that on the heap, we've had some wacky adventures with automatic VLAs...
-		char* line;
-		line = malloc(sizeof(*line) * (MAXCOLS + 1U));
+		char* line = NULL;
+		line       = malloc(sizeof(*line) * (MAXCOLS + 1U));
 
 		printf(
 		    "Need %hu lines to print %zu characters over %hu available columns\n", lines, len, available_cols);
@@ -737,8 +737,8 @@ int
 {
 	// We'll need to store our formatted string somewhere...
 	// NOTE: Fit a single page's worth of characters in it, as that's the best we can do anyway.
-	char*  buffer;
-	size_t pagelen = sizeof(*buffer) * (size_t)(MAXCOLS * MAXROWS);
+	char*  buffer  = NULL;
+	size_t pagelen = sizeof(*buffer) * ((size_t)(MAXCOLS * MAXROWS) + 1U);
 	buffer         = malloc(pagelen);
 
 	va_list args;
