@@ -421,12 +421,17 @@ int
 	FONTH = 8;
 
 	// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
+	// We still want to compare against the screen's "height", even in landscape mode...
+	uint32_t screen_height = vinfo.yres;
+	if (vinfo.rotate == 2) {
+		screen_height = vinfo.xres;
+	}
 	// FIXME: Even on 600x800 screens, 8x8 might be too small...
-	if (vinfo.yres <= 800U) {
+	if (screen_height <= 800U) {
 		FONTSIZE_MULT = 1U;    // 8x8
-	} else if (vinfo.yres <= 1024) {
+	} else if (screen_height <= 1024) {
 		FONTSIZE_MULT = 2U;    // 16x16
-	} else if (vinfo.yres <= 1440) {
+	} else if (screen_height <= 1440) {
 		FONTSIZE_MULT = 3U;    // 24x24
 	} else {
 		FONTSIZE_MULT = 4U;    // 32x32
