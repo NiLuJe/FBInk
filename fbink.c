@@ -415,8 +415,12 @@ int
 		fprintf(stderr, "[FBInk] Error reading variable information.\n");
 		return EXIT_FAILURE;
 	}
-	printf(
-	    "Variable info: %ux%u, %ubpp @ rotation: %u\n", vinfo.xres, vinfo.yres, vinfo.bits_per_pixel, vinfo.rotate);
+	fprintf(stderr,
+		"[FBInk] Variable fb info: %ux%u, %ubpp @ rotation: %u\n",
+		vinfo.xres,
+		vinfo.yres,
+		vinfo.bits_per_pixel,
+		vinfo.rotate);
 
 	// NOTE: Reset original font resolution, in case we're re-init'ing,
 	//       since we're relying on the default value to calculate the scaled value,
@@ -447,18 +451,18 @@ int
 	// Go!
 	FONTW = (unsigned short int) (FONTW * FONTSIZE_MULT);
 	FONTH = (unsigned short int) (FONTH * FONTSIZE_MULT);
-	printf("Fontsize set to %dx%d.\n", FONTW, FONTH);
+	fprintf(stderr, "[FBInk] Fontsize set to %dx%d.\n", FONTW, FONTH);
 
 	// Compute MAX* values now that we know the screen & font resolution
 	MAXCOLS = (unsigned short int) (vinfo.xres / FONTW);
 	MAXROWS = (unsigned short int) (vinfo.yres / FONTH);
-	printf("Line length: %hu cols, Page size: %hu rows.\n", MAXCOLS, MAXROWS);
+	fprintf(stderr, "[FBInk] Line length: %hu cols, Page size: %hu rows.\n", MAXCOLS, MAXROWS);
 
 	// Get fixed screen information
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo)) {
 		fprintf(stderr, "[FBInk] Error reading fixed information.\n");
 	}
-	printf("Fixed info: smem_len %d, line_length %d\n", finfo.smem_len, finfo.line_length);
+	fprintf(stderr, "[FBInk] Fixed fb info: smem_len %d, line_length %d\n", finfo.smem_len, finfo.line_length);
 
 	// NOTE: Do we want to keep the fb0 fd open and pass it to our caller, or simply close it for now?
 	//       Useful because we probably want to close it to keep open fds to a minimum when used as a library,
