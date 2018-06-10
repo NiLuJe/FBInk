@@ -421,7 +421,7 @@ int
 	FONTH = 8;
 
 	// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
-	// We still want to compare against the screen's "height", even in landscape mode...
+	// NOTE: We still want to compare against the screen's "height", even in a Kindle's landscape mode...
 	uint32_t screen_height = vinfo.yres;
 	if (vinfo.rotate == 2) {
 		screen_height = vinfo.xres;
