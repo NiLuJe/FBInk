@@ -40,7 +40,11 @@
 #include <sys/param.h>
 #include <unistd.h>
 
+#ifdef FBINK_FOR_KINDLE
+#include "eink/mxcfb-kindle.h"
+#else
 #include "eink/mxcfb-kobo.h"
+#endif
 #include "font8x8/font8x8_block.h"
 #include "font8x8/font8x8_box.h"
 #include "font8x8/font8x8_greek.h"

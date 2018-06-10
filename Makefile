@@ -53,6 +53,11 @@ SHARED_CFLAGS+=-DFBINK_SHAREDLIB
 # Assume we'll be safe to use by threaded applications...
 EXTRA_CPPFLAGS+=-D_REENTRANT=1
 
+# Toggle Kindle support
+ifeq "$(KINDLE)" "true"
+	EXTRA_CPPFLAGS+=-DFBINK_FOR_KINDLE
+endif
+
 # A version tag...
 FBINK_VERSION=$(shell git describe)
 LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION)"'
@@ -126,6 +131,9 @@ debug:
 shared:
 	$(MAKE) all SHARED=true
 
+kindle:
+	$(MAKE) strip KINDLE=true
+
 clean:
 	rm -rf Release/*.a
 	rm -rf Release/*.so*
@@ -140,4 +148,4 @@ clean:
 	rm -rf Debug/*.o
 	rm -rf Debug/fbink
 
-.PHONY: default outdir all staticlib sharedlib fbink strip debug shared clean
+.PHONY: default outdir all staticlib sharedlib fbink strip debug shared kindle clean

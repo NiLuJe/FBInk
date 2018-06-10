@@ -334,7 +334,19 @@ static int
 
 	// NOTE: Let's be extremely thorough, and wait for completion on flashing updates ;)
 	if (is_flashing) {
+#ifdef FBINK_FOR_KINDLE
+		// FIXME: Handle the Carta/Pearl switch...
+		struct mxcfb_update_marker_data update_marker = {
+			.update_marker = update.update_marker,
+			.collision_test = 0,
+		};
+		if (ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_marker) < 0) {
+			// NOTE: See FIXME. Because right now that's very, very cheap.
+			//       And trusting that the kernel won't barf :D.
+			if (ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL, &update.update_marker) < 0) {
+#else
 		if (ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update.update_marker) < 0) {
+#endif
 			{
 				char  buf[256];
 				char* errstr = strerror_r(errno, buf, sizeof(buf));
