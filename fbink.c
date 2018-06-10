@@ -715,7 +715,7 @@ int
 	}
 
 	// Refresh screen
-	if (refresh(fbfd, region, fbink_config->is_flashing) < 0) {
+	if (refresh(fbfd, region, fbink_config->is_flashing) != EXIT_SUCCESS) {
 		fprintf(stderr, "[FBInk] Failed to refresh the screen!\n");
 	}
 
@@ -757,9 +757,74 @@ int
 	return rc;
 }
 
-/*
- * TODO: waveform mode user-selection? -w
- * TODO: ioctl only (i.e., refresh current fb data, don't paint)
- *       -s w=758,h=1024 -f
- *       NOTE: Don't bother w/ getsubopt() and always make it full-screen?
- */
+// Small public wrapper around refresh(), without the caller having to depend on mxcfb headers
+int
+    fbink_refresh(int         fbfd,
+		  uint32_t    region_top,
+		  uint32_t    region_left,
+		  uint32_t    region_width,
+		  uint32_t    region_height,
+		  const char* waveform_mode,
+		  bool        is_flashing)
+{
+	// Open the framebuffer if need be...
+	bool keep_fd = true;
+	if (fbfd == -1) {
+		// If we open a fd now, we'll only keep it open for this single print call!
+		keep_fd = false;
+		if (-1 == (fbfd = fbink_open())) {
+			fprintf(stderr, "[FBInk] Failed to open the framebuffer, aborting . . .\n");
+			return EXIT_FAILURE;
+		}
+	}
+
+	uint32_t region_wfm = WAVEFORM_MODE_AUTO;
+	// Parse waveform mode...
+	if (strcasecmp("DU", waveform_mode) == 0) {
+		region_wfm = WAVEFORM_MODE_DU;
+	} else if (strcasecmp("GC16", waveform_mode) == 0) {
+		region_wfm = WAVEFORM_MODE_GC16;
+	} else if (strcasecmp("GC4", waveform_mode) == 0) {
+		region_wfm = WAVEFORM_MODE_GC4;
+	} else if (strcasecmp("A2", waveform_mode) == 0) {
+		region_wfm = WAVEFORM_MODE_A2;
+	} else if (strcasecmp("GL16", waveform_mode) == 0) {
+		region_wfm = WAVEFORM_MODE_GL16;
+	} else if (strcasecmp("REAGL", waveform_mode) == 0) {
+		region_wfm = WAVEFORM_MODE_REAGL;
+	} else if (strcasecmp("REAGLD", waveform_mode) == 0) {
+		region_wfm = WAVEFORM_MODE_REAGLD;
+#ifdef FBINK_FOR_KINDLE
+	} else if (strcasecmp("GC16_FAST", waveform_mode) == 0) {
+		region_wfm = WAVEFORM_MODE_GC16_FAST;
+	} else if (strcasecmp("GL16_FAST", waveform_mode) == 0) {
+		region_wfm = WAVEFORM_MODE_GL16_FAST;
+	} else if (strcasecmp("DU4", waveform_mode) == 0) {
+		region_wfm = WAVEFORM_MODE_DU4;
+	} else if (strcasecmp("GL4", waveform_mode) == 0) {
+		region_wfm = WAVEFORM_MODE_GL4;
+	} else if (strcasecmp("GL16_INV", waveform_mode) == 0) {
+		region_wfm = WAVEFORM_MODE_GL16_INV;
+#endif
+	} else if (strcasecmp("AUTO", waveform_mode) == 0) {
+		region_wfm = WAVEFORM_MODE_AUTO;
+	}
+
+	struct mxcfb_rect region = {
+		.top    = region_top,
+		.left   = region_left,
+		.width  = region_width,
+		.height = region_height,
+	};
+
+	int ret;
+	if (EXIT_SUCCESS != (ret = refresh(fbfd, region, is_flashing))) {
+		fprintf(stderr, "[FBInk] Failed to refresh the screen!\n");
+	}
+
+	if (!keep_fd) {
+		close(fbfd);
+	}
+
+	return ret;
+}

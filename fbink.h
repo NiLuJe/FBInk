@@ -35,6 +35,7 @@
 
 #include <stdarg.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 
 // Symbol visibility shenanigans...
@@ -91,6 +92,9 @@ FBINK_API int fbink_print(int, const char*, FBInkConfig*);
 
 // Like fbink_print, but with printf formatting ;).
 FBINK_API int fbink_printf(int, FBInkConfig*, const char*, ...) __attribute__((format(printf, 3, 4)));
+
+// And a simple wrapper around the internal refresh, without having to include mxcfb headers
+FBINK_API int fbink_refresh(int, uint32_t, uint32_t, uint32_t, uint32_t, const char*, bool);
 
 // When you intend to keep fd open for the lifecycle of your program:
 // fd = open() -> init(fd) -> print(fd, ...)

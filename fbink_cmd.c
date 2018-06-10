@@ -62,6 +62,10 @@ static void
 	    "\t\tAlthough it's worth mentioning that this will lead to undesirable results with multi-line STRINGs,\n"
 	    "\t\tas well as in combination with --clear, because the screen is cleared before each STRING, meaning you'll only get to see the final one.\n"
 	    "\tIf you want to properly print a long string, better do it in a single argument, fbink will do its best to spread it over multiple lines sanely.\n"
+	    "\n"
+	    "You can also eschew printing a STRING, and simply refresh the screen as per your specification:\n"
+	    "\t-s, --refresh top=NUM,left=NUM,width=NUM,height=NUM,wfm=NAME\n"
+	    "\t\tThis will also honor --flash\n"
 	    "\n",
 	    fbink_version());
 
@@ -74,16 +78,39 @@ int
 {
 	int                        opt;
 	int                        opt_index;
-	static const struct option opts[] = {
-		{ "row", required_argument, NULL, 'y' }, { "col", required_argument, NULL, 'x' },
-		{ "invert", no_argument, NULL, 'h' },    { "flash", no_argument, NULL, 'f' },
-		{ "clear", no_argument, NULL, 'c' },     { "centered", no_argument, NULL, 'm' },
-		{ "padded", no_argument, NULL, 'p' },    { NULL, 0, NULL, 0 }
-	};
+	static const struct option opts[] = { { "row", required_argument, NULL, 'y' },
+					      { "col", required_argument, NULL, 'x' },
+					      { "invert", no_argument, NULL, 'h' },
+					      { "flash", no_argument, NULL, 'f' },
+					      { "clear", no_argument, NULL, 'c' },
+					      { "centered", no_argument, NULL, 'm' },
+					      { "padded", no_argument, NULL, 'p' },
+					      { "refresh", required_argument, NULL, 's' },
+					      { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_config = { 0 };
 
-	while ((opt = getopt_long(argc, argv, "y:x:hfcmp", opts, &opt_index)) != -1) {
+	enum
+	{
+		TOP_OPT = 0,
+		LEFT_OPT,
+		WIDTH_OPT,
+		HEIGHT_OPT,
+		WFM_OPT,
+	};
+	char* const token[] = { [TOP_OPT] = "top",       [LEFT_OPT] = "left", [WIDTH_OPT] = "width",
+				[HEIGHT_OPT] = "height", [WFM_OPT] = "wfm",   NULL };
+	char*       subopts;
+	char*       value;
+	uint32_t    region_top      = 0;
+	uint32_t    region_left     = 0;
+	uint32_t    region_width    = 0;
+	uint32_t    region_height   = 0;
+	char*       region_wfm      = NULL;
+	bool        is_refresh_only = false;
+	int         errfnd          = 0;
+
+	while ((opt = getopt_long(argc, argv, "y:x:hfcmps:", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				fbink_config.row = (short int) atoi(optarg);
@@ -105,6 +132,50 @@ int
 				break;
 			case 'p':
 				fbink_config.is_padded = true;
+				break;
+			case 's':
+				subopts = optarg;
+				while (*subopts != '\0' && !errfnd) {
+					switch (getsubopt(&subopts, token, &value)) {
+						case TOP_OPT:
+							region_top = (uint32_t) strtoul(value, NULL, 10);
+							break;
+						case LEFT_OPT:
+							region_left = (uint32_t) strtoul(value, NULL, 10);
+							break;
+						case WIDTH_OPT:
+							region_width = (uint32_t) strtoul(value, NULL, 10);
+							break;
+						case HEIGHT_OPT:
+							region_height = (uint32_t) strtoul(value, NULL, 10);
+							break;
+						case WFM_OPT:
+							if (value == NULL) {
+								fprintf(stderr,
+									"Missing value for suboption '%s'\n",
+									token[WFM_OPT]);
+								errfnd = 1;
+								continue;
+							}
+
+							region_wfm = value;
+							break;
+						default:
+							fprintf(stderr, "No match found for token: /%s/\n", value);
+							errfnd = 1;
+							break;
+					}
+				}
+				if (region_height == 0 && region_width == 0 && region_wfm == NULL) {
+					fprintf(stderr,
+						"Must specify at least '%s', '%s' and '%s'\n",
+						token[HEIGHT_OPT],
+						token[WIDTH_OPT],
+						token[WFM_OPT]);
+					errfnd = 1;
+				} else {
+					is_refresh_only = true;
+				}
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", opt);
@@ -138,7 +209,7 @@ int
 			    fbink_config.is_centered ? "true" : "false",
 			    fbink_config.is_padded ? "true" : "false",
 			    fbink_config.is_cleared ? "true" : "false");
-			if (fbink_print(fbfd, string, &fbink_config) < 0) {
+			if (fbink_print(fbfd, string, &fbink_config) != EXIT_SUCCESS) {
 				fprintf(stderr, "Failed to print that string!\n");
 			}
 			// NOTE: Don't clobber previous entries if multiple strings were passed...
@@ -146,7 +217,27 @@ int
 			// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
 		}
 	} else {
-		show_helpmsg();
+		if (is_refresh_only) {
+			printf(
+			    "Refreshing the screen from top=%u, left=%u for width=%u, height=%u with %swaveform mode %s\n",
+			    region_top,
+			    region_left,
+			    region_width,
+			    region_height,
+			    fbink_config.is_flashing ? "a flashing " : "",
+			    region_wfm);
+			if (fbink_refresh(fbfd,
+					  region_top,
+					  region_left,
+					  region_width,
+					  region_height,
+					  region_wfm,
+					  fbink_config.is_flashing) != EXIT_SUCCESS) {
+				fprintf(stderr, "Failed to refresh the screen as per your specification!\n");
+			}
+		} else {
+			show_helpmsg();
+		}
 	}
 
 	// Cleanup
