@@ -717,6 +717,25 @@ int
 	return EXIT_SUCCESS;
 }
 
+// printf-like wrapper around fbink_print ;).
+int
+    fbink_printf(int fbfd, FBInkConfig* fbink_config, const char *fmt, ...)
+{
+	// We'll need to store our formatted string somewhere... Let's say... the stack!
+	// Clamp it at a somewhat arbitrary 256 characters (that's usually around 5 lines).
+	// NOTE: The only other viable solution is the heap, for a full page: MAXCOLS * MAXROWS
+	char buffer[256];
+
+	va_list args;
+	va_start(args, fmt);
+	// vsnprintf will ensure we'll always be NULL-terminated ;).
+	vsnprintf(buffer, sizeof(buffer), fmt, args);
+	va_end(args);
+
+	int rc = fbink_print(fbfd, buffer, fbink_config);
+	return rc;
+}
+
 /*
  * TODO: waveform mode user-selection? -w
  * TODO: ioctl only (i.e., refresh current fb data, don't paint)

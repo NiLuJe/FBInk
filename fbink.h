@@ -35,6 +35,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdarg.h>
 
 // Symbol visibility shenanigans...
 // c.f., https://gcc.gnu.org/wiki/Visibility
@@ -87,6 +88,9 @@ FBINK_API int fbink_init(int);
 // Print a string on screen.
 // if fd is -1, the fb is opened for the duration of this call
 FBINK_API int fbink_print(int, const char*, FBInkConfig*);
+
+// Like fbink_print, but with printf formatting ;).
+FBINK_API int fbink_printf(int, FBInkConfig*, const char*, ...) __attribute__ ((format (printf, 3, 4)));
 
 // When you intend to keep fd open for the lifecycle of your program:
 // fd = open() -> init(fd) -> print(fd, ...)
