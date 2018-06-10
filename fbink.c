@@ -106,7 +106,8 @@ static void
     put_pixel(unsigned short int x, unsigned short int y, unsigned short int c)
 {
 	if (vinfo.bits_per_pixel == 8) {
-		put_pixel_Gray8(x, y, c);
+		// NOTE: Grayscale palette, we could have used def_r or def_g ;).
+		put_pixel_Gray8(x, y, def_b[c]);
 	} else if (vinfo.bits_per_pixel == 16) {
 		put_pixel_RGB565(x, y, def_r[c], def_g[c], def_b[c]);
 	} else if (vinfo.bits_per_pixel == 24) {
@@ -138,10 +139,10 @@ static void
 static void
     clear_screen(unsigned short int c)
 {
+	// NOTE: Grayscale palette, we could have used def_r or def_g ;).
 	if (vinfo.bits_per_pixel == 8) {
-		memset(fbp, c, finfo.smem_len);
+		memset(fbp, def_b[c], finfo.smem_len);
 	} else {
-		// NOTE: Grayscale palette, we could have used def_r or def_g ;).
 		memset(fbp, def_b[c], finfo.smem_len);
 	}
 }
