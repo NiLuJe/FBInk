@@ -335,8 +335,9 @@ static int
 		.update_marker = (uint32_t) getpid(),
 		.update_mode   = is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL,
 		.update_region = region,
-		.waveform_mode = is_flashing ? WAVEFORM_MODE_GC16 : waveform_mode,
-		.flags         = 0U,
+		.waveform_mode =
+		    (is_flashing && waveform_mode == WAVEFORM_MODE_AUTO) ? WAVEFORM_MODE_GC16 : waveform_mode,
+		.flags = 0U,
 #ifdef FBINK_FOR_KINDLE
 		.hist_bw_waveform_mode   = WAVEFORM_MODE_DU,
 		.hist_gray_waveform_mode = WAVEFORM_MODE_GC16_FAST,
