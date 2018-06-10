@@ -426,12 +426,11 @@ int
 	if (vinfo.rotate == 2) {
 		screen_height = vinfo.xres;
 	}
-	// FIXME: Even on 600x800 screens, 8x8 might be too small...
-	if (screen_height <= 800U) {
+	if (screen_height <= 600U) {
 		FONTSIZE_MULT = 1U;    // 8x8
-	} else if (screen_height <= 1024) {
+	} else if (screen_height <= 1024U) {
 		FONTSIZE_MULT = 2U;    // 16x16
-	} else if (screen_height <= 1440) {
+	} else if (screen_height <= 1440U) {
 		FONTSIZE_MULT = 3U;    // 24x24
 	} else {
 		FONTSIZE_MULT = 4U;    // 32x32
