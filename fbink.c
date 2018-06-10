@@ -234,18 +234,21 @@ static struct mxcfb_rect
 
 	printf("Region: top=%u, left=%u, width=%u, height=%u\n", region.top, region.left, region.width, region.height);
 
-	// NOTE: eInk framebuffers are weird...,
-	//       we should be computing the length of a line (MAXCOLS) based on xres_virtual,
+	// NOTE: eInk framebuffers are weird...
+	//       We should be computing the length of a line (MAXCOLS) based on xres_virtual,
 	//       not xres (because it's guaranteed to be a multiple of 16).
-	//       Unfortunately, that means this last block of the line may be partly offscreen.
-	//       Also, it CANNOT be part of the region passed to the eInk controller for a screen update...
+	//       Unfortunately, that means this last block of the line would then be partly offscreen.
+	//       Also, it CANNOT be part of the region passed to the eInk controller for a screen update,
+	//       since it's expecting the effective screen size...
 	//       So, since this this last block may basically be unusable because partly unreadable,
 	//       and partly unrefreshable, don't count it as "available" (i.e., by including it in MAXCOLS),
 	//       since that would happen to also wreak havoc in a number of our heuristics,
 	//       just fudge printing a blank square 'til the edge of the screen if we're filling a line *completely*.
-	// NOTE: When even with xres instead of xres_virtual, we can perfectly fit our final character on the line,
+	//       TL;DR: We compute stuff with xres and not xres_virtual, unlike eips.
+	// NOTE: Given that, if we can perfectly fit our final character on the line
+	//       (c.f., how is_perfect_fit is computed, basically, when MAXCOLS is not a fraction),
 	//       this effectively works around the issue, in which case, we don't need to do anything :).
-	// NOTE: Use len + col if we want to do that everytime we simply *hit* the edge...
+	// NOTE: Use len + col == MAXCOLS if we want to do that everytime we simply *hit* the edge...
 	if (len == MAXCOLS && !is_perfect_fit) {
 		fill_rect((unsigned short int) (region.left + (len * FONTW)),
 			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
@@ -263,7 +266,7 @@ static struct mxcfb_rect
 
 	// NOTE: In case of a multi-line centered print, we can't really trust the final col,
 	//       it might be significantly different than the others, and as such, we'd be computing a cropped region.
-	//       Make the region cover the full-width of the screen to make sure we won't miss anything.
+	//       Make the region cover the full width of the screen to make sure we won't miss anything.
 	if (multiline_offset > 0 && is_centered) {
 		region.left  = 0;
 		region.width = vinfo.xres;
