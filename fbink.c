@@ -563,17 +563,21 @@ int
 		size_t len = strlen(string);
 
 		// Compute the amount of characters we can actually print on *one* line given the column we start on...
-		// NOTE: When centered & padded, col will effectively be zero, but we still reserve one slot to the left,
-		//       so fudge it here...
-		// NOTE: In the same vein, when only centered, col will fluctuate,
-		//       so we'll often end-up with a smaller amount of lines than originally calculated.
+		// NOTE: When centered, we enforce one padding character on the left,
+		//       as well as one padding character on the right when we have a perfect fit.
+		// NOTE: It's also worth noting that, since col will fluctuate,
+		//       we'll often end-up with a smaller amount of lines than originally calculated.
 		//       Doing the computation with the initial col value ensures we'll have MORE lines than necessary,
 		//       though, which is mostly harmless, since we'll skip trailing blank lines in this case :).
-		unsigned short int available_cols;
-		if (fbink_config->is_centered && fbink_config->is_padded) {
-			available_cols = (unsigned short int) (MAXCOLS - 1U);
+		unsigned short int available_cols = MAXCOLS;
+		if (fbink_config->is_centered) {
+			available_cols -= 1U; // Left padding
+			if (is_perfect_fit) {
+				available_cols -= 1U; // Right padding
+			}
 		} else {
-			available_cols = (unsigned short int) (MAXCOLS - col);
+			// Otherwise, col will be fixed, so, trust it.
+			available_cols -= col;
 		}
 		// Given that, compute how many lines it'll take to print all that in these constraints...
 		unsigned short int lines            = 1U;
@@ -592,7 +596,7 @@ int
 			lines = MAXROWS;
 		}
 
-		// Move our initial row up if we add so much line that some of it goes off-screen...
+		// Move our initial row up if we add so much lines that some of it goes off-screen...
 		if (row + lines > MAXROWS) {
 			row = (short int) MIN(row - ((row + lines) - MAXROWS), MAXROWS);
 		}
@@ -608,33 +612,30 @@ int
 
 		// Do the initial computation outside the loop,
 		// so we'll be able to re-use line_len to accurately compute left when looping.
-		size_t left     = len - (size_t)((multiline_offset) * (MAXCOLS - col));
+		size_t left     = len - ((multiline_offset) * (available_cols));
 		size_t line_len = 0U;
 		// If we have multiple lines to print, draw 'em line per line
 		for (multiline_offset = 0U; multiline_offset < lines; multiline_offset++) {
 			// Compute the amount of characters left to print...
 			left -= line_len;
 			// And use it to compute the amount of characters to print on *this* line
-			line_len = MIN(left, (size_t)(MAXCOLS - col));
+			line_len = MIN(left, available_cols);
 			printf("Size to print: %zu out of %zu (left: %zu)\n",
 			       line_len,
-			       (size_t)(MAXCOLS - col) * sizeof(char),
+			       available_cols * sizeof(char),
 			       left);
 
 			// Just fudge the column for centering...
 			if (fbink_config->is_centered) {
-				// Don't fudge if also padded, we'll need the original value for heuristics,
-				// but we still enforce column 0 later, as we always want full padding.
-				col = fbink_config->is_padded ? col : (short int) ((MAXCOLS / 2U) - (line_len / 2U));
+				col = (short int) ((MAXCOLS / 2U) - (line_len / 2U));
+				// When we're not padding, we have a few more things to take care of...
 				if (!fbink_config->is_padded) {
-					// Much like when both centering & padding, ensure we never write in column 0
+					// We don't do padding via snprintf in this case,
+					// so just fudge col to avoid the first column.
 					if (col == 0) {
 						col = 1;
 					}
 					printf("Adjusted column to %hd for centering\n", col);
-					// Recompute line_len since col has been updated.
-					line_len = MIN(left, (size_t)(MAXCOLS - col));
-					printf("Adjusted line_len to %zu for centering\n", line_len);
 					// Don't print trailing blank lines...
 					if (multiline_offset > 0 && line_len == 0) {
 						printf("Skipping trailing blank line @ offset %hu\n", multiline_offset);
@@ -645,7 +646,7 @@ int
 			// Just fudge the (formatted) line length for free padding :).
 			if (fbink_config->is_padded) {
 				// Don't fudge if also centered, we'll need the original value to split padding in two.
-				line_len = fbink_config->is_centered ? line_len : (size_t)(MAXCOLS - col);
+				line_len = fbink_config->is_centered ? line_len : available_cols;
 				if (!fbink_config->is_centered) {
 					printf("Adjusted line_len to %zu for padding\n", line_len);
 				}
@@ -653,45 +654,42 @@ int
 
 			// When centered & padded, we need to split the padding in two, left & right.
 			if (fbink_config->is_centered && fbink_config->is_padded) {
-				// NOTE: As we enforce a single padding space on the left,
-				// to match the nearly full block that we fudge on the right in draw())
-				// We crop 1 slot off MAXCOLS when doing these calculations,
-				// but only when we'd be printing a full line,
-				// to avoid shifting the centering to the left in other cases...
-				short unsigned int available_maxcols = MAXCOLS;
-				if (line_len + (short unsigned int) col == MAXCOLS) {
-					available_maxcols = (short unsigned int) (MAXCOLS - 1U);
-					printf("Setting available_maxcols to %hu\n", available_maxcols);
-				}
 				// We always want full padding
 				col = 0;
-				// We need to recompute left, because col is now 0.
-				left = len - (size_t)((multiline_offset) * (MAXCOLS) - (multiline_offset));
-				printf("Adjusted left to %zu for padding & centering\n", left);
-				// We need to recompute line_len, because col is now 0.
-				line_len = MIN(left, (size_t) available_maxcols);
-				if (available_maxcols != MAXCOLS) {
-					printf("Adjusted line_len to %zu for padding & centering\n", line_len);
-				}
+
+				// Compute a balanced padding length, and then split it in two,
+				// because we want to enforce different constraints on the left than on the right.
 				size_t pad_len = (MAXCOLS - line_len) / 2U;
+				size_t left_pad = pad_len;
+				size_t right_pad = pad_len;
+				// We want to enforce at least a single character of padding on the left.
+				if (left_pad < 1) {
+					left_pad = 1;
+				}
+				// When we have a perfect fit,
+				// we add one character of padding on the right to avoid the final column...
+				if (is_perfect_fit) {
+					right_pad++;
+				}
 				// If we're not at the edge of the screen because of rounding errors,
 				// add extra padding on the right.
 				// It'll get cropped out by snprintf if it turns out to be extraneous.
-				size_t extra_pad = MAXCOLS - line_len - (pad_len * 2U);
+				size_t extra_pad = MIN(0, MAXCOLS - right_pad - len - left_pad);
+
 				printf("Total size: %zu + %zu + %zu + %zu = %zu\n",
-				       1U + pad_len,
+				       left_pad,
 				       line_len,
-				       pad_len,
+				       right_pad,
 				       extra_pad,
-				       1U + (pad_len * 2U) + line_len + extra_pad);
+				       left_pad + line_len + right_pad + extra_pad);
 				snprintf(line,
 					 MAXCOLS + 1U,
-					 "%*s%*s%*s",
-					 (int) pad_len + 1,
+					 "%*s%.*s%-*s",
+					 (int) left_pad,
 					 "",
 					 (int) line_len,
 					 string + (len - left),
-					 (int) (pad_len + extra_pad),
+					 (int) (right_pad + extra_pad),
 					 "");
 			} else {
 				snprintf(line, line_len + 1U, "%*s", (int) line_len, string + (len - left));
