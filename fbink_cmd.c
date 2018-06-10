@@ -69,6 +69,7 @@ static void
 	    "\t\t\tAvailable waveform modes: DU, GC16, GC4, A2, GL16, REAGL, REAGLD, AUTO\n"
 	    "\t\t\t\tAs well as GC16_FAST, GL16_FAST, DU4, GL4, GL16_INV on Kindles, depending on FW version.\n"
 	    "\t\t\tNote that this will also honor --flash\n"
+	    "\t\t\tSpecifying one or more STRING takes precedence over this mode.\n"
 	    "\n",
 	    fbink_version());
 
