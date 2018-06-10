@@ -60,7 +60,11 @@ endif
 
 # A version tag...
 FBINK_VERSION=$(shell git describe)
-LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION)"'
+ifeq "$(KINDLE)" "true"
+	LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kindle"'
+else
+	LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kobo"'
+endif
 
 # NOTE: Always use as-needed to avoid unecessary DT_NEEDED entries :)
 LDFLAGS?=-Wl,--as-needed
