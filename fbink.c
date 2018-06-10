@@ -648,6 +648,7 @@ int
 	// cleanup
 	if (fb_is_mapped && !keep_fd) {
 		munmap(fbp, screensize);
+		fb_is_mapped = false;
 	}
 	if (!keep_fd) {
 		close(fbfd);
