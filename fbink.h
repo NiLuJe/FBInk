@@ -33,9 +33,9 @@
 #	define _GNU_SOURCE
 #endif
 
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdarg.h>
 
 // Symbol visibility shenanigans...
 // c.f., https://gcc.gnu.org/wiki/Visibility
@@ -90,7 +90,7 @@ FBINK_API int fbink_init(int);
 FBINK_API int fbink_print(int, const char*, FBInkConfig*);
 
 // Like fbink_print, but with printf formatting ;).
-FBINK_API int fbink_printf(int, FBInkConfig*, const char*, ...) __attribute__ ((format (printf, 3, 4)));
+FBINK_API int fbink_printf(int, FBInkConfig*, const char*, ...) __attribute__((format(printf, 3, 4)));
 
 // When you intend to keep fd open for the lifecycle of your program:
 // fd = open() -> init(fd) -> print(fd, ...)

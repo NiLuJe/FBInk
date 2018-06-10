@@ -96,9 +96,9 @@ unsigned short int       FONTW         = 8;
 unsigned short int       FONTH         = 8;
 unsigned short int       FONTSIZE_MULT = 1;
 // Slightly arbitrary-ish fallback values
-unsigned short int MAXROWS = 45;
-unsigned short int MAXCOLS = 32;
-bool        is_perfect_fit = false;
+unsigned short int MAXROWS        = 45;
+unsigned short int MAXCOLS        = 32;
+bool               is_perfect_fit = false;
 
 static void put_pixel_Gray8(unsigned short int, unsigned short int, unsigned short int);
 static void put_pixel_RGB24(unsigned short int,

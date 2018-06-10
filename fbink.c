@@ -267,9 +267,10 @@ static struct mxcfb_rect
 	if (multiline_offset > 0 && is_centered) {
 		region.left  = 0;
 		region.width = vinfo.xres;
-		printf("Updated region.left to %u & region.width to %u because of multi-line centering\n", region.left, region.width);
+		printf("Updated region.left to %u & region.width to %u because of multi-line centering\n",
+		       region.left,
+		       region.width);
 	}
-
 
 	// Fill our bounding box with our background color, so that we'll be visible no matter what's already on screen.
 	// NOTE: Unneeded, we already plot the background when handling font glyphs ;).
@@ -565,15 +566,18 @@ int
 		// Compute the amount of characters we can actually print on *one* line given the column we start on...
 		// NOTE: When centered, we enforce one padding character on the left,
 		//       as well as one padding character on the right when we have a perfect fit.
+		//       This is to avoid potentially printing stuff too close to the bezel and/or behind the bezel.
 		unsigned short int available_cols = MAXCOLS;
 		if (fbink_config->is_centered) {
-			available_cols -= 1U; // Left padding
+			// One for the left padding
+			available_cols = (unsigned short int) (available_cols - 1U);
 			if (is_perfect_fit) {
-				available_cols -= 1U; // Right padding
+				// And one for the right padding
+				available_cols = (unsigned short int) (available_cols - 1U);
 			}
 		} else {
 			// Otherwise, col will be fixed, so, trust it.
-			available_cols -= col;
+			available_cols = (unsigned short int) (available_cols - col);
 		}
 		// Given that, compute how many lines it'll take to print all that in these constraints...
 		unsigned short int lines            = 1U;
@@ -608,7 +612,7 @@ int
 
 		// Do the initial computation outside the loop,
 		// so we'll be able to re-use line_len to accurately compute left when looping.
-		size_t left     = len - ((multiline_offset) * (available_cols));
+		size_t left     = len - (size_t)((multiline_offset) * (available_cols));
 		size_t line_len = 0U;
 		// If we have multiple lines to print, draw 'em line per line
 		for (multiline_offset = 0U; multiline_offset < lines; multiline_offset++) {
@@ -631,8 +635,8 @@ int
 					if (col == 0) {
 						col = 1;
 					}
-					printf("Adjusted column to %hd for centering\n", col);
 				}
+				printf("Adjusted column to %hd for centering\n", col);
 			}
 			// Just fudge the (formatted) line length for free padding :).
 			if (fbink_config->is_padded) {
@@ -655,6 +659,7 @@ int
 					left_pad = 1;
 				}
 
+				// Compute the effective right padding value for science!
 				printf("Total size: %zu + %zu + %zu = %zu\n",
 				       left_pad,
 				       line_len,
@@ -725,13 +730,13 @@ int
 
 // printf-like wrapper around fbink_print ;).
 int
-    fbink_printf(int fbfd, FBInkConfig* fbink_config, const char *fmt, ...)
+    fbink_printf(int fbfd, FBInkConfig* fbink_config, const char* fmt, ...)
 {
 	// We'll need to store our formatted string somewhere...
 	// NOTE: Fit a single page's worth of characters in it, as that's the best we can do anyway.
-	char* buffer;
-	size_t pagelen = sizeof(*buffer) * (size_t) (MAXCOLS * MAXROWS);
-	buffer = malloc(pagelen);
+	char*  buffer;
+	size_t pagelen = sizeof(*buffer) * (size_t)(MAXCOLS * MAXROWS);
+	buffer         = malloc(pagelen);
 
 	va_list args;
 	va_start(args, fmt);
