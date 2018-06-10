@@ -110,6 +110,8 @@ static void
 		put_pixel_Gray8(x, y, def_b[c]);
 	} else if (vinfo.bits_per_pixel == 16) {
 		// FIXME: Colors *may* actually be inverted on 16bpp Kobos...
+		//        This should fix it:
+		//c = c ^ WHITE;
 		put_pixel_RGB565(x, y, def_r[c], def_g[c], def_b[c]);
 	} else if (vinfo.bits_per_pixel == 24) {
 		put_pixel_RGB24(x, y, def_r[c], def_g[c], def_b[c]);
