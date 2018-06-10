@@ -63,9 +63,12 @@ static void
 	    "\t\tas well as in combination with --clear, because the screen is cleared before each STRING, meaning you'll only get to see the final one.\n"
 	    "\tIf you want to properly print a long string, better do it in a single argument, fbink will do its best to spread it over multiple lines sanely.\n"
 	    "\n"
-	    "You can also eschew printing a STRING, and simply refresh the screen as per your specification:\n"
+	    "You can also eschew printing a STRING, and simply refresh the screen as per your specification, without touching the framebuffer:\n"
 	    "\t-s, --refresh top=NUM,left=NUM,width=NUM,height=NUM,wfm=NAME\n"
-	    "\t\tThis will also honor --flash\n"
+	    "\t\t\tThe specified rectangle *must* completely fit on screen, or the ioctl will fail.\n"
+	    "\t\t\tAvailable waveform modes: DU, GC16, GC4, A2, GL16, REAGL, REAGLD, AUTO\n"
+	    "\t\t\t\tAs well as GC16_FAST, GL16_FAST, DU4, GL4, GL16_INV on Kindles, depending on FW version.\n"
+	    "\t\t\tNote that this will also honor --flash\n"
 	    "\n",
 	    fbink_version());
 
