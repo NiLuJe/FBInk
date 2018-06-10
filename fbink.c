@@ -337,16 +337,30 @@ static int
 #ifdef FBINK_FOR_KINDLE
 		// FIXME: Handle the Carta/Pearl switch...
 		struct mxcfb_update_marker_data update_marker = {
-			.update_marker = update.update_marker,
+			.update_marker  = update.update_marker,
 			.collision_test = 0,
 		};
+		bool failed = false;
 		if (ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_marker) < 0) {
+			char  buf[256];
+			char* errstr = strerror_r(errno, buf, sizeof(buf));
+			fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s\n", errstr);
+			failed = true;
 			// NOTE: See FIXME. Because right now that's very, very cheap.
 			//       And trusting that the kernel won't barf :D.
 			if (ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL, &update.update_marker) < 0) {
+				errstr = strerror_r(errno, buf, sizeof(buf));
+				fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s\n", errstr);
+				failed = true;
+			} else {
+				failed = false;
+			}
+		}
+		if (failed) {
+			return EXIT_FAILURE;
+		}
 #else
 		if (ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update.update_marker) < 0) {
-#endif
 			{
 				char  buf[256];
 				char* errstr = strerror_r(errno, buf, sizeof(buf));
@@ -354,6 +368,7 @@ static int
 				return EXIT_FAILURE;
 			}
 		}
+#endif
 	}
 
 	return EXIT_SUCCESS;
@@ -395,7 +410,8 @@ int
 		fprintf(stderr, "[FBInk] Error reading variable information.\n");
 		return EXIT_FAILURE;
 	}
-	printf("Variable info: %dx%d, %dbpp\n", vinfo.xres, vinfo.yres, vinfo.bits_per_pixel);
+	printf(
+	    "Variable info: %ux%u, %ubpp @ rotation: %u\n", vinfo.xres, vinfo.yres, vinfo.bits_per_pixel, vinfo.rotate);
 
 	// NOTE: Reset original font resolution, in case we're re-init'ing,
 	//       since we're relying on the default value to calculate the scaled value,
