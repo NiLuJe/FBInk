@@ -17,19 +17,25 @@ It's been tested on Kobos and Kindles, but porting it to other Linux, iMX eInk d
 Right now, you don't. It's mostly aimed at developpers.
 While I'll probably end up distributing binaries somewhere on MobileRead, it probably won't be neatly packaged for end-users, the target audience *is* developpers.
 
-For exampke, I plan on using it in [KFMon](https://github.com/NiLuJe/kfmon) to provide visual feedback.
+For example, it's being used in [KFMon](https://github.com/NiLuJe/kfmon) to provide visual feedback.
 
 # How can I tinker with it?
 
-The tool is available both as a commandline utility, and as a shared or static library for C projects (beware, though, it's licensed under the AGPLv3, not the LGPL).
+The tool is available both as a commandline utility, and as a shared or static library for C projects (beware, though, it's licensed under the AGPLv3+, not the LGPL).
 See the [public header](fbink.h) for basic API usage.
 Launch the `fbink` tool with no argument for a quick manual.
 
 NOTE: It currently makes absolutely *NO* attempt at handling rotation, because that currently appears to be the right thing to do with current Kobo FW versions.
-YMMV on older FW, or if something else is fudging with fb rotation.
+YMMV on older FW, or if something else is fudging with fb rotation, or if your application is implementing rotation in software (i.e., a rotated viewport).
 
 # How does it look?
 
 Like this :).
 
 ![FBInk on a Kobo H2O](https://raw.githubusercontent.com/NiLuJe/FBInk/master/fbink_readme.png)
+
+# NOTES
+
+Kindle support is limited to anything with a touchscreen (i.e., anything since the Kindle Touch). The Kindle 4 is *NOT* supported.
+
+Kobo support has been tested on a H2O running a recent FW version (i.e., 32bpp fb).
