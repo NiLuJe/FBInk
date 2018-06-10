@@ -129,7 +129,7 @@ int
 		while (optind < argc) {
 			string = argv[optind++];
 			printf(
-			    "Printing string '%s' @ column %hu, row %hu (inverted: %s, flashing: %s, centered: %s, left padded: %s, clear screen: %s)\n",
+			    "Printing string '%s' @ column %hd, row %hd (inverted: %s, flashing: %s, centered: %s, left padded: %s, clear screen: %s)\n",
 			    string,
 			    fbink_config.col,
 			    fbink_config.row,

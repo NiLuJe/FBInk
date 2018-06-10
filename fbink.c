@@ -516,16 +516,16 @@ int
 		if (row < 0) {
 			row = (short int) MAX(MAXROWS + row, 0);
 		}
-		printf("Adjusted position: column %hu, row %hu\n", col, row);
+		printf("Adjusted position: column %hd, row %hd\n", col, row);
 
 		// Clamp coordinates to the screen, to avoid blowing up ;).
 		if (col >= MAXCOLS) {
 			col = (short int) (MAXCOLS - 1);
-			printf("Clamped column to %hu\n", col);
+			printf("Clamped column to %hd\n", col);
 		}
 		if (row >= MAXROWS) {
 			row = (short int) (MAXROWS - 1);
-			printf("Clamped row to %hu\n", row);
+			printf("Clamped row to %hd\n", row);
 		}
 
 		// See if we need to break our string down into multiple lines...
@@ -565,7 +565,7 @@ int
 		if (row + lines > MAXROWS) {
 			row = (short int) MIN(row - ((row + lines) - MAXROWS), MAXROWS);
 		}
-		printf("Final position: column %hu, row %hu\n", col, row);
+		printf("Final position: column %hd, row %hd\n", col, row);
 
 		// We'll copy our text in chunks of formatted line...
 		// NOTE: Store that on the heap, we've had some wacky adventures with automatic VLAs...
@@ -600,7 +600,7 @@ int
 					if (col == 0) {
 						col = 1;
 					}
-					printf("Adjusted column to %hu for centering\n", col);
+					printf("Adjusted column to %hd for centering\n", col);
 					// Recompute line_len since col has been updated.
 					line_len = MIN(left, (size_t)(MAXCOLS - col));
 					printf("Adjusted line_len to %zu for centering\n", line_len);
