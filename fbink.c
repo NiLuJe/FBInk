@@ -381,6 +381,12 @@ int
 	}
 	printf("Variable info: %dx%d, %dbpp\n", vinfo.xres, vinfo.yres, vinfo.bits_per_pixel);
 
+	// NOTE: Reset original font resolution, in case we're re-init'ing,
+	//       since we're relying on the default value to calculate the scaled value,
+	//       and we're using this value set MAXCOLS & MAXROWS...
+	FONTW = 8;
+	FONTH = 8;
+
 	// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD)
 	// FIXME: Even on 600x800 screens, 8x8 might be too small...
 	// NOTE: Using an odd number as scaling mutliplier works, too.
