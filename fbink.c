@@ -350,7 +350,7 @@ static int
 			//       And trusting that the kernel won't barf :D.
 			if (ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL, &update.update_marker) < 0) {
 				errstr = strerror_r(errno, buf, sizeof(buf));
-				fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s\n", errstr);
+				fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL: %s\n", errstr);
 				failed = true;
 			} else {
 				failed = false;
