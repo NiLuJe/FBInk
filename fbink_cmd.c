@@ -179,9 +179,14 @@ int
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", opt);
-				return EXIT_FAILURE;
+				errfnd = 1;
 				break;
 		}
+	}
+
+	if (errfnd == 1 || argc == 1) {
+		show_helpmsg();
+		return EXIT_FAILURE;
 	}
 
 	// Open framebuffer and keep it around, then setup globals.
