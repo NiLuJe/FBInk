@@ -648,7 +648,10 @@ int
 	// cleanup
 	if (fb_is_mapped && !keep_fd) {
 		munmap(fbp, screensize);
+		// NOTE: Don't forget to reset those state flags,
+		//       so we won't skip mmap'ing on the next call without an fb fd passed...
 		fb_is_mapped = false;
+		fbp          = 0;
 	}
 	if (!keep_fd) {
 		close(fbfd);
