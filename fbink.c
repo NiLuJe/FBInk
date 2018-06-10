@@ -421,9 +421,11 @@ int
 	FONTH = 8;
 
 	// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
-	// NOTE: We still want to compare against the screen's "height", even in a Kindle's landscape mode...
+	// NOTE: We still want to compare against the screen's "height", even in Landscape mode...
 	uint32_t screen_height = vinfo.yres;
-	if (vinfo.rotate == 2) {
+	if (vinfo.xres > vinfo.yres) {
+		// NOTE: vinfo.rotate == 2 (vs. 3 in Portrait mode) on my PW2
+		//       My Touch, which doesn't propose Landscape mode, defaults to vinfo.rotate == 1
 		screen_height = vinfo.xres;
 	}
 	if (screen_height <= 600U) {
