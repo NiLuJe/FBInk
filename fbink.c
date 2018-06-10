@@ -250,6 +250,10 @@ static struct mxcfb_rect
 			  bgC);
 		// Update region to the full width, no matter the circumstances
 		region.width += (vinfo.xres - (len * FONTW));
+		// And make sure it's properly clamped, in case it's already been tweaked because of a multiline print
+		if (region.width + region.left > vinfo.xres) {
+			region.width = vinfo.xres - region.left;
+		}
 		printf("Updated region.width to %u\n", region.width);
 	}
 
