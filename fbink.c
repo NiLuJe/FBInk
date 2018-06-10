@@ -660,6 +660,15 @@ int
 				       line_len,
 				       MAXCOLS - line_len - left_pad,
 				       left_pad + line_len + (MAXCOLS - line_len - left_pad));
+				// NOTE: To recap:
+				//       Print at least MAXCOLS + 1 (to ensure it's NULL-terminated)
+				//       Left-pad a blank with spaces for left_pad characters
+				//       Print line_len characters of our string at the correct position for this line
+				//       Right pad a blank with spaces for MAXCOLS characters
+				//           see the printf above for the real value, but this works just as well,
+				//           because it'll hit the MAXCOLS + 1U limit ;).
+				//           Also, given that we split this in three section,
+				//           left-padding would have a similar effect.
 				snprintf(line,
 					 MAXCOLS + 1U,
 					 "%*s%.*s%-*s",
@@ -670,6 +679,7 @@ int
 					 (int) (MAXCOLS),
 					 "");
 			} else {
+				// NOTE: We use a field width and not a precision flag to get free padding when asked.
 				snprintf(line, line_len + 1U, "%*s", (int) line_len, string + (len - left));
 			}
 
