@@ -671,11 +671,11 @@ int
 				       right_pad,
 				       left_pad + line_len + right_pad);
 				// NOTE: To recap:
-				//       Print at least MAXCOLS + 1 (to ensure it's NULL-terminated)
+				//       Copy at most MAXCOLS + 1 bytes into line (thus ensuring its NULL-terminated)
 				//       Left-pad a blank with spaces for left_pad characters
 				//       Print line_len characters of our string at the correct position for this line
 				//       Right pad a blank with spaces for right_pad characters
-				//           Given that we split this in three section,
+				//           Given that we split this in three sections,
 				//           left-padding would have had a similar effect.
 				snprintf(line,
 					 MAXCOLS + 1U,
@@ -687,7 +687,7 @@ int
 					 (int) right_pad,
 					 "");
 			} else {
-				// NOTE: We use a field width and not a precision flag to get free padding when asked.
+				// NOTE: We use a field width and not a precision flag to get free padding on request.
 				snprintf(line, line_len + 1U, "%*s", (int) line_len, string + (len - left));
 			}
 
