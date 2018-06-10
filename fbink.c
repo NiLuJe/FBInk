@@ -237,14 +237,16 @@ static struct mxcfb_rect
 	// NOTE: eInk framebuffers are weird...,
 	//       we should be computing the length of a line (MAXCOLS) based on xres_virtual,
 	//       not xres (because it's guaranteed to be a multiple of 16).
-	//       Unfortunately, that means this last block of the line is partly offscreen.
+	//       Unfortunately, that means this last block of the line may be partly offscreen.
 	//       Also, it CANNOT be part of the region passed to the eInk controller for a screen update...
-	//       So, since this this last block is basically unusable because partly unreadable,
+	//       So, since this this last block may basically be unusable because partly unreadable,
 	//       and partly unrefreshable, don't count it as "available" (i.e., by including it in MAXCOLS),
 	//       since that would happen to also wreak havoc in a number of our heuristics,
 	//       just fudge printing a blank square 'til the edge of the screen if we're filling a line *completely*.
+	// NOTE: When even with xres instead of xres_virtual, we can perfectly fit our final character on the line,
+	//       this effectively works around the issue, in which case, we don't need to do anything :).
 	// NOTE: Use len + col if we want to do that everytime we simply *hit* the edge...
-	if (len == MAXCOLS) {
+	if (len == MAXCOLS && !is_perfect_fit) {
 		fill_rect((unsigned short int) (region.left + (len * FONTW)),
 			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			  (unsigned short int) (vinfo.xres - (len * FONTW)),
@@ -468,6 +470,12 @@ int
 	MAXCOLS = (unsigned short int) (vinfo.xres / FONTW);
 	MAXROWS = (unsigned short int) (vinfo.yres / FONTH);
 	fprintf(stderr, "[FBInk] Line length: %hu cols, Page size: %hu rows.\n", MAXCOLS, MAXROWS);
+
+	// Mention & remember if we can perfectly fit the final column on screen
+	if (FONTW * MAXCOLS == vinfo.xres) {
+		is_perfect_fit = true;
+		fprintf(stderr, "[FBInk] It's a perfect fit!\n");
+	}
 
 	// Get fixed screen information
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo)) {
