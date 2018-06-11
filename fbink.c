@@ -313,13 +313,14 @@ static struct mxcfb_rect
 	char* pixmap = NULL;
 	pixmap       = malloc(sizeof(*pixmap) * (size_t)(FONTW * FONTH));
 
-	// Loop through all characters in the text string
+	// Loop through all the *characters* in the text string
 	int bi = 0;
 	unsigned int cn = 0;
 	uint32_t ch = 0;
 	while ((ch = u8_nextchar(text, &bi)) != 0) {
-		printf("Char %u out of %d is @ offset: %d and is U+%X\n", cn, charnum, bi, ch);
+		printf("Char %u out of %d is @ byte offset %d and is U+%X\n", cn, charnum, bi, ch);
 
+		// Get the glyph's pixmap
 		font8x8_render(ch, pixmap);
 
 		// loop through pixel rows
@@ -346,54 +347,6 @@ static struct mxcfb_rect
 		cn++;
 	}
 	printf("\n");
-
-	/*
-	for (i = 0U; i < charnum; i++) {
-		printf("Iteration %u out of %d\n", i, charnum);
-		// get the glyph's pixmap
-		// This is where things get fun... We might be printing a multibyte sequence,
-		// so 1 byte does not necessarily translate into one character.
-		// Pull the full multibyte sequence for that single character from our byte string...
-		int byte_index = u8_offset(text, i);
-		printf("Byte index: %d out of %zu (is: '%c')\n", byte_index, len-1, text[byte_index]);
-		// We need to know how many bytes this potential multibyte sequence may be...
-		int seqlen = u8_seqlen(&text[byte_index]);
-		if (seqlen > 1) {
-			// It's multibyte, compute its codepoint
-			uint32_t codepoint[2];
-			int mbchars = -1;
-			mbchars = u8_toucs(codepoint, 2, &text[byte_index], seqlen);
-			printf("Converted %d multibyte character to Unicode\n", mbchars);
-			// And then get the glyph for that codepoint
-			printf("Unicode codepoint U+%X\n", codepoint[0]);
-			font8x8_render(codepoint[0], pixmap);
-		} else {
-			// Low ASCII, easy-peasy ;).
-			printf("Char '%c' is low ASCII\n", text[byte_index]);
-			font8x8_render(text[byte_index], pixmap);
-		}
-		// loop through pixel rows
-		for (y = 0U; y < FONTH; y++) {
-			// loop through pixel columns
-			for (x = 0U; x < FONTW; x++) {
-				// get the pixel value
-				char b = pixmap[(y * FONTW) + x];
-				if (b > 0) {
-					// plot the pixel (fg, text)
-					put_pixel((unsigned short int) ((col * FONTW) + (i * FONTW) + x),
-						  (unsigned short int) ((row * FONTH) + y),
-						  fgC);
-				} else {
-					// this is background,
-					// fill it so that we'll be visible no matter what was on screen behind us.
-					put_pixel((unsigned short int) ((col * FONTW) + (i * FONTW) + x),
-						  (unsigned short int) ((row * FONTH) + y),
-						  bgC);
-				}
-			}    // end "for x"
-		}            // end "for y"
-	}                    // end "for i"
-	*/
 
 	// Cleanup
 	free(pixmap);
