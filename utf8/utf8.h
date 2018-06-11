@@ -64,7 +64,7 @@ char *u8_strchr(char *s, uint32_t ch, int *charn);
 char *u8_memchr(char *s, uint32_t ch, size_t sz, int *charn);
 
 /* count the number of characters in a UTF-8 string */
-int u8_strlen(const char *s);
+unsigned int u8_strlen(const char *s);
 
 int u8_is_locale_utf8(char *locale);
 

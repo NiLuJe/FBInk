@@ -247,8 +247,8 @@ static struct mxcfb_rect
 	//       more space (as in columns, not bytes) than (MAXCOLS - col), the maximum printable length.
 	//       And as we're printing glyphs, we need to iterate over the number of characters/grapheme clusters,
 	//       not bytes.
-	int charcount = u8_strlen(text);
-	printf("Character Count: %d (over %zu bytes)\n", charcount, strlen(text));
+	unsigned int charcount = u8_strlen(text);
+	printf("Character Count: %u (over %zu bytes)\n", charcount, strlen(text));
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
@@ -316,7 +316,7 @@ static struct mxcfb_rect
 	unsigned short int cn = 0;
 	uint32_t ch = 0;
 	while ((ch = u8_nextchar(text, &bi)) != 0) {
-		printf("Char %u out of %d is @ byte offset %d and is U+%04X\n", cn, charcount, bi, ch);
+		printf("Char %u out of %u is @ byte offset %d and is U+%04X\n", cn, charcount, bi, ch);
 
 		// Get the glyph's pixmap
 		font8x8_render(ch, pixmap);
@@ -607,10 +607,10 @@ int
 
 		// See if we need to break our string down into multiple lines...
 		size_t len = strlen(string);
-		int charcount = u8_strlen(string);
+		unsigned int charcount = u8_strlen(string);
 		// See if we need to allocate more space for multibyte characters...
 		if (len > charcount) {
-			printf("Extra storage needed because of multibyte sequences: %zu (size: %zu vs. chars: %d)\n", (len - charcount), len, charcount);
+			printf("Extra storage needed because of multibyte sequences: %zu (size: %zu vs. chars: %u)\n", (len - charcount), len, charcount);
 		}
 
 		// Compute the amount of characters we can actually print on *one* line given the column we start on...

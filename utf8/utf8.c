@@ -195,7 +195,7 @@ int u8_charnum(const char *s, int offset)
 }
 
 /* number of characters */
-int u8_strlen(const char *s)
+unsigned int u8_strlen(const char *s)
 {
     int count = 0;
     unsigned int i = 0;
