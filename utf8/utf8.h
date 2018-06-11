@@ -1,4 +1,8 @@
+#ifndef __LIBU8_H
+#define __LIBU8_H
+
 #include <stdarg.h>
+#include <stdint.h>
 
 /* is c the start of a utf8 sequence? */
 #define isutf(c) (((c)&0xC0)!=0x80)
@@ -69,3 +73,5 @@ int u8_is_locale_utf8(char *locale);
    locale is UTF-8. */
 int u8_vprintf(char *fmt, va_list ap);
 int u8_printf(char *fmt, ...);
+
+#endif

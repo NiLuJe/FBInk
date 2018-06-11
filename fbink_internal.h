@@ -39,7 +39,7 @@
 #include <sys/param.h>
 #include <unistd.h>
 
-#include "utf8/utf8.c"
+#include "utf8/utf8.h"
 
 #ifdef FBINK_FOR_KINDLE
 #	include "eink/mxcfb-kindle.h"
