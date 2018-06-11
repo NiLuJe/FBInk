@@ -190,7 +190,7 @@ static char*
 	} else if (codepoint >= 0x2580 && codepoint <= 0x259F) {
 		return font8x8_block[codepoint - 0x2580];
 	} else {
-		fprintf(stderr, "[FBInk] Codepoint U+%X is not covered by our font!\n", codepoint);
+		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by our font!\n", codepoint);
 		return font8x8_basic[0];
 	}
 }
@@ -316,7 +316,7 @@ static struct mxcfb_rect
 	unsigned short int cn = 0;
 	uint32_t ch = 0;
 	while ((ch = u8_nextchar(text, &bi)) != 0) {
-		printf("Char %u out of %d is @ byte offset %d and is U+%X\n", cn, charcount, bi, ch);
+		printf("Char %u out of %d is @ byte offset %d and is U+%04X\n", cn, charcount, bi, ch);
 
 		// Get the glyph's pixmap
 		font8x8_render(ch, pixmap);
