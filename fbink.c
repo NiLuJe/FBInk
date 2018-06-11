@@ -152,12 +152,11 @@ static void
 
 // Return the font8x8 bitmap for a specifric ascii character
 static char*
-    font8x8_get_bitmap(int ascii)
+    font8x8_get_bitmap(uint32_t codepoint)
 {
 	// Get the bitmap for that ASCII character
-	if (ascii >= 0 && ascii <= 0x7F) {
-		return font8x8_basic[ascii];
-		/*
+	if (codepoint >= 0 && codepoint <= 0x7F) {
+		return font8x8_basic[codepoint];
 	// NOTE: This is obviously no longer ASCII ;).
 	// TODO?: We do not support multibyte encodings, so don't pretend to.
 	//        And you'll notice the question mark after that TODO... Because we don't have an easy solution:
@@ -180,19 +179,18 @@ static char*
 	//       https://www.cl.cam.ac.uk/~mgk25/unicode.html
 	//       https://unicodebook.readthedocs.io/
 	//
-	} else if (ascii >= 0x80 && ascii <= 0x9F) {
-		return font8x8_control[ascii];
-	} else if (ascii >= 0xA0 && ascii <= 0xFF) {
-		return font8x8_ext_latin[ascii];
-	} else if (ascii >= 0x390 && ascii <= 0x3C9) {
-		return font8x8_greek[ascii - 0x390];
-	} else if (ascii >= 0x2500 && ascii <= 0x257F) {
-		return font8x8_box[ascii - 0x2500];
-	} else if (ascii >= 0x2580 && ascii <= 0x259F) {
-		return font8x8_block[ascii - 0x2580];
-	*/
+	} else if (codepoint >= 0x80 && codepoint <= 0x9F) {
+		return font8x8_control[codepoint - 0x80];
+	} else if (codepoint >= 0xA0 && codepoint <= 0xFF) {
+		return font8x8_ext_latin[codepoint - 0xA0];
+	} else if (codepoint >= 0x390 && codepoint <= 0x3C9) {
+		return font8x8_greek[codepoint - 0x390];
+	} else if (codepoint >= 0x2500 && codepoint <= 0x257F) {
+		return font8x8_box[codepoint - 0x2500];
+	} else if (codepoint >= 0x2580 && codepoint <= 0x259F) {
+		return font8x8_block[codepoint - 0x2580];
 	} else {
-		fprintf(stderr, "[FBInk] %d is out of ASCII range! (part of a multibyte sequence?)\n", ascii);
+		fprintf(stderr, "[FBInk] Codepoint U+%X is not covered by our font!\n", codepoint);
 		return font8x8_basic[0];
 	}
 }
@@ -200,9 +198,9 @@ static char*
 // Render a specific font8x8 glyph into a pixmap
 // (base size: 8x8, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
 static void
-    font8x8_render(int ascii, char* glyph_pixmap)
+    font8x8_render(uint32_t codepoint, char* glyph_pixmap)
 {
-	char* bitmap = font8x8_get_bitmap(ascii);
+	char* bitmap = font8x8_get_bitmap(codepoint);
 
 	unsigned short int x;
 	unsigned short int y;
@@ -250,12 +248,15 @@ static struct mxcfb_rect
 	//       wouldn't exceed the maximum printable length, MAXCOLS - col
 	size_t len = strnlen(text, MAXCOLS);
 	printf("StrLen: %zu\n", len);
+	// Except we're printing glyphs, so we need to iterate over the number of characters/grapheme clusters, and not bytes
+	int charnum = u8_strlen(text);
+	printf("CharNum: %d\n", charnum);
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
 		.top    = (uint32_t)((row - multiline_offset) * FONTH),
 		.left   = (uint32_t)(col * FONTW),
-		.width  = multiline_offset > 0U ? (vinfo.xres - (uint32_t)(col * FONTW)) : (uint32_t)(len * FONTW),
+		.width  = multiline_offset > 0U ? (vinfo.xres - (uint32_t)(col * FONTW)) : (uint32_t)(charnum * FONTW),
 		.height = (uint32_t)((multiline_offset + 1U) * FONTH),
 	};
 
@@ -276,14 +277,14 @@ static struct mxcfb_rect
 	//       (c.f., how is_perfect_fit is computed, basically, when MAXCOLS is not a fraction),
 	//       this effectively works around the issue, in which case, we don't need to do anything :).
 	// NOTE: Use len + col == MAXCOLS if we want to do that everytime we simply *hit* the edge...
-	if (len == MAXCOLS && !is_perfect_fit) {
-		fill_rect((unsigned short int) (region.left + (len * FONTW)),
+	if (charnum == MAXCOLS && !is_perfect_fit) {
+		fill_rect((unsigned short int) (region.left + (charnum * FONTW)),
 			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
-			  (unsigned short int) (vinfo.xres - (len * FONTW)),
+			  (unsigned short int) (vinfo.xres - (charnum * FONTW)),
 			  FONTH,
 			  bgC);
 		// Update region to the full width, no matter the circumstances
-		region.width += (vinfo.xres - (len * FONTW));
+		region.width += (vinfo.xres - (charnum * FONTW));
 		// And make sure it's properly clamped, in case it's already been tweaked because of a multiline print
 		if (region.width + region.left > vinfo.xres) {
 			region.width = vinfo.xres - region.left;
@@ -313,9 +314,30 @@ static struct mxcfb_rect
 	pixmap       = malloc(sizeof(*pixmap) * (size_t)(FONTW * FONTH));
 
 	// Loop through all characters in the text string
-	for (i = 0U; i < len; i++) {
+	for (i = 0U; i < charnum; i++) {
+		printf("Iteration %u out of %d\n", i, charnum);
 		// get the glyph's pixmap
-		font8x8_render(text[i], pixmap);
+		// This is where things get fun... We might be printing a multibyte sequence,
+		// so 1 byte does not necessarily translate into one character.
+		// Pull the full multibyte sequence for that single character from our byte string...
+		int byte_index = u8_offset(text, i);
+		printf("Byte index: %d out of %zu (is: '%c')\n", byte_index, len-1, text[byte_index]);
+		// We need to know how many bytes this potential multibyte sequence may be...
+		int seqlen = u8_seqlen(&text[byte_index]);
+		if (seqlen > 1) {
+			// It's multibyte, compute its codepoint
+			uint32_t codepoint[2];
+			int mbchars = -1;
+			mbchars = u8_toucs(codepoint, 2, &text[byte_index], seqlen);
+			printf("Converted %d multibyte character to Unicode\n", mbchars);
+			// And then get the glyph for that codepoint
+			printf("Unicode codepoint U+%X\n", codepoint[0]);
+			font8x8_render(codepoint[0], pixmap);
+		} else {
+			// Low ASCII, easy-peasy ;).
+			printf("Char '%c' is low ASCII\n", text[byte_index]);
+			font8x8_render(text[byte_index], pixmap);
+		}
 		// loop through pixel rows
 		for (y = 0U; y < FONTH; y++) {
 			// loop through pixel columns
@@ -599,6 +621,11 @@ int
 
 		// See if we need to break our string down into multiple lines...
 		size_t len = strlen(string);
+		int charnum = u8_strlen(string);
+		// See if we need to allocate more space for multibyte characters...
+		if (len > charnum) {
+			printf("Extra storage needed because of multibyte sequences: %zu (size: %zu vs. chars: %d)\n", (len - charnum), len, charnum);
+		}
 
 		// Compute the amount of characters we can actually print on *one* line given the column we start on...
 		// NOTE: When centered, we enforce one padding character on the left,

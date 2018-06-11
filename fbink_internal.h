@@ -39,19 +39,19 @@
 #include <sys/param.h>
 #include <unistd.h>
 
+#include "utf8/utf8.c"
+
 #ifdef FBINK_FOR_KINDLE
 #	include "eink/mxcfb-kindle.h"
 #else
 #	include "eink/mxcfb-kobo.h"
 #endif
 #include "font8x8/font8x8_basic.h"
-/*
 #include "font8x8/font8x8_block.h"
 #include "font8x8/font8x8_box.h"
 #include "font8x8/font8x8_control.h"
 #include "font8x8/font8x8_ext_latin.h"
 #include "font8x8/font8x8_greek.h"
-*/
 
 // Fallback version tag...
 #ifndef FBINK_VERSION
@@ -128,8 +128,8 @@ static void fill_rect(unsigned short int,
 		      unsigned short int);
 static void clear_screen(unsigned short int);
 
-static char* font8x8_get_bitmap(int);
-static void  font8x8_render(int, char*);
+static char* font8x8_get_bitmap(uint32_t);
+static void  font8x8_render(uint32_t, char*);
 
 static struct mxcfb_rect draw(const char*, unsigned short int, unsigned short int, bool, bool, unsigned short int);
 
