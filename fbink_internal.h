@@ -44,10 +44,14 @@
 #else
 #	include "eink/mxcfb-kobo.h"
 #endif
+#include "font8x8/font8x8_basic.h"
+/*
 #include "font8x8/font8x8_block.h"
 #include "font8x8/font8x8_box.h"
+#include "font8x8/font8x8_control.h"
+#include "font8x8/font8x8_ext_latin.h"
 #include "font8x8/font8x8_greek.h"
-#include "font8x8/font8x8_latin.h"
+*/
 
 // Fallback version tag...
 #ifndef FBINK_VERSION
