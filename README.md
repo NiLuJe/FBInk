@@ -14,10 +14,10 @@ It's been tested on Kobos and Kindles, but porting it to other Linux, iMX eInk d
 
 # How do I install this?
 
-Right now, you don't. It's mostly aimed at developpers.
-While I'll probably end up distributing binaries somewhere on MobileRead, it probably won't be neatly packaged for end-users, the target audience *is* developpers.
+There's a discussion thread open [over here](https://www.mobileread.com/forums/showthread.php?t=299110) on MobileRead, where you'll happen to find standalone binaries.
+It's purposefully lacking in detailed instructions, because the target audience is mainly developpers and tinkerers. Think of this as a safety precaution ;).
 
-For example, it's being used in [KFMon](https://github.com/NiLuJe/kfmon) to provide visual feedback.
+As an example of usage in the wild, see [KFMon](https://github.com/NiLuJe/kfmon), where I'm using it to provide visual feedback.
 
 # How can I tinker with it?
 
@@ -33,6 +33,8 @@ YMMV on older FW, or if something else is fudging with fb rotation, or if your a
 Like this :).
 
 ![FBInk on a Kobo H2O](https://raw.githubusercontent.com/NiLuJe/FBInk/master/fbink_readme.png)
+
+(Although the fontsize may be different in current releases. On the H2O shown as an example, it's now 24x24 vs. the 32x32 showcased here.)
 
 # NOTES
 
