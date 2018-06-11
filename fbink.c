@@ -314,6 +314,40 @@ static struct mxcfb_rect
 	pixmap       = malloc(sizeof(*pixmap) * (size_t)(FONTW * FONTH));
 
 	// Loop through all characters in the text string
+	int bi = 0;
+	unsigned int cn = 0;
+	uint32_t ch = 0;
+	while ((ch = u8_nextchar(text, &bi)) != 0) {
+		printf("Char %u out of %d is @ offset: %d and is U+%X\n", cn, charnum, bi, ch);
+
+		font8x8_render(ch, pixmap);
+
+		// loop through pixel rows
+		for (y = 0U; y < FONTH; y++) {
+			// loop through pixel columns
+			for (x = 0U; x < FONTW; x++) {
+				// get the pixel value
+				char b = pixmap[(y * FONTW) + x];
+				if (b > 0) {
+					// plot the pixel (fg, text)
+					put_pixel((unsigned short int) ((col * FONTW) + (cn * FONTW) + x),
+						  (unsigned short int) ((row * FONTH) + y),
+						  fgC);
+				} else {
+					// this is background,
+					// fill it so that we'll be visible no matter what was on screen behind us.
+					put_pixel((unsigned short int) ((col * FONTW) + (cn * FONTW) + x),
+						  (unsigned short int) ((row * FONTH) + y),
+						  bgC);
+				}
+			}    // end "for x"
+		}            // end "for y"
+
+		cn++;
+	}
+	printf("\n");
+
+	/*
 	for (i = 0U; i < charnum; i++) {
 		printf("Iteration %u out of %d\n", i, charnum);
 		// get the glyph's pixmap
@@ -359,6 +393,7 @@ static struct mxcfb_rect
 			}    // end "for x"
 		}            // end "for y"
 	}                    // end "for i"
+	*/
 
 	// Cleanup
 	free(pixmap);
