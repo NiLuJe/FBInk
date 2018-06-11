@@ -158,14 +158,14 @@ static char*
 	if (ascii >= 0 && ascii <= 0x7F) {
 		return font8x8_basic[ascii];
 		/*
-	// FIXME: This is obviously no longer ASCII ;).
-	// NOTE: We do not support multibyte encodings, so don't pretend to.
-	//       We can't switch to wchar_t and/or just use the locale/multibyte aware libc functions,
-	//       because locales are completely FUBAR on Kobo (we're good on Kindle) so all this is broken.
-	//       You might not have realized it, because busybox optionally rolls its own multibyte libc functions,
-	//       and these do work, because they don't rely on the libc and its locale handling.
-	//       That leaves us with handling UTF-8/Unicode (either in char or a custom data type) ourselves,
-	//       which, while not insurmountable, is fairly annoying given the use-case and the scope of this tool.
+	// NOTE: This is obviously no longer ASCII ;).
+	// TODO?: We do not support multibyte encodings, so don't pretend to.
+	//        We can't switch to wchar_t and/or just use the locale/multibyte aware libc functions,
+	//        because locales are completely FUBAR on Kobo (we're good on Kindle) so all this is broken.
+	//        You might not have realized it, because busybox optionally rolls its own multibyte libc functions,
+	//        and these do work, because they don't rely on the libc and its locale handling.
+	//        That leaves us with handling UTF-8/Unicode (either in char or a custom data type) ourselves,
+	//        which, while not insurmountable, is fairly annoying given the use-case and the scope of this tool.
 	} else if (ascii >= 0x80 && ascii <= 0x9F) {
 		return font8x8_control[ascii];
 	} else if (ascii >= 0xA0 && ascii <= 0xFF) {
