@@ -23,7 +23,7 @@ int u8_offset(const char *str, int charnum);
 int u8_charnum(const char *s, int offset);
 
 /* return next character, updating an index variable */
-uint32_t u8_nextchar(const char *s, int *i);
+uint32_t u8_nextchar(const char *s, unsigned int *i);
 
 /* move to next character */
 void u8_inc(char *s, int *i);

@@ -237,26 +237,24 @@ static struct mxcfb_rect
 	unsigned short int fgC = is_inverted ? WHITE : BLACK;
 	unsigned short int bgC = is_inverted ? BLACK : WHITE;
 
-	unsigned short int i;
 	unsigned short int x;
 	unsigned short int y;
 	// Adjust row in case we're a continuation of a multi-line print...
 	row = (unsigned short int) (row + multiline_offset);
 
 	// Compute the length of our actual string
-	// NOTE: We already took care in fbink_print() of making sure that the string passed in text
-	//       wouldn't exceed the maximum printable length, MAXCOLS - col
-	size_t len = strnlen(text, MAXCOLS);
-	printf("StrLen: %zu\n", len);
-	// Except we're printing glyphs, so we need to iterate over the number of characters/grapheme clusters, and not bytes
-	int charnum = u8_strlen(text);
-	printf("CharNum: %d\n", charnum);
+	// NOTE: We already took care in fbink_print() of making sure that the string passed in text wouldn't take up
+	//       more space (as in columns, not bytes) than (MAXCOLS - col), the maximum printable length.
+	//       And as we're printing glyphs, we need to iterate over the number of characters/grapheme clusters,
+	//       not bytes.
+	int charcount = u8_strlen(text);
+	printf("Character Count: %d (over %zu bytes)\n", charcount, strlen(text));
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
 		.top    = (uint32_t)((row - multiline_offset) * FONTH),
 		.left   = (uint32_t)(col * FONTW),
-		.width  = multiline_offset > 0U ? (vinfo.xres - (uint32_t)(col * FONTW)) : (uint32_t)(charnum * FONTW),
+		.width  = multiline_offset > 0U ? (vinfo.xres - (uint32_t)(col * FONTW)) : (uint32_t)(charcount * FONTW),
 		.height = (uint32_t)((multiline_offset + 1U) * FONTH),
 	};
 
@@ -277,14 +275,14 @@ static struct mxcfb_rect
 	//       (c.f., how is_perfect_fit is computed, basically, when MAXCOLS is not a fraction),
 	//       this effectively works around the issue, in which case, we don't need to do anything :).
 	// NOTE: Use len + col == MAXCOLS if we want to do that everytime we simply *hit* the edge...
-	if (charnum == MAXCOLS && !is_perfect_fit) {
-		fill_rect((unsigned short int) (region.left + (charnum * FONTW)),
+	if (charcount == MAXCOLS && !is_perfect_fit) {
+		fill_rect((unsigned short int) (region.left + (charcount * FONTW)),
 			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
-			  (unsigned short int) (vinfo.xres - (charnum * FONTW)),
+			  (unsigned short int) (vinfo.xres - (charcount * FONTW)),
 			  FONTH,
 			  bgC);
 		// Update region to the full width, no matter the circumstances
-		region.width += (vinfo.xres - (charnum * FONTW));
+		region.width += (vinfo.xres - (charcount * FONTW));
 		// And make sure it's properly clamped, in case it's already been tweaked because of a multiline print
 		if (region.width + region.left > vinfo.xres) {
 			region.width = vinfo.xres - region.left;
@@ -314,11 +312,11 @@ static struct mxcfb_rect
 	pixmap       = malloc(sizeof(*pixmap) * (size_t)(FONTW * FONTH));
 
 	// Loop through all the *characters* in the text string
-	int bi = 0;
-	unsigned int cn = 0;
+	unsigned int bi = 0;
+	unsigned short int cn = 0;
 	uint32_t ch = 0;
 	while ((ch = u8_nextchar(text, &bi)) != 0) {
-		printf("Char %u out of %d is @ byte offset %d and is U+%X\n", cn, charnum, bi, ch);
+		printf("Char %u out of %d is @ byte offset %d and is U+%X\n", cn, charcount, bi, ch);
 
 		// Get the glyph's pixmap
 		font8x8_render(ch, pixmap);
@@ -609,10 +607,10 @@ int
 
 		// See if we need to break our string down into multiple lines...
 		size_t len = strlen(string);
-		int charnum = u8_strlen(string);
+		int charcount = u8_strlen(string);
 		// See if we need to allocate more space for multibyte characters...
-		if (len > charnum) {
-			printf("Extra storage needed because of multibyte sequences: %zu (size: %zu vs. chars: %d)\n", (len - charnum), len, charnum);
+		if (len > charcount) {
+			printf("Extra storage needed because of multibyte sequences: %zu (size: %zu vs. chars: %d)\n", (len - charcount), len, charcount);
 		}
 
 		// Compute the amount of characters we can actually print on *one* line given the column we start on...

@@ -198,7 +198,7 @@ int u8_charnum(const char *s, int offset)
 int u8_strlen(const char *s)
 {
     int count = 0;
-    int i = 0;
+    unsigned int i = 0;
 
     while (u8_nextchar(s, &i) != 0)
         count++;
@@ -207,7 +207,7 @@ int u8_strlen(const char *s)
 }
 
 /* reads the next utf-8 sequence out of a string, updating an index */
-uint32_t u8_nextchar(const char *s, int *i)
+uint32_t u8_nextchar(const char *s, unsigned int *i)
 {
     uint32_t ch = 0;
     int sz = 0;
@@ -362,7 +362,8 @@ int u8_escape_wchar(char *buf, int sz, uint32_t ch)
 
 int u8_escape(char *buf, int sz, char *src, int escape_quotes)
 {
-    int c=0, i=0, amt;
+    int c=0, amt;
+    unsigned int i = 0;
 
     while (src[i] && c < sz) {
         if (escape_quotes && src[i] == '"') {
@@ -382,7 +383,7 @@ int u8_escape(char *buf, int sz, char *src, int escape_quotes)
 
 char *u8_strchr(char *s, uint32_t ch, int *charn)
 {
-    int i = 0, lasti=0;
+    unsigned int i = 0, lasti=0;
     uint32_t c;
 
     *charn = 0;
