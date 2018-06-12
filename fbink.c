@@ -681,8 +681,35 @@ int
 			// ... then compute how many bytes we'll need to store it.
 			unsigned int line_bytes = 0U;
 			unsigned int cn         = 0U;
-			while (u8_nextchar(string + line_offset, &line_bytes) != 0U) {
+			uint32_t             ch = 0U;
+			// FIXME: u8_strchr?
+			while ((ch = u8_nextchar(string + line_offset, &line_bytes)) != 0U) {
 				cn++;
+				// NOTE: This is fairly hackish: in every case, we get extra blank lines
+				//       (w/ left=0; or with left underflowing when padding is enabled),
+				//       and padding only actually applies to uncut lines? (i.e., the last).
+				// We've hit a linefeed, stop!
+				if (ch == 0x0A) {
+					printf("Caught a linefeed!\n");
+					// Update chars_left, because we're cutting a line mid-stream
+					chars_left += (line_len - cn);
+					// Increment lines, because of course we're adding a line ;).
+					lines++;
+					// Truncate to a single screen...
+					if (row + lines > MAXROWS) {
+						printf("Can only print %hu out of %hu lines, truncating!\n", MAXROWS, lines);
+						lines = MAXROWS - row;
+					}
+					// Decrement the byte index, because we don't want to print it.
+					line_bytes--;
+					// And trim line_len to where we left off, so padding works.
+					printf("Line len: %u but LF is charnum: %u\n", line_len, cn);
+					//line_len = MIN(chars_left, available_cols);
+					// Handle line_offset, too, because we've updated chars_left
+					//line_offset = u8_offset(string, charcount - chars_left);
+					printf("Updated chars_left to %u; lines to %u; lines_bytes to %u; line_len to %u and line_offset to %u\n", chars_left, lines, line_bytes, line_len, line_offset);
+					break;
+				}
 				// We've walked our full line, stop!
 				if (cn >= line_len) {
 					break;
