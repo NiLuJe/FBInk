@@ -119,23 +119,23 @@ int u8_toutf8(char *dest, unsigned int sz, const uint32_t *src, int srcsz)
         else if (ch < 0x800) {
             if (dest >= dest_end-1)
                 return i;
-            *dest++ = (ch>>6) | 0xC0;
-            *dest++ = (ch & 0x3F) | 0x80;
+            *dest++ = (char)((ch>>6) | 0xC0);
+            *dest++ = (char)((ch & 0x3F) | 0x80);
         }
         else if (ch < 0x10000) {
             if (dest >= dest_end-2)
                 return i;
-            *dest++ = (ch>>12) | 0xE0;
-            *dest++ = ((ch>>6) & 0x3F) | 0x80;
-            *dest++ = (ch & 0x3F) | 0x80;
+            *dest++ = (char)((ch>>12) | 0xE0);
+            *dest++ = (char)(((ch>>6) & 0x3F) | 0x80);
+            *dest++ = (char)((ch & 0x3F) | 0x80);
         }
         else if (ch < 0x110000) {
             if (dest >= dest_end-3)
                 return i;
-            *dest++ = (ch>>18) | 0xF0;
-            *dest++ = ((ch>>12) & 0x3F) | 0x80;
-            *dest++ = ((ch>>6) & 0x3F) | 0x80;
-            *dest++ = (ch & 0x3F) | 0x80;
+            *dest++ = (char)((ch>>18) | 0xF0);
+            *dest++ = (char)(((ch>>12) & 0x3F) | 0x80);
+            *dest++ = (char)(((ch>>6) & 0x3F) | 0x80);
+            *dest++ = (char)((ch & 0x3F) | 0x80);
         }
         i++;
     }
@@ -151,21 +151,21 @@ unsigned int u8_wc_toutf8(char *dest, uint32_t ch)
         return 1;
     }
     if (ch < 0x800) {
-        dest[0] = (ch>>6) | 0xC0;
-        dest[1] = (ch & 0x3F) | 0x80;
+        dest[0] = (char)((ch>>6) | 0xC0);
+        dest[1] = (char)((ch & 0x3F) | 0x80);
         return 2;
     }
     if (ch < 0x10000) {
-        dest[0] = (ch>>12) | 0xE0;
-        dest[1] = ((ch>>6) & 0x3F) | 0x80;
-        dest[2] = (ch & 0x3F) | 0x80;
+        dest[0] = (char)((ch>>12) | 0xE0);
+        dest[1] = (char)(((ch>>6) & 0x3F) | 0x80);
+        dest[2] = (char)((ch & 0x3F) | 0x80);
         return 3;
     }
     if (ch < 0x110000) {
-        dest[0] = (ch>>18) | 0xF0;
-        dest[1] = ((ch>>12) & 0x3F) | 0x80;
-        dest[2] = ((ch>>6) & 0x3F) | 0x80;
-        dest[3] = (ch & 0x3F) | 0x80;
+        dest[0] = (char)((ch>>18) | 0xF0);
+        dest[1] = (char)(((ch>>12) & 0x3F) | 0x80);
+        dest[2] = (char)(((ch>>6) & 0x3F) | 0x80);
+        dest[3] = (char)((ch & 0x3F) | 0x80);
         return 4;
     }
     return 0;
@@ -277,28 +277,28 @@ unsigned int u8_read_escape_sequence(const char *str, uint32_t *dest)
         do {
             digs[dno++] = str[i++];
         } while (octal_digit(str[i]) && dno < 3);
-        ch = strtol(digs, NULL, 8);
+        ch = strtoul(digs, NULL, 8);
     }
     else if (str[0] == 'x') {
         while (hex_digit(str[i]) && dno < 2) {
             digs[dno++] = str[i++];
         }
         if (dno > 0)
-            ch = strtol(digs, NULL, 16);
+            ch = strtoul(digs, NULL, 16);
     }
     else if (str[0] == 'u') {
         while (hex_digit(str[i]) && dno < 4) {
             digs[dno++] = str[i++];
         }
         if (dno > 0)
-            ch = strtol(digs, NULL, 16);
+            ch = strtoul(digs, NULL, 16);
     }
     else if (str[0] == 'U') {
         while (hex_digit(str[i]) && dno < 8) {
             digs[dno++] = str[i++];
         }
         if (dno > 0)
-            ch = strtol(digs, NULL, 16);
+            ch = strtoul(digs, NULL, 16);
     }
     *dest = ch;
 
