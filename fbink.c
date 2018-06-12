@@ -95,7 +95,7 @@ static void
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	// but a bit more complicated for RGB565
-	unsigned int c = ((r / 8U) << 11) + ((g / 4U) << 5) + (b / 8U);
+	unsigned int c = ((r / 8U) << 11U) + ((g / 4U) << 5U) + (b / 8U);
 	// or: c = ((r / 8) * 2048) + ((g / 4) * 32) + (b / 8);
 	// write 'two bytes at once'
 	*((char*) (fbp + pix_offset)) = (char) c;
@@ -105,17 +105,17 @@ static void
 static void
     put_pixel(unsigned short int x, unsigned short int y, unsigned short int c)
 {
-	if (vinfo.bits_per_pixel == 8) {
+	if (vinfo.bits_per_pixel == 8U) {
 		// NOTE: Grayscale palette, we could have used def_r or def_g ;).
 		put_pixel_Gray8(x, y, def_b[c]);
-	} else if (vinfo.bits_per_pixel == 16) {
+	} else if (vinfo.bits_per_pixel == 16U) {
 		// FIXME: Colors *may* actually be inverted on 16bpp Kobos...
 		//        This should fix it:
 		//c = c ^ WHITE;
 		put_pixel_RGB565(x, y, def_r[c], def_g[c], def_b[c]);
-	} else if (vinfo.bits_per_pixel == 24) {
+	} else if (vinfo.bits_per_pixel == 24U) {
 		put_pixel_RGB24(x, y, def_r[c], def_g[c], def_b[c]);
-	} else if (vinfo.bits_per_pixel == 32) {
+	} else if (vinfo.bits_per_pixel == 32U) {
 		put_pixel_RGB32(x, y, def_r[c], def_g[c], def_b[c]);
 	}
 }
@@ -143,7 +143,7 @@ static void
     clear_screen(unsigned short int c)
 {
 	// NOTE: Grayscale palette, we could have used def_r or def_g ;).
-	if (vinfo.bits_per_pixel == 8) {
+	if (vinfo.bits_per_pixel == 8U) {
 		memset(fbp, def_b[c], finfo.smem_len);
 	} else {
 		memset(fbp, def_b[c], finfo.smem_len);
@@ -152,47 +152,25 @@ static void
 
 // Return the font8x8 bitmap for a specifric ascii character
 static char*
-    font8x8_get_bitmap(int ascii)
+    font8x8_get_bitmap(uint32_t codepoint)
 {
 	// Get the bitmap for that ASCII character
-	if (ascii >= 0 && ascii <= 0x7F) {
-		return font8x8_basic[ascii];
-		/*
-	// NOTE: This is obviously no longer ASCII ;).
-	// TODO?: We do not support multibyte encodings, so don't pretend to.
-	//        And you'll notice the question mark after that TODO... Because we don't have an easy solution:
-	//        We can't switch to wchar_t and/or just use the locale/multibyte aware libc functions, or iconv,
-	//        because locales are completely FUBAR on Kobo (we're good on Kindle) so all this is broken.
-	//            You might not have realized it, because busybox optionally rolls its own multibyte libc functions,
-	//            and these do work, because they don't rely on the libc and its locale handling.
-	//        That leaves us with handling UTF-8/Unicode (either in char or a custom data type) ourselves,
-	//        which, while not insurmountable, is fairly annoying given the use-case and the scope of this tool.
-	//        I don't know how well static linking to another libc (musl?) would work,
-	//        and we do depend on glibc behavior in a number of places, so that's probably out, too...
-	// NOTE: Further reading on the subject, in no particular order:
-	//       https://stackoverflow.com/q/7298059
-	//       https://github.com/JuliaLang/utf8proc
-	//       https://stackoverflow.com/q/25803627
-	//       https://github.com/benkasminbullock/unicode-c
-	//       https://www.cprogramming.com/tutorial/unicode.html
-	//       https://www.gnu.org/software/libunistring
-	//       https://www.tldp.org/HOWTO/Unicode-HOWTO-6.html
-	//       https://www.cl.cam.ac.uk/~mgk25/unicode.html
-	//       https://unicodebook.readthedocs.io/
-	//
-	} else if (ascii >= 0x80 && ascii <= 0x9F) {
-		return font8x8_control[ascii];
-	} else if (ascii >= 0xA0 && ascii <= 0xFF) {
-		return font8x8_ext_latin[ascii];
-	} else if (ascii >= 0x390 && ascii <= 0x3C9) {
-		return font8x8_greek[ascii - 0x390];
-	} else if (ascii >= 0x2500 && ascii <= 0x257F) {
-		return font8x8_box[ascii - 0x2500];
-	} else if (ascii >= 0x2580 && ascii <= 0x259F) {
-		return font8x8_block[ascii - 0x2580];
-	*/
+	if (codepoint <= 0x7F) {
+		return font8x8_basic[codepoint];
+	} else if (codepoint >= 0x80 && codepoint <= 0x9F) {
+		return font8x8_control[codepoint - 0x80];
+	} else if (codepoint >= 0xA0 && codepoint <= 0xFF) {
+		return font8x8_ext_latin[codepoint - 0xA0];
+	} else if (codepoint >= 0x390 && codepoint <= 0x3C9) {
+		return font8x8_greek[codepoint - 0x390];
+	} else if (codepoint >= 0x2500 && codepoint <= 0x257F) {
+		return font8x8_box[codepoint - 0x2500];
+	} else if (codepoint >= 0x2580 && codepoint <= 0x259F) {
+		return font8x8_block[codepoint - 0x2580];
+	} else if (codepoint >= 0x3040 && codepoint <= 0x309F) {
+		return font8x8_hiragana[codepoint - 0x3040];
 	} else {
-		fprintf(stderr, "[FBInk] %d is out of ASCII range! (part of a multibyte sequence?)\n", ascii);
+		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by our font!\n", codepoint);
 		return font8x8_basic[0];
 	}
 }
@@ -200,9 +178,9 @@ static char*
 // Render a specific font8x8 glyph into a pixmap
 // (base size: 8x8, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
 static void
-    font8x8_render(int ascii, char* glyph_pixmap)
+    font8x8_render(uint32_t codepoint, char* glyph_pixmap)
 {
-	char* bitmap = font8x8_get_bitmap(ascii);
+	char* bitmap = font8x8_get_bitmap(codepoint);
 
 	unsigned short int x;
 	unsigned short int y;
@@ -239,23 +217,24 @@ static struct mxcfb_rect
 	unsigned short int fgC = is_inverted ? WHITE : BLACK;
 	unsigned short int bgC = is_inverted ? BLACK : WHITE;
 
-	unsigned short int i;
 	unsigned short int x;
 	unsigned short int y;
 	// Adjust row in case we're a continuation of a multi-line print...
 	row = (unsigned short int) (row + multiline_offset);
 
 	// Compute the length of our actual string
-	// NOTE: We already took care in fbink_print() of making sure that the string passed in text
-	//       wouldn't exceed the maximum printable length, MAXCOLS - col
-	size_t len = strnlen(text, MAXCOLS);
-	printf("StrLen: %zu\n", len);
+	// NOTE: We already took care in fbink_print() of making sure that the string passed in text wouldn't take up
+	//       more space (as in columns, not bytes) than (MAXCOLS - col), the maximum printable length.
+	//       And as we're printing glyphs, we need to iterate over the number of characters/grapheme clusters,
+	//       not bytes.
+	unsigned int charcount = u8_strlen(text);
+	printf("Character count: %u (over %zu bytes)\n", charcount, strlen(text));
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
-		.top    = (uint32_t)((row - multiline_offset) * FONTH),
-		.left   = (uint32_t)(col * FONTW),
-		.width  = multiline_offset > 0U ? (vinfo.xres - (uint32_t)(col * FONTW)) : (uint32_t)(len * FONTW),
+		.top   = (uint32_t)((row - multiline_offset) * FONTH),
+		.left  = (uint32_t)(col * FONTW),
+		.width = multiline_offset > 0U ? (vinfo.xres - (uint32_t)(col * FONTW)) : (uint32_t)(charcount * FONTW),
 		.height = (uint32_t)((multiline_offset + 1U) * FONTH),
 	};
 
@@ -275,15 +254,15 @@ static struct mxcfb_rect
 	// NOTE: Given that, if we can perfectly fit our final character on the line
 	//       (c.f., how is_perfect_fit is computed, basically, when MAXCOLS is not a fraction),
 	//       this effectively works around the issue, in which case, we don't need to do anything :).
-	// NOTE: Use len + col == MAXCOLS if we want to do that everytime we simply *hit* the edge...
-	if (len == MAXCOLS && !is_perfect_fit) {
-		fill_rect((unsigned short int) (region.left + (len * FONTW)),
+	// NOTE: Use charcount + col == MAXCOLS if we want to do that everytime we simply *hit* the edge...
+	if (charcount == MAXCOLS && !is_perfect_fit) {
+		fill_rect((unsigned short int) (region.left + (charcount * FONTW)),
 			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
-			  (unsigned short int) (vinfo.xres - (len * FONTW)),
+			  (unsigned short int) (vinfo.xres - (charcount * FONTW)),
 			  FONTH,
 			  bgC);
 		// Update region to the full width, no matter the circumstances
-		region.width += (vinfo.xres - (len * FONTW));
+		region.width += (vinfo.xres - (charcount * FONTW));
 		// And make sure it's properly clamped, in case it's already been tweaked because of a multiline print
 		if (region.width + region.left > vinfo.xres) {
 			region.width = vinfo.xres - region.left;
@@ -294,8 +273,8 @@ static struct mxcfb_rect
 	// NOTE: In case of a multi-line centered print, we can't really trust the final col,
 	//       it might be significantly different than the others, and as such, we'd be computing a cropped region.
 	//       Make the region cover the full width of the screen to make sure we won't miss anything.
-	if (multiline_offset > 0 && is_centered) {
-		region.left  = 0;
+	if (multiline_offset > 0U && is_centered) {
+		region.left  = 0U;
 		region.width = vinfo.xres;
 		printf("Updated region.left to %u & region.width to %u because of multi-line centering\n",
 		       region.left,
@@ -306,16 +285,27 @@ static struct mxcfb_rect
 	// NOTE: Unneeded, we already plot the background when handling font glyphs ;).
 	//fill_rect(region.left, region.top, region.width, region.height, bgC);
 
-	// Alloc our pixmap on the heap, and re-use it.
+	// Alloc our pixmap on the stack, and re-use it.
 	// NOTE: We tried using automatic VLAs, but that... didn't go well.
 	//       (as in, subtle (or not so) memory and/or stack corruption).
 	char* pixmap = NULL;
-	pixmap       = malloc(sizeof(*pixmap) * (size_t)(FONTW * FONTH));
+	// NOTE: Using alloca may prevent inlining. That said, trust that the compiler will do the right thing.
+	//       As for why alloca:
+	//       It's a very small allocation, we'll always fully write to it so we don't care about its initialization,
+	//       -> it's a perfect fit for the stack.
+	//       In any other situation (i.e., constant FONTW & FONTH), it'd have been an automatic.
+	pixmap = alloca(sizeof(*pixmap) * (size_t)(FONTW * FONTH));
 
-	// Loop through all characters in the text string
-	for (i = 0U; i < len; i++) {
-		// get the glyph's pixmap
-		font8x8_render(text[i], pixmap);
+	// Loop through all the *characters* in the text string
+	unsigned int       bi = 0U;
+	unsigned short int ci = 0U;
+	uint32_t           ch = 0U;
+	while ((ch = u8_nextchar(text, &bi)) != 0U) {
+		printf("Char %u (@ %u) out of %u is @ byte offset %d and is U+%04X\n", ci + 1, ci, charcount, bi, ch);
+
+		// Get the glyph's pixmap
+		font8x8_render(ch, pixmap);
+
 		// loop through pixel rows
 		for (y = 0U; y < FONTH; y++) {
 			// loop through pixel columns
@@ -324,22 +314,22 @@ static struct mxcfb_rect
 				char b = pixmap[(y * FONTW) + x];
 				if (b > 0) {
 					// plot the pixel (fg, text)
-					put_pixel((unsigned short int) ((col * FONTW) + (i * FONTW) + x),
+					put_pixel((unsigned short int) ((col * FONTW) + (ci * FONTW) + x),
 						  (unsigned short int) ((row * FONTH) + y),
 						  fgC);
 				} else {
 					// this is background,
 					// fill it so that we'll be visible no matter what was on screen behind us.
-					put_pixel((unsigned short int) ((col * FONTW) + (i * FONTW) + x),
+					put_pixel((unsigned short int) ((col * FONTW) + (ci * FONTW) + x),
 						  (unsigned short int) ((row * FONTH) + y),
 						  bgC);
 				}
 			}    // end "for x"
 		}            // end "for y"
-	}                    // end "for i"
-
-	// Cleanup
-	free(pixmap);
+		// Next glyph! This serves as the source for the pen position, hence it being used as an index...
+		ci++;
+	}
+	printf("\n");
 
 	return region;
 }
@@ -394,7 +384,7 @@ static int
 		// FIXME: Handle the Carta/Pearl switch in a saner way...
 		struct mxcfb_update_marker_data update_marker = {
 			.update_marker  = update.update_marker,
-			.collision_test = 0,
+			.collision_test = 0U,
 		};
 		bool failed = false;
 		if (ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_marker) < 0) {
@@ -476,8 +466,8 @@ int
 	// NOTE: Reset original font resolution, in case we're re-init'ing,
 	//       since we're relying on the default value to calculate the scaled value,
 	//       and we're using this value to set MAXCOLS & MAXROWS, which we *need* to be sane.
-	FONTW = 8;
-	FONTH = 8;
+	FONTW = 8U;
+	FONTH = 8U;
 
 	// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
 	// NOTE: We still want to compare against the screen's "height", even in Landscape mode...
@@ -598,7 +588,16 @@ int
 		}
 
 		// See if we need to break our string down into multiple lines...
-		size_t len = strlen(string);
+		size_t       len       = strlen(string);
+		unsigned int charcount = u8_strlen(string);
+		// Check how much extra storage is used up by multibyte sequences.
+		if (len > charcount) {
+			printf(
+			    "Extra storage used up by multibyte sequences: %zu bytes (for a total of %u characters over %zu bytes)\n",
+			    (len - charcount),
+			    charcount,
+			    len);
+		}
 
 		// Compute the amount of characters we can actually print on *one* line given the column we start on...
 		// NOTE: When centered, we enforce one padding character on the left,
@@ -619,10 +618,10 @@ int
 		// Given that, compute how many lines it'll take to print all that in these constraints...
 		unsigned short int lines            = 1U;
 		unsigned short int multiline_offset = 0U;
-		if (len > available_cols) {
-			lines = (unsigned short int) (len / available_cols);
+		if (charcount > available_cols) {
+			lines = (unsigned short int) (charcount / available_cols);
 			// If there's a remainder, we'll need an extra line ;).
-			if (len % available_cols) {
+			if (charcount % available_cols) {
 				lines++;
 			}
 		}
@@ -641,26 +640,56 @@ int
 
 		// We'll copy our text in chunks of formatted line...
 		// NOTE: Store that on the heap, we've had some wacky adventures with automatic VLAs...
+		// NOTE: UTF-8 is at most 4 bytes per sequence, make sure we can fit a full line of UTF-8 (+ 1 'wide' NULL).
 		char* line = NULL;
-		line       = malloc(sizeof(*line) * (MAXCOLS + 1U));
+		line       = calloc((MAXCOLS + 1U) * 4U, sizeof(*line));
+		// NOTE: This makes sure it's always full of NULLs, to avoid weird shit happening later with u8_strlen()
+		//       and uninitialized or re-used memory...
+		//       Namely, a single NULL immediately followed by something that *might* be interpreted as an UTF-8
+		//       sequence would trip it into counting bogus characters.
+		//       And as snprintf() only NULL-terminates what it expects to be a non-wide string,
+		//       it's not filling the end of the buffer with NULLs, it just outputs a single one!
+		//       That's why we're also using calloc here.
+		//       Plus, the OS will ensure that'll always be smarter than malloc + memset ;).
 
-		printf(
-		    "Need %hu lines to print %zu characters over %hu available columns\n", lines, len, available_cols);
+		printf("Need %hu lines to print %u characters over %hu available columns\n",
+		       lines,
+		       charcount,
+		       available_cols);
 
 		// Do the initial computation outside the loop,
-		// so we'll be able to re-use line_len to accurately compute left when looping.
-		size_t left     = len - (size_t)((multiline_offset) * (available_cols));
-		size_t line_len = 0U;
-		// If we have multiple lines to print, draw 'em line per line
+		// so we'll be able to re-use line_len to accurately compute chars_left when looping.
+		// NOTE: This is where it gets tricky. With multibyte sequences, 1 byte doesn't necessarily mean 1 char.
+		//       And we need to work both in amount of characters for column/width arithmetic,
+		//       and in bytes for snprintf...
+		unsigned int chars_left = charcount - (unsigned int) ((multiline_offset) * (available_cols));
+		unsigned int line_len   = 0U;
+		// If we have multiple lines worth of stuff to print, draw it line per line
 		for (multiline_offset = 0U; multiline_offset < lines; multiline_offset++) {
 			// Compute the amount of characters left to print...
-			left -= line_len;
+			chars_left -= line_len;
 			// And use it to compute the amount of characters to print on *this* line
-			line_len = MIN(left, available_cols);
-			printf("Size to print: %zu out of %zu (left: %zu)\n",
+			line_len = MIN(chars_left, available_cols);
+			printf("Characters to print: %u out of %zu (left: %u)\n",
 			       line_len,
 			       available_cols * sizeof(char),
-			       left);
+			       chars_left);
+
+			// NOTE: Now we just have to switch from characters to bytes, both for line_len & chars_left...
+			// First, get the byte offset of this section of our string (i.e., this line)...
+			unsigned int line_offset = u8_offset(string, charcount - chars_left);
+			// ... then compute how many bytes we'll need to store it.
+			unsigned int line_bytes = 0U;
+			unsigned int cn         = 0U;
+			while (u8_nextchar(string + line_offset, &line_bytes) != 0U) {
+				cn++;
+				// We've walked our full line, stop!
+				if (cn >= line_len) {
+					break;
+				}
+			}
+			printf("Line takes up %u bytes\n", line_bytes);
+			int bytes_printed = 0;
 
 			// Just fudge the column for centering...
 			if (fbink_config->is_centered) {
@@ -675,12 +704,16 @@ int
 				}
 				printf("Adjusted column to %hd for centering\n", col);
 			}
-			// Just fudge the (formatted) line length for free padding :).
+			// Just fudge the (formatted) line size in bytes for free padding :).
 			if (fbink_config->is_padded) {
 				// Don't fudge if also centered, we'll need the original value to split padding in two.
-				line_len = fbink_config->is_centered ? line_len : available_cols;
 				if (!fbink_config->is_centered) {
-					printf("Adjusted line_len to %zu for padding\n", line_len);
+					// Padding character is a space, which is 1 byte, so that's good enough ;).
+					line_bytes += (available_cols - line_len);
+					line_len = available_cols;
+					printf("Adjusted line_len to %u (over %u bytes) for padding\n",
+					       line_len,
+					       line_bytes);
 				}
 			}
 
@@ -690,40 +723,48 @@ int
 				col = 0;
 
 				// Compute our padding length
-				size_t left_pad = (MAXCOLS - line_len) / 2U;
+				unsigned int left_pad = (MAXCOLS - line_len) / 2U;
 				// We want to enforce at least a single character of padding on the left.
-				if (left_pad < 1) {
-					left_pad = 1;
+				if (left_pad < 1U) {
+					left_pad = 1U;
 				}
 				// As for the right padding, we basically just have to print 'til the edge of the screen
-				size_t right_pad = MAXCOLS - line_len - left_pad;
+				unsigned int right_pad = MAXCOLS - line_len - left_pad;
 
 				// Compute the effective right padding value for science!
-				printf("Total size: %zu + %zu + %zu = %zu\n",
+				printf("Total size: %u + %u + %u = %u\n",
 				       left_pad,
 				       line_len,
 				       right_pad,
 				       left_pad + line_len + right_pad);
+
 				// NOTE: To recap:
-				//       Copy at most MAXCOLS + 1 bytes into line (thus ensuring its NULL-terminated)
+				//       Copy at most (MAXCOLS * 4) + 1 bytes into line
+				//       (thus ensuring both that its NULL-terminated, and fits a full UTF-8 string)
 				//       Left-pad a blank with spaces for left_pad characters
 				//       Print line_len characters of our string at the correct position for this line
 				//       Right pad a blank with spaces for right_pad characters
 				//           Given that we split this in three sections,
 				//           left-padding would have had a similar effect.
-				snprintf(line,
-					 MAXCOLS + 1U,
-					 "%*s%.*s%-*s",
-					 (int) left_pad,
-					 "",
-					 (int) line_len,
-					 string + (len - left),
-					 (int) right_pad,
-					 "");
+				bytes_printed = snprintf(line,
+							 (MAXCOLS * 4U) + 1U,
+							 "%*s%.*s%-*s",
+							 (int) left_pad,
+							 "",
+							 (int) line_bytes,
+							 string + line_offset,
+							 (int) right_pad,
+							 "");
 			} else {
-				// NOTE: We use a field width and not a precision flag to get free padding on request.
-				snprintf(line, line_len + 1U, "%*s", (int) line_len, string + (len - left));
+				// NOTE: We use a field width to get free padding on request and a precision for safety.
+				bytes_printed = snprintf(line,
+							 line_bytes + 1U,
+							 "%*.*s",
+							 (int) line_bytes,
+							 (int) line_bytes,
+							 string + line_offset);
 			}
+			printf("snprintf wrote %d bytes\n", bytes_printed);
 
 			region = draw(line,
 				      (unsigned short int) row,
@@ -771,14 +812,16 @@ int
 {
 	// We'll need to store our formatted string somewhere...
 	// NOTE: Fit a single page's worth of characters in it, as that's the best we can do anyway.
-	char*  buffer  = NULL;
-	size_t pagelen = sizeof(*buffer) * ((size_t)(MAXCOLS * MAXROWS) + 1U);
-	buffer         = malloc(pagelen);
+	// NOTE: UTF-8 is at most 4 bytes per sequence, make sure we can fit a full page of UTF-8 (+1 'wide' NULL) :).
+	char* buffer = NULL;
+	// NOTE: We use calloc to make sure it'll always be zero-initialized,
+	//       and the OS is smart enough to make it fast if we don't use the full space anyway (CoW zeroing).
+	buffer = calloc(((size_t)(MAXCOLS * MAXROWS) + 1U) * 4U, sizeof(*buffer));
 
 	va_list args;
 	va_start(args, fmt);
-	// vsnprintf will ensure we'll always be NULL-terminated ;).
-	vsnprintf(buffer, pagelen, fmt, args);
+	// vsnprintf will ensure we'll always be NULL-terminated (but not NULL-backfilled, hence calloc!) ;).
+	vsnprintf(buffer, ((size_t)(MAXCOLS * MAXROWS) * 4U) + 1U, fmt, args);
 	va_end(args);
 
 	int rc = fbink_print(fbfd, buffer, fbink_config);

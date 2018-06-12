@@ -87,7 +87,7 @@ endif
 
 ##
 # Now that we're done fiddling with flags, let's build stuff!
-LIB_SRCS=fbink.c
+LIB_SRCS=fbink.c utf8/utf8.c
 CMD_SRCS=fbink_cmd.c
 
 # How we handle our library creation
@@ -114,7 +114,7 @@ $(OUT_DIR)/%.o: %.c
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -o $@ -c $<
 
 outdir:
-	mkdir -p $(OUT_DIR)/shared $(OUT_DIR)/static
+	mkdir -p $(OUT_DIR)/shared/utf8 $(OUT_DIR)/static/utf8
 
 all: outdir fbink
 
@@ -168,13 +168,17 @@ clean:
 	rm -rf Release/*.a
 	rm -rf Release/*.so*
 	rm -rf Release/shared/*.o
+	rm -rf Release/shared/utf8/*.o
 	rm -rf Release/static/*.o
+	rm -rf Release/static/utf8/*.o
 	rm -rf Release/*.o
 	rm -rf Release/fbink
 	rm -rf Debug/*.a
 	rm -rf Debug/*.so*
 	rm -rf Debug/shared/*.o
+	rm -rf Debug/shared/utf8/*.o
 	rm -rf Debug/static/*.o
+	rm -rf Debug/static/utf8/*.o
 	rm -rf Debug/*.o
 	rm -rf Debug/fbink
 

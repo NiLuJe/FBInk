@@ -87,6 +87,10 @@ FBINK_API int fbink_open(void);
 FBINK_API int fbink_init(int);
 
 // Print a string on screen.
+// NOTE: The string is expected to be encoded in valid UTF-8, no validation of any kind is done by the library,
+//       and we assume a single multibyte sequence will occupy a maximum of 4 bytes.
+//       c.f., my rant about Kobo's broken libc in fbink_internal.h for more details behind this choice.
+//       Since any decent system of the last decade should default to UTF-8, that should be pretty much transparent...
 // if fd is -1, the fb is opened for the duration of this call
 FBINK_API int fbink_print(int, const char*, FBInkConfig*);
 

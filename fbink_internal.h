@@ -39,19 +39,49 @@
 #include <sys/param.h>
 #include <unistd.h>
 
+// NOTE: This is from https://www.cprogramming.com/tutorial/unicode.html
+//       This helps us handling *VALID* UTF-8 properly, since our font does support extended Latin & Greek.
+//       That said, we have no (easy) way of ensuring all input either is or gets converted to valid UTF-8,
+//       because the libc is severely hobbled on Kobo: gconv modules are missing & locales are missing or broken,
+//       (at the very least), so we can't use iconv and we can't use locale/multibyte aware libc functions,
+//       which in turn renders the wchar_t data type fairly unusable.
+//       FWIW, we're okay on the Kindle.
+//       BusyBox can bypass some of these issues (for its applets) by basically rolling its own
+//       locale/unicode/widechar/multibyte handling, provided you set it up properly ;).
+//       We're left with handling UTF-8 ourselves, and taking great pains to try not to horribly blow up on invalid input.
+//
+//       TL;DR; for API users: You have to ensure you feed FBInk valid UTF-8 input,
+//              as this is the encoding it effectively uses internally, without any kind of validation.
+//
+//       Further reading on the subject, in no particular order:
+//           https://github.com/benkasminbullock/unicode-c
+//           https://stackoverflow.com/q/7298059
+//           https://github.com/JuliaLang/utf8proc
+//           https://stackoverflow.com/q/25803627
+//           https://www.gnu.org/software/libunistring
+//           https://www.tldp.org/HOWTO/Unicode-HOWTO-6.html
+//           https://www.cl.cam.ac.uk/~mgk25/unicode.html
+//           https://unicodebook.readthedocs.io/
+#include "utf8/utf8.h"
+
 #ifdef FBINK_FOR_KINDLE
 #	include "eink/mxcfb-kindle.h"
 #else
 #	include "eink/mxcfb-kobo.h"
 #endif
+
+// NOTE: This is from https://github.com/dhepper/font8x8
+//       See also https://github.com/achilikin/bdfe
+//       & https://unix.stackexchange.com/q/119236
+//       for fun ways to add new glyphs or just change the font ;).
+//       And for a repository of BDF fonts, c.f., https://github.com/Tecate/bitmap-fonts
 #include "font8x8/font8x8_basic.h"
-/*
 #include "font8x8/font8x8_block.h"
 #include "font8x8/font8x8_box.h"
 #include "font8x8/font8x8_control.h"
 #include "font8x8/font8x8_ext_latin.h"
 #include "font8x8/font8x8_greek.h"
-*/
+#include "font8x8/font8x8_hiragana.h"
 
 // Fallback version tag...
 #ifndef FBINK_VERSION
@@ -95,12 +125,12 @@ bool   fb_is_mapped = false;
 // And those stay purely inside the library
 struct fb_var_screeninfo vinfo;
 struct fb_fix_screeninfo finfo;
-unsigned short int       FONTW         = 8;
-unsigned short int       FONTH         = 8;
-unsigned short int       FONTSIZE_MULT = 1;
+unsigned short int       FONTW         = 8U;
+unsigned short int       FONTH         = 8U;
+unsigned short int       FONTSIZE_MULT = 1U;
 // Slightly arbitrary-ish fallback values
-unsigned short int MAXROWS        = 45;
-unsigned short int MAXCOLS        = 32;
+unsigned short int MAXROWS        = 45U;
+unsigned short int MAXCOLS        = 32U;
 bool               is_perfect_fit = false;
 
 static void put_pixel_Gray8(unsigned short int, unsigned short int, unsigned short int);
@@ -128,8 +158,8 @@ static void fill_rect(unsigned short int,
 		      unsigned short int);
 static void clear_screen(unsigned short int);
 
-static char* font8x8_get_bitmap(int);
-static void  font8x8_render(int, char*);
+static char* font8x8_get_bitmap(uint32_t);
+static void  font8x8_render(uint32_t, char*);
 
 static struct mxcfb_rect draw(const char*, unsigned short int, unsigned short int, bool, bool, unsigned short int);
 

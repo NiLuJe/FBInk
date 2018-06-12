@@ -208,6 +208,8 @@ int
 	if (optind < argc) {
 		while (optind < argc) {
 			string = argv[optind++];
+			// NOTE: This is probably the point where we'd be validating/converting string to UTF-8,
+			//       if we had an easy way to... (c.f., my rant about Kobo's broken libc in fbink_internal.h)
 			printf(
 			    "Printing string '%s' @ column %hd, row %hd (inverted: %s, flashing: %s, centered: %s, left padded: %s, clear screen: %s)\n",
 			    string,
