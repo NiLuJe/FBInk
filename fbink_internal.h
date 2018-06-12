@@ -46,8 +46,8 @@
 //       (at the very least), so we can't use iconv and we can't use locale/multibyte aware libc functions,
 //       which in turn renders the wchar_t data type fairly unusable.
 //       FWIW, we're okay on the Kindle.
-//       BusyBox can bypass some of these issues by basically rolling its own locale/unicode/widechar/multibyte handling,
-//       provided you set it up properly ;).
+//       BusyBox can bypass some of these issues (for its applets) by basically rolling its own
+//       locale/unicode/widechar/multibyte handling, provided you set it up properly ;).
 //       We're left with handling UTF-8 ourselves, and taking great pains to try not to horribly blow up on invalid input.
 //
 //       TL;DR; for API users: You have to ensure you feed FBInk valid UTF-8 input,
