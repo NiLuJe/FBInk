@@ -656,15 +656,17 @@ int
 
 		// We'll copy our text in chunks of formatted line...
 		// NOTE: Store that on the heap, we've had some wacky adventures with automatic VLAs...
-		// NOTE: UTF-8 is at most 4 bytes per sequence, make sure we can fit a full line of UTF-8.
+		// NOTE: UTF-8 is at most 4 bytes per sequence, make sure we can fit a full line of UTF-8 (+ 1 'wide' NULL).
 		char* line = NULL;
-		size_t linelen = sizeof(*line) * ((MAXCOLS * 4) + 1U);
-		line           = malloc(linelen);
+		line       = calloc((MAXCOLS + 1U) * 4U, sizeof(*line));
 		// NOTE: Make sure it's always full of NULLs, to avoid weird shit happening later with u8_strlen()
 		//       and uninitialized or re-used memory...
 		//       Namely, a single NULL immediately followed by something that *might* be interpreted as an UTF-8
 		//       sequence would trip it into counting bogus characters.
-		memset(line, 0, linelen);
+		//       And as snprintf() only NULL-terminates what it expects to be a non-wide string,
+		//       it's not filling the end of the buffer with NULLs, it just outputs a single one!
+		//       That's why we're also using calloc here, the OS will ensure that'll always be smarter than
+		//       malloc + memset ;).
 
 		printf(
 		    "Need %hu lines to print %u characters over %hu available columns\n", lines, charcount, available_cols);
@@ -756,7 +758,7 @@ int
 				//           Given that we split this in three sections,
 				//           left-padding would have had a similar effect.
 				bytes_printed = snprintf(line,
-					 (MAXCOLS * 4) + 1U,
+					 (MAXCOLS * 4U) + 1U,
 					 "%*s%.*s%-*s",
 					 (int) left_pad,
 					 "",
@@ -825,7 +827,7 @@ int
 
 	va_list args;
 	va_start(args, fmt);
-	// vsnprintf will ensure we'll always be NULL-terminated ;).
+	// vsnprintf will ensure we'll always be NULL-terminated (but not NULL-backfilled, hence calloc!) ;).
 	vsnprintf(buffer, pagelen, fmt, args);
 	va_end(args);
 
