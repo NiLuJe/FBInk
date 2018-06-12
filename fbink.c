@@ -305,11 +305,16 @@ static struct mxcfb_rect
 	// NOTE: Unneeded, we already plot the background when handling font glyphs ;).
 	//fill_rect(region.left, region.top, region.width, region.height, bgC);
 
-	// Alloc our pixmap on the heap, and re-use it.
+	// Alloc our pixmap on the stack, and re-use it.
 	// NOTE: We tried using automatic VLAs, but that... didn't go well.
 	//       (as in, subtle (or not so) memory and/or stack corruption).
 	char* pixmap = NULL;
-	pixmap       = malloc(sizeof(*pixmap) * (size_t)(FONTW * FONTH));
+	// NOTE: Using alloca may prevent inlining. Trust that the compiler will do the right thing.
+	//       As for why alloca:
+	//       It's a very small allocation, we'll always fully write to it so we don't care about its initialization,
+	//       -> it's a perfect fit for the stack.
+	//       In any other situation (i.e., constant FONTH & FONTW), it'd have been an automatic.
+	pixmap       = alloca(sizeof(*pixmap) * (size_t)(FONTW * FONTH));
 
 	// Loop through all the *characters* in the text string
 	unsigned int bi = 0;
@@ -345,9 +350,6 @@ static struct mxcfb_rect
 		ci++;
 	}
 	printf("\n");
-
-	// Cleanup
-	free(pixmap);
 
 	return region;
 }
