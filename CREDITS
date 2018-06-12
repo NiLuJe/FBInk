@@ -4,7 +4,7 @@ This project makes use of a number of third-party libraries, which we'll acknowl
 		Released under the public domain.
 		(https://github.com/dhepper/font8x8)
 
-	* libu8, (Basic UTF-8 manipulation routines), by Jeff Bezanson,
+	* libu8 (Basic UTF-8 manipulation routines), by Jeff Bezanson,
 		Released under the public domain.
 		(https://www.cprogramming.com/tutorial/unicode.html)
 
