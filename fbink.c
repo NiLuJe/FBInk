@@ -662,14 +662,13 @@ int
 		    "Need %hu lines to print %u characters over %hu available columns\n", lines, charcount, available_cols);
 
 		// Do the initial computation outside the loop,
-		// so we'll be able to re-use line_len to accurately compute left when looping.
-		// NOTE: This is where it gets tricky... With multibyte sequence, 1 byte doesn't necessarily mean 1 char
+		// so we'll be able to re-use line_len to accurately compute chars_left when looping.
+		// NOTE: This is where it gets tricky. With multibyte sequences, 1 byte doesn't necessarily mean 1 char.
 		//       And we need to work both in amount of characters for column/width arithmetic,
 		//       and in bytes for snprintf...
 		unsigned int chars_left = charcount - (unsigned int)((multiline_offset) * (available_cols));
-		//size_t left     = len - (size_t)((multiline_offset) * (available_cols));
 		unsigned int line_len = 0U;
-		// If we have multiple lines to print, draw 'em line per line
+		// If we have multiple lines worth of stuff to print, draw it line per line
 		for (multiline_offset = 0U; multiline_offset < lines; multiline_offset++) {
 			// Compute the amount of characters left to print...
 			chars_left -= line_len;
