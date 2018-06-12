@@ -168,13 +168,17 @@ clean:
 	rm -rf Release/*.a
 	rm -rf Release/*.so*
 	rm -rf Release/shared/*.o
+	rm -rf Release/shared/utf8/*.o
 	rm -rf Release/static/*.o
+	rm -rf Release/static/utf8/*.o
 	rm -rf Release/*.o
 	rm -rf Release/fbink
 	rm -rf Debug/*.a
 	rm -rf Debug/*.so*
 	rm -rf Debug/shared/*.o
+	rm -rf Debug/shared/utf8/*.o
 	rm -rf Debug/static/*.o
+	rm -rf Debug/static/utf8/*.o
 	rm -rf Debug/*.o
 	rm -rf Debug/fbink
 

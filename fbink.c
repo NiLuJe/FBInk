@@ -155,7 +155,7 @@ static char*
     font8x8_get_bitmap(uint32_t codepoint)
 {
 	// Get the bitmap for that ASCII character
-	if (codepoint >= 0 && codepoint <= 0x7F) {
+	if (codepoint <= 0x7F) {
 		return font8x8_basic[codepoint];
 	// NOTE: This is obviously no longer ASCII ;).
 	// TODO?: We do not support multibyte encodings, so don't pretend to.
@@ -608,7 +608,7 @@ int
 		// See if we need to break our string down into multiple lines...
 		size_t len = strlen(string);
 		unsigned int charcount = u8_strlen(string);
-		// See if we need to allocate more space for multibyte characters...
+		// See if we need to allocate more space for multibyte sequences...
 		if (len > charcount) {
 			printf("Extra storage needed because of multibyte sequences: %zu (size: %zu vs. chars: %u)\n", (len - charcount), len, charcount);
 		}
@@ -632,10 +632,10 @@ int
 		// Given that, compute how many lines it'll take to print all that in these constraints...
 		unsigned short int lines            = 1U;
 		unsigned short int multiline_offset = 0U;
-		if (len > available_cols) {
-			lines = (unsigned short int) (len / available_cols);
+		if (charcount > available_cols) {
+			lines = (unsigned short int) (charcount / available_cols);
 			// If there's a remainder, we'll need an extra line ;).
-			if (len % available_cols) {
+			if (charcount % available_cols) {
 				lines++;
 			}
 		}
@@ -654,26 +654,31 @@ int
 
 		// We'll copy our text in chunks of formatted line...
 		// NOTE: Store that on the heap, we've had some wacky adventures with automatic VLAs...
+		// NOTE: UTF-8 is at most 4 bytes per sequence, make sure we can fit a full line of UTF-8.
 		char* line = NULL;
-		line       = malloc(sizeof(*line) * (MAXCOLS + 1U));
+		line       = malloc(sizeof(*line) * ((MAXCOLS * 4) + 1U));
 
 		printf(
-		    "Need %hu lines to print %zu characters over %hu available columns\n", lines, len, available_cols);
+		    "Need %hu lines to print %u characters over %hu available columns\n", lines, charcount, available_cols);
 
 		// Do the initial computation outside the loop,
 		// so we'll be able to re-use line_len to accurately compute left when looping.
-		size_t left     = len - (size_t)((multiline_offset) * (available_cols));
-		size_t line_len = 0U;
+		// NOTE: This is where it gets tricky... With multibyte sequence, 1 byte doesn't necessarily mean 1 char
+		//       And we need to work both in amount of characters for column/width arithmetic,
+		//       and in bytes for snprintf...
+		unsigned int chars_left = charcount - (unsigned int)((multiline_offset) * (available_cols));
+		//size_t left     = len - (size_t)((multiline_offset) * (available_cols));
+		unsigned int line_len = 0U;
 		// If we have multiple lines to print, draw 'em line per line
 		for (multiline_offset = 0U; multiline_offset < lines; multiline_offset++) {
 			// Compute the amount of characters left to print...
-			left -= line_len;
+			chars_left -= line_len;
 			// And use it to compute the amount of characters to print on *this* line
-			line_len = MIN(left, available_cols);
-			printf("Size to print: %zu out of %zu (left: %zu)\n",
+			line_len = MIN(chars_left, available_cols);
+			printf("Size to print: %u out of %zu (left: %u)\n",
 			       line_len,
 			       available_cols * sizeof(char),
-			       left);
+			       chars_left);
 
 			// Just fudge the column for centering...
 			if (fbink_config->is_centered) {
@@ -693,7 +698,7 @@ int
 				// Don't fudge if also centered, we'll need the original value to split padding in two.
 				line_len = fbink_config->is_centered ? line_len : available_cols;
 				if (!fbink_config->is_centered) {
-					printf("Adjusted line_len to %zu for padding\n", line_len);
+					printf("Adjusted line_len to %u for padding\n", line_len);
 				}
 			}
 
@@ -703,39 +708,65 @@ int
 				col = 0;
 
 				// Compute our padding length
-				size_t left_pad = (MAXCOLS - line_len) / 2U;
+				unsigned int left_pad = (MAXCOLS - line_len) / 2U;
 				// We want to enforce at least a single character of padding on the left.
 				if (left_pad < 1) {
 					left_pad = 1;
 				}
 				// As for the right padding, we basically just have to print 'til the edge of the screen
-				size_t right_pad = MAXCOLS - line_len - left_pad;
+				unsigned int right_pad = MAXCOLS - line_len - left_pad;
 
 				// Compute the effective right padding value for science!
-				printf("Total size: %zu + %zu + %zu = %zu\n",
+				printf("Total size: %u + %u + %u = %u\n",
 				       left_pad,
 				       line_len,
 				       right_pad,
 				       left_pad + line_len + right_pad);
+				// Now we just have to switch from characters to bytes, both for line_len & chars_left...
+				// First, get the byte offset of this section of our string...
+				unsigned int line_offset = u8_offset(string, charcount - chars_left);
+				// ... then compute how many bytes we'll need to store it
+				unsigned int line_bytes = 0;
+				unsigned int cn = 0;
+				while (u8_nextchar(string + line_offset, &line_bytes) != 0) {
+					cn++;
+					// We've walked our full line, stop!
+					if (cn >= line_len) {
+						break;
+					}
+				}
+				printf("Padded & centered line takes %u bytes\n", line_bytes);
 				// NOTE: To recap:
-				//       Copy at most MAXCOLS + 1 bytes into line (thus ensuring its NULL-terminated)
+				//       Copy at most (MAXCOLS * 4) + 1 bytes into line
+				//       (thus ensuring both that its NULL-terminated, and fits a full UTF-8 string)
 				//       Left-pad a blank with spaces for left_pad characters
 				//       Print line_len characters of our string at the correct position for this line
 				//       Right pad a blank with spaces for right_pad characters
 				//           Given that we split this in three sections,
 				//           left-padding would have had a similar effect.
 				snprintf(line,
-					 MAXCOLS + 1U,
+					 (MAXCOLS * 4) + 1U,
 					 "%*s%.*s%-*s",
 					 (int) left_pad,
 					 "",
-					 (int) line_len,
-					 string + (len - left),
+					 (int) line_bytes,
+					 string + line_offset,
 					 (int) right_pad,
 					 "");
 			} else {
 				// NOTE: We use a field width and not a precision flag to get free padding on request.
-				snprintf(line, line_len + 1U, "%*s", (int) line_len, string + (len - left));
+				unsigned int line_offset = u8_offset(string, charcount - chars_left);
+				unsigned int line_bytes = 0;
+				unsigned int cn = 0;
+				while (u8_nextchar(string + line_offset, &line_bytes) != 0) {
+					cn++;
+					// We've walked our full line, stop!
+					if (cn >= line_len) {
+						break;
+					}
+				}
+				printf("Line takes %u bytes\n", line_bytes);
+				snprintf(line, line_bytes + 1U, "%*s", (int) line_bytes, string + line_offset);
 			}
 
 			region = draw(line,
@@ -784,8 +815,9 @@ int
 {
 	// We'll need to store our formatted string somewhere...
 	// NOTE: Fit a single page's worth of characters in it, as that's the best we can do anyway.
+	// NOTE: UTF-8 is at most 4 bytes per sequence, make sure we can fit a full page of UTF-8 :).
 	char*  buffer  = NULL;
-	size_t pagelen = sizeof(*buffer) * ((size_t)(MAXCOLS * MAXROWS) + 1U);
+	size_t pagelen = sizeof(*buffer) * ((size_t)(MAXCOLS * MAXROWS * 4) + 1U);
 	buffer         = malloc(pagelen);
 
 	va_list args;
