@@ -39,6 +39,29 @@
 #include <sys/param.h>
 #include <unistd.h>
 
+// NOTE: This is from https://www.cprogramming.com/tutorial/unicode.html
+//       This helps us handling *VALID* UTF-8 properly, since our font does support extended Latin & Greek.
+//       That said, we have no (easy) way of ensuring all input either is or gets converted to valid UTF-8,
+//       because the libc is severely hobbled on Kobo: gconv modules are missing & locales are missing or broken,
+//       (at the very least), so we can't use iconv and we can't use locale/multibyte aware libc functions,
+//       which in turn renders the wchar_t data type fairly unusable.
+//       FWIW, we're okay on the Kindle.
+//       BusyBox bypasses some of these issues by basically rolling its own unicode/widechar/multibyte handling,
+//       but even there, it's not all rosy.
+//       We're left with handling UTF-8 ourselves, and taking great pains to not not horribly blow up on invalid input.
+//
+//       TL;DR; for API users: You have to ensure you feed FBInk valid UTF-8 input,
+//              as this is the encoding it effectively uses internally, without any kind of validation.
+//
+//       Further reading on the subject, in no particular order:
+//           https://github.com/benkasminbullock/unicode-c
+//           https://stackoverflow.com/q/7298059
+//           https://github.com/JuliaLang/utf8proc
+//           https://stackoverflow.com/q/25803627
+//           https://www.gnu.org/software/libunistring
+//           https://www.tldp.org/HOWTO/Unicode-HOWTO-6.html
+//           https://www.cl.cam.ac.uk/~mgk25/unicode.html
+//           https://unicodebook.readthedocs.io/
 #include "utf8/utf8.h"
 
 #ifdef FBINK_FOR_KINDLE

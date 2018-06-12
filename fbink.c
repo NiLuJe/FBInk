@@ -157,28 +157,6 @@ static char*
 	// Get the bitmap for that ASCII character
 	if (codepoint <= 0x7F) {
 		return font8x8_basic[codepoint];
-	// NOTE: This is obviously no longer ASCII ;).
-	// TODO?: We do not support multibyte encodings, so don't pretend to.
-	//        And you'll notice the question mark after that TODO... Because we don't have an easy solution:
-	//        We can't switch to wchar_t and/or just use the locale/multibyte aware libc functions, or iconv,
-	//        because locales are completely FUBAR on Kobo (we're good on Kindle) so all this is broken.
-	//            You might not have realized it, because busybox optionally rolls its own multibyte libc functions,
-	//            and these do work, because they don't rely on the libc and its locale handling.
-	//        That leaves us with handling UTF-8/Unicode (either in char or a custom data type) ourselves,
-	//        which, while not insurmountable, is fairly annoying given the use-case and the scope of this tool.
-	//        I don't know how well static linking to another libc (musl?) would work,
-	//        and we do depend on glibc behavior in a number of places, so that's probably out, too...
-	// NOTE: Further reading on the subject, in no particular order:
-	//       https://stackoverflow.com/q/7298059
-	//       https://github.com/JuliaLang/utf8proc
-	//       https://stackoverflow.com/q/25803627
-	//       https://github.com/benkasminbullock/unicode-c
-	//       https://www.cprogramming.com/tutorial/unicode.html
-	//       https://www.gnu.org/software/libunistring
-	//       https://www.tldp.org/HOWTO/Unicode-HOWTO-6.html
-	//       https://www.cl.cam.ac.uk/~mgk25/unicode.html
-	//       https://unicodebook.readthedocs.io/
-	//
 	} else if (codepoint >= 0x80 && codepoint <= 0x9F) {
 		return font8x8_control[codepoint - 0x80];
 	} else if (codepoint >= 0xA0 && codepoint <= 0xFF) {
