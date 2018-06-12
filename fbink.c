@@ -659,14 +659,14 @@ int
 		// NOTE: UTF-8 is at most 4 bytes per sequence, make sure we can fit a full line of UTF-8 (+ 1 'wide' NULL).
 		char* line = NULL;
 		line       = calloc((MAXCOLS + 1U) * 4U, sizeof(*line));
-		// NOTE: Make sure it's always full of NULLs, to avoid weird shit happening later with u8_strlen()
+		// NOTE: This makes sure it's always full of NULLs, to avoid weird shit happening later with u8_strlen()
 		//       and uninitialized or re-used memory...
 		//       Namely, a single NULL immediately followed by something that *might* be interpreted as an UTF-8
 		//       sequence would trip it into counting bogus characters.
 		//       And as snprintf() only NULL-terminates what it expects to be a non-wide string,
 		//       it's not filling the end of the buffer with NULLs, it just outputs a single one!
-		//       That's why we're also using calloc here, the OS will ensure that'll always be smarter than
-		//       malloc + memset ;).
+		//       That's why we're also using calloc here.
+		//       Plus, the OS will ensure that'll always be smarter than malloc + memset ;).
 
 		printf(
 		    "Need %hu lines to print %u characters over %hu available columns\n", lines, charcount, available_cols);
@@ -820,7 +820,6 @@ int
 	// NOTE: Fit a single page's worth of characters in it, as that's the best we can do anyway.
 	// NOTE: UTF-8 is at most 4 bytes per sequence, make sure we can fit a full page of UTF-8 (+1 'wide' NULL) :).
 	char*  buffer  = NULL;
-	size_t pagelen = sizeof(*buffer) * (((((size_t)(MAXCOLS * MAXROWS) + 1U) * 4U)));
 	// NOTE: We use calloc to make sure it'll always be zero-initialized,
 	//       and the OS is smart enough to make it fast if we don't use the full space anyway (CoW zeroing).
 	buffer         = calloc(((size_t)(MAXCOLS * MAXROWS) + 1U) * 4U, sizeof(*buffer));
@@ -828,7 +827,7 @@ int
 	va_list args;
 	va_start(args, fmt);
 	// vsnprintf will ensure we'll always be NULL-terminated (but not NULL-backfilled, hence calloc!) ;).
-	vsnprintf(buffer, pagelen, fmt, args);
+	vsnprintf(buffer, ((size_t)(MAXCOLS * MAXROWS) + 1U) * 4U, fmt, args);
 	va_end(args);
 
 	int rc = fbink_print(fbfd, buffer, fbink_config);
