@@ -656,7 +656,13 @@ int
 		// NOTE: Store that on the heap, we've had some wacky adventures with automatic VLAs...
 		// NOTE: UTF-8 is at most 4 bytes per sequence, make sure we can fit a full line of UTF-8.
 		char* line = NULL;
-		line       = malloc(sizeof(*line) * ((MAXCOLS * 4) + 1U));
+		size_t linelen = sizeof(*line) * ((MAXCOLS * 4) + 4U);
+		line           = malloc(linelen);
+		// NOTE: Make sure it's always full of NULLs, to avoid weird shit happening later with u8_strlen()
+		//       and uninitialized or re-used memory...
+		//       Namely, a single NULL immediately followed by something that *might* be interpreted as an UTF-8
+		//       sequence would trip it into counting bogus characters.
+		memset(line, 0, linelen);
 
 		printf(
 		    "Need %hu lines to print %u characters over %hu available columns\n", lines, charcount, available_cols);
@@ -810,6 +816,8 @@ int
 	char*  buffer  = NULL;
 	size_t pagelen = sizeof(*buffer) * ((size_t)(MAXCOLS * MAXROWS * 4) + 1U);
 	buffer         = malloc(pagelen);
+	// NOTE: And make sure it's full of NULLs, no matter what.
+	memset(buffer, 0, pagelen);
 
 	va_list args;
 	va_start(args, fmt);
