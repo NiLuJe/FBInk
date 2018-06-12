@@ -74,10 +74,13 @@ unsigned int u8_toucs(uint32_t *dest, unsigned int sz, const char *src, int srcs
         }
         ch = 0;
         switch (nb) {
-            /* these fall through deliberately */
+        // fall through
         case 3: ch += (unsigned char)*src++; ch <<= 6;
+        // fall through
         case 2: ch += (unsigned char)*src++; ch <<= 6;
+        // fall through
         case 1: ch += (unsigned char)*src++; ch <<= 6;
+        // fall through
         case 0: ch += (unsigned char)*src++;
         }
         ch -= offsetsFromUTF8[nb];
