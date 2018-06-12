@@ -363,9 +363,9 @@ int u8_escape_wchar(char *buf, unsigned int sz, uint32_t ch)
     return snprintf(buf, sz, "%c", (char)ch);
 }
 
-int u8_escape(char *buf, unsigned int sz, const char *src, bool escape_quotes)
+unsigned int u8_escape(char *buf, unsigned int sz, const char *src, bool escape_quotes)
 {
-    int c=0;
+    unsigned int c=0;
     int amt;
     unsigned int i = 0;
 
@@ -377,8 +377,10 @@ int u8_escape(char *buf, unsigned int sz, const char *src, bool escape_quotes)
         else {
             amt = u8_escape_wchar(buf, sz - c, u8_nextchar(src, &i));
         }
-        c += amt;
-        buf += amt;
+        if (amt > 0) {
+            c += (unsigned int) amt;
+            buf += amt;
+        }
     }
     if (c < sz)
         *buf = '\0';
@@ -449,7 +451,7 @@ bool u8_is_locale_utf8(char *locale)
 int u8_vprintf(const char *fmt, va_list ap)
 {
     int cnt;
-    unsigned int sz=0;
+    size_t sz=0;
     char *buf;
     uint32_t *wcs;
 
@@ -457,13 +459,13 @@ int u8_vprintf(const char *fmt, va_list ap)
     buf = (char*)alloca(sz);
  try_print:
     cnt = vsnprintf(buf, sz, fmt, ap);
-    if (cnt >= sz) {
-        buf = (char*)alloca(cnt - sz + 1);
-        sz = cnt + 1;
+    if (cnt > 0 && (size_t) cnt >= sz) {
+        buf = (char*)alloca((size_t)cnt - sz + 1);
+        sz = (size_t) cnt + 1;
         goto try_print;
     }
-    wcs = (uint32_t*)alloca((cnt+1) * sizeof(uint32_t));
-    cnt = u8_toucs(wcs, cnt+1, buf, cnt);
+    wcs = (uint32_t*)alloca((size_t)(cnt+1) * sizeof(uint32_t));
+    cnt = (int) u8_toucs(wcs, (size_t)cnt+1, buf, cnt);
     printf("%ls", (wchar_t*)wcs);
     return cnt;
 }

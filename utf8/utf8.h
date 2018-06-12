@@ -55,9 +55,9 @@ unsigned int u8_unescape(char *buf, unsigned int sz, const char *src);
 int u8_escape_wchar(char *buf, unsigned int sz, uint32_t ch);
 
 /* convert UTF-8 "src" to ASCII with escape sequences.
-   if escape_quotes is nonzero, quote characters will be preceded by
+   if escape_quotes is true, quote characters will be preceded by
    backslashes as well. */
-int u8_escape(char *buf, unsigned int sz, const char *src, bool escape_quotes);
+unsigned int u8_escape(char *buf, unsigned int sz, const char *src, bool escape_quotes);
 
 /* return a pointer to the first occurrence of ch in s, or NULL if not
    found. character index of found character returned in *charn. */
