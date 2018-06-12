@@ -656,7 +656,7 @@ int
 		// NOTE: Store that on the heap, we've had some wacky adventures with automatic VLAs...
 		// NOTE: UTF-8 is at most 4 bytes per sequence, make sure we can fit a full line of UTF-8.
 		char* line = NULL;
-		size_t linelen = sizeof(*line) * ((MAXCOLS * 4) + 4U);
+		size_t linelen = sizeof(*line) * ((MAXCOLS * 4) + 1U);
 		line           = malloc(linelen);
 		// NOTE: Make sure it's always full of NULLs, to avoid weird shit happening later with u8_strlen()
 		//       and uninitialized or re-used memory...

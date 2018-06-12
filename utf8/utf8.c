@@ -58,7 +58,7 @@ int u8_seqlen(const char *s)
 int u8_toucs(uint32_t *dest, int sz, const char *src, int srcsz)
 {
     uint32_t ch;
-    char *src_end = src + srcsz;
+    const char *src_end = src + srcsz;
     int nb;
     int i=0;
 
