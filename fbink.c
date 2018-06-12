@@ -608,9 +608,9 @@ int
 		// See if we need to break our string down into multiple lines...
 		size_t len = strlen(string);
 		unsigned int charcount = u8_strlen(string);
-		// See if we need to allocate more space for multibyte sequences...
+		// Check how much extra storage is used up by multibyte sequences.
 		if (len > charcount) {
-			printf("Extra storage needed because of multibyte sequences: %zu (size: %zu vs. chars: %u)\n", (len - charcount), len, charcount);
+			printf("Extra storage used up by multibyte sequences: %zu bytes (for a total of %u characters over %zu bytes)\n", (len - charcount), charcount, len);
 		}
 
 		// Compute the amount of characters we can actually print on *one* line given the column we start on...
