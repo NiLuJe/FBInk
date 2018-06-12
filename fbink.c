@@ -767,8 +767,8 @@ int
 					 (int) right_pad,
 					 "");
 			} else {
-				// NOTE: We use a field width and not a precision flag to get free padding on request.
-				bytes_printed = snprintf(line, line_bytes + 1U, "%*s", (int) line_bytes, string + line_offset);
+				// NOTE: We use a field width to get free padding on request and a precision for safety.
+				bytes_printed = snprintf(line, line_bytes + 1U, "%*.*s", (int) line_bytes, (int) line_bytes, string + line_offset);
 			}
 			printf("snprintf wrote %d bytes\n", bytes_printed);
 
