@@ -814,12 +814,12 @@ int
 {
 	// We'll need to store our formatted string somewhere...
 	// NOTE: Fit a single page's worth of characters in it, as that's the best we can do anyway.
-	// NOTE: UTF-8 is at most 4 bytes per sequence, make sure we can fit a full page of UTF-8 :).
+	// NOTE: UTF-8 is at most 4 bytes per sequence, make sure we can fit a full page of UTF-8 (+1 'wide' NULL) :).
 	char*  buffer  = NULL;
-	size_t pagelen = sizeof(*buffer) * ((size_t)(MAXCOLS * MAXROWS * 4) + 1U);
-	buffer         = malloc(pagelen);
-	// NOTE: And make sure it's full of NULLs, no matter what.
-	memset(buffer, 0, pagelen);
+	size_t pagelen = sizeof(*buffer) * (((((size_t)(MAXCOLS * MAXROWS) + 1U) * 4U)));
+	// NOTE: We use calloc to make sure it'll always be zero-initialized,
+	//       and the OS is smart enough to make it fast if we don't use the full space anyway (CoW zeroing).
+	buffer         = calloc(((size_t)(MAXCOLS * MAXROWS) + 1U) * 4U, sizeof(*buffer));
 
 	va_list args;
 	va_start(args, fmt);
