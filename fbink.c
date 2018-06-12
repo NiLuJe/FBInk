@@ -300,7 +300,7 @@ static struct mxcfb_rect
 	unsigned int       bi = 0U;
 	unsigned short int ci = 0U;
 	uint32_t           ch = 0U;
-	while ((ch = u8_nextchar(text, &bi)) != 0) {
+	while ((ch = u8_nextchar(text, &bi)) != 0U) {
 		printf("Char %u (@ %u) out of %u is @ byte offset %d and is U+%04X\n", ci + 1, ci, charcount, bi, ch);
 
 		// Get the glyph's pixmap
@@ -670,7 +670,7 @@ int
 			chars_left -= line_len;
 			// And use it to compute the amount of characters to print on *this* line
 			line_len = MIN(chars_left, available_cols);
-			printf("Size to print: %u out of %zu (left: %u)\n",
+			printf("Characters to print: %u out of %zu (left: %u)\n",
 			       line_len,
 			       available_cols * sizeof(char),
 			       chars_left);
@@ -708,6 +708,7 @@ int
 			if (fbink_config->is_padded) {
 				// Don't fudge if also centered, we'll need the original value to split padding in two.
 				if (!fbink_config->is_centered) {
+					// Padding character is a space, which is 1 byte, so that's good enough ;).
 					line_bytes += (available_cols - line_len);
 					line_len = available_cols;
 					printf("Adjusted line_len to %u (over %u bytes) for padding\n",
@@ -820,7 +821,7 @@ int
 	va_list args;
 	va_start(args, fmt);
 	// vsnprintf will ensure we'll always be NULL-terminated (but not NULL-backfilled, hence calloc!) ;).
-	vsnprintf(buffer, ((size_t)(MAXCOLS * MAXROWS) + 1U) * 4U, fmt, args);
+	vsnprintf(buffer, ((size_t)(MAXCOLS * MAXROWS) * 4U) + 1U, fmt, args);
 	va_end(args);
 
 	int rc = fbink_print(fbfd, buffer, fbink_config);

@@ -48,7 +48,7 @@
 //       FWIW, we're okay on the Kindle.
 //       BusyBox bypasses some of these issues by basically rolling its own unicode/widechar/multibyte handling,
 //       but even there, it's not all rosy.
-//       We're left with handling UTF-8 ourselves, and taking great pains to not not horribly blow up on invalid input.
+//       We're left with handling UTF-8 ourselves, and taking great pains to try not to horribly blow up on invalid input.
 //
 //       TL;DR; for API users: You have to ensure you feed FBInk valid UTF-8 input,
 //              as this is the encoding it effectively uses internally, without any kind of validation.
