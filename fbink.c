@@ -228,7 +228,7 @@ static struct mxcfb_rect
 	//       And as we're printing glyphs, we need to iterate over the number of characters/grapheme clusters,
 	//       not bytes.
 	unsigned int charcount = u8_strlen(text);
-	printf("Character Count: %u (over %zu bytes)\n", charcount, strlen(text));
+	printf("Character count: %u (over %zu bytes)\n", charcount, strlen(text));
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
@@ -254,7 +254,7 @@ static struct mxcfb_rect
 	// NOTE: Given that, if we can perfectly fit our final character on the line
 	//       (c.f., how is_perfect_fit is computed, basically, when MAXCOLS is not a fraction),
 	//       this effectively works around the issue, in which case, we don't need to do anything :).
-	// NOTE: Use len + col == MAXCOLS if we want to do that everytime we simply *hit* the edge...
+	// NOTE: Use charcount + col == MAXCOLS if we want to do that everytime we simply *hit* the edge...
 	if (charcount == MAXCOLS && !is_perfect_fit) {
 		fill_rect((unsigned short int) (region.left + (charcount * FONTW)),
 			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
@@ -289,11 +289,11 @@ static struct mxcfb_rect
 	// NOTE: We tried using automatic VLAs, but that... didn't go well.
 	//       (as in, subtle (or not so) memory and/or stack corruption).
 	char* pixmap = NULL;
-	// NOTE: Using alloca may prevent inlining. Trust that the compiler will do the right thing.
+	// NOTE: Using alloca may prevent inlining. That said, trust that the compiler will do the right thing.
 	//       As for why alloca:
 	//       It's a very small allocation, we'll always fully write to it so we don't care about its initialization,
 	//       -> it's a perfect fit for the stack.
-	//       In any other situation (i.e., constant FONTH & FONTW), it'd have been an automatic.
+	//       In any other situation (i.e., constant FONTW & FONTH), it'd have been an automatic.
 	pixmap = alloca(sizeof(*pixmap) * (size_t)(FONTW * FONTH));
 
 	// Loop through all the *characters* in the text string
