@@ -313,10 +313,10 @@ static struct mxcfb_rect
 
 	// Loop through all the *characters* in the text string
 	unsigned int bi = 0;
-	unsigned short int cn = 0;
+	unsigned short int ci = 0;
 	uint32_t ch = 0;
 	while ((ch = u8_nextchar(text, &bi)) != 0) {
-		printf("Char %u out of %u is @ byte offset %d and is U+%04X\n", cn, charcount, bi, ch);
+		printf("Char %u (@ %u) out of %u is @ byte offset %d and is U+%04X\n", ci + 1, ci, charcount, bi, ch);
 
 		// Get the glyph's pixmap
 		font8x8_render(ch, pixmap);
@@ -329,20 +329,20 @@ static struct mxcfb_rect
 				char b = pixmap[(y * FONTW) + x];
 				if (b > 0) {
 					// plot the pixel (fg, text)
-					put_pixel((unsigned short int) ((col * FONTW) + (cn * FONTW) + x),
+					put_pixel((unsigned short int) ((col * FONTW) + (ci * FONTW) + x),
 						  (unsigned short int) ((row * FONTH) + y),
 						  fgC);
 				} else {
 					// this is background,
 					// fill it so that we'll be visible no matter what was on screen behind us.
-					put_pixel((unsigned short int) ((col * FONTW) + (cn * FONTW) + x),
+					put_pixel((unsigned short int) ((col * FONTW) + (ci * FONTW) + x),
 						  (unsigned short int) ((row * FONTH) + y),
 						  bgC);
 				}
 			}    // end "for x"
 		}            // end "for y"
-
-		cn++;
+		// Next glyph! This serves as the source for the pen position, hence it being used as an index...
+		ci++;
 	}
 	printf("\n");
 
