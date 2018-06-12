@@ -118,12 +118,12 @@ bool   fb_is_mapped = false;
 // And those stay purely inside the library
 struct fb_var_screeninfo vinfo;
 struct fb_fix_screeninfo finfo;
-unsigned short int       FONTW         = 8;
-unsigned short int       FONTH         = 8;
-unsigned short int       FONTSIZE_MULT = 1;
+unsigned short int       FONTW         = 8U;
+unsigned short int       FONTH         = 8U;
+unsigned short int       FONTSIZE_MULT = 1U;
 // Slightly arbitrary-ish fallback values
-unsigned short int MAXROWS        = 45;
-unsigned short int MAXCOLS        = 32;
+unsigned short int MAXROWS        = 45U;
+unsigned short int MAXCOLS        = 32U;
 bool               is_perfect_fit = false;
 
 static void put_pixel_Gray8(unsigned short int, unsigned short int, unsigned short int);
