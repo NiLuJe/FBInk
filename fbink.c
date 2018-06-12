@@ -701,6 +701,7 @@ int
 				}
 			}
 			printf("Line takes up %u bytes\n", line_bytes);
+			int bytes_printed = 0;
 
 			// Just fudge the column for centering...
 			if (fbink_config->is_centered) {
@@ -754,7 +755,7 @@ int
 				//       Right pad a blank with spaces for right_pad characters
 				//           Given that we split this in three sections,
 				//           left-padding would have had a similar effect.
-				snprintf(line,
+				bytes_printed = snprintf(line,
 					 (MAXCOLS * 4) + 1U,
 					 "%*s%.*s%-*s",
 					 (int) left_pad,
@@ -765,8 +766,9 @@ int
 					 "");
 			} else {
 				// NOTE: We use a field width and not a precision flag to get free padding on request.
-				snprintf(line, line_bytes + 1U, "%*s", (int) line_bytes, string + line_offset);
+				bytes_printed = snprintf(line, line_bytes + 1U, "%*s", (int) line_bytes, string + line_offset);
 			}
+			printf("snprintf wrote %d bytes\n", bytes_printed);
 
 			region = draw(line,
 				      (unsigned short int) row,
