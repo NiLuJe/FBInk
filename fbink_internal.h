@@ -75,6 +75,7 @@
 #include "font8x8/font8x8_control.h"
 #include "font8x8/font8x8_ext_latin.h"
 #include "font8x8/font8x8_greek.h"
+#include "font8x8/font8x8_hiragana.h"
 
 // Fallback version tag...
 #ifndef FBINK_VERSION

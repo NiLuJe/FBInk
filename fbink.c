@@ -167,6 +167,8 @@ static char*
 		return font8x8_box[codepoint - 0x2500];
 	} else if (codepoint >= 0x2580 && codepoint <= 0x259F) {
 		return font8x8_block[codepoint - 0x2580];
+	} else if (codepoint >= 0x3040 && codepoint <= 0x309F) {
+		return font8x8_hiragana[codepoint - 0x3040];
 	} else {
 		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by our font!\n", codepoint);
 		return font8x8_basic[0];
