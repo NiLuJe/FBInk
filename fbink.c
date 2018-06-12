@@ -680,6 +680,21 @@ int
 			       available_cols * sizeof(char),
 			       chars_left);
 
+			// NOTE: Now we just have to switch from characters to bytes, both for line_len & chars_left...
+			// First, get the byte offset of this section of our string (i.e., this line)...
+			unsigned int line_offset = u8_offset(string, charcount - chars_left);
+			// ... then compute how many bytes we'll need to store it.
+			unsigned int line_bytes = 0;
+			unsigned int cn = 0;
+			while (u8_nextchar(string + line_offset, &line_bytes) != 0) {
+				cn++;
+				// We've walked our full line, stop!
+				if (cn >= line_len) {
+					break;
+				}
+			}
+			printf("Line takes up %u bytes\n", line_bytes);
+
 			// Just fudge the column for centering...
 			if (fbink_config->is_centered) {
 				col = (short int) ((MAXCOLS / 2U) - (line_len / 2U));
@@ -693,12 +708,13 @@ int
 				}
 				printf("Adjusted column to %hd for centering\n", col);
 			}
-			// Just fudge the (formatted) line length for free padding :).
+			// Just fudge the (formatted) line size in bytes for free padding :).
 			if (fbink_config->is_padded) {
 				// Don't fudge if also centered, we'll need the original value to split padding in two.
-				line_len = fbink_config->is_centered ? line_len : available_cols;
 				if (!fbink_config->is_centered) {
-					printf("Adjusted line_len to %u for padding\n", line_len);
+					line_bytes += (available_cols - line_len);
+					line_len = available_cols;
+					printf("Adjusted line_len to %u (over %u bytes) for padding\n", line_len, line_bytes);
 				}
 			}
 
@@ -722,20 +738,7 @@ int
 				       line_len,
 				       right_pad,
 				       left_pad + line_len + right_pad);
-				// Now we just have to switch from characters to bytes, both for line_len & chars_left...
-				// First, get the byte offset of this section of our string...
-				unsigned int line_offset = u8_offset(string, charcount - chars_left);
-				// ... then compute how many bytes we'll need to store it
-				unsigned int line_bytes = 0;
-				unsigned int cn = 0;
-				while (u8_nextchar(string + line_offset, &line_bytes) != 0) {
-					cn++;
-					// We've walked our full line, stop!
-					if (cn >= line_len) {
-						break;
-					}
-				}
-				printf("Padded & centered line takes %u bytes\n", line_bytes);
+
 				// NOTE: To recap:
 				//       Copy at most (MAXCOLS * 4) + 1 bytes into line
 				//       (thus ensuring both that its NULL-terminated, and fits a full UTF-8 string)
@@ -755,17 +758,6 @@ int
 					 "");
 			} else {
 				// NOTE: We use a field width and not a precision flag to get free padding on request.
-				unsigned int line_offset = u8_offset(string, charcount - chars_left);
-				unsigned int line_bytes = 0;
-				unsigned int cn = 0;
-				while (u8_nextchar(string + line_offset, &line_bytes) != 0) {
-					cn++;
-					// We've walked our full line, stop!
-					if (cn >= line_len) {
-						break;
-					}
-				}
-				printf("Line takes %u bytes\n", line_bytes);
 				snprintf(line, line_bytes + 1U, "%*s", (int) line_bytes, string + line_offset);
 			}
 
