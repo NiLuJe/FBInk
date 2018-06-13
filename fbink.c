@@ -692,20 +692,17 @@ int
 			uint32_t             ch = 0U;
 			while ((ch = u8_nextchar(string + line_offset, &line_bytes)) != 0U) {
 				cn++;
-				// NOTE: This is fairly hackish: in every case, we get extra blank lines
-				//       (w/ left=0; or with chars_left underflowing when padding is enabled),
-				//       and padding only actually applies to the last line.
-				//       Granted, that last one may be by design...
-				//       Or just kill padding if we catch a LF?
-				// We've hit a linefeed, stop!
+				// NOTE: Honor linefeeds...
+				//       The main use-case for this is throwing tail'ed logfiles at us and having them
+				//       be readable instead of a jumbled glued together mess ;).
 				if (ch == 0x0A) {
 					printf("Caught a linefeed!\n");
 					// NOTE: We're essentially forcing a reflow by cutting the line mid-stream,
 					//       so we have to update our counters...
-					//       But we can only correct one of chars_left or line_len,
+					//       But we can only correct *one* of chars_left or line_len,
 					//       to avoid screwing the count on the next iteration if we correct both,
 					//       since the one depend on the other.
-					//       And as, for the rest of this iteration of the loop, we only rely on
+					//       And as, for the rest of this iteration/line, we only rely on
 					//       line_len being accurate (for padding & centering), the choice is easy.
 					// Increment lines, because of course we're adding a line,
 					// even if the reflowing changes that'll cause mean we might not end up using it.
@@ -718,7 +715,7 @@ int
 					line_len = cn;
 					// Don't touch line_offset, the beginning of our line has not changed,
 					// only its length was cut short.
-					printf("Updated lines to %u & line_len to %u\n", lines, line_len);
+					printf("Adjusted lines to %u & line_len to %u\n", lines, line_len);
 					break;
 				}
 				// We've walked our full line, stop!
