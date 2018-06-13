@@ -698,7 +698,9 @@ int
 				cn++;
 				// NOTE: This is fairly hackish: in every case, we get extra blank lines
 				//       (w/ left=0; or with chars_left underflowing when padding is enabled),
-				//       and padding only actually applies to uncut lines? (i.e., the last).
+				//       and padding only actually applies to the last line.
+				//       Granted, that last one may be by design...
+				//       Or just kill padding if we catch a LF?
 				// We've hit a linefeed, stop!
 				if (ch == 0x0A) {
 					printf("Caught a linefeed!\n");
