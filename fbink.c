@@ -720,6 +720,7 @@ int
 					// Don't touch line_offset, the beginning of our line has not changed,
 					// only its length was cut short.
 					printf("Adjusted lines to %u & line_len to %u\n", lines, line_len);
+					// And of course we break, because that was the whole point of this shenanigan!
 					break;
 				}
 				// We've walked our full line, stop!
