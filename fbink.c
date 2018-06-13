@@ -213,7 +213,7 @@ static struct mxcfb_rect
 	 bool               is_centered,
 	 unsigned short int multiline_offset)
 {
-	printf("Printing '%s' @ line offset %hu\n", text, multiline_offset);
+	printf("Printing '%s' @ line offset %hu (meaning row %d)\n", text, multiline_offset, row + multiline_offset);
 	unsigned short int fgC = is_inverted ? WHITE : BLACK;
 	unsigned short int bgC = is_inverted ? BLACK : WHITE;
 
