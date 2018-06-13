@@ -75,6 +75,8 @@
 //       & https://unix.stackexchange.com/q/119236
 //       for fun ways to add new glyphs or just change the font ;).
 //       And for a repository of BDF fonts, c.f., https://github.com/Tecate/bitmap-fonts
+// NOTE: See also tools/hextoc.py for a working experiment with Unifont's hex format,
+//       that can yield you a choice of a few different fonts ;).
 #include "font8x8/font8x8_basic.h"
 #include "font8x8/font8x8_block.h"
 #include "font8x8/font8x8_box.h"

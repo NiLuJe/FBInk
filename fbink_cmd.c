@@ -207,6 +207,7 @@ int
 	char* string;
 	if (optind < argc) {
 		while (optind < argc) {
+			int linecount = -1;
 			string = argv[optind++];
 			// NOTE: This is probably the point where we'd be validating/converting string to UTF-8,
 			//       if we had an easy way to... (c.f., my rant about Kobo's broken libc in fbink_internal.h)
@@ -220,11 +221,13 @@ int
 			    fbink_config.is_centered ? "true" : "false",
 			    fbink_config.is_padded ? "true" : "false",
 			    fbink_config.is_cleared ? "true" : "false");
-			if (fbink_print(fbfd, string, &fbink_config) != EXIT_SUCCESS) {
+			if ((linecount = fbink_print(fbfd, string, &fbink_config)) < 0) {
 				fprintf(stderr, "Failed to print that string!\n");
 			}
 			// NOTE: Don't clobber previous entries if multiple strings were passed...
-			fbink_config.row++;
+			//       We make sure to trust print's return value,
+			//       because it knows how much space it already took up ;).
+			fbink_config.row = (short int) (fbink_config.row + linecount);
 			// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
 		}
 	} else {

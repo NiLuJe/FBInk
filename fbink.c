@@ -213,7 +213,7 @@ static struct mxcfb_rect
 	 bool               is_centered,
 	 unsigned short int multiline_offset)
 {
-	printf("Printing '%s' @ line offset %hu\n", text, multiline_offset);
+	printf("Printing '%s' @ line offset %hu (meaning row %d)\n", text, multiline_offset, row + multiline_offset);
 	unsigned short int fgC = is_inverted ? WHITE : BLACK;
 	unsigned short int bgC = is_inverted ? BLACK : WHITE;
 
@@ -314,6 +314,10 @@ static struct mxcfb_rect
 				char b = pixmap[(y * FONTW) + x];
 				if (b > 0) {
 					// plot the pixel (fg, text)
+					// NOTE: Use (+ FONTW - x) instead of (+ x) for fonts converted from Unifont's
+					//       hex format, otherwise, they're vertically mirrored :?
+					//       This might be fucking with kerning a tiny bit, though...
+					//       c.f., tools/hextoc.py
 					put_pixel((unsigned short int) ((col * FONTW) + (ci * FONTW) + x),
 						  (unsigned short int) ((row * FONTH) + y),
 						  fgC);
@@ -534,7 +538,7 @@ int
 		keep_fd = false;
 		if (-1 == (fbfd = fbink_open())) {
 			fprintf(stderr, "[FBInk] Failed to open the framebuffer, aborting . . .\n");
-			return EXIT_FAILURE;
+			return -1;
 		}
 	}
 
@@ -549,7 +553,7 @@ int
 			char  buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
 			fprintf(stderr, "[FBInk] mmap: %s\n", errstr);
-			return EXIT_FAILURE;
+			return -1;
 		} else {
 			fb_is_mapped = true;
 		}
@@ -561,6 +565,8 @@ int
 	short int row = fbink_config->row;
 
 	struct mxcfb_rect region;
+	// We declare that a bit early, because that'll hold our return value on success.
+	unsigned short int multiline_offset = 0U;
 
 	if (fb_is_mapped) {
 		// Clear screen?
@@ -617,7 +623,6 @@ int
 		}
 		// Given that, compute how many lines it'll take to print all that in these constraints...
 		unsigned short int lines            = 1U;
-		unsigned short int multiline_offset = 0U;
 		if (charcount > available_cols) {
 			lines = (unsigned short int) (charcount / available_cols);
 			// If there's a remainder, we'll need an extra line ;).
@@ -662,17 +667,24 @@ int
 		// NOTE: This is where it gets tricky. With multibyte sequences, 1 byte doesn't necessarily mean 1 char.
 		//       And we need to work both in amount of characters for column/width arithmetic,
 		//       and in bytes for snprintf...
-		unsigned int chars_left = charcount - (unsigned int) ((multiline_offset) * (available_cols));
+		unsigned int chars_left = charcount;
 		unsigned int line_len   = 0U;
 		// If we have multiple lines worth of stuff to print, draw it line per line
-		for (multiline_offset = 0U; multiline_offset < lines; multiline_offset++) {
+		while (chars_left > line_len) {
+			printf("Line %u (of ~%u), previous line was %u characters long and there were %u characters left to print\n", multiline_offset + 1, lines, line_len, chars_left);
+			// Make sure we don't try to draw off-screen...
+			if (row + multiline_offset >= MAXROWS) {
+				printf("Can only print %hu lines, discarding the %u characters left!\n", MAXROWS, chars_left - line_len);
+				// And that's it, we're done.
+				break;
+			}
+
 			// Compute the amount of characters left to print...
 			chars_left -= line_len;
 			// And use it to compute the amount of characters to print on *this* line
 			line_len = MIN(chars_left, available_cols);
-			printf("Characters to print: %u out of %zu (left: %u)\n",
+			printf("Characters to print: %u out of the %u remaining ones\n",
 			       line_len,
-			       available_cols * sizeof(char),
 			       chars_left);
 
 			// NOTE: Now we just have to switch from characters to bytes, both for line_len & chars_left...
@@ -681,8 +693,36 @@ int
 			// ... then compute how many bytes we'll need to store it.
 			unsigned int line_bytes = 0U;
 			unsigned int cn         = 0U;
-			while (u8_nextchar(string + line_offset, &line_bytes) != 0U) {
+			uint32_t             ch = 0U;
+			while ((ch = u8_nextchar(string + line_offset, &line_bytes)) != 0U) {
 				cn++;
+				// NOTE: Honor linefeeds...
+				//       The main use-case for this is throwing tail'ed logfiles at us and having them
+				//       be readable instead of a jumbled glued together mess ;).
+				if (ch == 0x0A) {
+					printf("Caught a linefeed!\n");
+					// NOTE: We're essentially forcing a reflow by cutting the line mid-stream,
+					//       so we have to update our counters...
+					//       But we can only correct *one* of chars_left or line_len,
+					//       to avoid screwing the count on the next iteration if we correct both,
+					//       since the one depend on the other.
+					//       And as, for the rest of this iteration/line, we only rely on
+					//       line_len being accurate (for padding & centering), the choice is easy.
+					// Increment lines, because of course we're adding a line,
+					// even if the reflowing changes that'll cause mean we might not end up using it.
+					lines++;
+					// Don't decrement the byte index, we want to print the LF,
+					// (it'll render as a blank), mostly to make padding look nicer,
+					// but also so that line_bytes matches line_len ;).
+					// And finally, as we've explained earlier, trim line_len to where we stopped.
+					printf("Line length was %u characters, but LF is character number %u\n", line_len, cn);
+					line_len = cn;
+					// Don't touch line_offset, the beginning of our line has not changed,
+					// only its length was cut short.
+					printf("Adjusted lines to %u & line_len to %u\n", lines, line_len);
+					// And of course we break, because that was the whole point of this shenanigan!
+					break;
+				}
 				// We've walked our full line, stop!
 				if (cn >= line_len) {
 					break;
@@ -703,18 +743,6 @@ int
 					}
 				}
 				printf("Adjusted column to %hd for centering\n", col);
-			}
-			// Just fudge the (formatted) line size in bytes for free padding :).
-			if (fbink_config->is_padded) {
-				// Don't fudge if also centered, we'll need the original value to split padding in two.
-				if (!fbink_config->is_centered) {
-					// Padding character is a space, which is 1 byte, so that's good enough ;).
-					line_bytes += (available_cols - line_len);
-					line_len = available_cols;
-					printf("Adjusted line_len to %u (over %u bytes) for padding\n",
-					       line_len,
-					       line_bytes);
-				}
 			}
 
 			// When centered & padded, we need to split the padding in two, left & right.
@@ -755,8 +783,21 @@ int
 							 string + line_offset,
 							 (int) right_pad,
 							 "");
+			} else if (fbink_config->is_padded) {
+				// NOTE: Rely on the field width for padding ;).
+				// Padding character is a space, which is 1 byte, so that's good enough ;).
+				unsigned int padded_bytes = line_bytes + (available_cols - line_len);
+				// NOTE: Don't touch line_len, because we're *adding* new blank characters,
+				//       we're still printing the exact same amount of characters *from our string*.
+				printf("Padded %u bytes to %u to cover %u columns\n", line_bytes, padded_bytes, available_cols);
+				bytes_printed = snprintf(line,
+							 padded_bytes + 1U,
+							 "%*.*s",
+							 (int) padded_bytes,
+							 (int) line_bytes,
+							 string + line_offset);
 			} else {
-				// NOTE: We use a field width to get free padding on request and a precision for safety.
+				// NOTE: Enforce precision for safety.
 				bytes_printed = snprintf(line,
 							 line_bytes + 1U,
 							 "%*.*s",
@@ -772,6 +813,9 @@ int
 				      fbink_config->is_inverted,
 				      fbink_config->is_centered,
 				      multiline_offset);
+
+			// Next line!
+			multiline_offset++;
 		}
 
 		// Cleanup
@@ -803,7 +847,8 @@ int
 		close(fbfd);
 	}
 
-	return EXIT_SUCCESS;
+	// We return the total amount of lines we occupied on screen
+	return (int) multiline_offset;
 }
 
 // printf-like wrapper around fbink_print ;).
