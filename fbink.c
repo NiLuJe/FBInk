@@ -666,18 +666,13 @@ int
 		unsigned int chars_left = charcount;
 		unsigned int line_len   = 0U;
 		// If we have multiple lines worth of stuff to print, draw it line per line
-		for (multiline_offset = 0U; multiline_offset < lines; multiline_offset++) {
-			// FIXME: Handle extra lines due to LF-induced reflowing...
-			//        Because we may end up iterating the end of the loop with chars_left == 0
-			//        (or underflowed because of the padding issue...)
-			//        And then u8_nextchar() ends up picking up the NULL byte (I think?)
-			//        at the end of our array, and happily asking us to print a 1 byte line,
-			//        and snprintf happily obeys...
-			//        This is problematic, because one, this workaround is crappy and should not exist,
-			//        and, two, and more importantly, this skews our return value...
-			if (chars_left <= line_len) {
-				printf("Skipping empty line @ offset %u of %u\n", multiline_offset, lines);
-				continue;
+		while (chars_left > line_len) {
+			printf("Line %u (of ~%u), previous line was %u characters long and there were %u characters left to print\n", multiline_offset + 1, lines, line_len, chars_left);
+			// Make sure we don't try to draw off-screen...
+			if (row + multiline_offset >= MAXROWS) {
+				printf("Can only print %hu lines, discarding the %u characters left!\n", MAXROWS, chars_left);
+				// And that's it, we're done.
+				break;
 			}
 
 			// Compute the amount of characters left to print...
@@ -716,11 +711,6 @@ int
 					// Increment lines, because of course we're adding a line,
 					// even if the reflowing changes that'll cause mean we might not end up using it.
 					lines++;
-					// Truncate to a single screen...
-					if (row + lines > MAXROWS) {
-						printf("Can only print %hu out of %hu lines, truncating!\n", MAXROWS, lines);
-						lines = (short unsigned int) (MAXROWS - row);
-					}
 					// Don't decrement the byte index, we want to print the LF,
 					// (it'll render as a blank), mostly to make padding look nicer,
 					// but also so that line_bytes matches line_len ;).
@@ -822,6 +812,9 @@ int
 				      fbink_config->is_inverted,
 				      fbink_config->is_centered,
 				      multiline_offset);
+
+			// Next line!
+			multiline_offset++;
 		}
 
 		// Cleanup
