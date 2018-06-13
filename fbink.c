@@ -143,11 +143,7 @@ static void
     clear_screen(unsigned short int c)
 {
 	// NOTE: Grayscale palette, we could have used def_r or def_g ;).
-	if (vinfo.bits_per_pixel == 8U) {
-		memset(fbp, def_b[c], finfo.smem_len);
-	} else {
-		memset(fbp, def_b[c], finfo.smem_len);
-	}
+	memset(fbp, def_b[c], finfo.smem_len);
 }
 
 // Return the font8x8 bitmap for a specifric ascii character
