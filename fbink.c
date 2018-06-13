@@ -679,9 +679,8 @@ int
 			chars_left -= line_len;
 			// And use it to compute the amount of characters to print on *this* line
 			line_len = MIN(chars_left, available_cols);
-			printf("Characters to print: %u out of %zu (left: %u)\n",
+			printf("Characters to print: %u out of the %u remaining ones\n",
 			       line_len,
-			       available_cols * sizeof(char),
 			       chars_left);
 
 			// NOTE: Now we just have to switch from characters to bytes, both for line_len & chars_left...
