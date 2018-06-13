@@ -663,7 +663,7 @@ int
 		// NOTE: This is where it gets tricky. With multibyte sequences, 1 byte doesn't necessarily mean 1 char.
 		//       And we need to work both in amount of characters for column/width arithmetic,
 		//       and in bytes for snprintf...
-		unsigned int chars_left = charcount - (unsigned int) ((multiline_offset) * (available_cols));
+		unsigned int chars_left = charcount;
 		unsigned int line_len   = 0U;
 		// If we have multiple lines worth of stuff to print, draw it line per line
 		for (multiline_offset = 0U; multiline_offset < lines; multiline_offset++) {
