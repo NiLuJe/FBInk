@@ -699,7 +699,7 @@ int
 					// Truncate to a single screen...
 					if (row + lines > MAXROWS) {
 						printf("Can only print %hu out of %hu lines, truncating!\n", MAXROWS, lines);
-						lines = MAXROWS - row;
+						lines = (short unsigned int) (MAXROWS - row);
 					}
 					// Decrement the byte index, because we don't want to print it.
 					line_bytes--;
