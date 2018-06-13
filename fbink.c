@@ -753,18 +753,6 @@ int
 				}
 				printf("Adjusted column to %hd for centering\n", col);
 			}
-			// Just fudge the (formatted) line size in bytes for free padding :).
-			if (fbink_config->is_padded) {
-				// Don't fudge if also centered, we'll need the original value to split padding in two.
-				if (!fbink_config->is_centered) {
-					// Padding character is a space, which is 1 byte, so that's good enough ;).
-					line_bytes += (available_cols - line_len);
-					line_len = available_cols;
-					printf("Adjusted line_len to %u (over %u bytes) for padding\n",
-					       line_len,
-					       line_bytes);
-				}
-			}
 
 			// When centered & padded, we need to split the padding in two, left & right.
 			if (fbink_config->is_centered && fbink_config->is_padded) {
@@ -804,8 +792,21 @@ int
 							 string + line_offset,
 							 (int) right_pad,
 							 "");
+			} else if (fbink_config->is_padded) {
+				// NOTE: Rely on the field width for padding ;).
+				// Padding character is a space, which is 1 byte, so that's good enough ;).
+				unsigned int padded_bytes = line_bytes + (available_cols - line_len);
+				// NOTE: Don't touch line_len, because we're *adding* new blank characters,
+				//       we're still printing the exact same amount of characters *from our string*.
+				printf("Padded %u bytes to %u to cover %u columns\n", line_bytes, padded_bytes, available_cols);
+				bytes_printed = snprintf(line,
+							 padded_bytes + 1U,
+							 "%*.*s",
+							 (int) padded_bytes,
+							 (int) line_bytes,
+							 string + line_offset);
 			} else {
-				// NOTE: We use a field width to get free padding on request and a precision for safety.
+				// NOTE: Enforce precision for safety.
 				bytes_printed = snprintf(line,
 							 line_bytes + 1U,
 							 "%*.*s",
