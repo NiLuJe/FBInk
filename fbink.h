@@ -91,6 +91,7 @@ FBINK_API int fbink_init(int);
 //       and we assume a single multibyte sequence will occupy a maximum of 4 bytes.
 //       c.f., my rant about Kobo's broken libc in fbink_internal.h for more details behind this choice.
 //       Since any decent system of the last decade should default to UTF-8, that should be pretty much transparent...
+// Returns the amount of lines printed or EXIT_FAILURE
 // if fd is -1, the fb is opened for the duration of this call
 FBINK_API int fbink_print(int, const char*, FBInkConfig*);
 

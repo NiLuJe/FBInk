@@ -561,6 +561,8 @@ int
 	short int row = fbink_config->row;
 
 	struct mxcfb_rect region;
+	// We declare that a bit early, because that'll hold our return value on success.
+	unsigned short int multiline_offset = 0U;
 
 	if (fb_is_mapped) {
 		// Clear screen?
@@ -617,7 +619,6 @@ int
 		}
 		// Given that, compute how many lines it'll take to print all that in these constraints...
 		unsigned short int lines            = 1U;
-		unsigned short int multiline_offset = 0U;
 		if (charcount > available_cols) {
 			lines = (unsigned short int) (charcount / available_cols);
 			// If there's a remainder, we'll need an extra line ;).
@@ -830,7 +831,8 @@ int
 		close(fbfd);
 	}
 
-	return EXIT_SUCCESS;
+	// We return the total amount of lines we occupied on screen
+	return (int) multiline_offset;
 }
 
 // printf-like wrapper around fbink_print ;).
