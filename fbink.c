@@ -622,7 +622,7 @@ int
 			available_cols = (unsigned short int) (available_cols - col);
 		}
 		// Given that, compute how many lines it'll take to print all that in these constraints...
-		unsigned short int lines            = 1U;
+		unsigned short int lines = 1U;
 		if (charcount > available_cols) {
 			lines = (unsigned short int) (charcount / available_cols);
 			// If there's a remainder, we'll need an extra line ;).
@@ -671,10 +671,17 @@ int
 		unsigned int line_len   = 0U;
 		// If we have multiple lines worth of stuff to print, draw it line per line
 		while (chars_left > line_len) {
-			printf("Line %u (of ~%u), previous line was %u characters long and there were %u characters left to print\n", multiline_offset + 1, lines, line_len, chars_left);
+			printf(
+			    "Line %u (of ~%u), previous line was %u characters long and there were %u characters left to print\n",
+			    multiline_offset + 1,
+			    lines,
+			    line_len,
+			    chars_left);
 			// Make sure we don't try to draw off-screen...
 			if (row + multiline_offset >= MAXROWS) {
-				printf("Can only print %hu lines, discarding the %u characters left!\n", MAXROWS, chars_left - line_len);
+				printf("Can only print %hu lines, discarding the %u characters left!\n",
+				       MAXROWS,
+				       chars_left - line_len);
 				// And that's it, we're done.
 				break;
 			}
@@ -683,9 +690,7 @@ int
 			chars_left -= line_len;
 			// And use it to compute the amount of characters to print on *this* line
 			line_len = MIN(chars_left, available_cols);
-			printf("Characters to print: %u out of the %u remaining ones\n",
-			       line_len,
-			       chars_left);
+			printf("Characters to print: %u out of the %u remaining ones\n", line_len, chars_left);
 
 			// NOTE: Now we just have to switch from characters to bytes, both for line_len & chars_left...
 			// First, get the byte offset of this section of our string (i.e., this line)...
@@ -693,7 +698,7 @@ int
 			// ... then compute how many bytes we'll need to store it.
 			unsigned int line_bytes = 0U;
 			unsigned int cn         = 0U;
-			uint32_t             ch = 0U;
+			uint32_t     ch         = 0U;
 			while ((ch = u8_nextchar(string + line_offset, &line_bytes)) != 0U) {
 				cn++;
 				// NOTE: Honor linefeeds...
@@ -715,7 +720,9 @@ int
 					// (it'll render as a blank), mostly to make padding look nicer,
 					// but also so that line_bytes matches line_len ;).
 					// And finally, as we've explained earlier, trim line_len to where we stopped.
-					printf("Line length was %u characters, but LF is character number %u\n", line_len, cn);
+					printf("Line length was %u characters, but LF is character number %u\n",
+					       line_len,
+					       cn);
 					line_len = cn;
 					// Don't touch line_offset, the beginning of our line has not changed,
 					// only its length was cut short.
@@ -789,7 +796,10 @@ int
 				unsigned int padded_bytes = line_bytes + (available_cols - line_len);
 				// NOTE: Don't touch line_len, because we're *adding* new blank characters,
 				//       we're still printing the exact same amount of characters *from our string*.
-				printf("Padded %u bytes to %u to cover %u columns\n", line_bytes, padded_bytes, available_cols);
+				printf("Padded %u bytes to %u to cover %u columns\n",
+				       line_bytes,
+				       padded_bytes,
+				       available_cols);
 				bytes_printed = snprintf(line,
 							 padded_bytes + 1U,
 							 "%*.*s",

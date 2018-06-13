@@ -208,7 +208,7 @@ int
 	if (optind < argc) {
 		while (optind < argc) {
 			int linecount = -1;
-			string = argv[optind++];
+			string        = argv[optind++];
 			// NOTE: This is probably the point where we'd be validating/converting string to UTF-8,
 			//       if we had an easy way to... (c.f., my rant about Kobo's broken libc in fbink_internal.h)
 			printf(
