@@ -5,6 +5,7 @@
 # Assumes 8x8 glyphs
 # Tested on Unscii (http://pelulamu.net/unscii/)
 # And it "works", but, glyphs are rendered vertically mirrored :?
+# Or mirrored on the horizontal axis if I reverse their order (i.e., group 9 to 2 instead of 2 to 9) :?
 #
 ##
 
