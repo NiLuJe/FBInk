@@ -4,6 +4,7 @@
 # Very naive script to build a C array out of Unifont's hex format.
 # Assumes 8x8 glyphs
 # Tested on Unscii (http://pelulamu.net/unscii/)
+# And it "works", but, glyphs are rendered vertically mirrored :?
 #
 ##
 
