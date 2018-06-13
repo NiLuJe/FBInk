@@ -155,14 +155,6 @@ static char*
     font8x8_get_bitmap(uint32_t codepoint)
 {
 	// Get the bitmap for that ASCII character
-	if (codepoint <= 0x195) {
-		return unscii_block1[codepoint];
-	} else {
-		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by our font!\n", codepoint);
-		return unscii_block1[0];
-	}
-
-	/*
 	if (codepoint <= 0x7F) {
 		return font8x8_basic[codepoint];
 	} else if (codepoint >= 0x80 && codepoint <= 0x9F) {
@@ -181,7 +173,6 @@ static char*
 		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by our font!\n", codepoint);
 		return font8x8_basic[0];
 	}
-	*/
 }
 
 // Render a specific font8x8 glyph into a pixmap
@@ -323,17 +314,17 @@ static struct mxcfb_rect
 				char b = pixmap[(y * FONTW) + x];
 				if (b > 0) {
 					// plot the pixel (fg, text)
-					// NOTE: Use (+ FONTW - x) instead of (+ x) for fonts converted from Hex,
-					//       otherwise, they're vertically mirrored :?
-					//       This might be fucking with kerning a bit, though...
+					// NOTE: Use (+ FONTW - x) instead of (+ x) for fonts converted from Unifont's
+					//       hex format, otherwise, they're vertically mirrored :?
+					//       This might be fucking with kerning a tiny bit, though...
 					//       c.f., tools/hextoc.py
-					put_pixel((unsigned short int) ((col * FONTW) + (ci * FONTW) + FONTW - x),
+					put_pixel((unsigned short int) ((col * FONTW) + (ci * FONTW) + x),
 						  (unsigned short int) ((row * FONTH) + y),
 						  fgC);
 				} else {
 					// this is background,
 					// fill it so that we'll be visible no matter what was on screen behind us.
-					put_pixel((unsigned short int) ((col * FONTW) + (ci * FONTW) + FONTW - x),
+					put_pixel((unsigned short int) ((col * FONTW) + (ci * FONTW) + x),
 						  (unsigned short int) ((row * FONTH) + y),
 						  bgC);
 				}
