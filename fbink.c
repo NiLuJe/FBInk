@@ -706,30 +706,30 @@ int
 				// We've hit a linefeed, stop!
 				if (ch == 0x0A) {
 					printf("Caught a linefeed!\n");
-					// NOTE: We can only correct one of chars_left or line_len,
-					//       to avoid screwing the count on the next iteration if we correct both...
-					//       chars_left is probably easier, since we need to increase it here,
-					//       while an iteration of the loop decreases it based on line_len...
-					//       The only thing after this point that relies on line_len being accurate
-					//       *for the end of this iteration* is centering...
-					// Update chars_left, because we're cutting a line mid-stream
-					// (and we're skippig the LF itself)
-					chars_left += line_len - cn;
-					// Increment lines, because of course we're adding a line ;).
+					// NOTE: We're essentially forcing a reflow by cutting the line mid-stream,
+					//       so we have to update our counters...
+					//       But we can only correct one of chars_left or line_len,
+					//       to avoid screwing the count on the next iteration if we correct both,
+					//       since the one depend on the other.
+					//       And as, for the rest of this iteration of the loop, we only rely on
+					//       line_len being accurate (for padding & centering), the choice is easy.
+					// Increment lines, because of course we're adding a line,
+					// even if the reflowing changes that'll cause mean we might not end up using it.
 					lines++;
 					// Truncate to a single screen...
 					if (row + lines > MAXROWS) {
 						printf("Can only print %hu out of %hu lines, truncating!\n", MAXROWS, lines);
 						lines = (short unsigned int) (MAXROWS - row);
 					}
-					// Decrement the byte index, because we don't want to actually print the LF.
-					line_bytes--;
-					// And trim line_len to where we left off, so padding works.
-					printf("Line len: %u but LF is charnum: %u\n", line_len, cn);
-					//line_len = cn;
-					//line_len = MIN(chars_left, available_cols);
-					// Don't touch line_offset, the beginning of our line has not changed, only its length was cut short.
-					printf("Updated chars_left to %u; lines to %u; lines_bytes to %u; line_len to %u\n", chars_left, lines, line_bytes, line_len);
+					// Don't decrement the byte index, we want to print the LF,
+					// (it'll render as a blank), mostly to make padding look nicer,
+					// but also so that line_bytes matches line_len ;).
+					// And finally, as we've explained earlier, trim line_len to where we stopped.
+					printf("Line length was %u characters, but LF is character number %u\n", line_len, cn);
+					line_len = cn;
+					// Don't touch line_offset, the beginning of our line has not changed,
+					// only its length was cut short.
+					printf("Updated lines to %u & line_len to %u\n", lines, line_len);
 					break;
 				}
 				// We've walked our full line, stop!
