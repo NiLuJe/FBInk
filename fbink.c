@@ -667,6 +667,17 @@ int
 		unsigned int line_len   = 0U;
 		// If we have multiple lines worth of stuff to print, draw it line per line
 		for (multiline_offset = 0U; multiline_offset < lines; multiline_offset++) {
+			// FIXME: Why do we add too much lines in LF handling?
+			//        Because when we do, we end up with chars_left == 0
+			//        (or underflowed because of the padding issue...)
+			//        And then u8_nextchar() ends up picking up the NULL byte (I think?)
+			//        at the end of our array, and happily asking us to print a 1 byte line,
+			//        and snprintf happily obeys...
+			if (chars_left <= line_len) {
+				printf("Skipping empty line @ offset %u of %u\n", multiline_offset, lines);
+				continue;
+			}
+
 			// Compute the amount of characters left to print...
 			chars_left -= line_len;
 			// And use it to compute the amount of characters to print on *this* line
