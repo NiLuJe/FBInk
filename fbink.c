@@ -706,6 +706,12 @@ int
 				// We've hit a linefeed, stop!
 				if (ch == 0x0A) {
 					printf("Caught a linefeed!\n");
+					// NOTE: We can only correct one of chars_left or line_len,
+					//       to avoid screwing the count on the next iteration if we correct both...
+					//       chars_left is probably easier, since we need to increase it here,
+					//       while an iteration of the loop decreases it based on line_len...
+					//       The only thing after this point that relies on line_len being accurate
+					//       *for the end of this iteration* is centering...
 					// Update chars_left, because we're cutting a line mid-stream
 					// (and we're skippig the LF itself)
 					chars_left += line_len - cn;
