@@ -6,17 +6,30 @@
 # Tested on Unscii (http://pelulamu.net/unscii/)
 # And it "works", but, glyphs are rendered vertically mirrored :?
 # Or mirrored on the horizontal axis if I reverse their order (i.e., group 9 to 2 instead of 2 to 9) :?
+# Tweaking draw() a tiny bit yields acceptable results (c.f., the relevant comments there),
+# but might be messing with kerning...
 #
 ##
 
 import re
+import sys
+
+# We'll send the C header to stdout, but our C if/else snippet to stderr... ;).
+# And then use your shell to handle the I/O redirections, because I'm lazy :D.
+# ./hextoc.py > unscii.h 2> unscii.c
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
+fontfile = "unscii-8.hex"
+fontname = "unscii"
 
 blocknum = 0
 blockcount = 1
+blockcp = 0x0
 cp = 0x0
 prevcp = 0x0
 fmt = re.compile(r"([0-9a-fA-F]{4}):([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})")
-with open("unscii-8.hex", "r") as f:
+with open(fontfile, "r") as f:
 	for line in f:
 		m = fmt.match(line)
 		if m:
@@ -26,9 +39,12 @@ with open("unscii-8.hex", "r") as f:
 			else:
 				if blocknum > 0:
 					print("}}; // {}".format(blockcount))
+					eprint("\t}} else if (codepoint >= {:#04x} && codepoint <= {:#04x}) {{".format(int(blockcp, base=16), prevcp))
+					eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, int(blockcp, base=16)))
 				blocknum += 1
 				blockcount = 1
-				print("char unscii_block{}[][8] = {{".format(blocknum))
+				blockcp = cp
+				print("char {}_block{}[][8] = {{".format(fontname, blocknum))
 
 			print("\t{{ {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x} }},\t// U+{}".format(int(m.group(2), base=16), int(m.group(3), base=16), int(m.group(4), base=16), int(m.group(5), base=16), int(m.group(6), base=16), int(m.group(7), base=16), int(m.group(8), base=16), int(m.group(9), base=16), cp))
 			prevcp = int(cp, base=16)
