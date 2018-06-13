@@ -221,7 +221,7 @@ int
 			    fbink_config.is_centered ? "true" : "false",
 			    fbink_config.is_padded ? "true" : "false",
 			    fbink_config.is_cleared ? "true" : "false");
-			if ((linecount = fbink_print(fbfd, string, &fbink_config)) == EXIT_FAILURE) {
+			if ((linecount = fbink_print(fbfd, string, &fbink_config)) == -1) {
 				fprintf(stderr, "Failed to print that string!\n");
 			}
 			// NOTE: Don't clobber previous entries if multiple strings were passed...

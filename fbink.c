@@ -534,7 +534,7 @@ int
 		keep_fd = false;
 		if (-1 == (fbfd = fbink_open())) {
 			fprintf(stderr, "[FBInk] Failed to open the framebuffer, aborting . . .\n");
-			return EXIT_FAILURE;
+			return -1;
 		}
 	}
 
@@ -549,7 +549,7 @@ int
 			char  buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
 			fprintf(stderr, "[FBInk] mmap: %s\n", errstr);
-			return EXIT_FAILURE;
+			return -1;
 		} else {
 			fb_is_mapped = true;
 		}
@@ -683,17 +683,17 @@ int
 			unsigned int line_bytes = 0U;
 			unsigned int cn         = 0U;
 			uint32_t             ch = 0U;
-			// FIXME: u8_strchr?
 			while ((ch = u8_nextchar(string + line_offset, &line_bytes)) != 0U) {
 				cn++;
 				// NOTE: This is fairly hackish: in every case, we get extra blank lines
-				//       (w/ left=0; or with left underflowing when padding is enabled),
+				//       (w/ left=0; or with chars_left underflowing when padding is enabled),
 				//       and padding only actually applies to uncut lines? (i.e., the last).
 				// We've hit a linefeed, stop!
 				if (ch == 0x0A) {
 					printf("Caught a linefeed!\n");
 					// Update chars_left, because we're cutting a line mid-stream
-					chars_left += (line_len - cn);
+					// (and we're skippig the LF itself)
+					chars_left += line_len - cn;
 					// Increment lines, because of course we're adding a line ;).
 					lines++;
 					// Truncate to a single screen...
@@ -701,14 +701,14 @@ int
 						printf("Can only print %hu out of %hu lines, truncating!\n", MAXROWS, lines);
 						lines = (short unsigned int) (MAXROWS - row);
 					}
-					// Decrement the byte index, because we don't want to print it.
+					// Decrement the byte index, because we don't want to actually print the LF.
 					line_bytes--;
 					// And trim line_len to where we left off, so padding works.
 					printf("Line len: %u but LF is charnum: %u\n", line_len, cn);
+					//line_len = cn;
 					//line_len = MIN(chars_left, available_cols);
-					// Handle line_offset, too, because we've updated chars_left
-					//line_offset = u8_offset(string, charcount - chars_left);
-					printf("Updated chars_left to %u; lines to %u; lines_bytes to %u; line_len to %u and line_offset to %u\n", chars_left, lines, line_bytes, line_len, line_offset);
+					// Don't touch line_offset, the beginning of our line has not changed, only its length was cut short.
+					printf("Updated chars_left to %u; lines to %u; lines_bytes to %u; line_len to %u\n", chars_left, lines, line_bytes, line_len);
 					break;
 				}
 				// We've walked our full line, stop!
