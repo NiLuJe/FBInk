@@ -670,7 +670,7 @@ int
 			printf("Line %u (of ~%u), previous line was %u characters long and there were %u characters left to print\n", multiline_offset + 1, lines, line_len, chars_left);
 			// Make sure we don't try to draw off-screen...
 			if (row + multiline_offset >= MAXROWS) {
-				printf("Can only print %hu lines, discarding the %u characters left!\n", MAXROWS, chars_left);
+				printf("Can only print %hu lines, discarding the %u characters left!\n", MAXROWS, chars_left - line_len);
 				// And that's it, we're done.
 				break;
 			}
