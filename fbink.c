@@ -673,6 +673,8 @@ int
 			//        And then u8_nextchar() ends up picking up the NULL byte (I think?)
 			//        at the end of our array, and happily asking us to print a 1 byte line,
 			//        and snprintf happily obeys...
+			//        This is problematic, because one, this workaround is crappy and should not exist,
+			//        and, two, and more importantly, this skews our return value...
 			if (chars_left <= line_len) {
 				printf("Skipping empty line @ offset %u of %u\n", multiline_offset, lines);
 				continue;
