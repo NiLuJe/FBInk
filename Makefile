@@ -65,7 +65,7 @@ endif
 # A version tag...
 FBINK_VERSION=$(shell git describe)
 ifeq "$(LEGACY)" "true"
-	LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Non-Touch Kindle"'
+	LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kindle (Legacy)"'
 else
 ifeq "$(KINDLE)" "true"
 	LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kindle"'
