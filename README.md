@@ -38,6 +38,6 @@ Like this :).
 
 # NOTES
 
-Kindle support is limited to anything with a touchscreen (i.e., anything since the Kindle Touch). The Kindle 4 is *NOT* supported.
+Kindle support is split into Touch devices, and legacy devices (up to, and *including* the K4). This is because older devices use a completely different eInk controller.
 
 Kobo support has been tested on a H2O running a recent FW version (i.e., 32bpp fb).
