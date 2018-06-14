@@ -28,6 +28,11 @@
 #ifndef __FBINK_UNSCII_H
 #define __FBINK_UNSCII_H
 
+#include <stdio.h>
+#include <stdint.h>
 
+#include "fonts/unscii.h"
+
+static const char* unscii_get_bitmap(uint32_t);
 
 #endif
