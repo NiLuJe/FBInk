@@ -349,10 +349,10 @@ static int
 {
 #ifdef FBINK_FOR_LEGACY
 	struct update_area_t area = {
-		.x1 = region.left,
-		.y1 = region.top,
-		.x2 = region.left + region.width,
-		.y2 = region.top + region.height,
+		.x1 = (int) region.left,
+		.y1 = (int) region.top,
+		.x2 = (int) (region.left + region.width),
+		.y2 = (int) (region.top + region.height),
 		.which_fx = is_flashing ? fx_update_full : fx_update_partial,
 		.buffer = NULL,
 	};
