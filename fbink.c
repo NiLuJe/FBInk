@@ -151,12 +151,6 @@ static const char*
     font8x8_get_bitmap(uint32_t codepoint)
 {
 	// Get the bitmap for that ASCII character
-	if (codepoint <= 0x19f) {
-                return unscii_block1[codepoint];
-	} else {
-		return unscii_block1[0];
-	}
-	/*
 	if (codepoint <= 0x7F) {
 		return font8x8_basic[codepoint];
 	} else if (codepoint >= 0x80 && codepoint <= 0x9F) {
@@ -175,7 +169,6 @@ static const char*
 		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by our font!\n", codepoint);
 		return font8x8_basic[0];
 	}
-	*/
 }
 
 // Render a specific font8x8 glyph into a pixmap
@@ -472,7 +465,7 @@ int
 	//       since we're relying on the default value to calculate the scaled value,
 	//       and we're using this value to set MAXCOLS & MAXROWS, which we *need* to be sane.
 	FONTW = 8U;
-	FONTH = 16U;
+	FONTH = 8U;
 
 	// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
 	// NOTE: We still want to compare against the screen's "height", even in Landscape mode...

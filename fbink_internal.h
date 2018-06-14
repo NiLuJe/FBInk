@@ -71,13 +71,12 @@
 #endif
 
 // NOTE: This is from https://github.com/dhepper/font8x8
-//       See also https://github.com/achilikin/bdfe
-//       & https://unix.stackexchange.com/q/119236
-//       for fun ways to add new glyphs or just change the font ;).
-//       And for a repository of BDF fonts, c.f., https://github.com/Tecate/bitmap-fonts
-// NOTE: See also tools/hextoc.py for a working experiment with Unifont's hex format,
+//       See also https://github.com/achilikin/bdfe & https://unix.stackexchange.com/q/119236
+//       for *potentially* fun ways to add new glyphs or just change the font ;).
+//       Right now, there's a bit of a format mismatch issue...
+//       But in any case, for a repository of BDF fonts, see https://github.com/Tecate/bitmap-fonts
+// NOTE: On the other hand, tools/hextoc.py is a perfectly usable experiment with Unifont's hex format,
 //       that can yield you a choice of a few different fonts ;).
-/*
 #include "font8x8/font8x8_basic.h"
 #include "font8x8/font8x8_block.h"
 #include "font8x8/font8x8_box.h"
@@ -85,8 +84,6 @@
 #include "font8x8/font8x8_ext_latin.h"
 #include "font8x8/font8x8_greek.h"
 #include "font8x8/font8x8_hiragana.h"
-*/
-#include "tools/unscii.h"
 
 // Fallback version tag...
 #ifndef FBINK_VERSION
@@ -131,7 +128,7 @@ bool   fb_is_mapped = false;
 struct fb_var_screeninfo vinfo;
 struct fb_fix_screeninfo finfo;
 unsigned short int       FONTW         = 8U;
-unsigned short int       FONTH         = 16U;
+unsigned short int       FONTH         = 8U;
 unsigned short int       FONTSIZE_MULT = 1U;
 // Slightly arbitrary-ish fallback values
 unsigned short int MAXROWS        = 45U;

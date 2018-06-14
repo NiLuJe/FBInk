@@ -4,6 +4,7 @@
 # Very naive script to build a C array out of Unifont's hex format.
 # Assumes 8x8 or 8x16 glyphs
 # Tested on Unscii & its fun variants (http://pelulamu.net/unscii/)
+# NOTE: I've yet to get something working out of BDF fonts, either via bdfe, or Unifont's bdfimplode/unibdf2hex...
 #
 ##
 
@@ -17,7 +18,7 @@ def eprint(*args, **kwargs):
 	print(*args, file=sys.stderr, **kwargs)
 
 # NOTE: Turns out Unifont's hex format is *slightly* different from the one used by font8x8...
-# I couldn't actually find a human-readable documentation of Unifont's format,
+# I couldn't actually find a human-readable documentation of Unifont's format (http://czyborra.com/unifont/),
 # but there is one for font8x8 (in its README).
 # Thanks to this side of the documentation, what happened when we fed Unifont's format to the font8x8 renderer
 # turned out to start making some sense...
@@ -35,8 +36,8 @@ def hex2f8(v):
 	# Vintage 1972 magic trick ;)
 	return ((h * 0x0202020202 & 0x010884422010) % 1023)
 
-fontheight = 16
-fontfile = "unscii-16.hex"
+fontheight = 8
+fontfile = "unscii-8.hex"
 fontname = "unscii"
 
 print("/*")
