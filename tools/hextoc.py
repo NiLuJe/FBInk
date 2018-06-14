@@ -4,10 +4,6 @@
 # Very naive script to build a C array out of Unifont's hex format.
 # Assumes 8x8 glyphs
 # Tested on Unscii & its fun variants (http://pelulamu.net/unscii/)
-# And it "works", but, glyphs are rendered vertically mirrored :?
-# Or mirrored on the horizontal axis if I parse the hex from RTL (i.e., group 9 to 2 instead of 2 to 9) :?
-# Tweaking draw() a tiny bit yields acceptable results (c.f., the relevant comments there),
-# but might be messing with kerning a tiny bit? ...
 #
 ##
 
@@ -18,7 +14,23 @@ import sys
 # And then use your shell to handle the I/O redirections, because I'm lazy :D.
 # ./hextoc.py > unscii.h 2> unscii.c
 def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
+	print(*args, file=sys.stderr, **kwargs)
+
+# NOTE: Turns out Unifont's hex format is *slightly* different from the one used by font8x8...
+# I couldn't actually find a human-readable documentation of Unifont's format,
+# but there is one for font8x8 (in its README).
+# Thanks to this side of the documentation, what happened when we fed Unifont's format to the font8x8 renderer
+# turned out to start making some sense...
+# Long story short: we render glyphs *vertically* mirrored when doing nothing, so the issue lies in the row encoding...
+# Turns out, it's as "simple" as doing a bit reversal on each byte (as in 8 bits), so that we get the "mirror" bitmask.
+# And boom, magic.
+# "Magic" was helped by a lucky Google search, which led me first to: https://stackoverflow.com/q/4245936
+# And in turn to https://stackoverflow.com/q/12681945 which has a very Pythonic solution,
+# and links to http://graphics.stanford.edu/~seander/bithacks.html#BitReverseObvious for shit'n giggles.
+# Which, believe it or not, I already had bookmarked for some mysterious reason? (I'm going to guess KindleTool related).
+def hex2f8(v):
+	h = int(v, base=16)
+	return int((h * 0x0202020202 & 0x010884422010) % 1023)
 
 fontfile = "unscii-8.hex"
 fontname = "unscii"
@@ -50,7 +62,7 @@ with open(fontfile, "r") as f:
 				blockcp = cp
 				print("char {}_block{}[][8] = {{".format(fontname, blocknum))
 
-			print("\t{{ {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x} }},\t// U+{}".format(int(m.group(2), base=16), int(m.group(3), base=16), int(m.group(4), base=16), int(m.group(5), base=16), int(m.group(6), base=16), int(m.group(7), base=16), int(m.group(8), base=16), int(m.group(9), base=16), cp))
+			print("\t{{ {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x} }},\t// U+{}".format(hex2f8(m.group(2)), hex2f8(m.group(3)), hex2f8(m.group(4)), hex2f8(m.group(5)), hex2f8(m.group(6)), hex2f8(m.group(7)), hex2f8(m.group(8)), hex2f8(m.group(9)), cp))
 			prevcp = int(cp, base=16)
 print("}}; // {}".format(blockcount))
 
