@@ -62,17 +62,30 @@ extern FBINK_API char* fbp;
 extern FBINK_API size_t screensize;
 extern FBINK_API bool   fb_is_mapped;
 
+// Available fonts
+typedef enum
+{
+	IBM            = 0,    // font8x8
+	UNSCII         = 1,    // unscii-8
+	UNSCII_ALT     = 2,    // unscii-8-alt
+	UNSCII_THIN    = 3,    // unscii-8-thin
+	UNSCII_FANTASY = 4,    // unscii-8-fantasy
+	UNSCII_MCR     = 5,    // unscii-8-mcr
+	UNSCII_TALL    = 6     // unscii-16
+} FONT_INDEX_T;
+
 // What a FBInk Print config should look like
 typedef struct
 {
-	short int row;
-	short int col;
+	short int          row;
+	short int          col;
 	short unsigned int fontmult;
-	bool      is_inverted;
-	bool      is_flashing;
-	bool      is_cleared;
-	bool      is_centered;
-	bool      is_padded;
+	short unsigned int fontname;
+	bool               is_inverted;
+	bool               is_flashing;
+	bool               is_cleared;
+	bool               is_centered;
+	bool               is_padded;
 } FBInkConfig;
 
 // Return the version of the currently loaded FBInk library
