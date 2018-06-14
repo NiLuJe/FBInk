@@ -115,14 +115,15 @@ static void
 static void
     put_pixel(unsigned short int x, unsigned short int y, unsigned short int c)
 {
+#ifdef FBINK_FOR_LEGACY
+	// NOTE: Legacy devices all have an inverted palette.
+	c = c ^ WHITE;
+#endif
+
 	if (vinfo.bits_per_pixel == 4U) {
 		put_pixel_Gray4(x, y, def_b[c]);
 	} else if (vinfo.bits_per_pixel == 8U) {
 		// NOTE: Grayscale palette, we could have used def_r or def_g ;).
-#ifdef FBINK_FOR_LEGACY
-		// NOTE: The K4 as its palette inverted...
-		c = c ^ WHITE;
-#endif
 		put_pixel_Gray8(x, y, def_b[c]);
 	} else if (vinfo.bits_per_pixel == 16U) {
 		// FIXME: Colors *may* actually be inverted on 16bpp Kobos...
@@ -159,10 +160,8 @@ static void
     clear_screen(unsigned short int c)
 {
 #ifdef FBINK_FOR_LEGACY
-	if (vinfo.bits_per_pixel == 8U) {
-		// NOTE: The K4 as its palette inverted...
-		c = c ^ WHITE;
-	}
+	// NOTE: Legacy devices all have an inverted palette.
+	c = c ^ WHITE;
 #endif
 
 	// NOTE: Grayscale palette, we could have used def_r or def_g ;).
