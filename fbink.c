@@ -168,7 +168,7 @@ static void
 	memset(fbp, def_b[c], finfo.smem_len);
 }
 
-// Return the font8x8 bitmap for a specifric ascii character
+// Return the font8x8 bitmap for a specific Unicode codepoint
 static const char*
     font8x8_get_bitmap(uint32_t codepoint)
 {
