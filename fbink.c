@@ -547,7 +547,7 @@ int
 	fprintf(stderr, "[FBInk] Line length: %hu cols, Page size: %hu rows.\n", MAXCOLS, MAXROWS);
 
 	// Mention & remember if we can perfectly fit the final column on screen
-	if (FONTW * MAXCOLS == vinfo.xres) {
+	if ((unsigned short int) (FONTW * MAXCOLS) == vinfo.xres) {
 		is_perfect_fit = true;
 		fprintf(stderr, "[FBInk] It's a perfect fit!\n");
 	}
