@@ -167,9 +167,10 @@ static void fill_rect(unsigned short int,
 static void clear_screen(unsigned short int);
 
 static const char* font8x8_get_bitmap(uint32_t);
-static void        font8x8_render(uint32_t, char*);
+static void        font8x8_render(uint32_t, char*, unsigned short int);
 
-static struct mxcfb_rect draw(const char*, unsigned short int, unsigned short int, bool, bool, unsigned short int);
+static struct mxcfb_rect
+    draw(const char*, unsigned short int, unsigned short int, bool, bool, unsigned short int, unsigned short int);
 
 static int refresh(int, const struct mxcfb_rect, uint32_t, bool);
 

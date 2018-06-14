@@ -188,7 +188,7 @@ static const char*
 	} else if (codepoint >= 0x3040 && codepoint <= 0x309F) {
 		return font8x8_hiragana[codepoint - 0x3040];
 	} else {
-		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by our font!\n", codepoint);
+		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by this font!\n", codepoint);
 		return font8x8_basic[0];
 	}
 }
@@ -196,9 +196,11 @@ static const char*
 // Render a specific font8x8 glyph into a pixmap
 // (base size: 8x8, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
 static void
-    font8x8_render(uint32_t codepoint, char* glyph_pixmap)
+    font8x8_render(uint32_t codepoint, char* glyph_pixmap, unsigned short int fontname)
 {
-	const char* bitmap = font8x8_get_bitmap(codepoint);
+	const char* bitmap;
+
+	bitmap = font8x8_get_bitmap(codepoint);
 
 	unsigned short int x;
 	unsigned short int y;
@@ -229,7 +231,8 @@ static struct mxcfb_rect
 	 unsigned short int col,
 	 bool               is_inverted,
 	 bool               is_centered,
-	 unsigned short int multiline_offset)
+	 unsigned short int multiline_offset,
+	 unsigned short int fontname)
 {
 	printf("Printing '%s' @ line offset %hu (meaning row %d)\n", text, multiline_offset, row + multiline_offset);
 	unsigned short int fgC = is_inverted ? WHITE : BLACK;
@@ -323,7 +326,7 @@ static struct mxcfb_rect
 		printf("Char %u (@ %u) out of %u is @ byte offset %d and is U+%04X\n", ci + 1, ci, charcount, bi, ch);
 
 		// Get the glyph's pixmap
-		font8x8_render(ch, pixmap);
+		font8x8_render(ch, pixmap, fontname);
 
 		// loop through pixel rows
 		for (y = 0U; y < FONTH; y++) {
@@ -868,7 +871,8 @@ int
 				      (unsigned short int) col,
 				      fbink_config->is_inverted,
 				      fbink_config->is_centered,
-				      multiline_offset);
+				      multiline_offset,
+				      fbink_config->fontname);
 
 			// Next line!
 			multiline_offset++;

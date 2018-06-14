@@ -86,14 +86,17 @@ int
 {
 	int                        opt;
 	int                        opt_index;
-	static const struct option opts[] = {
-		{ "row", required_argument, NULL, 'y' },  { "col", required_argument, NULL, 'x' },
-		{ "invert", no_argument, NULL, 'h' },     { "flash", no_argument, NULL, 'f' },
-		{ "clear", no_argument, NULL, 'c' },      { "centered", no_argument, NULL, 'm' },
-		{ "padded", no_argument, NULL, 'p' },     { "refresh", required_argument, NULL, 's' },
-		{ "size", required_argument, NULL, 'S' }, { "font", required_argument, NULL, 'F' },
-		{ NULL, 0, NULL, 0 }
-	};
+	static const struct option opts[] = { { "row", required_argument, NULL, 'y' },
+					      { "col", required_argument, NULL, 'x' },
+					      { "invert", no_argument, NULL, 'h' },
+					      { "flash", no_argument, NULL, 'f' },
+					      { "clear", no_argument, NULL, 'c' },
+					      { "centered", no_argument, NULL, 'm' },
+					      { "padded", no_argument, NULL, 'p' },
+					      { "refresh", required_argument, NULL, 's' },
+					      { "size", required_argument, NULL, 'S' },
+					      { "font", required_argument, NULL, 'F' },
+					      { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_config = { 0 };
 
