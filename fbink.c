@@ -172,7 +172,7 @@ static void
 static const char*
     font8x8_get_bitmap(uint32_t codepoint)
 {
-	// Get the bitmap for that ASCII character
+	// Get the bitmap for the character mapped to that Unicode codepoint
 	if (codepoint <= 0x7F) {
 		return font8x8_basic[codepoint];
 	} else if (codepoint >= 0x80 && codepoint <= 0x9F) {
