@@ -13,7 +13,7 @@ import sys
 
 # We'll send the C header to stdout, but our C if/else snippet to stderr... ;).
 # And then use your shell to handle the I/O redirections, because I'm lazy :D.
-# ./hextoc.py > unscii.h 2> unscii.c
+# ./hextoc.py > ../unscii.h 2>> ../fbink_unscii.c
 def eprint(*args, **kwargs):
 	print(*args, file=sys.stderr, **kwargs)
 
@@ -37,7 +37,7 @@ def hex2f8(v):
 	return ((h * 0x0202020202 & 0x010884422010) % 1023)
 
 fontheight = 8
-fontfile = "unscii-8.hex"
+fontfile = "../fonts/unscii-8.hex"
 fontname = "unscii"
 
 print("/*")
@@ -72,6 +72,9 @@ with open(fontfile, "r") as f:
 					print("}}; // {}".format(blockcount))
 					print("")
 					if blocknum == 1:
+						eprint("static const char*")
+						eprint("    {}_get_bitmap(uint32_t codepoint)".format(fontname))
+						eprint("{")
 						eprint("\tif (codepoint <= {:#04x}) {{".format(prevcp))
 						eprint("\t\treturn {}_block{}[codepoint];".format(fontname, blocknum))
 					else:
@@ -97,3 +100,5 @@ eprint("\t}} else {{".format(int(blockcp, base=16), prevcp))
 eprint('\t\tfprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by our font!\\n", codepoint);')
 eprint("\t\treturn {}_block1[0];".format(fontname))
 eprint("\t}")
+eprint("}")
+eprint("")
