@@ -30,7 +30,10 @@ def eprint(*args, **kwargs):
 # Which, believe it or not, I already had bookmarked for some mysterious reason? (I'm going to guess KindleTool related).
 def hex2f8(v):
 	h = int(v, base=16)
-	return int((h * 0x0202020202 & 0x010884422010) % 1023)
+	# Pythonic approach, which may not require 64bits maths.
+	#return int('{:08b}'.format(h)[::-1], 2)
+	# Vintage 1972 magic trick ;)
+	return ((h * 0x0202020202 & 0x010884422010) % 1023)
 
 fontfile = "unscii-8.hex"
 fontname = "unscii"
