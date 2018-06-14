@@ -107,6 +107,10 @@ static void
 {
 	if (vinfo.bits_per_pixel == 8U) {
 		// NOTE: Grayscale palette, we could have used def_r or def_g ;).
+#ifdef FBINK_FOR_LEGACY
+		// NOTE: The K4 as its palette inverted...
+		c = c ^ WHITE;
+#endif
 		put_pixel_Gray8(x, y, def_b[c]);
 	} else if (vinfo.bits_per_pixel == 16U) {
 		// FIXME: Colors *may* actually be inverted on 16bpp Kobos...
@@ -142,6 +146,13 @@ static void
 static void
     clear_screen(unsigned short int c)
 {
+#ifdef FBINK_FOR_LEGACY
+	if (vinfo.bits_per_pixel == 8U) {
+		// NOTE: The K4 as its palette inverted...
+		c = c ^ WHITE;
+	}
+#endif
+
 	// NOTE: Grayscale palette, we could have used def_r or def_g ;).
 	memset(fbp, def_b[c], finfo.smem_len);
 }
