@@ -93,10 +93,10 @@ FBINK_API int fbink_init(int);
 //       Since any decent system of the last decade should default to UTF-8, that should be pretty much transparent...
 // Returns the amount of lines printed or -1 on failure.
 // if fd is -1, the fb is opened for the duration of this call
-FBINK_API int fbink_print(int, const char*, FBInkConfig*);
+FBINK_API int fbink_print(int, const char*, const FBInkConfig*);
 
 // Like fbink_print, but with printf formatting ;).
-FBINK_API int fbink_printf(int, FBInkConfig*, const char*, ...) __attribute__((format(printf, 3, 4)));
+FBINK_API int fbink_printf(int, const FBInkConfig*, const char*, ...) __attribute__((format(printf, 3, 4)));
 
 // And a simple wrapper around the internal refresh, without having to include mxcfb headers
 FBINK_API int fbink_refresh(int, uint32_t, uint32_t, uint32_t, uint32_t, const char*, bool);

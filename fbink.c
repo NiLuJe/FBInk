@@ -334,7 +334,7 @@ static struct mxcfb_rect
 
 // Handle eInk updates
 static int
-    refresh(int fbfd, struct mxcfb_rect region, uint32_t waveform_mode, bool is_flashing)
+    refresh(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode, bool is_flashing)
 {
 	// NOTE: While we'd be perfect candidates for using A2 waveform mode, it's all kinds of fucked up on Kobos,
 	//       and may lead to disappearing text or weird blending depending on the surrounding fb content...
@@ -522,7 +522,7 @@ int
 
 // Magic happens here!
 int
-    fbink_print(int fbfd, const char* string, FBInkConfig* fbink_config)
+    fbink_print(int fbfd, const char* string, const FBInkConfig* fbink_config)
 {
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
@@ -857,7 +857,7 @@ int
 
 // printf-like wrapper around fbink_print ;).
 int
-    fbink_printf(int fbfd, FBInkConfig* fbink_config, const char* fmt, ...)
+    fbink_printf(int fbfd, const FBInkConfig* fbink_config, const char* fmt, ...)
 {
 	// We'll need to store our formatted string somewhere...
 	// NOTE: Fit a single page's worth of characters in it, as that's the best we can do anyway.
