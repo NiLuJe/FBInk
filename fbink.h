@@ -67,6 +67,7 @@ typedef struct
 {
 	short int row;
 	short int col;
+	short unsigned int fontmult;
 	bool      is_inverted;
 	bool      is_flashing;
 	bool      is_cleared;
@@ -84,7 +85,7 @@ FBINK_API int fbink_open(void);
 // If fd is -1, the fb is opened for the duration of this call
 // NOTE: By virtue of, well, setting global variables, do NOT consider this thread-safe.
 //       The rest of the API should be, though, so make sure you init in your main thread *before* threading begins...
-FBINK_API int fbink_init(int);
+FBINK_API int fbink_init(int, const FBInkConfig*);
 
 // Print a string on screen.
 // NOTE: The string is expected to be encoded in valid UTF-8, no validation of any kind is done by the library,

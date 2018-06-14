@@ -480,7 +480,7 @@ int
 
 // Get the various fb info & setup global variables
 int
-    fbink_init(int fbfd)
+    fbink_init(int fbfd, const FBInkConfig* fbink_config)
 {
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
@@ -511,25 +511,30 @@ int
 	FONTW = 8U;
 	FONTH = 8U;
 
-	// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
-	// NOTE: We still want to compare against the screen's "height", even in Landscape mode...
-	uint32_t screen_height = vinfo.yres;
-	if (vinfo.xres > vinfo.yres) {
-		// NOTE: vinfo.rotate == 2 (vs. 3 in Portrait mode) on my PW2
-		//       My Touch, which doesn't propose Landscape mode, defaults to vinfo.rotate == 1
-		//       My K4, which supports the four possible rotations,
-		//          is always using vinfo.rotate == 0 (but xres & yres do switch).
-		//          It's also using the old eink_fb driver, which we do not support anyway :D.
-		screen_height = vinfo.xres;
-	}
-	if (screen_height <= 600U) {
-		FONTSIZE_MULT = 1U;    // 8x8
-	} else if (screen_height <= 1024U) {
-		FONTSIZE_MULT = 2U;    // 16x16
-	} else if (screen_height <= 1440U) {
-		FONTSIZE_MULT = 3U;    // 24x24
+	// Obey user-specified fonr scaling multiplier
+	if (fbink_config->fontmult > 0) {
+		FONTSIZE_MULT = fbink_config->fontmult;
 	} else {
-		FONTSIZE_MULT = 4U;    // 32x32
+		// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
+		// NOTE: We still want to compare against the screen's "height", even in Landscape mode...
+		uint32_t screen_height = vinfo.yres;
+		if (vinfo.xres > vinfo.yres) {
+			// NOTE: vinfo.rotate == 2 (vs. 3 in Portrait mode) on my PW2
+			//       My Touch, which doesn't propose Landscape mode, defaults to vinfo.rotate == 1
+			//       My K4, which supports the four possible rotations,
+			//          is always using vinfo.rotate == 0 (but xres & yres do switch).
+			//          It's also using the old eink_fb driver, which we do not support anyway :D.
+			screen_height = vinfo.xres;
+		}
+		if (screen_height <= 600U) {
+			FONTSIZE_MULT = 1U;    // 8x8
+		} else if (screen_height <= 1024U) {
+			FONTSIZE_MULT = 2U;    // 16x16
+		} else if (screen_height <= 1440U) {
+			FONTSIZE_MULT = 3U;    // 24x24
+		} else {
+			FONTSIZE_MULT = 4U;    // 32x32
+		}
 	}
 	// Go!
 	FONTW = (unsigned short int) (FONTW * FONTSIZE_MULT);
