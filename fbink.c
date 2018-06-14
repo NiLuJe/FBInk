@@ -388,15 +388,15 @@ static int
 		.update_region = region,
 		.waveform_mode =
 		    (is_flashing && waveform_mode == WAVEFORM_MODE_AUTO) ? WAVEFORM_MODE_GC16 : waveform_mode,
-		.update_mode   = is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL,
-		.update_marker = (uint32_t) getpid(),
+		.update_mode             = is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL,
+		.update_marker           = (uint32_t) getpid(),
 #	ifdef FBINK_FOR_KINDLE
 		.hist_bw_waveform_mode   = WAVEFORM_MODE_DU,
 		.hist_gray_waveform_mode = WAVEFORM_MODE_GC16_FAST,
 #	endif    // FBINK_FOR_KINDLE
-		.temp          = TEMP_USE_AMBIENT,
+		.temp                    = TEMP_USE_AMBIENT,
 #	ifndef FBINK_FOR_KINDLE
-		.flags = (waveform_mode == WAVEFORM_MODE_REAGLD)
+		.flags                   = (waveform_mode == WAVEFORM_MODE_REAGLD)
 			     ? EPDC_FLAG_USE_AAD
 			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
 #	else    // !FBINK_FOR_KINDLE
