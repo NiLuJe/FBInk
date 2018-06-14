@@ -699,6 +699,8 @@ int
 		//       it's not filling the end of the buffer with NULLs, it just outputs a single one!
 		//       That's why we're also using calloc here.
 		//       Plus, the OS will ensure that'll always be smarter than malloc + memset ;).
+		// NOTE: Since we re-use line on each iteration of the loop,
+		//       we do also need to clear it at the end of the loop, in preparation of the next iteration.
 
 		printf("Need %hu lines to print %u characters over %hu available columns\n",
 		       lines,
@@ -869,6 +871,10 @@ int
 
 			// Next line!
 			multiline_offset++;
+
+			// NOTE: Fully clear line, so u8_nextchar() has zero chance to skip a NULL on the next iteration.
+			//       See the comments around the initial calloc() call for more details.
+			memset(line, 0, ((MAXCOLS + 1U) * 4U) * sizeof(*line));
 		}
 
 		// Cleanup
