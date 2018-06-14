@@ -151,11 +151,6 @@ static char*
     font8x8_get_bitmap(uint32_t codepoint)
 {
 	// Get the bitmap for that ASCII character
-	if (codepoint <= 0x195)
-                return unscii_block1[codepoint];
-	else
-		return unscii_block1[0];
-	/*
 	if (codepoint <= 0x7F) {
 		return font8x8_basic[codepoint];
 	} else if (codepoint >= 0x80 && codepoint <= 0x9F) {
@@ -174,7 +169,6 @@ static char*
 		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by our font!\n", codepoint);
 		return font8x8_basic[0];
 	}
-	*/
 }
 
 // Render a specific font8x8 glyph into a pixmap
