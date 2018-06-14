@@ -312,7 +312,8 @@ static struct mxcfb_rect
 	//       It's a very small allocation, we'll always fully write to it so we don't care about its initialization,
 	//       -> it's a perfect fit for the stack.
 	//       In any other situation (i.e., constant FONTW & FONTH), it'd have been an automatic.
-	pixmap = alloca(sizeof(*pixmap) * (size_t)(FONTW * FONTH));
+	// NOTE: Don't forget the extra FONTSIZE_MULT - 1 to avoid a buffer overflow when scaling the last pixel...
+	pixmap = alloca(sizeof(*pixmap) * (size_t)((FONTW * FONTH) + FONTSIZE_MULT - 1));
 
 	// Loop through all the *characters* in the text string
 	unsigned int       bi = 0U;
