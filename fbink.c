@@ -360,14 +360,15 @@ static int
 {
 #ifdef FBINK_FOR_LEGACY
 	struct update_area_t area = {
-		.x1 = (int) region.left,
-		.y1 = (int) region.top,
-		.x2 = (int) (region.left + region.width),
-		.y2 = (int) (region.top + region.height),
+		.x1       = (int) region.left,
+		.y1       = (int) region.top,
+		.x2       = (int) (region.left + region.width),
+		.y2       = (int) (region.top + region.height),
 		.which_fx = is_flashing ? fx_update_full : fx_update_partial,
-		.buffer = NULL,
+		.buffer   = NULL,
 	};
-	printf("Area is: x1: %d, y1: %d, x2: %d, y2: %d with fx: %d\n", area.x1, area.y1, area.x2, area.y2, area.which_fx);
+	printf(
+	    "Area is: x1: %d, y1: %d, x2: %d, y2: %d with fx: %d\n", area.x1, area.y1, area.x2, area.y2, area.which_fx);
 
 	if (ioctl(fbfd, FBIO_EINK_UPDATE_DISPLAY_AREA, &area) < 0) {
 		// NOTE: perror() is not thread-safe...
@@ -390,17 +391,17 @@ static int
 		.update_region = region,
 		.waveform_mode =
 		    (is_flashing && waveform_mode == WAVEFORM_MODE_AUTO) ? WAVEFORM_MODE_GC16 : waveform_mode,
-#ifndef FBINK_FOR_KINDLE
+#	ifndef FBINK_FOR_KINDLE
 		.flags = (waveform_mode == WAVEFORM_MODE_REAGLD)
 			     ? EPDC_FLAG_USE_AAD
 			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
-#else	// FBINK_FOR_KINDLE
+#	else    // FBINK_FOR_KINDLE
 		.flags = 0U,
-#endif
-#ifdef FBINK_FOR_KINDLE
+#	endif
+#	ifdef FBINK_FOR_KINDLE
 		.hist_bw_waveform_mode   = WAVEFORM_MODE_DU,
 		.hist_gray_waveform_mode = WAVEFORM_MODE_GC16_FAST,
-#endif	// FBINK_FOR_KINDLE
+#	endif    // FBINK_FOR_KINDLE
 	};
 
 	// NOTE: Make sure update_marker is valid, an invalid marker *may* hang the kernel instead of failing gracefully,
@@ -419,7 +420,7 @@ static int
 
 	// NOTE: Let's be extremely thorough, and wait for completion on flashing updates ;)
 	if (is_flashing) {
-#ifdef FBINK_FOR_KINDLE
+#	ifdef FBINK_FOR_KINDLE
 		// FIXME: Handle the Carta/Pearl switch in a saner way...
 		struct mxcfb_update_marker_data update_marker = {
 			.update_marker  = update.update_marker,
@@ -444,7 +445,7 @@ static int
 		if (failed) {
 			return EXIT_FAILURE;
 		}
-#else
+#	else
 		if (ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update.update_marker) < 0) {
 			{
 				char buf[256];
@@ -453,9 +454,9 @@ static int
 				return EXIT_FAILURE;
 			}
 		}
-#endif	// FBINK_FOR_KINDLE
+#	endif    // FBINK_FOR_KINDLE
 	}
-#endif	// FBINK_FOR_LEGACY
+#endif            // FBINK_FOR_LEGACY
 
 	return EXIT_SUCCESS;
 }
