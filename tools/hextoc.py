@@ -38,6 +38,13 @@ def hex2f8(v):
 fontfile = "unscii-8.hex"
 fontname = "unscii"
 
+print("/*")
+print("* C Header for use with https://github.com/NiLuJe/FBInk")
+print("* Converted from Hex font {}".format(fontfile))
+print("* With FBInk's tools/hextoc.py")
+print("*/")
+print("")
+
 blocknum = 0
 blockcount = 1
 blockcp = 0x0
@@ -54,6 +61,7 @@ with open(fontfile, "r") as f:
 			else:
 				if blocknum > 0:
 					print("}}; // {}".format(blockcount))
+					print("")
 					if blocknum == 1:
 						eprint("\tif (codepoint <= {:#04x}) {{".format(prevcp))
 						eprint("\t\treturn {}_block{}[codepoint];".format(fontname, blocknum))
@@ -65,9 +73,11 @@ with open(fontfile, "r") as f:
 				blockcp = cp
 				print("char {}_block{}[][8] = {{".format(fontname, blocknum))
 
-			print("\t{{ {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x} }},\t// U+{}".format(hex2f8(m.group(2)), hex2f8(m.group(3)), hex2f8(m.group(4)), hex2f8(m.group(5)), hex2f8(m.group(6)), hex2f8(m.group(7)), hex2f8(m.group(8)), hex2f8(m.group(9)), cp))
+			hcp = int(cp, base=16)
+			print(u"\t{{ {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x} }},\t// U+{} ({})".format(hex2f8(m.group(2)), hex2f8(m.group(3)), hex2f8(m.group(4)), hex2f8(m.group(5)), hex2f8(m.group(6)), hex2f8(m.group(7)), hex2f8(m.group(8)), hex2f8(m.group(9)), cp, chr(hcp) if hcp >= 0x20 else "ESC"))
 			prevcp = int(cp, base=16)
 print("}}; // {}".format(blockcount))
+print("")
 
 eprint("\t}} else {{".format(int(blockcp, base=16), prevcp))
 eprint('\t\tfprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by our font!\\n", codepoint);')
