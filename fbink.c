@@ -333,10 +333,19 @@ static struct mxcfb_rect
 }
 
 // Handle eInk updates
-#ifdef FBINK_FOR_LEGACY
 static int
-    refresh(int fbfd, const struct update_area_t)
+    refresh(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode, bool is_flashing)
 {
+#ifdef FBINK_FOR_LEGACY
+	struct update_area_t area = {
+		.x1 = region.top,
+		.y1 = region.left,
+		.x2 = region.top + region.width,
+		.y2 = region.left + region.height,
+		.which_fx = is_flashing ? fx_update_full : fx_update_partial,
+		.buffer = NULL,
+	};
+
 	if (ioctl(fbfd, FBIO_EINK_UPDATE_DISPLAY_AREA, &area) < 0) {
 		// NOTE: perror() is not thread-safe...
 		char  buf[256];
@@ -344,11 +353,7 @@ static int
 		fprintf(stderr, "[FBInk] FBIO_EINK_UPDATE_DISPLAY_AREA: %s\n", errstr);
 		return EXIT_FAILURE;
 	}
-}
 #else
-static int
-    refresh(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode, bool is_flashing)
-{
 	// NOTE: While we'd be perfect candidates for using A2 waveform mode, it's all kinds of fucked up on Kobos,
 	//       and may lead to disappearing text or weird blending depending on the surrounding fb content...
 	//       It only shows up properly when FULL, which isn't great...
@@ -366,13 +371,13 @@ static int
 		.flags = (waveform_mode == WAVEFORM_MODE_REAGLD)
 			     ? EPDC_FLAG_USE_AAD
 			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
-#else
+#else	// FBINK_FOR_KINDLE
 		.flags = 0U,
 #endif
 #ifdef FBINK_FOR_KINDLE
 		.hist_bw_waveform_mode   = WAVEFORM_MODE_DU,
 		.hist_gray_waveform_mode = WAVEFORM_MODE_GC16_FAST,
-#endif
+#endif	// FBINK_FOR_KINDLE
 	};
 
 	// NOTE: Make sure update_marker is valid, an invalid marker *may* hang the kernel instead of failing gracefully,
@@ -425,12 +430,12 @@ static int
 				return EXIT_FAILURE;
 			}
 		}
-#endif
+#endif	// FBINK_FOR_KINDLE
 	}
+#endif	// FBINK_FOR_LEGACY
 
 	return EXIT_SUCCESS;
 }
-#endif
 
 // Open the framebuffer file & return the opened fd
 int

@@ -64,14 +64,15 @@
 //           https://unicodebook.readthedocs.io/
 #include "utf8/utf8.h"
 
-#ifdef FBINK_FOR_LEGACY
-#	include "eink/einkfb.h"
-#else
+// NOTE: We always neeed one of those, because we rely on mxcfb_rect in a number of places
 #ifdef FBINK_FOR_KINDLE
 #	include "eink/mxcfb-kindle.h"
 #else
 #	include "eink/mxcfb-kobo.h"
 #endif
+// Legacy einkfb driver
+#ifdef FBINK_FOR_LEGACY
+#	include "eink/einkfb.h"
 #endif
 
 // NOTE: This is from https://github.com/dhepper/font8x8
@@ -167,16 +168,8 @@ static void clear_screen(unsigned short int);
 static const char* font8x8_get_bitmap(uint32_t);
 static void  font8x8_render(uint32_t, char*);
 
-#ifdef FBINK_FOR_LEGACY
-static struct update_area_t draw(const char*, unsigned short int, unsigned short int, bool, bool, unsigned short int);
-#else
 static struct mxcfb_rect draw(const char*, unsigned short int, unsigned short int, bool, bool, unsigned short int);
-#endif
 
-#ifdef FBINK_FOR_LEGACY
-static int refresh(int, const struct update_area_t);
-#else
 static int refresh(int, const struct mxcfb_rect, uint32_t, bool);
-#endif
 
 #endif
