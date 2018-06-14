@@ -338,13 +338,14 @@ static int
 {
 #ifdef FBINK_FOR_LEGACY
 	struct update_area_t area = {
-		.x1 = region.top,
-		.y1 = region.left,
-		.x2 = region.top + region.width,
-		.y2 = region.left + region.height,
+		.x1 = region.left,
+		.y1 = region.top,
+		.x2 = region.left + region.width,
+		.y2 = region.top + region.height,
 		.which_fx = is_flashing ? fx_update_full : fx_update_partial,
 		.buffer = NULL,
 	};
+	printf("Area is: x1: %d, y1: %d, x2: %d, y2: %d with fx: %d\n", area.x1, area.y1, area.x2, area.y2, area.which_fx);
 
 	if (ioctl(fbfd, FBIO_EINK_UPDATE_DISPLAY_AREA, &area) < 0) {
 		// NOTE: perror() is not thread-safe...

@@ -36,7 +36,7 @@ struct raw_image_t
         yres,		// image's height
         bpp;		// image's pixel (bit) depth
     
-    u8  start[]; 	// actual start of image
+    __u8  start[]; 	// actual start of image
 };
 typedef struct raw_image_t raw_image_t;
 
@@ -47,7 +47,7 @@ struct image_t
         yres,       // image's height
         bpp;        // image's pixel (bit) depth
         
-    u8  *start;     // pointer to start of image
+    __u8  *start;     // pointer to start of image
 };
 typedef struct image_t image_t;
 
