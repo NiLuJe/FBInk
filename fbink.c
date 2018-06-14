@@ -38,6 +38,16 @@ const char*
 
 // Helper function to 'plot' a pixel in given color
 static void
+    put_pixel_Gray4(unsigned short int x, unsigned short int y, unsigned short int c)
+{
+	// calculate the pixel's byte offset inside the buffer
+	size_t pix_offset = x / 2 + y * finfo.line_length;
+
+	// now this is about the same as 'fbp[pix_offset] = value'
+	*((char*) (fbp + pix_offset)) = (char) c;
+}
+
+static void
     put_pixel_Gray8(unsigned short int x, unsigned short int y, unsigned short int c)
 {
 	// calculate the pixel's byte offset inside the buffer
@@ -105,7 +115,9 @@ static void
 static void
     put_pixel(unsigned short int x, unsigned short int y, unsigned short int c)
 {
-	if (vinfo.bits_per_pixel == 8U) {
+	if (vinfo.bits_per_pixel == 4U) {
+		put_pixel_Gray4(x, y, def_b[c]);
+	} else if (vinfo.bits_per_pixel == 8U) {
 		// NOTE: Grayscale palette, we could have used def_r or def_g ;).
 #ifdef FBINK_FOR_LEGACY
 		// NOTE: The K4 as its palette inverted...

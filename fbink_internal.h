@@ -140,6 +140,7 @@ unsigned short int MAXROWS        = 45U;
 unsigned short int MAXCOLS        = 32U;
 bool               is_perfect_fit = false;
 
+static void put_pixel_Gray4(unsigned short int, unsigned short int, unsigned short int);
 static void put_pixel_Gray8(unsigned short int, unsigned short int, unsigned short int);
 static void put_pixel_RGB24(unsigned short int,
 			    unsigned short int,
