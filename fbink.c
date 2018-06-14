@@ -147,7 +147,7 @@ static void
 }
 
 // Return the font8x8 bitmap for a specifric ascii character
-static char*
+static const char*
     font8x8_get_bitmap(uint32_t codepoint)
 {
 	// Get the bitmap for that ASCII character
@@ -176,7 +176,7 @@ static char*
 static void
     font8x8_render(uint32_t codepoint, char* glyph_pixmap)
 {
-	char* bitmap = font8x8_get_bitmap(codepoint);
+	const char* bitmap = font8x8_get_bitmap(codepoint);
 
 	unsigned short int x;
 	unsigned short int y;
