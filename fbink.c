@@ -333,6 +333,19 @@ static struct mxcfb_rect
 }
 
 // Handle eInk updates
+#ifdef FBINK_FOR_LEGACY
+static int
+    refresh(int fbfd, const struct update_area_t)
+{
+	if (ioctl(fbfd, FBIO_EINK_UPDATE_DISPLAY_AREA, &area) < 0) {
+		// NOTE: perror() is not thread-safe...
+		char  buf[256];
+		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		fprintf(stderr, "[FBInk] FBIO_EINK_UPDATE_DISPLAY_AREA: %s\n", errstr);
+		return EXIT_FAILURE;
+	}
+}
+#else
 static int
     refresh(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode, bool is_flashing)
 {
@@ -417,6 +430,7 @@ static int
 
 	return EXIT_SUCCESS;
 }
+#endif
 
 // Open the framebuffer file & return the opened fd
 int

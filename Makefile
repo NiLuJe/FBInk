@@ -57,13 +57,21 @@ EXTRA_CPPFLAGS+=-D_REENTRANT=1
 ifeq "$(KINDLE)" "true"
 	EXTRA_CPPFLAGS+=-DFBINK_FOR_KINDLE
 endif
+# Toggle Legacy Kindle support
+ifeq "$(LEGACY)" "true"
+	EXTRA_CPPFLAGS+=-DFBINK_FOR_LEGACY
+endif
 
 # A version tag...
 FBINK_VERSION=$(shell git describe)
+ifeq "$(LEGACY)" "true"
+	LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Non-Touch Kindle"'
+else
 ifeq "$(KINDLE)" "true"
 	LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kindle"'
 else
 	LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kobo"'
+endif
 endif
 
 # NOTE: Always use as-needed to avoid unecessary DT_NEEDED entries :)
@@ -145,6 +153,9 @@ release:
 kindle:
 	$(MAKE) strip KINDLE=true
 
+legacy:
+	$(MAKE) strip LEGACY=true
+
 kobo: release
 	mkdir -p Kobo/usr/local/fbink/bin Kobo/usr/local/fbink/lib
 	cp -av $(CURDIR)/Release/fbink Kobo/usr/local/fbink/bin
@@ -182,4 +193,4 @@ clean:
 	rm -rf Debug/*.o
 	rm -rf Debug/fbink
 
-.PHONY: default outdir all staticlib sharedlib fbink strip debug shared release kindle kobo clean
+.PHONY: default outdir all staticlib sharedlib fbink strip debug shared release kindle legacy kobo clean
