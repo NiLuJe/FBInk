@@ -68,6 +68,10 @@ static void
 	    "\t\t\tAvailable font families: IBM\n"
 #endif
 	    "\n"
+	    "Options affecting the program's verbosity:\n"
+	    "\t-v, --verbose\tPrint all diagnostic messages.\n"
+	    "\t-q, --quiet\tOnly print important messages.\n"
+	    "\n"
 	    "NOTE:\n"
 	    "\tYou can specify multiple STRINGs in a single invocation of fbink, each consecutive one will be printed on consecutive lines.\n"
 	    "\t\tAlthough it's worth mentioning that this will lead to undesirable results when combined with --clear,\n"
@@ -112,6 +116,8 @@ int
 					      { "refresh", required_argument, NULL, 's' },
 					      { "size", required_argument, NULL, 'S' },
 					      { "font", required_argument, NULL, 'F' },
+					      { "verbose", no_argument, NULL, 'v' },
+					      { "quiet", no_argument, NULL, 'q' },
 					      { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_config = { 0 };
@@ -136,7 +142,7 @@ int
 	bool        is_refresh_only = false;
 	int         errfnd          = 0;
 
-	while ((opt = getopt_long(argc, argv, "y:x:hfcmps:S:F:", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "y:x:hfcmps:S:F:vq", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				fbink_config.row = (short int) atoi(optarg);
@@ -225,6 +231,12 @@ int
 					fprintf(stderr, "Unknown font name '%s'.\n", optarg);
 					errfnd = 1;
 				}
+				break;
+			case 'v':
+				fbink_config.is_verbose = true;
+				break;
+			case 'q':
+				fbink_config.is_verbose = false;
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", opt);

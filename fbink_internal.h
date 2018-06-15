@@ -114,6 +114,14 @@
 #	define UNUSED_BY_MINIMAL
 #endif
 
+// Handle what we send to stdout (i.e., mostly diagnostic stuff)
+#define LOG(fmt, ...)                                                                                                  \
+	({                                                                                                             \
+		if (is_verbose) {                                                                                      \
+			\ fprintf(stdout, fmt "\n", ##__VA_ARGS__);                                                    \
+		}                                                                                                      \
+	})
+
 // default eInk framebuffer palette
 // c.f., linux/drivers/video/mxc/cmap_lab126.h
 typedef enum
@@ -148,6 +156,7 @@ static unsigned short def_b[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77
 char*  fbp          = 0;
 size_t screensize   = 0U;
 bool   fb_is_mapped = false;
+bool   is_verbose   = true;
 // And those stay purely inside the library
 struct fb_var_screeninfo vinfo;
 struct fb_fix_screeninfo finfo;

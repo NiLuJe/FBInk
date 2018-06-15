@@ -61,6 +61,7 @@
 extern FBINK_API char* fbp;
 extern FBINK_API size_t screensize;
 extern FBINK_API bool   fb_is_mapped;
+extern FBINK_API bool   is_verbose;
 
 // Available fonts
 typedef enum
@@ -86,6 +87,7 @@ typedef struct
 	bool               is_cleared;
 	bool               is_centered;
 	bool               is_padded;
+	bool               is_verbose;
 } FBInkConfig;
 
 // Return the version of the currently loaded FBInk library
