@@ -79,12 +79,16 @@ static void
 	    "You can also eschew printing a STRING, and simply refresh the screen as per your specification, without touching the framebuffer:\n"
 	    "\t-s, --refresh top=NUM,left=NUM,width=NUM,height=NUM,wfm=NAME\n"
 	    "\t\t\tThe specified rectangle *must* completely fit on screen, or the ioctl will fail.\n"
+#ifndef FBINK_FOR_LEGACY
 	    "\t\t\tAvailable waveform modes: DU, GC16, GC4, A2, GL16, REAGL, REAGLD, AUTO\n"
 #ifdef FBINK_FOR_KINDLE
 	    "\t\t\t\tAs well as GC16_FAST, GL16_FAST, DU4, GL4, GL16_INV on some Kindles, depending on the model & FW version.\n"
 #endif
 	    "\t\t\tNote that this will also honor --flash\n"
-	    "\t\t\tNote that specifying a waveform mode is ignored on legacy einkfb devices, because the hardware doesn't provide such a capability.\n"
+#else
+	    "\t\t\tNote that specifying a waveform mode is ignored on legacy einkfb devices, because the hardware doesn't expose such capabilities.\n"
+	    "\t\t\tBut it does also honor the --flash flag, though.\n"
+#endif
 	    "\t\t\tSpecifying one or more STRING takes precedence over this mode.\n"
 	    "\n",
 	    fbink_version());
