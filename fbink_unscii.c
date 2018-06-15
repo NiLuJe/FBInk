@@ -27,7 +27,7 @@
 
 #include "fbink_unscii.h"
 
-static const char*
+const char*
     unscii_get_bitmap(uint32_t codepoint)
 {
 	if (codepoint <= 0x195) {
@@ -266,7 +266,7 @@ static const char*
 	}
 }
 
-static const char*
+const char*
     alt_get_bitmap(uint32_t codepoint)
 {
 	if (codepoint <= 0x195) {
@@ -505,7 +505,7 @@ static const char*
 	}
 }
 
-static const char*
+const char*
     thin_get_bitmap(uint32_t codepoint)
 {
 	if (codepoint <= 0x195) {
@@ -744,7 +744,7 @@ static const char*
 	}
 }
 
-static const char*
+const char*
     fantasy_get_bitmap(uint32_t codepoint)
 {
 	if (codepoint <= 0x195) {
@@ -983,7 +983,7 @@ static const char*
 	}
 }
 
-static const char*
+const char*
     mcr_get_bitmap(uint32_t codepoint)
 {
 	if (codepoint <= 0x195) {
@@ -1222,7 +1222,7 @@ static const char*
 	}
 }
 
-static const char*
+const char*
     tall_get_bitmap(uint32_t codepoint)
 {
 	if (codepoint <= 0x19f) {

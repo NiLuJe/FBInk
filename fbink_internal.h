@@ -90,6 +90,11 @@
 #include "font8x8/font8x8_greek.h"
 #include "font8x8/font8x8_hiragana.h"
 
+// Speaking of, include the Unscii variants when we're not a minimal build
+#ifndef FBINK_MINIMAL
+#include "fbink_unscii.h"
+#endif
+
 // Fallback version tag...
 #ifndef FBINK_VERSION
 #	define FBINK_VERSION "v0.9.5"

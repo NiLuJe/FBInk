@@ -98,7 +98,10 @@ endif
 LIB_SRCS=fbink.c utf8/utf8.c
 CMD_SRCS=fbink_cmd.c
 # Unless we're asking for a minimal build, include the Unscii fonts, too
-ifneq "$(MINIMAL)" "true"
+ifeq "$(MINIMAL)" "true"
+	EXTRA_CPPFLAGS+=-DFBINK_MINIMAL
+else
+	EXTRA_CPPFLAGS+=-DFBINK_WITH_UNSCII
 	LIB_SRCS+=fbink_unscii.c
 endif
 

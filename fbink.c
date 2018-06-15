@@ -198,7 +198,7 @@ static const char*
 static void
     font8x8_render(uint32_t codepoint, char* glyph_pixmap, unsigned short int fontname)
 {
-	const char* bitmap;
+	const char* bitmap = NULL;
 
 	// Do we have Unscii fonts compiled in?
 #ifdef FBINK_WITH_UNSCII
