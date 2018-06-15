@@ -204,26 +204,26 @@ static void
 #ifdef FBINK_WITH_UNSCII
 	switch(fontname) {
 		case UNSCII:
-			unscii_get_bitmap(codepoint);
+			bitmap = unscii_get_bitmap(codepoint);
 			break;
 		case UNSCII_ALT:
-			alt_get_bitmap(codepoint);
+			bitmap = alt_get_bitmap(codepoint);
 			break;
 		case UNSCII_THIN:
-			thin_get_bitmap(codepoint);
+			bitmap = thin_get_bitmap(codepoint);
 			break;
 		case UNSCII_FANTASY:
-			fantasy_get_bitmap(codepoint);
+			bitmap = fantasy_get_bitmap(codepoint);
 			break;
 		case UNSCII_MCR:
-			mcr_get_bitmap(codepoint);
+			bitmap = mcr_get_bitmap(codepoint);
 			break;
 		case UNSCII_TALL:
-			tall_get_bitmap(codepoint);
+			bitmap = tall_get_bitmap(codepoint);
 			break;
 		case IBM:
 		default:
-			font8x8_get_bitmap(codepoint);
+			bitmap = font8x8_get_bitmap(codepoint);
 			break;
 	}
 #else
