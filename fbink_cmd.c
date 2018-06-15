@@ -206,7 +206,7 @@ int
 				} else if (strcasecmp(optarg, "TALL") == 0) {
 					fbink_config.fontname = UNSCII_TALL;
 				} else {
-					fprintf(stderr, "Unknown font name %s.\n", optarg);
+					fprintf(stderr, "Unknown font name '%s'.\n", optarg);
 					errfnd = 1;
 				}
 				break;

@@ -261,7 +261,7 @@ const char*
 	} else if (codepoint >= 0xfeeb && codepoint <= 0xfef4) {
 		return unscii_block115[codepoint - 0xfeeb];
 	} else {
-		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by our font!\n", codepoint);
+		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by this font!\n", codepoint);
 		return unscii_block1[0];
 	}
 }
@@ -500,7 +500,7 @@ const char*
 	} else if (codepoint >= 0xfeeb && codepoint <= 0xfef4) {
 		return alt_block115[codepoint - 0xfeeb];
 	} else {
-		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by our font!\n", codepoint);
+		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by this font!\n", codepoint);
 		return alt_block1[0];
 	}
 }
@@ -739,7 +739,7 @@ const char*
 	} else if (codepoint >= 0xfeeb && codepoint <= 0xfef4) {
 		return thin_block115[codepoint - 0xfeeb];
 	} else {
-		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by our font!\n", codepoint);
+		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by this font!\n", codepoint);
 		return thin_block1[0];
 	}
 }
@@ -978,7 +978,7 @@ const char*
 	} else if (codepoint >= 0xfeeb && codepoint <= 0xfef4) {
 		return fantasy_block115[codepoint - 0xfeeb];
 	} else {
-		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by our font!\n", codepoint);
+		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by this font!\n", codepoint);
 		return fantasy_block1[0];
 	}
 }
@@ -1217,7 +1217,7 @@ const char*
 	} else if (codepoint >= 0xfeeb && codepoint <= 0xfef4) {
 		return mcr_block115[codepoint - 0xfeeb];
 	} else {
-		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by our font!\n", codepoint);
+		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by this font!\n", codepoint);
 		return mcr_block1[0];
 	}
 }
@@ -1458,7 +1458,7 @@ const char*
 	} else if (codepoint >= 0xff5c && codepoint <= 0xff5e) {
 		return tall_block116[codepoint - 0xff5c];
 	} else {
-		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by our font!\n", codepoint);
+		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by this font!\n", codepoint);
 		return tall_block1[0];
 	}
 }

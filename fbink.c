@@ -550,7 +550,7 @@ int
 	}
 #endif
 
-	// Obey user-specified fonr scaling multiplier
+	// Obey user-specified font scaling multiplier
 	if (fbink_config->fontmult > 0) {
 		FONTSIZE_MULT = fbink_config->fontmult;
 	} else {

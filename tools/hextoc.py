@@ -97,7 +97,7 @@ print("}}; // {}".format(blockcount))
 print("")
 
 eprint("\t}} else {{".format(int(blockcp, base=16), prevcp))
-eprint('\t\tfprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by our font!\\n", codepoint);')
+eprint('\t\tfprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by this font!\\n", codepoint);')
 eprint("\t\treturn {}_block1[0];".format(fontname))
 eprint("\t}")
 eprint("}")
