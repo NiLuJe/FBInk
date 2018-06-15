@@ -381,7 +381,6 @@ static struct mxcfb_rect
 		// Next glyph! This serves as the source for the pen position, hence it being used as an index...
 		ci++;
 	}
-	printf("\n");
 
 	return region;
 }
@@ -918,9 +917,17 @@ int
 			// Next line!
 			multiline_offset++;
 
-			// NOTE: Fully clear line, so u8_nextchar() has zero chance to skip a NULL on the next iteration.
+			// NOTE: If we've actually written something, and we're not the final line,
+			//       clear what we've just written, to get back a pristine NULL-filled buffer,
+			//       so u8_nextchar() has zero chance to skip a NULL on the next iteration.
 			//       See the comments around the initial calloc() call for more details.
-			memset(line, 0, ((MAXCOLS + 1U) * 4U) * sizeof(*line));
+			if (bytes_printed > 0 && line_len < chars_left) {
+				printf("We have more stuff to print, clearing the line buffer for re-use!\n");
+				printf("\n");
+				memset(line, 0, (size_t) bytes_printed);
+			}
+			// The nuclear option is simply to unconditonally zero the *full* buffer ;).
+			//memset(line, 0, ((MAXCOLS + 1U) * 4U) * sizeof(*line));
 		}
 
 		// Cleanup
