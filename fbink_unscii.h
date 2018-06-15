@@ -32,7 +32,17 @@
 #include <stdint.h>
 
 #include "fonts/unscii.h"
+#include "fonts/alt.h"
+#include "fonts/thin.h"
+#include "fonts/fantasy.h"
+#include "fonts/mcr.h"
+#include "fonts/tall.h"
 
 static const char* unscii_get_bitmap(uint32_t);
+static const char* alt_get_bitmap(uint32_t);
+static const char* thin_get_bitmap(uint32_t);
+static const char* fantasy_get_bitmap(uint32_t);
+static const char* mcr_get_bitmap(uint32_t);
+static const char* tall_get_bitmap(uint32_t);
 
 #endif
