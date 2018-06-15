@@ -168,11 +168,11 @@ static void
 	memset(fbp, def_b[c], finfo.smem_len);
 }
 
-// Return the font8x8 bitmap for a specifric ascii character
+// Return the font8x8 bitmap for a specific Unicode codepoint
 static const char*
     font8x8_get_bitmap(uint32_t codepoint)
 {
-	// Get the bitmap for that ASCII character
+	// Get the bitmap for the character mapped to that Unicode codepoint
 	if (codepoint <= 0x7F) {
 		return font8x8_basic[codepoint];
 	} else if (codepoint >= 0x80 && codepoint <= 0x9F) {
@@ -188,7 +188,7 @@ static const char*
 	} else if (codepoint >= 0x3040 && codepoint <= 0x309F) {
 		return font8x8_hiragana[codepoint - 0x3040];
 	} else {
-		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by our font!\n", codepoint);
+		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by this font!\n", codepoint);
 		return font8x8_basic[0];
 	}
 }
@@ -196,9 +196,39 @@ static const char*
 // Render a specific font8x8 glyph into a pixmap
 // (base size: 8x8, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
 static void
-    font8x8_render(uint32_t codepoint, char* glyph_pixmap)
+    font8x8_render(uint32_t codepoint, char* glyph_pixmap, unsigned short int fontname)
 {
-	const char* bitmap = font8x8_get_bitmap(codepoint);
+	const char* bitmap = NULL;
+
+	// Do we have Unscii fonts compiled in?
+#ifdef FBINK_WITH_UNSCII
+	switch(fontname) {
+		case UNSCII:
+			bitmap = unscii_get_bitmap(codepoint);
+			break;
+		case UNSCII_ALT:
+			bitmap = alt_get_bitmap(codepoint);
+			break;
+		case UNSCII_THIN:
+			bitmap = thin_get_bitmap(codepoint);
+			break;
+		case UNSCII_FANTASY:
+			bitmap = fantasy_get_bitmap(codepoint);
+			break;
+		case UNSCII_MCR:
+			bitmap = mcr_get_bitmap(codepoint);
+			break;
+		case UNSCII_TALL:
+			bitmap = tall_get_bitmap(codepoint);
+			break;
+		case IBM:
+		default:
+			bitmap = font8x8_get_bitmap(codepoint);
+			break;
+	}
+#else
+	bitmap = font8x8_get_bitmap(codepoint);
+#endif
 
 	unsigned short int x;
 	unsigned short int y;
@@ -229,7 +259,8 @@ static struct mxcfb_rect
 	 unsigned short int col,
 	 bool               is_inverted,
 	 bool               is_centered,
-	 unsigned short int multiline_offset)
+	 unsigned short int multiline_offset,
+	 unsigned short int fontname)
 {
 	printf("Printing '%s' @ line offset %hu (meaning row %d)\n", text, multiline_offset, row + multiline_offset);
 	unsigned short int fgC = is_inverted ? WHITE : BLACK;
@@ -312,7 +343,8 @@ static struct mxcfb_rect
 	//       It's a very small allocation, we'll always fully write to it so we don't care about its initialization,
 	//       -> it's a perfect fit for the stack.
 	//       In any other situation (i.e., constant FONTW & FONTH), it'd have been an automatic.
-	pixmap = alloca(sizeof(*pixmap) * (size_t)(FONTW * FONTH));
+	// NOTE: Don't forget the extra FONTSIZE_MULT - 1 to avoid a buffer overflow when scaling the last pixel...
+	pixmap = alloca(sizeof(*pixmap) * (size_t)((FONTW * FONTH) + FONTSIZE_MULT - 1));
 
 	// Loop through all the *characters* in the text string
 	unsigned int       bi = 0U;
@@ -322,7 +354,7 @@ static struct mxcfb_rect
 		printf("Char %u (@ %u) out of %u is @ byte offset %d and is U+%04X\n", ci + 1, ci, charcount, bi, ch);
 
 		// Get the glyph's pixmap
-		font8x8_render(ch, pixmap);
+		font8x8_render(ch, pixmap, fontname);
 
 		// loop through pixel rows
 		for (y = 0U; y < FONTH; y++) {
@@ -480,7 +512,7 @@ int
 
 // Get the various fb info & setup global variables
 int
-    fbink_init(int fbfd)
+    fbink_init(int fbfd, const FBInkConfig* fbink_config)
 {
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
@@ -511,25 +543,37 @@ int
 	FONTW = 8U;
 	FONTH = 8U;
 
-	// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
-	// NOTE: We still want to compare against the screen's "height", even in Landscape mode...
-	uint32_t screen_height = vinfo.yres;
-	if (vinfo.xres > vinfo.yres) {
-		// NOTE: vinfo.rotate == 2 (vs. 3 in Portrait mode) on my PW2
-		//       My Touch, which doesn't propose Landscape mode, defaults to vinfo.rotate == 1
-		//       My K4, which supports the four possible rotations,
-		//          is always using vinfo.rotate == 0 (but xres & yres do switch).
-		//          It's also using the old eink_fb driver, which we do not support anyway :D.
-		screen_height = vinfo.xres;
+#ifdef FBINK_WITH_UNSCII
+	// NOTE: Unscii-16 is 8x16, handle it ;).
+	if (fbink_config->fontname == UNSCII_TALL) {
+		FONTH = 16U;
 	}
-	if (screen_height <= 600U) {
-		FONTSIZE_MULT = 1U;    // 8x8
-	} else if (screen_height <= 1024U) {
-		FONTSIZE_MULT = 2U;    // 16x16
-	} else if (screen_height <= 1440U) {
-		FONTSIZE_MULT = 3U;    // 24x24
+#endif
+
+	// Obey user-specified font scaling multiplier
+	if (fbink_config->fontmult > 0) {
+		FONTSIZE_MULT = fbink_config->fontmult;
 	} else {
-		FONTSIZE_MULT = 4U;    // 32x32
+		// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
+		// NOTE: We still want to compare against the screen's "height", even in Landscape mode...
+		uint32_t screen_height = vinfo.yres;
+		if (vinfo.xres > vinfo.yres) {
+			// NOTE: vinfo.rotate == 2 (vs. 3 in Portrait mode) on my PW2
+			//       My Touch, which doesn't propose Landscape mode, defaults to vinfo.rotate == 1
+			//       My K4, which supports the four possible rotations,
+			//          is always using vinfo.rotate == 0 (but xres & yres do switch).
+			//          It's also using the old eink_fb driver, which we do not support anyway :D.
+			screen_height = vinfo.xres;
+		}
+		if (screen_height <= 600U) {
+			FONTSIZE_MULT = 1U;    // 8x8
+		} else if (screen_height <= 1024U) {
+			FONTSIZE_MULT = 2U;    // 16x16
+		} else if (screen_height <= 1440U) {
+			FONTSIZE_MULT = 3U;    // 24x24
+		} else {
+			FONTSIZE_MULT = 4U;    // 32x32
+		}
 	}
 	// Go!
 	FONTW = (unsigned short int) (FONTW * FONTSIZE_MULT);
@@ -542,7 +586,7 @@ int
 	fprintf(stderr, "[FBInk] Line length: %hu cols, Page size: %hu rows.\n", MAXCOLS, MAXROWS);
 
 	// Mention & remember if we can perfectly fit the final column on screen
-	if (FONTW * MAXCOLS == vinfo.xres) {
+	if ((unsigned short int) (FONTW * MAXCOLS) == vinfo.xres) {
 		is_perfect_fit = true;
 		fprintf(stderr, "[FBInk] It's a perfect fit!\n");
 	}
@@ -694,6 +738,8 @@ int
 		//       it's not filling the end of the buffer with NULLs, it just outputs a single one!
 		//       That's why we're also using calloc here.
 		//       Plus, the OS will ensure that'll always be smarter than malloc + memset ;).
+		// NOTE: Since we re-use line on each iteration of the loop,
+		//       we do also need to clear it at the end of the loop, in preparation of the next iteration.
 
 		printf("Need %hu lines to print %u characters over %hu available columns\n",
 		       lines,
@@ -860,10 +906,15 @@ int
 				      (unsigned short int) col,
 				      fbink_config->is_inverted,
 				      fbink_config->is_centered,
-				      multiline_offset);
+				      multiline_offset,
+				      fbink_config->fontname);
 
 			// Next line!
 			multiline_offset++;
+
+			// NOTE: Fully clear line, so u8_nextchar() has zero chance to skip a NULL on the next iteration.
+			//       See the comments around the initial calloc() call for more details.
+			memset(line, 0, ((MAXCOLS + 1U) * 4U) * sizeof(*line));
 		}
 
 		// Cleanup

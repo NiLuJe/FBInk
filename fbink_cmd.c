@@ -56,6 +56,9 @@ static void
 	    "\t-h, --invert\tPrint STRING in white over a black background instead of the reverse.\n"
 	    "\t-f, --flash\tAsk the eInk driver to do a black flash when refreshing the area of the screen where STRING will be printed.\n"
 	    "\t-c, --clear\tFully clear the screen before printing STRING (obeys --invert).\n"
+	    "\t-S, --size\tOverride the automatic font scaling multiplier (defaults range from 1 (no scaling), to 4 (4x upscaling). 0 means automatic selection.).\n"
+	    "\t-F, --font NAME\tRender glyphs from builtin font NAME (Default: IBM).\n"
+	    "\t\t\tAvailable font families: IBM, UNSCII, ALT, THIN, FANTASY, MCR, TALL\n"
 	    "\n"
 	    "NOTE:\n"
 	    "\tYou can specify multiple STRINGs in a single invocation of fbink, each consecutive one will be printed on consecutive lines.\n"
@@ -91,6 +94,8 @@ int
 					      { "centered", no_argument, NULL, 'm' },
 					      { "padded", no_argument, NULL, 'p' },
 					      { "refresh", required_argument, NULL, 's' },
+					      { "size", required_argument, NULL, 'S' },
+					      { "font", required_argument, NULL, 'F' },
 					      { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_config = { 0 };
@@ -115,7 +120,7 @@ int
 	bool        is_refresh_only = false;
 	int         errfnd          = 0;
 
-	while ((opt = getopt_long(argc, argv, "y:x:hfcmps:", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "y:x:hfcmps:S:F:", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				fbink_config.row = (short int) atoi(optarg);
@@ -182,6 +187,29 @@ int
 					is_refresh_only = true;
 				}
 				break;
+			case 'S':
+				fbink_config.fontmult = (short unsigned int) strtoul(optarg, NULL, 10);
+				break;
+			case 'F':
+				if (strcasecmp(optarg, "IBM") == 0) {
+					fbink_config.fontname = IBM;
+				} else if (strcasecmp(optarg, "UNSCII") == 0) {
+					fbink_config.fontname = UNSCII;
+				} else if (strcasecmp(optarg, "ALT") == 0) {
+					fbink_config.fontname = UNSCII_ALT;
+				} else if (strcasecmp(optarg, "THIN") == 0) {
+					fbink_config.fontname = UNSCII_THIN;
+				} else if (strcasecmp(optarg, "FANTASY") == 0) {
+					fbink_config.fontname = UNSCII_FANTASY;
+				} else if (strcasecmp(optarg, "MCR") == 0) {
+					fbink_config.fontname = UNSCII_MCR;
+				} else if (strcasecmp(optarg, "TALL") == 0) {
+					fbink_config.fontname = UNSCII_TALL;
+				} else {
+					fprintf(stderr, "Unknown font name '%s'.\n", optarg);
+					errfnd = 1;
+				}
+				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", opt);
 				errfnd = 1;
@@ -200,7 +228,7 @@ int
 		fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
 		return EXIT_FAILURE;
 	}
-	if (EXIT_FAILURE == (fbfd = fbink_init(fbfd))) {
+	if (EXIT_FAILURE == (fbfd = fbink_init(fbfd, &fbink_config))) {
 		fprintf(stderr, "Failed to initialize FBInk, aborting . . .\n");
 		return EXIT_FAILURE;
 	}
