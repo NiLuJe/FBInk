@@ -541,7 +541,12 @@ int
 	//       since we're relying on the default value to calculate the scaled value,
 	//       and we're using this value to set MAXCOLS & MAXROWS, which we *need* to be sane.
 	FONTW = 8U;
-	FONTH = 8U;
+	// NOTE: Unscii-16 is 8x16, handle it ;).
+	if (fbink_config->fontname == UNSCII_TALL) {
+		FONTH = 16U;
+	} else {
+		FONTH = 8U;
+	}
 
 	// Obey user-specified fonr scaling multiplier
 	if (fbink_config->fontmult > 0) {
