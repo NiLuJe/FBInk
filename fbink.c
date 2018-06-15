@@ -730,6 +730,12 @@ int
 		// NOTE: UTF-8 is at most 4 bytes per sequence, make sure we can fit a full line of UTF-8 (+ 1 'wide' NULL).
 		char* line = NULL;
 		line       = calloc((MAXCOLS + 1U) * 4U, sizeof(*line));
+		if (line == NULL) {
+			char  buf[256];
+			char* errstr = strerror_r(errno, buf, sizeof(buf));
+			fprintf(stderr, "[FBInk] calloc (line): %s\n", errstr);
+			return -1;
+		}
 		// NOTE: This makes sure it's always full of NULLs, to avoid weird shit happening later with u8_strlen()
 		//       and uninitialized or re-used memory...
 		//       Namely, a single NULL immediately followed by something that *might* be interpreted as an UTF-8
@@ -961,6 +967,12 @@ int
 	// NOTE: We use calloc to make sure it'll always be zero-initialized,
 	//       and the OS is smart enough to make it fast if we don't use the full space anyway (CoW zeroing).
 	buffer = calloc(((size_t)(MAXCOLS * MAXROWS) + 1U) * 4U, sizeof(*buffer));
+	if (buffer == NULL) {
+		char  buf[256];
+		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		fprintf(stderr, "[FBInk] calloc (page): %s\n", errstr);
+		return -1;
+	}
 
 	va_list args;
 	va_start(args, fmt);
