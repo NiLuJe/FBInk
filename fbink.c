@@ -326,8 +326,8 @@ static struct mxcfb_rect
 		region.left  = 0U;
 		region.width = vinfo.xres;
 		LOG("Updated region.left to %u & region.width to %u because of multi-line centering",
-		       region.left,
-		       region.width);
+		    region.left,
+		    region.width);
 	}
 
 	// Fill our bounding box with our background color, so that we'll be visible no matter what's already on screen.
@@ -398,8 +398,7 @@ static int
 		.which_fx = is_flashing ? fx_update_full : fx_update_partial,
 		.buffer   = NULL,
 	};
-	LOG(
-	    "Area is: x1: %d, y1: %d, x2: %d, y2: %d with fx: %d", area.x1, area.y1, area.x2, area.y2, area.which_fx);
+	LOG("Area is: x1: %d, y1: %d, x2: %d, y2: %d with fx: %d", area.x1, area.y1, area.x2, area.y2, area.which_fx);
 
 	if (ioctl(fbfd, FBIO_EINK_UPDATE_DISPLAY_AREA, &area) < 0) {
 		// NOTE: perror() is not thread-safe...
@@ -686,8 +685,7 @@ int
 		unsigned int charcount = u8_strlen(string);
 		// Check how much extra storage is used up by multibyte sequences.
 		if (len > charcount) {
-			LOG(
-			    "Extra storage used up by multibyte sequences: %zu bytes (for a total of %u characters over %zu bytes)",
+			LOG("Extra storage used up by multibyte sequences: %zu bytes (for a total of %u characters over %zu bytes)",
 			    (len - charcount),
 			    charcount,
 			    len);
@@ -754,9 +752,9 @@ int
 		//       we do also need to clear it at the end of the loop, in preparation of the next iteration.
 
 		LOG("Need %hu lines to print %u characters over %hu available columns",
-		       lines,
-		       charcount,
-		       available_cols);
+		    lines,
+		    charcount,
+		    available_cols);
 
 		// Do the initial computation outside the loop,
 		// so we'll be able to re-use line_len to accurately compute chars_left when looping.
@@ -767,8 +765,7 @@ int
 		unsigned int line_len   = 0U;
 		// If we have multiple lines worth of stuff to print, draw it line per line
 		while (chars_left > line_len) {
-			LOG(
-			    "Line %u (of ~%u), previous line was %u characters long and there were %u characters left to print",
+			LOG("Line %u (of ~%u), previous line was %u characters long and there were %u characters left to print",
 			    multiline_offset + 1,
 			    lines,
 			    line_len,
@@ -776,8 +773,8 @@ int
 			// Make sure we don't try to draw off-screen...
 			if (row + multiline_offset >= MAXROWS) {
 				LOG("Can only print %hu lines, discarding the %u characters left!",
-				       MAXROWS,
-				       chars_left - line_len);
+				    MAXROWS,
+				    chars_left - line_len);
 				// And that's it, we're done.
 				break;
 			}
@@ -817,8 +814,8 @@ int
 					// but also so that line_bytes matches line_len ;).
 					// And finally, as we've explained earlier, trim line_len to where we stopped.
 					LOG("Line length was %u characters, but LF is character number %u",
-					       line_len,
-					       cn);
+					    line_len,
+					    cn);
 					line_len = cn;
 					// Don't touch line_offset, the beginning of our line has not changed,
 					// only its length was cut short.
@@ -864,10 +861,10 @@ int
 
 				// Compute the effective right padding value for science!
 				LOG("Total size: %u + %u + %u = %u",
-				       left_pad,
-				       line_len,
-				       right_pad,
-				       left_pad + line_len + right_pad);
+				    left_pad,
+				    line_len,
+				    right_pad,
+				    left_pad + line_len + right_pad);
 
 				// NOTE: To recap:
 				//       Copy at most (MAXCOLS * 4) + 1 bytes into line
@@ -893,9 +890,9 @@ int
 				// NOTE: Don't touch line_len, because we're *adding* new blank characters,
 				//       we're still printing the exact same amount of characters *from our string*.
 				LOG("Padded %u bytes to %u to cover %u columns",
-				       line_bytes,
-				       padded_bytes,
-				       available_cols);
+				    line_bytes,
+				    padded_bytes,
+				    available_cols);
 				bytes_printed = snprintf(line,
 							 padded_bytes + 1U,
 							 "%*.*s",
