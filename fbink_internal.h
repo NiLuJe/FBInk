@@ -118,7 +118,7 @@
 #define LOG(fmt, ...)                                                                                                  \
 	({                                                                                                             \
 		if (is_verbose) {                                                                                      \
-			\ fprintf(stdout, fmt "\n", ##__VA_ARGS__);                                                    \
+			fprintf(stdout, fmt "\n", ##__VA_ARGS__);                                                      \
 		}                                                                                                      \
 	})
 

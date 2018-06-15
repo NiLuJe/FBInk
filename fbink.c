@@ -152,7 +152,7 @@ static void
 			put_pixel((unsigned short int) (x + cx), (unsigned short int) (y + cy), c);
 		}
 	}
-	printf("filled %hux%hu rectangle @ %hu, %hu\n", w, h, x, y);
+	LOG("filled %hux%hu rectangle @ %hu, %hu", w, h, x, y);
 }
 
 // Helper function to clear the screen - fill whole screen with given color
@@ -262,7 +262,7 @@ static struct mxcfb_rect
 	 unsigned short int multiline_offset,
 	 unsigned short int fontname)
 {
-	printf("Printing '%s' @ line offset %hu (meaning row %d)\n", text, multiline_offset, row + multiline_offset);
+	LOG("Printing '%s' @ line offset %hu (meaning row %d)", text, multiline_offset, row + multiline_offset);
 	unsigned short int fgC = is_inverted ? WHITE : BLACK;
 	unsigned short int bgC = is_inverted ? BLACK : WHITE;
 
@@ -277,7 +277,7 @@ static struct mxcfb_rect
 	//       And as we're printing glyphs, we need to iterate over the number of characters/grapheme clusters,
 	//       not bytes.
 	unsigned int charcount = u8_strlen(text);
-	printf("Character count: %u (over %zu bytes)\n", charcount, strlen(text));
+	LOG("Character count: %u (over %zu bytes)", charcount, strlen(text));
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
@@ -287,7 +287,7 @@ static struct mxcfb_rect
 		.height = (uint32_t)((multiline_offset + 1U) * FONTH),
 	};
 
-	printf("Region: top=%u, left=%u, width=%u, height=%u\n", region.top, region.left, region.width, region.height);
+	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
 
 	// NOTE: eInk framebuffers are weird...
 	//       We should be computing the length of a line (MAXCOLS) based on xres_virtual,
@@ -316,7 +316,7 @@ static struct mxcfb_rect
 		if (region.width + region.left > vinfo.xres) {
 			region.width = vinfo.xres - region.left;
 		}
-		printf("Updated region.width to %u\n", region.width);
+		LOG("Updated region.width to %u", region.width);
 	}
 
 	// NOTE: In case of a multi-line centered print, we can't really trust the final col,
@@ -325,7 +325,7 @@ static struct mxcfb_rect
 	if (multiline_offset > 0U && is_centered) {
 		region.left  = 0U;
 		region.width = vinfo.xres;
-		printf("Updated region.left to %u & region.width to %u because of multi-line centering\n",
+		LOG("Updated region.left to %u & region.width to %u because of multi-line centering",
 		       region.left,
 		       region.width);
 	}
@@ -351,7 +351,7 @@ static struct mxcfb_rect
 	unsigned short int ci = 0U;
 	uint32_t           ch = 0U;
 	while ((ch = u8_nextchar(text, &bi)) != 0U) {
-		printf("Char %u (@ %u) out of %u is @ byte offset %d and is U+%04X\n", ci + 1, ci, charcount, bi, ch);
+		LOG("Char %u (@ %u) out of %u is @ byte offset %d and is U+%04X", ci + 1, ci, charcount, bi, ch);
 
 		// Get the glyph's pixmap
 		font8x8_render(ch, pixmap, fontname);
@@ -398,8 +398,8 @@ static int
 		.which_fx = is_flashing ? fx_update_full : fx_update_partial,
 		.buffer   = NULL,
 	};
-	printf(
-	    "Area is: x1: %d, y1: %d, x2: %d, y2: %d with fx: %d\n", area.x1, area.y1, area.x2, area.y2, area.which_fx);
+	LOG(
+	    "Area is: x1: %d, y1: %d, x2: %d, y2: %d with fx: %d", area.x1, area.y1, area.x2, area.y2, area.which_fx);
 
 	if (ioctl(fbfd, FBIO_EINK_UPDATE_DISPLAY_AREA, &area) < 0) {
 		// NOTE: perror() is not thread-safe...
@@ -669,16 +669,16 @@ int
 		if (row < 0) {
 			row = (short int) MAX(MAXROWS + row, 0);
 		}
-		printf("Adjusted position: column %hd, row %hd\n", col, row);
+		LOG("Adjusted position: column %hd, row %hd", col, row);
 
 		// Clamp coordinates to the screen, to avoid blowing up ;).
 		if (col >= MAXCOLS) {
 			col = (short int) (MAXCOLS - 1);
-			printf("Clamped column to %hd\n", col);
+			LOG("Clamped column to %hd", col);
 		}
 		if (row >= MAXROWS) {
 			row = (short int) (MAXROWS - 1);
-			printf("Clamped row to %hd\n", row);
+			LOG("Clamped row to %hd", row);
 		}
 
 		// See if we need to break our string down into multiple lines...
@@ -686,8 +686,8 @@ int
 		unsigned int charcount = u8_strlen(string);
 		// Check how much extra storage is used up by multibyte sequences.
 		if (len > charcount) {
-			printf(
-			    "Extra storage used up by multibyte sequences: %zu bytes (for a total of %u characters over %zu bytes)\n",
+			LOG(
+			    "Extra storage used up by multibyte sequences: %zu bytes (for a total of %u characters over %zu bytes)",
 			    (len - charcount),
 			    charcount,
 			    len);
@@ -721,7 +721,7 @@ int
 
 		// Truncate to a single screen...
 		if (lines > MAXROWS) {
-			printf("Can only print %hu out of %hu lines, truncating!\n", MAXROWS, lines);
+			LOG("Can only print %hu out of %hu lines, truncating!", MAXROWS, lines);
 			lines = MAXROWS;
 		}
 
@@ -729,7 +729,7 @@ int
 		if (row + lines > MAXROWS) {
 			row = (short int) MIN(row - ((row + lines) - MAXROWS), MAXROWS);
 		}
-		printf("Final position: column %hd, row %hd\n", col, row);
+		LOG("Final position: column %hd, row %hd", col, row);
 
 		// We'll copy our text in chunks of formatted line...
 		// NOTE: Store that on the heap, we've had some wacky adventures with automatic VLAs...
@@ -753,7 +753,7 @@ int
 		// NOTE: Since we re-use line on each iteration of the loop,
 		//       we do also need to clear it at the end of the loop, in preparation of the next iteration.
 
-		printf("Need %hu lines to print %u characters over %hu available columns\n",
+		LOG("Need %hu lines to print %u characters over %hu available columns",
 		       lines,
 		       charcount,
 		       available_cols);
@@ -767,15 +767,15 @@ int
 		unsigned int line_len   = 0U;
 		// If we have multiple lines worth of stuff to print, draw it line per line
 		while (chars_left > line_len) {
-			printf(
-			    "Line %u (of ~%u), previous line was %u characters long and there were %u characters left to print\n",
+			LOG(
+			    "Line %u (of ~%u), previous line was %u characters long and there were %u characters left to print",
 			    multiline_offset + 1,
 			    lines,
 			    line_len,
 			    chars_left);
 			// Make sure we don't try to draw off-screen...
 			if (row + multiline_offset >= MAXROWS) {
-				printf("Can only print %hu lines, discarding the %u characters left!\n",
+				LOG("Can only print %hu lines, discarding the %u characters left!",
 				       MAXROWS,
 				       chars_left - line_len);
 				// And that's it, we're done.
@@ -786,7 +786,7 @@ int
 			chars_left -= line_len;
 			// And use it to compute the amount of characters to print on *this* line
 			line_len = MIN(chars_left, available_cols);
-			printf("Characters to print: %u out of the %u remaining ones\n", line_len, chars_left);
+			LOG("Characters to print: %u out of the %u remaining ones", line_len, chars_left);
 
 			// NOTE: Now we just have to switch from characters to bytes, both for line_len & chars_left...
 			// First, get the byte offset of this section of our string (i.e., this line)...
@@ -801,7 +801,7 @@ int
 				//       The main use-case for this is throwing tail'ed logfiles at us and having them
 				//       be readable instead of a jumbled glued together mess ;).
 				if (ch == 0x0A) {
-					printf("Caught a linefeed!\n");
+					LOG("Caught a linefeed!");
 					// NOTE: We're essentially forcing a reflow by cutting the line mid-stream,
 					//       so we have to update our counters...
 					//       But we can only correct *one* of chars_left or line_len,
@@ -816,13 +816,13 @@ int
 					// (it'll render as a blank), mostly to make padding look nicer,
 					// but also so that line_bytes matches line_len ;).
 					// And finally, as we've explained earlier, trim line_len to where we stopped.
-					printf("Line length was %u characters, but LF is character number %u\n",
+					LOG("Line length was %u characters, but LF is character number %u",
 					       line_len,
 					       cn);
 					line_len = cn;
 					// Don't touch line_offset, the beginning of our line has not changed,
 					// only its length was cut short.
-					printf("Adjusted lines to %u & line_len to %u\n", lines, line_len);
+					LOG("Adjusted lines to %u & line_len to %u", lines, line_len);
 					// And of course we break, because that was the whole point of this shenanigan!
 					break;
 				}
@@ -831,7 +831,7 @@ int
 					break;
 				}
 			}
-			printf("Line takes up %u bytes\n", line_bytes);
+			LOG("Line takes up %u bytes", line_bytes);
 			int bytes_printed = 0;
 
 			// Just fudge the column for centering...
@@ -845,7 +845,7 @@ int
 						col = 1;
 					}
 				}
-				printf("Adjusted column to %hd for centering\n", col);
+				LOG("Adjusted column to %hd for centering", col);
 			}
 
 			// When centered & padded, we need to split the padding in two, left & right.
@@ -863,7 +863,7 @@ int
 				unsigned int right_pad = MAXCOLS - line_len - left_pad;
 
 				// Compute the effective right padding value for science!
-				printf("Total size: %u + %u + %u = %u\n",
+				LOG("Total size: %u + %u + %u = %u",
 				       left_pad,
 				       line_len,
 				       right_pad,
@@ -892,7 +892,7 @@ int
 				unsigned int padded_bytes = line_bytes + (available_cols - line_len);
 				// NOTE: Don't touch line_len, because we're *adding* new blank characters,
 				//       we're still printing the exact same amount of characters *from our string*.
-				printf("Padded %u bytes to %u to cover %u columns\n",
+				LOG("Padded %u bytes to %u to cover %u columns",
 				       line_bytes,
 				       padded_bytes,
 				       available_cols);
@@ -911,7 +911,7 @@ int
 							 (int) line_bytes,
 							 string + line_offset);
 			}
-			printf("snprintf wrote %d bytes\n", bytes_printed);
+			LOG("snprintf wrote %d bytes", bytes_printed);
 
 			region = draw(line,
 				      (unsigned short int) row,
@@ -929,8 +929,7 @@ int
 			//       so u8_nextchar() has zero chance to skip a NULL on the next iteration.
 			//       See the comments around the initial calloc() call for more details.
 			if (bytes_printed > 0 && line_len < chars_left) {
-				printf("We have more stuff to print, clearing the line buffer for re-use!\n");
-				printf("\n");
+				LOG("We have more stuff to print, clearing the line buffer for re-use!\n");
 				memset(line, 0, (size_t) bytes_printed);
 			}
 			// The nuclear option is simply to unconditonally zero the *full* buffer ;).
