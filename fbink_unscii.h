@@ -28,15 +28,15 @@
 #ifndef __FBINK_UNSCII_H
 #define __FBINK_UNSCII_H
 
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 
-#include "fonts/unscii.h"
 #include "fonts/alt.h"
-#include "fonts/thin.h"
 #include "fonts/fantasy.h"
 #include "fonts/mcr.h"
 #include "fonts/tall.h"
+#include "fonts/thin.h"
+#include "fonts/unscii.h"
 
 const char* unscii_get_bitmap(uint32_t);
 const char* alt_get_bitmap(uint32_t);

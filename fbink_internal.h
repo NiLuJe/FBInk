@@ -92,12 +92,26 @@
 
 // Speaking of, include the Unscii variants when we're not a minimal build
 #ifndef FBINK_MINIMAL
-#include "fbink_unscii.h"
+#	include "fbink_unscii.h"
 #endif
 
 // Fallback version tag...
 #ifndef FBINK_VERSION
 #	define FBINK_VERSION "v0.9.8"
+#endif
+
+// NOTE: Some of our ifdef combinations may cause a small number of function arguments to become unused...
+//       Handle the warnings in these cases with a bit of trickery,
+//       by conditionally marking theses arguments as unused ;).
+#ifdef FBINK_FOR_LEGACY
+#	define UNUSED_BY_LEGACY __attribute__((unused))
+#else
+#	define UNUSED_BY_LEGACY
+#endif
+#ifdef FBINK_MINIMAL
+#	define UNUSED_BY_MINIMAL __attribute__((unused))
+#else
+#	define UNUSED_BY_MINIMAL
 #endif
 
 // default eInk framebuffer palette
@@ -172,11 +186,11 @@ static void fill_rect(unsigned short int,
 static void clear_screen(unsigned short int);
 
 static const char* font8x8_get_bitmap(uint32_t);
-static void        font8x8_render(uint32_t, char*, unsigned short int);
+static void        font8x8_render(uint32_t, char*, unsigned short int UNUSED_BY_MINIMAL);
 
 static struct mxcfb_rect
     draw(const char*, unsigned short int, unsigned short int, bool, bool, unsigned short int, unsigned short int);
 
-static int refresh(int, const struct mxcfb_rect, uint32_t, bool);
+static int refresh(int, const struct mxcfb_rect, uint32_t UNUSED_BY_LEGACY, bool);
 
 #endif

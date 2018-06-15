@@ -196,13 +196,13 @@ static const char*
 // Render a specific font8x8 glyph into a pixmap
 // (base size: 8x8, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
 static void
-    font8x8_render(uint32_t codepoint, char* glyph_pixmap, unsigned short int fontname)
+    font8x8_render(uint32_t codepoint, char* glyph_pixmap, unsigned short int fontname UNUSED_BY_MINIMAL)
 {
 	const char* bitmap = NULL;
 
 	// Do we have Unscii fonts compiled in?
 #ifdef FBINK_WITH_UNSCII
-	switch(fontname) {
+	switch (fontname) {
 		case UNSCII:
 			bitmap = unscii_get_bitmap(codepoint);
 			break;
@@ -388,7 +388,7 @@ static struct mxcfb_rect
 
 // Handle eInk updates
 static int
-    refresh(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode, bool is_flashing)
+    refresh(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode UNUSED_BY_LEGACY, bool is_flashing)
 {
 #ifdef FBINK_FOR_LEGACY
 	struct update_area_t area = {

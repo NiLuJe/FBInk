@@ -1462,4 +1462,3 @@ const char*
 		return tall_block1[0];
 	}
 }
-
