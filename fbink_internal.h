@@ -97,7 +97,7 @@
 
 // Fallback version tag...
 #ifndef FBINK_VERSION
-#	define FBINK_VERSION "v0.9.5"
+#	define FBINK_VERSION "v0.9.8"
 #endif
 
 // default eInk framebuffer palette
