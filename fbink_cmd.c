@@ -35,7 +35,11 @@ static void
 {
 	printf(
 	    "\n"
+#ifdef FBINK_MINIMAL
+	    "FBInk %s [Minimalistic build]\n"
+#else
 	    "FBInk %s\n"
+#endif
 	    "\n"
 	    "Usage: fbink [OPTIONS] [STRING]\n"
 	    "\n"
@@ -58,7 +62,11 @@ static void
 	    "\t-c, --clear\tFully clear the screen before printing STRING (obeys --invert).\n"
 	    "\t-S, --size\tOverride the automatic font scaling multiplier (defaults range from 1 (no scaling), to 4 (4x upscaling). 0 means automatic selection.).\n"
 	    "\t-F, --font NAME\tRender glyphs from builtin font NAME (Default: IBM).\n"
+#ifdef FBINK_WITH_UNSCII
 	    "\t\t\tAvailable font families: IBM, UNSCII, ALT, THIN, FANTASY, MCR, TALL\n"
+#else
+	    "\t\t\tAvailable font families: IBM\n"
+#endif
 	    "\n"
 	    "NOTE:\n"
 	    "\tYou can specify multiple STRINGs in a single invocation of fbink, each consecutive one will be printed on consecutive lines.\n"
@@ -70,7 +78,9 @@ static void
 	    "\t-s, --refresh top=NUM,left=NUM,width=NUM,height=NUM,wfm=NAME\n"
 	    "\t\t\tThe specified rectangle *must* completely fit on screen, or the ioctl will fail.\n"
 	    "\t\t\tAvailable waveform modes: DU, GC16, GC4, A2, GL16, REAGL, REAGLD, AUTO\n"
-	    "\t\t\t\tAs well as GC16_FAST, GL16_FAST, DU4, GL4, GL16_INV on Kindles, depending on FW version.\n"
+#ifdef FBINK_FOR_KINDLE
+	    "\t\t\t\tAs well as GC16_FAST, GL16_FAST, DU4, GL4, GL16_INV on some Kindles, depending on the model & FW version.\n"
+#endif
 	    "\t\t\tNote that this will also honor --flash\n"
 	    "\t\t\tNote that specifying a waveform mode is ignored on legacy einkfb devices, because the hardware doesn't provide such a capability.\n"
 	    "\t\t\tSpecifying one or more STRING takes precedence over this mode.\n"
