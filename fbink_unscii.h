@@ -31,6 +31,11 @@
 #include <stdio.h>
 #include <stdint.h>
 
+// If we're being compiled, we're not in a minimal build, make the rest of the code aware that we're here
+#ifndef FBINK_WITH_UNSCII
+#define FBINK_WITH_UNSCII
+#endif
+
 #include "fonts/unscii.h"
 #include "fonts/alt.h"
 #include "fonts/thin.h"

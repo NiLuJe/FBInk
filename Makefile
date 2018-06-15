@@ -97,6 +97,10 @@ endif
 # Now that we're done fiddling with flags, let's build stuff!
 LIB_SRCS=fbink.c utf8/utf8.c
 CMD_SRCS=fbink_cmd.c
+# Unless we're asking for a minimal build, include the Unscii fonts, too
+ifneq "$(MINIMAL)" "true"
+	LIB_SRCS+=fbink_unscii.c
+endif
 
 # How we handle our library creation
 FBINK_SHARED_FLAGS:=-shared -Wl,-soname,libfbink.so.1
