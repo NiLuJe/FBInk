@@ -61,7 +61,6 @@
 extern FBINK_API char* fbp;
 extern FBINK_API size_t screensize;
 extern FBINK_API bool   fb_is_mapped;
-extern FBINK_API bool   is_verbose;
 
 // Available fonts
 typedef enum

@@ -156,7 +156,6 @@ static unsigned short def_b[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77
 char*  fbp          = 0;
 size_t screensize   = 0U;
 bool   fb_is_mapped = false;
-bool   is_verbose   = true;
 // And those stay purely inside the library
 struct fb_var_screeninfo vinfo;
 struct fb_fix_screeninfo finfo;
@@ -167,6 +166,8 @@ unsigned short int       FONTSIZE_MULT = 1U;
 unsigned short int MAXROWS        = 45U;
 unsigned short int MAXCOLS        = 32U;
 bool               is_perfect_fit = false;
+// Keep verbosity on by default, for now...
+bool is_verbose = true;
 
 static void put_pixel_Gray4(unsigned short int, unsigned short int, unsigned short int);
 static void put_pixel_Gray8(unsigned short int, unsigned short int, unsigned short int);
