@@ -646,7 +646,7 @@ int
 	short int col = fbink_config->col;
 	short int row = fbink_config->row;
 
-	struct mxcfb_rect region;
+	struct mxcfb_rect region = { 0 };
 	// We declare that a bit early, because that'll hold our return value on success.
 	unsigned short int multiline_offset = 0U;
 
