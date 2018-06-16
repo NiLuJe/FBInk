@@ -25,7 +25,8 @@ done
 FBINK_VERSION="$(git describe)"
 echo "Here: https://github.com/NiLuJe/FBInk" > "./WHERE_ARE_THE_SOURCES.txt"
 
-rm -f "./FBInk-*-kindle.tar.gz"
-tar -cvzf FBInk-${FBINK_VERSION}-kindle.tar.gz README.md LICENSE CREDITS K3 K5 PW2 WHERE_ARE_THE_SOURCES.txt
+mkdir -p ./Kindle
+rm -f ./Kindle/FBInk-*-kindle.tar.gz
+tar -cvzf Kindle/FBInk-${FBINK_VERSION}-kindle.tar.gz README.md LICENSE CREDITS K3 K5 PW2 WHERE_ARE_THE_SOURCES.txt
 rm -f "./WHERE_ARE_THE_SOURCES.txt"
 rm -rf "./K3" "./K5" "./PW2"
