@@ -20,7 +20,7 @@ DEBUG_CFLAGS=-Og -fno-omit-frame-pointer -pipe -g
 # Fallback CFLAGS, we honor the env first and foremost!
 OPT_CFLAGS=-O2 -fomit-frame-pointer -pipe
 
-ifeq "$(DEBUG)" "true"
+ifdef DEBUG
 	OUT_DIR=Debug
 	CFLAGS:=$(DEBUG_CFLAGS)
 	EXTRA_CFLAGS+=-DDEBUG
@@ -51,7 +51,7 @@ EXTRA_CFLAGS+=-Wcast-align
 EXTRA_CFLAGS+=-Wconversion
 # Output padding info when debugging (NOTE: Clang is slightly more verbose)
 # As well as function attribute hints
-ifeq "$(DEBUG)" "true"
+ifdef DEBUG
 	EXTRA_CFLAGS+=-Wpadded
 	EXTRA_CFLAGS+=-Wsuggest-attribute=pure -Wsuggest-attribute=const -Wsuggest-attribute=noreturn -Wsuggest-attribute=format -Wmissing-format-attribute
 endif
@@ -67,20 +67,20 @@ SHARED_CFLAGS+=-DFBINK_SHAREDLIB
 EXTRA_CPPFLAGS+=-D_REENTRANT=1
 
 # Toggle Kindle support
-ifeq "$(KINDLE)" "true"
+ifdef KINDLE
 	EXTRA_CPPFLAGS+=-DFBINK_FOR_KINDLE
 endif
 # Toggle Legacy Kindle support
-ifeq "$(LEGACY)" "true"
+ifdef LEGACY
 	EXTRA_CPPFLAGS+=-DFBINK_FOR_LEGACY
 endif
 
 # A version tag...
 FBINK_VERSION=$(shell git describe)
-ifeq "$(LEGACY)" "true"
+ifdef LEGACY
 	LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kindle (Legacy)"'
 else
-ifeq "$(KINDLE)" "true"
+ifdef KINDLE
 	LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kindle"'
 else
 	LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kobo"'
@@ -91,18 +91,18 @@ endif
 LDFLAGS?=-Wl,--as-needed
 
 # And we want to link against our own library ;).
-ifeq "$(DEBUG)" "true"
+ifdef DEBUG
 	EXTRA_LDFLAGS+=-L./Debug
 else
 	EXTRA_LDFLAGS+=-L./Release
 endif
-ifeq "$(SHARED)" "true"
+ifdef SHARED
 	LIBS:=-lfbink
 else
 	LIBS:=-l:libfbink.a
 endif
 # And with our own rpath for standalone distribution
-ifeq "$(STANDALONE)" "true"
+ifdef STANDALONE
 	EXTRA_LDFLAGS+=-Wl,-rpath=/usr/local/fbink/lib
 endif
 
@@ -111,7 +111,7 @@ endif
 LIB_SRCS=fbink.c utf8/utf8.c
 CMD_SRCS=fbink_cmd.c
 # Unless we're asking for a minimal build, include the Unscii fonts, too
-ifeq "$(MINIMAL)" "true"
+ifdef MINIMAL
 	EXTRA_CPPFLAGS+=-DFBINK_MINIMAL
 else
 	EXTRA_CPPFLAGS+=-DFBINK_WITH_UNSCII
