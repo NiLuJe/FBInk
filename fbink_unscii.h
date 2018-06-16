@@ -38,11 +38,12 @@
 #include "fonts/thin.h"
 #include "fonts/unscii.h"
 
-const char* unscii_get_bitmap(uint32_t);
-const char* alt_get_bitmap(uint32_t);
-const char* thin_get_bitmap(uint32_t);
-const char* fantasy_get_bitmap(uint32_t);
-const char* mcr_get_bitmap(uint32_t);
-const char* tall_get_bitmap(uint32_t);
+// NOTE: Should technically be pure, but we can get away with const, according to https://lwn.net/Articles/285332/
+const char* unscii_get_bitmap(uint32_t) __attribute__((const));
+const char* alt_get_bitmap(uint32_t) __attribute__((const));
+const char* thin_get_bitmap(uint32_t) __attribute__((const));
+const char* fantasy_get_bitmap(uint32_t) __attribute__((const));
+const char* mcr_get_bitmap(uint32_t) __attribute__((const));
+const char* tall_get_bitmap(uint32_t)__attribute__((const));
 
 #endif
