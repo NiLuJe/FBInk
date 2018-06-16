@@ -563,6 +563,19 @@ int
 	// Obey user-specified font scaling multiplier
 	if (fbink_config->fontmult > 0) {
 		FONTSIZE_MULT = fbink_config->fontmult;
+
+		// Clamp to sane-ish values to avoid blowing up the stack with alloca later
+		// As well as a simple matter of sanity in general ;).
+#ifdef FBINK_WITH_UNSCII
+		// NOTE: Unscii-16 is 8x16, handle it ;).
+		if (fbink_config->fontname == UNSCII_TALL) {
+			FONTSIZE_MULT = MIN(22, FONTSIZE_MULT);
+		} else {
+			FONTSIZE_MULT = MIN(32, FONTSIZE_MULT);
+		}
+#else
+		FONTSIZE_MULT = MIN(32, FONTSIZE_MULT);
+#endif
 	} else {
 		// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
 		// NOTE: We still want to compare against the screen's "height", even in Landscape mode...
