@@ -69,8 +69,8 @@ static void
 #endif
 	    "\n"
 	    "Options affecting the program's verbosity:\n"
-	    "\t-v, --verbose\tPrint all diagnostic messages.\n"
-	    "\t-q, --quiet\tOnly print important messages.\n"
+	    "\t-v, --verbose\tToggle printing diagnostic messages.\n"
+	    "\t-q, --quiet\tToggle hiding hardware setup messages.\n"
 	    "\n"
 	    "NOTE:\n"
 	    "\tYou can specify multiple STRINGs in a single invocation of fbink, each consecutive one will be printed on consecutive lines.\n"
@@ -121,9 +121,6 @@ int
 					      { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_config = { 0 };
-	// NOTE: For now, default to verbose, like fbink_internal.h
-	fbink_config.is_verbose = true;
-	fbink_config.is_quiet   = false;
 
 	enum
 	{
@@ -236,12 +233,10 @@ int
 				}
 				break;
 			case 'v':
-				fbink_config.is_verbose = true;
-				fbink_config.is_quiet   = false;
+				fbink_config.is_verbose = !fbink_config.is_verbose;
 				break;
 			case 'q':
-				fbink_config.is_verbose = false;
-				fbink_config.is_quiet   = true;
+				fbink_config.is_quiet   = !fbink_config.is_quiet;
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", opt);

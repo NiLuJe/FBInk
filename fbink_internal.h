@@ -174,8 +174,9 @@ unsigned short int       FONTSIZE_MULT = 1U;
 unsigned short int MAXROWS        = 45U;
 unsigned short int MAXCOLS        = 32U;
 bool               is_perfect_fit = false;
-// Keep verbosity on by default, for now...
-bool is_verbose = true;
+// Verbose is for diagnostic/debug info in general
+bool is_verbose = false;
+// Quiet is for fbink_init's hardware setup info
 bool is_quiet   = false;
 
 static void put_pixel_Gray4(unsigned short int, unsigned short int, unsigned short int);
