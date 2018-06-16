@@ -351,7 +351,7 @@ static struct mxcfb_rect
 	unsigned short int ci = 0U;
 	uint32_t           ch = 0U;
 	while ((ch = u8_nextchar(text, &bi)) != 0U) {
-		LOG("Char %u (@ %u) out of %u is @ byte offset %d and is U+%04X", ci + 1, ci, charcount, bi, ch);
+		LOG("Char %u (@ %u) out of %u is @ byte offset %u and is U+%04X", ci + 1U, ci, charcount, bi, ch);
 
 		// Get the glyph's pixmap
 		font8x8_render(ch, pixmap, fontname);
@@ -618,7 +618,7 @@ int
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo)) {
 		fprintf(stderr, "[FBInk] Error reading fixed information.\n");
 	}
-	ELOG("[FBInk] Fixed fb info: smem_len %d, line_length %d", finfo.smem_len, finfo.line_length);
+	ELOG("[FBInk] Fixed fb info: smem_len %u, line_length %u", finfo.smem_len, finfo.line_length);
 
 	// NOTE: Do we want to keep the fb0 fd open and pass it to our caller, or simply close it for now?
 	//       Useful because we probably want to close it to keep open fds to a minimum when used as a library,
@@ -784,7 +784,7 @@ int
 		// If we have multiple lines worth of stuff to print, draw it line per line
 		while (chars_left > line_len) {
 			LOG("Line %u (of ~%u), previous line was %u characters long and there were %u characters left to print",
-			    multiline_offset + 1,
+			    multiline_offset + 1U,
 			    lines,
 			    line_len,
 			    chars_left);
