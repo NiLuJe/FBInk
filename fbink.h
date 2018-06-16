@@ -87,6 +87,7 @@ typedef struct
 	bool               is_centered;
 	bool               is_padded;
 	bool               is_verbose;
+	bool               is_quiet;
 } FBInkConfig;
 
 // Return the version of the currently loaded FBInk library

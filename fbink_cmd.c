@@ -123,6 +123,7 @@ int
 	FBInkConfig fbink_config = { 0 };
 	// NOTE: For now, default to verbose, like fbink_internal.h
 	fbink_config.is_verbose = true;
+	fbink_config.is_quiet   = false;
 
 	enum
 	{
@@ -236,9 +237,11 @@ int
 				break;
 			case 'v':
 				fbink_config.is_verbose = true;
+				fbink_config.is_quiet   = false;
 				break;
 			case 'q':
 				fbink_config.is_verbose = false;
+				fbink_config.is_quiet   = true;
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", opt);
@@ -270,17 +273,19 @@ int
 			string        = argv[optind++];
 			// NOTE: This is probably the point where we'd be validating/converting string to UTF-8,
 			//       if we had an easy way to... (c.f., my rant about Kobo's broken libc in fbink_internal.h)
-			printf(
-			    "Printing string '%s' @ column %hd, row %hd (inverted: %s, flashing: %s, centered: %s, left padded: %s, clear screen: %s, font scaling: x%hu)\n",
-			    string,
-			    fbink_config.col,
-			    fbink_config.row,
-			    fbink_config.is_inverted ? "true" : "false",
-			    fbink_config.is_flashing ? "true" : "false",
-			    fbink_config.is_centered ? "true" : "false",
-			    fbink_config.is_padded ? "true" : "false",
-			    fbink_config.is_cleared ? "true" : "false",
-			    fbink_config.fontmult);
+			if (!fbink_config.is_quiet) {
+				printf(
+				    "Printing string '%s' @ column %hd, row %hd (inverted: %s, flashing: %s, centered: %s, left padded: %s, clear screen: %s, font scaling: x%hu)\n",
+				    string,
+				    fbink_config.col,
+				    fbink_config.row,
+				    fbink_config.is_inverted ? "true" : "false",
+				    fbink_config.is_flashing ? "true" : "false",
+				    fbink_config.is_centered ? "true" : "false",
+				    fbink_config.is_padded ? "true" : "false",
+				    fbink_config.is_cleared ? "true" : "false",
+				    fbink_config.fontmult);
+			}
 			if ((linecount = fbink_print(fbfd, string, &fbink_config)) < 0) {
 				fprintf(stderr, "Failed to print that string!\n");
 			}

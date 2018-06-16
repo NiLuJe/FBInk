@@ -523,17 +523,29 @@ int
 		}
 	}
 
+	// Update verbosity flag
+	if (fbink_config->is_verbose) {
+		is_verbose = true;
+	} else {
+		is_verbose = false;
+	}
+	// Update quiet flag
+	if (fbink_config->is_quiet) {
+		is_quiet = true;
+	} else {
+		is_quiet = false;
+	}
+
 	// Get variable screen information
 	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo)) {
 		fprintf(stderr, "[FBInk] Error reading variable information.\n");
 		return EXIT_FAILURE;
 	}
-	fprintf(stderr,
-		"[FBInk] Variable fb info: %ux%u, %ubpp @ rotation: %u\n",
-		vinfo.xres,
-		vinfo.yres,
-		vinfo.bits_per_pixel,
-		vinfo.rotate);
+	ELOG("[FBInk] Variable fb info: %ux%u, %ubpp @ rotation: %u",
+	     vinfo.xres,
+	     vinfo.yres,
+	     vinfo.bits_per_pixel,
+	     vinfo.rotate);
 
 	// NOTE: Reset original font resolution, in case we're re-init'ing,
 	//       since we're relying on the default value to calculate the scaled value,
@@ -576,31 +588,24 @@ int
 	// Go!
 	FONTW = (unsigned short int) (FONTW * FONTSIZE_MULT);
 	FONTH = (unsigned short int) (FONTH * FONTSIZE_MULT);
-	fprintf(stderr, "[FBInk] Fontsize set to %dx%d.\n", FONTW, FONTH);
+	ELOG("[FBInk] Fontsize set to %dx%d.", FONTW, FONTH);
 
 	// Compute MAX* values now that we know the screen & font resolution
 	MAXCOLS = (unsigned short int) (vinfo.xres / FONTW);
 	MAXROWS = (unsigned short int) (vinfo.yres / FONTH);
-	fprintf(stderr, "[FBInk] Line length: %hu cols, Page size: %hu rows.\n", MAXCOLS, MAXROWS);
+	ELOG("[FBInk] Line length: %hu cols, Page size: %hu rows.", MAXCOLS, MAXROWS);
 
 	// Mention & remember if we can perfectly fit the final column on screen
 	if ((unsigned short int) (FONTW * MAXCOLS) == vinfo.xres) {
 		is_perfect_fit = true;
-		fprintf(stderr, "[FBInk] It's a perfect fit!\n");
+		ELOG("[FBInk] It's a perfect fit!");
 	}
 
 	// Get fixed screen information
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo)) {
 		fprintf(stderr, "[FBInk] Error reading fixed information.\n");
 	}
-	fprintf(stderr, "[FBInk] Fixed fb info: smem_len %d, line_length %d\n", finfo.smem_len, finfo.line_length);
-
-	// Update verbosity flag
-	if (fbink_config->is_verbose) {
-		is_verbose = true;
-	} else {
-		is_verbose = false;
-	}
+	ELOG("[FBInk] Fixed fb info: smem_len %d, line_length %d", finfo.smem_len, finfo.line_length);
 
 	// NOTE: Do we want to keep the fb0 fd open and pass it to our caller, or simply close it for now?
 	//       Useful because we probably want to close it to keep open fds to a minimum when used as a library,

@@ -122,6 +122,14 @@
 		}                                                                                                      \
 	})
 
+// And then what we send to stderr (mostly fbink_init stuff)
+#define ELOG(fmt, ...)                                                                                                 \
+	({                                                                                                             \
+		if (!is_quiet) {                                                                                       \
+			fprintf(stderr, fmt "\n", ##__VA_ARGS__);                                                      \
+		}                                                                                                      \
+	})
+
 // default eInk framebuffer palette
 // c.f., linux/drivers/video/mxc/cmap_lab126.h
 typedef enum
@@ -168,6 +176,7 @@ unsigned short int MAXCOLS        = 32U;
 bool               is_perfect_fit = false;
 // Keep verbosity on by default, for now...
 bool is_verbose = true;
+bool is_quiet   = false;
 
 static void put_pixel_Gray4(unsigned short int, unsigned short int, unsigned short int);
 static void put_pixel_Gray8(unsigned short int, unsigned short int, unsigned short int);
