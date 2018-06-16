@@ -236,7 +236,7 @@ int
 				fbink_config.is_verbose = !fbink_config.is_verbose;
 				break;
 			case 'q':
-				fbink_config.is_quiet   = !fbink_config.is_quiet;
+				fbink_config.is_quiet = !fbink_config.is_quiet;
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", opt);

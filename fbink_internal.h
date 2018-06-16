@@ -177,7 +177,7 @@ bool               is_perfect_fit = false;
 // Verbose is for diagnostic/debug info in general
 bool is_verbose = false;
 // Quiet is for fbink_init's hardware setup info
-bool is_quiet   = false;
+bool is_quiet = false;
 
 static void put_pixel_Gray4(unsigned short int, unsigned short int, unsigned short int);
 static void put_pixel_Gray8(unsigned short int, unsigned short int, unsigned short int);
