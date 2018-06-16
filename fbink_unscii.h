@@ -44,6 +44,6 @@ const char* alt_get_bitmap(uint32_t) __attribute__((const));
 const char* thin_get_bitmap(uint32_t) __attribute__((const));
 const char* fantasy_get_bitmap(uint32_t) __attribute__((const));
 const char* mcr_get_bitmap(uint32_t) __attribute__((const));
-const char* tall_get_bitmap(uint32_t)__attribute__((const));
+const char* tall_get_bitmap(uint32_t) __attribute__((const));
 
 #endif

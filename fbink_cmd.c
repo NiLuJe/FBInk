@@ -130,17 +130,20 @@ int
 		HEIGHT_OPT,
 		WFM_OPT,
 	};
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdiscarded-qualifiers"
 	char* const token[] = { [TOP_OPT] = "top",       [LEFT_OPT] = "left", [WIDTH_OPT] = "width",
 				[HEIGHT_OPT] = "height", [WFM_OPT] = "wfm",   NULL };
-	char*       subopts;
-	char*       value;
-	uint32_t    region_top      = 0;
-	uint32_t    region_left     = 0;
-	uint32_t    region_width    = 0;
-	uint32_t    region_height   = 0;
-	char*       region_wfm      = NULL;
-	bool        is_refresh_only = false;
-	int         errfnd          = 0;
+#pragma GCC diagnostic pop
+	char*    subopts;
+	char*    value;
+	uint32_t region_top      = 0;
+	uint32_t region_left     = 0;
+	uint32_t region_width    = 0;
+	uint32_t region_height   = 0;
+	char*    region_wfm      = NULL;
+	bool     is_refresh_only = false;
+	int      errfnd          = 0;
 
 	while ((opt = getopt_long(argc, argv, "y:x:hfcmps:S:F:vq", opts, &opt_index)) != -1) {
 		switch (opt) {
@@ -239,7 +242,7 @@ int
 				fbink_config.is_quiet = !fbink_config.is_quiet;
 				break;
 			default:
-				fprintf(stderr, "?? Unknown option code 0%o ??\n", opt);
+				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
 				errfnd = 1;
 				break;
 		}
