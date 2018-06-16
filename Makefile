@@ -30,10 +30,22 @@ else
 endif
 
 # Moar warnings!
-EXTRA_CFLAGS+=-Wall -Wformat -Wformat-security
+EXTRA_CFLAGS+=-Wall -Wformat=2 -Wformat-signedness -Wformat-truncation=2
 EXTRA_CFLAGS+=-Wextra -Wunused
+EXTRA_CFLAGS+=-Wnull-dereference
+EXTRA_CFLAGS+=-Wuninitialized
+EXTRA_CFLAGS+=-Wsuggest-attribute=pure -Wsuggest-attribute=const -Wsuggest-attribute=noreturn -Wsuggest-attribute=format -Wmissing-format-attribute
+EXTRA_CFLAGS+=-Wduplicated-branches -Wduplicated-cond
+EXTRA_CFLAGS+=-Wundef
+EXTRA_CFLAGS+=-Wbad-function-cast
+EXTRA_CFLAGS+=-Wwrite-strings
+EXTRA_CFLAGS+=-Wjump-misses-init
+EXTRA_CFLAGS+=-Wlogical-op
+EXTRA_CFLAGS+=-Wstrict-prototypes -Wold-style-definition
 EXTRA_CFLAGS+=-Wshadow
-EXTRA_CFLAGS+=-Wmissing-prototypes
+EXTRA_CFLAGS+=-Wmissing-prototypes -Wmissing-declarations
+EXTRA_CFLAGS+=-Wnested-externs
+EXTRA_CFLAGS+=-Winline
 EXTRA_CFLAGS+=-Wcast-qual
 # NOTE: GCC 8 introduces -Wcast-align=strict to warn regardless of the target architecture (i.e., like clang)
 EXTRA_CFLAGS+=-Wcast-align
