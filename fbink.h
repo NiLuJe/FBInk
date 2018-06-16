@@ -91,7 +91,7 @@ typedef struct
 } FBInkConfig;
 
 // Return the version of the currently loaded FBInk library
-FBINK_API const char* fbink_version(void);
+FBINK_API const char* fbink_version(void) __attribute__((const));
 
 // Open the framebuffer device and returns its fd
 FBINK_API int fbink_open(void);
