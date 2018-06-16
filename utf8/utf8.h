@@ -27,10 +27,10 @@ unsigned int u8_offset(const char* str, unsigned int charnum) __attribute__((pur
 unsigned int u8_charnum(const char* s, unsigned int offset) __attribute__((pure));
 
 /* count the number of characters in a UTF-8 string */
-unsigned int u8_strlen(const char* s) __attribute__((pure));
+unsigned int u8_strlen(const char* s);
 
 /* return next character, updating an index variable */
-uint32_t u8_nextchar(const char* s, unsigned int* i) __attribute__((pure));
+uint32_t u8_nextchar(const char* s, unsigned int* i);
 
 /* move to next character */
 void u8_inc(char* s, unsigned int* i);
