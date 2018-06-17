@@ -414,6 +414,7 @@ static int
 	//       Also, we need to set the EPDC_FLAG_FORCE_MONOCHROME flag to do it right.
 	// NOTE: And while we're on the fun quirks train: FULL never flashes w/ AUTO on (some?) Kobos,
 	//       so request GC16 if we want a flash...
+	// TODO: Decide how best to decide when/how to switch to the Mark 7 API...
 #	ifdef FBINK_FOR_KINDLE
 	struct mxcfb_update_data update = {
 #	else
