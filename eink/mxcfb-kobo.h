@@ -341,7 +341,7 @@ struct mxcfb_csc_matrix {
 #define MXCFB_SET_AUTO_UPDATE_MODE	_IOW('F', 0x2D, __u32)
 
 /* Mark 7 */
-/* NOTE: Nickel: MXCFB_SEND_UPDATE */
+/* NOTE: Was MXCFB_SEND_UPDATE before Mark 7! Is still that in Nickel's header */
 #define MXCFB_SEND_UPDATE_V1_NTX		_IOW('F', 0x2E, struct mxcfb_update_data_v1_ntx)
 /* NOTE: Was: MXCFB_SEND_UPDATE_ORG before Mark 7 (appeared w/ Aura)! */
 #define MXCFB_SEND_UPDATE_V1		_IOW('F', 0x2E, struct mxcfb_update_data_v1)
@@ -353,7 +353,7 @@ struct mxcfb_csc_matrix {
 #define MXCFB_WAIT_FOR_UPDATE_COMPLETE	_IOWR('F', 0x2F, struct mxcfb_update_marker_data) // mx7d/mx6ull/mx6sll interface .
 /* NOTE: Nickel: MXCFB_WAIT_FOR_UPDATE_COMPLETE_V2 */
 #define MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3	_IOWR('F', 0x2F, struct mxcfb_update_marker_data) // mx7d/mx6ull/mx6sll interface .
-/* NOTE: Was MXCFB_WAIT_FOR_UPDATE_COMPLETE before Mark 7! Is still that in Nickel's header... */
+/* NOTE: Was MXCFB_WAIT_FOR_UPDATE_COMPLETE before Mark 7! Is still that in Nickel's header */
 #define MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1	_IOW('F', 0x2F, __u32) // mx50/NTX interface .
 #define MXCFB_WAIT_FOR_UPDATE_COMPLETE_V2	_IOWR('F', 0x35, struct mxcfb_update_marker_data) // mx6sl BSP interface .
 
