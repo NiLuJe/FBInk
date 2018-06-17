@@ -53,6 +53,7 @@ static void
 	    "\t-y, --row NUM\tBegin printing STRING @ row NUM (Default: 0).\n"
 	    "\t\t\tBeginning at row 1 instead of 0 is recommended, because row 0 (the topmost one) is often half-obscured by a bezel, especially on Kobos.\n"
 	    "\t-m, --centered\tDynamically override col to print STRING at the center of the screen.\n"
+	    "\t\t\tSpecial care is taken to avoid the very edges of the screen, to ensure the complete legibility of the message.\n"
 	    "\t-p, --padded\tLeft pad STRING with blank spaces.\n"
 	    "\t\t\tMost useful when combined with --centered to ensure a line will be completely filled, while still centering STRING.\n"
 	    "\n"
