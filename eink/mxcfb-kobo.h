@@ -189,7 +189,7 @@ struct mxcfb_alt_buffer_data_ntx {
 };
 
 
-/* Was mxcfb_alt_buffer_data_org (appeared w/ the Aura) */
+/* NOTE: Was: mxcfb_alt_buffer_data_org (appeared w/ the Aura) */
 struct mxcfb_alt_buffer_data {
 	__u32 phys_addr;
 	__u32 width;	/* width of entire buffer */
@@ -197,33 +197,25 @@ struct mxcfb_alt_buffer_data {
 	struct mxcfb_rect alt_update_region;	/* region within buffer to update */
 };
 
-
-/* Mark 7 */
+/*
+*  Mark 7
+*  NOTE: Was: mxcfb_update_data
+*/
 // mxcfb_update_data v1 for NTX linux since from mx50/mx6sl .
 struct mxcfb_update_data_v1_ntx {
-       struct mxcfb_rect update_region;
-       __u32 waveform_mode;
-       __u32 update_mode;
-       __u32 update_marker;
-       int temp;
-       unsigned int flags;
-       struct mxcfb_alt_buffer_data_ntx alt_buffer_data;
-};
-
-/* Was mxcfb_update_data */
-struct mxcfb_update_data_v1 {
 	struct mxcfb_rect update_region;
 	__u32 waveform_mode;
 	__u32 update_mode;
 	__u32 update_marker;
 	int temp;
 	unsigned int flags;
-	struct mxcfb_alt_buffer_data alt_buffer_data;
+	struct mxcfb_alt_buffer_data_ntx alt_buffer_data;
 };
 
 
-/* Aura */
-struct mxcfb_update_data_org {
+/* NOTE: Was: mxcfb_update_data_org (appeared w/ the Aura) */
+// mxcfb_update_data v1 since from mx50/mx6sl .
+struct mxcfb_update_data_v1 {
 	struct mxcfb_rect update_region;
 	__u32 waveform_mode;
 	__u32 update_mode;
@@ -334,12 +326,10 @@ struct mxcfb_csc_matrix {
 
 /* Mark 7 */
 #define MXCFB_SEND_UPDATE_V1_NTX		_IOW('F', 0x2E, struct mxcfb_update_data_v1_ntx)
+/* NOTE: Was: MXCFB_SEND_UPDATE_ORG before Mark 7 (appeared w/ Aura)! */
 #define MXCFB_SEND_UPDATE_V1		_IOW('F', 0x2E, struct mxcfb_update_data_v1)
 
 #define MXCFB_SEND_UPDATE		_IOW('F', 0x2E, struct mxcfb_update_data)
-
-/* Aura */
-#define MXCFB_SEND_UPDATE_ORG		_IOW('F', 0x2E, struct mxcfb_update_data_org)
 
 /* Mark 7 */
 #define MXCFB_SEND_UPDATE_V2		_IOW('F', 0x2E, struct mxcfb_update_data)
@@ -349,7 +339,6 @@ struct mxcfb_csc_matrix {
 #define MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1	_IOW('F', 0x2F, __u32) // mx50/NTX interface .
 #define MXCFB_WAIT_FOR_UPDATE_COMPLETE_V2	_IOWR('F', 0x35, struct mxcfb_update_marker_data) // mx6sl BSP interface .
 
-//#define MXCFB_WAIT_FOR_UPDATE_COMPLETE	_IOW('F', 0x2F, __u32)
 #define MXCFB_SET_PWRDOWN_DELAY		_IOW('F', 0x30, int32_t)
 #define MXCFB_GET_PWRDOWN_DELAY		_IOR('F', 0x31, int32_t)
 #define MXCFB_SET_UPDATE_SCHEME		_IOW('F', 0x32, __u32)
