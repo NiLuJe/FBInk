@@ -1,22 +1,30 @@
 /*
- * Copyright 2004-2011 Freescale Semiconductor, Inc. All Rights Reserved.
+ * Copyright 2004-2015 Freescale Semiconductor, Inc. All Rights Reserved.
  *
  * - slightly modified (commented out include of fb.h) for Lua integration
+ * - Frankensteined w/ Mark6 stuff -- NiLuJe
  */
 
 /*
- * The code contained herein is licensed under the GNU Lesser General
- * Public License.  You may obtain a copy of the GNU Lesser General
- * Public License Version 2.1 or later at the following locations:
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- * http://www.opensource.org/licenses/lgpl-license.html
- * http://www.gnu.org/copyleft/lgpl.html
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 /*
- * @file arch-mxc/   mxcfb.h
+ * @file uapi/linux/mxcfb.h
  *
- * @brief Global header file for the MXC Frame buffer
+ * @brief Global header file for the MXC frame buffer
  *
  * @ingroup Framebuffer
  */
@@ -31,6 +39,9 @@
 #define FB_SYNC_CLK_IDLE_EN	0x10000000
 #define FB_SYNC_SHARP_MODE	0x08000000
 #define FB_SYNC_SWAP_RGB	0x04000000
+/* Mark 7 */
+#define FB_ACCEL_TRIPLE_FLAG	0x00000000
+#define FB_ACCEL_DOUBLE_FLAG	0x00000001
 
 struct mxcfb_gbl_alpha {
 	int enable;
@@ -60,6 +71,12 @@ struct mxcfb_gamma {
 	int slopek[16];
 };
 
+/* Mark 7 */
+struct mxcfb_gpu_split_fmt {
+	struct fb_var_screeninfo var;
+	unsigned long offset;
+};
+
 struct mxcfb_rect {
 	__u32 top;
 	__u32 left;
@@ -69,6 +86,10 @@ struct mxcfb_rect {
 
 #define GRAYSCALE_8BIT				0x1
 #define GRAYSCALE_8BIT_INVERTED			0x2
+
+/* Mark 7 */
+#define GRAYSCALE_4BIT                          0x3
+#define GRAYSCALE_4BIT_INVERTED                 0x4
 
 #define AUTO_UPDATE_MODE_REGION_MODE		0
 #define AUTO_UPDATE_MODE_AUTOMATIC_MODE		1
@@ -80,7 +101,10 @@ struct mxcfb_rect {
 #define UPDATE_MODE_PARTIAL			0x0
 #define UPDATE_MODE_FULL			0x1
 
-/* Those are sneaked in in drivers/video/mxc/mxc_epdc_fb.c ... */
+/*
+*  Those are sneaked in in drivers/video/mxc/mxc_epdc_fb.c
+*  Or drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c since Mark 7
+*/
 #define NTX_WFM_MODE_INIT			0
 #define NTX_WFM_MODE_DU				1
 #define NTX_WFM_MODE_GC16			2
@@ -111,6 +135,10 @@ struct mxcfb_rect {
 #define WAVEFORM_MODE_GL16_INV			0xFFFF
 */
 
+/* Mark 7 */
+#define WAVEFORM_MODE_GLR16			6
+#define WAVEFORM_MODE_GLD16			7
+
 #define WAVEFORM_MODE_AUTO			257
 
 #define TEMP_USE_AMBIENT			0x1000
@@ -123,12 +151,36 @@ struct mxcfb_rect {
 
 #define EPDC_FLAG_USE_ALT_BUFFER		0x100
 
-/* Aura */
+/* Aura ONLY */
 #define EPDC_FLAG_USE_AAD			0x1000
+
+/* Mark 7 */
+#define EPDC_FLAG_TEST_COLLISION		0x200
+#define EPDC_FLAG_GROUP_UPDATE			0x400
+#define EPDC_FLAG_USE_DITHERING_Y1		0x2000
+#define EPDC_FLAG_USE_DITHERING_Y4		0x4000
+#define EPDC_FLAG_USE_REGAL				0x8000
+
+/* Mark 7 */
+enum mxcfb_dithering_mode {
+	EPDC_FLAG_USE_DITHERING_PASSTHROUGH = 0x0,
+	EPDC_FLAG_USE_DITHERING_FLOYD_STEINBERG,
+	EPDC_FLAG_USE_DITHERING_ATKINSON,
+	EPDC_FLAG_USE_DITHERING_ORDERED,
+	EPDC_FLAG_USE_DITHERING_QUANT_ONLY,
+	EPDC_FLAG_USE_DITHERING_MAX,
+};
 
 #define FB_POWERDOWN_DISABLE			-1
 
-struct mxcfb_alt_buffer_data {
+/* Mark 7 */
+#define FB_TEMP_AUTO_UPDATE_DISABLE     -1
+
+/*
+ * NOTE: Mark 7 renamed some of these to maintain backwards compatibility while providing a newer interface
+ *       Was: mxcfb_alt_buffer_data
+ */
+struct mxcfb_alt_buffer_data_ntx {
 	void *virt_addr;
 	__u32 phys_addr;
 	__u32 width;	/* width of entire buffer */
@@ -136,23 +188,39 @@ struct mxcfb_alt_buffer_data {
 	struct mxcfb_rect alt_update_region;	/* region within buffer to update */
 };
 
-/* Aura */
-struct mxcfb_alt_buffer_data_org {
+
+/* Was mxcfb_alt_buffer_data_org (appeared w/ the Aura) */
+struct mxcfb_alt_buffer_data {
 	__u32 phys_addr;
 	__u32 width;	/* width of entire buffer */
 	__u32 height;	/* height of entire buffer */
 	struct mxcfb_rect alt_update_region;	/* region within buffer to update */
 };
 
-struct mxcfb_update_data {
+
+/* Mark 7 */
+// mxcfb_update_data v1 for NTX linux since from mx50/mx6sl .
+struct mxcfb_update_data_v1_ntx {
+       struct mxcfb_rect update_region;
+       __u32 waveform_mode;
+       __u32 update_mode;
+       __u32 update_marker;
+       int temp;
+       unsigned int flags;
+       struct mxcfb_alt_buffer_data_ntx alt_buffer_data;
+};
+
+/* Was mxcfb_update_data */
+struct mxcfb_update_data_v1 {
 	struct mxcfb_rect update_region;
 	__u32 waveform_mode;
 	__u32 update_mode;
 	__u32 update_marker;
 	int temp;
-	uint flags;
+	unsigned int flags;
 	struct mxcfb_alt_buffer_data alt_buffer_data;
 };
+
 
 /* Aura */
 struct mxcfb_update_data_org {
@@ -161,14 +229,62 @@ struct mxcfb_update_data_org {
 	__u32 update_mode;
 	__u32 update_marker;
 	int temp;
-	uint flags;
-	struct mxcfb_alt_buffer_data_org alt_buffer_data;
+	unsigned int flags;
+	struct mxcfb_alt_buffer_data alt_buffer_data;
 };
+
+
+/* Mark 7 */
+// mxcfb_update_data v2 since from mx7d .
+#define mxcfb_update_data_v2 mxcfb_update_data
+struct mxcfb_update_data {
+	struct mxcfb_rect update_region;
+	__u32 waveform_mode;
+	__u32 update_mode;
+	__u32 update_marker;
+	int temp;
+	unsigned int flags;
+	int dither_mode;
+	int quant_bit;
+	struct mxcfb_alt_buffer_data alt_buffer_data;
+};
+
+/* Mark 7 */
+struct mxcfb_update_marker_data {
+	__u32 update_marker;
+	__u32 collision_test;
+};
+
+
+/* Mark 7 */
+#define WFM_ENABLE_AA				1
+#define WFM_ENABLE_AAD			1
+
 
 /*
  * Structure used to define waveform modes for driver
  * Needed for driver to perform auto-waveform selection
  */
+/*
+* NOTE: Once again, Mark 7 renamed some stuff
+*       Was mxcfb_waveform_modes
+*/
+struct mxcfb_waveform_modes_ntx {
+	int mode_init;
+	int mode_du;
+	int mode_gc4;
+	int mode_gc8;
+	int mode_gc16;
+	int mode_gc32;
+	/* Aura */
+	int mode_gl16;
+	int mode_a2;
+
+	int mode_aa;
+	int mode_aad;
+};
+
+/* Mark 7 */
 struct mxcfb_waveform_modes {
 	int mode_init;
 	int mode_du;
@@ -176,16 +292,17 @@ struct mxcfb_waveform_modes {
 	int mode_gc8;
 	int mode_gc16;
 	int mode_gc32;
-
-	/* Aura */
-	int mode_a2;
-	int mode_gl16;
-	/*
-	 * reagl_flow
-	 */
-	int mode_aa;
-	int mode_aad;
 };
+
+/* Mark 7 */
+/*
+ * Structure used to define a 5*3 matrix of parameters for
+ * setting IPU DP CSC module related to this framebuffer.
+ */
+struct mxcfb_csc_matrix {
+	int param[5][3];
+};
+
 
 #define MXCFB_WAIT_FOR_VSYNC	_IOW('F', 0x20, u_int32_t)
 #define MXCFB_SET_GBL_ALPHA     _IOW('F', 0x21, struct mxcfb_gbl_alpha)
@@ -200,20 +317,51 @@ struct mxcfb_waveform_modes {
 #define MXCFB_GET_FB_BLANK     _IOR('F', 0x2B, u_int32_t)
 #define MXCFB_SET_DIFMT		_IOW('F', 0x2C, u_int32_t)
 
+/* Mark 7 */
+#define MXCFB_CSC_UPDATE	_IOW('F', 0x2D, struct mxcfb_csc_matrix)
+#define MXCFB_SET_GPU_SPLIT_FMT	_IOW('F', 0x2F, struct mxcfb_gpu_split_fmt)
+#define MXCFB_SET_PREFETCH	_IOW('F', 0x30, int)
+#define MXCFB_GET_PREFETCH	_IOR('F', 0x31, int)
+
 /* IOCTLs for E-ink panel updates */
 #define MXCFB_SET_WAVEFORM_MODES	_IOW('F', 0x2B, struct mxcfb_waveform_modes)
+
+/* Mark 7 */
+#define MXCFB_SET_WAVEFORM_MODES_NTX	_IOW('F', 0x2B, struct mxcfb_waveform_modes_ntx)
+
 #define MXCFB_SET_TEMPERATURE		_IOW('F', 0x2C, int32_t)
 #define MXCFB_SET_AUTO_UPDATE_MODE	_IOW('F', 0x2D, __u32)
+
+/* Mark 7 */
+#define MXCFB_SEND_UPDATE_V1_NTX		_IOW('F', 0x2E, struct mxcfb_update_data_v1_ntx)
+#define MXCFB_SEND_UPDATE_V1		_IOW('F', 0x2E, struct mxcfb_update_data_v1)
+
 #define MXCFB_SEND_UPDATE		_IOW('F', 0x2E, struct mxcfb_update_data)
 
 /* Aura */
 #define MXCFB_SEND_UPDATE_ORG		_IOW('F', 0x2E, struct mxcfb_update_data_org)
 
-#define MXCFB_WAIT_FOR_UPDATE_COMPLETE	_IOW('F', 0x2F, __u32)
+/* Mark 7 */
+#define MXCFB_SEND_UPDATE_V2		_IOW('F', 0x2E, struct mxcfb_update_data)
+#define MXCFB_WAIT_FOR_UPDATE_COMPLETE	_IOWR('F', 0x2F, struct mxcfb_update_marker_data) // mx7d/mx6ull/mx6sll interface .
+#define MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3	_IOWR('F', 0x2F, struct mxcfb_update_marker_data) // mx7d/mx6ull/mx6sll interface .
+/* NOTE: Was MXCFB_WAIT_FOR_UPDATE_COMPLETE before Mark 7! */
+#define MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1	_IOW('F', 0x2F, __u32) // mx50/NTX interface .
+#define MXCFB_WAIT_FOR_UPDATE_COMPLETE_V2	_IOWR('F', 0x35, struct mxcfb_update_marker_data) // mx6sl BSP interface .
+
+//#define MXCFB_WAIT_FOR_UPDATE_COMPLETE	_IOW('F', 0x2F, __u32)
 #define MXCFB_SET_PWRDOWN_DELAY		_IOW('F', 0x30, int32_t)
 #define MXCFB_GET_PWRDOWN_DELAY		_IOR('F', 0x31, int32_t)
 #define MXCFB_SET_UPDATE_SCHEME		_IOW('F', 0x32, __u32)
+
+/* Went poof w/ Mark 7 */
 #define MXCFB_SET_MERGE_ON_WAVEFORM_MISMATCH	_IOW('F', 0x37, int32_t)
+
+/* Mark 7 */
+#define MXCFB_GET_WORK_BUFFER		_IOWR('F', 0x34, unsigned long)
+#define MXCFB_DISABLE_EPDC_ACCESS	_IO('F', 0x35)
+#define MXCFB_ENABLE_EPDC_ACCESS	_IO('F', 0x36)
+#define MXCFB_SET_TEMP_AUTO_UPDATE_PERIOD   _IOW('F', 0x37, int32_t)
 
 #ifdef __KERNEL__
 
