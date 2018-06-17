@@ -381,10 +381,17 @@ enum {
 
 int mxcfb_set_refresh_mode(struct fb_info *fbi, int mode,
 			   struct mxcfb_rect *update_region);
+
+/* Mark 7 */
+void mxcfb_elcdif_register_mode(const struct fb_videomode *modedb,
+		int num_modes, int dev_mode);
+
+/* Went poof in Mark 7*/
 void mxcfb_register_mode(int disp_port,
 		const struct fb_videomode *modedb,
 		int num_modes, int dev_mode);
 
+/* Went poof in Mark 7*/
 void mxcfb_register_presetup(int disp_port,
 		int (*pre_setup)(struct fb_info *info));
 
