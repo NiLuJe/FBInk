@@ -416,10 +416,11 @@ static int
 	//       so request GC16 if we want a flash...
 	// TODO: Decide how best to decide when/how to switch to the Mark 7 API...
 #	ifdef FBINK_FOR_KINDLE
-	struct mxcfb_update_data update = {
+	struct mxcfb_update_data update =
+	{
 #	else
 	struct mxcfb_update_data_v1_ntx update = {
-#	endif	// FBINK_FOR_KINDLE
+#	endif    // FBINK_FOR_KINDLE
 		.update_region = region,
 		.waveform_mode =
 		    (is_flashing && waveform_mode == WAVEFORM_MODE_AUTO) ? WAVEFORM_MODE_GC16 : waveform_mode,
@@ -434,9 +435,9 @@ static int
 		.flags                   = (waveform_mode == WAVEFORM_MODE_REAGLD)
 			     ? EPDC_FLAG_USE_AAD
 			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
-#	else    // !FBINK_FOR_KINDLE
+#	else     // !FBINK_FOR_KINDLE
 		.flags = 0U,
-#	endif
+#	endif    // FBINK_FOR_KINDLE
 		// NOTE: We're never using mxcfb_alt_buffer_data, it should safely init to NULL/0
 	};
 
@@ -450,7 +451,7 @@ static int
 	if (ioctl(fbfd, MXCFB_SEND_UPDATE, &update) < 0) {
 #	else
 	if (ioctl(fbfd, MXCFB_SEND_UPDATE_V1_NTX, &update) < 0) {
-#	endif
+#	endif    // FBINK_FOR_KINDLE
 		// NOTE: perror() is not thread-safe...
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
@@ -458,7 +459,7 @@ static int
 		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE: %s\n", errstr);
 #	else
 		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE_V1_NTX: %s\n", errstr);
-#	endif
+#	endif    // FBINK_FOR_KINDLE
 		return EXIT_FAILURE;
 	}
 
@@ -492,7 +493,7 @@ static int
 #	else
 		if (ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1, &update.update_marker) < 0) {
 			{
-				char buf[256];
+				char  buf[256];
 				char* errstr = strerror_r(errno, buf, sizeof(buf));
 				fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1: %s\n", errstr);
 				return EXIT_FAILURE;
