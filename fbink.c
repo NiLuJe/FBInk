@@ -414,7 +414,11 @@ static int
 	//       Also, we need to set the EPDC_FLAG_FORCE_MONOCHROME flag to do it right.
 	// NOTE: And while we're on the fun quirks train: FULL never flashes w/ AUTO on (some?) Kobos,
 	//       so request GC16 if we want a flash...
+#	ifdef FBINK_FOR_KINDLE
 	struct mxcfb_update_data update = {
+#	else
+	struct mxcfb_update_data_v1_ntx update = {
+#	endif	// FBINK_FOR_KINDLE
 		.update_region = region,
 		.waveform_mode =
 		    (is_flashing && waveform_mode == WAVEFORM_MODE_AUTO) ? WAVEFORM_MODE_GC16 : waveform_mode,
@@ -441,11 +445,11 @@ static int
 		update.update_marker = (70U + 66U + 73U + 78U + 75U);
 	}
 
-	if (ioctl(fbfd, MXCFB_SEND_UPDATE, &update) < 0) {
+	if (ioctl(fbfd, MXCFB_SEND_UPDATE_V1_NTX, &update) < 0) {
 		// NOTE: perror() is not thread-safe...
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
-		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE: %s\n", errstr);
+		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE_V1_NTX: %s\n", errstr);
 		return EXIT_FAILURE;
 	}
 
@@ -477,11 +481,11 @@ static int
 			return EXIT_FAILURE;
 		}
 #	else
-		if (ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update.update_marker) < 0) {
+		if (ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1, &update.update_marker) < 0) {
 			{
 				char buf[256];
 				char* errstr = strerror_r(errno, buf, sizeof(buf));
-				fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s\n", errstr);
+				fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1: %s\n", errstr);
 				return EXIT_FAILURE;
 			}
 		}
