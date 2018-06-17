@@ -136,7 +136,7 @@ struct mxcfb_rect {
 */
 
 /* Nickel */
-#define WAVEFORM_MODE_GL16			5
+//#define WAVEFORM_MODE_GL16			5
 #define WAVEFORM_MODE_GLR32			6
 
 /* Mark 7 */
