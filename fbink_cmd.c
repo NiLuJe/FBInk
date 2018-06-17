@@ -60,7 +60,12 @@ static void
 	    "\t-h, --invert\tPrint STRING in white over a black background instead of the reverse.\n"
 	    "\t-f, --flash\tAsk the eInk driver to do a black flash when refreshing the area of the screen where STRING will be printed.\n"
 	    "\t-c, --clear\tFully clear the screen before printing STRING (obeys --invert).\n"
-	    "\t-S, --size\tOverride the automatic font scaling multiplier (defaults range from 1 (no scaling), to 4 (4x upscaling). 0 means automatic selection.).\n"
+	    "\t-S, --size\tOverride the automatic font scaling multiplier (0 means automatic selection, which ranges from 1 (no scaling), to 4 (4x upscaling) depending on screen resolution).\n"
+#ifdef FBINK_WITH_UNSCII
+	    "\t\t\tNote that user-supplied values will be silently clamped to safe boundaries (from 1 to 31 for most fonts, and from 1 to 22 for TALL).\n"
+#else
+	    "\t\t\tNote that user-supplied values will be silently clamped to safe boundaries (from 1 to 31).\n"
+#endif
 	    "\t-F, --font NAME\tRender glyphs from builtin font NAME (Default: IBM).\n"
 #ifdef FBINK_WITH_UNSCII
 	    "\t\t\tAvailable font families: IBM, UNSCII, ALT, THIN, FANTASY, MCR, TALL\n"
