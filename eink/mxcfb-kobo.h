@@ -341,10 +341,11 @@ struct mxcfb_csc_matrix {
 #define MXCFB_SET_AUTO_UPDATE_MODE	_IOW('F', 0x2D, __u32)
 
 /* Mark 7 */
+/* NOTE: Nickel: MXCFB_SEND_UPDATE */
 #define MXCFB_SEND_UPDATE_V1_NTX		_IOW('F', 0x2E, struct mxcfb_update_data_v1_ntx)
 /* NOTE: Was: MXCFB_SEND_UPDATE_ORG before Mark 7 (appeared w/ Aura)! */
 #define MXCFB_SEND_UPDATE_V1		_IOW('F', 0x2E, struct mxcfb_update_data_v1)
-
+/* NOTE: -> MXCFB_SEND_UPDATE_V2 ! */
 #define MXCFB_SEND_UPDATE		_IOW('F', 0x2E, struct mxcfb_update_data)
 
 /* Mark 7 */
