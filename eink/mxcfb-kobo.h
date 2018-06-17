@@ -102,9 +102,9 @@ struct mxcfb_rect {
 #define UPDATE_MODE_FULL			0x1
 
 /*
-*  Those are sneaked in in drivers/video/mxc/mxc_epdc_fb.c
-*  Or drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c since Mark 7
-*/
+ * Those are sneaked in in drivers/video/mxc/mxc_epdc_fb.c
+ * Or drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c since Mark 7
+ */
 #define NTX_WFM_MODE_INIT			0
 #define NTX_WFM_MODE_DU				1
 #define NTX_WFM_MODE_GC16			2
@@ -135,6 +135,10 @@ struct mxcfb_rect {
 #define WAVEFORM_MODE_GL16_INV			0xFFFF
 */
 
+/* Nickel */
+#define WAVEFORM_MODE_GL16			5
+#define WAVEFORM_MODE_GLR32			6
+
 /* Mark 7 */
 #define WAVEFORM_MODE_GLR16			6
 #define WAVEFORM_MODE_GLD16			7
@@ -157,9 +161,13 @@ struct mxcfb_rect {
 /* Mark 7 */
 #define EPDC_FLAG_TEST_COLLISION		0x200
 #define EPDC_FLAG_GROUP_UPDATE			0x400
+/* Nickel: only for alyssum and above */
 #define EPDC_FLAG_USE_DITHERING_Y1		0x2000
 #define EPDC_FLAG_USE_DITHERING_Y4		0x4000
 #define EPDC_FLAG_USE_REGAL				0x8000
+
+/* Nickel */
+#define EPDC_FLAG_USE_DITHERING_NTX_D8		0x100000
 
 /* Mark 7 */
 enum mxcfb_dithering_mode {
@@ -179,6 +187,7 @@ enum mxcfb_dithering_mode {
 /*
  * NOTE: Mark 7 renamed some of these to maintain backwards compatibility while providing a newer interface
  *       Was: mxcfb_alt_buffer_data
+ *       Nickel: imx5/imx6
  */
 struct mxcfb_alt_buffer_data_ntx {
 	void *virt_addr;
@@ -189,7 +198,10 @@ struct mxcfb_alt_buffer_data_ntx {
 };
 
 
-/* NOTE: Was: mxcfb_alt_buffer_data_org (appeared w/ the Aura) */
+/*
+ * NOTE: Was: mxcfb_alt_buffer_data_org (appeared w/ the Aura)
+ *       Nickel: mxcfb_alt_buffer_data_v2
+ */
 struct mxcfb_alt_buffer_data {
 	__u32 phys_addr;
 	__u32 width;	/* width of entire buffer */
@@ -198,9 +210,10 @@ struct mxcfb_alt_buffer_data {
 };
 
 /*
-*  Mark 7
-*  NOTE: Was: mxcfb_update_data
-*/
+ * Mark 7
+ * NOTE: Was: mxcfb_update_data
+ * Nickel: imx5/imx6
+ */
 // mxcfb_update_data v1 for NTX linux since from mx50/mx6sl .
 struct mxcfb_update_data_v1_ntx {
 	struct mxcfb_rect update_region;
@@ -226,7 +239,10 @@ struct mxcfb_update_data_v1 {
 };
 
 
-/* Mark 7 */
+/*
+ * Mark 7
+ * Nickel: mxcfb_update_data_v2
+ */
 // mxcfb_update_data v2 since from mx7d .
 #define mxcfb_update_data_v2 mxcfb_update_data
 struct mxcfb_update_data {
@@ -258,9 +274,9 @@ struct mxcfb_update_marker_data {
  * Needed for driver to perform auto-waveform selection
  */
 /*
-* NOTE: Once again, Mark 7 renamed some stuff
-*       Was mxcfb_waveform_modes
-*/
+ * NOTE: Once again, Mark 7 renamed some stuff
+ *       Was mxcfb_waveform_modes
+ */
 struct mxcfb_waveform_modes_ntx {
 	int mode_init;
 	int mode_du;
@@ -334,8 +350,9 @@ struct mxcfb_csc_matrix {
 /* Mark 7 */
 #define MXCFB_SEND_UPDATE_V2		_IOW('F', 0x2E, struct mxcfb_update_data)
 #define MXCFB_WAIT_FOR_UPDATE_COMPLETE	_IOWR('F', 0x2F, struct mxcfb_update_marker_data) // mx7d/mx6ull/mx6sll interface .
+/* NOTE: Nickel: MXCFB_WAIT_FOR_UPDATE_COMPLETE_V2 */
 #define MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3	_IOWR('F', 0x2F, struct mxcfb_update_marker_data) // mx7d/mx6ull/mx6sll interface .
-/* NOTE: Was MXCFB_WAIT_FOR_UPDATE_COMPLETE before Mark 7! */
+/* NOTE: Was MXCFB_WAIT_FOR_UPDATE_COMPLETE before Mark 7! Is still that in Nickel's header... */
 #define MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1	_IOW('F', 0x2F, __u32) // mx50/NTX interface .
 #define MXCFB_WAIT_FOR_UPDATE_COMPLETE_V2	_IOWR('F', 0x35, struct mxcfb_update_marker_data) // mx6sl BSP interface .
 
