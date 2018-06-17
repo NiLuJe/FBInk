@@ -446,11 +446,19 @@ static int
 		update.update_marker = (70U + 66U + 73U + 78U + 75U);
 	}
 
+#	ifdef FBINK_FOR_KINDLE
+	if (ioctl(fbfd, MXCFB_SEND_UPDATE, &update) < 0) {
+#	else
 	if (ioctl(fbfd, MXCFB_SEND_UPDATE_V1_NTX, &update) < 0) {
+#	endif
 		// NOTE: perror() is not thread-safe...
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
+#	ifdef FBINK_FOR_KINDLE
+		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE: %s\n", errstr);
+#	else
 		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE_V1_NTX: %s\n", errstr);
+#	endif
 		return EXIT_FAILURE;
 	}
 
