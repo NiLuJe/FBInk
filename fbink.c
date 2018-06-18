@@ -1110,11 +1110,7 @@ int
 			region_wfm = WAVEFORM_MODE_GL16_FAST;
 		}
 	} else if (strcasecmp("DU4", waveform_mode) == 0) {
-		if (deviceQuirks.isKindleOasis2) {
-			region_wfm = WAVEFORM_MODE_KOA2_DU4;
-		} else {
-			region_wfm = WAVEFORM_MODE_DU4;
-		}
+		region_wfm = WAVEFORM_MODE_DU4;
 	} else if (strcasecmp("GL4", waveform_mode) == 0) {
 		if (deviceQuirks.isKindleOasis2) {
 			region_wfm = WAVEFORM_MODE_KOA2_GL4;
