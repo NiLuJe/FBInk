@@ -216,6 +216,11 @@ static void        font8x8_render(uint32_t, char*, unsigned short int UNUSED_BY_
 static struct mxcfb_rect
     draw(const char*, unsigned short int, unsigned short int, bool, bool, unsigned short int, unsigned short int);
 
+static int refresh_legacy(int, const struct mxcfb_rect, bool);
+static int refresh_kindle(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
+static int refresh_kindle_koa2(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
+static int refresh_kobo(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
+static int refresh_kobo_mk7(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
 static int refresh(int, const struct mxcfb_rect, uint32_t UNUSED_BY_LEGACY, bool);
 
 #endif
