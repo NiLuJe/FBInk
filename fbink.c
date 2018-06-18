@@ -304,7 +304,7 @@ static struct mxcfb_rect
 	//       (c.f., how is_perfect_fit is computed, basically, when MAXCOLS is not a fraction),
 	//       this effectively works around the issue, in which case, we don't need to do anything :).
 	// NOTE: Use charcount + col == MAXCOLS if we want to do that everytime we simply *hit* the edge...
-	if (charcount == MAXCOLS && !g_fbink_quirks.isPerfectFit) {
+	if (charcount == MAXCOLS && !deviceQuirks.isPerfectFit) {
 		fill_rect((unsigned short int) (region.left + (charcount * FONTW)),
 			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			  (unsigned short int) (vinfo.xres - (charcount * FONTW)),
@@ -626,7 +626,7 @@ int
 
 	// Mention & remember if we can perfectly fit the final column on screen
 	if ((unsigned short int) (FONTW * MAXCOLS) == vinfo.xres) {
-		g_fbink_quirks.isPerfectFit = true;
+		deviceQuirks.isPerfectFit = true;
 		ELOG("[FBInk] It's a perfect fit!");
 	}
 
@@ -733,7 +733,7 @@ int
 		if (fbink_config->is_centered) {
 			// One for the left padding
 			available_cols = (unsigned short int) (available_cols - 1U);
-			if (g_fbink_quirks.isPerfectFit) {
+			if (deviceQuirks.isPerfectFit) {
 				// And one for the right padding
 				available_cols = (unsigned short int) (available_cols - 1U);
 			}

@@ -184,7 +184,7 @@ typedef struct
 	bool isPerfectFit;
 } FBInkDeviceQuirks;
 
-FBInkDeviceQuirks g_fbink_quirks = { 0 };
+FBInkDeviceQuirks deviceQuirks = { 0 };
 
 static void put_pixel_Gray4(unsigned short int, unsigned short int, unsigned short int);
 static void put_pixel_Gray8(unsigned short int, unsigned short int, unsigned short int);
