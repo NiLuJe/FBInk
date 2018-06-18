@@ -95,9 +95,6 @@
 #	include "fbink_unscii.h"
 #endif
 
-// And this is where we handle device identification...
-#include "fbink_device_id.h"
-
 // Fallback version tag...
 #ifndef FBINK_VERSION
 #	define FBINK_VERSION "v0.9.8"
@@ -191,6 +188,9 @@ typedef struct
 } FBInkDeviceQuirks;
 
 FBInkDeviceQuirks deviceQuirks = { 0 };
+
+// And this is where we handle device identification...
+#include "fbink_device_id.h"
 
 static void put_pixel_Gray4(unsigned short int, unsigned short int, unsigned short int);
 static void put_pixel_Gray8(unsigned short int, unsigned short int, unsigned short int);

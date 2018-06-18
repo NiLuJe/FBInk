@@ -26,6 +26,15 @@
 
 #include "fbink_internal.h"
 
+#define KINDLE_SERIAL_NO_LENGTH 16
+
 void identify_kobo(FBInkDeviceQuirks*);
+
+bool     is_kindle_device(uint32_t);
+bool     is_kindle_touch(uint32_t);
+bool     is_kindle_device_v2(uint32_t);
+bool     is_kindle_oasis2(uint32_t);
+uint32_t from_base(char*, unsigned short int);
+void     identify_kindle(FBInkDeviceQuirks*);
 
 #endif
