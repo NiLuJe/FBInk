@@ -433,8 +433,10 @@ static int
 		.update_marker = marker,
 		.hist_bw_waveform_mode = WAVEFORM_MODE_DU,
 		.hist_gray_waveform_mode = WAVEFORM_MODE_GC16_FAST,
-		// NOTE: The PW2, at least, actually defaults to TEMP_USE_AUTO, although this works, too...
-		.temp = TEMP_USE_AMBIENT,
+		// NOTE: While TEMP_USE_AMBIENT appears to work just fine,
+		//       my Touch defaults to TEMP_USE_PAPYRUS, and my PW2 to TEMP_USE_AUTO,
+		//       which both conveniently point to the same value, so, let's use that :)
+		.temp = TEMP_USE_AUTO,
 		.flags = 0U,
 		.alt_buffer_data = { 0U },
 	};
@@ -590,7 +592,7 @@ static int
 		.update_marker = marker,
 		.temp          = TEMP_USE_AMBIENT,
 		// FIXME: Here be dragons! (REGAL flag, dither_mode & quant_bit)
-		.flags         = (waveform_mode == WAVEFORM_MODE_REAGLD)
+		.flags = (waveform_mode == WAVEFORM_MODE_REAGLD)
 			     ? EPDC_FLAG_USE_REGAL
 			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
 		.dither_mode     = EPDC_FLAG_USE_DITHERING_PASSTHROUGH,

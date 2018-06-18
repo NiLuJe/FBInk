@@ -177,7 +177,7 @@ struct mxcfb_rect {
 /* PW2, Gone w/ KOA2 */
 #define TEMP_USE_AUTO				0x1001
 
-/* KOA2... Once again breaking backward compat... */
+/* KOA2... Once again breaking backward compat... (NOTE: TEMP_USE_AMBIENT hasn't budged, though) */
 #define TEMP_USE_KOA2_AUTO			TEMP_USE_AMBIENT
 
 /* PXP Operations */
