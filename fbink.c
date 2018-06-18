@@ -433,9 +433,6 @@ static int
 		.update_marker = marker,
 		.hist_bw_waveform_mode = WAVEFORM_MODE_DU,
 		.hist_gray_waveform_mode = WAVEFORM_MODE_GC16_FAST,
-		// NOTE: While TEMP_USE_AMBIENT appears to work just fine,
-		//       my Touch defaults to TEMP_USE_PAPYRUS, and my PW2 to TEMP_USE_AUTO,
-		//       which both conveniently point to the same value, so, let's use that :)
 		.temp = TEMP_USE_AUTO,
 		.flags = 0U,
 		.alt_buffer_data = { 0U },
