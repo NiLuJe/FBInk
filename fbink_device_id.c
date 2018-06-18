@@ -325,3 +325,13 @@ void
 		}
 	}
 }
+
+void
+    identify_device(FBInkDeviceQuirks* deviceQuirks)
+{
+#if defined(FBINK_FOR_KINDLE) || defined(FBINK_FOR_LEGACY)
+	identify_kindle(deviceQuirks);
+#else
+	identify_kobo(deviceQuirks);
+#endif
+}

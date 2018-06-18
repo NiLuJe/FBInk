@@ -636,6 +636,9 @@ int
 	}
 	ELOG("[FBInk] Fixed fb info: smem_len %u, line_length %u", finfo.smem_len, finfo.line_length);
 
+	// Identify device...
+	identify_device(&deviceQuirks);
+
 	// NOTE: Do we want to keep the fb0 fd open and pass it to our caller, or simply close it for now?
 	//       Useful because we probably want to close it to keep open fds to a minimum when used as a library,
 	//       while wanting to avoid a useless open/close/open/close cycle when used as a standalone tool.

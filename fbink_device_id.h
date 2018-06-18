@@ -37,4 +37,6 @@ bool     is_kindle_oasis2(uint32_t);
 uint32_t from_base(char*, unsigned short int);
 void     identify_kindle(FBInkDeviceQuirks*);
 
+void identify_device(FBInkDeviceQuirks*);
+
 #endif
