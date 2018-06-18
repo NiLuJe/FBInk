@@ -95,6 +95,9 @@
 #	include "fbink_unscii.h"
 #endif
 
+// And this is where we handle device identification...
+#include "fbink_device_id.h"
+
 // Fallback version tag...
 #ifndef FBINK_VERSION
 #	define FBINK_VERSION "v0.9.8"
@@ -182,6 +185,9 @@ bool g_isQuiet = false;
 typedef struct
 {
 	bool isPerfectFit;
+	bool isKoboMk7;
+	bool isKindleTouch;
+	bool isKindleOasis2;
 } FBInkDeviceQuirks;
 
 FBInkDeviceQuirks deviceQuirks = { 0 };
