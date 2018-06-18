@@ -171,13 +171,20 @@ unsigned short int       FONTW         = 8U;
 unsigned short int       FONTH         = 8U;
 unsigned short int       FONTSIZE_MULT = 1U;
 // Slightly arbitrary-ish fallback values
-unsigned short int MAXROWS        = 45U;
-unsigned short int MAXCOLS        = 32U;
-bool               is_perfect_fit = false;
+unsigned short int MAXROWS = 45U;
+unsigned short int MAXCOLS = 32U;
 // Verbose is for diagnostic/debug info in general
 bool g_isVerbose = false;
 // Quiet is for fbink_init's hardware setup info
 bool g_isQuiet = false;
+
+// Where we track device/screen-specific quirks
+typedef struct
+{
+	bool isPerfectFit;
+} FBInkDeviceQuirks;
+
+FBInkDeviceQuirks g_fbink_quirks = { 0 };
 
 static void put_pixel_Gray4(unsigned short int, unsigned short int, unsigned short int);
 static void put_pixel_Gray8(unsigned short int, unsigned short int, unsigned short int);
