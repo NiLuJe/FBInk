@@ -539,15 +539,15 @@ int
 
 	// Update verbosity flag
 	if (fbink_config->is_verbose) {
-		is_verbose = true;
+		g_isVerbose = true;
 	} else {
-		is_verbose = false;
+		g_isVerbose = false;
 	}
 	// Update quiet flag
 	if (fbink_config->is_quiet) {
-		is_quiet = true;
+		g_isQuiet = true;
 	} else {
-		is_quiet = false;
+		g_isQuiet = false;
 	}
 
 	// Get variable screen information

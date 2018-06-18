@@ -117,7 +117,7 @@
 // Handle what we send to stdout (i.e., mostly diagnostic stuff)
 #define LOG(fmt, ...)                                                                                                  \
 	({                                                                                                             \
-		if (is_verbose) {                                                                                      \
+		if (g_isVerbose) {                                                                                     \
 			fprintf(stdout, fmt "\n", ##__VA_ARGS__);                                                      \
 		}                                                                                                      \
 	})
@@ -125,7 +125,7 @@
 // And then what we send to stderr (mostly fbink_init stuff)
 #define ELOG(fmt, ...)                                                                                                 \
 	({                                                                                                             \
-		if (!is_quiet) {                                                                                       \
+		if (!g_isQuiet) {                                                                                      \
 			fprintf(stderr, fmt "\n", ##__VA_ARGS__);                                                      \
 		}                                                                                                      \
 	})
@@ -175,9 +175,9 @@ unsigned short int MAXROWS        = 45U;
 unsigned short int MAXCOLS        = 32U;
 bool               is_perfect_fit = false;
 // Verbose is for diagnostic/debug info in general
-bool is_verbose = false;
+bool g_isVerbose = false;
 // Quiet is for fbink_init's hardware setup info
-bool is_quiet = false;
+bool g_isQuiet = false;
 
 static void put_pixel_Gray4(unsigned short int, unsigned short int, unsigned short int);
 static void put_pixel_Gray8(unsigned short int, unsigned short int, unsigned short int);
