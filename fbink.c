@@ -1064,9 +1064,74 @@ int
 		}
 	}
 
-	// FIXME: Handle the KOA2 special snowflake
 	uint32_t region_wfm = WAVEFORM_MODE_AUTO;
 	// Parse waveform mode...
+#ifdef FBINK_FOR_KINDLE
+	if (strcasecmp("DU", waveform_mode) == 0) {
+		region_wfm = WAVEFORM_MODE_DU;
+	} else if (strcasecmp("GC16", waveform_mode) == 0) {
+		region_wfm = WAVEFORM_MODE_GC16;
+	} else if (strcasecmp("GC4", waveform_mode) == 0) {
+		region_wfm = WAVEFORM_MODE_GC4;
+	} else if (strcasecmp("A2", waveform_mode) == 0) {
+		if (deviceQuirks.isKindleOasis2) {
+			region_wfm = WAVEFORM_MODE_KOA2_A2;
+		} else {
+			region_wfm = WAVEFORM_MODE_A2;
+		}
+	} else if (strcasecmp("GL16", waveform_mode) == 0) {
+		if (deviceQuirks.isKindleOasis2) {
+			region_wfm = WAVEFORM_MODE_KOA2_GL16;
+		} else {
+			region_wfm = WAVEFORM_MODE_GL16;
+		}
+	} else if (strcasecmp("REAGL", waveform_mode) == 0) {
+		if (deviceQuirks.isKindleOasis2) {
+			region_wfm = WAVEFORM_MODE_KOA2_REAGL;
+		} else {
+			region_wfm = WAVEFORM_MODE_REAGL;
+		}
+	} else if (strcasecmp("REAGLD", waveform_mode) == 0) {
+		if (deviceQuirks.isKindleOasis2) {
+			region_wfm = WAVEFORM_MODE_KOA2_REAGLD;
+		} else {
+			region_wfm = WAVEFORM_MODE_REAGLD;
+		}
+	} else if (strcasecmp("GC16_FAST", waveform_mode) == 0) {
+		if (deviceQuirks.isKindleOasis2) {
+			region_wfm = WAVEFORM_MODE_KOA2_GC16_FAST;
+		} else {
+			region_wfm = WAVEFORM_MODE_GC16_FAST;
+		}
+	} else if (strcasecmp("GL16_FAST", waveform_mode) == 0) {
+		if (deviceQuirks.isKindleOasis2) {
+			region_wfm = WAVEFORM_MODE_KOA2_GL16_FAST;
+		} else {
+			region_wfm = WAVEFORM_MODE_GL16_FAST;
+		}
+	} else if (strcasecmp("DU4", waveform_mode) == 0) {
+		if (deviceQuirks.isKindleOasis2) {
+			region_wfm = WAVEFORM_MODE_KOA2_DU4;
+		} else {
+			region_wfm = WAVEFORM_MODE_DU4;
+		}
+	} else if (strcasecmp("GL4", waveform_mode) == 0) {
+		if (deviceQuirks.isKindleOasis2) {
+			region_wfm = WAVEFORM_MODE_KOA2_GL4;
+		} else {
+			region_wfm = WAVEFORM_MODE_GL4;
+		}
+	} else if (strcasecmp("GL16_INV", waveform_mode) == 0) {
+		if (deviceQuirks.isKindleOasis2) {
+			region_wfm = WAVEFORM_MODE_KOA2_GL16_INV;
+		} else {
+			region_wfm = WAVEFORM_MODE_GL16_INV;
+		}
+	} else if (deviceQuirks.isKindleOasis2 && strcasecmp("GCK16", waveform_mode) == 0) {
+		region_wfm = WAVEFORM_MODE_KOA2_GCK16;
+	} else if (deviceQuirks.isKindleOasis2 && strcasecmp("GLKW16", waveform_mode) == 0) {
+		region_wfm = WAVEFORM_MODE_KOA2_GLKW16;
+#else
 	if (strcasecmp("DU", waveform_mode) == 0) {
 		region_wfm = WAVEFORM_MODE_DU;
 	} else if (strcasecmp("GC16", waveform_mode) == 0) {
@@ -1081,17 +1146,6 @@ int
 		region_wfm = WAVEFORM_MODE_REAGL;
 	} else if (strcasecmp("REAGLD", waveform_mode) == 0) {
 		region_wfm = WAVEFORM_MODE_REAGLD;
-#ifdef FBINK_FOR_KINDLE
-	} else if (strcasecmp("GC16_FAST", waveform_mode) == 0) {
-		region_wfm = WAVEFORM_MODE_GC16_FAST;
-	} else if (strcasecmp("GL16_FAST", waveform_mode) == 0) {
-		region_wfm = WAVEFORM_MODE_GL16_FAST;
-	} else if (strcasecmp("DU4", waveform_mode) == 0) {
-		region_wfm = WAVEFORM_MODE_DU4;
-	} else if (strcasecmp("GL4", waveform_mode) == 0) {
-		region_wfm = WAVEFORM_MODE_GL4;
-	} else if (strcasecmp("GL16_INV", waveform_mode) == 0) {
-		region_wfm = WAVEFORM_MODE_GL16_INV;
 #endif
 	} else if (strcasecmp("AUTO", waveform_mode) == 0) {
 		region_wfm = WAVEFORM_MODE_AUTO;
