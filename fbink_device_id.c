@@ -149,7 +149,7 @@ bool
 }
 
 bool
-    is_kindle_device_v2(uint32_t dev, FBInkDeviceQuirks* deviceQuirks)
+    is_kindle_device_new(uint32_t dev, FBInkDeviceQuirks* deviceQuirks)
 {
 	switch (dev) {
 		case 0x201:    // PW3
@@ -232,31 +232,33 @@ uint32_t
 void
     identify_kindle(FBInkDeviceQuirks* deviceQuirks)
 {
-	FILE* fp;
-	if ((fp = fopen("/proc/usid", "rb")) == NULL) {
+	FILE* fp = fopen("/proc/usid", "r");
+	if (!fp) {
 		fprintf(stderr, "Cannot open /proc/usid (not running on a Kindle?)\n");
-	}
-	unsigned char serial_no[KINDLE_SERIAL_NO_LENGTH];
-	if (fread(serial_no, sizeof(unsigned char), KINDLE_SERIAL_NO_LENGTH, fp) < KINDLE_SERIAL_NO_LENGTH ||
-	    ferror(fp) != 0) {
-		fprintf(stderr, "Error reading /proc/usid\n");
+	} else {
+		unsigned char serial_no[KINDLE_SERIAL_NO_LENGTH];
+		if (fread(serial_no, sizeof(unsigned char), KINDLE_SERIAL_NO_LENGTH, fp) < KINDLE_SERIAL_NO_LENGTH ||
+		    ferror(fp) != 0) {
+			fprintf(stderr, "Error reading /proc/usid\n");
+		}
 		fclose(fp);
-	}
-	fclose(fp);
 
-	// Get the device code...
-	char device_code[4] = { '\0' };
-	snprintf(device_code, 3, "%.*s", 2, &serial_no[2]);    // FIXME: ptr arithmetics & example comment
-	uint32_t dev = (uint32_t) strtoul(device_code, NULL, 16);
-	// First check if it looks like a valid device...
-	if (!is_kindle_device(dev, deviceQuirks)) {
-		// ... try the new device ID scheme if it doesn't...
-		snprintf(device_code, 4, "%.*s", 3, &serial_no[3]);
-		dev = from_base(device_code, 32);
-		// ... And finally, unless we're feeling adventurous,
-		// check if it's really a valid device...
-		if (!is_kindle_device_v2(dev, deviceQuirks)) {
-			fprintf(stderr, "Unknown device %s (0x%03X).\n", device_code, dev);
+		// Get the device code...
+		char device_code[3 + 1] = { '\0' };
+		// NOTE: Slice the bracketed section out of the S/N: F0[17]NNNNNNNNNNNN
+		snprintf(device_code, 2 + 1, "%.*s", 2, serial_no + 2);
+		// It's in hex, easy peasy.
+		uint32_t dev = (uint32_t) strtoul(device_code, NULL, 16);
+		// Check if it looks like the old device id scheme...
+		if (!is_kindle_device(dev, deviceQuirks)) {
+			// ... try the new device ID scheme if it doesn't... (G09[0G1]NNNNNNNNNN)
+			snprintf(device_code, 3 + 1, "%.*s", 3, serial_no + 3);
+			// (these ones are encoded in a slightly custom base 32)
+			dev = from_base(device_code, 32);
+			// ... And if it's not either, it's unknown.
+			if (!is_kindle_device_new(dev, deviceQuirks)) {
+				fprintf(stderr, "Unknown device %s (0x%03X).\n", device_code, dev);
+			}
 		}
 	}
 }

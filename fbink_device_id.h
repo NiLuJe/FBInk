@@ -43,7 +43,7 @@ typedef struct
 void identify_kobo(FBInkDeviceQuirks*);
 
 bool     is_kindle_device(uint32_t, FBInkDeviceQuirks*);
-bool     is_kindle_device_v2(uint32_t, FBInkDeviceQuirks*);
+bool     is_kindle_device_new(uint32_t, FBInkDeviceQuirks*);
 uint32_t from_base(char*, unsigned short int);
 void     identify_kindle(FBInkDeviceQuirks*);
 

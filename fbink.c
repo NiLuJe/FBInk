@@ -1064,6 +1064,7 @@ int
 		}
 	}
 
+	// FIXME: Handle the KOA2 special snowflake
 	uint32_t region_wfm = WAVEFORM_MODE_AUTO;
 	// Parse waveform mode...
 	if (strcasecmp("DU", waveform_mode) == 0) {
