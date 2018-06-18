@@ -433,6 +433,7 @@ static int
 		.update_marker = marker,
 		.hist_bw_waveform_mode = WAVEFORM_MODE_DU,
 		.hist_gray_waveform_mode = WAVEFORM_MODE_GC16_FAST,
+		// NOTE: The PW2, at least, actually defaults to TEMP_USE_AUTO, although this works, too...
 		.temp = TEMP_USE_AMBIENT,
 		.flags = 0U,
 		.alt_buffer_data = { 0U },
