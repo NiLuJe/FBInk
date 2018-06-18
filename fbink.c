@@ -450,7 +450,7 @@ static int
 
 	if (update_mode == UPDATE_MODE_FULL) {
 		if (deviceQuirks.isKindlePearlScreen) {
-			rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL, marker);
+			rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL, &marker);
 		} else {
 			struct mxcfb_update_marker_data update_marker = {
 				.update_marker = marker,
@@ -560,7 +560,7 @@ static int
 	}
 
 	if (update_mode == UPDATE_MODE_FULL) {
-		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1, marker);
+		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1, &marker);
 
 		if (rv < 0) {
 			char  buf[256];
