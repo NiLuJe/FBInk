@@ -21,6 +21,11 @@
 #ifndef __FBINK_DEVICE_ID_H
 #define __FBINK_DEVICE_ID_H
 
+// Make KDevelop happy (for getline)
+#ifndef _DEFAULT_SOURCE
+#	define _DEFAULT_SOURCE
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
