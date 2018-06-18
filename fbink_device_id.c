@@ -40,55 +40,29 @@ void
 			// Thankfully, the device code is always located in the three
 			// final characters, so that's easy enough to extract without
 			// having to worry about the formatting...
-			kobo_id = (unsigned short int) atoi(line + (nread - 3)); // FIXME: strtoul
+			kobo_id = (unsigned short int) strtoul(line + (nread - 3), NULL, 10);
 			// NOTE: Device code list pilfered from
 			// https://github.com/geek1011/KoboStuff/blob/gh-pages/kobofirmware.js#L11
 			switch (kobo_id) {
-				case 310:
-					// Touch A/B (trilogy)
+				case 310: // Touch A/B (trilogy)
+				case 320: // Touch C (trilogy)
+				case 340: // Mini (pixie)
+				case 330: // Glo (kraken)
+				case 371: // Glo HD (alyssum)
+				case 372: // Touch 2.0 (pika)
+				case 360: // Aura (phoenix)
+				case 350: // Aura HD (dragon)
+				case 370: // Aura H2O (dahlia)
+				case 374: // Aura H2O² (snow)
 					break;
-				case 320:
-					// Touch C (trilogy)
-					break;
-				case 340:
-					// Mini (pixie)
-					break;
-				case 330:
-					// Glo (kraken)
-					break;
-				case 371:
-					// Glo HD (alyssum)
-					break;
-				case 372:
-					// Touch 2.0 (pika)
-					break;
-				case 360:
-					// Aura (phoenix)
-					break;
-				case 350:
-					// Aura HD (dragon)
-					break;
-				case 370:
-					// Aura H2O (dahlia)
-					break;
-				case 374:
-					// Aura H2O² (snow)
-					break;
-				case 378:
-					// Aura H2O² r2 (snow)
+				case 378: // Aura H2O² r2 (snow)
 					deviceQuirks->isKoboMk7 = true;
 					break;
-				case 373:
-					// Aura ONE (daylight)
+				case 373: // Aura ONE (daylight)
+				case 381: // Aura ONE LE (daylight)
+				case 375: // Aura SE (star)
 					break;
-				case 381:
-					// Aura ONE LE (daylight)
-					break;
-				case 375:
-					// Aura SE (star)
-					break;
-				case 379:
-					// Aura SE r2 (star)
+				case 379: // Aura SE r2 (star)
 					deviceQuirks->isKoboMk7 = true;
 					break;
 				case 376:
