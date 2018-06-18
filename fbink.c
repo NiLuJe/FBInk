@@ -638,6 +638,13 @@ int
 
 	// Identify device...
 	identify_device(&deviceQuirks);
+	if (deviceQuirks.isKindleTouch) {
+		ELOG("[FBInk] Kindle Touch detected");
+	} else if (deviceQuirks.isKindleOasis2) {
+		ELOG("[FBInk] Kindle Oasis 2 detected");
+	} else if (deviceQuirks.isKoboMk7) {
+		ELOG("[FBInk] Kobo Mark 7 detected");
+	}
 
 	// NOTE: Do we want to keep the fb0 fd open and pass it to our caller, or simply close it for now?
 	//       Useful because we probably want to close it to keep open fds to a minimum when used as a library,
