@@ -636,7 +636,7 @@ int
 	}
 	ELOG("[FBInk] Fixed fb info: smem_len %u, line_length %u", finfo.smem_len, finfo.line_length);
 
-	// Identify device...
+	// Identify device... (This will only run once per lifecycle).
 	identify_device(&deviceQuirks);
 	if (deviceQuirks.isKindleTouch) {
 		ELOG("[FBInk] Kindle Touch detected");

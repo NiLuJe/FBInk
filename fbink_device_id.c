@@ -329,9 +329,13 @@ void
 void
     identify_device(FBInkDeviceQuirks* deviceQuirks)
 {
+	// Make sure we only run once (we init it at 0, meaning false).
+	if (!deviceQuirks->skipId) {
 #if defined(FBINK_FOR_KINDLE) || defined(FBINK_FOR_LEGACY)
-	identify_kindle(deviceQuirks);
+		identify_kindle(deviceQuirks);
 #else
-	identify_kobo(deviceQuirks);
+		identify_kobo(deviceQuirks);
 #endif
+		deviceQuirks->skipId = true;
+	}
 }

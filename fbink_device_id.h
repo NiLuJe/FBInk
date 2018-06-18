@@ -37,6 +37,7 @@ typedef struct
 	bool isKoboMk7;
 	bool isKindleTouch;
 	bool isKindleOasis2;
+	bool skipId;
 } FBInkDeviceQuirks;
 
 void identify_kobo(FBInkDeviceQuirks*);
