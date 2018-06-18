@@ -21,12 +21,23 @@
 #ifndef __FBINK_DEVICE_ID_H
 #define __FBINK_DEVICE_ID_H
 
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/types.h>
 
-#include "fbink_internal.h"
-
 #define KINDLE_SERIAL_NO_LENGTH 16
+
+// List of flags for device or screen-specific quirks...
+typedef struct
+{
+	bool isPerfectFit;
+	bool isKoboMk7;
+	bool isKindleTouch;
+	bool isKindleOasis2;
+} FBInkDeviceQuirks;
 
 void identify_kobo(FBInkDeviceQuirks*);
 

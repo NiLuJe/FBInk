@@ -95,6 +95,9 @@
 #	include "fbink_unscii.h"
 #endif
 
+// And this is where we handle device identification...
+#include "fbink_device_id.h"
+
 // Fallback version tag...
 #ifndef FBINK_VERSION
 #	define FBINK_VERSION "v0.9.8"
@@ -179,18 +182,7 @@ bool g_isVerbose = false;
 bool g_isQuiet = false;
 
 // Where we track device/screen-specific quirks
-typedef struct
-{
-	bool isPerfectFit;
-	bool isKoboMk7;
-	bool isKindleTouch;
-	bool isKindleOasis2;
-} FBInkDeviceQuirks;
-
 FBInkDeviceQuirks deviceQuirks = { 0 };
-
-// And this is where we handle device identification...
-#include "fbink_device_id.h"
 
 static void put_pixel_Gray4(unsigned short int, unsigned short int, unsigned short int);
 static void put_pixel_Gray8(unsigned short int, unsigned short int, unsigned short int);
