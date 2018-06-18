@@ -86,6 +86,7 @@ static void
 	    "\t\t\tAvailable waveform modes: DU, GC16, GC4, A2, GL16, REAGL, REAGLD & AUTO\n"
 #	ifdef FBINK_FOR_KINDLE
 	    "\t\t\t\tAs well as GC16_FAST, GL16_FAST, DU4, GL4, GL16_INV, GCK16 & GLKW16 on some Kindles, depending on the model & FW version.\n"
+	    "\t\t\t\tUnsupported modes should safely downgrade to AUTO.\n"
 #	endif
 	    "\t\t\tNote that this will also honor --flash\n"
 #else
