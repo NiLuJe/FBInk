@@ -44,25 +44,25 @@ void
 			// NOTE: Device code list pilfered from
 			// https://github.com/geek1011/KoboStuff/blob/gh-pages/kobofirmware.js#L11
 			switch (kobo_id) {
-				case 310: // Touch A/B (trilogy)
-				case 320: // Touch C (trilogy)
-				case 340: // Mini (pixie)
-				case 330: // Glo (kraken)
-				case 371: // Glo HD (alyssum)
-				case 372: // Touch 2.0 (pika)
-				case 360: // Aura (phoenix)
-				case 350: // Aura HD (dragon)
-				case 370: // Aura H2O (dahlia)
-				case 374: // Aura H2O² (snow)
+				case 310:    // Touch A/B (trilogy)
+				case 320:    // Touch C (trilogy)
+				case 340:    // Mini (pixie)
+				case 330:    // Glo (kraken)
+				case 371:    // Glo HD (alyssum)
+				case 372:    // Touch 2.0 (pika)
+				case 360:    // Aura (phoenix)
+				case 350:    // Aura HD (dragon)
+				case 370:    // Aura H2O (dahlia)
+				case 374:    // Aura H2O² (snow)
 					break;
-				case 378: // Aura H2O² r2 (snow)
+				case 378:    // Aura H2O² r2 (snow)
 					deviceQuirks->isKoboMk7 = true;
 					break;
-				case 373: // Aura ONE (daylight)
-				case 381: // Aura ONE LE (daylight)
-				case 375: // Aura SE (star)
+				case 373:    // Aura ONE (daylight)
+				case 381:    // Aura ONE LE (daylight)
+				case 375:    // Aura SE (star)
 					break;
-				case 379: // Aura SE r2 (star)
+				case 379:    // Aura SE r2 (star)
 					deviceQuirks->isKoboMk7 = true;
 					break;
 				case 376:
@@ -83,31 +83,37 @@ void
 // NOTE: This is adapted from KindleTool,
 //       c.f., https://github.com/NiLuJe/KindleTool/blob/master/KindleTool/kindle_tool.h#L189
 bool
-    is_kindle_device(uint32_t dev)
+    is_kindle_device(uint32_t dev, FBInkDeviceQuirks* deviceQuirks)
 {
 	switch (dev) {
-		case 0x01:
-		case 0x02:
+		case 0x01:    // K1
+		case 0x02:    // K2
 		case 0x03:
-		case 0x04:
+		case 0x04:    // KDX
 		case 0x05:
 		case 0x09:
-		case 0x08:
+		case 0x08:    // K3
 		case 0x06:
 		case 0x0A:
-		case 0x0E:
-		case 0x0F:
+		case 0x0E:    // K4
+			return true;
+		case 0x0F:    // K5
 		case 0x11:
 		case 0x10:
 		case 0x12:
-		case 0x23:
-		case 0x24:
+			deviceQuirks->isKindlePearlScreen = true;
+			return true;
+		case 0x23:    // K4b
+			return true;
+		case 0x24:    // PW1
 		case 0x1B:
 		case 0x1C:
 		case 0x1D:
 		case 0x1F:
 		case 0x20:
-		case 0xD4:
+			deviceQuirks->isKindlePearlScreen = true;
+			return true;
+		case 0xD4:    // PW2
 		case 0x5A:
 		case 0xD5:
 		case 0xD6:
@@ -121,36 +127,21 @@ bool
 		case 0x62:
 		case 0x61:
 		case 0x5F:
-		case 0xC6:
-		case 0x13:
-		case 0x16:
+		case 0xC6:    // KT2
+		case 0x13:    // KV
+		case 0x16:    // ??
 		case 0x21:
-		case 0x54:
+		case 0x54:    // KV
 		case 0x2A:
 		case 0x4F:
 		case 0x52:
 		case 0x53:
-		case 0x07:
+		case 0x07:    // ??
 		case 0x0B:
 		case 0x0C:
 		case 0x0D:
 		case 0x99:
-		case 0xDD:
-			return true;
-		default:
-			return false;
-	}
-}
-
-// TODO: Fold into is_kindle_device by passing it the strcut...
-bool
-    is_kindle_touch(uint32_t dev)
-{
-	switch (dev) {
-		case 0x0F:
-		case 0x11:
-		case 0x10:
-		case 0x12:
+		case 0xDD:    // KT2 AUS
 			return true;
 		default:
 			return false;
@@ -158,10 +149,10 @@ bool
 }
 
 bool
-    is_kindle_device_v2(uint32_t dev)
+    is_kindle_device_v2(uint32_t dev, FBInkDeviceQuirks* deviceQuirks)
 {
 	switch (dev) {
-		case 0x201:
+		case 0x201:    // PW3
 		case 0x202:
 		case 0x204:
 		case 0x205:
@@ -175,42 +166,17 @@ bool
 		case 0x270:
 		case 0x293:
 		case 0x294:
-		case 0x20C:
+		case 0x20C:    // KOA
 		case 0x20D:
 		case 0x219:
 		case 0x21A:
 		case 0x21B:
 		case 0x21C:
-		case 0x1BC:
+		case 0x1BC:    // KT3
 		case 0x269:
 		case 0x26A:
-		case 0x295:
-		case 0x296:
-		case 0x297:
-		case 0x298:
-		case 0x2E1:
-		case 0x2E2:
-		case 0x2E6:
-		case 0x2E7:
-		case 0x2E8:
-		case 0x341:
-		case 0x342:
-		case 0x343:
-		case 0x344:
-		case 0x347:
-		case 0x34A:
 			return true;
-		default:
-			return false;
-	}
-}
-
-// TODO: Fold into is_kindle_v2 by passing it the struct...
-bool
-    is_kindle_oasis2(uint32_t dev)
-{
-	switch (dev) {
-		case 0x295:
+		case 0x295:    // KOA2
 		case 0x296:
 		case 0x297:
 		case 0x298:
@@ -225,6 +191,7 @@ bool
 		case 0x344:
 		case 0x347:
 		case 0x34A:
+			deviceQuirks->isKindleOasis2 = true;
 			return true;
 		default:
 			return false;
@@ -278,25 +245,17 @@ void
 	fclose(fp);
 
 	// Get the device code...
-	char device_code[4] = { '\0' };	// FIXME: WTF?! {0} init
-	snprintf(device_code, 3, "%.*s", 2, &serial_no[2]);	// FIXME: ptr arithmetics & example comment
+	char device_code[4] = { '\0' };
+	snprintf(device_code, 3, "%.*s", 2, &serial_no[2]);    // FIXME: ptr arithmetics & example comment
 	uint32_t dev = (uint32_t) strtoul(device_code, NULL, 16);
 	// First check if it looks like a valid device...
-	if (is_kindle_device(dev)) {
-		if (is_kindle_touch(dev)) {
-			deviceQuirks->isKindleTouch = true;
-		}
-	} else {
+	if (!is_kindle_device(dev, deviceQuirks)) {
 		// ... try the new device ID scheme if it doesn't...
 		snprintf(device_code, 4, "%.*s", 3, &serial_no[3]);
 		dev = from_base(device_code, 32);
 		// ... And finally, unless we're feeling adventurous,
 		// check if it's really a valid device...
-		if (is_kindle_device_v2(dev)) {
-			if (is_kindle_oasis2(dev)) {
-				deviceQuirks->isKindleOasis2 = true;
-			}
-		} else {
+		if (!is_kindle_device_v2(dev, deviceQuirks)) {
 			fprintf(stderr, "Unknown device %s (0x%03X).\n", device_code, dev);
 		}
 	}

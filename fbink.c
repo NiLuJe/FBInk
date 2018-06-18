@@ -387,7 +387,6 @@ static struct mxcfb_rect
 
 // TODO: Split'em in variants (legacy, kindle, kobo, ...)
 
-
 // Handle eInk updates
 static int
     refresh(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode UNUSED_BY_LEGACY, bool is_flashing)
@@ -641,8 +640,8 @@ int
 
 	// Identify device... (This will only run once per lifecycle).
 	identify_device(&deviceQuirks);
-	if (deviceQuirks.isKindleTouch) {
-		ELOG("[FBInk] Enabled Kindle Touch device quirks");
+	if (deviceQuirks.isKindlePearlScreen) {
+		ELOG("[FBInk] Enabled Kindle with Pearl screen device quirks");
 	} else if (deviceQuirks.isKindleOasis2) {
 		ELOG("[FBInk] Enabled Kindle Oasis 2 device quirks");
 	} else if (deviceQuirks.isKoboMk7) {

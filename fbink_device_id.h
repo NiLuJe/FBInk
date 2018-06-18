@@ -35,17 +35,15 @@ typedef struct
 {
 	bool isPerfectFit;
 	bool isKoboMk7;
-	bool isKindleTouch;
+	bool isKindlePearlScreen;
 	bool isKindleOasis2;
 	bool skipId;
 } FBInkDeviceQuirks;
 
 void identify_kobo(FBInkDeviceQuirks*);
 
-bool     is_kindle_device(uint32_t);
-bool     is_kindle_touch(uint32_t);
-bool     is_kindle_device_v2(uint32_t);
-bool     is_kindle_oasis2(uint32_t);
+bool     is_kindle_device(uint32_t, FBInkDeviceQuirks*);
+bool     is_kindle_device_v2(uint32_t, FBInkDeviceQuirks*);
 uint32_t from_base(char*, unsigned short int);
 void     identify_kindle(FBInkDeviceQuirks*);
 
