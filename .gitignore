@@ -6,3 +6,7 @@ Kindle/
 # KDevelop
 FBInk.kdev4
 .kdev4/
+# Global
+GPATH
+GRTAGS
+GTAGS
