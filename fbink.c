@@ -44,7 +44,7 @@ static void
 	size_t pix_offset = x / 2 + y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((char*) (fbp + pix_offset)) = (char) c;
+	*((char*) (g_fbink_fbp + pix_offset)) = (char) c;
 }
 
 static void
@@ -54,7 +54,7 @@ static void
 	size_t pix_offset = x + y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((char*) (fbp + pix_offset)) = (char) c;
+	*((char*) (g_fbink_fbp + pix_offset)) = (char) c;
 }
 
 static void
@@ -69,9 +69,9 @@ static void
 	size_t pix_offset = x * 3U + y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((char*) (fbp + pix_offset))     = (char) b;
-	*((char*) (fbp + pix_offset + 1)) = (char) g;
-	*((char*) (fbp + pix_offset + 2)) = (char) r;
+	*((char*) (g_fbink_fbp + pix_offset))     = (char) b;
+	*((char*) (g_fbink_fbp + pix_offset + 1)) = (char) g;
+	*((char*) (g_fbink_fbp + pix_offset + 2)) = (char) r;
 }
 
 static void
@@ -86,10 +86,10 @@ static void
 	size_t pix_offset = x * 4U + y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((char*) (fbp + pix_offset))     = (char) b;
-	*((char*) (fbp + pix_offset + 1)) = (char) g;
-	*((char*) (fbp + pix_offset + 2)) = (char) r;
-	*((char*) (fbp + pix_offset + 3)) = 0xFF;    // Opaque, always.
+	*((char*) (g_fbink_fbp + pix_offset))     = (char) b;
+	*((char*) (g_fbink_fbp + pix_offset + 1)) = (char) g;
+	*((char*) (g_fbink_fbp + pix_offset + 2)) = (char) r;
+	*((char*) (g_fbink_fbp + pix_offset + 3)) = 0xFF;    // Opaque, always.
 }
 
 static void
@@ -108,7 +108,7 @@ static void
 	unsigned int c = ((r / 8U) << 11U) + ((g / 4U) << 5U) + (b / 8U);
 	// or: c = ((r / 8) * 2048) + ((g / 4) * 32) + (b / 8);
 	// write 'two bytes at once'
-	*((char*) (fbp + pix_offset)) = (char) c;
+	*((char*) (g_fbink_fbp + pix_offset)) = (char) c;
 }
 
 // Handle various bpp...
@@ -165,7 +165,7 @@ static void
 #endif
 
 	// NOTE: Grayscale palette, we could have used def_r or def_g ;).
-	memset(fbp, def_b[c], finfo.smem_len);
+	memset(g_fbink_fbp, def_b[c], finfo.smem_len);
 }
 
 // Return the font8x8 bitmap for a specific Unicode codepoint
@@ -667,16 +667,16 @@ int
 	// NOTE: Beware of smem_len on Kobos?
 	//       c.f., https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer_linux.lua#L36
 	// NOTE: If we're keeping the fb's fd open, keep this mmap around, too.
-	if (!fb_is_mapped) {
-		screensize = finfo.smem_len;
-		fbp        = (char*) mmap(NULL, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
-		if (fbp == MAP_FAILED) {
+	if (!g_fbink_isFbMapped) {
+		g_fbink_screensize = finfo.smem_len;
+		g_fbink_fbp = (char*) mmap(NULL, g_fbink_screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
+		if (g_fbink_fbp == MAP_FAILED) {
 			char  buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
 			fprintf(stderr, "[FBInk] mmap: %s\n", errstr);
 			return -1;
 		} else {
-			fb_is_mapped = true;
+			g_fbink_isFbMapped = true;
 		}
 	}
 
@@ -689,7 +689,7 @@ int
 	// We declare that a bit early, because that'll hold our return value on success.
 	unsigned short int multiline_offset = 0U;
 
-	if (fb_is_mapped) {
+	if (g_fbink_isFbMapped) {
 		// Clear screen?
 		if (fbink_config->is_cleared) {
 			clear_screen(fbink_config->is_inverted ? BLACK : WHITE);
@@ -985,12 +985,12 @@ int
 	}
 
 	// cleanup
-	if (fb_is_mapped && !keep_fd) {
-		munmap(fbp, screensize);
+	if (g_fbink_isFbMapped && !keep_fd) {
+		munmap(g_fbink_fbp, g_fbink_screensize);
 		// NOTE: Don't forget to reset those state flags,
 		//       so we won't skip mmap'ing on the next call without an fb fd passed...
-		fb_is_mapped = false;
-		fbp          = 0;
+		g_fbink_isFbMapped = false;
+		g_fbink_fbp        = 0;
 	}
 	if (!keep_fd) {
 		close(fbfd);

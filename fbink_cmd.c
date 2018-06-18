@@ -317,8 +317,8 @@ int
 	}
 
 	// Cleanup
-	if (fb_is_mapped) {
-		munmap(fbp, screensize);
+	if (g_fbink_isFbMapped) {
+		munmap(g_fbink_fbp, g_fbink_screensize);
 	}
 	close(fbfd);
 
