@@ -490,6 +490,7 @@ static int
 		.update_marker = marker,
 		.temp = TEMP_USE_KOA2_AUTO,
 		.flags = 0U,
+		// FIXME: Here be dragons! (dither_mode & quant_bit)
 		.dither_mode = EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
 		.quant_bit = 7,
 		.alt_buffer_data = { 0U },
@@ -587,6 +588,7 @@ static int
 		.update_mode   = update_mode,
 		.update_marker = marker,
 		.temp          = TEMP_USE_AMBIENT,
+		// FIXME: Here be dragons! (REGAL flag, dither_mode & quant_bit)
 		.flags         = (waveform_mode == WAVEFORM_MODE_REAGLD)
 			     ? EPDC_FLAG_USE_REGAL
 			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
