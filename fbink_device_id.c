@@ -40,7 +40,7 @@ void
 			// Thankfully, the device code is always located in the three
 			// final characters, so that's easy enough to extract without
 			// having to worry about the formatting...
-			kobo_id = (unsigned short int) atoi(line + (nread - 3));
+			kobo_id = (unsigned short int) atoi(line + (nread - 3)); // FIXME: strtoul
 			// NOTE: Device code list pilfered from
 			// https://github.com/geek1011/KoboStuff/blob/gh-pages/kobofirmware.js#L11
 			switch (kobo_id) {
@@ -168,6 +168,7 @@ bool
 	}
 }
 
+// TODO: Fold into is_kindle_device by passing it the strcut...
 bool
     is_kindle_touch(uint32_t dev)
 {
@@ -230,6 +231,7 @@ bool
 	}
 }
 
+// TODO: Fold into is_kindle_v2 by passing it the struct...
 bool
     is_kindle_oasis2(uint32_t dev)
 {
@@ -302,8 +304,8 @@ void
 	fclose(fp);
 
 	// Get the device code...
-	char device_code[4] = { '\0' };
-	snprintf(device_code, 3, "%.*s", 2, &serial_no[2]);
+	char device_code[4] = { '\0' };	// FIXME: WTF?! {0} init
+	snprintf(device_code, 3, "%.*s", 2, &serial_no[2]);	// FIXME: ptr arithmetics & example comment
 	uint32_t dev = (uint32_t) strtoul(device_code, NULL, 16);
 	// First check if it looks like a valid device...
 	if (is_kindle_device(dev)) {

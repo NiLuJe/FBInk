@@ -385,6 +385,9 @@ static struct mxcfb_rect
 	return region;
 }
 
+// TODO: Split'em in variants (legacy, kindle, kobo, ...)
+
+
 // Handle eInk updates
 static int
     refresh(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode UNUSED_BY_LEGACY, bool is_flashing)
@@ -639,11 +642,11 @@ int
 	// Identify device... (This will only run once per lifecycle).
 	identify_device(&deviceQuirks);
 	if (deviceQuirks.isKindleTouch) {
-		ELOG("[FBInk] Kindle Touch detected");
+		ELOG("[FBInk] Enabled Kindle Touch device quirks");
 	} else if (deviceQuirks.isKindleOasis2) {
-		ELOG("[FBInk] Kindle Oasis 2 detected");
+		ELOG("[FBInk] Enabled Kindle Oasis 2 device quirks");
 	} else if (deviceQuirks.isKoboMk7) {
-		ELOG("[FBInk] Kobo Mark 7 detected");
+		ELOG("[FBInk] Enabled Kobo Mark 7 device quirks");
 	}
 
 	// NOTE: Do we want to keep the fb0 fd open and pass it to our caller, or simply close it for now?
