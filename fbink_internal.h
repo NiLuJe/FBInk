@@ -180,6 +180,8 @@ unsigned short int MAXCOLS = 32U;
 bool g_isVerbose = false;
 // Quiet is for fbink_init's hardware setup info
 bool g_isQuiet = false;
+// This should be a pretty accurate fallback...
+long int USER_HZ = 100;
 
 // Where we track device/screen-specific quirks
 FBInkDeviceQuirks deviceQuirks = { 0 };
@@ -216,6 +218,7 @@ static void        font8x8_render(uint32_t, char*, unsigned short int UNUSED_BY_
 static struct mxcfb_rect
     draw(const char*, unsigned short int, unsigned short int, bool, bool, unsigned short int, unsigned short int);
 
+static long int jiffies_to_ms(long int);
 #ifdef FBINK_FOR_LEGACY
 static int refresh_legacy(int, const struct mxcfb_rect, bool);
 #else

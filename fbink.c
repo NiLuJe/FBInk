@@ -387,6 +387,16 @@ static struct mxcfb_rect
 
 // Handle eInk updates for the various range of HW we support...
 
+// NOTE: Small helper function to aid with logging the exact amount of time MXCFB_WAIT_FOR_UPDATE_COMPLETE blocked...
+//       The driver is using the Kernel's wait-for-completion handler,
+//       which returns the amount of jiffies left until the timeout set by the caller.
+//       As we don't give a rat's ass about jiffies, we need to convert 'em to milliseconds.
+static long int jiffies_to_ms(long int jiffies)
+{
+	// We need the Kernel's HZ value for this, which we stored in USER_HZ during fbink_init ;).
+	return (jiffies * 1000 / USER_HZ);
+}
+
 #ifdef FBINK_FOR_LEGACY
 // Legacy Kindle devices ([K2<->K4])
 static int
@@ -568,6 +578,9 @@ static int
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
 			fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1: %s\n", errstr);
 			return EXIT_FAILURE;
+		} else {
+			// NOTE: Timeout is set to 10000ms
+			LOG("Waited %ldms for completion of flashing update %u", (10000 - jiffies_to_ms(rv)), marker);
 		}
 	}
 
@@ -620,6 +633,9 @@ static int
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
 			fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3: %s\n", errstr);
 			return EXIT_FAILURE;
+		} else {
+			// NOTE: Timeout is set to 5000ms
+			LOG("Waited %ldms for completion of flashing update %u", (5000 - jiffies_to_ms(rv)), marker);
 		}
 	}
 
@@ -808,6 +824,10 @@ int
 	} else if (deviceQuirks.isKoboMk7) {
 		ELOG("[FBInk] Enabled Kobo Mark 7 device quirks");
 	}
+
+	// Ask the Kernel for its HZ value so we can translate jiffies into human-readable units
+	USER_HZ = sysconf(_SC_CLK_TCK);
+	ELOG("[FBInk] Kernel's HZ value appears to be %ld", USER_HZ);
 
 	// NOTE: Do we want to keep the fb0 fd open and pass it to our caller, or simply close it for now?
 	//       Useful because we probably want to close it to keep open fds to a minimum when used as a library,
