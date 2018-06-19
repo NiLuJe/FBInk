@@ -83,6 +83,8 @@ typedef struct
 	bool               is_quiet;
 } FBInkConfig;
 
+// NOTE: Unless otherwise specified, stuff returns EXIT_FAILURE on failure & EXIT_SUCCESS otherwise ;).
+
 // Return the version of the currently loaded FBInk library
 FBINK_API const char* fbink_version(void) __attribute__((const));
 
