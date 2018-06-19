@@ -385,7 +385,7 @@ static struct mxcfb_rect
 	return region;
 }
 
-// Handle eInk updates for the various range of HW we support...
+// Handle the various eInk update API quirks for the full range of HW we support...
 
 // NOTE: Small helper function to aid with logging the exact amount of time MXCFB_WAIT_FOR_UPDATE_COMPLETE blocked...
 //       The driver is using the Kernel's wait-for-completion handler,
@@ -894,7 +894,7 @@ int
 	short int col = fbink_config->col;
 	short int row = fbink_config->row;
 
-	struct mxcfb_rect region = { 0 };
+	struct mxcfb_rect region = { 0U };
 	// We declare that a bit early, because that'll hold our return value on success.
 	unsigned short int multiline_offset = 0U;
 

@@ -235,7 +235,7 @@ void
 	if (!fp) {
 		fprintf(stderr, "Cannot open /proc/usid (not running on a Kindle?)!\n");
 	} else {
-		unsigned char serial_no[KINDLE_SERIAL_NO_LENGTH];
+		unsigned char serial_no[KINDLE_SERIAL_NO_LENGTH] = { '\0' };
 		if (fread(serial_no, sizeof(unsigned char), KINDLE_SERIAL_NO_LENGTH, fp) < KINDLE_SERIAL_NO_LENGTH ||
 		    ferror(fp) != 0) {
 			fprintf(stderr, "Error reading /proc/usid (unexpected length)!\n");
