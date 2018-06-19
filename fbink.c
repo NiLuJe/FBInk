@@ -479,6 +479,9 @@ static int
 				fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s\n", errstr);
 			}
 			return EXIT_FAILURE;
+		} else {
+			// NOTE: Timeout is set to 5000ms
+			LOG("Waited %ldms for completion of flashing update %u", (5000 - jiffies_to_ms(rv)), marker);
 		}
 	}
 
@@ -533,6 +536,9 @@ static int
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
 			fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s\n", errstr);
 			return EXIT_FAILURE;
+		} else {
+			// NOTE: Timeout is set to 5000ms
+			LOG("Waited %ldms for completion of flashing update %u", (5000 - jiffies_to_ms(rv)), marker);
 		}
 	}
 
