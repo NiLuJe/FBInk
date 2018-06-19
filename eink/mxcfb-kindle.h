@@ -246,7 +246,7 @@ struct mxcfb_update_data {
 	__u32 hist_bw_waveform_mode;    /*Lab126: Def bw waveform for hist analysis*/
 	__u32 hist_gray_waveform_mode;  /*Lab126: Def gray waveform for hist analysis*/
 	int temp;
-	uint flags;
+	unsigned int flags;
 	struct mxcfb_alt_buffer_data alt_buffer_data;
 };
 
@@ -284,7 +284,7 @@ struct mxcfb_update_data_50x {
 	__u32 update_mode;
 	__u32 update_marker;
 	int temp;
-	uint flags;
+	unsigned int flags;
 	struct mxcfb_alt_buffer_data alt_buffer_data;
 };
 
