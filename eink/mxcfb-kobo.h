@@ -350,6 +350,7 @@ struct mxcfb_csc_matrix {
 
 /* Mark 7 */
 #define MXCFB_SEND_UPDATE_V2		_IOW('F', 0x2E, struct mxcfb_update_data)
+/* NOTE: -> MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3 ! */
 #define MXCFB_WAIT_FOR_UPDATE_COMPLETE	_IOWR('F', 0x2F, struct mxcfb_update_marker_data) // mx7d/mx6ull/mx6sll interface .
 /* NOTE: Nickel: MXCFB_WAIT_FOR_UPDATE_COMPLETE_V2 */
 #define MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3	_IOWR('F', 0x2F, struct mxcfb_update_marker_data) // mx7d/mx6ull/mx6sll interface .
