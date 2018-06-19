@@ -391,7 +391,8 @@ static struct mxcfb_rect
 //       The driver is using the Kernel's wait-for-completion handler,
 //       which returns the amount of jiffies left until the timeout set by the caller.
 //       As we don't give a rat's ass about jiffies, we need to convert 'em to milliseconds.
-static long int jiffies_to_ms(long int jiffies)
+static long int
+    jiffies_to_ms(long int jiffies)
 {
 	// We need the Kernel's HZ value for this, which we stored in USER_HZ during fbink_init ;).
 	return (jiffies * 1000 / USER_HZ);
