@@ -391,6 +391,8 @@ static struct mxcfb_rect
 //       The driver is using the Kernel's wait-for-completion handler,
 //       which returns the amount of jiffies left until the timeout set by the caller.
 //       As we don't give a rat's ass about jiffies, we need to convert 'em to milliseconds.
+// NOTE: The ioctl often actually blocks slightly longer than the perceived speed of the eInk refresh. Nevertheless,
+//       there is a direct correlation between the two, as can be shown by switching between waveform modes...
 static long int
     jiffies_to_ms(long int jiffies)
 {
