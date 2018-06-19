@@ -218,10 +218,10 @@ static void        font8x8_render(uint32_t, char*, unsigned short int UNUSED_BY_
 static struct mxcfb_rect
     draw(const char*, unsigned short int, unsigned short int, bool, bool, unsigned short int, unsigned short int);
 
-static long int jiffies_to_ms(long int);
 #ifdef FBINK_FOR_LEGACY
 static int refresh_legacy(int, const struct mxcfb_rect, bool);
 #else
+static long int jiffies_to_ms(long int);
 #	ifdef FBINK_FOR_KINDLE
 static int refresh_kindle(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
 static int refresh_kindle_koa2(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);

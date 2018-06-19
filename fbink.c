@@ -387,19 +387,6 @@ static struct mxcfb_rect
 
 // Handle the various eInk update API quirks for the full range of HW we support...
 
-// NOTE: Small helper function to aid with logging the exact amount of time MXCFB_WAIT_FOR_UPDATE_COMPLETE blocked...
-//       The driver is using the Kernel's wait-for-completion handler,
-//       which returns the amount of jiffies left until the timeout set by the caller.
-//       As we don't give a rat's ass about jiffies, we need to convert 'em to milliseconds.
-// NOTE: The ioctl often actually blocks slightly longer than the perceived speed of the eInk refresh. Nevertheless,
-//       there is a direct correlation between the two, as can be shown by switching between waveform modes...
-static long int
-    jiffies_to_ms(long int jiffies)
-{
-	// We need the Kernel's HZ value for this, which we stored in USER_HZ during fbink_init ;).
-	return (jiffies * 1000 / USER_HZ);
-}
-
 #ifdef FBINK_FOR_LEGACY
 // Legacy Kindle devices ([K2<->K4])
 static int
@@ -430,6 +417,19 @@ static int
 }
 
 #else
+// NOTE: Small helper function to aid with logging the exact amount of time MXCFB_WAIT_FOR_UPDATE_COMPLETE blocked...
+//       The driver is using the Kernel's wait-for-completion handler,
+//       which returns the amount of jiffies left until the timeout set by the caller.
+//       As we don't give a rat's ass about jiffies, we need to convert 'em to milliseconds.
+// NOTE: The ioctl often actually blocks slightly longer than the perceived speed of the eInk refresh. Nevertheless,
+//       there is a direct correlation between the two, as can be shown by switching between waveform modes...
+static long int
+    jiffies_to_ms(long int jiffies)
+{
+	// We need the Kernel's HZ value for this, which we stored in USER_HZ during fbink_init ;).
+	return (jiffies * 1000 / USER_HZ);
+}
+
 #	ifdef FBINK_FOR_KINDLE
 // Touch Kindle devices ([K5<->]KOA2)
 static int
