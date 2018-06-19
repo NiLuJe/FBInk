@@ -826,8 +826,13 @@ int
 	}
 
 	// Ask the Kernel for its HZ value so we can translate jiffies into human-readable units
-	USER_HZ = sysconf(_SC_CLK_TCK);
-	ELOG("[FBInk] Kernel's HZ value appears to be %ld", USER_HZ);
+	long int rv = sysconf(_SC_CLK_TCK);
+	if (rv > 0) {
+		USER_HZ = sysconf(_SC_CLK_TCK);
+		ELOG("[FBInk] Kernel's HZ value appears to be %ld", USER_HZ);
+	} else {
+		ELOG("[FBInk] Unable to query Kernel's HZ value, assuming %ld", USER_HZ);
+	}
 
 	// NOTE: Do we want to keep the fb0 fd open and pass it to our caller, or simply close it for now?
 	//       Useful because we probably want to close it to keep open fds to a minimum when used as a library,
