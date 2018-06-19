@@ -664,6 +664,9 @@ static int
 	//       Also, we need to set the EPDC_FLAG_FORCE_MONOCHROME flag to do it right.
 	// NOTE: And while we're on the fun quirks train: FULL never flashes w/ AUTO on (some?) Kobos,
 	//       so request GC16 if we want a flash...
+	// NOTE: FWIW, DU behaves properly when PARTIAL, but doesn't flash when FULL.
+	//       Which somewhat tracks given AUTO's behavior on Kobos, as well as on Kindles.
+	//       (i.e., DU or GC16 is most likely often what AUTO will land on).
 
 	// So, handle this common switcheroo here...
 	uint32_t wfm = (is_flashing && waveform_mode == WAVEFORM_MODE_AUTO) ? WAVEFORM_MODE_GC16 : waveform_mode;
