@@ -150,7 +150,7 @@ static uint32_t
 	uint32_t    result = 0;
 
 	if (base > strlen(tbl)) {
-		fprintf(stderr, "base %u is unsupported (too large).\n", base);
+		fprintf(stderr, "[FBInk] base %u is unsupported (too large).\n", base);
 		return 0;
 	}
 
@@ -176,12 +176,12 @@ static void
 {
 	FILE* fp = fopen("/proc/usid", "r");
 	if (!fp) {
-		fprintf(stderr, "Cannot open /proc/usid (not running on a Kindle?)!\n");
+		fprintf(stderr, "[FBInk] Cannot open /proc/usid (not running on a Kindle?)!\n");
 	} else {
 		unsigned char serial_no[KINDLE_SERIAL_NO_LENGTH] = { '\0' };
 		if (fread(serial_no, sizeof(unsigned char), KINDLE_SERIAL_NO_LENGTH, fp) < KINDLE_SERIAL_NO_LENGTH ||
 		    ferror(fp) != 0) {
-			fprintf(stderr, "Error reading /proc/usid (unexpected length)!\n");
+			fprintf(stderr, "[FBInk] Error reading /proc/usid (unexpected length)!\n");
 		}
 		fclose(fp);
 
@@ -199,7 +199,7 @@ static void
 			dev = from_base(device_code, 32);
 			// ... And if it's not either list, it's truly unknown.
 			if (!is_kindle_device_new(dev, deviceQuirks)) {
-				fprintf(stderr, "Unidentified Kindle device %s (0x%03X)!\n", device_code, dev);
+				fprintf(stderr, "[FBInk] Unidentified Kindle device %s (0x%03X)!\n", device_code, dev);
 			}
 		}
 	}
@@ -213,7 +213,7 @@ static void
 	// Get the model from Nickel's version tag file...
 	FILE* fp = fopen("/mnt/onboard/.kobo/version", "r");
 	if (!fp) {
-		fprintf(stderr, "Couldn't find a Kobo version tag (not running on a Kobo?)!\n");
+		fprintf(stderr, "[FBInk] Couldn't find a Kobo version tag (not running on a Kobo?)!\n");
 	} else {
 		// NOTE: I'm not entirely sure this will always have a fixed length, so,
 		//       rely on getline()'s dynamic allocation to be safe...
@@ -255,7 +255,7 @@ static void
 					break;
 				case 0:
 				default:
-					fprintf(stderr, "Unidentified Kobo device code (%u)!\n", kobo_id);
+					fprintf(stderr, "[FBInk] Unidentified Kobo device code (%u)!\n", kobo_id);
 					break;
 			}
 		}
