@@ -19,69 +19,12 @@
 */
 
 #include "fbink_device_id.h"
+#include "fbink_device.h"
 
-// NOTE: This is lifted from FBGrab,
-//       c.f., http://trac.ak-team.com/trac/browser/niluje/Configs/trunk/Kindle/Misc/FBGrab/fbgrab.c#L808
-void
-    identify_kobo(FBInkDeviceQuirks* deviceQuirks)
-{
-	// Get the model from Nickel's version tag file...
-	FILE* fp = fopen("/mnt/onboard/.kobo/version", "r");
-	if (!fp) {
-		fprintf(stderr, "Couldn't find a Kobo version tag (not running on a Kobo?)!\n");
-	} else {
-		// NOTE: I'm not entirely sure this will always have a fixed length, so,
-		//       rely on getline()'s dynamic allocation to be safe...
-		char*              line = NULL;
-		size_t             len  = 0;
-		ssize_t            nread;
-		unsigned short int kobo_id = 0;
-		while ((nread = getline(&line, &len, fp)) != -1) {
-			// Thankfully, the device code is always located in the three
-			// final characters, so that's easy enough to extract without
-			// having to worry about the formatting...
-			kobo_id = (unsigned short int) strtoul(line + (nread - 3), NULL, 10);
-			// NOTE: Device code list pilfered from
-			//       https://github.com/geek1011/KoboStuff/blob/gh-pages/kobofirmware.js#L11
-			switch (kobo_id) {
-				case 310:    // Touch A/B (trilogy)
-				case 320:    // Touch C (trilogy)
-				case 340:    // Mini (pixie)
-				case 330:    // Glo (kraken)
-				case 371:    // Glo HD (alyssum)
-				case 372:    // Touch 2.0 (pika)
-				case 360:    // Aura (phoenix)
-				case 350:    // Aura HD (dragon)
-				case 370:    // Aura H2O (dahlia)
-				case 374:    // Aura H2O² (snow)
-					break;
-				case 378:    // Aura H2O² r2 (snow)
-					deviceQuirks->isKoboMk7 = true;
-					break;
-				case 373:    // Aura ONE (daylight)
-				case 381:    // Aura ONE LE (daylight)
-				case 375:    // Aura SE (star)
-					break;
-				case 379:    // Aura SE r2 (star)
-					deviceQuirks->isKoboMk7 = true;
-					break;
-				case 376:    // Clara HD (nova)
-					deviceQuirks->isKoboMk7 = true;
-					break;
-				case 0:
-				default:
-					fprintf(stderr, "Unidentified Kobo device code (%u)!\n", kobo_id);
-					break;
-			}
-		}
-		free(line);
-		fclose(fp);
-	}
-}
-
+#if defined(FBINK_FOR_KINDLE) || defined(FBINK_FOR_LEGACY)
 // NOTE: This is adapted from KindleTool,
 //       c.f., https://github.com/NiLuJe/KindleTool/blob/master/KindleTool/kindle_tool.h#L189
-bool
+static bool
     is_kindle_device(uint32_t dev, FBInkDeviceQuirks* deviceQuirks)
 {
 	switch (dev) {
@@ -147,7 +90,7 @@ bool
 	}
 }
 
-bool
+static bool
     is_kindle_device_new(uint32_t dev, FBInkDeviceQuirks* deviceQuirks)
 {
 	switch (dev) {
@@ -199,7 +142,7 @@ bool
 
 // NOTE: This is from KindleTool,
 //       c.f., https://github.com/NiLuJe/KindleTool/blob/master/KindleTool/convert.c#L82
-uint32_t
+static uint32_t
     from_base(char* num, unsigned short int base)
 {
 	// NOTE: Crockford's Base32, but with the "L" & "U" re-added in?
@@ -228,7 +171,7 @@ uint32_t
 
 // NOTE: This is adapted from KindleTool,
 //       c.f., https://github.com/NiLuJe/KindleTool/blob/master/KindleTool/create.c#L1915
-void
+static void
     identify_kindle(FBInkDeviceQuirks* deviceQuirks)
 {
 	FILE* fp = fopen("/proc/usid", "r");
@@ -261,6 +204,66 @@ void
 		}
 	}
 }
+#else
+// NOTE: This is lifted from FBGrab,
+//       c.f., http://trac.ak-team.com/trac/browser/niluje/Configs/trunk/Kindle/Misc/FBGrab/fbgrab.c#L808
+static void
+    identify_kobo(FBInkDeviceQuirks* deviceQuirks)
+{
+	// Get the model from Nickel's version tag file...
+	FILE* fp = fopen("/mnt/onboard/.kobo/version", "r");
+	if (!fp) {
+		fprintf(stderr, "Couldn't find a Kobo version tag (not running on a Kobo?)!\n");
+	} else {
+		// NOTE: I'm not entirely sure this will always have a fixed length, so,
+		//       rely on getline()'s dynamic allocation to be safe...
+		char*              line = NULL;
+		size_t             len  = 0;
+		ssize_t            nread;
+		unsigned short int kobo_id = 0;
+		while ((nread = getline(&line, &len, fp)) != -1) {
+			// Thankfully, the device code is always located in the three
+			// final characters, so that's easy enough to extract without
+			// having to worry about the formatting...
+			kobo_id = (unsigned short int) strtoul(line + (nread - 3), NULL, 10);
+			// NOTE: Device code list pilfered from
+			//       https://github.com/geek1011/KoboStuff/blob/gh-pages/kobofirmware.js#L11
+			switch (kobo_id) {
+				case 310:    // Touch A/B (trilogy)
+				case 320:    // Touch C (trilogy)
+				case 340:    // Mini (pixie)
+				case 330:    // Glo (kraken)
+				case 371:    // Glo HD (alyssum)
+				case 372:    // Touch 2.0 (pika)
+				case 360:    // Aura (phoenix)
+				case 350:    // Aura HD (dragon)
+				case 370:    // Aura H2O (dahlia)
+				case 374:    // Aura H2O² (snow)
+					break;
+				case 378:    // Aura H2O² r2 (snow)
+					deviceQuirks->isKoboMk7 = true;
+					break;
+				case 373:    // Aura ONE (daylight)
+				case 381:    // Aura ONE LE (daylight)
+				case 375:    // Aura SE (star)
+					break;
+				case 379:    // Aura SE r2 (star)
+					deviceQuirks->isKoboMk7 = true;
+					break;
+				case 376:    // Clara HD (nova)
+					deviceQuirks->isKoboMk7 = true;
+					break;
+				case 0:
+				default:
+					fprintf(stderr, "Unidentified Kobo device code (%u)!\n", kobo_id);
+					break;
+			}
+		}
+		free(line);
+		fclose(fp);
+	}
+}
+#endif
 
 void
     identify_device(FBInkDeviceQuirks* deviceQuirks)

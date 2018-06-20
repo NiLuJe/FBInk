@@ -18,33 +18,41 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __FBINK_DEVICE_ID_H
-#define __FBINK_DEVICE_ID_H
-
-// Make KDevelop happy (for getline)
-#ifndef _DEFAULT_SOURCE
-#	define _DEFAULT_SOURCE
-#endif
+#ifndef __FBINK_TYPES_H
+#define __FBINK_TYPES_H
 
 #include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
 
-// For FBInkDeviceQuirks
-#include "fbink_types.h"
+// default eInk framebuffer palette
+// c.f., linux/drivers/video/mxc/cmap_lab126.h
+typedef enum
+{
+	BLACK  = 0,     // 0x00
+	GRAY1  = 1,     // 0x11
+	GRAY2  = 2,     // 0x22
+	GRAY3  = 3,     // 0x33
+	GRAY4  = 4,     // 0x44
+	GRAY5  = 5,     // 0x55
+	GRAY6  = 6,     // 0x66
+	GRAY7  = 7,     // 0x77
+	GRAY8  = 8,     // 0x88
+	GRAY9  = 9,     // 0x99
+	GRAY10 = 10,    // 0xAA
+	GRAY11 = 11,    // 0xBB
+	GRAY12 = 12,    // 0xCC
+	GRAY13 = 13,    // 0xDD
+	GRAY14 = 14,    // 0xEE
+	WHITE  = 15     // 0xFF
+} COLOR_INDEX_T;
 
-#define KINDLE_SERIAL_NO_LENGTH 16
-
-#if defined(FBINK_FOR_KINDLE) || defined(FBINK_FOR_LEGACY)
-static bool     is_kindle_device(uint32_t, FBInkDeviceQuirks*);
-static bool     is_kindle_device_new(uint32_t, FBInkDeviceQuirks*);
-static uint32_t from_base(char*, unsigned short int);
-static void     identify_kindle(FBInkDeviceQuirks*);
-#else
-static void identify_kobo(FBInkDeviceQuirks*);
-#endif
+// List of flags for device or screen-specific quirks...
+typedef struct
+{
+	bool isPerfectFit;
+	bool isKoboMk7;
+	bool isKindlePearlScreen;
+	bool isKindleOasis2;
+	bool skipId;
+} FBInkDeviceQuirks;
 
 #endif

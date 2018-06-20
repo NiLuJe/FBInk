@@ -90,13 +90,13 @@
 #include "font8x8/font8x8_greek.h"
 #include "font8x8/font8x8_hiragana.h"
 
+// WHere our custom typedefs dwell...
+#include "fbink_types.h"
+
 // Speaking of, include the Unscii variants when we're not a minimal build
 #ifndef FBINK_MINIMAL
 #	include "fbink_unscii.h"
 #endif
-
-// And this is where we handle device identification...
-#include "fbink_device_id.h"
 
 // Fallback version tag...
 #ifndef FBINK_VERSION
@@ -133,27 +133,6 @@
 		}                                                                                                      \
 	})
 
-// default eInk framebuffer palette
-// c.f., linux/drivers/video/mxc/cmap_lab126.h
-typedef enum
-{
-	BLACK  = 0,     // 0x00
-	GRAY1  = 1,     // 0x11
-	GRAY2  = 2,     // 0x22
-	GRAY3  = 3,     // 0x33
-	GRAY4  = 4,     // 0x44
-	GRAY5  = 5,     // 0x55
-	GRAY6  = 6,     // 0x66
-	GRAY7  = 7,     // 0x77
-	GRAY8  = 8,     // 0x88
-	GRAY9  = 9,     // 0x99
-	GRAY10 = 10,    // 0xAA
-	GRAY11 = 11,    // 0xBB
-	GRAY12 = 12,    // 0xCC
-	GRAY13 = 13,    // 0xDD
-	GRAY14 = 14,    // 0xEE
-	WHITE  = 15     // 0xFF
-} COLOR_INDEX_T;
 
 static unsigned short def_r[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
 				  0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
@@ -231,5 +210,8 @@ static int refresh_kobo_mk7(int, const struct mxcfb_rect, uint32_t, uint32_t, ui
 #	endif    // FBINK_FOR_KINDLE
 #endif            // FBINK_FOR_LEGACY
 static int refresh(int, const struct mxcfb_rect, uint32_t UNUSED_BY_LEGACY, bool);
+
+// fbink_device_id's identify_device
+#include "fbink_device.h"
 
 #endif
