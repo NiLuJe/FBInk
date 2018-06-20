@@ -825,19 +825,20 @@ int
 	}
 	ELOG("[FBInk] Fixed fb info: smem_len %u, line_length %u", finfo.smem_len, finfo.line_length);
 
-	// Identify device... (This will only run once per lifecycle).
-	identify_device(&deviceQuirks);
-	if (deviceQuirks.isKindlePearlScreen) {
-		ELOG("[FBInk] Enabled Kindle with Pearl screen device quirks");
-	} else if (deviceQuirks.isKindleOasis2) {
-		ELOG("[FBInk] Enabled Kindle Oasis 2 device quirks");
-	} else if (deviceQuirks.isKoboMk7) {
-		ELOG("[FBInk] Enabled Kobo Mark 7 device quirks");
-	}
-
-	// Ask the Kernel for its HZ value so we can translate jiffies into human-readable units.
-	// Again, once per lifecycle is also enough for this.
+	// Finish with some more generic stuff, not directly related to the framebuffer.
+	// As all this stuff is pretty much set in stone, we'll only query it once.
 	if (!deviceQuirks.skipId) {
+		// Identify the device's specific model...
+		identify_device(&deviceQuirks);
+		if (deviceQuirks.isKindlePearlScreen) {
+			ELOG("[FBInk] Enabled Kindle with Pearl screen device quirks");
+		} else if (deviceQuirks.isKindleOasis2) {
+			ELOG("[FBInk] Enabled Kindle Oasis 2 device quirks");
+		} else if (deviceQuirks.isKoboMk7) {
+			ELOG("[FBInk] Enabled Kobo Mark 7 device quirks");
+		}
+
+		// Ask the Kernel for its HZ value so we can translate jiffies into human-readable units.
 		long int rv = sysconf(_SC_CLK_TCK);
 		if (rv > 0) {
 			USER_HZ = rv;
@@ -845,8 +846,9 @@ int
 		} else {
 			ELOG("[FBInk] Unable to query Kernel's HZ value, assuming %ld", USER_HZ);
 		}
-	} else {
-		ELOG("[FBInk] Kernel's HZ value appears to be %ld", USER_HZ);
+
+		// And make sure we won't do that again ;).
+		deviceQuirks.skipId = true;
 	}
 
 	// NOTE: Do we want to keep the fb0 fd open and pass it to our caller, or simply close it for now?
