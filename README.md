@@ -9,8 +9,8 @@ Housed [here on GitHub](https://github.com/NiLuJe/FBInk).
 This is intended to fill the void felt by Kobo developpers and tinkerers when they realize they do not have a builtin way to print stuff on the device's screen!
 It's especially cruel when moving to a Kobo, after being used to the ubiquity of `eips` on Kindles...
 
-In short, it prints messages on your screen, handling the low-level tinkering with both the Linux framebuffer interface, and the iMX EPD driver.
-It's been tested on Kobos and Kindles, but porting it to other Linux, iMX eInk devices should be trivial.
+In short, it prints messages on your screen, handling the low-level tinkering with both the Linux framebuffer interface, and the i.MX EPD driver.
+It's been tested on Kobos and Kindles, but porting it to other Linux, i.MX eInk devices should be trivial (hell, even Sipix support shouldn't be too hard).
 
 # How do I install this?
 
@@ -23,9 +23,9 @@ As an example of usage in the wild, see [KFMon](https://github.com/NiLuJe/kfmon)
 
 The tool is available both as a commandline utility, and as a shared or static library for C projects (beware, though, it's licensed under the AGPLv3+, not the LGPL).
 See the [public header](fbink.h) for basic API usage.
-Launch the `fbink` tool with no argument for a quick manual.
+Launch the `fbink` tool with no argument for a quick manual & rundown of its capabilities.
 
-NOTE: It currently makes absolutely *NO* attempt at handling rotation, because that currently appears to be the right thing to do with current Kobo FW versions.
+NOTE: It makes absolutely *NO* attempt at handling rotation, because that currently appears to be the right thing to do with both current Kobo FW versions and Kindles.
 YMMV on older FW, or if something else is fudging with fb rotation, or if your application is implementing rotation in software (i.e., a rotated viewport).
 
 # How does it look?
@@ -34,10 +34,8 @@ Like this :).
 
 ![FBInk on a Kobo H2O](https://raw.githubusercontent.com/NiLuJe/FBInk/master/fbink_readme.png)
 
-(Although the fontsize may be different in current releases. On the H2O shown as an example, it's now 24x24 vs. the 32x32 showcased here.)
-
 # NOTES
 
 Kindle support is split into Touch devices, and legacy devices (up to, and *including* the K4). This is because older devices use a completely different eInk controller.
 
-Kobo support has been tested on a H2O running a recent FW version (i.e., 32bpp fb).
+Kobo support has been tested on a H2O running a recent FW version (i.e., 32bpp fb), but the full lineup should be supported.
