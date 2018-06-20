@@ -133,7 +133,6 @@
 		}                                                                                                      \
 	})
 
-
 static unsigned short def_r[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
 				  0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
 static unsigned short def_g[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
@@ -211,7 +210,7 @@ static int refresh_kobo_mk7(int, const struct mxcfb_rect, uint32_t, uint32_t, ui
 #endif            // FBINK_FOR_LEGACY
 static int refresh(int, const struct mxcfb_rect, uint32_t UNUSED_BY_LEGACY, bool);
 
-// fbink_device_id's identify_device
-#include "fbink_device.h"
+// For identify_device
+#include "fbink_device_id.h"
 
 #endif

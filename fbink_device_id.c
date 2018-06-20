@@ -19,7 +19,7 @@
 */
 
 #include "fbink_device_id.h"
-#include "fbink_device.h"
+#include "fbink_device_id_internal.h"
 
 #if defined(FBINK_FOR_KINDLE) || defined(FBINK_FOR_LEGACY)
 // NOTE: This is adapted from KindleTool,
