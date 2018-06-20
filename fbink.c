@@ -791,7 +791,6 @@ int
 			//       My Touch, which doesn't propose Landscape mode, defaults to vinfo.rotate == 1
 			//       My K4, which supports the four possible rotations,
 			//          is always using vinfo.rotate == 0 (but xres & yres do switch).
-			//          It's also using the old eink_fb driver, which we do not support anyway :D.
 			screen_height = vinfo.xres;
 		}
 		if (screen_height <= 600U) {
