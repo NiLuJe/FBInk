@@ -680,6 +680,16 @@ static int
 		marker = (70U + 66U + 73U + 78U + 75U);
 	}
 
+	// NOTE: Discard bogus regions, they can also softlock the kernel on some devices.
+	//       A 0x0 region is a no-no on most devices, while a 1x1 region may only upset some Kindle models.
+	if (region.width <= 1 && region.height <= 1) {
+		fprintf(stderr,
+			"[FBInk] Discarding bogus empty region (%ux%u) to avoid a softlock.\n",
+			region.width,
+			region.height);
+		return EXIT_FAILURE;
+	}
+
 #	ifdef FBINK_FOR_KINDLE
 	if (deviceQuirks.isKindleOasis2) {
 		return refresh_kindle_koa2(fbfd, region, wfm, upm, marker);
