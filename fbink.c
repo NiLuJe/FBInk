@@ -835,13 +835,18 @@ int
 		ELOG("[FBInk] Enabled Kobo Mark 7 device quirks");
 	}
 
-	// Ask the Kernel for its HZ value so we can translate jiffies into human-readable units
-	long int rv = sysconf(_SC_CLK_TCK);
-	if (rv > 0) {
-		USER_HZ = rv;
-		ELOG("[FBInk] Kernel's HZ value appears to be %ld", USER_HZ);
+	// Ask the Kernel for its HZ value so we can translate jiffies into human-readable units.
+	// Again, once per lifecycle is also enough for this.
+	if (!deviceQuirks.skipId) {
+		long int rv = sysconf(_SC_CLK_TCK);
+		if (rv > 0) {
+			USER_HZ = rv;
+			ELOG("[FBInk] Kernel's HZ value appears to be %ld", USER_HZ);
+		} else {
+			ELOG("[FBInk] Unable to query Kernel's HZ value, assuming %ld", USER_HZ);
+		}
 	} else {
-		ELOG("[FBInk] Unable to query Kernel's HZ value, assuming %ld", USER_HZ);
+		ELOG("[FBInk] Kernel's HZ value appears to be %ld", USER_HZ);
 	}
 
 	// NOTE: Do we want to keep the fb0 fd open and pass it to our caller, or simply close it for now?
