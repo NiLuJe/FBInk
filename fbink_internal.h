@@ -90,7 +90,7 @@
 #include "font8x8/font8x8_greek.h"
 #include "font8x8/font8x8_hiragana.h"
 
-// WHere our custom typedefs dwell...
+// Where our (internal) typedefs dwell...
 #include "fbink_types.h"
 
 // Speaking of, include the Unscii variants when we're not a minimal build
