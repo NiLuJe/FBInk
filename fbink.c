@@ -657,8 +657,8 @@ static int
 static int
     refresh(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode UNUSED_BY_LEGACY, bool is_flashing)
 {
-	// NOTE: Discard bogus regions, they can also softlock the kernel on some devices.
-	//       A 0x0 region is a no-no on most devices, while a 1x1 region may only upset some Kindle models.
+	// NOTE: Discard bogus regions, they can cause a softlock on some devices.
+	//       A 0x0 region is a no go on most devices, while a 1x1 region may only upset some Kindle models.
 	if (region.width <= 1 && region.height <= 1) {
 		fprintf(stderr,
 			"[FBInk] Discarding bogus empty region (%ux%u) to avoid a softlock.\n",
