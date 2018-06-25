@@ -505,10 +505,9 @@ static int
 		.update_mode = update_mode,
 		.update_marker = marker,
 		.temp = TEMP_USE_KOA2_AUTO,
-		.flags = 0U,
-		// FIXME: Here be dragons! (dither_mode & quant_bit)
+		.flags = (waveform_mode == WAVEFORM_MODE_DU) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
 		.dither_mode = EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
-		.quant_bit = 7,
+		.quant_bit = 0,
 		.alt_buffer_data = { 0U },
 		.hist_bw_waveform_mode = WAVEFORM_MODE_DU,
 		.hist_gray_waveform_mode = WAVEFORM_MODE_GC16_FAST,
