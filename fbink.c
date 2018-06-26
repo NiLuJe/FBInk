@@ -330,7 +330,7 @@ static struct mxcfb_rect
 		} else if (pixel_offset < 0) {
 			// ...or on the left edge (!isPerfectFit adjustments)
 			LOG("Painting a background rectangle on the left edge because of a negative pixel offset");
-			fill_rect((unsigned short int) (region.left),
+			fill_rect((unsigned short int) (region.left) - -pixel_offset,
 				(unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 				-pixel_offset,
 				FONTH,
@@ -355,13 +355,13 @@ static struct mxcfb_rect
 	// NOTE: Use charcount + col == MAXCOLS if we want to do that everytime we simply *hit* the edge...
 	if (charcount == MAXCOLS && !deviceQuirks.isPerfectFit) {
 		LOG("Painting a background rectangle to fill the dead space on the right edge");
-		fill_rect((unsigned short int) (region.left + (charcount * FONTW) + -pixel_offset),
+		fill_rect((unsigned short int) (region.left + (charcount * FONTW) - pixel_offset),
 			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
-			  (unsigned short int) (vinfo.xres - (charcount * FONTW) - -pixel_offset),
+			  (unsigned short int) (vinfo.xres - (charcount * FONTW) + pixel_offset),
 			  FONTH,
 			  bgC);
 		// Update region to the full width, no matter the circumstances
-		region.width += (vinfo.xres - (charcount * FONTW) - -pixel_offset);
+		region.width += (vinfo.xres - (charcount * FONTW) + pixel_offset);
 		// And make sure it's properly clamped, in case it's already been tweaked because of a multiline print
 		if (region.width + region.left > vinfo.xres) {
 			region.width = vinfo.xres - region.left;
