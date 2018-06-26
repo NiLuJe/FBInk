@@ -261,7 +261,7 @@ static struct mxcfb_rect
 	 bool               is_centered,
 	 unsigned short int multiline_offset,
 	 unsigned short int fontname,
-	 float subcell_offset)
+	 bool halfcell_offset)
 {
 	LOG("Printing '%s' @ line offset %hu (meaning row %d)", text, multiline_offset, row + multiline_offset);
 	unsigned short int fgC = is_inverted ? WHITE : BLACK;
@@ -281,8 +281,10 @@ static struct mxcfb_rect
 	LOG("Character count: %u (over %zu bytes)", charcount, strlen(text));
 
 	// Compute our actual subcell offset in pixels
-	short int pixel_offset = subcell_offset * FONTW;
-	// FIXME: Append half of dead right-edge if !perfectFit?
+	short int pixel_offset = 0;
+	if (halfcell_offset) {
+		pixel_offset = FONTW / 2;
+	}
 	if (!deviceQuirks.isPerfectFit) {
 		pixel_offset -= ((vinfo.xres - (MAXCOLS * FONTW)) / 2);
 	}
@@ -300,7 +302,6 @@ static struct mxcfb_rect
 	if (region.left >= pixel_offset) {
 		LOG("Region: original left was %u & pixel_offset is %i", region.left, pixel_offset);
 		region.left -= pixel_offset;
-		// FIXME: Do I need to tweak width if multiline_offset?
 	} else if (region.left >= -pixel_offset) {
 		LOG("Region: original left was %u & pixel_offset is %i", region.left, pixel_offset);
 		region.left += -pixel_offset;
@@ -312,6 +313,7 @@ static struct mxcfb_rect
 	if (charcount == MAXCOLS) {
 		if (pixel_offset > 0) {
 			// ...we need to fill the space that offset would have taken on the right edge...
+			LOG("Painting a bg rectangle on the right edge because of pixel offset");
 			fill_rect((unsigned short int) (region.left + (charcount * FONTW) - pixel_offset),
 				(unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 				pixel_offset,
@@ -319,6 +321,7 @@ static struct mxcfb_rect
 				bgC);
 		} else if (pixel_offset < 0) {
 			// ...or the left edge (!isPerfectFit adjustments)
+			LOG("Painting a bg rectangle on the left edge because of pixel offset");
 			fill_rect((unsigned short int) (region.left),
 				(unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 				-pixel_offset,
@@ -343,6 +346,7 @@ static struct mxcfb_rect
 	//       this effectively works around the issue, in which case, we don't need to do anything :).
 	// NOTE: Use charcount + col == MAXCOLS if we want to do that everytime we simply *hit* the edge...
 	if (charcount == MAXCOLS && !deviceQuirks.isPerfectFit) {
+		LOG("Painting a bg rectangle on the right edge because of !isPerfectFit");
 		fill_rect((unsigned short int) (region.left + (charcount * FONTW) + -pixel_offset),
 			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			  (unsigned short int) (vinfo.xres - (charcount * FONTW) - -pixel_offset),
@@ -1127,9 +1131,8 @@ int
 			LOG("Line takes up %u bytes", line_bytes);
 			int bytes_printed = 0;
 
-			float subcell_offset = 0.0f;
-
 			// Just fudge the column for centering...
+			bool halfcell_offset = false;
 			if (fbink_config->is_centered) {
 				col = (short int) ((MAXCOLS - line_len) / 2U);
 
@@ -1147,13 +1150,9 @@ int
 				//       and that there is at most a single cell of difference between the two.
 				if ((unsigned int) (col * 2) + line_len != MAXCOLS) {
 					col = (short int) (col + 1);
-					LOG("Line is not a perfect fit, fudging centering by one cell to the right");
-				}
-				// NOTE: In case of a perfect fit, fudge things further by doing half-cell adjustments...
-				if (deviceQuirks.isPerfectFit) {
-					// left pad - right pad / 2
-					subcell_offset = (col - (MAXCOLS - line_len - col)) / 2.0f;
-					LOG("Subcell offset is %f", subcell_offset);
+					LOG("Line is not a perfect fit, fudging centering by one half of a cell to the right");
+					// NOTE: This means we have a halfcell offset to correct in draw...
+					halfcell_offset = true;
 				}
 				LOG("Adjusted column to %hd for centering", col);
 			}
@@ -1232,7 +1231,7 @@ int
 				      fbink_config->is_centered,
 				      multiline_offset,
 				      fbink_config->fontname,
-				      subcell_offset);
+				      halfcell_offset);
 
 			// Next line!
 			multiline_offset++;
