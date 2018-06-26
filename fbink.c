@@ -1094,8 +1094,8 @@ int
 				col = (short int) ((MAXCOLS / 2U) - (line_len / 2U));
 				// NOTE: If we're not a perfect fit, and we don't occupy the full line or nearly,
 				//       start one more column on the right to compensate for the cut-off right edge...
-				if (!deviceQuirks.isPerfectFit && line_len < (available_cols - 1)) {
-					col += 1;
+				if (!deviceQuirks.isPerfectFit && line_len < (available_cols - 1U)) {
+					col = (short int) (col + 1);
 				}
 				// When we're not padding, we have a few more things to take care of...
 				if (!fbink_config->is_padded) {
@@ -1121,7 +1121,7 @@ int
 				} else {
 					// NOTE: If we're not a perfect fit, and we don't occupy the full line or nearly,
 					//       add one more block of padding to the left to compensate...
-					if (!deviceQuirks.isPerfectFit && line_len < (available_cols - 1)) {
+					if (!deviceQuirks.isPerfectFit && line_len < (available_cols - 1U)) {
 						left_pad += 1U;
 					}
 				}
