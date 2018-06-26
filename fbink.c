@@ -1091,12 +1091,18 @@ int
 
 			// Just fudge the column for centering...
 			if (fbink_config->is_centered) {
-				col = (short int) ((MAXCOLS / 2U) - (line_len / 2U));
-				// NOTE: If we're not a perfect fit, and the line itself is not a perfect fit,
-				//       start one more column on the right to compensate for the cut-off right edge...
-				if (!deviceQuirks.isPerfectFit && (unsigned int) (col * 2) + line_len != MAXCOLS) {
-					col = (short int) (col + 1);
-					LOG("Line is not a perfect fit, fudging centering by one cell to the right");
+				col = (short int) ((MAXCOLS - line_len) / 2U);
+
+				// We want to enforce at least a single empty cell on the left.
+				if (col < 1) {
+					col = 1;
+				} else {
+					// NOTE: If the line itself is not a perfect fit, start one more column
+					//       on the right to compensate for the cut-off right edge...
+					if ((unsigned int) (col * 2) + line_len != MAXCOLS) {
+						col = (short int) (col + 1);
+						LOG("Line is not a perfect fit, fudging centering by one cell to the right");
+					}
 				}
 				// When we're not padding, we have a few more things to take care of...
 				if (!fbink_config->is_padded) {
@@ -1120,9 +1126,9 @@ int
 				if (left_pad < 1U) {
 					left_pad = 1U;
 				} else {
-					// NOTE: If we're not a perfect fit, and the line itself is not a perfect fit,
-					//       add one more block of padding to the left to compensate...
-					if (!deviceQuirks.isPerfectFit && (left_pad * 2) + line_len != MAXCOLS) {
+					// NOTE: If the line itself is not a perfect fit, start one more column
+					//       on the right to compensate for the cut-off right edge...
+					if ((left_pad * 2) + line_len != MAXCOLS) {
 						left_pad += 1U;
 						LOG("Line is not a perfect fit, increasing left padding by one cell");
 					}
