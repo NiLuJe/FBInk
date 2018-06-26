@@ -1104,14 +1104,6 @@ int
 						LOG("Line is not a perfect fit, fudging centering by one cell to the right");
 					}
 				}
-				// When we're not padding, we have a few more things to take care of...
-				if (!fbink_config->is_padded) {
-					// We don't do padding via snprintf in this case,
-					// so just fudge col to avoid the first column.
-					if (col == 0) {
-						col = 1;
-					}
-				}
 				LOG("Adjusted column to %hd for centering", col);
 			}
 
