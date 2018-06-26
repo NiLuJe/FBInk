@@ -336,6 +336,8 @@ static struct mxcfb_rect
 				FONTH,
 				bgC);
 		}
+		// NOTE: We don't need to tweak width because we only do this for already full lines?
+		// TODO: Merge with the next fill_rect pass...
 	}
 
 	// NOTE: eInk framebuffers are weird...
@@ -354,19 +356,35 @@ static struct mxcfb_rect
 	//       this effectively works around the issue, in which case, we don't need to do anything :).
 	// NOTE: Use charcount + col == MAXCOLS if we want to do that everytime we simply *hit* the edge...
 	if (charcount == MAXCOLS && !deviceQuirks.isPerfectFit) {
-		LOG("Painting a background rectangle to fill the dead space on the right edge");
-		fill_rect((unsigned short int) (region.left + (charcount * FONTW) - pixel_offset),
-			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
-			  (unsigned short int) (vinfo.xres - (charcount * FONTW) + pixel_offset),
-			  FONTH,
-			  bgC);
-		// Update region to the full width, no matter the circumstances
-		region.width += (vinfo.xres - (charcount * FONTW) + pixel_offset);
-		// And make sure it's properly clamped, in case it's already been tweaked because of a multiline print
-		if (region.width + region.left > vinfo.xres) {
-			region.width = vinfo.xres - region.left;
+		if (pixel_offset >= 0) {
+			LOG("Painting a background rectangle to fill the dead space on the right edge");
+			fill_rect((unsigned short int) (region.left + (charcount * FONTW) - pixel_offset),
+				(unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
+				(unsigned short int) (vinfo.xres - (charcount * FONTW) + pixel_offset),
+				FONTH,
+				bgC);
+			// Update region to the full width, no matter the circumstances
+			region.width += (vinfo.xres - (charcount * FONTW) + pixel_offset);
+			// And make sure it's properly clamped, in case it's already been tweaked because of a multiline print
+			if (region.width + region.left > vinfo.xres) {
+				region.width = vinfo.xres - region.left;
+			}
+			LOG("Updated region.width to %u", region.width);
+		} else {
+			LOG("Painting a background rectangle to fill the dead space on the right edge");
+			fill_rect((unsigned short int) (region.left + (charcount * FONTW) - -pixel_offset),
+				(unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
+				(unsigned short int) (vinfo.xres - (charcount * FONTW) + -pixel_offset),
+				FONTH,
+				bgC);
+			// Update region to the full width, no matter the circumstances
+			region.width += (vinfo.xres - (charcount * FONTW) + -pixel_offset);
+			// And make sure it's properly clamped, in case it's already been tweaked because of a multiline print
+			if (region.width + region.left > vinfo.xres) {
+				region.width = vinfo.xres - region.left;
+			}
+			LOG("Updated region.width to %u", region.width);
 		}
-		LOG("Updated region.width to %u", region.width);
 	}
 
 	// NOTE: In case of a multi-line centered print, we can't really trust the final col,
