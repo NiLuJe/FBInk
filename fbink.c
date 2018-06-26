@@ -960,9 +960,6 @@ int
 			if (deviceQuirks.isPerfectFit) {
 				// And one for the right padding
 				available_cols = (unsigned short int) (available_cols - 1U);
-			} else {
-				// Or one for the left padding
-				available_cols = (unsigned short int) (available_cols - 1U);
 			}
 		} else {
 			// Otherwise, col will be fixed, so, trust it.
@@ -1095,9 +1092,9 @@ int
 			// Just fudge the column for centering...
 			if (fbink_config->is_centered) {
 				col = (short int) ((MAXCOLS / 2U) - (line_len / 2U));
-				// NOTE: If we're not a perfect fit,
+				// NOTE: If we're not a perfect fit, and we don't occupy the full line,
 				//       start one column on the right to compensate for the cut-off right edge...
-				if (!deviceQuirks.isPerfectFit) {
+				if (!deviceQuirks.isPerfectFit && line_len < available_cols) {
 					col += 1;
 				}
 				// When we're not padding, we have a few more things to take care of...
@@ -1122,9 +1119,9 @@ int
 				if (left_pad < 1U) {
 					left_pad = 1U;
 				} else {
-					// NOTE: If we're not a perfect fit,
+					// NOTE: If we're not a perfect fit, and we don't occupy the full line,
 					//       add one more block of padding to the left to compensate...
-					if (!deviceQuirks.isPerfectFit) {
+					if (!deviceQuirks.isPerfectFit && line_len < available_cols) {
 						left_pad += 1U;
 					}
 				}
