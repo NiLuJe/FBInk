@@ -1095,7 +1095,12 @@ int
 				// NOTE: If we're not a perfect fit, and we don't occupy the full line or nearly,
 				//       start one more column on the right to compensate for the cut-off right edge...
 				if (!deviceQuirks.isPerfectFit && line_len < (available_cols - 1U)) {
-					col = (short int) (col + 1);
+					// Only do it when the line itself is also not a perfect fit,
+					// to avoid unbalancing a perfect centering...
+					if ((unsigned int) (col * 2) + line_len != MAXCOLS) {
+						col = (short int) (col + 1);
+						LOG("Not a perfect fit, and not a full (or near full) line, fudging centering by one cell to the right");
+					}
 				}
 				// When we're not padding, we have a few more things to take care of...
 				if (!fbink_config->is_padded) {
@@ -1122,7 +1127,12 @@ int
 					// NOTE: If we're not a perfect fit, and we don't occupy the full line or nearly,
 					//       add one more block of padding to the left to compensate...
 					if (!deviceQuirks.isPerfectFit && line_len < (available_cols - 1U)) {
-						left_pad += 1U;
+						// Only do it when the line itself is also not a perfect fit,
+						// to avoid unbalancing a perfect centering...
+						if ((left_pad * 2) + line_len != MAXCOLS) {
+							left_pad += 1U;
+							LOG("Not a perfect fit, and not a full (or near full) line, increasing left padding by one cell");
+						}
 					}
 				}
 				// As for the right padding, we basically just have to print 'til the edge of the screen
