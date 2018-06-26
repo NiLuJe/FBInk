@@ -302,30 +302,34 @@ static struct mxcfb_rect
 	};
 
 	LOG("Region: left is %u and pixel_offset is %i", region.left, pixel_offset);
-	// If we can do so without underflowing (i.e., we're not a full line already), honor pixel_offset
-	if (region.left >= pixel_offset) {
-		LOG("Region: original left was %u & pixel_offset is %i -> moving pen to the LEFT", region.left, pixel_offset);
+	// If we can do so without underflowing (i.e., we're not a full line already), honor a positive pixel_offset
+	if (pixel_offset > 0 && region.left >= pixel_offset) {
+		LOG("Region: original left was %u & positive pixel_offset of %i -> moving pen to the LEFT", region.left, pixel_offset);
 		region.left -= pixel_offset;
-	} else if (region.left >= -pixel_offset) {
-		LOG("Region: original left was %u & pixel_offset is %i -> moving pen to the RIGHT", region.left, pixel_offset);
+	// And always honor a negative pixel_offset, because we are assured it's being carved out of actual screen space,
+	// so we know our adjusted region.left can never be greater than vinfo.xres ;).
+	} else if (pixel_offset < 0) {
+		LOG("Region: original left was %u & negative pixel_offset of %i -> moving pen to the RIGHT", region.left, pixel_offset);
 		region.left += -pixel_offset;
 	}
+	// NOTE: Yes, technically, region.left is modified the exact same way in both cases.
+	//       This is just to keep things consistent and more or less readable...
 
 	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
 
 	// If we're a full line...
 	if (charcount == MAXCOLS) {
 		if (pixel_offset > 0) {
-			// ...we need to fill the space that offset would have taken on the right edge...
-			LOG("Painting a bg rectangle on the right edge because of pixel offset");
+			// ...we need to fill the space that honoring our offset has left vacant on the right edge...
+			LOG("Painting a background rectangle on the right edge because of a positive pixel offset");
 			fill_rect((unsigned short int) (region.left + (charcount * FONTW) - pixel_offset),
 				(unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 				pixel_offset,
 				FONTH,
 				bgC);
 		} else if (pixel_offset < 0) {
-			// ...or the left edge (!isPerfectFit adjustments)
-			LOG("Painting a bg rectangle on the left edge because of pixel offset");
+			// ...or on the left edge (!isPerfectFit adjustments)
+			LOG("Painting a background rectangle on the left edge because of a negative pixel offset");
 			fill_rect((unsigned short int) (region.left),
 				(unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 				-pixel_offset,
@@ -350,14 +354,14 @@ static struct mxcfb_rect
 	//       this effectively works around the issue, in which case, we don't need to do anything :).
 	// NOTE: Use charcount + col == MAXCOLS if we want to do that everytime we simply *hit* the edge...
 	if (charcount == MAXCOLS && !deviceQuirks.isPerfectFit) {
-		LOG("Painting a bg rectangle on the right edge because of !isPerfectFit");
+		LOG("Painting a background rectangle to fill the dead space on the right edge");
 		fill_rect((unsigned short int) (region.left + (charcount * FONTW) + -pixel_offset),
 			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			  (unsigned short int) (vinfo.xres - (charcount * FONTW) - -pixel_offset),
 			  FONTH,
 			  bgC);
 		// Update region to the full width, no matter the circumstances
-		region.width += (vinfo.xres - (charcount * FONTW));
+		region.width += (vinfo.xres - (charcount * FONTW) - -pixel_offset);
 		// And make sure it's properly clamped, in case it's already been tweaked because of a multiline print
 		if (region.width + region.left > vinfo.xres) {
 			region.width = vinfo.xres - region.left;
