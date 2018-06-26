@@ -1094,7 +1094,7 @@ int
 				col = (short int) ((MAXCOLS - line_len) / 2U);
 
 				// We want to enforce at least a single empty cell on the left.
-				if (col < 1) {
+				if (col == 0) {
 					col = 1;
 				} else {
 					// NOTE: If the line itself is not a perfect fit, start one more column
@@ -1125,7 +1125,7 @@ int
 				// Compute our padding length
 				unsigned int left_pad = (MAXCOLS - line_len) / 2U;
 				// We want to enforce at least a single character of padding on the left.
-				if (left_pad < 1U) {
+				if (left_pad == 0U) {
 					left_pad = 1U;
 				} else {
 					// NOTE: If the line itself is not a perfect fit, start one more column
