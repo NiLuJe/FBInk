@@ -281,8 +281,11 @@ static struct mxcfb_rect
 	LOG("Character count: %u (over %zu bytes)", charcount, strlen(text));
 
 	// Compute our actual subcell offset in pixels
-	unsigned short pixel_offset = subcell_offset * FONTW;
+	short int pixel_offset = subcell_offset * FONTW;
 	// FIXME: Append half of dead right-edge if !perfectFit?
+	if (!deviceQuirks.isPerfectFit) {
+		pixel_offset -= ((vinfo.xres - (MAXCOLS * FONTW)) / 2);
+	}
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
@@ -292,22 +295,36 @@ static struct mxcfb_rect
 		.height = (uint32_t)((multiline_offset + 1U) * FONTH),
 	};
 
+	LOG("Region: left is %u vs. pixel_offset is %i", region.left, pixel_offset);
 	// If we're not a full line (i.e., centered + padded), honor pixel_offset
 	if (region.left >= pixel_offset) {
-		LOG("Region: original left was %u & pixel_offset is %u", region.left, pixel_offset);
+		LOG("Region: original left was %u & pixel_offset is %i", region.left, pixel_offset);
 		region.left -= pixel_offset;
 		// FIXME: Do I need to tweak width if multiline_offset?
+	} else if (region.left >= -pixel_offset) {
+		LOG("Region: original left was %u & pixel_offset is %i", region.left, pixel_offset);
+		region.left += -pixel_offset;
 	}
 
 	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
 
-	// If we're a full line, we need to fill the space that offset would have taken on the right edge...
-	if (charcount == MAXCOLS && pixel_offset > 0) {
-		fill_rect((unsigned short int) (region.left + (charcount * FONTW) - pixel_offset),
-			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
-			  pixel_offset,
-			  FONTH,
-			  bgC);
+	// If we're a full line...
+	if (charcount == MAXCOLS) {
+		if (pixel_offset > 0) {
+			// ...we need to fill the space that offset would have taken on the right edge...
+			fill_rect((unsigned short int) (region.left + (charcount * FONTW) - pixel_offset),
+				(unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
+				pixel_offset,
+				FONTH,
+				bgC);
+		} else if (pixel_offset < 0) {
+			// ...or the left edge (!isPerfectFit adjustments)
+			fill_rect((unsigned short int) (region.left),
+				(unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
+				-pixel_offset,
+				FONTH,
+				bgC);
+		}
 	}
 
 	// NOTE: eInk framebuffers are weird...
@@ -326,9 +343,9 @@ static struct mxcfb_rect
 	//       this effectively works around the issue, in which case, we don't need to do anything :).
 	// NOTE: Use charcount + col == MAXCOLS if we want to do that everytime we simply *hit* the edge...
 	if (charcount == MAXCOLS && !deviceQuirks.isPerfectFit) {
-		fill_rect((unsigned short int) (region.left + (charcount * FONTW)),
+		fill_rect((unsigned short int) (region.left + (charcount * FONTW) + -pixel_offset),
 			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
-			  (unsigned short int) (vinfo.xres - (charcount * FONTW)),
+			  (unsigned short int) (vinfo.xres - (charcount * FONTW) - -pixel_offset),
 			  FONTH,
 			  bgC);
 		// Update region to the full width, no matter the circumstances
