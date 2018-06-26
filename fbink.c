@@ -282,10 +282,14 @@ static struct mxcfb_rect
 
 	// Compute our actual subcell offset in pixels
 	short int pixel_offset = 0;
+	// Do we have a centering induced halfcell adjustment to correct?
 	if (halfcell_offset) {
+		// Positive pixel_offset -> we move the pen to the LEFT
 		pixel_offset = FONTW / 2;
 	}
+	// Do we have a permanent adjustment to make because of dead space on the right edge?
 	if (!deviceQuirks.isPerfectFit) {
+		// Negative pixel_offset -> we move the pen to the RIGHT (by half of said dead space)
 		pixel_offset -= ((vinfo.xres - (MAXCOLS * FONTW)) / 2);
 	}
 
@@ -297,13 +301,13 @@ static struct mxcfb_rect
 		.height = (uint32_t)((multiline_offset + 1U) * FONTH),
 	};
 
-	LOG("Region: left is %u vs. pixel_offset is %i", region.left, pixel_offset);
-	// If we're not a full line (i.e., centered + padded), honor pixel_offset
+	LOG("Region: left is %u and pixel_offset is %i", region.left, pixel_offset);
+	// If we can do so without underflowing (i.e., we're not a full line already), honor pixel_offset
 	if (region.left >= pixel_offset) {
-		LOG("Region: original left was %u & pixel_offset is %i", region.left, pixel_offset);
+		LOG("Region: original left was %u & pixel_offset is %i -> moving pen to the LEFT", region.left, pixel_offset);
 		region.left -= pixel_offset;
 	} else if (region.left >= -pixel_offset) {
-		LOG("Region: original left was %u & pixel_offset is %i", region.left, pixel_offset);
+		LOG("Region: original left was %u & pixel_offset is %i -> moving pen to the RIGHT", region.left, pixel_offset);
 		region.left += -pixel_offset;
 	}
 
