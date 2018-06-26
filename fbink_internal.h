@@ -194,7 +194,7 @@ static const char* font8x8_get_bitmap(uint32_t);
 static void        font8x8_render(uint32_t, char*, unsigned short int UNUSED_BY_MINIMAL);
 
 static struct mxcfb_rect
-    draw(const char*, unsigned short int, unsigned short int, bool, bool, unsigned short int, unsigned short int);
+    draw(const char*, unsigned short int, unsigned short int, bool, bool, unsigned short int, unsigned short int, float);
 
 #ifdef FBINK_FOR_LEGACY
 static int refresh_legacy(int, const struct mxcfb_rect, bool);

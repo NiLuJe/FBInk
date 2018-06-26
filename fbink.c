@@ -260,7 +260,8 @@ static struct mxcfb_rect
 	 bool               is_inverted,
 	 bool               is_centered,
 	 unsigned short int multiline_offset,
-	 unsigned short int fontname)
+	 unsigned short int fontname,
+	 float subcell_offset)
 {
 	LOG("Printing '%s' @ line offset %hu (meaning row %d)", text, multiline_offset, row + multiline_offset);
 	unsigned short int fgC = is_inverted ? WHITE : BLACK;
@@ -279,6 +280,10 @@ static struct mxcfb_rect
 	unsigned int charcount = u8_strlen(text);
 	LOG("Character count: %u (over %zu bytes)", charcount, strlen(text));
 
+	// Compute our actual subcell offset in pixels
+	unsigned short pixel_offset = subcell_offset * FONTW;
+	// FIXME: Append half of dead right-edge if !perfectFit?
+
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
 		.top   = (uint32_t)((row - multiline_offset) * FONTH),
@@ -287,7 +292,23 @@ static struct mxcfb_rect
 		.height = (uint32_t)((multiline_offset + 1U) * FONTH),
 	};
 
+	// If we're not a full line (i.e., centered + padded), honor pixel_offset
+	if (region.left >= pixel_offset) {
+		LOG("Region: original left was %u & pixel_offset is %u", region.left, pixel_offset);
+		region.left -= pixel_offset;
+		// FIXME: Do I need to tweak width if multiline_offset?
+	}
+
 	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
+
+	// If we're a full line, we need to fill the space that offset would have taken on the right edge...
+	if (charcount == MAXCOLS && pixel_offset > 0) {
+		fill_rect((unsigned short int) (region.left + (charcount * FONTW) - pixel_offset),
+			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
+			  pixel_offset,
+			  FONTH,
+			  bgC);
+	}
 
 	// NOTE: eInk framebuffers are weird...
 	//       We should be computing the length of a line (MAXCOLS) based on xres_virtual,
@@ -366,13 +387,13 @@ static struct mxcfb_rect
 					// plot the pixel (fg, text)
 					// NOTE: This is where we used to fudge positioning of hex fonts converted by
 					//       tools/hextoc.py before I figured out the root issue ;).
-					put_pixel((unsigned short int) ((col * FONTW) + (ci * FONTW) + x),
+					put_pixel((unsigned short int) (((col * FONTW) - pixel_offset) + (ci * FONTW) + x),
 						  (unsigned short int) ((row * FONTH) + y),
 						  fgC);
 				} else {
 					// this is background,
 					// fill it so that we'll be visible no matter what was on screen behind us.
-					put_pixel((unsigned short int) ((col * FONTW) + (ci * FONTW) + x),
+					put_pixel((unsigned short int) (((col * FONTW) - pixel_offset) + (ci * FONTW) + x),
 						  (unsigned short int) ((row * FONTH) + y),
 						  bgC);
 				}
@@ -1089,6 +1110,8 @@ int
 			LOG("Line takes up %u bytes", line_bytes);
 			int bytes_printed = 0;
 
+			float subcell_offset = 0.0f;
+
 			// Just fudge the column for centering...
 			if (fbink_config->is_centered) {
 				col = (short int) ((MAXCOLS - line_len) / 2U);
@@ -1108,6 +1131,12 @@ int
 				if ((unsigned int) (col * 2) + line_len != MAXCOLS) {
 					col = (short int) (col + 1);
 					LOG("Line is not a perfect fit, fudging centering by one cell to the right");
+				}
+				// NOTE: In case of a perfect fit, fudge things further by doing half-cell adjustments...
+				if (deviceQuirks.isPerfectFit) {
+					// left pad - right pad / 2
+					subcell_offset = (col - (MAXCOLS - line_len - col)) / 2.0f;
+					LOG("Subcell offset is %f", subcell_offset);
 				}
 				LOG("Adjusted column to %hd for centering", col);
 			}
@@ -1185,7 +1214,8 @@ int
 				      fbink_config->is_inverted,
 				      fbink_config->is_centered,
 				      multiline_offset,
-				      fbink_config->fontname);
+				      fbink_config->fontname,
+				      subcell_offset);
 
 			// Next line!
 			multiline_offset++;
