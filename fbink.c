@@ -1098,7 +1098,17 @@ int
 					col = 1;
 				} else {
 					// NOTE: If the line itself is not a perfect fit, start one more column
-					//       on the right to compensate for the cut-off right edge...
+					//       to the right to compensate...
+					//       If !perfectFit, we have more empty space on the right, so it makes
+					//       perfect sense, otherwise, it's a bit more dicey:
+					//       we hope that the left edge is slightly smaller because of a few pixels
+					//       hidden behind the bezel.
+					//       In any case, it feels more like we're actually doing something by
+					//       putting more weight on left padding than on right padding.
+					//       Because, essentially, what this does is simply ensuring that,
+					//       when left padding != right padding, then left padding > right padding
+					//       instead of the reverse,
+					//       and that there is at most a single cell of difference between the two.
 					if ((unsigned int) (col * 2) + line_len != MAXCOLS) {
 						col = (short int) (col + 1);
 						LOG("Line is not a perfect fit, fudging centering by one cell to the right");
@@ -1119,7 +1129,7 @@ int
 					left_pad = 1U;
 				} else {
 					// NOTE: If the line itself is not a perfect fit, start one more column
-					//       on the right to compensate for the cut-off right edge...
+					//       to the right to compensate...
 					if ((left_pad * 2) + line_len != MAXCOLS) {
 						left_pad += 1U;
 						LOG("Line is not a perfect fit, increasing left padding by one cell");
