@@ -357,17 +357,11 @@ static struct mxcfb_rect
 	//       (c.f., how is_perfect_fit is computed, basically, when MAXCOLS is not a fraction),
 	//       this effectively works around the issue, in which case, we don't need to do anything :).
 	// NOTE: Use charcount + col == MAXCOLS if we want to do that everytime we simply *hit* the edge...
-	if (charcount == MAXCOLS && !deviceQuirks.isPerfectFit) {
-		// NOTE: When combined with halfcell offset,
-		//       this might overshoot by pixel_offset (i.e., half the dead zone) to the left.
-		//       This is harmless, since we draw this before the glyphs,
-		//       and we handle the matching overshoot to the right when drawing the final glyph (in put_pixel).
-		// NOTE: This also draws a redundant halfcell rectangle when the left offset already pushes the rest of
-		//       our line to the very right edge.
+	if (charcount == MAXCOLS && !deviceQuirks.isPerfectFit && !halfcell_offset) {
 		LOG("Painting a background rectangle to fill the dead space on the right edge");
-		fill_rect((unsigned short int) (region.left + (charcount * FONTW)),
+		fill_rect((unsigned short int) (vinfo.xres - pixel_offset),
 			(unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
-			(unsigned short int) (vinfo.xres - (charcount * FONTW)),
+			pixel_offset,
 			FONTH,
 			bgC);
 		// If it's not already the case, update region to the full width
@@ -383,7 +377,7 @@ static struct mxcfb_rect
 	if (multiline_offset > 0U && is_centered) {
 		region.left  = 0U;
 		region.width = vinfo.xres;
-		LOG("Updated region.left to %u & region.width to %u because of multi-line centering",
+		LOG("Enforced region.left to %u & region.width to %u because of multi-line centering",
 		    region.left,
 		    region.width);
 	}
