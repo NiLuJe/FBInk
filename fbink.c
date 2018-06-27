@@ -292,12 +292,12 @@ static struct mxcfb_rect
 	unsigned short int pixel_offset = 0U;
 	// Do we have a centering induced halfcell adjustment to correct?
 	if (halfcell_offset) {
-		pixel_offset = FONTW / 2;
+		pixel_offset = FONTW / 2U;
 	}
 	// Do we have a permanent adjustment to make because of dead space on the right edge?
 	if (!deviceQuirks.isPerfectFit) {
 		// We correct by half of said dead space, since we want perfect centering ;).
-		pixel_offset += ((vinfo.xres - (MAXCOLS * FONTW)) / 2);
+		pixel_offset = (unsigned short int) (pixel_offset + ((vinfo.xres - (unsigned short int) (MAXCOLS * FONTW)) / 2U));
 	}
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
