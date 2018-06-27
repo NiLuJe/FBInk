@@ -333,7 +333,8 @@ static struct mxcfb_rect
 		if (region.width < vinfo.xres) {
 			region.width += pixel_offset;
 			// And make sure it's properly clamped,
-			// in case it's already been tweaked because of a multiline print
+			// because we can't necessarily rely on left & width being acurate
+			// because of the multiline print override or a subcell placement tweak overshoot...
 			if (region.width + region.left > vinfo.xres) {
 				region.width = vinfo.xres - region.left;
 			}
