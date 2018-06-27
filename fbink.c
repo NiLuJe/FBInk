@@ -116,6 +116,9 @@ static void
     put_pixel(unsigned short int x, unsigned short int y, unsigned short int c)
 {
 	// NOTE: Discard off-screen pixels!
+	//       For instance, when we have a halfcell offset + a !isPerfectFit pixel offset,
+	//       when we're padding and centering, the final whitespace of right-padding will have its last
+	//       pixel_offset (i.e., half of the dead zone) pixels drawn off-screen...
 	if (x >= vinfo.xres || y >= vinfo.yres) {
 		//LOG("Discarding off-screen pixel @ %u, %u (out of %ux%u bounds)", x, y, vinfo.xres, vinfo.yres);
 		return;
@@ -354,6 +357,10 @@ static struct mxcfb_rect
 	//       this effectively works around the issue, in which case, we don't need to do anything :).
 	// NOTE: Use charcount + col == MAXCOLS if we want to do that everytime we simply *hit* the edge...
 	if (charcount == MAXCOLS && !deviceQuirks.isPerfectFit) {
+		// NOTE: When combined with halfcell offset,
+		//       this might overshoot by pixel_offset (i.e., half the dead zone) to the left.
+		//       This is harmless, since we draw this before the glyphs,
+		//       and we handle the matching overshoot to the right when drawing the final glyph (in put_pixel).
 		LOG("Painting a background rectangle to fill the dead space on the right edge");
 		fill_rect((unsigned short int) (region.left + (charcount * FONTW)),
 			(unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
