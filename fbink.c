@@ -115,6 +115,11 @@ static void
 static void
     put_pixel(unsigned short int x, unsigned short int y, unsigned short int c)
 {
+	// NOTE: Discard off-screen pixels!
+	if (x >= vinfo.xres || y >= vinfo.yres) {
+		//LOG("Discarding off-screen pixel @ %u, %u (out of %ux%u bounds)", x, y, vinfo.xres, vinfo.yres);
+		return;
+	}
 #ifdef FBINK_FOR_LEGACY
 	// NOTE: Legacy devices all have an inverted palette.
 	c = c ^ WHITE;
