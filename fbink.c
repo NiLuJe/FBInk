@@ -361,6 +361,8 @@ static struct mxcfb_rect
 		//       this might overshoot by pixel_offset (i.e., half the dead zone) to the left.
 		//       This is harmless, since we draw this before the glyphs,
 		//       and we handle the matching overshoot to the right when drawing the final glyph (in put_pixel).
+		// NOTE: This also draws a redundant halfcell rectangle when the left offset already pushes the rest of
+		//       our line to the very right edge.
 		LOG("Painting a background rectangle to fill the dead space on the right edge");
 		fill_rect((unsigned short int) (region.left + (charcount * FONTW)),
 			(unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
