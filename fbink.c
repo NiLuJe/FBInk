@@ -342,29 +342,19 @@ static struct mxcfb_rect
 		}
 	}
 
-	// NOTE: eInk framebuffers are weird...
-	//       We should be computing the length of a line (MAXCOLS) based on xres_virtual,
-	//       not xres (because it's guaranteed to be a multiple of 16).
-	//       Unfortunately, that means this last block of the line would then be partly offscreen.
-	//       Also, it CANNOT be part of the region passed to the eInk controller for a screen update,
-	//       since it's expecting the effective screen size...
-	//       So, since this this last block may basically be unusable because partly unreadable,
-	//       and partly unrefreshable, don't count it as "available" (i.e., by including it in MAXCOLS),
-	//       since that would happen to also wreak havoc in a number of our heuristics,
-	//       just fudge printing a blank square 'til the edge of the screen if we're filling a line *completely*.
-	//       TL;DR: We compute stuff with xres and not xres_virtual, unlike eips.
-	// NOTE: Given that, if we can perfectly fit our final character on the line
-	//       (c.f., how is_perfect_fit is computed, basically, when MAXCOLS is not a fraction),
-	//       this effectively works around the issue, in which case, we don't need to do anything :).
-	// NOTE: Use charcount + col == MAXCOLS if we want to do that everytime we simply *hit* the edge...
+	// NOTE: In some cases, we also have a matching hole to patch on the right side...
+	//       This only applies when pixel_offset is *only* made of the !isPerfectFit adjustment,
+	//       in every other case, the previous block neatly pushes everything into place ;).
 	if (charcount == MAXCOLS && !deviceQuirks.isPerfectFit && !halfcell_offset) {
+		// NOTE: !isPerfectFit ensures pixel_offset is non-zero
 		LOG("Painting a background rectangle to fill the dead space on the right edge");
 		fill_rect((unsigned short int) (vinfo.xres - pixel_offset),
 			(unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			pixel_offset,
 			FONTH,
 			bgC);
-		// If it's not already the case, update region to the full width
+		// If it's not already the case, update region to the full width,
+		// because we've just plugged a hole at the very right edge of a full line.
 		if (region.width != vinfo.xres) {
 			region.width = vinfo.xres;
 			LOG("Updated region.width to %u", region.width);
