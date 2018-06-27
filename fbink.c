@@ -116,9 +116,9 @@ static void
     put_pixel(unsigned short int x, unsigned short int y, unsigned short int c)
 {
 	// NOTE: Discard off-screen pixels!
-	//       For instance, when we have a halfcell offset + a !isPerfectFit pixel offset,
+	//       For instance, when we have a halfcell offset in conjunction with a !isPerfectFit pixel offset,
 	//       when we're padding and centering, the final whitespace of right-padding will have its last
-	//       pixel offset pixels (i.e., half of the dead zone) pushed off-screen...
+	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
 	if (x >= vinfo.xres || y >= vinfo.yres) {
 		//LOG("Discarding off-screen pixel @ %u, %u (out of %ux%u bounds)", x, y, vinfo.xres, vinfo.yres);
 		return;
@@ -315,7 +315,7 @@ static struct mxcfb_rect
 	if (pixel_offset > 0U) {
 		LOG("Moving pen to the right by %u pixels to honor subcell centering adjustments", pixel_offset);
 		// NOTE: We need to update the start of our region rectangle if it doesn't already cover the full line,
-		//       i.e., when doing centering only.
+		//       i.e., when we're not padding + centering.
 		if (charcount != MAXCOLS) {
 			region.left += pixel_offset;
 			LOG("Updated region.left to %u", region.left);
@@ -323,7 +323,7 @@ static struct mxcfb_rect
 	}
 
 	// If we're a full line, we need to fill the space that honoring our offset has left vacant on the left edge...
-	if (charcount == MAXCOLS && pixel_offset > 0) {
+	if (charcount == MAXCOLS && pixel_offset > 0U) {
 		LOG("Painting a background rectangle on the left edge on account of pixel offset");
 		fill_rect(0,
 			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
