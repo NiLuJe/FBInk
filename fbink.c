@@ -300,17 +300,18 @@ static struct mxcfb_rect
 		.height = (uint32_t)((multiline_offset + 1U) * FONTH),
 	};
 
+	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
+
 	// Do we have a pixel_offset to honor?
 	if (pixel_offset > 0U) {
 		LOG("Moving pen to the RIGHT by %u pixels", pixel_offset);
 		// NOTE: We need to update the start of our region rectangle if it doesn't already cover the full line,
 		//       i.e., when doing centering only.
-		if (region.left > 0U) {
+		if (charcount != MAXCOLS) {
 			region.left += pixel_offset;
+			LOG("Updated region.left to %u", region.left);
 		}
 	}
-
-	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
 
 	// If we're a full line, we need to fill the space that honoring our offset has left vacant on the left edge...
 	if (charcount == MAXCOLS && pixel_offset > 0) {
