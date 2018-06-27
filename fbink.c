@@ -269,7 +269,7 @@ static struct mxcfb_rect
 	 bool               is_centered,
 	 unsigned short int multiline_offset,
 	 unsigned short int fontname,
-	 bool halfcell_offset)
+	 bool               halfcell_offset)
 {
 	LOG("Printing '%s' @ line offset %hu (meaning row %d)", text, multiline_offset, row + multiline_offset);
 	unsigned short int fgC = is_inverted ? WHITE : BLACK;
@@ -297,7 +297,8 @@ static struct mxcfb_rect
 	// Do we have a permanent adjustment to make because of dead space on the right edge?
 	if (!deviceQuirks.isPerfectFit) {
 		// We correct by half of said dead space, since we want perfect centering ;).
-		pixel_offset = (unsigned short int) (pixel_offset + ((vinfo.xres - (unsigned short int) (MAXCOLS * FONTW)) / 2U));
+		pixel_offset =
+		    (unsigned short int) (pixel_offset + ((vinfo.xres - (unsigned short int) (MAXCOLS * FONTW)) / 2U));
 	}
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
@@ -325,10 +326,10 @@ static struct mxcfb_rect
 	if (charcount == MAXCOLS && pixel_offset > 0) {
 		LOG("Painting a background rectangle on the left edge on account of pixel offset");
 		fill_rect(0,
-			(unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
-			pixel_offset,
-			FONTH,
-			bgC);
+			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
+			  pixel_offset,
+			  FONTH,
+			  bgC);
 		// Correct width, to include that bit of content, too, if needed
 		if (region.width < vinfo.xres) {
 			region.width += pixel_offset;
@@ -349,10 +350,10 @@ static struct mxcfb_rect
 		// NOTE: !isPerfectFit ensures pixel_offset is non-zero
 		LOG("Painting a background rectangle to fill the dead space on the right edge");
 		fill_rect((unsigned short int) (vinfo.xres - pixel_offset),
-			(unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
-			pixel_offset,
-			FONTH,
-			bgC);
+			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
+			  pixel_offset,
+			  FONTH,
+			  bgC);
 		// If it's not already the case, update region to the full width,
 		// because we've just plugged a hole at the very right edge of a full line.
 		if (region.width < vinfo.xres) {
@@ -408,15 +409,17 @@ static struct mxcfb_rect
 					// plot the pixel (fg, text)
 					// NOTE: This is where we used to fudge positioning of hex fonts converted by
 					//       tools/hextoc.py before I figured out the root issue ;).
-					put_pixel((unsigned short int) (((col * FONTW) + pixel_offset) + (ci * FONTW) + x),
-						  (unsigned short int) ((row * FONTH) + y),
-						  fgC);
+					put_pixel(
+					    (unsigned short int) (((col * FONTW) + pixel_offset) + (ci * FONTW) + x),
+					    (unsigned short int) ((row * FONTH) + y),
+					    fgC);
 				} else {
 					// this is background,
 					// fill it so that we'll be visible no matter what was on screen behind us.
-					put_pixel((unsigned short int) (((col * FONTW) + pixel_offset) + (ci * FONTW) + x),
-						  (unsigned short int) ((row * FONTH) + y),
-						  bgC);
+					put_pixel(
+					    (unsigned short int) (((col * FONTW) + pixel_offset) + (ci * FONTW) + x),
+					    (unsigned short int) ((row * FONTH) + y),
+					    bgC);
 				}
 			}    // end "for x"
 		}            // end "for y"
