@@ -281,16 +281,15 @@ static struct mxcfb_rect
 	LOG("Character count: %u (over %zu bytes)", charcount, strlen(text));
 
 	// Compute our actual subcell offset in pixels
-	short int pixel_offset = 0;
+	unsigned short int pixel_offset = 0;
 	// Do we have a centering induced halfcell adjustment to correct?
 	if (halfcell_offset) {
-		// Positive pixel_offset -> we move the pen to the LEFT
 		pixel_offset = FONTW / 2;
 	}
 	// Do we have a permanent adjustment to make because of dead space on the right edge?
 	if (!deviceQuirks.isPerfectFit) {
-		// Negative pixel_offset -> we move the pen to the RIGHT (by half of said dead space)
-		pixel_offset -= ((vinfo.xres - (MAXCOLS * FONTW)) / 2);
+		// We correct by half of said dead space, since we want perfect centering ;).
+		pixel_offset += ((vinfo.xres - (MAXCOLS * FONTW)) / 2);
 	}
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
@@ -301,43 +300,29 @@ static struct mxcfb_rect
 		.height = (uint32_t)((multiline_offset + 1U) * FONTH),
 	};
 
-	LOG("Region: left is %u and pixel_offset is %i", region.left, pixel_offset);
-	// If we can do so without underflowing (i.e., we're not a full line already), honor a positive pixel_offset
-	if (pixel_offset > 0 && region.left >= pixel_offset) {
-		LOG("Region: original left was %u & positive pixel_offset of %i -> moving pen to the LEFT", region.left, pixel_offset);
-		region.left -= pixel_offset;
-	// And always honor a negative pixel_offset, because we are assured it's being carved out of actual screen space,
-	// so we know our adjusted region.left can never be greater than vinfo.xres ;).
-	} else if (pixel_offset < 0) {
-		LOG("Region: original left was %u & negative pixel_offset of %i -> moving pen to the RIGHT", region.left, pixel_offset);
-		region.left += -pixel_offset;
+	LOG("Region: left is %u and pixel_offset is %u", region.left, pixel_offset);
+	// Honor pixel_offset (FIXME: Do we need to check if we can do so safely?)
+	if (pixel_offset > 0U) {
+		LOG("Region: original left was %u & pixel_offset of %u -> moving pen to the RIGHT", region.left, pixel_offset);
+		region.left += pixel_offset;
 	}
-	// NOTE: Yes, technically, region.left is modified the exact same way in both cases.
-	//       This is just to keep things consistent and more or less readable...
 
 	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
 
-	// If we're a full line...
-	if (charcount == MAXCOLS) {
-		if (pixel_offset > 0) {
-			// ...we need to fill the space that honoring our offset has left vacant on the right edge...
-			LOG("Painting a background rectangle on the right edge because of a positive pixel offset");
-			fill_rect((unsigned short int) (region.left + (charcount * FONTW) - pixel_offset),
-				(unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
-				pixel_offset,
-				FONTH,
-				bgC);
-		} else if (pixel_offset < 0) {
-			// ...or on the left edge (!isPerfectFit adjustments)
-			LOG("Painting a background rectangle on the left edge because of a negative pixel offset");
-			fill_rect((unsigned short int) (region.left) - -pixel_offset,
-				(unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
-				-pixel_offset,
-				FONTH,
-				bgC);
+	// If we're a full line, we need to fill the space that honoring our offset has left vacant on the left edge...
+	if (charcount == MAXCOLS && pixel_offset > 0) {
+		// ...or on the left edge (!isPerfectFit adjustments)
+		LOG("Painting a background rectangle on the left edge because of pixel offset");
+		fill_rect((unsigned short int) (region.left) - pixel_offset,
+			(unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
+			pixel_offset,
+			FONTH,
+			bgC);
+		// Correct width, too, if needed
+		if (region.width + pixel_offset < vinfo.xres) {
+			region.width += pixel_offset;
+			LOG("Updated region.width to %u", region.width);
 		}
-		// NOTE: We don't need to tweak width because we only do this for already full lines?
-		// TODO: Merge with the next fill_rect pass...
 	}
 
 	// NOTE: eInk framebuffers are weird...
@@ -356,33 +341,15 @@ static struct mxcfb_rect
 	//       this effectively works around the issue, in which case, we don't need to do anything :).
 	// NOTE: Use charcount + col == MAXCOLS if we want to do that everytime we simply *hit* the edge...
 	if (charcount == MAXCOLS && !deviceQuirks.isPerfectFit) {
-		if (pixel_offset >= 0) {
-			LOG("Painting a background rectangle to fill the dead space on the right edge");
-			fill_rect((unsigned short int) (region.left + (charcount * FONTW) - pixel_offset),
-				(unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
-				(unsigned short int) (vinfo.xres - (charcount * FONTW) + pixel_offset),
-				FONTH,
-				bgC);
-			// Update region to the full width, no matter the circumstances
-			region.width += (vinfo.xres - (charcount * FONTW) + pixel_offset);
-			// And make sure it's properly clamped, in case it's already been tweaked because of a multiline print
-			if (region.width + region.left > vinfo.xres) {
-				region.width = vinfo.xres - region.left;
-			}
-			LOG("Updated region.width to %u", region.width);
-		} else {
-			LOG("Painting a background rectangle to fill the dead space on the right edge");
-			fill_rect((unsigned short int) (region.left + (charcount * FONTW) - -pixel_offset),
-				(unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
-				(unsigned short int) (vinfo.xres - (charcount * FONTW) + -pixel_offset),
-				FONTH,
-				bgC);
-			// Update region to the full width, no matter the circumstances
-			region.width += (vinfo.xres - (charcount * FONTW) + -pixel_offset);
-			// And make sure it's properly clamped, in case it's already been tweaked because of a multiline print
-			if (region.width + region.left > vinfo.xres) {
-				region.width = vinfo.xres - region.left;
-			}
+		LOG("Painting a background rectangle to fill the dead space on the right edge");
+		fill_rect((unsigned short int) (region.left + (charcount * FONTW) - pixel_offset),
+			(unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
+			(unsigned short int) (vinfo.xres - (charcount * FONTW)),
+			FONTH,
+			bgC);
+		// Update region to the full width, no matter the circumstances
+		if (region.width != vinfo.xres) {
+			region.width = vinfo.xres;
 			LOG("Updated region.width to %u", region.width);
 		}
 	}
@@ -434,13 +401,13 @@ static struct mxcfb_rect
 					// plot the pixel (fg, text)
 					// NOTE: This is where we used to fudge positioning of hex fonts converted by
 					//       tools/hextoc.py before I figured out the root issue ;).
-					put_pixel((unsigned short int) (((col * FONTW) - pixel_offset) + (ci * FONTW) + x),
+					put_pixel((unsigned short int) (((col * FONTW) + pixel_offset) + (ci * FONTW) + x),
 						  (unsigned short int) ((row * FONTH) + y),
 						  fgC);
 				} else {
 					// this is background,
 					// fill it so that we'll be visible no matter what was on screen behind us.
-					put_pixel((unsigned short int) (((col * FONTW) - pixel_offset) + (ci * FONTW) + x),
+					put_pixel((unsigned short int) (((col * FONTW) + pixel_offset) + (ci * FONTW) + x),
 						  (unsigned short int) ((row * FONTH) + y),
 						  bgC);
 				}
@@ -1175,9 +1142,8 @@ int
 				//       instead of the reverse,
 				//       and that there is at most a single cell of difference between the two.
 				if ((unsigned int) (col * 2) + line_len != MAXCOLS) {
-					col = (short int) (col + 1);
 					LOG("Line is not a perfect fit, fudging centering by one half of a cell to the right");
-					// NOTE: This means we have a halfcell offset to correct in draw...
+					// NOTE: Flag it for correction in draw
 					halfcell_offset = true;
 				}
 				LOG("Adjusted column to %hd for centering", col);
@@ -1190,12 +1156,6 @@ int
 
 				// Compute our padding length
 				unsigned int left_pad = (MAXCOLS - line_len) / 2U;
-				// NOTE: If the line itself is not a perfect fit, start one more column
-				//       to the right to compensate...
-				if ((left_pad * 2) + line_len != MAXCOLS) {
-					left_pad += 1U;
-					LOG("Line is not a perfect fit, increasing left padding by one cell");
-				}
 				// As for the right padding, we basically just have to print 'til the edge of the screen
 				unsigned int right_pad = MAXCOLS - line_len - left_pad;
 
