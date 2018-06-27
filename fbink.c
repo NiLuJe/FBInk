@@ -281,7 +281,7 @@ static struct mxcfb_rect
 	LOG("Character count: %u (over %zu bytes)", charcount, strlen(text));
 
 	// Compute our actual subcell offset in pixels
-	unsigned short int pixel_offset = 0;
+	unsigned short int pixel_offset = 0U;
 	// Do we have a centering induced halfcell adjustment to correct?
 	if (halfcell_offset) {
 		pixel_offset = FONTW / 2;
@@ -302,9 +302,9 @@ static struct mxcfb_rect
 
 	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
 
-	// Do we have a pixel_offset to honor?
+	// Do we have a pixel offset to honor?
 	if (pixel_offset > 0U) {
-		LOG("Moving pen to the RIGHT by %u pixels", pixel_offset);
+		LOG("Moving pen to the right by %u pixels to honor subcell centering adjustments", pixel_offset);
 		// NOTE: We need to update the start of our region rectangle if it doesn't already cover the full line,
 		//       i.e., when doing centering only.
 		if (charcount != MAXCOLS) {
@@ -315,14 +315,14 @@ static struct mxcfb_rect
 
 	// If we're a full line, we need to fill the space that honoring our offset has left vacant on the left edge...
 	if (charcount == MAXCOLS && pixel_offset > 0) {
-		LOG("Painting a background rectangle on the left edge because of pixel offset");
+		LOG("Painting a background rectangle on the left edge on account of pixel offset");
 		fill_rect(0,
 			(unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			pixel_offset,
 			FONTH,
 			bgC);
 		// Correct width, to include that bit of content, too, if needed
-		if (region.width + pixel_offset < vinfo.xres) {
+		if (region.width + pixel_offset <= vinfo.xres) {
 			region.width += pixel_offset;
 			LOG("Updated region.width to %u", region.width);
 		}
@@ -1132,18 +1132,10 @@ int
 			if (fbink_config->is_centered) {
 				col = (short int) ((MAXCOLS - line_len) / 2U);
 
-				// NOTE: If the line itself is not a perfect fit, start one more column
-				//       to the right to compensate...
-				//       If !perfectFit, we have more empty space on the right, so it makes
-				//       perfect sense, otherwise, it's a bit more dicey:
-				//       we hope that the left edge is slightly smaller because of a few pixels
-				//       hidden behind the bezel.
-				//       In any case, it feels more like we're actually doing something by
-				//       putting more weight on left padding than on right padding.
-				//       Because, essentially, what this does is simply ensuring that,
-				//       when left padding != right padding, then left padding > right padding
-				//       instead of the reverse,
-				//       and that there is at most a single cell of difference between the two.
+				// NOTE: If the line itself is not a perfect fit, ask draw to start drawing half a cell
+				//       to the right to compensate, in order to achieve perfect padding...
+				//       This piggybacks a bit on the !isPerfectFit compensation done in draw,
+				//       which already does subcell placement ;).
 				if ((unsigned int) (col * 2) + line_len != MAXCOLS) {
 					LOG("Line is not a perfect fit, fudging centering by one half of a cell to the right");
 					// NOTE: Flag it for correction in draw
