@@ -300,25 +300,27 @@ static struct mxcfb_rect
 		.height = (uint32_t)((multiline_offset + 1U) * FONTH),
 	};
 
-	LOG("Region: left is %u and pixel_offset is %u", region.left, pixel_offset);
-	// Honor pixel_offset (FIXME: Do we need to check if we can do so safely?)
+	// Do we have a pixel_offset to honor?
 	if (pixel_offset > 0U) {
-		LOG("Region: original left was %u & pixel_offset of %u -> moving pen to the RIGHT", region.left, pixel_offset);
-		region.left += pixel_offset;
+		LOG("Moving pen to the RIGHT by %u pixels", pixel_offset);
+		// NOTE: We need to update the start of our region rectangle if it doesn't already cover the full line,
+		//       i.e., when doing centering only.
+		if (region.left > 0U) {
+			region.left += pixel_offset;
+		}
 	}
 
 	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
 
 	// If we're a full line, we need to fill the space that honoring our offset has left vacant on the left edge...
 	if (charcount == MAXCOLS && pixel_offset > 0) {
-		// ...or on the left edge (!isPerfectFit adjustments)
 		LOG("Painting a background rectangle on the left edge because of pixel offset");
-		fill_rect((unsigned short int) (region.left) - pixel_offset,
+		fill_rect(0,
 			(unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			pixel_offset,
 			FONTH,
 			bgC);
-		// Correct width, too, if needed
+		// Correct width, to include that bit of content, too, if needed
 		if (region.width + pixel_offset < vinfo.xres) {
 			region.width += pixel_offset;
 			LOG("Updated region.width to %u", region.width);
@@ -342,12 +344,12 @@ static struct mxcfb_rect
 	// NOTE: Use charcount + col == MAXCOLS if we want to do that everytime we simply *hit* the edge...
 	if (charcount == MAXCOLS && !deviceQuirks.isPerfectFit) {
 		LOG("Painting a background rectangle to fill the dead space on the right edge");
-		fill_rect((unsigned short int) (region.left + (charcount * FONTW) - pixel_offset),
+		fill_rect((unsigned short int) (region.left + (charcount * FONTW)),
 			(unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			(unsigned short int) (vinfo.xres - (charcount * FONTW)),
 			FONTH,
 			bgC);
-		// Update region to the full width, no matter the circumstances
+		// If it's not already the case, update region to the full width
 		if (region.width != vinfo.xres) {
 			region.width = vinfo.xres;
 			LOG("Updated region.width to %u", region.width);
