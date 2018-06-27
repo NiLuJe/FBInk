@@ -322,8 +322,13 @@ static struct mxcfb_rect
 			FONTH,
 			bgC);
 		// Correct width, to include that bit of content, too, if needed
-		if (region.width + pixel_offset <= vinfo.xres) {
+		if (region.width < vinfo.xres) {
 			region.width += pixel_offset;
+			// And make sure it's properly clamped,
+			// in case it's already been tweaked because of a multiline print
+			if (region.width + region.left > vinfo.xres) {
+				region.width = vinfo.xres - region.left;
+			}
 			LOG("Updated region.width to %u", region.width);
 		}
 	}
