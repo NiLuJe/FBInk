@@ -118,7 +118,7 @@ static void
 	// NOTE: Discard off-screen pixels!
 	//       For instance, when we have a halfcell offset + a !isPerfectFit pixel offset,
 	//       when we're padding and centering, the final whitespace of right-padding will have its last
-	//       pixel_offset (i.e., half of the dead zone) pixels drawn off-screen...
+	//       pixel offset pixels (i.e., half of the dead zone) pushed off-screen...
 	if (x >= vinfo.xres || y >= vinfo.yres) {
 		//LOG("Discarding off-screen pixel @ %u, %u (out of %ux%u bounds)", x, y, vinfo.xres, vinfo.yres);
 		return;
@@ -332,9 +332,9 @@ static struct mxcfb_rect
 		// Correct width, to include that bit of content, too, if needed
 		if (region.width < vinfo.xres) {
 			region.width += pixel_offset;
-			// And make sure it's properly clamped,
-			// because we can't necessarily rely on left & width being acurate
-			// because of the multiline print override or a subcell placement tweak overshoot...
+			// And make sure it's properly clamped, because we can't necessarily rely on left & width
+			// being entirely acurate either because of the multiline print override,
+			// or because of a bit of subcell placement overshoot trickery (c.f., comment in put_pixel).
 			if (region.width + region.left > vinfo.xres) {
 				region.width = vinfo.xres - region.left;
 			}
@@ -343,8 +343,8 @@ static struct mxcfb_rect
 	}
 
 	// NOTE: In some cases, we also have a matching hole to patch on the right side...
-	//       This only applies when pixel_offset is *only* made of the !isPerfectFit adjustment,
-	//       in every other case, the previous block neatly pushes everything into place ;).
+	//       This only applies when pixel_offset *only* accounts for the !isPerfectFit adjustment though,
+	//       because in every other case, the halfcell offset handling neatly pushes everything into place ;).
 	if (charcount == MAXCOLS && !deviceQuirks.isPerfectFit && !halfcell_offset) {
 		// NOTE: !isPerfectFit ensures pixel_offset is non-zero
 		LOG("Painting a background rectangle to fill the dead space on the right edge");
