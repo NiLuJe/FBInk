@@ -355,7 +355,7 @@ static struct mxcfb_rect
 			bgC);
 		// If it's not already the case, update region to the full width,
 		// because we've just plugged a hole at the very right edge of a full line.
-		if (region.width != vinfo.xres) {
+		if (region.width < vinfo.xres) {
 			region.width = vinfo.xres;
 			LOG("Updated region.width to %u", region.width);
 		}
