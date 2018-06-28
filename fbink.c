@@ -293,8 +293,7 @@ static struct mxcfb_rect
 	// Do we have a centering induced halfcell adjustment to correct?
 	if (halfcell_offset) {
 		pixel_offset = FONTW / 2U;
-		LOG("Appending %u pixels of positioning offset to account for a halfcell centering tweak",
-		    pixel_offset);
+		LOG("Incrementing pixel_offset by %u pixels to account for a halfcell centering tweak", pixel_offset);
 	}
 	// Do we have a permanent adjustment to make because of dead space on the right edge?
 	if (!deviceQuirks.isPerfectFit) {
@@ -302,7 +301,7 @@ static struct mxcfb_rect
 		unsigned short int deadzone_offset =
 		    (unsigned short int) (vinfo.xres - (unsigned short int) (MAXCOLS * FONTW)) / 2U;
 		pixel_offset = (unsigned short int) (pixel_offset + deadzone_offset);
-		LOG("Appending %u pixels of positioning offset to compensate for an unusable final cell",
+		LOG("Incrementing pixel_offset by %u pixels to compensate for dead space on the right edge",
 		    deadzone_offset);
 	}
 
@@ -329,7 +328,7 @@ static struct mxcfb_rect
 
 	// If we're a full line, we need to fill the space that honoring our offset has left vacant on the left edge...
 	if (charcount == MAXCOLS && pixel_offset > 0U) {
-		LOG("Painting a background rectangle on the left edge on account of pixel offset");
+		LOG("Painting a background rectangle on the left edge on account of pixel_offset");
 		fill_rect(0,
 			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			  pixel_offset,
