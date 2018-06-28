@@ -320,7 +320,7 @@ static struct mxcfb_rect
 		LOG("Moving pen %u pixels to the right to honor subcell centering adjustments", pixel_offset);
 		// NOTE: We need to update the start of our region rectangle if it doesn't already cover the full line,
 		//       i.e., when we're not padding + centering.
-		// NOTE: Make sure we don't mess with multiline prints,
+		// NOTE: Make sure we don't mess with multiline strings,
 		//       because by definition left has to keep matching the value of the first line,
 		//       even on subsequent lines.
 		if (charcount != MAXCOLS && multiline_offset == 0U) {
@@ -330,7 +330,10 @@ static struct mxcfb_rect
 	}
 
 	// If we're a full line, we need to fill the space that honoring our offset has left vacant on the left edge...
-	if (charcount == MAXCOLS && pixel_offset > 0U) {
+	// NOTE: Do it also when we're a left-aligned uncentered multiline string, no matter the length of the line,
+	//       so the final line matches the previous ones, which fell under the charcount == MAXCOLS case,
+	//       while the final one would not if it doesn't fill the line, too ;).
+	if ((charcount == MAXCOLS || (col == 0 && !is_centered && multiline_offset > 0U)) && pixel_offset > 0U) {
 		LOG("Painting a background rectangle on the left edge on account of pixel_offset");
 		fill_rect(0,
 			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
