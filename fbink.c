@@ -320,6 +320,9 @@ static struct mxcfb_rect
 		LOG("Moving pen %u pixels to the right to honor subcell centering adjustments", pixel_offset);
 		// NOTE: We need to update the start of our region rectangle if it doesn't already cover the full line,
 		//       i.e., when we're not padding + centering.
+		// NOTE: Make sure we don't mess with multiline prints,
+		//       because by definition left has to keep matching the value of the first line,
+		//       even on subsequent lines.
 		if (charcount != MAXCOLS && multiline_offset == 0U) {
 			region.left += pixel_offset;
 			LOG("Updated region.left to %u", region.left);
