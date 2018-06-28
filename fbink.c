@@ -293,12 +293,17 @@ static struct mxcfb_rect
 	// Do we have a centering induced halfcell adjustment to correct?
 	if (halfcell_offset) {
 		pixel_offset = FONTW / 2U;
+		LOG("Appending %u pixels of positioning offset to account for a halfcell centering tweak",
+		    pixel_offset);
 	}
 	// Do we have a permanent adjustment to make because of dead space on the right edge?
 	if (!deviceQuirks.isPerfectFit) {
 		// We correct by half of said dead space, since we want perfect centering ;).
-		pixel_offset =
-		    (unsigned short int) (pixel_offset + ((vinfo.xres - (unsigned short int) (MAXCOLS * FONTW)) / 2U));
+		unsigned short int deadzone_offset =
+		    (unsigned short int) (vinfo.xres - (unsigned short int) (MAXCOLS * FONTW)) / 2U;
+		pixel_offset = (unsigned short int) (pixel_offset + deadzone_offset);
+		LOG("Appending %u pixels of positioning offset to compensate for an unusable final cell",
+		    deadzone_offset);
 	}
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
@@ -313,7 +318,7 @@ static struct mxcfb_rect
 
 	// Do we have a pixel offset to honor?
 	if (pixel_offset > 0U) {
-		LOG("Moving pen to the right by %u pixels to honor subcell centering adjustments", pixel_offset);
+		LOG("Moving pen %u pixels to the right to honor subcell centering adjustments", pixel_offset);
 		// NOTE: We need to update the start of our region rectangle if it doesn't already cover the full line,
 		//       i.e., when we're not padding + centering.
 		if (charcount != MAXCOLS) {
@@ -1140,7 +1145,7 @@ int
 				col = (short int) ((MAXCOLS - line_len) / 2U);
 
 				// NOTE: If the line itself is not a perfect fit, ask draw to start drawing half a cell
-				//       to the right to compensate, in order to achieve perfect padding...
+				//       to the right to compensate, in order to achieve perfect centering...
 				//       This piggybacks a bit on the !isPerfectFit compensation done in draw,
 				//       which already does subcell placement ;).
 				if ((unsigned int) (col * 2) + line_len != MAXCOLS) {
