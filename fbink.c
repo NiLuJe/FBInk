@@ -135,8 +135,11 @@ static void
 		put_pixel_Gray8(x, y, def_b[c]);
 	} else if (vinfo.bits_per_pixel == 16U) {
 		// FIXME: Colors *may* actually be inverted on 16bpp Kobos...
-		//        This should fix it:
+		//        This would fix it:
 		//c = c ^ WHITE;
+		// NOTE: We'd also need to do the same in clear_screen,
+		//       under both a !defined FBINK_FOR_KINDLE && !defined FBINK_FOR_LEGACY preprocessor check,
+		//       and a live is 16bpp branch...
 		put_pixel_RGB565(x, y, def_r[c], def_g[c], def_b[c]);
 	} else if (vinfo.bits_per_pixel == 24U) {
 		put_pixel_RGB24(x, y, def_r[c], def_g[c], def_b[c]);
@@ -160,7 +163,7 @@ static void
 			put_pixel((unsigned short int) (x + cx), (unsigned short int) (y + cy), c);
 		}
 	}
-	LOG("filled %hux%hu rectangle @ %hu, %hu", w, h, x, y);
+	LOG("Filled a %hux%hu rectangle @ %hu, %hu", w, h, x, y);
 }
 
 // Helper function to clear the screen - fill whole screen with given color
@@ -348,8 +351,10 @@ static struct mxcfb_rect
 			// or because of a bit of subcell placement overshoot trickery (c.f., comment in put_pixel).
 			if (region.width + region.left > vinfo.xres) {
 				region.width = vinfo.xres - region.left;
+				LOG("Clamped region.width to %u", region.width);
+			} else {
+				LOG("Updated region.width to %u", region.width);
 			}
-			LOG("Updated region.width to %u", region.width);
 		}
 	}
 
@@ -375,7 +380,7 @@ static struct mxcfb_rect
 	// NOTE: In case of a multi-line centered print, we can't really trust the final col,
 	//       it might be significantly different than the others, and as such, we'd be computing a cropped region.
 	//       Make the region cover the full width of the screen to make sure we won't miss anything.
-	if (multiline_offset > 0U && is_centered) {
+	if (multiline_offset > 0U && is_centered && (region.left > 0U || region.width < vinfo.xres)) {
 		region.left  = 0U;
 		region.width = vinfo.xres;
 		LOG("Enforced region.left to %u & region.width to %u because of multi-line centering",
@@ -420,14 +425,14 @@ static struct mxcfb_rect
 					// NOTE: This is where we used to fudge positioning of hex fonts converted by
 					//       tools/hextoc.py before I figured out the root issue ;).
 					put_pixel(
-					    (unsigned short int) (((col * FONTW) + pixel_offset) + (ci * FONTW) + x),
+					    (unsigned short int) ((col * FONTW) + (ci * FONTW) + x + pixel_offset),
 					    (unsigned short int) ((row * FONTH) + y),
 					    fgC);
 				} else {
 					// this is background,
 					// fill it so that we'll be visible no matter what was on screen behind us.
 					put_pixel(
-					    (unsigned short int) (((col * FONTW) + pixel_offset) + (ci * FONTW) + x),
+					    (unsigned short int) ((col * FONTW) + (ci * FONTW) + x + pixel_offset),
 					    (unsigned short int) ((row * FONTH) + y),
 					    bgC);
 				}
