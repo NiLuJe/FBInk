@@ -142,9 +142,9 @@ static unsigned short def_b[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77
 
 // 'global' variables to store screen info
 // With our externs, first...
-char*  g_fbink_fbp        = 0;
-size_t g_fbink_screensize = 0U;
-bool   g_fbink_isFbMapped = false;
+unsigned char* g_fbink_fbp        = 0U;
+size_t         g_fbink_screensize = 0U;
+bool           g_fbink_isFbMapped = false;
 // And those stay purely inside the library
 struct fb_var_screeninfo vinfo;
 struct fb_fix_screeninfo finfo;
@@ -190,8 +190,8 @@ static void fill_rect(unsigned short int,
 		      unsigned short int);
 static void clear_screen(unsigned short int);
 
-static const char* font8x8_get_bitmap(uint32_t);
-static void        font8x8_render(uint32_t, char*, unsigned short int UNUSED_BY_MINIMAL);
+static const unsigned char* font8x8_get_bitmap(uint32_t);
+static void                 font8x8_render(uint32_t, unsigned char*, unsigned short int UNUSED_BY_MINIMAL);
 
 static struct mxcfb_rect
     draw(const char*, unsigned short int, unsigned short int, bool, bool, unsigned short int, unsigned short int, bool);

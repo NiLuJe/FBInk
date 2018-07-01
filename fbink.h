@@ -51,7 +51,7 @@
 #endif
 
 // The few externs we might need...
-extern FBINK_API char* g_fbink_fbp;
+extern FBINK_API unsigned char* g_fbink_fbp;
 extern FBINK_API size_t g_fbink_screensize;
 extern FBINK_API bool   g_fbink_isFbMapped;
 

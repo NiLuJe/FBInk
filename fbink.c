@@ -44,7 +44,7 @@ static void
 	size_t pix_offset = x / 2 + y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((char*) (g_fbink_fbp + pix_offset)) = (char) c;
+	*((unsigned char*) (g_fbink_fbp + pix_offset)) = (unsigned char) c;
 }
 
 static void
@@ -54,7 +54,7 @@ static void
 	size_t pix_offset = x + y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((char*) (g_fbink_fbp + pix_offset)) = (char) c;
+	*((unsigned char*) (g_fbink_fbp + pix_offset)) = (unsigned char) c;
 }
 
 static void
@@ -69,9 +69,9 @@ static void
 	size_t pix_offset = x * 3U + y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((char*) (g_fbink_fbp + pix_offset))     = (char) b;
-	*((char*) (g_fbink_fbp + pix_offset + 1)) = (char) g;
-	*((char*) (g_fbink_fbp + pix_offset + 2)) = (char) r;
+	*((unsigned char*) (g_fbink_fbp + pix_offset))     = (unsigned char) b;
+	*((unsigned char*) (g_fbink_fbp + pix_offset + 1)) = (unsigned char) g;
+	*((unsigned char*) (g_fbink_fbp + pix_offset + 2)) = (unsigned char) r;
 }
 
 static void
@@ -86,10 +86,10 @@ static void
 	size_t pix_offset = x * 4U + y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((char*) (g_fbink_fbp + pix_offset))     = (char) b;
-	*((char*) (g_fbink_fbp + pix_offset + 1)) = (char) g;
-	*((char*) (g_fbink_fbp + pix_offset + 2)) = (char) r;
-	*((char*) (g_fbink_fbp + pix_offset + 3)) = 0xFF;    // Opaque, always.
+	*((unsigned char*) (g_fbink_fbp + pix_offset))     = (unsigned char) b;
+	*((unsigned char*) (g_fbink_fbp + pix_offset + 1)) = (unsigned char) g;
+	*((unsigned char*) (g_fbink_fbp + pix_offset + 2)) = (unsigned char) r;
+	*((unsigned char*) (g_fbink_fbp + pix_offset + 3)) = 0xFF;    // Opaque, always.
 }
 
 static void
@@ -108,7 +108,7 @@ static void
 	unsigned int c = ((r / 8U) << 11U) + ((g / 4U) << 5U) + (b / 8U);
 	// or: c = ((r / 8) * 2048) + ((g / 4) * 32) + (b / 8);
 	// write 'two bytes at once'
-	*((char*) (g_fbink_fbp + pix_offset)) = (char) c;
+	*((unsigned char*) (g_fbink_fbp + pix_offset)) = (unsigned char) c;
 }
 
 // Handle various bpp...
@@ -180,7 +180,7 @@ static void
 }
 
 // Return the font8x8 bitmap for a specific Unicode codepoint
-static const char*
+static const unsigned char*
     font8x8_get_bitmap(uint32_t codepoint)
 {
 	// Get the bitmap for the character mapped to that Unicode codepoint
@@ -207,9 +207,9 @@ static const char*
 // Render a specific font8x8 glyph into a pixmap
 // (base size: 8x8, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
 static void
-    font8x8_render(uint32_t codepoint, char* glyph_pixmap, unsigned short int fontname UNUSED_BY_MINIMAL)
+    font8x8_render(uint32_t codepoint, unsigned char* glyph_pixmap, unsigned short int fontname UNUSED_BY_MINIMAL)
 {
-	const char* bitmap = NULL;
+	const unsigned char* bitmap = NULL;
 
 	// Do we have Unscii fonts compiled in?
 #ifdef FBINK_WITH_UNSCII
@@ -395,7 +395,7 @@ static struct mxcfb_rect
 	// Alloc our pixmap on the stack, and re-use it.
 	// NOTE: We tried using automatic VLAs, but that... didn't go well.
 	//       (as in, subtle (or not so) memory and/or stack corruption).
-	char* pixmap = NULL;
+	unsigned char* pixmap = NULL;
 	// NOTE: Using alloca may prevent inlining. That said, trust that the compiler will do the right thing.
 	//       As for why alloca:
 	//       It's a very small allocation, we'll always fully write to it so we don't care about its initialization,
@@ -419,7 +419,7 @@ static struct mxcfb_rect
 			// loop through pixel columns
 			for (x = 0U; x < FONTW; x++) {
 				// get the pixel value
-				char b = pixmap[(y * FONTW) + x];
+				unsigned char b = pixmap[(y * FONTW) + x];
 				if (b > 0) {
 					// plot the pixel (fg, text)
 					// NOTE: This is where we used to fudge positioning of hex fonts converted by
@@ -953,7 +953,8 @@ int
 	// NOTE: If we're keeping the fb's fd open, keep this mmap around, too.
 	if (!g_fbink_isFbMapped) {
 		g_fbink_screensize = finfo.smem_len;
-		g_fbink_fbp = (char*) mmap(NULL, g_fbink_screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
+		g_fbink_fbp =
+		    (unsigned char*) mmap(NULL, g_fbink_screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
 		if (g_fbink_fbp == MAP_FAILED) {
 			char  buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
@@ -1274,7 +1275,7 @@ int
 		// NOTE: Don't forget to reset those state flags,
 		//       so we won't skip mmap'ing on the next call without an fb fd passed...
 		g_fbink_isFbMapped = false;
-		g_fbink_fbp        = 0;
+		g_fbink_fbp        = 0U;
 	}
 	if (!keep_fd) {
 		close(fbfd);
