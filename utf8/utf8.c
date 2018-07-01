@@ -192,7 +192,8 @@ unsigned int
 unsigned int
     u8_charnum(const char* s, unsigned int offset)
 {
-	unsigned int charnum = 0, offs = 0;
+	unsigned int charnum = 0;
+	unsigned int offs    = 0;
 
 	while (offs < offset && s[offs]) {
 		(void) (isutf(s[++offs]) || isutf(s[++offs]) || isutf(s[++offs]) || ++offs);
@@ -262,7 +263,8 @@ unsigned int
 {
 	uint32_t     ch;
 	char         digs[9] = "\0\0\0\0\0\0\0\0";
-	unsigned int dno = 0, i = 1;
+	unsigned int dno     = 0;
+	unsigned int i       = 1;
 
 	ch = (uint32_t) str[0]; /* take literal character */
 	if (str[0] == 'n')
@@ -395,7 +397,8 @@ unsigned int
 char*
     u8_strchr(char* s, uint32_t ch, unsigned int* charn)
 {
-	unsigned int i = 0, lasti = 0;
+	unsigned int i     = 0;
+	unsigned int lasti = 0;
 	uint32_t     c;
 
 	*charn = 0;
@@ -413,7 +416,8 @@ char*
 char*
     u8_memchr(char* s, uint32_t ch, size_t sz, unsigned int* charn)
 {
-	unsigned int i = 0, lasti = 0;
+	unsigned int i     = 0;
+	unsigned int lasti = 0;
 	uint32_t     c;
 	unsigned int csz;
 
