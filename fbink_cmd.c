@@ -131,6 +131,8 @@ int
 		WFM_OPT,
 	};
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#pragma clang diagnostic ignored "-Wunknown-warning-option"
 #pragma GCC diagnostic ignored "-Wdiscarded-qualifiers"
 #pragma clang diagnostic ignored "-Wincompatible-pointer-types-discards-qualifiers"
 	char* const token[] = { [TOP_OPT] = "top",       [LEFT_OPT] = "left", [WIDTH_OPT] = "width",
