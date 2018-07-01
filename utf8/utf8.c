@@ -26,7 +26,7 @@
 static const uint32_t offsetsFromUTF8[6] = { 0x00000000UL, 0x00003080UL, 0x000E2080UL,
 					     0x03C82080UL, 0xFA082080UL, 0x82082080UL };
 
-static const char trailingBytesForUTF8[256] = {
+static const unsigned char trailingBytesForUTF8[256] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -284,25 +284,25 @@ unsigned int
 		do {
 			digs[dno++] = str[i++];
 		} while (octal_digit(str[i]) && dno < 3);
-		ch = strtoul(digs, NULL, 8);
+		ch = (unsigned int) strtoul(digs, NULL, 8);
 	} else if (str[0] == 'x') {
 		while (hex_digit(str[i]) && dno < 2) {
 			digs[dno++] = str[i++];
 		}
 		if (dno > 0)
-			ch = strtoul(digs, NULL, 16);
+			ch = (unsigned int) strtoul(digs, NULL, 16);
 	} else if (str[0] == 'u') {
 		while (hex_digit(str[i]) && dno < 4) {
 			digs[dno++] = str[i++];
 		}
 		if (dno > 0)
-			ch = strtoul(digs, NULL, 16);
+			ch = (unsigned int) strtoul(digs, NULL, 16);
 	} else if (str[0] == 'U') {
 		while (hex_digit(str[i]) && dno < 8) {
 			digs[dno++] = str[i++];
 		}
 		if (dno > 0)
-			ch = strtoul(digs, NULL, 16);
+			ch = (unsigned int) strtoul(digs, NULL, 16);
 	}
 	*dest = ch;
 
@@ -474,7 +474,7 @@ try_print:
 		goto try_print;
 	}
 	wcs = (uint32_t*) alloca((size_t)(cnt + 1) * sizeof(uint32_t));
-	cnt = (int) u8_toucs(wcs, (size_t) cnt + 1, buf, cnt);
+	cnt = (int) u8_toucs(wcs, (unsigned int) (cnt + 1), buf, cnt);
 	printf("%ls", (wchar_t*) wcs);
 	return cnt;
 }
