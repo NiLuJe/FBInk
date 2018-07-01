@@ -61,7 +61,7 @@ unsigned int
 	unsigned int nb;
 	unsigned int i = 0;
 
-	while (i < sz - 1) {
+	while (sz > 0 && i < sz - 1) {
 		nb = trailingBytesForUTF8[(unsigned char) *src];
 		if (srcsz == -1) {
 			if (*src == 0)
