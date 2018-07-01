@@ -72,7 +72,7 @@ with open(fontfile, "r") as f:
 					print("}}; // {}".format(blockcount))
 					print("")
 					if blocknum == 1:
-						eprint("const char*")
+						eprint("const unsigned char*")
 						eprint("    {}_get_bitmap(uint32_t codepoint)".format(fontname))
 						eprint("{")
 						eprint("\tif (codepoint <= {:#04x}) {{".format(prevcp))
@@ -83,7 +83,7 @@ with open(fontfile, "r") as f:
 				blocknum += 1
 				blockcount = 1
 				blockcp = cp
-				print("static const char {}_block{}[][{}] = {{".format(fontname, blocknum, fontheight))
+				print("static const unsigned char {}_block{}[][{}] = {{".format(fontname, blocknum, fontheight))
 
 			hcp = int(cp, base=16)
 			if fontheight == 16:
