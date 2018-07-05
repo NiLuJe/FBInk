@@ -159,9 +159,11 @@ static void
 	      unsigned short int c)
 {
 	FBInkCoordinates coords = { x, y };
+	/*
 	if (deviceQuirks.isKobo16Landscape) {
 		get_physical_coords(&coords);
 	}
+	*/
 
 	unsigned short int cx;
 	unsigned short int cy;
@@ -351,13 +353,13 @@ static struct mxcfb_rect
 			  FONTH,
 			  bgC);
 		// Correct width, to include that bit of content, too, if needed
-		if (region.width < vinfo.xres) {
+		if (region.width < viewWidth) {
 			region.width += pixel_offset;
 			// And make sure it's properly clamped, because we can't necessarily rely on left & width
 			// being entirely acurate either because of the multiline print override,
 			// or because of a bit of subcell placement overshoot trickery (c.f., comment in put_pixel).
-			if (region.width + region.left > vinfo.xres) {
-				region.width = vinfo.xres - region.left;
+			if (region.width + region.left > viewWidth) {
+				region.width = viewWidth - region.left;
 				LOG("Clamped region.width to %u", region.width);
 			} else {
 				LOG("Updated region.width to %u", region.width);
@@ -378,8 +380,8 @@ static struct mxcfb_rect
 			  bgC);
 		// If it's not already the case, update region to the full width,
 		// because we've just plugged a hole at the very right edge of a full line.
-		if (region.width < vinfo.xres) {
-			region.width = vinfo.xres;
+		if (region.width < viewWidth) {
+			region.width = viewWidth;
 			LOG("Updated region.width to %u", region.width);
 		}
 	}
@@ -387,9 +389,9 @@ static struct mxcfb_rect
 	// NOTE: In case of a multi-line centered print, we can't really trust the final col,
 	//       it might be significantly different than the others, and as such, we'd be computing a cropped region.
 	//       Make the region cover the full width of the screen to make sure we won't miss anything.
-	if (multiline_offset > 0U && is_centered && (region.left > 0U || region.width < vinfo.xres)) {
+	if (multiline_offset > 0U && is_centered && (region.left > 0U || region.width < viewWidth)) {
 		region.left  = 0U;
-		region.width = vinfo.xres;
+		region.width = viewWidth;
 		LOG("Enforced region.left to %u & region.width to %u because of multi-line centering",
 		    region.left,
 		    region.width);
