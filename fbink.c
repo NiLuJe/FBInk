@@ -870,19 +870,19 @@ int
 	} else {
 		// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
 		// NOTE: We still want to compare against the screen's "height", even in Landscape mode...
-		uint32_t screen_height = vinfo.yres;
+		uint32_t actual_height = MAX(vinfo.xres, vinfo.yres);
 		if (vinfo.xres > vinfo.yres) {
 			// NOTE: vinfo.rotate == 2 (vs. 3 in Portrait mode) on my PW2
 			//       My Touch, which doesn't propose Landscape mode, defaults to vinfo.rotate == 1
 			//       My K4, which supports the four possible rotations,
 			//          is always using vinfo.rotate == 0 (but xres & yres do switch).
-			screen_height = vinfo.xres;
+			//screen_height = vinfo.xres;
 		}
-		if (screen_height <= 600U) {
+		if (actual_height <= 600U) {
 			FONTSIZE_MULT = 1U;    // 8x8
-		} else if (screen_height <= 1024U) {
+		} else if (actual_height <= 1024U) {
 			FONTSIZE_MULT = 2U;    // 16x16
-		} else if (screen_height <= 1440U) {
+		} else if (actual_height <= 1440U) {
 			FONTSIZE_MULT = 3U;    // 24x24
 		} else {
 			FONTSIZE_MULT = 4U;    // 32x32
