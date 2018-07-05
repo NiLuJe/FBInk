@@ -892,7 +892,7 @@ int
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo)) {
 		fprintf(stderr, "[FBInk] Error reading fixed information.\n");
 	}
-	ELOG("[FBInk] Fixed fb info: smem_len %u, line_length %u", finfo.smem_len, finfo.line_length);
+	ELOG("[FBInk] Fixed fb info: id is \"%s\", smem_len: %u bytes & line_length: %u bytes", finfo.id, finfo.smem_len, finfo.line_length);
 
 	// Finish with some more generic stuff, not directly related to the framebuffer.
 	// As all this stuff is pretty much set in stone, we'll only query it once.
