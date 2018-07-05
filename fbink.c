@@ -300,7 +300,7 @@ static struct mxcfb_rect
 	if (!deviceQuirks.isPerfectFit) {
 		// We correct by half of said dead space, since we want perfect centering ;).
 		unsigned short int deadzone_offset =
-		    (unsigned short int) (vinfo.xres - (unsigned short int) (MAXCOLS * FONTW)) / 2U;
+		    (unsigned short int) (viewWidth - (unsigned short int) (MAXCOLS * FONTW)) / 2U;
 		pixel_offset = (unsigned short int) (pixel_offset + deadzone_offset);
 		LOG("Incrementing pixel_offset by %u pixels to compensate for dead space on the right edge",
 		    deadzone_offset);
@@ -310,7 +310,7 @@ static struct mxcfb_rect
 	struct mxcfb_rect region = {
 		.top   = (uint32_t)((row - multiline_offset) * FONTH),
 		.left  = (uint32_t)(col * FONTW),
-		.width = multiline_offset > 0U ? (vinfo.xres - (uint32_t)(col * FONTW)) : (uint32_t)(charcount * FONTW),
+		.width = multiline_offset > 0U ? (viewWidth - (uint32_t)(col * FONTW)) : (uint32_t)(charcount * FONTW),
 		.height = (uint32_t)((multiline_offset + 1U) * FONTH),
 	};
 
@@ -362,7 +362,7 @@ static struct mxcfb_rect
 	if (charcount == MAXCOLS && !deviceQuirks.isPerfectFit && !halfcell_offset) {
 		// NOTE: !isPerfectFit ensures pixel_offset is non-zero
 		LOG("Painting a background rectangle to fill the dead space on the right edge");
-		fill_rect((unsigned short int) (vinfo.xres - pixel_offset),
+		fill_rect((unsigned short int) (viewWidth - pixel_offset),
 			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			  pixel_offset,
 			  FONTH,
@@ -906,12 +906,12 @@ int
 	ELOG("[FBInk] Fontsize set to %dx%d.", FONTW, FONTH);
 
 	// Compute MAX* values now that we know the screen & font resolution
-	MAXCOLS = (unsigned short int) (vinfo.xres / FONTW);
-	MAXROWS = (unsigned short int) (vinfo.yres / FONTH);
+	MAXCOLS = (unsigned short int) (viewWidth / FONTW);
+	MAXROWS = (unsigned short int) (viewHeight / FONTH);
 	ELOG("[FBInk] Line length: %hu cols, Page size: %hu rows.", MAXCOLS, MAXROWS);
 
 	// Mention & remember if we can perfectly fit the final column on screen
-	if ((unsigned short int) (FONTW * MAXCOLS) == vinfo.xres) {
+	if ((unsigned short int) (FONTW * MAXCOLS) == viewWidth) {
 		deviceQuirks.isPerfectFit = true;
 		ELOG("[FBInk] It's a perfect fit!");
 	}
