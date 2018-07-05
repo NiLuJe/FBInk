@@ -108,7 +108,7 @@ static void
     get_physical_coords(FBInkCoordinates* coords)
 {
 	unsigned short int rx = coords->y;
-	unsigned short int ry = viewHeight - coords->x - 1;
+	unsigned short int ry = viewWidth - coords->x - 1;
 
 	coords->x = rx;
 	coords->y = ry;
