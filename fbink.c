@@ -128,7 +128,7 @@ static void
 	//       when we're padding and centering, the final whitespace of right-padding will have its last
 	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
 	if (coords.x >= vinfo.xres || coords.y >= vinfo.yres) {
-		LOG("Discarding off-screen pixel @ %u, %u (out of %ux%u bounds)", coords.x, coords.y, vinfo.xres, vinfo.yres);
+		//LOG("Discarding off-screen pixel @ %u, %u (out of %ux%u bounds)", coords.x, coords.y, vinfo.xres, vinfo.yres);
 		return;
 	}
 #ifdef FBINK_FOR_LEGACY
@@ -1301,6 +1301,12 @@ int
 	// Rotate the region if need be...
 	if (deviceQuirks.isKobo16Landscape) {
 		struct mxcfb_rect oregion = region;
+		/*
+		FBInkCoordinates coords = { oregion.left, oregion.top };
+		get_physical_coords(&coords);
+		region.top = coords.x;
+		region.left = coords.y;
+		*/
 		region.top = oregion.left;
 		region.left = oregion.top;
 		region.width = oregion.height;
