@@ -884,7 +884,6 @@ int
 		// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
 		// NOTE: We still want to compare against the screen's "height", even in Landscape mode...
 		uint32_t actual_height = MAX(vinfo.xres, vinfo.yres);
-		//deviceQuirks.isKobo16Landscape = true;
 		if (vinfo.xres > vinfo.yres) {
 			// NOTE: vinfo.rotate == 2 (vs. 3 in Portrait mode) on my PW2
 			//       My Touch, which doesn't propose Landscape mode, defaults to vinfo.rotate == 1
