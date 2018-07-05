@@ -100,7 +100,7 @@
 
 // Fallback version tag...
 #ifndef FBINK_VERSION
-#	define FBINK_VERSION "v0.9.12"
+#	define FBINK_VERSION "v0.9.13"
 #endif
 
 // NOTE: Some of our ifdef combinations may cause a small number of function arguments to become unused...
