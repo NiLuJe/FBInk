@@ -158,14 +158,19 @@ static void
 	      unsigned short int h,
 	      unsigned short int c)
 {
+	FBInkCoordinates coords = { x, y };
+	if (deviceQuirks.isKindleOasis2) {
+		get_physical_coords(&coords);
+	}
+
 	unsigned short int cx;
 	unsigned short int cy;
 	for (cy = 0U; cy < h; cy++) {
 		for (cx = 0U; cx < w; cx++) {
-			put_pixel((unsigned short int) (x + cx), (unsigned short int) (y + cy), c);
+			put_pixel((unsigned short int) (coords.x + cx), (unsigned short int) (coords.y + cy), c);
 		}
 	}
-	LOG("Filled a %hux%hu rectangle @ %hu, %hu", w, h, x, y);
+	LOG("Filled a %hux%hu rectangle @ %hu, %hu", w, h, coords.x, coords.y);
 }
 
 // Helper function to clear the screen - fill whole screen with given color
@@ -879,6 +884,7 @@ int
 		// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
 		// NOTE: We still want to compare against the screen's "height", even in Landscape mode...
 		uint32_t actual_height = MAX(vinfo.xres, vinfo.yres);
+		//deviceQuirks.isKobo16Landscape = true;
 		if (vinfo.xres > vinfo.yres) {
 			// NOTE: vinfo.rotate == 2 (vs. 3 in Portrait mode) on my PW2
 			//       My Touch, which doesn't propose Landscape mode, defaults to vinfo.rotate == 1
