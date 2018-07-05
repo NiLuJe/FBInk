@@ -118,23 +118,23 @@ static void
 static void
     put_pixel(unsigned short int x, unsigned short int y, unsigned short int c)
 {
+	FBInkCoordinates coords = { x, y };
+	if (deviceQuirks.isKobo16Landscape) {
+		get_physical_coords(&coords);
+	}
+
 	// NOTE: Discard off-screen pixels!
 	//       For instance, when we have a halfcell offset in conjunction with a !isPerfectFit pixel offset,
 	//       when we're padding and centering, the final whitespace of right-padding will have its last
 	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
-	if (x >= vinfo.xres || y >= vinfo.yres) {
-		//LOG("Discarding off-screen pixel @ %u, %u (out of %ux%u bounds)", x, y, vinfo.xres, vinfo.yres);
+	if (coords.x >= vinfo.xres || coords.y >= vinfo.yres) {
+		LOG("Discarding off-screen pixel @ %u, %u (out of %ux%u bounds)", coords.x, coords.y, vinfo.xres, vinfo.yres);
 		return;
 	}
 #ifdef FBINK_FOR_LEGACY
 	// NOTE: Legacy devices all have an inverted palette.
 	c = c ^ WHITE;
 #endif
-
-	FBInkCoordinates coords = { x, y };
-	if (deviceQuirks.isKindleOasis2) {
-		get_physical_coords(&coords);
-	}
 
 	if (vinfo.bits_per_pixel == 4U) {
 		put_pixel_Gray4(&coords, def_b[c]);
@@ -159,7 +159,7 @@ static void
 	      unsigned short int c)
 {
 	FBInkCoordinates coords = { x, y };
-	if (deviceQuirks.isKindleOasis2) {
+	if (deviceQuirks.isKobo16Landscape) {
 		get_physical_coords(&coords);
 	}
 
