@@ -52,6 +52,7 @@ typedef struct
 	bool isKoboMk7;
 	bool isKindlePearlScreen;
 	bool isKindleOasis2;
+	bool isKobo16Landscape;
 	bool skipId;
 } FBInkDeviceQuirks;
 

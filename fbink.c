@@ -836,6 +836,10 @@ int
 	     vinfo.rotate,
 	     fb_rotate_to_string(vinfo.rotate));
 
+	// NOTE: In most every cases, assume 0,0 is at the top-left of the screen, and xyes,yres at the bottom right.
+	viewWidth = vinfo.xres;
+	viewHeight = vinfo.yres;
+
 	// NOTE: Reset original font resolution, in case we're re-init'ing,
 	//       since we're relying on the default value to calculate the scaled value,
 	//       and we're using this value to set MAXCOLS & MAXROWS, which we *need* to be sane.
@@ -876,7 +880,15 @@ int
 			//       My Touch, which doesn't propose Landscape mode, defaults to vinfo.rotate == 1
 			//       My K4, which supports the four possible rotations,
 			//          is always using vinfo.rotate == 0 (but xres & yres do switch).
-			//screen_height = vinfo.xres;
+			// NOTE: Here be dragons!
+#if !defined(FBINK_FOR_KINDLE) && !defined(FBINK_FOR_LEGACY)
+			if (vinfo.bits_per_pixel == 16) {
+				viewWidth = vinfo.yres;
+				viewHeight = vinfo.xres;
+				deviceQuirks.isKobo16Landscape = true;
+				ELOG("[FBInk] Enabled Kobo 16bpp fb rotation device quirks");
+			}
+#endif
 		}
 		if (actual_height <= 600U) {
 			FONTSIZE_MULT = 1U;    // 8x8

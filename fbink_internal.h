@@ -148,6 +148,8 @@ bool           g_fbink_isFbMapped = false;
 // And those stay purely inside the library
 struct fb_var_screeninfo vinfo;
 struct fb_fix_screeninfo finfo;
+uint32_t viewWidth;
+uint32_t viewHeight;
 unsigned short int       FONTW         = 8U;
 unsigned short int       FONTH         = 8U;
 unsigned short int       FONTSIZE_MULT = 1U;
