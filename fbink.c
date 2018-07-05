@@ -138,12 +138,6 @@ static void
 		// NOTE: Grayscale palette, we could have used def_r or def_g ;).
 		put_pixel_Gray8(x, y, def_b[c]);
 	} else if (vinfo.bits_per_pixel == 16U) {
-		// FIXME: Colors *may* actually be inverted on 16bpp Kobos...
-		//        This would fix it:
-		//c = c ^ WHITE;
-		// NOTE: We'd also need to do the same in clear_screen,
-		//       under both a !defined FBINK_FOR_KINDLE && !defined FBINK_FOR_LEGACY preprocessor check,
-		//       and a live is 16bpp branch...
 		put_pixel_RGB565(x, y, def_r[c], def_g[c], def_b[c]);
 	} else if (vinfo.bits_per_pixel == 24U) {
 		put_pixel_RGB24(x, y, def_r[c], def_g[c], def_b[c]);
