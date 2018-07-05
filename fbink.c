@@ -38,35 +38,31 @@ const char*
 
 // Helper function to 'plot' a pixel in given color
 static void
-    put_pixel_Gray4(unsigned short int x, unsigned short int y, unsigned short int c)
+    put_pixel_Gray4(FBInkCoordinates* coords, unsigned short int c)
 {
 	// calculate the pixel's byte offset inside the buffer
-	size_t pix_offset = x / 2 + y * finfo.line_length;
+	size_t pix_offset = coords->x / 2 + coords->y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	*((unsigned char*) (g_fbink_fbp + pix_offset)) = (unsigned char) c;
 }
 
 static void
-    put_pixel_Gray8(unsigned short int x, unsigned short int y, unsigned short int c)
+    put_pixel_Gray8(FBInkCoordinates* coords, unsigned short int c)
 {
 	// calculate the pixel's byte offset inside the buffer
-	size_t pix_offset = x + y * finfo.line_length;
+	size_t pix_offset = coords->x + coords->y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	*((unsigned char*) (g_fbink_fbp + pix_offset)) = (unsigned char) c;
 }
 
 static void
-    put_pixel_RGB24(unsigned short int x,
-		    unsigned short int y,
-		    unsigned short int r,
-		    unsigned short int g,
-		    unsigned short int b)
+    put_pixel_RGB24(FBInkCoordinates* coords, unsigned short int r, unsigned short int g, unsigned short int b)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 3 as every pixel is 3 consecutive bytes
-	size_t pix_offset = x * 3U + y * finfo.line_length;
+	size_t pix_offset = coords->x * 3U + coords->y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	*((unsigned char*) (g_fbink_fbp + pix_offset))     = (unsigned char) b;
@@ -75,15 +71,11 @@ static void
 }
 
 static void
-    put_pixel_RGB32(unsigned short int x,
-		    unsigned short int y,
-		    unsigned short int r,
-		    unsigned short int g,
-		    unsigned short int b)
+    put_pixel_RGB32(FBInkCoordinates* coords, unsigned short int r, unsigned short int g, unsigned short int b)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 4 as every pixel is 4 consecutive bytes
-	size_t pix_offset = x * 4U + y * finfo.line_length;
+	size_t pix_offset = coords->x * 4U + coords->y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	*((unsigned char*) (g_fbink_fbp + pix_offset))     = (unsigned char) b;
@@ -93,15 +85,11 @@ static void
 }
 
 static void
-    put_pixel_RGB565(unsigned short int x,
-		     unsigned short int y,
-		     unsigned short int r,
-		     unsigned short int g,
-		     unsigned short int b)
+    put_pixel_RGB565(FBInkCoordinates* coords, unsigned short int r, unsigned short int g, unsigned short int b)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 2 as every pixel is 2 consecutive bytes
-	size_t pix_offset = x * 2U + y * finfo.line_length;
+	size_t pix_offset = coords->x * 2U + coords->y * finfo.line_length;
 
 #pragma GCC diagnostic push
 	// now this is about the same as 'fbp[pix_offset] = value'
@@ -113,6 +101,17 @@ static void
 #pragma GCC diagnostic ignored "-Wcast-align"
 	*((unsigned short int*) (g_fbink_fbp + pix_offset)) = c;
 #pragma GCC diagnostic pop
+}
+
+// Handle rotation quirks...
+static void
+    get_physical_coords(FBInkCoordinates* coords)
+{
+	unsigned short int rx = coords->y;
+	unsigned short int ry = viewHeight - coords->x - 1;
+
+	coords->x = rx;
+	coords->y = ry;
 }
 
 // Handle various bpp...
@@ -132,17 +131,22 @@ static void
 	c = c ^ WHITE;
 #endif
 
+	FBInkCoordinates coords = { x, y };
+	if (deviceQuirks.isKindleOasis2) {
+		get_physical_coords(&coords);
+	}
+
 	if (vinfo.bits_per_pixel == 4U) {
-		put_pixel_Gray4(x, y, def_b[c]);
+		put_pixel_Gray4(&coords, def_b[c]);
 	} else if (vinfo.bits_per_pixel == 8U) {
 		// NOTE: Grayscale palette, we could have used def_r or def_g ;).
-		put_pixel_Gray8(x, y, def_b[c]);
+		put_pixel_Gray8(&coords, def_b[c]);
 	} else if (vinfo.bits_per_pixel == 16U) {
-		put_pixel_RGB565(x, y, def_r[c], def_g[c], def_b[c]);
+		put_pixel_RGB565(&coords, def_r[c], def_g[c], def_b[c]);
 	} else if (vinfo.bits_per_pixel == 24U) {
-		put_pixel_RGB24(x, y, def_r[c], def_g[c], def_b[c]);
+		put_pixel_RGB24(&coords, def_r[c], def_g[c], def_b[c]);
 	} else if (vinfo.bits_per_pixel == 32U) {
-		put_pixel_RGB32(x, y, def_r[c], def_g[c], def_b[c]);
+		put_pixel_RGB32(&coords, def_r[c], def_g[c], def_b[c]);
 	}
 }
 
@@ -308,9 +312,9 @@ static struct mxcfb_rect
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
-		.top   = (uint32_t)((row - multiline_offset) * FONTH),
-		.left  = (uint32_t)(col * FONTW),
-		.width = multiline_offset > 0U ? (viewWidth - (uint32_t)(col * FONTW)) : (uint32_t)(charcount * FONTW),
+		.top    = (uint32_t)((row - multiline_offset) * FONTH),
+		.left   = (uint32_t)(col * FONTW),
+		.width  = multiline_offset > 0U ? (viewWidth - (uint32_t)(col * FONTW)) : (uint32_t)(charcount * FONTW),
 		.height = (uint32_t)((multiline_offset + 1U) * FONTH),
 	};
 
@@ -837,7 +841,7 @@ int
 	     fb_rotate_to_string(vinfo.rotate));
 
 	// NOTE: In most every cases, assume 0,0 is at the top-left of the screen, and xyes,yres at the bottom right.
-	viewWidth = vinfo.xres;
+	viewWidth  = vinfo.xres;
 	viewHeight = vinfo.yres;
 
 	// NOTE: Reset original font resolution, in case we're re-init'ing,
@@ -883,8 +887,8 @@ int
 			// NOTE: Here be dragons!
 #if !defined(FBINK_FOR_KINDLE) && !defined(FBINK_FOR_LEGACY)
 			if (vinfo.bits_per_pixel == 16) {
-				viewWidth = vinfo.yres;
-				viewHeight = vinfo.xres;
+				viewWidth                      = vinfo.yres;
+				viewHeight                     = vinfo.xres;
 				deviceQuirks.isKobo16Landscape = true;
 				ELOG("[FBInk] Enabled Kobo 16bpp fb rotation device quirks");
 			}
