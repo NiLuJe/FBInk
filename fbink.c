@@ -1296,8 +1296,17 @@ int
 		free(line);
 	}
 
+	// Rotate the region if need be...
+	if (deviceQuirks.isKobo16Landscape) {
+		struct mxcfb_rect oregion = region;
+		region.top = oregion.left;
+		region.left = oregion.top;
+		region.width = oregion.height;
+		region.height = oregion.width;
+	}
+
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
-	if (fbink_config->is_cleared || deviceQuirks.isKobo16Landscape) {
+	if (fbink_config->is_cleared) {
 		region.top    = 0U;
 		region.left   = 0U;
 		region.width  = vinfo.xres;
