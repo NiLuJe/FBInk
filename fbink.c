@@ -910,7 +910,7 @@ int
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo)) {
 		fprintf(stderr, "[FBInk] Error reading fixed information.\n");
 	}
-	ELOG("[FBInk] Fixed fb info: id is \"%s\", smem_len: %u bytes & line_length: %u bytes",
+	ELOG("[FBInk] Fixed fb info: ID is \"%s\", length of fb mem: %u bytes & line length: %u bytes",
 	     finfo.id,
 	     finfo.smem_len,
 	     finfo.line_length);
