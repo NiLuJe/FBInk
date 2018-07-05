@@ -1297,7 +1297,7 @@ int
 	}
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
-	if (fbink_config->is_cleared) {
+	if (fbink_config->is_cleared || deviceQuirks.isKobo16Landscape) {
 		region.top    = 0U;
 		region.left   = 0U;
 		region.width  = vinfo.xres;
