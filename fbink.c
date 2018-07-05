@@ -105,10 +105,10 @@ static void
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	// but a bit more complicated for RGB565
-	unsigned int c = ((r / 8U) << 11U) + ((g / 4U) << 5U) + (b / 8U);
+	unsigned short int c = ((r / 8U) << 11U) + ((g / 4U) << 5U) + (b / 8U);
 	// or: c = ((r / 8) * 2048) + ((g / 4) * 32) + (b / 8);
 	// write 'two bytes at once'
-	*((unsigned char*) (g_fbink_fbp + pix_offset)) = (unsigned char) c;
+	*((unsigned short int*) (g_fbink_fbp + pix_offset)) = c;
 }
 
 // Handle various bpp...
