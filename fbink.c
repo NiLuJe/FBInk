@@ -781,6 +781,23 @@ int
 	return fbfd;
 }
 
+static const char*
+    fb_rotate_to_string(uint32_t rotate)
+{
+	switch (rotate) {
+		case FB_ROTATE_UR:
+			return "Upright, 0°";
+		case FB_ROTATE_CW:
+			return "Clockwise, 90°";
+		case FB_ROTATE_UD:
+			return "Upside Down, 180°";
+		case FB_ROTATE_CCW:
+			return "Counter Clockwise, 270°";
+		default:
+			return "Unknown?!";
+	}
+}
+
 // Get the various fb info & setup global variables
 int
     fbink_init(int fbfd, const FBInkConfig* fbink_config)
@@ -814,11 +831,12 @@ int
 		fprintf(stderr, "[FBInk] Error reading variable information.\n");
 		return EXIT_FAILURE;
 	}
-	ELOG("[FBInk] Variable fb info: %ux%u, %ubpp @ rotation: %u",
+	ELOG("[FBInk] Variable fb info: %ux%u, %ubpp @ rotation: %u (%s)",
 	     vinfo.xres,
 	     vinfo.yres,
 	     vinfo.bits_per_pixel,
-	     vinfo.rotate);
+	     vinfo.rotate,
+	     fb_rotate_to_string(vinfo.rotate));
 
 	// NOTE: Reset original font resolution, in case we're re-init'ing,
 	//       since we're relying on the default value to calculate the scaled value,
@@ -892,7 +910,10 @@ int
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo)) {
 		fprintf(stderr, "[FBInk] Error reading fixed information.\n");
 	}
-	ELOG("[FBInk] Fixed fb info: id is \"%s\", smem_len: %u bytes & line_length: %u bytes", finfo.id, finfo.smem_len, finfo.line_length);
+	ELOG("[FBInk] Fixed fb info: id is \"%s\", smem_len: %u bytes & line_length: %u bytes",
+	     finfo.id,
+	     finfo.smem_len,
+	     finfo.line_length);
 
 	// Finish with some more generic stuff, not directly related to the framebuffer.
 	// As all this stuff is pretty much set in stone, we'll only query it once.
