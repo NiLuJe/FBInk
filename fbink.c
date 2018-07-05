@@ -103,12 +103,16 @@ static void
 	// note: x * 2 as every pixel is 2 consecutive bytes
 	size_t pix_offset = x * 2U + y * finfo.line_length;
 
+#pragma GCC diagnostic push
 	// now this is about the same as 'fbp[pix_offset] = value'
 	// but a bit more complicated for RGB565
+#pragma GCC diagnostic ignored "-Wconversion"
 	unsigned short int c = ((r / 8U) << 11U) + ((g / 4U) << 5U) + (b / 8U);
 	// or: c = ((r / 8) * 2048) + ((g / 4) * 32) + (b / 8);
-	// write 'two bytes at once'
+	// write 'two bytes at once', much to GCC's dismay...
+#pragma GCC diagnostic ignored "-Wcast-align"
 	*((unsigned short int*) (g_fbink_fbp + pix_offset)) = c;
+#pragma GCC diagnostic pop
 }
 
 // Handle various bpp...
