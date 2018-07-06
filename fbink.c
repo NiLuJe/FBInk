@@ -38,35 +38,31 @@ const char*
 
 // Helper function to 'plot' a pixel in given color
 static void
-    put_pixel_Gray4(unsigned short int x, unsigned short int y, unsigned short int c)
+    put_pixel_Gray4(FBInkCoordinates* coords, unsigned short int c)
 {
 	// calculate the pixel's byte offset inside the buffer
-	size_t pix_offset = x / 2 + y * finfo.line_length;
+	size_t pix_offset = coords->x / 2 + coords->y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	*((unsigned char*) (g_fbink_fbp + pix_offset)) = (unsigned char) c;
 }
 
 static void
-    put_pixel_Gray8(unsigned short int x, unsigned short int y, unsigned short int c)
+    put_pixel_Gray8(FBInkCoordinates* coords, unsigned short int c)
 {
 	// calculate the pixel's byte offset inside the buffer
-	size_t pix_offset = x + y * finfo.line_length;
+	size_t pix_offset = coords->x + coords->y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	*((unsigned char*) (g_fbink_fbp + pix_offset)) = (unsigned char) c;
 }
 
 static void
-    put_pixel_RGB24(unsigned short int x,
-		    unsigned short int y,
-		    unsigned short int r,
-		    unsigned short int g,
-		    unsigned short int b)
+    put_pixel_RGB24(FBInkCoordinates* coords, unsigned short int r, unsigned short int g, unsigned short int b)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 3 as every pixel is 3 consecutive bytes
-	size_t pix_offset = x * 3U + y * finfo.line_length;
+	size_t pix_offset = coords->x * 3U + coords->y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	*((unsigned char*) (g_fbink_fbp + pix_offset))     = (unsigned char) b;
@@ -75,15 +71,11 @@ static void
 }
 
 static void
-    put_pixel_RGB32(unsigned short int x,
-		    unsigned short int y,
-		    unsigned short int r,
-		    unsigned short int g,
-		    unsigned short int b)
+    put_pixel_RGB32(FBInkCoordinates* coords, unsigned short int r, unsigned short int g, unsigned short int b)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 4 as every pixel is 4 consecutive bytes
-	size_t pix_offset = x * 4U + y * finfo.line_length;
+	size_t pix_offset = coords->x * 4U + coords->y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	*((unsigned char*) (g_fbink_fbp + pix_offset))     = (unsigned char) b;
@@ -93,15 +85,11 @@ static void
 }
 
 static void
-    put_pixel_RGB565(unsigned short int x,
-		     unsigned short int y,
-		     unsigned short int r,
-		     unsigned short int g,
-		     unsigned short int b)
+    put_pixel_RGB565(FBInkCoordinates* coords, unsigned short int r, unsigned short int g, unsigned short int b)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 2 as every pixel is 2 consecutive bytes
-	size_t pix_offset = x * 2U + y * finfo.line_length;
+	size_t pix_offset = coords->x * 2U + coords->y * finfo.line_length;
 
 #pragma GCC diagnostic push
 	// now this is about the same as 'fbp[pix_offset] = value'
@@ -115,16 +103,84 @@ static void
 #pragma GCC diagnostic pop
 }
 
+// Handle rotation quirks...
+static void
+    rotate_coordinates(FBInkCoordinates* coords)
+{
+	unsigned short int rx = coords->y;
+	unsigned short int ry = (unsigned short int) (viewWidth - coords->x - 1);
+
+// NOTE: This codepath is not production ready, it was just an experiment to wrap my head around framebuffer rotation...
+//       In particular, only CW has been actually confirmed to behave properly (to handle the isKobo16Landscape quirk),
+//       and region rotation is NOT handled properly/at all.
+//       TL;DR: This is for documentation purposes only, never build w/ MATHS defined ;).
+#ifdef FBINK_WITH_MATHS
+	unsigned short int rotation = FB_ROTATE_CW;
+	// i.e., θ (c.f., https://en.wikipedia.org/wiki/Cartesian_coordinate_system#Rotation)
+	double rangle = ((rotation * 90) * M_PI / 180.0);
+	double fxp    = coords->x * cos(rangle) - coords->y * sin(rangle);
+	double fyp    = coords->x * sin(rangle) + coords->y * cos(rangle);
+	LOG("(fxp, fyp) -> (%f, %f)", fxp, fyp);
+	unsigned short int xp;
+	unsigned short int yp;
+	switch (rotation) {
+		case FB_ROTATE_CW:
+			xp = (unsigned short int) lround(-fxp);
+			yp = (unsigned short int) lround(vinfo.yres - 1 - fyp);
+			break;
+		case FB_ROTATE_UD:
+			// NOTE: IIRC, this pretty much ends up with (x', y') being equal to (y, x).
+			xp = (unsigned short int) lround(-fyp);
+			yp = (unsigned short int) lround(-fxp);
+			break;
+		case FB_ROTATE_CCW:
+			xp = (unsigned short int) lround(vinfo.xres - 1 - fxp);
+			yp = (unsigned short int) lround(-fyp);
+			break;
+		default:
+			xp = (unsigned short int) lround(fxp);
+			yp = (unsigned short int) lround(fyp);
+			break;
+	}
+
+	LOG("(x, y) -> (%hu, %hu) vs. (rx, ry) -> (%hu, %hu) vs. (x', y') -> (%hu, %hu)",
+	    coords->x,
+	    coords->y,
+	    rx,
+	    ry,
+	    xp,
+	    yp);
+
+	coords->x = xp;
+	coords->y = yp;
+#else
+	coords->x = rx;
+	coords->y = ry;
+#endif
+}
+
 // Handle various bpp...
 static void
     put_pixel(unsigned short int x, unsigned short int y, unsigned short int c)
 {
+	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
+	FBInkCoordinates coords = { x, y };
+	if (deviceQuirks.isKobo16Landscape) {
+		rotate_coordinates(&coords);
+	}
+
 	// NOTE: Discard off-screen pixels!
 	//       For instance, when we have a halfcell offset in conjunction with a !isPerfectFit pixel offset,
 	//       when we're padding and centering, the final whitespace of right-padding will have its last
 	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
-	if (x >= vinfo.xres || y >= vinfo.yres) {
-		//LOG("Discarding off-screen pixel @ %u, %u (out of %ux%u bounds)", x, y, vinfo.xres, vinfo.yres);
+	if (coords.x >= vinfo.xres || coords.y >= vinfo.yres) {
+		/*
+		LOG("Discarding off-screen pixel @ (%hu, %hu) (out of %ux%u bounds)",
+		    coords.x,
+		    coords.y,
+		    vinfo.xres,
+		    vinfo.yres);
+		*/
 		return;
 	}
 #ifdef FBINK_FOR_LEGACY
@@ -133,16 +189,16 @@ static void
 #endif
 
 	if (vinfo.bits_per_pixel == 4U) {
-		put_pixel_Gray4(x, y, def_b[c]);
+		put_pixel_Gray4(&coords, def_b[c]);
 	} else if (vinfo.bits_per_pixel == 8U) {
 		// NOTE: Grayscale palette, we could have used def_r or def_g ;).
-		put_pixel_Gray8(x, y, def_b[c]);
+		put_pixel_Gray8(&coords, def_b[c]);
 	} else if (vinfo.bits_per_pixel == 16U) {
-		put_pixel_RGB565(x, y, def_r[c], def_g[c], def_b[c]);
+		put_pixel_RGB565(&coords, def_r[c], def_g[c], def_b[c]);
 	} else if (vinfo.bits_per_pixel == 24U) {
-		put_pixel_RGB24(x, y, def_r[c], def_g[c], def_b[c]);
+		put_pixel_RGB24(&coords, def_r[c], def_g[c], def_b[c]);
 	} else if (vinfo.bits_per_pixel == 32U) {
-		put_pixel_RGB32(x, y, def_r[c], def_g[c], def_b[c]);
+		put_pixel_RGB32(&coords, def_r[c], def_g[c], def_b[c]);
 	}
 }
 
@@ -161,7 +217,7 @@ static void
 			put_pixel((unsigned short int) (x + cx), (unsigned short int) (y + cy), c);
 		}
 	}
-	LOG("Filled a %hux%hu rectangle @ %hu, %hu", w, h, x, y);
+	LOG("Filled a %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
 }
 
 // Helper function to clear the screen - fill whole screen with given color
@@ -236,7 +292,7 @@ static void
 			break;
 	}
 #else
-	bitmap = font8x8_get_bitmap(codepoint);
+	bitmap    = font8x8_get_bitmap(codepoint);
 #endif
 
 	unsigned short int x;
@@ -300,7 +356,7 @@ static struct mxcfb_rect
 	if (!deviceQuirks.isPerfectFit) {
 		// We correct by half of said dead space, since we want perfect centering ;).
 		unsigned short int deadzone_offset =
-		    (unsigned short int) (vinfo.xres - (unsigned short int) (MAXCOLS * FONTW)) / 2U;
+		    (unsigned short int) (viewWidth - (unsigned short int) (MAXCOLS * FONTW)) / 2U;
 		pixel_offset = (unsigned short int) (pixel_offset + deadzone_offset);
 		LOG("Incrementing pixel_offset by %u pixels to compensate for dead space on the right edge",
 		    deadzone_offset);
@@ -308,9 +364,9 @@ static struct mxcfb_rect
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
-		.top   = (uint32_t)((row - multiline_offset) * FONTH),
-		.left  = (uint32_t)(col * FONTW),
-		.width = multiline_offset > 0U ? (vinfo.xres - (uint32_t)(col * FONTW)) : (uint32_t)(charcount * FONTW),
+		.top    = (uint32_t)((row - multiline_offset) * FONTH),
+		.left   = (uint32_t)(col * FONTW),
+		.width  = multiline_offset > 0U ? (viewWidth - (uint32_t)(col * FONTW)) : (uint32_t)(charcount * FONTW),
 		.height = (uint32_t)((multiline_offset + 1U) * FONTH),
 	};
 
@@ -342,13 +398,13 @@ static struct mxcfb_rect
 			  FONTH,
 			  bgC);
 		// Correct width, to include that bit of content, too, if needed
-		if (region.width < vinfo.xres) {
+		if (region.width < viewWidth) {
 			region.width += pixel_offset;
 			// And make sure it's properly clamped, because we can't necessarily rely on left & width
 			// being entirely acurate either because of the multiline print override,
 			// or because of a bit of subcell placement overshoot trickery (c.f., comment in put_pixel).
-			if (region.width + region.left > vinfo.xres) {
-				region.width = vinfo.xres - region.left;
+			if (region.width + region.left > viewWidth) {
+				region.width = viewWidth - region.left;
 				LOG("Clamped region.width to %u", region.width);
 			} else {
 				LOG("Updated region.width to %u", region.width);
@@ -362,15 +418,15 @@ static struct mxcfb_rect
 	if (charcount == MAXCOLS && !deviceQuirks.isPerfectFit && !halfcell_offset) {
 		// NOTE: !isPerfectFit ensures pixel_offset is non-zero
 		LOG("Painting a background rectangle to fill the dead space on the right edge");
-		fill_rect((unsigned short int) (vinfo.xres - pixel_offset),
+		fill_rect((unsigned short int) (viewWidth - pixel_offset),
 			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			  pixel_offset,
 			  FONTH,
 			  bgC);
 		// If it's not already the case, update region to the full width,
 		// because we've just plugged a hole at the very right edge of a full line.
-		if (region.width < vinfo.xres) {
-			region.width = vinfo.xres;
+		if (region.width < viewWidth) {
+			region.width = viewWidth;
 			LOG("Updated region.width to %u", region.width);
 		}
 	}
@@ -378,9 +434,9 @@ static struct mxcfb_rect
 	// NOTE: In case of a multi-line centered print, we can't really trust the final col,
 	//       it might be significantly different than the others, and as such, we'd be computing a cropped region.
 	//       Make the region cover the full width of the screen to make sure we won't miss anything.
-	if (multiline_offset > 0U && is_centered && (region.left > 0U || region.width < vinfo.xres)) {
+	if (multiline_offset > 0U && is_centered && (region.left > 0U || region.width < viewWidth)) {
 		region.left  = 0U;
-		region.width = vinfo.xres;
+		region.width = viewWidth;
 		LOG("Enforced region.left to %u & region.width to %u because of multi-line centering",
 		    region.left,
 		    region.width);
@@ -836,6 +892,54 @@ int
 	     vinfo.rotate,
 	     fb_rotate_to_string(vinfo.rotate));
 
+	// NOTE: In most every cases, we assume (0, 0) is at the top left of the screen,
+	//       and (xres, yres) at the bottom right, as we should.
+	viewWidth  = vinfo.xres;
+	viewHeight = vinfo.yres;
+
+	// NOTE: But in some very specific circumstances, that doesn't hold true...
+	//       In particular, Kobos boot with a framebuffer in Landscape orientation (i.e., xres > yres),
+	//       but a viewport in Portrait (the boot progress, as well as Nickel itself are presented in Portrait mode),
+	//       which leads to a broken origin: (0, 0) is at the top-right of the screen
+	//       (i.e., as if it were intended to be used in the same Landscape viewport as the framebuffer orientation).
+	//       So we have to handle the rotation ourselves. We limit this to Kobos and a simple xres > yres check,
+	//       because as we'll show, vinfo.rotate doesn't necessarily provide us with actionable info...
+	// NOTE: Nickel itself will put things back into order, so this should NOT affect behavior under Nickel...
+	//       Be aware that pickel, on the other hand, will forcibly drop back to this modeset!
+	if (vinfo.xres > vinfo.yres) {
+		// NOTE: PW2:
+		//         vinfo.rotate == 2 in Landscape (vs. 3 in Portrait mode), w/ the xres/yres switch in Landscape,
+		//         and (0, 0) is always at the top-left of the viewport, so we're always correct.
+		//       Kindle Touch:
+		//         Doesn't propose a Landscape mode, and defaults to vinfo.rotate == 1
+		//       K4:
+		//         It supports the four possible rotations, and while it is always using vinfo.rotate == 0,
+		//         xres & yres switch accordingly when in Landscape modes,
+		//         and (0, 0) is always at the top-left of the viewport, so we're always correct.
+		//       TL;DR: We can't really rely on rotate to tell us anything reliably actionable, but, thankfully,
+		//              we don't have to do anything extra on Kindles anyway :).
+		// NOTE: The Kobos, on the other hand, at boot, are in 16bpp mode, and appear to be natively rotated CCW
+		//       (or CW, depending on how you look at it...).
+		//       Because we have legitimate uses in that state,
+		//       (be it during the boot process, i.e., on-animator; or out-of-Nickel use cases),
+		//       we attempt to handle this rotation properly, much like KOReader does.
+		//       c.f., https://github.com/koreader/koreader/blob/master/frontend/device/kobo/device.lua#L32-L33
+		//           & https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer.lua#L74-L84
+#if !defined(FBINK_FOR_KINDLE) && !defined(FBINK_FOR_LEGACY)
+		if (vinfo.bits_per_pixel == 16) {
+			// Correct viewWidth & viewHeight, so we do all our row/column arithmetics on the right values...
+			viewWidth                      = vinfo.yres;
+			viewHeight                     = vinfo.xres;
+			deviceQuirks.isKobo16Landscape = true;
+			ELOG("[FBInk] Enabled Kobo @ 16bpp fb rotation quirks (%ux%u -> %ux%u)",
+			     vinfo.xres,
+			     vinfo.yres,
+			     viewWidth,
+			     viewHeight);
+		}
+#endif
+	}
+
 	// NOTE: Reset original font resolution, in case we're re-init'ing,
 	//       since we're relying on the default value to calculate the scaled value,
 	//       and we're using this value to set MAXCOLS & MAXROWS, which we *need* to be sane.
@@ -869,20 +973,14 @@ int
 #endif
 	} else {
 		// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
-		// NOTE: We still want to compare against the screen's "height", even in Landscape mode...
-		uint32_t screen_height = vinfo.yres;
-		if (vinfo.xres > vinfo.yres) {
-			// NOTE: vinfo.rotate == 2 (vs. 3 in Portrait mode) on my PW2
-			//       My Touch, which doesn't propose Landscape mode, defaults to vinfo.rotate == 1
-			//       My K4, which supports the four possible rotations,
-			//          is always using vinfo.rotate == 0 (but xres & yres do switch).
-			screen_height = vinfo.xres;
-		}
-		if (screen_height <= 600U) {
+		// NOTE: We still want to compare against the screen's "height", even in Landscape mode,
+		//       so we simply use the longest edge to do just that...
+		uint32_t actual_height = MAX(vinfo.xres, vinfo.yres);
+		if (actual_height <= 600U) {
 			FONTSIZE_MULT = 1U;    // 8x8
-		} else if (screen_height <= 1024U) {
+		} else if (actual_height <= 1024U) {
 			FONTSIZE_MULT = 2U;    // 16x16
-		} else if (screen_height <= 1440U) {
+		} else if (actual_height <= 1440U) {
 			FONTSIZE_MULT = 3U;    // 24x24
 		} else {
 			FONTSIZE_MULT = 4U;    // 32x32
@@ -894,12 +992,12 @@ int
 	ELOG("[FBInk] Fontsize set to %dx%d.", FONTW, FONTH);
 
 	// Compute MAX* values now that we know the screen & font resolution
-	MAXCOLS = (unsigned short int) (vinfo.xres / FONTW);
-	MAXROWS = (unsigned short int) (vinfo.yres / FONTH);
+	MAXCOLS = (unsigned short int) (viewWidth / FONTW);
+	MAXROWS = (unsigned short int) (viewHeight / FONTH);
 	ELOG("[FBInk] Line length: %hu cols, Page size: %hu rows.", MAXCOLS, MAXROWS);
 
 	// Mention & remember if we can perfectly fit the final column on screen
-	if ((unsigned short int) (FONTW * MAXCOLS) == vinfo.xres) {
+	if ((unsigned short int) (FONTW * MAXCOLS) == viewWidth) {
 		deviceQuirks.isPerfectFit = true;
 		ELOG("[FBInk] It's a perfect fit!");
 	}
@@ -919,11 +1017,11 @@ int
 		// Identify the device's specific model...
 		identify_device(&deviceQuirks);
 		if (deviceQuirks.isKindlePearlScreen) {
-			ELOG("[FBInk] Enabled Kindle with Pearl screen device quirks");
+			ELOG("[FBInk] Enabled Kindle with Pearl screen quirks");
 		} else if (deviceQuirks.isKindleOasis2) {
-			ELOG("[FBInk] Enabled Kindle Oasis 2 device quirks");
+			ELOG("[FBInk] Enabled Kindle Oasis 2 quirks");
 		} else if (deviceQuirks.isKoboMk7) {
-			ELOG("[FBInk] Enabled Kobo Mark 7 device quirks");
+			ELOG("[FBInk] Enabled Kobo Mark 7 quirks");
 		}
 
 		// Ask the Kernel for its HZ value so we can translate jiffies into human-readable units.
@@ -1273,6 +1371,16 @@ int
 
 		// Cleanup
 		free(line);
+	}
+
+	// Rotate the region if need be...
+	if (deviceQuirks.isKobo16Landscape) {
+		struct mxcfb_rect oregion = region;
+		// NOTE: left = x, top = y
+		region.top    = viewWidth - oregion.left - oregion.width;
+		region.left   = oregion.top;
+		region.width  = oregion.height;
+		region.height = oregion.width;
 	}
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...

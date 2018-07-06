@@ -52,7 +52,15 @@ typedef struct
 	bool isKoboMk7;
 	bool isKindlePearlScreen;
 	bool isKindleOasis2;
+	bool isKobo16Landscape;
 	bool skipId;
 } FBInkDeviceQuirks;
+
+// An (x, y) coordinates tuple
+typedef struct
+{
+	unsigned short int x;
+	unsigned short int y;
+} FBInkCoordinates;
 
 #endif

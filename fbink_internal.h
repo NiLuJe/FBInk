@@ -32,6 +32,10 @@
 #include <fcntl.h>
 #include <linux/fb.h>
 #include <linux/kd.h>
+// NOTE: Don't use in prod, c.f., Makefile & rotate_coordinates() comments in fbink.c
+#ifdef FBINK_WITH_MATHS
+#	include <math.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -148,6 +152,8 @@ bool           g_fbink_isFbMapped = false;
 // And those stay purely inside the library
 struct fb_var_screeninfo vinfo;
 struct fb_fix_screeninfo finfo;
+uint32_t                 viewWidth;
+uint32_t                 viewHeight;
 unsigned short int       FONTW         = 8U;
 unsigned short int       FONTH         = 8U;
 unsigned short int       FONTSIZE_MULT = 1U;
@@ -164,23 +170,13 @@ long int USER_HZ = 100;
 // Where we track device/screen-specific quirks
 FBInkDeviceQuirks deviceQuirks = { 0 };
 
-static void put_pixel_Gray4(unsigned short int, unsigned short int, unsigned short int);
-static void put_pixel_Gray8(unsigned short int, unsigned short int, unsigned short int);
-static void put_pixel_RGB24(unsigned short int,
-			    unsigned short int,
-			    unsigned short int,
-			    unsigned short int,
-			    unsigned short int);
-static void put_pixel_RGB32(unsigned short int,
-			    unsigned short int,
-			    unsigned short int,
-			    unsigned short int,
-			    unsigned short int);
-static void put_pixel_RGB565(unsigned short int,
-			     unsigned short int,
-			     unsigned short int,
-			     unsigned short int,
-			     unsigned short int);
+static void rotate_coordinates(FBInkCoordinates*);
+
+static void put_pixel_Gray4(FBInkCoordinates*, unsigned short int);
+static void put_pixel_Gray8(FBInkCoordinates*, unsigned short int);
+static void put_pixel_RGB24(FBInkCoordinates*, unsigned short int, unsigned short int, unsigned short int);
+static void put_pixel_RGB32(FBInkCoordinates*, unsigned short int, unsigned short int, unsigned short int);
+static void put_pixel_RGB565(FBInkCoordinates*, unsigned short int, unsigned short int, unsigned short int);
 static void put_pixel(unsigned short int, unsigned short int, unsigned short int);
 
 static void fill_rect(unsigned short int,
