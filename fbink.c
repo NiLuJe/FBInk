@@ -105,7 +105,7 @@ static void
 
 // Handle rotation quirks...
 static void
-    get_physical_coords(FBInkCoordinates* coords)
+    rotate_coordinates(FBInkCoordinates* coords)
 {
 	unsigned short int rx = coords->y;
 	unsigned short int ry = viewWidth - coords->x - 1;
@@ -120,7 +120,7 @@ static void
 {
 	FBInkCoordinates coords = { x, y };
 	if (deviceQuirks.isKobo16Landscape) {
-		get_physical_coords(&coords);
+		rotate_coordinates(&coords);
 	}
 
 	// NOTE: Discard off-screen pixels!
@@ -1302,14 +1302,7 @@ int
 	// Rotate the region if need be...
 	if (deviceQuirks.isKobo16Landscape) {
 		struct mxcfb_rect oregion = region;
-		// left = x
-		// top = y
-		/*
-		FBInkCoordinates coords = { oregion.left, oregion.top };
-		get_physical_coords(&coords);
-		region.top = coords.x;
-		region.left = coords.y;
-		*/
+		// NOTE: left = x, top = y
 		region.top    = viewWidth - oregion.left - oregion.width;
 		region.left   = oregion.top;
 		region.width  = oregion.height;

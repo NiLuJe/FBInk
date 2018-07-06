@@ -166,7 +166,7 @@ long int USER_HZ = 100;
 // Where we track device/screen-specific quirks
 FBInkDeviceQuirks deviceQuirks = { 0 };
 
-static void get_physical_coords(FBInkCoordinates*);
+static void rotate_coordinates(FBInkCoordinates*);
 
 static void put_pixel_Gray4(FBInkCoordinates*, unsigned short int);
 static void put_pixel_Gray8(FBInkCoordinates*, unsigned short int);
