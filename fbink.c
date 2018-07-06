@@ -572,6 +572,14 @@ static int
 		char buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
 		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE: %s\n", errstr);
+		if (errno == EINVAL) {
+			fprintf(stderr,
+				"[FBInk] update_region={top=%u, left=%u, width=%u, height=%u}\n",
+				region.top,
+				region.left,
+				region.width,
+				region.height);
+		}
 		return EXIT_FAILURE;
 	}
 
@@ -636,6 +644,14 @@ static int
 		char buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
 		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE_KOA2: %s\n", errstr);
+		if (errno == EINVAL) {
+			fprintf(stderr,
+				"[FBInk] update_region={top=%u, left=%u, width=%u, height=%u}\n",
+				region.top,
+				region.left,
+				region.width,
+				region.height);
+		}
 		return EXIT_FAILURE;
 	}
 
@@ -689,6 +705,14 @@ static int
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
 		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE_V1_NTX: %s\n", errstr);
+		if (errno == EINVAL) {
+			fprintf(stderr,
+				"[FBInk] update_region={top=%u, left=%u, width=%u, height=%u}\n",
+				region.top,
+				region.left,
+				region.width,
+				region.height);
+		}
 		return EXIT_FAILURE;
 	}
 
@@ -739,6 +763,14 @@ static int
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
 		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE_V2: %s\n", errstr);
+		if (errno == EINVAL) {
+			fprintf(stderr,
+				"[FBInk] update_region={top=%u, left=%u, width=%u, height=%u}\n",
+				region.top,
+				region.left,
+				region.width,
+				region.height);
+		}
 		return EXIT_FAILURE;
 	}
 
