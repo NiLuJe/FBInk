@@ -929,6 +929,9 @@ int
 	viewWidth  = vinfo.xres;
 	viewHeight = vinfo.yres;
 
+#if !defined(FBINK_FOR_KINDLE) && !defined(FBINK_FOR_LEGACY)
+	// Make sure we default to no rotation shenanigans, to avoid issues on reinit...
+	deviceQuirks.isKobo16Landscape = false;
 	// NOTE: But in some very specific circumstances, that doesn't hold true...
 	//       In particular, Kobos boot with a framebuffer in Landscape orientation (i.e., xres > yres),
 	//       but a viewport in Portrait (the boot progress, as well as Nickel itself are presented in Portrait mode),
@@ -959,7 +962,6 @@ int
 		//       we attempt to handle this rotation properly, much like KOReader does.
 		//       c.f., https://github.com/koreader/koreader/blob/master/frontend/device/kobo/device.lua#L32-L33
 		//           & https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer.lua#L74-L84
-#if !defined(FBINK_FOR_KINDLE) && !defined(FBINK_FOR_LEGACY)
 		if (vinfo.bits_per_pixel == 16) {
 			// Correct viewWidth & viewHeight, so we do all our row/column arithmetics on the right values...
 			viewWidth                      = vinfo.yres;
@@ -971,8 +973,8 @@ int
 			     viewWidth,
 			     viewHeight);
 		}
-#endif
 	}
+#endif
 
 	// NOTE: Reset original font resolution, in case we're re-init'ing,
 	//       since we're relying on the default value to calculate the scaled value,
