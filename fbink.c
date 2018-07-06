@@ -128,7 +128,7 @@ static void
 	//       when we're padding and centering, the final whitespace of right-padding will have its last
 	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
 	if (coords.x >= vinfo.xres || coords.y >= vinfo.yres) {
-		LOG("Discarding off-screen pixel @ %u, %u (out of %ux%u bounds)",
+		LOG("Discarding off-screen pixel @ (%hu, %hu) (out of %ux%u bounds)",
 		    coords.x,
 		    coords.y,
 		    vinfo.xres,
@@ -169,7 +169,7 @@ static void
 			put_pixel((unsigned short int) (x + cx), (unsigned short int) (y + cy), c);
 		}
 	}
-	LOG("Filled a %hux%hu rectangle @ %hu, %hu", w, h, x, y);
+	LOG("Filled a %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
 }
 
 // Helper function to clear the screen - fill whole screen with given color

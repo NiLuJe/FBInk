@@ -25,7 +25,7 @@ The tool is available both as a commandline utility, and as a shared or static l
 See the [public header](fbink.h) for basic API usage.
 Launch the `fbink` tool with no argument for a quick manual & rundown of its capabilities.
 
-NOTE: It makes absolutely *NO* attempt at handling rotation, because that currently appears to be the right thing to do with both current Kobo FW versions and Kindles.
+NOTE: It generally makes absolutely *NO* attempt at handling rotation, because that currently appears to be the right thing to do with both current Kobo FW versions and Kindles.
 YMMV on older FW, or if something else is fudging with fb rotation, or if your application is implementing rotation in software (i.e., a rotated viewport).
 There's a very specific exception made for Kobo devices running in 16bpp mode and appearing to be in landscape mode: since that seems to be their native state,
 we *attempt* to compensate for this, as we can legitimately be used before Nickel itself corrects this.

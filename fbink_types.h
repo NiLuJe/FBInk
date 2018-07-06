@@ -56,7 +56,7 @@ typedef struct
 	bool skipId;
 } FBInkDeviceQuirks;
 
-// x,y coordinates tuple
+// An (x, y) coordinates tuple
 typedef struct
 {
 	unsigned short int x;
