@@ -111,7 +111,7 @@ static void
 	unsigned short int ry = (unsigned short int) (viewWidth - coords->x - 1);
 
 // NOTE: This codepath is not production ready, it was just an experiment to wrap my head around framebuffer rotation...
-//       In particular, only CW has been actually confirmed to behave properly,
+//       In particular, only CW has been actually confirmed to behave properly (to handle the isKobo16Landscape quirk),
 //       and region rotation is NOT handled properly/at all.
 //       TL;DR: This is for documentation purposes only, never build w/ MATHS defined ;).
 #ifdef FBINK_WITH_MATHS
