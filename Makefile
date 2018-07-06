@@ -105,6 +105,8 @@ endif
 ifdef STANDALONE
 	EXTRA_LDFLAGS+=-Wl,-rpath=/usr/local/fbink/lib
 endif
+# Maths!
+LIBS+=-lm
 
 ##
 # Now that we're done fiddling with flags, let's build stuff!

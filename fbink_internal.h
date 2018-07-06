@@ -32,6 +32,7 @@
 #include <fcntl.h>
 #include <linux/fb.h>
 #include <linux/kd.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>

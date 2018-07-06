@@ -110,6 +110,14 @@ static void
 	unsigned short int rx = coords->y;
 	unsigned short int ry = (unsigned short int) (viewWidth - coords->x - 1);
 
+	// i.e., θ (c.f., https://en.wikipedia.org/wiki/Cartesian_coordinate_system#Rotation)
+	double rangle = ((FB_ROTATE_CW * 90) * M_PI / 180.0);
+	// NOTE: We want unsigned values, so abs(); and lround is needed to avoid off-by-ones because of the float-to-uint conversion
+	unsigned short int xp = lround(fabs(coords->x * cos(rangle) - coords->y * sin(rangle)));
+	unsigned short int yp = vinfo.yres - 1 - lround(fabs(coords->x * sin(rangle) + coords->y * cos(rangle)));
+
+	LOG("(x, y) -> (%hu, %hu) vs. (rx, ry) -> (%hu, %hu) vs. (x', y') -> (%hu, %hu)", coords->x, coords->y, rx, ry, xp, yp);
+
 	coords->x = rx;
 	coords->y = ry;
 }
