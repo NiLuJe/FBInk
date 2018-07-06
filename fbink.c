@@ -128,7 +128,11 @@ static void
 	//       when we're padding and centering, the final whitespace of right-padding will have its last
 	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
 	if (coords.x >= vinfo.xres || coords.y >= vinfo.yres) {
-		//LOG("Discarding off-screen pixel @ %u, %u (out of %ux%u bounds)", coords.x, coords.y, vinfo.xres, vinfo.yres);
+		LOG("Discarding off-screen pixel @ %u, %u (out of %ux%u bounds)",
+		    coords.x,
+		    coords.y,
+		    vinfo.xres,
+		    vinfo.yres);
 		return;
 	}
 #ifdef FBINK_FOR_LEGACY
@@ -158,21 +162,14 @@ static void
 	      unsigned short int h,
 	      unsigned short int c)
 {
-	FBInkCoordinates coords = { x, y };
-	/*
-	if (deviceQuirks.isKobo16Landscape) {
-		get_physical_coords(&coords);
-	}
-	*/
-
 	unsigned short int cx;
 	unsigned short int cy;
 	for (cy = 0U; cy < h; cy++) {
 		for (cx = 0U; cx < w; cx++) {
-			put_pixel((unsigned short int) (coords.x + cx), (unsigned short int) (coords.y + cy), c);
+			put_pixel((unsigned short int) (x + cx), (unsigned short int) (y + cy), c);
 		}
 	}
-	LOG("Filled a %hux%hu rectangle @ %hu, %hu", w, h, coords.x, coords.y);
+	LOG("Filled a %hux%hu rectangle @ %hu, %hu", w, h, x, y);
 }
 
 // Helper function to clear the screen - fill whole screen with given color
@@ -1301,15 +1298,17 @@ int
 	// Rotate the region if need be...
 	if (deviceQuirks.isKobo16Landscape) {
 		struct mxcfb_rect oregion = region;
+		// left = x
+		// top = y
 		/*
 		FBInkCoordinates coords = { oregion.left, oregion.top };
 		get_physical_coords(&coords);
 		region.top = coords.x;
 		region.left = coords.y;
 		*/
-		region.top = oregion.left;
-		region.left = oregion.top;
-		region.width = oregion.height;
+		region.top    = viewWidth - oregion.left - oregion.width;
+		region.left   = oregion.top;
+		region.width  = oregion.height;
 		region.height = oregion.width;
 	}
 
