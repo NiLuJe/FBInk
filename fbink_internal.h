@@ -34,7 +34,7 @@
 #include <linux/kd.h>
 // NOTE: Doin't use in prod, c.f., Makefile
 #ifdef FBINK_WITH_MATHS
-#include <math.h>
+#	include <math.h>
 #endif
 #include <stdlib.h>
 #include <string.h>

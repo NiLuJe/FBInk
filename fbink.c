@@ -111,12 +111,15 @@ static void
 	unsigned short int ry = (unsigned short int) (viewWidth - coords->x - 1);
 
 // NOTE: This codepath is not production ready, it was just an experiment to wrap my head around framebuffer rotation...
+//       In particular, only CW has been actually confirmed to behave properly,
+//       and region rotation is NOT handled properly/at all.
+//       TL;DR: This is for documentation purposes only, never build w/ MATHS defined ;).
 #ifdef FBINK_WITH_MATHS
 	unsigned short int rotation = FB_ROTATE_CW;
 	// i.e., θ (c.f., https://en.wikipedia.org/wiki/Cartesian_coordinate_system#Rotation)
 	double rangle = ((rotation * 90) * M_PI / 180.0);
-	double fxp = coords->x * cos(rangle) - coords->y * sin(rangle);
-	double fyp = coords->x * sin(rangle) + coords->y * cos(rangle);
+	double fxp    = coords->x * cos(rangle) - coords->y * sin(rangle);
+	double fyp    = coords->x * sin(rangle) + coords->y * cos(rangle);
 	LOG("(fxp, fyp) -> (%f, %f)", fxp, fyp);
 	switch (rotation) {
 		case FB_ROTATE_CW:
@@ -144,7 +147,13 @@ static void
 		yp = (unsigned short int) lround(fyp);
 	}
 
-	LOG("(x, y) -> (%hu, %hu) vs. (rx, ry) -> (%hu, %hu) vs. (x', y') -> (%hu, %hu)", coords->x, coords->y, rx, ry, xp, yp);
+	LOG("(x, y) -> (%hu, %hu) vs. (rx, ry) -> (%hu, %hu) vs. (x', y') -> (%hu, %hu)",
+	    coords->x,
+	    coords->y,
+	    rx,
+	    ry,
+	    xp,
+	    yp);
 
 	coords->x = xp;
 	coords->y = yp;
@@ -284,7 +293,7 @@ static void
 			break;
 	}
 #else
-	bitmap = font8x8_get_bitmap(codepoint);
+	bitmap    = font8x8_get_bitmap(codepoint);
 #endif
 
 	unsigned short int x;
