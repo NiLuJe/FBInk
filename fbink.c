@@ -903,7 +903,7 @@ int
 	//       which leads to a broken origin: (0, 0) is at the top-right of the screen
 	//       (i.e., as if it were intended to be used in the same Landscape viewport as the framebuffer orientation).
 	//       So we have to handle the rotation ourselves. We limit this to Kobos and a simple xres > yres check,
-	//       because as we'll show, vinfo.rotate doesn't necessarily provides us with actionable info...
+	//       because as we'll show, vinfo.rotate doesn't necessarily provide us with actionable info...
 	// NOTE: Nickel itself will put things back into order, so this should NOT affect behavior under Nickel...
 	//       Be aware that pickel, on the other hand, will forcibly drop back to this modeset!
 	if (vinfo.xres > vinfo.yres) {
@@ -927,6 +927,7 @@ int
 		//           & https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer.lua#L74-L84
 #if !defined(FBINK_FOR_KINDLE) && !defined(FBINK_FOR_LEGACY)
 		if (vinfo.bits_per_pixel == 16) {
+			// Correct viewWidth & viewHeight, so we do all our row/column arithmetics on the right values...
 			viewWidth                      = vinfo.yres;
 			viewHeight                     = vinfo.xres;
 			deviceQuirks.isKobo16Landscape = true;
