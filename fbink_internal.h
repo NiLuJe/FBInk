@@ -32,7 +32,7 @@
 #include <fcntl.h>
 #include <linux/fb.h>
 #include <linux/kd.h>
-// NOTE: Doin't use in prod, c.f., Makefile
+// NOTE: Don't use in prod, c.f., Makefile & rotate_coordinates() comments in fbink.c
 #ifdef FBINK_WITH_MATHS
 #	include <math.h>
 #endif

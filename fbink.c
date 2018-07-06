@@ -895,7 +895,8 @@ int
 	     vinfo.rotate,
 	     fb_rotate_to_string(vinfo.rotate));
 
-	// NOTE: In most every cases, assume 0,0 is at the top left of the screen, and xres,yres at the bottom right.
+	// NOTE: In most every cases, we assume (0, 0) is at the top left of the screen,
+	//       and (xres, yres) at the bottom right.
 	viewWidth  = vinfo.xres;
 	viewHeight = vinfo.yres;
 
@@ -932,14 +933,21 @@ int
 #endif
 	} else {
 		// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
-		// NOTE: We still want to compare against the screen's "height", even in Landscape mode...
+		// NOTE: We still want to compare against the screen's "height", even in Landscape mode,
+		//       so we simply use the longest edge to do just that...
 		uint32_t actual_height = MAX(vinfo.xres, vinfo.yres);
 		if (vinfo.xres > vinfo.yres) {
 			// NOTE: vinfo.rotate == 2 (vs. 3 in Portrait mode) on my PW2
 			//       My Touch, which doesn't propose Landscape mode, defaults to vinfo.rotate == 1
 			//       My K4, which supports the four possible rotations,
 			//          is always using vinfo.rotate == 0 (but xres & yres do switch).
-			// NOTE: Here be dragons!
+			// NOTE: The Kobos, at boot, are in 16bpp mode, and appear to be natively rotated CCW
+			//       (or CW, depending on how you look at it...).
+			//       Because we have legitimate uses in that state
+			//       (be it during the boot process, i.e., on-animator; or out-of-Nickel use cases),
+			//       we attempt to handle this rotation properly, much like KOReader does.
+			//       c.f., https://github.com/koreader/koreader/blob/master/frontend/device/kobo/device.lua#L32-L33
+			//           & https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer.lua#L74-L84
 #if !defined(FBINK_FOR_KINDLE) && !defined(FBINK_FOR_LEGACY)
 			if (vinfo.bits_per_pixel == 16) {
 				viewWidth                      = vinfo.yres;
