@@ -894,7 +894,11 @@ int
 				viewWidth                      = vinfo.yres;
 				viewHeight                     = vinfo.xres;
 				deviceQuirks.isKobo16Landscape = true;
-				ELOG("[FBInk] Enabled Kobo 16bpp fb rotation device quirks");
+				ELOG("[FBInk] Enabled Kobo @ 16bpp fb rotation quirks (%ux%u -> %ux%u)",
+				     vinfo.xres,
+				     vinfo.yres,
+				     viewWidth,
+				     viewHeight);
 			}
 #endif
 		}
@@ -939,11 +943,11 @@ int
 		// Identify the device's specific model...
 		identify_device(&deviceQuirks);
 		if (deviceQuirks.isKindlePearlScreen) {
-			ELOG("[FBInk] Enabled Kindle with Pearl screen device quirks");
+			ELOG("[FBInk] Enabled Kindle with Pearl screen quirks");
 		} else if (deviceQuirks.isKindleOasis2) {
-			ELOG("[FBInk] Enabled Kindle Oasis 2 device quirks");
+			ELOG("[FBInk] Enabled Kindle Oasis 2 quirks");
 		} else if (deviceQuirks.isKoboMk7) {
-			ELOG("[FBInk] Enabled Kobo Mark 7 device quirks");
+			ELOG("[FBInk] Enabled Kobo Mark 7 quirks");
 		}
 
 		// Ask the Kernel for its HZ value so we can translate jiffies into human-readable units.
