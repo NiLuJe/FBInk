@@ -904,14 +904,20 @@ int
 	// NOTE: But in some very specific circumstances, that doesn't hold true...
 	//       In particular, Kobos boot in Landscape orientation with coordinates still matching a portrait one...
 	if (vinfo.xres > vinfo.yres) {
-		// NOTE: vinfo.rotate == 2 (vs. 3 in Portrait mode) on my PW2
-		//       My Touch, which doesn't propose Landscape mode, defaults to vinfo.rotate == 1
-		//       My K4, which supports the four possible rotations,
-		//          is always using vinfo.rotate == 0 (but xres & yres do switch).
-		//       TL;DR: We can't really rely on rotate to tell us anything reliably actionable...
-		// NOTE: The Kobos, at boot, are in 16bpp mode, and appear to be natively rotated CCW
+		// NOTE: PW2:
+		//         vinfo.rotate == 2 in Landscape (vs. 3 in Portrait mode), w/ the xres/yres switch in Landscape,
+		//         and (0, 0) is always at the top-left of the viewport, so we're always correct.
+		//       Kindle Touch:
+		//         Doesn't propose a Landscape mode, and defaults to vinfo.rotate == 1
+		//       K4:
+		//         It supports the four possible rotations, and while it is always using vinfo.rotate == 0,
+		//         xres & yres switch accordingly when in Landscape modes,
+		//         and (0, 0) is always at the top-left of the viewport, so we're always correct.
+		//       TL;DR: We can't really rely on rotate to tell us anything reliably actionable, but, thankfully,
+		//              we don't have to do anything extra on Kindles anyway :).
+		// NOTE: The Kobos, on the other hand, at boot, are in 16bpp mode, and appear to be natively rotated CCW
 		//       (or CW, depending on how you look at it...).
-		//       Because we have legitimate uses in that state
+		//       Because we have legitimate uses in that state,
 		//       (be it during the boot process, i.e., on-animator; or out-of-Nickel use cases),
 		//       we attempt to handle this rotation properly, much like KOReader does.
 		//       c.f., https://github.com/koreader/koreader/blob/master/frontend/device/kobo/device.lua#L32-L33
