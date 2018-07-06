@@ -177,11 +177,13 @@ static void
 	//       when we're padding and centering, the final whitespace of right-padding will have its last
 	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
 	if (coords.x >= vinfo.xres || coords.y >= vinfo.yres) {
+		/*
 		LOG("Discarding off-screen pixel @ (%hu, %hu) (out of %ux%u bounds)",
 		    coords.x,
 		    coords.y,
 		    vinfo.xres,
 		    vinfo.yres);
+		*/
 		return;
 	}
 #ifdef FBINK_FOR_LEGACY
