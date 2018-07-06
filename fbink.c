@@ -121,30 +121,23 @@ static void
 	double fxp    = coords->x * cos(rangle) - coords->y * sin(rangle);
 	double fyp    = coords->x * sin(rangle) + coords->y * cos(rangle);
 	LOG("(fxp, fyp) -> (%f, %f)", fxp, fyp);
+	unsigned short int xp;
+	unsigned short int yp;
 	switch (rotation) {
 		case FB_ROTATE_CW:
-			fxp = -fxp;
-			fyp = vinfo.yres - 1 - fyp;
+			xp = (unsigned short int) lround(-fxp);
+			yp = (unsigned short int) lround(vinfo.yres - 1 - fyp);
 			break;
 		case FB_ROTATE_UD:
-			fxp = -fxp;
-			fyp = -fyp;
+			xp = (unsigned short int) lround(-fyp);
+			yp = (unsigned short int) lround(-fxp);
 			break;
 		case FB_ROTATE_CCW:
-			fxp = vinfo.xres - 1 - fxp;
-			fyp = -fyp;
+			xp = (unsigned short int) lround(vinfo.xres - 1 - fxp);
+			yp = (unsigned short int) lround(-fyp);
 			break;
 		default:
 			break;
-	}
-	unsigned short int xp;
-	unsigned short int yp;
-	if (rotation == FB_ROTATE_UD) {
-		xp = (unsigned short int) lround(fyp);
-		yp = (unsigned short int) lround(fxp);
-	} else {
-		xp = (unsigned short int) lround(fxp);
-		yp = (unsigned short int) lround(fyp);
 	}
 
 	LOG("(x, y) -> (%hu, %hu) vs. (rx, ry) -> (%hu, %hu) vs. (x', y') -> (%hu, %hu)",
@@ -928,10 +921,10 @@ int
 			viewHeight                     = vinfo.xres;
 			deviceQuirks.isKobo16Landscape = true;
 			ELOG("[FBInk] Enabled Kobo @ 16bpp fb rotation quirks (%ux%u -> %ux%u)",
-			vinfo.xres,
-			vinfo.yres,
-			viewWidth,
-			viewHeight);
+			     vinfo.xres,
+			     vinfo.yres,
+			     viewWidth,
+			     viewHeight);
 		}
 #endif
 	}
