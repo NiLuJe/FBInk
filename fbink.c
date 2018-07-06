@@ -129,6 +129,7 @@ static void
 			yp = (unsigned short int) lround(vinfo.yres - 1 - fyp);
 			break;
 		case FB_ROTATE_UD:
+			// NOTE: IIRC, this pretty much ends up with (x', y') being equal to (y, x).
 			xp = (unsigned short int) lround(-fyp);
 			yp = (unsigned short int) lround(-fxp);
 			break;
@@ -137,6 +138,8 @@ static void
 			yp = (unsigned short int) lround(-fyp);
 			break;
 		default:
+			xp = (unsigned short int) lround(fxp);
+			yp = (unsigned short int) lround(fyp);
 			break;
 	}
 
