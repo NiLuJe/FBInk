@@ -844,7 +844,7 @@ int
 	     vinfo.rotate,
 	     fb_rotate_to_string(vinfo.rotate));
 
-	// NOTE: In most every cases, assume 0,0 is at the top-left of the screen, and xyes,yres at the bottom right.
+	// NOTE: In most every cases, assume 0,0 is at the top left of the screen, and xres,yres at the bottom right.
 	viewWidth  = vinfo.xres;
 	viewHeight = vinfo.yres;
 
