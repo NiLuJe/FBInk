@@ -167,6 +167,7 @@ static void
 static void
     put_pixel(unsigned short int x, unsigned short int y, unsigned short int c)
 {
+	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
 	FBInkCoordinates coords = { x, y };
 	if (deviceQuirks.isKobo16Landscape) {
 		rotate_coordinates(&coords);
