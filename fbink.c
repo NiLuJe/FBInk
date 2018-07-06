@@ -901,6 +901,35 @@ int
 	viewWidth  = vinfo.xres;
 	viewHeight = vinfo.yres;
 
+	// NOTE: But in some very specific circumstances, that doesn't hold true...
+	//       In particular, Kobos boot in Landscape orientation with coordinates still matching a portrait one...
+	if (vinfo.xres > vinfo.yres) {
+		// NOTE: vinfo.rotate == 2 (vs. 3 in Portrait mode) on my PW2
+		//       My Touch, which doesn't propose Landscape mode, defaults to vinfo.rotate == 1
+		//       My K4, which supports the four possible rotations,
+		//          is always using vinfo.rotate == 0 (but xres & yres do switch).
+		//       TL;DR: We can't really rely on rotate to tell us anything reliably actionable...
+		// NOTE: The Kobos, at boot, are in 16bpp mode, and appear to be natively rotated CCW
+		//       (or CW, depending on how you look at it...).
+		//       Because we have legitimate uses in that state
+		//       (be it during the boot process, i.e., on-animator; or out-of-Nickel use cases),
+		//       we attempt to handle this rotation properly, much like KOReader does.
+		//       c.f., https://github.com/koreader/koreader/blob/master/frontend/device/kobo/device.lua#L32-L33
+		//           & https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer.lua#L74-L84
+#if !defined(FBINK_FOR_KINDLE) && !defined(FBINK_FOR_LEGACY)
+		if (vinfo.bits_per_pixel == 16) {
+			viewWidth                      = vinfo.yres;
+			viewHeight                     = vinfo.xres;
+			deviceQuirks.isKobo16Landscape = true;
+			ELOG("[FBInk] Enabled Kobo @ 16bpp fb rotation quirks (%ux%u -> %ux%u)",
+			vinfo.xres,
+			vinfo.yres,
+			viewWidth,
+			viewHeight);
+		}
+#endif
+	}
+
 	// NOTE: Reset original font resolution, in case we're re-init'ing,
 	//       since we're relying on the default value to calculate the scaled value,
 	//       and we're using this value to set MAXCOLS & MAXROWS, which we *need* to be sane.
@@ -937,31 +966,6 @@ int
 		// NOTE: We still want to compare against the screen's "height", even in Landscape mode,
 		//       so we simply use the longest edge to do just that...
 		uint32_t actual_height = MAX(vinfo.xres, vinfo.yres);
-		if (vinfo.xres > vinfo.yres) {
-			// NOTE: vinfo.rotate == 2 (vs. 3 in Portrait mode) on my PW2
-			//       My Touch, which doesn't propose Landscape mode, defaults to vinfo.rotate == 1
-			//       My K4, which supports the four possible rotations,
-			//          is always using vinfo.rotate == 0 (but xres & yres do switch).
-			// NOTE: The Kobos, at boot, are in 16bpp mode, and appear to be natively rotated CCW
-			//       (or CW, depending on how you look at it...).
-			//       Because we have legitimate uses in that state
-			//       (be it during the boot process, i.e., on-animator; or out-of-Nickel use cases),
-			//       we attempt to handle this rotation properly, much like KOReader does.
-			//       c.f., https://github.com/koreader/koreader/blob/master/frontend/device/kobo/device.lua#L32-L33
-			//           & https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer.lua#L74-L84
-#if !defined(FBINK_FOR_KINDLE) && !defined(FBINK_FOR_LEGACY)
-			if (vinfo.bits_per_pixel == 16) {
-				viewWidth                      = vinfo.yres;
-				viewHeight                     = vinfo.xres;
-				deviceQuirks.isKobo16Landscape = true;
-				ELOG("[FBInk] Enabled Kobo @ 16bpp fb rotation quirks (%ux%u -> %ux%u)",
-				     vinfo.xres,
-				     vinfo.yres,
-				     viewWidth,
-				     viewHeight);
-			}
-#endif
-		}
 		if (actual_height <= 600U) {
 			FONTSIZE_MULT = 1U;    // 8x8
 		} else if (actual_height <= 1024U) {
