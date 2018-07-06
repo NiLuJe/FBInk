@@ -110,6 +110,8 @@ static void
 	unsigned short int rx = coords->y;
 	unsigned short int ry = (unsigned short int) (viewWidth - coords->x - 1);
 
+// NOTE: This codepath is not production ready, it was just an experiment to wrap my head around framebuffer rotation...
+#ifdef FBINK_WITH_MATHS
 	unsigned short int rotation = FB_ROTATE_CW;
 	// i.e., θ (c.f., https://en.wikipedia.org/wiki/Cartesian_coordinate_system#Rotation)
 	double rangle = ((rotation * 90) * M_PI / 180.0);
@@ -135,17 +137,21 @@ static void
 	unsigned short int xp;
 	unsigned short int yp;
 	if (rotation == FB_ROTATE_UD) {
-		xp = lround(fyp);
-		yp = lround(fxp);
+		xp = (unsigned short int) lround(fyp);
+		yp = (unsigned short int) lround(fxp);
 	} else {
-		xp = lround(fxp);
-		yp = lround(fyp);
+		xp = (unsigned short int) lround(fxp);
+		yp = (unsigned short int) lround(fyp);
 	}
 
 	LOG("(x, y) -> (%hu, %hu) vs. (rx, ry) -> (%hu, %hu) vs. (x', y') -> (%hu, %hu)", coords->x, coords->y, rx, ry, xp, yp);
 
 	coords->x = xp;
 	coords->y = yp;
+#else
+	coords->x = rx;
+	coords->y = ry;
+#endif
 }
 
 // Handle various bpp...
