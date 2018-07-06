@@ -898,7 +898,14 @@ int
 	viewHeight = vinfo.yres;
 
 	// NOTE: But in some very specific circumstances, that doesn't hold true...
-	//       In particular, Kobos boot in Landscape orientation with coordinates still matching a portrait one...
+	//       In particular, Kobos boot with a framebuffer in Landscape orientation (i.e., xres > yres),
+	//       but a viewport in Portrait (the boot progress, as well as Nickel itself are presented in Portrait mode),
+	//       which leads to a broken origin: (0, 0) is at the top-right of the screen
+	//       (i.e., as if it were intended to be used in the same Landscape viewport as the framebuffer orientation).
+	//       So we have to handle the rotation ourselves. We limit this to Kobos and a simple xres > yres check,
+	//       because as we'll show, vinfo.rotate doesn't necessarily provides us with actionable info...
+	// NOTE: Nickel itself will put things back into order, so this should NOT affect behavior under Nickel...
+	//       Be aware that pickel, on the other hand, will forcibly drop back to this modeset!
 	if (vinfo.xres > vinfo.yres) {
 		// NOTE: PW2:
 		//         vinfo.rotate == 2 in Landscape (vs. 3 in Portrait mode), w/ the xres/yres switch in Landscape,
