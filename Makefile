@@ -38,7 +38,7 @@ ifeq "$(GCC_VER)" "4.2.1"
 	MOAR_WARNIGS:=1
 endif
 ifeq "$(shell expr `echo $(GCC_VER) | cut -f1 -d.` \>= 7)" "1"
-	# This is GCC 7
+	# This is GCC >= 7
 	MOAR_WARNIGS:=1
 endif
 
