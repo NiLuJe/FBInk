@@ -29,31 +29,46 @@ else
 	CFLAGS?=$(OPT_CFLAGS)
 endif
 
+# Detect GCC version because reasons...
+# (namely, stupid GCC builds dying on unknown -W options when they shouldn't, according to the docs)
+MOAR_WARNIGS:=0
+GCC_VER:=$(shell $(CC) -dumpversion)
+ifeq "$(GCC_VER)" "4.2.1"
+	# This is Clang (or you really need to update GCC ;D)
+	MOAR_WARNIGS:=1
+endif
+ifeq "$(shell expr `echo $(GCC_VER) | cut -f1 -d.` \>= 7)" "1"
+	# This is GCC 7
+	MOAR_WARNIGS:=1
+endif
+
 # Moar warnings!
-EXTRA_CFLAGS+=-Wall -Wformat=2 -Wformat-signedness -Wformat-truncation=2
-EXTRA_CFLAGS+=-Wextra -Wunused
-EXTRA_CFLAGS+=-Wnull-dereference
-EXTRA_CFLAGS+=-Wuninitialized
-EXTRA_CFLAGS+=-Wduplicated-branches -Wduplicated-cond
-EXTRA_CFLAGS+=-Wundef
-EXTRA_CFLAGS+=-Wbad-function-cast
-EXTRA_CFLAGS+=-Wwrite-strings
-EXTRA_CFLAGS+=-Wjump-misses-init
-EXTRA_CFLAGS+=-Wlogical-op
-EXTRA_CFLAGS+=-Wstrict-prototypes -Wold-style-definition
-EXTRA_CFLAGS+=-Wshadow
-EXTRA_CFLAGS+=-Wmissing-prototypes -Wmissing-declarations
-EXTRA_CFLAGS+=-Wnested-externs
-EXTRA_CFLAGS+=-Winline
-EXTRA_CFLAGS+=-Wcast-qual
-# NOTE: GCC 8 introduces -Wcast-align=strict to warn regardless of the target architecture (i.e., like clang)
-EXTRA_CFLAGS+=-Wcast-align
-EXTRA_CFLAGS+=-Wconversion
-# Output padding info when debugging (NOTE: Clang is slightly more verbose)
-# As well as function attribute hints
-ifdef DEBUG
-	EXTRA_CFLAGS+=-Wpadded
-	EXTRA_CFLAGS+=-Wsuggest-attribute=pure -Wsuggest-attribute=const -Wsuggest-attribute=noreturn -Wsuggest-attribute=format -Wmissing-format-attribute
+ifeq "$(MOAR_WARNIGS)" "1"
+	EXTRA_CFLAGS+=-Wall -Wformat=2 -Wformat-signedness -Wformat-truncation=2
+	EXTRA_CFLAGS+=-Wextra -Wunused
+	EXTRA_CFLAGS+=-Wnull-dereference
+	EXTRA_CFLAGS+=-Wuninitialized
+	EXTRA_CFLAGS+=-Wduplicated-branches -Wduplicated-cond
+	EXTRA_CFLAGS+=-Wundef
+	EXTRA_CFLAGS+=-Wbad-function-cast
+	EXTRA_CFLAGS+=-Wwrite-strings
+	EXTRA_CFLAGS+=-Wjump-misses-init
+	EXTRA_CFLAGS+=-Wlogical-op
+	EXTRA_CFLAGS+=-Wstrict-prototypes -Wold-style-definition
+	EXTRA_CFLAGS+=-Wshadow
+	EXTRA_CFLAGS+=-Wmissing-prototypes -Wmissing-declarations
+	EXTRA_CFLAGS+=-Wnested-externs
+	EXTRA_CFLAGS+=-Winline
+	EXTRA_CFLAGS+=-Wcast-qual
+	# NOTE: GCC 8 introduces -Wcast-align=strict to warn regardless of the target architecture (i.e., like clang)
+	EXTRA_CFLAGS+=-Wcast-align
+	EXTRA_CFLAGS+=-Wconversion
+	# Output padding info when debugging (NOTE: Clang is slightly more verbose)
+	# As well as function attribute hints
+	ifdef DEBUG
+		EXTRA_CFLAGS+=-Wpadded
+		EXTRA_CFLAGS+=-Wsuggest-attribute=pure -Wsuggest-attribute=const -Wsuggest-attribute=noreturn -Wsuggest-attribute=format -Wmissing-format-attribute
+	endif
 endif
 
 # We need to build PIC to support running as/with a shared library
