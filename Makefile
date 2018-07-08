@@ -30,7 +30,7 @@ else
 endif
 
 # Detect GCC version because reasons...
-# (namely, stupid GCC builds dying on unknown -W options when they shouldn't, according to the docs)
+# (namely, GCC emitting an error instead of a warning on unknown -W options)
 MOAR_WARNIGS:=0
 GCC_VER:=$(shell $(CC) -dumpversion)
 ifeq "$(GCC_VER)" "4.2.1"
