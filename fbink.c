@@ -627,7 +627,11 @@ static int
 		.update_mode = update_mode,
 		.update_marker = marker,
 		.temp = TEMP_USE_AMBIENT,
-		.flags = (waveform_mode == WAVEFORM_MODE_DU) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
+		.flags = (waveform_mode == WAVEFORM_MODE_KOA2_GLD16)
+			     ? EPDC_FLAG_USE_KOA2_REGAL
+			     : (waveform_mode == WAVEFORM_MODE_KOA2_A2 || waveform_mode == WAVEFORM_MODE_DU)
+				   ? EPDC_FLAG_FORCE_MONOCHROME
+				   : 0U,
 		.dither_mode = EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
 		.quant_bit = 0,
 		.alt_buffer_data = { 0U },
@@ -742,12 +746,14 @@ static int
 		     uint32_t                marker)
 {
 	struct mxcfb_update_data_v2 update = {
-		.update_region   = region,
-		.waveform_mode   = waveform_mode,
-		.update_mode     = update_mode,
-		.update_marker   = marker,
-		.temp            = TEMP_USE_AMBIENT,
-		.flags           = (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
+		.update_region = region,
+		.waveform_mode = waveform_mode,
+		.update_mode   = update_mode,
+		.update_marker = marker,
+		.temp          = TEMP_USE_AMBIENT,
+		.flags         = (waveform_mode == WAVEFORM_MODE_GLD16)
+			     ? EPDC_FLAG_USE_REGAL
+			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
 		.dither_mode     = EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
 		.quant_bit       = 0,
 		.alt_buffer_data = { 0U },
