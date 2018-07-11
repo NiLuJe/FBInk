@@ -742,17 +742,14 @@ static int
 		     uint32_t                marker)
 {
 	struct mxcfb_update_data_v2 update = {
-		.update_region = region,
-		.waveform_mode = waveform_mode,
-		.update_mode   = update_mode,
-		.update_marker = marker,
-		.temp          = TEMP_USE_AMBIENT,
-		// FIXME: Here be dragons! (REGAL flag, dither_mode & quant_bit)
-		.flags = (waveform_mode == WAVEFORM_MODE_REAGLD)
-			     ? EPDC_FLAG_USE_REGAL
-			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
+		.update_region   = region,
+		.waveform_mode   = waveform_mode,
+		.update_mode     = update_mode,
+		.update_marker   = marker,
+		.temp            = TEMP_USE_AMBIENT,
+		.flags           = (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
 		.dither_mode     = EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
-		.quant_bit       = 7,
+		.quant_bit       = 0,
 		.alt_buffer_data = { 0U },
 	};
 
