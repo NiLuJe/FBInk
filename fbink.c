@@ -1604,3 +1604,11 @@ int
 
 	return ret;
 }
+
+// Simple public getter for temporary Device Quirks
+bool
+    fbink_is_quirky(void)
+{
+	// NOTE: For now, that's easy enough, we only have one ;).
+	return deviceQuirks.isKobo16Landscape;
+}

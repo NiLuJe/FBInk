@@ -112,6 +112,12 @@ FBINK_API int fbink_printf(int, const FBInkConfig*, const char*, ...) __attribut
 // And a simple wrapper around the internal refresh, without having to include mxcfb headers
 FBINK_API int fbink_refresh(int, uint32_t, uint32_t, uint32_t, uint32_t, const char*, bool);
 
+// Returns true if the device appears to be in a quirky framebuffer state
+// NOTE: Right now, this only checks for the isKobo16Landscape Device Quirk,
+//       because that's the only one that is not permanent (i.e., hardware specific),
+//       but instead software specific (here, because of pickel).
+FBINK_API bool fbink_is_quirky(void);
+
 // When you intend to keep fd open for the lifecycle of your program:
 // fd = open() -> init(fd) -> print(fd, ...)
 //
