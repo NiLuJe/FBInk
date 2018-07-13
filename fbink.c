@@ -1019,7 +1019,7 @@ int
 			FONTSIZE_MULT = 1U;    // 8x8
 		} else if (actual_height <= 1024U) {
 			FONTSIZE_MULT = 2U;    // 16x16
-		} else if (actual_height <= 1440U) {
+		} else if (actual_height <= 1448U) {
 			FONTSIZE_MULT = 3U;    // 24x24
 		} else {
 			FONTSIZE_MULT = 4U;    // 32x32
