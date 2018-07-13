@@ -197,8 +197,9 @@ legacy:
 	$(MAKE) strip LEGACY=true
 
 kobo: release
-	mkdir -p Kobo/usr/local/fbink/bin Kobo/usr/local/fbink/lib
+	mkdir -p Kobo/usr/local/fbink/bin Kobo/usr/bin Kobo/usr/local/fbink/lib
 	cp -av $(CURDIR)/Release/fbink Kobo/usr/local/fbink/bin
+	ln -sf /usr/local/fbink/bin/fbink Kobo/usr/bin/fbink
 	cp -av $(CURDIR)/Release/$(FBINK_SHARED_NAME_FILE) Kobo/usr/local/fbink/lib
 	ln -sf $(FBINK_SHARED_NAME_FILE) Kobo/usr/local/fbink/lib/$(FBINK_SHARED_NAME)
 	ln -sf $(FBINK_SHARED_NAME_FILE) Kobo/usr/local/fbink/lib/$(FBINK_SHARED_NAME_VER)
