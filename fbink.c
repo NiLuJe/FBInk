@@ -30,7 +30,21 @@
 #include "fbink_internal.h"
 
 #define STB_IMAGE_IMPLEMENTATION
+#define STBI_NO_HDR
+#define STBI_NO_LINEAR
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#pragma clang diagnostic ignored "-Wunknown-warning-option"
+#pragma GCC diagnostic ignored "-Wcast-qual"
+#pragma GCC diagnostic ignored "-Wcast-align"
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wduplicated-branches"
+#pragma GCC diagnostic ignored "-Wmissing-prototypes"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-function"
 #include "stb/stb_image.h"
+#pragma GCC diagnostic pop
 
 // Return the library version as devised at library compile-time
 const char*
