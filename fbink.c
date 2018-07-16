@@ -29,6 +29,9 @@
 
 #include "fbink_internal.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb/stb_image.h"
+
 // Return the library version as devised at library compile-time
 const char*
     fbink_version(void)
