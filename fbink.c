@@ -205,17 +205,23 @@ static void
 	c = c ^ WHITE;
 #endif
 
-	if (vinfo.bits_per_pixel == 4U) {
-		put_pixel_Gray4(&coords, def_b[c]);
-	} else if (vinfo.bits_per_pixel == 8U) {
-		// NOTE: Grayscale palette, we could have used def_r or def_g ;).
-		put_pixel_Gray8(&coords, def_b[c]);
-	} else if (vinfo.bits_per_pixel == 16U) {
-		put_pixel_RGB565(&coords, def_r[c], def_g[c], def_b[c]);
-	} else if (vinfo.bits_per_pixel == 24U) {
-		put_pixel_RGB24(&coords, def_r[c], def_g[c], def_b[c]);
-	} else if (vinfo.bits_per_pixel == 32U) {
-		put_pixel_RGB32(&coords, def_r[c], def_g[c], def_b[c]);
+	switch (vinfo.bits_per_pixel) {
+		case 4U:
+			put_pixel_Gray4(&coords, def_b[c]);
+			break;
+		case 8U:
+			// NOTE: Grayscale palette, we could have used def_r or def_g ;).
+			put_pixel_Gray8(&coords, def_b[c]);
+			break;
+		case 16U:
+			put_pixel_RGB565(&coords, def_r[c], def_g[c], def_b[c]);
+			break;
+		case 24U:
+			put_pixel_RGB24(&coords, def_r[c], def_g[c], def_b[c]);
+			break;
+		case 32U:
+			put_pixel_RGB32(&coords, def_r[c], def_g[c], def_b[c]);
+			break;
 	}
 }
 
@@ -1628,4 +1634,71 @@ bool
 {
 	// NOTE: For now, that's easy enough, we only have one ;).
 	return deviceQuirks.isKobo16Landscape;
+}
+
+// Draw an image on screen
+int
+    fbink_print_image(int fbfd, const char* filename, int x, int y)
+{
+	// Open the framebuffer if need be...
+	bool keep_fd = true;
+	if (fbfd == -1) {
+		// If we open a fd now, we'll only keep it open for this single print call!
+		keep_fd = false;
+		if (-1 == (fbfd = fbink_open())) {
+			fprintf(stderr, "[FBInk] Failed to open the framebuffer, aborting . . .\n");
+			return EXIT_FAILURE;
+		}
+	}
+
+	int n;
+	int req_n = 0;
+	// Let stb handles grayscaling for us
+	switch (vinfo.bits_per_pixel) {
+		case 4U:
+		case 8U:
+			req_n = 1;
+			break;
+		case 16U:
+		case 24U:
+		case 32U:
+			// TODO: Set to 3, and unpack manually to feed put_pixel an actual r, g, b triplet
+			req_n = 1;
+			break;
+	}
+
+	unsigned char *data = stbi_load(filename, &x, &y, &n, req_n);
+	if (x > viewWidth || y > viewHeight) {
+		LOG("Image is larger than the screen (%dx%d > %ux%u), it will be cropped!", x, y, viewWidth, viewHeight);
+	}
+	int i;
+	int j;
+	// FIXME? ++j/++i?
+	for (j = 0; j < y; j++) {
+		for (i = 0; i < x; i++) {
+			unsigned char pixel = data[(j * x) + i];
+			put_pixel((unsigned short int) i, (unsigned short int) j, pixel);
+		}
+	}
+
+	stbi_image_free(data);
+
+	// TODO: Positioning & proper rect calc
+	struct mxcfb_rect region = {
+		.top = 0U,
+		.left   = 0U,
+		.width  = vinfo.xres,
+		.height = vinfo.yres,
+	};
+
+	// Refresh screen
+	if (refresh(fbfd, region, WAVEFORM_MODE_GC16, true) != EXIT_SUCCESS) {
+		fprintf(stderr, "[FBInk] Failed to refresh the screen!\n");
+	}
+
+	if (!keep_fd) {
+		close(fbfd);
+	}
+
+	return EXIT_SUCCESS;
 }
