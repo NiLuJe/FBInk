@@ -118,6 +118,7 @@ int
 					      { "font", required_argument, NULL, 'F' },
 					      { "verbose", no_argument, NULL, 'v' },
 					      { "quiet", no_argument, NULL, 'q' },
+					      { "image", no_argument, NULL, 'g' },
 					      { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_config = { 0 };
@@ -146,9 +147,10 @@ int
 	uint32_t region_height   = 0;
 	char*    region_wfm      = NULL;
 	bool     is_refresh_only = false;
+	char*    image_file      = NULL;
 	int      errfnd          = 0;
 
-	while ((opt = getopt_long(argc, argv, "y:x:hfcmps:S:F:vq", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "y:x:hfcmps:S:F:vqg:", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				fbink_config.row = (short int) atoi(optarg);
@@ -244,6 +246,9 @@ int
 			case 'q':
 				fbink_config.is_quiet = !fbink_config.is_quiet;
 				break;
+			case 'g':
+				image_file = strdup(optarg);
+				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
 				errfnd = 1;
@@ -265,6 +270,11 @@ int
 	if (EXIT_FAILURE == (fbfd = fbink_init(fbfd, &fbink_config))) {
 		fprintf(stderr, "Failed to initialize FBInk, aborting . . .\n");
 		return EXIT_FAILURE;
+	}
+
+	// TODO: Shortcut string printing properly
+	if (image_file) {
+		fbink_print_image(fbfd, image_file, 0, 0);
 	}
 
 	char* string;
@@ -325,6 +335,7 @@ int
 		munmap(g_fbink_fbp, g_fbink_screensize);
 	}
 	close(fbfd);
+	free(image_file);
 
 	return EXIT_SUCCESS;
 }
