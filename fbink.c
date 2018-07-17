@@ -1637,6 +1637,7 @@ bool
 }
 
 // Handle various bpp...
+// TODO: Deduplicate (perhaps a palette_to_rgb that takes an index and returns a rgbv struct?)
 static void
     put_img_pixel(unsigned short int x, unsigned short int y, unsigned short int v, unsigned short int r, unsigned short int g, unsigned short int b)
 {
@@ -1676,10 +1677,12 @@ static void
 }
 
 // Draw an image on screen
+// TODO: Don't compile when MINIMAL (-> FBINK_WITH_IMAGE)
 int
     fbink_print_image(int fbfd, const char* filename, int x_off, int y_off)
 {
 	// FIXME: Should we automagically handle the H2O offset?
+	//        I'd go with no, we already don't for text...
 	y_off += 11;
 
 	// Open the framebuffer if need be...
@@ -1693,7 +1696,7 @@ int
 		}
 	}
 
-	// TODO: Deduplicate!
+	// TODO: Deduplicate! (as well as the keep_fd stuff, w/ error propagation)
 	// map fb to user mem
 	// NOTE: Beware of smem_len on Kobos?
 	//       c.f., https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer_linux.lua#L36
@@ -1714,7 +1717,7 @@ int
 
 	int x, y, n;
 	int req_n = 0;
-	// Let stb handles grayscaling for us
+	// Let stb handle grayscaling for us
 	switch (vinfo.bits_per_pixel) {
 		case 4U:
 		case 8U:
@@ -1732,13 +1735,13 @@ int
 		LOG("Failed to load image '%s'!", filename);
 		return EXIT_FAILURE;
 	}
+	// FIXME: Take offsets into account (-> doesn't fit on screen)
 	if (x > viewWidth || y > viewHeight) {
 		LOG("Image is larger than the screen (%dx%d > %ux%u), it will be cropped!", x, y, viewWidth, viewHeight);
 	}
 	int i;
 	int j;
 	unsigned short int v, r, g, b;
-	// FIXME? ++j/++i?
 	for (j = 0; j < y; j++) {
 		for (i = 0; i < x; i++) {
 			if (req_n == 1) {
@@ -1756,7 +1759,7 @@ int
 
 	stbi_image_free(data);
 
-	// TODO: Positioning & proper rect calc
+	// TODO: Positioning & proper rect calc (possibly rename vars so we have x, y, w & h)
 	struct mxcfb_rect region = {
 		.top    = 0U,
 		.left   = 0U,

@@ -273,6 +273,7 @@ int
 	}
 
 	// TODO: Shortcut string printing properly
+	//       getsubopt file, x, y, row, col (to help align w/ text; append x & y after rox/col calcs, top-left)
 	if (image_file) {
 		fbink_print_image(fbfd, image_file, 0, 0);
 	}
