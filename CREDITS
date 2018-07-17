@@ -12,3 +12,7 @@ This project makes use of a number of third-party libraries, which we'll acknowl
 		Released under the public domain.
 		(http://pelulamu.net/unscii)
 
+	* stb_image (Image loader), by Sean Barrett,
+		Released under the public domain.
+		(http://nothings.org/stb)
+
