@@ -30,8 +30,17 @@
 #include "fbink_internal.h"
 
 #define STB_IMAGE_IMPLEMENTATION
+// Disable HDR, as well as the linear light API, to avoid pulling in libm
 #define STBI_NO_HDR
 #define STBI_NO_LINEAR
+// We want SIMD for JPEG decoding (... if we can actually use it)!
+#ifdef __ARM_NEON
+#define STBI_NEON
+#endif
+// We don't care about those formats (PhotoShop, AutoDesk)
+#define STBI_NO_PSD
+#define STBI_NO_PIC
+// Disable a bunch of very verbose but mostly harmless warnings
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunknown-warning-option"
@@ -1732,6 +1741,8 @@ int
 
 	unsigned char *data = stbi_load(filename, &x, &y, &n, req_n);
 	if (data == NULL) {
+		// FIXME: Do we want to use stbi_failure_reason() w/ STBI_FAILURE_USERMSG? It's not thread-safe (static storage).
+		//       Consider using STBI_NO_FAILURE_STRINGS if we don't.
 		LOG("Failed to load image '%s'!", filename);
 		return EXIT_FAILURE;
 	}
