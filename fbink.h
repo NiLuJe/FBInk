@@ -84,7 +84,6 @@ typedef struct
 } FBInkConfig;
 
 // NOTE: Unless otherwise specified, stuff returns EXIT_FAILURE on failure & EXIT_SUCCESS otherwise ;).
-// TODO: Document fx args
 
 // Return the version of the currently loaded FBInk library
 FBINK_API const char* fbink_version(void) __attribute__((const));
@@ -93,7 +92,9 @@ FBINK_API const char* fbink_version(void) __attribute__((const));
 FBINK_API int fbink_open(void);
 
 // Initialize the global variables.
-// If fd is -1, the fb is opened for the duration of this call
+// Arg 1: fbfd, if it's -1, the fb is opened for the duration of this call
+// Arg 2: pointer to an FBInkConfig struct
+//        If you wish to customize them, the fontmult, fontname, is_verbose & is_quiet fields should be set beforehand.
 // NOTE: By virtue of, well, setting global variables, do NOT consider this thread-safe.
 //       The rest of the API should be, though, so make sure you init in your main thread *before* threading begins...
 FBINK_API int fbink_init(int, const FBInkConfig*);
@@ -104,13 +105,24 @@ FBINK_API int fbink_init(int, const FBInkConfig*);
 //       c.f., my rant about Kobo's broken libc in fbink_internal.h for more details behind this choice.
 //       Since any decent system of the last decade should default to UTF-8, that should be pretty much transparent...
 // Returns the amount of lines printed or -1 on failure.
-// if fd is -1, the fb is opened for the duration of this call
+// Arg 1: fbfd, if it's -1, the fb is opened for the duration of this call
+// Arg 2: UTF-8 encoded string to print
+// Arg 3: pointer to an FBInkConfig struct
 FBINK_API int fbink_print(int, const char*, const FBInkConfig*);
 
 // Like fbink_print, but with printf formatting ;).
+// Arg 1: fbfd, if it's -1, the fb is opened for the duration of this call
+// Arg 2: pointer to an FBInkConfig struct
 FBINK_API int fbink_printf(int, const FBInkConfig*, const char*, ...) __attribute__((format(printf, 3, 4)));
 
 // And a simple wrapper around the internal refresh, without having to include mxcfb headers
+// Arg 1: fbfd, if it's -1, the fb is opened for the duration of this call
+// Arg 2: top field of an mxcfb rectangle
+// Arg 3: left field of ab mxcfb rectangle
+// Arg 4: width field of ab mxcfb rectangle
+// Arg 5: height field of ab mxcfb rectangle
+// Arg 6: waveform mode (i.e, "GC16")
+// Arg 7: will ask for a black flash if true
 FBINK_API int fbink_refresh(int, uint32_t, uint32_t, uint32_t, uint32_t, const char*, bool);
 
 // Returns true if the device appears to be in a quirky framebuffer state
@@ -121,6 +133,11 @@ FBINK_API bool fbink_is_fb_quirky(void);
 
 // Print an image on screen
 // Returns -1 on failure, or ENOSYS when image support is disabled (MINIMAL build)
+// Arg 1: fbfd, if it's -1, the fb is opened for the duration of this call
+// Arg 2: path to the image file
+// Arg 3: target coordinates, x
+// Arg 4: target coordinates, y
+// Arg 3: pointer to an FBInkConfig struct (honors row & col)
 FBINK_API int fbink_print_image(int, const char*, short int, short int, const FBInkConfig*);
 
 // When you intend to keep fd open for the lifecycle of your program:
