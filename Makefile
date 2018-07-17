@@ -22,11 +22,16 @@ OPT_CFLAGS=-O2 -fomit-frame-pointer -pipe
 
 ifdef DEBUG
 	OUT_DIR=Debug
-	CFLAGS:=$(DEBUG_CFLAGS)
+	CFLAGS?=$(DEBUG_CFLAGS)
 	EXTRA_CFLAGS+=-DDEBUG
 else
 	OUT_DIR=Release
 	CFLAGS?=$(OPT_CFLAGS)
+endif
+
+# Explictly enforce debug CFLAGS for the debug target (vs., simply having DEBUG set in the env)
+ifdef DEBUGFLAGS
+	CFLAGS:=$(DEBUG_CFLAGS)
 endif
 
 # Detect GCC version because reasons...
@@ -182,7 +187,7 @@ strip: all
 	$(STRIP) --strip-unneeded $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/fbink
 
 debug:
-	$(MAKE) all DEBUG=true
+	$(MAKE) all DEBUG=true DEBUGFLAGS=true
 
 shared:
 	$(MAKE) all SHARED=true
