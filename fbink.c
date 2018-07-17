@@ -1647,9 +1647,6 @@ static void
 	}
 
 	// NOTE: Discard off-screen pixels!
-	//       For instance, when we have a halfcell offset in conjunction with a !isPerfectFit pixel offset,
-	//       when we're padding and centering, the final whitespace of right-padding will have its last
-	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
 	if (coords.x >= vinfo.xres || coords.y >= vinfo.yres) {
 		LOG("Discarding off-screen pixel @ (%hu, %hu) (out of %ux%u bounds)",
 		    coords.x,
@@ -1682,6 +1679,9 @@ static void
 int
     fbink_print_image(int fbfd, const char* filename, int x_off, int y_off)
 {
+	// FIXME: Should we automagically handle the H2O offset?
+	y_off += 11;
+
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
 	if (fbfd == -1) {
@@ -1690,6 +1690,25 @@ int
 		if (-1 == (fbfd = fbink_open())) {
 			fprintf(stderr, "[FBInk] Failed to open the framebuffer, aborting . . .\n");
 			return EXIT_FAILURE;
+		}
+	}
+
+	// TODO: Deduplicate!
+	// map fb to user mem
+	// NOTE: Beware of smem_len on Kobos?
+	//       c.f., https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer_linux.lua#L36
+	// NOTE: If we're keeping the fb's fd open, keep this mmap around, too.
+	if (!g_fbink_isFbMapped) {
+		g_fbink_screensize = finfo.smem_len;
+		g_fbink_fbp =
+		    (unsigned char*) mmap(NULL, g_fbink_screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
+		if (g_fbink_fbp == MAP_FAILED) {
+			char  buf[256];
+			char* errstr = strerror_r(errno, buf, sizeof(buf));
+			fprintf(stderr, "[FBInk] mmap: %s\n", errstr);
+			return -1;
+		} else {
+			g_fbink_isFbMapped = true;
 		}
 	}
 
@@ -1750,6 +1769,14 @@ int
 		fprintf(stderr, "[FBInk] Failed to refresh the screen!\n");
 	}
 
+	// cleanup
+	if (g_fbink_isFbMapped && !keep_fd) {
+		munmap(g_fbink_fbp, g_fbink_screensize);
+		// NOTE: Don't forget to reset those state flags,
+		//       so we won't skip mmap'ing on the next call without an fb fd passed...
+		g_fbink_isFbMapped = false;
+		g_fbink_fbp        = 0U;
+	}
 	if (!keep_fd) {
 		close(fbfd);
 	}
