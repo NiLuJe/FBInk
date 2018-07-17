@@ -1680,7 +1680,7 @@ static void
 
 // Draw an image on screen
 int
-    fbink_print_image(int fbfd, const char* filename, int x, int y)
+    fbink_print_image(int fbfd, const char* filename, int x_off, int y_off)
 {
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
@@ -1693,7 +1693,7 @@ int
 		}
 	}
 
-	int n;
+	int x, y, n;
 	int req_n = 0;
 	// Let stb handles grayscaling for us
 	switch (vinfo.bits_per_pixel) {
@@ -1731,7 +1731,7 @@ int
 				g = data[(j * req_n * x) + (i * req_n) + 1];
 				b = data[(j * req_n * x) + (i * req_n) + 2];
 			}
-			put_img_pixel((unsigned short int) i, (unsigned short int) j, v, r, g, b);
+			put_img_pixel((unsigned short int) i + x_off, (unsigned short int) j + y_off, v, r, g, b);
 		}
 	}
 
