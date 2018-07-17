@@ -63,4 +63,32 @@ typedef struct
 	unsigned short int y;
 } FBInkCoordinates;
 
+// An (r, g, b) triplet for an 8-bit per component, 3 channel color
+typedef struct
+{
+	unsigned short int r;
+	unsigned short int g;
+	unsigned short int b;
+} FBInkRGB;
+
+// The supported FBInkColor variants
+typedef enum
+{
+	PALETTE,
+	GRAY,
+	RGB
+} FBInkColorType;
+
+// A color, either as a palette index, a grayscale intensity, or an RGB triplet
+typedef struct
+{
+	FBInkColorType type;
+	union
+	{
+		unsigned short c;	// PALETTE index
+		unsigned short v;	// GRAY intensity
+		FBInkRGB;		// RGB (anonymous)
+	};				// anonymous to make usage clearer
+} FBInkColor;
+
 #endif
