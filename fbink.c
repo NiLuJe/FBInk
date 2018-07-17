@@ -109,6 +109,10 @@ static void
 	// note: x * 4 as every pixel is 4 consecutive bytes
 	size_t pix_offset = coords->x * 4U + coords->y * finfo.line_length;
 
+	if (a != 0xFF) {
+		LOG("Pixel (%d, %d) alpha is %hu)", coords->x, coords->y, a);
+	}
+
 	// now this is about the same as 'fbp[pix_offset] = value'
 	*((unsigned char*) (g_fbink_fbp + pix_offset))     = (unsigned char) b;
 	*((unsigned char*) (g_fbink_fbp + pix_offset + 1)) = (unsigned char) g;
@@ -1801,6 +1805,9 @@ int
 				color.b = data[(j * req_n * w) + (i * req_n) + 2];
 				if (req_n == 4) {
 					color.a = data[(j * req_n * w) + (i * req_n) + 3];
+					if (color.a != 0xFF) {
+						LOG("Pixel (%d, %d) alpha is %hu (image components: %d)", i, j, color.a, n);
+					}
 				}
 			}
 			put_pixel((unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
