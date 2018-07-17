@@ -217,9 +217,9 @@ static void
 		color->type = GRAY;
 		// We're going to stomp this value by writing another variant, so store it.
 		unsigned short int c = color->c;
-		// NOTE: We cheat a bit and rely on possibly undefined but reliable behavior...
+		// NOTE: We cheat a bit and rely on possibly undefined but reliable behavior of unions...
 		// Gray means r = g = b = v, but since we have an union, only set r, g & b,
-		// and v should automagically point to r :).
+		// and v should automagically point to r (as in, they occupy the same memory address) :).
 		color->r = def_r[c];
 		color->g = def_g[c];
 		color->b = def_b[c];
