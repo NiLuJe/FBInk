@@ -1728,7 +1728,7 @@ int
 
 	unsigned char *data = stbi_load(filename, &x, &y, &n, req_n);
 	if (data == NULL) {
-		fprintf(stderr, "[FBInk] Failed to load image '%s'!\n", filename);
+		fprintf(stderr, "[FBInk] Failed to open or decode image '%s'!\n", filename);
 		return -1;
 	}
 	// FIXME: Take offsets into account (-> doesn't fit on screen)
