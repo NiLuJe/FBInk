@@ -63,18 +63,10 @@ typedef struct
 	unsigned short int y;
 } FBInkCoordinates;
 
-// The supported FBInkColor variants
-typedef enum
-{
-	PALETTE,
-	GRAY,
-	RGB
-} FBInkColorType;
-
 // A color, either as a palette index, a grayscale intensity, or an RGB triplet
 typedef struct
 {
-	FBInkColorType type;
+	bool isPaletteIndex;
 	union
 	{
 		unsigned short int c;	// PALETTE index

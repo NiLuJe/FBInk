@@ -213,8 +213,8 @@ static void
 	}
 
 	// Depalettize if need be (i.e., palette index -> RGB)
-	if (color->type == PALETTE) {
-		color->type = GRAY;
+	if (color->isPaletteIndex) {
+		color->isPaletteIndex = false;
 		// We're going to stomp this value by writing another variant, so store it.
 		unsigned short int c = color->c;
 		// NOTE: We cheat a bit and rely on possibly undefined but reliable behavior of unions...
@@ -379,11 +379,11 @@ static struct mxcfb_rect
 {
 	LOG("Printing '%s' @ line offset %hu (meaning row %d)", text, multiline_offset, row + multiline_offset);
 	FBInkColor fgC = {
-		.type = PALETTE,
+		.isPaletteIndex = true,
 		.c = is_inverted ? WHITE : BLACK,
 	};
 	FBInkColor bgC = {
-		.type = PALETTE,
+		.isPaletteIndex = true,
 		.c = is_inverted ? BLACK : WHITE,
 	};
 
@@ -1716,13 +1716,11 @@ int
 		case 4U:
 		case 8U:
 			req_n = 1;
-			color.type = GRAY;
 			break;
 		case 16U:
 		case 24U:
 		case 32U:
 			req_n = 3;
-			color.type = RGB;
 			break;
 	}
 
