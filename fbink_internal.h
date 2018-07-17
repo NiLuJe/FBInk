@@ -28,6 +28,12 @@
 #ifndef __FBINK_INTERNAL_H
 #define __FBINK_INTERNAL_H
 
+// No extra fonts & no image support in minimal builds
+#ifndef FBINK_MINIMAL
+#define FBINK_WITH_UNSCII
+#define FBINK_WITH_IMAGE
+#endif
+
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/fb.h>
@@ -98,7 +104,7 @@
 #include "fbink_types.h"
 
 // Speaking of, include the Unscii variants when we're not a minimal build
-#ifndef FBINK_MINIMAL
+#ifdef FBINK_WITH_UNSCII
 #	include "fbink_unscii.h"
 #endif
 

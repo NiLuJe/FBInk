@@ -1702,10 +1702,10 @@ bool
 }
 
 // Draw an image on screen
-// TODO: Don't compile when MINIMAL (-> FBINK_WITH_IMAGE) (warn & return ENOIMP or whatever it's called)
 int
-    fbink_print_image(int fbfd, const char* filename, short int x_off, short int y_off, const FBInkConfig* fbink_config)
+    fbink_print_image(int fbfd UNUSED_BY_MINIMAL, const char* filename UNUSED_BY_MINIMAL, short int x_off UNUSED_BY_MINIMAL, short int y_off UNUSED_BY_MINIMAL, const FBInkConfig* fbink_config UNUSED_BY_MINIMAL)
 {
+#ifdef FBINK_WITH_IMAGE
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
 	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
@@ -1812,4 +1812,8 @@ int
 	}
 
 	return EXIT_SUCCESS;
+#else
+	fprintf(stderr, "[FBInk] Image support is disabled in this FBInk build!\n");
+	return ENOSYS;
+#endif // FBINK_WITH_IMAGE
 }

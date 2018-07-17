@@ -84,6 +84,7 @@ typedef struct
 } FBInkConfig;
 
 // NOTE: Unless otherwise specified, stuff returns EXIT_FAILURE on failure & EXIT_SUCCESS otherwise ;).
+// TODO: Document fx args
 
 // Return the version of the currently loaded FBInk library
 FBINK_API const char* fbink_version(void) __attribute__((const));
@@ -119,6 +120,7 @@ FBINK_API int fbink_refresh(int, uint32_t, uint32_t, uint32_t, uint32_t, const c
 FBINK_API bool fbink_is_fb_quirky(void);
 
 // Print an image on screen
+// Returns -1 on failure, or ENOSYS when image support is disabled (MINIMAL build)
 FBINK_API int fbink_print_image(int, const char*, short int, short int, const FBInkConfig*);
 
 // When you intend to keep fd open for the lifecycle of your program:

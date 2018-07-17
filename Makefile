@@ -139,7 +139,6 @@ CMD_SRCS=fbink_cmd.c
 ifdef MINIMAL
 	EXTRA_CPPFLAGS+=-DFBINK_MINIMAL
 else
-	EXTRA_CPPFLAGS+=-DFBINK_WITH_UNSCII
 	LIB_SRCS+=fbink_unscii.c
 endif
 
