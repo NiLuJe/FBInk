@@ -1726,14 +1726,14 @@ int
 
 	// NOTE: We compute initial offsets from row/col, to help aligning images with text.
 	if (fbink_config->col < 0) {
-		x_off += MAX(MAXCOLS + fbink_config->col, 0) * FONTW;
+		x_off = (short int) (x_off + (MAX(MAXCOLS + fbink_config->col, 0) * FONTW));
 	} else {
-		x_off += fbink_config->col * FONTW;
+		x_off = (short int) (x_off + (fbink_config->col * FONTW));
 	}
 	if (fbink_config->row < 0) {
-		y_off += MAX(MAXROWS + fbink_config->row, 0) * FONTH;
+		y_off = (short int) (y_off + (MAX(MAXROWS + fbink_config->row, 0) * FONTH));
 	} else {
-		y_off += fbink_config->row * FONTH;
+		y_off = (short int) (y_off + (fbink_config->row * FONTH));
 	}
 	LOG("Adjusted image display coordinates to (%hd, %hd), after column %hd & row %hd",
 	    x_off,
@@ -1763,7 +1763,7 @@ int
 		return -1;
 	}
 	// NOTE: Warn if either the sheer size of the image or its position will force a crop...
-	if ((w + x_off) > viewWidth || (h + y_off) > viewHeight) {
+	if ((w + x_off) > (short int) viewWidth || (h + y_off) > (short int) viewHeight) {
 		LOG("Displayed at these coordinates (%d, %d), the image (%dx%d) won't fit on the screen (%ux%u), it will be cropped!",
 		    x_off,
 		    y_off,
@@ -1783,7 +1783,7 @@ int
 				color.g = data[(j * req_n * w) + (i * req_n) + 1];
 				color.b = data[(j * req_n * w) + (i * req_n) + 2];
 			}
-			put_pixel((unsigned short int) i + x_off, (unsigned short int) j + y_off, &color);
+			put_pixel((unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
 		}
 	}
 
@@ -1791,10 +1791,10 @@ int
 
 	// Clamp everything to a safe range, because we can't have *anything* going off-screen here.
 	struct mxcfb_rect region = {
-		.top    = MIN(vinfo.yres, MAX(0, y_off)),
-		.left   = MIN(vinfo.xres, MAX(0, x_off)),
-		.width  = MIN(vinfo.xres, MIN(w, w - region.left)),
-		.height = MIN(vinfo.yres, MIN(h, h - region.top)),
+		.top    = MIN(vinfo.yres, MAX(0, (uint32_t) y_off)),
+		.left   = MIN(vinfo.xres, MAX(0, (uint32_t) x_off)),
+		.width  = MIN(vinfo.xres, MIN((uint32_t) w, (uint32_t) w - region.left)),
+		.height = MIN(vinfo.yres, MIN((uint32_t) h, (uint32_t) h - region.top)),
 	};
 	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
 
