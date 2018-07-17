@@ -1709,7 +1709,7 @@ int
 
 	int x, y, n;
 	int req_n = 0;
-	FBInkColor color;
+	FBInkColor color = { 0 };
 	// Let stb handle grayscaling for us
 	switch (vinfo.bits_per_pixel) {
 		case 4U:
