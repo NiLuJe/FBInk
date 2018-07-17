@@ -925,6 +925,22 @@ int
 	return fbfd;
 }
 
+// Internal version of this which keeps track of whether we were fed an already opened fd or not...
+static int
+    open_fb_fd(int* fbfd, bool* keep_fd)
+{
+	if (*fbfd == -1) {
+		// If we're opening a fd now, don't keep it around.
+		*keep_fd = false;
+		if (-1 == (*fbfd = fbink_open())) {
+			fprintf(stderr, "[FBInk] Failed to open the framebuffer, aborting . . .\n");
+			return EXIT_FAILURE;
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
+
 static const char*
     fb_rotate_to_string(uint32_t rotate)
 {
@@ -948,13 +964,8 @@ int
 {
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
-	if (fbfd == -1) {
-		// If we're opening a fd now, don't keep it around.
-		keep_fd = false;
-		if (-1 == (fbfd = fbink_open())) {
-			fprintf(stderr, "[FBInk] Failed to open the framebuffer, aborting . . .\n");
-			return EXIT_FAILURE;
-		}
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return EXIT_FAILURE;
 	}
 
 	// Update verbosity flag
@@ -1146,16 +1157,11 @@ int
 int
     fbink_print(int fbfd, const char* string, const FBInkConfig* fbink_config)
 {
-	// Open the framebuffer if need be...
+	// If we open a fd now, we'll only keep it open for this single print call!
+	// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
 	bool keep_fd = true;
-	if (fbfd == -1) {
-		// If we open a fd now, we'll only keep it open for this single print call!
-		// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
-		keep_fd = false;
-		if (-1 == (fbfd = fbink_open())) {
-			fprintf(stderr, "[FBInk] Failed to open the framebuffer, aborting . . .\n");
-			return -1;
-		}
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return -1;
 	}
 
 	// map fb to user mem
@@ -1549,13 +1555,8 @@ int
 {
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
-	if (fbfd == -1) {
-		// If we open a fd now, we'll only keep it open for this single print call!
-		keep_fd = false;
-		if (-1 == (fbfd = fbink_open())) {
-			fprintf(stderr, "[FBInk] Failed to open the framebuffer, aborting . . .\n");
-			return EXIT_FAILURE;
-		}
+		if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return EXIT_FAILURE;
 	}
 
 	uint32_t region_wfm = WAVEFORM_MODE_AUTO;
@@ -1679,13 +1680,8 @@ int
 
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
-	if (fbfd == -1) {
-		// If we open a fd now, we'll only keep it open for this single print call!
-		keep_fd = false;
-		if (-1 == (fbfd = fbink_open())) {
-			fprintf(stderr, "[FBInk] Failed to open the framebuffer, aborting . . .\n");
-			return -1;
-		}
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return -1;
 	}
 
 	// TODO: Deduplicate! (as well as the keep_fd stuff, w/ error propagation)
