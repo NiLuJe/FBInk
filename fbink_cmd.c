@@ -94,6 +94,7 @@ static void
 	    "\t\t\tBut it does also honor the --flash flag, though.\n"
 #endif
 	    "\t\t\tSpecifying one or more STRING takes precedence over this mode.\n"
+// TODO: Image doc (here & README)
 	    "\n",
 	    fbink_version());
 

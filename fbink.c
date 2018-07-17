@@ -1687,7 +1687,8 @@ bool
 }
 
 // Draw an image on screen
-// TODO: Don't compile when MINIMAL (-> FBINK_WITH_IMAGE)
+// TODO: Don't compile when MINIMAL (-> FBINK_WITH_IMAGE) (warn & return ENOIMP or whatever it's called)
+// TODO: Make offs short ints
 int
     fbink_print_image(int fbfd, const char* filename, int x_off, int y_off, const FBInkConfig* fbink_config)
 {
@@ -1705,6 +1706,7 @@ int
 	}
 
 	// NOTE: We compute initial offsets from row/col, to help aligning images with text.
+	// FIXME: Handle negative values
 	x_off += fbink_config->col * FONTW;
 	y_off += fbink_config->row * FONTH;
 	LOG("Adjusted image display coordinates to (%d, %d), after column %hd & row %hd", x_off, y_off, fbink_config->col, fbink_config->row);
