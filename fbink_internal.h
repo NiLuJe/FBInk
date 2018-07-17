@@ -207,7 +207,11 @@ static int refresh_kobo_mk7(int, const struct mxcfb_rect, uint32_t, uint32_t, ui
 static int refresh(int, const struct mxcfb_rect, uint32_t UNUSED_BY_LEGACY, bool);
 
 static int open_fb_fd(int*, bool*);
+
 static const char* fb_rotate_to_string(uint32_t);
+
+static int memmap_fb(int);
+static void unmap_fb(void);
 
 // For identify_device
 #include "fbink_device_id.h"

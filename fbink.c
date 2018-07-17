@@ -1153,6 +1153,35 @@ int
 	}
 }
 
+// Memory map the framebuffer
+static int
+    memmap_fb(int fbfd)
+{
+	g_fbink_screensize = finfo.smem_len;
+	g_fbink_fbp = (unsigned char*) mmap(NULL, g_fbink_screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
+	if (g_fbink_fbp == MAP_FAILED) {
+		char  buf[256];
+		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		fprintf(stderr, "[FBInk] mmap: %s\n", errstr);
+		return EXIT_FAILURE;
+	} else {
+		g_fbink_isFbMapped = true;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+// And unmap it
+static void
+    unmap_fb(void)
+{
+	munmap(g_fbink_fbp, g_fbink_screensize);
+	// NOTE: Don't forget to reset those state flags,
+	//       so we won't skip mmap'ing on the next call without an fb fd passed...
+	g_fbink_isFbMapped = false;
+	g_fbink_fbp        = 0U;
+}
+
 // Magic happens here!
 int
     fbink_print(int fbfd, const char* string, const FBInkConfig* fbink_config)
@@ -1169,16 +1198,8 @@ int
 	//       c.f., https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer_linux.lua#L36
 	// NOTE: If we're keeping the fb's fd open, keep this mmap around, too.
 	if (!g_fbink_isFbMapped) {
-		g_fbink_screensize = finfo.smem_len;
-		g_fbink_fbp =
-		    (unsigned char*) mmap(NULL, g_fbink_screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
-		if (g_fbink_fbp == MAP_FAILED) {
-			char  buf[256];
-			char* errstr = strerror_r(errno, buf, sizeof(buf));
-			fprintf(stderr, "[FBInk] mmap: %s\n", errstr);
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
 			return -1;
-		} else {
-			g_fbink_isFbMapped = true;
 		}
 	}
 
@@ -1498,11 +1519,7 @@ int
 
 	// cleanup
 	if (g_fbink_isFbMapped && !keep_fd) {
-		munmap(g_fbink_fbp, g_fbink_screensize);
-		// NOTE: Don't forget to reset those state flags,
-		//       so we won't skip mmap'ing on the next call without an fb fd passed...
-		g_fbink_isFbMapped = false;
-		g_fbink_fbp        = 0U;
+		unmap_fb();
 	}
 	if (!keep_fd) {
 		close(fbfd);
@@ -1684,22 +1701,10 @@ int
 		return -1;
 	}
 
-	// TODO: Deduplicate! (as well as the keep_fd stuff, w/ error propagation)
-	// map fb to user mem
-	// NOTE: Beware of smem_len on Kobos?
-	//       c.f., https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer_linux.lua#L36
-	// NOTE: If we're keeping the fb's fd open, keep this mmap around, too.
+	// mmap the fb if need be...
 	if (!g_fbink_isFbMapped) {
-		g_fbink_screensize = finfo.smem_len;
-		g_fbink_fbp =
-		    (unsigned char*) mmap(NULL, g_fbink_screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
-		if (g_fbink_fbp == MAP_FAILED) {
-			char  buf[256];
-			char* errstr = strerror_r(errno, buf, sizeof(buf));
-			fprintf(stderr, "[FBInk] mmap: %s\n", errstr);
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
 			return -1;
-		} else {
-			g_fbink_isFbMapped = true;
 		}
 	}
 
@@ -1762,11 +1767,7 @@ int
 
 	// cleanup
 	if (g_fbink_isFbMapped && !keep_fd) {
-		munmap(g_fbink_fbp, g_fbink_screensize);
-		// NOTE: Don't forget to reset those state flags,
-		//       so we won't skip mmap'ing on the next call without an fb fd passed...
-		g_fbink_isFbMapped = false;
-		g_fbink_fbp        = 0U;
+		unmap_fb();
 	}
 	if (!keep_fd) {
 		close(fbfd);
