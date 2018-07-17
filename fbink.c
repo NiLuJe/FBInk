@@ -1751,13 +1751,16 @@ int
 
 	stbi_image_free(data);
 
-	// TODO: Positioning & proper rect calc (possibly rename vars so we have x, y, w & h)
+	// Clamp everything to a safe range, because we can't have *anything* going off-screen here.
 	struct mxcfb_rect region = {
-		.top    = 0U,
-		.left   = 0U,
-		.width  = vinfo.xres,
-		.height = vinfo.yres,
+		.top    = MIN(vinfo.yres, MAX(0, y_off)),
+		.left   = MIN(vinfo.xres, MAX(0, x_off)),
+		.width  = MIN(vinfo.xres, MIN(w, w - region.left)),
+		.height = MIN(vinfo.yres, MIN(h, h - region.top)),
 	};
+	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
+
+	// FIXME: Rota?
 
 	// Refresh screen
 	if (refresh(fbfd, region, WAVEFORM_MODE_GC16, true) != EXIT_SUCCESS) {
