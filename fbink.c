@@ -1688,9 +1688,8 @@ bool
 
 // Draw an image on screen
 // TODO: Don't compile when MINIMAL (-> FBINK_WITH_IMAGE) (warn & return ENOIMP or whatever it's called)
-// TODO: Make offs short ints
 int
-    fbink_print_image(int fbfd, const char* filename, int x_off, int y_off, const FBInkConfig* fbink_config)
+    fbink_print_image(int fbfd, const char* filename, short int x_off, short int y_off, const FBInkConfig* fbink_config)
 {
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
@@ -1709,7 +1708,7 @@ int
 	// FIXME: Handle negative values
 	x_off += fbink_config->col * FONTW;
 	y_off += fbink_config->row * FONTH;
-	LOG("Adjusted image display coordinates to (%d, %d), after column %hd & row %hd", x_off, y_off, fbink_config->col, fbink_config->row);
+	LOG("Adjusted image display coordinates to (%hd, %hd), after column %hd & row %hd", x_off, y_off, fbink_config->col, fbink_config->row);
 
 	int w, h, n;
 	int req_n = 0;

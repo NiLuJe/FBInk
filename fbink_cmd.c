@@ -157,8 +157,8 @@ int
 	char*    region_wfm      = NULL;
 	bool     is_refresh      = false;
 	char*    image_file      = NULL;
-	int      image_x_offset  = 0;
-	int      image_y_offset  = 0;
+	short int image_x_offset  = 0;
+	short int image_y_offset  = 0;
 	bool     is_image        = false;
 	int      errfnd          = 0;
 
@@ -266,10 +266,10 @@ int
 							image_file = strdup(value);
 							break;
 						case XOFF_OPT:
-							image_x_offset = atoi(value);
+							image_x_offset = (short int) atoi(value);
 							break;
 						case YOFF_OPT:
-							image_y_offset = atoi(value);
+							image_y_offset = (short int) atoi(value);
 							break;
 						default:
 							fprintf(stderr, "No match found for token: /%s/\n", value);
@@ -358,7 +358,7 @@ int
 				fprintf(stderr, "Failed to refresh the screen as per your specification!\n");
 			}
 		} else if (is_image) {
-			printf("Displaying image '%s' @ (%d, %d)\n", image_file, image_x_offset, image_y_offset);
+			printf("Displaying image '%s' @ (%hd, %hd)\n", image_file, image_x_offset, image_y_offset);
 			if (fbink_print_image(fbfd, image_file, image_x_offset, image_y_offset, &fbink_config) < 0) {
 				fprintf(stderr, "Failed to display that image!\n");
 			}
