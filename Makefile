@@ -131,10 +131,6 @@ ifdef MATHS
 	LIBS+=-lm
 endif
 
-# For anonymous structs based on a typedef (c.f., https://gcc.gnu.org/onlinedocs/gcc/Unnamed-Fields.html)
-# We use this for FBInkColor (c.F; fbink_types.h)
-EXTRA_CFLAGS+=-fms-extensions
-
 ##
 # Now that we're done fiddling with flags, let's build stuff!
 LIB_SRCS=fbink.c fbink_device_id.c utf8/utf8.c
