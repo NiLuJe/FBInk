@@ -1,18 +1,18 @@
 This project makes use of a number of third-party libraries, which we'll acknowledge here:
 
 	* font8x8 (8x8 monochrome bitmap fonts for rendering), by Daniel Hepper <daniel@hepper.net>,
-		Released under the public domain.
+		Released into the public domain.
 		(https://github.com/dhepper/font8x8)
 
 	* libu8 (Basic UTF-8 manipulation routines), by Jeff Bezanson,
-		Released under the public domain.
+		Released into the public domain.
 		(https://www.cprogramming.com/tutorial/unicode.html)
 
 	* unscii (Bitmapped Unicode fonts), by Viznut,
-		Released under the public domain.
+		Released into the public domain.
 		(http://pelulamu.net/unscii)
 
 	* stb_image (Image loader), by Sean Barrett,
-		Released under the public domain.
+		Released into the public domain.
 		(http://nothings.org/stb)
 
