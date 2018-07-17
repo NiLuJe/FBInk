@@ -99,25 +99,18 @@ static void
 }
 
 static void
-    put_pixel_RGB32(FBInkCoordinates*  coords,
-		    unsigned short int r,
-		    unsigned short int g,
-		    unsigned short int b,
-		    unsigned short int a)
+    put_pixel_RGB32(FBInkCoordinates* coords, unsigned short int r, unsigned short int g, unsigned short int b)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 4 as every pixel is 4 consecutive bytes
 	size_t pix_offset = coords->x * 4U + coords->y * finfo.line_length;
 
-	if (a != 0xFF) {
-		LOG("Pixel (%d, %d) alpha is %hu)", coords->x, coords->y, a);
-	}
-
 	// now this is about the same as 'fbp[pix_offset] = value'
 	*((unsigned char*) (g_fbink_fbp + pix_offset))     = (unsigned char) b;
 	*((unsigned char*) (g_fbink_fbp + pix_offset + 1)) = (unsigned char) g;
 	*((unsigned char*) (g_fbink_fbp + pix_offset + 2)) = (unsigned char) r;
-	*((unsigned char*) (g_fbink_fbp + pix_offset + 3)) = (unsigned char) a;
+	// Opaque, always. It seems to be discarded by the eInk driver, anyway.
+	*((unsigned char*) (g_fbink_fbp + pix_offset + 3)) = 0xFF;
 }
 
 static void
@@ -231,8 +224,6 @@ static void
 		color->r = def_r[c];
 		color->g = def_g[c];
 		color->b = def_b[c];
-		// TODO: Make alpha configurable?
-		color->a = 0xFF;
 	}
 
 #ifdef FBINK_FOR_LEGACY
@@ -256,7 +247,7 @@ static void
 			put_pixel_RGB24(&coords, color->r, color->g, color->b);
 			break;
 		case 32U:
-			put_pixel_RGB32(&coords, color->r, color->g, color->b, color->a);
+			put_pixel_RGB32(&coords, color->r, color->g, color->b);
 			break;
 		default:
 			// Huh oh... Should never happen!
@@ -1768,11 +1759,7 @@ int
 			break;
 		case 16U:
 		case 24U:
-			req_n = 3;
-			break;
 		case 32U:
-			req_n = 4;
-			break;
 		default:
 			req_n = 3;
 			break;
@@ -1803,12 +1790,6 @@ int
 				color.r = data[(j * req_n * w) + (i * req_n) + 0];
 				color.g = data[(j * req_n * w) + (i * req_n) + 1];
 				color.b = data[(j * req_n * w) + (i * req_n) + 2];
-				if (req_n == 4) {
-					color.a = data[(j * req_n * w) + (i * req_n) + 3];
-					if (color.a != 0xFF) {
-						LOG("Pixel (%d, %d) alpha is %hu (image components: %d)", i, j, color.a, n);
-					}
-				}
 			}
 			put_pixel((unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
 		}
