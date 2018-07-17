@@ -248,6 +248,10 @@ static void
 		case 32U:
 			put_pixel_RGB32(&coords, color->r, color->g, color->b);
 			break;
+		default:
+			// Huh oh... Should never happen!
+			return;
+			break;
 	}
 }
 
@@ -1741,8 +1745,10 @@ int
 	    fbink_config->col,
 	    fbink_config->row);
 
-	int        w, h, n;
-	int        req_n = 0;
+	int        w;
+	int        h;
+	int        n;
+	int        req_n;
 	FBInkColor color = { 0 };
 	// Let stb handle grayscaling for us
 	switch (vinfo.bits_per_pixel) {
@@ -1752,7 +1758,8 @@ int
 			break;
 		case 16U:
 		case 24U:
-		case 32U:
+		case 32U:    // TODO: Support alpha?
+		default:
 			req_n = 3;
 			break;
 	}
