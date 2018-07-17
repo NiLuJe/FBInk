@@ -53,7 +53,7 @@ static void
 	    "Options affecting the message's appearance:\n"
 	    "\t-h, --invert\tPrint STRING in white over a black background instead of the reverse.\n"
 	    "\t-f, --flash\tAsk the eInk driver to do a black flash when refreshing the area of the screen where STRING will be printed.\n"
-	    "\t-c, --clear\tFully clear the screen before printing STRING (obeys --invert).\n"
+	    "\t-c, --clear\tFully clear the screen before printing (obeys --invert).\n"
 	    "\t-S, --size\tOverride the automatic font scaling multiplier (0 means automatic selection, which ranges from 1 (no scaling), to 4 (4x upscaling), depending on screen resolution).\n"
 #ifdef FBINK_WITH_UNSCII
 	    "\t\t\tNote that user-supplied values will be silently clamped to safe boundaries (from 1 to 31 for most fonts, and from 1 to 22 for TALL).\n"
@@ -94,7 +94,17 @@ static void
 	    "\t\t\tBut it does also honor the --flash flag, though.\n"
 #endif
 	    "\t\t\tSpecifying one or more STRING takes precedence over this mode.\n"
-// TODO: Image doc (here & README)
+#ifdef FBINK_WITH_IMAGE
+	    "\n"
+	    "You can also eschew printing a STRING, and print an IMAGE at the requested coordinates instead:\n"
+	    "\t-g, --image file=PATH,x=NUM,y=NUM\n"
+	    "\t\t\tSupported image formats: JPEG, PNG, TGA, BMP, GIF & PNM\n"
+	    "\t\t\tNote that, in some cases, exotic encoding settings may not be supported.\n"
+	    "\t\t\tNote that this also honors --col & --row, in addition to the coordinates you specify.\n"
+	    "\t\t\tThe aim is to make it easier to align small images to text. As such, you can specifiy negative values to x & y.\n"
+	    "\t\t\tSpecifying one or more STRING takes precedence over this mode.\n"
+	    "\t\t\t--refresh also takes precedence over this mode.\n"
+#endif
 	    "\n",
 	    fbink_version());
 

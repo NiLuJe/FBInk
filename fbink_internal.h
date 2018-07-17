@@ -30,8 +30,12 @@
 
 // No extra fonts & no image support in minimal builds
 #ifndef FBINK_MINIMAL
+#ifndef FBINK_WITH_UNSCII
 #define FBINK_WITH_UNSCII
+#endif
+#ifndef FBINK_WITH_IMAGE
 #define FBINK_WITH_IMAGE
+#endif
 #endif
 
 #include <errno.h>
