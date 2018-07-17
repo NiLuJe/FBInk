@@ -99,7 +99,11 @@ static void
 }
 
 static void
-    put_pixel_RGB32(FBInkCoordinates* coords, unsigned short int r, unsigned short int g, unsigned short int b, unsigned short int a)
+    put_pixel_RGB32(FBInkCoordinates*  coords,
+		    unsigned short int r,
+		    unsigned short int g,
+		    unsigned short int b,
+		    unsigned short int a)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 4 as every pixel is 4 consecutive bytes
@@ -1751,7 +1755,7 @@ int
 	int        h;
 	int        n;
 	int        req_n;
-	FBInkColor color = { 0 };
+	FBInkColor color = { 0U };
 	// Let stb handle grayscaling for us
 	switch (vinfo.bits_per_pixel) {
 		case 4U:
@@ -1807,10 +1811,10 @@ int
 
 	// Clamp everything to a safe range, because we can't have *anything* going off-screen here.
 	struct mxcfb_rect region = {
-		.top    = MIN(vinfo.yres, MAX(0, (uint32_t) y_off)),
-		.left   = MIN(vinfo.xres, MAX(0, (uint32_t) x_off)),
-		.width  = MIN(vinfo.xres - region.left, w),
-		.height = MIN(vinfo.yres - region.top, h),
+		.top    = MIN(vinfo.yres, MAX(0U, (uint32_t) y_off)),
+		.left   = MIN(vinfo.xres, MAX(0U, (uint32_t) x_off)),
+		.width  = MIN(vinfo.xres - region.left, (uint32_t) w),
+		.height = MIN(vinfo.yres - region.top, (uint32_t) h),
 	};
 	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
 
