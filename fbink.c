@@ -1809,8 +1809,8 @@ int
 	struct mxcfb_rect region = {
 		.top    = MIN(vinfo.yres, MAX(0, (uint32_t) y_off)),
 		.left   = MIN(vinfo.xres, MAX(0, (uint32_t) x_off)),
-		.width  = MIN(vinfo.xres - region.left, MAX(w, vinfo.xres - region.left)),
-		.height = MIN(vinfo.yres - region.top, MAX(h, vinfo.yres - region.top)),
+		.width  = MIN(vinfo.xres - region.left, w),
+		.height = MIN(vinfo.yres - region.top, h),
 	};
 	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
 
