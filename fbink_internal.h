@@ -174,16 +174,16 @@ static void rotate_coordinates(FBInkCoordinates*);
 
 static void put_pixel_Gray4(FBInkCoordinates*, unsigned short int);
 static void put_pixel_Gray8(FBInkCoordinates*, unsigned short int);
-static void put_pixel_RGB24(FBInkCoordinates*, unsigned short int, unsigned short int, unsigned short int);
-static void put_pixel_RGB32(FBInkCoordinates*, unsigned short int, unsigned short int, unsigned short int);
-static void put_pixel_RGB565(FBInkCoordinates*, unsigned short int, unsigned short int, unsigned short int);
-static void put_pixel(unsigned short int, unsigned short int, unsigned short int);
+static void put_pixel_RGB24(FBInkCoordinates*, FBInkRGB*);
+static void put_pixel_RGB32(FBInkCoordinates*, FBInkRGB*);
+static void put_pixel_RGB565(FBInkCoordinates*, FBInkRGB*);
+static void put_pixel(unsigned short int, unsigned short int, FBInkColor*);
 
 static void fill_rect(unsigned short int,
 		      unsigned short int,
 		      unsigned short int,
 		      unsigned short int,
-		      unsigned short int);
+		      FBInkColor*);
 static void clear_screen(unsigned short int);
 
 static const unsigned char* font8x8_get_bitmap(uint32_t);
@@ -207,8 +207,6 @@ static int refresh_kobo_mk7(int, const struct mxcfb_rect, uint32_t, uint32_t, ui
 static int refresh(int, const struct mxcfb_rect, uint32_t UNUSED_BY_LEGACY, bool);
 
 static const char* fb_rotate_to_string(uint32_t);
-
-static void put_img_pixel(unsigned short int, unsigned short int, unsigned short int, unsigned short int, unsigned short int, unsigned short int);
 
 // For identify_device
 #include "fbink_device_id.h"

@@ -189,7 +189,7 @@ static void
 
 // Handle various bpp...
 static void
-    put_pixel(unsigned short int x, unsigned short int y, unsigned short int c)
+    put_pixel(unsigned short int x, unsigned short int y, FBInkColor* color)
 {
 	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
 	FBInkCoordinates coords = { x, y };
@@ -211,27 +211,42 @@ static void
 		*/
 		return;
 	}
+
+	// Depalettize if need be
+	if (color->type == PALETTE) {
+		color->type = GRAY;
+		// We're going to stomp this value by writing another variant, so store it.
+		unsigned short int c = color->c;
+		// NOTE: We cheat a bit and rely on possibly undefined but reliable behavior...
+		// Gray means r = g = b = v, but since we have an union, only set r, g & b,
+		// and v should automagically point to r :).
+		color->r = def_r[c];
+		color->g = def_g[c];
+		color->b = def_b[c];
+	}
+
 #ifdef FBINK_FOR_LEGACY
-	// NOTE: Legacy devices all have an inverted palette.
-	c = c ^ WHITE;
+	// NOTE: Legacy devices all have an inverted color map...
+	color->r = color->r ^ 0xFF;
+	color->g = color->g ^ 0xFF;
+	color->b = color->b ^ 0xFF;
 #endif
 
 	switch (vinfo.bits_per_pixel) {
 		case 4U:
-			put_pixel_Gray4(&coords, def_b[c]);
+			put_pixel_Gray4(&coords, color->v);
 			break;
 		case 8U:
-			// NOTE: Grayscale palette, we could have used def_r or def_g ;).
-			put_pixel_Gray8(&coords, def_b[c]);
+			put_pixel_Gray8(&coords, color->v);
 			break;
 		case 16U:
-			put_pixel_RGB565(&coords, def_r[c], def_g[c], def_b[c]);
+			put_pixel_RGB565(&coords, color->r, color->g, color->b);
 			break;
 		case 24U:
-			put_pixel_RGB24(&coords, def_r[c], def_g[c], def_b[c]);
+			put_pixel_RGB24(&coords, color->r, color->g, color->b);
 			break;
 		case 32U:
-			put_pixel_RGB32(&coords, def_r[c], def_g[c], def_b[c]);
+			put_pixel_RGB32(&coords, color->r, color->g, color->b);
 			break;
 	}
 }
