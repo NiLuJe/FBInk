@@ -185,7 +185,7 @@ static void rotate_coordinates(FBInkCoordinates*);
 static void put_pixel_Gray4(FBInkCoordinates*, unsigned short int);
 static void put_pixel_Gray8(FBInkCoordinates*, unsigned short int);
 static void put_pixel_RGB24(FBInkCoordinates*, unsigned short int, unsigned short int, unsigned short int);
-static void put_pixel_RGB32(FBInkCoordinates*, unsigned short int, unsigned short int, unsigned short int);
+static void put_pixel_RGB32(FBInkCoordinates*, unsigned short int, unsigned short int, unsigned short int, unsigned short int);
 static void put_pixel_RGB565(FBInkCoordinates*, unsigned short int, unsigned short int, unsigned short int);
 static void put_pixel(unsigned short int, unsigned short int, FBInkColor*);
 

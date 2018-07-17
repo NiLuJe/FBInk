@@ -99,7 +99,7 @@ static void
 }
 
 static void
-    put_pixel_RGB32(FBInkCoordinates* coords, unsigned short int r, unsigned short int g, unsigned short int b)
+    put_pixel_RGB32(FBInkCoordinates* coords, unsigned short int r, unsigned short int g, unsigned short int b, unsigned short int a)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 4 as every pixel is 4 consecutive bytes
@@ -109,7 +109,7 @@ static void
 	*((unsigned char*) (g_fbink_fbp + pix_offset))     = (unsigned char) b;
 	*((unsigned char*) (g_fbink_fbp + pix_offset + 1)) = (unsigned char) g;
 	*((unsigned char*) (g_fbink_fbp + pix_offset + 2)) = (unsigned char) r;
-	*((unsigned char*) (g_fbink_fbp + pix_offset + 3)) = 0xFF;    // Opaque, always.
+	*((unsigned char*) (g_fbink_fbp + pix_offset + 3)) = (unsigned char) a;
 }
 
 static void
@@ -223,6 +223,8 @@ static void
 		color->r = def_r[c];
 		color->g = def_g[c];
 		color->b = def_b[c];
+		// TODO: Make alpha configurable?
+		color->a = 0xFF;
 	}
 
 #ifdef FBINK_FOR_LEGACY
@@ -246,7 +248,7 @@ static void
 			put_pixel_RGB24(&coords, color->r, color->g, color->b);
 			break;
 		case 32U:
-			put_pixel_RGB32(&coords, color->r, color->g, color->b);
+			put_pixel_RGB32(&coords, color->r, color->g, color->b, color->a);
 			break;
 		default:
 			// Huh oh... Should never happen!
@@ -1758,7 +1760,11 @@ int
 			break;
 		case 16U:
 		case 24U:
-		case 32U:    // TODO: Support alpha?
+			req_n = 3;
+			break;
+		case 32U:
+			req_n = 4;
+			break;
 		default:
 			req_n = 3;
 			break;
@@ -1789,6 +1795,9 @@ int
 				color.r = data[(j * req_n * w) + (i * req_n) + 0];
 				color.g = data[(j * req_n * w) + (i * req_n) + 1];
 				color.b = data[(j * req_n * w) + (i * req_n) + 2];
+				if (req_n == 4) {
+					color.a = data[(j * req_n * w) + (i * req_n) + 3];
+				}
 			}
 			put_pixel((unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
 		}
@@ -1800,8 +1809,8 @@ int
 	struct mxcfb_rect region = {
 		.top    = MIN(vinfo.yres, MAX(0, (uint32_t) y_off)),
 		.left   = MIN(vinfo.xres, MAX(0, (uint32_t) x_off)),
-		.width  = MIN(vinfo.xres, MIN((uint32_t) w, (uint32_t) w - region.left)),
-		.height = MIN(vinfo.yres, MIN((uint32_t) h, (uint32_t) h - region.top)),
+		.width  = MIN(vinfo.xres - region.left, MAX(w, vinfo.xres - region.left)),
+		.height = MIN(vinfo.yres - region.top, MAX(h, vinfo.yres - region.top)),
 	};
 	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
 

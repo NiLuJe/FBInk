@@ -71,13 +71,14 @@ typedef struct
 	{
 		unsigned short int c;    // PALETTE index
 		unsigned short int v;    // GRAY intensity
-		// An (r, g, b) triplet for an 8-bit per component, 3 channel color
+		// An (r, g, b, a) quadruplet for an 8-bit per component, 3 or 4 channel color (alpha is optional)
 		struct
 		{
 			unsigned short int r;
 			unsigned short int g;
 			unsigned short int b;
-		};    // RGB, anonymous to make calling less cumbersome
+			unsigned short int a;
+		};    // RGBA, anonymous to make calling less cumbersome
 	};            // anonymous too to make usage clearer
 } FBInkColor;
 
