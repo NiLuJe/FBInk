@@ -1691,10 +1691,6 @@ bool
 int
     fbink_print_image(int fbfd, const char* filename, int x_off, int y_off)
 {
-	// FIXME: Should we automagically handle the H2O offset?
-	//        I'd go with no, we already don't for text...
-	y_off += 11;
-
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
 	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {

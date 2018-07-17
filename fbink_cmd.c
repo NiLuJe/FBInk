@@ -131,13 +131,21 @@ int
 		HEIGHT_OPT,
 		WFM_OPT,
 	};
+	enum
+	{
+		FILE_OPT = 0,
+		XOFF_OPT,
+		YOFF_OPT,
+	};
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunknown-warning-option"
 #pragma GCC diagnostic ignored "-Wdiscarded-qualifiers"
 #pragma clang diagnostic ignored "-Wincompatible-pointer-types-discards-qualifiers"
-	char* const token[] = { [TOP_OPT] = "top",       [LEFT_OPT] = "left", [WIDTH_OPT] = "width",
+	char* const refresh_token[] = { [TOP_OPT] = "top",       [LEFT_OPT] = "left", [WIDTH_OPT] = "width",
 				[HEIGHT_OPT] = "height", [WFM_OPT] = "wfm",   NULL };
+	char* const image_token[] = { [FILE_OPT] = "file",       [XOFF_OPT] = "x", [YOFF_OPT] = "y",
+				NULL };
 #pragma GCC diagnostic pop
 	char*    subopts;
 	char*    value;
@@ -146,8 +154,11 @@ int
 	uint32_t region_width    = 0;
 	uint32_t region_height   = 0;
 	char*    region_wfm      = NULL;
-	bool     is_refresh_only = false;
+	bool     is_refresh      = false;
 	char*    image_file      = NULL;
+	int      image_x_offset  = 0;
+	int      image_y_offset  = 0;
+	bool     is_image        = false;
 	int      errfnd          = 0;
 
 	while ((opt = getopt_long(argc, argv, "y:x:hfcmps:S:F:vqg:", opts, &opt_index)) != -1) {
@@ -176,7 +187,7 @@ int
 			case 's':
 				subopts = optarg;
 				while (*subopts != '\0' && !errfnd) {
-					switch (getsubopt(&subopts, token, &value)) {
+					switch (getsubopt(&subopts, refresh_token, &value)) {
 						case TOP_OPT:
 							region_top = (uint32_t) strtoul(value, NULL, 10);
 							break;
@@ -193,7 +204,7 @@ int
 							if (value == NULL) {
 								fprintf(stderr,
 									"Missing value for suboption '%s'\n",
-									token[WFM_OPT]);
+									refresh_token[WFM_OPT]);
 								errfnd = 1;
 								continue;
 							}
@@ -209,12 +220,12 @@ int
 				if (region_height == 0 && region_width == 0 && region_wfm == NULL) {
 					fprintf(stderr,
 						"Must specify at least '%s', '%s' and '%s'\n",
-						token[HEIGHT_OPT],
-						token[WIDTH_OPT],
-						token[WFM_OPT]);
+						refresh_token[HEIGHT_OPT],
+						refresh_token[WIDTH_OPT],
+						refresh_token[WFM_OPT]);
 					errfnd = 1;
 				} else {
-					is_refresh_only = true;
+					is_refresh = true;
 				}
 				break;
 			case 'S':
@@ -247,7 +258,32 @@ int
 				fbink_config.is_quiet = !fbink_config.is_quiet;
 				break;
 			case 'g':
-				image_file = strdup(optarg);
+				subopts = optarg;
+				while (*subopts != '\0' && !errfnd) {
+					switch (getsubopt(&subopts, image_token, &value)) {
+						case FILE_OPT:
+							image_file = strdup(value);
+							break;
+						case XOFF_OPT:
+							image_x_offset = atoi(value);
+							break;
+						case YOFF_OPT:
+							image_y_offset = atoi(value);
+							break;
+						default:
+							fprintf(stderr, "No match found for token: /%s/\n", value);
+							errfnd = 1;
+							break;
+					}
+				}
+				if (image_file == NULL) {
+					fprintf(stderr,
+						"Must specify at least '%s'\n",
+						image_token[FILE_OPT]);
+					errfnd = 1;
+				} else {
+					is_image = true;
+				}
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
@@ -270,12 +306,6 @@ int
 	if (EXIT_FAILURE == (fbfd = fbink_init(fbfd, &fbink_config))) {
 		fprintf(stderr, "Failed to initialize FBInk, aborting . . .\n");
 		return EXIT_FAILURE;
-	}
-
-	// TODO: Shortcut string printing properly
-	//       getsubopt file, x, y, row, col (to help align w/ text; append x & y after rox/col calcs, top-left)
-	if (image_file) {
-		fbink_print_image(fbfd, image_file, 0, 0);
 	}
 
 	char* string;
@@ -308,7 +338,7 @@ int
 			// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
 		}
 	} else {
-		if (is_refresh_only) {
+		if (is_refresh) {
 			printf(
 			    "Refreshing the screen from top=%u, left=%u for width=%u, height=%u with %swaveform mode %s\n",
 			    region_top,
@@ -325,6 +355,11 @@ int
 					  region_wfm,
 					  fbink_config.is_flashing) != EXIT_SUCCESS) {
 				fprintf(stderr, "Failed to refresh the screen as per your specification!\n");
+			}
+		} else if (is_image) {
+			// TODO: Compute initial offsets from row/col...
+			if (fbink_print_image(fbfd, image_file, image_x_offset, image_y_offset) < 0) {
+				fprintf(stderr, "Failed to display that image!\n");
 			}
 		} else {
 			show_helpmsg();
