@@ -1704,7 +1704,7 @@ int
 		}
 	}
 
-	int x, y, n;
+	int w, h, n;
 	int req_n = 0;
 	FBInkColor color = { 0 };
 	// Let stb handle grayscaling for us
@@ -1720,25 +1720,25 @@ int
 			break;
 	}
 
-	unsigned char *data = stbi_load(filename, &x, &y, &n, req_n);
+	unsigned char *data = stbi_load(filename, &w, &h, &n, req_n);
 	if (data == NULL) {
 		fprintf(stderr, "[FBInk] Failed to open or decode image '%s'!\n", filename);
 		return -1;
 	}
-	// FIXME: Take offsets into account (-> doesn't fit on screen)
-	if (x > viewWidth || y > viewHeight) {
-		LOG("Image is larger than the screen (%dx%d > %ux%u), it will be cropped!", x, y, viewWidth, viewHeight);
+	// NOTE: Warn if either the sheer size of the image or its position will force a crop...
+	if ((w + x_off) > viewWidth || (h + y_off) > viewHeight) {
+		LOG("Displayed at these coordinates (%d, %d), the image (%dx%d) won't fit on the screen (%ux%u), it will be cropped!", x_off, y_off, w, h, viewWidth, viewHeight);
 	}
 	int i;
 	int j;
-	for (j = 0; j < y; j++) {
-		for (i = 0; i < x; i++) {
+	for (j = 0; j < h; j++) {
+		for (i = 0; i < w; i++) {
 			if (req_n == 1) {
-				color.v = data[(j * x) + i];
+				color.v = data[(j * w) + i];
 			} else {
-				color.r = data[(j * req_n * x) + (i * req_n) + 0];
-				color.g = data[(j * req_n * x) + (i * req_n) + 1];
-				color.b = data[(j * req_n * x) + (i * req_n) + 2];
+				color.r = data[(j * req_n * w) + (i * req_n) + 0];
+				color.g = data[(j * req_n * w) + (i * req_n) + 1];
+				color.b = data[(j * req_n * w) + (i * req_n) + 2];
 			}
 			put_pixel((unsigned short int) i + x_off, (unsigned short int) j + y_off, &color);
 		}

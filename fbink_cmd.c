@@ -358,6 +358,7 @@ int
 			}
 		} else if (is_image) {
 			// TODO: Compute initial offsets from row/col...
+			printf("Displaying image '%s' @ (%d, %d)\n", image_file, image_x_offset, image_y_offset);
 			if (fbink_print_image(fbfd, image_file, image_x_offset, image_y_offset) < 0) {
 				fprintf(stderr, "Failed to display that image!\n");
 			}
