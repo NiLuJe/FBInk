@@ -22,7 +22,7 @@ OPT_CFLAGS=-O2 -fomit-frame-pointer -pipe
 
 ifdef DEBUG
 	OUT_DIR=Debug
-	CFLAGS?=$(DEBUG_CFLAGS)
+	CFLAGS:=$(DEBUG_CFLAGS)
 	EXTRA_CFLAGS+=-DDEBUG
 else
 	OUT_DIR=Release

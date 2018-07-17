@@ -208,6 +208,8 @@ static int refresh(int, const struct mxcfb_rect, uint32_t UNUSED_BY_LEGACY, bool
 
 static const char* fb_rotate_to_string(uint32_t);
 
+static void put_img_pixel(unsigned short int, unsigned short int, unsigned short int, unsigned short int, unsigned short int, unsigned short int);
+
 // For identify_device
 #include "fbink_device_id.h"
 

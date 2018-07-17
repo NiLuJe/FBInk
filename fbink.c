@@ -1636,6 +1636,48 @@ bool
 	return deviceQuirks.isKobo16Landscape;
 }
 
+// Handle various bpp...
+static void
+    put_img_pixel(unsigned short int x, unsigned short int y, unsigned short int v, unsigned short int r, unsigned short int g, unsigned short int b)
+{
+	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
+	FBInkCoordinates coords = { x, y };
+	if (deviceQuirks.isKobo16Landscape) {
+		rotate_coordinates(&coords);
+	}
+
+	// NOTE: Discard off-screen pixels!
+	//       For instance, when we have a halfcell offset in conjunction with a !isPerfectFit pixel offset,
+	//       when we're padding and centering, the final whitespace of right-padding will have its last
+	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
+	if (coords.x >= vinfo.xres || coords.y >= vinfo.yres) {
+		LOG("Discarding off-screen pixel @ (%hu, %hu) (out of %ux%u bounds)",
+		    coords.x,
+		    coords.y,
+		    vinfo.xres,
+		    vinfo.yres);
+		return;
+	}
+
+	switch (vinfo.bits_per_pixel) {
+		case 4U:
+			put_pixel_Gray4(&coords, v);
+			break;
+		case 8U:
+			put_pixel_Gray8(&coords, v);
+			break;
+		case 16U:
+			put_pixel_RGB565(&coords, r, g, b);
+			break;
+		case 24U:
+			put_pixel_RGB24(&coords, r, g, b);
+			break;
+		case 32U:
+			put_pixel_RGB32(&coords, r, g, b);
+			break;
+	}
+}
+
 // Draw an image on screen
 int
     fbink_print_image(int fbfd, const char* filename, int x, int y)
@@ -1662,22 +1704,34 @@ int
 		case 16U:
 		case 24U:
 		case 32U:
-			// TODO: Set to 3, and unpack manually to feed put_pixel an actual r, g, b triplet
-			req_n = 1;
+			req_n = 3;
 			break;
 	}
 
 	unsigned char *data = stbi_load(filename, &x, &y, &n, req_n);
+	if (data == NULL) {
+		LOG("Failed to load image '%s'!", filename);
+		return EXIT_FAILURE;
+	}
 	if (x > viewWidth || y > viewHeight) {
 		LOG("Image is larger than the screen (%dx%d > %ux%u), it will be cropped!", x, y, viewWidth, viewHeight);
 	}
 	int i;
 	int j;
+	unsigned short int v, r, g, b;
 	// FIXME? ++j/++i?
 	for (j = 0; j < y; j++) {
 		for (i = 0; i < x; i++) {
-			unsigned char pixel = data[(j * x) + i];
-			put_pixel((unsigned short int) i, (unsigned short int) j, pixel);
+			if (req_n == 1) {
+				r = g = b = 0;
+				v = data[(j * x) + i];
+			} else {
+				v = 0;
+				r = data[(j * req_n * x) + (i * req_n) + 0];
+				g = data[(j * req_n * x) + (i * req_n) + 1];
+				b = data[(j * req_n * x) + (i * req_n) + 2];
+			}
+			put_img_pixel((unsigned short int) i, (unsigned short int) j, v, r, g, b);
 		}
 	}
 
@@ -1685,7 +1739,7 @@ int
 
 	// TODO: Positioning & proper rect calc
 	struct mxcfb_rect region = {
-		.top = 0U,
+		.top    = 0U,
 		.left   = 0U,
 		.width  = vinfo.xres,
 		.height = vinfo.yres,
