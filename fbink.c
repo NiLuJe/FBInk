@@ -212,7 +212,7 @@ static void
 		return;
 	}
 
-	// Depalettize if need be
+	// Depalettize if need be (i.e., palette index -> RGB)
 	if (color->type == PALETTE) {
 		color->type = GRAY;
 		// We're going to stomp this value by writing another variant, so store it.
@@ -257,13 +257,13 @@ static void
 	      unsigned short int y,
 	      unsigned short int w,
 	      unsigned short int h,
-	      unsigned short int c)
+	      FBInkColor* color)
 {
 	unsigned short int cx;
 	unsigned short int cy;
 	for (cy = 0U; cy < h; cy++) {
 		for (cx = 0U; cx < w; cx++) {
-			put_pixel((unsigned short int) (x + cx), (unsigned short int) (y + cy), c);
+			put_pixel((unsigned short int) (x + cx), (unsigned short int) (y + cy), color);
 		}
 	}
 	LOG("Filled a %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
@@ -378,8 +378,14 @@ static struct mxcfb_rect
 	 bool               halfcell_offset)
 {
 	LOG("Printing '%s' @ line offset %hu (meaning row %d)", text, multiline_offset, row + multiline_offset);
-	unsigned short int fgC = is_inverted ? WHITE : BLACK;
-	unsigned short int bgC = is_inverted ? BLACK : WHITE;
+	FBInkColor fgC = {
+		.type = PALETTE,
+		.c = is_inverted ? WHITE : BLACK,
+	};
+	FBInkColor bgC = {
+		.type = PALETTE,
+		.c = is_inverted ? BLACK : WHITE,
+	};
 
 	unsigned short int x;
 	unsigned short int y;
@@ -445,7 +451,7 @@ static struct mxcfb_rect
 			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			  pixel_offset,
 			  FONTH,
-			  bgC);
+			  &bgC);
 		// Correct width, to include that bit of content, too, if needed
 		if (region.width < viewWidth) {
 			region.width += pixel_offset;
@@ -471,7 +477,7 @@ static struct mxcfb_rect
 			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			  pixel_offset,
 			  FONTH,
-			  bgC);
+			  &bgC);
 		// If it's not already the case, update region to the full width,
 		// because we've just plugged a hole at the very right edge of a full line.
 		if (region.width < viewWidth) {
@@ -530,14 +536,14 @@ static struct mxcfb_rect
 					put_pixel(
 					    (unsigned short int) ((col * FONTW) + (ci * FONTW) + x + pixel_offset),
 					    (unsigned short int) ((row * FONTH) + y),
-					    fgC);
+					    &fgC);
 				} else {
 					// this is background,
 					// fill it so that we'll be visible no matter what was on screen behind us.
 					put_pixel(
 					    (unsigned short int) ((col * FONTW) + (ci * FONTW) + x + pixel_offset),
 					    (unsigned short int) ((row * FONTH) + y),
-					    bgC);
+					    &bgC);
 				}
 			}    // end "for x"
 		}            // end "for y"
@@ -1662,46 +1668,6 @@ bool
 	return deviceQuirks.isKobo16Landscape;
 }
 
-// Handle various bpp...
-// TODO: Deduplicate (perhaps a palette_to_rgb that takes an index and returns a rgbv struct?)
-static void
-    put_img_pixel(unsigned short int x, unsigned short int y, unsigned short int v, unsigned short int r, unsigned short int g, unsigned short int b)
-{
-	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
-	FBInkCoordinates coords = { x, y };
-	if (deviceQuirks.isKobo16Landscape) {
-		rotate_coordinates(&coords);
-	}
-
-	// NOTE: Discard off-screen pixels!
-	if (coords.x >= vinfo.xres || coords.y >= vinfo.yres) {
-		LOG("Discarding off-screen pixel @ (%hu, %hu) (out of %ux%u bounds)",
-		    coords.x,
-		    coords.y,
-		    vinfo.xres,
-		    vinfo.yres);
-		return;
-	}
-
-	switch (vinfo.bits_per_pixel) {
-		case 4U:
-			put_pixel_Gray4(&coords, v);
-			break;
-		case 8U:
-			put_pixel_Gray8(&coords, v);
-			break;
-		case 16U:
-			put_pixel_RGB565(&coords, r, g, b);
-			break;
-		case 24U:
-			put_pixel_RGB24(&coords, r, g, b);
-			break;
-		case 32U:
-			put_pixel_RGB32(&coords, r, g, b);
-			break;
-	}
-}
-
 // Draw an image on screen
 // TODO: Don't compile when MINIMAL (-> FBINK_WITH_IMAGE)
 int
@@ -1743,16 +1709,19 @@ int
 
 	int x, y, n;
 	int req_n = 0;
+	FBInkColor color;
 	// Let stb handle grayscaling for us
 	switch (vinfo.bits_per_pixel) {
 		case 4U:
 		case 8U:
 			req_n = 1;
+			color.type = GRAY;
 			break;
 		case 16U:
 		case 24U:
 		case 32U:
 			req_n = 3;
+			color.type = RGB;
 			break;
 	}
 
@@ -1767,19 +1736,16 @@ int
 	}
 	int i;
 	int j;
-	unsigned short int v, r, g, b;
 	for (j = 0; j < y; j++) {
 		for (i = 0; i < x; i++) {
 			if (req_n == 1) {
-				r = g = b = 0;
-				v = data[(j * x) + i];
+				color.v = data[(j * x) + i];
 			} else {
-				v = 0;
-				r = data[(j * req_n * x) + (i * req_n) + 0];
-				g = data[(j * req_n * x) + (i * req_n) + 1];
-				b = data[(j * req_n * x) + (i * req_n) + 2];
+				color.r = data[(j * req_n * x) + (i * req_n) + 0];
+				color.g = data[(j * req_n * x) + (i * req_n) + 1];
+				color.b = data[(j * req_n * x) + (i * req_n) + 2];
 			}
-			put_img_pixel((unsigned short int) i + x_off, (unsigned short int) j + y_off, v, r, g, b);
+			put_pixel((unsigned short int) i + x_off, (unsigned short int) j + y_off, &color);
 		}
 	}
 
