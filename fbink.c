@@ -1684,7 +1684,7 @@ int
 		keep_fd = false;
 		if (-1 == (fbfd = fbink_open())) {
 			fprintf(stderr, "[FBInk] Failed to open the framebuffer, aborting . . .\n");
-			return EXIT_FAILURE;
+			return -1;
 		}
 	}
 
@@ -1727,8 +1727,8 @@ int
 
 	unsigned char *data = stbi_load(filename, &x, &y, &n, req_n);
 	if (data == NULL) {
-		LOG("Failed to load image '%s'!", filename);
-		return EXIT_FAILURE;
+		fprintf(stderr, "[FBInk] Failed to load image '%s'!\n", filename);
+		return -1;
 	}
 	// FIXME: Take offsets into account (-> doesn't fit on screen)
 	if (x > viewWidth || y > viewHeight) {
