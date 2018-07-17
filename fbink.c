@@ -1705,9 +1705,16 @@ int
 	}
 
 	// NOTE: We compute initial offsets from row/col, to help aligning images with text.
-	// FIXME: Handle negative values
-	x_off += fbink_config->col * FONTW;
-	y_off += fbink_config->row * FONTH;
+	if (fbink_config->col < 0) {
+		x_off += MAX(MAXCOLS + fbink_config->col, 0) * FONTW;
+	} else {
+		x_off += fbink_config->col * FONTW;
+	}
+	if (fbink_config->row < 0) {
+		y_off += MAX(MAXROWS + fbink_config->row, 0) * FONTH;
+	} else {
+		y_off += fbink_config->row * FONTH;
+	}
 	LOG("Adjusted image display coordinates to (%hd, %hd), after column %hd & row %hd", x_off, y_off, fbink_config->col, fbink_config->row);
 
 	int w, h, n;
