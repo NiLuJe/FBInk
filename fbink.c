@@ -1195,6 +1195,16 @@ static void
 	region->height = oregion.width;
 }
 
+// Tweak the region to cover the full screen
+static void
+    fullscreen_region(struct mxcfb_rect* region)
+{
+	region->top    = 0U;
+	region->left   = 0U;
+	region->width  = vinfo.xres;
+	region->height = vinfo.yres;
+}
+
 // Magic happens here!
 int
     fbink_print(int fbfd, const char* string, const FBInkConfig* fbink_config)
@@ -1514,10 +1524,7 @@ int
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
 	if (fbink_config->is_cleared) {
-		region.top    = 0U;
-		region.left   = 0U;
-		region.width  = vinfo.xres;
-		region.height = vinfo.yres;
+		fullscreen_region(&region);
 	}
 
 	// Refresh screen
@@ -1712,7 +1719,10 @@ int
 		}
 	}
 
-	// TODO: Honor screen clear
+	// Clear screen?
+	if (fbink_config->is_cleared) {
+		clear_screen(fbink_config->is_inverted ? BLACK : WHITE);
+	}
 
 	// NOTE: We compute initial offsets from row/col, to help aligning images with text.
 	if (fbink_config->col < 0) {
@@ -1781,6 +1791,11 @@ int
 	// Rotate the region if need be...
 	if (deviceQuirks.isKobo16Landscape) {
 		rotate_region(&region);
+	}
+
+	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
+	if (fbink_config->is_cleared) {
+		fullscreen_region(&region);
 	}
 
 	// Refresh screen
