@@ -35,7 +35,7 @@
 #define STBI_NO_LINEAR
 // We want SIMD for JPEG decoding (... if we can actually use it)!
 #ifdef __ARM_NEON
-#define STBI_NEON
+#	define STBI_NEON
 #endif
 // We don't care about those formats (PhotoShop, AutoDesk)
 #define STBI_NO_PSD
@@ -253,11 +253,7 @@ static void
 
 // Helper function to draw a rectangle in given color
 static void
-    fill_rect(unsigned short int x,
-	      unsigned short int y,
-	      unsigned short int w,
-	      unsigned short int h,
-	      FBInkColor* color)
+    fill_rect(unsigned short int x, unsigned short int y, unsigned short int w, unsigned short int h, FBInkColor* color)
 {
 	unsigned short int cx;
 	unsigned short int cy;
@@ -380,11 +376,11 @@ static struct mxcfb_rect
 	LOG("Printing '%s' @ line offset %hu (meaning row %d)", text, multiline_offset, row + multiline_offset);
 	FBInkColor fgC = {
 		.isPaletteIndex = true,
-		.c = is_inverted ? WHITE : BLACK,
+		.c              = is_inverted ? WHITE : BLACK,
 	};
 	FBInkColor bgC = {
 		.isPaletteIndex = true,
-		.c = is_inverted ? BLACK : WHITE,
+		.c              = is_inverted ? BLACK : WHITE,
 	};
 
 	unsigned short int x;
@@ -1587,7 +1583,7 @@ int
 {
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
-		if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
 		return EXIT_FAILURE;
 	}
 
@@ -1703,7 +1699,11 @@ bool
 
 // Draw an image on screen
 int
-    fbink_print_image(int fbfd UNUSED_BY_MINIMAL, const char* filename UNUSED_BY_MINIMAL, short int x_off UNUSED_BY_MINIMAL, short int y_off UNUSED_BY_MINIMAL, const FBInkConfig* fbink_config UNUSED_BY_MINIMAL)
+    fbink_print_image(int fbfd    UNUSED_BY_MINIMAL,
+		      const char* filename UNUSED_BY_MINIMAL,
+		      short int x_off UNUSED_BY_MINIMAL,
+		      short int y_off    UNUSED_BY_MINIMAL,
+		      const FBInkConfig* fbink_config UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_IMAGE
 	// Open the framebuffer if need be...
@@ -1735,10 +1735,14 @@ int
 	} else {
 		y_off += fbink_config->row * FONTH;
 	}
-	LOG("Adjusted image display coordinates to (%hd, %hd), after column %hd & row %hd", x_off, y_off, fbink_config->col, fbink_config->row);
+	LOG("Adjusted image display coordinates to (%hd, %hd), after column %hd & row %hd",
+	    x_off,
+	    y_off,
+	    fbink_config->col,
+	    fbink_config->row);
 
-	int w, h, n;
-	int req_n = 0;
+	int        w, h, n;
+	int        req_n = 0;
 	FBInkColor color = { 0 };
 	// Let stb handle grayscaling for us
 	switch (vinfo.bits_per_pixel) {
@@ -1753,14 +1757,20 @@ int
 			break;
 	}
 
-	unsigned char *data = stbi_load(filename, &w, &h, &n, req_n);
+	unsigned char* data = stbi_load(filename, &w, &h, &n, req_n);
 	if (data == NULL) {
 		fprintf(stderr, "[FBInk] Failed to open or decode image '%s'!\n", filename);
 		return -1;
 	}
 	// NOTE: Warn if either the sheer size of the image or its position will force a crop...
 	if ((w + x_off) > viewWidth || (h + y_off) > viewHeight) {
-		LOG("Displayed at these coordinates (%d, %d), the image (%dx%d) won't fit on the screen (%ux%u), it will be cropped!", x_off, y_off, w, h, viewWidth, viewHeight);
+		LOG("Displayed at these coordinates (%d, %d), the image (%dx%d) won't fit on the screen (%ux%u), it will be cropped!",
+		    x_off,
+		    y_off,
+		    w,
+		    h,
+		    viewWidth,
+		    viewHeight);
 	}
 	int i;
 	int j;
@@ -1815,5 +1825,5 @@ int
 #else
 	fprintf(stderr, "[FBInk] Image support is disabled in this FBInk build!\n");
 	return ENOSYS;
-#endif // FBINK_WITH_IMAGE
+#endif    // FBINK_WITH_IMAGE
 }

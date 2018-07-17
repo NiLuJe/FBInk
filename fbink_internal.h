@@ -30,12 +30,12 @@
 
 // No extra fonts & no image support in minimal builds
 #ifndef FBINK_MINIMAL
-#ifndef FBINK_WITH_UNSCII
-#define FBINK_WITH_UNSCII
-#endif
-#ifndef FBINK_WITH_IMAGE
-#define FBINK_WITH_IMAGE
-#endif
+#	ifndef FBINK_WITH_UNSCII
+#		define FBINK_WITH_UNSCII
+#	endif
+#	ifndef FBINK_WITH_IMAGE
+#		define FBINK_WITH_IMAGE
+#	endif
 #endif
 
 #include <errno.h>
@@ -189,11 +189,7 @@ static void put_pixel_RGB32(FBInkCoordinates*, unsigned short int, unsigned shor
 static void put_pixel_RGB565(FBInkCoordinates*, unsigned short int, unsigned short int, unsigned short int);
 static void put_pixel(unsigned short int, unsigned short int, FBInkColor*);
 
-static void fill_rect(unsigned short int,
-		      unsigned short int,
-		      unsigned short int,
-		      unsigned short int,
-		      FBInkColor*);
+static void fill_rect(unsigned short int, unsigned short int, unsigned short int, unsigned short int, FBInkColor*);
 static void clear_screen(unsigned short int);
 
 static const unsigned char* font8x8_get_bitmap(uint32_t);
@@ -220,7 +216,7 @@ static int open_fb_fd(int*, bool*);
 
 static const char* fb_rotate_to_string(uint32_t);
 
-static int memmap_fb(int);
+static int  memmap_fb(int);
 static void unmap_fb(void);
 
 static void rotate_region(struct mxcfb_rect*);
