@@ -40,6 +40,8 @@
 // We don't care about those formats (PhotoShop, AutoDesk)
 #define STBI_NO_PSD
 #define STBI_NO_PIC
+// We can't use stbi_failure_reason as it's not thread-safe, so ditch the strings
+#define STBI_NO_FAILURE_STRINGS
 // Disable a bunch of very verbose but mostly harmless warnings
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
@@ -1741,8 +1743,6 @@ int
 
 	unsigned char *data = stbi_load(filename, &x, &y, &n, req_n);
 	if (data == NULL) {
-		// FIXME: Do we want to use stbi_failure_reason() w/ STBI_FAILURE_USERMSG? It's not thread-safe (static storage).
-		//       Consider using STBI_NO_FAILURE_STRINGS if we don't.
 		LOG("Failed to load image '%s'!", filename);
 		return EXIT_FAILURE;
 	}
