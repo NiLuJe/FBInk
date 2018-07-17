@@ -119,7 +119,7 @@ FBINK_API int fbink_refresh(int, uint32_t, uint32_t, uint32_t, uint32_t, const c
 FBINK_API bool fbink_is_fb_quirky(void);
 
 // Print an image on screen
-FBINK_API int fbink_print_image(int, const char*, int, int);
+FBINK_API int fbink_print_image(int, const char*, int, int, const FBInkConfig*);
 
 // When you intend to keep fd open for the lifecycle of your program:
 // fd = open() -> init(fd) -> print(fd, ...)
