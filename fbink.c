@@ -1182,6 +1182,19 @@ static void
 	g_fbink_fbp        = 0U;
 }
 
+// Much like rotate_coordinates, but for a mxcfb rectangle
+static void
+    rotate_region(struct mxcfb_rect* region)
+{
+	// Rotate the region if need be...
+	struct mxcfb_rect oregion = *region;
+	// NOTE: left = x, top = y
+	region->top    = viewWidth - oregion.left - oregion.width;
+	region->left   = oregion.top;
+	region->width  = oregion.height;
+	region->height = oregion.width;
+}
+
 // Magic happens here!
 int
     fbink_print(int fbfd, const char* string, const FBInkConfig* fbink_config)
@@ -1496,12 +1509,7 @@ int
 
 	// Rotate the region if need be...
 	if (deviceQuirks.isKobo16Landscape) {
-		struct mxcfb_rect oregion = region;
-		// NOTE: left = x, top = y
-		region.top    = viewWidth - oregion.left - oregion.width;
-		region.left   = oregion.top;
-		region.width  = oregion.height;
-		region.height = oregion.width;
+		rotate_region(&region);
 	}
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
@@ -1704,6 +1712,8 @@ int
 		}
 	}
 
+	// TODO: Honor screen clear
+
 	// NOTE: We compute initial offsets from row/col, to help aligning images with text.
 	if (fbink_config->col < 0) {
 		x_off += MAX(MAXCOLS + fbink_config->col, 0) * FONTW;
@@ -1768,7 +1778,10 @@ int
 	};
 	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
 
-	// FIXME: Rota?
+	// Rotate the region if need be...
+	if (deviceQuirks.isKobo16Landscape) {
+		rotate_region(&region);
+	}
 
 	// Refresh screen
 	if (refresh(fbfd, region, WAVEFORM_MODE_GC16, true) != EXIT_SUCCESS) {
