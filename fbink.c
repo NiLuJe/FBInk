@@ -534,6 +534,10 @@ static int
 	};
 	LOG("Area is: x1: %d, y1: %d, x2: %d, y2: %d with fx: %d", area.x1, area.y1, area.x2, area.y2, area.which_fx);
 
+	// NOTE: Getting UPDATE_DISPLAY_AREA to actually flash seems to be less straightforward than it appears...
+	//       The easiest workaround might be to switch to FBIO_EINK_UPDATE_DISPLAY,
+	//       which refreshes the full-screen, and only takes an fx_type argument...
+	//       That said, fx_update_full does behave differently than fx_update_partial, despite the lack of flash.
 	int rv;
 	rv = ioctl(fbfd, FBIO_EINK_UPDATE_DISPLAY_AREA, &area);
 

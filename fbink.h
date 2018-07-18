@@ -118,9 +118,9 @@ FBINK_API int fbink_printf(int, const FBInkConfig*, const char*, ...) __attribut
 // And a simple wrapper around the internal refresh, without having to include mxcfb headers
 // Arg 1: fbfd, if it's -1, the fb is opened for the duration of this call
 // Arg 2: top field of an mxcfb rectangle
-// Arg 3: left field of ab mxcfb rectangle
-// Arg 4: width field of ab mxcfb rectangle
-// Arg 5: height field of ab mxcfb rectangle
+// Arg 3: left field of an mxcfb rectangle
+// Arg 4: width field of an mxcfb rectangle
+// Arg 5: height field of an mxcfb rectangle
 // Arg 6: waveform mode (i.e, "GC16")
 // Arg 7: will ask for a black flash if true
 FBINK_API int fbink_refresh(int, uint32_t, uint32_t, uint32_t, uint32_t, const char*, bool);
