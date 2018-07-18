@@ -1785,16 +1785,16 @@ int
 	if (req_n == 1) {
 		for (j = 0; j < h; j++) {
 			for (i = 0; i < w; i++) {
-				color.v = data[(j * w) + i] ^ invert;
+				color.v = (unsigned short int) (data[(j * w) + i] ^ invert);
 				put_pixel((unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
 			}
 		}
 	} else {
 		for (j = 0; j < h; j++) {
 			for (i = 0; i < w; i++) {
-				color.r = data[(j * req_n * w) + (i * req_n) + 0] ^ invert;
-				color.g = data[(j * req_n * w) + (i * req_n) + 1] ^ invert;
-				color.b = data[(j * req_n * w) + (i * req_n) + 2] ^ invert;
+				color.r = (unsigned short int) (data[(j * req_n * w) + (i * req_n) + 0] ^ invert);
+				color.g = (unsigned short int) (data[(j * req_n * w) + (i * req_n) + 1] ^ invert);
+				color.b = (unsigned short int) (data[(j * req_n * w) + (i * req_n) + 2] ^ invert);
 				put_pixel((unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
 			}
 		}
