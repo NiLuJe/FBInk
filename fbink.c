@@ -206,13 +206,11 @@ static void
 	//       when we're padding and centering, the final whitespace of right-padding will have its last
 	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
 	if (coords.x >= vinfo.xres || coords.y >= vinfo.yres) {
-		/*
 		LOG("Discarding off-screen pixel @ (%hu, %hu) (out of %ux%u bounds)",
 		    coords.x,
 		    coords.y,
 		    vinfo.xres,
 		    vinfo.yres);
-		*/
 		return;
 	}
 
@@ -1755,13 +1753,31 @@ int
 	//       to avoid looping on only part of the image.
 	unsigned short int max_width  = (unsigned short int) region.width;
 	unsigned short int max_height = (unsigned short int) region.height;
+	// NOTE: We also need to decide if we start looping at the top left of the image, or if we start later, to
+	// avoid plotting off-screen pixels with negative offsets...
+	unsigned short int img_x_off = 0;
+	unsigned short int img_y_off = 0;
 	if (x_off < 0) {
-		region.width -= (uint32_t) abs(x_off);
+		// We'll start plotting from the beginning of the visible part of the image ;)
+		img_x_off += (short unsigned int) abs(x_off);
+		max_width += img_x_off;
+		// Only if the visible bit of image's width is smaller than our screen's width...
+		if ((w + x_off) < viewWidth) {
+			region.width -= (uint32_t) abs(x_off);
+		}
 	}
 	if (y_off < 0) {
-		region.height -= (uint32_t) abs(y_off);
+		// We'll start plotting from the beginning of the visible part of the image ;)
+		img_y_off += (short unsigned int) abs(y_off);
+		max_height += img_y_off;
+		// Only if the visible bit of image's height is smaller than our screen's height...
+		if ((h + y_off) < viewHeight) {
+			region.height -= (uint32_t) abs(y_off);
+		}
 	}
+	LOG("Image size: %dx%d", w, h);
 	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
+	LOG("Max width: %hu & Max height: %hu; Image x offset: %hu & Image y offset: %hu", max_width, max_height, img_x_off, img_y_off);
 
 	// Handle inversion if requested, in a way that avoids branching in the loop...
 	// NOTE: Keeping in mind that legacy devices have an inverted color map...
@@ -1780,10 +1796,10 @@ int
 	unsigned short int j;
 	// NOTE: The slight duplication is on purpose, to move the branching outside the loop.
 	//       And since we can easily do so from here,
-	//       we also entirely avoid trying to plot off-screen pixels from the right & bottom of the image.
+	//       we also entirely avoid trying to plot off-screen pixels.
 	if (req_n == 1) {
-		for (j = 0; j < max_height; j++) {
-			for (i = 0; i < max_width; i++) {
+		for (j = img_y_off; j < max_height; j++) {
+			for (i = img_x_off; i < max_width; i++) {
 				color.r = (unsigned short int) (data[(j * w) + i] ^ invert);
 				// NOTE: We'll never access those two at this bpp, so we don't even need to set them ;).
 				/*
@@ -1794,8 +1810,8 @@ int
 			}
 		}
 	} else {
-		for (j = 0; j < max_height; j++) {
-			for (i = 0; i < max_width; i++) {
+		for (j = img_y_off; j < max_height; j++) {
+			for (i = img_x_off; i < max_width; i++) {
 				color.r = (unsigned short int) (data[(j * req_n * w) + (i * req_n) + 0] ^ invert);
 				color.g = (unsigned short int) (data[(j * req_n * w) + (i * req_n) + 1] ^ invert);
 				color.b = (unsigned short int) (data[(j * req_n * w) + (i * req_n) + 2] ^ invert);
