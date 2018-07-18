@@ -100,8 +100,10 @@ static void
 	    "\t-g, --image file=PATH,x=NUM,y=NUM\n"
 	    "\t\t\tSupported image formats: JPEG, PNG, TGA, BMP, GIF & PNM\n"
 	    "\t\t\tNote that, in some cases, exotic encoding settings may not be supported.\n"
-	    "\t\t\tNote that this also honors --col & --row, in addition to the coordinates you specify.\n"
-	    "\t\t\tThe aim is to make it easier to align small images to text. As such, you can specifiy negative values to x & y.\n"
+	    "\t\t\tThis honors --flash, as well as --clear & --invert (with invert only affecting the clear)\n"
+	    "\t\t\tNote that this also honors --col & --row (taking --size into account), in addition to the coordinates you specify.\n"
+	    "\t\t\tThe aim is to make it easier to align small images to text.\n"
+	    "\t\t\tAnd to make pixel-perfect adjustments, you can also specifiy negative values for x & y.\n"
 	    "\t\t\tSpecifying one or more STRING takes precedence over this mode.\n"
 	    "\t\t\t--refresh also takes precedence over this mode.\n"
 #endif

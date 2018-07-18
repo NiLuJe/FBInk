@@ -1819,7 +1819,7 @@ int
 	}
 
 	// Refresh screen
-	if (refresh(fbfd, region, WAVEFORM_MODE_GC16, true) != EXIT_SUCCESS) {
+	if (refresh(fbfd, region, WAVEFORM_MODE_GC16, fbink_config->is_flashing) != EXIT_SUCCESS) {
 		fprintf(stderr, "[FBInk] Failed to refresh the screen!\n");
 	}
 
