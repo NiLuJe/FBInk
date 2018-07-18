@@ -1774,32 +1774,6 @@ int
 		    viewWidth,
 		    viewHeight);
 	}
-	int i;
-	int j;
-	// Handle inversion if requested, in a way that avoids branching in the loop...
-	unsigned short int invert = 0U;
-	if (fbink_config->is_inverted) {
-		invert = 0xFF;
-	}
-	// NOTE: The slight duplication is on purpose, to move the branching outside the loop
-	if (req_n == 1) {
-		for (j = 0; j < h; j++) {
-			for (i = 0; i < w; i++) {
-				color.v = (unsigned short int) (data[(j * w) + i] ^ invert);
-				put_pixel((unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
-			}
-		}
-	} else {
-		for (j = 0; j < h; j++) {
-			for (i = 0; i < w; i++) {
-				color.r = (unsigned short int) (data[(j * req_n * w) + (i * req_n) + 0] ^ invert);
-				color.g = (unsigned short int) (data[(j * req_n * w) + (i * req_n) + 1] ^ invert);
-				color.b = (unsigned short int) (data[(j * req_n * w) + (i * req_n) + 2] ^ invert);
-				put_pixel((unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
-			}
-		}
-	}
-	stbi_image_free(data);
 
 	// Clamp everything to a safe range, because we can't have *anything* going off-screen here.
 	struct mxcfb_rect region = {
@@ -1809,6 +1783,34 @@ int
 		.height = MIN(viewHeight - region.top, (uint32_t) h),
 	};
 	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
+
+	// Handle inversion if requested, in a way that avoids branching in the loop...
+	unsigned short int invert = 0U;
+	if (fbink_config->is_inverted) {
+		invert = 0xFF;
+	}
+	int i;
+	int j;
+	// NOTE: The slight duplication is on purpose, to move the branching outside the loop.
+	//       Since we can easily do so from here, we also entirely avoid trying to plot off-screen pixels.
+	if (req_n == 1) {
+		for (j = 0; j < region.height; j++) {
+			for (i = 0; i < region.width; i++) {
+				color.v = (unsigned short int) (data[(j * w) + i] ^ invert);
+				put_pixel((unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
+			}
+		}
+	} else {
+		for (j = 0; j < region.height; j++) {
+			for (i = 0; i < region.width; i++) {
+				color.r = (unsigned short int) (data[(j * req_n * w) + (i * req_n) + 0] ^ invert);
+				color.g = (unsigned short int) (data[(j * req_n * w) + (i * req_n) + 1] ^ invert);
+				color.b = (unsigned short int) (data[(j * req_n * w) + (i * req_n) + 2] ^ invert);
+				put_pixel((unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
+			}
+		}
+	}
+	stbi_image_free(data);
 
 	// Rotate the region if need be...
 	if (deviceQuirks.isKobo16Landscape) {
