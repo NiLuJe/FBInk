@@ -1785,19 +1785,22 @@ int
 	}
 	int i;
 	int j;
-	unsigned short int invert = 0U;
-	// If we asked for an inverted picture, set it up...
-	if (fbink_config->is_inverted) {
-		invert = 0xFF;
-	}
 	for (j = 0; j < h; j++) {
 		for (i = 0; i < w; i++) {
 			if (req_n == 1) {
-				color.v = (unsigned short int) (data[(j * w) + i] ^ invert);
+				color.v = data[(j * w) + i];
+				if (fbink_config->is_inverted) {
+					color.v ^= 0xFF;
+				}
 			} else {
-				color.r = (unsigned short int) (data[(j * req_n * w) + (i * req_n) + 0] ^ invert);
-				color.g = (unsigned short int) (data[(j * req_n * w) + (i * req_n) + 1] ^ invert);
-				color.b = (unsigned short int) (data[(j * req_n * w) + (i * req_n) + 2] ^ invert);
+				color.r = data[(j * req_n * w) + (i * req_n) + 0];
+				color.g = data[(j * req_n * w) + (i * req_n) + 1];
+				color.b = data[(j * req_n * w) + (i * req_n) + 2];
+				if (fbink_config->is_inverted) {
+					color.r ^= 0xFF;
+					color.g ^= 0xFF;
+					color.b ^= 0xFF;
+				}
 			}
 			put_pixel((unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
 		}
