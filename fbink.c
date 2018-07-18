@@ -534,7 +534,7 @@ static struct mxcfb_rect
 			for (x = 0U; x < FONTW; x++) {
 				// get the pixel value
 				unsigned char b = pixmap[(y * FONTW) + x];
-				// plot the pixel (fg or bg)
+				// plot the pixel (fg if b > 0; bg otherwise)
 				// NOTE: This is where we used to fudge positioning of hex fonts converted by
 				//       tools/hextoc.py before I figured out the root issue ;).
 				put_pixel((unsigned short int) ((col * FONTW) + (ci * FONTW) + x + pixel_offset),
