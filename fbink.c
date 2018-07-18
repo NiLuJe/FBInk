@@ -216,33 +216,18 @@ static void
 		return;
 	}
 
-	// Depalettize if need be (i.e., palette index -> RGB)
-	if (color->isPaletteIndex) {
-		color->isPaletteIndex = false;
-		// We're going to stomp this value by writing another variant, so store it.
-		unsigned short int c = color->c;
-		// NOTE: We cheat a bit and rely on possibly undefined but reliable behavior of unions...
-		// Gray means r = g = b = v, but since we have an union, only set r, g & b,
-		// and v should automagically point to r (as in, they occupy the same memory address) :).
-		color->r = def_r[c];
-		color->g = def_g[c];
-		color->b = def_b[c];
-	}
-
-	unsigned short int v = color->v;
 #ifdef FBINK_FOR_LEGACY
 	// NOTE: Legacy devices all have an inverted color map...
-	//       And they're also all greyscale, so we can get away with only inverting v...
-	//       For some mysterious reason, this only works right when using an intermediate variable...
-	v ^= 0xFF;
+	//       And they're also all greyscale, so we can get away with only inverting v (meaning r, or g, or b)...
+	color->r ^= 0xFF;
 #endif
 
 	switch (vinfo.bits_per_pixel) {
 		case 4U:
-			put_pixel_Gray4(&coords, v);
+			put_pixel_Gray4(&coords, color->r);
 			break;
 		case 8U:
-			put_pixel_Gray8(&coords, v);
+			put_pixel_Gray8(&coords, color->r);
 			break;
 		case 16U:
 			put_pixel_RGB565(&coords, color->r, color->g, color->b);
@@ -284,7 +269,7 @@ static void
 #endif
 
 	// NOTE: Grayscale palette, we could have used def_r or def_g ;).
-	memset(g_fbink_fbp, def_b[c], finfo.smem_len);
+	memset(g_fbink_fbp, def_v[c], finfo.smem_len);
 }
 
 // Return the font8x8 bitmap for a specific Unicode codepoint
@@ -383,14 +368,8 @@ static struct mxcfb_rect
 	 bool               halfcell_offset)
 {
 	LOG("Printing '%s' @ line offset %hu (meaning row %d)", text, multiline_offset, row + multiline_offset);
-	FBInkColor fgC = {
-		.isPaletteIndex = true,
-		.c              = is_inverted ? WHITE : BLACK,
-	};
-	FBInkColor bgC = {
-		.isPaletteIndex = true,
-		.c              = is_inverted ? BLACK : WHITE,
-	};
+	FBInkColor fgC = { def_v[is_inverted ? WHITE : BLACK], def_v[is_inverted ? WHITE : BLACK], def_v[is_inverted ? WHITE : BLACK] };
+	FBInkColor bgC = { def_v[is_inverted ? BLACK : WHITE], def_v[is_inverted ? BLACK : WHITE], def_v[is_inverted ? BLACK : WHITE] };
 
 	unsigned short int x;
 	unsigned short int y;
@@ -504,7 +483,7 @@ static struct mxcfb_rect
 
 	// Fill our bounding box with our background color, so that we'll be visible no matter what's already on screen.
 	// NOTE: Unneeded, we already plot the background when handling font glyphs ;).
-	//fill_rect(region.left, region.top, region.width, region.height, bgC);
+	//fill_rect(region.left, region.top, region.width, region.height, &bgC);
 
 	// Alloc our pixmap on the stack, and re-use it.
 	// NOTE: We tried using automatic VLAs, but that... didn't go well.
@@ -1808,7 +1787,7 @@ int
 	if (req_n == 1) {
 		for (j = 0; j < max_height; j++) {
 			for (i = 0; i < max_width; i++) {
-				color.v = (unsigned short int) (data[(j * w) + i] ^ invert);
+				color.r = (unsigned short int) (data[(j * w) + i] ^ invert);
 				put_pixel((unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
 			}
 		}
