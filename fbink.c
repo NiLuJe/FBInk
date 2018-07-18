@@ -537,6 +537,7 @@ static int
 	// NOTE: Getting UPDATE_DISPLAY_AREA to actually flash seems to be less straightforward than it appears...
 	//       The easiest workaround might be to switch to FBIO_EINK_UPDATE_DISPLAY,
 	//       which refreshes the full-screen, and only takes an fx_type argument...
+	//       (Do it anyway if an area is full-screen?)
 	//       That said, fx_update_full does behave differently than fx_update_partial, despite the lack of flash.
 	int rv;
 	rv = ioctl(fbfd, FBIO_EINK_UPDATE_DISPLAY_AREA, &area);
