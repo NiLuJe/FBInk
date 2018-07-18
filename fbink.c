@@ -1785,6 +1785,11 @@ int
 		for (j = 0; j < max_height; j++) {
 			for (i = 0; i < max_width; i++) {
 				color.r = (unsigned short int) (data[(j * w) + i] ^ invert);
+				// NOTE: We'll never access those two at this bpp, so we don't even need to set them ;).
+				/*
+				color.g = color.r;
+				color.b = color.r;
+				*/
 				put_pixel((unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
 			}
 		}
