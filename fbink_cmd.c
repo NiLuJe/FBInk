@@ -101,7 +101,7 @@ static void
 	    "\t\t\tSupported image formats: JPEG, PNG, TGA, BMP, GIF & PNM\n"
 	    "\t\t\tNote that, in some cases, exotic encoding settings may not be supported.\n"
 	    "\t\t\tAs an additional quirk, you can't pass paths with commas in it to file. Pass those to the -i, --img flag instead.\n"
-	    "\t\t\tThis honors --flash, as well as --clear & --invert (with invert only affecting the clear)\n"
+	    "\t\t\tThis honors --flash, as well as --clear & --invert\n"
 	    "\t\t\tNote that this also honors --col & --row (taking --size into account), in addition to the coordinates you specify.\n"
 	    "\t\t\tThe aim is to make it easier to align small images to text.\n"
 	    "\t\t\tAnd to make pixel-perfect adjustments, you can also specifiy negative values for x & y.\n"
