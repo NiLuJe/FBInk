@@ -1782,6 +1782,11 @@ int
 		.width  = MIN(viewWidth - region.left, (uint32_t) w),
 		.height = MIN(viewHeight - region.top, (uint32_t) h),
 	};
+	// NOTE: If we ended up with negative offsets,
+	//       we should theoretically shave those off region.width & region.height, but that would slightly break
+	//       the pixel loop condition...
+	//       So, yeah, despite not showing the full image, width & height are still as large as if we started
+	//       drawing the image at (0, 0).
 	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
 
 	// Handle inversion if requested, in a way that avoids branching in the loop...
@@ -1792,7 +1797,8 @@ int
 	unsigned short int i;
 	unsigned short int j;
 	// NOTE: The slight duplication is on purpose, to move the branching outside the loop.
-	//       And since we can easily do so from here, we also entirely avoid trying to plot off-screen pixels.
+	//       And since we can easily do so from here,
+	//       we also entirely avoid trying to plot off-screen pixels from the right & bottom of the image.
 	if (req_n == 1) {
 		for (j = 0; j < region.height; j++) {
 			for (i = 0; i < region.width; i++) {
