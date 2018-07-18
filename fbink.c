@@ -208,7 +208,8 @@ static void
 	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
 	if (coords.x >= vinfo.xres || coords.y >= vinfo.yres) {
 #ifdef DEBUG
-		// NOTE: This is only enabled in Debug builds because it can be pretty verbose...
+		// NOTE: This is only enabled in Debug builds because it can be pretty verbose,
+		//       and does not necessarily indicate an actual issue, as we've just explained...
 		LOG("Discarding off-screen pixel @ (%hu, %hu) (out of %ux%u bounds)",
 		    coords.x,
 		    coords.y,
