@@ -119,6 +119,9 @@ static void
 	    "\tSupported image formats: JPEG, PNG, TGA, BMP, GIF & PNM\n"
 	    "\t\tNote that, in some cases, exotic encoding settings may not be supported.\n"
 	    "\t\tAs an additional quirk, you can't pass paths with commas in it to file. Pass those to the -i, --img flag instead.\n"
+#	ifdef FBINK_FOR_LEGACY
+	    "\t\tOn your legacy device, some files may also decode badly (i.e., JPEG). PNG files should siplay properly.\n"
+#	endif
 	    "\tThis honors --flash, as well as --clear & --invert\n"
 	    "\t\tNote that this also honors --col & --row (taking --size into account), in addition to the coordinates you specify.\n"
 	    "\t\tThe aim is to make it easier to align small images to text.\n"
