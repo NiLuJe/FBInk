@@ -229,20 +229,20 @@ static void
 		color->b = def_b[c];
 	}
 
+	unsigned short int v = color->v;
 #ifdef FBINK_FOR_LEGACY
 	// NOTE: Legacy devices all have an inverted color map...
-	// FIXME: They're also all greyscale, we could probably get away with just inverting v...
-	color->r ^= 0xFF;
-	color->g ^= 0xFF;
-	color->b ^= 0xFF;
+	//       And they're also all greyscale, so we can get away with only inverting v...
+	//       For some mysterious reason, this only works right when using an intermediate variable...
+	v ^= 0xFF;
 #endif
 
 	switch (vinfo.bits_per_pixel) {
 		case 4U:
-			put_pixel_Gray4(&coords, color->v);
+			put_pixel_Gray4(&coords, v);
 			break;
 		case 8U:
-			put_pixel_Gray8(&coords, color->v);
+			put_pixel_Gray8(&coords, v);
 			break;
 		case 16U:
 			put_pixel_RGB565(&coords, color->r, color->g, color->b);
