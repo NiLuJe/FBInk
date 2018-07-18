@@ -1763,10 +1763,18 @@ int
 	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
 
 	// Handle inversion if requested, in a way that avoids branching in the loop...
+	// NOTE: Keeping in mind that legacy devices have an inverted color map...
+#	ifdef FBINK_FOR_LEGACY
+	unsigned short int invert = 0xFF;
+	if (fbink_config->is_inverted) {
+		invert = 0U;
+	}
+#	else
 	unsigned short int invert = 0U;
 	if (fbink_config->is_inverted) {
 		invert = 0xFF;
 	}
+#	endif
 	unsigned short int i;
 	unsigned short int j;
 	// NOTE: The slight duplication is on purpose, to move the branching outside the loop.
