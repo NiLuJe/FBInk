@@ -35,6 +35,7 @@
 #	define STBI_NO_HDR
 #	define STBI_NO_LINEAR
 // We want SIMD for JPEG decoding (... if we can actually use it)!
+// It's not the end of the world if we can't, the speed gains are minimal (~5%).
 #	ifdef __ARM_NEON
 #		define STBI_NEON
 #	endif
