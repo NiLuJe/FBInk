@@ -69,23 +69,23 @@ const char*
 
 // Helper function to 'plot' a pixel in given color
 static void
-    put_pixel_Gray4(FBInkCoordinates* coords, unsigned short int c)
+    put_pixel_Gray4(FBInkCoordinates* coords, unsigned short int v)
 {
 	// calculate the pixel's byte offset inside the buffer
 	size_t pix_offset = coords->x / 2 + coords->y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((unsigned char*) (g_fbink_fbp + pix_offset)) = (unsigned char) c;
+	*((unsigned char*) (g_fbink_fbp + pix_offset)) = (unsigned char) v;
 }
 
 static void
-    put_pixel_Gray8(FBInkCoordinates* coords, unsigned short int c)
+    put_pixel_Gray8(FBInkCoordinates* coords, unsigned short int v)
 {
 	// calculate the pixel's byte offset inside the buffer
 	size_t pix_offset = coords->x + coords->y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((unsigned char*) (g_fbink_fbp + pix_offset)) = (unsigned char) c;
+	*((unsigned char*) (g_fbink_fbp + pix_offset)) = (unsigned char) v;
 }
 
 static void
