@@ -1754,13 +1754,14 @@ int
 	unsigned short int max_width  = (unsigned short int) region.width;
 	unsigned short int max_height = (unsigned short int) region.height;
 	// NOTE: We also need to decide if we start looping at the top left of the image, or if we start later, to
-	// avoid plotting off-screen pixels with negative offsets...
+	//       avoid plotting off-screen pixels when using negative display offsets...
 	unsigned short int img_x_off = 0;
 	unsigned short int img_y_off = 0;
 	if (x_off < 0) {
 		// We'll start plotting from the beginning of the visible part of the image ;)
 		img_x_off += (short unsigned int) abs(x_off);
 		max_width += img_x_off;
+		// Make sure we're not trying to loop past the actual width of the image!
 		max_width = MIN(w, max_width);
 		// Only if the visible bit of image's width is smaller than our screen's width...
 		if ((w + x_off) < viewWidth) {
@@ -1771,15 +1772,15 @@ int
 		// We'll start plotting from the beginning of the visible part of the image ;)
 		img_y_off += (short unsigned int) abs(y_off);
 		max_height += img_y_off;
+		// Make sure we're not trying to loop past the actual height of the image!
 		max_height = MIN(h, max_height);
 		// Only if the visible bit of image's height is smaller than our screen's height...
 		if ((h + y_off) < viewHeight) {
 			region.height -= (uint32_t) abs(y_off);
 		}
 	}
-	LOG("Image size: %dx%d", w, h);
 	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
-	LOG("Max width: %hu & Max height: %hu; Image x offset: %hu & Image y offset: %hu", max_width, max_height, img_x_off, img_y_off);
+	LOG("Image offsets: (%hu, %hu), looping 'til: (%hu, %hu) of %dx%d", img_x_off, img_y_off, max_width, max_height, w, h);
 
 	// Handle inversion if requested, in a way that avoids branching in the loop...
 	// NOTE: Keeping in mind that legacy devices have an inverted color map...
