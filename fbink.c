@@ -1789,10 +1789,10 @@ int
 	if (fbink_config->is_inverted) {
 		invert = 0xFF;
 	}
-	int i;
-	int j;
+	unsigned short int i;
+	unsigned short int j;
 	// NOTE: The slight duplication is on purpose, to move the branching outside the loop.
-	//       Since we can easily do so from here, we also entirely avoid trying to plot off-screen pixels.
+	//       And since we can easily do so from here, we also entirely avoid trying to plot off-screen pixels.
 	if (req_n == 1) {
 		for (j = 0; j < region.height; j++) {
 			for (i = 0; i < region.width; i++) {
