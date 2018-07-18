@@ -153,8 +153,8 @@ int
 					      { "font", required_argument, NULL, 'F' },
 					      { "verbose", no_argument, NULL, 'v' },
 					      { "quiet", no_argument, NULL, 'q' },
-					      { "image", no_argument, NULL, 'g' },
-					      { "img", no_argument, NULL, 'i' },
+					      { "image", required_argument, NULL, 'g' },
+					      { "img", required_argument, NULL, 'i' },
 					      { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_config = { 0 };
