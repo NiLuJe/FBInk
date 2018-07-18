@@ -100,6 +100,7 @@ static void
 	    "\t-g, --image file=PATH,x=NUM,y=NUM\n"
 	    "\t\t\tSupported image formats: JPEG, PNG, TGA, BMP, GIF & PNM\n"
 	    "\t\t\tNote that, in some cases, exotic encoding settings may not be supported.\n"
+	    "\t\t\tAs an additional quirk, you can't pass paths with commas in it to file. Pass those to the -i, --img flag instead.\n"
 	    "\t\t\tThis honors --flash, as well as --clear & --invert (with invert only affecting the clear)\n"
 	    "\t\t\tNote that this also honors --col & --row (taking --size into account), in addition to the coordinates you specify.\n"
 	    "\t\t\tThe aim is to make it easier to align small images to text.\n"
@@ -119,15 +120,21 @@ int
 {
 	int                        opt;
 	int                        opt_index;
-	static const struct option opts[] = {
-		{ "row", required_argument, NULL, 'y' },  { "col", required_argument, NULL, 'x' },
-		{ "invert", no_argument, NULL, 'h' },     { "flash", no_argument, NULL, 'f' },
-		{ "clear", no_argument, NULL, 'c' },      { "centered", no_argument, NULL, 'm' },
-		{ "padded", no_argument, NULL, 'p' },     { "refresh", required_argument, NULL, 's' },
-		{ "size", required_argument, NULL, 'S' }, { "font", required_argument, NULL, 'F' },
-		{ "verbose", no_argument, NULL, 'v' },    { "quiet", no_argument, NULL, 'q' },
-		{ "image", no_argument, NULL, 'g' },      { NULL, 0, NULL, 0 }
-	};
+	static const struct option opts[] = { { "row", required_argument, NULL, 'y' },
+					      { "col", required_argument, NULL, 'x' },
+					      { "invert", no_argument, NULL, 'h' },
+					      { "flash", no_argument, NULL, 'f' },
+					      { "clear", no_argument, NULL, 'c' },
+					      { "centered", no_argument, NULL, 'm' },
+					      { "padded", no_argument, NULL, 'p' },
+					      { "refresh", required_argument, NULL, 's' },
+					      { "size", required_argument, NULL, 'S' },
+					      { "font", required_argument, NULL, 'F' },
+					      { "verbose", no_argument, NULL, 'v' },
+					      { "quiet", no_argument, NULL, 'q' },
+					      { "image", no_argument, NULL, 'g' },
+					      { "img", no_argument, NULL, 'i' },
+					      { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_config = { 0 };
 
@@ -168,7 +175,7 @@ int
 	bool      is_image       = false;
 	int       errfnd         = 0;
 
-	while ((opt = getopt_long(argc, argv, "y:x:hfcmps:S:F:vqg:", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "y:x:hfcmps:S:F:vqg:i:", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				fbink_config.row = (short int) atoi(optarg);
@@ -269,6 +276,11 @@ int
 				while (*subopts != '\0' && !errfnd) {
 					switch (getsubopt(&subopts, image_token, &value)) {
 						case FILE_OPT:
+							// NOTE: As a hack to support paths with a comma,
+							//       which we can't handle via getsubopt,
+							//       we have *two* ways of specifying image_file,
+							//       so make sure we're not dup'ing twice...
+							free(image_file);
 							image_file = strdup(value);
 							break;
 						case XOFF_OPT:
@@ -289,6 +301,11 @@ int
 				} else {
 					is_image = true;
 				}
+				break;
+			case 'i':
+				// Free a potentially previously set value...
+				free(image_file);
+				image_file = strdup(optarg);
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
