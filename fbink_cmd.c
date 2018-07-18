@@ -101,7 +101,7 @@ static void
 	    "\tNote that this will also honor --flash\n"
 #else
 	    "\tNote that specifying a waveform mode is ignored on legacy einkfb devices, because the hardware doesn't expose such capabilities.\n"
-	    "\tBut it does also honor the --flash flag, though.\n"
+	    "\tBut it does (mostly) honor the --flash flag, though.\n"
 #endif
 	    "\tSpecifying one or more STRING takes precedence over this mode.\n"
 #ifdef FBINK_WITH_IMAGE
