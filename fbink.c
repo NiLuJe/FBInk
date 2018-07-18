@@ -1786,27 +1786,29 @@ int
 	}
 	int i;
 	int j;
-	for (j = 0; j < h; j++) {
-		for (i = 0; i < w; i++) {
-			if (req_n == 1) {
-				color.v = data[(j * w) + i];
-				if (fbink_config->is_inverted) {
-					color.v ^= 0xFF;
-				}
-			} else {
-				color.r = data[(j * req_n * w) + (i * req_n) + 0];
-				color.g = data[(j * req_n * w) + (i * req_n) + 1];
-				color.b = data[(j * req_n * w) + (i * req_n) + 2];
-				if (fbink_config->is_inverted) {
-					color.r ^= 0xFF;
-					color.g ^= 0xFF;
-					color.b ^= 0xFF;
-				}
+	// Handle inversion if requested, in a way that avoids branching in the loop...
+	unsigned short int invert = 0U;
+	if (fbink_config->is_inverted) {
+		invert = 0xFF;
+	}
+	// NOTE: The slight duplication is on purpose, to move the branching outside the loop
+	if (req_n == 1) {
+		for (j = 0; j < h; j++) {
+			for (i = 0; i < w; i++) {
+				color.v = data[(j * w) + i] ^ invert;
+				put_pixel((unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
 			}
-			put_pixel((unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
+		}
+	} else {
+		for (j = 0; j < h; j++) {
+			for (i = 0; i < w; i++) {
+				color.r = data[(j * req_n * w) + (i * req_n) + 0] ^ invert;
+				color.g = data[(j * req_n * w) + (i * req_n) + 1] ^ invert;
+				color.b = data[(j * req_n * w) + (i * req_n) + 2] ^ invert;
+				put_pixel((unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
+			}
 		}
 	}
-
 	stbi_image_free(data);
 
 	// Clamp everything to a safe range, because we can't have *anything* going off-screen here.
