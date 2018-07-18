@@ -1801,10 +1801,10 @@ int
 
 	// Clamp everything to a safe range, because we can't have *anything* going off-screen here.
 	struct mxcfb_rect region = {
-		.top    = MIN(vinfo.yres, MAX(0U, (uint32_t) y_off)),
-		.left   = MIN(vinfo.xres, MAX(0U, (uint32_t) x_off)),
-		.width  = MIN(vinfo.xres - region.left, (uint32_t) w),
-		.height = MIN(vinfo.yres - region.top, (uint32_t) h),
+		.top    = MIN(viewHeight, MAX(0U, (uint32_t) y_off)),
+		.left   = MIN(viewWidth, MAX(0U, (uint32_t) x_off)),
+		.width  = MIN(viewWidth - region.left, (uint32_t) w),
+		.height = MIN(viewHeight - region.top, (uint32_t) h),
 	};
 	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
 
