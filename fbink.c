@@ -216,12 +216,6 @@ static void
 		return;
 	}
 
-#ifdef FBINK_FOR_LEGACY
-	// NOTE: Legacy devices all have an inverted color map...
-	//       And they're also all greyscale, so we can get away with only inverting v (meaning r, or g, or b)...
-	color->r ^= 0xFF;
-#endif
-
 	switch (vinfo.bits_per_pixel) {
 		case 4U:
 			put_pixel_Gray4(&coords, color->r);
@@ -261,15 +255,9 @@ static void
 
 // Helper function to clear the screen - fill whole screen with given color
 static void
-    clear_screen(unsigned short int c)
+    clear_screen(unsigned short int v)
 {
-#ifdef FBINK_FOR_LEGACY
-	// NOTE: Legacy devices all have an inverted palette.
-	c ^= WHITE;
-#endif
-
-	// NOTE: Grayscale palette, we could have used def_r or def_g ;).
-	memset(g_fbink_fbp, def_v[c], finfo.smem_len);
+	memset(g_fbink_fbp, v, finfo.smem_len);
 }
 
 // Return the font8x8 bitmap for a specific Unicode codepoint
@@ -368,8 +356,8 @@ static struct mxcfb_rect
 	 bool               halfcell_offset)
 {
 	LOG("Printing '%s' @ line offset %hu (meaning row %d)", text, multiline_offset, row + multiline_offset);
-	FBInkColor fgC = { def_v[is_inverted ? WHITE : BLACK], def_v[is_inverted ? WHITE : BLACK], def_v[is_inverted ? WHITE : BLACK] };
-	FBInkColor bgC = { def_v[is_inverted ? BLACK : WHITE], def_v[is_inverted ? BLACK : WHITE], def_v[is_inverted ? BLACK : WHITE] };
+	FBInkColor fgC = { is_inverted ? WHITE : BLACK, is_inverted ? WHITE : BLACK, is_inverted ? WHITE : BLACK };
+	FBInkColor bgC = { is_inverted ? BLACK : WHITE, is_inverted ? BLACK : WHITE, is_inverted ? BLACK : WHITE };
 
 	unsigned short int x;
 	unsigned short int y;

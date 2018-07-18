@@ -147,9 +147,6 @@
 		}                                                                                                      \
 	})
 
-static unsigned short def_v[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
-				  0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
-
 // 'global' variables to store screen info
 // With our externs, first...
 unsigned char* g_fbink_fbp        = 0U;
