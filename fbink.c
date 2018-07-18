@@ -1761,7 +1761,7 @@ int
 		// We'll start plotting from the beginning of the visible part of the image ;)
 		img_x_off += (short unsigned int) abs(x_off);
 		max_width += img_x_off;
-		max_width = MIN(h, max_width);
+		max_width = MIN(w, max_width);
 		// Only if the visible bit of image's width is smaller than our screen's width...
 		if ((w + x_off) < viewWidth) {
 			region.width -= (uint32_t) abs(x_off);
