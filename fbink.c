@@ -1730,16 +1730,6 @@ int
 		fprintf(stderr, "[FBInk] Failed to open or decode image '%s'!\n", filename);
 		return -1;
 	}
-	// NOTE: Warn if either the sheer size of the image or its position will force a crop...
-	if ((w + x_off) > (short int) viewWidth || (h + y_off) > (short int) viewHeight) {
-		LOG("Displayed at these coordinates (%d, %d), the image (%dx%d) won't fit on the screen (%ux%u), it will be cropped!",
-		    x_off,
-		    y_off,
-		    w,
-		    h,
-		    viewWidth,
-		    viewHeight);
-	}
 
 	// Clamp everything to a safe range, because we can't have *anything* going off-screen here.
 	struct mxcfb_rect region = {
@@ -1780,7 +1770,7 @@ int
 		}
 	}
 	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
-	LOG("Image offsets: (%hu, %hu), looping 'til: (%hu, %hu) of %dx%d", img_x_off, img_y_off, max_width, max_height, w, h);
+	LOG("Image becomes visible @ (%hu, %hu), looping 'til (%hu, %hu) out of %dx%d pixels", img_x_off, img_y_off, max_width, max_height, w, h);
 
 	// Handle inversion if requested, in a way that avoids branching in the loop...
 	// NOTE: Keeping in mind that legacy devices have an inverted color map...
@@ -1799,7 +1789,7 @@ int
 	unsigned short int j;
 	// NOTE: The slight duplication is on purpose, to move the branching outside the loop.
 	//       And since we can easily do so from here,
-	//       we also entirely avoid trying to plot off-screen pixels.
+	//       we also entirely avoid trying to plot off-screen pixels (on every sides).
 	if (req_n == 1) {
 		for (j = img_y_off; j < max_height; j++) {
 			for (i = img_x_off; i < max_width; i++) {
