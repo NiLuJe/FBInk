@@ -231,9 +231,9 @@ static void
 
 #ifdef FBINK_FOR_LEGACY
 	// NOTE: Legacy devices all have an inverted color map...
-	color->r = color->r ^ 0xFF;
-	color->g = color->g ^ 0xFF;
-	color->b = color->b ^ 0xFF;
+	color->r ^= 0xFF;
+	color->g ^= 0xFF;
+	color->b ^= 0xFF;
 #endif
 
 	switch (vinfo.bits_per_pixel) {
@@ -279,7 +279,7 @@ static void
 {
 #ifdef FBINK_FOR_LEGACY
 	// NOTE: Legacy devices all have an inverted palette.
-	c = c ^ WHITE;
+	c ^= WHITE;
 #endif
 
 	// NOTE: Grayscale palette, we could have used def_r or def_g ;).
