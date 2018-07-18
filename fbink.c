@@ -29,33 +29,35 @@
 
 #include "fbink_internal.h"
 
-#define STB_IMAGE_IMPLEMENTATION
+#ifdef FBINK_WITH_IMAGE
+#	define STB_IMAGE_IMPLEMENTATION
 // Disable HDR, as well as the linear light API, to avoid pulling in libm
-#define STBI_NO_HDR
-#define STBI_NO_LINEAR
+#	define STBI_NO_HDR
+#	define STBI_NO_LINEAR
 // We want SIMD for JPEG decoding (... if we can actually use it)!
-#ifdef __ARM_NEON
-#	define STBI_NEON
-#endif
+#	ifdef __ARM_NEON
+#		define STBI_NEON
+#	endif
 // We don't care about those formats (PhotoShop, AutoDesk)
-#define STBI_NO_PSD
-#define STBI_NO_PIC
+#	define STBI_NO_PSD
+#	define STBI_NO_PIC
 // We can't use stbi_failure_reason as it's not thread-safe, so ditch the strings
-#define STBI_NO_FAILURE_STRINGS
+#	define STBI_NO_FAILURE_STRINGS
 // Disable a bunch of very verbose but mostly harmless warnings
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunknown-warning-option"
-#pragma GCC diagnostic ignored "-Wcast-qual"
-#pragma GCC diagnostic ignored "-Wcast-align"
-#pragma GCC diagnostic ignored "-Wconversion"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wduplicated-branches"
-#pragma GCC diagnostic ignored "-Wmissing-prototypes"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-function"
-#include "stb/stb_image.h"
-#pragma GCC diagnostic pop
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#	pragma clang diagnostic ignored "-Wunknown-warning-option"
+#	pragma GCC diagnostic ignored "-Wcast-qual"
+#	pragma GCC diagnostic ignored "-Wcast-align"
+#	pragma GCC diagnostic ignored "-Wconversion"
+#	pragma GCC diagnostic ignored "-Wsign-conversion"
+#	pragma GCC diagnostic ignored "-Wduplicated-branches"
+#	pragma GCC diagnostic ignored "-Wmissing-prototypes"
+#	pragma GCC diagnostic ignored "-Wunused-parameter"
+#	pragma GCC diagnostic ignored "-Wunused-function"
+#	include "stb/stb_image.h"
+#	pragma GCC diagnostic pop
+#endif
 
 // Return the library version as devised at library compile-time
 const char*
