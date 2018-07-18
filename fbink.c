@@ -206,11 +206,13 @@ static void
 	//       when we're padding and centering, the final whitespace of right-padding will have its last
 	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
 	if (coords.x >= vinfo.xres || coords.y >= vinfo.yres) {
+		/*
 		LOG("Discarding off-screen pixel @ (%hu, %hu) (out of %ux%u bounds)",
 		    coords.x,
 		    coords.y,
 		    vinfo.xres,
 		    vinfo.yres);
+		*/
 		return;
 	}
 
@@ -1748,23 +1750,23 @@ int
 	unsigned short int img_x_off = 0;
 	unsigned short int img_y_off = 0;
 	if (x_off < 0) {
-		// We'll start plotting from the beginning of the visible part of the image ;)
+		// We'll start plotting from the beginning of the *visible* part of the image ;)
 		img_x_off = (short unsigned int) abs(x_off);
 		max_width = (short unsigned int) (max_width + img_x_off);
 		// Make sure we're not trying to loop past the actual width of the image!
 		max_width = (short unsigned int) MIN(w, max_width);
-		// Only if the visible bit of image's width is smaller than our screen's width...
+		// Only if the visible section of image width is smaller than our screen's width...
 		if ((uint32_t)(w - img_x_off) < viewWidth) {
 			region.width -= img_x_off;
 		}
 	}
 	if (y_off < 0) {
-		// We'll start plotting from the beginning of the visible part of the image ;)
+		// We'll start plotting from the beginning of the *visible* part of the image ;)
 		img_y_off  = (short unsigned int) abs(y_off);
 		max_height = (short unsigned int) (max_height + img_y_off);
 		// Make sure we're not trying to loop past the actual height of the image!
 		max_height = (short unsigned int) MIN(h, max_height);
-		// Only if the visible bit of image's height is smaller than our screen's height...
+		// Only if the visible section of image height is smaller than our screen's height...
 		if ((uint32_t)(h - img_y_off) < viewHeight) {
 			region.height -= img_y_off;
 		}
