@@ -1749,28 +1749,34 @@ int
 	unsigned short int img_y_off = 0;
 	if (x_off < 0) {
 		// We'll start plotting from the beginning of the visible part of the image ;)
-		img_x_off += (short unsigned int) abs(x_off);
-		max_width += img_x_off;
+		img_x_off = (short unsigned int) abs(x_off);
+		max_width = (short unsigned int) (max_width + img_x_off);
 		// Make sure we're not trying to loop past the actual width of the image!
-		max_width = MIN(w, max_width);
+		max_width = (short unsigned int) MIN(w, max_width);
 		// Only if the visible bit of image's width is smaller than our screen's width...
-		if ((w + x_off) < viewWidth) {
-			region.width -= (uint32_t) abs(x_off);
+		if ((uint32_t)(w - img_x_off) < viewWidth) {
+			region.width -= img_x_off;
 		}
 	}
 	if (y_off < 0) {
 		// We'll start plotting from the beginning of the visible part of the image ;)
-		img_y_off += (short unsigned int) abs(y_off);
-		max_height += img_y_off;
+		img_y_off  = (short unsigned int) abs(y_off);
+		max_height = (short unsigned int) (max_height + img_y_off);
 		// Make sure we're not trying to loop past the actual height of the image!
-		max_height = MIN(h, max_height);
+		max_height = (short unsigned int) MIN(h, max_height);
 		// Only if the visible bit of image's height is smaller than our screen's height...
-		if ((h + y_off) < viewHeight) {
-			region.height -= (uint32_t) abs(y_off);
+		if ((uint32_t)(h - img_y_off) < viewHeight) {
+			region.height -= img_y_off;
 		}
 	}
 	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
-	LOG("Image becomes visible @ (%hu, %hu), looping 'til (%hu, %hu) out of %dx%d pixels", img_x_off, img_y_off, max_width, max_height, w, h);
+	LOG("Image becomes visible @ (%hu, %hu), looping 'til (%hu, %hu) out of %dx%d pixels",
+	    img_x_off,
+	    img_y_off,
+	    max_width,
+	    max_height,
+	    w,
+	    h);
 
 	// Handle inversion if requested, in a way that avoids branching in the loop...
 	// NOTE: Keeping in mind that legacy devices have an inverted color map...
