@@ -231,6 +231,7 @@ static void
 
 #ifdef FBINK_FOR_LEGACY
 	// NOTE: Legacy devices all have an inverted color map...
+	// FIXME: They're also all greyscale, we could probably get away with just inverting v...
 	color->r ^= 0xFF;
 	color->g ^= 0xFF;
 	color->b ^= 0xFF;
