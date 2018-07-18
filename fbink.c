@@ -534,22 +534,12 @@ static struct mxcfb_rect
 			for (x = 0U; x < FONTW; x++) {
 				// get the pixel value
 				unsigned char b = pixmap[(y * FONTW) + x];
-				if (b > 0) {
-					// plot the pixel (fg, text)
-					// NOTE: This is where we used to fudge positioning of hex fonts converted by
-					//       tools/hextoc.py before I figured out the root issue ;).
-					put_pixel(
-					    (unsigned short int) ((col * FONTW) + (ci * FONTW) + x + pixel_offset),
-					    (unsigned short int) ((row * FONTH) + y),
-					    &fgC);
-				} else {
-					// this is background,
-					// fill it so that we'll be visible no matter what was on screen behind us.
-					put_pixel(
-					    (unsigned short int) ((col * FONTW) + (ci * FONTW) + x + pixel_offset),
-					    (unsigned short int) ((row * FONTH) + y),
-					    &bgC);
-				}
+				// plot the pixel (fg or bg)
+				// NOTE: This is where we used to fudge positioning of hex fonts converted by
+				//       tools/hextoc.py before I figured out the root issue ;).
+				put_pixel((unsigned short int) ((col * FONTW) + (ci * FONTW) + x + pixel_offset),
+					  (unsigned short int) ((row * FONTH) + y),
+					  b > 0 ? &fgC : &bgC);
 			}    // end "for x"
 		}            // end "for y"
 		// Next glyph! This serves as the source for the pen position, hence it being used as an index...
