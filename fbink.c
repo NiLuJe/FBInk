@@ -356,8 +356,9 @@ static struct mxcfb_rect
 	 bool               halfcell_offset)
 {
 	LOG("Printing '%s' @ line offset %hu (meaning row %d)", text, multiline_offset, row + multiline_offset);
-	FBInkColor fgC = { is_inverted ? WHITE : BLACK, is_inverted ? WHITE : BLACK, is_inverted ? WHITE : BLACK };
-	FBInkColor bgC = { is_inverted ? BLACK : WHITE, is_inverted ? BLACK : WHITE, is_inverted ? BLACK : WHITE };
+	// NOTE: It's a grayscale ramp, so r = g = b (= v).
+	FBInkColor fgC = { is_inverted ? WHITE : BLACK, fgC.r, fgC.r };
+	FBInkColor bgC = { is_inverted ? BLACK : WHITE, bgC.r, bgC.r };
 
 	unsigned short int x;
 	unsigned short int y;
