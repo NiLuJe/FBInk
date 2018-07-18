@@ -36,6 +36,7 @@
 #	define STBI_NO_LINEAR
 // We want SIMD for JPEG decoding (... if we can actually use it)!
 // It's not the end of the world if we can't, the speed gains are minimal (~5%).
+// Plus, JPEG decoding in mostly broken on those legacy devices where we can't anyway...
 #	ifdef __ARM_NEON
 #		define STBI_NEON
 #	endif
@@ -1745,7 +1746,8 @@ int
 		.width  = MIN(viewWidth - region.left, (uint32_t) w),
 		.height = MIN(viewHeight - region.top, (uint32_t) h),
 	};
-	// NOTE: If we ended up with negative offsets, we should shave those off region.width & region.height,
+	// NOTE: If we ended up with negative display offsets, we should shave those off region.width & region.height,
+	//       when it makes sense to do so,
 	//       but we need to remember the unshaven value for the pixel loop condition,
 	//       to avoid looping on only part of the image.
 	unsigned short int max_width  = (unsigned short int) region.width;
@@ -1760,7 +1762,7 @@ int
 		max_width = (short unsigned int) (max_width + img_x_off);
 		// Make sure we're not trying to loop past the actual width of the image!
 		max_width = (short unsigned int) MIN(w, max_width);
-		// Only if the visible section of image width is smaller than our screen's width...
+		// Only if the visible section of the image's width is smaller than our screen's width...
 		if ((uint32_t)(w - img_x_off) < viewWidth) {
 			region.width -= img_x_off;
 		}
@@ -1771,7 +1773,7 @@ int
 		max_height = (short unsigned int) (max_height + img_y_off);
 		// Make sure we're not trying to loop past the actual height of the image!
 		max_height = (short unsigned int) MIN(h, max_height);
-		// Only if the visible section of image height is smaller than our screen's height...
+		// Only if the visible section of the image's height is smaller than our screen's height...
 		if ((uint32_t)(h - img_y_off) < viewHeight) {
 			region.height -= img_y_off;
 		}
@@ -1785,8 +1787,8 @@ int
 	    w,
 	    h);
 
-	// Handle inversion if requested, in a way that avoids branching in the loop...
-	// NOTE: Keeping in mind that legacy devices have an inverted color map...
+	// Handle inversion if requested, in a way that avoids branching in the loop ;).
+	// And, as an added bonus, plays well with the fact that legacy devices have an inverted color map...
 #	ifdef FBINK_FOR_LEGACY
 	unsigned short int invert = 0xFF;
 	if (fbink_config->is_inverted) {
@@ -1802,7 +1804,7 @@ int
 	unsigned short int j;
 	// NOTE: The slight duplication is on purpose, to move the branching outside the loop.
 	//       And since we can easily do so from here,
-	//       we also entirely avoid trying to plot off-screen pixels (on every sides).
+	//       we also entirely avoid trying to plot off-screen pixels (on any sides).
 	if (req_n == 1) {
 		for (j = img_y_off; j < max_height; j++) {
 			for (i = img_x_off; i < max_width; i++) {
