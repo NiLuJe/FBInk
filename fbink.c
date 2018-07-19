@@ -1695,6 +1695,7 @@ int
 {
 #ifdef FBINK_WITH_IMAGE
 	// Open the framebuffer if need be...
+	// NOTE: As usual, we *expect* to be initialized at this point!
 	bool keep_fd = true;
 	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
 		return -1;
