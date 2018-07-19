@@ -38,7 +38,11 @@ static void
 	    "\n"
 	    "Print STRING on your device's screen.\n"
 	    "\n"
-	    "Example: fbink -x 1 -y 10 \"Hello World!\"\n"
+	    "EXAMPLES:\n"
+	    "\tfbink -x 1 -y 10 \"Hello World!\"\n"
+	    "\t\tPrints Hello World on the eleventh line, starting at the second column from the left.\n"
+	    "\tfbink -pmh -y -5 \"Hello World!\"\n"
+	    "\t\tPrints Hello World, highlighted (i.e., white on black), centered & padded on both sides, on the fifth line starting from the bottom.\n"
 	    "\n"
 	    "Options affecting the message's position on screen:\n"
 	    "\t-x, --col NUM\tBegin printing STRING @ column NUM (Default: 0).\n"
@@ -53,7 +57,7 @@ static void
 	    "Options affecting the message's appearance:\n"
 	    "\t-h, --invert\tPrint STRING in white over a black background instead of the reverse.\n"
 	    "\t-f, --flash\tAsk the eInk driver to do a black flash when refreshing the area of the screen where STRING will be printed.\n"
-	    "\t-c, --clear\tFully clear the screen before printing STRING (obeys --invert).\n"
+	    "\t-c, --clear\tFully clear the screen before printing (obeys --invert).\n"
 	    "\t-S, --size\tOverride the automatic font scaling multiplier (0 means automatic selection, which ranges from 1 (no scaling), to 4 (4x upscaling), depending on screen resolution).\n"
 #ifdef FBINK_WITH_UNSCII
 	    "\t\t\tNote that user-supplied values will be silently clamped to safe boundaries (from 1 to 31 for most fonts, and from 1 to 22 for TALL).\n"
@@ -71,29 +75,60 @@ static void
 	    "\t-v, --verbose\tToggle printing diagnostic messages.\n"
 	    "\t-q, --quiet\tToggle hiding hardware setup messages.\n"
 	    "\n"
-	    "NOTE:\n"
+	    "NOTES:\n"
 	    "\tYou can specify multiple STRINGs in a single invocation of fbink, each consecutive one will be printed on consecutive lines.\n"
 	    "\t\tAlthough it's worth mentioning that this will lead to undesirable results when combined with --clear,\n"
 	    "\t\tbecause the screen is cleared before each STRING, meaning you'll only get to see the final one.\n"
 	    "\tIf you want to properly print a long string, better do it in a single argument, fbink will do its best to spread it over multiple lines sanely.\n"
 	    "\tIt will also honor the linefeed character (and I do mean the actual control character, not the human-readable escape sequence),\n"
 	    "\twhich comes in handy when passing a few lines of logs straight from tail as an argument.\n"
-	    "\n"
+	    "\n\n"
 	    "You can also eschew printing a STRING, and simply refresh the screen as per your specification, without touching the framebuffer:\n"
 	    "\t-s, --refresh top=NUM,left=NUM,width=NUM,height=NUM,wfm=NAME\n"
-	    "\t\t\tThe specified rectangle *must* completely fit on screen, or the ioctl will fail.\n"
+	    "\n"
+	    "EXAMPLES:\n"
+	    "\tfbink -s top=20,left=10,width=500,heigh=600,wfm=GC16\n"
+	    "\t\tRefreshes a 500x600 rectangle with its top-left corner at coordinates (10, 20) with a GC16 waveform mode.\n"
+	    "\n"
+	    "NOTES:\n"
+	    "\tThe specified rectangle *must* completely fit on screen, or the ioctl will fail.\n"
 #ifndef FBINK_FOR_LEGACY
-	    "\t\t\tAvailable waveform modes: DU, GC16, GC4, A2, GL16, REAGL, REAGLD & AUTO\n"
+	    "\tAvailable waveform modes: DU, GC16, GC4, A2, GL16, REAGL, REAGLD & AUTO\n"
 #	ifdef FBINK_FOR_KINDLE
-	    "\t\t\t\tAs well as GC16_FAST, GL16_FAST, DU4, GL4, GL16_INV, GCK16 & GLKW16 on some Kindles, depending on the model & FW version.\n"
-	    "\t\t\t\tUnsupported modes should safely downgrade to AUTO.\n"
+	    "\t\tAs well as GC16_FAST, GL16_FAST, DU4, GL4, GL16_INV, GCK16 & GLKW16 on some Kindles, depending on the model & FW version.\n"
+	    "\t\tUnsupported modes should safely downgrade to AUTO.\n"
 #	endif
-	    "\t\t\tNote that this will also honor --flash\n"
+	    "\tNote that this will also honor --flash\n"
 #else
-	    "\t\t\tNote that specifying a waveform mode is ignored on legacy einkfb devices, because the hardware doesn't expose such capabilities.\n"
-	    "\t\t\tBut it does also honor the --flash flag, though.\n"
+	    "\tNote that specifying a waveform mode is ignored on legacy einkfb devices, because the hardware doesn't expose such capabilities.\n"
+	    "\tBut it does (mostly) honor the --flash flag, though.\n"
 #endif
-	    "\t\t\tSpecifying one or more STRING takes precedence over this mode.\n"
+	    "\tSpecifying one or more STRING takes precedence over this mode.\n"
+#ifdef FBINK_WITH_IMAGE
+	    "\n\n"
+	    "You can also eschew printing a STRING, and print an IMAGE at the requested coordinates instead:\n"
+	    "\t-g, --image file=PATH,x=NUM,y=NUM\n"
+	    "\n"
+	    "EXAMPLES:\n"
+	    "\tfbink -g file=hello.png\n"
+	    "\t\tDraws the content of the image file hello.png, starting at the top left of the screen.\n"
+	    "\tfbink -i hello,world.png -g x=-10,y=11 -x 5 -y 8\n"
+	    "\t\tDraws the content of the image file hello,world.png, starting at the ninth line plus 11px and the sixth column minus 10px\n"
+	    "\n"
+	    "NOTES:\n"
+	    "\tSupported image formats: JPEG, PNG, TGA, BMP, GIF & PNM\n"
+	    "\t\tNote that, in some cases, exotic encoding settings may not be supported.\n"
+	    "\t\tAs an additional quirk, you can't pass paths with commas in it to file. Pass those to the -i, --img flag instead.\n"
+#	ifdef FBINK_FOR_LEGACY
+	    "\t\tOn your legacy device, some files may also decode badly (i.e., JPEG). PNG files should display properly.\n"
+#	endif
+	    "\tThis honors --flash, as well as --clear & --invert\n"
+	    "\t\tNote that this also honors --col & --row (taking --size into account), in addition to the coordinates you specify.\n"
+	    "\t\tThe aim is to make it easier to align small images to text.\n"
+	    "\t\tAnd to make pixel-perfect adjustments, you can also specifiy negative values for x & y.\n"
+	    "\tSpecifying one or more STRING takes precedence over this mode.\n"
+	    "\t--refresh also takes precedence over this mode.\n"
+#endif
 	    "\n",
 	    fbink_version());
 
@@ -118,6 +153,8 @@ int
 					      { "font", required_argument, NULL, 'F' },
 					      { "verbose", no_argument, NULL, 'v' },
 					      { "quiet", no_argument, NULL, 'q' },
+					      { "image", required_argument, NULL, 'g' },
+					      { "img", required_argument, NULL, 'i' },
 					      { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_config = { 0 };
@@ -130,25 +167,36 @@ int
 		HEIGHT_OPT,
 		WFM_OPT,
 	};
+	enum
+	{
+		FILE_OPT = 0,
+		XOFF_OPT,
+		YOFF_OPT,
+	};
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunknown-warning-option"
 #pragma GCC diagnostic ignored "-Wdiscarded-qualifiers"
 #pragma clang diagnostic ignored "-Wincompatible-pointer-types-discards-qualifiers"
-	char* const token[] = { [TOP_OPT] = "top",       [LEFT_OPT] = "left", [WIDTH_OPT] = "width",
-				[HEIGHT_OPT] = "height", [WFM_OPT] = "wfm",   NULL };
+	char* const refresh_token[] = { [TOP_OPT] = "top",       [LEFT_OPT] = "left", [WIDTH_OPT] = "width",
+					[HEIGHT_OPT] = "height", [WFM_OPT] = "wfm",   NULL };
+	char* const image_token[]   = { [FILE_OPT] = "file", [XOFF_OPT] = "x", [YOFF_OPT] = "y", NULL };
 #pragma GCC diagnostic pop
-	char*    subopts;
-	char*    value;
-	uint32_t region_top      = 0;
-	uint32_t region_left     = 0;
-	uint32_t region_width    = 0;
-	uint32_t region_height   = 0;
-	char*    region_wfm      = NULL;
-	bool     is_refresh_only = false;
-	int      errfnd          = 0;
+	char*     subopts;
+	char*     value;
+	uint32_t  region_top     = 0;
+	uint32_t  region_left    = 0;
+	uint32_t  region_width   = 0;
+	uint32_t  region_height  = 0;
+	char*     region_wfm     = NULL;
+	bool      is_refresh     = false;
+	char*     image_file     = NULL;
+	short int image_x_offset = 0;
+	short int image_y_offset = 0;
+	bool      is_image       = false;
+	int       errfnd         = 0;
 
-	while ((opt = getopt_long(argc, argv, "y:x:hfcmps:S:F:vq", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "y:x:hfcmps:S:F:vqg:i:", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				fbink_config.row = (short int) atoi(optarg);
@@ -174,7 +222,7 @@ int
 			case 's':
 				subopts = optarg;
 				while (*subopts != '\0' && !errfnd) {
-					switch (getsubopt(&subopts, token, &value)) {
+					switch (getsubopt(&subopts, refresh_token, &value)) {
 						case TOP_OPT:
 							region_top = (uint32_t) strtoul(value, NULL, 10);
 							break;
@@ -191,7 +239,7 @@ int
 							if (value == NULL) {
 								fprintf(stderr,
 									"Missing value for suboption '%s'\n",
-									token[WFM_OPT]);
+									refresh_token[WFM_OPT]);
 								errfnd = 1;
 								continue;
 							}
@@ -207,12 +255,12 @@ int
 				if (region_height == 0 && region_width == 0 && region_wfm == NULL) {
 					fprintf(stderr,
 						"Must specify at least '%s', '%s' and '%s'\n",
-						token[HEIGHT_OPT],
-						token[WIDTH_OPT],
-						token[WFM_OPT]);
+						refresh_token[HEIGHT_OPT],
+						refresh_token[WIDTH_OPT],
+						refresh_token[WFM_OPT]);
 					errfnd = 1;
 				} else {
-					is_refresh_only = true;
+					is_refresh = true;
 				}
 				break;
 			case 'S':
@@ -243,6 +291,42 @@ int
 				break;
 			case 'q':
 				fbink_config.is_quiet = !fbink_config.is_quiet;
+				break;
+			case 'g':
+				subopts = optarg;
+				while (*subopts != '\0' && !errfnd) {
+					switch (getsubopt(&subopts, image_token, &value)) {
+						case FILE_OPT:
+							// NOTE: As a hack to support paths with a comma,
+							//       which we can't handle via getsubopt,
+							//       we have *two* ways of specifying image_file,
+							//       so make sure we're not dup'ing twice...
+							free(image_file);
+							image_file = strdup(value);
+							break;
+						case XOFF_OPT:
+							image_x_offset = (short int) atoi(value);
+							break;
+						case YOFF_OPT:
+							image_y_offset = (short int) atoi(value);
+							break;
+						default:
+							fprintf(stderr, "No match found for token: /%s/\n", value);
+							errfnd = 1;
+							break;
+					}
+				}
+				if (image_file == NULL) {
+					fprintf(stderr, "Must specify at least '%s'\n", image_token[FILE_OPT]);
+					errfnd = 1;
+				} else {
+					is_image = true;
+				}
+				break;
+			case 'i':
+				// Free a potentially previously set value...
+				free(image_file);
+				image_file = strdup(optarg);
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
@@ -297,7 +381,7 @@ int
 			// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
 		}
 	} else {
-		if (is_refresh_only) {
+		if (is_refresh) {
 			printf(
 			    "Refreshing the screen from top=%u, left=%u for width=%u, height=%u with %swaveform mode %s\n",
 			    region_top,
@@ -315,6 +399,11 @@ int
 					  fbink_config.is_flashing) != EXIT_SUCCESS) {
 				fprintf(stderr, "Failed to refresh the screen as per your specification!\n");
 			}
+		} else if (is_image) {
+			printf("Displaying image '%s' @ (%hd, %hd)\n", image_file, image_x_offset, image_y_offset);
+			if (fbink_print_image(fbfd, image_file, image_x_offset, image_y_offset, &fbink_config) < 0) {
+				fprintf(stderr, "Failed to display that image!\n");
+			}
 		} else {
 			show_helpmsg();
 		}
@@ -325,6 +414,7 @@ int
 		munmap(g_fbink_fbp, g_fbink_screensize);
 	}
 	close(fbfd);
+	free(image_file);
 
 	return EXIT_SUCCESS;
 }

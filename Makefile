@@ -29,6 +29,11 @@ else
 	CFLAGS?=$(OPT_CFLAGS)
 endif
 
+# Explictly enforce debug CFLAGS for the debug target (vs., simply having DEBUG set in the env)
+ifdef DEBUGFLAGS
+	CFLAGS:=$(DEBUG_CFLAGS)
+endif
+
 # Detect GCC version because reasons...
 # (namely, GCC emitting an error instead of a warning on unknown -W options)
 MOAR_WARNIGS:=0
@@ -135,6 +140,7 @@ ifdef MINIMAL
 	EXTRA_CPPFLAGS+=-DFBINK_MINIMAL
 else
 	EXTRA_CPPFLAGS+=-DFBINK_WITH_UNSCII
+	EXTRA_CPPFLAGS+=-DFBINK_WITH_IMAGE
 	LIB_SRCS+=fbink_unscii.c
 endif
 
@@ -182,7 +188,7 @@ strip: all
 	$(STRIP) --strip-unneeded $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/fbink
 
 debug:
-	$(MAKE) all DEBUG=true
+	$(MAKE) all DEBUG=true DEBUGFLAGS=true
 
 shared:
 	$(MAKE) all SHARED=true

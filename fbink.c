@@ -29,6 +29,39 @@
 
 #include "fbink_internal.h"
 
+#ifdef FBINK_WITH_IMAGE
+#	define STB_IMAGE_IMPLEMENTATION
+// Disable HDR, as well as the linear light API, to avoid pulling in libm
+#	define STBI_NO_HDR
+#	define STBI_NO_LINEAR
+// We want SIMD for JPEG decoding (... if we can actually use it)!
+// It's not the end of the world if we can't, the speed gains are minimal (~5%).
+// In any case, the C codepath appears not to agree with the ARM1136JF-S,
+// so we just have to live with broken JPEG decoding on anything older than a K4...
+#	ifdef __ARM_NEON
+#		define STBI_NEON
+#	endif
+// We don't care about those formats (PhotoShop, AutoDesk)
+#	define STBI_NO_PSD
+#	define STBI_NO_PIC
+// We can't use stbi_failure_reason as it's not thread-safe, so ditch the strings
+#	define STBI_NO_FAILURE_STRINGS
+// Disable a bunch of very verbose but mostly harmless warnings
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#	pragma clang diagnostic ignored "-Wunknown-warning-option"
+#	pragma GCC diagnostic ignored "-Wcast-qual"
+#	pragma GCC diagnostic ignored "-Wcast-align"
+#	pragma GCC diagnostic ignored "-Wconversion"
+#	pragma GCC diagnostic ignored "-Wsign-conversion"
+#	pragma GCC diagnostic ignored "-Wduplicated-branches"
+#	pragma GCC diagnostic ignored "-Wmissing-prototypes"
+#	pragma GCC diagnostic ignored "-Wunused-parameter"
+#	pragma GCC diagnostic ignored "-Wunused-function"
+#	include "stb/stb_image.h"
+#	pragma GCC diagnostic pop
+#endif
+
 // Return the library version as devised at library compile-time
 const char*
     fbink_version(void)
@@ -38,23 +71,23 @@ const char*
 
 // Helper function to 'plot' a pixel in given color
 static void
-    put_pixel_Gray4(FBInkCoordinates* coords, unsigned short int c)
+    put_pixel_Gray4(FBInkCoordinates* coords, unsigned short int v)
 {
 	// calculate the pixel's byte offset inside the buffer
 	size_t pix_offset = coords->x / 2 + coords->y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((unsigned char*) (g_fbink_fbp + pix_offset)) = (unsigned char) c;
+	*((unsigned char*) (g_fbink_fbp + pix_offset)) = (unsigned char) v;
 }
 
 static void
-    put_pixel_Gray8(FBInkCoordinates* coords, unsigned short int c)
+    put_pixel_Gray8(FBInkCoordinates* coords, unsigned short int v)
 {
 	// calculate the pixel's byte offset inside the buffer
 	size_t pix_offset = coords->x + coords->y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((unsigned char*) (g_fbink_fbp + pix_offset)) = (unsigned char) c;
+	*((unsigned char*) (g_fbink_fbp + pix_offset)) = (unsigned char) v;
 }
 
 static void
@@ -81,7 +114,9 @@ static void
 	*((unsigned char*) (g_fbink_fbp + pix_offset))     = (unsigned char) b;
 	*((unsigned char*) (g_fbink_fbp + pix_offset + 1)) = (unsigned char) g;
 	*((unsigned char*) (g_fbink_fbp + pix_offset + 2)) = (unsigned char) r;
-	*((unsigned char*) (g_fbink_fbp + pix_offset + 3)) = 0xFF;    // Opaque, always.
+	// Opaque, always. Note that everything is rendered as opaque, no matter what.
+	// But at least this way we ensure fb grabs are consistent with what's seen on screen.
+	*((unsigned char*) (g_fbink_fbp + pix_offset + 3)) = 0xFF;
 }
 
 static void
@@ -161,7 +196,7 @@ static void
 
 // Handle various bpp...
 static void
-    put_pixel(unsigned short int x, unsigned short int y, unsigned short int c)
+    put_pixel(unsigned short int x, unsigned short int y, FBInkColor* color)
 {
 	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
 	FBInkCoordinates coords = { x, y };
@@ -174,47 +209,50 @@ static void
 	//       when we're padding and centering, the final whitespace of right-padding will have its last
 	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
 	if (coords.x >= vinfo.xres || coords.y >= vinfo.yres) {
-		/*
+#ifdef DEBUG
+		// NOTE: This is only enabled in Debug builds because it can be pretty verbose,
+		//       and does not necessarily indicate an actual issue, as we've just explained...
 		LOG("Discarding off-screen pixel @ (%hu, %hu) (out of %ux%u bounds)",
 		    coords.x,
 		    coords.y,
 		    vinfo.xres,
 		    vinfo.yres);
-		*/
+#endif
 		return;
 	}
-#ifdef FBINK_FOR_LEGACY
-	// NOTE: Legacy devices all have an inverted palette.
-	c = c ^ WHITE;
-#endif
 
-	if (vinfo.bits_per_pixel == 4U) {
-		put_pixel_Gray4(&coords, def_b[c]);
-	} else if (vinfo.bits_per_pixel == 8U) {
-		// NOTE: Grayscale palette, we could have used def_r or def_g ;).
-		put_pixel_Gray8(&coords, def_b[c]);
-	} else if (vinfo.bits_per_pixel == 16U) {
-		put_pixel_RGB565(&coords, def_r[c], def_g[c], def_b[c]);
-	} else if (vinfo.bits_per_pixel == 24U) {
-		put_pixel_RGB24(&coords, def_r[c], def_g[c], def_b[c]);
-	} else if (vinfo.bits_per_pixel == 32U) {
-		put_pixel_RGB32(&coords, def_r[c], def_g[c], def_b[c]);
+	switch (vinfo.bits_per_pixel) {
+		case 4U:
+			put_pixel_Gray4(&coords, color->r);
+			break;
+		case 8U:
+			put_pixel_Gray8(&coords, color->r);
+			break;
+		case 16U:
+			put_pixel_RGB565(&coords, color->r, color->g, color->b);
+			break;
+		case 24U:
+			put_pixel_RGB24(&coords, color->r, color->g, color->b);
+			break;
+		case 32U:
+			put_pixel_RGB32(&coords, color->r, color->g, color->b);
+			break;
+		default:
+			// Huh oh... Should never happen!
+			return;
+			break;
 	}
 }
 
 // Helper function to draw a rectangle in given color
 static void
-    fill_rect(unsigned short int x,
-	      unsigned short int y,
-	      unsigned short int w,
-	      unsigned short int h,
-	      unsigned short int c)
+    fill_rect(unsigned short int x, unsigned short int y, unsigned short int w, unsigned short int h, FBInkColor* color)
 {
 	unsigned short int cx;
 	unsigned short int cy;
 	for (cy = 0U; cy < h; cy++) {
 		for (cx = 0U; cx < w; cx++) {
-			put_pixel((unsigned short int) (x + cx), (unsigned short int) (y + cy), c);
+			put_pixel((unsigned short int) (x + cx), (unsigned short int) (y + cy), color);
 		}
 	}
 	LOG("Filled a %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
@@ -222,15 +260,9 @@ static void
 
 // Helper function to clear the screen - fill whole screen with given color
 static void
-    clear_screen(unsigned short int c)
+    clear_screen(unsigned short int v)
 {
-#ifdef FBINK_FOR_LEGACY
-	// NOTE: Legacy devices all have an inverted palette.
-	c = c ^ WHITE;
-#endif
-
-	// NOTE: Grayscale palette, we could have used def_r or def_g ;).
-	memset(g_fbink_fbp, def_b[c], finfo.smem_len);
+	memset(g_fbink_fbp, v, finfo.smem_len);
 }
 
 // Return the font8x8 bitmap for a specific Unicode codepoint
@@ -329,8 +361,9 @@ static struct mxcfb_rect
 	 bool               halfcell_offset)
 {
 	LOG("Printing '%s' @ line offset %hu (meaning row %d)", text, multiline_offset, row + multiline_offset);
-	unsigned short int fgC = is_inverted ? WHITE : BLACK;
-	unsigned short int bgC = is_inverted ? BLACK : WHITE;
+	// NOTE: It's a grayscale ramp, so r = g = b (= v).
+	FBInkColor fgC = { is_inverted ? WHITE : BLACK, fgC.r, fgC.r };
+	FBInkColor bgC = { is_inverted ? BLACK : WHITE, bgC.r, bgC.r };
 
 	unsigned short int x;
 	unsigned short int y;
@@ -396,7 +429,7 @@ static struct mxcfb_rect
 			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			  pixel_offset,
 			  FONTH,
-			  bgC);
+			  &bgC);
 		// Correct width, to include that bit of content, too, if needed
 		if (region.width < viewWidth) {
 			region.width += pixel_offset;
@@ -422,7 +455,7 @@ static struct mxcfb_rect
 			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			  pixel_offset,
 			  FONTH,
-			  bgC);
+			  &bgC);
 		// If it's not already the case, update region to the full width,
 		// because we've just plugged a hole at the very right edge of a full line.
 		if (region.width < viewWidth) {
@@ -444,7 +477,7 @@ static struct mxcfb_rect
 
 	// Fill our bounding box with our background color, so that we'll be visible no matter what's already on screen.
 	// NOTE: Unneeded, we already plot the background when handling font glyphs ;).
-	//fill_rect(region.left, region.top, region.width, region.height, bgC);
+	//fill_rect(region.left, region.top, region.width, region.height, &bgC);
 
 	// Alloc our pixmap on the stack, and re-use it.
 	// NOTE: We tried using automatic VLAs, but that... didn't go well.
@@ -474,22 +507,12 @@ static struct mxcfb_rect
 			for (x = 0U; x < FONTW; x++) {
 				// get the pixel value
 				unsigned char b = pixmap[(y * FONTW) + x];
-				if (b > 0) {
-					// plot the pixel (fg, text)
-					// NOTE: This is where we used to fudge positioning of hex fonts converted by
-					//       tools/hextoc.py before I figured out the root issue ;).
-					put_pixel(
-					    (unsigned short int) ((col * FONTW) + (ci * FONTW) + x + pixel_offset),
-					    (unsigned short int) ((row * FONTH) + y),
-					    fgC);
-				} else {
-					// this is background,
-					// fill it so that we'll be visible no matter what was on screen behind us.
-					put_pixel(
-					    (unsigned short int) ((col * FONTW) + (ci * FONTW) + x + pixel_offset),
-					    (unsigned short int) ((row * FONTH) + y),
-					    bgC);
-				}
+				// plot the pixel (fg if b != 0; bg otherwise)
+				// NOTE: This is where we used to fudge positioning of hex fonts converted by
+				//       tools/hextoc.py before I figured out the root issue ;).
+				put_pixel((unsigned short int) ((col * FONTW) + (ci * FONTW) + x + pixel_offset),
+					  (unsigned short int) ((row * FONTH) + y),
+					  b != 0 ? &fgC : &bgC);
 			}    // end "for x"
 		}            // end "for y"
 		// Next glyph! This serves as the source for the pen position, hence it being used as an index...
@@ -516,14 +539,30 @@ static int
 	};
 	LOG("Area is: x1: %d, y1: %d, x2: %d, y2: %d with fx: %d", area.x1, area.y1, area.x2, area.y2, area.which_fx);
 
-	int rv;
-	rv = ioctl(fbfd, FBIO_EINK_UPDATE_DISPLAY_AREA, &area);
+	// NOTE: Getting UPDATE_DISPLAY_AREA to actually flash seems to be less straightforward than it appears...
+	//       That said, fx_update_full does behave differently than fx_update_partial, despite the lack of flash,
+	//       and it really is what the framework itself uses...
+	int  rv;
+	bool is_fs = false;
+	if (region.width == vinfo.xres && region.height == vinfo.yres) {
+		// NOTE: In the hopes that UPDATE_DISPLAY is less finicky,
+		//       we use it instead when area covers the full screen.
+		LOG("Detected a full-screen area, upgrading to FBIO_EINK_UPDATE_DISPLAY");
+		is_fs = true;
+		rv    = ioctl(fbfd, FBIO_EINK_UPDATE_DISPLAY, area.which_fx);
+	} else {
+		rv = ioctl(fbfd, FBIO_EINK_UPDATE_DISPLAY_AREA, &area);
+	}
 
 	if (rv < 0) {
 		// NOTE: perror() is not thread-safe...
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
-		fprintf(stderr, "[FBInk] FBIO_EINK_UPDATE_DISPLAY_AREA: %s\n", errstr);
+		if (is_fs) {
+			fprintf(stderr, "[FBInk] FBIO_EINK_UPDATE_DISPLAY: %s\n", errstr);
+		} else {
+			fprintf(stderr, "[FBInk] FBIO_EINK_UPDATE_DISPLAY_AREA: %s\n", errstr);
+		}
 		return EXIT_FAILURE;
 	}
 
@@ -870,6 +909,22 @@ int
 	return fbfd;
 }
 
+// Internal version of this which keeps track of whether we were fed an already opened fd or not...
+static int
+    open_fb_fd(int* fbfd, bool* keep_fd)
+{
+	if (*fbfd == -1) {
+		// If we're opening a fd now, don't keep it around.
+		*keep_fd = false;
+		if (-1 == (*fbfd = fbink_open())) {
+			fprintf(stderr, "[FBInk] Failed to open the framebuffer, aborting . . .\n");
+			return EXIT_FAILURE;
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
+
 static const char*
     fb_rotate_to_string(uint32_t rotate)
 {
@@ -893,13 +948,8 @@ int
 {
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
-	if (fbfd == -1) {
-		// If we're opening a fd now, don't keep it around.
-		keep_fd = false;
-		if (-1 == (fbfd = fbink_open())) {
-			fprintf(stderr, "[FBInk] Failed to open the framebuffer, aborting . . .\n");
-			return EXIT_FAILURE;
-		}
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return EXIT_FAILURE;
 	}
 
 	// Update verbosity flag
@@ -1087,20 +1137,67 @@ int
 	}
 }
 
+// Memory map the framebuffer
+static int
+    memmap_fb(int fbfd)
+{
+	g_fbink_screensize = finfo.smem_len;
+	g_fbink_fbp = (unsigned char*) mmap(NULL, g_fbink_screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
+	if (g_fbink_fbp == MAP_FAILED) {
+		char  buf[256];
+		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		fprintf(stderr, "[FBInk] mmap: %s\n", errstr);
+		return EXIT_FAILURE;
+	} else {
+		g_fbink_isFbMapped = true;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+// And unmap it
+static void
+    unmap_fb(void)
+{
+	munmap(g_fbink_fbp, g_fbink_screensize);
+	// NOTE: Don't forget to reset those state flags,
+	//       so we won't skip mmap'ing on the next call without an fb fd passed...
+	g_fbink_isFbMapped = false;
+	g_fbink_fbp        = 0U;
+}
+
+// Much like rotate_coordinates, but for a mxcfb rectangle
+static void
+    rotate_region(struct mxcfb_rect* region)
+{
+	// Rotate the region if need be...
+	struct mxcfb_rect oregion = *region;
+	// NOTE: left = x, top = y
+	region->top    = viewWidth - oregion.left - oregion.width;
+	region->left   = oregion.top;
+	region->width  = oregion.height;
+	region->height = oregion.width;
+}
+
+// Tweak the region to cover the full screen
+static void
+    fullscreen_region(struct mxcfb_rect* region)
+{
+	region->top    = 0U;
+	region->left   = 0U;
+	region->width  = vinfo.xres;
+	region->height = vinfo.yres;
+}
+
 // Magic happens here!
 int
     fbink_print(int fbfd, const char* string, const FBInkConfig* fbink_config)
 {
-	// Open the framebuffer if need be...
+	// If we open a fd now, we'll only keep it open for this single print call!
+	// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
 	bool keep_fd = true;
-	if (fbfd == -1) {
-		// If we open a fd now, we'll only keep it open for this single print call!
-		// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
-		keep_fd = false;
-		if (-1 == (fbfd = fbink_open())) {
-			fprintf(stderr, "[FBInk] Failed to open the framebuffer, aborting . . .\n");
-			return -1;
-		}
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return -1;
 	}
 
 	// map fb to user mem
@@ -1108,16 +1205,8 @@ int
 	//       c.f., https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer_linux.lua#L36
 	// NOTE: If we're keeping the fb's fd open, keep this mmap around, too.
 	if (!g_fbink_isFbMapped) {
-		g_fbink_screensize = finfo.smem_len;
-		g_fbink_fbp =
-		    (unsigned char*) mmap(NULL, g_fbink_screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
-		if (g_fbink_fbp == MAP_FAILED) {
-			char  buf[256];
-			char* errstr = strerror_r(errno, buf, sizeof(buf));
-			fprintf(stderr, "[FBInk] mmap: %s\n", errstr);
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
 			return -1;
-		} else {
-			g_fbink_isFbMapped = true;
 		}
 	}
 
@@ -1414,20 +1503,12 @@ int
 
 	// Rotate the region if need be...
 	if (deviceQuirks.isKobo16Landscape) {
-		struct mxcfb_rect oregion = region;
-		// NOTE: left = x, top = y
-		region.top    = viewWidth - oregion.left - oregion.width;
-		region.left   = oregion.top;
-		region.width  = oregion.height;
-		region.height = oregion.width;
+		rotate_region(&region);
 	}
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
 	if (fbink_config->is_cleared) {
-		region.top    = 0U;
-		region.left   = 0U;
-		region.width  = vinfo.xres;
-		region.height = vinfo.yres;
+		fullscreen_region(&region);
 	}
 
 	// Refresh screen
@@ -1437,11 +1518,7 @@ int
 
 	// cleanup
 	if (g_fbink_isFbMapped && !keep_fd) {
-		munmap(g_fbink_fbp, g_fbink_screensize);
-		// NOTE: Don't forget to reset those state flags,
-		//       so we won't skip mmap'ing on the next call without an fb fd passed...
-		g_fbink_isFbMapped = false;
-		g_fbink_fbp        = 0U;
+		unmap_fb();
 	}
 	if (!keep_fd) {
 		close(fbfd);
@@ -1494,13 +1571,8 @@ int
 {
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
-	if (fbfd == -1) {
-		// If we open a fd now, we'll only keep it open for this single print call!
-		keep_fd = false;
-		if (-1 == (fbfd = fbink_open())) {
-			fprintf(stderr, "[FBInk] Failed to open the framebuffer, aborting . . .\n");
-			return EXIT_FAILURE;
-		}
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return EXIT_FAILURE;
 	}
 
 	uint32_t region_wfm = WAVEFORM_MODE_AUTO;
@@ -1611,4 +1683,194 @@ bool
 {
 	// NOTE: For now, that's easy enough, we only have one ;).
 	return deviceQuirks.isKobo16Landscape;
+}
+
+// Draw an image on screen
+int
+    fbink_print_image(int fbfd    UNUSED_BY_MINIMAL,
+		      const char* filename UNUSED_BY_MINIMAL,
+		      short int x_off UNUSED_BY_MINIMAL,
+		      short int y_off    UNUSED_BY_MINIMAL,
+		      const FBInkConfig* fbink_config UNUSED_BY_MINIMAL)
+{
+#ifdef FBINK_WITH_IMAGE
+	// Open the framebuffer if need be...
+	// NOTE: As usual, we *expect* to be initialized at this point!
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return -1;
+	}
+
+	// mmap the fb if need be...
+	if (!g_fbink_isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			return -1;
+		}
+	}
+
+	// Clear screen?
+	if (fbink_config->is_cleared) {
+		clear_screen(fbink_config->is_inverted ? BLACK : WHITE);
+	}
+
+	// NOTE: We compute initial offsets from row/col, to help aligning images with text.
+	if (fbink_config->col < 0) {
+		x_off = (short int) (x_off + (MAX(MAXCOLS + fbink_config->col, 0) * FONTW));
+	} else {
+		x_off = (short int) (x_off + (fbink_config->col * FONTW));
+	}
+	if (fbink_config->row < 0) {
+		y_off = (short int) (y_off + (MAX(MAXROWS + fbink_config->row, 0) * FONTH));
+	} else {
+		y_off = (short int) (y_off + (fbink_config->row * FONTH));
+	}
+	LOG("Adjusted image display coordinates to (%hd, %hd), after column %hd & row %hd",
+	    x_off,
+	    y_off,
+	    fbink_config->col,
+	    fbink_config->row);
+
+	int        w;
+	int        h;
+	int        n;
+	int        req_n;
+	FBInkColor color = { 0U };
+	// Let stb handle grayscaling for us
+	switch (vinfo.bits_per_pixel) {
+		case 4U:
+		case 8U:
+			req_n = 1;
+			break;
+		case 16U:
+		case 24U:
+		case 32U:
+		default:
+			req_n = 3;
+			break;
+	}
+
+	unsigned char* data = stbi_load(filename, &w, &h, &n, req_n);
+	if (data == NULL) {
+		fprintf(stderr, "[FBInk] Failed to open or decode image '%s'!\n", filename);
+		return -1;
+	}
+
+	// Clamp everything to a safe range, because we can't have *anything* going off-screen here.
+	struct mxcfb_rect region = {
+		.top    = MIN(viewHeight, (uint32_t) MAX(0, y_off)),
+		.left   = MIN(viewWidth, (uint32_t) MAX(0, x_off)),
+		.width  = MIN(viewWidth - region.left, (uint32_t) w),
+		.height = MIN(viewHeight - region.top, (uint32_t) h),
+	};
+	// NOTE: If we ended up with negative display offsets, we should shave those off region.width & region.height,
+	//       when it makes sense to do so,
+	//       but we need to remember the unshaven value for the pixel loop condition,
+	//       to avoid looping on only part of the image.
+	unsigned short int max_width  = (unsigned short int) region.width;
+	unsigned short int max_height = (unsigned short int) region.height;
+	// NOTE: We also need to decide if we start looping at the top left of the image, or if we start later, to
+	//       avoid plotting off-screen pixels when using negative display offsets...
+	unsigned short int img_x_off = 0;
+	unsigned short int img_y_off = 0;
+	if (x_off < 0) {
+		// We'll start plotting from the beginning of the *visible* part of the image ;)
+		img_x_off = (short unsigned int) abs(x_off);
+		max_width = (short unsigned int) (max_width + img_x_off);
+		// Make sure we're not trying to loop past the actual width of the image!
+		max_width = (short unsigned int) MIN(w, max_width);
+		// Only if the visible section of the image's width is smaller than our screen's width...
+		if ((uint32_t)(w - img_x_off) < viewWidth) {
+			region.width -= img_x_off;
+		}
+	}
+	if (y_off < 0) {
+		// We'll start plotting from the beginning of the *visible* part of the image ;)
+		img_y_off  = (short unsigned int) abs(y_off);
+		max_height = (short unsigned int) (max_height + img_y_off);
+		// Make sure we're not trying to loop past the actual height of the image!
+		max_height = (short unsigned int) MIN(h, max_height);
+		// Only if the visible section of the image's height is smaller than our screen's height...
+		if ((uint32_t)(h - img_y_off) < viewHeight) {
+			region.height -= img_y_off;
+		}
+	}
+	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
+	LOG("Image becomes visible @ (%hu, %hu), looping 'til (%hu, %hu) out of %dx%d pixels",
+	    img_x_off,
+	    img_y_off,
+	    max_width,
+	    max_height,
+	    w,
+	    h);
+
+	// Handle inversion if requested, in a way that avoids branching in the loop ;).
+	// And, as an added bonus, plays well with the fact that legacy devices have an inverted color map...
+#	ifdef FBINK_FOR_LEGACY
+	unsigned short int invert = 0xFF;
+	if (fbink_config->is_inverted) {
+		invert = 0U;
+	}
+#	else
+	unsigned short int invert = 0U;
+	if (fbink_config->is_inverted) {
+		invert = 0xFF;
+	}
+#	endif
+	unsigned short int i;
+	unsigned short int j;
+	// NOTE: The slight duplication is on purpose, to move the branching outside the loop.
+	//       And since we can easily do so from here,
+	//       we also entirely avoid trying to plot off-screen pixels (on any sides).
+	if (req_n == 1) {
+		for (j = img_y_off; j < max_height; j++) {
+			for (i = img_x_off; i < max_width; i++) {
+				color.r = (unsigned short int) (data[(j * w) + i] ^ invert);
+				// NOTE: We'll never access those two at this bpp, so we don't even need to set them ;).
+				/*
+				color.g = color.r;
+				color.b = color.r;
+				*/
+				put_pixel((unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
+			}
+		}
+	} else {
+		for (j = img_y_off; j < max_height; j++) {
+			for (i = img_x_off; i < max_width; i++) {
+				color.r = (unsigned short int) (data[(j * req_n * w) + (i * req_n) + 0] ^ invert);
+				color.g = (unsigned short int) (data[(j * req_n * w) + (i * req_n) + 1] ^ invert);
+				color.b = (unsigned short int) (data[(j * req_n * w) + (i * req_n) + 2] ^ invert);
+				put_pixel((unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
+			}
+		}
+	}
+	stbi_image_free(data);
+
+	// Rotate the region if need be...
+	if (deviceQuirks.isKobo16Landscape) {
+		rotate_region(&region);
+	}
+
+	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
+	if (fbink_config->is_cleared) {
+		fullscreen_region(&region);
+	}
+
+	// Refresh screen
+	if (refresh(fbfd, region, WAVEFORM_MODE_GC16, fbink_config->is_flashing) != EXIT_SUCCESS) {
+		fprintf(stderr, "[FBInk] Failed to refresh the screen!\n");
+	}
+
+	// cleanup
+	if (g_fbink_isFbMapped && !keep_fd) {
+		unmap_fb();
+	}
+	if (!keep_fd) {
+		close(fbfd);
+	}
+
+	return EXIT_SUCCESS;
+#else
+	fprintf(stderr, "[FBInk] Image support is disabled in this FBInk build!\n");
+	return ENOSYS;
+#endif    // FBINK_WITH_IMAGE
 }

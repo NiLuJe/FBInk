@@ -25,25 +25,48 @@
 
 // default eInk framebuffer palette
 // c.f., linux/drivers/video/mxc/cmap_lab126.h
+// NOTE: Legacy devices all have an inverted color map...
+#ifdef FBINK_FOR_LEGACY
 typedef enum
 {
-	BLACK  = 0,     // 0x00
-	GRAY1  = 1,     // 0x11
-	GRAY2  = 2,     // 0x22
-	GRAY3  = 3,     // 0x33
-	GRAY4  = 4,     // 0x44
-	GRAY5  = 5,     // 0x55
-	GRAY6  = 6,     // 0x66
-	GRAY7  = 7,     // 0x77
-	GRAY8  = 8,     // 0x88
-	GRAY9  = 9,     // 0x99
-	GRAY10 = 10,    // 0xAA
-	GRAY11 = 11,    // 0xBB
-	GRAY12 = 12,    // 0xCC
-	GRAY13 = 13,    // 0xDD
-	GRAY14 = 14,    // 0xEE
-	WHITE  = 15     // 0xFF
-} COLOR_INDEX_T;
+	BLACK  = 0xFF,
+	GRAY1  = 0xEE,
+	GRAY2  = 0xDD,
+	GRAY3  = 0xCC,
+	GRAY4  = 0xBB,
+	GRAY5  = 0xAA,
+	GRAY6  = 0x99,
+	GRAY7  = 0x88,
+	GRAY8  = 0x77,
+	GRAY9  = 0x66,
+	GRAY10 = 0x55,
+	GRAY11 = 0x44,
+	GRAY12 = 0x33,
+	GRAY13 = 0x22,
+	GRAY14 = 0x11,
+	WHITE  = 0x00
+} FBInkGrayRamp;
+#else
+typedef enum
+{
+	BLACK  = 0x00,
+	GRAY1  = 0x11,
+	GRAY2  = 0x22,
+	GRAY3  = 0x33,
+	GRAY4  = 0x44,
+	GRAY5  = 0x55,
+	GRAY6  = 0x66,
+	GRAY7  = 0x77,
+	GRAY8  = 0x88,
+	GRAY9  = 0x99,
+	GRAY10 = 0xAA,
+	GRAY11 = 0xBB,
+	GRAY12 = 0xCC,
+	GRAY13 = 0xDD,
+	GRAY14 = 0xEE,
+	WHITE  = 0xFF
+} FBInkGrayRamp;
+#endif
 
 // List of flags for device or screen-specific quirks...
 typedef struct
@@ -62,5 +85,14 @@ typedef struct
 	unsigned short int x;
 	unsigned short int y;
 } FBInkCoordinates;
+
+// A color, as an (r, g, b) triplet for an 8-bit per component, 3 channel color
+// NOTE: For grayscale, r = g = b (= v), so we assume v is r for simplicity's sake.
+typedef struct
+{
+	unsigned short int r;
+	unsigned short int g;
+	unsigned short int b;
+} FBInkColor;
 
 #endif

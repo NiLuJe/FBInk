@@ -28,6 +28,16 @@
 #ifndef __FBINK_INTERNAL_H
 #define __FBINK_INTERNAL_H
 
+// No extra fonts & no image support in minimal builds
+#ifndef FBINK_MINIMAL
+#	ifndef FBINK_WITH_UNSCII
+#		define FBINK_WITH_UNSCII
+#	endif
+#	ifndef FBINK_WITH_IMAGE
+#		define FBINK_WITH_IMAGE
+#	endif
+#endif
+
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/fb.h>
@@ -98,7 +108,7 @@
 #include "fbink_types.h"
 
 // Speaking of, include the Unscii variants when we're not a minimal build
-#ifndef FBINK_MINIMAL
+#ifdef FBINK_WITH_UNSCII
 #	include "fbink_unscii.h"
 #endif
 
@@ -137,13 +147,6 @@
 		}                                                                                                      \
 	})
 
-static unsigned short def_r[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
-				  0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
-static unsigned short def_g[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
-				  0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
-static unsigned short def_b[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
-				  0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
-
 // 'global' variables to store screen info
 // With our externs, first...
 unsigned char* g_fbink_fbp        = 0U;
@@ -177,13 +180,9 @@ static void put_pixel_Gray8(FBInkCoordinates*, unsigned short int);
 static void put_pixel_RGB24(FBInkCoordinates*, unsigned short int, unsigned short int, unsigned short int);
 static void put_pixel_RGB32(FBInkCoordinates*, unsigned short int, unsigned short int, unsigned short int);
 static void put_pixel_RGB565(FBInkCoordinates*, unsigned short int, unsigned short int, unsigned short int);
-static void put_pixel(unsigned short int, unsigned short int, unsigned short int);
+static void put_pixel(unsigned short int, unsigned short int, FBInkColor*);
 
-static void fill_rect(unsigned short int,
-		      unsigned short int,
-		      unsigned short int,
-		      unsigned short int,
-		      unsigned short int);
+static void fill_rect(unsigned short int, unsigned short int, unsigned short int, unsigned short int, FBInkColor*);
 static void clear_screen(unsigned short int);
 
 static const unsigned char* font8x8_get_bitmap(uint32_t);
@@ -206,7 +205,15 @@ static int refresh_kobo_mk7(int, const struct mxcfb_rect, uint32_t, uint32_t, ui
 #endif            // FBINK_FOR_LEGACY
 static int refresh(int, const struct mxcfb_rect, uint32_t UNUSED_BY_LEGACY, bool);
 
+static int open_fb_fd(int*, bool*);
+
 static const char* fb_rotate_to_string(uint32_t);
+
+static int  memmap_fb(int);
+static void unmap_fb(void);
+
+static void rotate_region(struct mxcfb_rect*);
+static void fullscreen_region(struct mxcfb_rect*);
 
 // For identify_device
 #include "fbink_device_id.h"
