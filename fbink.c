@@ -36,7 +36,8 @@
 #	define STBI_NO_LINEAR
 // We want SIMD for JPEG decoding (... if we can actually use it)!
 // It's not the end of the world if we can't, the speed gains are minimal (~5%).
-// Plus, JPEG decoding in mostly broken on those legacy devices where we can't anyway...
+// In any case, the C codepath appears not to agree with the ARM1136JF-S,
+// so we just have to live with broken JPEG decoding on anything older than a K4...
 #	ifdef __ARM_NEON
 #		define STBI_NEON
 #	endif
