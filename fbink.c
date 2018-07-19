@@ -114,7 +114,8 @@ static void
 	*((unsigned char*) (g_fbink_fbp + pix_offset))     = (unsigned char) b;
 	*((unsigned char*) (g_fbink_fbp + pix_offset + 1)) = (unsigned char) g;
 	*((unsigned char*) (g_fbink_fbp + pix_offset + 2)) = (unsigned char) r;
-	// Opaque, always. It seems to be discarded by the eInk driver, anyway.
+	// Opaque, always. Note that everything is rendered as opaque, no matter what.
+	// But at least this way we ensure fb grabs are consistent with what's seen on screen.
 	*((unsigned char*) (g_fbink_fbp + pix_offset + 3)) = 0xFF;
 }
 
