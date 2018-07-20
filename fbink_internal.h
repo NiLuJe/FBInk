@@ -185,6 +185,13 @@ static void put_pixel_RGB32(FBInkCoordinates*, uint8_t, uint8_t, uint8_t);
 static void put_pixel_RGB565(FBInkCoordinates*, uint8_t, uint8_t, uint8_t);
 static void put_pixel(unsigned short int, unsigned short int, FBInkColor*);
 
+static void get_pixel_Gray4(FBInkCoordinates*, FBInkColor*);
+static void get_pixel_Gray8(FBInkCoordinates*, FBInkColor*);
+static void get_pixel_RGB24(FBInkCoordinates*, FBInkColor*);
+static void get_pixel_RGB32(FBInkCoordinates*, FBInkColor*);
+static void get_pixel_RGB565(FBInkCoordinates*, FBInkColor*);
+static void get_pixel(unsigned short int, unsigned short int, FBInkColor*);
+
 static void fill_rect(unsigned short int, unsigned short int, unsigned short int, unsigned short int, FBInkColor*);
 static void clear_screen(uint8_t);
 

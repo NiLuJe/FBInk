@@ -69,7 +69,7 @@ const char*
 	return FBINK_VERSION;
 }
 
-// Helper function to 'plot' a pixel in given color
+// Helper functions to 'plot' a pixel in given color
 static void
     put_pixel_Gray4(FBInkCoordinates* coords, uint8_t v)
 {
@@ -235,6 +235,122 @@ static void
 			break;
 		case 32U:
 			put_pixel_RGB32(&coords, color->r, color->g, color->b);
+			break;
+		default:
+			// Huh oh... Should never happen!
+			return;
+			break;
+	}
+}
+
+// Helper functions to 'get' a specific pixel's color
+// c.f., FBGrab convert* functions
+//       (http://trac.ak-team.com/trac/browser/niluje/Configs/trunk/Kindle/Misc/FBGrab/fbgrab.c#L402)
+static void
+    get_pixel_Gray4(FBInkCoordinates* coords, FBInkColor* color)
+{
+	// calculate the pixel's byte offset inside the buffer
+	size_t pix_offset = coords->x / 2 + coords->y * finfo.line_length;
+
+	color->r = *((unsigned char*) (g_fbink_fbp + pix_offset));
+}
+
+static void
+    get_pixel_Gray8(FBInkCoordinates* coords, FBInkColor* color)
+{
+	// calculate the pixel's byte offset inside the buffer
+	size_t pix_offset = coords->x + coords->y * finfo.line_length;
+
+	color->r = *((unsigned char*) (g_fbink_fbp + pix_offset));
+}
+
+static void
+    get_pixel_RGB24(FBInkCoordinates* coords, FBInkColor* color)
+{
+	// calculate the pixel's byte offset inside the buffer
+	// note: x * 3 as every pixel is 3 consecutive bytes
+	size_t pix_offset = coords->x * 3U + coords->y * finfo.line_length;
+
+	color->b = *((unsigned char*) (g_fbink_fbp + pix_offset));
+	color->g = *((unsigned char*) (g_fbink_fbp + pix_offset + 1));
+	color->r = *((unsigned char*) (g_fbink_fbp + pix_offset + 2));
+}
+
+static void
+    get_pixel_RGB32(FBInkCoordinates* coords, FBInkColor* color)
+{
+	// calculate the pixel's byte offset inside the buffer
+	// note: x * 4 as every pixel is 4 consecutive bytes
+	size_t pix_offset = coords->x * 4U + coords->y * finfo.line_length;
+
+	color->b = *((unsigned char*) (g_fbink_fbp + pix_offset));
+	color->g = *((unsigned char*) (g_fbink_fbp + pix_offset + 1));
+	color->r = *((unsigned char*) (g_fbink_fbp + pix_offset + 2));
+}
+
+static void
+    get_pixel_RGB565(FBInkCoordinates* coords, FBInkColor* color)
+{
+	// calculate the pixel's byte offset inside the buffer
+	// note: x * 2 as every pixel is 2 consecutive bytes
+	size_t pix_offset = coords->x * 2U + coords->y * finfo.line_length;
+
+	uint16_t v;
+	uint16_t b;
+	uint16_t g;
+	uint16_t r;
+	v = *((uint16_t*) (g_fbink_fbp + pix_offset));
+
+	b        = v & 0x001F;
+	color->b = (uint8_t)((b << 3) + (b >> 2));
+	g        = (v >> 5) & 0x3F;
+	color->g = (uint8_t)((g << 2) + (g >> 4));
+	r        = (uint16_t)(v >> 11);
+	color->r = (uint8_t)((r << 3) + (r >> 2));
+}
+
+// Handle various bpp...
+static void
+    get_pixel(unsigned short int x, unsigned short int y, FBInkColor* color)
+{
+	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
+	FBInkCoordinates coords = { x, y };
+	if (deviceQuirks.isKobo16Landscape) {
+		rotate_coordinates(&coords);
+	}
+
+	// NOTE: Discard off-screen pixels!
+	//       For instance, when we have a halfcell offset in conjunction with a !isPerfectFit pixel offset,
+	//       when we're padding and centering, the final whitespace of right-padding will have its last
+	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
+	if (coords.x >= vinfo.xres || coords.y >= vinfo.yres) {
+#ifdef DEBUG
+		// NOTE: This is only enabled in Debug builds because it can be pretty verbose,
+		//       and does not necessarily indicate an actual issue, as we've just explained...
+		LOG("Discarding off-screen pixel @ (%hu, %hu) (out of %ux%u bounds)",
+		    coords.x,
+		    coords.y,
+		    vinfo.xres,
+		    vinfo.yres);
+#endif
+		return;
+	}
+
+	switch (vinfo.bits_per_pixel) {
+		case 4U:
+			get_pixel_Gray4(&coords, color);
+			break;
+		case 8U:
+			get_pixel_Gray8(&coords, color);
+			break;
+		case 16U:
+			get_pixel_RGB565(&coords, color);
+			break;
+		case 24U:
+			get_pixel_RGB24(&coords, color);
+			break;
+		case 32U:
+			get_pixel_RGB32(&coords, color);
 			break;
 		default:
 			// Huh oh... Should never happen!
