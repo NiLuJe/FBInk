@@ -1852,18 +1852,21 @@ int
 	int        h;
 	int        n;
 	int        req_n;
-	FBInkColor color = { 0U };
+	bool       is_grayscale = false;
+	FBInkColor color        = { 0U };
 	// Let stb handle grayscaling for us
 	switch (vinfo.bits_per_pixel) {
 		case 4U:
 		case 8U:
-			req_n = 1 + !fbink_config->ignore_alpha;
+			req_n        = 1 + !fbink_config->ignore_alpha;
+			is_grayscale = true;
 			break;
 		case 16U:
 		case 24U:
 		case 32U:
 		default:
-			req_n = 3 + !fbink_config->ignore_alpha;
+			req_n        = 3 + !fbink_config->ignore_alpha;
+			is_grayscale = false;
 			break;
 	}
 
@@ -1947,8 +1950,8 @@ int
 	// NOTE: The slight duplication is on purpose, to move the branching outside the loop.
 	//       And since we can easily do so from here,
 	//       we also entirely avoid trying to plot off-screen pixels (on any sides).
-	if (req_n == 1 + !fbink_config->ignore_alpha) {
-		if (n == 2 || n == 4) {
+	if (is_grayscale) {
+		if (!fbink_config->ignore_alpha && (n == 2 || n == 4)) {
 			// There's an alpha channel in the image, we'll have to do Alpha blending...
 			// c.f., https://en.wikipedia.org/wiki/Alpha_compositing
 			//       https://blogs.msdn.microsoft.com/shawnhar/2009/11/06/premultiplied-alpha/
@@ -1987,7 +1990,7 @@ int
 			}
 		}
 	} else {
-		if (n == 2 || n == 4) {
+		if (!fbink_config->ignore_alpha && (n == 2 || n == 4)) {
 			FBInkColor bg_color  = { 0U };
 			FBInkColor img_color = { 0U };
 			uint8_t    alpha     = 0U;
