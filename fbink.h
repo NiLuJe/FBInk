@@ -147,5 +147,7 @@ FBINK_API int fbink_print_image(int, const char*, short int, short int, const FB
 // init(-1)
 // And then whenever you want to print something:
 // print(-1, ...)
+//
+// See fbink_cmd.c for an example of the former, and KFMon for an example of the latter.
 
 #endif
