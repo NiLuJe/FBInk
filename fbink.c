@@ -1919,8 +1919,9 @@ int
 	    max_height,
 	    w,
 	    h);
+	// Warn if there's an alpha channel, because it's much more expensive to handle...
 	if (n == 2 || n == 4) {
-		LOG("Image has an alpha channel, we'll do alpha blending.");
+		LOG("Image has an alpha channel, we'll have to do alpha blending.");
 	}
 
 	// Handle inversion if requested, in a way that avoids branching in the loop ;).
@@ -1946,18 +1947,21 @@ int
 			// There's an alpha channel in the image, we'll have to do Alpha blending...
 			// c.f., https://en.wikipedia.org/wiki/Alpha_compositing
 			//       https://blogs.msdn.microsoft.com/shawnhar/2009/11/06/premultiplied-alpha/
-			FBInkColor bg_color = { 0U };
-			uint8_t    alpha    = 0U;
+			FBInkColor bg_color  = { 0U };
+			FBInkColor img_color = { 0U };
+			uint8_t    alpha     = 0U;
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
+					// We need to know what this pixel currently looks like in the framebuffer...
 					get_pixel((unsigned short int) (i + x_off),
 						  (unsigned short int) (j + y_off),
 						  &bg_color);
 
-					color.r = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 0] ^ invert);
-					alpha   = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 1]);
+					img_color.r = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 0] ^ invert);
+					alpha       = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 1]);
 					// Blend it!
-					color.r = (uint8_t) DIV255(((color.r * alpha) + (bg_color.r * (0xFF - alpha))));
+					color.r =
+					    (uint8_t) DIV255(((img_color.r * alpha) + (bg_color.r * (0xFF - alpha))));
 
 					put_pixel(
 					    (unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
