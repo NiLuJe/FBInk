@@ -1949,6 +1949,9 @@ int
 #	endif
 	unsigned short int i;
 	unsigned short int j;
+	size_t             pix_offset;
+	unsigned short int px;
+	unsigned short int py;
 	// NOTE: The slight duplication is on purpose, to move the branching outside the loop.
 	//       And since we can easily do so from here,
 	//       we also entirely avoid trying to plot off-screen pixels (on any sides).
@@ -1963,31 +1966,33 @@ int
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
 					// We need to know what this pixel currently looks like in the framebuffer...
-					get_pixel((unsigned short int) (i + x_off),
-						  (unsigned short int) (j + y_off),
-						  &bg_color);
+					px = (short unsigned int) (i + x_off);
+					py = (short unsigned int) (j + y_off);
+					get_pixel(px, py, &bg_color);
 
-					img_color.r = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 0] ^ invert);
-					alpha       = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 1]);
+					pix_offset  = (size_t)((j * req_n * w) + (i * req_n));
+					img_color.r = (uint8_t)(data[pix_offset + 0] ^ invert);
+					alpha       = (uint8_t)(data[pix_offset + 1]);
 					// Blend it!
 					color.r =
 					    (uint8_t) DIV255(((img_color.r * alpha) + (bg_color.r * (0xFF - alpha))));
 
-					put_pixel(
-					    (unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
+					put_pixel(px, py, &color);
 				}
 			}
 		} else {
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
-					color.r = (uint8_t)(data[(j * w) + i] ^ invert);
+					pix_offset = (size_t)((j * w) + i);
+					color.r    = (uint8_t)(data[pix_offset] ^ invert);
 					// NOTE: We'll never access those two at this bpp, so we don't even need to set them ;).
 					/*
 					color.g = color.r;
 					color.b = color.r;
 					*/
-					put_pixel(
-					    (unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
+					px = (short unsigned int) (i + x_off);
+					py = (short unsigned int) (j + y_off);
+					put_pixel(px, py, &color);
 				}
 			}
 		}
@@ -1998,14 +2003,15 @@ int
 			uint8_t    alpha     = 0U;
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
-					get_pixel((unsigned short int) (i + x_off),
-						  (unsigned short int) (j + y_off),
-						  &bg_color);
+					px = (short unsigned int) (i + x_off);
+					py = (short unsigned int) (j + y_off);
+					get_pixel(px, py, &bg_color);
 
-					img_color.r = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 0] ^ invert);
-					img_color.g = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 1] ^ invert);
-					img_color.b = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 2] ^ invert);
-					alpha       = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 3]);
+					pix_offset  = (size_t)((j * req_n * w) + (i * req_n));
+					img_color.r = (uint8_t)(data[pix_offset + 0] ^ invert);
+					img_color.g = (uint8_t)(data[pix_offset + 1] ^ invert);
+					img_color.b = (uint8_t)(data[pix_offset + 2] ^ invert);
+					alpha       = (uint8_t)(data[pix_offset + 3]);
 					// Blend it!
 					color.r =
 					    (uint8_t) DIV255(((img_color.r * alpha) + (bg_color.r * (0xFF - alpha))));
@@ -2014,18 +2020,20 @@ int
 					color.b =
 					    (uint8_t) DIV255(((img_color.b * alpha) + (bg_color.b * (0xFF - alpha))));
 
-					put_pixel(
-					    (unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
+					put_pixel(px, py, &color);
 				}
 			}
 		} else {
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
-					color.r = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 0] ^ invert);
-					color.g = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 1] ^ invert);
-					color.b = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 2] ^ invert);
-					put_pixel(
-					    (unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
+					pix_offset = (size_t)((j * req_n * w) + (i * req_n));
+					color.r    = (uint8_t)(data[pix_offset + 0] ^ invert);
+					color.g    = (uint8_t)(data[pix_offset + 1] ^ invert);
+					color.b    = (uint8_t)(data[pix_offset + 2] ^ invert);
+
+					px = (short unsigned int) (i + x_off);
+					py = (short unsigned int) (j + y_off);
+					put_pixel(px, py, &color);
 				}
 			}
 		}
