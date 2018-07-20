@@ -147,14 +147,14 @@ int
 	int                        opt;
 	int                        opt_index;
 	static const struct option opts[] = {
-		{ "row", required_argument, NULL, 'y' },     { "col", required_argument, NULL, 'x' },
-		{ "invert", no_argument, NULL, 'h' },        { "flash", no_argument, NULL, 'f' },
-		{ "clear", no_argument, NULL, 'c' },         { "centered", no_argument, NULL, 'm' },
-		{ "padded", no_argument, NULL, 'p' },        { "refresh", required_argument, NULL, 's' },
-		{ "size", required_argument, NULL, 'S' },    { "font", required_argument, NULL, 'F' },
-		{ "verbose", no_argument, NULL, 'v' },       { "quiet", no_argument, NULL, 'q' },
-		{ "image", required_argument, NULL, 'g' },   { "img", required_argument, NULL, 'i' },
-		{ "flatten", required_argument, NULL, 'a' }, { NULL, 0, NULL, 0 }
+		{ "row", required_argument, NULL, 'y' },   { "col", required_argument, NULL, 'x' },
+		{ "invert", no_argument, NULL, 'h' },      { "flash", no_argument, NULL, 'f' },
+		{ "clear", no_argument, NULL, 'c' },       { "centered", no_argument, NULL, 'm' },
+		{ "padded", no_argument, NULL, 'p' },      { "refresh", required_argument, NULL, 's' },
+		{ "size", required_argument, NULL, 'S' },  { "font", required_argument, NULL, 'F' },
+		{ "verbose", no_argument, NULL, 'v' },     { "quiet", no_argument, NULL, 'q' },
+		{ "image", required_argument, NULL, 'g' }, { "img", required_argument, NULL, 'i' },
+		{ "flatten", no_argument, NULL, 'a' },     { NULL, 0, NULL, 0 }
 	};
 
 	FBInkConfig fbink_config = { 0 };
@@ -196,7 +196,7 @@ int
 	bool      is_image       = false;
 	int       errfnd         = 0;
 
-	while ((opt = getopt_long(argc, argv, "y:x:hfcmps:S:F:vqg:i:a:", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "y:x:hfcmps:S:F:vqg:i:a", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				fbink_config.row = (short int) atoi(optarg);
