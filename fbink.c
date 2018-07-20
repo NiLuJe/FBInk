@@ -299,7 +299,10 @@ static void
 	uint16_t b;
 	uint16_t g;
 	uint16_t r;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
 	v = *((uint16_t*) (g_fbink_fbp + pix_offset));
+#pragma GCC diagnostic pop
 
 	b        = v & 0x001F;
 	color->b = (uint8_t)((b << 3) + (b >> 2));
@@ -1954,7 +1957,7 @@ int
 					color.r = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 0] ^ invert);
 					alpha   = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 1]);
 					// Blend it!
-					color.r = DIV_255((color.r * alpha) + (bg_color.r * (0xFF - alpha)));
+					color.r = (uint8_t) DIV_255((color.r * alpha) + (bg_color.r * (0xFF - alpha)));
 
 					put_pixel(
 					    (unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
@@ -1990,9 +1993,12 @@ int
 					img_color.b = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 2] ^ invert);
 					alpha       = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 3]);
 					// Blend it!
-					color.r = DIV_255((img_color.r * alpha) + (bg_color.r * (0xFF - alpha)));
-					color.g = DIV_255((img_color.g * alpha) + (bg_color.g * (0xFF - alpha)));
-					color.b = DIV_255((img_color.b * alpha) + (bg_color.b * (0xFF - alpha)));
+					color.r =
+					    (uint8_t) DIV_255((img_color.r * alpha) + (bg_color.r * (0xFF - alpha)));
+					color.g =
+					    (uint8_t) DIV_255((img_color.g * alpha) + (bg_color.g * (0xFF - alpha)));
+					color.b =
+					    (uint8_t) DIV_255((img_color.b * alpha) + (bg_color.b * (0xFF - alpha)));
 
 					put_pixel(
 					    (unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
