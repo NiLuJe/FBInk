@@ -287,6 +287,8 @@ static void
 	color->b = *((unsigned char*) (g_fbink_fbp + pix_offset));
 	color->g = *((unsigned char*) (g_fbink_fbp + pix_offset + 1));
 	color->r = *((unsigned char*) (g_fbink_fbp + pix_offset + 2));
+	// NOTE: We don't care about alpha, we always assume it's opaque,
+	//       as that's how it behaves.
 }
 
 static void
@@ -1855,13 +1857,13 @@ int
 	switch (vinfo.bits_per_pixel) {
 		case 4U:
 		case 8U:
-			req_n = 2;
+			req_n = 1 + !fbink_config->ignore_alpha;
 			break;
 		case 16U:
 		case 24U:
 		case 32U:
 		default:
-			req_n = 4;
+			req_n = 3 + !fbink_config->ignore_alpha;
 			break;
 	}
 
@@ -1920,7 +1922,11 @@ int
 	    h);
 	// Warn if there's an alpha channel, because it's much more expensive to handle...
 	if (n == 2 || n == 4) {
-		LOG("Image has an alpha channel, we'll have to do alpha blending.");
+		if (fbink_config->ignore_alpha) {
+			LOG("Ignoring the image's alpha channel.");
+		} else {
+			LOG("Image has an alpha channel, we'll have to do alpha blending.");
+		}
 	}
 
 	// Handle inversion if requested, in a way that avoids branching in the loop ;).
@@ -1941,7 +1947,7 @@ int
 	// NOTE: The slight duplication is on purpose, to move the branching outside the loop.
 	//       And since we can easily do so from here,
 	//       we also entirely avoid trying to plot off-screen pixels (on any sides).
-	if (req_n == 2) {
+	if (req_n == 1 + !fbink_config->ignore_alpha) {
 		if (n == 2 || n == 4) {
 			// There's an alpha channel in the image, we'll have to do Alpha blending...
 			// c.f., https://en.wikipedia.org/wiki/Alpha_compositing

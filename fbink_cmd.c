@@ -115,10 +115,14 @@ static void
 	    "\tfbink -i hello,world.png -g x=-10,y=11 -x 5 -y 8\n"
 	    "\t\tDraws the content of the image file hello,world.png, starting at the ninth line plus 11px and the sixth column minus 10px\n"
 	    "\n"
+	    "Options affecting the image's appearance:\n"
+	    "\t-a, --flatten\tIgnore the alpha channel.\n"
+	    "\n"
 	    "NOTES:\n"
 	    "\tSupported image formats: JPEG, PNG, TGA, BMP, GIF & PNM\n"
 	    "\t\tNote that, in some cases, exotic encoding settings may not be supported.\n"
 	    "\t\tTransparency is supported, but it's slower (because we need to do alpha blending).\n"
+	    "\t\t\tYou can use the -a, --flatten flag to avoid the performance penalty by always ignoring alpha.\n"
 	    "\t\tAs an additional quirk, you can't pass paths with commas in it to file. Pass those to the -i, --img flag instead.\n"
 #	ifdef FBINK_FOR_LEGACY
 	    "\t\tOn your legacy device, some files may also decode badly (i.e., JPEG). PNG files should display properly.\n"
@@ -142,21 +146,16 @@ int
 {
 	int                        opt;
 	int                        opt_index;
-	static const struct option opts[] = { { "row", required_argument, NULL, 'y' },
-					      { "col", required_argument, NULL, 'x' },
-					      { "invert", no_argument, NULL, 'h' },
-					      { "flash", no_argument, NULL, 'f' },
-					      { "clear", no_argument, NULL, 'c' },
-					      { "centered", no_argument, NULL, 'm' },
-					      { "padded", no_argument, NULL, 'p' },
-					      { "refresh", required_argument, NULL, 's' },
-					      { "size", required_argument, NULL, 'S' },
-					      { "font", required_argument, NULL, 'F' },
-					      { "verbose", no_argument, NULL, 'v' },
-					      { "quiet", no_argument, NULL, 'q' },
-					      { "image", required_argument, NULL, 'g' },
-					      { "img", required_argument, NULL, 'i' },
-					      { NULL, 0, NULL, 0 } };
+	static const struct option opts[] = {
+		{ "row", required_argument, NULL, 'y' },     { "col", required_argument, NULL, 'x' },
+		{ "invert", no_argument, NULL, 'h' },        { "flash", no_argument, NULL, 'f' },
+		{ "clear", no_argument, NULL, 'c' },         { "centered", no_argument, NULL, 'm' },
+		{ "padded", no_argument, NULL, 'p' },        { "refresh", required_argument, NULL, 's' },
+		{ "size", required_argument, NULL, 'S' },    { "font", required_argument, NULL, 'F' },
+		{ "verbose", no_argument, NULL, 'v' },       { "quiet", no_argument, NULL, 'q' },
+		{ "image", required_argument, NULL, 'g' },   { "img", required_argument, NULL, 'i' },
+		{ "flatten", required_argument, NULL, 'a' }, { NULL, 0, NULL, 0 }
+	};
 
 	FBInkConfig fbink_config = { 0 };
 
@@ -197,7 +196,7 @@ int
 	bool      is_image       = false;
 	int       errfnd         = 0;
 
-	while ((opt = getopt_long(argc, argv, "y:x:hfcmps:S:F:vqg:i:", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "y:x:hfcmps:S:F:vqg:i:a:", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				fbink_config.row = (short int) atoi(optarg);
@@ -328,6 +327,9 @@ int
 				// Free a potentially previously set value...
 				free(image_file);
 				image_file = strdup(optarg);
+				break;
+			case 'a':
+				fbink_config.ignore_alpha = true;
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
