@@ -83,7 +83,7 @@ typedef struct
 	bool               is_quiet;
 } FBInkConfig;
 
-// NOTE: Unless otherwise specified, stuff returns EXIT_FAILURE on failure & EXIT_SUCCESS otherwise ;).
+// NOTE: Unless otherwise specified, stuff returns a negative value (usually -(EXIT_FAILURE)) on failure & EXIT_SUCCESS otherwise ;).
 
 // Return the version of the currently loaded FBInk library
 FBINK_API const char* fbink_version(void) __attribute__((const));
@@ -104,7 +104,7 @@ FBINK_API int fbink_init(int, const FBInkConfig*);
 //       and we assume a single multibyte sequence will occupy a maximum of 4 bytes.
 //       c.f., my rant about Kobo's broken libc in fbink_internal.h for more details behind this choice.
 //       Since any decent system of the last decade should default to UTF-8, that should be pretty much transparent...
-// Returns the amount of lines printed or -1 on failure.
+// Returns the amount of lines printed on success.
 // Arg 1: fbfd, if it's -1, the fb is opened for the duration of this call
 // Arg 2: UTF-8 encoded string to print
 // Arg 3: pointer to an FBInkConfig struct
@@ -132,7 +132,7 @@ FBINK_API int fbink_refresh(int, uint32_t, uint32_t, uint32_t, uint32_t, const c
 FBINK_API bool fbink_is_fb_quirky(void);
 
 // Print an image on screen
-// Returns -1 on failure, or -ENOSYS when image support is disabled (MINIMAL build)
+// Returns -(ENOSYS) when image support is disabled (MINIMAL build)
 // Arg 1: fbfd, if it's -1, the fb is opened for the duration of this call
 // Arg 2: path to the image file
 // Arg 3: target coordinates, x

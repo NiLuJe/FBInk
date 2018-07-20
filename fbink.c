@@ -562,7 +562,7 @@ static int
 		} else {
 			fprintf(stderr, "[FBInk] FBIO_EINK_UPDATE_DISPLAY_AREA: %s\n", errstr);
 		}
-		return EXIT_FAILURE;
+		return ERRCODE(EXIT_FAILURE);
 	}
 
 	return rv;
@@ -618,7 +618,7 @@ static int
 				region.width,
 				region.height);
 		}
-		return EXIT_FAILURE;
+		return ERRCODE(EXIT_FAILURE);
 	}
 
 	if (update_mode == UPDATE_MODE_FULL) {
@@ -641,7 +641,7 @@ static int
 			} else {
 				fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s\n", errstr);
 			}
-			return EXIT_FAILURE;
+			return ERRCODE(EXIT_FAILURE);
 		} else {
 			// NOTE: Timeout is set to 5000ms
 			LOG("Waited %ldms for completion of flashing update %u", (5000 - jiffies_to_ms(rv)), marker);
@@ -694,7 +694,7 @@ static int
 				region.width,
 				region.height);
 		}
-		return EXIT_FAILURE;
+		return ERRCODE(EXIT_FAILURE);
 	}
 
 	if (update_mode == UPDATE_MODE_FULL) {
@@ -709,7 +709,7 @@ static int
 			char buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
 			fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s\n", errstr);
-			return EXIT_FAILURE;
+			return ERRCODE(EXIT_FAILURE);
 		} else {
 			// NOTE: Timeout is set to 5000ms
 			LOG("Waited %ldms for completion of flashing update %u", (5000 - jiffies_to_ms(rv)), marker);
@@ -755,7 +755,7 @@ static int
 				region.width,
 				region.height);
 		}
-		return EXIT_FAILURE;
+		return ERRCODE(EXIT_FAILURE);
 	}
 
 	if (update_mode == UPDATE_MODE_FULL) {
@@ -765,7 +765,7 @@ static int
 			char  buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
 			fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1: %s\n", errstr);
-			return EXIT_FAILURE;
+			return ERRCODE(EXIT_FAILURE);
 		} else {
 			// NOTE: Timeout is set to 10000ms
 			LOG("Waited %ldms for completion of flashing update %u", (10000 - jiffies_to_ms(rv)), marker);
@@ -812,7 +812,7 @@ static int
 				region.width,
 				region.height);
 		}
-		return EXIT_FAILURE;
+		return ERRCODE(EXIT_FAILURE);
 	}
 
 	if (update_mode == UPDATE_MODE_FULL) {
@@ -827,7 +827,7 @@ static int
 			char  buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
 			fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3: %s\n", errstr);
-			return EXIT_FAILURE;
+			return ERRCODE(EXIT_FAILURE);
 		} else {
 			// NOTE: Timeout is set to 5000ms
 			LOG("Waited %ldms for completion of flashing update %u", (5000 - jiffies_to_ms(rv)), marker);
@@ -850,7 +850,7 @@ static int
 			"[FBInk] Discarding bogus empty region (%ux%u) to avoid a softlock.\n",
 			region.width,
 			region.height);
-		return EXIT_FAILURE;
+		return ERRCODE(EXIT_FAILURE);
 	}
 
 #ifdef FBINK_FOR_LEGACY
@@ -902,7 +902,7 @@ int
 	fbfd = open("/dev/fb0", O_RDWR);
 	if (!fbfd) {
 		fprintf(stderr, "[FBInk] Error: cannot open framebuffer device.\n");
-		return EXIT_FAILURE;
+		return ERRCODE(EXIT_FAILURE);
 	}
 
 	return fbfd;
@@ -915,9 +915,9 @@ static int
 	if (*fbfd == -1) {
 		// If we're opening a fd now, don't keep it around.
 		*keep_fd = false;
-		if (-1 == (*fbfd = fbink_open())) {
+		if (ERRCODE(EXIT_FAILURE) == (*fbfd = fbink_open())) {
 			fprintf(stderr, "[FBInk] Failed to open the framebuffer, aborting . . .\n");
-			return EXIT_FAILURE;
+			return ERRCODE(EXIT_FAILURE);
 		}
 	}
 
@@ -948,7 +948,7 @@ int
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
 	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
-		return EXIT_FAILURE;
+		return ERRCODE(EXIT_FAILURE);
 	}
 
 	// Update verbosity flag
@@ -967,7 +967,7 @@ int
 	// Get variable screen information
 	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo)) {
 		fprintf(stderr, "[FBInk] Error reading variable information.\n");
-		return EXIT_FAILURE;
+		return ERRCODE(EXIT_FAILURE);
 	}
 	ELOG("[FBInk] Variable fb info: %ux%u, %ubpp @ rotation: %u (%s)",
 	     vinfo.xres,
@@ -1145,7 +1145,7 @@ static int
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
 		fprintf(stderr, "[FBInk] mmap: %s\n", errstr);
-		return EXIT_FAILURE;
+		return ERRCODE(EXIT_FAILURE);
 	} else {
 		g_fbink_isFbMapped = true;
 	}
@@ -1195,7 +1195,7 @@ int
 	// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
 	bool keep_fd = true;
 	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
-		return -1;
+		return ERRCODE(EXIT_FAILURE);
 	}
 
 	// map fb to user mem
@@ -1204,7 +1204,7 @@ int
 	// NOTE: If we're keeping the fb's fd open, keep this mmap around, too.
 	if (!g_fbink_isFbMapped) {
 		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
-			return -1;
+			return ERRCODE(EXIT_FAILURE);
 		}
 	}
 
@@ -1300,7 +1300,7 @@ int
 			char  buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
 			fprintf(stderr, "[FBInk] calloc (line): %s\n", errstr);
-			return -1;
+			return ERRCODE(EXIT_FAILURE);
 		}
 		// NOTE: This makes sure it's always full of NULLs, to avoid weird shit happening later with u8_strlen()
 		//       and uninitialized or re-used memory...
@@ -1541,7 +1541,7 @@ int
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
 		fprintf(stderr, "[FBInk] calloc (page): %s\n", errstr);
-		return -1;
+		return ERRCODE(EXIT_FAILURE);
 	}
 
 	va_list args;
@@ -1570,7 +1570,7 @@ int
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
 	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
-		return EXIT_FAILURE;
+		return ERRCODE(EXIT_FAILURE);
 	}
 
 	uint32_t region_wfm = WAVEFORM_MODE_AUTO;
@@ -1696,13 +1696,13 @@ int
 	// NOTE: As usual, we *expect* to be initialized at this point!
 	bool keep_fd = true;
 	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
-		return -1;
+		return ERRCODE(EXIT_FAILURE);
 	}
 
 	// mmap the fb if need be...
 	if (!g_fbink_isFbMapped) {
 		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
-			return -1;
+			return ERRCODE(EXIT_FAILURE);
 		}
 	}
 
@@ -1750,7 +1750,7 @@ int
 	unsigned char* data = stbi_load(filename, &w, &h, &n, req_n);
 	if (data == NULL) {
 		fprintf(stderr, "[FBInk] Failed to open or decode image '%s'!\n", filename);
-		return -1;
+		return ERRCODE(EXIT_FAILURE);
 	}
 
 	// Clamp everything to a safe range, because we can't have *anything* going off-screen here.
@@ -1822,7 +1822,7 @@ int
 	if (req_n == 1) {
 		for (j = img_y_off; j < max_height; j++) {
 			for (i = img_x_off; i < max_width; i++) {
-				color.r = (uint8_t) (data[(j * w) + i] ^ invert);
+				color.r = (uint8_t)(data[(j * w) + i] ^ invert);
 				// NOTE: We'll never access those two at this bpp, so we don't even need to set them ;).
 				/*
 				color.g = color.r;
@@ -1834,9 +1834,9 @@ int
 	} else {
 		for (j = img_y_off; j < max_height; j++) {
 			for (i = img_x_off; i < max_width; i++) {
-				color.r = (uint8_t) (data[(j * req_n * w) + (i * req_n) + 0] ^ invert);
-				color.g = (uint8_t) (data[(j * req_n * w) + (i * req_n) + 1] ^ invert);
-				color.b = (uint8_t) (data[(j * req_n * w) + (i * req_n) + 2] ^ invert);
+				color.r = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 0] ^ invert);
+				color.g = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 1] ^ invert);
+				color.b = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 2] ^ invert);
 				put_pixel((unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
 			}
 		}
@@ -1869,6 +1869,6 @@ int
 	return EXIT_SUCCESS;
 #else
 	fprintf(stderr, "[FBInk] Image support is disabled in this FBInk build!\n");
-	return -ENOSYS;
+	return ERRCODE(ENOSYS);
 #endif    // FBINK_WITH_IMAGE
 }

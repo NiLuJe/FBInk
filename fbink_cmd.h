@@ -29,6 +29,9 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
+// FBInk always returns negative values on failure
+#define ERRCODE(e) (-(e))
+
 static void show_helpmsg(void);
 
 #endif

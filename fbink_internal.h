@@ -147,6 +147,9 @@
 		}                                                                                                      \
 	})
 
+// We want to return negative values on failure, always
+#define ERRCODE(e) (-(e))
+
 // 'global' variables to store screen info
 // With our externs, first...
 unsigned char* g_fbink_fbp        = 0U;

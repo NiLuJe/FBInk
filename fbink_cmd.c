@@ -337,18 +337,18 @@ int
 
 	if (errfnd == 1 || argc == 1) {
 		show_helpmsg();
-		return EXIT_FAILURE;
+		return ERRCODE(EXIT_FAILURE);
 	}
 
 	// Open framebuffer and keep it around, then setup globals.
 	int fbfd = -1;
-	if (-1 == (fbfd = fbink_open())) {
+	if (ERRCODE(EXIT_FAILURE) == (fbfd = fbink_open())) {
 		fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
-		return EXIT_FAILURE;
+		return ERRCODE(EXIT_FAILURE);
 	}
-	if (fbink_init(fbfd, &fbink_config) == EXIT_FAILURE) {
+	if (fbink_init(fbfd, &fbink_config) == ERRCODE(EXIT_FAILURE)) {
 		fprintf(stderr, "Failed to initialize FBInk, aborting . . .\n");
-		return EXIT_FAILURE;
+		return ERRCODE(EXIT_FAILURE);
 	}
 
 	char* string;
@@ -401,7 +401,8 @@ int
 			}
 		} else if (is_image) {
 			printf("Displaying image '%s' @ (%hd, %hd)\n", image_file, image_x_offset, image_y_offset);
-			if (fbink_print_image(fbfd, image_file, image_x_offset, image_y_offset, &fbink_config) < 0) {
+			if (fbink_print_image(fbfd, image_file, image_x_offset, image_y_offset, &fbink_config) !=
+			    EXIT_SUCCESS) {
 				fprintf(stderr, "Failed to display that image!\n");
 			}
 		} else {
