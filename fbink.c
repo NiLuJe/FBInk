@@ -452,6 +452,7 @@ static void
 	unsigned short int j;
 	unsigned short int k;
 	bool               set = false;
+	size_t             idx;
 	for (i = 0U; i < FONTH; i++) {
 		// x: input row, i: output row
 		x = i / FONTSIZE_MULT;
@@ -460,7 +461,7 @@ static void
 			y   = j / FONTSIZE_MULT;
 			set = bitmap[x] & 1 << y;
 			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTW=1,0)
-			unsigned short int idx = (unsigned short int) (j + (i * FONTW));
+			idx = (size_t)(j + (i * FONTW));
 			for (k = 0U; k < FONTSIZE_MULT; k++) {
 				glyph_pixmap[idx + k] = set ? 1 : 0;
 			}
@@ -1167,17 +1168,15 @@ int
 
 		// NOTE: Clamp to safe values to avoid blowing up the stack with alloca later,
 		//       in case we get fed a stupidly large value.
-		//       Incidentally, this is also necessary to avoid overflowing an unsigned short with the result of
-		//       FONTW * FONTH, because that's basically what happens in one form or another during scaling.
 #ifdef FBINK_WITH_UNSCII
 		// NOTE: Unscii-16 is 8x16, handle it ;).
 		if (fbink_config->fontname == UNSCII_TALL) {
-			FONTSIZE_MULT = MIN(22, FONTSIZE_MULT);    // $(( (8 * 23) * ( 16 * 23) )) -> 67712. MEEP!
+			FONTSIZE_MULT = MIN(48, FONTSIZE_MULT);
 		} else {
-			FONTSIZE_MULT = MIN(31, FONTSIZE_MULT);    // $(( (8 * 32) ** 2 )) -> 65536. MEEP!
+			FONTSIZE_MULT = MIN(64, FONTSIZE_MULT);
 		}
 #else
-		FONTSIZE_MULT = MIN(31, FONTSIZE_MULT);
+		FONTSIZE_MULT = MIN(64, FONTSIZE_MULT);
 #endif
 	} else {
 		// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
@@ -1937,12 +1936,12 @@ int
 	// Handle inversion if requested, in a way that avoids branching in the loop ;).
 	// And, as an added bonus, plays well with the fact that legacy devices have an inverted color map...
 #	ifdef FBINK_FOR_LEGACY
-	unsigned short int invert = 0xFF;
+	uint8_t invert = 0xFF;
 	if (fbink_config->is_inverted) {
 		invert = 0U;
 	}
 #	else
-	unsigned short int invert = 0U;
+	uint8_t invert = 0U;
 	if (fbink_config->is_inverted) {
 		invert = 0xFF;
 	}
@@ -1966,8 +1965,8 @@ int
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
 					// We need to know what this pixel currently looks like in the framebuffer...
-					px = (short unsigned int) (i + x_off);
-					py = (short unsigned int) (j + y_off);
+					px = (unsigned short int) (i + x_off);
+					py = (unsigned short int) (j + y_off);
 					get_pixel(px, py, &bg_color);
 
 					pix_offset  = (size_t)((j * req_n * w) + (i * req_n));
@@ -1990,8 +1989,8 @@ int
 					color.g = color.r;
 					color.b = color.r;
 					*/
-					px = (short unsigned int) (i + x_off);
-					py = (short unsigned int) (j + y_off);
+					px = (unsigned short int) (i + x_off);
+					py = (unsigned short int) (j + y_off);
 					put_pixel(px, py, &color);
 				}
 			}
@@ -2003,8 +2002,8 @@ int
 			uint8_t    alpha     = 0U;
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
-					px = (short unsigned int) (i + x_off);
-					py = (short unsigned int) (j + y_off);
+					px = (unsigned short int) (i + x_off);
+					py = (unsigned short int) (j + y_off);
 					get_pixel(px, py, &bg_color);
 
 					pix_offset  = (size_t)((j * req_n * w) + (i * req_n));
@@ -2031,8 +2030,8 @@ int
 					color.g    = (uint8_t)(data[pix_offset + 1] ^ invert);
 					color.b    = (uint8_t)(data[pix_offset + 2] ^ invert);
 
-					px = (short unsigned int) (i + x_off);
-					py = (short unsigned int) (j + y_off);
+					px = (unsigned short int) (i + x_off);
+					py = (unsigned short int) (j + y_off);
 					put_pixel(px, py, &color);
 				}
 			}

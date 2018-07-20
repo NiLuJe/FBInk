@@ -60,9 +60,9 @@ static void
 	    "\t-c, --clear\tFully clear the screen before printing (obeys --invert).\n"
 	    "\t-S, --size\tOverride the automatic font scaling multiplier (0 means automatic selection, which ranges from 1 (no scaling), to 4 (4x upscaling), depending on screen resolution).\n"
 #ifdef FBINK_WITH_UNSCII
-	    "\t\t\tNote that user-supplied values will be silently clamped to safe boundaries (from 1 to 31 for most fonts, and from 1 to 22 for TALL).\n"
+	    "\t\t\tNote that user-supplied values will be silently clamped to safe boundaries (from 1 to 64 for most fonts, and from 1 to 48 for TALL).\n"
 #else
-	    "\t\t\tNote that user-supplied values will be silently clamped to safe boundaries (from 1 to 31).\n"
+	    "\t\t\tNote that user-supplied values will be silently clamped to safe boundaries (from 1 to 64).\n"
 #endif
 	    "\t-F, --font NAME\tRender glyphs from builtin font NAME (Default: IBM).\n"
 #ifdef FBINK_WITH_UNSCII
