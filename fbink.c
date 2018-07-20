@@ -1876,6 +1876,8 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
+	LOG("Requested %d color channels, image had %d.", req_n, n);
+
 	// Clamp everything to a safe range, because we can't have *anything* going off-screen here.
 	struct mxcfb_rect region = {
 		.top    = MIN(viewHeight, (uint32_t) MAX(0, y_off)),
@@ -1982,7 +1984,7 @@ int
 		} else {
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
-					pix_offset = (size_t)((j * w) + i);
+					pix_offset = (size_t)((j * req_n * w) + (i * req_n));
 					color.r    = (uint8_t)(data[pix_offset] ^ invert);
 					// NOTE: We'll never access those two at this bpp, so we don't even need to set them ;).
 					/*
