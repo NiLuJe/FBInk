@@ -132,7 +132,7 @@ FBINK_API int fbink_refresh(int, uint32_t, uint32_t, uint32_t, uint32_t, const c
 FBINK_API bool fbink_is_fb_quirky(void);
 
 // Print an image on screen
-// Returns -1 on failure, or ENOSYS when image support is disabled (MINIMAL build)
+// Returns -1 on failure, or -ENOSYS when image support is disabled (MINIMAL build)
 // Arg 1: fbfd, if it's -1, the fb is opened for the duration of this call
 // Arg 2: path to the image file
 // Arg 3: target coordinates, x

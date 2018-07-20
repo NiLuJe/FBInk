@@ -1871,6 +1871,6 @@ int
 	return EXIT_SUCCESS;
 #else
 	fprintf(stderr, "[FBInk] Image support is disabled in this FBInk build!\n");
-	return ENOSYS;
+	return -ENOSYS;
 #endif    // FBINK_WITH_IMAGE
 }
