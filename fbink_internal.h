@@ -185,15 +185,18 @@ static void put_pixel_RGB32(FBInkCoordinates*, uint8_t, uint8_t, uint8_t);
 static void put_pixel_RGB565(FBInkCoordinates*, uint8_t, uint8_t, uint8_t);
 static void put_pixel(unsigned short int, unsigned short int, FBInkColor*);
 
+// All this is only needed for alpha blending in the image codepath ;).
+#ifdef FBINK_WITH_IMAGE
 // c.f., https://github.com/videolan/vlc/blob/6b96ade7dd97acb49303a0a9da9b3d2056b808e0/modules/video_filter/blend.cpp#L49
 //     & https://github.com/koreader/koreader-base/blob/b3e72affd0e1ba819d92194b229468452c58836f/blitbuffer.c#L59
-#define DIV255(v) (((v >> 8) + v + 0x01) >> 8)
+#	define DIV255(v) (((v >> 8) + v + 0x01) >> 8)
 static void get_pixel_Gray4(FBInkCoordinates*, FBInkColor*);
 static void get_pixel_Gray8(FBInkCoordinates*, FBInkColor*);
 static void get_pixel_RGB24(FBInkCoordinates*, FBInkColor*);
 static void get_pixel_RGB32(FBInkCoordinates*, FBInkColor*);
 static void get_pixel_RGB565(FBInkCoordinates*, FBInkColor*);
 static void get_pixel(unsigned short int, unsigned short int, FBInkColor*);
+#endif
 
 static void fill_rect(unsigned short int, unsigned short int, unsigned short int, unsigned short int, FBInkColor*);
 static void clear_screen(uint8_t);

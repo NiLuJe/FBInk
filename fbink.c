@@ -243,6 +243,7 @@ static void
 	}
 }
 
+#ifdef FBINK_WITH_IMAGE
 // Helper functions to 'get' a specific pixel's color
 // c.f., FBGrab convert* functions
 //       (http://trac.ak-team.com/trac/browser/niluje/Configs/trunk/Kindle/Misc/FBGrab/fbgrab.c#L402)
@@ -295,14 +296,14 @@ static void
 	// note: x * 2 as every pixel is 2 consecutive bytes
 	size_t pix_offset = coords->x * 2U + coords->y * finfo.line_length;
 
-	uint16_t v;
-	uint16_t b;
-	uint16_t g;
-	uint16_t r;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-align"
+	uint16_t    v;
+	uint16_t    b;
+	uint16_t    g;
+	uint16_t    r;
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
 	v = *((uint16_t*) (g_fbink_fbp + pix_offset));
-#pragma GCC diagnostic pop
+#	pragma GCC diagnostic pop
 
 	b        = v & 0x001F;
 	color->b = (uint8_t)((b << 3) + (b >> 2));
@@ -323,11 +324,8 @@ static void
 	}
 
 	// NOTE: Discard off-screen pixels!
-	//       For instance, when we have a halfcell offset in conjunction with a !isPerfectFit pixel offset,
-	//       when we're padding and centering, the final whitespace of right-padding will have its last
-	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
 	if (coords.x >= vinfo.xres || coords.y >= vinfo.yres) {
-#ifdef DEBUG
+#	ifdef DEBUG
 		// NOTE: This is only enabled in Debug builds because it can be pretty verbose,
 		//       and does not necessarily indicate an actual issue, as we've just explained...
 		LOG("Discarding off-screen pixel @ (%hu, %hu) (out of %ux%u bounds)",
@@ -335,7 +333,7 @@ static void
 		    coords.y,
 		    vinfo.xres,
 		    vinfo.yres);
-#endif
+#	endif
 		return;
 	}
 
@@ -361,6 +359,7 @@ static void
 			break;
 	}
 }
+#endif    // FBINK_WITH_IMAGE
 
 // Helper function to draw a rectangle in given color
 static void
