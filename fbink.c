@@ -1853,13 +1853,13 @@ int
 	switch (vinfo.bits_per_pixel) {
 		case 4U:
 		case 8U:
-			req_n = 1;
+			req_n = 2;
 			break;
 		case 16U:
 		case 24U:
 		case 32U:
 		default:
-			req_n = 3;
+			req_n = 4;
 			break;
 	}
 
@@ -1916,6 +1916,9 @@ int
 	    max_height,
 	    w,
 	    h);
+	if (n == 2 || n == 4) {
+		LOG("Image has an alpha channel, we'll do alpha blending.");
+	}
 
 	// Handle inversion if requested, in a way that avoids branching in the loop ;).
 	// And, as an added bonus, plays well with the fact that legacy devices have an inverted color map...
@@ -1935,25 +1938,75 @@ int
 	// NOTE: The slight duplication is on purpose, to move the branching outside the loop.
 	//       And since we can easily do so from here,
 	//       we also entirely avoid trying to plot off-screen pixels (on any sides).
-	if (req_n == 1) {
-		for (j = img_y_off; j < max_height; j++) {
-			for (i = img_x_off; i < max_width; i++) {
-				color.r = (uint8_t)(data[(j * w) + i] ^ invert);
-				// NOTE: We'll never access those two at this bpp, so we don't even need to set them ;).
-				/*
-				color.g = color.r;
-				color.b = color.r;
-				*/
-				put_pixel((unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
+	if (req_n == 2) {
+		if (n == 2 || n == 4) {
+			// There's an alpha channel in the image, we'll have to do Alpha blending...
+			// c.f., https://en.wikipedia.org/wiki/Alpha_compositing
+			//       https://blogs.msdn.microsoft.com/shawnhar/2009/11/06/premultiplied-alpha/
+			FBInkColor bg_color = { 0U };
+			uint8_t    alpha    = 0U;
+			for (j = img_y_off; j < max_height; j++) {
+				for (i = img_x_off; i < max_width; i++) {
+					get_pixel((unsigned short int) (i + x_off),
+						  (unsigned short int) (j + y_off),
+						  &bg_color);
+
+					color.r = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 0] ^ invert);
+					alpha   = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 1]);
+					// Blend it!
+					color.r = (color.r * alpha) + (bg_color.r * (0xFF - alpha));
+
+					put_pixel(
+					    (unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
+				}
+			}
+		} else {
+			for (j = img_y_off; j < max_height; j++) {
+				for (i = img_x_off; i < max_width; i++) {
+					color.r = (uint8_t)(data[(j * w) + i] ^ invert);
+					// NOTE: We'll never access those two at this bpp, so we don't even need to set them ;).
+					/*
+					color.g = color.r;
+					color.b = color.r;
+					*/
+					put_pixel(
+					    (unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
+				}
 			}
 		}
 	} else {
-		for (j = img_y_off; j < max_height; j++) {
-			for (i = img_x_off; i < max_width; i++) {
-				color.r = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 0] ^ invert);
-				color.g = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 1] ^ invert);
-				color.b = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 2] ^ invert);
-				put_pixel((unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
+		if (n == 2 || n == 4) {
+			FBInkColor bg_color  = { 0U };
+			FBInkColor img_color = { 0U };
+			uint8_t    alpha     = 0U;
+			for (j = img_y_off; j < max_height; j++) {
+				for (i = img_x_off; i < max_width; i++) {
+					get_pixel((unsigned short int) (i + x_off),
+						  (unsigned short int) (j + y_off),
+						  &bg_color);
+
+					img_color.r = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 0] ^ invert);
+					img_color.g = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 1] ^ invert);
+					img_color.b = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 2] ^ invert);
+					alpha       = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 3]);
+					// Blend it!
+					color.r = (img_color.r * alpha) + (bg_color.r * (0xFF - alpha));
+					color.g = (img_color.g * alpha) + (bg_color.g * (0xFF - alpha));
+					color.b = (img_color.b * alpha) + (bg_color.b * (0xFF - alpha));
+
+					put_pixel(
+					    (unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
+				}
+			}
+		} else {
+			for (j = img_y_off; j < max_height; j++) {
+				for (i = img_x_off; i < max_width; i++) {
+					color.r = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 0] ^ invert);
+					color.g = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 1] ^ invert);
+					color.b = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 2] ^ invert);
+					put_pixel(
+					    (unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
+				}
 			}
 		}
 	}
