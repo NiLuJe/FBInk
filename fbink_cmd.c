@@ -346,7 +346,7 @@ int
 		fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
 		return EXIT_FAILURE;
 	}
-	if (EXIT_FAILURE == (fbfd = fbink_init(fbfd, &fbink_config))) {
+	if (fbink_init(fbfd, &fbink_config) == EXIT_FAILURE) {
 		fprintf(stderr, "Failed to initialize FBInk, aborting . . .\n");
 		return EXIT_FAILURE;
 	}

@@ -1126,15 +1126,14 @@ int
 		deviceQuirks.skipId = true;
 	}
 
-	// NOTE: Do we want to keep the fb0 fd open and pass it to our caller, or simply close it for now?
+	// NOTE: Do we want to keep the fb0 fd open, or simply close it for now?
 	//       Useful because we probably want to close it to keep open fds to a minimum when used as a library,
 	//       while wanting to avoid a useless open/close/open/close cycle when used as a standalone tool.
-	if (keep_fd) {
-		return fbfd;
-	} else {
+	if (!keep_fd) {
 		close(fbfd);
-		return EXIT_SUCCESS;
 	}
+
+	return EXIT_SUCCESS;
 }
 
 // Memory map the framebuffer
