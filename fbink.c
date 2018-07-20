@@ -1954,7 +1954,7 @@ int
 					color.r = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 0] ^ invert);
 					alpha   = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 1]);
 					// Blend it!
-					color.r = (color.r * alpha) + (bg_color.r * (0xFF - alpha));
+					color.r = DIV_255((color.r * alpha) + (bg_color.r * (0xFF - alpha)));
 
 					put_pixel(
 					    (unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
@@ -1990,9 +1990,9 @@ int
 					img_color.b = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 2] ^ invert);
 					alpha       = (uint8_t)(data[(j * req_n * w) + (i * req_n) + 3]);
 					// Blend it!
-					color.r = (img_color.r * alpha) + (bg_color.r * (0xFF - alpha));
-					color.g = (img_color.g * alpha) + (bg_color.g * (0xFF - alpha));
-					color.b = (img_color.b * alpha) + (bg_color.b * (0xFF - alpha));
+					color.r = DIV_255((img_color.r * alpha) + (bg_color.r * (0xFF - alpha)));
+					color.g = DIV_255((img_color.g * alpha) + (bg_color.g * (0xFF - alpha)));
+					color.b = DIV_255((img_color.b * alpha) + (bg_color.b * (0xFF - alpha)));
 
 					put_pixel(
 					    (unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
