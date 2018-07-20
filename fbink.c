@@ -1852,21 +1852,22 @@ int
 	int        h;
 	int        n;
 	int        req_n;
-	bool       is_grayscale = false;
-	FBInkColor color        = { 0U };
+	bool       fb_is_grayscale = false;
+	bool       img_has_alpha   = false;
+	FBInkColor color           = { 0U };
 	// Let stb handle grayscaling for us
 	switch (vinfo.bits_per_pixel) {
 		case 4U:
 		case 8U:
-			req_n        = 1 + !fbink_config->ignore_alpha;
-			is_grayscale = true;
+			req_n           = 1 + !fbink_config->ignore_alpha;
+			fb_is_grayscale = true;
 			break;
 		case 16U:
 		case 24U:
 		case 32U:
 		default:
-			req_n        = 3 + !fbink_config->ignore_alpha;
-			is_grayscale = false;
+			req_n           = 3 + !fbink_config->ignore_alpha;
+			fb_is_grayscale = false;
 			break;
 	}
 
@@ -1925,6 +1926,7 @@ int
 	    h);
 	// Warn if there's an alpha channel, because it's much more expensive to handle...
 	if (n == 2 || n == 4) {
+		img_has_alpha = true;
 		if (fbink_config->ignore_alpha) {
 			LOG("Ignoring the image's alpha channel.");
 		} else {
@@ -1950,8 +1952,8 @@ int
 	// NOTE: The slight duplication is on purpose, to move the branching outside the loop.
 	//       And since we can easily do so from here,
 	//       we also entirely avoid trying to plot off-screen pixels (on any sides).
-	if (is_grayscale) {
-		if (!fbink_config->ignore_alpha && (n == 2 || n == 4)) {
+	if (fb_is_grayscale) {
+		if (!fbink_config->ignore_alpha && img_has_alpha) {
 			// There's an alpha channel in the image, we'll have to do Alpha blending...
 			// c.f., https://en.wikipedia.org/wiki/Alpha_compositing
 			//       https://blogs.msdn.microsoft.com/shawnhar/2009/11/06/premultiplied-alpha/
@@ -1990,7 +1992,7 @@ int
 			}
 		}
 	} else {
-		if (!fbink_config->ignore_alpha && (n == 2 || n == 4)) {
+		if (!fbink_config->ignore_alpha && img_has_alpha) {
 			FBInkColor bg_color  = { 0U };
 			FBInkColor img_color = { 0U };
 			uint8_t    alpha     = 0U;
