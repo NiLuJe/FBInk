@@ -32,9 +32,13 @@ we *attempt* to compensate for this, as we can legitimately be used before Nicke
 
 # How does it look?
 
-Like this :).
+Like this for its text printing facilities :).
 
 ![FBInk on a Kobo H2O](https://raw.githubusercontent.com/NiLuJe/FBInk/master/fbink_readme.png)
+
+And like this when displaying an image :).
+
+![FBInk 1.2.0 on a Kobo H2O](https://raw.githubusercontent.com/NiLuJe/FBInk/master/fbink_image.png)
 
 # NOTES
 
