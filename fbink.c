@@ -71,68 +71,67 @@ const char*
 
 // Helper function to 'plot' a pixel in given color
 static void
-    put_pixel_Gray4(FBInkCoordinates* coords, unsigned short int v)
+    put_pixel_Gray4(FBInkCoordinates* coords, uint8_t v)
 {
 	// calculate the pixel's byte offset inside the buffer
 	size_t pix_offset = coords->x / 2 + coords->y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((unsigned char*) (g_fbink_fbp + pix_offset)) = (unsigned char) v;
+	*((unsigned char*) (g_fbink_fbp + pix_offset)) = v;
 }
 
 static void
-    put_pixel_Gray8(FBInkCoordinates* coords, unsigned short int v)
+    put_pixel_Gray8(FBInkCoordinates* coords, uint8_t v)
 {
 	// calculate the pixel's byte offset inside the buffer
 	size_t pix_offset = coords->x + coords->y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((unsigned char*) (g_fbink_fbp + pix_offset)) = (unsigned char) v;
+	*((unsigned char*) (g_fbink_fbp + pix_offset)) = v;
 }
 
 static void
-    put_pixel_RGB24(FBInkCoordinates* coords, unsigned short int r, unsigned short int g, unsigned short int b)
+    put_pixel_RGB24(FBInkCoordinates* coords, uint8_t r, uint8_t g, uint8_t b)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 3 as every pixel is 3 consecutive bytes
 	size_t pix_offset = coords->x * 3U + coords->y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((unsigned char*) (g_fbink_fbp + pix_offset))     = (unsigned char) b;
-	*((unsigned char*) (g_fbink_fbp + pix_offset + 1)) = (unsigned char) g;
-	*((unsigned char*) (g_fbink_fbp + pix_offset + 2)) = (unsigned char) r;
+	*((unsigned char*) (g_fbink_fbp + pix_offset))     = b;
+	*((unsigned char*) (g_fbink_fbp + pix_offset + 1)) = g;
+	*((unsigned char*) (g_fbink_fbp + pix_offset + 2)) = r;
 }
 
 static void
-    put_pixel_RGB32(FBInkCoordinates* coords, unsigned short int r, unsigned short int g, unsigned short int b)
+    put_pixel_RGB32(FBInkCoordinates* coords, uint8_t r, uint8_t g, uint8_t b)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 4 as every pixel is 4 consecutive bytes
 	size_t pix_offset = coords->x * 4U + coords->y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((unsigned char*) (g_fbink_fbp + pix_offset))     = (unsigned char) b;
-	*((unsigned char*) (g_fbink_fbp + pix_offset + 1)) = (unsigned char) g;
-	*((unsigned char*) (g_fbink_fbp + pix_offset + 2)) = (unsigned char) r;
+	*((unsigned char*) (g_fbink_fbp + pix_offset))     = b;
+	*((unsigned char*) (g_fbink_fbp + pix_offset + 1)) = g;
+	*((unsigned char*) (g_fbink_fbp + pix_offset + 2)) = r;
 	// Opaque, always. Note that everything is rendered as opaque, no matter what.
 	// But at least this way we ensure fb grabs are consistent with what's seen on screen.
 	*((unsigned char*) (g_fbink_fbp + pix_offset + 3)) = 0xFF;
 }
 
 static void
-    put_pixel_RGB565(FBInkCoordinates* coords, unsigned short int r, unsigned short int g, unsigned short int b)
+    put_pixel_RGB565(FBInkCoordinates* coords, uint8_t r, uint8_t g, uint8_t b)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 2 as every pixel is 2 consecutive bytes
 	size_t pix_offset = coords->x * 2U + coords->y * finfo.line_length;
 
-#pragma GCC diagnostic push
 	// now this is about the same as 'fbp[pix_offset] = value'
 	// but a bit more complicated for RGB565
-#pragma GCC diagnostic ignored "-Wconversion"
-	unsigned short int c = ((r / 8U) << 11U) + ((g / 4U) << 5U) + (b / 8U);
+	unsigned short int c = (unsigned short int) (((r / 8U) << 11U) + ((g / 4U) << 5U) + (b / 8U));
 	// or: c = ((r / 8) * 2048) + ((g / 4) * 32) + (b / 8);
 	// write 'two bytes at once', much to GCC's dismay...
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
 	*((unsigned short int*) (g_fbink_fbp + pix_offset)) = c;
 #pragma GCC diagnostic pop
@@ -260,7 +259,7 @@ static void
 
 // Helper function to clear the screen - fill whole screen with given color
 static void
-    clear_screen(unsigned short int v)
+    clear_screen(uint8_t v)
 {
 	memset(g_fbink_fbp, v, finfo.smem_len);
 }
@@ -1823,7 +1822,7 @@ int
 	if (req_n == 1) {
 		for (j = img_y_off; j < max_height; j++) {
 			for (i = img_x_off; i < max_width; i++) {
-				color.r = (unsigned short int) (data[(j * w) + i] ^ invert);
+				color.r = (uint8_t) (data[(j * w) + i] ^ invert);
 				// NOTE: We'll never access those two at this bpp, so we don't even need to set them ;).
 				/*
 				color.g = color.r;
@@ -1835,9 +1834,9 @@ int
 	} else {
 		for (j = img_y_off; j < max_height; j++) {
 			for (i = img_x_off; i < max_width; i++) {
-				color.r = (unsigned short int) (data[(j * req_n * w) + (i * req_n) + 0] ^ invert);
-				color.g = (unsigned short int) (data[(j * req_n * w) + (i * req_n) + 1] ^ invert);
-				color.b = (unsigned short int) (data[(j * req_n * w) + (i * req_n) + 2] ^ invert);
+				color.r = (uint8_t) (data[(j * req_n * w) + (i * req_n) + 0] ^ invert);
+				color.g = (uint8_t) (data[(j * req_n * w) + (i * req_n) + 1] ^ invert);
+				color.b = (uint8_t) (data[(j * req_n * w) + (i * req_n) + 2] ^ invert);
 				put_pixel((unsigned short int) (i + x_off), (unsigned short int) (j + y_off), &color);
 			}
 		}

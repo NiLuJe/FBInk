@@ -175,15 +175,15 @@ FBInkDeviceQuirks deviceQuirks = { 0 };
 
 static void rotate_coordinates(FBInkCoordinates*);
 
-static void put_pixel_Gray4(FBInkCoordinates*, unsigned short int);
-static void put_pixel_Gray8(FBInkCoordinates*, unsigned short int);
-static void put_pixel_RGB24(FBInkCoordinates*, unsigned short int, unsigned short int, unsigned short int);
-static void put_pixel_RGB32(FBInkCoordinates*, unsigned short int, unsigned short int, unsigned short int);
-static void put_pixel_RGB565(FBInkCoordinates*, unsigned short int, unsigned short int, unsigned short int);
+static void put_pixel_Gray4(FBInkCoordinates*, uint8_t);
+static void put_pixel_Gray8(FBInkCoordinates*, uint8_t);
+static void put_pixel_RGB24(FBInkCoordinates*, uint8_t, uint8_t, uint8_t);
+static void put_pixel_RGB32(FBInkCoordinates*, uint8_t, uint8_t, uint8_t);
+static void put_pixel_RGB565(FBInkCoordinates*, uint8_t, uint8_t, uint8_t);
 static void put_pixel(unsigned short int, unsigned short int, FBInkColor*);
 
 static void fill_rect(unsigned short int, unsigned short int, unsigned short int, unsigned short int, FBInkColor*);
-static void clear_screen(unsigned short int);
+static void clear_screen(uint8_t);
 
 static const unsigned char* font8x8_get_bitmap(uint32_t);
 static void                 font8x8_render(uint32_t, unsigned char*, unsigned short int UNUSED_BY_MINIMAL);

@@ -22,6 +22,7 @@
 #define __FBINK_TYPES_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 // default eInk framebuffer palette
 // c.f., linux/drivers/video/mxc/cmap_lab126.h
@@ -90,9 +91,9 @@ typedef struct
 // NOTE: For grayscale, r = g = b (= v), so we assume v is r for simplicity's sake.
 typedef struct
 {
-	unsigned short int r;
-	unsigned short int g;
-	unsigned short int b;
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
 } FBInkColor;
 
 #endif
