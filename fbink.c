@@ -255,33 +255,21 @@ static void
 	// calculate the pixel's byte offset inside the buffer
 	size_t pix_offset = (coords->x >> 1) + (coords->y * finfo.line_length);
 
+	//color->r = *((unsigned char*) (g_fbink_fbp + pix_offset));
 
 	uint8_t a = *((unsigned char*) (g_fbink_fbp + pix_offset));
 	uint8_t v;
 	uint8_t u;
 	uint8_t l;
 
-	/*
-	u = ((v & 0xF0) | ((v & 0xF0) >> 4));
-	l = ((v & 0x0F) << 4);
-	*/
-
 	v = a & 0xF0;
-	//u = v + (v >> 4);
 	u = v | (v >> 4);
 
 	l = (a & 0x0F) * 0x11;
 
-	//LOG("(%hu, %hu): a: %hhu (u: %hhu & l: %hhu) & r: %hhu @ %#zx", coords->x, coords->y, a, u, l, color->r, pix_offset);
-	//color->r = *((unsigned char*) (g_fbink_fbp + pix_offset));
-
 	if ((coords->x & 0x01) == 0) {
-		// v = *((unsigned char*) (g_fbink_fbp + pix_offset)) & 0xF0;
-		//color->r = (v | (v >> 4));
 		color->r = u;
 	} else {
-		// v = color->r & 0x0F;
-		//color->r |= v * 0x11;
 		color->r |= l;
 	}
 }
@@ -2005,13 +1993,8 @@ int
 					img_color.r = (uint8_t)(data[pix_offset + 0] ^ invert);
 					alpha       = (uint8_t)(data[pix_offset + 1]);
 					// Blend it!
-					if ((px & 0x01) == 0) {
-						color.r =
-						    (uint8_t) DIV255(((img_color.r * alpha) + (bg_color.r * (0xFF - alpha))));
-					} else {
-						color.r =
-						    (uint8_t) DIV255(((img_color.r * alpha) + (bg_color.r * (0xFF - alpha))));
-					}
+					color.r =
+					    (uint8_t) DIV255(((img_color.r * alpha) + (bg_color.r * (0xFF - alpha))));
 
 					put_pixel(px, py, &color);
 				}
