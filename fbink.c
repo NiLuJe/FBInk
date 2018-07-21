@@ -74,10 +74,42 @@ static void
     put_pixel_Gray4(FBInkCoordinates* coords, uint8_t v)
 {
 	// calculate the pixel's byte offset inside the buffer
-	size_t pix_offset = coords->x / 2 + coords->y * finfo.line_length;
+	size_t pix_offset = (coords->x / 2) + (coords->y * finfo.line_length);
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((unsigned char*) (g_fbink_fbp + pix_offset)) = v;
+	uint8_t u;
+	uint8_t l;
+
+	//if ((coords->x & 0x01) == 0) {
+//		u = v & 0xF0;
+//		u = (u | (u >> 4));
+//		*((unsigned char*) (g_fbink_fbp + pix_offset)) = u;
+	//} else {
+//		l = v & 0x0F;
+//		l = l * 0x11;
+//		*((unsigned char*) (g_fbink_fbp + pix_offset + 1)) = l;
+	//}
+
+	//if ((coords->x & 0x01) == 0) {
+		u = v & 0xF0;
+		u |= v >> 4 & 0x0F;
+		//u |= u >> 4 & 0x0F;
+		//*((unsigned char*) (g_fbink_fbp + pix_offset)) = u;
+	//} else {
+		l = v & 0x0F;
+		l |= v << 4 & 0xF0;
+		//l |= l << 4 & 0xF0;
+		//*((unsigned char*) (g_fbink_fbp + pix_offset + 1)) = l;
+	//}
+
+	u = (v & 0xF0);
+	l = (v >> 4);
+	if ((coords->x & 0x01) == 0) {
+		*((unsigned char*) (g_fbink_fbp + pix_offset)) = u;
+	} else {
+		*((unsigned char*) (g_fbink_fbp + pix_offset)) |= l;
+	}
+	LOG("(%hu, %hu): v: %hhu (u: %hhu & l: %hhu) @ %#zx", coords->x, coords->y, v, u, l, pix_offset);
 }
 
 static void
