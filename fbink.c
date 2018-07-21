@@ -255,14 +255,16 @@ static void
 	// calculate the pixel's byte offset inside the buffer
 	size_t pix_offset = (coords->x >> 1) + (coords->y * finfo.line_length);
 
+	// NOTE: This one is not quite right, but this 4bpp mess is driving me crazy, so, meh.
+	//       (It decimates half of the vertical resolution of the background seen through transparent parts).
 	uint8_t a = *((unsigned char*) (g_fbink_fbp + pix_offset));
 
 	if ((coords->x & 0x01) == 0) {
 		uint8_t v = (a & 0xF0);
 		uint8_t u = (v | (v >> 4));
-		color->r = u;
+		color->r  = u;
 	} else {
-		uint8_t l = (uint8_t) ((a & 0x0F) * 0x11);
+		uint8_t l = (uint8_t)((a & 0x0F) * 0x11);
 		color->r |= l;
 	}
 }
