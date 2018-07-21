@@ -40,7 +40,7 @@ And like this when displaying an image :).
 
 ![FBInk 1.2.0 on a Kobo H2O](https://raw.githubusercontent.com/NiLuJe/FBInk/master/fbink_image.png)
 
-And with all the bells of whistles of working transparency, even on ancient hardware :).
+And with all the bells and whistles of working transparency, even on ancient hardware :).
 
 ![FBInk 1.2.5 on a Kindle 3](https://raw.githubusercontent.com/NiLuJe/FBInk/master/fbink_alpha.png)
 
