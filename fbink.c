@@ -1985,6 +1985,7 @@ int
 					py = (unsigned short int) (j + y_off);
 					get_pixel(px, py, &bg_color);
 
+					// NOTE: In this branch, req_n == 2, so we can do j << 1 instead of j * 2 ;).
 					pix_offset  = (size_t)(((j << 1U) * w) + (i << 1U));
 					img_color.r = (uint8_t)(data[pix_offset + 0] ^ invert);
 					alpha       = (uint8_t)(data[pix_offset + 1]);
@@ -1998,6 +1999,7 @@ int
 		} else {
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
+					// NOTE: Here, req_n is either 2, or 1 if ignore_alpha, so, no shift trickery ;)
 					pix_offset = (size_t)((j * req_n * w) + (i * req_n));
 					color.r    = (uint8_t)(data[pix_offset] ^ invert);
 					// NOTE: We'll never access those two at this bpp, so we don't even need to set them ;).
@@ -2022,6 +2024,7 @@ int
 					py = (unsigned short int) (j + y_off);
 					get_pixel(px, py, &bg_color);
 
+					// NOTE: In this branch, req_n == 4, so we can do j << 2 instead of j * 4 ;).
 					pix_offset  = (size_t)(((j << 2U) * w) + (i << 2U));
 					img_color.r = (uint8_t)(data[pix_offset + 0] ^ invert);
 					img_color.g = (uint8_t)(data[pix_offset + 1] ^ invert);
@@ -2041,6 +2044,7 @@ int
 		} else {
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
+					// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
 					pix_offset = (size_t)((j * req_n * w) + (i * req_n));
 					color.r    = (uint8_t)(data[pix_offset + 0] ^ invert);
 					color.g    = (uint8_t)(data[pix_offset + 1] ^ invert);
