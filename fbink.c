@@ -283,9 +283,12 @@ static void
 		uint8_t v = (b & 0xF0);
 		color->r  = (v | (v >> 4U));
 		*/
+		// We need to get the low nibble *now*, before it gets clobbered by our alpha-blending put...
+
+		color->b = (uint8_t)(((b) &0x0F) * 0x11);
 	} else {
 		// Odd pixel: low nibble
-		color->r |= (uint8_t)(((b) &0x0F) * 0x11);
+		color->r = color->b;
 		// or: pull the low/right nibble, expanded to 8bit
 	}
 }
