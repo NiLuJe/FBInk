@@ -1998,7 +1998,7 @@ int
 	//       we also entirely avoid trying to plot off-screen pixels (on any sides).
 	if (fb_is_grayscale) {
 		if (!fbink_config->ignore_alpha && img_has_alpha) {
-			// There's an alpha channel in the image, we'll have to do Alpha blending...
+			// There's an alpha channel in the image, we'll have to do alpha blending...
 			// c.f., https://en.wikipedia.org/wiki/Alpha_compositing
 			//       https://blogs.msdn.microsoft.com/shawnhar/2009/11/06/premultiplied-alpha/
 			FBInkColor bg_color  = { 0U };
@@ -2011,7 +2011,7 @@ int
 					py = (unsigned short int) (j + y_off);
 					get_pixel(px, py, &bg_color);
 
-					// NOTE: In this branch, req_n == 2, so we can do j << 1 instead of j * 2 ;).
+					// NOTE: In this branch, req_n == 2, so we can do << 1 instead of * 2 ;).
 					pix_offset  = (size_t)(((j << 1U) * w) + (i << 1U));
 					img_color.r = (uint8_t)(data[pix_offset + 0] ^ invert);
 					alpha       = (uint8_t)(data[pix_offset + 1]);
@@ -2028,7 +2028,8 @@ int
 					// NOTE: Here, req_n is either 2, or 1 if ignore_alpha, so, no shift trickery ;)
 					pix_offset = (size_t)((j * req_n * w) + (i * req_n));
 					color.r    = (uint8_t)(data[pix_offset] ^ invert);
-					// NOTE: We'll never access those two at this bpp, so we don't even need to set them ;).
+					// NOTE: We'll never access those two at this bpp,
+					//       so we don't even need to set them ;).
 					/*
 					color.g = color.r;
 					color.b = color.r;
@@ -2050,7 +2051,7 @@ int
 					py = (unsigned short int) (j + y_off);
 					get_pixel(px, py, &bg_color);
 
-					// NOTE: In this branch, req_n == 4, so we can do j << 2 instead of j * 4 ;).
+					// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
 					pix_offset  = (size_t)(((j << 2U) * w) + (i << 2U));
 					img_color.r = (uint8_t)(data[pix_offset + 0] ^ invert);
 					img_color.g = (uint8_t)(data[pix_offset + 1] ^ invert);
