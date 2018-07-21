@@ -264,10 +264,6 @@ static void
 static void
     get_pixel_Gray4(FBInkCoordinates* coords, FBInkColor* color)
 {
-	// calculate the pixel's byte offset inside the buffer
-	// note: x / 2 as every byte holds 2 pixels
-	size_t pix_offset = (coords->x >> 1U) + (coords->y * finfo.line_length);
-
 	// NOTE: Expand 4bpp to 8bpp:
 	// (v * 0x11)
 	// Byte to nibble (c.f., https://en.wikipedia.org/wiki/Nibble)
@@ -276,9 +272,12 @@ static void
 	// Lo:
 	// ((b) & 0x0F)
 
-	uint8_t b = *((unsigned char*) (g_fbink_fbp + pix_offset));
-
 	if ((coords->x & 0x01) == 0) {
+		// calculate the pixel's byte offset inside the buffer
+		// note: x / 2 as every byte holds 2 pixels
+		size_t  pix_offset = (coords->x >> 1U) + (coords->y * finfo.line_length);
+		uint8_t b          = *((unsigned char*) (g_fbink_fbp + pix_offset));
+
 		// Even pixel: high nibble
 		uint8_t v = (b & 0xF0);
 		color->r  = (v | (v >> 4U));
