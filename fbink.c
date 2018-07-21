@@ -83,6 +83,7 @@ static void
 	if ((coords->x & 0x01) == 0) {
 		// Even pixel: high nibble
 		*((unsigned char*) (g_fbink_fbp + pix_offset)) = (v & 0xF0);
+		// Squash to 4bpp, and write to the top/left nibble
 		// or: ((v >> 4) << 4)
 	} else {
 		// Odd pixel: low nibble
@@ -258,6 +259,8 @@ static void
 // Helper functions to 'get' a specific pixel's color from the framebuffer
 // c.f., FBGrab convert* functions
 //       (http://trac.ak-team.com/trac/browser/niluje/Configs/trunk/Kindle/Misc/FBGrab/fbgrab.c#L402)
+// as well as KOReader's routines
+//       (https://github.com/koreader/koreader-base/blob/b3e72affd0e1ba819d92194b229468452c58836f/ffi/blitbuffer.lua#L292)
 static void
     get_pixel_Gray4(FBInkCoordinates* coords, FBInkColor* color)
 {
@@ -277,19 +280,19 @@ static void
 
 	if ((coords->x & 0x01) == 0) {
 		// Even pixel: high nibble
-		color->r = (uint8_t)((((b) >> 4) & 0x0F) * 0x11);
-		// or: pull the top/left nibble, expanded to 8bit
-		/*
 		uint8_t v = (b & 0xF0);
 		color->r  = (v | (v >> 4U));
-		*/
-		// We need to get the low nibble *now*, before it gets clobbered by our alpha-blending put...
+		// pull the top/left nibble, expanded to 8bit
+		// or: (uint8_t)((((b) >> 4) & 0x0F) * 0x11);
 
-		color->b = (uint8_t)(((b) &0x0F) * 0x11);
+		// We need to get the low nibble *now*, before it gets clobbered by our alpha-blending put...
+		// Thankfully, we have two empty channels in our color struct that we can use ;).
+		color->g = (uint8_t)(((b) &0x0F) * 0x11);
+		// or: pull the low/right nibble, expanded to 8bit
 	} else {
 		// Odd pixel: low nibble
-		color->r = color->b;
-		// or: pull the low/right nibble, expanded to 8bit
+		// We just have to point to what we got during the even pixel pass ;).
+		color->r = color->g;
 	}
 }
 

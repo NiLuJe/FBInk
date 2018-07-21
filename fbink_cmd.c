@@ -123,9 +123,6 @@ static void
 	    "\t\tNote that, in some cases, exotic encoding settings may not be supported.\n"
 	    "\t\tTransparency is supported, but it's slower (because we need to do alpha blending).\n"
 	    "\t\t\tYou can use the -a, --flatten flag to avoid the performance penalty by always ignoring alpha.\n"
-#	ifdef FBINK_FOR_LEGACY
-	    "\t\t\tAlpha blending is currently slightly flawed on legacy devices with a 4bpp framebuffer.\n"
-#	endif
 	    "\t\tAs an additional quirk, you can't pass paths with commas in it to file. Pass those to the -i, --img flag instead.\n"
 	    "\tThis honors --flash, as well as --clear & --invert\n"
 	    "\t\tNote that this also honors --col & --row (taking --size into account), in addition to the coordinates you specify.\n"
