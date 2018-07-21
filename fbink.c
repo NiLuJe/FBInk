@@ -72,13 +72,13 @@ static void
     put_pixel_Gray4(FBInkCoordinates* coords, uint8_t v)
 {
 	// calculate the pixel's byte offset inside the buffer
-	size_t pix_offset = (coords->x >> 1) + (coords->y * finfo.line_length);
+	size_t pix_offset = (coords->x >> 1U) + (coords->y * finfo.line_length);
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	if ((coords->x & 0x01) == 0) {
 		*((unsigned char*) (g_fbink_fbp + pix_offset)) = (v & 0xF0);
 	} else {
-		*((unsigned char*) (g_fbink_fbp + pix_offset)) |= (v >> 4);
+		*((unsigned char*) (g_fbink_fbp + pix_offset)) |= (v >> 4U);
 	}
 }
 
@@ -110,7 +110,7 @@ static void
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 4 as every pixel is 4 consecutive bytes
-	size_t pix_offset = coords->x * 4U + coords->y * finfo.line_length;
+	size_t pix_offset = (coords->x << 2U) + (coords->y * finfo.line_length);
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	*((unsigned char*) (g_fbink_fbp + pix_offset))     = b;
@@ -126,11 +126,11 @@ static void
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 2 as every pixel is 2 consecutive bytes
-	size_t pix_offset = coords->x * 2U + coords->y * finfo.line_length;
+	size_t pix_offset = (coords->x << 1U) + (coords->y * finfo.line_length);
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	// but a bit more complicated for RGB565
-	uint16_t c = (uint16_t)(((r / 8U) << 11U) + ((g / 4U) << 5U) + (b / 8U));
+	uint16_t c = (uint16_t)(((r >> 3U) << 11U) + ((g >> 2U) << 5U) + (b >> 3U));
 	// or: c = ((r / 8) * 2048) + ((g / 4) * 32) + (b / 8);
 	// write 'two bytes at once', much to GCC's dismay...
 #pragma GCC diagnostic push
@@ -253,7 +253,7 @@ static void
     get_pixel_Gray4(FBInkCoordinates* coords, FBInkColor* color)
 {
 	// calculate the pixel's byte offset inside the buffer
-	size_t pix_offset = (coords->x >> 1) + (coords->y * finfo.line_length);
+	size_t pix_offset = (coords->x >> 1U) + (coords->y * finfo.line_length);
 
 	// NOTE: This one is not quite right, but this 4bpp mess is driving me crazy, so, meh.
 	//       (It decimates half of the vertical resolution of the background seen through transparent parts).
@@ -261,7 +261,7 @@ static void
 
 	if ((coords->x & 0x01) == 0) {
 		uint8_t v = (a & 0xF0);
-		uint8_t u = (v | (v >> 4));
+		uint8_t u = (v | (v >> 4U));
 		color->r  = u;
 	} else {
 		uint8_t l = (uint8_t)((a & 0x0F) * 0x11);
@@ -295,7 +295,7 @@ static void
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 4 as every pixel is 4 consecutive bytes
-	size_t pix_offset = coords->x * 4U + coords->y * finfo.line_length;
+	size_t pix_offset = (coords->x << 2U) + (coords->y * finfo.line_length);
 
 	color->b = *((unsigned char*) (g_fbink_fbp + pix_offset));
 	color->g = *((unsigned char*) (g_fbink_fbp + pix_offset + 1));
@@ -309,7 +309,7 @@ static void
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 2 as every pixel is 2 consecutive bytes
-	size_t pix_offset = coords->x * 2U + coords->y * finfo.line_length;
+	size_t pix_offset = (coords->x << 1U) + (coords->y * finfo.line_length);
 
 	uint16_t    v;
 	uint16_t    b;
@@ -321,11 +321,11 @@ static void
 #	pragma GCC diagnostic pop
 
 	b        = (v & 0x001F);
-	color->b = (uint8_t)((b << 3) + (b >> 2));
-	g        = ((v >> 5) & 0x3F);
-	color->g = (uint8_t)((g << 2) + (g >> 4));
-	r        = (v >> 11);
-	color->r = (uint8_t)((r << 3) + (r >> 2));
+	color->b = (uint8_t)((b << 3U) + (b >> 2U));
+	g        = ((v >> 5U) & 0x3F);
+	color->g = (uint8_t)((g << 2U) + (g >> 4U));
+	r        = (v >> 11U);
+	color->r = (uint8_t)((r << 3U) + (r >> 2U));
 }
 
 // Handle various bpp...
@@ -1149,7 +1149,7 @@ int
 		//       we attempt to handle this rotation properly, much like KOReader does.
 		//       c.f., https://github.com/koreader/koreader/blob/master/frontend/device/kobo/device.lua#L32-L33
 		//           & https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer.lua#L74-L84
-		if (vinfo.bits_per_pixel == 16) {
+		if (vinfo.bits_per_pixel == 16U) {
 			// Correct viewWidth & viewHeight, so we do all our row/column arithmetics on the right values...
 			viewWidth                      = vinfo.yres;
 			viewHeight                     = vinfo.xres;
@@ -1985,7 +1985,7 @@ int
 					py = (unsigned short int) (j + y_off);
 					get_pixel(px, py, &bg_color);
 
-					pix_offset  = (size_t)((j * req_n * w) + (i * req_n));
+					pix_offset  = (size_t)(((j << 1U) * w) + (i << 1U));
 					img_color.r = (uint8_t)(data[pix_offset + 0] ^ invert);
 					alpha       = (uint8_t)(data[pix_offset + 1]);
 					// Blend it!
@@ -2022,7 +2022,7 @@ int
 					py = (unsigned short int) (j + y_off);
 					get_pixel(px, py, &bg_color);
 
-					pix_offset  = (size_t)((j * req_n * w) + (i * req_n));
+					pix_offset  = (size_t)(((j << 2U) * w) + (i << 2U));
 					img_color.r = (uint8_t)(data[pix_offset + 0] ^ invert);
 					img_color.g = (uint8_t)(data[pix_offset + 1] ^ invert);
 					img_color.b = (uint8_t)(data[pix_offset + 2] ^ invert);
