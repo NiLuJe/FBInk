@@ -255,8 +255,6 @@ static void
 	// calculate the pixel's byte offset inside the buffer
 	size_t pix_offset = (coords->x >> 1) + (coords->y * finfo.line_length);
 
-	//color->r = *((unsigned char*) (g_fbink_fbp + pix_offset));
-
 	uint8_t a = *((unsigned char*) (g_fbink_fbp + pix_offset));
 	uint8_t v;
 	uint8_t u;
@@ -264,6 +262,7 @@ static void
 
 	v = a & 0xF0;
 	u = v | (v >> 4);
+	//u = v + (v >> 4);
 
 	l = (a & 0x0F) * 0x11;
 
