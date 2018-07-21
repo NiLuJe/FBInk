@@ -75,10 +75,18 @@ static void
 	// note: x / 2 as every byte holds 2 pixels
 	size_t pix_offset = (coords->x >> 1U) + (coords->y * finfo.line_length);
 
-	// now this is about the same as 'fbp[pix_offset] = value'
+	// NOTE: Squash 8bpp to 4bpp:
+	// (v >> 4)
+	// or: v * 16 / 256
+
+	// We can't address nibbles directly, so this takes some shenanigans...
 	if ((coords->x & 0x01) == 0) {
+		// Even pixel: high nibble
 		*((unsigned char*) (g_fbink_fbp + pix_offset)) = (v & 0xF0);
+		// or: ((v >> 4) << 4)
 	} else {
+		// Odd pixel: low nibble
+		// ORed to avoid clobbering our even pixel
 		*((unsigned char*) (g_fbink_fbp + pix_offset)) |= (v >> 4U);
 	}
 }
@@ -257,19 +265,28 @@ static void
 	// note: x / 2 as every byte holds 2 pixels
 	size_t pix_offset = (coords->x >> 1U) + (coords->y * finfo.line_length);
 
-	// NOTE: This one is not quite right, but this 4bpp mess is driving me crazy, so, meh.
-	//       (After alpha blending,
-	//       half of the horizontal resolution of the background, when seen through transparent parts,
-	//       gets decimated -> aliasing).
-	uint8_t a = *((unsigned char*) (g_fbink_fbp + pix_offset));
+	// NOTE: Expand 4bpp to 8bpp:
+	// (v * 0x11)
+	// Byte to nibble (c.f., https://en.wikipedia.org/wiki/Nibble)
+	// Hi:
+	// (((b) >> 4) & 0x0F)
+	// Lo:
+	// ((b) & 0x0F)
+
+	uint8_t b = *((unsigned char*) (g_fbink_fbp + pix_offset));
 
 	if ((coords->x & 0x01) == 0) {
-		uint8_t v = (a & 0xF0);
-		uint8_t u = (v | (v >> 4U));
-		color->r  = u;
+		// Even pixel: high nibble
+		color->r = (uint8_t)((((b) >> 4) & 0x0F) * 0x11);
+		// or: pull the top/left nibble, expanded to 8bit
+		/*
+		uint8_t v = (b & 0xF0);
+		color->r  = (v | (v >> 4U));
+		*/
 	} else {
-		uint8_t l = (uint8_t)((a & 0x0F) * 0x11);
-		color->r |= l;
+		// Odd pixel: low nibble
+		color->r |= (uint8_t)(((b) &0x0F) * 0x11);
+		// or: pull the low/right nibble, expanded to 8bit
 	}
 }
 
