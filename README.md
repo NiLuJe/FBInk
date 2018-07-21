@@ -40,6 +40,10 @@ And like this when displaying an image :).
 
 ![FBInk 1.2.0 on a Kobo H2O](https://raw.githubusercontent.com/NiLuJe/FBInk/master/fbink_image.png)
 
+And with all the bells of whistles of working transparency, even on ancient hardware :).
+
+![FBInk 1.2.5 on a Kindle 3](https://raw.githubusercontent.com/NiLuJe/FBInk/master/fbink_alpha.png)
+
 # NOTES
 
 Kindle support is split into Touch devices, and legacy devices (up to, and *including* the K4). This is because older devices use a completely different eInk controller.
