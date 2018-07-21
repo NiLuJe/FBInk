@@ -67,7 +67,7 @@ const char*
 	return FBINK_VERSION;
 }
 
-// Helper functions to 'plot' a pixel in given color
+// Helper functions to 'plot' a specific pixel in a given color to the framebuffer
 static void
     put_pixel_Gray4(FBInkCoordinates* coords, uint8_t v)
 {
@@ -130,12 +130,12 @@ static void
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	// but a bit more complicated for RGB565
-	unsigned short int c = (unsigned short int) (((r / 8U) << 11U) + ((g / 4U) << 5U) + (b / 8U));
+	uint16_t c = (uint16_t)(((r / 8U) << 11U) + ((g / 4U) << 5U) + (b / 8U));
 	// or: c = ((r / 8) * 2048) + ((g / 4) * 32) + (b / 8);
 	// write 'two bytes at once', much to GCC's dismay...
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
-	*((unsigned short int*) (g_fbink_fbp + pix_offset)) = c;
+	*((uint16_t*) (g_fbink_fbp + pix_offset)) = c;
 #pragma GCC diagnostic pop
 }
 
@@ -213,7 +213,7 @@ static void
 #ifdef DEBUG
 		// NOTE: This is only enabled in Debug builds because it can be pretty verbose,
 		//       and does not necessarily indicate an actual issue, as we've just explained...
-		LOG("Discarding off-screen pixel @ (%hu, %hu) (out of %ux%u bounds)",
+		LOG("Put: discarding off-screen pixel @ (%hu, %hu) (out of %ux%u bounds)",
 		    coords.x,
 		    coords.y,
 		    vinfo.xres,
@@ -246,7 +246,7 @@ static void
 }
 
 #ifdef FBINK_WITH_IMAGE
-// Helper functions to 'get' a specific pixel's color
+// Helper functions to 'get' a specific pixel's color from the framebuffer
 // c.f., FBGrab convert* functions
 //       (http://trac.ak-team.com/trac/browser/niluje/Configs/trunk/Kindle/Misc/FBGrab/fbgrab.c#L402)
 static void
@@ -320,11 +320,11 @@ static void
 	v = *((uint16_t*) (g_fbink_fbp + pix_offset));
 #	pragma GCC diagnostic pop
 
-	b        = v & 0x001F;
+	b        = (v & 0x001F);
 	color->b = (uint8_t)((b << 3) + (b >> 2));
-	g        = (v >> 5) & 0x3F;
+	g        = ((v >> 5) & 0x3F);
 	color->g = (uint8_t)((g << 2) + (g >> 4));
-	r        = (uint16_t)(v >> 11);
+	r        = (v >> 11);
 	color->r = (uint8_t)((r << 3) + (r >> 2));
 }
 
@@ -343,7 +343,7 @@ static void
 #	ifdef DEBUG
 		// NOTE: This is only enabled in Debug builds because it can be pretty verbose,
 		//       and does not necessarily indicate an actual issue, as we've just explained...
-		LOG("Discarding off-screen pixel @ (%hu, %hu) (out of %ux%u bounds)",
+		LOG("Get: discarding off-screen pixel @ (%hu, %hu) (out of %ux%u bounds)",
 		    coords.x,
 		    coords.y,
 		    vinfo.xres,
@@ -417,6 +417,7 @@ static const unsigned char*
 	} else if (codepoint >= 0x3040 && codepoint <= 0x309F) {
 		return font8x8_hiragana[codepoint - 0x3040];
 	} else {
+		// NOTE: Print a blank space for unknown codepoints
 		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by this font!\n", codepoint);
 		return font8x8_basic[0];
 	}
