@@ -258,7 +258,9 @@ static void
 	size_t pix_offset = (coords->x >> 1U) + (coords->y * finfo.line_length);
 
 	// NOTE: This one is not quite right, but this 4bpp mess is driving me crazy, so, meh.
-	//       (It decimates half of the vertical resolution of the background seen through transparent parts).
+	//       (After alpha blending,
+	//       half of the horizontal resolution of the background, when seen through transparent parts,
+	//       gets decimated -> aliasing).
 	uint8_t a = *((unsigned char*) (g_fbink_fbp + pix_offset));
 
 	if ((coords->x & 0x01) == 0) {
