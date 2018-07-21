@@ -72,6 +72,7 @@ static void
     put_pixel_Gray4(FBInkCoordinates* coords, uint8_t v)
 {
 	// calculate the pixel's byte offset inside the buffer
+	// note: x / 2 as every byte holds 2 pixels
 	size_t pix_offset = (coords->x >> 1U) + (coords->y * finfo.line_length);
 
 	// now this is about the same as 'fbp[pix_offset] = value'
@@ -253,6 +254,7 @@ static void
     get_pixel_Gray4(FBInkCoordinates* coords, FBInkColor* color)
 {
 	// calculate the pixel's byte offset inside the buffer
+	// note: x / 2 as every byte holds 2 pixels
 	size_t pix_offset = (coords->x >> 1U) + (coords->y * finfo.line_length);
 
 	// NOTE: This one is not quite right, but this 4bpp mess is driving me crazy, so, meh.
