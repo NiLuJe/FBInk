@@ -110,7 +110,7 @@ static void
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 4 as every pixel is 4 consecutive bytes
-	size_t pix_offset = (coords->x << 2U) + (coords->y * finfo.line_length);
+	size_t pix_offset = (uint32_t)(coords->x << 2U) + (coords->y * finfo.line_length);
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	*((unsigned char*) (g_fbink_fbp + pix_offset))     = b;
@@ -126,7 +126,7 @@ static void
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 2 as every pixel is 2 consecutive bytes
-	size_t pix_offset = (coords->x << 1U) + (coords->y * finfo.line_length);
+	size_t pix_offset = (uint32_t)(coords->x << 1U) + (coords->y * finfo.line_length);
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	// but a bit more complicated for RGB565
@@ -295,7 +295,7 @@ static void
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 4 as every pixel is 4 consecutive bytes
-	size_t pix_offset = (coords->x << 2U) + (coords->y * finfo.line_length);
+	size_t pix_offset = (uint32_t)(coords->x << 2U) + (coords->y * finfo.line_length);
 
 	color->b = *((unsigned char*) (g_fbink_fbp + pix_offset));
 	color->g = *((unsigned char*) (g_fbink_fbp + pix_offset + 1));
@@ -309,7 +309,7 @@ static void
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 2 as every pixel is 2 consecutive bytes
-	size_t pix_offset = (coords->x << 1U) + (coords->y * finfo.line_length);
+	size_t pix_offset = (uint32_t)(coords->x << 1U) + (coords->y * finfo.line_length);
 
 	uint16_t    v;
 	uint16_t    b;
