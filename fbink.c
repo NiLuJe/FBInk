@@ -1184,12 +1184,12 @@ int
 #ifdef FBINK_WITH_UNSCII
 		// NOTE: Unscii-16 is 8x16, handle it ;).
 		if (fbink_config->fontname == UNSCII_TALL) {
-			FONTSIZE_MULT = MIN(48, FONTSIZE_MULT);
+			FONTSIZE_MULT = MIN(31, FONTSIZE_MULT);
 		} else {
-			FONTSIZE_MULT = MIN(64, FONTSIZE_MULT);
+			FONTSIZE_MULT = MIN(45, FONTSIZE_MULT);
 		}
 #else
-		FONTSIZE_MULT = MIN(64, FONTSIZE_MULT);
+		FONTSIZE_MULT = MIN(45, FONTSIZE_MULT);
 #endif
 	} else {
 		// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
