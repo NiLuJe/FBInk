@@ -256,19 +256,13 @@ static void
 	size_t pix_offset = (coords->x >> 1) + (coords->y * finfo.line_length);
 
 	uint8_t a = *((unsigned char*) (g_fbink_fbp + pix_offset));
-	uint8_t v;
-	uint8_t u;
-	uint8_t l;
-
-	v = a & 0xF0;
-	u = v | (v >> 4);
-	//u = v + (v >> 4);
-
-	l = (a & 0x0F) * 0x11;
 
 	if ((coords->x & 0x01) == 0) {
+		uint8_t v = (a & 0xF0);
+		uint8_t u = (v | (v >> 4));
 		color->r = u;
 	} else {
+		uint8_t l = (uint8_t) ((a & 0x0F) * 0x11);
 		color->r |= l;
 	}
 }
