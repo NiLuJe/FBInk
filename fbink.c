@@ -1342,287 +1342,273 @@ int
 	// We declare that a bit early, because that'll hold our return value on success.
 	unsigned short int multiline_offset = 0U;
 
-	if (g_fbink_isFbMapped) {
-		// Clear screen?
-		if (fbink_config->is_cleared) {
-			clear_screen(fbink_config->is_inverted ? BLACK : WHITE);
-		}
+	// Clear screen?
+	if (fbink_config->is_cleared) {
+		clear_screen(fbink_config->is_inverted ? BLACK : WHITE);
+	}
 
-		// See if want to position our text relative to the edge of the screen, and not the beginning
-		if (col < 0) {
-			col = (short int) MAX(MAXCOLS + col, 0);
-		}
-		if (row < 0) {
-			row = (short int) MAX(MAXROWS + row, 0);
-		}
-		LOG("Adjusted position: column %hd, row %hd", col, row);
+	// See if want to position our text relative to the edge of the screen, and not the beginning
+	if (col < 0) {
+		col = (short int) MAX(MAXCOLS + col, 0);
+	}
+	if (row < 0) {
+		row = (short int) MAX(MAXROWS + row, 0);
+	}
+	LOG("Adjusted position: column %hd, row %hd", col, row);
 
-		// Clamp coordinates to the screen, to avoid blowing up ;).
-		if (col >= MAXCOLS) {
-			col = (short int) (MAXCOLS - 1);
-			LOG("Clamped column to %hd", col);
-		}
-		if (row >= MAXROWS) {
-			row = (short int) (MAXROWS - 1);
-			LOG("Clamped row to %hd", row);
-		}
+	// Clamp coordinates to the screen, to avoid blowing up ;).
+	if (col >= MAXCOLS) {
+		col = (short int) (MAXCOLS - 1);
+		LOG("Clamped column to %hd", col);
+	}
+	if (row >= MAXROWS) {
+		row = (short int) (MAXROWS - 1);
+		LOG("Clamped row to %hd", row);
+	}
 
-		// See if we need to break our string down into multiple lines...
-		size_t       len       = strlen(string);
-		unsigned int charcount = u8_strlen(string);
-		// Check how much extra storage is used up by multibyte sequences.
-		if (len > charcount) {
-			LOG("Extra storage used up by multibyte sequences: %zu bytes (for a total of %u characters over %zu bytes)",
-			    (len - charcount),
-			    charcount,
-			    len);
-		}
-
-		// Compute the amount of characters we can actually print on *one* line given the column we start on...
-		// NOTE: When centered, we enforce one padding character on the left,
-		//       as well as one padding character on the right when we have a perfect fit.
-		//       This is to avoid potentially printing stuff too close to the bezel and/or behind the bezel.
-		unsigned short int available_cols = MAXCOLS;
-		if (fbink_config->is_centered) {
-			// One for the left padding
-			available_cols = (unsigned short int) (available_cols - 1U);
-			if (deviceQuirks.isPerfectFit) {
-				// And one for the right padding
-				available_cols = (unsigned short int) (available_cols - 1U);
-			}
-		} else {
-			// Otherwise, col will be fixed, so, trust it.
-			available_cols = (unsigned short int) (available_cols - col);
-		}
-		// Given that, compute how many lines it'll take to print all that in these constraints...
-		unsigned short int lines = 1U;
-		if (charcount > available_cols) {
-			lines = (unsigned short int) (charcount / available_cols);
-			// If there's a remainder, we'll need an extra line ;).
-			if (charcount % available_cols) {
-				lines++;
-			}
-		}
-
-		// Truncate to a single screen...
-		if (lines > MAXROWS) {
-			LOG("Can only print %hu out of %hu lines, truncating!", MAXROWS, lines);
-			lines = MAXROWS;
-		}
-
-		// Move our initial row up if we add so much lines that some of it goes off-screen...
-		if (row + lines > MAXROWS) {
-			row = (short int) MIN(row - ((row + lines) - MAXROWS), MAXROWS);
-		}
-		LOG("Final position: column %hd, row %hd", col, row);
-
-		// We'll copy our text in chunks of formatted line...
-		// NOTE: Store that on the heap, we've had some wacky adventures with automatic VLAs...
-		// NOTE: UTF-8 is at most 4 bytes per sequence, make sure we can fit a full line of UTF-8 (+ 1 'wide' NULL).
-		char* line = NULL;
-		line       = calloc((MAXCOLS + 1U) * 4U, sizeof(*line));
-		if (line == NULL) {
-			char  buf[256];
-			char* errstr = strerror_r(errno, buf, sizeof(buf));
-			fprintf(stderr, "[FBInk] calloc (line): %s\n", errstr);
-			return ERRCODE(EXIT_FAILURE);
-		}
-		// NOTE: This makes sure it's always full of NULLs, to avoid weird shit happening later with u8_strlen()
-		//       and uninitialized or re-used memory...
-		//       Namely, a single NULL immediately followed by something that *might* be interpreted as an UTF-8
-		//       sequence would trip it into counting bogus characters.
-		//       And as snprintf() only NULL-terminates what it expects to be a non-wide string,
-		//       it's not filling the end of the buffer with NULLs, it just outputs a single one!
-		//       That's why we're also using calloc here.
-		//       Plus, the OS will ensure that'll always be smarter than malloc + memset ;).
-		// NOTE: Since we re-use line on each iteration of the loop,
-		//       we do also need to clear it at the end of the loop, in preparation of the next iteration.
-
-		LOG("Need %hu lines to print %u characters over %hu available columns",
-		    lines,
+	// See if we need to break our string down into multiple lines...
+	size_t       len       = strlen(string);
+	unsigned int charcount = u8_strlen(string);
+	// Check how much extra storage is used up by multibyte sequences.
+	if (len > charcount) {
+		LOG("Extra storage used up by multibyte sequences: %zu bytes (for a total of %u characters over %zu bytes)",
+		    (len - charcount),
 		    charcount,
-		    available_cols);
+		    len);
+	}
 
-		// Do the initial computation outside the loop,
-		// so we'll be able to re-use line_len to accurately compute chars_left when looping.
-		// NOTE: This is where it gets tricky. With multibyte sequences, 1 byte doesn't necessarily mean 1 char.
-		//       And we need to work both in amount of characters for column/width arithmetic,
-		//       and in bytes for snprintf...
-		unsigned int chars_left = charcount;
-		unsigned int line_len   = 0U;
-		// If we have multiple lines worth of stuff to print, draw it line per line
-		while (chars_left > line_len) {
-			LOG("Line %u (of ~%u), previous line was %u characters long and there were %u characters left to print",
-			    multiline_offset + 1U,
-			    lines,
-			    line_len,
-			    chars_left);
-			// Make sure we don't try to draw off-screen...
-			if (row + multiline_offset >= MAXROWS) {
-				LOG("Can only print %hu lines, discarding the %u characters left!",
-				    MAXROWS,
-				    chars_left - line_len);
-				// And that's it, we're done.
+	// Compute the amount of characters we can actually print on *one* line given the column we start on...
+	// NOTE: When centered, we enforce one padding character on the left,
+	//       as well as one padding character on the right when we have a perfect fit.
+	//       This is to avoid potentially printing stuff too close to the bezel and/or behind the bezel.
+	unsigned short int available_cols = MAXCOLS;
+	if (fbink_config->is_centered) {
+		// One for the left padding
+		available_cols = (unsigned short int) (available_cols - 1U);
+		if (deviceQuirks.isPerfectFit) {
+			// And one for the right padding
+			available_cols = (unsigned short int) (available_cols - 1U);
+		}
+	} else {
+		// Otherwise, col will be fixed, so, trust it.
+		available_cols = (unsigned short int) (available_cols - col);
+	}
+	// Given that, compute how many lines it'll take to print all that in these constraints...
+	unsigned short int lines = 1U;
+	if (charcount > available_cols) {
+		lines = (unsigned short int) (charcount / available_cols);
+		// If there's a remainder, we'll need an extra line ;).
+		if (charcount % available_cols) {
+			lines++;
+		}
+	}
+
+	// Truncate to a single screen...
+	if (lines > MAXROWS) {
+		LOG("Can only print %hu out of %hu lines, truncating!", MAXROWS, lines);
+		lines = MAXROWS;
+	}
+
+	// Move our initial row up if we add so much lines that some of it goes off-screen...
+	if (row + lines > MAXROWS) {
+		row = (short int) MIN(row - ((row + lines) - MAXROWS), MAXROWS);
+	}
+	LOG("Final position: column %hd, row %hd", col, row);
+
+	// We'll copy our text in chunks of formatted line...
+	// NOTE: Store that on the heap, we've had some wacky adventures with automatic VLAs...
+	// NOTE: UTF-8 is at most 4 bytes per sequence, make sure we can fit a full line of UTF-8 (+ 1 'wide' NULL).
+	char* line = NULL;
+	line       = calloc((MAXCOLS + 1U) * 4U, sizeof(*line));
+	if (line == NULL) {
+		char  buf[256];
+		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		fprintf(stderr, "[FBInk] calloc (line): %s\n", errstr);
+		return ERRCODE(EXIT_FAILURE);
+	}
+	// NOTE: This makes sure it's always full of NULLs, to avoid weird shit happening later with u8_strlen()
+	//       and uninitialized or re-used memory...
+	//       Namely, a single NULL immediately followed by something that *might* be interpreted as an UTF-8
+	//       sequence would trip it into counting bogus characters.
+	//       And as snprintf() only NULL-terminates what it expects to be a non-wide string,
+	//       it's not filling the end of the buffer with NULLs, it just outputs a single one!
+	//       That's why we're also using calloc here.
+	//       Plus, the OS will ensure that'll always be smarter than malloc + memset ;).
+	// NOTE: Since we re-use line on each iteration of the loop,
+	//       we do also need to clear it at the end of the loop, in preparation of the next iteration.
+
+	LOG("Need %hu lines to print %u characters over %hu available columns", lines, charcount, available_cols);
+
+	// Do the initial computation outside the loop,
+	// so we'll be able to re-use line_len to accurately compute chars_left when looping.
+	// NOTE: This is where it gets tricky. With multibyte sequences, 1 byte doesn't necessarily mean 1 char.
+	//       And we need to work both in amount of characters for column/width arithmetic,
+	//       and in bytes for snprintf...
+	unsigned int chars_left = charcount;
+	unsigned int line_len   = 0U;
+	// If we have multiple lines worth of stuff to print, draw it line per line
+	while (chars_left > line_len) {
+		LOG("Line %u (of ~%u), previous line was %u characters long and there were %u characters left to print",
+		    multiline_offset + 1U,
+		    lines,
+		    line_len,
+		    chars_left);
+		// Make sure we don't try to draw off-screen...
+		if (row + multiline_offset >= MAXROWS) {
+			LOG("Can only print %hu lines, discarding the %u characters left!",
+			    MAXROWS,
+			    chars_left - line_len);
+			// And that's it, we're done.
+			break;
+		}
+
+		// Compute the amount of characters left to print...
+		chars_left -= line_len;
+		// And use it to compute the amount of characters to print on *this* line
+		line_len = MIN(chars_left, available_cols);
+		LOG("Characters to print: %u out of the %u remaining ones", line_len, chars_left);
+
+		// NOTE: Now we just have to switch from characters to bytes, both for line_len & chars_left...
+		// First, get the byte offset of this section of our string (i.e., this line)...
+		unsigned int line_offset = u8_offset(string, charcount - chars_left);
+		// ... then compute how many bytes we'll need to store it.
+		unsigned int line_bytes = 0U;
+		unsigned int cn         = 0U;
+		uint32_t     ch         = 0U;
+		while ((ch = u8_nextchar(string + line_offset, &line_bytes)) != 0U) {
+			cn++;
+			// NOTE: Honor linefeeds...
+			//       The main use-case for this is throwing tail'ed logfiles at us and having them
+			//       be readable instead of a jumbled glued together mess ;).
+			if (ch == 0x0A) {
+				LOG("Caught a linefeed!");
+				// NOTE: We're essentially forcing a reflow by cutting the line mid-stream,
+				//       so we have to update our counters...
+				//       But we can only correct *one* of chars_left or line_len,
+				//       to avoid screwing the count on the next iteration if we correct both,
+				//       since the one depend on the other.
+				//       And as, for the rest of this iteration/line, we only rely on
+				//       line_len being accurate (for padding & centering), the choice is easy.
+				// Increment lines, because of course we're adding a line,
+				// even if the reflowing changes that'll cause mean we might not end up using it.
+				lines++;
+				// Don't decrement the byte index, we want to print the LF,
+				// (it'll render as a blank), mostly to make padding look nicer,
+				// but also so that line_bytes matches line_len ;).
+				// And finally, as we've explained earlier, trim line_len to where we stopped.
+				LOG("Line length was %u characters, but LF is character number %u", line_len, cn);
+				line_len = cn;
+				// Don't touch line_offset, the beginning of our line has not changed,
+				// only its length was cut short.
+				LOG("Adjusted lines to %u & line_len to %u", lines, line_len);
+				// And of course we break, because that was the whole point of this shenanigan!
 				break;
 			}
-
-			// Compute the amount of characters left to print...
-			chars_left -= line_len;
-			// And use it to compute the amount of characters to print on *this* line
-			line_len = MIN(chars_left, available_cols);
-			LOG("Characters to print: %u out of the %u remaining ones", line_len, chars_left);
-
-			// NOTE: Now we just have to switch from characters to bytes, both for line_len & chars_left...
-			// First, get the byte offset of this section of our string (i.e., this line)...
-			unsigned int line_offset = u8_offset(string, charcount - chars_left);
-			// ... then compute how many bytes we'll need to store it.
-			unsigned int line_bytes = 0U;
-			unsigned int cn         = 0U;
-			uint32_t     ch         = 0U;
-			while ((ch = u8_nextchar(string + line_offset, &line_bytes)) != 0U) {
-				cn++;
-				// NOTE: Honor linefeeds...
-				//       The main use-case for this is throwing tail'ed logfiles at us and having them
-				//       be readable instead of a jumbled glued together mess ;).
-				if (ch == 0x0A) {
-					LOG("Caught a linefeed!");
-					// NOTE: We're essentially forcing a reflow by cutting the line mid-stream,
-					//       so we have to update our counters...
-					//       But we can only correct *one* of chars_left or line_len,
-					//       to avoid screwing the count on the next iteration if we correct both,
-					//       since the one depend on the other.
-					//       And as, for the rest of this iteration/line, we only rely on
-					//       line_len being accurate (for padding & centering), the choice is easy.
-					// Increment lines, because of course we're adding a line,
-					// even if the reflowing changes that'll cause mean we might not end up using it.
-					lines++;
-					// Don't decrement the byte index, we want to print the LF,
-					// (it'll render as a blank), mostly to make padding look nicer,
-					// but also so that line_bytes matches line_len ;).
-					// And finally, as we've explained earlier, trim line_len to where we stopped.
-					LOG("Line length was %u characters, but LF is character number %u",
-					    line_len,
-					    cn);
-					line_len = cn;
-					// Don't touch line_offset, the beginning of our line has not changed,
-					// only its length was cut short.
-					LOG("Adjusted lines to %u & line_len to %u", lines, line_len);
-					// And of course we break, because that was the whole point of this shenanigan!
-					break;
-				}
-				// We've walked our full line, stop!
-				if (cn >= line_len) {
-					break;
-				}
+			// We've walked our full line, stop!
+			if (cn >= line_len) {
+				break;
 			}
-			LOG("Line takes up %u bytes", line_bytes);
-			int bytes_printed = 0;
+		}
+		LOG("Line takes up %u bytes", line_bytes);
+		int bytes_printed = 0;
 
-			// Just fudge the column for centering...
-			bool halfcell_offset = false;
-			if (fbink_config->is_centered) {
-				col = (short int) ((MAXCOLS - line_len) / 2U);
+		// Just fudge the column for centering...
+		bool halfcell_offset = false;
+		if (fbink_config->is_centered) {
+			col = (short int) ((MAXCOLS - line_len) / 2U);
 
-				// NOTE: If the line itself is not a perfect fit, ask draw to start drawing half a cell
-				//       to the right to compensate, in order to achieve perfect centering...
-				//       This piggybacks a bit on the !isPerfectFit compensation done in draw,
-				//       which already does subcell placement ;).
-				if ((unsigned int) (col * 2) + line_len != MAXCOLS) {
-					LOG("Line is not a perfect fit, fudging centering by one half of a cell to the right");
-					// NOTE: Flag it for correction in draw
-					halfcell_offset = true;
-				}
-				LOG("Adjusted column to %hd for centering", col);
+			// NOTE: If the line itself is not a perfect fit, ask draw to start drawing half a cell
+			//       to the right to compensate, in order to achieve perfect centering...
+			//       This piggybacks a bit on the !isPerfectFit compensation done in draw,
+			//       which already does subcell placement ;).
+			if ((unsigned int) (col * 2) + line_len != MAXCOLS) {
+				LOG("Line is not a perfect fit, fudging centering by one half of a cell to the right");
+				// NOTE: Flag it for correction in draw
+				halfcell_offset = true;
 			}
-
-			// When centered & padded, we need to split the padding in two, left & right.
-			if (fbink_config->is_centered && fbink_config->is_padded) {
-				// We always want full padding
-				col = 0;
-
-				// Compute our padding length
-				unsigned int left_pad = (MAXCOLS - line_len) / 2U;
-				// As for the right padding, we basically just have to print 'til the edge of the screen
-				unsigned int right_pad = MAXCOLS - line_len - left_pad;
-
-				// Compute the effective right padding value for science!
-				LOG("Total size: %u + %u + %u = %u",
-				    left_pad,
-				    line_len,
-				    right_pad,
-				    left_pad + line_len + right_pad);
-
-				// NOTE: To recap:
-				//       Copy at most (MAXCOLS * 4) + 1 bytes into line
-				//       (thus ensuring both that its NULL-terminated, and fits a full UTF-8 string)
-				//       Left-pad a blank with spaces for left_pad characters
-				//       Print line_len characters of our string at the correct position for this line
-				//       Right pad a blank with spaces for right_pad characters
-				//           Given that we split this in three sections,
-				//           left-padding would have had a similar effect.
-				bytes_printed = snprintf(line,
-							 (MAXCOLS * 4U) + 1U,
-							 "%*s%.*s%-*s",
-							 (int) left_pad,
-							 "",
-							 (int) line_bytes,
-							 string + line_offset,
-							 (int) right_pad,
-							 "");
-			} else if (fbink_config->is_padded) {
-				// NOTE: Rely on the field width for padding ;).
-				// Padding character is a space, which is 1 byte, so that's good enough ;).
-				unsigned int padded_bytes = line_bytes + (available_cols - line_len);
-				// NOTE: Don't touch line_len, because we're *adding* new blank characters,
-				//       we're still printing the exact same amount of characters *from our string*.
-				LOG("Padded %u bytes to %u to cover %u columns",
-				    line_bytes,
-				    padded_bytes,
-				    available_cols);
-				bytes_printed = snprintf(line,
-							 padded_bytes + 1U,
-							 "%*.*s",
-							 (int) padded_bytes,
-							 (int) line_bytes,
-							 string + line_offset);
-			} else {
-				// NOTE: Enforce precision for safety.
-				bytes_printed = snprintf(line,
-							 line_bytes + 1U,
-							 "%*.*s",
-							 (int) line_bytes,
-							 (int) line_bytes,
-							 string + line_offset);
-			}
-			LOG("snprintf wrote %d bytes", bytes_printed);
-
-			region = draw(line,
-				      (unsigned short int) row,
-				      (unsigned short int) col,
-				      fbink_config->is_inverted,
-				      fbink_config->is_centered,
-				      multiline_offset,
-				      fbink_config->fontname,
-				      halfcell_offset);
-
-			// Next line!
-			multiline_offset++;
-
-			// NOTE: If we've actually written something, and we're not the final line,
-			//       clear what we've just written, to get back a pristine NULL-filled buffer,
-			//       so u8_nextchar() has zero chance to skip a NULL on the next iteration.
-			//       See the comments around the initial calloc() call for more details.
-			if (bytes_printed > 0 && line_len < chars_left) {
-				LOG("We have more stuff to print, clearing the line buffer for re-use!\n");
-				memset(line, 0, (size_t) bytes_printed);
-			}
-			// The nuclear option is simply to unconditonally zero the *full* buffer ;).
-			//memset(line, 0, ((MAXCOLS + 1U) * 4U) * sizeof(*line));
+			LOG("Adjusted column to %hd for centering", col);
 		}
 
-		// Cleanup
-		free(line);
+		// When centered & padded, we need to split the padding in two, left & right.
+		if (fbink_config->is_centered && fbink_config->is_padded) {
+			// We always want full padding
+			col = 0;
+
+			// Compute our padding length
+			unsigned int left_pad = (MAXCOLS - line_len) / 2U;
+			// As for the right padding, we basically just have to print 'til the edge of the screen
+			unsigned int right_pad = MAXCOLS - line_len - left_pad;
+
+			// Compute the effective right padding value for science!
+			LOG("Total size: %u + %u + %u = %u",
+			    left_pad,
+			    line_len,
+			    right_pad,
+			    left_pad + line_len + right_pad);
+
+			// NOTE: To recap:
+			//       Copy at most (MAXCOLS * 4) + 1 bytes into line
+			//       (thus ensuring both that its NULL-terminated, and fits a full UTF-8 string)
+			//       Left-pad a blank with spaces for left_pad characters
+			//       Print line_len characters of our string at the correct position for this line
+			//       Right pad a blank with spaces for right_pad characters
+			//           Given that we split this in three sections,
+			//           left-padding would have had a similar effect.
+			bytes_printed = snprintf(line,
+						 (MAXCOLS * 4U) + 1U,
+						 "%*s%.*s%-*s",
+						 (int) left_pad,
+						 "",
+						 (int) line_bytes,
+						 string + line_offset,
+						 (int) right_pad,
+						 "");
+		} else if (fbink_config->is_padded) {
+			// NOTE: Rely on the field width for padding ;).
+			// Padding character is a space, which is 1 byte, so that's good enough ;).
+			unsigned int padded_bytes = line_bytes + (available_cols - line_len);
+			// NOTE: Don't touch line_len, because we're *adding* new blank characters,
+			//       we're still printing the exact same amount of characters *from our string*.
+			LOG("Padded %u bytes to %u to cover %u columns", line_bytes, padded_bytes, available_cols);
+			bytes_printed = snprintf(line,
+						 padded_bytes + 1U,
+						 "%*.*s",
+						 (int) padded_bytes,
+						 (int) line_bytes,
+						 string + line_offset);
+		} else {
+			// NOTE: Enforce precision for safety.
+			bytes_printed = snprintf(
+			    line, line_bytes + 1U, "%*.*s", (int) line_bytes, (int) line_bytes, string + line_offset);
+		}
+		LOG("snprintf wrote %d bytes", bytes_printed);
+
+		region = draw(line,
+			      (unsigned short int) row,
+			      (unsigned short int) col,
+			      fbink_config->is_inverted,
+			      fbink_config->is_centered,
+			      multiline_offset,
+			      fbink_config->fontname,
+			      halfcell_offset);
+
+		// Next line!
+		multiline_offset++;
+
+		// NOTE: If we've actually written something, and we're not the final line,
+		//       clear what we've just written, to get back a pristine NULL-filled buffer,
+		//       so u8_nextchar() has zero chance to skip a NULL on the next iteration.
+		//       See the comments around the initial calloc() call for more details.
+		if (bytes_printed > 0 && line_len < chars_left) {
+			LOG("We have more stuff to print, clearing the line buffer for re-use!\n");
+			memset(line, 0, (size_t) bytes_printed);
+		}
+		// The nuclear option is simply to unconditonally zero the *full* buffer ;).
+		//memset(line, 0, ((MAXCOLS + 1U) * 4U) * sizeof(*line));
 	}
+
+	// Cleanup
+	free(line);
 
 	// Rotate the region if need be...
 	if (deviceQuirks.isKobo16Landscape) {
