@@ -205,7 +205,7 @@ static void
 #endif
 }
 
-// Handle various bpp...
+// Handle a few sanity checks...
 static void
     put_pixel(FBInkCoordinates* coords, FBInkColor* color)
 {
@@ -231,27 +231,7 @@ static void
 		return;
 	}
 
-	switch (vinfo.bits_per_pixel) {
-		case 4U:
-			put_pixel_Gray4(coords, color);
-			break;
-		case 8U:
-			put_pixel_Gray8(coords, color);
-			break;
-		case 16U:
-			put_pixel_RGB565(coords, color);
-			break;
-		case 24U:
-			put_pixel_RGB24(coords, color);
-			break;
-		case 32U:
-			put_pixel_RGB32(coords, color);
-			break;
-		default:
-			// Huh oh... Should never happen!
-			return;
-			break;
-	}
+	(*fxpPutPixel)(coords, color);
 }
 
 #ifdef FBINK_WITH_IMAGE
@@ -353,7 +333,7 @@ static void
 	color->r = (uint8_t)((r << 3U) + (r >> 2U));
 }
 
-// Handle various bpp...
+// Handle a few sanity checks...
 static void
     get_pixel(FBInkCoordinates* coords, FBInkColor* color)
 {
@@ -362,6 +342,7 @@ static void
 		rotate_coordinates(coords);
 	}
 
+	// NOTE: We disable this, because the only codepath that currently uses get_pixel already takes care of that.
 	// NOTE: Discard off-screen pixels!
 	if (coords->x >= vinfo.xres || coords->y >= vinfo.yres) {
 #	ifdef DEBUG
@@ -376,27 +357,7 @@ static void
 		return;
 	}
 
-	switch (vinfo.bits_per_pixel) {
-		case 4U:
-			get_pixel_Gray4(coords, color);
-			break;
-		case 8U:
-			get_pixel_Gray8(coords, color);
-			break;
-		case 16U:
-			get_pixel_RGB565(coords, color);
-			break;
-		case 24U:
-			get_pixel_RGB24(coords, color);
-			break;
-		case 32U:
-			get_pixel_RGB32(coords, color);
-			break;
-		default:
-			// Huh oh... Should never happen!
-			return;
-			break;
-	}
+	(*fxpGetPixel)(coords, color);
 }
 #endif    // FBINK_WITH_IMAGE
 
@@ -1261,6 +1222,35 @@ int
 	     finfo.smem_len,
 	     finfo.line_length);
 
+	// Use the appropriate get/put pixel functions...
+	switch (vinfo.bits_per_pixel) {
+		case 4U:
+			fxpGetPixel = &get_pixel_Gray4;
+			fxpPutPixel = &put_pixel_Gray4;
+			break;
+		case 8U:
+			fxpGetPixel = &get_pixel_Gray8;
+			fxpPutPixel = &put_pixel_Gray8;
+			break;
+		case 16U:
+			fxpGetPixel = &get_pixel_RGB565;
+			fxpPutPixel = &put_pixel_RGB565;
+			break;
+		case 24U:
+			fxpGetPixel = &get_pixel_RGB24;
+			fxpPutPixel = &put_pixel_RGB24;
+			break;
+		case 32U:
+			fxpGetPixel = &get_pixel_RGB32;
+			fxpPutPixel = &put_pixel_RGB32;
+			break;
+		default:
+			// Huh oh... Should never happen!
+			fprintf(stderr, "[FBInk] Unsupported framebuffer bpp!\n");
+			return ERRCODE(EXIT_FAILURE);
+			break;
+	}
+
 	// Finish with some more generic stuff, not directly related to the framebuffer.
 	// As all this stuff is pretty much set in stone, we'll only query it once.
 	if (!deviceQuirks.skipId) {
@@ -2011,7 +2001,13 @@ int
 					// We need to know what this pixel currently looks like in the framebuffer...
 					coords.x = (unsigned short int) (i + x_off);
 					coords.y = (unsigned short int) (j + y_off);
-					get_pixel(&coords, &bg_color);
+					// NOTE: We use the the function pointers directly, to avoid the OOB checks,
+					//       because we know we're only processing on-screen pixels,
+					//       but this means we have to handle rotation ourselves...
+					if (deviceQuirks.isKobo16Landscape) {
+						rotate_coordinates(&coords);
+					}
+					(*fxpGetPixel)(&coords, &bg_color);
 
 					// NOTE: In this branch, req_n == 2, so we can do << 1 instead of * 2 ;).
 					pix_offset  = (size_t)(((j << 1U) * w) + (i << 1U));
@@ -2021,7 +2017,7 @@ int
 					color.r =
 					    (uint8_t) DIV255(((img_color.r * alpha) + (bg_color.r * (0xFF - alpha))));
 
-					put_pixel(&coords, &color);
+					(*fxpPutPixel)(&coords, &color);
 				}
 			}
 		} else {
@@ -2051,7 +2047,10 @@ int
 				for (i = img_x_off; i < max_width; i++) {
 					coords.x = (unsigned short int) (i + x_off);
 					coords.y = (unsigned short int) (j + y_off);
-					get_pixel(&coords, &bg_color);
+					if (deviceQuirks.isKobo16Landscape) {
+						rotate_coordinates(&coords);
+					}
+					(*fxpGetPixel)(&coords, &bg_color);
 
 					// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
 					pix_offset  = (size_t)(((j << 2U) * w) + (i << 2U));
@@ -2067,7 +2066,7 @@ int
 					color.b =
 					    (uint8_t) DIV255(((img_color.b * alpha) + (bg_color.b * (0xFF - alpha))));
 
-					put_pixel(&coords, &color);
+					(*fxpPutPixel)(&coords, &color);
 				}
 			}
 		} else {
