@@ -1,5 +1,5 @@
 /*
-	FBInk: FrameBuffer eInker, a tool to print strings on eInk devices (Kobo/Kindle)
+	FBInk: FrameBuffer eInker, a tool to print text & images on eInk devices (Kobo/Kindle)
 	Copyright (C) 2018 NiLuJe <ninuje@gmail.com>
 
 	----
