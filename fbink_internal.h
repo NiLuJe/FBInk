@@ -174,7 +174,9 @@ bool g_isQuiet = false;
 long int USER_HZ = 100;
 // Pointers to the appropriate put_pixel/get_pixel functions for the fb's bpp
 void (*fxpPutPixel)(FBInkCoordinates*, FBInkColor*) = NULL;
+#ifdef FBINK_WITH_IMAGE
 void (*fxpGetPixel)(FBInkCoordinates*, FBInkColor*) = NULL;
+#endif
 
 // Where we track device/screen-specific quirks
 FBInkDeviceQuirks deviceQuirks = { 0 };

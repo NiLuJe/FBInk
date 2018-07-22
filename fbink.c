@@ -1172,7 +1172,7 @@ int
 			}
 		}
 #else
-		(unsigned short int) (viewWidth / 3 / 8);
+		max_fontmult = (unsigned short int) (viewWidth / 3 / 8);
 		if (FONTSIZE_MULT > max_fontmult) {
 			FONTSIZE_MULT = max_fontmult;
 			ELOG("[FBInk] Clamped font size mutliplier from %hu to %hu",
@@ -1223,24 +1223,34 @@ int
 	// Use the appropriate get/put pixel functions...
 	switch (vinfo.bits_per_pixel) {
 		case 4U:
-			fxpGetPixel = &get_pixel_Gray4;
 			fxpPutPixel = &put_pixel_Gray4;
+#ifdef FBINK_WITH_IMAGE
+			fxpGetPixel = &get_pixel_Gray4;
+#endif
 			break;
 		case 8U:
-			fxpGetPixel = &get_pixel_Gray8;
 			fxpPutPixel = &put_pixel_Gray8;
+#ifdef FBINK_WITH_IMAGE
+			fxpGetPixel = &get_pixel_Gray8;
+#endif
 			break;
 		case 16U:
-			fxpGetPixel = &get_pixel_RGB565;
 			fxpPutPixel = &put_pixel_RGB565;
+#ifdef FBINK_WITH_IMAGE
+			fxpGetPixel = &get_pixel_RGB565;
+#endif
 			break;
 		case 24U:
-			fxpGetPixel = &get_pixel_RGB24;
 			fxpPutPixel = &put_pixel_RGB24;
+#ifdef FBINK_WITH_IMAGE
+			fxpGetPixel = &get_pixel_RGB24;
+#endif
 			break;
 		case 32U:
-			fxpGetPixel = &get_pixel_RGB32;
 			fxpPutPixel = &put_pixel_RGB32;
+#ifdef FBINK_WITH_IMAGE
+			fxpGetPixel = &get_pixel_RGB32;
+#endif
 			break;
 		default:
 			// Huh oh... Should never happen!
