@@ -401,11 +401,11 @@ int
 			}
 		} else if (is_image) {
 			printf(
-			    "Displaying image '%s' @ column %hd, row %hd + (%hd, %hd) (inverted: %s, flattened: %s)\n",
+			    "Displaying image '%s' @ column %hd + %hdpx, row %hd + %dpx (inverted: %s, flattened: %s)\n",
 			    image_file,
 			    fbink_config.col,
-			    fbink_config.row,
 			    image_x_offset,
+			    fbink_config.row,
 			    image_y_offset,
 			    fbink_config.is_inverted ? "true" : "false",
 			    fbink_config.ignore_alpha ? "true" : "false");
