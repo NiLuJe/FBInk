@@ -198,7 +198,6 @@ static void get_pixel_Gray8(FBInkCoordinates*, FBInkColor*);
 static void get_pixel_RGB24(FBInkCoordinates*, FBInkColor*);
 static void get_pixel_RGB32(FBInkCoordinates*, FBInkColor*);
 static void get_pixel_RGB565(FBInkCoordinates*, FBInkColor*);
-static void get_pixel(FBInkCoordinates*, FBInkColor*);
 #endif
 
 static void fill_rect(unsigned short int, unsigned short int, unsigned short int, unsigned short int, FBInkColor*);

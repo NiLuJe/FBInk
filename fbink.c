@@ -332,33 +332,6 @@ static void
 	r        = (v >> 11U);
 	color->r = (uint8_t)((r << 3U) + (r >> 2U));
 }
-
-// Handle a few sanity checks...
-static void
-    get_pixel(FBInkCoordinates* coords, FBInkColor* color)
-{
-	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
-	if (deviceQuirks.isKobo16Landscape) {
-		rotate_coordinates(coords);
-	}
-
-	// NOTE: We disable this, because the only codepath that currently uses get_pixel already takes care of that.
-	// NOTE: Discard off-screen pixels!
-	if (coords->x >= vinfo.xres || coords->y >= vinfo.yres) {
-#	ifdef DEBUG
-		// NOTE: This is only enabled in Debug builds because it can be pretty verbose,
-		//       and does not necessarily indicate an actual issue, as we've just explained...
-		LOG("Get: discarding off-screen pixel @ (%hu, %hu) (out of %ux%u bounds)",
-		    coords.x,
-		    coords.y,
-		    vinfo.xres,
-		    vinfo.yres);
-#	endif
-		return;
-	}
-
-	(*fxpGetPixel)(coords, color);
-}
 #endif    // FBINK_WITH_IMAGE
 
 // Helper function to draw a rectangle in given color
