@@ -1157,7 +1157,7 @@ int
 			max_fontmult = (unsigned short int) (viewHeight / 3 / 16);
 			if (FONTSIZE_MULT > max_fontmult) {
 				FONTSIZE_MULT = max_fontmult;
-				ELOG("[FBInk] Clamped font size mutliplier from %hu to %hu",
+				ELOG("[FBInk] Clamped font size multiplier from %hu to %hu",
 				     fbink_config->fontmult,
 				     max_fontmult);
 			}
@@ -1166,7 +1166,7 @@ int
 			max_fontmult = (unsigned short int) (viewWidth / 3 / 8);
 			if (FONTSIZE_MULT > max_fontmult) {
 				FONTSIZE_MULT = max_fontmult;
-				ELOG("[FBInk] Clamped font size mutliplier from %hu to %hu",
+				ELOG("[FBInk] Clamped font size multiplier from %hu to %hu",
 				     fbink_config->fontmult,
 				     max_fontmult);
 			}
@@ -1175,7 +1175,7 @@ int
 		max_fontmult = (unsigned short int) (viewWidth / 3 / 8);
 		if (FONTSIZE_MULT > max_fontmult) {
 			FONTSIZE_MULT = max_fontmult;
-			ELOG("[FBInk] Clamped font size mutliplier from %hu to %hu",
+			ELOG("[FBInk] Clamped font size multiplier from %hu to %hu",
 			     fbink_config->fontmult,
 			     max_fontmult);
 		}
@@ -1198,12 +1198,12 @@ int
 	// Go!
 	FONTW = (unsigned short int) (FONTW * FONTSIZE_MULT);
 	FONTH = (unsigned short int) (FONTH * FONTSIZE_MULT);
-	ELOG("[FBInk] Fontsize set to %dx%d.", FONTW, FONTH);
+	ELOG("[FBInk] Fontsize set to %dx%d", FONTW, FONTH);
 
 	// Compute MAX* values now that we know the screen & font resolution
 	MAXCOLS = (unsigned short int) (viewWidth / FONTW);
 	MAXROWS = (unsigned short int) (viewHeight / FONTH);
-	ELOG("[FBInk] Line length: %hu cols, Page size: %hu rows.", MAXCOLS, MAXROWS);
+	ELOG("[FBInk] Line length: %hu cols, Page size: %hu rows", MAXCOLS, MAXROWS);
 
 	// Mention & remember if we can perfectly fit the final column on screen
 	if ((unsigned short int) (FONTW * MAXCOLS) == viewWidth) {
