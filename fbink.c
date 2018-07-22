@@ -1976,10 +1976,7 @@ int
 					coords.y = (unsigned short int) (j + y_off);
 					// NOTE: We use the the function pointers directly, to avoid the OOB checks,
 					//       because we know we're only processing on-screen pixels,
-					//       but this means we have to handle rotation ourselves...
-					if (deviceQuirks.isKobo16Landscape) {
-						rotate_coordinates(&coords);
-					}
+					//       and we don't care about the rotation checks at this bpp :).
 					(*fxpGetPixel)(&coords, &bg_color);
 
 					// NOTE: In this branch, req_n == 2, so we can do << 1 instead of * 2 ;).
@@ -2007,7 +2004,10 @@ int
 					*/
 					coords.x = (unsigned short int) (i + x_off);
 					coords.y = (unsigned short int) (j + y_off);
-					put_pixel(&coords, &color);
+
+					// NOTE: Again, use the function pointer directly, to skip redundant OOB checks,
+					//       as well as unneeded rotation checks (can't happen at this bpp).
+					(*fxpPutPixel)(&coords, &color);
 				}
 			}
 		}
@@ -2020,6 +2020,8 @@ int
 				for (i = img_x_off; i < max_width; i++) {
 					coords.x = (unsigned short int) (i + x_off);
 					coords.y = (unsigned short int) (j + y_off);
+					// NOTE: Same general idea as the fb_is_grayscale case,
+					//       except at this bpp we then have to handle rotation ourselves...
 					if (deviceQuirks.isKobo16Landscape) {
 						rotate_coordinates(&coords);
 					}
@@ -2053,7 +2055,11 @@ int
 
 					coords.x = (unsigned short int) (i + x_off);
 					coords.y = (unsigned short int) (j + y_off);
-					put_pixel(&coords, &color);
+					// NOTE: Again, we can only skip the OOB checks at this bpp.
+					if (deviceQuirks.isKobo16Landscape) {
+						rotate_coordinates(&coords);
+					}
+					(*fxpPutPixel)(&coords, &color);
 				}
 			}
 		}
