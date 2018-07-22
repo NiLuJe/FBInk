@@ -36,7 +36,7 @@ endif
 
 ifndef DEBUG
 	# Don't hobble GCC just for the sake of being interposable
-	EXTRA_CFLAGS+=-fno-semantic-interposition
+	SHARED_CFLAGS+=-fno-semantic-interposition
 	# Enable loop unrolling & vectorization in the hope it'll do something smart with our pixel loops
 	EXTRA_CFLAGS+=-ftree-vectorize
 	EXTRA_CFLAGS+=-funroll-loops
