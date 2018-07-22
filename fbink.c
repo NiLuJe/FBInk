@@ -207,19 +207,18 @@ static void
 
 // Handle various bpp...
 static void
-    put_pixel(unsigned short int x, unsigned short int y, FBInkColor* color)
+    put_pixel(FBInkCoordinates* coords, FBInkColor* color)
 {
 	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
-	FBInkCoordinates coords = { x, y };
 	if (deviceQuirks.isKobo16Landscape) {
-		rotate_coordinates(&coords);
+		rotate_coordinates(coords);
 	}
 
 	// NOTE: Discard off-screen pixels!
 	//       For instance, when we have a halfcell offset in conjunction with a !isPerfectFit pixel offset,
 	//       when we're padding and centering, the final whitespace of right-padding will have its last
 	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
-	if (coords.x >= vinfo.xres || coords.y >= vinfo.yres) {
+	if (coords->x >= vinfo.xres || coords->y >= vinfo.yres) {
 #ifdef DEBUG
 		// NOTE: This is only enabled in Debug builds because it can be pretty verbose,
 		//       and does not necessarily indicate an actual issue, as we've just explained...
@@ -234,19 +233,19 @@ static void
 
 	switch (vinfo.bits_per_pixel) {
 		case 4U:
-			put_pixel_Gray4(&coords, color);
+			put_pixel_Gray4(coords, color);
 			break;
 		case 8U:
-			put_pixel_Gray8(&coords, color);
+			put_pixel_Gray8(coords, color);
 			break;
 		case 16U:
-			put_pixel_RGB565(&coords, color);
+			put_pixel_RGB565(coords, color);
 			break;
 		case 24U:
-			put_pixel_RGB24(&coords, color);
+			put_pixel_RGB24(coords, color);
 			break;
 		case 32U:
-			put_pixel_RGB32(&coords, color);
+			put_pixel_RGB32(coords, color);
 			break;
 		default:
 			// Huh oh... Should never happen!
@@ -356,16 +355,15 @@ static void
 
 // Handle various bpp...
 static void
-    get_pixel(unsigned short int x, unsigned short int y, FBInkColor* color)
+    get_pixel(FBInkCoordinates* coords, FBInkColor* color)
 {
 	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
-	FBInkCoordinates coords = { x, y };
 	if (deviceQuirks.isKobo16Landscape) {
-		rotate_coordinates(&coords);
+		rotate_coordinates(coords);
 	}
 
 	// NOTE: Discard off-screen pixels!
-	if (coords.x >= vinfo.xres || coords.y >= vinfo.yres) {
+	if (coords->x >= vinfo.xres || coords->y >= vinfo.yres) {
 #	ifdef DEBUG
 		// NOTE: This is only enabled in Debug builds because it can be pretty verbose,
 		//       and does not necessarily indicate an actual issue, as we've just explained...
@@ -380,19 +378,19 @@ static void
 
 	switch (vinfo.bits_per_pixel) {
 		case 4U:
-			get_pixel_Gray4(&coords, color);
+			get_pixel_Gray4(coords, color);
 			break;
 		case 8U:
-			get_pixel_Gray8(&coords, color);
+			get_pixel_Gray8(coords, color);
 			break;
 		case 16U:
-			get_pixel_RGB565(&coords, color);
+			get_pixel_RGB565(coords, color);
 			break;
 		case 24U:
-			get_pixel_RGB24(&coords, color);
+			get_pixel_RGB24(coords, color);
 			break;
 		case 32U:
-			get_pixel_RGB32(&coords, color);
+			get_pixel_RGB32(coords, color);
 			break;
 		default:
 			// Huh oh... Should never happen!
@@ -408,9 +406,12 @@ static void
 {
 	unsigned short int cx;
 	unsigned short int cy;
+	FBInkCoordinates   coords = { 0U };
 	for (cy = 0U; cy < h; cy++) {
 		for (cx = 0U; cx < w; cx++) {
-			put_pixel((unsigned short int) (x + cx), (unsigned short int) (y + cy), color);
+			coords.x = (unsigned short int) (x + cx);
+			coords.y = (unsigned short int) (y + cy);
+			put_pixel(&coords, color);
 		}
 	}
 	LOG("Filled a %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
@@ -652,9 +653,11 @@ static struct mxcfb_rect
 	pixmap = alloca(sizeof(*pixmap) * (size_t)((FONTW * FONTH) + FONTSIZE_MULT - 1));
 
 	// Loop through all the *characters* in the text string
-	unsigned int       bi = 0U;
-	unsigned short int ci = 0U;
-	uint32_t           ch = 0U;
+	unsigned int       bi     = 0U;
+	unsigned short int ci     = 0U;
+	uint32_t           ch     = 0U;
+	unsigned char      b      = 0U;
+	FBInkCoordinates   coords = { 0U };
 	while ((ch = u8_nextchar(text, &bi)) != 0U) {
 		LOG("Char %u (@ %u) out of %u is @ byte offset %u and is U+%04X", ci + 1U, ci, charcount, bi, ch);
 
@@ -666,13 +669,13 @@ static struct mxcfb_rect
 			// loop through pixel columns
 			for (x = 0U; x < FONTW; x++) {
 				// get the pixel value
-				unsigned char b = pixmap[(y * FONTW) + x];
+				b = pixmap[(y * FONTW) + x];
 				// plot the pixel (fg if b != 0; bg otherwise)
 				// NOTE: This is where we used to fudge positioning of hex fonts converted by
 				//       tools/hextoc.py before I figured out the root issue ;).
-				put_pixel((unsigned short int) ((col * FONTW) + (ci * FONTW) + x + pixel_offset),
-					  (unsigned short int) ((row * FONTH) + y),
-					  b != 0 ? &fgC : &bgC);
+				coords.x = (unsigned short int) ((col * FONTW) + (ci * FONTW) + x + pixel_offset);
+				coords.y = (unsigned short int) ((row * FONTH) + y);
+				put_pixel(&coords, b != 0 ? &fgC : &bgC);
 			}    // end "for x"
 		}            // end "for y"
 		// Next glyph! This serves as the source for the pen position, hence it being used as an index...
@@ -1991,8 +1994,7 @@ int
 	unsigned short int i;
 	unsigned short int j;
 	size_t             pix_offset;
-	unsigned short int px;
-	unsigned short int py;
+	FBInkCoordinates   coords = { 0U };
 	// NOTE: The slight duplication is on purpose, to move the branching outside the loop.
 	//       And since we can easily do so from here,
 	//       we also entirely avoid trying to plot off-screen pixels (on any sides).
@@ -2007,9 +2009,9 @@ int
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
 					// We need to know what this pixel currently looks like in the framebuffer...
-					px = (unsigned short int) (i + x_off);
-					py = (unsigned short int) (j + y_off);
-					get_pixel(px, py, &bg_color);
+					coords.x = (unsigned short int) (i + x_off);
+					coords.y = (unsigned short int) (j + y_off);
+					get_pixel(&coords, &bg_color);
 
 					// NOTE: In this branch, req_n == 2, so we can do << 1 instead of * 2 ;).
 					pix_offset  = (size_t)(((j << 1U) * w) + (i << 1U));
@@ -2019,7 +2021,7 @@ int
 					color.r =
 					    (uint8_t) DIV255(((img_color.r * alpha) + (bg_color.r * (0xFF - alpha))));
 
-					put_pixel(px, py, &color);
+					put_pixel(&coords, &color);
 				}
 			}
 		} else {
@@ -2034,9 +2036,9 @@ int
 					color.g = color.r;
 					color.b = color.r;
 					*/
-					px = (unsigned short int) (i + x_off);
-					py = (unsigned short int) (j + y_off);
-					put_pixel(px, py, &color);
+					coords.x = (unsigned short int) (i + x_off);
+					coords.y = (unsigned short int) (j + y_off);
+					put_pixel(&coords, &color);
 				}
 			}
 		}
@@ -2047,9 +2049,9 @@ int
 			uint8_t    alpha     = 0U;
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
-					px = (unsigned short int) (i + x_off);
-					py = (unsigned short int) (j + y_off);
-					get_pixel(px, py, &bg_color);
+					coords.x = (unsigned short int) (i + x_off);
+					coords.y = (unsigned short int) (j + y_off);
+					get_pixel(&coords, &bg_color);
 
 					// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
 					pix_offset  = (size_t)(((j << 2U) * w) + (i << 2U));
@@ -2065,7 +2067,7 @@ int
 					color.b =
 					    (uint8_t) DIV255(((img_color.b * alpha) + (bg_color.b * (0xFF - alpha))));
 
-					put_pixel(px, py, &color);
+					put_pixel(&coords, &color);
 				}
 			}
 		} else {
@@ -2077,9 +2079,9 @@ int
 					color.g    = (uint8_t)(data[pix_offset + 1] ^ invert);
 					color.b    = (uint8_t)(data[pix_offset + 2] ^ invert);
 
-					px = (unsigned short int) (i + x_off);
-					py = (unsigned short int) (j + y_off);
-					put_pixel(px, py, &color);
+					coords.x = (unsigned short int) (i + x_off);
+					coords.y = (unsigned short int) (j + y_off);
+					put_pixel(&coords, &color);
 				}
 			}
 		}
