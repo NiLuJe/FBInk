@@ -69,7 +69,7 @@ const char*
 
 // Helper functions to 'plot' a specific pixel in a given color to the framebuffer
 static void
-    put_pixel_Gray4(FBInkCoordinates* coords, uint8_t v)
+    put_pixel_Gray4(FBInkCoordinates* coords, FBInkColor* color)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x / 2 as every byte holds 2 pixels
@@ -82,57 +82,57 @@ static void
 	// We can't address nibbles directly, so this takes some shenanigans...
 	if ((coords->x & 0x01) == 0) {
 		// Even pixel: high nibble
-		*((unsigned char*) (g_fbink_fbp + pix_offset)) = (v & 0xF0);
+		*((unsigned char*) (g_fbink_fbp + pix_offset)) = (color->r & 0xF0);
 		// Squash to 4bpp, and write to the top/left nibble
 		// or: ((v >> 4) << 4)
 	} else {
 		// Odd pixel: low nibble
 		// ORed to avoid clobbering our even pixel
-		*((unsigned char*) (g_fbink_fbp + pix_offset)) |= (v >> 4U);
+		*((unsigned char*) (g_fbink_fbp + pix_offset)) |= (color->r >> 4U);
 	}
 }
 
 static void
-    put_pixel_Gray8(FBInkCoordinates* coords, uint8_t v)
+    put_pixel_Gray8(FBInkCoordinates* coords, FBInkColor* color)
 {
 	// calculate the pixel's byte offset inside the buffer
 	size_t pix_offset = coords->x + coords->y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((unsigned char*) (g_fbink_fbp + pix_offset)) = v;
+	*((unsigned char*) (g_fbink_fbp + pix_offset)) = color->r;
 }
 
 static void
-    put_pixel_RGB24(FBInkCoordinates* coords, uint8_t r, uint8_t g, uint8_t b)
+    put_pixel_RGB24(FBInkCoordinates* coords, FBInkColor* color)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 3 as every pixel is 3 consecutive bytes
 	size_t pix_offset = coords->x * 3U + coords->y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((unsigned char*) (g_fbink_fbp + pix_offset))     = b;
-	*((unsigned char*) (g_fbink_fbp + pix_offset + 1)) = g;
-	*((unsigned char*) (g_fbink_fbp + pix_offset + 2)) = r;
+	*((unsigned char*) (g_fbink_fbp + pix_offset))     = color->b;
+	*((unsigned char*) (g_fbink_fbp + pix_offset + 1)) = color->g;
+	*((unsigned char*) (g_fbink_fbp + pix_offset + 2)) = color->r;
 }
 
 static void
-    put_pixel_RGB32(FBInkCoordinates* coords, uint8_t r, uint8_t g, uint8_t b)
+    put_pixel_RGB32(FBInkCoordinates* coords, FBInkColor* color)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 4 as every pixel is 4 consecutive bytes
 	size_t pix_offset = (uint32_t)(coords->x << 2U) + (coords->y * finfo.line_length);
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((unsigned char*) (g_fbink_fbp + pix_offset))     = b;
-	*((unsigned char*) (g_fbink_fbp + pix_offset + 1)) = g;
-	*((unsigned char*) (g_fbink_fbp + pix_offset + 2)) = r;
+	*((unsigned char*) (g_fbink_fbp + pix_offset))     = color->b;
+	*((unsigned char*) (g_fbink_fbp + pix_offset + 1)) = color->g;
+	*((unsigned char*) (g_fbink_fbp + pix_offset + 2)) = color->r;
 	// Opaque, always. Note that everything is rendered as opaque, no matter what.
 	// But at least this way we ensure fb grabs are consistent with what's seen on screen.
 	*((unsigned char*) (g_fbink_fbp + pix_offset + 3)) = 0xFF;
 }
 
 static void
-    put_pixel_RGB565(FBInkCoordinates* coords, uint8_t r, uint8_t g, uint8_t b)
+    put_pixel_RGB565(FBInkCoordinates* coords, FBInkColor* color)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 2 as every pixel is 2 consecutive bytes
@@ -140,7 +140,7 @@ static void
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	// but a bit more complicated for RGB565
-	uint16_t c = (uint16_t)(((r >> 3U) << 11U) + ((g >> 2U) << 5U) + (b >> 3U));
+	uint16_t c = (uint16_t)(((color->r >> 3U) << 11U) + ((color->g >> 2U) << 5U) + (color->b >> 3U));
 	// or: c = ((r / 8) * 2048) + ((g / 4) * 32) + (b / 8);
 	// write 'two bytes at once', much to GCC's dismay...
 #pragma GCC diagnostic push
@@ -234,19 +234,19 @@ static void
 
 	switch (vinfo.bits_per_pixel) {
 		case 4U:
-			put_pixel_Gray4(&coords, color->r);
+			put_pixel_Gray4(&coords, color);
 			break;
 		case 8U:
-			put_pixel_Gray8(&coords, color->r);
+			put_pixel_Gray8(&coords, color);
 			break;
 		case 16U:
-			put_pixel_RGB565(&coords, color->r, color->g, color->b);
+			put_pixel_RGB565(&coords, color);
 			break;
 		case 24U:
-			put_pixel_RGB24(&coords, color->r, color->g, color->b);
+			put_pixel_RGB24(&coords, color);
 			break;
 		case 32U:
-			put_pixel_RGB32(&coords, color->r, color->g, color->b);
+			put_pixel_RGB32(&coords, color);
 			break;
 		default:
 			// Huh oh... Should never happen!

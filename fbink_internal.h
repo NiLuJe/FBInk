@@ -178,11 +178,11 @@ FBInkDeviceQuirks deviceQuirks = { 0 };
 
 static void rotate_coordinates(FBInkCoordinates*);
 
-static void put_pixel_Gray4(FBInkCoordinates*, uint8_t);
-static void put_pixel_Gray8(FBInkCoordinates*, uint8_t);
-static void put_pixel_RGB24(FBInkCoordinates*, uint8_t, uint8_t, uint8_t);
-static void put_pixel_RGB32(FBInkCoordinates*, uint8_t, uint8_t, uint8_t);
-static void put_pixel_RGB565(FBInkCoordinates*, uint8_t, uint8_t, uint8_t);
+static void put_pixel_Gray4(FBInkCoordinates*, FBInkColor*);
+static void put_pixel_Gray8(FBInkCoordinates*, FBInkColor*);
+static void put_pixel_RGB24(FBInkCoordinates*, FBInkColor*);
+static void put_pixel_RGB32(FBInkCoordinates*, FBInkColor*);
+static void put_pixel_RGB565(FBInkCoordinates*, FBInkColor*);
 static void put_pixel(unsigned short int, unsigned short int, FBInkColor*);
 
 // All this is only needed for alpha blending in the image codepath ;).
