@@ -1146,15 +1146,20 @@ int
 
 		// NOTE: Clamp to safe values to avoid blowing up the stack with alloca later,
 		//       in case we get fed a stupidly large value.
+		// NOTE: Also, to avoid a division by zero later if a glyph becomes so big that it causes
+		//       MAXCOLS or MAXROWS to become too small (we want at least a 3x3 grid, to be safe).
+		//       This is to ensure available_cols in fbink_print will be at least 1, no matter the settings.
 #ifdef FBINK_WITH_UNSCII
 		// NOTE: Unscii-16 is 8x16, handle it ;).
 		if (fbink_config->fontname == UNSCII_TALL) {
-			FONTSIZE_MULT = MIN(31, FONTSIZE_MULT);
+			// We want at least 3 rows, so, viewHeight / 3 / glyphHeight gives up the maximum multiplier.
+			FONTSIZE_MULT = MIN(viewHeight / 3 / 16, FONTSIZE_MULT);
 		} else {
-			FONTSIZE_MULT = MIN(45, FONTSIZE_MULT);
+			// We want at least 3 columns, so, viewWidth / 3 / glyphWidth gives up the maximum multiplier.
+			FONTSIZE_MULT = MIN(viewWidth / 3 / 8, FONTSIZE_MULT);
 		}
 #else
-		FONTSIZE_MULT = MIN(45, FONTSIZE_MULT);
+		FONTSIZE_MULT = MIN(viewWidth / 3 / 8, FONTSIZE_MULT);
 #endif
 	} else {
 		// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
