@@ -231,6 +231,7 @@ static void
 		return;
 	}
 
+	// fbink_init() takes care of setting this global pointer to the right function for the fb's bpp
 	(*fxpPutPixel)(coords, color);
 }
 

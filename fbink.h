@@ -98,6 +98,10 @@ FBINK_API int fbink_open(void);
 //        If you wish to customize them, the fontmult, fontname, is_verbose & is_quiet fields should be set beforehand.
 // NOTE: By virtue of, well, setting global variables, do NOT consider this thread-safe.
 //       The rest of the API should be, though, so make sure you init in your main thread *before* threading begins...
+// NOTE: On devices where the fb state can change (i.e., Kobos switching between 16bpp & 32bpp),
+//       this needs to be called as many times as necessary to ensure that every following fbink_* call will be made
+//       against a fb state that matches the state it was in during the last fbink_init() call...
+//       c.f., KFMon's handling of this via fbink_is_fb_quirky() to detect the initial 16bpp -> 32bpp switch.
 FBINK_API int fbink_init(int, const FBInkConfig*);
 
 // Print a string on screen.
