@@ -1143,6 +1143,7 @@ int
 	// Obey user-specified font scaling multiplier
 	if (fbink_config->fontmult > 0) {
 		FONTSIZE_MULT = fbink_config->fontmult;
+		unsigned short int max_fontmult;
 
 		// NOTE: Clamp to safe values to avoid blowing up the stack with alloca later,
 		//       in case we get fed a stupidly large value.
@@ -1153,13 +1154,31 @@ int
 		// NOTE: Unscii-16 is 8x16, handle it ;).
 		if (fbink_config->fontname == UNSCII_TALL) {
 			// We want at least 3 rows, so, viewHeight / 3 / glyphHeight gives up the maximum multiplier.
-			FONTSIZE_MULT = MIN(viewHeight / 3 / 16, FONTSIZE_MULT);
+			max_fontmult = (unsigned short int) (viewHeight / 3 / 16);
+			if (FONTSIZE_MULT > max_fontmult) {
+				FONTSIZE_MULT = max_fontmult;
+				ELOG("[FBInk] Clamped font size mutliplier from %hu to %hu",
+				     fbink_config->fontmult,
+				     max_fontmult);
+			}
 		} else {
 			// We want at least 3 columns, so, viewWidth / 3 / glyphWidth gives up the maximum multiplier.
-			FONTSIZE_MULT = MIN(viewWidth / 3 / 8, FONTSIZE_MULT);
+			max_fontmult = (unsigned short int) (viewWidth / 3 / 8);
+			if (FONTSIZE_MULT > max_fontmult) {
+				FONTSIZE_MULT = max_fontmult;
+				ELOG("[FBInk] Clamped font size mutliplier from %hu to %hu",
+				     fbink_config->fontmult,
+				     max_fontmult);
+			}
 		}
 #else
-		FONTSIZE_MULT = MIN(viewWidth / 3 / 8, FONTSIZE_MULT);
+		(unsigned short int) (viewWidth / 3 / 8);
+		if (FONTSIZE_MULT > max_fontmult) {
+			FONTSIZE_MULT = max_fontmult;
+			ELOG("[FBInk] Clamped font size mutliplier from %hu to %hu",
+			     fbink_config->fontmult,
+			     max_fontmult);
+		}
 #endif
 	} else {
 		// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
