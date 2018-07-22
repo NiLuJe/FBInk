@@ -400,7 +400,15 @@ int
 				fprintf(stderr, "Failed to refresh the screen as per your specification!\n");
 			}
 		} else if (is_image) {
-			printf("Displaying image '%s' @ (%hd, %hd)\n", image_file, image_x_offset, image_y_offset);
+			printf(
+			    "Displaying image '%s' @ column %hd, row %hd + (%hd, %hd) (inverted: %s, flattened: %s)\n",
+			    image_file,
+			    fbink_config.col,
+			    fbink_config.row,
+			    image_x_offset,
+			    image_y_offset,
+			    fbink_config.is_inverted ? "true" : "false",
+			    fbink_config.ignore_alpha ? "true" : "false");
 			if (fbink_print_image(fbfd, image_file, image_x_offset, image_y_offset, &fbink_config) !=
 			    EXIT_SUCCESS) {
 				fprintf(stderr, "Failed to display that image!\n");
