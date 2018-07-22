@@ -34,16 +34,15 @@ ifdef DEBUGFLAGS
 	CFLAGS:=$(DEBUG_CFLAGS)
 endif
 
-# Don't hobble GCC just for the sake of being interposable
-EXTRA_CFLAGS+=-fno-semantic-interposition
-# Enable loop unrolling & vectorization in the hope it'll do something smart with our pixel loops
-EXTRA_CFLAGS+=-ftree-vectorize
-EXTRA_CFLAGS+=-funroll-loops
-# More loop/vectorization tweaks
-#EXTRA_CFLAGS+=-ftree-loop-distribution
-#EXTRA_CFLAGS+=-ftree-loop-im
-#EXTRA_CFLAGS+=-ftree-loop-ivcanon
-#EXTRA_CFLAGS+=-fivopts
+ifndef DEBUG
+	# Don't hobble GCC just for the sake of being interposable
+	EXTRA_CFLAGS+=-fno-semantic-interposition
+	# Enable loop unrolling & vectorization in the hope it'll do something smart with our pixel loops
+	EXTRA_CFLAGS+=-ftree-vectorize
+	EXTRA_CFLAGS+=-funroll-loops
+	# More loop/vectorization tweaks
+	#EXTRA_CFLAGS+=-ftree-loop-distribution -ftree-loop-im -ftree-loop-ivcanon -fivopts
+endif
 
 # Detect GCC version because reasons...
 # (namely, GCC emitting an error instead of a warning on unknown -W options)
