@@ -1138,6 +1138,10 @@ int
 	if (fbink_config->fontname == UNSCII_TALL) {
 		FONTH = 16U;
 	}
+#else
+	if (fbink_config->fontname != IBM) {
+		ELOG("[FBInk] Custom fonts are not supported in this FBInk build, using IBM instead.");
+	}
 #endif
 
 	// Obey user-specified font scaling multiplier
