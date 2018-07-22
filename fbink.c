@@ -610,7 +610,7 @@ static struct mxcfb_rect
 				//       tools/hextoc.py before I figured out the root issue ;).
 				coords.x = (unsigned short int) ((col * FONTW) + (ci * FONTW) + x + pixel_offset);
 				coords.y = (unsigned short int) ((row * FONTH) + y);
-				put_pixel(&coords, b != 0 ? &fgC : &bgC);
+				put_pixel(&coords, b != 0U ? &fgC : &bgC);
 			}    // end "for x"
 		}            // end "for y"
 		// Next glyph! This serves as the source for the pen position, hence it being used as an index...
