@@ -1157,7 +1157,7 @@ int
 #ifdef FBINK_WITH_UNSCII
 		// NOTE: Unscii-16 is 8x16, handle it ;).
 		if (fbink_config->fontname == UNSCII_TALL) {
-			// We want at least 3 rows, so, viewHeight / 3 / glyphHeight gives up the maximum multiplier.
+			// We want at least 3 rows, so, viewHeight / 3 / glyphHeight gives us the maximum multiplier.
 			max_fontmult = (unsigned short int) (viewHeight / 3 / 16);
 			if (FONTSIZE_MULT > max_fontmult) {
 				FONTSIZE_MULT = max_fontmult;
@@ -1166,7 +1166,7 @@ int
 				     max_fontmult);
 			}
 		} else {
-			// We want at least 3 columns, so, viewWidth / 3 / glyphWidth gives up the maximum multiplier.
+			// We want at least 3 columns, so, viewWidth / 3 / glyphWidth gives us the maximum multiplier.
 			max_fontmult = (unsigned short int) (viewWidth / 3 / 8);
 			if (FONTSIZE_MULT > max_fontmult) {
 				FONTSIZE_MULT = max_fontmult;
