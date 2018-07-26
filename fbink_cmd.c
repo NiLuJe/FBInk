@@ -61,7 +61,7 @@ static void
 	    "\t-h, --invert\tPrint STRING in white over a black background instead of the reverse.\n"
 	    "\t-f, --flash\tAsk the eInk driver to do a black flash when refreshing the area of the screen where STRING will be printed.\n"
 	    "\t-c, --clear\tFully clear the screen before printing (obeys --invert).\n"
-	    "\t-S, --size\tOverride the automatic font scaling multiplier (0 means automatic selection, which ranges from 1 (no scaling), to 4 (4x upscaling), depending on screen resolution).\n"
+	    "\t-S, --size\tOverride the automatic font scaling multiplier (Default: 0, automatic selection, ranging from 1 (no scaling), to 4 (4x upscaling), depending on screen resolution).\n"
 #ifdef FBINK_WITH_UNSCII
 	    "\t\t\tNote that user-supplied values will be clamped to safe boundaries (from 1 to around 45 for most fonts, and from 1 to around 30 for TALL).\n"
 #else
@@ -80,7 +80,7 @@ static void
 	    "\t-q, --quiet\tToggle hiding hardware setup messages.\n"
 	    "\n"
 	    "NOTES:\n"
-	    "\tYou can specify multiple STRINGs in a single invocation of fbink, each consecutive one will be printed on consecutive lines.\n"
+	    "\tYou can specify multiple STRINGs in a single invocation of fbink, each consecutive one will be printed on the subsequent line.\n"
 	    "\t\tAlthough it's worth mentioning that this will lead to undesirable results when combined with --clear,\n"
 	    "\t\tbecause the screen is cleared before each STRING, meaning you'll only get to see the final one.\n"
 	    "\tIf you want to properly print a long string, better do it in a single argument, fbink will do its best to spread it over multiple lines sanely.\n"
@@ -127,7 +127,7 @@ static void
 	    "\t\tNote that, in some cases, exotic encoding settings may not be supported.\n"
 	    "\t\tTransparency is supported, but it's slower (because we need to do alpha blending).\n"
 	    "\t\t\tYou can use the --flatten flag to avoid the performance penalty by always ignoring alpha.\n"
-	    "\t\tAs an additional quirk, you can't pass paths with commas in it to file. Pass those to the --img flag instead.\n"
+	    "\t\tAs an additional quirk, you can't pass paths with commas in it to file. Pass those to the -i, --img flag instead.\n"
 	    "\tThis honors --flash, as well as --clear & --invert\n"
 	    "\t\tNote that this also honors --col & --row (taking --size into account), in addition to the coordinates you specify.\n"
 	    "\t\tThe aim is to make it easier to align small images to text.\n"
