@@ -31,6 +31,8 @@
 
 #ifdef FBINK_WITH_IMAGE
 #	define STB_IMAGE_IMPLEMENTATION
+// Make it private, we don't need it anywhere else
+#	define STB_IMAGE_STATIC
 // Disable HDR, as well as the linear light API, to avoid pulling in libm
 #	define STBI_NO_HDR
 #	define STBI_NO_LINEAR
@@ -53,7 +55,6 @@
 #	pragma GCC diagnostic ignored "-Wconversion"
 #	pragma GCC diagnostic ignored "-Wsign-conversion"
 #	pragma GCC diagnostic ignored "-Wduplicated-branches"
-#	pragma GCC diagnostic ignored "-Wmissing-prototypes"
 #	pragma GCC diagnostic ignored "-Wunused-parameter"
 #	pragma GCC diagnostic ignored "-Wunused-function"
 #	include "stb/stb_image.h"
