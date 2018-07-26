@@ -2008,8 +2008,8 @@ int
 
 					// NOTE: In this branch, req_n == 2, so we can do << 1 instead of * 2 ;).
 					pix_offset  = (size_t)(((j << 1U) * w) + (i << 1U));
-					img_color.r = (uint8_t)(data[pix_offset + 0] ^ invert);
-					alpha       = (uint8_t)(data[pix_offset + 1]);
+					img_color.r = data[pix_offset + 0] ^ invert;
+					alpha       = data[pix_offset + 1];
 					ainv        = alpha ^ 0xFF;
 					// Blend it!
 					color.r = (uint8_t) DIV255(((img_color.r * alpha) + (bg_color.r * ainv)));
@@ -2022,7 +2022,7 @@ int
 				for (i = img_x_off; i < max_width; i++) {
 					// NOTE: Here, req_n is either 2, or 1 if ignore_alpha, so, no shift trickery ;)
 					pix_offset = (size_t)((j * req_n * w) + (i * req_n));
-					color.r    = (uint8_t)(data[pix_offset] ^ invert);
+					color.r    = data[pix_offset] ^ invert;
 					// NOTE: We'll never access those two at this bpp,
 					//       so we don't even need to set them ;).
 					/*
@@ -2057,10 +2057,10 @@ int
 
 					// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
 					pix_offset  = (size_t)(((j << 2U) * w) + (i << 2U));
-					img_color.r = (uint8_t)(data[pix_offset + 0] ^ invert);
-					img_color.g = (uint8_t)(data[pix_offset + 1] ^ invert);
-					img_color.b = (uint8_t)(data[pix_offset + 2] ^ invert);
-					alpha       = (uint8_t)(data[pix_offset + 3]);
+					img_color.r = data[pix_offset + 0] ^ invert;
+					img_color.g = data[pix_offset + 1] ^ invert;
+					img_color.b = data[pix_offset + 2] ^ invert;
+					alpha       = data[pix_offset + 3];
 					ainv        = alpha ^ 0xFF;
 					// Blend it!
 					color.r = (uint8_t) DIV255(((img_color.r * alpha) + (bg_color.r * ainv)));
@@ -2075,9 +2075,9 @@ int
 				for (i = img_x_off; i < max_width; i++) {
 					// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
 					pix_offset = (size_t)((j * req_n * w) + (i * req_n));
-					color.r    = (uint8_t)(data[pix_offset + 0] ^ invert);
-					color.g    = (uint8_t)(data[pix_offset + 1] ^ invert);
-					color.b    = (uint8_t)(data[pix_offset + 2] ^ invert);
+					color.r    = data[pix_offset + 0] ^ invert;
+					color.g    = data[pix_offset + 1] ^ invert;
+					color.b    = data[pix_offset + 2] ^ invert;
 
 					coords.x = (unsigned short int) (i + x_off);
 					coords.y = (unsigned short int) (j + y_off);
