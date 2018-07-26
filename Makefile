@@ -34,27 +34,31 @@ ifdef DEBUGFLAGS
 	CFLAGS:=$(DEBUG_CFLAGS)
 endif
 
+# Detect GCC version because reasons...
+# (namely, GCC emitting an error instead of a warning on unknown -W options)
+MOAR_WARNIGS:=0
+CC_IS_CLANG:=0
+GCC_VER:=$(shell $(CC) -dumpversion)
+ifeq "$(GCC_VER)" "4.2.1"
+	# This is Clang (or you really need to update GCC ;D)
+	MOAR_WARNIGS:=1
+	CC_IS_CLANG:=1
+endif
+ifeq "$(shell expr `echo $(GCC_VER) | cut -f1 -d.` \>= 7)" "1"
+	# This is GCC >= 7
+	MOAR_WARNIGS:=1
+endif
+
 ifndef DEBUG
 	# Don't hobble GCC just for the sake of being interposable
-	SHARED_CFLAGS+=-fno-semantic-interposition
+	ifneq "$(CC_IS_CLANG)" "1"
+		SHARED_CFLAGS+=-fno-semantic-interposition
+	endif
 	# Enable loop unrolling & vectorization in the hope it'll do something smart with our pixel loops
 	EXTRA_CFLAGS+=-ftree-vectorize
 	EXTRA_CFLAGS+=-funroll-loops
 	# More loop/vectorization tweaks
 	#EXTRA_CFLAGS+=-ftree-loop-distribution -ftree-loop-im -ftree-loop-ivcanon -fivopts
-endif
-
-# Detect GCC version because reasons...
-# (namely, GCC emitting an error instead of a warning on unknown -W options)
-MOAR_WARNIGS:=0
-GCC_VER:=$(shell $(CC) -dumpversion)
-ifeq "$(GCC_VER)" "4.2.1"
-	# This is Clang (or you really need to update GCC ;D)
-	MOAR_WARNIGS:=1
-endif
-ifeq "$(shell expr `echo $(GCC_VER) | cut -f1 -d.` \>= 7)" "1"
-	# This is GCC >= 7
-	MOAR_WARNIGS:=1
 endif
 
 # Moar warnings!
