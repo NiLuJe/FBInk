@@ -2010,7 +2010,7 @@ int
 					pix_offset  = (size_t)(((j << 1U) * w) + (i << 1U));
 					img_color.r = (uint8_t)(data[pix_offset + 0] ^ invert);
 					alpha       = (uint8_t)(data[pix_offset + 1]);
-					ainv        = 0xFF - alpha;
+					ainv        = alpha ^ 0xFF;
 					// Blend it!
 					color.r = (uint8_t) DIV255(((img_color.r * alpha) + (bg_color.r * ainv)));
 
@@ -2061,7 +2061,7 @@ int
 					img_color.g = (uint8_t)(data[pix_offset + 1] ^ invert);
 					img_color.b = (uint8_t)(data[pix_offset + 2] ^ invert);
 					alpha       = (uint8_t)(data[pix_offset + 3]);
-					ainv        = 0xFF - alpha;
+					ainv        = alpha ^ 0xFF;
 					// Blend it!
 					color.r = (uint8_t) DIV255(((img_color.r * alpha) + (bg_color.r * ainv)));
 					color.g = (uint8_t) DIV255(((img_color.g * alpha) + (bg_color.g * ainv)));
