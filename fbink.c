@@ -1995,6 +1995,7 @@ int
 			FBInkColor bg_color  = { 0U };
 			FBInkColor img_color = { 0U };
 			uint8_t    alpha     = 0U;
+			uint8_t    ainv      = 0U;
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
 					// We need to know what this pixel currently looks like in the framebuffer...
@@ -2009,9 +2010,9 @@ int
 					pix_offset  = (size_t)(((j << 1U) * w) + (i << 1U));
 					img_color.r = (uint8_t)(data[pix_offset + 0] ^ invert);
 					alpha       = (uint8_t)(data[pix_offset + 1]);
+					ainv        = 0xFF - alpha;
 					// Blend it!
-					color.r =
-					    (uint8_t) DIV255(((img_color.r * alpha) + (bg_color.r * (0xFF - alpha))));
+					color.r = (uint8_t) DIV255(((img_color.r * alpha) + (bg_color.r * ainv)));
 
 					(*fxpPutPixel)(&coords, &color);
 				}
@@ -2042,6 +2043,7 @@ int
 			FBInkColor bg_color  = { 0U };
 			FBInkColor img_color = { 0U };
 			uint8_t    alpha     = 0U;
+			uint8_t    ainv      = 0U;
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
 					coords.x = (unsigned short int) (i + x_off);
@@ -2059,13 +2061,11 @@ int
 					img_color.g = (uint8_t)(data[pix_offset + 1] ^ invert);
 					img_color.b = (uint8_t)(data[pix_offset + 2] ^ invert);
 					alpha       = (uint8_t)(data[pix_offset + 3]);
+					ainv        = 0xFF - alpha;
 					// Blend it!
-					color.r =
-					    (uint8_t) DIV255(((img_color.r * alpha) + (bg_color.r * (0xFF - alpha))));
-					color.g =
-					    (uint8_t) DIV255(((img_color.g * alpha) + (bg_color.g * (0xFF - alpha))));
-					color.b =
-					    (uint8_t) DIV255(((img_color.b * alpha) + (bg_color.b * (0xFF - alpha))));
+					color.r = (uint8_t) DIV255(((img_color.r * alpha) + (bg_color.r * ainv)));
+					color.g = (uint8_t) DIV255(((img_color.g * alpha) + (bg_color.g * ainv)));
+					color.b = (uint8_t) DIV255(((img_color.b * alpha) + (bg_color.b * ainv)));
 
 					(*fxpPutPixel)(&coords, &color);
 				}
