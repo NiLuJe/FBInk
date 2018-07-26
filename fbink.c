@@ -322,6 +322,7 @@ static void
 	uint16_t    b;
 	uint16_t    g;
 	uint16_t    r;
+	// Like put_pixel_RGB565, read those two consecutive bytes at once
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 	v = *((uint16_t*) (g_fbink_fbp + pix_offset));
@@ -1159,7 +1160,7 @@ int
 		// NOTE: Unscii-16 is 8x16, handle it ;).
 		if (fbink_config->fontname == UNSCII_TALL) {
 			// We want at least 3 rows, so, viewHeight / 3 / glyphHeight gives us the maximum multiplier.
-			max_fontmult = (unsigned short int) (viewHeight / 3 / 16);
+			max_fontmult = (unsigned short int) (viewHeight / 3U / 16U);
 			if (FONTSIZE_MULT > max_fontmult) {
 				FONTSIZE_MULT = max_fontmult;
 				ELOG("[FBInk] Clamped font size multiplier from %hu to %hu",
@@ -1168,7 +1169,7 @@ int
 			}
 		} else {
 			// We want at least 3 columns, so, viewWidth / 3 / glyphWidth gives us the maximum multiplier.
-			max_fontmult = (unsigned short int) (viewWidth / 3 / 8);
+			max_fontmult = (unsigned short int) (viewWidth / 3U / 8U);
 			if (FONTSIZE_MULT > max_fontmult) {
 				FONTSIZE_MULT = max_fontmult;
 				ELOG("[FBInk] Clamped font size multiplier from %hu to %hu",
@@ -1177,7 +1178,7 @@ int
 			}
 		}
 #else
-		max_fontmult = (unsigned short int) (viewWidth / 3 / 8);
+		max_fontmult = (unsigned short int) (viewWidth / 3U / 8U);
 		if (FONTSIZE_MULT > max_fontmult) {
 			FONTSIZE_MULT = max_fontmult;
 			ELOG("[FBInk] Clamped font size multiplier from %hu to %hu",
@@ -1211,7 +1212,7 @@ int
 	ELOG("[FBInk] Line length: %hu cols, Page size: %hu rows", MAXCOLS, MAXROWS);
 
 	// Mention & remember if we can perfectly fit the final column on screen
-	if ((unsigned short int) (FONTW * MAXCOLS) == viewWidth) {
+	if ((FONTW * MAXCOLS) == viewWidth) {
 		deviceQuirks.isPerfectFit = true;
 		ELOG("[FBInk] It's a perfect fit!");
 	}
@@ -1324,7 +1325,7 @@ static void
 {
 	munmap(g_fbink_fbp, g_fbink_screensize);
 	// NOTE: Don't forget to reset those state flags,
-	//       so we won't skip mmap'ing on the next call without an fb fd passed...
+	//       so we won't skip mmap'ing on the next call without a fb fd passed...
 	g_fbink_isFbMapped = false;
 	g_fbink_fbp        = 0U;
 }
@@ -1398,11 +1399,11 @@ int
 
 	// Clamp coordinates to the screen, to avoid blowing up ;).
 	if (col >= MAXCOLS) {
-		col = (short int) (MAXCOLS - 1);
+		col = (short int) (MAXCOLS - 1U);
 		LOG("Clamped column to %hd", col);
 	}
 	if (row >= MAXROWS) {
-		row = (short int) (MAXROWS - 1);
+		row = (short int) (MAXROWS - 1U);
 		LOG("Clamped row to %hd", row);
 	}
 
