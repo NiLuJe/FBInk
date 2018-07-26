@@ -248,8 +248,6 @@ static void
 				case 375:    // Aura SE (star)
 					break;
 				case 379:    // Aura SE r2 (star)
-					deviceQuirks->isKoboMk7 = true;
-					break;
 				case 376:    // Clara HD (nova)
 					deviceQuirks->isKoboMk7 = true;
 					break;
