@@ -318,10 +318,10 @@ static void
 	// note: x * 2 as every pixel is 2 consecutive bytes
 	size_t pix_offset = (uint32_t)(coords->x << 1U) + (coords->y * finfo.line_length);
 
-	uint16_t    v;
-	uint16_t    b;
-	uint16_t    g;
-	uint16_t    r;
+	uint16_t v;
+	uint16_t b;
+	uint16_t g;
+	uint16_t r;
 	// Like put_pixel_RGB565, read those two consecutive bytes at once
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
