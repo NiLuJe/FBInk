@@ -212,6 +212,12 @@ static void
     rotate_nop(FBInkCoordinates* coords __attribute__((unused)))
 {
 	// NOP!
+	// May be smarter than one might think on armv7-a,
+	// (quoting http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.100069_0610_01_en/pge1425898111637.html
+	//  "NOP is not necessarily a time-consuming NOP.
+	//  The processor might remove it from the pipeline before it reaches the execution stage."),
+	// which might explain why this isn't worse than branching (i.e., what we did before
+	// https://github.com/NiLuJe/FBInk/commit/75407d4a44d7bfc7705665ad4ec9ecad0d03a368).
 }
 
 // Handle a few sanity checks...
