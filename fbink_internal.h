@@ -186,7 +186,7 @@ FBInkDeviceQuirks deviceQuirks = { 0 };
 #if !defined(FBINK_FOR_KINDLE) && !defined(FBINK_FOR_LEGACY)
 static void rotate_coordinates(FBInkCoordinates*);
 #endif
-static void rotate_nop(FBInkCoordinates*);
+static void rotate_nop(FBInkCoordinates* __attribute__((unused)));
 
 static void put_pixel_Gray4(FBInkCoordinates*, FBInkColor*);
 static void put_pixel_Gray8(FBInkCoordinates*, FBInkColor*);
