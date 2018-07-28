@@ -177,11 +177,16 @@ void (*fxpPutPixel)(FBInkCoordinates*, FBInkColor*) = NULL;
 #ifdef FBINK_WITH_IMAGE
 void (*fxpGetPixel)(FBInkCoordinates*, FBInkColor*) = NULL;
 #endif
+// As well as the appropriate coordinates rotation function...
+void (*fxpRotateCoords)(FBInkCoordinates*) = NULL;
 
 // Where we track device/screen-specific quirks
 FBInkDeviceQuirks deviceQuirks = { 0 };
 
+#if !defined(FBINK_FOR_KINDLE) && !defined(FBINK_FOR_LEGACY)
 static void rotate_coordinates(FBInkCoordinates*);
+#endif
+static void rotate_nop(FBInkCoordinates*);
 
 static void put_pixel_Gray4(FBInkCoordinates*, FBInkColor*);
 static void put_pixel_Gray8(FBInkCoordinates*, FBInkColor*);

@@ -150,6 +150,7 @@ static void
 #pragma GCC diagnostic pop
 }
 
+#if !defined(FBINK_FOR_KINDLE) && !defined(FBINK_FOR_LEGACY)
 // Handle rotation quirks...
 static void
     rotate_coordinates(FBInkCoordinates* coords)
@@ -161,7 +162,7 @@ static void
 //       In particular, only CW has been actually confirmed to behave properly (to handle the isKobo16Landscape quirk),
 //       and region rotation is NOT handled properly/at all.
 //       TL;DR: This is for documentation purposes only, never build w/ MATHS defined ;).
-#ifdef FBINK_WITH_MATHS
+#	ifdef FBINK_WITH_MATHS
 	unsigned short int rotation = FB_ROTATE_CW;
 	// i.e., θ (c.f., https://en.wikipedia.org/wiki/Cartesian_coordinate_system#Rotation)
 	double rangle = ((rotation * 90) * M_PI / 180.0);
@@ -200,10 +201,17 @@ static void
 
 	coords->x = xp;
 	coords->y = yp;
-#else
-	coords->x = rx;
-	coords->y = ry;
-#endif
+#	else
+	coords->x      = rx;
+	coords->y      = ry;
+#	endif
+}
+#endif    // FBINK_FOR_KOBO (!FBINK_FOR_KINDLE && !FBINK_FOR_LEGACY)
+
+static void
+    rotate_nop(FBInkCoordinates* coords __attribute__((unused)))
+{
+	// NOP!
 }
 
 // Handle a few sanity checks...
@@ -211,9 +219,7 @@ static void
     put_pixel(FBInkCoordinates* coords, FBInkColor* color)
 {
 	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
-	if (deviceQuirks.isKobo16Landscape) {
-		rotate_coordinates(coords);
-	}
+	(*fxpRotateCoords)(coords);
 
 	// NOTE: Discard off-screen pixels!
 	//       For instance, when we have a halfcell offset in conjunction with a !isPerfectFit pixel offset,
@@ -421,7 +427,7 @@ static void
 			break;
 	}
 #else
-	bitmap    = font8x8_get_bitmap(codepoint);
+	bitmap = font8x8_get_bitmap(codepoint);
 #endif
 
 	unsigned short int x;
@@ -1082,6 +1088,8 @@ int
 	viewWidth  = vinfo.xres;
 	viewHeight = vinfo.yres;
 
+	// NOTE: This needs to be NOP by default, no matter the target device ;).
+	fxpRotateCoords = &rotate_nop;
 #if !defined(FBINK_FOR_KINDLE) && !defined(FBINK_FOR_LEGACY)
 	// Make sure we default to no rotation shenanigans, to avoid issues on reinit...
 	deviceQuirks.isKobo16Landscape = false;
@@ -1120,6 +1128,7 @@ int
 			viewWidth                      = vinfo.yres;
 			viewHeight                     = vinfo.xres;
 			deviceQuirks.isKobo16Landscape = true;
+			fxpRotateCoords                = &rotate_coordinates;
 			ELOG("[FBInk] Enabled Kobo @ 16bpp fb rotation quirks (%ux%u -> %ux%u)",
 			     vinfo.xres,
 			     vinfo.yres,
@@ -2051,9 +2060,7 @@ int
 					coords.y = (unsigned short int) (j + y_off);
 					// NOTE: Same general idea as the fb_is_grayscale case,
 					//       except at this bpp we then have to handle rotation ourselves...
-					if (deviceQuirks.isKobo16Landscape) {
-						rotate_coordinates(&coords);
-					}
+					(*fxpRotateCoords)(&coords);
 					(*fxpGetPixel)(&coords, &bg_color);
 
 					// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
@@ -2083,9 +2090,7 @@ int
 					coords.x = (unsigned short int) (i + x_off);
 					coords.y = (unsigned short int) (j + y_off);
 					// NOTE: Again, we can only skip the OOB checks at this bpp.
-					if (deviceQuirks.isKobo16Landscape) {
-						rotate_coordinates(&coords);
-					}
+					(*fxpRotateCoords)(&coords);
 					(*fxpPutPixel)(&coords, &color);
 				}
 			}
