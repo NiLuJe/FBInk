@@ -253,7 +253,7 @@ static void
 					break;
 				case 0:
 				default:
-					fprintf(stderr, "[FBInk] Unidentified Kobo device code (%u)!\n", kobo_id);
+					fprintf(stderr, "[FBInk] Unidentified Kobo device code (%hu)!\n", kobo_id);
 					break;
 			}
 		}
