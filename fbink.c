@@ -611,8 +611,8 @@ static struct mxcfb_rect
 	unsigned char    b      = 0U;
 	FBInkCoordinates coords = { 0U };
 	while ((ch = u8_nextchar(text, &bi)) != 0U) {
-		LOG("Char %hhu (@ %hhu) out of %hhu is @ byte offset %u and is U+%04X",
-		    (uint8_t)(ci + 1U),
+		LOG("Char %hu (@ %hhu) out of %hhu is @ byte offset %u and is U+%04X",
+		    (unsigned short int) (ci + 1U),
 		    ci,
 		    charcount,
 		    bi,
