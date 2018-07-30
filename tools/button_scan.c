@@ -111,8 +111,9 @@ int
 				consecutive_matches++;
 				fprintf(stderr, "match %hu @ (%hu, %hu)\n", consecutive_matches, x, y);
 			} else {
-				// One button is roughly 17% of the screen's width on my H2O
-				if (consecutive_matches >= (0.16 * viewWidth) && consecutive_matches <= (0.18 * viewWidth)) {
+				// One button is roughly 17% of the screen's width on my H2O (18.5% in Large Print mode)
+				// NOTE: May need to be even stricter to avoid skipping the gap between the two buttons on some devices?
+				if (consecutive_matches >= (0.165 * viewWidth) && consecutive_matches <= (0.19 * viewWidth)) {
 					match_count++;
 					fprintf(stderr, "End match %hu @ (%hu, %hu)\n", match_count, x, y);
 					match_coords.y = y - ((0.048 * viewHeight) / 2U);	// Try to hit roughly the middle of the button (which takes roughly 4.8% of the screen's height)
@@ -123,16 +124,17 @@ int
 		}
 	}
 
-	// Half of the empty space over the tallest letter of one button is roughly 0.76% of the screen's height on my H2O (!large print)
+	// Half of the empty space over the tallest letter of one button (in Large Print) is roughly 0.625% of the screen's height on my H2O (0.76% otherwise).
 	// (2 buttons times 2 sides (top + bottom around the text) == 8)
-	unsigned short int min_target_count = 8U * (0.0076 * viewHeight);
-	// +25%? Might not be terribly useful...
-	unsigned short int max_target_count = 10U * (0.0076 * viewHeight);
+	// LP - 5%
+	unsigned short int min_target_count = 8U * (0.00625 * viewHeight) * 0.95;
+	// !LP + 10%
+	unsigned short int max_target_count = 8U * (0.0076 * viewHeight) * 1.10;
 	if (match_count >= min_target_count && match_count <= max_target_count) {
 		fprintf(stderr, "Match! :) (count: %hu >= %hu && <= %hu)\n", match_count, min_target_count, max_target_count);
 		fprintf(stdout, "x=%hu, y=%hu\n", match_coords.x, match_coords.y);
 	} else {
-		fprintf(stderr, "No match :( (count: %hu < %hu)\n", match_count, min_target_count);
+		fprintf(stderr, "No match :( (count: %hu < %hu || > %hu)\n", match_count, min_target_count, max_target_count);
 	}
 
 	// Cleanup
