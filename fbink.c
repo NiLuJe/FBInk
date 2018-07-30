@@ -1237,6 +1237,13 @@ int
 		fprintf(
 		    stderr,
 		    "[FBInk] Overflow detected when computing MAXCOLS or MAXROWS! Try with a larger font size multiplier, or report this as a bug ;).\n");
+		// Log the exact mismatch (by doing the computation without truncation on larger data types).
+		fprintf(stderr,
+			"[FBInk] MAXCOLS: %u -> %hhu & MAXROWS: %u -> %hhu\n",
+			viewWidth / FONTW,
+			MAXCOLS,
+			viewHeight / FONTH,
+			MAXROWS);
 		return ERRCODE(EXIT_FAILURE);
 	}
 	ELOG("[FBInk] Line length: %hhu cols, Page size: %hhu rows", MAXCOLS, MAXROWS);
