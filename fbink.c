@@ -1579,13 +1579,13 @@ int
 		// Just fudge the column for centering...
 		bool halfcell_offset = false;
 		if (fbink_config->is_centered) {
-			col = (short int) ((MAXCOLS - line_len) / 2);
+			col = (short int) ((uint8_t)(MAXCOLS - line_len) / 2U);
 
 			// NOTE: If the line itself is not a perfect fit, ask draw to start drawing half a cell
 			//       to the right to compensate, in order to achieve perfect centering...
 			//       This piggybacks a bit on the !isPerfectFit compensation done in draw,
 			//       which already does subcell placement ;).
-			if ((uint8_t)(col * 2) + line_len != MAXCOLS) {
+			if (((uint8_t) col * 2U) + line_len != MAXCOLS) {
 				LOG("Line is not a perfect fit, fudging centering by one half of a cell to the right");
 				// NOTE: Flag it for correction in draw
 				halfcell_offset = true;
@@ -1599,7 +1599,7 @@ int
 			col = 0;
 
 			// Compute our padding length
-			uint8_t left_pad = (uint8_t)((MAXCOLS - line_len) / 2);
+			uint8_t left_pad = (uint8_t)(MAXCOLS - line_len) / 2U;
 			// As for the right padding, we basically just have to print 'til the edge of the screen
 			uint8_t right_pad = (uint8_t)(MAXCOLS - line_len - left_pad);
 
