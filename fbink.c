@@ -1469,7 +1469,7 @@ int
 
 	// Truncate to a single screen...
 	if (lines > MAXROWS) {
-		LOG("Can only print %hhu out of %hu lines, truncating!", MAXROWS, lines);
+		LOG("Can only print %hu out of %hu lines, truncating!", MAXROWS, lines);
 		lines = MAXROWS;
 	}
 
@@ -1501,7 +1501,7 @@ int
 	// NOTE: Since we re-use line on each iteration of the loop,
 	//       we do also need to clear it at the end of the loop, in preparation of the next iteration.
 
-	LOG("Need %hu lines to print %u characters over %hhu available columns", lines, charcount, available_cols);
+	LOG("Need %hu lines to print %u characters over %hu available columns", lines, charcount, available_cols);
 
 	// Do the initial computation outside the loop,
 	// so we'll be able to re-use line_len to accurately compute chars_left when looping.
@@ -1633,7 +1633,7 @@ int
 			unsigned int padded_bytes = line_bytes + (unsigned int) (available_cols - line_len);
 			// NOTE: Don't touch line_len, because we're *adding* new blank characters,
 			//       we're still printing the exact same amount of characters *from our string*.
-			LOG("Padded %u bytes to %u to cover %hhu columns", line_bytes, padded_bytes, available_cols);
+			LOG("Padded %u bytes to %u to cover %hu columns", line_bytes, padded_bytes, available_cols);
 			bytes_printed = snprintf(line,
 						 padded_bytes + 1U,
 						 "%*.*s",
