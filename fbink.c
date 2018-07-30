@@ -163,7 +163,7 @@ static void
 //       and region rotation is NOT handled properly/at all.
 //       TL;DR: This is for documentation purposes only, never build w/ MATHS defined ;).
 #	ifdef FBINK_WITH_MATHS
-	unsigned short int rotation = FB_ROTATE_CW;
+	uint8_t rotation = FB_ROTATE_CW;
 	// i.e., θ (c.f., https://en.wikipedia.org/wiki/Cartesian_coordinate_system#Rotation)
 	double rangle = ((rotation * 90) * M_PI / 180.0);
 	double fxp    = coords->x * cos(rangle) - coords->y * sin(rangle);
