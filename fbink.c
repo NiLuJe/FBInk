@@ -1232,6 +1232,11 @@ int
 	// Compute MAX* values now that we know the screen & font resolution
 	MAXCOLS = (uint8_t)(viewWidth / FONTW);
 	MAXROWS = (uint8_t)(viewHeight / FONTH);
+	// Cheap-ass way to check that we did not overflow...
+	if ((MAXCOLS * FONTW < viewWidth - FONTW) || (MAXROWS * FONTH < viewHeight - FONTH)) {
+		fprintf(stderr, "[FBInk] Overflow detected when computing MAXCOLS or MAXROWS! Try with a larger font size multiplier, or report this as a bug ;).\n");
+		return ERRCODE(EXIT_FAILURE);
+	}
 	ELOG("[FBInk] Line length: %hhu cols, Page size: %hhu rows", MAXCOLS, MAXROWS);
 
 	// Mention & remember if we can perfectly fit the final column on screen
