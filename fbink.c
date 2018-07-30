@@ -496,7 +496,7 @@ static struct mxcfb_rect
 	// Do we have a centering induced halfcell adjustment to correct?
 	if (halfcell_offset) {
 		pixel_offset = FONTW / 2U;
-		LOG("Incrementing pixel_offset by %u pixels to account for a halfcell centering tweak", pixel_offset);
+		LOG("Incrementing pixel_offset by %hu pixels to account for a halfcell centering tweak", pixel_offset);
 	}
 	// Do we have a permanent adjustment to make because of dead space on the right edge?
 	if (!deviceQuirks.isPerfectFit) {
@@ -504,7 +504,7 @@ static struct mxcfb_rect
 		unsigned short int deadzone_offset =
 		    (unsigned short int) (viewWidth - (unsigned short int) (MAXCOLS * FONTW)) / 2U;
 		pixel_offset = (unsigned short int) (pixel_offset + deadzone_offset);
-		LOG("Incrementing pixel_offset by %u pixels to compensate for dead space on the right edge",
+		LOG("Incrementing pixel_offset by %hu pixels to compensate for dead space on the right edge",
 		    deadzone_offset);
 	}
 
@@ -520,7 +520,7 @@ static struct mxcfb_rect
 
 	// Do we have a pixel offset to honor?
 	if (pixel_offset > 0U) {
-		LOG("Moving pen %u pixels to the right to honor subcell centering adjustments", pixel_offset);
+		LOG("Moving pen %hu pixels to the right to honor subcell centering adjustments", pixel_offset);
 		// NOTE: We need to update the start of our region rectangle if it doesn't already cover the full line,
 		//       i.e., when we're not padding + centering.
 		// NOTE: Make sure we don't mess with multiline strings,
@@ -1227,7 +1227,7 @@ int
 	// Go!
 	FONTW = (unsigned short int) (FONTW * FONTSIZE_MULT);
 	FONTH = (unsigned short int) (FONTH * FONTSIZE_MULT);
-	ELOG("[FBInk] Fontsize set to %dx%d", FONTW, FONTH);
+	ELOG("[FBInk] Fontsize set to %hux%hu", FONTW, FONTH);
 
 	// Compute MAX* values now that we know the screen & font resolution
 	MAXCOLS = (unsigned short int) (viewWidth / FONTW);
@@ -1560,11 +1560,11 @@ int
 				// (it'll render as a blank), mostly to make padding look nicer,
 				// but also so that line_bytes matches line_len ;).
 				// And finally, as we've explained earlier, trim line_len to where we stopped.
-				LOG("Line length was %u characters, but LF is character number %u", line_len, cn);
+				LOG("Line length was %hu characters, but LF is character number %u", line_len, cn);
 				line_len = cn;
 				// Don't touch line_offset, the beginning of our line has not changed,
 				// only its length was cut short.
-				LOG("Adjusted lines to %u & line_len to %u", lines, line_len);
+				LOG("Adjusted lines to %hu & line_len to %hu", lines, line_len);
 				// And of course we break, because that was the whole point of this shenanigan!
 				break;
 			}
