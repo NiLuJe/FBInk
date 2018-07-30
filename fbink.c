@@ -1234,7 +1234,9 @@ int
 	MAXROWS = (uint8_t)(viewHeight / FONTH);
 	// Cheap-ass way to check that we did not overflow and/or truncate...
 	if ((MAXCOLS * FONTW < viewWidth - FONTW) || (MAXROWS * FONTH < viewHeight - FONTH)) {
-		fprintf(stderr, "[FBInk] Overflow detected when computing MAXCOLS or MAXROWS! Try with a larger font size multiplier, or report this as a bug ;).\n");
+		fprintf(
+		    stderr,
+		    "[FBInk] Overflow detected when computing MAXCOLS or MAXROWS! Try with a larger font size multiplier, or report this as a bug ;).\n");
 		return ERRCODE(EXIT_FAILURE);
 	}
 	ELOG("[FBInk] Line length: %hhu cols, Page size: %hhu rows", MAXCOLS, MAXROWS);
