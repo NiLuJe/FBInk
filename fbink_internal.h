@@ -166,6 +166,8 @@ uint8_t                  FONTSIZE_MULT = 1U;
 // Slightly arbitrary-ish fallback values
 // NOTE: Using uint8_t here might be cutting it a bit close...
 //       With the smallest font size possible, we'll start overflowing after 2048 pixels in a side...
+//       For ref., changed in https://github.com/NiLuJe/FBInk/commit/0bbfbaf9ff450116b615d00c233cc4c858f53aa4
+//       There's an explicit abort on overflow in fbink_init to catch this if we ever get awesome screens like that ;).
 uint8_t MAXROWS = 45U;
 uint8_t MAXCOLS = 32U;
 // Verbose is for diagnostic/debug info in general
