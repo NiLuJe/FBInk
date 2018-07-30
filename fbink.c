@@ -402,7 +402,7 @@ static const unsigned char*
 // Render a specific font8x8 glyph into a pixmap
 // (base size: 8x8, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
 static void
-    font8x8_render(uint32_t codepoint, unsigned char* glyph_pixmap, unsigned short int fontname UNUSED_BY_MINIMAL)
+    font8x8_render(uint32_t codepoint, unsigned char* glyph_pixmap, uint8_t fontname UNUSED_BY_MINIMAL)
 {
 	const unsigned char* bitmap = NULL;
 
@@ -440,15 +440,15 @@ static void
 	unsigned short int y;
 	unsigned short int i;
 	unsigned short int j;
-	unsigned short int k;
+	uint8_t            k;
 	bool               set = false;
 	size_t             idx;
 	for (i = 0U; i < FONTH; i++) {
 		// x: input row, i: output row
-		x = i / FONTSIZE_MULT;
+		x = (unsigned short int) (i / FONTSIZE_MULT);
 		for (j = 0U; j < FONTW; j++) {
 			// y: input column, j: output column
-			y   = j / FONTSIZE_MULT;
+			y   = (unsigned short int) (j / FONTSIZE_MULT);
 			set = bitmap[x] & 1 << y;
 			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTW=1,0)
 			idx = (size_t)(j + (i * FONTW));
@@ -461,16 +461,19 @@ static void
 
 // Helper function for drawing
 static struct mxcfb_rect
-    draw(const char*        text,
-	 unsigned short int row,
-	 unsigned short int col,
-	 bool               is_inverted,
-	 bool               is_centered,
-	 unsigned short int multiline_offset,
-	 unsigned short int fontname,
-	 bool               halfcell_offset)
+    draw(const char* text,
+	 uint8_t     row,
+	 uint8_t     col,
+	 bool        is_inverted,
+	 bool        is_centered,
+	 uint8_t     multiline_offset,
+	 uint8_t     fontname,
+	 bool        halfcell_offset)
 {
-	LOG("Printing '%s' @ line offset %hu (meaning row %d)", text, multiline_offset, row + multiline_offset);
+	LOG("Printing '%s' @ line offset %hhu (meaning row %hhu)",
+	    text,
+	    multiline_offset,
+	    (uint8_t)(row + multiline_offset));
 	// NOTE: It's a grayscale ramp, so r = g = b (= v).
 	FBInkColor fgC = { is_inverted ? WHITE : BLACK, fgC.r, fgC.r };
 	FBInkColor bgC = { is_inverted ? BLACK : WHITE, bgC.r, bgC.r };
@@ -478,15 +481,15 @@ static struct mxcfb_rect
 	unsigned short int x;
 	unsigned short int y;
 	// Adjust row in case we're a continuation of a multi-line print...
-	row = (unsigned short int) (row + multiline_offset);
+	row = (uint8_t)(row + multiline_offset);
 
 	// Compute the length of our actual string
 	// NOTE: We already took care in fbink_print() of making sure that the string passed in text wouldn't take up
 	//       more space (as in columns, not bytes) than (MAXCOLS - col), the maximum printable length.
 	//       And as we're printing glyphs, we need to iterate over the number of characters/grapheme clusters,
 	//       not bytes.
-	unsigned int charcount = u8_strlen(text);
-	LOG("Character count: %u (over %zu bytes)", charcount, strlen(text));
+	uint8_t charcount = (uint8_t) u8_strlen(text);
+	LOG("Character count: %hhu (over %zu bytes)", charcount, strlen(text));
 
 	// Compute our actual subcell offset in pixels
 	unsigned short int pixel_offset = 0U;
@@ -602,13 +605,18 @@ static struct mxcfb_rect
 	pixmap = alloca(sizeof(*pixmap) * (size_t)((FONTW * FONTH) + FONTSIZE_MULT - 1));
 
 	// Loop through all the *characters* in the text string
-	unsigned int       bi     = 0U;
-	unsigned short int ci     = 0U;
-	uint32_t           ch     = 0U;
-	unsigned char      b      = 0U;
-	FBInkCoordinates   coords = { 0U };
+	unsigned int     bi     = 0U;
+	uint8_t          ci     = 0U;
+	uint32_t         ch     = 0U;
+	unsigned char    b      = 0U;
+	FBInkCoordinates coords = { 0U };
 	while ((ch = u8_nextchar(text, &bi)) != 0U) {
-		LOG("Char %u (@ %u) out of %u is @ byte offset %u and is U+%04X", ci + 1U, ci, charcount, bi, ch);
+		LOG("Char %hhu (@ %hhu) out of %hhu is @ byte offset %u and is U+%04X",
+		    (uint8_t)(ci + 1U),
+		    ci,
+		    charcount,
+		    bi,
+		    ch);
 
 		// Get the glyph's pixmap
 		font8x8_render(ch, pixmap, fontname);
@@ -1164,7 +1172,7 @@ int
 	// Obey user-specified font scaling multiplier
 	if (fbink_config->fontmult > 0) {
 		FONTSIZE_MULT = fbink_config->fontmult;
-		unsigned short int max_fontmult;
+		uint8_t max_fontmult;
 
 		// NOTE: Clamp to safe values to avoid blowing up the stack with alloca later,
 		//       in case we get fed a stupidly large value.
@@ -1175,28 +1183,28 @@ int
 		// NOTE: Unscii-16 is 8x16, handle it ;).
 		if (fbink_config->fontname == UNSCII_TALL) {
 			// We want at least 3 rows, so, viewHeight / 3 / glyphHeight gives us the maximum multiplier.
-			max_fontmult = (unsigned short int) (viewHeight / 3U / 16U);
+			max_fontmult = (uint8_t)(viewHeight / 3U / 16U);
 			if (FONTSIZE_MULT > max_fontmult) {
 				FONTSIZE_MULT = max_fontmult;
-				ELOG("[FBInk] Clamped font size multiplier from %hu to %hu",
+				ELOG("[FBInk] Clamped font size multiplier from %hhu to %hhu",
 				     fbink_config->fontmult,
 				     max_fontmult);
 			}
 		} else {
 			// We want at least 3 columns, so, viewWidth / 3 / glyphWidth gives us the maximum multiplier.
-			max_fontmult = (unsigned short int) (viewWidth / 3U / 8U);
+			max_fontmult = (uint8_t)(viewWidth / 3U / 8U);
 			if (FONTSIZE_MULT > max_fontmult) {
 				FONTSIZE_MULT = max_fontmult;
-				ELOG("[FBInk] Clamped font size multiplier from %hu to %hu",
+				ELOG("[FBInk] Clamped font size multiplier from %hhu to %hhu",
 				     fbink_config->fontmult,
 				     max_fontmult);
 			}
 		}
 #else
-		max_fontmult = (unsigned short int) (viewWidth / 3U / 8U);
+		max_fontmult = (uint8_t)(viewWidth / 3U / 8U);
 		if (FONTSIZE_MULT > max_fontmult) {
 			FONTSIZE_MULT = max_fontmult;
-			ELOG("[FBInk] Clamped font size multiplier from %hu to %hu",
+			ELOG("[FBInk] Clamped font size multiplier from %hhu to %hhu",
 			     fbink_config->fontmult,
 			     max_fontmult);
 		}
@@ -1222,9 +1230,9 @@ int
 	ELOG("[FBInk] Fontsize set to %dx%d", FONTW, FONTH);
 
 	// Compute MAX* values now that we know the screen & font resolution
-	MAXCOLS = (unsigned short int) (viewWidth / FONTW);
-	MAXROWS = (unsigned short int) (viewHeight / FONTH);
-	ELOG("[FBInk] Line length: %hu cols, Page size: %hu rows", MAXCOLS, MAXROWS);
+	MAXCOLS = (uint8_t)(viewWidth / FONTW);
+	MAXROWS = (uint8_t)(viewHeight / FONTH);
+	ELOG("[FBInk] Line length: %hhu cols, Page size: %hhu rows", MAXCOLS, MAXROWS);
 
 	// Mention & remember if we can perfectly fit the final column on screen
 	if ((FONTW * MAXCOLS) == viewWidth) {
@@ -1396,7 +1404,7 @@ int
 
 	struct mxcfb_rect region = { 0U };
 	// We declare that a bit early, because that'll hold our return value on success.
-	unsigned short int multiline_offset = 0U;
+	uint8_t multiline_offset = 0U;
 
 	// Clear screen?
 	if (fbink_config->is_cleared) {
@@ -1437,17 +1445,17 @@ int
 	// NOTE: When centered, we enforce one padding character on the left,
 	//       as well as one padding character on the right when we have a perfect fit.
 	//       This is to avoid potentially printing stuff too close to the bezel and/or behind the bezel.
-	unsigned short int available_cols = MAXCOLS;
+	uint8_t available_cols = MAXCOLS;
 	if (fbink_config->is_centered) {
 		// One for the left padding
-		available_cols = (unsigned short int) (available_cols - 1U);
+		available_cols = (uint8_t)(available_cols - 1U);
 		if (deviceQuirks.isPerfectFit) {
 			// And one for the right padding
-			available_cols = (unsigned short int) (available_cols - 1U);
+			available_cols = (uint8_t)(available_cols - 1U);
 		}
 	} else {
 		// Otherwise, col will be fixed, so, trust it.
-		available_cols = (unsigned short int) (available_cols - col);
+		available_cols = (uint8_t)(available_cols - col);
 	}
 	// Given that, compute how many lines it'll take to print all that in these constraints...
 	unsigned short int lines = 1U;
@@ -1461,7 +1469,7 @@ int
 
 	// Truncate to a single screen...
 	if (lines > MAXROWS) {
-		LOG("Can only print %hu out of %hu lines, truncating!", MAXROWS, lines);
+		LOG("Can only print %hhu out of %hu lines, truncating!", MAXROWS, lines);
 		lines = MAXROWS;
 	}
 
@@ -1493,7 +1501,7 @@ int
 	// NOTE: Since we re-use line on each iteration of the loop,
 	//       we do also need to clear it at the end of the loop, in preparation of the next iteration.
 
-	LOG("Need %hu lines to print %u characters over %hu available columns", lines, charcount, available_cols);
+	LOG("Need %hu lines to print %u characters over %hhu available columns", lines, charcount, available_cols);
 
 	// Do the initial computation outside the loop,
 	// so we'll be able to re-use line_len to accurately compute chars_left when looping.
@@ -1501,17 +1509,17 @@ int
 	//       And we need to work both in amount of characters for column/width arithmetic,
 	//       and in bytes for snprintf...
 	unsigned int chars_left = charcount;
-	unsigned int line_len   = 0U;
+	uint8_t      line_len   = 0U;
 	// If we have multiple lines worth of stuff to print, draw it line per line
 	while (chars_left > line_len) {
-		LOG("Line %u (of ~%u), previous line was %u characters long and there were %u characters left to print",
-		    multiline_offset + 1U,
+		LOG("Line %hhu (of ~%hu), previous line was %hhu characters long and there were %u characters left to print",
+		    (uint8_t)(multiline_offset + 1U),
 		    lines,
 		    line_len,
 		    chars_left);
 		// Make sure we don't try to draw off-screen...
 		if (row + multiline_offset >= MAXROWS) {
-			LOG("Can only print %hu lines, discarding the %u characters left!",
+			LOG("Can only print %hhu lines, discarding the %u characters left!",
 			    MAXROWS,
 			    chars_left - line_len);
 			// And that's it, we're done.
@@ -1521,15 +1529,15 @@ int
 		// Compute the amount of characters left to print...
 		chars_left -= line_len;
 		// And use it to compute the amount of characters to print on *this* line
-		line_len = MIN(chars_left, available_cols);
-		LOG("Characters to print: %u out of the %u remaining ones", line_len, chars_left);
+		line_len = (uint8_t) MIN(chars_left, available_cols);
+		LOG("Characters to print: %hhu out of the %u remaining ones", line_len, chars_left);
 
 		// NOTE: Now we just have to switch from characters to bytes, both for line_len & chars_left...
 		// First, get the byte offset of this section of our string (i.e., this line)...
 		unsigned int line_offset = u8_offset(string, charcount - chars_left);
 		// ... then compute how many bytes we'll need to store it.
 		unsigned int line_bytes = 0U;
-		unsigned int cn         = 0U;
+		uint8_t      cn         = 0U;
 		uint32_t     ch         = 0U;
 		while ((ch = u8_nextchar(string + line_offset, &line_bytes)) != 0U) {
 			cn++;
@@ -1571,13 +1579,13 @@ int
 		// Just fudge the column for centering...
 		bool halfcell_offset = false;
 		if (fbink_config->is_centered) {
-			col = (short int) ((MAXCOLS - line_len) / 2U);
+			col = (short int) ((MAXCOLS - line_len) / 2);
 
 			// NOTE: If the line itself is not a perfect fit, ask draw to start drawing half a cell
 			//       to the right to compensate, in order to achieve perfect centering...
 			//       This piggybacks a bit on the !isPerfectFit compensation done in draw,
 			//       which already does subcell placement ;).
-			if ((unsigned int) (col * 2) + line_len != MAXCOLS) {
+			if ((uint8_t)(col * 2) + line_len != MAXCOLS) {
 				LOG("Line is not a perfect fit, fudging centering by one half of a cell to the right");
 				// NOTE: Flag it for correction in draw
 				halfcell_offset = true;
@@ -1591,16 +1599,16 @@ int
 			col = 0;
 
 			// Compute our padding length
-			unsigned int left_pad = (MAXCOLS - line_len) / 2U;
+			uint8_t left_pad = (uint8_t)((MAXCOLS - line_len) / 2);
 			// As for the right padding, we basically just have to print 'til the edge of the screen
-			unsigned int right_pad = MAXCOLS - line_len - left_pad;
+			uint8_t right_pad = (uint8_t)(MAXCOLS - line_len - left_pad);
 
 			// Compute the effective right padding value for science!
-			LOG("Total size: %u + %u + %u = %u",
+			LOG("Total size: %hhu + %hhu + %hhu = %hhu",
 			    left_pad,
 			    line_len,
 			    right_pad,
-			    left_pad + line_len + right_pad);
+			    (uint8_t)(left_pad + line_len + right_pad));
 
 			// NOTE: To recap:
 			//       Copy at most (MAXCOLS * 4) + 1 bytes into line
@@ -1622,10 +1630,10 @@ int
 		} else if (fbink_config->is_padded) {
 			// NOTE: Rely on the field width for padding ;).
 			// Padding character is a space, which is 1 byte, so that's good enough ;).
-			unsigned int padded_bytes = line_bytes + (available_cols - line_len);
+			unsigned int padded_bytes = line_bytes + (unsigned int) (available_cols - line_len);
 			// NOTE: Don't touch line_len, because we're *adding* new blank characters,
 			//       we're still printing the exact same amount of characters *from our string*.
-			LOG("Padded %u bytes to %u to cover %u columns", line_bytes, padded_bytes, available_cols);
+			LOG("Padded %u bytes to %u to cover %hhu columns", line_bytes, padded_bytes, available_cols);
 			bytes_printed = snprintf(line,
 						 padded_bytes + 1U,
 						 "%*.*s",
@@ -1640,8 +1648,8 @@ int
 		LOG("snprintf wrote %d bytes", bytes_printed);
 
 		region = draw(line,
-			      (unsigned short int) row,
-			      (unsigned short int) col,
+			      (uint8_t) row,
+			      (uint8_t) col,
 			      fbink_config->is_inverted,
 			      fbink_config->is_centered,
 			      multiline_offset,

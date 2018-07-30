@@ -41,7 +41,7 @@
 #if defined(FBINK_FOR_KINDLE) || defined(FBINK_FOR_LEGACY)
 static bool     is_kindle_device(uint32_t, FBInkDeviceQuirks*);
 static bool     is_kindle_device_new(uint32_t, FBInkDeviceQuirks*);
-static uint32_t from_base(char*, unsigned short int);
+static uint32_t from_base(char*, uint8_t);
 static void     identify_kindle(FBInkDeviceQuirks*);
 #else
 static void identify_kobo(FBInkDeviceQuirks*);

@@ -70,18 +70,18 @@ typedef enum
 // What a FBInk Print config should look like
 typedef struct
 {
-	short int          row;
-	short int          col;
-	short unsigned int fontmult;
-	short unsigned int fontname;
-	bool               is_inverted;
-	bool               is_flashing;
-	bool               is_cleared;
-	bool               is_centered;
-	bool               is_padded;
-	bool               is_verbose;
-	bool               is_quiet;
-	bool               ignore_alpha;
+	short int row;
+	short int col;
+	uint8_t   fontmult;
+	uint8_t   fontname;
+	bool      is_inverted;
+	bool      is_flashing;
+	bool      is_cleared;
+	bool      is_centered;
+	bool      is_padded;
+	bool      is_verbose;
+	bool      is_quiet;
+	bool      ignore_alpha;
 } FBInkConfig;
 
 // NOTE: Unless otherwise specified, stuff returns a negative value (usually -(EXIT_FAILURE)) on failure & EXIT_SUCCESS otherwise ;).

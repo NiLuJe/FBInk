@@ -143,14 +143,14 @@ static bool
 // NOTE: This is from KindleTool,
 //       c.f., https://github.com/NiLuJe/KindleTool/blob/master/KindleTool/convert.c#L82
 static uint32_t
-    from_base(char* num, unsigned short int base)
+    from_base(char* num, uint8_t base)
 {
 	// NOTE: Crockford's Base32, but with the "L" & "U" re-added in?
 	const char* tbl    = "0123456789ABCDEFGHJKLMNPQRSTUVWX";
 	uint32_t    result = 0;
 
 	if (base > strlen(tbl)) {
-		fprintf(stderr, "[FBInk] base %u is unsupported (too large).\n", base);
+		fprintf(stderr, "[FBInk] base %hhu is unsupported (too large).\n", base);
 		return 0;
 	}
 

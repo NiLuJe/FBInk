@@ -162,10 +162,12 @@ uint32_t                 viewWidth;
 uint32_t                 viewHeight;
 unsigned short int       FONTW         = 8U;
 unsigned short int       FONTH         = 8U;
-unsigned short int       FONTSIZE_MULT = 1U;
+uint8_t                  FONTSIZE_MULT = 1U;
 // Slightly arbitrary-ish fallback values
-unsigned short int MAXROWS = 45U;
-unsigned short int MAXCOLS = 32U;
+// NOTE: Using uint8_t here might be cutting it a bit close...
+//       With the smallest font size possible, we'll start overflowing after 2048 pixels in a side...
+uint8_t MAXROWS = 45U;
+uint8_t MAXCOLS = 32U;
 // Verbose is for diagnostic/debug info in general
 bool g_isVerbose = false;
 // Quiet is for fbink_init's hardware setup info
@@ -211,10 +213,9 @@ static void fill_rect(unsigned short int, unsigned short int, unsigned short int
 static void clear_screen(uint8_t);
 
 static const unsigned char* font8x8_get_bitmap(uint32_t);
-static void                 font8x8_render(uint32_t, unsigned char*, unsigned short int UNUSED_BY_MINIMAL);
+static void                 font8x8_render(uint32_t, unsigned char*, uint8_t UNUSED_BY_MINIMAL);
 
-static struct mxcfb_rect
-    draw(const char*, unsigned short int, unsigned short int, bool, bool, unsigned short int, unsigned short int, bool);
+static struct mxcfb_rect draw(const char*, uint8_t, uint8_t, bool, bool, uint8_t, uint8_t, bool);
 
 #ifdef FBINK_FOR_LEGACY
 static int refresh_legacy(int, const struct mxcfb_rect, bool);

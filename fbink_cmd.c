@@ -265,7 +265,7 @@ int
 				}
 				break;
 			case 'S':
-				fbink_config.fontmult = (short unsigned int) strtoul(optarg, NULL, 10);
+				fbink_config.fontmult = (uint8_t) strtoul(optarg, NULL, 10);
 				break;
 			case 'F':
 				if (strcasecmp(optarg, "IBM") == 0) {
@@ -364,7 +364,7 @@ int
 			//       if we had an easy way to... (c.f., my rant about Kobo's broken libc in fbink_internal.h)
 			if (!fbink_config.is_quiet) {
 				printf(
-				    "Printing string '%s' @ column %hd, row %hd (inverted: %s, flashing: %s, centered: %s, left padded: %s, clear screen: %s, font scaling: x%hu)\n",
+				    "Printing string '%s' @ column %hd, row %hd (inverted: %s, flashing: %s, centered: %s, left padded: %s, clear screen: %s, font scaling: x%hhu)\n",
 				    string,
 				    fbink_config.col,
 				    fbink_config.row,
