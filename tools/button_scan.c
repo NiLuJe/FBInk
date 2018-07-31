@@ -145,16 +145,22 @@ int
 	if (gotcha) {
 		fprintf(stderr, "Match! :) (over %hu lines)\n", matched_lines);
 		fprintf(stdout, "x=%hu, y=%hu\n", match_coords.x, match_coords.y);
+		// NOTE: The H2O²r1 is a special snowflake, input is rotated 90° in the *other* direction
+		//       (i.e., origin at the bottom-left instead of top-right).
+		//       Hopefully that doesn't apply to the fb itself, too...
+		fprintf(stdout,
+			"H2O²r1: x=%hu, y=%hu\n",
+			(unsigned short int) (viewHeight - match_coords.y - 1),
+			match_coords.x);
 		// NOTE: Rotate coords, because the Touch origin may not match the fb origin... >_<"
 		// FIXME: May output garbage if fb is already rotated -_-"
 		//        Set match_coords to coords.x/y and only do this rota if !fbink_is_fb_quirky?
-		// NOTE: H2O²r1 appears to be a special snowflake, too, so, that one might be fun... (i.e., ry = x there?)
 		rotate_coordinates(&match_coords);
-		/*
-		unsigned short int rx = match_coords.y;
-		unsigned short int ry = (unsigned short int) (viewWidth - match_coords.x - 1);
-		*/
 		fprintf(stdout, "Rotated: x=%hu, y=%hu\n", match_coords.x, match_coords.y);
+		fprintf(stdout,
+			"Rotated H2O²r1: x=%hu, y=%hu\n",
+			(unsigned short int) (viewHeight - match_coords.x - 1),
+			(unsigned short int) (viewWidth - match_coords.y - 1));
 	} else {
 		fprintf(stderr, "No match :(\n");
 	}
