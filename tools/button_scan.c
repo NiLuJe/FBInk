@@ -18,54 +18,19 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Build w/ ${CROSS_TC}-gcc -O3 -ffast-math -ftree-vectorize -funroll-loops -march=armv7-a -mtune=cortex-a8 -mfpu=neon -mfloat-abi=hard -mthumb -D_GLIBCXX_USE_CXX11_ABI=0 -pipe -fomit-frame-pointer -frename-registers -fweb -flto=9 -fuse-linker-plugin tools/button_scan.c -LRelease/ -l:libfbink.a -o button_scan
+// Build w/ ${CROSS_TC}-gcc -O3 -ffast-math -ftree-vectorize -funroll-loops -march=armv7-a -mtune=cortex-a8 -mfpu=neon -mfloat-abi=hard -mthumb -D_GLIBCXX_USE_CXX11_ABI=0 -pipe -fomit-frame-pointer -frename-registers -fweb -flto=9 -fuse-linker-plugin -Wall -Wextra -Wno-unused-function -s tools/button_scan.c -o button_scan
 
-#include "../fbink.h"
 // NOTE: Don't do this at home. This is a quick and rough POC to have some fun w/ https://www.mobileread.com/forums/showpost.php?p=3731967&postcount=12
-//       No-one should ever, ever, ever include internal headers, I'm just re-using bits of private API to isolate this POC.
-#include "../fbink_internal.h"
+//       No-one should ever, ever, ever include internal headers/code, I'm just re-using bits of private API to isolate this POC.
+#include "../fbink.c"
+#include "../fbink_device_id.c"
 
 // FBInk always returns negative values on failure
 #define ERRCODE(e) (-(e))
 
-// Help message
-static void
-    show_helpmsg(void)
-{
-	printf(
-	    "\n"
-	    "FBInk Scan (w/ FBInk %s)\n"
-	    "\n"
-	    "Usage: fbink\n"
-	    "\n"
-	    "Spits out x, y coordinates for the USB Connect button.\n"
-	    "\n",
-	    fbink_version());
-
-	return;
-}
-
-// Memory map the framebuffer (from fbink.c, part of the private API, but implementation is in the C file, so, copy it).
-static int
-    memmap_fb(int fbfd)
-{
-	g_fbink_screensize = finfo.smem_len;
-	g_fbink_fbp = (unsigned char*) mmap(NULL, g_fbink_screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
-	if (g_fbink_fbp == MAP_FAILED) {
-		char  buf[256];
-		char* errstr = strerror_r(errno, buf, sizeof(buf));
-		fprintf(stderr, "[FBInk] mmap: %s\n", errstr);
-		return ERRCODE(EXIT_FAILURE);
-	} else {
-		g_fbink_isFbMapped = true;
-	}
-
-	return EXIT_SUCCESS;
-}
-
 // Application entry point
 int
-    main(int argc, char* argv[])
+    main(int argc __attribute__((unused)), char* argv[] __attribute__((unused)))
 {
 	FBInkConfig fbink_config = { 0 };
 
@@ -184,9 +149,12 @@ int
 		// FIXME: May output garbage if fb is already rotated -_-"
 		//        Set match_coords to coords.x/y and only do this rota if !fbink_is_fb_quirky?
 		// NOTE: H2O²r1 appears to be a special snowflake, too, so, that one might be fun... (i.e., ry = x there?)
+		rotate_coordinates(&match_coords);
+		/*
 		unsigned short int rx = match_coords.y;
 		unsigned short int ry = (unsigned short int) (viewWidth - match_coords.x - 1);
-		fprintf(stdout, "Rotated: x=%hu, y=%hu\n", rx, ry);
+		*/
+		fprintf(stdout, "Rotated: x=%hu, y=%hu\n", match_coords.x, match_coords.y);
 	} else {
 		fprintf(stderr, "No match :(\n");
 	}
