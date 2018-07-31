@@ -95,11 +95,16 @@ int
 	*/
 
 	// Centralize the various thresholds we use...
-	// The +1 is both to make sure we end up with a non-zero value, and to fake a ceil()-ish rounding.
-	unsigned short int target_lines         = (0.005 * viewHeight) + 1U;
-	unsigned short int button_height_offset = (0.02 * viewHeight) + 1U;
-	unsigned short int min_target_pixels    = (0.125 * viewWidth) + 1U;
-	unsigned short int max_target_pixels    = (0.25 * viewWidth) + 1U;
+	// A button roughly takes 5% of the screen's height.
+	// We roughly assume we can split a button's height in three vertical zones: top padding, text, bottom padding.
+	// We want to match on half of the top padding, and move our cursor roughly to the center (of the text, of the button).
+	// So, split its height in 6, match for one sixth, and move the cursor from two sixth after that to get to the middle.
+	unsigned short int target_lines         = ((0.05 * viewHeight) / 6U);
+	unsigned short int button_height_offset = target_lines * 2U;
+	// Depending on the device's DPI & resolution, a button takes between 17% and 20% of the screen's width.
+	// Possibly less on larger resolution, and more on smaller resolution, so try to handle everone in one fell swoop.
+	unsigned short int min_target_pixels = (0.125 * viewWidth);
+	unsigned short int max_target_pixels = (0.25 * viewWidth);
 	fprintf(stderr, "Button color is expected to be #%hhx%hhx%hhx\n", button_color.r, button_color.g, button_color.b);
 	fprintf(stderr,
 		"We need to match two buttons each between %hu and %hu pixels wide over %hu lines!\n",
@@ -114,7 +119,6 @@ int
 			// It looks like we found the buttons on the previous line, keep looking...
 			matched_lines++;
 			fprintf(stderr, "Now at %hu consecutive lines matched\n", matched_lines);
-			// If we matched over 0.5% of the screen's height in consecutive lines, we got it!
 			if (matched_lines >= target_lines) {
 				gotcha = true;
 				fprintf(stderr, "Gotcha! (After %hu consecutive lines matched)\n", matched_lines);
@@ -145,9 +149,6 @@ int
 			if (color.r == button_color.r && color.g == button_color.g && color.b == button_color.b) {
 				consecutive_matches++;
 			} else {
-				// One button is roughly 17% of the screen's width on my H2O (18.5% in Large Print mode)
-				// 19% on a Glo !LP
-				// The larger window should hopefully cover the various range of resolutions & DPI...
 				if (consecutive_matches >= min_target_pixels &&
 				    consecutive_matches <= max_target_pixels) {
 					match_count++;
@@ -162,8 +163,6 @@ int
 					// We only care about the second button, Connect :).
 					if (match_count == 2) {
 						// Try to hit roughly the middle of the button
-						// (which takes roughly 4.8% of the screen's height on a H2O, LP & !LP)
-						// 5.5% on a Glo !LP
 						match_coords.y = y + button_height_offset;
 						// Backtrack to the middle of the button
 						match_coords.x = x - (consecutive_matches / 2U);
