@@ -180,6 +180,12 @@ int
 	if (gotcha) {
 		fprintf(stderr, "Match! :) (over %hu lines)\n", matched_lines);
 		fprintf(stdout, "x=%hu, y=%hu\n", match_coords.x, match_coords.y);
+		// NOTE: Rotate coords, because the Touch origin may not match the fb origin... >_<"
+		// FIXME: May output garbage if fb is already rotated -_-"
+		//        Set match_coords to coords.x/y and only do this rota if fbink_is_fb_quirky?
+		unsigned short int rx = match_coords.y;
+		unsigned short int ry = (unsigned short int) (viewWidth - match_coords.x - 1);
+		fprintf(stdout, "Rotated: x=%hu, y=%hu\n", rx, ry);
 	} else {
 		fprintf(stderr, "No match :(\n");
 	}
