@@ -1183,7 +1183,7 @@ int
 		unsigned short int min_maxcols = 1U;
 		if (fbink_config->is_centered) {
 			min_maxcols++;
-			// NOTE: If that wasn't a circular dependency, we'd take care of the isPerfectFit case here,
+			// NOTE: If that weren't a circular dependency, we'd take care of the isPerfectFit case here,
 			//       but we can't, so instead that corner-case is handled in fbink_print...
 		}
 #ifdef FBINK_WITH_UNSCII
