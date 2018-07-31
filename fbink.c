@@ -1248,6 +1248,8 @@ int
 	if ((FONTW * MAXCOLS) == viewWidth) {
 		deviceQuirks.isPerfectFit = true;
 		ELOG("[FBInk] It's a perfect fit!");
+	} else {
+		deviceQuirks.isPerfectFit = false;
 	}
 
 	// Get fixed screen information
