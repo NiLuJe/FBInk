@@ -29,6 +29,18 @@
 // FBInk always returns negative values on failure
 #define ERRCODE(e) (-(e))
 
+#include <linux/input.h>
+
+// c.f., https://github.com/koreader/koreader-base/pull/468/files
+#define SEND_INPUT_EVENT(t, c, v)                                                                                        \
+	({                                                                                                               \
+		gettimeofday(&ev.time, NULL);                                                                            \
+		ev.type  = (t);                                                                                          \
+		ev.code  = (c);                                                                                          \
+		ev.value = (v);                                                                                          \
+		write(ifd, &ev, sizeof(ev));                                                                             \
+	})
+
 // Application entry point
 int
     main(int argc __attribute__((unused)), char* argv[] __attribute__((unused)))
@@ -189,6 +201,39 @@ int
 			"H2O²r1: x=%hu, y=%hu\n",
 			(unsigned short int) (viewHeight - match_coords.x - 1),
 			(unsigned short int) (viewWidth - match_coords.y - 1));
+
+		// Press it if TOUCH_ME is in the env...
+		if (getenv("TOUCH_ME") != NULL) {
+			fprintf(stderr, "Pressing the button . . .\n");
+			struct input_event ev;
+			int                ifd = -1;
+			ifd                    = open("/dev/input/event1", O_WRONLY | O_NONBLOCK);
+			if (ifd == -1) {
+				fprintf(stderr, "Failed to open input device! \n");
+				return ERRCODE(EXIT_FAILURE);
+			}
+
+			// NOTE: May not be completely right for every model... (OK on H2O)
+			//       Double-check on your device w/ hexdump -x /dev/input/event1 (or -d if you prefer decimal).
+			SEND_INPUT_EVENT(EV_ABS, ABS_MT_TRACKING_ID, 1);
+			SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MAJOR, 1);
+			SEND_INPUT_EVENT(EV_ABS, ABS_MT_WIDTH_MAJOR, 1);
+			SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_X, match_coords.x);
+			SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_Y, match_coords.y);
+			SEND_INPUT_EVENT(EV_SYN, SYN_MT_REPORT, 0);
+			SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
+
+			SEND_INPUT_EVENT(EV_ABS, ABS_MT_TRACKING_ID, 1);
+			SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MAJOR, 0);
+			SEND_INPUT_EVENT(EV_ABS, ABS_MT_WIDTH_MAJOR, 0);
+			SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_X, match_coords.x);
+			SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_Y, match_coords.y);
+			SEND_INPUT_EVENT(EV_SYN, SYN_MT_REPORT, 0);
+			SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
+
+			ioctl(ifd, EVIOCGRAB, 0);
+			close(ifd);
+		}
 	} else {
 		fprintf(stderr, "No match :(\n");
 	}
