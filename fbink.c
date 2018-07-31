@@ -1177,13 +1177,24 @@ int
 		// NOTE: Clamp to safe values to avoid blowing up the stack with alloca later,
 		//       in case we get fed a stupidly large value.
 		// NOTE: Also, to avoid a division by zero later if a glyph becomes so big that it causes
-		//       MAXCOLS or MAXROWS to become too small (we want at least a 3x3 grid, to be safe).
-		//       This is to ensure available_cols in fbink_print will be at least 1, no matter the settings.
+		//       MAXCOLS or MAXROWS to become too small...
+		//       We want to ensure available_cols in fbink_print will be > 0, so,
+		//       follow the same heuristics to devise the minimum MAXCOLS we want to enforce...
+		unsigned short int min_maxcols = 1U;
+		if (fbink_config->is_centered) {
+			min_maxcols++;
+			if (deviceQuirks.isPerfectFit) {
+				min_maxcols++;
+			}
+		}
 #ifdef FBINK_WITH_UNSCII
 		// NOTE: Unscii-16 is 8x16, handle it ;).
 		if (fbink_config->fontname == UNSCII_TALL) {
-			// We want at least 3 rows, so, viewHeight / 3 / glyphHeight gives us the maximum multiplier.
-			max_fontmult = (uint8_t)(viewHeight / 3U / 16U);
+			// We want at least N columns, so, viewWidth / N / glyphWidth gives us the maximum multiplier.
+			uint8_t max_fontmult_width = (uint8_t)(viewWidth / min_maxcols / 8U);
+			// We want at least 1 row, so, viewHeight / glyphHeight gives us the maximum multiplier.
+			uint8_t max_fontmult_height = (uint8_t)(viewWidth / 16U);
+			max_fontmult                = MIN(max_fontmult_width, max_fontmult_height);
 			if (FONTSIZE_MULT > max_fontmult) {
 				FONTSIZE_MULT = max_fontmult;
 				ELOG("[FBInk] Clamped font size multiplier from %hhu to %hhu",
@@ -1191,8 +1202,7 @@ int
 				     max_fontmult);
 			}
 		} else {
-			// We want at least 3 columns, so, viewWidth / 3 / glyphWidth gives us the maximum multiplier.
-			max_fontmult = (uint8_t)(viewWidth / 3U / 8U);
+			max_fontmult = (uint8_t)(viewWidth / min_maxcols / 8U);
 			if (FONTSIZE_MULT > max_fontmult) {
 				FONTSIZE_MULT = max_fontmult;
 				ELOG("[FBInk] Clamped font size multiplier from %hhu to %hhu",
@@ -1201,7 +1211,7 @@ int
 			}
 		}
 #else
-		max_fontmult = (uint8_t)(viewWidth / 3U / 8U);
+		max_fontmult = (uint8_t)(viewWidth / min_maxcols / 8U);
 		if (FONTSIZE_MULT > max_fontmult) {
 			FONTSIZE_MULT = max_fontmult;
 			ELOG("[FBInk] Clamped font size multiplier from %hhu to %hhu",
