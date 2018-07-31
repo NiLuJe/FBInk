@@ -98,7 +98,7 @@ int
 	// A button roughly takes 5% of the screen's height.
 	// We roughly assume we can split a button's height in three vertical zones: top padding, text, bottom padding.
 	// We want to match on half of the top padding, and move our cursor roughly to the center (of the text, of the button).
-	// So, split its height in 6, match for one sixth, and move the cursor from two sixth after that to get to the middle.
+	// So, split its height in 6, match for one sixth, and move the cursor for two sixth after that to get to the middle.
 	unsigned short int target_lines         = ((0.05 * viewHeight) / 6U);
 	unsigned short int button_height_offset = target_lines * 2U;
 	// Depending on the device's DPI & resolution, a button takes between 17% and 20% of the screen's width.
