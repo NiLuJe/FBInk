@@ -94,7 +94,6 @@ int
 	unsigned short int y;
 	FBInkCoordinates   coords              = { 0U };
 	unsigned short int consecutive_matches = 0U;
-	unsigned short int buttons_width       = 0U;
 	unsigned short int match_count         = 0U;
 	unsigned short int matched_lines       = 0U;
 	bool               gotcha              = false;
@@ -110,24 +109,7 @@ int
 	for (y = (viewHeight / 2U); y < viewHeight; y++) {
 		if (match_count == 2) {
 			// It looks like we found the buttons on the previous line, keep looking...
-			if (matched_lines > 0) {
-				// Make sure we match *strictly* the same amount of horizontal pixels, because I'm paranoid.
-				if (consecutive_matches == buttons_width) {
-					matched_lines++;
-				} else {
-					fprintf(
-					    stderr,
-					    "Ouch :(. Hit a sneaky pattern. Failed to match exactly %hu pixels after %hu consecutive lines (matched %hu instead)\n",
-					    buttons_width,
-					    matched_lines,
-					    consecutive_matches);
-					break;
-				}
-			} else {
-				// First line of buttons
-				matched_lines = 1;
-				buttons_width = consecutive_matches;
-			}
+			matched_lines++;
 			fprintf(stderr, "Now at %hu consecutive lines matched\n", matched_lines);
 			// If we matched over 0.5% of the screen's height in consecutive lines, we got it!
 			if (matched_lines >= (0.005 * viewHeight)) {
