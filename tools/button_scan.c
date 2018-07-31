@@ -106,7 +106,7 @@ int
 	unsigned short int target_lines         = ((0.05 * viewHeight) / 6U);
 	unsigned short int button_height_offset = target_lines * 2U;
 	// NOTE: Depending on the device's DPI & resolution, a button takes between 17% and 20% of the screen's width.
-	//       Possibly less on larger resolutions, and more on smaller resolutions, so try to handle everone in one fell swoop.
+	//       Possibly less on larger resolutions, and more on smaller resolutions, so try to handle everyone in one fell swoop.
 	unsigned short int min_target_pixels = (0.125 * viewWidth);
 	unsigned short int max_target_pixels = (0.25 * viewWidth);
 	fprintf(stderr, "Button color is expected to be #%hhx%hhx%hhx\n", button_color.r, button_color.g, button_color.b);
