@@ -98,7 +98,6 @@ int
 	// The +1 is both to make sure we end up with a non-zero value, and to fake a ceil()-ish rounding.
 	unsigned short int target_lines         = (0.005 * viewHeight) + 1U;
 	unsigned short int button_height_offset = (0.02 * viewHeight) + 1U;
-	unsigned short int button_width_offset  = (0.08 * viewWidth) + 1U;
 	unsigned short int min_target_pixels    = (0.125 * viewWidth) + 1U;
 	unsigned short int max_target_pixels    = (0.25 * viewWidth) + 1U;
 	fprintf(stderr, "Button color is expected to be #%hhx%hhx%hhx\n", button_color.r, button_color.g, button_color.b);
@@ -107,10 +106,7 @@ int
 		min_target_pixels,
 		max_target_pixels,
 		target_lines);
-	fprintf(stderr,
-		"Correcting button coordinates by +%hupx vertically, -%hupx horizontally!\n",
-		button_height_offset,
-		button_width_offset);
+	fprintf(stderr, "Correcting button coordinates by +%hupx vertically!\n", button_height_offset);
 
 	// Start looping from the bottom half of the screen, to save some time...
 	for (y = (viewHeight / 2U); y < viewHeight; y++) {
@@ -169,8 +165,8 @@ int
 						// (which takes roughly 4.8% of the screen's height on a H2O, LP & !LP)
 						// 5.5% on a Glo !LP
 						match_coords.y = y + button_height_offset;
-						// Try to hit roughly the middle of the button
-						match_coords.x = x - button_width_offset;
+						// Backtrack to the middle of the button
+						match_coords.x = x - (consecutive_matches / 2U);
 					}
 				} else {
 					if (consecutive_matches > 0U) {
