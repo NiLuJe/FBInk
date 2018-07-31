@@ -54,8 +54,16 @@ int
 	}
 
 	// Wheee!
-	FBInkColor         button_color = { 0xD9, 0xD9, 0xD9 };
-	FBInkColor         color        = { 0U };
+	FBInkColor button_color = { 0xD9, 0xD9, 0xD9 };
+
+	// NOTE: *May* be a rounding/conversion error... Here be dragons...
+	if (fbink_is_fb_quirky()) {
+		button_color.r = 0xDE;
+		button_color.g = 0xDB;
+		button_color.b = 0xDE;
+	}
+
+	FBInkColor         color = { 0U };
 	unsigned short int x;
 	unsigned short int y;
 	FBInkCoordinates   coords              = { 0U };
@@ -78,6 +86,7 @@ int
 	unsigned short int button_width_offset  = (0.08 * viewWidth) + 1U;
 	unsigned short int min_target_pixels    = (0.125 * viewWidth) + 1U;
 	unsigned short int max_target_pixels    = (0.25 * viewWidth) + 1U;
+	fprintf(stderr, "Button color is expected to be #%hhx%hhx%hhx\n", button_color.r, button_color.g, button_color.b);
 	fprintf(stderr,
 		"We need to match two buttons each between %hu and %hu pixels wide over %hu lines!\n",
 		min_target_pixels,
@@ -144,9 +153,9 @@ int
 						// Try to hit roughly the middle of the button
 						// (which takes roughly 4.8% of the screen's height on a H2O, LP & !LP)
 						// 5.5% on a Glo !LP
-						match_coords.y = coords.y + button_height_offset;
+						match_coords.y = y + button_height_offset;
 						// Try to hit roughly the middle of the button
-						match_coords.x = coords.x - button_width_offset;
+						match_coords.x = x - button_width_offset;
 					}
 				} else {
 					if (consecutive_matches > 0U) {
@@ -165,27 +174,18 @@ int
 
 	if (gotcha) {
 		fprintf(stderr, "Match! :) (over %hu lines)\n", matched_lines);
-		if (!fbink_is_fb_quirky()) {
-			// FB is NOT rotated, so we need to rotate the touch coordinates ourselves...
-			fprintf(stderr, "Framebuffer is upright, rotating coordinates for (landscape) touch input...\n");
-			rotate_coordinates(&match_coords);
-			fprintf(stdout, "x=%hu, y=%hu\n", match_coords.x, match_coords.y);
-			// NOTE: ... possibly do the right thing to get something correct out of that?
-			fprintf(stdout,
-				"H2O²r1: x=%hu, y=%hu\n",
-				(unsigned short int) (viewHeight - match_coords.x - 1),
-				(unsigned short int) (viewWidth - match_coords.y - 1));
-		} else {
-			fprintf(stderr, "Framebuffer is already rotated, touch input should match with no tinkering.\n");
-			fprintf(stdout, "x=%hu, y=%hu\n", match_coords.x, match_coords.y);
-			// NOTE: The H2O²r1 is a special snowflake, input is rotated 90° in the *other* direction
-			//       (i.e., origin at the bottom-left instead of top-right).
-			//       Hopefully that doesn't apply to the fb itself, too...
-			fprintf(stdout,
-				"H2O²r1: x=%hu, y=%hu\n",
-				(unsigned short int) (viewHeight - match_coords.y - 1),
-				match_coords.x);
-		}
+
+		// The touch panel has a fixed origin that differs from the framebuffer's... >_<".
+		rotate_coordinates(&match_coords);
+		fprintf(stdout, "x=%hu, y=%hu\n", match_coords.x, match_coords.y);
+
+		// NOTE: The H2O²r1 is a special snowflake, input is rotated 90° in the *other* direction
+		//       (i.e., origin at the bottom-left instead of top-right).
+		//       Hopefully that doesn't apply to the fb itself, too...
+		fprintf(stdout,
+			"H2O²r1: x=%hu, y=%hu\n",
+			(unsigned short int) (viewHeight - match_coords.x - 1),
+			(unsigned short int) (viewWidth - match_coords.y - 1));
 	} else {
 		fprintf(stderr, "No match :(\n");
 	}
