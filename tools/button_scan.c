@@ -53,9 +53,10 @@ int
 		}
 	}
 
-	// Wheee!
+	// Wheee! (Default to the proper value on 32bpp FW)
 	FBInkColor button_color = { 0xD9, 0xD9, 0xD9 };
 
+	// And handle yet another bit of 16bpp weirdness...
 	// NOTE: There *may* be a rounding/conversion error somewhere...
 	//       I can vouch for get_pixel_RGB565's accuracy,
 	//       and set_pixel_RGB565 looks straightforward enough, so, err, I blame Kobo? :D.
