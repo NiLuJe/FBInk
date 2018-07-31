@@ -116,6 +116,7 @@ int
 				if (consecutive_matches >= (0.165 * viewWidth) && consecutive_matches <= (0.19 * viewWidth)) {
 					match_count++;
 					fprintf(stderr, "End match %hu @ (%hu, %hu)\n", match_count, x, y);
+					// NOTE: We store un-rotated coords. That may not be what we ultimately need on those 16bpp FW?
 					match_coords.y = y - ((0.048 * viewHeight) / 2U);	// Try to hit roughly the middle of the button (which takes roughly 4.8% of the screen's height, LP & !LP)
 					match_coords.x = x - ((0.17 * viewWidth) / 2U);		// Try to hit roughly the middle of the button
 				}
