@@ -127,9 +127,9 @@ int
 						// Try to hit roughly the middle of the button
 						// (which takes roughly 4.8% of the screen's height on a H2O, LP & !LP)
 						// 5.5% on a Glo !LP
-						match_coords.y = y + (0.02 * viewHeight);
+						match_coords.y = coords.y + (0.02 * viewHeight);
 						// Try to hit roughly the middle of the button
-						match_coords.x = x - (0.08 * viewWidth);
+						match_coords.x = coords.x - (0.08 * viewWidth);
 					}
 				} else {
 					if (consecutive_matches > 0U) {
@@ -148,23 +148,27 @@ int
 
 	if (gotcha) {
 		fprintf(stderr, "Match! :) (over %hu lines)\n", matched_lines);
-		fprintf(stdout, "x=%hu, y=%hu\n", match_coords.x, match_coords.y);
-		// NOTE: The H2O²r1 is a special snowflake, input is rotated 90° in the *other* direction
-		//       (i.e., origin at the bottom-left instead of top-right).
-		//       Hopefully that doesn't apply to the fb itself, too...
-		fprintf(stdout,
-			"H2O²r1: x=%hu, y=%hu\n",
-			(unsigned short int) (viewHeight - match_coords.y - 1),
-			match_coords.x);
-		// NOTE: Rotate coords, because the Touch origin may not match the fb origin... >_<"
-		// FIXME: May output garbage if fb is already rotated -_-"
-		//        Set match_coords to coords.x/y and only do this rota if !fbink_is_fb_quirky?
-		rotate_coordinates(&match_coords);
-		fprintf(stdout, "Rotated: x=%hu, y=%hu\n", match_coords.x, match_coords.y);
-		fprintf(stdout,
-			"Rotated H2O²r1: x=%hu, y=%hu\n",
-			(unsigned short int) (viewHeight - match_coords.x - 1),
-			(unsigned short int) (viewWidth - match_coords.y - 1));
+		if (!fbink_is_fb_quirky()) {
+			// FB is NOT rotated, so we need to rotate the touch coordinates ourselves...
+			fprintf(stderr, "Framebuffer is upright, rotating coordinates for (landscape) touch input...\n");
+			rotate_coordinates(&match_coords);
+			fprintf(stdout, "x=%hu, y=%hu\n", match_coords.x, match_coords.y);
+			// NOTE: ... possibly do the right thing to get something correct out of that?
+			fprintf(stdout,
+				"H2O²r1: x=%hu, y=%hu\n",
+				(unsigned short int) (viewHeight - match_coords.x - 1),
+				(unsigned short int) (viewWidth - match_coords.y - 1));
+		} else {
+			fprintf(stderr, "Framebuffer is already rotated, touch input should match with no tinkering.\n");
+			fprintf(stdout, "x=%hu, y=%hu\n", match_coords.x, match_coords.y);
+			// NOTE: The H2O²r1 is a special snowflake, input is rotated 90° in the *other* direction
+			//       (i.e., origin at the bottom-left instead of top-right).
+			//       Hopefully that doesn't apply to the fb itself, too...
+			fprintf(stdout,
+				"H2O²r1: x=%hu, y=%hu\n",
+				(unsigned short int) (viewHeight - match_coords.y - 1),
+				match_coords.x);
+		}
 	} else {
 		fprintf(stderr, "No match :(\n");
 	}
