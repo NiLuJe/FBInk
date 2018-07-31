@@ -96,8 +96,8 @@ FBINK_API int fbink_open(void);
 // Arg 1: fbfd, if it's -1, the fb is opened for the duration of this call
 // Arg 2: pointer to an FBInkConfig struct
 //        If you wish to customize them,
-//        the is_centered, fontmult, fontname, is_verbose & is_quiet fields should be set beforehand.
-//        This means you should not hesitate to call fbink_init when you update them, too!
+//        the is_centered, fontmult, fontname, is_verbose & is_quiet fields must be set beforehand.
+//        This means you must call fbink_init again when you update them, too!
 // NOTE: By virtue of, well, setting global variables, do NOT consider this thread-safe.
 //       The rest of the API should be, though, so make sure you init in your main thread *before* threading begins...
 // NOTE: On devices where the fb state can change (i.e., Kobos switching between 16bpp & 32bpp),
