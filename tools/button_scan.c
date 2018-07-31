@@ -182,7 +182,8 @@ int
 		fprintf(stdout, "x=%hu, y=%hu\n", match_coords.x, match_coords.y);
 		// NOTE: Rotate coords, because the Touch origin may not match the fb origin... >_<"
 		// FIXME: May output garbage if fb is already rotated -_-"
-		//        Set match_coords to coords.x/y and only do this rota if fbink_is_fb_quirky?
+		//        Set match_coords to coords.x/y and only do this rota if !fbink_is_fb_quirky?
+		// NOTE: H2O²r1 appears to be a special snowflake, too, so, that one might be fun... (i.e., ry = x there?)
 		unsigned short int rx = match_coords.y;
 		unsigned short int ry = (unsigned short int) (viewWidth - match_coords.x - 1);
 		fprintf(stdout, "Rotated: x=%hu, y=%hu\n", rx, ry);
