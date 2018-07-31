@@ -119,7 +119,7 @@ int
 		target_lines);
 	fprintf(stderr, "Correcting button coordinates by +%hupx vertically!\n", button_height_offset);
 
-	// Start looping from the bottom half of the screen, to save some time, buttons are always going to be below that...
+	// Only loop on the bottom half of the screen, to save time: buttons are always going to be below that.
 	for (y = (viewHeight / 2U); y < viewHeight; y++) {
 		if (match_count == 2) {
 			// It looks like we found the buttons on the previous line, keep looking...
