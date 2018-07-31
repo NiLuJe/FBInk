@@ -155,10 +155,13 @@ int
 						x,
 						y);
 					// NOTE: We store un-rotated coords. That may not be what we ultimately need on those 16bpp FW?
-					// Try to hit roughly the middle of the button (which takes roughly 4.8% of the screen's height, LP & !LP)
-					match_coords.y = y + (0.02 * viewHeight);
-					// Try to hit roughly the middle of the button
-					match_coords.x = x - (0.08 * viewWidth);
+					if (match_count == 2) {
+						// We only care about the second button, Connect :).
+						// Try to hit roughly the middle of the button (which takes roughly 4.8% of the screen's height, LP & !LP)
+						match_coords.y = y + (0.02 * viewHeight);
+						// Try to hit roughly the middle of the button
+						match_coords.x = x - (0.08 * viewWidth);
+					}
 				} else {
 					if (consecutive_matches > 0U) {
 						fprintf(
