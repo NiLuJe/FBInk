@@ -111,7 +111,8 @@ int
 				// One button is roughly 17% of the screen's width on my H2O (18.5% in Large Print mode)
 				// 19% on a Glo !LP
 				// The larger window should hopefully cover the various range of resolutions & DPI...
-				if (consecutive_matches >= (0.125 * viewWidth) && consecutive_matches <= (0.25 * viewWidth)) {
+				if (consecutive_matches >= (0.125 * viewWidth) &&
+				    consecutive_matches <= (0.25 * viewWidth)) {
 					match_count++;
 					fprintf(stderr,
 						"End of match %hu after %hu consecutive matche @ (%hu, %hu)\n",
@@ -150,7 +151,10 @@ int
 		// NOTE: The H2O²r1 is a special snowflake, input is rotated 90° in the *other* direction
 		//       (i.e., origin at the bottom-left instead of top-right).
 		//       Hopefully that doesn't apply to the fb itself, too...
-		fprintf(stdout, "H2O²r1: x=%hu, y=%hu\n", (unsigned short int) (viewHeight - match_coords.y - 1), match_coords.x);
+		fprintf(stdout,
+			"H2O²r1: x=%hu, y=%hu\n",
+			(unsigned short int) (viewHeight - match_coords.y - 1),
+			match_coords.x);
 		// NOTE: Rotate coords, because the Touch origin may not match the fb origin... >_<"
 		// FIXME: May output garbage if fb is already rotated -_-"
 		//        Set match_coords to coords.x/y and only do this rota if !fbink_is_fb_quirky?

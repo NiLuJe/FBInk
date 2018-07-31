@@ -386,13 +386,14 @@ int
 		}
 	} else {
 		if (is_refresh) {
-			printf("Refreshing the screen from top=%u, left=%u for width=%u, height=%u with %swaveform mode %s\n",
-			       region_top,
-			       region_left,
-			       region_width,
-			       region_height,
-			       fbink_config.is_flashing ? "a flashing " : "",
-			       region_wfm);
+			printf(
+			    "Refreshing the screen from top=%u, left=%u for width=%u, height=%u with %swaveform mode %s\n",
+			    region_top,
+			    region_left,
+			    region_width,
+			    region_height,
+			    fbink_config.is_flashing ? "a flashing " : "",
+			    region_wfm);
 			if (fbink_refresh(fbfd,
 					  region_top,
 					  region_left,
@@ -411,7 +412,8 @@ int
 			       image_y_offset,
 			       fbink_config.is_inverted ? "true" : "false",
 			       fbink_config.ignore_alpha ? "true" : "false");
-			if (fbink_print_image(fbfd, image_file, image_x_offset, image_y_offset, &fbink_config) != EXIT_SUCCESS) {
+			if (fbink_print_image(fbfd, image_file, image_x_offset, image_y_offset, &fbink_config) !=
+			    EXIT_SUCCESS) {
 				fprintf(stderr, "Failed to display that image!\n");
 			}
 		} else {
