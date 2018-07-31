@@ -1183,6 +1183,8 @@ int
 		unsigned short int min_maxcols = 1U;
 		if (fbink_config->is_centered) {
 			min_maxcols++;
+			// FIXME: Given the fact that isPerfectFit hasn't been set yet,
+			//        and I haven't seen any obvious breakage, this can probably go poof...
 			if (deviceQuirks.isPerfectFit) {
 				min_maxcols++;
 			}
