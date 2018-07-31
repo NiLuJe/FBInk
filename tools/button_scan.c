@@ -95,14 +95,18 @@ int
 	*/
 
 	// Centralize the various thresholds we use...
-	// A button roughly takes 5% of the screen's height.
-	// We roughly assume we can split a button's height in three vertical zones: top padding, text, bottom padding.
-	// We want to match on half of the top padding, and move our cursor roughly to the center (of the text, of the button).
-	// So, split its height in 6, match for one sixth, and move the cursor for two sixth after that to get to the middle.
+	// NOTE: A button roughly takes 5% of the screen's height.
+	//       We roughly assume we can split a button's height in three vertical zones: top padding, text, bottom padding.
+	//       We want to match on half of the top padding, and move our cursor roughly to the center (of the text & button).
+	//       So, split its height in 6, match for one sixth, and move the cursor for two sixth after that to get to the middle.
+	//       We go with half of the padding because this isn't an exact science,
+	//       and because Large Print mode makes the "text" zone slightly larger without changing the height of the button,
+	//       which stretches a bit the assumption of the three zones of roughly equal heights ;).
+	//       Fun fact: Large Print mode *can* make the button wider, on the other hand.
 	unsigned short int target_lines         = ((0.05 * viewHeight) / 6U);
 	unsigned short int button_height_offset = target_lines * 2U;
-	// Depending on the device's DPI & resolution, a button takes between 17% and 20% of the screen's width.
-	// Possibly less on larger resolution, and more on smaller resolution, so try to handle everone in one fell swoop.
+	// NOTE: Depending on the device's DPI & resolution, a button takes between 17% and 20% of the screen's width.
+	//       Possibly less on larger resolutions, and more on smaller resolutions, so try to handle everone in one fell swoop.
 	unsigned short int min_target_pixels = (0.125 * viewWidth);
 	unsigned short int max_target_pixels = (0.25 * viewWidth);
 	fprintf(stderr, "Button color is expected to be #%hhx%hhx%hhx\n", button_color.r, button_color.g, button_color.b);
