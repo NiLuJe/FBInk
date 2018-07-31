@@ -88,14 +88,14 @@ int
 	}
 
 	// Wheee!
-	FBInkColor button_color  = { 0xD9, 0xD9, 0xD9 };
-	FBInkColor color = { 0U };
+	FBInkColor         button_color = { 0xD9, 0xD9, 0xD9 };
+	FBInkColor         color        = { 0U };
 	unsigned short int x;
 	unsigned short int y;
-	FBInkCoordinates   coords = { 0U };
+	FBInkCoordinates   coords              = { 0U };
 	unsigned short int consecutive_matches = 0U;
-	unsigned short int match_count = 0U;
-	FBInkCoordinates   match_coords = { 0U };
+	unsigned short int match_count         = 0U;
+	FBInkCoordinates   match_coords        = { 0U };
 
 	// Start looping from the bottom half of the screen, to save some time...
 	for (y = (viewHeight / 2U); y < viewHeight; y++) {
@@ -113,14 +113,19 @@ int
 			} else {
 				// One button is roughly 17% of the screen's width on my H2O (18.5% in Large Print mode)
 				// NOTE: May need to be even stricter to avoid skipping the gap between the two buttons on some devices?
-				if (consecutive_matches >= (0.165 * viewWidth) && consecutive_matches <= (0.19 * viewWidth)) {
+				if (consecutive_matches >= (0.165 * viewWidth) &&
+				    consecutive_matches <= (0.19 * viewWidth)) {
 					match_count++;
 					fprintf(stderr, "End match %hu @ (%hu, %hu)\n", match_count, x, y);
 					// NOTE: We store un-rotated coords. That may not be what we ultimately need on those 16bpp FW?
-					match_coords.y = y - ((0.048 * viewHeight) / 2U);	// Try to hit roughly the middle of the button (which takes roughly 4.8% of the screen's height, LP & !LP)
-					match_coords.x = x - ((0.17 * viewWidth) / 2U);		// Try to hit roughly the middle of the button
+					match_coords.y =
+					    y -
+					    ((0.048 * viewHeight) /
+					     2U);    // Try to hit roughly the middle of the button (which takes roughly 4.8% of the screen's height, LP & !LP)
+					match_coords.x = x - ((0.17 * viewWidth) /
+							      2U);    // Try to hit roughly the middle of the button
 				}
-				consecutive_matches=0U;
+				consecutive_matches = 0U;
 			}
 		}
 	}
@@ -132,10 +137,18 @@ int
 	// !LP + 10%
 	unsigned short int max_target_count = 8U * (0.0076 * viewHeight) * 1.10;
 	if (match_count >= min_target_count && match_count <= max_target_count) {
-		fprintf(stderr, "Match! :) (count: %hu >= %hu && <= %hu)\n", match_count, min_target_count, max_target_count);
+		fprintf(stderr,
+			"Match! :) (count: %hu >= %hu && <= %hu)\n",
+			match_count,
+			min_target_count,
+			max_target_count);
 		fprintf(stdout, "x=%hu, y=%hu\n", match_coords.x, match_coords.y);
 	} else {
-		fprintf(stderr, "No match :( (count: %hu < %hu || > %hu)\n", match_count, min_target_count, max_target_count);
+		fprintf(stderr,
+			"No match :( (count: %hu < %hu || > %hu)\n",
+			match_count,
+			min_target_count,
+			max_target_count);
 	}
 
 	// Cleanup
