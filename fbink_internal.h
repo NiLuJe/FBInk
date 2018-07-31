@@ -132,19 +132,19 @@
 #endif
 
 // Handle what we send to stdout (i.e., mostly diagnostic stuff)
-#define LOG(fmt, ...)                                                                                                  \
-	({                                                                                                             \
-		if (g_isVerbose) {                                                                                     \
-			fprintf(stdout, fmt "\n", ##__VA_ARGS__);                                                      \
-		}                                                                                                      \
+#define LOG(fmt, ...)                                                                                                            \
+	({                                                                                                                       \
+		if (g_isVerbose) {                                                                                               \
+			fprintf(stdout, fmt "\n", ##__VA_ARGS__);                                                                \
+		}                                                                                                                \
 	})
 
 // And then what we send to stderr (mostly fbink_init stuff)
-#define ELOG(fmt, ...)                                                                                                 \
-	({                                                                                                             \
-		if (!g_isQuiet) {                                                                                      \
-			fprintf(stderr, fmt "\n", ##__VA_ARGS__);                                                      \
-		}                                                                                                      \
+#define ELOG(fmt, ...)                                                                                                           \
+	({                                                                                                                       \
+		if (!g_isQuiet) {                                                                                                \
+			fprintf(stderr, fmt "\n", ##__VA_ARGS__);                                                                \
+		}                                                                                                                \
 	})
 
 // We want to return negative values on failure, always
@@ -213,8 +213,7 @@ static void clear_screen(uint8_t);
 static const unsigned char* font8x8_get_bitmap(uint32_t);
 static void                 font8x8_render(uint32_t, unsigned char*, uint8_t UNUSED_BY_MINIMAL);
 
-static struct mxcfb_rect
-    draw(const char*, unsigned short int, unsigned short int, bool, bool, unsigned short int, uint8_t, bool);
+static struct mxcfb_rect draw(const char*, unsigned short int, unsigned short int, bool, bool, unsigned short int, uint8_t, bool);
 
 #ifdef FBINK_FOR_LEGACY
 static int refresh_legacy(int, const struct mxcfb_rect, bool);

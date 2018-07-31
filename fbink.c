@@ -191,13 +191,7 @@ static void
 			break;
 	}
 
-	LOG("(x, y) -> (%hu, %hu) vs. (rx, ry) -> (%hu, %hu) vs. (x', y') -> (%hu, %hu)",
-	    coords->x,
-	    coords->y,
-	    rx,
-	    ry,
-	    xp,
-	    yp);
+	LOG("(x, y) -> (%hu, %hu) vs. (rx, ry) -> (%hu, %hu) vs. (x', y') -> (%hu, %hu)", coords->x, coords->y, rx, ry, xp, yp);
 
 	coords->x = xp;
 	coords->y = yp;
@@ -504,8 +498,7 @@ static struct mxcfb_rect
 		unsigned short int deadzone_offset =
 		    (unsigned short int) (viewWidth - (unsigned short int) (MAXCOLS * FONTW)) / 2U;
 		pixel_offset = (unsigned short int) (pixel_offset + deadzone_offset);
-		LOG("Incrementing pixel_offset by %hu pixels to compensate for dead space on the right edge",
-		    deadzone_offset);
+		LOG("Incrementing pixel_offset by %hu pixels to compensate for dead space on the right edge", deadzone_offset);
 	}
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
@@ -583,9 +576,7 @@ static struct mxcfb_rect
 	if (multiline_offset > 0U && is_centered && (region.left > 0U || region.width < viewWidth)) {
 		region.left  = 0U;
 		region.width = viewWidth;
-		LOG("Enforced region.left to %u & region.width to %u because of multi-line centering",
-		    region.left,
-		    region.width);
+		LOG("Enforced region.left to %u & region.width to %u because of multi-line centering", region.left, region.width);
 	}
 
 	// Fill our bounding box with our background color, so that we'll be visible no matter what's already on screen.
@@ -706,11 +697,7 @@ static long int
 #	ifdef FBINK_FOR_KINDLE
 // Touch Kindle devices ([K5<->]KOA2)
 static int
-    refresh_kindle(int fbfd,
-		   const struct mxcfb_rect region,
-		   uint32_t waveform_mode,
-		   uint32_t update_mode,
-		   uint32_t marker)
+    refresh_kindle(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode, uint32_t update_mode, uint32_t marker)
 {
 	struct mxcfb_update_data update = {
 		.update_region = region,
@@ -774,11 +761,7 @@ static int
 
 // Kindle Oasis 2 ([KOA2<->??)
 static int
-    refresh_kindle_koa2(int fbfd,
-			const struct mxcfb_rect region,
-			uint32_t waveform_mode,
-			uint32_t update_mode,
-			uint32_t marker)
+    refresh_kindle_koa2(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode, uint32_t update_mode, uint32_t marker)
 {
 	struct mxcfb_update_data_koa2 update = {
 		.update_region = region,
@@ -843,11 +826,7 @@ static int
 #	else
 // Kobo devices ([Mk3<->Mk6])
 static int
-    refresh_kobo(int                     fbfd,
-		 const struct mxcfb_rect region,
-		 uint32_t                waveform_mode,
-		 uint32_t                update_mode,
-		 uint32_t                marker)
+    refresh_kobo(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode, uint32_t update_mode, uint32_t marker)
 {
 	struct mxcfb_update_data_v1_ntx update = {
 		.update_region = region,
@@ -898,11 +877,7 @@ static int
 
 // Kobo Mark 7 devices ([Mk7<->??)
 static int
-    refresh_kobo_mk7(int                     fbfd,
-		     const struct mxcfb_rect region,
-		     uint32_t                waveform_mode,
-		     uint32_t                update_mode,
-		     uint32_t                marker)
+    refresh_kobo_mk7(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode, uint32_t update_mode, uint32_t marker)
 {
 	struct mxcfb_update_data_v2 update = {
 		.update_region = region,
@@ -967,10 +942,8 @@ static int
 	// NOTE: Discard bogus regions, they can cause a softlock on some devices.
 	//       A 0x0 region is a no go on most devices, while a 1x1 region may only upset some Kindle models.
 	if (region.width <= 1 && region.height <= 1) {
-		fprintf(stderr,
-			"[FBInk] Discarding bogus empty region (%ux%u) to avoid a softlock.\n",
-			region.width,
-			region.height);
+		fprintf(
+		    stderr, "[FBInk] Discarding bogus empty region (%ux%u) to avoid a softlock.\n", region.width, region.height);
 		return ERRCODE(EXIT_FAILURE);
 	}
 
@@ -1213,9 +1186,7 @@ int
 		max_fontmult = (uint8_t)(viewWidth / min_maxcols / 8U);
 		if (FONTSIZE_MULT > max_fontmult) {
 			FONTSIZE_MULT = max_fontmult;
-			ELOG("[FBInk] Clamped font size multiplier from %hhu to %hhu",
-			     fbink_config->fontmult,
-			     max_fontmult);
+			ELOG("[FBInk] Clamped font size multiplier from %hhu to %hhu", fbink_config->fontmult, max_fontmult);
 		}
 #endif
 	} else {
@@ -1340,7 +1311,7 @@ static int
     memmap_fb(int fbfd)
 {
 	g_fbink_screensize = finfo.smem_len;
-	g_fbink_fbp = (unsigned char*) mmap(NULL, g_fbink_screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
+	g_fbink_fbp        = (unsigned char*) mmap(NULL, g_fbink_screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
 	if (g_fbink_fbp == MAP_FAILED) {
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
@@ -1537,9 +1508,7 @@ int
 		    chars_left);
 		// Make sure we don't try to draw off-screen...
 		if (row + multiline_offset >= MAXROWS) {
-			LOG("Can only print %hu lines, discarding the %u characters left!",
-			    MAXROWS,
-			    chars_left - line_len);
+			LOG("Can only print %hu lines, discarding the %u characters left!", MAXROWS, chars_left - line_len);
 			// And that's it, we're done.
 			break;
 		}
@@ -1652,16 +1621,12 @@ int
 			// NOTE: Don't touch line_len, because we're *adding* new blank characters,
 			//       we're still printing the exact same amount of characters *from our string*.
 			LOG("Padded %u bytes to %u to cover %hu columns", line_bytes, padded_bytes, available_cols);
-			bytes_printed = snprintf(line,
-						 padded_bytes + 1U,
-						 "%*.*s",
-						 (int) padded_bytes,
-						 (int) line_bytes,
-						 string + line_offset);
+			bytes_printed = snprintf(
+			    line, padded_bytes + 1U, "%*.*s", (int) padded_bytes, (int) line_bytes, string + line_offset);
 		} else {
 			// NOTE: Enforce precision for safety.
-			bytes_printed = snprintf(
-			    line, line_bytes + 1U, "%*.*s", (int) line_bytes, (int) line_bytes, string + line_offset);
+			bytes_printed =
+			    snprintf(line, line_bytes + 1U, "%*.*s", (int) line_bytes, (int) line_bytes, string + line_offset);
 		}
 		LOG("snprintf wrote %d bytes", bytes_printed);
 
