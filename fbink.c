@@ -1183,11 +1183,8 @@ int
 		unsigned short int min_maxcols = 1U;
 		if (fbink_config->is_centered) {
 			min_maxcols++;
-			// FIXME: Given the fact that isPerfectFit hasn't been set yet,
-			//        and I haven't seen any obvious breakage, this can probably go poof...
-			if (deviceQuirks.isPerfectFit) {
-				min_maxcols++;
-			}
+			// NOTE: If that wasn't a circular dependency, we'd take care of the isPerfectFit case here,
+			//       but we can't, so instead that corner-case is handled in fbink_print...
 		}
 #ifdef FBINK_WITH_UNSCII
 		// NOTE: Unscii-16 is 8x16, handle it ;).
@@ -1466,6 +1463,13 @@ int
 		if (deviceQuirks.isPerfectFit) {
 			// And one for the right padding
 			available_cols = (unsigned short int) (available_cols - 1U);
+			// NOTE: If that makes us fall to 0 (because of high font scaling),
+			//       set it to 1 to avoid a division by zero, and warn that centering will be slightly off.
+			//       This takes a *really* unlucky perfect fit at high font sizes to actually happen...
+			if (available_cols == 0U) {
+				available_cols = 1U;
+				LOG("Enforced a minimum of 1 available column to compensate for an unlucky perfect fit at high font scaling! Centering may be slightly off.");
+			}
 		}
 	} else {
 		// Otherwise, col will be fixed, so, trust it.
