@@ -20,7 +20,8 @@
 
 // Build w/ ${CROSS_TC}-gcc -O3 -ffast-math -ftree-vectorize -funroll-loops -march=armv7-a -mtune=cortex-a8 -mfpu=neon -mfloat-abi=hard -mthumb -D_GLIBCXX_USE_CXX11_ABI=0 -pipe -fomit-frame-pointer -frename-registers -fweb -flto=9 -fuse-linker-plugin -Wall -Wextra -s tools/button_scan.c -o button_scan
 
-// NOTE: Don't do this at home. This is a quick and rough POC to have some fun w/ https://www.mobileread.com/forums/showpost.php?p=3731967&postcount=12
+// NOTE: Don't do this at home. This is a quick and rough POC to have some fun w/
+//       https://www.mobileread.com/forums/showpost.php?p=3731967&postcount=12
 //       No-one should ever, ever, ever include internal headers/code, I'm just re-using bits of private API to isolate this POC.
 #include "../fbink.c"
 #include "../fbink_device_id.c"
@@ -108,6 +109,7 @@ int
 				consecutive_matches++;
 			} else {
 				// One button is roughly 17% of the screen's width on my H2O (18.5% in Large Print mode)
+				// 19% on a Glo !LP
 				// The larger window should hopefully cover the various range of resolutions & DPI...
 				if (consecutive_matches >= (0.125 * viewWidth) && consecutive_matches <= (0.25 * viewWidth)) {
 					match_count++;
@@ -117,10 +119,13 @@ int
 						consecutive_matches,
 						x,
 						y);
-					// NOTE: We store un-rotated coords. That may not be what we ultimately need on those 16bpp FW?
+					// NOTE: We store un-rotated coords.
+					//       That may not be what we ultimately need on those 16bpp FW...
+					// We only care about the second button, Connect :).
 					if (match_count == 2) {
-						// We only care about the second button, Connect :).
-						// Try to hit roughly the middle of the button (which takes roughly 4.8% of the screen's height, LP & !LP)
+						// Try to hit roughly the middle of the button
+						// (which takes roughly 4.8% of the screen's height on a H2O, LP & !LP)
+						// 5.5% on a Glo !LP
 						match_coords.y = y + (0.02 * viewHeight);
 						// Try to hit roughly the middle of the button
 						match_coords.x = x - (0.08 * viewWidth);
