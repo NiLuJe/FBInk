@@ -95,10 +95,43 @@ int
 	FBInkCoordinates   coords              = { 0U };
 	unsigned short int consecutive_matches = 0U;
 	unsigned short int match_count         = 0U;
+	unsigned short int matched_lines       = 0U;
+	bool               gotcha              = false;
 	FBInkCoordinates   match_coords        = { 0U };
+
+	// DEBUG: Fake a Glo ;).
+	/*
+	viewWidth  = 758U;
+	viewHeight = 1024U;
+	*/
 
 	// Start looping from the bottom half of the screen, to save some time...
 	for (y = (viewHeight / 2U); y < viewHeight; y++) {
+		if (match_count == 2) {
+			// It looks like we found the buttons on the previous line, keep looking...
+			matched_lines++;
+			fprintf(stderr, "Now at %hu consecutive lines matched\n", matched_lines);
+			// If we matched over 0.5% of the screen's height in consecutive lines, we got it!
+			if (matched_lines >= (0.005 * viewHeight)) {
+				gotcha = true;
+				fprintf(stderr, "Gotcha! (After %hu consecutive lines matched)\n", matched_lines);
+				break;
+			}
+		} else {
+			// No match on the previous line, break if we were attempting to track a pair of buttons
+			if (matched_lines > 0) {
+				fprintf(
+				    stderr, "Booh :(. Failed to match after %hu consecutive lines\n", matched_lines);
+				break;
+			} else {
+				// Reset the counter otherwise.
+				matched_lines = 0U;
+			}
+		}
+		// New line, reset counters
+		consecutive_matches = 0U;
+		match_count         = 0U;
+
 		for (x = 0U; x < viewWidth; x++) {
 			coords.x = x;
 			coords.y = y;
@@ -109,46 +142,43 @@ int
 
 			if (color.r == button_color.r && color.g == button_color.g && color.b == button_color.b) {
 				consecutive_matches++;
-				fprintf(stderr, "match %hu @ (%hu, %hu)\n", consecutive_matches, x, y);
 			} else {
 				// One button is roughly 17% of the screen's width on my H2O (18.5% in Large Print mode)
-				// NOTE: May need to be even stricter to avoid skipping the gap between the two buttons on some devices?
-				if (consecutive_matches >= (0.165 * viewWidth) &&
-				    consecutive_matches <= (0.19 * viewWidth)) {
+				// The larger window should hopefully cover the various range of resolutions & DPI...
+				if (consecutive_matches >= (0.125 * viewWidth) &&
+				    consecutive_matches <= (0.25 * viewWidth)) {
 					match_count++;
-					fprintf(stderr, "End match %hu @ (%hu, %hu)\n", match_count, x, y);
+					fprintf(stderr,
+						"End of match %hu after %hu consecutive matche @ (%hu, %hu)\n",
+						match_count,
+						consecutive_matches,
+						x,
+						y);
 					// NOTE: We store un-rotated coords. That may not be what we ultimately need on those 16bpp FW?
-					match_coords.y =
-					    y -
-					    ((0.048 * viewHeight) /
-					     2U);    // Try to hit roughly the middle of the button (which takes roughly 4.8% of the screen's height, LP & !LP)
-					match_coords.x = x - ((0.17 * viewWidth) /
-							      2U);    // Try to hit roughly the middle of the button
+					// Try to hit roughly the middle of the button (which takes roughly 4.8% of the screen's height, LP & !LP)
+					match_coords.y = y + (0.02 * viewHeight);
+					// Try to hit roughly the middle of the button
+					match_coords.x = x - (0.08 * viewWidth);
+				} else {
+					if (consecutive_matches > 0U) {
+						fprintf(
+						    stderr,
+						    "Failed end of match after %hu consecutive matches @ (%hu, %hu)\n",
+						    consecutive_matches,
+						    x,
+						    y);
+					}
 				}
 				consecutive_matches = 0U;
 			}
 		}
 	}
 
-	// Half of the empty space over the tallest letter of one button (in Large Print) is roughly 0.625% of the screen's height on my H2O (0.76% otherwise).
-	// (2 buttons times 2 sides (top + bottom around the text) == 8)
-	// LP - 5%
-	unsigned short int min_target_count = 8U * (0.00625 * viewHeight) * 0.95;
-	// !LP + 10%
-	unsigned short int max_target_count = 8U * (0.0076 * viewHeight) * 1.10;
-	if (match_count >= min_target_count && match_count <= max_target_count) {
-		fprintf(stderr,
-			"Match! :) (count: %hu >= %hu && <= %hu)\n",
-			match_count,
-			min_target_count,
-			max_target_count);
+	if (gotcha) {
+		fprintf(stderr, "Match! :) (over %hu lines)\n", matched_lines);
 		fprintf(stdout, "x=%hu, y=%hu\n", match_coords.x, match_coords.y);
 	} else {
-		fprintf(stderr,
-			"No match :( (count: %hu < %hu || > %hu)\n",
-			match_count,
-			min_target_count,
-			max_target_count);
+		fprintf(stderr, "No match :(\n");
 	}
 
 	// Cleanup
