@@ -109,6 +109,8 @@ int
 	//       Possibly less on larger resolutions, and more on smaller resolutions, so try to handle everyone in one fell swoop.
 	unsigned short int min_target_pixels = (0.125 * viewWidth);
 	unsigned short int max_target_pixels = (0.25 * viewWidth);
+
+	// Recap the various settings as computed for this screen...
 	fprintf(stderr, "Button color is expected to be #%hhx%hhx%hhx\n", button_color.r, button_color.g, button_color.b);
 	fprintf(stderr,
 		"We need to match two buttons each between %hu and %hu pixels wide over %hu lines!\n",
@@ -117,7 +119,7 @@ int
 		target_lines);
 	fprintf(stderr, "Correcting button coordinates by +%hupx vertically!\n", button_height_offset);
 
-	// Start looping from the bottom half of the screen, to save some time...
+	// Start looping from the bottom half of the screen, to save some time, buttons are always going to be below that...
 	for (y = (viewHeight / 2U); y < viewHeight; y++) {
 		if (match_count == 2) {
 			// It looks like we found the buttons on the previous line, keep looking...
@@ -151,10 +153,13 @@ int
 			(*fxpGetPixel)(&coords, &color);
 
 			if (color.r == button_color.r && color.g == button_color.g && color.b == button_color.b) {
+				// Found a pixel of the right color for a button...
 				consecutive_matches++;
 			} else {
+				// Pixel is no longer part of a button...
 				if (consecutive_matches >= min_target_pixels &&
 				    consecutive_matches <= max_target_pixels) {
+					// But we've just finished matching enough pixels in a row to assume we found a button!
 					match_count++;
 					fprintf(stderr,
 						"End of match %hu after %hu consecutive matche @ (%hu, %hu)\n",
@@ -162,8 +167,6 @@ int
 						consecutive_matches,
 						x,
 						y);
-					// NOTE: We store un-rotated coords.
-					//       That may not be what we ultimately need on those 16bpp FW...
 					// We only care about the second button, Connect :).
 					if (match_count == 2) {
 						// Try to hit roughly the middle of the button
@@ -173,6 +176,7 @@ int
 					}
 				} else {
 					if (consecutive_matches > 0U) {
+						// And we only matched a few stray pixels of the right color before, not a button.
 						fprintf(
 						    stderr,
 						    "Failed end of match after %hu consecutive matches @ (%hu, %hu)\n",
@@ -181,6 +185,7 @@ int
 						    y);
 					}
 				}
+				// In any case, wrong color, reset the counter.
 				consecutive_matches = 0U;
 			}
 		}
