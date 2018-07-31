@@ -235,7 +235,6 @@ int
 			SEND_INPUT_EVENT(EV_SYN, SYN_MT_REPORT, 0);
 			SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
 
-			ioctl(ifd, EVIOCGRAB, 0);
 			close(ifd);
 		}
 	} else {
