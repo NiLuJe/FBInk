@@ -706,7 +706,11 @@ static long int
 #	ifdef FBINK_FOR_KINDLE
 // Touch Kindle devices ([K5<->]KOA2)
 static int
-    refresh_kindle(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode, uint32_t update_mode, uint32_t marker)
+    refresh_kindle(int fbfd,
+		   const struct mxcfb_rect region,
+		   uint32_t waveform_mode,
+		   uint32_t update_mode,
+		   uint32_t marker)
 {
 	struct mxcfb_update_data update = {
 		.update_region = region,
@@ -1205,8 +1209,9 @@ int
 		max_fontmult = (uint8_t)(viewWidth / min_maxcols / 8U);
 		if (FONTSIZE_MULT > max_fontmult) {
 			FONTSIZE_MULT = max_fontmult;
-			ELOG(
-			    "[FBInk] Clamped font size multiplier from %hhu to %hhu", fbink_config->fontmult, max_fontmult);
+			ELOG("[FBInk] Clamped font size multiplier from %hhu to %hhu",
+			     fbink_config->fontmult,
+			     max_fontmult);
 		}
 #endif
 	} else {
@@ -1528,7 +1533,9 @@ int
 		    chars_left);
 		// Make sure we don't try to draw off-screen...
 		if (row + multiline_offset >= MAXROWS) {
-			LOG("Can only print %hu lines, discarding the %u characters left!", MAXROWS, chars_left - line_len);
+			LOG("Can only print %hu lines, discarding the %u characters left!",
+			    MAXROWS,
+			    chars_left - line_len);
 			// And that's it, we're done.
 			break;
 		}

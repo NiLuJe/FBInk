@@ -132,19 +132,19 @@
 #endif
 
 // Handle what we send to stdout (i.e., mostly diagnostic stuff)
-#define LOG(fmt, ...)                                                                                                      \
-	({                                                                                                                 \
-		if (g_isVerbose) {                                                                                         \
-			fprintf(stdout, fmt "\n", ##__VA_ARGS__);                                                          \
-		}                                                                                                          \
+#define LOG(fmt, ...)                                                                                                    \
+	({                                                                                                               \
+		if (g_isVerbose) {                                                                                       \
+			fprintf(stdout, fmt "\n", ##__VA_ARGS__);                                                        \
+		}                                                                                                        \
 	})
 
 // And then what we send to stderr (mostly fbink_init stuff)
-#define ELOG(fmt, ...)                                                                                                     \
-	({                                                                                                                 \
-		if (!g_isQuiet) {                                                                                          \
-			fprintf(stderr, fmt "\n", ##__VA_ARGS__);                                                          \
-		}                                                                                                          \
+#define ELOG(fmt, ...)                                                                                                   \
+	({                                                                                                               \
+		if (!g_isQuiet) {                                                                                        \
+			fprintf(stderr, fmt "\n", ##__VA_ARGS__);                                                        \
+		}                                                                                                        \
 	})
 
 // We want to return negative values on failure, always

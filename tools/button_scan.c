@@ -133,11 +133,12 @@ int
 					}
 				} else {
 					if (consecutive_matches > 0U) {
-						fprintf(stderr,
-							"Failed end of match after %hu consecutive matches @ (%hu, %hu)\n",
-							consecutive_matches,
-							x,
-							y);
+						fprintf(
+						    stderr,
+						    "Failed end of match after %hu consecutive matches @ (%hu, %hu)\n",
+						    consecutive_matches,
+						    x,
+						    y);
 					}
 				}
 				consecutive_matches = 0U;
