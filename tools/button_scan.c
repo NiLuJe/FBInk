@@ -176,7 +176,7 @@ int
 	}
 
 	if (gotcha) {
-		fprintf(stderr, "Match! :) (over %hu lines)\n", matched_lines);
+		fprintf(stderr, "Match! :)\n");
 
 		// The touch panel has a fixed origin that differs from the framebuffer's... >_<".
 		rotate_coordinates(&match_coords);
