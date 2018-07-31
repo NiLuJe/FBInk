@@ -71,6 +71,23 @@ int
 	viewHeight = 1024U;
 	*/
 
+	// Centralize the various thresholds we use...
+	// The +1 is both to make sure we end up with a non-zero value, and to fake a ceil()-ish rounding.
+	unsigned short int target_lines         = (0.005 * viewHeight) + 1U;
+	unsigned short int button_height_offset = (0.02 * viewHeight) + 1U;
+	unsigned short int button_width_offset  = (0.08 * viewWidth) + 1U;
+	unsigned short int min_target_pixels    = (0.125 * viewWidth) + 1U;
+	unsigned short int max_target_pixels    = (0.25 * viewWidth) + 1U;
+	fprintf(stderr,
+		"We need to match two buttons each between %hu and %hu pixels wide over %hu lines!\n",
+		min_target_pixels,
+		max_target_pixels,
+		target_lines);
+	fprintf(stderr,
+		"Correcting button coordinates by +%hupx vertically, -%hupx horizontally!\n",
+		button_height_offset,
+		button_width_offset);
+
 	// Start looping from the bottom half of the screen, to save some time...
 	for (y = (viewHeight / 2U); y < viewHeight; y++) {
 		if (match_count == 2) {
@@ -78,7 +95,7 @@ int
 			matched_lines++;
 			fprintf(stderr, "Now at %hu consecutive lines matched\n", matched_lines);
 			// If we matched over 0.5% of the screen's height in consecutive lines, we got it!
-			if (matched_lines >= (0.005 * viewHeight)) {
+			if (matched_lines >= target_lines) {
 				gotcha = true;
 				fprintf(stderr, "Gotcha! (After %hu consecutive lines matched)\n", matched_lines);
 				break;
@@ -111,8 +128,8 @@ int
 				// One button is roughly 17% of the screen's width on my H2O (18.5% in Large Print mode)
 				// 19% on a Glo !LP
 				// The larger window should hopefully cover the various range of resolutions & DPI...
-				if (consecutive_matches >= (0.125 * viewWidth) &&
-				    consecutive_matches <= (0.25 * viewWidth)) {
+				if (consecutive_matches >= min_target_pixels &&
+				    consecutive_matches <= max_target_pixels) {
 					match_count++;
 					fprintf(stderr,
 						"End of match %hu after %hu consecutive matche @ (%hu, %hu)\n",
@@ -127,9 +144,9 @@ int
 						// Try to hit roughly the middle of the button
 						// (which takes roughly 4.8% of the screen's height on a H2O, LP & !LP)
 						// 5.5% on a Glo !LP
-						match_coords.y = coords.y + (0.02 * viewHeight);
+						match_coords.y = coords.y + button_height_offset;
 						// Try to hit roughly the middle of the button
-						match_coords.x = coords.x - (0.08 * viewWidth);
+						match_coords.x = coords.x - button_width_offset;
 					}
 				} else {
 					if (consecutive_matches > 0U) {
