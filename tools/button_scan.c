@@ -108,12 +108,13 @@ int
 		min_target_pixels,
 		max_target_pixels);
 
-	// Only loop on the bottom half of the screen, to save time: buttons are always going to be below that.
-	// In the same vein, don't loop 'til the end of the line or the bottom of the screen, limit the search to
-	// roughly the area where there's a chance to find the buttons...
-	unsigned short int min_height = (viewHeight / 2U);
-	unsigned short int max_height = (0.90 * viewHeight);
+	// Only look in the area of the screen where we're likely to find the buttons, both to save some time,
+	// and to lower the risk of false positives, as unlikely as that might be.
+	unsigned short int min_height = (0.55 * viewHeight);
+	unsigned short int max_height = (0.85 * viewHeight);
+	unsigned short int min_width  = (0.05 * viewWidth);
 	unsigned short int max_width  = (0.80 * viewWidth);
+	fprintf(stderr, "Looking for buttons in a %hux%hu rectangle, from x (%hu -> %hu) to y (%hu -> %hu)\n", (max_width - min_width), (max_height - min_height), min_width, max_width, min_height, max_height);
 
 	for (y = min_height; y < max_height; y++) {
 		if (match_count == 2) {
@@ -126,7 +127,7 @@ int
 		button_width = 0U;
 		match_count  = 0U;
 
-		for (x = 0U; x < max_width; x++) {
+		for (x = min_width; x < max_width; x++) {
 			coords.x = x;
 			coords.y = y;
 
