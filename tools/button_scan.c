@@ -18,7 +18,8 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Build w/ ${CROSS_TC}-gcc -O3 -ffast-math -ftree-vectorize -funroll-loops -march=armv7-a -mtune=cortex-a8 -mfpu=neon -mfloat-abi=hard -mthumb -D_GLIBCXX_USE_CXX11_ABI=0 -pipe -fomit-frame-pointer -frename-registers -fweb -flto=9 -fuse-linker-plugin -Wall -Wextra -s tools/button_scan.c -o button_scan
+// Build w/ ${CROSS_TC}-gcc ${RICE_CFLAGS} -Wall -Wextra -s tools/button_scan.c -o button_scan
+// (After a setopt sh_word_split w/ my ZSH setup).
 
 // NOTE: Don't do this at home. This is a quick and rough POC to have some fun w/
 //       https://www.mobileread.com/forums/showpost.php?p=3731967&postcount=12
