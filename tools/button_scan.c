@@ -20,6 +20,7 @@
 
 // Build w/ ${CROSS_TC}-gcc ${RICE_CFLAGS} -Wall -Wextra -s tools/button_scan.c -o button_scan
 // (After a setopt sh_word_split w/ my ZSH setup).
+// (or ${CFLAGS[@]} after CFLAGS=("${(s: :)RICE_CFLAGS}"))
 
 // NOTE: Don't do this at home. This is a quick and rough POC to have some fun w/
 //       https://www.mobileread.com/forums/showpost.php?p=3731967&postcount=12
