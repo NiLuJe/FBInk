@@ -120,7 +120,13 @@ int
 	fprintf(stderr, "Correcting button coordinates by +%hupx vertically!\n", button_height_offset);
 
 	// Only loop on the bottom half of the screen, to save time: buttons are always going to be below that.
-	for (y = (viewHeight / 2U); y < viewHeight; y++) {
+	// In the same vein, don't loop 'til the end of the line or the bottom of the screen, limit the search to
+	// roughly the area where there's a chance to find the buttons...
+	unsigned short int min_height = (viewHeight / 2U);
+	unsigned short int max_height = (0.90 * viewHeight);
+	unsigned short int max_width  = (0.80 * viewWidth);
+
+	for (y = min_height; y < max_height; y++) {
 		if (match_count == 2) {
 			// It looks like we found the buttons on the previous line, keep looking...
 			matched_lines++;
@@ -144,7 +150,7 @@ int
 		consecutive_matches = 0U;
 		match_count         = 0U;
 
-		for (x = 0U; x < viewWidth; x++) {
+		for (x = 0U; x < max_width; x++) {
 			coords.x = x;
 			coords.y = y;
 
