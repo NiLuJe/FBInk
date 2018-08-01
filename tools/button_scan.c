@@ -78,16 +78,16 @@ int
 		button_color.b = 0xDE;
 	}
 
-	FBInkColor         color = { 0U };
 	unsigned short int x;
 	unsigned short int y;
+	FBInkColor         color        = { 0U };
+	FBInkCoordinates   coords       = { 0U };
+	unsigned short int button_width = 0U;
+	unsigned short int match_count  = 0U;
+	FBInkCoordinates   match_coords = { 0U };
+	bool               gotcha       = false;
 	unsigned short int j;
-	FBInkCoordinates   coords        = { 0U };
-	unsigned short int button_width  = 0U;
-	unsigned short int match_count   = 0U;
 	unsigned short int button_height = 0U;
-	bool               gotcha        = false;
-	FBInkCoordinates   match_coords  = { 0U };
 
 	// DEBUG: Fake a Glo ;).
 	/*
