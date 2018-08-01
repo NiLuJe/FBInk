@@ -176,12 +176,15 @@ SHAREDLIB_OBJS:=$(LIB_SRCS:%.c=$(OUT_DIR)/shared/%.o)
 STATICLIB_OBJS:=$(LIB_SRCS:%.c=$(OUT_DIR)/static/%.o)
 CMD_OBJS:=$(CMD_SRCS:%.c=$(OUT_DIR)/%.o)
 
+# Shared lib
 $(OUT_DIR)/shared/%.o: %.c
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) -o $@ -c $<
 
+# Static lib
 $(OUT_DIR)/static/%.o: %.c
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) -o $@ -c $<
 
+# CLI front-end
 $(OUT_DIR)/%.o: %.c
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) -o $@ -c $<
 
@@ -222,8 +225,8 @@ static:
 	$(MAKE) staticlib
 	$(MAKE) staticbin
 
-# This one may be a bit counter-intuitive... It's to build a static library built like if it were shared (i.e., PIC),
-# because apparently that's a requirement for FFI interfaces in some high-level languages (i.e., Go; c.f., #7)
+# NOTE: This one may be a bit counter-intuitive... It's to build a static library built like if it were shared (i.e., PIC),
+#       because apparently that's a requirement for FFI in some high-level languages (i.e., Go; c.f., #7)
 pic:
 	$(MAKE) staticlib SHARED=true
 	$(MAKE) staticbin SHARED=true
