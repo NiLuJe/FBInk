@@ -230,8 +230,7 @@ strip: static
 	$(MAKE) stripbin
 
 debug:
-	$(MAKE) staticlib DEBUG=true DEBUGFLAGS=true
-	$(MAKE) staticbin DEBUG=true DEBUGFLAGS=true
+	$(MAKE) static DEBUG=true DEBUGFLAGS=true
 
 static:
 	$(MAKE) staticlib
@@ -240,26 +239,21 @@ static:
 # NOTE: This one may be a bit counter-intuitive... It's to build a static library built like if it were shared (i.e., PIC),
 #       because apparently that's a requirement for FFI in some high-level languages (i.e., Go; c.f., #7)
 pic:
-	$(MAKE) staticlib SHARED=true
-	$(MAKE) staticbin SHARED=true
+	$(MAKE) static SHARED=true
 
 shared:
 	$(MAKE) sharedlib SHARED=true STANDALONE=true
 	$(MAKE) sharedbin SHARED=true STANDALONE=true
 
-release:
-	$(MAKE) sharedlib SHARED=true STANDALONE=true
-	$(MAKE) sharedbin SHARED=true STANDALONE=true
+release: shared
 	$(MAKE) striplib
 	$(MAKE) stripbin
 
 kindle:
-	$(MAKE) staticbin KINDLE=true
-	$(MAKE) stripbin
+	$(MAKE) strip KINDLE=true
 
 legacy:
-	$(MAKE) staticbin LEGACY=true
-	$(MAKE) stripbin
+	$(MAKE) strip LEGACY=true
 
 kobo: release
 	mkdir -p Kobo/usr/local/fbink/bin Kobo/usr/bin Kobo/usr/local/fbink/lib
