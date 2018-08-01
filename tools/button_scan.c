@@ -207,7 +207,7 @@ int
 	}
 
 	if (gotcha) {
-		ELOG("Match! :)");
+		ELOG("Matched on a %hux%hu button! :)", button_width, button_height);
 
 		// The touch panel has a fixed origin that differs from the framebuffer's... >_<".
 		rotate_coordinates(&match_coords);
