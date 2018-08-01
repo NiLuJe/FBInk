@@ -170,7 +170,8 @@ default: all
 
 SHAREDLIB_OBJS:=$(LIB_SRCS:%.c=$(OUT_DIR)/shared/%.o)
 STATICLIB_OBJS:=$(LIB_SRCS:%.c=$(OUT_DIR)/static/%.o)
-CMD_OBJS:=$(CMD_SRCS:%.c=$(OUT_DIR)/%.o)
+SHAREDCMD_OBJS:=$(CMD_SRCS:%.c=$(OUT_DIR)/shared/%.o)
+STATICCMD_OBJS:=$(CMD_SRCS:%.c=$(OUT_DIR)/static/%.o)
 
 $(OUT_DIR)/shared/%.o: %.c
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LIB_CFLAGS) $(SHARED_CFLAGS) -o $@ -c $<
@@ -178,43 +179,56 @@ $(OUT_DIR)/shared/%.o: %.c
 $(OUT_DIR)/static/%.o: %.c
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LIB_CFLAGS) -o $@ -c $<
 
-$(OUT_DIR)/%.o: %.c
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -o $@ -c $<
-
 outdir:
 	mkdir -p $(OUT_DIR)/shared/utf8 $(OUT_DIR)/static/utf8
 
-all: outdir fbink
+all: outdir static
 
-staticlib: $(STATICLIB_OBJS)
+staticlib: outdir $(STATICLIB_OBJS)
 	$(AR) $(FBINK_STATIC_FLAGS) $(OUT_DIR)/$(FBINK_STATIC_NAME) $(STATICLIB_OBJS)
 	$(RANLIB) $(OUT_DIR)/$(FBINK_STATIC_NAME)
 
-sharedlib: $(SHAREDLIB_OBJS)
+sharedlib: outdir $(SHAREDLIB_OBJS)
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LIB_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(SHAREDLIB_OBJS)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME_VER)
 
-fbink: $(CMD_OBJS) sharedlib staticlib
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/$@$(BINEXT) $(CMD_OBJS) $(LIBS)
+staticbin: outdir staticlib $(STATICCMD_OBJS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbink $(STATICCMD_OBJS) $(LIBS)
 
-strip: all
-	$(STRIP) --strip-unneeded $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/fbink
+sharedbin: outdir sharedlib $(SHAREDCMD_OBJS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/fbink $(SHAREDCMD_OBJS) $(LIBS)
+
+striplib: sharedlib
+	$(STRIP) --strip-unneeded $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE)
+
+stripbin:
+	$(STRIP) --strip-unneeded $(OUT_DIR)/fbink
+
+strip: staticbin
+	$(MAKE) stripbin
 
 debug:
-	$(MAKE) all DEBUG=true DEBUGFLAGS=true
+	$(MAKE) staticbin DEBUG=true DEBUGFLAGS=true
+
+static:
+	$(MAKE) staticbin
 
 shared:
-	$(MAKE) all SHARED=true
+	$(MAKE) sharedbin SHARED=true
 
 release:
-	$(MAKE) strip SHARED=true STANDALONE=true
+	$(MAKE) sharedbin SHARED=true STANDALONE=true
+	$(MAKE) striplib
+	$(MAKE) stripbin
 
 kindle:
-	$(MAKE) strip KINDLE=true
+	$(MAKE) staticbin KINDLE=true
+	$(MAKE) stripbin
 
 legacy:
-	$(MAKE) strip LEGACY=true
+	$(MAKE) staticbin LEGACY=true
+	$(MAKE) stripbin
 
 kobo: release
 	mkdir -p Kobo/usr/local/fbink/bin Kobo/usr/bin Kobo/usr/local/fbink/lib
@@ -254,4 +268,4 @@ clean:
 	rm -rf Debug/*.o
 	rm -rf Debug/fbink
 
-.PHONY: default outdir all staticlib sharedlib fbink strip debug shared release kindle legacy kobo clean
+.PHONY: default outdir all staticlib sharedlib static shared striplib stripbin strip debug static shared release kindle legacy kobo clean
