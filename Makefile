@@ -211,6 +211,14 @@ sharedbin: outdir $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(CMD_OBJS)
 striplib: $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE)
 
+# NOTE: Unless you *really* need to, I don't recommend stripping LTO archives,
+#       strip a binary linked against the untouched archive instead.
+#       (c.f., https://sourceware.org/bugzilla/show_bug.cgi?id=21479)
+#       (i.e., strip doesn't know what to do with LTO archives, has no -plugin wrapper, and as such, breaks the symbol table).
+striparchive: $(OUT_DIR)/$(FBINK_STATIC_NAME)
+	$(STRIP) --strip-unneeded $(OUT_DIR)/$(FBINK_STATIC_NAME)
+	$(RANLIB) $(OUT_DIR)/$(FBINK_STATIC_NAME)
+
 stripbin: $(OUT_DIR)/fbink
 	$(STRIP) --strip-unneeded $(OUT_DIR)/fbink
 
@@ -287,4 +295,4 @@ clean:
 	rm -rf Debug/*.o
 	rm -rf Debug/fbink
 
-.PHONY: default outdir all staticlib sharedlib static shared striplib stripbin strip debug static pic shared release kindle legacy kobo clean
+.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy kobo clean
