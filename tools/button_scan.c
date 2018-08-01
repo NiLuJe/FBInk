@@ -176,6 +176,7 @@ int
 	// If we've got a button corner stored in there, we're not quite done yet...
 	if (match_coords.x != 0 && match_coords.y != 0) {
 		coords.x = match_coords.x;
+		// We're just going too scan down that final column of the button until we hit the end of it :).
 		for (j = match_coords.y; j < max_height; j++) {
 			coords.y = j;
 
