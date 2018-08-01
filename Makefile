@@ -51,8 +51,10 @@ endif
 
 ifndef DEBUG
 	# Don't hobble GCC just for the sake of being interposable
-	ifneq "$(CC_IS_CLANG)" "1"
-		SHARED_CFLAGS+=-fno-semantic-interposition
+	ifdef SHARED
+		ifneq "$(CC_IS_CLANG)" "1"
+			SHARED_CFLAGS+=-fno-semantic-interposition
+		endif
 	endif
 	# Enable loop unrolling & vectorization in the hope it'll do something smart with our pixel loops
 	EXTRA_CFLAGS+=-ftree-vectorize
@@ -93,9 +95,11 @@ endif
 # We need to build PIC to support running as/with a shared library
 # NOTE: We should be safe with -fpic instead of -fPIC ;).
 # And we also handle symbol visibility properly...
-SHARED_CFLAGS+=-fpic
-SHARED_CFLAGS+=-fvisibility=hidden
-SHARED_CFLAGS+=-DFBINK_SHAREDLIB
+ifdef SHARED
+	SHARED_CFLAGS+=-fpic
+	SHARED_CFLAGS+=-fvisibility=hidden
+	SHARED_CFLAGS+=-DFBINK_SHAREDLIB
+endif
 
 # Assume we'll be safe to use by threaded applications...
 EXTRA_CPPFLAGS+=-D_REENTRANT=1
@@ -177,7 +181,7 @@ $(OUT_DIR)/shared/%.o: %.c
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LIB_CFLAGS) $(SHARED_CFLAGS) -o $@ -c $<
 
 $(OUT_DIR)/static/%.o: %.c
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LIB_CFLAGS) -o $@ -c $<
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LIB_CFLAGS) $(SHARED_CFLAGS) -o $@ -c $<
 
 outdir:
 	mkdir -p $(OUT_DIR)/shared/utf8 $(OUT_DIR)/static/utf8
@@ -194,10 +198,10 @@ sharedlib: outdir $(SHAREDLIB_OBJS)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME_VER)
 
 staticbin: outdir staticlib $(STATICCMD_OBJS)
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbink $(STATICCMD_OBJS) $(LIBS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(SHARED_CFLAGS) -o$(OUT_DIR)/fbink $(STATICCMD_OBJS) $(LIBS)
 
 sharedbin: outdir sharedlib $(SHAREDCMD_OBJS)
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/fbink $(SHAREDCMD_OBJS) $(LIBS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(SHARED_CFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/fbink $(SHAREDCMD_OBJS) $(LIBS)
 
 striplib: sharedlib
 	$(STRIP) --strip-unneeded $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE)
@@ -213,6 +217,11 @@ debug:
 
 static:
 	$(MAKE) staticbin
+
+# This one may be a bit counter-intuitive... It's to build a static library built like if it were shared (i.e., PIC),
+# because apparently that's a requirement for FFI interfaces in some high-level languages (i.e., Go; c.f., #7)
+pic:
+	$(MAKE) staticbin SHARED=true
 
 shared:
 	$(MAKE) sharedbin SHARED=true
@@ -268,4 +277,4 @@ clean:
 	rm -rf Debug/*.o
 	rm -rf Debug/fbink
 
-.PHONY: default outdir all staticlib sharedlib static shared striplib stripbin strip debug static shared release kindle legacy kobo clean
+.PHONY: default outdir all staticlib sharedlib static shared striplib stripbin strip debug static pic shared release kindle legacy kobo clean
