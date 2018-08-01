@@ -143,7 +143,7 @@ int
 					// But we've just finished matching enough pixels in a row to assume we found a button!
 					match_count++;
 					fprintf(stderr,
-						"End of match %hu after %hu consecutive matche @ (%hu, %hu)\n",
+						"End of match %hu after %hu consecutive matches @ (%hu, %hu)\n",
 						match_count,
 						button_width,
 						x,
