@@ -190,7 +190,7 @@ int
 				// which likely means we've now hit the bottom-right of the Connect button.
 				// Backtrack from half the height & half the width to get the center of the button.
 				match_coords.y = j - (matched_lines / 2U);
-				match_coords.x = x - (consecutive_matches / 2U);
+				match_coords.x -= (consecutive_matches / 2U);
 				// And we're done!
 				gotcha = true;
 				break;
