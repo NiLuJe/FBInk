@@ -189,6 +189,7 @@ int
 			} else {
 				// Pixel is no longer part of a button,
 				// which likely means we've now hit the bottom-right of the Connect button.
+				// NOTE: No more guesses, assume we *really* got the corner of the button earlier.
 				// Backtrack from half the height & half the width to get the center of the button.
 				match_coords.y = j - (matched_lines / 2U);
 				match_coords.x -= (consecutive_matches / 2U);
