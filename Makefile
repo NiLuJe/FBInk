@@ -202,7 +202,7 @@ sharedbin: outdir sharedlib $(SHAREDCMD_OBJS)
 striplib: sharedlib
 	$(STRIP) --strip-unneeded $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE)
 
-stripbin:
+stripbin: $(OUT_DIR)/fbink
 	$(STRIP) --strip-unneeded $(OUT_DIR)/fbink
 
 strip: staticbin
