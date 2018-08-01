@@ -81,6 +81,7 @@ int
 	FBInkColor         color = { 0U };
 	unsigned short int x;
 	unsigned short int y;
+	unsigned short int j;
 	FBInkCoordinates   coords              = { 0U };
 	unsigned short int consecutive_matches = 0U;
 	unsigned short int match_count         = 0U;
@@ -95,16 +96,6 @@ int
 	*/
 
 	// Centralize the various thresholds we use...
-	// NOTE: A button roughly takes 5% of the screen's height.
-	//       We roughly assume we can split a button's height in three vertical zones: top padding, text, bottom padding.
-	//       We want to match on half of the top padding, and move our cursor roughly to the center (of the text & button).
-	//       So, split its height in 6, match for one sixth, and move the cursor for two sixth after that to get to the middle.
-	//       We go with half of the padding because this isn't an exact science,
-	//       and because Large Print mode makes the "text" zone slightly larger without changing the height of the button,
-	//       which stretches a bit the assumption of the three zones of roughly equal heights ;).
-	//       Fun fact: Large Print mode *can* make the button wider, on the other hand.
-	unsigned short int target_lines         = ((0.05 * viewHeight) / 6U);
-	unsigned short int button_height_offset = target_lines * 2U;
 	// NOTE: Depending on the device's DPI & resolution, a button takes between 17% and 20% of the screen's width.
 	//       Possibly less on larger resolutions, and more on smaller resolutions, so try to handle everyone in one fell swoop.
 	unsigned short int min_target_pixels = (0.125 * viewWidth);
@@ -113,11 +104,9 @@ int
 	// Recap the various settings as computed for this screen...
 	fprintf(stderr, "Button color is expected to be #%hhx%hhx%hhx\n", button_color.r, button_color.g, button_color.b);
 	fprintf(stderr,
-		"We need to match two buttons each between %hu and %hu pixels wide over %hu lines!\n",
+		"We need to match two buttons each between %hu and %hu pixels wide!\n",
 		min_target_pixels,
-		max_target_pixels,
-		target_lines);
-	fprintf(stderr, "Correcting button coordinates by +%hupx vertically!\n", button_height_offset);
+		max_target_pixels);
 
 	// Only loop on the bottom half of the screen, to save time: buttons are always going to be below that.
 	// In the same vein, don't loop 'til the end of the line or the bottom of the screen, limit the search to
@@ -128,24 +117,10 @@ int
 
 	for (y = min_height; y < max_height; y++) {
 		if (match_count == 2) {
-			// It looks like we found the buttons on the previous line, keep looking...
-			matched_lines++;
-			fprintf(stderr, "Now at %hu consecutive lines matched\n", matched_lines);
-			if (matched_lines >= target_lines) {
-				gotcha = true;
-				fprintf(stderr, "Gotcha! (After %hu consecutive lines matched)\n", matched_lines);
-				break;
-			}
-		} else {
-			// No match on the previous line, break if we were attempting to track a pair of buttons
-			if (matched_lines > 0) {
-				fprintf(stderr, "Booh :(. Failed to match after %hu consecutive lines\n", matched_lines);
-				break;
-			} else {
-				// Reset the counter otherwise.
-				matched_lines = 0U;
-			}
+			// It looks like we found the buttons on the previous line, we can stop looping.
+			break;
 		}
+
 		// New line, reset counters
 		consecutive_matches = 0U;
 		match_count         = 0U;
@@ -175,10 +150,11 @@ int
 						y);
 					// We only care about the second button, Connect :).
 					if (match_count == 2) {
-						// Try to hit roughly the middle of the button
-						match_coords.y = y + button_height_offset;
-						// Backtrack to the middle of the button
-						match_coords.x = x - (consecutive_matches / 2U);
+						match_coords.y = y;
+						// Last good pixel was the previous one, store that one ;).
+						match_coords.x = x - 1;
+						// We've got the top-right corner of the Connect button, stop looping.
+						break;
 					}
 				} else {
 					if (consecutive_matches > 0U) {
@@ -193,6 +169,31 @@ int
 				}
 				// In any case, wrong color, reset the counter.
 				consecutive_matches = 0U;
+			}
+		}
+	}
+
+	// If we've got a button corner stored in there, we're not quite done yet...
+	if (match_coords.x != 0 && match_coords.y != 0) {
+		coords.x = match_coords.x;
+		for (j = match_coords.y; j < max_height; j++) {
+			coords.y = j;
+
+			(*fxpRotateCoords)(&coords);
+			(*fxpGetPixel)(&coords, &color);
+
+			if (color.r == button_color.r && color.g == button_color.g && color.b == button_color.b) {
+				// Found a pixel of the right color for a button...
+				matched_lines++;
+			} else {
+				// Pixel is no longer part of a button,
+				// which likely means we've now hit the bottom-right of the Connect button.
+				// Backtrack from half the height & half the width to get the center of the button.
+				match_coords.y = j - (matched_lines / 2U);
+				match_coords.x = x - (consecutive_matches / 2U);
+				// And we're done!
+				gotcha = true;
+				break;
 			}
 		}
 	}
