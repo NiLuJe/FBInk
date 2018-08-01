@@ -82,12 +82,12 @@ int
 	unsigned short int x;
 	unsigned short int y;
 	unsigned short int j;
-	FBInkCoordinates   coords              = { 0U };
-	unsigned short int consecutive_matches = 0U;
-	unsigned short int match_count         = 0U;
-	unsigned short int matched_lines       = 0U;
-	bool               gotcha              = false;
-	FBInkCoordinates   match_coords        = { 0U };
+	FBInkCoordinates   coords        = { 0U };
+	unsigned short int button_width  = 0U;
+	unsigned short int match_count   = 0U;
+	unsigned short int button_height = 0U;
+	bool               gotcha        = false;
+	FBInkCoordinates   match_coords  = { 0U };
 
 	// DEBUG: Fake a Glo ;).
 	/*
@@ -117,35 +117,35 @@ int
 
 	for (y = min_height; y < max_height; y++) {
 		if (match_count == 2) {
-			// It looks like we found the buttons on the previous line, we can stop looping.
+			// It looks like we found the top of the buttons on the previous line, we can stop looping.
+			gotcha = true;
 			break;
 		}
 
 		// New line, reset counters
-		consecutive_matches = 0U;
-		match_count         = 0U;
+		button_width = 0U;
+		match_count  = 0U;
 
 		for (x = 0U; x < max_width; x++) {
 			coords.x = x;
 			coords.y = y;
 
-			// Handle 16bpp rota (hopefully applies in Nickel, too ;D)
+			// Handle 16bpp rotation (hopefully applies in Nickel, too ;D)
 			(*fxpRotateCoords)(&coords);
 			(*fxpGetPixel)(&coords, &color);
 
 			if (color.r == button_color.r && color.g == button_color.g && color.b == button_color.b) {
 				// Found a pixel of the right color for a button...
-				consecutive_matches++;
+				button_width++;
 			} else {
 				// Pixel is no longer part of a button...
-				if (consecutive_matches >= min_target_pixels &&
-				    consecutive_matches <= max_target_pixels) {
+				if (button_width >= min_target_pixels && button_width <= max_target_pixels) {
 					// But we've just finished matching enough pixels in a row to assume we found a button!
 					match_count++;
 					fprintf(stderr,
 						"End of match %hu after %hu consecutive matche @ (%hu, %hu)\n",
 						match_count,
-						consecutive_matches,
+						button_width,
 						x,
 						y);
 					// We only care about the second button, Connect :).
@@ -157,24 +157,25 @@ int
 						break;
 					}
 				} else {
-					if (consecutive_matches > 0U) {
+					if (button_width > 0U) {
 						// And we only matched a few stray pixels of the right color before, not a button.
 						fprintf(
 						    stderr,
 						    "Failed end of match after %hu consecutive matches @ (%hu, %hu)\n",
-						    consecutive_matches,
+						    button_width,
 						    x,
 						    y);
 					}
 				}
 				// In any case, wrong color, reset the counter.
-				consecutive_matches = 0U;
+				button_width = 0U;
 			}
 		}
 	}
 
-	// If we've got a button corner stored in there, we're not quite done yet...
-	if (match_coords.x != 0 && match_coords.y != 0) {
+	// If we've got a button corner in the previous pass, we're not quite done yet...
+	if (gotcha) {
+		gotcha   = false;
 		coords.x = match_coords.x;
 		// We're just going too scan down that final column of the button until we hit the end of it :).
 		for (j = match_coords.y; j < max_height; j++) {
@@ -185,14 +186,14 @@ int
 
 			if (color.r == button_color.r && color.g == button_color.g && color.b == button_color.b) {
 				// Found a pixel of the right color for a button...
-				matched_lines++;
+				button_height++;
 			} else {
 				// Pixel is no longer part of a button,
 				// which likely means we've now hit the bottom-right of the Connect button.
 				// NOTE: No more guesses, assume we *really* got the corner of the button earlier.
 				// Backtrack from half the height & half the width to get the center of the button.
-				match_coords.y = j - (matched_lines / 2U);
-				match_coords.x -= (consecutive_matches / 2U);
+				match_coords.y = j - (button_height / 2U);
+				match_coords.x -= (button_width / 2U);
 				// And we're done!
 				gotcha = true;
 				break;
