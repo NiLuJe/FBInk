@@ -197,36 +197,41 @@ sharedlib: outdir $(SHAREDLIB_OBJS)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME_VER)
 
-staticbin: outdir staticlib $(STATICCMD_OBJS)
+staticbin: outdir $(OUT_DIR)/$(FBINK_STATIC_NAME) $(STATICCMD_OBJS)
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(SHARED_CFLAGS) -o$(OUT_DIR)/fbink $(STATICCMD_OBJS) $(LIBS)
 
-sharedbin: outdir sharedlib $(SHAREDCMD_OBJS)
+sharedbin: outdir $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(SHAREDCMD_OBJS)
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(SHARED_CFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/fbink $(SHAREDCMD_OBJS) $(LIBS)
 
-striplib: sharedlib
+striplib: $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE)
 
 stripbin: $(OUT_DIR)/fbink
 	$(STRIP) --strip-unneeded $(OUT_DIR)/fbink
 
-strip: staticbin
+strip: static
 	$(MAKE) stripbin
 
 debug:
+	$(MAKE) staticlib DEBUG=true DEBUGFLAGS=true
 	$(MAKE) staticbin DEBUG=true DEBUGFLAGS=true
 
 static:
+	$(MAKE) staticlib
 	$(MAKE) staticbin
 
 # This one may be a bit counter-intuitive... It's to build a static library built like if it were shared (i.e., PIC),
 # because apparently that's a requirement for FFI interfaces in some high-level languages (i.e., Go; c.f., #7)
 pic:
+	$(MAKE) staticlib SHARED=true
 	$(MAKE) staticbin SHARED=true
 
 shared:
-	$(MAKE) sharedbin SHARED=true
+	$(MAKE) sharedlib SHARED=true STANDALONE=true
+	$(MAKE) sharedbin SHARED=true STANDALONE=true
 
 release:
+	$(MAKE) sharedlib SHARED=true STANDALONE=true
 	$(MAKE) sharedbin SHARED=true STANDALONE=true
 	$(MAKE) striplib
 	$(MAKE) stripbin
