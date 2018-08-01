@@ -53,6 +53,7 @@ ifndef DEBUG
 	# Don't hobble GCC just for the sake of being interposable
 	ifdef SHARED
 		ifneq "$(CC_IS_CLANG)" "1"
+			# Applies when building a shared library as well as just PIC in general.
 			SHARED_CFLAGS+=-fno-semantic-interposition
 		endif
 	endif
@@ -94,11 +95,14 @@ endif
 
 # We need to build PIC to support running as/with a shared library
 # NOTE: We should be safe with -fpic instead of -fPIC ;).
-# And we also handle symbol visibility properly...
+# And we also want to handle symbol visibility sanely...
 ifdef SHARED
 	SHARED_CFLAGS+=-fpic
+	# The symbol visibility shenanigans only make sense for shared builds.
+	# (Unless you *really* want that main symbol to be local in fbink_cmd in static builds ;)).
 	SHARED_CFLAGS+=-fvisibility=hidden
-	SHARED_CFLAGS+=-DFBINK_SHAREDLIB
+	# And this ensures that only what needs to be public in the library will actually be.
+	LIB_CFLAGS+=-DFBINK_SHAREDLIB
 endif
 
 # Assume we'll be safe to use by threaded applications...
