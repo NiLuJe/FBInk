@@ -45,7 +45,11 @@
 int
     main(int argc __attribute__((unused)), char* argv[] __attribute__((unused)))
 {
-	FBInkConfig fbink_config = { 0 };
+	FBInkConfig fbink_config = { 0U };
+	// Enable stderr diagnostics
+	fbink_config.is_verbose = true;
+	// Enable stdout results
+	fbink_config.is_quiet = false;
 
 	// Open framebuffer and keep it around, then setup globals.
 	int fbfd = -1;
@@ -102,11 +106,8 @@ int
 	unsigned short int max_target_pixels = (0.25 * viewWidth);
 
 	// Recap the various settings as computed for this screen...
-	fprintf(stderr, "Button color is expected to be #%hhx%hhx%hhx\n", button_color.r, button_color.g, button_color.b);
-	fprintf(stderr,
-		"We need to match two buttons each between %hu and %hu pixels wide!\n",
-		min_target_pixels,
-		max_target_pixels);
+	ELOG("Button color is expected to be #%hhx%hhx%hhx", button_color.r, button_color.g, button_color.b);
+	ELOG("We need to match two buttons each between %hu and %hu pixels wide!", min_target_pixels, max_target_pixels);
 
 	// Only look in the area of the screen where we're likely to find the buttons, both to save some time,
 	// and to lower the risk of false positives, as unlikely as that might be.
@@ -114,14 +115,13 @@ int
 	unsigned short int max_height = (0.85 * viewHeight);
 	unsigned short int min_width  = (0.05 * viewWidth);
 	unsigned short int max_width  = (0.80 * viewWidth);
-	fprintf(stderr,
-		"Looking for buttons in a %hux%hu rectangle, from (%hu, %hu) to (%hu, %hu)\n",
-		(unsigned short int) (max_width - min_width),
-		(unsigned short int) (max_height - min_height),
-		min_width,
-		min_height,
-		max_width,
-		max_height);
+	ELOG("Looking for buttons in a %hux%hu rectangle, from (%hu, %hu) to (%hu, %hu)",
+	     (unsigned short int) (max_width - min_width),
+	     (unsigned short int) (max_height - min_height),
+	     min_width,
+	     min_height,
+	     max_width,
+	     max_height);
 
 	for (y = min_height; y < max_height; y++) {
 		if (match_count == 2) {
@@ -150,12 +150,11 @@ int
 				if (button_width >= min_target_pixels && button_width <= max_target_pixels) {
 					// But we've just finished matching enough pixels in a row to assume we found a button!
 					match_count++;
-					fprintf(stderr,
-						"End of match %hu after %hu consecutive matches @ (%hu, %hu)\n",
-						match_count,
-						button_width,
-						x,
-						y);
+					ELOG("End of match %hu after %hu consecutive matches @ (%hu, %hu)",
+					     match_count,
+					     button_width,
+					     x,
+					     y);
 					// We only care about the second button, Connect :).
 					if (match_count == 2) {
 						match_coords.y = y;
@@ -167,12 +166,10 @@ int
 				} else {
 					if (button_width > 0U) {
 						// And we only matched a few stray pixels of the right color before, not a button.
-						fprintf(
-						    stderr,
-						    "Failed end of match after %hu consecutive matches @ (%hu, %hu)\n",
-						    button_width,
-						    x,
-						    y);
+						ELOG("Failed end of match after %hu consecutive matches @ (%hu, %hu)",
+						     button_width,
+						     x,
+						     y);
 					}
 				}
 				// In any case, wrong color, reset the counter.
@@ -210,28 +207,27 @@ int
 	}
 
 	if (gotcha) {
-		fprintf(stderr, "Match! :)\n");
+		ELOG("Match! :)");
 
 		// The touch panel has a fixed origin that differs from the framebuffer's... >_<".
 		rotate_coordinates(&match_coords);
-		fprintf(stdout, "x=%hu, y=%hu\n", match_coords.x, match_coords.y);
+		LOG("x=%hu, y=%hu", match_coords.x, match_coords.y);
 
 		// NOTE: The H2O²r1 is a special snowflake, input is rotated 90° in the *other* direction
 		//       (i.e., origin at the bottom-left instead of top-right).
 		//       Hopefully that doesn't apply to the fb itself, too...
-		fprintf(stdout,
-			"H2O²r1: x=%hu, y=%hu\n",
-			(unsigned short int) (viewHeight - match_coords.x - 1),
-			(unsigned short int) (viewWidth - match_coords.y - 1));
+		LOG("H2O²r1: x=%hu, y=%hu",
+		    (unsigned short int) (viewHeight - match_coords.x - 1),
+		    (unsigned short int) (viewWidth - match_coords.y - 1));
 
 		// Press it if TOUCH_ME is in the env...
 		if (getenv("TOUCH_ME") != NULL) {
-			fprintf(stderr, "Pressing the button . . .\n");
+			ELOG("Pressing the button . . .");
 			struct input_event ev;
 			int                ifd = -1;
 			ifd                    = open("/dev/input/event1", O_WRONLY | O_NONBLOCK);
 			if (ifd == -1) {
-				fprintf(stderr, "Failed to open input device! \n");
+				ELOG("Failed to open input device!");
 				return ERRCODE(EXIT_FAILURE);
 			}
 
@@ -256,7 +252,7 @@ int
 			close(ifd);
 		}
 	} else {
-		fprintf(stderr, "No match :(\n");
+		ELOG("No match :(");
 	}
 
 	// Cleanup
