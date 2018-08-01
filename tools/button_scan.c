@@ -114,7 +114,7 @@ int
 	unsigned short int max_height = (0.85 * viewHeight);
 	unsigned short int min_width  = (0.05 * viewWidth);
 	unsigned short int max_width  = (0.80 * viewWidth);
-	fprintf(stderr, "Looking for buttons in a %hux%hu rectangle, from x (%hu -> %hu) to y (%hu -> %hu)\n", (max_width - min_width), (max_height - min_height), min_width, max_width, min_height, max_height);
+	fprintf(stderr, "Looking for buttons in a %hux%hu rectangle, from (%hu, %hu) to (%hu, %hu)\n", (max_width - min_width), (max_height - min_height), min_width, min_height, max_width, max_height);
 
 	for (y = min_height; y < max_height; y++) {
 		if (match_count == 2) {
