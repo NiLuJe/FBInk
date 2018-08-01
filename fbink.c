@@ -353,11 +353,9 @@ static void
 static void
     fill_rect(unsigned short int x, unsigned short int y, unsigned short int w, unsigned short int h, FBInkColor* color)
 {
-	unsigned short int cx;
-	unsigned short int cy;
-	FBInkCoordinates   coords = { 0U };
-	for (cy = 0U; cy < h; cy++) {
-		for (cx = 0U; cx < w; cx++) {
+	FBInkCoordinates coords = { 0U };
+	for (unsigned short int cy = 0U; cy < h; cy++) {
+		for (unsigned short int cx = 0U; cx < w; cx++) {
 			coords.x = (unsigned short int) (x + cx);
 			coords.y = (unsigned short int) (y + cy);
 			put_pixel(&coords, color);
@@ -438,21 +436,18 @@ static void
 
 	unsigned short int x;
 	unsigned short int y;
-	unsigned short int i;
-	unsigned short int j;
-	uint8_t            k;
 	bool               set = false;
 	size_t             idx;
-	for (i = 0U; i < FONTH; i++) {
+	for (unsigned short int i = 0U; i < FONTH; i++) {
 		// x: input row, i: output row
 		x = (unsigned short int) (i / FONTSIZE_MULT);
-		for (j = 0U; j < FONTW; j++) {
+		for (unsigned short int j = 0U; j < FONTW; j++) {
 			// y: input column, j: output column
 			y   = (unsigned short int) (j / FONTSIZE_MULT);
 			set = bitmap[x] & 1 << y;
 			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTW=1,0)
 			idx = (size_t)(j + (i * FONTW));
-			for (k = 0U; k < FONTSIZE_MULT; k++) {
+			for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
 				glyph_pixmap[idx + k] = set ? 1 : 0;
 			}
 		}
@@ -478,8 +473,6 @@ static struct mxcfb_rect
 	FBInkColor fgC = { is_inverted ? WHITE : BLACK, fgC.r, fgC.r };
 	FBInkColor bgC = { is_inverted ? BLACK : WHITE, bgC.r, bgC.r };
 
-	unsigned short int x;
-	unsigned short int y;
 	// Adjust row in case we're a continuation of a multi-line print...
 	row = (unsigned short int) (row + multiline_offset);
 
@@ -622,9 +615,9 @@ static struct mxcfb_rect
 		font8x8_render(ch, pixmap, fontname);
 
 		// loop through pixel rows
-		for (y = 0U; y < FONTH; y++) {
+		for (unsigned short int y = 0U; y < FONTH; y++) {
 			// loop through pixel columns
-			for (x = 0U; x < FONTW; x++) {
+			for (unsigned short int x = 0U; x < FONTW; x++) {
 				// get the pixel value
 				b = pixmap[(y * FONTW) + x];
 				// plot the pixel (fg if b != 0; bg otherwise)

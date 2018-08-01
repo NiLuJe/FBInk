@@ -155,10 +155,8 @@ static uint32_t
 	}
 
 	// Hi, my name is Neo. I know pointers! (Or not.)
-	char* p;
-	for (p = num; *p != '\0'; p++) {
-		size_t i = 0;
-		for (i = 0; tbl[i] != '\0'; i++) {
+	for (char* p = num; *p != '\0'; p++) {
+		for (size_t i = 0; tbl[i] != '\0'; i++) {
 			if (*p == tbl[i]) {
 				result = result * base + i;
 				break;
