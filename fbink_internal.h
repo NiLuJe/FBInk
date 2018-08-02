@@ -151,9 +151,8 @@
 #define ERRCODE(e) (-(e))
 
 // 'global' variables to store fb/screen info
-unsigned char* fbPtr      = NULL;
-bool           isFbMapped = false;
-// And those stay purely inside the library
+unsigned char*           fbPtr      = NULL;
+bool                     isFbMapped = false;
 struct fb_var_screeninfo vInfo;
 struct fb_fix_screeninfo fInfo;
 uint32_t                 viewWidth;
