@@ -233,8 +233,8 @@ static int open_fb_fd(int*, bool*);
 
 static const char* fb_rotate_to_string(uint32_t);
 
-static int  memmap_fb(int);
-static void unmap_fb(void);
+static int memmap_fb(int);
+static int unmap_fb(void);
 
 static void rotate_region(struct mxcfb_rect*);
 static void fullscreen_region(struct mxcfb_rect*);

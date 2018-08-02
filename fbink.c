@@ -1343,28 +1343,45 @@ static int
 }
 
 // And unmap it
-static void
+static int
     unmap_fb(void)
 {
-	munmap(fbPtr, fbLen);
-	// NOTE: Don't forget to reset those state flags,
-	//       so we won't skip mmap'ing on the next call without a fb fd passed...
-	isFbMapped = false;
-	fbPtr      = 0U;
+	if (munmap(fbPtr, fbLen) < 0) {
+		char  buf[256];
+		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		fprintf(stderr, "[FBInk] munmap: %s\n", errstr);
+		return ERRCODE(EXIT_FAILURE);
+	} else {
+		// NOTE: Don't forget to reset those state flags,
+		//       so we won't skip mmap'ing on the next call without a fb fd passed...
+		isFbMapped = false;
+		fbPtr      = 0U;
+	}
+
+	return EXIT_SUCCESS;
 }
 
 // Public helper function that handles unmapping the fb & closing its fd, for applications that want to keep both around
-void
+int
     fbink_close(int fbfd)
 {
 	// With a few sprinkles of sanity checks, in case something unexpected happen, or the API was used badly.
 	if (isFbMapped) {
-		unmap_fb();
+		if (unmap_fb() != EXIT_SUCCESS) {
+			return ERRCODE(EXIT_FAILURE);
+		}
 	}
 
 	if (fbfd != -1) {
-		close(fbfd);
+		if (close(fbfd) < 0) {
+			char  buf[256];
+			char* errstr = strerror_r(errno, buf, sizeof(buf));
+			fprintf(stderr, "[FBInk] close: %s\n", errstr);
+			return ERRCODE(EXIT_FAILURE);
+		}
 	}
+
+	return EXIT_SUCCESS;
 }
 
 // Much like rotate_coordinates, but for a mxcfb rectangle

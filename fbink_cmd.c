@@ -423,8 +423,11 @@ int
 	}
 
 	// Cleanup
-	fbink_close(fbfd);
 	free(image_file);
+	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
+		fprintf(stderr, "Failed to close the framebuffer, aborting . . .\n");
+		return ERRCODE(EXIT_FAILURE);
+	}
 
 	return EXIT_SUCCESS;
 }

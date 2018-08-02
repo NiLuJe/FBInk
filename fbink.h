@@ -89,7 +89,7 @@ FBINK_API int fbink_open(void);
 
 // Unmap the framebuffer and close its fd
 // (c.f., the recap at the bottom if you're concerned about mmap handling).
-FBINK_API void fbink_close(int);
+FBINK_API int fbink_close(int);
 
 // Initialize the global variables.
 // Arg 1: fbfd, if it's -1, the fb is opened for the duration of this call
