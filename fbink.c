@@ -83,13 +83,13 @@ static void
 	// We can't address nibbles directly, so this takes some shenanigans...
 	if ((coords->x & 0x01) == 0) {
 		// Even pixel: high nibble
-		*((unsigned char*) (g_fbink_fbp + pix_offset)) = (color->r & 0xF0);
+		*((unsigned char*) (fbPtr + pix_offset)) = (color->r & 0xF0);
 		// Squash to 4bpp, and write to the top/left nibble
 		// or: ((v >> 4) << 4)
 	} else {
 		// Odd pixel: low nibble
 		// ORed to avoid clobbering our even pixel
-		*((unsigned char*) (g_fbink_fbp + pix_offset)) |= (color->r >> 4U);
+		*((unsigned char*) (fbPtr + pix_offset)) |= (color->r >> 4U);
 	}
 }
 
@@ -100,7 +100,7 @@ static void
 	size_t pix_offset = coords->x + coords->y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((unsigned char*) (g_fbink_fbp + pix_offset)) = color->r;
+	*((unsigned char*) (fbPtr + pix_offset)) = color->r;
 }
 
 static void
@@ -111,9 +111,9 @@ static void
 	size_t pix_offset = coords->x * 3U + coords->y * finfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((unsigned char*) (g_fbink_fbp + pix_offset))     = color->b;
-	*((unsigned char*) (g_fbink_fbp + pix_offset + 1)) = color->g;
-	*((unsigned char*) (g_fbink_fbp + pix_offset + 2)) = color->r;
+	*((unsigned char*) (fbPtr + pix_offset))     = color->b;
+	*((unsigned char*) (fbPtr + pix_offset + 1)) = color->g;
+	*((unsigned char*) (fbPtr + pix_offset + 2)) = color->r;
 }
 
 static void
@@ -124,12 +124,12 @@ static void
 	size_t pix_offset = (uint32_t)(coords->x << 2U) + (coords->y * finfo.line_length);
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((unsigned char*) (g_fbink_fbp + pix_offset))     = color->b;
-	*((unsigned char*) (g_fbink_fbp + pix_offset + 1)) = color->g;
-	*((unsigned char*) (g_fbink_fbp + pix_offset + 2)) = color->r;
+	*((unsigned char*) (fbPtr + pix_offset))     = color->b;
+	*((unsigned char*) (fbPtr + pix_offset + 1)) = color->g;
+	*((unsigned char*) (fbPtr + pix_offset + 2)) = color->r;
 	// Opaque, always. Note that everything is rendered as opaque, no matter what.
 	// But at least this way we ensure fb grabs are consistent with what's seen on screen.
-	*((unsigned char*) (g_fbink_fbp + pix_offset + 3)) = 0xFF;
+	*((unsigned char*) (fbPtr + pix_offset + 3)) = 0xFF;
 }
 
 static void
@@ -146,7 +146,7 @@ static void
 	// write 'two bytes at once', much to GCC's dismay...
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
-	*((uint16_t*) (g_fbink_fbp + pix_offset)) = c;
+	*((uint16_t*) (fbPtr + pix_offset)) = c;
 #pragma GCC diagnostic pop
 }
 
@@ -269,7 +269,7 @@ static void
 		// calculate the pixel's byte offset inside the buffer
 		// note: x / 2 as every byte holds 2 pixels
 		size_t  pix_offset = (coords->x >> 1U) + (coords->y * finfo.line_length);
-		uint8_t b          = *((unsigned char*) (g_fbink_fbp + pix_offset));
+		uint8_t b          = *((unsigned char*) (fbPtr + pix_offset));
 
 		// Even pixel: high nibble
 		uint8_t v = (b & 0xF0);
@@ -294,7 +294,7 @@ static void
 	// calculate the pixel's byte offset inside the buffer
 	size_t pix_offset = coords->x + coords->y * finfo.line_length;
 
-	color->r = *((unsigned char*) (g_fbink_fbp + pix_offset));
+	color->r = *((unsigned char*) (fbPtr + pix_offset));
 }
 
 static void
@@ -304,9 +304,9 @@ static void
 	// note: x * 3 as every pixel is 3 consecutive bytes
 	size_t pix_offset = coords->x * 3U + coords->y * finfo.line_length;
 
-	color->b = *((unsigned char*) (g_fbink_fbp + pix_offset));
-	color->g = *((unsigned char*) (g_fbink_fbp + pix_offset + 1));
-	color->r = *((unsigned char*) (g_fbink_fbp + pix_offset + 2));
+	color->b = *((unsigned char*) (fbPtr + pix_offset));
+	color->g = *((unsigned char*) (fbPtr + pix_offset + 1));
+	color->r = *((unsigned char*) (fbPtr + pix_offset + 2));
 }
 
 static void
@@ -316,9 +316,9 @@ static void
 	// note: x * 4 as every pixel is 4 consecutive bytes
 	size_t pix_offset = (uint32_t)(coords->x << 2U) + (coords->y * finfo.line_length);
 
-	color->b = *((unsigned char*) (g_fbink_fbp + pix_offset));
-	color->g = *((unsigned char*) (g_fbink_fbp + pix_offset + 1));
-	color->r = *((unsigned char*) (g_fbink_fbp + pix_offset + 2));
+	color->b = *((unsigned char*) (fbPtr + pix_offset));
+	color->g = *((unsigned char*) (fbPtr + pix_offset + 1));
+	color->r = *((unsigned char*) (fbPtr + pix_offset + 2));
 	// NOTE: We don't care about alpha, we always assume it's opaque,
 	//       as that's how it behaves.
 }
@@ -337,7 +337,7 @@ static void
 	// Like put_pixel_RGB565, read those two consecutive bytes at once
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
-	v = *((uint16_t*) (g_fbink_fbp + pix_offset));
+	v = *((uint16_t*) (fbPtr + pix_offset));
 #	pragma GCC diagnostic pop
 
 	b        = (v & 0x001F);
@@ -368,7 +368,7 @@ static void
 static void
     clear_screen(uint8_t v)
 {
-	memset(g_fbink_fbp, v, finfo.smem_len);
+	memset(fbPtr, v, finfo.smem_len);
 }
 
 // Return the font8x8 bitmap for a specific Unicode codepoint
@@ -1328,15 +1328,15 @@ int
 static int
     memmap_fb(int fbfd)
 {
-	g_fbink_screensize = finfo.smem_len;
-	g_fbink_fbp        = (unsigned char*) mmap(NULL, g_fbink_screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
-	if (g_fbink_fbp == MAP_FAILED) {
+	fbLen = finfo.smem_len;
+	fbPtr = (unsigned char*) mmap(NULL, fbLen, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
+	if (fbPtr == MAP_FAILED) {
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
 		fprintf(stderr, "[FBInk] mmap: %s\n", errstr);
 		return ERRCODE(EXIT_FAILURE);
 	} else {
-		g_fbink_isFbMapped = true;
+		isFbMapped = true;
 	}
 
 	return EXIT_SUCCESS;
@@ -1346,11 +1346,11 @@ static int
 static void
     unmap_fb(void)
 {
-	munmap(g_fbink_fbp, g_fbink_screensize);
+	munmap(fbPtr, fbLen);
 	// NOTE: Don't forget to reset those state flags,
 	//       so we won't skip mmap'ing on the next call without a fb fd passed...
-	g_fbink_isFbMapped = false;
-	g_fbink_fbp        = 0U;
+	isFbMapped = false;
+	fbPtr      = 0U;
 }
 
 // Public helper function that handles unmapping the fb & closing its fd, for applications that want to keep both around
@@ -1358,7 +1358,7 @@ void
     fbink_close(int fbfd)
 {
 	// With a few sprinkles of sanity checks, in case something unexpected happen, or the API was used badly.
-	if (g_fbink_isFbMapped) {
+	if (isFbMapped) {
 		unmap_fb();
 	}
 
@@ -1405,7 +1405,7 @@ int
 	// NOTE: Beware of smem_len on Kobos?
 	//       c.f., https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer_linux.lua#L36
 	// NOTE: If we're keeping the fb's fd open, keep this mmap around, too.
-	if (!g_fbink_isFbMapped) {
+	if (!isFbMapped) {
 		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
 			return ERRCODE(EXIT_FAILURE);
 		}
@@ -1707,7 +1707,7 @@ int
 	}
 
 	// cleanup
-	if (g_fbink_isFbMapped && !keep_fd) {
+	if (isFbMapped && !keep_fd) {
 		unmap_fb();
 	}
 	if (!keep_fd) {
@@ -1892,7 +1892,7 @@ int
 	}
 
 	// mmap the fb if need be...
-	if (!g_fbink_isFbMapped) {
+	if (!isFbMapped) {
 		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
 			return ERRCODE(EXIT_FAILURE);
 		}
@@ -2145,7 +2145,7 @@ int
 	}
 
 	// cleanup
-	if (g_fbink_isFbMapped && !keep_fd) {
+	if (isFbMapped && !keep_fd) {
 		unmap_fb();
 	}
 	if (!keep_fd) {

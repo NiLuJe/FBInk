@@ -150,11 +150,10 @@
 // We want to return negative values on failure, always
 #define ERRCODE(e) (-(e))
 
-// 'global' variables to store screen info
-// With our externs, first...
-unsigned char* g_fbink_fbp        = 0U;
-size_t         g_fbink_screensize = 0U;
-bool           g_fbink_isFbMapped = false;
+// 'global' variables to store fb/screen info
+unsigned char* fbPtr      = 0U;
+size_t         fbLen      = 0U;
+bool           isFbMapped = false;
 // And those stay purely inside the library
 struct fb_var_screeninfo vinfo;
 struct fb_fix_screeninfo finfo;
