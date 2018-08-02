@@ -65,7 +65,7 @@ int
 	}
 
 	// mmap the fb if need be...
-	if (!g_fbink_isFbMapped) {
+	if (!isFbMapped) {
 		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
 			return ERRCODE(EXIT_FAILURE);
 		}
@@ -258,10 +258,7 @@ int
 	}
 
 	// Cleanup
-	if (g_fbink_isFbMapped) {
-		munmap(g_fbink_fbp, g_fbink_screensize);
-	}
-	close(fbfd);
+	fbink_close(fbfd);
 
 	return EXIT_SUCCESS;
 }
