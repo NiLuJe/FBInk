@@ -1011,7 +1011,7 @@ int
 	// Open the framebuffer file for reading and writing
 	fbfd = open("/dev/fb0", O_RDWR);
 	if (!fbfd) {
-		fprintf(stderr, "[FBInk] Error: cannot open framebuffer device.\n");
+		fprintf(stderr, "[FBInk] Error: cannot open framebuffer character device.\n");
 		return ERRCODE(EXIT_FAILURE);
 	}
 
@@ -1026,7 +1026,7 @@ static int
 		// If we're opening a fd now, don't keep it around.
 		*keep_fd = false;
 		if (ERRCODE(EXIT_FAILURE) == (*fbfd = fbink_open())) {
-			fprintf(stderr, "[FBInk] Failed to open the framebuffer, aborting . . .\n");
+			fprintf(stderr, "[FBInk] Failed to open the framebuffer character device, aborting . . .\n");
 			return ERRCODE(EXIT_FAILURE);
 		}
 	}
@@ -1351,6 +1351,20 @@ static void
 	//       so we won't skip mmap'ing on the next call without a fb fd passed...
 	g_fbink_isFbMapped = false;
 	g_fbink_fbp        = 0U;
+}
+
+// Public helper function that handles unmapping the fb & closing its fd, for applications that want to keep both around
+void
+    fbink_close(int fbfd)
+{
+	// With a few sprinkles of sanity checks, in case something unexpected happen, or the API was used badly.
+	if (g_fbink_isFbMapped) {
+		unmap_fb();
+	}
+
+	if (fbfd != -1) {
+		close(fbfd);
+	}
 }
 
 // Much like rotate_coordinates, but for a mxcfb rectangle

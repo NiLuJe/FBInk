@@ -50,11 +50,6 @@
 #	define FBINK_LOCAL
 #endif
 
-// The few externs we might need...
-extern FBINK_API unsigned char* g_fbink_fbp;
-extern FBINK_API size_t g_fbink_screensize;
-extern FBINK_API bool   g_fbink_isFbMapped;
-
 // Available fonts
 typedef enum
 {
@@ -91,6 +86,10 @@ FBINK_API const char* fbink_version(void) __attribute__((const));
 
 // Open the framebuffer device and returns its fd
 FBINK_API int fbink_open(void);
+
+// Unmap the framebuffer and close its fd
+// (c.f., the recap at the bottom if you're concerned about mmap handling).
+FBINK_API void fbink_close(int);
 
 // Initialize the global variables.
 // Arg 1: fbfd, if it's -1, the fb is opened for the duration of this call
@@ -147,8 +146,11 @@ FBINK_API bool fbink_is_fb_quirky(void);
 // Arg 3: pointer to an FBInkConfig struct (honors row & col)
 FBINK_API int fbink_print_image(int, const char*, short int, short int, const FBInkConfig*);
 
-// When you intend to keep fd open for the lifecycle of your program:
-// fd = open() -> init(fd) -> print(fd, ...)
+// When you intend to keep the framebuffer fd open for the lifecycle of your program:
+// fd = open() -> init(fd) -> print(fd, ...) -> close(fd)
+// NOTE: This implies keeping the framebuffer's mmap around, too.
+//       The initial mmap will only happen on the first function call that actually needs to write to the fb, i.e., print*.
+//       On the upside, that's going to be the only mmap to ever happen, subsequent print* calls will re-use it.
 //
 // Otherwise:
 // init(-1)

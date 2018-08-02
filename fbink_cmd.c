@@ -423,10 +423,7 @@ int
 	}
 
 	// Cleanup
-	if (g_fbink_isFbMapped) {
-		munmap(g_fbink_fbp, g_fbink_screensize);
-	}
-	close(fbfd);
+	fbink_close(fbfd);
 	free(image_file);
 
 	return EXIT_SUCCESS;
