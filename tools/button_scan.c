@@ -84,15 +84,12 @@ int
 		button_color.b = 0xDE;
 	}
 
-	unsigned short int x;
-	unsigned short int y;
-	FBInkColor         color        = { 0U };
-	FBInkCoordinates   coords       = { 0U };
-	unsigned short int button_width = 0U;
-	unsigned short int match_count  = 0U;
-	FBInkCoordinates   match_coords = { 0U };
-	bool               gotcha       = false;
-	unsigned short int j;
+	FBInkColor         color         = { 0U };
+	FBInkCoordinates   coords        = { 0U };
+	unsigned short int button_width  = 0U;
+	unsigned short int match_count   = 0U;
+	FBInkCoordinates   match_coords  = { 0U };
+	bool               gotcha        = false;
 	unsigned short int button_height = 0U;
 
 	// DEBUG: Fake a Glo ;).
@@ -125,7 +122,7 @@ int
 	     max_width,
 	     max_height);
 
-	for (y = min_height; y < max_height; y++) {
+	for (unsigned short int y = min_height; y < max_height; y++) {
 		if (match_count == 2) {
 			// It looks like we found the top of the buttons on the previous line, we can stop looping.
 			gotcha = true;
@@ -136,7 +133,7 @@ int
 		button_width = 0U;
 		match_count  = 0U;
 
-		for (x = min_width; x < max_width; x++) {
+		for (unsigned short int x = min_width; x < max_width; x++) {
 			coords.x = x;
 			coords.y = y;
 
@@ -185,7 +182,7 @@ int
 		gotcha   = false;
 		coords.x = match_coords.x;
 		// We're just going too scan down that final column of the button until we hit the end of it :).
-		for (j = match_coords.y; j < max_height; j++) {
+		for (unsigned short int j = match_coords.y; j < max_height; j++) {
 			coords.y = j;
 
 			(*fxpRotateCoords)(&coords);
