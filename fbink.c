@@ -74,7 +74,7 @@ static void
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x / 2 as every byte holds 2 pixels
-	size_t pix_offset = (coords->x >> 1U) + (coords->y * finfo.line_length);
+	size_t pix_offset = (coords->x >> 1U) + (coords->y * fInfo.line_length);
 
 	// NOTE: Squash 8bpp to 4bpp:
 	// (v >> 4)
@@ -97,7 +97,7 @@ static void
     put_pixel_Gray8(FBInkCoordinates* coords, FBInkColor* color)
 {
 	// calculate the pixel's byte offset inside the buffer
-	size_t pix_offset = coords->x + coords->y * finfo.line_length;
+	size_t pix_offset = coords->x + coords->y * fInfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	*((unsigned char*) (fbPtr + pix_offset)) = color->r;
@@ -108,7 +108,7 @@ static void
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 3 as every pixel is 3 consecutive bytes
-	size_t pix_offset = coords->x * 3U + coords->y * finfo.line_length;
+	size_t pix_offset = coords->x * 3U + coords->y * fInfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	*((unsigned char*) (fbPtr + pix_offset))     = color->b;
@@ -121,7 +121,7 @@ static void
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 4 as every pixel is 4 consecutive bytes
-	size_t pix_offset = (uint32_t)(coords->x << 2U) + (coords->y * finfo.line_length);
+	size_t pix_offset = (uint32_t)(coords->x << 2U) + (coords->y * fInfo.line_length);
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	*((unsigned char*) (fbPtr + pix_offset))     = color->b;
@@ -137,7 +137,7 @@ static void
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 2 as every pixel is 2 consecutive bytes
-	size_t pix_offset = (uint32_t)(coords->x << 1U) + (coords->y * finfo.line_length);
+	size_t pix_offset = (uint32_t)(coords->x << 1U) + (coords->y * fInfo.line_length);
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	// but a bit more complicated for RGB565
@@ -174,7 +174,7 @@ static void
 	switch (rotation) {
 		case FB_ROTATE_CW:
 			xp = (unsigned short int) lround(-fxp);
-			yp = (unsigned short int) lround(vinfo.yres - 1 - fyp);
+			yp = (unsigned short int) lround(vInfo.yres - 1 - fyp);
 			break;
 		case FB_ROTATE_UD:
 			// NOTE: IIRC, this pretty much ends up with (x', y') being equal to (y, x).
@@ -182,7 +182,7 @@ static void
 			yp = (unsigned short int) lround(-fxp);
 			break;
 		case FB_ROTATE_CCW:
-			xp = (unsigned short int) lround(vinfo.xres - 1 - fxp);
+			xp = (unsigned short int) lround(vInfo.xres - 1 - fxp);
 			yp = (unsigned short int) lround(-fyp);
 			break;
 		default:
@@ -231,15 +231,15 @@ static void
 	//       For instance, when we have a halfcell offset in conjunction with a !isPerfectFit pixel offset,
 	//       when we're padding and centering, the final whitespace of right-padding will have its last
 	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
-	if (coords->x >= vinfo.xres || coords->y >= vinfo.yres) {
+	if (coords->x >= vInfo.xres || coords->y >= vInfo.yres) {
 #ifdef DEBUG
 		// NOTE: This is only enabled in Debug builds because it can be pretty verbose,
 		//       and does not necessarily indicate an actual issue, as we've just explained...
 		LOG("Put: discarding off-screen pixel @ (%hu, %hu) (out of %ux%u bounds)",
 		    coords->x,
 		    coords->y,
-		    vinfo.xres,
-		    vinfo.yres);
+		    vInfo.xres,
+		    vInfo.yres);
 #endif
 		return;
 	}
@@ -268,7 +268,7 @@ static void
 	if ((coords->x & 0x01) == 0) {
 		// calculate the pixel's byte offset inside the buffer
 		// note: x / 2 as every byte holds 2 pixels
-		size_t  pix_offset = (coords->x >> 1U) + (coords->y * finfo.line_length);
+		size_t  pix_offset = (coords->x >> 1U) + (coords->y * fInfo.line_length);
 		uint8_t b          = *((unsigned char*) (fbPtr + pix_offset));
 
 		// Even pixel: high nibble
@@ -292,7 +292,7 @@ static void
     get_pixel_Gray8(FBInkCoordinates* coords, FBInkColor* color)
 {
 	// calculate the pixel's byte offset inside the buffer
-	size_t pix_offset = coords->x + coords->y * finfo.line_length;
+	size_t pix_offset = coords->x + coords->y * fInfo.line_length;
 
 	color->r = *((unsigned char*) (fbPtr + pix_offset));
 }
@@ -302,7 +302,7 @@ static void
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 3 as every pixel is 3 consecutive bytes
-	size_t pix_offset = coords->x * 3U + coords->y * finfo.line_length;
+	size_t pix_offset = coords->x * 3U + coords->y * fInfo.line_length;
 
 	color->b = *((unsigned char*) (fbPtr + pix_offset));
 	color->g = *((unsigned char*) (fbPtr + pix_offset + 1));
@@ -314,7 +314,7 @@ static void
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 4 as every pixel is 4 consecutive bytes
-	size_t pix_offset = (uint32_t)(coords->x << 2U) + (coords->y * finfo.line_length);
+	size_t pix_offset = (uint32_t)(coords->x << 2U) + (coords->y * fInfo.line_length);
 
 	color->b = *((unsigned char*) (fbPtr + pix_offset));
 	color->g = *((unsigned char*) (fbPtr + pix_offset + 1));
@@ -328,7 +328,7 @@ static void
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 2 as every pixel is 2 consecutive bytes
-	size_t pix_offset = (uint32_t)(coords->x << 1U) + (coords->y * finfo.line_length);
+	size_t pix_offset = (uint32_t)(coords->x << 1U) + (coords->y * fInfo.line_length);
 
 	uint16_t v;
 	uint16_t b;
@@ -368,7 +368,7 @@ static void
 static void
     clear_screen(uint8_t v)
 {
-	memset(fbPtr, v, finfo.smem_len);
+	memset(fbPtr, v, fInfo.smem_len);
 }
 
 // Return the font8x8 bitmap for a specific Unicode codepoint
@@ -657,7 +657,7 @@ static int
 	//       and it really is what the framework itself uses...
 	int  rv;
 	bool is_fs = false;
-	if (region.width == vinfo.xres && region.height == vinfo.yres) {
+	if (region.width == vInfo.xres && region.height == vInfo.yres) {
 		// NOTE: In the hopes that UPDATE_DISPLAY is less finicky,
 		//       we use it instead when area covers the full screen.
 		LOG("Detected a full-screen area, upgrading to FBIO_EINK_UPDATE_DISPLAY");
@@ -1075,21 +1075,21 @@ int
 	}
 
 	// Get variable screen information
-	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo)) {
+	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
 		fprintf(stderr, "[FBInk] Error reading variable information.\n");
 		return ERRCODE(EXIT_FAILURE);
 	}
 	ELOG("[FBInk] Variable fb info: %ux%u, %ubpp @ rotation: %u (%s)",
-	     vinfo.xres,
-	     vinfo.yres,
-	     vinfo.bits_per_pixel,
-	     vinfo.rotate,
-	     fb_rotate_to_string(vinfo.rotate));
+	     vInfo.xres,
+	     vInfo.yres,
+	     vInfo.bits_per_pixel,
+	     vInfo.rotate,
+	     fb_rotate_to_string(vInfo.rotate));
 
 	// NOTE: In most every cases, we assume (0, 0) is at the top left of the screen,
 	//       and (xres, yres) at the bottom right, as we should.
-	viewWidth  = vinfo.xres;
-	viewHeight = vinfo.yres;
+	viewWidth  = vInfo.xres;
+	viewHeight = vInfo.yres;
 
 	// NOTE: This needs to be NOP by default, no matter the target device ;).
 	fxpRotateCoords = &rotate_nop;
@@ -1102,19 +1102,19 @@ int
 	//       which leads to a broken origin: (0, 0) is at the top-right of the screen
 	//       (i.e., as if it were intended to be used in the same Landscape viewport as the framebuffer orientation).
 	//       So we have to handle the rotation ourselves. We limit this to Kobos and a simple xres > yres check,
-	//       because as we'll show, vinfo.rotate doesn't necessarily provide us with actionable info...
+	//       because as we'll show, vInfo.rotate doesn't necessarily provide us with actionable info...
 	// NOTE: Nickel itself will put things back into order, so this should NOT affect behavior under Nickel...
 	//       Be aware that pickel, on the other hand, will forcibly drop back to this modeset!
 	//       In fact, if you manage to run *before* pickel (i.e., before on-animator),
 	//       you'll notice that it's in yet another rotation at very early boot (CCW?)...
-	if (vinfo.xres > vinfo.yres) {
+	if (vInfo.xres > vInfo.yres) {
 		// NOTE: PW2:
-		//         vinfo.rotate == 2 in Landscape (vs. 3 in Portrait mode), w/ the xres/yres switch in Landscape,
+		//         vInfo.rotate == 2 in Landscape (vs. 3 in Portrait mode), w/ the xres/yres switch in Landscape,
 		//         and (0, 0) is always at the top-left of the viewport, so we're always correct.
 		//       Kindle Touch:
-		//         Doesn't propose a Landscape mode, and defaults to vinfo.rotate == 1
+		//         Doesn't propose a Landscape mode, and defaults to vInfo.rotate == 1
 		//       K4:
-		//         It supports the four possible rotations, and while it is always using vinfo.rotate == 0,
+		//         It supports the four possible rotations, and while it is always using vInfo.rotate == 0,
 		//         xres & yres switch accordingly when in Landscape modes,
 		//         and (0, 0) is always at the top-left of the viewport, so we're always correct.
 		//       TL;DR: We can't really rely on rotate to tell us anything reliably actionable, but, thankfully,
@@ -1126,15 +1126,15 @@ int
 		//       we attempt to handle this rotation properly, much like KOReader does.
 		//       c.f., https://github.com/koreader/koreader/blob/master/frontend/device/kobo/device.lua#L32-L33
 		//           & https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer.lua#L74-L84
-		if (vinfo.bits_per_pixel == 16U) {
+		if (vInfo.bits_per_pixel == 16U) {
 			// Correct viewWidth & viewHeight, so we do all our row/column arithmetics on the right values...
-			viewWidth                      = vinfo.yres;
-			viewHeight                     = vinfo.xres;
+			viewWidth                      = vInfo.yres;
+			viewHeight                     = vInfo.xres;
 			deviceQuirks.isKobo16Landscape = true;
 			fxpRotateCoords                = &rotate_coordinates;
 			ELOG("[FBInk] Enabled Kobo @ 16bpp fb rotation quirks (%ux%u -> %ux%u)",
-			     vinfo.xres,
-			     vinfo.yres,
+			     vInfo.xres,
+			     vInfo.yres,
 			     viewWidth,
 			     viewHeight);
 		}
@@ -1211,7 +1211,7 @@ int
 		// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
 		// NOTE: We still want to compare against the screen's "height", even in Landscape mode,
 		//       so we simply use the longest edge to do just that...
-		uint32_t actual_height = MAX(vinfo.xres, vinfo.yres);
+		uint32_t actual_height = MAX(vInfo.xres, vInfo.yres);
 		if (actual_height <= 600U) {
 			FONTSIZE_MULT = 1U;    // 8x8
 		} else if (actual_height <= 1024U) {
@@ -1241,16 +1241,16 @@ int
 	}
 
 	// Get fixed screen information
-	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo)) {
+	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &fInfo)) {
 		fprintf(stderr, "[FBInk] Error reading fixed information.\n");
 	}
 	ELOG("[FBInk] Fixed fb info: ID is \"%s\", length of fb mem: %u bytes & line length: %u bytes",
-	     finfo.id,
-	     finfo.smem_len,
-	     finfo.line_length);
+	     fInfo.id,
+	     fInfo.smem_len,
+	     fInfo.line_length);
 
 	// Use the appropriate get/put pixel functions...
-	switch (vinfo.bits_per_pixel) {
+	switch (vInfo.bits_per_pixel) {
 		case 4U:
 			fxpPutPixel = &put_pixel_Gray4;
 #ifdef FBINK_WITH_IMAGE
@@ -1328,7 +1328,7 @@ int
 static int
     memmap_fb(int fbfd)
 {
-	fbPtr = (unsigned char*) mmap(NULL, finfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
+	fbPtr = (unsigned char*) mmap(NULL, fInfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
 	if (fbPtr == MAP_FAILED) {
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
@@ -1345,7 +1345,7 @@ static int
 static int
     unmap_fb(void)
 {
-	if (munmap(fbPtr, finfo.smem_len) < 0) {
+	if (munmap(fbPtr, fInfo.smem_len) < 0) {
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
 		fprintf(stderr, "[FBInk] munmap: %s\n", errstr);
@@ -1403,8 +1403,8 @@ static void
 {
 	region->top    = 0U;
 	region->left   = 0U;
-	region->width  = vinfo.xres;
-	region->height = vinfo.yres;
+	region->width  = vInfo.xres;
+	region->height = vInfo.yres;
 }
 
 // Magic happens here!
@@ -1945,7 +1945,7 @@ int
 	bool       img_has_alpha   = false;
 	FBInkColor color           = { 0U };
 	// Let stb handle grayscaling for us
-	switch (vinfo.bits_per_pixel) {
+	switch (vInfo.bits_per_pixel) {
 		case 4U:
 		case 8U:
 			req_n           = 1 + !fbink_config->ignore_alpha;

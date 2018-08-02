@@ -154,8 +154,8 @@
 unsigned char* fbPtr      = NULL;
 bool           isFbMapped = false;
 // And those stay purely inside the library
-struct fb_var_screeninfo vinfo;
-struct fb_fix_screeninfo finfo;
+struct fb_var_screeninfo vInfo;
+struct fb_fix_screeninfo fInfo;
 uint32_t                 viewWidth;
 uint32_t                 viewHeight;
 unsigned short int       FONTW         = 8U;
