@@ -1354,7 +1354,7 @@ static int
 		// NOTE: Don't forget to reset those state flags,
 		//       so we won't skip mmap'ing on the next call without a fb fd passed...
 		isFbMapped = false;
-		fbPtr      = 0U;
+		fbPtr      = NULL;
 	}
 
 	return EXIT_SUCCESS;
