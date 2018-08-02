@@ -87,7 +87,7 @@ FBINK_API const char* fbink_version(void) __attribute__((const));
 // Open the framebuffer device and returns its fd
 FBINK_API int fbink_open(void);
 
-// Unmap the framebuffer and close its fd
+// Unmap the framebuffer (if need be) and close its fd
 // (c.f., the recap at the bottom if you're concerned about mmap handling).
 FBINK_API int fbink_close(int);
 
