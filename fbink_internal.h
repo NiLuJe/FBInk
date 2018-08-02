@@ -112,6 +112,19 @@
 #	include "fbink_unscii.h"
 #endif
 
+// NOTE: CLOEXEC shenanigans...
+//       Story time: it was introduced (for open) in Linux 2.6.23. Kindle FW 2.x runs something older,
+//       and I can't be arsed to check if they backported it in there or not.
+//       This means we effectively can't use CLOEXEC on LEGACY builds.
+//       But, our legacy TC actually uses an LTS kernel that *does* support CLOEXEC,
+//       so we have to forcefully scrap it to make sure we're not building w/ CLOEXEC support baked in...
+#ifdef FBINK_FOR_LEGACY
+#	ifdef O_CLOEXEC
+#		undef O_CLOEXEC
+#	endif
+#	define O_CLOEXEC 0
+#endif
+
 // Fallback version tag...
 #ifndef FBINK_VERSION
 #	define FBINK_VERSION "v1.2.6"

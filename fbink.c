@@ -1009,7 +1009,7 @@ int
 	int fbfd = -1;
 
 	// Open the framebuffer file for reading and writing
-	fbfd = open("/dev/fb0", O_RDWR);
+	fbfd = open("/dev/fb0", O_RDWR | O_CLOEXEC);
 	if (!fbfd) {
 		fprintf(stderr, "[FBInk] Error: cannot open framebuffer character device.\n");
 		return ERRCODE(EXIT_FAILURE);
