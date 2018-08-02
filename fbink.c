@@ -1360,11 +1360,12 @@ static int
 	return EXIT_SUCCESS;
 }
 
-// Public helper function that handles unmapping the fb & closing its fd, for applications that want to keep both around
+// Public helper function that handles unmapping the fb & closing its fd, for applications that want to keep both around,
+// (i.e., those that use fbink_open in the first place).
 int
     fbink_close(int fbfd)
 {
-	// With a few sprinkles of sanity checks, in case something unexpected happen, or the API was used badly.
+	// With a few sprinkles of sanity checks, in case something *really* unexpected happen, or the API was used badly.
 	if (isFbMapped) {
 		if (unmap_fb() != EXIT_SUCCESS) {
 			return ERRCODE(EXIT_FAILURE);

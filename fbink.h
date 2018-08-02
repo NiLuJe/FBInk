@@ -147,7 +147,7 @@ FBINK_API bool fbink_is_fb_quirky(void);
 FBINK_API int fbink_print_image(int, const char*, short int, short int, const FBInkConfig*);
 
 // When you intend to keep the framebuffer fd open for the lifecycle of your program:
-// fd = open() -> init(fd) -> print(fd, ...) -> close(fd)
+// fd = open() -> init(fd) -> print*(fd, ...) -> ... -> close(fd)
 // NOTE: This implies keeping the framebuffer's mmap around, too.
 //       The initial mmap will only happen on the first function call that actually needs to write to the fb, i.e., print*.
 //       On the upside, that's going to be the only mmap to ever happen, subsequent print* calls will re-use it.
