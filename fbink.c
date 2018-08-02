@@ -1328,8 +1328,7 @@ int
 static int
     memmap_fb(int fbfd)
 {
-	fbLen = finfo.smem_len;
-	fbPtr = (unsigned char*) mmap(NULL, fbLen, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
+	fbPtr = (unsigned char*) mmap(NULL, finfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
 	if (fbPtr == MAP_FAILED) {
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
@@ -1346,7 +1345,7 @@ static int
 static int
     unmap_fb(void)
 {
-	if (munmap(fbPtr, fbLen) < 0) {
+	if (munmap(fbPtr, finfo.smem_len) < 0) {
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
 		fprintf(stderr, "[FBInk] munmap: %s\n", errstr);
