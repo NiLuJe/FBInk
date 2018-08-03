@@ -150,7 +150,7 @@
 #	define UNUSED_BY_MINIMAL
 #endif
 #ifndef FBINK_WITH_BUTTON_SCAN
-#	define UNUSED_BY_NOBUTTONL __attribute__((unused))
+#	define UNUSED_BY_NOBUTTON __attribute__((unused))
 #else
 #	define UNUSED_BY_NOBUTTON
 #endif
