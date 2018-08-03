@@ -20,7 +20,7 @@
 
 #include "fbink_button_scan.h"
 
-#if FBINK_WITH_BUTTON_SCAN
+#ifdef FBINK_WITH_BUTTON_SCAN
 static int
     generate_button_press(FBInkCoordinates* match_coords)
 {

@@ -21,17 +21,16 @@
 #ifndef __FBINK_BUTTON_SCAN_H
 #define __FBINK_BUTTON_SCAN_H
 
-// Make KDevelop happy (for getline)
+// Make KDevelop happy
 #ifndef _DEFAULT_SOURCE
 #	define _DEFAULT_SOURCE
 #endif
 
-// For public stuff
+// And again, mainly to make IDEs happy
 #include "fbink.h"
-// For internal state variables
 #include "fbink_internal.h"
 
-#if FBINK_WITH_BUTTON_SCAN
+#ifdef FBINK_WITH_BUTTON_SCAN
 #	include <linux/input.h>
 
 // c.f., https://github.com/koreader/koreader-base/pull/468/files
