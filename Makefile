@@ -157,6 +157,7 @@ endif
 # Now that we're done fiddling with flags, let's build stuff!
 LIB_SRCS=fbink.c utf8/utf8.c
 CMD_SRCS=fbink_cmd.c
+BUT_SRCS=button_scan_cmd.c
 # Unless we're asking for a minimal build, include the Unscii fonts, too
 ifdef MINIMAL
 	EXTRA_CPPFLAGS+=-DFBINK_MINIMAL
@@ -185,6 +186,7 @@ default: all
 SHAREDLIB_OBJS:=$(LIB_SRCS:%.c=$(OUT_DIR)/shared/%.o)
 STATICLIB_OBJS:=$(LIB_SRCS:%.c=$(OUT_DIR)/static/%.o)
 CMD_OBJS:=$(CMD_SRCS:%.c=$(OUT_DIR)/%.o)
+BUT_OBJS:=$(BUT_SRCS:%.c=$(OUT_DIR)/%.o)
 
 # Shared lib
 $(OUT_DIR)/shared/%.o: %.c
@@ -212,11 +214,13 @@ sharedlib: outdir $(SHAREDLIB_OBJS)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME_VER)
 
-staticbin: outdir $(OUT_DIR)/$(FBINK_STATIC_NAME) $(CMD_OBJS)
+staticbin: outdir $(OUT_DIR)/$(FBINK_STATIC_NAME) $(CMD_OBJS) $(BUT_OBJS)
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbink $(CMD_OBJS) $(LIBS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/button_scan $(BUT_OBJS) $(LIBS)
 
-sharedbin: outdir $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(CMD_OBJS)
+sharedbin: outdir $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(CMD_OBJS) $(BUT_OBJS)
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/fbink $(CMD_OBJS) $(LIBS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/button_scan $(BUT_OBJS) $(LIBS)
 
 striplib: $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE)
@@ -231,6 +235,7 @@ striparchive: $(OUT_DIR)/$(FBINK_STATIC_NAME)
 
 stripbin: $(OUT_DIR)/fbink
 	$(STRIP) --strip-unneeded $(OUT_DIR)/fbink
+	$(STRIP) --strip-unneeded $(OUT_DIR)/button_scan
 
 strip: static
 	$(MAKE) stripbin
@@ -265,6 +270,8 @@ kobo: release
 	mkdir -p Kobo/usr/local/fbink/bin Kobo/usr/bin Kobo/usr/local/fbink/lib
 	cp -av $(CURDIR)/Release/fbink Kobo/usr/local/fbink/bin
 	ln -sf /usr/local/fbink/bin/fbink Kobo/usr/bin/fbink
+	cp -av $(CURDIR)/Release/button_scan Kobo/usr/local/fbink/bin
+	ln -sf /usr/local/fbink/bin/button_scan Kobo/usr/bin/button_scan
 	cp -av $(CURDIR)/Release/$(FBINK_SHARED_NAME_FILE) Kobo/usr/local/fbink/lib
 	ln -sf $(FBINK_SHARED_NAME_FILE) Kobo/usr/local/fbink/lib/$(FBINK_SHARED_NAME)
 	ln -sf $(FBINK_SHARED_NAME_FILE) Kobo/usr/local/fbink/lib/$(FBINK_SHARED_NAME_VER)

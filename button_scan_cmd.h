@@ -18,8 +18,8 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __FBINK_CMD_H
-#define __FBINK_CMD_H
+#ifndef __BUTTON_SCAN_CMD_H
+#define __BUTTON_SCAN_CMD_H
 
 #include <getopt.h>
 #include <stdio.h>
