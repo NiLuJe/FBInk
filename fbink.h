@@ -65,21 +65,21 @@ typedef enum
 	UNSCII_TALL    = 6     // unscii-16
 } FONT_INDEX_T;
 
-// What a FBInk Print config should look like
+// What a FBInk config should look like. Perfectly sane when fully zero-initialized.
 typedef struct
 {
-	short int row;
-	short int col;
-	uint8_t   fontmult;
-	uint8_t   fontname;
-	bool      is_inverted;
-	bool      is_flashing;
-	bool      is_cleared;
-	bool      is_centered;
-	bool      is_padded;
-	bool      is_verbose;
-	bool      is_quiet;
-	bool      ignore_alpha;
+	short int row;             // y axis (i.e., line), counts down from the bottom of the screen if negative
+	short int col;             // x axis (i.e., column), counts down from the right edge of the screen if negative
+	uint8_t   fontmult;        // Font scaling multiplier (i.e., 4 -> x4), 0 means automatic.
+	uint8_t   fontname;        // Request a specific font (c.f., FONT_INDEX_T enum)
+	bool      is_inverted;     // Invert colors
+	bool      is_flashing;     // Request a black flash on refresh
+	bool      is_cleared;      // Clear the screen beforehand (honors is_inverted)
+	bool      is_centered;     // Center the text
+	bool      is_padded;       // Pad the text with blanks (on the left, or on both sides if is_centered)
+	bool      is_verbose;      // Print verbose diagnostic informations on stdout
+	bool      is_quiet;        // Hide hardware setup info (sent to stderr)
+	bool      ignore_alpha;    // Ignore any potential alpha channel in source image (i.e., flatten the image)
 } FBInkConfig;
 
 // NOTE: Unless otherwise specified,
