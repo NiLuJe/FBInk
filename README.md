@@ -49,3 +49,9 @@ And with all the bells and whistles of working transparency, even on ancient har
 Kindle support is split into Touch devices, and legacy devices (up to, and *including* the K4). This is because older devices use a completely different eInk controller.
 
 Kobo support has been tested on a H2O running a recent FW version (i.e., 32bpp fb), but the full lineup should be supported.
+
+# Bindings in other languages
+
+So that everyone gets to have fun, even if you can't stand C!
+
+[Go](https://golang.org/): [go-fbink](https://github.com/shermp/go-fbink) by @shermp
