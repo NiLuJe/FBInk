@@ -94,19 +94,19 @@ FBINK_API int fbink_open(void);
 
 // Unmap the framebuffer (if need be) and close its file descriptor
 // (c.f., the recap at the bottom if you're concerned about mmap handling).
-// Arg 1: open file descriptor to the framebuffer character device, as returned by fbink_open()
+// fbfd:		open file descriptor to the framebuffer character device, as returned by fbink_open()
 FBINK_API int fbink_close(int fbfd);
 
 // Initialize internal variables keeping track of the framebuffer's configuration and state, as well as the device's hardware.
 // MUST be called at least *once* before any fbink_print* functions.
 // CAN safely be called multiple times, but doing so is only necessary if the framebuffer's state has changed,
 //     or if you modified one of the FBInkConfig fields that affects its results (listed below).
-// Arg 1: open file descriptor to the framebuffer character device,
-//        if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
-// Arg 2: pointer to an FBInkConfig struct
-//        If you wish to customize them,
-//        the is_centered, fontmult, fontname, is_verbose & is_quiet fields MUST be set beforehand.
-//        This means you MUST call fbink_init() again when you update them, too!
+// fbfd:		open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
+// fbink_config:	pointer to an FBInkConfig struct
+//				If you wish to customize them,
+//				the is_centered, fontmult, fontname, is_verbose & is_quiet fields MUST be set beforehand.
+//				This means you MUST call fbink_init() again when you update them, too!
 // NOTE: By virtue of, well, setting global variables, do NOT consider this thread-safe.
 //       The rest of the API should be, though, so make sure you init in your main thread *before* threading begins...
 // NOTE: On devices where the fb state can change (i.e., Kobos switching between 16bpp & 32bpp),
@@ -121,28 +121,28 @@ FBINK_API int fbink_init(int fbfd, const FBInkConfig* fbink_config);
 //       c.f., my rant about Kobo's broken libc in fbink_internal.h for more details behind this choice.
 //       Since any decent system built in the last decade should default to UTF-8, that should be pretty much transparent...
 // Returns the amount of lines printed on success (helpful when you keep track of which row you're printing to).
-// Arg 1: open file descriptor to the framebuffer character device,
-//        if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
-// Arg 2: UTF-8 encoded string to print
-// Arg 3: pointer to an FBInkConfig struct
+// fbfd:		open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
+// string:		UTF-8 encoded string to print
+// fbink_config:	pointer to an FBInkConfig struct
 FBINK_API int fbink_print(int fbfd, const char* string, const FBInkConfig* fbink_config);
 
 // Like fbink_print, but with printf formatting ;).
-// Arg 1: open file descriptor to the framebuffer character device,
-//        if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
-// Arg 2: pointer to an FBInkConfig struct
+// fbfd:		open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
+// fbink_config:	pointer to an FBInkConfig struct
 FBINK_API int fbink_printf(int fbfd, const FBInkConfig* fbink_config, const char* fmt, ...)
     __attribute__((format(printf, 3, 4)));
 
 // A simple wrapper around the internal screen refresh handling, without requiring you to include einkfb/mxcfb headers
-// Arg 1: open file descriptor to the framebuffer character device,
-//        if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
-// Arg 2: top field of an mxcfb rectangle
-// Arg 3: left field of an mxcfb rectangle
-// Arg 4: width field of an mxcfb rectangle
-// Arg 5: height field of an mxcfb rectangle
-// Arg 6: waveform mode (i.e, "GC16")
-// Arg 7: will ask for a black flash if true
+// fbfd:		open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
+// region_top:		top field of an mxcfb rectangle
+// region_left:		left field of an mxcfb rectangle
+// region_width:	width field of an mxcfb rectangle
+// region_height:	height field of an mxcfb rectangle
+// waveform_mode:	waveform mode (i.e, "GC16")
+// is_flashing:		will ask for a black flash if true
 FBINK_API int fbink_refresh(int         fbfd,
 			    uint32_t    region_top,
 			    uint32_t    region_left,
@@ -160,12 +160,12 @@ FBINK_API bool fbink_is_fb_quirky(void);
 
 // Print an image on screen
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
-// Arg 1: open file descriptor to the framebuffer character device,
-//        if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
-// Arg 2: path to the image file (Supported formats: JPEG, PNG, TGA, BMP, GIF & PNM)
-// Arg 3: target coordinates, x (honors negative offsets)
-// Arg 4: target coordinates, y (honors negative offsets)
-// Arg 3: pointer to an FBInkConfig struct (honors row & col, in *addition* to x_off & y_off)
+// fdfd:		open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
+// filename:		path to the image file (Supported formats: JPEG, PNG, TGA, BMP, GIF & PNM)
+// x_off:		target coordinates, x (honors negative offsets)
+// y_off:		target coordinates, y (honors negative offsets)
+// fbink_config:	pointer to an FBInkConfig struct (honors row/col, in *addition* to x_off/y_off)
 FBINK_API int fbink_print_image(int                fbfd,
 				const char*        filename,
 				short int          x_off,
