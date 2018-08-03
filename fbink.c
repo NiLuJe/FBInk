@@ -2187,5 +2187,5 @@ int
 #ifdef FBINK_WITH_UNSCII
 #	include "fbink_unscii.c"
 #endif
-// Contains fbink_button_scan's implementation
+// Contains fbink_button_scan's implementation, Kobo only, and has a bit of Linux MT input thrown in ;).
 #include "fbink_button_scan.c"
