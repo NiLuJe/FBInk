@@ -18,8 +18,6 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "fbink.h"
-
 #include "button_scan_cmd.h"
 
 // Help message
@@ -44,14 +42,12 @@ int
 {
 	int                        opt;
 	int                        opt_index;
-	static const struct option opts[] = {
-		{ "press", no_argument, NULL, 'p' },   { NULL, 0, NULL, 0 }
-	};
+	static const struct option opts[] = { { "press", no_argument, NULL, 'p' }, { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_config = { 0U };
 
-	bool      press_button   = false;
-	int       errfnd         = 0;
+	bool press_button = false;
+	int  errfnd       = 0;
 
 	while ((opt = getopt_long(argc, argv, "p", opts, &opt_index)) != -1) {
 		switch (opt) {

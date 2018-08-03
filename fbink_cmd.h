@@ -21,12 +21,12 @@
 #ifndef __FBINK_CMD_H
 #define __FBINK_CMD_H
 
+#include "fbink.h"
+
 #include <getopt.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
-#include <unistd.h>
 
 // FBInk always returns negative values on failure
 #define ERRCODE(e) (-(e))

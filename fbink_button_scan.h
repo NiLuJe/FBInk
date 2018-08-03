@@ -21,12 +21,7 @@
 #ifndef __FBINK_BUTTON_SCAN_H
 #define __FBINK_BUTTON_SCAN_H
 
-// Make KDevelop happy
-#ifndef _DEFAULT_SOURCE
-#	define _DEFAULT_SOURCE
-#endif
-
-// And again, mainly to make IDEs happy
+// Mainly to make IDEs happy
 #include "fbink.h"
 #include "fbink_internal.h"
 
