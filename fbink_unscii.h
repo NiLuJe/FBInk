@@ -21,8 +21,9 @@
 #ifndef __FBINK_UNSCII_H
 #define __FBINK_UNSCII_H
 
-#include <stdint.h>
-#include <stdio.h>
+// Mainly to make IDEs happy
+#include "fbink.h"
+#include "fbink_internal.h"
 
 #include "fonts/alt.h"
 #include "fonts/fantasy.h"
@@ -32,11 +33,11 @@
 #include "fonts/unscii.h"
 
 // NOTE: Should technically be pure, but we can get away with const, according to https://lwn.net/Articles/285332/
-const unsigned char* unscii_get_bitmap(uint32_t) __attribute__((const));
-const unsigned char* alt_get_bitmap(uint32_t) __attribute__((const));
-const unsigned char* thin_get_bitmap(uint32_t) __attribute__((const));
-const unsigned char* fantasy_get_bitmap(uint32_t) __attribute__((const));
-const unsigned char* mcr_get_bitmap(uint32_t) __attribute__((const));
-const unsigned char* tall_get_bitmap(uint32_t) __attribute__((const));
+static const unsigned char* unscii_get_bitmap(uint32_t) __attribute__((const));
+static const unsigned char* alt_get_bitmap(uint32_t) __attribute__((const));
+static const unsigned char* thin_get_bitmap(uint32_t) __attribute__((const));
+static const unsigned char* fantasy_get_bitmap(uint32_t) __attribute__((const));
+static const unsigned char* mcr_get_bitmap(uint32_t) __attribute__((const));
+static const unsigned char* tall_get_bitmap(uint32_t) __attribute__((const));
 
 #endif

@@ -2183,5 +2183,9 @@ int
 //
 // Deals with device identification
 #include "fbink_device_id.c"
+// Extra fonts
+#ifdef FBINK_WITH_UNSCII
+#	include "fbink_unscii.c"
+#endif
 // Contains fbink_button_scan's implementation
 #include "fbink_button_scan.c"

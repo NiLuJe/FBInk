@@ -170,7 +170,6 @@ else
 		EXTRA_CPPFLAGS+=-DFBINK_WITH_BUTTON_SCAN
 	endif
 	endif
-	LIB_SRCS+=fbink_unscii.c
 endif
 
 # How we handle our library creation

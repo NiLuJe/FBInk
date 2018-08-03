@@ -72,7 +72,7 @@ with open(fontfile, "r") as f:
 					print("}}; // {}".format(blockcount))
 					print("")
 					if blocknum == 1:
-						eprint("const unsigned char*")
+						eprint("static const unsigned char*")
 						eprint("    {}_get_bitmap(uint32_t codepoint)".format(fontname))
 						eprint("{")
 						eprint("\tif (codepoint <= {:#04x}) {{".format(prevcp))
