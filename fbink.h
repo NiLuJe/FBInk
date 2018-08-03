@@ -89,7 +89,7 @@ FBINK_API int fbink_open(void);
 
 // Unmap the framebuffer (if need be) and close its fd
 // (c.f., the recap at the bottom if you're concerned about mmap handling).
-FBINK_API int fbink_close(int);
+FBINK_API int fbink_close(int fbfd);
 
 // Initialize the global variables.
 // Arg 1: fbfd, if it's -1, the fb is opened for the duration of this call
@@ -103,7 +103,7 @@ FBINK_API int fbink_close(int);
 //       this needs to be called as many times as necessary to ensure that every following fbink_* call will be made
 //       against a fb state that matches the state it was in during the last fbink_init() call...
 //       c.f., KFMon's handling of this via fbink_is_fb_quirky() to detect the initial 16bpp -> 32bpp switch.
-FBINK_API int fbink_init(int, const FBInkConfig*);
+FBINK_API int fbink_init(int fbfd, const FBInkConfig* fbink_config);
 
 // Print a string on screen.
 // NOTE: The string is expected to be encoded in valid UTF-8, no validation of any kind is done by the library,
@@ -114,12 +114,13 @@ FBINK_API int fbink_init(int, const FBInkConfig*);
 // Arg 1: fbfd, if it's -1, the fb is opened & mmap'ed for the duration of this call
 // Arg 2: UTF-8 encoded string to print
 // Arg 3: pointer to an FBInkConfig struct
-FBINK_API int fbink_print(int, const char*, const FBInkConfig*);
+FBINK_API int fbink_print(int fbfd, const char* string, const FBInkConfig* fbink_config);
 
 // Like fbink_print, but with printf formatting ;).
 // Arg 1: fbfd, if it's -1, the fb is opened for the duration of this call
 // Arg 2: pointer to an FBInkConfig struct
-FBINK_API int fbink_printf(int, const FBInkConfig*, const char*, ...) __attribute__((format(printf, 3, 4)));
+FBINK_API int fbink_printf(int fbfd, const FBInkConfig* fbink_config, const char* fmt, ...)
+    __attribute__((format(printf, 3, 4)));
 
 // And a simple wrapper around the internal refresh, without having to include mxcfb headers
 // Arg 1: fbfd, if it's -1, the fb is opened & mmap'ed for the duration of this call
@@ -129,7 +130,13 @@ FBINK_API int fbink_printf(int, const FBInkConfig*, const char*, ...) __attribut
 // Arg 5: height field of an mxcfb rectangle
 // Arg 6: waveform mode (i.e, "GC16")
 // Arg 7: will ask for a black flash if true
-FBINK_API int fbink_refresh(int, uint32_t, uint32_t, uint32_t, uint32_t, const char*, bool);
+FBINK_API int fbink_refresh(int         fbfd,
+			    uint32_t    region_top,
+			    uint32_t    region_left,
+			    uint32_t    region_width,
+			    uint32_t    region_height,
+			    const char* waveform_mode,
+			    bool        is_flashing);
 
 // Returns true if the device appears to be in a quirky framebuffer state
 // NOTE: Right now, this only checks for the isKobo16Landscape Device Quirk,
@@ -144,7 +151,11 @@ FBINK_API bool fbink_is_fb_quirky(void);
 // Arg 3: target coordinates, x
 // Arg 4: target coordinates, y
 // Arg 3: pointer to an FBInkConfig struct (honors row & col)
-FBINK_API int fbink_print_image(int, const char*, short int, short int, const FBInkConfig*);
+FBINK_API int fbink_print_image(int                fbfd,
+				const char*        filename,
+				short int          x_off,
+				short int          y_off,
+				const FBInkConfig* fbink_config);
 
 // When you intend to keep the framebuffer fd open for the lifecycle of your program:
 // fd = open() -> init(fd) -> print*(fd, ...) -> ... -> close(fd)
