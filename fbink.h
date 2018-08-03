@@ -78,7 +78,7 @@ typedef struct
 	bool      is_centered;     // Center the text
 	bool      is_padded;       // Pad the text with blanks (on the left, or on both sides if is_centered)
 	bool      is_verbose;      // Print verbose diagnostic informations on stdout
-	bool      is_quiet;        // Hide hardware setup info (sent to stderr)
+	bool      is_quiet;        // Hide fbink_init()'s hardware setup info (sent to stderr)
 	bool      ignore_alpha;    // Ignore any potential alpha channel in source image (i.e., flatten the image)
 } FBInkConfig;
 
