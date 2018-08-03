@@ -3,8 +3,6 @@ Release/
 Debug/
 Kobo/
 Kindle/
-# POC
-button_scan
 # KDevelop
 FBInk.kdev4
 .kdev4/
