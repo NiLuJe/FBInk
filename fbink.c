@@ -1022,7 +1022,7 @@ int
 static int
     open_fb_fd(int* fbfd, bool* keep_fd)
 {
-	if (*fbfd == -1) {
+	if (*fbfd == FBFD_AUTO) {
 		// If we're opening a fd now, don't keep it around.
 		*keep_fd = false;
 		if (ERRCODE(EXIT_FAILURE) == (*fbfd = fbink_open())) {
@@ -1372,7 +1372,7 @@ int
 		}
 	}
 
-	if (fbfd != -1) {
+	if (fbfd != FBFD_AUTO) {
 		if (close(fbfd) < 0) {
 			char  buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
