@@ -54,4 +54,4 @@ Kobo support has been tested on a H2O running a recent FW version (i.e., 32bpp f
 
 So that everyone gets to have fun, even if you can't stand C!
 
-[Go](https://golang.org/): [go-fbink](https://github.com/shermp/go-fbink) by @shermp
+[Go](https://golang.org/): [go-fbink](https://github.com/shermp/go-fbink) by [@shermp](https://github.com/shermp)
