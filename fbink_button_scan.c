@@ -59,9 +59,7 @@ static int
 
 // Scan the screen's content for Kobo's "Connect" button in the "USB plugged in" popup.
 int
-    fbink_button_scan(int fbfd UNUSED_BY_MINIMAL,
-		      bool press_button UNUSED_BY_MINIMAL,
-		      FBInkConfig* fbink_config UNUSED_BY_MINIMAL)
+    fbink_button_scan(int fbfd UNUSED_BY_NOBUTTON, bool press_button UNUSED_BY_NOBUTTON)
 {
 #ifdef FBINK_WITH_BUTTON_SCAN
 	// Open the framebuffer if need be...
@@ -102,8 +100,8 @@ int
 	// Centralize the various thresholds we use...
 	// NOTE: Depending on the device's DPI & resolution, a button takes between 17% and 20% of the screen's width.
 	//       Possibly less on larger resolutions, and more on smaller resolutions, so try to handle everyone in one fell swoop.
-	unsigned short int min_target_pixels = (0.125 * viewWidth);
-	unsigned short int max_target_pixels = (0.25 * viewWidth);
+	unsigned short int min_target_pixels = (0.125f * viewWidth);
+	unsigned short int max_target_pixels = (0.25f * viewWidth);
 
 	// Recap the various settings as computed for this screen...
 	ELOG("Button color is expected to be #%hhx%hhx%hhx", button_color.r, button_color.g, button_color.b);
@@ -111,10 +109,10 @@ int
 
 	// Only look in the area of the screen where we're likely to find the buttons, both to save some time,
 	// and to lower the risk of false positives, as unlikely as that might be.
-	unsigned short int min_height = (0.55 * viewHeight);
-	unsigned short int max_height = (0.85 * viewHeight);
-	unsigned short int min_width  = (0.05 * viewWidth);
-	unsigned short int max_width  = (0.80 * viewWidth);
+	unsigned short int min_height = (0.55f * viewHeight);
+	unsigned short int max_height = (0.85f * viewHeight);
+	unsigned short int min_width  = (0.05f * viewWidth);
+	unsigned short int max_width  = (0.80f * viewWidth);
 	ELOG("Looking for buttons in a %hux%hu rectangle, from (%hu, %hu) to (%hu, %hu)",
 	     (unsigned short int) (max_width - min_width),
 	     (unsigned short int) (max_height - min_height),
@@ -159,7 +157,7 @@ int
 					if (match_count == 2) {
 						match_coords.y = y;
 						// Last good pixel was the previous one, store that one ;).
-						match_coords.x = x - 1;
+						match_coords.x = (short unsigned int) (x - 1);
 						// We've got the top-right corner of the Connect button, stop looping.
 						break;
 					}
@@ -197,8 +195,8 @@ int
 				// which likely means we've now hit the bottom-right of the Connect button.
 				// NOTE: No more guesses, assume we *really* got the corner of the button earlier.
 				// Backtrack from half the height & half the width to get the center of the button.
-				match_coords.y = j - (button_height / 2U);
-				match_coords.x -= (button_width / 2U);
+				match_coords.y = (unsigned short int) (j - (button_height / 2U));
+				match_coords.x = (unsigned short int) (match_coords.x - (button_width / 2U));
 				// And we're done!
 				gotcha = true;
 				break;

@@ -149,6 +149,11 @@
 #else
 #	define UNUSED_BY_MINIMAL
 #endif
+#ifndef FBINK_WITH_BUTTON_SCAN
+#	define UNUSED_BY_NOBUTTONL __attribute__((unused))
+#else
+#	define UNUSED_BY_NOBUTTON
+#endif
 
 // Handle what we send to stdout (i.e., mostly diagnostic stuff)
 #define LOG(fmt, ...)                                                                                                    \
