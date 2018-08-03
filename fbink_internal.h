@@ -36,6 +36,12 @@
 #	ifndef FBINK_WITH_IMAGE
 #		define FBINK_WITH_IMAGE
 #	endif
+// Connect button scanning is Kobo specific
+#	if !defined(FBINK_FOR_KINDLE) && !defined(FBINK_FOR_LEGACY)
+#		ifndef FBINK_WITH_BUTTON_SCAN
+#			define FBINK_WITH_BUTTON_SCAN
+#		endif
+#	endif
 #endif
 
 #include <errno.h>

@@ -172,6 +172,15 @@ FBINK_API int fbink_print_image(int                fbfd,
 				short int          y_off,
 				const FBInkConfig* fbink_config);
 
+// Scan the screen for Kobo's "Connect" button in the "USB plugged in" popup,
+// and optionally generate an input event to press that button.
+// KOBO Only! Returns -(ENOSYS) when disabled.
+// fdfd:		open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
+// press_button:	generate an input even to press the button if true
+// fbink_config:	pointer to an FBInkConfig struct (honors row/col, in *addition* to x_off/y_off)
+FBINK_API int fbink_button_scan(int fbfd, bool press_button, FBInkConfig* fbink_config);
+
 //
 // When you intend to keep the framebuffer fd open for the lifecycle of your program:
 // fd = open() -> init(fd, ...) -> print*(fd, ...) -> ... -> close(fd)

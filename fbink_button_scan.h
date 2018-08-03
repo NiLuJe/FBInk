@@ -1,0 +1,50 @@
+/*
+	FBInk: FrameBuffer eInker, a tool to print text & images on eInk devices (Kobo/Kindle)
+	Copyright (C) 2018 NiLuJe <ninuje@gmail.com>
+
+	----
+
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as
+	published by the Free Software Foundation, either version 3 of the
+	License, or (at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#ifndef __FBINK_BUTTON_SCAN_H
+#define __FBINK_BUTTON_SCAN_H
+
+// Make KDevelop happy (for getline)
+#ifndef _DEFAULT_SOURCE
+#	define _DEFAULT_SOURCE
+#endif
+
+// For public stuff
+#include "fbink.h"
+// For internal state variables
+#include "fbink_internal.h"
+
+#if FBINK_WITH_BUTTON_SCAN
+#	include <linux/input.h>
+
+// c.f., https://github.com/koreader/koreader-base/pull/468/files
+#	define SEND_INPUT_EVENT(t, c, v)                                                                                \
+		({                                                                                                       \
+			gettimeofday(&ev.time, NULL);                                                                    \
+			ev.type  = (t);                                                                                  \
+			ev.code  = (c);                                                                                  \
+			ev.value = (v);                                                                                  \
+			write(ifd, &ev, sizeof(ev));                                                                     \
+		})
+
+static int generate_button_press(FBInkCoordinates*);
+#endif
+
+#endif

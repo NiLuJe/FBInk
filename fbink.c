@@ -2161,7 +2161,7 @@ int
 		fprintf(stderr, "[FBInk] Failed to refresh the screen!\n");
 	}
 
-	// cleanup
+	// Cleanup
 	if (isFbMapped && !keep_fd) {
 		unmap_fb();
 	}

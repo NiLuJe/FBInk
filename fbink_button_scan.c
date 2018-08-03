@@ -18,49 +18,56 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Build w/ ${CROSS_TC}-gcc ${RICE_CFLAGS} -Wall -Wextra -s tools/button_scan.c -o button_scan
-// (After a setopt sh_word_split w/ my ZSH setup).
-// (or ${FLAGS[@]} after FLAGS=("${(s: :)RICE_CFLAGS}") or FLAGS=("${(z)RICE_CFLAGS}"))
+#include "fbink_button_scan.h"
 
-// NOTE: Don't do this at home. This is a quick and rough POC to have some fun w/
-//       https://www.mobileread.com/forums/showpost.php?p=3731967&postcount=12
-//       No-one should ever, ever, ever include internal headers/code, I'm just re-using bits of private API to isolate this POC.
-#include "../fbink.c"
-#include "../fbink_device_id.c"
-
-// FBInk always returns negative values on failure
-#define ERRCODE(e) (-(e))
-
-#include <linux/input.h>
-
-// c.f., https://github.com/koreader/koreader-base/pull/468/files
-#define SEND_INPUT_EVENT(t, c, v)                                                                                        \
-	({                                                                                                               \
-		gettimeofday(&ev.time, NULL);                                                                            \
-		ev.type  = (t);                                                                                          \
-		ev.code  = (c);                                                                                          \
-		ev.value = (v);                                                                                          \
-		write(ifd, &ev, sizeof(ev));                                                                             \
-	})
-
-// Application entry point
-int
-    main(int argc __attribute__((unused)), char* argv[] __attribute__((unused)))
+#if FBINK_WITH_BUTTON_SCAN
+static int
+    generate_button_press(FBInkCoordinates* match_coords)
 {
-	FBInkConfig fbink_config = { 0U };
-	// Enable stderr diagnostics
-	fbink_config.is_verbose = true;
-	// Enable stdout results
-	fbink_config.is_quiet = false;
-
-	// Open framebuffer and keep it around, then setup globals.
-	int fbfd = -1;
-	if (ERRCODE(EXIT_FAILURE) == (fbfd = fbink_open())) {
-		fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
+	ELOG("Pressing the button . . .");
+	struct input_event ev;
+	int                ifd = -1;
+	ifd                    = open("/dev/input/event1", O_WRONLY | O_NONBLOCK);
+	if (ifd == -1) {
+		ELOG("Failed to open input device!");
 		return ERRCODE(EXIT_FAILURE);
 	}
-	if (fbink_init(fbfd, &fbink_config) == ERRCODE(EXIT_FAILURE)) {
-		fprintf(stderr, "Failed to initialize FBInk, aborting . . .\n");
+
+	// NOTE: May not be completely right for every model... (OK on H2O)
+	//       Double-check on your device w/ hexdump -x /dev/input/event1 (or -d if you prefer decimal).
+	SEND_INPUT_EVENT(EV_ABS, ABS_MT_TRACKING_ID, 1);
+	SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MAJOR, 1);
+	SEND_INPUT_EVENT(EV_ABS, ABS_MT_WIDTH_MAJOR, 1);
+	SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_X, match_coords->x);
+	SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_Y, match_coords->y);
+	SEND_INPUT_EVENT(EV_SYN, SYN_MT_REPORT, 0);
+	SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
+
+	SEND_INPUT_EVENT(EV_ABS, ABS_MT_TRACKING_ID, 1);
+	SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MAJOR, 0);
+	SEND_INPUT_EVENT(EV_ABS, ABS_MT_WIDTH_MAJOR, 0);
+	SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_X, match_coords->x);
+	SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_Y, match_coords->y);
+	SEND_INPUT_EVENT(EV_SYN, SYN_MT_REPORT, 0);
+	SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
+
+	close(ifd);
+
+	return EXIT_SUCCESS;
+}
+#endif
+
+// Scan the screen's content for Kobo's "Connect" button in the "USB plugged in" popup.
+int
+    fbink_button_scan(int fbfd UNUSED_BY_MINIMAL,
+		      bool press_button UNUSED_BY_MINIMAL,
+		      FBInkConfig* fbink_config UNUSED_BY_MINIMAL)
+{
+#ifdef FBINK_WITH_BUTTON_SCAN
+	// Open the framebuffer if need be...
+	// NOTE: As usual, we *expect* to be initialized at this point!
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
 		return ERRCODE(EXIT_FAILURE);
 	}
 
@@ -91,12 +98,6 @@ int
 	FBInkCoordinates   match_coords  = { 0U };
 	bool               gotcha        = false;
 	unsigned short int button_height = 0U;
-
-	// DEBUG: Fake a Glo ;).
-	/*
-	viewWidth  = 758U;
-	viewHeight = 1024U;
-	*/
 
 	// Centralize the various thresholds we use...
 	// NOTE: Depending on the device's DPI & resolution, a button takes between 17% and 20% of the screen's width.
@@ -219,43 +220,28 @@ int
 		    (unsigned short int) (viewHeight - match_coords.x - 1),
 		    (unsigned short int) (viewWidth - match_coords.y - 1));
 
-		// Press it if TOUCH_ME is in the env...
-		if (getenv("TOUCH_ME") != NULL) {
-			ELOG("Pressing the button . . .");
-			struct input_event ev;
-			int                ifd = -1;
-			ifd                    = open("/dev/input/event1", O_WRONLY | O_NONBLOCK);
-			if (ifd == -1) {
-				ELOG("Failed to open input device!");
+		// Press it if requested...
+		if (press_button) {
+			if (generate_button_press(&match_coords) != EXIT_SUCCESS) {
+				LOG("Failed to press the Connect button!");
 				return ERRCODE(EXIT_FAILURE);
 			}
-
-			// NOTE: May not be completely right for every model... (OK on H2O)
-			//       Double-check on your device w/ hexdump -x /dev/input/event1 (or -d if you prefer decimal).
-			SEND_INPUT_EVENT(EV_ABS, ABS_MT_TRACKING_ID, 1);
-			SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MAJOR, 1);
-			SEND_INPUT_EVENT(EV_ABS, ABS_MT_WIDTH_MAJOR, 1);
-			SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_X, match_coords.x);
-			SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_Y, match_coords.y);
-			SEND_INPUT_EVENT(EV_SYN, SYN_MT_REPORT, 0);
-			SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
-
-			SEND_INPUT_EVENT(EV_ABS, ABS_MT_TRACKING_ID, 1);
-			SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MAJOR, 0);
-			SEND_INPUT_EVENT(EV_ABS, ABS_MT_WIDTH_MAJOR, 0);
-			SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_X, match_coords.x);
-			SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_Y, match_coords.y);
-			SEND_INPUT_EVENT(EV_SYN, SYN_MT_REPORT, 0);
-			SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
-
-			close(ifd);
 		}
 	} else {
 		ELOG("No match :(");
 	}
 
 	// Cleanup
-	fbink_close(fbfd);
+	if (isFbMapped && !keep_fd) {
+		unmap_fb();
+	}
+	if (!keep_fd) {
+		close(fbfd);
+	}
 
 	return EXIT_SUCCESS;
+#else
+	fprintf(stderr, "[FBInk] Kobo Connect button scanning is disabled in this FBInk build!\n");
+	return ERRCODE(ENOSYS);
+#endif    // FBINK_WITH_BUTTON_SCAN
 }
