@@ -28,9 +28,15 @@ static void
 	    "\n"
 	    "Button Scan (w/ FBInk %s)\n"
 	    "\n"
-	    "Usage: button_scan\n"
+	    "Usage: button_scan [-phvq]\n"
 	    "\n"
 	    "Spits out x, y coordinates for the USB Connect button from Kobo's 'USB Plugged In' popup.\n"
+	    "\n"
+	    "OPTIONS:\n"
+	    "\t-p, --press\tGenerate an input event to press the button automatically.\n"
+	    "\t-h, --help\tShow this help message.\n"
+	    "\t-v, --verbose\tToggle printing diagnostic messages.\n"
+	    "\t-q, --quiet\tToggle hiding hardware setup messages.\n"
 	    "\n",
 	    fbink_version());
 	return;
@@ -42,17 +48,33 @@ int
 {
 	int                        opt;
 	int                        opt_index;
-	static const struct option opts[] = { { "press", no_argument, NULL, 'p' }, { NULL, 0, NULL, 0 } };
+	static const struct option opts[] = { { "press", no_argument, NULL, 'p' },
+					      { "help", no_argument, NULL, 'h' },
+					      { "verbose", no_argument, NULL, 'v' },
+					      { "quiet", no_argument, NULL, 'q' },
+					      { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_config = { 0U };
+	// Default to verbose for now
+	fbink_config.is_verbose = true;
 
 	bool press_button = false;
 	int  errfnd       = 0;
 
-	while ((opt = getopt_long(argc, argv, "p", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "phvq", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'p':
 				press_button = true;
+				break;
+			case 'v':
+				fbink_config.is_verbose = !fbink_config.is_verbose;
+				break;
+			case 'q':
+				fbink_config.is_quiet = !fbink_config.is_quiet;
+				break;
+			case 'h':
+				show_helpmsg();
+				return EXIT_SUCCESS;
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
@@ -61,7 +83,7 @@ int
 		}
 	}
 
-	if (errfnd == 1 || argc == 1) {
+	if (errfnd == 1) {
 		show_helpmsg();
 		return ERRCODE(EXIT_FAILURE);
 	}
@@ -77,6 +99,7 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
+	// And actually do stuff :)
 	fbink_button_scan(fbfd, press_button);
 
 	// Cleanup
