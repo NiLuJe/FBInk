@@ -122,8 +122,8 @@
 //       Story time: it was introduced (for open) in Linux 2.6.23. Kindle FW 2.x runs something older,
 //       and I can't be arsed to check if they backported it in there or not.
 //       This means we effectively can't use CLOEXEC on LEGACY builds.
-//       But, our legacy TC actually uses an LTS kernel that *does* support CLOEXEC,
-//       so we have to forcefully scrap it to make sure we're not building w/ CLOEXEC support baked in...
+//       But, our LEGACY TC actually uses an LTS kernel that *does* support CLOEXEC,
+//       so we have to forcefully scrap it to make sure we're not building w/ CLOEXEC support baked in for LEGACY builds...
 #ifdef FBINK_FOR_LEGACY
 #	ifdef O_CLOEXEC
 #		undef O_CLOEXEC
@@ -174,7 +174,7 @@
 // We want to return negative values on failure, always
 #define ERRCODE(e) (-(e))
 
-// 'global' variables to store fb/screen info
+// Global variables to store fb/screen info
 unsigned char*           fbPtr      = NULL;
 bool                     isFbMapped = false;
 struct fb_var_screeninfo vInfo;
@@ -261,7 +261,7 @@ static int unmap_fb(void);
 static void rotate_region(struct mxcfb_rect*);
 static void fullscreen_region(struct mxcfb_rect*);
 
-// For identify_device
+// For identify_device, which we need outside of fbink_device_id.c ;)
 #include "fbink_device_id.h"
 
 #endif
