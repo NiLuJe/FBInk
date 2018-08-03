@@ -2177,7 +2177,11 @@ int
 }
 
 // And now, we just bundle auxiliary parts of the public or private API,
-// that are implemented in separate source files because they deal with a specific concept.
+// that are implemented in separate source files because they deal with a specific concept,
+// but that still rely heavily on either the public or the private API.
+// We want them in a single compilation unit because it makes dealing with all-static functions slightly less cumbersome.
 //
+// Deals with device identification
+#include "fbink_device_id.c"
 // Contains fbink_button_scan's implementation
 #include "fbink_button_scan.c"

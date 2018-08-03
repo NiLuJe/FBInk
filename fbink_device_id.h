@@ -21,9 +21,26 @@
 #ifndef __FBINK_DEVICE_ID_H
 #define __FBINK_DEVICE_ID_H
 
-// For FBInkDeviceQuirks
-#include "fbink_types.h"
+// Make KDevelop happy
+#ifndef _DEFAULT_SOURCE
+#	define _DEFAULT_SOURCE
+#endif
 
-void identify_device(FBInkDeviceQuirks*);
+// And again, mainly to make IDEs happy
+#include "fbink.h"
+#include "fbink_internal.h"
+
+#if defined(FBINK_FOR_KINDLE) || defined(FBINK_FOR_LEGACY)
+#	define KINDLE_SERIAL_NO_LENGTH 16
+
+static bool     is_kindle_device(uint32_t, FBInkDeviceQuirks*);
+static bool     is_kindle_device_new(uint32_t, FBInkDeviceQuirks*);
+static uint32_t from_base(char*, uint8_t);
+static void     identify_kindle(FBInkDeviceQuirks*);
+#else
+static void identify_kobo(FBInkDeviceQuirks*);
+#endif
+
+static void identify_device(FBInkDeviceQuirks*);
 
 #endif

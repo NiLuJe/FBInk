@@ -19,13 +19,12 @@
 */
 
 #include "fbink_device_id.h"
-#include "fbink_device_id_internal.h"
 
 #if defined(FBINK_FOR_KINDLE) || defined(FBINK_FOR_LEGACY)
 // NOTE: This is adapted from KindleTool,
 //       c.f., https://github.com/NiLuJe/KindleTool/blob/master/KindleTool/kindle_tool.h#L189
 static bool
-    is_kindle_device(uint32_t dev, FBInkDeviceQuirks* deviceQuirks)
+    is_kindle_device(uint32_t dev, FBInkDeviceQuirks* device_quirks)
 {
 	switch (dev) {
 		case 0x01:    // K1
@@ -43,7 +42,7 @@ static bool
 		case 0x11:
 		case 0x10:
 		case 0x12:
-			deviceQuirks->isKindlePearlScreen = true;
+			device_quirks->isKindlePearlScreen = true;
 			return true;
 		case 0x23:    // K4b
 			return true;
@@ -53,7 +52,7 @@ static bool
 		case 0x1D:
 		case 0x1F:
 		case 0x20:
-			deviceQuirks->isKindlePearlScreen = true;
+			device_quirks->isKindlePearlScreen = true;
 			return true;
 		case 0xD4:    // PW2
 		case 0x5A:
@@ -91,7 +90,7 @@ static bool
 }
 
 static bool
-    is_kindle_device_new(uint32_t dev, FBInkDeviceQuirks* deviceQuirks)
+    is_kindle_device_new(uint32_t dev, FBInkDeviceQuirks* device_quirks)
 {
 	switch (dev) {
 		case 0x201:    // PW3
@@ -133,7 +132,7 @@ static bool
 		case 0x344:
 		case 0x347:
 		case 0x34A:
-			deviceQuirks->isKindleOasis2 = true;
+			device_quirks->isKindleOasis2 = true;
 			return true;
 		default:
 			return false;
@@ -170,7 +169,7 @@ static uint32_t
 // NOTE: This is adapted from KindleTool,
 //       c.f., https://github.com/NiLuJe/KindleTool/blob/master/KindleTool/create.c#L1915
 static void
-    identify_kindle(FBInkDeviceQuirks* deviceQuirks)
+    identify_kindle(FBInkDeviceQuirks* device_quirks)
 {
 	FILE* fp = fopen("/proc/usid", "r");
 	if (!fp) {
@@ -190,13 +189,13 @@ static void
 		// It's in hex, easy peasy.
 		uint32_t dev = (uint32_t) strtoul(device_code, NULL, 16);
 		// Check if it looks like the old device id scheme...
-		if (!is_kindle_device(dev, deviceQuirks)) {
+		if (!is_kindle_device(dev, device_quirks)) {
 			// ... try the new device ID scheme if it doesn't... (G09[0G1]NNNNNNNNNN)
 			snprintf(device_code, 3 + 1, "%.*s", 3, serial_no + 3);
 			// (these ones are encoded in a slightly custom base 32)
 			dev = from_base(device_code, 32);
 			// ... And if it's not either list, it's truly unknown.
-			if (!is_kindle_device_new(dev, deviceQuirks)) {
+			if (!is_kindle_device_new(dev, device_quirks)) {
 				fprintf(stderr, "[FBInk] Unidentified Kindle device %s (0x%03X)!\n", device_code, dev);
 			}
 		}
@@ -206,7 +205,7 @@ static void
 // NOTE: This is lifted from FBGrab,
 //       c.f., http://trac.ak-team.com/trac/browser/niluje/Configs/trunk/Kindle/Misc/FBGrab/fbgrab.c#L808
 static void
-    identify_kobo(FBInkDeviceQuirks* deviceQuirks)
+    identify_kobo(FBInkDeviceQuirks* device_quirks)
 {
 	// Get the model from Nickel's version tag file...
 	FILE* fp = fopen("/mnt/onboard/.kobo/version", "re");
@@ -239,7 +238,7 @@ static void
 				case 374:    // Aura H2O² (snow)
 					break;
 				case 378:    // Aura H2O² r2 (snow)
-					deviceQuirks->isKoboMk7 = true;
+					device_quirks->isKoboMk7 = true;
 					break;
 				case 373:    // Aura ONE (daylight)
 				case 381:    // Aura ONE LE (daylight)
@@ -247,7 +246,7 @@ static void
 					break;
 				case 379:    // Aura SE r2 (star)
 				case 376:    // Clara HD (nova)
-					deviceQuirks->isKoboMk7 = true;
+					device_quirks->isKoboMk7 = true;
 					break;
 				case 0:
 				default:
@@ -261,12 +260,12 @@ static void
 }
 #endif
 
-void
-    identify_device(FBInkDeviceQuirks* deviceQuirks)
+static void
+    identify_device(FBInkDeviceQuirks* device_quirks)
 {
 #if defined(FBINK_FOR_KINDLE) || defined(FBINK_FOR_LEGACY)
-	identify_kindle(deviceQuirks);
+	identify_kindle(device_quirks);
 #else
-	identify_kobo(deviceQuirks);
+	identify_kobo(device_quirks);
 #endif
 }
