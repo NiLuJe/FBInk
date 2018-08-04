@@ -30,13 +30,13 @@ static void
 	    "\n"
 	    "Usage: button_scan [-phvq]\n"
 	    "\n"
-	    "Spits out x, y coordinates for the USB Connect button from Kobo's 'USB Plugged In' popup.\n"
+	    "Spits out x, y coordinates for the USB Connect button from Kobo's 'USB Plugged In' popup, optionally pressing it in the process.\n"
 	    "\n"
 	    "OPTIONS:\n"
-	    "\t-p, --press\tGenerate an input event to press the button automatically.\n"
+	    "\t-p, --press\tGenerate an input event to automatically press the button.\n"
 	    "\t-h, --help\tShow this help message.\n"
 	    "\t-v, --verbose\tToggle printing diagnostic messages.\n"
-	    "\t-q, --quiet\tToggle hiding hardware setup messages.\n"
+	    "\t-q, --quiet\tToggle hiding hardware setup messages, as well as the coordinates themselves.\n"
 	    "\n",
 	    fbink_version());
 	return;
