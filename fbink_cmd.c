@@ -337,19 +337,23 @@ int
 		}
 	}
 
-	if (errfnd == 1 || argc == 1) {
-		show_helpmsg();
-		return ERRCODE(EXIT_FAILURE);
-	}
-
 	// Assume success, until shit happens ;)
 	int rv = EXIT_SUCCESS;
+	// Declare it a tiny bit early to make cleanup handling safe
+	// (fbink_close is safe to call with fbfd set to -1 and/or the mmap not actually done).
+	int fbfd = -1;
+
+	if (errfnd == 1 || argc == 1) {
+		show_helpmsg();
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
 
 	// Open framebuffer and keep it around, then setup globals.
-	int fbfd = -1;
 	if (ERRCODE(EXIT_FAILURE) == (fbfd = fbink_open())) {
 		fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
-		return ERRCODE(EXIT_FAILURE);
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
 	}
 	if (fbink_init(fbfd, &fbink_config) == ERRCODE(EXIT_FAILURE)) {
 		fprintf(stderr, "Failed to initialize FBInk, aborting . . .\n");
