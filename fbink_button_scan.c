@@ -69,10 +69,14 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
 	// mmap the fb if need be...
 	if (!isFbMapped) {
 		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
-			return ERRCODE(EXIT_FAILURE);
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
 		}
 	}
 
@@ -231,7 +235,8 @@ int
 		if (press_button) {
 			if (generate_button_press(&match_coords) != EXIT_SUCCESS) {
 				LOG("Failed to press the Connect button!");
-				return ERRCODE(EXIT_FAILURE);
+				rv = ERRCODE(EXIT_FAILURE);
+				goto cleanup;
 			}
 		}
 	} else {
@@ -239,6 +244,7 @@ int
 	}
 
 	// Cleanup
+cleanup:
 	if (isFbMapped && !keep_fd) {
 		unmap_fb();
 	}
@@ -246,7 +252,7 @@ int
 		close(fbfd);
 	}
 
-	return EXIT_SUCCESS;
+	return rv;
 #else
 	fprintf(stderr, "[FBInk] Kobo Connect button scanning is disabled in this FBInk build!\n");
 	return ERRCODE(ENOSYS);

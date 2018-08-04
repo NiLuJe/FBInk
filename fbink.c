@@ -1061,6 +1061,9 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
 	// Update verbosity flag
 	if (fbink_config->is_verbose) {
 		g_isVerbose = true;
@@ -1077,7 +1080,8 @@ int
 	// Get variable screen information
 	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
 		fprintf(stderr, "[FBInk] Error reading variable information.\n");
-		return ERRCODE(EXIT_FAILURE);
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
 	}
 	ELOG("[FBInk] Variable fb info: %ux%u, %ubpp @ rotation: %u (%s)",
 	     vInfo.xres,
@@ -1243,6 +1247,8 @@ int
 	// Get fixed screen information
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &fInfo)) {
 		fprintf(stderr, "[FBInk] Error reading fixed information.\n");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
 	}
 	ELOG("[FBInk] Fixed fb info: ID is \"%s\", length of fb mem: %u bytes & line length: %u bytes",
 	     fInfo.id,
@@ -1284,7 +1290,8 @@ int
 		default:
 			// Huh oh... Should never happen!
 			fprintf(stderr, "[FBInk] Unsupported framebuffer bpp!\n");
-			return ERRCODE(EXIT_FAILURE);
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
 			break;
 	}
 
@@ -1317,11 +1324,12 @@ int
 	// NOTE: Do we want to keep the fb0 fd open, or simply close it for now?
 	//       Useful because we probably want to close it to keep open fds to a minimum when used as a library,
 	//       while wanting to avoid a useless open/close/open/close cycle when used as a standalone tool.
+cleanup:
 	if (!keep_fd) {
 		close(fbfd);
 	}
 
-	return EXIT_SUCCESS;
+	return rv;
 }
 
 // Memory map the framebuffer
@@ -1418,13 +1426,19 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+	// We need to declare this early (& sentinel it to NULL) to make our cleanup jumps safe
+	char* line = NULL;
+
 	// map fb to user mem
 	// NOTE: Beware of smem_len on Kobos?
 	//       c.f., https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer_linux.lua#L36
 	// NOTE: If we're keeping the fb's fd open, keep this mmap around, too.
 	if (!isFbMapped) {
 		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
-			return ERRCODE(EXIT_FAILURE);
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
 		}
 	}
 
@@ -1520,13 +1534,13 @@ int
 	// We'll copy our text in chunks of formatted line...
 	// NOTE: Store that on the heap, we've had some wacky adventures with automatic VLAs...
 	// NOTE: UTF-8 is at most 4 bytes per sequence, make sure we can fit a full line of UTF-8 (+ 1 'wide' NULL).
-	char* line = NULL;
-	line       = calloc((MAXCOLS + 1U) * 4U, sizeof(*line));
+	line = calloc((MAXCOLS + 1U) * 4U, sizeof(*line));
 	if (line == NULL) {
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
 		fprintf(stderr, "[FBInk] calloc (line): %s\n", errstr);
-		return ERRCODE(EXIT_FAILURE);
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
 	}
 	// NOTE: This makes sure it's always full of NULLs, to avoid weird shit happening later with u8_strlen()
 	//       and uninitialized or re-used memory...
@@ -1705,9 +1719,6 @@ int
 		//memset(line, 0, ((MAXCOLS + 1U) * 4U) * sizeof(*line));
 	}
 
-	// Cleanup
-	free(line);
-
 	// Rotate the region if need be...
 	if (deviceQuirks.isKobo16Landscape) {
 		rotate_region(&region);
@@ -1721,9 +1732,16 @@ int
 	// Refresh screen
 	if (refresh(fbfd, region, WAVEFORM_MODE_AUTO, fbink_config->is_flashing) != EXIT_SUCCESS) {
 		fprintf(stderr, "[FBInk] Failed to refresh the screen!\n");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
 	}
 
-	// cleanup
+	// On success, we return the total amount of lines we occupied on screen
+	rv = (int) multiline_offset;
+
+	// Cleanup
+cleanup:
+	free(line);
 	if (isFbMapped && !keep_fd) {
 		unmap_fb();
 	}
@@ -1731,8 +1749,7 @@ int
 		close(fbfd);
 	}
 
-	// We return the total amount of lines we occupied on screen
-	return (int) multiline_offset;
+	return rv;
 }
 
 // printf-like wrapper around fbink_print ;).
@@ -1759,11 +1776,11 @@ int
 	vsnprintf(buffer, ((size_t)(MAXCOLS * MAXROWS) * 4U) + 1U, fmt, args);
 	va_end(args);
 
-	int rc = fbink_print(fbfd, buffer, fbink_config);
+	int rv = fbink_print(fbfd, buffer, fbink_config);
 
 	// Cleanup
 	free(buffer);
-	return rc;
+	return rv;
 }
 
 // Small public wrapper around refresh(), without the caller having to depend on mxcfb headers
@@ -1908,10 +1925,14 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
 	// mmap the fb if need be...
 	if (!isFbMapped) {
 		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
-			return ERRCODE(EXIT_FAILURE);
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
 		}
 	}
 
@@ -1963,7 +1984,8 @@ int
 	unsigned char* data = stbi_load(filename, &w, &h, &n, req_n);
 	if (data == NULL) {
 		fprintf(stderr, "[FBInk] Failed to open or decode image '%s'!\n", filename);
-		return ERRCODE(EXIT_FAILURE);
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
 	}
 
 	LOG("Requested %d color channels, image had %d.", req_n, n);
@@ -2162,6 +2184,7 @@ int
 	}
 
 	// Cleanup
+cleanup:
 	if (isFbMapped && !keep_fd) {
 		unmap_fb();
 	}
@@ -2169,7 +2192,7 @@ int
 		close(fbfd);
 	}
 
-	return EXIT_SUCCESS;
+	return rv;
 #else
 	fprintf(stderr, "[FBInk] Image support is disabled in this FBInk build!\n");
 	return ERRCODE(ENOSYS);
