@@ -83,7 +83,7 @@ int
 		}
 	}
 
-	if (errfnd == 1) {
+	if (errfnd == 1 || argc > optind) {
 		show_helpmsg();
 		return ERRCODE(EXIT_FAILURE);
 	}
