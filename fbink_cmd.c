@@ -342,6 +342,9 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
 	// Open framebuffer and keep it around, then setup globals.
 	int fbfd = -1;
 	if (ERRCODE(EXIT_FAILURE) == (fbfd = fbink_open())) {
@@ -350,7 +353,8 @@ int
 	}
 	if (fbink_init(fbfd, &fbink_config) == ERRCODE(EXIT_FAILURE)) {
 		fprintf(stderr, "Failed to initialize FBInk, aborting . . .\n");
-		return ERRCODE(EXIT_FAILURE);
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
 	}
 
 	char* string;
@@ -375,6 +379,8 @@ int
 			}
 			if ((linecount = fbink_print(fbfd, string, &fbink_config)) < 0) {
 				fprintf(stderr, "Failed to print that string!\n");
+				rv = ERRCODE(EXIT_FAILURE);
+				goto cleanup;
 			}
 			// NOTE: Don't clobber previous entries if multiple strings were passed...
 			//       We make sure to trust print's return value,
@@ -400,6 +406,8 @@ int
 					  region_wfm,
 					  fbink_config.is_flashing) != EXIT_SUCCESS) {
 				fprintf(stderr, "Failed to refresh the screen as per your specification!\n");
+				rv = ERRCODE(EXIT_FAILURE);
+				goto cleanup;
 			}
 		} else if (is_image) {
 			printf(
@@ -414,6 +422,8 @@ int
 			if (fbink_print_image(fbfd, image_file, image_x_offset, image_y_offset, &fbink_config) !=
 			    EXIT_SUCCESS) {
 				fprintf(stderr, "Failed to display that image!\n");
+				rv = ERRCODE(EXIT_FAILURE);
+				goto cleanup;
 			}
 		} else {
 			show_helpmsg();
@@ -421,11 +431,12 @@ int
 	}
 
 	// Cleanup
+cleanup:
 	free(image_file);
 	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
 		fprintf(stderr, "Failed to close the framebuffer, aborting . . .\n");
-		return ERRCODE(EXIT_FAILURE);
+		rv = ERRCODE(EXIT_FAILURE);
 	}
 
-	return EXIT_SUCCESS;
+	return rv;
 }

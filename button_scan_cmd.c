@@ -88,6 +88,9 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
 	// Open framebuffer and keep it around, then setup globals.
 	int fbfd = -1;
 	if (ERRCODE(EXIT_FAILURE) == (fbfd = fbink_open())) {
@@ -96,17 +99,19 @@ int
 	}
 	if (fbink_init(fbfd, &fbink_config) == ERRCODE(EXIT_FAILURE)) {
 		fprintf(stderr, "Failed to initialize FBInk, aborting . . .\n");
-		return ERRCODE(EXIT_FAILURE);
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
 	}
 
 	// And actually do stuff :)
 	fbink_button_scan(fbfd, press_button);
 
 	// Cleanup
+cleanup:
 	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
 		fprintf(stderr, "Failed to close the framebuffer, aborting . . .\n");
-		return ERRCODE(EXIT_FAILURE);
+		rv = ERRCODE(EXIT_FAILURE);
 	}
 
-	return EXIT_SUCCESS;
+	return rv;
 }
