@@ -1309,9 +1309,9 @@ int
 		}
 
 		// Ask the Kernel for its HZ value so we can translate jiffies into human-readable units.
-		long int rv = sysconf(_SC_CLK_TCK);
-		if (rv > 0) {
-			USER_HZ = rv;
+		long int rc = sysconf(_SC_CLK_TCK);
+		if (rc > 0) {
+			USER_HZ = rc;
 			ELOG("[FBInk] Kernel's HZ value appears to be %ld", USER_HZ);
 		} else {
 			ELOG("[FBInk] Unable to query Kernel's HZ value, assuming %ld", USER_HZ);
