@@ -56,7 +56,6 @@
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
-#include <sys/param.h>
 #include <unistd.h>
 
 // NOTE: This is from https://www.cprogramming.com/tutorial/unicode.html
@@ -135,6 +134,23 @@
 #ifndef FBINK_VERSION
 #	define FBINK_VERSION "v1.2.6"
 #endif
+
+// MIN/MAX with no side-effects,
+// c.f., https://gcc.gnu.org/onlinedocs/cpp/Duplication-of-Side-Effects.html#Duplication-of-Side-Effects
+//     & https://dustri.org/b/min-and-max-macro-considered-harmful.html
+#define MIN(X, Y)                                                                                                        \
+	({                                                                                                               \
+		typeof(X) x_ = (X);                                                                                      \
+		typeof(Y) y_ = (Y);                                                                                      \
+		(x_ < y_) ? x_ : y_;                                                                                     \
+	})
+
+#define MAX(X, Y)                                                                                                        \
+	({                                                                                                               \
+		typeof(X) x__ = (X);                                                                                     \
+		typeof(Y) y__ = (Y);                                                                                     \
+		(x__ > y__) ? x__ : y__;                                                                                 \
+	})
 
 // NOTE: Some of our ifdef combinations may cause a small number of function arguments to become unused...
 //       Handle the warnings in these cases with a bit of trickery,

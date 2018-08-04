@@ -1186,7 +1186,7 @@ int
 			uint8_t max_fontmult_width = (uint8_t)(viewWidth / min_maxcols / 8U);
 			// We want at least 1 row, so, viewHeight / glyphHeight gives us the maximum multiplier.
 			uint8_t max_fontmult_height = (uint8_t)(viewHeight / 16U);
-			max_fontmult                = MIN(max_fontmult_width, max_fontmult_height);
+			max_fontmult                = (uint8_t) MIN(max_fontmult_width, max_fontmult_height);
 			if (FONTSIZE_MULT > max_fontmult) {
 				FONTSIZE_MULT = max_fontmult;
 				ELOG("[FBInk] Clamped font size multiplier from %hhu to %hhu",
