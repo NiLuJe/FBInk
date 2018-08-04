@@ -24,12 +24,12 @@
 static int
     generate_button_press(FBInkCoordinates* match_coords)
 {
-	ELOG("Pressing the button . . .");
+	LOG("Pressing the Connect button . . .");
 	struct input_event ev;
 	int                ifd = -1;
 	ifd                    = open("/dev/input/event1", O_WRONLY | O_NONBLOCK);
 	if (ifd == -1) {
-		ELOG("Failed to open input device!");
+		fprintf(stderr, "[FBInk] Failed to open input device!\n");
 		return ERRCODE(EXIT_FAILURE);
 	}
 
@@ -113,8 +113,8 @@ int
 #	pragma GCC diagnostic pop
 
 	// Recap the various settings as computed for this screen...
-	ELOG("Button color is expected to be #%hhx%hhx%hhx", button_color.r, button_color.g, button_color.b);
-	ELOG("We need to match two buttons each between %hu and %hu pixels wide!", min_target_pixels, max_target_pixels);
+	LOG("Button color is expected to be #%hhx%hhx%hhx", button_color.r, button_color.g, button_color.b);
+	LOG("We need to match two buttons each between %hu and %hu pixels wide!", min_target_pixels, max_target_pixels);
 
 	// Only look in the area of the screen where we're likely to find the buttons, both to save some time,
 	// and to lower the risk of false positives, as unlikely as that might be.
@@ -126,13 +126,13 @@ int
 	unsigned short int     min_width  = (0.05f * viewWidth);
 	unsigned short int     max_width  = (0.80f * viewWidth);
 #	pragma GCC diagnostic pop
-	ELOG("Looking for buttons in a %hux%hu rectangle, from (%hu, %hu) to (%hu, %hu)",
-	     (unsigned short int) (max_width - min_width),
-	     (unsigned short int) (max_height - min_height),
-	     min_width,
-	     min_height,
-	     max_width,
-	     max_height);
+	LOG("Looking for buttons in a %hux%hu rectangle, from (%hu, %hu) to (%hu, %hu)",
+	    (unsigned short int) (max_width - min_width),
+	    (unsigned short int) (max_height - min_height),
+	    min_width,
+	    min_height,
+	    max_width,
+	    max_height);
 
 	for (unsigned short int y = min_height; y < max_height; y++) {
 		if (match_count == 2) {
@@ -161,11 +161,11 @@ int
 				if (button_width >= min_target_pixels && button_width <= max_target_pixels) {
 					// But we've just finished matching enough pixels in a row to assume we found a button!
 					match_count++;
-					ELOG("End of match %hu after %hu consecutive matches @ (%hu, %hu)",
-					     match_count,
-					     button_width,
-					     x,
-					     y);
+					LOG("End of match %hu after %hu consecutive matches @ (%hu, %hu)",
+					    match_count,
+					    button_width,
+					    x,
+					    y);
 					// We only care about the second button, Connect :).
 					if (match_count == 2) {
 						match_coords.y = y;
@@ -177,10 +177,10 @@ int
 				} else {
 					if (button_width > 0U) {
 						// And we only matched a few stray pixels of the right color before, not a button.
-						ELOG("Failed end of match after %hu consecutive matches @ (%hu, %hu)",
-						     button_width,
-						     x,
-						     y);
+						LOG("Failed end of match after %hu consecutive matches @ (%hu, %hu)",
+						    button_width,
+						    x,
+						    y);
 					}
 				}
 				// In any case, wrong color, reset the counter.
@@ -218,29 +218,29 @@ int
 	}
 
 	if (gotcha) {
-		ELOG("Matched on a %hux%hu button! :)", button_width, button_height);
+		LOG("Matched on a %hux%hu button! :)", button_width, button_height);
 
 		// The touch panel has a fixed origin that differs from the framebuffer's... >_<".
 		rotate_coordinates(&match_coords);
-		LOG("x=%hu, y=%hu", match_coords.x, match_coords.y);
+		ELOG("x=%hu, y=%hu", match_coords.x, match_coords.y);
 
 		// NOTE: The H2O²r1 is a special snowflake, input is rotated 90° in the *other* direction
 		//       (i.e., origin at the bottom-left instead of top-right).
 		//       Hopefully that doesn't apply to the fb itself, too...
-		LOG("H2O²r1: x=%hu, y=%hu",
-		    (unsigned short int) (viewHeight - match_coords.x - 1),
-		    (unsigned short int) (viewWidth - match_coords.y - 1));
+		ELOG("H2O²r1: x=%hu, y=%hu",
+		     (unsigned short int) (viewHeight - match_coords.x - 1),
+		     (unsigned short int) (viewWidth - match_coords.y - 1));
 
 		// Press it if requested...
 		if (press_button) {
 			if (generate_button_press(&match_coords) != EXIT_SUCCESS) {
-				LOG("Failed to press the Connect button!");
+				fprintf(stderr, "[FBInk] Failed to press the Connect button!\n");
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
 			}
 		}
 	} else {
-		ELOG("No match :(");
+		LOG("No match :(");
 	}
 
 	// Cleanup
