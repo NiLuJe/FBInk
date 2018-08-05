@@ -175,6 +175,8 @@ FBINK_API int fbink_print_image(int                fbfd,
 // Scan the screen for Kobo's "Connect" button in the "USB plugged in" popup,
 // and optionally generate an input event to press that button.
 // KOBO Only! Returns -(ENOSYS) when disabled (!KOBO, as well as MINIMAL builds).
+// NOTE: We don't really have any sane way to check if a button press was successful,
+//       so an EXIT_SUCCESS return value *cannot* guarantee a successful tap when press_button is set (c.f., #9).
 // fdfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // press_button:	generate an input event to press the button if true
