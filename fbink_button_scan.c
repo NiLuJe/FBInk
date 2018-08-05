@@ -28,13 +28,20 @@ static bool
 	// Something on the bottom margin should do the trick,
 	// without falling into any "might be behind the bezel" quirk,
 	// which would cause it to potentially already be black (or transparent) in Nickel...
-	FBInkCoordinates coords = { (unsigned short int) (viewWidth / 2U), (unsigned short int) viewHeight };
+	FBInkCoordinates coords = { (unsigned short int) (viewWidth / 2U), (unsigned short int) (viewHeight - 1) };
 	(*fxpRotateCoords)(&coords);
 	FBInkColor color = { 0U };
 
 	// We loop for 8s at most
 	for (uint8_t i = 0U; i < 32; i++) {
 		(*fxpGetPixel)(&coords, &color);
+		LOG("On iteration nr. %hhu, pixel (%hu, %hu) was #%hhx%hhx%hhx",
+		    i,
+		    coords.x,
+		    coords.y,
+		    color.r,
+		    color.g,
+		    color.b);
 
 		// Got it!
 		if (color.r == BLACK && color.g == BLACK && color.b == BLACK) {
