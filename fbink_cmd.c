@@ -110,6 +110,7 @@ static void
 	    "\n\n"
 	    "You can also eschew printing a STRING, and print an IMAGE at the requested coordinates instead:\n"
 	    "\t-g, --image file=PATH,x=NUM,y=NUM,halign=ALIGN,valign=ALIGN\n"
+	    "\t\tSupported ALIGN values: NONE (or LEFT for halign, TOP for valign), CENTER or MIDDLE, EDGE (or RIGHT for halign, BOTTOM for valign)\n"
 	    "\n"
 	    "EXAMPLES:\n"
 	    "\tfbink -g file=hello.png\n"
@@ -325,7 +326,7 @@ int
 								   strcasecmp(value, "RIGHT") == 0) {
 								fbink_config.halign = EDGE;
 							} else {
-								fprintf(stderr, "Unknown alignment name '%s'.\n", value);
+								fprintf(stderr, "Unknown alignment value '%s'.\n", value);
 								errfnd = 1;
 							}
 							break;
@@ -340,7 +341,7 @@ int
 								   strcasecmp(value, "BOTTOM") == 0) {
 								fbink_config.valign = EDGE;
 							} else {
-								fprintf(stderr, "Unknown alignment name '%s'.\n", value);
+								fprintf(stderr, "Unknown alignment value '%s'.\n", value);
 								errfnd = 1;
 							}
 							break;
