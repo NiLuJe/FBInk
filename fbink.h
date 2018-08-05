@@ -183,7 +183,8 @@ FBINK_API int fbink_print_image(int                fbfd,
 // fdfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // press_button:	generate an input event to press the button if true
-FBINK_API int fbink_button_scan(int fbfd, bool press_button);
+// silent:		internal use only, always set it to false
+FBINK_API int fbink_button_scan(int fbfd, bool press_button, bool silent);
 
 //
 // When you intend to keep the framebuffer fd open for the lifecycle of your program:

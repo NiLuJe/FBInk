@@ -53,20 +53,23 @@ static int
 
 	close(ifd);
 
-	// Assume success until shit happen :)
+	// Assume success until shit happens :)
 	int rv = EXIT_SUCCESS;
 
 	// Check if screen content changed 100ms later, as a poor man's way of checking if the tap was successful...
 	nanosleep((const struct timespec[]){ { 0, 100000000L } }, NULL);
+
 	// Neuter logging for this pass...
 	bool orig_verbose = g_isVerbose;
 	bool orig_quiet   = g_isQuiet;
 	g_isVerbose       = false;
 	g_isQuiet         = true;
-	// If we still *find* a button, we've failed ;).
-	if (fbink_button_scan(fbfd, false) == EXIT_SUCCESS) {
+
+	// If we still *find* a button, we've failed to press it ;).
+	if (fbink_button_scan(fbfd, false, true) == EXIT_SUCCESS) {
 		rv = ERRCODE(ENOTSUP);
 	}
+
 	// Restore logging
 	g_isVerbose = orig_verbose;
 	g_isQuiet   = orig_quiet;
@@ -77,7 +80,7 @@ static int
 
 // Scan the screen's content for Kobo's "Connect" button in the "USB plugged in" popup.
 int
-    fbink_button_scan(int fbfd UNUSED_BY_NOBUTTON, bool press_button UNUSED_BY_NOBUTTON)
+    fbink_button_scan(int fbfd UNUSED_BY_NOBUTTON, bool press_button UNUSED_BY_NOBUTTON, bool silent UNUSED_BY_NOBUTTON)
 {
 #ifdef FBINK_WITH_BUTTON_SCAN
 	// Open the framebuffer if need be...
@@ -260,10 +263,8 @@ int
 		}
 	} else {
 		LOG("No match :(");
-		// NOTE: This is a stupid hack to inhibit that message on the second scan pass done by generate_button_press...
-		if (press_button == false && g_isQuiet == true && g_isVerbose == false) {
-			;
-		} else {
+		// We don't want to see that message during the second checking pass done by generate_button_press...
+		if (!silent) {
 			fprintf(stderr, "[FBInk] Failed to find a Connect button on screen!\n");
 		}
 		rv = ERRCODE(EXIT_FAILURE);
