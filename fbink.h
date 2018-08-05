@@ -74,6 +74,8 @@ typedef enum
 } ALIGN_INDEX_T;
 
 // What a FBInk config should look like. Perfectly sane when fully zero-initialized.
+// NOTE: Refrain from narrowing some of those (i.e., fontname, halign, valign) to bitfields,
+//       because that'd make them hostile to FFI ;).
 typedef struct
 {
 	short int row;             // y axis (i.e., line), counts down from the bottom of the screen if negative
