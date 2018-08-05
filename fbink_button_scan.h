@@ -39,7 +39,8 @@
 			write(ifd, &ev, sizeof(ev));                                                                     \
 		})
 
-static int generate_button_press(int, FBInkCoordinates*);
+static bool is_on_connected_screen(void);
+static int  generate_button_press(FBInkCoordinates*);
 #endif
 
 #endif

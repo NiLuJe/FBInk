@@ -21,8 +21,36 @@
 #include "fbink_button_scan.h"
 
 #ifdef FBINK_WITH_BUTTON_SCAN
+static bool
+    is_on_connected_screen(void)
+{
+	// Check a single pixel that should always be white in Nickel, and always black when on the "Connected" screen.
+	// Something on the bottom margin should do the trick,
+	// without falling into any "might be behind the bezel" quirk,
+	// which would cause it to potentially already be black (or transparent) in Nickel...
+	FBInkCoordinates coords = { (unsigned short int) (viewWidth / 2U), (unsigned short int) viewHeight };
+	(*fxpRotateCoords)(&coords);
+	FBInkColor color = { 0U };
+
+	// We loop for 8s at most
+	for (uint8_t i = 0U; i < 32; i++) {
+		(*fxpGetPixel)(&coords, &color);
+
+		// Got it!
+		if (color.r == BLACK && color.g == BLACK && color.b == BLACK) {
+			return true;
+		}
+
+		// Otherwise, try again in 250ms
+		nanosleep((const struct timespec[]){ { 0, 250000000L } }, NULL);
+	}
+
+	// If we got this far, we failed :(
+	return false;
+}
+
 static int
-    generate_button_press(int fbfd, FBInkCoordinates* match_coords)
+    generate_button_press(FBInkCoordinates* match_coords)
 {
 	LOG("Pressing the Connect button . . .");
 	struct input_event ev;
@@ -56,23 +84,10 @@ static int
 	// Assume success until shit happens :)
 	int rv = EXIT_SUCCESS;
 
-	// Check if screen content changed 5s later, as a poor man's way of checking if the tap was successful...
-	nanosleep((const struct timespec[]){ { 5, 0 } }, NULL);
-
-	// Neuter logging for this pass...
-	bool orig_verbose = g_isVerbose;
-	bool orig_quiet   = g_isQuiet;
-	g_isVerbose       = false;
-	g_isQuiet         = true;
-
-	// If we fail to detect what appears to be the "Connected" screen, we've failed to press the button...
-	if (fbink_button_scan(fbfd, false, true) != EXIT_SUCCESS) {
+	// If we fail to detect the "Connected" screen, we've failed to press the button...
+	if (!is_on_connected_screen()) {
 		rv = ERRCODE(ENOTSUP);
 	}
-
-	// Restore logging
-	g_isVerbose = orig_verbose;
-	g_isQuiet   = orig_quiet;
 
 	return rv;
 }
@@ -80,7 +95,7 @@ static int
 
 // Scan the screen's content for Kobo's "Connect" button in the "USB plugged in" popup.
 int
-    fbink_button_scan(int fbfd UNUSED_BY_NOBUTTON, bool press_button UNUSED_BY_NOBUTTON, bool silent UNUSED_BY_NOBUTTON)
+    fbink_button_scan(int fbfd UNUSED_BY_NOBUTTON, bool press_button UNUSED_BY_NOBUTTON)
 {
 #ifdef FBINK_WITH_BUTTON_SCAN
 	// Open the framebuffer if need be...
@@ -133,14 +148,6 @@ int
 	unsigned short int     max_target_pixels = (0.25f * viewWidth);
 #	pragma GCC diagnostic pop
 
-	// NOTE: If we're in the second, button-pressing check pass, try to find patches of black instead,
-	//       since that's the predominant color of the "Connected and charging/charged" screen...
-	if (silent) {
-		button_color.r = 0x00;
-		button_color.g = 0x00;
-		button_color.b = 0x00;
-	}
-
 	// Recap the various settings as computed for this screen...
 	LOG("Button color is expected to be #%hhx%hhx%hhx", button_color.r, button_color.g, button_color.b);
 	LOG("We need to match two buttons each between %hu and %hu pixels wide!", min_target_pixels, max_target_pixels);
@@ -154,15 +161,6 @@ int
 	unsigned short int     max_height = (0.85f * viewHeight);
 	unsigned short int     min_width  = (0.05f * viewWidth);
 	unsigned short int     max_width  = (0.80f * viewWidth);
-
-	// NOTE: If we're in the second, button-pressing check pass,
-	//       we're trying to find patches of black on both sides of the white USB cable of the pictogram,
-	//       with a helpful fallback from the laptop's screen...
-	if (silent) {
-		min_height = (unsigned short int) (viewHeight / 2U);
-		min_width  = 0U;
-		max_width  = (0.85f * viewWidth);
-	}
 #	pragma GCC diagnostic pop
 
 	LOG("Looking for buttons in a %hux%hu rectangle, from (%hu, %hu) to (%hu, %hu)",
@@ -272,19 +270,16 @@ int
 
 		// Press it if requested...
 		if (press_button) {
-			if ((rv = generate_button_press(fbfd, &match_coords)) != EXIT_SUCCESS) {
+			if ((rv = generate_button_press(&match_coords)) != EXIT_SUCCESS) {
 				fprintf(stderr, "[FBInk] Failed to press the Connect button!\n");
 				goto cleanup;
 			} else {
-				LOG(". . . appeared to have been a success!");
+				LOG(". . . appears to have been a success!");
 			}
 		}
 	} else {
 		LOG("No match :(");
-		// We don't want to see that message during the second checking pass done by generate_button_press...
-		if (!silent) {
-			fprintf(stderr, "[FBInk] Failed to find a Connect button on screen!\n");
-		}
+		fprintf(stderr, "[FBInk] Failed to find a Connect button on screen!\n");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
