@@ -65,8 +65,8 @@ static int
 	g_isVerbose       = false;
 	g_isQuiet         = true;
 
-	// If we still *find* a button, we've failed to press it ;).
-	if (fbink_button_scan(fbfd, false, true) == EXIT_SUCCESS) {
+	// If we fail to detect what appears to be the "Connected" screen, we've failed to press the button...
+	if (fbink_button_scan(fbfd, false, true) != EXIT_SUCCESS) {
 		rv = ERRCODE(ENOTSUP);
 	}
 
@@ -133,6 +133,14 @@ int
 	unsigned short int     max_target_pixels = (0.25f * viewWidth);
 #	pragma GCC diagnostic pop
 
+	// NOTE: If we're in the second, button-pressing check pass, try to find patches of black instead,
+	//       since that's the predominant color of the "Connected and charging/charged" screen...
+	if (silent) {
+		button_color.r = 0x00;
+		button_color.g = 0x00;
+		button_color.b = 0x00;
+	}
+
 	// Recap the various settings as computed for this screen...
 	LOG("Button color is expected to be #%hhx%hhx%hhx", button_color.r, button_color.g, button_color.b);
 	LOG("We need to match two buttons each between %hu and %hu pixels wide!", min_target_pixels, max_target_pixels);
@@ -147,6 +155,16 @@ int
 	unsigned short int     min_width  = (0.05f * viewWidth);
 	unsigned short int     max_width  = (0.80f * viewWidth);
 #	pragma GCC diagnostic pop
+
+	// NOTE: If we're in the second, button-pressing check pass,
+	//       we're trying to find patches of black on both sides of the white USB cable of the pictogram,
+	//       with a helpful fallback from the laptop's screen...
+	if (silent) {
+		min_height = (unsigned short int) (viewHeight / 2U);
+		min_width  = 0U;
+		max_width  = (0.85f * viewWidth);
+	}
+
 	LOG("Looking for buttons in a %hux%hu rectangle, from (%hu, %hu) to (%hu, %hu)",
 	    (unsigned short int) (max_width - min_width),
 	    (unsigned short int) (max_height - min_height),

@@ -179,8 +179,7 @@ FBINK_API int fbink_print_image(int                fbfd,
 //	-(EXIT_FAILURE)	when the button was not found
 //	-(ENODEV)	when we couldn't generate a touch event at all (unlikely to ever happen on current HW)
 //	-(ENOTSUP)	when the generated touch event appeared to have failed to actually tap the button
-//				emphasis on "appeared to", it's a very naive check,
-//				that has myriad ways of being tricked into false-positives...
+//				emphasis on "appeared to", it's hard to programatically make sure the right thing happened...
 // NOTE: Obviously not thread-safe with press_button enabled!
 // fdfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
