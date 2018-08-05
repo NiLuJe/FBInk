@@ -1991,10 +1991,6 @@ int
 	LOG("Requested %d color channels, image had %d.", req_n, n);
 
 	// Handle horizontal alignment...
-	if (fbink_config->is_centered) {
-		LOG("is_centered is true, enforcing halign to CENTER");
-		fbink_config->halign = CENTER;
-	}
 	switch (fbink_config->halign) {
 		case CENTER:
 			x_off += (viewWidth / 2U);

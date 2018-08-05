@@ -83,7 +83,7 @@ typedef struct
 	bool      is_inverted;     // Invert colors
 	bool      is_flashing;     // Request a black flash on refresh
 	bool      is_cleared;      // Clear the screen beforehand (honors is_inverted)
-	bool      is_centered;     // Center the text (synonym for halign == CENTER for images)
+	bool      is_centered;     // Center the text
 	bool      is_padded;       // Pad the text with blanks (on the left, or on both sides if is_centered)
 	bool      is_verbose;      // Print verbose diagnostic informations on stdout
 	bool      is_quiet;        // Hide fbink_init()'s hardware setup info (sent to stderr)
