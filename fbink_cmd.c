@@ -109,13 +109,15 @@ static void
 #ifdef FBINK_WITH_IMAGE
 	    "\n\n"
 	    "You can also eschew printing a STRING, and print an IMAGE at the requested coordinates instead:\n"
-	    "\t-g, --image file=PATH,x=NUM,y=NUM\n"
+	    "\t-g, --image file=PATH,x=NUM,y=NUM,halign=ALIGN,valign=ALIGN\n"
 	    "\n"
 	    "EXAMPLES:\n"
 	    "\tfbink -g file=hello.png\n"
 	    "\t\tDisplays the image \"hello.png\", starting at the top left of the screen.\n"
 	    "\tfbink -i hello,world.png -g x=-10,y=11 -x 5 -y 8\n"
 	    "\t\tDisplays the image \"hello,world.png\", starting at the ninth line plus 11px and the sixth column minus 10px\n"
+	    "\tfbink -g file=hello.png,halign=EDGE,valign=CENTER\n"
+	    "\t\tDisplays the image \"hello.png\", in the middle of the screen, aligned to the right edge.\n"
 	    "\n"
 	    "Options affecting the image's appearance:\n"
 	    "\t-a, --flatten\tIgnore the alpha channel.\n"
@@ -171,6 +173,8 @@ int
 		FILE_OPT = 0,
 		XOFF_OPT,
 		YOFF_OPT,
+		HALIGN_OPT,
+		VALIGN_OPT,
 	};
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
@@ -179,7 +183,8 @@ int
 #pragma clang diagnostic ignored "-Wincompatible-pointer-types-discards-qualifiers"
 	char* const refresh_token[] = { [TOP_OPT] = "top",       [LEFT_OPT] = "left", [WIDTH_OPT] = "width",
 					[HEIGHT_OPT] = "height", [WFM_OPT] = "wfm",   NULL };
-	char* const image_token[]   = { [FILE_OPT] = "file", [XOFF_OPT] = "x", [YOFF_OPT] = "y", NULL };
+	char* const image_token[]   = { [FILE_OPT] = "file",     [XOFF_OPT] = "x",        [YOFF_OPT] = "y",
+                                      [HALIGN_OPT] = "halign", [VALIGN_OPT] = "valign", NULL };
 #pragma GCC diagnostic pop
 	char*     subopts;
 	char*     value;
@@ -309,6 +314,36 @@ int
 						case YOFF_OPT:
 							image_y_offset = (short int) atoi(value);
 							break;
+						case HALIGN_OPT:
+							if (strcasecmp(optarg, "NONE") == 0 ||
+							    strcasecmp(optarg, "LEFT") == 0) {
+								fbink_config.halign = NONE;
+							} else if (strcasecmp(optarg, "CENTER") == 0 ||
+								   strcasecmp(optarg, "MIDDLE") == 0) {
+								fbink_config.halign = CENTER;
+							} else if (strcasecmp(optarg, "EDGE") == 0 ||
+								   strcasecmp(optarg, "RIGHT") == 0) {
+								fbink_config.halign = EDGE;
+							} else {
+								fprintf(stderr, "Unknown alignment name '%s'.\n", optarg);
+								errfnd = 1;
+							}
+							break;
+						case VALIGN_OPT:
+							if (strcasecmp(optarg, "NONE") == 0 ||
+							    strcasecmp(optarg, "TOP") == 0) {
+								fbink_config.valign = NONE;
+							} else if (strcasecmp(optarg, "CENTER") == 0 ||
+								   strcasecmp(optarg, "MIDDLE") == 0) {
+								fbink_config.valign = CENTER;
+							} else if (strcasecmp(optarg, "EDGE") == 0 ||
+								   strcasecmp(optarg, "BOTTOM") == 0) {
+								fbink_config.valign = EDGE;
+							} else {
+								fprintf(stderr, "Unknown alignment name '%s'.\n", optarg);
+								errfnd = 1;
+							}
+							break;
 						default:
 							fprintf(stderr, "No match found for token: /%s/\n", value);
 							errfnd = 1;
@@ -370,7 +405,7 @@ int
 			//       if we had an easy way to... (c.f., my rant about Kobo's broken libc in fbink_internal.h)
 			if (!fbink_config.is_quiet) {
 				printf(
-				    "Printing string '%s' @ column %hd, row %hd (inverted: %s, flashing: %s, centered: %s, left padded: %s, clear screen: %s, font scaling: x%hhu)\n",
+				    "Printing string '%s' @ column %hd, row %hd (inverted: %s, flashing: %s, centered: %s, left padded: %s, clear screen: %s, font: %hhu, font scaling: x%hhu)\n",
 				    string,
 				    fbink_config.col,
 				    fbink_config.row,
@@ -379,6 +414,7 @@ int
 				    fbink_config.is_centered ? "true" : "false",
 				    fbink_config.is_padded ? "true" : "false",
 				    fbink_config.is_cleared ? "true" : "false",
+				    fbink_config.fontname,
 				    fbink_config.fontmult);
 			}
 			if ((linecount = fbink_print(fbfd, string, &fbink_config)) < 0) {
@@ -415,12 +451,14 @@ int
 			}
 		} else if (is_image) {
 			printf(
-			    "Displaying image '%s' @ column %hd + %hdpx, row %hd + %dpx (inverted: %s, flattened: %s)\n",
+			    "Displaying image '%s' @ column %hd + %hdpx, row %hd + %dpx (halign: %hhu, valign: %hhu, inverted: %s, flattened: %s)\n",
 			    image_file,
 			    fbink_config.col,
 			    image_x_offset,
 			    fbink_config.row,
 			    image_y_offset,
+			    fbink_config.halign,
+			    fbink_config.valign,
 			    fbink_config.is_inverted ? "true" : "false",
 			    fbink_config.ignore_alpha ? "true" : "false");
 			if (fbink_print_image(fbfd, image_file, image_x_offset, image_y_offset, &fbink_config) !=

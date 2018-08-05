@@ -1990,6 +1990,40 @@ int
 
 	LOG("Requested %d color channels, image had %d.", req_n, n);
 
+	// Handle horizontal alignment...
+	if (fbink_config->is_centered) {
+		LOG("is_centered is true, enforcing halign to CENTER");
+		fbink_config->halign = CENTER;
+	}
+	switch (fbink_config->halign) {
+		case CENTER:
+			x_off += (viewWidth / 2U);
+			x_off -= (w / 2U);
+			break;
+		case EDGE:
+			x_off += (viewWidth - w);
+			break;
+		case NONE:
+		default:
+			break;
+	}
+	LOG("Adjusted image display coordinates to (%hd, %hd) after horizontal alignment", x_off, y_off);
+
+	// Handle vertical alignment...
+	switch (fbink_config->valign) {
+		case CENTER:
+			y_off += (viewHeight / 2U);
+			y_off -= (h / 2U);
+			break;
+		case EDGE:
+			y_off += (viewHeight - h);
+			break;
+		case NONE:
+		default:
+			break;
+	}
+	LOG("Adjusted image display coordinates to (%hd, %hd) after vertical alignment", x_off, y_off);
+
 	// Clamp everything to a safe range, because we can't have *anything* going off-screen here.
 	struct mxcfb_rect region = {
 		.top    = MIN(viewHeight, (uint32_t) MAX(0, y_off)),

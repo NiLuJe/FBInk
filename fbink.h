@@ -65,6 +65,14 @@ typedef enum
 	UNSCII_TALL    = 6     // unscii-16
 } FONT_INDEX_T;
 
+// List of available halign/valign values
+typedef enum
+{
+	NONE   = 0,    // i.e., LEFT for halign, TOP for valign
+	CENTER = 1,
+	EDGE   = 2    // i.e., RIGHT for halign, BOTTOM for valign
+} ALIGN_INDEX_T;
+
 // What a FBInk config should look like. Perfectly sane when fully zero-initialized.
 typedef struct
 {
@@ -75,11 +83,13 @@ typedef struct
 	bool      is_inverted;     // Invert colors
 	bool      is_flashing;     // Request a black flash on refresh
 	bool      is_cleared;      // Clear the screen beforehand (honors is_inverted)
-	bool      is_centered;     // Center the text
+	bool      is_centered;     // Center the text (synonym for halign == CENTER for images)
 	bool      is_padded;       // Pad the text with blanks (on the left, or on both sides if is_centered)
 	bool      is_verbose;      // Print verbose diagnostic informations on stdout
 	bool      is_quiet;        // Hide fbink_init()'s hardware setup info (sent to stderr)
 	bool      ignore_alpha;    // Ignore any potential alpha channel in source image (i.e., flatten the image)
+	uint8_t   halign;          // Horizontal alignment of images (NONE/LEFT, CENTER, EDGE/RIGHT)
+	uint8_t   valign;          // Vertical alignment of images (NONE/TOP, CENTER, EDGE/BOTTOM)
 } FBInkConfig;
 
 // NOTE: Unless otherwise specified,
@@ -165,7 +175,7 @@ FBINK_API bool fbink_is_fb_quirky(void);
 // filename:		path to the image file (Supported formats: JPEG, PNG, TGA, BMP, GIF & PNM)
 // x_off:		target coordinates, x (honors negative offsets)
 // y_off:		target coordinates, y (honors negative offsets)
-// fbink_config:	pointer to an FBInkConfig struct (honors row/col, in *addition* to x_off/y_off)
+// fbink_config:	pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
 FBINK_API int fbink_print_image(int                fbfd,
 				const char*        filename,
 				short int          x_off,
