@@ -315,32 +315,32 @@ int
 							image_y_offset = (short int) atoi(value);
 							break;
 						case HALIGN_OPT:
-							if (strcasecmp(optarg, "NONE") == 0 ||
-							    strcasecmp(optarg, "LEFT") == 0) {
+							if (strcasecmp(value, "NONE") == 0 ||
+							    strcasecmp(value, "LEFT") == 0) {
 								fbink_config.halign = NONE;
-							} else if (strcasecmp(optarg, "CENTER") == 0 ||
-								   strcasecmp(optarg, "MIDDLE") == 0) {
+							} else if (strcasecmp(value, "CENTER") == 0 ||
+								   strcasecmp(value, "MIDDLE") == 0) {
 								fbink_config.halign = CENTER;
-							} else if (strcasecmp(optarg, "EDGE") == 0 ||
-								   strcasecmp(optarg, "RIGHT") == 0) {
+							} else if (strcasecmp(value, "EDGE") == 0 ||
+								   strcasecmp(value, "RIGHT") == 0) {
 								fbink_config.halign = EDGE;
 							} else {
-								fprintf(stderr, "Unknown alignment name '%s'.\n", optarg);
+								fprintf(stderr, "Unknown alignment name '%s'.\n", value);
 								errfnd = 1;
 							}
 							break;
 						case VALIGN_OPT:
-							if (strcasecmp(optarg, "NONE") == 0 ||
-							    strcasecmp(optarg, "TOP") == 0) {
+							if (strcasecmp(value, "NONE") == 0 ||
+							    strcasecmp(value, "TOP") == 0) {
 								fbink_config.valign = NONE;
-							} else if (strcasecmp(optarg, "CENTER") == 0 ||
-								   strcasecmp(optarg, "MIDDLE") == 0) {
+							} else if (strcasecmp(value, "CENTER") == 0 ||
+								   strcasecmp(value, "MIDDLE") == 0) {
 								fbink_config.valign = CENTER;
-							} else if (strcasecmp(optarg, "EDGE") == 0 ||
-								   strcasecmp(optarg, "BOTTOM") == 0) {
+							} else if (strcasecmp(value, "EDGE") == 0 ||
+								   strcasecmp(value, "BOTTOM") == 0) {
 								fbink_config.valign = EDGE;
 							} else {
-								fprintf(stderr, "Unknown alignment name '%s'.\n", optarg);
+								fprintf(stderr, "Unknown alignment name '%s'.\n", value);
 								errfnd = 1;
 							}
 							break;
