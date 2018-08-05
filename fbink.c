@@ -1993,11 +1993,11 @@ int
 	// Handle horizontal alignment...
 	switch (fbink_config->halign) {
 		case CENTER:
-			x_off += (viewWidth / 2U);
-			x_off -= (w / 2U);
+			x_off = (short int) (x_off + (int) (viewWidth / 2U));
+			x_off = (short int) (x_off - (w / 2));
 			break;
 		case EDGE:
-			x_off += (viewWidth - w);
+			x_off = (short int) (x_off + (int) (viewWidth - (uint32_t) w));
 			break;
 		case NONE:
 		default:
@@ -2008,11 +2008,11 @@ int
 	// Handle vertical alignment...
 	switch (fbink_config->valign) {
 		case CENTER:
-			y_off += (viewHeight / 2U);
-			y_off -= (h / 2U);
+			y_off = (short int) (y_off + (int) (viewHeight / 2U));
+			y_off = (short int) (y_off - (h / 2));
 			break;
 		case EDGE:
-			y_off += (viewHeight - h);
+			y_off = (short int) (y_off + (int) (viewHeight - (uint32_t) h));
 			break;
 		case NONE:
 		default:
