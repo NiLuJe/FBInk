@@ -209,7 +209,7 @@ int
 					if (match_count == 2) {
 						match_coords.y = y;
 						// Last good pixel was the previous one, store that one ;).
-						match_coords.x = (short unsigned int) (x - 1);
+						match_coords.x = (unsigned short int) (x - 1);
 						// We've got the top-right corner of the Connect button, stop looping.
 						break;
 					}

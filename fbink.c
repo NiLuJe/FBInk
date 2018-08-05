@@ -2009,10 +2009,10 @@ int
 	unsigned short int img_y_off = 0;
 	if (x_off < 0) {
 		// We'll start plotting from the beginning of the *visible* part of the image ;)
-		img_x_off = (short unsigned int) abs(x_off);
-		max_width = (short unsigned int) (max_width + img_x_off);
+		img_x_off = (unsigned short int) abs(x_off);
+		max_width = (unsigned short int) (max_width + img_x_off);
 		// Make sure we're not trying to loop past the actual width of the image!
-		max_width = (short unsigned int) MIN(w, max_width);
+		max_width = (unsigned short int) MIN(w, max_width);
 		// Only if the visible section of the image's width is smaller than our screen's width...
 		if ((uint32_t)(w - img_x_off) < viewWidth) {
 			region.width -= img_x_off;
@@ -2020,10 +2020,10 @@ int
 	}
 	if (y_off < 0) {
 		// We'll start plotting from the beginning of the *visible* part of the image ;)
-		img_y_off  = (short unsigned int) abs(y_off);
-		max_height = (short unsigned int) (max_height + img_y_off);
+		img_y_off  = (unsigned short int) abs(y_off);
+		max_height = (unsigned short int) (max_height + img_y_off);
 		// Make sure we're not trying to loop past the actual height of the image!
-		max_height = (short unsigned int) MIN(h, max_height);
+		max_height = (unsigned short int) MIN(h, max_height);
 		// Only if the visible section of the image's height is smaller than our screen's height...
 		if ((uint32_t)(h - img_y_off) < viewHeight) {
 			region.height -= img_y_off;
