@@ -174,6 +174,11 @@ else
 	endif
 endif
 
+# Support tweaking a MINIMAL build to still include image support
+ifdef IMAGE
+	EXTRA_CPPFLAGS+=-DFBINK_WITH_IMAGE
+endif
+
 # How we handle our library creation
 FBINK_SHARED_FLAGS:=-shared -Wl,-soname,libfbink.so.1
 FBINK_SHARED_NAME_FILE:=libfbink.so.1.0.0
