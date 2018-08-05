@@ -254,11 +254,18 @@ int
 			if ((rv = generate_button_press(fbfd, &match_coords)) != EXIT_SUCCESS) {
 				fprintf(stderr, "[FBInk] Failed to press the Connect button!\n");
 				goto cleanup;
+			} else {
+				LOG(". . . was a success!");
 			}
 		}
 	} else {
 		LOG("No match :(");
-		fprintf(stderr, "[FBInk] Failed to find a Connect button on screen!\n");
+		// NOTE: This is a stupid hack to inhibit that message on the second scan pass done by generate_button_press...
+		if (press_button == false && g_isQuiet == true && g_isVerbose == false) {
+			;
+		} else {
+			fprintf(stderr, "[FBInk] Failed to find a Connect button on screen!\n");
+		}
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
