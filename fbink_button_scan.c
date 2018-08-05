@@ -258,7 +258,7 @@ int
 				fprintf(stderr, "[FBInk] Failed to press the Connect button!\n");
 				goto cleanup;
 			} else {
-				LOG(". . . was a success!");
+				LOG(". . . appeared to have been a success!");
 			}
 		}
 	} else {
