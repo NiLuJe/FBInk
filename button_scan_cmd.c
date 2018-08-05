@@ -104,7 +104,7 @@ int
 	}
 
 	// And actually do stuff :)
-	fbink_button_scan(fbfd, press_button, false);
+	rv = fbink_button_scan(fbfd, press_button, false);
 
 	// Cleanup
 cleanup:
