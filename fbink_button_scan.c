@@ -56,8 +56,8 @@ static int
 	// Assume success until shit happens :)
 	int rv = EXIT_SUCCESS;
 
-	// Check if screen content changed 100ms later, as a poor man's way of checking if the tap was successful...
-	nanosleep((const struct timespec[]){ { 0, 100000000L } }, NULL);
+	// Check if screen content changed 1.5s later, as a poor man's way of checking if the tap was successful...
+	nanosleep((const struct timespec[]){ { 0, 1500000000L } }, NULL);
 
 	// Neuter logging for this pass...
 	bool orig_verbose = g_isVerbose;
