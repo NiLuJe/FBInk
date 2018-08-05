@@ -22,7 +22,7 @@
 
 #ifdef FBINK_WITH_BUTTON_SCAN
 static int
-    generate_button_press(FBInkCoordinates* match_coords)
+    generate_button_press(int fbfd, FBInkCoordinates* match_coords)
 {
 	LOG("Pressing the Connect button . . .");
 	struct input_event ev;
@@ -30,7 +30,7 @@ static int
 	ifd                    = open("/dev/input/event1", O_WRONLY | O_NONBLOCK);
 	if (ifd == -1) {
 		fprintf(stderr, "[FBInk] Failed to open input device!\n");
-		return ERRCODE(EXIT_FAILURE);
+		return ERRCODE(ENODEV);
 	}
 
 	// NOTE: May not be completely right for every model... (OK on H2O)
@@ -53,7 +53,24 @@ static int
 
 	close(ifd);
 
-	return EXIT_SUCCESS;
+	// Assume success until shit happen :)
+	int rv = EXIT_SUCCESS;
+
+	// Check if screen content changed 100ms later, as a poor man's way of checking if the tap was successful...
+	nanosleep((const struct timespec[]){ { 0, 100000000L } }, NULL);
+	// Neuter logging for this pass...
+	bool orig_verbose = g_isVerbose;
+	bool orig_quiet   = g_isQuiet;
+	g_isVerbose       = false;
+	g_isQuiet         = true;
+	if (fbink_button_scan(fbfd, false) != EXIT_SUCCESS) {
+		rv = ERRCODE(ENOTSUP);
+	}
+	// Restore logging
+	g_isVerbose = orig_verbose;
+	g_isQuiet   = orig_quiet;
+
+	return rv;
 }
 #endif
 
@@ -233,9 +250,8 @@ int
 
 		// Press it if requested...
 		if (press_button) {
-			if (generate_button_press(&match_coords) != EXIT_SUCCESS) {
+			if ((rv = generate_button_press(fbfd, &match_coords)) != EXIT_SUCCESS) {
 				fprintf(stderr, "[FBInk] Failed to press the Connect button!\n");
-				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
 			}
 		}

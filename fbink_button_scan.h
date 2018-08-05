@@ -27,6 +27,7 @@
 
 #ifdef FBINK_WITH_BUTTON_SCAN
 #	include <linux/input.h>
+#	include <time.h>
 
 // c.f., https://github.com/koreader/koreader-base/pull/468/files
 #	define SEND_INPUT_EVENT(t, c, v)                                                                                \
@@ -38,7 +39,7 @@
 			write(ifd, &ev, sizeof(ev));                                                                     \
 		})
 
-static int generate_button_press(FBInkCoordinates*);
+static int generate_button_press(int, FBInkCoordinates*);
 #endif
 
 #endif
