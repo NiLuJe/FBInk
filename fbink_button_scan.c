@@ -63,7 +63,8 @@ static int
 	bool orig_quiet   = g_isQuiet;
 	g_isVerbose       = false;
 	g_isQuiet         = true;
-	if (fbink_button_scan(fbfd, false) != EXIT_SUCCESS) {
+	// If we still *find* a button, we've failed ;).
+	if (fbink_button_scan(fbfd, false) == EXIT_SUCCESS) {
 		rv = ERRCODE(ENOTSUP);
 	}
 	// Restore logging
