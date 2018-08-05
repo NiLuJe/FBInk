@@ -241,6 +241,9 @@ int
 		}
 	} else {
 		LOG("No match :(");
+		fprintf(stderr, "[FBInk] Failed to find a Connect button on screen!\n");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
 	}
 
 	// Cleanup
