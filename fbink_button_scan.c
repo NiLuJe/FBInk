@@ -154,7 +154,6 @@ int
 	unsigned short int     max_height = (0.85f * viewHeight);
 	unsigned short int     min_width  = (0.05f * viewWidth);
 	unsigned short int     max_width  = (0.80f * viewWidth);
-#	pragma GCC diagnostic pop
 
 	// NOTE: If we're in the second, button-pressing check pass,
 	//       we're trying to find patches of black on both sides of the white USB cable of the pictogram,
@@ -164,6 +163,7 @@ int
 		min_width  = 0U;
 		max_width  = (0.85f * viewWidth);
 	}
+#	pragma GCC diagnostic pop
 
 	LOG("Looking for buttons in a %hux%hu rectangle, from (%hu, %hu) to (%hu, %hu)",
 	    (unsigned short int) (max_width - min_width),
