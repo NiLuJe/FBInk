@@ -40,7 +40,7 @@
 		})
 
 static bool is_on_connected_screen(void);
-static int  generate_button_press(FBInkCoordinates*);
+static int  generate_button_press(FBInkCoordinates*, bool);
 #endif
 
 #endif

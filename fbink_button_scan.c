@@ -57,7 +57,7 @@ static bool
 }
 
 static int
-    generate_button_press(FBInkCoordinates* match_coords)
+    generate_button_press(FBInkCoordinates* match_coords, bool nosleep)
 {
 	LOG("Pressing the Connect button . . .");
 	struct input_event ev;
@@ -91,9 +91,14 @@ static int
 	// Assume success until shit happens :)
 	int rv = EXIT_SUCCESS;
 
-	// If we fail to detect the "Connected" screen, we've failed to press the button...
-	if (!is_on_connected_screen()) {
-		rv = ERRCODE(ENOTSUP);
+	// NOTE: Checking if the input was successful is optional, since it can sleep for up to 5s,
+	//       which may not be desirable, especially when you have other ways of checking the success of the operation,
+	//       f.g., checking the state of the /mnt/onboard mountpoint...
+	if (!nosleep) {
+		// If we fail to detect the "Connected" screen, we've failed to press the button...
+		if (!is_on_connected_screen()) {
+			rv = ERRCODE(ENOTSUP);
+		}
 	}
 
 	return rv;
@@ -102,7 +107,7 @@ static int
 
 // Scan the screen's content for Kobo's "Connect" button in the "USB plugged in" popup.
 int
-    fbink_button_scan(int fbfd UNUSED_BY_NOBUTTON, bool press_button UNUSED_BY_NOBUTTON)
+    fbink_button_scan(int fbfd UNUSED_BY_NOBUTTON, bool press_button UNUSED_BY_NOBUTTON, bool nosleep UNUSED_BY_NOBUTTON)
 {
 #ifdef FBINK_WITH_BUTTON_SCAN
 	// Open the framebuffer if need be...
@@ -277,7 +282,7 @@ int
 
 		// Press it if requested...
 		if (press_button) {
-			if ((rv = generate_button_press(&match_coords)) != EXIT_SUCCESS) {
+			if ((rv = generate_button_press(&match_coords, nosleep)) != EXIT_SUCCESS) {
 				fprintf(stderr, "[FBInk] Failed to press the Connect button!\n");
 				goto cleanup;
 			} else {

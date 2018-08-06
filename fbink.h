@@ -192,12 +192,15 @@ FBINK_API int fbink_print_image(int                fbfd,
 //	-(ENODEV)	when we couldn't generate a touch event at all (unlikely to ever happen on current HW)
 //	-(ENOTSUP)	when the generated touch event appeared to have failed to actually tap the button
 //				emphasis on "appeared to", it's tricky to be perfectly sure the right thing happened...
+//				CANNOT happen when nosleep is true (because it skips this very codepath).
 // NOTE: Obviously not thread-safe with press_button enabled!
 // fdfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // press_button:	generate an input event to press the button if true,
-//				MAY sleep up to 5s to confirm that input was successful!
-FBINK_API int fbink_button_scan(int fbfd, bool press_button);
+//				MAY sleep up to 5s to confirm that input was successful! (unless nosleep is true)
+// nosleep:		if true, don't try to confirm that press_button's input event was successful,
+//				avoiding the nanosleep() calls that might incur...
+FBINK_API int fbink_button_scan(int fbfd, bool press_button, bool nosleep);
 
 //
 // When you intend to keep the framebuffer fd open for the lifecycle of your program:
