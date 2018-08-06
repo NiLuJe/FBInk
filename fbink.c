@@ -1447,6 +1447,13 @@ int
 	short int col = fbink_config->col;
 	short int row = fbink_config->row;
 
+	// NOTE: If we asked to print in the middle of the screen, make the specified row an offset from the middle of the screen,
+	//       instead of the top.
+	if (fbink_config->is_halfway) {
+		row += (MAXROWS / 2U);
+		LOG("Adjusted row to %hd for vertical centering", row);
+	}
+
 	struct mxcfb_rect region = { 0U };
 	// We declare that a bit early, because that'll hold our return value on success.
 	unsigned short int multiline_offset = 0U;
