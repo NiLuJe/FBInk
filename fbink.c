@@ -1450,7 +1450,7 @@ int
 	// NOTE: If we asked to print in the middle of the screen, make the specified row an offset from the middle of the screen,
 	//       instead of the top.
 	if (fbink_config->is_halfway) {
-		row += (MAXROWS / 2U);
+		row = (short int) (row + (short int) (MAXROWS / 2U));
 		LOG("Adjusted row to %hd for vertical centering", row);
 	}
 
