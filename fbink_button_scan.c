@@ -130,7 +130,7 @@ int
 	// NOTE: There *may* be a rounding/conversion error somewhere...
 	//       I can vouch for get_pixel_RGB565's accuracy,
 	//       and set_pixel_RGB565 looks straightforward enough, so, err, I blame Kobo? :D.
-	if (fbink_is_fb_quirky()) {
+	if (deviceQuirks.isKobo16Landscape) {
 		button_color.r = 0xDE;
 		button_color.g = 0xDB;
 		button_color.b = 0xDE;
