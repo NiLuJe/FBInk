@@ -32,8 +32,11 @@ static bool
 	(*fxpRotateCoords)(&coords);
 	FBInkColor color = { 0U };
 
-	// We loop for 8s at most
-	for (uint8_t i = 0U; i < 32; i++) {
+	// We loop for 5s at most
+	for (uint8_t i = 0U; i < 20; i++) {
+		// Wait 250ms . . .
+		nanosleep((const struct timespec[]){ { 0, 250000000L } }, NULL);
+
 		(*fxpGetPixel)(&coords, &color);
 		LOG("On iteration nr. %hhu, pixel (%hu, %hu) was #%hhx%hhx%hhx",
 		    i,
@@ -47,9 +50,6 @@ static bool
 		if (color.r == BLACK && color.g == BLACK && color.b == BLACK) {
 			return true;
 		}
-
-		// Otherwise, try again in 250ms
-		nanosleep((const struct timespec[]){ { 0, 250000000L } }, NULL);
 	}
 
 	// If we got this far, we failed :(

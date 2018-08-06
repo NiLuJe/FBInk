@@ -196,7 +196,7 @@ FBINK_API int fbink_print_image(int                fbfd,
 // fdfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // press_button:	generate an input event to press the button if true,
-//				MAY sleep up to 8s to confirm that input was successful!
+//				MAY sleep up to 5s to confirm that input was successful!
 FBINK_API int fbink_button_scan(int fbfd, bool press_button);
 
 //
