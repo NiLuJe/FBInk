@@ -1451,6 +1451,10 @@ int
 	//       instead of the top.
 	if (fbink_config->is_halfway) {
 		row = (short int) (row + (short int) (MAXROWS / 2U));
+		// NOTE: Clamp to positive values to avoid wrap-around (i.e., -MAX should always be 0, and +MAX always MAXROWS).
+		//       Our default behavior of starting negative rows from the bottom essentially amounts to valign == bottom,
+		//       which is not desirable when we explicitly asked for center ;).
+		row = (short int) MAX(0, row);
 		LOG("Adjusted row to %hd for vertical centering", row);
 	}
 
