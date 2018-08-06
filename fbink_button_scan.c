@@ -62,7 +62,7 @@ static int
 	LOG("Pressing the Connect button . . .");
 	struct input_event ev;
 	int                ifd = -1;
-	ifd                    = open("/dev/input/event1", O_WRONLY | O_NONBLOCK);
+	ifd                    = open("/dev/input/event1", O_WRONLY | O_NONBLOCK | O_CLOEXEC);
 	if (ifd == -1) {
 		fprintf(stderr, "[FBInk] Failed to open input device!\n");
 		return ERRCODE(ENODEV);
