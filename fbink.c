@@ -2003,7 +2003,9 @@ int
 		default:
 			break;
 	}
-	LOG("Adjusted image display coordinates to (%hd, %hd) after horizontal alignment", x_off, y_off);
+	if (fbink_config->halign != NONE) {
+		LOG("Adjusted image display coordinates to (%hd, %hd) after horizontal alignment", x_off, y_off);
+	}
 
 	// Handle vertical alignment...
 	switch (fbink_config->valign) {
@@ -2018,7 +2020,9 @@ int
 		default:
 			break;
 	}
-	LOG("Adjusted image display coordinates to (%hd, %hd) after vertical alignment", x_off, y_off);
+	if (fbink_config->valign != NONE) {
+		LOG("Adjusted image display coordinates to (%hd, %hd) after vertical alignment", x_off, y_off);
+	}
 
 	// Clamp everything to a safe range, because we can't have *anything* going off-screen here.
 	struct mxcfb_rect region = {
