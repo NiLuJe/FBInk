@@ -38,7 +38,7 @@ static bool
 		nanosleep((const struct timespec[]){ { 0, 250000000L } }, NULL);
 
 		(*fxpGetPixel)(&coords, &color);
-		LOG("On iteration nr. %hhu, pixel (%hu, %hu) was #%hhx%hhx%hhx",
+		LOG("On iteration nr. %hhu, pixel (%hu, %hu) was #%02hhX%02hhX%02hhX",
 		    i,
 		    coords.x,
 		    coords.y,
@@ -161,7 +161,7 @@ int
 #	pragma GCC diagnostic pop
 
 	// Recap the various settings as computed for this screen...
-	LOG("Button color is expected to be #%hhx%hhx%hhx", button_color.r, button_color.g, button_color.b);
+	LOG("Button color is expected to be #%02hhX%02hhX%02hhX", button_color.r, button_color.g, button_color.b);
 	LOG("We need to match two buttons each between %hu and %hu pixels wide!", min_target_pixels, max_target_pixels);
 
 	// Only look in the area of the screen where we're likely to find the buttons, both to save some time,
