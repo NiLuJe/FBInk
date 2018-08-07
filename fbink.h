@@ -74,8 +74,6 @@ typedef enum
 } ALIGN_INDEX_T;
 
 // What a FBInk config should look like. Perfectly sane when fully zero-initialized.
-// NOTE: I refrained from narrowing some of those (i.e., fontname, halign, valign) to bitfields,
-//       because that'd make them hostile to FFI ;).
 typedef struct
 {
 	short int row;             // y axis (i.e., line), counts down from the bottom of the screen if negative
@@ -86,7 +84,7 @@ typedef struct
 	bool      is_flashing;     // Request a black flash on refresh
 	bool      is_cleared;      // Clear the screen beforehand (honors is_inverted)
 	bool      is_centered;     // Center the text (horizontally)
-	bool      is_halfway;      // Center the text (vertically), honoring row offsets
+	bool      is_halfway;      // Vertically center the text, honoring row offsets
 	bool      is_padded;       // Pad the text with blanks (on the left, or on both sides if is_centered)
 	bool      is_verbose;      // Print verbose diagnostic informations on stdout
 	bool      is_quiet;        // Hide fbink_init()'s hardware setup info (sent to stderr)

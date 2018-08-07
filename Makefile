@@ -66,8 +66,10 @@ endif
 
 # Moar warnings!
 ifeq "$(MOAR_WARNIGS)" "1"
-	EXTRA_CFLAGS+=-Wall -Wformat=2 -Wformat-signedness -Wformat-truncation=2
+	EXTRA_CFLAGS+=-Wall
 	EXTRA_CFLAGS+=-Wextra -Wunused
+	EXTRA_CFLAGS+=-Wformat=2
+	EXTRA_CFLAGS+=-Wformat-signedness -Wformat-truncation=2
 	EXTRA_CFLAGS+=-Wnull-dereference
 	EXTRA_CFLAGS+=-Wuninitialized
 	EXTRA_CFLAGS+=-Wduplicated-branches -Wduplicated-cond
@@ -93,6 +95,10 @@ ifeq "$(MOAR_WARNIGS)" "1"
 	endif
 	# And disable this, because it obviously doesn't play well with using goto to handle cleanup on error codepaths...
 	EXTRA_CFLAGS+=-Wno-jump-misses-init
+	# And just because that's annoying...
+	ifeq "$(CC_IS_CLANG)" "1"
+		EXTRA_CFLAGS+=-Wno-ignored-optimization-argument -Wno-unknown-warning-option
+	endif
 endif
 
 # We need to build PIC to support running as/with a shared library
