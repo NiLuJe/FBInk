@@ -110,6 +110,7 @@ typedef union
 	} color;
 } FBInkPixelRGBA;
 
+// Because of course, images are stored RGB, but the framebuffer is BGR...
 typedef union
 {
 	uint32_t p;
