@@ -2187,6 +2187,7 @@ int
 					img_px.p = *((uint32_t*) &data[(((j << 2U) * w) + (i << 2U))]);
 #	pragma GCC diagnostic pop
 
+					// Take a shortcut for the most common alpha values (none & full)
 					if (img_px.color.a == 0xFF) {
 						// Fully opaque, we can blit the image (almost) directly.
 						// We do need to handle BGR and honor inversion ;).
@@ -2194,12 +2195,12 @@ int
 						fb_px.color.g = img_px.color.g ^ invert;
 						fb_px.color.b = img_px.color.b ^ invert;
 
-						pix_offset = (uint32_t)((unsigned short int) (i + x_off) << 2U) +
-							     ((unsigned short int) (j + y_off) * fInfo.line_length);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// And we write the full pixel to the fb (all 4 bytes)
-						*((uint32_t*) (fbPtr + pix_offset)) = fb_px.p;
+						*((uint32_t*) (fbPtr + ((unsigned short int) (i + x_off) << 2U) +
+							       ((unsigned short int) (j + y_off) * fInfo.line_length))) =
+						    fb_px.p;
 #	pragma GCC diagnostic pop
 					} else if (img_px.color.a == 0) {
 						// Transparent! Keep fb as-is.
