@@ -2184,6 +2184,7 @@ int
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 					// First, we gobble the full image pixel (all 4 bytes)
+					// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
 					img_px.p = *((uint32_t*) &data[(((j << 2U) * w) + (i << 2U))]);
 #	pragma GCC diagnostic pop
 
@@ -2242,13 +2243,11 @@ int
 			fb_px.color.a = 0xFF;
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
-					// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
-					//pix_offset = (size_t)((j * req_n * w) + (i * req_n));
-
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 					// NOTE: Yes, we potentially read 1 byte too far if req_n == 3,
 					//       but that's still faster than reading the 3 component bytes one by one.
+					// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
 					img_px.p = *((uint32_t*) &data[((j * req_n * w) + (i * req_n))]);
 #	pragma GCC diagnostic pop
 
@@ -2258,7 +2257,6 @@ int
 					fb_px.color.b = img_px.color.b ^ invert;
 
 					// NOTE: Again, assume we can safely skip rotation tweaks
-
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 					// NOTE: We clobber the first byte of the next pixel on 24bpp fbs!
