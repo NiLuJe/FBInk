@@ -1974,6 +1974,7 @@ int
 	int        n;
 	int        req_n;
 	bool       fb_is_grayscale = false;
+	bool       fb_is_true_bgr  = false;
 	bool       img_has_alpha   = false;
 	FBInkColor color           = { 0U };
 	// Let stb handle grayscaling for us
@@ -1984,11 +1985,13 @@ int
 			fb_is_grayscale = true;
 			break;
 		case 16U:
+			req_n = 3 + !fbink_config->ignore_alpha;
+			break;
 		case 24U:
 		case 32U:
 		default:
-			req_n           = 3 + !fbink_config->ignore_alpha;
-			fb_is_grayscale = false;
+			req_n          = 3 + !fbink_config->ignore_alpha;
+			fb_is_true_bgr = true;
 			break;
 	}
 
@@ -2160,6 +2163,82 @@ int
 					// NOTE: Again, use the function pointer directly, to skip redundant OOB checks,
 					//       as well as unneeded rotation checks (can't happen at this bpp).
 					(*fxpPutPixel)(&coords, &color);
+				}
+			}
+		}
+	} else if (fb_is_true_bgr) {
+		if (!fbink_config->ignore_alpha && img_has_alpha) {
+			uint8_t        ainv = 0U;
+			FBInkPixelRGBA img_px;
+			FBInkPixelBGRA fb_px;
+			FBInkPixelBGRA bg_px;
+			// This is essentially a constant in our case...
+			fb_px.color.a = 0xFF;
+			for (j = img_y_off; j < max_height; j++) {
+				for (i = img_x_off; i < max_width; i++) {
+					coords.x = (unsigned short int) (i + x_off);
+					coords.y = (unsigned short int) (j + y_off);
+					(*fxpRotateCoords)(&coords);
+
+					img_px.p = *((uint32_t*) &data[(((j << 2U) * w) + (i << 2U))]);
+					//memcpy(&img_px.p, &data[(((j << 2U) * w) + (i << 2U))], sizeof(img_px.p));
+
+					if (img_px.color.a == 0xFF) {
+						// Fully opaque, blit image (almost) directly
+						// Because we need to swap it to BGR and honor invert...
+						fb_px.color.r = img_px.color.r ^ invert;
+						fb_px.color.g = img_px.color.g ^ invert;
+						fb_px.color.b = img_px.color.b ^ invert;
+
+						*((uint32_t*) (fbPtr + (coords.x << 2U) +
+							       (coords.y * fInfo.line_length))) = fb_px.p;
+					} else if (img_px.color.a == 0) {
+						// Transparent! Keep fb as-is.
+					} else {
+						// Alpha blending...
+						ainv = img_px.color.a ^ 0xFF;
+
+						bg_px.p = *((uint32_t*) (fbPtr + (coords.x << 2U) +
+									 (coords.y * fInfo.line_length)));
+
+						fb_px.color.r =
+						    (uint8_t) DIV255((((img_px.color.r ^ invert) * img_px.color.a) +
+								      (bg_px.color.r * ainv)));
+						fb_px.color.g =
+						    (uint8_t) DIV255((((img_px.color.g ^ invert) * img_px.color.a) +
+								      (bg_px.color.r * ainv)));
+						fb_px.color.b =
+						    (uint8_t) DIV255((((img_px.color.b ^ invert) * img_px.color.a) +
+								      (bg_px.color.b * ainv)));
+
+						//memcpy(fbPtr + (coords.x << 2U) + (coords.y * fInfo.line_length), &fb_px.p, sizeof(fb_px.p));
+						*((uint32_t*) (fbPtr + (coords.x << 2U) +
+							       (coords.y * fInfo.line_length))) = fb_px.p;
+					}
+				}
+			}
+		} else {
+			FBInkPixelRGBA img_px;
+			FBInkPixelBGRA fb_px;
+			// This is essentially a constant in our case...
+			fb_px.color.a = 0xFF;
+			for (j = img_y_off; j < max_height; j++) {
+				for (i = img_x_off; i < max_width; i++) {
+					// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
+					//pix_offset = (size_t)((j * req_n * w) + (i * req_n));
+
+					img_px.p = *((uint32_t*) &data[((j * req_n * w) + (i * req_n))]);
+
+					fb_px.color.r = img_px.color.r ^ invert;
+					fb_px.color.g = img_px.color.g ^ invert;
+					fb_px.color.b = img_px.color.b ^ invert;
+
+					coords.x = (unsigned short int) (i + x_off);
+					coords.y = (unsigned short int) (j + y_off);
+					(*fxpRotateCoords)(&coords);
+
+					*((uint32_t*) (fbPtr + (coords.x << 2U) + (coords.y * fInfo.line_length))) =
+					    fb_px.p;
 				}
 			}
 		}
