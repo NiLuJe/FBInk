@@ -96,7 +96,7 @@ typedef struct
 	uint8_t b;
 } FBInkColor;
 
-// Magical uni(c)on(rn)s to speed up working with 32bpp pixels,
+// Magical uni(c)on(rn)s to speed up working with true color, packed 32bpp pixels,
 // so we can do a single get/set per pixel, instead of one per component...
 typedef union
 {

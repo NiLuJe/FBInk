@@ -2116,6 +2116,7 @@ int
 	//       And since we can easily do so from here,
 	//       we also entirely avoid trying to plot off-screen pixels (on any sides).
 	if (fb_is_grayscale) {
+		// 4bpp & 8bpp
 		if (!fbink_config->ignore_alpha && img_has_alpha) {
 			// There's an alpha channel in the image, we'll have to do alpha blending...
 			// c.f., https://en.wikipedia.org/wiki/Alpha_compositing
@@ -2167,40 +2168,54 @@ int
 			}
 		}
 	} else if (fb_is_true_bgr) {
+		// 24 bpp & 32bpp
 		if (!fbink_config->ignore_alpha && img_has_alpha) {
 			uint8_t        ainv = 0U;
 			FBInkPixelRGBA img_px;
 			FBInkPixelBGRA fb_px;
 			FBInkPixelBGRA bg_px;
-			// This is essentially a constant in our case...
+			// This is essentially a constant in our case... (c.f., put_pixel_RGB32)
 			fb_px.color.a = 0xFF;
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
-					coords.x = (unsigned short int) (i + x_off);
-					coords.y = (unsigned short int) (j + y_off);
-					(*fxpRotateCoords)(&coords);
+					// NOTE: We should be able to skip rotation hacks at this bpp...
 
+					// Yeah, I know, GCC...
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
+					// First, we gobble the full image pixel (all 4 bytes)
 					img_px.p = *((uint32_t*) &data[(((j << 2U) * w) + (i << 2U))]);
-					//memcpy(&img_px.p, &data[(((j << 2U) * w) + (i << 2U))], sizeof(img_px.p));
+#	pragma GCC diagnostic pop
 
 					if (img_px.color.a == 0xFF) {
-						// Fully opaque, blit image (almost) directly
-						// Because we need to swap it to BGR and honor invert...
+						// Fully opaque, we can blit the image (almost) directly.
+						// We do need to handle BGR and honor inversion ;).
 						fb_px.color.r = img_px.color.r ^ invert;
 						fb_px.color.g = img_px.color.g ^ invert;
 						fb_px.color.b = img_px.color.b ^ invert;
 
-						*((uint32_t*) (fbPtr + (coords.x << 2U) +
-							       (coords.y * fInfo.line_length))) = fb_px.p;
+						pix_offset = (uint32_t)((unsigned short int) (i + x_off) << 2U) +
+							     ((unsigned short int) (j + y_off) * fInfo.line_length);
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
+						// And we write the full pixel to the fb (all 4 bytes)
+						*((uint32_t*) (fbPtr + pix_offset)) = fb_px.p;
+#	pragma GCC diagnostic pop
 					} else if (img_px.color.a == 0) {
 						// Transparent! Keep fb as-is.
 					} else {
 						// Alpha blending...
 						ainv = img_px.color.a ^ 0xFF;
 
-						bg_px.p = *((uint32_t*) (fbPtr + (coords.x << 2U) +
-									 (coords.y * fInfo.line_length)));
+						pix_offset = (uint32_t)((unsigned short int) (i + x_off) << 2U) +
+							     ((unsigned short int) (j + y_off) * fInfo.line_length);
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
+						// Again, read the full pixel from the framebuffer (all 4 bytes)
+						bg_px.p = *((uint32_t*) (fbPtr + pix_offset));
+#	pragma GCC diagnostic pop
 
+						// Don't forget to honor inversion, and we get our BGR swap in the process.
 						fb_px.color.r =
 						    (uint8_t) DIV255((((img_px.color.r ^ invert) * img_px.color.a) +
 								      (bg_px.color.r * ainv)));
@@ -2211,9 +2226,11 @@ int
 						    (uint8_t) DIV255((((img_px.color.b ^ invert) * img_px.color.a) +
 								      (bg_px.color.b * ainv)));
 
-						//memcpy(fbPtr + (coords.x << 2U) + (coords.y * fInfo.line_length), &fb_px.p, sizeof(fb_px.p));
-						*((uint32_t*) (fbPtr + (coords.x << 2U) +
-							       (coords.y * fInfo.line_length))) = fb_px.p;
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
+						// And we write the full blended pixel to the fb (all 4 bytes)
+						*((uint32_t*) (fbPtr + pix_offset)) = fb_px.p;
+#	pragma GCC diagnostic pop
 					}
 				}
 			}
@@ -2227,22 +2244,32 @@ int
 					// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
 					//pix_offset = (size_t)((j * req_n * w) + (i * req_n));
 
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
+					// NOTE: Yes, we potentially read 1 byte too far if req_n == 3,
+					//       but that's still faster than reading the 3 component bytes one by one.
 					img_px.p = *((uint32_t*) &data[((j * req_n * w) + (i * req_n))]);
+#	pragma GCC diagnostic pop
 
+					// Handle BGR & inversion
 					fb_px.color.r = img_px.color.r ^ invert;
 					fb_px.color.g = img_px.color.g ^ invert;
 					fb_px.color.b = img_px.color.b ^ invert;
 
-					coords.x = (unsigned short int) (i + x_off);
-					coords.y = (unsigned short int) (j + y_off);
-					(*fxpRotateCoords)(&coords);
+					// NOTE: Again, assume we can safely skip rotation tweaks
 
-					*((uint32_t*) (fbPtr + (coords.x << 2U) + (coords.y * fInfo.line_length))) =
-					    fb_px.p;
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
+					// NOTE: We clobber the first byte of the next pixel on 24bpp fbs!
+					//       ... but we don't actually have devices running a 24bpp fb, so, meh.
+					*((uint32_t*) (fbPtr + ((unsigned short int) (i + x_off) << 2U) +
+						       ((unsigned short int) (j + y_off) * fInfo.line_length))) = fb_px.p;
+#	pragma GCC diagnostic pop
 				}
 			}
 		}
 	} else {
+		// 16 bpp
 		if (!fbink_config->ignore_alpha && img_has_alpha) {
 			FBInkColor bg_color  = { 0U };
 			FBInkColor img_color = { 0U };
