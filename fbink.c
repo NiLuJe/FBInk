@@ -130,6 +130,8 @@ static void
 	// Opaque, always. Note that everything is rendered as opaque, no matter what.
 	// But at least this way we ensure fb grabs are consistent with what's seen on screen.
 	*((unsigned char*) (fbPtr + pix_offset + 3)) = 0xFF;
+
+	// NOTE: Trying to retrofit FBInkPixelBGRA into this doesn't appear to net us anything noticeable...
 }
 
 static void
@@ -312,13 +314,17 @@ static void
 static void
     get_pixel_RGB32(FBInkCoordinates* coords, FBInkColor* color)
 {
-	// calculate the pixel's byte offset inside the buffer
-	// note: x * 4 as every pixel is 4 consecutive bytes
-	size_t pix_offset = (uint32_t)(coords->x << 2U) + (coords->y * fInfo.line_length);
+	FBInkPixelBGRA px;
 
-	color->b = *((unsigned char*) (fbPtr + pix_offset));
-	color->g = *((unsigned char*) (fbPtr + pix_offset + 1));
-	color->r = *((unsigned char*) (fbPtr + pix_offset + 2));
+	// calculate the pixel's byte offset inside the buffer
+	// note: x * 4 as every pixel is 4 consecutive bytes, which we read in one go
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
+	px.p = *((uint32_t*) (fbPtr + (coords->x << 2U) + (coords->y * fInfo.line_length)));
+#	pragma GCC diagnostic pop
+	color->b = px.color.b;
+	color->g = px.color.g;
+	color->r = px.color.r;
 	// NOTE: We don't care about alpha, we always assume it's opaque,
 	//       as that's how it behaves.
 }
