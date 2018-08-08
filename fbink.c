@@ -2507,6 +2507,7 @@ int
 				}
 			}
 		} else {
+			// No alpha in image, or ignored
 			size_t           pix_offset;
 			FBInkCoordinates coords = { 0U };
 			// NOTE: For some reason, reading the image 3 or 4 bytes at once doesn't win us anything, here...
