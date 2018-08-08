@@ -2117,8 +2117,6 @@ int
 #	endif
 	unsigned short int i;
 	unsigned short int j;
-	size_t             pix_offset;
-	FBInkCoordinates   coords = { 0U };
 	// NOTE: The slight duplication is on purpose, to move the branching outside the loop.
 	//       And since we can easily do so from here,
 	//       we also entirely avoid trying to plot off-screen pixels (on any sides).
@@ -2128,9 +2126,10 @@ int
 			// There's an alpha channel in the image, we'll have to do alpha blending...
 			// c.f., https://en.wikipedia.org/wiki/Alpha_compositing
 			//       https://blogs.msdn.microsoft.com/shawnhar/2009/11/06/premultiplied-alpha/
-			FBInkColor    bg_color = { 0U };
-			FBInkPixelG8A img_px;
-			uint8_t       ainv = 0U;
+			FBInkCoordinates coords   = { 0U };
+			FBInkColor       bg_color = { 0U };
+			FBInkPixelG8A    img_px;
+			uint8_t          ainv = 0U;
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
 #	pragma GCC diagnostic push
@@ -2173,6 +2172,7 @@ int
 				}
 			}
 		} else {
+			FBInkCoordinates coords = { 0U };
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
 					// NOTE: Here, req_n is either 2, or 1 if ignore_alpha, so, no shift trickery ;)
@@ -2190,10 +2190,11 @@ int
 	} else if (fb_is_true_bgr) {
 		// 24 bpp & 32bpp
 		if (!fbink_config->ignore_alpha && img_has_alpha) {
-			uint8_t        ainv = 0U;
 			FBInkPixelRGBA img_px;
 			FBInkPixelBGRA fb_px;
 			FBInkPixelBGRA bg_px;
+			uint8_t        ainv = 0U;
+			size_t         pix_offset;
 			// This is essentially a constant in our case... (c.f., put_pixel_RGB32)
 			fb_px.color.a = 0xFF;
 			for (j = img_y_off; j < max_height; j++) {
@@ -2290,9 +2291,10 @@ int
 	} else {
 		// 16 bpp
 		if (!fbink_config->ignore_alpha && img_has_alpha) {
-			FBInkColor     bg_color = { 0U };
-			FBInkPixelRGBA img_px;
-			uint8_t        ainv = 0U;
+			FBInkCoordinates coords   = { 0U };
+			FBInkColor       bg_color = { 0U };
+			FBInkPixelRGBA   img_px;
+			uint8_t          ainv = 0U;
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
 					// NOTE: Same general idea as the fb_is_grayscale case,
@@ -2340,6 +2342,8 @@ int
 				}
 			}
 		} else {
+			size_t           pix_offset;
+			FBInkCoordinates coords = { 0U };
 			// NOTE: For some reason, reading the image 4 bytes at once doesn't win us anything, here...
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
