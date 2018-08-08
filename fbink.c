@@ -2117,7 +2117,8 @@ int
 #	endif
 	unsigned short int i;
 	unsigned short int j;
-	// NOTE: The slight duplication is on purpose, to move the branching outside the loop.
+	// NOTE: The *slight* duplication is on purpose, to move the branching outside the loop,
+	//       and make use of a few different blitting tweaks depending on the situation...
 	//       And since we can easily do so from here,
 	//       we also entirely avoid trying to plot off-screen pixels (on any sides).
 	if (fb_is_grayscale) {
@@ -2129,7 +2130,6 @@ int
 			FBInkCoordinates coords   = { 0U };
 			FBInkColor       bg_color = { 0U };
 			FBInkPixelG8A    img_px;
-			uint8_t          ainv = 0U;
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
 #	pragma GCC diagnostic push
@@ -2153,7 +2153,6 @@ int
 						// Transparent! Keep fb as-is.
 					} else {
 						// Alpha blending...
-						ainv = img_px.color.a ^ 0xFF;
 
 						// We need to know what this pixel currently looks like in the framebuffer...
 						coords.x = (unsigned short int) (i + x_off);
@@ -2164,8 +2163,8 @@ int
 						(*fxpGetPixel)(&coords, &bg_color);
 
 						// Don't forget to honor inversion
-						color.r = (uint8_t) DIV255(
-						    (((img_px.color.v ^ invert) * img_px.color.a) + (bg_color.r * ainv)));
+						color.r = (uint8_t) DIV255((((img_px.color.v ^ invert) * img_px.color.a) +
+									    (bg_color.r * (img_px.color.a ^ 0xFF))));
 
 						(*fxpPutPixel)(&coords, &color);
 					}
