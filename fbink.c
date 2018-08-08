@@ -1981,12 +1981,17 @@ int
 	int        n;
 	int        req_n;
 	bool       fb_is_grayscale = false;
+	bool       fb_is_legacy    = false;
 	bool       fb_is_true_bgr  = false;
 	bool       img_has_alpha   = false;
 	FBInkColor color           = { 0U };
 	// Let stb handle grayscaling for us
 	switch (vInfo.bits_per_pixel) {
 		case 4U:
+			req_n           = 1 + !fbink_config->ignore_alpha;
+			fb_is_grayscale = true;
+			fb_is_legacy    = true;
+			break;
 		case 8U:
 			req_n           = 1 + !fbink_config->ignore_alpha;
 			fb_is_grayscale = true;
@@ -2124,36 +2129,64 @@ int
 	if (fb_is_grayscale) {
 		// 4bpp & 8bpp
 		if (!fbink_config->ignore_alpha && img_has_alpha) {
-			// There's an alpha channel in the image, we'll have to do alpha blending...
-			// c.f., https://en.wikipedia.org/wiki/Alpha_compositing
-			//       https://blogs.msdn.microsoft.com/shawnhar/2009/11/06/premultiplied-alpha/
-			FBInkCoordinates coords   = { 0U };
-			FBInkColor       bg_color = { 0U };
-			FBInkPixelG8A    img_px;
-			for (j = img_y_off; j < max_height; j++) {
-				for (i = img_x_off; i < max_width; i++) {
+			if (!fb_is_legacy) {
+				// 8bpp
+				// There's an alpha channel in the image, we'll have to do alpha blending...
+				// c.f., https://en.wikipedia.org/wiki/Alpha_compositing
+				//       https://blogs.msdn.microsoft.com/shawnhar/2009/11/06/premultiplied-alpha/
+				FBInkCoordinates coords   = { 0U };
+				FBInkColor       bg_color = { 0U };
+				FBInkPixelG8A    img_px;
+				for (j = img_y_off; j < max_height; j++) {
+					for (i = img_x_off; i < max_width; i++) {
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
-					// First, we gobble the full image pixel (all 2 bytes)
-					// NOTE: In this branch, req_n == 2, so we can do << 1 instead of * 2 ;).
-					img_px.p = *((uint16_t*) &data[(((j << 1U) * w) + (i << 1U))]);
+						// First, we gobble the full image pixel (all 2 bytes)
+						// NOTE: In this branch, req_n == 2, so we can do << 1 instead of * 2 ;).
+						img_px.p = *((uint16_t*) &data[(((j << 1U) * w) + (i << 1U))]);
 #	pragma GCC diagnostic pop
 
-					// Take a shortcut for the most common alpha values (none & full)
-					if (img_px.color.a == 0xFF) {
-						// Fully opaque, we can blit the image (almost) directly.
-						// We do need to honor inversion ;).
-						color.r = img_px.color.v ^ invert;
+						// Take a shortcut for the most common alpha values (none & full)
+						if (img_px.color.a == 0xFF) {
+							// Fully opaque, we can blit the image (almost) directly.
+							// We do need to honor inversion ;).
+							color.r = img_px.color.v ^ invert;
 
-						coords.x = (unsigned short int) (i + x_off);
-						coords.y = (unsigned short int) (j + y_off);
+							coords.x = (unsigned short int) (i + x_off);
+							coords.y = (unsigned short int) (j + y_off);
 
-						(*fxpPutPixel)(&coords, &color);
-					} else if (img_px.color.a == 0) {
-						// Transparent! Keep fb as-is.
-					} else {
-						// Alpha blending...
+							(*fxpPutPixel)(&coords, &color);
+						} else if (img_px.color.a == 0) {
+							// Transparent! Keep fb as-is.
+						} else {
+							// Alpha blending...
 
+							// We need to know what this pixel currently looks like in the framebuffer...
+							coords.x = (unsigned short int) (i + x_off);
+							coords.y = (unsigned short int) (j + y_off);
+							// NOTE: We use the the function pointers directly, to avoid the OOB checks,
+							//       because we know we're only processing on-screen pixels,
+							//       and we don't care about the rotation checks at this bpp :).
+							(*fxpGetPixel)(&coords, &bg_color);
+
+							// Don't forget to honor inversion
+							color.r = (uint8_t) DIV255(
+							    (((img_px.color.v ^ invert) * img_px.color.a) +
+							     (bg_color.r * (img_px.color.a ^ 0xFF))));
+
+							(*fxpPutPixel)(&coords, &color);
+						}
+					}
+				}
+			} else {
+				// 4bpp
+				// NOTE: The fact that the fb stores two pixels per byte means we can't take any shortcut,
+				//       because they may only apply to one of those two pixels...
+				FBInkCoordinates coords   = { 0U };
+				FBInkColor       bg_color = { 0U };
+				FBInkPixelG8A    img_px;
+				for (j = img_y_off; j < max_height; j++) {
+					for (i = img_x_off; i < max_width; i++) {
 						// We need to know what this pixel currently looks like in the framebuffer...
 						coords.x = (unsigned short int) (i + x_off);
 						coords.y = (unsigned short int) (j + y_off);
@@ -2162,7 +2195,14 @@ int
 						//       and we don't care about the rotation checks at this bpp :).
 						(*fxpGetPixel)(&coords, &bg_color);
 
-						// Don't forget to honor inversion
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
+						// We gobble the full image pixel (all 2 bytes)
+						// NOTE: In this branch, req_n == 2, so we can do << 1 instead of * 2 ;).
+						img_px.p = *((uint16_t*) &data[(((j << 1U) * w) + (i << 1U))]);
+#	pragma GCC diagnostic pop
+
+						// Blend it! (While honoring inversion)
 						color.r = (uint8_t) DIV255((((img_px.color.v ^ invert) * img_px.color.a) +
 									    (bg_color.r * (img_px.color.a ^ 0xFF))));
 
