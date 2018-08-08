@@ -2509,7 +2509,7 @@ int
 		} else {
 			size_t           pix_offset;
 			FBInkCoordinates coords = { 0U };
-			// NOTE: For some reason, reading the image 4 bytes at once doesn't win us anything, here...
+			// NOTE: For some reason, reading the image 3 or 4 bytes at once doesn't win us anything, here...
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
 					// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
