@@ -319,9 +319,11 @@ static void
 
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 4 as every pixel is 4 consecutive bytes, which we read in one go
+	size_t pix_offset = (uint32_t)(coords->x << 2U) + (coords->y * fInfo.line_length);
+
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
-	px.p = *((uint32_t*) (fbPtr + (coords->x << 2U) + (coords->y * fInfo.line_length)));
+	px.p = *((uint32_t*) (fbPtr + pix_offset));
 #	pragma GCC diagnostic pop
 	color->b = px.color.b;
 	color->g = px.color.g;
@@ -2136,14 +2138,17 @@ int
 				//       https://blogs.msdn.microsoft.com/shawnhar/2009/11/06/premultiplied-alpha/
 				FBInkCoordinates coords   = { 0U };
 				FBInkColor       bg_color = { 0U };
+				size_t           pix_offset;
 				FBInkPixelG8A    img_px;
+				uint8_t          ainv = 0U;
 				for (j = img_y_off; j < max_height; j++) {
 					for (i = img_x_off; i < max_width; i++) {
+						// NOTE: In this branch, req_n == 2, so we can do << 1 instead of * 2 ;).
+						pix_offset = (size_t)(((j << 1U) * w) + (i << 1U));
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// First, we gobble the full image pixel (all 2 bytes)
-						// NOTE: In this branch, req_n == 2, so we can do << 1 instead of * 2 ;).
-						img_px.p = *((uint16_t*) &data[(((j << 1U) * w) + (i << 1U))]);
+						img_px.p = *((uint16_t*) &data[pix_offset]);
 #	pragma GCC diagnostic pop
 
 						// Take a shortcut for the most common alpha values (none & full)
@@ -2169,10 +2174,11 @@ int
 							//       and we don't care about the rotation checks at this bpp :).
 							(*fxpGetPixel)(&coords, &bg_color);
 
+							ainv = img_px.color.a ^ 0xFF;
 							// Don't forget to honor inversion
 							color.r = (uint8_t) DIV255(
 							    (((img_px.color.v ^ invert) * img_px.color.a) +
-							     (bg_color.r * (img_px.color.a ^ 0xFF))));
+							     (bg_color.r * ainv)));
 
 							(*fxpPutPixel)(&coords, &color);
 						}
@@ -2184,7 +2190,9 @@ int
 				//       because they may only apply to one of those two pixels...
 				FBInkCoordinates coords   = { 0U };
 				FBInkColor       bg_color = { 0U };
+				size_t           pix_offset;
 				FBInkPixelG8A    img_px;
+				uint8_t          ainv = 0U;
 				for (j = img_y_off; j < max_height; j++) {
 					for (i = img_x_off; i < max_width; i++) {
 						// We need to know what this pixel currently looks like in the framebuffer...
@@ -2195,27 +2203,31 @@ int
 						//       and we don't care about the rotation checks at this bpp :).
 						(*fxpGetPixel)(&coords, &bg_color);
 
+						// NOTE: In this branch, req_n == 2, so we can do << 1 instead of * 2 ;).
+						pix_offset = (size_t)(((j << 1U) * w) + (i << 1U));
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// We gobble the full image pixel (all 2 bytes)
-						// NOTE: In this branch, req_n == 2, so we can do << 1 instead of * 2 ;).
-						img_px.p = *((uint16_t*) &data[(((j << 1U) * w) + (i << 1U))]);
+						img_px.p = *((uint16_t*) &data[pix_offset]);
 #	pragma GCC diagnostic pop
 
+						ainv = img_px.color.a ^ 0xFF;
 						// Blend it! (While honoring inversion)
-						color.r = (uint8_t) DIV255((((img_px.color.v ^ invert) * img_px.color.a) +
-									    (bg_color.r * (img_px.color.a ^ 0xFF))));
+						color.r = (uint8_t) DIV255(
+						    (((img_px.color.v ^ invert) * img_px.color.a) + (bg_color.r * ainv)));
 
 						(*fxpPutPixel)(&coords, &color);
 					}
 				}
 			}
 		} else {
+			size_t           pix_offset;
 			FBInkCoordinates coords = { 0U };
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
 					// NOTE: Here, req_n is either 2, or 1 if ignore_alpha, so, no shift trickery ;)
-					color.r = data[((j * req_n * w) + (i * req_n))] ^ invert;
+					pix_offset = (size_t)((j * req_n * w) + (i * req_n));
+					color.r    = data[pix_offset] ^ invert;
 
 					coords.x = (unsigned short int) (i + x_off);
 					coords.y = (unsigned short int) (j + y_off);
@@ -2241,11 +2253,12 @@ int
 					// NOTE: We should be able to skip rotation hacks at this bpp...
 
 					// Yeah, I know, GCC...
+					// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
+					pix_offset = (size_t)(((j << 2U) * w) + (i << 2U));
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 					// First, we gobble the full image pixel (all 4 bytes)
-					// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
-					img_px.p = *((uint32_t*) &data[(((j << 2U) * w) + (i << 2U))]);
+					img_px.p = *((uint32_t*) &data[pix_offset]);
 #	pragma GCC diagnostic pop
 
 					// Take a shortcut for the most common alpha values (none & full)
@@ -2256,12 +2269,12 @@ int
 						fb_px.color.g = img_px.color.g ^ invert;
 						fb_px.color.b = img_px.color.b ^ invert;
 
+						pix_offset = (uint32_t)((unsigned short int) (i + x_off) << 2U) +
+							     ((unsigned short int) (j + y_off) * fInfo.line_length);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// And we write the full pixel to the fb (all 4 bytes)
-						*((uint32_t*) (fbPtr + ((unsigned short int) (i + x_off) << 2U) +
-							       ((unsigned short int) (j + y_off) * fInfo.line_length))) =
-						    fb_px.p;
+						*((uint32_t*) (fbPtr + pix_offset)) = fb_px.p;
 #	pragma GCC diagnostic pop
 					} else if (img_px.color.a == 0) {
 						// Transparent! Keep fb as-is.
@@ -2297,18 +2310,20 @@ int
 				}
 			}
 		} else {
+			size_t         pix_offset;
 			FBInkPixelRGBA img_px;
 			FBInkPixelBGRA fb_px;
 			// This is essentially a constant in our case...
 			fb_px.color.a = 0xFF;
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
+					// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
+					pix_offset = (size_t)((j * req_n * w) + (i * req_n));
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 					// NOTE: Yes, we potentially read 1 byte too far if req_n == 3,
 					//       but that's still faster than reading the 3 component bytes one by one.
-					// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
-					img_px.p = *((uint32_t*) &data[((j * req_n * w) + (i * req_n))]);
+					img_px.p = *((uint32_t*) &data[pix_offset]);
 #	pragma GCC diagnostic pop
 
 					// Handle BGR & inversion
@@ -2317,12 +2332,13 @@ int
 					fb_px.color.b = img_px.color.b ^ invert;
 
 					// NOTE: Again, assume we can safely skip rotation tweaks
+					pix_offset = (uint32_t)((unsigned short int) (i + x_off) << 2U) +
+						     ((unsigned short int) (j + y_off) * fInfo.line_length);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 					// NOTE: We clobber the first byte of the next pixel on 24bpp fbs!
 					//       ... but we don't actually have devices running a 24bpp fb, so, meh.
-					*((uint32_t*) (fbPtr + ((unsigned short int) (i + x_off) << 2U) +
-						       ((unsigned short int) (j + y_off) * fInfo.line_length))) = fb_px.p;
+					*((uint32_t*) (fbPtr + pix_offset)) = fb_px.p;
 #	pragma GCC diagnostic pop
 				}
 			}
@@ -2332,17 +2348,19 @@ int
 		if (!fbink_config->ignore_alpha && img_has_alpha) {
 			FBInkCoordinates coords   = { 0U };
 			FBInkColor       bg_color = { 0U };
+			size_t           pix_offset;
 			FBInkPixelRGBA   img_px;
 			uint8_t          ainv = 0U;
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
 					// NOTE: Same general idea as the fb_is_grayscale case,
 					//       except at this bpp we then have to handle rotation ourselves...
+					// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
+					pix_offset = (size_t)(((j << 2U) * w) + (i << 2U));
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 					// Gobble the full image pixel (all 4 bytes)
-					// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
-					img_px.p = *((uint32_t*) &data[(((j << 2U) * w) + (i << 2U))]);
+					img_px.p = *((uint32_t*) &data[pix_offset]);
 #	pragma GCC diagnostic pop
 
 					// Take a shortcut for the most common alpha values (none & full)
