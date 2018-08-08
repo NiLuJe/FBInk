@@ -204,8 +204,8 @@ static void
 	coords->x = xp;
 	coords->y = yp;
 #	else
-	coords->x      = rx;
-	coords->y      = ry;
+	coords->x           = rx;
+	coords->y           = ry;
 #	endif
 }
 #endif    // FBINK_FOR_KOBO (!FBINK_FOR_KINDLE && !FBINK_FOR_LEGACY)
@@ -2112,14 +2112,18 @@ int
 	// Handle inversion if requested, in a way that avoids branching in the loop ;).
 	// And, as an added bonus, plays well with the fact that legacy devices have an inverted color map...
 #	ifdef FBINK_FOR_LEGACY
-	uint8_t invert = 0xFF;
+	uint8_t  invert     = 0xFF;
+	uint32_t invert_rgb = 0x00FFFFFF;
 	if (fbink_config->is_inverted) {
-		invert = 0U;
+		invert     = 0U;
+		invert_rgb = 0U;
 	}
 #	else
-	uint8_t invert = 0U;
+	uint8_t  invert     = 0U;
+	uint32_t invert_rgb = 0U;
 	if (fbink_config->is_inverted) {
-		invert = 0xFF;
+		invert     = 0xFF;
+		invert_rgb = 0x00FFFFFF;
 	}
 #	endif
 	unsigned short int i;
@@ -2268,9 +2272,10 @@ int
 					if (img_px.color.a == 0xFF) {
 						// Fully opaque, we can blit the image (almost) directly.
 						// We do need to handle BGR and honor inversion ;).
-						fb_px.color.r = img_px.color.r ^ invert;
-						fb_px.color.g = img_px.color.g ^ invert;
-						fb_px.color.b = img_px.color.b ^ invert;
+						img_px.p ^= invert_rgb;
+						fb_px.color.r = img_px.color.r;
+						fb_px.color.g = img_px.color.g;
+						fb_px.color.b = img_px.color.b;
 
 						pix_offset = (uint32_t)((unsigned short int) (i + x_off) << 2U) +
 							     ((unsigned short int) (j + y_off) * fInfo.line_length);
@@ -2294,9 +2299,7 @@ int
 #	pragma GCC diagnostic pop
 
 						// Don't forget to honor inversion
-						img_px.color.r ^= invert;
-						img_px.color.g ^= invert;
-						img_px.color.b ^= invert;
+						img_px.p ^= invert_rgb;
 						// Blend it, we get our BGR swap in the process ;).
 						fb_px.color.r = (uint8_t) DIV255(
 						    ((img_px.color.r * img_px.color.a) + (bg_px.color.r * ainv)));
@@ -2331,9 +2334,10 @@ int
 #	pragma GCC diagnostic pop
 
 					// Handle BGR & inversion
-					fb_px.color.r = img_px.color.r ^ invert;
-					fb_px.color.g = img_px.color.g ^ invert;
-					fb_px.color.b = img_px.color.b ^ invert;
+					img_px.p ^= invert_rgb;
+					fb_px.color.r = img_px.color.r;
+					fb_px.color.g = img_px.color.g;
+					fb_px.color.b = img_px.color.b;
 
 					// NOTE: Again, assume we can safely skip rotation tweaks
 					pix_offset = (uint32_t)((unsigned short int) (i + x_off) << 2U) +
@@ -2371,9 +2375,10 @@ int
 					if (img_px.color.a == 0xFF) {
 						// Fully opaque, we can blit the image (almost) directly.
 						// We do need to handle BGR and honor inversion ;).
-						color.r = img_px.color.r ^ invert;
-						color.g = img_px.color.g ^ invert;
-						color.b = img_px.color.b ^ invert;
+						img_px.p ^= invert_rgb;
+						color.r = img_px.color.r;
+						color.g = img_px.color.g;
+						color.b = img_px.color.b;
 
 						coords.x = (unsigned short int) (i + x_off);
 						coords.y = (unsigned short int) (j + y_off);
@@ -2391,9 +2396,7 @@ int
 						(*fxpGetPixel)(&coords, &bg_color);
 
 						// Don't forget to honor inversion
-						img_px.color.r ^= invert;
-						img_px.color.g ^= invert;
-						img_px.color.b ^= invert;
+						img_px.p ^= invert_rgb;
 						// Blend it, we get our BGR swap in the process ;).
 						color.r = (uint8_t) DIV255(
 						    ((img_px.color.r * img_px.color.a) + (bg_color.r * ainv)));
