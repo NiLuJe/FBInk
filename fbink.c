@@ -2255,70 +2255,133 @@ int
 		// 24bpp & 32bpp
 		if (!fbink_config->ignore_alpha && img_has_alpha) {
 			FBInkPixelRGBA img_px;
-			FBInkPixelBGRA fb_px;
-			FBInkPixelBGRA bg_px;
 			uint8_t        ainv = 0U;
 			size_t         pix_offset;
-			// This is essentially a constant in our case... (c.f., put_pixel_RGB32)
-			fb_px.color.a = 0xFF;
-			for (j = img_y_off; j < max_height; j++) {
-				for (i = img_x_off; i < max_width; i++) {
-					// NOTE: We should be able to skip rotation hacks at this bpp...
+			if (!fb_is_24bpp) {
+				// 32bpp
+				FBInkPixelBGRA fb_px;
+				FBInkPixelBGRA bg_px;
+				// This is essentially a constant in our case... (c.f., put_pixel_RGB32)
+				fb_px.color.a = 0xFF;
+				for (j = img_y_off; j < max_height; j++) {
+					for (i = img_x_off; i < max_width; i++) {
+						// NOTE: We should be able to skip rotation hacks at this bpp...
 
-					// Yeah, I know, GCC...
-					// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
-					pix_offset = (size_t)(((j << 2U) * w) + (i << 2U));
+						// Yeah, I know, GCC...
+						// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
+						pix_offset = (size_t)(((j << 2U) * w) + (i << 2U));
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
-					// First, we gobble the full image pixel (all 4 bytes)
-					img_px.p = *((uint32_t*) &data[pix_offset]);
+						// First, we gobble the full image pixel (all 4 bytes)
+						img_px.p = *((uint32_t*) &data[pix_offset]);
 #	pragma GCC diagnostic pop
 
-					// Take a shortcut for the most common alpha values (none & full)
-					if (img_px.color.a == 0xFF) {
-						// Fully opaque, we can blit the image (almost) directly.
-						// We do need to handle BGR and honor inversion ;).
-						img_px.p ^= invert_rgb;
-						fb_px.color.r = img_px.color.r;
-						fb_px.color.g = img_px.color.g;
-						fb_px.color.b = img_px.color.b;
+						// Take a shortcut for the most common alpha values (none & full)
+						if (img_px.color.a == 0xFF) {
+							// Fully opaque, we can blit the image (almost) directly.
+							// We do need to handle BGR and honor inversion ;).
+							img_px.p ^= invert_rgb;
+							fb_px.color.r = img_px.color.r;
+							fb_px.color.g = img_px.color.g;
+							fb_px.color.b = img_px.color.b;
 
-						pix_offset = (uint32_t)((unsigned short int) (i + x_off) << 2U) +
-							     ((unsigned short int) (j + y_off) * fInfo.line_length);
+							pix_offset =
+							    (uint32_t)((unsigned short int) (i + x_off) << 2U) +
+							    ((unsigned short int) (j + y_off) * fInfo.line_length);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
-						// And we write the full pixel to the fb (all 4 bytes)
-						*((uint32_t*) (fbPtr + pix_offset)) = fb_px.p;
+							// And we write the full pixel to the fb (all 4 bytes)
+							*((uint32_t*) (fbPtr + pix_offset)) = fb_px.p;
 #	pragma GCC diagnostic pop
-					} else if (img_px.color.a == 0) {
-						// Transparent! Keep fb as-is.
-					} else {
-						// Alpha blending...
-						ainv = img_px.color.a ^ 0xFF;
+						} else if (img_px.color.a == 0) {
+							// Transparent! Keep fb as-is.
+						} else {
+							// Alpha blending...
+							ainv = img_px.color.a ^ 0xFF;
 
-						pix_offset = (uint32_t)((unsigned short int) (i + x_off) << 2U) +
-							     ((unsigned short int) (j + y_off) * fInfo.line_length);
+							pix_offset =
+							    (uint32_t)((unsigned short int) (i + x_off) << 2U) +
+							    ((unsigned short int) (j + y_off) * fInfo.line_length);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
-						// Again, read the full pixel from the framebuffer (all 4 bytes)
-						bg_px.p = *((uint32_t*) (fbPtr + pix_offset));
+							// Again, read the full pixel from the framebuffer (all 4 bytes)
+							bg_px.p = *((uint32_t*) (fbPtr + pix_offset));
 #	pragma GCC diagnostic pop
 
-						// Don't forget to honor inversion
-						img_px.p ^= invert_rgb;
-						// Blend it, we get our BGR swap in the process ;).
-						fb_px.color.r = (uint8_t) DIV255(
-						    ((img_px.color.r * img_px.color.a) + (bg_px.color.r * ainv)));
-						fb_px.color.g = (uint8_t) DIV255(
-						    ((img_px.color.g * img_px.color.a) + (bg_px.color.r * ainv)));
-						fb_px.color.b = (uint8_t) DIV255(
-						    ((img_px.color.b * img_px.color.a) + (bg_px.color.b * ainv)));
+							// Don't forget to honor inversion
+							img_px.p ^= invert_rgb;
+							// Blend it, we get our BGR swap in the process ;).
+							fb_px.color.r = (uint8_t) DIV255(
+							    ((img_px.color.r * img_px.color.a) + (bg_px.color.r * ainv)));
+							fb_px.color.g = (uint8_t) DIV255(
+							    ((img_px.color.g * img_px.color.a) + (bg_px.color.r * ainv)));
+							fb_px.color.b = (uint8_t) DIV255(
+							    ((img_px.color.b * img_px.color.a) + (bg_px.color.b * ainv)));
 
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
-						// And we write the full blended pixel to the fb (all 4 bytes)
-						*((uint32_t*) (fbPtr + pix_offset)) = fb_px.p;
+							// And we write the full blended pixel to the fb (all 4 bytes)
+							*((uint32_t*) (fbPtr + pix_offset)) = fb_px.p;
 #	pragma GCC diagnostic pop
+						}
+					}
+				}
+			} else {
+				// 24bpp
+				FBInkPixelBGR fb_px;
+				FBInkPixelBGR bg_px;
+				for (j = img_y_off; j < max_height; j++) {
+					for (i = img_x_off; i < max_width; i++) {
+						// NOTE: We should be able to skip rotation hacks at this bpp...
+
+						// Yeah, I know, GCC...
+						// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
+						pix_offset = (size_t)(((j << 2U) * w) + (i << 2U));
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
+						// First, we gobble the full image pixel (all 4 bytes)
+						img_px.p = *((uint32_t*) &data[pix_offset]);
+#	pragma GCC diagnostic pop
+
+						// Take a shortcut for the most common alpha values (none & full)
+						if (img_px.color.a == 0xFF) {
+							// Fully opaque, we can blit the image (almost) directly.
+							// We do need to handle BGR and honor inversion ;).
+							img_px.p ^= invert_rgb;
+							fb_px.color.r = img_px.color.r;
+							fb_px.color.g = img_px.color.g;
+							fb_px.color.b = img_px.color.b;
+
+							pix_offset =
+							    (uint32_t)((unsigned short int) (i + x_off) << 2U) +
+							    ((unsigned short int) (j + y_off) * fInfo.line_length);
+							// And we write the full pixel to the fb (all 3 bytes)
+							*((uint24_t*) (fbPtr + pix_offset)) = fb_px.p;
+						} else if (img_px.color.a == 0) {
+							// Transparent! Keep fb as-is.
+						} else {
+							// Alpha blending...
+							ainv = img_px.color.a ^ 0xFF;
+
+							pix_offset =
+							    (uint32_t)((unsigned short int) (i + x_off) << 2U) +
+							    ((unsigned short int) (j + y_off) * fInfo.line_length);
+							// Again, read the full pixel from the framebuffer (all 3 bytes)
+							bg_px.p = *((uint24_t*) (fbPtr + pix_offset));
+
+							// Don't forget to honor inversion
+							img_px.p ^= invert_rgb;
+							// Blend it, we get our BGR swap in the process ;).
+							fb_px.color.r = (uint8_t) DIV255(
+							    ((img_px.color.r * img_px.color.a) + (bg_px.color.r * ainv)));
+							fb_px.color.g = (uint8_t) DIV255(
+							    ((img_px.color.g * img_px.color.a) + (bg_px.color.r * ainv)));
+							fb_px.color.b = (uint8_t) DIV255(
+							    ((img_px.color.b * img_px.color.a) + (bg_px.color.b * ainv)));
+
+							// And we write the full blended pixel to the fb (all 3 bytes)
+							*((uint24_t*) (fbPtr + pix_offset)) = fb_px.p;
+						}
 					}
 				}
 			}
