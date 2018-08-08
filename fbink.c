@@ -2246,7 +2246,7 @@ int
 			}
 		}
 	} else if (fb_is_true_bgr) {
-		// 24 bpp & 32bpp
+		// 24bpp & 32bpp
 		if (!fbink_config->ignore_alpha && img_has_alpha) {
 			FBInkPixelRGBA img_px;
 			FBInkPixelBGRA fb_px;
@@ -2352,7 +2352,7 @@ int
 			}
 		}
 	} else {
-		// 16 bpp
+		// 16bpp
 		if (!fbink_config->ignore_alpha && img_has_alpha) {
 			FBInkCoordinates coords   = { 0U };
 			FBInkColor       bg_color = { 0U };
