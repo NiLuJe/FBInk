@@ -1984,6 +1984,7 @@ int
 	int        req_n;
 	bool       fb_is_grayscale = false;
 	bool       fb_is_legacy    = false;
+	bool       fb_is_24bpp     = false;
 	bool       fb_is_true_bgr  = false;
 	bool       img_has_alpha   = false;
 	FBInkColor color           = { 0U };
@@ -2002,6 +2003,10 @@ int
 			req_n = 3 + !fbink_config->ignore_alpha;
 			break;
 		case 24U:
+			req_n          = 3 + !fbink_config->ignore_alpha;
+			fb_is_24bpp    = true;
+			fb_is_true_bgr = true;
+			break;
 		case 32U:
 		default:
 			req_n          = 3 + !fbink_config->ignore_alpha;
@@ -2228,6 +2233,7 @@ int
 				}
 			}
 		} else {
+			// No alpha in image, or ignored
 			size_t           pix_offset;
 			FBInkCoordinates coords = { 0U };
 			for (j = img_y_off; j < max_height; j++) {
@@ -2317,37 +2323,65 @@ int
 				}
 			}
 		} else {
-			size_t         pix_offset;
-			FBInkPixelRGBA img_px;
-			FBInkPixelBGRA fb_px;
-			// This is essentially a constant in our case...
-			fb_px.color.a = 0xFF;
-			for (j = img_y_off; j < max_height; j++) {
-				for (i = img_x_off; i < max_width; i++) {
-					// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
-					pix_offset = (size_t)((j * req_n * w) + (i * req_n));
+			// No alpha in image, or ignored
+			size_t pix_offset;
+			// We don't care about image alpha in this branch, so we don't even store it.
+			FBInkPixelRGB img_px;
+			if (!fb_is_24bpp) {
+				// 32bpp
+				FBInkPixelBGRA fb_px;
+				// This is essentially a constant in our case...
+				fb_px.color.a = 0xFF;
+				for (j = img_y_off; j < max_height; j++) {
+					for (i = img_x_off; i < max_width; i++) {
+						// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
+						pix_offset = (size_t)((j * req_n * w) + (i * req_n));
+						// Gobble the full image pixel (3 bytes, we don't care about alpha if it's there)
+						img_px.p = *((uint24_t*) &data[pix_offset]);
+						// NOTE: Given our typedef trickery, this exactly boils down to a 3 bytes memcpy:
+						//memcpy(&img_px.p, &data[pix_offset], 3 * sizeof(uint8_t));
+
+						// Handle BGR & inversion
+						fb_px.color.r = img_px.color.r ^ invert;
+						fb_px.color.g = img_px.color.g ^ invert;
+						fb_px.color.b = img_px.color.b ^ invert;
+
+						// NOTE: Again, assume we can safely skip rotation tweaks
+						pix_offset = (uint32_t)((unsigned short int) (i + x_off) << 2U) +
+							     ((unsigned short int) (j + y_off) * fInfo.line_length);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
-					// NOTE: Yes, we potentially read 1 byte too far if req_n == 3,
-					//       but that's still faster than reading the 3 component bytes one by one.
-					img_px.p = *((uint32_t*) &data[pix_offset]);
+						// Write the full pixel to the fb (all 4 bytes)
+						*((uint32_t*) (fbPtr + pix_offset)) = fb_px.p;
 #	pragma GCC diagnostic pop
+					}
+				}
+			} else {
+				// 24bpp
+				FBInkPixelBGR fb_px;
+				for (j = img_y_off; j < max_height; j++) {
+					for (i = img_x_off; i < max_width; i++) {
+						// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
+						pix_offset = (size_t)((j * req_n * w) + (i * req_n));
+						// Gobble the full image pixel (3 bytes, we don't care about alpha if it's there)
+						img_px.p = *((uint24_t*) &data[pix_offset]);
+						// NOTE: Given our typedef trickery, this exactly boils down to a 3 bytes memcpy:
+						//memcpy(&img_px.p, &data[pix_offset], 3 * sizeof(uint8_t));
 
-					// Handle BGR & inversion
-					img_px.p ^= invert_rgb;
-					fb_px.color.r = img_px.color.r;
-					fb_px.color.g = img_px.color.g;
-					fb_px.color.b = img_px.color.b;
+						// Handle BGR & inversion
+						fb_px.color.r = img_px.color.r ^ invert;
+						fb_px.color.g = img_px.color.g ^ invert;
+						fb_px.color.b = img_px.color.b ^ invert;
 
-					// NOTE: Again, assume we can safely skip rotation tweaks
-					pix_offset = (uint32_t)((unsigned short int) (i + x_off) << 2U) +
-						     ((unsigned short int) (j + y_off) * fInfo.line_length);
-#	pragma GCC diagnostic push
-#	pragma GCC diagnostic ignored "-Wcast-align"
-					// NOTE: We clobber the first byte of the next pixel on 24bpp fbs!
-					//       ... but we don't actually have devices running a 24bpp fb, so, meh.
-					*((uint32_t*) (fbPtr + pix_offset)) = fb_px.p;
-#	pragma GCC diagnostic pop
+						// NOTE: Again, assume we can safely skip rotation tweaks
+						pix_offset = (uint32_t)((unsigned short int) (i + x_off) << 2U) +
+							     ((unsigned short int) (j + y_off) * fInfo.line_length);
+						// Write the full pixel to the fb (all 3 bytes)
+						*((uint24_t*) (fbPtr + pix_offset)) = fb_px.p;
+						// NOTE: Again, this should roughly amount to a 3 bytes memcpy,
+						//       although in this instance, GCC generates slightly different code.
+						//memcpy(fbPtr + pix_offset, &fb_px.p, 3 * sizeof(uint8_t));
+					}
 				}
 			}
 		}

@@ -134,4 +134,38 @@ typedef union
 	} color;
 } FBInkPixelG8A;
 
+// And here be fucking dragons... Crazy-ass trickery for 24bits handling...
+// NOTE: The packed attribute ensures that sizeof == 3 for this :)
+struct _uint24_t
+{
+	uint32_t u24 : 24;
+} __attribute__((packed));
+
+// ... But we can't pack a typedef, so do it like this...
+typedef struct _uint24_t uint24_t;
+
+// So we can have this, with 3 bytes on both sides of the union :).
+typedef union
+{
+	uint24_t p;
+	struct
+	{
+		uint8_t r;
+		uint8_t g;
+		uint8_t b;
+	} color;
+} FBInkPixelRGB;
+
+// And its BGR brother for 24bpp fbs...
+typedef union
+{
+	uint24_t p;
+	struct
+	{
+		uint8_t b;
+		uint8_t g;
+		uint8_t r;
+	} color;
+} FBInkPixelBGR;
+
 #endif
