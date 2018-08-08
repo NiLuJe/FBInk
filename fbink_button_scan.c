@@ -240,10 +240,11 @@ int
 
 	// If we've got a button corner in the previous pass, we're not quite done yet...
 	if (gotcha) {
-		gotcha   = false;
-		coords.x = match_coords.x;
+		gotcha = false;
 		// We're just going too scan down that final column of the button until we hit the end of it :).
 		for (unsigned short int j = match_coords.y; j < max_height; j++) {
+			// NOTE: Keep those two together to avoid desyncing them if we have a rotation quirk...
+			coords.x = match_coords.x;
 			coords.y = j;
 
 			(*fxpRotateCoords)(&coords);
