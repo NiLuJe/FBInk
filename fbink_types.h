@@ -123,4 +123,15 @@ typedef union
 	} color;
 } FBInkPixelBGRA;
 
+// Used to speedup alpha-blending of Grayscale images
+typedef union
+{
+	uint16_t p;
+	struct
+	{
+		uint8_t v;
+		uint8_t a;
+	} color;
+} FBInkPixelG8A;
+
 #endif

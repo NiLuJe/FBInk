@@ -2128,43 +2128,56 @@ int
 			// There's an alpha channel in the image, we'll have to do alpha blending...
 			// c.f., https://en.wikipedia.org/wiki/Alpha_compositing
 			//       https://blogs.msdn.microsoft.com/shawnhar/2009/11/06/premultiplied-alpha/
-			FBInkColor bg_color  = { 0U };
-			FBInkColor img_color = { 0U };
-			uint8_t    alpha     = 0U;
-			uint8_t    ainv      = 0U;
+			FBInkColor    bg_color = { 0U };
+			FBInkPixelG8A img_px;
+			uint8_t       ainv = 0U;
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
-					// We need to know what this pixel currently looks like in the framebuffer...
-					coords.x = (unsigned short int) (i + x_off);
-					coords.y = (unsigned short int) (j + y_off);
-					// NOTE: We use the the function pointers directly, to avoid the OOB checks,
-					//       because we know we're only processing on-screen pixels,
-					//       and we don't care about the rotation checks at this bpp :).
-					(*fxpGetPixel)(&coords, &bg_color);
-
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
+					// First, we gobble the full image pixel (all 2 bytes)
 					// NOTE: In this branch, req_n == 2, so we can do << 1 instead of * 2 ;).
-					pix_offset  = (size_t)(((j << 1U) * w) + (i << 1U));
-					img_color.r = data[pix_offset + 0] ^ invert;
-					alpha       = data[pix_offset + 1];
-					ainv        = alpha ^ 0xFF;
-					// Blend it!
-					color.r = (uint8_t) DIV255(((img_color.r * alpha) + (bg_color.r * ainv)));
+					img_px.p = *((uint16_t*) &data[(((j << 1U) * w) + (i << 1U))]);
+#	pragma GCC diagnostic pop
 
-					(*fxpPutPixel)(&coords, &color);
+					// Take a shortcut for the most common alpha values (none & full)
+					if (img_px.color.a == 0xFF) {
+						// Fully opaque, we can blit the image (almost) directly.
+						// We do need to honor inversion ;).
+						color.r = img_px.color.v ^ invert;
+
+						coords.x = (unsigned short int) (i + x_off);
+						coords.y = (unsigned short int) (j + y_off);
+
+						(*fxpPutPixel)(&coords, &color);
+					} else if (img_px.color.a == 0) {
+						// Transparent! Keep fb as-is.
+					} else {
+						// Alpha blending...
+						ainv = img_px.color.a ^ 0xFF;
+
+						// We need to know what this pixel currently looks like in the framebuffer...
+						coords.x = (unsigned short int) (i + x_off);
+						coords.y = (unsigned short int) (j + y_off);
+						// NOTE: We use the the function pointers directly, to avoid the OOB checks,
+						//       because we know we're only processing on-screen pixels,
+						//       and we don't care about the rotation checks at this bpp :).
+						(*fxpGetPixel)(&coords, &bg_color);
+
+						// Don't forget to honor inversion
+						color.r = (uint8_t) DIV255(
+						    (((img_px.color.v ^ invert) * img_px.color.a) + (bg_color.r * ainv)));
+
+						(*fxpPutPixel)(&coords, &color);
+					}
 				}
 			}
 		} else {
 			for (j = img_y_off; j < max_height; j++) {
 				for (i = img_x_off; i < max_width; i++) {
 					// NOTE: Here, req_n is either 2, or 1 if ignore_alpha, so, no shift trickery ;)
-					pix_offset = (size_t)((j * req_n * w) + (i * req_n));
-					color.r    = data[pix_offset] ^ invert;
-					// NOTE: We'll never access those two at this bpp,
-					//       so we don't even need to set them ;).
-					/*
-					color.g = color.r;
-					color.b = color.r;
-					*/
+					color.r = data[((j * req_n * w) + (i * req_n))] ^ invert;
+
 					coords.x = (unsigned short int) (i + x_off);
 					coords.y = (unsigned short int) (j + y_off);
 
