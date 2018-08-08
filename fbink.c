@@ -2176,9 +2176,10 @@ int
 
 							ainv = img_px.color.a ^ 0xFF;
 							// Don't forget to honor inversion
+							img_px.color.v ^= invert;
+							// Blend it!
 							color.r = (uint8_t) DIV255(
-							    (((img_px.color.v ^ invert) * img_px.color.a) +
-							     (bg_color.r * ainv)));
+							    ((img_px.color.v * img_px.color.a) + (bg_color.r * ainv)));
 
 							(*fxpPutPixel)(&coords, &color);
 						}
@@ -2212,9 +2213,11 @@ int
 #	pragma GCC diagnostic pop
 
 						ainv = img_px.color.a ^ 0xFF;
-						// Blend it! (While honoring inversion)
+						// Don't forget to honor inversion
+						img_px.color.v ^= invert;
+						// Blend it!
 						color.r = (uint8_t) DIV255(
-						    (((img_px.color.v ^ invert) * img_px.color.a) + (bg_color.r * ainv)));
+						    ((img_px.color.v * img_px.color.a) + (bg_color.r * ainv)));
 
 						(*fxpPutPixel)(&coords, &color);
 					}
@@ -2290,16 +2293,17 @@ int
 						bg_px.p = *((uint32_t*) (fbPtr + pix_offset));
 #	pragma GCC diagnostic pop
 
-						// Don't forget to honor inversion, and we get our BGR swap in the process.
-						fb_px.color.r =
-						    (uint8_t) DIV255((((img_px.color.r ^ invert) * img_px.color.a) +
-								      (bg_px.color.r * ainv)));
-						fb_px.color.g =
-						    (uint8_t) DIV255((((img_px.color.g ^ invert) * img_px.color.a) +
-								      (bg_px.color.r * ainv)));
-						fb_px.color.b =
-						    (uint8_t) DIV255((((img_px.color.b ^ invert) * img_px.color.a) +
-								      (bg_px.color.b * ainv)));
+						// Don't forget to honor inversion
+						img_px.color.r ^= invert;
+						img_px.color.g ^= invert;
+						img_px.color.b ^= invert;
+						// Blend it, we get our BGR swap in the process ;).
+						fb_px.color.r = (uint8_t) DIV255(
+						    ((img_px.color.r * img_px.color.a) + (bg_px.color.r * ainv)));
+						fb_px.color.g = (uint8_t) DIV255(
+						    ((img_px.color.g * img_px.color.a) + (bg_px.color.r * ainv)));
+						fb_px.color.b = (uint8_t) DIV255(
+						    ((img_px.color.b * img_px.color.a) + (bg_px.color.b * ainv)));
 
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
@@ -2386,13 +2390,17 @@ int
 						(*fxpRotateCoords)(&coords);
 						(*fxpGetPixel)(&coords, &bg_color);
 
-						// Don't forget to honor inversion, and we get our BGR swap in the process.
+						// Don't forget to honor inversion
+						img_px.color.r ^= invert;
+						img_px.color.g ^= invert;
+						img_px.color.b ^= invert;
+						// Blend it, we get our BGR swap in the process ;).
 						color.r = (uint8_t) DIV255(
-						    (((img_px.color.r ^ invert) * img_px.color.a) + (bg_color.r * ainv)));
+						    ((img_px.color.r * img_px.color.a) + (bg_color.r * ainv)));
 						color.g = (uint8_t) DIV255(
-						    (((img_px.color.g ^ invert) * img_px.color.a) + (bg_color.r * ainv)));
+						    ((img_px.color.g * img_px.color.a) + (bg_color.r * ainv)));
 						color.b = (uint8_t) DIV255(
-						    (((img_px.color.b ^ invert) * img_px.color.a) + (bg_color.b * ainv)));
+						    ((img_px.color.b * img_px.color.a) + (bg_color.b * ainv)));
 
 						(*fxpPutPixel)(&coords, &color);
 					}
