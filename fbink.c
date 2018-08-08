@@ -314,6 +314,7 @@ static void
 static void
     get_pixel_RGB32(FBInkCoordinates* coords, FBInkColor* color)
 {
+	// NOTE: We retrofitted a bit of union magic implemented for fbink_print_image for a noticeable performance bump :)
 	FBInkPixelBGRA px;
 
 	// calculate the pixel's byte offset inside the buffer
