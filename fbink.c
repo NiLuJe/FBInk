@@ -143,7 +143,7 @@ static void
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	// but a bit more complicated for RGB565
-	uint16_t c = (uint16_t)(((color->r >> 3U) << 11U) + ((color->g >> 2U) << 5U) + (color->b >> 3U));
+	uint16_t c = (uint16_t)(((color->r >> 3U) << 11U) | ((color->g >> 2U) << 5U) | (color->b >> 3U));
 	// or: c = ((r / 8) * 2048) + ((g / 4) * 32) + (b / 8);
 	// write 'two bytes at once', much to GCC's dismay...
 #pragma GCC diagnostic push
