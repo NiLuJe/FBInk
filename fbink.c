@@ -349,12 +349,24 @@ static void
 	v = *((uint16_t*) (fbPtr + pix_offset));
 #	pragma GCC diagnostic pop
 
+	// NOTE: Ported from KOReader
 	b        = (v & 0x001F);
 	color->b = (uint8_t)((b << 3U) + (b >> 2U));
 	g        = ((v >> 5U) & 0x3F);
 	color->g = (uint8_t)((g << 2U) + (g >> 4U));
 	r        = (v >> 11U);
 	color->r = (uint8_t)((r << 3U) + (r >> 2U));
+
+	// c.f., https://stackoverflow.com/q/2442576 for a whole lot of details ;).
+	// Leading us to this very similar approach, which I somehow 'get' better than KOReader's...
+	/*
+	r = (v & 0xF800) >> 11U;
+	g = (v & 0x07E0) >> 5U;
+	b = (v & 0x001F);
+	color->r = (r << 3U) | (r >> 2U);
+	color->g = (g << 2U) | (g >> 4U);
+	color->b = (b << 3U) | (b >> 2U);
+	*/
 }
 #endif    // FBINK_WITH_IMAGE
 
