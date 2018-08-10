@@ -339,34 +339,28 @@ static void
 	// note: x * 2 as every pixel is 2 consecutive bytes
 	size_t pix_offset = (uint32_t)(coords->x << 1U) + (coords->y * fInfo.line_length);
 
+	// NOTE: We're assuming RGB565 and not BGR565 here (as well as in put_pixel)...
 	uint16_t v;
-	uint16_t b;
-	uint16_t g;
 	uint16_t r;
+	uint16_t g;
+	uint16_t b;
 	// Like put_pixel_RGB565, read those two consecutive bytes at once
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 	v = *((uint16_t*) (fbPtr + pix_offset));
 #	pragma GCC diagnostic pop
 
-	// NOTE: Ported from KOReader
-	b        = (v & 0x001F);
-	color->b = (uint8_t)((b << 3U) + (b >> 2U));
-	g        = ((v >> 5U) & 0x3F);
-	color->g = (uint8_t)((g << 2U) + (g >> 4U));
-	r        = (v >> 11U);
-	color->r = (uint8_t)((r << 3U) + (r >> 2U));
-
-	// c.f., https://stackoverflow.com/q/2442576 for a whole lot of details ;).
-	// Leading us to this very similar approach, which I somehow 'get' better than KOReader's...
-	/*
+	// NOTE: c.f., https://stackoverflow.com/q/2442576
+	//       I feel that this approach tracks better with what we do in put_pixel_RGB565,
+	//       and I have an easier time following it than the previous approach ported from KOReader.
+	//       Both do exactly the same thing, though ;).
 	r = (v & 0xF800) >> 11U;
 	g = (v & 0x07E0) >> 5U;
 	b = (v & 0x001F);
-	color->r = (r << 3U) | (r >> 2U);
-	color->g = (g << 2U) | (g >> 4U);
-	color->b = (b << 3U) | (b >> 2U);
-	*/
+
+	color->r = (uint8_t)((r << 3U) | (r >> 2U));
+	color->g = (uint8_t)((g << 2U) | (g >> 4U));
+	color->b = (uint8_t)((b << 3U) | (b >> 2U));
 }
 #endif    // FBINK_WITH_IMAGE
 
