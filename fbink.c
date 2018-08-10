@@ -341,9 +341,9 @@ static void
 
 	// NOTE: We're assuming RGB565 and not BGR565 here (as well as in put_pixel)...
 	uint16_t v;
-	uint16_t r;
-	uint16_t g;
-	uint16_t b;
+	uint8_t  r;
+	uint8_t  g;
+	uint8_t  b;
 	// Like put_pixel_RGB565, read those two consecutive bytes at once
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
@@ -354,7 +354,7 @@ static void
 	//       I feel that this approach tracks better with what we do in put_pixel_RGB565,
 	//       and I have an easier time following it than the previous approach ported from KOReader.
 	//       Both do exactly the same thing, though ;).
-	r = (v & 0xF800) >> 11U;
+	r = (uint8_t)((v & 0xF800) >> 11U);
 	g = (v & 0x07E0) >> 5U;
 	b = (v & 0x001F);
 
