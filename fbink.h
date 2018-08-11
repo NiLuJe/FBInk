@@ -126,6 +126,9 @@ FBINK_API int fbink_close(int fbfd);
 //       c.f., KFMon's handling of this via fbink_is_fb_quirky() to detect the initial 16bpp -> 32bpp switch.
 FBINK_API int fbink_init(int fbfd, const FBInkConfig* fbink_config);
 
+// Dumps a few of our internal state variables to stdout, in a format easily consumable by a shell (i.e., eval)
+FBINK_API void fbink_state_dump(void);
+
 // Print a string on screen.
 // NOTE: The string is expected to be encoded in valid UTF-8, no validation of any kind is done by the library,
 //       and we assume a single multibyte sequence will occupy a maximum of 4 bytes.

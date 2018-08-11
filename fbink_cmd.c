@@ -140,6 +140,9 @@ static void
 	    "\tSpecifying one or more STRING takes precedence over this mode.\n"
 	    "\t--refresh also takes precedence over this mode.\n"
 #endif
+	    "\n"
+	    "NOTES:\n"
+	    "\tShell script writers can also use the -e, --eval flag to have fbink just spits out a few of its internal state variables to stdout.\n"
 	    "\n",
 	    fbink_version());
 
@@ -152,23 +155,17 @@ int
 {
 	int                        opt;
 	int                        opt_index;
-	static const struct option opts[] = { { "row", required_argument, NULL, 'y' },
-					      { "col", required_argument, NULL, 'x' },
-					      { "invert", no_argument, NULL, 'h' },
-					      { "flash", no_argument, NULL, 'f' },
-					      { "clear", no_argument, NULL, 'c' },
-					      { "centered", no_argument, NULL, 'm' },
-					      { "halfway", no_argument, NULL, 'M' },
-					      { "padded", no_argument, NULL, 'p' },
-					      { "refresh", required_argument, NULL, 's' },
-					      { "size", required_argument, NULL, 'S' },
-					      { "font", required_argument, NULL, 'F' },
-					      { "verbose", no_argument, NULL, 'v' },
-					      { "quiet", no_argument, NULL, 'q' },
-					      { "image", required_argument, NULL, 'g' },
-					      { "img", required_argument, NULL, 'i' },
-					      { "flatten", no_argument, NULL, 'a' },
-					      { NULL, 0, NULL, 0 } };
+	static const struct option opts[] = {
+		{ "row", required_argument, NULL, 'y' },     { "col", required_argument, NULL, 'x' },
+		{ "invert", no_argument, NULL, 'h' },        { "flash", no_argument, NULL, 'f' },
+		{ "clear", no_argument, NULL, 'c' },         { "centered", no_argument, NULL, 'm' },
+		{ "halfway", no_argument, NULL, 'M' },       { "padded", no_argument, NULL, 'p' },
+		{ "refresh", required_argument, NULL, 's' }, { "size", required_argument, NULL, 'S' },
+		{ "font", required_argument, NULL, 'F' },    { "verbose", no_argument, NULL, 'v' },
+		{ "quiet", no_argument, NULL, 'q' },         { "image", required_argument, NULL, 'g' },
+		{ "img", required_argument, NULL, 'i' },     { "flatten", no_argument, NULL, 'a' },
+		{ "eval", no_argument, NULL, 'e' },          { NULL, 0, NULL, 0 }
+	};
 
 	FBInkConfig fbink_config = { 0 };
 
@@ -210,9 +207,10 @@ int
 	short int image_x_offset = 0;
 	short int image_y_offset = 0;
 	bool      is_image       = false;
+	bool      is_eval        = false;
 	int       errfnd         = 0;
 
-	while ((opt = getopt_long(argc, argv, "y:x:hfcmMps:S:F:vqg:i:a", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "y:x:hfcmMps:S:F:vqg:i:ae", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				fbink_config.row = (short int) atoi(optarg);
@@ -380,6 +378,9 @@ int
 			case 'a':
 				fbink_config.ignore_alpha = true;
 				break;
+			case 'e':
+				is_eval = true;
+				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
 				errfnd = 1;
@@ -482,6 +483,8 @@ int
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
 			}
+		} else if (is_eval) {
+			fbink_state_dump();
 		} else {
 			show_helpmsg();
 		}

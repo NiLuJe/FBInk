@@ -1347,6 +1347,26 @@ cleanup:
 	return rv;
 }
 
+// Dump a few of our internal state variables to stdout, for shell script consumption
+void
+    fbink_state_dump(void)
+{
+	fprintf(
+	    stdout,
+	    "viewWidth=%u;viewHeight=%u;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld",
+	    viewWidth,
+	    viewHeight,
+	    vInfo.bits_per_pixel,
+	    FONTW,
+	    FONTH,
+	    FONTSIZE_MULT,
+	    MAXCOLS,
+	    MAXROWS,
+	    deviceQuirks.isPerfectFit,
+	    fInfo.id,
+	    USER_HZ);
+}
+
 // Memory map the framebuffer
 static int
     memmap_fb(int fbfd)
