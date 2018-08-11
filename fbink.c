@@ -1510,7 +1510,8 @@ int
 	// Clear screen?
 	if (fbink_config->is_cleared) {
 #ifdef FBINK_FOR_KINDLE
-		clear_screen(((deviceQuirks.isKindleLegacy && !fbink_config->is_inverted) || fbink_config->is_inverted)
+		clear_screen(((deviceQuirks.isKindleLegacy && !fbink_config->is_inverted) ||
+			      (!deviceQuirks.isKindleLegacy && fbink_config->is_inverted))
 				 ? BLACK
 				 : WHITE);
 #else
@@ -2001,7 +2002,8 @@ int
 	// Clear screen?
 	if (fbink_config->is_cleared) {
 #	ifdef FBINK_FOR_KINDLE
-		clear_screen(((deviceQuirks.isKindleLegacy && !fbink_config->is_inverted) || fbink_config->is_inverted)
+		clear_screen(((deviceQuirks.isKindleLegacy && !fbink_config->is_inverted) ||
+			      (!deviceQuirks.isKindleLegacy && fbink_config->is_inverted))
 				 ? BLACK
 				 : WHITE);
 #	else
@@ -2167,7 +2169,8 @@ int
 	uint8_t  invert     = 0U;
 	uint32_t invert_rgb = 0U;
 #	ifdef FBINK_FOR_KINDLE
-	if ((deviceQuirks.isKindleLegacy && !fbink_config->is_inverted) || fbink_config->is_inverted) {
+	if ((deviceQuirks.isKindleLegacy && !fbink_config->is_inverted) ||
+	    (!deviceQuirks.isKindleLegacy && fbink_config->is_inverted)) {
 #	else
 	if (fbink_config->is_inverted) {
 #	endif
