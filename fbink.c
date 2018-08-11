@@ -281,7 +281,7 @@ static void
 
 		// We need to get the low nibble *now*, before it gets clobbered by our alpha-blending put...
 		// Thankfully, we have two empty channels in our color struct that we can use ;).
-		color->g = (uint8_t)(((b) &0x0F) * 0x11);
+		color->g = (uint8_t)((b & 0x0F) * 0x11);
 		// or: pull the low/right nibble, expanded to 8bit
 	} else {
 		// Odd pixel: low nibble
