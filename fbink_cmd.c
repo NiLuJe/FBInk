@@ -98,14 +98,13 @@ static void
 	    "\n"
 	    "NOTES:\n"
 	    "\tThe specified rectangle *must* completely fit on screen, or the ioctl will fail.\n"
-#ifndef FBINK_FOR_LEGACY
 	    "\tAvailable waveform modes: DU, GC16, GC4, A2, GL16, REAGL, REAGLD & AUTO\n"
-#	ifdef FBINK_FOR_KINDLE
+#ifdef FBINK_FOR_KINDLE
 	    "\t\tAs well as GC16_FAST, GL16_FAST, DU4, GL4, GL16_INV, GCK16 & GLKW16 on some Kindles, depending on the model & FW version.\n"
 	    "\t\tUnsupported modes should safely downgrade to AUTO.\n"
-#	endif
+#endif
 	    "\tNote that this will also honor --flash\n"
-#else
+#ifdef FBINK_FOR_KINDLE
 	    "\tNote that specifying a waveform mode is ignored on legacy einkfb devices, because the hardware doesn't expose such capabilities.\n"
 	    "\tBut it does (mostly) honor the --flash flag, though.\n"
 #endif

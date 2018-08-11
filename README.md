@@ -46,7 +46,7 @@ And with all the bells and whistles of working transparency, even on ancient har
 
 # NOTES
 
-Kindle support is split into Touch devices, and legacy devices (up to, and *including* the K4). This is because older devices use a completely different eInk controller.
+Kindle support covers the full Kindle lineup, starting from the K2.
 
 Kobo support has been tested on a H2O running a recent FW version (i.e., 32bpp fb), but the full lineup should be supported.
 

@@ -152,7 +152,7 @@ static void
 #pragma GCC diagnostic pop
 }
 
-#if !defined(FBINK_FOR_KINDLE) && !defined(FBINK_FOR_LEGACY)
+#ifndef FBINK_FOR_KINDLE
 // Handle rotation quirks...
 static void
     rotate_coordinates(FBInkCoordinates* coords)
@@ -204,11 +204,11 @@ static void
 	coords->x = xp;
 	coords->y = yp;
 #	else
-	coords->x           = rx;
-	coords->y           = ry;
+	coords->x = rx;
+	coords->y = ry;
 #	endif
 }
-#endif    // FBINK_FOR_KOBO (!FBINK_FOR_KINDLE && !FBINK_FOR_LEGACY)
+#endif    // !FBINK_FOR_KINDLE
 
 static void
     rotate_nop(FBInkCoordinates* coords __attribute__((unused)))
@@ -484,6 +484,13 @@ static struct mxcfb_rect
 	    text,
 	    multiline_offset,
 	    (unsigned short int) (row + multiline_offset));
+
+	// Handle the inverted palette on Legacy Kindles...
+#ifdef FBINK_FOR_KINDLE
+	if (deviceQuirks.isKindleLegacy) {
+		is_inverted = !is_inverted;
+	}
+#endif
 	// NOTE: It's a grayscale ramp, so r = g = b (= v).
 	FBInkColor fgC = { is_inverted ? WHITE : BLACK, fgC.r, fgC.r };
 	FBInkColor bgC = { is_inverted ? BLACK : WHITE, bgC.r, bgC.r };
@@ -650,9 +657,21 @@ static struct mxcfb_rect
 	return region;
 }
 
-// Handle the various eInk update API quirks for the full range of HW we support...
+// NOTE: Small helper function to aid with logging the exact amount of time MXCFB_WAIT_FOR_UPDATE_COMPLETE blocked...
+//       The driver is using the Kernel's wait-for-completion handler,
+//       which returns the amount of jiffies left until the timeout set by the caller.
+//       As we don't give a rat's ass about jiffies, we need to convert 'em to milliseconds.
+// NOTE: The ioctl often actually blocks slightly longer than the perceived speed of the eInk refresh. Nevertheless,
+//       there is a direct correlation between the two, as can be shown by switching between waveform modes...
+static long int
+    jiffies_to_ms(long int jiffies)
+{
+	// We need the Kernel's HZ value for this, which we stored in USER_HZ during fbink_init ;).
+	return (jiffies * 1000 / USER_HZ);
+}
 
-#ifdef FBINK_FOR_LEGACY
+// Handle the various eInk update API quirks for the full range of HW we support...
+#ifdef FBINK_FOR_KINDLE
 // Legacy Kindle devices ([K2<->K4])
 static int
     refresh_legacy(int fbfd, const struct mxcfb_rect region, bool is_flashing)
@@ -697,46 +716,31 @@ static int
 	return rv;
 }
 
-#else
-// NOTE: Small helper function to aid with logging the exact amount of time MXCFB_WAIT_FOR_UPDATE_COMPLETE blocked...
-//       The driver is using the Kernel's wait-for-completion handler,
-//       which returns the amount of jiffies left until the timeout set by the caller.
-//       As we don't give a rat's ass about jiffies, we need to convert 'em to milliseconds.
-// NOTE: The ioctl often actually blocks slightly longer than the perceived speed of the eInk refresh. Nevertheless,
-//       there is a direct correlation between the two, as can be shown by switching between waveform modes...
-static long int
-    jiffies_to_ms(long int jiffies)
-{
-	// We need the Kernel's HZ value for this, which we stored in USER_HZ during fbink_init ;).
-	return (jiffies * 1000 / USER_HZ);
-}
-
-#	ifdef FBINK_FOR_KINDLE
 // Touch Kindle devices ([K5<->]KOA2)
 static int
-    refresh_kindle(int fbfd,
+    refresh_kindle(int                     fbfd,
 		   const struct mxcfb_rect region,
-		   uint32_t waveform_mode,
-		   uint32_t update_mode,
-		   uint32_t marker)
+		   uint32_t                waveform_mode,
+		   uint32_t                update_mode,
+		   uint32_t                marker)
 {
 	struct mxcfb_update_data update = {
-		.update_region = region,
-		.waveform_mode = waveform_mode,
-		.update_mode = update_mode,
-		.update_marker = marker,
-		.hist_bw_waveform_mode = WAVEFORM_MODE_DU,
+		.update_region           = region,
+		.waveform_mode           = waveform_mode,
+		.update_mode             = update_mode,
+		.update_marker           = marker,
+		.hist_bw_waveform_mode   = WAVEFORM_MODE_DU,
 		.hist_gray_waveform_mode = WAVEFORM_MODE_GC16_FAST,
-		.temp = TEMP_USE_AUTO,
-		.flags = 0U,
-		.alt_buffer_data = { 0U },
+		.temp                    = TEMP_USE_AUTO,
+		.flags                   = 0U,
+		.alt_buffer_data         = { 0U },
 	};
 
 	int rv;
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
 
 	if (rv < 0) {
-		char buf[256];
+		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
 		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE: %s\n", errstr);
 		if (errno == EINVAL) {
@@ -755,7 +759,7 @@ static int
 			rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL, &marker);
 		} else {
 			struct mxcfb_update_marker_data update_marker = {
-				.update_marker = marker,
+				.update_marker  = marker,
 				.collision_test = 0U,
 			};
 
@@ -763,7 +767,7 @@ static int
 		}
 
 		if (rv < 0) {
-			char buf[256];
+			char  buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
 			if (deviceQuirks.isKindlePearlScreen) {
 				fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL: %s\n", errstr);
@@ -782,153 +786,39 @@ static int
 
 // Kindle Oasis 2 ([KOA2<->??)
 static int
-    refresh_kindle_koa2(int fbfd,
+    refresh_kindle_koa2(int                     fbfd,
 			const struct mxcfb_rect region,
-			uint32_t waveform_mode,
-			uint32_t update_mode,
-			uint32_t marker)
+			uint32_t                waveform_mode,
+			uint32_t                update_mode,
+			uint32_t                marker)
 {
 	struct mxcfb_update_data_koa2 update = {
 		.update_region = region,
 		.waveform_mode = waveform_mode,
-		.update_mode = update_mode,
+		.update_mode   = update_mode,
 		.update_marker = marker,
-		.temp = TEMP_USE_AMBIENT,
-		.flags = (waveform_mode == WAVEFORM_MODE_KOA2_GLD16)
+		.temp          = TEMP_USE_AMBIENT,
+		.flags         = (waveform_mode == WAVEFORM_MODE_KOA2_GLD16)
 			     ? EPDC_FLAG_USE_KOA2_REGAL
 			     : (waveform_mode == WAVEFORM_MODE_KOA2_A2 || waveform_mode == WAVEFORM_MODE_DU)
 				   ? EPDC_FLAG_FORCE_MONOCHROME
 				   : 0U,
-		.dither_mode = EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
-		.quant_bit = 0,
-		.alt_buffer_data = { 0U },
-		.hist_bw_waveform_mode = WAVEFORM_MODE_DU,
+		.dither_mode             = EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		.quant_bit               = 0,
+		.alt_buffer_data         = { 0U },
+		.hist_bw_waveform_mode   = WAVEFORM_MODE_DU,
 		.hist_gray_waveform_mode = WAVEFORM_MODE_GC16,
-		.ts_pxp = 0U,
-		.ts_epdc = 0U,
+		.ts_pxp                  = 0U,
+		.ts_epdc                 = 0U,
 	};
 
 	int rv;
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_KOA2, &update);
 
 	if (rv < 0) {
-		char buf[256];
+		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
 		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE_KOA2: %s\n", errstr);
-		if (errno == EINVAL) {
-			fprintf(stderr,
-				"[FBInk] update_region={top=%u, left=%u, width=%u, height=%u}\n",
-				region.top,
-				region.left,
-				region.width,
-				region.height);
-		}
-		return ERRCODE(EXIT_FAILURE);
-	}
-
-	if (update_mode == UPDATE_MODE_FULL) {
-		struct mxcfb_update_marker_data update_marker = {
-			.update_marker = marker,
-			.collision_test = 0U,
-		};
-
-		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_marker);
-
-		if (rv < 0) {
-			char buf[256];
-			char* errstr = strerror_r(errno, buf, sizeof(buf));
-			fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s\n", errstr);
-			return ERRCODE(EXIT_FAILURE);
-		} else {
-			// NOTE: Timeout is set to 5000ms
-			LOG("Waited %ldms for completion of flashing update %u", (5000 - jiffies_to_ms(rv)), marker);
-		}
-	}
-
-	return EXIT_SUCCESS;
-}
-
-#	else
-// Kobo devices ([Mk3<->Mk6])
-static int
-    refresh_kobo(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode, uint32_t update_mode, uint32_t marker)
-{
-	struct mxcfb_update_data_v1_ntx update = {
-		.update_region = region,
-		.waveform_mode = waveform_mode,
-		.update_mode   = update_mode,
-		.update_marker = marker,
-		.temp          = TEMP_USE_AMBIENT,
-		.flags         = (waveform_mode == WAVEFORM_MODE_REAGLD)
-			     ? EPDC_FLAG_USE_AAD
-			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
-		.alt_buffer_data = { 0U },
-	};
-
-	int rv;
-	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V1_NTX, &update);
-
-	if (rv < 0) {
-		char  buf[256];
-		char* errstr = strerror_r(errno, buf, sizeof(buf));
-		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE_V1_NTX: %s\n", errstr);
-		if (errno == EINVAL) {
-			fprintf(stderr,
-				"[FBInk] update_region={top=%u, left=%u, width=%u, height=%u}\n",
-				region.top,
-				region.left,
-				region.width,
-				region.height);
-		}
-		return ERRCODE(EXIT_FAILURE);
-	}
-
-	if (update_mode == UPDATE_MODE_FULL) {
-		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1, &marker);
-
-		if (rv < 0) {
-			char  buf[256];
-			char* errstr = strerror_r(errno, buf, sizeof(buf));
-			fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1: %s\n", errstr);
-			return ERRCODE(EXIT_FAILURE);
-		} else {
-			// NOTE: Timeout is set to 10000ms
-			LOG("Waited %ldms for completion of flashing update %u", (10000 - jiffies_to_ms(rv)), marker);
-		}
-	}
-
-	return EXIT_SUCCESS;
-}
-
-// Kobo Mark 7 devices ([Mk7<->??)
-static int
-    refresh_kobo_mk7(int                     fbfd,
-		     const struct mxcfb_rect region,
-		     uint32_t                waveform_mode,
-		     uint32_t                update_mode,
-		     uint32_t                marker)
-{
-	struct mxcfb_update_data_v2 update = {
-		.update_region = region,
-		.waveform_mode = waveform_mode,
-		.update_mode   = update_mode,
-		.update_marker = marker,
-		.temp          = TEMP_USE_AMBIENT,
-		.flags         = (waveform_mode == WAVEFORM_MODE_GLD16)
-			     ? EPDC_FLAG_USE_REGAL
-			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
-		.dither_mode     = EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
-		.quant_bit       = 0,
-		.alt_buffer_data = { 0U },
-	};
-
-	int rv;
-	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V2, &update);
-
-	if (rv < 0) {
-		char  buf[256];
-		char* errstr = strerror_r(errno, buf, sizeof(buf));
-		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE_V2: %s\n", errstr);
 		if (errno == EINVAL) {
 			fprintf(stderr,
 				"[FBInk] update_region={top=%u, left=%u, width=%u, height=%u}\n",
@@ -946,10 +836,124 @@ static int
 			.collision_test = 0U,
 		};
 
-		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3, &update_marker);
+		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_marker);
 
 		if (rv < 0) {
 			char  buf[256];
+			char* errstr = strerror_r(errno, buf, sizeof(buf));
+			fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s\n", errstr);
+			return ERRCODE(EXIT_FAILURE);
+		} else {
+			// NOTE: Timeout is set to 5000ms
+			LOG("Waited %ldms for completion of flashing update %u", (5000 - jiffies_to_ms(rv)), marker);
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
+
+#else
+// Kobo devices ([Mk3<->Mk6])
+static int
+    refresh_kobo(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode, uint32_t update_mode, uint32_t marker)
+{
+	struct mxcfb_update_data_v1_ntx update = {
+		.update_region = region,
+		.waveform_mode = waveform_mode,
+		.update_mode = update_mode,
+		.update_marker = marker,
+		.temp = TEMP_USE_AMBIENT,
+		.flags = (waveform_mode == WAVEFORM_MODE_REAGLD)
+			     ? EPDC_FLAG_USE_AAD
+			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
+		.alt_buffer_data = { 0U },
+	};
+
+	int rv;
+	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V1_NTX, &update);
+
+	if (rv < 0) {
+		char buf[256];
+		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE_V1_NTX: %s\n", errstr);
+		if (errno == EINVAL) {
+			fprintf(stderr,
+				"[FBInk] update_region={top=%u, left=%u, width=%u, height=%u}\n",
+				region.top,
+				region.left,
+				region.width,
+				region.height);
+		}
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	if (update_mode == UPDATE_MODE_FULL) {
+		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1, &marker);
+
+		if (rv < 0) {
+			char buf[256];
+			char* errstr = strerror_r(errno, buf, sizeof(buf));
+			fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1: %s\n", errstr);
+			return ERRCODE(EXIT_FAILURE);
+		} else {
+			// NOTE: Timeout is set to 10000ms
+			LOG("Waited %ldms for completion of flashing update %u", (10000 - jiffies_to_ms(rv)), marker);
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
+
+// Kobo Mark 7 devices ([Mk7<->??)
+static int
+    refresh_kobo_mk7(int fbfd,
+		     const struct mxcfb_rect region,
+		     uint32_t waveform_mode,
+		     uint32_t update_mode,
+		     uint32_t marker)
+{
+	struct mxcfb_update_data_v2 update = {
+		.update_region = region,
+		.waveform_mode = waveform_mode,
+		.update_mode = update_mode,
+		.update_marker = marker,
+		.temp = TEMP_USE_AMBIENT,
+		.flags = (waveform_mode == WAVEFORM_MODE_GLD16)
+			     ? EPDC_FLAG_USE_REGAL
+			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
+		.dither_mode = EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		.quant_bit = 0,
+		.alt_buffer_data = { 0U },
+	};
+
+	int rv;
+	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V2, &update);
+
+	if (rv < 0) {
+		char buf[256];
+		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE_V2: %s\n", errstr);
+		if (errno == EINVAL) {
+			fprintf(stderr,
+				"[FBInk] update_region={top=%u, left=%u, width=%u, height=%u}\n",
+				region.top,
+				region.left,
+				region.width,
+				region.height);
+		}
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	if (update_mode == UPDATE_MODE_FULL) {
+		struct mxcfb_update_marker_data update_marker = {
+			.update_marker = marker,
+			.collision_test = 0U,
+		};
+
+		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3, &update_marker);
+
+		if (rv < 0) {
+			char buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
 			fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3: %s\n", errstr);
 			return ERRCODE(EXIT_FAILURE);
@@ -961,12 +965,11 @@ static int
 
 	return EXIT_SUCCESS;
 }
-#	endif    // FBINK_FOR_KINDLE
-#endif            // FBINK_FOR_LEGACY
+#endif    // FBINK_FOR_KINDLE
 
 // And finally, dispatch the right refresh request for our HW...
 static int
-    refresh(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode UNUSED_BY_LEGACY, bool is_flashing)
+    refresh(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode, bool is_flashing)
 {
 	// NOTE: Discard bogus regions, they can cause a softlock on some devices.
 	//       A 0x0 region is a no go on most devices, while a 1x1 region may only upset some Kindle models.
@@ -978,9 +981,11 @@ static int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
-#ifdef FBINK_FOR_LEGACY
-	return refresh_legacy(fbfd, region, is_flashing);
-#else
+#ifdef FBINK_FOR_KINDLE
+	if (deviceQuirks.isKindleLegacy) {
+		return refresh_legacy(fbfd, region, is_flashing);
+	}
+#endif
 	// NOTE: While we'd be perfect candidates for using A2 waveform mode, it's all kinds of fucked up on Kobos,
 	//       and may lead to disappearing text or weird blending depending on the surrounding fb content...
 	//       It only shows up properly when FULL, which isn't great...
@@ -991,8 +996,8 @@ static int
 	//       (i.e., DU or GC16 is most likely often what AUTO will land on).
 
 	// So, handle this common switcheroo here...
-	uint32_t wfm = (is_flashing && waveform_mode == WAVEFORM_MODE_AUTO) ? WAVEFORM_MODE_GC16 : waveform_mode;
-	uint32_t upm = is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
+	uint32_t wfm    = (is_flashing && waveform_mode == WAVEFORM_MODE_AUTO) ? WAVEFORM_MODE_GC16 : waveform_mode;
+	uint32_t upm    = is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
 	uint32_t marker = (uint32_t) getpid();
 
 	// NOTE: Make sure update_marker is valid, an invalid marker *may* hang the kernel instead of failing gracefully,
@@ -1001,20 +1006,19 @@ static int
 		marker = (70U + 66U + 73U + 78U + 75U);
 	}
 
-#	ifdef FBINK_FOR_KINDLE
+#ifdef FBINK_FOR_KINDLE
 	if (deviceQuirks.isKindleOasis2) {
 		return refresh_kindle_koa2(fbfd, region, wfm, upm, marker);
 	} else {
 		return refresh_kindle(fbfd, region, wfm, upm, marker);
 	}
-#	else
+#else
 	if (deviceQuirks.isKoboMk7) {
 		return refresh_kobo_mk7(fbfd, region, wfm, upm, marker);
 	} else {
 		return refresh_kobo(fbfd, region, wfm, upm, marker);
 	}
-#	endif    // FBINK_FOR_KINDLE
-#endif            // FBINK_FOR_LEGACY
+#endif    // FBINK_FOR_KINDLE
 }
 
 // Open the framebuffer file & return the opened fd
@@ -1112,7 +1116,7 @@ int
 
 	// NOTE: This needs to be NOP by default, no matter the target device ;).
 	fxpRotateCoords = &rotate_nop;
-#if !defined(FBINK_FOR_KINDLE) && !defined(FBINK_FOR_LEGACY)
+#ifndef FBINK_FOR_KINDLE
 	// Make sure we default to no rotation shenanigans, to avoid issues on reinit...
 	deviceQuirks.isKobo16Landscape = false;
 	// NOTE: But in some very specific circumstances, that doesn't hold true...
@@ -1315,13 +1319,19 @@ int
 	if (!deviceQuirks.skipId) {
 		// Identify the device's specific model...
 		identify_device(&deviceQuirks);
-		if (deviceQuirks.isKindlePearlScreen) {
+#ifdef FBINK_FOR_KINDLE
+		if (deviceQuirks.isKindleLegacy) {
+			ELOG("[FBInk] Enabled Legacy einkfb Kindle quirks");
+		} else if (deviceQuirks.isKindlePearlScreen) {
 			ELOG("[FBInk] Enabled Kindle with Pearl screen quirks");
 		} else if (deviceQuirks.isKindleOasis2) {
 			ELOG("[FBInk] Enabled Kindle Oasis 2 quirks");
-		} else if (deviceQuirks.isKoboMk7) {
+		}
+#else
+		if (deviceQuirks.isKoboMk7) {
 			ELOG("[FBInk] Enabled Kobo Mark 7 quirks");
 		}
+#endif
 
 		// Ask the Kernel for its HZ value so we can translate jiffies into human-readable units.
 		long int rc = sysconf(_SC_CLK_TCK);
@@ -1499,7 +1509,13 @@ int
 
 	// Clear screen?
 	if (fbink_config->is_cleared) {
+#ifdef FBINK_FOR_KINDLE
+		clear_screen(((deviceQuirks.isKindleLegacy && !fbink_config->is_inverted) || fbink_config->is_inverted)
+				 ? BLACK
+				 : WHITE);
+#else
 		clear_screen(fbink_config->is_inverted ? BLACK : WHITE);
+#endif
 	}
 
 	// See if want to position our text relative to the edge of the screen, and not the beginning
@@ -1984,7 +2000,13 @@ int
 
 	// Clear screen?
 	if (fbink_config->is_cleared) {
+#	ifdef FBINK_FOR_KINDLE
+		clear_screen(((deviceQuirks.isKindleLegacy && !fbink_config->is_inverted) || fbink_config->is_inverted)
+				 ? BLACK
+				 : WHITE);
+#	else
 		clear_screen(fbink_config->is_inverted ? BLACK : WHITE);
+#	endif
 	}
 
 	// NOTE: We compute initial offsets from row/col, to help aligning images with text.
@@ -2142,21 +2164,16 @@ int
 
 	// Handle inversion if requested, in a way that avoids branching in the loop ;).
 	// And, as an added bonus, plays well with the fact that legacy devices have an inverted color map...
-#	ifdef FBINK_FOR_LEGACY
-	uint8_t  invert     = 0xFF;
-	uint32_t invert_rgb = 0x00FFFFFF;
-	if (fbink_config->is_inverted) {
-		invert     = 0U;
-		invert_rgb = 0U;
-	}
-#	else
 	uint8_t  invert     = 0U;
 	uint32_t invert_rgb = 0U;
+#	ifdef FBINK_FOR_KINDLE
+	if ((deviceQuirks.isKindleLegacy && !fbink_config->is_inverted) || fbink_config->is_inverted) {
+#	else
 	if (fbink_config->is_inverted) {
+#	endif
 		invert     = 0xFF;
 		invert_rgb = 0x00FFFFFF;
 	}
-#	endif
 	unsigned short int i;
 	unsigned short int j;
 	// NOTE: The *slight* duplication is on purpose, to move the branching outside the loop,

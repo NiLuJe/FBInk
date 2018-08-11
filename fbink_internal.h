@@ -37,7 +37,7 @@
 #		define FBINK_WITH_IMAGE
 #	endif
 // Connect button scanning is Kobo specific
-#	if !defined(FBINK_FOR_KINDLE) && !defined(FBINK_FOR_LEGACY)
+#	ifndef FBINK_FOR_KINDLE
 #		ifndef FBINK_WITH_BUTTON_SCAN
 #			define FBINK_WITH_BUTTON_SCAN
 #		endif
@@ -86,12 +86,10 @@
 // NOTE: We always neeed one of those, because we rely on mxcfb_rect in a number of places
 #ifdef FBINK_FOR_KINDLE
 #	include "eink/mxcfb-kindle.h"
+// Legacy einkfb driver
+#	include "eink/einkfb.h"
 #else
 #	include "eink/mxcfb-kobo.h"
-#endif
-// Legacy einkfb driver
-#ifdef FBINK_FOR_LEGACY
-#	include "eink/einkfb.h"
 #endif
 
 // NOTE: This is from https://github.com/dhepper/font8x8
@@ -155,11 +153,6 @@
 // NOTE: Some of our ifdef combinations may cause a small number of function arguments to become unused...
 //       Handle the warnings in these cases with a bit of trickery,
 //       by conditionally marking theses arguments as unused ;).
-#ifdef FBINK_FOR_LEGACY
-#	define UNUSED_BY_LEGACY __attribute__((unused))
-#else
-#	define UNUSED_BY_LEGACY
-#endif
 #ifdef FBINK_MINIMAL
 #	define UNUSED_BY_MINIMAL __attribute__((unused))
 #else
@@ -220,7 +213,7 @@ void (*fxpRotateCoords)(FBInkCoordinates*) = NULL;
 // Where we track device/screen-specific quirks
 FBInkDeviceQuirks deviceQuirks = { 0 };
 
-#if !defined(FBINK_FOR_KINDLE) && !defined(FBINK_FOR_LEGACY)
+#ifndef FBINK_FOR_KINDLE
 static void rotate_coordinates(FBInkCoordinates*);
 #endif
 static void rotate_nop(FBInkCoordinates* __attribute__((unused)));
@@ -253,19 +246,16 @@ static void                 font8x8_render(uint32_t, unsigned char*, uint8_t UNU
 static struct mxcfb_rect
     draw(const char*, unsigned short int, unsigned short int, bool, bool, unsigned short int, uint8_t, bool);
 
-#ifdef FBINK_FOR_LEGACY
-static int refresh_legacy(int, const struct mxcfb_rect, bool);
-#else
 static long int jiffies_to_ms(long int);
-#	ifdef FBINK_FOR_KINDLE
-static int      refresh_kindle(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
-static int      refresh_kindle_koa2(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
-#	else
+#ifdef FBINK_FOR_KINDLE
+static int refresh_legacy(int, const struct mxcfb_rect, bool);
+static int refresh_kindle(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
+static int refresh_kindle_koa2(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
+#else
 static int refresh_kobo(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
 static int refresh_kobo_mk7(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
-#	endif    // FBINK_FOR_KINDLE
-#endif            // FBINK_FOR_LEGACY
-static int refresh(int, const struct mxcfb_rect, uint32_t UNUSED_BY_LEGACY, bool);
+#endif    // FBINK_FOR_KINDLE
+static int refresh(int, const struct mxcfb_rect, uint32_t, bool);
 
 static int open_fb_fd(int*, bool*);
 

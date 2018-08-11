@@ -20,7 +20,7 @@
 
 #include "fbink_device_id.h"
 
-#if defined(FBINK_FOR_KINDLE) || defined(FBINK_FOR_LEGACY)
+#ifdef FBINK_FOR_KINDLE
 // NOTE: This is adapted from KindleTool,
 //       c.f., https://github.com/NiLuJe/KindleTool/blob/master/KindleTool/kindle_tool.h#L189
 static bool
@@ -37,6 +37,7 @@ static bool
 		case 0x06:
 		case 0x0A:
 		case 0x0E:    // K4
+			device_quirks->isKindleLegacy = true;
 			return true;
 		case 0x0F:    // K5
 		case 0x11:
@@ -263,7 +264,7 @@ static void
 static void
     identify_device(FBInkDeviceQuirks* device_quirks)
 {
-#if defined(FBINK_FOR_KINDLE) || defined(FBINK_FOR_LEGACY)
+#ifdef FBINK_FOR_KINDLE
 	identify_kindle(device_quirks);
 #else
 	identify_kobo(device_quirks);

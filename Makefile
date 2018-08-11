@@ -127,14 +127,10 @@ endif
 
 # A version tag...
 FBINK_VERSION=$(shell git describe)
-ifdef LEGACY
-	LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kindle (Legacy)"'
-else
 ifdef KINDLE
 	LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kindle"'
 else
 	LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kobo"'
-endif
 endif
 
 # NOTE: Always use as-needed to avoid unecessary DT_NEEDED entries :)
@@ -173,10 +169,8 @@ else
 	EXTRA_CPPFLAGS+=-DFBINK_WITH_UNSCII
 	EXTRA_CPPFLAGS+=-DFBINK_WITH_IMAGE
 	# Connect button scanning is Kobo specific
-	ifndef LEGACY
 	ifndef KINDLE
 		EXTRA_CPPFLAGS+=-DFBINK_WITH_BUTTON_SCAN
-	endif
 	endif
 endif
 
@@ -276,7 +270,7 @@ kindle:
 	$(MAKE) strip KINDLE=true
 
 legacy:
-	$(MAKE) strip LEGACY=true
+	$(MAKE) strip KINDLE=true LEGACY=true
 
 kobo: release
 	mkdir -p Kobo/usr/local/fbink/bin Kobo/usr/bin Kobo/usr/local/fbink/lib

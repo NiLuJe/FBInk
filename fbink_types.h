@@ -26,28 +26,7 @@
 
 // default eInk framebuffer palette
 // c.f., linux/drivers/video/mxc/cmap_lab126.h
-// NOTE: Legacy devices all have an inverted color map...
-#ifdef FBINK_FOR_LEGACY
-typedef enum
-{
-	BLACK  = 0xFF,
-	GRAY1  = 0xEE,
-	GRAY2  = 0xDD,
-	GRAY3  = 0xCC,
-	GRAY4  = 0xBB,
-	GRAY5  = 0xAA,
-	GRAY6  = 0x99,
-	GRAY7  = 0x88,
-	GRAY8  = 0x77,
-	GRAY9  = 0x66,
-	GRAY10 = 0x55,
-	GRAY11 = 0x44,
-	GRAY12 = 0x33,
-	GRAY13 = 0x22,
-	GRAY14 = 0x11,
-	WHITE  = 0x00
-} FBInkGrayRamp;
-#else
+// NOTE: Legacy devices have an inverted color map!
 typedef enum
 {
 	BLACK  = 0x00,
@@ -67,16 +46,16 @@ typedef enum
 	GRAY14 = 0xEE,
 	WHITE  = 0xFF
 } FBInkGrayRamp;
-#endif
 
 // List of flags for device or screen-specific quirks...
 typedef struct
 {
 	bool isPerfectFit;
-	bool isKoboMk7;
+	bool isKindleLegacy;
 	bool isKindlePearlScreen;
 	bool isKindleOasis2;
 	bool isKobo16Landscape;
+	bool isKoboMk7;
 	bool skipId;
 } FBInkDeviceQuirks;
 

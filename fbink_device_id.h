@@ -25,7 +25,7 @@
 #include "fbink.h"
 #include "fbink_internal.h"
 
-#if defined(FBINK_FOR_KINDLE) || defined(FBINK_FOR_LEGACY)
+#ifdef FBINK_FOR_KINDLE
 #	define KINDLE_SERIAL_NO_LENGTH 16
 
 static bool     is_kindle_device(uint32_t, FBInkDeviceQuirks*);
