@@ -69,7 +69,11 @@ ifeq "$(MOAR_WARNIGS)" "1"
 	EXTRA_CFLAGS+=-Wall
 	EXTRA_CFLAGS+=-Wextra -Wunused
 	EXTRA_CFLAGS+=-Wformat=2
-	EXTRA_CFLAGS+=-Wformat-signedness -Wformat-truncation=2
+	EXTRA_CFLAGS+=-Wformat-signedness
+	# NOTE: This doesn't really play nice w/ FORTIFY, leading to an assload of false-positives
+	ifndef LINUX
+		EXTRA_CFLAGS+=-Wformat-truncation=2
+	endif
 	EXTRA_CFLAGS+=-Wnull-dereference
 	EXTRA_CFLAGS+=-Wuninitialized
 	EXTRA_CFLAGS+=-Wduplicated-branches -Wduplicated-cond
