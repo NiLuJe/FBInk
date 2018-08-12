@@ -971,6 +971,11 @@ static int
 static int
     refresh(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode, bool is_flashing)
 {
+	// NOP when we don't have an eInk screen ;).
+#ifdef FBINK_FOR_LINUX
+	return EXIT_SUCCESS;
+#endif
+
 	// NOTE: Discard bogus regions, they can cause a softlock on some devices.
 	//       A 0x0 region is a no go on most devices, while a 1x1 region may only upset some Kindle models.
 	if (region.width <= 1 && region.height <= 1) {
@@ -1317,9 +1322,10 @@ int
 	// Finish with some more generic stuff, not directly related to the framebuffer.
 	// As all this stuff is pretty much set in stone, we'll only query it once.
 	if (!deviceQuirks.skipId) {
+#ifndef FBINK_FOR_LINUX
 		// Identify the device's specific model...
 		identify_device(&deviceQuirks);
-#ifdef FBINK_FOR_KINDLE
+#	ifdef FBINK_FOR_KINDLE
 		if (deviceQuirks.isKindleLegacy) {
 			ELOG("[FBInk] Enabled Legacy einkfb Kindle quirks");
 		} else if (deviceQuirks.isKindlePearlScreen) {
@@ -1327,10 +1333,11 @@ int
 		} else if (deviceQuirks.isKindleOasis2) {
 			ELOG("[FBInk] Enabled Kindle Oasis 2 quirks");
 		}
-#else
+#	else
 		if (deviceQuirks.isKoboMk7) {
 			ELOG("[FBInk] Enabled Kobo Mark 7 quirks");
 		}
+#	endif
 #endif
 
 		// Ask the Kernel for its HZ value so we can translate jiffies into human-readable units.
