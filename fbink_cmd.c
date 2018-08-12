@@ -72,7 +72,7 @@ static void
 	    "\t\t\tThe exact upper value depends on the resolution of your screen.\n"
 	    "\t-F, --font NAME\tRender glyphs from builtin font NAME (Default: IBM).\n"
 #ifdef FBINK_WITH_UNSCII
-	    "\t\t\tAvailable font families: IBM, UNSCII, ALT, THIN, FANTASY, MCR, TALL\n"
+	    "\t\t\tAvailable font families: IBM, UNSCII, ALT, THIN, FANTASY, MCR, TALL, BLOCK\n"
 #else
 	    "\t\t\tAvailable font families: IBM\n"
 #endif
@@ -297,6 +297,8 @@ int
 					fbink_config.fontname = UNSCII_MCR;
 				} else if (strcasecmp(optarg, "TALL") == 0) {
 					fbink_config.fontname = UNSCII_TALL;
+				} else if (strcasecmp(optarg, "BLOCK") == 0) {
+					fbink_config.fontname = BLOCK;
 				} else {
 					fprintf(stderr, "Unknown font name '%s'.\n", optarg);
 					errfnd = 1;

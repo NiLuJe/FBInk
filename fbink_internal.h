@@ -113,6 +113,7 @@
 // Speaking of, include the Unscii variants when we're not a minimal build
 #ifdef FBINK_WITH_UNSCII
 #	include "fbink_unscii.h"
+#	include "fbink_block.h"
 #endif
 
 // NOTE: CLOEXEC shenanigans...

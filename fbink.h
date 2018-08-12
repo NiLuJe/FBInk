@@ -62,7 +62,8 @@ typedef enum
 	UNSCII_THIN    = 3,    // unscii-8-thin
 	UNSCII_FANTASY = 4,    // unscii-8-fantasy
 	UNSCII_MCR     = 5,    // unscii-8-mcr
-	UNSCII_TALL    = 6     // unscii-16
+	UNSCII_TALL    = 6,    // unscii-16
+	BLOCK          = 7     // block
 } FONT_INDEX_T;
 
 // List of available halign/valign values

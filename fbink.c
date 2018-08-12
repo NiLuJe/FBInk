@@ -469,6 +469,40 @@ static void
 	}
 }
 
+// Render a specific font32x32 glyph into a pixmap
+// (base size: 32x32, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
+static void
+    font32x32_render(uint32_t codepoint, unsigned char* glyph_pixmap, uint8_t fontname)
+{
+	const uint32_t* bitmap = NULL;
+
+	switch (fontname) {
+		case BLOCK:
+		default:
+			bitmap = block_get_bitmap(codepoint);
+			break;
+	}
+
+	unsigned short int x;
+	unsigned short int y;
+	bool               set = false;
+	size_t             idx;
+	for (unsigned short int i = 0U; i < FONTH; i++) {
+		// x: input row, i: output row
+		x = (unsigned short int) (i / FONTSIZE_MULT);
+		for (unsigned short int j = 0U; j < FONTW; j++) {
+			// y: input column, j: output column
+			y   = (unsigned short int) (j / FONTSIZE_MULT);
+			set = bitmap[x] & 1 << y;
+			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTW=1,0)
+			idx = (size_t)(j + (i * FONTW));
+			for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
+				glyph_pixmap[idx + k] = set ? 1 : 0;
+			}
+		}
+	}
+}
+
 // Helper function for drawing
 static struct mxcfb_rect
     draw(const char*        text,
@@ -634,7 +668,8 @@ static struct mxcfb_rect
 		    ch);
 
 		// Get the glyph's pixmap
-		font8x8_render(ch, pixmap, fontname);
+		//font8x8_render(ch, pixmap, fontname);
+		font32x32_render(ch, pixmap, fontname);
 
 		// loop through pixel rows
 		for (unsigned short int y = 0U; y < FONTH; y++) {
@@ -1179,6 +1214,10 @@ int
 	// NOTE: Unscii-16 is 8x16, handle it ;).
 	if (fbink_config->fontname == UNSCII_TALL) {
 		FONTH = 16U;
+	} else if (fbink_config->fontname == BLOCK) {
+		// And block is 32x32
+		FONTW = 32U;
+		FONTH = 32U;
 	}
 #else
 	if (fbink_config->fontname != IBM) {
@@ -2628,6 +2667,7 @@ cleanup:
 // Extra fonts
 #ifdef FBINK_WITH_UNSCII
 #	include "fbink_unscii.c"
+#	include "fbink_block.c"
 #endif
 // Contains fbink_button_scan's implementation, Kobo only, and has a bit of Linux MT input thrown in ;).
 #include "fbink_button_scan.c"
