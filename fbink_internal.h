@@ -268,6 +268,8 @@ static void rotate_region(struct mxcfb_rect*);
 static void fullscreen_region(struct mxcfb_rect*);
 
 // For identify_device, which we need outside of fbink_device_id.c ;)
-#include "fbink_device_id.h"
+#ifndef FBINK_FOR_LINUX
+#	include "fbink_device_id.h"
+#endif
 
 #endif

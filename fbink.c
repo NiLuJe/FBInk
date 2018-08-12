@@ -2622,7 +2622,9 @@ cleanup:
 // We want them in a single compilation unit because it makes dealing with all-static functions slightly less cumbersome.
 //
 // Deals with device identification
-#include "fbink_device_id.c"
+#ifndef FBINK_FOR_LINUX
+#	include "fbink_device_id.c"
+#endif
 // Extra fonts
 #ifdef FBINK_WITH_UNSCII
 #	include "fbink_unscii.c"
