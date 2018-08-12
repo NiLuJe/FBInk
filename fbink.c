@@ -1341,6 +1341,8 @@ int
 #endif
 
 		// Ask the Kernel for its HZ value so we can translate jiffies into human-readable units.
+		// NOTE: This will most likely be 100, even if CONFIG_HZ is > 100
+		//       c.f., sysconf(3)
 		long int rc = sysconf(_SC_CLK_TCK);
 		if (rc > 0) {
 			USER_HZ = rc;
