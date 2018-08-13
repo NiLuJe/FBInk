@@ -64,14 +64,14 @@ static void
 	    "\t-f, --flash\tAsk the eInk driver to do a black flash when refreshing the area of the screen where STRING will be printed.\n"
 	    "\t-c, --clear\tFully clear the screen before printing (obeys --invert).\n"
 	    "\t-S, --size\tOverride the automatic font scaling multiplier (Default: 0, automatic selection, ranging from 1 (no scaling), to 4 (4x upscaling), depending on screen resolution).\n"
-#ifdef FBINK_WITH_UNSCII
+#ifdef FBINK_WITH_FONTS
 	    "\t\t\tNote that user-supplied values will be clamped to safe boundaries (from 1 to around 45 for most fonts, and from 1 to around 30 for TALL).\n"
 #else
 	    "\t\t\tNote that user-supplied values will be clamped to safe boundaries (from 1 to around 45).\n"
 #endif
 	    "\t\t\tThe exact upper value depends on the resolution of your screen.\n"
 	    "\t-F, --font NAME\tRender glyphs from builtin font NAME (Default: IBM).\n"
-#ifdef FBINK_WITH_UNSCII
+#ifdef FBINK_WITH_FONTS
 	    "\t\t\tAvailable font families: IBM, UNSCII, ALT, THIN, FANTASY, MCR, TALL, BLOCK, LEGGIE\n"
 #else
 	    "\t\t\tAvailable font families: IBM\n"

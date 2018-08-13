@@ -30,8 +30,8 @@
 
 // No extra fonts & no image support in minimal builds
 #ifndef FBINK_MINIMAL
-#	ifndef FBINK_WITH_UNSCII
-#		define FBINK_WITH_UNSCII
+#	ifndef FBINK_WITH_FONTS
+#		define FBINK_WITH_FONTS
 #	endif
 #	ifndef FBINK_WITH_IMAGE
 #		define FBINK_WITH_IMAGE
@@ -111,7 +111,7 @@
 #include "fbink_types.h"
 
 // Speaking of, include the Unscii variants when we're not a minimal build
-#ifdef FBINK_WITH_UNSCII
+#ifdef FBINK_WITH_FONTS
 #	include "fbink_unscii.h"
 #	include "fbink_block.h"
 #	include "fbink_leggie.h"
@@ -246,7 +246,7 @@ static void clear_screen(uint8_t);
 
 static const unsigned char* font8x8_get_bitmap(uint32_t);
 static void                 font8x8_render(uint32_t, unsigned char*, uint8_t UNUSED_BY_MINIMAL);
-#ifdef FBINK_WITH_UNSCII
+#ifdef FBINK_WITH_FONTS
 static void font32x32_render(uint32_t, unsigned char*, uint8_t);
 #endif
 

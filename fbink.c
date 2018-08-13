@@ -420,7 +420,7 @@ static void
 	const unsigned char* bitmap = NULL;
 
 	// Do we have Unscii fonts compiled in?
-#ifdef FBINK_WITH_UNSCII
+#ifdef FBINK_WITH_FONTS
 	switch (fontname) {
 		case UNSCII:
 			bitmap = unscii_get_bitmap(codepoint);
@@ -472,7 +472,7 @@ static void
 	}
 }
 
-#ifdef FBINK_WITH_UNSCII
+#ifdef FBINK_WITH_FONTS
 // Render a specific font32x32 glyph into a pixmap
 // (base size: 32x32, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
 static void
@@ -1216,7 +1216,7 @@ int
 	// As well as the font rendering function pointer...
 	fxpFontRender = &font8x8_render;
 
-#ifdef FBINK_WITH_UNSCII
+#ifdef FBINK_WITH_FONTS
 	// NOTE: Unscii-16 is 8x16, handle it ;).
 	if (fbink_config->fontname == UNSCII_TALL) {
 		FONTH = 16U;
@@ -1253,7 +1253,7 @@ int
 			// NOTE: If that weren't a circular dependency, we'd take care of the isPerfectFit case here,
 			//       but we can't, so instead that corner-case is handled in fbink_print...
 		}
-#ifdef FBINK_WITH_UNSCII
+#ifdef FBINK_WITH_FONTS
 		// NOTE: Handle custom fonts, no matter their base glyph size...
 		// We want at least N columns, so, viewWidth / N / glyphWidth gives us the maximum multiplier.
 		uint8_t max_fontmult_width = (uint8_t)(viewWidth / min_maxcols / FONTW);
@@ -1289,7 +1289,7 @@ int
 		} else {
 			FONTSIZE_MULT = 4U;    // 32x32
 		}
-#ifdef FBINK_WITH_UNSCII
+#ifdef FBINK_WITH_FONTS
 		if (fbink_config->fontname == BLOCK) {
 			// Block is 4 times larger than other fonts, compensate for that...
 			FONTSIZE_MULT = (uint8_t) MAX(1U, FONTSIZE_MULT / 4U);
@@ -2672,7 +2672,7 @@ cleanup:
 #	include "fbink_device_id.c"
 #endif
 // Extra fonts
-#ifdef FBINK_WITH_UNSCII
+#ifdef FBINK_WITH_FONTS
 #	include "fbink_unscii.c"
 // PoP's Block font, c.f., https://www.mobileread.com/forums/showpost.php?p=3736203&postcount=26 and earlier ;).
 #	include "fbink_block.c"
