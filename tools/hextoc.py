@@ -48,10 +48,10 @@ def hex2f32(v):
 	h = int(v, base=16)
 	return int(bin(h)[2:].zfill(32)[::-1], 2)
 
-fontwidth = 8
-fontheight = 8
-fontfile = "../fonts/unscii-8.hex"
-fontname = "unscii"
+fontwidth = 32
+fontheight = 32
+fontfile = "../fonts/block.hex"
+fontname = "block"
 
 print("/*")
 print("* C Header for use with https://github.com/NiLuJe/FBInk")
