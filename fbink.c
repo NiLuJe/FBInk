@@ -452,6 +452,9 @@ static void
 		case FKP:
 			bitmap = fkp_get_bitmap(codepoint);
 			break;
+		case CTRLD:
+			bitmap = ctrld_get_bitmap(codepoint);
+			break;
 		case IBM:
 		default:
 			bitmap = font8x8_get_bitmap(codepoint);
@@ -1234,6 +1237,7 @@ int
 		case UNSCII_TALL:
 		case VEGGIE:
 		case FKP:
+		case CTRLD:
 			FONTH = 16U;
 			break;
 		case LEGGIE:

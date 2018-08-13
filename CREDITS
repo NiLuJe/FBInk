@@ -28,3 +28,8 @@ As well as a number of third-party resources (namely, font files):
 		(https://www.gilesorr.com/bashprompt/xfonts)
 		(http://artwizaleczapka.sourceforge.net)
 		(http://artwiz-latin1.sourceforge.net)
+
+	* ctrld, a fixed-width bitmap font forked from Dina,
+		Licensed under the MIT License (https://opensource.org/licenses/MIT)
+		(https://github.com/bjin/ctrld-font)
+		(http://www.dcmembers.com/jibsen/download/61/)
