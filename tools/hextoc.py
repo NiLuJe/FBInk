@@ -48,10 +48,10 @@ def hex2f32(v):
 	h = int(v, base=16)
 	return int(bin(h)[2:].zfill(32)[::-1], 2)
 
-fontwidth = 32
-fontheight = 32
-fontfile = "../fonts/block.hex"
-fontname = "block"
+fontwidth = 8
+fontheight = 8
+fontfile = "../fonts/unscii-8.hex"
+fontname = "unscii"
 
 print("/*")
 print("* C Header for use with https://github.com/NiLuJe/FBInk")
@@ -143,6 +143,23 @@ with open(fontfile, "r") as f:
 			prevcp = int(cp, base=16)
 print("}}; // {}".format(blockcount))
 print("")
+
+# Handle single block fonts, even when they don't start at codepoint U+0000
+if blocknum == 1:
+	if fontwidth == 32:
+		eprint("static const uint32_t*")
+	elif fontwidth == 16:
+		eprint("static const uint16_t*")
+	else:
+		eprint("static const unsigned char*")
+	eprint("    {}_get_bitmap(uint32_t codepoint)".format(fontname))
+	eprint("{")
+	eprint("\tif (codepoint >= {:#04x} && codepoint <= {:#04x}) {{".format(int(blockcp, base=16), prevcp))
+	eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, int(blockcp, base=16)))
+else:
+	# Don't forget the final block
+	eprint("\t}} else if (codepoint >= {:#04x} && codepoint <= {:#04x}) {{".format(int(blockcp, base=16), prevcp))
+	eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, int(blockcp, base=16)))
 
 eprint("\t} else {")
 eprint('\t\tfprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by this font!\\n", codepoint);')
