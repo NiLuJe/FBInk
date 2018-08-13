@@ -1303,6 +1303,12 @@ int
 		} else {
 			FONTSIZE_MULT = 4U;    // 32x32
 		}
+#ifdef FBINK_WITH_UNSCII
+		if (fbink_config->fontname == BLOCK) {
+			// Block is 4 times larger than other fonts, compensate for that...
+			FONTSIZE_MULT = (uint8_t) MAX(1U, FONTSIZE_MULT / 4U);
+		}
+#endif
 	}
 	// Go!
 	FONTW = (unsigned short int) (FONTW * FONTSIZE_MULT);
