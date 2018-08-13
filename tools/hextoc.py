@@ -7,9 +7,9 @@
 # NOTE: You can probably get something working out of BDF fonts, either via gbdfed, bdfe, or Unifont's bdfimplode/unibdf2hex,
 #       but if the horizontal resolution is different than 8, that implies code tweaks to handle it right.
 #       Right now, fontwidth 8 means we store an array of uint8_t, for a 16xN font an array of uint16_t,
-#       a 32xN one an array of uint32_t, and a 64xN one would need an array of uint64_t ;).
-#       This script currently handles 8/16/32, and FBInk has code for 8 & 32.
-#       FontForge + gbdfed + a text editor should handle most common cases just fine ;).
+#       a 32xN one an array of uint32_t, and a 64xN one an array of uint64_t ;).
+#       This script currently handles 8/16/32/64, and FBInk has code for 8 & 32.
+#       As for the conversion process itself, FontForge + gbdfed + a text editor should handle most common cases just fine ;).
 #
 ##
 
@@ -50,6 +50,10 @@ def hex2f32(v):
 	h = int(v, base=16)
 	return int(bin(h)[2:].zfill(32)[::-1], 2)
 
+def hex2f64(v):
+	h = int(v, base=16)
+	return int(bin(h)[2:].zfill(64)[::-1], 2)
+
 fontwidth = 8
 fontheight = 16
 fontfile = "../fonts/ctrld-fixed-8x16r.hex"
@@ -84,7 +88,9 @@ with open(fontfile, "r") as f:
 					print("}}; // {}".format(blockcount))
 					print("")
 					if blocknum == 1:
-						if fontwidth == 32:
+						if fontwidth == 64:
+							eprint("static const uint64_t*")
+						elif fontwidth == 32:
 							eprint("static const uint32_t*")
 						elif fontwidth == 16:
 							eprint("static const uint16_t*")
@@ -104,7 +110,9 @@ with open(fontfile, "r") as f:
 				blocknum += 1
 				blockcount = 1
 				blockcp = cp
-				if fontwidth == 32:
+				if fontwidth == 64:
+					print("static const uint64_t {}_block{}[][{}] = {{".format(fontname, blocknum, fontheight))
+				elif fontwidth == 32:
 					print("static const uint32_t {}_block{}[][{}] = {{".format(fontname, blocknum, fontheight))
 				elif fontwidth == 16:
 					print("static const uint16_t {}_block{}[][{}] = {{".format(fontname, blocknum, fontheight))
@@ -122,7 +130,11 @@ with open(fontfile, "r") as f:
 			elif fontwidth == 32:
 				for i in range(fontheight):
 					print(u" {:#010x}".format(hex2f32(m.group(i+2))), end='' if i+1 == fontheight else ',')
+			elif fontwidth == 64:
+				for i in range(fontheight):
+					print(u" {:#018x}".format(hex2f64(m.group(i+2))), end='' if i+1 == fontheight else ',')
 			else:
+				print("Unsupported font width (Must exactly match the width of a C data type, in bits [i.e., 8/16/32/64])!")
 				exit(-1)
 			print(u" }},\t// U+{} ({})".format(cp, chr(hcp) if hcp >= 0x20 else "ESC"))
 			prevcp = int(cp, base=16)
@@ -131,7 +143,9 @@ print("")
 
 # Handle single block fonts
 if blocknum == 1:
-	if fontwidth == 32:
+	if fontwidth == 64:
+		eprint("static const uint64_t*")
+	elif fontwidth == 32:
 		eprint("static const uint32_t*")
 	elif fontwidth == 16:
 		eprint("static const uint16_t*")
