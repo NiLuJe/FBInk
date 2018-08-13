@@ -1229,7 +1229,7 @@ int
 	// NOTE: Handle custom fonts with non-standard sizes
 	switch (fbink_config->fontname) {
 		case KATES:
-			FONTH = 14U;
+			FONTH = 15U;
 			break;
 		case UNSCII_TALL:
 		case VEGGIE:

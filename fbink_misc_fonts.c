@@ -23,8 +23,18 @@
 static const unsigned char*
     kates_get_bitmap(uint32_t codepoint)
 {
-	if (codepoint <= 0xff) {
+	if (codepoint <= 0x02) {
 		return kates_block1[codepoint];
+	} else if (codepoint >= 0x09 && codepoint <= 0x19) {
+		return kates_block2[codepoint - 0x09];
+	} else if (codepoint >= 0x1b && codepoint <= 0x1b) {
+		return kates_block3[codepoint - 0x1b];
+	} else if (codepoint >= 0x20 && codepoint <= 0x7e) {
+		return kates_block4[codepoint - 0x20];
+	} else if (codepoint >= 0xa1 && codepoint <= 0xac) {
+		return kates_block5[codepoint - 0xa1];
+	} else if (codepoint >= 0xae && codepoint <= 0xff) {
+		return kates_block6[codepoint - 0xae];
 	} else {
 		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by this font!\n", codepoint);
 		return kates_block1[0];
@@ -41,4 +51,3 @@ static const unsigned char*
 		return fkp_block1[0];
 	}
 }
-
