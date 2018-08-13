@@ -8,11 +8,17 @@ This project makes use of a number of third-party libraries, which we'll acknowl
 		Released into the public domain.
 		(https://www.cprogramming.com/tutorial/unicode.html)
 
-	* unscii (Bitmapped Unicode fonts), by Viznut,
-		Released into the public domain.
-		(http://pelulamu.net/unscii)
-
 	* stb_image (Image loader), by Sean Barrett,
 		Released into the public domain.
 		(http://nothings.org/stb)
 
+
+As well as a number of third-party resources (namely, font files):
+
+	* unscii (Bitmapped Unicode fonts), by Viznut,
+		Released into the public domain.
+		(http://pelulamu.net/unscii)
+
+	* leggie, (a legible, pretty bitmap font), Copyright © 2012-2018 Wiktor Kerr,
+		Licensed under a Creative Commons Attribution 4.0 International License (CC BY) (https://creativecommons.org/licenses/by/4.0/).
+		(https://memleek.org/leggie)

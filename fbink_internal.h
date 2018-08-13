@@ -114,6 +114,7 @@
 #ifdef FBINK_WITH_UNSCII
 #	include "fbink_unscii.h"
 #	include "fbink_block.h"
+#	include "fbink_leggie.h"
 #endif
 
 // NOTE: CLOEXEC shenanigans...

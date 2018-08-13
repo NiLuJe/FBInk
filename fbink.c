@@ -440,6 +440,9 @@ static void
 		case UNSCII_TALL:
 			bitmap = tall_get_bitmap(codepoint);
 			break;
+		case LEGGIE:
+			bitmap = leggie_get_bitmap(codepoint);
+			break;
 		case IBM:
 		default:
 			bitmap = font8x8_get_bitmap(codepoint);
@@ -1223,6 +1226,9 @@ int
 		FONTH = 32U;
 		// Different horizontal resolution means a different data type...
 		fxpFontRender = &font32x32_render;
+	} else if (fbink_config->fontname == LEGGIE) {
+		// leggie is 8x18
+		FONTH = 18U;
 	}
 #else
 	if (fbink_config->fontname != IBM) {
@@ -1248,39 +1254,17 @@ int
 			//       but we can't, so instead that corner-case is handled in fbink_print...
 		}
 #ifdef FBINK_WITH_UNSCII
-		// NOTE: Unscii-16 is 8x16, handle it ;).
-		if (fbink_config->fontname == UNSCII_TALL) {
-			// We want at least N columns, so, viewWidth / N / glyphWidth gives us the maximum multiplier.
-			uint8_t max_fontmult_width = (uint8_t)(viewWidth / min_maxcols / 8U);
-			// We want at least 1 row, so, viewHeight / glyphHeight gives us the maximum multiplier.
-			uint8_t max_fontmult_height = (uint8_t)(viewHeight / 16U);
-			max_fontmult                = (uint8_t) MIN(max_fontmult_width, max_fontmult_height);
-			if (FONTSIZE_MULT > max_fontmult) {
-				FONTSIZE_MULT = max_fontmult;
-				ELOG("[FBInk] Clamped font size multiplier from %hhu to %hhu",
-				     fbink_config->fontmult,
-				     max_fontmult);
-			}
-		} else if (fbink_config->fontname == BLOCK) {
-			// We want at least N columns, so, viewWidth / N / glyphWidth gives us the maximum multiplier.
-			uint8_t max_fontmult_width = (uint8_t)(viewWidth / min_maxcols / 32U);
-			// We want at least 1 row, so, viewHeight / glyphHeight gives us the maximum multiplier.
-			uint8_t max_fontmult_height = (uint8_t)(viewHeight / 32U);
-			max_fontmult                = (uint8_t) MIN(max_fontmult_width, max_fontmult_height);
-			if (FONTSIZE_MULT > max_fontmult) {
-				FONTSIZE_MULT = max_fontmult;
-				ELOG("[FBInk] Clamped font size multiplier from %hhu to %hhu",
-				     fbink_config->fontmult,
-				     max_fontmult);
-			}
-		} else {
-			max_fontmult = (uint8_t)(viewWidth / min_maxcols / 8U);
-			if (FONTSIZE_MULT > max_fontmult) {
-				FONTSIZE_MULT = max_fontmult;
-				ELOG("[FBInk] Clamped font size multiplier from %hhu to %hhu",
-				     fbink_config->fontmult,
-				     max_fontmult);
-			}
+		// NOTE: Handle custom fonts, no matter their base glyph size...
+		// We want at least N columns, so, viewWidth / N / glyphWidth gives us the maximum multiplier.
+		uint8_t max_fontmult_width = (uint8_t)(viewWidth / min_maxcols / FONTW);
+		// We want at least 1 row, so, viewHeight / glyphHeight gives us the maximum multiplier.
+		uint8_t max_fontmult_height = (uint8_t)(viewHeight / FONTH);
+		max_fontmult                = (uint8_t) MIN(max_fontmult_width, max_fontmult_height);
+		if (FONTSIZE_MULT > max_fontmult) {
+			FONTSIZE_MULT = max_fontmult;
+			ELOG("[FBInk] Clamped font size multiplier from %hhu to %hhu",
+			     fbink_config->fontmult,
+			     max_fontmult);
 		}
 #else
 		max_fontmult = (uint8_t)(viewWidth / min_maxcols / 8U);
@@ -2692,6 +2676,8 @@ cleanup:
 #	include "fbink_unscii.c"
 // PoP's Block font, c.f., https://www.mobileread.com/forums/showpost.php?p=3736203&postcount=26 and earlier ;).
 #	include "fbink_block.c"
+// Wiktor Kerr's Leggie (https://memleek.org/leggie/)
+#	include "fbink_leggie.c"
 #endif
 // Contains fbink_button_scan's implementation, Kobo only, and has a bit of Linux MT input thrown in ;).
 #include "fbink_button_scan.c"
