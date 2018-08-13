@@ -459,7 +459,7 @@ static void
 		for (unsigned short int j = 0U; j < FONTW; j++) {
 			// y: input column, j: output column
 			y   = (unsigned short int) (j / FONTSIZE_MULT);
-			set = bitmap[x] & 1 << y;
+			set = bitmap[x] & 1U << y;
 			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTW=1,0)
 			idx = (size_t)(j + (i * FONTW));
 			for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
@@ -493,7 +493,7 @@ static void
 		for (unsigned short int j = 0U; j < FONTW; j++) {
 			// y: input column, j: output column
 			y   = (unsigned short int) (j / FONTSIZE_MULT);
-			set = bitmap[x] & 1 << y;
+			set = bitmap[x] & 1U << y;
 			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTW=1,0)
 			idx = (size_t)(j + (i * FONTW));
 			for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
@@ -668,8 +668,7 @@ static struct mxcfb_rect
 		    ch);
 
 		// Get the glyph's pixmap
-		//font8x8_render(ch, pixmap, fontname);
-		font32x32_render(ch, pixmap, fontname);
+		(*fxpFontRender)(ch, pixmap, fontname);
 
 		// loop through pixel rows
 		for (unsigned short int y = 0U; y < FONTH; y++) {
@@ -1209,6 +1208,8 @@ int
 	//       and we're using this value to set MAXCOLS & MAXROWS, which we *need* to be sane.
 	FONTW = 8U;
 	FONTH = 8U;
+	// As well as the font rendering function pointer...
+	fxpFontRender = &font8x8_render;
 
 #ifdef FBINK_WITH_UNSCII
 	// NOTE: Unscii-16 is 8x16, handle it ;).
@@ -1218,6 +1219,8 @@ int
 		// And block is 32x32
 		FONTW = 32U;
 		FONTH = 32U;
+		// Different horizontal resolution means a different data type...
+		fxpFontRender = &font32x32_render;
 	}
 #else
 	if (fbink_config->fontname != IBM) {
@@ -1249,6 +1252,18 @@ int
 			uint8_t max_fontmult_width = (uint8_t)(viewWidth / min_maxcols / 8U);
 			// We want at least 1 row, so, viewHeight / glyphHeight gives us the maximum multiplier.
 			uint8_t max_fontmult_height = (uint8_t)(viewHeight / 16U);
+			max_fontmult                = (uint8_t) MIN(max_fontmult_width, max_fontmult_height);
+			if (FONTSIZE_MULT > max_fontmult) {
+				FONTSIZE_MULT = max_fontmult;
+				ELOG("[FBInk] Clamped font size multiplier from %hhu to %hhu",
+				     fbink_config->fontmult,
+				     max_fontmult);
+			}
+		} else if (fbink_config->fontname == BLOCK) {
+			// We want at least N columns, so, viewWidth / N / glyphWidth gives us the maximum multiplier.
+			uint8_t max_fontmult_width = (uint8_t)(viewWidth / min_maxcols / 32U);
+			// We want at least 1 row, so, viewHeight / glyphHeight gives us the maximum multiplier.
+			uint8_t max_fontmult_height = (uint8_t)(viewHeight / 32U);
 			max_fontmult                = (uint8_t) MIN(max_fontmult_width, max_fontmult_height);
 			if (FONTSIZE_MULT > max_fontmult) {
 				FONTSIZE_MULT = max_fontmult;

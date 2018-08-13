@@ -210,6 +210,8 @@ void (*fxpGetPixel)(FBInkCoordinates*, FBInkColor*) = NULL;
 #endif
 // As well as the appropriate coordinates rotation function...
 void (*fxpRotateCoords)(FBInkCoordinates*) = NULL;
+// And the font rendering function...
+void (*fxpFontRender)(uint32_t, unsigned char*, uint8_t) = NULL;
 
 // Where we track device/screen-specific quirks
 FBInkDeviceQuirks deviceQuirks = { 0 };
