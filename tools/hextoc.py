@@ -51,9 +51,9 @@ def hex2f32(v):
 	return int(bin(h)[2:].zfill(32)[::-1], 2)
 
 fontwidth = 8
-fontheight = 14
-fontfile = "../fonts/kates-8x14.hex"
-fontname = "kates"
+fontheight = 16
+fontfile = "../fonts/fkp-8x16.hex"
+fontname = "fkp"
 
 print("/*")
 print("* C Header for use with https://github.com/NiLuJe/FBInk")

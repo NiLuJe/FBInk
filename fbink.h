@@ -66,7 +66,8 @@ typedef enum
 	BLOCK          = 7,    // block
 	LEGGIE         = 8,    // leggie
 	VEGGIE         = 9,    // leggie EGA/VGA/FB
-	KATES          = 10    // kates (nexus)
+	KATES          = 10,   // kates (nexus)
+	FKP            = 11    // fkp
 } FONT_INDEX_T;
 
 // List of available halign/valign values

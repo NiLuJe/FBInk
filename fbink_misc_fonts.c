@@ -30,3 +30,15 @@ static const unsigned char*
 		return kates_block1[0];
 	}
 }
+
+static const unsigned char*
+    fkp_get_bitmap(uint32_t codepoint)
+{
+	if (codepoint <= 0xff) {
+		return fkp_block1[codepoint];
+	} else {
+		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by this font!\n", codepoint);
+		return fkp_block1[0];
+	}
+}
+

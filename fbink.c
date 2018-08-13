@@ -449,6 +449,9 @@ static void
 		case KATES:
 			bitmap = kates_get_bitmap(codepoint);
 			break;
+		case FKP:
+			bitmap = fkp_get_bitmap(codepoint);
+			break;
 		case IBM:
 		default:
 			bitmap = font8x8_get_bitmap(codepoint);
@@ -1230,6 +1233,7 @@ int
 			break;
 		case UNSCII_TALL:
 		case VEGGIE:
+		case FKP:
 			FONTH = 16U;
 			break;
 		case LEGGIE:
