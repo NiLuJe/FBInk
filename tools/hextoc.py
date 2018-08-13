@@ -9,6 +9,7 @@
 #       Right now, fontwidth 8 means we store an array of uint8_t, for a 16xN font an array of uint16_t,
 #       a 32xN one an array of uint32_t, and a 64xN one would need an array of uint64_t ;).
 #       This script currently handles 8/16/32, and FBInk has code for 8 & 32.
+#       FontForge + gbdfed + a text editor should handle most common cases just fine ;).
 #
 ##
 

@@ -99,6 +99,8 @@
 //       But in any case, for a repository of BDF fonts, see https://github.com/Tecate/bitmap-fonts
 // NOTE: On the other hand, tools/hextoc.py is a perfectly usable experiment with Unifont's hex format,
 //       that can yield you a choice of a few different fonts ;).
+//       And with potentially a tiny bit of additional work, can work with Hex files exported from BDF
+//       or other bitmap fonts by gbdfed (with maybe an initial FontForge conversion to BDF if need be) ;).
 #include "font8x8/font8x8_basic.h"
 #include "font8x8/font8x8_block.h"
 #include "font8x8/font8x8_box.h"
