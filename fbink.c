@@ -2688,6 +2688,7 @@ cleanup:
 // Extra fonts
 #ifdef FBINK_WITH_UNSCII
 #	include "fbink_unscii.c"
+// PoP's Block font, c.f., https://www.mobileread.com/forums/showpost.php?p=3736203&postcount=26 and earlier ;).
 #	include "fbink_block.c"
 #endif
 // Contains fbink_button_scan's implementation, Kobo only, and has a bit of Linux MT input thrown in ;).
