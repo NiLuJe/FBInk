@@ -23,8 +23,8 @@ As well as a number of third-party resources (namely, font files):
 		Licensed under a Creative Commons Attribution 4.0 International License (CC BY) (https://creativecommons.org/licenses/by/4.0/).
 		(https://memleek.org/leggie)
 
-	* kates, a highly stylized bitmap font.
-		(https://www.gilesorr.com/bashprompt/xfonts/)
-
-	* fkp, a bitmap font, by freakpie.
-		(https://www.gilesorr.com/bashprompt/xfonts/)
+	* kates & fkp, bitmap fonts from the artwiz package,
+		Licensed under the GNU General Public License version 2+ (https://www.gnu.org/licenses/gpl-2.0.html)
+		(https://www.gilesorr.com/bashprompt/xfonts)
+		(http://artwizaleczapka.sourceforge.net)
+		(http://artwiz-latin1.sourceforge.net)
