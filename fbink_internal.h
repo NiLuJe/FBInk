@@ -245,6 +245,9 @@ static void clear_screen(uint8_t);
 
 static const unsigned char* font8x8_get_bitmap(uint32_t);
 static void                 font8x8_render(uint32_t, unsigned char*, uint8_t UNUSED_BY_MINIMAL);
+#ifdef FBINK_WITH_UNSCII
+static void font32x32_render(uint32_t, unsigned char*, uint8_t);
+#endif
 
 static struct mxcfb_rect
     draw(const char*, unsigned short int, unsigned short int, bool, bool, unsigned short int, uint8_t, bool);

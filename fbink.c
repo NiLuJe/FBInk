@@ -469,6 +469,7 @@ static void
 	}
 }
 
+#ifdef FBINK_WITH_UNSCII
 // Render a specific font32x32 glyph into a pixmap
 // (base size: 32x32, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
 static void
@@ -502,6 +503,7 @@ static void
 		}
 	}
 }
+#endif
 
 // Helper function for drawing
 static struct mxcfb_rect
