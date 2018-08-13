@@ -115,6 +115,7 @@
 #	include "fbink_unscii.h"
 #	include "fbink_block.h"
 #	include "fbink_leggie.h"
+#	include "fbink_misc_fonts.h"
 #endif
 
 // NOTE: CLOEXEC shenanigans...

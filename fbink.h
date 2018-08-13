@@ -65,7 +65,8 @@ typedef enum
 	UNSCII_TALL    = 6,    // unscii-16
 	BLOCK          = 7,    // block
 	LEGGIE         = 8,    // leggie
-	VEGGIE         = 9     // leggie EGA/VGA/FB
+	VEGGIE         = 9,    // leggie EGA/VGA/FB
+	KATES          = 10    // kates (nexus)
 } FONT_INDEX_T;
 
 // List of available halign/valign values

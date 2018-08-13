@@ -446,6 +446,9 @@ static void
 		case VEGGIE:
 			bitmap = veggie_get_bitmap(codepoint);
 			break;
+		case KATES:
+			bitmap = kates_get_bitmap(codepoint);
+			break;
 		case IBM:
 		default:
 			bitmap = font8x8_get_bitmap(codepoint);
@@ -1221,7 +1224,10 @@ int
 
 #ifdef FBINK_WITH_FONTS
 	// NOTE: Handle custom fonts with non-standard sizes
-	switch(fbink_config->fontname) {
+	switch (fbink_config->fontname) {
+		case KATES:
+			FONTH = 14U;
+			break;
 		case UNSCII_TALL:
 		case VEGGIE:
 			FONTH = 16U;
@@ -2686,6 +2692,8 @@ cleanup:
 #	include "fbink_block.c"
 // Wiktor Kerr's Leggie (https://memleek.org/leggie/)
 #	include "fbink_leggie.c"
+// Various other small fonts
+#	include "fbink_misc_fonts.c"
 #endif
 // Contains fbink_button_scan's implementation, Kobo only, and has a bit of Linux MT input thrown in ;).
 #include "fbink_button_scan.c"
