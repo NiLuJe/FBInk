@@ -443,6 +443,9 @@ static void
 		case LEGGIE:
 			bitmap = leggie_get_bitmap(codepoint);
 			break;
+		case VEGGIE:
+			bitmap = veggie_get_bitmap(codepoint);
+			break;
 		case IBM:
 		default:
 			bitmap = font8x8_get_bitmap(codepoint);
@@ -1217,18 +1220,23 @@ int
 	fxpFontRender = &font8x8_render;
 
 #ifdef FBINK_WITH_FONTS
-	// NOTE: Unscii-16 is 8x16, handle it ;).
-	if (fbink_config->fontname == UNSCII_TALL) {
-		FONTH = 16U;
-	} else if (fbink_config->fontname == BLOCK) {
-		// And block is 32x32
-		FONTW = 32U;
-		FONTH = 32U;
-		// Different horizontal resolution means a different data type...
-		fxpFontRender = &font32x32_render;
-	} else if (fbink_config->fontname == LEGGIE) {
-		// leggie is 8x18
-		FONTH = 18U;
+	// NOTE: Handle custom fonts with non-standard sizes
+	switch(fbink_config->fontname) {
+		case UNSCII_TALL:
+		case VEGGIE:
+			FONTH = 16U;
+			break;
+		case LEGGIE:
+			FONTH = 18U;
+			break;
+		case BLOCK:
+			FONTW = 32U;
+			FONTH = 32U;
+			// Different horizontal resolution means a different data type, meaning a different render fx...
+			fxpFontRender = &font32x32_render;
+			break;
+		default:
+			break;
 	}
 #else
 	if (fbink_config->fontname != IBM) {
@@ -1291,7 +1299,7 @@ int
 		}
 #ifdef FBINK_WITH_FONTS
 		if (fbink_config->fontname == BLOCK) {
-			// Block is 4 times larger than other fonts, compensate for that...
+			// Block is 4 times wider than other fonts, compensate for that...
 			FONTSIZE_MULT = (uint8_t) MAX(1U, FONTSIZE_MULT / 4U);
 		}
 #endif
