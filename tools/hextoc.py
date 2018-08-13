@@ -49,10 +49,10 @@ def hex2f32(v):
 	h = int(v, base=16)
 	return int(bin(h)[2:].zfill(32)[::-1], 2)
 
-fontwidth = 32
-fontheight = 32
-fontfile = "../fonts/block.hex"
-fontname = "block"
+fontwidth = 8
+fontheight = 18
+fontfile = "../fonts/leggie-8x18.hex"
+fontname = "leggie"
 
 print("/*")
 print("* C Header for use with https://github.com/NiLuJe/FBInk")
@@ -91,8 +91,12 @@ with open(fontfile, "r") as f:
 							eprint("static const unsigned char*")
 						eprint("    {}_get_bitmap(uint32_t codepoint)".format(fontname))
 						eprint("{")
-						eprint("\tif (codepoint <= {:#04x}) {{".format(prevcp))
-						eprint("\t\treturn {}_block{}[codepoint];".format(fontname, blocknum))
+						if int(blockcp) > 0:
+							eprint("\tif (codepoint >= {:#04x} && codepoint <= {:#04x}) {{".format(int(blockcp, base=16), prevcp))
+							eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, int(blockcp, base=16)))
+						else:
+							eprint("\tif (codepoint <= {:#04x}) {{".format(prevcp))
+							eprint("\t\treturn {}_block{}[codepoint];".format(fontname, blocknum))
 					else:
 						eprint("\t}} else if (codepoint >= {:#04x} && codepoint <= {:#04x}) {{".format(int(blockcp, base=16), prevcp))
 						eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, int(blockcp, base=16)))
