@@ -4,7 +4,7 @@
 # Very naive script to build a C array out of Unifont's hex format.
 # Assumes 8x8 or 8x16 glyphs
 # Tested on Unscii & its fun variants (http://pelulamu.net/unscii/)
-# NOTE: You can probably get something working out of BDF fonts, either via bdfe, or Unifont's bdfimplode/unibdf2hex,
+# NOTE: You can probably get something working out of BDF fonts, either via gbdfed, bdfe, or Unifont's bdfimplode/unibdf2hex,
 #       but if the horizontal resolution is different than 8, that implies code tweaks to handle it right.
 #       Right now, fontwidth 8 means we store an array of uint8_t, for a 16xN font an array of uint16_t,
 #       a 32xN one an array of uint32_t, and a 64xN one would need an array of uint64_t ;).
@@ -66,15 +66,10 @@ blockcount = 1
 blockcp = 0x0
 cp = 0x0
 prevcp = 0x0
-if fontheight == 32:
-	fmt = re.compile(r"([0-9a-fA-F]{{4}}):([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})".format(n=int(fontwidth/4)))
-elif fontheight == 16:
-	fmt = re.compile(r"([0-9a-fA-F]{{4}}):([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})".format(n=int(fontwidth/4)))
-elif fontheight == 8:
-	fmt = re.compile(r"([0-9a-fA-F]{{4}}):([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})([0-9a-fA-F]{{{n}}})".format(n=int(fontwidth/4)))
-else:
-	print("Unsupported font height!")
-	exit(-1)
+
+pat_cp = "([0-9a-fA-F]{4})"
+pat_rows = "([0-9a-fA-F]{{{n}}})".format(n=int(fontwidth/4)) * fontheight
+fmt = re.compile(r"{}:{}".format(pat_cp, pat_rows))
 
 with open(fontfile, "r") as f:
 	for line in f:
@@ -112,35 +107,19 @@ with open(fontfile, "r") as f:
 					print("static const unsigned char {}_block{}[][{}] = {{".format(fontname, blocknum, fontheight))
 
 			hcp = int(cp, base=16)
+			print(u"\t{", end='')
 			if fontwidth == 8:
-				if fontheight == 32:
-					print(u"\t{{ {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x} }},\t// U+{} ({})".format(hex2f8(m.group(2)), hex2f8(m.group(3)), hex2f8(m.group(4)), hex2f8(m.group(5)), hex2f8(m.group(6)), hex2f8(m.group(7)), hex2f8(m.group(8)), hex2f8(m.group(9)), hex2f8(m.group(10)), hex2f8(m.group(11)), hex2f8(m.group(12)), hex2f8(m.group(13)), hex2f8(m.group(14)), hex2f8(m.group(15)), hex2f8(m.group(16)), hex2f8(m.group(17)), hex2f8(m.group(18)), hex2f8(m.group(19)), hex2f8(m.group(20)), hex2f8(m.group(21)), hex2f8(m.group(22)), hex2f8(m.group(23)), hex2f8(m.group(24)), hex2f8(m.group(25)), hex2f8(m.group(26)), hex2f8(m.group(27)), hex2f8(m.group(28)), hex2f8(m.group(29)), hex2f8(m.group(30)), hex2f8(m.group(31)), hex2f8(m.group(32)), hex2f8(m.group(33)), cp, chr(hcp) if hcp >= 0x20 else "ESC"))
-				elif fontheight == 16:
-					print(u"\t{{ {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x} }},\t// U+{} ({})".format(hex2f8(m.group(2)), hex2f8(m.group(3)), hex2f8(m.group(4)), hex2f8(m.group(5)), hex2f8(m.group(6)), hex2f8(m.group(7)), hex2f8(m.group(8)), hex2f8(m.group(9)), hex2f8(m.group(10)), hex2f8(m.group(11)), hex2f8(m.group(12)), hex2f8(m.group(13)), hex2f8(m.group(14)), hex2f8(m.group(15)), hex2f8(m.group(16)), hex2f8(m.group(17)), cp, chr(hcp) if hcp >= 0x20 else "ESC"))
-				elif fontheight == 8:
-					print(u"\t{{ {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x}, {:#04x} }},\t// U+{} ({})".format(hex2f8(m.group(2)), hex2f8(m.group(3)), hex2f8(m.group(4)), hex2f8(m.group(5)), hex2f8(m.group(6)), hex2f8(m.group(7)), hex2f8(m.group(8)), hex2f8(m.group(9)), cp, chr(hcp) if hcp >= 0x20 else "ESC"))
-				else:
-					exit(-1)
+				for i in range(fontheight):
+					print(u" {:#04x}".format(hex2f8(m.group(i+2))), end='' if i+1 == fontheight else ',')
 			elif fontwidth == 16:
-				if fontheight == 32:
-					print(u"\t{{ {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x} }},\t// U+{} ({})".format(hex2f16(m.group(2)), hex2f16(m.group(3)), hex2f16(m.group(4)), hex2f16(m.group(5)), hex2f16(m.group(6)), hex2f16(m.group(7)), hex2f16(m.group(8)), hex2f16(m.group(9)), hex2f16(m.group(10)), hex2f16(m.group(11)), hex2f16(m.group(12)), hex2f16(m.group(13)), hex2f16(m.group(14)), hex2f16(m.group(15)), hex2f16(m.group(16)), hex2f16(m.group(17)), hex2f16(m.group(18)), hex2f16(m.group(19)), hex2f16(m.group(20)), hex2f16(m.group(21)), hex2f16(m.group(22)), hex2f16(m.group(23)), hex2f16(m.group(24)), hex2f16(m.group(25)), hex2f16(m.group(26)), hex2f16(m.group(27)), hex2f16(m.group(28)), hex2f16(m.group(29)), hex2f16(m.group(30)), hex2f16(m.group(31)), hex2f16(m.group(32)), hex2f16(m.group(33)), cp, chr(hcp) if hcp >= 0x20 else "ESC"))
-				elif fontheight == 16:
-					print(u"\t{{ {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x} }},\t// U+{} ({})".format(hex2f16(m.group(2)), hex2f16(m.group(3)), hex2f16(m.group(4)), hex2f16(m.group(5)), hex2f16(m.group(6)), hex2f16(m.group(7)), hex2f16(m.group(8)), hex2f16(m.group(9)), hex2f16(m.group(10)), hex2f16(m.group(11)), hex2f16(m.group(12)), hex2f16(m.group(13)), hex2f16(m.group(14)), hex2f16(m.group(15)), hex2f16(m.group(16)), hex2f16(m.group(17)), cp, chr(hcp) if hcp >= 0x20 else "ESC"))
-				elif fontheight == 8:
-					print(u"\t{{ {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x}, {:#06x} }},\t// U+{} ({})".format(hex2f16(m.group(2)), hex2f16(m.group(3)), hex2f16(m.group(4)), hex2f16(m.group(5)), hex2f16(m.group(6)), hex2f16(m.group(7)), hex2f16(m.group(8)), hex2f16(m.group(9)), cp, chr(hcp) if hcp >= 0x20 else "ESC"))
-				else:
-					exit(-1)
+				for i in range(fontheight):
+					print(u" {:#06x}".format(hex2f16(m.group(i+2))), end='' if i+1 == fontheight else ',')
 			elif fontwidth == 32:
-				if fontheight == 32:
-					print(u"\t{{ {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x} }},\t// U+{} ({})".format(hex2f32(m.group(2)), hex2f32(m.group(3)), hex2f32(m.group(4)), hex2f32(m.group(5)), hex2f32(m.group(6)), hex2f32(m.group(7)), hex2f32(m.group(8)), hex2f32(m.group(9)), hex2f32(m.group(10)), hex2f32(m.group(11)), hex2f32(m.group(12)), hex2f32(m.group(13)), hex2f32(m.group(14)), hex2f32(m.group(15)), hex2f32(m.group(16)), hex2f32(m.group(17)), hex2f32(m.group(18)), hex2f32(m.group(19)), hex2f32(m.group(20)), hex2f32(m.group(21)), hex2f32(m.group(22)), hex2f32(m.group(23)), hex2f32(m.group(24)), hex2f32(m.group(25)), hex2f32(m.group(26)), hex2f32(m.group(27)), hex2f32(m.group(28)), hex2f32(m.group(29)), hex2f32(m.group(30)), hex2f32(m.group(31)), hex2f32(m.group(32)), hex2f32(m.group(33)), cp, chr(hcp) if hcp >= 0x20 else "ESC"))
-				elif fontheight == 16:
-					print(u"\t{{ {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x} }},\t// U+{} ({})".format(hex2f32(m.group(2)), hex2f32(m.group(3)), hex2f32(m.group(4)), hex2f32(m.group(5)), hex2f32(m.group(6)), hex2f32(m.group(7)), hex2f32(m.group(8)), hex2f32(m.group(9)), hex2f32(m.group(10)), hex2f32(m.group(11)), hex2f32(m.group(12)), hex2f32(m.group(13)), hex2f32(m.group(14)), hex2f32(m.group(15)), hex2f32(m.group(16)), hex2f32(m.group(17)), cp, chr(hcp) if hcp >= 0x20 else "ESC"))
-				elif fontheight == 8:
-					print(u"\t{{ {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x}, {:#010x} }},\t// U+{} ({})".format(hex2f32(m.group(2)), hex2f32(m.group(3)), hex2f32(m.group(4)), hex2f32(m.group(5)), hex2f32(m.group(6)), hex2f32(m.group(7)), hex2f32(m.group(8)), hex2f32(m.group(9)), cp, chr(hcp) if hcp >= 0x20 else "ESC"))
-				else:
-					exit(-1)
+				for i in range(fontheight):
+					print(u" {:#010x}".format(hex2f32(m.group(i+2))), end='' if i+1 == fontheight else ',')
 			else:
 				exit(-1)
+			print(u" }},\t// U+{} ({})".format(cp, chr(hcp) if hcp >= 0x20 else "ESC"))
 			prevcp = int(cp, base=16)
 print("}}; // {}".format(blockcount))
 print("")
@@ -158,7 +137,7 @@ if blocknum == 1:
 	eprint("\tif (codepoint >= {:#04x} && codepoint <= {:#04x}) {{".format(int(blockcp, base=16), prevcp))
 	eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, int(blockcp, base=16)))
 else:
-	# Don't forget the final block
+	# Otherwise, don't forget the final block ;)
 	eprint("\t}} else if (codepoint >= {:#04x} && codepoint <= {:#04x}) {{".format(int(blockcp, base=16), prevcp))
 	eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, int(blockcp, base=16)))
 
