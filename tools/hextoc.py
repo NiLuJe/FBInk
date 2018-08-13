@@ -51,9 +51,9 @@ def hex2f32(v):
 	return int(bin(h)[2:].zfill(32)[::-1], 2)
 
 fontwidth = 8
-fontheight = 15
-fontfile = "../fonts/kates-8x15.hex"
-fontname = "kates"
+fontheight = 16
+fontfile = "../fonts/ctrld-fixed-8x16r.hex"
+fontname = "ctrld"
 
 print("/*")
 print("* C Header for use with https://github.com/NiLuJe/FBInk")
@@ -92,7 +92,7 @@ with open(fontfile, "r") as f:
 							eprint("static const unsigned char*")
 						eprint("    {}_get_bitmap(uint32_t codepoint)".format(fontname))
 						eprint("{")
-						if int(blockcp) > 0:
+						if int(blockcp, base=16) > 0:
 							eprint("\tif (codepoint >= {:#04x} && codepoint <= {:#04x}) {{".format(int(blockcp, base=16), prevcp))
 							eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, int(blockcp, base=16)))
 						else:
@@ -139,7 +139,7 @@ if blocknum == 1:
 		eprint("static const unsigned char*")
 	eprint("    {}_get_bitmap(uint32_t codepoint)".format(fontname))
 	eprint("{")
-	if int(blockcp) > 0:
+	if int(blockcp, base=16) > 0:
 		eprint("\tif (codepoint >= {:#04x} && codepoint <= {:#04x}) {{".format(int(blockcp, base=16), prevcp))
 		eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, int(blockcp, base=16)))
 	else:
