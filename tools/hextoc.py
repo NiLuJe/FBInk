@@ -50,9 +50,9 @@ def hex2f32(v):
 	return int(bin(h)[2:].zfill(32)[::-1], 2)
 
 fontwidth = 8
-fontheight = 16
-fontfile = "../fonts/leggie-8x16v.hex"
-fontname = "veggie"
+fontheight = 14
+fontfile = "../fonts/kates-8x14.hex"
+fontname = "kates"
 
 print("/*")
 print("* C Header for use with https://github.com/NiLuJe/FBInk")
@@ -128,7 +128,7 @@ with open(fontfile, "r") as f:
 print("}}; // {}".format(blockcount))
 print("")
 
-# Handle single block fonts, even when they don't start at codepoint U+0000
+# Handle single block fonts
 if blocknum == 1:
 	if fontwidth == 32:
 		eprint("static const uint32_t*")
@@ -138,8 +138,12 @@ if blocknum == 1:
 		eprint("static const unsigned char*")
 	eprint("    {}_get_bitmap(uint32_t codepoint)".format(fontname))
 	eprint("{")
-	eprint("\tif (codepoint >= {:#04x} && codepoint <= {:#04x}) {{".format(int(blockcp, base=16), prevcp))
-	eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, int(blockcp, base=16)))
+	if int(blockcp) > 0:
+		eprint("\tif (codepoint >= {:#04x} && codepoint <= {:#04x}) {{".format(int(blockcp, base=16), prevcp))
+		eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, int(blockcp, base=16)))
+	else:
+		eprint("\tif (codepoint <= {:#04x}) {{".format(prevcp))
+		eprint("\t\treturn {}_block{}[codepoint];".format(fontname, blocknum))
 else:
 	# Otherwise, don't forget the final block ;)
 	eprint("\t}} else if (codepoint >= {:#04x} && codepoint <= {:#04x}) {{".format(int(blockcp, base=16), prevcp))
