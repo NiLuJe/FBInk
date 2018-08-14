@@ -1405,7 +1405,11 @@ int
 	// Go!
 	FONTW = (unsigned short int) (FONTW * FONTSIZE_MULT);
 	FONTH = (unsigned short int) (FONTH * FONTSIZE_MULT);
-	ELOG("[FBInk] Fontsize set to %hux%hu", FONTW, FONTH);
+	ELOG("[FBInk] Fontsize set to %hux%hu (base glyph size: %hhux%hhu)",
+	     FONTW,
+	     FONTH,
+	     (uint8_t)(FONTW / FONTSIZE_MULT),
+	     (uint8_t)(FONTH / FONTSIZE_MULT));
 
 	// Compute MAX* values now that we know the screen & font resolution
 	MAXCOLS = (unsigned short int) (viewWidth / FONTW);
