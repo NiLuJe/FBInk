@@ -250,8 +250,9 @@ static void clear_screen(uint8_t);
 static const unsigned char* font8x8_get_bitmap(uint32_t);
 static void                 font8x8_render(uint32_t, unsigned char*, uint8_t UNUSED_BY_MINIMAL);
 #ifdef FBINK_WITH_FONTS
-static void font16x16_render(uint32_t, unsigned char*, uint8_t);
+//static void font16x16_render(uint32_t, unsigned char*, uint8_t);
 static void font32x32_render(uint32_t, unsigned char*, uint8_t);
+//static void font64x64_render(uint32_t, unsigned char*, uint8_t);
 #endif
 
 static struct mxcfb_rect
