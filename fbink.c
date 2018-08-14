@@ -464,6 +464,15 @@ static void
 		case ORPI:
 			bitmap = orpi_get_bitmap(codepoint);
 			break;
+		case SCIENTIFICA:
+			bitmap = scientifica_get_bitmap(codepoint);
+			break;
+		case SCIENTIFICAB:
+			bitmap = scientificab_get_bitmap(codepoint);
+			break;
+		case SCIENTIFICAI:
+			bitmap = scientificai_get_bitmap(codepoint);
+			break;
 		case IBM:
 		default:
 			bitmap = font8x8_get_bitmap(codepoint);
@@ -1308,6 +1317,15 @@ int
 #ifdef FBINK_WITH_FONTS
 	// NOTE: Handle custom fonts with non-standard sizes
 	switch (fbink_config->fontname) {
+		case SCIENTIFICA:
+		case SCIENTIFICAB:
+			FONTW = 5U;
+			FONTH = 12U;
+			break;
+		case SCIENTIFICAI:
+			FONTW = 7U;
+			FONTH = 12U;
+			break;
 		case ORP:
 		case ORPB:
 		case ORPI:
@@ -2783,6 +2801,7 @@ cleanup:
 #endif
 // Extra fonts
 #ifdef FBINK_WITH_FONTS
+// Viznut's Unscii (http://pelulamu.net/unscii/)
 #	include "fbink_unscii.c"
 // PoP's Block font, c.f., https://www.mobileread.com/forums/showpost.php?p=3736203&postcount=26 and earlier ;).
 #	include "fbink_block.c"
@@ -2790,6 +2809,8 @@ cleanup:
 #	include "fbink_leggie.c"
 // Micah Elliott's Orp (https://github.com/MicahElliott/Orp-Font)
 #	include "fbink_orp.c"
+// Nerdy Pepper's Scientifica (https://github.com/NerdyPepper/scientifica)
+#	include "fbink_scientifica.c"
 // Various other small fonts
 #	include "fbink_misc_fonts.c"
 #endif

@@ -71,7 +71,10 @@ typedef enum
 	CTRLD,             // ctrld
 	ORP,               // orp (regular)
 	ORPB,              // orp (bold)
-	ORPI               // orp (italic)
+	ORPI,              // orp (italic)
+	SCIENTIFICA,       // scientifica (regular)
+	SCIENTIFICAB,      // scientifica (bold)
+	SCIENTIFICAI       // scientifica (italic)
 } FONT_INDEX_T;
 
 // List of available halign/valign values

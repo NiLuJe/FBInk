@@ -19,21 +19,25 @@ As well as a number of third-party resources (namely, font files):
 		Released into the public domain.
 		(http://pelulamu.net/unscii)
 
-	* leggie, (a legible, pretty bitmap font), Copyright © 2012-2018 Wiktor Kerr,
+	* leggie (a legible, pretty bitmap font), Copyright © 2012-2018 Wiktor Kerr,
 		Licensed under a Creative Commons Attribution 4.0 International License (CC BY) (https://creativecommons.org/licenses/by/4.0/).
 		(https://memleek.org/leggie)
 
-	* kates & fkp, bitmap fonts from the artwiz package,
-		Licensed under the GNU General Public License version 2+ (https://www.gnu.org/licenses/gpl-2.0.html)
+	* kates & fkp (bitmap fonts from the artwiz package),
+		Licensed under the GNU General Public License version 2+ (https://www.gnu.org/licenses/gpl-2.0.html).
 		(https://www.gilesorr.com/bashprompt/xfonts)
 		(http://artwizaleczapka.sourceforge.net)
 		(http://artwiz-latin1.sourceforge.net)
 
-	* ctrld, a fixed-width bitmap font forked from Dina,
-		Licensed under the MIT License (https://opensource.org/licenses/MIT)
+	* ctrld (a fixed-width bitmap font forked from Dina),
+		Licensed under the MIT License (https://opensource.org/licenses/MIT).
 		(https://github.com/bjin/ctrld-font)
 		(http://www.dcmembers.com/jibsen/download/61/)
 
-	* orp, a small bitmap pixel-perfect font, by Micah Elliott,
+	* orp (a small bitmap pixel-perfect font), by Micah Elliott,
 		Released into the public domain.
 		(https://github.com/MicahElliott/Orp-Font)
+
+	* scientifica (a tall, condensed, bitmap font for geeks), Copyright (c) 2018 Akshay Oppiliappan <nerdypepper@tuta.io>,
+		Licensed under the SIL Open Font License, Version 1.1 (https://opensource.org/licenses/OFL-1.1).
+		(https://github.com/NerdyPepper/scientifica)
