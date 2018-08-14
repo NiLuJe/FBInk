@@ -26,8 +26,12 @@
 #include "fbink_internal.h"
 
 #include "fonts/orp.h"
+#include "fonts/orpb.h"
+#include "fonts/orpi.h"
 
 // NOTE: Should technically be pure, but we can get away with const, according to https://lwn.net/Articles/285332/
 static const unsigned char* orp_get_bitmap(uint32_t codepoint) __attribute__((const));
+static const unsigned char* orpb_get_bitmap(uint32_t codepoint) __attribute__((const));
+static const unsigned char* orpi_get_bitmap(uint32_t codepoint) __attribute__((const));
 
 #endif

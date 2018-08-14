@@ -57,8 +57,8 @@ def hex2f64(v):
 
 fontwidth = 6
 fontheight = 12
-fontfile = "../fonts/orp-6x12.hex"
-fontname = "orp"
+fontfile = "../fonts/orp-6x12i.hex"
+fontname = "orpi"
 
 print("/*")
 print("* C Header for use with https://github.com/NiLuJe/FBInk")

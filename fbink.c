@@ -458,6 +458,12 @@ static void
 		case ORP:
 			bitmap = orp_get_bitmap(codepoint);
 			break;
+		case ORPB:
+			bitmap = orpb_get_bitmap(codepoint);
+			break;
+		case ORPI:
+			bitmap = orpi_get_bitmap(codepoint);
+			break;
 		case IBM:
 		default:
 			bitmap = font8x8_get_bitmap(codepoint);
@@ -1303,6 +1309,8 @@ int
 	// NOTE: Handle custom fonts with non-standard sizes
 	switch (fbink_config->fontname) {
 		case ORP:
+		case ORPB:
+		case ORPI:
 			FONTW = 6U;
 			FONTH = 12U;
 			break;

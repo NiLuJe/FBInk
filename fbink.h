@@ -69,7 +69,9 @@ typedef enum
 	KATES,             // kates (nexus)
 	FKP,               // fkp
 	CTRLD,             // ctrld
-	ORP                // orp (regular)
+	ORP,               // orp (regular)
+	ORPB,              // orp (bold)
+	ORPI               // orp (italic)
 } FONT_INDEX_T;
 
 // List of available halign/valign values
