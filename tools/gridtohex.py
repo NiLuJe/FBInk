@@ -28,7 +28,7 @@ with open(fontfile, "r") as f:
 		if m:
 			cp = m.group(2)
 			print("")
-			print("{}:".format(cp), end='')
+			print("{}:".format(cp.upper()), end='')
 		else:
 			m = fmt.match(line)
 			if m:
