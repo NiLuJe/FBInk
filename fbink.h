@@ -64,7 +64,7 @@ typedef enum
 	UNSCII_MCR,        // unscii-8-mcr
 	UNSCII_TALL,       // unscii-16
 	BLOCK,             // block
-	LEGGIE,            // leggie
+	LEGGIE,            // leggie (regular)
 	VEGGIE,            // leggie EGA/VGA/FB
 	KATES,             // kates (nexus)
 	FKP,               // fkp
