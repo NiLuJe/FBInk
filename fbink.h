@@ -56,27 +56,27 @@
 // List of available fonts
 typedef enum
 {
-	IBM            = 0,    // font8x8
-	UNSCII         = 1,    // unscii-8
-	UNSCII_ALT     = 2,    // unscii-8-alt
-	UNSCII_THIN    = 3,    // unscii-8-thin
-	UNSCII_FANTASY = 4,    // unscii-8-fantasy
-	UNSCII_MCR     = 5,    // unscii-8-mcr
-	UNSCII_TALL    = 6,    // unscii-16
-	BLOCK          = 7,    // block
-	LEGGIE         = 8,    // leggie
-	VEGGIE         = 9,    // leggie EGA/VGA/FB
-	KATES          = 10,   // kates (nexus)
-	FKP            = 11,   // fkp
-	CTRLD          = 12    // ctrld
+	IBM = 0,           // font8x8
+	UNSCII,            // unscii-8
+	UNSCII_ALT,        // unscii-8-alt
+	UNSCII_THIN,       // unscii-8-thin
+	UNSCII_FANTASY,    // unscii-8-fantasy
+	UNSCII_MCR,        // unscii-8-mcr
+	UNSCII_TALL,       // unscii-16
+	BLOCK,             // block
+	LEGGIE,            // leggie
+	VEGGIE,            // leggie EGA/VGA/FB
+	KATES,             // kates (nexus)
+	FKP,               // fkp
+	CTRLD              // ctrld
 } FONT_INDEX_T;
 
 // List of available halign/valign values
 typedef enum
 {
-	NONE   = 0,    // i.e., LEFT for halign, TOP for valign
-	CENTER = 1,
-	EDGE   = 2    // i.e., RIGHT for halign, BOTTOM for valign
+	NONE = 0,    // i.e., LEFT for halign, TOP for valign
+	CENTER,      //
+	EDGE         // i.e., RIGHT for halign, BOTTOM for valign
 } ALIGN_INDEX_T;
 
 // What a FBInk config should look like. Perfectly sane when fully zero-initialized.
