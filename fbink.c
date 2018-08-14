@@ -440,9 +440,6 @@ static void
 		case UNSCII_TALL:
 			bitmap = tall_get_bitmap(codepoint);
 			break;
-		case LEGGIE:
-			bitmap = leggie_get_bitmap(codepoint);
-			break;
 		case VEGGIE:
 			bitmap = veggie_get_bitmap(codepoint);
 			break;
@@ -485,6 +482,40 @@ static void
 }
 
 #ifdef FBINK_WITH_FONTS
+// Render a specific font16x16 glyph into a pixmap
+// (base size: 16x16, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
+static void
+    font16x16_render(uint32_t codepoint, unsigned char* glyph_pixmap, uint8_t fontname)
+{
+	const uint16_t* bitmap = NULL;
+
+	switch (fontname) {
+		case LEGGIE:
+		default:
+			bitmap = leggie_get_bitmap(codepoint);
+			break;
+	}
+
+	unsigned short int x;
+	unsigned short int y;
+	bool               set = false;
+	size_t             idx;
+	for (unsigned short int i = 0U; i < FONTH; i++) {
+		// x: input row, i: output row
+		x = (unsigned short int) (i / FONTSIZE_MULT);
+		for (unsigned short int j = 0U; j < FONTW; j++) {
+			// y: input column, j: output column
+			y   = (unsigned short int) (j / FONTSIZE_MULT);
+			set = bitmap[x] & 1U << y;
+			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTW=1,0)
+			idx = (size_t)(j + (i * FONTW));
+			for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
+				glyph_pixmap[idx + k] = set ? 1 : 0;
+			}
+		}
+	}
+}
+
 // Render a specific font32x32 glyph into a pixmap
 // (base size: 32x32, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
 static void
@@ -1242,7 +1273,10 @@ int
 			FONTH = 16U;
 			break;
 		case LEGGIE:
+			FONTW = 9U;
 			FONTH = 18U;
+			// Different horizontal resolution means a different data type, meaning a different render fx...
+			fxpFontRender = &font16x16_render;
 			break;
 		case BLOCK:
 			FONTW = 32U;

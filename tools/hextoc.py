@@ -8,7 +8,7 @@
 #       but if the horizontal resolution is > 8, that implies code tweaks to handle it right.
 #       Right now, fontwidth <= 8 means we store an array of uint8_t, for a <= 16xN font an array of uint16_t,
 #       a <= 32xN one an array of uint32_t, and a <= 64xN one an array of uint64_t ;).
-#       This script currently handles <= 64, and FBInk has code for uint8_t & uint32_t.
+#       This script currently handles <= 64, and FBInk has code for uint8_t, uint16_t & uint32_t.
 #       As for the conversion process itself, FontForge + gbdfed + a text editor should handle most common cases just fine ;).
 #       In case that wasn't clear, width of intermediary values are supported, it's a tiny bit of waste of memory ;).
 #
@@ -55,10 +55,10 @@ def hex2f64(v):
 	h = int(v, base=16)
 	return int(bin(h)[2:].zfill(64)[::-1], 2)
 
-fontwidth = 7
-fontheight = 15
-fontfile = "../fonts/kates-7x15.hex"
-fontname = "kates"
+fontwidth = 9
+fontheight = 18
+fontfile = "../fonts/leggie-9x18.hex"
+fontname = "leggie"
 
 print("/*")
 print("* C Header for use with https://github.com/NiLuJe/FBInk")

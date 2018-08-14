@@ -20,7 +20,7 @@
 
 #include "fbink_leggie.h"
 
-static const unsigned char*
+static const uint16_t*
     leggie_get_bitmap(uint32_t codepoint)
 {
 	if (codepoint >= 0x20 && codepoint <= 0x7e) {
