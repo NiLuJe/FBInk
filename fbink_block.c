@@ -23,7 +23,7 @@
 static const uint32_t*
     block_get_bitmap(uint32_t codepoint)
 {
-	if (codepoint >= 0x20 && codepoint <= 0x64) {
+	if (codepoint >= 0x20 && codepoint <= 0x7e) {
 		return block_block1[codepoint - 0x20];
 	} else {
 		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by this font!\n", codepoint);
