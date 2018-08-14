@@ -5,11 +5,12 @@
 # Assumes 8x8 or 8x16 glyphs
 # Tested on Unscii & its fun variants (http://pelulamu.net/unscii/)
 # NOTE: You can probably get something working out of BDF fonts, either via gbdfed, bdfe, or Unifont's bdfimplode/unibdf2hex,
-#       but if the horizontal resolution is different than 8, that implies code tweaks to handle it right.
-#       Right now, fontwidth 8 means we store an array of uint8_t, for a 16xN font an array of uint16_t,
-#       a 32xN one an array of uint32_t, and a 64xN one an array of uint64_t ;).
-#       This script currently handles 8/16/32/64, and FBInk has code for 8 & 32.
+#       but if the horizontal resolution is > 8, that implies code tweaks to handle it right.
+#       Right now, fontwidth <= 8 means we store an array of uint8_t, for a <= 16xN font an array of uint16_t,
+#       a <= 32xN one an array of uint32_t, and a <= 64xN one an array of uint64_t ;).
+#       This script currently handles <= 64, and FBInk has code for uint8_t & uint32_t.
 #       As for the conversion process itself, FontForge + gbdfed + a text editor should handle most common cases just fine ;).
+#       In case that wasn't clear, width of intermediary values are supported, it's a tiny bit of waste of memory ;).
 #
 ##
 
@@ -54,10 +55,10 @@ def hex2f64(v):
 	h = int(v, base=16)
 	return int(bin(h)[2:].zfill(64)[::-1], 2)
 
-fontwidth = 8
-fontheight = 16
-fontfile = "../fonts/ctrld-fixed-8x16r.hex"
-fontname = "ctrld"
+fontwidth = 7
+fontheight = 15
+fontfile = "../fonts/kates-7x15.hex"
+fontname = "kates"
 
 print("/*")
 print("* C Header for use with https://github.com/NiLuJe/FBInk")
@@ -73,7 +74,17 @@ cp = 0x0
 prevcp = 0x0
 
 pat_cp = "([0-9a-fA-F]{4})"
-pat_rows = "([0-9a-fA-F]{{{n}}})".format(n=int(fontwidth/4)) * fontheight
+if fontwidth <= 8:
+	pat_rows = "([0-9a-fA-F]{2})" * fontheight
+elif fontwidth <= 16:
+	pat_rows = "([0-9a-fA-F]{4})" * fontheight
+elif fontwidth <= 32:
+	pat_rows = "([0-9a-fA-F]{8})" * fontheight
+elif fontwidth <= 64:
+	pat_rows = "([0-9a-fA-F]{16})" * fontheight
+else:
+	print("Unsupported font width (Must be <= 64)!")
+	exit(-1)
 fmt = re.compile(r"{}:{}".format(pat_cp, pat_rows))
 
 with open(fontfile, "r") as f:
@@ -88,14 +99,16 @@ with open(fontfile, "r") as f:
 					print("}}; // {}".format(blockcount))
 					print("")
 					if blocknum == 1:
-						if fontwidth == 64:
-							eprint("static const uint64_t*")
-						elif fontwidth == 32:
-							eprint("static const uint32_t*")
-						elif fontwidth == 16:
-							eprint("static const uint16_t*")
-						else:
+						if fontwidth <= 8:
 							eprint("static const unsigned char*")
+						elif fontwidth <= 16:
+							eprint("static const uint16_t*")
+						elif fontwidth <= 32:
+							eprint("static const uint32_t*")
+						elif fontwidth <= 64:
+							eprint("static const uint64_t*")
+						else:
+							exit(-1)
 						eprint("    {}_get_bitmap(uint32_t codepoint)".format(fontname))
 						eprint("{")
 						if int(blockcp, base=16) > 0:
@@ -110,31 +123,32 @@ with open(fontfile, "r") as f:
 				blocknum += 1
 				blockcount = 1
 				blockcp = cp
-				if fontwidth == 64:
-					print("static const uint64_t {}_block{}[][{}] = {{".format(fontname, blocknum, fontheight))
-				elif fontwidth == 32:
-					print("static const uint32_t {}_block{}[][{}] = {{".format(fontname, blocknum, fontheight))
-				elif fontwidth == 16:
-					print("static const uint16_t {}_block{}[][{}] = {{".format(fontname, blocknum, fontheight))
-				else:
+				if fontwidth <= 8:
 					print("static const unsigned char {}_block{}[][{}] = {{".format(fontname, blocknum, fontheight))
+				elif fontwidth <= 16:
+					print("static const uint16_t {}_block{}[][{}] = {{".format(fontname, blocknum, fontheight))
+				elif fontwidth <= 32:
+					print("static const uint32_t {}_block{}[][{}] = {{".format(fontname, blocknum, fontheight))
+				elif fontwidth <= 64:
+					print("static const uint64_t {}_block{}[][{}] = {{".format(fontname, blocknum, fontheight))
+				else:
+					exit(-1)
 
 			hcp = int(cp, base=16)
 			print(u"\t{", end='')
-			if fontwidth == 8:
+			if fontwidth <= 8:
 				for i in range(fontheight):
 					print(u" {:#04x}".format(hex2f8(m.group(i+2))), end='' if i+1 == fontheight else ',')
-			elif fontwidth == 16:
+			elif fontwidth <= 16:
 				for i in range(fontheight):
 					print(u" {:#06x}".format(hex2f16(m.group(i+2))), end='' if i+1 == fontheight else ',')
-			elif fontwidth == 32:
+			elif fontwidth <= 32:
 				for i in range(fontheight):
 					print(u" {:#010x}".format(hex2f32(m.group(i+2))), end='' if i+1 == fontheight else ',')
-			elif fontwidth == 64:
+			elif fontwidth <= 64:
 				for i in range(fontheight):
 					print(u" {:#018x}".format(hex2f64(m.group(i+2))), end='' if i+1 == fontheight else ',')
 			else:
-				print("Unsupported font width (Must exactly match the width of a C data type, in bits [i.e., 8/16/32/64])!")
 				exit(-1)
 			print(u" }},\t// U+{} ({})".format(cp, chr(hcp) if hcp >= 0x20 else "ESC"))
 			prevcp = int(cp, base=16)
@@ -143,14 +157,16 @@ print("")
 
 # Handle single block fonts
 if blocknum == 1:
-	if fontwidth == 64:
-		eprint("static const uint64_t*")
-	elif fontwidth == 32:
-		eprint("static const uint32_t*")
-	elif fontwidth == 16:
-		eprint("static const uint16_t*")
-	else:
+	if fontwidth <= 8:
 		eprint("static const unsigned char*")
+	elif fontwidth <= 16:
+		eprint("static const uint16_t*")
+	elif fontwidth <= 32:
+		eprint("static const uint32_t*")
+	elif fontwidth <= 64:
+		eprint("static const uint64_t*")
+	else:
+		exit(-1)
 	eprint("    {}_get_bitmap(uint32_t codepoint)".format(fontname))
 	eprint("{")
 	if int(blockcp, base=16) > 0:
