@@ -257,6 +257,8 @@ static void font32x32_render(uint32_t, unsigned char*, uint8_t);
 //static void font64x64_render(uint32_t, unsigned char*, uint8_t);
 #endif
 
+static const char* fontname_to_string(uint8_t);
+
 static struct mxcfb_rect
     draw(const char*, unsigned short int, unsigned short int, bool, bool, unsigned short int, uint8_t, bool);
 

@@ -604,7 +604,56 @@ static void
 	}
 }
 */
+#endif    // FBINK_WITH_FONTS
+
+static const char*
+    fontname_to_string(uint8_t fontname)
+{
+	switch (fontname) {
+		case IBM:
+			return "IBM";
+#ifdef FBINK_WITH_FONTS
+		case UNSCII:
+			return "Unscii";
+		case UNSCII_ALT:
+			return "Unscii Alt";
+		case UNSCII_THIN:
+			return "Unscii Thin";
+		case UNSCII_FANTASY:
+			return "Unscii Fantasy";
+		case UNSCII_MCR:
+			return "Unscii MCR";
+		case UNSCII_TALL:
+			return "Unscii 16";
+		case BLOCK:
+			return "BLOCK";
+		case LEGGIE:
+			return "Leggie Regular";
+		case VEGGIE:
+			return "Leggie VGA/EGA/FB";
+		case KATES:
+			return "Kates";
+		case FKP:
+			return "FKP";
+		case CTRLD:
+			return "CtrlD";
+		case ORP:
+			return "Orp Regular";
+		case ORPB:
+			return "Orp Bold";
+		case ORPI:
+			return "Orp Italic";
+		case SCIENTIFICA:
+			return "Scientifica Regular";
+		case SCIENTIFICAB:
+			return "Scientifica Bold";
+		case SCIENTIFICAI:
+			return "Scientifica Italic";
 #endif
+		default:
+			return "Unknown?!";
+	}
+}
 
 // Helper function for drawing
 static struct mxcfb_rect
@@ -1423,9 +1472,10 @@ int
 	// Go!
 	FONTW = (unsigned short int) (FONTW * FONTSIZE_MULT);
 	FONTH = (unsigned short int) (FONTH * FONTSIZE_MULT);
-	ELOG("[FBInk] Fontsize set to %hux%hu (base glyph size: %hhux%hhu)",
+	ELOG("[FBInk] Fontsize set to %hux%hu (%s base glyph size: %hhux%hhu)",
 	     FONTW,
 	     FONTH,
+	     fontname_to_string(fbink_config->fontname),
 	     (uint8_t)(FONTW / FONTSIZE_MULT),
 	     (uint8_t)(FONTH / FONTSIZE_MULT));
 
