@@ -1,0 +1,107 @@
+#!/usr/bin/perl
+#
+# Copyright (C) 1998, 2013 Roman Czyborra, Paul Hardy
+#
+# LICENSE:
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#    First, parse command-line options.  Two are available:
+#
+#       - Font name (-f name or --font name)
+#       - Lines per glyph (-lnn or --lines nn, where nn is a decimal number)
+#
+use Getopt::Long;
+
+$result = GetOptions (
+             "copyright|c=s" => \$copyright, # Copyright string
+             "font|f=s"      => \$font_name, # XLFD FAMILY_NAME
+             "rows|r=i"      => \$vpixels,   # XLFD PIXEL_SIZE; vertical pixels
+             "version|v=s"   => \$version    # Version of this font
+             );
+
+if (not $font_name) {
+   $font_name = "BLOCK";
+}
+if (not $vpixels) {
+   $vpixels  = 32;
+}
+if (not $version) {
+   $version = "0.9";
+}
+
+$point_size   = $vpixels;
+$point_size10 = 10 * $point_size;
+
+while (<>) { chomp; $glyph{$1} = $2 if /^([0-9a-fA-F]+):([0-9a-fA-F]+)/; }
+@chars = sort keys %glyph;
+$nchars = $#chars + 1;
+
+
+print "STARTFONT 2.1
+FONT -gnu-${font_name}-Medium-R-Normal-Sans-${vpixels}-${point_size10}-75-75-c-80-iso8859-1
+SIZE $point_size 75 75
+FONTBOUNDINGBOX $vpixels $vpixels 0 -4
+STARTPROPERTIES 24
+COPYRIGHT \"${copyright}\"
+FONT_VERSION \"${version}\"
+FONT_TYPE \"Bitmap\"
+FOUNDRY \"PoP\"
+FAMILY_NAME \"${font_name}\"
+WEIGHT_NAME \"Medium\"
+SLANT \"R\"
+SETWIDTH_NAME \"Normal\"
+ADD_STYLE_NAME \"Sans Serif\"
+PIXEL_SIZE ${vpixels}
+POINT_SIZE ${point_size10}
+RESOLUTION_X 75
+RESOLUTION_Y 75
+SPACING \"C\"
+AVERAGE_WIDTH 80
+CHARSET_REGISTRY \"ISO8859\"
+CHARSET_ENCODING \"1\"
+UNDERLINE_POSITION -4
+UNDERLINE_THICKNESS 1
+CAP_HEIGHT 10
+X_HEIGHT 32
+FONT_ASCENT 14
+FONT_DESCENT 4
+DEFAULT_CHAR 20
+ENDPROPERTIES
+CHARS $nchars\n" or die ("Cannot print to stdout.\n");
+
+# TODO: $swidth needs to be modified to accomodate different widths better
+#       for glyphs with height different than 16 pixels.
+
+foreach $character (@chars)
+{
+	$encoding = hex($character); $glyph = $glyph{$character};
+	$width    = length ($glyph) / $vpixels;  # hex digits per row
+	$dwidth   = $width * 4;     # device width, in pixels; 1 digit = 4 px
+	# scalable width, units of 1/1000th full-width glyph
+	$swidth   = (1000 * $width) / ($vpixels / 2);
+	$glyph    =~ s/((.){$width})/\n$1/g;
+	$character = "$character $charname"
+	    if $charname = $charname{pack("n",hex($character))};
+
+	print "STARTCHAR U+$character
+ENCODING $encoding
+SWIDTH $swidth 0
+DWIDTH $dwidth 0
+BBX $dwidth $vpixels 0 -4
+BITMAP $glyph
+ENDCHAR\n" or die ("Cannot print to stdout.\n");
+}
+
+print "ENDFONT\n" or die ("Cannot print to stdout.\n");
