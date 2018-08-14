@@ -68,7 +68,8 @@ typedef enum
 	VEGGIE,            // leggie EGA/VGA/FB
 	KATES,             // kates (nexus)
 	FKP,               // fkp
-	CTRLD              // ctrld
+	CTRLD,             // ctrld
+	ORP                // orp (regular)
 } FONT_INDEX_T;
 
 // List of available halign/valign values

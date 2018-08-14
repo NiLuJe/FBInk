@@ -72,7 +72,7 @@ static void
 	    "\t\t\tThe exact upper value depends on the resolution of your screen.\n"
 	    "\t-F, --font NAME\tRender glyphs from builtin font NAME (Default: IBM).\n"
 #ifdef FBINK_WITH_FONTS
-	    "\t\t\tAvailable font families: IBM, UNSCII, ALT, THIN, FANTASY, MCR, TALL, BLOCK, LEGGIE, VEGGIE, KATES, FKP, CTRLD\n"
+	    "\t\t\tAvailable font families: IBM, UNSCII, ALT, THIN, FANTASY, MCR, TALL, BLOCK, LEGGIE, VEGGIE, KATES, FKP, CTRLD, ORP\n"
 #else
 	    "\t\t\tAvailable font families: IBM\n"
 #endif
@@ -309,6 +309,8 @@ int
 					fbink_config.fontname = FKP;
 				} else if (strcasecmp(optarg, "CTRLD") == 0) {
 					fbink_config.fontname = CTRLD;
+				} else if (strcasecmp(optarg, "ORP") == 0) {
+					fbink_config.fontname = ORP;
 				} else {
 					fprintf(stderr, "Unknown font name '%s'.\n", optarg);
 					errfnd = 1;

@@ -33,3 +33,7 @@ As well as a number of third-party resources (namely, font files):
 		Licensed under the MIT License (https://opensource.org/licenses/MIT)
 		(https://github.com/bjin/ctrld-font)
 		(http://www.dcmembers.com/jibsen/download/61/)
+
+	* orp, a small bitmap pixel-perfect font, by Micah Elliott,
+		Released into the public domain.
+		(https://github.com/MicahElliott/Orp-Font)

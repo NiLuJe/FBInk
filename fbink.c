@@ -455,6 +455,9 @@ static void
 		case CTRLD:
 			bitmap = ctrld_get_bitmap(codepoint);
 			break;
+		case ORP:
+			bitmap = orp_get_bitmap(codepoint);
+			break;
 		case IBM:
 		default:
 			bitmap = font8x8_get_bitmap(codepoint);
@@ -1299,6 +1302,10 @@ int
 #ifdef FBINK_WITH_FONTS
 	// NOTE: Handle custom fonts with non-standard sizes
 	switch (fbink_config->fontname) {
+		case ORP:
+			FONTW = 6U;
+			FONTH = 12U;
+			break;
 		case KATES:
 			FONTW = 7U;
 			FONTH = 15U;
@@ -2767,8 +2774,10 @@ cleanup:
 #	include "fbink_unscii.c"
 // PoP's Block font, c.f., https://www.mobileread.com/forums/showpost.php?p=3736203&postcount=26 and earlier ;).
 #	include "fbink_block.c"
-// Wiktor Kerr's Leggie (https://memleek.org/leggie/)
+// Wiktor Kerr's Leggie (https://memleek.org/leggie)
 #	include "fbink_leggie.c"
+// Micah Elliott's Orp (https://github.com/MicahElliott/Orp-Font)
+#	include "fbink_orp.c"
 // Various other small fonts
 #	include "fbink_misc_fonts.c"
 #endif

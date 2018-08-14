@@ -55,10 +55,10 @@ def hex2f64(v):
 	h = int(v, base=16)
 	return int(bin(h)[2:].zfill(64)[::-1], 2)
 
-fontwidth = 8
-fontheight = 18
-fontfile = "../fonts/leggie-8x18.hex"
-fontname = "leggie"
+fontwidth = 6
+fontheight = 12
+fontfile = "../fonts/orp-6x12.hex"
+fontname = "orp"
 
 print("/*")
 print("* C Header for use with https://github.com/NiLuJe/FBInk")
