@@ -413,7 +413,7 @@ static const unsigned char*
 }
 
 // Render a specific font8x8 glyph into a pixmap
-// (base size: 8x8, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
+// (base size: width <= 8, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
 static void
     font8x8_render(uint32_t codepoint, unsigned char* glyph_pixmap, uint8_t fontname UNUSED_BY_MINIMAL)
 {
@@ -487,7 +487,7 @@ static void
 #ifdef FBINK_WITH_FONTS
 /*
 // Render a specific font16x16 glyph into a pixmap
-// (base size: 16x16, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
+// (base size: 8 < width <= 16, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
 static void
     font16x16_render(uint32_t codepoint, unsigned char* glyph_pixmap, uint8_t fontname)
 {
@@ -520,7 +520,7 @@ static void
 */
 
 // Render a specific font32x32 glyph into a pixmap
-// (base size: 32x32, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
+// (base size: 16 < width <= 32, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
 static void
     font32x32_render(uint32_t codepoint, unsigned char* glyph_pixmap, uint8_t fontname)
 {
@@ -555,7 +555,7 @@ static void
 
 /*
 // Render a specific font64x64 glyph into a pixmap
-// (base size: 64x64, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
+// (base size: 32 < width <= 64, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
 static void
     font64x64_render(uint32_t codepoint, unsigned char* glyph_pixmap, uint8_t fontname)
 {
