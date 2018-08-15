@@ -217,7 +217,14 @@ void (*fxpGetPixel)(FBInkCoordinates*, FBInkColor*) = NULL;
 // As well as the appropriate coordinates rotation function...
 void (*fxpRotateCoords)(FBInkCoordinates*) = NULL;
 // And the font rendering function...
-void (*fxpFontRender)(uint32_t, unsigned char*, uint8_t) = NULL;
+void (*fxpFontRender)(uint32_t, unsigned char*) = NULL;
+// And the font bitmap getter...
+const unsigned char* (*fxpFont8xGetBitmap)(uint32_t) = NULL;
+#ifdef FBINK_WITH_FONTS
+//const uint16_t* (*fxpFont16xGetBitmap)(uint32_t) = NULL;
+const uint32_t* (*fxpFont32xGetBitmap)(uint32_t) = NULL;
+//const uint64_t* (*fxpFont64xGetBitmap)(uint32_t) = NULL;
+#endif
 
 // Where we track device/screen-specific quirks
 FBInkDeviceQuirks deviceQuirks = { 0 };
@@ -250,17 +257,16 @@ static void fill_rect(unsigned short int, unsigned short int, unsigned short int
 static void clear_screen(uint8_t);
 
 static const unsigned char* font8x8_get_bitmap(uint32_t);
-static void                 font8x8_render(uint32_t, unsigned char*, uint8_t UNUSED_BY_MINIMAL);
+static void                 font8x8_render(uint32_t, unsigned char*);
 #ifdef FBINK_WITH_FONTS
-//static void font16x16_render(uint32_t, unsigned char*, uint8_t);
-static void font32x32_render(uint32_t, unsigned char*, uint8_t);
-//static void font64x64_render(uint32_t, unsigned char*, uint8_t);
+//static void font16x16_render(uint32_t, unsigned char*);
+static void font32x32_render(uint32_t, unsigned char*);
+//static void font64x64_render(uint32_t, unsigned char*);
 #endif
 
 static const char* fontname_to_string(uint8_t);
 
-static struct mxcfb_rect
-    draw(const char*, unsigned short int, unsigned short int, bool, bool, unsigned short int, uint8_t, bool);
+static struct mxcfb_rect draw(const char*, unsigned short int, unsigned short int, bool, bool, unsigned short int, bool);
 
 static long int jiffies_to_ms(long int);
 #ifdef FBINK_FOR_KINDLE

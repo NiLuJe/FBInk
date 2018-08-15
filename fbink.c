@@ -415,72 +415,11 @@ static const unsigned char*
 // Render a specific font8x8 glyph into a pixmap
 // (base size: width <= 8, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
 static void
-    font8x8_render(uint32_t codepoint, unsigned char* glyph_pixmap, uint8_t fontname UNUSED_BY_MINIMAL)
+    font8x8_render(uint32_t codepoint, unsigned char* glyph_pixmap)
 {
 	const unsigned char* bitmap = NULL;
 
-	// Do we have Unscii fonts compiled in?
-#ifdef FBINK_WITH_FONTS
-	switch (fontname) {
-		case UNSCII:
-			bitmap = unscii_get_bitmap(codepoint);
-			break;
-		case UNSCII_ALT:
-			bitmap = alt_get_bitmap(codepoint);
-			break;
-		case UNSCII_THIN:
-			bitmap = thin_get_bitmap(codepoint);
-			break;
-		case UNSCII_FANTASY:
-			bitmap = fantasy_get_bitmap(codepoint);
-			break;
-		case UNSCII_MCR:
-			bitmap = mcr_get_bitmap(codepoint);
-			break;
-		case UNSCII_TALL:
-			bitmap = tall_get_bitmap(codepoint);
-			break;
-		case LEGGIE:
-			bitmap = leggie_get_bitmap(codepoint);
-			break;
-		case VEGGIE:
-			bitmap = veggie_get_bitmap(codepoint);
-			break;
-		case KATES:
-			bitmap = kates_get_bitmap(codepoint);
-			break;
-		case FKP:
-			bitmap = fkp_get_bitmap(codepoint);
-			break;
-		case CTRLD:
-			bitmap = ctrld_get_bitmap(codepoint);
-			break;
-		case ORP:
-			bitmap = orp_get_bitmap(codepoint);
-			break;
-		case ORPB:
-			bitmap = orpb_get_bitmap(codepoint);
-			break;
-		case ORPI:
-			bitmap = orpi_get_bitmap(codepoint);
-			break;
-		case SCIENTIFICA:
-			bitmap = scientifica_get_bitmap(codepoint);
-			break;
-		case SCIENTIFICAB:
-			bitmap = scientificab_get_bitmap(codepoint);
-			break;
-		case SCIENTIFICAI:
-			bitmap = scientificai_get_bitmap(codepoint);
-			break;
-		case IBM:
-		default:
-			bitmap = font8x8_get_bitmap(codepoint);
-			break;
-	}
-#else
-	bitmap = font8x8_get_bitmap(codepoint);
-#endif
+	bitmap = (*fxpFont8xGetBitmap)(codepoint);
 
 	unsigned short int x;
 	unsigned short int y;
@@ -507,14 +446,11 @@ static void
 // Render a specific font16x16 glyph into a pixmap
 // (base size: 8 < width <= 16, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
 static void
-    font16x16_render(uint32_t codepoint, unsigned char* glyph_pixmap, uint8_t fontname)
+    font16x16_render(uint32_t codepoint, unsigned char* glyph_pixmap)
 {
 	const uint16_t* bitmap = NULL;
 
-	switch (fontname) {
-		default:
-			break;
-	}
+	bitmap = (*fxpFont16xGetBitmap)(codepoint);
 
 	unsigned short int x;
 	unsigned short int y;
@@ -540,16 +476,11 @@ static void
 // Render a specific font32x32 glyph into a pixmap
 // (base size: 16 < width <= 32, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
 static void
-    font32x32_render(uint32_t codepoint, unsigned char* glyph_pixmap, uint8_t fontname)
+    font32x32_render(uint32_t codepoint, unsigned char* glyph_pixmap)
 {
 	const uint32_t* bitmap = NULL;
 
-	switch (fontname) {
-		case BLOCK:
-		default:
-			bitmap = block_get_bitmap(codepoint);
-			break;
-	}
+	bitmap = (*fxpFont32xGetBitmap)(codepoint);
 
 	unsigned short int x;
 	unsigned short int y;
@@ -575,14 +506,11 @@ static void
 // Render a specific font64x64 glyph into a pixmap
 // (base size: 32 < width <= 64, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
 static void
-    font64x64_render(uint32_t codepoint, unsigned char* glyph_pixmap, uint8_t fontname)
+    font64x64_render(uint32_t codepoint, unsigned char* glyph_pixmap)
 {
 	const uint64_t* bitmap = NULL;
 
-	switch (fontname) {
-		default:
-			break;
-	}
+	bitmap = (*fxpFont64xGetBitmap)(codepoint);
 
 	unsigned short int x;
 	unsigned short int y;
@@ -663,7 +591,6 @@ static struct mxcfb_rect
 	 bool               is_inverted,
 	 bool               is_centered,
 	 unsigned short int multiline_offset,
-	 uint8_t            fontname,
 	 bool               halfcell_offset)
 {
 	LOG("Printing '%s' @ line offset %hu (meaning row %hu)",
@@ -820,7 +747,7 @@ static struct mxcfb_rect
 		    ch);
 
 		// Get the glyph's pixmap
-		(*fxpFontRender)(ch, pixmap, fontname);
+		(*fxpFontRender)(ch, pixmap);
 
 		// loop through pixel rows
 		for (unsigned short int y = 0U; y < FONTH; y++) {
@@ -1046,10 +973,10 @@ static int
 	struct mxcfb_update_data_v1_ntx update = {
 		.update_region = region,
 		.waveform_mode = waveform_mode,
-		.update_mode = update_mode,
+		.update_mode   = update_mode,
 		.update_marker = marker,
-		.temp = TEMP_USE_AMBIENT,
-		.flags = (waveform_mode == WAVEFORM_MODE_REAGLD)
+		.temp          = TEMP_USE_AMBIENT,
+		.flags         = (waveform_mode == WAVEFORM_MODE_REAGLD)
 			     ? EPDC_FLAG_USE_AAD
 			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
 		.alt_buffer_data = { 0U },
@@ -1059,7 +986,7 @@ static int
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V1_NTX, &update);
 
 	if (rv < 0) {
-		char buf[256];
+		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
 		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE_V1_NTX: %s\n", errstr);
 		if (errno == EINVAL) {
@@ -1077,7 +1004,7 @@ static int
 		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1, &marker);
 
 		if (rv < 0) {
-			char buf[256];
+			char  buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
 			fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1: %s\n", errstr);
 			return ERRCODE(EXIT_FAILURE);
@@ -1092,23 +1019,23 @@ static int
 
 // Kobo Mark 7 devices ([Mk7<->??)
 static int
-    refresh_kobo_mk7(int fbfd,
+    refresh_kobo_mk7(int                     fbfd,
 		     const struct mxcfb_rect region,
-		     uint32_t waveform_mode,
-		     uint32_t update_mode,
-		     uint32_t marker)
+		     uint32_t                waveform_mode,
+		     uint32_t                update_mode,
+		     uint32_t                marker)
 {
 	struct mxcfb_update_data_v2 update = {
 		.update_region = region,
 		.waveform_mode = waveform_mode,
-		.update_mode = update_mode,
+		.update_mode   = update_mode,
 		.update_marker = marker,
-		.temp = TEMP_USE_AMBIENT,
-		.flags = (waveform_mode == WAVEFORM_MODE_GLD16)
+		.temp          = TEMP_USE_AMBIENT,
+		.flags         = (waveform_mode == WAVEFORM_MODE_GLD16)
 			     ? EPDC_FLAG_USE_REGAL
 			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
-		.dither_mode = EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
-		.quant_bit = 0,
+		.dither_mode     = EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		.quant_bit       = 0,
 		.alt_buffer_data = { 0U },
 	};
 
@@ -1116,7 +1043,7 @@ static int
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V2, &update);
 
 	if (rv < 0) {
-		char buf[256];
+		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
 		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE_V2: %s\n", errstr);
 		if (errno == EINVAL) {
@@ -1132,14 +1059,14 @@ static int
 
 	if (update_mode == UPDATE_MODE_FULL) {
 		struct mxcfb_update_marker_data update_marker = {
-			.update_marker = marker,
+			.update_marker  = marker,
 			.collision_test = 0U,
 		};
 
 		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3, &update_marker);
 
 		if (rv < 0) {
-			char buf[256];
+			char  buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
 			fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3: %s\n", errstr);
 			return ERRCODE(EXIT_FAILURE);
@@ -1355,55 +1282,136 @@ int
 	}
 #endif
 
-	// NOTE: Reset original font resolution, in case we're re-init'ing,
+	// NOTE: Set (& reset) original font resolution, in case we're re-init'ing,
 	//       since we're relying on the default value to calculate the scaled value,
 	//       and we're using this value to set MAXCOLS & MAXROWS, which we *need* to be sane.
-	FONTW = 8U;
-	FONTH = 8U;
-	// As well as the font rendering function pointer...
-	fxpFontRender = &font8x8_render;
-
 #ifdef FBINK_WITH_FONTS
-	// NOTE: Handle custom fonts with non-standard sizes
+	// Setup custom fonts (glyph size, render fx, bitmap fx)
 	switch (fbink_config->fontname) {
 		case SCIENTIFICA:
+			FONTW              = 5U;
+			FONTH              = 12U;
+			fxpFontRender      = &font8x8_render;
+			fxpFont8xGetBitmap = &scientifica_get_bitmap;
+			break;
 		case SCIENTIFICAB:
-			FONTW = 5U;
-			FONTH = 12U;
+			FONTW              = 5U;
+			FONTH              = 12U;
+			fxpFontRender      = &font8x8_render;
+			fxpFont8xGetBitmap = &scientificab_get_bitmap;
 			break;
 		case SCIENTIFICAI:
-			FONTW = 7U;
-			FONTH = 12U;
+			FONTW              = 7U;
+			FONTH              = 12U;
+			fxpFontRender      = &font8x8_render;
+			fxpFont8xGetBitmap = &scientificai_get_bitmap;
 			break;
 		case ORP:
+			FONTW              = 6U;
+			FONTH              = 12U;
+			fxpFontRender      = &font8x8_render;
+			fxpFont8xGetBitmap = &orp_get_bitmap;
+			break;
 		case ORPB:
+			FONTW              = 6U;
+			FONTH              = 12U;
+			fxpFontRender      = &font8x8_render;
+			fxpFont8xGetBitmap = &orpb_get_bitmap;
+			break;
 		case ORPI:
-			FONTW = 6U;
-			FONTH = 12U;
+			FONTW              = 6U;
+			FONTH              = 12U;
+			fxpFontRender      = &font8x8_render;
+			fxpFont8xGetBitmap = &orpi_get_bitmap;
 			break;
 		case KATES:
-			FONTW = 7U;
-			FONTH = 15U;
+			FONTW              = 7U;
+			FONTH              = 15U;
+			fxpFontRender      = &font8x8_render;
+			fxpFont8xGetBitmap = &kates_get_bitmap;
 			break;
 		case UNSCII_TALL:
+			FONTW              = 8U;
+			FONTH              = 16U;
+			fxpFontRender      = &font8x8_render;
+			fxpFont8xGetBitmap = &tall_get_bitmap;
+			break;
 		case VEGGIE:
+			FONTW              = 8U;
+			FONTH              = 16U;
+			fxpFontRender      = &font8x8_render;
+			fxpFont8xGetBitmap = &veggie_get_bitmap;
+			break;
 		case FKP:
+			FONTW              = 8U;
+			FONTH              = 16U;
+			fxpFontRender      = &font8x8_render;
+			fxpFont8xGetBitmap = &fkp_get_bitmap;
+			break;
 		case CTRLD:
-			FONTH = 16U;
+			FONTW              = 8U;
+			FONTH              = 16U;
+			fxpFontRender      = &font8x8_render;
+			fxpFont8xGetBitmap = &ctrld_get_bitmap;
 			break;
 		case LEGGIE:
-			FONTH = 18U;
+			FONTW              = 8U;
+			FONTH              = 18U;
+			fxpFontRender      = &font8x8_render;
+			fxpFont8xGetBitmap = &leggie_get_bitmap;
 			break;
 		case BLOCK:
 			FONTW = 32U;
 			FONTH = 32U;
 			// An horizontal resolution > 8 means a different data type, meaning a different render fx...
-			fxpFontRender = &font32x32_render;
+			fxpFontRender       = &font32x32_render;
+			fxpFont32xGetBitmap = &block_get_bitmap;
 			break;
+		case UNSCII_MCR:
+			FONTW              = 8U;
+			FONTH              = 8U;
+			fxpFontRender      = &font8x8_render;
+			fxpFont8xGetBitmap = &mcr_get_bitmap;
+			break;
+		case UNSCII_FANTASY:
+			FONTW              = 8U;
+			FONTH              = 8U;
+			fxpFontRender      = &font8x8_render;
+			fxpFont8xGetBitmap = &fantasy_get_bitmap;
+			break;
+		case UNSCII_THIN:
+			FONTW              = 8U;
+			FONTH              = 8U;
+			fxpFontRender      = &font8x8_render;
+			fxpFont8xGetBitmap = &thin_get_bitmap;
+			break;
+		case UNSCII_ALT:
+			FONTW              = 8U;
+			FONTH              = 8U;
+			fxpFontRender      = &font8x8_render;
+			fxpFont8xGetBitmap = &alt_get_bitmap;
+			break;
+		case UNSCII:
+			FONTW              = 8U;
+			FONTH              = 8U;
+			fxpFontRender      = &font8x8_render;
+			fxpFont8xGetBitmap = &unscii_get_bitmap;
+			break;
+		case IBM:
 		default:
+			FONTW              = 8U;
+			FONTH              = 8U;
+			fxpFontRender      = &font8x8_render;
+			fxpFont8xGetBitmap = &font8x8_get_bitmap;
 			break;
 	}
 #else
+	// Default font is IBM
+	FONTW              = 8U;
+	FONTH              = 8U;
+	fxpFontRender      = &font8x8_render;
+	fxpFont8xGetBitmap = &font8x8_get_bitmap;
+
 	if (fbink_config->fontname != IBM) {
 		ELOG("[FBInk] Custom fonts are not supported in this FBInk build, using IBM instead.");
 	}
@@ -2000,7 +2008,6 @@ int
 			      fbink_config->is_inverted,
 			      fbink_config->is_centered,
 			      multiline_offset,
-			      fbink_config->fontname,
 			      halfcell_offset);
 
 		// Next line!
