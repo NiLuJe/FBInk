@@ -508,7 +508,7 @@ int
 				goto cleanup;
 			}
 		} else if (is_eval) {
-			fbink_state_dump();
+			fbink_state_dump(&fbink_config);
 		} else {
 			show_helpmsg();
 		}

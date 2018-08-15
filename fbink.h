@@ -139,7 +139,7 @@ FBINK_API int fbink_close(int fbfd);
 FBINK_API int fbink_init(int fbfd, const FBInkConfig* fbink_config);
 
 // Dumps a few of our internal state variables to stdout, in a format easily consumable by a shell (i.e., eval)
-FBINK_API void fbink_state_dump(void);
+FBINK_API void fbink_state_dump(const FBInkConfig* fbink_config);
 
 // Print a string on screen.
 // NOTE: The string is expected to be encoded in valid UTF-8, no validation of any kind is done by the library,

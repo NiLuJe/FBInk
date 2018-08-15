@@ -1592,17 +1592,18 @@ cleanup:
 
 // Dump a few of our internal state variables to stdout, for shell script consumption
 void
-    fbink_state_dump(void)
+    fbink_state_dump(const FBInkConfig* fbink_config)
 {
 	fprintf(
 	    stdout,
-	    "viewWidth=%u;viewHeight=%u;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld",
+	    "viewWidth=%u;viewHeight=%u;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld",
 	    viewWidth,
 	    viewHeight,
 	    vInfo.bits_per_pixel,
 	    FONTW,
 	    FONTH,
 	    FONTSIZE_MULT,
+	    fontname_to_string(fbink_config->fontname),
 	    MAXCOLS,
 	    MAXROWS,
 	    deviceQuirks.isPerfectFit,
