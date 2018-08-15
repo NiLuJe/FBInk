@@ -421,21 +421,27 @@ static void
 
 	bitmap = (*fxpFont8xGetBitmap)(codepoint);
 
-	unsigned short int x;
-	unsigned short int y;
+	unsigned short int i;
+	unsigned short int j;
 	bool               set = false;
 	size_t             idx;
-	for (unsigned short int i = 0U; i < FONTH; i++) {
-		// x: input row, i: output row
-		x = (unsigned short int) (i / FONTSIZE_MULT);
-		for (unsigned short int j = 0U; j < FONTW; j++) {
-			// y: input column, j: output column
-			y   = (unsigned short int) (j / FONTSIZE_MULT);
+
+	// NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution),
+	//       and from there compute the extra pixels for that single input pixel given our scaling factor...
+	for (unsigned short int x = 0U; x < (FONTH / FONTSIZE_MULT); x++) {
+		// x: input row, i: first output row
+		i = (unsigned short int) (x * FONTSIZE_MULT);
+		for (unsigned short int y = 0U; y < (FONTW / FONTSIZE_MULT); y++) {
+			// y: input column, j: first output column
+			j   = (unsigned short int) (y * FONTSIZE_MULT);
 			set = bitmap[x] & 1U << y;
 			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTW=1,0)
-			idx = (size_t)(j + (i * FONTW));
+			// NOTE: Apply our scaling factor in both dimensions!
 			for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
-				glyph_pixmap[idx + k] = set ? 1 : 0;
+				idx = (size_t)(j + ((i + k) * FONTW));
+				for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {
+					glyph_pixmap[idx + l] = set ? 1 : 0;
+				}
 			}
 		}
 	}
@@ -452,21 +458,27 @@ static void
 
 	bitmap = (*fxpFont16xGetBitmap)(codepoint);
 
-	unsigned short int x;
-	unsigned short int y;
+	unsigned short int i;
+	unsigned short int j;
 	bool               set = false;
 	size_t             idx;
-	for (unsigned short int i = 0U; i < FONTH; i++) {
-		// x: input row, i: output row
-		x = (unsigned short int) (i / FONTSIZE_MULT);
-		for (unsigned short int j = 0U; j < FONTW; j++) {
-			// y: input column, j: output column
-			y   = (unsigned short int) (j / FONTSIZE_MULT);
+
+	// NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution),
+	//       and from there compute the extra pixels for that single input pixel given our scaling factor...
+	for (unsigned short int x = 0U; x < (FONTH / FONTSIZE_MULT); x++) {
+		// x: input row, i: first output row
+		i = (unsigned short int) (x * FONTSIZE_MULT);
+		for (unsigned short int y = 0U; y < (FONTW / FONTSIZE_MULT); y++) {
+			// y: input column, j: first output column
+			j   = (unsigned short int) (y * FONTSIZE_MULT);
 			set = bitmap[x] & 1U << y;
 			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTW=1,0)
-			idx = (size_t)(j + (i * FONTW));
+			// NOTE: Apply our scaling factor in both dimensions!
 			for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
-				glyph_pixmap[idx + k] = set ? 1 : 0;
+				idx = (size_t)(j + ((i + k) * FONTW));
+				for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {
+					glyph_pixmap[idx + l] = set ? 1 : 0;
+				}
 			}
 		}
 	}
@@ -482,21 +494,27 @@ static void
 
 	bitmap = (*fxpFont32xGetBitmap)(codepoint);
 
-	unsigned short int x;
-	unsigned short int y;
+	unsigned short int i;
+	unsigned short int j;
 	bool               set = false;
 	size_t             idx;
-	for (unsigned short int i = 0U; i < FONTH; i++) {
-		// x: input row, i: output row
-		x = (unsigned short int) (i / FONTSIZE_MULT);
-		for (unsigned short int j = 0U; j < FONTW; j++) {
-			// y: input column, j: output column
-			y   = (unsigned short int) (j / FONTSIZE_MULT);
+
+	// NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution),
+	//       and from there compute the extra pixels for that single input pixel given our scaling factor...
+	for (unsigned short int x = 0U; x < (FONTH / FONTSIZE_MULT); x++) {
+		// x: input row, i: first output row
+		i = (unsigned short int) (x * FONTSIZE_MULT);
+		for (unsigned short int y = 0U; y < (FONTW / FONTSIZE_MULT); y++) {
+			// y: input column, j: first output column
+			j   = (unsigned short int) (y * FONTSIZE_MULT);
 			set = bitmap[x] & 1U << y;
 			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTW=1,0)
-			idx = (size_t)(j + (i * FONTW));
+			// NOTE: Apply our scaling factor in both dimensions!
 			for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
-				glyph_pixmap[idx + k] = set ? 1 : 0;
+				idx = (size_t)(j + ((i + k) * FONTW));
+				for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {
+					glyph_pixmap[idx + l] = set ? 1 : 0;
+				}
 			}
 		}
 	}
@@ -512,21 +530,27 @@ static void
 
 	bitmap = (*fxpFont64xGetBitmap)(codepoint);
 
-	unsigned short int x;
-	unsigned short int y;
+	unsigned short int i;
+	unsigned short int j;
 	bool               set = false;
 	size_t             idx;
-	for (unsigned short int i = 0U; i < FONTH; i++) {
-		// x: input row, i: output row
-		x = (unsigned short int) (i / FONTSIZE_MULT);
-		for (unsigned short int j = 0U; j < FONTW; j++) {
-			// y: input column, j: output column
-			y   = (unsigned short int) (j / FONTSIZE_MULT);
+
+	// NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution),
+	//       and from there compute the extra pixels for that single input pixel given our scaling factor...
+	for (unsigned short int x = 0U; x < (FONTH / FONTSIZE_MULT); x++) {
+		// x: input row, i: first output row
+		i = (unsigned short int) (x * FONTSIZE_MULT);
+		for (unsigned short int y = 0U; y < (FONTW / FONTSIZE_MULT); y++) {
+			// y: input column, j: first output column
+			j   = (unsigned short int) (y * FONTSIZE_MULT);
 			set = bitmap[x] & 1U << y;
 			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTW=1,0)
-			idx = (size_t)(j + (i * FONTW));
+			// NOTE: Apply our scaling factor in both dimensions!
 			for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
-				glyph_pixmap[idx + k] = set ? 1 : 0;
+				idx = (size_t)(j + ((i + k) * FONTW));
+				for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {
+					glyph_pixmap[idx + l] = set ? 1 : 0;
+				}
 			}
 		}
 	}
