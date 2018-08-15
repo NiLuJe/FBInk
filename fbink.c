@@ -1440,6 +1440,7 @@ int
 			     max_fontmult);
 		}
 #else
+		// The default font's glyphs are 8x8, do the least amount of work possible ;).
 		max_fontmult = (uint8_t)(viewWidth / min_maxcols / 8U);
 		if (FONTSIZE_MULT > max_fontmult) {
 			FONTSIZE_MULT = max_fontmult;
@@ -1464,7 +1465,7 @@ int
 		}
 #ifdef FBINK_WITH_FONTS
 		if (fbink_config->fontname == BLOCK) {
-			// Block is 4 times wider than other fonts, compensate for that...
+			// Block is roughly 4 times wider than other fonts, compensate for that...
 			FONTSIZE_MULT = (uint8_t) MAX(1U, FONTSIZE_MULT / 4U);
 		}
 #endif
@@ -1652,7 +1653,8 @@ static int
 int
     fbink_close(int fbfd)
 {
-	// With a few sprinkles of sanity checks, in case something *really* unexpected happen, or the API was used badly.
+	// With a few sprinkles of sanity checks, in case something *really* unexpected happen,
+	// or simply to cover a wide range of API usage.
 	if (isFbMapped) {
 		if (unmap_fb() != EXIT_SUCCESS) {
 			return ERRCODE(EXIT_FAILURE);
@@ -2852,7 +2854,7 @@ cleanup:
 #endif
 // Extra fonts
 #ifdef FBINK_WITH_FONTS
-// Viznut's Unscii (http://pelulamu.net/unscii/)
+// Viznut's Unscii (http://pelulamu.net/unscii)
 #	include "fbink_unscii.c"
 // PoP's Block font, c.f., https://www.mobileread.com/forums/showpost.php?p=3736203&postcount=26 and earlier ;).
 #	include "fbink_block.c"
@@ -2862,7 +2864,7 @@ cleanup:
 #	include "fbink_orp.c"
 // Nerdy Pepper's Scientifica (https://github.com/NerdyPepper/scientifica)
 #	include "fbink_scientifica.c"
-// Various other small fonts
+// Various other small fonts (c.f., CREDITS for details)
 #	include "fbink_misc_fonts.c"
 #endif
 // Contains fbink_button_scan's implementation, Kobo only, and has a bit of Linux MT input thrown in ;).

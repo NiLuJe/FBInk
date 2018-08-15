@@ -10,7 +10,7 @@
 #       a <= 32xN one an array of uint32_t, and a <= 64xN one an array of uint64_t ;).
 #       This script currently handles <= 64, as does FBInk.
 #       As for the conversion process itself, FontForge + gbdfed + a text editor should handle most common cases just fine ;).
-#       In case that wasn't clear, width of intermediary values are supported, it's a tiny bit of waste of memory ;).
+#       In case that wasn't clear, width of intermediary values are supported, it's just a bit of a waste of memory ;).
 #
 ##
 
