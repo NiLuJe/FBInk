@@ -526,13 +526,15 @@ static struct mxcfb_rect
 	// Clamp h/v offset to safe values
 	short int voffset = fbink_config->voffset;
 	short int hoffset = fbink_config->hoffset;
-	// NOTE: This test isn't perfect, but then, if you play with this, you do in knowing the risks...
+	// NOTE: This test isn't perfect, but then, if you play with this, you do it knowing the risks...
 	if (abs(voffset) >= viewHeight) {
-		LOG("The specified vertical offset (%hd) pushes *all* content out of bounds, discarding it", voffset);
+		LOG("The specified vertical offset (%hd) necessarily pushes *all* content out of bounds, discarding it",
+		    voffset);
 		voffset = 0;
 	}
 	if (abs(hoffset) >= viewWidth) {
-		LOG("The specified horizontal offset (%hd) pushes *all* content out of bounds, discarding it", hoffset);
+		LOG("The specified horizontal offset (%hd) necessarily pushes *all* content out of bounds, discarding it",
+		    hoffset);
 		hoffset = 0;
 	}
 	// Recap final offset values
