@@ -525,8 +525,8 @@ static struct mxcfb_rect
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
-		.top    = (uint32_t)((row - multiline_offset) * FONTH),
-		.left   = (uint32_t)(col * FONTW),
+		.top    = (uint32_t)(((row - multiline_offset) * FONTH) + fbink_config->voffset),
+		.left   = (uint32_t)((col * FONTW) + fbink_config->hoffset),
 		.width  = multiline_offset > 0U ? (viewWidth - (uint32_t)(col * FONTW)) : (uint32_t)(charcount * FONTW),
 		.height = (uint32_t)((multiline_offset + 1U) * FONTH),
 	};
