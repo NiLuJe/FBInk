@@ -627,7 +627,9 @@ static struct mxcfb_rect
 
 	// NOTE: Extra code duplication because the glyph's bitmap data type depends on the glyph's width,
 	//       and we want to inline this and branch outside the loops...
+#ifdef FBINK_WITH_FONTS
 	if (glyphWidth <= 8) {
+#endif
 		while ((ch = u8_nextchar(text, &bi)) != 0U) {
 			LOG("Char %hu (@ %hu) out of %hu is @ byte offset %u and is U+%04X",
 			    (unsigned short int) (ci + 1U),
@@ -676,6 +678,7 @@ static struct mxcfb_rect
 			// Next glyph! This serves as the source for the pen position, hence it being used as an index...
 			ci++;
 		}
+#ifdef FBINK_WITH_FONTS
 		/*
 	} else if (glyphWidth <= 16) {
 		while ((ch = u8_nextchar(text, &bi)) != 0U) {
@@ -828,6 +831,7 @@ static struct mxcfb_rect
 		}
 	*/
 	}
+#endif
 
 	return region;
 }
