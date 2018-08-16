@@ -747,21 +747,23 @@ static struct mxcfb_rect
 	// Alloc our pixmap on the stack, and re-use it.
 	// NOTE: We tried using automatic VLAs, but that... didn't go well.
 	//       (as in, subtle (or not so) memory and/or stack corruption).
-	unsigned char* pixmap = NULL;
+	//unsigned char* pixmap = NULL;
 	// NOTE: Using alloca may prevent inlining. That said, trust that the compiler will do the right thing.
 	//       As for why alloca:
 	//       It's a very small allocation, we'll always fully write to it so we don't care about its initialization,
 	//       -> it's a perfect fit for the stack.
 	//       In any other situation (i.e., constant FONTW & FONTH), it'd have been an automatic.
 	// NOTE: Don't forget the extra FONTSIZE_MULT - 1 to avoid a buffer overflow when scaling the last pixel...
-	pixmap = alloca(sizeof(*pixmap) * (size_t)((FONTW * FONTH) + FONTSIZE_MULT - 1));
+	//pixmap = alloca(sizeof(*pixmap) * (size_t)((FONTW * FONTH) + FONTSIZE_MULT - 1));
 
 	// Loop through all the *characters* in the text string
 	unsigned int       bi     = 0U;
 	unsigned short int ci     = 0U;
 	uint32_t           ch     = 0U;
-	unsigned char      b      = 0U;
-	FBInkCoordinates   coords = { 0U };
+	//unsigned char      b      = 0U;
+	//FBInkCoordinates   coords = { 0U };
+	unsigned short int x_offs = 0U;
+	unsigned short int y_offs = (unsigned short int) (row * FONTH);
 	while ((ch = u8_nextchar(text, &bi)) != 0U) {
 		LOG("Char %hu (@ %hu) out of %hu is @ byte offset %u and is U+%04X",
 		    (unsigned short int) (ci + 1U),
@@ -771,8 +773,55 @@ static struct mxcfb_rect
 		    ch);
 
 		// Get the glyph's pixmap
-		(*fxpFontRender)(ch, pixmap);
+		//(*fxpFontRender)(ch, pixmap);
+		x_offs = (unsigned short int) ((col * FONTW) + (ci * FONTW) + pixel_offset);
+		//font_render(ch, x_offs, y_offs, &fgC, &bgC);
+		(*fxpNewFontRender)(ch, x_offs, y_offs, &fgC, &bgC);
 
+		/*
+		const unsigned char* bitmap = NULL;
+
+		bitmap = (*fxpFont8xGetBitmap)(ch);
+
+		// FIXME: Bench it for real, try to inline? Dedup at the very least... somehow.
+		FBInkCoordinates   coords = { 0U };
+		FBInkColor*        pxC;
+
+		unsigned short int i;
+		unsigned short int j;
+		unsigned short int cx;
+		unsigned short int cy;
+
+		// NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution),
+		//       and from there compute the extra pixels for that single input pixel given our scaling factor...
+		for (uint8_t y = 0U; y < (FONTH / FONTSIZE_MULT); y++) {
+			// y: input row, j: first output row after scaling
+			j = (unsigned short int) (y * FONTSIZE_MULT);
+			for (uint8_t x = 0U; x < (FONTW / FONTSIZE_MULT); x++) {
+				// x: input column, i: first output column after scaling
+				i = (unsigned short int) (x * FONTSIZE_MULT);
+				// Each element encodes a full row, we access a column's bit in that row by shifting.
+				if (bitmap[y] & 1U << x) {
+					pxC = &fgC;
+				} else {
+					pxC = &bgC;
+				}
+				cx = (unsigned short int) (x_offs + i);
+				cy = (unsigned short int) (y_offs + j);
+				// NOTE: Apply our scaling factor in both dimensions!
+				for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {
+					for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
+						coords.x = (unsigned short int) (cx + k);
+						coords.y = (unsigned short int) (cy + l);
+						//LOG("Char %hu: put %s px @ (%hu, %hu) from (%hhu, %hhu) scaled to (%hu + %hhu, %hu + %hhu)", char_xpos, set ? "fg" : "bg", coords.x, coords.y, x, y, i, k, j, l);
+						put_pixel(&coords, pxC);
+					}
+				}
+			}
+		}
+		*/
+
+		/*
 		// loop through pixel rows
 		for (unsigned short int y = 0U; y < FONTH; y++) {
 			// loop through pixel columns
@@ -787,11 +836,57 @@ static struct mxcfb_rect
 				put_pixel(&coords, b != 0U ? &fgC : &bgC);
 			}    // end "for x"
 		}            // end "for y"
+		*/
 		// Next glyph! This serves as the source for the pen position, hence it being used as an index...
 		ci++;
 	}
 
 	return region;
+}
+
+static void
+    font_render(uint32_t codepoint, unsigned short int x_offs, unsigned short int y_offs, FBInkColor* fgC, FBInkColor* bgC)
+{
+	const unsigned char* bitmap = NULL;
+
+	bitmap = (*fxpFont8xGetBitmap)(codepoint);
+
+	// FIXME: Bench it for real, try to inline? Dedup at the very least... somehow.
+	FBInkCoordinates   coords = { 0U };
+	FBInkColor*        pxC;
+
+	unsigned short int i;
+	unsigned short int j;
+	unsigned short int cx;
+	unsigned short int cy;
+
+	// NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution),
+	//       and from there compute the extra pixels for that single input pixel given our scaling factor...
+	for (uint8_t y = 0U; y < (FONTH / FONTSIZE_MULT); y++) {
+		// y: input row, j: first output row after scaling
+		j = (unsigned short int) (y * FONTSIZE_MULT);
+		for (uint8_t x = 0U; x < (FONTW / FONTSIZE_MULT); x++) {
+			// x: input column, i: first output column after scaling
+			i = (unsigned short int) (x * FONTSIZE_MULT);
+			// Each element encodes a full row, we access a column's bit in that row by shifting.
+			if (bitmap[y] & 1U << x) {
+				pxC = fgC;
+			} else {
+				pxC = bgC;
+			}
+			cx = (unsigned short int) (x_offs + i);
+			cy = (unsigned short int) (y_offs + j);
+			// NOTE: Apply our scaling factor in both dimensions!
+			for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {
+				for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
+					coords.x = (unsigned short int) (cx + k);
+					coords.y = (unsigned short int) (cy + l);
+					//LOG("Char %hu: put %s px @ (%hu, %hu) from (%hhu, %hhu) scaled to (%hu + %hhu, %hu + %hhu)", char_xpos, set ? "fg" : "bg", coords.x, coords.y, x, y, i, k, j, l);
+					put_pixel(&coords, pxC);
+				}
+			}
+		}
+	}
 }
 
 // NOTE: Small helper function to aid with logging the exact amount of time MXCFB_WAIT_FOR_UPDATE_COMPLETE blocked...
@@ -1309,6 +1404,7 @@ int
 	// NOTE: Set (& reset) original font resolution, in case we're re-init'ing,
 	//       since we're relying on the default value to calculate the scaled value,
 	//       and we're using this value to set MAXCOLS & MAXROWS, which we *need* to be sane.
+	fxpNewFontRender = &font_render;
 #ifdef FBINK_WITH_FONTS
 	// Setup custom fonts (glyph size, render fx, bitmap fx)
 	switch (fbink_config->fontname) {
@@ -1446,10 +1542,8 @@ int
 		FONTSIZE_MULT = fbink_config->fontmult;
 		uint8_t max_fontmult;
 
-		// NOTE: Clamp to safe values to avoid blowing up the stack with alloca later,
-		//       in case we get fed a stupidly large value.
-		// NOTE: Also, to avoid a division by zero later if a glyph becomes so big that it causes
-		//       MAXCOLS or MAXROWS to become too small...
+		// NOTE: Clamp to safe values to avoid a division by zero later if a glyph becomes so big
+		//       that it causes MAXCOLS or MAXROWS to become too small...
 		//       We want to ensure available_cols in fbink_print will be > 0, so,
 		//       follow the same heuristics to devise the minimum MAXCOLS we want to enforce...
 		unsigned short int min_maxcols = 1U;

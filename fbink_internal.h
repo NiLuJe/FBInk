@@ -225,6 +225,7 @@ const unsigned char* (*fxpFont8xGetBitmap)(uint32_t) = NULL;
 const uint32_t* (*fxpFont32xGetBitmap)(uint32_t) = NULL;
 //const uint64_t* (*fxpFont64xGetBitmap)(uint32_t) = NULL;
 #endif
+void (*fxpNewFontRender)(uint32_t, unsigned short int, unsigned short int, FBInkColor*, FBInkColor*) = NULL;
 
 // Where we track device/screen-specific quirks
 FBInkDeviceQuirks deviceQuirks = { 0 };
@@ -263,6 +264,7 @@ static void                 font8x8_render(uint32_t, unsigned char*);
 static void font32x32_render(uint32_t, unsigned char*);
 //static void font64x64_render(uint32_t, unsigned char*);
 #endif
+static void font_render(uint32_t codepoint, unsigned short int x_offs, unsigned short int y_offs, FBInkColor* fgC, FBInkColor* bgC);
 
 static const char* fontname_to_string(uint8_t);
 
