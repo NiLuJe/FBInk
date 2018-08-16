@@ -617,31 +617,31 @@ static struct mxcfb_rect
 	FBInkCoordinates   coords = { 0U };
 	FBInkColor*        pxC;
 	unsigned short int x_base_offs = (unsigned short int) ((col * FONTW) + pixel_offset);
-	unsigned short int y_offs = (unsigned short int) (row * FONTH);
-	unsigned short int x_offs = 0U;
+	unsigned short int y_offs      = (unsigned short int) (row * FONTH);
+	unsigned short int x_offs      = 0U;
+
+	unsigned short int i;
+	unsigned short int j;
+	unsigned short int cx;
+	unsigned short int cy;
 
 	// NOTE: Extra code duplication because the glyph's bitmap data type depends on the glyph's width,
 	//       and we want to inline this and branch outside the loops...
 	if (glyphWidth <= 8) {
 		while ((ch = u8_nextchar(text, &bi)) != 0U) {
 			LOG("Char %hu (@ %hu) out of %hu is @ byte offset %u and is U+%04X",
-			(unsigned short int) (ci + 1U),
-			ci,
-			charcount,
-			bi,
-			ch);
+			    (unsigned short int) (ci + 1U),
+			    ci,
+			    charcount,
+			    bi,
+			    ch);
 
 			// Update the x coordinates for this character
 			x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
 
 			// Get the glyph's pixmap (width <= 8 -> uint8_t)
 			const unsigned char* bitmap = NULL;
-			bitmap = (*fxpFont8xGetBitmap)(ch);
-
-			unsigned short int i;
-			unsigned short int j;
-			unsigned short int cx;
-			unsigned short int cy;
+			bitmap                      = (*fxpFont8xGetBitmap)(ch);
 
 			// NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution),
 			//       and from there compute the extra pixels for that single input pixel given our scaling factor...
@@ -676,7 +676,7 @@ static struct mxcfb_rect
 			// Next glyph! This serves as the source for the pen position, hence it being used as an index...
 			ci++;
 		}
-	/*
+		/*
 	} else if (glyphWidth <= 16) {
 		while ((ch = u8_nextchar(text, &bi)) != 0U) {
 			LOG("Char %hu (@ %hu) out of %hu is @ byte offset %u and is U+%04X",
@@ -692,11 +692,6 @@ static struct mxcfb_rect
 			// Get the glyph's pixmap (width <= 16 -> uint16_t)
 			const uint16_t* bitmap = NULL;
 			bitmap = (*fxpFont16xGetBitmap)(ch);
-
-			unsigned short int i;
-			unsigned short int j;
-			unsigned short int cx;
-			unsigned short int cy;
 
 			// NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution),
 			//       and from there compute the extra pixels for that single input pixel given our scaling factor...
@@ -735,23 +730,18 @@ static struct mxcfb_rect
 	} else if (glyphWidth <= 32) {
 		while ((ch = u8_nextchar(text, &bi)) != 0U) {
 			LOG("Char %hu (@ %hu) out of %hu is @ byte offset %u and is U+%04X",
-			(unsigned short int) (ci + 1U),
-			ci,
-			charcount,
-			bi,
-			ch);
+			    (unsigned short int) (ci + 1U),
+			    ci,
+			    charcount,
+			    bi,
+			    ch);
 
 			// Update the x coordinates for this character
 			x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
 
 			// Get the glyph's pixmap (width <= 32 -> uint32_t)
 			const uint32_t* bitmap = NULL;
-			bitmap = (*fxpFont32xGetBitmap)(ch);
-
-			unsigned short int i;
-			unsigned short int j;
-			unsigned short int cx;
-			unsigned short int cy;
+			bitmap                 = (*fxpFont32xGetBitmap)(ch);
 
 			// NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution),
 			//       and from there compute the extra pixels for that single input pixel given our scaling factor...
@@ -786,7 +776,7 @@ static struct mxcfb_rect
 			// Next glyph! This serves as the source for the pen position, hence it being used as an index...
 			ci++;
 		}
-	/*
+		/*
 	} else if (glyphWidth <= 64) {
 		while ((ch = u8_nextchar(text, &bi)) != 0U) {
 			LOG("Char %hu (@ %hu) out of %hu is @ byte offset %u and is U+%04X",
@@ -802,11 +792,6 @@ static struct mxcfb_rect
 			// Get the glyph's pixmap (width <= 64 -> uint64_t)
 			const uint64_t* bitmap = NULL;
 			bitmap = (*fxpFont64xGetBitmap)(ch);
-
-			unsigned short int i;
-			unsigned short int j;
-			unsigned short int cx;
-			unsigned short int cy;
 
 			// NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution),
 			//       and from there compute the extra pixels for that single input pixel given our scaling factor...
@@ -1366,107 +1351,107 @@ int
 	// Setup custom fonts (glyph size, render fx, bitmap fx)
 	switch (fbink_config->fontname) {
 		case SCIENTIFICA:
-			glyphWidth              = 5U;
-			glyphHeight              = 12U;
+			glyphWidth         = 5U;
+			glyphHeight        = 12U;
 			fxpFont8xGetBitmap = &scientifica_get_bitmap;
 			break;
 		case SCIENTIFICAB:
-			glyphWidth              = 5U;
-			glyphHeight              = 12U;
+			glyphWidth         = 5U;
+			glyphHeight        = 12U;
 			fxpFont8xGetBitmap = &scientificab_get_bitmap;
 			break;
 		case SCIENTIFICAI:
-			glyphWidth              = 7U;
-			glyphHeight              = 12U;
+			glyphWidth         = 7U;
+			glyphHeight        = 12U;
 			fxpFont8xGetBitmap = &scientificai_get_bitmap;
 			break;
 		case ORP:
-			glyphWidth              = 6U;
-			glyphHeight              = 12U;
+			glyphWidth         = 6U;
+			glyphHeight        = 12U;
 			fxpFont8xGetBitmap = &orp_get_bitmap;
 			break;
 		case ORPB:
-			glyphWidth              = 6U;
-			glyphHeight              = 12U;
+			glyphWidth         = 6U;
+			glyphHeight        = 12U;
 			fxpFont8xGetBitmap = &orpb_get_bitmap;
 			break;
 		case ORPI:
-			glyphWidth              = 6U;
-			glyphHeight              = 12U;
+			glyphWidth         = 6U;
+			glyphHeight        = 12U;
 			fxpFont8xGetBitmap = &orpi_get_bitmap;
 			break;
 		case KATES:
-			glyphWidth              = 7U;
-			glyphHeight              = 15U;
+			glyphWidth         = 7U;
+			glyphHeight        = 15U;
 			fxpFont8xGetBitmap = &kates_get_bitmap;
 			break;
 		case UNSCII_TALL:
-			glyphWidth              = 8U;
-			glyphHeight              = 16U;
+			glyphWidth         = 8U;
+			glyphHeight        = 16U;
 			fxpFont8xGetBitmap = &tall_get_bitmap;
 			break;
 		case VEGGIE:
-			glyphWidth              = 8U;
-			glyphHeight              = 16U;
+			glyphWidth         = 8U;
+			glyphHeight        = 16U;
 			fxpFont8xGetBitmap = &veggie_get_bitmap;
 			break;
 		case FKP:
-			glyphWidth              = 8U;
-			glyphHeight              = 16U;
+			glyphWidth         = 8U;
+			glyphHeight        = 16U;
 			fxpFont8xGetBitmap = &fkp_get_bitmap;
 			break;
 		case CTRLD:
-			glyphWidth              = 8U;
-			glyphHeight              = 16U;
+			glyphWidth         = 8U;
+			glyphHeight        = 16U;
 			fxpFont8xGetBitmap = &ctrld_get_bitmap;
 			break;
 		case LEGGIE:
-			glyphWidth              = 8U;
-			glyphHeight              = 18U;
+			glyphWidth         = 8U;
+			glyphHeight        = 18U;
 			fxpFont8xGetBitmap = &leggie_get_bitmap;
 			break;
 		case BLOCK:
-			glyphWidth = 32U;
+			glyphWidth  = 32U;
 			glyphHeight = 32U;
 			// An horizontal resolution > 8 means a different data type...
 			fxpFont32xGetBitmap = &block_get_bitmap;
 			break;
 		case UNSCII_MCR:
-			glyphWidth              = 8U;
-			glyphHeight              = 8U;
+			glyphWidth         = 8U;
+			glyphHeight        = 8U;
 			fxpFont8xGetBitmap = &mcr_get_bitmap;
 			break;
 		case UNSCII_FANTASY:
-			glyphWidth              = 8U;
-			glyphHeight              = 8U;
+			glyphWidth         = 8U;
+			glyphHeight        = 8U;
 			fxpFont8xGetBitmap = &fantasy_get_bitmap;
 			break;
 		case UNSCII_THIN:
-			glyphWidth              = 8U;
-			glyphHeight              = 8U;
+			glyphWidth         = 8U;
+			glyphHeight        = 8U;
 			fxpFont8xGetBitmap = &thin_get_bitmap;
 			break;
 		case UNSCII_ALT:
-			glyphWidth              = 8U;
-			glyphHeight              = 8U;
+			glyphWidth         = 8U;
+			glyphHeight        = 8U;
 			fxpFont8xGetBitmap = &alt_get_bitmap;
 			break;
 		case UNSCII:
-			glyphWidth              = 8U;
-			glyphHeight              = 8U;
+			glyphWidth         = 8U;
+			glyphHeight        = 8U;
 			fxpFont8xGetBitmap = &unscii_get_bitmap;
 			break;
 		case IBM:
 		default:
-			glyphWidth              = 8U;
-			glyphHeight              = 8U;
+			glyphWidth         = 8U;
+			glyphHeight        = 8U;
 			fxpFont8xGetBitmap = &font8x8_get_bitmap;
 			break;
 	}
 #else
 	// Default font is IBM
-	glyphWidth              = 8U;
-	glyphHeight              = 8U;
+	glyphWidth         = 8U;
+	glyphHeight        = 8U;
 	fxpFont8xGetBitmap = &font8x8_get_bitmap;
 
 	if (fbink_config->fontname != IBM) {
