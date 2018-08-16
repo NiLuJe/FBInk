@@ -412,152 +412,6 @@ static const unsigned char*
 	}
 }
 
-// Render a specific font8x8 glyph into a pixmap
-// (base size: width <= 8, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
-static void
-    font8x8_render(uint32_t codepoint, unsigned char* glyph_pixmap)
-{
-	const unsigned char* bitmap = NULL;
-
-	bitmap = (*fxpFont8xGetBitmap)(codepoint);
-
-	unsigned short int i;
-	unsigned short int j;
-	bool               set = false;
-	size_t             idx;
-
-	// NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution),
-	//       and from there compute the extra pixels for that single input pixel given our scaling factor...
-	for (uint8_t x = 0U; x < (FONTH / FONTSIZE_MULT); x++) {
-		// x: input row, i: first output row
-		i = (unsigned short int) (x * FONTSIZE_MULT);
-		for (uint8_t y = 0U; y < (FONTW / FONTSIZE_MULT); y++) {
-			// y: input column, j: first output column
-			j   = (unsigned short int) (y * FONTSIZE_MULT);
-			set = bitmap[x] & 1U << y;
-			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTW=1,0)
-			// NOTE: Apply our scaling factor in both dimensions!
-			for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
-				idx = (size_t)(j + ((i + k) * FONTW));
-				for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {
-					glyph_pixmap[idx + l] = set ? 1 : 0;
-				}
-			}
-		}
-	}
-}
-
-#ifdef FBINK_WITH_FONTS
-/*
-// Render a specific font16x16 glyph into a pixmap
-// (base size: 8 < width <= 16, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
-static void
-    font16x16_render(uint32_t codepoint, unsigned char* glyph_pixmap)
-{
-	const uint16_t* bitmap = NULL;
-
-	bitmap = (*fxpFont16xGetBitmap)(codepoint);
-
-	unsigned short int i;
-	unsigned short int j;
-	bool               set = false;
-	size_t             idx;
-
-	// NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution),
-	//       and from there compute the extra pixels for that single input pixel given our scaling factor...
-	for (uint8_t x = 0U; x < (FONTH / FONTSIZE_MULT); x++) {
-		// x: input row, i: first output row
-		i = (unsigned short int) (x * FONTSIZE_MULT);
-		for (uint8_t y = 0U; y < (FONTW / FONTSIZE_MULT); y++) {
-			// y: input column, j: first output column
-			j   = (unsigned short int) (y * FONTSIZE_MULT);
-			set = bitmap[x] & 1U << y;
-			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTW=1,0)
-			// NOTE: Apply our scaling factor in both dimensions!
-			for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
-				idx = (size_t)(j + ((i + k) * FONTW));
-				for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {
-					glyph_pixmap[idx + l] = set ? 1 : 0;
-				}
-			}
-		}
-	}
-}
-*/
-
-// Render a specific font32x32 glyph into a pixmap
-// (base size: 16 < width <= 32, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
-static void
-    font32x32_render(uint32_t codepoint, unsigned char* glyph_pixmap)
-{
-	const uint32_t* bitmap = NULL;
-
-	bitmap = (*fxpFont32xGetBitmap)(codepoint);
-
-	unsigned short int i;
-	unsigned short int j;
-	bool               set = false;
-	size_t             idx;
-
-	// NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution),
-	//       and from there compute the extra pixels for that single input pixel given our scaling factor...
-	for (uint8_t x = 0U; x < (FONTH / FONTSIZE_MULT); x++) {
-		// x: input row, i: first output row
-		i = (unsigned short int) (x * FONTSIZE_MULT);
-		for (uint8_t y = 0U; y < (FONTW / FONTSIZE_MULT); y++) {
-			// y: input column, j: first output column
-			j   = (unsigned short int) (y * FONTSIZE_MULT);
-			set = bitmap[x] & 1U << y;
-			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTW=1,0)
-			// NOTE: Apply our scaling factor in both dimensions!
-			for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
-				idx = (size_t)(j + ((i + k) * FONTW));
-				for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {
-					glyph_pixmap[idx + l] = set ? 1 : 0;
-				}
-			}
-		}
-	}
-}
-
-/*
-// Render a specific font64x64 glyph into a pixmap
-// (base size: 32 < width <= 64, scaled by a factor of FONTSIZE_MULT, which varies depending on screen resolution)
-static void
-    font64x64_render(uint32_t codepoint, unsigned char* glyph_pixmap)
-{
-	const uint64_t* bitmap = NULL;
-
-	bitmap = (*fxpFont64xGetBitmap)(codepoint);
-
-	unsigned short int i;
-	unsigned short int j;
-	bool               set = false;
-	size_t             idx;
-
-	// NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution),
-	//       and from there compute the extra pixels for that single input pixel given our scaling factor...
-	for (uint8_t x = 0U; x < (FONTH / FONTSIZE_MULT); x++) {
-		// x: input row, i: first output row
-		i = (unsigned short int) (x * FONTSIZE_MULT);
-		for (uint8_t y = 0U; y < (FONTW / FONTSIZE_MULT); y++) {
-			// y: input column, j: first output column
-			j   = (unsigned short int) (y * FONTSIZE_MULT);
-			set = bitmap[x] & 1U << y;
-			// 'Flatten' our pixmap into a 1D array (0=0,0; 1=0,1; 2=0,2; FONTW=1,0)
-			// NOTE: Apply our scaling factor in both dimensions!
-			for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
-				idx = (size_t)(j + ((i + k) * FONTW));
-				for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {
-					glyph_pixmap[idx + l] = set ? 1 : 0;
-				}
-			}
-		}
-	}
-}
-*/
-#endif    // FBINK_WITH_FONTS
-
 static const char*
     fontname_to_string(uint8_t fontname)
 {
@@ -760,133 +614,237 @@ static struct mxcfb_rect
 	unsigned int       bi     = 0U;
 	unsigned short int ci     = 0U;
 	uint32_t           ch     = 0U;
-	//unsigned char      b      = 0U;
-	//FBInkCoordinates   coords = { 0U };
-	unsigned short int x_offs = 0U;
+	FBInkCoordinates   coords = { 0U };
+	FBInkColor*        pxC;
+	unsigned short int x_base_offs = (unsigned short int) ((col * FONTW) + pixel_offset);
 	unsigned short int y_offs = (unsigned short int) (row * FONTH);
-	while ((ch = u8_nextchar(text, &bi)) != 0U) {
-		LOG("Char %hu (@ %hu) out of %hu is @ byte offset %u and is U+%04X",
-		    (unsigned short int) (ci + 1U),
-		    ci,
-		    charcount,
-		    bi,
-		    ch);
+	unsigned short int x_offs = 0U;
 
-		// Get the glyph's pixmap
-		//(*fxpFontRender)(ch, pixmap);
-		x_offs = (unsigned short int) ((col * FONTW) + (ci * FONTW) + pixel_offset);
-		//font_render(ch, x_offs, y_offs, &fgC, &bgC);
-		(*fxpNewFontRender)(ch, x_offs, y_offs, &fgC, &bgC);
+	// NOTE: Extra code duplication because the glyph's bitmap data type depends on the glyph's width,
+	//       and we want to inline this and branch outside the loops...
+	if (glyphWidth <= 8) {
+		while ((ch = u8_nextchar(text, &bi)) != 0U) {
+			LOG("Char %hu (@ %hu) out of %hu is @ byte offset %u and is U+%04X",
+			(unsigned short int) (ci + 1U),
+			ci,
+			charcount,
+			bi,
+			ch);
 
-		/*
-		const unsigned char* bitmap = NULL;
+			// Update the x coordinates for this character
+			x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
 
-		bitmap = (*fxpFont8xGetBitmap)(ch);
+			// Get the glyph's pixmap (width <= 8 -> uint8_t)
+			const unsigned char* bitmap = NULL;
+			bitmap = (*fxpFont8xGetBitmap)(ch);
 
-		// FIXME: Bench it for real, try to inline? Dedup at the very least... somehow.
-		FBInkCoordinates   coords = { 0U };
-		FBInkColor*        pxC;
+			unsigned short int i;
+			unsigned short int j;
+			unsigned short int cx;
+			unsigned short int cy;
 
-		unsigned short int i;
-		unsigned short int j;
-		unsigned short int cx;
-		unsigned short int cy;
-
-		// NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution),
-		//       and from there compute the extra pixels for that single input pixel given our scaling factor...
-		for (uint8_t y = 0U; y < (FONTH / FONTSIZE_MULT); y++) {
-			// y: input row, j: first output row after scaling
-			j = (unsigned short int) (y * FONTSIZE_MULT);
-			for (uint8_t x = 0U; x < (FONTW / FONTSIZE_MULT); x++) {
-				// x: input column, i: first output column after scaling
-				i = (unsigned short int) (x * FONTSIZE_MULT);
-				// Each element encodes a full row, we access a column's bit in that row by shifting.
-				if (bitmap[y] & 1U << x) {
-					pxC = &fgC;
-				} else {
-					pxC = &bgC;
-				}
-				cx = (unsigned short int) (x_offs + i);
-				cy = (unsigned short int) (y_offs + j);
-				// NOTE: Apply our scaling factor in both dimensions!
-				for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {
-					for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
-						coords.x = (unsigned short int) (cx + k);
-						coords.y = (unsigned short int) (cy + l);
-						//LOG("Char %hu: put %s px @ (%hu, %hu) from (%hhu, %hhu) scaled to (%hu + %hhu, %hu + %hhu)", char_xpos, set ? "fg" : "bg", coords.x, coords.y, x, y, i, k, j, l);
-						put_pixel(&coords, pxC);
+			// NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution),
+			//       and from there compute the extra pixels for that single input pixel given our scaling factor...
+			for (uint8_t y = 0U; y < glyphHeight; y++) {
+				// y: input row, j: first output row after scaling
+				j = (unsigned short int) (y * FONTSIZE_MULT);
+				for (uint8_t x = 0U; x < glyphWidth; x++) {
+					// x: input column, i: first output column after scaling
+					i = (unsigned short int) (x * FONTSIZE_MULT);
+					// Each element encodes a full row, we access a column's bit in that row by shifting.
+					if (bitmap[y] & 1U << x) {
+						// bit was set, pixel is fg!
+						pxC = &fgC;
+					} else {
+						// bit was unset, pixel is bg
+						pxC = &bgC;
+					}
+					// Initial coordinates, before we generate the extra pixels from the scaling factor
+					cx = (unsigned short int) (x_offs + i);
+					cy = (unsigned short int) (y_offs + j);
+					// NOTE: Apply our scaling factor in both dimensions!
+					for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {
+						for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
+							coords.x = (unsigned short int) (cx + k);
+							coords.y = (unsigned short int) (cy + l);
+							put_pixel(&coords, pxC);
+						}
 					}
 				}
 			}
-		}
-		*/
 
-		/*
-		// loop through pixel rows
-		for (unsigned short int y = 0U; y < FONTH; y++) {
-			// loop through pixel columns
-			for (unsigned short int x = 0U; x < FONTW; x++) {
-				// get the pixel value
-				b = pixmap[(y * FONTW) + x];
-				// plot the pixel (fg if b != 0; bg otherwise)
-				// NOTE: This is where we used to fudge positioning of hex fonts converted by
-				//       tools/hextoc.py before I figured out the root issue ;).
-				coords.x = (unsigned short int) ((col * FONTW) + (ci * FONTW) + x + pixel_offset);
-				coords.y = (unsigned short int) ((row * FONTH) + y);
-				put_pixel(&coords, b != 0U ? &fgC : &bgC);
-			}    // end "for x"
-		}            // end "for y"
-		*/
-		// Next glyph! This serves as the source for the pen position, hence it being used as an index...
-		ci++;
+			// Next glyph! This serves as the source for the pen position, hence it being used as an index...
+			ci++;
+		}
+	/*
+	} else if (glyphWidth <= 16) {
+		while ((ch = u8_nextchar(text, &bi)) != 0U) {
+			LOG("Char %hu (@ %hu) out of %hu is @ byte offset %u and is U+%04X",
+			(unsigned short int) (ci + 1U),
+			ci,
+			charcount,
+			bi,
+			ch);
+
+			// Update the x coordinates for this character
+			x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
+
+			// Get the glyph's pixmap (width <= 16 -> uint16_t)
+			const uint16_t* bitmap = NULL;
+			bitmap = (*fxpFont16xGetBitmap)(ch);
+
+			unsigned short int i;
+			unsigned short int j;
+			unsigned short int cx;
+			unsigned short int cy;
+
+			// NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution),
+			//       and from there compute the extra pixels for that single input pixel given our scaling factor...
+			for (uint8_t y = 0U; y < glyphHeight; y++) {
+				// y: input row, j: first output row after scaling
+				j = (unsigned short int) (y * FONTSIZE_MULT);
+				for (uint8_t x = 0U; x < glyphWidth; x++) {
+					// x: input column, i: first output column after scaling
+					i = (unsigned short int) (x * FONTSIZE_MULT);
+					// Each element encodes a full row, we access a column's bit in that row by shifting.
+					if (bitmap[y] & 1U << x) {
+						// bit was set, pixel is fg!
+						pxC = &fgC;
+					} else {
+						// bit was unset, pixel is bg
+						pxC = &bgC;
+					}
+					// Initial coordinates, before we generate the extra pixels from the scaling factor
+					cx = (unsigned short int) (x_offs + i);
+					cy = (unsigned short int) (y_offs + j);
+					// NOTE: Apply our scaling factor in both dimensions!
+					for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {
+						for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
+							coords.x = (unsigned short int) (cx + k);
+							coords.y = (unsigned short int) (cy + l);
+							put_pixel(&coords, pxC);
+						}
+					}
+				}
+			}
+
+			// Next glyph! This serves as the source for the pen position, hence it being used as an index...
+			ci++;
+		}
+	*/
+	} else if (glyphWidth <= 32) {
+		while ((ch = u8_nextchar(text, &bi)) != 0U) {
+			LOG("Char %hu (@ %hu) out of %hu is @ byte offset %u and is U+%04X",
+			(unsigned short int) (ci + 1U),
+			ci,
+			charcount,
+			bi,
+			ch);
+
+			// Update the x coordinates for this character
+			x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
+
+			// Get the glyph's pixmap (width <= 32 -> uint32_t)
+			const uint32_t* bitmap = NULL;
+			bitmap = (*fxpFont32xGetBitmap)(ch);
+
+			unsigned short int i;
+			unsigned short int j;
+			unsigned short int cx;
+			unsigned short int cy;
+
+			// NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution),
+			//       and from there compute the extra pixels for that single input pixel given our scaling factor...
+			for (uint8_t y = 0U; y < glyphHeight; y++) {
+				// y: input row, j: first output row after scaling
+				j = (unsigned short int) (y * FONTSIZE_MULT);
+				for (uint8_t x = 0U; x < glyphWidth; x++) {
+					// x: input column, i: first output column after scaling
+					i = (unsigned short int) (x * FONTSIZE_MULT);
+					// Each element encodes a full row, we access a column's bit in that row by shifting.
+					if (bitmap[y] & 1U << x) {
+						// bit was set, pixel is fg!
+						pxC = &fgC;
+					} else {
+						// bit was unset, pixel is bg
+						pxC = &bgC;
+					}
+					// Initial coordinates, before we generate the extra pixels from the scaling factor
+					cx = (unsigned short int) (x_offs + i);
+					cy = (unsigned short int) (y_offs + j);
+					// NOTE: Apply our scaling factor in both dimensions!
+					for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {
+						for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
+							coords.x = (unsigned short int) (cx + k);
+							coords.y = (unsigned short int) (cy + l);
+							put_pixel(&coords, pxC);
+						}
+					}
+				}
+			}
+
+			// Next glyph! This serves as the source for the pen position, hence it being used as an index...
+			ci++;
+		}
+	/*
+	} else if (glyphWidth <= 64) {
+		while ((ch = u8_nextchar(text, &bi)) != 0U) {
+			LOG("Char %hu (@ %hu) out of %hu is @ byte offset %u and is U+%04X",
+			(unsigned short int) (ci + 1U),
+			ci,
+			charcount,
+			bi,
+			ch);
+
+			// Update the x coordinates for this character
+			x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
+
+			// Get the glyph's pixmap (width <= 64 -> uint64_t)
+			const uint64_t* bitmap = NULL;
+			bitmap = (*fxpFont64xGetBitmap)(ch);
+
+			unsigned short int i;
+			unsigned short int j;
+			unsigned short int cx;
+			unsigned short int cy;
+
+			// NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution),
+			//       and from there compute the extra pixels for that single input pixel given our scaling factor...
+			for (uint8_t y = 0U; y < glyphHeight; y++) {
+				// y: input row, j: first output row after scaling
+				j = (unsigned short int) (y * FONTSIZE_MULT);
+				for (uint8_t x = 0U; x < glyphWidth; x++) {
+					// x: input column, i: first output column after scaling
+					i = (unsigned short int) (x * FONTSIZE_MULT);
+					// Each element encodes a full row, we access a column's bit in that row by shifting.
+					if (bitmap[y] & 1U << x) {
+						// bit was set, pixel is fg!
+						pxC = &fgC;
+					} else {
+						// bit was unset, pixel is bg
+						pxC = &bgC;
+					}
+					// Initial coordinates, before we generate the extra pixels from the scaling factor
+					cx = (unsigned short int) (x_offs + i);
+					cy = (unsigned short int) (y_offs + j);
+					// NOTE: Apply our scaling factor in both dimensions!
+					for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {
+						for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
+							coords.x = (unsigned short int) (cx + k);
+							coords.y = (unsigned short int) (cy + l);
+							put_pixel(&coords, pxC);
+						}
+					}
+				}
+			}
+
+			// Next glyph! This serves as the source for the pen position, hence it being used as an index...
+			ci++;
+		}
+	*/
 	}
 
 	return region;
-}
-
-static void
-    font_render(uint32_t codepoint, unsigned short int x_offs, unsigned short int y_offs, FBInkColor* fgC, FBInkColor* bgC)
-{
-	const unsigned char* bitmap = NULL;
-
-	bitmap = (*fxpFont8xGetBitmap)(codepoint);
-
-	// FIXME: Bench it for real, try to inline? Dedup at the very least... somehow.
-	FBInkCoordinates   coords = { 0U };
-	FBInkColor*        pxC;
-
-	unsigned short int i;
-	unsigned short int j;
-	unsigned short int cx;
-	unsigned short int cy;
-
-	// NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution),
-	//       and from there compute the extra pixels for that single input pixel given our scaling factor...
-	for (uint8_t y = 0U; y < (FONTH / FONTSIZE_MULT); y++) {
-		// y: input row, j: first output row after scaling
-		j = (unsigned short int) (y * FONTSIZE_MULT);
-		for (uint8_t x = 0U; x < (FONTW / FONTSIZE_MULT); x++) {
-			// x: input column, i: first output column after scaling
-			i = (unsigned short int) (x * FONTSIZE_MULT);
-			// Each element encodes a full row, we access a column's bit in that row by shifting.
-			if (bitmap[y] & 1U << x) {
-				pxC = fgC;
-			} else {
-				pxC = bgC;
-			}
-			cx = (unsigned short int) (x_offs + i);
-			cy = (unsigned short int) (y_offs + j);
-			// NOTE: Apply our scaling factor in both dimensions!
-			for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {
-				for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
-					coords.x = (unsigned short int) (cx + k);
-					coords.y = (unsigned short int) (cy + l);
-					//LOG("Char %hu: put %s px @ (%hu, %hu) from (%hhu, %hhu) scaled to (%hu + %hhu, %hu + %hhu)", char_xpos, set ? "fg" : "bg", coords.x, coords.y, x, y, i, k, j, l);
-					put_pixel(&coords, pxC);
-				}
-			}
-		}
-	}
 }
 
 // NOTE: Small helper function to aid with logging the exact amount of time MXCFB_WAIT_FOR_UPDATE_COMPLETE blocked...
@@ -1404,132 +1362,111 @@ int
 	// NOTE: Set (& reset) original font resolution, in case we're re-init'ing,
 	//       since we're relying on the default value to calculate the scaled value,
 	//       and we're using this value to set MAXCOLS & MAXROWS, which we *need* to be sane.
-	fxpNewFontRender = &font_render;
 #ifdef FBINK_WITH_FONTS
 	// Setup custom fonts (glyph size, render fx, bitmap fx)
 	switch (fbink_config->fontname) {
 		case SCIENTIFICA:
-			FONTW              = 5U;
-			FONTH              = 12U;
-			fxpFontRender      = &font8x8_render;
+			glyphWidth              = 5U;
+			glyphHeight              = 12U;
 			fxpFont8xGetBitmap = &scientifica_get_bitmap;
 			break;
 		case SCIENTIFICAB:
-			FONTW              = 5U;
-			FONTH              = 12U;
-			fxpFontRender      = &font8x8_render;
+			glyphWidth              = 5U;
+			glyphHeight              = 12U;
 			fxpFont8xGetBitmap = &scientificab_get_bitmap;
 			break;
 		case SCIENTIFICAI:
-			FONTW              = 7U;
-			FONTH              = 12U;
-			fxpFontRender      = &font8x8_render;
+			glyphWidth              = 7U;
+			glyphHeight              = 12U;
 			fxpFont8xGetBitmap = &scientificai_get_bitmap;
 			break;
 		case ORP:
-			FONTW              = 6U;
-			FONTH              = 12U;
-			fxpFontRender      = &font8x8_render;
+			glyphWidth              = 6U;
+			glyphHeight              = 12U;
 			fxpFont8xGetBitmap = &orp_get_bitmap;
 			break;
 		case ORPB:
-			FONTW              = 6U;
-			FONTH              = 12U;
-			fxpFontRender      = &font8x8_render;
+			glyphWidth              = 6U;
+			glyphHeight              = 12U;
 			fxpFont8xGetBitmap = &orpb_get_bitmap;
 			break;
 		case ORPI:
-			FONTW              = 6U;
-			FONTH              = 12U;
-			fxpFontRender      = &font8x8_render;
+			glyphWidth              = 6U;
+			glyphHeight              = 12U;
 			fxpFont8xGetBitmap = &orpi_get_bitmap;
 			break;
 		case KATES:
-			FONTW              = 7U;
-			FONTH              = 15U;
-			fxpFontRender      = &font8x8_render;
+			glyphWidth              = 7U;
+			glyphHeight              = 15U;
 			fxpFont8xGetBitmap = &kates_get_bitmap;
 			break;
 		case UNSCII_TALL:
-			FONTW              = 8U;
-			FONTH              = 16U;
-			fxpFontRender      = &font8x8_render;
+			glyphWidth              = 8U;
+			glyphHeight              = 16U;
 			fxpFont8xGetBitmap = &tall_get_bitmap;
 			break;
 		case VEGGIE:
-			FONTW              = 8U;
-			FONTH              = 16U;
-			fxpFontRender      = &font8x8_render;
+			glyphWidth              = 8U;
+			glyphHeight              = 16U;
 			fxpFont8xGetBitmap = &veggie_get_bitmap;
 			break;
 		case FKP:
-			FONTW              = 8U;
-			FONTH              = 16U;
-			fxpFontRender      = &font8x8_render;
+			glyphWidth              = 8U;
+			glyphHeight              = 16U;
 			fxpFont8xGetBitmap = &fkp_get_bitmap;
 			break;
 		case CTRLD:
-			FONTW              = 8U;
-			FONTH              = 16U;
-			fxpFontRender      = &font8x8_render;
+			glyphWidth              = 8U;
+			glyphHeight              = 16U;
 			fxpFont8xGetBitmap = &ctrld_get_bitmap;
 			break;
 		case LEGGIE:
-			FONTW              = 8U;
-			FONTH              = 18U;
-			fxpFontRender      = &font8x8_render;
+			glyphWidth              = 8U;
+			glyphHeight              = 18U;
 			fxpFont8xGetBitmap = &leggie_get_bitmap;
 			break;
 		case BLOCK:
-			FONTW = 32U;
-			FONTH = 32U;
-			// An horizontal resolution > 8 means a different data type, meaning a different render fx...
-			fxpFontRender       = &font32x32_render;
+			glyphWidth = 32U;
+			glyphHeight = 32U;
+			// An horizontal resolution > 8 means a different data type...
 			fxpFont32xGetBitmap = &block_get_bitmap;
 			break;
 		case UNSCII_MCR:
-			FONTW              = 8U;
-			FONTH              = 8U;
-			fxpFontRender      = &font8x8_render;
+			glyphWidth              = 8U;
+			glyphHeight              = 8U;
 			fxpFont8xGetBitmap = &mcr_get_bitmap;
 			break;
 		case UNSCII_FANTASY:
-			FONTW              = 8U;
-			FONTH              = 8U;
-			fxpFontRender      = &font8x8_render;
+			glyphWidth              = 8U;
+			glyphHeight              = 8U;
 			fxpFont8xGetBitmap = &fantasy_get_bitmap;
 			break;
 		case UNSCII_THIN:
-			FONTW              = 8U;
-			FONTH              = 8U;
-			fxpFontRender      = &font8x8_render;
+			glyphWidth              = 8U;
+			glyphHeight              = 8U;
 			fxpFont8xGetBitmap = &thin_get_bitmap;
 			break;
 		case UNSCII_ALT:
-			FONTW              = 8U;
-			FONTH              = 8U;
-			fxpFontRender      = &font8x8_render;
+			glyphWidth              = 8U;
+			glyphHeight              = 8U;
 			fxpFont8xGetBitmap = &alt_get_bitmap;
 			break;
 		case UNSCII:
-			FONTW              = 8U;
-			FONTH              = 8U;
-			fxpFontRender      = &font8x8_render;
+			glyphWidth              = 8U;
+			glyphHeight              = 8U;
 			fxpFont8xGetBitmap = &unscii_get_bitmap;
 			break;
 		case IBM:
 		default:
-			FONTW              = 8U;
-			FONTH              = 8U;
-			fxpFontRender      = &font8x8_render;
+			glyphWidth              = 8U;
+			glyphHeight              = 8U;
 			fxpFont8xGetBitmap = &font8x8_get_bitmap;
 			break;
 	}
 #else
 	// Default font is IBM
-	FONTW              = 8U;
-	FONTH              = 8U;
-	fxpFontRender      = &font8x8_render;
+	glyphWidth              = 8U;
+	glyphHeight              = 8U;
 	fxpFont8xGetBitmap = &font8x8_get_bitmap;
 
 	if (fbink_config->fontname != IBM) {
@@ -1597,14 +1534,14 @@ int
 #endif
 	}
 	// Go!
-	FONTW = (unsigned short int) (FONTW * FONTSIZE_MULT);
-	FONTH = (unsigned short int) (FONTH * FONTSIZE_MULT);
+	FONTW = (unsigned short int) (glyphWidth * FONTSIZE_MULT);
+	FONTH = (unsigned short int) (glyphHeight * FONTSIZE_MULT);
 	ELOG("[FBInk] Fontsize set to %hux%hu (%s base glyph size: %hhux%hhu)",
 	     FONTW,
 	     FONTH,
 	     fontname_to_string(fbink_config->fontname),
-	     (uint8_t)(FONTW / FONTSIZE_MULT),
-	     (uint8_t)(FONTH / FONTSIZE_MULT));
+	     glyphWidth,
+	     glyphHeight);
 
 	// Compute MAX* values now that we know the screen & font resolution
 	MAXCOLS = (unsigned short int) (viewWidth / FONTW);
@@ -1723,7 +1660,7 @@ void
 {
 	fprintf(
 	    stdout,
-	    "viewWidth=%u;viewHeight=%u;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld",
+	    "viewWidth=%u;viewHeight=%u;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld",
 	    viewWidth,
 	    viewHeight,
 	    vInfo.bits_per_pixel,
@@ -1731,6 +1668,8 @@ void
 	    FONTH,
 	    FONTSIZE_MULT,
 	    fontname_to_string(fbink_config->fontname),
+	    glyphWidth,
+	    glyphHeight,
 	    MAXCOLS,
 	    MAXROWS,
 	    deviceQuirks.isPerfectFit,

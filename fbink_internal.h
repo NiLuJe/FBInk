@@ -197,6 +197,8 @@ struct fb_var_screeninfo vInfo;
 struct fb_fix_screeninfo fInfo;
 uint32_t                 viewWidth;
 uint32_t                 viewHeight;
+uint8_t             glyphWidth         = 8U;
+uint8_t            glyphHeight         = 8U;
 unsigned short int       FONTW         = 8U;
 unsigned short int       FONTH         = 8U;
 uint8_t                  FONTSIZE_MULT = 1U;
@@ -216,8 +218,6 @@ void (*fxpGetPixel)(FBInkCoordinates*, FBInkColor*) = NULL;
 #endif
 // As well as the appropriate coordinates rotation function...
 void (*fxpRotateCoords)(FBInkCoordinates*) = NULL;
-// And the font rendering function...
-void (*fxpFontRender)(uint32_t, unsigned char*) = NULL;
 // And the font bitmap getter...
 const unsigned char* (*fxpFont8xGetBitmap)(uint32_t) = NULL;
 #ifdef FBINK_WITH_FONTS
@@ -225,7 +225,6 @@ const unsigned char* (*fxpFont8xGetBitmap)(uint32_t) = NULL;
 const uint32_t* (*fxpFont32xGetBitmap)(uint32_t) = NULL;
 //const uint64_t* (*fxpFont64xGetBitmap)(uint32_t) = NULL;
 #endif
-void (*fxpNewFontRender)(uint32_t, unsigned short int, unsigned short int, FBInkColor*, FBInkColor*) = NULL;
 
 // Where we track device/screen-specific quirks
 FBInkDeviceQuirks deviceQuirks = { 0 };
@@ -258,13 +257,6 @@ static void fill_rect(unsigned short int, unsigned short int, unsigned short int
 static void clear_screen(uint8_t);
 
 static const unsigned char* font8x8_get_bitmap(uint32_t);
-static void                 font8x8_render(uint32_t, unsigned char*);
-#ifdef FBINK_WITH_FONTS
-//static void font16x16_render(uint32_t, unsigned char*);
-static void font32x32_render(uint32_t, unsigned char*);
-//static void font64x64_render(uint32_t, unsigned char*);
-#endif
-static void font_render(uint32_t codepoint, unsigned short int x_offs, unsigned short int y_offs, FBInkColor* fgC, FBInkColor* bgC);
 
 static const char* fontname_to_string(uint8_t);
 
