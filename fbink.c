@@ -537,13 +537,6 @@ static struct mxcfb_rect
 		    hoffset);
 		hoffset = 0;
 	}
-	// Recap final offset values
-	if (hoffset != 0) {
-		LOG("Adjusting horizontal pen position by %hd pixels, as requested", hoffset);
-	}
-	if (voffset != 0) {
-		LOG("Adjusting vertical pen position by %hd pixels, as requested", voffset);
-	}
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
@@ -553,14 +546,30 @@ static struct mxcfb_rect
 		.height = (uint32_t)((multiline_offset + 1U) * FONTH),
 	};
 
-	// Fudge height & width if h/v offset is pushing stuff off-screen
-	if (voffset != 0 && (region.top + region.height) > viewHeight) {
-		region.height = viewHeight - region.top;
-		LOG("Adjusted region height to account for vertical offset pushing part of the content off-screen");
+	// Recap final offset values
+	if (hoffset != 0) {
+		LOG("Adjusting horizontal pen position by %hd pixels, as requested", hoffset);
+		// Clamp region to sane values if h/v offset is pushing stuff off-screen
+		if ((region.left + pixel_offset) > viewWidth) {
+			region.left = viewWidth - pixel_offset;
+			LOG("Adjusted region left to account for horizontal offset pushing part of the content off-screen");
+		}
+		if ((region.width + region.left) > viewWidth) {
+			region.width = viewWidth - region.left;
+			LOG("Adjusted region width to account for horizontal offset pushing part of the content off-screen");
+		}
 	}
-	if (hoffset != 0 && (region.width + region.left) > viewWidth) {
-		region.width = viewWidth - region.left;
-		LOG("Adjusted region width to account for horizontal offset pushing part of the content off-screen");
+	if (voffset != 0) {
+		LOG("Adjusting vertical pen position by %hd pixels, as requested", voffset);
+		// Clamp region to sane values if h/v offset is pushing stuff off-screen
+		if (region.top > viewHeight) {
+			region.top = viewHeight;
+			LOG("Adjusted region top to account for vertical offset pushing part of the content off-screen");
+		}
+		if ((region.top + region.height) > viewHeight) {
+			region.height = viewHeight - region.top;
+			LOG("Adjusted region height to account for vertical offset pushing part of the content off-screen");
+		}
 	}
 
 	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
@@ -642,7 +651,7 @@ static struct mxcfb_rect
 	uint32_t           ch     = 0U;
 	FBInkCoordinates   coords = { 0U };
 	FBInkColor*        pxC;
-	// NOTE: We don't do *any* sanity checking on hoffset/voffset,
+	// NOTE: We don't do much sanity checking on hoffset/voffset,
 	//       because we want to allow pushing part of the string off-screen.
 	//       put_pixel is checked, and will discard off-screen pixels safely.
 	//       Because we store the final position in an unsigned value,
