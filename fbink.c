@@ -652,10 +652,11 @@ static struct mxcfb_rect
 	FBInkCoordinates   coords = { 0U };
 	FBInkColor*        pxC;
 	// NOTE: We don't do much sanity checking on hoffset/voffset,
-	//       because we want to allow pushing part of the string off-screen.
+	//       because we want to allow pushing part of the string off-screen
+	//       (we basically only make sure it won't screw up the region rectangle too badly).
 	//       put_pixel is checked, and will discard off-screen pixels safely.
-	//       Because we store the final position in an unsigned value,
-	//       this means we rely on wraparound on underflow to still point to (large, but positive) off-screen coordinates.
+	//       Because we store the final position in an unsigned value, this means that, to some extent,
+	//       we rely on wraparound on underflow to still point to (large, but positive) off-screen coordinates.
 	unsigned short int x_base_offs = (unsigned short int) ((col * FONTW) + pixel_offset + hoffset);
 	unsigned short int y_offs      = (unsigned short int) ((row * FONTH) + voffset);
 	unsigned short int x_offs      = 0U;
