@@ -594,22 +594,6 @@ static struct mxcfb_rect
 		    region.width);
 	}
 
-	// Fill our bounding box with our background color, so that we'll be visible no matter what's already on screen.
-	// NOTE: Unneeded, we already plot the background when handling font glyphs ;).
-	//fill_rect(region.left, region.top, region.width, region.height, &bgC);
-
-	// Alloc our pixmap on the stack, and re-use it.
-	// NOTE: We tried using automatic VLAs, but that... didn't go well.
-	//       (as in, subtle (or not so) memory and/or stack corruption).
-	//unsigned char* pixmap = NULL;
-	// NOTE: Using alloca may prevent inlining. That said, trust that the compiler will do the right thing.
-	//       As for why alloca:
-	//       It's a very small allocation, we'll always fully write to it so we don't care about its initialization,
-	//       -> it's a perfect fit for the stack.
-	//       In any other situation (i.e., constant FONTW & FONTH), it'd have been an automatic.
-	// NOTE: Don't forget the extra FONTSIZE_MULT - 1 to avoid a buffer overflow when scaling the last pixel...
-	//pixmap = alloca(sizeof(*pixmap) * (size_t)((FONTW * FONTH) + FONTSIZE_MULT - 1));
-
 	// Loop through all the *characters* in the text string
 	unsigned int       bi     = 0U;
 	unsigned short int ci     = 0U;
