@@ -96,9 +96,9 @@ typedef struct
 	bool      is_flashing;     // Request a black flash on refresh
 	bool      is_cleared;      // Clear the screen beforehand (honors is_inverted)
 	bool      is_centered;     // Center the text (horizontally)
-	bool      is_halfway;      // Vertically center the text, honoring row offsets
 	short int hoffset;         // Horizontal offset (in pixels) for text position
 	short int voffset;         // Vertical offset (in pixels) for text position
+	bool      is_halfway;      // Vertically center the text, honoring row offsets
 	bool      is_padded;       // Pad the text with blanks (on the left, or on both sides if is_centered)
 	bool      is_verbose;      // Print verbose diagnostic informations on stdout
 	bool      is_quiet;        // Hide fbink_init()'s hardware setup info (sent to stderr)
