@@ -526,11 +526,12 @@ static struct mxcfb_rect
 	// Clamp h/v offset to safe values
 	short int voffset = fbink_config->voffset;
 	short int hoffset = fbink_config->hoffset;
-	if ((((row - multiline_offset) * FONTH) + voffset) >= viewHeight) {
+	// NOTE: This test isn't perfect, but then, if you play with this, you do in knowing the risks...
+	if (abs(((row - multiline_offset) * FONTH) + voffset) >= viewHeight) {
 		LOG("The specified vertical offset (%hd) pushes *all* content out of bounds, discarding it", voffset);
 		voffset = 0;
 	}
-	if (((col * FONTW) + hoffset) >= viewWidth) {
+	if (abs((col * FONTW) + hoffset) >= viewWidth) {
 		LOG("The specified horizontal offset (%hd) pushes *all* content out of bounds, discarding it", hoffset);
 		hoffset = 0;
 	}
@@ -544,8 +545,8 @@ static struct mxcfb_rect
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
-		.top    = (uint32_t)(((row - multiline_offset) * FONTH) + voffset),
-		.left   = (uint32_t)((col * FONTW) + hoffset),
+		.top    = (uint32_t) MAX(0, (((row - multiline_offset) * FONTH) + voffset)),
+		.left   = (uint32_t) MAX(0, ((col * FONTW) + hoffset)),
 		.width  = multiline_offset > 0U ? (viewWidth - (uint32_t)(col * FONTW)) : (uint32_t)(charcount * FONTW),
 		.height = (uint32_t)((multiline_offset + 1U) * FONTH),
 	};
