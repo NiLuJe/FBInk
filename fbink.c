@@ -457,7 +457,7 @@ static const char*
 			return "Scientifica Italic";
 #endif
 		default:
-			return "Unknown?!";
+			return "IBM (Default)";
 	}
 }
 
