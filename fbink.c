@@ -523,6 +523,14 @@ static struct mxcfb_rect
 		    deadzone_offset);
 	}
 
+	// Warn if *offsets are liable to push *all* test off-screen
+	if (abs(fbink_config->voffset) >= viewHeight) {
+		LOG("voffset's absolute value is large enough to push *all* content off-screen!");
+	}
+	if (abs(fbink_config->hoffset) >= viewWidth) {
+		LOG("hoffset's absolute value is large enough to push *all* content off-screen!");
+	}
+
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
 		.top    = (uint32_t)(((row - multiline_offset) * FONTH) + fbink_config->voffset),
