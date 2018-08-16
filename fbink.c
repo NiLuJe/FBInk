@@ -523,21 +523,42 @@ static struct mxcfb_rect
 		    deadzone_offset);
 	}
 
-	// Warn if *offsets are liable to push *all* test off-screen
-	if (abs(fbink_config->voffset) >= viewHeight) {
-		LOG("voffset's absolute value is large enough to push *all* content off-screen!");
+	// Clamp h/v offset to safe values
+	short int voffset = fbink_config->voffset;
+	short int hoffset = fbink_config->hoffset;
+	if ((((row - multiline_offset) * FONTH) + voffset) >= viewHeight) {
+		LOG("The specified vertical offset (%hd) pushes *all* content out of bounds, discarding it", voffset);
+		voffset = 0;
 	}
-	if (abs(fbink_config->hoffset) >= viewWidth) {
-		LOG("hoffset's absolute value is large enough to push *all* content off-screen!");
+	if (((col * FONTW) + hoffset) >= viewWidth) {
+		LOG("The specified horizontal offset (%hd) pushes *all* content out of bounds, discarding it", hoffset);
+		hoffset = 0;
+	}
+	// Recap final offset values
+	if (hoffset != 0) {
+		LOG("Adjusting horizontal pen position by %hd pixels", hoffset);
+	}
+	if (voffset != 0) {
+		LOG("Adjusting vertical pen position by %hd pixels", voffset);
 	}
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
-		.top    = (uint32_t)(((row - multiline_offset) * FONTH) + fbink_config->voffset),
-		.left   = (uint32_t)((col * FONTW) + fbink_config->hoffset),
+		.top    = (uint32_t)(((row - multiline_offset) * FONTH) + voffset),
+		.left   = (uint32_t)((col * FONTW) + hoffset),
 		.width  = multiline_offset > 0U ? (viewWidth - (uint32_t)(col * FONTW)) : (uint32_t)(charcount * FONTW),
 		.height = (uint32_t)((multiline_offset + 1U) * FONTH),
 	};
+
+	// Fudge height & width if h/v offset is pushing stuff off-screen
+	if (voffset != 0 && (region.top + region.height) > viewHeight) {
+		region.height = viewHeight - region.top;
+		LOG("Adjusted region height to account for vertical offset pushing part of the content off-screen");
+	}
+	if (hoffset != 0 && (region.width + region.left) > viewWidth) {
+		region.width = viewWidth - region.left;
+		LOG("Adjusted region width to account for horizontal offset pushing part of the content off-screen");
+	}
 
 	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
 
@@ -623,8 +644,8 @@ static struct mxcfb_rect
 	//       put_pixel is checked, and will discard off-screen pixels safely.
 	//       Because we store the final position in an unsigned value,
 	//       this means we rely on wraparound on underflow to still point to (large, but positive) off-screen coordinates.
-	unsigned short int x_base_offs = (unsigned short int) ((col * FONTW) + pixel_offset + fbink_config->hoffset);
-	unsigned short int y_offs      = (unsigned short int) ((row * FONTH) + fbink_config->voffset);
+	unsigned short int x_base_offs = (unsigned short int) ((col * FONTW) + pixel_offset + hoffset);
+	unsigned short int y_offs      = (unsigned short int) ((row * FONTH) + voffset);
 	unsigned short int x_offs      = 0U;
 
 	unsigned short int i;
