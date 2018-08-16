@@ -527,11 +527,11 @@ static struct mxcfb_rect
 	short int voffset = fbink_config->voffset;
 	short int hoffset = fbink_config->hoffset;
 	// NOTE: This test isn't perfect, but then, if you play with this, you do in knowing the risks...
-	if (abs(((row - multiline_offset) * FONTH) + voffset) >= viewHeight) {
+	if (abs(voffset) >= viewHeight) {
 		LOG("The specified vertical offset (%hd) pushes *all* content out of bounds, discarding it", voffset);
 		voffset = 0;
 	}
-	if (abs((col * FONTW) + hoffset) >= viewWidth) {
+	if (abs(hoffset) >= viewWidth) {
 		LOG("The specified horizontal offset (%hd) pushes *all* content out of bounds, discarding it", hoffset);
 		hoffset = 0;
 	}
