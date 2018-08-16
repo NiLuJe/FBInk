@@ -539,10 +539,10 @@ static struct mxcfb_rect
 	}
 	// Recap final offset values
 	if (hoffset != 0) {
-		LOG("Adjusting horizontal pen position by %hd pixels", hoffset);
+		LOG("Adjusting horizontal pen position by %hd pixels, as requested", hoffset);
 	}
 	if (voffset != 0) {
-		LOG("Adjusting vertical pen position by %hd pixels", voffset);
+		LOG("Adjusting vertical pen position by %hd pixels, as requested", voffset);
 	}
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
