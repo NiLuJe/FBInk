@@ -1526,9 +1526,9 @@ int
 #ifdef FBINK_WITH_FONTS
 		// NOTE: Handle custom fonts, no matter their base glyph size...
 		// We want at least N columns, so, viewWidth / N / glyphWidth gives us the maximum multiplier.
-		uint8_t max_fontmult_width = (uint8_t)(viewWidth / min_maxcols / FONTW);
+		uint8_t max_fontmult_width = (uint8_t)(viewWidth / min_maxcols / glyphWidth);
 		// We want at least 1 row, so, viewHeight / glyphHeight gives us the maximum multiplier.
-		uint8_t max_fontmult_height = (uint8_t)(viewHeight / FONTH);
+		uint8_t max_fontmult_height = (uint8_t)(viewHeight / glyphHeight);
 		max_fontmult                = (uint8_t) MIN(max_fontmult_width, max_fontmult_height);
 		if (FONTSIZE_MULT > max_fontmult) {
 			FONTSIZE_MULT = max_fontmult;
