@@ -260,7 +260,7 @@ static const unsigned char* font8x8_get_bitmap(uint32_t);
 
 static const char* fontname_to_string(uint8_t);
 
-static struct mxcfb_rect draw(const char*, unsigned short int, unsigned short int, bool, bool, unsigned short int, bool);
+static struct mxcfb_rect draw(const char*, unsigned short int, unsigned short int, unsigned short int, bool, const FBInkConfig*);
 
 static long int jiffies_to_ms(long int);
 #ifdef FBINK_FOR_KINDLE

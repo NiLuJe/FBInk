@@ -51,6 +51,10 @@ static void
 	    "\t-y, --row NUM\tBegin printing STRING @ row NUM (Default: 0).\n"
 	    "\t\t\tBeginning at row 1 instead of 0 is recommended, because row 0 (the topmost one) is often half-obscured by a bezel, especially on Kobos.\n"
 	    "\t\t\tUse a negative value to count back from the bottom of the screen.\n"
+	    "\t-X, --hoffset NUM\tAdjust final text position by NUM pixels on the horizontal axis (Default: 0).\n"
+	    "\t\t\tHonors negative values, and will let you move stuff off-screen without warning.\n"
+	    "\t-Y, --voffset NUM\tAdjust final text position by NUM pixels on the vertical axis (Default: 0).\n"
+	    "\t\t\tHonors negative values, and will let you move stuff off-screen without warning.\n"
 	    "\t-m, --centered\tDynamically override col to print STRING at the center of the screen.\n"
 	    "\t\t\tSpecial care is taken to avoid the very edges of the screen, to ensure the complete legibility of the message.\n"
 	    "\t-M, --halfway\tDynamically adjust row to print STRING in the middle of the screen.\n"
@@ -157,6 +161,7 @@ int
 	int                        opt_index;
 	static const struct option opts[] = {
 		{ "row", required_argument, NULL, 'y' },     { "col", required_argument, NULL, 'x' },
+		{ "voffset", required_argument, NULL, 'Y' }, { "hoffset", required_argument, NULL, 'X' },
 		{ "invert", no_argument, NULL, 'h' },        { "flash", no_argument, NULL, 'f' },
 		{ "clear", no_argument, NULL, 'c' },         { "centered", no_argument, NULL, 'm' },
 		{ "halfway", no_argument, NULL, 'M' },       { "padded", no_argument, NULL, 'p' },
@@ -210,13 +215,19 @@ int
 	bool      is_eval        = false;
 	int       errfnd         = 0;
 
-	while ((opt = getopt_long(argc, argv, "y:x:hfcmMps:S:F:vqg:i:ae", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:ae", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				fbink_config.row = (short int) atoi(optarg);
 				break;
 			case 'x':
 				fbink_config.col = (short int) atoi(optarg);
+				break;
+			case 'Y':
+				fbink_config.voffset = (short int) atoi(optarg);
+				break;
+			case 'X':
+				fbink_config.hoffset = (short int) atoi(optarg);
 				break;
 			case 'h':
 				fbink_config.is_inverted = true;
