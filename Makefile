@@ -42,7 +42,7 @@ CC_IS_CLANG:=$(shell $(CC) -v 2>&1 | grep -q "clang version" && echo 1 || echo 0
 CC_VERSION:=$(shell printf "%02d%02d%02d" `echo __GNUC__ | $(CC) -E -x c - | tail -n 1` `echo __GNUC_MINOR__ | $(CC) -E -x c - | tail -n 1` `echo __GNUC_PATCHLEVEL__ | $(CC) -E -x c - | tail -n 1`)
 ifeq "$(CC_IS_CLANG)" "1"
 	# This is Clang
-	CC_IS_CLANG:=1
+	MOAR_WARNIGS:=1
 endif
 ifeq "$(shell expr $(CC_VERSION) \>= 070000)" "1"
 	# This is GCC >= 7
