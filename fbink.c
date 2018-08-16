@@ -527,6 +527,7 @@ static struct mxcfb_rect
 	short int voffset = fbink_config->voffset;
 	short int hoffset = fbink_config->hoffset;
 	// NOTE: This test isn't perfect, but then, if you play with this, you do it knowing the risks...
+	//       It's mainly there so that stupidly large values don't wrap back on screen because of overflow wraparound.
 	if (abs(voffset) >= viewHeight) {
 		LOG("The specified vertical offset (%hd) necessarily pushes *all* content out of bounds, discarding it",
 		    voffset);
@@ -667,7 +668,10 @@ static struct mxcfb_rect
 	unsigned short int cy;
 
 	// NOTE: Extra code duplication because the glyph's bitmap data type depends on the glyph's width,
-	//       and we want to inline this and branch outside the loops...
+	//       so, one way or another, we have to duplicate the inner loops,
+	//       but we want to inline this *and* branch outside the loops,
+	//       and I don't feel like moving that to inline functions,
+	//       because it depends on seven billion different variables I'd have to pass around...
 #ifdef FBINK_WITH_FONTS
 	if (glyphWidth <= 8) {
 #endif
