@@ -555,8 +555,8 @@ static struct mxcfb_rect
 			region.width = viewWidth - region.left - pixel_offset;
 			LOG("Adjusted region width to account for horizontal offset pushing part of the content off-screen");
 		}
-		if ((region.left + pixel_offset) > viewWidth) {
-			region.left = viewWidth - pixel_offset;
+		if ((region.left + pixel_offset) >= viewWidth) {
+			region.left = viewWidth - pixel_offset - 1;
 			LOG("Adjusted region left to account for horizontal offset pushing part of the content off-screen");
 		}
 	}
@@ -567,8 +567,8 @@ static struct mxcfb_rect
 			region.height = viewHeight - region.top;
 			LOG("Adjusted region height to account for vertical offset pushing part of the content off-screen");
 		}
-		if (region.top > viewHeight) {
-			region.top = viewHeight;
+		if (region.top >= viewHeight) {
+			region.top = viewHeight - 1;
 			LOG("Adjusted region top to account for vertical offset pushing part of the content off-screen");
 		}
 	}
@@ -1202,7 +1202,7 @@ static int
 
 	// NOTE: Discard bogus regions, they can cause a softlock on some devices.
 	//       A 0x0 region is a no go on most devices, while a 1x1 region may only upset some Kindle models.
-	if (region.width <= 1 && region.height <= 1) {
+	if (region.width <= 1 || region.height <= 1) {
 		fprintf(stderr,
 			"[FBInk] Discarding bogus empty region (%ux%u) to avoid a softlock.\n",
 			region.width,
