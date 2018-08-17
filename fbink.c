@@ -599,9 +599,10 @@ static struct mxcfb_rect
 	if ((charcount == MAXCOLS || (col == 0 && !fbink_config->is_centered && multiline_offset > 0U)) &&
 	    pixel_offset > 0U) {
 		LOG("Painting a background rectangle on the left edge on account of pixel_offset");
-		fill_rect(0,
+		// Make sure we don't leave a hoffset sized gap when we have a positive hoffset...
+		fill_rect(hoffset > 0 ? (unsigned short int) hoffset : 0U,
 			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
-			  hoffset > 0 ? (unsigned short int) (pixel_offset + hoffset) : pixel_offset,
+			  pixel_offset,    // Don't append hoffset here, to make it clear stuff moved to the right.
 			  FONTH,
 			  &bgC);
 		// Correct width, to include that bit of content, too, if needed
