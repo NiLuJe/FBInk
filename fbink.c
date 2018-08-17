@@ -601,7 +601,7 @@ static struct mxcfb_rect
 		LOG("Painting a background rectangle on the left edge on account of pixel_offset");
 		fill_rect(0,
 			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
-			  pixel_offset,
+			  hoffset > 0 ? (unsigned short int) (pixel_offset + hoffset) : pixel_offset,
 			  FONTH,
 			  &bgC);
 		// Correct width, to include that bit of content, too, if needed
