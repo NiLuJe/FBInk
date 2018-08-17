@@ -80,7 +80,7 @@ static int
 		SEND_INPUT_EVENT(EV_KEY, BTN_TOUCH, 1);
 		SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
 
-		// This was sandwiched in the Glo report we got, but this feels extraneous, let'd do without for now :)
+		// This was sandwiched in the Glo report we got, but this feels extraneous, let's do without for now :)
 		/*
 		SEND_INPUT_EVENT(EV_ABS, ABS_PRESSURE, 101);
 		SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
@@ -95,7 +95,7 @@ static int
 		// NOTE: Corresponds to what we call the "Phoenix" protocol in KOReader
 		//       (with or without the Alyssum tweaks, which appear irrelevant),
 		//       (and with or without the ev_epoch_time tweaks, which shouldn't matter for us).
-		//       Which means we should cover the: KA1, H2O, Aura, Aura SEr1, Aura SEr2, Glo HD, Touch 2.0
+		//       Which means we should cover the: KA1, H2O, Aura, Aura SEr1, (Aura SEr2?), Glo HD, Touch 2.0
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TRACKING_ID, 1);
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MAJOR, 1);
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_WIDTH_MAJOR, 1);
@@ -122,8 +122,9 @@ static int
 		SEND_INPUT_EVENT(EV_SYN, SYN_MT_REPORT, 0);
 		SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
 	}
-	// FIXME: That leaves the "snow" protocol, on the H2O²r1 & most Mk7 devices...
-	//        H2O²r1, H2O²r2, Clara HD
+	// FIXME: That leaves the "snow" protocol, introduced on the H2O²r1,
+	//        and used on most (if not all, we never actually heard from an Aura SEr2 owner) Mk7 devices...
+	//        H2O²r1, H2O²r2, (Aura SEr2?), Clara HD
 
 	close(ifd);
 
