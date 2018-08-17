@@ -197,8 +197,8 @@ struct fb_var_screeninfo vInfo;
 struct fb_fix_screeninfo fInfo;
 uint32_t                 viewWidth;
 uint32_t                 viewHeight;
-uint8_t             glyphWidth         = 8U;
-uint8_t            glyphHeight         = 8U;
+uint8_t                  glyphWidth    = 8U;
+uint8_t                  glyphHeight   = 8U;
 unsigned short int       FONTW         = 8U;
 unsigned short int       FONTH         = 8U;
 uint8_t                  FONTSIZE_MULT = 1U;
@@ -260,7 +260,12 @@ static const unsigned char* font8x8_get_bitmap(uint32_t);
 
 static const char* fontname_to_string(uint8_t);
 
-static struct mxcfb_rect draw(const char*, unsigned short int, unsigned short int, unsigned short int, bool, const FBInkConfig*);
+static struct mxcfb_rect draw(const char*,
+			      unsigned short int,
+			      unsigned short int,
+			      unsigned short int,
+			      bool,
+			      const FBInkConfig*);
 
 static long int jiffies_to_ms(long int);
 #ifdef FBINK_FOR_KINDLE

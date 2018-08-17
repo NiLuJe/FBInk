@@ -552,7 +552,7 @@ static struct mxcfb_rect
 		LOG("Adjusting horizontal pen position by %hd pixels, as requested", hoffset);
 		// Clamp region to sane values if h/v offset is pushing stuff off-screen
 		if ((region.width + region.left + pixel_offset) > viewWidth) {
-			region.width = viewWidth - region.left - pixel_offset;
+			region.width = (uint32_t) MAX(0, (short int) (viewWidth - region.left - pixel_offset));
 			LOG("Adjusted region width to account for horizontal offset pushing part of the content off-screen");
 		}
 		if ((region.left + pixel_offset) >= viewWidth) {
@@ -564,7 +564,7 @@ static struct mxcfb_rect
 		LOG("Adjusting vertical pen position by %hd pixels, as requested", voffset);
 		// Clamp region to sane values if h/v offset is pushing stuff off-screen
 		if ((region.top + region.height) > viewHeight) {
-			region.height = viewHeight - region.top;
+			region.height = (uint32_t) MAX(0, (short int) (viewHeight - region.top));
 			LOG("Adjusted region height to account for vertical offset pushing part of the content off-screen");
 		}
 		if (region.top >= viewHeight) {
