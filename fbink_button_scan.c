@@ -68,19 +68,22 @@ static int
 		return ERRCODE(ENODEV);
 	}
 
-	// NOTE: Kobo devices uses a wide range of weird & quirky variations of touch input protocols,
+	// NOTE: Kobo devices use a wide range of weird & quirky variations on the touch input protocol,
 	//       depending on the exact device, so do our best to handle that properly...
 	// NOTE: Double-check on your device w/ hexdump -x /dev/input/event1 (or -d if you prefer decimal).
 	if (deviceQuirks.isKoboNonMT) {
 		// NOTE: Should match what Kobo does on devices who don't hanve a Multi-Touch aware driver...
 		//       Should cover the Touch A/B/C, Mini, Glo, Aura HD
+		// NOTE: The original Touch is known to come in multiple variants,
+		//       some of which might handle things slightly differently.
+		//       Trying to guess which is which seems to be a lost cause, so don't try too hard...
 		SEND_INPUT_EVENT(EV_ABS, ABS_Y, match_coords->y);
 		SEND_INPUT_EVENT(EV_ABS, ABS_X, match_coords->x);
 		SEND_INPUT_EVENT(EV_ABS, ABS_PRESSURE, 100);
 		SEND_INPUT_EVENT(EV_KEY, BTN_TOUCH, 1);
 		SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
 
-		// This was sandwiched in the Glo report we got, but this feels extraneous, let's do without for now :)
+		// This was sandwiched in the Glo report we got, but it feels extraneous, let's do without for now :)
 		/*
 		SEND_INPUT_EVENT(EV_ABS, ABS_PRESSURE, 101);
 		SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
@@ -102,8 +105,8 @@ static int
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_X, match_coords->x);
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_Y, match_coords->y);
 		// At this point, the Glo HD adds another pair of events:
-		// NOTE: Not adding them still works on Mk6, and adding them also works on Mk5,
-		//       so, add them unconditionally until something blows up ;).
+		// NOTE: Not adding them appears to work on Mk6, and adding them also works on Mk5,
+		//       so, let's add them unconditionally until something blows up ;).
 		SEND_INPUT_EVENT(EV_ABS, ABS_PRESSURE, 1024);
 		SEND_INPUT_EVENT(EV_KEY, BTN_TOUCH, 1);
 
