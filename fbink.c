@@ -714,35 +714,38 @@ static struct mxcfb_rect
 			const unsigned char* bitmap = NULL;
 			bitmap                      = (*fxpFont8xGetBitmap)(ch);
 
-			// NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution),
-			//       and from there compute the extra pixels for that single input pixel given our scaling factor...
-			for (uint8_t y = 0U; y < glyphHeight; y++) {
-				// y: input row, j: first output row after scaling
-				j = (unsigned short int) (y * FONTSIZE_MULT);
-				for (uint8_t x = 0U; x < glyphWidth; x++) {
-					// x: input column, i: first output column after scaling
-					i = (unsigned short int) (x * FONTSIZE_MULT);
-					// Each element encodes a full row, we access a column's bit in that row by shifting.
-					if (bitmap[y] & 1U << x) {
-						// bit was set, pixel is fg!
-						pxC = &fgC;
-					} else {
-						// bit was unset, pixel is bg
-						pxC = &bgC;
-					}
-					// Initial coordinates, before we generate the extra pixels from the scaling factor
-					cx = (unsigned short int) (x_offs + i);
-					cy = (unsigned short int) (y_offs + j);
-					// NOTE: Apply our scaling factor in both dimensions!
-					for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {
-						for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
-							coords.x = (unsigned short int) (cx + k);
-							coords.y = (unsigned short int) (cy + l);
-							put_pixel(&coords, pxC);
-						}
-					}
-				}
-			}
+			// Crappy macro to avoid repeating myself in each branch...
+#define RENDER_GLYPH()                                                                                                   \
+	/* NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution), */                   \
+	/*       and from there compute the extra pixels for that single input pixel given our scaling factor... */      \
+	for (uint8_t y = 0U; y < glyphHeight; y++) {                                                                     \
+		/* y: input row, j: first output row after scaling */                                                    \
+		j = (unsigned short int) (y * FONTSIZE_MULT);                                                            \
+		for (uint8_t x = 0U; x < glyphWidth; x++) {                                                              \
+			/* x: input column, i: first output column after scaling */                                      \
+			i = (unsigned short int) (x * FONTSIZE_MULT);                                                    \
+			/* Each element encodes a full row, we access a column's bit in that row by shifting. */         \
+			if (bitmap[y] & 1U << x) {                                                                       \
+				/* bit was set, pixel is fg! */                                                          \
+				pxC = &fgC;                                                                              \
+			} else {                                                                                         \
+				/* bit was unset, pixel is bg */                                                         \
+				pxC = &bgC;                                                                              \
+			}                                                                                                \
+			/* Initial coordinates, before we generate the extra pixels from the scaling factor */           \
+			cx = (unsigned short int) (x_offs + i);                                                          \
+			cy = (unsigned short int) (y_offs + j);                                                          \
+			/* NOTE: Apply our scaling factor in both dimensions! */                                         \
+			for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {                                                   \
+				for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {                                           \
+					coords.x = (unsigned short int) (cx + k);                                        \
+					coords.y = (unsigned short int) (cy + l);                                        \
+					put_pixel(&coords, pxC);                                                         \
+				}                                                                                        \
+			}                                                                                                \
+		}                                                                                                        \
+	}
+			RENDER_GLYPH();
 
 			// Next glyph! This serves as the source for the pen position, hence it being used as an index...
 			ci++;
@@ -765,35 +768,8 @@ static struct mxcfb_rect
 			const uint16_t* bitmap = NULL;
 			bitmap = (*fxpFont16xGetBitmap)(ch);
 
-			// NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution),
-			//       and from there compute the extra pixels for that single input pixel given our scaling factor...
-			for (uint8_t y = 0U; y < glyphHeight; y++) {
-				// y: input row, j: first output row after scaling
-				j = (unsigned short int) (y * FONTSIZE_MULT);
-				for (uint8_t x = 0U; x < glyphWidth; x++) {
-					// x: input column, i: first output column after scaling
-					i = (unsigned short int) (x * FONTSIZE_MULT);
-					// Each element encodes a full row, we access a column's bit in that row by shifting.
-					if (bitmap[y] & 1U << x) {
-						// bit was set, pixel is fg!
-						pxC = &fgC;
-					} else {
-						// bit was unset, pixel is bg
-						pxC = &bgC;
-					}
-					// Initial coordinates, before we generate the extra pixels from the scaling factor
-					cx = (unsigned short int) (x_offs + i);
-					cy = (unsigned short int) (y_offs + j);
-					// NOTE: Apply our scaling factor in both dimensions!
-					for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {
-						for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
-							coords.x = (unsigned short int) (cx + k);
-							coords.y = (unsigned short int) (cy + l);
-							put_pixel(&coords, pxC);
-						}
-					}
-				}
-			}
+			// Render, scale & plot!
+			RENDER_GLYPH();
 
 			// Next glyph! This serves as the source for the pen position, hence it being used as an index...
 			ci++;
@@ -815,35 +791,8 @@ static struct mxcfb_rect
 			const uint32_t* bitmap = NULL;
 			bitmap                 = (*fxpFont32xGetBitmap)(ch);
 
-			// NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution),
-			//       and from there compute the extra pixels for that single input pixel given our scaling factor...
-			for (uint8_t y = 0U; y < glyphHeight; y++) {
-				// y: input row, j: first output row after scaling
-				j = (unsigned short int) (y * FONTSIZE_MULT);
-				for (uint8_t x = 0U; x < glyphWidth; x++) {
-					// x: input column, i: first output column after scaling
-					i = (unsigned short int) (x * FONTSIZE_MULT);
-					// Each element encodes a full row, we access a column's bit in that row by shifting.
-					if (bitmap[y] & 1U << x) {
-						// bit was set, pixel is fg!
-						pxC = &fgC;
-					} else {
-						// bit was unset, pixel is bg
-						pxC = &bgC;
-					}
-					// Initial coordinates, before we generate the extra pixels from the scaling factor
-					cx = (unsigned short int) (x_offs + i);
-					cy = (unsigned short int) (y_offs + j);
-					// NOTE: Apply our scaling factor in both dimensions!
-					for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {
-						for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
-							coords.x = (unsigned short int) (cx + k);
-							coords.y = (unsigned short int) (cy + l);
-							put_pixel(&coords, pxC);
-						}
-					}
-				}
-			}
+			// Render, scale & plot!
+			RENDER_GLYPH();
 
 			// Next glyph! This serves as the source for the pen position, hence it being used as an index...
 			ci++;
@@ -865,35 +814,8 @@ static struct mxcfb_rect
 			const uint64_t* bitmap = NULL;
 			bitmap = (*fxpFont64xGetBitmap)(ch);
 
-			// NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution),
-			//       and from there compute the extra pixels for that single input pixel given our scaling factor...
-			for (uint8_t y = 0U; y < glyphHeight; y++) {
-				// y: input row, j: first output row after scaling
-				j = (unsigned short int) (y * FONTSIZE_MULT);
-				for (uint8_t x = 0U; x < glyphWidth; x++) {
-					// x: input column, i: first output column after scaling
-					i = (unsigned short int) (x * FONTSIZE_MULT);
-					// Each element encodes a full row, we access a column's bit in that row by shifting.
-					if (bitmap[y] & 1U << x) {
-						// bit was set, pixel is fg!
-						pxC = &fgC;
-					} else {
-						// bit was unset, pixel is bg
-						pxC = &bgC;
-					}
-					// Initial coordinates, before we generate the extra pixels from the scaling factor
-					cx = (unsigned short int) (x_offs + i);
-					cy = (unsigned short int) (y_offs + j);
-					// NOTE: Apply our scaling factor in both dimensions!
-					for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {
-						for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {
-							coords.x = (unsigned short int) (cx + k);
-							coords.y = (unsigned short int) (cy + l);
-							put_pixel(&coords, pxC);
-						}
-					}
-				}
-			}
+			// Render, scale & plot!
+			RENDER_GLYPH();
 
 			// Next glyph! This serves as the source for the pen position, hence it being used as an index...
 			ci++;
