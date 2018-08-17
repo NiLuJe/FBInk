@@ -1681,7 +1681,9 @@ int
 			ELOG("[FBInk] Enabled Kindle Oasis 2 quirks");
 		}
 #	else
-		if (deviceQuirks.isKoboMk7) {
+		if (deviceQuirks.isKoboNonMT) {
+			ELOG("[FBInk] Enabled Kobo w/o Multi-Touch quirks");
+		} else if (deviceQuirks.isKoboMk7) {
 			ELOG("[FBInk] Enabled Kobo Mark 7 quirks");
 		}
 #	endif

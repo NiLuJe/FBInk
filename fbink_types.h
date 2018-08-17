@@ -54,6 +54,7 @@ typedef struct
 	bool isKindleLegacy;
 	bool isKindlePearlScreen;
 	bool isKindleOasis2;
+	bool isKoboNonMT;
 	bool isKobo16Landscape;
 	bool isKoboMk7;
 	bool skipId;

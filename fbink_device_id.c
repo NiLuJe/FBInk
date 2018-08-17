@@ -231,10 +231,15 @@ static void
 				case 320:    // Touch C (trilogy)
 				case 340:    // Mini (pixie)
 				case 330:    // Glo (kraken)
+					device_quirks->isKoboNonMT = true;
+					break;
 				case 371:    // Glo HD (alyssum)
 				case 372:    // Touch 2.0 (pika)
 				case 360:    // Aura (phoenix)
+					break;
 				case 350:    // Aura HD (dragon)
+					device_quirks->isKoboNonMT = true;
+					break;
 				case 370:    // Aura H2O (dahlia)
 				case 374:    // Aura H2O² (snow)
 					break;
