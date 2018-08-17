@@ -634,7 +634,13 @@ static struct mxcfb_rect
 		// because we've just plugged a hole at the very right edge of a full line.
 		if (region.width < viewWidth) {
 			region.width = viewWidth;
-			LOG("Updated region.width to %u", region.width);
+			// Keep making sure it's properly clamped, interaction w/ hoffset can push us over the edge.
+			if (region.width + region.left > viewWidth) {
+				region.width = viewWidth - region.left;
+				LOG("Clamped region.width to %u", region.width);
+			} else {
+				LOG("Updated region.width to %u", region.width);
+			}
 		}
 	}
 
