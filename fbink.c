@@ -638,20 +638,13 @@ static struct mxcfb_rect
 		// NOTE: !isPerfectFit ensures pixel_offset is non-zero
 		LOG("Painting a background rectangle to fill the dead space on the right edge");
 		// Make sure we don't leave a hoffset sized gap when we have a negative hoffset...
-		if (hoffset < 0) {
-			fill_rect(
-			    (unsigned short int) (viewWidth - pixel_offset - (unsigned short int) abs(hoffset)),
-			    (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
-			    pixel_offset,    // Don't append abs(hoffset) here, to make it clear stuff moved to the left.
-			    FONTH,
-			    &bgC);
-		} else {
-			fill_rect((unsigned short int) (viewWidth - pixel_offset),
-				  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
-				  pixel_offset,
-				  FONTH,
-				  &bgC);
-		}
+		fill_rect(hoffset < 0
+			      ? (unsigned short int) (viewWidth - pixel_offset - (unsigned short int) abs(hoffset))
+			      : (unsigned short int) (viewWidth - pixel_offset),
+			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
+			  pixel_offset,    // Don't append abs(hoffset) here, to make it clear stuff moved to the left.
+			  FONTH,
+			  &bgC);
 		// If it's not already the case, update region to the full width,
 		// because we've just plugged a hole at the very right edge of a full line.
 		if (region.width < viewWidth) {
