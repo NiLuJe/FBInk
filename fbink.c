@@ -1226,6 +1226,7 @@ static int
 
 	// NOTE: Discard bogus regions, they can cause a softlock on some devices.
 	//       A 0x0 region is a no go on most devices, while a 1x1 region may only upset some Kindle models.
+	//       Some devices even balk at 1xN or Nx1, so, catch that, too.
 	if (region.width <= 1 || region.height <= 1) {
 		fprintf(stderr,
 			"[FBInk] Discarding bogus empty region (%ux%u) to avoid a softlock.\n",
