@@ -584,9 +584,20 @@ static struct mxcfb_rect
 		//       because by definition left has to keep matching the value of the first line,
 		//       even on subsequent lines.
 		if (charcount != MAXCOLS && multiline_offset == 0U) {
-			// Don't override a negative hoffset that pushes us off-screen
-			if (hoffset >= 0) {
+			if (hoffset == 0) {
 				region.left += pixel_offset;
+				LOG("Updated region.left to %u", region.left);
+			} else {
+				// Things are a bit more complex when hoffset is involved...
+				// We basically have to re-do the maths from scratch,
+				// do it signed to catch corner-cases interactions between col/hoffset/pixel_offset,
+				// and clamp it to safe values!
+				if (hoffset < 0) {
+					region.left = (uint32_t) MAX(0, ((col * FONTW) + hoffset + pixel_offset));
+				} else {
+					region.left = (uint32_t) MIN((uint32_t)((col * FONTW) + hoffset + pixel_offset),
+								     (viewWidth - 1U));
+				}
 				LOG("Updated region.left to %u", region.left);
 			}
 		}
