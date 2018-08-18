@@ -1813,13 +1813,13 @@ int
 	LOG("Adjusted position: column %hd, row %hd", col, row);
 
 	// Clamp coordinates to the screen, to avoid blowing up ;).
-	if (col >= MAXCOLS) {
-		col = (short int) (MAXCOLS - 1U);
-		LOG("Clamped column to %hd", col);
+	while (col >= MAXCOLS) {
+		col = (short int) (col - MAXCOLS);
+		LOG("Wrapped column back to %hd", col);
 	}
-	if (row >= MAXROWS) {
-		row = (short int) (MAXROWS - 1U);
-		LOG("Clamped row to %hd", row);
+	while (row >= MAXROWS) {
+		row = (short int) (row - MAXROWS);
+		LOG("Wrapped row back to %hd", row);
 	}
 
 	// See if we need to break our string down into multiple lines...
