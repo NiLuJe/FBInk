@@ -86,6 +86,9 @@ static void
 	    "\t-v, --verbose\tToggle printing diagnostic messages.\n"
 	    "\t-q, --quiet\tToggle hiding hardware setup messages.\n"
 	    "\n"
+	    "Options affecting the program's behavior:\n"
+	    "\t-I, --interactive\tEnter a very basic interactive mode.\n"
+	    "\n"
 	    "NOTES:\n"
 	    "\tYou can specify multiple STRINGs in a single invocation of fbink, each consecutive one will be printed on the subsequent line.\n"
 	    "\t\tAlthough it's worth mentioning that this will lead to undesirable results when combined with --clear,\n"
@@ -169,7 +172,7 @@ int
 		{ "font", required_argument, NULL, 'F' },    { "verbose", no_argument, NULL, 'v' },
 		{ "quiet", no_argument, NULL, 'q' },         { "image", required_argument, NULL, 'g' },
 		{ "img", required_argument, NULL, 'i' },     { "flatten", no_argument, NULL, 'a' },
-		{ "eval", no_argument, NULL, 'e' },          { NULL, 0, NULL, 0 }
+		{ "eval", no_argument, NULL, 'e' },          { "interactive", no_argument, NULL, 'I' }, { NULL, 0, NULL, 0 }
 	};
 
 	FBInkConfig fbink_config = { 0 };
@@ -213,9 +216,10 @@ int
 	short int image_y_offset = 0;
 	bool      is_image       = false;
 	bool      is_eval        = false;
+	bool      is_interactive = false;
 	int       errfnd         = 0;
 
-	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:ae", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeI", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				fbink_config.row = (short int) atoi(optarg);
@@ -416,6 +420,9 @@ int
 			case 'e':
 				is_eval = true;
 				break;
+			case 'I':
+				is_interactive = true;
+				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
 				errfnd = 1;
@@ -529,15 +536,25 @@ int
 			size_t  len  = 0;
 			ssize_t nread;
 			int     linecnt = -1;
-			// Interactive!
-			printf(">");
-			while ((nread = getline(&line, &len, stdin)) != -1) {
-				printf(">");
-				if ((linecnt = fbink_print(fbfd, line, &fbink_config)) < 0) {
-					fprintf(stderr, "Failed to print that string!\n");
-					rv = ERRCODE(EXIT_FAILURE);
+			if (isatty(fileno(stdin))) {
+				// We've got a terminal, make it interactive
+				printf(">>> ");
+				while ((nread = getline(&line, &len, stdin)) != -1) {
+					printf(">>> ");
+					if ((linecnt = fbink_print(fbfd, line, &fbink_config)) < 0) {
+						fprintf(stderr, "Failed to print that string!\n");
+						rv = ERRCODE(EXIT_FAILURE);
+					}
+					fbink_config.row = (short int) (fbink_config.row + linecnt);
 				}
-				fbink_config.row = (short int) (fbink_config.row + linecnt);
+			} else {
+				while ((nread = getline(&line, &len, stdin)) != -1) {
+					if ((linecnt = fbink_print(fbfd, line, &fbink_config)) < 0) {
+						fprintf(stderr, "Failed to print that string!\n");
+						rv = ERRCODE(EXIT_FAILURE);
+					}
+					fbink_config.row = (short int) (fbink_config.row + linecnt);
+				}
 			}
 			free(line);
 
