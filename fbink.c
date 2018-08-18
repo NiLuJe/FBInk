@@ -2347,8 +2347,27 @@ int
 	}
 
 	unsigned char* data = NULL;
-	if (strcmp(filename, "-") == 0) {
-		data = stbi_load_from_file(stdin, &w, &h, &n, req_n);
+	if (strcmp(filename, "-") == 0 && !isatty(fileno(stdin))) {
+		// NOTE: Ideally, we'd simply feed stdin to stbi_load_from_file, but apparently, that doesn't work,
+		//       so read stdin ourselves...
+		unsigned char  buffer[4096];
+		unsigned char* imgdata = NULL;
+		ssize_t        nread;
+		size_t         imglen = 0U;
+		while ((nread = read(STDIN_FILENO, buffer, sizeof(buffer)))) {
+			if (nread < 0) {
+				if (errno == EAGAIN)
+					continue;
+				perror("read");
+				break;
+			}
+			imgdata = realloc(imgdata, imglen + nread + 1);
+			memcpy(imgdata + imglen, buffer, nread);
+			imglen += nread;
+			imgdata[imglen] = '\0';
+		}
+		data = stbi_load_from_memory(imgdata, imglen, &w, &h, &n, req_n);
+		free(imgdata);
 	} else {
 		data = stbi_load(filename, &w, &h, &n, req_n);
 	}
