@@ -191,6 +191,8 @@ FBINK_API bool fbink_is_fb_quirky(void);
 // fdfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // filename:		path to the image file (Supported formats: JPEG, PNG, TGA, BMP, GIF & PNM)
+//				if set to "-" and stdin is not attached to a terminal,
+//				will attempt to read image data from stdin.
 // x_off:		target coordinates, x (honors negative offsets)
 // y_off:		target coordinates, y (honors negative offsets)
 // fbink_config:	pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
