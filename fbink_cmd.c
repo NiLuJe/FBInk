@@ -140,6 +140,7 @@ static void
 	    "\t\tTransparency is supported, but it may be slightly slower (because we may need to do alpha blending).\n"
 	    "\t\t\tYou can use the --flatten flag to avoid the potential performance penalty by always ignoring alpha.\n"
 	    "\t\tAs an additional quirk, you can't pass paths with commas in it to file. Pass those to the -i, --img flag instead.\n"
+	    "\t\tAnd if you want to read image data from stdin, make sure to pass \"-\" as the file name.\n"
 	    "\tThis honors --flash, as well as --clear & --invert\n"
 	    "\t\tNote that this also honors --col & --row (taking --size into account), in addition to the coordinates you specify.\n"
 	    "\t\tThe aim is to make it easier to align small images to text.\n"
