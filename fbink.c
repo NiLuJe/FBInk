@@ -1818,6 +1818,13 @@ int
 		col = (short int) (MAXCOLS - 1U);
 		LOG("Clamped column to %hd", col);
 	}
+	// NOTE: For lines, we attempt to do something potentially a bit less destructive, namely,
+	//       wrapping back to the top of the screen.
+	//       This seems like a better way to handle large dumps of data over stdin, for instance,
+	//       as well as a slightly less cryptic behavior when in interactive mode...
+	//       In any case, we're always going to overwrite something, but that way,
+	//       stuff shown on screen should be more or less consistent,
+	//       instead of overwriting over and over again the final line at the bottom of the screen...
 	bool wrapped_line = false;
 	while (row >= MAXROWS) {
 		row = (short int) (row - MAXROWS);
