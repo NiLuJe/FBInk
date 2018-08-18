@@ -523,7 +523,27 @@ int
 		} else if (is_eval) {
 			fbink_state_dump(&fbink_config);
 		} else {
-			show_helpmsg();
+			// If all else failed, try reading from stdin ;).
+			char*   line = NULL;
+			size_t  len  = 0;
+			ssize_t nread;
+			int     linecnt = -1;
+			// Interactive!
+			printf(">");
+			while ((nread = getline(&line, &len, stdin)) != -1) {
+				printf(">");
+				if ((linecnt = fbink_print(fbfd, line, &fbink_config)) < 0) {
+					fprintf(stderr, "Failed to print that string!\n");
+					rv = ERRCODE(EXIT_FAILURE);
+				}
+				fbink_config.row = (short int) (fbink_config.row + linecnt);
+			}
+			free(line);
+
+			// If nothing was read, show the help
+			if (linecnt == -1) {
+				show_helpmsg();
+			}
 		}
 	}
 

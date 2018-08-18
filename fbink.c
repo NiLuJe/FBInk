@@ -2346,7 +2346,12 @@ int
 			break;
 	}
 
-	unsigned char* data = stbi_load(filename, &w, &h, &n, req_n);
+	unsigned char* data = NULL;
+	if (strcmp(filename, "-") == 0) {
+		data = stbi_load_from_file(stdin, &w, &h, &n, req_n);
+	} else {
+		data = stbi_load(filename, &w, &h, &n, req_n);
+	}
 	if (data == NULL) {
 		fprintf(stderr, "[FBInk] Failed to open or decode image '%s'!\n", filename);
 		rv = ERRCODE(EXIT_FAILURE);
