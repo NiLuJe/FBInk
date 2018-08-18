@@ -2349,7 +2349,7 @@ int
 	unsigned char* data = NULL;
 	// Read image either from stdin (provided we're not running from a terminal), or a file
 	if (strcmp(filename, "-") == 0 && !isatty(fileno(stdin))) {
-		// NOTE: Ideally, we'd simply feed stdin to stbi_load_from_file, but apparently, that doesn't work,
+		// NOTE: Ideally, we'd simply feed stdin to stbi_load_from_file, but that doesn't work because it relies on fseek,
 		//       so read stdin ourselves...
 		//       c.f., https://stackoverflow.com/a/44894946
 		unsigned char* imgdata = NULL;
