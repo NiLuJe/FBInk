@@ -546,6 +546,7 @@ int
 			size_t  len  = 0;
 			ssize_t nread;
 			int     linecnt = -1;
+			// Draw a poor man's prompt, which works fairly okay, until we enable verbose mode :D.
 			printf(">>> ");
 			while ((nread = getline(&line, &len, stdin)) != -1) {
 				printf(">>> ");
