@@ -1814,16 +1814,16 @@ int
 	LOG("Adjusted position: column %hd, row %hd", col, row);
 
 	// Clamp coordinates to the screen, to avoid blowing up ;).
-	bool has_wrapped = false;
-	while (col >= MAXCOLS) {
-		col = (short int) (col - MAXCOLS);
-		LOG("Wrapped column back to %hd", col);
+	if (col >= MAXCOLS) {
+		col = (short int) (MAXCOLS - 1U);
+		LOG("Clamped column to %hd", col);
 	}
+	bool wrapped_line = false;
 	while (row >= MAXROWS) {
 		row = (short int) (row - MAXROWS);
 		LOG("Wrapped row back to %hd", row);
 		// Remember that, so we'll append something to our line to make the wraparound clearer...
-		has_wrapped = true;
+		wrapped_line = true;
 	}
 
 	// See if we need to break our string down into multiple lines...
@@ -2047,7 +2047,7 @@ int
 		}
 		LOG("snprintf wrote %d bytes", bytes_printed);
 
-		if (has_wrapped) {
+		if (wrapped_line) {
 			LOG("Capping the line with a solid block to make it clearer it has wrapped around...");
 			strcat(line, "\u2588");
 			bytes_printed++;
