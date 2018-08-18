@@ -2347,7 +2347,7 @@ int
 	}
 
 	unsigned char* data = NULL;
-	// Read image either from stdin, or a file
+	// Read image either from stdin (provided we're not running from a terminal), or a file
 	if (strcmp(filename, "-") == 0 && !isatty(fileno(stdin))) {
 		// NOTE: Ideally, we'd simply feed stdin to stbi_load_from_file, but apparently, that doesn't work,
 		//       so read stdin ourselves...
@@ -2388,11 +2388,10 @@ int
 				imgdata = temp;
 			}
 
-			nread = fread(imgdata + used, 1, CHUNK, stdin);
+			nread = fread(imgdata + used, 1U, CHUNK, stdin);
 			if (nread == 0) {
 				break;
 			}
-
 			used += nread;
 		}
 

@@ -541,7 +541,7 @@ int
 		} else if (is_eval) {
 			fbink_state_dump(&fbink_config);
 		} else if (is_interactive && isatty(fileno(stdin))) {
-			// We asked for interactive mode, and we're really a terminal, so, go ahead.
+			// We asked for interactive mode, and we're really running from a terminal, so, go ahead.
 			char*   line = NULL;
 			size_t  len  = 0;
 			ssize_t nread;
@@ -557,7 +557,7 @@ int
 			}
 			free(line);
 		} else {
-			// If all else failed, try reading from stdin, provided we're not a terminal ;).
+			// If all else failed, try reading from stdin, provided we're not running from a terminal ;).
 			if (!isatty(fileno(stdin))) {
 				char*   line = NULL;
 				size_t  len  = 0;
