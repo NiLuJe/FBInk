@@ -2052,7 +2052,7 @@ int
 		if (wrapped_line) {
 			LOG("Capping the line with a solid block to make it clearer it has wrapped around...");
 			strcat(line, "\u2588");
-			// NOTE: U+2588 is a multibyte sequence, namely, it takes 3 bytes
+			// NOTE: U+2588 (█) is a multibyte sequence, namely, it takes 3 bytes
 			bytes_printed += 3;
 		}
 
