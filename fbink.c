@@ -2055,8 +2055,9 @@ int
 		LOG("snprintf wrote %d bytes", bytes_printed);
 
 		// NOTE: And don't forget our wraparound marker (U+2588, a solid black block).
-		//       We've made sure line is large enough to handle it.
-		if (wrapped_line) {
+		//       While we've made sure the line buffer is large enough to handle it,
+		//       we can't add it to a full line (in terms of occupied columns), because it'd bork the region...
+		if (wrapped_line && line_len < available_cols) {
 			LOG("Capping the line with a solid block to make it clearer it has wrapped around...");
 			strcat(line, "\u2588");
 			// NOTE: U+2588 (█) is a multibyte sequence, namely, it takes 3 bytes
