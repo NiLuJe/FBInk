@@ -162,18 +162,27 @@ int
 {
 	int                        opt;
 	int                        opt_index;
-	static const struct option opts[] = {
-		{ "row", required_argument, NULL, 'y' },     { "col", required_argument, NULL, 'x' },
-		{ "voffset", required_argument, NULL, 'Y' }, { "hoffset", required_argument, NULL, 'X' },
-		{ "invert", no_argument, NULL, 'h' },        { "flash", no_argument, NULL, 'f' },
-		{ "clear", no_argument, NULL, 'c' },         { "centered", no_argument, NULL, 'm' },
-		{ "halfway", no_argument, NULL, 'M' },       { "padded", no_argument, NULL, 'p' },
-		{ "refresh", required_argument, NULL, 's' }, { "size", required_argument, NULL, 'S' },
-		{ "font", required_argument, NULL, 'F' },    { "verbose", no_argument, NULL, 'v' },
-		{ "quiet", no_argument, NULL, 'q' },         { "image", required_argument, NULL, 'g' },
-		{ "img", required_argument, NULL, 'i' },     { "flatten", no_argument, NULL, 'a' },
-		{ "eval", no_argument, NULL, 'e' },          { "interactive", no_argument, NULL, 'I' }, { NULL, 0, NULL, 0 }
-	};
+	static const struct option opts[] = { { "row", required_argument, NULL, 'y' },
+					      { "col", required_argument, NULL, 'x' },
+					      { "voffset", required_argument, NULL, 'Y' },
+					      { "hoffset", required_argument, NULL, 'X' },
+					      { "invert", no_argument, NULL, 'h' },
+					      { "flash", no_argument, NULL, 'f' },
+					      { "clear", no_argument, NULL, 'c' },
+					      { "centered", no_argument, NULL, 'm' },
+					      { "halfway", no_argument, NULL, 'M' },
+					      { "padded", no_argument, NULL, 'p' },
+					      { "refresh", required_argument, NULL, 's' },
+					      { "size", required_argument, NULL, 'S' },
+					      { "font", required_argument, NULL, 'F' },
+					      { "verbose", no_argument, NULL, 'v' },
+					      { "quiet", no_argument, NULL, 'q' },
+					      { "image", required_argument, NULL, 'g' },
+					      { "img", required_argument, NULL, 'i' },
+					      { "flatten", no_argument, NULL, 'a' },
+					      { "eval", no_argument, NULL, 'e' },
+					      { "interactive", no_argument, NULL, 'I' },
+					      { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_config = { 0 };
 
@@ -530,36 +539,43 @@ int
 			}
 		} else if (is_eval) {
 			fbink_state_dump(&fbink_config);
-		} else {
-			// If all else failed, try reading from stdin ;).
+		} else if (is_interactive && isatty(fileno(stdin))) {
+			// We asked for interactive mode, and we're really a terminal, so, go ahead.
 			char*   line = NULL;
 			size_t  len  = 0;
 			ssize_t nread;
 			int     linecnt = -1;
-			if (isatty(fileno(stdin))) {
-				// We've got a terminal, make it interactive
+			printf(">>> ");
+			while ((nread = getline(&line, &len, stdin)) != -1) {
 				printf(">>> ");
-				while ((nread = getline(&line, &len, stdin)) != -1) {
-					printf(">>> ");
-					if ((linecnt = fbink_print(fbfd, line, &fbink_config)) < 0) {
-						fprintf(stderr, "Failed to print that string!\n");
-						rv = ERRCODE(EXIT_FAILURE);
-					}
-					fbink_config.row = (short int) (fbink_config.row + linecnt);
+				if ((linecnt = fbink_print(fbfd, line, &fbink_config)) < 0) {
+					fprintf(stderr, "Failed to print that string!\n");
+					rv = ERRCODE(EXIT_FAILURE);
 				}
-			} else {
-				while ((nread = getline(&line, &len, stdin)) != -1) {
-					if ((linecnt = fbink_print(fbfd, line, &fbink_config)) < 0) {
-						fprintf(stderr, "Failed to print that string!\n");
-						rv = ERRCODE(EXIT_FAILURE);
-					}
-					fbink_config.row = (short int) (fbink_config.row + linecnt);
-				}
+				fbink_config.row = (short int) (fbink_config.row + linecnt);
 			}
 			free(line);
+		} else {
+			// If all else failed, try reading from stdin, provided we're not a terminal ;).
+			if (!isatty(fileno(stdin))) {
+				char*   line = NULL;
+				size_t  len  = 0;
+				ssize_t nread;
+				int     linecnt = -1;
+				while ((nread = getline(&line, &len, stdin)) != -1) {
+					if ((linecnt = fbink_print(fbfd, line, &fbink_config)) < 0) {
+						fprintf(stderr, "Failed to print that string!\n");
+						rv = ERRCODE(EXIT_FAILURE);
+					}
+					fbink_config.row = (short int) (fbink_config.row + linecnt);
+				}
+				free(line);
 
-			// If nothing was read, show the help
-			if (linecnt == -1) {
+				// If nothing was read, show the help
+				if (linecnt == -1) {
+					show_helpmsg();
+				}
+			} else {
 				show_helpmsg();
 			}
 		}
