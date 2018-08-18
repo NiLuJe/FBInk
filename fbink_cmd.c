@@ -429,7 +429,8 @@ int
 	// (fbink_close is safe to call with fbfd set to -1 and/or the mmap not actually done).
 	int fbfd = -1;
 
-	if (errfnd == 1 || argc == 1) {
+	// Don't abort if we piped something without passing any arguments!
+	if (errfnd == 1 || (argc == 1 && isatty(fileno(stdin)))) {
 		show_helpmsg();
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;

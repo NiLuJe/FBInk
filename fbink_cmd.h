@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <unistd.h>
 
 // FBInk always returns negative values on failure
 #define ERRCODE(e) (-(e))
