@@ -1814,6 +1814,7 @@ int
 	LOG("Adjusted position: column %hd, row %hd", col, row);
 
 	// Clamp coordinates to the screen, to avoid blowing up ;).
+	bool has_wrapped = false;
 	while (col >= MAXCOLS) {
 		col = (short int) (col - MAXCOLS);
 		LOG("Wrapped column back to %hd", col);
@@ -1821,6 +1822,8 @@ int
 	while (row >= MAXROWS) {
 		row = (short int) (row - MAXROWS);
 		LOG("Wrapped row back to %hd", row);
+		// Remember that, so we'll append something to our line to make the wraparound clearer...
+		has_wrapped = true;
 	}
 
 	// See if we need to break our string down into multiple lines...
@@ -1881,8 +1884,9 @@ int
 
 	// We'll copy our text in chunks of formatted line...
 	// NOTE: Store that on the heap, we've had some wacky adventures with automatic VLAs...
-	// NOTE: UTF-8 is at most 4 bytes per sequence, make sure we can fit a full line of UTF-8 (+ 1 'wide' NULL).
-	line = calloc((MAXCOLS + 1U) * 4U, sizeof(*line));
+	// NOTE: UTF-8 is at most 4 bytes per sequence, make sure we can fit a full line of UTF-8,
+	//       (+ 1 'wide' wraparound marker, and 1 'wide' NULL).
+	line = calloc((MAXCOLS + 2U) * 4U, sizeof(*line));
 	if (line == NULL) {
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
@@ -2042,6 +2046,12 @@ int
 			    line, line_bytes + 1U, "%*.*s", (int) line_bytes, (int) line_bytes, string + line_offset);
 		}
 		LOG("snprintf wrote %d bytes", bytes_printed);
+
+		if (has_wrapped) {
+			LOG("Capping the line with a solid block to make it clearer it has wrapped around...");
+			strcat(line, "\u2588");
+			bytes_printed++;
+		}
 
 		region = draw(line,
 			      (unsigned short int) row,
