@@ -2347,28 +2347,78 @@ int
 	}
 
 	unsigned char* data = NULL;
+	// Read image either from stdin, or a file
 	if (strcmp(filename, "-") == 0 && !isatty(fileno(stdin))) {
 		// NOTE: Ideally, we'd simply feed stdin to stbi_load_from_file, but apparently, that doesn't work,
 		//       so read stdin ourselves...
-		unsigned char  buffer[4096];
+		//       c.f., https://stackoverflow.com/a/44894946
 		unsigned char* imgdata = NULL;
-		ssize_t        nread;
-		size_t         imglen = 0U;
-		while ((nread = read(STDIN_FILENO, buffer, sizeof(buffer)))) {
-			if (nread < 0) {
-				if (errno == EAGAIN)
-					continue;
-				perror("read");
+		unsigned char* temp;
+		size_t         size = 0;
+		size_t         used = 0;
+		size_t         nread;
+
+		if (ferror(stdin)) {
+			fprintf(stderr, "[FBInk] Failed to read image data from stdin!\n");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+
+#	define CHUNK (256 * 1024)
+		while (1) {
+			if (used + CHUNK + 1U > size) {
+				size = used + CHUNK + 1U;
+
+				// Overflow check
+				if (size <= used) {
+					free(imgdata);
+					fprintf(stderr, "[FBInk] Too much input data!\n");
+					rv = ERRCODE(EXIT_FAILURE);
+					goto cleanup;
+				}
+
+				// OOM check
+				temp = realloc(imgdata, size);
+				if (temp == NULL) {
+					free(imgdata);
+					fprintf(stderr, "[FBInk] realloc: out of memory!\n");
+					rv = ERRCODE(EXIT_FAILURE);
+					goto cleanup;
+				}
+				imgdata = temp;
+			}
+
+			nread = fread(imgdata + used, 1, CHUNK, stdin);
+			if (nread == 0) {
 				break;
 			}
-			imgdata = realloc(imgdata, imglen + nread + 1);
-			memcpy(imgdata + imglen, buffer, nread);
-			imglen += nread;
-			imgdata[imglen] = '\0';
+
+			used += nread;
 		}
-		data = stbi_load_from_memory(imgdata, imglen, &w, &h, &n, req_n);
+
+		if (ferror(stdin)) {
+			free(imgdata);
+			fprintf(stderr, "[FBInk] Failed to read image data from stdin!\n");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+
+		// NULL termination
+		temp = realloc(imgdata, used + 1U);
+		if (temp == NULL) {
+			free(imgdata);
+			fprintf(stderr, "[FBInk] realloc: out of memory!\n");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+		imgdata       = temp;
+		imgdata[used] = '\0';
+
+		// Finally, load the image from that buffer, and discard it once we're done.
+		data = stbi_load_from_memory(imgdata, (int) used, &w, &h, &n, req_n);
 		free(imgdata);
 	} else {
+		// With a filepath, we can just let stb handle it ;).
 		data = stbi_load(filename, &w, &h, &n, req_n);
 	}
 	if (data == NULL) {
