@@ -2464,12 +2464,13 @@ int
 	}
 
 	// Clamp everything to a safe range, because we can't have *anything* going off-screen here.
-	struct mxcfb_rect region = {
-		.top    = MIN(viewHeight, (uint32_t) MAX(0, y_off)),
-		.left   = MIN(viewWidth, (uint32_t) MAX(0, x_off)),
-		.width  = MIN(viewWidth - region.left, (uint32_t) w),
-		.height = MIN(viewHeight - region.top, (uint32_t) h),
-	};
+	struct mxcfb_rect region;
+	// NOTE: Assign each field individually to avoid a false-positive with Clang's SA...
+	region.top    = MIN(viewHeight, (uint32_t) MAX(0, y_off));
+	region.left   = MIN(viewWidth, (uint32_t) MAX(0, x_off));
+	region.width  = MIN(viewWidth - region.left, (uint32_t) w);
+	region.height = MIN(viewHeight - region.top, (uint32_t) h);
+
 	// NOTE: If we ended up with negative display offsets, we should shave those off region.width & region.height,
 	//       when it makes sense to do so,
 	//       but we need to remember the unshaven value for the pixel loop condition,
