@@ -8,7 +8,7 @@
 
 void usage(char *exec) {
     printf("Usage: %s <char_code>\n", exec);
-    printf("       <char_code> Decimal character code between 0 and 255\n");
+    printf("       <char_code> Decimal character code between 20 and 255\n");
 }
 
 void render(const uint32_t *bitmap) {
@@ -29,11 +29,12 @@ int main(int argc, char **argv) {
         return 1;
     }
     ord = (short int) atoi(argv[1]);
-    if (ord > 255 || ord < 0) {
+    if (ord > 255 || ord < 20) {
         usage(argv[0]);
         return 2;
     }
-    const uint32_t *bitmap = block_block1[ord];
+    // NOTE: First char is 0x20, convert from ASCII code to array index
+    const uint32_t *bitmap = block_block1[ord - 0x20];
 
     render(bitmap);
     return 0;
