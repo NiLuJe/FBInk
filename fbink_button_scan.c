@@ -128,6 +128,9 @@ static int
 	// FIXME: That leaves the "snow" protocol, introduced on the H2O²r1,
 	//        and used on most (if not all, we never actually heard from an Aura SEr2 owner) Mk7 devices...
 	//        H2O²r1, H2O²r2, (Aura SEr2?), Clara HD
+	// NOTE: FWIW, on a PW2 (where we don't have to jump through crazy hoops to calculate coordinates, ahem...):
+	//       BTN_TOUCH:1;ABS_MT_TRACKING_ID:0;ABS_MT_POSITION_X:x;ABS_MT_POSITION_Y:y;SYN_REPORT;BTN_TOOL_FINGER:1;SYN_REPORT
+	//       ABS_MT_POSITION_X:x;ABS_MT_POSITION_Y:y;SYN_REPORT;ABS_MT_TRACKING_ID:-1;SYN_REPORT;BTN_TOUCH:0;BTN_TOOL_FINGER:0;SYN_REPORT
 
 	close(ifd);
 
