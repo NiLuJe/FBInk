@@ -1892,8 +1892,8 @@ int
 	// We'll copy our text in chunks of formatted line...
 	// NOTE: Store that on the heap, we've had some wacky adventures with automatic VLAs...
 	// NOTE: UTF-8 is at most 4 bytes per sequence, make sure we can fit a full line of UTF-8,
-	//       (+ 1 'wide' wraparound marker, and 1 'wide' NULL).
-	line = calloc((MAXCOLS + 2U) * 4U, sizeof(*line));
+	//       (+ 1 'wide' NULL, wide to make sure u8_strlen won't skip over it).
+	line = calloc((MAXCOLS + 1U) * 4U, sizeof(*line));
 	if (line == NULL) {
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
@@ -2055,8 +2055,9 @@ int
 		LOG("snprintf wrote %d bytes", bytes_printed);
 
 		// NOTE: And don't forget our wraparound marker (U+2588, a solid black block).
-		//       While we've made sure the line buffer is large enough to handle it,
-		//       we can't add it to a full line (in terms of occupied columns), because it'd bork the region...
+		//       We don't need nor even *want* to add it if the line is already full,
+		//       (since the idea is to make it clearer when we're potentially mixing up content from two different lines).
+		//       Plus, that'd bork the region in the following draw call, and potentially risk a buffer overflow anyway.
 		if (wrapped_line && line_len < available_cols) {
 			LOG("Capping the line with a solid block to make it clearer it has wrapped around...");
 			strcat(line, "\u2588");
