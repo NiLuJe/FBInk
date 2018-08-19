@@ -2376,9 +2376,9 @@ int
 		//       so read stdin ourselves...
 		//       c.f., https://stackoverflow.com/a/44894946
 		unsigned char* imgdata = NULL;
-		unsigned char* temp;
-		size_t         size = 0;
-		size_t         used = 0;
+		unsigned char* temp    = NULL;
+		size_t         size    = 0;
+		size_t         used    = 0;
 		size_t         nread;
 
 		if (ferror(stdin)) {
@@ -2409,6 +2409,7 @@ int
 					goto cleanup;
 				}
 				imgdata = temp;
+				temp    = NULL;
 			}
 
 			nread = fread(imgdata + used, 1U, CHUNK, stdin);
@@ -2425,7 +2426,9 @@ int
 			goto cleanup;
 		}
 
-		// NULL termination
+		// Shrink & NULL terminate
+		// NOTE: We're not buffering C strings, and we're discarding the buffer very very soon, so skip that ;).
+		/*
 		temp = realloc(imgdata, used + 1U);
 		if (temp == NULL) {
 			free(imgdata);
@@ -2434,7 +2437,9 @@ int
 			goto cleanup;
 		}
 		imgdata       = temp;
+		temp          = NULL;
 		imgdata[used] = '\0';
+		*/
 
 		// Finally, load the image from that buffer, and discard it once we're done.
 		data = stbi_load_from_memory(imgdata, (int) used, &w, &h, &n, req_n);
