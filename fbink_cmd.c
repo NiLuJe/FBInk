@@ -150,7 +150,8 @@ static void
 #endif
 	    "\n"
 	    "NOTES:\n"
-	    "\tShell script writers can also use the -e, --eval flag to have fbink just spits out a few of its internal state variables to stdout.\n"
+	    "\tShell script writers can also use the -e, --eval flag to have fbink just spit out a few of its internal state variables to stdout,\n"
+	    "\t\tf.g., eval $(fbink -qe)\n"
 	    "\n",
 	    fbink_version());
 
