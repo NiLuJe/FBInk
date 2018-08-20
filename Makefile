@@ -73,6 +73,8 @@ ifeq "$(MOAR_WARNIGS)" "1"
 	# NOTE: This doesn't really play nice w/ FORTIFY, leading to an assload of false-positives
 	ifndef LINUX
 		EXTRA_CFLAGS+=-Wformat-truncation=2
+	else
+		EXTRA_CFLAGS+=-Wformat-truncation=1
 	endif
 	EXTRA_CFLAGS+=-Wnull-dereference
 	EXTRA_CFLAGS+=-Wuninitialized
