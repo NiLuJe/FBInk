@@ -83,16 +83,40 @@ static int
 		SEND_INPUT_EVENT(EV_KEY, BTN_TOUCH, 1);
 		SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
 
-		// This was sandwiched in the Glo report we got, but it feels extraneous, let's do without for now :)
-		/*
-		SEND_INPUT_EVENT(EV_ABS, ABS_PRESSURE, 101);
-		SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
-		*/
-
 		SEND_INPUT_EVENT(EV_ABS, ABS_Y, match_coords->y);
 		SEND_INPUT_EVENT(EV_ABS, ABS_X, match_coords->x);
 		SEND_INPUT_EVENT(EV_ABS, ABS_PRESSURE, 0);
 		SEND_INPUT_EVENT(EV_KEY, BTN_TOUCH, 0);
+		SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
+	} else if (deviceQuirks.isKoboMk7) {
+		// NOTE: Roughly corresponds to what we call the "Snow" protocol in KOReader.
+		//       Should handle the H2O²r2, (Aura SEr2?), Clara HD
+		//       And possibly the H2O²r1, although this one will need a dedicated quirk to compute the proper x/y coords.
+		SEND_INPUT_EVENT(EV_KEY, BTN_TOOL_FINGER, 1);
+		SEND_INPUT_EVENT(EV_KEY, BTN_TOUCH, 1);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TRACKING_ID, 0);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_DISTANCE, 0);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_X, match_coords->x);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_Y, match_coords->y);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_PRESSURE, 20);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MAJOR, 0);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MINOR, 0);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_ORIENTATION, 0);
+		SEND_INPUT_EVENT(EV_SYN, SYN_MT_REPORT, 0);
+		SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
+
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TRACKING_ID, 0);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_DISTANCE, 0);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_X, match_coords->x);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_Y, match_coords->y);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_PRESSURE, 0);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MAJOR, 0);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MINOR, 0);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_ORIENTATION, 0);
+		SEND_INPUT_EVENT(EV_SYN, SYN_MT_REPORT, 0);
+		SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
+		SEND_INPUT_EVENT(EV_KEY, BTN_TOUCH, 0);
+		SEND_INPUT_EVENT(EV_KEY, BTN_TOOL_FINGER, 0);
 		SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
 	} else {
 		// NOTE: Corresponds to what we call the "Phoenix" protocol in KOReader
@@ -125,9 +149,6 @@ static int
 		SEND_INPUT_EVENT(EV_SYN, SYN_MT_REPORT, 0);
 		SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
 	}
-	// FIXME: That leaves the "snow" protocol, introduced on the H2O²r1,
-	//        and used on most (if not all, we never actually heard from an Aura SEr2 owner) Mk7 devices...
-	//        H2O²r1, H2O²r2, (Aura SEr2?), Clara HD
 	// NOTE: FWIW, on a PW2 (where we don't have to jump through crazy hoops to calculate coordinates, ahem...):
 	//       BTN_TOUCH:1;ABS_MT_TRACKING_ID:0;ABS_MT_POSITION_X:x;ABS_MT_POSITION_Y:y;SYN_REPORT;BTN_TOOL_FINGER:1;SYN_REPORT
 	//       ABS_MT_POSITION_X:x;ABS_MT_POSITION_Y:y;SYN_REPORT;ABS_MT_TRACKING_ID:-1;SYN_REPORT;BTN_TOUCH:0;BTN_TOOL_FINGER:0;SYN_REPORT
