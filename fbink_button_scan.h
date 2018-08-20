@@ -29,6 +29,11 @@
 #	include <linux/input.h>
 #	include <time.h>
 
+// NOTE: My TC's kernel is too old for some newer event codes...
+#	ifndef ABS_MT_DISTANCE
+#		define ABS_MT_DISTANCE 0x3b
+#	endif
+
 // c.f., https://github.com/koreader/koreader-base/pull/468/files
 #	define SEND_INPUT_EVENT(t, c, v)                                                                                \
 		({                                                                                                       \
