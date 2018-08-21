@@ -190,6 +190,15 @@
 // We want to return negative values on failure, always
 #define ERRCODE(e) (-(e))
 
+// eInk color map
+// c.f., linux/drivers/video/mxc/cmap_lab126.h
+// NOTE: Legacy devices have an inverted color map, which we handle internally!
+//       Incidentally, this is partly why we have two LUTs for the Gray ramp ;).
+static const uint8_t eInkFGCMap[16] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+					0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
+static const uint8_t eInkBGCMap[16] = { 0xFF, 0xEE, 0xDD, 0xCC, 0xBB, 0xAA, 0x99, 0x88,
+					0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11, 0x00 };
+
 // Global variables to store fb/screen info
 unsigned char*           fbPtr      = NULL;
 bool                     isFbMapped = false;
@@ -202,6 +211,8 @@ uint8_t                  glyphHeight   = 8U;
 unsigned short int       FONTW         = 8U;
 unsigned short int       FONTH         = 8U;
 uint8_t                  FONTSIZE_MULT = 1U;
+uint8_t                  penFGColor    = 0x00;
+uint8_t                  penBGColor    = 0xFF;
 // Slightly arbitrary-ish fallback values
 unsigned short int MAXROWS = 45U;
 unsigned short int MAXCOLS = 32U;

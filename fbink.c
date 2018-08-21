@@ -475,25 +475,9 @@ static struct mxcfb_rect
 	    multiline_offset,
 	    (unsigned short int) (row + multiline_offset));
 
-	// Handle the inverted palette on Legacy Kindles...
 	// NOTE: It's a grayscale ramp, so r = g = b (= v).
-#ifdef FBINK_FOR_KINDLE
-	FBInkColor fgC = { ((deviceQuirks.isKindleLegacy && !fbink_config->is_inverted) ||
-			    (!deviceQuirks.isKindleLegacy && fbink_config->is_inverted))
-			       ? WHITE
-			       : fbink_config->pen_color,
-			   fgC.r,
-			   fgC.r };
-	FBInkColor bgC = { ((deviceQuirks.isKindleLegacy && !fbink_config->is_inverted) ||
-			    (!deviceQuirks.isKindleLegacy && fbink_config->is_inverted))
-			       ? fbink_config->pen_color
-			       : WHITE,
-			   bgC.r,
-			   bgC.r };
-#else
-	FBInkColor fgC = { fbink_config->is_inverted ? WHITE : fbink_config->pen_color, fgC.r, fgC.r };
-	FBInkColor bgC = { fbink_config->is_inverted ? fbink_config->pen_color : WHITE, bgC.r, bgC.r };
-#endif
+	FBInkColor fgC = { fbink_config->is_inverted ? penBGColor : penFGColor, fgC.r, fgC.r };
+	FBInkColor bgC = { fbink_config->is_inverted ? penFGColor : penBGColor, bgC.r, bgC.r };
 
 	// Adjust row in case we're a continuation of a multi-line print...
 	row = (unsigned short int) (row + multiline_offset);
@@ -1036,10 +1020,10 @@ static int
 	struct mxcfb_update_data_v1_ntx update = {
 		.update_region = region,
 		.waveform_mode = waveform_mode,
-		.update_mode = update_mode,
+		.update_mode   = update_mode,
 		.update_marker = marker,
-		.temp = TEMP_USE_AMBIENT,
-		.flags = (waveform_mode == WAVEFORM_MODE_REAGLD)
+		.temp          = TEMP_USE_AMBIENT,
+		.flags         = (waveform_mode == WAVEFORM_MODE_REAGLD)
 			     ? EPDC_FLAG_USE_AAD
 			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
 		.alt_buffer_data = { 0U },
@@ -1049,7 +1033,7 @@ static int
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V1_NTX, &update);
 
 	if (rv < 0) {
-		char buf[256];
+		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
 		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE_V1_NTX: %s\n", errstr);
 		if (errno == EINVAL) {
@@ -1067,7 +1051,7 @@ static int
 		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1, &marker);
 
 		if (rv < 0) {
-			char buf[256];
+			char  buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
 			fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1: %s\n", errstr);
 			return ERRCODE(EXIT_FAILURE);
@@ -1082,23 +1066,23 @@ static int
 
 // Kobo Mark 7 devices ([Mk7<->??)
 static int
-    refresh_kobo_mk7(int fbfd,
+    refresh_kobo_mk7(int                     fbfd,
 		     const struct mxcfb_rect region,
-		     uint32_t waveform_mode,
-		     uint32_t update_mode,
-		     uint32_t marker)
+		     uint32_t                waveform_mode,
+		     uint32_t                update_mode,
+		     uint32_t                marker)
 {
 	struct mxcfb_update_data_v2 update = {
 		.update_region = region,
 		.waveform_mode = waveform_mode,
-		.update_mode = update_mode,
+		.update_mode   = update_mode,
 		.update_marker = marker,
-		.temp = TEMP_USE_AMBIENT,
-		.flags = (waveform_mode == WAVEFORM_MODE_GLD16)
+		.temp          = TEMP_USE_AMBIENT,
+		.flags         = (waveform_mode == WAVEFORM_MODE_GLD16)
 			     ? EPDC_FLAG_USE_REGAL
 			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
-		.dither_mode = EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
-		.quant_bit = 0,
+		.dither_mode     = EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		.quant_bit       = 0,
 		.alt_buffer_data = { 0U },
 	};
 
@@ -1106,7 +1090,7 @@ static int
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V2, &update);
 
 	if (rv < 0) {
-		char buf[256];
+		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
 		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE_V2: %s\n", errstr);
 		if (errno == EINVAL) {
@@ -1122,14 +1106,14 @@ static int
 
 	if (update_mode == UPDATE_MODE_FULL) {
 		struct mxcfb_update_marker_data update_marker = {
-			.update_marker = marker,
+			.update_marker  = marker,
 			.collision_test = 0U,
 		};
 
 		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3, &update_marker);
 
 		if (rv < 0) {
-			char buf[256];
+			char  buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
 			fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3: %s\n", errstr);
 			return ERRCODE(EXIT_FAILURE);
@@ -1452,8 +1436,8 @@ int
 	}
 #else
 	// Default font is IBM
-	glyphWidth = 8U;
-	glyphHeight = 8U;
+	glyphWidth         = 8U;
+	glyphHeight        = 8U;
 	fxpFont8xGetBitmap = &font8x8_get_bitmap;
 
 	if (fbink_config->fontname != IBM) {
@@ -1632,6 +1616,27 @@ int
 		deviceQuirks.skipId = true;
 	}
 
+	// NOTE: Now that we know which device we're running on, setup pen colors,
+	//       taking into account the inverted cmap on legacy Kindles...
+#ifdef FBINK_FOR_KINDLE
+	if (deviceQuirks.isKindleLegacy) {
+		penFGColor = eInkBGCMap[fbink_config->fg_color];
+		penBGColor = eInkFGCMap[fbink_config->bg_color];
+	} else {
+#endif
+		penFGColor = eInkFGCMap[fbink_config->fg_color];
+		penBGColor = eInkBGCMap[fbink_config->bg_color];
+#ifdef FBINK_FOR_KINDLE
+	}
+#endif
+	ELOG("[FBInk] Pen colors set to #%02X%02X%02X for foreground and #%02X%02X%02X for background",
+	     penFGColor,
+	     penFGColor,
+	     penFGColor,
+	     penBGColor,
+	     penBGColor,
+	     penBGColor);
+
 	// NOTE: Do we want to keep the fb0 fd open, or simply close it for now?
 	//       Useful because we probably want to close it to keep open fds to a minimum when used as a library,
 	//       while wanting to avoid a useless open/close/open/close cycle when used as a standalone tool.
@@ -1800,14 +1805,7 @@ int
 
 	// Clear screen?
 	if (fbink_config->is_cleared) {
-#ifdef FBINK_FOR_KINDLE
-		clear_screen(((deviceQuirks.isKindleLegacy && !fbink_config->is_inverted) ||
-			      (!deviceQuirks.isKindleLegacy && fbink_config->is_inverted))
-				 ? fbink_config->pen_color
-				 : WHITE);
-#else
-		clear_screen(fbink_config->is_inverted ? fbink_config->pen_color : WHITE);
-#endif
+		clear_screen(fbink_config->is_inverted ? penFGColor : penBGColor);
 	}
 
 	// See if want to position our text relative to the edge of the screen, and not the beginning
@@ -2312,14 +2310,7 @@ int
 
 	// Clear screen?
 	if (fbink_config->is_cleared) {
-#	ifdef FBINK_FOR_KINDLE
-		clear_screen(((deviceQuirks.isKindleLegacy && !fbink_config->is_inverted) ||
-			      (!deviceQuirks.isKindleLegacy && fbink_config->is_inverted))
-				 ? BLACK
-				 : WHITE);
-#	else
-		clear_screen(fbink_config->is_inverted ? BLACK : WHITE);
-#	endif
+		clear_screen(fbink_config->is_inverted ? penFGColor : penBGColor);
 	}
 
 	// NOTE: We compute initial offsets from row/col, to help aligning images with text.

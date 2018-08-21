@@ -428,37 +428,37 @@ int
 				break;
 			case 'C':
 				if (strcasecmp(optarg, "BLACK") == 0) {
-					fbink_config.pen_color = BLACK;
+					fbink_config.fg_color = FG_BLACK;
 				} else if (strcasecmp(optarg, "GRAY1") == 0) {
-					fbink_config.pen_color = GRAY1;
+					fbink_config.fg_color = FG_GRAY1;
 				} else if (strcasecmp(optarg, "GRAY2") == 0) {
-					fbink_config.pen_color = GRAY2;
+					fbink_config.fg_color = FG_GRAY2;
 				} else if (strcasecmp(optarg, "GRAY3") == 0) {
-					fbink_config.pen_color = GRAY3;
+					fbink_config.fg_color = FG_GRAY3;
 				} else if (strcasecmp(optarg, "GRAY4") == 0) {
-					fbink_config.pen_color = GRAY4;
+					fbink_config.fg_color = FG_GRAY4;
 				} else if (strcasecmp(optarg, "GRAY5") == 0) {
-					fbink_config.pen_color = GRAY5;
+					fbink_config.fg_color = FG_GRAY5;
 				} else if (strcasecmp(optarg, "GRAY6") == 0) {
-					fbink_config.pen_color = GRAY6;
+					fbink_config.fg_color = FG_GRAY6;
 				} else if (strcasecmp(optarg, "GRAY7") == 0) {
-					fbink_config.pen_color = GRAY7;
+					fbink_config.fg_color = FG_GRAY7;
 				} else if (strcasecmp(optarg, "GRAY8") == 0) {
-					fbink_config.pen_color = GRAY8;
+					fbink_config.fg_color = FG_GRAY8;
 				} else if (strcasecmp(optarg, "GRAY9") == 0) {
-					fbink_config.pen_color = GRAY9;
+					fbink_config.fg_color = FG_GRAY9;
 				} else if (strcasecmp(optarg, "GRAYA") == 0) {
-					fbink_config.pen_color = GRAYA;
+					fbink_config.fg_color = FG_GRAYA;
 				} else if (strcasecmp(optarg, "GRAYB") == 0) {
-					fbink_config.pen_color = GRAYB;
+					fbink_config.fg_color = FG_GRAYB;
 				} else if (strcasecmp(optarg, "GRAYC") == 0) {
-					fbink_config.pen_color = GRAYC;
+					fbink_config.fg_color = FG_GRAYC;
 				} else if (strcasecmp(optarg, "GRAYD") == 0) {
-					fbink_config.pen_color = GRAYD;
+					fbink_config.fg_color = FG_GRAYD;
 				} else if (strcasecmp(optarg, "GRAYE") == 0) {
-					fbink_config.pen_color = GRAYE;
+					fbink_config.fg_color = FG_GRAYE;
 				} else if (strcasecmp(optarg, "WHITE") == 0) {
-					fbink_config.pen_color = WHITE;
+					fbink_config.fg_color = FG_WHITE;
 				} else {
 					fprintf(stderr, "Unknown color name '%s'.\n", optarg);
 					errfnd = 1;
@@ -505,15 +505,12 @@ int
 			//       if we had an easy way to... (c.f., my rant about Kobo's broken libc in fbink_internal.h)
 			if (!fbink_config.is_quiet) {
 				printf(
-				    "Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (color: #%02X%02X%02X, inverted: %s, flashing: %s, centered: %s, left padded: %s, clear screen: %s, font: %hhu, font scaling: x%hhu)\n",
+				    "Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (inverted: %s, flashing: %s, centered: %s, left padded: %s, clear screen: %s, font: %hhu, font scaling: x%hhu)\n",
 				    string,
 				    fbink_config.col,
 				    fbink_config.hoffset,
 				    fbink_config.row,
 				    fbink_config.voffset,
-				    fbink_config.pen_color,
-				    fbink_config.pen_color,
-				    fbink_config.pen_color,
 				    fbink_config.is_inverted ? "true" : "false",
 				    fbink_config.is_flashing ? "true" : "false",
 				    fbink_config.is_centered ? "true" : "false",
