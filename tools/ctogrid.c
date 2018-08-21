@@ -14,9 +14,9 @@ void usage(char *exec) {
 void render(const uint32_t *bitmap) {
     bool set;
     for (uint8_t x=0U; x < 32; x++) {
-        //for (uint8_t y=0U; y < 32; y++) {
+        for (uint8_t y=0U; y < 32; y++) {
         // NOTE: For the non-mirrored Unifont hex format, access rows in reverse order
-        for (int8_t y=32-1; y >= 0; y--) {
+        //for (int8_t y=32-1; y >= 0; y--) {
             set = bitmap[x] & 1U << y;
             printf("%c", set ? '#' : '.');
         }

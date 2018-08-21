@@ -746,6 +746,12 @@ static struct mxcfb_rect
 		}                                                                                                        \
 	}
 			RENDER_GLYPH();
+			// NOTE: If we did not mirror the bitmasks during conversion,
+			//       another approach to the fact that Unifont's hex format encodes columns in the reverse order
+			//       is simply to access columns in the reverse order ;).
+			//       i.e., switch the inner column loop to:
+			//       for (int8_t x = (glyphWidth - 1); x >= 0; x--) {
+			//           i = (unsigned short int) ((glyphWidth - x) * FONTSIZE_MULT);
 
 			// Next glyph! This serves as the source for the pen position, hence it being used as an index...
 			ci++;
