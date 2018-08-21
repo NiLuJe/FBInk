@@ -85,6 +85,30 @@ typedef enum
 	EDGE         // i.e., RIGHT for halign, BOTTOM for valign
 } ALIGN_INDEX_T;
 
+// List of available colors in the eInk color map
+// c.f., linux/drivers/video/mxc/cmap_lab126.h
+// NOTE: Legacy devices have an inverted color map, which we handle internally!
+//       i.e., you can safely request BLACK, knowing it'll look BLACK everywhere ;).
+typedef enum
+{
+	BLACK = 0x00,
+	GRAY1 = 0x11,
+	GRAY2 = 0x22,
+	GRAY3 = 0x33,
+	GRAY4 = 0x44,
+	GRAY5 = 0x55,
+	GRAY6 = 0x66,
+	GRAY7 = 0x77,
+	GRAY8 = 0x88,
+	GRAY9 = 0x99,
+	GRAYA = 0xAA,
+	GRAYB = 0xBB,
+	GRAYC = 0xCC,
+	GRAYD = 0xDD,
+	GRAYE = 0xEE,
+	WHITE = 0xFF
+} COLOR_INDEX_T;
+
 // What a FBInk config should look like. Perfectly sane when fully zero-initialized.
 typedef struct
 {
@@ -100,11 +124,12 @@ typedef struct
 	short int voffset;         // Vertical offset (in pixels) for text position
 	bool      is_halfway;      // Vertically center the text, honoring row offsets
 	bool      is_padded;       // Pad the text with blanks (on the left, or on both sides if is_centered)
+	uint8_t   pen_color;       // Requested foreground color for text (c.f., COLOR_INDEX_T enum)
 	bool      is_verbose;      // Print verbose diagnostic informations on stdout
 	bool      is_quiet;        // Hide fbink_init()'s hardware setup info (sent to stderr)
 	bool      ignore_alpha;    // Ignore any potential alpha channel in source image (i.e., flatten the image)
-	uint8_t   halign;          // Horizontal alignment of images (NONE/LEFT, CENTER, EDGE/RIGHT)
-	uint8_t   valign;          // Vertical alignment of images (NONE/TOP, CENTER, EDGE/BOTTOM)
+	uint8_t   halign;    // Horizontal alignment of images (NONE/LEFT, CENTER, EDGE/RIGHT; c.f., ALIGN_INDEX_T enum)
+	uint8_t   valign;    // Vertical alignment of images (NONE/TOP, CENTER, EDGE/BOTTOM; c.f., ALIGN_INDEX_T enum)
 } FBInkConfig;
 
 // NOTE: Unless otherwise specified,
