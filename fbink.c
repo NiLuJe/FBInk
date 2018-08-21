@@ -1654,7 +1654,7 @@ void
 {
 	fprintf(
 	    stdout,
-	    "viewWidth=%u;viewHeight=%u;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld",
+	    "viewWidth=%u;viewHeight=%u;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu",
 	    viewWidth,
 	    viewHeight,
 	    vInfo.bits_per_pixel,
@@ -1668,7 +1668,9 @@ void
 	    MAXROWS,
 	    deviceQuirks.isPerfectFit,
 	    fInfo.id,
-	    USER_HZ);
+	    USER_HZ,
+	    penFGColor,
+	    penBGColor);
 }
 
 // Memory map the framebuffer
