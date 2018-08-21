@@ -29,22 +29,22 @@
 // NOTE: Legacy devices have an inverted color map!
 typedef enum
 {
-	BLACK  = 0x00,
-	GRAY1  = 0x11,
-	GRAY2  = 0x22,
-	GRAY3  = 0x33,
-	GRAY4  = 0x44,
-	GRAY5  = 0x55,
-	GRAY6  = 0x66,
-	GRAY7  = 0x77,
-	GRAY8  = 0x88,
-	GRAY9  = 0x99,
-	GRAY10 = 0xAA,
-	GRAY11 = 0xBB,
-	GRAY12 = 0xCC,
-	GRAY13 = 0xDD,
-	GRAY14 = 0xEE,
-	WHITE  = 0xFF
+	BLACK = 0x00,
+	GRAY1 = 0x11,
+	GRAY2 = 0x22,
+	GRAY3 = 0x33,
+	GRAY4 = 0x44,
+	GRAY5 = 0x55,
+	GRAY6 = 0x66,
+	GRAY7 = 0x77,
+	GRAY8 = 0x88,
+	GRAY9 = 0x99,
+	GRAYA = 0xAA,
+	GRAYB = 0xBB,
+	GRAYC = 0xCC,
+	GRAYD = 0xDD,
+	GRAYE = 0xEE,
+	WHITE = 0xFF
 } FBInkGrayRamp;
 
 // List of flags for device or screen-specific quirks...
