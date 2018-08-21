@@ -480,23 +480,19 @@ static struct mxcfb_rect
 #ifdef FBINK_FOR_KINDLE
 	FBInkColor fgC = { ((deviceQuirks.isKindleLegacy && !fbink_config->is_inverted) ||
 			    (!deviceQuirks.isKindleLegacy && fbink_config->is_inverted))
-			       ? fbink_config->pen_color ^ WHITE
+			       ? WHITE
 			       : fbink_config->pen_color,
 			   fgC.r,
 			   fgC.r };
 	FBInkColor bgC = { ((deviceQuirks.isKindleLegacy && !fbink_config->is_inverted) ||
 			    (!deviceQuirks.isKindleLegacy && fbink_config->is_inverted))
 			       ? fbink_config->pen_color
-			       : fbink_config->pen_color ^ WHITE,
+			       : WHITE,
 			   bgC.r,
 			   bgC.r };
 #else
-	FBInkColor fgC = { fbink_config->is_inverted ? fbink_config->pen_color ^ WHITE : fbink_config->pen_color,
-			   fgC.r,
-			   fgC.r };
-	FBInkColor bgC = { fbink_config->is_inverted ? fbink_config->pen_color : fbink_config->pen_color ^ WHITE,
-			   bgC.r,
-			   bgC.r };
+	FBInkColor fgC = { fbink_config->is_inverted ? WHITE : fbink_config->pen_color, fgC.r, fgC.r };
+	FBInkColor bgC = { fbink_config->is_inverted ? fbink_config->pen_color : WHITE, bgC.r, bgC.r };
 #endif
 
 	// Adjust row in case we're a continuation of a multi-line print...
@@ -1808,9 +1804,9 @@ int
 		clear_screen(((deviceQuirks.isKindleLegacy && !fbink_config->is_inverted) ||
 			      (!deviceQuirks.isKindleLegacy && fbink_config->is_inverted))
 				 ? fbink_config->pen_color
-				 : fbink_config->pen_color ^ WHITE);
+				 : WHITE);
 #else
-		clear_screen(fbink_config->is_inverted ? fbink_config->pen_color : fbink_config->pen_color ^ WHITE);
+		clear_screen(fbink_config->is_inverted ? fbink_config->pen_color : WHITE);
 #endif
 	}
 
