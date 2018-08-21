@@ -505,12 +505,15 @@ int
 			//       if we had an easy way to... (c.f., my rant about Kobo's broken libc in fbink_internal.h)
 			if (!fbink_config.is_quiet) {
 				printf(
-				    "Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (inverted: %s, flashing: %s, centered: %s, left padded: %s, clear screen: %s, font: %hhu, font scaling: x%hhu)\n",
+				    "Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (color: #%02X%02X%02X, inverted: %s, flashing: %s, centered: %s, left padded: %s, clear screen: %s, font: %hhu, font scaling: x%hhu)\n",
 				    string,
 				    fbink_config.col,
 				    fbink_config.hoffset,
 				    fbink_config.row,
 				    fbink_config.voffset,
+				    fbink_config.pen_color,
+				    fbink_config.pen_color,
+				    fbink_config.pen_color,
 				    fbink_config.is_inverted ? "true" : "false",
 				    fbink_config.is_flashing ? "true" : "false",
 				    fbink_config.is_centered ? "true" : "false",
