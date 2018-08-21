@@ -164,19 +164,29 @@ int
 {
 	int                        opt;
 	int                        opt_index;
-	static const struct option opts[] = {
-		{ "row", required_argument, NULL, 'y' },     { "col", required_argument, NULL, 'x' },
-		{ "voffset", required_argument, NULL, 'Y' }, { "hoffset", required_argument, NULL, 'X' },
-		{ "invert", no_argument, NULL, 'h' },        { "flash", no_argument, NULL, 'f' },
-		{ "clear", no_argument, NULL, 'c' },         { "centered", no_argument, NULL, 'm' },
-		{ "halfway", no_argument, NULL, 'M' },       { "padded", no_argument, NULL, 'p' },
-		{ "refresh", required_argument, NULL, 's' }, { "size", required_argument, NULL, 'S' },
-		{ "font", required_argument, NULL, 'F' },    { "verbose", no_argument, NULL, 'v' },
-		{ "quiet", no_argument, NULL, 'q' },         { "image", required_argument, NULL, 'g' },
-		{ "img", required_argument, NULL, 'i' },     { "flatten", no_argument, NULL, 'a' },
-		{ "eval", no_argument, NULL, 'e' },          { "interactive", no_argument, NULL, 'I' },
-		{ "color", required_argument, NULL, 'C' },   { NULL, 0, NULL, 0 }
-	};
+	static const struct option opts[] = { { "row", required_argument, NULL, 'y' },
+					      { "col", required_argument, NULL, 'x' },
+					      { "voffset", required_argument, NULL, 'Y' },
+					      { "hoffset", required_argument, NULL, 'X' },
+					      { "invert", no_argument, NULL, 'h' },
+					      { "flash", no_argument, NULL, 'f' },
+					      { "clear", no_argument, NULL, 'c' },
+					      { "centered", no_argument, NULL, 'm' },
+					      { "halfway", no_argument, NULL, 'M' },
+					      { "padded", no_argument, NULL, 'p' },
+					      { "refresh", required_argument, NULL, 's' },
+					      { "size", required_argument, NULL, 'S' },
+					      { "font", required_argument, NULL, 'F' },
+					      { "verbose", no_argument, NULL, 'v' },
+					      { "quiet", no_argument, NULL, 'q' },
+					      { "image", required_argument, NULL, 'g' },
+					      { "img", required_argument, NULL, 'i' },
+					      { "flatten", no_argument, NULL, 'a' },
+					      { "eval", no_argument, NULL, 'e' },
+					      { "interactive", no_argument, NULL, 'I' },
+					      { "color", required_argument, NULL, 'C' },
+					      { "background", required_argument, NULL, 'B' },
+					      { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_config = { 0 };
 
@@ -222,7 +232,7 @@ int
 	bool      is_interactive = false;
 	int       errfnd         = 0;
 
-	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:B:", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				fbink_config.row = (short int) atoi(optarg);
@@ -459,6 +469,44 @@ int
 					fbink_config.fg_color = FG_GRAYE;
 				} else if (strcasecmp(optarg, "WHITE") == 0) {
 					fbink_config.fg_color = FG_WHITE;
+				} else {
+					fprintf(stderr, "Unknown color name '%s'.\n", optarg);
+					errfnd = 1;
+				}
+				break;
+			case 'B':
+				if (strcasecmp(optarg, "BLACK") == 0) {
+					fbink_config.bg_color = BG_BLACK;
+				} else if (strcasecmp(optarg, "GRAY1") == 0) {
+					fbink_config.bg_color = BG_GRAY1;
+				} else if (strcasecmp(optarg, "GRAY2") == 0) {
+					fbink_config.bg_color = BG_GRAY2;
+				} else if (strcasecmp(optarg, "GRAY3") == 0) {
+					fbink_config.bg_color = BG_GRAY3;
+				} else if (strcasecmp(optarg, "GRAY4") == 0) {
+					fbink_config.bg_color = BG_GRAY4;
+				} else if (strcasecmp(optarg, "GRAY5") == 0) {
+					fbink_config.bg_color = BG_GRAY5;
+				} else if (strcasecmp(optarg, "GRAY6") == 0) {
+					fbink_config.bg_color = BG_GRAY6;
+				} else if (strcasecmp(optarg, "GRAY7") == 0) {
+					fbink_config.bg_color = BG_GRAY7;
+				} else if (strcasecmp(optarg, "GRAY8") == 0) {
+					fbink_config.bg_color = BG_GRAY8;
+				} else if (strcasecmp(optarg, "GRAY9") == 0) {
+					fbink_config.bg_color = BG_GRAY9;
+				} else if (strcasecmp(optarg, "GRAYA") == 0) {
+					fbink_config.bg_color = BG_GRAYA;
+				} else if (strcasecmp(optarg, "GRAYB") == 0) {
+					fbink_config.bg_color = BG_GRAYB;
+				} else if (strcasecmp(optarg, "GRAYC") == 0) {
+					fbink_config.bg_color = BG_GRAYC;
+				} else if (strcasecmp(optarg, "GRAYD") == 0) {
+					fbink_config.bg_color = BG_GRAYD;
+				} else if (strcasecmp(optarg, "GRAYE") == 0) {
+					fbink_config.bg_color = BG_GRAYE;
+				} else if (strcasecmp(optarg, "WHITE") == 0) {
+					fbink_config.bg_color = BG_WHITE;
 				} else {
 					fprintf(stderr, "Unknown color name '%s'.\n", optarg);
 					errfnd = 1;
