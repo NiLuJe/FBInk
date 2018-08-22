@@ -1624,7 +1624,7 @@ int
 		penBGColor = eInkFGCMap[fbink_config->bg_color];
 
 		ELOG(
-		    "[FBInk] Pen colors set to #%02X%02X%02X -> #%02X%02X%02X for foreground and #%02X%02X%02X -> #%02X%02X%02X for background",
+		    "[FBInk] Pen colors set to #%02X%02X%02X -> #%02X%02X%02X for the foreground and #%02X%02X%02X -> #%02X%02X%02X for the background",
 		    eInkFGCMap[fbink_config->fg_color],
 		    eInkFGCMap[fbink_config->fg_color],
 		    eInkFGCMap[fbink_config->fg_color],
@@ -1642,7 +1642,7 @@ int
 		penFGColor = eInkFGCMap[fbink_config->fg_color];
 		penBGColor = eInkBGCMap[fbink_config->bg_color];
 
-		ELOG("[FBInk] Pen colors set to #%02X%02X%02X for foreground and #%02X%02X%02X for background",
+		ELOG("[FBInk] Pen colors set to #%02X%02X%02X for the foreground and #%02X%02X%02X for the background",
 		     penFGColor,
 		     penFGColor,
 		     penFGColor,

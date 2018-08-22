@@ -40,7 +40,7 @@ static void
 	    "\tfbink -x 1 -y 10 \"Hello World!\"\n"
 	    "\t\tPrints 'Hello World!' on the eleventh line, starting at the second column from the left.\n"
 	    "\tfbink -pmh -y -5 \"Hello World!\"\n"
-	    "\t\tPrints 'Hello World!', highlighted (i.e., white on black), centered & padded on both sides, on the fifth line starting from the bottom.\n"
+	    "\t\tPrints 'Hello World!', highlighted (i.e., white on black with the default colors), centered & padded on both sides, on the fifth line starting from the bottom.\n"
 	    "\tfbink -pmM -y -8 \"Hello World!\"\n"
 	    "\t\tPrints 'Hello World!', centered & padded on both sides, eight lines above the center of the screen.\n"
 	    "\n"
@@ -64,7 +64,7 @@ static void
 	    "\t\t\ti.e., padding it on both sides.\n"
 	    "\n"
 	    "Options affecting the message's appearance:\n"
-	    "\t-h, --invert\tPrint STRING in white over a black background instead of the reverse.\n"
+	    "\t-h, --invert\tPrint STRING in <background color> over <foreground color> instead of the reverse.\n"
 	    "\t-f, --flash\tAsk the eInk driver to do a black flash when refreshing the area of the screen where STRING will be printed.\n"
 	    "\t-c, --clear\tFully clear the screen before printing (obeys --invert).\n"
 	    "\t-S, --size\tOverride the automatic font scaling multiplier (Default: 0, automatic selection, ranging from 1 (no scaling), to 4 (4x upscaling), depending on screen resolution).\n"
@@ -77,10 +77,14 @@ static void
 	    "\t-F, --font NAME\tRender glyphs from builtin font NAME (Default: IBM).\n"
 #ifdef FBINK_WITH_FONTS
 	    "\t\t\tAvailable font families: IBM, UNSCII, ALT, THIN, FANTASY, MCR, TALL, BLOCK,\n"
-	    "\t\t\t\tLEGGIE, VEGGIE, KATES, FKP, CTRLD, ORP, ORPB, ORPI, SCIENTIFICA, SCIENTIFICAB, SCIENTIFICAI\n"
+	    "\t\t\t\t\tLEGGIE, VEGGIE, KATES, FKP, CTRLD, ORP, ORPB, ORPI, SCIENTIFICA, SCIENTIFICAB, SCIENTIFICAI\n"
 #else
 	    "\t\t\tAvailable font families: IBM\n"
 #endif
+	    "\t-C, --color NAME\tColor the text will be printed in (Default: BLACK).\n"
+	    "\t-B, --background NAME\tColor of the background the text will be printed on (Default: WHITE).\n"
+	    "\t\t\tAvailable colors: BLACK, GRAY1, GRAY2, GRAY3, GRAY4, GRAY5, GRAY6, GRAY7,\n"
+	    "\t\t\t\t\tGRAY8, GRAY9, GRAYA, GRAYB, GRAYC, GRAYD, GRAYE, WHITE\n"
 	    "\n"
 	    "Options affecting the program's verbosity:\n"
 	    "\t-v, --verbose\tToggle printing diagnostic messages.\n"
