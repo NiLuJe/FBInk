@@ -1622,21 +1622,36 @@ int
 	if (deviceQuirks.isKindleLegacy) {
 		penFGColor = eInkBGCMap[fbink_config->fg_color];
 		penBGColor = eInkFGCMap[fbink_config->bg_color];
+
+		ELOG(
+		    "[FBInk] Pen colors set to #%02X%02X%02X -> #%02X%02X%02X for foreground and #%02X%02X%02X -> #%02X%02X%02X for background",
+		    eInkFGCMap[fbink_config->fg_color],
+		    eInkFGCMap[fbink_config->fg_color],
+		    eInkFGCMap[fbink_config->fg_color],
+		    penFGColor,
+		    penFGColor,
+		    penFGColor,
+		    eInkBGCMap[fbink_config->bg_color],
+		    eInkBGCMap[fbink_config->bg_color],
+		    eInkBGCMap[fbink_config->bg_color],
+		    penBGColor,
+		    penBGColor,
+		    penBGColor);
 	} else {
 #endif
 		penFGColor = eInkFGCMap[fbink_config->fg_color];
 		penBGColor = eInkBGCMap[fbink_config->bg_color];
+
+		ELOG("[FBInk] Pen colors set to #%02X%02X%02X for foreground and #%02X%02X%02X for background",
+		     penFGColor,
+		     penFGColor,
+		     penFGColor,
+		     penBGColor,
+		     penBGColor,
+		     penBGColor);
 #ifdef FBINK_FOR_KINDLE
 	}
 #endif
-	// NOTE: We use the LUTs here to avoid showing confusing values on Legacy Kindles...
-	ELOG("[FBInk] Pen colors set to #%02X%02X%02X for foreground and #%02X%02X%02X for background",
-	     eInkFGCMap[fbink_config->fg_color],
-	     eInkFGCMap[fbink_config->fg_color],
-	     eInkFGCMap[fbink_config->fg_color],
-	     eInkBGCMap[fbink_config->bg_color],
-	     eInkBGCMap[fbink_config->bg_color],
-	     eInkBGCMap[fbink_config->bg_color]);
 
 	// NOTE: Do we want to keep the fb0 fd open, or simply close it for now?
 	//       Useful because we probably want to close it to keep open fds to a minimum when used as a library,
