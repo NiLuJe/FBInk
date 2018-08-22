@@ -47,7 +47,7 @@ static bool
 		    color.b);
 
 		// Got it!
-		if (color.r == BLACK && color.g == BLACK && color.b == BLACK) {
+		if (color.r == 0x00 && color.g == 0x00 && color.b == 0x00) {
 			return true;
 		}
 	}
