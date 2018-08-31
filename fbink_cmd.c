@@ -93,7 +93,7 @@ static void
 	    "Options affecting the program's behavior:\n"
 	    "\t-I, --interactive\tEnter a very basic interactive mode.\n"
 	    "\t-L, --linecountcode\tWhen successfully printing text, returns the total amount of printed lines as the process exit code.\n"
-	    "\t-l, --linecount\tWhen successfully printing text, outputs the total amount of printed lines in the final line of output to stdout.\n"
+	    "\t-l, --linecount\tWhen printing text, outputs the total amount of successfully printed lines in the final line of output to stdout (NOTE: enforces quiet & non-verbose!).\n"
 	    "\n"
 	    "NOTES:\n"
 	    "\tYou can specify multiple STRINGs in a single invocation of fbink, each consecutive one will be printed on the subsequent line.\n"
@@ -533,6 +533,12 @@ int
 				errfnd = 1;
 				break;
 		}
+	}
+
+	// Enforce quiet output when asking for want_linecount, to avoid polluting the output...
+	if (want_linecount) {
+		fbink_config.is_quiet   = true;
+		fbink_config.is_verbose = false;
 	}
 
 	// Assume success, until shit happens ;)
