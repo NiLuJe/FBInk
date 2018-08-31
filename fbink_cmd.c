@@ -92,6 +92,7 @@ static void
 	    "\n"
 	    "Options affecting the program's behavior:\n"
 	    "\t-I, --interactive\tEnter a very basic interactive mode.\n"
+	    "\t-L, --linecount\tWhen successfully printing text, returns the total amount of printed lines as the process exit code.\n"
 	    "\n"
 	    "NOTES:\n"
 	    "\tYou can specify multiple STRINGs in a single invocation of fbink, each consecutive one will be printed on the subsequent line.\n"
@@ -168,29 +169,20 @@ int
 {
 	int                        opt;
 	int                        opt_index;
-	static const struct option opts[] = { { "row", required_argument, NULL, 'y' },
-					      { "col", required_argument, NULL, 'x' },
-					      { "voffset", required_argument, NULL, 'Y' },
-					      { "hoffset", required_argument, NULL, 'X' },
-					      { "invert", no_argument, NULL, 'h' },
-					      { "flash", no_argument, NULL, 'f' },
-					      { "clear", no_argument, NULL, 'c' },
-					      { "centered", no_argument, NULL, 'm' },
-					      { "halfway", no_argument, NULL, 'M' },
-					      { "padded", no_argument, NULL, 'p' },
-					      { "refresh", required_argument, NULL, 's' },
-					      { "size", required_argument, NULL, 'S' },
-					      { "font", required_argument, NULL, 'F' },
-					      { "verbose", no_argument, NULL, 'v' },
-					      { "quiet", no_argument, NULL, 'q' },
-					      { "image", required_argument, NULL, 'g' },
-					      { "img", required_argument, NULL, 'i' },
-					      { "flatten", no_argument, NULL, 'a' },
-					      { "eval", no_argument, NULL, 'e' },
-					      { "interactive", no_argument, NULL, 'I' },
-					      { "color", required_argument, NULL, 'C' },
-					      { "background", required_argument, NULL, 'B' },
-					      { NULL, 0, NULL, 0 } };
+	static const struct option opts[] = {
+		{ "row", required_argument, NULL, 'y' },     { "col", required_argument, NULL, 'x' },
+		{ "voffset", required_argument, NULL, 'Y' }, { "hoffset", required_argument, NULL, 'X' },
+		{ "invert", no_argument, NULL, 'h' },        { "flash", no_argument, NULL, 'f' },
+		{ "clear", no_argument, NULL, 'c' },         { "centered", no_argument, NULL, 'm' },
+		{ "halfway", no_argument, NULL, 'M' },       { "padded", no_argument, NULL, 'p' },
+		{ "refresh", required_argument, NULL, 's' }, { "size", required_argument, NULL, 'S' },
+		{ "font", required_argument, NULL, 'F' },    { "verbose", no_argument, NULL, 'v' },
+		{ "quiet", no_argument, NULL, 'q' },         { "image", required_argument, NULL, 'g' },
+		{ "img", required_argument, NULL, 'i' },     { "flatten", no_argument, NULL, 'a' },
+		{ "eval", no_argument, NULL, 'e' },          { "interactive", no_argument, NULL, 'I' },
+		{ "color", required_argument, NULL, 'C' },   { "background", required_argument, NULL, 'B' },
+		{ "linecount", no_argument, NULL, 'L' },     { NULL, 0, NULL, 0 }
+	};
 
 	FBInkConfig fbink_config = { 0 };
 
@@ -234,9 +226,10 @@ int
 	bool      is_image       = false;
 	bool      is_eval        = false;
 	bool      is_interactive = false;
+	bool      want_linecount = false;
 	int       errfnd         = 0;
 
-	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:B:", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:B:L", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				fbink_config.row = (short int) atoi(optarg);
@@ -516,6 +509,9 @@ int
 					errfnd = 1;
 				}
 				break;
+			case 'L':
+				want_linecount = true;
+				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
 				errfnd = 1;
@@ -581,6 +577,12 @@ int
 			//       because it knows how much space it already took up ;).
 			fbink_config.row = (short int) (fbink_config.row + linecount);
 			// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
+
+			// If we were asked to return the amount of printed lines, honor that,
+			// provided we actually successfully printed something...
+			if (want_linecount && rv >= EXIT_SUCCESS) {
+				rv += linecount;
+			}
 		}
 	} else {
 		if (is_refresh) {
