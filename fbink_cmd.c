@@ -605,8 +605,12 @@ int
 			}
 		}
 		// And print the total amount of lines we printed, if requested...
-		if (want_linecount && rv >= EXIT_SUCCESS) {
-			printf("%u", total_lines);
+		if (want_linecount) {
+			if (rv == ERRCODE(EXIT_FAILURE)) {
+				printf("0");
+			} else {
+				printf("%u", total_lines);
+			}
 		}
 	} else {
 		if (is_refresh) {
