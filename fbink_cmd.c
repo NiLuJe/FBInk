@@ -93,7 +93,7 @@ static void
 	    "Options affecting the program's behavior:\n"
 	    "\t-I, --interactive\tEnter a very basic interactive mode.\n"
 	    "\t-L, --linecountcode\tWhen successfully printing text, returns the total amount of printed lines as the process exit code.\n"
-	    "\t-l, --linecount\tWhen printing text, outputs the total amount of successfully printed lines in the final line of output to stdout (NOTE: enforces quiet & non-verbose!).\n"
+	    "\t-l, --linecount\tWhen successfully printing text, outputs the total amount of printed lines in the final line of output to stdout (NOTE: enforces quiet & non-verbose!).\n"
 	    "\n"
 	    "NOTES:\n"
 	    "\tYou can specify multiple STRINGs in a single invocation of fbink, each consecutive one will be printed on the subsequent line.\n"
