@@ -92,7 +92,8 @@ static void
 	    "\n"
 	    "Options affecting the program's behavior:\n"
 	    "\t-I, --interactive\tEnter a very basic interactive mode.\n"
-	    "\t-L, --linecount\tWhen successfully printing text, returns the total amount of printed lines as the process exit code.\n"
+	    "\t-L, --linecountcode\tWhen successfully printing text, returns the total amount of printed lines as the process exit code.\n"
+	    "\t-l, --linecount\tWhen successfully printing text, outputs the total amount of printed lines in the final line of output to stdout.\n"
 	    "\n"
 	    "NOTES:\n"
 	    "\tYou can specify multiple STRINGs in a single invocation of fbink, each consecutive one will be printed on the subsequent line.\n"
@@ -169,20 +170,31 @@ int
 {
 	int                        opt;
 	int                        opt_index;
-	static const struct option opts[] = {
-		{ "row", required_argument, NULL, 'y' },     { "col", required_argument, NULL, 'x' },
-		{ "voffset", required_argument, NULL, 'Y' }, { "hoffset", required_argument, NULL, 'X' },
-		{ "invert", no_argument, NULL, 'h' },        { "flash", no_argument, NULL, 'f' },
-		{ "clear", no_argument, NULL, 'c' },         { "centered", no_argument, NULL, 'm' },
-		{ "halfway", no_argument, NULL, 'M' },       { "padded", no_argument, NULL, 'p' },
-		{ "refresh", required_argument, NULL, 's' }, { "size", required_argument, NULL, 'S' },
-		{ "font", required_argument, NULL, 'F' },    { "verbose", no_argument, NULL, 'v' },
-		{ "quiet", no_argument, NULL, 'q' },         { "image", required_argument, NULL, 'g' },
-		{ "img", required_argument, NULL, 'i' },     { "flatten", no_argument, NULL, 'a' },
-		{ "eval", no_argument, NULL, 'e' },          { "interactive", no_argument, NULL, 'I' },
-		{ "color", required_argument, NULL, 'C' },   { "background", required_argument, NULL, 'B' },
-		{ "linecount", no_argument, NULL, 'L' },     { NULL, 0, NULL, 0 }
-	};
+	static const struct option opts[] = { { "row", required_argument, NULL, 'y' },
+					      { "col", required_argument, NULL, 'x' },
+					      { "voffset", required_argument, NULL, 'Y' },
+					      { "hoffset", required_argument, NULL, 'X' },
+					      { "invert", no_argument, NULL, 'h' },
+					      { "flash", no_argument, NULL, 'f' },
+					      { "clear", no_argument, NULL, 'c' },
+					      { "centered", no_argument, NULL, 'm' },
+					      { "halfway", no_argument, NULL, 'M' },
+					      { "padded", no_argument, NULL, 'p' },
+					      { "refresh", required_argument, NULL, 's' },
+					      { "size", required_argument, NULL, 'S' },
+					      { "font", required_argument, NULL, 'F' },
+					      { "verbose", no_argument, NULL, 'v' },
+					      { "quiet", no_argument, NULL, 'q' },
+					      { "image", required_argument, NULL, 'g' },
+					      { "img", required_argument, NULL, 'i' },
+					      { "flatten", no_argument, NULL, 'a' },
+					      { "eval", no_argument, NULL, 'e' },
+					      { "interactive", no_argument, NULL, 'I' },
+					      { "color", required_argument, NULL, 'C' },
+					      { "background", required_argument, NULL, 'B' },
+					      { "linecountcode", no_argument, NULL, 'L' },
+					      { "linecount", no_argument, NULL, 'l' },
+					      { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_config = { 0 };
 
@@ -226,10 +238,11 @@ int
 	bool      is_image       = false;
 	bool      is_eval        = false;
 	bool      is_interactive = false;
+	bool      want_linecode  = false;
 	bool      want_linecount = false;
 	int       errfnd         = 0;
 
-	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:B:L", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:B:Ll", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				fbink_config.row = (short int) atoi(optarg);
@@ -510,6 +523,9 @@ int
 				}
 				break;
 			case 'L':
+				want_linecode = true;
+				break;
+			case 'l':
 				want_linecount = true;
 				break;
 			default:
@@ -546,6 +562,7 @@ int
 
 	char* string;
 	if (optind < argc) {
+		unsigned short int total_lines = 0U;
 		while (optind < argc) {
 			int linecount = -1;
 			string        = argv[optind++];
@@ -580,9 +597,16 @@ int
 
 			// If we were asked to return the amount of printed lines, honor that,
 			// provided we actually successfully printed something...
-			if (want_linecount && rv >= EXIT_SUCCESS) {
+			if (want_linecode && rv >= EXIT_SUCCESS) {
 				rv += linecount;
 			}
+			if (want_linecount && rv >= EXIT_SUCCESS) {
+				total_lines = (unsigned short int) (total_lines + linecount);
+			}
+		}
+		// And print the total amount of lines we printed, if requested...
+		if (want_linecount && rv >= EXIT_SUCCESS) {
+			printf("%u", total_lines);
 		}
 	} else {
 		if (is_refresh) {
