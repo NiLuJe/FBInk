@@ -760,6 +760,7 @@ static struct mxcfb_rect
 					} else {                                                                         \
 						/* In overlay mode, we only print foreground pixels, */                  \
 						/* and we print in the inverse color of the underlying pixel's */        \
+						/* Obviously, the closer we get to GRAY7, the less contrast we get */    \
 						if (is_fgpx) {                                                           \
 							get_pixel(&coords, &fbC);                                        \
 							fbC.r ^= 0xFF;                                                   \
@@ -2430,7 +2431,7 @@ int
 
 	// This is the easiest way to give us something that'll play nice both inverted, and on legacy devices...
 	// FIXME: Check/fix on inverted devices...
-	FBInkColor emptyC = { fbink_config.is_inverted ? eInkFGCMap[BG_GRAYC] : eInkBGCMap[BG_GRAYC],
+	FBInkColor emptyC = { fbink_config.is_inverted ? eInkFGCMap[BG_GRAYB] : eInkBGCMap[BG_GRAYB],
 			      emptyC.r,
 			      emptyC.r };
 
