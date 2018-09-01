@@ -2427,6 +2427,7 @@ int
 	unsigned short int top_pos  = (unsigned short int) MAX(0, ((fbink_config.row * FONTH) + fbink_config.voffset));
 	unsigned short int left_pos = 0U;
 
+	// NOTE: I'm not actually sure I like this in every instance...
 	fill_rect(left_pos, top_pos, (unsigned short int) viewWidth, FONTH, &bgC);
 
 	// Next comes the maths!
