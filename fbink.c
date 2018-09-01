@@ -2446,15 +2446,15 @@ int
 	unsigned short int empty_left = (unsigned short int) (fill_left + fill_width);
 
 	// NOTE: We always use the same BG_ constant in order to get a rough inverse by just swapping to the inverted LUT ;).
-	FBInkColor emptyC = { fbink_config.is_inverted ? eInkFGCMap[BG_GRAYB] : eInkBGCMap[BG_GRAYB],
-			      emptyC.r,
-			      emptyC.r };
+	FBInkColor emptyC;
 	// Handle devices with an inverted palette properly...
 	if (deviceQuirks.isKindleLegacy) {
 		emptyC.r = fbink_config.is_inverted ? eInkBGCMap[BG_GRAYB] : eInkFGCMap[BG_GRAYB];
-		emptyC.g = emptyC.r;
-		emptyC.b = emptyC.r;
+	} else {
+		emptyC.r = fbink_config.is_inverted ? eInkFGCMap[BG_GRAYB] : eInkBGCMap[BG_GRAYB];
 	}
+	emptyC.g = emptyC.r;
+	emptyC.b = emptyC.r;
 
 	// Draw the fill bar...
 	fill_rect(fill_left, top_pos, fill_width, FONTH, &fgC);
