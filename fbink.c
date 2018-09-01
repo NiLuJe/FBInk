@@ -2437,12 +2437,11 @@ int
 		percentage = 100U;
 	}
 
-	// We'll want a full cell of padding on each side...
-	unsigned short int fill_width =
-	    (unsigned short int) ((float) (percentage / 100.0f) * (float) (viewWidth - (FONTW * 2U)));
-	unsigned short int fill_left = (unsigned short int) (left_pos + FONTW);
+	// We'll want 5% of padding on each side...
+	unsigned short int fill_width = (unsigned short int) ((percentage / 100.0f) * (0.90f * (float) viewWidth));
+	unsigned short int fill_left  = (unsigned short int) (left_pos + (0.05f * (float) viewWidth));
 	unsigned short int empty_width =
-	    (unsigned short int) (((float) (100U - percentage) / 100.0f) * (float) (viewWidth - (FONTW * 2U)));
+	    (unsigned short int) (((float) (100U - percentage) / 100.0f) * (0.90f * (float) viewWidth));
 	unsigned short int empty_left = (unsigned short int) (fill_left + fill_width);
 
 	// NOTE: We always use the same BG_ constant in order to get a rough inverse by just swapping to the inverted LUT ;).
