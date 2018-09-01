@@ -219,13 +219,9 @@ int
 	// Centralize the various thresholds we use...
 	// NOTE: Depending on the device's DPI & resolution, a button takes between 17% and 20% of the screen's width.
 	//       Possibly less on larger resolutions, and more on smaller resolutions, so try to handle everyone in one fell swoop.
-	// NOTE: Yes, GCC, we're truncating floats, I know. We don't care ;).
-#	pragma GCC diagnostic push
-#	pragma GCC diagnostic ignored "-Wconversion"
-#	pragma GCC diagnostic ignored "-Wfloat-conversion"
-	unsigned short int     min_target_pixels = (0.125f * viewWidth);
-	unsigned short int     max_target_pixels = (0.25f * viewWidth);
-#	pragma GCC diagnostic pop
+	// NOTE: Truncating floats via explicit casts is good enough for us, no need to pull in libm ;).
+	unsigned short int min_target_pixels = (unsigned short int) (0.125f * (float) viewWidth);
+	unsigned short int max_target_pixels = (unsigned short int) (0.25f * (float) viewWidth);
 
 	// Recap the various settings as computed for this screen...
 	LOG("Button color is expected to be #%02hhX%02hhX%02hhX", button_color.r, button_color.g, button_color.b);
@@ -233,14 +229,10 @@ int
 
 	// Only look in the area of the screen where we're likely to find the buttons, both to save some time,
 	// and to lower the risk of false positives, as unlikely as that might be.
-#	pragma GCC diagnostic push
-#	pragma GCC diagnostic ignored "-Wconversion"
-#	pragma GCC diagnostic ignored "-Wfloat-conversion"
-	unsigned short int     min_height = (0.55f * viewHeight);
-	unsigned short int     max_height = (0.85f * viewHeight);
-	unsigned short int     min_width  = (0.05f * viewWidth);
-	unsigned short int     max_width  = (0.80f * viewWidth);
-#	pragma GCC diagnostic pop
+	unsigned short int min_height = (unsigned short int) (0.55f * (float) viewHeight);
+	unsigned short int max_height = (unsigned short int) (0.85f * (float) viewHeight);
+	unsigned short int min_width  = (unsigned short int) (0.05f * (float) viewWidth);
+	unsigned short int max_width  = (unsigned short int) (0.80f * (float) viewWidth);
 
 	LOG("Looking for buttons in a %hux%hu rectangle, from (%hu, %hu) to (%hu, %hu)",
 	    (unsigned short int) (max_width - min_width),
