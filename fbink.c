@@ -2406,7 +2406,8 @@ int
 	}
 
 	// We enforce centering for the percentage text...
-	char percentage_text[5];
+	// NOTE: Zero init, and leave enough space for a *wide* NULL, to avoid spurious behavior with u8_strlen later on...
+	char percentage_text[8] = { 0 };
 	snprintf(percentage_text, sizeof(percentage_text), "%hhu%%", percentage);
 	size_t line_len = strlen(percentage_text);
 
