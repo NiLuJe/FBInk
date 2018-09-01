@@ -686,7 +686,9 @@ static struct mxcfb_rect
 	uint32_t           ch     = 0U;
 	FBInkCoordinates   coords = { 0U };
 	FBInkColor*        pxC;
-	FBInkColor         fbC = { 0 };
+	// That's only used in overlay mode...
+	FBInkColor fbC     = { 0 };
+	bool       is_fgpx = false;
 	// NOTE: We don't do much sanity checking on hoffset/voffset,
 	//       because we want to allow pushing part of the string off-screen
 	//       (we basically only make sure it won't screw up the region rectangle too badly).
@@ -735,30 +737,38 @@ static struct mxcfb_rect
 		for (uint8_t x = 0U; x < glyphWidth; x++) {                                                              \
 			/* x: input column, i: first output column after scaling */                                      \
 			i = (unsigned short int) (x * FONTSIZE_MULT);                                                    \
-			/* Each element encodes a full row, we access a column's bit in that row by shifting. */         \
-			if (bitmap[y] & 1U << x) {                                                                       \
-				/* bit was set, pixel is fg! */                                                          \
-				pxC = &fgC;                                                                              \
-			} else {                                                                                         \
-				/* bit was unset, pixel is bg */                                                         \
-				pxC = &bgC;                                                                              \
-			}                                                                                                \
 			/* Initial coordinates, before we generate the extra pixels from the scaling factor */           \
 			cx = (unsigned short int) (x_offs + i);                                                          \
 			cy = (unsigned short int) (y_offs + j);                                                          \
+			/* Each element encodes a full row, we access a column's bit in that row by shifting. */         \
+			if (bitmap[y] & 1U << x) {                                                                       \
+				/* bit was set, pixel is fg! */                                                          \
+				pxC     = &fgC;                                                                          \
+				is_fgpx = true;                                                                          \
+				/* In overlay mode, we only print foreground pixels, and we invert the color */          \
+				/* if the underlying pixel is already in the foreground color... */                      \
+				if (fbink_config->is_overlay) {                                                          \
+					coords.x = cx;                                                                   \
+					coords.y = cy;                                                                   \
+					get_pixel(&coords, &fbC);                                                        \
+					if (fbC.r == fgC.r && fbC.g == fgC.g && fbC.b == fgC.b) {                        \
+						pxC = &bgC;                                                              \
+					}                                                                                \
+				}                                                                                        \
+			} else {                                                                                         \
+				/* bit was unset, pixel is bg */                                                         \
+				pxC     = &bgC;                                                                          \
+				is_fgpx = false;                                                                         \
+			}                                                                                                \
 			/* NOTE: Apply our scaling factor in both dimensions! */                                         \
 			for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {                                                   \
 				for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {                                           \
 					coords.x = (unsigned short int) (cx + k);                                        \
 					coords.y = (unsigned short int) (cy + l);                                        \
-					if (!fbink_config->is_overlay) {                                                  \
+					if (!fbink_config->is_overlay) {                                                 \
 						put_pixel(&coords, pxC);                                                 \
 					} else {                                                                         \
-						if (pxC == &fgC) {                                                        \
-							get_pixel(&coords, &fbC);                                        \
-							if (fbC.r == fgC.r && fbC.g == fgC.g && fbC.b == fgC.b) {         \
-								pxC = &bgC;                                              \
-							}                                                                \
+						if (is_fgpx) {                                                           \
 							put_pixel(&coords, pxC);                                         \
 						}                                                                        \
 					}                                                                                \
@@ -2380,6 +2390,25 @@ int
 		LOG("Clamped row to %hd", row);
 	}
 
+	// We enforce centering for the percentage text...
+	char percentage_text[5];
+	snprintf(percentage_text, sizeof(percentage_text), "%hhu%%", percentage);
+	size_t line_len = strlen(percentage_text);
+
+	short int col             = 0;
+	bool      halfcell_offset = false;
+	col                       = (short int) ((unsigned short int) (MAXCOLS - line_len) / 2U);
+
+	// NOTE: If the line itself is not a perfect fit, ask draw to start drawing half a cell
+	//       to the right to compensate, in order to achieve perfect centering...
+	//       This piggybacks a bit on the !isPerfectFit compensation done in draw,
+	//       which already does subcell placement ;).
+	if (((unsigned short int) col * 2U) + line_len != MAXCOLS) {
+		LOG("Line is not a perfect fit, fudging centering by one half of a cell to the right");
+		// NOTE: Flag it for correction in draw
+		halfcell_offset = true;
+	}
+
 	// We'll begin by painting a blank canvas, just to make sure everything's clean behind us.
 	unsigned short int top_pos  = (unsigned short int) MAX(0, ((row * FONTH) + voffset));
 	unsigned short int left_pos = (unsigned short int) MAX(0, hoffset);
@@ -2446,13 +2475,7 @@ int
 	}
 
 	// Draw percentage in the middle of the bar...
-	if (fbink_config->is_centered) {
-		LOG("still centered");
-	}
-	if (fbink_config->is_overlay) {
-		LOG("still overlayed");
-	}
-	draw("42%", row, fbink_config->col, 0U, false, fbink_config);
+	draw(percentage_text, row, col, 0U, halfcell_offset, fbink_config);
 
 	// Rotate the region if need be...
 	if (deviceQuirks.isKobo16Landscape) {

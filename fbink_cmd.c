@@ -550,9 +550,8 @@ int
 	}
 	// Enforce centered & overlay glyph drawing when drawing a progress bar...
 	if (is_progressbar) {
-		fbink_config.is_overlay = true;
+		fbink_config.is_overlay  = true;
 		fbink_config.is_centered = true;
-		printf("centered & overlay\n");
 	}
 
 	// Assume success, until shit happens ;)
