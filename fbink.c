@@ -2366,6 +2366,11 @@ int
 	fbink_config.hoffset = 0;
 	// And we enforce centered text internally, so we'll set col ourselves later...
 
+	// Clear screen?
+	if (fbink_config.is_cleared) {
+		clear_screen(fbink_config.is_inverted ? penFGColor : penBGColor);
+	}
+
 	// Let's go! Start by pilfering some computations from draw...
 	// NOTE: It's a grayscale ramp, so r = g = b (= v).
 	FBInkColor fgC = { fbink_config.is_inverted ? penBGColor : penFGColor, fgC.r, fgC.r };
