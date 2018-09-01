@@ -85,6 +85,7 @@ static void
 	    "\t-B, --background NAME\tColor of the background the text will be printed on (Default: WHITE).\n"
 	    "\t\t\tAvailable colors: BLACK, GRAY1, GRAY2, GRAY3, GRAY4, GRAY5, GRAY6, GRAY7,\n"
 	    "\t\t\t\t\tGRAY8, GRAY9, GRAYA, GRAYB, GRAYC, GRAYD, GRAYE, WHITE\n"
+	    "\t-o, --overlay\tDon't draw background pixels, and compute foreground pixel color based on the inverse of the underlying framebufer pixel color. Obviously ignores -h, --invert; -C, --color & -B, --background *as far as glyphs are concerned*.\n"
 	    "\n"
 	    "Options affecting the program's verbosity:\n"
 	    "\t-v, --verbose\tToggle printing diagnostic messages.\n"
@@ -94,7 +95,8 @@ static void
 	    "\t-I, --interactive\tEnter a very basic interactive mode.\n"
 	    "\t-L, --linecountcode\tWhen successfully printing text, returns the total amount of printed lines as the process exit code.\n"
 	    "\t-l, --linecount\tWhen successfully printing text, outputs the total amount of printed lines in the final line of output to stdout (NOTE: enforces quiet & non-verbose!).\n"
-	    "\t-P, --progressbar PERCENT\tDraw a PERCENT full prgress bar.\n"
+	    "\t-P, --progressbar PROGRESS\tDraw a PROGRESS%% full progress bar (full-width). Like other alternative modes, does *NOT* have precedence over text printing.\n"
+	    "\t\t\tIgnores -o, --overlay; -x, --col; -X, --hoffset; as well as -m, --centered & -p, --padded"
 	    "\n"
 	    "NOTES:\n"
 	    "\tYou can specify multiple STRINGs in a single invocation of fbink, each consecutive one will be printed on the subsequent line.\n"
@@ -196,6 +198,7 @@ int
 					      { "linecountcode", no_argument, NULL, 'L' },
 					      { "linecount", no_argument, NULL, 'l' },
 					      { "progressbar", required_argument, NULL, 'P' },
+					      { "overlay", no_argument, NULL, 'o' },
 					      { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_config = { 0 };
@@ -246,7 +249,7 @@ int
 	uint8_t   progress       = 0;
 	int       errfnd         = 0;
 
-	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:B:LlP:", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:B:LlP:o", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				fbink_config.row = (short int) atoi(optarg);
@@ -536,6 +539,9 @@ int
 				is_progressbar = true;
 				progress       = (uint8_t) strtoul(optarg, NULL, 10);
 				break;
+			case 'o':
+				fbink_config.is_overlay = true;
+				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
 				errfnd = 1;
@@ -584,12 +590,13 @@ int
 			//       if we had an easy way to... (c.f., my rant about Kobo's broken libc in fbink_internal.h)
 			if (!fbink_config.is_quiet) {
 				printf(
-				    "Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (inverted: %s, flashing: %s, centered: %s, left padded: %s, clear screen: %s, font: %hhu, font scaling: x%hhu)\n",
+				    "Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (overlay: %s, inverted: %s, flashing: %s, centered: %s, left padded: %s, clear screen: %s, font: %hhu, font scaling: x%hhu)\n",
 				    string,
 				    fbink_config.col,
 				    fbink_config.hoffset,
 				    fbink_config.row,
 				    fbink_config.voffset,
+				    fbink_config.is_overlay ? "true" : "false",
 				    fbink_config.is_inverted ? "true" : "false",
 				    fbink_config.is_flashing ? "true" : "false",
 				    fbink_config.is_centered ? "true" : "false",
@@ -628,14 +635,16 @@ int
 		}
 	} else {
 		if (is_refresh) {
-			printf(
-			    "Refreshing the screen from top=%u, left=%u for width=%u, height=%u with %swaveform mode %s\n",
-			    region_top,
-			    region_left,
-			    region_width,
-			    region_height,
-			    fbink_config.is_flashing ? "a flashing " : "",
-			    region_wfm);
+			if (!fbink_config.is_quiet) {
+				printf(
+				    "Refreshing the screen from top=%u, left=%u for width=%u, height=%u with %swaveform mode %s\n",
+				    region_top,
+				    region_left,
+				    region_width,
+				    region_height,
+				    fbink_config.is_flashing ? "a flashing " : "",
+				    region_wfm);
+			}
 			if (fbink_refresh(fbfd,
 					  region_top,
 					  region_left,
@@ -648,17 +657,19 @@ int
 				goto cleanup;
 			}
 		} else if (is_image) {
-			printf(
-			    "Displaying image '%s' @ column %hd + %hdpx, row %hd + %dpx (halign: %hhu, valign: %hhu, inverted: %s, flattened: %s)\n",
-			    image_file,
-			    fbink_config.col,
-			    image_x_offset,
-			    fbink_config.row,
-			    image_y_offset,
-			    fbink_config.halign,
-			    fbink_config.valign,
-			    fbink_config.is_inverted ? "true" : "false",
-			    fbink_config.ignore_alpha ? "true" : "false");
+			if (!fbink_config.is_quiet) {
+				printf(
+				    "Displaying image '%s' @ column %hd + %hdpx, row %hd + %dpx (halign: %hhu, valign: %hhu, inverted: %s, flattened: %s)\n",
+				    image_file,
+				    fbink_config.col,
+				    image_x_offset,
+				    fbink_config.row,
+				    image_y_offset,
+				    fbink_config.halign,
+				    fbink_config.valign,
+				    fbink_config.is_inverted ? "true" : "false",
+				    fbink_config.ignore_alpha ? "true" : "false");
+			}
 			if (fbink_print_image(fbfd, image_file, image_x_offset, image_y_offset, &fbink_config) !=
 			    EXIT_SUCCESS) {
 				fprintf(stderr, "Failed to display that image!\n");
@@ -666,6 +677,18 @@ int
 				goto cleanup;
 			}
 		} else if (is_progressbar) {
+			if (!fbink_config.is_quiet) {
+				printf(
+				    "Displaying a %hhu%% full progress bar @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, font: %hhu, font scaling: x%hhu)\n",
+				    progress,
+				    fbink_config.row,
+				    fbink_config.voffset,
+				    fbink_config.is_inverted ? "true" : "false",
+				    fbink_config.is_flashing ? "true" : "false",
+				    fbink_config.is_cleared ? "true" : "false",
+				    fbink_config.fontname,
+				    fbink_config.fontmult);
+			}
 			if (fbink_print_progress_bar(fbfd, progress, &fbink_config) != EXIT_SUCCESS) {
 				fprintf(stderr, "Failed to display a progressbar!\n");
 				rv = ERRCODE(EXIT_FAILURE);
