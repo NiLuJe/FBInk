@@ -737,30 +737,19 @@ static struct mxcfb_rect
 		for (uint8_t x = 0U; x < glyphWidth; x++) {                                                              \
 			/* x: input column, i: first output column after scaling */                                      \
 			i = (unsigned short int) (x * FONTSIZE_MULT);                                                    \
-			/* Initial coordinates, before we generate the extra pixels from the scaling factor */           \
-			cx = (unsigned short int) (x_offs + i);                                                          \
-			cy = (unsigned short int) (y_offs + j);                                                          \
 			/* Each element encodes a full row, we access a column's bit in that row by shifting. */         \
 			if (bitmap[y] & 1U << x) {                                                                       \
 				/* bit was set, pixel is fg! */                                                          \
 				pxC     = &fgC;                                                                          \
 				is_fgpx = true;                                                                          \
-				/* In overlay mode, we only print foreground pixels, */                                  \
-				/* and we print in a color exactly the inverse of the underlying pixel's */              \
-				if (fbink_config->is_overlay) {                                                          \
-					coords.x = cx;                                                                   \
-					coords.y = cy;                                                                   \
-					get_pixel(&coords, &fbC);                                                        \
-					fbC.r ^= 0xFF;                                                                   \
-					fbC.g ^= 0xFF;                                                                   \
-					fbC.b ^= 0xFF;                                                                   \
-					pxC = &fbC;                                                                      \
-				}                                                                                        \
 			} else {                                                                                         \
 				/* bit was unset, pixel is bg */                                                         \
 				pxC     = &bgC;                                                                          \
 				is_fgpx = false;                                                                         \
 			}                                                                                                \
+			/* Initial coordinates, before we generate the extra pixels from the scaling factor */           \
+			cx = (unsigned short int) (x_offs + i);                                                          \
+			cy = (unsigned short int) (y_offs + j);                                                          \
 			/* NOTE: Apply our scaling factor in both dimensions! */                                         \
 			for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {                                                   \
 				for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {                                           \
@@ -769,7 +758,14 @@ static struct mxcfb_rect
 					if (!fbink_config->is_overlay) {                                                 \
 						put_pixel(&coords, pxC);                                                 \
 					} else {                                                                         \
+						/* In overlay mode, we only print foreground pixels, */                  \
+						/* and we print in the inverse color of the underlying pixel's */        \
 						if (is_fgpx) {                                                           \
+							get_pixel(&coords, &fbC);                                        \
+							fbC.r ^= 0xFF;                                                   \
+							fbC.g ^= 0xFF;                                                   \
+							fbC.b ^= 0xFF;                                                   \
+							pxC = &fbC;                                                      \
 							put_pixel(&coords, pxC);                                         \
 						}                                                                        \
 					}                                                                                \
