@@ -2363,6 +2363,7 @@ int
 	// and no hoffset, because it makes no sense for a full-width bar,
 	// and we don't want the text to be affected by a stray value...
 	fbink_config.hoffset = 0;
+	// And we enforce centered text internally, so we'll set col ourselves later...
 
 	// Let's go! Start by pilfering some computations from draw...
 	// NOTE: It's a grayscale ramp, so r = g = b (= v).
@@ -2393,15 +2394,14 @@ int
 	snprintf(percentage_text, sizeof(percentage_text), "%hhu%%", percentage);
 	size_t line_len = strlen(percentage_text);
 
-	short int col             = 0;
-	bool      halfcell_offset = false;
-	col                       = (short int) ((unsigned short int) (MAXCOLS - line_len) / 2U);
+	bool halfcell_offset = false;
+	fbink_config.col     = (short int) ((unsigned short int) (MAXCOLS - line_len) / 2U);
 
 	// NOTE: If the line itself is not a perfect fit, ask draw to start drawing half a cell
 	//       to the right to compensate, in order to achieve perfect centering...
 	//       This piggybacks a bit on the !isPerfectFit compensation done in draw,
 	//       which already does subcell placement ;).
-	if (((unsigned short int) col * 2U) + line_len != MAXCOLS) {
+	if (((unsigned short int) fbink_config.col * 2U) + line_len != MAXCOLS) {
 		LOG("Line is not a perfect fit, fudging centering by one half of a cell to the right");
 		// NOTE: Flag it for correction in draw
 		halfcell_offset = true;
@@ -2462,7 +2462,12 @@ int
 	}
 
 	// Draw percentage in the middle of the bar...
-	draw(percentage_text, fbink_config.row, col, 0U, halfcell_offset, &fbink_config);
+	draw(percentage_text,
+	     (unsigned short int) fbink_config.row,
+	     (unsigned short int) fbink_config.col,
+	     0U,
+	     halfcell_offset,
+	     &fbink_config);
 
 	// Rotate the region if need be...
 	if (deviceQuirks.isKobo16Landscape) {
