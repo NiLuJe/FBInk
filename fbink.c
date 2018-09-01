@@ -2386,13 +2386,23 @@ int
 	}
 
 	// And then some from fbink_print...
+	if (fbink_config.is_halfway) {
+		fbink_config.row = (short int) (fbink_config.row + (short int) (MAXROWS / 2U));
+		// NOTE: Clamp to positive values to avoid wrap-around,
+		//       (i.e., -MAX should always be 0, and +MAX always the last row (i.e., MAXROWS - 1)).
+		//       Our default behavior of starting negative rows from the bottom essentially amounts to valign == bottom,
+		//       which is not desirable when we explicitly asked for center ;).
+		fbink_config.row = (short int) MIN(MAX(0, fbink_config.row), (MAXROWS - 1));
+		LOG("Adjusted row to %hd for vertical centering", fbink_config.row);
+	}
+
 	if (fbink_config.row < 0) {
 		fbink_config.row = (short int) MAX(MAXROWS + fbink_config.row, 0);
 		LOG("Adjusted row to %hd", fbink_config.row);
 	}
-	if (fbink_config.row >= MAXROWS) {
-		fbink_config.row = (short int) (MAXROWS - 1U);
-		LOG("Clamped row to %hd", fbink_config.row);
+	while (fbink_config.row >= MAXROWS) {
+		fbink_config.row = (short int) (fbink_config.row - MAXROWS);
+		LOG("Wrapped row back to %hd", fbink_config.row);
 	}
 
 	// We enforce centering for the percentage text...
