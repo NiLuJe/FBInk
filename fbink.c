@@ -250,7 +250,6 @@ static void
 	(*fxpPutPixel)(coords, color);
 }
 
-#ifdef FBINK_WITH_IMAGE
 // Helper functions to 'get' a specific pixel's color from the framebuffer
 // c.f., FBGrab convert* functions
 //       (http://trac.ak-team.com/trac/browser/niluje/Configs/trunk/Kindle/Misc/FBGrab/fbgrab.c#L402)
@@ -321,10 +320,10 @@ static void
 	// note: x * 4 as every pixel is 4 consecutive bytes, which we read in one go
 	size_t pix_offset = (uint32_t)(coords->x << 2U) + (coords->y * fInfo.line_length);
 
-#	pragma GCC diagnostic push
-#	pragma GCC diagnostic ignored "-Wcast-align"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
 	px.p = *((uint32_t*) (fbPtr + pix_offset));
-#	pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
 	color->b = px.color.b;
 	color->g = px.color.g;
 	color->r = px.color.r;
@@ -345,10 +344,10 @@ static void
 	uint8_t  g;
 	uint8_t  b;
 	// Like put_pixel_RGB565, read those two consecutive bytes at once
-#	pragma GCC diagnostic push
-#	pragma GCC diagnostic ignored "-Wcast-align"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
 	v = *((uint16_t*) (fbPtr + pix_offset));
-#	pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
 
 	// NOTE: c.f., https://stackoverflow.com/q/2442576
 	//       I feel that this approach tracks better with what we do in put_pixel_RGB565,
@@ -362,7 +361,34 @@ static void
 	color->g = (uint8_t)((g << 2U) | (g >> 4U));
 	color->b = (uint8_t)((b << 3U) | (b >> 2U));
 }
-#endif    // FBINK_WITH_IMAGE
+
+// Handle a few sanity checks...
+static void
+    get_pixel(FBInkCoordinates* coords, FBInkColor* color)
+{
+	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
+	(*fxpRotateCoords)(coords);
+
+	// NOTE: Discard off-screen pixels!
+	//       For instance, when we have a halfcell offset in conjunction with a !isPerfectFit pixel offset,
+	//       when we're padding and centering, the final whitespace of right-padding will have its last
+	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
+	if (coords->x >= vInfo.xres || coords->y >= vInfo.yres) {
+#ifdef DEBUG
+		// NOTE: This is only enabled in Debug builds because it can be pretty verbose,
+		//       and does not necessarily indicate an actual issue, as we've just explained...
+		LOG("Put: discarding off-screen pixel @ (%hu, %hu) (out of %ux%u bounds)",
+		    coords->x,
+		    coords->y,
+		    vInfo.xres,
+		    vInfo.yres);
+#endif
+		return;
+	}
+
+	// fbink_init() takes care of setting this global pointer to the right function for the fb's bpp
+	(*fxpGetPixel)(coords, color);
+}
 
 // Helper function to draw a rectangle in given color
 static void
@@ -660,6 +686,7 @@ static struct mxcfb_rect
 	uint32_t           ch     = 0U;
 	FBInkCoordinates   coords = { 0U };
 	FBInkColor*        pxC;
+	FBInkColor         fbC = { 0 };
 	// NOTE: We don't do much sanity checking on hoffset/voffset,
 	//       because we want to allow pushing part of the string off-screen
 	//       (we basically only make sure it won't screw up the region rectangle too badly).
@@ -724,7 +751,17 @@ static struct mxcfb_rect
 				for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {                                           \
 					coords.x = (unsigned short int) (cx + k);                                        \
 					coords.y = (unsigned short int) (cy + l);                                        \
-					put_pixel(&coords, pxC);                                                         \
+					if (!fbink_config->is_overlay) {                                                  \
+						put_pixel(&coords, pxC);                                                 \
+					} else {                                                                         \
+						if (pxC == &fgC) {                                                        \
+							get_pixel(&coords, &fbC);                                        \
+							if (fbC.r == fgC.r && fbC.g == fgC.g && fbC.b == fgC.b) {         \
+								pxC = &bgC;                                              \
+							}                                                                \
+							put_pixel(&coords, pxC);                                         \
+						}                                                                        \
+					}                                                                                \
 				}                                                                                        \
 			}                                                                                                \
 		}                                                                                                        \
@@ -1542,33 +1579,23 @@ int
 	switch (vInfo.bits_per_pixel) {
 		case 4U:
 			fxpPutPixel = &put_pixel_Gray4;
-#ifdef FBINK_WITH_IMAGE
 			fxpGetPixel = &get_pixel_Gray4;
-#endif
 			break;
 		case 8U:
 			fxpPutPixel = &put_pixel_Gray8;
-#ifdef FBINK_WITH_IMAGE
 			fxpGetPixel = &get_pixel_Gray8;
-#endif
 			break;
 		case 16U:
 			fxpPutPixel = &put_pixel_RGB565;
-#ifdef FBINK_WITH_IMAGE
 			fxpGetPixel = &get_pixel_RGB565;
-#endif
 			break;
 		case 24U:
 			fxpPutPixel = &put_pixel_RGB24;
-#ifdef FBINK_WITH_IMAGE
 			fxpGetPixel = &get_pixel_RGB24;
-#endif
 			break;
 		case 32U:
 			fxpPutPixel = &put_pixel_RGB32;
-#ifdef FBINK_WITH_IMAGE
 			fxpGetPixel = &get_pixel_RGB32;
-#endif
 			break;
 		default:
 			// Huh oh... Should never happen!
@@ -2346,6 +2373,7 @@ int
 	short int row = fbink_config->row;
 	if (row < 0) {
 		row = (short int) MAX(MAXROWS + row, 0);
+		LOG("Adjusted row to %hd", row);
 	}
 	if (row >= MAXROWS) {
 		row = (short int) (MAXROWS - 1U);
@@ -2416,6 +2444,15 @@ int
 			LOG("Adjusted region top to account for vertical offset pushing part of the content off-screen");
 		}
 	}
+
+	// Draw percentage in the middle of the bar...
+	if (fbink_config->is_centered) {
+		LOG("still centered");
+	}
+	if (fbink_config->is_overlay) {
+		LOG("still overlayed");
+	}
+	draw("42%", row, fbink_config->col, 0U, false, fbink_config);
 
 	// Rotate the region if need be...
 	if (deviceQuirks.isKobo16Landscape) {

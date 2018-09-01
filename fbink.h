@@ -144,6 +144,7 @@ typedef struct
 	bool      is_padded;       // Pad the text with blanks (on the left, or on both sides if is_centered)
 	uint8_t   fg_color;        // Requested foreground color for text (c.f., FG_COLOR_INDEX_T enum)
 	uint8_t   bg_color;        // Requested background color for text (c.f., BG_COLOR_INDEX_T enum)
+	bool      is_overlay;      // Don't draw glyph background (tailored for progress bar drawing)
 	bool      is_verbose;      // Print verbose diagnostic informations on stdout
 	bool      is_quiet;        // Hide fbink_init()'s hardware setup info (sent to stderr)
 	bool      ignore_alpha;    // Ignore any potential alpha channel in source image (i.e., flatten the image)
