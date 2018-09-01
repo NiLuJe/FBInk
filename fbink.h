@@ -144,7 +144,7 @@ typedef struct
 	bool      is_padded;       // Pad the text with blanks (on the left, or on both sides if is_centered)
 	uint8_t   fg_color;        // Requested foreground color for text (c.f., FG_COLOR_INDEX_T enum)
 	uint8_t   bg_color;        // Requested background color for text (c.f., BG_COLOR_INDEX_T enum)
-	bool      is_overlay;      // Don't draw glyph background (tailored for progress bar drawing)
+	bool      is_overlay;      // Don't draw bg, use inverse of fb's underlying pixel as pen fg color
 	bool      is_verbose;      // Print verbose diagnostic informations on stdout
 	bool      is_quiet;        // Hide fbink_init()'s hardware setup info (sent to stderr)
 	bool      ignore_alpha;    // Ignore any potential alpha channel in source image (i.e., flatten the image)
@@ -232,6 +232,10 @@ FBINK_API int fbink_refresh(int         fbfd,
 FBINK_API bool fbink_is_fb_quirky(void);
 
 // Print a full-width progress bar on screen
+// fdfd:		open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
+// percentage:		0-100 value to set the progress bar's progression
+// fbink_config:	pointer to an FBInkConfig struct (ignores is_overlay, col & hoffset; as well as is_centered & is_padded).
 FBINK_API int fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInkConfig* fbink_config);
 
 // Print an image on screen
