@@ -2335,7 +2335,7 @@ bool
 
 // Draw a full-width progress bar
 int
-    fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInkConfig* fbink_config)
+    fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInkConfig* caller_fbink_config)
 {
 	// Open the framebuffer if need be...
 	// NOTE: As usual, we *expect* to be initialized at this point!
@@ -2355,36 +2355,37 @@ int
 		}
 	}
 
+	// We need a local copy of the config struct, because we have a few things to enforce on our end,
+	// and we don't want to mess with the caller's setup (plus, it's const for that very reason anyway).
+	FBInkConfig fbink_config = *caller_fbink_config;
+	// Namely, we need overlay mode to properly print the percentage text,
+	fbink_config.is_overlay = true;
+	// and no hoffset, because it makes no sense for a full-width bar,
+	// and we don't want the text to be affected by a stray value...
+	fbink_config.hoffset = 0;
+
 	// Let's go! Start by pilfering some computations from draw...
 	// NOTE: It's a grayscale ramp, so r = g = b (= v).
-	FBInkColor fgC = { fbink_config->is_inverted ? penBGColor : penFGColor, fgC.r, fgC.r };
-	FBInkColor bgC = { fbink_config->is_inverted ? penFGColor : penBGColor, bgC.r, bgC.r };
+	FBInkColor fgC = { fbink_config.is_inverted ? penBGColor : penFGColor, fgC.r, fgC.r };
+	FBInkColor bgC = { fbink_config.is_inverted ? penFGColor : penBGColor, bgC.r, bgC.r };
 
-	// Clamp h/v offset to safe values
-	short int voffset = fbink_config->voffset;
-	short int hoffset = fbink_config->hoffset;
+	// Clamp v offset to safe values
 	// NOTE: This test isn't perfect, but then, if you play with this, you do it knowing the risks...
 	//       It's mainly there so that stupidly large values don't wrap back on screen because of overflow wraparound.
-	if (abs(voffset) >= viewHeight) {
+	if (abs(fbink_config.voffset) >= viewHeight) {
 		LOG("The specified vertical offset (%hd) necessarily pushes *all* content out of bounds, discarding it",
-		    voffset);
-		voffset = 0;
-	}
-	if (abs(hoffset) >= viewWidth) {
-		LOG("The specified horizontal offset (%hd) necessarily pushes *all* content out of bounds, discarding it",
-		    hoffset);
-		hoffset = 0;
+		    fbink_config.voffset);
+		fbink_config.voffset = 0;
 	}
 
 	// And then some from fbink_print...
-	short int row = fbink_config->row;
-	if (row < 0) {
-		row = (short int) MAX(MAXROWS + row, 0);
-		LOG("Adjusted row to %hd", row);
+	if (fbink_config.row < 0) {
+		fbink_config.row = (short int) MAX(MAXROWS + fbink_config.row, 0);
+		LOG("Adjusted row to %hd", fbink_config.row);
 	}
-	if (row >= MAXROWS) {
-		row = (short int) (MAXROWS - 1U);
-		LOG("Clamped row to %hd", row);
+	if (fbink_config.row >= MAXROWS) {
+		fbink_config.row = (short int) (MAXROWS - 1U);
+		LOG("Clamped row to %hd", fbink_config.row);
 	}
 
 	// We enforce centering for the percentage text...
@@ -2407,8 +2408,8 @@ int
 	}
 
 	// We'll begin by painting a blank canvas, just to make sure everything's clean behind us.
-	unsigned short int top_pos  = (unsigned short int) MAX(0, ((row * FONTH) + voffset));
-	unsigned short int left_pos = (unsigned short int) MAX(0, hoffset);
+	unsigned short int top_pos  = (unsigned short int) MAX(0, ((fbink_config.row * FONTH) + fbink_config.voffset));
+	unsigned short int left_pos = 0U;
 
 	fill_rect(left_pos, top_pos, (unsigned short int) viewWidth, FONTH, &bgC);
 
@@ -2429,7 +2430,7 @@ int
 
 	// This is the easiest way to give us something that'll play nice both inverted, and on legacy devices...
 	// FIXME: Check/fix on inverted devices...
-	FBInkColor emptyC = { fbink_config->is_inverted ? eInkFGCMap[BG_GRAYC] : eInkBGCMap[BG_GRAYC],
+	FBInkColor emptyC = { fbink_config.is_inverted ? eInkFGCMap[BG_GRAYC] : eInkBGCMap[BG_GRAYC],
 			      emptyC.r,
 			      emptyC.r };
 
@@ -2446,21 +2447,9 @@ int
 		.height = FONTH,
 	};
 
-	// H/V offset handling is the pits.
-	if (hoffset != 0) {
-		LOG("Adjusting horizontal pen position by %hd pixels, as requested", hoffset);
-		// Clamp region to sane values if h/v offset is pushing stuff off-screen
-		if ((region.width + region.left) > viewWidth) {
-			region.width = (uint32_t) MAX(0, (short int) (viewWidth - region.left));
-			LOG("Adjusted region width to account for horizontal offset pushing part of the content off-screen");
-		}
-		if (region.left >= viewWidth) {
-			region.left = viewWidth - 1;
-			LOG("Adjusted region left to account for horizontal offset pushing part of the content off-screen");
-		}
-	}
-	if (voffset != 0) {
-		LOG("Adjusting vertical pen position by %hd pixels, as requested", voffset);
+	// V offset handling is the pits.
+	if (fbink_config.voffset != 0) {
+		LOG("Adjusting vertical pen position by %hd pixels, as requested", fbink_config.voffset);
 		// Clamp region to sane values if h/v offset is pushing stuff off-screen
 		if ((region.top + region.height) > viewHeight) {
 			region.height = (uint32_t) MAX(0, (short int) (viewHeight - region.top));
@@ -2473,7 +2462,7 @@ int
 	}
 
 	// Draw percentage in the middle of the bar...
-	draw(percentage_text, row, col, 0U, halfcell_offset, fbink_config);
+	draw(percentage_text, fbink_config.row, col, 0U, halfcell_offset, &fbink_config);
 
 	// Rotate the region if need be...
 	if (deviceQuirks.isKobo16Landscape) {
@@ -2481,7 +2470,7 @@ int
 	}
 
 	// Refresh screen
-	if (refresh(fbfd, region, WAVEFORM_MODE_AUTO, fbink_config->is_flashing) != EXIT_SUCCESS) {
+	if (refresh(fbfd, region, WAVEFORM_MODE_AUTO, fbink_config.is_flashing) != EXIT_SUCCESS) {
 		fprintf(stderr, "[FBInk] Failed to refresh the screen!\n");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
