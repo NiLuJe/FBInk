@@ -2439,7 +2439,7 @@ int
 	// And the empty bar...
 	fill_rect(empty_left, top_pos, empty_width, FONTH, &emptyC);
 
-	// And finally, refresh the screen!
+	// Start setting up the screen refresh...
 	struct mxcfb_rect region = {
 		.top    = top_pos,
 		.left   = left_pos,
@@ -2474,7 +2474,7 @@ int
 		rotate_region(&region);
 	}
 
-	// Refresh screen
+	// And finally, refresh the screen
 	if (refresh(fbfd, region, WAVEFORM_MODE_AUTO, fbink_config.is_flashing) != EXIT_SUCCESS) {
 		fprintf(stderr, "[FBInk] Failed to refresh the screen!\n");
 		rv = ERRCODE(EXIT_FAILURE);
