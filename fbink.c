@@ -2299,6 +2299,144 @@ bool
 	return deviceQuirks.isKobo16Landscape;
 }
 
+// Draw a full-width progress bar
+int
+    fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInkConfig* fbink_config)
+{
+	// Open the framebuffer if need be...
+	// NOTE: As usual, we *expect* to be initialized at this point!
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// mmap the fb if need be...
+	if (!isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	}
+
+	// Let's go! Start by pilfering some computations from draw...
+	// NOTE: It's a grayscale ramp, so r = g = b (= v).
+	FBInkColor fgC = { fbink_config->is_inverted ? penBGColor : penFGColor, fgC.r, fgC.r };
+	FBInkColor bgC = { fbink_config->is_inverted ? penFGColor : penBGColor, bgC.r, bgC.r };
+
+	// Clamp h/v offset to safe values
+	short int voffset = fbink_config->voffset;
+	short int hoffset = fbink_config->hoffset;
+	// NOTE: This test isn't perfect, but then, if you play with this, you do it knowing the risks...
+	//       It's mainly there so that stupidly large values don't wrap back on screen because of overflow wraparound.
+	if (abs(voffset) >= viewHeight) {
+		LOG("The specified vertical offset (%hd) necessarily pushes *all* content out of bounds, discarding it",
+		    voffset);
+		voffset = 0;
+	}
+	if (abs(hoffset) >= viewWidth) {
+		LOG("The specified horizontal offset (%hd) necessarily pushes *all* content out of bounds, discarding it",
+		    hoffset);
+		hoffset = 0;
+	}
+
+	// And then some from fbink_print...
+	short int row = fbink_config->row;
+	if (row < 0) {
+		row = (short int) MAX(MAXROWS + row, 0);
+	}
+	if (row >= MAXROWS) {
+		row = (short int) (MAXROWS - 1U);
+		LOG("Clamped row to %hd", row);
+	}
+
+	// We'll begin by painting a blank canvas, just to make sure everything's clean behind us.
+	unsigned short int top_pos = MAX(0, ((row * FONTH) + voffset));
+	unsigned short int left_pos = MAX(0, hoffset);
+
+	fill_rect(left_pos, top_pos, viewWidth, FONTH, &bgC);
+
+	// Next comes the maths!
+	// Begin by sanitizing the input...
+	if (percentage > 100U) {
+		LOG("The specified percentage (%hhu) is larger than 100, clamping it.", percentage);
+		percentage = 100U;
+	}
+
+	// We'll want half a cell of padding on each side...
+	unsigned short int fill_width = (unsigned short int) ((percentage / (float) 100U) * (viewWidth - FONTW));
+	unsigned short int fill_left = left_pos + (FONTW / 2U);
+	unsigned short int empty_width = (unsigned short int) (((100U - percentage) / (float) 100U) * (viewWidth - FONTW));
+	unsigned short int empty_left = fill_left + fill_width;
+
+	// This is the easiest way to give us something that'll play nice both inverted, and on legacy devices...
+	FBInkColor emptyC = { eInkFGCMap[FG_GRAY7], eInkFGCMap[FG_GRAY7], eInkFGCMap[FG_GRAY7] };
+
+	// Draw the fill bar...
+	fill_rect(fill_left, top_pos, fill_width, FONTH, &fgC);
+	// And the empty bar...
+	fill_rect(empty_left, top_pos, empty_width, FONTH, &emptyC);
+
+	// And finally, refresh the screen!
+	struct mxcfb_rect region = {
+		.top    = top_pos,
+		.left   = left_pos,
+		.width  = viewWidth,
+		.height = FONTH,
+	};
+
+	// H/V offset handling is the pits.
+	if (hoffset != 0) {
+		LOG("Adjusting horizontal pen position by %hd pixels, as requested", hoffset);
+		// Clamp region to sane values if h/v offset is pushing stuff off-screen
+		if ((region.width + region.left) > viewWidth) {
+			region.width = (uint32_t) MAX(0, (short int) (viewWidth - region.left));
+			LOG("Adjusted region width to account for horizontal offset pushing part of the content off-screen");
+		}
+		if (region.left >= viewWidth) {
+			region.left = viewWidth - 1;
+			LOG("Adjusted region left to account for horizontal offset pushing part of the content off-screen");
+		}
+	}
+	if (voffset != 0) {
+		LOG("Adjusting vertical pen position by %hd pixels, as requested", voffset);
+		// Clamp region to sane values if h/v offset is pushing stuff off-screen
+		if ((region.top + region.height) > viewHeight) {
+			region.height = (uint32_t) MAX(0, (short int) (viewHeight - region.top));
+			LOG("Adjusted region height to account for vertical offset pushing part of the content off-screen");
+		}
+		if (region.top >= viewHeight) {
+			region.top = viewHeight - 1;
+			LOG("Adjusted region top to account for vertical offset pushing part of the content off-screen");
+		}
+	}
+
+	// Rotate the region if need be...
+	if (deviceQuirks.isKobo16Landscape) {
+		rotate_region(&region);
+	}
+
+	// Refresh screen
+	if (refresh(fbfd, region, WAVEFORM_MODE_AUTO, fbink_config->is_flashing) != EXIT_SUCCESS) {
+		fprintf(stderr, "[FBInk] Failed to refresh the screen!\n");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// Cleanup
+cleanup:
+	if (isFbMapped && !keep_fd) {
+		unmap_fb();
+	}
+	if (!keep_fd) {
+		close(fbfd);
+	}
+
+	return rv;
+}
+
 // Draw an image on screen
 int
     fbink_print_image(int fbfd    UNUSED_BY_MINIMAL,
