@@ -534,7 +534,7 @@ int
 				break;
 			case 'P':
 				is_progressbar = true;
-				progress = (uint8_t) strtoul(optarg, NULL, 10);
+				progress       = (uint8_t) strtoul(optarg, NULL, 10);
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
@@ -666,8 +666,7 @@ int
 				goto cleanup;
 			}
 		} else if (is_progressbar) {
-			if (fbink_print_progress_bar(fbfd, progress, &fbink_config) !=
-			    EXIT_SUCCESS) {
+			if (fbink_print_progress_bar(fbfd, progress, &fbink_config) != EXIT_SUCCESS) {
 				fprintf(stderr, "Failed to display a progressbar!\n");
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;

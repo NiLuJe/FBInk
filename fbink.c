@@ -2353,10 +2353,10 @@ int
 	}
 
 	// We'll begin by painting a blank canvas, just to make sure everything's clean behind us.
-	unsigned short int top_pos = MAX(0, ((row * FONTH) + voffset));
-	unsigned short int left_pos = MAX(0, hoffset);
+	unsigned short int top_pos  = (unsigned short int) MAX(0, ((row * FONTH) + voffset));
+	unsigned short int left_pos = (unsigned short int) MAX(0, hoffset);
 
-	fill_rect(left_pos, top_pos, viewWidth, FONTH, &bgC);
+	fill_rect(left_pos, top_pos, (unsigned short int) viewWidth, FONTH, &bgC);
 
 	// Next comes the maths!
 	// Begin by sanitizing the input...
@@ -2366,13 +2366,17 @@ int
 	}
 
 	// We'll want half a cell of padding on each side...
-	unsigned short int fill_width = (unsigned short int) ((percentage / (float) 100U) * (viewWidth - FONTW));
-	unsigned short int fill_left = left_pos + (FONTW / 2U);
-	unsigned short int empty_width = (unsigned short int) (((100U - percentage) / (float) 100U) * (viewWidth - FONTW));
-	unsigned short int empty_left = fill_left + fill_width;
+	unsigned short int fill_width =
+	    (unsigned short int) ((float) (percentage / 100.0f) * (float) (viewWidth - FONTW));
+	unsigned short int fill_left = (unsigned short int) (left_pos + (FONTW / 2U));
+	unsigned short int empty_width =
+	    (unsigned short int) (((float) (100U - percentage) / 100.0f) * (float) (viewWidth - FONTW));
+	unsigned short int empty_left = (unsigned short int) (fill_left + fill_width);
 
 	// This is the easiest way to give us something that'll play nice both inverted, and on legacy devices...
-	FBInkColor emptyC = { eInkFGCMap[FG_GRAY7], eInkFGCMap[FG_GRAY7], eInkFGCMap[FG_GRAY7] };
+	FBInkColor emptyC = { fbink_config->is_inverted ? eInkBGCMap[BG_GRAY7] : eInkFGCMap[FG_GRAY7],
+			      emptyC.r,
+			      emptyC.r };
 
 	// Draw the fill bar...
 	fill_rect(fill_left, top_pos, fill_width, FONTH, &fgC);
