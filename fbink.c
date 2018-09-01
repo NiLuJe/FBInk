@@ -745,15 +745,16 @@ static struct mxcfb_rect
 				/* bit was set, pixel is fg! */                                                          \
 				pxC     = &fgC;                                                                          \
 				is_fgpx = true;                                                                          \
-				/* In overlay mode, we only print foreground pixels, and we invert the color */          \
-				/* if the underlying pixel is already in the foreground color... */                      \
+				/* In overlay mode, we only print foreground pixels, */                                  \
+				/* and we print in a color exactly the inverse of the underlying pixel's */              \
 				if (fbink_config->is_overlay) {                                                          \
 					coords.x = cx;                                                                   \
 					coords.y = cy;                                                                   \
 					get_pixel(&coords, &fbC);                                                        \
-					if (fbC.r == fgC.r && fbC.g == fgC.g && fbC.b == fgC.b) {                        \
-						pxC = &bgC;                                                              \
-					}                                                                                \
+					fbC.r ^= 0xFF;                                                                   \
+					fbC.g ^= 0xFF;                                                                   \
+					fbC.b ^= 0xFF;                                                                   \
+					pxC = &fbC;                                                                      \
 				}                                                                                        \
 			} else {                                                                                         \
 				/* bit was unset, pixel is bg */                                                         \
@@ -2431,7 +2432,8 @@ int
 	unsigned short int empty_left = (unsigned short int) (fill_left + fill_width);
 
 	// This is the easiest way to give us something that'll play nice both inverted, and on legacy devices...
-	FBInkColor emptyC = { fbink_config->is_inverted ? eInkBGCMap[BG_GRAY7] : eInkFGCMap[FG_GRAY7],
+	// FIXME: Check/fix on inverted devices...
+	FBInkColor emptyC = { fbink_config->is_inverted ? eInkFGCMap[BG_GRAYC] : eInkBGCMap[BG_GRAYC],
 			      emptyC.r,
 			      emptyC.r };
 
