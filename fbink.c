@@ -2444,11 +2444,16 @@ int
 	    (unsigned short int) (((float) (100U - percentage) / 100.0f) * (float) (viewWidth - FONTW));
 	unsigned short int empty_left = (unsigned short int) (fill_left + fill_width);
 
-	// This is the easiest way to give us something that'll play nice both inverted, and on legacy devices...
-	// FIXME: Check/fix on inverted devices...
+	// NOTE: We always use the same BG_ constant in order to get a rough inverse by just swapping to the inverted LUT ;).
 	FBInkColor emptyC = { fbink_config.is_inverted ? eInkFGCMap[BG_GRAYB] : eInkBGCMap[BG_GRAYB],
 			      emptyC.r,
 			      emptyC.r };
+	// Handle devices with an inverted palette properly...
+	if (deviceQuirks.isKindleLegacy) {
+		emptyC.r = fbink_config.is_inverted ? eInkBGCMap[BG_GRAYB] : eInkFGCMap[BG_GRAYB];
+		emptyC.g = emptyC.r;
+		emptyC.b = emptyC.r;
+	}
 
 	// Draw the fill bar...
 	fill_rect(fill_left, top_pos, fill_width, FONTH, &fgC);
