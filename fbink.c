@@ -687,7 +687,7 @@ static struct mxcfb_rect
 	FBInkCoordinates   coords = { 0U };
 	FBInkColor*        pxC;
 	// That's only used in overlay mode...
-	FBInkColor fbC     = { 0 };
+	FBInkColor fbC     = { 0U };
 	bool       is_fgpx = false;
 	// NOTE: We don't do much sanity checking on hoffset/voffset,
 	//       because we want to allow pushing part of the string off-screen
