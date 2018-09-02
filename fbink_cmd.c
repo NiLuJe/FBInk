@@ -381,6 +381,10 @@ int
 				break;
 			case 'g':
 				subopts = optarg;
+				// NOTE: I'm not terribly fond of getsubopt in general, especially here with the comma limitation
+				//       for filenames, but it does make sense to keep image-specific options separate...
+				//       The same argument could be made against moving x_off/y_off to hoffset/voffset now
+				//       that we have those in FBInkConfig... (Plus, getting rid of that would break ABI compat).
 				while (*subopts != '\0' && !errfnd) {
 					switch (getsubopt(&subopts, image_token, &value)) {
 						case FILE_OPT:
