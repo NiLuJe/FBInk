@@ -111,7 +111,7 @@ static void
 	    "\t-s, --refresh top=NUM,left=NUM,width=NUM,height=NUM,wfm=NAME\n"
 	    "\n"
 	    "EXAMPLES:\n"
-	    "\tfbink -s top=20,left=10,width=500,heigh=600,wfm=GC16\n"
+	    "\tfbink -s top=20,left=10,width=500,height=600,wfm=GC16\n"
 	    "\t\tRefreshes a 500x600 rectangle with its top-left corner at coordinates (10, 20) with a GC16 waveform mode.\n"
 	    "\n"
 	    "NOTES:\n"
