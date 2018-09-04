@@ -764,8 +764,14 @@ static struct mxcfb_rect
 						if (is_fgpx) {                                                           \
 							get_pixel(&coords, &fbC);                                        \
 							fbC.r ^= 0xFF;                                                   \
-							fbC.g ^= 0xFF;                                                   \
-							fbC.b ^= 0xFF;                                                   \
+							/* NOTE: Don't touch g & b if it's not needed! */                \
+							/*       It's especially important on 4bpp, */                   \
+							/*       to avoid clobbering the low nibble, */                  \
+							/*       which we store in b... */                               \
+							if (vInfo.bits_per_pixel > 8U) {                                 \
+								fbC.g ^= 0xFF;                                           \
+								fbC.b ^= 0xFF;                                           \
+							}                                                                \
 							pxC = &fbC;                                                      \
 							put_pixel(&coords, pxC);                                         \
 						}                                                                        \
