@@ -617,26 +617,30 @@ static struct mxcfb_rect
 	// NOTE: Do it also when we're a left-aligned uncentered multiline string, no matter the length of the line,
 	//       so the final line matches the previous ones, which fell under the charcount == MAXCOLS case,
 	//       while the final one would not if it doesn't fill the line, too ;).
-	if ((charcount == MAXCOLS || (col == 0 && !fbink_config->is_centered && multiline_offset > 0U)) &&
-	    pixel_offset > 0U) {
-		LOG("Painting a background rectangle on the left edge on account of pixel_offset");
-		// Make sure we don't leave a hoffset sized gap when we have a positive hoffset...
-		fill_rect(hoffset > 0 ? (unsigned short int) hoffset : 0U,
-			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
-			  pixel_offset,    // Don't append hoffset here, to make it clear stuff moved to the right.
-			  FONTH,
-			  &bgC);
-		// Correct width, to include that bit of content, too, if needed
-		if (region.width < viewWidth) {
-			region.width += pixel_offset;
-			// And make sure it's properly clamped, because we can't necessarily rely on left & width
-			// being entirely acurate either because of the multiline print override,
-			// or because of a bit of subcell placement overshoot trickery (c.f., comment in put_pixel).
-			if (region.width + region.left > viewWidth) {
-				region.width = viewWidth - region.left;
-				LOG("Clamped region.width to %u", region.width);
-			} else {
-				LOG("Updated region.width to %u", region.width);
+	// NOTE: In overlay mode, we don't paint background pixels. This is pure background, so skip it ;).
+	if (!fbink_config->is_overlay) {
+		if ((charcount == MAXCOLS || (col == 0 && !fbink_config->is_centered && multiline_offset > 0U)) &&
+		    pixel_offset > 0U) {
+			LOG("Painting a background rectangle on the left edge on account of pixel_offset");
+			// Make sure we don't leave a hoffset sized gap when we have a positive hoffset...
+			fill_rect(
+			    hoffset > 0 ? (unsigned short int) hoffset : 0U,
+			    (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
+			    pixel_offset,    // Don't append hoffset here, to make it clear stuff moved to the right.
+			    FONTH,
+			    &bgC);
+			// Correct width, to include that bit of content, too, if needed
+			if (region.width < viewWidth) {
+				region.width += pixel_offset;
+				// And make sure it's properly clamped, because we can't necessarily rely on left & width
+				// being entirely acurate either because of the multiline print override,
+				// or because of a bit of subcell placement overshoot trickery (c.f., comment in put_pixel).
+				if (region.width + region.left > viewWidth) {
+					region.width = viewWidth - region.left;
+					LOG("Clamped region.width to %u", region.width);
+				} else {
+					LOG("Updated region.width to %u", region.width);
+				}
 			}
 		}
 	}
@@ -644,27 +648,31 @@ static struct mxcfb_rect
 	// NOTE: In some cases, we also have a matching hole to patch on the right side...
 	//       This only applies when pixel_offset *only* accounts for the !isPerfectFit adjustment though,
 	//       because in every other case, the halfcell offset handling neatly pushes everything into place ;).
-	if (charcount == MAXCOLS && !deviceQuirks.isPerfectFit && !halfcell_offset) {
-		// NOTE: !isPerfectFit ensures pixel_offset is non-zero
-		LOG("Painting a background rectangle to fill the dead space on the right edge");
-		// Make sure we don't leave a hoffset sized gap when we have a negative hoffset...
-		fill_rect(hoffset < 0
-			      ? (unsigned short int) (viewWidth - pixel_offset - (unsigned short int) abs(hoffset))
-			      : (unsigned short int) (viewWidth - pixel_offset),
-			  (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
-			  pixel_offset,    // Don't append abs(hoffset) here, to make it clear stuff moved to the left.
-			  FONTH,
-			  &bgC);
-		// If it's not already the case, update region to the full width,
-		// because we've just plugged a hole at the very right edge of a full line.
-		if (region.width < viewWidth) {
-			region.width = viewWidth;
-			// Keep making sure it's properly clamped, interaction w/ hoffset can push us over the edge.
-			if (region.width + region.left > viewWidth) {
-				region.width = viewWidth - region.left;
-				LOG("Clamped region.width to %u", region.width);
-			} else {
-				LOG("Updated region.width to %u", region.width);
+	// NOTE: Again, skip this in overlay mode ;).
+	if (!fbink_config->is_overlay) {
+		if (charcount == MAXCOLS && !deviceQuirks.isPerfectFit && !halfcell_offset) {
+			// NOTE: !isPerfectFit ensures pixel_offset is non-zero
+			LOG("Painting a background rectangle to fill the dead space on the right edge");
+			// Make sure we don't leave a hoffset sized gap when we have a negative hoffset...
+			fill_rect(
+			    hoffset < 0
+				? (unsigned short int) (viewWidth - pixel_offset - (unsigned short int) abs(hoffset))
+				: (unsigned short int) (viewWidth - pixel_offset),
+			    (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
+			    pixel_offset,    // Don't append abs(hoffset) here, to make it clear stuff moved to the left.
+			    FONTH,
+			    &bgC);
+			// If it's not already the case, update region to the full width,
+			// because we've just plugged a hole at the very right edge of a full line.
+			if (region.width < viewWidth) {
+				region.width = viewWidth;
+				// Keep making sure it's properly clamped, interaction w/ hoffset can push us over the edge.
+				if (region.width + region.left > viewWidth) {
+					region.width = viewWidth - region.left;
+					LOG("Clamped region.width to %u", region.width);
+				} else {
+					LOG("Updated region.width to %u", region.width);
+				}
 			}
 		}
 	}
