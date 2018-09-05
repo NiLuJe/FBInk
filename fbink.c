@@ -617,8 +617,8 @@ static struct mxcfb_rect
 	// NOTE: Do it also when we're a left-aligned uncentered multiline string, no matter the length of the line,
 	//       so the final line matches the previous ones, which fell under the charcount == MAXCOLS case,
 	//       while the final one would not if it doesn't fill the line, too ;).
-	// NOTE: In overlay mode, we don't paint background pixels. This is pure background, so skip it ;).
-	if (!fbink_config->is_overlay) {
+	// NOTE: In overlay or bgless mode, we don't paint background pixels. This is pure background, so skip it ;).
+	if (!fbink_config->is_overlay && !fbink_config->is_bgless) {
 		if ((charcount == MAXCOLS || (col == 0 && !fbink_config->is_centered && multiline_offset > 0U)) &&
 		    pixel_offset > 0U) {
 			LOG("Painting a background rectangle on the left edge on account of pixel_offset");
@@ -648,8 +648,8 @@ static struct mxcfb_rect
 	// NOTE: In some cases, we also have a matching hole to patch on the right side...
 	//       This only applies when pixel_offset *only* accounts for the !isPerfectFit adjustment though,
 	//       because in every other case, the halfcell offset handling neatly pushes everything into place ;).
-	// NOTE: Again, skip this in overlay mode ;).
-	if (!fbink_config->is_overlay) {
+	// NOTE: Again, skip this in overlay/bgless mode ;).
+	if (!fbink_config->is_overlay && !fbink_config->is_bgless) {
 		if (charcount == MAXCOLS && !deviceQuirks.isPerfectFit && !halfcell_offset) {
 			// NOTE: !isPerfectFit ensures pixel_offset is non-zero
 			LOG("Painting a background rectangle to fill the dead space on the right edge");
@@ -763,24 +763,26 @@ static struct mxcfb_rect
 				for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {                                           \
 					coords.x = (unsigned short int) (cx + k);                                        \
 					coords.y = (unsigned short int) (cy + l);                                        \
-					if (!fbink_config->is_overlay) {                                                 \
+					if (!fbink_config->is_overlay && !fbink_config->is_bgless) {                     \
 						put_pixel(&coords, pxC);                                                 \
 					} else {                                                                         \
 						/* In overlay mode, we only print foreground pixels, */                  \
 						/* and we print in the inverse color of the underlying pixel's */        \
 						/* Obviously, the closer we get to GRAY7, the less contrast we get */    \
 						if (is_fgpx) {                                                           \
-							get_pixel(&coords, &fbC);                                        \
-							fbC.r ^= 0xFF;                                                   \
-							/* NOTE: Don't touch g & b if it's not needed! */                \
-							/*       It's especially important on 4bpp, */                   \
-							/*       to avoid clobbering the low nibble, */                  \
-							/*       which we store in b... */                               \
-							if (vInfo.bits_per_pixel > 8U) {                                 \
-								fbC.g ^= 0xFF;                                           \
-								fbC.b ^= 0xFF;                                           \
+							if (fbink_config->is_overlay) {                                  \
+								get_pixel(&coords, &fbC);                                \
+								fbC.r ^= 0xFF;                                           \
+								/* NOTE: Don't touch g & b if it's not needed! */        \
+								/*       It's especially important on 4bpp, */           \
+								/*       to avoid clobbering the low nibble, */          \
+								/*       which we store in b... */                       \
+								if (vInfo.bits_per_pixel > 8U) {                         \
+									fbC.g ^= 0xFF;                                   \
+									fbC.b ^= 0xFF;                                   \
+								}                                                        \
+								pxC = &fbC;                                              \
 							}                                                                \
-							pxC = &fbC;                                                      \
 							put_pixel(&coords, pxC);                                         \
 						}                                                                        \
 					}                                                                                \
@@ -2375,6 +2377,7 @@ int
 	FBInkConfig fbink_config = *caller_fbink_config;
 	// Namely, we need overlay mode to properly print the percentage text,
 	fbink_config.is_overlay = true;
+	fbink_config.is_bgless  = false;
 	// and no hoffset, because it makes no sense for a full-width bar,
 	// and we don't want the text to be affected by a stray value...
 	fbink_config.hoffset = 0;
