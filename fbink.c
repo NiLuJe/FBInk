@@ -2377,7 +2377,6 @@ int
 	FBInkConfig fbink_config = *caller_fbink_config;
 	// Namely, we need overlay mode to properly print the percentage text,
 	fbink_config.is_overlay = true;
-	fbink_config.is_bgless  = false;
 	// and no hoffset, because it makes no sense for a full-width bar,
 	// and we don't want the text to be affected by a stray value...
 	fbink_config.hoffset = 0;
@@ -2441,12 +2440,14 @@ int
 		halfcell_offset = true;
 	}
 
-	// We'll begin by painting a blank canvas, just to make sure everything's clean behind us.
+	// We'll begin by painting a blank canvas, just to make sure everything's clean behind us...
 	unsigned short int top_pos  = (unsigned short int) MAX(0, ((fbink_config.row * FONTH) + fbink_config.voffset));
 	unsigned short int left_pos = 0U;
 
-	// NOTE: I'm not actually sure I like this in every instance...
-	fill_rect(left_pos, top_pos, (unsigned short int) viewWidth, FONTH, &bgC);
+	// ... unless we were asked to skip background pixels... ;).
+	if (!fbink_config.is_bgless) {
+		fill_rect(left_pos, top_pos, (unsigned short int) viewWidth, FONTH, &bgC);
+	}
 
 	// Next comes the maths!
 	// Begin by sanitizing the input...
