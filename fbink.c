@@ -1744,6 +1744,11 @@ void
 static int
     memmap_fb(int fbfd)
 {
+	// NOTE: Beware of smem_len on Kobos?
+	//       c.f., https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer_linux.lua#L36
+	//       TL;DR: On 16bpp fbs, it *might* be a bit larger than strictly necessary,
+	//              but I've yet to see that be an issue with what I'm doing,
+	//              and trusting it is much simpler than trying to outsmart broken fb setup info...
 	fbPtr = (unsigned char*) mmap(NULL, fInfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
 	if (fbPtr == MAP_FAILED) {
 		char  buf[256];
@@ -1841,8 +1846,6 @@ int
 	char* line = NULL;
 
 	// map fb to user mem
-	// NOTE: Beware of smem_len on Kobos?
-	//       c.f., https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer_linux.lua#L36
 	// NOTE: If we're keeping the fb's fd open, keep this mmap around, too.
 	if (!isFbMapped) {
 		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
