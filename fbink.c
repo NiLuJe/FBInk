@@ -694,7 +694,6 @@ static struct mxcfb_rect
 	uint32_t           ch     = 0U;
 	FBInkCoordinates   coords = { 0U };
 	FBInkColor*        pxC;
-	// That's only used in overlay mode...
 	FBInkColor fbC     = { 0U };
 	bool       is_fgpx = false;
 	// NOTE: We don't do much sanity checking on hoffset/voffset,
@@ -739,33 +738,61 @@ static struct mxcfb_rect
 #define RENDER_GLYPH()                                                                                                   \
 	/* NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution), */                   \
 	/*       and from there compute the extra pixels for that single input pixel given our scaling factor... */      \
-	for (uint8_t y = 0U; y < glyphHeight; y++) {                                                                     \
-		/* y: input row, j: first output row after scaling */                                                    \
-		j = (unsigned short int) (y * FONTSIZE_MULT);                                                            \
-		for (uint8_t x = 0U; x < glyphWidth; x++) {                                                              \
-			/* x: input column, i: first output column after scaling */                                      \
-			i = (unsigned short int) (x * FONTSIZE_MULT);                                                    \
-			/* Each element encodes a full row, we access a column's bit in that row by shifting. */         \
-			if (bitmap[y] & 1U << x) {                                                                       \
-				/* bit was set, pixel is fg! */                                                          \
-				pxC     = &fgC;                                                                          \
-				is_fgpx = true;                                                                          \
-			} else {                                                                                         \
-				/* bit was unset, pixel is bg */                                                         \
-				pxC     = &bgC;                                                                          \
-				is_fgpx = false;                                                                         \
-			}                                                                                                \
-			/* Initial coordinates, before we generate the extra pixels from the scaling factor */           \
-			cx = (unsigned short int) (x_offs + i);                                                          \
-			cy = (unsigned short int) (y_offs + j);                                                          \
-			/* NOTE: Apply our scaling factor in both dimensions! */                                         \
-			for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {                                                   \
-				for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {                                           \
-					coords.x = (unsigned short int) (cx + k);                                        \
-					coords.y = (unsigned short int) (cy + l);                                        \
-					if (!fbink_config->is_overlay && !fbink_config->is_bgless) {                     \
+	if (!fbink_config->is_overlay && !fbink_config->is_bgless) {                                                     \
+		for (uint8_t y = 0U; y < glyphHeight; y++) {                                                             \
+			/* y: input row, j: first output row after scaling */                                            \
+			j = (unsigned short int) (y * FONTSIZE_MULT);                                                    \
+			for (uint8_t x = 0U; x < glyphWidth; x++) {                                                      \
+				/* x: input column, i: first output column after scaling */                              \
+				i = (unsigned short int) (x * FONTSIZE_MULT);                                            \
+				/* Each element encodes a full row, we access a column's bit in that row by shifting. */ \
+				if (bitmap[y] & 1U << x) {                                                               \
+					/* bit was set, pixel is fg! */                                                  \
+					pxC = &fgC;                                                                      \
+				} else {                                                                                 \
+					/* bit was unset, pixel is bg */                                                 \
+					pxC = &bgC;                                                                      \
+				}                                                                                        \
+				/* Initial coordinates, before we generate the extra pixels from the scaling factor */   \
+				cx = (unsigned short int) (x_offs + i);                                                  \
+				cy = (unsigned short int) (y_offs + j);                                                  \
+				/* NOTE: Apply our scaling factor in both dimensions! */                                 \
+				for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {                                           \
+					for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {                                   \
+						coords.x = (unsigned short int) (cx + k);                                \
+						coords.y = (unsigned short int) (cy + l);                                \
 						put_pixel(&coords, pxC);                                                 \
-					} else {                                                                         \
+					}                                                                                \
+				}                                                                                        \
+			}                                                                                                \
+		}                                                                                                        \
+	} else {                                                                                                         \
+		FBInkColor fbC     = { 0U };                                                                             \
+		bool       is_fgpx = false;                                                                              \
+		for (uint8_t y = 0U; y < glyphHeight; y++) {                                                             \
+			/* y: input row, j: first output row after scaling */                                            \
+			j = (unsigned short int) (y * FONTSIZE_MULT);                                                    \
+			for (uint8_t x = 0U; x < glyphWidth; x++) {                                                      \
+				/* x: input column, i: first output column after scaling */                              \
+				i = (unsigned short int) (x * FONTSIZE_MULT);                                            \
+				/* Each element encodes a full row, we access a column's bit in that row by shifting. */ \
+				if (bitmap[y] & 1U << x) {                                                               \
+					/* bit was set, pixel is fg! */                                                  \
+					pxC     = &fgC;                                                                  \
+					is_fgpx = true;                                                                  \
+				} else {                                                                                 \
+					/* bit was unset, pixel is bg */                                                 \
+					pxC     = &bgC;                                                                  \
+					is_fgpx = false;                                                                 \
+				}                                                                                        \
+				/* Initial coordinates, before we generate the extra pixels from the scaling factor */   \
+				cx = (unsigned short int) (x_offs + i);                                                  \
+				cy = (unsigned short int) (y_offs + j);                                                  \
+				/* NOTE: Apply our scaling factor in both dimensions! */                                 \
+				for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {                                           \
+					for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {                                   \
+						coords.x = (unsigned short int) (cx + k);                                \
+						coords.y = (unsigned short int) (cy + l);                                \
 						/* In overlay mode, we only print foreground pixels, */                  \
 						/* and we print in the inverse color of the underlying pixel's */        \
 						/* Obviously, the closer we get to GRAY7, the less contrast we get */    \
@@ -790,6 +817,7 @@ static struct mxcfb_rect
 			}                                                                                                \
 		}                                                                                                        \
 	}
+
 			RENDER_GLYPH();
 			// NOTE: If we did not mirror the bitmasks during conversion,
 			//       another approach to the fact that Unifont's hex format encodes columns in the reverse order
