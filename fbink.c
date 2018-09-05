@@ -694,8 +694,6 @@ static struct mxcfb_rect
 	uint32_t           ch     = 0U;
 	FBInkCoordinates   coords = { 0U };
 	FBInkColor*        pxC;
-	FBInkColor fbC     = { 0U };
-	bool       is_fgpx = false;
 	// NOTE: We don't do much sanity checking on hoffset/voffset,
 	//       because we want to allow pushing part of the string off-screen
 	//       (we basically only make sure it won't screw up the region rectangle too badly).
