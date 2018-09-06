@@ -415,6 +415,9 @@ static void
 		// NOTE: The ioctl only does white, though, and it has a tendency to enforce a flash,
 		//       which would cause a double refresh if we were to print a rectangle in another color right after...
 		//       So, basically, only use the ioctl when we request a FLASHING clear to WHITE...
+		//       This still enforces an explicit flash that's lengthier than what we usually get,
+		//       not that that's a great comparison, since we hardly ever manage to coax a *real* full flash
+		//       out of einkfb... This appears to do it (i.e., ~800ms)!
 		// NOTE: We're on inverted palette devices, hence the use of the "wrong" LUT...
 		if (is_flashing && v == eInkFGCMap[BG_WHITE]) {
 			if (ioctl(fbfd, FBIO_EINK_CLEAR_SCREEN, EINK_CLEAR_SCREEN) < 0) {
