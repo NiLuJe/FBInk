@@ -410,22 +410,22 @@ static void
     clear_screen(int fbfd UNUSED_BY_NOTKINDLE, uint8_t v, bool is_flashing UNUSED_BY_NOTKINDLE)
 {
 #ifdef FBINK_FOR_KINDLE
-	// NOTE: einkfb has a dedicated ioctl, so, use that ;).
+	// NOTE: einkfb has a dedicated ioctl, so, use that, when it's not doing more harm than good...
 	if (deviceQuirks.isKindleLegacy) {
-		// It also has a tendency to enforce a flash, so only do it if the user explicitly requested a flash...
-		if (is_flashing) {
+		// NOTE: The ioctl only does white, though, and it has a tendency to enforce a flash,
+		//       which would cause a double refresh if we were to print a rectangle in another color right after...
+		//       So, basically, only use the ioctl when we request a FLASHING clear to WHITE...
+		// NOTE: We're on inverted palette devices, hence the use of the "wrong" LUT...
+		if (is_flashing && v == eInkFGCMap[BG_WHITE]) {
 			if (ioctl(fbfd, FBIO_EINK_CLEAR_SCREEN, EINK_CLEAR_SCREEN) < 0) {
 				// NOTE: perror() is not thread-safe...
 				char  buf[256];
 				char* errstr = strerror_r(errno, buf, sizeof(buf));
 				fprintf(stderr, "[FBInk] FBIO_EINK_CLEAR_SCREEN: %s\n", errstr);
 			}
-			// The ioctl only does white, though, so if we asked for a clear in a different color, do both!
-			// NOTE: We're on inverted palette devices, hence the use of the "wrong" LUT...
-			if (v == eInkFGCMap[BG_WHITE]) {
-				LOG("Requested a flashing WHITE clear, only doing an FBIO_EINK_CLEAR_SCREEN to save some time!");
-				return;
-			}
+
+			LOG("Requested a flashing WHITE clear, only doing an FBIO_EINK_CLEAR_SCREEN to save some time!");
+			return;
 		}
 		// NOTE: And because we can't have nice things, the einkfb driver has a stupid "optimization",
 		//       where it discards redundant FBIO_EINK_UPDATE_DISPLAY* calls if the buffer content hasn't changed...
