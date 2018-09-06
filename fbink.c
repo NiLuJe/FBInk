@@ -407,22 +407,25 @@ static void
 
 // Helper function to clear the screen - fill whole screen with given color
 static void
-    clear_screen(int fbfd UNUSED_BY_NOTKINDLE, uint8_t v)
+    clear_screen(int fbfd UNUSED_BY_NOTKINDLE, uint8_t v, bool is_flashing UNUSED_BY_NOTKINDLE)
 {
 #ifdef FBINK_FOR_KINDLE
 	// NOTE: einkfb has a dedicated ioctl, so, use that ;).
 	if (deviceQuirks.isKindleLegacy) {
-		if (ioctl(fbfd, FBIO_EINK_CLEAR_SCREEN, EINK_CLEAR_SCREEN) < 0) {
-			// NOTE: perror() is not thread-safe...
-			char  buf[256];
-			char* errstr = strerror_r(errno, buf, sizeof(buf));
-			fprintf(stderr, "[FBInk] FBIO_EINK_CLEAR_SCREEN: %s\n", errstr);
-		}
-		// The ioctl only does white, though, so if we asked for a clear in a different color, do both!
-		// NOTE: We're on inverted palette devices, hence the use of the "wrong" LUT...
-		if (v == eInkFGCMap[BG_WHITE]) {
-			LOG("Requested a WHITE clear, only doing an FBIO_EINK_CLEAR_SCREEN to save some time!");
-			return;
+		// It also has a tendency to enforce a flash, so only do it if the user explicitly requested a flash...
+		if (is_flashing) {
+			if (ioctl(fbfd, FBIO_EINK_CLEAR_SCREEN, EINK_CLEAR_SCREEN) < 0) {
+				// NOTE: perror() is not thread-safe...
+				char  buf[256];
+				char* errstr = strerror_r(errno, buf, sizeof(buf));
+				fprintf(stderr, "[FBInk] FBIO_EINK_CLEAR_SCREEN: %s\n", errstr);
+			}
+			// The ioctl only does white, though, so if we asked for a clear in a different color, do both!
+			// NOTE: We're on inverted palette devices, hence the use of the "wrong" LUT...
+			if (v == eInkFGCMap[BG_WHITE]) {
+				LOG("Requested a flashing WHITE clear, only doing an FBIO_EINK_CLEAR_SCREEN to save some time!");
+				return;
+			}
 		}
 		// NOTE: And because we can't have nice things, the einkfb driver has a stupid "optimization",
 		//       where it discards redundant FBIO_EINK_UPDATE_DISPLAY* calls if the buffer content hasn't changed...
@@ -1928,7 +1931,7 @@ int
 
 	// Clear screen?
 	if (fbink_config->is_cleared) {
-		clear_screen(fbfd, fbink_config->is_inverted ? penFGColor : penBGColor);
+		clear_screen(fbfd, fbink_config->is_inverted ? penFGColor : penBGColor, fbink_config->is_flashing);
 	}
 
 	// See if want to position our text relative to the edge of the screen, and not the beginning
@@ -2438,7 +2441,7 @@ int
 
 	// Clear screen?
 	if (fbink_config.is_cleared) {
-		clear_screen(fbfd, fbink_config.is_inverted ? penFGColor : penBGColor);
+		clear_screen(fbfd, fbink_config.is_inverted ? penFGColor : penBGColor, fbink_config.is_flashing);
 	}
 
 	// Let's go! Start by pilfering some computations from draw...
@@ -2621,7 +2624,7 @@ int
 
 	// Clear screen?
 	if (fbink_config->is_cleared) {
-		clear_screen(fbfd, fbink_config->is_inverted ? penFGColor : penBGColor);
+		clear_screen(fbfd, fbink_config->is_inverted ? penFGColor : penBGColor, fbink_config->is_flashing);
 	}
 
 	// NOTE: We compute initial offsets from row/col, to help aligning images with text.
