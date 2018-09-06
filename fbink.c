@@ -425,6 +425,7 @@ static void
 				char  buf[256];
 				char* errstr = strerror_r(errno, buf, sizeof(buf));
 				fprintf(stderr, "[FBInk] FBIO_EINK_CLEAR_SCREEN: %s\n", errstr);
+				// Just warn, this is non-fatal ;).
 			}
 
 			LOG("Requested a flashing WHITE clear, only doing an FBIO_EINK_CLEAR_SCREEN to save some time!");
