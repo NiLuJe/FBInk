@@ -433,11 +433,11 @@ static void
 		}
 		// NOTE: And because we can't have nice things, the einkfb driver has a stupid "optimization",
 		//       where it discards redundant FBIO_EINK_UPDATE_DISPLAY* calls if the buffer content hasn't changed...
-		//       And of course, for mysterious reasons, it doesn't detect what memset does as having modified the buffer.
-		//       Explicitly draw a full-screen rectangle instead, because that works...
-		FBInkColor bgC = { v, v, v };
-		fill_rect(0, 0, (unsigned short int) viewWidth, (unsigned short int) viewHeight, &bgC);
-		// And get out now, we don't want to pile a memset on top of that ;).
+		//       If we memset the full smem_len, that trips this check, because we probably overwrite both buffers...
+		//       Do a slightly more targeted memset instead (line_length * yres_virtual),
+		//       which should cover the active & visible buffer only...
+		memset(fbPtr, v, fInfo.line_length * vInfo.yres_virtual);
+		// And get out now, we don't want to pile another full memset on top of that ;).
 		return;
 	}
 #endif
