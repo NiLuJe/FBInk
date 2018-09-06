@@ -170,6 +170,11 @@
 #else
 #	define UNUSED_BY_NOBUTTON
 #endif
+#ifndef FBINK_FOR_KINDLE
+#	define UNUSED_BY_NOTKINDLE __attribute__((unused))
+#else
+#	define UNUSED_BY_NOTKINDLE
+#endif
 
 // Handle what we send to stdout (i.e., mostly diagnostic stuff)
 #define LOG(fmt, ...)                                                                                                    \
@@ -265,7 +270,7 @@ static void get_pixel(FBInkCoordinates*, FBInkColor*);
 #endif
 
 static void fill_rect(unsigned short int, unsigned short int, unsigned short int, unsigned short int, FBInkColor*);
-static void clear_screen(uint8_t);
+static void clear_screen(int UNUSED_BY_NOTKINDLE, uint8_t);
 
 static const unsigned char* font8x8_get_bitmap(uint32_t);
 
