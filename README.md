@@ -12,7 +12,7 @@ It's especially cruel when moving to a Kobo, after being used to the ubiquity of
 In short, it prints messages or images on your screen, handling the low-level tinkering with both the Linux framebuffer interface, and the i.MX EPD driver.
 It's been tested on Kobos and Kindles, but porting it to other Linux, i.MX eInk devices should be trivial (hell, even Sipix support shouldn't be too hard).
 
-It also happens to work perfectly fine on *any* kind of Linux framebuffer device, and supports a wide range of bitdepth (4bpp, 8bpp, 16bpp, 24bpp & 32bpp),
+It also happens to work perfectly fine on *any* kind of Linux framebuffer device, and supports a wide range of bitdepths (4bpp, 8bpp, 16bpp, 24bpp & 32bpp),
 so you could use this to draw on your EFI fb, for instance ;).
 
 # How do I install this?
