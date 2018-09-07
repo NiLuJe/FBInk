@@ -945,7 +945,7 @@ static struct mxcfb_rect
 static long int
     jiffies_to_ms(long int jiffies)
 {
-	// We need the Kernel's HZ value for this, which we stored in USER_HZ during fbink_init ;).
+	// We need the Kernel's clock tick frequency for this, which we stored in USER_HZ during fbink_init ;).
 	return (jiffies * 1000 / USER_HZ);
 }
 
@@ -1710,15 +1710,15 @@ int
 #	endif
 #endif
 
-		// Ask the Kernel for its HZ value so we can translate jiffies into human-readable units.
+		// Ask the system for its clock tick frequency so we can translate jiffies into human-readable units.
 		// NOTE: This will most likely be 100, even if CONFIG_HZ is > 100
 		//       c.f., sysconf(3)
 		long int rc = sysconf(_SC_CLK_TCK);
 		if (rc > 0) {
 			USER_HZ = rc;
-			ELOG("[FBInk] Kernel's HZ value appears to be %ld", USER_HZ);
+			ELOG("[FBInk] Clock tick frequency appears to be %ld", USER_HZ);
 		} else {
-			ELOG("[FBInk] Unable to query Kernel's HZ value, assuming %ld", USER_HZ);
+			ELOG("[FBInk] Unable to query clock tick frequency, assuming %ld", USER_HZ);
 		}
 
 		// And make sure we won't do that again ;).
