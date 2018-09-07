@@ -2542,16 +2542,24 @@ int
 	borderC.b = borderC.r;
 
 	// Draw the border...
-	fill_rect(fill_left, top_pos, fill_width + empty_width, FONTH, &borderC);
+	fill_rect(fill_left, top_pos, (unsigned short int) (fill_width + empty_width), FONTH, &borderC);
 	// Draw the fill bar, which we want to override the border with!
 	fill_rect(fill_left, top_pos, fill_width, FONTH, &fgC);
 	// And the empty bar...
 	// NOTE: With a minor tweak to keep a double-width border on the bottom & right sides ;).
-	if (percentage == 0) {
+	if (percentage == 0U) {
 		// Keep the left border alone!
-		fill_rect(empty_left + 1U, top_pos + 1U, MAX(0, empty_width - 3), FONTH - 3U, &emptyC);
+		fill_rect((unsigned short int) (empty_left + 1U),
+			  (unsigned short int) (top_pos + 1U),
+			  (unsigned short int) MAX(0, empty_width - 3),
+			  (unsigned short int) (FONTH - 3U),
+			  &emptyC);
 	} else {
-		fill_rect(empty_left, top_pos + 1U, MAX(0, empty_width - 2), FONTH - 3U, &emptyC);
+		fill_rect(empty_left,
+			  (unsigned short int) (top_pos + 1U),
+			  (unsigned short int) MAX(0, empty_width - 2),
+			  (unsigned short int) (FONTH - 3U),
+			  &emptyC);
 	}
 
 	// Start setting up the screen refresh...
