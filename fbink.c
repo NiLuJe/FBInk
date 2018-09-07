@@ -1716,9 +1716,9 @@ int
 		long int rc = sysconf(_SC_CLK_TCK);
 		if (rc > 0) {
 			USER_HZ = rc;
-			ELOG("[FBInk] Clock tick frequency appears to be %ld", USER_HZ);
+			ELOG("[FBInk] Clock tick frequency appears to be %ld Hz", USER_HZ);
 		} else {
-			ELOG("[FBInk] Unable to query clock tick frequency, assuming %ld", USER_HZ);
+			ELOG("[FBInk] Unable to query clock tick frequency, assuming %ld Hz", USER_HZ);
 		}
 
 		// And make sure we won't do that again ;).
