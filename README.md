@@ -22,7 +22,7 @@ It's purposefully lacking in detailed instructions, because the target audience 
 
 There's also a sister thread for Kindle devices [over here](https://www.mobileread.com/forums/showthread.php?t=299620) where, besides binaries, you'll also find examples of people doing crazy things with it ;).
 
-As an example of usage in the wild, see [KFMon](https://github.com/NiLuJe/kfmon), where I'm using it to provide visual feedback, or [kobo-rclone](https://github.com/shermp/kobo-rclone), where it's also used for screen scraping. We're also using it in [KOReader](https://github.com/koreader/koreader) to make the OTA update process more user-friendly.
+As an example of usage in the wild, see [KFMon](https://github.com/NiLuJe/kfmon), where I'm using it to provide visual feedback, or [kobo-rclone](https://github.com/shermp/kobo-rclone), where it's also used for screen scraping. We're also using it in [KOReader](https://github.com/koreader/koreader), to make the OTA update process more user-friendly.
 
 # How can I tinker with it?
 
@@ -48,6 +48,10 @@ And like this when displaying an image :).
 And with all the bells and whistles of working transparency, even on ancient hardware :).
 
 ![FBInk 1.2.5 on a Kindle 3](https://raw.githubusercontent.com/NiLuJe/FBInk/master/fbink_alpha.png)
+
+And with a few other fonts, as well as a progress bar...
+
+![FBInk 1.6.2 on a Kobo H2O](https://raw.githubusercontent.com/NiLuJe/FBInk/master/fbink_bars.png)
 
 # NOTES
 
