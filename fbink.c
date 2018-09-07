@@ -2603,6 +2603,10 @@ int
 	}
 
 	// And finally, refresh the screen
+	// NOTE: FWIW, using A2 basically ends up drawing the border black, and the empty white, which kinda works...
+	//       It has the added benefits of increasing the framerate limit after which the eInk controller risks getting
+	//       confused (unless is_flashing is enabled, since that'll block,
+	//       essentially throttling the bar to the screen's refresh rate).
 	if (refresh(fbfd, region, WAVEFORM_MODE_AUTO, fbink_config.is_flashing) != EXIT_SUCCESS) {
 		fprintf(stderr, "[FBInk] Failed to refresh the screen!\n");
 		rv = ERRCODE(EXIT_FAILURE);
