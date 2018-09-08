@@ -165,6 +165,10 @@ endif
 ifdef STANDALONE
 	EXTRA_LDFLAGS+=-Wl,-rpath=/usr/local/fbink/lib
 endif
+# NOTE: We're already doing that in KFMon, still not sure it's a great idea... :D
+ifndef LINUX
+	EXTRA_LDFLAGS+=-static-libgcc
+endif
 # NOTE: Don't use in production, this was to help wrap my head around fb rotation experiments...
 ifdef MATHS
 	EXTRA_CPPFLAGS+=-DFBINK_WITH_MATHS
