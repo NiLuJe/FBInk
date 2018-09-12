@@ -449,6 +449,11 @@ int
 				// Do we want to do the extra mile and wait for the end of a content import?
 				if (detect_import) {
 					// Right now, we're on the "USB Connected" screen, onboard *should* be unmounted...
+					// NOTE: Except that USB is terrible, so it takes quite a bit of time for things to settle down...
+					//       So, wait 10s and hope shit will have settled down by then...
+					LOG("Waiting 10s for USB to settle down . . .");
+					// NOTE: time_t is int64_t on Linux, so, long too ;).
+					nanosleep((const struct timespec[]){ { 10L, 0L } }, NULL);
 					if (is_onboard_mounted()) {
 						LOG("Err, we're supposed to be in USBMS mode, but onboard appears to still be mounted ?!");
 						// That won't do... abort!
