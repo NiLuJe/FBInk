@@ -46,8 +46,8 @@
 			write(ifd, &ev, sizeof(ev));                                                                     \
 		})
 
-static bool is_onboard_mounted(void);
-static bool wait_for_onboard(void);
+static bool is_onboard_state(bool);
+static bool wait_for_onboard_state(bool);
 static bool wait_for_background_color(uint8_t, unsigned short int, unsigned short int);
 static bool is_on_connected_screen(void);
 static bool is_on_home_screen(void);

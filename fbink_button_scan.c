@@ -22,9 +22,9 @@
 
 #ifdef FBINK_WITH_BUTTON_SCAN
 // Mountpoint monitoring helpers pilfered from KFMon ;).
-// Check that onboard is mounted (in the right place)...
+// Check that onboard is mounted or not (in the right place)...
 static bool
-    is_onboard_mounted(void)
+    is_onboard_state(bool mounted)
 {
 	// c.f., http://program-nix.blogspot.com/2008/08/c-language-check-filesystem-is-mounted.html
 	FILE*          mtab       = NULL;
@@ -43,15 +43,20 @@ static bool
 	}
 
 	if (!is_mounted) {
-		LOG("onboard is still unmounted . . .");
+		LOG("onboard is unmounted");
 	}
 
-	return is_mounted;
+	// Return the right thing depending on which state we want onboard to be...
+	if (mounted) {
+		return is_mounted;
+	} else {
+		return !is_mounted;
+	}
 }
 
 // Monitor mountpoint activity...
 static bool
-    wait_for_onboard(void)
+    wait_for_onboard_state(bool mounted)
 {
 	// c.f., https://stackoverflow.com/questions/5070801
 	int           mfd = open("/proc/mounts", O_RDONLY, 0);
@@ -65,9 +70,9 @@ static bool
 		if (pfd.revents & POLLERR) {
 			LOG("Mountpoints changed (iteration nr. %hhu)", changes++);
 
-			// Stop polling once we know onboard is available...
-			if (is_onboard_mounted()) {
-				LOG("Yay, onboard is available!");
+			// Stop polling once we know onboard is in the requested state...
+			if (is_onboard_state(mounted)) {
+				LOG("Good, onboard is finally %s!", mounted ? "mounted" : "unmounted");
 				break;
 			}
 		}
@@ -82,7 +87,7 @@ static bool
 	}
 
 	close(mfd);
-	// Onboard is finally available ;).
+	// Onboard is finally in the state we asked for ;).
 	return true;
 }
 
@@ -506,23 +511,21 @@ int
 		}
 	}
 
-	// FIXME: Wait for onboard to be *unmounted* instead of a hard sleep.
-	// Right now, we're espected to be on the "USB Connected" screen, so onboard *should* be unmounted...
-	// NOTE: Except that USB is terrible, so it takes quite a bit of time for things to settle down...
-	//       So, wait 10s and hope shit will have settled down by then...
-	LOG("Waiting 10s for USB to settle down . . .");
-	// NOTE: time_t is int64_t on Linux, so, long too ;).
-	nanosleep((const struct timespec[]){ { 10L, 0L } }, NULL);
-	if (is_onboard_mounted()) {
-		LOG("Err, we're supposed to be in USBMS mode, but onboard appears to still be mounted ?!");
-		// That won't do... abort!
-		fprintf(stderr, "[FBInk] Unexpected onboard mount status, can't detect content import!\n");
-		rv = ERRCODE(EXIT_FAILURE);
-		goto cleanup;
+	// NOTE: Since USB is terrible, it may take a bit for onboard to *actually* get unmounted...
+	bool mounted = true;
+	if (is_onboard_state(mounted)) {
+		LOG("We're entering USBMS mode, but onboard is still mounted, waiting for it not to be . . .");
+		if (!wait_for_onboard_state(!mounted)) {
+			// That won't do... abort!
+			fprintf(stderr,
+				"[FBInk] Failed to detect start of USBMS session, can't detect content import!\n");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
 	}
 
-	// Right, now that we've made sure of that, wait for onboard to come back up :)
-	if (!wait_for_onboard()) {
+	// Right, now that we've made sure that we're properly in USBMS, wait for onboard to come back up :)
+	if (!wait_for_onboard_state(mounted)) {
 		// That won't do... abort!
 		fprintf(stderr, "[FBInk] Failed to detect end of USBMS session, can't detect content import!\n");
 		rv = ERRCODE(EXIT_FAILURE);
