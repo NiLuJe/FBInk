@@ -456,7 +456,7 @@ int
 				// Do we want to go the extra mile and wait for the end of a full USBMS session,
 				// trying to detect content import in the process?
 				if (!nosleep && detect_import) {
-					rv = fbink_wait_for_nickel_ready();
+					rv = fbink_wait_for_usbms_processing();
 				}
 			}
 		}
@@ -485,7 +485,7 @@ cleanup:
 
 // Wait for the end of an USBMS session, trying to detect a successful content import in the process.
 int
-    fbink_wait_for_nickel_ready(void)
+    fbink_wait_for_usbms_processing(void)
 {
 #ifdef FBINK_WITH_BUTTON_SCAN
 	// Assume success, until shit happens ;)

@@ -280,7 +280,7 @@ FBINK_API int fbink_print_image(int                fbfd,
 //				only returning successfully at the end of Content import...
 //				NOTE: nosleep completely inhibits this codepath,
 //				since it relies extensively on blocking, polling & sleeping ;).
-//				NOTE: This basically calls fbink_wait_for_nickel_ready() after a successful button press ;).
+//				NOTE: This basically calls fbink_wait_for_usbms_processing() after a successful button press ;).
 FBINK_API int fbink_button_scan(int fbfd, bool press_button, bool nosleep, bool detect_import);
 
 // Wait for the end of a Kobo USBMS session, trying to detect a successful content import in the process.
@@ -290,7 +290,7 @@ FBINK_API int fbink_button_scan(int fbfd, bool press_button, bool nosleep, bool 
 //	-(EXIT_FAILURE)	when the expected chain of events fails to be detected properly
 //	-(ENODATA)	when there was no new content to import at the end of the USBMS session
 //	-(ETIME)	when we failed to detect the end of the import session itself, because it ran longer than 5 minutes.
-FBINK_API int fbink_wait_for_nickel_ready(void);
+FBINK_API int fbink_wait_for_usbms_processing(void);
 
 //
 // When you intend to keep the framebuffer fd open for the lifecycle of your program:
