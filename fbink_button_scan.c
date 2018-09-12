@@ -456,62 +456,7 @@ int
 				// Do we want to go the extra mile and wait for the end of a full USBMS session,
 				// trying to detect content import in the process?
 				if (!nosleep && detect_import) {
-					// Right now, we're on the "USB Connected" screen, onboard *should* be unmounted...
-					// NOTE: Except that USB is terrible,
-					//       so it takes quite a bit of time for things to settle down...
-					//       So, wait 10s and hope shit will have settled down by then...
-					LOG("Waiting 10s for USB to settle down . . .");
-					// NOTE: time_t is int64_t on Linux, so, long too ;).
-					nanosleep((const struct timespec[]){ { 10L, 0L } }, NULL);
-					if (is_onboard_mounted()) {
-						LOG("Err, we're supposed to be in USBMS mode, but onboard appears to still be mounted ?!");
-						// That won't do... abort!
-						fprintf(
-						    stderr,
-						    "[FBInk] Unexpected onboard mount status, can't detect content import!\n");
-						rv = ERRCODE(EXIT_FAILURE);
-						goto cleanup;
-					}
-
-					// Right, now that we've made sure of that, wait for onboard to come back up :)
-					if (!wait_for_onboard()) {
-						// That won't do... abort!
-						fprintf(
-						    stderr,
-						    "[FBInk] Failed to detect end of USBMS session, can't detect content import!\n");
-						rv = ERRCODE(EXIT_FAILURE);
-						goto cleanup;
-					}
-
-					// Now check that we're back on the Home screen...
-					if (!is_on_home_screen()) {
-						// That won't do... abort!
-						fprintf(
-						    stderr,
-						    "[FBInk] Failed to detect Home screen, can't detect content import!\n");
-						rv = ERRCODE(EXIT_FAILURE);
-						goto cleanup;
-					}
-
-					// Then wait a while to see if the Import screen pops up...
-					if (!is_on_import_screen()) {
-						// Maybe there was nothing to import?
-						fprintf(
-						    stderr,
-						    "[FBInk] Couldn't detect the Import screen, maybe there was nothing to import?\n");
-						rv = ERRCODE(ENODATA);
-						goto cleanup;
-					}
-
-					// Then wait a potentially long while (~5min) for the end of the Import process...
-					if (!is_on_home_screen_again()) {
-						// NOTE: LF better method than a stupid hard timeout... ;'(
-						fprintf(
-						    stderr,
-						    "[FBInk] Failed to detect the end of the Import process, maybe it's hung or running suspiciously long (it's been > 5min)?\n");
-						rv = ERRCODE(ETIME);
-						goto cleanup;
-					}
+					rv = fbink_wait_for_nickel_ready();
 				}
 			}
 		}
@@ -534,6 +479,71 @@ cleanup:
 	return rv;
 #else
 	fprintf(stderr, "[FBInk] Kobo Connect button scanning is disabled in this FBInk build!\n");
+	return ERRCODE(ENOSYS);
+#endif    // FBINK_WITH_BUTTON_SCAN
+}
+
+// Wait for the end of an USBMS session, trying to detect a successful content import in the process.
+int
+    fbink_wait_for_nickel_ready(void)
+{
+#ifdef FBINK_WITH_BUTTON_SCAN
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// FIXME: Wait for onboard to be *unmounted* instead of a hard sleep.
+	// Right now, we're espected to be on the "USB Connected" screen, so onboard *should* be unmounted...
+	// NOTE: Except that USB is terrible, so it takes quite a bit of time for things to settle down...
+	//       So, wait 10s and hope shit will have settled down by then...
+	LOG("Waiting 10s for USB to settle down . . .");
+	// NOTE: time_t is int64_t on Linux, so, long too ;).
+	nanosleep((const struct timespec[]){ { 10L, 0L } }, NULL);
+	if (is_onboard_mounted()) {
+		LOG("Err, we're supposed to be in USBMS mode, but onboard appears to still be mounted ?!");
+		// That won't do... abort!
+		fprintf(stderr, "[FBInk] Unexpected onboard mount status, can't detect content import!\n");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// Right, now that we've made sure of that, wait for onboard to come back up :)
+	if (!wait_for_onboard()) {
+		// That won't do... abort!
+		fprintf(stderr, "[FBInk] Failed to detect end of USBMS session, can't detect content import!\n");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// Now check that we're back on the Home screen...
+	if (!is_on_home_screen()) {
+		// That won't do... abort!
+		fprintf(stderr, "[FBInk] Failed to detect Home screen, can't detect content import!\n");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// Then wait a while to see if the Import screen pops up...
+	if (!is_on_import_screen()) {
+		// Maybe there was nothing to import?
+		fprintf(stderr, "[FBInk] Couldn't detect the Import screen, maybe there was nothing to import?\n");
+		rv = ERRCODE(ENODATA);
+		goto cleanup;
+	}
+
+	// Then wait a potentially long while (~5min) for the end of the Import process...
+	if (!is_on_home_screen_again()) {
+		// NOTE: LF better method than a stupid hard timeout... ;'(
+		fprintf(
+		    stderr,
+		    "[FBInk] Failed to detect the end of the Import process, maybe it's hung or running suspiciously long (it's been > 5min)?\n");
+		rv = ERRCODE(ETIME);
+		goto cleanup;
+	}
+
+cleanup:
+	return rv;
+#else
+	fprintf(stderr, "[FBInk] Kobo USBMS monitoring is disabled in this FBInk build!\n");
 	return ERRCODE(ENOSYS);
 #endif    // FBINK_WITH_BUTTON_SCAN
 }
