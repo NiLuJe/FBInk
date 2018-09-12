@@ -26,20 +26,24 @@
 static bool
     is_onboard_mounted(void)
 {
-	// cf. http://program-nix.blogspot.fr/2008/08/c-language-check-filesystem-is-mounted.html
+	// c.f., http://program-nix.blogspot.com/2008/08/c-language-check-filesystem-is-mounted.html
 	FILE*          mtab       = NULL;
 	struct mntent* part       = NULL;
 	bool           is_mounted = false;
 
 	if ((mtab = setmntent("/proc/mounts", "r")) != NULL) {
 		while ((part = getmntent(mtab)) != NULL) {
-			LOG("Checking fs %s mounted on %s", part->mnt_fsname, part->mnt_dir);
 			if ((part->mnt_dir != NULL) && (strcmp(part->mnt_dir, "/mnt/onboard")) == 0) {
+				LOG("fs %s is mounted on %s", part->mnt_fsname, part->mnt_dir);
 				is_mounted = true;
 				break;
 			}
 		}
 		endmntent(mtab);
+	}
+
+	if (!is_mounted) {
+		LOG("onboard is still unmounted . . .");
 	}
 
 	return is_mounted;
@@ -49,7 +53,7 @@ static bool
 static bool
     wait_for_onboard(void)
 {
-	// cf. https://stackoverflow.com/questions/5070801
+	// c.f., https://stackoverflow.com/questions/5070801
 	int           mfd = open("/proc/mounts", O_RDONLY, 0);
 	struct pollfd pfd;
 
@@ -148,7 +152,7 @@ static bool
     is_on_home_screen_again(void)
 {
 	// Home screen has a white background
-	LOG("Waiting for the 'Home' screen . . .");
+	LOG("Waiting for the 'Home' screen again . . .");
 	// NOTE: Give up after 5 minutes?
 	return wait_for_background_color(eInkBGCMap[BG_WHITE], (60U * 5U));
 }
