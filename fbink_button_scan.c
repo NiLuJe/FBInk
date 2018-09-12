@@ -271,7 +271,10 @@ static int
 
 // Scan the screen's content for Kobo's "Connect" button in the "USB plugged in" popup.
 int
-    fbink_button_scan(int fbfd UNUSED_BY_NOBUTTON, bool press_button UNUSED_BY_NOBUTTON, bool nosleep UNUSED_BY_NOBUTTON)
+    fbink_button_scan(int fbfd UNUSED_BY_NOBUTTON,
+		      bool press_button UNUSED_BY_NOBUTTON,
+		      bool nosleep UNUSED_BY_NOBUTTON,
+		      bool detect_import UNUSED_BY_NOBUTTON)
 {
 #ifdef FBINK_WITH_BUTTON_SCAN
 	// Open the framebuffer if need be...
@@ -445,9 +448,8 @@ int
 			} else {
 				LOG(". . . appears to have been a success!");
 
-				bool detect_import = true;
 				// Do we want to do the extra mile and wait for the end of a content import?
-				if (detect_import) {
+				if (!nosleep && detect_import) {
 					// Right now, we're on the "USB Connected" screen, onboard *should* be unmounted...
 					// NOTE: Except that USB is terrible, so it takes quite a bit of time for things to settle down...
 					//       So, wait 10s and hope shit will have settled down by then...
