@@ -34,7 +34,8 @@ static void
 	    "\n"
 	    "OPTIONS:\n"
 	    "\t-p, --press\tGenerate an input event to automatically press the button.\n"
-	    "\t-w, --wait\tWait for the end of the USBMS session, and detect the end of the content import process (implies -p, --press).\n"
+	    "\t-w, --wait\tWhile in the \"Connected\" state, wait for the end of this USBMS session, and detect the end of the content import process.\n"
+	    "\t-b, --both\tALL THE THINGS! Do everything in a single shot (scan for the button, press it, and wait for the end of the USBMS session).\n"
 	    "\t-h, --help\tShow this help message.\n"
 	    "\t-v, --verbose\tToggle printing diagnostic messages.\n"
 	    "\t-q, --quiet\tToggle hiding hardware setup messages, as well as the coordinates themselves.\n"
@@ -49,24 +50,32 @@ int
 {
 	int                        opt;
 	int                        opt_index;
-	static const struct option opts[] = { { "press", no_argument, NULL, 'p' }, { "wait", no_argument, NULL, 'w' },
-					      { "help", no_argument, NULL, 'h' },  { "verbose", no_argument, NULL, 'v' },
-					      { "quiet", no_argument, NULL, 'q' }, { NULL, 0, NULL, 0 } };
+	static const struct option opts[] = { { "press", no_argument, NULL, 'p' },
+					      { "wait", no_argument, NULL, 'w' },
+					      { "both", no_argument, NULL, 'b' },
+					      { "help", no_argument, NULL, 'h' },
+					      { "verbose", no_argument, NULL, 'v' },
+					      { "quiet", no_argument, NULL, 'q' },
+					      { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_config = { 0U };
 	// Default to verbose for now
 	fbink_config.is_verbose = true;
 
-	bool press_button  = false;
-	bool detect_import = false;
-	int  errfnd        = 0;
+	bool press_button      = false;
+	bool detect_import     = false;
+	bool do_wait_for_usbms = false;
+	int  errfnd            = 0;
 
-	while ((opt = getopt_long(argc, argv, "pwhvq", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "pwbhvq", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'p':
 				press_button = true;
 				break;
 			case 'w':
+				do_wait_for_usbms = true;
+				break;
+			case 'b':
 				press_button  = true;
 				detect_import = true;
 				break;
@@ -108,7 +117,11 @@ int
 	}
 
 	// And actually do stuff :)
-	rv = fbink_button_scan(fbfd, press_button, false, detect_import);
+	if (do_wait_for_usbms) {
+		rv = fbink_wait_for_usbms_processing(fbfd);
+	} else {
+		rv = fbink_button_scan(fbfd, press_button, false, detect_import);
+	}
 
 	// Cleanup
 cleanup:
