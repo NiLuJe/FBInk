@@ -99,10 +99,11 @@ static bool
 	FBInkColor color = { 0U };
 
 	// We loop for <timeout> seconds at most, waking up every <granularity> ms...
-	unsigned short int iterations = (unsigned short int) (timeout * (1000 / (float) granularity));
+	unsigned short int    iterations = (unsigned short int) (timeout * (1000 / (float) granularity));
+	const struct timespec zzz        = { 0L, (long int) (granularity * 1000000L) };
 	for (uint8_t i = 0U; i < iterations; i++) {
 		// Wait <granularity> ms . . .
-		nanosleep((const struct timespec[]){ { 0L, (long int) (granularity * 1000000L) } }, NULL);
+		nanosleep(&zzz, NULL);
 
 		(*fxpGetPixel)(&coords, &color);
 		LOG("On iteration nr. %hhu of %hu, pixel (%hu, %hu) was #%02hhX%02hhX%02hhX",
