@@ -28,6 +28,8 @@
 #ifdef FBINK_WITH_BUTTON_SCAN
 #	include <linux/input.h>
 #	include <time.h>
+#	include <mntent.h>
+#	include <poll.h>
 
 // NOTE: My TC's kernel is too old for some newer event codes...
 #	ifndef ABS_MT_DISTANCE
@@ -44,7 +46,12 @@
 			write(ifd, &ev, sizeof(ev));                                                                     \
 		})
 
+static bool is_onboard_mounted(void);
+static bool wait_for_onboard(void);
+static bool wait_for_background_color(uint8_t, unsigned short int);
 static bool is_on_connected_screen(void);
+static bool is_on_home_screen(void);
+static bool is_on_import_screen(void);
 static int  generate_button_press(FBInkCoordinates*, bool);
 #endif
 

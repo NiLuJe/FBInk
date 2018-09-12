@@ -21,10 +21,72 @@
 #include "fbink_button_scan.h"
 
 #ifdef FBINK_WITH_BUTTON_SCAN
+// Mountpoint monitoring helpers pilfered from KFMon ;).
+// Check that onboard is mounted (in the right place)...
 static bool
-    is_on_connected_screen(void)
+    is_onboard_mounted(void)
 {
-	// Check a single pixel that should always be white in Nickel, and always black when on the "Connected" screen.
+	// cf. http://program-nix.blogspot.fr/2008/08/c-language-check-filesystem-is-mounted.html
+	FILE*          mtab       = NULL;
+	struct mntent* part       = NULL;
+	bool           is_mounted = false;
+
+	if ((mtab = setmntent("/proc/mounts", "r")) != NULL) {
+		while ((part = getmntent(mtab)) != NULL) {
+			LOG("Checking fs %s mounted on %s", part->mnt_fsname, part->mnt_dir);
+			if ((part->mnt_dir != NULL) && (strcmp(part->mnt_dir, "/mnt/onboard")) == 0) {
+				is_mounted = true;
+				break;
+			}
+		}
+		endmntent(mtab);
+	}
+
+	return is_mounted;
+}
+
+// Monitor mountpoint activity...
+static bool
+    wait_for_onboard(void)
+{
+	// cf. https://stackoverflow.com/questions/5070801
+	int           mfd = open("/proc/mounts", O_RDONLY, 0);
+	struct pollfd pfd;
+
+	uint8_t changes = 0;
+	pfd.fd          = mfd;
+	pfd.events      = POLLERR | POLLPRI;
+	pfd.revents     = 0;
+	while (poll(&pfd, 1, -1) >= 0) {
+		if (pfd.revents & POLLERR) {
+			LOG("Mountpoints changed (iteration nr. %hhu)", changes++);
+
+			// Stop polling once we know onboard is available...
+			if (is_onboard_mounted()) {
+				LOG("Yay, onboard is available!");
+				break;
+			}
+		}
+		pfd.revents = 0;
+
+		// If we can't find our mountpoint after that many changes, assume we're screwed...
+		if (changes >= 5) {
+			LOG("Too many mountpoint changes without finding onboard, aborting!");
+			close(mfd);
+			return false;
+		}
+	}
+
+	close(mfd);
+	// Onboard is finally available ;).
+	return true;
+}
+
+static bool
+    wait_for_background_color(uint8_t v, unsigned short int timeout)
+{
+	// Check a single pixel that should always be white in Nickel,
+	// and always black when on the "Connected" & "Importing Content" screens.
 	// Something on the bottom margin should do the trick,
 	// without falling into any "might be behind the bezel" quirk,
 	// which would cause it to potentially already be black (or transparent) in Nickel...
@@ -32,14 +94,16 @@ static bool
 	(*fxpRotateCoords)(&coords);
 	FBInkColor color = { 0U };
 
-	// We loop for 5s at most
-	for (uint8_t i = 0U; i < 20; i++) {
+	// We loop for timeout seconds at most, waking up every 250ms...
+	unsigned short int iterations = (unsigned short int) (timeout * (1 / 0.25f));
+	for (uint8_t i = 0U; i < iterations; i++) {
 		// Wait 250ms . . .
 		nanosleep((const struct timespec[]){ { 0, 250000000L } }, NULL);
 
 		(*fxpGetPixel)(&coords, &color);
-		LOG("On iteration nr. %hhu, pixel (%hu, %hu) was #%02hhX%02hhX%02hhX",
+		LOG("On iteration nr. %hhu of %hu, pixel (%hu, %hu) was #%02hhX%02hhX%02hhX",
 		    i,
+		    iterations,
 		    coords.x,
 		    coords.y,
 		    color.r,
@@ -47,13 +111,46 @@ static bool
 		    color.b);
 
 		// Got it!
-		if (color.r == 0x00 && color.g == 0x00 && color.b == 0x00) {
+		if (color.r == v && color.g == v && color.b == v) {
 			return true;
 		}
 	}
 
 	// If we got this far, we failed :(
 	return false;
+}
+
+static bool
+    is_on_connected_screen(void)
+{
+	// USB Connected screen has a black background
+	LOG("Waiting for the 'USB Connected' screen . . .");
+	return wait_for_background_color(eInkBGCMap[BG_BLACK], 5U);
+}
+
+static bool
+    is_on_home_screen(void)
+{
+	// Home screen has a white background
+	LOG("Waiting for the 'Home' screen . . .");
+	return wait_for_background_color(eInkBGCMap[BG_WHITE], 5U);
+}
+
+static bool
+    is_on_import_screen(void)
+{
+	// Import screen has a black background
+	LOG("Waiting for the 'Content Import' screen . . .");
+	return wait_for_background_color(eInkBGCMap[BG_BLACK], 5U);
+}
+
+static bool
+    is_on_home_screen_again(void)
+{
+	// Home screen has a white background
+	LOG("Waiting for the 'Home' screen . . .");
+	// NOTE: Give up after 5 minutes?
+	return wait_for_background_color(eInkBGCMap[BG_WHITE], (60U * 5U));
 }
 
 static int
@@ -347,6 +444,61 @@ int
 				goto cleanup;
 			} else {
 				LOG(". . . appears to have been a success!");
+
+				bool detect_import = true;
+				// Do we want to do the extra mile and wait for the end of a content import?
+				if (detect_import) {
+					// Right now, we're on the "USB Connected" screen, onboard *should* be unmounted...
+					if (is_onboard_mounted()) {
+						LOG("Err, we're supposed to be in USBMS mode, but onboard appears to still be mounted ?!");
+						// That won't do... abort!
+						fprintf(
+						    stderr,
+						    "[FBInk] Unexpected onboard mount status, can't detect content import!\n");
+						rv = ERRCODE(EXIT_FAILURE);
+						goto cleanup;
+					}
+
+					// Right, now that we've made sure of that, wait for onboard to come back up :)
+					if (!wait_for_onboard()) {
+						// That won't do... abort!
+						fprintf(
+						    stderr,
+						    "[FBInk] Failed to detect end of USBMS session, can't detect content import!\n");
+						rv = ERRCODE(EXIT_FAILURE);
+						goto cleanup;
+					}
+
+					// Now check that we're back on the Home screen...
+					if (!is_on_home_screen()) {
+						// That won't do... abort!
+						fprintf(
+						    stderr,
+						    "[FBInk] Failed to detect Home screen, can't detect content import!\n");
+						rv = ERRCODE(EXIT_FAILURE);
+						goto cleanup;
+					}
+
+					// Then wait a while to see if the Import screen pops up...
+					if (!is_on_import_screen()) {
+						// Maybe there was nothing to import?
+						fprintf(
+						    stderr,
+						    "[FBInk] Couldn't detect the Import screen, maybe there was nothing to import?\n");
+						rv = ERRCODE(ENODATA);
+						goto cleanup;
+					}
+
+					// The wait a potentially long while (~5min) for the end of the Import process...
+					if (!is_on_home_screen_again()) {
+						// That won't do... abort!
+						fprintf(
+						    stderr,
+						    "[FBInk] Failed to detect the end of the Import process, maybe it's hung or running suspiciously long (> 5min)?\n");
+						rv = ERRCODE(ETIME);
+						goto cleanup;
+					}
+				}
 			}
 		}
 	} else {
