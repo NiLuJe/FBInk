@@ -66,6 +66,9 @@ static bool
 	pfd.fd          = mfd;
 	pfd.events      = POLLERR | POLLPRI;
 	pfd.revents     = 0;
+	// NOTE: We're going with no timeout, which works out great when everything behaves as expected,
+	//       but *might* be problematic in case something goes awfully wrong,
+	//       in which case we might block for a while...
 	while (poll(&pfd, 1, -1) >= 0) {
 		if (pfd.revents & POLLERR) {
 			LOG("Mountpoints changed (iteration nr. %hhu)", changes++);
