@@ -153,7 +153,7 @@ static bool
 {
 	// Home screen has a white background
 	LOG("Waiting for the 'Home' screen again . . .");
-	// NOTE: Give up after 5 minutes?
+	// NOTE: Give up after 5 minutes...
 	return wait_for_background_color(eInkBGCMap[BG_WHITE], (60U * 5U), 750U);
 }
 
@@ -452,10 +452,12 @@ int
 			} else {
 				LOG(". . . appears to have been a success!");
 
-				// Do we want to do the extra mile and wait for the end of a content import?
+				// Do we want to go the extra mile and wait for the end of a full USBMS session,
+				// trying to detect content import in the process?
 				if (!nosleep && detect_import) {
 					// Right now, we're on the "USB Connected" screen, onboard *should* be unmounted...
-					// NOTE: Except that USB is terrible, so it takes quite a bit of time for things to settle down...
+					// NOTE: Except that USB is terrible,
+					//       so it takes quite a bit of time for things to settle down...
 					//       So, wait 10s and hope shit will have settled down by then...
 					LOG("Waiting 10s for USB to settle down . . .");
 					// NOTE: time_t is int64_t on Linux, so, long too ;).
@@ -500,12 +502,12 @@ int
 						goto cleanup;
 					}
 
-					// The wait a potentially long while (~5min) for the end of the Import process...
+					// Then wait a potentially long while (~5min) for the end of the Import process...
 					if (!is_on_home_screen_again()) {
-						// That won't do... abort!
+						// NOTE: LF better method than a stupid hard timeout... ;'(
 						fprintf(
 						    stderr,
-						    "[FBInk] Failed to detect the end of the Import process, maybe it's hung or running suspiciously long (> 5min)?\n");
+						    "[FBInk] Failed to detect the end of the Import process, maybe it's hung or running suspiciously long (it's been > 5min)?\n");
 						rv = ERRCODE(ETIME);
 						goto cleanup;
 					}
