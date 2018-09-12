@@ -87,7 +87,7 @@ static bool
 }
 
 static bool
-    wait_for_background_color(uint8_t v, unsigned short int timeout)
+    wait_for_background_color(uint8_t v, unsigned short int timeout, unsigned short int granularity)
 {
 	// Check a single pixel that should always be white in Nickel,
 	// and always black when on the "Connected" & "Importing Content" screens.
@@ -98,11 +98,11 @@ static bool
 	(*fxpRotateCoords)(&coords);
 	FBInkColor color = { 0U };
 
-	// We loop for timeout seconds at most, waking up every 250ms...
-	unsigned short int iterations = (unsigned short int) (timeout * (1 / 0.25f));
+	// We loop for <timeout> seconds at most, waking up every <granularity> ms...
+	unsigned short int iterations = (unsigned short int) (timeout * (1000 / (float) granularity));
 	for (uint8_t i = 0U; i < iterations; i++) {
-		// Wait 250ms . . .
-		nanosleep((const struct timespec[]){ { 0, 250000000L } }, NULL);
+		// Wait <granularity> ms . . .
+		nanosleep((const struct timespec[]){ { 0L, (long int) (granularity * 1000000L) } }, NULL);
 
 		(*fxpGetPixel)(&coords, &color);
 		LOG("On iteration nr. %hhu of %hu, pixel (%hu, %hu) was #%02hhX%02hhX%02hhX",
@@ -129,7 +129,7 @@ static bool
 {
 	// USB Connected screen has a black background
 	LOG("Waiting for the 'USB Connected' screen . . .");
-	return wait_for_background_color(eInkBGCMap[BG_BLACK], 5U);
+	return wait_for_background_color(eInkBGCMap[BG_BLACK], 5U, 250U);
 }
 
 static bool
@@ -137,7 +137,7 @@ static bool
 {
 	// Home screen has a white background
 	LOG("Waiting for the 'Home' screen . . .");
-	return wait_for_background_color(eInkBGCMap[BG_WHITE], 5U);
+	return wait_for_background_color(eInkBGCMap[BG_WHITE], 5U, 250U);
 }
 
 static bool
@@ -145,7 +145,7 @@ static bool
 {
 	// Import screen has a black background
 	LOG("Waiting for the 'Content Import' screen . . .");
-	return wait_for_background_color(eInkBGCMap[BG_BLACK], 5U);
+	return wait_for_background_color(eInkBGCMap[BG_BLACK], 5U, 250U);
 }
 
 static bool
@@ -154,7 +154,7 @@ static bool
 	// Home screen has a white background
 	LOG("Waiting for the 'Home' screen again . . .");
 	// NOTE: Give up after 5 minutes?
-	return wait_for_background_color(eInkBGCMap[BG_WHITE], (60U * 5U));
+	return wait_for_background_color(eInkBGCMap[BG_WHITE], (60U * 5U), 750U);
 }
 
 static int
