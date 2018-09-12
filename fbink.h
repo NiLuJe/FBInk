@@ -290,7 +290,9 @@ FBINK_API int fbink_button_scan(int fbfd, bool press_button, bool nosleep, bool 
 //	-(EXIT_FAILURE)	when the expected chain of events fails to be detected properly
 //	-(ENODATA)	when there was no new content to import at the end of the USBMS session
 //	-(ETIME)	when we failed to detect the end of the import session itself, because it ran longer than 5 minutes.
-FBINK_API int fbink_wait_for_usbms_processing(void);
+// fdfd:		open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
+FBINK_API int fbink_wait_for_usbms_processing(int fbfd);
 
 //
 // When you intend to keep the framebuffer fd open for the lifecycle of your program:

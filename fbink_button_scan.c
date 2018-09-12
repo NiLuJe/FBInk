@@ -456,7 +456,7 @@ int
 				// Do we want to go the extra mile and wait for the end of a full USBMS session,
 				// trying to detect content import in the process?
 				if (!nosleep && detect_import) {
-					rv = fbink_wait_for_usbms_processing();
+					rv = fbink_wait_for_usbms_processing(fbfd);
 				}
 			}
 		}
@@ -485,11 +485,26 @@ cleanup:
 
 // Wait for the end of an USBMS session, trying to detect a successful content import in the process.
 int
-    fbink_wait_for_usbms_processing(void)
+    fbink_wait_for_usbms_processing(int fbfd)
 {
 #ifdef FBINK_WITH_BUTTON_SCAN
+	// Open the framebuffer if need be...
+	// NOTE: As usual, we *expect* to be initialized at this point!
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
 	// Assume success, until shit happens ;)
 	int rv = EXIT_SUCCESS;
+
+	// mmap the fb if need be...
+	if (!isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	}
 
 	// FIXME: Wait for onboard to be *unmounted* instead of a hard sleep.
 	// Right now, we're espected to be on the "USB Connected" screen, so onboard *should* be unmounted...
@@ -540,7 +555,15 @@ int
 		goto cleanup;
 	}
 
+	// Cleanup
 cleanup:
+	if (isFbMapped && !keep_fd) {
+		unmap_fb();
+	}
+	if (!keep_fd) {
+		close(fbfd);
+	}
+
 	return rv;
 #else
 	fprintf(stderr, "[FBInk] Kobo USBMS monitoring is disabled in this FBInk build!\n");
