@@ -35,6 +35,8 @@ static void
 	    "OPTIONS:\n"
 	    "\t-p, --press\tGenerate an input event to automatically press the button.\n"
 	    "\t-w, --wait\tWhile in the \"Connected\" state, wait for the end of this USBMS session, and detect the end of the content import process.\n"
+	    "\t-u, --unplug\tExplicitly fake an USB unplug event to exit the USBMS session as soon as possible.\n"
+	    "\t\t\tDoing this with a *real* USBMS sessions is a potentially terrible idea! This is aimed at purely faked USBMS sessions.\n"
 	    "\t-b, --both\tALL THE THINGS! Do everything in a single shot (scan for the button, press it, and wait for the end of the USBMS session).\n"
 	    "\t-h, --help\tShow this help message.\n"
 	    "\t-v, --verbose\tToggle printing diagnostic messages.\n"
@@ -50,13 +52,10 @@ int
 {
 	int                        opt;
 	int                        opt_index;
-	static const struct option opts[] = { { "press", no_argument, NULL, 'p' },
-					      { "wait", no_argument, NULL, 'w' },
-					      { "both", no_argument, NULL, 'b' },
-					      { "help", no_argument, NULL, 'h' },
-					      { "verbose", no_argument, NULL, 'v' },
-					      { "quiet", no_argument, NULL, 'q' },
-					      { NULL, 0, NULL, 0 } };
+	static const struct option opts[] = { { "press", no_argument, NULL, 'p' },  { "wait", no_argument, NULL, 'w' },
+					      { "unplug", no_argument, NULL, 'u' }, { "both", no_argument, NULL, 'b' },
+					      { "help", no_argument, NULL, 'h' },   { "verbose", no_argument, NULL, 'v' },
+					      { "quiet", no_argument, NULL, 'q' },  { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_config = { 0U };
 	// Default to verbose for now
@@ -65,15 +64,19 @@ int
 	bool press_button      = false;
 	bool detect_import     = false;
 	bool do_wait_for_usbms = false;
+	bool force_unplug      = false;
 	int  errfnd            = 0;
 
-	while ((opt = getopt_long(argc, argv, "pwbhvq", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "pwubhvq", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'p':
 				press_button = true;
 				break;
 			case 'w':
 				do_wait_for_usbms = true;
+				break;
+			case 'u':
+				force_unplug = true;
 				break;
 			case 'b':
 				press_button  = true;
@@ -118,12 +121,12 @@ int
 
 	// And actually do stuff :)
 	if (do_wait_for_usbms) {
-		rv = fbink_wait_for_usbms_processing(fbfd, false);
+		rv = fbink_wait_for_usbms_processing(fbfd, force_unplug);
 	} else {
 		rv = fbink_button_scan(fbfd, press_button, false);
 		// If the button press was successful, optionally wait for the end of the USBMS session
 		if (press_button && rv == EXIT_SUCCESS && detect_import) {
-			rv = fbink_wait_for_usbms_processing(fbfd, false);
+			rv = fbink_wait_for_usbms_processing(fbfd, force_unplug);
 		}
 	}
 
