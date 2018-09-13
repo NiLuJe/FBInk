@@ -28,7 +28,7 @@ static void
 	    "\n"
 	    "Button Scan (w/ FBInk %s)\n"
 	    "\n"
-	    "Usage: button_scan [-phvq]\n"
+	    "Usage: button_scan [-pwubhvq]\n"
 	    "\n"
 	    "Spits out x, y coordinates for the USB Connect button from Kobo's 'USB Plugged In' popup, optionally pressing it in the process.\n"
 	    "\n"
