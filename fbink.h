@@ -268,7 +268,11 @@ FBINK_API int fbink_print_image(int                fbfd,
 //	With detect_import:
 //	-(ENODATA)	when there was no new content to import at the end of the USBMS session
 //	-(ETIME)	when we failed to detect the end of the import session itself, because it ran longer than 5 minutes.
-// NOTE: Obviously not thread-safe with press_button enabled!
+// NOTE: Thread-safety obviously goes out the window with press_button enabled,
+//       since you can then only reasonably expect to be able to concurrently run a single instance of that function ;).
+// NOTE: For the duration of this call, screen updates should be kept to a minimum: in particular,
+//       we of course expect to be able to see the "Connect" button,
+//       but we also expect the middle section of the final line to be untouched!
 // fdfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // press_button:	generate an input event to press the button if true,
@@ -284,8 +288,10 @@ FBINK_API int fbink_print_image(int                fbfd,
 FBINK_API int fbink_button_scan(int fbfd, bool press_button, bool nosleep, bool detect_import);
 
 // Wait for the end of a Kobo USBMS session, trying to detect a successful content import in the process.
-// NOTE: Expects to be called while in the "Connected" state!
 // KOBO Only! Returns -(ENOSYS) when disabled (!KOBO, as well as MINIMAL builds)
+// NOTE: Expects to be called while in the "Connected" state! It will abort early if that's not the case.
+// NOTE: For the duration of this call, screen updates should be kept to a minimum: in particular,
+//       we expect the middle section of the final line to be untouched!
 // Otherwise, returns a few different things on failure:
 //	-(EXIT_FAILURE)	when the expected chain of events fails to be detected properly
 //	-(ENODATA)	when there was no new content to import at the end of the USBMS session
