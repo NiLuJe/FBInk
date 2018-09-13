@@ -22,7 +22,7 @@
 
 #ifdef FBINK_WITH_BUTTON_SCAN
 // Mountpoint monitoring helpers pilfered from KFMon ;).
-// Check that onboard is mounted or not (in the right place)...
+// Check if onboard (the mountpoint, not the fs) is mounted or not...
 static bool
     is_onboard_state(bool mounted)
 {
@@ -67,6 +67,15 @@ static bool
 	pfd.fd              = mfd;
 	pfd.events          = POLLERR | POLLPRI;
 	pfd.revents         = 0;
+	// Assume success unless proven otherwise ;).
+	bool rb = true;
+
+	// NOTE: Abort early if the mountpoint is already in the requested state,
+	//       in an effort to keep the race window as short as possible...
+	if (is_onboard_state(mounted)) {
+		goto cleanup;
+	}
+
 	// NOTE: We're going with no timeout, which works out great when everything behaves as expected,
 	//       but *might* be problematic in case something goes awfully wrong,
 	//       in which case we might block for a while...
@@ -85,14 +94,15 @@ static bool
 		// If we can't find our mountpoint after that many changes, assume we're screwed...
 		if (changes >= max_changes) {
 			LOG("Too many mountpoint changes without finding onboard, aborting!");
-			close(mfd);
-			return false;
+			rb = false;
+			break;
 		}
 	}
 
+cleanup:
 	close(mfd);
 	// Onboard is finally in the state we asked for ;).
-	return true;
+	return rb;
 }
 
 static bool
@@ -523,19 +533,12 @@ int
 
 	// NOTE: Since USB is terrible, it may take a bit for onboard to *actually* get unmounted...
 	bool mounted = true;
-	if (is_onboard_state(mounted)) {
-		// NOTE: Do we want to care about the infinitesimal window in which this might be race-y?
-		//       (i.e., if it gets unmounted between now and the first mountpoint change we haven't yet caught?)
-		//       (that'd take another is_onboard_state check inside wait_for_onboard_state,
-		//       right before the poll call, and, arguably, that'd still be potentially race-y...)
-		LOG("We're entering USBMS mode, but onboard is still mounted, waiting for it not to be . . .");
-		if (!wait_for_onboard_state(!mounted)) {
-			// That won't do... abort!
-			fprintf(stderr,
-				"[FBInk] Failed to detect start of USBMS session, can't detect content import!\n");
-			rv = ERRCODE(EXIT_FAILURE);
-			goto cleanup;
-		}
+	LOG("Waiting for the start of the USBMS session . . .");
+	if (!wait_for_onboard_state(!mounted)) {
+		// That won't do... abort!
+		fprintf(stderr, "[FBInk] Failed to detect start of USBMS session, can't detect content import!\n");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
 	}
 
 	// Right, now that we've made sure that we're properly in USBMS, wait for onboard to come back up :)
