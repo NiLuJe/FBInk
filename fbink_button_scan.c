@@ -533,6 +533,10 @@ int
 	// NOTE: Since USB is terrible, it may take a bit for onboard to *actually* get unmounted...
 	bool mounted = true;
 	if (is_onboard_state(mounted)) {
+		// NOTE: Do we want to care about the infinitesimal window in which this might be race-y?
+		//       (i.e., if it gets unmounted between now and the first mountpoint change we haven't yet caught?)
+		//       (that'd take another is_onboard_state check inside wait_for_onboard_state,
+		//       right before the poll call, and, arguably, that'd still be potentially race-y...)
 		LOG("We're entering USBMS mode, but onboard is still mounted, waiting for it not to be . . .");
 		if (!wait_for_onboard_state(!mounted)) {
 			// That won't do... abort!
