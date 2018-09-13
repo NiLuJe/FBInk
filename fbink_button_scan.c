@@ -521,7 +521,8 @@ int
 		}
 	}
 
-	// Double-check that we're really on something that looks like the Connected screen...
+	// Double-check that we're really on something that looks like the Connected screen,
+	// in case someone slipped on the wrong CLI flag or the wrong function ;).
 	if (!wait_for_background_color(eInkBGCMap[BG_BLACK], 0U, 0U)) {
 		// That won't do... abort!
 		fprintf(stderr, "[FBInk] We don't appear to on the Connected screen, abort!\n");
