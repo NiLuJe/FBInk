@@ -62,16 +62,17 @@ static bool
 	int           mfd = open("/proc/mounts", O_RDONLY, 0);
 	struct pollfd pfd;
 
-	uint8_t changes = 0;
-	pfd.fd          = mfd;
-	pfd.events      = POLLERR | POLLPRI;
-	pfd.revents     = 0;
+	uint8_t changes     = 0;
+	uint8_t max_changes = 5;
+	pfd.fd              = mfd;
+	pfd.events          = POLLERR | POLLPRI;
+	pfd.revents         = 0;
 	// NOTE: We're going with no timeout, which works out great when everything behaves as expected,
 	//       but *might* be problematic in case something goes awfully wrong,
 	//       in which case we might block for a while...
 	while (poll(&pfd, 1, -1) >= 0) {
 		if (pfd.revents & POLLERR) {
-			LOG("Mountpoints changed (iteration nr. %hhu)", changes++);
+			LOG("Mountpoints changed (iteration nr. %hhu of %hhu)", changes++, max_changes);
 
 			// Stop polling once we know onboard is in the requested state...
 			if (is_onboard_state(mounted)) {
@@ -82,7 +83,7 @@ static bool
 		pfd.revents = 0;
 
 		// If we can't find our mountpoint after that many changes, assume we're screwed...
-		if (changes >= 5) {
+		if (changes >= max_changes) {
 			LOG("Too many mountpoint changes without finding onboard, aborting!");
 			close(mfd);
 			return false;
@@ -120,8 +121,8 @@ static bool
 		nanosleep(&zzz, NULL);
 
 		(*fxpGetPixel)(&coords, &color);
-		LOG("On iteration nr. %hhu of %hu, pixel (%hu, %hu) was #%02hhX%02hhX%02hhX",
-		    i,
+		LOG("On iteration nr. %hhuu of %hu, pixel (%hu, %hu) was #%02hhX%02hhX%02hhX",
+		    (uint8_t)(i + 1U),
 		    iterations,
 		    coords.x,
 		    coords.y,
