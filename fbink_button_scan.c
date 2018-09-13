@@ -121,7 +121,7 @@ static bool
 		nanosleep(&zzz, NULL);
 
 		(*fxpGetPixel)(&coords, &color);
-		LOG("On iteration nr. %hhuu of %hu, pixel (%hu, %hu) was #%02hhX%02hhX%02hhX",
+		LOG("On iteration nr. %hhu of %hu, pixel (%hu, %hu) was #%02hhX%02hhX%02hhX",
 		    i,
 		    iterations,
 		    coords.x,
