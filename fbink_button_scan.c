@@ -116,13 +116,13 @@ static bool
 		iterations = 1U;
 	}
 	const struct timespec zzz = { 0L, (long int) (granularity * 1000000L) };
-	for (uint8_t i = 0U; i < iterations; i++) {
+	for (uint8_t i = 1U; i <= iterations; i++) {
 		// Wait <granularity> ms . . .
 		nanosleep(&zzz, NULL);
 
 		(*fxpGetPixel)(&coords, &color);
 		LOG("On iteration nr. %hhuu of %hu, pixel (%hu, %hu) was #%02hhX%02hhX%02hhX",
-		    (uint8_t)(i + 1U),
+		    i,
 		    iterations,
 		    coords.x,
 		    coords.y,
