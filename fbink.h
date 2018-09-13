@@ -265,8 +265,6 @@ FBINK_API int fbink_print_image(int                fbfd,
 //	-(ENOTSUP)	when the generated touch event appeared to have failed to actually tap the button
 //				emphasis on "appeared to", it's tricky to be perfectly sure the right thing happened...
 //				CANNOT happen when nosleep is true (because it skips this very codepath).
-// NOTE: Thread-safety obviously goes out the window with press_button enabled,
-//       since you can then only reasonably expect to be able to concurrently run a single instance of that function ;).
 // NOTE: For the duration of this call, screen updates should be kept to a minimum: in particular,
 //       we of course expect to be able to see the "Connect" button,
 //       but we also expect the middle section of the final line to be untouched!
@@ -276,6 +274,8 @@ FBINK_API int fbink_print_image(int                fbfd,
 //				MAY sleep up to 5s to confirm that input was successful! (unless nosleep is true)
 // nosleep:		if true, don't try to confirm that press_button's input event was successful,
 //				avoiding the nanosleep() calls that might incur...
+// NOTE: Thread-safety obviously goes out the window with press_button enabled,
+//       since you can then only reasonably expect to be able to concurrently run a single instance of that function ;).
 FBINK_API int fbink_button_scan(int fbfd, bool press_button, bool nosleep);
 
 // Wait for the end of a Kobo USBMS session, trying to detect a successful content import in the process.
