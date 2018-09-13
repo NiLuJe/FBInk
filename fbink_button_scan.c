@@ -528,6 +528,7 @@ int
 	}
 
 	// Right, now that we've made sure that we're properly in USBMS, wait for onboard to come back up :)
+	LOG("Waiting for onboard to come back up . . .");
 	if (!wait_for_onboard_state(mounted)) {
 		// That won't do... abort!
 		fprintf(stderr, "[FBInk] Failed to detect end of USBMS session, can't detect content import!\n");
