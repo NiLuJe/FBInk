@@ -265,9 +265,6 @@ FBINK_API int fbink_print_image(int                fbfd,
 //	-(ENOTSUP)	when the generated touch event appeared to have failed to actually tap the button
 //				emphasis on "appeared to", it's tricky to be perfectly sure the right thing happened...
 //				CANNOT happen when nosleep is true (because it skips this very codepath).
-//	With detect_import:
-//	-(ENODATA)	when there was no new content to import at the end of the USBMS session
-//	-(ETIME)	when we failed to detect the end of the import session itself, because it ran longer than 5 minutes.
 // NOTE: Thread-safety obviously goes out the window with press_button enabled,
 //       since you can then only reasonably expect to be able to concurrently run a single instance of that function ;).
 // NOTE: For the duration of this call, screen updates should be kept to a minimum: in particular,
@@ -279,19 +276,14 @@ FBINK_API int fbink_print_image(int                fbfd,
 //				MAY sleep up to 5s to confirm that input was successful! (unless nosleep is true)
 // nosleep:		if true, don't try to confirm that press_button's input event was successful,
 //				avoiding the nanosleep() calls that might incur...
-// detect_import:	works in tandem with press_button,
-//				if true, will block, trying to detect the end of a full USBMS session,
-//				only returning successfully at the end of Content import...
-//				NOTE: nosleep completely inhibits this codepath,
-//				since it relies extensively on blocking, polling & sleeping ;).
-//				NOTE: This basically calls fbink_wait_for_usbms_processing() after a successful button press ;).
-FBINK_API int fbink_button_scan(int fbfd, bool press_button, bool nosleep, bool detect_import);
+FBINK_API int fbink_button_scan(int fbfd, bool press_button, bool nosleep);
 
 // Wait for the end of a Kobo USBMS session, trying to detect a successful content import in the process.
+// NOTE: Expects to be called while in the "Connected" state (like after a successful fbink_button_scan call w/ press_buton)!
+//       It will abort early if that's not the case.
+// NOTE: For the duration of this call (which is obviously blocking!), screen updates should be kept to a minimum:
+//       in particular, we expect the middle section of the final line to be untouched!
 // KOBO Only! Returns -(ENOSYS) when disabled (!KOBO, as well as MINIMAL builds)
-// NOTE: Expects to be called while in the "Connected" state! It will abort early if that's not the case.
-// NOTE: For the duration of this call, screen updates should be kept to a minimum: in particular,
-//       we expect the middle section of the final line to be untouched!
 // Otherwise, returns a few different things on failure:
 //	-(EXIT_FAILURE)	when the expected chain of events fails to be detected properly
 //	-(ENODATA)	when there was no new content to import at the end of the USBMS session

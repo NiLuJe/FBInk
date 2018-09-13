@@ -120,7 +120,11 @@ int
 	if (do_wait_for_usbms) {
 		rv = fbink_wait_for_usbms_processing(fbfd);
 	} else {
-		rv = fbink_button_scan(fbfd, press_button, false, detect_import);
+		rv = fbink_button_scan(fbfd, press_button, false);
+		// If the button press was successful, optionally wait for the end of the USBMS session
+		if (press_button && rv == EXIT_SUCCESS && detect_import) {
+			rv = fbink_wait_for_usbms_processing(fbfd);
+		}
 	}
 
 	// Cleanup

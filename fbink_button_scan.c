@@ -291,10 +291,7 @@ static int
 
 // Scan the screen's content for Kobo's "Connect" button in the "USB plugged in" popup.
 int
-    fbink_button_scan(int fbfd UNUSED_BY_NOBUTTON,
-		      bool press_button UNUSED_BY_NOBUTTON,
-		      bool nosleep UNUSED_BY_NOBUTTON,
-		      bool detect_import UNUSED_BY_NOBUTTON)
+    fbink_button_scan(int fbfd UNUSED_BY_NOBUTTON, bool press_button UNUSED_BY_NOBUTTON, bool nosleep UNUSED_BY_NOBUTTON)
 {
 #ifdef FBINK_WITH_BUTTON_SCAN
 	// Open the framebuffer if need be...
@@ -467,12 +464,6 @@ int
 				goto cleanup;
 			} else {
 				LOG(". . . appears to have been a success!");
-
-				// Do we want to go the extra mile and wait for the end of a full USBMS session,
-				// trying to detect content import in the process?
-				if (!nosleep && detect_import) {
-					rv = fbink_wait_for_usbms_processing(fbfd);
-				}
 			}
 		}
 	} else {
