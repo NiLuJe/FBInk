@@ -43,7 +43,7 @@ static bool
 	}
 
 	if (!is_mounted) {
-		LOG("onboard is unmounted");
+		LOG("/mnt/onboard is unmounted");
 	}
 
 	// Return the right thing depending on which state we want onboard to be...
@@ -162,7 +162,8 @@ static bool
 {
 	// Home screen has a white background
 	LOG("Waiting for the 'Home' screen . . .");
-	return wait_for_background_color(eInkBGCMap[BG_WHITE], 5U, 250U);
+	// NOTE: This one *might* need a slightly larger timeout, just to be safe...
+	return wait_for_background_color(eInkBGCMap[BG_WHITE], 6U, 250U);
 }
 
 static bool
