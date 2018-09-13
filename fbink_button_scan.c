@@ -107,8 +107,14 @@ static bool
 	FBInkColor color = { 0U };
 
 	// We loop for <timeout> seconds at most, waking up every <granularity> ms...
-	unsigned short int    iterations = (unsigned short int) (timeout * (1000 / (float) granularity));
-	const struct timespec zzz        = { 0L, (long int) (granularity * 1000000L) };
+	unsigned short int iterations;
+	// In case we asked for no timeout (i.e., 0), take that to mean a single iteration...
+	if (timeout > 0U) {
+		iterations = (unsigned short int) (timeout * (1000 / (float) granularity));
+	} else {
+		iterations = 1U;
+	}
+	const struct timespec zzz = { 0L, (long int) (granularity * 1000000L) };
 	for (uint8_t i = 0U; i < iterations; i++) {
 		// Wait <granularity> ms . . .
 		nanosleep(&zzz, NULL);
@@ -512,6 +518,14 @@ int
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
+	}
+
+	// Double-check that we're really on something that looks like the Connected screen...
+	if (!wait_for_background_color(eInkBGCMap[BG_BLACK], 0U, 0U)) {
+		// That won't do... abort!
+		fprintf(stderr, "[FBInk] We don't appear to on the Connected screen, abort!\n");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
 	}
 
 	// NOTE: Since USB is terrible, it may take a bit for onboard to *actually* get unmounted...
