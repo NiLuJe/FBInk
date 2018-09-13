@@ -501,7 +501,7 @@ cleanup:
 
 // Wait for the end of an USBMS session, trying to detect a successful content import in the process.
 int
-    fbink_wait_for_usbms_processing(int fbfd)
+    fbink_wait_for_usbms_processing(int fbfd, bool force_unplug)
 {
 #ifdef FBINK_WITH_BUTTON_SCAN
 	// Open the framebuffer if need be...
@@ -544,6 +544,29 @@ int
 
 	// Right, now that we've made sure that we're properly in USBMS, wait for onboard to come back up :)
 	LOG("Waiting for onboard to come back up . . .");
+
+	// If we were asked to force an unplug event, now is the time ;).
+	if (force_unplug) {
+		LOG("Sending an USB unplug event . . .");
+		int nfd = -1;
+		nfd     = open("/tmp/nickel-hardware-status", O_WRONLY | O_NONBLOCK | O_CLOEXEC);
+		if (nfd == -1) {
+			fprintf(stderr, "[FBInk] Failed to open Nickel pipe!\n");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+
+		const unsigned char cmd[] = "usb plug remove";
+		if (write(nfd, cmd, sizeof(cmd)) < 0) {
+			fprintf(stderr, "[FBInk] Failed to write to Nickel pipe!\n");
+			rv = ERRCODE(EXIT_FAILURE);
+			close(nfd);
+			goto cleanup;
+		}
+
+		close(nfd);
+	}
+
 	if (!wait_for_onboard_state(mounted)) {
 		// That won't do... abort!
 		fprintf(stderr, "[FBInk] Failed to detect end of USBMS session, can't detect content import!\n");

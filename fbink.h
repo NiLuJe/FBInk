@@ -290,7 +290,15 @@ FBINK_API int fbink_button_scan(int fbfd, bool press_button, bool nosleep);
 //	-(ETIME)	when we failed to detect the end of the import session itself, because it ran longer than 5 minutes.
 // fdfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
-FBINK_API int fbink_wait_for_usbms_processing(int fbfd);
+// force_unplug:	after having made sure to be in USBMS mode, generate a fake USB unplug event to force Nickel to wake up.
+//				This makes sense if you want to do stuff behind Nickel's back during the USBMS session,
+//				instead of simply monitoring it, especially with fake USBMS sessions ;).
+//				NOTE: Obviously, if this was a real USBMS session, and not an entirely faked one,
+//				      if you force an unplug while onboard is still mounted on the connected to machine,
+//				      shit will go horribly wrong!
+// NOTE: Thread-safety obviously goes out the window with force_unplug enabled,
+//       since you can then only reasonably expect to be able to concurrently run a single instance of that function ;).
+FBINK_API int fbink_wait_for_usbms_processing(int fbfd, bool force_unplug);
 
 //
 // When you intend to keep the framebuffer fd open for the lifecycle of your program:
