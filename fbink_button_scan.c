@@ -101,7 +101,6 @@ static bool
 
 cleanup:
 	close(mfd);
-	// Onboard is finally in the state we asked for ;).
 	return rb;
 }
 
