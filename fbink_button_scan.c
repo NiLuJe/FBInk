@@ -526,12 +526,13 @@ int
 	// in case someone slipped on the wrong CLI flag or the wrong function ;).
 	if (!wait_for_background_color(eInkBGCMap[BG_BLACK], 0U, 0U)) {
 		// That won't do... abort!
-		fprintf(stderr, "[FBInk] We don't appear to on the Connected screen, abort!\n");
+		fprintf(stderr, "[FBInk] We don't appear to be on the Connected screen, abort!\n");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
 
-	// NOTE: Since USB is terrible, it may take a bit for onboard to *actually* get unmounted...
+	// NOTE: Since USB is terrible, it may take a bit for onboard to *actually* get unmounted,
+	//       so we wait for that to happen (wait_for_onboard_state() will return early if that's already the case)...
 	bool mounted = true;
 	LOG("Waiting for the start of the USBMS session . . .");
 	if (!wait_for_onboard_state(!mounted)) {

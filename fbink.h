@@ -279,7 +279,7 @@ FBINK_API int fbink_print_image(int                fbfd,
 FBINK_API int fbink_button_scan(int fbfd, bool press_button, bool nosleep);
 
 // Wait for the end of a Kobo USBMS session, trying to detect a successful content import in the process.
-// NOTE: Expects to be called while in the "Connected" state (like after a successful fbink_button_scan call w/ press_buton)!
+// NOTE: Expects to be called while in the "Connected" state (like after a successful fbink_button_scan() call w/ press_buton)!
 //       It will abort early if that's not the case.
 // NOTE: For the duration of this call (which is obviously blocking!), screen updates should be kept to a minimum:
 //       in particular, we expect the middle section of the final line to be untouched!
