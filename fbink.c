@@ -2413,63 +2413,55 @@ bool
 
 // Handle drawing both types of progress bars
 int
-    draw_progress_bars(int fbfd, bool is_infinite, uint8_t value, const FBInkConfig* caller_fbink_config)
+    draw_progress_bars(int fbfd, bool is_infinite, uint8_t value, const FBInkConfig* fbink_config)
 {
-	// We need a local copy of the config struct, because we have a few things to enforce on our end,
-	// and we don't want to mess with the caller's setup (plus, it's const for that very reason anyway).
-	FBInkConfig fbink_config = *caller_fbink_config;
-	// Namely, we need overlay mode to properly print the percentage text,
-	fbink_config.is_overlay = true;
-	// and no hoffset, because it makes no sense for a full-width bar,
-	// and we don't want the text to be affected by a stray value...
-	fbink_config.hoffset = 0;
-	// And we enforce centered text internally, so we'll set col ourselves later...
-
 	// Clear screen?
-	if (fbink_config.is_cleared) {
-		clear_screen(fbfd, fbink_config.is_inverted ? penFGColor : penBGColor, fbink_config.is_flashing);
+	if (fbink_config->is_cleared) {
+		clear_screen(fbfd, fbink_config->is_inverted ? penFGColor : penBGColor, fbink_config->is_flashing);
 	}
 
 	// Let's go! Start by pilfering some computations from draw...
 	// NOTE: It's a grayscale ramp, so r = g = b (= v).
-	FBInkColor fgC = { fbink_config.is_inverted ? penBGColor : penFGColor, fgC.r, fgC.r };
-	FBInkColor bgC = { fbink_config.is_inverted ? penFGColor : penBGColor, bgC.r, bgC.r };
+	FBInkColor fgC = { fbink_config->is_inverted ? penBGColor : penFGColor, fgC.r, fgC.r };
+	FBInkColor bgC = { fbink_config->is_inverted ? penFGColor : penBGColor, bgC.r, bgC.r };
 
 	// Clamp v offset to safe values
 	// NOTE: This test isn't perfect, but then, if you play with this, you do it knowing the risks...
 	//       It's mainly there so that stupidly large values don't wrap back on screen because of overflow wraparound.
-	if (abs(fbink_config.voffset) >= viewHeight) {
+	short int voffset = fbink_config->voffset;
+	if (abs(voffset) >= viewHeight) {
 		LOG("The specified vertical offset (%hd) necessarily pushes *all* content out of bounds, discarding it",
-		    fbink_config.voffset);
-		fbink_config.voffset = 0;
+		    voffset);
+		voffset = 0;
 	}
 
 	// And then some from fbink_print...
-	if (fbink_config.is_halfway) {
-		fbink_config.row = (short int) (fbink_config.row + (short int) (MAXROWS / 2U));
+	short int row = fbink_config->row;
+	if (fbink_config->is_halfway) {
+		row = (short int) (row + (short int) (MAXROWS / 2U));
 		// NOTE: Clamp to positive values to avoid wrap-around,
 		//       (i.e., -MAX should always be 0, and +MAX always the last row (i.e., MAXROWS - 1)).
 		//       Our default behavior of starting negative rows from the bottom essentially amounts to valign == bottom,
 		//       which is not desirable when we explicitly asked for center ;).
-		fbink_config.row = (short int) MIN(MAX(0, fbink_config.row), (MAXROWS - 1));
-		LOG("Adjusted row to %hd for vertical centering", fbink_config.row);
+		row = (short int) MIN(MAX(0, row), (MAXROWS - 1));
+		LOG("Adjusted row to %hd for vertical centering", row);
 	}
 
-	if (fbink_config.row < 0) {
-		fbink_config.row = (short int) MAX(MAXROWS + fbink_config.row, 0);
-		LOG("Adjusted row to %hd", fbink_config.row);
+	if (row < 0) {
+		row = (short int) MAX(MAXROWS + row, 0);
+		LOG("Adjusted row to %hd", row);
 	}
-	while (fbink_config.row >= MAXROWS) {
-		fbink_config.row = (short int) (fbink_config.row - MAXROWS);
-		LOG("Wrapped row back to %hd", fbink_config.row);
+	while (row >= MAXROWS) {
+		row = (short int) (row - MAXROWS);
+		LOG("Wrapped row back to %hd", row);
 	}
 
 	// We'll begin by painting a blank canvas, just to make sure everything's clean behind us...
-	unsigned short int top_pos  = (unsigned short int) MAX(0, ((fbink_config.row * FONTH) + fbink_config.voffset));
+	unsigned short int top_pos  = (unsigned short int) MAX(0, ((row * FONTH) + voffset));
 	unsigned short int left_pos = 0U;
 
 	// ... unless we were asked to skip background pixels... ;).
-	if (!fbink_config.is_bgless) {
+	if (!fbink_config->is_bgless) {
 		fill_rect(left_pos, top_pos, (unsigned short int) viewWidth, FONTH, &bgC);
 	}
 
@@ -2478,11 +2470,11 @@ int
 	FBInkColor borderC;
 	// Handle devices with an inverted palette properly...
 	if (deviceQuirks.isKindleLegacy) {
-		emptyC.r  = fbink_config.is_inverted ? eInkBGCMap[BG_GRAYB] : eInkFGCMap[BG_GRAYB];
-		borderC.r = fbink_config.is_inverted ? eInkBGCMap[BG_GRAY4] : eInkFGCMap[BG_GRAY4];
+		emptyC.r  = fbink_config->is_inverted ? eInkBGCMap[BG_GRAYB] : eInkFGCMap[BG_GRAYB];
+		borderC.r = fbink_config->is_inverted ? eInkBGCMap[BG_GRAY4] : eInkFGCMap[BG_GRAY4];
 	} else {
-		emptyC.r  = fbink_config.is_inverted ? eInkFGCMap[BG_GRAYB] : eInkBGCMap[BG_GRAYB];
-		borderC.r = fbink_config.is_inverted ? eInkFGCMap[BG_GRAY4] : eInkBGCMap[BG_GRAY4];
+		emptyC.r  = fbink_config->is_inverted ? eInkFGCMap[BG_GRAYB] : eInkBGCMap[BG_GRAYB];
+		borderC.r = fbink_config->is_inverted ? eInkFGCMap[BG_GRAY4] : eInkBGCMap[BG_GRAY4];
 	}
 	emptyC.g  = emptyC.r;
 	emptyC.b  = emptyC.r;
@@ -2530,14 +2522,14 @@ int
 		snprintf(percentage_text, sizeof(percentage_text), "%hhu%%", value);
 		size_t line_len = strlen(percentage_text);
 
-		bool halfcell_offset = false;
-		fbink_config.col     = (short int) ((unsigned short int) (MAXCOLS - line_len) / 2U);
+		bool      halfcell_offset = false;
+		short int col             = (short int) ((unsigned short int) (MAXCOLS - line_len) / 2U);
 
 		// NOTE: If the line itself is not a perfect fit, ask draw to start drawing half a cell
 		//       to the right to compensate, in order to achieve perfect centering...
 		//       This piggybacks a bit on the !isPerfectFit compensation done in draw,
 		//       which already does subcell placement ;).
-		if (((unsigned short int) fbink_config.col * 2U) + line_len != MAXCOLS) {
+		if (((unsigned short int) col * 2U) + line_len != MAXCOLS) {
 			LOG("Line is not a perfect fit, fudging centering by one half of a cell to the right");
 			// NOTE: Flag it for correction in draw
 			halfcell_offset = true;
@@ -2545,11 +2537,11 @@ int
 
 		// Draw percentage in the middle of the bar...
 		draw(percentage_text,
-		     (unsigned short int) fbink_config.row,
-		     (unsigned short int) fbink_config.col,
+		     (unsigned short int) row,
+		     (unsigned short int) col,
 		     0U,
 		     halfcell_offset,
-		     &fbink_config);
+		     fbink_config);
 	} else {
 		// This is an infinite progress bar (a.k.a., activity bar)!
 
@@ -2587,8 +2579,8 @@ int
 	};
 
 	// V offset handling is the pits.
-	if (fbink_config.voffset != 0) {
-		LOG("Adjusting vertical pen position by %hd pixels, as requested", fbink_config.voffset);
+	if (voffset != 0) {
+		LOG("Adjusting vertical pen position by %hd pixels, as requested", voffset);
 		// Clamp region to sane values if h/v offset is pushing stuff off-screen
 		if ((region.top + region.height) > viewHeight) {
 			region.height = (uint32_t) MAX(0, (short int) (viewHeight - region.top));
@@ -2606,7 +2598,7 @@ int
 	}
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
-	if (fbink_config.is_cleared) {
+	if (fbink_config->is_cleared) {
 		fullscreen_region(&region);
 	}
 
@@ -2615,7 +2607,7 @@ int
 	//       It has the added benefit of increasing the framerate limit after which the eInk controller risks getting
 	//       confused (unless is_flashing is enabled, since that'll block,
 	//       essentially throttling the bar to the screen's refresh rate).
-	if (refresh(fbfd, region, WAVEFORM_MODE_AUTO, fbink_config.is_flashing) != EXIT_SUCCESS) {
+	if (refresh(fbfd, region, WAVEFORM_MODE_AUTO, fbink_config->is_flashing) != EXIT_SUCCESS) {
 		fprintf(stderr, "[FBInk] Failed to refresh the screen!\n");
 		return ERRCODE(EXIT_FAILURE);
 	}
@@ -2651,8 +2643,18 @@ int
 		percentage = 100U;
 	}
 
+	// We need a local copy of the config struct, because we have a few things to enforce on our end,
+	// and we don't want to mess with the caller's setup (plus, it's const for that very reason anyway).
+	FBInkConfig fbink_config = *caller_fbink_config;
+	// Namely, we need overlay mode to properly print the percentage text,
+	fbink_config.is_overlay = true;
+	// and no hoffset, because it makes no sense for a full-width bar,
+	// and we don't want the text to be affected by a stray value...
+	fbink_config.hoffset = 0;
+	// And we enforce centered text internally, so we'll set col ourselves later...
+
 	// And do the work ;).
-	rv = draw_progress_bars(fbfd, false, percentage, caller_fbink_config);
+	rv = draw_progress_bars(fbfd, false, percentage, &fbink_config);
 
 	// Cleanup
 cleanup:
@@ -2693,6 +2695,8 @@ int
 		LOG("The specified progress step (%hhu) is larger than 18, clamping it.", progress);
 		progress = 18U;
 	}
+
+	// We don't need to fudge with fbink_config, no text ;).
 
 	// And do the work ;).
 	rv = draw_progress_bars(fbfd, true, progress, caller_fbink_config);
