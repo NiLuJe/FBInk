@@ -2526,7 +2526,7 @@ int
 	borderC.g = borderC.r;
 	borderC.b = borderC.r;
 
-	bool is_infinite = false;
+	bool is_infinite = true;
 	if (!is_infinite) {
 		// This is a real progress bar ;).
 		// Next comes the maths!
@@ -2537,7 +2537,7 @@ int
 		}
 
 		// We'll want 5% of padding on each side,
-		// with a poor man's rounding to make sure the bar's size is constant across all percentage values...
+		// with accurate rounding to make sure the bar's size is constant across all percentage values...
 		unsigned short int fill_width =
 		    (unsigned short int) lround((percentage / 100.0f) * (0.90f * (float) viewWidth));
 		unsigned short int fill_left = (unsigned short int) lround(left_pos + (0.05f * (float) viewWidth));
@@ -2598,17 +2598,12 @@ int
 
 		// We want our thumb to take 10% of the bar's width
 		unsigned short int thumb_width = (unsigned short int) lround(0.10f * empty_width);
-		// We move the thumb in increment of 5% (i.e., half its width)
+		// We move the thumb in increment of 5% of the bar's width (i.e., half its width)
 		unsigned short int thumb_left =
 		    (unsigned short int) lround((empty_left + ((0.05f * empty_width) * percentage)));
 
 		// And finally, draw the thumb, which we want to override the border with!
 		fill_rect(thumb_left, top_pos, thumb_width, FONTH, &fgC);
-
-		LOG("Bar width: %hu | Thumb width: %hu | Thumb Start: %hu",
-		    empty_width,
-		    thumb_width,
-		    (unsigned short int) (thumb_left - empty_left));
 	}
 
 	// Start setting up the screen refresh...
