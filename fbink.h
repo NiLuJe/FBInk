@@ -127,6 +127,26 @@ typedef enum
 	BG_BLACK
 } BG_COLOR_INDEX_T;
 
+// A struct to dump the FBInk state into, for when a shell isn't wanted
+typedef struct
+{
+	uint32_t       view_width;
+	uint32_t       view_height;
+	uint32_t       bpp;
+	unsigned short font_w;
+	unsigned short font_h;
+	uint8_t        font_sz_mult;
+	const char*    font_name;
+	uint8_t        glyph_width;
+	uint8_t        glyph_height;
+	unsigned short max_cols;
+	unsigned short max_rows;
+	bool           is_perfect_fit;
+	long           user_hz;
+	uint8_t        pen_fg_color;
+	uint8_t        pen_bg_color;
+} FBInkState;
+
 // What a FBInk config should look like. Perfectly sane when fully zero-initialized.
 typedef struct
 {
@@ -188,6 +208,9 @@ FBINK_API int fbink_init(int fbfd, const FBInkConfig* fbink_config);
 
 // Dumps a few of our internal state variables to stdout, in a format easily consumable by a shell (i.e., eval)
 FBINK_API void fbink_state_dump(const FBInkConfig* fbink_config);
+
+// Dump a few of out internal state variables to struct pointed to by fbink_state
+FBINK_API void fbink_get_state(const FBInkConfig* fbink_config, FBInkState* fbink_state);
 
 // Print a string on screen.
 // NOTE: The string is expected to be encoded in valid UTF-8, no validation of any kind is done by the library,

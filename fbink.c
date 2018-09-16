@@ -1798,6 +1798,29 @@ void
 	    penBGColor);
 }
 
+// Dump a few of out internal state variables to struct pointed to by fbink_state
+void
+	fbink_get_state(const FBInkConfig* fbink_config, FBInkState* fbink_state)
+{
+	if (fbink_state) {
+		fbink_state->view_width     = viewWidth;
+		fbink_state->view_height    = viewHeight;
+		fbink_state->bpp            = vInfo.bits_per_pixel;
+		fbink_state->font_w         = FONTW;
+		fbink_state->font_h         = FONTH;
+		fbink_state->font_sz_mult   = FONTSIZE_MULT;
+		fbink_state->font_name      = fontname_to_string(fbink_config->fontname);
+		fbink_state->glyph_width    = glyphWidth;
+		fbink_state->glyph_height   = glyphHeight;
+		fbink_state->max_cols       = MAXCOLS;
+		fbink_state->max_rows       = MAXROWS;
+		fbink_state->is_perfect_fit = deviceQuirks.isPerfectFit;
+		fbink_state->user_hz        = USER_HZ;
+		fbink_state->pen_fg_color   = penFGColor;
+		fbink_state->pen_bg_color   = penBGColor;
+	}
+}
+
 // Memory map the framebuffer
 static int
     memmap_fb(int fbfd)
