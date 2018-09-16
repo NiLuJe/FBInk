@@ -2599,10 +2599,12 @@ int
 		// We want our thumb to take 10% of the bar's width
 		unsigned short int thumb_width = (unsigned short int) ((float) (0.10f * empty_width) + 0.5f);
 		// We move the thumb in increment of 5% (i.e., half its width)
-		unsigned short int thumb_left = (unsigned short int) ((thumb_width / 2U) * percentage);
+		unsigned short int thumb_left = (unsigned short int) lround((empty_left + (float) (((float) (0.05f * empty_width)) * percentage)));
 
 		// And finally, draw the thumb, which we want to override the border with!
 		fill_rect(thumb_left, top_pos, thumb_width, FONTH, &fgC);
+
+		LOG("Bar width: %hu | Thumb width: %hu | Thumb Start: %hu", empty_width, thumb_width, (unsigned short int) (thumb_left - empty_left));
 	}
 
 	// Start setting up the screen refresh...

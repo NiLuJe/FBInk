@@ -48,10 +48,7 @@
 #include <fcntl.h>
 #include <linux/fb.h>
 #include <linux/kd.h>
-// NOTE: Don't use in prod, c.f., Makefile & rotate_coordinates() comments in fbink.c
-#ifdef FBINK_WITH_MATHS
-#	include <math.h>
-#endif
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
