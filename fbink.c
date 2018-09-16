@@ -2526,7 +2526,7 @@ int
 	borderC.g = borderC.r;
 	borderC.b = borderC.r;
 
-	bool is_infinite = true;
+	bool is_infinite = false;
 	if (!is_infinite) {
 		// This is a real progress bar ;).
 		// Next comes the maths!
@@ -2539,10 +2539,10 @@ int
 		// We'll want 5% of padding on each side,
 		// with a poor man's rounding to make sure the bar's size is constant across all percentage values...
 		unsigned short int fill_width =
-		    (unsigned short int) ((percentage / 100.0f) * (0.90f * (float) viewWidth) + 0.5f);
-		unsigned short int fill_left = (unsigned short int) (left_pos + (0.05f * (float) viewWidth) + 0.5f);
+		    (unsigned short int) lround((percentage / 100.0f) * (0.90f * (float) viewWidth));
+		unsigned short int fill_left = (unsigned short int) lround(left_pos + (0.05f * (float) viewWidth));
 		unsigned short int empty_width =
-		    (unsigned short int) (((float) (100U - percentage) / 100.0f) * (0.90f * (float) viewWidth) + 0.5f);
+		    (unsigned short int) lround(((float) (100U - percentage) / 100.0f) * (0.90f * (float) viewWidth));
 		unsigned short int empty_left = (unsigned short int) (fill_left + fill_width);
 
 		// Draw the border...
@@ -2577,9 +2577,9 @@ int
 		// This is an infinite progress bar (a.k.a., activity bar)!
 		// Next comes the maths!
 		// Begin by sanitizing the input...
-		if (percentage > 20U) {
-			LOG("The specified progress (%hhu) is larger than 20, clamping it.", percentage);
-			percentage = 20U;
+		if (percentage > 18U) {
+			LOG("The specified progress (%hhu) is larger than 18, clamping it.", percentage);
+			percentage = 18U;
 		}
 
 		// We'll want 5% of padding on each side,
