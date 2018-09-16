@@ -101,6 +101,8 @@ static void
 	    "\t-l, --linecount\t\tWhen successfully printing text, outputs the total amount of printed lines in the final line of output to stdout (NOTE: enforces quiet & non-verbose!).\n"
 	    "\t-P, --progressbar NUM\tDraw a NUM%% full progress bar (full-width). Like other alternative modes, does *NOT* have precedence over text printing.\n"
 	    "\t\t\t\tIgnores -o, --overlay; -x, --col; -X, --hoffset; as well as -m, --centered & -p, --padded"
+	    "\t-A, --activitybar NUM\tDraw an activity bar on step NUM (full-width). NUM must be between 0 and 18. Like other alternative modes, does *NOT* have precedence over text printing.\n"
+	    "\t\t\t\tIgnores -x, --col; -X, --hoffset; as well as -m, --centered & -p, --padded"
 	    "\n"
 	    "NOTES:\n"
 	    "\tYou can specify multiple STRINGs in a single invocation of fbink, each consecutive one will be printed on the subsequent line.\n"
@@ -202,6 +204,7 @@ int
 					      { "linecountcode", no_argument, NULL, 'L' },
 					      { "linecount", no_argument, NULL, 'l' },
 					      { "progressbar", required_argument, NULL, 'P' },
+					      { "activitybar", required_argument, NULL, 'A' },
 					      { "overlay", no_argument, NULL, 'o' },
 					      { "bgless", no_argument, NULL, 'O' },
 					      { NULL, 0, NULL, 0 } };
@@ -251,10 +254,11 @@ int
 	bool      want_linecode  = false;
 	bool      want_linecount = false;
 	bool      is_progressbar = false;
+	bool      is_activitybar = false;
 	uint8_t   progress       = 0;
 	int       errfnd         = 0;
 
-	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:B:LlP:oO", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:B:LlP:A:oO", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				fbink_config.row = (short int) atoi(optarg);
@@ -548,6 +552,10 @@ int
 				is_progressbar = true;
 				progress       = (uint8_t) strtoul(optarg, NULL, 10);
 				break;
+			case 'A':
+				is_activitybar = true;
+				progress       = (uint8_t) strtoul(optarg, NULL, 10);
+				break;
 			case 'o':
 				fbink_config.is_overlay = true;
 				break;
@@ -704,6 +712,22 @@ int
 			}
 			if (fbink_print_progress_bar(fbfd, progress, &fbink_config) != EXIT_SUCCESS) {
 				fprintf(stderr, "Failed to display a progressbar!\n");
+				rv = ERRCODE(EXIT_FAILURE);
+				goto cleanup;
+			}
+		} else if (is_activitybar) {
+			if (!fbink_config.is_quiet) {
+				printf(
+				    "Displaying an activity bar on step %hhu @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s)\n",
+				    progress,
+				    fbink_config.row,
+				    fbink_config.voffset,
+				    fbink_config.is_inverted ? "true" : "false",
+				    fbink_config.is_flashing ? "true" : "false",
+				    fbink_config.is_cleared ? "true" : "false");
+			}
+			if (fbink_print_activity_bar(fbfd, progress, &fbink_config) != EXIT_SUCCESS) {
+				fprintf(stderr, "Failed to display an activitybar!\n");
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
 			}
