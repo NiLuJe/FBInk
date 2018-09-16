@@ -2464,25 +2464,6 @@ int
 		LOG("Wrapped row back to %hd", fbink_config.row);
 	}
 
-	// We enforce centering for the percentage text...
-	// NOTE: Zero init, and leave enough space for a *wide* NULL, to avoid spurious behavior with u8_strlen later on...
-	char percentage_text[8] = { 0 };
-	snprintf(percentage_text, sizeof(percentage_text), "%hhu%%", value);
-	size_t line_len = strlen(percentage_text);
-
-	bool halfcell_offset = false;
-	fbink_config.col     = (short int) ((unsigned short int) (MAXCOLS - line_len) / 2U);
-
-	// NOTE: If the line itself is not a perfect fit, ask draw to start drawing half a cell
-	//       to the right to compensate, in order to achieve perfect centering...
-	//       This piggybacks a bit on the !isPerfectFit compensation done in draw,
-	//       which already does subcell placement ;).
-	if (((unsigned short int) fbink_config.col * 2U) + line_len != MAXCOLS) {
-		LOG("Line is not a perfect fit, fudging centering by one half of a cell to the right");
-		// NOTE: Flag it for correction in draw
-		halfcell_offset = true;
-	}
-
 	// We'll begin by painting a blank canvas, just to make sure everything's clean behind us...
 	unsigned short int top_pos  = (unsigned short int) MAX(0, ((fbink_config.row * FONTH) + fbink_config.voffset));
 	unsigned short int left_pos = 0U;
@@ -2540,6 +2521,26 @@ int
 				  (unsigned short int) MAX(0, empty_width - 2),
 				  (unsigned short int) (FONTH - 3U),
 				  &emptyC);
+		}
+
+		// We enforce centering for the percentage text...
+		// NOTE: Zero init, and leave enough space for a *wide* NULL,
+		//       to avoid spurious behavior with u8_strlen later on...
+		char percentage_text[8] = { 0 };
+		snprintf(percentage_text, sizeof(percentage_text), "%hhu%%", value);
+		size_t line_len = strlen(percentage_text);
+
+		bool halfcell_offset = false;
+		fbink_config.col     = (short int) ((unsigned short int) (MAXCOLS - line_len) / 2U);
+
+		// NOTE: If the line itself is not a perfect fit, ask draw to start drawing half a cell
+		//       to the right to compensate, in order to achieve perfect centering...
+		//       This piggybacks a bit on the !isPerfectFit compensation done in draw,
+		//       which already does subcell placement ;).
+		if (((unsigned short int) fbink_config.col * 2U) + line_len != MAXCOLS) {
+			LOG("Line is not a perfect fit, fudging centering by one half of a cell to the right");
+			// NOTE: Flag it for correction in draw
+			halfcell_offset = true;
 		}
 
 		// Draw percentage in the middle of the bar...
