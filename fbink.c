@@ -2411,28 +2411,10 @@ bool
 	return deviceQuirks.isKobo16Landscape;
 }
 
-// Draw a full-width progress bar
+// Handle drawing both types of progress bars
 int
-    fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInkConfig* caller_fbink_config)
+    draw_progress_bars(int fbfd, bool is_infinite, uint8_t value, const FBInkConfig* caller_fbink_config)
 {
-	// Open the framebuffer if need be...
-	// NOTE: As usual, we *expect* to be initialized at this point!
-	bool keep_fd = true;
-	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
-		return ERRCODE(EXIT_FAILURE);
-	}
-
-	// Assume success, until shit happens ;)
-	int rv = EXIT_SUCCESS;
-
-	// mmap the fb if need be...
-	if (!isFbMapped) {
-		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
-			rv = ERRCODE(EXIT_FAILURE);
-			goto cleanup;
-		}
-	}
-
 	// We need a local copy of the config struct, because we have a few things to enforce on our end,
 	// and we don't want to mess with the caller's setup (plus, it's const for that very reason anyway).
 	FBInkConfig fbink_config = *caller_fbink_config;
@@ -2485,7 +2467,7 @@ int
 	// We enforce centering for the percentage text...
 	// NOTE: Zero init, and leave enough space for a *wide* NULL, to avoid spurious behavior with u8_strlen later on...
 	char percentage_text[8] = { 0 };
-	snprintf(percentage_text, sizeof(percentage_text), "%hhu%%", percentage);
+	snprintf(percentage_text, sizeof(percentage_text), "%hhu%%", value);
 	size_t line_len = strlen(percentage_text);
 
 	bool halfcell_offset = false;
@@ -2526,23 +2508,17 @@ int
 	borderC.g = borderC.r;
 	borderC.b = borderC.r;
 
-	bool is_infinite = true;
+	// Which kind of bar did we request?
 	if (!is_infinite) {
 		// This is a real progress bar ;).
-		// Next comes the maths!
-		// Begin by sanitizing the input...
-		if (percentage > 100U) {
-			LOG("The specified percentage (%hhu) is larger than 100, clamping it.", percentage);
-			percentage = 100U;
-		}
 
 		// We'll want 5% of padding on each side,
 		// with rounding to make sure the bar's size is constant across all percentage values...
 		unsigned short int fill_width =
-		    (unsigned short int) (((percentage / 100.0f) * (0.90f * (float) viewWidth)) + 0.5f);
+		    (unsigned short int) (((value / 100.0f) * (0.90f * (float) viewWidth)) + 0.5f);
 		unsigned short int fill_left = (unsigned short int) (left_pos + (0.05f * (float) viewWidth) + 0.5f);
 		unsigned short int empty_width =
-		    (unsigned short int) ((((float) (100U - percentage) / 100.0f) * (0.90f * (float) viewWidth)) + 0.5f);
+		    (unsigned short int) ((((float) (100U - value) / 100.0f) * (0.90f * (float) viewWidth)) + 0.5f);
 		unsigned short int empty_left = (unsigned short int) (fill_left + fill_width);
 
 		// Draw the border...
@@ -2551,7 +2527,7 @@ int
 		fill_rect(fill_left, top_pos, fill_width, FONTH, &fgC);
 		// And the empty bar...
 		// NOTE: With a minor tweak to keep a double-width border on the bottom & right sides ;).
-		if (percentage == 0U) {
+		if (value == 0U) {
 			// Keep the left border alone!
 			fill_rect((unsigned short int) (empty_left + 1U),
 				  (unsigned short int) (top_pos + 1U),
@@ -2575,12 +2551,6 @@ int
 		     &fbink_config);
 	} else {
 		// This is an infinite progress bar (a.k.a., activity bar)!
-		// Next comes the maths!
-		// Begin by sanitizing the input...
-		if (percentage > 18U) {
-			LOG("The specified progress (%hhu) is larger than 18, clamping it.", percentage);
-			percentage = 18U;
-		}
 
 		// We'll want 5% of padding on each side,
 		// with rounding to make sure the bar's size is constant across all percentage values...
@@ -2601,7 +2571,7 @@ int
 		// We move the thumb in increment of 5% of the bar's width (i.e., half its width),
 		// with rounding to avoid accumulating drift...
 		unsigned short int thumb_left =
-		    (unsigned short int) (empty_left + ((0.05f * empty_width) * percentage) + 0.5f);
+		    (unsigned short int) (empty_left + ((0.05f * empty_width) * value) + 0.5f);
 
 		// And finally, draw the thumb, which we want to override the border with!
 		fill_rect(thumb_left, top_pos, thumb_width, FONTH, &fgC);
@@ -2646,9 +2616,85 @@ int
 	//       essentially throttling the bar to the screen's refresh rate).
 	if (refresh(fbfd, region, WAVEFORM_MODE_AUTO, fbink_config.is_flashing) != EXIT_SUCCESS) {
 		fprintf(stderr, "[FBInk] Failed to refresh the screen!\n");
-		rv = ERRCODE(EXIT_FAILURE);
-		goto cleanup;
+		return ERRCODE(EXIT_FAILURE);
 	}
+
+	return EXIT_SUCCESS;
+}
+
+// Draw a full-width progress bar
+int
+    fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInkConfig* caller_fbink_config)
+{
+	// Open the framebuffer if need be...
+	// NOTE: As usual, we *expect* to be initialized at this point!
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// mmap the fb if need be...
+	if (!isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	}
+
+	// Begin by sanitizing the input...
+	if (percentage > 100U) {
+		LOG("The specified percentage (%hhu) is larger than 100, clamping it.", percentage);
+		percentage = 100U;
+	}
+
+	// And do the work ;).
+	rv = draw_progress_bars(fbfd, false, percentage, caller_fbink_config);
+
+	// Cleanup
+cleanup:
+	if (isFbMapped && !keep_fd) {
+		unmap_fb();
+	}
+	if (!keep_fd) {
+		close(fbfd);
+	}
+
+	return rv;
+}
+
+// Draw a full-width activity bar
+int
+    fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkConfig* caller_fbink_config)
+{
+	// Open the framebuffer if need be...
+	// NOTE: As usual, we *expect* to be initialized at this point!
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// mmap the fb if need be...
+	if (!isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	}
+
+	// Begin by sanitizing the input...
+	if (progress > 18U) {
+		LOG("The specified progress step (%hhu) is larger than 18, clamping it.", progress);
+		progress = 18U;
+	}
+
+	// And do the work ;).
+	rv = draw_progress_bars(fbfd, true, progress, caller_fbink_config);
 
 	// Cleanup
 cleanup:

@@ -239,6 +239,13 @@ FBINK_API bool fbink_is_fb_quirky(void);
 // fbink_config:	pointer to an FBInkConfig struct (ignores is_overlay, col & hoffset; as well as is_centered & is_padded).
 FBINK_API int fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInkConfig* fbink_config);
 
+// Print a full-width activity bar on screen (i.e., an infinite progress bar)
+// fdfd:		open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
+// progress:		0-18 value to set the progress thumb's position in the bar
+// fbink_config:	pointer to an FBInkConfig struct (ignores col & hoffset; as well as is_centered & is_padded).
+FBINK_API int fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkConfig* fbink_config);
+
 // Print an image on screen
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
 // fdfd:		open file descriptor to the framebuffer character device,

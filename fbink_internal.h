@@ -304,6 +304,8 @@ static int unmap_fb(void);
 static void rotate_region(struct mxcfb_rect*);
 static void fullscreen_region(struct mxcfb_rect*);
 
+int draw_progress_bars(int, bool, uint8_t, const FBInkConfig*);
+
 // For identify_device, which we need outside of fbink_device_id.c ;)
 #ifndef FBINK_FOR_LINUX
 #	include "fbink_device_id.h"
