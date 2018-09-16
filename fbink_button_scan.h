@@ -27,7 +27,6 @@
 
 #ifdef FBINK_WITH_BUTTON_SCAN
 #	include <linux/input.h>
-#	include <time.h>
 #	include <mntent.h>
 #	include <poll.h>
 

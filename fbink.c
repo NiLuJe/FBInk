@@ -2690,16 +2690,33 @@ int
 		}
 	}
 
-	// Begin by sanitizing the input...
-	if (progress > 18U) {
-		LOG("The specified progress step (%hhu) is larger than 18, clamping it.", progress);
-		progress = 18U;
+	// We don't need to fudge with fbink_config, no text to show ;).
+
+	// NOTE: If we passed 0 as progress, loop forever!
+	if (progress == 0U) {
+		LOG("** No progress specified, will loop forever! **");
+		const struct timespec zzz = { 0L, 500000000L };
+
+		while (1) {
+			for (uint8_t i = 0; i < 18; i++) {
+				rv = draw_progress_bars(fbfd, true, i, caller_fbink_config);
+				nanosleep(&zzz, NULL);
+			}
+			for (uint8_t i = 18; i > 0; i--) {
+				rv = draw_progress_bars(fbfd, true, i, caller_fbink_config);
+				nanosleep(&zzz, NULL);
+			}
+		}
+	} else {
+		// Begin by sanitizing the input...
+		if (progress > 19U) {
+			LOG("The specified progress step (%hhu) is larger than 19, clamping it.", progress);
+			progress = 19U;
+		}
+
+		// And do the work ;).
+		rv = draw_progress_bars(fbfd, true, (uint8_t)(progress - 1U), caller_fbink_config);
 	}
-
-	// We don't need to fudge with fbink_config, no text ;).
-
-	// And do the work ;).
-	rv = draw_progress_bars(fbfd, true, progress, caller_fbink_config);
 
 	// Cleanup
 cleanup:
