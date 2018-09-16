@@ -2510,21 +2510,6 @@ int
 		fill_rect(left_pos, top_pos, (unsigned short int) viewWidth, FONTH, &bgC);
 	}
 
-	// Next comes the maths!
-	// Begin by sanitizing the input...
-	if (percentage > 100U) {
-		LOG("The specified percentage (%hhu) is larger than 100, clamping it.", percentage);
-		percentage = 100U;
-	}
-
-	// We'll want 5% of padding on each side,
-	// with a poor man's rounding to make sure the bar's size is constant across all percentage values...
-	unsigned short int fill_width = (unsigned short int) ((percentage / 100.0f) * (0.90f * (float) viewWidth) + 0.5f);
-	unsigned short int fill_left  = (unsigned short int) (left_pos + (0.05f * (float) viewWidth) + 0.5f);
-	unsigned short int empty_width =
-	    (unsigned short int) (((float) (100U - percentage) / 100.0f) * (0.90f * (float) viewWidth) + 0.5f);
-	unsigned short int empty_left = (unsigned short int) (fill_left + fill_width);
-
 	// NOTE: We always use the same BG_ constant in order to get a rough inverse by just swapping to the inverted LUT ;).
 	FBInkColor emptyC;
 	FBInkColor borderC;
@@ -2541,25 +2526,83 @@ int
 	borderC.g = borderC.r;
 	borderC.b = borderC.r;
 
-	// Draw the border...
-	fill_rect(fill_left, top_pos, (unsigned short int) (fill_width + empty_width), FONTH, &borderC);
-	// Draw the fill bar, which we want to override the border with!
-	fill_rect(fill_left, top_pos, fill_width, FONTH, &fgC);
-	// And the empty bar...
-	// NOTE: With a minor tweak to keep a double-width border on the bottom & right sides ;).
-	if (percentage == 0U) {
-		// Keep the left border alone!
+	bool is_infinite = true;
+	if (!is_infinite) {
+		// This is a real progress bar ;).
+		// Next comes the maths!
+		// Begin by sanitizing the input...
+		if (percentage > 100U) {
+			LOG("The specified percentage (%hhu) is larger than 100, clamping it.", percentage);
+			percentage = 100U;
+		}
+
+		// We'll want 5% of padding on each side,
+		// with a poor man's rounding to make sure the bar's size is constant across all percentage values...
+		unsigned short int fill_width =
+		    (unsigned short int) ((percentage / 100.0f) * (0.90f * (float) viewWidth) + 0.5f);
+		unsigned short int fill_left = (unsigned short int) (left_pos + (0.05f * (float) viewWidth) + 0.5f);
+		unsigned short int empty_width =
+		    (unsigned short int) (((float) (100U - percentage) / 100.0f) * (0.90f * (float) viewWidth) + 0.5f);
+		unsigned short int empty_left = (unsigned short int) (fill_left + fill_width);
+
+		// Draw the border...
+		fill_rect(fill_left, top_pos, (unsigned short int) (fill_width + empty_width), FONTH, &borderC);
+		// Draw the fill bar, which we want to override the border with!
+		fill_rect(fill_left, top_pos, fill_width, FONTH, &fgC);
+		// And the empty bar...
+		// NOTE: With a minor tweak to keep a double-width border on the bottom & right sides ;).
+		if (percentage == 0U) {
+			// Keep the left border alone!
+			fill_rect((unsigned short int) (empty_left + 1U),
+				  (unsigned short int) (top_pos + 1U),
+				  (unsigned short int) MAX(0, empty_width - 3),
+				  (unsigned short int) (FONTH - 3U),
+				  &emptyC);
+		} else {
+			fill_rect(empty_left,
+				  (unsigned short int) (top_pos + 1U),
+				  (unsigned short int) MAX(0, empty_width - 2),
+				  (unsigned short int) (FONTH - 3U),
+				  &emptyC);
+		}
+
+		// Draw percentage in the middle of the bar...
+		draw(percentage_text,
+		     (unsigned short int) fbink_config.row,
+		     (unsigned short int) fbink_config.col,
+		     0U,
+		     halfcell_offset,
+		     &fbink_config);
+	} else {
+		// This is an infinite progress bar (a.k.a., activity bar)!
+		// Next comes the maths!
+		// Begin by sanitizing the input...
+		if (percentage > 20U) {
+			LOG("The specified progress (%hhu) is larger than 20, clamping it.", percentage);
+			percentage = 20U;
+		}
+
+		// We'll want 5% of padding on each side,
+		// with a poor man's rounding to make sure the bar's size is constant across all percentage values...
+		unsigned short int empty_width = (unsigned short int) ((float) (0.90f * (float) viewWidth) + 0.5f);
+		unsigned short int empty_left  = (unsigned short int) (left_pos + (0.05f * (float) viewWidth) + 0.5f);
+
+		// Draw the border...
+		fill_rect(empty_left, top_pos, (unsigned short int) (empty_width), FONTH, &borderC);
+		// Draw the empty bar...
 		fill_rect((unsigned short int) (empty_left + 1U),
 			  (unsigned short int) (top_pos + 1U),
 			  (unsigned short int) MAX(0, empty_width - 3),
 			  (unsigned short int) (FONTH - 3U),
 			  &emptyC);
-	} else {
-		fill_rect(empty_left,
-			  (unsigned short int) (top_pos + 1U),
-			  (unsigned short int) MAX(0, empty_width - 2),
-			  (unsigned short int) (FONTH - 3U),
-			  &emptyC);
+
+		// We want our thumb to take 10% of the bar's width
+		unsigned short int thumb_width = (unsigned short int) ((float) (0.10f * empty_width) + 0.5f);
+		// We move the thumb in increment of 5% (i.e., half its width)
+		unsigned short int thumb_left = (unsigned short int) ((thumb_width / 2U) * percentage);
+
+		// And finally, draw the thumb, which we want to override the border with!
+		fill_rect(thumb_left, top_pos, thumb_width, FONTH, &fgC);
 	}
 
 	// Start setting up the screen refresh...
@@ -2583,14 +2626,6 @@ int
 			LOG("Adjusted region top to account for vertical offset pushing part of the content off-screen");
 		}
 	}
-
-	// Draw percentage in the middle of the bar...
-	draw(percentage_text,
-	     (unsigned short int) fbink_config.row,
-	     (unsigned short int) fbink_config.col,
-	     0U,
-	     halfcell_offset,
-	     &fbink_config);
 
 	// Rotate the region if need be...
 	if (deviceQuirks.isKobo16Landscape) {
