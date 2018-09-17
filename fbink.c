@@ -2854,9 +2854,10 @@ int
 		x_off = (short int) (viewHoriOrigin + x_off + (fbink_config->col * FONTW));
 	}
 	if (fbink_config->row < 0) {
-		y_off = (short int) (viewVertOrigin + y_off + (MAX(MAXROWS + fbink_config->row, 0) * FONTH));
+		y_off =
+		    (short int) (viewVertOrigin - viewSoftOffset + y_off + (MAX(MAXROWS + fbink_config->row, 0) * FONTH));
 	} else {
-		y_off = (short int) (viewVertOrigin + y_off + (fbink_config->row * FONTH));
+		y_off = (short int) (viewVertOrigin - viewSoftOffset + y_off + (fbink_config->row * FONTH));
 	}
 	LOG("Adjusted image display coordinates to (%hd, %hd), after column %hd & row %hd",
 	    x_off,
@@ -3041,7 +3042,7 @@ int
 	unsigned short int img_y_off = 0;
 	if (x_off < 0) {
 		// We'll start plotting from the beginning of the *visible* part of the image ;)
-		img_x_off = (unsigned short int) abs(x_off - viewHoriOrigin);
+		img_x_off = (unsigned short int) abs(x_off);
 		max_width = (unsigned short int) (max_width + img_x_off);
 		// Make sure we're not trying to loop past the actual width of the image!
 		max_width = (unsigned short int) MIN(w, max_width);
@@ -3052,7 +3053,7 @@ int
 	}
 	if (y_off < 0) {
 		// We'll start plotting from the beginning of the *visible* part of the image ;)
-		img_y_off  = (unsigned short int) abs(y_off - viewVertOrigin);
+		img_y_off  = (unsigned short int) abs(y_off);
 		max_height = (unsigned short int) (max_height + img_y_off);
 		// Make sure we're not trying to loop past the actual height of the image!
 		max_height = (unsigned short int) MIN(h, max_height);
