@@ -104,6 +104,9 @@ static void
 	    "\t-A, --activitybar NUM\tDraw an activity bar on step NUM (full-width). NUM must be between 0 and 16. Like other alternative modes, does *NOT* have precedence over text printing.\n"
 	    "\t\t\t\tNOTE: If NUM is negative, will cycle between each possible value every 500ms, until the death of the sun! Be careful not to be caught in an involuntary infinite loop!"
 	    "\t\t\t\tIgnores -x, --col; -X, --hoffset; as well as -m, --centered & -p, --padded"
+#ifndef FBINK_FOR_KINDLE
+	    "\t-V, --noviewport\tIgnore the native viewport correction on Kobo devices with rows of pixels hidden by a bezel.\n"
+#endif
 	    "\n"
 	    "NOTES:\n"
 	    "\tYou can specify multiple STRINGs in a single invocation of fbink, each consecutive one will be printed on the subsequent line.\n"
@@ -206,6 +209,7 @@ int
 					      { "linecount", no_argument, NULL, 'l' },
 					      { "progressbar", required_argument, NULL, 'P' },
 					      { "activitybar", required_argument, NULL, 'A' },
+					      { "noviewport", no_argument, NULL, 'V' },
 					      { "overlay", no_argument, NULL, 'o' },
 					      { "bgless", no_argument, NULL, 'O' },
 					      { NULL, 0, NULL, 0 } };
@@ -260,7 +264,7 @@ int
 	uint8_t   progress       = 0;
 	int       errfnd         = 0;
 
-	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:B:LlP:A:oO", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:B:LlP:A:oOV", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				fbink_config.row = (short int) atoi(optarg);
@@ -568,6 +572,9 @@ int
 				break;
 			case 'O':
 				fbink_config.is_bgless = true;
+				break;
+			case 'V':
+				fbink_config.ignore_viewport = true;
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
