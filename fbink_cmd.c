@@ -180,20 +180,30 @@ static void
 // Truly infinite progress bar
 // NOTE: Punted off to a dedicated function to workaround an amizingly obscure performance issue:
 //       Keeping this in main massively tanks image processing performance (by ~50%!) o_O.
-static void
+static int
     do_infinite_progress_bar(int fbfd, const FBInkConfig* fbink_config)
 {
+	int rv = EXIT_SUCCESS;
+
 	const struct timespec zzz = { 0L, 500000000L };
 	for (;;) {
 		for (uint8_t i = 0; i < 18; i++) {
-			fbink_print_activity_bar(fbfd, i, fbink_config);
+			rv = fbink_print_activity_bar(fbfd, i, fbink_config);
+			if (rv != EXIT_SUCCESS) {
+				break;
+			}
 			nanosleep(&zzz, NULL);
 		}
 		for (uint8_t i = 18; i > 0; i--) {
-			fbink_print_activity_bar(fbfd, i, fbink_config);
+			rv = fbink_print_activity_bar(fbfd, i, fbink_config);
+			if (rv != EXIT_SUCCESS) {
+				break;
+			}
 			nanosleep(&zzz, NULL);
 		}
 	}
+
+	return rv;
 }
 
 // Application entry point
@@ -763,7 +773,11 @@ int
 				// NOTE: In a dedicated function,
 				//       because keeping it inline massively tanks performance in the image codepath,
 				//       for an amazingly weird reason :?
-				do_infinite_progress_bar(fbfd, &fbink_config);
+				if (do_infinite_progress_bar(fbfd, &fbink_config) != EXIT_SUCCESS) {
+					fprintf(stderr, "Failed to display a progressbar!\n");
+					rv = ERRCODE(EXIT_FAILURE);
+					goto cleanup;
+				}
 			} else {
 				if (!fbink_config.is_quiet) {
 					printf(

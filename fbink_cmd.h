@@ -35,6 +35,6 @@
 
 static void show_helpmsg(void);
 
-static void do_infinite_progress_bar(int, const FBInkConfig*);
+static int do_infinite_progress_bar(int, const FBInkConfig*);
 
 #endif
