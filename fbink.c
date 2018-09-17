@@ -635,10 +635,12 @@ static struct mxcfb_rect
 				// do it signed to catch corner-cases interactions between col/hoffset/pixel_offset,
 				// and clamp it to safe values!
 				if (hoffset < 0) {
-					region.left = (uint32_t) MAX(0, ((col * FONTW) + hoffset + viewHoriOrigin + pixel_offset));
+					region.left =
+					    (uint32_t) MAX(0, ((col * FONTW) + hoffset + viewHoriOrigin + pixel_offset));
 				} else {
-					region.left = (uint32_t) MIN((uint32_t)((col * FONTW) + hoffset + viewHoriOrigin + pixel_offset),
-								     (screenWidth - 1U));
+					region.left = (uint32_t) MIN(
+					    (uint32_t)((col * FONTW) + hoffset + viewHoriOrigin + pixel_offset),
+					    (screenWidth - 1U));
 				}
 				LOG("Updated region.left to %u", region.left);
 			}
@@ -656,7 +658,8 @@ static struct mxcfb_rect
 			LOG("Painting a background rectangle on the left edge on account of pixel_offset");
 			// Make sure we don't leave a hoffset sized gap when we have a positive hoffset...
 			fill_rect(
-			    hoffset > 0 ? (unsigned short int) (hoffset + viewHoriOrigin) : (unsigned short int) (0U + viewHoriOrigin),
+			    hoffset > 0 ? (unsigned short int) (hoffset + viewHoriOrigin)
+					: (unsigned short int) (0U + viewHoriOrigin),
 			    (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			    pixel_offset,    // Don't append hoffset here, to make it clear stuff moved to the right.
 			    FONTH,
@@ -687,9 +690,9 @@ static struct mxcfb_rect
 			LOG("Painting a background rectangle to fill the dead space on the right edge");
 			// Make sure we don't leave a hoffset sized gap when we have a negative hoffset...
 			fill_rect(
-			    hoffset < 0
-				? (unsigned short int) (screenWidth - pixel_offset - (unsigned short int) abs(hoffset) - viewHoriOrigin)
-				: (unsigned short int) (screenWidth - pixel_offset - viewHoriOrigin),
+			    hoffset < 0 ? (unsigned short int) (screenWidth - pixel_offset -
+								(unsigned short int) abs(hoffset) - viewHoriOrigin)
+					: (unsigned short int) (screenWidth - pixel_offset - viewHoriOrigin),
 			    (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			    pixel_offset,    // Don't append abs(hoffset) here, to make it clear stuff moved to the left.
 			    FONTH,
