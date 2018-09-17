@@ -1730,11 +1730,11 @@ int
 	if ((FONTH * MAXROWS) == viewHeight) {
 		viewSoftOffset = 0U;
 	} else {
-		viewSoftOffset = (viewHeight - (FONTH * MAXROWS)) / 2U;
+		viewSoftOffset = (uint8_t)((viewHeight - (uint32_t)(FONTH * MAXROWS)) / 2U);
 		ELOG("[FBInk] Vertical fit isn't perfect, adding a %hhu pixels offset to text & bars", viewSoftOffset);
 	}
 	// Bake that into the viewport computations, we'll special-case the image codepath to ignore it ;).
-	viewVertOrigin += viewSoftOffset;
+	viewVertOrigin = (uint8_t)(viewVertOrigin + viewSoftOffset);
 
 	// Get fixed screen information
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &fInfo)) {
