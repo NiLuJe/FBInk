@@ -101,7 +101,7 @@ static void
 	    "\t-l, --linecount\t\tWhen successfully printing text, outputs the total amount of printed lines in the final line of output to stdout (NOTE: enforces quiet & non-verbose!).\n"
 	    "\t-P, --progressbar NUM\tDraw a NUM%% full progress bar (full-width). Like other alternative modes, does *NOT* have precedence over text printing.\n"
 	    "\t\t\t\tIgnores -o, --overlay; -x, --col; -X, --hoffset; as well as -m, --centered & -p, --padded"
-	    "\t-A, --activitybar NUM\tDraw an activity bar on step NUM (full-width). NUM must be between 0 and 18. Like other alternative modes, does *NOT* have precedence over text printing.\n"
+	    "\t-A, --activitybar NUM\tDraw an activity bar on step NUM (full-width). NUM must be between 0 and 17. Like other alternative modes, does *NOT* have precedence over text printing.\n"
 	    "\t\t\t\tNOTE: If NUM is negative, will cycle between each possible value every 500ms, until the death of the sun! Be careful not to be caught in an involuntary infinite loop!"
 	    "\t\t\t\tIgnores -x, --col; -X, --hoffset; as well as -m, --centered & -p, --padded"
 	    "\n"
@@ -736,11 +736,11 @@ int
 				}
 				const struct timespec zzz = { 0L, 500000000L };
 				while (1) {
-					for (uint8_t i = 0; i < 18; i++) {
+					for (uint8_t i = 0; i < 17; i++) {
 						rv = fbink_print_activity_bar(fbfd, i, &fbink_config);
 						nanosleep(&zzz, NULL);
 					}
-					for (uint8_t i = 18; i > 0; i--) {
+					for (uint8_t i = 17; i > 0; i--) {
 						rv = fbink_print_activity_bar(fbfd, i, &fbink_config);
 						nanosleep(&zzz, NULL);
 					}
