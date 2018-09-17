@@ -605,12 +605,12 @@ static struct mxcfb_rect
 	if (voffset != 0) {
 		LOG("Adjusting vertical pen position by %hd pixels, as requested", voffset);
 		// Clamp region to sane values if h/v offset is pushing stuff off-screen
-		if ((region.top + region.height) > viewHeight) {
-			region.height = (uint32_t) MAX(0, (short int) (viewHeight - region.top));
+		if ((region.top + region.height) > screenHeight) {
+			region.height = (uint32_t) MAX(0, (short int) (screenHeight - region.top));
 			LOG("Adjusted region height to account for vertical offset pushing part of the content off-screen");
 		}
-		if (region.top >= viewHeight) {
-			region.top = viewHeight - 1;
+		if (region.top >= screenHeight) {
+			region.top = screenHeight - 1;
 			LOG("Adjusted region top to account for vertical offset pushing part of the content off-screen");
 		}
 	}
@@ -2662,12 +2662,12 @@ int
 	if (voffset != 0) {
 		LOG("Adjusting vertical pen position by %hd pixels, as requested", voffset);
 		// Clamp region to sane values if h/v offset is pushing stuff off-screen
-		if ((region.top + region.height) > viewHeight) {
-			region.height = (uint32_t) MAX(0, (short int) (viewHeight - region.top));
+		if ((region.top + region.height) > screenHeight) {
+			region.height = (uint32_t) MAX(0, (short int) (screenHeight - region.top));
 			LOG("Adjusted region height to account for vertical offset pushing part of the content off-screen");
 		}
-		if (region.top >= viewHeight) {
-			region.top = viewHeight - 1;
+		if (region.top >= screenHeight) {
+			region.top = screenHeight - 1;
 			LOG("Adjusted region top to account for vertical offset pushing part of the content off-screen");
 		}
 	}
