@@ -1831,13 +1831,14 @@ void
 {
 	fprintf(
 	    stdout,
-	    "viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu",
+	    "viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewSoftOffset=%hhu;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu",
 	    viewWidth,
 	    viewHeight,
 	    screenWidth,
 	    screenHeight,
 	    viewHoriOrigin,
 	    viewVertOrigin,
+	    viewSoftOffset,
 	    vInfo.bits_per_pixel,
 	    FONTW,
 	    FONTH,
@@ -1865,6 +1866,7 @@ void
 		fbink_state->screen_height    = screenHeight;
 		fbink_state->view_hori_origin = viewHoriOrigin;
 		fbink_state->view_vert_origin = viewVertOrigin;
+		fbink_state->view_soft_offset = viewSoftOffset;
 		fbink_state->bpp              = vInfo.bits_per_pixel;
 		fbink_state->font_w           = FONTW;
 		fbink_state->font_h           = FONTH;
