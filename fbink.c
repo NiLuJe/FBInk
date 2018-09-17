@@ -591,7 +591,7 @@ static struct mxcfb_rect
 
 	// Recap final offset values
 	if (hoffset != 0 || viewHoriOrigin != 0) {
-		LOG("Adjusting horizontal pen position by %hd pixels, plus %hhu pixels, as mandated by the native viewport",
+		LOG("Adjusting horizontal pen position by %hd pixels, as requested, plus %hhu pixels, as mandated by the native viewport",
 		    hoffset,
 		    viewHoriOrigin);
 		// Clamp region to sane values if h/v offset is pushing stuff off-screen
@@ -605,7 +605,7 @@ static struct mxcfb_rect
 		}
 	}
 	if (voffset != 0 || viewVertOrigin != 0) {
-		LOG("Adjusting vertical pen position by %hd pixels, plus %hhu pixels, as mandated by the native viewport",
+		LOG("Adjusting vertical pen position by %hd pixels, as requested, plus %hhu pixels, as mandated by the native viewport",
 		    voffset,
 		    viewVertOrigin);
 		// Clamp region to sane values if h/v offset is pushing stuff off-screen
