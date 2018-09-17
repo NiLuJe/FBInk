@@ -734,7 +734,7 @@ int
 					    fbink_config.is_flashing ? "true" : "false",
 					    fbink_config.is_cleared ? "true" : "false");
 				}
-				const struct timespec zzz = { 0L, 500000000L };
+				const struct timespec zzz = { 0L, 750000000L };
 				while (1) {
 					for (uint8_t i = 0U; i < 16U; i++) {
 						rv = fbink_print_activity_bar(fbfd, i, &fbink_config);
