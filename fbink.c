@@ -1396,8 +1396,8 @@ int
 
 	// NOTE: In most every cases, we assume (0, 0) is at the top left of the screen,
 	//       and (xres, yres) at the bottom right, as we should.
-	viewWidth  = vInfo.xres;
-	viewHeight = vInfo.yres;
+	screenWidth  = vInfo.xres;
+	screenHeight = vInfo.yres;
 
 	// NOTE: This needs to be NOP by default, no matter the target device ;).
 	fxpRotateCoords = &rotate_nop;
@@ -1436,17 +1436,51 @@ int
 		//           & https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer.lua#L74-L84
 		if (vInfo.bits_per_pixel == 16U) {
 			// Correct viewWidth & viewHeight, so we do all our row/column arithmetics on the right values...
-			viewWidth                      = vInfo.yres;
-			viewHeight                     = vInfo.xres;
+			screenWidth                    = vInfo.yres;
+			screenHeight                   = vInfo.xres;
 			deviceQuirks.isKobo16Landscape = true;
 			fxpRotateCoords                = &rotate_coordinates;
 			ELOG("[FBInk] Enabled Kobo @ 16bpp fb rotation quirks (%ux%u -> %ux%u)",
 			     vInfo.xres,
 			     vInfo.yres,
-			     viewWidth,
-			     viewHeight);
+			     screenWidth,
+			     screenHeight);
 		}
 	}
+
+	// Handle the Kobo viewport trickery for the few devices with hidden rows of pixels...
+	// Things should generally not be broken-by-design on the horizontal axis...
+	viewWidth      = screenWidth;
+	viewHoriOrigin = 0U;
+	// But on the vertical axis, oh my...
+	if (deviceQuirks.koboVertOffset != 0) {
+		if (deviceQuirks.koboVertOffset > 0) {
+			// Rows of pixels are hidden at the top
+			viewWidth      = screenWidth - deviceQuirks.koboVertOffset;
+			viewVertOrigin = deviceQuirks.koboVertOffset;
+		} else {
+			// Rows of pixels are hidden at the bottom
+			viewWidth      = screenWidth - abs(deviceQuirks.koboVertOffset);
+			viewVertOrigin = 0U;
+		}
+		ELOG("[FBInk] Enabled Kobo viewport insanity (%ux%u -> %ux%u), top-left corner is @ (%hhu, %hhu)",
+		     screenWidth,
+		     screenHeight,
+		     viewWidth,
+		     viewHeight,
+		     viewHoriOrigin,
+		     viewVertOrigin);
+	} else {
+		// Device is not utterly mad, the top-left corner is at (0, 0)!
+		viewHeight     = screenHeight;
+		viewVertOrigin = 0U;
+	}
+#else
+	// Kindle devices are generally never broken-by-design (at least not on that front ;))
+	viewWidth      = screenWidth;
+	viewHoriOrigin = 0U;
+	viewHeight     = screenHeight;
+	viewVertOrigin = 0U;
 #endif
 
 	// NOTE: Set (& reset) original font resolution, in case we're re-init'ing,
