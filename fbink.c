@@ -1813,9 +1813,13 @@ void
 {
 	fprintf(
 	    stdout,
-	    "viewWidth=%u;viewHeight=%u;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu",
+	    "viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu",
 	    viewWidth,
 	    viewHeight,
+	    screenWidth,
+	    screenHeight,
+	    viewHoriOrigin,
+	    viewVertOrigin,
 	    vInfo.bits_per_pixel,
 	    FONTW,
 	    FONTH,
@@ -1837,21 +1841,25 @@ void
     fbink_get_state(const FBInkConfig* fbink_config, FBInkState* fbink_state)
 {
 	if (fbink_state) {
-		fbink_state->view_width     = viewWidth;
-		fbink_state->view_height    = viewHeight;
-		fbink_state->bpp            = vInfo.bits_per_pixel;
-		fbink_state->font_w         = FONTW;
-		fbink_state->font_h         = FONTH;
-		fbink_state->fontsize_mult  = FONTSIZE_MULT;
-		fbink_state->font_name      = fontname_to_string(fbink_config->fontname);
-		fbink_state->glyph_width    = glyphWidth;
-		fbink_state->glyph_height   = glyphHeight;
-		fbink_state->max_cols       = MAXCOLS;
-		fbink_state->max_rows       = MAXROWS;
-		fbink_state->is_perfect_fit = deviceQuirks.isPerfectFit;
-		fbink_state->user_hz        = USER_HZ;
-		fbink_state->pen_fg_color   = penFGColor;
-		fbink_state->pen_bg_color   = penBGColor;
+		fbink_state->view_width       = viewWidth;
+		fbink_state->view_height      = viewHeight;
+		fbink_state->screen_width     = screenWidth;
+		fbink_state->screen_height    = screenHeight;
+		fbink_state->view_hori_origin = viewHoriOrigin;
+		fbink_state->view_vert_origin = viewVertOrigin;
+		fbink_state->bpp              = vInfo.bits_per_pixel;
+		fbink_state->font_w           = FONTW;
+		fbink_state->font_h           = FONTH;
+		fbink_state->fontsize_mult    = FONTSIZE_MULT;
+		fbink_state->font_name        = fontname_to_string(fbink_config->fontname);
+		fbink_state->glyph_width      = glyphWidth;
+		fbink_state->glyph_height     = glyphHeight;
+		fbink_state->max_cols         = MAXCOLS;
+		fbink_state->max_rows         = MAXROWS;
+		fbink_state->is_perfect_fit   = deviceQuirks.isPerfectFit;
+		fbink_state->user_hz          = USER_HZ;
+		fbink_state->pen_fg_color     = penFGColor;
+		fbink_state->pen_bg_color     = penBGColor;
 	} else {
 		fprintf(stderr, "[FBInk] Err, it appears we were passed a NULL fbink_state pointer?\n");
 	}
