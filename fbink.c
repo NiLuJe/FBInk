@@ -719,8 +719,9 @@ static struct mxcfb_rect
 	// NOTE: In case of a multi-line centered print, we can't really trust the final col,
 	//       it might be significantly different than the others, and as such, we'd be computing a cropped region.
 	//       Make the region cover the full width of the screen to make sure we won't miss anything.
-	if (multiline_offset > 0U && fbink_config->is_centered && (region.left > 0U || region.width < screenWidth)) {
-		region.left  = 0U;
+	if (multiline_offset > 0U && fbink_config->is_centered &&
+	    (region.left > (0U + viewHoriOrigin) || region.width < screenWidth)) {
+		region.left  = 0U + viewHoriOrigin;
 		region.width = screenWidth;
 		LOG("Enforced region.left to %u & region.width to %u because of multi-line centering",
 		    region.left,
@@ -2531,7 +2532,7 @@ int
 
 	// We'll begin by painting a blank canvas, just to make sure everything's clean behind us...
 	unsigned short int top_pos  = (unsigned short int) MAX(0, ((row * FONTH) + voffset + viewVertOrigin));
-	unsigned short int left_pos = (unsigned short int) (0U + viewHoriOrigin);
+	unsigned short int left_pos = 0U + viewHoriOrigin;
 
 	// ... unless we were asked to skip background pixels... ;).
 	if (!fbink_config->is_bgless) {
