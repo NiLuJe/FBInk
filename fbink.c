@@ -583,14 +583,14 @@ static struct mxcfb_rect
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
-		.top    = (uint32_t) MAX(0, (((row - multiline_offset) * FONTH) + voffset)),
-		.left   = (uint32_t) MAX(0, ((col * FONTW) + hoffset)),
+		.top    = (uint32_t) MAX(0, (((row - multiline_offset) * FONTH) + voffset + viewVertOrigin)),
+		.left   = (uint32_t) MAX(0, ((col * FONTW) + hoffset + viewHoriOrigin)),
 		.width  = multiline_offset > 0U ? (screenWidth - (uint32_t)(col * FONTW)) : (uint32_t)(charcount * FONTW),
 		.height = (uint32_t)((multiline_offset + 1U) * FONTH),
 	};
 
 	// Recap final offset values
-	if (hoffset != 0) {
+	if (hoffset != 0 || viewHoriOrigin != 0) {
 		LOG("Adjusting horizontal pen position by %hd pixels, as requested", hoffset);
 		// Clamp region to sane values if h/v offset is pushing stuff off-screen
 		if ((region.width + region.left + pixel_offset) > screenWidth) {
@@ -602,7 +602,7 @@ static struct mxcfb_rect
 			LOG("Adjusted region left to account for horizontal offset pushing part of the content off-screen");
 		}
 	}
-	if (voffset != 0) {
+	if (voffset != 0 || viewVertOrigin != 0) {
 		LOG("Adjusting vertical pen position by %hd pixels, as requested", voffset);
 		// Clamp region to sane values if h/v offset is pushing stuff off-screen
 		if ((region.top + region.height) > screenHeight) {
@@ -635,9 +635,9 @@ static struct mxcfb_rect
 				// do it signed to catch corner-cases interactions between col/hoffset/pixel_offset,
 				// and clamp it to safe values!
 				if (hoffset < 0) {
-					region.left = (uint32_t) MAX(0, ((col * FONTW) + hoffset + pixel_offset));
+					region.left = (uint32_t) MAX(0, ((col * FONTW) + hoffset + viewHoriOrigin + pixel_offset));
 				} else {
-					region.left = (uint32_t) MIN((uint32_t)((col * FONTW) + hoffset + pixel_offset),
+					region.left = (uint32_t) MIN((uint32_t)((col * FONTW) + hoffset + viewHoriOrigin + pixel_offset),
 								     (screenWidth - 1U));
 				}
 				LOG("Updated region.left to %u", region.left);
@@ -656,7 +656,7 @@ static struct mxcfb_rect
 			LOG("Painting a background rectangle on the left edge on account of pixel_offset");
 			// Make sure we don't leave a hoffset sized gap when we have a positive hoffset...
 			fill_rect(
-			    hoffset > 0 ? (unsigned short int) hoffset : 0U,
+			    hoffset > 0 ? (unsigned short int) (hoffset + viewHoriOrigin) : (unsigned short int) (0U + viewHoriOrigin),
 			    (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			    pixel_offset,    // Don't append hoffset here, to make it clear stuff moved to the right.
 			    FONTH,
@@ -688,8 +688,8 @@ static struct mxcfb_rect
 			// Make sure we don't leave a hoffset sized gap when we have a negative hoffset...
 			fill_rect(
 			    hoffset < 0
-				? (unsigned short int) (screenWidth - pixel_offset - (unsigned short int) abs(hoffset))
-				: (unsigned short int) (screenWidth - pixel_offset),
+				? (unsigned short int) (screenWidth - pixel_offset - (unsigned short int) abs(hoffset) - viewHoriOrigin)
+				: (unsigned short int) (screenWidth - pixel_offset - viewHoriOrigin),
 			    (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			    pixel_offset,    // Don't append abs(hoffset) here, to make it clear stuff moved to the left.
 			    FONTH,
@@ -732,8 +732,8 @@ static struct mxcfb_rect
 	//       put_pixel is checked, and will discard off-screen pixels safely.
 	//       Because we store the final position in an unsigned value, this means that, to some extent,
 	//       we rely on wraparound on underflow to still point to (large, but positive) off-screen coordinates.
-	unsigned short int x_base_offs = (unsigned short int) ((col * FONTW) + pixel_offset + hoffset);
-	unsigned short int y_offs      = (unsigned short int) ((row * FONTH) + voffset);
+	unsigned short int x_base_offs = (unsigned short int) ((col * FONTW) + pixel_offset + hoffset + viewHoriOrigin);
+	unsigned short int y_offs      = (unsigned short int) ((row * FONTH) + voffset + viewVertOrigin);
 	unsigned short int x_offs      = 0U;
 
 	unsigned short int i;
@@ -2524,8 +2524,8 @@ int
 	}
 
 	// We'll begin by painting a blank canvas, just to make sure everything's clean behind us...
-	unsigned short int top_pos  = (unsigned short int) MAX(0, ((row * FONTH) + voffset));
-	unsigned short int left_pos = 0U;
+	unsigned short int top_pos  = (unsigned short int) MAX(0, ((row * FONTH) + voffset + viewVertOrigin));
+	unsigned short int left_pos = (unsigned short int) (0U + viewHoriOrigin);
 
 	// ... unless we were asked to skip background pixels... ;).
 	if (!fbink_config->is_bgless) {
@@ -2827,14 +2827,14 @@ int
 
 	// NOTE: We compute initial offsets from row/col, to help aligning images with text.
 	if (fbink_config->col < 0) {
-		x_off = (short int) (x_off + (MAX(MAXCOLS + fbink_config->col, 0) * FONTW));
+		x_off = (short int) (viewHoriOrigin + x_off + (MAX(MAXCOLS + fbink_config->col, 0) * FONTW));
 	} else {
-		x_off = (short int) (x_off + (fbink_config->col * FONTW));
+		x_off = (short int) (viewHoriOrigin + x_off + (fbink_config->col * FONTW));
 	}
 	if (fbink_config->row < 0) {
-		y_off = (short int) (y_off + (MAX(MAXROWS + fbink_config->row, 0) * FONTH));
+		y_off = (short int) (viewVertOrigin + y_off + (MAX(MAXROWS + fbink_config->row, 0) * FONTH));
 	} else {
-		y_off = (short int) (y_off + (fbink_config->row * FONTH));
+		y_off = (short int) (viewVertOrigin + y_off + (fbink_config->row * FONTH));
 	}
 	LOG("Adjusted image display coordinates to (%hd, %hd), after column %hd & row %hd",
 	    x_off,
@@ -3019,7 +3019,7 @@ int
 	unsigned short int img_y_off = 0;
 	if (x_off < 0) {
 		// We'll start plotting from the beginning of the *visible* part of the image ;)
-		img_x_off = (unsigned short int) abs(x_off);
+		img_x_off = (unsigned short int) abs(x_off - viewHoriOrigin);
 		max_width = (unsigned short int) (max_width + img_x_off);
 		// Make sure we're not trying to loop past the actual width of the image!
 		max_width = (unsigned short int) MIN(w, max_width);
@@ -3030,7 +3030,7 @@ int
 	}
 	if (y_off < 0) {
 		// We'll start plotting from the beginning of the *visible* part of the image ;)
-		img_y_off  = (unsigned short int) abs(y_off);
+		img_y_off  = (unsigned short int) abs(y_off - viewVertOrigin);
 		max_height = (unsigned short int) (max_height + img_y_off);
 		// Make sure we're not trying to loop past the actual height of the image!
 		max_height = (unsigned short int) MIN(h, max_height);
