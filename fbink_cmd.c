@@ -178,8 +178,8 @@ static void
 }
 
 // Truly infinite progress bar
-// NOTE: Punted off to a dedicated function to workaround an amizingly obscure performance issue:
-//       Keeping this in main massively tanks image processing performance (by ~50%!) o_O.
+// NOTE: Punted off to a dedicated function to workaround an amazingly weird & obscure performance issue:
+//       keeping this in main massively tanks *image* processing performance (by ~50%!) o_O.
 static int
     do_infinite_progress_bar(int fbfd, const FBInkConfig* fbink_config)
 {
