@@ -158,7 +158,7 @@ static void
     rotate_coordinates(FBInkCoordinates* coords)
 {
 	unsigned short int rx = coords->y;
-	unsigned short int ry = (unsigned short int) (viewWidth - coords->x - 1);
+	unsigned short int ry = (unsigned short int) (screenWidth - coords->x - 1);
 
 // NOTE: This codepath is not production ready, it was just an experiment to wrap my head around framebuffer rotation...
 //       In particular, only CW has been actually confirmed to behave properly (to handle the isKobo16Landscape quirk),
@@ -585,7 +585,7 @@ static struct mxcfb_rect
 	struct mxcfb_rect region = {
 		.top    = (uint32_t) MAX(0, (((row - multiline_offset) * FONTH) + voffset)),
 		.left   = (uint32_t) MAX(0, ((col * FONTW) + hoffset)),
-		.width  = multiline_offset > 0U ? (viewWidth - (uint32_t)(col * FONTW)) : (uint32_t)(charcount * FONTW),
+		.width  = multiline_offset > 0U ? (screenWidth - (uint32_t)(col * FONTW)) : (uint32_t)(charcount * FONTW),
 		.height = (uint32_t)((multiline_offset + 1U) * FONTH),
 	};
 
@@ -593,12 +593,12 @@ static struct mxcfb_rect
 	if (hoffset != 0) {
 		LOG("Adjusting horizontal pen position by %hd pixels, as requested", hoffset);
 		// Clamp region to sane values if h/v offset is pushing stuff off-screen
-		if ((region.width + region.left + pixel_offset) > viewWidth) {
-			region.width = (uint32_t) MAX(0, (short int) (viewWidth - region.left - pixel_offset));
+		if ((region.width + region.left + pixel_offset) > screenWidth) {
+			region.width = (uint32_t) MAX(0, (short int) (screenWidth - region.left - pixel_offset));
 			LOG("Adjusted region width to account for horizontal offset pushing part of the content off-screen");
 		}
-		if ((region.left + pixel_offset) >= viewWidth) {
-			region.left = viewWidth - pixel_offset - 1;
+		if ((region.left + pixel_offset) >= screenWidth) {
+			region.left = screenWidth - pixel_offset - 1;
 			LOG("Adjusted region left to account for horizontal offset pushing part of the content off-screen");
 		}
 	}
@@ -638,7 +638,7 @@ static struct mxcfb_rect
 					region.left = (uint32_t) MAX(0, ((col * FONTW) + hoffset + pixel_offset));
 				} else {
 					region.left = (uint32_t) MIN((uint32_t)((col * FONTW) + hoffset + pixel_offset),
-								     (viewWidth - 1U));
+								     (screenWidth - 1U));
 				}
 				LOG("Updated region.left to %u", region.left);
 			}
@@ -662,13 +662,13 @@ static struct mxcfb_rect
 			    FONTH,
 			    &bgC);
 			// Correct width, to include that bit of content, too, if needed
-			if (region.width < viewWidth) {
+			if (region.width < screenWidth) {
 				region.width += pixel_offset;
 				// And make sure it's properly clamped, because we can't necessarily rely on left & width
 				// being entirely acurate either because of the multiline print override,
 				// or because of a bit of subcell placement overshoot trickery (c.f., comment in put_pixel).
-				if (region.width + region.left > viewWidth) {
-					region.width = viewWidth - region.left;
+				if (region.width + region.left > screenWidth) {
+					region.width = screenWidth - region.left;
 					LOG("Clamped region.width to %u", region.width);
 				} else {
 					LOG("Updated region.width to %u", region.width);
@@ -688,19 +688,19 @@ static struct mxcfb_rect
 			// Make sure we don't leave a hoffset sized gap when we have a negative hoffset...
 			fill_rect(
 			    hoffset < 0
-				? (unsigned short int) (viewWidth - pixel_offset - (unsigned short int) abs(hoffset))
-				: (unsigned short int) (viewWidth - pixel_offset),
+				? (unsigned short int) (screenWidth - pixel_offset - (unsigned short int) abs(hoffset))
+				: (unsigned short int) (screenWidth - pixel_offset),
 			    (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			    pixel_offset,    // Don't append abs(hoffset) here, to make it clear stuff moved to the left.
 			    FONTH,
 			    &bgC);
 			// If it's not already the case, update region to the full width,
 			// because we've just plugged a hole at the very right edge of a full line.
-			if (region.width < viewWidth) {
-				region.width = viewWidth;
+			if (region.width < screenWidth) {
+				region.width = screenWidth;
 				// Keep making sure it's properly clamped, interaction w/ hoffset can push us over the edge.
-				if (region.width + region.left > viewWidth) {
-					region.width = viewWidth - region.left;
+				if (region.width + region.left > screenWidth) {
+					region.width = screenWidth - region.left;
 					LOG("Clamped region.width to %u", region.width);
 				} else {
 					LOG("Updated region.width to %u", region.width);
@@ -712,9 +712,9 @@ static struct mxcfb_rect
 	// NOTE: In case of a multi-line centered print, we can't really trust the final col,
 	//       it might be significantly different than the others, and as such, we'd be computing a cropped region.
 	//       Make the region cover the full width of the screen to make sure we won't miss anything.
-	if (multiline_offset > 0U && fbink_config->is_centered && (region.left > 0U || region.width < viewWidth)) {
+	if (multiline_offset > 0U && fbink_config->is_centered && (region.left > 0U || region.width < screenWidth)) {
 		region.left  = 0U;
-		region.width = viewWidth;
+		region.width = screenWidth;
 		LOG("Enforced region.left to %u & region.width to %u because of multi-line centering",
 		    region.left,
 		    region.width);
@@ -1435,7 +1435,7 @@ int
 		//       c.f., https://github.com/koreader/koreader/blob/master/frontend/device/kobo/device.lua#L32-L33
 		//           & https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer.lua#L74-L84
 		if (vInfo.bits_per_pixel == 16U) {
-			// Correct viewWidth & viewHeight, so we do all our row/column arithmetics on the right values...
+			// Correct screenWidth & screenHeight, so we do all our row/column arithmetics on the right values...
 			screenWidth                    = vInfo.yres;
 			screenHeight                   = vInfo.xres;
 			deviceQuirks.isKobo16Landscape = true;
@@ -1938,7 +1938,7 @@ static void
 	// Rotate the region if need be...
 	struct mxcfb_rect oregion = *region;
 	// NOTE: left = x, top = y
-	region->top    = viewWidth - oregion.left - oregion.width;
+	region->top    = screenWidth - oregion.left - oregion.width;
 	region->left   = oregion.top;
 	region->width  = oregion.height;
 	region->height = oregion.width;
@@ -2529,7 +2529,7 @@ int
 
 	// ... unless we were asked to skip background pixels... ;).
 	if (!fbink_config->is_bgless) {
-		fill_rect(left_pos, top_pos, (unsigned short int) viewWidth, FONTH, &bgC);
+		fill_rect(left_pos, top_pos, (unsigned short int) screenWidth, FONTH, &bgC);
 	}
 
 	// NOTE: We always use the same BG_ constant in order to get a rough inverse by just swapping to the inverted LUT ;).
@@ -2654,7 +2654,7 @@ int
 	struct mxcfb_rect region = {
 		.top    = top_pos,
 		.left   = left_pos,
-		.width  = viewWidth,
+		.width  = screenWidth,
 		.height = FONTH,
 	};
 
@@ -3002,10 +3002,10 @@ int
 	// Clamp everything to a safe range, because we can't have *anything* going off-screen here.
 	struct mxcfb_rect region;
 	// NOTE: Assign each field individually to avoid a false-positive with Clang's SA...
-	region.top    = MIN(viewHeight, (uint32_t) MAX(0, y_off));
-	region.left   = MIN(viewWidth, (uint32_t) MAX(0, x_off));
-	region.width  = MIN(viewWidth - region.left, (uint32_t) w);
-	region.height = MIN(viewHeight - region.top, (uint32_t) h);
+	region.top    = MIN(screenHeight, (uint32_t) MAX(0, y_off));
+	region.left   = MIN(screenWidth, (uint32_t) MAX(0, x_off));
+	region.width  = MIN(screenWidth - region.left, (uint32_t) w);
+	region.height = MIN(screenHeight - region.top, (uint32_t) h);
 
 	// NOTE: If we ended up with negative display offsets, we should shave those off region.width & region.height,
 	//       when it makes sense to do so,
