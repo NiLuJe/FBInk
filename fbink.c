@@ -2595,11 +2595,13 @@ int
 		fill_rect(thumb_left, top_pos, thumb_width, FONTH, &fgC);
 
 		// Draw an ellipsis in the middle of the thumb...
-		uint8_t            ellipsis_size = FONTH / 3U;
-		unsigned short int ellipsis_left = (thumb_width - (5U * ellipsis_size)) / 2U;
+		uint8_t ellipsis_size = (uint8_t)(FONTH / 3U);
+		// Three dots = two spaces, 3 + 2 = 5 ;).
+		unsigned short int ellipsis_left = (unsigned short int) ((thumb_width - (5U * ellipsis_size)) / 2U);
 		for (uint8_t i = 0U; i < 3U; i++) {
-			fill_rect(thumb_left + ellipsis_left + (i * 2U * ellipsis_size),
-				  top_pos + ellipsis_size,
+			fill_rect((unsigned short int) (thumb_left + ellipsis_left +
+							(unsigned short int) (i * 2U * ellipsis_size)),
+				  (unsigned short int) (top_pos + ellipsis_size),
 				  ellipsis_size,
 				  ellipsis_size,
 				  &bgC);
