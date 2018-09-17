@@ -1384,6 +1384,44 @@ int
 		g_isQuiet = false;
 	}
 
+	// Start with some more generic stuff, not directly related to the framebuffer.
+	// As all this stuff is pretty much set in stone, we'll only query it once.
+	if (!deviceQuirks.skipId) {
+#ifndef FBINK_FOR_LINUX
+		// Identify the device's specific model...
+		identify_device(&deviceQuirks);
+#	ifdef FBINK_FOR_KINDLE
+		if (deviceQuirks.isKindleLegacy) {
+			ELOG("[FBInk] Enabled Legacy einkfb Kindle quirks");
+		} else if (deviceQuirks.isKindlePearlScreen) {
+			ELOG("[FBInk] Enabled Kindle with Pearl screen quirks");
+		} else if (deviceQuirks.isKindleOasis2) {
+			ELOG("[FBInk] Enabled Kindle Oasis 2 quirks");
+		}
+#	else
+		if (deviceQuirks.isKoboNonMT) {
+			ELOG("[FBInk] Enabled Kobo w/o Multi-Touch quirks");
+		} else if (deviceQuirks.isKoboMk7) {
+			ELOG("[FBInk] Enabled Kobo Mark 7 quirks");
+		}
+#	endif
+#endif
+
+		// Ask the system for its clock tick frequency so we can translate jiffies into human-readable units.
+		// NOTE: This will most likely be 100, even if CONFIG_HZ is > 100
+		//       c.f., sysconf(3)
+		long int rc = sysconf(_SC_CLK_TCK);
+		if (rc > 0) {
+			USER_HZ = rc;
+			ELOG("[FBInk] Clock tick frequency appears to be %ld Hz", USER_HZ);
+		} else {
+			ELOG("[FBInk] Unable to query clock tick frequency, assuming %ld Hz", USER_HZ);
+		}
+
+		// And make sure we won't do that again ;).
+		deviceQuirks.skipId = true;
+	}
+
 	// Get variable screen information
 	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
 		fprintf(stderr, "[FBInk] Error reading variable information.\n");
@@ -1723,46 +1761,8 @@ int
 			break;
 	}
 
-	// Finish with some more generic stuff, not directly related to the framebuffer.
-	// As all this stuff is pretty much set in stone, we'll only query it once.
-	if (!deviceQuirks.skipId) {
-#ifndef FBINK_FOR_LINUX
-		// Identify the device's specific model...
-		identify_device(&deviceQuirks);
-#	ifdef FBINK_FOR_KINDLE
-		if (deviceQuirks.isKindleLegacy) {
-			ELOG("[FBInk] Enabled Legacy einkfb Kindle quirks");
-		} else if (deviceQuirks.isKindlePearlScreen) {
-			ELOG("[FBInk] Enabled Kindle with Pearl screen quirks");
-		} else if (deviceQuirks.isKindleOasis2) {
-			ELOG("[FBInk] Enabled Kindle Oasis 2 quirks");
-		}
-#	else
-		if (deviceQuirks.isKoboNonMT) {
-			ELOG("[FBInk] Enabled Kobo w/o Multi-Touch quirks");
-		} else if (deviceQuirks.isKoboMk7) {
-			ELOG("[FBInk] Enabled Kobo Mark 7 quirks");
-		}
-#	endif
-#endif
-
-		// Ask the system for its clock tick frequency so we can translate jiffies into human-readable units.
-		// NOTE: This will most likely be 100, even if CONFIG_HZ is > 100
-		//       c.f., sysconf(3)
-		long int rc = sysconf(_SC_CLK_TCK);
-		if (rc > 0) {
-			USER_HZ = rc;
-			ELOG("[FBInk] Clock tick frequency appears to be %ld Hz", USER_HZ);
-		} else {
-			ELOG("[FBInk] Unable to query clock tick frequency, assuming %ld Hz", USER_HZ);
-		}
-
-		// And make sure we won't do that again ;).
-		deviceQuirks.skipId = true;
-	}
-
-	// NOTE: Now that we know which device we're running on, setup pen colors,
-	//       taking into account the inverted cmap on legacy Kindles...
+		// NOTE: Now that we know which device we're running on, setup pen colors,
+		//       taking into account the inverted cmap on legacy Kindles...
 #ifdef FBINK_FOR_KINDLE
 	if (deviceQuirks.isKindleLegacy) {
 		penFGColor = eInkBGCMap[fbink_config->fg_color];
