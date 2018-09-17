@@ -1798,7 +1798,7 @@ void
 	    penBGColor);
 }
 
-// Dump a few of out internal state variables to struct pointed to by fbink_state
+// Dump a few of our internal state variables to the FBInkState struct pointed to by fbink_state
 void
     fbink_get_state(const FBInkConfig* fbink_config, FBInkState* fbink_state)
 {
@@ -1818,6 +1818,8 @@ void
 		fbink_state->user_hz        = USER_HZ;
 		fbink_state->pen_fg_color   = penFGColor;
 		fbink_state->pen_bg_color   = penBGColor;
+	} else {
+		fprintf(stderr, "[FBInk] Err, it appears we were passed a NULL fbink_state pointer?\n");
 	}
 }
 

@@ -127,24 +127,24 @@ typedef enum
 	BG_BLACK
 } BG_COLOR_INDEX_T;
 
-// A struct to dump the FBInk state into, for when a shell isn't wanted
+// A struct to dump FBInk's internal state into, like fbink_state_dump() would, but in C ;)
 typedef struct
 {
-	uint32_t       view_width;
-	uint32_t       view_height;
-	uint32_t       bpp;
-	unsigned short font_w;
-	unsigned short font_h;
-	uint8_t        fontsize_mult;
-	const char*    font_name;
-	uint8_t        glyph_width;
-	uint8_t        glyph_height;
-	unsigned short max_cols;
-	unsigned short max_rows;
-	bool           is_perfect_fit;
-	long           user_hz;
-	uint8_t        pen_fg_color;
-	uint8_t        pen_bg_color;
+	uint32_t           view_width;        // viewWidth
+	uint32_t           view_height;       // viewHeight
+	uint32_t           bpp;               // vInfo.bits_per_pixel
+	unsigned short int font_w;            // FONTW
+	unsigned short     font_h;            // FONTH
+	uint8_t            fontsize_mult;     // FONTSIZE_MULT
+	const char*        font_name;         // fbink_config->fontname
+	uint8_t            glyph_width;       // glyphWidth
+	uint8_t            glyph_height;      // glyphHeight
+	unsigned short int max_cols;          // MAXCOLS
+	unsigned short int max_rows;          // MAXROWS
+	bool               is_perfect_fit;    // deviceQuirks.isPerfectFit
+	long int           user_hz;           // USER_HZ
+	uint8_t            pen_fg_color;      // penFGColor
+	uint8_t            pen_bg_color;      // penFGColor;
 } FBInkState;
 
 // What a FBInk config should look like. Perfectly sane when fully zero-initialized.
@@ -206,10 +206,10 @@ FBINK_API int fbink_close(int fbfd);
 //       c.f., KFMon's handling of this via fbink_is_fb_quirky() to detect the initial 16bpp -> 32bpp switch.
 FBINK_API int fbink_init(int fbfd, const FBInkConfig* fbink_config);
 
-// Dumps a few of our internal state variables to stdout, in a format easily consumable by a shell (i.e., eval)
+// Dump a few of our internal state variables to stdout, in a format easily consumable by a shell (i.e., eval)
 FBINK_API void fbink_state_dump(const FBInkConfig* fbink_config);
 
-// Dump a few of our internal state variables to struct pointed to by fbink_state
+// Dump a few of our internal state variables to the FBInkState struct pointed to by fbink_state
 FBINK_API void fbink_get_state(const FBInkConfig* fbink_config, FBInkState* fbink_state);
 
 // Print a string on screen.
