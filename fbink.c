@@ -1800,7 +1800,7 @@ void
 
 // Dump a few of out internal state variables to struct pointed to by fbink_state
 void
-	fbink_get_state(const FBInkConfig* fbink_config, FBInkState* fbink_state)
+    fbink_get_state(const FBInkConfig* fbink_config, FBInkState* fbink_state)
 {
 	if (fbink_state) {
 		fbink_state->view_width     = viewWidth;
@@ -1808,7 +1808,7 @@ void
 		fbink_state->bpp            = vInfo.bits_per_pixel;
 		fbink_state->font_w         = FONTW;
 		fbink_state->font_h         = FONTH;
-		fbink_state->fontsize_mult   = FONTSIZE_MULT;
+		fbink_state->fontsize_mult  = FONTSIZE_MULT;
 		fbink_state->font_name      = fontname_to_string(fbink_config->fontname);
 		fbink_state->glyph_width    = glyphWidth;
 		fbink_state->glyph_height   = glyphHeight;
@@ -2715,31 +2715,14 @@ int
 
 	// We don't need to fudge with fbink_config, no text to show ;).
 
-	// NOTE: If we passed 0 as progress, loop forever!
-	if (progress == 0U) {
-		LOG("** No progress specified, will loop forever! **");
-		const struct timespec zzz = { 0L, 500000000L };
-
-		while (1) {
-			for (uint8_t i = 0; i < 18; i++) {
-				rv = draw_progress_bars(fbfd, true, i, caller_fbink_config);
-				nanosleep(&zzz, NULL);
-			}
-			for (uint8_t i = 18; i > 0; i--) {
-				rv = draw_progress_bars(fbfd, true, i, caller_fbink_config);
-				nanosleep(&zzz, NULL);
-			}
-		}
-	} else {
-		// Begin by sanitizing the input...
-		if (progress > 19U) {
-			LOG("The specified progress step (%hhu) is larger than 19, clamping it.", progress);
-			progress = 19U;
-		}
-
-		// And do the work ;).
-		rv = draw_progress_bars(fbfd, true, (uint8_t)(progress - 1U), caller_fbink_config);
+	// Begin by sanitizing the input...
+	if (progress > 18U) {
+		LOG("The specified progress step (%hhu) is larger than 18, clamping it.", progress);
+		progress = 18U;
 	}
+
+	// And do the work ;).
+	rv = draw_progress_bars(fbfd, true, progress, caller_fbink_config);
 
 	// Cleanup
 cleanup:

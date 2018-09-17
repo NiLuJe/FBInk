@@ -101,8 +101,8 @@ static void
 	    "\t-l, --linecount\t\tWhen successfully printing text, outputs the total amount of printed lines in the final line of output to stdout (NOTE: enforces quiet & non-verbose!).\n"
 	    "\t-P, --progressbar NUM\tDraw a NUM%% full progress bar (full-width). Like other alternative modes, does *NOT* have precedence over text printing.\n"
 	    "\t\t\t\tIgnores -o, --overlay; -x, --col; -X, --hoffset; as well as -m, --centered & -p, --padded"
-	    "\t-A, --activitybar NUM\tDraw an activity bar on step NUM (full-width). NUM must be between 1 and 19. Like other alternative modes, does *NOT* have precedence over text printing.\n"
-	    "\t\t\t\tNOTE: If NUM is 0, will cycle between each possible value every 500ms, until the death of the sun! Be careful not to be caught in an involuntary infinite loop!"
+	    "\t-A, --activitybar NUM\tDraw an activity bar on step NUM (full-width). NUM must be between 0 and 18. Like other alternative modes, does *NOT* have precedence over text printing.\n"
+	    "\t\t\t\tNOTE: If NUM is negative, will cycle between each possible value every 500ms, until the death of the sun! Be careful not to be caught in an involuntary infinite loop!"
 	    "\t\t\t\tIgnores -x, --col; -X, --hoffset; as well as -m, --centered & -p, --padded"
 	    "\n"
 	    "NOTES:\n"
@@ -256,6 +256,7 @@ int
 	bool      want_linecount = false;
 	bool      is_progressbar = false;
 	bool      is_activitybar = false;
+	bool      is_infinite    = false;
 	uint8_t   progress       = 0;
 	int       errfnd         = 0;
 
@@ -555,7 +556,12 @@ int
 				break;
 			case 'A':
 				is_activitybar = true;
-				progress       = (uint8_t) strtoul(optarg, NULL, 10);
+				int8_t val     = (int8_t) strtol(optarg, NULL, 10);
+				if (val < 0) {
+					is_infinite = true;
+				} else {
+					progress = (uint8_t) val;
+				}
 				break;
 			case 'o':
 				fbink_config.is_overlay = true;
@@ -717,20 +723,44 @@ int
 				goto cleanup;
 			}
 		} else if (is_activitybar) {
-			if (!fbink_config.is_quiet) {
-				printf(
-				    "Displaying an activity bar on step %hhu @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s)\n",
-				    progress,
-				    fbink_config.row,
-				    fbink_config.voffset,
-				    fbink_config.is_inverted ? "true" : "false",
-				    fbink_config.is_flashing ? "true" : "false",
-				    fbink_config.is_cleared ? "true" : "false");
-			}
-			if (fbink_print_activity_bar(fbfd, progress, &fbink_config) != EXIT_SUCCESS) {
-				fprintf(stderr, "Failed to display an activitybar!\n");
-				rv = ERRCODE(EXIT_FAILURE);
-				goto cleanup;
+			// Were we asked to loop forever?
+			if (is_infinite) {
+				if (!fbink_config.is_quiet) {
+					printf(
+					    "Displaying an activity bar cycling forever @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s)\n",
+					    fbink_config.row,
+					    fbink_config.voffset,
+					    fbink_config.is_inverted ? "true" : "false",
+					    fbink_config.is_flashing ? "true" : "false",
+					    fbink_config.is_cleared ? "true" : "false");
+				}
+				const struct timespec zzz = { 0L, 500000000L };
+				while (1) {
+					for (uint8_t i = 0; i < 18; i++) {
+						rv = fbink_print_activity_bar(fbfd, i, &fbink_config);
+						nanosleep(&zzz, NULL);
+					}
+					for (uint8_t i = 18; i > 0; i--) {
+						rv = fbink_print_activity_bar(fbfd, i, &fbink_config);
+						nanosleep(&zzz, NULL);
+					}
+				}
+			} else {
+				if (!fbink_config.is_quiet) {
+					printf(
+					    "Displaying an activity bar on step %hhu @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s)\n",
+					    progress,
+					    fbink_config.row,
+					    fbink_config.voffset,
+					    fbink_config.is_inverted ? "true" : "false",
+					    fbink_config.is_flashing ? "true" : "false",
+					    fbink_config.is_cleared ? "true" : "false");
+				}
+				if (fbink_print_activity_bar(fbfd, progress, &fbink_config) != EXIT_SUCCESS) {
+					fprintf(stderr, "Failed to display an activitybar!\n");
+					rv = ERRCODE(EXIT_FAILURE);
+					goto cleanup;
+				}
 			}
 		} else if (is_eval) {
 			fbink_state_dump(&fbink_config);

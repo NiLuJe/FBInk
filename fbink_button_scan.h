@@ -29,6 +29,7 @@
 #	include <linux/input.h>
 #	include <mntent.h>
 #	include <poll.h>
+#	include <time.h>
 
 // NOTE: My TC's kernel is too old for some newer event codes...
 #	ifndef ABS_MT_DISTANCE

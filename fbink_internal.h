@@ -56,7 +56,6 @@
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
-#include <time.h>
 #include <unistd.h>
 
 // NOTE: This is from https://www.cprogramming.com/tutorial/unicode.html
