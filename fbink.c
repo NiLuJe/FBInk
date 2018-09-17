@@ -1457,13 +1457,12 @@ int
 	viewHoriOrigin = 0U;
 	// But on the vertical axis, oh my...
 	if (!fbink_config->ignore_viewport && deviceQuirks.koboVertOffset != 0) {
+		viewWidth = screenWidth - (uint32_t) abs(deviceQuirks.koboVertOffset);
 		if (deviceQuirks.koboVertOffset > 0) {
 			// Rows of pixels are hidden at the top
-			viewWidth      = screenWidth - deviceQuirks.koboVertOffset;
-			viewVertOrigin = deviceQuirks.koboVertOffset;
+			viewVertOrigin = (uint8_t) deviceQuirks.koboVertOffset;
 		} else {
 			// Rows of pixels are hidden at the bottom
-			viewWidth      = screenWidth - abs(deviceQuirks.koboVertOffset);
 			viewVertOrigin = 0U;
 		}
 		ELOG("[FBInk] Enabled Kobo viewport insanity (%ux%u -> %ux%u), top-left corner is @ (%hhu, %hhu)",
