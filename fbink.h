@@ -135,7 +135,7 @@ typedef struct
 	uint32_t       bpp;
 	unsigned short font_w;
 	unsigned short font_h;
-	uint8_t        font_sz_mult;
+	uint8_t        fontsize_mult;
 	const char*    font_name;
 	uint8_t        glyph_width;
 	uint8_t        glyph_height;
@@ -209,7 +209,7 @@ FBINK_API int fbink_init(int fbfd, const FBInkConfig* fbink_config);
 // Dumps a few of our internal state variables to stdout, in a format easily consumable by a shell (i.e., eval)
 FBINK_API void fbink_state_dump(const FBInkConfig* fbink_config);
 
-// Dump a few of out internal state variables to struct pointed to by fbink_state
+// Dump a few of our internal state variables to struct pointed to by fbink_state
 FBINK_API void fbink_get_state(const FBInkConfig* fbink_config, FBInkState* fbink_state);
 
 // Print a string on screen.

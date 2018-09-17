@@ -1808,7 +1808,7 @@ void
 		fbink_state->bpp            = vInfo.bits_per_pixel;
 		fbink_state->font_w         = FONTW;
 		fbink_state->font_h         = FONTH;
-		fbink_state->font_sz_mult   = FONTSIZE_MULT;
+		fbink_state->fontsize_mult   = FONTSIZE_MULT;
 		fbink_state->font_name      = fontname_to_string(fbink_config->fontname);
 		fbink_state->glyph_width    = glyphWidth;
 		fbink_state->glyph_height   = glyphHeight;
