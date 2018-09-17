@@ -1453,7 +1453,7 @@ int
 	viewWidth      = screenWidth;
 	viewHoriOrigin = 0U;
 	// But on the vertical axis, oh my...
-	if (deviceQuirks.koboVertOffset != 0) {
+	if (!fbink_config->ignore_viewport && deviceQuirks.koboVertOffset != 0) {
 		if (deviceQuirks.koboVertOffset > 0) {
 			// Rows of pixels are hidden at the top
 			viewWidth      = screenWidth - deviceQuirks.koboVertOffset;

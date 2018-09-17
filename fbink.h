@@ -150,27 +150,28 @@ typedef struct
 // What a FBInk config should look like. Perfectly sane when fully zero-initialized.
 typedef struct
 {
-	short int row;             // y axis (i.e., line), counts down from the bottom of the screen if negative
-	short int col;             // x axis (i.e., column), counts down from the right edge of the screen if negative
-	uint8_t   fontmult;        // Font scaling multiplier (i.e., 4 -> x4), 0 means automatic.
-	uint8_t   fontname;        // Request a specific font (c.f., FONT_INDEX_T enum)
-	bool      is_inverted;     // Invert colors
-	bool      is_flashing;     // Request a black flash on refresh
-	bool      is_cleared;      // Clear the screen beforehand (honors is_inverted)
-	bool      is_centered;     // Center the text (horizontally)
-	short int hoffset;         // Horizontal offset (in pixels) for text position
-	short int voffset;         // Vertical offset (in pixels) for text position
-	bool      is_halfway;      // Vertically center the text, honoring row offsets
-	bool      is_padded;       // Pad the text with blanks (on the left, or on both sides if is_centered)
-	uint8_t   fg_color;        // Requested foreground color for text (c.f., FG_COLOR_INDEX_T enum)
-	uint8_t   bg_color;        // Requested background color for text (c.f., BG_COLOR_INDEX_T enum)
-	bool      is_overlay;      // Don't draw bg, use inverse of fb's underlying pixel as pen fg color
-	bool      is_bgless;       // Don't draw bg
-	bool      is_verbose;      // Print verbose diagnostic informations on stdout
-	bool      is_quiet;        // Hide fbink_init()'s hardware setup info (sent to stderr)
-	bool      ignore_alpha;    // Ignore any potential alpha channel in source image (i.e., flatten the image)
-	uint8_t   halign;    // Horizontal alignment of images (NONE/LEFT, CENTER, EDGE/RIGHT; c.f., ALIGN_INDEX_T enum)
-	uint8_t   valign;    // Vertical alignment of images (NONE/TOP, CENTER, EDGE/BOTTOM; c.f., ALIGN_INDEX_T enum)
+	short int row;            // y axis (i.e., line), counts down from the bottom of the screen if negative
+	short int col;            // x axis (i.e., column), counts down from the right edge of the screen if negative
+	uint8_t   fontmult;       // Font scaling multiplier (i.e., 4 -> x4), 0 means automatic.
+	uint8_t   fontname;       // Request a specific font (c.f., FONT_INDEX_T enum)
+	bool      is_inverted;    // Invert colors
+	bool      is_flashing;    // Request a black flash on refresh
+	bool      is_cleared;     // Clear the screen beforehand (honors is_inverted)
+	bool      is_centered;    // Center the text (horizontally)
+	short int hoffset;        // Horizontal offset (in pixels) for text position
+	short int voffset;        // Vertical offset (in pixels) for text position
+	bool      is_halfway;     // Vertically center the text, honoring row offsets
+	bool      is_padded;      // Pad the text with blanks (on the left, or on both sides if is_centered)
+	uint8_t   fg_color;       // Requested foreground color for text (c.f., FG_COLOR_INDEX_T enum)
+	uint8_t   bg_color;       // Requested background color for text (c.f., BG_COLOR_INDEX_T enum)
+	bool      is_overlay;     // Don't draw bg, use inverse of fb's underlying pixel as pen fg color
+	bool      is_bgless;      // Don't draw bg
+	bool ignore_viewport;    // Do not correct the viewport on Kobo devices with rows of pixels hidden by the bezel...
+	bool is_verbose;         // Print verbose diagnostic informations on stdout
+	bool is_quiet;           // Hide fbink_init()'s hardware setup info (sent to stderr)
+	bool ignore_alpha;       // Ignore any potential alpha channel in source image (i.e., flatten the image)
+	uint8_t halign;    // Horizontal alignment of images (NONE/LEFT, CENTER, EDGE/RIGHT; c.f., ALIGN_INDEX_T enum)
+	uint8_t valign;    // Vertical alignment of images (NONE/TOP, CENTER, EDGE/BOTTOM; c.f., ALIGN_INDEX_T enum)
 } FBInkConfig;
 
 // NOTE: Unless otherwise specified,
