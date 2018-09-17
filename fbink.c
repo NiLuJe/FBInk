@@ -2593,6 +2593,17 @@ int
 
 		// And finally, draw the thumb, which we want to override the border with!
 		fill_rect(thumb_left, top_pos, thumb_width, FONTH, &fgC);
+
+		// Draw an ellipsis in the middle of the thumb...
+		uint8_t            ellipsis_size = FONTH / 3U;
+		unsigned short int ellipsis_left = (thumb_width - (5U * ellipsis_size)) / 2U;
+		for (uint8_t i = 0U; i < 3U; i++) {
+			fill_rect(thumb_left + ellipsis_left + (i * 2U * ellipsis_size),
+				  top_pos + ellipsis_size,
+				  ellipsis_size,
+				  ellipsis_size,
+				  &bgC);
+		}
 	}
 
 	// Start setting up the screen refresh...

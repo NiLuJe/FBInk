@@ -736,11 +736,11 @@ int
 				}
 				const struct timespec zzz = { 0L, 500000000L };
 				while (1) {
-					for (uint8_t i = 0; i < 17; i++) {
+					for (uint8_t i = 0U; i < 17U; i++) {
 						rv = fbink_print_activity_bar(fbfd, i, &fbink_config);
 						nanosleep(&zzz, NULL);
 					}
-					for (uint8_t i = 17; i > 0; i--) {
+					for (uint8_t i = 17U; i > 0U; i--) {
 						rv = fbink_print_activity_bar(fbfd, i, &fbink_config);
 						nanosleep(&zzz, NULL);
 					}
