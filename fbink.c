@@ -1720,10 +1720,21 @@ int
 	// Mention & remember if we can perfectly fit the final column on screen
 	if ((FONTW * MAXCOLS) == viewWidth) {
 		deviceQuirks.isPerfectFit = true;
-		ELOG("[FBInk] It's a perfect fit!");
+		ELOG("[FBInk] Horizontal fit is perfect!");
 	} else {
 		deviceQuirks.isPerfectFit = false;
 	}
+
+	// In a similar fashion, add a vertical offset to make sure rows are vertically "centered",
+	// in case we can't perfectly fit the final row.
+	if ((FONTH * MAXROWS) == viewHeight) {
+		viewSoftOffset = 0U;
+	} else {
+		viewSoftOffset = (viewHeight - (FONTH * MAXROWS)) / 2U;
+		ELOG("[FBInk] Vertical fit isn't perfect, adding a %hhu pixels offset to text & bars", viewSoftOffset);
+	}
+	// Bake that into the viewport computations, we'll special-case the image codepath to ignore it ;).
+	viewVertOrigin += viewSoftOffset;
 
 	// Get fixed screen information
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &fInfo)) {

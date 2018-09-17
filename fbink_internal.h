@@ -216,6 +216,7 @@ uint32_t           screenWidth;
 uint32_t           screenHeight;
 uint8_t            viewHoriOrigin = 0U;
 uint8_t            viewVertOrigin = 0U;
+uint8_t            viewSoftOffset = 0U;
 uint8_t            glyphWidth     = 8U;
 uint8_t            glyphHeight    = 8U;
 unsigned short int FONTW          = 8U;
