@@ -177,6 +177,25 @@ static void
 	return;
 }
 
+// Truly infinite progress bar
+// NOTE: Punted off to a dedicated function to workaround an amizingly obscure performance issue:
+//       Keeping this in main massively tanks image processing performance (by ~50%!) o_O.
+static void
+    do_infinite_progress_bar(int fbfd, const FBInkConfig* fbink_config)
+{
+	const struct timespec zzz = { 0L, 500000000L };
+	for (;;) {
+		for (uint8_t i = 0; i < 18; i++) {
+			fbink_print_activity_bar(fbfd, i, fbink_config);
+			nanosleep(&zzz, NULL);
+		}
+		for (uint8_t i = 18; i > 0; i--) {
+			fbink_print_activity_bar(fbfd, i, fbink_config);
+			nanosleep(&zzz, NULL);
+		}
+	}
+}
+
 // Application entry point
 int
     main(int argc, char* argv[])
@@ -741,17 +760,10 @@ int
 					    fbink_config.is_flashing ? "true" : "false",
 					    fbink_config.is_cleared ? "true" : "false");
 				}
-				const struct timespec zzz = { 0L, 750000000L };
-				while (1) {
-					for (uint8_t i = 0U; i < 16U; i++) {
-						rv = fbink_print_activity_bar(fbfd, i, &fbink_config);
-						nanosleep(&zzz, NULL);
-					}
-					for (uint8_t i = 16U; i > 0U; i--) {
-						rv = fbink_print_activity_bar(fbfd, i, &fbink_config);
-						nanosleep(&zzz, NULL);
-					}
-				}
+				// NOTE: In a dedicated function,
+				//       because keeping it inline massively tanks performance in the image codepath,
+				//       for an amazingly weird reason :?
+				do_infinite_progress_bar(fbfd, &fbink_config);
 			} else {
 				if (!fbink_config.is_quiet) {
 					printf(
