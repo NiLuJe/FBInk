@@ -591,7 +591,9 @@ static struct mxcfb_rect
 
 	// Recap final offset values
 	if (hoffset != 0 || viewHoriOrigin != 0) {
-		LOG("Adjusting horizontal pen position by %hd pixels, as requested", hoffset);
+		LOG("Adjusting horizontal pen position by %hd pixels, plus %hhu pixels, as mandated by the native viewport",
+		    hoffset,
+		    viewHoriOrigin);
 		// Clamp region to sane values if h/v offset is pushing stuff off-screen
 		if ((region.width + region.left + pixel_offset) > screenWidth) {
 			region.width = (uint32_t) MAX(0, (short int) (screenWidth - region.left - pixel_offset));
@@ -603,7 +605,9 @@ static struct mxcfb_rect
 		}
 	}
 	if (voffset != 0 || viewVertOrigin != 0) {
-		LOG("Adjusting vertical pen position by %hd pixels, as requested", voffset);
+		LOG("Adjusting vertical pen position by %hd pixels, plus %hhu pixels, as mandated by the native viewport",
+		    voffset,
+		    viewVertOrigin);
 		// Clamp region to sane values if h/v offset is pushing stuff off-screen
 		if ((region.top + region.height) > screenHeight) {
 			region.height = (uint32_t) MAX(0, (short int) (screenHeight - region.top));
@@ -2661,8 +2665,10 @@ int
 	};
 
 	// V offset handling is the pits.
-	if (voffset != 0) {
-		LOG("Adjusting vertical pen position by %hd pixels, as requested", voffset);
+	if (voffset != 0 || viewVertOrigin != 0) {
+		LOG("Adjusting vertical pen position by %hd pixels, as requested, plus %hhu pixels, as mandated by the native viewport",
+		    voffset,
+		    viewVertOrigin);
 		// Clamp region to sane values if h/v offset is pushing stuff off-screen
 		if ((region.top + region.height) > screenHeight) {
 			region.height = (uint32_t) MAX(0, (short int) (screenHeight - region.top));
