@@ -265,7 +265,7 @@ FBINK_API int fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInk
 // Print a full-width activity bar on screen (i.e., an infinite progress bar)
 // fdfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
-// progress:		0-17 value to set the progress thumb's position in the bar
+// progress:		0-16 value to set the progress thumb's position in the bar
 // fbink_config:	pointer to an FBInkConfig struct (ignores col & hoffset; as well as is_centered & is_padded).
 FBINK_API int fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkConfig* fbink_config);
 

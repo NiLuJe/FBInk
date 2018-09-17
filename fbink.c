@@ -2584,8 +2584,8 @@ int
 			  (unsigned short int) (FONTH - 3U),
 			  &emptyC);
 
-		// We want our thumb to take 15% of the bar's width
-		unsigned short int thumb_width = (unsigned short int) ((0.15f * empty_width) + 0.5f);
+		// We want our thumb to take 20% of the bar's width
+		unsigned short int thumb_width = (unsigned short int) ((0.20f * empty_width) + 0.5f);
 		// We move the thumb in increment of 5% of the bar's width (i.e., half its width),
 		// with rounding to avoid accumulating drift...
 		unsigned short int thumb_left =
@@ -2729,9 +2729,9 @@ int
 	// We don't need to fudge with fbink_config, no text to show ;).
 
 	// Begin by sanitizing the input...
-	if (progress > 17U) {
-		LOG("The specified progress step (%hhu) is larger than 17, clamping it.", progress);
-		progress = 17U;
+	if (progress > 16U) {
+		LOG("The specified progress step (%hhu) is larger than 16, clamping it.", progress);
+		progress = 16U;
 	}
 
 	// And do the work ;).
