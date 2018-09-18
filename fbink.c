@@ -158,7 +158,7 @@ static void
     rotate_coordinates(FBInkCoordinates* coords)
 {
 	unsigned short int rx = coords->y;
-	unsigned short int ry = (unsigned short int) (viewWidth - coords->x - 1);
+	unsigned short int ry = (unsigned short int) (screenWidth - coords->x - 1);
 
 // NOTE: This codepath is not production ready, it was just an experiment to wrap my head around framebuffer rotation...
 //       In particular, only CW has been actually confirmed to behave properly (to handle the isKobo16Landscape quirk),
@@ -583,34 +583,39 @@ static struct mxcfb_rect
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
-		.top    = (uint32_t) MAX(0, (((row - multiline_offset) * FONTH) + voffset)),
-		.left   = (uint32_t) MAX(0, ((col * FONTW) + hoffset)),
-		.width  = multiline_offset > 0U ? (viewWidth - (uint32_t)(col * FONTW)) : (uint32_t)(charcount * FONTW),
+		.top    = (uint32_t) MAX(0 + (viewVertOrigin - viewVertOffset),
+                                      (((row - multiline_offset) * FONTH) + voffset + viewVertOrigin)),
+		.left   = (uint32_t) MAX(0 + viewHoriOrigin, ((col * FONTW) + hoffset + viewHoriOrigin)),
+		.width  = multiline_offset > 0U ? (screenWidth - (uint32_t)(col * FONTW)) : (uint32_t)(charcount * FONTW),
 		.height = (uint32_t)((multiline_offset + 1U) * FONTH),
 	};
 
 	// Recap final offset values
-	if (hoffset != 0) {
-		LOG("Adjusting horizontal pen position by %hd pixels, as requested", hoffset);
+	if (hoffset != 0 || viewHoriOrigin != 0) {
+		LOG("Adjusting horizontal pen position by %hd pixels, as requested, plus %hhu pixels, as mandated by the native viewport",
+		    hoffset,
+		    viewHoriOrigin);
 		// Clamp region to sane values if h/v offset is pushing stuff off-screen
-		if ((region.width + region.left + pixel_offset) > viewWidth) {
-			region.width = (uint32_t) MAX(0, (short int) (viewWidth - region.left - pixel_offset));
+		if ((region.width + region.left + pixel_offset) > screenWidth) {
+			region.width = (uint32_t) MAX(0, (short int) (screenWidth - region.left - pixel_offset));
 			LOG("Adjusted region width to account for horizontal offset pushing part of the content off-screen");
 		}
-		if ((region.left + pixel_offset) >= viewWidth) {
-			region.left = viewWidth - pixel_offset - 1;
+		if ((region.left + pixel_offset) >= screenWidth) {
+			region.left = screenWidth - pixel_offset - 1;
 			LOG("Adjusted region left to account for horizontal offset pushing part of the content off-screen");
 		}
 	}
-	if (voffset != 0) {
-		LOG("Adjusting vertical pen position by %hd pixels, as requested", voffset);
+	if (voffset != 0 || viewVertOrigin != 0) {
+		LOG("Adjusting vertical pen position by %hd pixels, as requested, plus %hhu pixels, as mandated by the native viewport",
+		    voffset,
+		    viewVertOrigin);
 		// Clamp region to sane values if h/v offset is pushing stuff off-screen
-		if ((region.top + region.height) > viewHeight) {
-			region.height = (uint32_t) MAX(0, (short int) (viewHeight - region.top));
+		if ((region.top + region.height) > screenHeight) {
+			region.height = (uint32_t) MAX(0, (short int) (screenHeight - region.top));
 			LOG("Adjusted region height to account for vertical offset pushing part of the content off-screen");
 		}
-		if (region.top >= viewHeight) {
-			region.top = viewHeight - 1;
+		if (region.top >= screenHeight) {
+			region.top = screenHeight - 1;
 			LOG("Adjusted region top to account for vertical offset pushing part of the content off-screen");
 		}
 	}
@@ -626,7 +631,7 @@ static struct mxcfb_rect
 		//       because by definition left has to keep matching the value of the first line,
 		//       even on subsequent lines.
 		if (charcount != MAXCOLS && multiline_offset == 0U) {
-			if (hoffset == 0) {
+			if ((hoffset + viewHoriOrigin) == 0) {
 				region.left += pixel_offset;
 				LOG("Updated region.left to %u", region.left);
 			} else {
@@ -634,11 +639,14 @@ static struct mxcfb_rect
 				// We basically have to re-do the maths from scratch,
 				// do it signed to catch corner-cases interactions between col/hoffset/pixel_offset,
 				// and clamp it to safe values!
-				if (hoffset < 0) {
-					region.left = (uint32_t) MAX(0, ((col * FONTW) + hoffset + pixel_offset));
+				if ((hoffset + viewHoriOrigin) < 0) {
+					region.left =
+					    (uint32_t) MAX(0 + viewHoriOrigin,
+							   ((col * FONTW) + hoffset + viewHoriOrigin + pixel_offset));
 				} else {
-					region.left = (uint32_t) MIN((uint32_t)((col * FONTW) + hoffset + pixel_offset),
-								     (viewWidth - 1U));
+					region.left = (uint32_t) MIN(
+					    (uint32_t)((col * FONTW) + hoffset + viewHoriOrigin + pixel_offset),
+					    (screenWidth - 1U));
 				}
 				LOG("Updated region.left to %u", region.left);
 			}
@@ -656,19 +664,20 @@ static struct mxcfb_rect
 			LOG("Painting a background rectangle on the left edge on account of pixel_offset");
 			// Make sure we don't leave a hoffset sized gap when we have a positive hoffset...
 			fill_rect(
-			    hoffset > 0 ? (unsigned short int) hoffset : 0U,
+			    hoffset > 0 ? (unsigned short int) (hoffset + viewHoriOrigin)
+					: (unsigned short int) (0U + viewHoriOrigin),
 			    (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			    pixel_offset,    // Don't append hoffset here, to make it clear stuff moved to the right.
 			    FONTH,
 			    &bgC);
 			// Correct width, to include that bit of content, too, if needed
-			if (region.width < viewWidth) {
+			if (region.width < screenWidth) {
 				region.width += pixel_offset;
 				// And make sure it's properly clamped, because we can't necessarily rely on left & width
 				// being entirely acurate either because of the multiline print override,
 				// or because of a bit of subcell placement overshoot trickery (c.f., comment in put_pixel).
-				if (region.width + region.left > viewWidth) {
-					region.width = viewWidth - region.left;
+				if (region.width + region.left > screenWidth) {
+					region.width = screenWidth - region.left;
 					LOG("Clamped region.width to %u", region.width);
 				} else {
 					LOG("Updated region.width to %u", region.width);
@@ -687,20 +696,20 @@ static struct mxcfb_rect
 			LOG("Painting a background rectangle to fill the dead space on the right edge");
 			// Make sure we don't leave a hoffset sized gap when we have a negative hoffset...
 			fill_rect(
-			    hoffset < 0
-				? (unsigned short int) (viewWidth - pixel_offset - (unsigned short int) abs(hoffset))
-				: (unsigned short int) (viewWidth - pixel_offset),
+			    hoffset < 0 ? (unsigned short int) (screenWidth - pixel_offset -
+								(unsigned short int) abs(hoffset) - viewHoriOrigin)
+					: (unsigned short int) (screenWidth - pixel_offset - viewHoriOrigin),
 			    (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			    pixel_offset,    // Don't append abs(hoffset) here, to make it clear stuff moved to the left.
 			    FONTH,
 			    &bgC);
 			// If it's not already the case, update region to the full width,
 			// because we've just plugged a hole at the very right edge of a full line.
-			if (region.width < viewWidth) {
-				region.width = viewWidth;
+			if (region.width < screenWidth) {
+				region.width = screenWidth;
 				// Keep making sure it's properly clamped, interaction w/ hoffset can push us over the edge.
-				if (region.width + region.left > viewWidth) {
-					region.width = viewWidth - region.left;
+				if (region.width + region.left > screenWidth) {
+					region.width = screenWidth - region.left;
 					LOG("Clamped region.width to %u", region.width);
 				} else {
 					LOG("Updated region.width to %u", region.width);
@@ -712,9 +721,10 @@ static struct mxcfb_rect
 	// NOTE: In case of a multi-line centered print, we can't really trust the final col,
 	//       it might be significantly different than the others, and as such, we'd be computing a cropped region.
 	//       Make the region cover the full width of the screen to make sure we won't miss anything.
-	if (multiline_offset > 0U && fbink_config->is_centered && (region.left > 0U || region.width < viewWidth)) {
-		region.left  = 0U;
-		region.width = viewWidth;
+	if (multiline_offset > 0U && fbink_config->is_centered &&
+	    (region.left > (0U + viewHoriOrigin) || region.width < screenWidth)) {
+		region.left  = 0U + viewHoriOrigin;
+		region.width = screenWidth;
 		LOG("Enforced region.left to %u & region.width to %u because of multi-line centering",
 		    region.left,
 		    region.width);
@@ -732,8 +742,8 @@ static struct mxcfb_rect
 	//       put_pixel is checked, and will discard off-screen pixels safely.
 	//       Because we store the final position in an unsigned value, this means that, to some extent,
 	//       we rely on wraparound on underflow to still point to (large, but positive) off-screen coordinates.
-	unsigned short int x_base_offs = (unsigned short int) ((col * FONTW) + pixel_offset + hoffset);
-	unsigned short int y_offs      = (unsigned short int) ((row * FONTH) + voffset);
+	unsigned short int x_base_offs = (unsigned short int) ((col * FONTW) + pixel_offset + hoffset + viewHoriOrigin);
+	unsigned short int y_offs      = (unsigned short int) ((row * FONTH) + voffset + viewVertOrigin);
 	unsigned short int x_offs      = 0U;
 
 	unsigned short int i;
@@ -1381,6 +1391,44 @@ int
 		g_isQuiet = false;
 	}
 
+	// Start with some more generic stuff, not directly related to the framebuffer.
+	// As all this stuff is pretty much set in stone, we'll only query it once.
+	if (!deviceQuirks.skipId) {
+#ifndef FBINK_FOR_LINUX
+		// Identify the device's specific model...
+		identify_device(&deviceQuirks);
+#	ifdef FBINK_FOR_KINDLE
+		if (deviceQuirks.isKindleLegacy) {
+			ELOG("[FBInk] Enabled Legacy einkfb Kindle quirks");
+		} else if (deviceQuirks.isKindlePearlScreen) {
+			ELOG("[FBInk] Enabled Kindle with Pearl screen quirks");
+		} else if (deviceQuirks.isKindleOasis2) {
+			ELOG("[FBInk] Enabled Kindle Oasis 2 quirks");
+		}
+#	else
+		if (deviceQuirks.isKoboNonMT) {
+			ELOG("[FBInk] Enabled Kobo w/o Multi-Touch quirks");
+		} else if (deviceQuirks.isKoboMk7) {
+			ELOG("[FBInk] Enabled Kobo Mark 7 quirks");
+		}
+#	endif
+#endif
+
+		// Ask the system for its clock tick frequency so we can translate jiffies into human-readable units.
+		// NOTE: This will most likely be 100, even if CONFIG_HZ is > 100
+		//       c.f., sysconf(3)
+		long int rc = sysconf(_SC_CLK_TCK);
+		if (rc > 0) {
+			USER_HZ = rc;
+			ELOG("[FBInk] Clock tick frequency appears to be %ld Hz", USER_HZ);
+		} else {
+			ELOG("[FBInk] Unable to query clock tick frequency, assuming %ld Hz", USER_HZ);
+		}
+
+		// And make sure we won't do that again ;).
+		deviceQuirks.skipId = true;
+	}
+
 	// Get variable screen information
 	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
 		fprintf(stderr, "[FBInk] Error reading variable information.\n");
@@ -1396,8 +1444,8 @@ int
 
 	// NOTE: In most every cases, we assume (0, 0) is at the top left of the screen,
 	//       and (xres, yres) at the bottom right, as we should.
-	viewWidth  = vInfo.xres;
-	viewHeight = vInfo.yres;
+	screenWidth  = vInfo.xres;
+	screenHeight = vInfo.yres;
 
 	// NOTE: This needs to be NOP by default, no matter the target device ;).
 	fxpRotateCoords = &rotate_nop;
@@ -1435,18 +1483,51 @@ int
 		//       c.f., https://github.com/koreader/koreader/blob/master/frontend/device/kobo/device.lua#L32-L33
 		//           & https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer.lua#L74-L84
 		if (vInfo.bits_per_pixel == 16U) {
-			// Correct viewWidth & viewHeight, so we do all our row/column arithmetics on the right values...
-			viewWidth                      = vInfo.yres;
-			viewHeight                     = vInfo.xres;
+			// Correct screenWidth & screenHeight, so we do all our row/column arithmetics on the right values...
+			screenWidth                    = vInfo.yres;
+			screenHeight                   = vInfo.xres;
 			deviceQuirks.isKobo16Landscape = true;
 			fxpRotateCoords                = &rotate_coordinates;
 			ELOG("[FBInk] Enabled Kobo @ 16bpp fb rotation quirks (%ux%u -> %ux%u)",
 			     vInfo.xres,
 			     vInfo.yres,
-			     viewWidth,
-			     viewHeight);
+			     screenWidth,
+			     screenHeight);
 		}
 	}
+
+	// Handle the Kobo viewport trickery for the few devices with hidden rows of pixels...
+	// Things should generally not be broken-by-design on the horizontal axis...
+	viewWidth      = screenWidth;
+	viewHoriOrigin = 0U;
+	// But on the vertical axis, oh my...
+	if (!fbink_config->no_viewport && deviceQuirks.koboVertOffset != 0) {
+		viewHeight = screenHeight - (uint32_t) abs(deviceQuirks.koboVertOffset);
+		if (deviceQuirks.koboVertOffset > 0) {
+			// Rows of pixels are hidden at the top
+			viewVertOrigin = (uint8_t) deviceQuirks.koboVertOffset;
+		} else {
+			// Rows of pixels are hidden at the bottom
+			viewVertOrigin = 0U;
+		}
+		ELOG("[FBInk] Enabled Kobo viewport insanity (%ux%u -> %ux%u), top-left corner is @ (%hhu, %hhu)",
+		     screenWidth,
+		     screenHeight,
+		     viewWidth,
+		     viewHeight,
+		     viewHoriOrigin,
+		     viewVertOrigin);
+	} else {
+		// Device is not utterly mad, the top-left corner is at (0, 0)!
+		viewHeight     = screenHeight;
+		viewVertOrigin = 0U;
+	}
+#else
+	// Kindle devices are generally never broken-by-design (at least not on that front ;))
+	viewWidth      = screenWidth;
+	viewHoriOrigin = 0U;
+	viewHeight     = screenHeight;
+	viewVertOrigin = 0U;
 #endif
 
 	// NOTE: Set (& reset) original font resolution, in case we're re-init'ing,
@@ -1641,10 +1722,28 @@ int
 	// Mention & remember if we can perfectly fit the final column on screen
 	if ((FONTW * MAXCOLS) == viewWidth) {
 		deviceQuirks.isPerfectFit = true;
-		ELOG("[FBInk] It's a perfect fit!");
+		ELOG("[FBInk] Horizontal fit is perfect!");
 	} else {
 		deviceQuirks.isPerfectFit = false;
 	}
+
+	// In a similar fashion, add a vertical offset to make sure rows are vertically "centered",
+	// in case we can't perfectly fit the final row.
+	if ((FONTH * MAXROWS) == viewHeight) {
+		viewVertOffset = 0U;
+	} else {
+		// NOTE: That should also fall under no_viewport's purview
+		if (!fbink_config->no_viewport) {
+			viewVertOffset = (uint8_t)(((float) (viewHeight - (uint32_t)(FONTH * MAXROWS)) / 2.0f) + 0.5f);
+			ELOG("[FBInk] Vertical fit isn't perfect, adding a %hhu pixels offset to strings & bars",
+			     viewVertOffset);
+		} else {
+			viewVertOffset = 0U;
+			ELOG("[FBInk] Vertical fit isn't perfect, but viewport fiddling was explicitly disabled");
+		}
+	}
+	// Bake that into the viewport computations, we'll special-case the image codepath to ignore it ;).
+	viewVertOrigin = (uint8_t)(viewVertOrigin + viewVertOffset);
 
 	// Get fixed screen information
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &fInfo)) {
@@ -1687,46 +1786,8 @@ int
 			break;
 	}
 
-	// Finish with some more generic stuff, not directly related to the framebuffer.
-	// As all this stuff is pretty much set in stone, we'll only query it once.
-	if (!deviceQuirks.skipId) {
-#ifndef FBINK_FOR_LINUX
-		// Identify the device's specific model...
-		identify_device(&deviceQuirks);
-#	ifdef FBINK_FOR_KINDLE
-		if (deviceQuirks.isKindleLegacy) {
-			ELOG("[FBInk] Enabled Legacy einkfb Kindle quirks");
-		} else if (deviceQuirks.isKindlePearlScreen) {
-			ELOG("[FBInk] Enabled Kindle with Pearl screen quirks");
-		} else if (deviceQuirks.isKindleOasis2) {
-			ELOG("[FBInk] Enabled Kindle Oasis 2 quirks");
-		}
-#	else
-		if (deviceQuirks.isKoboNonMT) {
-			ELOG("[FBInk] Enabled Kobo w/o Multi-Touch quirks");
-		} else if (deviceQuirks.isKoboMk7) {
-			ELOG("[FBInk] Enabled Kobo Mark 7 quirks");
-		}
-#	endif
-#endif
-
-		// Ask the system for its clock tick frequency so we can translate jiffies into human-readable units.
-		// NOTE: This will most likely be 100, even if CONFIG_HZ is > 100
-		//       c.f., sysconf(3)
-		long int rc = sysconf(_SC_CLK_TCK);
-		if (rc > 0) {
-			USER_HZ = rc;
-			ELOG("[FBInk] Clock tick frequency appears to be %ld Hz", USER_HZ);
-		} else {
-			ELOG("[FBInk] Unable to query clock tick frequency, assuming %ld Hz", USER_HZ);
-		}
-
-		// And make sure we won't do that again ;).
-		deviceQuirks.skipId = true;
-	}
-
-	// NOTE: Now that we know which device we're running on, setup pen colors,
-	//       taking into account the inverted cmap on legacy Kindles...
+		// NOTE: Now that we know which device we're running on, setup pen colors,
+		//       taking into account the inverted cmap on legacy Kindles...
 #ifdef FBINK_FOR_KINDLE
 	if (deviceQuirks.isKindleLegacy) {
 		penFGColor = eInkBGCMap[fbink_config->fg_color];
@@ -1779,9 +1840,14 @@ void
 {
 	fprintf(
 	    stdout,
-	    "viewWidth=%u;viewHeight=%u;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu",
+	    "viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu",
 	    viewWidth,
 	    viewHeight,
+	    screenWidth,
+	    screenHeight,
+	    viewHoriOrigin,
+	    viewVertOrigin,
+	    viewVertOffset,
 	    vInfo.bits_per_pixel,
 	    FONTW,
 	    FONTH,
@@ -1803,21 +1869,26 @@ void
     fbink_get_state(const FBInkConfig* fbink_config, FBInkState* fbink_state)
 {
 	if (fbink_state) {
-		fbink_state->view_width     = viewWidth;
-		fbink_state->view_height    = viewHeight;
-		fbink_state->bpp            = vInfo.bits_per_pixel;
-		fbink_state->font_w         = FONTW;
-		fbink_state->font_h         = FONTH;
-		fbink_state->fontsize_mult  = FONTSIZE_MULT;
-		fbink_state->font_name      = fontname_to_string(fbink_config->fontname);
-		fbink_state->glyph_width    = glyphWidth;
-		fbink_state->glyph_height   = glyphHeight;
-		fbink_state->max_cols       = MAXCOLS;
-		fbink_state->max_rows       = MAXROWS;
-		fbink_state->is_perfect_fit = deviceQuirks.isPerfectFit;
-		fbink_state->user_hz        = USER_HZ;
-		fbink_state->pen_fg_color   = penFGColor;
-		fbink_state->pen_bg_color   = penBGColor;
+		fbink_state->view_width       = viewWidth;
+		fbink_state->view_height      = viewHeight;
+		fbink_state->screen_width     = screenWidth;
+		fbink_state->screen_height    = screenHeight;
+		fbink_state->view_hori_origin = viewHoriOrigin;
+		fbink_state->view_vert_origin = viewVertOrigin;
+		fbink_state->view_vert_offset = viewVertOffset;
+		fbink_state->bpp              = vInfo.bits_per_pixel;
+		fbink_state->font_w           = FONTW;
+		fbink_state->font_h           = FONTH;
+		fbink_state->fontsize_mult    = FONTSIZE_MULT;
+		fbink_state->font_name        = fontname_to_string(fbink_config->fontname);
+		fbink_state->glyph_width      = glyphWidth;
+		fbink_state->glyph_height     = glyphHeight;
+		fbink_state->max_cols         = MAXCOLS;
+		fbink_state->max_rows         = MAXROWS;
+		fbink_state->is_perfect_fit   = deviceQuirks.isPerfectFit;
+		fbink_state->user_hz          = USER_HZ;
+		fbink_state->pen_fg_color     = penFGColor;
+		fbink_state->pen_bg_color     = penBGColor;
 	} else {
 		fprintf(stderr, "[FBInk] Err, it appears we were passed a NULL fbink_state pointer?\n");
 	}
@@ -1896,7 +1967,7 @@ static void
 	// Rotate the region if need be...
 	struct mxcfb_rect oregion = *region;
 	// NOTE: left = x, top = y
-	region->top    = viewWidth - oregion.left - oregion.width;
+	region->top    = screenWidth - oregion.left - oregion.width;
 	region->left   = oregion.top;
 	region->width  = oregion.height;
 	region->height = oregion.width;
@@ -2482,12 +2553,13 @@ int
 	}
 
 	// We'll begin by painting a blank canvas, just to make sure everything's clean behind us...
-	unsigned short int top_pos  = (unsigned short int) MAX(0, ((row * FONTH) + voffset));
-	unsigned short int left_pos = 0U;
+	unsigned short int top_pos =
+	    (unsigned short int) MAX(0 + (viewVertOrigin - viewVertOffset), ((row * FONTH) + voffset + viewVertOrigin));
+	unsigned short int left_pos = 0U + viewHoriOrigin;
 
 	// ... unless we were asked to skip background pixels... ;).
 	if (!fbink_config->is_bgless) {
-		fill_rect(left_pos, top_pos, (unsigned short int) viewWidth, FONTH, &bgC);
+		fill_rect(left_pos, top_pos, (unsigned short int) screenWidth, FONTH, &bgC);
 	}
 
 	// NOTE: We always use the same BG_ constant in order to get a rough inverse by just swapping to the inverted LUT ;).
@@ -2612,20 +2684,22 @@ int
 	struct mxcfb_rect region = {
 		.top    = top_pos,
 		.left   = left_pos,
-		.width  = viewWidth,
+		.width  = screenWidth,
 		.height = FONTH,
 	};
 
 	// V offset handling is the pits.
-	if (voffset != 0) {
-		LOG("Adjusting vertical pen position by %hd pixels, as requested", voffset);
+	if (voffset != 0 || viewVertOrigin != 0) {
+		LOG("Adjusting vertical pen position by %hd pixels, as requested, plus %hhu pixels, as mandated by the native viewport",
+		    voffset,
+		    viewVertOrigin);
 		// Clamp region to sane values if h/v offset is pushing stuff off-screen
-		if ((region.top + region.height) > viewHeight) {
-			region.height = (uint32_t) MAX(0, (short int) (viewHeight - region.top));
+		if ((region.top + region.height) > screenHeight) {
+			region.height = (uint32_t) MAX(0, (short int) (screenHeight - region.top));
 			LOG("Adjusted region height to account for vertical offset pushing part of the content off-screen");
 		}
-		if (region.top >= viewHeight) {
-			region.top = viewHeight - 1;
+		if (region.top >= screenHeight) {
+			region.top = screenHeight - 1;
 			LOG("Adjusted region top to account for vertical offset pushing part of the content off-screen");
 		}
 	}
@@ -2785,14 +2859,15 @@ int
 
 	// NOTE: We compute initial offsets from row/col, to help aligning images with text.
 	if (fbink_config->col < 0) {
-		x_off = (short int) (x_off + (MAX(MAXCOLS + fbink_config->col, 0) * FONTW));
+		x_off = (short int) (viewHoriOrigin + x_off + (MAX(MAXCOLS + fbink_config->col, 0) * FONTW));
 	} else {
-		x_off = (short int) (x_off + (fbink_config->col * FONTW));
+		x_off = (short int) (viewHoriOrigin + x_off + (fbink_config->col * FONTW));
 	}
 	if (fbink_config->row < 0) {
-		y_off = (short int) (y_off + (MAX(MAXROWS + fbink_config->row, 0) * FONTH));
+		y_off =
+		    (short int) (viewVertOrigin - viewVertOffset + y_off + (MAX(MAXROWS + fbink_config->row, 0) * FONTH));
 	} else {
-		y_off = (short int) (y_off + (fbink_config->row * FONTH));
+		y_off = (short int) (viewVertOrigin - viewVertOffset + y_off + (fbink_config->row * FONTH));
 	}
 	LOG("Adjusted image display coordinates to (%hd, %hd), after column %hd & row %hd",
 	    x_off,
@@ -2960,10 +3035,10 @@ int
 	// Clamp everything to a safe range, because we can't have *anything* going off-screen here.
 	struct mxcfb_rect region;
 	// NOTE: Assign each field individually to avoid a false-positive with Clang's SA...
-	region.top    = MIN(viewHeight, (uint32_t) MAX(0, y_off));
-	region.left   = MIN(viewWidth, (uint32_t) MAX(0, x_off));
-	region.width  = MIN(viewWidth - region.left, (uint32_t) w);
-	region.height = MIN(viewHeight - region.top, (uint32_t) h);
+	region.top    = MIN(screenHeight, (uint32_t) MAX((viewVertOrigin - viewVertOffset), y_off));
+	region.left   = MIN(screenWidth, (uint32_t) MAX(viewHoriOrigin, x_off));
+	region.width  = MIN(screenWidth - region.left, (uint32_t) w);
+	region.height = MIN(screenHeight - region.top, (uint32_t) h);
 
 	// NOTE: If we ended up with negative display offsets, we should shave those off region.width & region.height,
 	//       when it makes sense to do so,
@@ -2977,7 +3052,7 @@ int
 	unsigned short int img_y_off = 0;
 	if (x_off < 0) {
 		// We'll start plotting from the beginning of the *visible* part of the image ;)
-		img_x_off = (unsigned short int) abs(x_off);
+		img_x_off = (unsigned short int) (abs(x_off) + viewHoriOrigin);
 		max_width = (unsigned short int) (max_width + img_x_off);
 		// Make sure we're not trying to loop past the actual width of the image!
 		max_width = (unsigned short int) MIN(w, max_width);
@@ -2988,7 +3063,7 @@ int
 	}
 	if (y_off < 0) {
 		// We'll start plotting from the beginning of the *visible* part of the image ;)
-		img_y_off  = (unsigned short int) abs(y_off);
+		img_y_off  = (unsigned short int) (abs(y_off) + viewVertOrigin - viewVertOffset);
 		max_height = (unsigned short int) (max_height + img_y_off);
 		// Make sure we're not trying to loop past the actual height of the image!
 		max_height = (unsigned short int) MIN(h, max_height);

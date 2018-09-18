@@ -235,12 +235,18 @@ static void
 					break;
 				case 371:    // Glo HD (alyssum)
 				case 372:    // Touch 2.0 (pika)
+					break;
 				case 360:    // Aura (phoenix)
+					// NOTE: The bottom 10 pixels *may* be blacked out by Nickel? (TBC!)
+					//device_quirks->koboVertOffset = -10;
 					break;
 				case 350:    // Aura HD (dragon)
 					device_quirks->isKoboNonMT = true;
 					break;
 				case 370:    // Aura H2O (dahlia)
+					// NOTE: The top 11 pixels are blacked out by Nickel (behind the bezel)
+					device_quirks->koboVertOffset = 11;
+					break;
 				case 374:    // Aura H2O² (snow)
 					break;
 				case 378:    // Aura H2O² r2 (snow)

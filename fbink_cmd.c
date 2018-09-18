@@ -100,10 +100,11 @@ static void
 	    "\t-L, --linecountcode\tWhen successfully printing text, returns the total amount of printed lines as the process exit code.\n"
 	    "\t-l, --linecount\t\tWhen successfully printing text, outputs the total amount of printed lines in the final line of output to stdout (NOTE: enforces quiet & non-verbose!).\n"
 	    "\t-P, --progressbar NUM\tDraw a NUM%% full progress bar (full-width). Like other alternative modes, does *NOT* have precedence over text printing.\n"
-	    "\t\t\t\tIgnores -o, --overlay; -x, --col; -X, --hoffset; as well as -m, --centered & -p, --padded"
+	    "\t\t\t\tIgnores -o, --overlay; -x, --col; -X, --hoffset; as well as -m, --centered & -p, --padded\n"
 	    "\t-A, --activitybar NUM\tDraw an activity bar on step NUM (full-width). NUM must be between 0 and 16. Like other alternative modes, does *NOT* have precedence over text printing.\n"
-	    "\t\t\t\tNOTE: If NUM is negative, will cycle between each possible value every 500ms, until the death of the sun! Be careful not to be caught in an involuntary infinite loop!"
-	    "\t\t\t\tIgnores -x, --col; -X, --hoffset; as well as -m, --centered & -p, --padded"
+	    "\t\t\t\tNOTE: If NUM is negative, will cycle between each possible value every 750ms, until the death of the sun! Be careful not to be caught in an involuntary infinite loop!\n"
+	    "\t\t\t\tIgnores -x, --col; -X, --hoffset; as well as -m, --centered & -p, --padded\n"
+	    "\t-V, --noviewport\tIgnore any & all viewport corrections, be it from Kobo devices with rows of pixels hidden by a bezel, or a dynamic offset applied to rows when vertical fit isn't perfect.\n"
 	    "\n"
 	    "NOTES:\n"
 	    "\tYou can specify multiple STRINGs in a single invocation of fbink, each consecutive one will be printed on the subsequent line.\n"
@@ -174,6 +175,36 @@ static void
 	return;
 }
 
+// Truly infinite progress bar
+// NOTE: Punted off to a dedicated function to workaround an amazingly weird & obscure performance issue:
+//       keeping this inlined in main massively tanks *image* processing performance (by ~50%!),
+//       when built w/ LTO... o_O.
+static int
+    do_infinite_progress_bar(int fbfd, const FBInkConfig* fbink_config)
+{
+	int rv = EXIT_SUCCESS;
+
+	const struct timespec zzz = { 0L, 750000000L };
+	for (;;) {
+		for (uint8_t i = 0; i < 16; i++) {
+			rv = fbink_print_activity_bar(fbfd, i, fbink_config);
+			if (rv != EXIT_SUCCESS) {
+				break;
+			}
+			nanosleep(&zzz, NULL);
+		}
+		for (uint8_t i = 16; i > 0; i--) {
+			rv = fbink_print_activity_bar(fbfd, i, fbink_config);
+			if (rv != EXIT_SUCCESS) {
+				break;
+			}
+			nanosleep(&zzz, NULL);
+		}
+	}
+
+	return rv;
+}
+
 // Application entry point
 int
     main(int argc, char* argv[])
@@ -206,6 +237,7 @@ int
 					      { "linecount", no_argument, NULL, 'l' },
 					      { "progressbar", required_argument, NULL, 'P' },
 					      { "activitybar", required_argument, NULL, 'A' },
+					      { "noviewport", no_argument, NULL, 'V' },
 					      { "overlay", no_argument, NULL, 'o' },
 					      { "bgless", no_argument, NULL, 'O' },
 					      { NULL, 0, NULL, 0 } };
@@ -260,7 +292,7 @@ int
 	uint8_t   progress       = 0;
 	int       errfnd         = 0;
 
-	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:B:LlP:A:oO", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:B:LlP:A:oOV", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				fbink_config.row = (short int) atoi(optarg);
@@ -556,7 +588,7 @@ int
 				break;
 			case 'A':
 				is_activitybar = true;
-				int8_t val     = (int8_t) strtol(optarg, NULL, 10);
+				int8_t val     = (int8_t) atoi(optarg);
 				if (val < 0) {
 					is_infinite = true;
 				} else {
@@ -568,6 +600,9 @@ int
 				break;
 			case 'O':
 				fbink_config.is_bgless = true;
+				break;
+			case 'V':
+				fbink_config.no_viewport = true;
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
@@ -734,16 +769,13 @@ int
 					    fbink_config.is_flashing ? "true" : "false",
 					    fbink_config.is_cleared ? "true" : "false");
 				}
-				const struct timespec zzz = { 0L, 750000000L };
-				while (1) {
-					for (uint8_t i = 0U; i < 16U; i++) {
-						rv = fbink_print_activity_bar(fbfd, i, &fbink_config);
-						nanosleep(&zzz, NULL);
-					}
-					for (uint8_t i = 16U; i > 0U; i--) {
-						rv = fbink_print_activity_bar(fbfd, i, &fbink_config);
-						nanosleep(&zzz, NULL);
-					}
+				// NOTE: In a dedicated function,
+				//       because keeping it inline massively tanks performance in the image codepath,
+				//       for an amazingly weird LTO-related reason :?
+				if (do_infinite_progress_bar(fbfd, &fbink_config) != EXIT_SUCCESS) {
+					fprintf(stderr, "Failed to display a progressbar!\n");
+					rv = ERRCODE(EXIT_FAILURE);
+					goto cleanup;
 				}
 			} else {
 				if (!fbink_config.is_quiet) {

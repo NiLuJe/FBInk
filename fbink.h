@@ -130,21 +130,26 @@ typedef enum
 // A struct to dump FBInk's internal state into, like fbink_state_dump() would, but in C ;)
 typedef struct
 {
-	uint32_t           view_width;        // viewWidth
-	uint32_t           view_height;       // viewHeight
-	uint32_t           bpp;               // vInfo.bits_per_pixel
-	unsigned short int font_w;            // FONTW
-	unsigned short     font_h;            // FONTH
-	uint8_t            fontsize_mult;     // FONTSIZE_MULT
-	const char*        font_name;         // fbink_config->fontname
-	uint8_t            glyph_width;       // glyphWidth
-	uint8_t            glyph_height;      // glyphHeight
-	unsigned short int max_cols;          // MAXCOLS
-	unsigned short int max_rows;          // MAXROWS
-	bool               is_perfect_fit;    // deviceQuirks.isPerfectFit
-	long int           user_hz;           // USER_HZ
-	uint8_t            pen_fg_color;      // penFGColor
-	uint8_t            pen_bg_color;      // penFGColor;
+	uint32_t           view_width;          // viewWidth
+	uint32_t           view_height;         // viewHeight
+	uint32_t           screen_width;        // screenWidth
+	uint32_t           screen_height;       // screenHeight
+	uint8_t            view_hori_origin;    // viewHoriOrigin
+	uint8_t            view_vert_origin;    // viewVertOrigin
+	uint8_t            view_vert_offset;    // viewVertOffset
+	uint32_t           bpp;                 // vInfo.bits_per_pixel
+	unsigned short int font_w;              // FONTW
+	unsigned short     font_h;              // FONTH
+	uint8_t            fontsize_mult;       // FONTSIZE_MULT
+	const char*        font_name;           // fbink_config->fontname
+	uint8_t            glyph_width;         // glyphWidth
+	uint8_t            glyph_height;        // glyphHeight
+	unsigned short int max_cols;            // MAXCOLS
+	unsigned short int max_rows;            // MAXROWS
+	bool               is_perfect_fit;      // deviceQuirks.isPerfectFit
+	long int           user_hz;             // USER_HZ
+	uint8_t            pen_fg_color;        // penFGColor
+	uint8_t            pen_bg_color;        // penFGColor;
 } FBInkState;
 
 // What a FBInk config should look like. Perfectly sane when fully zero-initialized.
@@ -166,6 +171,7 @@ typedef struct
 	uint8_t   bg_color;        // Requested background color for text (c.f., BG_COLOR_INDEX_T enum)
 	bool      is_overlay;      // Don't draw bg, use inverse of fb's underlying pixel as pen fg color
 	bool      is_bgless;       // Don't draw bg
+	bool      no_viewport;     // Ignore viewport corrections, whether hardware-related on Kobo, or to center rows
 	bool      is_verbose;      // Print verbose diagnostic informations on stdout
 	bool      is_quiet;        // Hide fbink_init()'s hardware setup info (sent to stderr)
 	bool      ignore_alpha;    // Ignore any potential alpha channel in source image (i.e., flatten the image)

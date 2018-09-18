@@ -465,8 +465,8 @@ int
 		//       (i.e., origin at the bottom-left instead of top-right).
 		//       Hopefully that doesn't apply to the fb itself, too...
 		ELOG("H2O²r1: x=%hu, y=%hu",
-		     (unsigned short int) (viewHeight - match_coords.x - 1),
-		     (unsigned short int) (viewWidth - match_coords.y - 1));
+		     (unsigned short int) (screenHeight - match_coords.x - 1),
+		     (unsigned short int) (screenWidth - match_coords.y - 1));
 
 		// Press it if requested...
 		if (press_button) {
