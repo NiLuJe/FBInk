@@ -1728,13 +1728,13 @@ int
 	// In a similar fashion, add a vertical offset to make sure rows are vertically "centered",
 	// in case we can't perfectly fit the final row.
 	if ((FONTH * MAXROWS) == viewHeight) {
-		viewSoftOffset = 0U;
+		viewVertOffset = 0U;
 	} else {
-		viewSoftOffset = (uint8_t)((viewHeight - (uint32_t)(FONTH * MAXROWS)) / 2U);
-		ELOG("[FBInk] Vertical fit isn't perfect, adding a %hhu pixels offset to strings & bars", viewSoftOffset);
+		viewVertOffset = (uint8_t)((viewHeight - (uint32_t)(FONTH * MAXROWS)) / 2U);
+		ELOG("[FBInk] Vertical fit isn't perfect, adding a %hhu pixels offset to strings & bars", viewVertOffset);
 	}
 	// Bake that into the viewport computations, we'll special-case the image codepath to ignore it ;).
-	viewVertOrigin = (uint8_t)(viewVertOrigin + viewSoftOffset);
+	viewVertOrigin = (uint8_t)(viewVertOrigin + viewVertOffset);
 
 	// Get fixed screen information
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &fInfo)) {
@@ -1831,14 +1831,14 @@ void
 {
 	fprintf(
 	    stdout,
-	    "viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewSoftOffset=%hhu;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu",
+	    "viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu",
 	    viewWidth,
 	    viewHeight,
 	    screenWidth,
 	    screenHeight,
 	    viewHoriOrigin,
 	    viewVertOrigin,
-	    viewSoftOffset,
+	    viewVertOffset,
 	    vInfo.bits_per_pixel,
 	    FONTW,
 	    FONTH,
@@ -1866,7 +1866,7 @@ void
 		fbink_state->screen_height    = screenHeight;
 		fbink_state->view_hori_origin = viewHoriOrigin;
 		fbink_state->view_vert_origin = viewVertOrigin;
-		fbink_state->view_soft_offset = viewSoftOffset;
+		fbink_state->view_vert_offset = viewVertOffset;
 		fbink_state->bpp              = vInfo.bits_per_pixel;
 		fbink_state->font_w           = FONTW;
 		fbink_state->font_h           = FONTH;
@@ -2855,9 +2855,9 @@ int
 	}
 	if (fbink_config->row < 0) {
 		y_off =
-		    (short int) (viewVertOrigin - viewSoftOffset + y_off + (MAX(MAXROWS + fbink_config->row, 0) * FONTH));
+		    (short int) (viewVertOrigin - viewVertOffset + y_off + (MAX(MAXROWS + fbink_config->row, 0) * FONTH));
 	} else {
-		y_off = (short int) (viewVertOrigin - viewSoftOffset + y_off + (fbink_config->row * FONTH));
+		y_off = (short int) (viewVertOrigin - viewVertOffset + y_off + (fbink_config->row * FONTH));
 	}
 	LOG("Adjusted image display coordinates to (%hd, %hd), after column %hd & row %hd",
 	    x_off,

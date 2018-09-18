@@ -136,7 +136,7 @@ typedef struct
 	uint32_t           screen_height;       // screenHeight
 	uint8_t            view_hori_origin;    // viewHoriOrigin
 	uint8_t            view_vert_origin;    // viewVertOrigin
-	uint8_t            view_soft_offset;    // viewSoftOffset
+	uint8_t            view_vert_offset;    // viewVertOffset
 	uint32_t           bpp;                 // vInfo.bits_per_pixel
 	unsigned short int font_w;              // FONTW
 	unsigned short     font_h;              // FONTH
