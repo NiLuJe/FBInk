@@ -641,7 +641,8 @@ static struct mxcfb_rect
 				// and clamp it to safe values!
 				if (hoffset < 0) {
 					region.left =
-					    (uint32_t) MAX(0, ((col * FONTW) + hoffset + viewHoriOrigin + pixel_offset));
+					    (uint32_t) MAX(0 + viewHoriOrigin,
+							   ((col * FONTW) + hoffset + viewHoriOrigin + pixel_offset));
 				} else {
 					region.left = (uint32_t) MIN(
 					    (uint32_t)((col * FONTW) + hoffset + viewHoriOrigin + pixel_offset),
@@ -1500,7 +1501,7 @@ int
 	viewWidth      = screenWidth;
 	viewHoriOrigin = 0U;
 	// But on the vertical axis, oh my...
-	if (!fbink_config->ignore_viewport && deviceQuirks.koboVertOffset != 0) {
+	if (!fbink_config->no_viewport && deviceQuirks.koboVertOffset != 0) {
 		viewHeight = screenHeight - (uint32_t) abs(deviceQuirks.koboVertOffset);
 		if (deviceQuirks.koboVertOffset > 0) {
 			// Rows of pixels are hidden at the top
@@ -1731,8 +1732,15 @@ int
 	if ((FONTH * MAXROWS) == viewHeight) {
 		viewVertOffset = 0U;
 	} else {
-		viewVertOffset = (uint8_t)((viewHeight - (uint32_t)(FONTH * MAXROWS)) / 2U);
-		ELOG("[FBInk] Vertical fit isn't perfect, adding a %hhu pixels offset to strings & bars", viewVertOffset);
+		// NOTE: That should also fall under no_viewport's purview
+		if (!fbink_config->no_viewport) {
+			viewVertOffset = (uint8_t)((viewHeight - (uint32_t)(FONTH * MAXROWS)) / 2U);
+			ELOG("[FBInk] Vertical fit isn't perfect, adding a %hhu pixels offset to strings & bars",
+			     viewVertOffset);
+		} else {
+			viewVertOffset = 0U;
+			ELOG("[FBInk] Vertical fit isn't perfect, but viewport fiddling was explicitly disabled");
+		}
 	}
 	// Bake that into the viewport computations, we'll special-case the image codepath to ignore it ;).
 	viewVertOrigin = (uint8_t)(viewVertOrigin + viewVertOffset);

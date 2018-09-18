@@ -602,7 +602,7 @@ int
 				fbink_config.is_bgless = true;
 				break;
 			case 'V':
-				fbink_config.ignore_viewport = true;
+				fbink_config.no_viewport = true;
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
