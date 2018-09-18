@@ -583,8 +583,9 @@ static struct mxcfb_rect
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
-		.top    = (uint32_t) MAX(0, (((row - multiline_offset) * FONTH) + voffset + viewVertOrigin)),
-		.left   = (uint32_t) MAX(0, ((col * FONTW) + hoffset + viewHoriOrigin)),
+		.top    = (uint32_t) MAX(0 + (viewVertOrigin - viewVertOffset),
+                                      (((row - multiline_offset) * FONTH) + voffset + viewVertOrigin)),
+		.left   = (uint32_t) MAX(0 + viewHoriOrigin, ((col * FONTW) + hoffset + viewHoriOrigin)),
 		.width  = multiline_offset > 0U ? (screenWidth - (uint32_t)(col * FONTW)) : (uint32_t)(charcount * FONTW),
 		.height = (uint32_t)((multiline_offset + 1U) * FONTH),
 	};
@@ -2544,7 +2545,8 @@ int
 	}
 
 	// We'll begin by painting a blank canvas, just to make sure everything's clean behind us...
-	unsigned short int top_pos  = (unsigned short int) MAX(0, ((row * FONTH) + voffset + viewVertOrigin));
+	unsigned short int top_pos =
+	    (unsigned short int) MAX(0 + (viewVertOrigin - viewVertOffset), ((row * FONTH) + voffset + viewVertOrigin));
 	unsigned short int left_pos = 0U + viewHoriOrigin;
 
 	// ... unless we were asked to skip background pixels... ;).
@@ -3025,8 +3027,8 @@ int
 	// Clamp everything to a safe range, because we can't have *anything* going off-screen here.
 	struct mxcfb_rect region;
 	// NOTE: Assign each field individually to avoid a false-positive with Clang's SA...
-	region.top    = MIN(screenHeight, (uint32_t) MAX(0, y_off));
-	region.left   = MIN(screenWidth, (uint32_t) MAX(0, x_off));
+	region.top    = MIN(screenHeight, (uint32_t) MAX((viewVertOrigin - viewVertOffset), y_off));
+	region.left   = MIN(screenWidth, (uint32_t) MAX(viewHoriOrigin, x_off));
 	region.width  = MIN(screenWidth - region.left, (uint32_t) w);
 	region.height = MIN(screenHeight - region.top, (uint32_t) h);
 
@@ -3042,7 +3044,7 @@ int
 	unsigned short int img_y_off = 0;
 	if (x_off < 0) {
 		// We'll start plotting from the beginning of the *visible* part of the image ;)
-		img_x_off = (unsigned short int) abs(x_off);
+		img_x_off = (unsigned short int) (abs(x_off) + viewHoriOrigin);
 		max_width = (unsigned short int) (max_width + img_x_off);
 		// Make sure we're not trying to loop past the actual width of the image!
 		max_width = (unsigned short int) MIN(w, max_width);
@@ -3053,7 +3055,7 @@ int
 	}
 	if (y_off < 0) {
 		// We'll start plotting from the beginning of the *visible* part of the image ;)
-		img_y_off  = (unsigned short int) abs(y_off);
+		img_y_off  = (unsigned short int) (abs(y_off) + viewVertOrigin - viewVertOffset);
 		max_height = (unsigned short int) (max_height + img_y_off);
 		// Make sure we're not trying to loop past the actual height of the image!
 		max_height = (unsigned short int) MIN(h, max_height);
