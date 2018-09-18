@@ -171,7 +171,7 @@ typedef struct
 	uint8_t   bg_color;       // Requested background color for text (c.f., BG_COLOR_INDEX_T enum)
 	bool      is_overlay;     // Don't draw bg, use inverse of fb's underlying pixel as pen fg color
 	bool      is_bgless;      // Don't draw bg
-	bool ignore_viewport;    // Do not correct the viewport on Kobo devices with rows of pixels hidden by the bezel...
+	bool ignore_viewport;    // Ignore viewport corrections, whether hardware-related on Kobo, or to center rows (c.f., #14)
 	bool is_verbose;         // Print verbose diagnostic informations on stdout
 	bool is_quiet;           // Hide fbink_init()'s hardware setup info (sent to stderr)
 	bool ignore_alpha;       // Ignore any potential alpha channel in source image (i.e., flatten the image)

@@ -104,7 +104,7 @@ static void
 	    "\t-A, --activitybar NUM\tDraw an activity bar on step NUM (full-width). NUM must be between 0 and 16. Like other alternative modes, does *NOT* have precedence over text printing.\n"
 	    "\t\t\t\tNOTE: If NUM is negative, will cycle between each possible value every 750ms, until the death of the sun! Be careful not to be caught in an involuntary infinite loop!\n"
 	    "\t\t\t\tIgnores -x, --col; -X, --hoffset; as well as -m, --centered & -p, --padded\n"
-	    "\t-V, --noviewport\tIgnore any & all viewport corrections, be it from Kobo devices with rows of pixels hidden by a bezel, or a dynamic offset when vertical fit isn't perfect.\n"
+	    "\t-V, --noviewport\tIgnore any & all viewport corrections, be it from Kobo devices with rows of pixels hidden by a bezel, or a dynamic offset applied to rows when vertical fit isn't perfect.\n"
 	    "\n"
 	    "NOTES:\n"
 	    "\tYou can specify multiple STRINGs in a single invocation of fbink, each consecutive one will be printed on the subsequent line.\n"
@@ -177,7 +177,8 @@ static void
 
 // Truly infinite progress bar
 // NOTE: Punted off to a dedicated function to workaround an amazingly weird & obscure performance issue:
-//       keeping this inlined in main massively tanks *image* processing performance (by ~50%!) o_O.
+//       keeping this inlined in main massively tanks *image* processing performance (by ~50%!),
+//       when built w/ LTO... o_O.
 static int
     do_infinite_progress_bar(int fbfd, const FBInkConfig* fbink_config)
 {
@@ -770,7 +771,7 @@ int
 				}
 				// NOTE: In a dedicated function,
 				//       because keeping it inline massively tanks performance in the image codepath,
-				//       for an amazingly weird reason :?
+				//       for an amazingly weird LTO-related reason :?
 				if (do_infinite_progress_bar(fbfd, &fbink_config) != EXIT_SUCCESS) {
 					fprintf(stderr, "Failed to display a progressbar!\n");
 					rv = ERRCODE(EXIT_FAILURE);

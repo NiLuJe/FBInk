@@ -211,7 +211,6 @@ struct fb_var_screeninfo vInfo;
 struct fb_fix_screeninfo fInfo;
 uint32_t                 viewWidth;
 uint32_t                 viewHeight;
-// To account for Kobo shenanigans with behind-the-bezel pixels...
 uint32_t           screenWidth;
 uint32_t           screenHeight;
 uint8_t            viewHoriOrigin = 0U;
