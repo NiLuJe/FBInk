@@ -1734,7 +1734,7 @@ int
 	} else {
 		// NOTE: That should also fall under no_viewport's purview
 		if (!fbink_config->no_viewport) {
-			viewVertOffset = (uint8_t)((viewHeight - (uint32_t)(FONTH * MAXROWS)) / 2U);
+			viewVertOffset = (uint8_t)(((float) (viewHeight - (uint32_t)(FONTH * MAXROWS)) / 2.0f) + 0.5f);
 			ELOG("[FBInk] Vertical fit isn't perfect, adding a %hhu pixels offset to strings & bars",
 			     viewVertOffset);
 		} else {
