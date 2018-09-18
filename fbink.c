@@ -1731,7 +1731,7 @@ int
 		viewSoftOffset = 0U;
 	} else {
 		viewSoftOffset = (uint8_t)((viewHeight - (uint32_t)(FONTH * MAXROWS)) / 2U);
-		ELOG("[FBInk] Vertical fit isn't perfect, adding a %hhu pixels offset to text & bars", viewSoftOffset);
+		ELOG("[FBInk] Vertical fit isn't perfect, adding a %hhu pixels offset to strings & bars", viewSoftOffset);
 	}
 	// Bake that into the viewport computations, we'll special-case the image codepath to ignore it ;).
 	viewVertOrigin = (uint8_t)(viewVertOrigin + viewSoftOffset);
