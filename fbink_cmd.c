@@ -587,7 +587,7 @@ int
 				break;
 			case 'A':
 				is_activitybar = true;
-				int8_t val     = (int8_t) strtol(optarg, NULL, 10);
+				int8_t val     = (int8_t) atoi(optarg);
 				if (val < 0) {
 					is_infinite = true;
 				} else {
