@@ -1735,14 +1735,15 @@ int
 		// NOTE: That should also fall under no_viewport's purview
 		if (!fbink_config->no_viewport) {
 			viewVertOffset = (uint8_t)(((float) (viewHeight - (uint32_t)(FONTH * MAXROWS)) / 2.0f) + 0.5f);
-			ELOG("[FBInk] Vertical fit isn't perfect, adding a %hhu pixels offset to strings & bars",
+			ELOG("[FBInk] Vertical fit isn't perfect, shitfting rows by %hhu pixels to the bottom",
 			     viewVertOffset);
 		} else {
 			viewVertOffset = 0U;
 			ELOG("[FBInk] Vertical fit isn't perfect, but viewport fiddling was explicitly disabled");
 		}
 	}
-	// Bake that into the viewport computations, we'll special-case the image codepath to ignore it ;).
+	// Bake that into the viewport computations,
+	// we'll special-case the image codepath to ignore it when row is unspecified (i.e., 0) ;).
 	viewVertOrigin = (uint8_t)(viewVertOrigin + viewVertOffset);
 
 	// Get fixed screen information
