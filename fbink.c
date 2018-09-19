@@ -2863,13 +2863,15 @@ int
 	} else {
 		x_off = (short int) (viewHoriOrigin + x_off + (fbink_config->col * FONTW));
 	}
-	// NOTE: We currently *always* ignore viewVertOffset,
-	//       which may run counter-intuitively to the original goal of helping align images with text...
+	// NOTE: Unless we *actually* specified a row, ignore viewVertOffset
+	//       The rationale being we want to keep being aligned to text rows when we do specify a row,
+	//       but we don't want the extra offset when we don't (in particular, when printing full-screen images).
 	if (fbink_config->row < 0) {
-		y_off =
-		    (short int) (viewVertOrigin - viewVertOffset + y_off + (MAX(MAXROWS + fbink_config->row, 0) * FONTH));
-	} else {
+		y_off = (short int) (viewVertOrigin + y_off + (MAX(MAXROWS + fbink_config->row, 0) * FONTH));
+	} else if (fbink_config->row == 0) {
 		y_off = (short int) (viewVertOrigin - viewVertOffset + y_off + (fbink_config->row * FONTH));
+	} else {
+		y_off = (short int) (viewVertOrigin + y_off + (fbink_config->row * FONTH));
 	}
 	LOG("Adjusted image display coordinates to (%hd, %hd), after column %hd & row %hd",
 	    x_off,
@@ -3037,7 +3039,11 @@ int
 	// Clamp everything to a safe range, because we can't have *anything* going off-screen here.
 	struct mxcfb_rect region;
 	// NOTE: Assign each field individually to avoid a false-positive with Clang's SA...
-	region.top    = MIN(screenHeight, (uint32_t) MAX((viewVertOrigin - viewVertOffset), y_off));
+	if (fbink_config->row == 0) {
+		region.top = MIN(screenHeight, (uint32_t) MAX((viewVertOrigin - viewVertOffset), y_off));
+	} else {
+		region.top = MIN(screenHeight, (uint32_t) MAX(viewVertOrigin, y_off));
+	}
 	region.left   = MIN(screenWidth, (uint32_t) MAX(viewHoriOrigin, x_off));
 	region.width  = MIN(screenWidth - region.left, (uint32_t) w);
 	region.height = MIN(screenHeight - region.top, (uint32_t) h);
@@ -3065,7 +3071,11 @@ int
 	}
 	if (y_off < 0) {
 		// We'll start plotting from the beginning of the *visible* part of the image ;)
-		img_y_off  = (unsigned short int) (abs(y_off) + viewVertOrigin - viewVertOffset);
+		if (fbink_config->row == 0) {
+			img_y_off = (unsigned short int) (abs(y_off) + viewVertOrigin - viewVertOffset);
+		} else {
+			img_y_off = (unsigned short int) (abs(y_off) + viewVertOrigin);
+		}
 		max_height = (unsigned short int) (max_height + img_y_off);
 		// Make sure we're not trying to loop past the actual height of the image!
 		max_height = (unsigned short int) MIN(h, max_height);
