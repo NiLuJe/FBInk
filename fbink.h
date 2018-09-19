@@ -201,8 +201,9 @@ FBINK_API int fbink_close(int fbfd);
 // fbfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // fbink_config:	pointer to an FBInkConfig struct
-//				If you wish to customize them,
-//				the is_centered, fontmult, fontname, is_verbose & is_quiet fields MUST be set beforehand.
+//				If you wish to customize them, the fields:
+//				is_centered, fontmult, fontname, fg_color, bg_color, no_viewport, is_verbose & is_quiet
+//				MUST be set beforehand.
 //				This means you MUST call fbink_init() again when you update them, too!
 // NOTE: By virtue of, well, setting global variables, do NOT consider this thread-safe.
 //       The rest of the API should be, though, so make sure you init in your main thread *before* threading begins...
