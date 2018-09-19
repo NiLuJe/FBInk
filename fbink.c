@@ -2872,6 +2872,11 @@ int
 		y_off = (short int) (viewVertOrigin + y_off + (MAX(MAXROWS + fbink_config->row, 0) * FONTH));
 	} else if (fbink_config->row == 0) {
 		y_off = (short int) (viewVertOrigin - viewVertOffset + y_off + (fbink_config->row * FONTH));
+		// This of course means that row 0 effectively breaks that "align with text" contract if viewVertOffset != 0,
+		// so, warn about it...
+		if (viewVertOffset != 0U) {
+			LOG("Ignoring the %hhupx row offset because row is 0!", viewVertOffset);
+		}
 	} else {
 		y_off = (short int) (viewVertOrigin + y_off + (fbink_config->row * FONTH));
 	}
