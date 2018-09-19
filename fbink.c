@@ -2873,7 +2873,9 @@ int
 	} else if (fbink_config->row == 0) {
 		y_off = (short int) (viewVertOrigin - viewVertOffset + y_off + (fbink_config->row * FONTH));
 		// This of course means that row 0 effectively breaks that "align with text" contract if viewVertOffset != 0,
-		// so, warn about it...
+		// on the off-chance we do explicitly really want to align something to row 0, so, warn about it...
+		// The "print full-screen images" use-case is greatly more prevalent than "actually rely on row 0 alignment" ;).
+		// And in case that's *really* needed, using -MAXROWS instead of 0 will honor alignment anyway.
 		if (viewVertOffset != 0U) {
 			LOG("Ignoring the %hhupx row offset because row is 0!", viewVertOffset);
 		}
