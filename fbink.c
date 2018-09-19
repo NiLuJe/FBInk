@@ -1735,8 +1735,7 @@ int
 		// NOTE: That should also fall under no_viewport's purview
 		if (!fbink_config->no_viewport) {
 			viewVertOffset = (uint8_t)(((float) (viewHeight - (uint32_t)(FONTH * MAXROWS)) / 2.0f) + 0.5f);
-			ELOG("[FBInk] Vertical fit isn't perfect, shitfting rows by %hhu pixels to the bottom",
-			     viewVertOffset);
+			ELOG("[FBInk] Vertical fit isn't perfect, shifting rows down by %hhu pixels", viewVertOffset);
 		} else {
 			viewVertOffset = 0U;
 			ELOG("[FBInk] Vertical fit isn't perfect, but viewport fiddling was explicitly disabled");
