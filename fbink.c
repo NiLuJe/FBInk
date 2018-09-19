@@ -2866,6 +2866,7 @@ int
 	// NOTE: Unless we *actually* specified a row, ignore viewVertOffset
 	//       The rationale being we want to keep being aligned to text rows when we do specify a row,
 	//       but we don't want the extra offset when we don't (in particular, when printing full-screen images).
+	// NOTE: This means that row 0 and row -MAXROWS *will* behave differently, but so be it...
 	if (fbink_config->row < 0) {
 		y_off = (short int) (viewVertOrigin + y_off + (MAX(MAXROWS + fbink_config->row, 0) * FONTH));
 	} else if (fbink_config->row == 0) {
