@@ -502,7 +502,7 @@ cleanup:
 
 // Wait for the end of an USBMS session, trying to detect a successful content import in the process.
 int
-    fbink_wait_for_usbms_processing(int fbfd, bool force_unplug)
+    fbink_wait_for_usbms_processing(int fbfd UNUSED_BY_NOBUTTON, bool force_unplug UNUSED_BY_NOBUTTON)
 {
 #ifdef FBINK_WITH_BUTTON_SCAN
 	// Open the framebuffer if need be...
