@@ -2863,6 +2863,8 @@ int
 	} else {
 		x_off = (short int) (viewHoriOrigin + x_off + (fbink_config->col * FONTW));
 	}
+	// NOTE: We currently *always* ignore viewVertOffset,
+	//       which may run counter-intuitively to the original goal of helping align images with text...
 	if (fbink_config->row < 0) {
 		y_off =
 		    (short int) (viewVertOrigin - viewVertOffset + y_off + (MAX(MAXROWS + fbink_config->row, 0) * FONTH));
