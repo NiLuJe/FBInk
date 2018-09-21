@@ -2826,6 +2826,36 @@ cleanup:
 }
 
 int
+	fbink_get_image_channels(const FBInkConfig* fbink_config UNUSED_BY_MINIMAL)
+{
+#ifdef FBINK_WITH_IMAGE
+	int req_n;
+	switch (vInfo.bits_per_pixel) {
+		case 4U:
+			req_n = 1 + !fbink_config->ignore_alpha;
+			break;
+		case 8U:
+			req_n = 1 + !fbink_config->ignore_alpha;
+			break;
+		case 16U:
+			req_n = 3 + !fbink_config->ignore_alpha;
+			break;
+		case 24U:
+			req_n = 3 + !fbink_config->ignore_alpha;
+			break;
+		case 32U:
+		default:
+			req_n = 3 + !fbink_config->ignore_alpha;
+			break;
+	}
+	return req_n;
+#else
+	fprintf(stderr, "[FBInk] Image support is disabled in this FBInk build!\n");
+	return ERRCODE(ENOSYS);
+#endif    // FBINK_WITH_IMAGE
+}
+
+int
     fbink_print_image(int fbfd    UNUSED_BY_MINIMAL,
 		      const char* filename UNUSED_BY_MINIMAL,
 		      short int x_off UNUSED_BY_MINIMAL,
@@ -2939,8 +2969,10 @@ int
 	LOG("Requested %d color channels, image had %d.", req_n, n);
 
 	return fbink_print_image_data(fbfd, data, x_off, y_off, w, h, n, req_n, fbink_config);
-
-#endif
+#else
+	fprintf(stderr, "[FBInk] Image support is disabled in this FBInk build!\n");
+	return ERRCODE(ENOSYS);
+#endif    // FBINK_WITH_IMAGE
 }
 // Draw an image on screen
 int
