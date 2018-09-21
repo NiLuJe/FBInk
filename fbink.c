@@ -2825,12 +2825,133 @@ cleanup:
 	return rv;
 }
 
-// Draw an image on screen
 int
     fbink_print_image(int fbfd    UNUSED_BY_MINIMAL,
 		      const char* filename UNUSED_BY_MINIMAL,
 		      short int x_off UNUSED_BY_MINIMAL,
 		      short int y_off    UNUSED_BY_MINIMAL,
+		      const FBInkConfig* fbink_config UNUSED_BY_MINIMAL)
+{
+#ifdef FBINK_WITH_IMAGE
+	int        req_n;
+	int 	   w;
+	int        h;
+	int        n;
+	// Let stb handle grayscaling for us
+	switch (vInfo.bits_per_pixel) {
+		case 4U:
+			req_n           = 1 + !fbink_config->ignore_alpha;
+			break;
+		case 8U:
+			req_n           = 1 + !fbink_config->ignore_alpha;
+			break;
+		case 16U:
+			req_n = 3 + !fbink_config->ignore_alpha;
+			break;
+		case 24U:
+			req_n          = 3 + !fbink_config->ignore_alpha;
+			break;
+		case 32U:
+		default:
+			req_n          = 3 + !fbink_config->ignore_alpha;
+			break;
+	}
+
+	unsigned char* data = NULL;
+	// Read image either from stdin (provided we're not running from a terminal), or a file
+	if (strcmp(filename, "-") == 0 && !isatty(fileno(stdin))) {
+		// NOTE: Ideally, we'd simply feed stdin to stbi_load_from_file, but that doesn't work because it relies on fseek,
+		//       so read stdin ourselves...
+		//       c.f., https://stackoverflow.com/a/44894946
+		unsigned char* imgdata = NULL;
+		unsigned char* temp    = NULL;
+		size_t         size    = 0;
+		size_t         used    = 0;
+		size_t         nread;
+
+		if (ferror(stdin)) {
+			fprintf(stderr, "[FBInk] Failed to read image data from stdin!\n");
+			return ERRCODE(EXIT_FAILURE);
+		}
+
+#	define CHUNK (256 * 1024)
+		while (1) {
+			if (used + CHUNK + 1U > size) {
+				size = used + CHUNK + 1U;
+
+				// Overflow check
+				if (size <= used) {
+					free(imgdata);
+					fprintf(stderr, "[FBInk] Too much input data!\n");
+					return ERRCODE(EXIT_FAILURE);
+				}
+
+				// OOM check
+				temp = realloc(imgdata, size);
+				if (temp == NULL) {
+					free(imgdata);
+					fprintf(stderr, "[FBInk] realloc: out of memory!\n");
+					return ERRCODE(EXIT_FAILURE);
+				}
+				imgdata = temp;
+				temp    = NULL;
+			}
+
+			nread = fread(imgdata + used, 1U, CHUNK, stdin);
+			if (nread == 0) {
+				break;
+			}
+			used += nread;
+		}
+
+		if (ferror(stdin)) {
+			free(imgdata);
+			fprintf(stderr, "[FBInk] Failed to read image data from stdin!\n");
+			return ERRCODE(EXIT_FAILURE);
+		}
+
+		// Shrink & NULL terminate
+		// NOTE: We're not buffering C strings, and we're discarding the buffer very very soon, so skip that ;).
+		/*
+		temp = realloc(imgdata, used + 1U);
+		if (temp == NULL) {
+			free(imgdata);
+			fprintf(stderr, "[FBInk] realloc: out of memory!\n");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+		imgdata       = temp;
+		temp          = NULL;
+		imgdata[used] = '\0';
+		*/
+
+		// Finally, load the image from that buffer, and discard it once we're done.
+		data = stbi_load_from_memory(imgdata, (int) used, &w, &h, &n, req_n);
+		free(imgdata);
+	} else {
+		// With a filepath, we can just let stb handle it ;).
+		data = stbi_load(filename, &w, &h, &n, req_n);
+	}
+	if (data == NULL) {
+		fprintf(stderr, "[FBInk] Failed to open or decode image '%s'!\n", filename);
+		return ERRCODE(EXIT_FAILURE);
+	}
+	LOG("Requested %d color channels, image had %d.", req_n, n);
+
+	return fbink_print_image_data(fbfd, data, x_off, y_off, w, h, n, req_n, fbink_config);
+
+#endif
+}
+// Draw an image on screen
+int
+    fbink_print_image_data(int fbfd    UNUSED_BY_MINIMAL,
+		      const char* data UNUSED_BY_MINIMAL,
+		      short int x_off UNUSED_BY_MINIMAL,
+		      short int y_off    UNUSED_BY_MINIMAL,
+			  int w UNUSED_BY_MINIMAL,
+			  int h UNUSED_BY_MINIMAL,
+			  int n UNUSED_BY_MINIMAL,
+			  int req_n UNUSED_BY_MINIMAL,
 		      const FBInkConfig* fbink_config UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_IMAGE
@@ -2887,10 +3008,6 @@ int
 	    fbink_config->col,
 	    fbink_config->row);
 
-	int        w;
-	int        h;
-	int        n;
-	int        req_n;
 	bool       fb_is_grayscale = false;
 	bool       fb_is_legacy    = false;
 	bool       fb_is_24bpp     = false;
@@ -2900,115 +3017,24 @@ int
 	// Let stb handle grayscaling for us
 	switch (vInfo.bits_per_pixel) {
 		case 4U:
-			req_n           = 1 + !fbink_config->ignore_alpha;
 			fb_is_grayscale = true;
 			fb_is_legacy    = true;
 			break;
 		case 8U:
-			req_n           = 1 + !fbink_config->ignore_alpha;
 			fb_is_grayscale = true;
 			break;
 		case 16U:
-			req_n = 3 + !fbink_config->ignore_alpha;
 			break;
 		case 24U:
-			req_n          = 3 + !fbink_config->ignore_alpha;
 			fb_is_24bpp    = true;
 			fb_is_true_bgr = true;
 			break;
 		case 32U:
 		default:
-			req_n          = 3 + !fbink_config->ignore_alpha;
 			fb_is_true_bgr = true;
 			break;
 	}
 
-	unsigned char* data = NULL;
-	// Read image either from stdin (provided we're not running from a terminal), or a file
-	if (strcmp(filename, "-") == 0 && !isatty(fileno(stdin))) {
-		// NOTE: Ideally, we'd simply feed stdin to stbi_load_from_file, but that doesn't work because it relies on fseek,
-		//       so read stdin ourselves...
-		//       c.f., https://stackoverflow.com/a/44894946
-		unsigned char* imgdata = NULL;
-		unsigned char* temp    = NULL;
-		size_t         size    = 0;
-		size_t         used    = 0;
-		size_t         nread;
-
-		if (ferror(stdin)) {
-			fprintf(stderr, "[FBInk] Failed to read image data from stdin!\n");
-			rv = ERRCODE(EXIT_FAILURE);
-			goto cleanup;
-		}
-
-#	define CHUNK (256 * 1024)
-		while (1) {
-			if (used + CHUNK + 1U > size) {
-				size = used + CHUNK + 1U;
-
-				// Overflow check
-				if (size <= used) {
-					free(imgdata);
-					fprintf(stderr, "[FBInk] Too much input data!\n");
-					rv = ERRCODE(EXIT_FAILURE);
-					goto cleanup;
-				}
-
-				// OOM check
-				temp = realloc(imgdata, size);
-				if (temp == NULL) {
-					free(imgdata);
-					fprintf(stderr, "[FBInk] realloc: out of memory!\n");
-					rv = ERRCODE(EXIT_FAILURE);
-					goto cleanup;
-				}
-				imgdata = temp;
-				temp    = NULL;
-			}
-
-			nread = fread(imgdata + used, 1U, CHUNK, stdin);
-			if (nread == 0) {
-				break;
-			}
-			used += nread;
-		}
-
-		if (ferror(stdin)) {
-			free(imgdata);
-			fprintf(stderr, "[FBInk] Failed to read image data from stdin!\n");
-			rv = ERRCODE(EXIT_FAILURE);
-			goto cleanup;
-		}
-
-		// Shrink & NULL terminate
-		// NOTE: We're not buffering C strings, and we're discarding the buffer very very soon, so skip that ;).
-		/*
-		temp = realloc(imgdata, used + 1U);
-		if (temp == NULL) {
-			free(imgdata);
-			fprintf(stderr, "[FBInk] realloc: out of memory!\n");
-			rv = ERRCODE(EXIT_FAILURE);
-			goto cleanup;
-		}
-		imgdata       = temp;
-		temp          = NULL;
-		imgdata[used] = '\0';
-		*/
-
-		// Finally, load the image from that buffer, and discard it once we're done.
-		data = stbi_load_from_memory(imgdata, (int) used, &w, &h, &n, req_n);
-		free(imgdata);
-	} else {
-		// With a filepath, we can just let stb handle it ;).
-		data = stbi_load(filename, &w, &h, &n, req_n);
-	}
-	if (data == NULL) {
-		fprintf(stderr, "[FBInk] Failed to open or decode image '%s'!\n", filename);
-		rv = ERRCODE(EXIT_FAILURE);
-		goto cleanup;
-	}
-
-	LOG("Requested %d color channels, image had %d.", req_n, n);
 
 	// Handle horizontal alignment...
 	switch (fbink_config->halign) {
