@@ -2977,7 +2977,7 @@ int
 // Draw an image on screen
 int
     fbink_print_image_data(int fbfd    UNUSED_BY_MINIMAL,
-		      const char* data UNUSED_BY_MINIMAL,
+		      unsigned char* data UNUSED_BY_MINIMAL,
 		      short int x_off UNUSED_BY_MINIMAL,
 		      short int y_off    UNUSED_BY_MINIMAL,
 			  int w UNUSED_BY_MINIMAL,
