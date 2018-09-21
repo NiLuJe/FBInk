@@ -127,6 +127,14 @@ typedef enum
 	BG_BLACK
 } BG_COLOR_INDEX_T;
 
+typedef enum
+{
+	GRAY = 1,
+	GRAY_ALPHA = 2,
+	RGB = 3,
+	RGBA = 4
+} COLOR_CHANNEL_T;
+
 // A struct to dump FBInk's internal state into, like fbink_state_dump() would, but in C ;)
 typedef struct
 {
@@ -276,7 +284,7 @@ FBINK_API int fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInk
 // fbink_config:	pointer to an FBInkConfig struct (ignores col & hoffset; as well as is_centered & is_padded).
 FBINK_API int fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkConfig* fbink_config);
 
-// Print an image on screen
+// Print an image on screen from an image file
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
 // fdfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
@@ -292,6 +300,36 @@ FBINK_API int fbink_print_image(int                fbfd,
 				short int          y_off,
 				const FBInkConfig* fbink_config);
 
+// Return the number of colour channels fbink_print_image_data() expects,
+// considering the current state of the framebuffer.
+// Returns -(ENOSYS) when image support is disabled (MINIMAL build)
+// Returns a COLOR_CHANNEL_T
+// fbink_config: pointer to an FBInkConfig struct. Used to determine transparency setting
+FBINK_API int fbink_get_image_channels(const FBInkConfig* fbink_config);
+
+// Print an image on screen from data in memory
+// Returns -(ENOSYS) when image support is disabled (MINIMAL build)
+// fdfd:		open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
+// data:		pointer to an image with dimensions w and h, and req_n color channels
+// x_off:		target coordinates, x (honors negative offsets)
+// y_off:		target coordinates, y (honors negative offsets)
+// w:			image width
+// h:			image height
+// n:			number of 8-bit color channels from original image
+// req_n:		number of 8-bit color channels data uses, as determined beforehand by
+//				fbink_get_image_channels(). Callers are expected to prepare their image
+//				accordingly.
+// fbink_config:	pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
+FBINK_API int fbink_print_image_data(int fbfd,
+				const char*        data,
+				short int          x_off,
+				short int          y_off,
+				int w,
+				int h,
+				int n,
+				int req_n,
+				const FBInkConfig* fbink_config);
 // Scan the screen for Kobo's "Connect" button in the "USB plugged in" popup,
 // and optionally generate an input event to press that button.
 // KOBO Only! Returns -(ENOSYS) when disabled (!KOBO, as well as MINIMAL builds).
