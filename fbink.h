@@ -317,7 +317,7 @@ FBINK_API int fbink_get_image_channels(const FBInkConfig* fbink_config);
 // w:			image width
 // h:			image height
 // n:			number of 8-bit color channels from original image
-// req_n:		number of 8-bit color channels data uses, as determined beforehand by
+// req_n:		number of 8-bit color channels data used, as determined beforehand by
 //				fbink_get_image_channels(). Callers are expected to prepare their image
 //				accordingly.
 // fbink_config:	pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
