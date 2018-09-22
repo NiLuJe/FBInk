@@ -322,7 +322,7 @@ FBINK_API int fbink_get_image_channels(const FBInkConfig* fbink_config);
 //				accordingly.
 // fbink_config:	pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
 FBINK_API int fbink_print_image_data(int fbfd,
-				const char*        data,
+				unsigned char*        data,
 				short int          x_off,
 				short int          y_off,
 				int w,
