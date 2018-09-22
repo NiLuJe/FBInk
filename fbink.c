@@ -2825,6 +2825,8 @@ cleanup:
 	return rv;
 }
 
+// Get the number of image channels required for the current framebuffer.
+// Used by those who call fbink_print_image_data() directly
 int
 	fbink_get_image_channels(const FBInkConfig* fbink_config UNUSED_BY_MINIMAL)
 {
@@ -2855,6 +2857,7 @@ int
 #endif    // FBINK_WITH_IMAGE
 }
 
+// Draw am image on the screen from a file
 int
     fbink_print_image(int fbfd    UNUSED_BY_MINIMAL,
 		      const char* filename UNUSED_BY_MINIMAL,
