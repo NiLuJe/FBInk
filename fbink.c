@@ -2971,7 +2971,9 @@ int
 	}
 	LOG("Requested %d color channels, image had %d.", req_n, n);
 
-	return fbink_print_image_data(fbfd, data, x_off, y_off, w, h, n, req_n, fbink_config);
+	int rv = fbink_print_image_data(fbfd, data, x_off, y_off, w, h, n, req_n, fbink_config);
+	stbi_image_free(data);
+	return rv;
 #else
 	fprintf(stderr, "[FBInk] Image support is disabled in this FBInk build!\n");
 	return ERRCODE(ENOSYS);
@@ -3581,7 +3583,6 @@ int
 			}
 		}
 	}
-	stbi_image_free(data);
 
 	// Rotate the region if need be...
 	if (deviceQuirks.isKobo16Landscape) {
