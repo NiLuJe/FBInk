@@ -132,6 +132,8 @@ static void
 #ifdef FBINK_FOR_KINDLE
 	    "\tNote that specifying a waveform mode is ignored on legacy einkfb devices, because the hardware doesn't expose such capabilities.\n"
 	    "\tBut it does (mostly) honor the --flash flag, though.\n"
+#else
+	    "\tNote that the arguments are passed as-is to the ioctl, no viewport or rotation quirks are applied!\n"
 #endif
 	    "\tSpecifying one or more STRING takes precedence over this mode.\n"
 #ifdef FBINK_WITH_IMAGE
