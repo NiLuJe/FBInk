@@ -626,7 +626,17 @@ int
 
 	// Don't abort if we piped something without passing any arguments!
 	if (errfnd == 1 || (argc == 1 && isatty(fileno(stdin)))) {
+		if (errfnd == 1) {
+			fprintf(stderr, "\n****\t****\t****\t****\n");
+		}
 		show_helpmsg();
+		// NOTE: Having the actual error message printed *above* the seven billion lines of the help message
+		//       pretty much ensures no one will ever notice it, so remind the user that there's also
+		//       an actual error message to read much higher in their terminal backlog ;p
+		if (errfnd == 1) {
+			fprintf(stderr, "\n****\t****\t****\t****\n\n");
+			fprintf(stderr, "Encountered a parsing error, see the top of the output for details!\n");
+		}
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
