@@ -358,11 +358,12 @@ int
 					}
 				}
 				if (region_height == 0 || region_width == 0 || region_wfm == NULL) {
-					fprintf(stderr,
-						"Suboption '%s' must be specified, as well as non-zero values for '%s' and '%s'\n",
-						refresh_token[WFM_OPT],
-						refresh_token[HEIGHT_OPT],
-						refresh_token[WIDTH_OPT]);
+					fprintf(
+					    stderr,
+					    "Suboption '%s' must be specified, as well as non-zero values for '%s' and '%s'\n",
+					    refresh_token[WFM_OPT],
+					    refresh_token[HEIGHT_OPT],
+					    refresh_token[WIDTH_OPT]);
 					errfnd = 1;
 				} else {
 					is_refresh = true;
