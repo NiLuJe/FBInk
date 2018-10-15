@@ -2478,6 +2478,9 @@ int
 #endif
 	} else if (strcasecmp("AUTO", waveform_mode) == 0) {
 		region_wfm = WAVEFORM_MODE_AUTO;
+	} else {
+		LOG("Unknown waveform mode '%s', defaulting to AUTO", waveform_mode);
+		region_wfm = WAVEFORM_MODE_AUTO;
 	}
 
 	struct mxcfb_rect region = {
