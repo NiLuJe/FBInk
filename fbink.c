@@ -2828,6 +2828,7 @@ cleanup:
 	return rv;
 }
 
+#ifdef FBINK_WITH_IMAGE
 // Load image data from a file or stdin, via STB
 static int
     img_load_from_file(const char* filename, unsigned char** data, int* w, int* h, int* n, int req_n)
@@ -2848,7 +2849,7 @@ static int
 			return ERRCODE(EXIT_FAILURE);
 		}
 
-#define CHUNK (256 * 1024)
+#	define CHUNK (256 * 1024)
 		while (1) {
 			if (used + CHUNK + 1U > size) {
 				size = used + CHUNK + 1U;
@@ -2928,7 +2929,6 @@ static int
 	       short int            y_off,
 	       const FBInkConfig*   fbink_config)
 {
-#ifdef FBINK_WITH_IMAGE
 	// Open the framebuffer if need be...
 	// NOTE: As usual, we *expect* to be initialized at this point!
 	bool keep_fd = true;
@@ -3545,13 +3545,8 @@ cleanup:
 	}
 
 	return rv;
-#else
-	fprintf(stderr, "[FBInk] Image support is disabled in this FBInk build!\n");
-	return ERRCODE(ENOSYS);
-#endif    // FBINK_WITH_IMAGE
 }
-
-// TODO: Update iffdeffery (ENOSYS only on public API, private stuff behind ifdefs)
+#endif    // FBINK_WITH_IMAGE
 
 // Draw an image on screen
 int
@@ -3561,6 +3556,7 @@ int
 		      short int y_off    UNUSED_BY_MINIMAL,
 		      const FBInkConfig* fbink_config UNUSED_BY_MINIMAL)
 {
+#ifdef FBINK_WITH_IMAGE
 	// Let stb handle grayscaling for us
 	int req_n;
 	switch (vInfo.bits_per_pixel) {
@@ -3608,6 +3604,10 @@ int
 	stbi_image_free(data);
 
 	return EXIT_SUCCESS;
+#else
+	fprintf(stderr, "[FBInk] Image support is disabled in this FBInk build!\n");
+	return ERRCODE(ENOSYS);
+#endif    // FBINK_WITH_IMAGE
 }
 
 // Draw raw data on screen
@@ -3621,6 +3621,7 @@ int
 			 short int y_off    UNUSED_BY_MINIMAL,
 			 const FBInkConfig* fbink_config UNUSED_BY_MINIMAL)
 {
+#ifdef FBINK_WITH_IMAGE
 	// Since draw_image doesn't really handle every possible case,
 	// we'll have to fiddle with an intermediary buffer ourselves tpo make it happy,
 	// while still accepting various different kinds of inputs...
@@ -3676,6 +3677,10 @@ int
 	}
 
 	return EXIT_SUCCESS;
+#else
+	fprintf(stderr, "[FBInk] Image support is disabled in this FBInk build!\n");
+	return ERRCODE(ENOSYS);
+#endif    // FBINK_WITH_IMAGE
 }
 
 // And now, we just bundle auxiliary parts of the public or private API,
