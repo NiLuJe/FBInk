@@ -3653,9 +3653,14 @@ int
 	// If there's a mismatch between the components in the input data vs. what the fb expects,
 	// re-interleave the data w/ STB's help...
 	unsigned char* imgdata = NULL;
+	unsigned char* rawdata = NULL;
 	if (req_n != n) {
-		// FIXME: This frees the input buffer, which is indesirable here...
-		imgdata = stbi__convert_format(data, n, req_n, (unsigned int) w, (unsigned int) h);
+		// NOTE: stbi__convert_format will *always* free the input buffer, which we do NOT want here...
+		//       Since it saves us a lot of annoying work,
+		//       the easiest workaround is simply to feed it a copy of the input buffer...
+		rawdata = malloc(len);
+		memcpy(rawdata, data, len);
+		imgdata = stbi__convert_format(rawdata, n, req_n, (unsigned int) w, (unsigned int) h);
 		if (imgdata == NULL) {
 			fprintf(stderr, "[FBInk] Failed to convert input data to a suitable format!\n");
 			return ERRCODE(EXIT_FAILURE);
@@ -3674,6 +3679,7 @@ int
 	// If we created an intermediary buffer ourselves, free it.
 	if (req_n != n) {
 		stbi_image_free(imgdata);
+		free(rawdata);
 	}
 
 	return EXIT_SUCCESS;
