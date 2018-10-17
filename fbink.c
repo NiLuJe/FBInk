@@ -3599,7 +3599,7 @@ int
 
 	// Finally, draw it on screen
 	if (draw_image(fbfd, data, w, h, n, req_n, x_off, y_off, fbink_config) != EXIT_SUCCESS) {
-		fprintf(stderr, "[FBInk] Failed display image data on screen!\n");
+		fprintf(stderr, "[FBInk] Failed to display image data on screen!\n");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -3616,7 +3616,7 @@ cleanup:
 #endif    // FBINK_WITH_IMAGE
 }
 
-// Draw raw data on screen
+// Draw raw (supposedly image) data on screen
 int
     fbink_print_raw_data(int fbfd             UNUSED_BY_MINIMAL,
 			 unsigned char* const data UNUSED_BY_MINIMAL,
@@ -3665,13 +3665,13 @@ int
 	unsigned char* rawdata = NULL;
 	if (req_n != n) {
 		// NOTE: stbi__convert_format will *always* free the input buffer, which we do NOT want here...
-		//       Since it saves us a lot of annoying work,
+		//       Since it does save us a lot of annoying work,
 		//       the easiest workaround is simply to feed it a copy of the input buffer...
 		rawdata = malloc(len);
 		memcpy(rawdata, data, len);
 		imgdata = stbi__convert_format(rawdata, n, req_n, (unsigned int) w, (unsigned int) h);
 		if (imgdata == NULL) {
-			fprintf(stderr, "[FBInk] Failed to convert input data to a suitable format!\n");
+			fprintf(stderr, "[FBInk] Failed to re-interleave input data in a suitable format!\n");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
@@ -3682,7 +3682,7 @@ int
 
 	// We should now be able to draw that on screen, knowing that it probably won't horribly implode ;p
 	if (draw_image(fbfd, imgdata, w, h, n, req_n, x_off, y_off, fbink_config) != EXIT_SUCCESS) {
-		fprintf(stderr, "[FBInk] Failed display image data on screen!\n");
+		fprintf(stderr, "[FBInk] Failed to display image data on screen!\n");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
