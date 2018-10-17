@@ -3632,8 +3632,8 @@ int
 	int rv = EXIT_SUCCESS;
 
 	// Since draw_image doesn't really handle every possible case,
-	// we'll have to fiddle with an intermediary buffer ourselves tpo make it happy,
-	// while still accepting various different kinds of inputs...
+	// we'll have to fiddle with an intermediary buffer ourselves to make it happy,
+	// while still accepting various different kinds of inputs so the user doesn't have to worry about any of this...
 	int req_n;
 	switch (vInfo.bits_per_pixel) {
 		case 4U:
