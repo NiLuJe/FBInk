@@ -359,6 +359,8 @@ int
 							break;
 					}
 				}
+				// Make sure we won't pass an invalid rectangle to the driver, because that'd soft lock,
+				// or a NULL pointer to fbink_refresh, because that would segfault in strcmp ;).
 				if (region_height == 0 || region_width == 0 || region_wfm == NULL) {
 					fprintf(
 					    stderr,
