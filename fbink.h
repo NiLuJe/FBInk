@@ -292,6 +292,19 @@ FBINK_API int fbink_print_image(int                fbfd,
 				short int          y_off,
 				const FBInkConfig* fbink_config);
 
+// Prints raw scanlines on screen
+// Returns -(ENOSYS) when image support is disabled (MINIMAL build)
+// fdfd:		open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
+// data:		pointer to a buffer holding the image data (Y/YA/RGB/RGBA)
+// w:			width (in pixels) of a single scanline of the input data
+// h:			height (in pixels) of the full data (i.e., amount of scanlines)
+// len:			*exact* size of the input buffer.
+//				Input format is simply computed as len / h, so this *needs* to be exact,
+//				do not pass a padded length!
+// x_off:		target coordinates, x (honors negative offsets)
+// y_off:		target coordinates, y (honors negative offsets)
+// fbink_config:	pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
 FBINK_API int fbink_print_raw_data(int                  fbfd,
 				   unsigned char* const data,
 				   const int            w,
