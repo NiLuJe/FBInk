@@ -2918,15 +2918,15 @@ static int
 
 // Draw image data on screen (we inherit a few of the variable types/names from STB ;))
 static int
-    draw_image(int                fbfd,
-	       unsigned char*     data,
-	       const int          w,
-	       const int          h,
-	       const int          n,
-	       const int          req_n,
-	       short int          x_off,
-	       short int          y_off,
-	       const FBInkConfig* fbink_config)
+    draw_image(int                  fbfd,
+	       unsigned char* const data,
+	       const int            w,
+	       const int            h,
+	       const int            n,
+	       const int            req_n,
+	       short int            x_off,
+	       short int            y_off,
+	       const FBInkConfig*   fbink_config)
 {
 #ifdef FBINK_WITH_IMAGE
 	// Open the framebuffer if need be...
@@ -3606,6 +3606,74 @@ int
 
 	// Andd free the buffer holding our decoded image data
 	stbi_image_free(data);
+
+	return EXIT_SUCCESS;
+}
+
+// Draw raw data on screen
+int
+    fbink_print_raw_data(int fbfd             UNUSED_BY_MINIMAL,
+			 unsigned char* const data UNUSED_BY_MINIMAL,
+			 const int w UNUSED_BY_MINIMAL,
+			 const int h  UNUSED_BY_MINIMAL,
+			 const size_t len UNUSED_BY_MINIMAL,
+			 short int x_off UNUSED_BY_MINIMAL,
+			 short int y_off    UNUSED_BY_MINIMAL,
+			 const FBInkConfig* fbink_config UNUSED_BY_MINIMAL)
+{
+	// Since draw_image doesn't really handle every possible case,
+	// we'll have to fiddle with an intermediary buffer ourselves tpo make it happy,
+	// while still accepting various different kinds of inputs...
+	int req_n;
+	switch (vInfo.bits_per_pixel) {
+		case 4U:
+			req_n = 1 + !fbink_config->ignore_alpha;
+			break;
+		case 8U:
+			req_n = 1 + !fbink_config->ignore_alpha;
+			break;
+		case 16U:
+			req_n = 3 + !fbink_config->ignore_alpha;
+			break;
+		case 24U:
+			req_n = 3 + !fbink_config->ignore_alpha;
+			break;
+		case 32U:
+		default:
+			req_n = 3 + !fbink_config->ignore_alpha;
+			break;
+	}
+
+	// Devising the actual amount of components in the input should be as easy as that...
+	int n = (int) len / h;
+
+	LOG("Requested %d color channels, supplied data had %d.", req_n, n);
+
+	// If there's a mismatch between the components in the input data vs. what the fb expects,
+	// re-interleave the data w/ STB's help...
+	unsigned char* imgdata = NULL;
+	if (req_n != n) {
+		// FIXME: This frees the input buffer, which is indesirable here...
+		imgdata = stbi__convert_format(data, n, req_n, (unsigned int) w, (unsigned int) h);
+		if (imgdata == NULL) {
+			fprintf(stderr, "[FBInk] Failed to convert input data to a suitable format!\n");
+			return ERRCODE(EXIT_FAILURE);
+		}
+	} else {
+		// We can use the input buffer as-is :)
+		imgdata = data;
+	}
+
+	// We should now be able to draw that on screen, knowing that it probably won't horribly implode ;p
+	if (draw_image(fbfd, imgdata, w, h, n, req_n, x_off, y_off, fbink_config) != EXIT_SUCCESS) {
+		fprintf(stderr, "[FBInk] Failed display image data on screen!\n");
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// If we created an intermediary buffer ourselves, free it.
+	if (req_n != n) {
+		stbi_image_free(imgdata);
+	}
 
 	return EXIT_SUCCESS;
 }

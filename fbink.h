@@ -292,6 +292,15 @@ FBINK_API int fbink_print_image(int                fbfd,
 				short int          y_off,
 				const FBInkConfig* fbink_config);
 
+FBINK_API int fbink_print_raw_data(int                  fbfd,
+				   unsigned char* const data,
+				   const int            w,
+				   const int            h,
+				   const size_t         len,
+				   short int            x_off,
+				   short int            y_off,
+				   const FBInkConfig*   fbink_config);
+
 // Scan the screen for Kobo's "Connect" button in the "USB plugged in" popup,
 // and optionally generate an input event to press that button.
 // KOBO Only! Returns -(ENOSYS) when disabled (!KOBO, as well as MINIMAL builds).
