@@ -6,6 +6,8 @@ Kindle/
 # KDevelop
 FBInk.kdev4
 .kdev4/
+# VSCode
+.vscode
 # Global
 GPATH
 GRTAGS
