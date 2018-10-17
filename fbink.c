@@ -3557,6 +3557,9 @@ int
 		      const FBInkConfig* fbink_config UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_IMAGE
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
 	// Let stb handle grayscaling for us
 	int req_n;
 	switch (vInfo.bits_per_pixel) {
@@ -3597,13 +3600,16 @@ int
 	// Finally, draw it on screen
 	if (draw_image(fbfd, data, w, h, n, req_n, x_off, y_off, fbink_config) != EXIT_SUCCESS) {
 		fprintf(stderr, "[FBInk] Failed display image data on screen!\n");
-		return ERRCODE(EXIT_FAILURE);
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
 	}
 
-	// Andd free the buffer holding our decoded image data
+	// Cleanup
+cleanup:
+	// Free the buffer holding our decoded image data
 	stbi_image_free(data);
 
-	return EXIT_SUCCESS;
+	return rv;
 #else
 	fprintf(stderr, "[FBInk] Image support is disabled in this FBInk build!\n");
 	return ERRCODE(ENOSYS);
@@ -3622,6 +3628,9 @@ int
 			 const FBInkConfig* fbink_config UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_IMAGE
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
 	// Since draw_image doesn't really handle every possible case,
 	// we'll have to fiddle with an intermediary buffer ourselves tpo make it happy,
 	// while still accepting various different kinds of inputs...
@@ -3663,7 +3672,8 @@ int
 		imgdata = stbi__convert_format(rawdata, n, req_n, (unsigned int) w, (unsigned int) h);
 		if (imgdata == NULL) {
 			fprintf(stderr, "[FBInk] Failed to convert input data to a suitable format!\n");
-			return ERRCODE(EXIT_FAILURE);
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
 		}
 	} else {
 		// We can use the input buffer as-is :)
@@ -3673,16 +3683,19 @@ int
 	// We should now be able to draw that on screen, knowing that it probably won't horribly implode ;p
 	if (draw_image(fbfd, imgdata, w, h, n, req_n, x_off, y_off, fbink_config) != EXIT_SUCCESS) {
 		fprintf(stderr, "[FBInk] Failed display image data on screen!\n");
-		return ERRCODE(EXIT_FAILURE);
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
 	}
 
+	// Cleanup
+cleanup:
 	// If we created an intermediary buffer ourselves, free it.
-	if (req_n != n) {
+	if (rawdata != NULL) {
 		stbi_image_free(imgdata);
 		free(rawdata);
 	}
 
-	return EXIT_SUCCESS;
+	return rv;
 #else
 	fprintf(stderr, "[FBInk] Image support is disabled in this FBInk build!\n");
 	return ERRCODE(ENOSYS);
