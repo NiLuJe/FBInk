@@ -10,7 +10,7 @@ This is intended to fill the void felt by Kobo developpers and tinkerers when th
 It's especially cruel when moving to a Kobo, after being used to the ubiquity of `eips` on Kindles...
 
 In short, it prints messages or images on your screen, handling the low-level tinkering with both the Linux framebuffer interface, and the i.MX EPD driver.
-It's been tested on Kobos and Kindles, but porting it to other Linux, i.MX eInk devices should be trivial (hell, even Sipix support shouldn't be too hard).
+It's been tested on Kobos, Kindles and BQ Cervantes, but porting it to other Linux, i.MX eInk devices should be trivial (hell, even Sipix support shouldn't be too hard).
 
 It also happens to work perfectly fine on *any* kind of Linux framebuffer device, and supports a wide range of bitdepths (4bpp, 8bpp, 16bpp, 24bpp & 32bpp),
 so you could use this to draw on your EFI fb, for instance ;).
@@ -58,6 +58,8 @@ And with a few other fonts, as well as a progress bar...
 Kindle support covers the full Kindle lineup, starting from the K2.
 
 Kobo support has been tested on a H2O running a recent FW version (i.e., 32bpp fb), but the full lineup should be supported.
+
+BQ Cervantes support has been contributed by @pazos (#17), and should handle the current lineup.
 
 # Bindings in other languages
 
