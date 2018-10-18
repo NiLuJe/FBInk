@@ -778,7 +778,7 @@ static struct mxcfb_rect
 #define RENDER_GLYPH()                                                                                                   \
 	/* NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution), */                   \
 	/*       and from there compute the extra pixels for that single input pixel given our scaling factor... */      \
-	if (!fbink_config->is_overlay && !fbink_config->is_bgless) {                                                     \
+	if (!fbink_config->is_overlay && !fbink_config->is_bgless && !fbink_config->is_fgless) {                         \
 		for (uint8_t y = 0U; y < glyphHeight; y++) {                                                             \
 			/* y: input row, j: first output row after scaling */                                            \
 			j = (unsigned short int) (y * FONTSIZE_MULT);                                                    \
@@ -836,7 +836,7 @@ static struct mxcfb_rect
 						/* In overlay mode, we only print foreground pixels, */                  \
 						/* and we print in the inverse color of the underlying pixel's */        \
 						/* Obviously, the closer we get to GRAY7, the less contrast we get */    \
-						if (is_fgpx) {                                                           \
+						if (is_fgpx && !fbink_config->is_fgless) {                               \
 							if (fbink_config->is_overlay) {                                  \
 								get_pixel(&coords, &fbC);                                \
 								fbC.r ^= 0xFF;                                           \
@@ -850,6 +850,8 @@ static struct mxcfb_rect
 								}                                                        \
 								pxC = &fbC;                                              \
 							}                                                                \
+							put_pixel(&coords, pxC);                                         \
+						} else if (!is_fgpx && fbink_config->is_fgless) {                        \
 							put_pixel(&coords, pxC);                                         \
 						}                                                                        \
 					}                                                                                \
