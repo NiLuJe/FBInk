@@ -91,6 +91,7 @@ static void
 	    "\t-O, --bgless\t\tDon't draw background pixels.\n"
 	    "\t\t\t\tObviously mutually exclusive with -o, --overlay, because it's simply a subset of what overlay does.\n"
 	    "\t-T, --fgless\t\tDon't draw foreground pixels.\n"
+	    "\t\t\t\tMutually exclusive with -o, --overlay or -O, --bgless, and takes precedence over them.\n"
 	    "\n"
 	    "Options affecting the program's verbosity:\n"
 	    "\t-v, --verbose\tToggle printing diagnostic messages.\n"
