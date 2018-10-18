@@ -3691,8 +3691,9 @@ int
 cleanup:
 	// If we created an intermediary buffer ourselves, free it.
 	if (rawdata != NULL) {
-		stbi_image_free(imgdata);
-		free(rawdata);
+		// FIXME: This obviously blows up when the caller's data is allocated on the stack...
+		//stbi_image_free(imgdata);
+		//free(rawdata);
 	}
 
 	return rv;
