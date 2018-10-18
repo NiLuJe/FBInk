@@ -2917,6 +2917,109 @@ static int
 	return EXIT_SUCCESS;
 }
 
+// Convert raw image data between various pixel formats
+// NOTE: This is a direct copy of STB's stbi__convert_format, except that it doesn't free the input buffer.
+static unsigned char*
+    img_convert_px_format(unsigned char* data, int img_n, int req_comp, int x, int y)
+{
+	int            i, j;
+	unsigned char* good;
+
+	//if (req_comp == img_n) return data;
+	STBI_ASSERT(req_comp >= 1 && req_comp <= 4);
+
+	good = (unsigned char*) stbi__malloc_mad3(req_comp, x, y, 0);
+	if (good == NULL) {
+		//STBI_FREE(data);
+		return NULL;
+	}
+
+	for (j = 0; j < (int) y; ++j) {
+		unsigned char* src  = data + j * x * img_n;
+		unsigned char* dest = good + j * x * req_comp;
+
+		// NOTE: STB undef's STBI__CASE, but not STBI__COMBO...
+#	ifdef STBI__COMBO
+#		undef STBI__COMBO
+#	endif
+#	define STBI__COMBO(a, b) ((a) *8 + (b))
+#	define STBI__CASE(a, b)                                                                                         \
+		case STBI__COMBO(a, b):                                                                                  \
+			for (i = x - 1; i >= 0; --i, src += a, dest += b)
+		// convert source image with img_n components to one with req_comp components;
+		// avoid switch per pixel, so use switch per scanline and massive macros
+		switch (STBI__COMBO(img_n, req_comp)) {
+			STBI__CASE(1, 2)
+			{
+				dest[0] = src[0], dest[1] = 255;
+			}
+			break;
+			STBI__CASE(1, 3)
+			{
+				dest[0] = dest[1] = dest[2] = src[0];
+			}
+			break;
+			STBI__CASE(1, 4)
+			{
+				dest[0] = dest[1] = dest[2] = src[0], dest[3] = 255;
+			}
+			break;
+			STBI__CASE(2, 1)
+			{
+				dest[0] = src[0];
+			}
+			break;
+			STBI__CASE(2, 3)
+			{
+				dest[0] = dest[1] = dest[2] = src[0];
+			}
+			break;
+			STBI__CASE(2, 4)
+			{
+				dest[0] = dest[1] = dest[2] = src[0], dest[3] = src[1];
+			}
+			break;
+			STBI__CASE(3, 4)
+			{
+				dest[0] = src[0], dest[1] = src[1], dest[2] = src[2], dest[3] = 255;
+			}
+			break;
+			STBI__CASE(3, 1)
+			{
+				dest[0] = stbi__compute_y(src[0], src[1], src[2]);
+			}
+			break;
+			STBI__CASE(3, 2)
+			{
+				dest[0] = stbi__compute_y(src[0], src[1], src[2]), dest[1] = 255;
+			}
+			break;
+			STBI__CASE(4, 1)
+			{
+				dest[0] = stbi__compute_y(src[0], src[1], src[2]);
+			}
+			break;
+			STBI__CASE(4, 2)
+			{
+				dest[0] = stbi__compute_y(src[0], src[1], src[2]), dest[1] = src[3];
+			}
+			break;
+			STBI__CASE(4, 3)
+			{
+				dest[0] = src[0], dest[1] = src[1], dest[2] = src[2];
+			}
+			break;
+			default:
+				STBI_ASSERT(0);
+		}
+#	undef STBI__CASE
+#	undef STBI__COMBO
+	}
+
+	//STBI_FREE(data);
+	return good;
+}
+
 // Draw image data on screen (we inherit a few of the variable types/names from STB ;))
 static int
     draw_image(int                  fbfd,
@@ -3662,15 +3765,11 @@ int
 	// If there's a mismatch between the components in the input data vs. what the fb expects,
 	// re-interleave the data w/ STB's help...
 	unsigned char* imgdata = NULL;
-	unsigned char* rawdata = NULL;
 	if (req_n != n) {
 		LOG("Converting from %d components to the requested %d", n, req_n);
 		// NOTE: stbi__convert_format will *always* free the input buffer, which we do NOT want here...
-		//       Since it does save us a lot of annoying work,
-		//       the easiest workaround is simply to feed it a copy of the input buffer...
-		rawdata = malloc(len);
-		memcpy(rawdata, data, len);
-		imgdata = stbi__convert_format(rawdata, n, req_n, (unsigned int) w, (unsigned int) h);
+		//       Which is why we're using a tweaked internal copy, which does not free ;).
+		imgdata = img_convert_px_format(data, n, req_n, w, h);
 		if (imgdata == NULL) {
 			fprintf(stderr, "[FBInk] Failed to re-interleave input data in a suitable format!\n");
 			rv = ERRCODE(EXIT_FAILURE);
@@ -3692,7 +3791,7 @@ int
 	// Cleanup
 cleanup:
 	// If we created an intermediary buffer ourselves, free it.
-	if (imgdata != NULL) {
+	if (req_n != n) {
 		stbi_image_free(imgdata);
 	}
 

@@ -753,14 +753,16 @@ int
 					       0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
 			uint8_t v          = 0;
 			size_t  len        = 50 * 50 * sizeof(eInkCMap);
-			// -> RGBA
-			len *= 4;
+			// Y -> RGBA
+			//len *= 4;
 			unsigned char* data    = malloc(len);
 			unsigned char* pix_ptr = data;
 			for (uint8_t c = 0; c < sizeof(eInkCMap); c++) {
 				v = eInkCMap[c];
 				for (uint8_t y = 0; y < 50; y++) {
 					for (uint8_t x = 0; x < 50; x++) {
+						// Y -> RGBA
+						/*
 						for (uint8_t n = 0; n < 4; n++) {
 							if (n == 3) {
 								// Make it opaque!
@@ -769,6 +771,8 @@ int
 								*pix_ptr++ = v;
 							}
 						}
+						*/
+						*pix_ptr++ = v;
 					}
 				}
 			}
