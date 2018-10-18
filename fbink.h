@@ -311,7 +311,8 @@ FBINK_API int fbink_print_image(int                fbfd,
 //       To make everyone happy, this will transparently handle the pixel format conversion *as needed*,
 //       a process which incurs a single copy of the input buffer (same behavior as in the non-raw image codepath).
 //       If this is a concern to you, make sure your input buffer is formatted in a manner adapted to your output device:
-//       RGBA on Kobo (or RGB with ignore_alpha), and YA (grayscale + alpha) on Kindle (or Y with ignore_alpha).
+//       RGBA (32bpp) on Kobo (or RGB (24bpp) with ignore_alpha),
+//       and YA (grayscale + alpha) on Kindle (or Y (8bpp) with ignore_alpha).
 FBINK_API int fbink_print_raw_data(int                fbfd,
 				   unsigned char*     data,
 				   const int          w,
