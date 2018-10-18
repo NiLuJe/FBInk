@@ -3655,8 +3655,7 @@ int
 	}
 
 	// Devising the actual amount of components in the input should be as easy as that...
-	// FIXME: That probably needs to be len / h / w, you dummy!
-	int n = (int) len / h;
+	int n = (int) len / h / w;
 
 	LOG("Requested %d color channels, supplied data had %d.", req_n, n);
 
