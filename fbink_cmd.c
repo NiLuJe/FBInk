@@ -90,6 +90,7 @@ static void
 	    "\t\t\t\t-B, --background is still honored if you combine this with -c, --clear\n"
 	    "\t-O, --bgless\t\tDon't draw background pixels.\n"
 	    "\t\t\t\tObviously mutually exclusive with -o, --overlay, because it's simply a subset of what overlay does.\n"
+	    "\t-T, --fgless\t\tDon't draw foreground pixels.\n"
 	    "\n"
 	    "Options affecting the program's verbosity:\n"
 	    "\t-v, --verbose\tToggle printing diagnostic messages.\n"
@@ -242,6 +243,7 @@ int
 					      { "noviewport", no_argument, NULL, 'V' },
 					      { "overlay", no_argument, NULL, 'o' },
 					      { "bgless", no_argument, NULL, 'O' },
+					      { "fgless", no_argument, NULL, 'T' },
 					      { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_config = { 0 };
@@ -294,7 +296,7 @@ int
 	uint8_t   progress       = 0;
 	int       errfnd         = 0;
 
-	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:B:LlP:A:oOV", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:B:LlP:A:oOTV", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				fbink_config.row = (short int) atoi(optarg);
@@ -606,6 +608,9 @@ int
 			case 'O':
 				fbink_config.is_bgless = true;
 				break;
+			case 'T':
+				fbink_config.is_fgless = true;
+				break;
 			case 'V':
 				fbink_config.no_viewport = true;
 				break;
@@ -667,7 +672,7 @@ int
 			//       if we had an easy way to... (c.f., my rant about Kobo's broken libc in fbink_internal.h)
 			if (!fbink_config.is_quiet) {
 				printf(
-				    "Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (overlay: %s, backgroundless: %s, inverted: %s, flashing: %s, centered: %s, left padded: %s, clear screen: %s, font: %hhu, font scaling: x%hhu)\n",
+				    "Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (overlay: %s, backgroundless: %s, foregroundless: %s, inverted: %s, flashing: %s, centered: %s, left padded: %s, clear screen: %s, font: %hhu, font scaling: x%hhu)\n",
 				    string,
 				    fbink_config.col,
 				    fbink_config.hoffset,
@@ -675,6 +680,7 @@ int
 				    fbink_config.voffset,
 				    fbink_config.is_overlay ? "true" : "false",
 				    fbink_config.is_bgless ? "true" : "false",
+				    fbink_config.is_fgless ? "true" : "false",
 				    fbink_config.is_inverted ? "true" : "false",
 				    fbink_config.is_flashing ? "true" : "false",
 				    fbink_config.is_centered ? "true" : "false",
