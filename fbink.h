@@ -292,7 +292,7 @@ FBINK_API int fbink_print_image(int                fbfd,
 				short int          y_off,
 				const FBInkConfig* fbink_config);
 
-// Prints raw scanlines on screen
+// Print raw scanlines on screen
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
 // fdfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
