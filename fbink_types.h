@@ -34,6 +34,7 @@ typedef struct
 	bool   isKoboNonMT;
 	bool   isKobo16Landscape;
 	bool   isKoboMk7;
+	bool   isCervantesNew;
 	int8_t koboVertOffset;
 	bool   skipId;
 } FBInkDeviceQuirks;

@@ -84,10 +84,12 @@
 #include "utf8/utf8.h"
 
 // NOTE: We always neeed one of those, because we rely on mxcfb_rect in a number of places
-#ifdef FBINK_FOR_KINDLE
+#if defined (FBINK_FOR_KINDLE)
 #	include "eink/mxcfb-kindle.h"
 // Legacy einkfb driver
 #	include "eink/einkfb.h"
+#elif defined (FBINK_FOR_CERVANTES)
+#       include "eink/mxcfb-cervantes.h"
 #else
 #	include "eink/mxcfb-kobo.h"
 #endif
@@ -289,10 +291,13 @@ static struct mxcfb_rect draw(const char*,
 			      const FBInkConfig*);
 
 static long int jiffies_to_ms(long int);
-#ifdef FBINK_FOR_KINDLE
+#if defined (FBINK_FOR_KINDLE)
 static int refresh_legacy(int, const struct mxcfb_rect, bool);
 static int refresh_kindle(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
 static int refresh_kindle_koa2(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
+#elif defined (FBINK_FOR_CERVANTES)
+static int refresh_cervantes(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
+static int refresh_cervantes_new(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
 #else
 static int refresh_kobo(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
 static int refresh_kobo_mk7(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
