@@ -195,6 +195,7 @@ else
 	ifndef KINDLE
 		ifndef CERVANTES
 			ifndef LINUX
+				WITH_BUTTON_SCAN:=True
 				EXTRA_CPPFLAGS+=-DFBINK_WITH_BUTTON_SCAN
 			endif
 		endif
@@ -247,13 +248,23 @@ sharedlib: outdir $(SHAREDLIB_OBJS)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME_VER)
 
+ifdef WITH_BUTTON_SCAN
 staticbin: outdir $(OUT_DIR)/$(FBINK_STATIC_NAME) $(CMD_OBJS) $(BTN_OBJS)
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbink $(CMD_OBJS) $(LIBS)
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/button_scan $(BTN_OBJS) $(LIBS)
+else
+staticbin: outdir $(OUT_DIR)/$(FBINK_STATIC_NAME) $(CMD_OBJS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbink $(CMD_OBJS) $(LIBS)
+endif
 
+ifdef WITH_BUTTON_SCAN
 sharedbin: outdir $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(CMD_OBJS) $(BTN_OBJS)
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbink $(CMD_OBJS) $(LIBS)
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/button_scan $(BTN_OBJS) $(LIBS)
+else
+sharedbin: outdir $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(CMD_OBJS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbink $(CMD_OBJS) $(LIBS)
+endif
 
 striplib: $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE)
@@ -266,9 +277,14 @@ striparchive: $(OUT_DIR)/$(FBINK_STATIC_NAME)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/$(FBINK_STATIC_NAME)
 	$(RANLIB) $(OUT_DIR)/$(FBINK_STATIC_NAME)
 
+ifdef WITH_BUTTON_SCAN
 stripbin: $(OUT_DIR)/fbink
 	$(STRIP) --strip-unneeded $(OUT_DIR)/fbink
 	$(STRIP) --strip-unneeded $(OUT_DIR)/button_scan
+else
+stripbin: $(OUT_DIR)/fbink
+	$(STRIP) --strip-unneeded $(OUT_DIR)/fbink
+endif
 
 strip: static
 	$(MAKE) stripbin
@@ -336,6 +352,7 @@ clean:
 	rm -rf Release/static/utf8/*.o
 	rm -rf Release/*.o
 	rm -rf Release/fbink
+	rm -rf Release/button_scan
 	rm -rf Debug/*.a
 	rm -rf Debug/*.so*
 	rm -rf Debug/shared/*.o
@@ -344,5 +361,6 @@ clean:
 	rm -rf Debug/static/utf8/*.o
 	rm -rf Debug/*.o
 	rm -rf Debug/fbink
+	rm -rf Debug/button_scan
 
 .PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux kobo clean
