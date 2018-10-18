@@ -2828,15 +2828,211 @@ cleanup:
 	return rv;
 }
 
-// Draw an image on screen
-int
-    fbink_print_image(int fbfd    UNUSED_BY_MINIMAL,
-		      const char* filename UNUSED_BY_MINIMAL,
-		      short int x_off UNUSED_BY_MINIMAL,
-		      short int y_off    UNUSED_BY_MINIMAL,
-		      const FBInkConfig* fbink_config UNUSED_BY_MINIMAL)
-{
 #ifdef FBINK_WITH_IMAGE
+// Load & decode image data from a file or stdin, via stbi
+static unsigned char*
+    img_load_from_file(const char* filename, int* w, int* h, int* n, int req_n)
+{
+	unsigned char* data = NULL;
+
+	// Read image either from stdin (provided we're not running from a terminal), or a file
+	if (strcmp(filename, "-") == 0 && !isatty(fileno(stdin))) {
+		// NOTE: Ideally, we'd simply feed stdin to stbi_load_from_file, but that doesn't work because it relies on fseek,
+		//       so read stdin ourselves...
+		//       c.f., https://stackoverflow.com/a/44894946
+		unsigned char* imgdata = NULL;
+		unsigned char* temp    = NULL;
+		size_t         size    = 0;
+		size_t         used    = 0;
+		size_t         nread;
+
+		if (ferror(stdin)) {
+			fprintf(stderr, "[FBInk] Failed to read image data from stdin!\n");
+			return NULL;
+		}
+
+#	define CHUNK (256 * 1024)
+		while (1) {
+			if (used + CHUNK + 1U > size) {
+				size = used + CHUNK + 1U;
+
+				// Overflow check
+				if (size <= used) {
+					free(imgdata);
+					fprintf(stderr, "[FBInk] Too much input data!\n");
+					return NULL;
+				}
+
+				// OOM check
+				temp = realloc(imgdata, size);
+				if (temp == NULL) {
+					free(imgdata);
+					fprintf(stderr, "[FBInk] realloc: out of memory!\n");
+					return NULL;
+				}
+				imgdata = temp;
+				temp    = NULL;
+			}
+
+			nread = fread(imgdata + used, 1U, CHUNK, stdin);
+			if (nread == 0) {
+				break;
+			}
+			used += nread;
+		}
+
+		if (ferror(stdin)) {
+			free(imgdata);
+			fprintf(stderr, "[FBInk] Failed to read image data from stdin!\n");
+			return NULL;
+		}
+
+		// Shrink & NULL terminate
+		// NOTE: We're not buffering C strings, and we're discarding the buffer very very soon, so skip that ;).
+		/*
+		temp = realloc(imgdata, used + 1U);
+		if (temp == NULL) {
+			free(imgdata);
+			fprintf(stderr, "[FBInk] realloc: out of memory!\n");
+			return NULL;
+		}
+		imgdata       = temp;
+		temp          = NULL;
+		imgdata[used] = '\0';
+		*/
+
+		// Finally, load the image from that buffer, and discard it once we're done.
+		data = stbi_load_from_memory(imgdata, (int) used, w, h, n, req_n);
+		free(imgdata);
+	} else {
+		// With a filepath, we can just let stbi handle it ;).
+		data = stbi_load(filename, w, h, n, req_n);
+	}
+	if (data == NULL) {
+		fprintf(stderr, "[FBInk] Failed to open or decode image '%s'!\n", filename);
+		return NULL;
+	}
+
+	LOG("Requested %d color channels, image had %d", req_n, *n);
+
+	return data;
+}
+
+// Convert raw image data between various pixel formats
+// NOTE: This is a direct copy of stbi's stbi__convert_format, except that it doesn't free the input buffer.
+static unsigned char*
+    img_convert_px_format(unsigned char* data, int img_n, int req_comp, int x, int y)
+{
+	unsigned char* good;
+
+	// NOTE: We're already doing that in fbink_print_raw_data ;)
+	//if (req_comp == img_n) return data;
+	STBI_ASSERT(req_comp >= 1 && req_comp <= 4);
+
+	good = (unsigned char*) stbi__malloc_mad3(req_comp, x, y, 0);
+	if (good == NULL) {
+		//STBI_FREE(data);
+		return NULL;
+	}
+
+	for (int j = 0; j < (int) y; ++j) {
+		unsigned char* src  = data + j * x * img_n;
+		unsigned char* dest = good + j * x * req_comp;
+
+		// NOTE: stbi undef's STBI__CASE, but not STBI__COMBO...
+#	ifdef STBI__COMBO
+#		undef STBI__COMBO
+#	endif
+#	define STBI__COMBO(a, b) ((a) *8 + (b))
+#	define STBI__CASE(a, b)                                                                                         \
+		case STBI__COMBO(a, b):                                                                                  \
+			for (int i = x - 1; i >= 0; --i, src += a, dest += b)
+		// convert source image with img_n components to one with req_comp components;
+		// avoid switch per pixel, so use switch per scanline and massive macros
+		switch (STBI__COMBO(img_n, req_comp)) {
+			STBI__CASE(1, 2)
+			{
+				dest[0] = src[0], dest[1] = 255;
+			}
+			break;
+			STBI__CASE(1, 3)
+			{
+				dest[0] = dest[1] = dest[2] = src[0];
+			}
+			break;
+			STBI__CASE(1, 4)
+			{
+				dest[0] = dest[1] = dest[2] = src[0], dest[3] = 255;
+			}
+			break;
+			STBI__CASE(2, 1)
+			{
+				dest[0] = src[0];
+			}
+			break;
+			STBI__CASE(2, 3)
+			{
+				dest[0] = dest[1] = dest[2] = src[0];
+			}
+			break;
+			STBI__CASE(2, 4)
+			{
+				dest[0] = dest[1] = dest[2] = src[0], dest[3] = src[1];
+			}
+			break;
+			STBI__CASE(3, 4)
+			{
+				dest[0] = src[0], dest[1] = src[1], dest[2] = src[2], dest[3] = 255;
+			}
+			break;
+			STBI__CASE(3, 1)
+			{
+				dest[0] = stbi__compute_y(src[0], src[1], src[2]);
+			}
+			break;
+			STBI__CASE(3, 2)
+			{
+				dest[0] = stbi__compute_y(src[0], src[1], src[2]), dest[1] = 255;
+			}
+			break;
+			STBI__CASE(4, 1)
+			{
+				dest[0] = stbi__compute_y(src[0], src[1], src[2]);
+			}
+			break;
+			STBI__CASE(4, 2)
+			{
+				dest[0] = stbi__compute_y(src[0], src[1], src[2]), dest[1] = src[3];
+			}
+			break;
+			STBI__CASE(4, 3)
+			{
+				dest[0] = src[0], dest[1] = src[1], dest[2] = src[2];
+			}
+			break;
+			default:
+				STBI_ASSERT(0);
+		}
+#	undef STBI__CASE
+#	undef STBI__COMBO
+	}
+
+	//STBI_FREE(data);
+	return good;
+}
+
+// Draw image data on screen (we inherit a few of the variable types/names from stbi ;))
+static int
+    draw_image(int                fbfd,
+	       unsigned char*     data,
+	       const int          w,
+	       const int          h,
+	       const int          n,
+	       const int          req_n,
+	       short int          x_off,
+	       short int          y_off,
+	       const FBInkConfig* fbink_config)
+{
 	// Open the framebuffer if need be...
 	// NOTE: As usual, we *expect* to be initialized at this point!
 	bool keep_fd = true;
@@ -2890,128 +3086,32 @@ int
 	    fbink_config->col,
 	    fbink_config->row);
 
-	int        w;
-	int        h;
-	int        n;
-	int        req_n;
 	bool       fb_is_grayscale = false;
 	bool       fb_is_legacy    = false;
 	bool       fb_is_24bpp     = false;
 	bool       fb_is_true_bgr  = false;
 	bool       img_has_alpha   = false;
 	FBInkColor color           = { 0U };
-	// Let stb handle grayscaling for us
+	// Use boolean flags to make the mess of branching slightly more human-readable later...
 	switch (vInfo.bits_per_pixel) {
 		case 4U:
-			req_n           = 1 + !fbink_config->ignore_alpha;
 			fb_is_grayscale = true;
 			fb_is_legacy    = true;
 			break;
 		case 8U:
-			req_n           = 1 + !fbink_config->ignore_alpha;
 			fb_is_grayscale = true;
 			break;
 		case 16U:
-			req_n = 3 + !fbink_config->ignore_alpha;
 			break;
 		case 24U:
-			req_n          = 3 + !fbink_config->ignore_alpha;
 			fb_is_24bpp    = true;
 			fb_is_true_bgr = true;
 			break;
 		case 32U:
 		default:
-			req_n          = 3 + !fbink_config->ignore_alpha;
 			fb_is_true_bgr = true;
 			break;
 	}
-
-	unsigned char* data = NULL;
-	// Read image either from stdin (provided we're not running from a terminal), or a file
-	if (strcmp(filename, "-") == 0 && !isatty(fileno(stdin))) {
-		// NOTE: Ideally, we'd simply feed stdin to stbi_load_from_file, but that doesn't work because it relies on fseek,
-		//       so read stdin ourselves...
-		//       c.f., https://stackoverflow.com/a/44894946
-		unsigned char* imgdata = NULL;
-		unsigned char* temp    = NULL;
-		size_t         size    = 0;
-		size_t         used    = 0;
-		size_t         nread;
-
-		if (ferror(stdin)) {
-			fprintf(stderr, "[FBInk] Failed to read image data from stdin!\n");
-			rv = ERRCODE(EXIT_FAILURE);
-			goto cleanup;
-		}
-
-#	define CHUNK (256 * 1024)
-		while (1) {
-			if (used + CHUNK + 1U > size) {
-				size = used + CHUNK + 1U;
-
-				// Overflow check
-				if (size <= used) {
-					free(imgdata);
-					fprintf(stderr, "[FBInk] Too much input data!\n");
-					rv = ERRCODE(EXIT_FAILURE);
-					goto cleanup;
-				}
-
-				// OOM check
-				temp = realloc(imgdata, size);
-				if (temp == NULL) {
-					free(imgdata);
-					fprintf(stderr, "[FBInk] realloc: out of memory!\n");
-					rv = ERRCODE(EXIT_FAILURE);
-					goto cleanup;
-				}
-				imgdata = temp;
-				temp    = NULL;
-			}
-
-			nread = fread(imgdata + used, 1U, CHUNK, stdin);
-			if (nread == 0) {
-				break;
-			}
-			used += nread;
-		}
-
-		if (ferror(stdin)) {
-			free(imgdata);
-			fprintf(stderr, "[FBInk] Failed to read image data from stdin!\n");
-			rv = ERRCODE(EXIT_FAILURE);
-			goto cleanup;
-		}
-
-		// Shrink & NULL terminate
-		// NOTE: We're not buffering C strings, and we're discarding the buffer very very soon, so skip that ;).
-		/*
-		temp = realloc(imgdata, used + 1U);
-		if (temp == NULL) {
-			free(imgdata);
-			fprintf(stderr, "[FBInk] realloc: out of memory!\n");
-			rv = ERRCODE(EXIT_FAILURE);
-			goto cleanup;
-		}
-		imgdata       = temp;
-		temp          = NULL;
-		imgdata[used] = '\0';
-		*/
-
-		// Finally, load the image from that buffer, and discard it once we're done.
-		data = stbi_load_from_memory(imgdata, (int) used, &w, &h, &n, req_n);
-		free(imgdata);
-	} else {
-		// With a filepath, we can just let stb handle it ;).
-		data = stbi_load(filename, &w, &h, &n, req_n);
-	}
-	if (data == NULL) {
-		fprintf(stderr, "[FBInk] Failed to open or decode image '%s'!\n", filename);
-		rv = ERRCODE(EXIT_FAILURE);
-		goto cleanup;
-	}
-
-	LOG("Requested %d color channels, image had %d.", req_n, n);
 
 	// Handle horizontal alignment...
 	switch (fbink_config->halign) {
@@ -3103,7 +3203,7 @@ int
 	    max_height,
 	    w,
 	    h);
-	// Warn if there's an alpha channel, because it's much more expensive to handle...
+	// Warn if there's an alpha channel, because it's usually a bit more expensive to handle...
 	if (n == 2 || n == 4) {
 		img_has_alpha = true;
 		if (fbink_config->ignore_alpha) {
@@ -3523,7 +3623,6 @@ int
 			}
 		}
 	}
-	stbi_image_free(data);
 
 	// Rotate the region if need be...
 	if (deviceQuirks.isKobo16Landscape) {
@@ -3547,6 +3646,149 @@ cleanup:
 	}
 	if (!keep_fd) {
 		close(fbfd);
+	}
+
+	return rv;
+}
+#endif    // FBINK_WITH_IMAGE
+
+// Draw an image on screen
+int
+    fbink_print_image(int fbfd    UNUSED_BY_MINIMAL,
+		      const char* filename UNUSED_BY_MINIMAL,
+		      short int x_off UNUSED_BY_MINIMAL,
+		      short int y_off    UNUSED_BY_MINIMAL,
+		      const FBInkConfig* fbink_config UNUSED_BY_MINIMAL)
+{
+#ifdef FBINK_WITH_IMAGE
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// Let stbi handle grayscaling for us
+	int req_n;
+	switch (vInfo.bits_per_pixel) {
+		case 4U:
+			req_n = 1 + !fbink_config->ignore_alpha;
+			break;
+		case 8U:
+			req_n = 1 + !fbink_config->ignore_alpha;
+			break;
+		case 16U:
+			req_n = 3 + !fbink_config->ignore_alpha;
+			break;
+		case 24U:
+			req_n = 3 + !fbink_config->ignore_alpha;
+			break;
+		case 32U:
+		default:
+			req_n = 3 + !fbink_config->ignore_alpha;
+			break;
+	}
+
+	// Decode image via stbi
+	unsigned char* data = NULL;
+	int            w;
+	int            h;
+	int            n;
+	data = img_load_from_file(filename, &w, &h, &n, req_n);
+	if (data == NULL) {
+		fprintf(stderr, "[FBInk] Failed to decode image data from '%s'!\n", filename);
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Finally, draw it on screen
+	if (draw_image(fbfd, data, w, h, n, req_n, x_off, y_off, fbink_config) != EXIT_SUCCESS) {
+		fprintf(stderr, "[FBInk] Failed to display image data on screen!\n");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// Cleanup
+cleanup:
+	// Free the buffer holding our decoded image data
+	stbi_image_free(data);
+
+	return rv;
+#else
+	fprintf(stderr, "[FBInk] Image support is disabled in this FBInk build!\n");
+	return ERRCODE(ENOSYS);
+#endif    // FBINK_WITH_IMAGE
+}
+
+// Draw raw (supposedly image) data on screen
+int
+    fbink_print_raw_data(int fbfd       UNUSED_BY_MINIMAL,
+			 unsigned char* data UNUSED_BY_MINIMAL,
+			 const int w UNUSED_BY_MINIMAL,
+			 const int h  UNUSED_BY_MINIMAL,
+			 const size_t len UNUSED_BY_MINIMAL,
+			 short int x_off UNUSED_BY_MINIMAL,
+			 short int y_off    UNUSED_BY_MINIMAL,
+			 const FBInkConfig* fbink_config UNUSED_BY_MINIMAL)
+{
+#ifdef FBINK_WITH_IMAGE
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// Since draw_image doesn't really handle every possible case,
+	// we'll have to fiddle with an intermediary buffer ourselves to make it happy,
+	// while still accepting various different kinds of inputs so the user doesn't have to worry about any of this...
+	int req_n;
+	switch (vInfo.bits_per_pixel) {
+		case 4U:
+			req_n = 1 + !fbink_config->ignore_alpha;
+			break;
+		case 8U:
+			req_n = 1 + !fbink_config->ignore_alpha;
+			break;
+		case 16U:
+			req_n = 3 + !fbink_config->ignore_alpha;
+			break;
+		case 24U:
+			req_n = 3 + !fbink_config->ignore_alpha;
+			break;
+		case 32U:
+		default:
+			req_n = 3 + !fbink_config->ignore_alpha;
+			break;
+	}
+
+	// Devising the actual amount of components in the input should be as easy as that...
+	int n = (int) len / h / w;
+
+	LOG("Requested %d color channels, supplied data had %d", req_n, n);
+
+	// If there's a mismatch between the components in the input data vs. what the fb expects,
+	// re-interleave the data w/ stbi's help...
+	unsigned char* imgdata = NULL;
+	if (req_n != n) {
+		LOG("Converting from %d components to the requested %d", n, req_n);
+		// NOTE: stbi__convert_format will *always* free the input buffer, which we do NOT want here...
+		//       Which is why we're using a tweaked internal copy, which does not free ;).
+		imgdata = img_convert_px_format(data, n, req_n, w, h);
+		if (imgdata == NULL) {
+			fprintf(stderr, "[FBInk] Failed to re-interleave input data in a suitable format!\n");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	} else {
+		// We can use the input buffer as-is :)
+		LOG("No conversion needed, using the input buffer directly");
+		imgdata = data;
+	}
+
+	// We should now be able to draw that on screen, knowing that it probably won't horribly implode ;p
+	if (draw_image(fbfd, imgdata, w, h, n, req_n, x_off, y_off, fbink_config) != EXIT_SUCCESS) {
+		fprintf(stderr, "[FBInk] Failed to display image data on screen!\n");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// Cleanup
+cleanup:
+	// If we created an intermediary buffer ourselves, free it.
+	if (req_n != n) {
+		stbi_image_free(imgdata);
 	}
 
 	return rv;

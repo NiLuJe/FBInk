@@ -292,6 +292,36 @@ FBINK_API int fbink_print_image(int                fbfd,
 				short int          y_off,
 				const FBInkConfig* fbink_config);
 
+// Print raw scanlines on screen
+// Returns -(ENOSYS) when image support is disabled (MINIMAL build)
+// fdfd:		open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
+// data:		pointer to a buffer holding the image data (Supported pixel formats: Y/YA/RGB/RGBA,
+//				8-bit components, the first pixel should be the top-left of the image).
+// w:			width (in pixels) of a single scanline of the input image data
+// h:			height (in pixels) of the full image data (i.e., amount of scanlines)
+// len:			*exact* size of the input buffer.
+//				Input pixel format is simply computed as len / h / w, so this *needs* to be exact,
+//				do not pass a padded length (or pad the data itself in any way)!
+// x_off:		target coordinates, x (honors negative offsets)
+// y_off:		target coordinates, y (honors negative offsets)
+// fbink_config:	pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
+// NOTE: While we do accept a various range of input formats (as far as component interleaving is concerned),
+//       our display code only handles a few specific combinations, depending on the target hardware.
+//       To make everyone happy, this will transparently handle the pixel format conversion *as needed*,
+//       a process which incurs a single copy of the input buffer (same behavior as in the non-raw image codepath).
+//       If this is a concern to you, make sure your input buffer is formatted in a manner adapted to your output device:
+//       RGBA (32bpp) on Kobo (or RGB (24bpp) with ignore_alpha),
+//       and YA (grayscale + alpha) on Kindle (or Y (8bpp) with ignore_alpha).
+FBINK_API int fbink_print_raw_data(int                fbfd,
+				   unsigned char*     data,
+				   const int          w,
+				   const int          h,
+				   const size_t       len,
+				   short int          x_off,
+				   short int          y_off,
+				   const FBInkConfig* fbink_config);
+
 // Scan the screen for Kobo's "Connect" button in the "USB plugged in" popup,
 // and optionally generate an input event to press that button.
 // KOBO Only! Returns -(ENOSYS) when disabled (!KOBO, as well as MINIMAL builds).
