@@ -300,7 +300,7 @@ FBINK_API int fbink_print_image(int                fbfd,
 // w:			width (in pixels) of a single scanline of the input data
 // h:			height (in pixels) of the full data (i.e., amount of scanlines)
 // len:			*exact* size of the input buffer.
-//				Input format is simply computed as len / h, so this *needs* to be exact,
+//				Input format is simply computed as len / h / w, so this *needs* to be exact,
 //				do not pass a padded length!
 // x_off:		target coordinates, x (honors negative offsets)
 // y_off:		target coordinates, y (honors negative offsets)
