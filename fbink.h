@@ -296,12 +296,13 @@ FBINK_API int fbink_print_image(int                fbfd,
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
 // fdfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
-// data:		pointer to a buffer holding the image data (Y/YA/RGB/RGBA)
-// w:			width (in pixels) of a single scanline of the input data
-// h:			height (in pixels) of the full data (i.e., amount of scanlines)
+// data:		pointer to a buffer holding the image data (Supported pixel formats: Y/YA/RGB/RGBA,
+//				8-bit components, the first pixel should be the top-left of the image).
+// w:			width (in pixels) of a single scanline of the input image data
+// h:			height (in pixels) of the full image data (i.e., amount of scanlines)
 // len:			*exact* size of the input buffer.
-//				Input format is simply computed as len / h / w, so this *needs* to be exact,
-//				do not pass a padded length!
+//				Input pixel format is simply computed as len / h / w, so this *needs* to be exact,
+//				do not pass a padded length (or pad the data itself in any way)!
 // x_off:		target coordinates, x (honors negative offsets)
 // y_off:		target coordinates, y (honors negative offsets)
 // fbink_config:	pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
