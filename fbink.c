@@ -2829,7 +2829,7 @@ cleanup:
 }
 
 #ifdef FBINK_WITH_IMAGE
-// Load & decode image data from a file or stdin, via STB
+// Load & decode image data from a file or stdin, via stbi
 static unsigned char*
     img_load_from_file(const char* filename, int* w, int* h, int* n, int req_n)
 {
@@ -2905,7 +2905,7 @@ static unsigned char*
 		data = stbi_load_from_memory(imgdata, (int) used, w, h, n, req_n);
 		free(imgdata);
 	} else {
-		// With a filepath, we can just let stb handle it ;).
+		// With a filepath, we can just let stbi handle it ;).
 		data = stbi_load(filename, w, h, n, req_n);
 	}
 	if (data == NULL) {
@@ -2919,7 +2919,7 @@ static unsigned char*
 }
 
 // Convert raw image data between various pixel formats
-// NOTE: This is a direct copy of STB's stbi__convert_format, except that it doesn't free the input buffer.
+// NOTE: This is a direct copy of stbi's stbi__convert_format, except that it doesn't free the input buffer.
 static unsigned char*
     img_convert_px_format(unsigned char* data, int img_n, int req_comp, int x, int y)
 {
@@ -2939,7 +2939,7 @@ static unsigned char*
 		unsigned char* src  = data + j * x * img_n;
 		unsigned char* dest = good + j * x * req_comp;
 
-		// NOTE: STB undef's STBI__CASE, but not STBI__COMBO...
+		// NOTE: stbi undef's STBI__CASE, but not STBI__COMBO...
 #	ifdef STBI__COMBO
 #		undef STBI__COMBO
 #	endif
@@ -3021,7 +3021,7 @@ static unsigned char*
 	return good;
 }
 
-// Draw image data on screen (we inherit a few of the variable types/names from STB ;))
+// Draw image data on screen (we inherit a few of the variable types/names from stbi ;))
 static int
     draw_image(int                fbfd,
 	       unsigned char*     data,
@@ -3664,7 +3664,7 @@ int
 	// Assume success, until shit happens ;)
 	int rv = EXIT_SUCCESS;
 
-	// Let stb handle grayscaling for us
+	// Let stbi handle grayscaling for us
 	int req_n;
 	switch (vInfo.bits_per_pixel) {
 		case 4U:
@@ -3685,7 +3685,7 @@ int
 			break;
 	}
 
-	// Decode image via STB
+	// Decode image via stbi
 	unsigned char* data = NULL;
 	int            w;
 	int            h;
@@ -3759,7 +3759,7 @@ int
 	LOG("Requested %d color channels, supplied data had %d", req_n, n);
 
 	// If there's a mismatch between the components in the input data vs. what the fb expects,
-	// re-interleave the data w/ STB's help...
+	// re-interleave the data w/ stbi's help...
 	unsigned char* imgdata = NULL;
 	if (req_n != n) {
 		LOG("Converting from %d components to the requested %d", n, req_n);
