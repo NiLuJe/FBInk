@@ -38,8 +38,10 @@
 #	endif
 // Connect button scanning is Kobo specific
 #	ifndef FBINK_FOR_KINDLE
-#		ifndef FBINK_WITH_BUTTON_SCAN
-#			define FBINK_WITH_BUTTON_SCAN
+#		ifndef FBINK_FOR_CERVANTES
+#			ifndef FBINK_WITH_BUTTON_SCAN
+#				define FBINK_WITH_BUTTON_SCAN
+#			endif
 #		endif
 #	endif
 #endif
@@ -84,12 +86,12 @@
 #include "utf8/utf8.h"
 
 // NOTE: We always neeed one of those, because we rely on mxcfb_rect in a number of places
-#if defined (FBINK_FOR_KINDLE)
+#if defined(FBINK_FOR_KINDLE)
 #	include "eink/mxcfb-kindle.h"
 // Legacy einkfb driver
 #	include "eink/einkfb.h"
-#elif defined (FBINK_FOR_CERVANTES)
-#       include "eink/mxcfb-cervantes.h"
+#elif defined(FBINK_FOR_CERVANTES)
+#	include "eink/mxcfb-cervantes.h"
 #else
 #	include "eink/mxcfb-kobo.h"
 #endif
@@ -291,11 +293,11 @@ static struct mxcfb_rect draw(const char*,
 			      const FBInkConfig*);
 
 static long int jiffies_to_ms(long int);
-#if defined (FBINK_FOR_KINDLE)
+#if defined(FBINK_FOR_KINDLE)
 static int refresh_legacy(int, const struct mxcfb_rect, bool);
 static int refresh_kindle(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
 static int refresh_kindle_koa2(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
-#elif defined (FBINK_FOR_CERVANTES)
+#elif defined(FBINK_FOR_CERVANTES)
 static int refresh_cervantes(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
 static int refresh_cervantes_new(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
 #else

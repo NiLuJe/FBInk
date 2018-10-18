@@ -20,7 +20,7 @@
 
 #include "fbink_device_id.h"
 
-#if defined (FBINK_FOR_KINDLE)
+#if defined(FBINK_FOR_KINDLE)
 // NOTE: This is adapted from KindleTool,
 //       c.f., https://github.com/NiLuJe/KindleTool/blob/master/KindleTool/kindle_tool.h#L189
 static bool
@@ -202,7 +202,7 @@ static void
 		}
 	}
 }
-#elif defined (FBINK_FOR_CERVANTES)
+#elif defined(FBINK_FOR_CERVANTES)
 // read pcb id from HWCONFIG for bq/fnac devices, adapted from OKreader's kobo_hwconfig:
 // https://github.com/lgeek/okreader/blob/master/src/kobo_hwconfig/kobo_hwconfig.c
 static void
@@ -212,38 +212,40 @@ static void
 	if (!fp) {
 		fprintf(stderr, "[FBInk] Couldn't read from %s (not running on a Cervantes?)!\n", HWCONFIG_DEVICE);
 	} else {
-		int ret;
+		int      ret;
 		hwconfig config;
 
 		ret = fseek(fp, HWCONFIG_OFFSET, SEEK_SET);
-		if (ret != 0)
-		{
-			fprintf(stderr, "[FBInk] Failed to seek to position 0x%p in %s\n", (void*) HWCONFIG_OFFSET, HWCONFIG_DEVICE);
+		if (ret != 0) {
+			fprintf(stderr,
+				"[FBInk] Failed to seek to position 0x%p in %s\n",
+				(void*) HWCONFIG_OFFSET,
+				HWCONFIG_DEVICE);
 			exit(EXIT_FAILURE);
 		}
 
 		ret = (int) fread(&config, sizeof(config), 1, fp);
-		if (ret != 1)
-		{
+		if (ret != 1) {
 			fprintf(stderr, "[FBInk] Failed to read the HWCONFIG entry in %s\n", HWCONFIG_DEVICE);
 			exit(EXIT_FAILURE);
 		}
 
-		if (strncmp(config.magic, HWCONFIG_MAGIC, strlen(HWCONFIG_MAGIC)) != 0)
-		{
-			fprintf(stderr, "[FBInk] Input file %s does not appear to contain a HWCONFIG entry\n", HWCONFIG_DEVICE);
+		if (strncmp(config.magic, HWCONFIG_MAGIC, strlen(HWCONFIG_MAGIC)) != 0) {
+			fprintf(stderr,
+				"[FBInk] Input file %s does not appear to contain a HWCONFIG entry\n",
+				HWCONFIG_DEVICE);
 			exit(EXIT_FAILURE);
 		}
 
-                // supported devices,
-                // from https://github.com/bq/cervantes/blob/master/bqHAL/Devices/mx508/src/DeviceInfoMx508.cpp#L33-L37
-		switch(config.pcb_id) {
-			case 22: // BQ Cervantes Touch - Fnac Touch (2012-2013)
-			case 23: // BQ Cervantes TouchLight - Fnac Touch Plus (2012-2013)
-			case 33: // BQ Cervantes 2013 - Fnac Touch Light (2013)
+		// supported devices,
+		// from https://github.com/bq/cervantes/blob/master/bqHAL/Devices/mx508/src/DeviceInfoMx508.cpp#L33-L37
+		switch (config.pcb_id) {
+			case 22:    // BQ Cervantes Touch - Fnac Touch (2012-2013)
+			case 23:    // BQ Cervantes TouchLight - Fnac Touch Plus (2012-2013)
+			case 33:    // BQ Cervantes 2013 - Fnac Touch Light (2013)
 				break;
-			case 51: // BQ Cervantes 3 - Fnac Touch Light 2 (2016)
-			case 68: // BQ Cervantes 4
+			case 51:    // BQ Cervantes 3 - Fnac Touch Light 2 (2016)
+			case 68:    // BQ Cervantes 4
 				device_quirks->isCervantesNew = true;
 				break;
 			default:
@@ -326,10 +328,10 @@ static void
 static void
     identify_device(FBInkDeviceQuirks* device_quirks)
 {
-#if defined (FBINK_FOR_KINDLE)
+#if defined(FBINK_FOR_KINDLE)
 	identify_kindle(device_quirks);
-#elif defined (FBINK_FOR_CERVANTES)
-        identify_cervantes(device_quirks);
+#elif defined(FBINK_FOR_CERVANTES)
+	identify_cervantes(device_quirks);
 #else
 	identify_kobo(device_quirks);
 #endif

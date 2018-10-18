@@ -133,7 +133,7 @@ ifdef LEGACY
 endif
 # Toggle Bq Cervantes support
 ifdef CERVANTES
-    EXTRA_CPPFLAGS+=-DFBINK_FOR_CERVANTES
+	EXTRA_CPPFLAGS+=-DFBINK_FOR_CERVANTES
 endif
 # Toggle generic Linux support
 ifdef LINUX
@@ -144,12 +144,16 @@ endif
 FBINK_VERSION=$(shell git describe)
 ifdef KINDLE
 	LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kindle"'
-else ifdef KOBO
-	LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kobo"'
-else ifdef CERVANTES
-    LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Cervantes"'
-else ifdef LINUX
-	LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Linux"'
+else
+	ifdef CERVANTES
+		LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Cervantes"'
+	else
+		ifdef LINUX
+			LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Linux"'
+		else
+			LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kobo"'
+		endif
+	endif
 endif
 
 # NOTE: Always use as-needed to avoid unecessary DT_NEEDED entries :)
@@ -189,7 +193,11 @@ else
 	EXTRA_CPPFLAGS+=-DFBINK_WITH_IMAGE
 	# Connect button scanning is Kobo specific
 	ifndef KINDLE
-		EXTRA_CPPFLAGS+=-DFBINK_WITH_BUTTON_SCAN
+		ifndef CERVANTES
+			ifndef LINUX
+				EXTRA_CPPFLAGS+=-DFBINK_WITH_BUTTON_SCAN
+			endif
+		endif
 	endif
 endif
 

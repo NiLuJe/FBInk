@@ -25,18 +25,19 @@
 #include "fbink.h"
 #include "fbink_internal.h"
 
-#ifdef FBINK_FOR_KINDLE
+#if defined(FBINK_FOR_KINDLE)
 #	define KINDLE_SERIAL_NO_LENGTH 16
 
 static bool     is_kindle_device(uint32_t, FBInkDeviceQuirks*);
 static bool     is_kindle_device_new(uint32_t, FBInkDeviceQuirks*);
 static uint32_t from_base(char*, uint8_t);
 static void     identify_kindle(FBInkDeviceQuirks*);
-#elif defined (FBINK_FOR_CERVANTES)
-#define HWCONFIG_DEVICE "/dev/mmcblk0"
-#define HWCONFIG_OFFSET (1024 * 512)
-#define HWCONFIG_MAGIC  "HW CONFIG "
-typedef struct  __attribute__ ((__packed__)) {
+#elif defined(FBINK_FOR_CERVANTES)
+#	define HWCONFIG_DEVICE "/dev/mmcblk0"
+#	define HWCONFIG_OFFSET (1024 * 512)
+#	define HWCONFIG_MAGIC "HW CONFIG "
+typedef struct __attribute__((__packed__))
+{
 	char    magic[10];
 	char    version[5];
 	uint8_t size;

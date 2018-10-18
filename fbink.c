@@ -960,7 +960,7 @@ static long int
 }
 
 // Handle the various eInk update API quirks for the full range of HW we support...
-#if defined (FBINK_FOR_KINDLE)
+#if defined(FBINK_FOR_KINDLE)
 // Legacy Kindle devices ([K2<->K4])
 static int
     refresh_legacy(int fbfd, const struct mxcfb_rect region, bool is_flashing)
@@ -1140,10 +1140,14 @@ static int
 
 	return EXIT_SUCCESS;
 }
-#elif defined (FBINK_FOR_CERVANTES)
+#elif defined(FBINK_FOR_CERVANTES)
 // Legacy Cervantes devices (2013)
 static int
-    refresh_cervantes(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode, uint32_t update_mode, uint32_t marker)
+    refresh_cervantes(int                     fbfd,
+		      const struct mxcfb_rect region,
+		      uint32_t                waveform_mode,
+		      uint32_t                update_mode,
+		      uint32_t                marker)
 {
 	struct mxcfb_update_data update = {
 		.update_region = region,
@@ -1195,10 +1199,10 @@ static int
 // New cervantes devices (2013+)
 static int
     refresh_cervantes_new(int                     fbfd,
-		     const struct mxcfb_rect region,
-		     uint32_t                waveform_mode,
-		     uint32_t                update_mode,
-		     uint32_t                marker)
+			  const struct mxcfb_rect region,
+			  uint32_t                waveform_mode,
+			  uint32_t                update_mode,
+			  uint32_t                marker)
 {
 	struct mxcfb_update_data_org update = {
 		.update_region = region,
