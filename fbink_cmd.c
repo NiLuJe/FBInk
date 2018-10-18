@@ -749,11 +749,12 @@ int
 				    fbink_config.ignore_alpha ? "true" : "false");
 			}
 			// Draw a vertical stripe composed of 50x50 blocks of each color in the eInk palette
-			uint8_t eInkCMap[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
-			uint8_t v = 0;
-			size_t len = 50 * 50 * sizeof(eInkCMap);
-			unsigned char *data = malloc(len);
-			unsigned char *pix_ptr = data;
+			uint8_t        eInkCMap[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+                                               0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
+			uint8_t        v          = 0;
+			size_t         len        = 50 * 50 * sizeof(eInkCMap);
+			unsigned char* data       = malloc(len);
+			unsigned char* pix_ptr    = data;
 			for (uint8_t c = 0; c < sizeof(eInkCMap); c++) {
 				v = eInkCMap[c];
 				for (uint8_t y = 0; y < 50; y++) {
@@ -762,8 +763,14 @@ int
 					}
 				}
 			}
-			if (fbink_print_raw_data(fbfd, data, 50, 50 * sizeof(eInkCMap), len, image_x_offset, image_y_offset, &fbink_config) !=
-			    EXIT_SUCCESS) {
+			if (fbink_print_raw_data(fbfd,
+						 data,
+						 50,
+						 50 * sizeof(eInkCMap),
+						 len,
+						 image_x_offset,
+						 image_y_offset,
+						 &fbink_config) != EXIT_SUCCESS) {
 				fprintf(stderr, "Failed to display that image!\n");
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
