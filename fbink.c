@@ -2922,9 +2922,9 @@ static int
 static unsigned char*
     img_convert_px_format(unsigned char* data, int img_n, int req_comp, int x, int y)
 {
-	int            i, j;
 	unsigned char* good;
 
+	// NOTE: We're already doing that in fbink_print_raw_data ;)
 	//if (req_comp == img_n) return data;
 	STBI_ASSERT(req_comp >= 1 && req_comp <= 4);
 
@@ -2934,7 +2934,7 @@ static unsigned char*
 		return NULL;
 	}
 
-	for (j = 0; j < (int) y; ++j) {
+	for (int j = 0; j < (int) y; ++j) {
 		unsigned char* src  = data + j * x * img_n;
 		unsigned char* dest = good + j * x * req_comp;
 
@@ -2945,7 +2945,7 @@ static unsigned char*
 #	define STBI__COMBO(a, b) ((a) *8 + (b))
 #	define STBI__CASE(a, b)                                                                                         \
 		case STBI__COMBO(a, b):                                                                                  \
-			for (i = x - 1; i >= 0; --i, src += a, dest += b)
+			for (int i = x - 1; i >= 0; --i, src += a, dest += b)
 		// convert source image with img_n components to one with req_comp components;
 		// avoid switch per pixel, so use switch per scanline and massive macros
 		switch (STBI__COMBO(img_n, req_comp)) {
