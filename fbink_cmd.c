@@ -749,17 +749,26 @@ int
 				    fbink_config.ignore_alpha ? "true" : "false");
 			}
 			// Draw a vertical stripe composed of 50x50 blocks of each color in the eInk palette
-			uint8_t        eInkCMap[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
-                                               0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
-			uint8_t        v          = 0;
-			size_t         len        = 50 * 50 * sizeof(eInkCMap);
-			unsigned char* data       = malloc(len);
-			unsigned char* pix_ptr    = data;
+			uint8_t eInkCMap[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+					       0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
+			uint8_t v          = 0;
+			size_t  len        = 50 * 50 * sizeof(eInkCMap);
+			// -> RGBA
+			len *= 4;
+			unsigned char* data    = malloc(len);
+			unsigned char* pix_ptr = data;
 			for (uint8_t c = 0; c < sizeof(eInkCMap); c++) {
 				v = eInkCMap[c];
 				for (uint8_t y = 0; y < 50; y++) {
 					for (uint8_t x = 0; x < 50; x++) {
-						*pix_ptr++ = v;
+						for (uint8_t n = 0; n < 4; n++) {
+							if (n == 3) {
+								// Make it opaque!
+								*pix_ptr++ = 0xFF;
+							} else {
+								*pix_ptr++ = v;
+							}
+						}
 					}
 				}
 			}
