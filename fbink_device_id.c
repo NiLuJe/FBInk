@@ -172,7 +172,12 @@ static uint32_t
 static void
     identify_kindle(FBInkDeviceQuirks* device_quirks)
 {
+#	ifdef FBINK_FOR_LEGACY
 	FILE* fp = fopen("/proc/usid", "r");
+#	else
+	// NOTE: We only need to forgo CLOEXEC on Legacy Kindles ;).
+	FILE* fp = fopen("/proc/usid", "re");
+#	endif
 	if (!fp) {
 		fprintf(stderr, "[FBInk] Cannot open /proc/usid (not running on a Kindle?)!\n");
 	} else {
