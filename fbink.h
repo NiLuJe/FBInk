@@ -307,10 +307,10 @@ FBINK_API int fbink_print_image(int                fbfd,
 // fbink_config:	pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
 // NOTE: While we do accept a various range of input formats (as far as component interleaving is concerned),
 //       our display code only handles a few specific combinations, depending on the target hardware.
-//       To make everyone happy in a transparent manner, this will handle the conversion transparently *as needed*,
-//       a process which incurs a *double* copy of the input buffer (that's one more than the non-raw image codepath).
+//       To make everyone happy, this will transparently handle the pixel format conversion *as needed*,
+//       a process which incurs a single copy of the input buffer (same behavior as in the non-raw image codepath).
 //       If this is a concern to you, make sure your input buffer is formatted in a manner adapted to your output device:
-//       RGB on Kobo (+/- A, depending on ignore_alpha), and Y (grayscale) on Kindle (+/- A, depending on ignore_alpha).
+//       RGBA on Kobo (or RGB with ignore_alpha), and YA (grayscale + alpha) on Kindle (or Y with ignore_alpha).
 FBINK_API int fbink_print_raw_data(int                  fbfd,
 				   unsigned char* const data,
 				   const int            w,
