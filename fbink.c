@@ -3022,15 +3022,15 @@ static unsigned char*
 
 // Draw image data on screen (we inherit a few of the variable types/names from STB ;))
 static int
-    draw_image(int                  fbfd,
-	       unsigned char* const data,
-	       const int            w,
-	       const int            h,
-	       const int            n,
-	       const int            req_n,
-	       short int            x_off,
-	       short int            y_off,
-	       const FBInkConfig*   fbink_config)
+    draw_image(int                fbfd,
+	       unsigned char*     data,
+	       const int          w,
+	       const int          h,
+	       const int          n,
+	       const int          req_n,
+	       short int          x_off,
+	       short int          y_off,
+	       const FBInkConfig* fbink_config)
 {
 	// Open the framebuffer if need be...
 	// NOTE: As usual, we *expect* to be initialized at this point!
@@ -3721,8 +3721,8 @@ cleanup:
 
 // Draw raw (supposedly image) data on screen
 int
-    fbink_print_raw_data(int fbfd             UNUSED_BY_MINIMAL,
-			 unsigned char* const data UNUSED_BY_MINIMAL,
+    fbink_print_raw_data(int fbfd       UNUSED_BY_MINIMAL,
+			 unsigned char* data UNUSED_BY_MINIMAL,
 			 const int w UNUSED_BY_MINIMAL,
 			 const int h  UNUSED_BY_MINIMAL,
 			 const size_t len UNUSED_BY_MINIMAL,

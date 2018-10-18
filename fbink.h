@@ -311,14 +311,14 @@ FBINK_API int fbink_print_image(int                fbfd,
 //       a process which incurs a single copy of the input buffer (same behavior as in the non-raw image codepath).
 //       If this is a concern to you, make sure your input buffer is formatted in a manner adapted to your output device:
 //       RGBA on Kobo (or RGB with ignore_alpha), and YA (grayscale + alpha) on Kindle (or Y with ignore_alpha).
-FBINK_API int fbink_print_raw_data(int                  fbfd,
-				   unsigned char* const data,
-				   const int            w,
-				   const int            h,
-				   const size_t         len,
-				   short int            x_off,
-				   short int            y_off,
-				   const FBInkConfig*   fbink_config);
+FBINK_API int fbink_print_raw_data(int                fbfd,
+				   unsigned char*     data,
+				   const int          w,
+				   const int          h,
+				   const size_t       len,
+				   short int          x_off,
+				   short int          y_off,
+				   const FBInkConfig* fbink_config);
 
 // Scan the screen for Kobo's "Connect" button in the "USB plugged in" popup,
 // and optionally generate an input event to press that button.
