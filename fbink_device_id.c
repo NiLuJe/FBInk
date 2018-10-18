@@ -212,19 +212,19 @@ static void
 	if (!fp) {
 		fprintf(stderr, "[FBInk] Couldn't read from %s (not running on a Cervantes?)!\n", HWCONFIG_DEVICE);
 	} else {
-		hwconfig config;
+		hwconfig config = { 0 };
 
 		if (fseek(fp, HWCONFIG_OFFSET, SEEK_SET) != 0) {
 			fprintf(stderr,
 				"[FBInk] Failed to seek to position 0x%p in %s\n",
 				(void*) HWCONFIG_OFFSET,
 				HWCONFIG_DEVICE);
-			exit(EXIT_FAILURE);
-		}
-
-		if (fread(&config, sizeof(config), 1, fp) != 1) {
-			fprintf(stderr, "[FBInk] Failed to read the HWCONFIG entry in %s\n", HWCONFIG_DEVICE);
-			exit(EXIT_FAILURE);
+		} else {
+			if (fread(&config, sizeof(config), 1, fp) != 1) {
+				fprintf(stderr, "[FBInk] Failed to read the HWCONFIG entry in %s\n", HWCONFIG_DEVICE);
+				fclose(fp);
+				return;
+			}
 		}
 		fclose(fp);
 
@@ -232,7 +232,7 @@ static void
 			fprintf(stderr,
 				"[FBInk] Input file %s does not appear to contain a HWCONFIG entry\n",
 				HWCONFIG_DEVICE);
-			exit(EXIT_FAILURE);
+			return;
 		}
 
 		// supported devices,
