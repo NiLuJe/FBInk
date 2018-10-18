@@ -2829,7 +2829,7 @@ cleanup:
 }
 
 #ifdef FBINK_WITH_IMAGE
-// Load image data from a file or stdin, via STB
+// Load & decode image data from a file or stdin, via STB
 static int
     img_load_from_file(const char* filename, unsigned char** data, int* w, int* h, int* n, int req_n)
 {
