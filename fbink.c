@@ -2912,7 +2912,7 @@ static int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
-	LOG("Requested %d color channels, image had %d.", req_n, *n);
+	LOG("Requested %d color channels, image had %d", req_n, *n);
 
 	return EXIT_SUCCESS;
 }
@@ -3657,13 +3657,14 @@ int
 	// Devising the actual amount of components in the input should be as easy as that...
 	int n = (int) len / h / w;
 
-	LOG("Requested %d color channels, supplied data had %d.", req_n, n);
+	LOG("Requested %d color channels, supplied data had %d", req_n, n);
 
 	// If there's a mismatch between the components in the input data vs. what the fb expects,
 	// re-interleave the data w/ STB's help...
 	unsigned char* imgdata = NULL;
 	unsigned char* rawdata = NULL;
 	if (req_n != n) {
+		LOG("Converting from %d components to the requested %d", n, req_n);
 		// NOTE: stbi__convert_format will *always* free the input buffer, which we do NOT want here...
 		//       Since it does save us a lot of annoying work,
 		//       the easiest workaround is simply to feed it a copy of the input buffer...
@@ -3677,6 +3678,7 @@ int
 		}
 	} else {
 		// We can use the input buffer as-is :)
+		LOG("No conversion needed, using the input buffer directly");
 		imgdata = data;
 	}
 
@@ -3690,10 +3692,9 @@ int
 	// Cleanup
 cleanup:
 	// If we created an intermediary buffer ourselves, free it.
-	if (rawdata != NULL) {
+	if (req_n != n) {
 		// FIXME: This obviously blows up when the caller's data is allocated on the stack...
 		//stbi_image_free(imgdata);
-		//free(rawdata);
 	}
 
 	return rv;
