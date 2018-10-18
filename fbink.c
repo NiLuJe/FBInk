@@ -2830,9 +2830,11 @@ cleanup:
 
 #ifdef FBINK_WITH_IMAGE
 // Load & decode image data from a file or stdin, via STB
-static int
-    img_load_from_file(const char* filename, unsigned char** data, int* w, int* h, int* n, int req_n)
+static unsigned char*
+    img_load_from_file(const char* filename, int* w, int* h, int* n, int req_n)
 {
+	unsigned char* data = NULL;
+
 	// Read image either from stdin (provided we're not running from a terminal), or a file
 	if (strcmp(filename, "-") == 0 && !isatty(fileno(stdin))) {
 		// NOTE: Ideally, we'd simply feed stdin to stbi_load_from_file, but that doesn't work because it relies on fseek,
@@ -2846,7 +2848,7 @@ static int
 
 		if (ferror(stdin)) {
 			fprintf(stderr, "[FBInk] Failed to read image data from stdin!\n");
-			return ERRCODE(EXIT_FAILURE);
+			return NULL;
 		}
 
 #	define CHUNK (256 * 1024)
@@ -2858,7 +2860,7 @@ static int
 				if (size <= used) {
 					free(imgdata);
 					fprintf(stderr, "[FBInk] Too much input data!\n");
-					return ERRCODE(EXIT_FAILURE);
+					return NULL;
 				}
 
 				// OOM check
@@ -2866,7 +2868,7 @@ static int
 				if (temp == NULL) {
 					free(imgdata);
 					fprintf(stderr, "[FBInk] realloc: out of memory!\n");
-					return ERRCODE(EXIT_FAILURE);
+					return NULL;
 				}
 				imgdata = temp;
 				temp    = NULL;
@@ -2882,7 +2884,7 @@ static int
 		if (ferror(stdin)) {
 			free(imgdata);
 			fprintf(stderr, "[FBInk] Failed to read image data from stdin!\n");
-			return ERRCODE(EXIT_FAILURE);
+			return NULL;
 		}
 
 		// Shrink & NULL terminate
@@ -2892,8 +2894,7 @@ static int
 		if (temp == NULL) {
 			free(imgdata);
 			fprintf(stderr, "[FBInk] realloc: out of memory!\n");
-			rv = ERRCODE(EXIT_FAILURE);
-			goto cleanup;
+			return NULL;
 		}
 		imgdata       = temp;
 		temp          = NULL;
@@ -2901,20 +2902,20 @@ static int
 		*/
 
 		// Finally, load the image from that buffer, and discard it once we're done.
-		*data = stbi_load_from_memory(imgdata, (int) used, w, h, n, req_n);
+		data = stbi_load_from_memory(imgdata, (int) used, w, h, n, req_n);
 		free(imgdata);
 	} else {
 		// With a filepath, we can just let stb handle it ;).
-		*data = stbi_load(filename, w, h, n, req_n);
+		data = stbi_load(filename, w, h, n, req_n);
 	}
-	if (*data == NULL) {
+	if (data == NULL) {
 		fprintf(stderr, "[FBInk] Failed to open or decode image '%s'!\n", filename);
-		return ERRCODE(EXIT_FAILURE);
+		return NULL;
 	}
 
 	LOG("Requested %d color channels, image had %d", req_n, *n);
 
-	return EXIT_SUCCESS;
+	return data;
 }
 
 // Convert raw image data between various pixel formats
@@ -3689,14 +3690,9 @@ int
 	int            w;
 	int            h;
 	int            n;
-	if (img_load_from_file(filename, &data, &w, &h, &n, req_n) != EXIT_SUCCESS) {
-		fprintf(stderr, "[FBInk] Failed to decode image data from '%s'!\n", filename);
-		return ERRCODE(EXIT_FAILURE);
-	}
-
-	// We're already doing that inside img_load_from_file, so if this fails, it means I'm terrible at pointers :D.
+	data = img_load_from_file(filename, &w, &h, &n, req_n);
 	if (data == NULL) {
-		fprintf(stderr, "[FBInk] NULL image data ptr?!\n");
+		fprintf(stderr, "[FBInk] Failed to decode image data from '%s'!\n", filename);
 		return ERRCODE(EXIT_FAILURE);
 	}
 

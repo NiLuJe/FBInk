@@ -312,7 +312,7 @@ static void fullscreen_region(struct mxcfb_rect*);
 int draw_progress_bars(int, bool, uint8_t, const FBInkConfig*);
 
 #ifdef FBINK_WITH_IMAGE
-static int            img_load_from_file(const char*, unsigned char**, int*, int*, int*, int);
+static unsigned char* img_load_from_file(const char*, int*, int*, int*, int);
 static unsigned char* img_convert_px_format(unsigned char*, int, int, int, int);
 static int
     draw_image(int, unsigned char*, const int, const int, const int, const int, short int, short int, const FBInkConfig*);
