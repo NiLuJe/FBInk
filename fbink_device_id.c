@@ -208,7 +208,7 @@ static void
 static void
     identify_cervantes(FBInkDeviceQuirks* device_quirks)
 {
-	FILE* fp = fopen(HWCONFIG_DEVICE, "rb");
+	FILE* fp = fopen(HWCONFIG_DEVICE, "re");
 	if (!fp) {
 		fprintf(stderr, "[FBInk] Couldn't read from %s (not running on a Cervantes?)!\n", HWCONFIG_DEVICE);
 	} else {
