@@ -214,8 +214,7 @@ static void
 	} else {
 		hwconfig config;
 
-		int ret = fseek(fp, HWCONFIG_OFFSET, SEEK_SET);
-		if (ret != 0) {
+		if (fseek(fp, HWCONFIG_OFFSET, SEEK_SET) != 0) {
 			fprintf(stderr,
 				"[FBInk] Failed to seek to position 0x%p in %s\n",
 				(void*) HWCONFIG_OFFSET,
@@ -223,11 +222,11 @@ static void
 			exit(EXIT_FAILURE);
 		}
 
-		size_t nread = fread(&config, sizeof(config), 1, fp);
-		if (nread != 1) {
+		if (fread(&config, sizeof(config), 1, fp) != 1) {
 			fprintf(stderr, "[FBInk] Failed to read the HWCONFIG entry in %s\n", HWCONFIG_DEVICE);
 			exit(EXIT_FAILURE);
 		}
+		fclose(fp);
 
 		if (strncmp(config.magic, HWCONFIG_MAGIC, strlen(HWCONFIG_MAGIC)) != 0) {
 			fprintf(stderr,
@@ -251,7 +250,6 @@ static void
 				fprintf(stderr, "[FBInk] Unidentified Cervantes device (%d)!\n", config.pcb_id);
 				break;
 		}
-		fclose(fp);
 	}
 }
 #else
