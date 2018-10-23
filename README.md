@@ -59,7 +59,7 @@ Kindle support covers the full Kindle lineup, starting from the K2.
 
 Kobo support has been tested on a H2O running a recent FW version (i.e., 32bpp fb), but the full lineup should be supported.
 
-BQ Cervantes support has been contributed by @pazos (#17), and should handle the current lineup.
+BQ Cervantes support has been contributed by [@pazos](https://github.com/pazos) ([#17](https://github.com/NiLuJe/FBInk/pull/17)), and should handle the current lineup.
 
 # Bindings in other languages
 
