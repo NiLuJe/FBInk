@@ -46,6 +46,7 @@ static bool
 			device_quirks->isKindlePearlScreen = true;
 			return true;
 		case 0x23:    // K4b
+			device_quirks->isKindleLegacy = true;
 			return true;
 		case 0x24:    // PW1
 		case 0x1B:
