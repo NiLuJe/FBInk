@@ -256,7 +256,11 @@ FBINK_API int fbink_refresh(int         fbfd,
 			    const char* waveform_mode,
 			    bool        is_flashing);
 
-// Returns true if the device appears to be in a quirky framebuffer state
+// Returns true if the device appears to be in a quirky framebuffer state that *may* require a reinit to produce sane results.
+// NOTE: The intended use-case is for long running apps which may trigger prints across different framebuffer states,
+//       to allow them to call fbink_init again at specific points only (instead of enforcing a reinit on every print).
+//       This is of interest on a few devices, where trying to print based on a "stale" init state would fail,
+//       or produce unwanted results (f.g., rotation).
 // NOTE: Right now, this only checks for the isKobo16Landscape Device Quirk,
 //       because that's the only one that is not permanent (i.e., hardware specific),
 //       but instead software specific (here, because of pickel).
