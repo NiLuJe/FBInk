@@ -1605,6 +1605,8 @@ int
 		//       we attempt to handle this rotation properly, much like KOReader does.
 		//       c.f., https://github.com/koreader/koreader/blob/master/frontend/device/kobo/device.lua#L32-L33
 		//           & https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer.lua#L74-L84
+		// NOTE: See the discussion around p16 of the Plato thread for even more gory details!
+		//       https://www.mobileread.com/forums/showthread.php?t=292914&page=16
 		if (vInfo.bits_per_pixel == 16U) {
 			// Correct screenWidth & screenHeight, so we do all our row/column arithmetics on the right values...
 			screenWidth                    = vInfo.yres;
