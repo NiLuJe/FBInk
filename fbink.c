@@ -1489,8 +1489,8 @@ static const char*
 }
 
 // Get the various fb info & setup global variables
-int
-    fbink_init(int fbfd, const FBInkConfig* fbink_config)
+static int
+    initialize_fbink(int fbfd, const FBInkConfig* fbink_config, bool skip_vinfo)
 {
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
@@ -1552,11 +1552,13 @@ int
 		deviceQuirks.skipId = true;
 	}
 
-	// Get variable screen information
-	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
-		fprintf(stderr, "[FBInk] Error reading variable information.\n");
-		rv = ERRCODE(EXIT_FAILURE);
-		goto cleanup;
+	// Get variable screen information (unless we were asked to skip it, because we've already populated it elsewhere)
+	if (!skip_vinfo) {
+		if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
+			fprintf(stderr, "[FBInk] Error reading variable information.\n");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
 	}
 	ELOG("[FBInk] Variable fb info: %ux%u, %ubpp @ rotation: %u (%s)",
 	     vInfo.xres,
@@ -1961,6 +1963,14 @@ cleanup:
 	}
 
 	return rv;
+}
+
+// And that's how we expose it to the API ;)
+int
+    fbink_init(int fbfd, const FBInkConfig* fbink_config)
+{
+	// Don't skip any ioctls on a first init ;)
+	return initialize_fbink(fbfd, fbink_config, false);
 }
 
 // Dump a few of our internal state variables to stdout, for shell script consumption

@@ -309,6 +309,7 @@ static int refresh(int, const struct mxcfb_rect, uint32_t, bool);
 static int open_fb_fd(int*, bool*);
 
 static const char* fb_rotate_to_string(uint32_t);
+static int         initialize_fbink(int, const FBInkConfig*, bool);
 
 static int memmap_fb(int);
 static int unmap_fb(void);
