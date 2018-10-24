@@ -33,16 +33,18 @@ static bool     is_kindle_device_new(uint32_t, FBInkDeviceQuirks*);
 static uint32_t from_base(char*, uint8_t);
 static void     identify_kindle(FBInkDeviceQuirks*);
 #elif defined(FBINK_FOR_CERVANTES)
+// NOTE: This is NTX's homegrown hardware tagging, c.f., arch/arm/mach-imx/ntx_hwconfig.h in a Kobo kernel, for instance
 #	define HWCONFIG_DEVICE "/dev/mmcblk0"
 #	define HWCONFIG_OFFSET (1024 * 512)
 #	define HWCONFIG_MAGIC "HW CONFIG "
 typedef struct __attribute__((__packed__))
 {
-	char    magic[10];
-	char    version[5];
-	uint8_t size;
-	uint8_t pcb_id;
-} hwconfig;
+	char    magic[10] __attribute__((nonstring));     // HWCONFIG_MAGIC (i.e., "HW CONFIG ")
+	char    version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.0" on Mk7
+	uint8_t len;    // Length (in bytes) of the full payload, header excluded (up to 69 on v3.0)
+	// Header stops here, actual data follows
+	uint8_t pcb_id;    // First field is the PCB ID, which dictates the device model, the only thing we care about ;)
+} NTXHWConfig;
 static void identify_cervantes(FBInkDeviceQuirks*);
 #else
 static void identify_kobo(FBInkDeviceQuirks*);

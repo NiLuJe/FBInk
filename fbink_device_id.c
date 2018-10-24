@@ -209,25 +209,28 @@ static void
 	}
 }
 #elif defined(FBINK_FOR_CERVANTES)
-// read pcb id from HWCONFIG for bq/fnac devices, adapted from OKreader's kobo_hwconfig:
+// Read pcb id from NTX_HWCONFIG for BQ/Fnac devices, adapted from OKreader's kobo_hwconfig:
 // https://github.com/lgeek/okreader/blob/master/src/kobo_hwconfig/kobo_hwconfig.c
 static void
     identify_cervantes(FBInkDeviceQuirks* device_quirks)
 {
 	FILE* fp = fopen(HWCONFIG_DEVICE, "re");
 	if (!fp) {
-		fprintf(stderr, "[FBInk] Couldn't read from %s (not running on a Cervantes?)!\n", HWCONFIG_DEVICE);
+		fprintf(stderr,
+			"[FBInk] Couldn't read from '%s', unable to identify the Cervantes model!\n",
+			HWCONFIG_DEVICE);
 	} else {
-		hwconfig config = { 0 };
+		NTXHWConfig config = { 0 };
 
 		if (fseek(fp, HWCONFIG_OFFSET, SEEK_SET) != 0) {
 			fprintf(stderr,
-				"[FBInk] Failed to seek to position 0x%p in %s\n",
+				"[FBInk] Failed to seek to position 0x%p in '%s'!\n",
 				(void*) HWCONFIG_OFFSET,
 				HWCONFIG_DEVICE);
 		} else {
 			if (fread(&config, sizeof(config), 1, fp) != 1) {
-				fprintf(stderr, "[FBInk] Failed to read the HWCONFIG entry in %s\n", HWCONFIG_DEVICE);
+				fprintf(
+				    stderr, "[FBInk] Failed to read the NTX HWConfig entry on '%s'!\n", HWCONFIG_DEVICE);
 				fclose(fp);
 				return;
 			}
@@ -236,7 +239,7 @@ static void
 
 		if (strncmp(config.magic, HWCONFIG_MAGIC, strlen(HWCONFIG_MAGIC)) != 0) {
 			fprintf(stderr,
-				"[FBInk] Input file %s does not appear to contain a HWCONFIG entry\n",
+				"[FBInk] Input device '%s' does not appear to contain an NTX HWConfig entry!\n",
 				HWCONFIG_DEVICE);
 			return;
 		}
@@ -253,7 +256,7 @@ static void
 				device_quirks->isCervantesNew = true;
 				break;
 			default:
-				fprintf(stderr, "[FBInk] Unidentified Cervantes device (%d)!\n", config.pcb_id);
+				fprintf(stderr, "[FBInk] Unidentified Cervantes device (%hhu)!\n", config.pcb_id);
 				break;
 		}
 	}
