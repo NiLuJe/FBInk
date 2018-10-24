@@ -155,8 +155,9 @@ static void
 #ifndef FBINK_FOR_KINDLE
 // Handle rotation quirks...
 static void
-    rotate_coordinates(FBInkCoordinates* coords)
+    rotate_coordinates_pickel(FBInkCoordinates* coords)
 {
+	// Rotate the coordinates to account for pickel's rotation...
 	unsigned short int rx = coords->y;
 	unsigned short int ry = (unsigned short int) (screenWidth - coords->x - 1);
 
@@ -207,6 +208,17 @@ static void
 	coords->x = rx;
 	coords->y = ry;
 #	endif
+}
+
+static void
+    rotate_coordinates_boot(FBInkCoordinates* coords)
+{
+	// Rotate the coordinates to account for the native boot rotation...
+	unsigned short int rx = (unsigned short int) (screenHeight - coords->y - 1);
+	unsigned short int ry = coords->x;
+
+	coords->x = rx;
+	coords->y = ry;
 }
 #endif    // !FBINK_FOR_KINDLE
 
@@ -1574,6 +1586,7 @@ static int
 
 	// NOTE: This needs to be NOP by default, no matter the target device ;).
 	fxpRotateCoords = &rotate_nop;
+	fxpRotateRegion = &rotate_region_nop;
 #ifndef FBINK_FOR_KINDLE
 	// Make sure we default to no rotation shenanigans, to avoid issues on reinit...
 	deviceQuirks.isKobo16Landscape = false;
@@ -1614,12 +1627,27 @@ static int
 			screenWidth                    = vInfo.yres;
 			screenHeight                   = vInfo.xres;
 			deviceQuirks.isKobo16Landscape = true;
-			fxpRotateCoords                = &rotate_coordinates;
-			ELOG("[FBInk] Enabled Kobo @ 16bpp fb rotation quirks (%ux%u -> %ux%u)",
-			     vInfo.xres,
-			     vInfo.yres,
-			     screenWidth,
-			     screenHeight);
+			// NOTE: Here be dragons! I'm going out on a limb here,
+			//       assuming that rotation 0 on 16bpp fbs *always* means it's the boot/native rotation,
+			//       and that otherwise it's the pickel rotation.
+			//       It holds true on my H2O, but that might not be the case everywhere...
+			if (vInfo.rotate == FB_ROTATE_UR) {
+				fxpRotateCoords = &rotate_coordinates_boot;
+				fxpRotateRegion = &rotate_region_boot;
+				ELOG("[FBInk] Enabled Kobo @ 16bpp boot rotation quirks (%ux%u -> %ux%u)",
+				     vInfo.xres,
+				     vInfo.yres,
+				     screenWidth,
+				     screenHeight);
+			} else {
+				fxpRotateCoords = &rotate_coordinates_pickel;
+				fxpRotateRegion = &rotate_region_pickel;
+				ELOG("[FBInk] Enabled Kobo @ 16bpp pickel rotation quirks (%ux%u -> %ux%u)",
+				     vInfo.xres,
+				     vInfo.yres,
+				     screenWidth,
+				     screenHeight);
+			}
 		}
 	}
 
@@ -2100,16 +2128,36 @@ int
 }
 
 // Much like rotate_coordinates, but for a mxcfb rectangle
+#ifndef FBINK_FOR_KINDLE
 static void
-    rotate_region(struct mxcfb_rect* region)
+    rotate_region_pickel(struct mxcfb_rect* region)
 {
-	// Rotate the region if need be...
+	// Rotate the region to account for pickel's rotation...
 	struct mxcfb_rect oregion = *region;
 	// NOTE: left = x, top = y
 	region->top    = screenWidth - oregion.left - oregion.width;
 	region->left   = oregion.top;
 	region->width  = oregion.height;
 	region->height = oregion.width;
+}
+
+static void
+    rotate_region_boot(struct mxcfb_rect* region)
+{
+	// Rotate the region to account for the native boot rotation...
+	struct mxcfb_rect oregion = *region;
+	// NOTE: left = x, top = y
+	region->top    = oregion.left;
+	region->left   = screenHeight - oregion.top - oregion.height;
+	region->width  = oregion.height;
+	region->height = oregion.width;
+}
+#endif    // !FBINK_FOR_KINDLE
+
+static void
+    rotate_region_nop(struct mxcfb_rect* region __attribute__((unused)))
+{
+	// NOP! See rotate_nop for the rationale ;)
 }
 
 // Tweak the region to cover the full screen
@@ -2457,9 +2505,7 @@ int
 	}
 
 	// Rotate the region if need be...
-	if (deviceQuirks.isKobo16Landscape) {
-		rotate_region(&region);
-	}
+	(*fxpRotateRegion)(&region);
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
 	if (fbink_config->is_cleared) {
@@ -2912,9 +2958,7 @@ int
 	}
 
 	// Rotate the region if need be...
-	if (deviceQuirks.isKobo16Landscape) {
-		rotate_region(&region);
-	}
+	(*fxpRotateRegion)(&region);
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
 	if (fbink_config->is_cleared) {
@@ -3829,9 +3873,7 @@ static int
 	}
 
 	// Rotate the region if need be...
-	if (deviceQuirks.isKobo16Landscape) {
-		rotate_region(&region);
-	}
+	(*fxpRotateRegion)(&region);
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
 	if (fbink_config->is_cleared) {

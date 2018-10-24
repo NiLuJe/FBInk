@@ -268,7 +268,7 @@ FBINK_API int fbink_refresh(int         fbfd,
 FBINK_API bool fbink_is_fb_quirky(void);
 
 // Attempt to detect changes in framebuffer states, doing a reinit (i.e., calling fbink_init again) if needed,
-// diung the least amount of work possible in the process.
+// doing the least amount of work possible in the process.
 // Returns -(ENOSYS) on Kindle, where this is not needed
 FBINK_API int fbink_reinit(int fbfd, const FBInkConfig* fbink_config);
 

@@ -458,7 +458,7 @@ int
 		LOG("Matched on a %hux%hu button! :)", button_width, button_height);
 
 		// The touch panel has a fixed origin that differs from the framebuffer's... >_<".
-		rotate_coordinates(&match_coords);
+		rotate_coordinates_pickel(&match_coords);
 		ELOG("x=%hu, y=%hu", match_coords.x, match_coords.y);
 
 		// NOTE: The H2O²r1 is a special snowflake, input is rotated 90° in the *other* direction

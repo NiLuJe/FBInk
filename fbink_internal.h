@@ -239,8 +239,9 @@ long int USER_HZ = 100;
 // Pointers to the appropriate put_pixel/get_pixel functions for the fb's bpp
 void (*fxpPutPixel)(FBInkCoordinates*, FBInkColor*) = NULL;
 void (*fxpGetPixel)(FBInkCoordinates*, FBInkColor*) = NULL;
-// As well as the appropriate coordinates rotation function...
-void (*fxpRotateCoords)(FBInkCoordinates*) = NULL;
+// As well as the appropriate coordinates rotation functions...
+void (*fxpRotateCoords)(FBInkCoordinates*)  = NULL;
+void (*fxpRotateRegion)(struct mxcfb_rect*) = NULL;
 // And the font bitmap getter...
 const unsigned char* (*fxpFont8xGetBitmap)(uint32_t) = NULL;
 #ifdef FBINK_WITH_FONTS
@@ -253,7 +254,8 @@ const uint32_t* (*fxpFont32xGetBitmap)(uint32_t) = NULL;
 FBInkDeviceQuirks deviceQuirks = { 0 };
 
 #ifndef FBINK_FOR_KINDLE
-static void rotate_coordinates(FBInkCoordinates*);
+static void rotate_coordinates_pickel(FBInkCoordinates*);
+static void rotate_coordinates_boot(FBInkCoordinates*);
 #endif
 static void rotate_nop(FBInkCoordinates* __attribute__((unused)));
 
@@ -314,7 +316,11 @@ static int         initialize_fbink(int, const FBInkConfig*, bool);
 static int memmap_fb(int);
 static int unmap_fb(void);
 
-static void rotate_region(struct mxcfb_rect*);
+#ifndef FBINK_FOR_KINDLE
+static void rotate_region_pickel(struct mxcfb_rect*);
+static void rotate_region_boot(struct mxcfb_rect*);
+#endif
+static void rotate_region_nop(struct mxcfb_rect*);
 static void fullscreen_region(struct mxcfb_rect*);
 
 int draw_progress_bars(int, bool, uint8_t, const FBInkConfig*);
