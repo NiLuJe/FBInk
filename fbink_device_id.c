@@ -237,7 +237,10 @@ static void
 		}
 		fclose(fp);
 
-		if (strncmp(config.magic, HWCONFIG_MAGIC, strlen(HWCONFIG_MAGIC)) != 0) {
+		// NOTE: These are NOT NULL-terminated, so we use the size of the storage array,
+		//       and not of the string literal (where sizeof would have appended space for a terminating NULL).
+		//       (i.e., here, sizeof(config.magic) == 10 == strlen(HWCONFIG_MAGIC) while sizeof(HWCONFIG_MAGIC) == 11)
+		if (memcmp(config.magic, HWCONFIG_MAGIC, sizeof(config.magic)) != 0) {
 			fprintf(stderr,
 				"[FBInk] Input device '%s' does not appear to contain an NTX HWConfig entry!\n",
 				HWCONFIG_DEVICE);
