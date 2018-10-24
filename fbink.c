@@ -1555,7 +1555,7 @@ static int
 	// Get variable screen information (unless we were asked to skip it, because we've already populated it elsewhere)
 	if (!skip_vinfo) {
 		if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
-			fprintf(stderr, "[FBInk] Error reading variable information.\n");
+			fprintf(stderr, "[FBInk] Error reading variable fb information.\n");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
@@ -1874,7 +1874,7 @@ static int
 
 	// Get fixed screen information
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &fInfo)) {
-		fprintf(stderr, "[FBInk] Error reading fixed information.\n");
+		fprintf(stderr, "[FBInk] Error reading fixed fb information.\n");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -2647,6 +2647,71 @@ bool
 {
 	// NOTE: For now, that's easy enough, we only have one ;).
 	return deviceQuirks.isKobo16Landscape;
+}
+
+// Reinitialize FBInk in case the framebuffer state has changed
+int
+    fbink_reinit(int fbfd, const FBInkConfig* fbink_config)
+{
+#ifndef FBINK_FOR_KINDLE
+	// Open the framebuffer if need be...
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// NOTE: Okay, currently,
+	//       we're aiming to handle the various states the Kobo framebuffer will be in throughout the boot process.
+	//       c.f., https://www.mobileread.com/forums/showpost.php?p=3764776&postcount=229 for more details
+
+	// First step is checking if the device was in a 16bpp mode the last time we ran initialize_fbink...
+	if (deviceQuirks.isKobo16Landscape) {
+		// Okay, so, store the previous bitdepth & rotation, and check if that changed...
+		uint32_t old_bpp  = vInfo.bits_per_pixel;
+		uint32_t old_rota = vInfo.rotate;
+		// NOTE: Given the fact that we're behind an isKobo16Landscape branch, old_bpp should *always* be 16...
+
+		// We evidently need to query the current state in order to do that...
+		if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
+			fprintf(stderr, "[FBInk] Error reading variable fb information.\n");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+
+		// And do the dance to detect the three states we care about...
+		if (old_bpp == 16 && vInfo.bits_per_pixel == 32) {
+			// NOTE: If we switched from 16bpp to 32bpp,
+			//       Nickel has finished setting up the fb to its liking, we need to reinit!
+			// It's a reinit, so ask to skip the vinfo ioctl we just did
+			ELOG("[FBInk] Detected a change in framebuffer bitdepth, reinitializing...");
+			rv = initialize_fbink(fbfd, fbink_config, true);
+		} else if ((old_bpp == 16 && vInfo.bits_per_pixel == 16) && (old_rota != vInfo.rotate)) {
+			// NOTE: If we're still in 16bpp, but the rotation changed,
+			//       pickel has been used to show something (most likely the "three dots" progress bar),
+			//       and we're no longer in the native rotation, we need to reinit!
+			// It's a reinit, so ask to skip the vinfo ioctl we just did
+			ELOG("[FBInk] Detected a change in framebuffer rotation, reinitializing...");
+			rv = initialize_fbink(fbfd, fbink_config, true);
+		}
+	}
+
+	// And we're done, that's all we care about for now :).
+	// We keep silent when we do nothing, to avoid flooding logs (mainly, KFMon's ;)).
+
+cleanup:
+	if (!keep_fd) {
+		close(fbfd);
+	}
+
+	return rv;
+#else
+	// NOTE: I currently haven't found the need for any shenanigans like that on Kindle, so, make this a NOP there ;)
+	fprintf(stderr, "[FBInk] Reinitilization is not needed on Kindle devices :)\n");
+	return ERRCODE(ENOSYS);
+#endif
 }
 
 // Handle drawing both types of progress bars

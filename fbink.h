@@ -267,6 +267,11 @@ FBINK_API int fbink_refresh(int         fbfd,
 //       In practical terms, this means the Kobo's fb is in 16bpp mode, with its origin in the top-right corner (i.e., Landscape).
 FBINK_API bool fbink_is_fb_quirky(void);
 
+// Attempt to detect changes in framebuffer states, doing a reinit (i.e., calling fbink_init again) if needed,
+// diung the least amount of work possible in the process.
+// Returns -(ENOSYS) on Kindle, where this is not needed
+FBINK_API int fbink_reinit(int fbfd, const FBInkConfig* fbink_config);
+
 // Print a full-width progress bar on screen
 // fdfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
