@@ -1880,6 +1880,10 @@ int
 	     fInfo.id,
 	     fInfo.smem_len,
 	     fInfo.line_length);
+	// NOTE: On a reinit, we're trusting that smem_len will *NOT* have changed,
+	//       which thankfully appears to hold true on our target devices.
+	//       Otherwise, we'd probably have to compare the previous smem_len to the new, and to
+	//       mremap fbPtr if isFbMapped in case they differ (and the old smem_len != 0, which would indicate a first init).
 
 	// Use the appropriate get/put pixel functions...
 	switch (vInfo.bits_per_pixel) {
