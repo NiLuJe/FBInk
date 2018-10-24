@@ -1631,6 +1631,7 @@ static int
 			//       assuming that rotation 0 on 16bpp fbs *always* means it's the boot/native rotation,
 			//       and that otherwise it's the pickel rotation.
 			//       It holds true on my H2O, but that might not be the case everywhere...
+			//       Especially since Nickel's rotation definitely isn't the same on Mk6+ devices... -_-"
 			if (vInfo.rotate == FB_ROTATE_UR) {
 				fxpRotateCoords = &rotate_coordinates_boot;
 				fxpRotateRegion = &rotate_region_boot;
