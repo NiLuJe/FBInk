@@ -289,9 +289,9 @@ static void
 			// NOTE: Shaky assumption that almost everything follows the same rotation scheme, with:
 			//       Boot rotation is FB_ROTATE_UD, pickel is FB_ROTATE_UR, nickel is FB_ROTATE_CCW
 			//       With the exception of the Aura HD and the H2O.
-			//       As usual, the H2O² is a mystery, the Rev 2 *may* follow this pattern too,
-			//       but that would make it diverge from other Mk7, which is weird.
-			//       c.f., the relevant bit of fbink_init...
+			//       As usual, the H2O² is a mystery, the Rev 1 *may* follow this pattern too...
+			//       Or that might be the Rev 2 only, but that would make it diverge from other Mk7, which is weirder.
+			//       c.f., the relevant bit of fbink_init for more details...
 			device_quirks->koboBootRota = FB_ROTATE_UD;
 			// NOTE: Device code list pilfered from
 			//       https://github.com/geek1011/KoboStuff/blob/gh-pages/kobofirmware.js#L11
