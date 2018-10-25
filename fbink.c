@@ -1639,8 +1639,10 @@ static int
 		//       https://www.mobileread.com/forums/showthread.php?t=292914&page=16
 		if (vInfo.bits_per_pixel == 16U) {
 			// Correct screenWidth & screenHeight, so we do all our row/column arithmetics on the right values...
+			/*
 			screenWidth                    = vInfo.yres;
 			screenHeight                   = vInfo.xres;
+			*/
 			deviceQuirks.isKobo16Landscape = true;
 			// NOTE: Here be dragons!
 			//       I'm assuming that most devices follow the same pattern as far as rotation is concerned,
