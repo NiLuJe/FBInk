@@ -225,7 +225,7 @@ static void
 #endif    // !FBINK_FOR_KINDLE
 
 static void
-    rotate_nop(FBInkCoordinates* coords __attribute__((unused)))
+    rotate_coordinates_nop(FBInkCoordinates* coords __attribute__((unused)))
 {
 	// NOP!
 	// May be smarter than one might think on armv7-a,
@@ -1587,7 +1587,7 @@ static int
 	screenHeight = vInfo.yres;
 
 	// NOTE: This needs to be NOP by default, no matter the target device ;).
-	fxpRotateCoords = &rotate_nop;
+	fxpRotateCoords = &rotate_coordinates_nop;
 	fxpRotateRegion = &rotate_region_nop;
 #ifndef FBINK_FOR_KINDLE
 	// Make sure we default to no rotation shenanigans, to avoid issues on reinit...
@@ -2171,7 +2171,7 @@ static void
 static void
     rotate_region_nop(struct mxcfb_rect* region __attribute__((unused)))
 {
-	// NOP! See rotate_nop for the rationale ;)
+	// NOP! See rotate_coordinates_nop for the rationale ;)
 }
 
 // Tweak the region to cover the full screen

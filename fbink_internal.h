@@ -259,7 +259,7 @@ FBInkDeviceQuirks deviceQuirks = { 0 };
 static void rotate_coordinates_pickel(FBInkCoordinates*);
 static void rotate_coordinates_boot(FBInkCoordinates*);
 #endif
-static void rotate_nop(FBInkCoordinates* __attribute__((unused)));
+static void rotate_coordinates_nop(FBInkCoordinates* __attribute__((unused)));
 
 static void put_pixel_Gray4(FBInkCoordinates*, FBInkColor*);
 static void put_pixel_Gray8(FBInkCoordinates*, FBInkColor*);
