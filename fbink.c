@@ -1636,6 +1636,14 @@ static int
 			//       - possibly the pickel values on other devices...
 			//       Yay?
 			if (vInfo.rotate == deviceQuirks.koboBootRota) {
+				// NOTE: Fun fact: on my H2O, the initial boot rotation appears to be even weirder...
+				//       This rotation shenanigan was tested by running pickel, then rotating the fb via sysfs,
+				//       until I got something that matched what I get during KFMon's boot process.
+				//       And yet, while this rotates stuff properly in my tests, during boot, y is wrong:
+				//       with row set to -5,
+				//       the message is printed near the top of the screen instead of near the bottom...
+				//       On the plus side, it's no longer upside down and RTL, so, progress!
+				//       >_<".
 				fxpRotateCoords = &rotate_coordinates_boot;
 				fxpRotateRegion = &rotate_region_boot;
 				ELOG("[FBInk] Enabled Kobo @ 16bpp boot rotation quirks (%ux%u -> %ux%u)",
