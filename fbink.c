@@ -214,6 +214,8 @@ static void
     rotate_coordinates_boot(FBInkCoordinates* coords)
 {
 	// Rotate the coordinates to account for the native boot rotation...
+	// NOTE: See the note is fbink_init, this is based on a replicated boot modeset,
+	//       which apparently doesn't exactly match the *real* boot modeset... -_-".
 	unsigned short int rx = (unsigned short int) (screenHeight - coords->y - 1);
 	unsigned short int ry = coords->x;
 
