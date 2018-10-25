@@ -2728,6 +2728,11 @@ int
     fbink_reinit(int fbfd UNUSED_BY_KINDLE, const FBInkConfig* fbink_config UNUSED_BY_KINDLE)
 {
 #ifndef FBINK_FOR_KINDLE
+	// NOTE: Don't even try to open/close the fb if we don't have anything to do ;)
+	if (!deviceQuirks.isKobo16Landscape) {
+		return EXIT_SUCCESS;
+	}
+
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
 	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
