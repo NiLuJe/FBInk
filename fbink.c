@@ -451,11 +451,24 @@ static void
 		//       Do a slightly more targeted memset instead (line_length * yres_virtual),
 		//       which should cover the active & visible buffer only...
 		memset(fbPtr, v, fInfo.line_length * vInfo.yres_virtual);
-		// And get out now, we don't want to pile another full memset on top of that ;).
-		return;
+	} else {
+		memset(fbPtr, v, fInfo.smem_len);
+	}
+#else
+	// NOTE: Apparently, some NTX devices do not appreciate a memset of the full smem_len when they're in a 16bpp mode...
+	//       It's a bitdepth where we know smem_len is much larger (exactly twice) than it strictly should be, to begin with,
+	//       which is nice for us, because it matches what it should be (and still is) in a 32bpp mode,
+	//       which means we don't ever have to worry about remapping it.
+	//       Anyway, I can't seem to have this do anything untoward on my H2O when it's in a 16bpp mode,
+	//       but apparently it softlocks (some?) BQ/Cervantes devices, so take the same approach as on einkfb...
+	if (vInfo.bits_per_pixel == 16) {
+		memset(fbPtr, v, fInfo.line_length * vInfo.yres_virtual);
+	} else {
+		// NOTE: fInfo.smem_len should actually match fInfo.line_length * vInfo.yres_virtual on 32bpp ;).
+		//       Which is how things should always be, but, alas, poor Yorick...
+		memset(fbPtr, v, fInfo.smem_len);
 	}
 #endif
-	memset(fbPtr, v, fInfo.smem_len);
 }
 
 // Return the font8x8 bitmap for a specific Unicode codepoint
@@ -1159,19 +1172,19 @@ static int
 #elif defined(FBINK_FOR_CERVANTES)
 // Legacy Cervantes devices (2013)
 static int
-    refresh_cervantes(int                     fbfd,
+    refresh_cervantes(int fbfd,
 		      const struct mxcfb_rect region,
-		      uint32_t                waveform_mode,
-		      uint32_t                update_mode,
-		      uint32_t                marker)
+		      uint32_t waveform_mode,
+		      uint32_t update_mode,
+		      uint32_t marker)
 {
 	struct mxcfb_update_data update = {
 		.update_region = region,
 		.waveform_mode = waveform_mode,
-		.update_mode   = update_mode,
+		.update_mode = update_mode,
 		.update_marker = marker,
-		.temp          = TEMP_USE_AMBIENT,
-		.flags         = (waveform_mode == WAVEFORM_MODE_REAGLD)
+		.temp = TEMP_USE_AMBIENT,
+		.flags = (waveform_mode == WAVEFORM_MODE_REAGLD)
 			     ? EPDC_FLAG_USE_AAD
 			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
 		.alt_buffer_data = { 0U },
@@ -1181,7 +1194,7 @@ static int
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
 
 	if (rv < 0) {
-		char  buf[256];
+		char buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
 		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE: %s\n", errstr);
 		if (errno == EINVAL) {
@@ -1199,7 +1212,7 @@ static int
 		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &marker);
 
 		if (rv < 0) {
-			char  buf[256];
+			char buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
 			fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s\n", errstr);
 			return ERRCODE(EXIT_FAILURE);
@@ -1214,23 +1227,23 @@ static int
 
 // New cervantes devices (2013+)
 static int
-    refresh_cervantes_new(int                     fbfd,
+    refresh_cervantes_new(int fbfd,
 			  const struct mxcfb_rect region,
-			  uint32_t                waveform_mode,
-			  uint32_t                update_mode,
-			  uint32_t                marker)
+			  uint32_t waveform_mode,
+			  uint32_t update_mode,
+			  uint32_t marker)
 {
 	struct mxcfb_update_data_org update = {
 		.update_region = region,
 		.waveform_mode = waveform_mode,
-		.update_mode   = update_mode,
+		.update_mode = update_mode,
 		.update_marker = marker,
-		.temp          = TEMP_USE_AMBIENT,
-		.flags         = (waveform_mode == WAVEFORM_MODE_GLD16)
+		.temp = TEMP_USE_AMBIENT,
+		.flags = (waveform_mode == WAVEFORM_MODE_GLD16)
 			     ? EPDC_FLAG_USE_REGAL
 			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
-		.dither_mode     = EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
-		.quant_bit       = 0,
+		.dither_mode = EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		.quant_bit = 0,
 		.alt_buffer_data = { 0U },
 	};
 
@@ -1238,7 +1251,7 @@ static int
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
 
 	if (rv < 0) {
-		char  buf[256];
+		char buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
 		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE: %s\n", errstr);
 		if (errno == EINVAL) {
@@ -1254,14 +1267,14 @@ static int
 
 	if (update_mode == UPDATE_MODE_FULL) {
 		struct mxcfb_update_marker_data update_marker = {
-			.update_marker  = marker,
+			.update_marker = marker,
 			.collision_test = 0U,
 		};
 
 		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE2, &update_marker);
 
 		if (rv < 0) {
-			char  buf[256];
+			char buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
 			fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3: %s\n", errstr);
 			return ERRCODE(EXIT_FAILURE);
@@ -1693,9 +1706,9 @@ static int
 	}
 #else
 	// Kindle devices are generally never broken-by-design (at least not on that front ;))
-	viewWidth      = screenWidth;
+	viewWidth = screenWidth;
 	viewHoriOrigin = 0U;
-	viewHeight     = screenHeight;
+	viewHeight = screenHeight;
 	viewVertOrigin = 0U;
 #endif
 
@@ -1805,8 +1818,8 @@ static int
 	}
 #else
 	// Default font is IBM
-	glyphWidth         = 8U;
-	glyphHeight        = 8U;
+	glyphWidth = 8U;
+	glyphHeight = 8U;
 	fxpFont8xGetBitmap = &font8x8_get_bitmap;
 
 	if (fbink_config->fontname != IBM) {
@@ -2084,6 +2097,7 @@ static int
 	//       TL;DR: On 16bpp fbs, it *might* be a bit larger than strictly necessary,
 	//              but I've yet to see that be an issue with what I'm doing,
 	//              and trusting it is much simpler than trying to outsmart broken fb setup info...
+	//       See also the Cervantes quirk documented in clear_screen...
 	fbPtr = (unsigned char*) mmap(NULL, fInfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
 	if (fbPtr == MAP_FAILED) {
 		char  buf[256];
