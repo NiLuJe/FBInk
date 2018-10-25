@@ -176,8 +176,10 @@
 #endif
 #ifndef FBINK_FOR_KINDLE
 #	define UNUSED_BY_NOTKINDLE __attribute__((unused))
+#	define UNUSED_BY_KINDLE
 #else
 #	define UNUSED_BY_NOTKINDLE
+#	define UNUSED_BY_KINDLE __attribute__((unused))
 #endif
 
 // Handle what we send to stdout (i.e., mostly diagnostic stuff)

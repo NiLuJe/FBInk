@@ -2701,7 +2701,7 @@ bool
 
 // Reinitialize FBInk in case the framebuffer state has changed
 int
-    fbink_reinit(int fbfd, const FBInkConfig* fbink_config)
+    fbink_reinit(int fbfd UNUSED_BY_KINDLE, const FBInkConfig* fbink_config UNUSED_BY_KINDLE)
 {
 #ifndef FBINK_FOR_KINDLE
 	// Open the framebuffer if need be...
@@ -2761,7 +2761,7 @@ cleanup:
 	// NOTE: I currently haven't found the need for any shenanigans like that on Kindle, so, make this a NOP there ;)
 	fprintf(stderr, "[FBInk] Reinitilization is not needed on Kindle devices :)\n");
 	return ERRCODE(ENOSYS);
-#endif
+#endif    // !FBINK_FOR_KINDLE
 }
 
 // Handle drawing both types of progress bars
