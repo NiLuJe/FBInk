@@ -1627,12 +1627,15 @@ static int
 			screenWidth                    = vInfo.yres;
 			screenHeight                   = vInfo.xres;
 			deviceQuirks.isKobo16Landscape = true;
-			// NOTE: Here be dragons! I'm going out on a limb here,
-			//       assuming that rotation 0 on 16bpp fbs *always* means it's the boot/native rotation,
-			//       and that otherwise it's the pickel rotation.
-			//       It holds true on my H2O, but that might not be the case everywhere...
-			//       Especially since Nickel's rotation definitely isn't the same on Mk6+ devices... -_-"
-			if (vInfo.rotate == FB_ROTATE_UR) {
+			// NOTE: Here be dragons!
+			//       I'm assuming that most devices follow the same pattern as far as rotation is concerned,
+			//       with a few exceptions hardcoded (c.f., identify_kobo in fbink_device_id.c).
+			//       Right now, the only values I'm confident about are:
+			//       - the ones on the H2O, because I've got one ;).
+			//       - the nickel values on other devices.
+			//       - possibly the pickel values on other devices...
+			//       Yay?
+			if (vInfo.rotate == deviceQuirks.koboBootRota) {
 				fxpRotateCoords = &rotate_coordinates_boot;
 				fxpRotateRegion = &rotate_region_boot;
 				ELOG("[FBInk] Enabled Kobo @ 16bpp boot rotation quirks (%ux%u -> %ux%u)",

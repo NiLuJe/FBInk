@@ -286,6 +286,13 @@ static void
 			// final characters, so that's easy enough to extract without
 			// having to worry about the formatting...
 			kobo_id = (unsigned short int) strtoul(line + (nread - 3), NULL, 10);
+			// NOTE: Shaky assumption that almost everything follows the same rotation scheme, with:
+			//       Boot rotation is FB_ROTATE_UD, pickel is FB_ROTATE_UR, nickel is FB_ROTATE_CCW
+			//       With the exception of the Aura HD and the H2O.
+			//       As usual, the H2O² is a mystery, the Rev 2 *may* follow this pattern too,
+			//       but that would make it diverge from other Mk7, which is weird.
+			//       c.f., the relevant bit of fbink_init...
+			device_quirks->koboBootRota = FB_ROTATE_UD;
 			// NOTE: Device code list pilfered from
 			//       https://github.com/geek1011/KoboStuff/blob/gh-pages/kobofirmware.js#L11
 			switch (kobo_id) {
@@ -304,10 +311,14 @@ static void
 					break;
 				case 350:    // Aura HD (dragon)
 					device_quirks->isKoboNonMT = true;
+					// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
+					device_quirks->koboBootRota = FB_ROTATE_UR;
 					break;
 				case 370:    // Aura H2O (dahlia)
 					// NOTE: The top 11 pixels are blacked out by Nickel (behind the bezel)
 					device_quirks->koboVertOffset = 11;
+					// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
+					device_quirks->koboBootRota = FB_ROTATE_UR;
 					break;
 				case 374:    // Aura H2O² (snow)
 					break;

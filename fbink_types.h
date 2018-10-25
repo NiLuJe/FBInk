@@ -27,16 +27,17 @@
 // List of flags for device or screen-specific quirks...
 typedef struct
 {
-	bool   isPerfectFit;
-	bool   isKindleLegacy;
-	bool   isKindlePearlScreen;
-	bool   isKindleOasis2;
-	bool   isKoboNonMT;
-	bool   isKobo16Landscape;
-	bool   isKoboMk7;
-	bool   isCervantesNew;
-	int8_t koboVertOffset;
-	bool   skipId;
+	bool    isPerfectFit;
+	bool    isKindleLegacy;
+	bool    isKindlePearlScreen;
+	bool    isKindleOasis2;
+	bool    isKoboNonMT;
+	bool    isKobo16Landscape;
+	bool    isKoboMk7;
+	int8_t  koboVertOffset;
+	uint8_t koboBootRota;
+	bool    isCervantesNew;
+	bool    skipId;
 } FBInkDeviceQuirks;
 
 // An (x, y) coordinates tuple
