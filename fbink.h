@@ -268,13 +268,13 @@ FBINK_API int fbink_refresh(int         fbfd,
 // NOTE: Deprecated in favor of fbink_reinit ;).
 FBINK_API bool fbink_is_fb_quirky(void) __attribute__((deprecated));
 
-// Attempt to detect changes in framebuffer states, doing a reinit (i.e., calling fbink_init again) if needed,
-// while doing the least amount of work possible in the process.
+// Attempt to detect changes in framebuffer states (between this call and the last time fbink_init/fbink_reinit was called),
+// doing a reinit (i.e., calling fbink_init again) if needed, while doing the least amount of work possible in the process.
 // NOTE: The intended use-case is for long running apps which may trigger prints across different framebuffer states,
 //       to allow them to ensure they'll be using up-to-date init data at key points in their lifecycle
-//       (without needing to bruteforce a reinit on every print).
-//       This is of interest on a few devices, where trying to print based on a "stale" init state would fail,
-//       or produce unwanted results (f.g., after a bitdepth change or a hw rotation).
+//       (without needing to bruteforce a full reinit on every print).
+//       This is of interest on a few devices, where trying to print based on a "stale" init state would at worst fail,
+//       at best produce unwanted results (f.g., after a bitdepth change or a hw rotation).
 // NOTE: This obviously supercedes fbink_is_fb_quirky, because it should be smarter,
 //       by catching more scenarios where a reinit would be useful,
 //       and it can avoid running the same ioctl twice when an ioctl already done by init is needed to detect a state change.
