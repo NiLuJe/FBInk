@@ -2538,9 +2538,7 @@ int
 	(*fxpRotateRegion)(&region);
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
-	if (fbink_config->is_cleared) {
-		fullscreen_region(&region);
-	}
+	fullscreen_region(&region);
 
 	// Refresh screen
 	if (refresh(fbfd, region, WAVEFORM_MODE_AUTO, fbink_config->is_flashing) != EXIT_SUCCESS) {
@@ -2996,9 +2994,7 @@ int
 	(*fxpRotateRegion)(&region);
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
-	if (fbink_config->is_cleared) {
-		fullscreen_region(&region);
-	}
+	fullscreen_region(&region);
 
 	// And finally, refresh the screen
 	// NOTE: FWIW, using A2 basically ends up drawing the border black, and the empty white, which kinda works...
@@ -3911,9 +3907,7 @@ static int
 	(*fxpRotateRegion)(&region);
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
-	if (fbink_config->is_cleared) {
-		fullscreen_region(&region);
-	}
+	fullscreen_region(&region);
 
 	// Refresh screen
 	if (refresh(fbfd, region, WAVEFORM_MODE_GC16, fbink_config->is_flashing) != EXIT_SUCCESS) {
