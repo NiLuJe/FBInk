@@ -2061,6 +2061,7 @@ int
 	if (!stbtt_InitFont(&otFontInfo, font_data, 0)) {
 		rv = ERRCODE(EXIT_FAILURE);
 	}
+	otInit = true;
 	return rv;
 #else
 	fprintf(stderr, "[FBInk] Opentype support is disabled in this FBInk build!\n");
@@ -2641,6 +2642,12 @@ int
 		//Note, we do a lot of casting floats to ints, so silence those GCC warnings
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wfloat-conversion"
+
+	// Has fbink_init_ot() been called yet?
+	if (!otInit) {
+		return ERRCODE(ENODATA);
+	}
+
 	// If we open a fd now, we'll only keep it open for this single print call!
 	// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
 	bool keep_fd = true;

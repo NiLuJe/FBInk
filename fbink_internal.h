@@ -263,6 +263,7 @@ const uint32_t* (*fxpFont32xGetBitmap)(uint32_t) = NULL;
 FBInkDeviceQuirks deviceQuirks = { 0 };
 
 // Information about the currently loaded OpenType font
+bool otInit = false;
 stbtt_fontinfo otFontInfo = { 0 };
 
 #ifndef FBINK_FOR_KINDLE

@@ -260,6 +260,7 @@ FBINK_API int fbink_printf(int fbfd, const FBInkConfig* fbink_config, const char
 // positioning and setting the printable area.
 // Returns -(ERANGE) if the provided margins are out of range, or sum to < 100%
 // Returns -(ENOSYS) if compiled with MINIMAL
+// Returns -(ENODAT) if fbink_init_ot() hasn't yet been called.
 // fbfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // string:		UTF-8 encoded string to print
