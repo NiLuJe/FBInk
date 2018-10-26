@@ -2819,10 +2819,16 @@ int
 			gw = x1 - x0;
 			printf("BMGW: %d\n", gw);
 			gh = y1 - y0;
-			ins_point.x = curr_point.x + (int)roundf(lsb * sf);
+			ins_point.x = curr_point.x + x0;
 			ins_point.y += y0;
 			lw = ins_point.x + gw;
-			stbtt_MakeCodepointBitmap(&otFontInfo, glyph_buff, gw, gh, 0, sf, sf, c);
+			// Because the stbtt_MakeCodepointBitmap documentation is a bit vague on this
+			// point, the parameter 'out_stride' should be the width of the surface in our
+			// buffer. It's designed so that the glyph can be rendered directly to a screen buffer.
+			// For example, if we were rendering directly to a screen of 1080 x 1440m out_stride
+			// should be set to 1080. In this case however, we want to render to a 'box' of the
+			// dimensions of the glyph, so we set 'out_stride' to the glyph width.
+			stbtt_MakeCodepointBitmap(&otFontInfo, glyph_buff, gw, gh, gw, sf, sf, c);
 			// paint our glyph into the line buffer
 			unsigned char* lnPtr = line_buff + ins_point.x + (max_lw * ins_point.y);
 			unsigned char* glPtr = glyph_buff;
