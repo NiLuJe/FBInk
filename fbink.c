@@ -2901,6 +2901,8 @@ int
 		region.top = start_y;
 		region.width = lw;
 		region.height = font_size_px;
+		// Rotate our eink refresh region before refreshing
+		(*fxpRotateRegion)(&region);
 		refresh(fbfd, region, WAVEFORM_MODE_AUTO, false);
 		LOG("Printed Line!");
 		// And clear our line buffer for next use. The glyph buffer shouldn't
