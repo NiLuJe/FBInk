@@ -181,14 +181,14 @@ typedef struct
 } FBInkConfig;
 
 typedef struct {
-	uint8_t size_pt;
+	uint8_t size_pt;          // Size of text in points. If not set (0), defaults to 12pt
 	struct {
-		unsigned char top;
-		unsigned char bottom;
-		unsigned char left;
-		unsigned char right;
+		unsigned char top;    // Top margin as percentage. Max 90%
+		unsigned char bottom; // Bottom margin as percentage. Max 90%
+		unsigned char left;   // Left margin as percentage. Max 90%
+		unsigned char right;  // Right margin as percentage. Max 90%
 	} margins;
-	bool is_centered;
+	bool is_centered;         // Horizontal text centering
 } FBInkOTConfig;
 
 // NOTE: Unless otherwise specified,
@@ -225,7 +225,11 @@ FBINK_API int fbink_close(int fbfd);
 //       c.f., KFMon's handling of this via fbink_is_fb_quirky() to detect the initial 16bpp -> 32bpp switch.
 FBINK_API int fbink_init(int fbfd, const FBInkConfig* fbink_config);
 
+// If using OpenType fonts, this initialises a font for use by FBInk.
+// The caller should load the font data into a buffer and pass that data in.
+// NOTE: The caller MUST NOT free this font_data untill you are done printing. 
 FBINK_API int fbink_init_ot(const unsigned char* font_data);
+
 // Dump a few of our internal state variables to stdout, in a format easily consumable by a shell (i.e., eval)
 FBINK_API void fbink_state_dump(const FBInkConfig* fbink_config);
 
@@ -251,7 +255,17 @@ FBINK_API int fbink_print(int fbfd, const char* string, const FBInkConfig* fbink
 FBINK_API int fbink_printf(int fbfd, const FBInkConfig* fbink_config, const char* fmt, ...)
     __attribute__((format(printf, 3, 4)));
 
+// Print a string using an OpenType font. Note the caller MUST init with fbink_init_ot() FIRST.
+// This function uses margins (as whole number percentages) instead of rows/columns for 
+// positioning and setting the printable area.
+// Returns -(ERANGE) if the provided margins are out of range, or sum to < 100%
+// Returns -(ENOSYS) if compiled with MINIMAL
+// fbfd:		open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
+// string:		UTF-8 encoded string to print
+// cfg:			Pointer to a FBInkOTConfig struct.
 FBINK_API int fbink_print_ot(int fbfd, char* string, FBInkOTConfig* cfg);
+
 // A simple wrapper around the internal screen refresh handling, without requiring you to include einkfb/mxcfb headers
 // fbfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
