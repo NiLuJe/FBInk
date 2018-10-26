@@ -2821,6 +2821,8 @@ int
 	uint32_t tmp_c;
 	unsigned char *lnPtr, *glPtr = NULL;
 	unsigned short start_x, start_y;
+	// stb_truetype renders glyphs with color inverted to what our blitting functions expect
+	unsigned char invert = 0xff;
 	// Render!
 	for (line = 0; lines[line].line_used; line++) {
 		printf("Line # %d\n", line);
@@ -2884,7 +2886,7 @@ int
 		lnPtr = line_buff;
 		for (int j = 0; j < font_size_px; j++) {
 			for (int k = 0; k < lw; k++) {
-				color.r = color.b = color.g = OT_INVERT_PIXEL(lnPtr[k]);
+				color.r = color.b = color.g = lnPtr[k] ^ invert;
 				put_pixel(&paint_point, &color);
 				paint_point.x++;
 			}

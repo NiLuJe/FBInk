@@ -204,10 +204,6 @@
 // We want to return negative values on failure, always
 #define ERRCODE(e) (-(e))
 
-// stb_truetype bitmaps are 8bpp, with 0 being transparent and
-// 255 fully opaque
-#define OT_INVERT_PIXEL(x) (255 - (x))
-
 // eInk color map
 // c.f., linux/drivers/video/mxc/cmap_lab126.h
 // NOTE: Legacy devices have an inverted color map, which we handle internally!
