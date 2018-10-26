@@ -2881,7 +2881,6 @@ int
 			paint_point.y++;
 		}
 		paint_point.y += (int)(sf * lg);
-#ifndef LINUX
 		// Woohoo, it's in our framebuffer! Let's refresh the screen.
 		struct mxcfb_rect region = { 0 };
 		region.left = start_x;
@@ -2889,7 +2888,6 @@ int
 		region.width = lw;
 		region.height = font_size_px;
 		refresh(fbfd, region, WAVEFORM_MODE_AUTO, false);
-#endif
 		LOG("Printed Line!");
 		// And clear our line buffer for next use. The glyph buffer shouldn't
 		// need clearing, as stbtt_MakeCodepointBitmap() should overwrite it.
