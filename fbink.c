@@ -2806,6 +2806,8 @@ int
 	FBInkCoordinates paint_point = {area.tl.x, area.tl.y};
 	int x0, y0, x1, y1, gw, gh, lw;
 	uint32_t tmp_c;
+	unsigned char *lnPtr, *glPtr = NULL;
+	unsigned short start_x, start_y;
 	for (line = 0; lines[line].line_used; line++) {
 		printf("Line # %d\n", line);
 		lw = 0;
@@ -2823,6 +2825,10 @@ int
 			ins_point.x = curr_point.x + x0;
 			ins_point.y += y0;
 			lw = ins_point.x + gw;
+			// Just in case our arithmetic was off by a pixel or two...
+			if (lw > max_lw) {
+				gw -= lw - max_lw;
+			}
 			// Because the stbtt_MakeCodepointBitmap documentation is a bit vague on this
 			// point, the parameter 'out_stride' should be the width of the surface in our
 			// buffer. It's designed so that the glyph can be rendered directly to a screen buffer.
@@ -2831,8 +2837,8 @@ int
 			// dimensions of the glyph, so we set 'out_stride' to the glyph width.
 			stbtt_MakeCodepointBitmap(&otFontInfo, glyph_buff, gw, gh, gw, sf, sf, c);
 			// paint our glyph into the line buffer
-			unsigned char* lnPtr = line_buff + ins_point.x + (max_lw * ins_point.y);
-			unsigned char* glPtr = glyph_buff;
+			lnPtr = line_buff + ins_point.x + (max_lw * ins_point.y);
+			glPtr = glyph_buff;
 			for (int j = 0; j < gh; j++) {
 				for (int k = 0; k < gw; k++) {
 					// 0 value pixels are transparent
@@ -2859,9 +2865,9 @@ int
 			paint_point.x += (max_lw - lw) / 2;
 		}
 		FBInkColor color = { 0 };
-		unsigned short start_x = paint_point.x;
-		unsigned short start_y = paint_point.y;
-		unsigned char* lnPtr = line_buff;
+		start_x = paint_point.x;
+		start_y = paint_point.y;
+		lnPtr = line_buff;
 		for (int j = 0; j < font_size_px; j++) {
 			for (int k = 0; k < lw; k++) {
 				color.r = color.b = color.g = OT_INVERT_PIXEL(lnPtr[k]);
