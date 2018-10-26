@@ -180,6 +180,17 @@ typedef struct
 	uint8_t   valign;    // Vertical alignment of images (NONE/TOP, CENTER, EDGE/BOTTOM; c.f., ALIGN_INDEX_T enum)
 } FBInkConfig;
 
+typedef struct {
+	uint8_t size_pt;
+	struct {
+		unsigned char top;
+		unsigned char bottom;
+		unsigned char left;
+		unsigned char right;
+	} margins;
+	bool is_centered;
+} FBInkOTConfig;
+
 // NOTE: Unless otherwise specified,
 //       stuff returns a negative value (usually -(EXIT_FAILURE)) on failure & EXIT_SUCCESS otherwise ;).
 
@@ -214,6 +225,7 @@ FBINK_API int fbink_close(int fbfd);
 //       c.f., KFMon's handling of this via fbink_is_fb_quirky() to detect the initial 16bpp -> 32bpp switch.
 FBINK_API int fbink_init(int fbfd, const FBInkConfig* fbink_config);
 
+FBINK_API int fbink_init_ot(const unsigned char* font_data);
 // Dump a few of our internal state variables to stdout, in a format easily consumable by a shell (i.e., eval)
 FBINK_API void fbink_state_dump(const FBInkConfig* fbink_config);
 
@@ -239,6 +251,7 @@ FBINK_API int fbink_print(int fbfd, const char* string, const FBInkConfig* fbink
 FBINK_API int fbink_printf(int fbfd, const FBInkConfig* fbink_config, const char* fmt, ...)
     __attribute__((format(printf, 3, 4)));
 
+FBINK_API int fbink_print_ot(int fbfd, char* string, FBInkOTConfig* cfg);
 // A simple wrapper around the internal screen refresh handling, without requiring you to include einkfb/mxcfb headers
 // fbfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call

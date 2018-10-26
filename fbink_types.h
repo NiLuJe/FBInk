@@ -128,4 +128,12 @@ typedef union
 	} color;
 } FBInkPixelBGR;
 
+// Stores the information necessary to render a line of text
+// using OpenType/TrueType fonts
+typedef struct FBInkOTLine {
+	unsigned int startCharIndex;
+	unsigned int endCharIndex;
+	bool line_used;
+	int line_gap;
+} FBInkOTLine;
 #endif

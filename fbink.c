@@ -61,6 +61,27 @@
 #	pragma GCC diagnostic pop
 #endif
 
+#ifdef FBINK_WITH_OPENTYPE
+// stb_truetype needs maths, and so do we to round to the nearest pixel
+#	include <math.h>
+#	define STB_TRUETYPE_IMPLEMENTATION
+// stb_truetype is.... noisy
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#	pragma clang diagnostic ignored "-Wunknown-warning-option"
+#	pragma GCC diagnostic ignored "-Wcast-qual"
+#	pragma GCC diagnostic ignored "-Wcast-align"
+#	pragma GCC diagnostic ignored "-Wconversion"
+#	pragma GCC diagnostic ignored "-Wsign-conversion"
+#	pragma GCC diagnostic ignored "-Wduplicated-branches"
+#	pragma GCC diagnostic ignored "-Wunused-parameter"
+#	pragma GCC diagnostic ignored "-Wunused-function"
+#	pragma GCC diagnostic ignored "-Wbad-function-cast"
+#	include "stb/stb_truetype.h"
+#	pragma GCC diagnostic pop
+#	include "libunibreak/src/linebreak.h"
+#endif
+
 // Return the library version as devised at library compile-time
 const char*
     fbink_version(void)
@@ -2028,6 +2049,23 @@ int
 	// Don't skip any ioctls on a first init ;)
 	return initialize_fbink(fbfd, fbink_config, false);
 }
+// Load font from a provided buffer.
+// NOTE: the caller MUST NOT free the font_data buffer untill they know they will no longer need to print.
+//		 Should we create our own copy of the font data instead? Perhaps from a FILE pointer? Or filepath?
+int
+	fbink_init_ot(const unsigned char* font_data)
+{
+#ifdef FBINK_WITH_OPENTYPE
+	int rv = EXIT_SUCCESS;
+	otFontInfo = (const stbtt_fontinfo){ 0 };
+	if (!stbtt_InitFont(&otFontInfo, font_data, 0)) {
+		rv = ERRCODE(EXIT_FAILURE);
+	}
+	return rv;
+#else
+	return ERRCODE(ENOTSUP);
+#endif
+}
 
 // Dump a few of our internal state variables to stdout, for shell script consumption
 void
@@ -2593,6 +2631,271 @@ int
 	// Cleanup
 	free(buffer);
 	return rv;
+}
+
+int
+	fbink_print_ot(int fbfd, char* string, FBInkOTConfig* cfg)
+{
+#ifdef FBINK_WITH_OPENTYPE
+		//Note, we do a lot of casting floats to ints, so silence those GCC warnings
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wfloat-conversion"
+	// If we open a fd now, we'll only keep it open for this single print call!
+	// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// Declare buffers early to make cleanup easier
+	FBInkOTLine* lines = NULL;
+	char * brk_buff = NULL;
+	unsigned char* line_buff = NULL;
+	unsigned char* glyph_buff = NULL;
+
+	// map fb to user mem
+	// NOTE: If we're keeping the fb's fd open, keep this mmap around, too.
+	if (!isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	}
+	LOG("Printing OpenType text.");
+	// Sanity check the provided margins and calculate the printable area.
+	// We'll cap the margin at 90% for each side. Margins for opposing edges
+	// should sum to less than 100%
+	if (cfg->margins.top > 90 || cfg->margins.bottom > 90 || cfg->margins.left > 90 || cfg->margins.right > 90) {
+		rv = ERRCODE(ERANGE);
+		goto cleanup;
+	}
+	if (cfg->margins.top + cfg->margins.bottom >= 100 || cfg->margins.left + cfg->margins.right >= 100) {
+		rv = ERRCODE(ERANGE);
+		goto cleanup;
+	}
+	struct {
+		FBInkCoordinates tl;
+		FBInkCoordinates br;
+	} area = { 0 };
+	area.tl.x = (unsigned short)(cfg->margins.left / 100.0f * viewWidth);
+	area.tl.y = (unsigned short)(cfg->margins.top / 100.0f * viewHeight);
+	area.br.x = (unsigned short)(viewWidth - (uint32_t)(cfg->margins.right / 100.0f * viewWidth));
+	area.br.y = (unsigned short)(viewHeight - (uint32_t)(cfg->margins.bottom / 100.0f * viewHeight));
+
+	// TODO: handle ppi properly
+	int ppi = 265;
+	// Given the ppi, convert point height to pixels. Note, 1pt is 1/72th of an inch
+	int font_size_px = (int)(ppi / 72.0f * cfg->size_pt);
+	// Get the Scale Factor used for most of the stbtt functions
+	float sf = stbtt_ScaleForPixelHeight(&otFontInfo, (float)font_size_px);
+	// Get the max possible glyph height, and therefore calc the maximum number of lines
+	// that may be printed in the given dimensions.
+	int asc, dec, lg;
+	stbtt_GetFontVMetrics(&otFontInfo, &asc, &dec, &lg);
+	int num_lines = (int)(viewHeight / (uint32_t)roundf(sf * (asc - dec)));
+	int baseline = (int)roundf(sf * asc);
+	// And allocate the memory for it...
+	lines = calloc(num_lines, sizeof(FBInkOTLine));
+
+	// Now, lets use libunibreak to find the possible break opportunities in our string.
+
+	// Note: we only care about the byte length here
+	int str_len_bytes = strlen(string);
+	brk_buff = calloc(str_len_bytes + 1, sizeof(char));
+
+	init_linebreak();
+	set_linebreaks_utf8((utf8_t*)string, str_len_bytes + 1, "en", brk_buff);
+	LOG("Found linebreaks!");
+	// Lets find our lines! Nothing fancy, just a simple first fit algorithm, but we do
+	// our best not to break inside a word.
+	unsigned int chars_in_str = u8_strlen(string);
+	unsigned int c_index = 0;
+	unsigned int tmp_c_index = c_index;
+	uint32_t c;
+	unsigned short max_lw = area.br.x - area.tl.x;
+	printf("Max LW: %d\n", max_lw);
+	int line = 0;
+	// adv = advance: the horizontal distance along the baseline to the origin of
+	//                the next glyph
+	// lsb = left side bearing: The horizontal distance from the origin point to
+	//                          left edge of the glyph
+	int adv, lsb, curr_x;
+	for (line = 0; line < num_lines; line++) {
+		// Every line has a start character index and an end char index.
+		curr_x = 0;
+		lines[line].startCharIndex = c_index;
+		lines[line].line_used = true;
+		while (c_index < chars_in_str) {
+			// First, we check for a mandatory break
+			if (brk_buff[c_index] == LINEBREAK_MUSTBREAK) {
+				unsigned char last_index;
+				// We don't want to print the break character
+				u8_dec(string, &last_index);
+				lines[line].endCharIndex = last_index;
+				// We want our next line to start after this breakpoint
+				u8_inc(string, &c_index);
+				// And we're done processing this line
+				break;
+			}
+			c = u8_nextchar(string, &c_index);
+			// Note, these metrics are unscaled, we need to use our previously
+			// obtained scale factor (sf) to get the metrics as pixels
+			stbtt_GetCodepointHMetrics(&otFontInfo, (int)c, &adv, &lsb);
+			// If starting a line with a character that has a negative lsb
+			// eg 'j', move our start point a little.
+			if (curr_x == 0 && lsb < 0) {
+				curr_x += (int)roundf(sf * abs(lsb));
+			}
+			int x0, x1;
+			stbtt_GetCodepointBox(&otFontInfo, c, &x0, 0, &x1, 0);
+			int gw_from_origin = (int)roundf(sf * (x1 - x0)) - (int)roundf(sf * lsb);
+			printf("GW: %d\n", ((int)roundf(sf * (x1 - x0))));
+			printf("Calced LW: %d\n", (curr_x + gw_from_origin));
+			// Oops, we appear to have advanced too far :)
+			// Better backtrack to see if we can find a suitable break opportunity
+			if (curr_x + gw_from_origin > max_lw) {
+				// Set our final line character to the previous char in case we cannot
+				// find a suitable breakpoint
+				u8_dec(string, &c_index);
+				// Note, we need to do this a second time, to get the previous character, as
+				// u8_nextchar() 'consumes' a character.
+				u8_dec(string, &c_index);
+				lines[line].endCharIndex = c_index;
+				for (c_index; c_index > lines[line].startCharIndex; u8_dec(string, &c_index)) {
+					if (brk_buff[c_index] == LINEBREAK_ALLOWBREAK) {
+						lines[line].endCharIndex = c_index;
+						break;
+					}
+				}
+				u8_inc(string, &c_index);
+				// We are done with this line.
+				break;
+			}
+			curr_x += (int)roundf(sf * adv);
+			// Adjust our x position for kerning, because we can :)
+			if (string[c_index + 1]) {
+				tmp_c_index = c_index;
+				uint32_t c2 = u8_nextchar(string, &tmp_c_index);
+				curr_x += (int)roundf(sf * stbtt_GetCodepointKernAdvance(&otFontInfo, c, c2));
+			}
+		}
+		// We've run out of string! This is our last line.
+		if (c_index >= chars_in_str) {
+			u8_dec(string, &c_index);
+			lines[line].endCharIndex = c_index;
+			break;
+		}
+	}
+	LOG("Lines Found!");
+	// Hopefully, we have some lines to render!
+
+	// Create a bitmap buffer to render a single line. We don't render the glyphs directly to the
+	// fb here, as we need to do some simple blending, and it makes it easier to calculate our
+	// centering if required.
+	line_buff = calloc(max_lw * font_size_px, sizeof(char));
+	// We also don't want to be creating a new buffer for every glyph
+	glyph_buff = calloc(font_size_px * font_size_px * 2, sizeof(char));
+	if (!line_buff || !glyph_buff) {
+		goto cleanup;
+	}
+	FBInkCoordinates curr_point = { 0, baseline };
+	FBInkCoordinates ins_point = {0, baseline};
+	FBInkCoordinates paint_point = {area.tl.x, area.tl.y};
+	int x0, y0, x1, y1, gw, gh, lw;
+	uint32_t tmp_c;
+	for (line = 0; lines[line].line_used; line++) {
+		lw = 0;
+		int ci;
+		for (ci = lines[line].startCharIndex; ci <= lines[line].endCharIndex;) {
+			c = u8_nextchar(string, &ci);
+			stbtt_GetCodepointHMetrics(&otFontInfo, c, &adv, &lsb);
+			if (ci == lines[line].startCharIndex && lsb < 0) {
+				curr_point.x += (int)roundf(sf * abs(lsb));
+			}
+			stbtt_GetCodepointBitmapBox(&otFontInfo, c, sf, sf, &x0, &y0, &x1, &y1);
+			gw = x1 - x0;
+			printf("BMGW: %d\n", gw);
+			gh = y1 - y0;
+			ins_point.x = curr_point.x + (int)roundf(lsb * sf);
+			ins_point.y += y0;
+			lw = ins_point.x + gw;
+			stbtt_MakeCodepointBitmap(&otFontInfo, glyph_buff, gw, gh, 0, sf, sf, c);
+			// paint our glyph into the line buffer
+			unsigned char* lnPtr = line_buff + ins_point.x + (max_lw * ins_point.y);
+			unsigned char* glPtr = glyph_buff;
+			for (int j = 0; j < gh; j++) {
+				for (int k = 0; k < gw; k++) {
+					// 0 value pixels are transparent
+					if (glPtr[k] > 0) {
+						lnPtr[k] = glPtr[k];
+					}
+				}
+				// And advance one scanline. Quick! Hide! Pointer arithmetic
+				glPtr += gw;
+				lnPtr += max_lw;
+			}
+			curr_point.x += (int)roundf(sf * adv);
+			if (ci < lines[line].endCharIndex) {
+				int tmp_i = ci;
+				tmp_c = u8_nextchar(string, &tmp_i);
+				curr_point.x += (int)roundf(sf * stbtt_GetCodepointKernAdvance(&otFontInfo, c, tmp_c));
+			}
+			ins_point.y = baseline;
+			printf("LW: %d\n", lw);
+		}
+		// Right, we've rendered a line to a bitmap, time to display it.
+		if (cfg->is_centered) {
+			paint_point.x += (max_lw - lw) / 2;
+		}
+		FBInkColor color = { 0 };
+		unsigned short start_x = paint_point.x;
+		unsigned short start_y = paint_point.y;
+		unsigned char* lnPtr = line_buff;
+		for (int j = 0; j < font_size_px; j++) {
+			for (int k = 0; k < lw; k++) {
+				color.r = color.b = color.g = OT_INVERT_PIXEL(lnPtr[k]);
+				put_pixel(&paint_point, &color);
+				paint_point.x++;
+			}
+			lnPtr += max_lw;
+			paint_point.x = start_x;
+			paint_point.y++;
+		}
+		paint_point.y += (int)(sf * lg);
+#ifndef LINUX
+		// Woohoo, it's in our framebuffer! Let's refresh the screen.
+		struct mxcfb_rect region = { 0 };
+		region.left = start_x;
+		region.top = start_y;
+		region.width = lw;
+		region.height = font_size_px;
+		refresh(fbfd, region, WAVEFORM_MODE_AUTO, false);
+#endif
+		LOG("Printed Line!");
+		// And clear our line buffer for next use. The glyph buffer shouldn't
+		// need clearing, as stbtt_MakeCodepointBitmap() should overwrite it.
+		memset(line_buff, 0, (max_lw * font_size_px * sizeof(char)));
+	}
+
+	cleanup:
+		free(lines);
+		free(brk_buff);
+		free(line_buff);
+		free(glyph_buff);
+		if (isFbMapped && !keep_fd) {
+			unmap_fb();
+		}
+		if (!keep_fd) {
+			close(fbfd);
+		}
+	return rv;
+#	pragma GCC diagnostic pop
+#else
+	return ERRCODE(ENOTSUP);
+#endif
 }
 
 // Small public wrapper around refresh(), without the caller having to depend on mxcfb headers

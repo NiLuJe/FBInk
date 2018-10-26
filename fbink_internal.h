@@ -126,6 +126,9 @@
 #	include "fbink_misc_fonts.h"
 #endif
 
+// We need a definition from stb_truetype.h
+#include "stb/stb_truetype.h"
+
 // NOTE: CLOEXEC shenanigans...
 //       Story time: it was introduced (for open) in Linux 2.6.23. Kindle FW 2.x runs something older,
 //       and I can't be arsed to check if they backported it in there or not.
@@ -201,6 +204,10 @@
 // We want to return negative values on failure, always
 #define ERRCODE(e) (-(e))
 
+// stb_truetype bitmaps are 8bpp, with 0 being transparent and
+// 255 fully opaque
+#define OT_INVERT_PIXEL(x) (255 - (x))
+
 // eInk color map
 // c.f., linux/drivers/video/mxc/cmap_lab126.h
 // NOTE: Legacy devices have an inverted color map, which we handle internally!
@@ -254,6 +261,9 @@ const uint32_t* (*fxpFont32xGetBitmap)(uint32_t) = NULL;
 
 // Where we track device/screen-specific quirks
 FBInkDeviceQuirks deviceQuirks = { 0 };
+
+// Information about the currently loaded OpenType font
+stbtt_fontinfo otFontInfo = { 0 };
 
 #ifndef FBINK_FOR_KINDLE
 static void rotate_coordinates_pickel(FBInkCoordinates*);
