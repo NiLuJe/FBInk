@@ -2750,9 +2750,9 @@ int
 				curr_x += (int)roundf(sf * abs(lsb));
 			}
 			int x0, x1;
-			stbtt_GetCodepointBox(&otFontInfo, c, &x0, 0, &x1, 0);
-			int gw_from_origin = (int)roundf(sf * (x1 - x0)) - (int)roundf(sf * lsb);
-			printf("GW: %d\n", ((int)roundf(sf * (x1 - x0))));
+			stbtt_GetCodepointBitmapBox(&otFontInfo, c, sf, sf, &x0, 0, &x1, 0);
+			int gw_from_origin = x1;
+			printf("GW: %d\n", (x1 - x0));
 			printf("Calced LW: %d\n", (curr_x + gw_from_origin));
 			// Oops, we appear to have advanced too far :)
 			// Better backtrack to see if we can find a suitable break opportunity
