@@ -17,7 +17,7 @@ else
 	RANLIB?=gcc-ranlib
 endif
 
-DEBUG_CFLAGS=-O0 -fno-omit-frame-pointer -pipe -g
+DEBUG_CFLAGS=-Og -fno-omit-frame-pointer -pipe -g
 # Fallback CFLAGS, we honor the env first and foremost!
 OPT_CFLAGS=-O2 -fomit-frame-pointer -pipe
 
