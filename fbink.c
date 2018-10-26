@@ -2685,11 +2685,15 @@ int
 	area.tl.y = (unsigned short)(cfg->margins.top / 100.0f * viewHeight);
 	area.br.x = (unsigned short)(viewWidth - (uint32_t)(cfg->margins.right / 100.0f * viewWidth));
 	area.br.y = (unsigned short)(viewHeight - (uint32_t)(cfg->margins.bottom / 100.0f * viewHeight));
-
+	// Set default font size if required
+	uint8_t size_pt = cfg->size_pt;
+	if (!size_pt) {
+		size_pt = 12;
+	}
 	// TODO: handle ppi properly
 	int ppi = 265;
 	// Given the ppi, convert point height to pixels. Note, 1pt is 1/72th of an inch
-	int font_size_px = (int)(ppi / 72.0f * cfg->size_pt);
+	int font_size_px = (int)(ppi / 72.0f * size_pt);
 	// Get the Scale Factor used for most of the stbtt functions
 	float sf = stbtt_ScaleForPixelHeight(&otFontInfo, (float)font_size_px);
 	// Get the max possible glyph height, and therefore calc the maximum number of lines
