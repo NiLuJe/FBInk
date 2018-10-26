@@ -2063,8 +2063,9 @@ int
 	}
 	return rv;
 #else
-	return ERRCODE(ENOTSUP);
-#endif
+	fprintf(stderr, "[FBInk] Opentype support is disabled in this FBInk build!\n");
+	return ERRCODE(ENOSYS);
+#endif // FBINK_WITH_OPENTYPE
 }
 
 // Dump a few of our internal state variables to stdout, for shell script consumption
@@ -2908,8 +2909,9 @@ int
 	return rv;
 #	pragma GCC diagnostic pop
 #else
-	return ERRCODE(ENOTSUP);
-#endif
+	fprintf(stderr, "[FBInk] Opentype support is disabled in this FBInk build!\n");
+	return ERRCODE(ENOSYS);
+#endif // FBINK_WITH_OPENTYPE
 }
 
 // Small public wrapper around refresh(), without the caller having to depend on mxcfb headers
