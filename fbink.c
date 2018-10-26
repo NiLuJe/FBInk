@@ -2807,6 +2807,7 @@ int
 	int x0, y0, x1, y1, gw, gh, lw;
 	uint32_t tmp_c;
 	for (line = 0; lines[line].line_used; line++) {
+		printf("Line # %d\n", line);
 		lw = 0;
 		int ci;
 		for (ci = lines[line].startCharIndex; ci <= lines[line].endCharIndex;) {
@@ -2852,6 +2853,7 @@ int
 			ins_point.y = baseline;
 			printf("LW: %d\n", lw);
 		}
+		curr_point.x = 0;
 		// Right, we've rendered a line to a bitmap, time to display it.
 		if (cfg->is_centered) {
 			paint_point.x += (max_lw - lw) / 2;
