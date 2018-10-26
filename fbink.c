@@ -2743,7 +2743,7 @@ int
 		while (c_index < chars_in_str) {
 			// First, we check for a mandatory break
 			if (brk_buff[c_index] == LINEBREAK_MUSTBREAK) {
-				unsigned char last_index;
+				unsigned char last_index = c_index;
 				// We don't want to print the break character
 				u8_dec(string, &last_index);
 				lines[line].endCharIndex = last_index;
