@@ -2801,6 +2801,7 @@ int
 	if (!line_buff || !glyph_buff) {
 		goto cleanup;
 	}
+	// Setup the variables needed to render
 	FBInkCoordinates curr_point = { 0, baseline };
 	FBInkCoordinates ins_point = {0, baseline};
 	FBInkCoordinates paint_point = {area.tl.x, area.tl.y};
@@ -2808,6 +2809,7 @@ int
 	uint32_t tmp_c;
 	unsigned char *lnPtr, *glPtr = NULL;
 	unsigned short start_x, start_y;
+	// Render!
 	for (line = 0; lines[line].line_used; line++) {
 		printf("Line # %d\n", line);
 		lw = 0;
