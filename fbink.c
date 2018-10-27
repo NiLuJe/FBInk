@@ -976,6 +976,7 @@ static struct mxcfb_rect
 	return region;
 }
 
+#ifndef FBINK_FOR_LINUX
 // NOTE: Small helper function to aid with logging the exact amount of time MXCFB_WAIT_FOR_UPDATE_COMPLETE blocked...
 //       The driver is using the Kernel's wait-for-completion handler,
 //       which returns the amount of jiffies left until the timeout set by the caller.
@@ -990,7 +991,7 @@ static long int
 }
 
 // Handle the various eInk update API quirks for the full range of HW we support...
-#if defined(FBINK_FOR_KINDLE)
+#	if defined(FBINK_FOR_KINDLE)
 // Legacy Kindle devices ([K2<->K4])
 static int
     refresh_legacy(int fbfd, const struct mxcfb_rect region, bool is_flashing)
@@ -1170,7 +1171,7 @@ static int
 
 	return EXIT_SUCCESS;
 }
-#elif defined(FBINK_FOR_CERVANTES)
+#	elif defined(FBINK_FOR_CERVANTES)
 // Legacy Cervantes devices (2013)
 static int
     refresh_cervantes(int fbfd,
@@ -1286,7 +1287,7 @@ static int
 	}
 	return EXIT_SUCCESS;
 }
-#else
+#	else
 // Kobo devices ([Mk3<->Mk6])
 static int
     refresh_kobo(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode, uint32_t update_mode, uint32_t marker)
@@ -1399,17 +1400,24 @@ static int
 
 	return EXIT_SUCCESS;
 }
-#endif    // FBINK_FOR_KINDLE
+#	endif    // FBINK_FOR_KINDLE
+#endif            // !FBINK_FOR_LINUX
 
 // And finally, dispatch the right refresh request for our HW...
+#ifdef FBINK_FOR_LINUX
+// NOP when we don't have an eInk screen ;).
+static int
+    refresh(int                     fbfd __attribute__((unused)),
+	    const struct mxcfb_rect region __attribute__((unused)),
+	    uint32_t                waveform_mode __attribute__((unused)),
+	    bool                    is_flashing __attribute__((unused)))
+{
+	return EXIT_SUCCESS;
+}
+#else
 static int
     refresh(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode, bool is_flashing)
 {
-	// NOP when we don't have an eInk screen ;).
-#ifdef FBINK_FOR_LINUX
-	return EXIT_SUCCESS;
-#endif
-
 	// NOTE: Discard bogus regions, they can cause a softlock on some devices.
 	//       A 0x0 region is a no go on most devices, while a 1x1 region may only upset some Kindle models.
 	//       Some devices even balk at 1xN or Nx1, so, catch that, too.
@@ -1421,11 +1429,11 @@ static int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
-#ifdef FBINK_FOR_KINDLE
+#	ifdef FBINK_FOR_KINDLE
 	if (deviceQuirks.isKindleLegacy) {
 		return refresh_legacy(fbfd, region, is_flashing);
 	}
-#endif
+#	endif
 	// NOTE: While we'd be perfect candidates for using A2 waveform mode, it's all kinds of fucked up on Kobos,
 	//       and may lead to disappearing text or weird blending depending on the surrounding fb content...
 	//       It only shows up properly when FULL, which isn't great...
@@ -1436,8 +1444,8 @@ static int
 	//       (i.e., DU or GC16 is most likely often what AUTO will land on).
 
 	// So, handle this common switcheroo here...
-	uint32_t wfm    = (is_flashing && waveform_mode == WAVEFORM_MODE_AUTO) ? WAVEFORM_MODE_GC16 : waveform_mode;
-	uint32_t upm    = is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
+	uint32_t wfm = (is_flashing && waveform_mode == WAVEFORM_MODE_AUTO) ? WAVEFORM_MODE_GC16 : waveform_mode;
+	uint32_t upm = is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
 	uint32_t marker = (uint32_t) getpid();
 
 	// NOTE: Make sure update_marker is valid, an invalid marker *may* hang the kernel instead of failing gracefully,
@@ -1446,26 +1454,27 @@ static int
 		marker = (70U + 66U + 73U + 78U + 75U);
 	}
 
-#if defined(FBINK_FOR_KINDLE)
+#	if defined(FBINK_FOR_KINDLE)
 	if (deviceQuirks.isKindleOasis2) {
 		return refresh_kindle_koa2(fbfd, region, wfm, upm, marker);
 	} else {
 		return refresh_kindle(fbfd, region, wfm, upm, marker);
 	}
-#elif defined(FBINK_FOR_CERVANTES)
+#	elif defined(FBINK_FOR_CERVANTES)
 	if (deviceQuirks.isCervantesNew) {
 		return refresh_cervantes_new(fbfd, region, wfm, upm, marker);
 	} else {
 		return refresh_cervantes(fbfd, region, wfm, upm, marker);
 	}
-#else
+#	else
 	if (deviceQuirks.isKoboMk7) {
 		return refresh_kobo_mk7(fbfd, region, wfm, upm, marker);
 	} else {
 		return refresh_kobo(fbfd, region, wfm, upm, marker);
 	}
-#endif    // FBINK_FOR_KINDLE
+#	endif    // FBINK_FOR_KINDLE
 }
+#endif            // FBINK_FOR_LINUX
 
 // Open the framebuffer file & return the opened fd
 int
