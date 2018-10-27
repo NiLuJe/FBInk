@@ -126,9 +126,6 @@
 #	include "fbink_misc_fonts.h"
 #endif
 
-// We need a definition from stb_truetype.h
-#include "stb/stb_truetype.h"
-
 // NOTE: CLOEXEC shenanigans...
 //       Story time: it was introduced (for open) in Linux 2.6.23. Kindle FW 2.x runs something older,
 //       and I can't be arsed to check if they backported it in there or not.
@@ -260,7 +257,7 @@ FBInkDeviceQuirks deviceQuirks = { 0 };
 
 // Information about the currently loaded OpenType font
 bool otInit = false;
-stbtt_fontinfo otFontInfo = { 0 };
+FBInkOTFonts otFonts = { NULL, NULL, NULL, NULL };
 
 #ifndef FBINK_FOR_KINDLE
 static void rotate_coordinates_pickel(FBInkCoordinates*);
@@ -339,6 +336,10 @@ static unsigned char* img_load_from_file(const char*, int*, int*, int*, int);
 static unsigned char* img_convert_px_format(unsigned char*, int, int, int, int);
 static int
     draw_image(int, unsigned char*, const int, const int, const int, const int, short int, short int, const FBInkConfig*);
+#endif
+
+#ifdef FBINK_WITH_OPENTYPE
+static void* free_ot_font(stbtt_fontinfo* font_info);
 #endif
 
 // For identify_device, which we need outside of fbink_device_id.c ;)

@@ -23,6 +23,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "stb/stb_truetype.h"
 
 // List of flags for device or screen-specific quirks...
 typedef struct
@@ -136,4 +137,11 @@ typedef struct FBInkOTLine {
 	bool line_used;
 	int line_gap;
 } FBInkOTLine;
+
+typedef struct FBInkOTFonts {
+	stbtt_fontinfo* otRegular;
+	stbtt_fontinfo* otItalic;
+	stbtt_fontinfo* otBold;
+	stbtt_fontinfo* otBoldItalic;
+} FBInkOTFonts;
 #endif

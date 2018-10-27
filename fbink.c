@@ -2049,20 +2049,91 @@ int
 	// Don't skip any ioctls on a first init ;)
 	return initialize_fbink(fbfd, fbink_config, false);
 }
-// Load font from a provided buffer.
-// NOTE: the caller MUST NOT free the font_data buffer untill they know they will no longer need to print.
-//		 Should we create our own copy of the font data instead? Perhaps from a FILE pointer? Or filepath?
+// Load font from given file path. Up to four font variants may be used by FBInk at any given time.
 int
-	fbink_init_ot(const unsigned char* font_data)
+	fbink_add_ot_font(const char* fp, FONT_VARIANT_T variant)
 {
 #ifdef FBINK_WITH_OPENTYPE
-	int rv = EXIT_SUCCESS;
-	otFontInfo = (const stbtt_fontinfo){ 0 };
-	if (!stbtt_InitFont(&otFontInfo, font_data, 0)) {
-		rv = ERRCODE(EXIT_FAILURE);
-	}
 	otInit = true;
-	return rv;
+	// Open font from given path, and load into buffer
+	FILE *f = fopen(fp, "rb");
+	unsigned char *data = NULL;
+	if (f) {
+		fseek(f, 0, SEEK_END);
+		long size = ftell(f);
+		fseek(f, 0, SEEK_SET);
+		data = calloc(1, size);
+		if (!data) {
+			fclose(f);
+			otInit = false;
+			return(ERRCODE(EXIT_FAILURE));
+		}
+		size_t read = fread(data, 1, size, f);
+		if (read != size) {
+			free(data);
+			fclose(f);
+			otInit = false;
+			return(ERRCODE(EXIT_FAILURE));
+		}
+		fclose(f);
+	}
+	stbtt_fontinfo *font_info = calloc(1, sizeof(stbtt_fontinfo));
+	if (!font_info) {
+		free(data);
+		return ERRCODE(EXIT_FAILURE);
+	}
+	if (!stbtt_InitFont(font_info, data, 0)) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+	// Assign the current font to it's appropriate otFonts struct member, depending
+	// on the variant specified by the caller.
+	// NOTE: We make sure we free any previous allocation first!
+	switch(variant) {
+	case FNT_REGULAR:
+		otFonts.otRegular = free_ot_font(otFonts.otRegular);
+		otFonts.otRegular = font_info;
+		break;
+	case FNT_ITALIC:
+		otFonts.otItalic = free_ot_font(otFonts.otItalic);
+		otFonts.otItalic = font_info;
+		break;
+	case FNT_BOLD:
+		otFonts.otBold = free_ot_font(otFonts.otBold);
+		otFonts.otBold = font_info;
+		break;
+	case FNT_BOLD_ITALIC:
+		otFonts.otBoldItalic = free_ot_font(otFonts.otBoldItalic);
+		otFonts.otBoldItalic = font_info;
+		break;
+	}
+	return EXIT_SUCCESS;
+#else
+	fprintf(stderr, "[FBInk] Opentype support is disabled in this FBInk build!\n");
+	return ERRCODE(ENOSYS);
+#endif // FBINK_WITH_OPENTYPE
+}
+
+// Free an individual OpenType font structure
+void* 
+	free_ot_font(stbtt_fontinfo* font_info) 
+{
+	if (font_info) {
+		free(font_info->data); // This is the font data we loaded
+		free(font_info);
+	}
+	return NULL;
+}
+
+// Free all OpenType fonts
+int
+	fbink_free_ot_fonts(void)
+{
+#ifdef FBINK_WITH_OPENTYPE
+	free_ot_font(otFonts.otRegular);
+	free_ot_font(otFonts.otItalic);
+	free_ot_font(otFonts.otBold);
+	free_ot_font(otFonts.otBoldItalic);
+	return EXIT_SUCCESS;
 #else
 	fprintf(stderr, "[FBInk] Opentype support is disabled in this FBInk build!\n");
 	return ERRCODE(ENOSYS);
@@ -2701,12 +2772,28 @@ int
 	int ppi = 265;
 	// Given the ppi, convert point height to pixels. Note, 1pt is 1/72th of an inch
 	int font_size_px = (int)(ppi / 72.0f * size_pt);
+
+	stbtt_fontinfo *curr_font = NULL;
+	// TEMP choose a current font
+	if (otFonts.otRegular) {
+		curr_font = otFonts.otRegular;
+	} else if (otFonts.otItalic) {
+		curr_font = otFonts.otItalic;
+	} else if (otFonts.otBold) {
+		curr_font = otFonts.otBold;
+	} else if (otFonts.otBoldItalic) {
+		curr_font = otFonts.otBoldItalic;
+	} else {
+		rv = ERRCODE(ENOENT);
+		goto cleanup;
+	}
+
 	// Get the Scale Factor used for most of the stbtt functions
-	float sf = stbtt_ScaleForPixelHeight(&otFontInfo, (float)font_size_px);
+	float sf = stbtt_ScaleForPixelHeight(curr_font, (float)font_size_px);
 	// Get the max possible glyph height, and therefore calc the maximum number of lines
 	// that may be printed in the given dimensions.
 	int asc, dec, lg;
-	stbtt_GetFontVMetrics(&otFontInfo, &asc, &dec, &lg);
+	stbtt_GetFontVMetrics(curr_font, &asc, &dec, &lg);
 	int num_lines = (int)(viewHeight / (uint32_t)roundf(sf * (asc - dec)));
 	int baseline = (int)roundf(sf * asc);
 	// And allocate the memory for it...
@@ -2755,14 +2842,14 @@ int
 			c = u8_nextchar(string, &c_index);
 			// Note, these metrics are unscaled, we need to use our previously
 			// obtained scale factor (sf) to get the metrics as pixels
-			stbtt_GetCodepointHMetrics(&otFontInfo, (int)c, &adv, &lsb);
+			stbtt_GetCodepointHMetrics(curr_font, (int)c, &adv, &lsb);
 			// If starting a line with a character that has a negative lsb
 			// eg 'j', move our start point a little.
 			if (curr_x == 0 && lsb < 0) {
 				curr_x += (int)roundf(sf * abs(lsb));
 			}
 			int x0, x1;
-			stbtt_GetCodepointBitmapBox(&otFontInfo, c, sf, sf, &x0, 0, &x1, 0);
+			stbtt_GetCodepointBitmapBox(curr_font, c, sf, sf, &x0, 0, &x1, 0);
 			int gw_from_origin = x1;
 			printf("GW: %d\n", (x1 - x0));
 			printf("Calced LW: %d\n", (curr_x + gw_from_origin));
@@ -2791,7 +2878,7 @@ int
 			if (string[c_index + 1]) {
 				tmp_c_index = c_index;
 				uint32_t c2 = u8_nextchar(string, &tmp_c_index);
-				curr_x += (int)roundf(sf * stbtt_GetCodepointKernAdvance(&otFontInfo, c, c2));
+				curr_x += (int)roundf(sf * stbtt_GetCodepointKernAdvance(curr_font, c, c2));
 			}
 		}
 		// We've run out of string! This is our last line.
@@ -2830,11 +2917,11 @@ int
 		int ci;
 		for (ci = lines[line].startCharIndex; ci <= lines[line].endCharIndex;) {
 			c = u8_nextchar(string, &ci);
-			stbtt_GetCodepointHMetrics(&otFontInfo, c, &adv, &lsb);
+			stbtt_GetCodepointHMetrics(curr_font, c, &adv, &lsb);
 			if (ci == lines[line].startCharIndex && lsb < 0) {
 				curr_point.x += (int)roundf(sf * abs(lsb));
 			}
-			stbtt_GetCodepointBitmapBox(&otFontInfo, c, sf, sf, &x0, &y0, &x1, &y1);
+			stbtt_GetCodepointBitmapBox(curr_font, c, sf, sf, &x0, &y0, &x1, &y1);
 			gw = x1 - x0;
 			printf("BMGW: %d\n", gw);
 			gh = y1 - y0;
@@ -2851,7 +2938,7 @@ int
 			// For example, if we were rendering directly to a screen of 1080 x 1440m out_stride
 			// should be set to 1080. In this case however, we want to render to a 'box' of the
 			// dimensions of the glyph, so we set 'out_stride' to the glyph width.
-			stbtt_MakeCodepointBitmap(&otFontInfo, glyph_buff, gw, gh, gw, sf, sf, c);
+			stbtt_MakeCodepointBitmap(curr_font, glyph_buff, gw, gh, gw, sf, sf, c);
 			// paint our glyph into the line buffer
 			lnPtr = line_buff + ins_point.x + (max_lw * ins_point.y);
 			glPtr = glyph_buff;
@@ -2870,7 +2957,7 @@ int
 			if (ci < lines[line].endCharIndex) {
 				int tmp_i = ci;
 				tmp_c = u8_nextchar(string, &tmp_i);
-				curr_point.x += (int)roundf(sf * stbtt_GetCodepointKernAdvance(&otFontInfo, c, tmp_c));
+				curr_point.x += (int)roundf(sf * stbtt_GetCodepointKernAdvance(curr_font, c, tmp_c));
 			}
 			ins_point.y = baseline;
 			printf("LW: %d\n", lw);
