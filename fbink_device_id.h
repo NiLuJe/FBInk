@@ -81,6 +81,7 @@ static const char* kobo_disp_res[] = { "800x600",   "1024x758",   "1024x768",   
 				       "2200x1650", "1440x640x4", "1600x1200x4", "1920x1440" };
 */
 
+static void set_kobo_quirks(unsigned short int, FBInkDeviceQuirks*);
 static void identify_kobo(FBInkDeviceQuirks*);
 #endif
 

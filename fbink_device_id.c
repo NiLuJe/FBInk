@@ -265,6 +265,64 @@ static void
 	}
 }
 #else
+static void
+    set_kobo_quirks(unsigned short int kobo_id, FBInkDeviceQuirks* device_quirks)
+{
+	// NOTE: Shaky assumption that almost everything follows the same rotation scheme, with:
+	//       Boot rotation is FB_ROTATE_UD, pickel is FB_ROTATE_UR, nickel is FB_ROTATE_CCW
+	//       With the exception of the Aura HD and the H2O.
+	//       As usual, the H2O² is a mystery, the Rev 1 *may* follow this pattern too...
+	//       Or that might be the Rev 2 only, but that would make it diverge from other Mk7, which is weirder.
+	//       c.f., the relevant bit of fbink_init for more details...
+	device_quirks->koboBootRota = FB_ROTATE_UD;
+	// NOTE: Device code list pilfered from
+	//       https://github.com/geek1011/KoboStuff/blob/gh-pages/kobofirmware.js#L11
+	switch (kobo_id) {
+		case 310:    // Touch A/B (trilogy)
+		case 320:    // Touch C (trilogy)
+		case 340:    // Mini (pixie)
+		case 330:    // Glo (kraken)
+			device_quirks->isKoboNonMT = true;
+			break;
+		case 371:    // Glo HD (alyssum)
+		case 372:    // Touch 2.0 (pika)
+			break;
+		case 360:    // Aura (phoenix)
+			// NOTE: The bottom 10 pixels *may* be blacked out by Nickel? (TBC!)
+			//device_quirks->koboVertOffset = -10;
+			break;
+		case 350:    // Aura HD (dragon)
+			device_quirks->isKoboNonMT = true;
+			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
+			device_quirks->koboBootRota = FB_ROTATE_UR;
+			break;
+		case 370:    // Aura H2O (dahlia)
+			// NOTE: The top 11 pixels are blacked out by Nickel (behind the bezel)
+			device_quirks->koboVertOffset = 11;
+			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
+			device_quirks->koboBootRota = FB_ROTATE_UR;
+			break;
+		case 374:    // Aura H2O² (snow)
+			break;
+		case 378:    // Aura H2O² r2 (snow)
+			device_quirks->isKoboMk7 = true;
+			break;
+		case 373:    // Aura ONE (daylight)
+		case 381:    // Aura ONE LE (daylight)
+		case 375:    // Aura SE (star)
+			break;
+		case 379:    // Aura SE r2 (star)
+		case 376:    // Clara HD (nova)
+		case 380:    // Forma (frost)
+			device_quirks->isKoboMk7 = true;
+			break;
+		case 0:
+		default:
+			fprintf(stderr, "[FBInk] Unidentified Kobo device code (%hu)!\n", kobo_id);
+			break;
+	}
+}
+
 // NOTE: This is lifted from FBGrab,
 //       c.f., http://trac.ak-team.com/trac/browser/niluje/Configs/trunk/Kindle/Misc/FBGrab/fbgrab.c#L808
 static void
@@ -273,7 +331,8 @@ static void
 	// Get the model from Nickel's version tag file...
 	FILE* fp = fopen("/mnt/onboard/.kobo/version", "re");
 	if (!fp) {
-		fprintf(stderr, "[FBInk] Couldn't find a Kobo version tag (not running on a Kobo?)!\n");
+		fprintf(stderr,
+			"[FBInk] Couldn't find a Kobo version tag (onboard unmounted or not running on a Kobo?)!\n");
 	} else {
 		// NOTE: I'm not entirely sure this will always have a fixed length, so,
 		//       rely on getline()'s dynamic allocation to be safe...
@@ -286,70 +345,22 @@ static void
 			// final characters, so that's easy enough to extract without
 			// having to worry about the formatting...
 			kobo_id = (unsigned short int) strtoul(line + (nread - 3), NULL, 10);
-			// NOTE: Shaky assumption that almost everything follows the same rotation scheme, with:
-			//       Boot rotation is FB_ROTATE_UD, pickel is FB_ROTATE_UR, nickel is FB_ROTATE_CCW
-			//       With the exception of the Aura HD and the H2O.
-			//       As usual, the H2O² is a mystery, the Rev 1 *may* follow this pattern too...
-			//       Or that might be the Rev 2 only, but that would make it diverge from other Mk7, which is weirder.
-			//       c.f., the relevant bit of fbink_init for more details...
-			device_quirks->koboBootRota = FB_ROTATE_UD;
-			// NOTE: Device code list pilfered from
-			//       https://github.com/geek1011/KoboStuff/blob/gh-pages/kobofirmware.js#L11
-			switch (kobo_id) {
-				case 310:    // Touch A/B (trilogy)
-				case 320:    // Touch C (trilogy)
-				case 340:    // Mini (pixie)
-				case 330:    // Glo (kraken)
-					device_quirks->isKoboNonMT = true;
-					break;
-				case 371:    // Glo HD (alyssum)
-				case 372:    // Touch 2.0 (pika)
-					break;
-				case 360:    // Aura (phoenix)
-					// NOTE: The bottom 10 pixels *may* be blacked out by Nickel? (TBC!)
-					//device_quirks->koboVertOffset = -10;
-					break;
-				case 350:    // Aura HD (dragon)
-					device_quirks->isKoboNonMT = true;
-					// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
-					device_quirks->koboBootRota = FB_ROTATE_UR;
-					break;
-				case 370:    // Aura H2O (dahlia)
-					// NOTE: The top 11 pixels are blacked out by Nickel (behind the bezel)
-					device_quirks->koboVertOffset = 11;
-					// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
-					device_quirks->koboBootRota = FB_ROTATE_UR;
-					break;
-				case 374:    // Aura H2O² (snow)
-					break;
-				case 378:    // Aura H2O² r2 (snow)
-					device_quirks->isKoboMk7 = true;
-					break;
-				case 373:    // Aura ONE (daylight)
-				case 381:    // Aura ONE LE (daylight)
-				case 375:    // Aura SE (star)
-					break;
-				case 379:    // Aura SE r2 (star)
-				case 376:    // Clara HD (nova)
-				case 380:    // Forma (frost)
-					device_quirks->isKoboMk7 = true;
-					break;
-				case 0:
-				default:
-					fprintf(stderr, "[FBInk] Unidentified Kobo device code (%hu)!\n", kobo_id);
-					break;
-			}
+			set_kobo_quirks(kobo_id, device_quirks);
 		}
 		free(line);
 		fclose(fp);
+
+		// Get out now, we're done!
+		return;
 	}
 
-	// And the HWConfig way...
+	// NOTE: Okay, if we got this far, we failed to open /mnt/onboard/.kobo/version,
+	//       which, provided we're really running on a Kobo, can legitimately happen,
+	//       if we were launched in the middle of an USBMS session, in which case onboard is obviously not available ;).
+	//       So try to do it the hard way, via the NTXHWConfig tag...
 	fp = fopen(HWCONFIG_DEVICE, "re");
 	if (!fp) {
-		fprintf(stderr,
-			"[FBInk] Couldn't read from '%s', unable to identify the Cervantes model!\n",
-			HWCONFIG_DEVICE);
+		fprintf(stderr, "[FBInk] Couldn't read from '%s', unable to identify the Kobo model!\n", HWCONFIG_DEVICE);
 	} else {
 		NTXHWConfig config = { 0 };
 
@@ -393,8 +404,8 @@ static void
 			kobo_id = 340;
 		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E60Q9", 5)) {
 			// Touch 2.0 (pika) [372] (if 800x600)
-			kobo_id = 372;
 			// Glo HD (alyssum) [371] (if !800x600)
+			kobo_id = 372;
 		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E606C", 5)) {
 			// Aura HD (dragon) [350]
 			kobo_id = 350;
@@ -416,11 +427,11 @@ static void
 			   !strncmp(kobo_pcbs[config.pcb_id], "E60U0", 5) ||
 			   !strncmp(kobo_pcbs[config.pcb_id], "T60Q0", 5)) {
 			// Aura SE (star) [375]
-			// Aura SE r2 (star) [379]
+			// Aura SE r2 (star) [379] (NOTE: Mildy inaccurate, because the r2 is a Mk7, unlike the r1)
 			kobo_id = 375;
 		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E60QM", 5)) {
 			// Aura H2O² (snow) [374]
-			// Aura H2O² r2 (snow) [378]
+			// Aura H2O² r2 (snow) [378] (NOTE: Mildy inaccurate, because the r2 is a Mk7, unlike the r1)
 			kobo_id = 374;
 		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E80K0", 5)) {
 			// Forma (frost) [380]
@@ -433,11 +444,8 @@ static void
 				kobo_pcbs[config.pcb_id]);
 		}
 
-		fprintf(stderr,
-			"[FBInk] PCB ID: %hhu (%s) is product id %hu\n",
-			config.pcb_id,
-			kobo_pcbs[config.pcb_id],
-			kobo_id);
+		// And now we can do this, almost as accurately as if onboard were mounted ;).
+		set_kobo_quirks(kobo_id, device_quirks);
 	}
 }
 #endif
