@@ -2715,7 +2715,7 @@ int
 void 
 	parse_simple_md(char* string, int size, unsigned char* result)
 {
-	int ci;
+	int ci = 0;
 	bool is_italic = false;
 	bool is_bold = false;
 	while (ci < size) {
