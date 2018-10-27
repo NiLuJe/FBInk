@@ -2706,6 +2706,78 @@ int
 	return rv;
 }
 
+// An extremely rudimentry "markdown" parser. It would probably be wise to cook up something better
+// at some point...
+// This is *italic* text.
+// This is **bold** text.
+// This is ***bold italic*** text.
+// As well as their underscore equivalents
+void 
+	parse_simple_md(char* string, int size, unsigned char* result)
+{
+	int ci;
+	bool is_italic = false;
+	bool is_bold = false;
+	while (ci < size) {
+		switch (string[ci]) {
+		case '*':
+			if (ci + 1 < size && string[ci + 1] == '*') {
+				if (ci + 2 < size && string[ci + 2] == '*') {
+					is_bold = !is_bold;
+					is_italic = !is_italic;
+					result[ci] = CH_IGNORE;
+					result[ci + 1] = CH_IGNORE;
+					result[ci + 2] = CH_IGNORE;
+					ci += 3;
+					break;
+				}
+				is_bold = !is_bold;
+				result[ci] = CH_IGNORE;
+				result[ci + 1] = CH_IGNORE;
+				ci += 2;
+				break;
+			}
+			is_italic = !is_italic;
+			result[ci] = CH_IGNORE;
+			ci++;
+			break;
+		case '_':
+			if (ci + 1 < size && string[ci + 1] == '_') {
+				if (ci + 2 < size && string[ci + 2] == '_') {
+					is_bold = !is_bold;
+					is_italic = !is_italic;
+					result[ci] = CH_IGNORE;
+					result[ci + 1] = CH_IGNORE;
+					result[ci + 2] = CH_IGNORE;
+					ci += 3;
+					break;
+				}
+				is_bold = !is_bold;
+				result[ci] = CH_IGNORE;
+				result[ci + 1] = CH_IGNORE;
+				ci += 2;
+				break;
+			}
+			is_italic = !is_italic;
+			result[ci] = CH_IGNORE;
+			ci++;
+			break;
+		default:
+			if (is_bold && is_italic) {
+				result[ci] = CH_BOLD_ITALIC;
+			} else if (is_bold) {
+				result[ci] = CH_BOLD;
+			} else if (is_italic) {
+				result[ci] = CH_ITALIC;
+			} else {
+				result[ci] = CH_REGULAR;
+			}
+			ci++;
+			break;
+		}
+	}
+}
+
 int
 	fbink_print_ot(int fbfd, char* string, FBInkOTConfig* cfg)
 {
@@ -2732,6 +2804,7 @@ int
 	// Declare buffers early to make cleanup easier
 	FBInkOTLine* lines = NULL;
 	char * brk_buff = NULL;
+	char* fmt_buff = NULL;
 	unsigned char* line_buff = NULL;
 	unsigned char* glyph_buff = NULL;
 
@@ -2774,28 +2847,55 @@ int
 	int font_size_px = (int)(ppi / 72.0f * size_pt);
 
 	stbtt_fontinfo *curr_font = NULL;
-	// TEMP choose a current font
-	if (otFonts.otRegular) {
-		curr_font = otFonts.otRegular;
-	} else if (otFonts.otItalic) {
-		curr_font = otFonts.otItalic;
-	} else if (otFonts.otBold) {
-		curr_font = otFonts.otBold;
-	} else if (otFonts.otBoldItalic) {
-		curr_font = otFonts.otBoldItalic;
-	} else {
-		rv = ERRCODE(ENOENT);
-		goto cleanup;
-	}
 
-	// Get the Scale Factor used for most of the stbtt functions
-	float sf = stbtt_ScaleForPixelHeight(curr_font, (float)font_size_px);
-	// Get the max possible glyph height, and therefore calc the maximum number of lines
-	// that may be printed in the given dimensions.
-	int asc, dec, lg;
-	stbtt_GetFontVMetrics(curr_font, &asc, &dec, &lg);
-	int num_lines = (int)(viewHeight / (uint32_t)roundf(sf * (asc - dec)));
-	int baseline = (int)roundf(sf * asc);
+	struct font_v_metrics {
+		float sf;
+		int asc;
+		int desc;
+		int lg;
+		int baseline;
+	};
+	int max_height = 0;
+	struct font_v_metrics rgMetrics, itMetrics, bdMetrics, bditMetrics;
+	if (otFonts.otRegular) {
+		rgMetrics.sf = stbtt_ScaleForPixelHeight(otFonts.otRegular, (float)font_size_px);
+		stbtt_GetFontVMetrics(otFonts.otRegular, &rgMetrics.asc, &rgMetrics.desc, &rgMetrics.lg);
+		rgMetrics.baseline = (int)roundf(rgMetrics.sf * rgMetrics.asc);
+		int height = (int)roundf(rgMetrics.sf * (rgMetrics.asc - rgMetrics.desc));
+		if (height > max_height) {
+			max_height = height;
+		}
+	}
+	if (otFonts.otItalic) {
+		itMetrics.sf = stbtt_ScaleForPixelHeight(otFonts.otItalic, (float)font_size_px);
+		stbtt_GetFontVMetrics(otFonts.otRegular, &itMetrics.asc, &itMetrics.desc, &itMetrics.lg);
+		itMetrics.baseline = (int)roundf(itMetrics.sf * itMetrics.asc);
+		int height = (int)roundf(itMetrics.sf * (itMetrics.asc - itMetrics.desc));
+		if (height > max_height) {
+			max_height = height;
+		}
+	}
+	if (otFonts.otBold) {
+		bdMetrics.sf = stbtt_ScaleForPixelHeight(otFonts.otBold, (float)font_size_px);
+		stbtt_GetFontVMetrics(otFonts.otRegular, &bdMetrics.asc, &bdMetrics.desc, &bdMetrics.lg);
+		bdMetrics.baseline = (int)roundf(bdMetrics.sf * bdMetrics.asc);
+		int height = (int)roundf(bdMetrics.sf * (bdMetrics.asc - bdMetrics.desc));
+		if (height > max_height) {
+			max_height = height;
+		}
+	}
+	if (otFonts.otBoldItalic) {
+		bditMetrics.sf = stbtt_ScaleForPixelHeight(otFonts.otBoldItalic, (float)font_size_px);
+		stbtt_GetFontVMetrics(otFonts.otRegular, &bditMetrics.asc, &bditMetrics.desc, &bditMetrics.lg);
+		bditMetrics.baseline = (int)roundf(bditMetrics.sf * bditMetrics.asc);
+		int height = (int)roundf(bditMetrics.sf * (bditMetrics.asc - bditMetrics.desc));
+		if (height > max_height) {
+			max_height = height;
+		}
+	}
+	// Get the Scale Factor used for most of the stbtt functions	
+	int num_lines = (int)(viewHeight / (uint32_t)max_height);
+	int baseline;
 	// And allocate the memory for it...
 	lines = calloc(num_lines, sizeof(FBInkOTLine));
 
@@ -2808,8 +2908,16 @@ int
 	init_linebreak();
 	set_linebreaks_utf8((utf8_t*)string, str_len_bytes + 1, "en", brk_buff);
 	LOG("Found linebreaks!");
+
+	// Parse our string for formatting, if requested
+	fmt_buff = calloc(str_len_bytes, sizeof(char));
+	if (cfg->is_formatted) {
+		parse_simple_md(string, str_len_bytes, fmt_buff);
+	}
 	// Lets find our lines! Nothing fancy, just a simple first fit algorithm, but we do
 	// our best not to break inside a word.
+	float sf;
+	int asc, dec, lg;
 	unsigned int chars_in_str = u8_strlen(string);
 	unsigned int c_index = 0;
 	unsigned int tmp_c_index = c_index;
@@ -2828,6 +2936,34 @@ int
 		lines[line].startCharIndex = c_index;
 		lines[line].line_used = true;
 		while (c_index < chars_in_str) {
+			// Check if we need to skip formatting characters
+			if (fmt_buff[c_index] == CH_IGNORE) {
+				c_index++;
+				continue;
+			} else {
+				switch (fmt_buff[c_index]) {
+				case CH_REGULAR:
+					curr_font = otFonts.otRegular;
+					sf = rgMetrics.sf;
+					break;
+				case CH_ITALIC:
+					curr_font = otFonts.otItalic;
+					sf = itMetrics.sf;
+					break;
+				case CH_BOLD:
+					curr_font = otFonts.otBold;
+					sf = bditMetrics.sf;
+					break;
+				case CH_BOLD_ITALIC:
+					curr_font = otFonts.otBoldItalic;
+					sf = bditMetrics.sf;
+					break;
+				}
+			}
+			if (!curr_font) {
+				rv = ERRCODE(ENOENT);
+				goto cleanup;
+			}
 			// First, we check for a mandatory break
 			if (brk_buff[c_index] == LINEBREAK_MUSTBREAK) {
 				unsigned char last_index = c_index;
@@ -2901,8 +3037,8 @@ int
 		goto cleanup;
 	}
 	// Setup the variables needed to render
-	FBInkCoordinates curr_point = { 0, baseline };
-	FBInkCoordinates ins_point = {0, baseline};
+	FBInkCoordinates curr_point = { 0, 0 };
+	FBInkCoordinates ins_point = {0, 0};
 	FBInkCoordinates paint_point = {area.tl.x, area.tl.y};
 	int x0, y0, x1, y1, gw, gh, lw;
 	uint32_t tmp_c;
@@ -2916,6 +3052,38 @@ int
 		lw = 0;
 		int ci;
 		for (ci = lines[line].startCharIndex; ci <= lines[line].endCharIndex;) {
+			if (fmt_buff[ci] == CH_IGNORE) {
+				ci++;
+				continue;
+			} else {
+				switch (fmt_buff[ci]) {
+				case CH_REGULAR:
+					curr_font = otFonts.otRegular;
+					sf = rgMetrics.sf;
+					lg = rgMetrics.lg;
+					baseline = rgMetrics.baseline;
+					break;
+				case CH_ITALIC:
+					curr_font = otFonts.otItalic;
+					sf = itMetrics.sf;
+					lg = itMetrics.lg;
+					baseline = itMetrics.baseline;
+					break;
+				case CH_BOLD:
+					curr_font = otFonts.otBold;
+					sf = bditMetrics.sf;
+					lg = bditMetrics.lg;
+					baseline = bditMetrics.baseline;
+					break;
+				case CH_BOLD_ITALIC:
+					curr_font = otFonts.otBoldItalic;
+					sf = bditMetrics.sf;
+					lg = bditMetrics.lg;
+					baseline = bditMetrics.baseline;
+					break;
+				}
+			}
+			curr_point.y = ins_point.y = baseline;
 			c = u8_nextchar(string, &ci);
 			stbtt_GetCodepointHMetrics(curr_font, c, &adv, &lsb);
 			if (ci == lines[line].startCharIndex && lsb < 0) {
@@ -3000,6 +3168,7 @@ int
 	cleanup:
 		free(lines);
 		free(brk_buff);
+		free(fmt_buff);
 		free(line_buff);
 		free(glyph_buff);
 		if (isFbMapped && !keep_fd) {

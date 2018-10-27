@@ -258,6 +258,13 @@ FBInkDeviceQuirks deviceQuirks = { 0 };
 // Information about the currently loaded OpenType font
 bool otInit = false;
 FBInkOTFonts otFonts = { NULL, NULL, NULL, NULL };
+typedef enum {
+	CH_IGNORE = 0U,
+	CH_REGULAR,
+	CH_ITALIC,
+	CH_BOLD,
+	CH_BOLD_ITALIC
+} CHARACTER_FONT;
 
 #ifndef FBINK_FOR_KINDLE
 static void rotate_coordinates_pickel(FBInkCoordinates*);

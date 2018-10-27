@@ -197,6 +197,7 @@ typedef struct {
 		unsigned char right;  // Right margin as percentage. Max 90%
 	} margins;
 	bool is_centered;         // Horizontal text centering
+	bool is_formatted;		  // Is string "formatted"? Bold/Italic support only, markdown like syntax
 } FBInkOTConfig;
 
 // NOTE: Unless otherwise specified,
