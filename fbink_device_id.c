@@ -19,7 +19,6 @@
 */
 
 #ifndef FBINK_FOR_LINUX
-
 #	include "fbink_device_id.h"
 
 #	if defined(FBINK_FOR_KINDLE)
@@ -463,5 +462,4 @@ static void
 	identify_kobo(device_quirks);
 #	endif
 }
-
 #endif    // !FBINK_FOR_LINUX

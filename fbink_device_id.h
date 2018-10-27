@@ -26,7 +26,6 @@
 #include "fbink_internal.h"
 
 #ifndef FBINK_FOR_LINUX
-
 #	ifndef FBINK_FOR_KINDLE
 // NOTE: This is NTX's homegrown hardware tagging, c.f., arch/arm/mach-imx/ntx_hwconfig.h in a Kobo kernel, for instance
 #		define HWCONFIG_DEVICE "/dev/mmcblk0"
@@ -47,7 +46,6 @@ typedef struct __attribute__((__packed__))
 
 #	if defined(FBINK_FOR_KINDLE)
 #		define KINDLE_SERIAL_NO_LENGTH 16
-
 static bool     is_kindle_device(uint32_t, FBInkDeviceQuirks*);
 static bool     is_kindle_device_new(uint32_t, FBInkDeviceQuirks*);
 static uint32_t from_base(char*, uint8_t);
@@ -55,7 +53,6 @@ static void     identify_kindle(FBInkDeviceQuirks*);
 #        elif defined(FBINK_FOR_CERVANTES)
 static void identify_cervantes(FBInkDeviceQuirks*);
 #        else
-
 // List of NTX/Kobo PCB IDs... For a given device, what we get in NTXHWConfig.pcb_id corresponds to an index in this array.
 // Can thankfully be populated from /bin/ntx_hwconfig with the help of strings and a bit of sed, i.e.,
 // sed -re 's/(^)(.*?)($)/"\2",/g' PCB_IDs.txt
