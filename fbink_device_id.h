@@ -25,14 +25,7 @@
 #include "fbink.h"
 #include "fbink_internal.h"
 
-#if defined(FBINK_FOR_KINDLE)
-#	define KINDLE_SERIAL_NO_LENGTH 16
-
-static bool     is_kindle_device(uint32_t, FBInkDeviceQuirks*);
-static bool     is_kindle_device_new(uint32_t, FBInkDeviceQuirks*);
-static uint32_t from_base(char*, uint8_t);
-static void     identify_kindle(FBInkDeviceQuirks*);
-#elif defined(FBINK_FOR_CERVANTES)
+#ifndef FBINK_FOR_KINDLE
 // NOTE: This is NTX's homegrown hardware tagging, c.f., arch/arm/mach-imx/ntx_hwconfig.h in a Kobo kernel, for instance
 #	define HWCONFIG_DEVICE "/dev/mmcblk0"
 #	define HWCONFIG_OFFSET (1024 * 512)
@@ -41,15 +34,53 @@ typedef struct __attribute__((__packed__))
 {
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wattributes"
-	char    magic[10] __attribute__((nonstring));     // HWCONFIG_MAGIC (i.e., "HW CONFIG ")
-	char    version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.0" on Mk7
+	char                   magic[10] __attribute__((nonstring));     // HWCONFIG_MAGIC (i.e., "HW CONFIG ")
+	char                   version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.0" on Mk7
 #	pragma GCC diagnostic pop
-	uint8_t len;    // Length (in bytes) of the full payload, header excluded (up to 69 on v3.0)
+	uint8_t                len;    // Length (in bytes) of the full payload, header excluded (up to 69 on v3.0)
 	// Header stops here, actual data follows
 	uint8_t pcb_id;    // First field is the PCB ID, which dictates the device model, the only thing we care about ;)
 } NTXHWConfig;
+#endif
+
+#if defined(FBINK_FOR_KINDLE)
+#	define KINDLE_SERIAL_NO_LENGTH 16
+
+static bool     is_kindle_device(uint32_t, FBInkDeviceQuirks*);
+static bool     is_kindle_device_new(uint32_t, FBInkDeviceQuirks*);
+static uint32_t from_base(char*, uint8_t);
+static void     identify_kindle(FBInkDeviceQuirks*);
+#elif defined(FBINK_FOR_CERVANTES)
 static void identify_cervantes(FBInkDeviceQuirks*);
 #else
+
+// List of NTX/Kobo PCB IDs... For a given device, what we get in NTXHWConfig.pcb_id corresponds to an index in this array.
+// Can thankfully be populated from /bin/ntx_hwconfig with the help of strings and a bit of sed, i.e.,
+// sed -re 's/(^)(.*?)($)/"\2",/g' PCB_IDs.txt
+// NOTE: Last updated on 10/27/18, from FW 4.11.11911
+static const char* kobo_pcbs[] = { "E60800", "E60810", "E60820", "E90800",  "E90810",  "E60830",  "E60850", "E50800",
+				   "E50810", "E60860", "E60MT2", "E60M10",  "E60610",  "E60M00",  "E60M30", "E60620",
+				   "E60630", "E60640", "E50600", "E60680",  "E60610C", "E60610D", "E606A0", "E60670",
+				   "E606B0", "E50620", "Q70Q00", "E50610",  "E606C0",  "E606D0",  "E606E0", "E60Q00",
+				   "E60Q10", "E60Q20", "E606F0", "E606F0B", "E60Q30",  "E60QB0",  "E60QC0", "A13120",
+				   "E60Q50", "E606G0", "E60Q60", "E60Q80",  "A13130",  "E606H2",  "E60Q90", "ED0Q00",
+				   "E60QA0", "E60QD0", "E60QF0", "E60QH0",  "E60QG0",  "H70000",  "ED0Q10", "E70Q00",
+				   "H40000", "E60QJ0", "E60QL0", "E60QM0",  "E60QK0",  "E70S00",  "T60Q00", "C31Q00",
+				   "E60QN0", "E60U00", "E70Q10", "E60QP0",  "E60QQ0",  "E70Q20",  "T05R00", "M31Q00",
+				   "E60U10", "E60K00", "E80K00", "E70Q30",  "EA0Q00",  "E60R00" };
+
+// List of NTX/Kobo Display Resolutions...
+// NOTE: If PCB is field 0, DisplayResolution is field 31
+//       The good news is, we'd only need it to differentiate pika from alyssum (as per /bin/kobo_config.sh),
+//       and it's a good news because we don't care about that distinction.
+//       The bad news is, it's a field that was added in v1.0 of that whole NTXHWConfig shenanigan,
+//       and since it started at v0.1, I'm not going to risk it... ;)
+/*
+static const char* kobo_disp_res[] = { "800x600",   "1024x758",   "1024x768",    "1440x1080", "1366x768",
+				       "1448x1072", "1600x1200",  "400x375x2",   "1872x1404", "960x540",
+				       "2200x1650", "1440x640x4", "1600x1200x4", "1920x1440" };
+*/
+
 static void identify_kobo(FBInkDeviceQuirks*);
 #endif
 

@@ -343,6 +343,102 @@ static void
 		free(line);
 		fclose(fp);
 	}
+
+	// And the HWConfig way...
+	fp = fopen(HWCONFIG_DEVICE, "re");
+	if (!fp) {
+		fprintf(stderr,
+			"[FBInk] Couldn't read from '%s', unable to identify the Cervantes model!\n",
+			HWCONFIG_DEVICE);
+	} else {
+		NTXHWConfig config = { 0 };
+
+		if (fseek(fp, HWCONFIG_OFFSET, SEEK_SET) != 0) {
+			fprintf(stderr,
+				"[FBInk] Failed to seek to position 0x%p in '%s'!\n",
+				(void*) HWCONFIG_OFFSET,
+				HWCONFIG_DEVICE);
+		} else {
+			if (fread(&config, sizeof(config), 1, fp) != 1) {
+				fprintf(
+				    stderr, "[FBInk] Failed to read the NTX HWConfig entry on '%s'!\n", HWCONFIG_DEVICE);
+				fclose(fp);
+				return;
+			}
+		}
+		fclose(fp);
+
+		// NOTE: These are NOT NULL-terminated, so we use the size of the storage array,
+		//       and not of the string literal (where sizeof would have appended space for a terminating NULL).
+		//       (i.e., here, sizeof(config.magic) == 10 == strlen(HWCONFIG_MAGIC) while sizeof(HWCONFIG_MAGIC) == 11)
+		if (memcmp(config.magic, HWCONFIG_MAGIC, sizeof(config.magic)) != 0) {
+			fprintf(stderr,
+				"[FBInk] Input device '%s' does not appear to contain an NTX HWConfig entry!\n",
+				HWCONFIG_DEVICE);
+			return;
+		}
+
+		// As per /bin/kobo_config.sh, match PCB IDs to production models...
+		unsigned short int kobo_id = 0;
+		if (!strncmp(kobo_pcbs[config.pcb_id], "E60610", 6)) {
+			// Touch A/B (trilogy) [310]
+			// Touch C (trilogy) [320]
+			kobo_id = 310;
+		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E60QB", 5) ||
+			   !strncmp(kobo_pcbs[config.pcb_id], "E606B", 5)) {
+			// Glo (kraken) [330]
+			kobo_id = 330;
+		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E5061", 5)) {
+			// Mini (pixie) [340]
+			kobo_id = 340;
+		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E60Q9", 5)) {
+			// Touch 2.0 (pika) [372] (if 800x600)
+			kobo_id = 372;
+			// Glo HD (alyssum) [371] (if !800x600)
+		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E606C", 5)) {
+			// Aura HD (dragon) [350]
+			kobo_id = 350;
+		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E606G", 5)) {
+			// Aura H2O (dahlia) [370]
+			kobo_id = 370;
+		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E606F", 5)) {
+			// Aura (phoenix) [360]
+			kobo_id = 360;
+		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E70Q0", 5)) {
+			// Aura ONE (daylight) [373]
+			// Aura ONE LE (daylight) [381]
+			kobo_id = 373;
+		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E60K0", 5) ||
+			   !strncmp(kobo_pcbs[config.pcb_id], "E60U1", 5)) {
+			// Clara HD (nova) [376]
+			kobo_id = 376;
+		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E60QL", 5) ||
+			   !strncmp(kobo_pcbs[config.pcb_id], "E60U0", 5) ||
+			   !strncmp(kobo_pcbs[config.pcb_id], "T60Q0", 5)) {
+			// Aura SE (star) [375]
+			// Aura SE r2 (star) [379]
+			kobo_id = 375;
+		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E60QM", 5)) {
+			// Aura H2O² (snow) [374]
+			// Aura H2O² r2 (snow) [378]
+			kobo_id = 374;
+		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E80K0", 5)) {
+			// Forma (frost) [380]
+			kobo_id = 380;
+		} else {
+			// NOTE: kobo_config.sh defaults to trilogy, which is probably a safety precaution more than anything...
+			fprintf(stderr,
+				"[FBInk] Unidentified Kobo PCB ID (%hhu -> %s)!\n",
+				config.pcb_id,
+				kobo_pcbs[config.pcb_id]);
+		}
+
+		fprintf(stderr,
+			"[FBInk] PCB ID: %hhu (%s) is product id %hu\n",
+			config.pcb_id,
+			kobo_pcbs[config.pcb_id],
+			kobo_id);
+	}
 }
 #endif
 
