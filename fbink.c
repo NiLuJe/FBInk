@@ -62,6 +62,7 @@
 #endif
 
 #ifdef FBINK_WITH_OPENTYPE
+#	include <sys/stat.h>
 // stb_truetype needs maths, and so do we to round to the nearest pixel
 #	include <math.h>
 #	define STB_TRUETYPE_IMPLEMENTATION
@@ -2059,17 +2060,17 @@ int
 	FILE *f = fopen(fp, "rb");
 	unsigned char *data = NULL;
 	if (f) {
-		fseek(f, 0, SEEK_END);
-		long size = ftell(f);
-		fseek(f, 0, SEEK_SET);
-		data = calloc(1, size);
+		int fd = fileno(f);
+		struct stat st;
+		fstat(fd, &st);
+		data = calloc(1, st.st_size);
 		if (!data) {
 			fclose(f);
 			otInit = false;
 			return(ERRCODE(EXIT_FAILURE));
 		}
-		size_t read = fread(data, 1, size, f);
-		if (read != size) {
+		size_t read = fread(data, 1, st.st_size, f);
+		if (read != st.st_size) {
 			free(data);
 			fclose(f);
 			otInit = false;
@@ -2785,6 +2786,8 @@ int
 		//Note, we do a lot of casting floats to ints, so silence those GCC warnings
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wfloat-conversion"
+# 	pragma GCC diagnostic ignored "-Wconversion"
+#	pragma GCC diagnostic ignored "-Wbad-function-cast"
 
 	// Has fbink_init_ot() been called yet?
 	if (!otInit) {
@@ -2804,7 +2807,7 @@ int
 	// Declare buffers early to make cleanup easier
 	FBInkOTLine* lines = NULL;
 	char * brk_buff = NULL;
-	char* fmt_buff = NULL;
+	unsigned char* fmt_buff = NULL;
 	unsigned char* line_buff = NULL;
 	unsigned char* glyph_buff = NULL;
 
@@ -2842,12 +2845,15 @@ int
 		size_pt = 12;
 	}
 	// TODO: handle ppi properly
-	int ppi = 265;
+	unsigned int ppi = 265;
 	// Given the ppi, convert point height to pixels. Note, 1pt is 1/72th of an inch
-	int font_size_px = (int)(ppi / 72.0f * size_pt);
+	unsigned int font_size_px = (unsigned int)(ppi / 72.0f * size_pt);
 
+	// This is a pointer to whichever font is currently active. It gets updated for every
+	// character in the loop, as needed.
 	stbtt_fontinfo *curr_font = NULL;
 
+	// A struct to hold some metrics for each font as a whole
 	struct font_v_metrics {
 		float sf;
 		int asc;
@@ -2856,6 +2862,8 @@ int
 		int baseline;
 	};
 	int max_height = 0;
+	// Calculate some metrics for every font we have loaded.
+	// Please forgive the repetition here.
 	struct font_v_metrics rgMetrics, itMetrics, bdMetrics, bditMetrics;
 	if (otFonts.otRegular) {
 		rgMetrics.sf = stbtt_ScaleForPixelHeight(otFonts.otRegular, (float)font_size_px);
@@ -2893,16 +2901,16 @@ int
 			max_height = height;
 		}
 	}
-	// Get the Scale Factor used for most of the stbtt functions	
-	int num_lines = (int)(viewHeight / (uint32_t)max_height);
-	int baseline;
+	// Calculate the maximum number of lines we may have to deal with
+	unsigned int num_lines = (unsigned int)(viewHeight / (uint32_t)max_height);
+	
 	// And allocate the memory for it...
 	lines = calloc(num_lines, sizeof(FBInkOTLine));
 
 	// Now, lets use libunibreak to find the possible break opportunities in our string.
 
 	// Note: we only care about the byte length here
-	int str_len_bytes = strlen(string);
+	size_t str_len_bytes = strlen(string);
 	brk_buff = calloc(str_len_bytes + 1, sizeof(char));
 
 	init_linebreak();
@@ -2916,15 +2924,18 @@ int
 	}
 	// Lets find our lines! Nothing fancy, just a simple first fit algorithm, but we do
 	// our best not to break inside a word.
-	float sf;
-	int asc, dec, lg;
+
+	// Initialising the following three variables to make GCC happy.
+	float sf = 0.0;
+	int baseline = 0;
+	int lg = 0;
 	unsigned int chars_in_str = u8_strlen(string);
 	unsigned int c_index = 0;
 	unsigned int tmp_c_index = c_index;
 	uint32_t c;
 	unsigned short max_lw = area.br.x - area.tl.x;
 	printf("Max LW: %d\n", max_lw);
-	int line = 0;
+	unsigned int line = 0;
 	// adv = advance: the horizontal distance along the baseline to the origin of
 	//                the next glyph
 	// lsb = left side bearing: The horizontal distance from the origin point to
@@ -2938,7 +2949,7 @@ int
 		while (c_index < chars_in_str) {
 			// Check if we need to skip formatting characters
 			if (fmt_buff[c_index] == CH_IGNORE) {
-				c_index++;
+				u8_inc(string, &c_index);
 				continue;
 			} else {
 				switch (fmt_buff[c_index]) {
@@ -2964,9 +2975,9 @@ int
 				rv = ERRCODE(ENOENT);
 				goto cleanup;
 			}
-			// First, we check for a mandatory break
+			// We check for a mandatory break
 			if (brk_buff[c_index] == LINEBREAK_MUSTBREAK) {
-				unsigned char last_index = c_index;
+				unsigned int last_index = c_index;
 				// We don't want to print the break character
 				u8_dec(string, &last_index);
 				lines[line].endCharIndex = last_index;
@@ -3040,7 +3051,8 @@ int
 	FBInkCoordinates curr_point = { 0, 0 };
 	FBInkCoordinates ins_point = {0, 0};
 	FBInkCoordinates paint_point = {area.tl.x, area.tl.y};
-	int x0, y0, x1, y1, gw, gh, lw;
+	int x0, y0, x1, y1, gw, gh;
+	unsigned int lw;
 	uint32_t tmp_c;
 	unsigned char *lnPtr, *glPtr = NULL;
 	unsigned short start_x, start_y;
@@ -3050,10 +3062,10 @@ int
 	for (line = 0; lines[line].line_used; line++) {
 		printf("Line # %d\n", line);
 		lw = 0;
-		int ci;
+		unsigned int ci;
 		for (ci = lines[line].startCharIndex; ci <= lines[line].endCharIndex;) {
 			if (fmt_buff[ci] == CH_IGNORE) {
-				ci++;
+				u8_inc(string, &ci);
 				continue;
 			} else {
 				switch (fmt_buff[ci]) {
@@ -3123,7 +3135,7 @@ int
 			}
 			curr_point.x += (int)roundf(sf * adv);
 			if (ci < lines[line].endCharIndex) {
-				int tmp_i = ci;
+				unsigned int tmp_i = ci;
 				tmp_c = u8_nextchar(string, &tmp_i);
 				curr_point.x += (int)roundf(sf * stbtt_GetCodepointKernAdvance(curr_font, c, tmp_c));
 			}
