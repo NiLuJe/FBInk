@@ -25,34 +25,36 @@
 #include "fbink.h"
 #include "fbink_internal.h"
 
-#ifndef FBINK_FOR_KINDLE
+#ifndef FBINK_FOR_LINUX
+
+#	ifndef FBINK_FOR_KINDLE
 // NOTE: This is NTX's homegrown hardware tagging, c.f., arch/arm/mach-imx/ntx_hwconfig.h in a Kobo kernel, for instance
-#	define HWCONFIG_DEVICE "/dev/mmcblk0"
-#	define HWCONFIG_OFFSET (1024 * 512)
-#	define HWCONFIG_MAGIC "HW CONFIG "
+#		define HWCONFIG_DEVICE "/dev/mmcblk0"
+#		define HWCONFIG_OFFSET (1024 * 512)
+#		define HWCONFIG_MAGIC "HW CONFIG "
 typedef struct __attribute__((__packed__))
 {
-#	pragma GCC diagnostic push
-#	pragma GCC diagnostic ignored "-Wattributes"
-	char                   magic[10] __attribute__((nonstring));     // HWCONFIG_MAGIC (i.e., "HW CONFIG ")
-	char                   version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.0" on Mk7
-#	pragma GCC diagnostic pop
-	uint8_t                len;    // Length (in bytes) of the full payload, header excluded (up to 69 on v3.0)
+#		pragma GCC diagnostic push
+#		pragma GCC diagnostic ignored "-Wattributes"
+	char magic[10] __attribute__((nonstring));     // HWCONFIG_MAGIC (i.e., "HW CONFIG ")
+	char version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.0" on Mk7
+#		pragma GCC diagnostic pop
+	uint8_t len;    // Length (in bytes) of the full payload, header excluded (up to 69 on v3.0)
 	// Header stops here, actual data follows
 	uint8_t pcb_id;    // First field is the PCB ID, which dictates the device model, the only thing we care about ;)
 } NTXHWConfig;
-#endif
+#	endif    // !FBINK_FOR_KINDLE
 
-#if defined(FBINK_FOR_KINDLE)
-#	define KINDLE_SERIAL_NO_LENGTH 16
+#	if defined(FBINK_FOR_KINDLE)
+#		define KINDLE_SERIAL_NO_LENGTH 16
 
 static bool     is_kindle_device(uint32_t, FBInkDeviceQuirks*);
 static bool     is_kindle_device_new(uint32_t, FBInkDeviceQuirks*);
 static uint32_t from_base(char*, uint8_t);
 static void     identify_kindle(FBInkDeviceQuirks*);
-#elif defined(FBINK_FOR_CERVANTES)
+#        elif defined(FBINK_FOR_CERVANTES)
 static void identify_cervantes(FBInkDeviceQuirks*);
-#else
+#        else
 
 // List of NTX/Kobo PCB IDs... For a given device, what we get in NTXHWConfig.pcb_id corresponds to an index in this array.
 // Can thankfully be populated from /bin/ntx_hwconfig with the help of strings and a bit of sed, i.e.,
@@ -83,8 +85,9 @@ static const char* kobo_disp_res[] = { "800x600",   "1024x758",   "1024x768",   
 
 static void set_kobo_quirks(unsigned short int, FBInkDeviceQuirks*);
 static void identify_kobo(FBInkDeviceQuirks*);
-#endif
+#        endif    // FBINK_FOR_KINDLE
 
 static void identify_device(FBInkDeviceQuirks*);
+#endif    // !FBINK_FOR_LINUX
 
 #endif

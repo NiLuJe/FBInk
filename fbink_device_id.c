@@ -18,9 +18,11 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "fbink_device_id.h"
+#ifndef FBINK_FOR_LINUX
 
-#if defined(FBINK_FOR_KINDLE)
+#	include "fbink_device_id.h"
+
+#	if defined(FBINK_FOR_KINDLE)
 // NOTE: This is adapted from KindleTool,
 //       c.f., https://github.com/NiLuJe/KindleTool/blob/master/KindleTool/kindle_tool.h#L189
 static bool
@@ -173,12 +175,12 @@ static uint32_t
 static void
     identify_kindle(FBInkDeviceQuirks* device_quirks)
 {
-#	ifdef FBINK_FOR_LEGACY
+#		ifdef FBINK_FOR_LEGACY
 	FILE* fp = fopen("/proc/usid", "r");
-#	else
+#		else
 	// NOTE: We only need to forgo CLOEXEC on Legacy Kindles ;).
 	FILE* fp = fopen("/proc/usid", "re");
-#	endif
+#		endif
 	if (!fp) {
 		fprintf(stderr, "[FBInk] Cannot open /proc/usid (not running on a Kindle?)!\n");
 	} else {
@@ -208,7 +210,7 @@ static void
 		}
 	}
 }
-#elif defined(FBINK_FOR_CERVANTES)
+#	elif defined(FBINK_FOR_CERVANTES)
 // Read pcb id from NTX_HWCONFIG for BQ/Fnac devices, adapted from OKreader's kobo_hwconfig:
 // https://github.com/lgeek/okreader/blob/master/src/kobo_hwconfig/kobo_hwconfig.c
 static void
@@ -264,7 +266,7 @@ static void
 		}
 	}
 }
-#else
+#	else
 static void
     set_kobo_quirks(unsigned short int kobo_id, FBInkDeviceQuirks* device_quirks)
 {
@@ -448,16 +450,18 @@ static void
 		set_kobo_quirks(kobo_id, device_quirks);
 	}
 }
-#endif
+#	endif    // FBINK_FOR_KINDLE
 
 static void
     identify_device(FBInkDeviceQuirks* device_quirks)
 {
-#if defined(FBINK_FOR_KINDLE)
+#	if defined(FBINK_FOR_KINDLE)
 	identify_kindle(device_quirks);
-#elif defined(FBINK_FOR_CERVANTES)
+#	elif defined(FBINK_FOR_CERVANTES)
 	identify_cervantes(device_quirks);
-#else
+#	else
 	identify_kobo(device_quirks);
-#endif
+#	endif
 }
+
+#endif    // !FBINK_FOR_LINUX
