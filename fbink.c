@@ -2912,6 +2912,10 @@ int
 	// Note: we only care about the byte length here
 	size_t str_len_bytes = strlen(string);
 	brk_buff = calloc(str_len_bytes + 1, sizeof(char));
+	if (!brk_buff) {
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
 
 	init_linebreak();
 	set_linebreaks_utf8((utf8_t*)string, str_len_bytes + 1, "en", brk_buff);
@@ -2919,6 +2923,10 @@ int
 
 	// Parse our string for formatting, if requested
 	fmt_buff = calloc(str_len_bytes, sizeof(char));
+	if (!fmt_buff) {
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
 	if (cfg->is_formatted) {
 		parse_simple_md(string, str_len_bytes, fmt_buff);
 	}
@@ -3162,6 +3170,7 @@ int
 			paint_point.y++;
 		}
 		paint_point.y += (int)(sf * lg);
+		paint_point.x = area.tl.x;
 		// Woohoo, it's in our framebuffer! Let's refresh the screen.
 		struct mxcfb_rect region = { 0 };
 		region.left = start_x;
