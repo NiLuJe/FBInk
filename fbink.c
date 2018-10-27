@@ -456,13 +456,14 @@ static void
 	}
 #else
 	// NOTE: Apparently, some NTX devices do not appreciate a memset of the full smem_len when they're in a 16bpp mode...
-	//       It's a bitdepth where we know smem_len is much larger (exactly twice) than it strictly should be, to begin with,
-	//       which is nice for us, because it matches what it should be (and still is) in a 32bpp mode,
-	//       which means we don't ever have to worry about remapping it.
-	//       Anyway, I can't seem to have this do anything untoward on my H2O when it's in a 16bpp mode,
-	//       but apparently it softlocks (some?) BQ/Cervantes devices, so take the same approach as on einkfb...
+	//       In this mode, smem_len is twice as large as it needs to be,
+	//       and Cervantes' Qt driver takes this opportunity to use the offscreen memory region to do some... stuff.
+	//       c.f., https://github.com/bq/cervantes-qt/blob/eink-imx508/src/plugins/gfxdrivers/einkfb/einkfb.cpp,
+	//       in particular size/psize vs. mapsize
+	//       Anyway, don't clobber that, as it seems to cause softlocks on BQ/Cervantes,
+	//       and be very conservative, using yres instead of yres_virtual, as Qt *may* already rely on that memory region.
 	if (vInfo.bits_per_pixel == 16) {
-		memset(fbPtr, v, fInfo.line_length * vInfo.yres_virtual);
+		memset(fbPtr, v, fInfo.line_length * vInfo.yres);
 	} else {
 		// NOTE: fInfo.smem_len should actually match fInfo.line_length * vInfo.yres_virtual on 32bpp ;).
 		//       Which is how things should always be, but, alas, poor Yorick...
