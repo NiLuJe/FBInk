@@ -366,8 +366,10 @@ clean:
 	rm -rf Debug/*.so*
 	rm -rf Debug/shared/*.o
 	rm -rf Debug/shared/utf8/*.o
+	rm -rf Debug/shared/libunibreak/src/*.o
 	rm -rf Debug/static/*.o
 	rm -rf Debug/static/utf8/*.o
+	rm -rf Debug/static/libunibreak/src/*.o
 	rm -rf Debug/*.o
 	rm -rf Debug/fbink
 	rm -rf Debug/button_scan
