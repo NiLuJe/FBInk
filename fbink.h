@@ -198,6 +198,7 @@ typedef struct {
 	} margins;
 	bool is_centered;         // Horizontal text centering
 	bool is_formatted;		  // Is string "formatted"? Bold/Italic support only, markdown like syntax
+    bool is_inverted;
 } FBInkOTConfig;
 
 // NOTE: Unless otherwise specified,
@@ -271,7 +272,7 @@ FBINK_API int fbink_printf(int fbfd, const FBInkConfig* fbink_config, const char
     __attribute__((format(printf, 3, 4)));
 
 // Print a string using an OpenType font. Note the caller MUST init with fbink_init_ot() FIRST.
-// This function uses margins (as whole number percentages) instead of rows/columns for 
+// This function uses margins (as whole number percentages) instead of rows/columns for
 // positioning and setting the printable area.
 // Returns -(ERANGE) if the provided margins are out of range, or sum to < 100%
 // Returns -(ENOSYS) if compiled with MINIMAL

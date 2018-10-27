@@ -23,6 +23,9 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+// NOTE: We need to import stbtt early because we depend on stbtt_fontinfo here
+//       We'll want it as static/private, so do that here, because we're importing it earlier than fbink.c
+#define STBTT_STATIC
 #include "stb/stb_truetype.h"
 
 // List of flags for device or screen-specific quirks...

@@ -66,6 +66,8 @@
 // stb_truetype needs maths, and so do we to round to the nearest pixel
 #	include <math.h>
 #	define STB_TRUETYPE_IMPLEMENTATION
+// Make it private, we don't need it anywhere else
+#      define STBTT_STATIC
 // stb_truetype is.... noisy
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wunknown-pragmas"
@@ -2115,8 +2117,8 @@ int
 }
 
 // Free an individual OpenType font structure
-void* 
-	free_ot_font(stbtt_fontinfo* font_info) 
+void*
+    free_ot_font(stbtt_fontinfo* font_info)
 {
 	if (font_info) {
 		free(font_info->data); // This is the font data we loaded
@@ -2713,17 +2715,22 @@ int
 // This is **bold** text.
 // This is ***bold italic*** text.
 // As well as their underscore equivalents
-void 
+void
 	parse_simple_md(char* string, int size, unsigned char* result)
 {
 	int ci = 0;
+    char ch;
 	bool is_italic = false;
 	bool is_bold = false;
 	while (ci < size) {
-		switch (string[ci]) {
+		printf("ci: %d (< %d) is %c\n", ci, size, string[ci]);
+		switch (ch = string[ci]) {
 		case '*':
-			if (ci + 1 < size && string[ci + 1] == '*') {
-				if (ci + 2 < size && string[ci + 2] == '*') {
+		case '_':
+			if (ci + 1 < size && string[ci + 1] == ch) {
+				printf("ci: %d && ci + 1 == %c\n", ci, ch);
+				if (ci + 2 < size && string[ci + 2] == ch) {
+					printf("ci: %d && ci + 2 == %c\n", ci, ch);
 					is_bold = !is_bold;
 					is_italic = !is_italic;
 					result[ci] = CH_IGNORE;
@@ -2738,25 +2745,10 @@ void
 				ci += 2;
 				break;
 			}
-			is_italic = !is_italic;
-			result[ci] = CH_IGNORE;
-			ci++;
-			break;
-		case '_':
-			if (ci + 1 < size && string[ci + 1] == '_') {
-				if (ci + 2 < size && string[ci + 2] == '_') {
-					is_bold = !is_bold;
-					is_italic = !is_italic;
-					result[ci] = CH_IGNORE;
-					result[ci + 1] = CH_IGNORE;
-					result[ci + 2] = CH_IGNORE;
-					ci += 3;
-					break;
-				}
-				is_bold = !is_bold;
-				result[ci] = CH_IGNORE;
-				result[ci + 1] = CH_IGNORE;
-				ci += 2;
+			// Try to avoid flagging a single underscore in the middle of a word.
+			if (ch == '_' && ci > 0 && string[ci - 1] != ' ' && string[ci + 1] != ' ') {
+				result[ci] = CH_REGULAR;
+				ci++;
 				break;
 			}
 			is_italic = !is_italic;
@@ -2788,6 +2780,11 @@ int
 #	pragma GCC diagnostic ignored "-Wfloat-conversion"
 # 	pragma GCC diagnostic ignored "-Wconversion"
 #	pragma GCC diagnostic ignored "-Wbad-function-cast"
+
+	// Abort if we were passed an empty string
+	if (! *string) {
+			return ERRCODE(EXIT_FAILURE);
+	}
 
 	// Has fbink_init_ot() been called yet?
 	if (!otInit) {
@@ -2922,7 +2919,7 @@ int
 	LOG("Found linebreaks!");
 
 	// Parse our string for formatting, if requested
-	fmt_buff = calloc(str_len_bytes, sizeof(char));
+    fmt_buff = calloc(str_len_bytes + 1, sizeof(char));
 	if (!fmt_buff) {
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
@@ -3065,7 +3062,7 @@ int
 	unsigned char *lnPtr, *glPtr = NULL;
 	unsigned short start_x, start_y;
 	// stb_truetype renders glyphs with color inverted to what our blitting functions expect
-	unsigned char invert = 0xff;
+    unsigned char invert = cfg->is_inverted ? 0x00 : 0xFF;
 	// Render!
 	for (line = 0; lines[line].line_used; line++) {
 		printf("Line # %d\n", line);
