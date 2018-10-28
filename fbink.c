@@ -3071,7 +3071,7 @@ int
 			// stb_truetype does not appear to create a bounding box for space characters,
 			// so we need to handle this situation.
 			if (!gw && adv) {
-				lw = curr_x + (int)roundf(sf * adv);
+				lw = curr_x;
 			} else {
 				lw = curr_x + x0 + gw;
 			}
@@ -3205,10 +3205,12 @@ int
 			gh = y1 - y0;
 			ins_point.x = curr_point.x + x0;
 			ins_point.y += y0;
-			if (!gw && adv) {
-				lw = curr_point.x + (int)roundf(sf * adv);
-			} else {
+			// We only increase the lw if glyph not a space This hopefully prevent trailing
+			// spaces from being printed on a line.
+			if (gw) {
 				lw = ins_point.x + gw;
+			} else {
+				lw = ins_point.x;
 			}
 			printf("Current Rendered LW: %d  Line# %d\n", lw, line);
 			// Just in case our arithmetic was off by a pixel or two...
