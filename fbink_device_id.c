@@ -390,16 +390,19 @@ static void
 			return;
 		}
 
-		// As per /bin/kobo_config.sh, match PCB IDs to production models via a LUT...
-		if (config.pcb_id > sizeof(kobo_ids)) {
+		// As per /bin/kobo_config.sh, match PCB IDs to Product IDs via a LUT...
+		unsigned short int kobo_id = 0;
+		if (config.pcb_id >= (sizeof(kobo_ids) / sizeof(*kobo_ids))) {
 			// NOTE: kobo_config.sh defaults to trilogy, which is probably a safety precaution more than anything...
-			fprintf(stderr, "[FBInk] Unidentified Kobo PCB ID index (%hhu)!\n", config.pcb_id);
+			fprintf(stderr,
+				"[FBInk] Unknown Kobo PCB ID index (%hhu >= %zu)!\n",
+				config.pcb_id,
+				(sizeof(kobo_ids) / sizeof(*kobo_ids)));
 		} else {
-			unsigned short int kobo_id = kobo_ids[config.pcb_id];
-
-			// And now we can do this, almost as accurately as if onboard were mounted ;).
-			set_kobo_quirks(kobo_id, device_quirks);
+			kobo_id = kobo_ids[config.pcb_id];
 		}
+		// And now we can do this, almost as accurately as if onboard were mounted ;).
+		set_kobo_quirks(kobo_id, device_quirks);
 	}
 }
 #	endif    // FBINK_FOR_KINDLE
