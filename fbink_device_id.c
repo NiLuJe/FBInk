@@ -314,7 +314,7 @@ static void
 			break;
 		case 379:    // Aura SE r2 (star)
 		case 376:    // Clara HD (nova)
-		case 380:    // Forma (frost)
+		case 377:    // Forma (frost)
 			device_quirks->isKoboMk7 = true;
 			break;
 		case 0:
