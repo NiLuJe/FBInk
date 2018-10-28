@@ -330,7 +330,7 @@ static void
     identify_kobo(FBInkDeviceQuirks* device_quirks)
 {
 	// Get the model from Nickel's version tag file...
-	FILE* fp = fopen("/mnt/onboard/.kobo/versionS", "re");
+	FILE* fp = fopen("/mnt/onboard/.kobo/version", "re");
 	if (!fp) {
 		fprintf(stderr,
 			"[FBInk] Couldn't find a Kobo version tag (onboard unmounted or not running on a Kobo?)!\n");
