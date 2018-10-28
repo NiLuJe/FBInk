@@ -2728,14 +2728,14 @@ void
 	bool is_italic = false;
 	bool is_bold = false;
 	while (ci < size) {
-		printf("ci: %d (< %d) is %c\n", ci, size, string[ci]);
+		//printf("ci: %d (< %d) is %c\n", ci, size, string[ci]);
 		switch (ch = string[ci]) {
 		case '*':
 		case '_':
 			if (ci + 1 < size && string[ci + 1] == ch) {
-				printf("ci: %d && ci + 1 == %c\n", ci, ch);
+				//printf("ci: %d && ci + 1 == %c\n", ci, ch);
 				if (ci + 2 < size && string[ci + 2] == ch) {
-					printf("ci: %d && ci + 2 == %c\n", ci, ch);
+					//printf("ci: %d && ci + 2 == %c\n", ci, ch);
 					is_bold = !is_bold;
 					is_italic = !is_italic;
 					result[ci] = CH_IGNORE;
@@ -2997,13 +2997,13 @@ int
 	unsigned int tmp_c_index = c_index;
 	uint32_t c;
 	unsigned short max_lw = area.br.x - area.tl.x;
-	printf("Max LW: %d\n", max_lw);
-	unsigned int line = 0;
+	unsigned int line;
 	// adv = advance: the horizontal distance along the baseline to the origin of
 	//                the next glyph
 	// lsb = left side bearing: The horizontal distance from the origin point to
 	//                          left edge of the glyph
 	int adv, lsb, curr_x;
+	bool complete_str = false;
 	for (line = 0; line < num_lines; line++) {
 		// Every line has a start character index and an end char index.
 		curr_x = 0;
@@ -3069,6 +3069,12 @@ int
 			// Better backtrack to see if we can find a suitable break opportunity
 			unsigned short ot_meas_padding = 3; // Just so we don't use a magic number
 			if (curr_x + gw_from_origin > (max_lw - ot_meas_padding)) {
+				// Is the glyph itself too wide for our printable area? If so, we abort
+				if (x1 - x0 >= max_lw) {
+					ELOG("[FBInk] Font size too big for current printable area. Try to reduce margins or font size");
+					rv = ERRCODE(EXIT_FAILURE);
+					goto cleanup;
+				}
 				// Set our final line character to the previous char in case we cannot
 				// find a suitable breakpoint
 				u8_dec(string, &c_index);
@@ -3098,10 +3104,14 @@ int
 		if (c_index >= chars_in_str) {
 			u8_dec(string, &c_index);
 			lines[line].endCharIndex = c_index;
+			complete_str = true;
 			break;
 		}
 	}
-	LOG("Lines Found!");
+	ELOG("[FBInk] %d lines to be printed", (line + 1));
+	if (!complete_str) {
+		ELOG("[FBInk] String too long. Truncated to %d characters", (c_index + 1));
+	}
 	// Hopefully, we have some lines to render!
 
 	// Create a bitmap buffer to render a single line. We don't render the glyphs directly to the
