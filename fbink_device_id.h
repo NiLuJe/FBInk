@@ -95,9 +95,11 @@ static const unsigned short int kobo_ids[] = { 0, 0,   0,   0,   0,   0,   0, 0,
 					       0, 375, 0,   0,   0,   0,   0, 0,   376, 376, 380, 0,   0,   0 };
 
 // Same idea, but for the various CPUs via NTXHWConfig.cpu...
+/*
 static const char* kobo_cpus[] = {
 	"mx35", "m166e", "mx50", "mx6sl", "it8951", "i386", "mx7d", "mx6ull", "mx6sll", "mx6dl"
 };
+*/
 
 // List of NTX/Kobo Display Resolutions...
 // NOTE: If PCB is field 0, DisplayResolution is field 31
