@@ -3036,9 +3036,11 @@ int
 			int gw_from_origin = x1;
 			printf("GW: %d\n", (x1 - x0));
 			printf("Calced LW: %d\n", (curr_x + gw_from_origin));
+
 			// Oops, we appear to have advanced too far :)
 			// Better backtrack to see if we can find a suitable break opportunity
-			if (curr_x + gw_from_origin > max_lw) {
+			unsigned short ot_meas_padding = 3; // Just so we don't use a magic number
+			if (curr_x + gw_from_origin > (max_lw - ot_meas_padding)) {
 				// Set our final line character to the previous char in case we cannot
 				// find a suitable breakpoint
 				u8_dec(string, &c_index);
@@ -3147,8 +3149,13 @@ int
 			ins_point.y += y0;
 			lw = ins_point.x + gw;
 			// Just in case our arithmetic was off by a pixel or two...
+			// Note that we are deliberately using a slightly shorter line
+			// width during the measurement phase, so this should not happen.
+			// If it does occur, we will now exit instead of clipping the glyph
+			// bounding box, to avoid the possiblity of stb_truetype segfaulting.
 			if (lw > max_lw) {
-				gw -= lw - max_lw;
+				rv = ERRCODE(EXIT_FAILURE);
+				goto cleanup;
 			}
 			// Because the stbtt_MakeCodepointBitmap documentation is a bit vague on this
 			// point, the parameter 'out_stride' should be the width of the surface in our
