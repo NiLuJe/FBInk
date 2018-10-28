@@ -3005,9 +3005,12 @@ int
 	//                          left edge of the glyph
 	int adv, lsb, curr_x;
 	bool complete_str = false;
+	int x0, y0, x1, y1, gw, gh;
+	unsigned int lw;
 	for (line = 0; line < num_lines; line++) {
 		// Every line has a start character index and an end char index.
 		curr_x = 0;
+		lw = 0;
 		lines[line].startCharIndex = c_index;
 		lines[line].line_used = true;
 		while (c_index < chars_in_str) {
@@ -3057,41 +3060,55 @@ int
 			// Note, these metrics are unscaled, we need to use our previously
 			// obtained scale factor (sf) to get the metrics as pixels
 			stbtt_GetCodepointHMetrics(curr_font, (int)c, &adv, &lsb);
+			
 			// If starting a line with a character that has a negative lsb
 			// eg 'j', move our start point a little.
 			if (curr_x == 0 && lsb < 0) {
 				curr_x += (int)roundf(sf * abs(lsb));
 			}
-			int x0, x1;
-			stbtt_GetCodepointBitmapBox(curr_font, c, sf, sf, &x0, 0, &x1, 0);
-			int gw_from_origin = x1;
-
+			stbtt_GetCodepointBitmapBox(curr_font, c, sf, sf, &x0, &y0, &x1, &y1);
+			gw = x1 - x0;
+			// stb_truetype does not appear to create a bounding box for space characters,
+			// so we need to handle this situation.
+			if (!gw && adv) {
+				lw = curr_x + (int)roundf(sf * adv);
+			} else {
+				lw = curr_x + x0 + gw;
+			}
+			printf("Current Measured LW: %d  Line# %d\n", lw, line);
 			// Oops, we appear to have advanced too far :)
 			// Better backtrack to see if we can find a suitable break opportunity
-			unsigned short ot_meas_padding = 3; // Just so we don't use a magic number
-			if (curr_x + gw_from_origin > (max_lw - ot_meas_padding)) {
+			//unsigned short ot_meas_padding = 3; // Just so we don't use a magic number
+			if (lw > max_lw) {
 				// Is the glyph itself too wide for our printable area? If so, we abort
-				if (x1 - x0 >= max_lw) {
+				if (gw >= max_lw) {
 					ELOG("[FBInk] Font size too big for current printable area. Try to reduce margins or font size");
 					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
 				}
-				// Set our final line character to the previous char in case we cannot
-				// find a suitable breakpoint
+				// Reset the index to our current character (c_index is ahead by one at this point)
 				u8_dec(string, &c_index);
-				// Note, we need to do this a second time, to get the previous character, as
-				// u8_nextchar() 'consumes' a character.
-				u8_dec(string, &c_index);
-				lines[line].endCharIndex = c_index;
-				for (; c_index > lines[line].startCharIndex; u8_dec(string, &c_index)) {
-					if (brk_buff[c_index] == LINEBREAK_ALLOWBREAK) {
-						lines[line].endCharIndex = c_index;
-						break;
+				// If the current glyph is a space, handle that now.
+				if (brk_buff[c_index] == LINEBREAK_ALLOWBREAK) {
+					tmp_c_index = c_index;
+					u8_dec(string, &tmp_c_index);
+					lines[line].endCharIndex = tmp_c_index;
+					u8_inc(string, &c_index);
+					break;
+				} else {
+					// Note, we need to do this a second time, to get the previous character, as
+					// u8_nextchar() 'consumes' a character.
+					u8_dec(string, &c_index);
+					lines[line].endCharIndex = c_index;
+					for (; c_index > lines[line].startCharIndex; u8_dec(string, &c_index)) {
+						if (brk_buff[c_index] == LINEBREAK_ALLOWBREAK) {
+							lines[line].endCharIndex = c_index;
+							break;
+						}
 					}
+					u8_inc(string, &c_index);
+					break;
 				}
-				u8_inc(string, &c_index);
-				// We are done with this line.
-				break;
 			}
 			curr_x += (int)roundf(sf * adv);
 			// Adjust our x position for kerning, because we can :)
@@ -3109,7 +3126,7 @@ int
 			break;
 		}
 	}
-	ELOG("[FBInk] %d lines to be printed", (line + 1));
+	ELOG("[FBInk] %d lines to be printed", line);
 	if (!complete_str) {
 		ELOG("[FBInk] String too long. Truncated to %d characters", (c_index + 1));
 	}
@@ -3130,15 +3147,16 @@ int
 	FBInkCoordinates curr_point = { 0, 0 };
 	FBInkCoordinates ins_point = {0, 0};
 	FBInkCoordinates paint_point = {area.tl.x, area.tl.y};
-	int x0, y0, x1, y1, gw, gh;
-	unsigned int lw;
 	uint32_t tmp_c;
 	unsigned char *lnPtr, *glPtr = NULL;
 	unsigned short start_x, start_y;
 	// stb_truetype renders glyphs with color inverted to what our blitting functions expect
     unsigned char invert = cfg->is_inverted ? 0x00 : 0xFF;
 	// Render!
-	for (line = 0; lines[line].line_used; line++) {
+	for (line = 0; line < num_lines; line++) {
+		if (!lines[line].line_used) {
+			break;
+		}
 		printf("Line # %d\n", line);
 		lw = 0;
 		unsigned int ci;
@@ -3179,7 +3197,7 @@ int
 			curr_point.y = ins_point.y = baseline;
 			c = u8_nextchar(string, &ci);
 			stbtt_GetCodepointHMetrics(curr_font, c, &adv, &lsb);
-			if (ci == lines[line].startCharIndex && lsb < 0) {
+			if (curr_point.x == 0 && lsb < 0) {
 				curr_point.x += (int)roundf(sf * abs(lsb));
 			}
 			stbtt_GetCodepointBitmapBox(curr_font, c, sf, sf, &x0, &y0, &x1, &y1);
@@ -3187,7 +3205,12 @@ int
 			gh = y1 - y0;
 			ins_point.x = curr_point.x + x0;
 			ins_point.y += y0;
-			lw = ins_point.x + gw;
+			if (!gw && adv) {
+				lw = curr_point.x + (int)roundf(sf * adv);
+			} else {
+				lw = ins_point.x + gw;
+			}
+			printf("Current Rendered LW: %d  Line# %d\n", lw, line);
 			// Just in case our arithmetic was off by a pixel or two...
 			// Note that we are deliberately using a slightly shorter line
 			// width during the measurement phase, so this should not happen.
@@ -3199,26 +3222,28 @@ int
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
 			}
-			// Because the stbtt_MakeCodepointBitmap documentation is a bit vague on this
-			// point, the parameter 'out_stride' should be the width of the surface in our
-			// buffer. It's designed so that the glyph can be rendered directly to a screen buffer.
-			// For example, if we were rendering directly to a screen of 1080 x 1440m out_stride
-			// should be set to 1080. In this case however, we want to render to a 'box' of the
-			// dimensions of the glyph, so we set 'out_stride' to the glyph width.
-			stbtt_MakeCodepointBitmap(curr_font, glyph_buff, gw, gh, gw, sf, sf, c);
-			// paint our glyph into the line buffer
-			lnPtr = line_buff + ins_point.x + (max_lw * ins_point.y);
-			glPtr = glyph_buff;
-			for (int j = 0; j < gh; j++) {
-				for (int k = 0; k < gw; k++) {
-					// 0 value pixels are transparent
-					if (glPtr[k] > 0) {
-						lnPtr[k] = glPtr[k];
+			if (gw) {
+				// Because the stbtt_MakeCodepointBitmap documentation is a bit vague on this
+				// point, the parameter 'out_stride' should be the width of the surface in our
+				// buffer. It's designed so that the glyph can be rendered directly to a screen buffer.
+				// For example, if we were rendering directly to a screen of 1080 x 1440m out_stride
+				// should be set to 1080. In this case however, we want to render to a 'box' of the
+				// dimensions of the glyph, so we set 'out_stride' to the glyph width.
+				stbtt_MakeCodepointBitmap(curr_font, glyph_buff, gw, gh, gw, sf, sf, c);
+				// paint our glyph into the line buffer
+				lnPtr = line_buff + ins_point.x + (max_lw * ins_point.y);
+				glPtr = glyph_buff;
+				for (int j = 0; j < gh; j++) {
+					for (int k = 0; k < gw; k++) {
+						// 0 value pixels are transparent
+						if (glPtr[k] > 0) {
+							lnPtr[k] = glPtr[k];
+						}
 					}
+					// And advance one scanline. Quick! Hide! Pointer arithmetic
+					glPtr += gw;
+					lnPtr += max_lw;
 				}
-				// And advance one scanline. Quick! Hide! Pointer arithmetic
-				glPtr += gw;
-				lnPtr += max_lw;
 			}
 			curr_point.x += (int)roundf(sf * adv);
 			if (ci < lines[line].endCharIndex) {
