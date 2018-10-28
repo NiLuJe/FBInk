@@ -31,18 +31,34 @@
 #		define HWCONFIG_DEVICE "/dev/mmcblk0"
 #		define HWCONFIG_OFFSET (1024 * 512)
 #		define HWCONFIG_MAGIC "HW CONFIG "
+#		ifdef FBINK_FOR_CERVANTES
 typedef struct __attribute__((__packed__))
 {
-#		pragma GCC diagnostic push
-#		pragma GCC diagnostic ignored "-Wattributes"
+#			pragma GCC diagnostic push
+#			pragma GCC diagnostic ignored "-Wattributes"
 	char magic[10] __attribute__((nonstring));     // HWCONFIG_MAGIC (i.e., "HW CONFIG ")
-	char version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.1" on Mk7
-#		pragma GCC diagnostic pop
+	char version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.1" on Mk.7
+#			pragma GCC diagnostic pop
 	uint8_t len;    // Length (in bytes) of the full payload, header excluded (up to 70 on v3.1)
 	// Header stops here, actual data follows
 	uint8_t pcb_id;    // First field is the PCB ID, which dictates the device model, the only thing we care about ;)
 } NTXHWConfig;
-#	endif    // !FBINK_FOR_KINDLE
+#		else
+typedef struct __attribute__((__packed__))
+{
+#			pragma GCC diagnostic push
+#			pragma GCC diagnostic ignored "-Wattributes"
+	char    magic[10] __attribute__((nonstring));     // HWCONFIG_MAGIC (i.e., "HW CONFIG ")
+	char    version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.1" on Mk.7
+#			pragma GCC diagnostic pop
+	uint8_t len;    // Length (in bytes) of the full payload, header excluded (up to 70 on v3.1)
+	// Header stops here, actual data follows
+	uint8_t pcb_id;     // First field is the PCB ID, which dictates the device model, the only thing we care about ;)
+	uint8_t foo[26];    // Skip a bunch of fields
+	uint8_t cpu;        // The device's CPU, which'll help differentiate some Kobo Mk.7 variants
+} NTXHWConfig;
+#		endif    // FBINK_FOR_CERVANTES
+#	endif            // !FBINK_FOR_KINDLE
 
 #	if defined(FBINK_FOR_KINDLE)
 #		define KINDLE_SERIAL_NO_LENGTH 16
@@ -78,12 +94,19 @@ static const unsigned short int kobo_ids[] = { 0, 0,   0,   0,   0,   0,   0, 0,
 					       0, 0,   0,   0,   0,   0,   0, 373, 0,   0,   375, 374, 0,   0, 375, 0,
 					       0, 375, 0,   0,   0,   0,   0, 0,   376, 376, 380, 0,   0,   0 };
 
+// Same idea, but for the various CPUs via NTXHWConfig.cpu...
+static const char* kobo_cpus[] = {
+	"mx35", "m166e", "mx50", "mx6sl", "it8951", "i386", "mx7d", "mx6ull", "mx6sll", "mx6dl"
+};
+
 // List of NTX/Kobo Display Resolutions...
 // NOTE: If PCB is field 0, DisplayResolution is field 31
 //       The good news is, we'd only need it to differentiate pika from alyssum (as per /bin/kobo_config.sh),
 //       and it's a good news because we don't care about that distinction.
 //       The bad news is, it's a field that was added in v1.0 of that whole NTXHWConfig shenanigan,
 //       and since it started at v0.1, I'm not going to risk it... ;)
+//       Good decision, as, apparently, the first NTX-built imx508 Touch may only have handled v0.7
+//       The next set of imx507 devices had jumped to v1.6, though ;).
 /*
 static const char* kobo_disp_res[] = { "800x600",   "1024x758",   "1024x768",    "1440x1080", "1366x768",
 				       "1448x1072", "1600x1200",  "400x375x2",   "1872x1404", "960x540",

@@ -330,7 +330,7 @@ static void
     identify_kobo(FBInkDeviceQuirks* device_quirks)
 {
 	// Get the model from Nickel's version tag file...
-	FILE* fp = fopen("/mnt/onboard/.kobo/version", "re");
+	FILE* fp = fopen("/mnt/onboard/.kobo/versionS", "re");
 	if (!fp) {
 		fprintf(stderr,
 			"[FBInk] Couldn't find a Kobo version tag (onboard unmounted or not running on a Kobo?)!\n");
@@ -400,6 +400,27 @@ static void
 				(sizeof(kobo_ids) / sizeof(*kobo_ids)));
 		} else {
 			kobo_id = kobo_ids[config.pcb_id];
+			// Discriminate Mk.7 version for dual rev models by checking the CPU...
+			if (kobo_id == 374 || kobo_id == 375) {
+				if (config.cpu >= (sizeof(kobo_cpus) / sizeof(*kobo_cpus))) {
+					fprintf(stderr,
+					"[FBInk] Unknown Kobo CPU index (%hhu >= %zu)!\n",
+					config.cpu,
+					(sizeof(kobo_cpus) / sizeof(*kobo_cpus)));
+				} else {
+					if (!strncmp(kobo_cpus[config.cpu], "mx6sll", 6)) {
+						kobo_id+=4U;
+					}
+				}
+			}
+			fprintf(stderr,
+					"[FBInk] Unknown Kobo CPU index (%hhu >= %zu)!\n",
+					config.cpu,
+					(sizeof(kobo_cpus) / sizeof(*kobo_cpus)));
+			fprintf(stderr, "[FBInk] Kobo CPU: %s!\n", kobo_cpus[config.cpu]);
+			for (uint8_t i = 0; i < sizeof(config.foo); i++) {
+				fprintf(stderr, "[FBInk] foo:%hhu -> %hhu!\n", i, config.foo[i]);
+			}
 		}
 		// And now we can do this, almost as accurately as if onboard were mounted ;).
 		set_kobo_quirks(kobo_id, device_quirks);
