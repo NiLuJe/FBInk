@@ -138,7 +138,6 @@ typedef struct FBInkOTLine {
 	unsigned int startCharIndex;
 	unsigned int endCharIndex;
 	bool line_used;
-	int line_gap;
 } FBInkOTLine;
 
 typedef struct FBInkOTFonts {

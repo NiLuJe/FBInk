@@ -3048,7 +3048,7 @@ int
 				// u8_nextchar() 'consumes' a character.
 				u8_dec(string, &c_index);
 				lines[line].endCharIndex = c_index;
-				for (c_index; c_index > lines[line].startCharIndex; u8_dec(string, &c_index)) {
+				for (; c_index > lines[line].startCharIndex; u8_dec(string, &c_index)) {
 					if (brk_buff[c_index] == LINEBREAK_ALLOWBREAK) {
 						lines[line].endCharIndex = c_index;
 						break;
@@ -3079,9 +3079,9 @@ int
 	// Create a bitmap buffer to render a single line. We don't render the glyphs directly to the
 	// fb here, as we need to do some simple blending, and it makes it easier to calculate our
 	// centering if required.
-	line_buff = calloc(max_lw * font_size_px, sizeof(char));
+	line_buff = calloc(max_lw * font_size_px, sizeof(unsigned char));
 	// We also don't want to be creating a new buffer for every glyph
-	glyph_buff = calloc(font_size_px * font_size_px * 2, sizeof(char));
+	glyph_buff = calloc(font_size_px * font_size_px * 2, sizeof(unsigned char));
 	if (!line_buff || !glyph_buff) {
 		goto cleanup;
 	}
