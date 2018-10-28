@@ -390,63 +390,16 @@ static void
 			return;
 		}
 
-		// As per /bin/kobo_config.sh, match PCB IDs to production models...
-		unsigned short int kobo_id = 0;
-		if (!strncmp(kobo_pcbs[config.pcb_id], "E60610", 6)) {
-			// Touch A/B (trilogy) [310]
-			// Touch C (trilogy) [320]
-			kobo_id = 310;
-		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E60QB", 5) ||
-			   !strncmp(kobo_pcbs[config.pcb_id], "E606B", 5)) {
-			// Glo (kraken) [330]
-			kobo_id = 330;
-		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E5061", 5)) {
-			// Mini (pixie) [340]
-			kobo_id = 340;
-		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E60Q9", 5)) {
-			// Touch 2.0 (pika) [372] (if 800x600)
-			// Glo HD (alyssum) [371] (if !800x600)
-			kobo_id = 372;
-		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E606C", 5)) {
-			// Aura HD (dragon) [350]
-			kobo_id = 350;
-		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E606G", 5)) {
-			// Aura H2O (dahlia) [370]
-			kobo_id = 370;
-		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E606F", 5)) {
-			// Aura (phoenix) [360]
-			kobo_id = 360;
-		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E70Q0", 5)) {
-			// Aura ONE (daylight) [373]
-			// Aura ONE LE (daylight) [381]
-			kobo_id = 373;
-		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E60K0", 5) ||
-			   !strncmp(kobo_pcbs[config.pcb_id], "E60U1", 5)) {
-			// Clara HD (nova) [376]
-			kobo_id = 376;
-		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E60QL", 5) ||
-			   !strncmp(kobo_pcbs[config.pcb_id], "E60U0", 5) ||
-			   !strncmp(kobo_pcbs[config.pcb_id], "T60Q0", 5)) {
-			// Aura SE (star) [375]
-			// Aura SE r2 (star) [379] (NOTE: Mildy inaccurate, because the r2 is a Mk7, unlike the r1)
-			kobo_id = 375;
-		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E60QM", 5)) {
-			// Aura H2O² (snow) [374]
-			// Aura H2O² r2 (snow) [378] (NOTE: Mildy inaccurate, because the r2 is a Mk7, unlike the r1)
-			kobo_id = 374;
-		} else if (!strncmp(kobo_pcbs[config.pcb_id], "E80K0", 5)) {
-			// Forma (frost) [380]
-			kobo_id = 380;
-		} else {
+		// As per /bin/kobo_config.sh, match PCB IDs to production models via a LUT...
+		if (config.pcb_id > sizeof(kobo_ids)) {
 			// NOTE: kobo_config.sh defaults to trilogy, which is probably a safety precaution more than anything...
-			fprintf(stderr,
-				"[FBInk] Unidentified Kobo PCB ID (%hhu -> %s)!\n",
-				config.pcb_id,
-				kobo_pcbs[config.pcb_id]);
-		}
+			fprintf(stderr, "[FBInk] Unidentified Kobo PCB ID index (%hhu)!\n", config.pcb_id);
+		} else {
+			unsigned short int kobo_id = kobo_ids[config.pcb_id];
 
-		// And now we can do this, almost as accurately as if onboard were mounted ;).
-		set_kobo_quirks(kobo_id, device_quirks);
+			// And now we can do this, almost as accurately as if onboard were mounted ;).
+			set_kobo_quirks(kobo_id, device_quirks);
+		}
 	}
 }
 #	endif    // FBINK_FOR_KINDLE

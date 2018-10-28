@@ -13,28 +13,45 @@ data = "./Kobo_PCB_IDs.txt"
 with open(data, "r") as f:
 	for line in f:
 		if line.startswith("E60610"):
-			print("TRILOGY,")
+			# Touch A/B (trilogy) [310]
+			# Touch C (trilogy) [320]
+			print("310,")
 		elif line.startswith("E60QB") or line.startswith("E606B"):
-			print("KRAKEN,")
+			# Glo (kraken) [330]
+			print("330,")
 		elif line.startswith("E5061"):
-			print("PIXIE,")
+			# Mini (pixie) [340]
+			print("340,")
 		elif line.startswith("E60Q9"):
-			print("PIKA_ALYSSUM,")
+			# Touch 2.0 (pika) [372] (if 800x600)
+			# Glo HD (alyssum) [371] (if !800x600)
+			print("371,")
 		elif line.startswith("E606C"):
-			print("DRAGON,")
+			# Aura HD (dragon) [350]
+			print("350,")
 		elif line.startswith("E606G"):
-			print("DAHLIA,")
+			# Aura H2O (dahlia) [370]
+			print("370,")
 		elif line.startswith("E606F"):
-			print("PHOENIX,")
+			# Aura (phoenix) [360]
+			print("360,")
 		elif line.startswith("E70Q0"):
-			print("DAYLIGHT,")
+			# Aura ONE (daylight) [373]
+			# Aura ONE LE (daylight) [381]
+			print("373,")
 		elif line.startswith("E60K0") or line.startswith("E60U1"):
-			print("NOVA,")
+			# Clara HD (nova) [376]
+			print("376,")
 		elif line.startswith("E60QL") or line.startswith("E60U0") or line.startswith("T60Q0"):
-			print("STAR,")
+			# Aura SE (star) [375]
+			# Aura SE r2 (star) [379] (NOTE: Mildy inaccurate, because the r2 is a Mk7, unlike the r1)
+			print("375,")
 		elif line.startswith("E60QM"):
-			print("SNOW,")
+			# Aura H2O² (snow) [374]
+			# Aura H2O² r2 (snow) [378] (NOTE: Mildy inaccurate, because the r2 is a Mk7, unlike the r1)
+			print("374,")
 		elif line.startswith("E80K0"):
-			print("FROST,")
+			# Forma (frost) [380]
+			print("380,")
 		else:
-			print("UNKNOWN,")
+			print("0,")
