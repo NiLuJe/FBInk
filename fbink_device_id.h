@@ -32,6 +32,7 @@
 #		define HWCONFIG_OFFSET (1024 * 512)
 #		define HWCONFIG_MAGIC "HW CONFIG "
 #		ifdef FBINK_FOR_CERVANTES
+// Keep it to the minimum on Cervantes
 typedef struct __attribute__((__packed__))
 {
 #			pragma GCC diagnostic push
@@ -44,6 +45,7 @@ typedef struct __attribute__((__packed__))
 	uint8_t pcb_id;    // First field is the PCB ID, which dictates the device model, the only thing we care about ;)
 } NTXHWConfig;
 #		else
+// On Kobo, dig a little deeper to pickup the CPU, too.
 typedef struct __attribute__((__packed__))
 {
 #			pragma GCC diagnostic push
@@ -94,7 +96,7 @@ static const unsigned short int kobo_ids[] = { 0, 0,   0,   0,   0,   0,   0, 0,
 					       0, 0,   0,   0,   0,   0,   0, 373, 0,   0,   375, 374, 0,   0, 375, 0,
 					       0, 375, 0,   0,   0,   0,   0, 0,   376, 376, 380, 0,   0,   0 };
 
-// Same idea, but for the various CPUs via NTXHWConfig.cpu...
+// Same idea, but for the various NTX/Kobo CPUs via NTXHWConfig.cpu...
 /*
 static const char* kobo_cpus[] = {
 	"mx35", "m166e", "mx50", "mx6sl", "it8951", "i386", "mx7d", "mx6ull", "mx6sll", "mx6dl"
@@ -107,7 +109,8 @@ static const char* kobo_cpus[] = {
 //       and it's a good news because we don't care about that distinction.
 //       The bad news is, it's a field that was added in v1.0 of that whole NTXHWConfig shenanigan,
 //       and since it started at v0.1, I'm not going to risk it... ;)
-//       Good decision, as, apparently, the first NTX-built imx508 Touch may only have handled v0.7
+//       Good decision, as, apparently, the first NTX-built imx508 Touch (whichever of the Trilogy that was)
+//       may only have handled v0.7
 //       The next set of imx507 devices had jumped to v1.6, though ;).
 /*
 static const char* kobo_disp_res[] = { "800x600",   "1024x758",   "1024x768",    "1440x1080", "1366x768",
