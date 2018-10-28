@@ -2861,6 +2861,11 @@ int
 	int max_height = 0;
 	// Calculate some metrics for every font we have loaded.
 	// Please forgive the repetition here.
+
+	// Declaring these three variables early, so a default can be set
+	float sf = 0.0;
+	int baseline = 0;
+	int lg = 0;
 	struct font_v_metrics rgMetrics, itMetrics, bdMetrics, bditMetrics;
 	if (otFonts.otRegular) {
 		rgMetrics.sf = stbtt_ScaleForPixelHeight(otFonts.otRegular, (float)font_size_px);
@@ -2869,6 +2874,13 @@ int
 		int height = (int)roundf(rgMetrics.sf * (rgMetrics.asc - rgMetrics.desc));
 		if (height > max_height) {
 			max_height = height;
+		}
+		// Set default font, for when markdown parsing is disabled
+		if (!curr_font) {
+			curr_font = otFonts.otRegular;
+			sf = rgMetrics.sf;
+			baseline = rgMetrics.baseline;
+			lg = rgMetrics.lg;
 		}
 	}
 	if (otFonts.otItalic) {
@@ -2879,6 +2891,13 @@ int
 		if (height > max_height) {
 			max_height = height;
 		}
+		// Set default font, for when markdown parsing is disabled
+		if (!curr_font) {
+			curr_font = otFonts.otItalic;
+			sf = itMetrics.sf;
+			baseline = itMetrics.baseline;
+			lg = itMetrics.lg;
+		}
 	}
 	if (otFonts.otBold) {
 		bdMetrics.sf = stbtt_ScaleForPixelHeight(otFonts.otBold, (float)font_size_px);
@@ -2888,6 +2907,13 @@ int
 		if (height > max_height) {
 			max_height = height;
 		}
+		// Set default font, for when markdown parsing is disabled
+		if (!curr_font) {
+			curr_font = otFonts.otBold;
+			sf = bdMetrics.sf;
+			baseline = bdMetrics.baseline;
+			lg = bdMetrics.lg;
+		}
 	}
 	if (otFonts.otBoldItalic) {
 		bditMetrics.sf = stbtt_ScaleForPixelHeight(otFonts.otBoldItalic, (float)font_size_px);
@@ -2896,6 +2922,13 @@ int
 		int height = (int)roundf(bditMetrics.sf * (bditMetrics.asc - bditMetrics.desc));
 		if (height > max_height) {
 			max_height = height;
+		}
+		// Set default font, for when markdown parsing is disabled
+		if (!curr_font) {
+			curr_font = otFonts.otBoldItalic;
+			sf = bditMetrics.sf;
+			baseline = bditMetrics.baseline;
+			lg = bditMetrics.lg;
 		}
 	}
 	// Calculate the maximum number of lines we may have to deal with
@@ -2919,21 +2952,17 @@ int
 	LOG("Found linebreaks!");
 
 	// Parse our string for formatting, if requested
-    fmt_buff = calloc(str_len_bytes + 1, sizeof(char));
-	if (!fmt_buff) {
-		rv = ERRCODE(EXIT_FAILURE);
-		goto cleanup;
-	}
 	if (cfg->is_formatted) {
+		fmt_buff = calloc(str_len_bytes + 1, sizeof(unsigned char));
+		if (!fmt_buff) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
 		parse_simple_md(string, str_len_bytes, fmt_buff);
 	}
 	// Lets find our lines! Nothing fancy, just a simple first fit algorithm, but we do
 	// our best not to break inside a word.
 
-	// Initialising the following three variables to make GCC happy.
-	float sf = 0.0;
-	int baseline = 0;
-	int lg = 0;
 	unsigned int chars_in_str = u8_strlen(string);
 	unsigned int c_index = 0;
 	unsigned int tmp_c_index = c_index;
@@ -2952,28 +2981,30 @@ int
 		lines[line].startCharIndex = c_index;
 		lines[line].line_used = true;
 		while (c_index < chars_in_str) {
-			// Check if we need to skip formatting characters
-			if (fmt_buff[c_index] == CH_IGNORE) {
-				u8_inc(string, &c_index);
-				continue;
-			} else {
-				switch (fmt_buff[c_index]) {
-				case CH_REGULAR:
-					curr_font = otFonts.otRegular;
-					sf = rgMetrics.sf;
-					break;
-				case CH_ITALIC:
-					curr_font = otFonts.otItalic;
-					sf = itMetrics.sf;
-					break;
-				case CH_BOLD:
-					curr_font = otFonts.otBold;
-					sf = bditMetrics.sf;
-					break;
-				case CH_BOLD_ITALIC:
-					curr_font = otFonts.otBoldItalic;
-					sf = bditMetrics.sf;
-					break;
+			if (cfg->is_formatted) {
+				// Check if we need to skip formatting characters
+				if (fmt_buff[c_index] == CH_IGNORE) {
+					u8_inc(string, &c_index);
+					continue;
+				} else {
+					switch (fmt_buff[c_index]) {
+					case CH_REGULAR:
+						curr_font = otFonts.otRegular;
+						sf = rgMetrics.sf;
+						break;
+					case CH_ITALIC:
+						curr_font = otFonts.otItalic;
+						sf = itMetrics.sf;
+						break;
+					case CH_BOLD:
+						curr_font = otFonts.otBold;
+						sf = bditMetrics.sf;
+						break;
+					case CH_BOLD_ITALIC:
+						curr_font = otFonts.otBoldItalic;
+						sf = bditMetrics.sf;
+						break;
+					}
 				}
 			}
 			if (!curr_font) {
@@ -3069,35 +3100,37 @@ int
 		lw = 0;
 		unsigned int ci;
 		for (ci = lines[line].startCharIndex; ci <= lines[line].endCharIndex;) {
-			if (fmt_buff[ci] == CH_IGNORE) {
-				u8_inc(string, &ci);
-				continue;
-			} else {
-				switch (fmt_buff[ci]) {
-				case CH_REGULAR:
-					curr_font = otFonts.otRegular;
-					sf = rgMetrics.sf;
-					lg = rgMetrics.lg;
-					baseline = rgMetrics.baseline;
-					break;
-				case CH_ITALIC:
-					curr_font = otFonts.otItalic;
-					sf = itMetrics.sf;
-					lg = itMetrics.lg;
-					baseline = itMetrics.baseline;
-					break;
-				case CH_BOLD:
-					curr_font = otFonts.otBold;
-					sf = bditMetrics.sf;
-					lg = bditMetrics.lg;
-					baseline = bditMetrics.baseline;
-					break;
-				case CH_BOLD_ITALIC:
-					curr_font = otFonts.otBoldItalic;
-					sf = bditMetrics.sf;
-					lg = bditMetrics.lg;
-					baseline = bditMetrics.baseline;
-					break;
+			if (cfg->is_formatted) {
+				if (fmt_buff[ci] == CH_IGNORE) {
+					u8_inc(string, &ci);
+					continue;
+				} else {
+					switch (fmt_buff[ci]) {
+					case CH_REGULAR:
+						curr_font = otFonts.otRegular;
+						sf = rgMetrics.sf;
+						lg = rgMetrics.lg;
+						baseline = rgMetrics.baseline;
+						break;
+					case CH_ITALIC:
+						curr_font = otFonts.otItalic;
+						sf = itMetrics.sf;
+						lg = itMetrics.lg;
+						baseline = itMetrics.baseline;
+						break;
+					case CH_BOLD:
+						curr_font = otFonts.otBold;
+						sf = bditMetrics.sf;
+						lg = bditMetrics.lg;
+						baseline = bditMetrics.baseline;
+						break;
+					case CH_BOLD_ITALIC:
+						curr_font = otFonts.otBoldItalic;
+						sf = bditMetrics.sf;
+						lg = bditMetrics.lg;
+						baseline = bditMetrics.baseline;
+						break;
+					}
 				}
 			}
 			curr_point.y = ins_point.y = baseline;
