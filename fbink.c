@@ -2961,7 +2961,7 @@ int
 	// Calculate the maximum number of lines we may have to deal with
 	unsigned int print_height = area.br.y - area.tl.y;
 	unsigned int num_lines = print_height / max_font_height;
-	
+
 	// And allocate the memory for it...
 	lines = calloc(num_lines, sizeof(FBInkOTLine));
 
@@ -2969,7 +2969,7 @@ int
 
 	// Note: we only care about the byte length here
 	size_t str_len_bytes = strlen(string);
-	brk_buff = calloc(str_len_bytes + 1, sizeof(char));
+	brk_buff = calloc(str_len_bytes + 1, sizeof(*brk_buff));
 	if (!brk_buff) {
 		ELOG("[FBInk] Linebreak buffer could not be allocated");
 		rv = ERRCODE(EXIT_FAILURE);
@@ -2982,7 +2982,7 @@ int
 
 	// Parse our string for formatting, if requested
 	if (cfg->is_formatted) {
-		fmt_buff = calloc(str_len_bytes + 1, sizeof(unsigned char));
+		fmt_buff = calloc(str_len_bytes + 1, sizeof(*fmt_buff));
 		if (!fmt_buff) {
 			ELOG("[FBInk] Formatted text buffer could not be allocated");
 			rv = ERRCODE(EXIT_FAILURE);
@@ -3060,7 +3060,7 @@ int
 			// Note, these metrics are unscaled, we need to use our previously
 			// obtained scale factor (sf) to get the metrics as pixels
 			stbtt_GetCodepointHMetrics(curr_font, (int)c, &adv, &lsb);
-			
+
 			// If starting a line with a character that has a negative lsb
 			// eg 'j', move our start point a little.
 			if (curr_x == 0 && lsb < 0) {
@@ -3140,9 +3140,9 @@ int
 	// Create a bitmap buffer to render a single line. We don't render the glyphs directly to the
 	// fb here, as we need to do some simple blending, and it makes it easier to calculate our
 	// centering if required.
-	line_buff = calloc(max_lw * font_size_px, sizeof(unsigned char));
+	line_buff = calloc(max_lw * font_size_px, sizeof(*line_buff));
 	// We also don't want to be creating a new buffer for every glyph
-	glyph_buff = calloc(font_size_px * font_size_px * 8, sizeof(unsigned char));
+	glyph_buff = calloc(font_size_px * font_size_px * 8, sizeof(*glyph_buff));
 	if (!line_buff || !glyph_buff) {
 		ELOG("[FBInk] Line or glyph buffers could not be allocated");
 		rv = ERRCODE(EXIT_FAILURE);
@@ -3212,7 +3212,7 @@ int
 			}
 			ins_point.x = curr_point.x + x0;
 			ins_point.y += y0;
-			printf("gw: %d & gh: %d for c: U+%04X @ ins_point (%hu, %hu) & curr_point (%hu, %hu) / x0: %d y0: %d x1: %d y1: %d\n", gw, gh, c, ins_point.x, ins_point.y, curr_point.x, curr_point.y, x0, y0, x1, y1);
+			printf("gw: %d & gh: %d for c: U+%04X @ ins_point (%hu, %hu) & curr_point (%hu, %hu) / x0: %d y0: %d x1: %d y1: %d / lsb: %d\n", gw, gh, c, ins_point.x, ins_point.y, curr_point.x, curr_point.y, x0, y0, x1, y1, lsb);
 			// We only increase the lw if glyph not a space This hopefully prevent trailing
 			// spaces from being printed on a line.
 			if (gw > 0) {
