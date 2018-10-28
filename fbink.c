@@ -2069,6 +2069,7 @@ int
 		if (!data) {
 			fclose(f);
 			otInit = false;
+			ELOG("[FBInk] Error allocating font data buffer.");
 			return(ERRCODE(EXIT_FAILURE));
 		}
 		size_t read = fread(data, 1, st.st_size, f);
@@ -2076,6 +2077,7 @@ int
 			free(data);
 			fclose(f);
 			otInit = false;
+			ELOG("[FBInk] Error reading font file.");
 			return(ERRCODE(EXIT_FAILURE));
 		}
 		fclose(f);
@@ -2083,9 +2085,11 @@ int
 	stbtt_fontinfo *font_info = calloc(1, sizeof(stbtt_fontinfo));
 	if (!font_info) {
 		free(data);
+		ELOG("[FNInk] Error allocating stbtt_fontinfo struct");
 		return ERRCODE(EXIT_FAILURE);
 	}
 	if (!stbtt_InitFont(font_info, data, 0)) {
+		ELOG("[FBInk] Error initialising font %s", fp);
 		return ERRCODE(EXIT_FAILURE);
 	}
 	// Assign the current font to it's appropriate otFonts struct member, depending
@@ -2109,6 +2113,7 @@ int
 		otFonts.otBoldItalic = font_info;
 		break;
 	}
+	ELOG("[FBInk] Font %s loaded", fp);
 	return EXIT_SUCCESS;
 #else
 	fprintf(stderr, "[FBInk] Opentype support is disabled in this FBInk build!\n");
@@ -2783,11 +2788,13 @@ int
 
 	// Abort if we were passed an empty string
 	if (! *string) {
+			ELOG("[FBInk] Cannot print empty string");
 			return ERRCODE(EXIT_FAILURE);
 	}
 
 	// Has fbink_init_ot() been called yet?
 	if (!otInit) {
+		ELOG("[FBInk] No fonts have been loaded");
 		return ERRCODE(ENODATA);
 	}
 
@@ -2821,10 +2828,12 @@ int
 	// We'll cap the margin at 90% for each side. Margins for opposing edges
 	// should sum to less than 100%
 	if (cfg->margins.top > 90 || cfg->margins.bottom > 90 || cfg->margins.left > 90 || cfg->margins.right > 90) {
+		ELOG("[FBInk] A margin was out of range (allowed range < 90)");
 		rv = ERRCODE(ERANGE);
 		goto cleanup;
 	}
 	if (cfg->margins.top + cfg->margins.bottom >= 100 || cfg->margins.left + cfg->margins.right >= 100) {
+		ELOG("[FBInk] Opposing margins sum to greater than 100 percent");
 		rv = ERRCODE(ERANGE);
 		goto cleanup;
 	}
@@ -2881,6 +2890,7 @@ int
 			sf = rgMetrics.sf;
 			baseline = rgMetrics.baseline;
 			lg = rgMetrics.lg;
+			ELOG("[FBInk] Unformatted text defaulting to regular font");
 		}
 	}
 	if (otFonts.otItalic) {
@@ -2897,6 +2907,7 @@ int
 			sf = itMetrics.sf;
 			baseline = itMetrics.baseline;
 			lg = itMetrics.lg;
+			ELOG("[FBInk] Unformatted text defaulting to italic font");
 		}
 	}
 	if (otFonts.otBold) {
@@ -2913,6 +2924,7 @@ int
 			sf = bdMetrics.sf;
 			baseline = bdMetrics.baseline;
 			lg = bdMetrics.lg;
+			ELOG("[FBInk] Unformatted text defaulting to bold font");
 		}
 	}
 	if (otFonts.otBoldItalic) {
@@ -2929,8 +2941,23 @@ int
 			sf = bditMetrics.sf;
 			baseline = bditMetrics.baseline;
 			lg = bditMetrics.lg;
+			ELOG("[FBInk] Unformatted text defaulting to bold italic font");
 		}
 	}
+	// If no font was loaded, exit early. We checked earlier, but just in case...
+	if (!curr_font) {
+		ELOG("[FBInk] No font appears to be loaded");
+		rv = ERRCODE(ENOENT);
+		goto cleanup;
+	}
+	// And if max_height was not changed from zero, this is also an unrecoverable error.
+	// Also guards against a potential divide-by-zero in the following calculation
+	if (max_height <= 0) {
+		ELOG("[FBInk] Max line height not set");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
 	// Calculate the maximum number of lines we may have to deal with
 	unsigned int num_lines = (unsigned int)(viewHeight / (uint32_t)max_height);
 	
@@ -2943,6 +2970,7 @@ int
 	size_t str_len_bytes = strlen(string);
 	brk_buff = calloc(str_len_bytes + 1, sizeof(char));
 	if (!brk_buff) {
+		ELOG("[FBInk] Linebreak buffer could not be allocated");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -2955,6 +2983,7 @@ int
 	if (cfg->is_formatted) {
 		fmt_buff = calloc(str_len_bytes + 1, sizeof(unsigned char));
 		if (!fmt_buff) {
+			ELOG("[FBInk] Formatted text buffer could not be allocated");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
@@ -3008,6 +3037,7 @@ int
 				}
 			}
 			if (!curr_font) {
+				ELOG("[FBInk] The specified font variant was not loaded");
 				rv = ERRCODE(ENOENT);
 				goto cleanup;
 			}
@@ -3034,8 +3064,6 @@ int
 			int x0, x1;
 			stbtt_GetCodepointBitmapBox(curr_font, c, sf, sf, &x0, 0, &x1, 0);
 			int gw_from_origin = x1;
-			printf("GW: %d\n", (x1 - x0));
-			printf("Calced LW: %d\n", (curr_x + gw_from_origin));
 
 			// Oops, we appear to have advanced too far :)
 			// Better backtrack to see if we can find a suitable break opportunity
@@ -3083,6 +3111,8 @@ int
 	// We also don't want to be creating a new buffer for every glyph
 	glyph_buff = calloc(font_size_px * font_size_px * 2, sizeof(unsigned char));
 	if (!line_buff || !glyph_buff) {
+		ELOG("[FBInk] Line or glyph buffers could not be allocated");
+		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
 	// Setup the variables needed to render
@@ -3143,7 +3173,6 @@ int
 			}
 			stbtt_GetCodepointBitmapBox(curr_font, c, sf, sf, &x0, &y0, &x1, &y1);
 			gw = x1 - x0;
-			printf("BMGW: %d\n", gw);
 			gh = y1 - y0;
 			ins_point.x = curr_point.x + x0;
 			ins_point.y += y0;
@@ -3154,6 +3183,8 @@ int
 			// If it does occur, we will now exit instead of clipping the glyph
 			// bounding box, to avoid the possiblity of stb_truetype segfaulting.
 			if (lw > max_lw) {
+				ELOG("[FBInk] Max allowed line width exceeded");
+				ELOG("[FBInk] Curr LW: %d   Max Allowed: %d", lw, max_lw);
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
 			}
@@ -3185,7 +3216,6 @@ int
 				curr_point.x += (int)roundf(sf * stbtt_GetCodepointKernAdvance(curr_font, c, tmp_c));
 			}
 			ins_point.y = baseline;
-			printf("LW: %d\n", lw);
 		}
 		curr_point.x = 0;
 		// Right, we've rendered a line to a bitmap, time to display it.
@@ -3220,7 +3250,7 @@ int
 		LOG("Printed Line!");
 		// And clear our line buffer for next use. The glyph buffer shouldn't
 		// need clearing, as stbtt_MakeCodepointBitmap() should overwrite it.
-		memset(line_buff, 0, (max_lw * font_size_px * sizeof(char)));
+		memset(line_buff, 0, (max_lw * font_size_px * sizeof(unsigned char)));
 	}
 
 	cleanup:
