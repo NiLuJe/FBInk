@@ -36,6 +36,9 @@
 #	ifndef FBINK_WITH_IMAGE
 #		define FBINK_WITH_IMAGE
 #	endif
+#   ifndef FBINK_WITH_OPENTYPE
+#       define FBINK_WITH_OPENTYPE
+#   endif
 // Connect button scanning is Kobo specific
 #	ifndef FBINK_FOR_KINDLE
 #		ifndef FBINK_FOR_CERVANTES

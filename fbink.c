@@ -2879,8 +2879,8 @@ int
 	if (otFonts.otRegular) {
 		rgMetrics.sf = stbtt_ScaleForPixelHeight(otFonts.otRegular, (float)font_size_px);
 		stbtt_GetFontVMetrics(otFonts.otRegular, &rgMetrics.asc, &rgMetrics.desc, &rgMetrics.lg);
-		rgMetrics.baseline = (int)roundf(rgMetrics.sf * rgMetrics.asc);
-		int height = (int)roundf(rgMetrics.sf * (rgMetrics.asc - rgMetrics.desc + rgMetrics.lg));
+		rgMetrics.baseline = (int) lroundf(rgMetrics.sf * rgMetrics.asc);
+		int height = (int) lroundf(rgMetrics.sf * (rgMetrics.asc - rgMetrics.desc + rgMetrics.lg));
 		if (height > max_font_height) {
 			max_font_height = height;
 		}
@@ -2896,8 +2896,8 @@ int
 	if (otFonts.otItalic) {
 		itMetrics.sf = stbtt_ScaleForPixelHeight(otFonts.otItalic, (float)font_size_px);
 		stbtt_GetFontVMetrics(otFonts.otRegular, &itMetrics.asc, &itMetrics.desc, &itMetrics.lg);
-		itMetrics.baseline = (int)roundf(itMetrics.sf * itMetrics.asc);
-		int height = (int)roundf(itMetrics.sf * (itMetrics.asc - itMetrics.desc + itMetrics.lg));
+		itMetrics.baseline = (int) lroundf(itMetrics.sf * itMetrics.asc);
+		int height = (int) lroundf(itMetrics.sf * (itMetrics.asc - itMetrics.desc + itMetrics.lg));
 		if (height > max_font_height) {
 			max_font_height = height;
 		}
@@ -2913,8 +2913,8 @@ int
 	if (otFonts.otBold) {
 		bdMetrics.sf = stbtt_ScaleForPixelHeight(otFonts.otBold, (float)font_size_px);
 		stbtt_GetFontVMetrics(otFonts.otRegular, &bdMetrics.asc, &bdMetrics.desc, &bdMetrics.lg);
-		bdMetrics.baseline = (int)roundf(bdMetrics.sf * bdMetrics.asc);
-		int height = (int)roundf(bdMetrics.sf * (bdMetrics.asc - bdMetrics.desc + bdMetrics.lg));
+		bdMetrics.baseline = (int)lroundf(bdMetrics.sf * bdMetrics.asc);
+		int height = (int)lroundf(bdMetrics.sf * (bdMetrics.asc - bdMetrics.desc + bdMetrics.lg));
 		if (height > max_font_height) {
 			max_font_height = height;
 		}
@@ -2930,8 +2930,8 @@ int
 	if (otFonts.otBoldItalic) {
 		bditMetrics.sf = stbtt_ScaleForPixelHeight(otFonts.otBoldItalic, (float)font_size_px);
 		stbtt_GetFontVMetrics(otFonts.otRegular, &bditMetrics.asc, &bditMetrics.desc, &bditMetrics.lg);
-		bditMetrics.baseline = (int)roundf(bditMetrics.sf * bditMetrics.asc);
-		int height = (int)roundf(bditMetrics.sf * (bditMetrics.asc - bditMetrics.desc + bditMetrics.lg));
+		bditMetrics.baseline = (int)lroundf(bditMetrics.sf * bditMetrics.asc);
+		int height = (int)lroundf(bditMetrics.sf * (bditMetrics.asc - bditMetrics.desc + bditMetrics.lg));
 		if (height > max_font_height) {
 			max_font_height = height;
 		}
@@ -3005,7 +3005,7 @@ int
 	//                          left edge of the glyph
 	int adv, lsb, curr_x;
 	bool complete_str = false;
-	int x0, y0, x1, y1, gw, gh;
+	int x0, y0, x1, y1, gw, gh, cx;
 	unsigned int lw;
 	for (line = 0; line < num_lines; line++) {
 		// Every line has a start character index and an end char index.
@@ -3068,6 +3068,11 @@ int
 			}
 			stbtt_GetCodepointBitmapBox(curr_font, c, sf, sf, &x0, &y0, &x1, &y1);
 			gw = x1 - x0;
+			// Ensure that curr_x never goes negative
+			cx = curr_x;
+			if (cx + x0 < 0) {
+				curr_x += abs(cx + x0);
+			}
 			// stb_truetype does not appear to create a bounding box for space characters,
 			// so we need to handle this situation.
 			if (!gw && adv) {
@@ -3110,12 +3115,12 @@ int
 					break;
 				}
 			}
-			curr_x += (int)roundf(sf * adv);
+			curr_x += (int)lroundf(sf * adv);
 			// Adjust our x position for kerning, because we can :)
 			if (string[c_index + 1]) {
 				tmp_c_index = c_index;
 				uint32_t c2 = u8_nextchar(string, &tmp_c_index);
-				curr_x += (int)roundf(sf * stbtt_GetCodepointKernAdvance(curr_font, c, c2));
+				curr_x += (int)lroundf(sf * stbtt_GetCodepointKernAdvance(curr_font, c, c2));
 			}
 		}
 		// We've run out of string! This is our last line.
@@ -3137,7 +3142,7 @@ int
 	// centering if required.
 	line_buff = calloc(max_lw * font_size_px, sizeof(unsigned char));
 	// We also don't want to be creating a new buffer for every glyph
-	glyph_buff = calloc(font_size_px * font_size_px * 2, sizeof(unsigned char));
+	glyph_buff = calloc(font_size_px * font_size_px * 8, sizeof(unsigned char));
 	if (!line_buff || !glyph_buff) {
 		ELOG("[FBInk] Line or glyph buffers could not be allocated");
 		rv = ERRCODE(EXIT_FAILURE);
@@ -3197,22 +3202,25 @@ int
 			curr_point.y = ins_point.y = baseline;
 			c = u8_nextchar(string, &ci);
 			stbtt_GetCodepointHMetrics(curr_font, c, &adv, &lsb);
-			if (curr_point.x == 0 && lsb < 0) {
-				curr_point.x += (int)roundf(sf * abs(lsb));
-			}
 			stbtt_GetCodepointBitmapBox(curr_font, c, sf, sf, &x0, &y0, &x1, &y1);
 			gw = x1 - x0;
 			gh = y1 - y0;
+			// Make sure we don't have an underflow/wrap around
+			cx = (int)curr_point.x;
+			if (cx + x0 < 0) {
+				curr_point.x += (unsigned short)abs(cx + x0);
+			}
 			ins_point.x = curr_point.x + x0;
 			ins_point.y += y0;
+			printf("gw: %d & gh: %d for c: U+%04X @ ins_point (%hu, %hu) & curr_point (%hu, %hu) / x0: %d y0: %d x1: %d y1: %d\n", gw, gh, c, ins_point.x, ins_point.y, curr_point.x, curr_point.y, x0, y0, x1, y1);
 			// We only increase the lw if glyph not a space This hopefully prevent trailing
 			// spaces from being printed on a line.
-			if (gw) {
+			if (gw > 0) {
 				lw = ins_point.x + gw;
 			} else {
 				lw = ins_point.x;
 			}
-			printf("Current Rendered LW: %d  Line# %d\n", lw, line);
+			printf("Current Rendered LW: %u  Line# %d\n", lw, line);
 			// Just in case our arithmetic was off by a pixel or two...
 			// Note that we are deliberately using a slightly shorter line
 			// width during the measurement phase, so this should not happen.
@@ -3220,11 +3228,11 @@ int
 			// bounding box, to avoid the possiblity of stb_truetype segfaulting.
 			if (lw > max_lw) {
 				ELOG("[FBInk] Max allowed line width exceeded");
-				ELOG("[FBInk] Curr LW: %d   Max Allowed: %d", lw, max_lw);
+				ELOG("[FBInk] Curr LW: %u   Max Allowed: %hu", lw, max_lw);
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
 			}
-			if (gw) {
+			if (gw > 0) {
 				// Because the stbtt_MakeCodepointBitmap documentation is a bit vague on this
 				// point, the parameter 'out_stride' should be the width of the surface in our
 				// buffer. It's designed so that the glyph can be rendered directly to a screen buffer.
@@ -3247,11 +3255,11 @@ int
 					lnPtr += max_lw;
 				}
 			}
-			curr_point.x += (int)roundf(sf * adv);
+			curr_point.x += (unsigned short int) lroundf(sf * adv);
 			if (ci < lines[line].endCharIndex) {
 				unsigned int tmp_i = ci;
 				tmp_c = u8_nextchar(string, &tmp_i);
-				curr_point.x += (int)roundf(sf * stbtt_GetCodepointKernAdvance(curr_font, c, tmp_c));
+				curr_point.x += (unsigned short int) lroundf(sf * stbtt_GetCodepointKernAdvance(curr_font, c, tmp_c));
 			}
 			ins_point.y = baseline;
 		}
@@ -3274,7 +3282,7 @@ int
 			paint_point.x = start_x;
 			paint_point.y++;
 		}
-		paint_point.y += (int)(sf * lg);
+		paint_point.y += (unsigned short int) lroundf(sf * lg);
 		paint_point.x = area.tl.x;
 		// Woohoo, it's in our framebuffer! Let's refresh the screen.
 		struct mxcfb_rect region = { 0 };
