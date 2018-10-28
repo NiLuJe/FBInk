@@ -401,7 +401,7 @@ static void
 		} else {
 			kobo_id = kobo_ids[config.pcb_id];
 
-			// Discriminate Mk.7 version for dual rev models by checking the CPU...
+			// Discriminate the Mk.7 version for dual rev models by checking the CPU...
 			if (kobo_id == 374 || kobo_id == 375) {
 				// NOTE: kobo_cpus[8] == "mx6sll"
 				if (config.cpu == 8) {
@@ -410,7 +410,7 @@ static void
 				}
 			}
 		}
-		// And now we can do this, almost as accurately as if onboard were mounted ;).
+		// And now we can do this, as accurately as if onboard were mounted ;).
 		set_kobo_quirks(kobo_id, device_quirks);
 	}
 }
