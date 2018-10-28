@@ -2867,7 +2867,7 @@ int
 		int lg;
 		int baseline;
 	};
-	int max_height = 0;
+	int max_font_height = 0;
 	// Calculate some metrics for every font we have loaded.
 	// Please forgive the repetition here.
 
@@ -2880,9 +2880,9 @@ int
 		rgMetrics.sf = stbtt_ScaleForPixelHeight(otFonts.otRegular, (float)font_size_px);
 		stbtt_GetFontVMetrics(otFonts.otRegular, &rgMetrics.asc, &rgMetrics.desc, &rgMetrics.lg);
 		rgMetrics.baseline = (int)roundf(rgMetrics.sf * rgMetrics.asc);
-		int height = (int)roundf(rgMetrics.sf * (rgMetrics.asc - rgMetrics.desc));
-		if (height > max_height) {
-			max_height = height;
+		int height = (int)roundf(rgMetrics.sf * (rgMetrics.asc - rgMetrics.desc + rgMetrics.lg));
+		if (height > max_font_height) {
+			max_font_height = height;
 		}
 		// Set default font, for when markdown parsing is disabled
 		if (!curr_font) {
@@ -2897,9 +2897,9 @@ int
 		itMetrics.sf = stbtt_ScaleForPixelHeight(otFonts.otItalic, (float)font_size_px);
 		stbtt_GetFontVMetrics(otFonts.otRegular, &itMetrics.asc, &itMetrics.desc, &itMetrics.lg);
 		itMetrics.baseline = (int)roundf(itMetrics.sf * itMetrics.asc);
-		int height = (int)roundf(itMetrics.sf * (itMetrics.asc - itMetrics.desc));
-		if (height > max_height) {
-			max_height = height;
+		int height = (int)roundf(itMetrics.sf * (itMetrics.asc - itMetrics.desc + itMetrics.lg));
+		if (height > max_font_height) {
+			max_font_height = height;
 		}
 		// Set default font, for when markdown parsing is disabled
 		if (!curr_font) {
@@ -2914,9 +2914,9 @@ int
 		bdMetrics.sf = stbtt_ScaleForPixelHeight(otFonts.otBold, (float)font_size_px);
 		stbtt_GetFontVMetrics(otFonts.otRegular, &bdMetrics.asc, &bdMetrics.desc, &bdMetrics.lg);
 		bdMetrics.baseline = (int)roundf(bdMetrics.sf * bdMetrics.asc);
-		int height = (int)roundf(bdMetrics.sf * (bdMetrics.asc - bdMetrics.desc));
-		if (height > max_height) {
-			max_height = height;
+		int height = (int)roundf(bdMetrics.sf * (bdMetrics.asc - bdMetrics.desc + bdMetrics.lg));
+		if (height > max_font_height) {
+			max_font_height = height;
 		}
 		// Set default font, for when markdown parsing is disabled
 		if (!curr_font) {
@@ -2931,9 +2931,9 @@ int
 		bditMetrics.sf = stbtt_ScaleForPixelHeight(otFonts.otBoldItalic, (float)font_size_px);
 		stbtt_GetFontVMetrics(otFonts.otRegular, &bditMetrics.asc, &bditMetrics.desc, &bditMetrics.lg);
 		bditMetrics.baseline = (int)roundf(bditMetrics.sf * bditMetrics.asc);
-		int height = (int)roundf(bditMetrics.sf * (bditMetrics.asc - bditMetrics.desc));
-		if (height > max_height) {
-			max_height = height;
+		int height = (int)roundf(bditMetrics.sf * (bditMetrics.asc - bditMetrics.desc + bditMetrics.lg));
+		if (height > max_font_height) {
+			max_font_height = height;
 		}
 		// Set default font, for when markdown parsing is disabled
 		if (!curr_font) {
@@ -2950,16 +2950,17 @@ int
 		rv = ERRCODE(ENOENT);
 		goto cleanup;
 	}
-	// And if max_height was not changed from zero, this is also an unrecoverable error.
+	// And if max_font_height was not changed from zero, this is also an unrecoverable error.
 	// Also guards against a potential divide-by-zero in the following calculation
-	if (max_height <= 0) {
+	if (max_font_height <= 0) {
 		ELOG("[FBInk] Max line height not set");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
 
 	// Calculate the maximum number of lines we may have to deal with
-	unsigned int num_lines = (unsigned int)(viewHeight / (uint32_t)max_height);
+	unsigned int print_height = area.br.y - area.tl.y;
+	unsigned int num_lines = print_height / max_font_height;
 	
 	// And allocate the memory for it...
 	lines = calloc(num_lines, sizeof(FBInkOTLine));
