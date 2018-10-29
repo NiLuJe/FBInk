@@ -2956,7 +2956,7 @@ int
 		if (!curr_font) {
 			curr_font = otFonts.otBoldItalic;
 			sf = bditSF;
-			ELOG("[FBInk] Unformatted text defaulting to bold font");
+			ELOG("[FBInk] Unformatted text defaulting to bold italic font");
 		}
 	}
 	// If no font was loaded, exit early. We checked earlier, but just in case...
@@ -2976,8 +2976,9 @@ int
 	}
 
 	// Calculate the maximum number of lines we may have to deal with
-	unsigned int print_height = area.br.y - area.tl.y;
-	unsigned int num_lines = print_height / max_row_height;
+	unsigned int print_height, num_lines;
+	print_height = area.br.y - area.tl.y;
+	num_lines = print_height / max_row_height;
 
 	// And allocate the memory for it...
 	lines = calloc(num_lines, sizeof(FBInkOTLine));
@@ -3079,6 +3080,7 @@ int
 			// Note, these metrics are unscaled, we need to use our previously
 			// obtained scale factor (sf) to get the metrics as pixels
 			stbtt_GetCodepointHMetrics(curr_font, c, &adv, &lsb);
+			// But these are already scaled
 			stbtt_GetCodepointBitmapBox(curr_font, c, sf, sf, &x0, &y0, &x1, &y1);
 			gw = x1 - x0;
 			// Ensure that curr_x never goes negative
@@ -3105,7 +3107,7 @@ int
 			} else {
 				lw = curr_x + x0 + gw;
 			}
-			printf("Current Measured LW: %d  Line# %d\n", lw, line);
+			printf("Current Measured LW: %u  Line# %u\n", lw, line);
 			// Oops, we appear to have advanced too far :)
 			// Better backtrack to see if we can find a suitable break opportunity
 			//unsigned short ot_meas_padding = 3; // Just so we don't use a magic number
@@ -3156,9 +3158,9 @@ int
 			break;
 		}
 	}
-	ELOG("[FBInk] %d lines to be printed", line);
+	ELOG("[FBInk] %u lines to be printed", line);
 	if (!complete_str) {
-		ELOG("[FBInk] String too long. Truncated to %d characters", (c_index + 1));
+		ELOG("[FBInk] String too long. Truncated to %u characters", (c_index + 1));
 	}
 	// Hopefully, we have some lines to render!
 
@@ -3167,7 +3169,7 @@ int
 	// centering if required.
 	line_buff = calloc(max_lw * max_line_height, sizeof(*line_buff));
 	// We also don't want to be creating a new buffer for every glyph
-	glyph_buff = calloc(font_size_px * font_size_px * 8, sizeof(*glyph_buff));
+	glyph_buff = calloc(font_size_px * max_line_height * 8, sizeof(*glyph_buff));
 	if (!line_buff || !glyph_buff) {
 		ELOG("[FBInk] Line or glyph buffers could not be allocated");
 		rv = ERRCODE(EXIT_FAILURE);
@@ -3193,7 +3195,7 @@ int
 		if (abort_line) {
 			break;
 		}
-		printf("Line # %d\n", line);
+		printf("Line # %u\n", line);
 		lw = 0;
 		unsigned int ci;
 		for (ci = lines[line].startCharIndex; ci <= lines[line].endCharIndex;) {
@@ -3243,7 +3245,7 @@ int
 			} else {
 				lw = ins_point.x;
 			}
-			printf("Current Rendered LW: %u  Line# %d\n", lw, line);
+			printf("Current Rendered LW: %u  Line# %u\n", lw, line);
 			// Just in case our arithmetic was off by a pixel or two...
 			// Note that we are deliberately using a slightly shorter line
 			// width during the measurement phase, so this should not happen.
