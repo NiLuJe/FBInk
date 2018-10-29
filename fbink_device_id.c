@@ -319,6 +319,9 @@ static void
 			device_quirks->isKoboMk7 = true;
 			break;
 		case 0:
+			// Like kobo_config.sh, assume Trilogy as a fallback
+			device_quirks->isKoboNonMT = true;
+			/* FALLTHROUGH */
 		default:
 			fprintf(stderr, "[FBInk] Unidentified Kobo device code (%hu)!\n", kobo_id);
 			break;
@@ -388,13 +391,14 @@ static void
 			fprintf(stderr,
 				"[FBInk] Input device '%s' does not appear to contain an NTX HWConfig entry!\n",
 				HWCONFIG_DEVICE);
+			// NOTE: Like rcS, assume it's an old Freescale Trilogy if we can't find an NTX HW tag
+			set_kobo_quirks(0, device_quirks);
 			return;
 		}
 
 		// As per /bin/kobo_config.sh, match PCB IDs to Product IDs via a LUT...
 		unsigned short int kobo_id = 0;
 		if (config.pcb_id >= (sizeof(kobo_ids) / sizeof(*kobo_ids))) {
-			// NOTE: kobo_config.sh defaults to trilogy, which is probably a safety precaution more than anything...
 			fprintf(stderr,
 				"[FBInk] Unknown Kobo PCB ID index (%hhu >= %zu)!\n",
 				config.pcb_id,
