@@ -2859,89 +2859,104 @@ int
 	// character in the loop, as needed.
 	stbtt_fontinfo *curr_font = NULL;
 
-	// A struct to hold some metrics for each font as a whole
-	struct font_v_metrics {
-		float sf;
-		int asc;
-		int desc;
-		int lg;
-		int baseline;
-	};
-	int max_font_height = 0;
+	int max_row_height = 0;
 	// Calculate some metrics for every font we have loaded.
 	// Please forgive the repetition here.
 
 	// Declaring these three variables early, so a default can be set
 	float sf = 0.0;
-	int baseline = 0;
-	int lg = 0;
-	struct font_v_metrics rgMetrics, itMetrics, bdMetrics, bditMetrics;
+	int max_baseline = 0;
+	int max_lg = 0;
+	int max_desc = 0;
+	float rgSF, itSF, bdSF, bditSF;
+	int asc, desc, lg;
+	int scaled_bl, scaled_desc, scaled_lg;
 	if (otFonts.otRegular) {
-		rgMetrics.sf = stbtt_ScaleForPixelHeight(otFonts.otRegular, (float)font_size_px);
-		stbtt_GetFontVMetrics(otFonts.otRegular, &rgMetrics.asc, &rgMetrics.desc, &rgMetrics.lg);
-		rgMetrics.baseline = (int) lroundf(rgMetrics.sf * rgMetrics.asc);
-		int height = (int) lroundf(rgMetrics.sf * (rgMetrics.asc - rgMetrics.desc + rgMetrics.lg));
-		if (height > max_font_height) {
-			max_font_height = height;
+		rgSF = stbtt_ScaleForPixelHeight(otFonts.otRegular, (float)font_size_px);
+		stbtt_GetFontVMetrics(otFonts.otRegular, &asc, &desc, &lg);
+		scaled_bl = (int)(ceilf(rgSF * asc));
+		scaled_desc = (int)(ceilf(rgSF * desc));
+		scaled_lg = (int)(ceilf(rgSF * lg));
+		if (scaled_bl > max_baseline) {
+			max_baseline = scaled_bl;
+		}
+		if (scaled_desc < max_desc) {
+			max_desc = scaled_desc;
+		}
+		if (scaled_lg > max_lg) {
+			max_lg = scaled_lg;
 		}
 		// Set default font, for when markdown parsing is disabled
 		if (!curr_font) {
 			curr_font = otFonts.otRegular;
-			sf = rgMetrics.sf;
-			baseline = rgMetrics.baseline;
-			lg = rgMetrics.lg;
+			sf = rgSF;
 			ELOG("[FBInk] Unformatted text defaulting to regular font");
 		}
 	}
 	if (otFonts.otItalic) {
-		itMetrics.sf = stbtt_ScaleForPixelHeight(otFonts.otItalic, (float)font_size_px);
-		stbtt_GetFontVMetrics(otFonts.otRegular, &itMetrics.asc, &itMetrics.desc, &itMetrics.lg);
-		itMetrics.baseline = (int) lroundf(itMetrics.sf * itMetrics.asc);
-		int height = (int) lroundf(itMetrics.sf * (itMetrics.asc - itMetrics.desc + itMetrics.lg));
-		if (height > max_font_height) {
-			max_font_height = height;
+		itSF = stbtt_ScaleForPixelHeight(otFonts.otItalic, (float)font_size_px);
+		stbtt_GetFontVMetrics(otFonts.otItalic, &asc, &desc, &lg);
+		scaled_bl = (int)(ceilf(itSF * asc));
+		scaled_desc = (int)(ceilf(itSF * desc));
+		scaled_lg = (int)(ceilf(itSF * lg));
+		if (scaled_bl > max_baseline) {
+			max_baseline = scaled_bl;
+		}
+		if (scaled_desc < max_desc) {
+			max_desc = scaled_desc;
+		}
+		if (scaled_lg > max_lg) {
+			max_lg = scaled_lg;
 		}
 		// Set default font, for when markdown parsing is disabled
 		if (!curr_font) {
 			curr_font = otFonts.otItalic;
-			sf = itMetrics.sf;
-			baseline = itMetrics.baseline;
-			lg = itMetrics.lg;
+			sf = itSF;
 			ELOG("[FBInk] Unformatted text defaulting to italic font");
 		}
 	}
 	if (otFonts.otBold) {
-		bdMetrics.sf = stbtt_ScaleForPixelHeight(otFonts.otBold, (float)font_size_px);
-		stbtt_GetFontVMetrics(otFonts.otRegular, &bdMetrics.asc, &bdMetrics.desc, &bdMetrics.lg);
-		bdMetrics.baseline = (int)lroundf(bdMetrics.sf * bdMetrics.asc);
-		int height = (int)lroundf(bdMetrics.sf * (bdMetrics.asc - bdMetrics.desc + bdMetrics.lg));
-		if (height > max_font_height) {
-			max_font_height = height;
+		bdSF = stbtt_ScaleForPixelHeight(otFonts.otBold, (float)font_size_px);
+		stbtt_GetFontVMetrics(otFonts.otBold, &asc, &desc, &lg);
+		scaled_bl = (int)(ceilf(bdSF * asc));
+		scaled_desc = (int)(ceilf(bdSF * desc));
+		scaled_lg = (int)(ceilf(bdSF * lg));
+		if (scaled_bl > max_baseline) {
+			max_baseline = scaled_bl;
+		}
+		if (scaled_desc < max_desc) {
+			max_desc = scaled_desc;
+		}
+		if (scaled_lg > max_lg) {
+			max_lg = scaled_lg;
 		}
 		// Set default font, for when markdown parsing is disabled
 		if (!curr_font) {
 			curr_font = otFonts.otBold;
-			sf = bdMetrics.sf;
-			baseline = bdMetrics.baseline;
-			lg = bdMetrics.lg;
+			sf = bdSF;
 			ELOG("[FBInk] Unformatted text defaulting to bold font");
 		}
 	}
 	if (otFonts.otBoldItalic) {
-		bditMetrics.sf = stbtt_ScaleForPixelHeight(otFonts.otBoldItalic, (float)font_size_px);
-		stbtt_GetFontVMetrics(otFonts.otRegular, &bditMetrics.asc, &bditMetrics.desc, &bditMetrics.lg);
-		bditMetrics.baseline = (int)lroundf(bditMetrics.sf * bditMetrics.asc);
-		int height = (int)lroundf(bditMetrics.sf * (bditMetrics.asc - bditMetrics.desc + bditMetrics.lg));
-		if (height > max_font_height) {
-			max_font_height = height;
+		bditSF = stbtt_ScaleForPixelHeight(otFonts.otBoldItalic, (float)font_size_px);
+		stbtt_GetFontVMetrics(otFonts.otBoldItalic, &asc, &desc, &lg);
+		scaled_bl = (int)(ceilf(bditSF * asc));
+		scaled_desc = (int)(ceilf(bditSF * desc));
+		scaled_lg = (int)(ceilf(bditSF * lg));
+		if (scaled_bl > max_baseline) {
+			max_baseline = scaled_bl;
+		}
+		if (scaled_desc < max_desc) {
+			max_desc = scaled_desc;
+		}
+		if (scaled_lg > max_lg) {
+			max_lg = scaled_lg;
 		}
 		// Set default font, for when markdown parsing is disabled
 		if (!curr_font) {
 			curr_font = otFonts.otBoldItalic;
-			sf = bditMetrics.sf;
-			baseline = bditMetrics.baseline;
-			lg = bditMetrics.lg;
-			ELOG("[FBInk] Unformatted text defaulting to bold italic font");
+			sf = bditSF;
+			ELOG("[FBInk] Unformatted text defaulting to bold font");
 		}
 	}
 	// If no font was loaded, exit early. We checked earlier, but just in case...
@@ -2950,9 +2965,11 @@ int
 		rv = ERRCODE(ENOENT);
 		goto cleanup;
 	}
-	// And if max_font_height was not changed from zero, this is also an unrecoverable error.
+	printf("Max BL: %d  Max Desc: %d  Max LG: %d\n", max_baseline, max_desc, max_lg);
+	max_row_height = max_baseline + abs(max_desc) + max_lg;
+	// And if max_row_height was not changed from zero, this is also an unrecoverable error.
 	// Also guards against a potential divide-by-zero in the following calculation
-	if (max_font_height <= 0) {
+	if (max_row_height <= 0) {
 		ELOG("[FBInk] Max line height not set");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
@@ -2960,7 +2977,7 @@ int
 
 	// Calculate the maximum number of lines we may have to deal with
 	unsigned int print_height = area.br.y - area.tl.y;
-	unsigned int num_lines = print_height / max_font_height;
+	unsigned int num_lines = print_height / max_row_height;
 
 	// And allocate the memory for it...
 	lines = calloc(num_lines, sizeof(FBInkOTLine));
@@ -2999,6 +3016,7 @@ int
 	uint32_t c;
 	unsigned short max_lw = area.br.x - area.tl.x;
 	unsigned int line;
+	int max_line_height = max_row_height - max_lg;
 	// adv = advance: the horizontal distance along the baseline to the origin of
 	//                the next glyph
 	// lsb = left side bearing: The horizontal distance from the origin point to
@@ -3013,6 +3031,7 @@ int
 		lw = 0;
 		lines[line].startCharIndex = c_index;
 		lines[line].line_used = true;
+		lines[line].line_gap = max_lg;
 		while (c_index < chars_in_str) {
 			if (cfg->is_formatted) {
 				// Check if we need to skip formatting characters
@@ -3023,19 +3042,19 @@ int
 					switch (fmt_buff[c_index]) {
 					case CH_REGULAR:
 						curr_font = otFonts.otRegular;
-						sf = rgMetrics.sf;
+						sf = rgSF;
 						break;
 					case CH_ITALIC:
 						curr_font = otFonts.otItalic;
-						sf = itMetrics.sf;
+						sf = itSF;
 						break;
 					case CH_BOLD:
 						curr_font = otFonts.otBold;
-						sf = bditMetrics.sf;
+						sf = bdSF;
 						break;
 					case CH_BOLD_ITALIC:
 						curr_font = otFonts.otBoldItalic;
-						sf = bditMetrics.sf;
+						sf = bditSF;
 						break;
 					}
 				}
@@ -3059,19 +3078,25 @@ int
 			c = u8_nextchar(string, &c_index);
 			// Note, these metrics are unscaled, we need to use our previously
 			// obtained scale factor (sf) to get the metrics as pixels
-			stbtt_GetCodepointHMetrics(curr_font, (int)c, &adv, &lsb);
-
-			// If starting a line with a character that has a negative lsb
-			// eg 'j', move our start point a little.
-			if (curr_x == 0 && lsb < 0) {
-				curr_x += (int)roundf(sf * abs(lsb));
-			}
+			stbtt_GetCodepointHMetrics(curr_font, c, &adv, &lsb);
 			stbtt_GetCodepointBitmapBox(curr_font, c, sf, sf, &x0, &y0, &x1, &y1);
 			gw = x1 - x0;
 			// Ensure that curr_x never goes negative
 			cx = curr_x;
 			if (cx + x0 < 0) {
 				curr_x += abs(cx + x0);
+			}
+			// Handle the situation where the metrics may lie, and the glyph descends
+			// below what the metrics say.
+			if (max_baseline + y1 > max_line_height) {
+				int height_diff = (max_baseline + y1) - max_line_height;
+				printf("Height Diff: %d, available LG: %d\n", height_diff, lines[line].line_gap);
+				if (height_diff > lines[line].line_gap) {
+					lines[line].line_gap = 0;
+				} else {
+					lines[line].line_gap -= height_diff;
+				}
+				max_line_height = max_baseline + y1;
 			}
 			// stb_truetype does not appear to create a bounding box for space characters,
 			// so we need to handle this situation.
@@ -3140,7 +3165,7 @@ int
 	// Create a bitmap buffer to render a single line. We don't render the glyphs directly to the
 	// fb here, as we need to do some simple blending, and it makes it easier to calculate our
 	// centering if required.
-	line_buff = calloc(max_lw * font_size_px, sizeof(*line_buff));
+	line_buff = calloc(max_lw * max_line_height, sizeof(*line_buff));
 	// We also don't want to be creating a new buffer for every glyph
 	glyph_buff = calloc(font_size_px * font_size_px * 8, sizeof(*glyph_buff));
 	if (!line_buff || !glyph_buff) {
@@ -3157,9 +3182,15 @@ int
 	unsigned short start_x, start_y;
 	// stb_truetype renders glyphs with color inverted to what our blitting functions expect
     unsigned char invert = cfg->is_inverted ? 0x00 : 0xFF;
+	bool abort_line = false;
 	// Render!
 	for (line = 0; line < num_lines; line++) {
 		if (!lines[line].line_used) {
+			break;
+		}
+		// We have run out of (vertical) printable area, most likely due to incorrect font
+		// metrics in the font.
+		if (abort_line) {
 			break;
 		}
 		printf("Line # %d\n", line);
@@ -3174,32 +3205,24 @@ int
 					switch (fmt_buff[ci]) {
 					case CH_REGULAR:
 						curr_font = otFonts.otRegular;
-						sf = rgMetrics.sf;
-						lg = rgMetrics.lg;
-						baseline = rgMetrics.baseline;
+						sf = rgSF;
 						break;
 					case CH_ITALIC:
 						curr_font = otFonts.otItalic;
-						sf = itMetrics.sf;
-						lg = itMetrics.lg;
-						baseline = itMetrics.baseline;
+						sf = itSF;
 						break;
 					case CH_BOLD:
 						curr_font = otFonts.otBold;
-						sf = bditMetrics.sf;
-						lg = bditMetrics.lg;
-						baseline = bditMetrics.baseline;
+						sf = bdSF;
 						break;
 					case CH_BOLD_ITALIC:
 						curr_font = otFonts.otBoldItalic;
-						sf = bditMetrics.sf;
-						lg = bditMetrics.lg;
-						baseline = bditMetrics.baseline;
+						sf = bditSF;
 						break;
 					}
 				}
 			}
-			curr_point.y = ins_point.y = baseline;
+			curr_point.y = ins_point.y = max_baseline;
 			c = u8_nextchar(string, &ci);
 			stbtt_GetCodepointHMetrics(curr_font, c, &adv, &lsb);
 			stbtt_GetCodepointBitmapBox(curr_font, c, sf, sf, &x0, &y0, &x1, &y1);
@@ -3261,7 +3284,7 @@ int
 				tmp_c = u8_nextchar(string, &tmp_i);
 				curr_point.x += (unsigned short int) lroundf(sf * stbtt_GetCodepointKernAdvance(curr_font, c, tmp_c));
 			}
-			ins_point.y = baseline;
+			ins_point.y = max_baseline;
 		}
 		curr_point.x = 0;
 		// Right, we've rendered a line to a bitmap, time to display it.
@@ -3282,8 +3305,11 @@ int
 			paint_point.x = start_x;
 			paint_point.y++;
 		}
-		paint_point.y += (unsigned short int) lroundf(sf * lg);
+		paint_point.y += (unsigned short int)lines[line].line_gap;
 		paint_point.x = area.tl.x;
+		if (paint_point.y + max_line_height > area.br.y) {
+			abort_line = true;
+		}
 		// Woohoo, it's in our framebuffer! Let's refresh the screen.
 		struct mxcfb_rect region = { 0 };
 		region.left = start_x;
@@ -3296,7 +3322,7 @@ int
 		LOG("Printed Line!");
 		// And clear our line buffer for next use. The glyph buffer shouldn't
 		// need clearing, as stbtt_MakeCodepointBitmap() should overwrite it.
-		memset(line_buff, 0, (max_lw * font_size_px * sizeof(unsigned char)));
+		memset(line_buff, 0, (max_lw * max_line_height * sizeof(unsigned char)));
 	}
 
 	cleanup:

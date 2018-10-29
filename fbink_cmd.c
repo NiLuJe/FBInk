@@ -694,11 +694,16 @@ int
 			FBInkOTConfig cfg = { 0 };
 			cfg.is_formatted = true;
 			cfg.margins.top = 5;
-			cfg.size_pt = 36;
-			fbink_add_ot_font("/mnt/onboard/fonts/Bookerly-Regular.ttf", FNT_REGULAR);
-			fbink_add_ot_font("/mnt/onboard/fonts/Bookerly-Italic.ttf", FNT_ITALIC);
-			fbink_add_ot_font("/mnt/onboard/fonts/Bookerly-Bold.ttf", FNT_BOLD);
-			fbink_add_ot_font("/mnt/onboard/fonts/Bookerly-BoldItalic.ttf", FNT_BOLD_ITALIC);
+			cfg.size_pt = 18; 
+			// fbink_add_ot_font("/mnt/onboard/fonts/Bookerly-Regular.ttf", FNT_REGULAR);
+			// fbink_add_ot_font("/mnt/onboard/fonts/Bookerly-Italic.ttf", FNT_ITALIC);
+			// fbink_add_ot_font("/mnt/onboard/fonts/Bookerly-Bold.ttf", FNT_BOLD);
+			// fbink_add_ot_font("/mnt/onboard/fonts/Bookerly-BoldItalic.ttf", FNT_BOLD_ITALIC);
+
+			fbink_add_ot_font("/mnt/onboard/fonts/Alegreya-Regular.ttf", FNT_REGULAR);
+			fbink_add_ot_font("/mnt/onboard/fonts/Alegreya-Italic.ttf", FNT_ITALIC);
+			fbink_add_ot_font("/mnt/onboard/fonts/Alegreya-Bold.ttf", FNT_BOLD);
+			fbink_add_ot_font("/mnt/onboard/fonts/Alegreya-BoldItalic.ttf", FNT_BOLD_ITALIC);
 			fbink_print_ot(fbfd, string, &cfg);
 			fbink_free_ot_fonts();
         	/*
