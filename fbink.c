@@ -3224,7 +3224,8 @@ int
 	// centering if required.
 	line_buff = calloc(max_lw * (unsigned int)max_line_height, sizeof(*line_buff));
 	// We also don't want to be creating a new buffer for every glyph
-	glyph_buff = calloc(font_size_px * (unsigned int)max_line_height * 8U, sizeof(*glyph_buff));
+	unsigned int glyph_buffer_dims = font_size_px * (unsigned int)max_line_height * 2U;
+	glyph_buff = calloc(glyph_buffer_dims, sizeof(*glyph_buff));
 	if (!line_buff || !glyph_buff) {
 		ELOG("[FBInk] Line or glyph buffers could not be allocated");
 		rv = ERRCODE(EXIT_FAILURE);
@@ -3295,6 +3296,16 @@ int
 			stbtt_GetCodepointBitmapBox(curr_font, c, sf, sf, &x0, &y0, &x1, &y1);
 			gw = x1 - x0;
 			gh = y1 - y0;
+			// Ensure that our glyph size does not exceed the buffer size. Resize the buffer if it does
+			if (gw * gh > (int)glyph_buffer_dims) {
+				unsigned int new_buff_size = (unsigned int)gw * (unsigned int)gh * 2U * sizeof(unsigned char);
+				glyph_buff = realloc(glyph_buff, new_buff_size);
+				if (!glyph_buff) {
+					ELOG("[FBInk] Failure resizing glyph buffer");
+					ERRCODE(EXIT_FAILURE);
+					goto cleanup;
+				}
+			}
 			// Make sure we don't have an underflow/wrap around
 			cx = (int)curr_point.x;
 			if (cx + x0 < 0) {
