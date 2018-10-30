@@ -3305,6 +3305,7 @@ int
 					ERRCODE(EXIT_FAILURE);
 					goto cleanup;
 				}
+				glyph_buffer_dims = new_buff_size;
 			}
 			// Make sure we don't have an underflow/wrap around
 			cx = (int)curr_point.x;
