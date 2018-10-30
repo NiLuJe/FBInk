@@ -3162,6 +3162,32 @@ int
 	if (!complete_str) {
 		ELOG("[FBInk] String too long. Truncated to %u characters", (c_index + 1));
 	}
+	// Let's determine our exact height, so we can determine vertical alignment later if required.
+	printf("Maximum printable height is %u\n", print_height);
+	unsigned int curr_print_height = 0;
+	for (line = 0; line < num_lines; line++) {
+		if (!lines[line].line_used) {
+			break;
+		}
+		if (curr_print_height + max_line_height > print_height) {
+			// This line can't be printed, so set it to unused
+			lines[line].line_used = false;
+			break;
+		}
+		curr_print_height += max_line_height;
+		if (line <= num_lines - 1) {
+			if (line == num_lines - 1 || !lines[line + 1].line_used) {
+				// Last line, we don't want to add a line gap
+				break;
+			}
+		}
+		// We only add a line gap if there's room for one
+		if (!(curr_print_height + lines[line].line_gap > print_height)) {
+			curr_print_height += lines[line].line_gap;
+		}
+	}
+	printf("Actual print height is %u\n", curr_print_height);
+
 	// Hopefully, we have some lines to render!
 
 	// Create a bitmap buffer to render a single line. We don't render the glyphs directly to the
