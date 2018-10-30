@@ -18,8 +18,20 @@ for my_tc in K3 K5 PW2 ; do
 	fi
 
 	cp -av Release/fbink ${KINDLE_TC}/bin/fbink
-	cp -av Release/libfbink.a ${KINDLE_TC}/lib/libfbink.a
 	cp -av fbink.h ${KINDLE_TC}/include/fbink.h
+
+	# We'll want to bundle a shared lib, too, because TCC won't like an LTO archive ;).
+	make clean
+	if [[ "${KINDLE_TC}" == "K3" ]] ; then
+		make sharedlib striplib SHARED=true KINDLE=true LEGACY=true
+	else
+		make sharedlib striplib SHARED=true KINDLE=true
+	fi
+
+	cp -av Release/libfbink.so.1.0.0 ${KINDLE_TC}/lib/libfbink.so.1.0.0
+	ln -sf libfbink.so.1.0.0 ${KINDLE_TC}/lib/libfbink.so
+	ln -sf libfbink.so.1.0.0 ${KINDLE_TC}/lib/libfbink.so.1
+
 	make clean
 done
 
