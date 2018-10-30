@@ -3195,19 +3195,27 @@ int
 	printf("Actual print height is %u\n", curr_print_height);
 
 	// Let's get some rendering options from FBInkConfig
-	uint8_t valign = NONE, halign = NONE, fgcolor = FG_BLACK, bgcolor = BG_WHITE;
+	uint8_t valign = NONE, halign = NONE, fgcolor = FG_BLACK * 16U, bgcolor = BG_WHITE * 16U;
 	bool is_inverted = false, is_overlay = false, is_bgless = false, is_fgless = false;
 	if (fbCfg) {
 		valign = fbCfg->valign;
 		halign = fbCfg->halign;
-		fgcolor = fbCfg->fg_color;
-		bgcolor = fbCfg->bg_color;
+		fgcolor = fbCfg->fg_color * 16U;
+		bgcolor = fbCfg->bg_color * 16U;
 		is_inverted = fbCfg->is_inverted;
 		is_overlay = fbCfg->is_overlay;
 		is_bgless = fbCfg->is_bgless;
 		is_fgless = fbCfg->is_fgless;
 	}
-
+	fgcolor ^= 0xFF;
+	// Is the foreground color lighter than background? If so, we make things easier
+	// for ourselves by inverting the colors, and toggling the is_invert flag to reverse
+	// it back later.
+	if (fgcolor < bgcolor) {
+		fgcolor ^= 0xFF;
+		bgcolor ^= 0xFF;
+		is_inverted = !is_inverted;
+	}
 	// Hopefully, we have some lines to render!
 
 	// Create a bitmap buffer to render a single line. We don't render the glyphs directly to the
@@ -3221,7 +3229,10 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
-
+	if (bgcolor > 0) {
+		memset(line_buff, bgcolor, max_lw * max_line_height * sizeof(unsigned char));
+	}
+	unsigned int layer_diff = fgcolor - bgcolor;
 	// Setup the variables needed to render
 	FBInkCoordinates curr_point = { 0, 0 };
 	FBInkCoordinates ins_point = {0, 0};
@@ -3236,7 +3247,7 @@ int
 	unsigned char *lnPtr, *glPtr = NULL;
 	unsigned short start_x, start_y;
 	// stb_truetype renders glyphs with color inverted to what our blitting functions expect
-    unsigned char invert = cfg->is_inverted ? 0x00 : 0xFF;
+    unsigned char invert = is_inverted ? 0x00 : 0xFF;
 	bool abort_line = false;
 	// Render!
 	for (line = 0; line < num_lines; line++) {
@@ -3310,7 +3321,7 @@ int
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
 			}
-			if (gw > 0) {
+			if (gw > 0 && fgcolor != bgcolor) {
 				// Because the stbtt_MakeCodepointBitmap documentation is a bit vague on this
 				// point, the parameter 'out_stride' should be the width of the surface in our
 				// buffer. It's designed so that the glyph can be rendered directly to a screen buffer.
@@ -3321,17 +3332,36 @@ int
 				// paint our glyph into the line buffer
 				lnPtr = line_buff + ins_point.x + (max_lw * ins_point.y);
 				glPtr = glyph_buff;
-				for (int j = 0; j < gh; j++) {
-					for (int k = 0; k < gw; k++) {
-						// 0 value pixels are transparent
-						if (glPtr[k] > 0) {
-							lnPtr[k] = glPtr[k];
+				// Note, two options here, because we REALLY want to avoid floating point
+				// math where at all possible.
+				if (layer_diff == 255U) {
+					for (int j = 0; j < gh; j++) {
+						for (int k = 0; k < gw; k++) {
+							// 0 value pixels are transparent
+							if (glPtr[k] > 0) {
+								lnPtr[k] = glPtr[k];
+							}
 						}
+						// And advance one scanline. Quick! Hide! Pointer arithmetic
+						glPtr += gw;
+						lnPtr += max_lw;
 					}
-					// And advance one scanline. Quick! Hide! Pointer arithmetic
-					glPtr += gw;
-					lnPtr += max_lw;
+				} else {
+					for (int j = 0; j < gh; j++) {
+						for (int k = 0; k < gw; k++) {
+							// 0 value pixels are transparent
+							if (glPtr[k] == 255U) {
+								lnPtr[k] = fgcolor;
+							} else if (glPtr[k] > 0) {
+								lnPtr[k] = (unsigned char)(bgcolor + ((glPtr[k] / 255.0f) * layer_diff));
+							}
+						}
+						// And advance one scanline. Quick! Hide! Pointer arithmetic
+						glPtr += gw;
+						lnPtr += max_lw;
+					}
 				}
+				
 			}
 			curr_point.x += (unsigned short int) lroundf(sf * adv);
 			if (ci < lines[line].endCharIndex) {
