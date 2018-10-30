@@ -3197,7 +3197,7 @@ int
 
 	// Let's get some rendering options from FBInkConfig
 	uint8_t valign = NONE, halign = NONE, fgcolor = FG_BLACK * 16U, bgcolor = BG_WHITE * 16U;
-	bool is_inverted = false, is_overlay = false, is_bgless = false, is_fgless = false;
+	bool is_inverted = false, is_overlay = false, is_bgless = false, is_fgless = false, is_flashing = false, is_cleared = false; 
 	if (fbCfg) {
 		valign = fbCfg->valign;
 		halign = fbCfg->halign;
@@ -3207,6 +3207,8 @@ int
 		is_overlay = fbCfg->is_overlay;
 		is_bgless = fbCfg->is_bgless;
 		is_fgless = fbCfg->is_fgless;
+		is_flashing = fbCfg->is_flashing;
+		is_cleared = fbCfg->is_cleared;
 	}
 	fgcolor ^= 0xFF;
 	// Is the foreground color lighter than background? If so, we make things easier
@@ -3245,9 +3247,30 @@ int
 	} else if (valign == EDGE) {
 		paint_point.y += print_height - curr_print_height;
 	}
+	// Setup our eink refresh region now. We will call refresh during cleanup.
+	struct mxcfb_rect region = { 0 };
+	if (cfg->is_centered || halign == CENTER) {
+		region.left = area.tl.x + ((area.br.x - area.tl.x) / 2U);
+		//printf("Region LEFT = %u + ((%u - %u) / 2) = %u\n", area.tl.x, area.br.x, area.tl.x, (area.tl.x + ((area.br.x - area.tl.x) / 2U)));
+	} else if (halign == EDGE) {
+		region.left = area.br.x;
+	} else {
+		region.left = paint_point.x;
+	}
+	region.top = paint_point.y;
+	//printf("Region LEFT: %d\n", (int)region.left);
+
+	// Do we need to clear the screen?
+	if (is_cleared) {
+		clear_screen(fbfd, !is_inverted ? fgcolor : bgcolor, is_flashing);
+		region.top = 0;
+		region.left = 0;
+		region.width = viewWidth;
+		region.height = viewHeight;
+	}
 	uint32_t tmp_c;
 	unsigned char *lnPtr, *glPtr = NULL;
-	unsigned short start_x, start_y;
+	unsigned short start_x;
 	// stb_truetype renders glyphs with color inverted to what our blitting functions expect
     unsigned char invert = is_inverted ? 0x00 : 0xFF;
 	bool abort_line = false;
@@ -3261,7 +3284,7 @@ int
 		if (abort_line) {
 			break;
 		}
-		printf("Line # %u\n", line);
+		//printf("Line # %u\n", line);
 		lw = 0;
 		unsigned int ci;
 		for (ci = lines[line].startCharIndex; ci <= lines[line].endCharIndex;) {
@@ -3316,7 +3339,7 @@ int
 			}
 			ins_point.x = curr_point.x + (unsigned short)x0;
 			ins_point.y += y0;
-			printf("gw: %d & gh: %d for c: U+%04X @ ins_point (%hu, %hu) & curr_point (%hu, %hu) / x0: %d y0: %d x1: %d y1: %d / lsb: %d\n", gw, gh, c, ins_point.x, ins_point.y, curr_point.x, curr_point.y, x0, y0, x1, y1, lsb);
+			//printf("gw: %d & gh: %d for c: U+%04X @ ins_point (%hu, %hu) & curr_point (%hu, %hu) / x0: %d y0: %d x1: %d y1: %d / lsb: %d\n", gw, gh, c, ins_point.x, ins_point.y, curr_point.x, curr_point.y, x0, y0, x1, y1, lsb);
 			// We only increase the lw if glyph not a space This hopefully prevent trailing
 			// spaces from being printed on a line.
 			if (gw > 0) {
@@ -3324,7 +3347,8 @@ int
 			} else {
 				lw = ins_point.x;
 			}
-			printf("Current Rendered LW: %u  Line# %u\n", lw, line);
+			
+			//printf("Current Rendered LW: %u  Line# %u\n", lw, line);
 			// Just in case our arithmetic was off by a pixel or two...
 			// Note that we are deliberately using a slightly shorter line
 			// width during the measurement phase, so this should not happen.
@@ -3391,12 +3415,22 @@ int
 
 		if (cfg->is_centered || halign == CENTER) {
 			paint_point.x += (max_lw - lw) / 2U;
+			if (paint_point.x < region.left) {
+				region.left = paint_point.x;
+				region.width = lw;
+			}
 		} else if (halign == EDGE) {
 			paint_point.x += max_lw - lw;
+			if (paint_point.x < region.left) {
+				region.left = paint_point.x;
+				region.width = lw;
+			}
+		} else if (lw > region.width) {
+			region.width = lw;
 		}
+		//printf("Region LEFT: %d\n", (int)region.left);
 		FBInkColor color = { 0 };
 		start_x = paint_point.x;
-		start_y = paint_point.y;
 		lnPtr = line_buff;
 		// Normal painting to framebuffer. Please forgive the code repetition. Performance...
 		if (!is_overlay && !is_fgless && !is_bgless) {
@@ -3460,15 +3494,10 @@ int
 		if (paint_point.y + max_line_height > area.br.y) {
 			abort_line = true;
 		}
-		// Woohoo, it's in our framebuffer! Let's refresh the screen.
-		struct mxcfb_rect region = { 0 };
-		region.left = start_x;
-		region.top = start_y;
-		region.width = lw;
-		region.height = font_size_px;
-		// Rotate our eink refresh region before refreshing
-		(*fxpRotateRegion)(&region);
-		refresh(fbfd, region, WAVEFORM_MODE_AUTO, false);
+		region.height += (unsigned int)max_line_height;
+		if (region.top + region.height > viewHeight) {
+			region.height -= region.top + region.height - viewHeight;
+		}
 		LOG("Printed Line!");
 		// And clear our line buffer for next use. The glyph buffer shouldn't
 		// need clearing, as stbtt_MakeCodepointBitmap() should overwrite it.
@@ -3480,6 +3509,12 @@ int
 		rv = paint_point.y; // inform the caller what their next top margin should be to follow on
 	}
 	cleanup:
+		// Rotate our eink refresh region before refreshing
+		printf("Refreshing region from LEFT: %d, TOP: %d, WIDTH: %d, HEIGHT: %d\n", (int)region.left, (int)region.top, (int)region.width, (int)region.height);
+		if (region.width > 0 && region.height > 0) {
+			(*fxpRotateRegion)(&region);
+			refresh(fbfd, region, WAVEFORM_MODE_AUTO, is_flashing);
+		}
 		free(lines);
 		free(brk_buff);
 		free(fmt_buff);
