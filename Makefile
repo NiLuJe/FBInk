@@ -322,7 +322,7 @@ cervantes:
 	$(MAKE) strip CERVANTES=true
 
 kobo: release
-	mkdir -p Kobo/usr/local/fbink/bin Kobo/usr/bin Kobo/usr/local/fbink/lib
+	mkdir -p Kobo/usr/local/fbink/bin Kobo/usr/bin Kobo/usr/local/fbink/lib Kobo/usr/local/fbink/include
 	cp -av $(CURDIR)/Release/fbink Kobo/usr/local/fbink/bin
 	ln -sf /usr/local/fbink/bin/fbink Kobo/usr/bin/fbink
 	cp -av $(CURDIR)/Release/button_scan Kobo/usr/local/fbink/bin
@@ -330,6 +330,7 @@ kobo: release
 	cp -av $(CURDIR)/Release/$(FBINK_SHARED_NAME_FILE) Kobo/usr/local/fbink/lib
 	ln -sf $(FBINK_SHARED_NAME_FILE) Kobo/usr/local/fbink/lib/$(FBINK_SHARED_NAME)
 	ln -sf $(FBINK_SHARED_NAME_FILE) Kobo/usr/local/fbink/lib/$(FBINK_SHARED_NAME_VER)
+	cp -av $(CURDIR)/fbink.h Kobo/usr/local/fbink/include
 	cp -av $(CURDIR)/README.md Kobo/usr/local/fbink/README.md
 	cp -av $(CURDIR)/LICENSE Kobo/usr/local/fbink/LICENSE
 	cp -av $(CURDIR)/CREDITS Kobo/usr/local/fbink/CREDITS
