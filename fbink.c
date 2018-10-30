@@ -3408,7 +3408,36 @@ int
 				paint_point.x = start_x;
 				paint_point.y++;
 			}
-		} 
+		} else if (is_bgless) {
+			for (int j = 0; j < font_size_px; j++) {
+				for (int k = 0; k < lw; k++) {
+					if (lnPtr[k] != bgcolor) {
+						color.r = color.b = color.g = lnPtr[k] ^ invert;
+						put_pixel(&paint_point, &color);
+					}
+					paint_point.x++;
+				}
+				lnPtr += max_lw;
+				paint_point.x = start_x;
+				paint_point.y++;
+			}
+		} else if (is_overlay) {
+			for (int j = 0; j < font_size_px; j++) {
+				for (int k = 0; k < lw; k++) {
+					if (lnPtr[k] != bgcolor) {
+						get_pixel(&paint_point, &color);
+						color.r ^= 0xFF;
+						color.b ^= 0xFF;
+						color.g ^= 0xFF;
+						put_pixel(&paint_point, &color);
+					}
+					paint_point.x++;
+				}
+				lnPtr += max_lw;
+				paint_point.x = start_x;
+				paint_point.y++;
+			}
+		}
 		paint_point.y += (unsigned short int)lines[line].line_gap;
 		paint_point.x = area.tl.x;
 		if (paint_point.y + max_line_height > area.br.y) {
