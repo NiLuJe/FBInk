@@ -3322,7 +3322,7 @@ int
 			// Ensure that our glyph size does not exceed the buffer size. Resize the buffer if it does
 			if (gw * gh > (int)glyph_buffer_dims) {
 				unsigned int new_buff_size = (unsigned int)gw * (unsigned int)gh * 2U * sizeof(unsigned char);
-				unsigned char tmp_g_buff = NULL;
+				unsigned char *tmp_g_buff = NULL;
 				tmp_g_buff = realloc(glyph_buff, new_buff_size);
 				if (!tmp_g_buff) {
 					ELOG("[FBInk] Failure resizing glyph buffer");
