@@ -8,7 +8,7 @@ for my_tc in K3 K5 PW2 ; do
 	# And... GO!
 	echo "* Launching ${KINDLE_TC} build . . ."
 
-	mkdir -p ${KINDLE_TC}
+	mkdir -p ${KINDLE_TC}/lib ${KINDLE_TC}/include ${KINDLE_TC}/bin
 	make clean
 
 	if [[ "${KINDLE_TC}" == "K3" ]] ; then
@@ -17,7 +17,9 @@ for my_tc in K3 K5 PW2 ; do
 		make ${JOBSFLAGS} kindle
 	fi
 
-	cp -av Release/fbink ${KINDLE_TC}/fbink
+	cp -av Release/fbink ${KINDLE_TC}/bin/fbink
+	cp -av Release/libfbink.a ${KINDLE_TC}/lib/libfbink.a
+	cp -av fbink.h ${KINDLE_TC}/include/fbink.h
 	make clean
 done
 
