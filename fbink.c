@@ -2984,7 +2984,7 @@ int
 	// Calculate the maximum number of lines we may have to deal with
 	unsigned int print_height, num_lines;
 	print_height = area.br.y - area.tl.y;
-	num_lines = print_height / max_row_height;
+	num_lines = print_height / (unsigned int)max_row_height;
 
 	// And allocate the memory for it...
 	lines = calloc(num_lines, sizeof(FBInkOTLine));
@@ -3109,9 +3109,9 @@ int
 			// stb_truetype does not appear to create a bounding box for space characters,
 			// so we need to handle this situation.
 			if (!gw && adv) {
-				lw = curr_x;
+				lw = (unsigned int)curr_x;
 			} else {
-				lw = curr_x + x0 + gw;
+				lw = (unsigned int)(curr_x + x0 + gw);
 			}
 			printf("Current Measured LW: %u  Line# %u\n", lw, line);
 			// Oops, we appear to have advanced too far :)
@@ -3119,7 +3119,7 @@ int
 			//unsigned short ot_meas_padding = 3; // Just so we don't use a magic number
 			if (lw > max_lw) {
 				// Is the glyph itself too wide for our printable area? If so, we abort
-				if (gw >= max_lw) {
+				if ((unsigned int)gw >= max_lw) {
 					ELOG("[FBInk] Font size too big for current printable area. Try to reduce margins or font size");
 					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
@@ -3175,12 +3175,12 @@ int
 		if (!lines[line].line_used) {
 			break;
 		}
-		if (curr_print_height + max_line_height > print_height) {
+		if (curr_print_height + (unsigned int)max_line_height > print_height) {
 			// This line can't be printed, so set it to unused
 			lines[line].line_used = false;
 			break;
 		}
-		curr_print_height += max_line_height;
+		curr_print_height += (unsigned int)max_line_height;
 		if (line <= num_lines - 1) {
 			if (line == num_lines - 1 || !lines[line + 1].line_used) {
 				// Last line, we don't want to add a line gap
@@ -3188,8 +3188,8 @@ int
 			}
 		}
 		// We only add a line gap if there's room for one
-		if (!(curr_print_height + lines[line].line_gap > print_height)) {
-			curr_print_height += lines[line].line_gap;
+		if (!(curr_print_height + (unsigned int)lines[line].line_gap > print_height)) {
+			curr_print_height += (unsigned int)lines[line].line_gap;
 		}
 	}
 	printf("Actual print height is %u\n", curr_print_height);
@@ -3221,18 +3221,18 @@ int
 	// Create a bitmap buffer to render a single line. We don't render the glyphs directly to the
 	// fb here, as we need to do some simple blending, and it makes it easier to calculate our
 	// centering if required.
-	line_buff = calloc(max_lw * max_line_height, sizeof(*line_buff));
+	line_buff = calloc(max_lw * (unsigned int)max_line_height, sizeof(*line_buff));
 	// We also don't want to be creating a new buffer for every glyph
-	glyph_buff = calloc(font_size_px * max_line_height * 8, sizeof(*glyph_buff));
+	glyph_buff = calloc(font_size_px * (unsigned int)max_line_height * 8U, sizeof(*glyph_buff));
 	if (!line_buff || !glyph_buff) {
 		ELOG("[FBInk] Line or glyph buffers could not be allocated");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
-	if (bgcolor > 0) {
-		memset(line_buff, bgcolor, max_lw * max_line_height * sizeof(unsigned char));
+	if (bgcolor > 0U) {
+		memset(line_buff, bgcolor, max_lw * (unsigned int)max_line_height * sizeof(unsigned char));
 	}
-	unsigned int layer_diff = fgcolor - bgcolor;
+	unsigned int layer_diff = (unsigned int)fgcolor - (unsigned int)bgcolor;
 	// Setup the variables needed to render
 	FBInkCoordinates curr_point = { 0, 0 };
 	FBInkCoordinates ins_point = {0, 0};
@@ -3288,7 +3288,7 @@ int
 					}
 				}
 			}
-			curr_point.y = ins_point.y = max_baseline;
+			curr_point.y = ins_point.y = (unsigned int)max_baseline;
 			c = u8_nextchar(string, &ci);
 			stbtt_GetCodepointHMetrics(curr_font, c, &adv, &lsb);
 			stbtt_GetCodepointBitmapBox(curr_font, c, sf, sf, &x0, &y0, &x1, &y1);
@@ -3299,13 +3299,13 @@ int
 			if (cx + x0 < 0) {
 				curr_point.x += (unsigned short)abs(cx + x0);
 			}
-			ins_point.x = curr_point.x + x0;
+			ins_point.x = curr_point.x + (unsigned short)x0;
 			ins_point.y += y0;
 			printf("gw: %d & gh: %d for c: U+%04X @ ins_point (%hu, %hu) & curr_point (%hu, %hu) / x0: %d y0: %d x1: %d y1: %d / lsb: %d\n", gw, gh, c, ins_point.x, ins_point.y, curr_point.x, curr_point.y, x0, y0, x1, y1, lsb);
 			// We only increase the lw if glyph not a space This hopefully prevent trailing
 			// spaces from being printed on a line.
 			if (gw > 0) {
-				lw = ins_point.x + gw;
+				lw = ins_point.x + (unsigned int)gw;
 			} else {
 				lw = ins_point.x;
 			}
@@ -3375,7 +3375,7 @@ int
 		// Right, we've rendered a line to a bitmap, time to display it.
 
 		if (cfg->is_centered || halign == CENTER) {
-			paint_point.x += (max_lw - lw) / 2;
+			paint_point.x += (max_lw - lw) / 2U;
 		} else if (halign == EDGE) {
 			paint_point.x += max_lw - lw;
 		}
@@ -3385,8 +3385,8 @@ int
 		lnPtr = line_buff;
 		// Normal painting to framebuffer. Please forgive the code repetition. Performance...
 		if (!is_overlay && !is_fgless && !is_bgless) {
-			for (int j = 0; j < font_size_px; j++) {
-				for (int k = 0; k < lw; k++) {
+			for (unsigned int j = 0; j < font_size_px; j++) {
+				for (unsigned int k = 0; k < lw; k++) {
 					color.r = color.b = color.g = lnPtr[k] ^ invert;
 					put_pixel(&paint_point, &color);
 					paint_point.x++;
@@ -3395,9 +3395,11 @@ int
 				paint_point.x = start_x;
 				paint_point.y++;
 			}
+		// Note, the current implementation of the following three branches don't properly account for
+		// anti-aliasing. Expect artifacting when using these options.
 		} else if (is_fgless) {
-			for (int j = 0; j < font_size_px; j++) {
-				for (int k = 0; k < lw; k++) {
+			for (unsigned int j = 0; j < font_size_px; j++) {
+				for (unsigned int k = 0; k < lw; k++) {
 					if (lnPtr[k] == bgcolor) {
 						color.r = color.b = color.g = lnPtr[k] ^ invert;
 						put_pixel(&paint_point, &color);
@@ -3409,8 +3411,8 @@ int
 				paint_point.y++;
 			}
 		} else if (is_bgless) {
-			for (int j = 0; j < font_size_px; j++) {
-				for (int k = 0; k < lw; k++) {
+			for (unsigned int j = 0; j < font_size_px; j++) {
+				for (unsigned int k = 0; k < lw; k++) {
 					if (lnPtr[k] != bgcolor) {
 						color.r = color.b = color.g = lnPtr[k] ^ invert;
 						put_pixel(&paint_point, &color);
@@ -3422,8 +3424,8 @@ int
 				paint_point.y++;
 			}
 		} else if (is_overlay) {
-			for (int j = 0; j < font_size_px; j++) {
-				for (int k = 0; k < lw; k++) {
+			for (unsigned int j = 0; j < font_size_px; j++) {
+				for (unsigned int k = 0; k < lw; k++) {
 					if (lnPtr[k] != bgcolor) {
 						get_pixel(&paint_point, &color);
 						color.r ^= 0xFF;
@@ -3455,7 +3457,7 @@ int
 		LOG("Printed Line!");
 		// And clear our line buffer for next use. The glyph buffer shouldn't
 		// need clearing, as stbtt_MakeCodepointBitmap() should overwrite it.
-		memset(line_buff, 0, (max_lw * max_line_height * sizeof(unsigned char)));
+		memset(line_buff, 0, (max_lw * (unsigned int)max_line_height * sizeof(unsigned char)));
 	}
 
 	cleanup:
