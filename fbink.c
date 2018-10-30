@@ -2777,7 +2777,7 @@ void
 }
 
 int
-	fbink_print_ot(int fbfd, char* string, FBInkOTConfig* cfg)
+	fbink_print_ot(int fbfd, char* string, FBInkOTConfig* cfg, FBInkConfig* fbCfg)
 {
 #ifdef FBINK_WITH_OPENTYPE
 		//Note, we do a lot of casting floats to ints, so silence those GCC warnings
@@ -2796,6 +2796,12 @@ int
 	if (!otInit) {
 		ELOG("[FBInk] No fonts have been loaded");
 		return ERRCODE(ENODATA);
+	}
+
+	// Just in case we receive a NULL pointer to the cfg struct
+	if (!cfg) {
+		ELOG("[FBInk] FBInkOTConfig expected. Got NULL pointer instead");
+		return ERRCODE(EXIT_FAILURE);
 	}
 
 	// If we open a fd now, we'll only keep it open for this single print call!
@@ -3188,6 +3194,20 @@ int
 	}
 	printf("Actual print height is %u\n", curr_print_height);
 
+	// Let's get some rendering options from FBInkConfig
+	uint8_t valign = NONE, halign = NONE, fgcolor = FG_BLACK, bgcolor = BG_WHITE;
+	bool is_inverted = false, is_overlay = false, is_bgless = false, is_fgless = false;
+	if (fbCfg) {
+		valign = fbCfg->valign;
+		halign = fbCfg->halign;
+		fgcolor = fbCfg->fg_color;
+		bgcolor = fbCfg->bg_color;
+		is_inverted = fbCfg->is_inverted;
+		is_overlay = fbCfg->is_overlay;
+		is_bgless = fbCfg->is_bgless;
+		is_fgless = fbCfg->is_fgless;
+	}
+
 	// Hopefully, we have some lines to render!
 
 	// Create a bitmap buffer to render a single line. We don't render the glyphs directly to the
@@ -3201,10 +3221,17 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
+
 	// Setup the variables needed to render
 	FBInkCoordinates curr_point = { 0, 0 };
 	FBInkCoordinates ins_point = {0, 0};
 	FBInkCoordinates paint_point = {area.tl.x, area.tl.y};
+	// Set the vertical positioning now
+	if (valign == CENTER) {
+		paint_point.y += (print_height - curr_print_height) / 2;
+	} else if (valign == EDGE) {
+		paint_point.y += print_height - curr_print_height;
+	}
 	uint32_t tmp_c;
 	unsigned char *lnPtr, *glPtr = NULL;
 	unsigned short start_x, start_y;
@@ -3316,8 +3343,11 @@ int
 		}
 		curr_point.x = 0;
 		// Right, we've rendered a line to a bitmap, time to display it.
-		if (cfg->is_centered) {
+
+		if (cfg->is_centered || halign == CENTER) {
 			paint_point.x += (max_lw - lw) / 2;
+		} else if (halign == EDGE) {
+			paint_point.x += max_lw - lw;
 		}
 		FBInkColor color = { 0 };
 		start_x = paint_point.x;
