@@ -191,14 +191,13 @@ typedef struct
 typedef struct {
 	uint8_t size_pt;          // Size of text in points. If not set (0), defaults to 12pt
 	struct {
-		unsigned char top;    // Top margin as percentage. Max 90%
-		unsigned char bottom; // Bottom margin as percentage. Max 90%
-		unsigned char left;   // Left margin as percentage. Max 90%
-		unsigned char right;  // Right margin as percentage. Max 90%
+		unsigned short top;    // Top margin in pixels
+		unsigned short bottom; // Bottom margin in pixels
+		unsigned short left;   // Left margin in pixels
+		unsigned short right;  // Right margin in pixels
 	} margins;
 	bool is_centered;         // Horizontal text centering
 	bool is_formatted;		  // Is string "formatted"? Bold/Italic support only, markdown like syntax
-    bool is_inverted;
 } FBInkOTConfig;
 
 // NOTE: Unless otherwise specified,
@@ -274,7 +273,10 @@ FBINK_API int fbink_printf(int fbfd, const FBInkConfig* fbink_config, const char
 // Print a string using an OpenType font. Note the caller MUST init with fbink_init_ot() FIRST.
 // This function uses margins (as whole number percentages) instead of rows/columns for
 // positioning and setting the printable area.
-// Returns -(ERANGE) if the provided margins are out of range, or sum to < 100%
+// Returns new top margin for use in subsequent calls, if the return value is positive.
+// 		A zero return value indicates there is no room left to print another row of text at the current
+// 		margins or font size.
+// Returns -(ERANGE) if the provided margins are out of range, or sum to < view height or width
 // Returns -(ENOSYS) if compiled with MINIMAL
 // Returns -(ENODAT) if fbink_init_ot() hasn't yet been called.
 // fbfd:		open file descriptor to the framebuffer character device,

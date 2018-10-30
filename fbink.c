@@ -2833,13 +2833,13 @@ int
 	// Sanity check the provided margins and calculate the printable area.
 	// We'll cap the margin at 90% for each side. Margins for opposing edges
 	// should sum to less than 100%
-	if (cfg->margins.top > 90 || cfg->margins.bottom > 90 || cfg->margins.left > 90 || cfg->margins.right > 90) {
-		ELOG("[FBInk] A margin was out of range (allowed range < 90)");
+	if (cfg->margins.top > viewHeight || cfg->margins.bottom > viewHeight || cfg->margins.left > viewWidth || cfg->margins.right > viewWidth) {
+		ELOG("[FBInk] A margin was out of range (allowed ranges :: Vert < %u  Horiz < %u)", (unsigned int)viewHeight, (unsigned int)viewWidth);
 		rv = ERRCODE(ERANGE);
 		goto cleanup;
 	}
-	if (cfg->margins.top + cfg->margins.bottom >= 100 || cfg->margins.left + cfg->margins.right >= 100) {
-		ELOG("[FBInk] Opposing margins sum to greater than 100 percent");
+	if (cfg->margins.top + cfg->margins.bottom >= viewHeight || cfg->margins.left + cfg->margins.right >= viewWidth) {
+		ELOG("[FBInk] Opposing margins sum to greater than the viewport height or width");
 		rv = ERRCODE(ERANGE);
 		goto cleanup;
 	}
@@ -2847,10 +2847,10 @@ int
 		FBInkCoordinates tl;
 		FBInkCoordinates br;
 	} area = { 0 };
-	area.tl.x = (unsigned short)(cfg->margins.left / 100.0f * viewWidth);
-	area.tl.y = (unsigned short)(cfg->margins.top / 100.0f * viewHeight);
-	area.br.x = (unsigned short)(viewWidth - (uint32_t)(cfg->margins.right / 100.0f * viewWidth));
-	area.br.y = (unsigned short)(viewHeight - (uint32_t)(cfg->margins.bottom / 100.0f * viewHeight));
+	area.tl.x = cfg->margins.left;
+	area.tl.y = cfg->margins.top;
+	area.br.x = viewWidth - cfg->margins.right;
+	area.br.y = viewHeight - cfg->margins.bottom;
 	// Set default font size if required
 	uint8_t size_pt = cfg->size_pt;
 	if (!size_pt) {
@@ -3184,6 +3184,7 @@ int
 		if (line <= num_lines - 1) {
 			if (line == num_lines - 1 || !lines[line + 1].line_used) {
 				// Last line, we don't want to add a line gap
+				lines[line].line_gap = 0;
 				break;
 			}
 		}
@@ -3459,7 +3460,11 @@ int
 		// need clearing, as stbtt_MakeCodepointBitmap() should overwrite it.
 		memset(line_buff, 0, (max_lw * (unsigned int)max_line_height * sizeof(unsigned char)));
 	}
-
+	if (paint_point.y + max_line_height > area.br.y) {
+		rv = 0; // Inform the caller there is no room left to print another row.
+	} else {
+		rv = paint_point.y; // inform the caller what their next top margin should be to follow on
+	}
 	cleanup:
 		free(lines);
 		free(brk_buff);
