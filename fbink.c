@@ -3383,16 +3383,32 @@ int
 		start_x = paint_point.x;
 		start_y = paint_point.y;
 		lnPtr = line_buff;
-		for (int j = 0; j < font_size_px; j++) {
-			for (int k = 0; k < lw; k++) {
-				color.r = color.b = color.g = lnPtr[k] ^ invert;
-				put_pixel(&paint_point, &color);
-				paint_point.x++;
+		// Normal painting to framebuffer. Please forgive the code repetition. Performance...
+		if (!is_overlay && !is_fgless && !is_bgless) {
+			for (int j = 0; j < font_size_px; j++) {
+				for (int k = 0; k < lw; k++) {
+					color.r = color.b = color.g = lnPtr[k] ^ invert;
+					put_pixel(&paint_point, &color);
+					paint_point.x++;
+				}
+				lnPtr += max_lw;
+				paint_point.x = start_x;
+				paint_point.y++;
 			}
-			lnPtr += max_lw;
-			paint_point.x = start_x;
-			paint_point.y++;
-		}
+		} else if (is_fgless) {
+			for (int j = 0; j < font_size_px; j++) {
+				for (int k = 0; k < lw; k++) {
+					if (lnPtr[k] == bgcolor) {
+						color.r = color.b = color.g = lnPtr[k] ^ invert;
+						put_pixel(&paint_point, &color);
+					}
+					paint_point.x++;
+				}
+				lnPtr += max_lw;
+				paint_point.x = start_x;
+				paint_point.y++;
+			}
+		} 
 		paint_point.y += (unsigned short int)lines[line].line_gap;
 		paint_point.x = area.tl.x;
 		if (paint_point.y + max_line_height > area.br.y) {
