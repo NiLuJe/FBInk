@@ -281,7 +281,10 @@ FBINK_API int fbink_printf(int fbfd, const FBInkConfig* fbink_config, const char
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // string:		UTF-8 encoded string to print
 // cfg:			Pointer to a FBInkOTConfig struct.
-FBINK_API int fbink_print_ot(int fbfd, char* string, FBInkOTConfig* cfg);
+// fbCfg:		Optional pointer to a FBInkConfig struct. If set, the options
+//				is_inverted, is_overlay, is_fgless, is_bgless, fg_color, bg_color, valign, halign
+//              will be honored.
+FBINK_API int fbink_print_ot(int fbfd, char* string, FBInkOTConfig* cfg, FBInkConfig* fbCfg);
 
 // A simple wrapper around the internal screen refresh handling, without requiring you to include einkfb/mxcfb headers
 // fbfd:		open file descriptor to the framebuffer character device,
