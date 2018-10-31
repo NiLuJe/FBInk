@@ -3226,6 +3226,8 @@ int
 		is_cleared  = fbCfg->is_cleared;
 		is_centered = fbCfg->is_centered;
 		is_halfway  = fbCfg->is_halfway;
+	} else {
+		is_centered = cfg->is_centered;
 	}
 	fgcolor ^= 0xFF;
 	// Is the foreground color lighter than background? If so, we make things easier

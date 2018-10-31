@@ -198,6 +198,7 @@ typedef struct
 		unsigned short int left;      // Left margin in pixels
 		unsigned short int right;     // Right margin in pixels
 	} margins;
+	bool is_centered;     // Horizontal centering
 	bool is_formatted;    // Is string "formatted"? Bold/Italic support only, markdown like syntax
 } FBInkOTConfig;
 
