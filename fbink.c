@@ -67,7 +67,7 @@
 #	include <math.h>
 #	define STB_TRUETYPE_IMPLEMENTATION
 // Make it private, we don't need it anywhere else
-#      define STBTT_STATIC
+#	define STBTT_STATIC
 // stb_truetype is.... noisy
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wunknown-pragmas"
@@ -2063,15 +2063,15 @@ int
 }
 // Load font from given file path. Up to four font variants may be used by FBInk at any given time.
 int
-	fbink_add_ot_font(const char* fp, FONT_VARIANT_T variant)
+    fbink_add_ot_font(const char* fp, FONT_VARIANT_T variant)
 {
 #ifdef FBINK_WITH_OPENTYPE
 	otInit = true;
 	// Open font from given path, and load into buffer
-	FILE *f = fopen(fp, "rb");
-	unsigned char *data = NULL;
+	FILE*          f    = fopen(fp, "rb");
+	unsigned char* data = NULL;
 	if (f) {
-		int fd = fileno(f);
+		int         fd = fileno(f);
 		struct stat st;
 		fstat(fd, &st);
 		data = calloc(1, st.st_size);
@@ -2079,7 +2079,7 @@ int
 			fclose(f);
 			otInit = false;
 			ELOG("[FBInk] Error allocating font data buffer.");
-			return(ERRCODE(EXIT_FAILURE));
+			return (ERRCODE(EXIT_FAILURE));
 		}
 		size_t read = fread(data, 1, st.st_size, f);
 		if (read != st.st_size) {
@@ -2087,11 +2087,11 @@ int
 			fclose(f);
 			otInit = false;
 			ELOG("[FBInk] Error reading font file.");
-			return(ERRCODE(EXIT_FAILURE));
+			return (ERRCODE(EXIT_FAILURE));
 		}
 		fclose(f);
 	}
-	stbtt_fontinfo *font_info = calloc(1, sizeof(stbtt_fontinfo));
+	stbtt_fontinfo* font_info = calloc(1, sizeof(stbtt_fontinfo));
 	if (!font_info) {
 		free(data);
 		ELOG("[FNInk] Error allocating stbtt_fontinfo struct");
@@ -2104,30 +2104,30 @@ int
 	// Assign the current font to it's appropriate otFonts struct member, depending
 	// on the variant specified by the caller.
 	// NOTE: We make sure we free any previous allocation first!
-	switch(variant) {
-	case FNT_REGULAR:
-		otFonts.otRegular = free_ot_font(otFonts.otRegular);
-		otFonts.otRegular = font_info;
-		break;
-	case FNT_ITALIC:
-		otFonts.otItalic = free_ot_font(otFonts.otItalic);
-		otFonts.otItalic = font_info;
-		break;
-	case FNT_BOLD:
-		otFonts.otBold = free_ot_font(otFonts.otBold);
-		otFonts.otBold = font_info;
-		break;
-	case FNT_BOLD_ITALIC:
-		otFonts.otBoldItalic = free_ot_font(otFonts.otBoldItalic);
-		otFonts.otBoldItalic = font_info;
-		break;
+	switch (variant) {
+		case FNT_REGULAR:
+			otFonts.otRegular = free_ot_font(otFonts.otRegular);
+			otFonts.otRegular = font_info;
+			break;
+		case FNT_ITALIC:
+			otFonts.otItalic = free_ot_font(otFonts.otItalic);
+			otFonts.otItalic = font_info;
+			break;
+		case FNT_BOLD:
+			otFonts.otBold = free_ot_font(otFonts.otBold);
+			otFonts.otBold = font_info;
+			break;
+		case FNT_BOLD_ITALIC:
+			otFonts.otBoldItalic = free_ot_font(otFonts.otBoldItalic);
+			otFonts.otBoldItalic = font_info;
+			break;
 	}
 	ELOG("[FBInk] Font %s loaded", fp);
 	return EXIT_SUCCESS;
 #else
 	fprintf(stderr, "[FBInk] Opentype support is disabled in this FBInk build!\n");
 	return ERRCODE(ENOSYS);
-#endif // FBINK_WITH_OPENTYPE
+#endif    // FBINK_WITH_OPENTYPE
 }
 
 // Free an individual OpenType font structure
@@ -2135,7 +2135,7 @@ void*
     free_ot_font(stbtt_fontinfo* font_info)
 {
 	if (font_info) {
-		free(font_info->data); // This is the font data we loaded
+		free(font_info->data);    // This is the font data we loaded
 		free(font_info);
 	}
 	return NULL;
@@ -2143,7 +2143,7 @@ void*
 
 // Free all OpenType fonts
 int
-	fbink_free_ot_fonts(void)
+    fbink_free_ot_fonts(void)
 {
 #ifdef FBINK_WITH_OPENTYPE
 	free_ot_font(otFonts.otRegular);
@@ -2154,7 +2154,7 @@ int
 #else
 	fprintf(stderr, "[FBInk] Opentype support is disabled in this FBInk build!\n");
 	return ERRCODE(ENOSYS);
-#endif // FBINK_WITH_OPENTYPE
+#endif    // FBINK_WITH_OPENTYPE
 }
 
 // Dump a few of our internal state variables to stdout, for shell script consumption
@@ -2730,75 +2730,75 @@ int
 // This is ***bold italic*** text.
 // As well as their underscore equivalents
 void
-	parse_simple_md(char* string, int size, unsigned char* result)
+    parse_simple_md(char* string, int size, unsigned char* result)
 {
-	int ci = 0;
-    char ch;
+	int  ci = 0;
+	char ch;
 	bool is_italic = false;
-	bool is_bold = false;
+	bool is_bold   = false;
 	while (ci < size) {
 		//printf("ci: %d (< %d) is %c\n", ci, size, string[ci]);
 		switch (ch = string[ci]) {
-		case '*':
-		case '_':
-			if (ci + 1 < size && string[ci + 1] == ch) {
-				//printf("ci: %d && ci + 1 == %c\n", ci, ch);
-				if (ci + 2 < size && string[ci + 2] == ch) {
-					//printf("ci: %d && ci + 2 == %c\n", ci, ch);
-					is_bold = !is_bold;
-					is_italic = !is_italic;
-					result[ci] = CH_IGNORE;
+			case '*':
+			case '_':
+				if (ci + 1 < size && string[ci + 1] == ch) {
+					//printf("ci: %d && ci + 1 == %c\n", ci, ch);
+					if (ci + 2 < size && string[ci + 2] == ch) {
+						//printf("ci: %d && ci + 2 == %c\n", ci, ch);
+						is_bold        = !is_bold;
+						is_italic      = !is_italic;
+						result[ci]     = CH_IGNORE;
+						result[ci + 1] = CH_IGNORE;
+						result[ci + 2] = CH_IGNORE;
+						ci += 3;
+						break;
+					}
+					is_bold        = !is_bold;
+					result[ci]     = CH_IGNORE;
 					result[ci + 1] = CH_IGNORE;
-					result[ci + 2] = CH_IGNORE;
-					ci += 3;
+					ci += 2;
 					break;
 				}
-				is_bold = !is_bold;
+				// Try to avoid flagging a single underscore in the middle of a word.
+				if (ch == '_' && ci > 0 && string[ci - 1] != ' ' && string[ci + 1] != ' ') {
+					result[ci] = CH_REGULAR;
+					ci++;
+					break;
+				}
+				is_italic  = !is_italic;
 				result[ci] = CH_IGNORE;
-				result[ci + 1] = CH_IGNORE;
-				ci += 2;
-				break;
-			}
-			// Try to avoid flagging a single underscore in the middle of a word.
-			if (ch == '_' && ci > 0 && string[ci - 1] != ' ' && string[ci + 1] != ' ') {
-				result[ci] = CH_REGULAR;
 				ci++;
 				break;
-			}
-			is_italic = !is_italic;
-			result[ci] = CH_IGNORE;
-			ci++;
-			break;
-		default:
-			if (is_bold && is_italic) {
-				result[ci] = CH_BOLD_ITALIC;
-			} else if (is_bold) {
-				result[ci] = CH_BOLD;
-			} else if (is_italic) {
-				result[ci] = CH_ITALIC;
-			} else {
-				result[ci] = CH_REGULAR;
-			}
-			ci++;
-			break;
+			default:
+				if (is_bold && is_italic) {
+					result[ci] = CH_BOLD_ITALIC;
+				} else if (is_bold) {
+					result[ci] = CH_BOLD;
+				} else if (is_italic) {
+					result[ci] = CH_ITALIC;
+				} else {
+					result[ci] = CH_REGULAR;
+				}
+				ci++;
+				break;
 		}
 	}
 }
 
 int
-	fbink_print_ot(int fbfd, char* string, FBInkOTConfig* cfg, FBInkConfig* fbCfg)
+    fbink_print_ot(int fbfd, char* string, FBInkOTConfig* cfg, FBInkConfig* fbCfg)
 {
 #ifdef FBINK_WITH_OPENTYPE
-		//Note, we do a lot of casting floats to ints, so silence those GCC warnings
+	//Note, we do a lot of casting floats to ints, so silence those GCC warnings
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wfloat-conversion"
-# 	pragma GCC diagnostic ignored "-Wconversion"
+#	pragma GCC diagnostic ignored "-Wconversion"
 #	pragma GCC diagnostic ignored "-Wbad-function-cast"
 
 	// Abort if we were passed an empty string
-	if (! *string) {
-			ELOG("[FBInk] Cannot print empty string");
-			return ERRCODE(EXIT_FAILURE);
+	if (!*string) {
+		ELOG("[FBInk] Cannot print empty string");
+		return ERRCODE(EXIT_FAILURE);
 	}
 
 	// Has fbink_init_ot() been called yet?
@@ -2824,10 +2824,10 @@ int
 	int rv = EXIT_SUCCESS;
 
 	// Declare buffers early to make cleanup easier
-	FBInkOTLine* lines = NULL;
-	char * brk_buff = NULL;
-	unsigned char* fmt_buff = NULL;
-	unsigned char* line_buff = NULL;
+	FBInkOTLine*   lines      = NULL;
+	char*          brk_buff   = NULL;
+	unsigned char* fmt_buff   = NULL;
+	unsigned char* line_buff  = NULL;
 	unsigned char* glyph_buff = NULL;
 
 	// map fb to user mem
@@ -2842,8 +2842,11 @@ int
 	// Sanity check the provided margins and calculate the printable area.
 	// We'll cap the margin at 90% for each side. Margins for opposing edges
 	// should sum to less than 100%
-	if (cfg->margins.top > viewHeight || cfg->margins.bottom > viewHeight || cfg->margins.left > viewWidth || cfg->margins.right > viewWidth) {
-		ELOG("[FBInk] A margin was out of range (allowed ranges :: Vert < %u  Horiz < %u)", (unsigned int)viewHeight, (unsigned int)viewWidth);
+	if (cfg->margins.top > viewHeight || cfg->margins.bottom > viewHeight || cfg->margins.left > viewWidth ||
+	    cfg->margins.right > viewWidth) {
+		ELOG("[FBInk] A margin was out of range (allowed ranges :: Vert < %u  Horiz < %u)",
+		     (unsigned int) viewHeight,
+		     (unsigned int) viewWidth);
 		rv = ERRCODE(ERANGE);
 		goto cleanup;
 	}
@@ -2852,10 +2855,11 @@ int
 		rv = ERRCODE(ERANGE);
 		goto cleanup;
 	}
-	struct {
+	struct
+	{
 		FBInkCoordinates tl;
 		FBInkCoordinates br;
-	} area = { 0 };
+	} area    = { 0 };
 	area.tl.x = cfg->margins.left;
 	area.tl.y = cfg->margins.top;
 	area.br.x = viewWidth - cfg->margins.right;
@@ -2868,30 +2872,30 @@ int
 	// TODO: handle ppi properly
 	unsigned int ppi = 265;
 	// Given the ppi, convert point height to pixels. Note, 1pt is 1/72th of an inch
-	unsigned int font_size_px = (unsigned int)(ppi / 72.0f * size_pt);
+	unsigned int font_size_px = (unsigned int) (ppi / 72.0f * size_pt);
 
 	// This is a pointer to whichever font is currently active. It gets updated for every
 	// character in the loop, as needed.
-	stbtt_fontinfo *curr_font = NULL;
+	stbtt_fontinfo* curr_font = NULL;
 
 	int max_row_height = 0;
 	// Calculate some metrics for every font we have loaded.
 	// Please forgive the repetition here.
 
 	// Declaring these three variables early, so a default can be set
-	float sf = 0.0;
-	int max_baseline = 0;
-	int max_lg = 0;
-	int max_desc = 0;
+	float sf           = 0.0;
+	int   max_baseline = 0;
+	int   max_lg       = 0;
+	int   max_desc     = 0;
 	float rgSF, itSF, bdSF, bditSF;
-	int asc, desc, lg;
-	int scaled_bl, scaled_desc, scaled_lg;
+	int   asc, desc, lg;
+	int   scaled_bl, scaled_desc, scaled_lg;
 	if (otFonts.otRegular) {
-		rgSF = stbtt_ScaleForPixelHeight(otFonts.otRegular, (float)font_size_px);
+		rgSF = stbtt_ScaleForPixelHeight(otFonts.otRegular, (float) font_size_px);
 		stbtt_GetFontVMetrics(otFonts.otRegular, &asc, &desc, &lg);
-		scaled_bl = (int)(ceilf(rgSF * asc));
-		scaled_desc = (int)(ceilf(rgSF * desc));
-		scaled_lg = (int)(ceilf(rgSF * lg));
+		scaled_bl   = (int) (ceilf(rgSF * asc));
+		scaled_desc = (int) (ceilf(rgSF * desc));
+		scaled_lg   = (int) (ceilf(rgSF * lg));
 		if (scaled_bl > max_baseline) {
 			max_baseline = scaled_bl;
 		}
@@ -2904,16 +2908,16 @@ int
 		// Set default font, for when markdown parsing is disabled
 		if (!curr_font) {
 			curr_font = otFonts.otRegular;
-			sf = rgSF;
+			sf        = rgSF;
 			ELOG("[FBInk] Unformatted text defaulting to regular font");
 		}
 	}
 	if (otFonts.otItalic) {
-		itSF = stbtt_ScaleForPixelHeight(otFonts.otItalic, (float)font_size_px);
+		itSF = stbtt_ScaleForPixelHeight(otFonts.otItalic, (float) font_size_px);
 		stbtt_GetFontVMetrics(otFonts.otItalic, &asc, &desc, &lg);
-		scaled_bl = (int)(ceilf(itSF * asc));
-		scaled_desc = (int)(ceilf(itSF * desc));
-		scaled_lg = (int)(ceilf(itSF * lg));
+		scaled_bl   = (int) (ceilf(itSF * asc));
+		scaled_desc = (int) (ceilf(itSF * desc));
+		scaled_lg   = (int) (ceilf(itSF * lg));
 		if (scaled_bl > max_baseline) {
 			max_baseline = scaled_bl;
 		}
@@ -2926,16 +2930,16 @@ int
 		// Set default font, for when markdown parsing is disabled
 		if (!curr_font) {
 			curr_font = otFonts.otItalic;
-			sf = itSF;
+			sf        = itSF;
 			ELOG("[FBInk] Unformatted text defaulting to italic font");
 		}
 	}
 	if (otFonts.otBold) {
-		bdSF = stbtt_ScaleForPixelHeight(otFonts.otBold, (float)font_size_px);
+		bdSF = stbtt_ScaleForPixelHeight(otFonts.otBold, (float) font_size_px);
 		stbtt_GetFontVMetrics(otFonts.otBold, &asc, &desc, &lg);
-		scaled_bl = (int)(ceilf(bdSF * asc));
-		scaled_desc = (int)(ceilf(bdSF * desc));
-		scaled_lg = (int)(ceilf(bdSF * lg));
+		scaled_bl   = (int) (ceilf(bdSF * asc));
+		scaled_desc = (int) (ceilf(bdSF * desc));
+		scaled_lg   = (int) (ceilf(bdSF * lg));
 		if (scaled_bl > max_baseline) {
 			max_baseline = scaled_bl;
 		}
@@ -2948,16 +2952,16 @@ int
 		// Set default font, for when markdown parsing is disabled
 		if (!curr_font) {
 			curr_font = otFonts.otBold;
-			sf = bdSF;
+			sf        = bdSF;
 			ELOG("[FBInk] Unformatted text defaulting to bold font");
 		}
 	}
 	if (otFonts.otBoldItalic) {
-		bditSF = stbtt_ScaleForPixelHeight(otFonts.otBoldItalic, (float)font_size_px);
+		bditSF = stbtt_ScaleForPixelHeight(otFonts.otBoldItalic, (float) font_size_px);
 		stbtt_GetFontVMetrics(otFonts.otBoldItalic, &asc, &desc, &lg);
-		scaled_bl = (int)(ceilf(bditSF * asc));
-		scaled_desc = (int)(ceilf(bditSF * desc));
-		scaled_lg = (int)(ceilf(bditSF * lg));
+		scaled_bl   = (int) (ceilf(bditSF * asc));
+		scaled_desc = (int) (ceilf(bditSF * desc));
+		scaled_lg   = (int) (ceilf(bditSF * lg));
 		if (scaled_bl > max_baseline) {
 			max_baseline = scaled_bl;
 		}
@@ -2970,7 +2974,7 @@ int
 		// Set default font, for when markdown parsing is disabled
 		if (!curr_font) {
 			curr_font = otFonts.otBoldItalic;
-			sf = bditSF;
+			sf        = bditSF;
 			ELOG("[FBInk] Unformatted text defaulting to bold italic font");
 		}
 	}
@@ -2993,7 +2997,7 @@ int
 	// Calculate the maximum number of lines we may have to deal with
 	unsigned int print_height, num_lines;
 	print_height = area.br.y - area.tl.y;
-	num_lines = print_height / (unsigned int)max_row_height;
+	num_lines    = print_height / (unsigned int) max_row_height;
 
 	// And allocate the memory for it...
 	lines = calloc(num_lines, sizeof(FBInkOTLine));
@@ -3002,7 +3006,7 @@ int
 
 	// Note: we only care about the byte length here
 	size_t str_len_bytes = strlen(string);
-	brk_buff = calloc(str_len_bytes + 1, sizeof(*brk_buff));
+	brk_buff             = calloc(str_len_bytes + 1, sizeof(*brk_buff));
 	if (!brk_buff) {
 		ELOG("[FBInk] Linebreak buffer could not be allocated");
 		rv = ERRCODE(EXIT_FAILURE);
@@ -3010,7 +3014,7 @@ int
 	}
 
 	init_linebreak();
-	set_linebreaks_utf8((utf8_t*)string, str_len_bytes + 1, "en", brk_buff);
+	set_linebreaks_utf8((utf8_t*) string, str_len_bytes + 1, "en", brk_buff);
 	LOG("Found linebreaks!");
 
 	// Parse our string for formatting, if requested
@@ -3026,28 +3030,28 @@ int
 	// Lets find our lines! Nothing fancy, just a simple first fit algorithm, but we do
 	// our best not to break inside a word.
 
-	unsigned int chars_in_str = u8_strlen(string);
-	unsigned int c_index = 0;
-	unsigned int tmp_c_index = c_index;
-	uint32_t c;
+	unsigned int   chars_in_str = u8_strlen(string);
+	unsigned int   c_index      = 0;
+	unsigned int   tmp_c_index  = c_index;
+	uint32_t       c;
 	unsigned short max_lw = area.br.x - area.tl.x;
-	unsigned int line;
-	int max_line_height = max_row_height - max_lg;
+	unsigned int   line;
+	int            max_line_height = max_row_height - max_lg;
 	// adv = advance: the horizontal distance along the baseline to the origin of
 	//                the next glyph
 	// lsb = left side bearing: The horizontal distance from the origin point to
 	//                          left edge of the glyph
-	int adv, lsb, curr_x;
-	bool complete_str = false;
-	int x0, y0, x1, y1, gw, gh, cx;
+	int          adv, lsb, curr_x;
+	bool         complete_str = false;
+	int          x0, y0, x1, y1, gw, gh, cx;
 	unsigned int lw;
 	for (line = 0; line < num_lines; line++) {
 		// Every line has a start character index and an end char index.
-		curr_x = 0;
-		lw = 0;
+		curr_x                     = 0;
+		lw                         = 0;
 		lines[line].startCharIndex = c_index;
-		lines[line].line_used = true;
-		lines[line].line_gap = max_lg;
+		lines[line].line_used      = true;
+		lines[line].line_gap       = max_lg;
 		while (c_index < chars_in_str) {
 			if (cfg->is_formatted) {
 				// Check if we need to skip formatting characters
@@ -3056,22 +3060,22 @@ int
 					continue;
 				} else {
 					switch (fmt_buff[c_index]) {
-					case CH_REGULAR:
-						curr_font = otFonts.otRegular;
-						sf = rgSF;
-						break;
-					case CH_ITALIC:
-						curr_font = otFonts.otItalic;
-						sf = itSF;
-						break;
-					case CH_BOLD:
-						curr_font = otFonts.otBold;
-						sf = bdSF;
-						break;
-					case CH_BOLD_ITALIC:
-						curr_font = otFonts.otBoldItalic;
-						sf = bditSF;
-						break;
+						case CH_REGULAR:
+							curr_font = otFonts.otRegular;
+							sf        = rgSF;
+							break;
+						case CH_ITALIC:
+							curr_font = otFonts.otItalic;
+							sf        = itSF;
+							break;
+						case CH_BOLD:
+							curr_font = otFonts.otBold;
+							sf        = bdSF;
+							break;
+						case CH_BOLD_ITALIC:
+							curr_font = otFonts.otBoldItalic;
+							sf        = bditSF;
+							break;
 					}
 				}
 			}
@@ -3118,9 +3122,9 @@ int
 			// stb_truetype does not appear to create a bounding box for space characters,
 			// so we need to handle this situation.
 			if (!gw && adv) {
-				lw = (unsigned int)curr_x;
+				lw = (unsigned int) curr_x;
 			} else {
-				lw = (unsigned int)(curr_x + x0 + gw);
+				lw = (unsigned int) (curr_x + x0 + gw);
 			}
 			printf("Current Measured LW: %u  Line# %u\n", lw, line);
 			// Oops, we appear to have advanced too far :)
@@ -3128,8 +3132,9 @@ int
 			//unsigned short ot_meas_padding = 3; // Just so we don't use a magic number
 			if (lw > max_lw) {
 				// Is the glyph itself too wide for our printable area? If so, we abort
-				if ((unsigned int)gw >= max_lw) {
-					ELOG("[FBInk] Font size too big for current printable area. Try to reduce margins or font size");
+				if ((unsigned int) gw >= max_lw) {
+					ELOG(
+					    "[FBInk] Font size too big for current printable area. Try to reduce margins or font size");
 					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
 				}
@@ -3157,19 +3162,19 @@ int
 					break;
 				}
 			}
-			curr_x += (int)lroundf(sf * adv);
+			curr_x += (int) lroundf(sf * adv);
 			// Adjust our x position for kerning, because we can :)
 			if (string[c_index + 1]) {
 				tmp_c_index = c_index;
 				uint32_t c2 = u8_nextchar(string, &tmp_c_index);
-				curr_x += (int)lroundf(sf * stbtt_GetCodepointKernAdvance(curr_font, c, c2));
+				curr_x += (int) lroundf(sf * stbtt_GetCodepointKernAdvance(curr_font, c, c2));
 			}
 		}
 		// We've run out of string! This is our last line.
 		if (c_index >= chars_in_str) {
 			u8_dec(string, &c_index);
 			lines[line].endCharIndex = c_index;
-			complete_str = true;
+			complete_str             = true;
 			break;
 		}
 	}
@@ -3184,12 +3189,12 @@ int
 		if (!lines[line].line_used) {
 			break;
 		}
-		if (curr_print_height + (unsigned int)max_line_height > print_height) {
+		if (curr_print_height + (unsigned int) max_line_height > print_height) {
 			// This line can't be printed, so set it to unused
 			lines[line].line_used = false;
 			break;
 		}
-		curr_print_height += (unsigned int)max_line_height;
+		curr_print_height += (unsigned int) max_line_height;
 		if (line <= num_lines - 1) {
 			if (line == num_lines - 1 || !lines[line + 1].line_used) {
 				// Last line, we don't want to add a line gap
@@ -3198,26 +3203,27 @@ int
 			}
 		}
 		// We only add a line gap if there's room for one
-		if (!(curr_print_height + (unsigned int)lines[line].line_gap > print_height)) {
-			curr_print_height += (unsigned int)lines[line].line_gap;
+		if (!(curr_print_height + (unsigned int) lines[line].line_gap > print_height)) {
+			curr_print_height += (unsigned int) lines[line].line_gap;
 		}
 	}
 	printf("Actual print height is %u\n", curr_print_height);
 
 	// Let's get some rendering options from FBInkConfig
 	uint8_t valign = NONE, halign = NONE, fgcolor = FG_BLACK * 16U, bgcolor = BG_WHITE * 16U;
-	bool is_inverted = false, is_overlay = false, is_bgless = false, is_fgless = false, is_flashing = false, is_cleared = false, is_centered = false;
+	bool    is_inverted = false, is_overlay = false, is_bgless = false, is_fgless = false, is_flashing = false,
+	     is_cleared = false, is_centered = false;
 	if (fbCfg) {
-		valign = fbCfg->valign;
-		halign = fbCfg->halign;
-		fgcolor = fbCfg->fg_color * 16U;
-		bgcolor = fbCfg->bg_color * 16U;
+		valign      = fbCfg->valign;
+		halign      = fbCfg->halign;
+		fgcolor     = fbCfg->fg_color * 16U;
+		bgcolor     = fbCfg->bg_color * 16U;
 		is_inverted = fbCfg->is_inverted;
-		is_overlay = fbCfg->is_overlay;
-		is_bgless = fbCfg->is_bgless;
-		is_fgless = fbCfg->is_fgless;
+		is_overlay  = fbCfg->is_overlay;
+		is_bgless   = fbCfg->is_bgless;
+		is_fgless   = fbCfg->is_fgless;
 		is_flashing = fbCfg->is_flashing;
-		is_cleared = fbCfg->is_cleared;
+		is_cleared  = fbCfg->is_cleared;
 		is_centered = fbCfg->is_centered;
 	}
 	fgcolor ^= 0xFF;
@@ -3234,23 +3240,23 @@ int
 	// Create a bitmap buffer to render a single line. We don't render the glyphs directly to the
 	// fb here, as we need to do some simple blending, and it makes it easier to calculate our
 	// centering if required.
-	line_buff = calloc(max_lw * (unsigned int)max_line_height, sizeof(*line_buff));
+	line_buff = calloc(max_lw * (unsigned int) max_line_height, sizeof(*line_buff));
 	// We also don't want to be creating a new buffer for every glyph
-	unsigned int glyph_buffer_dims = font_size_px * (unsigned int)max_line_height * 2U;
-	glyph_buff = calloc(glyph_buffer_dims, sizeof(*glyph_buff));
+	unsigned int glyph_buffer_dims = font_size_px * (unsigned int) max_line_height * 2U;
+	glyph_buff                     = calloc(glyph_buffer_dims, sizeof(*glyph_buff));
 	if (!line_buff || !glyph_buff) {
 		ELOG("[FBInk] Line or glyph buffers could not be allocated");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
 	if (bgcolor > 0U) {
-		memset(line_buff, bgcolor, max_lw * (unsigned int)max_line_height * sizeof(unsigned char));
+		memset(line_buff, bgcolor, max_lw * (unsigned int) max_line_height * sizeof(unsigned char));
 	}
-	unsigned int layer_diff = (unsigned int)fgcolor - (unsigned int)bgcolor;
+	unsigned int layer_diff = (unsigned int) fgcolor - (unsigned int) bgcolor;
 	// Setup the variables needed to render
-	FBInkCoordinates curr_point = { 0, 0 };
-	FBInkCoordinates ins_point = {0, 0};
-	FBInkCoordinates paint_point = {area.tl.x, area.tl.y};
+	FBInkCoordinates curr_point  = { 0, 0 };
+	FBInkCoordinates ins_point   = { 0, 0 };
+	FBInkCoordinates paint_point = { area.tl.x, area.tl.y };
 	// Set the vertical positioning now
 	if (valign == CENTER) {
 		paint_point.y += (print_height - curr_print_height) / 2;
@@ -3273,17 +3279,17 @@ int
 	// Do we need to clear the screen?
 	if (is_cleared) {
 		clear_screen(fbfd, !is_inverted ? fgcolor : bgcolor, is_flashing);
-		region.top = 0;
-		region.left = 0;
-		region.width = viewWidth;
+		region.top    = 0;
+		region.left   = 0;
+		region.width  = viewWidth;
 		region.height = viewHeight;
 	}
-	uint32_t tmp_c;
+	uint32_t       tmp_c;
 	unsigned char *lnPtr, *glPtr = NULL;
 	unsigned short start_x;
 	// stb_truetype renders glyphs with color inverted to what our blitting functions expect
-    unsigned char invert = is_inverted ? 0x00 : 0xFF;
-	bool abort_line = false;
+	unsigned char invert     = is_inverted ? 0x00 : 0xFF;
+	bool          abort_line = false;
 	// Render!
 	for (line = 0; line < num_lines; line++) {
 		if (!lines[line].line_used) {
@@ -3304,56 +3310,57 @@ int
 					continue;
 				} else {
 					switch (fmt_buff[ci]) {
-					case CH_REGULAR:
-						curr_font = otFonts.otRegular;
-						sf = rgSF;
-						break;
-					case CH_ITALIC:
-						curr_font = otFonts.otItalic;
-						sf = itSF;
-						break;
-					case CH_BOLD:
-						curr_font = otFonts.otBold;
-						sf = bdSF;
-						break;
-					case CH_BOLD_ITALIC:
-						curr_font = otFonts.otBoldItalic;
-						sf = bditSF;
-						break;
+						case CH_REGULAR:
+							curr_font = otFonts.otRegular;
+							sf        = rgSF;
+							break;
+						case CH_ITALIC:
+							curr_font = otFonts.otItalic;
+							sf        = itSF;
+							break;
+						case CH_BOLD:
+							curr_font = otFonts.otBold;
+							sf        = bdSF;
+							break;
+						case CH_BOLD_ITALIC:
+							curr_font = otFonts.otBoldItalic;
+							sf        = bditSF;
+							break;
 					}
 				}
 			}
-			curr_point.y = ins_point.y = (unsigned int)max_baseline;
-			c = u8_nextchar(string, &ci);
+			curr_point.y = ins_point.y = (unsigned int) max_baseline;
+			c                          = u8_nextchar(string, &ci);
 			stbtt_GetCodepointHMetrics(curr_font, c, &adv, &lsb);
 			stbtt_GetCodepointBitmapBox(curr_font, c, sf, sf, &x0, &y0, &x1, &y1);
 			gw = x1 - x0;
 			gh = y1 - y0;
 			// Ensure that our glyph size does not exceed the buffer size. Resize the buffer if it does
-			if (gw * gh > (int)glyph_buffer_dims) {
-				unsigned int new_buff_size = (unsigned int)gw * (unsigned int)gh * 2U * sizeof(unsigned char);
-				unsigned char *tmp_g_buff = NULL;
-				tmp_g_buff = realloc(glyph_buff, new_buff_size);
+			if (gw * gh > (int) glyph_buffer_dims) {
+				unsigned int new_buff_size =
+				    (unsigned int) gw * (unsigned int) gh * 2U * sizeof(unsigned char);
+				unsigned char* tmp_g_buff = NULL;
+				tmp_g_buff                = realloc(glyph_buff, new_buff_size);
 				if (!tmp_g_buff) {
 					ELOG("[FBInk] Failure resizing glyph buffer");
 					ERRCODE(EXIT_FAILURE);
 					goto cleanup;
 				}
-				glyph_buff = tmp_g_buff;
+				glyph_buff        = tmp_g_buff;
 				glyph_buffer_dims = new_buff_size;
 			}
 			// Make sure we don't have an underflow/wrap around
-			cx = (int)curr_point.x;
+			cx = (int) curr_point.x;
 			if (cx + x0 < 0) {
-				curr_point.x += (unsigned short)abs(cx + x0);
+				curr_point.x += (unsigned short) abs(cx + x0);
 			}
-			ins_point.x = curr_point.x + (unsigned short)x0;
+			ins_point.x = curr_point.x + (unsigned short) x0;
 			ins_point.y += y0;
 			//printf("gw: %d & gh: %d for c: U+%04X @ ins_point (%hu, %hu) & curr_point (%hu, %hu) / x0: %d y0: %d x1: %d y1: %d / lsb: %d\n", gw, gh, c, ins_point.x, ins_point.y, curr_point.x, curr_point.y, x0, y0, x1, y1, lsb);
 			// We only increase the lw if glyph not a space This hopefully prevent trailing
 			// spaces from being printed on a line.
 			if (gw > 0) {
-				lw = ins_point.x + (unsigned int)gw;
+				lw = ins_point.x + (unsigned int) gw;
 			} else {
 				lw = ins_point.x;
 			}
@@ -3402,7 +3409,9 @@ int
 							if (glPtr[k] == 255U) {
 								lnPtr[k] = fgcolor;
 							} else if (glPtr[k] > 0) {
-								lnPtr[k] = (unsigned char)(bgcolor + ((glPtr[k] / 255.0f) * layer_diff));
+								lnPtr[k] =
+								    (unsigned char) (bgcolor +
+										     ((glPtr[k] / 255.0f) * layer_diff));
 							}
 						}
 						// And advance one scanline. Quick! Hide! Pointer arithmetic
@@ -3410,13 +3419,13 @@ int
 						lnPtr += max_lw;
 					}
 				}
-
 			}
 			curr_point.x += (unsigned short int) lroundf(sf * adv);
 			if (ci < lines[line].endCharIndex) {
 				unsigned int tmp_i = ci;
-				tmp_c = u8_nextchar(string, &tmp_i);
-				curr_point.x += (unsigned short int) lroundf(sf * stbtt_GetCodepointKernAdvance(curr_font, c, tmp_c));
+				tmp_c              = u8_nextchar(string, &tmp_i);
+				curr_point.x +=
+				    (unsigned short int) lroundf(sf * stbtt_GetCodepointKernAdvance(curr_font, c, tmp_c));
 			}
 			ins_point.y = max_baseline;
 		}
@@ -3426,13 +3435,13 @@ int
 		if (is_centered || halign == CENTER) {
 			paint_point.x += (max_lw - lw) / 2U;
 			if (paint_point.x < region.left) {
-				region.left = paint_point.x;
+				region.left  = paint_point.x;
 				region.width = lw;
 			}
 		} else if (halign == EDGE) {
 			paint_point.x += max_lw - lw;
 			if (paint_point.x < region.left) {
-				region.left = paint_point.x;
+				region.left  = paint_point.x;
 				region.width = lw;
 			}
 		} else if (lw > region.width) {
@@ -3440,8 +3449,8 @@ int
 		}
 		//printf("Region LEFT: %d\n", (int)region.left);
 		FBInkColor color = { 0 };
-		start_x = paint_point.x;
-		lnPtr = line_buff;
+		start_x          = paint_point.x;
+		lnPtr            = line_buff;
 		// Normal painting to framebuffer. Please forgive the code repetition. Performance...
 		if (!is_overlay && !is_fgless && !is_bgless) {
 			for (unsigned int j = 0; j < font_size_px; j++) {
@@ -3454,8 +3463,8 @@ int
 				paint_point.x = start_x;
 				paint_point.y++;
 			}
-		// Note, the current implementation of the following three branches don't properly account for
-		// anti-aliasing. Expect artifacting when using these options.
+			// Note, the current implementation of the following three branches don't properly account for
+			// anti-aliasing. Expect artifacting when using these options.
 		} else if (is_fgless) {
 			for (unsigned int j = 0; j < font_size_px; j++) {
 				for (unsigned int k = 0; k < lw; k++) {
@@ -3499,49 +3508,53 @@ int
 				paint_point.y++;
 			}
 		}
-		paint_point.y += (unsigned short int)lines[line].line_gap;
+		paint_point.y += (unsigned short int) lines[line].line_gap;
 		paint_point.x = area.tl.x;
 		if (paint_point.y + max_line_height > area.br.y) {
 			abort_line = true;
 		}
-		region.height += (unsigned int)max_line_height;
+		region.height += (unsigned int) max_line_height;
 		if (region.top + region.height > viewHeight) {
 			region.height -= region.top + region.height - viewHeight;
 		}
 		LOG("Printed Line!");
 		// And clear our line buffer for next use. The glyph buffer shouldn't
 		// need clearing, as stbtt_MakeCodepointBitmap() should overwrite it.
-		memset(line_buff, 0, (max_lw * (unsigned int)max_line_height * sizeof(unsigned char)));
+		memset(line_buff, 0, (max_lw * (unsigned int) max_line_height * sizeof(unsigned char)));
 	}
 	if (paint_point.y + max_line_height > area.br.y) {
-		rv = 0; // Inform the caller there is no room left to print another row.
+		rv = 0;    // Inform the caller there is no room left to print another row.
 	} else {
-		rv = paint_point.y; // inform the caller what their next top margin should be to follow on
+		rv = paint_point.y;    // inform the caller what their next top margin should be to follow on
 	}
-	cleanup:
-		// Rotate our eink refresh region before refreshing
-		printf("Refreshing region from LEFT: %d, TOP: %d, WIDTH: %d, HEIGHT: %d\n", (int)region.left, (int)region.top, (int)region.width, (int)region.height);
-		if (region.width > 0 && region.height > 0) {
-			(*fxpRotateRegion)(&region);
-			refresh(fbfd, region, WAVEFORM_MODE_AUTO, is_flashing);
-		}
-		free(lines);
-		free(brk_buff);
-		free(fmt_buff);
-		free(line_buff);
-		free(glyph_buff);
-		if (isFbMapped && !keep_fd) {
-			unmap_fb();
-		}
-		if (!keep_fd) {
-			close(fbfd);
-		}
+cleanup:
+	// Rotate our eink refresh region before refreshing
+	printf("Refreshing region from LEFT: %d, TOP: %d, WIDTH: %d, HEIGHT: %d\n",
+	       (int) region.left,
+	       (int) region.top,
+	       (int) region.width,
+	       (int) region.height);
+	if (region.width > 0 && region.height > 0) {
+		(*fxpRotateRegion)(&region);
+		refresh(fbfd, region, WAVEFORM_MODE_AUTO, is_flashing);
+	}
+	free(lines);
+	free(brk_buff);
+	free(fmt_buff);
+	free(line_buff);
+	free(glyph_buff);
+	if (isFbMapped && !keep_fd) {
+		unmap_fb();
+	}
+	if (!keep_fd) {
+		close(fbfd);
+	}
 	return rv;
 #	pragma GCC diagnostic pop
 #else
 	fprintf(stderr, "[FBInk] Opentype support is disabled in this FBInk build!\n");
 	return ERRCODE(ENOSYS);
-#endif // FBINK_WITH_OPENTYPE
+#endif    // FBINK_WITH_OPENTYPE
 }
 
 // Small public wrapper around refresh(), without the caller having to depend on mxcfb headers

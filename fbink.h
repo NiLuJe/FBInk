@@ -188,15 +188,17 @@ typedef struct
 	uint8_t   valign;    // Vertical alignment of images (NONE/TOP, CENTER, EDGE/BOTTOM; c.f., ALIGN_INDEX_T enum)
 } FBInkConfig;
 
-typedef struct {
-	uint8_t size_pt;          // Size of text in points. If not set (0), defaults to 12pt
-	struct {
-		unsigned short top;    // Top margin in pixels
-		unsigned short bottom; // Bottom margin in pixels
-		unsigned short left;   // Left margin in pixels
-		unsigned short right;  // Right margin in pixels
+typedef struct
+{
+	uint8_t size_pt;    // Size of text in points. If not set (0), defaults to 12pt
+	struct
+	{
+		unsigned short top;       // Top margin in pixels
+		unsigned short bottom;    // Bottom margin in pixels
+		unsigned short left;      // Left margin in pixels
+		unsigned short right;     // Right margin in pixels
 	} margins;
-	bool is_formatted;		  // Is string "formatted"? Bold/Italic support only, markdown like syntax
+	bool is_formatted;    // Is string "formatted"? Bold/Italic support only, markdown like syntax
 } FBInkOTConfig;
 
 // NOTE: Unless otherwise specified,

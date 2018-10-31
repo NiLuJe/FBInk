@@ -36,9 +36,9 @@
 #	ifndef FBINK_WITH_IMAGE
 #		define FBINK_WITH_IMAGE
 #	endif
-#   ifndef FBINK_WITH_OPENTYPE
-#       define FBINK_WITH_OPENTYPE
-#   endif
+#	ifndef FBINK_WITH_OPENTYPE
+#		define FBINK_WITH_OPENTYPE
+#	endif
 // Connect button scanning is Kobo specific
 #	ifndef FBINK_FOR_KINDLE
 #		ifndef FBINK_FOR_CERVANTES
@@ -259,9 +259,10 @@ const uint32_t* (*fxpFont32xGetBitmap)(uint32_t) = NULL;
 FBInkDeviceQuirks deviceQuirks = { 0 };
 
 // Information about the currently loaded OpenType font
-bool otInit = false;
+bool         otInit  = false;
 FBInkOTFonts otFonts = { NULL, NULL, NULL, NULL };
-typedef enum {
+typedef enum
+{
 	CH_IGNORE = 0U,
 	CH_REGULAR,
 	CH_ITALIC,
@@ -352,7 +353,7 @@ static int
 
 #ifdef FBINK_WITH_OPENTYPE
 static void* free_ot_font(stbtt_fontinfo* font_info);
-static void parse_simple_md(char* string, int size, unsigned char* result);
+static void  parse_simple_md(char* string, int size, unsigned char* result);
 #endif
 
 // For identify_device, which we need outside of fbink_device_id.c ;)

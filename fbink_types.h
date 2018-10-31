@@ -134,14 +134,16 @@ typedef union
 
 // Stores the information necessary to render a line of text
 // using OpenType/TrueType fonts
-typedef struct FBInkOTLine {
+typedef struct FBInkOTLine
+{
 	unsigned int startCharIndex;
 	unsigned int endCharIndex;
-	bool line_used;
-	int line_gap;
+	bool         line_used;
+	int          line_gap;
 } FBInkOTLine;
 
-typedef struct FBInkOTFonts {
+typedef struct FBInkOTFonts
+{
 	stbtt_fontinfo* otRegular;
 	stbtt_fontinfo* otItalic;
 	stbtt_fontinfo* otBold;
