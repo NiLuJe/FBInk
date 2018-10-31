@@ -285,7 +285,7 @@ FBINK_API int fbink_printf(int fbfd, const FBInkConfig* fbink_config, const char
 // string:		UTF-8 encoded string to print
 // cfg:			Pointer to a FBInkOTConfig struct.
 // fbCfg:		Optional pointer to a FBInkConfig struct. If set, the options
-//				is_inverted, is_flashing, is_cleared, is_centered, is_overlay, is_fgless, is_bgless,
+//				is_inverted, is_flashing, is_cleared, is_centered, is_halfway, is_overlay, is_fgless, is_bgless,
 //				fg_color, bg_color, valign, halign will be honored.
 FBINK_API int fbink_print_ot(int fbfd, char* string, FBInkOTConfig* cfg, FBInkConfig* fbCfg);
 

@@ -3212,7 +3212,7 @@ int
 	// Let's get some rendering options from FBInkConfig
 	uint8_t valign = NONE, halign = NONE, fgcolor = FG_BLACK * 16U, bgcolor = BG_WHITE * 16U;
 	bool    is_inverted = false, is_overlay = false, is_bgless = false, is_fgless = false, is_flashing = false,
-	     is_cleared = false, is_centered = false;
+	     is_cleared = false, is_centered = false, is_halfway = false;
 	if (fbCfg) {
 		valign      = fbCfg->valign;
 		halign      = fbCfg->halign;
@@ -3225,6 +3225,7 @@ int
 		is_flashing = fbCfg->is_flashing;
 		is_cleared  = fbCfg->is_cleared;
 		is_centered = fbCfg->is_centered;
+		is_halfway  = fbCfg->is_halfway;
 	}
 	fgcolor ^= 0xFF;
 	// Is the foreground color lighter than background? If so, we make things easier
@@ -3258,7 +3259,7 @@ int
 	FBInkCoordinates ins_point   = { 0, 0 };
 	FBInkCoordinates paint_point = { area.tl.x, area.tl.y };
 	// Set the vertical positioning now
-	if (valign == CENTER) {
+	if (is_halfway || valign == CENTER) {
 		paint_point.y += (print_height - curr_print_height) / 2;
 	} else if (valign == EDGE) {
 		paint_point.y += print_height - curr_print_height;
