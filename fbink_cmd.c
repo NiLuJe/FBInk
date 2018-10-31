@@ -801,7 +801,7 @@ int
 			if (is_truetype) {
 				if (!fbink_config.is_quiet) {
 					printf(
-					    "Printing string '%s' @ %hhupt, honoring the following margins { top: %hupx, bottom: %hupx, left: %hupx, right: %hupx } (formatted: %s, overlay: %s, backgroundless: %s, foregroundless: %s, inverted: %s, flashing: %s, centered: %s, halign: %hhu, valign: %hhu, clear screen: %s)\n",
+					    "Printing string '%s' @ %hhupt, honoring the following margins { top: %hupx, bottom: %hupx, left: %hupx, right: %hupx } (formatted: %s, overlay: %s, backgroundless: %s, foregroundless: %s, inverted: %s, flashing: %s, centered: %s, halign: %hhu, halfway: %s, valign: %hhu, clear screen: %s)\n",
 					    string,
 					    ot_config.size_pt,
 					    ot_config.margins.top,
@@ -816,6 +816,7 @@ int
 					    fbink_config.is_flashing ? "true" : "false",
 					    fbink_config.is_centered ? "true" : "false",
 					    fbink_config.halign,
+					    fbink_config.is_halfway ? "true" : "false",
 					    fbink_config.valign,
 					    fbink_config.is_cleared ? "true" : "false");
 				}
@@ -835,7 +836,7 @@ int
 			} else {
 				if (!fbink_config.is_quiet) {
 					printf(
-					    "Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (overlay: %s, backgroundless: %s, foregroundless: %s, inverted: %s, flashing: %s, centered: %s, left padded: %s, clear screen: %s, font: %hhu, font scaling: x%hhu)\n",
+					    "Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (overlay: %s, backgroundless: %s, foregroundless: %s, inverted: %s, flashing: %s, centered: %s, halfway: %s, left padded: %s, clear screen: %s, font: %hhu, font scaling: x%hhu)\n",
 					    string,
 					    fbink_config.col,
 					    fbink_config.hoffset,
@@ -847,6 +848,7 @@ int
 					    fbink_config.is_inverted ? "true" : "false",
 					    fbink_config.is_flashing ? "true" : "false",
 					    fbink_config.is_centered ? "true" : "false",
+					    fbink_config.is_halfway ? "true" : "false",
 					    fbink_config.is_padded ? "true" : "false",
 					    fbink_config.is_cleared ? "true" : "false",
 					    fbink_config.fontname,
