@@ -45,7 +45,9 @@ typedef struct __attribute__((__packed__))
 	uint8_t pcb_id;    // First field is the PCB ID, which dictates the device model, the only thing we care about ;)
 } NTXHWConfig;
 #		else
-// On Kobo, dig a little deeper to pickup the CPU, too.
+// On Kobo, we'll need dig a little deeper to pickup the CPU & display resolution, too.
+// So we'll first read the header only, because its size is fixed,
+// and then trust it to tell us how much data there is to read for the payload.
 typedef struct __attribute__((__packed__))
 {
 #			pragma GCC diagnostic push
@@ -54,11 +56,13 @@ typedef struct __attribute__((__packed__))
 	char    version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.1" on Mk.7
 #			pragma GCC diagnostic pop
 	uint8_t len;    // Length (in bytes) of the full payload, header excluded (up to 70 on v3.1)
-	// Header stops here, actual data follows
-	uint8_t pcb_id;     // First field is the PCB ID, which dictates the device model, the only thing we care about ;)
-	uint8_t foo[26];    // Skip a bunch of fields
-	uint8_t cpu;        // The device's CPU, which'll help differentiate some Kobo Mk.7 variants
 } NTXHWConfig;
+// Index of the few fields we're interested in inside the payload...
+#			define KOBO_HWCFG_PCB 0
+#			define KOBO_HWCFG_CPU 27
+// NOTE: This one was added in v1.0, while the original NTX Touch was only on v0.7,
+//       which is why we handle this dynamically, instead of relying on a fixed-size struct...
+#			define KOBO_HWCFG_DisplayResolution 31
 #		endif    // FBINK_FOR_CERVANTES
 #	endif            // !FBINK_FOR_KINDLE
 
@@ -71,7 +75,8 @@ static void     identify_kindle(FBInkDeviceQuirks*);
 #        elif defined(FBINK_FOR_CERVANTES)
 static void identify_cervantes(FBInkDeviceQuirks*);
 #        else
-// List of NTX/Kobo PCB IDs... For a given device, what we get in NTXHWConfig.pcb_id corresponds to an index in this array.
+// List of NTX/Kobo PCB IDs... For a given device,
+// what we get in the NTXHWConfig payload @ index KOBO_HWCFG_CPU corresponds to an index in this array.
 // Can thankfully be populated from /bin/ntx_hwconfig with the help of strings and a bit of sed, i.e.,
 // sed -re 's/(^)(.*?)($)/"\2",/g' PCB_IDs.txt
 // NOTE: Last updated on 10/27/18, from FW 4.11.11911
@@ -96,22 +101,14 @@ static const unsigned short int kobo_ids[] = { 0, 0,   0,   0,   0,   0,   0, 0,
 					       0, 0,   0,   0,   0,   0,   0, 373, 0,   0,   375, 374, 0,   0, 375, 0,
 					       0, 375, 0,   0,   0,   0,   0, 0,   376, 376, 377, 0,   0,   0 };
 
-// Same idea, but for the various NTX/Kobo CPUs via NTXHWConfig.cpu...
+// Same idea, but for the various NTX/Kobo CPUs...
 /*
 static const char* kobo_cpus[] = {
 	"mx35", "m166e", "mx50", "mx6sl", "it8951", "i386", "mx7d", "mx6ull", "mx6sll", "mx6dl"
 };
 */
 
-// List of NTX/Kobo Display Resolutions...
-// NOTE: If PCB is field 0, DisplayResolution is field 31
-//       The good news is, we'd only need it to differentiate pika from alyssum (as per /bin/kobo_config.sh),
-//       and it's a good news because we don't care about that distinction.
-//       The bad news is, it's a field that was added in v1.0 of that whole NTXHWConfig shenanigan,
-//       and since it started at v0.1, I'm not going to risk it... ;)
-//       Good decision, as, apparently, the first NTX-built imx508 Touch (whichever of the Trilogy that was)
-//       may only have handled v0.7
-//       The next set of imx507 devices had jumped to v1.6, though ;).
+// And for the various NTX/Kobo Display Resolutions...
 /*
 static const char* kobo_disp_res[] = { "800x600",   "1024x758",   "1024x768",    "1440x1080", "1366x768",
 				       "1448x1072", "1600x1200",  "400x375x2",   "1872x1404", "960x540",

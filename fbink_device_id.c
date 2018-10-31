@@ -229,7 +229,7 @@ static void
 				(void*) HWCONFIG_OFFSET,
 				HWCONFIG_DEVICE);
 		} else {
-			if (fread(&config, sizeof(config), 1, fp) != 1) {
+			if (fread(&config, sizeof(config), 1, fp) < 1 || ferror(fp) != 0) {
 				fprintf(
 				    stderr, "[FBInk] Failed to read the NTX HWConfig entry on '%s'!\n", HWCONFIG_DEVICE);
 				fclose(fp);
@@ -367,7 +367,8 @@ static void
 	if (!fp) {
 		fprintf(stderr, "[FBInk] Couldn't read from '%s', unable to identify the Kobo model!\n", HWCONFIG_DEVICE);
 	} else {
-		NTXHWConfig config = { 0 };
+		NTXHWConfig    config  = { 0 };
+		unsigned char* payload = NULL;
 
 		if (fseek(fp, HWCONFIG_OFFSET, SEEK_SET) != 0) {
 			fprintf(stderr,
@@ -375,43 +376,69 @@ static void
 				(void*) HWCONFIG_OFFSET,
 				HWCONFIG_DEVICE);
 		} else {
-			if (fread(&config, sizeof(config), 1, fp) != 1) {
+			if (fread(&config, sizeof(config), 1, fp) < 1 || ferror(fp) != 0) {
 				fprintf(
 				    stderr, "[FBInk] Failed to read the NTX HWConfig entry on '%s'!\n", HWCONFIG_DEVICE);
 				fclose(fp);
+				// NOTE: Make it clear we failed to identify the device...
+				set_kobo_quirks(0, device_quirks);
+				return;
+			}
+
+			// NOTE: These are NOT NULL-terminated, so we use the size of the storage array,
+			//       and not of the string literal (where sizeof would have appended space for a terminating NULL).
+			//       (i.e., here, sizeof(config.magic) == 10 == strlen(HWCONFIG_MAGIC) while sizeof(HWCONFIG_MAGIC) == 11)
+			if (memcmp(config.magic, HWCONFIG_MAGIC, sizeof(config.magic)) != 0) {
+				fprintf(stderr,
+					"[FBInk] Input device '%s' does not appear to contain an NTX HWConfig entry!\n",
+					HWCONFIG_DEVICE);
+				fclose(fp);
+				// NOTE: Like rcS, assume it's an old Freescale Trilogy if we can't find an NTX HW tag
+				set_kobo_quirks(0, device_quirks);
+				return;
+			}
+
+			// We'll read the full payload, whose size varies depending on the exact kernel being used...
+			// Since it's only a couple dozen bytes, do that on the stack to make our life easier.
+			payload = alloca(config.len);
+			if (fread(payload, sizeof(*payload), config.len, fp) < config.len || ferror(fp) != 0) {
+				fprintf(stderr, "[FBInk] Error reading NTX HWConfig payload (unexpected length)!\n");
+				fclose(fp);
+				// NOTE: Make it clear we failed to identify the device...
+				set_kobo_quirks(0, device_quirks);
 				return;
 			}
 		}
 		fclose(fp);
 
-		// NOTE: These are NOT NULL-terminated, so we use the size of the storage array,
-		//       and not of the string literal (where sizeof would have appended space for a terminating NULL).
-		//       (i.e., here, sizeof(config.magic) == 10 == strlen(HWCONFIG_MAGIC) while sizeof(HWCONFIG_MAGIC) == 11)
-		if (memcmp(config.magic, HWCONFIG_MAGIC, sizeof(config.magic)) != 0) {
-			fprintf(stderr,
-				"[FBInk] Input device '%s' does not appear to contain an NTX HWConfig entry!\n",
-				HWCONFIG_DEVICE);
-			// NOTE: Like rcS, assume it's an old Freescale Trilogy if we can't find an NTX HW tag
-			set_kobo_quirks(0, device_quirks);
-			return;
-		}
-
 		// As per /bin/kobo_config.sh, match PCB IDs to Product IDs via a LUT...
 		unsigned short int kobo_id = 0;
-		if (config.pcb_id >= (sizeof(kobo_ids) / sizeof(*kobo_ids))) {
-			fprintf(stderr,
-				"[FBInk] Unknown Kobo PCB ID index (%hhu >= %zu)!\n",
-				config.pcb_id,
-				(sizeof(kobo_ids) / sizeof(*kobo_ids)));
-		} else {
-			kobo_id = kobo_ids[config.pcb_id];
+		// Mainly to make GCC happy, because if alloca failed, we're screwed anyway.
+		if (payload) {
+			if (payload[KOBO_HWCFG_PCB] >= (sizeof(kobo_ids) / sizeof(*kobo_ids))) {
+				fprintf(stderr,
+					"[FBInk] Unknown Kobo PCB ID index (%hhu >= %zu)!\n",
+					payload[KOBO_HWCFG_PCB],
+					(sizeof(kobo_ids) / sizeof(*kobo_ids)));
+			} else {
+				kobo_id = kobo_ids[payload[KOBO_HWCFG_PCB]];
 
-			// Discriminate the Mk.7 version for dual rev models by checking the CPU...
-			if (kobo_id == 374 || kobo_id == 375) {
-				// NOTE: kobo_cpus[8] == "mx6sll"
-				if (config.cpu == 8) {
-					// Thankfully, that works for both the H2O² (374 -> 378) and the Aura SE (375 -> 379) ;)
-					kobo_id = (unsigned short int) (kobo_id + 4U);
+				// And now for the fun part, the few device variants that use the same PCB ID...
+				if (kobo_id == 374 || kobo_id == 375) {
+					// Discriminate the Mk.7 version for dual rev models by checking the CPU...
+					// NOTE: kobo_cpus[8] == "mx6sll"
+					if (payload[KOBO_HWCFG_CPU] == 8) {
+						// Thankfully, that works for both the H2O² (374 -> 378),
+						// and the Aura SE (375 -> 379) ;)
+						kobo_id = (unsigned short int) (kobo_id + 4U);
+					}
+				} else if (kobo_id == 371) {
+					// Discriminate Alyssum from Pika, by checking the Display Resolution...
+					// NOTE: kobo_disp_res[0] == "800x600"
+					if (payload[KOBO_HWCFG_DisplayResolution] == 0) {
+						// Glo HD (Alyssum) [371] -> Touch 2.0 (Pika) [372]
+						kobo_id = 372;
+					}
 				}
 			}
 		}
