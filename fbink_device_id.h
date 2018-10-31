@@ -59,6 +59,7 @@ typedef struct __attribute__((__packed__))
 } NTXHWConfig;
 // Index of the few fields we're interested in inside the payload...
 #			define KOBO_HWCFG_PCB 0
+#			define KOBO_HWCFG_DisplayPanel 10
 #			define KOBO_HWCFG_CPU 27
 // NOTE: This one was added in v1.0, while the original NTX Touch was only on v0.7,
 //       which is why we handle this dynamically, instead of relying on a fixed-size struct...
@@ -101,7 +102,20 @@ static const unsigned short int kobo_ids[] = { 0, 0,   0,   0,   0,   0,   0, 0,
 					       0, 0,   0,   0,   0,   0,   0, 373, 0,   0,   375, 374, 0,   0, 375, 0,
 					       0, 375, 0,   0,   0,   0,   0, 0,   376, 376, 377, 0,   0,   0 };
 
-// Same idea, but for the various NTX/Kobo CPUs...
+// Same idea, but for the various NTX/Kobo Display Panels...
+/*
+static const char* kobo_disp_panel[] = { "6\" Left EPD",      "6\" Right EPD",     "9\" Right EPD",    "5\" Left EPD",
+					 "5\" Right EPD",     "6\" Top EPD",       "6\" Bottom EPD",   "5\" Top EPD",
+					 "5\" Bottom EPD",    "6.8\" Top EPD",     "6.8\" Bottom EPD", "13.3\" Left EPD",
+					 "13.3\" Right EPD",  "13.3\" Bottom EPD", "13.3\" Top EPD",   "7.8\" Bottom EPD",
+					 "7.8\" Top EPD",     "7.8\" Left EPD",    "7.8\" Right EPD",  "7.3\" Bottom EPD",
+					 "7.3\" Top EPD",     "7.3\" Left EPD",    "7.3\" Right EPD",  "4.7\" Bottom EPD",
+					 "4.7\" Top EPD",     "4.7\" Left EPD",    "4.7\" Right EPD",  "10.3\" Top EPD",
+					 "10.3\" Bottom EPD", "10.3\" Left EPD",   "10.3\" Right EPD", "8\" Bottom EPD",
+					 "8\" Top EPD",       "8\" Left EPD",      "8\" Right EPD" };
+*/
+
+// And for the various NTX/Kobo CPUs...
 /*
 static const char* kobo_cpus[] = {
 	"mx35", "m166e", "mx50", "mx6sl", "it8951", "i386", "mx7d", "mx6ull", "mx6sll", "mx6dl"
