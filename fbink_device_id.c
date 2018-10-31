@@ -415,6 +415,13 @@ static void
 		unsigned short int kobo_id = 0;
 		// Mainly to make GCC happy, because if alloca failed, we're screwed anyway.
 		if (payload) {
+			/*
+			// NOTE: Dump the full payload, for science!
+			for (uint8_t i = 0; i < config.len; i++) {
+				ELOG("NTXHWConfig[%hhu] -> %hhu", i, payload[i]);
+			}
+			*/
+
 			if (payload[KOBO_HWCFG_PCB] >= (sizeof(kobo_ids) / sizeof(*kobo_ids))) {
 				fprintf(stderr,
 					"[FBInk] Unknown Kobo PCB ID index (%hhu >= %zu)!\n",
@@ -441,6 +448,10 @@ static void
 					}
 				}
 			}
+		} else {
+			// Should hopefully never happen, since there's a good chance we'd have caught a SIGSEGV before that,
+			// if alloca failed ;).
+			fprintf(stderr, "[FBInk] Empty NTX HWConfig payload ?!\n");
 		}
 		// And now we can do this, as accurately as if onboard were mounted ;).
 		set_kobo_quirks(kobo_id, device_quirks);
