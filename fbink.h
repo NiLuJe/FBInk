@@ -196,7 +196,6 @@ typedef struct {
 		unsigned short left;   // Left margin in pixels
 		unsigned short right;  // Right margin in pixels
 	} margins;
-	bool is_centered;         // Horizontal text centering
 	bool is_formatted;		  // Is string "formatted"? Bold/Italic support only, markdown like syntax
 } FBInkOTConfig;
 
@@ -284,8 +283,8 @@ FBINK_API int fbink_printf(int fbfd, const FBInkConfig* fbink_config, const char
 // string:		UTF-8 encoded string to print
 // cfg:			Pointer to a FBInkOTConfig struct.
 // fbCfg:		Optional pointer to a FBInkConfig struct. If set, the options
-//				is_inverted, is_overlay, is_fgless, is_bgless, fg_color, bg_color, valign, halign
-//              will be honored.
+//				is_inverted, is_flashing, is_cleared, is_centered, is_overlay, is_fgless, is_bgless,
+//				fg_color, bg_color, valign, halign will be honored.
 FBINK_API int fbink_print_ot(int fbfd, char* string, FBInkOTConfig* cfg, FBInkConfig* fbCfg);
 
 // A simple wrapper around the internal screen refresh handling, without requiring you to include einkfb/mxcfb headers

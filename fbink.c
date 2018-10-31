@@ -3206,7 +3206,7 @@ int
 
 	// Let's get some rendering options from FBInkConfig
 	uint8_t valign = NONE, halign = NONE, fgcolor = FG_BLACK * 16U, bgcolor = BG_WHITE * 16U;
-	bool is_inverted = false, is_overlay = false, is_bgless = false, is_fgless = false, is_flashing = false, is_cleared = false; 
+	bool is_inverted = false, is_overlay = false, is_bgless = false, is_fgless = false, is_flashing = false, is_cleared = false, is_centered = false;
 	if (fbCfg) {
 		valign = fbCfg->valign;
 		halign = fbCfg->halign;
@@ -3218,6 +3218,7 @@ int
 		is_fgless = fbCfg->is_fgless;
 		is_flashing = fbCfg->is_flashing;
 		is_cleared = fbCfg->is_cleared;
+		is_centered = fbCfg->is_centered;
 	}
 	fgcolor ^= 0xFF;
 	// Is the foreground color lighter than background? If so, we make things easier
@@ -3258,7 +3259,7 @@ int
 	}
 	// Setup our eink refresh region now. We will call refresh during cleanup.
 	struct mxcfb_rect region = { 0 };
-	if (cfg->is_centered || halign == CENTER) {
+	if (is_centered || halign == CENTER) {
 		region.left = area.tl.x + ((area.br.x - area.tl.x) / 2U);
 		//printf("Region LEFT = %u + ((%u - %u) / 2) = %u\n", area.tl.x, area.br.x, area.tl.x, (area.tl.x + ((area.br.x - area.tl.x) / 2U)));
 	} else if (halign == EDGE) {
@@ -3356,7 +3357,7 @@ int
 			} else {
 				lw = ins_point.x;
 			}
-			
+
 			//printf("Current Rendered LW: %u  Line# %u\n", lw, line);
 			// Just in case our arithmetic was off by a pixel or two...
 			// Note that we are deliberately using a slightly shorter line
@@ -3409,7 +3410,7 @@ int
 						lnPtr += max_lw;
 					}
 				}
-				
+
 			}
 			curr_point.x += (unsigned short int) lroundf(sf * adv);
 			if (ci < lines[line].endCharIndex) {
@@ -3422,7 +3423,7 @@ int
 		curr_point.x = 0;
 		// Right, we've rendered a line to a bitmap, time to display it.
 
-		if (cfg->is_centered || halign == CENTER) {
+		if (is_centered || halign == CENTER) {
 			paint_point.x += (max_lw - lw) / 2U;
 			if (paint_point.x < region.left) {
 				region.left = paint_point.x;
