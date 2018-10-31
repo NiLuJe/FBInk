@@ -245,9 +245,11 @@ int
 					      { "overlay", no_argument, NULL, 'o' },
 					      { "bgless", no_argument, NULL, 'O' },
 					      { "fgless", no_argument, NULL, 'T' },
+					      { "truetype", required_argument, NULL, 't' },
 					      { NULL, 0, NULL, 0 } };
 
-	FBInkConfig fbink_config = { 0 };
+	FBInkConfig   fbink_config = { 0 };
+	FBInkOTConfig ot_config    = { 0 };
 
 	enum
 	{
@@ -265,15 +267,39 @@ int
 		HALIGN_OPT,
 		VALIGN_OPT,
 	};
+	enum
+	{
+		REGULAR_OPT = 0,
+		BOLD_OPT,
+		ITALIC_OPT,
+		BOLDITALIC_OPT,
+		SIZE_OPT,
+		TM_OPT,
+		BM_OPT,
+		LM_OPT,
+		RM_OPT,
+		FMT_OPT,
+	};
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunknown-warning-option"
 #pragma GCC diagnostic ignored "-Wdiscarded-qualifiers"
 #pragma clang diagnostic ignored "-Wincompatible-pointer-types-discards-qualifiers"
-	char* const refresh_token[] = { [TOP_OPT] = "top",       [LEFT_OPT] = "left", [WIDTH_OPT] = "width",
-					[HEIGHT_OPT] = "height", [WFM_OPT] = "wfm",   NULL };
-	char* const image_token[]   = { [FILE_OPT] = "file",     [XOFF_OPT] = "x",        [YOFF_OPT] = "y",
+	char* const refresh_token[]  = { [TOP_OPT] = "top",       [LEFT_OPT] = "left", [WIDTH_OPT] = "width",
+                                        [HEIGHT_OPT] = "height", [WFM_OPT] = "wfm",   NULL };
+	char* const image_token[]    = { [FILE_OPT] = "file",     [XOFF_OPT] = "x",        [YOFF_OPT] = "y",
                                       [HALIGN_OPT] = "halign", [VALIGN_OPT] = "valign", NULL };
+	char* const truetype_token[] = { [REGULAR_OPT]    = "regular",
+					 [BOLD_OPT]       = "bold",
+					 [ITALIC_OPT]     = "italic",
+					 [BOLDITALIC_OPT] = "bolditalic",
+					 [SIZE_OPT]       = "size",
+					 [TM_OPT]         = "top",
+					 [BM_OPT]         = "bottom",
+					 [LM_OPT]         = "left",
+					 [RM_OPT]         = "right",
+					 [FMT_OPT]        = "format",
+					 NULL };
 #pragma GCC diagnostic pop
 	char*     subopts;
 	char*     value;
@@ -295,9 +321,14 @@ int
 	bool      is_activitybar = false;
 	bool      is_infinite    = false;
 	uint8_t   progress       = 0;
+	bool      is_truetype    = false;
+	char*     reg_ot_file    = NULL;
+	char*     bd_ot_file     = NULL;
+	char*     it_ot_file     = NULL;
+	char*     bdit_ot_file   = NULL;
 	int       errfnd         = 0;
 
-	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:B:LlP:A:oOTV", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				fbink_config.row = (short int) atoi(optarg);
@@ -615,6 +646,59 @@ int
 			case 'V':
 				fbink_config.no_viewport = true;
 				break;
+			case 't':
+				subopts = optarg;
+				while (*subopts != '\0' && !errfnd) {
+					switch (getsubopt(&subopts, truetype_token, &value)) {
+						case REGULAR_OPT:
+							reg_ot_file = strdup(value);
+							break;
+						case BOLD_OPT:
+							bd_ot_file = strdup(value);
+							break;
+						case ITALIC_OPT:
+							it_ot_file = strdup(value);
+							break;
+						case BOLDITALIC_OPT:
+							bdit_ot_file = strdup(value);
+							break;
+						case SIZE_OPT:
+							ot_config.size_pt = (uint8_t) strtoul(value, NULL, 10);
+							break;
+						case TM_OPT:
+							ot_config.margins.top =
+							    (unsigned short int) strtoul(value, NULL, 10);
+							break;
+						case BM_OPT:
+							ot_config.margins.bottom =
+							    (unsigned short int) strtoul(value, NULL, 10);
+							break;
+						case LM_OPT:
+							ot_config.margins.left =
+							    (unsigned short int) strtoul(value, NULL, 10);
+							break;
+						case RM_OPT:
+							ot_config.margins.right =
+							    (unsigned short int) strtoul(value, NULL, 10);
+							break;
+						case FMT_OPT:
+							ot_config.is_formatted = true;
+							break;
+						default:
+							fprintf(stderr, "No match found for token: /%s/\n", value);
+							errfnd = 1;
+							break;
+					}
+				}
+				// Make sure we've passed at least one font style
+				if (reg_ot_file == NULL && bd_ot_file == NULL && it_ot_file == NULL &&
+				    bdit_ot_file == NULL) {
+					fprintf(stderr, "At least one font style must be specified!\n");
+					errfnd = 1;
+				} else {
+					is_truetype = true;
+				}
+				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
 				errfnd = 1;
@@ -665,76 +749,134 @@ int
 
 	char* string;
 	if (optind < argc) {
+		// We'll need that in the cell rendering codepath
 		unsigned short int total_lines = 0U;
+
+		// And for the OpenType codepath, we'll want to load the fonts only once ;)
+		if (is_truetype) {
+			if (reg_ot_file) {
+				if (!fbink_config.is_quiet) {
+					printf("Loading font '%s' for the Regular style\n", reg_ot_file);
+				}
+				fbink_add_ot_font(reg_ot_file, FNT_REGULAR);
+			}
+			if (bd_ot_file) {
+				if (!fbink_config.is_quiet) {
+					printf("Loading font '%s' for the Bold style\n", bd_ot_file);
+				}
+				fbink_add_ot_font(bd_ot_file, FNT_BOLD);
+			}
+			if (it_ot_file) {
+				if (!fbink_config.is_quiet) {
+					printf("Loading font '%s' for the Italic style\n", it_ot_file);
+				}
+				fbink_add_ot_font(it_ot_file, FNT_ITALIC);
+			}
+			if (bdit_ot_file) {
+				if (!fbink_config.is_quiet) {
+					printf("Loading font '%s' for the Bold Italic style\n", bdit_ot_file);
+				}
+				fbink_add_ot_font(bdit_ot_file, FNT_BOLD_ITALIC);
+			}
+		}
+
+		// Now that this is out of the way, loop over the leftover arguments, i.e.: the strings ;)
 		while (optind < argc) {
 			int linecount = -1;
 			string        = argv[optind++];
 			// NOTE: This is probably the point where we'd be validating/converting string to UTF-8,
 			//       if we had an easy way to... (c.f., my rant about Kobo's broken libc in fbink_internal.h)
-			if (!fbink_config.is_quiet) {
-				printf(
-				    "Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (overlay: %s, backgroundless: %s, foregroundless: %s, inverted: %s, flashing: %s, centered: %s, left padded: %s, clear screen: %s, font: %hhu, font scaling: x%hhu)\n",
-				    string,
-				    fbink_config.col,
-				    fbink_config.hoffset,
-				    fbink_config.row,
-				    fbink_config.voffset,
-				    fbink_config.is_overlay ? "true" : "false",
-				    fbink_config.is_bgless ? "true" : "false",
-				    fbink_config.is_fgless ? "true" : "false",
-				    fbink_config.is_inverted ? "true" : "false",
-				    fbink_config.is_flashing ? "true" : "false",
-				    fbink_config.is_centered ? "true" : "false",
-				    fbink_config.is_padded ? "true" : "false",
-				    fbink_config.is_cleared ? "true" : "false",
-				    fbink_config.fontname,
-				    fbink_config.fontmult);
-			}
-			// TTF!
-			FBInkOTConfig cfg = { 0 };
-			cfg.is_formatted  = true;
-			cfg.margins.top   = 5;
-			cfg.size_pt       = 18;
-			// fbink_add_ot_font("/mnt/onboard/fonts/Bookerly-Regular.ttf", FNT_REGULAR);
-			// fbink_add_ot_font("/mnt/onboard/fonts/Bookerly-Italic.ttf", FNT_ITALIC);
-			// fbink_add_ot_font("/mnt/onboard/fonts/Bookerly-Bold.ttf", FNT_BOLD);
-			// fbink_add_ot_font("/mnt/onboard/fonts/Bookerly-BoldItalic.ttf", FNT_BOLD_ITALIC);
 
-			fbink_add_ot_font("/mnt/onboard/fonts/Alegreya-Regular.ttf", FNT_REGULAR);
-			fbink_add_ot_font("/mnt/onboard/fonts/Alegreya-Italic.ttf", FNT_ITALIC);
-			fbink_add_ot_font("/mnt/onboard/fonts/Alegreya-Bold.ttf", FNT_BOLD);
-			fbink_add_ot_font("/mnt/onboard/fonts/Alegreya-BoldItalic.ttf", FNT_BOLD_ITALIC);
-			fbink_print_ot(fbfd, string, &cfg, &fbink_config);
-			fbink_free_ot_fonts();
-			/*
-			if ((linecount = fbink_print(fbfd, string, &fbink_config)) < 0) {
-				fprintf(stderr, "Failed to print that string!\n");
-				rv = ERRCODE(EXIT_FAILURE);
-				goto cleanup;
-			}
-       		*/
-			// NOTE: Don't clobber previous entries if multiple strings were passed...
-			//       We make sure to trust print's return value,
-			//       because it knows how much space it already took up ;).
-			fbink_config.row = (short int) (fbink_config.row + linecount);
-			// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
+			// Did we want to use the OpenType codepath?
+			if (is_truetype) {
+				if (!fbink_config.is_quiet) {
+					printf(
+					    "Printing string '%s' @ %hhupt, honoring the following margins { top: %hupx, bottom: %hupx, left: %hupx, right: %hupx } (formatted: %s, overlay: %s, backgroundless: %s, foregroundless: %s, inverted: %s, flashing: %s, centered: %s, halign: %hhu, valign: %hhu, clear screen: %s)\n",
+					    string,
+					    ot_config.size_pt,
+					    ot_config.margins.top,
+					    ot_config.margins.bottom,
+					    ot_config.margins.left,
+					    ot_config.margins.right,
+					    ot_config.is_formatted ? "true" : "false",
+					    fbink_config.is_overlay ? "true" : "false",
+					    fbink_config.is_bgless ? "true" : "false",
+					    fbink_config.is_fgless ? "true" : "false",
+					    fbink_config.is_inverted ? "true" : "false",
+					    fbink_config.is_flashing ? "true" : "false",
+					    fbink_config.is_centered ? "true" : "false",
+					    fbink_config.halign,
+					    fbink_config.valign,
+					    fbink_config.is_cleared ? "true" : "false");
+				}
 
-			// If we were asked to return the amount of printed lines, honor that,
-			// provided we actually successfully printed something...
-			if (want_linecode && rv >= EXIT_SUCCESS) {
-				rv += linecount;
-			}
-			if (want_linecount && rv >= EXIT_SUCCESS) {
-				total_lines = (unsigned short int) (total_lines + linecount);
+				if ((linecount = fbink_print_ot(fbfd, string, &ot_config, &fbink_config)) < 0) {
+					fprintf(stderr, "Failed to print that string!\n");
+					rv = ERRCODE(EXIT_FAILURE);
+					goto cleanup;
+				}
+
+				// NOTE: Don't clobber previous entries if multiple strings were passed...
+				//       We make sure to trust print's return value,
+				//       because it knows how much space it already took up ;).
+				ot_config.margins.top = (unsigned short int) linecount;
+				// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
+
+			} else {
+				if (!fbink_config.is_quiet) {
+					printf(
+					    "Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (overlay: %s, backgroundless: %s, foregroundless: %s, inverted: %s, flashing: %s, centered: %s, left padded: %s, clear screen: %s, font: %hhu, font scaling: x%hhu)\n",
+					    string,
+					    fbink_config.col,
+					    fbink_config.hoffset,
+					    fbink_config.row,
+					    fbink_config.voffset,
+					    fbink_config.is_overlay ? "true" : "false",
+					    fbink_config.is_bgless ? "true" : "false",
+					    fbink_config.is_fgless ? "true" : "false",
+					    fbink_config.is_inverted ? "true" : "false",
+					    fbink_config.is_flashing ? "true" : "false",
+					    fbink_config.is_centered ? "true" : "false",
+					    fbink_config.is_padded ? "true" : "false",
+					    fbink_config.is_cleared ? "true" : "false",
+					    fbink_config.fontname,
+					    fbink_config.fontmult);
+				}
+
+				if ((linecount = fbink_print(fbfd, string, &fbink_config)) < 0) {
+					fprintf(stderr, "Failed to print that string!\n");
+					rv = ERRCODE(EXIT_FAILURE);
+					goto cleanup;
+				}
+
+				// NOTE: Don't clobber previous entries if multiple strings were passed...
+				//       We make sure to trust print's return value,
+				//       because it knows how much space it already took up ;).
+				fbink_config.row = (short int) (fbink_config.row + linecount);
+				// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
+
+				// If we were asked to return the amount of printed lines, honor that,
+				// provided we actually successfully printed something...
+				if (want_linecode && rv >= EXIT_SUCCESS) {
+					rv += linecount;
+				}
+				if (want_linecount && rv >= EXIT_SUCCESS) {
+					total_lines = (unsigned short int) (total_lines + linecount);
+				}
 			}
 		}
 		// And print the total amount of lines we printed, if requested...
-		if (want_linecount) {
+		if (!is_truetype && want_linecount) {
 			if (rv == ERRCODE(EXIT_FAILURE)) {
 				printf("0");
 			} else {
 				printf("%u", total_lines);
 			}
+		}
+
+		// Free OpenType fonts now that we're done
+		if (is_truetype) {
+			fbink_free_ot_fonts();
 		}
 	} else {
 		if (is_refresh) {
