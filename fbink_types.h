@@ -23,6 +23,10 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+// NOTE: We need to import stbtt early because we depend on stbtt_fontinfo here
+//       We'll want it as static/private, so do that here, because we're importing it earlier than fbink.c
+#define STBTT_STATIC
+#include "stb/stb_truetype.h"
 
 // List of flags for device or screen-specific quirks...
 typedef struct
@@ -128,4 +132,19 @@ typedef union
 	} color;
 } FBInkPixelBGR;
 
+// Stores the information necessary to render a line of text
+// using OpenType/TrueType fonts
+typedef struct FBInkOTLine {
+	unsigned int startCharIndex;
+	unsigned int endCharIndex;
+	bool line_used;
+	int line_gap;
+} FBInkOTLine;
+
+typedef struct FBInkOTFonts {
+	stbtt_fontinfo* otRegular;
+	stbtt_fontinfo* otItalic;
+	stbtt_fontinfo* otBold;
+	stbtt_fontinfo* otBoldItalic;
+} FBInkOTFonts;
 #endif

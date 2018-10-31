@@ -77,6 +77,14 @@ typedef enum
 	SCIENTIFICAI       // scientifica (italic)
 } FONT_INDEX_T;
 
+typedef enum
+{
+	FNT_REGULAR = 0U,
+	FNT_ITALIC,
+	FNT_BOLD,
+	FNT_BOLD_ITALIC
+} FONT_VARIANT_T;
+
 // List of available halign/valign values
 typedef enum
 {
@@ -180,6 +188,18 @@ typedef struct
 	uint8_t   valign;    // Vertical alignment of images (NONE/TOP, CENTER, EDGE/BOTTOM; c.f., ALIGN_INDEX_T enum)
 } FBInkConfig;
 
+typedef struct {
+	uint8_t size_pt;          // Size of text in points. If not set (0), defaults to 12pt
+	struct {
+		unsigned short top;    // Top margin in pixels
+		unsigned short bottom; // Bottom margin in pixels
+		unsigned short left;   // Left margin in pixels
+		unsigned short right;  // Right margin in pixels
+	} margins;
+	bool is_centered;         // Horizontal text centering
+	bool is_formatted;		  // Is string "formatted"? Bold/Italic support only, markdown like syntax
+} FBInkOTConfig;
+
 // NOTE: Unless otherwise specified,
 //       stuff returns a negative value (usually -(EXIT_FAILURE)) on failure & EXIT_SUCCESS otherwise ;).
 
@@ -214,6 +234,17 @@ FBINK_API int fbink_close(int fbfd);
 //       c.f., KFMon's handling of this via fbink_is_fb_quirky() to detect the initial 16bpp -> 32bpp switch.
 FBINK_API int fbink_init(int fbfd, const FBInkConfig* fbink_config);
 
+// Add an OpenType font to FBInk. Note that at least one font must be added in order to use fbink_print_ot()
+// Returns -(EXIT_FAILURE) on failure, or EXIT_SUCCESS otherwise
+// fp:      The font file path. This should be a valid *.otf or *.ttf font
+// variant: What variant of font this is (FNT_REGULAR, FNT_ITALIC, FNT_BOLD, FNT_BOLD_ITALIC)
+// NOTE:    You MUST free the fonts loaded when you are fone by calling fbink_free_ot_fonts()
+// NOTE:    You may replace a font without first calling free
+FBINK_API int fbink_add_ot_font(const char* fp, FONT_VARIANT_T variant);
+
+// Free all loaded OpenType fonts. You MUST call this when you have finished all OT printing.
+FBINK_API int fbink_free_ot_fonts(void);
+
 // Dump a few of our internal state variables to stdout, in a format easily consumable by a shell (i.e., eval)
 FBINK_API void fbink_state_dump(const FBInkConfig* fbink_config);
 
@@ -238,6 +269,24 @@ FBINK_API int fbink_print(int fbfd, const char* string, const FBInkConfig* fbink
 // fbink_config:	pointer to an FBInkConfig struct
 FBINK_API int fbink_printf(int fbfd, const FBInkConfig* fbink_config, const char* fmt, ...)
     __attribute__((format(printf, 3, 4)));
+
+// Print a string using an OpenType font. Note the caller MUST init with fbink_init_ot() FIRST.
+// This function uses margins (as whole number percentages) instead of rows/columns for
+// positioning and setting the printable area.
+// Returns new top margin for use in subsequent calls, if the return value is positive.
+// 		A zero return value indicates there is no room left to print another row of text at the current
+// 		margins or font size.
+// Returns -(ERANGE) if the provided margins are out of range, or sum to < view height or width
+// Returns -(ENOSYS) if compiled with MINIMAL
+// Returns -(ENODAT) if fbink_init_ot() hasn't yet been called.
+// fbfd:		open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
+// string:		UTF-8 encoded string to print
+// cfg:			Pointer to a FBInkOTConfig struct.
+// fbCfg:		Optional pointer to a FBInkConfig struct. If set, the options
+//				is_inverted, is_overlay, is_fgless, is_bgless, fg_color, bg_color, valign, halign
+//              will be honored.
+FBINK_API int fbink_print_ot(int fbfd, char* string, FBInkOTConfig* cfg, FBInkConfig* fbCfg);
 
 // A simple wrapper around the internal screen refresh handling, without requiring you to include einkfb/mxcfb headers
 // fbfd:		open file descriptor to the framebuffer character device,

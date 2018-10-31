@@ -8,10 +8,13 @@ This project makes use of a number of third-party libraries, which we'll acknowl
 		Released into the public domain.
 		(https://www.cprogramming.com/tutorial/unicode.html)
 
-	* stb_image (Image loader), by Sean Barrett,
+	* stb_image (Image loader) and stb_truetype (font renderer), by Sean Barrett,
 		Released into the public domain.
 		(http://nothings.org/stb)
 
+	* libunibreak (Unicode line breaking implementation) by Wu Yongwei, et al
+		Licensed under the Zlib license
+		(https://github.com/adah1972/libunibreak)
 
 As well as a number of third-party resources (namely, font files):
 

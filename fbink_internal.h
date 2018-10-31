@@ -36,6 +36,9 @@
 #	ifndef FBINK_WITH_IMAGE
 #		define FBINK_WITH_IMAGE
 #	endif
+#   ifndef FBINK_WITH_OPENTYPE
+#       define FBINK_WITH_OPENTYPE
+#   endif
 // Connect button scanning is Kobo specific
 #	ifndef FBINK_FOR_KINDLE
 #		ifndef FBINK_FOR_CERVANTES
@@ -255,6 +258,17 @@ const uint32_t* (*fxpFont32xGetBitmap)(uint32_t) = NULL;
 // Where we track device/screen-specific quirks
 FBInkDeviceQuirks deviceQuirks = { 0 };
 
+// Information about the currently loaded OpenType font
+bool otInit = false;
+FBInkOTFonts otFonts = { NULL, NULL, NULL, NULL };
+typedef enum {
+	CH_IGNORE = 0U,
+	CH_REGULAR,
+	CH_ITALIC,
+	CH_BOLD,
+	CH_BOLD_ITALIC
+} CHARACTER_FONT;
+
 #ifndef FBINK_FOR_KINDLE
 static void rotate_coordinates_pickel(FBInkCoordinates*);
 static void rotate_coordinates_boot(FBInkCoordinates*);
@@ -334,6 +348,11 @@ static unsigned char* img_load_from_file(const char*, int*, int*, int*, int);
 static unsigned char* img_convert_px_format(unsigned char*, int, int, int, int);
 static int
     draw_image(int, unsigned char*, const int, const int, const int, const int, short int, short int, const FBInkConfig*);
+#endif
+
+#ifdef FBINK_WITH_OPENTYPE
+static void* free_ot_font(stbtt_fontinfo* font_info);
+static void parse_simple_md(char* string, int size, unsigned char* result);
 #endif
 
 // For identify_device, which we need outside of fbink_device_id.c ;)

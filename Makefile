@@ -179,10 +179,16 @@ ifdef MATHS
 	EXTRA_CPPFLAGS+=-DFBINK_WITH_MATHS
 	LIBS+=-lm
 endif
-
+ifndef MINIMAL
+	LIBS+=-lm
+endif
 ##
 # Now that we're done fiddling with flags, let's build stuff!
-LIB_SRCS=fbink.c utf8/utf8.c
+ifdef MINIMAL
+	LIB_SRCS=fbink.c utf8/utf8.c
+else
+	LIB_SRCS=fbink.c utf8/utf8.c libunibreak/src/linebreak.c libunibreak/src/linebreakdata.c libunibreak/src/unibreakdef.c libunibreak/src/linebreakdef.c
+endif
 CMD_SRCS=fbink_cmd.c
 BTN_SRCS=button_scan_cmd.c
 # Unless we're asking for a minimal build, include the Unscii fonts, too
@@ -191,6 +197,7 @@ ifdef MINIMAL
 else
 	EXTRA_CPPFLAGS+=-DFBINK_WITH_FONTS
 	EXTRA_CPPFLAGS+=-DFBINK_WITH_IMAGE
+	EXTRA_CPPFLAGS+=-DFBINK_WITH_OPENTYPE
 	# Connect button scanning is Kobo specific
 	ifndef KINDLE
 		ifndef CERVANTES
@@ -235,7 +242,7 @@ $(OUT_DIR)/%.o: %.c
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) -o $@ -c $<
 
 outdir:
-	mkdir -p $(OUT_DIR)/shared/utf8 $(OUT_DIR)/static/utf8
+	mkdir -p $(OUT_DIR)/shared/utf8 $(OUT_DIR)/static/utf8 $(OUT_DIR)/shared/libunibreak/src $(OUT_DIR)/static/libunibreak/src
 
 all: outdir static
 
@@ -349,8 +356,10 @@ clean:
 	rm -rf Release/*.so*
 	rm -rf Release/shared/*.o
 	rm -rf Release/shared/utf8/*.o
+	rm -rf Release/shared/libunibreak/src/*.o
 	rm -rf Release/static/*.o
 	rm -rf Release/static/utf8/*.o
+	rm -rf Release/static/libunibreak/src/*.o
 	rm -rf Release/*.o
 	rm -rf Release/fbink
 	rm -rf Release/button_scan
@@ -358,8 +367,10 @@ clean:
 	rm -rf Debug/*.so*
 	rm -rf Debug/shared/*.o
 	rm -rf Debug/shared/utf8/*.o
+	rm -rf Debug/shared/libunibreak/src/*.o
 	rm -rf Debug/static/*.o
 	rm -rf Debug/static/utf8/*.o
+	rm -rf Debug/static/libunibreak/src/*.o
 	rm -rf Debug/*.o
 	rm -rf Debug/fbink
 	rm -rf Debug/button_scan
