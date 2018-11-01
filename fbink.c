@@ -3367,7 +3367,7 @@ int
 				tmp_g_buff                = realloc(glyph_buff, new_buff_size);
 				if (!tmp_g_buff) {
 					ELOG("[FBInk] Failure resizing glyph buffer");
-					ERRCODE(EXIT_FAILURE);
+					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
 				}
 				glyph_buff        = tmp_g_buff;
