@@ -93,11 +93,15 @@
 #	include "libunibreak/src/linebreak.h"
 // Try to use GCC's lceilf builtin if possible...
 // NOTE: Relies on the fact that:
-//       * Clang implements the __has_builtin macro, but not the __builtin_lceilf function
+//       * Clang implements the __has_builtin macro, but currently not the __builtin_lceilf function
 //       * GCC implements the __builtin_lceilf function, but not the __has_builtin macro
 //       Will horribly blow up on GCC versions that do NOT implement __builtin_lceilf
 // c.f., https://stackoverflow.com/q/4322352/
-#	ifndef __has_builtin
+#	ifdef __clang__
+#		if __has_builtin(__builtin_lceilf)
+#			define ceilf(x) __builtin_lceilf(x)
+#		endif
+#	else
 #		define ceilf(x) __builtin_lceilf(x)
 #	endif
 #endif
