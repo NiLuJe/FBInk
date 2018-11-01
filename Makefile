@@ -71,8 +71,8 @@ ifeq "$(MOAR_WARNIGS)" "1"
 	EXTRA_CFLAGS+=-Wextra -Wunused
 	EXTRA_CFLAGS+=-Wformat=2
 	EXTRA_CFLAGS+=-Wformat-signedness
-	# NOTE: This doesn't really play nice w/ FORTIFY, leading to an assload of false-positives
-	ifndef LINUX
+	# NOTE: This doesn't really play nice w/ FORTIFY, leading to an assload of false-positives, unless LTO is enabled
+	ifneq (,$(findstring flto,$(CFLAGS)))
 		EXTRA_CFLAGS+=-Wformat-truncation=2
 	else
 		EXTRA_CFLAGS+=-Wformat-truncation=1
