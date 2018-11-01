@@ -618,12 +618,12 @@ static struct mxcfb_rect
 	short int hoffset = fbink_config->hoffset;
 	// NOTE: This test isn't perfect, but then, if you play with this, you do it knowing the risks...
 	//       It's mainly there so that stupidly large values don't wrap back on screen because of overflow wraparound.
-	if (abs(voffset) >= viewHeight) {
+	if ((uint32_t) abs(voffset) >= viewHeight) {
 		LOG("The specified vertical offset (%hd) necessarily pushes *all* content out of bounds, discarding it",
 		    voffset);
 		voffset = 0;
 	}
-	if (abs(hoffset) >= viewWidth) {
+	if ((uint32_t) abs(hoffset) >= viewWidth) {
 		LOG("The specified horizontal offset (%hd) necessarily pushes *all* content out of bounds, discarding it",
 		    hoffset);
 		hoffset = 0;
@@ -3805,7 +3805,7 @@ int
 	// NOTE: This test isn't perfect, but then, if you play with this, you do it knowing the risks...
 	//       It's mainly there so that stupidly large values don't wrap back on screen because of overflow wraparound.
 	short int voffset = fbink_config->voffset;
-	if (abs(voffset) >= viewHeight) {
+	if ((uint32_t) abs(voffset) >= viewHeight) {
 		LOG("The specified vertical offset (%hd) necessarily pushes *all* content out of bounds, discarding it",
 		    voffset);
 		voffset = 0;
