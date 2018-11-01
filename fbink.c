@@ -2106,6 +2106,7 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 	if (!stbtt_InitFont(font_info, data, 0)) {
+		free(font_info);
 		ELOG("[FBInk] Error initialising font %s", filename);
 		return ERRCODE(EXIT_FAILURE);
 	}
