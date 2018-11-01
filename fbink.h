@@ -143,23 +143,23 @@ typedef struct
 	uint32_t           view_height;         // viewHeight
 	uint32_t           screen_width;        // screenWidth
 	uint32_t           screen_height;       // screenHeight
+	uint32_t           bpp;                 // vInfo.bits_per_pixel
+	uint8_t            pen_fg_color;        // penFGColor
+	uint8_t            pen_bg_color;        // penFGColor
+	unsigned short int screen_dpi;          // deviceQuirks.screenDPI
+	long int           user_hz;             // USER_HZ
+	const char*        font_name;           // fbink_config->fontname
+	unsigned short int font_w;              // FONTW
+	unsigned short int font_h;              // FONTH
+	unsigned short int max_cols;            // MAXCOLS
+	unsigned short int max_rows;            // MAXROWS
 	uint8_t            view_hori_origin;    // viewHoriOrigin
 	uint8_t            view_vert_origin;    // viewVertOrigin
 	uint8_t            view_vert_offset;    // viewVertOffset
-	unsigned short int screen_dpi;          // deviceQuirks.screenDPI
-	uint32_t           bpp;                 // vInfo.bits_per_pixel
-	unsigned short int font_w;              // FONTW
-	unsigned short int font_h;              // FONTH
 	uint8_t            fontsize_mult;       // FONTSIZE_MULT
-	const char*        font_name;           // fbink_config->fontname
 	uint8_t            glyph_width;         // glyphWidth
 	uint8_t            glyph_height;        // glyphHeight
-	unsigned short int max_cols;            // MAXCOLS
-	unsigned short int max_rows;            // MAXROWS
-	long int           user_hz;             // USER_HZ
 	bool               is_perfect_fit;      // deviceQuirks.isPerfectFit
-	uint8_t            pen_fg_color;        // penFGColor
-	uint8_t            pen_bg_color;        // penFGColor;
 } FBInkState;
 
 // What a FBInk config should look like. Perfectly sane when fully zero-initialized.
