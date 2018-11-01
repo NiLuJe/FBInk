@@ -2883,8 +2883,8 @@ int
 	if (!size_pt) {
 		size_pt = 12;
 	}
-	// TODO: handle ppi properly
-	unsigned int ppi = 265;
+	// We should have a fairly accurate idea of what the screen DPI is...
+	unsigned int ppi = deviceQuirks.screenDPI;
 	// Given the ppi, convert point height to pixels. Note, 1pt is 1/72th of an inch
 	unsigned int font_size_px = (unsigned int) (ppi / 72.0f * size_pt);
 
