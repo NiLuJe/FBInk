@@ -2087,27 +2087,27 @@ int
 		if (!data) {
 			fclose(f);
 			otInit = false;
-			ELOG("[FBInk] Error allocating font data buffer.");
-			return (ERRCODE(EXIT_FAILURE));
+			fprintf(stderr, "[FBInk] Error allocating font data buffer!\n");
+			return ERRCODE(EXIT_FAILURE);
 		}
 		if (fread(data, 1, (size_t) st.st_size, f) < (size_t) st.st_size || ferror(f) != 0) {
 			free(data);
 			fclose(f);
 			otInit = false;
-			ELOG("[FBInk] Error reading font file.");
-			return (ERRCODE(EXIT_FAILURE));
+			fprintf(stderr, "[FBInk] Error reading font file!\n");
+			return ERRCODE(EXIT_FAILURE);
 		}
 		fclose(f);
 	}
 	stbtt_fontinfo* font_info = calloc(1, sizeof(stbtt_fontinfo));
 	if (!font_info) {
 		free(data);
-		ELOG("[FNInk] Error allocating stbtt_fontinfo struct");
+		fprintf(stderr, "[FBInk] Error allocating stbtt_fontinfo struct!\n");
 		return ERRCODE(EXIT_FAILURE);
 	}
 	if (!stbtt_InitFont(font_info, data, 0)) {
 		free(font_info);
-		ELOG("[FBInk] Error initialising font %s", filename);
+		fprintf(stderr, "[FBInk] Error initialising font '%s'!\n", filename);
 		return ERRCODE(EXIT_FAILURE);
 	}
 	// Assign the current font to it's appropriate otFonts struct member, depending
@@ -2134,7 +2134,7 @@ int
 	ELOG("[FBInk] Font %s loaded", filename);
 	return EXIT_SUCCESS;
 #else
-	fprintf(stderr, "[FBInk] Opentype support is disabled in this FBInk build!\n");
+	fprintf(stderr, "[FBInk] OpenType support is disabled in this FBInk build!\n");
 	return ERRCODE(ENOSYS);
 #endif    // FBINK_WITH_OPENTYPE
 }
@@ -2161,7 +2161,7 @@ int
 	free_ot_font(otFonts.otBoldItalic);
 	return EXIT_SUCCESS;
 #else
-	fprintf(stderr, "[FBInk] Opentype support is disabled in this FBInk build!\n");
+	fprintf(stderr, "[FBInk] OpenType support is disabled in this FBInk build!\n");
 	return ERRCODE(ENOSYS);
 #endif    // FBINK_WITH_OPENTYPE
 }
@@ -2748,14 +2748,11 @@ static void
 	bool   is_italic = false;
 	bool   is_bold   = false;
 	while (ci < size) {
-		//printf("ci: %d (< %d) is %c\n", ci, size, string[ci]);
 		switch (ch = string[ci]) {
 			case '*':
 			case '_':
 				if (ci + 1 < size && string[ci + 1] == ch) {
-					//printf("ci: %d && ci + 1 == %c\n", ci, ch);
 					if (ci + 2 < size && string[ci + 2] == ch) {
-						//printf("ci: %d && ci + 2 == %c\n", ci, ch);
 						is_bold        = !is_bold;
 						is_italic      = !is_italic;
 						result[ci]     = CH_IGNORE;
@@ -2802,19 +2799,19 @@ int
 #ifdef FBINK_WITH_OPENTYPE
 	// Abort if we were passed an empty string
 	if (!*string) {
-		ELOG("[FBInk] Cannot print empty string");
+		fprintf(stderr, "[FBInk] Cannot print an empty string!\n");
 		return ERRCODE(EXIT_FAILURE);
 	}
 
 	// Has fbink_init_ot() been called yet?
 	if (!otInit) {
-		ELOG("[FBInk] No fonts have been loaded");
+		fprintf(stderr, "[FBInk] No fonts have been loaded!\n");
 		return ERRCODE(ENODATA);
 	}
 
 	// Just in case we receive a NULL pointer to the cfg struct
 	if (!cfg) {
-		ELOG("[FBInk] FBInkOTConfig expected. Got NULL pointer instead");
+		fprintf(stderr, "[FBInk] FBInkOTConfig expected. Got NULL pointer instead!\n");
 		return ERRCODE(EXIT_FAILURE);
 	}
 
@@ -2852,14 +2849,15 @@ int
 	// should sum to less than 100%
 	if (cfg->margins.top > viewHeight || cfg->margins.bottom > viewHeight || cfg->margins.left > viewWidth ||
 	    cfg->margins.right > viewWidth) {
-		ELOG("[FBInk] A margin was out of range (allowed ranges :: Vert < %u  Horiz < %u)",
-		     (unsigned int) viewHeight,
-		     (unsigned int) viewWidth);
+		fprintf(stderr,
+			"[FBInk] A margin was out of range (allowed ranges :: Vert < %u  Horiz < %u)!\n",
+			viewHeight,
+			viewWidth);
 		rv = ERRCODE(ERANGE);
 		goto cleanup;
 	}
 	if (cfg->margins.top + cfg->margins.bottom >= viewHeight || cfg->margins.left + cfg->margins.right >= viewWidth) {
-		ELOG("[FBInk] Opposing margins sum to greater than the viewport height or width");
+		fprintf(stderr, "[FBInk] Opposing margins sum to greater than the viewport height or width!\n");
 		rv = ERRCODE(ERANGE);
 		goto cleanup;
 	}
@@ -2920,7 +2918,7 @@ int
 		if (!curr_font) {
 			curr_font = otFonts.otRegular;
 			sf        = rgSF;
-			ELOG("[FBInk] Unformatted text defaulting to regular font");
+			LOG("[FBInk] Unformatted text defaulting to Regular font style");
 		}
 	}
 	if (otFonts.otItalic) {
@@ -2942,7 +2940,7 @@ int
 		if (!curr_font) {
 			curr_font = otFonts.otItalic;
 			sf        = itSF;
-			ELOG("[FBInk] Unformatted text defaulting to italic font");
+			LOG("[FBInk] Unformatted text defaulting to Italic font style");
 		}
 	}
 	if (otFonts.otBold) {
@@ -2964,7 +2962,7 @@ int
 		if (!curr_font) {
 			curr_font = otFonts.otBold;
 			sf        = bdSF;
-			ELOG("[FBInk] Unformatted text defaulting to bold font");
+			LOG("[FBInk] Unformatted text defaulting to Bold font style");
 		}
 	}
 	if (otFonts.otBoldItalic) {
@@ -2986,21 +2984,21 @@ int
 		if (!curr_font) {
 			curr_font = otFonts.otBoldItalic;
 			sf        = bditSF;
-			ELOG("[FBInk] Unformatted text defaulting to bold italic font");
+			LOG("[FBInk] Unformatted text defaulting to Bold Italic font style");
 		}
 	}
 	// If no font was loaded, exit early. We checked earlier, but just in case...
 	if (!curr_font) {
-		ELOG("[FBInk] No font appears to be loaded");
+		fprintf(stderr, "[FBInk] No font appears to be loaded!\n");
 		rv = ERRCODE(ENOENT);
 		goto cleanup;
 	}
-	printf("Max BL: %d  Max Desc: %d  Max LG: %d\n", max_baseline, max_desc, max_lg);
+	LOG("Max BL: %d  Max Desc: %d  Max LG: %d", max_baseline, max_desc, max_lg);
 	max_row_height = max_baseline + abs(max_desc) + max_lg;
 	// And if max_row_height was not changed from zero, this is also an unrecoverable error.
 	// Also guards against a potential divide-by-zero in the following calculation
 	if (max_row_height <= 0) {
-		ELOG("[FBInk] Max line height not set");
+		fprintf(stderr, "[FBInk] Max line height not set!\n");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -3019,7 +3017,7 @@ int
 	size_t str_len_bytes = strlen(string);
 	brk_buff             = calloc(str_len_bytes + 1, sizeof(*brk_buff));
 	if (!brk_buff) {
-		ELOG("[FBInk] Linebreak buffer could not be allocated");
+		fprintf(stderr, "[FBInk] Linebreak buffer could not be allocated!\n");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -3032,7 +3030,7 @@ int
 	if (cfg->is_formatted) {
 		fmt_buff = calloc(str_len_bytes + 1, sizeof(*fmt_buff));
 		if (!fmt_buff) {
-			ELOG("[FBInk] Formatted text buffer could not be allocated");
+			fprintf(stderr, "[FBInk] Formatted text buffer could not be allocated!\n");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
@@ -3091,7 +3089,7 @@ int
 				}
 			}
 			if (!curr_font) {
-				ELOG("[FBInk] The specified font style was not loaded");
+				fprintf(stderr, "[FBInk] The specified font style was not loaded!\n");
 				rv = ERRCODE(ENOENT);
 				goto cleanup;
 			}
@@ -3122,7 +3120,7 @@ int
 			// below what the metrics say.
 			if (max_baseline + y1 > max_line_height) {
 				int height_diff = (max_baseline + y1) - max_line_height;
-				printf("Height Diff: %d, available LG: %d\n", height_diff, lines[line].line_gap);
+				LOG("Height Diff: %d, available LG: %d", height_diff, lines[line].line_gap);
 				if (height_diff > lines[line].line_gap) {
 					lines[line].line_gap = 0;
 				} else {
@@ -3137,14 +3135,15 @@ int
 			} else {
 				lw = (unsigned int) (curr_x + x0 + gw);
 			}
-			printf("Current Measured LW: %u  Line# %u\n", lw, line);
+			LOG("Current Measured LW: %u  Line# %u", lw, line);
 			// Oops, we appear to have advanced too far :)
 			// Better backtrack to see if we can find a suitable break opportunity
 			if (lw > max_lw) {
 				// Is the glyph itself too wide for our printable area? If so, we abort
 				if ((unsigned int) gw >= max_lw) {
-					ELOG(
-					    "[FBInk] Font size too big for current printable area. Try to reduce margins or font size");
+					fprintf(
+					    stderr,
+					    "[FBInk] Font size too big for current printable area. Try to reduce margins or font size!\n");
 					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
 				}
@@ -3192,12 +3191,12 @@ int
 			break;
 		}
 	}
-	ELOG("[FBInk] %u lines to be printed", line);
+	LOG("[FBInk] %u lines to be printed", (line + 1U));
 	if (!complete_str) {
-		ELOG("[FBInk] String too long. Truncated to %u characters", (c_index + 1));
+		LOG("[FBInk] String too long. Truncated to %u characters", (c_index + 1U));
 	}
 	// Let's determine our exact height, so we can determine vertical alignment later if required.
-	printf("Maximum printable height is %u\n", print_height);
+	LOG("Maximum printable height is %u", print_height);
 	unsigned int curr_print_height = 0;
 	for (line = 0; line < num_lines; line++) {
 		if (!lines[line].line_used) {
@@ -3221,7 +3220,7 @@ int
 			curr_print_height += (unsigned int) lines[line].line_gap;
 		}
 	}
-	printf("Actual print height is %u\n", curr_print_height);
+	LOG("Actual print height is %u", curr_print_height);
 
 	// Let's get some rendering options from FBInkConfig
 	uint8_t valign      = NONE;
@@ -3275,7 +3274,7 @@ int
 	unsigned int glyph_buffer_dims = font_size_px * (unsigned int) max_line_height * 2U;
 	glyph_buff                     = calloc(glyph_buffer_dims, sizeof(*glyph_buff));
 	if (!line_buff || !glyph_buff) {
-		ELOG("[FBInk] Line or glyph buffers could not be allocated");
+		fprintf(stderr, "[FBInk] Line or glyph buffers could not be allocated!\n");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -3297,14 +3296,12 @@ int
 	// Setup our eink refresh region now. We will call refresh during cleanup.
 	if (is_centered || halign == CENTER) {
 		region.left = area.tl.x + ((uint32_t)(area.br.x - area.tl.x) / 2U);
-		//printf("Region LEFT = %u + ((%u - %u) / 2) = %u\n", area.tl.x, area.br.x, area.tl.x, (area.tl.x + ((area.br.x - area.tl.x) / 2U)));
 	} else if (halign == EDGE) {
 		region.left = area.br.x;
 	} else {
 		region.left = paint_point.x;
 	}
 	region.top = paint_point.y;
-	//printf("Region LEFT: %d\n", (int)region.left);
 
 	// Do we need to clear the screen?
 	if (is_cleared) {
@@ -3334,7 +3331,6 @@ int
 		if (abort_line) {
 			break;
 		}
-		//printf("Line # %u\n", line);
 		lw = 0;
 		unsigned int ci;
 		for (ci = lines[line].startCharIndex; ci <= lines[line].endCharIndex;) {
@@ -3390,7 +3386,6 @@ int
 			}
 			ins_point.x = (unsigned short int) (curr_point.x + x0);
 			ins_point.y = (unsigned short int) (ins_point.y + y0);
-			//printf("gw: %d & gh: %d for c: U+%04X @ ins_point (%hu, %hu) & curr_point (%hu, %hu) / x0: %d y0: %d x1: %d y1: %d / lsb: %d\n", gw, gh, c, ins_point.x, ins_point.y, curr_point.x, curr_point.y, x0, y0, x1, y1, lsb);
 			// We only increase the lw if glyph not a space This hopefully prevent trailing
 			// spaces from being printed on a line.
 			if (gw > 0) {
@@ -3399,15 +3394,14 @@ int
 				lw = ins_point.x;
 			}
 
-			//printf("Current Rendered LW: %u  Line# %u\n", lw, line);
 			// Just in case our arithmetic was off by a pixel or two...
 			// Note that we are deliberately using a slightly shorter line
 			// width during the measurement phase, so this should not happen.
 			// If it does occur, we will now exit instead of clipping the glyph
 			// bounding box, to avoid the possiblity of stb_truetype segfaulting.
 			if (lw > max_lw) {
-				ELOG("[FBInk] Max allowed line width exceeded");
-				ELOG("[FBInk] Curr LW: %u   Max Allowed: %hu", lw, max_lw);
+				fprintf(stderr, "[FBInk] Max allowed line width exceeded!\n");
+				fprintf(stderr, "[FBInk] Curr LW: %u   Max Allowed: %hu\n", lw, max_lw);
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
 			}
@@ -3483,7 +3477,6 @@ int
 		} else if (lw > region.width) {
 			region.width = lw;
 		}
-		//printf("Region LEFT: %d\n", (int)region.left);
 		FBInkColor color = { 0 };
 		start_x          = paint_point.x;
 		lnPtr            = line_buff;
@@ -3568,11 +3561,11 @@ int
 	}
 cleanup:
 	// Rotate our eink refresh region before refreshing
-	printf("Refreshing region from LEFT: %d, TOP: %d, WIDTH: %d, HEIGHT: %d\n",
-	       (int) region.left,
-	       (int) region.top,
-	       (int) region.width,
-	       (int) region.height);
+	LOG("Refreshing region from LEFT: %d, TOP: %d, WIDTH: %d, HEIGHT: %d",
+	    (int) region.left,
+	    (int) region.top,
+	    (int) region.width,
+	    (int) region.height);
 	if (region.width > 0 && region.height > 0) {
 		(*fxpRotateRegion)(&region);
 		refresh(fbfd, region, WAVEFORM_MODE_AUTO, is_flashing);
@@ -3590,7 +3583,7 @@ cleanup:
 	}
 	return rv;
 #else
-	fprintf(stderr, "[FBInk] Opentype support is disabled in this FBInk build!\n");
+	fprintf(stderr, "[FBInk] OpenType support is disabled in this FBInk build!\n");
 	return ERRCODE(ENOSYS);
 #endif    // FBINK_WITH_OPENTYPE
 }
