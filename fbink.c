@@ -2090,8 +2090,7 @@ int
 			ELOG("[FBInk] Error allocating font data buffer.");
 			return (ERRCODE(EXIT_FAILURE));
 		}
-		size_t read = fread(data, 1, st.st_size, f);
-		if (read != st.st_size) {
+		if (fread(data, 1, st.st_size, f) < st.st_size || ferror(f) != 0) {
 			free(data);
 			fclose(f);
 			otInit = false;
