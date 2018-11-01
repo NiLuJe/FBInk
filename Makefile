@@ -233,6 +233,7 @@ CMD_OBJS:=$(CMD_SRCS:%.c=$(OUT_DIR)/%.o)
 BTN_OBJS:=$(BTN_SRCS:%.c=$(OUT_DIR)/%.o)
 
 # Silence a few warnings, only when specifically compiling libunibreak...
+# c.f., https://stackoverflow.com/q/1305665
 $(UB_SHAREDLIB_OBJS): QUIET_CFLAGS := -Wno-conversion -Wno-sign-conversion
 
 $(UB_STATICLIB_OBJS): QUIET_CFLAGS := -Wno-conversion -Wno-sign-conversion

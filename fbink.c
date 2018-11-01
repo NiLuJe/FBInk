@@ -2083,14 +2083,14 @@ int
 		int         fd = fileno(f);
 		struct stat st;
 		fstat(fd, &st);
-		data = calloc(1, st.st_size);
+		data = calloc(1, (size_t) st.st_size);
 		if (!data) {
 			fclose(f);
 			otInit = false;
 			ELOG("[FBInk] Error allocating font data buffer.");
 			return (ERRCODE(EXIT_FAILURE));
 		}
-		if (fread(data, 1, st.st_size, f) < st.st_size || ferror(f) != 0) {
+		if (fread(data, 1, (size_t) st.st_size, f) < (size_t) st.st_size || ferror(f) != 0) {
 			free(data);
 			fclose(f);
 			otInit = false;
@@ -2740,12 +2740,12 @@ int
 // This is ***bold italic*** text.
 // As well as their underscore equivalents
 static void
-    parse_simple_md(char* string, int size, unsigned char* result)
+    parse_simple_md(char* string, size_t size, unsigned char* result)
 {
-	int  ci = 0;
-	char ch;
-	bool is_italic = false;
-	bool is_bold   = false;
+	size_t ci = 0;
+	char   ch;
+	bool   is_italic = false;
+	bool   is_bold   = false;
 	while (ci < size) {
 		//printf("ci: %d (< %d) is %c\n", ci, size, string[ci]);
 		switch (ch = string[ci]) {
@@ -3008,7 +3008,7 @@ int
 
 	// Calculate the maximum number of lines we may have to deal with
 	unsigned int print_height, num_lines;
-	print_height = area.br.y - area.tl.y;
+	print_height = (unsigned int) (area.br.y - area.tl.y);
 	num_lines    = print_height / (unsigned int) max_row_height;
 
 	// And allocate the memory for it...
@@ -3110,9 +3110,9 @@ int
 			c = u8_nextchar(string, &c_index);
 			// Note, these metrics are unscaled, we need to use our previously
 			// obtained scale factor (sf) to get the metrics as pixels
-			stbtt_GetCodepointHMetrics(curr_font, c, &adv, &lsb);
+			stbtt_GetCodepointHMetrics(curr_font, (int) c, &adv, &lsb);
 			// But these are already scaled
-			stbtt_GetCodepointBitmapBox(curr_font, c, sf, sf, &x0, &y0, &x1, &y1);
+			stbtt_GetCodepointBitmapBox(curr_font, (int) c, sf, sf, &x0, &y0, &x1, &y1);
 			gw = x1 - x0;
 			// Ensure that curr_x never goes negative
 			cx = curr_x;
@@ -3179,7 +3179,7 @@ int
 			if (string[c_index + 1]) {
 				tmp_c_index = c_index;
 				uint32_t c2 = u8_nextchar(string, &tmp_c_index);
-				curr_x += (int) lroundf(sf * stbtt_GetCodepointKernAdvance(curr_font, c, c2));
+				curr_x += (int) lroundf(sf * stbtt_GetCodepointKernAdvance(curr_font, (int) c, (int) c2));
 			}
 		}
 		// We've run out of string! This is our last line.
@@ -3286,7 +3286,7 @@ int
 	// Setup our eink refresh region now. We will call refresh during cleanup.
 	struct mxcfb_rect region = { 0 };
 	if (is_centered || halign == CENTER) {
-		region.left = area.tl.x + ((area.br.x - area.tl.x) / 2U);
+		region.left = area.tl.x + ((uint32_t)(area.br.x - area.tl.x) / 2U);
 		//printf("Region LEFT = %u + ((%u - %u) / 2) = %u\n", area.tl.x, area.br.x, area.tl.x, (area.tl.x + ((area.br.x - area.tl.x) / 2U)));
 	} else if (halign == EDGE) {
 		region.left = area.br.x;
@@ -3355,8 +3355,8 @@ int
 			}
 			curr_point.y = ins_point.y = (unsigned int) max_baseline;
 			c                          = u8_nextchar(string, &ci);
-			stbtt_GetCodepointHMetrics(curr_font, c, &adv, &lsb);
-			stbtt_GetCodepointBitmapBox(curr_font, c, sf, sf, &x0, &y0, &x1, &y1);
+			stbtt_GetCodepointHMetrics(curr_font, (int) c, &adv, &lsb);
+			stbtt_GetCodepointBitmapBox(curr_font, (int) c, sf, sf, &x0, &y0, &x1, &y1);
 			gw = x1 - x0;
 			gh = y1 - y0;
 			// Ensure that our glyph size does not exceed the buffer size. Resize the buffer if it does
