@@ -1572,17 +1572,17 @@ static int
 		identify_device(&deviceQuirks);
 #	ifdef FBINK_FOR_KINDLE
 		if (deviceQuirks.isKindleLegacy) {
-			ELOG("[FBInk] Enabled Legacy einkfb Kindle quirks");
+			ELOG("Enabled Legacy einkfb Kindle quirks");
 		} else if (deviceQuirks.isKindlePearlScreen) {
-			ELOG("[FBInk] Enabled Kindle with Pearl screen quirks");
+			ELOG("Enabled Kindle with Pearl screen quirks");
 		} else if (deviceQuirks.isKindleOasis2) {
-			ELOG("[FBInk] Enabled Kindle Oasis 2 quirks");
+			ELOG("Enabled Kindle Oasis 2 quirks");
 		}
 #	else
 		if (deviceQuirks.isKoboNonMT) {
-			ELOG("[FBInk] Enabled Kobo w/o Multi-Touch quirks");
+			ELOG("Enabled Kobo w/o Multi-Touch quirks");
 		} else if (deviceQuirks.isKoboMk7) {
-			ELOG("[FBInk] Enabled Kobo Mark 7 quirks");
+			ELOG("Enabled Kobo Mark 7 quirks");
 		}
 #	endif
 #endif
@@ -1593,9 +1593,9 @@ static int
 		long int rc = sysconf(_SC_CLK_TCK);
 		if (rc > 0) {
 			USER_HZ = rc;
-			ELOG("[FBInk] Clock tick frequency appears to be %ld Hz", USER_HZ);
+			ELOG("Clock tick frequency appears to be %ld Hz", USER_HZ);
 		} else {
-			ELOG("[FBInk] Unable to query clock tick frequency, assuming %ld Hz", USER_HZ);
+			ELOG("Unable to query clock tick frequency, assuming %ld Hz", USER_HZ);
 		}
 
 		// Much like KOReader, assume a baseline DPI for devices where we don't specify a value in device_id
@@ -1608,7 +1608,7 @@ static int
 			deviceQuirks.screenDPI = 167U;
 #endif
 		}
-		ELOG("[FBInk] Screen density set to %hu dpi", deviceQuirks.screenDPI);
+		ELOG("Screen density set to %hu dpi", deviceQuirks.screenDPI);
 
 		// And make sure we won't do that again ;).
 		deviceQuirks.skipId = true;
@@ -1622,7 +1622,7 @@ static int
 			goto cleanup;
 		}
 	}
-	ELOG("[FBInk] Variable fb info: %ux%u, %ubpp @ rotation: %u (%s)",
+	ELOG("Variable fb info: %ux%u, %ubpp @ rotation: %u (%s)",
 	     vInfo.xres,
 	     vInfo.yres,
 	     vInfo.bits_per_pixel,
@@ -1696,7 +1696,7 @@ static int
 				//       >_<".
 				fxpRotateCoords = &rotate_coordinates_boot;
 				fxpRotateRegion = &rotate_region_boot;
-				ELOG("[FBInk] Enabled Kobo @ 16bpp boot rotation quirks (%ux%u -> %ux%u)",
+				ELOG("Enabled Kobo @ 16bpp boot rotation quirks (%ux%u -> %ux%u)",
 				     vInfo.xres,
 				     vInfo.yres,
 				     screenWidth,
@@ -1704,7 +1704,7 @@ static int
 			} else {
 				fxpRotateCoords = &rotate_coordinates_pickel;
 				fxpRotateRegion = &rotate_region_pickel;
-				ELOG("[FBInk] Enabled Kobo @ 16bpp pickel rotation quirks (%ux%u -> %ux%u)",
+				ELOG("Enabled Kobo @ 16bpp pickel rotation quirks (%ux%u -> %ux%u)",
 				     vInfo.xres,
 				     vInfo.yres,
 				     screenWidth,
@@ -1727,7 +1727,7 @@ static int
 			// Rows of pixels are hidden at the bottom
 			viewVertOrigin = 0U;
 		}
-		ELOG("[FBInk] Enabled Kobo viewport insanity (%ux%u -> %ux%u), top-left corner is @ (%hhu, %hhu)",
+		ELOG("Enabled Kobo viewport insanity (%ux%u -> %ux%u), top-left corner is @ (%hhu, %hhu)",
 		     screenWidth,
 		     screenHeight,
 		     viewWidth,
@@ -1858,7 +1858,7 @@ static int
 	fxpFont8xGetBitmap = &font8x8_get_bitmap;
 
 	if (fbink_config->fontname != IBM) {
-		ELOG("[FBInk] Custom fonts are not supported in this FBInk build, using IBM instead.");
+		ELOG("Custom fonts are not supported in this FBInk build, using IBM instead.");
 	}
 #endif
 
@@ -1886,18 +1886,14 @@ static int
 		max_fontmult                = (uint8_t) MIN(max_fontmult_width, max_fontmult_height);
 		if (FONTSIZE_MULT > max_fontmult) {
 			FONTSIZE_MULT = max_fontmult;
-			ELOG("[FBInk] Clamped font size multiplier from %hhu to %hhu",
-			     fbink_config->fontmult,
-			     max_fontmult);
+			ELOG("Clamped font size multiplier from %hhu to %hhu", fbink_config->fontmult, max_fontmult);
 		}
 #else
 		// The default font's glyphs are 8x8, do the least amount of work possible ;).
 		max_fontmult = (uint8_t)(viewWidth / min_maxcols / 8U);
 		if (FONTSIZE_MULT > max_fontmult) {
 			FONTSIZE_MULT = max_fontmult;
-			ELOG("[FBInk] Clamped font size multiplier from %hhu to %hhu",
-			     fbink_config->fontmult,
-			     max_fontmult);
+			ELOG("Clamped font size multiplier from %hhu to %hhu", fbink_config->fontmult, max_fontmult);
 		}
 #endif
 	} else {
@@ -1921,7 +1917,7 @@ static int
 	// Go!
 	FONTW = (unsigned short int) (glyphWidth * FONTSIZE_MULT);
 	FONTH = (unsigned short int) (glyphHeight * FONTSIZE_MULT);
-	ELOG("[FBInk] Fontsize set to %hux%hu (%s base glyph size: %hhux%hhu)",
+	ELOG("Fontsize set to %hux%hu (%s base glyph size: %hhux%hhu)",
 	     FONTW,
 	     FONTH,
 	     fontname_to_string(fbink_config->fontname),
@@ -1931,12 +1927,12 @@ static int
 	// Compute MAX* values now that we know the screen & font resolution
 	MAXCOLS = (unsigned short int) (viewWidth / FONTW);
 	MAXROWS = (unsigned short int) (viewHeight / FONTH);
-	ELOG("[FBInk] Line length: %hu cols, Page size: %hu rows", MAXCOLS, MAXROWS);
+	ELOG("Line length: %hu cols, Page size: %hu rows", MAXCOLS, MAXROWS);
 
 	// Mention & remember if we can perfectly fit the final column on screen
 	if ((uint32_t)(FONTW * MAXCOLS) == viewWidth) {
 		deviceQuirks.isPerfectFit = true;
-		ELOG("[FBInk] Horizontal fit is perfect!");
+		ELOG("Horizontal fit is perfect!");
 	} else {
 		deviceQuirks.isPerfectFit = false;
 	}
@@ -1949,10 +1945,10 @@ static int
 		// NOTE: That should also fall under no_viewport's purview
 		if (!fbink_config->no_viewport) {
 			viewVertOffset = (uint8_t)(((float) (viewHeight - (uint32_t)(FONTH * MAXROWS)) / 2.0f) + 0.5f);
-			ELOG("[FBInk] Vertical fit isn't perfect, shifting rows down by %hhu pixels", viewVertOffset);
+			ELOG("Vertical fit isn't perfect, shifting rows down by %hhu pixels", viewVertOffset);
 		} else {
 			viewVertOffset = 0U;
-			ELOG("[FBInk] Vertical fit isn't perfect, but viewport fiddling was explicitly disabled");
+			ELOG("Vertical fit isn't perfect, but viewport fiddling was explicitly disabled");
 		}
 	}
 	// Bake that into the viewport computations,
@@ -1965,7 +1961,7 @@ static int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
-	ELOG("[FBInk] Fixed fb info: ID is \"%s\", length of fb mem: %u bytes & line length: %u bytes",
+	ELOG("Fixed fb info: ID is \"%s\", length of fb mem: %u bytes & line length: %u bytes",
 	     fInfo.id,
 	     fInfo.smem_len,
 	     fInfo.line_length);
@@ -2012,7 +2008,7 @@ static int
 		penBGColor = eInkFGCMap[fbink_config->bg_color];
 
 		ELOG(
-		    "[FBInk] Pen colors set to #%02X%02X%02X -> #%02X%02X%02X for the foreground and #%02X%02X%02X -> #%02X%02X%02X for the background",
+		    "Pen colors set to #%02X%02X%02X -> #%02X%02X%02X for the foreground and #%02X%02X%02X -> #%02X%02X%02X for the background",
 		    eInkFGCMap[fbink_config->fg_color],
 		    eInkFGCMap[fbink_config->fg_color],
 		    eInkFGCMap[fbink_config->fg_color],
@@ -2030,7 +2026,7 @@ static int
 		penFGColor = eInkFGCMap[fbink_config->fg_color];
 		penBGColor = eInkBGCMap[fbink_config->bg_color];
 
-		ELOG("[FBInk] Pen colors set to #%02X%02X%02X for the foreground and #%02X%02X%02X for the background",
+		ELOG("Pen colors set to #%02X%02X%02X for the foreground and #%02X%02X%02X for the background",
 		     penFGColor,
 		     penFGColor,
 		     penFGColor,
@@ -2124,7 +2120,7 @@ int
 			otFonts.otBoldItalic = font_info;
 			break;
 	}
-	ELOG("[FBInk] Font '%s' loaded", filename);
+	ELOG("Font '%s' loaded", filename);
 	return EXIT_SUCCESS;
 #else
 	WARN("OpenType support is disabled in this FBInk build");
@@ -3361,7 +3357,7 @@ int
 				unsigned char* tmp_g_buff = NULL;
 				tmp_g_buff                = realloc(glyph_buff, new_buff_size);
 				if (!tmp_g_buff) {
-					ELOG("[FBInk] Failure resizing glyph buffer");
+					ELOG("Failure resizing glyph buffer");
 					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
 				}
@@ -3748,14 +3744,14 @@ int
 			// NOTE: If we switched from 16bpp to 32bpp,
 			//       Nickel has finished setting up the fb to its liking, we need to reinit!
 			// It's a reinit, so ask to skip the vinfo ioctl we just did
-			ELOG("[FBInk] Detected a change in framebuffer bitdepth, reinitializing...");
+			ELOG("Detected a change in framebuffer bitdepth, reinitializing...");
 			rv = initialize_fbink(fbfd, fbink_config, true);
 		} else if ((old_bpp == 16 && vInfo.bits_per_pixel == 16) && (old_rota != vInfo.rotate)) {
 			// NOTE: If we're still in 16bpp, but the rotation changed,
 			//       pickel has been used to show something (most likely the "three dots" progress bar),
 			//       and we're no longer in the native rotation, we need to reinit!
 			// It's a reinit, so ask to skip the vinfo ioctl we just did
-			ELOG("[FBInk] Detected a change in framebuffer rotation, reinitializing...");
+			ELOG("Detected a change in framebuffer rotation, reinitializing...");
 			rv = initialize_fbink(fbfd, fbink_config, true);
 		}
 	}
