@@ -60,7 +60,7 @@
 #		if __has_builtin(__builtin_lceilf)
 #			define ceilf(x) __builtin_lceilf(x)
 #		endif
-// STBTT will include math.h on its own ;).
+// STBTT will include math.h on its own on Clang, since we don't define any STBTT_ math macros ;).
 #	else
 #		define ceilf(x) __builtin_lceilf(x)
 #		define lroundf(x) __builtin_lroundf(x)
