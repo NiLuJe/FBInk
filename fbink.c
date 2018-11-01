@@ -2139,7 +2139,7 @@ int
 }
 
 // Free an individual OpenType font structure
-void*
+static void*
     free_ot_font(stbtt_fontinfo* font_info)
 {
 	if (font_info) {
@@ -2739,7 +2739,7 @@ int
 // This is **bold** text.
 // This is ***bold italic*** text.
 // As well as their underscore equivalents
-void
+static void
     parse_simple_md(char* string, int size, unsigned char* result)
 {
 	int  ci = 0;
