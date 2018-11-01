@@ -460,7 +460,7 @@ static void
 				// NOTE: perror() is not thread-safe...
 				char  buf[256];
 				char* errstr = strerror_r(errno, buf, sizeof(buf));
-				fprintf(stderr, "[FBInk] FBIO_EINK_CLEAR_SCREEN: %s\n", errstr);
+				WARN("FBIO_EINK_CLEAR_SCREEN: %s", errstr);
 				// Just warn, this is non-fatal ;).
 			}
 
@@ -515,7 +515,7 @@ static const unsigned char*
 		return font8x8_hiragana[codepoint - 0x3040];
 	} else {
 		// NOTE: Print a blank space for unknown codepoints
-		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by this font!\n", codepoint);
+		WARN("Codepoint U+%04X is not covered by this font", codepoint);
 		return font8x8_basic[0];
 	}
 }
@@ -1048,9 +1048,9 @@ static int
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
 		if (is_fs) {
-			fprintf(stderr, "[FBInk] FBIO_EINK_UPDATE_DISPLAY: %s\n", errstr);
+			WARN("FBIO_EINK_UPDATE_DISPLAY: %s", errstr);
 		} else {
-			fprintf(stderr, "[FBInk] FBIO_EINK_UPDATE_DISPLAY_AREA: %s\n", errstr);
+			WARN("FBIO_EINK_UPDATE_DISPLAY_AREA: %s", errstr);
 		}
 		return ERRCODE(EXIT_FAILURE);
 	}
@@ -1084,14 +1084,13 @@ static int
 	if (rv < 0) {
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
-		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE: %s\n", errstr);
+		WARN("MXCFB_SEND_UPDATE: %s", errstr);
 		if (errno == EINVAL) {
-			fprintf(stderr,
-				"[FBInk] update_region={top=%u, left=%u, width=%u, height=%u}\n",
-				region.top,
-				region.left,
-				region.width,
-				region.height);
+			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
+			     region.top,
+			     region.left,
+			     region.width,
+			     region.height);
 		}
 		return ERRCODE(EXIT_FAILURE);
 	}
@@ -1112,9 +1111,9 @@ static int
 			char  buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
 			if (deviceQuirks.isKindlePearlScreen) {
-				fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL: %s\n", errstr);
+				WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL: %s", errstr);
 			} else {
-				fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s\n", errstr);
+				WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s", errstr);
 			}
 			return ERRCODE(EXIT_FAILURE);
 		} else {
@@ -1160,14 +1159,13 @@ static int
 	if (rv < 0) {
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
-		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE_KOA2: %s\n", errstr);
+		WARN("MXCFB_SEND_UPDATE_KOA2: %s", errstr);
 		if (errno == EINVAL) {
-			fprintf(stderr,
-				"[FBInk] update_region={top=%u, left=%u, width=%u, height=%u}\n",
-				region.top,
-				region.left,
-				region.width,
-				region.height);
+			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
+			     region.top,
+			     region.left,
+			     region.width,
+			     region.height);
 		}
 		return ERRCODE(EXIT_FAILURE);
 	}
@@ -1183,7 +1181,7 @@ static int
 		if (rv < 0) {
 			char  buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
-			fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s\n", errstr);
+			WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s", errstr);
 			return ERRCODE(EXIT_FAILURE);
 		} else {
 			// NOTE: Timeout is set to 5000ms
@@ -1220,14 +1218,13 @@ static int
 	if (rv < 0) {
 		char buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
-		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE: %s\n", errstr);
+		WARN("MXCFB_SEND_UPDATE: %s", errstr);
 		if (errno == EINVAL) {
-			fprintf(stderr,
-				"[FBInk] update_region={top=%u, left=%u, width=%u, height=%u}\n",
-				region.top,
-				region.left,
-				region.width,
-				region.height);
+			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
+			     region.top,
+			     region.left,
+			     region.width,
+			     region.height);
 		}
 		return ERRCODE(EXIT_FAILURE);
 	}
@@ -1238,7 +1235,7 @@ static int
 		if (rv < 0) {
 			char buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
-			fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s\n", errstr);
+			WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s", errstr);
 			return ERRCODE(EXIT_FAILURE);
 		} else {
 			// NOTE: Timeout is set to 10000ms
@@ -1277,14 +1274,13 @@ static int
 	if (rv < 0) {
 		char buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
-		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE: %s\n", errstr);
+		WARN("MXCFB_SEND_UPDATE: %s", errstr);
 		if (errno == EINVAL) {
-			fprintf(stderr,
-				"[FBInk] update_region={top=%u, left=%u, width=%u, height=%u}\n",
-				region.top,
-				region.left,
-				region.width,
-				region.height);
+			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
+			     region.top,
+			     region.left,
+			     region.width,
+			     region.height);
 		}
 		return ERRCODE(EXIT_FAILURE);
 	}
@@ -1300,7 +1296,7 @@ static int
 		if (rv < 0) {
 			char buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
-			fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3: %s\n", errstr);
+			WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3: %s", errstr);
 			return ERRCODE(EXIT_FAILURE);
 		} else {
 			// NOTE: Timeout is set to 5000ms
@@ -1332,14 +1328,13 @@ static int
 	if (rv < 0) {
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
-		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE_V1_NTX: %s\n", errstr);
+		WARN("MXCFB_SEND_UPDATE_V1_NTX: %s", errstr);
 		if (errno == EINVAL) {
-			fprintf(stderr,
-				"[FBInk] update_region={top=%u, left=%u, width=%u, height=%u}\n",
-				region.top,
-				region.left,
-				region.width,
-				region.height);
+			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
+			     region.top,
+			     region.left,
+			     region.width,
+			     region.height);
 		}
 		return ERRCODE(EXIT_FAILURE);
 	}
@@ -1350,7 +1345,7 @@ static int
 		if (rv < 0) {
 			char  buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
-			fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1: %s\n", errstr);
+			WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1: %s", errstr);
 			return ERRCODE(EXIT_FAILURE);
 		} else {
 			// NOTE: Timeout is set to 10000ms
@@ -1389,14 +1384,13 @@ static int
 	if (rv < 0) {
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
-		fprintf(stderr, "[FBInk] MXCFB_SEND_UPDATE_V2: %s\n", errstr);
+		WARN("MXCFB_SEND_UPDATE_V2: %s", errstr);
 		if (errno == EINVAL) {
-			fprintf(stderr,
-				"[FBInk] update_region={top=%u, left=%u, width=%u, height=%u}\n",
-				region.top,
-				region.left,
-				region.width,
-				region.height);
+			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
+			     region.top,
+			     region.left,
+			     region.width,
+			     region.height);
 		}
 		return ERRCODE(EXIT_FAILURE);
 	}
@@ -1412,7 +1406,7 @@ static int
 		if (rv < 0) {
 			char  buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
-			fprintf(stderr, "[FBInk] MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3: %s\n", errstr);
+			WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3: %s", errstr);
 			return ERRCODE(EXIT_FAILURE);
 		} else {
 			// NOTE: Timeout is set to 5000ms
@@ -1444,10 +1438,7 @@ static int
 	//       A 0x0 region is a no go on most devices, while a 1x1 region may only upset some Kindle models.
 	//       Some devices even balk at 1xN or Nx1, so, catch that, too.
 	if (region.width <= 1 || region.height <= 1) {
-		fprintf(stderr,
-			"[FBInk] Discarding bogus empty region (%ux%u) to avoid a softlock.\n",
-			region.width,
-			region.height);
+		WARN("Discarding bogus empty region (%ux%u) to avoid a softlock", region.width, region.height);
 		return ERRCODE(EXIT_FAILURE);
 	}
 
@@ -1507,7 +1498,7 @@ int
 	// Open the framebuffer file for reading and writing
 	fbfd = open("/dev/fb0", O_RDWR | O_CLOEXEC);
 	if (!fbfd) {
-		fprintf(stderr, "[FBInk] Error: cannot open framebuffer character device.\n");
+		WARN("Error: cannot open framebuffer character device");
 		return ERRCODE(EXIT_FAILURE);
 	}
 
@@ -1522,7 +1513,7 @@ static int
 		// If we're opening a fd now, don't keep it around.
 		*keep_fd = false;
 		if (ERRCODE(EXIT_FAILURE) == (*fbfd = fbink_open())) {
-			fprintf(stderr, "[FBInk] Failed to open the framebuffer character device, aborting . . .\n");
+			WARN("Failed to open the framebuffer character device, aborting");
 			return ERRCODE(EXIT_FAILURE);
 		}
 	}
@@ -1626,7 +1617,7 @@ static int
 	// Get variable screen information (unless we were asked to skip it, because we've already populated it elsewhere)
 	if (!skip_vinfo) {
 		if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
-			fprintf(stderr, "[FBInk] Error reading variable fb information.\n");
+			WARN("Error reading variable fb information");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
@@ -1970,7 +1961,7 @@ static int
 
 	// Get fixed screen information
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &fInfo)) {
-		fprintf(stderr, "[FBInk] Error reading fixed fb information.\n");
+		WARN("Error reading fixed fb information");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -2007,7 +1998,7 @@ static int
 			break;
 		default:
 			// Huh oh... Should never happen!
-			fprintf(stderr, "[FBInk] Unsupported framebuffer bpp!\n");
+			WARN("Unsupported framebuffer bpp");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 			break;
@@ -2089,14 +2080,14 @@ int
 		if (!data) {
 			fclose(f);
 			otInit = false;
-			fprintf(stderr, "[FBInk] Error allocating font data buffer!\n");
+			WARN("Error allocating font data buffer");
 			return ERRCODE(EXIT_FAILURE);
 		}
 		if (fread(data, 1, (size_t) st.st_size, f) < (size_t) st.st_size || ferror(f) != 0) {
 			free(data);
 			fclose(f);
 			otInit = false;
-			fprintf(stderr, "[FBInk] Error reading font file!\n");
+			WARN("Error reading font file");
 			return ERRCODE(EXIT_FAILURE);
 		}
 		fclose(f);
@@ -2104,12 +2095,12 @@ int
 	stbtt_fontinfo* font_info = calloc(1, sizeof(stbtt_fontinfo));
 	if (!font_info) {
 		free(data);
-		fprintf(stderr, "[FBInk] Error allocating stbtt_fontinfo struct!\n");
+		WARN("Error allocating stbtt_fontinfo struct");
 		return ERRCODE(EXIT_FAILURE);
 	}
 	if (!stbtt_InitFont(font_info, data, 0)) {
 		free(font_info);
-		fprintf(stderr, "[FBInk] Error initialising font '%s'!\n", filename);
+		WARN("Error initialising font '%s'", filename);
 		return ERRCODE(EXIT_FAILURE);
 	}
 	// Assign the current font to it's appropriate otFonts struct member, depending
@@ -2136,7 +2127,7 @@ int
 	ELOG("[FBInk] Font '%s' loaded", filename);
 	return EXIT_SUCCESS;
 #else
-	fprintf(stderr, "[FBInk] OpenType support is disabled in this FBInk build!\n");
+	WARN("OpenType support is disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
 #endif    // FBINK_WITH_OPENTYPE
 }
@@ -2163,7 +2154,7 @@ int
 	free_ot_font(otFonts.otBoldItalic);
 	return EXIT_SUCCESS;
 #else
-	fprintf(stderr, "[FBInk] OpenType support is disabled in this FBInk build!\n");
+	WARN("OpenType support is disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
 #endif    // FBINK_WITH_OPENTYPE
 }
@@ -2226,7 +2217,7 @@ void
 		fbink_state->glyph_height     = glyphHeight;
 		fbink_state->is_perfect_fit   = deviceQuirks.isPerfectFit;
 	} else {
-		fprintf(stderr, "[FBInk] Err, it appears we were passed a NULL fbink_state pointer?\n");
+		WARN("Err, it appears we were passed a NULL fbink_state pointer?");
 	}
 }
 
@@ -2244,7 +2235,7 @@ static int
 	if (fbPtr == MAP_FAILED) {
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
-		fprintf(stderr, "[FBInk] mmap: %s\n", errstr);
+		WARN("mmap: %s", errstr);
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		isFbMapped = true;
@@ -2260,7 +2251,7 @@ static int
 	if (munmap(fbPtr, fInfo.smem_len) < 0) {
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
-		fprintf(stderr, "[FBInk] munmap: %s\n", errstr);
+		WARN("munmap: %s", errstr);
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		// NOTE: Don't forget to reset those state flags,
@@ -2289,7 +2280,7 @@ int
 		if (close(fbfd) < 0) {
 			char  buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
-			fprintf(stderr, "[FBInk] close: %s\n", errstr);
+			WARN("close: %s", errstr);
 			return ERRCODE(EXIT_FAILURE);
 		}
 	}
@@ -2484,7 +2475,7 @@ int
 	if (line == NULL) {
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
-		fprintf(stderr, "[FBInk] calloc (line): %s\n", errstr);
+		WARN("calloc (line): %s", errstr);
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -2667,7 +2658,7 @@ int
 		//       so u8_nextchar() has zero chance to skip a NULL on the next iteration.
 		//       See the comments around the initial calloc() call for more details.
 		if (bytes_printed > 0 && line_len < chars_left) {
-			LOG("We have more stuff to print, clearing the line buffer for re-use!\n");
+			LOG("We have more stuff to print, clearing the line buffer for re-use!");
 			memset(line, 0, (size_t) bytes_printed);
 		}
 		// The nuclear option is simply to unconditonally zero the *full* buffer ;).
@@ -2684,7 +2675,7 @@ int
 
 	// Refresh screen
 	if (refresh(fbfd, region, WAVEFORM_MODE_AUTO, fbink_config->is_flashing) != EXIT_SUCCESS) {
-		fprintf(stderr, "[FBInk] Failed to refresh the screen!\n");
+		WARN("Failed to refresh the screen");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -2719,7 +2710,7 @@ int
 	if (buffer == NULL) {
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
-		fprintf(stderr, "[FBInk] calloc (page): %s\n", errstr);
+		WARN("calloc (page): %s", errstr);
 		return ERRCODE(EXIT_FAILURE);
 	}
 
@@ -2801,19 +2792,19 @@ int
 #ifdef FBINK_WITH_OPENTYPE
 	// Abort if we were passed an empty string
 	if (!*string) {
-		fprintf(stderr, "[FBInk] Cannot print an empty string!\n");
+		WARN("Cannot print an empty string");
 		return ERRCODE(EXIT_FAILURE);
 	}
 
 	// Has fbink_init_ot() been called yet?
 	if (!otInit) {
-		fprintf(stderr, "[FBInk] No fonts have been loaded!\n");
+		WARN("No fonts have been loaded");
 		return ERRCODE(ENODATA);
 	}
 
 	// Just in case we receive a NULL pointer to the cfg struct
 	if (!cfg) {
-		fprintf(stderr, "[FBInk] FBInkOTConfig expected. Got NULL pointer instead!\n");
+		WARN("FBInkOTConfig expected. Got NULL pointer instead");
 		return ERRCODE(EXIT_FAILURE);
 	}
 
@@ -2851,15 +2842,12 @@ int
 	// should sum to less than 100%
 	if (cfg->margins.top > viewHeight || cfg->margins.bottom > viewHeight || cfg->margins.left > viewWidth ||
 	    cfg->margins.right > viewWidth) {
-		fprintf(stderr,
-			"[FBInk] A margin was out of range (allowed ranges :: Vert < %u  Horiz < %u)!\n",
-			viewHeight,
-			viewWidth);
+		WARN("A margin was out of range (allowed ranges :: Vert < %u  Horiz < %u)", viewHeight, viewWidth);
 		rv = ERRCODE(ERANGE);
 		goto cleanup;
 	}
 	if (cfg->margins.top + cfg->margins.bottom >= viewHeight || cfg->margins.left + cfg->margins.right >= viewWidth) {
-		fprintf(stderr, "[FBInk] Opposing margins sum to greater than the viewport height or width!\n");
+		WARN("Opposing margins sum to greater than the viewport height or width");
 		rv = ERRCODE(ERANGE);
 		goto cleanup;
 	}
@@ -2991,7 +2979,7 @@ int
 	}
 	// If no font was loaded, exit early. We checked earlier, but just in case...
 	if (!curr_font) {
-		fprintf(stderr, "[FBInk] No font appears to be loaded!\n");
+		WARN("No font appears to be loaded");
 		rv = ERRCODE(ENOENT);
 		goto cleanup;
 	}
@@ -3000,7 +2988,7 @@ int
 	// And if max_row_height was not changed from zero, this is also an unrecoverable error.
 	// Also guards against a potential divide-by-zero in the following calculation
 	if (max_row_height <= 0) {
-		fprintf(stderr, "[FBInk] Max line height not set!\n");
+		WARN("Max line height not set");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -3019,7 +3007,7 @@ int
 	size_t str_len_bytes = strlen(string);
 	brk_buff             = calloc(str_len_bytes + 1, sizeof(*brk_buff));
 	if (!brk_buff) {
-		fprintf(stderr, "[FBInk] Linebreak buffer could not be allocated!\n");
+		WARN("Linebreak buffer could not be allocated");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -3032,7 +3020,7 @@ int
 	if (cfg->is_formatted) {
 		fmt_buff = calloc(str_len_bytes + 1, sizeof(*fmt_buff));
 		if (!fmt_buff) {
-			fprintf(stderr, "[FBInk] Formatted text buffer could not be allocated!\n");
+			WARN("Formatted text buffer could not be allocated");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
@@ -3091,7 +3079,7 @@ int
 				}
 			}
 			if (!curr_font) {
-				fprintf(stderr, "[FBInk] The specified font style was not loaded!\n");
+				WARN("The specified font style was not loaded");
 				rv = ERRCODE(ENOENT);
 				goto cleanup;
 			}
@@ -3143,9 +3131,8 @@ int
 			if (lw > max_lw) {
 				// Is the glyph itself too wide for our printable area? If so, we abort
 				if ((unsigned int) gw >= max_lw) {
-					fprintf(
-					    stderr,
-					    "[FBInk] Font size too big for current printable area. Try to reduce margins or font size!\n");
+					WARN(
+					    "Font size too big for current printable area. Try to reduce margins or font size");
 					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
 				}
@@ -3276,7 +3263,7 @@ int
 	unsigned int glyph_buffer_dims = font_size_px * (unsigned int) max_line_height * 2U;
 	glyph_buff                     = calloc(glyph_buffer_dims, sizeof(*glyph_buff));
 	if (!line_buff || !glyph_buff) {
-		fprintf(stderr, "[FBInk] Line or glyph buffers could not be allocated!\n");
+		WARN("Line or glyph buffers could not be allocated");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -3402,8 +3389,8 @@ int
 			// If it does occur, we will now exit instead of clipping the glyph
 			// bounding box, to avoid the possiblity of stb_truetype segfaulting.
 			if (lw > max_lw) {
-				fprintf(stderr, "[FBInk] Max allowed line width exceeded!\n");
-				fprintf(stderr, "[FBInk] Curr LW: %u   Max Allowed: %hu\n", lw, max_lw);
+				WARN("Max allowed line width exceeded");
+				WARN("Curr LW: %u   Max Allowed: %hu", lw, max_lw);
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
 			}
@@ -3585,7 +3572,7 @@ cleanup:
 	}
 	return rv;
 #else
-	fprintf(stderr, "[FBInk] OpenType support is disabled in this FBInk build!\n");
+	WARN("OpenType support is disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
 #endif    // FBINK_WITH_OPENTYPE
 }
@@ -3701,7 +3688,7 @@ int
 
 	int ret;
 	if (EXIT_SUCCESS != (ret = refresh(fbfd, region, region_wfm, is_flashing))) {
-		fprintf(stderr, "[FBInk] Failed to refresh the screen!\n");
+		WARN("Failed to refresh the screen");
 	}
 
 	if (!keep_fd) {
@@ -3751,7 +3738,7 @@ int
 
 		// We evidently need to query the current state in order to do that...
 		if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
-			fprintf(stderr, "[FBInk] Error reading variable fb information.\n");
+			WARN("Error reading variable fb information");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
@@ -3784,7 +3771,7 @@ cleanup:
 	return rv;
 #else
 	// NOTE: I currently haven't found the need for any shenanigans like that on Kindle, so, make this a NOP there ;)
-	fprintf(stderr, "[FBInk] Reinitilization is not needed on Kindle devices :)\n");
+	WARN("Reinitilization is not needed on Kindle devices :)");
 	return ERRCODE(ENOSYS);
 #endif    // !FBINK_FOR_KINDLE
 }
@@ -4000,7 +3987,7 @@ int
 	//       confused (unless is_flashing is enabled, since that'll block,
 	//       essentially throttling the bar to the screen's refresh rate).
 	if (refresh(fbfd, region, WAVEFORM_MODE_AUTO, fbink_config->is_flashing) != EXIT_SUCCESS) {
-		fprintf(stderr, "[FBInk] Failed to refresh the screen!\n");
+		WARN("Failed to refresh the screen");
 		return ERRCODE(EXIT_FAILURE);
 	}
 
@@ -4124,7 +4111,7 @@ static unsigned char*
 		size_t         nread;
 
 		if (ferror(stdin)) {
-			fprintf(stderr, "[FBInk] Failed to read image data from stdin!\n");
+			WARN("Failed to read image data from stdin");
 			return NULL;
 		}
 
@@ -4136,7 +4123,7 @@ static unsigned char*
 				// Overflow check
 				if (size <= used) {
 					free(imgdata);
-					fprintf(stderr, "[FBInk] Too much input data!\n");
+					WARN("Too much input data");
 					return NULL;
 				}
 
@@ -4144,7 +4131,7 @@ static unsigned char*
 				temp = realloc(imgdata, size);
 				if (temp == NULL) {
 					free(imgdata);
-					fprintf(stderr, "[FBInk] realloc: out of memory!\n");
+					WARN("realloc: out of memory");
 					return NULL;
 				}
 				imgdata = temp;
@@ -4160,7 +4147,7 @@ static unsigned char*
 
 		if (ferror(stdin)) {
 			free(imgdata);
-			fprintf(stderr, "[FBInk] Failed to read image data from stdin!\n");
+			WARN("Failed to read image data from stdin");
 			return NULL;
 		}
 
@@ -4170,7 +4157,7 @@ static unsigned char*
 		temp = realloc(imgdata, used + 1U);
 		if (temp == NULL) {
 			free(imgdata);
-			fprintf(stderr, "[FBInk] realloc: out of memory!\n");
+			WARN("realloc: out of memory!");
 			return NULL;
 		}
 		imgdata       = temp;
@@ -4186,7 +4173,7 @@ static unsigned char*
 		data = stbi_load(filename, w, h, n, req_n);
 	}
 	if (data == NULL) {
-		fprintf(stderr, "[FBInk] Failed to open or decode image '%s'!\n", filename);
+		WARN("Failed to open or decode image '%s'", filename);
 		return NULL;
 	}
 
@@ -4911,7 +4898,7 @@ static int
 
 	// Refresh screen
 	if (refresh(fbfd, region, WAVEFORM_MODE_GC16, fbink_config->is_flashing) != EXIT_SUCCESS) {
-		fprintf(stderr, "[FBInk] Failed to refresh the screen!\n");
+		WARN("Failed to refresh the screen");
 	}
 
 	// Cleanup
@@ -4967,13 +4954,13 @@ int
 	int            n;
 	data = img_load_from_file(filename, &w, &h, &n, req_n);
 	if (data == NULL) {
-		fprintf(stderr, "[FBInk] Failed to decode image data from '%s'!\n", filename);
+		WARN("Failed to decode image data from '%s'", filename);
 		return ERRCODE(EXIT_FAILURE);
 	}
 
 	// Finally, draw it on screen
 	if (draw_image(fbfd, data, w, h, n, req_n, x_off, y_off, fbink_config) != EXIT_SUCCESS) {
-		fprintf(stderr, "[FBInk] Failed to display image data on screen!\n");
+		WARN("Failed to display image data on screen");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -4985,7 +4972,7 @@ cleanup:
 
 	return rv;
 #else
-	fprintf(stderr, "[FBInk] Image support is disabled in this FBInk build!\n");
+	WARN("Image support is disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
 #endif    // FBINK_WITH_IMAGE
 }
@@ -5042,7 +5029,7 @@ int
 		//       Which is why we're using a tweaked internal copy, which does not free ;).
 		imgdata = img_convert_px_format(data, n, req_n, w, h);
 		if (imgdata == NULL) {
-			fprintf(stderr, "[FBInk] Failed to re-interleave input data in a suitable format!\n");
+			WARN("Failed to re-interleave input data in a suitable format");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
@@ -5054,7 +5041,7 @@ int
 
 	// We should now be able to draw that on screen, knowing that it probably won't horribly implode ;p
 	if (draw_image(fbfd, imgdata, w, h, n, req_n, x_off, y_off, fbink_config) != EXIT_SUCCESS) {
-		fprintf(stderr, "[FBInk] Failed to display image data on screen!\n");
+		WARN("Failed to display image data on screen");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -5068,7 +5055,7 @@ cleanup:
 
 	return rv;
 #else
-	fprintf(stderr, "[FBInk] Image support is disabled in this FBInk build!\n");
+	WARN("Image support is disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
 #endif    // FBINK_WITH_IMAGE
 }

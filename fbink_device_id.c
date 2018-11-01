@@ -166,7 +166,7 @@ static uint32_t
 	uint32_t    result = 0;
 
 	if (base > strlen(tbl)) {
-		fprintf(stderr, "[FBInk] base %hhu is unsupported (too large).\n", base);
+		WARN("base %hhu is unsupported (too large)", base);
 		return 0;
 	}
 
@@ -195,12 +195,12 @@ static void
 	FILE* fp = fopen("/proc/usid", "re");
 #		endif
 	if (!fp) {
-		fprintf(stderr, "[FBInk] Cannot open /proc/usid (not running on a Kindle?)!\n");
+		WARN("Cannot open /proc/usid (not running on a Kindle?)");
 	} else {
 		unsigned char serial_no[KINDLE_SERIAL_NO_LENGTH] = { '\0' };
 		if (fread(serial_no, sizeof(unsigned char), KINDLE_SERIAL_NO_LENGTH, fp) < KINDLE_SERIAL_NO_LENGTH ||
 		    ferror(fp) != 0) {
-			fprintf(stderr, "[FBInk] Error reading /proc/usid (unexpected length)!\n");
+			WARN("Error reading /proc/usid (unexpected length)");
 		}
 		fclose(fp);
 
@@ -218,7 +218,7 @@ static void
 			dev = from_base(device_code, 32);
 			// ... And if it's not either list, it's truly unknown.
 			if (!is_kindle_device_new(dev, device_quirks)) {
-				fprintf(stderr, "[FBInk] Unidentified Kindle device %s (0x%03X)!\n", device_code, dev);
+				WARN("Unidentified Kindle device %s (0x%03X)", device_code, dev);
 			}
 		}
 	}
@@ -231,21 +231,15 @@ static void
 {
 	FILE* fp = fopen(HWCONFIG_DEVICE, "re");
 	if (!fp) {
-		fprintf(stderr,
-			"[FBInk] Couldn't read from '%s', unable to identify the Cervantes model!\n",
-			HWCONFIG_DEVICE);
+		WARN("Couldn't read from '%s', unable to identify the Cervantes model", HWCONFIG_DEVICE);
 	} else {
 		NTXHWConfig config = { 0 };
 
 		if (fseek(fp, HWCONFIG_OFFSET, SEEK_SET) != 0) {
-			fprintf(stderr,
-				"[FBInk] Failed to seek to position 0x%p in '%s'!\n",
-				(void*) HWCONFIG_OFFSET,
-				HWCONFIG_DEVICE);
+			WARN("Failed to seek to position 0x%p in '%s'", (void*) HWCONFIG_OFFSET, HWCONFIG_DEVICE);
 		} else {
 			if (fread(&config, sizeof(config), 1, fp) < 1 || ferror(fp) != 0) {
-				fprintf(
-				    stderr, "[FBInk] Failed to read the NTX HWConfig entry on '%s'!\n", HWCONFIG_DEVICE);
+				WARN("Failed to read the NTX HWConfig entry on '%s'", HWCONFIG_DEVICE);
 				fclose(fp);
 				return;
 			}
@@ -256,9 +250,7 @@ static void
 		//       and not of the string literal (where sizeof would have appended space for a terminating NULL).
 		//       (i.e., here, sizeof(config.magic) == 10 == strlen(HWCONFIG_MAGIC) while sizeof(HWCONFIG_MAGIC) == 11)
 		if (memcmp(config.magic, HWCONFIG_MAGIC, sizeof(config.magic)) != 0) {
-			fprintf(stderr,
-				"[FBInk] Input device '%s' does not appear to contain an NTX HWConfig entry!\n",
-				HWCONFIG_DEVICE);
+			WARN("Input device '%s' does not appear to contain an NTX HWConfig entry", HWCONFIG_DEVICE);
 			return;
 		}
 
@@ -278,7 +270,7 @@ static void
 				device_quirks->screenDPI      = 300U;
 				break;
 			default:
-				fprintf(stderr, "[FBInk] Unidentified Cervantes device (%hhu)!\n", config.pcb_id);
+				WARN("Unidentified Cervantes device (%hhu)", config.pcb_id);
 				break;
 		}
 	}
@@ -363,7 +355,7 @@ static void
 			device_quirks->isKoboNonMT = true;
 			/* FALLTHROUGH */
 		default:
-			fprintf(stderr, "[FBInk] Unidentified Kobo device code (%hu)!\n", kobo_id);
+			WARN("Unidentified Kobo device code (%hu)", kobo_id);
 			break;
 	}
 }
@@ -376,8 +368,7 @@ static void
 	// Get the model from Nickel's version tag file...
 	FILE* fp = fopen("/mnt/onboard/.kobo/version", "re");
 	if (!fp) {
-		fprintf(stderr,
-			"[FBInk] Couldn't find a Kobo version tag (onboard unmounted or not running on a Kobo?)!\n");
+		WARN("Couldn't find a Kobo version tag (onboard unmounted or not running on a Kobo?)");
 	} else {
 		// NOTE: I'm not entirely sure this will always have a fixed length, so,
 		//       rely on getline()'s dynamic allocation to be safe...
@@ -405,20 +396,16 @@ static void
 	//       So try to do it the hard way, via the NTXHWConfig tag...
 	fp = fopen(HWCONFIG_DEVICE, "re");
 	if (!fp) {
-		fprintf(stderr, "[FBInk] Couldn't read from '%s', unable to identify the Kobo model!\n", HWCONFIG_DEVICE);
+		WARN("Couldn't read from '%s', unable to identify the Kobo model", HWCONFIG_DEVICE);
 	} else {
 		NTXHWConfig    config  = { 0 };
 		unsigned char* payload = NULL;
 
 		if (fseek(fp, HWCONFIG_OFFSET, SEEK_SET) != 0) {
-			fprintf(stderr,
-				"[FBInk] Failed to seek to position 0x%p in '%s'!\n",
-				(void*) HWCONFIG_OFFSET,
-				HWCONFIG_DEVICE);
+			WARN("Failed to seek to position 0x%p in '%s'", (void*) HWCONFIG_OFFSET, HWCONFIG_DEVICE);
 		} else {
 			if (fread(&config, sizeof(config), 1, fp) < 1 || ferror(fp) != 0) {
-				fprintf(
-				    stderr, "[FBInk] Failed to read the NTX HWConfig entry on '%s'!\n", HWCONFIG_DEVICE);
+				WARN("Failed to read the NTX HWConfig entry on '%s'", HWCONFIG_DEVICE);
 				fclose(fp);
 				// NOTE: Make it clear we failed to identify the device...
 				set_kobo_quirks(0, device_quirks);
@@ -429,9 +416,8 @@ static void
 			//       and not of the string literal (where sizeof would have appended space for a terminating NULL).
 			//       (i.e., here, sizeof(config.magic) == 10 == strlen(HWCONFIG_MAGIC) while sizeof(HWCONFIG_MAGIC) == 11)
 			if (memcmp(config.magic, HWCONFIG_MAGIC, sizeof(config.magic)) != 0) {
-				fprintf(stderr,
-					"[FBInk] Input device '%s' does not appear to contain an NTX HWConfig entry!\n",
-					HWCONFIG_DEVICE);
+				WARN("Input device '%s' does not appear to contain an NTX HWConfig entry",
+				     HWCONFIG_DEVICE);
 				fclose(fp);
 				// NOTE: Like rcS, assume it's an old Freescale Trilogy if we can't find an NTX HW tag
 				set_kobo_quirks(0, device_quirks);
@@ -442,7 +428,7 @@ static void
 			// Since it's only a couple dozen bytes, do that on the stack to make our life easier.
 			payload = alloca(config.len);
 			if (fread(payload, sizeof(*payload), config.len, fp) < config.len || ferror(fp) != 0) {
-				fprintf(stderr, "[FBInk] Error reading NTX HWConfig payload (unexpected length)!\n");
+				WARN("Error reading NTX HWConfig payload (unexpected length)");
 				fclose(fp);
 				// NOTE: Make it clear we failed to identify the device...
 				set_kobo_quirks(0, device_quirks);
@@ -463,10 +449,9 @@ static void
 			*/
 
 			if (payload[KOBO_HWCFG_PCB] >= (sizeof(kobo_ids) / sizeof(*kobo_ids))) {
-				fprintf(stderr,
-					"[FBInk] Unknown Kobo PCB ID index (%hhu >= %zu)!\n",
-					payload[KOBO_HWCFG_PCB],
-					(sizeof(kobo_ids) / sizeof(*kobo_ids)));
+				WARN("Unknown Kobo PCB ID index (%hhu >= %zu)",
+				     payload[KOBO_HWCFG_PCB],
+				     (sizeof(kobo_ids) / sizeof(*kobo_ids)));
 			} else {
 				kobo_id = kobo_ids[payload[KOBO_HWCFG_PCB]];
 
@@ -491,7 +476,7 @@ static void
 		} else {
 			// Should hopefully never happen, since there's a good chance we'd have caught a SIGSEGV before that,
 			// if alloca failed ;).
-			fprintf(stderr, "[FBInk] Empty NTX HWConfig payload ?!\n");
+			WARN("Empty NTX HWConfig payload?");
 		}
 		// And now we can do this, as accurately as if onboard were mounted ;).
 		set_kobo_quirks(kobo_id, device_quirks);

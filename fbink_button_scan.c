@@ -191,7 +191,7 @@ static int
 	int                ifd = -1;
 	ifd                    = open("/dev/input/event1", O_WRONLY | O_NONBLOCK | O_CLOEXEC);
 	if (ifd == -1) {
-		fprintf(stderr, "[FBInk] Failed to open input device!\n");
+		WARN("Failed to open input device");
 		return ERRCODE(ENODEV);
 	}
 
@@ -471,7 +471,7 @@ int
 		// Press it if requested...
 		if (press_button) {
 			if ((rv = generate_button_press(&match_coords, nosleep)) != EXIT_SUCCESS) {
-				fprintf(stderr, "[FBInk] Failed to press the Connect button!\n");
+				WARN("Failed to press the Connect button");
 				goto cleanup;
 			} else {
 				LOG(". . . appears to have been a success!");
@@ -479,7 +479,7 @@ int
 		}
 	} else {
 		LOG("No match :(");
-		fprintf(stderr, "[FBInk] Failed to find a Connect button on screen!\n");
+		WARN("Failed to find a Connect button on screen");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -495,7 +495,7 @@ cleanup:
 
 	return rv;
 #else
-	fprintf(stderr, "[FBInk] Kobo Connect button scanning is disabled in this FBInk build!\n");
+	WARN("Kobo Connect button scanning is disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
 #endif    // FBINK_WITH_BUTTON_SCAN
 }
@@ -527,7 +527,7 @@ int
 	// in case someone slipped on the wrong CLI flag or the wrong function ;).
 	if (!wait_for_background_color(eInkBGCMap[BG_BLACK], 0U, 0U)) {
 		// That won't do... abort!
-		fprintf(stderr, "[FBInk] We don't appear to be on the Connected screen, abort!\n");
+		WARN("We don't appear to be on the Connected screen, abort");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -538,7 +538,7 @@ int
 	LOG("Waiting for the start of the USBMS session . . .");
 	if (!wait_for_onboard_state(!mounted)) {
 		// That won't do... abort!
-		fprintf(stderr, "[FBInk] Failed to detect start of USBMS session, can't detect content import!\n");
+		WARN("Failed to detect start of USBMS session, can't detect content import");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -552,14 +552,14 @@ int
 		int nfd = -1;
 		nfd     = open("/tmp/nickel-hardware-status", O_WRONLY | O_NONBLOCK | O_CLOEXEC);
 		if (nfd == -1) {
-			fprintf(stderr, "[FBInk] Failed to open Nickel pipe!\n");
+			WARN("Failed to open Nickel pipe");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
 
 		const unsigned char cmd[] = "usb plug remove";
 		if (write(nfd, cmd, sizeof(cmd)) < 0) {
-			fprintf(stderr, "[FBInk] Failed to write to Nickel pipe!\n");
+			WARN("Failed to write to Nickel pipe");
 			rv = ERRCODE(EXIT_FAILURE);
 			close(nfd);
 			goto cleanup;
@@ -570,7 +570,7 @@ int
 
 	if (!wait_for_onboard_state(mounted)) {
 		// That won't do... abort!
-		fprintf(stderr, "[FBInk] Failed to detect end of USBMS session, can't detect content import!\n");
+		WARN("Failed to detect end of USBMS session, can't detect content import");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -578,7 +578,7 @@ int
 	// Now check that we're back on the Home screen...
 	if (!is_on_home_screen()) {
 		// That won't do... abort!
-		fprintf(stderr, "[FBInk] Failed to detect Home screen, can't detect content import!\n");
+		WARN("Failed to detect Home screen, can't detect content import");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -586,7 +586,7 @@ int
 	// Then wait a while to see if the Import screen pops up...
 	if (!is_on_import_screen()) {
 		// Maybe there was nothing to import?
-		fprintf(stderr, "[FBInk] Couldn't detect the Import screen, maybe there was nothing to import?\n");
+		WARN("Couldn't detect the Import screen, maybe there was nothing to import?");
 		rv = ERRCODE(ENODATA);
 		goto cleanup;
 	}
@@ -594,9 +594,8 @@ int
 	// Then wait a potentially long while (~5min) for the end of the Import process...
 	if (!is_on_home_screen_again()) {
 		// NOTE: LF better method than a stupid hard timeout... ;'(
-		fprintf(
-		    stderr,
-		    "[FBInk] Failed to detect the end of the Import process, maybe it's hung or running suspiciously long (it's been > 5min)?\n");
+		WARN(
+		    "Failed to detect the end of the Import process, maybe it's hung or running suspiciously long (it's been > 5min)?");
 		rv = ERRCODE(ETIME);
 		goto cleanup;
 	}
@@ -612,7 +611,7 @@ cleanup:
 
 	return rv;
 #else
-	fprintf(stderr, "[FBInk] Kobo USBMS monitoring is disabled in this FBInk build!\n");
+	WARN("Kobo USBMS monitoring is disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
 #endif    // FBINK_WITH_BUTTON_SCAN
 }

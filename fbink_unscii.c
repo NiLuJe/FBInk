@@ -256,7 +256,7 @@ static const unsigned char*
 	} else if (codepoint >= 0xff61 && codepoint <= 0xff9f) {
 		return unscii_block116[codepoint - 0xff61];
 	} else {
-		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by this font!\n", codepoint);
+		WARN("Codepoint U+%04X is not covered by this font", codepoint);
 		return unscii_block1[0];
 	}
 }
@@ -497,7 +497,7 @@ static const unsigned char*
 	} else if (codepoint >= 0xff61 && codepoint <= 0xff9f) {
 		return alt_block116[codepoint - 0xff61];
 	} else {
-		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by this font!\n", codepoint);
+		WARN("Codepoint U+%04X is not covered by this font", codepoint);
 		return alt_block1[0];
 	}
 }
@@ -738,7 +738,7 @@ static const unsigned char*
 	} else if (codepoint >= 0xff61 && codepoint <= 0xff9f) {
 		return thin_block116[codepoint - 0xff61];
 	} else {
-		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by this font!\n", codepoint);
+		WARN("Codepoint U+%04X is not covered by this font", codepoint);
 		return thin_block1[0];
 	}
 }
@@ -979,7 +979,7 @@ static const unsigned char*
 	} else if (codepoint >= 0xff61 && codepoint <= 0xff9f) {
 		return fantasy_block116[codepoint - 0xff61];
 	} else {
-		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by this font!\n", codepoint);
+		WARN("Codepoint U+%04X is not covered by this font", codepoint);
 		return fantasy_block1[0];
 	}
 }
@@ -1220,7 +1220,7 @@ static const unsigned char*
 	} else if (codepoint >= 0xff61 && codepoint <= 0xff9f) {
 		return mcr_block116[codepoint - 0xff61];
 	} else {
-		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by this font!\n", codepoint);
+		WARN("Codepoint U+%04X is not covered by this font", codepoint);
 		return mcr_block1[0];
 	}
 }
@@ -1463,7 +1463,7 @@ static const unsigned char*
 	} else if (codepoint >= 0xff61 && codepoint <= 0xff9f) {
 		return tall_block117[codepoint - 0xff61];
 	} else {
-		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by this font!\n", codepoint);
+		WARN("Codepoint U+%04X is not covered by this font", codepoint);
 		return tall_block1[0];
 	}
 }

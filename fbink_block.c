@@ -26,7 +26,7 @@ static const uint32_t*
 	if (codepoint >= 0x20 && codepoint <= 0x7e) {
 		return block_block1[codepoint - 0x20];
 	} else {
-		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by this font!\n", codepoint);
+		WARN("Codepoint U+%04X is not covered by this font", codepoint);
 		return block_block1[0];
 	}
 }

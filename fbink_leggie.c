@@ -382,7 +382,7 @@ static const unsigned char*
 	} else if (codepoint >= 0xffff && codepoint <= 0xffff) {
 		return leggie_block179[codepoint - 0xffff];
 	} else {
-		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by this font!\n", codepoint);
+		WARN("Codepoint U+%04X is not covered by this font", codepoint);
 		return leggie_block1[0];
 	}
 }
@@ -577,7 +577,7 @@ static const unsigned char*
 	} else if (codepoint >= 0xffff && codepoint <= 0xffff) {
 		return veggie_block93[codepoint - 0xffff];
 	} else {
-		fprintf(stderr, "[FBInk] Codepoint U+%04X is not covered by this font!\n", codepoint);
+		WARN("Codepoint U+%04X is not covered by this font", codepoint);
 		return veggie_block1[0];
 	}
 }

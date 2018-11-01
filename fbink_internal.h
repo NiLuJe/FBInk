@@ -199,7 +199,7 @@
 #	define UNUSED_BY_KINDLE __attribute__((unused))
 #endif
 
-// Handle what we send to stdout (i.e., mostly diagnostic stuff)
+// Handle what we send to stdout (i.e., mostly diagnostic stuff, which tends to be verbose, so no FBInk tag)
 #define LOG(fmt, ...)                                                                                                    \
 	({                                                                                                               \
 		if (g_isVerbose) {                                                                                       \
@@ -207,13 +207,17 @@
 		}                                                                                                        \
 	})
 
-// And then what we send to stderr (mostly fbink_init stuff)
+// And then what we send to stderr (mostly fbink_init stuff, add an FBInk tag to make it clear where it comes from for API users)
 #define ELOG(fmt, ...)                                                                                                   \
 	({                                                                                                               \
 		if (!g_isQuiet) {                                                                                        \
-			fprintf(stderr, fmt "\n", ##__VA_ARGS__);                                                        \
+			fprintf(stderr, "[FBInk] " fmt "\n", ##__VA_ARGS__);                                             \
 		}                                                                                                        \
 	})
+
+// And a simple wrapper for actual warnings on error codepaths. Should only be used for warnings before a return/exit.
+// Always shown, always tagged, and always ends with a bang.
+#define WARN(fmt, ...) ({ fprintf(stderr, "[FBInk] " fmt "!\n", ##__VA_ARGS__); })
 
 // We want to return negative values on failure, always
 #define ERRCODE(e) (-(e))
