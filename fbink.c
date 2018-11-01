@@ -2073,7 +2073,11 @@ int
 #ifdef FBINK_WITH_OPENTYPE
 	otInit = true;
 	// Open font from given path, and load into buffer
-	FILE*          f    = fopen(filename, "rb");
+#	ifdef FBINK_FOR_LEGACY
+	FILE* f = fopen(filename, "r");
+#	else
+	FILE* f = fopen(filename, "re");
+#	endif
 	unsigned char* data = NULL;
 	if (f) {
 		int         fd = fileno(f);
