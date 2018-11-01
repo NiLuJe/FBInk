@@ -3263,7 +3263,7 @@ int
 		goto cleanup;
 	}
 	if (bgcolor > 0U) {
-		memset(line_buff, bgcolor, max_lw * (unsigned int) max_line_height * sizeof(unsigned char));
+		memset(line_buff, bgcolor, max_lw * (unsigned int) max_line_height * sizeof(*line_buff));
 	}
 	unsigned int layer_diff = (unsigned int) fgcolor - (unsigned int) bgcolor;
 	// Setup the variables needed to render
@@ -3530,7 +3530,7 @@ int
 		LOG("Printed Line!");
 		// And clear our line buffer for next use. The glyph buffer shouldn't
 		// need clearing, as stbtt_MakeCodepointBitmap() should overwrite it.
-		memset(line_buff, 0, (max_lw * (unsigned int) max_line_height * sizeof(unsigned char)));
+		memset(line_buff, 0, (max_lw * (unsigned int) max_line_height * sizeof(*line_buff)));
 	}
 	if (paint_point.y + max_line_height > area.br.y) {
 		rv = 0;    // Inform the caller there is no room left to print another row.
