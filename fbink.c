@@ -2904,7 +2904,7 @@ int
 		if (!curr_font) {
 			curr_font = otFonts.otRegular;
 			sf        = rgSF;
-			LOG("[FBInk] Unformatted text defaulting to Regular font style");
+			LOG("Unformatted text defaulting to Regular font style");
 		}
 	}
 	if (otFonts.otItalic) {
@@ -2926,7 +2926,7 @@ int
 		if (!curr_font) {
 			curr_font = otFonts.otItalic;
 			sf        = itSF;
-			LOG("[FBInk] Unformatted text defaulting to Italic font style");
+			LOG("Unformatted text defaulting to Italic font style");
 		}
 	}
 	if (otFonts.otBold) {
@@ -2948,7 +2948,7 @@ int
 		if (!curr_font) {
 			curr_font = otFonts.otBold;
 			sf        = bdSF;
-			LOG("[FBInk] Unformatted text defaulting to Bold font style");
+			LOG("Unformatted text defaulting to Bold font style");
 		}
 	}
 	if (otFonts.otBoldItalic) {
@@ -2970,7 +2970,7 @@ int
 		if (!curr_font) {
 			curr_font = otFonts.otBoldItalic;
 			sf        = bditSF;
-			LOG("[FBInk] Unformatted text defaulting to Bold Italic font style");
+			LOG("Unformatted text defaulting to Bold Italic font style");
 		}
 	}
 	// If no font was loaded, exit early. We checked earlier, but just in case...
@@ -3176,9 +3176,9 @@ int
 			break;
 		}
 	}
-	LOG("[FBInk] %u lines to be printed", (line + 1U));
+	LOG("%u lines to be printed", (line + 1U));
 	if (!complete_str) {
-		LOG("[FBInk] String too long. Truncated to %u characters", (c_index + 1U));
+		LOG("String too long. Truncated to %u characters", (c_index + 1U));
 	}
 	// Let's determine our exact height, so we can determine vertical alignment later if required.
 	LOG("Maximum printable height is %u", print_height);
