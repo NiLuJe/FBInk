@@ -1912,15 +1912,12 @@ static int
 		}
 #endif
 	} else {
-		// Set font-size based on screen resolution (roughly matches: Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
-		// NOTE: We still want to compare against the screen's "height", even in Landscape mode,
-		//       so we simply use the longest edge to do just that...
-		uint32_t actual_height = MAX(vInfo.xres, vInfo.yres);
-		if (actual_height <= 600U) {
+		// Set font-size based on screen DPI (roughly matches: Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
+		if (deviceQuirks.screenDPI <= 167U) {
 			FONTSIZE_MULT = 1U;    // 8x8
-		} else if (actual_height <= 1024U) {
+		} else if (deviceQuirks.screenDPI <= 212U) {
 			FONTSIZE_MULT = 2U;    // 16x16
-		} else if (actual_height <= 1448U) {
+		} else if (deviceQuirks.screenDPI <= 265U) {
 			FONTSIZE_MULT = 3U;    // 24x24
 		} else {
 			FONTSIZE_MULT = 4U;    // 32x32
