@@ -1609,6 +1609,18 @@ static int
 			ELOG("[FBInk] Unable to query clock tick frequency, assuming %ld Hz", USER_HZ);
 		}
 
+		// Much like KOReader, assume a baseline DPI for devices where we don't specify a value in device_id
+		if (deviceQuirks.screenDPI == 0) {
+#ifdef FBINK_FOR_LINUX
+			// Assume non-HiDPI screens on pure Linux
+			deviceQuirks.screenDPI = 96;
+#else
+			// Should roughly apply to a vast majority of early Pearl screens
+			deviceQuirks.screenDPI = 160;
+#endif
+		}
+		ELOG("[FBInk] Screen density set to %hhu dpi", deviceQuirks.screenDPI);
+
 		// And make sure we won't do that again ;).
 		deviceQuirks.skipId = true;
 	}
@@ -2163,7 +2175,7 @@ void
 {
 	fprintf(
 	    stdout,
-	    "viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu",
+	    "viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hhu;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu",
 	    viewWidth,
 	    viewHeight,
 	    screenWidth,
@@ -2171,6 +2183,7 @@ void
 	    viewHoriOrigin,
 	    viewVertOrigin,
 	    viewVertOffset,
+	    deviceQuirks.screenDPI,
 	    vInfo.bits_per_pixel,
 	    FONTW,
 	    FONTH,
@@ -2199,6 +2212,7 @@ void
 		fbink_state->view_hori_origin = viewHoriOrigin;
 		fbink_state->view_vert_origin = viewVertOrigin;
 		fbink_state->view_vert_offset = viewVertOffset;
+		fbink_state->screen_dpi       = deviceQuirks.screenDPI;
 		fbink_state->bpp              = vInfo.bits_per_pixel;
 		fbink_state->font_w           = FONTW;
 		fbink_state->font_h           = FONTH;
@@ -2208,10 +2222,10 @@ void
 		fbink_state->glyph_height     = glyphHeight;
 		fbink_state->max_cols         = MAXCOLS;
 		fbink_state->max_rows         = MAXROWS;
-		fbink_state->is_perfect_fit   = deviceQuirks.isPerfectFit;
 		fbink_state->user_hz          = USER_HZ;
 		fbink_state->pen_fg_color     = penFGColor;
 		fbink_state->pen_bg_color     = penBGColor;
+		fbink_state->is_perfect_fit   = deviceQuirks.isPerfectFit;
 	} else {
 		fprintf(stderr, "[FBInk] Err, it appears we were passed a NULL fbink_state pointer?\n");
 	}

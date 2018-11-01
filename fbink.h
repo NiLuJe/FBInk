@@ -145,6 +145,7 @@ typedef struct
 	uint8_t            view_hori_origin;    // viewHoriOrigin
 	uint8_t            view_vert_origin;    // viewVertOrigin
 	uint8_t            view_vert_offset;    // viewVertOffset
+	uint8_t            screen_dpi;          // deviceQuirks.screenDPI
 	uint32_t           bpp;                 // vInfo.bits_per_pixel
 	unsigned short int font_w;              // FONTW
 	unsigned short     font_h;              // FONTH
@@ -154,8 +155,8 @@ typedef struct
 	uint8_t            glyph_height;        // glyphHeight
 	unsigned short int max_cols;            // MAXCOLS
 	unsigned short int max_rows;            // MAXROWS
-	bool               is_perfect_fit;      // deviceQuirks.isPerfectFit
 	long int           user_hz;             // USER_HZ
+	bool               is_perfect_fit;      // deviceQuirks.isPerfectFit
 	uint8_t            pen_fg_color;        // penFGColor
 	uint8_t            pen_bg_color;        // penFGColor;
 } FBInkState;

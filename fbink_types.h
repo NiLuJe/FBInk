@@ -41,6 +41,7 @@ typedef struct
 	int8_t  koboVertOffset;
 	uint8_t koboBootRota;
 	bool    isCervantesNew;
+	uint8_t screenDPI;
 	bool    skipId;
 } FBInkDeviceQuirks;
 
