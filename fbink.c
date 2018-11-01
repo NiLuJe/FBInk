@@ -189,7 +189,7 @@ static void
 //       In particular, only CW has been actually confirmed to behave properly (to handle the isKobo16Landscape quirk),
 //       and region rotation is NOT handled properly/at all.
 //       TL;DR: This is for documentation purposes only, never build w/ MATHS defined ;).
-#	ifdef FBINK_WITH_MATHS
+#	ifdef FBINK_WITH_MATHS_ROTA
 	uint8_t rotation = FB_ROTATE_CW;
 	// i.e., θ (c.f., https://en.wikipedia.org/wiki/Cartesian_coordinate_system#Rotation)
 	double rangle = ((rotation * 90) * M_PI / 180.0);

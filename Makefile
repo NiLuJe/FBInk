@@ -176,8 +176,7 @@ ifdef STANDALONE
 endif
 # NOTE: Don't use in production, this was to help wrap my head around fb rotation experiments...
 ifdef MATHS
-	EXTRA_CPPFLAGS+=-DFBINK_WITH_MATHS
-	LIBS+=-lm
+	EXTRA_CPPFLAGS+=-DFBINK_WITH_MATHS_ROTA
 endif
 ifndef MINIMAL
 	LIBS+=-lm
