@@ -274,8 +274,7 @@ FBINK_API int fbink_printf(int fbfd, const FBInkConfig* fbink_config, const char
     __attribute__((format(printf, 3, 4)));
 
 // Print a string using an OpenType font. Note the caller MUST init with fbink_init_ot() FIRST.
-// This function uses margins (as whole number percentages) instead of rows/columns for
-// positioning and setting the printable area.
+// This function uses positive margins (in pixels) instead of rows/columns for positioning and setting the printable area.
 // Returns new top margin for use in subsequent calls, if the return value is positive.
 // 		A zero return value indicates there is no room left to print another row of text at the current
 // 		margins or font size.
@@ -289,6 +288,9 @@ FBINK_API int fbink_printf(int fbfd, const FBInkConfig* fbink_config, const char
 // fbCfg:		Optional pointer to a FBInkConfig struct. If set, the options
 //				is_inverted, is_flashing, is_cleared, is_centered, is_halfway, is_overlay, is_fgless, is_bgless,
 //				fg_color, bg_color, valign, halign will be honored.
+//				Pass a NULL pointer if unneeded.
+// NOTE: Alignment is relative to the printable area, as defined by the margins.
+//       As such, it only makes sense in the context of a single, specific print call.
 FBINK_API int fbink_print_ot(int fbfd, char* string, FBInkOTConfig* cfg, FBInkConfig* fbCfg);
 
 // A simple wrapper around the internal screen refresh handling, without requiring you to include einkfb/mxcfb headers
