@@ -2887,11 +2887,14 @@ int
 	// Please forgive the repetition here.
 
 	// Declaring these three variables early, so a default can be set
-	float sf           = 0.0;
+	float sf           = 0.0f;
 	int   max_baseline = 0;
 	int   max_lg       = 0;
 	int   max_desc     = 0;
-	float rgSF, itSF, bdSF, bditSF;
+	float rgSF         = 0.0f;
+	float itSF         = 0.0f;
+	float bdSF         = 0.0f;
+	float bditSF       = 0.0f;
 	int   asc, desc, lg;
 	int   scaled_bl, scaled_desc, scaled_lg;
 	if (otFonts.otRegular) {
@@ -3064,10 +3067,6 @@ int
 					continue;
 				} else {
 					switch (fmt_buff[c_index]) {
-						case CH_REGULAR:
-							curr_font = otFonts.otRegular;
-							sf        = rgSF;
-							break;
 						case CH_ITALIC:
 							curr_font = otFonts.otItalic;
 							sf        = itSF;
@@ -3079,6 +3078,11 @@ int
 						case CH_BOLD_ITALIC:
 							curr_font = otFonts.otBoldItalic;
 							sf        = bditSF;
+							break;
+						case CH_REGULAR:
+						default:
+							curr_font = otFonts.otRegular;
+							sf        = rgSF;
 							break;
 					}
 				}
