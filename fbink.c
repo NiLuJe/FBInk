@@ -3517,8 +3517,11 @@ int
 					if (lnPtr[k] != bgcolor) {
 						get_pixel(&paint_point, &color);
 						color.r ^= 0xFF;
-						color.b ^= 0xFF;
-						color.g ^= 0xFF;
+						// Don't clobber the other nibble on 4bpp fbs
+						if (vInfo.bits_per_pixel > 8U) {
+							color.b ^= 0xFF;
+							color.g ^= 0xFF;
+						}
 						put_pixel(&paint_point, &color);
 					}
 					paint_point.x++;
