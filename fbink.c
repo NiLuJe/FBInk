@@ -3174,8 +3174,11 @@ int
 			if (string[c_index + 1]) {
 				tmp_c_index = c_index;
 				uint32_t c2 = u8_nextchar(string, &tmp_c_index);
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wbad-function-cast"
 				curr_x += (int) lroundf(
 				    sf * (float) stbtt_GetCodepointKernAdvance(curr_font, (int) c, (int) c2));
+#	pragma GCC diagnostic pop
 			}
 		}
 		// We've run out of string! This is our last line.
@@ -3443,9 +3446,12 @@ int
 			if (ci < lines[line].endCharIndex) {
 				unsigned int tmp_i = ci;
 				tmp_c              = u8_nextchar(string, &tmp_i);
-				curr_point.x       = (unsigned short int) (curr_point.x +
-                                                                     lroundf(sf * (float) stbtt_GetCodepointKernAdvance(
-                                                                                      curr_font, (int) c, (int) tmp_c)));
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wbad-function-cast"
+				curr_point.x = (unsigned short int) (curr_point.x +
+								     lroundf(sf * (float) stbtt_GetCodepointKernAdvance(
+										      curr_font, (int) c, (int) tmp_c)));
+#	pragma GCC diagnostic pop
 			}
 			ins_point.y = (unsigned short int) max_baseline;
 		}
