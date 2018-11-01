@@ -2799,13 +2799,6 @@ int
     fbink_print_ot(int fbfd, char* string, FBInkOTConfig* cfg, FBInkConfig* fbCfg)
 {
 #ifdef FBINK_WITH_OPENTYPE
-	//Note, we do a lot of casting floats to ints, so silence those GCC warnings
-#	pragma GCC diagnostic push
-#	pragma GCC diagnostic ignored "-Wunknown-pragmas"
-#	pragma clang diagnostic ignored "-Wunknown-warning-option"
-#	pragma GCC diagnostic ignored "-Wfloat-conversion"
-#	pragma GCC diagnostic ignored "-Wconversion"
-
 	// Abort if we were passed an empty string
 	if (!*string) {
 		ELOG("[FBInk] Cannot print empty string");
@@ -2873,8 +2866,8 @@ int
 	} area    = { 0 };
 	area.tl.x = cfg->margins.left;
 	area.tl.y = cfg->margins.top;
-	area.br.x = viewWidth - cfg->margins.right;
-	area.br.y = viewHeight - cfg->margins.bottom;
+	area.br.x = (unsigned short int) (viewWidth - cfg->margins.right);
+	area.br.y = (unsigned short int) (viewHeight - cfg->margins.bottom);
 	// Set default font size if required
 	uint8_t size_pt = cfg->size_pt;
 	if (!size_pt) {
@@ -2904,9 +2897,9 @@ int
 	if (otFonts.otRegular) {
 		rgSF = stbtt_ScaleForPixelHeight(otFonts.otRegular, (float) font_size_px);
 		stbtt_GetFontVMetrics(otFonts.otRegular, &asc, &desc, &lg);
-		scaled_bl   = (int) (ceilf(rgSF * asc));
-		scaled_desc = (int) (ceilf(rgSF * desc));
-		scaled_lg   = (int) (ceilf(rgSF * lg));
+		scaled_bl   = (int) (ceilf(rgSF * (float) asc));
+		scaled_desc = (int) (ceilf(rgSF * (float) desc));
+		scaled_lg   = (int) (ceilf(rgSF * (float) lg));
 		if (scaled_bl > max_baseline) {
 			max_baseline = scaled_bl;
 		}
@@ -2926,9 +2919,9 @@ int
 	if (otFonts.otItalic) {
 		itSF = stbtt_ScaleForPixelHeight(otFonts.otItalic, (float) font_size_px);
 		stbtt_GetFontVMetrics(otFonts.otItalic, &asc, &desc, &lg);
-		scaled_bl   = (int) (ceilf(itSF * asc));
-		scaled_desc = (int) (ceilf(itSF * desc));
-		scaled_lg   = (int) (ceilf(itSF * lg));
+		scaled_bl   = (int) (ceilf(itSF * (float) asc));
+		scaled_desc = (int) (ceilf(itSF * (float) desc));
+		scaled_lg   = (int) (ceilf(itSF * (float) lg));
 		if (scaled_bl > max_baseline) {
 			max_baseline = scaled_bl;
 		}
@@ -2948,9 +2941,9 @@ int
 	if (otFonts.otBold) {
 		bdSF = stbtt_ScaleForPixelHeight(otFonts.otBold, (float) font_size_px);
 		stbtt_GetFontVMetrics(otFonts.otBold, &asc, &desc, &lg);
-		scaled_bl   = (int) (ceilf(bdSF * asc));
-		scaled_desc = (int) (ceilf(bdSF * desc));
-		scaled_lg   = (int) (ceilf(bdSF * lg));
+		scaled_bl   = (int) (ceilf(bdSF * (float) asc));
+		scaled_desc = (int) (ceilf(bdSF * (float) desc));
+		scaled_lg   = (int) (ceilf(bdSF * (float) lg));
 		if (scaled_bl > max_baseline) {
 			max_baseline = scaled_bl;
 		}
@@ -2970,9 +2963,9 @@ int
 	if (otFonts.otBoldItalic) {
 		bditSF = stbtt_ScaleForPixelHeight(otFonts.otBoldItalic, (float) font_size_px);
 		stbtt_GetFontVMetrics(otFonts.otBoldItalic, &asc, &desc, &lg);
-		scaled_bl   = (int) (ceilf(bditSF * asc));
-		scaled_desc = (int) (ceilf(bditSF * desc));
-		scaled_lg   = (int) (ceilf(bditSF * lg));
+		scaled_bl   = (int) (ceilf(bditSF * (float) asc));
+		scaled_desc = (int) (ceilf(bditSF * (float) desc));
+		scaled_lg   = (int) (ceilf(bditSF * (float) lg));
 		if (scaled_bl > max_baseline) {
 			max_baseline = scaled_bl;
 		}
@@ -3041,13 +3034,13 @@ int
 	// Lets find our lines! Nothing fancy, just a simple first fit algorithm, but we do
 	// our best not to break inside a word.
 
-	unsigned int   chars_in_str = u8_strlen(string);
-	unsigned int   c_index      = 0;
-	unsigned int   tmp_c_index  = c_index;
-	uint32_t       c;
-	unsigned short max_lw = area.br.x - area.tl.x;
-	unsigned int   line;
-	int            max_line_height = max_row_height - max_lg;
+	unsigned int       chars_in_str = u8_strlen(string);
+	unsigned int       c_index      = 0;
+	unsigned int       tmp_c_index  = c_index;
+	uint32_t           c;
+	unsigned short int max_lw = (unsigned short int) (area.br.x - area.tl.x);
+	unsigned int       line;
+	int                max_line_height = max_row_height - max_lg;
 	// adv = advance: the horizontal distance along the baseline to the origin of
 	//                the next glyph
 	// lsb = left side bearing: The horizontal distance from the origin point to
@@ -3140,7 +3133,6 @@ int
 			printf("Current Measured LW: %u  Line# %u\n", lw, line);
 			// Oops, we appear to have advanced too far :)
 			// Better backtrack to see if we can find a suitable break opportunity
-			//unsigned short ot_meas_padding = 3; // Just so we don't use a magic number
 			if (lw > max_lw) {
 				// Is the glyph itself too wide for our printable area? If so, we abort
 				if ((unsigned int) gw >= max_lw) {
@@ -3173,12 +3165,13 @@ int
 					break;
 				}
 			}
-			curr_x += (int) lroundf(sf * adv);
+			curr_x += (int) lroundf(sf * (float) adv);
 			// Adjust our x position for kerning, because we can :)
 			if (string[c_index + 1]) {
 				tmp_c_index = c_index;
 				uint32_t c2 = u8_nextchar(string, &tmp_c_index);
-				curr_x += (int) lroundf(sf * stbtt_GetCodepointKernAdvance(curr_font, (int) c, (int) c2));
+				curr_x += (int) lroundf(
+				    sf * (float) stbtt_GetCodepointKernAdvance(curr_font, (int) c, (int) c2));
 			}
 		}
 		// We've run out of string! This is our last line.
@@ -3272,16 +3265,16 @@ int
 		memset(line_buff, bgcolor, max_lw * (unsigned int) max_line_height * sizeof(*line_buff));
 	}
 	// FIXME: Make sure this doesn't do something stupid on inverted palettes...
-	uint8_t layer_diff = fgcolor - bgcolor;
+	uint8_t layer_diff = (uint8_t)(fgcolor - bgcolor);
 	// Setup the variables needed to render
 	FBInkCoordinates curr_point  = { 0, 0 };
 	FBInkCoordinates ins_point   = { 0, 0 };
 	FBInkCoordinates paint_point = { area.tl.x, area.tl.y };
 	// Set the vertical positioning now
 	if (is_halfway || valign == CENTER) {
-		paint_point.y += (print_height - curr_print_height) / 2;
+		paint_point.y = (unsigned short int) (paint_point.y + ((print_height - curr_print_height) / 2U));
 	} else if (valign == EDGE) {
-		paint_point.y += print_height - curr_print_height;
+		paint_point.y = (unsigned short int) (paint_point.y + print_height - curr_print_height);
 	}
 	// Setup our eink refresh region now. We will call refresh during cleanup.
 	struct mxcfb_rect region = { 0 };
@@ -3301,9 +3294,9 @@ int
 		clear_screen(fbfd, !is_inverted ? fgcolor : bgcolor, is_flashing);
 		fullscreen_region(&region);
 	}
-	uint32_t       tmp_c;
-	unsigned char *lnPtr, *glPtr = NULL;
-	unsigned short start_x;
+	uint32_t           tmp_c;
+	unsigned char *    lnPtr, *glPtr = NULL;
+	unsigned short int start_x;
 	// stb_truetype renders glyphs with color inverted to what our blitting functions expect
 	unsigned char invert = 0xFF;
 #	ifdef FBINK_FOR_KINDLE
@@ -3353,7 +3346,7 @@ int
 					}
 				}
 			}
-			curr_point.y = ins_point.y = (unsigned int) max_baseline;
+			curr_point.y = ins_point.y = (unsigned short int) max_baseline;
 			c                          = u8_nextchar(string, &ci);
 			stbtt_GetCodepointHMetrics(curr_font, (int) c, &adv, &lsb);
 			stbtt_GetCodepointBitmapBox(curr_font, (int) c, sf, sf, &x0, &y0, &x1, &y1);
@@ -3376,10 +3369,10 @@ int
 			// Make sure we don't have an underflow/wrap around
 			cx = (int) curr_point.x;
 			if (cx + x0 < 0) {
-				curr_point.x += (unsigned short) abs(cx + x0);
+				curr_point.x = (unsigned short int) (curr_point.x + abs(cx + x0));
 			}
-			ins_point.x = curr_point.x + (unsigned short) x0;
-			ins_point.y += y0;
+			ins_point.x = (unsigned short int) (curr_point.x + x0);
+			ins_point.y = (unsigned short int) (ins_point.y + y0);
 			//printf("gw: %d & gh: %d for c: U+%04X @ ins_point (%hu, %hu) & curr_point (%hu, %hu) / x0: %d y0: %d x1: %d y1: %d / lsb: %d\n", gw, gh, c, ins_point.x, ins_point.y, curr_point.x, curr_point.y, x0, y0, x1, y1, lsb);
 			// We only increase the lw if glyph not a space This hopefully prevent trailing
 			// spaces from being printed on a line.
@@ -3442,26 +3435,27 @@ int
 					}
 				}
 			}
-			curr_point.x += (unsigned short int) lroundf(sf * adv);
+			curr_point.x = (unsigned short int) (curr_point.x + lroundf(sf * (float) adv));
 			if (ci < lines[line].endCharIndex) {
 				unsigned int tmp_i = ci;
 				tmp_c              = u8_nextchar(string, &tmp_i);
-				curr_point.x += (unsigned short int) lroundf(
-				    sf * stbtt_GetCodepointKernAdvance(curr_font, (int) c, (int) tmp_c));
+				curr_point.x       = (unsigned short int) (curr_point.x +
+                                                                     lroundf(sf * (float) stbtt_GetCodepointKernAdvance(
+                                                                                      curr_font, (int) c, (int) tmp_c)));
 			}
-			ins_point.y = max_baseline;
+			ins_point.y = (unsigned short int) max_baseline;
 		}
 		curr_point.x = 0;
 		// Right, we've rendered a line to a bitmap, time to display it.
 
 		if (is_centered || halign == CENTER) {
-			paint_point.x += (max_lw - lw) / 2U;
+			paint_point.x = (unsigned short int) (paint_point.x + ((max_lw - lw) / 2U));
 			if (paint_point.x < region.left) {
 				region.left  = paint_point.x;
 				region.width = lw;
 			}
 		} else if (halign == EDGE) {
-			paint_point.x += max_lw - lw;
+			paint_point.x = (unsigned short int) (paint_point.x + (max_lw - lw));
 			if (paint_point.x < region.left) {
 				region.left  = paint_point.x;
 				region.width = lw;
@@ -3533,7 +3527,7 @@ int
 				paint_point.y++;
 			}
 		}
-		paint_point.y += (unsigned short int) lines[line].line_gap;
+		paint_point.y = (unsigned short int) (paint_point.y + lines[line].line_gap);
 		paint_point.x = area.tl.x;
 		if (paint_point.y + max_line_height > area.br.y) {
 			abort_line = true;
@@ -3575,7 +3569,6 @@ cleanup:
 		close(fbfd);
 	}
 	return rv;
-#	pragma GCC diagnostic pop
 #else
 	fprintf(stderr, "[FBInk] Opentype support is disabled in this FBInk build!\n");
 	return ERRCODE(ENOSYS);
