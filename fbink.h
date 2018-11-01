@@ -192,7 +192,6 @@ typedef struct
 
 typedef struct
 {
-	uint8_t size_pt;    // Size of text in points. If not set (0), defaults to 12pt
 	struct
 	{
 		unsigned short int top;       // Top margin in pixels
@@ -200,8 +199,9 @@ typedef struct
 		unsigned short int left;      // Left margin in pixels
 		unsigned short int right;     // Right margin in pixels
 	} margins;
-	bool is_centered;     // Horizontal centering
-	bool is_formatted;    // Is string "formatted"? Bold/Italic support only, markdown like syntax
+	uint8_t size_pt;         // Size of text in points. If not set (0), defaults to 12pt
+	bool    is_centered;     // Horizontal centering
+	bool    is_formatted;    // Is string "formatted"? Bold/Italic support only, markdown like syntax
 } FBInkOTConfig;
 
 // NOTE: Unless otherwise specified,

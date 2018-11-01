@@ -3058,8 +3058,8 @@ int
 		// Every line has a start character index and an end char index.
 		curr_x                     = 0;
 		lines[line].startCharIndex = c_index;
-		lines[line].line_used      = true;
 		lines[line].line_gap       = max_lg;
+		lines[line].line_used      = true;
 		while (c_index < chars_in_str) {
 			if (cfg->is_formatted) {
 				// Check if we need to skip formatting characters
