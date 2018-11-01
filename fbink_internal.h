@@ -263,17 +263,11 @@ const uint32_t* (*fxpFont32xGetBitmap)(uint32_t) = NULL;
 // Where we track device/screen-specific quirks
 FBInkDeviceQuirks deviceQuirks = { 0 };
 
+#ifdef FBINK_WITH_OPENTYPE
 // Information about the currently loaded OpenType font
 bool         otInit  = false;
 FBInkOTFonts otFonts = { NULL, NULL, NULL, NULL };
-typedef enum
-{
-	CH_IGNORE = 0U,
-	CH_REGULAR,
-	CH_ITALIC,
-	CH_BOLD,
-	CH_BOLD_ITALIC
-} CHARACTER_FONT;
+#endif
 
 #ifndef FBINK_FOR_KINDLE
 static void rotate_coordinates_pickel(FBInkCoordinates*);

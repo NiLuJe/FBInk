@@ -133,6 +133,7 @@ typedef union
 	} color;
 } FBInkPixelBGR;
 
+#ifdef FBINK_WITH_OPENTYPE
 // Stores the information necessary to render a line of text
 // using OpenType/TrueType fonts
 typedef struct FBInkOTLine
@@ -150,4 +151,15 @@ typedef struct FBInkOTFonts
 	stbtt_fontinfo* otBold;
 	stbtt_fontinfo* otBoldItalic;
 } FBInkOTFonts;
+
+typedef enum
+{
+	CH_IGNORE = 0U,
+	CH_REGULAR,
+	CH_ITALIC,
+	CH_BOLD,
+	CH_BOLD_ITALIC
+} CHARACTER_FONT_T;
+#endif    // FBINK_WITH_OPENTYPE
+
 #endif
