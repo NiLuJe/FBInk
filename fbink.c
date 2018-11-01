@@ -3292,10 +3292,7 @@ int
 	// Do we need to clear the screen?
 	if (is_cleared) {
 		clear_screen(fbfd, !is_inverted ? fgcolor : bgcolor, is_flashing);
-		region.top    = 0;
-		region.left   = 0;
-		region.width  = viewWidth;
-		region.height = viewHeight;
+		fullscreen_region(&region);
 	}
 	uint32_t       tmp_c;
 	unsigned char *lnPtr, *glPtr = NULL;
