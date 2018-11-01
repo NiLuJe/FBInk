@@ -3220,14 +3220,12 @@ int
 	printf("Actual print height is %u\n", curr_print_height);
 
 	// Let's get some rendering options from FBInkConfig
-	uint8_t valign = NONE, halign = NONE, fgcolor = FG_BLACK * 16U, bgcolor = BG_WHITE * 16U;
+	uint8_t valign = NONE, halign = NONE, fgcolor = penFGColor, bgcolor = penBGColor;
 	bool    is_inverted = false, is_overlay = false, is_bgless = false, is_fgless = false, is_flashing = false,
 	     is_cleared = false, is_centered = false, is_halfway = false;
 	if (fbCfg) {
 		valign      = fbCfg->valign;
 		halign      = fbCfg->halign;
-		fgcolor     = fbCfg->fg_color * 16U;
-		bgcolor     = fbCfg->bg_color * 16U;
 		is_inverted = fbCfg->is_inverted;
 		is_overlay  = fbCfg->is_overlay;
 		is_bgless   = fbCfg->is_bgless;
@@ -3239,11 +3237,18 @@ int
 	} else {
 		is_centered = cfg->is_centered;
 	}
+
+	// Account for the fact that stbtt renders inverted bitmaps...
 	fgcolor ^= 0xFF;
+	bgcolor ^= 0xFF;
 	// Is the foreground color lighter than background? If so, we make things easier
 	// for ourselves by inverting the colors, and toggling the is_invert flag to reverse
 	// it back later.
+#	ifdef FBINK_FOR_KINDLE
+	if ((deviceQuirks.isKindleLegacy && fgcolor > bgcolor) || (!deviceQuirks.isKindleLegacy && fgcolor < bgcolor)) {
+#	else
 	if (fgcolor < bgcolor) {
+#	endif
 		fgcolor ^= 0xFF;
 		bgcolor ^= 0xFF;
 		is_inverted = !is_inverted;
@@ -3298,8 +3303,15 @@ int
 	unsigned char *lnPtr, *glPtr = NULL;
 	unsigned short start_x;
 	// stb_truetype renders glyphs with color inverted to what our blitting functions expect
-	unsigned char invert     = is_inverted ? 0x00 : 0xFF;
-	bool          abort_line = false;
+	unsigned char invert = 0xFF;
+#	ifdef FBINK_FOR_KINDLE
+	if ((deviceQuirks.isKindleLegacy && is_inverted) || (!deviceQuirks.isKindleLegacy && is_inverted)) {
+#	else
+	if (is_inverted) {
+#	endif
+		invert = 0x00;
+	}
+	bool abort_line = false;
 	// Render!
 	for (line = 0; line < num_lines; line++) {
 		if (!lines[line].line_used) {
