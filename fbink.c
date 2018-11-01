@@ -3054,11 +3054,10 @@ int
 	int          adv, lsb, curr_x;
 	bool         complete_str = false;
 	int          x0, y0, x1, y1, gw, gh, cx;
-	unsigned int lw;
+	unsigned int lw = 0U;
 	for (line = 0; line < num_lines; line++) {
 		// Every line has a start character index and an end char index.
 		curr_x                     = 0;
-		lw                         = 0;
 		lines[line].startCharIndex = c_index;
 		lines[line].line_used      = true;
 		lines[line].line_gap       = max_lg;
