@@ -1941,7 +1941,7 @@ static int
 	ELOG("[FBInk] Line length: %hu cols, Page size: %hu rows", MAXCOLS, MAXROWS);
 
 	// Mention & remember if we can perfectly fit the final column on screen
-	if ((FONTW * MAXCOLS) == viewWidth) {
+	if ((uint32_t)(FONTW * MAXCOLS) == viewWidth) {
 		deviceQuirks.isPerfectFit = true;
 		ELOG("[FBInk] Horizontal fit is perfect!");
 	} else {
@@ -1950,7 +1950,7 @@ static int
 
 	// In a similar fashion, add a vertical offset to make sure rows are vertically "centered",
 	// in case we can't perfectly fit the final row.
-	if ((FONTH * MAXROWS) == viewHeight) {
+	if ((uint32_t)(FONTH * MAXROWS) == viewHeight) {
 		viewVertOffset = 0U;
 	} else {
 		// NOTE: That should also fall under no_viewport's purview
