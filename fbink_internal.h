@@ -289,8 +289,8 @@ static void get_pixel_RGB32(FBInkCoordinates*, FBInkColor*);
 static void get_pixel_RGB565(FBInkCoordinates*, FBInkColor*);
 static void get_pixel(FBInkCoordinates*, FBInkColor*);
 
-#ifdef FBINK_WITH_IMAGE
-// This is only needed for alpha blending in the image codepath ;).
+#if defined(FBINK_WITH_IMAGE) || defined(FBINK_WITH_OPENTYPE)
+// This is only needed for alpha blending in the image or OpenType codepath ;).
 // c.f., https://github.com/videolan/vlc/blob/6b96ade7dd97acb49303a0a9da9b3d2056b808e0/modules/video_filter/blend.cpp#L49
 //     & https://github.com/koreader/koreader-base/blob/b3e72affd0e1ba819d92194b229468452c58836f/blitbuffer.c#L59
 #	define DIV255(v) (((v >> 8U) + v + 0x01) >> 8U)

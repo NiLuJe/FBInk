@@ -3410,9 +3410,8 @@ int
 				// paint our glyph into the line buffer
 				lnPtr = line_buff + ins_point.x + (max_lw * ins_point.y);
 				glPtr = glyph_buff;
-				// Note, two options here, because we REALLY want to avoid floating point
-				// math where at all possible.
-				if (layer_diff == 255U) {
+				// Note, two options here, because we REALLY want to avoid per-pixel math where at all possible.
+				if (layer_diff == 0xFF) {
 					for (int j = 0; j < gh; j++) {
 						for (int k = 0; k < gw; k++) {
 							// 0 value pixels are transparent
@@ -3428,12 +3427,11 @@ int
 					for (int j = 0; j < gh; j++) {
 						for (int k = 0; k < gw; k++) {
 							// 0 value pixels are transparent
-							if (glPtr[k] == 255U) {
+							if (glPtr[k] == 0xFF) {
 								lnPtr[k] = fgcolor;
 							} else if (glPtr[k] > 0) {
-								lnPtr[k] =
-								    (unsigned char) (bgcolor +
-										     ((glPtr[k] / 255.0f) * layer_diff));
+								lnPtr[k] = (unsigned char) (bgcolor + (DIV255(glPtr[k]) *
+												       layer_diff));
 							}
 						}
 						// And advance one scanline. Quick! Hide! Pointer arithmetic
