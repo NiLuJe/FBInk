@@ -2131,7 +2131,7 @@ int
 			otFonts.otBoldItalic = font_info;
 			break;
 	}
-	ELOG("[FBInk] Font %s loaded", filename);
+	ELOG("[FBInk] Font '%s' loaded", filename);
 	return EXIT_SUCCESS;
 #else
 	fprintf(stderr, "[FBInk] OpenType support is disabled in this FBInk build!\n");
