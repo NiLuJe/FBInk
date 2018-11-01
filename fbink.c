@@ -3272,7 +3272,8 @@ int
 	if (bgcolor > 0U) {
 		memset(line_buff, bgcolor, max_lw * (unsigned int) max_line_height * sizeof(*line_buff));
 	}
-	unsigned int layer_diff = (unsigned int) fgcolor - (unsigned int) bgcolor;
+	// FIXME: Make sure this doesn't do something stupid on inverted palettes...
+	uint8_t layer_diff = fgcolor - bgcolor;
 	// Setup the variables needed to render
 	FBInkCoordinates curr_point  = { 0, 0 };
 	FBInkCoordinates ins_point   = { 0, 0 };
@@ -3408,7 +3409,7 @@ int
 				// For example, if we were rendering directly to a screen of 1080 x 1440m out_stride
 				// should be set to 1080. In this case however, we want to render to a 'box' of the
 				// dimensions of the glyph, so we set 'out_stride' to the glyph width.
-				stbtt_MakeCodepointBitmap(curr_font, glyph_buff, gw, gh, gw, sf, sf, c);
+				stbtt_MakeCodepointBitmap(curr_font, glyph_buff, gw, gh, gw, sf, sf, (int) c);
 				// paint our glyph into the line buffer
 				lnPtr = line_buff + ins_point.x + (max_lw * ins_point.y);
 				glPtr = glyph_buff;
@@ -3446,8 +3447,8 @@ int
 			if (ci < lines[line].endCharIndex) {
 				unsigned int tmp_i = ci;
 				tmp_c              = u8_nextchar(string, &tmp_i);
-				curr_point.x +=
-				    (unsigned short int) lroundf(sf * stbtt_GetCodepointKernAdvance(curr_font, c, tmp_c));
+				curr_point.x += (unsigned short int) lroundf(
+				    sf * stbtt_GetCodepointKernAdvance(curr_font, (int) c, (int) tmp_c));
 			}
 			ins_point.y = max_baseline;
 		}
