@@ -253,11 +253,15 @@ static void
 		switch (config.pcb_id) {
 			case 22:    // BQ Cervantes Touch - Fnac Touch (2012-2013)
 			case 23:    // BQ Cervantes TouchLight - Fnac Touch Plus (2012-2013)
+				device_quirks->screenDPI = 167U;
+				break;
 			case 33:    // BQ Cervantes 2013 - Fnac Touch Light (2013)
+				device_quirks->screenDPI = 212U;
 				break;
 			case 51:    // BQ Cervantes 3 - Fnac Touch Light 2 (2016)
 			case 68:    // BQ Cervantes 4
 				device_quirks->isCervantesNew = true;
+				device_quirks->screenDPI      = 300U;
 				break;
 			default:
 				fprintf(stderr, "[FBInk] Unidentified Cervantes device (%hhu)!\n", config.pcb_id);
