@@ -3270,6 +3270,7 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
+	// If we have a non-zero background color, enforce it, otherwise we'll have a white bg (because 0 means white here).
 	if (bgcolor > 0U) {
 		memset(line_buff, bgcolor, max_lw * (unsigned int) max_line_height * sizeof(*line_buff));
 	}
@@ -3544,7 +3545,8 @@ int
 		LOG("Printed Line!");
 		// And clear our line buffer for next use. The glyph buffer shouldn't
 		// need clearing, as stbtt_MakeCodepointBitmap() should overwrite it.
-		memset(line_buff, 0, (max_lw * (unsigned int) max_line_height * sizeof(*line_buff)));
+		// NOTE: And we want to honor our background color, too ;).
+		memset(line_buff, bgcolor, (max_lw * (unsigned int) max_line_height * sizeof(*line_buff)));
 	}
 	if (paint_point.y + max_line_height > area.br.y) {
 		rv = 0;    // Inform the caller there is no room left to print another row.
