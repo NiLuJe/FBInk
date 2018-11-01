@@ -62,9 +62,6 @@
 #endif
 
 #ifdef FBINK_WITH_OPENTYPE
-#	include <sys/stat.h>
-// stb_truetype needs maths, and so do we to round to the nearest pixel
-#	include <math.h>
 #	define STB_TRUETYPE_IMPLEMENTATION
 // Make it private, we don't need it anywhere else
 #	define STBTT_STATIC
@@ -82,7 +79,6 @@
 #	pragma GCC diagnostic ignored "-Wbad-function-cast"
 #	include "stb/stb_truetype.h"
 #	pragma GCC diagnostic pop
-#	include "libunibreak/src/linebreak.h"
 #endif
 
 // Return the library version as devised at library compile-time

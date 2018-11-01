@@ -84,6 +84,15 @@
 //           https://unicodebook.readthedocs.io/
 #include "utf8/utf8.h"
 
+// We're going to need a few more things for OpenType support, namely, maths ;).
+#ifdef FBINK_WITH_OPENTYPE
+#	include <sys/stat.h>
+// stb_truetype needs maths, and so do we to round to the nearest pixel
+#	include <math.h>
+// And we need libunibreak for word breaking
+#	include "libunibreak/src/linebreak.h"
+#endif
+
 // NOTE: We always neeed one of those, because we rely on mxcfb_rect in a number of places
 #if defined(FBINK_FOR_KINDLE)
 #	include "eink/mxcfb-kindle.h"
