@@ -281,39 +281,61 @@ static void
 	switch (kobo_id) {
 		case 310:    // Touch A/B (trilogy)
 		case 320:    // Touch C (trilogy)
-		case 340:    // Mini (pixie)
-		case 330:    // Glo (kraken)
 			device_quirks->isKoboNonMT = true;
 			break;
+		case 340:    // Mini (pixie)
+			device_quirks->isKoboNonMT = true;
+			device_quirks->screenDPI   = 200U;
+			break;
+		case 330:    // Glo (kraken)
+			device_quirks->isKoboNonMT = true;
+			device_quirks->screenDPI   = 212U;
+			break;
 		case 371:    // Glo HD (alyssum)
+			device_quirks->screenDPI = 300U;
+			break;
 		case 372:    // Touch 2.0 (pika)
 			break;
 		case 360:    // Aura (phoenix)
 			// NOTE: The bottom 10 pixels *may* be blacked out by Nickel? (TBC!)
 			//device_quirks->koboVertOffset = -10;
+			device_quirks->screenDPI = 212U;
 			break;
 		case 350:    // Aura HD (dragon)
 			device_quirks->isKoboNonMT = true;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
 			device_quirks->koboBootRota = FB_ROTATE_UR;
+			device_quirks->screenDPI    = 265U;
 			break;
 		case 370:    // Aura H2O (dahlia)
 			// NOTE: The top 11 pixels are blacked out by Nickel (behind the bezel)
 			device_quirks->koboVertOffset = 11;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
 			device_quirks->koboBootRota = FB_ROTATE_UR;
+			device_quirks->screenDPI    = 265U;
 			break;
 		case 374:    // Aura H2O² (snow)
+			device_quirks->screenDPI = 265U;
 			break;
 		case 378:    // Aura H2O² r2 (snow)
 			device_quirks->isKoboMk7 = true;
+			device_quirks->screenDPI = 265U;
 			break;
 		case 373:    // Aura ONE (daylight)
 		case 381:    // Aura ONE LE (daylight)
+			device_quirks->screenDPI = 300U;
+			break;
 		case 375:    // Aura SE (star)
+			device_quirks->screenDPI = 212U;
 			break;
 		case 379:    // Aura SE r2 (star)
+			device_quirks->isKoboMk7 = true;
+			device_quirks->screenDPI = 212U;
+			break;
 		case 376:    // Clara HD (nova)
+			device_quirks->isKoboMk7 = true;
+			device_quirks->screenDPI = 300U;
+			break;
 		case 377:    // Forma (frost)
 		case 380:    // Forma (frost)
 			device_quirks->isKoboMk7 = true;

@@ -1610,16 +1610,16 @@ static int
 		}
 
 		// Much like KOReader, assume a baseline DPI for devices where we don't specify a value in device_id
-		if (deviceQuirks.screenDPI == 0) {
+		if (deviceQuirks.screenDPI == 0U) {
 #ifdef FBINK_FOR_LINUX
 			// Assume non-HiDPI screens on pure Linux
-			deviceQuirks.screenDPI = 96;
+			deviceQuirks.screenDPI = 96U;
 #else
 			// Should roughly apply to a vast majority of early Pearl screens
-			deviceQuirks.screenDPI = 160;
+			deviceQuirks.screenDPI = 160U;
 #endif
 		}
-		ELOG("[FBInk] Screen density set to %hhu dpi", deviceQuirks.screenDPI);
+		ELOG("[FBInk] Screen density set to %hu dpi", deviceQuirks.screenDPI);
 
 		// And make sure we won't do that again ;).
 		deviceQuirks.skipId = true;
@@ -2175,7 +2175,7 @@ void
 {
 	fprintf(
 	    stdout,
-	    "viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hhu;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu",
+	    "viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu",
 	    viewWidth,
 	    viewHeight,
 	    screenWidth,
@@ -2884,7 +2884,7 @@ int
 		size_pt = 12;
 	}
 	// We should have a fairly accurate idea of what the screen DPI is...
-	unsigned int ppi = deviceQuirks.screenDPI;
+	unsigned short int ppi = deviceQuirks.screenDPI;
 	// Given the ppi, convert point height to pixels. Note, 1pt is 1/72th of an inch
 	unsigned int font_size_px = (unsigned int) (ppi / 72.0f * size_pt);
 

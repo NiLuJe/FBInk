@@ -145,10 +145,10 @@ typedef struct
 	uint8_t            view_hori_origin;    // viewHoriOrigin
 	uint8_t            view_vert_origin;    // viewVertOrigin
 	uint8_t            view_vert_offset;    // viewVertOffset
-	uint8_t            screen_dpi;          // deviceQuirks.screenDPI
+	unsigned short int screen_dpi;          // deviceQuirks.screenDPI
 	uint32_t           bpp;                 // vInfo.bits_per_pixel
 	unsigned short int font_w;              // FONTW
-	unsigned short     font_h;              // FONTH
+	unsigned short int font_h;              // FONTH
 	uint8_t            fontsize_mult;       // FONTSIZE_MULT
 	const char*        font_name;           // fbink_config->fontname
 	uint8_t            glyph_width;         // glyphWidth
