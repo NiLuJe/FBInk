@@ -2860,7 +2860,7 @@ int
 		FBInkCoordinates br;
 	} area    = { 0 };
 	area.tl.x = cfg->margins.left;
-	area.tl.y = cfg->margins.top;
+	area.tl.y = (unsigned short int) (cfg->margins.top + (viewVertOrigin - viewVertOffset));
 	area.br.x = (unsigned short int) (viewWidth - cfg->margins.right);
 	area.br.y = (unsigned short int) (viewHeight - cfg->margins.bottom);
 	// Set default font size if required
@@ -2998,7 +2998,7 @@ int
 
 	// Calculate the maximum number of lines we may have to deal with
 	unsigned int print_height, num_lines;
-	print_height = (unsigned int) (area.br.y - area.tl.y);
+	print_height = (unsigned int) (area.br.y - area.tl.y + (viewVertOrigin - viewVertOffset));
 	num_lines    = print_height / (unsigned int) max_row_height;
 
 	// And allocate the memory for it...
