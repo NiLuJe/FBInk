@@ -2833,6 +2833,9 @@ int
 	unsigned char* fmt_buff   = NULL;
 	unsigned char* line_buff  = NULL;
 	unsigned char* glyph_buff = NULL;
+	// This also needs to be declared early, as we refresh on cleanup.
+	struct mxcfb_rect region      = { 0 };
+	bool              is_flashing = false;
 
 	// map fb to user mem
 	// NOTE: If we're keeping the fb's fd open, keep this mmap around, too.
@@ -3221,9 +3224,17 @@ int
 	printf("Actual print height is %u\n", curr_print_height);
 
 	// Let's get some rendering options from FBInkConfig
-	uint8_t valign = NONE, halign = NONE, fgcolor = penFGColor, bgcolor = penBGColor;
-	bool    is_inverted = false, is_overlay = false, is_bgless = false, is_fgless = false, is_flashing = false,
-	     is_cleared = false, is_centered = false, is_halfway = false;
+	uint8_t valign      = NONE;
+	uint8_t halign      = NONE;
+	uint8_t fgcolor     = penFGColor;
+	uint8_t bgcolor     = penBGColor;
+	bool    is_inverted = false;
+	bool    is_overlay  = false;
+	bool    is_bgless   = false;
+	bool    is_fgless   = false;
+	bool    is_cleared  = false;
+	bool    is_centered = false;
+	bool    is_halfway  = false;
 	if (fbCfg) {
 		valign      = fbCfg->valign;
 		halign      = fbCfg->halign;
@@ -3284,7 +3295,6 @@ int
 		paint_point.y = (unsigned short int) (paint_point.y + print_height - curr_print_height);
 	}
 	// Setup our eink refresh region now. We will call refresh during cleanup.
-	struct mxcfb_rect region = { 0 };
 	if (is_centered || halign == CENTER) {
 		region.left = area.tl.x + ((uint32_t)(area.br.x - area.tl.x) / 2U);
 		//printf("Region LEFT = %u + ((%u - %u) / 2) = %u\n", area.tl.x, area.br.x, area.tl.x, (area.tl.x + ((area.br.x - area.tl.x) / 2U)));
