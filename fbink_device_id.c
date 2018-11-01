@@ -56,6 +56,7 @@ static bool
 		case 0x1F:
 		case 0x20:
 			device_quirks->isKindlePearlScreen = true;
+			device_quirks->screenDPI           = 212U;
 			return true;
 		case 0xD4:    // PW2
 		case 0x5A:
@@ -71,15 +72,23 @@ static bool
 		case 0x62:
 		case 0x61:
 		case 0x5F:
+			device_quirks->screenDPI = 212U;
+			return true;
 		case 0xC6:    // KT2
+			return true;
 		case 0x13:    // KV
+			device_quirks->screenDPI = 300U;
+			return true;
 		case 0x16:    // ??
 		case 0x21:
+			return true;
 		case 0x54:    // KV
 		case 0x2A:
 		case 0x4F:
 		case 0x52:
 		case 0x53:
+			device_quirks->screenDPI = 300U;
+			return true;
 		case 0x07:    // ??
 		case 0x0B:
 		case 0x0C:
@@ -110,12 +119,16 @@ static bool
 		case 0x270:
 		case 0x293:
 		case 0x294:
+			device_quirks->screenDPI = 300U;
+			return true;
 		case 0x20C:    // KOA
 		case 0x20D:
 		case 0x219:
 		case 0x21A:
 		case 0x21B:
 		case 0x21C:
+			device_quirks->screenDPI = 300U;
+			return true;
 		case 0x1BC:    // KT3
 		case 0x269:
 		case 0x26A:
@@ -136,6 +149,7 @@ static bool
 		case 0x347:
 		case 0x34A:
 			device_quirks->isKindleOasis2 = true;
+			device_quirks->screenDPI      = 300U;
 			return true;
 		default:
 			return false;

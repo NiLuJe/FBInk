@@ -1616,7 +1616,7 @@ static int
 			deviceQuirks.screenDPI = 96U;
 #else
 			// Should roughly apply to a vast majority of early Pearl screens
-			deviceQuirks.screenDPI = 160U;
+			deviceQuirks.screenDPI = 167U;
 #endif
 		}
 		ELOG("[FBInk] Screen density set to %hu dpi", deviceQuirks.screenDPI);
