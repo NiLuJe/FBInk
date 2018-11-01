@@ -183,10 +183,12 @@ ifndef MINIMAL
 endif
 ##
 # Now that we're done fiddling with flags, let's build stuff!
+LIB_SRCS=fbink.c utf8/utf8.c
+# Jump through a few hoops to set a few libunibreak-specific CFLAGS to silence some warnings...
 ifdef MINIMAL
-	LIB_SRCS=fbink.c utf8/utf8.c
+	LIB_UB_SRCS=
 else
-	LIB_SRCS=fbink.c utf8/utf8.c libunibreak/src/linebreak.c libunibreak/src/linebreakdata.c libunibreak/src/unibreakdef.c libunibreak/src/linebreakdef.c
+	LIB_UB_SRCS=libunibreak/src/linebreak.c libunibreak/src/linebreakdata.c libunibreak/src/unibreakdef.c libunibreak/src/linebreakdef.c
 endif
 CMD_SRCS=fbink_cmd.c
 BTN_SRCS=button_scan_cmd.c
@@ -224,17 +226,24 @@ FBINK_STATIC_NAME:=libfbink.a
 default: all
 
 SHAREDLIB_OBJS:=$(LIB_SRCS:%.c=$(OUT_DIR)/shared/%.o)
+UB_SHAREDLIB_OBJS:=$(LIB_UB_SRCS:%.c=$(OUT_DIR)/shared/%.o)
 STATICLIB_OBJS:=$(LIB_SRCS:%.c=$(OUT_DIR)/static/%.o)
+UB_STATICLIB_OBJS:=$(LIB_UB_SRCS:%.c=$(OUT_DIR)/static/%.o)
 CMD_OBJS:=$(CMD_SRCS:%.c=$(OUT_DIR)/%.o)
 BTN_OBJS:=$(BTN_SRCS:%.c=$(OUT_DIR)/%.o)
 
+# Silence a few warnings, only when specifically compiling libunibreak...
+$(UB_SHAREDLIB_OBJS): QUIET_CFLAGS := -Wno-conversion -Wno-sign-conversion
+
+$(UB_STATICLIB_OBJS): QUIET_CFLAGS := -Wno-conversion -Wno-sign-conversion
+
 # Shared lib
 $(OUT_DIR)/shared/%.o: %.c
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) -o $@ -c $<
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(QUIET_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) -o $@ -c $<
 
 # Static lib
 $(OUT_DIR)/static/%.o: %.c
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) -o $@ -c $<
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(QUIET_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) -o $@ -c $<
 
 # CLI front-end
 $(OUT_DIR)/%.o: %.c
@@ -245,12 +254,12 @@ outdir:
 
 all: outdir static
 
-staticlib: outdir $(STATICLIB_OBJS)
-	$(AR) $(FBINK_STATIC_FLAGS) $(OUT_DIR)/$(FBINK_STATIC_NAME) $(STATICLIB_OBJS)
+staticlib: outdir $(STATICLIB_OBJS) $(UB_STATICLIB_OBJS)
+	$(AR) $(FBINK_STATIC_FLAGS) $(OUT_DIR)/$(FBINK_STATIC_NAME) $(STATICLIB_OBJS) $(UB_STATICLIB_OBJS)
 	$(RANLIB) $(OUT_DIR)/$(FBINK_STATIC_NAME)
 
-sharedlib: outdir $(SHAREDLIB_OBJS)
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(SHAREDLIB_OBJS)
+sharedlib: outdir $(SHAREDLIB_OBJS) $(UB_SHAREDLIB_OBJS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(SHAREDLIB_OBJS) $(UB_SHAREDLIB_OBJS)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME_VER)
 

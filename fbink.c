@@ -2801,6 +2801,8 @@ int
 #ifdef FBINK_WITH_OPENTYPE
 	//Note, we do a lot of casting floats to ints, so silence those GCC warnings
 #	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#	pragma clang diagnostic ignored "-Wunknown-warning-option"
 #	pragma GCC diagnostic ignored "-Wfloat-conversion"
 #	pragma GCC diagnostic ignored "-Wconversion"
 #	pragma GCC diagnostic ignored "-Wbad-function-cast"
