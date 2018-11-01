@@ -2805,7 +2805,6 @@ int
 #	pragma clang diagnostic ignored "-Wunknown-warning-option"
 #	pragma GCC diagnostic ignored "-Wfloat-conversion"
 #	pragma GCC diagnostic ignored "-Wconversion"
-#	pragma GCC diagnostic ignored "-Wbad-function-cast"
 
 	// Abort if we were passed an empty string
 	if (!*string) {
