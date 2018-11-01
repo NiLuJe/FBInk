@@ -178,9 +178,11 @@ endif
 ifdef MATHS
 	EXTRA_CPPFLAGS+=-DFBINK_WITH_MATHS_ROTA
 endif
+# NOTE: Despite attempts at using mostly GCC builtins, OpenType support needs lm
 ifndef MINIMAL
 	LIBS+=-lm
 endif
+
 ##
 # Now that we're done fiddling with flags, let's build stuff!
 LIB_SRCS=fbink.c utf8/utf8.c

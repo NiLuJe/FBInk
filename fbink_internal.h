@@ -49,6 +49,33 @@
 #	endif
 #endif
 
+// Try to use GCC's lceilf builtin if possible...
+// NOTE: Relies on the fact that:
+//       * Clang implements the __has_builtin macro, but currently not the __builtin_lceilf function
+//       * GCC implements the __builtin_lceilf function, but not the __has_builtin macro
+//       Will horribly blow up on GCC versions that do NOT implement __builtin_lceilf
+// c.f., https://stackoverflow.com/q/4322352/
+#ifdef FBINK_WITH_OPENTYPE
+#	ifdef __clang__
+#		if __has_builtin(__builtin_lceilf)
+#			define ceilf(x) __builtin_lceilf(x)
+#		endif
+// STBTT will include math.h on its own ;).
+#	else
+#		define ceilf(x) __builtin_lceilf(x)
+#		define lroundf(x) __builtin_lroundf(x)
+#		define floorf(x) __builtin_floorf(x)
+#		define STBTT_ifloor(x) ((int) __builtin_lfloorf(x))
+#		define STBTT_iceil(x) ((int) __builtin_lceilf(x))
+#		define STBTT_sqrt(x) __builtin_sqrtf(x)
+#		define STBTT_pow(x, y) __builtin_powf(x, y)
+#		define STBTT_fmod(x, y) __builtin_fmodf(x, y)
+#		define STBTT_cos(x) __builtin_cos(x)
+#		define STBTT_acos(x) __builtin_acosf(x)
+#		define STBTT_fabs(x) __builtin_fabsf(x)
+#	endif
+#endif
+
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/fb.h>
@@ -87,23 +114,8 @@
 // We're going to need a few more things for OpenType support, namely, maths ;).
 #ifdef FBINK_WITH_OPENTYPE
 #	include <sys/stat.h>
-// stb_truetype needs maths, and so do we to round to the nearest pixel
-#	include <math.h>
 // And we need libunibreak for word breaking
 #	include "libunibreak/src/linebreak.h"
-// Try to use GCC's lceilf builtin if possible...
-// NOTE: Relies on the fact that:
-//       * Clang implements the __has_builtin macro, but currently not the __builtin_lceilf function
-//       * GCC implements the __builtin_lceilf function, but not the __has_builtin macro
-//       Will horribly blow up on GCC versions that do NOT implement __builtin_lceilf
-// c.f., https://stackoverflow.com/q/4322352/
-#	ifdef __clang__
-#		if __has_builtin(__builtin_lceilf)
-#			define ceilf(x) __builtin_lceilf(x)
-#		endif
-#	else
-#		define ceilf(x) __builtin_lceilf(x)
-#	endif
 #endif
 
 // NOTE: We always neeed one of those, because we rely on mxcfb_rect in a number of places
