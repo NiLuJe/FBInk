@@ -2057,7 +2057,7 @@ int
 }
 // Load font from given file path. Up to four font styles may be used by FBInk at any given time.
 int
-    fbink_add_ot_font(const char* filename, FONT_STYLE_T style)
+    fbink_add_ot_font(const char* filename UNUSED_BY_MINIMAL, FONT_STYLE_T style UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_OPENTYPE
 	otInit = true;
@@ -2128,6 +2128,7 @@ int
 #endif    // FBINK_WITH_OPENTYPE
 }
 
+#ifdef FBINK_WITH_OPENTYPE
 // Free an individual OpenType font structure
 static void*
     free_ot_font(stbtt_fontinfo* font_info)
@@ -2138,6 +2139,7 @@ static void*
 	}
 	return NULL;
 }
+#endif    // FBINK_WITH_OPENTYPE
 
 // Free all OpenType fonts
 int
@@ -2723,6 +2725,7 @@ int
 	return rv;
 }
 
+#ifdef FBINK_WITH_OPENTYPE
 // An extremely rudimentry "markdown" parser. It would probably be wise to cook up something better
 // at some point...
 // This is *italic* text.
@@ -2781,9 +2784,13 @@ static void
 		}
 	}
 }
+#endif    // FBINK_WITH_OPENTYPE
 
 int
-    fbink_print_ot(int fbfd, char* string, FBInkOTConfig* cfg, FBInkConfig* fbCfg)
+    fbink_print_ot(int fbfd UNUSED_BY_MINIMAL,
+		   char* string   UNUSED_BY_MINIMAL,
+		   FBInkOTConfig* cfg UNUSED_BY_MINIMAL,
+		   FBInkConfig* fbCfg UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_OPENTYPE
 	// Abort if we were passed an empty string
