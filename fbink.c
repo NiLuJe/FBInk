@@ -2068,12 +2068,12 @@ int
 }
 // Load font from given file path. Up to four font variants may be used by FBInk at any given time.
 int
-    fbink_add_ot_font(const char* fp, FONT_VARIANT_T variant)
+    fbink_add_ot_font(const char* filename, FONT_VARIANT_T variant)
 {
 #ifdef FBINK_WITH_OPENTYPE
 	otInit = true;
 	// Open font from given path, and load into buffer
-	FILE*          f    = fopen(fp, "rb");
+	FILE*          f    = fopen(filename, "rb");
 	unsigned char* data = NULL;
 	if (f) {
 		int         fd = fileno(f);
@@ -2103,7 +2103,7 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 	if (!stbtt_InitFont(font_info, data, 0)) {
-		ELOG("[FBInk] Error initialising font %s", fp);
+		ELOG("[FBInk] Error initialising font %s", filename);
 		return ERRCODE(EXIT_FAILURE);
 	}
 	// Assign the current font to it's appropriate otFonts struct member, depending
@@ -2127,7 +2127,7 @@ int
 			otFonts.otBoldItalic = font_info;
 			break;
 	}
-	ELOG("[FBInk] Font %s loaded", fp);
+	ELOG("[FBInk] Font %s loaded", filename);
 	return EXIT_SUCCESS;
 #else
 	fprintf(stderr, "[FBInk] Opentype support is disabled in this FBInk build!\n");
