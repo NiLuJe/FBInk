@@ -458,6 +458,9 @@ int
 		LOG("Matched on a %hux%hu button! :)", button_width, button_height);
 
 		// The touch panel has a fixed origin that differs from the framebuffer's... >_<".
+		// FIXME: This probably needs to be rethough on the Forma (c.f., canRotate quirk & fbink_reinit)...
+		//        c.f., this post by @baskerville for a good recap of the situation:
+		//        https://www.mobileread.com/forums/showpost.php?p=3766627&postcount=236
 		rotate_coordinates_pickel(&match_coords);
 		ELOG("x=%hu, y=%hu", match_coords.x, match_coords.y);
 

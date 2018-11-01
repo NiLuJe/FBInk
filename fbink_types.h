@@ -42,6 +42,7 @@ typedef struct
 	uint8_t            koboBootRota;
 	bool               isCervantesNew;
 	unsigned short int screenDPI;
+	bool               canRotate;
 	bool               skipId;
 } FBInkDeviceQuirks;
 

@@ -3708,7 +3708,7 @@ int
 {
 #ifndef FBINK_FOR_KINDLE
 	// NOTE: Don't even try to open/close the fb if we don't have anything to do ;)
-	if (!deviceQuirks.isKobo16Landscape) {
+	if (!deviceQuirks.isKobo16Landscape && !deviceQuirks.canRotate) {
 		return EXIT_SUCCESS;
 	}
 
@@ -3754,6 +3754,31 @@ int
 			ELOG("Detected a change in framebuffer rotation, reinitializing...");
 			rv = initialize_fbink(fbfd, fbink_config, true);
 		}
+	} else if (deviceQuirks.canRotate) {
+		// The second step is checking for a rotation change on devices with an accelerometer...
+		// We're doing this outside of the 16bpp branch, because we're concerned with Nickel rotations here,
+		// and Nickel will always run @ 32bpp ;).
+
+		// Okay, so, store the previous rotation, and check if that changed...
+		uint32_t old_rota = vInfo.rotate;
+
+		// We evidently need to query the current state in order to do that...
+		if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
+			WARN("Error reading variable fb information");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+
+		// And see if we were rotated since the last time...
+		if (old_rota != vInfo.rotate) {
+			// NOTE: Nickel properly updates vInfo, and until I get a decisive answer,
+			//       I'm going to assume the fb origin gets updated, too,
+			//       so we don't need any new rotation tricks, as far as printing is concerned.
+			//       This would match the Kindle behavior.
+			// It's a reinit, so ask to skip the vinfo ioctl we just did
+			ELOG("Detected a change in framebuffer rotation, reinitializing...");
+			rv = initialize_fbink(fbfd, fbink_config, true);
+		}
 	}
 
 	// And we're done, that's all we care about for now :).
@@ -3766,7 +3791,8 @@ cleanup:
 
 	return rv;
 #else
-	// NOTE: I currently haven't found the need for any shenanigans like that on Kindle, so, make this a NOP there ;)
+	// NOTE: I currently haven't found the need for any shenanigans like that on Kindle, so, make this a NOP there ;).
+	// NOTE: That said, we technically could make use of the canRotate quirk if we had an API user on Kindle that cared...
 	WARN("Reinitilization is not needed on Kindle devices :)");
 	return ERRCODE(ENOSYS);
 #endif    // !FBINK_FOR_KINDLE

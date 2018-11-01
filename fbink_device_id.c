@@ -349,6 +349,7 @@ static void
 		case 377:    // Forma (frost)
 		case 380:    // Forma (frost)
 			device_quirks->isKoboMk7 = true;
+			device_quirks->canRotate = true;
 			break;
 		case 0:
 			// Like kobo_config.sh, assume Trilogy as a fallback
