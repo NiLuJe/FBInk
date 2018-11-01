@@ -77,13 +77,14 @@ typedef enum
 	SCIENTIFICAI       // scientifica (italic)
 } FONT_INDEX_T;
 
+// List of supported font styles
 typedef enum
 {
 	FNT_REGULAR = 0U,
 	FNT_ITALIC,
 	FNT_BOLD,
 	FNT_BOLD_ITALIC
-} FONT_VARIANT_T;
+} FONT_STYLE_T;
 
 // List of available halign/valign values
 typedef enum
@@ -240,10 +241,10 @@ FBINK_API int fbink_init(int fbfd, const FBInkConfig* fbink_config);
 // Add an OpenType font to FBInk. Note that at least one font must be added in order to use fbink_print_ot()
 // Returns -(EXIT_FAILURE) on failure, or EXIT_SUCCESS otherwise
 // filename:		The font file path. This should be a valid *.otf or *.ttf font
-// variant:		What variant of font this is (FNT_REGULAR, FNT_ITALIC, FNT_BOLD, FNT_BOLD_ITALIC)
+// style:		Defines the specific style of the specified font (FNT_REGULAR, FNT_ITALIC, FNT_BOLD, FNT_BOLD_ITALIC)
 // NOTE:    You MUST free the fonts loaded when you are done by calling fbink_free_ot_fonts()
 // NOTE:    You may replace a font without first calling free
-FBINK_API int fbink_add_ot_font(const char* filename, FONT_VARIANT_T variant);
+FBINK_API int fbink_add_ot_font(const char* filename, FONT_STYLE_T style);
 
 // Free all loaded OpenType fonts. You MUST call this when you have finished all OT printing.
 FBINK_API int fbink_free_ot_fonts(void);

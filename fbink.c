@@ -2066,9 +2066,9 @@ int
 	// Don't skip any ioctls on a first init ;)
 	return initialize_fbink(fbfd, fbink_config, false);
 }
-// Load font from given file path. Up to four font variants may be used by FBInk at any given time.
+// Load font from given file path. Up to four font styles may be used by FBInk at any given time.
 int
-    fbink_add_ot_font(const char* filename, FONT_VARIANT_T variant)
+    fbink_add_ot_font(const char* filename, FONT_STYLE_T style)
 {
 #ifdef FBINK_WITH_OPENTYPE
 	otInit = true;
@@ -2110,9 +2110,9 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 	// Assign the current font to it's appropriate otFonts struct member, depending
-	// on the variant specified by the caller.
+	// on the style specified by the caller.
 	// NOTE: We make sure we free any previous allocation first!
-	switch (variant) {
+	switch (style) {
 		case FNT_REGULAR:
 			otFonts.otRegular = free_ot_font(otFonts.otRegular);
 			otFonts.otRegular = font_info;
@@ -3090,7 +3090,7 @@ int
 				}
 			}
 			if (!curr_font) {
-				ELOG("[FBInk] The specified font variant was not loaded");
+				ELOG("[FBInk] The specified font style was not loaded");
 				rv = ERRCODE(ENOENT);
 				goto cleanup;
 			}
