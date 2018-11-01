@@ -180,7 +180,12 @@ ifdef MATHS
 endif
 # NOTE: Despite attempts at using mostly GCC builtins, OpenType support needs lm
 ifndef MINIMAL
-	LIBS+=-lm
+	# NOTE: Here be dragons! Static linking bits of the glibc is usually considered a fairly terrible idea.
+	ifdef STATIC_LIBM
+		LIBS+=-l:libm.a
+	else
+		LIBS+=-lm
+	endif
 endif
 
 ##
