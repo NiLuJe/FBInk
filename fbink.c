@@ -1897,8 +1897,10 @@ static int
 		}
 #endif
 	} else {
-		// Set font-size based on screen DPI (roughly matches: Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
-		if (deviceQuirks.screenDPI <= 167U) {
+		// Set font-size based on screen DPI (roughly matches: Linux, Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
+		if (deviceQuirks.screenDPI <= 96U) {
+			FONTSIZE_MULT = 2U;    // 16x16 on pure Linux
+		} else if (deviceQuirks.screenDPI <= 167U) {
 			FONTSIZE_MULT = 1U;    // 8x8
 		} else if (deviceQuirks.screenDPI <= 212U) {
 			FONTSIZE_MULT = 2U;    // 16x16
