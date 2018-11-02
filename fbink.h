@@ -199,9 +199,9 @@ typedef struct
 		unsigned short int left;      // Left margin in pixels
 		unsigned short int right;     // Right margin in pixels
 	} margins;
-	uint8_t size_pt;         // Size of text in points. If not set (0), defaults to 12pt
-	bool    is_centered;     // Horizontal centering
-	bool    is_formatted;    // Is string "formatted"? Bold/Italic support only, markdown like syntax
+	unsigned short int size_pt;  // Size of text in points. If not set (0), defaults to 12pt
+	bool    is_centered;         // Horizontal centering
+	bool    is_formatted;        // Is string "formatted"? Bold/Italic support only, markdown like syntax
 } FBInkOTConfig;
 
 // NOTE: Unless otherwise specified,

@@ -695,7 +695,8 @@ int
 							bdit_ot_file = strdup(value);
 							break;
 						case SIZE_OPT:
-							ot_config.size_pt = (uint8_t) strtoul(value, NULL, 10);
+							ot_config.size_pt = 
+								(unsigned short int) strtoul(value, NULL, 10);
 							break;
 						case TM_OPT:
 							ot_config.margins.top =
@@ -831,7 +832,7 @@ int
 			if (is_truetype) {
 				if (!fbink_config.is_quiet) {
 					printf(
-					    "Printing string '%s' @ %hhupt, honoring the following margins { top: %hupx, bottom: %hupx, left: %hupx, right: %hupx } (formatted: %s, overlay: %s, backgroundless: %s, foregroundless: %s, inverted: %s, flashing: %s, centered: %s, halign: %hhu, halfway: %s, valign: %hhu, clear screen: %s)\n",
+					    "Printing string '%s' @ %hupt, honoring the following margins { top: %hupx, bottom: %hupx, left: %hupx, right: %hupx } (formatted: %s, overlay: %s, backgroundless: %s, foregroundless: %s, inverted: %s, flashing: %s, centered: %s, halign: %hhu, halfway: %s, valign: %hhu, clear screen: %s)\n",
 					    string,
 					    ot_config.size_pt,
 					    ot_config.margins.top,

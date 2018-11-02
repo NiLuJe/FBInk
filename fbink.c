@@ -2872,9 +2872,9 @@ int
 	area.br.x = (unsigned short int) (viewWidth - cfg->margins.right);
 	area.br.y = (unsigned short int) (viewHeight - cfg->margins.bottom);
 	// Set default font size if required
-	uint8_t size_pt = cfg->size_pt;
+	unsigned short int size_pt = cfg->size_pt;
 	if (!size_pt) {
-		size_pt = 12;
+		size_pt = 12U;
 	}
 	// We should have a fairly accurate idea of what the screen DPI is...
 	unsigned short int ppi = deviceQuirks.screenDPI;
