@@ -67,9 +67,9 @@ And when using shiny TrueType fonts :).
 Unless you're just trying to play with it on a pure Linux system (`make linux`), you'll need a cross-compiler targeting your, well, target device.
 The Makefile is tailored to automatically detect my own cross-compilation [ToolChain](http://trac.ak-team.com/trac/browser/niluje/Configs/trunk/Kindle/Misc/x-compile.sh) [setups](https://github.com/koreader/koxtoolchain), which I evidently heartily recommend using instead of relying on generic cross-compilation toolchains which may not exactly target the right kernel/libc duo ;).
 
-With that out of the way, the default target (i.e., `make`) will yield a Kobo build, while `make kobo` will additionally package everything the Kobo way. The package found in the Kobo thread is built that way.
+With that out of the way, the default target (i.e., `make`) will yield a static Kobo build, while `make kobo` will yield a stripped shared build, and additionally package everything the Kobo way. The package found in the Kobo thread is built that way.
 
-There's a few convenience targets for usual build types (`make static` for a static build, `make shared` for a shared build, `make strip` for a stripped static build, `make release` for a stripped shared build, `make debug` for a debug build), as well as a few unusual ones for very specific usage, usually related to FFI bindings (`make pic` for a PIC static build, or passing `STATIC_LIBM=1` to make to attempt to link against libm statically).
+There's a few convenience targets for usual build types (`make static` for a static build, `make shared` for a shared build, `make strip` for a stripped static build, `make release` for a stripped shared build, `make debug` for a debug build), as well as a few unusual ones for very specific use cases, usually related to FFI bindings (`make pic` for a PIC static build, or passing `STATIC_LIBM=1` to make to attempt to link against libm statically).
 
 The choice of target platform is handled via a simple variable:
 - Pass `KINDLE=1` to make for a Kindle build (`make kindle` does that on a stripped static build)
@@ -77,7 +77,7 @@ The choice of target platform is handled via a simple variable:
 - Pass `CERVANTES=1` to make for a BQ/Cervantes build (`make cervantes` does that on a stripped static build)
 
 The same logic is used to allow for a bit of tailoring:
-- Pass `MINIMAL=1` to make for a build with limited functionality (only fixed cell font rendering, no image, no extra fonts, no OpenType), which yields a much smaller application & library.
+- Pass `MINIMAL=1` to make for a build with limited functionality (only fixed cell font rendering, no image rendering, no extra fonts, no OpenType), which yields a much smaller application & library.
 - Pass `DEBUG=1` to make for a Debug build, and pass `DEBUG=1 DEBUGFLAGS=1` to make for a Debug build with enforced debug CFLAGS.
 
 # NOTES
