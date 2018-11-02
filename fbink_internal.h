@@ -53,26 +53,34 @@
 // NOTE: Relies on the fact that:
 //       * Clang implements the __has_builtin macro, but currently not the __builtin_lceilf function
 //       * GCC implements the __builtin_lceilf function, but not the __has_builtin macro
-//       Will horribly blow up on GCC versions that do NOT implement __builtin_lceilf
 // c.f., https://stackoverflow.com/q/4322352/
+// NOTE: The idea here is to rely as much as possible on GCC builtins.
+//       GCC should mostly have handled this right on its own, we're just giving it a nudge ;).
+//       The original idea was to see if we could actually completely avoid libm, but we really can't since,
+//       if need be, GCC builtins *may* emit library calls. Which is the case here ;).
 #ifdef FBINK_WITH_OPENTYPE
+// Since we can't avoid libm, include the standard header, so everyones gets the right declarations
+#	include <math.h>
 #	ifdef __clang__
 #		if __has_builtin(__builtin_lceilf)
 #			define ceilf(x) __builtin_lceilf(x)
 #		endif
-// STBTT will include math.h on its own on Clang, since we don't define any STBTT_ math macros ;).
 #	else
-#		define ceilf(x) __builtin_lceilf(x)
-#		define lroundf(x) __builtin_lroundf(x)
-#		define floorf(x) __builtin_floorf(x)
-#		define STBTT_ifloor(x) ((int) __builtin_lfloorf(x))
-#		define STBTT_iceil(x) ((int) __builtin_lceilf(x))
-#		define STBTT_sqrt(x) __builtin_sqrtf(x)
-#		define STBTT_pow(x, y) __builtin_powf(x, y)
-#		define STBTT_fmod(x, y) __builtin_fmodf(x, y)
-#		define STBTT_cos(x) __builtin_cos(x)
-#		define STBTT_acos(x) __builtin_acosf(x)
-#		define STBTT_fabs(x) __builtin_fabsf(x)
+// Hide all this behind a C99 check, to try to avoid blowing up on really old GCC versions...
+#		if __STDC_VERSION__ >= 199901L
+#			define ceilf(x) __builtin_lceilf(x)
+#			define lroundf(x) __builtin_lroundf(x)
+#			define floorf(x) __builtin_floorf(x)
+#			define STBTT_ifloor(x) ((int) __builtin_lfloorf(x))
+#			define STBTT_iceil(x) ((int) __builtin_lceilf(x))
+#			define STBTT_sqrt(x) __builtin_sqrtf(x)
+#			define STBTT_pow(x, y) __builtin_powf(x, y)
+#			define STBTT_fmod(x, y) __builtin_fmodf(x, y)
+// Need to keep double precision for cos, there's an implicit conversion involved
+#			define STBTT_cos(x) __builtin_cos(x)
+#			define STBTT_acos(x) __builtin_acosf(x)
+#			define STBTT_fabs(x) __builtin_fabsf(x)
+#		endif
 #	endif
 #endif
 
