@@ -3247,11 +3247,7 @@ int
 	// Is the foreground color lighter than background? If so, we make things easier
 	// for ourselves by inverting the colors, and toggling the is_invert flag to reverse
 	// it back later.
-#	ifdef FBINK_FOR_KINDLE
-	if ((deviceQuirks.isKindleLegacy && fgcolor > bgcolor) || (!deviceQuirks.isKindleLegacy && fgcolor < bgcolor)) {
-#	else
 	if (fgcolor < bgcolor) {
-#	endif
 		fgcolor ^= 0xFF;
 		bgcolor ^= 0xFF;
 		is_inverted = !is_inverted;
@@ -3274,7 +3270,6 @@ int
 	if (bgcolor > 0U) {
 		memset(line_buff, bgcolor, max_lw * (unsigned int) max_line_height * sizeof(*line_buff));
 	}
-	// FIXME: Make sure this doesn't do something stupid on inverted palettes...
 	uint8_t layer_diff = (uint8_t)(fgcolor - bgcolor);
 	// Setup the variables needed to render
 	FBInkCoordinates curr_point  = { 0, 0 };
