@@ -242,8 +242,10 @@ FBINK_API int fbink_init(int fbfd, const FBInkConfig* fbink_config);
 // Returns -(EXIT_FAILURE) on failure, or EXIT_SUCCESS otherwise
 // filename:		The font file path. This should be a valid *.otf or *.ttf font
 // style:		Defines the specific style of the specified font (FNT_REGULAR, FNT_ITALIC, FNT_BOLD, FNT_BOLD_ITALIC)
-// NOTE:    You MUST free the fonts loaded when you are done by calling fbink_free_ot_fonts()
-// NOTE:    You may replace a font without first calling free
+// NOTE: You MUST free the fonts loaded when you are done by calling fbink_free_ot_fonts()
+// NOTE: You may replace a font without first calling free
+// NOTE: Default fonts are secreted away in /usr/java/lib/fonts on Kindle,
+//       and in /usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/fonts/ on Kobo.
 FBINK_API int fbink_add_ot_font(const char* filename, FONT_STYLE_T style);
 
 // Free all loaded OpenType fonts. You MUST call this when you have finished all OT printing.
