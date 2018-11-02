@@ -245,7 +245,7 @@ FBINK_API int fbink_init(int fbfd, const FBInkConfig* fbink_config);
 // NOTE: You MUST free the fonts loaded when you are done by calling fbink_free_ot_fonts()
 // NOTE: You may replace a font without first calling free
 // NOTE: Default fonts are secreted away in /usr/java/lib/fonts on Kindle,
-//       and in /usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/fonts/ on Kobo.
+//       and in /usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/fonts on Kobo.
 FBINK_API int fbink_add_ot_font(const char* filename, FONT_STYLE_T style);
 
 // Free all loaded OpenType fonts. You MUST call this when you have finished all OT printing.
