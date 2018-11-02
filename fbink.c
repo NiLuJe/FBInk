@@ -2068,7 +2068,13 @@ int
 	FILE* f = fopen(filename, "re");
 #	endif
 	unsigned char* data = NULL;
-	if (f) {
+	if (!f) {
+		char  buf[256];
+		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		WARN("fopen: %s", errstr);
+		otInit = false;
+		return ERRCODE(EXIT_FAILURE);
+	} else {
 		int         fd = fileno(f);
 		struct stat st;
 		fstat(fd, &st);
