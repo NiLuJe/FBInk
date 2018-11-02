@@ -44,23 +44,23 @@ as we can legitimately be used before Nickel itself corrects this.
 
 Like this for its text printing facilities :).
 
-![FBInk on a Kobo H2O](https://raw.githubusercontent.com/NiLuJe/FBInk/master/fbink_readme.png)
+![FBInk on a Kobo H2O](https://raw.githubusercontent.com/NiLuJe/FBInk/master/resources/fbink_readme.png)
 
 And like this when displaying an image :).
 
-![FBInk 1.2.0 on a Kobo H2O](https://raw.githubusercontent.com/NiLuJe/FBInk/master/fbink_image.png)
+![FBInk 1.2.0 on a Kobo H2O](https://raw.githubusercontent.com/NiLuJe/FBInk/master/resources/fbink_image.png)
 
 And with all the bells and whistles of working transparency, even on ancient hardware :).
 
-![FBInk 1.2.5 on a Kindle 3](https://raw.githubusercontent.com/NiLuJe/FBInk/master/fbink_alpha.png)
+![FBInk 1.2.5 on a Kindle 3](https://raw.githubusercontent.com/NiLuJe/FBInk/master/resources/fbink_alpha.png)
 
 And with a few other fonts, as well as a progress bar...
 
-![FBInk 1.6.2 on a Kobo H2O](https://raw.githubusercontent.com/NiLuJe/FBInk/master/fbink_bars.png)
+![FBInk 1.6.2 on a Kobo H2O](https://raw.githubusercontent.com/NiLuJe/FBInk/master/resources/fbink_bars.png)
 
 And when using shiny TrueType fonts :).
 
-![FBInk 1.8.0 on a Kobo H2O](https://raw.githubusercontent.com/NiLuJe/FBInk/master/fbink_ot.png)
+![FBInk 1.8.0 on a Kobo H2O](https://raw.githubusercontent.com/NiLuJe/FBInk/master/resources/fbink_ot.png)
 
 # NOTES
 
