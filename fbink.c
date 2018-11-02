@@ -3040,7 +3040,6 @@ int
 	// Lets find our lines! Nothing fancy, just a simple first fit algorithm, but we do
 	// our best not to break inside a word.
 
-	unsigned int       chars_in_str = u8_strlen(string);
 	unsigned int       c_index      = 0;
 	unsigned int       tmp_c_index  = c_index;
 	uint32_t           c;
@@ -3061,7 +3060,7 @@ int
 		lines[line].startCharIndex = c_index;
 		lines[line].line_gap       = max_lg;
 		lines[line].line_used      = true;
-		while (c_index < chars_in_str) {
+		while (c_index < str_len_bytes) {
 			if (cfg->is_formatted) {
 				// Check if we need to skip formatting characters
 				if (fmt_buff[c_index] == CH_IGNORE) {
@@ -3184,7 +3183,7 @@ int
 			}
 		}
 		// We've run out of string! This is our last line.
-		if (c_index >= chars_in_str) {
+		if (c_index >= str_len_bytes) {
 			u8_dec(string, &c_index);
 			lines[line].endCharIndex = c_index;
 			complete_str             = true;
