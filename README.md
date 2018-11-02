@@ -7,10 +7,10 @@ Housed [here on GitHub](https://github.com/NiLuJe/FBInk).
 # What's it for?
 
 This is intended to fill the void felt by Kobo developpers and tinkerers when they realize they do not have a builtin way to print stuff on the device's screen!
-It's especially cruel when moving to a Kobo, after being used to the ubiquity of `eips` on Kindles...
+It's especially cruel when moving to a Kobo, after being used to the ubiquity of `eips` on Kindle...
 
 In short, it prints messages or images on your screen, handling the low-level tinkering with both the Linux framebuffer interface, and the i.MX EPD driver.
-It's been tested on Kobos, Kindles and BQ Cervantes, but porting it to other Linux, i.MX eInk devices should be trivial (hell, even Sipix support shouldn't be too hard).
+It's been tested on Kobo, Kindle and BQ Cervantes, but porting it to other Linux, i.MX eInk devices should be trivial (hell, even Sipix support shouldn't be too hard).
 
 By default, text rendering relies on bundled fixed cell bitmap fonts ([see this post](https://www.mobileread.com/forums/showpost.php?p=3765426&postcount=31) for a small sampling),
 but thanks to [@shermp](https://github.com/shermp)'s contributions ([#20](https://github.com/NiLuJe/FBInk/pull/20)), you can also rely on full-fledged TrueType/OpenType font rendering!
@@ -33,10 +33,12 @@ The tool is available both as a commandline utility, and as a shared or static l
 See the [public header](fbink.h) for basic API usage.
 Launch the `fbink` tool with no argument for a quick manual & rundown of its capabilities.
 
-NOTE: It generally makes *NO* attempt at handling rotation, because that currently appears to be the right thing to do with both current Kobo FW versions and Kindles.
+NOTE: It generally makes *NO* attempt at handling software rotation, because that currently appears to be the right thing to do with both current Kobo FW versions and on Kindle.
 YMMV on older FW, or if something else is fudging with fb rotation, or if your application is implementing rotation in software (i.e., a rotated viewport).
-There's a very specific exception made for Kobo devices running in 16bpp mode and appearing to be in landscape mode: since that seems to be their native state,
-we *attempt* to compensate for this, as we can legitimately be used before Nickel itself corrects this.
+As far as hardware rotation is concerned, there are a few specific exceptions made for Kobo devices:
+- Those running in 16bpp mode and appearing to be in landscape mode: since that seems to be their native state, we *attempt* to compensate for this,
+as we can legitimately be used before Nickel itself corrects this.
+- On devices with an accelerometer, like the Forma, where Nickel itself will handle the hardware rotation.
 
 # How does it look?
 
