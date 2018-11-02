@@ -2807,7 +2807,7 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
-	// Has fbink_init_ot() been called yet?
+	// Has fbink_add_ot_font() been successfully called yet?
 	if (!otInit) {
 		WARN("No fonts have been loaded");
 		return ERRCODE(ENODATA);
