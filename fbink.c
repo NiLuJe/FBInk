@@ -3403,7 +3403,7 @@ int
 				// Because the stbtt_MakeCodepointBitmap documentation is a bit vague on this
 				// point, the parameter 'out_stride' should be the width of the surface in our
 				// buffer. It's designed so that the glyph can be rendered directly to a screen buffer.
-				// For example, if we were rendering directly to a screen of 1080 x 1440m out_stride
+				// For example, if we were rendering directly to a 1080x1440 screen out_stride
 				// should be set to 1080. In this case however, we want to render to a 'box' of the
 				// dimensions of the glyph, so we set 'out_stride' to the glyph width.
 				stbtt_MakeCodepointBitmap(curr_font, glyph_buff, gw, gh, gw, sf, sf, (int) c);
@@ -3430,8 +3430,8 @@ int
 							if (glPtr[k] == 0xFF) {
 								lnPtr[k] = fgcolor;
 							} else if (glPtr[k] > 0) {
-								lnPtr[k] = (unsigned char) (bgcolor + (DIV255(glPtr[k]) *
-												       layer_diff));
+								lnPtr[k] = (unsigned char) DIV255(
+								    (bgcolor + (glPtr[k] * layer_diff)));
 							}
 						}
 						// And advance one scanline. Quick! Hide! Pointer arithmetic
