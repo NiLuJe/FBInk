@@ -3781,10 +3781,9 @@ int
 
 		// And see if we were rotated since the last time...
 		if (old_rota != vInfo.rotate) {
-			// NOTE: Nickel properly updates vInfo, and until I get a decisive answer,
-			//       I'm going to assume the fb origin gets updated, too,
+			// NOTE: Nickel properly updates vInfo, and this time, the fb origin properly gets updated, too,
 			//       so we don't need any new rotation tricks, as far as printing is concerned.
-			//       This would match the Kindle behavior.
+			//       This matches the Kindle behavior (c.f., notes in initialize_fbink).
 			// It's a reinit, so ask to skip the vinfo ioctl we just did
 			ELOG("Detected a change in framebuffer rotation, reinitializing...");
 			rv = initialize_fbink(fbfd, fbink_config, true);
