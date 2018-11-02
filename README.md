@@ -56,6 +56,10 @@ And with a few other fonts, as well as a progress bar...
 
 ![FBInk 1.6.2 on a Kobo H2O](https://raw.githubusercontent.com/NiLuJe/FBInk/master/fbink_bars.png)
 
+And when using shiny TrueType fonts :).
+
+![FBInk 1.8.0 on a Kobo H2O](https://raw.githubusercontent.com/NiLuJe/FBInk/master/fbink_ot.png)
+
 # NOTES
 
 Kindle support covers the full Kindle lineup, starting from the K2.
