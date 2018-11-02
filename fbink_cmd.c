@@ -81,6 +81,9 @@ static void
 #else
 	    "\t\t\t\tAvailable font families: IBM\n"
 #endif
+#ifdef FBINK_WITH_OPENTYPE
+	    "\t\t\t\tNOTE: If you're looking for vector font rendering, see the OpenType section a few lines down!\n"
+#endif
 	    "\t-C, --color NAME\tColor the text will be printed in (Default: BLACK).\n"
 	    "\t-B, --background NAME\tColor of the background the text will be printed on (Default: WHITE).\n"
 	    "\t\t\t\tAvailable colors: BLACK, GRAY1, GRAY2, GRAY3, GRAY4, GRAY5, GRAY6, GRAY7,\n"
@@ -115,10 +118,26 @@ static void
 	    "\tIf you want to properly print a long string, better do it in a single argument, fbink will do its best to spread it over multiple lines sanely.\n"
 	    "\tIt will also honor the linefeed character (and I do mean the actual control character, not the human-readable escape sequence),\n"
 	    "\twhich comes in handy when passing a few lines of logs straight from tail as an argument.\n"
+#ifdef FBINK_WITH_OPENTYPE
 	    "\n"
 	    "\n"
-	    "OpenType/TrueType Support:\n"
-	    "\t-t, --truetype regular=FILE,bold=FILE,italic=FILE,bolditalic=FILE,size=NUM,top=NUM,bottom=NUM,left=NUM,right=NUM,format"
+	    "\n"
+	    "OpenType & TrueType font support:\n"
+	    "\t-t, --truetype regular=FILE,bold=FILE,italic=FILE,bolditalic=FILE,size=NUM,top=NUM,bottom=NUM,left=NUM,right=NUM,format\n"
+	    "\t\tregular, bold, italic & bolditalic should point to the font file matching their respective font style. At least one of them MUST be specified.\n"
+	    "\t\tsize sets the rendering size, in points. Defaults to 12pt if unset.\n"
+	    "\t\ttop, bottom, left & right set the margins used to define the display area. Defaults to 0, i.e., the full screen, starting at the top-left corner.\n"
+	    "\t\tIf format is specified, the underscore/star MarkDown syntax will be honored to set the font style (i.e., *italic*, **bold** & ***bold italic***).\n"
+	    "\n"
+	    "\t\tHonors -h, --invert; -f, --flash; -c, --clear; -m, --centered; -M, --halfway; -o, --overlay; -T, --fgless; -O, --bgless; -C, --color; -B, --background\n"
+	    "\n"
+	    "EXAMPLES:\n"
+	    "\tfbink -t regular=/mnt/onboard/fonts/NotoSans-Regular.ttf,bold=/mnt/onboard/fonts/NotoSans-Bold.ttf,size=24,top=100,bottom=500,left=25,right=50,format \"Hello **world**!\"\n"
+	    "\t\tWill use NotoSans to print 'Hello world!' at 24pt in a display area starting from 100px down the top of the screen to 500px before the bottom of the screen,\n"
+	    "\t\tfrom 25px of the left edge of the screen until 50px before the right edge.\n"
+	    "\t\tHonoring the MarkDown syntax, 'Hello' will be printed with the Regular font style, while 'world' will use the Bold font style.\n"
+	    "\n"
+#endif
 	    "\n"
 	    "\n"
 	    "\n"
@@ -179,6 +198,9 @@ static void
 	    "\tSpecifying one or more STRING takes precedence over this mode.\n"
 	    "\t--refresh also takes precedence over this mode.\n"
 #endif
+	    "\n"
+	    "\n"
+	    "\n"
 	    "\n"
 	    "NOTES:\n"
 	    "\tShell script writers can also use the -e, --eval flag to have fbink just spit out a few of its internal state variables to stdout,\n"
