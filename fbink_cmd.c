@@ -768,25 +768,33 @@ int
 				if (!fbink_config.is_quiet) {
 					printf("Loading font '%s' for the Regular style\n", reg_ot_file);
 				}
-				fbink_add_ot_font(reg_ot_file, FNT_REGULAR);
+				if (fbink_add_ot_font(reg_ot_file, FNT_REGULAR) < 0) {
+					fprintf(stderr, "Failed to open font file '%s'!\n", reg_ot_file);
+				}
 			}
 			if (bd_ot_file) {
 				if (!fbink_config.is_quiet) {
 					printf("Loading font '%s' for the Bold style\n", bd_ot_file);
 				}
-				fbink_add_ot_font(bd_ot_file, FNT_BOLD);
+				if (fbink_add_ot_font(bd_ot_file, FNT_BOLD) < 0) {
+					fprintf(stderr, "Failed to open font file '%s'!\n", bd_ot_file);
+				}
 			}
 			if (it_ot_file) {
 				if (!fbink_config.is_quiet) {
 					printf("Loading font '%s' for the Italic style\n", it_ot_file);
 				}
-				fbink_add_ot_font(it_ot_file, FNT_ITALIC);
+				if (fbink_add_ot_font(it_ot_file, FNT_ITALIC) < 0) {
+					fprintf(stderr, "Failed to open font file '%s'!\n", it_ot_file);
+				}
 			}
 			if (bdit_ot_file) {
 				if (!fbink_config.is_quiet) {
 					printf("Loading font '%s' for the Bold Italic style\n", bdit_ot_file);
 				}
-				fbink_add_ot_font(bdit_ot_file, FNT_BOLD_ITALIC);
+				if (fbink_add_ot_font(bdit_ot_file, FNT_BOLD_ITALIC) < 0) {
+					fprintf(stderr, "Failed to open font file '%s'!\n", bdit_ot_file);
+				}
 			}
 		}
 
