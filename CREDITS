@@ -13,7 +13,7 @@ This project makes use of a number of third-party libraries, which we'll acknowl
 		(http://nothings.org/stb)
 
 	* libunibreak (Unicode line breaking implementation) by Wu Yongwei, et al
-		Licensed under the Zlib license
+		Licensed under the Zlib license (https://opensource.org/licenses/Zlib)
 		(https://github.com/adah1972/libunibreak)
 
 As well as a number of third-party resources (namely, font files):
