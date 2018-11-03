@@ -3308,6 +3308,7 @@ int
 	}
 	fgcolor ^= invert;
 	bgcolor ^= invert;
+	//uint8_t layer_diff = (uint8_t) MAX(0, fgcolor - bgcolor)
 	//uint8_t layer_diff = (uint8_t) abs(fgcolor - bgcolor);
 	short int layer_diff = (short int) (fgcolor - bgcolor);
 
@@ -3574,8 +3575,14 @@ int
 							color.r = color.b = color.g = fgcolor;
 						} else {
 							// AA, blend it using the coverage mask as alpha
-							color.r = color.b = color.g =
-							    (uint8_t) DIV255((bgcolor + (layer_diff * lnPtr[k])));
+							color.r = color.b = color.g = (uint8_t) DIV255(
+							    ((bgcolor * 0xFF) + (layer_diff * lnPtr[k])));
+							LOG("color.r: %hhu | fgcolor: %hhu | bgcolor: %hhu | layer_diff: %hd | alpha: %hhu",
+							    color.r,
+							    fgcolor,
+							    bgcolor,
+							    layer_diff,
+							    lnPtr[k]);
 						}
 						put_pixel(&paint_point, &color);
 						paint_point.x++;
