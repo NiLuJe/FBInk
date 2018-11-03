@@ -3443,7 +3443,7 @@ int
 					for (int k = 0; k < gw; k++) {
 						// 0 value pixels are transparent (no coverage),
 						// and our line buffer is already filled with zeroes ;)
-						if (glPtr[k] > 0) {
+						if (glPtr[k] != 0U) {
 							lnPtr[k] = glPtr[k];
 						}
 					}
@@ -3548,9 +3548,9 @@ int
 			}
 		}
 		*/
-		for (unsigned int j = 0; j < font_size_px; j++) {
-			for (unsigned int k = 0; k < lw; k++) {
-				if (lnPtr[k] == 0) {
+		for (unsigned int j = 0U; j < font_size_px; j++) {
+			for (unsigned int k = 0U; k < lw; k++) {
+				if (lnPtr[k] == 0U) {
 					// No coverage (transparent) -> background
 					color.r = color.b = color.g = bgcolor;
 				} else if (lnPtr[k] == 0xFF) {
