@@ -915,11 +915,6 @@ int
 				printf("%u", total_lines);
 			}
 		}
-
-		// Free OpenType fonts now that we're done
-		if (is_truetype) {
-			fbink_free_ot_fonts();
-		}
 	} else {
 		if (is_refresh) {
 			if (!fbink_config.is_quiet) {
@@ -1066,6 +1061,13 @@ int
 	// Cleanup
 cleanup:
 	free(image_file);
+
+	fbink_free_ot_fonts();
+	free(reg_ot_file);
+	free(bd_ot_file);
+	free(it_ot_file);
+	free(bdit_ot_file);
+
 	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
 		fprintf(stderr, "Failed to close the framebuffer, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
