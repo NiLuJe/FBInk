@@ -3548,26 +3548,42 @@ int
 			}
 		}
 		*/
-		for (unsigned int j = 0U; j < font_size_px; j++) {
-			for (unsigned int k = 0U; k < lw; k++) {
-				if (lnPtr[k] == 0U) {
-					// No coverage (transparent) -> background
-					color.r = color.b = color.g = bgcolor;
-				} else if (lnPtr[k] == 0xFF) {
-					// Full coverage (opaque) -> foreground
-					color.r = color.b = color.g = fgcolor;
-				} else {
-					// AA, blend it using the coverage mask as alpha
-					//color.r = color.b = color.g = (uint8_t) DIV255((bgcolor + ((fgcolor - bgcolor) * lnPtr[k])));
-					color.r = color.b = color.g =
-					    (uint8_t) DIV255((bgcolor + (layer_diff * lnPtr[k])));
+		if (abs(layer_diff) == 0xFF) {
+			// If we're painting in B&W, use the mask as-is, it's already B&W ;).
+			// We just need to invert it ;).
+			uint8_t ainv = invert ^ 0xFF;
+			for (unsigned int j = 0U; j < font_size_px; j++) {
+				for (unsigned int k = 0U; k < lw; k++) {
+					color.r = color.b = color.g = lnPtr[k] ^ ainv;
+					put_pixel(&paint_point, &color);
+					paint_point.x++;
 				}
-				put_pixel(&paint_point, &color);
-				paint_point.x++;
+				lnPtr += max_lw;
+				paint_point.x = start_x;
+				paint_point.y++;
 			}
-			lnPtr += max_lw;
-			paint_point.x = start_x;
-			paint_point.y++;
+		} else {
+			for (unsigned int j = 0U; j < font_size_px; j++) {
+				for (unsigned int k = 0U; k < lw; k++) {
+					if (lnPtr[k] == 0U) {
+						// No coverage (transparent) -> background
+						color.r = color.b = color.g = bgcolor;
+					} else if (lnPtr[k] == 0xFF) {
+						// Full coverage (opaque) -> foreground
+						color.r = color.b = color.g = fgcolor;
+					} else {
+						// AA, blend it using the coverage mask as alpha
+						//color.r = color.b = color.g = (uint8_t) DIV255((bgcolor + ((fgcolor - bgcolor) * lnPtr[k])));
+						color.r = color.b = color.g =
+						    (uint8_t) DIV255((bgcolor + (layer_diff * lnPtr[k])));
+					}
+					put_pixel(&paint_point, &color);
+					paint_point.x++;
+				}
+				lnPtr += max_lw;
+				paint_point.x = start_x;
+				paint_point.y++;
+			}
 		}
 
 		paint_point.y = (unsigned short int) (paint_point.y + lines[line].line_gap);
