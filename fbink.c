@@ -3493,8 +3493,7 @@ int
 			}
 		} else if (is_fgless) {
 			FBInkColor fb_color = { 0 };
-			// NOTE: We can't take *any* shortcuts on 4bpp as long as we're doing any kind of alpha-blending,
-			//       because we'll clobber pixels otherwise...
+			// NOTE: One more branch needed because 4bpp fbs are terrible...
 			if (vInfo.bits_per_pixel > 4U) {
 				// 8, 16, 24 & 32bpp
 				for (unsigned int j = 0U; j < font_size_px; j++) {
@@ -3522,7 +3521,6 @@ int
 				}
 			} else {
 				// 4bpp... We'll have to alpha-blend *everything* to avoid clobbering pixels...
-				// NOTE: We still clobber the final column because reasons, I guess.
 				for (unsigned int j = 0U; j < font_size_px; j++) {
 					for (unsigned int k = 0U; k < lw; k++) {
 						// AA, blend it using the coverage mask as alpha, and the underlying pixel as fg
