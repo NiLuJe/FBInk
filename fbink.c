@@ -3407,38 +3407,7 @@ int
 				// paint our glyph into the line buffer
 				lnPtr = line_buff + ins_point.x + (max_lw * ins_point.y);
 				glPtr = glyph_buff;
-				/*
-				// Note, two options here, because we REALLY want to avoid per-pixel math where at all possible.
-				if (layer_diff == 0xFF) {
-					for (int j = 0; j < gh; j++) {
-						for (int k = 0; k < gw; k++) {
-							// 0 value pixels are transparent
-							if (glPtr[k] > 0) {
-								lnPtr[k] = glPtr[k];
-							}
-						}
-						// And advance one scanline. Quick! Hide! Pointer arithmetic
-						glPtr += gw;
-						lnPtr += max_lw;
-					}
-				} else {
-					for (int j = 0; j < gh; j++) {
-						for (int k = 0; k < gw; k++) {
-							// 0 value pixels are transparent
-							if (glPtr[k] == 0xFF) {
-								lnPtr[k] = fgcolor;
-							} else if (glPtr[k] > 0) {
-								lnPtr[k] = (unsigned char) DIV255(
-								    (bgcolor + (glPtr[k] * layer_diff)));
-							}
-						}
-						// And advance one scanline. Quick! Hide! Pointer arithmetic
-						glPtr += gw;
-						lnPtr += max_lw;
-					}
-				}
-				*/
-				// Keep storing it as an alpha coverage mask...
+				// NOTE: We keep storing it as an alpha coverage mask, we'll blend in the final rendering stage
 				for (int j = 0; j < gh; j++) {
 					for (int k = 0; k < gw; k++) {
 						// 0 value pixels are transparent (no coverage),
@@ -3487,67 +3456,8 @@ int
 		start_x          = paint_point.x;
 		lnPtr            = line_buff;
 		// Normal painting to framebuffer. Please forgive the code repetition. Performance...
-		/*
-		if (!is_overlay && !is_fgless && !is_bgless) {
-			for (unsigned int j = 0; j < font_size_px; j++) {
-				for (unsigned int k = 0; k < lw; k++) {
-					color.r = color.b = color.g = lnPtr[k] ^ invert;
-					put_pixel(&paint_point, &color);
-					paint_point.x++;
-				}
-				lnPtr += max_lw;
-				paint_point.x = start_x;
-				paint_point.y++;
-			}
-			// Note, the current implementation of the following three branches don't properly account for
-			// anti-aliasing. Expect artifacting when using these options.
-		} else if (is_fgless) {
-			for (unsigned int j = 0; j < font_size_px; j++) {
-				for (unsigned int k = 0; k < lw; k++) {
-					if (lnPtr[k] == bgcolor) {
-						color.r = color.b = color.g = lnPtr[k] ^ invert;
-						put_pixel(&paint_point, &color);
-					}
-					paint_point.x++;
-				}
-				lnPtr += max_lw;
-				paint_point.x = start_x;
-				paint_point.y++;
-			}
-		} else if (is_bgless) {
-			for (unsigned int j = 0; j < font_size_px; j++) {
-				for (unsigned int k = 0; k < lw; k++) {
-					if (lnPtr[k] != bgcolor) {
-						color.r = color.b = color.g = lnPtr[k] ^ invert;
-						put_pixel(&paint_point, &color);
-					}
-					paint_point.x++;
-				}
-				lnPtr += max_lw;
-				paint_point.x = start_x;
-				paint_point.y++;
-			}
-		} else if (is_overlay) {
-			for (unsigned int j = 0; j < font_size_px; j++) {
-				for (unsigned int k = 0; k < lw; k++) {
-					if (lnPtr[k] != bgcolor) {
-						get_pixel(&paint_point, &color);
-						color.r ^= 0xFF;
-						// Don't clobber the other nibble on 4bpp fbs
-						if (vInfo.bits_per_pixel > 8U) {
-							color.b ^= 0xFF;
-							color.g ^= 0xFF;
-						}
-						put_pixel(&paint_point, &color);
-					}
-					paint_point.x++;
-				}
-				lnPtr += max_lw;
-				paint_point.x = start_x;
-				paint_point.y++;
-			}
-		}
-		*/
+		// What we get from stbtt is an alpha coverage mask, hence the need for alpha-blending for anti-aliasing.
+		// As it's obviously expensive, we try to avoid it if possible (on fully opaque & fully transparent pixels).
 		if (!is_overlay && !is_fgless && !is_bgless) {
 			if (abs(layer_diff) == 0xFF) {
 				// If we're painting in B&W, use the mask as-is, it's already B&W ;).
