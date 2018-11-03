@@ -3493,28 +3493,51 @@ int
 			}
 		} else if (is_fgless) {
 			FBInkColor fb_color = { 0 };
-			for (unsigned int j = 0U; j < font_size_px; j++) {
-				for (unsigned int k = 0U; k < lw; k++) {
-					if (lnPtr[k] == 0U) {
-						// No coverage (transparent) -> background
-						color.r = color.b = color.g = bgcolor;
-						put_pixel(&paint_point, &color);
-					} else if (lnPtr[k] != 0xFF) {
+			// NOTE: We can't take *any* shortcuts on 4bpp as long as we're doing any kind of alpha-blending,
+			//       because we'll clobber pixels otherwise...
+			if (vInfo.bits_per_pixel > 4U) {
+				// 8, 16, 24 & 32bpp
+				for (unsigned int j = 0U; j < font_size_px; j++) {
+					for (unsigned int k = 0U; k < lw; k++) {
+						if (lnPtr[k] == 0U) {
+							// No coverage (transparent) -> background
+							color.r = color.b = color.g = bgcolor;
+							put_pixel(&paint_point, &color);
+						} else if (lnPtr[k] != 0xFF) {
+							// AA, blend it using the coverage mask as alpha, and the underlying pixel as fg
+							get_pixel(&paint_point, &fb_color);
+							color.r = (uint8_t) DIV255(
+							    ((bgcolor * 0xFF) + ((fb_color.r - bgcolor) * lnPtr[k])));
+							color.g = (uint8_t) DIV255(
+							    ((bgcolor * 0xFF) + ((fb_color.g - bgcolor) * lnPtr[k])));
+							color.b = (uint8_t) DIV255(
+							    ((bgcolor * 0xFF) + ((fb_color.b - bgcolor) * lnPtr[k])));
+							put_pixel(&paint_point, &color);
+						}
+						paint_point.x++;
+					}
+					lnPtr += max_lw;
+					paint_point.x = start_x;
+					paint_point.y++;
+				}
+			} else {
+				// 4bpp... We'll have to alpha-blend *everything* to avoid clobbering pixels...
+				for (unsigned int j = 0U; j < font_size_px; j++) {
+					for (unsigned int k = 0U; k < lw; k++) {
 						// AA, blend it using the coverage mask as alpha, and the underlying pixel as fg
 						get_pixel(&paint_point, &fb_color);
 						color.r = (uint8_t) DIV255(
 						    ((bgcolor * 0xFF) + ((fb_color.r - bgcolor) * lnPtr[k])));
-						color.g = (uint8_t) DIV255(
-						    ((bgcolor * 0xFF) + ((fb_color.g - bgcolor) * lnPtr[k])));
-						color.b = (uint8_t) DIV255(
-						    ((bgcolor * 0xFF) + ((fb_color.b - bgcolor) * lnPtr[k])));
+						// Don't touch the low nibble...
+						color.g = fb_color.g;
+						color.b = fb_color.b;
 						put_pixel(&paint_point, &color);
+						paint_point.x++;
 					}
-					paint_point.x++;
+					lnPtr += max_lw;
+					paint_point.x = start_x;
+					paint_point.y++;
 				}
-				lnPtr += max_lw;
-				paint_point.x = start_x;
-				paint_point.y++;
 			}
 		} else if (is_bgless) {
 			FBInkColor fb_color = { 0 };
