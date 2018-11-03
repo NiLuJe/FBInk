@@ -3461,7 +3461,7 @@ int
 				uint8_t ainv = invert ^ 0xFF;
 				for (unsigned int j = 0U; j < font_size_px; j++) {
 					for (unsigned int k = 0U; k < lw; k++) {
-						color.r = color.b = color.g = lnPtr[k] ^ ainv;
+						color.r = color.g = color.b = lnPtr[k] ^ ainv;
 						put_pixel(&paint_point, &color);
 						paint_point.x++;
 					}
@@ -3474,13 +3474,13 @@ int
 					for (unsigned int k = 0U; k < lw; k++) {
 						if (lnPtr[k] == 0U) {
 							// No coverage (transparent) -> background
-							color.r = color.b = color.g = bgcolor;
+							color.r = color.g = color.b = bgcolor;
 						} else if (lnPtr[k] == 0xFF) {
 							// Full coverage (opaque) -> foreground
-							color.r = color.b = color.g = fgcolor;
+							color.r = color.g = color.b = fgcolor;
 						} else {
 							// AA, blend it using the coverage mask as alpha
-							color.r = color.b = color.g = (uint8_t) DIV255(
+							color.r = color.g = color.b = (uint8_t) DIV255(
 							    ((bgcolor * 0xFF) + (layer_diff * lnPtr[k])));
 						}
 						put_pixel(&paint_point, &color);
@@ -3501,7 +3501,7 @@ int
 					for (unsigned int k = 0U; k < lw; k++) {
 						if (lnPtr[k] == 0U) {
 							// No coverage (transparent) -> background
-							color.r = color.b = color.g = bgcolor;
+							color.r = color.g = color.b = bgcolor;
 							put_pixel(&paint_point, &color);
 						} else if (lnPtr[k] != 0xFF) {
 							// AA, blend it using the coverage mask as alpha, and the underlying pixel as fg
@@ -3522,6 +3522,7 @@ int
 				}
 			} else {
 				// 4bpp... We'll have to alpha-blend *everything* to avoid clobbering pixels...
+				// NOTE: We still clobber the final column because reasons, I guess.
 				for (unsigned int j = 0U; j < font_size_px; j++) {
 					for (unsigned int k = 0U; k < lw; k++) {
 						// AA, blend it using the coverage mask as alpha, and the underlying pixel as fg
@@ -3545,7 +3546,7 @@ int
 				for (unsigned int k = 0U; k < lw; k++) {
 					if (lnPtr[k] == 0xFF) {
 						// Full coverage (opaque) -> foreground
-						color.r = color.b = color.g = fgcolor;
+						color.r = color.g = color.b = fgcolor;
 						put_pixel(&paint_point, &color);
 					} else if (lnPtr[k] != 0U) {
 						// AA, blend it using the coverage mask as alpha, and the underlying pixel as bg
