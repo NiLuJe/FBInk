@@ -2062,6 +2062,12 @@ int
     fbink_add_ot_font(const char* filename UNUSED_BY_MINIMAL, FONT_STYLE_T style UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_OPENTYPE
+	// Init libunibreak the first time we're called
+	if (!otInit) {
+		init_linebreak();
+		LOG("Initialized libunibreak");
+	}
+
 	otInit = true;
 	// Open font from given path, and load into buffer
 #	ifdef FBINK_FOR_LEGACY
@@ -3023,9 +3029,8 @@ int
 		goto cleanup;
 	}
 
-	init_linebreak();
 	set_linebreaks_utf8((const utf8_t*) string, str_len_bytes + 1, "en", brk_buff);
-	LOG("Found linebreaks!");
+	LOG("Finished looking for linebreaks");
 
 	// Parse our string for formatting, if requested
 	if (cfg->is_formatted) {
@@ -3036,6 +3041,7 @@ int
 			goto cleanup;
 		}
 		parse_simple_md(string, str_len_bytes, fmt_buff);
+		LOG("Finished parsing formatting markup");
 	}
 	// Lets find our lines! Nothing fancy, just a simple first fit algorithm, but we do
 	// our best not to break inside a word.
@@ -3544,7 +3550,7 @@ int
 		if (region.top + region.height > viewHeight) {
 			region.height -= region.top + region.height - viewHeight;
 		}
-		LOG("Printed Line!");
+		LOG("Finished printing line# %u", line);
 		// And clear our line buffer for next use. The glyph buffer shouldn't
 		// need clearing, as stbtt_MakeCodepointBitmap() should overwrite it.
 		// NOTE: And we want to honor our background color, too ;).
