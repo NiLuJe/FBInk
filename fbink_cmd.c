@@ -695,8 +695,7 @@ int
 							bdit_ot_file = strdup(value);
 							break;
 						case SIZE_OPT:
-							ot_config.size_pt = 
-								(unsigned short int) strtoul(value, NULL, 10);
+							ot_config.size_pt = (unsigned short int) strtoul(value, NULL, 10);
 							break;
 						case TM_OPT:
 							ot_config.margins.top =

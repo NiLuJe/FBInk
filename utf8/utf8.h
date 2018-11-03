@@ -33,10 +33,10 @@ unsigned int u8_strlen(const char* s);
 uint32_t u8_nextchar(const char* s, unsigned int* i);
 
 /* move to next character */
-void u8_inc(char* s, unsigned int* i);
+void u8_inc(const char* s, unsigned int* i);
 
 /* move to previous character */
-void u8_dec(char* s, unsigned int* i);
+void u8_dec(const char* s, unsigned int* i);
 
 /* utility predicates used by the above */
 unsigned int octal_digit(const char c) __attribute__((const));

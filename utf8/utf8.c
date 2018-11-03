@@ -233,13 +233,13 @@ uint32_t
 }
 
 void
-    u8_inc(char* s, unsigned int* i)
+    u8_inc(const char* s, unsigned int* i)
 {
 	(void) (isutf(s[++(*i)]) || isutf(s[++(*i)]) || isutf(s[++(*i)]) || ++(*i));
 }
 
 void
-    u8_dec(char* s, unsigned int* i)
+    u8_dec(const char* s, unsigned int* i)
 {
 	(void) (isutf(s[--(*i)]) || isutf(s[--(*i)]) || isutf(s[--(*i)]) || --(*i));
 }

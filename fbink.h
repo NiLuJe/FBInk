@@ -199,9 +199,9 @@ typedef struct
 		unsigned short int left;      // Left margin in pixels
 		unsigned short int right;     // Right margin in pixels
 	} margins;
-	unsigned short int size_pt;  // Size of text in points. If not set (0), defaults to 12pt
-	bool    is_centered;         // Horizontal centering
-	bool    is_formatted;        // Is string "formatted"? Bold/Italic support only, markdown like syntax
+	unsigned short int size_pt;         // Size of text in points. If not set (0), defaults to 12pt
+	bool               is_centered;     // Horizontal centering
+	bool               is_formatted;    // Is string "formatted"? Bold/Italic support only, markdown like syntax
 } FBInkOTConfig;
 
 // NOTE: Unless otherwise specified,
@@ -294,7 +294,7 @@ FBINK_API int fbink_printf(int fbfd, const FBInkConfig* fbink_config, const char
 //				Pass a NULL pointer if unneeded.
 // NOTE: Alignment is relative to the printable area, as defined by the margins.
 //       As such, it only makes sense in the context of a single, specific print call.
-FBINK_API int fbink_print_ot(int fbfd, char* string, FBInkOTConfig* cfg, FBInkConfig* fbCfg);
+FBINK_API int fbink_print_ot(int fbfd, const char* string, FBInkOTConfig* cfg, FBInkConfig* fbCfg);
 
 // A simple wrapper around the internal screen refresh handling, without requiring you to include einkfb/mxcfb headers
 // fbfd:		open file descriptor to the framebuffer character device,

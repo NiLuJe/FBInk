@@ -389,7 +389,7 @@ static int
 
 #ifdef FBINK_WITH_OPENTYPE
 static void* free_ot_font(stbtt_fontinfo*);
-static void  parse_simple_md(char*, size_t, unsigned char*);
+static void  parse_simple_md(const char*, size_t, unsigned char*);
 #endif
 
 // For identify_device, which we need outside of fbink_device_id.c ;)

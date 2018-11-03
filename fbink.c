@@ -2741,7 +2741,7 @@ int
 // This is ***bold italic*** text.
 // As well as their underscore equivalents
 static void
-    parse_simple_md(char* string, size_t size, unsigned char* result)
+    parse_simple_md(const char* string, size_t size, unsigned char* result)
 {
 	size_t ci = 0;
 	char   ch;
@@ -2795,8 +2795,8 @@ static void
 #endif    // FBINK_WITH_OPENTYPE
 
 int
-    fbink_print_ot(int fbfd UNUSED_BY_MINIMAL,
-		   char* string   UNUSED_BY_MINIMAL,
+    fbink_print_ot(int fbfd    UNUSED_BY_MINIMAL,
+		   const char* string UNUSED_BY_MINIMAL,
 		   FBInkOTConfig* cfg UNUSED_BY_MINIMAL,
 		   FBInkConfig* fbCfg UNUSED_BY_MINIMAL)
 {
@@ -3024,7 +3024,7 @@ int
 	}
 
 	init_linebreak();
-	set_linebreaks_utf8((utf8_t*) string, str_len_bytes + 1, "en", brk_buff);
+	set_linebreaks_utf8((const utf8_t*) string, str_len_bytes + 1, "en", brk_buff);
 	LOG("Found linebreaks!");
 
 	// Parse our string for formatting, if requested
@@ -3040,8 +3040,8 @@ int
 	// Lets find our lines! Nothing fancy, just a simple first fit algorithm, but we do
 	// our best not to break inside a word.
 
-	unsigned int       c_index      = 0;
-	unsigned int       tmp_c_index  = c_index;
+	unsigned int       c_index     = 0;
+	unsigned int       tmp_c_index = c_index;
 	uint32_t           c;
 	unsigned short int max_lw = (unsigned short int) (area.br.x - area.tl.x);
 	unsigned int       line;
