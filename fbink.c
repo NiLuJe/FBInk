@@ -3577,12 +3577,6 @@ int
 							// AA, blend it using the coverage mask as alpha
 							color.r = color.b = color.g = (uint8_t) DIV255(
 							    ((bgcolor * 0xFF) + (layer_diff * lnPtr[k])));
-							LOG("color.r: %hhu | fgcolor: %hhu | bgcolor: %hhu | layer_diff: %hd | alpha: %hhu",
-							    color.r,
-							    fgcolor,
-							    bgcolor,
-							    layer_diff,
-							    lnPtr[k]);
 						}
 						put_pixel(&paint_point, &color);
 						paint_point.x++;
@@ -3603,12 +3597,12 @@ int
 					} else if (lnPtr[k] != 0xFF) {
 						// AA, blend it using the coverage mask as alpha, and the underlying pixel as fg
 						get_pixel(&paint_point, &fb_color);
-						color.r =
-						    (uint8_t) DIV255((bgcolor + ((fb_color.r - bgcolor) * lnPtr[k])));
-						color.g =
-						    (uint8_t) DIV255((bgcolor + ((fb_color.g - bgcolor) * lnPtr[k])));
-						color.b =
-						    (uint8_t) DIV255((bgcolor + ((fb_color.b - bgcolor) * lnPtr[k])));
+						color.r = (uint8_t) DIV255(
+						    ((bgcolor * 0xFF) + ((fb_color.r - bgcolor) * lnPtr[k])));
+						color.g = (uint8_t) DIV255(
+						    ((bgcolor * 0xFF) + ((fb_color.g - bgcolor) * lnPtr[k])));
+						color.b = (uint8_t) DIV255(
+						    ((bgcolor * 0xFF) + ((fb_color.b - bgcolor) * lnPtr[k])));
 						put_pixel(&paint_point, &color);
 					}
 					paint_point.x++;
