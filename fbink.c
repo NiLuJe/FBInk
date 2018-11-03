@@ -3308,7 +3308,6 @@ int
 	}
 	fgcolor ^= invert;
 	bgcolor ^= invert;
-	//uint8_t layer_diff = (uint8_t) abs(fgcolor - bgcolor);
 	short int layer_diff = (short int) (fgcolor - bgcolor);
 
 	bool abort_line = false;
