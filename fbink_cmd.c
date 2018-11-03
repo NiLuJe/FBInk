@@ -132,8 +132,12 @@ static void
 	    "\t\tHonors -h, --invert; -f, --flash; -c, --clear; -m, --centered; -M, --halfway; -o, --overlay; -T, --fgless; -O, --bgless; -C, --color; -B, --background\n"
 	    "\n"
 	    "EXAMPLES:\n"
-	    "\tfbink -t regular=/mnt/onboard/fonts/NotoSans-Regular.ttf,bold=/mnt/onboard/fonts/NotoSans-Bold.ttf,size=24,top=100,bottom=500,left=25,right=50,format \"Hello **world**!\"\n"
-	    "\t\tWill use NotoSans to print 'Hello world!' at 24pt in a display area starting from 100px down the top of the screen to 500px before the bottom of the screen,\n"
+#	ifdef FBINK_FOR_KINDLE
+	    "\tfbink -t regular=/usr/java/lib/fonts/Caecilia_LT_65_Medium.ttf,bold=/usr/java/lib/fonts/Caecilia_LT_75_Bold.ttf,size=24,top=100,bottom=500,left=25,right=50,format \"Hello **world**!\"\n"
+#	else
+	    "\tfbink -t regular=/usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/fonts/Caecilia.ttf,bold=/usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/fonts/Caecilia-Bold.ttf,size=24,top=100,bottom=500,left=25,right=50,format \"Hello **world**!\"\n"
+#	endif
+	    "\t\tWill use Caecilia to print 'Hello world!' at 24pt in a display area starting from 100px down the top of the screen to 500px before the bottom of the screen,\n"
 	    "\t\tfrom 25px of the left edge of the screen until 50px before the right edge.\n"
 	    "\t\tHonoring the MarkDown syntax, 'Hello' will be printed with the Regular font style, while 'world' will use the Bold font style.\n"
 	    "\n"
