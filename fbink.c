@@ -3254,17 +3254,6 @@ int
 		is_centered = cfg->is_centered;
 	}
 
-	// Account for the fact that stbtt renders inverted bitmaps...
-	fgcolor ^= 0xFF;
-	bgcolor ^= 0xFF;
-	// Is the foreground color lighter than background? If so, we make things easier
-	// for ourselves by inverting the colors, and toggling the is_invert flag to reverse
-	// it back later.
-	if (fgcolor < bgcolor) {
-		fgcolor ^= 0xFF;
-		bgcolor ^= 0xFF;
-		is_inverted = !is_inverted;
-	}
 	// Hopefully, we have some lines to render!
 
 	// Create a bitmap buffer to render a single line. We don't render the glyphs directly to the
@@ -3279,11 +3268,7 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
-	// If we have a non-zero background color, enforce it, otherwise we'll have a white bg (because 0 means white here).
-	if (bgcolor > 0U) {
-		memset(line_buff, bgcolor, max_lw * (unsigned int) max_line_height * sizeof(*line_buff));
-	}
-	uint8_t layer_diff = (uint8_t)(fgcolor - bgcolor);
+
 	// Setup the variables needed to render
 	FBInkCoordinates curr_point  = { 0, 0 };
 	FBInkCoordinates ins_point   = { 0, 0 };
@@ -3312,15 +3297,20 @@ int
 	uint32_t           tmp_c;
 	unsigned char *    lnPtr, *glPtr = NULL;
 	unsigned short int start_x;
-	// stb_truetype renders glyphs with color inverted to what our blitting functions expect
-	unsigned char invert = 0xFF;
+	unsigned char      invert = 0U;
+
 #	ifdef FBINK_FOR_KINDLE
 	if ((deviceQuirks.isKindleLegacy && is_inverted) || (!deviceQuirks.isKindleLegacy && is_inverted)) {
 #	else
 	if (is_inverted) {
 #	endif
-		invert = 0x00;
+		invert = 0xFF;
 	}
+	fgcolor ^= invert;
+	bgcolor ^= invert;
+	//uint8_t layer_diff = (uint8_t) abs(fgcolor - bgcolor);
+	short int layer_diff = (short int) (fgcolor - bgcolor);
+
 	bool abort_line = false;
 	// Render!
 	for (line = 0; line < num_lines; line++) {
@@ -3417,6 +3407,7 @@ int
 				// paint our glyph into the line buffer
 				lnPtr = line_buff + ins_point.x + (max_lw * ins_point.y);
 				glPtr = glyph_buff;
+				/*
 				// Note, two options here, because we REALLY want to avoid per-pixel math where at all possible.
 				if (layer_diff == 0xFF) {
 					for (int j = 0; j < gh; j++) {
@@ -3445,6 +3436,20 @@ int
 						glPtr += gw;
 						lnPtr += max_lw;
 					}
+				}
+				*/
+				// Keep storing it as an alpha coverage mask...
+				for (int j = 0; j < gh; j++) {
+					for (int k = 0; k < gw; k++) {
+						// 0 value pixels are transparent (no coverage),
+						// and our line buffer is already filled with zeroes ;)
+						if (glPtr[k] > 0) {
+							lnPtr[k] = glPtr[k];
+						}
+					}
+					// And advance one scanline. Quick! Hide! Pointer arithmetic
+					glPtr += gw;
+					lnPtr += max_lw;
 				}
 			}
 			curr_point.x = (unsigned short int) (curr_point.x + lroundf(sf * (float) adv));
@@ -3482,6 +3487,7 @@ int
 		start_x          = paint_point.x;
 		lnPtr            = line_buff;
 		// Normal painting to framebuffer. Please forgive the code repetition. Performance...
+		/*
 		if (!is_overlay && !is_fgless && !is_bgless) {
 			for (unsigned int j = 0; j < font_size_px; j++) {
 				for (unsigned int k = 0; k < lw; k++) {
@@ -3541,6 +3547,29 @@ int
 				paint_point.y++;
 			}
 		}
+		*/
+		for (unsigned int j = 0; j < font_size_px; j++) {
+			for (unsigned int k = 0; k < lw; k++) {
+				if (lnPtr[k] == 0) {
+					// No coverage (transparent) -> background
+					color.r = color.b = color.g = bgcolor;
+				} else if (lnPtr[k] == 0xFF) {
+					// Full coverage (opaque) -> foreground
+					color.r = color.b = color.g = fgcolor;
+				} else {
+					// AA, blend it using the coverage mask as alpha
+					//color.r = color.b = color.g = (uint8_t) DIV255((bgcolor + ((fgcolor - bgcolor) * lnPtr[k])));
+					color.r = color.b = color.g =
+					    (uint8_t) DIV255((bgcolor + (layer_diff * lnPtr[k])));
+				}
+				put_pixel(&paint_point, &color);
+				paint_point.x++;
+			}
+			lnPtr += max_lw;
+			paint_point.x = start_x;
+			paint_point.y++;
+		}
+
 		paint_point.y = (unsigned short int) (paint_point.y + lines[line].line_gap);
 		paint_point.x = area.tl.x;
 		if (paint_point.y + max_line_height > area.br.y) {
@@ -3553,8 +3582,8 @@ int
 		LOG("Finished printing line# %u", line);
 		// And clear our line buffer for next use. The glyph buffer shouldn't
 		// need clearing, as stbtt_MakeCodepointBitmap() should overwrite it.
-		// NOTE: And we want to honor our background color, too ;).
-		memset(line_buff, bgcolor, (max_lw * (unsigned int) max_line_height * sizeof(*line_buff)));
+		// NOTE: Fill it with 0 (no coverage -> background)
+		memset(line_buff, 0, (max_lw * (unsigned int) max_line_height * sizeof(*line_buff)));
 	}
 	if (paint_point.y + max_line_height > area.br.y) {
 		rv = 0;    // Inform the caller there is no room left to print another row.
