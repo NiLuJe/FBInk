@@ -3448,6 +3448,14 @@ int
 		} else if (lw > region.width) {
 			region.width = lw;
 		}
+
+		// NOTE: Snip a pixel off on 4bpp fbs to workaround a bizarre interaction,
+		//       that'd leave us with an extra column of white pixels.
+		//       Most likely another case of the low nibble getting clobbered...
+		if (vInfo.bits_per_pixel < 8U) {
+			lw = (unsigned int) MAX(0, (int) (lw - 1));
+		}
+
 		FBInkColor color = { 0 };
 		start_x          = paint_point.x;
 		lnPtr            = line_buff;
