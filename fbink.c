@@ -3467,7 +3467,7 @@ int
 				// If we're painting in B&W, use the mask as-is, it's already B&W ;).
 				// We just need to invert it ;).
 				uint8_t ainv = invert ^ 0xFF;
-				for (unsigned int j = 0U; j < font_size_px; j++) {
+				for (int j = 0; j < max_line_height; j++) {
 					for (unsigned int k = 0U; k < lw; k++) {
 						color.r = color.g = color.b = lnPtr[k] ^ ainv;
 						put_pixel(&paint_point, &color);
@@ -3478,7 +3478,7 @@ int
 					paint_point.y++;
 				}
 			} else {
-				for (unsigned int j = 0U; j < font_size_px; j++) {
+				for (int j = 0; j < max_line_height; j++) {
 					for (unsigned int k = 0U; k < lw; k++) {
 						if (lnPtr[k] == 0U) {
 							// No coverage (transparent) -> background
@@ -3504,7 +3504,7 @@ int
 			// NOTE: One more branch needed because 4bpp fbs are terrible...
 			if (vInfo.bits_per_pixel > 4U) {
 				// 8, 16, 24 & 32bpp
-				for (unsigned int j = 0U; j < font_size_px; j++) {
+				for (int j = 0; j < max_line_height; j++) {
 					for (unsigned int k = 0U; k < lw; k++) {
 						if (lnPtr[k] == 0U) {
 							// No coverage (transparent) -> background
@@ -3529,7 +3529,7 @@ int
 				}
 			} else {
 				// 4bpp... We'll have to alpha-blend *everything* to avoid clobbering pixels...
-				for (unsigned int j = 0U; j < font_size_px; j++) {
+				for (int j = 0; j < max_line_height; j++) {
 					for (unsigned int k = 0U; k < lw; k++) {
 						// AA, blend it using the coverage mask as alpha, and the underlying pixel as fg
 						get_pixel(&paint_point, &fb_color);
@@ -3550,7 +3550,7 @@ int
 			FBInkColor fb_color = { 0 };
 			if (vInfo.bits_per_pixel > 4U) {
 				// 8, 16, 24 & 32bpp
-				for (unsigned int j = 0U; j < font_size_px; j++) {
+				for (int j = 0; j < max_line_height; j++) {
 					for (unsigned int k = 0U; k < lw; k++) {
 						if (lnPtr[k] == 0xFF) {
 							// Full coverage (opaque) -> foreground
@@ -3575,7 +3575,7 @@ int
 				}
 			} else {
 				// 4bpp...
-				for (unsigned int j = 0U; j < font_size_px; j++) {
+				for (int j = 0; j < max_line_height; j++) {
 					for (unsigned int k = 0U; k < lw; k++) {
 						// AA, blend it using the coverage mask as alpha, and the underlying pixel as bg
 						get_pixel(&paint_point, &fb_color);
@@ -3596,7 +3596,7 @@ int
 			FBInkColor fb_color = { 0 };
 			if (vInfo.bits_per_pixel > 4U) {
 				// 8, 16, 24 & 32bpp
-				for (unsigned int j = 0U; j < font_size_px; j++) {
+				for (int j = 0; j < max_line_height; j++) {
 					for (unsigned int k = 0U; k < lw; k++) {
 						if (lnPtr[k] == 0xFF) {
 							// Full coverage (opaque) -> foreground
@@ -3629,7 +3629,7 @@ int
 				}
 			} else {
 				// 4bpp...
-				for (unsigned int j = 0U; j < font_size_px; j++) {
+				for (int j = 0; j < max_line_height; j++) {
 					for (unsigned int k = 0U; k < lw; k++) {
 						// AA, blend it using the coverage mask as alpha, and the underlying pixel as bg
 						// Without forgetting our foreground color trickery...
