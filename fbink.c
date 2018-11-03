@@ -3540,61 +3540,105 @@ int
 			}
 		} else if (is_bgless) {
 			FBInkColor fb_color = { 0 };
-			for (unsigned int j = 0U; j < font_size_px; j++) {
-				for (unsigned int k = 0U; k < lw; k++) {
-					if (lnPtr[k] == 0xFF) {
-						// Full coverage (opaque) -> foreground
-						color.r = color.g = color.b = fgcolor;
-						put_pixel(&paint_point, &color);
-					} else if (lnPtr[k] != 0U) {
+			if (vInfo.bits_per_pixel > 4U) {
+				// 8, 16, 24 & 32bpp
+				for (unsigned int j = 0U; j < font_size_px; j++) {
+					for (unsigned int k = 0U; k < lw; k++) {
+						if (lnPtr[k] == 0xFF) {
+							// Full coverage (opaque) -> foreground
+							color.r = color.g = color.b = fgcolor;
+							put_pixel(&paint_point, &color);
+						} else if (lnPtr[k] != 0U) {
+							// AA, blend it using the coverage mask as alpha, and the underlying pixel as bg
+							get_pixel(&paint_point, &fb_color);
+							color.r = (uint8_t) DIV255(
+							    ((fb_color.r * 0xFF) + ((fgcolor - fb_color.r) * lnPtr[k])));
+							color.g = (uint8_t) DIV255(
+							    ((fb_color.g * 0xFF) + ((fgcolor - fb_color.g) * lnPtr[k])));
+							color.b = (uint8_t) DIV255(
+							    ((fb_color.b * 0xFF) + ((fgcolor - fb_color.b) * lnPtr[k])));
+							put_pixel(&paint_point, &color);
+						}
+						paint_point.x++;
+					}
+					lnPtr += max_lw;
+					paint_point.x = start_x;
+					paint_point.y++;
+				}
+			} else {
+				// 4bpp...
+				for (unsigned int j = 0U; j < font_size_px; j++) {
+					for (unsigned int k = 0U; k < lw; k++) {
 						// AA, blend it using the coverage mask as alpha, and the underlying pixel as bg
 						get_pixel(&paint_point, &fb_color);
 						color.r = (uint8_t) DIV255(
 						    ((fb_color.r * 0xFF) + ((fgcolor - fb_color.r) * lnPtr[k])));
-						color.g = (uint8_t) DIV255(
-						    ((fb_color.g * 0xFF) + ((fgcolor - fb_color.g) * lnPtr[k])));
-						color.b = (uint8_t) DIV255(
-						    ((fb_color.b * 0xFF) + ((fgcolor - fb_color.b) * lnPtr[k])));
+						// Don't touch the low nibble...
+						color.g = fb_color.g;
+						color.b = fb_color.b;
 						put_pixel(&paint_point, &color);
+						paint_point.x++;
 					}
-					paint_point.x++;
+					lnPtr += max_lw;
+					paint_point.x = start_x;
+					paint_point.y++;
 				}
-				lnPtr += max_lw;
-				paint_point.x = start_x;
-				paint_point.y++;
 			}
 		} else if (is_overlay) {
 			FBInkColor fb_color = { 0 };
-			for (unsigned int j = 0U; j < font_size_px; j++) {
-				for (unsigned int k = 0U; k < lw; k++) {
-					if (lnPtr[k] == 0xFF) {
-						// Full coverage (opaque) -> foreground
-						get_pixel(&paint_point, &fb_color);
-						// We want our foreground to be the inverse of the underlying pixel...
-						color.r = fb_color.r ^ 0xFF;
-						color.g = fb_color.g ^ 0xFF;
-						color.b = fb_color.b ^ 0xFF;
-						put_pixel(&paint_point, &color);
-					} else if (lnPtr[k] != 0U) {
+			if (vInfo.bits_per_pixel > 4U) {
+				// 8, 16, 24 & 32bpp
+				for (unsigned int j = 0U; j < font_size_px; j++) {
+					for (unsigned int k = 0U; k < lw; k++) {
+						if (lnPtr[k] == 0xFF) {
+							// Full coverage (opaque) -> foreground
+							get_pixel(&paint_point, &fb_color);
+							// We want our foreground to be the inverse of the underlying pixel...
+							color.r = fb_color.r ^ 0xFF;
+							color.g = fb_color.g ^ 0xFF;
+							color.b = fb_color.b ^ 0xFF;
+							put_pixel(&paint_point, &color);
+						} else if (lnPtr[k] != 0U) {
+							// AA, blend it using the coverage mask as alpha, and the underlying pixel as bg
+							// Without forgetting our foreground color trickery...
+							get_pixel(&paint_point, &fb_color);
+							color.r = (uint8_t) DIV255(
+							    ((fb_color.r * 0xFF) +
+							     (((fb_color.r ^ 0xFF) - fb_color.r) * lnPtr[k])));
+							color.g = (uint8_t) DIV255(
+							    ((fb_color.g * 0xFF) +
+							     (((fb_color.g ^ 0xFF) - fb_color.g) * lnPtr[k])));
+							color.b = (uint8_t) DIV255(
+							    ((fb_color.b * 0xFF) +
+							     (((fb_color.b ^ 0xFF) - fb_color.b) * lnPtr[k])));
+							put_pixel(&paint_point, &color);
+						}
+						paint_point.x++;
+					}
+					lnPtr += max_lw;
+					paint_point.x = start_x;
+					paint_point.y++;
+				}
+			} else {
+				// 4bpp...
+				for (unsigned int j = 0U; j < font_size_px; j++) {
+					for (unsigned int k = 0U; k < lw; k++) {
 						// AA, blend it using the coverage mask as alpha, and the underlying pixel as bg
 						// Without forgetting our foreground color trickery...
 						get_pixel(&paint_point, &fb_color);
 						color.r =
 						    (uint8_t) DIV255(((fb_color.r * 0xFF) +
 								      (((fb_color.r ^ 0xFF) - fb_color.r) * lnPtr[k])));
-						color.g =
-						    (uint8_t) DIV255(((fb_color.g * 0xFF) +
-								      (((fb_color.g ^ 0xFF) - fb_color.g) * lnPtr[k])));
-						color.b =
-						    (uint8_t) DIV255(((fb_color.b * 0xFF) +
-								      (((fb_color.b ^ 0xFF) - fb_color.b) * lnPtr[k])));
+						// Don't touch the low nibble...
+						color.g = fb_color.g;
+						color.b = fb_color.b;
 						put_pixel(&paint_point, &color);
+						paint_point.x++;
 					}
-					paint_point.x++;
+					lnPtr += max_lw;
+					paint_point.x = start_x;
+					paint_point.y++;
 				}
-				lnPtr += max_lw;
-				paint_point.x = start_x;
-				paint_point.y++;
 			}
 		}
 
