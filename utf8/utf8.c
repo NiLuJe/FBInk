@@ -394,8 +394,8 @@ unsigned int
 	return c;
 }
 
-char*
-    u8_strchr(char* s, uint32_t ch, unsigned int* charn)
+const char*
+    u8_strchr(const char* s, uint32_t ch, unsigned int* charn)
 {
 	unsigned int i     = 0;
 	unsigned int lasti = 0;
@@ -413,8 +413,8 @@ char*
 	return NULL;
 }
 
-char*
-    u8_memchr(char* s, uint32_t ch, size_t sz, unsigned int* charn)
+const char*
+    u8_memchr(const char* s, uint32_t ch, size_t sz, unsigned int* charn)
 {
 	unsigned int i     = 0;
 	unsigned int lasti = 0;
@@ -441,7 +441,7 @@ char*
 }
 
 bool
-    u8_is_locale_utf8(char* locale)
+    u8_is_locale_utf8(const char* locale)
 {
 	/* this code based on libutf8 */
 	const char* cp = locale;

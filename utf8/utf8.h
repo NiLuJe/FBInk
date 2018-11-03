@@ -61,13 +61,13 @@ unsigned int u8_escape(char* buf, unsigned int sz, const char* src, bool escape_
 
 /* return a pointer to the first occurrence of ch in s, or NULL if not
    found. character index of found character returned in *charn. */
-char* u8_strchr(char* s, uint32_t ch, unsigned int* charn);
+const char* u8_strchr(const char* s, uint32_t ch, unsigned int* charn);
 
 /* same as the above, but searches a buffer of a given size instead of
    a NUL-terminated string. */
-char* u8_memchr(char* s, uint32_t ch, size_t sz, unsigned int* charn);
+const char* u8_memchr(const char* s, uint32_t ch, size_t sz, unsigned int* charn);
 
-bool u8_is_locale_utf8(char* locale) __attribute__((pure));
+bool u8_is_locale_utf8(const char* locale) __attribute__((pure));
 
 /* printf where the format string and arguments may be in UTF-8.
    you can avoid this function and just use ordinary printf() if the current
