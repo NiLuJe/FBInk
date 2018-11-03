@@ -1897,12 +1897,9 @@ static int
 		}
 #endif
 	} else {
-		// Set font-size based on screen DPI (roughly matches: Linux, Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
-		if (deviceQuirks.screenDPI <= 96U) {
-			FONTSIZE_MULT = 2U;    // 16x16 on pure Linux
-		} else if (deviceQuirks.screenDPI <= 167U) {
-			FONTSIZE_MULT = 1U;    // 8x8
-		} else if (deviceQuirks.screenDPI <= 212U) {
+		// Set font-size based on screen DPI
+		// (roughly matches: Linux (96), Pearl (167), Carta (212), Carta HD & 7" Carta (265), 7" Carta HD (300))
+		if (deviceQuirks.screenDPI <= 212U) {
 			FONTSIZE_MULT = 2U;    // 16x16
 		} else if (deviceQuirks.screenDPI <= 265U) {
 			FONTSIZE_MULT = 3U;    // 24x24
