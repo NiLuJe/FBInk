@@ -330,7 +330,11 @@ static void get_pixel(FBInkCoordinates*, FBInkColor*);
 // This is only needed for alpha blending in the image or OpenType codepath ;).
 // c.f., https://github.com/videolan/vlc/blob/6b96ade7dd97acb49303a0a9da9b3d2056b808e0/modules/video_filter/blend.cpp#L49
 //     & https://github.com/koreader/koreader-base/blob/b3e72affd0e1ba819d92194b229468452c58836f/blitbuffer.c#L59
+// NOTE: May not actually be faster on x86_64, where most compilers will do better with a simple (v / 255U),
+//       but on ARM, which is what we mainly care about, this yields better results... ;).
 #	define DIV255(v) (((v >> 8U) + v + 0x01) >> 8U)
+// NOTE: On the other hand, for mul, every decent compiler seem to figure that one on its own, regardless of architecture ;).
+#	define MUL255(v) ((v << 8U) - v)
 #endif
 
 static void fill_rect(unsigned short int, unsigned short int, unsigned short int, unsigned short int, FBInkColor*);
