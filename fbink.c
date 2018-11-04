@@ -2129,8 +2129,7 @@ int
 		WARN("Error initialising font '%s'", filename);
 		return ERRCODE(EXIT_FAILURE);
 	}
-	// Assign the current font to its appropriate otFonts struct member, depending
-	// on the style specified by the caller.
+	// Assign the current font to its appropriate otFonts struct member, depending on the style specified by the caller.
 	// NOTE: We make sure we free any previous allocation first!
 	switch (style) {
 		case FNT_REGULAR:
@@ -2756,8 +2755,7 @@ int
 }
 
 #ifdef FBINK_WITH_OPENTYPE
-// An extremely rudimentry "markdown" parser. It would probably be wise to cook up something better
-// at some point...
+// An extremely rudimentry "markdown" parser. It would probably be wise to cook up something better at some point...
 // This is *italic* text.
 // This is **bold** text.
 // This is ***bold italic*** text.
@@ -2869,6 +2867,7 @@ int
 			goto cleanup;
 		}
 	}
+
 	LOG("Printing OpenType text.");
 	// Sanity check the provided margins and calculate the printable area.
 	// We'll cap the margin at 90% for each side. Margins for opposing edges
@@ -2903,8 +2902,7 @@ int
 	// Given the ppi, convert point height to pixels. Note, 1pt is 1/72th of an inch
 	unsigned int font_size_px = (unsigned int) (ppi / 72.0f * size_pt);
 
-	// This is a pointer to whichever font is currently active. It gets updated for every
-	// character in the loop, as needed.
+	// This is a pointer to whichever font is currently active. It gets updated for every character in the loop, as needed.
 	stbtt_fontinfo* curr_font = NULL;
 
 	int max_row_height = 0;
@@ -3059,8 +3057,7 @@ int
 		parse_simple_md(string, str_len_bytes, fmt_buff);
 		LOG("Finished parsing formatting markup");
 	}
-	// Lets find our lines! Nothing fancy, just a simple first fit algorithm, but we do
-	// our best not to break inside a word.
+	// Lets find our lines! Nothing fancy, just a simple first fit algorithm, but we do our best not to break inside a word.
 
 	unsigned int       c_index     = 0;
 	unsigned int       tmp_c_index = c_index;
@@ -3068,10 +3065,8 @@ int
 	unsigned short int max_lw = (unsigned short int) (area.br.x - area.tl.x);
 	unsigned int       line;
 	int                max_line_height = max_row_height - max_lg;
-	// adv = advance: the horizontal distance along the baseline to the origin of
-	//                the next glyph
-	// lsb = left side bearing: The horizontal distance from the origin point to
-	//                          left edge of the glyph
+	// adv = advance: the horizontal distance along the baseline to the origin of the next glyph
+	// lsb = left side bearing: The horizontal distance from the origin point to left edge of the glyph
 	int          adv, lsb, curr_x;
 	bool         complete_str = false;
 	int          x0, y0, x1, y1, gw, gh, cx;
@@ -3127,8 +3122,8 @@ int
 				break;
 			}
 			c = u8_nextchar(string, &c_index);
-			// Note, these metrics are unscaled, we need to use our previously
-			// obtained scale factor (sf) to get the metrics as pixels
+			// Note, these metrics are unscaled,
+			// we need to use our previously obtained scale factor (sf) to get the metrics as pixels
 			stbtt_GetCodepointHMetrics(curr_font, (int) c, &adv, &lsb);
 			// But these are already scaled
 			stbtt_GetCodepointBitmapBox(curr_font, (int) c, sf, sf, &x0, &y0, &x1, &y1);
@@ -3138,8 +3133,7 @@ int
 			if (cx + x0 < 0) {
 				curr_x += abs(cx + x0);
 			}
-			// Handle the situation where the metrics may lie, and the glyph descends
-			// below what the metrics say.
+			// Handle the situation where the metrics may lie, and the glyph descends below what the metrics say.
 			if (max_baseline + y1 > max_line_height) {
 				int height_diff = (max_baseline + y1) - max_line_height;
 				LOG("Height Diff: %d, available LG: %d", height_diff, lines[line].line_gap);
@@ -3178,8 +3172,8 @@ int
 					u8_inc(string, &c_index);
 					break;
 				} else {
-					// Note, we need to do this a second time, to get the previous character, as
-					// u8_nextchar() 'consumes' a character.
+					// Note, we need to do this a second time, to get the previous character,
+					// as u8_nextchar() 'consumes' a character.
 					u8_dec(string, &c_index);
 					lines[line].endCharIndex = c_index;
 					for (; c_index > lines[line].startCharIndex; u8_dec(string, &c_index)) {
@@ -3270,11 +3264,11 @@ int
 
 	// Hopefully, we have some lines to render!
 
-	// Create a bitmap buffer to render a single line. We don't render the glyphs directly to the
-	// fb here, as we need to do some simple blending, and it makes it easier to calculate our
-	// centering if required.
+	// Create a bitmap buffer to render a single line.
+	// We don't render the glyphs directly to the fb here, as we need to do some simple blending,
+	// and it makes it easier to calculate our centering if required.
 	line_buff = calloc(max_lw * (unsigned int) max_line_height, sizeof(*line_buff));
-	// We also don't want to be creating a new buffer for every glyph
+	// We also don't want to be creating a new buffer for every glyph, so make it roomy, just in case...
 	unsigned int glyph_buffer_dims = font_size_px * (unsigned int) max_line_height * 2U;
 	glyph_buff                     = calloc(glyph_buffer_dims, sizeof(*glyph_buff));
 	if (!line_buff || !glyph_buff) {
@@ -3324,8 +3318,7 @@ int
 		if (!lines[line].line_used) {
 			break;
 		}
-		// We have run out of (vertical) printable area, most likely due to incorrect font
-		// metrics in the font.
+		// We have run out of (vertical) printable area, most likely due to incorrect font metrics in the font.
 		if (abort_line) {
 			break;
 		}
@@ -3384,8 +3377,8 @@ int
 			}
 			ins_point.x = (unsigned short int) (curr_point.x + x0);
 			ins_point.y = (unsigned short int) (ins_point.y + y0);
-			// We only increase the lw if glyph not a space This hopefully prevent trailing
-			// spaces from being printed on a line.
+			// We only increase the lw if the glyph is not a space.
+			// This hopefully prevent trailing spaces from being printed on a line.
 			if (gw > 0) {
 				lw = ins_point.x + (unsigned int) gw;
 			} else {
@@ -3393,10 +3386,10 @@ int
 			}
 
 			// Just in case our arithmetic was off by a pixel or two...
-			// Note that we are deliberately using a slightly shorter line
-			// width during the measurement phase, so this should not happen.
-			// If it does occur, we will now exit instead of clipping the glyph
-			// bounding box, to avoid the possiblity of stb_truetype segfaulting.
+			// Note that we are deliberately using a slightly shorter line width during the measurement phase,
+			// so this should not happen.
+			// If it does occur, we will now exit instead of clipping the glyph bounding box,
+			// to avoid the possiblity of stb_truetype segfaulting.
 			if (lw > max_lw) {
 				WARN("Max allowed line width exceeded");
 				WARN("Curr LW: %u   Max Allowed: %hu", lw, max_lw);
@@ -3404,17 +3397,18 @@ int
 				goto cleanup;
 			}
 			if (gw > 0 && fgcolor != bgcolor) {
-				// Because the stbtt_MakeCodepointBitmap documentation is a bit vague on this
-				// point, the parameter 'out_stride' should be the width of the surface in our
-				// buffer. It's designed so that the glyph can be rendered directly to a screen buffer.
-				// For example, if we were rendering directly to a 1080x1440 screen out_stride
-				// should be set to 1080. In this case however, we want to render to a 'box' of the
-				// dimensions of the glyph, so we set 'out_stride' to the glyph width.
+				// Because the stbtt_MakeCodepointBitmap documentation is a bit vague on this point,
+				// the parameter 'out_stride' should be the width of the surface in our buffer.
+				// It's designed so that the glyph can be rendered directly to a screen buffer.
+				// For example, if we were rendering directly to a 1080x1440 screen,
+				// out_stride should be set to 1080.
+				// In this case however, we want to render to a 'box' of the dimensions of the glyph,
+				// so we set 'out_stride' to the glyph width.
 				stbtt_MakeCodepointBitmap(curr_font, glyph_buff, gw, gh, gw, sf, sf, (int) c);
 				// paint our glyph into the line buffer
 				lnPtr = line_buff + ins_point.x + (max_lw * ins_point.y);
 				glPtr = glyph_buff;
-				// NOTE: We keep storing it as an alpha coverage mask, we'll blend in the final rendering stage
+				// NOTE: We keep storing it as an alpha coverage mask, we'll blend it in the final rendering stage
 				for (int j = 0; j < gh; j++) {
 					for (int k = 0; k < gw; k++) {
 						// 0 value pixels are transparent (no coverage),
@@ -3683,8 +3677,8 @@ int
 			region.height -= region.top + region.height - screenHeight;
 		}
 		LOG("Finished printing line# %u", line);
-		// And clear our line buffer for next use. The glyph buffer shouldn't
-		// need clearing, as stbtt_MakeCodepointBitmap() should overwrite it.
+		// And clear our line buffer for next use. The glyph buffer shouldn't need clearing,
+		// as stbtt_MakeCodepointBitmap() should overwrite it.
 		// NOTE: Fill it with 0 (no coverage -> background)
 		memset(line_buff, 0, (max_lw * (unsigned int) max_line_height * sizeof(*line_buff)));
 	}
