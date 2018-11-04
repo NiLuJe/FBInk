@@ -3243,8 +3243,6 @@ int
 	// Let's get some rendering options from FBInkConfig
 	uint8_t valign      = NONE;
 	uint8_t halign      = NONE;
-	uint8_t fgcolor     = penFGColor;
-	uint8_t bgcolor     = penBGColor;
 	bool    is_inverted = false;
 	bool    is_overlay  = false;
 	bool    is_bgless   = false;
@@ -3302,6 +3300,9 @@ int
 	}
 	region.top = paint_point.y;
 
+	uint8_t fgcolor = is_inverted ? penBGColor : penFGColor;
+	uint8_t bgcolor = is_inverted ? penFGColor : penBGColor;
+
 	// Do we need to clear the screen?
 	if (is_cleared) {
 		clear_screen(fbfd, !is_inverted ? fgcolor : bgcolor, is_flashing);
@@ -3311,10 +3312,8 @@ int
 	unsigned char *    lnPtr, *glPtr = NULL;
 	unsigned short int start_x;
 
-	unsigned char invert = is_inverted ? 0xFF : 0U;
-	fgcolor ^= invert;
-	bgcolor ^= invert;
-	short int layer_diff = (short int) (fgcolor - bgcolor);
+	unsigned char invert     = is_inverted ? 0xFF : 0U;
+	short int     layer_diff = (short int) (fgcolor - bgcolor);
 
 	bool abort_line = false;
 	// Render!
