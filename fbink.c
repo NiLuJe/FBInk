@@ -3679,8 +3679,8 @@ int
 			abort_line = true;
 		}
 		region.height += (unsigned int) max_line_height;
-		if (region.top + region.height > viewHeight) {
-			region.height -= region.top + region.height - viewHeight;
+		if (region.top + region.height > screenHeight) {
+			region.height -= region.top + region.height - screenHeight;
 		}
 		LOG("Finished printing line# %u", line);
 		// And clear our line buffer for next use. The glyph buffer shouldn't
@@ -3695,12 +3695,12 @@ int
 	}
 cleanup:
 	// Rotate our eink refresh region before refreshing
-	LOG("Refreshing region from LEFT: %d, TOP: %d, WIDTH: %d, HEIGHT: %d",
-	    (int) region.left,
-	    (int) region.top,
-	    (int) region.width,
-	    (int) region.height);
-	if (region.width > 0 && region.height > 0) {
+	LOG("Refreshing region from LEFT: %u, TOP: %u, WIDTH: %u, HEIGHT: %u",
+	    region.left,
+	    region.top,
+	    region.width,
+	    region.height);
+	if (region.width > 0U && region.height > 0U) {
 		(*fxpRotateRegion)(&region);
 		refresh(fbfd, region, WAVEFORM_MODE_AUTO, is_flashing);
 	}
