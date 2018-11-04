@@ -3511,7 +3511,8 @@ int
 							color.r = color.g = color.b = bgcolor;
 							put_pixel(&paint_point, &color);
 						} else if (lnPtr[k] != 0xFF) {
-							// AA, blend it using the coverage mask as alpha, and the underlying pixel as fg
+							// AA, blend it using the coverage mask as alpha,
+							// and the underlying pixel as fg
 							get_pixel(&paint_point, &fb_color);
 							color.r = (uint8_t) DIV255(
 							    ((bgcolor * 0xFF) + ((fb_color.r - bgcolor) * lnPtr[k])));
@@ -3557,7 +3558,8 @@ int
 							color.r = color.g = color.b = fgcolor;
 							put_pixel(&paint_point, &color);
 						} else if (lnPtr[k] != 0U) {
-							// AA, blend it using the coverage mask as alpha, and the underlying pixel as bg
+							// AA, blend it using the coverage mask as alpha,
+							// and the underlying pixel as bg
 							get_pixel(&paint_point, &fb_color);
 							color.r = (uint8_t) DIV255(
 							    ((fb_color.r * 0xFF) + ((fgcolor - fb_color.r) * lnPtr[k])));
@@ -3607,7 +3609,8 @@ int
 							color.b = fb_color.b ^ 0xFF;
 							put_pixel(&paint_point, &color);
 						} else if (lnPtr[k] != 0U) {
-							// AA, blend it using the coverage mask as alpha, and the underlying pixel as bg
+							// AA, blend it using the coverage mask as alpha,
+							// and the underlying pixel as bg
 							// Without forgetting our foreground color trickery...
 							get_pixel(&paint_point, &fb_color);
 							color.r = (uint8_t) DIV255(
