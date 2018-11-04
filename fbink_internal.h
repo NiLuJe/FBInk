@@ -343,6 +343,7 @@ static void get_pixel(FBInkCoordinates*, FBInkColor*);
 //       but on ARM, which is what we mainly care about, this yields better results... ;).
 #	define DIV255(v) (((v >> 8U) + v + 0x01) >> 8U)
 // NOTE: On the other hand, for mul, every decent compiler seem to figure that one on its own, regardless of architecture ;).
+//       (... most of the time, i.e., when it's on its own).
 #	define MUL255(v) ((v << 8U) - v)
 #endif
 

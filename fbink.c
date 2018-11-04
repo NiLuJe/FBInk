@@ -3486,6 +3486,7 @@ int
 					paint_point.y++;
 				}
 			} else {
+				uint16_t pmul_bg = (uint16_t)(bgcolor * 0xFF);
 				for (int j = 0; j < max_line_height; j++) {
 					for (unsigned int k = 0U; k < lw; k++) {
 						if (lnPtr[k] == 0U) {
@@ -3496,8 +3497,8 @@ int
 							color.r = color.g = color.b = fgcolor;
 						} else {
 							// AA, blend it using the coverage mask as alpha
-							color.r = color.g = color.b = (uint8_t) DIV255(
-							    ((bgcolor * 0xFF) + (layer_diff * lnPtr[k])));
+							color.r = color.g = color.b =
+							    (uint8_t) DIV255((pmul_bg + (layer_diff * lnPtr[k])));
 						}
 						put_pixel(&paint_point, &color);
 						paint_point.x++;
@@ -3509,6 +3510,7 @@ int
 			}
 		} else if (is_fgless) {
 			FBInkColor fb_color = { 0 };
+			uint16_t   pmul_bg  = (uint16_t)(bgcolor * 0xFF);
 			// NOTE: One more branch needed because 4bpp fbs are terrible...
 			if (vInfo.bits_per_pixel > 4U) {
 				// 8, 16, 24 & 32bpp
@@ -3523,11 +3525,11 @@ int
 							// and the underlying pixel as fg
 							get_pixel(&paint_point, &fb_color);
 							color.r = (uint8_t) DIV255(
-							    ((bgcolor * 0xFF) + ((fb_color.r - bgcolor) * lnPtr[k])));
+							    (pmul_bg + ((fb_color.r - bgcolor) * lnPtr[k])));
 							color.g = (uint8_t) DIV255(
-							    ((bgcolor * 0xFF) + ((fb_color.g - bgcolor) * lnPtr[k])));
+							    (pmul_bg + ((fb_color.g - bgcolor) * lnPtr[k])));
 							color.b = (uint8_t) DIV255(
-							    ((bgcolor * 0xFF) + ((fb_color.b - bgcolor) * lnPtr[k])));
+							    (pmul_bg + ((fb_color.b - bgcolor) * lnPtr[k])));
 							put_pixel(&paint_point, &color);
 						}
 						paint_point.x++;
@@ -3542,8 +3544,8 @@ int
 					for (unsigned int k = 0U; k < lw; k++) {
 						// AA, blend it using the coverage mask as alpha, and the underlying pixel as fg
 						get_pixel(&paint_point, &fb_color);
-						color.r = (uint8_t) DIV255(
-						    ((bgcolor * 0xFF) + ((fb_color.r - bgcolor) * lnPtr[k])));
+						color.r =
+						    (uint8_t) DIV255((pmul_bg + ((fb_color.r - bgcolor) * lnPtr[k])));
 						// Don't touch the low nibble...
 						color.g = fb_color.g;
 						color.b = fb_color.b;
@@ -3570,11 +3572,11 @@ int
 							// and the underlying pixel as bg
 							get_pixel(&paint_point, &fb_color);
 							color.r = (uint8_t) DIV255(
-							    ((fb_color.r * 0xFF) + ((fgcolor - fb_color.r) * lnPtr[k])));
+							    (MUL255(fb_color.r) + ((fgcolor - fb_color.r) * lnPtr[k])));
 							color.g = (uint8_t) DIV255(
-							    ((fb_color.g * 0xFF) + ((fgcolor - fb_color.g) * lnPtr[k])));
+							    (MUL255(fb_color.g) + ((fgcolor - fb_color.g) * lnPtr[k])));
 							color.b = (uint8_t) DIV255(
-							    ((fb_color.b * 0xFF) + ((fgcolor - fb_color.b) * lnPtr[k])));
+							    (MUL255(fb_color.b) + ((fgcolor - fb_color.b) * lnPtr[k])));
 							put_pixel(&paint_point, &color);
 						}
 						paint_point.x++;
@@ -3590,7 +3592,7 @@ int
 						// AA, blend it using the coverage mask as alpha, and the underlying pixel as bg
 						get_pixel(&paint_point, &fb_color);
 						color.r = (uint8_t) DIV255(
-						    ((fb_color.r * 0xFF) + ((fgcolor - fb_color.r) * lnPtr[k])));
+						    (MUL255(fb_color.r) + ((fgcolor - fb_color.r) * lnPtr[k])));
 						// Don't touch the low nibble...
 						color.g = fb_color.g;
 						color.b = fb_color.b;
@@ -3622,13 +3624,13 @@ int
 							// Without forgetting our foreground color trickery...
 							get_pixel(&paint_point, &fb_color);
 							color.r = (uint8_t) DIV255(
-							    ((fb_color.r * 0xFF) +
+							    (MUL255(fb_color.r) +
 							     (((fb_color.r ^ 0xFF) - fb_color.r) * lnPtr[k])));
 							color.g = (uint8_t) DIV255(
-							    ((fb_color.g * 0xFF) +
+							    (MUL255(fb_color.g) +
 							     (((fb_color.g ^ 0xFF) - fb_color.g) * lnPtr[k])));
 							color.b = (uint8_t) DIV255(
-							    ((fb_color.b * 0xFF) +
+							    (MUL255(fb_color.b) +
 							     (((fb_color.b ^ 0xFF) - fb_color.b) * lnPtr[k])));
 							put_pixel(&paint_point, &color);
 						}
@@ -3646,7 +3648,7 @@ int
 						// Without forgetting our foreground color trickery...
 						get_pixel(&paint_point, &fb_color);
 						color.r =
-						    (uint8_t) DIV255(((fb_color.r * 0xFF) +
+						    (uint8_t) DIV255((MUL255(fb_color.r) +
 								      (((fb_color.r ^ 0xFF) - fb_color.r) * lnPtr[k])));
 						// Don't touch the low nibble...
 						color.g = fb_color.g;
