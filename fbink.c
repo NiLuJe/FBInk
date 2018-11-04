@@ -2068,7 +2068,7 @@ int
 	// NOTE: Bail if we were passed a Kobo system font, as they're obfuscated, and that'd segfault in stbtt_InitFont >_<"
 	const char blacklist[] = "/usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/fonts/";
 	if (!strncmp(filename, blacklist, sizeof(blacklist) - 1)) {
-		WARN("Cannot use font '%s': it's an obfuscated Kobo system font", filename);
+		WARN("Cannot use font '%s': it's an obfuscated Kobo system font", filename + sizeof(blacklist) - 1);
 		return ERRCODE(EXIT_FAILURE);
 	}
 #			endif
