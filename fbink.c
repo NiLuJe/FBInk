@@ -3295,10 +3295,7 @@ int
 	unsigned char *    lnPtr, *glPtr = NULL;
 	unsigned short int start_x;
 
-	unsigned char invert = 0U;
-	if (is_inverted) {
-		invert = 0xFF;
-	}
+	unsigned char invert = is_inverted ? 0xFF : 0U;
 	fgcolor ^= invert;
 	bgcolor ^= invert;
 	short int layer_diff = (short int) (fgcolor - bgcolor);
