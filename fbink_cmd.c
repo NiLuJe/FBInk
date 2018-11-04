@@ -145,7 +145,7 @@ static void
 #	ifndef FBINK_FOR_LINUX
 #		ifndef FBINK_FOR_KINDLE
 #			ifndef FBINK_FOR_CERVANTES
-	    "\t\tPlease note that you will NOT be able to use system fonts on Kobo, because they're obfuscated. Trying to do so will only lead to a crash.\n"
+	    "\t\tPlease note that you will NOT be able to use system fonts on Kobo, because they're obfuscated.\n"
 #			endif
 #		endif
 #	endif
