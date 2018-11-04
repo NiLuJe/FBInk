@@ -2105,7 +2105,7 @@ int
 		WARN("Error allocating stbtt_fontinfo struct");
 		return ERRCODE(EXIT_FAILURE);
 	}
-	if (!stbtt_InitFont(font_info, data, 0)) {
+	if (!stbtt_InitFont(font_info, data, stbtt_GetFontOffsetForIndex(data, 0))) {
 		free(font_info);
 		WARN("Error initialising font '%s'", filename);
 		return ERRCODE(EXIT_FAILURE);
