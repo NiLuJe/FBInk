@@ -3294,10 +3294,10 @@ int
 	uint32_t           tmp_c;
 	unsigned char *    lnPtr, *glPtr = NULL;
 	unsigned short int start_x;
-	unsigned char      invert = 0U;
 
+	unsigned char invert = 0U;
 #	ifdef FBINK_FOR_KINDLE
-	if ((deviceQuirks.isKindleLegacy && is_inverted) || (!deviceQuirks.isKindleLegacy && is_inverted)) {
+	if ((deviceQuirks.isKindleLegacy && !is_inverted) || (!deviceQuirks.isKindleLegacy && is_inverted)) {
 #	else
 	if (is_inverted) {
 #	endif
