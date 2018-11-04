@@ -583,9 +583,12 @@ static struct mxcfb_rect
 	    multiline_offset,
 	    (unsigned short int) (row + multiline_offset));
 
+	uint8_t invert  = fbink_config->is_inverted ? 0xFF : 0U;
+	uint8_t fgcolor = penFGColor ^ invert;
+	uint8_t bgcolor = penBGColor ^ invert;
 	// NOTE: It's a grayscale ramp, so r = g = b (= v).
-	FBInkColor fgC = { fbink_config->is_inverted ? penBGColor : penFGColor, fgC.r, fgC.r };
-	FBInkColor bgC = { fbink_config->is_inverted ? penFGColor : penBGColor, bgC.r, bgC.r };
+	FBInkColor fgC = { fgcolor, fgC.r, fgC.r };
+	FBInkColor bgC = { bgcolor, bgC.r, bgC.r };
 
 	// Adjust row in case we're a continuation of a multi-line print...
 	row = (unsigned short int) (row + multiline_offset);
@@ -1897,12 +1900,9 @@ static int
 		}
 #endif
 	} else {
-		// Set font-size based on screen DPI (roughly matches: Linux, Pearl, Carta, Carta HD & 7" Carta, 7" Carta HD)
-		if (deviceQuirks.screenDPI <= 96U) {
-			FONTSIZE_MULT = 2U;    // 16x16 on pure Linux
-		} else if (deviceQuirks.screenDPI <= 167U) {
-			FONTSIZE_MULT = 1U;    // 8x8
-		} else if (deviceQuirks.screenDPI <= 212U) {
+		// Set font-size based on screen DPI
+		// (roughly matches: Linux (96), Pearl (167), Carta (212), Carta HD & 7" Carta (265), 7" Carta HD (300))
+		if (deviceQuirks.screenDPI <= 212U) {
 			FONTSIZE_MULT = 2U;    // 16x16
 		} else if (deviceQuirks.screenDPI <= 265U) {
 			FONTSIZE_MULT = 3U;    // 24x24
@@ -2062,6 +2062,22 @@ int
     fbink_add_ot_font(const char* filename UNUSED_BY_MINIMAL, FONT_STYLE_T style UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_OPENTYPE
+#	ifndef FBINK_FOR_LINUX
+#		ifndef FBINK_FOR_KINDLE
+#			ifndef FBINK_FOR_CERVANTES
+	// NOTE: Bail if we were passed a Kobo system font, as they're obfuscated, and that'd segfault in stbtt_InitFont >_<"
+	char* path = strdup(filename);
+	char* dir  = dirname(path);
+	if (!strcasecmp(dir, "/usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/fonts")) {
+		free(path);
+		WARN("Cannot use font '%s': it's an obfuscated Kobo system font", filename);
+		return ERRCODE(EXIT_FAILURE);
+	}
+	free(path);
+#			endif
+#		endif
+#	endif
+
 	// Init libunibreak the first time we're called
 	if (!otInit) {
 		init_linebreak();
@@ -2108,13 +2124,12 @@ int
 		WARN("Error allocating stbtt_fontinfo struct");
 		return ERRCODE(EXIT_FAILURE);
 	}
-	if (!stbtt_InitFont(font_info, data, 0)) {
+	if (!stbtt_InitFont(font_info, data, stbtt_GetFontOffsetForIndex(data, 0))) {
 		free(font_info);
 		WARN("Error initialising font '%s'", filename);
 		return ERRCODE(EXIT_FAILURE);
 	}
-	// Assign the current font to it's appropriate otFonts struct member, depending
-	// on the style specified by the caller.
+	// Assign the current font to its appropriate otFonts struct member, depending on the style specified by the caller.
 	// NOTE: We make sure we free any previous allocation first!
 	switch (style) {
 		case FNT_REGULAR:
@@ -2391,7 +2406,7 @@ int
 
 	// Clear screen?
 	if (fbink_config->is_cleared) {
-		clear_screen(fbfd, fbink_config->is_inverted ? penFGColor : penBGColor, fbink_config->is_flashing);
+		clear_screen(fbfd, fbink_config->is_inverted ? penBGColor ^ 0xFF : penBGColor, fbink_config->is_flashing);
 	}
 
 	// See if want to position our text relative to the edge of the screen, and not the beginning
@@ -2740,8 +2755,7 @@ int
 }
 
 #ifdef FBINK_WITH_OPENTYPE
-// An extremely rudimentry "markdown" parser. It would probably be wise to cook up something better
-// at some point...
+// An extremely rudimentry "markdown" parser. It would probably be wise to cook up something better at some point...
 // This is *italic* text.
 // This is **bold** text.
 // This is ***bold italic*** text.
@@ -2853,6 +2867,7 @@ int
 			goto cleanup;
 		}
 	}
+
 	LOG("Printing OpenType text.");
 	// Sanity check the provided margins and calculate the printable area.
 	// We'll cap the margin at 90% for each side. Margins for opposing edges
@@ -2887,8 +2902,7 @@ int
 	// Given the ppi, convert point height to pixels. Note, 1pt is 1/72th of an inch
 	unsigned int font_size_px = (unsigned int) (ppi / 72.0f * size_pt);
 
-	// This is a pointer to whichever font is currently active. It gets updated for every
-	// character in the loop, as needed.
+	// This is a pointer to whichever font is currently active. It gets updated for every character in the loop, as needed.
 	stbtt_fontinfo* curr_font = NULL;
 
 	int max_row_height = 0;
@@ -3043,8 +3057,7 @@ int
 		parse_simple_md(string, str_len_bytes, fmt_buff);
 		LOG("Finished parsing formatting markup");
 	}
-	// Lets find our lines! Nothing fancy, just a simple first fit algorithm, but we do
-	// our best not to break inside a word.
+	// Lets find our lines! Nothing fancy, just a simple first fit algorithm, but we do our best not to break inside a word.
 
 	unsigned int       c_index     = 0;
 	unsigned int       tmp_c_index = c_index;
@@ -3052,10 +3065,8 @@ int
 	unsigned short int max_lw = (unsigned short int) (area.br.x - area.tl.x);
 	unsigned int       line;
 	int                max_line_height = max_row_height - max_lg;
-	// adv = advance: the horizontal distance along the baseline to the origin of
-	//                the next glyph
-	// lsb = left side bearing: The horizontal distance from the origin point to
-	//                          left edge of the glyph
+	// adv = advance: the horizontal distance along the baseline to the origin of the next glyph
+	// lsb = left side bearing: The horizontal distance from the origin point to left edge of the glyph
 	int          adv, lsb, curr_x;
 	bool         complete_str = false;
 	int          x0, y0, x1, y1, gw, gh, cx;
@@ -3111,8 +3122,8 @@ int
 				break;
 			}
 			c = u8_nextchar(string, &c_index);
-			// Note, these metrics are unscaled, we need to use our previously
-			// obtained scale factor (sf) to get the metrics as pixels
+			// Note, these metrics are unscaled,
+			// we need to use our previously obtained scale factor (sf) to get the metrics as pixels
 			stbtt_GetCodepointHMetrics(curr_font, (int) c, &adv, &lsb);
 			// But these are already scaled
 			stbtt_GetCodepointBitmapBox(curr_font, (int) c, sf, sf, &x0, &y0, &x1, &y1);
@@ -3122,8 +3133,7 @@ int
 			if (cx + x0 < 0) {
 				curr_x += abs(cx + x0);
 			}
-			// Handle the situation where the metrics may lie, and the glyph descends
-			// below what the metrics say.
+			// Handle the situation where the metrics may lie, and the glyph descends below what the metrics say.
 			if (max_baseline + y1 > max_line_height) {
 				int height_diff = (max_baseline + y1) - max_line_height;
 				LOG("Height Diff: %d, available LG: %d", height_diff, lines[line].line_gap);
@@ -3162,8 +3172,8 @@ int
 					u8_inc(string, &c_index);
 					break;
 				} else {
-					// Note, we need to do this a second time, to get the previous character, as
-					// u8_nextchar() 'consumes' a character.
+					// Note, we need to do this a second time, to get the previous character,
+					// as u8_nextchar() 'consumes' a character.
 					u8_dec(string, &c_index);
 					lines[line].endCharIndex = c_index;
 					for (; c_index > lines[line].startCharIndex; u8_dec(string, &c_index)) {
@@ -3230,8 +3240,6 @@ int
 	// Let's get some rendering options from FBInkConfig
 	uint8_t valign      = NONE;
 	uint8_t halign      = NONE;
-	uint8_t fgcolor     = penFGColor;
-	uint8_t bgcolor     = penBGColor;
 	bool    is_inverted = false;
 	bool    is_overlay  = false;
 	bool    is_bgless   = false;
@@ -3254,24 +3262,13 @@ int
 		is_centered = cfg->is_centered;
 	}
 
-	// Account for the fact that stbtt renders inverted bitmaps...
-	fgcolor ^= 0xFF;
-	bgcolor ^= 0xFF;
-	// Is the foreground color lighter than background? If so, we make things easier
-	// for ourselves by inverting the colors, and toggling the is_invert flag to reverse
-	// it back later.
-	if (fgcolor < bgcolor) {
-		fgcolor ^= 0xFF;
-		bgcolor ^= 0xFF;
-		is_inverted = !is_inverted;
-	}
 	// Hopefully, we have some lines to render!
 
-	// Create a bitmap buffer to render a single line. We don't render the glyphs directly to the
-	// fb here, as we need to do some simple blending, and it makes it easier to calculate our
-	// centering if required.
+	// Create a bitmap buffer to render a single line.
+	// We don't render the glyphs directly to the fb here, as we need to do some simple blending,
+	// and it makes it easier to calculate our centering if required.
 	line_buff = calloc(max_lw * (unsigned int) max_line_height, sizeof(*line_buff));
-	// We also don't want to be creating a new buffer for every glyph
+	// We also don't want to be creating a new buffer for every glyph, so make it roomy, just in case...
 	unsigned int glyph_buffer_dims = font_size_px * (unsigned int) max_line_height * 2U;
 	glyph_buff                     = calloc(glyph_buffer_dims, sizeof(*glyph_buff));
 	if (!line_buff || !glyph_buff) {
@@ -3279,11 +3276,7 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
-	// If we have a non-zero background color, enforce it, otherwise we'll have a white bg (because 0 means white here).
-	if (bgcolor > 0U) {
-		memset(line_buff, bgcolor, max_lw * (unsigned int) max_line_height * sizeof(*line_buff));
-	}
-	uint8_t layer_diff = (uint8_t)(fgcolor - bgcolor);
+
 	// Setup the variables needed to render
 	FBInkCoordinates curr_point  = { 0, 0 };
 	FBInkCoordinates ins_point   = { 0, 0 };
@@ -3304,31 +3297,28 @@ int
 	}
 	region.top = paint_point.y;
 
+	uint8_t   invert     = is_inverted ? 0xFF : 0U;
+	uint8_t   fgcolor    = penFGColor ^ invert;
+	uint8_t   bgcolor    = penBGColor ^ invert;
+	short int layer_diff = (short int) (fgcolor - bgcolor);
+
 	// Do we need to clear the screen?
 	if (is_cleared) {
-		clear_screen(fbfd, !is_inverted ? fgcolor : bgcolor, is_flashing);
+		clear_screen(fbfd, bgcolor, is_flashing);
 		fullscreen_region(&region);
 	}
+
 	uint32_t           tmp_c;
 	unsigned char *    lnPtr, *glPtr = NULL;
 	unsigned short int start_x;
-	// stb_truetype renders glyphs with color inverted to what our blitting functions expect
-	unsigned char invert = 0xFF;
-#	ifdef FBINK_FOR_KINDLE
-	if ((deviceQuirks.isKindleLegacy && is_inverted) || (!deviceQuirks.isKindleLegacy && is_inverted)) {
-#	else
-	if (is_inverted) {
-#	endif
-		invert = 0x00;
-	}
+
 	bool abort_line = false;
 	// Render!
 	for (line = 0; line < num_lines; line++) {
 		if (!lines[line].line_used) {
 			break;
 		}
-		// We have run out of (vertical) printable area, most likely due to incorrect font
-		// metrics in the font.
+		// We have run out of (vertical) printable area, most likely due to incorrect font metrics in the font.
 		if (abort_line) {
 			break;
 		}
@@ -3387,8 +3377,8 @@ int
 			}
 			ins_point.x = (unsigned short int) (curr_point.x + x0);
 			ins_point.y = (unsigned short int) (ins_point.y + y0);
-			// We only increase the lw if glyph not a space This hopefully prevent trailing
-			// spaces from being printed on a line.
+			// We only increase the lw if the glyph is not a space.
+			// This hopefully prevent trailing spaces from being printed on a line.
 			if (gw > 0) {
 				lw = ins_point.x + (unsigned int) gw;
 			} else {
@@ -3396,10 +3386,10 @@ int
 			}
 
 			// Just in case our arithmetic was off by a pixel or two...
-			// Note that we are deliberately using a slightly shorter line
-			// width during the measurement phase, so this should not happen.
-			// If it does occur, we will now exit instead of clipping the glyph
-			// bounding box, to avoid the possiblity of stb_truetype segfaulting.
+			// Note that we are deliberately using a slightly shorter line width during the measurement phase,
+			// so this should not happen.
+			// If it does occur, we will now exit instead of clipping the glyph bounding box,
+			// to avoid the possibility of stb_truetype segfaulting.
 			if (lw > max_lw) {
 				WARN("Max allowed line width exceeded");
 				WARN("Curr LW: %u   Max Allowed: %hu", lw, max_lw);
@@ -3407,44 +3397,29 @@ int
 				goto cleanup;
 			}
 			if (gw > 0 && fgcolor != bgcolor) {
-				// Because the stbtt_MakeCodepointBitmap documentation is a bit vague on this
-				// point, the parameter 'out_stride' should be the width of the surface in our
-				// buffer. It's designed so that the glyph can be rendered directly to a screen buffer.
-				// For example, if we were rendering directly to a 1080x1440 screen out_stride
-				// should be set to 1080. In this case however, we want to render to a 'box' of the
-				// dimensions of the glyph, so we set 'out_stride' to the glyph width.
+				// Because the stbtt_MakeCodepointBitmap documentation is a bit vague on this point,
+				// the parameter 'out_stride' should be the width of the surface in our buffer.
+				// It's designed so that the glyph can be rendered directly to a screen buffer.
+				// For example, if we were rendering directly to a 1080x1440 screen,
+				// out_stride should be set to 1080.
+				// In this case however, we want to render to a 'box' of the dimensions of the glyph,
+				// so we set 'out_stride' to the glyph width.
 				stbtt_MakeCodepointBitmap(curr_font, glyph_buff, gw, gh, gw, sf, sf, (int) c);
 				// paint our glyph into the line buffer
 				lnPtr = line_buff + ins_point.x + (max_lw * ins_point.y);
 				glPtr = glyph_buff;
-				// Note, two options here, because we REALLY want to avoid per-pixel math where at all possible.
-				if (layer_diff == 0xFF) {
-					for (int j = 0; j < gh; j++) {
-						for (int k = 0; k < gw; k++) {
-							// 0 value pixels are transparent
-							if (glPtr[k] > 0) {
-								lnPtr[k] = glPtr[k];
-							}
+				// NOTE: We keep storing it as an alpha coverage mask, we'll blend it in the final rendering stage
+				for (int j = 0; j < gh; j++) {
+					for (int k = 0; k < gw; k++) {
+						// 0 value pixels are transparent (no coverage),
+						// and our line buffer is already filled with zeroes ;)
+						if (glPtr[k] != 0U) {
+							lnPtr[k] = glPtr[k];
 						}
-						// And advance one scanline. Quick! Hide! Pointer arithmetic
-						glPtr += gw;
-						lnPtr += max_lw;
 					}
-				} else {
-					for (int j = 0; j < gh; j++) {
-						for (int k = 0; k < gw; k++) {
-							// 0 value pixels are transparent
-							if (glPtr[k] == 0xFF) {
-								lnPtr[k] = fgcolor;
-							} else if (glPtr[k] > 0) {
-								lnPtr[k] = (unsigned char) DIV255(
-								    (bgcolor + (glPtr[k] * layer_diff)));
-							}
-						}
-						// And advance one scanline. Quick! Hide! Pointer arithmetic
-						glPtr += gw;
-						lnPtr += max_lw;
-					}
+					// And advance one scanline. Quick! Hide! Pointer arithmetic
+					glPtr += gw;
+					lnPtr += max_lw;
 				}
 			}
 			curr_point.x = (unsigned short int) (curr_point.x + lroundf(sf * (float) adv));
@@ -3478,83 +3453,234 @@ int
 		} else if (lw > region.width) {
 			region.width = lw;
 		}
+
+		// NOTE: Snip a couple pixels off on 4bpp fbs to workaround a bizarre interaction,
+		//       that'd leave us with an extra column of white pixels.
+		//       Most likely another case of the low nibble getting clobbered...
+		if (vInfo.bits_per_pixel < 8U) {
+			if (((paint_point.x + lw) & 0x01) == 0) {
+				// If we end printing on an even pixel, snip off 2 pixels
+				lw = (unsigned int) MAX(0, (int) (lw - 2));
+			} else {
+				// If we end printing on an *odd* pixel, snip off 1 pixel
+				lw = (unsigned int) MAX(0, (int) (lw - 1));
+			}
+			LOG("Snipped Line# %u LW down to %u", line, lw);
+		}
+
 		FBInkColor color = { 0 };
 		start_x          = paint_point.x;
 		lnPtr            = line_buff;
 		// Normal painting to framebuffer. Please forgive the code repetition. Performance...
+		// What we get from stbtt is an alpha coverage mask, hence the need for alpha-blending for anti-aliasing.
+		// As it's obviously expensive, we try to avoid it if possible (on fully opaque & fully transparent pixels).
 		if (!is_overlay && !is_fgless && !is_bgless) {
-			for (unsigned int j = 0; j < font_size_px; j++) {
-				for (unsigned int k = 0; k < lw; k++) {
-					color.r = color.b = color.g = lnPtr[k] ^ invert;
-					put_pixel(&paint_point, &color);
-					paint_point.x++;
-				}
-				lnPtr += max_lw;
-				paint_point.x = start_x;
-				paint_point.y++;
-			}
-			// Note, the current implementation of the following three branches don't properly account for
-			// anti-aliasing. Expect artifacting when using these options.
-		} else if (is_fgless) {
-			for (unsigned int j = 0; j < font_size_px; j++) {
-				for (unsigned int k = 0; k < lw; k++) {
-					if (lnPtr[k] == bgcolor) {
-						color.r = color.b = color.g = lnPtr[k] ^ invert;
+			if (abs(layer_diff) == 0xFF) {
+				// If we're painting in B&W, use the mask as-is, it's already B&W ;).
+				// We just need to invert it ;).
+				uint8_t ainv = invert ^ 0xFF;
+				for (int j = 0; j < max_line_height; j++) {
+					for (unsigned int k = 0U; k < lw; k++) {
+						color.r = color.g = color.b = lnPtr[k] ^ ainv;
 						put_pixel(&paint_point, &color);
+						paint_point.x++;
 					}
-					paint_point.x++;
+					lnPtr += max_lw;
+					paint_point.x = start_x;
+					paint_point.y++;
 				}
-				lnPtr += max_lw;
-				paint_point.x = start_x;
-				paint_point.y++;
-			}
-		} else if (is_bgless) {
-			for (unsigned int j = 0; j < font_size_px; j++) {
-				for (unsigned int k = 0; k < lw; k++) {
-					if (lnPtr[k] != bgcolor) {
-						color.r = color.b = color.g = lnPtr[k] ^ invert;
-						put_pixel(&paint_point, &color);
-					}
-					paint_point.x++;
-				}
-				lnPtr += max_lw;
-				paint_point.x = start_x;
-				paint_point.y++;
-			}
-		} else if (is_overlay) {
-			for (unsigned int j = 0; j < font_size_px; j++) {
-				for (unsigned int k = 0; k < lw; k++) {
-					if (lnPtr[k] != bgcolor) {
-						get_pixel(&paint_point, &color);
-						color.r ^= 0xFF;
-						// Don't clobber the other nibble on 4bpp fbs
-						if (vInfo.bits_per_pixel > 8U) {
-							color.b ^= 0xFF;
-							color.g ^= 0xFF;
+			} else {
+				uint16_t pmul_bg = (uint16_t)(bgcolor * 0xFF);
+				for (int j = 0; j < max_line_height; j++) {
+					for (unsigned int k = 0U; k < lw; k++) {
+						if (lnPtr[k] == 0U) {
+							// No coverage (transparent) -> background
+							color.r = color.g = color.b = bgcolor;
+						} else if (lnPtr[k] == 0xFF) {
+							// Full coverage (opaque) -> foreground
+							color.r = color.g = color.b = fgcolor;
+						} else {
+							// AA, blend it using the coverage mask as alpha
+							color.r = color.g = color.b =
+							    (uint8_t) DIV255((pmul_bg + (layer_diff * lnPtr[k])));
 						}
 						put_pixel(&paint_point, &color);
+						paint_point.x++;
 					}
-					paint_point.x++;
+					lnPtr += max_lw;
+					paint_point.x = start_x;
+					paint_point.y++;
 				}
-				lnPtr += max_lw;
-				paint_point.x = start_x;
-				paint_point.y++;
+			}
+		} else if (is_fgless) {
+			FBInkColor fb_color = { 0 };
+			uint16_t   pmul_bg  = (uint16_t)(bgcolor * 0xFF);
+			// NOTE: One more branch needed because 4bpp fbs are terrible...
+			if (vInfo.bits_per_pixel > 4U) {
+				// 8, 16, 24 & 32bpp
+				for (int j = 0; j < max_line_height; j++) {
+					for (unsigned int k = 0U; k < lw; k++) {
+						if (lnPtr[k] == 0U) {
+							// No coverage (transparent) -> background
+							color.r = color.g = color.b = bgcolor;
+							put_pixel(&paint_point, &color);
+						} else if (lnPtr[k] != 0xFF) {
+							// AA, blend it using the coverage mask as alpha,
+							// and the underlying pixel as fg
+							get_pixel(&paint_point, &fb_color);
+							color.r = (uint8_t) DIV255(
+							    (pmul_bg + ((fb_color.r - bgcolor) * lnPtr[k])));
+							color.g = (uint8_t) DIV255(
+							    (pmul_bg + ((fb_color.g - bgcolor) * lnPtr[k])));
+							color.b = (uint8_t) DIV255(
+							    (pmul_bg + ((fb_color.b - bgcolor) * lnPtr[k])));
+							put_pixel(&paint_point, &color);
+						}
+						paint_point.x++;
+					}
+					lnPtr += max_lw;
+					paint_point.x = start_x;
+					paint_point.y++;
+				}
+			} else {
+				// 4bpp... We'll have to alpha-blend *everything* to avoid clobbering pixels...
+				for (int j = 0; j < max_line_height; j++) {
+					for (unsigned int k = 0U; k < lw; k++) {
+						// AA, blend it using the coverage mask as alpha, and the underlying pixel as fg
+						get_pixel(&paint_point, &fb_color);
+						color.r =
+						    (uint8_t) DIV255((pmul_bg + ((fb_color.r - bgcolor) * lnPtr[k])));
+						// Don't touch the low nibble...
+						color.g = fb_color.g;
+						color.b = fb_color.b;
+						put_pixel(&paint_point, &color);
+						paint_point.x++;
+					}
+					lnPtr += max_lw;
+					paint_point.x = start_x;
+					paint_point.y++;
+				}
+			}
+		} else if (is_bgless) {
+			FBInkColor fb_color = { 0 };
+			if (vInfo.bits_per_pixel > 4U) {
+				// 8, 16, 24 & 32bpp
+				for (int j = 0; j < max_line_height; j++) {
+					for (unsigned int k = 0U; k < lw; k++) {
+						if (lnPtr[k] == 0xFF) {
+							// Full coverage (opaque) -> foreground
+							color.r = color.g = color.b = fgcolor;
+							put_pixel(&paint_point, &color);
+						} else if (lnPtr[k] != 0U) {
+							// AA, blend it using the coverage mask as alpha,
+							// and the underlying pixel as bg
+							get_pixel(&paint_point, &fb_color);
+							color.r = (uint8_t) DIV255(
+							    (MUL255(fb_color.r) + ((fgcolor - fb_color.r) * lnPtr[k])));
+							color.g = (uint8_t) DIV255(
+							    (MUL255(fb_color.g) + ((fgcolor - fb_color.g) * lnPtr[k])));
+							color.b = (uint8_t) DIV255(
+							    (MUL255(fb_color.b) + ((fgcolor - fb_color.b) * lnPtr[k])));
+							put_pixel(&paint_point, &color);
+						}
+						paint_point.x++;
+					}
+					lnPtr += max_lw;
+					paint_point.x = start_x;
+					paint_point.y++;
+				}
+			} else {
+				// 4bpp...
+				for (int j = 0; j < max_line_height; j++) {
+					for (unsigned int k = 0U; k < lw; k++) {
+						// AA, blend it using the coverage mask as alpha, and the underlying pixel as bg
+						get_pixel(&paint_point, &fb_color);
+						color.r = (uint8_t) DIV255(
+						    (MUL255(fb_color.r) + ((fgcolor - fb_color.r) * lnPtr[k])));
+						// Don't touch the low nibble...
+						color.g = fb_color.g;
+						color.b = fb_color.b;
+						put_pixel(&paint_point, &color);
+						paint_point.x++;
+					}
+					lnPtr += max_lw;
+					paint_point.x = start_x;
+					paint_point.y++;
+				}
+			}
+		} else if (is_overlay) {
+			FBInkColor fb_color = { 0 };
+			if (vInfo.bits_per_pixel > 4U) {
+				// 8, 16, 24 & 32bpp
+				for (int j = 0; j < max_line_height; j++) {
+					for (unsigned int k = 0U; k < lw; k++) {
+						if (lnPtr[k] == 0xFF) {
+							// Full coverage (opaque) -> foreground
+							get_pixel(&paint_point, &fb_color);
+							// We want our foreground to be the inverse of the underlying pixel...
+							color.r = fb_color.r ^ 0xFF;
+							color.g = fb_color.g ^ 0xFF;
+							color.b = fb_color.b ^ 0xFF;
+							put_pixel(&paint_point, &color);
+						} else if (lnPtr[k] != 0U) {
+							// AA, blend it using the coverage mask as alpha,
+							// and the underlying pixel as bg
+							// Without forgetting our foreground color trickery...
+							get_pixel(&paint_point, &fb_color);
+							color.r = (uint8_t) DIV255(
+							    (MUL255(fb_color.r) +
+							     (((fb_color.r ^ 0xFF) - fb_color.r) * lnPtr[k])));
+							color.g = (uint8_t) DIV255(
+							    (MUL255(fb_color.g) +
+							     (((fb_color.g ^ 0xFF) - fb_color.g) * lnPtr[k])));
+							color.b = (uint8_t) DIV255(
+							    (MUL255(fb_color.b) +
+							     (((fb_color.b ^ 0xFF) - fb_color.b) * lnPtr[k])));
+							put_pixel(&paint_point, &color);
+						}
+						paint_point.x++;
+					}
+					lnPtr += max_lw;
+					paint_point.x = start_x;
+					paint_point.y++;
+				}
+			} else {
+				// 4bpp...
+				for (int j = 0; j < max_line_height; j++) {
+					for (unsigned int k = 0U; k < lw; k++) {
+						// AA, blend it using the coverage mask as alpha, and the underlying pixel as bg
+						// Without forgetting our foreground color trickery...
+						get_pixel(&paint_point, &fb_color);
+						color.r =
+						    (uint8_t) DIV255((MUL255(fb_color.r) +
+								      (((fb_color.r ^ 0xFF) - fb_color.r) * lnPtr[k])));
+						// Don't touch the low nibble...
+						color.g = fb_color.g;
+						color.b = fb_color.b;
+						put_pixel(&paint_point, &color);
+						paint_point.x++;
+					}
+					lnPtr += max_lw;
+					paint_point.x = start_x;
+					paint_point.y++;
+				}
 			}
 		}
+
 		paint_point.y = (unsigned short int) (paint_point.y + lines[line].line_gap);
 		paint_point.x = area.tl.x;
 		if (paint_point.y + max_line_height > area.br.y) {
 			abort_line = true;
 		}
 		region.height += (unsigned int) max_line_height;
-		if (region.top + region.height > viewHeight) {
-			region.height -= region.top + region.height - viewHeight;
+		if (region.top + region.height > screenHeight) {
+			region.height -= region.top + region.height - screenHeight;
 		}
 		LOG("Finished printing line# %u", line);
-		// And clear our line buffer for next use. The glyph buffer shouldn't
-		// need clearing, as stbtt_MakeCodepointBitmap() should overwrite it.
-		// NOTE: And we want to honor our background color, too ;).
-		memset(line_buff, bgcolor, (max_lw * (unsigned int) max_line_height * sizeof(*line_buff)));
+		// And clear our line buffer for next use. The glyph buffer shouldn't need clearing,
+		// as stbtt_MakeCodepointBitmap() should overwrite it.
+		// NOTE: Fill it with 0 (no coverage -> background)
+		memset(line_buff, 0, (max_lw * (unsigned int) max_line_height * sizeof(*line_buff)));
 	}
 	if (paint_point.y + max_line_height > area.br.y) {
 		rv = 0;    // Inform the caller there is no room left to print another row.
@@ -3563,12 +3689,12 @@ int
 	}
 cleanup:
 	// Rotate our eink refresh region before refreshing
-	LOG("Refreshing region from LEFT: %d, TOP: %d, WIDTH: %d, HEIGHT: %d",
-	    (int) region.left,
-	    (int) region.top,
-	    (int) region.width,
-	    (int) region.height);
-	if (region.width > 0 && region.height > 0) {
+	LOG("Refreshing region from LEFT: %u, TOP: %u, WIDTH: %u, HEIGHT: %u",
+	    region.left,
+	    region.top,
+	    region.width,
+	    region.height);
+	if (region.width > 0U && region.height > 0U) {
 		(*fxpRotateRegion)(&region);
 		refresh(fbfd, region, WAVEFORM_MODE_AUTO, is_flashing);
 	}
@@ -3820,15 +3946,19 @@ cleanup:
 int
     draw_progress_bars(int fbfd, bool is_infinite, uint8_t value, const FBInkConfig* fbink_config)
 {
+	uint8_t invert  = fbink_config->is_inverted ? 0xFF : 0U;
+	uint8_t fgcolor = penFGColor ^ invert;
+	uint8_t bgcolor = penBGColor ^ invert;
+
 	// Clear screen?
 	if (fbink_config->is_cleared) {
-		clear_screen(fbfd, fbink_config->is_inverted ? penFGColor : penBGColor, fbink_config->is_flashing);
+		clear_screen(fbfd, bgcolor, fbink_config->is_flashing);
 	}
 
 	// Let's go! Start by pilfering some computations from draw...
 	// NOTE: It's a grayscale ramp, so r = g = b (= v).
-	FBInkColor fgC = { fbink_config->is_inverted ? penBGColor : penFGColor, fgC.r, fgC.r };
-	FBInkColor bgC = { fbink_config->is_inverted ? penFGColor : penBGColor, bgC.r, bgC.r };
+	FBInkColor fgC = { fgcolor, fgC.r, fgC.r };
+	FBInkColor bgC = { bgcolor, bgC.r, bgC.r };
 
 	// Clamp v offset to safe values
 	// NOTE: This test isn't perfect, but then, if you play with this, you do it knowing the risks...
@@ -4357,7 +4487,7 @@ static int
 
 	// Clear screen?
 	if (fbink_config->is_cleared) {
-		clear_screen(fbfd, fbink_config->is_inverted ? penFGColor : penBGColor, fbink_config->is_flashing);
+		clear_screen(fbfd, fbink_config->is_inverted ? penBGColor ^ 0xFF : penBGColor, fbink_config->is_flashing);
 	}
 
 	// NOTE: We compute initial offsets from row/col, to help aligning images with text.
