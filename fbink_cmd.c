@@ -142,10 +142,11 @@ static void
 
 	    "\t\tfrom 25px of the left edge of the screen until 50px before the right edge.\n"
 	    "\t\tHonoring the MarkDown syntax, 'Hello' will be printed with the Regular font style, while 'world' will use the Bold font style.\n"
+	    "\t\tNOTE: You will NOT be able to use obfuscated or encrypted fonts. Trying to do so will only lead to a crash!\n"
 #	ifndef FBINK_FOR_LINUX
 #		ifndef FBINK_FOR_KINDLE
 #			ifndef FBINK_FOR_CERVANTES
-	    "\t\tPlease note that you will NOT be able to use system fonts on Kobo, because they're obfuscated.\n"
+	    "\t\tPlease note that this means you will NOT be able to use system fonts on Kobo, because they're all obfuscated.\n"
 #			endif
 #		endif
 #	endif
