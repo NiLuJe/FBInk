@@ -3296,11 +3296,7 @@ int
 	unsigned short int start_x;
 
 	unsigned char invert = 0U;
-#	ifdef FBINK_FOR_KINDLE
-	if ((deviceQuirks.isKindleLegacy && !is_inverted) || (!deviceQuirks.isKindleLegacy && is_inverted)) {
-#	else
 	if (is_inverted) {
-#	endif
 		invert = 0xFF;
 	}
 	fgcolor ^= invert;
