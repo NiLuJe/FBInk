@@ -2126,7 +2126,7 @@ int
 		WARN("Error initialising font '%s'", filename);
 		return ERRCODE(EXIT_FAILURE);
 	}
-	// Assign the current font to it's appropriate otFonts struct member, depending
+	// Assign the current font to its appropriate otFonts struct member, depending
 	// on the style specified by the caller.
 	// NOTE: We make sure we free any previous allocation first!
 	switch (style) {
