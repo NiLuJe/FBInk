@@ -86,10 +86,12 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#ifndef FBINK_FOR_LINUX
-#	ifndef FBINK_FOR_KINDLE
-#		ifndef FBINK_FOR_CERVANTES
-#			include <libgen.h>    // We need dirname() on Kobo...
+#ifdef FBINK_WITH_OPENTYPE
+#	ifndef FBINK_FOR_LINUX
+#		ifndef FBINK_FOR_KINDLE
+#			ifndef FBINK_FOR_CERVANTES
+#				include <libgen.h>    // We need dirname() on Kobo...
+#			endif
 #		endif
 #	endif
 #endif
