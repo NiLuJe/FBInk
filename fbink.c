@@ -2059,6 +2059,22 @@ int
     fbink_add_ot_font(const char* filename UNUSED_BY_MINIMAL, FONT_STYLE_T style UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_OPENTYPE
+#	ifndef FBINK_FOR_LINUX
+#		ifndef FBINK_FOR_KINDLE
+#			ifndef FBINK_FOR_CERVANTES
+	// NOTE: Bail if we were passed a Kobo system font, as they're obfuscated, and that'd segfault in stbtt_InitFont >_<"
+	char* path = strdup(filename);
+	char* dir  = dirname(path);
+	if (!strcasecmp(dir, "/usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/fonts")) {
+		free(path);
+		WARN("Cannot use font '%s': it's an obfuscated Kobo system font", filename);
+		return ERRCODE(EXIT_FAILURE);
+	}
+	free(path);
+#			endif
+#		endif
+#	endif
+
 	// Init libunibreak the first time we're called
 	if (!otInit) {
 		init_linebreak();
