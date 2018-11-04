@@ -583,9 +583,12 @@ static struct mxcfb_rect
 	    multiline_offset,
 	    (unsigned short int) (row + multiline_offset));
 
+	uint8_t invert  = fbink_config->is_inverted ? 0xFF : 0U;
+	uint8_t fgcolor = penFGColor ^ invert;
+	uint8_t bgcolor = penBGColor ^ invert;
 	// NOTE: It's a grayscale ramp, so r = g = b (= v).
-	FBInkColor fgC = { fbink_config->is_inverted ? penBGColor : penFGColor, fgC.r, fgC.r };
-	FBInkColor bgC = { fbink_config->is_inverted ? penFGColor : penBGColor, bgC.r, bgC.r };
+	FBInkColor fgC = { fgcolor, fgC.r, fgC.r };
+	FBInkColor bgC = { bgcolor, bgC.r, bgC.r };
 
 	// Adjust row in case we're a continuation of a multi-line print...
 	row = (unsigned short int) (row + multiline_offset);
@@ -2404,7 +2407,7 @@ int
 
 	// Clear screen?
 	if (fbink_config->is_cleared) {
-		clear_screen(fbfd, fbink_config->is_inverted ? penFGColor : penBGColor, fbink_config->is_flashing);
+		clear_screen(fbfd, fbink_config->is_inverted ? penBGColor ^ 0xFF : penBGColor, fbink_config->is_flashing);
 	}
 
 	// See if want to position our text relative to the edge of the screen, and not the beginning
@@ -3300,20 +3303,20 @@ int
 	}
 	region.top = paint_point.y;
 
-	uint8_t fgcolor = is_inverted ? penBGColor : penFGColor;
-	uint8_t bgcolor = is_inverted ? penFGColor : penBGColor;
+	uint8_t   invert     = is_inverted ? 0xFF : 0U;
+	uint8_t   fgcolor    = penFGColor ^ invert;
+	uint8_t   bgcolor    = penBGColor ^ invert;
+	short int layer_diff = (short int) (fgcolor - bgcolor);
 
 	// Do we need to clear the screen?
 	if (is_cleared) {
-		clear_screen(fbfd, !is_inverted ? fgcolor : bgcolor, is_flashing);
+		clear_screen(fbfd, bgcolor, is_flashing);
 		fullscreen_region(&region);
 	}
+
 	uint32_t           tmp_c;
 	unsigned char *    lnPtr, *glPtr = NULL;
 	unsigned short int start_x;
-
-	unsigned char invert     = is_inverted ? 0xFF : 0U;
-	short int     layer_diff = (short int) (fgcolor - bgcolor);
 
 	bool abort_line = false;
 	// Render!
@@ -3949,15 +3952,19 @@ cleanup:
 int
     draw_progress_bars(int fbfd, bool is_infinite, uint8_t value, const FBInkConfig* fbink_config)
 {
+	uint8_t invert  = fbink_config->is_inverted ? 0xFF : 0U;
+	uint8_t fgcolor = penFGColor ^ invert;
+	uint8_t bgcolor = penBGColor ^ invert;
+
 	// Clear screen?
 	if (fbink_config->is_cleared) {
-		clear_screen(fbfd, fbink_config->is_inverted ? penFGColor : penBGColor, fbink_config->is_flashing);
+		clear_screen(fbfd, bgcolor, fbink_config->is_flashing);
 	}
 
 	// Let's go! Start by pilfering some computations from draw...
 	// NOTE: It's a grayscale ramp, so r = g = b (= v).
-	FBInkColor fgC = { fbink_config->is_inverted ? penBGColor : penFGColor, fgC.r, fgC.r };
-	FBInkColor bgC = { fbink_config->is_inverted ? penFGColor : penBGColor, bgC.r, bgC.r };
+	FBInkColor fgC = { fgcolor, fgC.r, fgC.r };
+	FBInkColor bgC = { bgcolor, bgC.r, bgC.r };
 
 	// Clamp v offset to safe values
 	// NOTE: This test isn't perfect, but then, if you play with this, you do it knowing the risks...
@@ -4486,7 +4493,7 @@ static int
 
 	// Clear screen?
 	if (fbink_config->is_cleared) {
-		clear_screen(fbfd, fbink_config->is_inverted ? penFGColor : penBGColor, fbink_config->is_flashing);
+		clear_screen(fbfd, fbink_config->is_inverted ? penBGColor ^ 0xFF : penBGColor, fbink_config->is_flashing);
 	}
 
 	// NOTE: We compute initial offsets from row/col, to help aligning images with text.
