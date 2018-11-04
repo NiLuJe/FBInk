@@ -3389,7 +3389,7 @@ int
 			// Note that we are deliberately using a slightly shorter line width during the measurement phase,
 			// so this should not happen.
 			// If it does occur, we will now exit instead of clipping the glyph bounding box,
-			// to avoid the possiblity of stb_truetype segfaulting.
+			// to avoid the possibility of stb_truetype segfaulting.
 			if (lw > max_lw) {
 				WARN("Max allowed line width exceeded");
 				WARN("Curr LW: %u   Max Allowed: %hu", lw, max_lw);
