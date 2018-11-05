@@ -317,13 +317,18 @@ static void put_pixel_Gray8(const FBInkCoordinates*, const FBInkColor*);
 static void put_pixel_RGB24(const FBInkCoordinates*, const FBInkColor*);
 static void put_pixel_RGB32(const FBInkCoordinates*, const FBInkColor*);
 static void put_pixel_RGB565(const FBInkCoordinates*, const FBInkColor*);
+// NOTE: We pass coordinates by value here, because a rotation transformation *may* be applied to them,
+//       and that's a rotation that the caller will *never* care about.
 static void put_pixel(FBInkCoordinates, const FBInkColor*);
+// NOTE: On the other hand, if you happen to be calling function pointers directly,
+//       it's left to you to not do anything stupid ;)
 
 static void get_pixel_Gray4(const FBInkCoordinates*, FBInkColor*);
 static void get_pixel_Gray8(const FBInkCoordinates*, FBInkColor*);
 static void get_pixel_RGB24(const FBInkCoordinates*, FBInkColor*);
 static void get_pixel_RGB32(const FBInkCoordinates*, FBInkColor*);
 static void get_pixel_RGB565(const FBInkCoordinates*, FBInkColor*);
+// NOTE: Same as put_pixel ;)
 static void get_pixel(FBInkCoordinates, FBInkColor*);
 
 #if defined(FBINK_WITH_IMAGE) || defined(FBINK_WITH_OPENTYPE)
