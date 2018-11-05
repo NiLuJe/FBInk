@@ -263,10 +263,11 @@ static int
 	// NOTE: We want to *reject* negative values (which strtoul does not)!
 	if (strchr(str, '-')) {
 		fprintf(stderr,
-			"Assigned a negative value (%s) to an option (%c:%s) expecting an uint32_t.\n",
+			"Assigned a negative value (%s) to an option (%c%s%s) expecting an uint32_t.\n",
 			str,
 			opt,
-			subopt);
+			subopt ? ":" : "",
+			subopt ? subopt : "");
 		return ERRCODE(EINVAL);
 	}
 
@@ -284,10 +285,11 @@ static int
 
 	if (endptr == str) {
 		fprintf(stderr,
-			"No digits were found in value '%s' assigned to an option (%c:%s) expecting an uint32_t.\n",
+			"No digits were found in value '%s' assigned to an option (%c%s%s) expecting an uint32_t.\n",
 			str,
 			opt,
-			subopt);
+			subopt ? ":" : "",
+			subopt ? subopt : "");
 		return ERRCODE(EINVAL);
 	}
 
@@ -296,22 +298,24 @@ static int
 	if (*endptr != '\0') {
 		fprintf(
 		    stderr,
-		    "Found trailing characters (%s) behind value '%lu' assigned from string '%s' to an option (%c:%s) expecting an uint32_t.\n",
+		    "Found trailing characters (%s) behind value '%lu' assigned from string '%s' to an option (%c%s%s) expecting an uint32_t.\n",
 		    endptr,
 		    val,
 		    str,
 		    opt,
-		    subopt);
+		    subopt ? ":" : "",
+		    subopt ? subopt : "");
 		return ERRCODE(EINVAL);
 	}
 
 	// Make sure there isn't a loss of precision on this arch when casting explictly
 	if ((uint32_t) val != val) {
 		fprintf(stderr,
-			"Loss of precision when casting value '%lu' to an uint32_t for option '%c:%s'.\n",
+			"Loss of precision when casting value '%lu' to an uint32_t for option '%c%s%s'.\n",
 			val,
 			opt,
-			subopt);
+			subopt ? ":" : "",
+			subopt ? subopt : "");
 		return ERRCODE(EINVAL);
 	}
 
@@ -326,10 +330,11 @@ static int
 	// NOTE: We want to *reject* negative values (which strtoul does not)!
 	if (strchr(str, '-')) {
 		fprintf(stderr,
-			"Assigned a negative value (%s) to an option (%c:%s) expecting an unsigned short int.\n",
+			"Assigned a negative value (%s) to an option (%c%s%s) expecting an unsigned short int.\n",
 			str,
 			opt,
-			subopt);
+			subopt ? ":" : "",
+			subopt ? subopt : "");
 		return ERRCODE(EINVAL);
 	}
 
@@ -348,10 +353,11 @@ static int
 	if (endptr == str) {
 		fprintf(
 		    stderr,
-		    "No digits were found in value '%s' assigned to an option (%c:%s) expecting an unsigned short int.\n",
+		    "No digits were found in value '%s' assigned to an option (%c%s%s) expecting an unsigned short int.\n",
 		    str,
 		    opt,
-		    subopt);
+		    subopt ? ":" : "",
+		    subopt ? subopt : "");
 		return ERRCODE(EINVAL);
 	}
 
@@ -360,22 +366,24 @@ static int
 	if (*endptr != '\0') {
 		fprintf(
 		    stderr,
-		    "Found trailing characters (%s) behind value '%lu' assigned from string '%s' to an option (%c:%s) expecting an unsigned short int.\n",
+		    "Found trailing characters (%s) behind value '%lu' assigned from string '%s' to an option (%c%s%s) expecting an unsigned short int.\n",
 		    endptr,
 		    val,
 		    str,
 		    opt,
-		    subopt);
+		    subopt ? ":" : "",
+		    subopt ? subopt : "");
 		return ERRCODE(EINVAL);
 	}
 
 	// Make sure there isn't a loss of precision on this arch when casting explictly
 	if ((unsigned short int) val != val) {
 		fprintf(stderr,
-			"Loss of precision when casting value '%lu' to an unsigned short int for option '%c:%s'.\n",
+			"Loss of precision when casting value '%lu' to an unsigned short int for option '%c%s%s'.\n",
 			val,
 			opt,
-			subopt);
+			subopt ? ":" : "",
+			subopt ? subopt : "");
 		return ERRCODE(EINVAL);
 	}
 
@@ -454,10 +462,11 @@ static int
 
 	if (endptr == str) {
 		fprintf(stderr,
-			"No digits were found in value '%s' assigned to an option (%c:%s) expecting a short int.\n",
+			"No digits were found in value '%s' assigned to an option (%c%s%s) expecting a short int.\n",
 			str,
 			opt,
-			subopt);
+			subopt ? ":" : "",
+			subopt ? subopt : "");
 		return ERRCODE(EINVAL);
 	}
 
@@ -466,22 +475,24 @@ static int
 	if (*endptr != '\0') {
 		fprintf(
 		    stderr,
-		    "Found trailing characters (%s) behind value '%ld' assigned from string '%s' to an option (%c:%s) expecting a short int.\n",
+		    "Found trailing characters (%s) behind value '%ld' assigned from string '%s' to an option (%c%s%s) expecting a short int.\n",
 		    endptr,
 		    val,
 		    str,
 		    opt,
-		    subopt);
+		    subopt ? ":" : "",
+		    subopt ? subopt : "");
 		return ERRCODE(EINVAL);
 	}
 
 	// Make sure there isn't a loss of precision on this arch when casting explictly
 	if ((short int) val != val) {
 		fprintf(stderr,
-			"Loss of precision when casting value '%ld' to a short int for option '%c:%s'.\n",
+			"Loss of precision when casting value '%ld' to a short int for option '%c%s%s'.\n",
 			val,
 			opt,
-			subopt);
+			subopt ? ":" : "",
+			subopt ? subopt : "");
 		return ERRCODE(EINVAL);
 	}
 
