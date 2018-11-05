@@ -393,11 +393,16 @@ static int
 
 // Input validation via strtoul, for an uint8_t
 static int
-    strtoul_hhu(int opt, const char* str, uint8_t* result)
+    strtoul_hhu(int opt, const char* subopt, const char* str, uint8_t* result)
 {
 	// NOTE: We want to *reject* negative values (which strtoul does not)!
 	if (strchr(str, '-')) {
-		fprintf(stderr, "Assigned a negative value (%s) to an option (%c) expecting an uint8_t.\n", str, opt);
+		fprintf(stderr,
+			"Assigned a negative value (%s) to an option (%c%s%s) expecting an uint8_t.\n",
+			str,
+			opt,
+			subopt ? ":" : "",
+			subopt ? subopt : "");
 		return ERRCODE(EINVAL);
 	}
 
@@ -415,9 +420,11 @@ static int
 
 	if (endptr == str) {
 		fprintf(stderr,
-			"No digits were found in value '%s' assigned to an option (%c) expecting an uint8_t.\n",
+			"No digits were found in value '%s' assigned to an option (%c%s%s) expecting an uint8_t.\n",
 			str,
-			opt);
+			opt,
+			subopt ? ":" : "",
+			subopt ? subopt : "");
 		return ERRCODE(EINVAL);
 	}
 
@@ -426,17 +433,24 @@ static int
 	if (*endptr != '\0') {
 		fprintf(
 		    stderr,
-		    "Found trailing characters (%s) behind value '%lu' assigned from string '%s' to an option (%c) expecting an uint8_t.\n",
+		    "Found trailing characters (%s) behind value '%lu' assigned from string '%s' to an option (%c%s%s) expecting an uint8_t.\n",
 		    endptr,
 		    val,
 		    str,
-		    opt);
+		    opt,
+		    subopt ? ":" : "",
+		    subopt ? subopt : "");
 		return ERRCODE(EINVAL);
 	}
 
 	// Make sure there isn't a loss of precision on this arch when casting explictly
 	if ((uint8_t) val != val) {
-		fprintf(stderr, "Loss of precision when casting value '%lu' to an uint8_t for option '%c'.\n", val, opt);
+		fprintf(stderr,
+			"Loss of precision when casting value '%lu' to an uint8_t for option '%c%s%s'.\n",
+			val,
+			opt,
+			subopt ? ":" : "",
+			subopt ? subopt : "");
 		return ERRCODE(EINVAL);
 	}
 
@@ -502,7 +516,7 @@ static int
 
 // Input validation via strtol, for an int8_t
 static int
-    strtol_hhi(int opt, const char* str, int8_t* result)
+    strtol_hhi(int opt, const char* subopt, const char* str, int8_t* result)
 {
 	// Go on with strtol...
 	char*    endptr;
@@ -518,9 +532,11 @@ static int
 
 	if (endptr == str) {
 		fprintf(stderr,
-			"No digits were found in value '%s' assigned to an option (%c) expecting an int8_t.\n",
+			"No digits were found in value '%s' assigned to an option (%c%s%s) expecting an int8_t.\n",
 			str,
-			opt);
+			opt,
+			subopt ? ":" : "",
+			subopt ? subopt : "");
 		return ERRCODE(EINVAL);
 	}
 
@@ -529,17 +545,24 @@ static int
 	if (*endptr != '\0') {
 		fprintf(
 		    stderr,
-		    "Found trailing characters (%s) behind value '%ld' assigned from string '%s' to an option (%c) expecting an int8_t.\n",
+		    "Found trailing characters (%s) behind value '%ld' assigned from string '%s' to an option (%c%s%s) expecting an int8_t.\n",
 		    endptr,
 		    val,
 		    str,
-		    opt);
+		    opt,
+		    subopt ? ":" : "",
+		    subopt ? subopt : "");
 		return ERRCODE(EINVAL);
 	}
 
 	// Make sure there isn't a loss of precision on this arch when casting explictly
 	if ((int8_t) val != val) {
-		fprintf(stderr, "Loss of precision when casting value '%ld' to an int8_t for option '%c'.\n", val, opt);
+		fprintf(stderr,
+			"Loss of precision when casting value '%ld' to an int8_t for option '%c%s%s'.\n",
+			val,
+			opt,
+			subopt ? ":" : "",
+			subopt ? subopt : "");
 		return ERRCODE(EINVAL);
 	}
 
@@ -768,7 +791,7 @@ int
 				}
 				break;
 			case 'S':
-				if (strtoul_hhu(opt, optarg, &fbink_config.fontmult) < 0) {
+				if (strtoul_hhu(opt, NULL, optarg, &fbink_config.fontmult) < 0) {
 					errfnd = true;
 				}
 				break;
@@ -991,14 +1014,14 @@ int
 				break;
 			case 'P':
 				is_progressbar = true;
-				if (strtoul_hhu(opt, optarg, &progress) < 0) {
+				if (strtoul_hhu(opt, NULL, optarg, &progress) < 0) {
 					errfnd = true;
 				}
 				break;
 			case 'A':
 				is_activitybar = true;
 				int8_t val     = 0;
-				if (strtol_hhi(opt, optarg, &val) < 0) {
+				if (strtol_hhi(opt, NULL, optarg, &val) < 0) {
 					errfnd = true;
 				}
 				if (val < 0) {
