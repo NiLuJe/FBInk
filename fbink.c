@@ -2133,7 +2133,7 @@ int
 		    filename,
 		    fontcount);
 	}
-	// Then, get the offset for the first font
+	// Then, get the offset to the first font
 	int fontoffset = stbtt_GetFontOffsetForIndex(data, 0);
 	if (fontoffset == -1) {
 		free(data);
