@@ -23,7 +23,9 @@
 
 #include "fbink.h"
 
+#include <errno.h>
 #include <getopt.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
@@ -36,5 +38,11 @@
 static void show_helpmsg(void);
 
 static int do_infinite_progress_bar(int, const FBInkConfig*);
+
+static int strtoul_u(int, const char*, uint32_t*);
+static int strtoul_hu(int, const char*, unsigned short int*);
+static int strtoul_hhu(int, const char*, uint8_t*);
+static int strtol_hi(int, const char*, short int*);
+static int strtol_hhi(int, const char*, int8_t*);
 
 #endif

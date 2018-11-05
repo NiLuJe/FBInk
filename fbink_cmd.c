@@ -255,6 +255,267 @@ static int
 	return rv;
 }
 
+// Input validation via strtoul, for an uint32_t
+// Adapted from the same in KFMon ;).
+static int
+    strtoul_u(int opt, const char* str, uint32_t* result)
+{
+	// NOTE: We want to *reject* negative values (which strtoul does not)!
+	if (strchr(str, '-')) {
+		fprintf(stderr, "Assigned a negative value (%s) to an option (%c) expecting an uint32_t.\n", str, opt);
+		return ERRCODE(EINVAL);
+	}
+
+	// Now that we know it's positive, we can go on with strtoul...
+	char*             endptr;
+	unsigned long int val;
+
+	errno = 0;    // To distinguish success/failure after call
+	val   = strtoul(str, &endptr, 10);
+
+	if ((errno == ERANGE && val == ULONG_MAX) || (errno != 0 && val == 0)) {
+		perror("[FBInk] strtoul");
+		return ERRCODE(EINVAL);
+	}
+
+	if (endptr == str) {
+		fprintf(stderr,
+			"No digits were found in value '%s' assigned to an option (%c) expecting an uint32_t.\n",
+			str,
+			opt);
+		return ERRCODE(EINVAL);
+	}
+
+	// If we got here, strtoul() successfully parsed at least part of a number.
+	// But we do want to enforce the fact that the input really was *only* an integer value.
+	if (*endptr != '\0') {
+		fprintf(
+		    stderr,
+		    "Found trailing characters (%s) behind value '%lu' assigned from string '%s' to an option (%c) expecting an uint32_t.\n",
+		    endptr,
+		    val,
+		    str,
+		    opt);
+		return ERRCODE(EINVAL);
+	}
+
+	// Make sure there isn't a loss of precision on this arch when casting explictly
+	if ((uint32_t) val != val) {
+		fprintf(stderr, "Loss of precision when casting value '%lu' to an uint32_t for option '%c'.\n", val, opt);
+		return ERRCODE(EINVAL);
+	}
+
+	*result = (uint32_t) val;
+	return EXIT_SUCCESS;
+}
+
+// Input validation via strtoul, for an unsigned short int
+static int
+    strtoul_hu(int opt, const char* str, unsigned short int* result)
+{
+	// NOTE: We want to *reject* negative values (which strtoul does not)!
+	if (strchr(str, '-')) {
+		fprintf(stderr,
+			"Assigned a negative value (%s) to an option (%c) expecting an unsigned short int.\n",
+			str,
+			opt);
+		return ERRCODE(EINVAL);
+	}
+
+	// Now that we know it's positive, we can go on with strtoul...
+	char*             endptr;
+	unsigned long int val;
+
+	errno = 0;    // To distinguish success/failure after call
+	val   = strtoul(str, &endptr, 10);
+
+	if ((errno == ERANGE && val == ULONG_MAX) || (errno != 0 && val == 0)) {
+		perror("[FBInk] strtoul");
+		return ERRCODE(EINVAL);
+	}
+
+	if (endptr == str) {
+		fprintf(
+		    stderr,
+		    "No digits were found in value '%s' assigned to an option (%c) expecting an unsigned short int.\n",
+		    str,
+		    opt);
+		return ERRCODE(EINVAL);
+	}
+
+	// If we got here, strtoul() successfully parsed at least part of a number.
+	// But we do want to enforce the fact that the input really was *only* an integer value.
+	if (*endptr != '\0') {
+		fprintf(
+		    stderr,
+		    "Found trailing characters (%s) behind value '%lu' assigned from string '%s' to an option (%c) expecting an unsigned short int.\n",
+		    endptr,
+		    val,
+		    str,
+		    opt);
+		return ERRCODE(EINVAL);
+	}
+
+	// Make sure there isn't a loss of precision on this arch when casting explictly
+	if ((unsigned short int) val != val) {
+		fprintf(stderr,
+			"Loss of precision when casting value '%lu' to an unsigned short int for option '%c'.\n",
+			val,
+			opt);
+		return ERRCODE(EINVAL);
+	}
+
+	*result = (unsigned short int) val;
+	return EXIT_SUCCESS;
+}
+
+// Input validation via strtoul, for an uint8_t
+static int
+    strtoul_hhu(int opt, const char* str, uint8_t* result)
+{
+	// NOTE: We want to *reject* negative values (which strtoul does not)!
+	if (strchr(str, '-')) {
+		fprintf(stderr, "Assigned a negative value (%s) to an option (%c) expecting an uint8_t.\n", str, opt);
+		return ERRCODE(EINVAL);
+	}
+
+	// Now that we know it's positive, we can go on with strtoul...
+	char*             endptr;
+	unsigned long int val;
+
+	errno = 0;    // To distinguish success/failure after call
+	val   = strtoul(str, &endptr, 10);
+
+	if ((errno == ERANGE && val == ULONG_MAX) || (errno != 0 && val == 0)) {
+		perror("[FBInk] strtoul");
+		return ERRCODE(EINVAL);
+	}
+
+	if (endptr == str) {
+		fprintf(stderr,
+			"No digits were found in value '%s' assigned to an option (%c) expecting an uint8_t.\n",
+			str,
+			opt);
+		return ERRCODE(EINVAL);
+	}
+
+	// If we got here, strtoul() successfully parsed at least part of a number.
+	// But we do want to enforce the fact that the input really was *only* an integer value.
+	if (*endptr != '\0') {
+		fprintf(
+		    stderr,
+		    "Found trailing characters (%s) behind value '%lu' assigned from string '%s' to an option (%c) expecting an uint8_t.\n",
+		    endptr,
+		    val,
+		    str,
+		    opt);
+		return ERRCODE(EINVAL);
+	}
+
+	// Make sure there isn't a loss of precision on this arch when casting explictly
+	if ((uint8_t) val != val) {
+		fprintf(stderr, "Loss of precision when casting value '%lu' to an uint8_t for option '%c'.\n", val, opt);
+		return ERRCODE(EINVAL);
+	}
+
+	*result = (uint8_t) val;
+	return EXIT_SUCCESS;
+}
+
+// Input validation via strtol, for a short int
+static int
+    strtol_hi(int opt, const char* str, short int* result)
+{
+	// Go on with strtol...
+	char*    endptr;
+	long int val;
+
+	errno = 0;    // To distinguish success/failure after call
+	val   = strtol(str, &endptr, 10);
+
+	if ((errno == ERANGE && (val == LONG_MAX || val == LONG_MIN)) || (errno != 0 && val == 0)) {
+		perror("[FBInk] strtol");
+		return ERRCODE(EINVAL);
+	}
+
+	if (endptr == str) {
+		fprintf(stderr,
+			"No digits were found in value '%s' assigned to an option (%c) expecting a short int.\n",
+			str,
+			opt);
+		return ERRCODE(EINVAL);
+	}
+
+	// If we got here, strtol() successfully parsed at least part of a number.
+	// But we do want to enforce the fact that the input really was *only* an integer value.
+	if (*endptr != '\0') {
+		fprintf(
+		    stderr,
+		    "Found trailing characters (%s) behind value '%ld' assigned from string '%s' to an option (%c) expecting a short int.\n",
+		    endptr,
+		    val,
+		    str,
+		    opt);
+		return ERRCODE(EINVAL);
+	}
+
+	// Make sure there isn't a loss of precision on this arch when casting explictly
+	if ((short int) val != val) {
+		fprintf(stderr, "Loss of precision when casting value '%ld' to a short int for option '%c'.\n", val, opt);
+		return ERRCODE(EINVAL);
+	}
+
+	*result = (short int) val;
+	return EXIT_SUCCESS;
+}
+
+// Input validation via strtol, for an int8_t
+static int
+    strtol_hhi(int opt, const char* str, int8_t* result)
+{
+	// Go on with strtol...
+	char*    endptr;
+	long int val;
+
+	errno = 0;    // To distinguish success/failure after call
+	val   = strtol(str, &endptr, 10);
+
+	if ((errno == ERANGE && (val == LONG_MAX || val == LONG_MIN)) || (errno != 0 && val == 0)) {
+		perror("[FBInk] strtol");
+		return ERRCODE(EINVAL);
+	}
+
+	if (endptr == str) {
+		fprintf(stderr,
+			"No digits were found in value '%s' assigned to an option (%c) expecting an int8_t.\n",
+			str,
+			opt);
+		return ERRCODE(EINVAL);
+	}
+
+	// If we got here, strtol() successfully parsed at least part of a number.
+	// But we do want to enforce the fact that the input really was *only* an integer value.
+	if (*endptr != '\0') {
+		fprintf(
+		    stderr,
+		    "Found trailing characters (%s) behind value '%ld' assigned from string '%s' to an option (%c) expecting an int8_t.\n",
+		    endptr,
+		    val,
+		    str,
+		    opt);
+		return ERRCODE(EINVAL);
+	}
+
+	// Make sure there isn't a loss of precision on this arch when casting explictly
+	if ((int8_t) val != val) {
+		fprintf(stderr, "Loss of precision when casting value '%ld' to an int8_t for option '%c'.\n", val, opt);
+		return ERRCODE(EINVAL);
+	}
+
+	*result = (int8_t) val;
+	return EXIT_SUCCESS;
+}
+
 // Application entry point
 int
     main(int argc, char* argv[])
@@ -377,16 +638,24 @@ int
 	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
-				fbink_config.row = (short int) atoi(optarg);
+				if (strtol_hi(opt, optarg, &fbink_config.row) < 0) {
+					errfnd = true;
+				}
 				break;
 			case 'x':
-				fbink_config.col = (short int) atoi(optarg);
+				if (strtol_hi(opt, optarg, &fbink_config.col) < 0) {
+					errfnd = true;
+				}
 				break;
 			case 'Y':
-				fbink_config.voffset = (short int) atoi(optarg);
+				if (strtol_hi(opt, optarg, &fbink_config.voffset) < 0) {
+					errfnd = true;
+				}
 				break;
 			case 'X':
-				fbink_config.hoffset = (short int) atoi(optarg);
+				if (strtol_hi(opt, optarg, &fbink_config.hoffset) < 0) {
+					errfnd = true;
+				}
 				break;
 			case 'h':
 				fbink_config.is_inverted = true;
@@ -411,16 +680,24 @@ int
 				while (*subopts != '\0' && !errfnd) {
 					switch (getsubopt(&subopts, refresh_token, &value)) {
 						case TOP_OPT:
-							region_top = (uint32_t) strtoul(value, NULL, 10);
+							if (strtoul_u(TOP_OPT, value, &region_top) < 0) {
+								errfnd = true;
+							}
 							break;
 						case LEFT_OPT:
-							region_left = (uint32_t) strtoul(value, NULL, 10);
+							if (strtoul_u(LEFT_OPT, value, &region_left) < 0) {
+								errfnd = true;
+							}
 							break;
 						case WIDTH_OPT:
-							region_width = (uint32_t) strtoul(value, NULL, 10);
+							if (strtoul_u(WIDTH_OPT, value, &region_width) < 0) {
+								errfnd = true;
+							}
 							break;
 						case HEIGHT_OPT:
-							region_height = (uint32_t) strtoul(value, NULL, 10);
+							if (strtoul_u(HEIGHT_OPT, value, &region_height) < 0) {
+								errfnd = true;
+							}
 							break;
 						case WFM_OPT:
 							if (value == NULL) {
@@ -454,7 +731,9 @@ int
 				}
 				break;
 			case 'S':
-				fbink_config.fontmult = (uint8_t) strtoul(optarg, NULL, 10);
+				if (strtoul_hhu(opt, optarg, &fbink_config.fontmult) < 0) {
+					errfnd = true;
+				}
 				break;
 			case 'F':
 				if (strcasecmp(optarg, "IBM") == 0) {
@@ -523,10 +802,14 @@ int
 							image_file = strdup(value);
 							break;
 						case XOFF_OPT:
-							image_x_offset = (short int) atoi(value);
+							if (strtol_hi(XOFF_OPT, value, &image_x_offset) < 0) {
+								errfnd = true;
+							}
 							break;
 						case YOFF_OPT:
-							image_y_offset = (short int) atoi(value);
+							if (strtol_hi(YOFF_OPT, value, &image_y_offset) < 0) {
+								errfnd = true;
+							}
 							break;
 						case HALIGN_OPT:
 							if (strcasecmp(value, "NONE") == 0 ||
@@ -669,11 +952,16 @@ int
 				break;
 			case 'P':
 				is_progressbar = true;
-				progress       = (uint8_t) strtoul(optarg, NULL, 10);
+				if (strtoul_hhu(opt, optarg, &progress) < 0) {
+					errfnd = true;
+				}
 				break;
 			case 'A':
 				is_activitybar = true;
-				int8_t val     = (int8_t) atoi(optarg);
+				int8_t val     = 0;
+				if (strtol_hhi(opt, optarg, &val) < 0) {
+					errfnd = true;
+				}
 				if (val < 0) {
 					is_infinite = true;
 				} else {
@@ -709,23 +997,29 @@ int
 							bdit_ot_file = strdup(value);
 							break;
 						case SIZE_OPT:
-							ot_config.size_pt = (unsigned short int) strtoul(value, NULL, 10);
+							if (strtoul_hu(SIZE_OPT, value, &ot_config.size_pt) < 0) {
+								errfnd = true;
+							}
 							break;
 						case TM_OPT:
-							ot_config.margins.top =
-							    (unsigned short int) strtoul(value, NULL, 10);
+							if (strtoul_hu(TM_OPT, value, &ot_config.margins.top) < 0) {
+								errfnd = true;
+							}
 							break;
 						case BM_OPT:
-							ot_config.margins.bottom =
-							    (unsigned short int) strtoul(value, NULL, 10);
+							if (strtoul_hu(BM_OPT, value, &ot_config.margins.bottom) < 0) {
+								errfnd = true;
+							}
 							break;
 						case LM_OPT:
-							ot_config.margins.left =
-							    (unsigned short int) strtoul(value, NULL, 10);
+							if (strtoul_hu(LM_OPT, value, &ot_config.margins.left) < 0) {
+								errfnd = true;
+							}
 							break;
 						case RM_OPT:
-							ot_config.margins.right =
-							    (unsigned short int) strtoul(value, NULL, 10);
+							if (strtoul_hu(RM_OPT, value, &ot_config.margins.right) < 0) {
+								errfnd = true;
+							}
 							break;
 						case FMT_OPT:
 							ot_config.is_formatted = true;
