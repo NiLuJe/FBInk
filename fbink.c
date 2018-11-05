@@ -2121,7 +2121,27 @@ int
 		WARN("Error allocating stbtt_fontinfo struct");
 		return ERRCODE(EXIT_FAILURE);
 	}
-	if (!stbtt_InitFont(font_info, data, stbtt_GetFontOffsetForIndex(data, 0))) {
+	// First, check if we can actually find a font in the data...
+	int fontcount = stbtt_GetNumberOfFonts(data);
+	if (fontcount == 0) {
+		free(data);
+		WARN("File '%s' doesn't appear to be a valid or supported font", filename);
+		return ERRCODE(EXIT_FAILURE);
+	} else if (fontcount > 1) {
+		LOG("Font file '%s' appears to be a font collection containing %d fonts, but we'll only use the first one!",
+		    filename,
+		    fontcount);
+	}
+	// Then, get the offset for the first font
+	int fontoffset = stbtt_GetFontOffsetForIndex(data, 0);
+	if (fontoffset == -1) {
+		free(data);
+		WARN("File '%s' doesn't appear to contain valid font data at offset %d", filename, fontoffset);
+		return ERRCODE(EXIT_FAILURE);
+	}
+	// And finally, initialize that font
+	// NOTE: We took the long way 'round to try to avoid crashes on invalid data...
+	if (!stbtt_InitFont(font_info, data, fontoffset)) {
 		free(font_info);
 		WARN("Error initialising font '%s'", filename);
 		return ERRCODE(EXIT_FAILURE);
