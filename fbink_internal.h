@@ -28,7 +28,7 @@
 #ifndef __FBINK_INTERNAL_H
 #define __FBINK_INTERNAL_H
 
-// // No extra fonts, no image support, and no OpenType support in minimal builds
+// No extra fonts, no image support, and no OpenType support in minimal builds
 #ifndef FBINK_MINIMAL
 #	ifndef FBINK_WITH_FONTS
 #		define FBINK_WITH_FONTS
