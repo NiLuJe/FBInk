@@ -2841,7 +2841,12 @@ int
 	int size = vsnprintf(buffer, buffer_size, fmt, args);
 	// vsnprintf will tell us if it truncated our string to fit the buffer, and by how much. We will need
 	// to realloc if this occurs.
-	if (size >= 0 && (size_t)size >= buffer_size) {
+	// We may as well check for an error from vsnprintf() while we're at it.
+	if (size < 0) {
+		free(buffer);
+		WARN("Could not format string");
+		return ERRCODE(EXIT_FAILURE);
+	} else if ((size_t)size >= buffer_size) {
 		char* tmp_buf = NULL;
 		size_t new_size = (size_t)size + 4U; // Just to be extra safe, use a wide null terminator
 		tmp_buf = realloc(buffer, new_size);
@@ -2858,11 +2863,6 @@ int
 		memset(buffer, '\0', new_size);
 		// Finally, we call vsnprintf() again, this time with the new buffer that should fit our formatted string
 		vsnprintf(buffer, new_size, fmt, args);
-	// We may as well check for an error from vsnprintf() while we're at it.
-	} else if (size < 0) {
-		free(buffer);
-		WARN("Could not format string");
-		return ERRCODE(EXIT_FAILURE);
 	}
 	va_end(args);
 
