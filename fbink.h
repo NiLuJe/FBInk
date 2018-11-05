@@ -304,8 +304,8 @@ FBINK_API int fbink_print_ot(int fbfd, const char* string, const FBInkOTConfig* 
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // cfg:			Pointer to a FBInkOTConfig struct.
 // fbCfg:		Optional pointer to a FBInkConfig struct.
-FBINK_API int fbink_printf_ot(int fbfd, FBInkOTConfig* cfg, FBInkConfig* fbCfg, const char* fmt, ...)
-	__attribute__((format(printf, 4, 5)));
+FBINK_API int fbink_printf_ot(int fbfd, const FBInkOTConfig* cfg, const FBInkConfig* fbCfg, const char* fmt, ...)
+    __attribute__((format(printf, 4, 5)));
 
 // A simple wrapper around the internal screen refresh handling, without requiring you to include einkfb/mxcfb headers
 // fbfd:		open file descriptor to the framebuffer character device,

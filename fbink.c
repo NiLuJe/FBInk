@@ -2834,17 +2834,17 @@ static void
 
 // printf-like wrapper around fbink_print_ot ;).
 int
-	fbink_printf_ot(int fbfd	UNUSED_BY_MINIMAL,
-			FBInkOTConfig* cfg  UNUSED_BY_MINIMAL,
-			FBInkConfig* fbCfg  UNUSED_BY_MINIMAL,
-			const char* fmt     UNUSED_BY_MINIMAL, 
-			...                 UNUSED_BY_MINIMAL)
+    fbink_printf_ot(int fbfd             UNUSED_BY_MINIMAL,
+		    const FBInkOTConfig* cfg UNUSED_BY_MINIMAL,
+		    const FBInkConfig* fbCfg UNUSED_BY_MINIMAL,
+		    const char* fmt UNUSED_BY_MINIMAL,
+		    ... UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_OPENTYPE
 	// We'll need to store our formatted string somewhere...
 	// NOTE: Unlike fbink_printf, we can't assume a maximum size, so we set the buffer size to the input
 	//       string size, and realloc if we must (which is likely).
-	char* buffer = NULL;
+	char*  buffer      = NULL;
 	size_t buffer_size = strlen(fmt) + 1U;
 	// NOTE: We use calloc to make sure it'll always be zero-initialized,
 	//       and the OS is smart enough to make it fast if we don't use the full space anyway (CoW zeroing).
@@ -2867,10 +2867,10 @@ int
 		free(buffer);
 		WARN("Could not format string");
 		return ERRCODE(EXIT_FAILURE);
-	} else if ((size_t)size >= buffer_size) {
-		char* tmp_buf = NULL;
-		size_t new_size = (size_t)size + 4U; // Just to be extra safe, use a wide null terminator
-		tmp_buf = realloc(buffer, new_size);
+	} else if ((size_t) size >= buffer_size) {
+		char*  tmp_buf  = NULL;
+		size_t new_size = (size_t) size + 4U;    // Just to be extra safe, use a wide null terminator
+		tmp_buf         = realloc(buffer, new_size);
 		if (tmp_buf == NULL) {
 			free(buffer);
 			char  buf[256];
@@ -2878,7 +2878,7 @@ int
 			WARN("realloc (page): %s", errstr);
 			return ERRCODE(EXIT_FAILURE);
 		}
-		buffer = tmp_buf;
+		buffer  = tmp_buf;
 		tmp_buf = NULL;
 		// Memset the new buffer, because realloc doesn't
 		memset(buffer, '\0', new_size);
@@ -2896,6 +2896,7 @@ int
 	return ERRCODE(ENOSYS);
 #endif    // FBINK_WITH_OPENTYPE
 }
+
 int
     fbink_print_ot(int fbfd    UNUSED_BY_MINIMAL,
 		   const char* string   UNUSED_BY_MINIMAL,
