@@ -299,6 +299,14 @@ FBINK_API int fbink_printf(int fbfd, const FBInkConfig* fbink_config, const char
 //       As such, it only makes sense in the context of a single, specific print call.
 FBINK_API int fbink_print_ot(int fbfd, const char* string, const FBInkOTConfig* cfg, const FBInkConfig* fbCfg);
 
+// Like fbink_print_ot, but with printf formatting ;).
+// fbfd:		open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
+// cfg:			Pointer to a FBInkOTConfig struct.
+// fbCfg:		Optional pointer to a FBInkConfig struct.
+FBINK_API int fbink_printf_ot(int fbfd, FBInkOTConfig* cfg, FBInkConfig* fbCfg, const char* fmt, ...)
+	__attribute__((format(printf, 4, 5)));
+
 // A simple wrapper around the internal screen refresh handling, without requiring you to include einkfb/mxcfb headers
 // fbfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call

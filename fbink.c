@@ -2832,6 +2832,70 @@ static void
 }
 #endif    // FBINK_WITH_OPENTYPE
 
+// printf-like wrapper around fbink_print_ot ;).
+int
+	fbink_printf_ot(int fbfd	UNUSED_BY_MINIMAL,
+			FBInkOTConfig* cfg  UNUSED_BY_MINIMAL,
+			FBInkConfig* fbCfg  UNUSED_BY_MINIMAL,
+			const char* fmt     UNUSED_BY_MINIMAL, 
+			...                 UNUSED_BY_MINIMAL)
+{
+#ifdef FBINK_WITH_OPENTYPE
+	// We'll need to store our formatted string somewhere...
+	// NOTE: Unlike fbink_printf, we can't assume a maximum size, so we set the buffer size to the input
+	//       string size, and realloc if we must (which is likely).
+	char* buffer = NULL;
+	size_t buffer_size = strlen(fmt) + 1U;
+	// NOTE: We use calloc to make sure it'll always be zero-initialized,
+	//       and the OS is smart enough to make it fast if we don't use the full space anyway (CoW zeroing).
+	buffer = calloc(buffer_size, sizeof(*buffer));
+	if (buffer == NULL) {
+		char  buf[256];
+		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		WARN("calloc (page): %s", errstr);
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	va_list args;
+	va_start(args, fmt);
+	// vsnprintf will ensure we'll always be NULL-terminated (but not NULL-backfilled, hence calloc!) ;).
+	int size = vsnprintf(buffer, buffer_size, fmt, args);
+	// vsnprintf will tell us if it truncated our string to fit the buffer, and by how much. We will need
+	// to realloc if this occurs.
+	// We may as well check for an error from vsnprintf() while we're at it.
+	if (size < 0) {
+		free(buffer);
+		WARN("Could not format string");
+		return ERRCODE(EXIT_FAILURE);
+	} else if ((size_t)size >= buffer_size) {
+		char* tmp_buf = NULL;
+		size_t new_size = (size_t)size + 4U; // Just to be extra safe, use a wide null terminator
+		tmp_buf = realloc(buffer, new_size);
+		if (tmp_buf == NULL) {
+			free(buffer);
+			char  buf[256];
+			char* errstr = strerror_r(errno, buf, sizeof(buf));
+			WARN("realloc (page): %s", errstr);
+			return ERRCODE(EXIT_FAILURE);
+		}
+		buffer = tmp_buf;
+		tmp_buf = NULL;
+		// Memset the new buffer, because realloc doesn't
+		memset(buffer, '\0', new_size);
+		// Finally, we call vsnprintf() again, this time with the new buffer that should fit our formatted string
+		vsnprintf(buffer, new_size, fmt, args);
+	}
+	va_end(args);
+
+	int rv = fbink_print_ot(fbfd, buffer, cfg, fbCfg);
+	// Cleanup
+	free(buffer);
+	return rv;
+#else
+	WARN("OpenType support is disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif    // FBINK_WITH_OPENTYPE
+}
 int
     fbink_print_ot(int fbfd    UNUSED_BY_MINIMAL,
 		   const char* string   UNUSED_BY_MINIMAL,
