@@ -178,6 +178,9 @@
 #		undef O_CLOEXEC
 #	endif
 #	define O_CLOEXEC 0
+#	define STDIO_CLOEXEC
+#else
+#	define STDIO_CLOEXEC "e"
 #endif
 
 // Fallback version tag...

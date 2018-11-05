@@ -2088,11 +2088,7 @@ int
 
 	otInit = true;
 	// Open font from given path, and load into buffer
-#	ifdef FBINK_FOR_LEGACY
-	FILE* f = fopen(filename, "r");
-#	else
-	FILE* f = fopen(filename, "re");
-#	endif
+	FILE*          f    = fopen(filename, "r" STDIO_CLOEXEC);
 	unsigned char* data = NULL;
 	if (!f) {
 		char  buf[256];
