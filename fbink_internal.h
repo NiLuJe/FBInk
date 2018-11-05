@@ -284,8 +284,8 @@ bool g_isQuiet = false;
 // This should be a pretty accurate fallback...
 long int USER_HZ = 100;
 // Pointers to the appropriate put_pixel/get_pixel functions for the fb's bpp
-void (*fxpPutPixel)(FBInkCoordinates*, FBInkColor*) = NULL;
-void (*fxpGetPixel)(FBInkCoordinates*, FBInkColor*) = NULL;
+void (*fxpPutPixel)(const FBInkCoordinates*, const FBInkColor*) = NULL;
+void (*fxpGetPixel)(const FBInkCoordinates*, FBInkColor*)       = NULL;
 // As well as the appropriate coordinates rotation functions...
 void (*fxpRotateCoords)(FBInkCoordinates*)  = NULL;
 void (*fxpRotateRegion)(struct mxcfb_rect*) = NULL;
@@ -312,18 +312,18 @@ static void rotate_coordinates_boot(FBInkCoordinates*);
 #endif
 static void rotate_coordinates_nop(FBInkCoordinates* __attribute__((unused)));
 
-static void put_pixel_Gray4(FBInkCoordinates*, FBInkColor*);
-static void put_pixel_Gray8(FBInkCoordinates*, FBInkColor*);
-static void put_pixel_RGB24(FBInkCoordinates*, FBInkColor*);
-static void put_pixel_RGB32(FBInkCoordinates*, FBInkColor*);
-static void put_pixel_RGB565(FBInkCoordinates*, FBInkColor*);
-static void put_pixel(FBInkCoordinates, FBInkColor*);
+static void put_pixel_Gray4(const FBInkCoordinates*, const FBInkColor*);
+static void put_pixel_Gray8(const FBInkCoordinates*, const FBInkColor*);
+static void put_pixel_RGB24(const FBInkCoordinates*, const FBInkColor*);
+static void put_pixel_RGB32(const FBInkCoordinates*, const FBInkColor*);
+static void put_pixel_RGB565(const FBInkCoordinates*, const FBInkColor*);
+static void put_pixel(FBInkCoordinates, const FBInkColor*);
 
-static void get_pixel_Gray4(FBInkCoordinates*, FBInkColor*);
-static void get_pixel_Gray8(FBInkCoordinates*, FBInkColor*);
-static void get_pixel_RGB24(FBInkCoordinates*, FBInkColor*);
-static void get_pixel_RGB32(FBInkCoordinates*, FBInkColor*);
-static void get_pixel_RGB565(FBInkCoordinates*, FBInkColor*);
+static void get_pixel_Gray4(const FBInkCoordinates*, FBInkColor*);
+static void get_pixel_Gray8(const FBInkCoordinates*, FBInkColor*);
+static void get_pixel_RGB24(const FBInkCoordinates*, FBInkColor*);
+static void get_pixel_RGB32(const FBInkCoordinates*, FBInkColor*);
+static void get_pixel_RGB565(const FBInkCoordinates*, FBInkColor*);
 static void get_pixel(FBInkCoordinates, FBInkColor*);
 
 #if defined(FBINK_WITH_IMAGE) || defined(FBINK_WITH_OPENTYPE)

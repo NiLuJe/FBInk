@@ -92,7 +92,7 @@ const char*
 
 // Helper functions to 'plot' a specific pixel in a given color to the framebuffer
 static void
-    put_pixel_Gray4(FBInkCoordinates* coords, FBInkColor* color)
+    put_pixel_Gray4(const FBInkCoordinates* coords, const FBInkColor* color)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x / 2 as every byte holds 2 pixels
@@ -116,7 +116,7 @@ static void
 }
 
 static void
-    put_pixel_Gray8(FBInkCoordinates* coords, FBInkColor* color)
+    put_pixel_Gray8(const FBInkCoordinates* coords, const FBInkColor* color)
 {
 	// calculate the pixel's byte offset inside the buffer
 	size_t pix_offset = coords->x + coords->y * fInfo.line_length;
@@ -126,7 +126,7 @@ static void
 }
 
 static void
-    put_pixel_RGB24(FBInkCoordinates* coords, FBInkColor* color)
+    put_pixel_RGB24(const FBInkCoordinates* coords, const FBInkColor* color)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 3 as every pixel is 3 consecutive bytes
@@ -139,7 +139,7 @@ static void
 }
 
 static void
-    put_pixel_RGB32(FBInkCoordinates* coords, FBInkColor* color)
+    put_pixel_RGB32(const FBInkCoordinates* coords, const FBInkColor* color)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 4 as every pixel is 4 consecutive bytes
@@ -157,7 +157,7 @@ static void
 }
 
 static void
-    put_pixel_RGB565(FBInkCoordinates* coords, FBInkColor* color)
+    put_pixel_RGB565(const FBInkCoordinates* coords, const FBInkColor* color)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 2 as every pixel is 2 consecutive bytes
@@ -260,7 +260,7 @@ static void
 
 // Handle a few sanity checks...
 static void
-    put_pixel(FBInkCoordinates coords, FBInkColor* color)
+    put_pixel(FBInkCoordinates coords, const FBInkColor* color)
 {
 	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
 	(*fxpRotateCoords)(&coords);
@@ -292,7 +292,7 @@ static void
 // as well as KOReader's routines
 //       (https://github.com/koreader/koreader-base/blob/b3e72affd0e1ba819d92194b229468452c58836f/ffi/blitbuffer.lua#L292)
 static void
-    get_pixel_Gray4(FBInkCoordinates* coords, FBInkColor* color)
+    get_pixel_Gray4(const FBInkCoordinates* coords, FBInkColor* color)
 {
 	// NOTE: Expand 4bpp to 8bpp:
 	// (v * 0x11)
@@ -326,7 +326,7 @@ static void
 }
 
 static void
-    get_pixel_Gray8(FBInkCoordinates* coords, FBInkColor* color)
+    get_pixel_Gray8(const FBInkCoordinates* coords, FBInkColor* color)
 {
 	// calculate the pixel's byte offset inside the buffer
 	size_t pix_offset = coords->x + coords->y * fInfo.line_length;
@@ -335,7 +335,7 @@ static void
 }
 
 static void
-    get_pixel_RGB24(FBInkCoordinates* coords, FBInkColor* color)
+    get_pixel_RGB24(const FBInkCoordinates* coords, FBInkColor* color)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 3 as every pixel is 3 consecutive bytes
@@ -347,7 +347,7 @@ static void
 }
 
 static void
-    get_pixel_RGB32(FBInkCoordinates* coords, FBInkColor* color)
+    get_pixel_RGB32(const FBInkCoordinates* coords, FBInkColor* color)
 {
 	// NOTE: We retrofitted a bit of union magic implemented for fbink_print_image for a noticeable performance bump :)
 	FBInkPixelBGRA px;
@@ -368,7 +368,7 @@ static void
 }
 
 static void
-    get_pixel_RGB565(FBInkCoordinates* coords, FBInkColor* color)
+    get_pixel_RGB565(const FBInkCoordinates* coords, FBInkColor* color)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 2 as every pixel is 2 consecutive bytes
