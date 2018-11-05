@@ -258,11 +258,15 @@ static int
 // Input validation via strtoul, for an uint32_t
 // Adapted from the same in KFMon ;).
 static int
-    strtoul_u(int opt, const char* str, uint32_t* result)
+    strtoul_u(int opt, const char* subopt, const char* str, uint32_t* result)
 {
 	// NOTE: We want to *reject* negative values (which strtoul does not)!
 	if (strchr(str, '-')) {
-		fprintf(stderr, "Assigned a negative value (%s) to an option (%c) expecting an uint32_t.\n", str, opt);
+		fprintf(stderr,
+			"Assigned a negative value (%s) to an option (%c:%s) expecting an uint32_t.\n",
+			str,
+			opt,
+			subopt);
 		return ERRCODE(EINVAL);
 	}
 
@@ -280,9 +284,10 @@ static int
 
 	if (endptr == str) {
 		fprintf(stderr,
-			"No digits were found in value '%s' assigned to an option (%c) expecting an uint32_t.\n",
+			"No digits were found in value '%s' assigned to an option (%c:%s) expecting an uint32_t.\n",
 			str,
-			opt);
+			opt,
+			subopt);
 		return ERRCODE(EINVAL);
 	}
 
@@ -291,17 +296,22 @@ static int
 	if (*endptr != '\0') {
 		fprintf(
 		    stderr,
-		    "Found trailing characters (%s) behind value '%lu' assigned from string '%s' to an option (%c) expecting an uint32_t.\n",
+		    "Found trailing characters (%s) behind value '%lu' assigned from string '%s' to an option (%c:%s) expecting an uint32_t.\n",
 		    endptr,
 		    val,
 		    str,
-		    opt);
+		    opt,
+		    subopt);
 		return ERRCODE(EINVAL);
 	}
 
 	// Make sure there isn't a loss of precision on this arch when casting explictly
 	if ((uint32_t) val != val) {
-		fprintf(stderr, "Loss of precision when casting value '%lu' to an uint32_t for option '%c'.\n", val, opt);
+		fprintf(stderr,
+			"Loss of precision when casting value '%lu' to an uint32_t for option '%c:%s'.\n",
+			val,
+			opt,
+			subopt);
 		return ERRCODE(EINVAL);
 	}
 
@@ -311,14 +321,15 @@ static int
 
 // Input validation via strtoul, for an unsigned short int
 static int
-    strtoul_hu(int opt, const char* str, unsigned short int* result)
+    strtoul_hu(int opt, const char* subopt, const char* str, unsigned short int* result)
 {
 	// NOTE: We want to *reject* negative values (which strtoul does not)!
 	if (strchr(str, '-')) {
 		fprintf(stderr,
-			"Assigned a negative value (%s) to an option (%c) expecting an unsigned short int.\n",
+			"Assigned a negative value (%s) to an option (%c:%s) expecting an unsigned short int.\n",
 			str,
-			opt);
+			opt,
+			subopt);
 		return ERRCODE(EINVAL);
 	}
 
@@ -337,9 +348,10 @@ static int
 	if (endptr == str) {
 		fprintf(
 		    stderr,
-		    "No digits were found in value '%s' assigned to an option (%c) expecting an unsigned short int.\n",
+		    "No digits were found in value '%s' assigned to an option (%c:%s) expecting an unsigned short int.\n",
 		    str,
-		    opt);
+		    opt,
+		    subopt);
 		return ERRCODE(EINVAL);
 	}
 
@@ -348,20 +360,22 @@ static int
 	if (*endptr != '\0') {
 		fprintf(
 		    stderr,
-		    "Found trailing characters (%s) behind value '%lu' assigned from string '%s' to an option (%c) expecting an unsigned short int.\n",
+		    "Found trailing characters (%s) behind value '%lu' assigned from string '%s' to an option (%c:%s) expecting an unsigned short int.\n",
 		    endptr,
 		    val,
 		    str,
-		    opt);
+		    opt,
+		    subopt);
 		return ERRCODE(EINVAL);
 	}
 
 	// Make sure there isn't a loss of precision on this arch when casting explictly
 	if ((unsigned short int) val != val) {
 		fprintf(stderr,
-			"Loss of precision when casting value '%lu' to an unsigned short int for option '%c'.\n",
+			"Loss of precision when casting value '%lu' to an unsigned short int for option '%c:%s'.\n",
 			val,
-			opt);
+			opt,
+			subopt);
 		return ERRCODE(EINVAL);
 	}
 
@@ -424,7 +438,7 @@ static int
 
 // Input validation via strtol, for a short int
 static int
-    strtol_hi(int opt, const char* str, short int* result)
+    strtol_hi(int opt, const char* subopt, const char* str, short int* result)
 {
 	// Go on with strtol...
 	char*    endptr;
@@ -440,9 +454,10 @@ static int
 
 	if (endptr == str) {
 		fprintf(stderr,
-			"No digits were found in value '%s' assigned to an option (%c) expecting a short int.\n",
+			"No digits were found in value '%s' assigned to an option (%c:%s) expecting a short int.\n",
 			str,
-			opt);
+			opt,
+			subopt);
 		return ERRCODE(EINVAL);
 	}
 
@@ -451,17 +466,22 @@ static int
 	if (*endptr != '\0') {
 		fprintf(
 		    stderr,
-		    "Found trailing characters (%s) behind value '%ld' assigned from string '%s' to an option (%c) expecting a short int.\n",
+		    "Found trailing characters (%s) behind value '%ld' assigned from string '%s' to an option (%c:%s) expecting a short int.\n",
 		    endptr,
 		    val,
 		    str,
-		    opt);
+		    opt,
+		    subopt);
 		return ERRCODE(EINVAL);
 	}
 
 	// Make sure there isn't a loss of precision on this arch when casting explictly
 	if ((short int) val != val) {
-		fprintf(stderr, "Loss of precision when casting value '%ld' to a short int for option '%c'.\n", val, opt);
+		fprintf(stderr,
+			"Loss of precision when casting value '%ld' to a short int for option '%c:%s'.\n",
+			val,
+			opt,
+			subopt);
 		return ERRCODE(EINVAL);
 	}
 
@@ -638,22 +658,22 @@ int
 	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
-				if (strtol_hi(opt, optarg, &fbink_config.row) < 0) {
+				if (strtol_hi(opt, NULL, optarg, &fbink_config.row) < 0) {
 					errfnd = true;
 				}
 				break;
 			case 'x':
-				if (strtol_hi(opt, optarg, &fbink_config.col) < 0) {
+				if (strtol_hi(opt, NULL, optarg, &fbink_config.col) < 0) {
 					errfnd = true;
 				}
 				break;
 			case 'Y':
-				if (strtol_hi(opt, optarg, &fbink_config.voffset) < 0) {
+				if (strtol_hi(opt, NULL, optarg, &fbink_config.voffset) < 0) {
 					errfnd = true;
 				}
 				break;
 			case 'X':
-				if (strtol_hi(opt, optarg, &fbink_config.hoffset) < 0) {
+				if (strtol_hi(opt, NULL, optarg, &fbink_config.hoffset) < 0) {
 					errfnd = true;
 				}
 				break;
@@ -680,22 +700,28 @@ int
 				while (*subopts != '\0' && !errfnd) {
 					switch (getsubopt(&subopts, refresh_token, &value)) {
 						case TOP_OPT:
-							if (strtoul_u(TOP_OPT, value, &region_top) < 0) {
+							if (strtoul_u(opt, refresh_token[TOP_OPT], value, &region_top) <
+							    0) {
 								errfnd = true;
 							}
 							break;
 						case LEFT_OPT:
-							if (strtoul_u(LEFT_OPT, value, &region_left) < 0) {
+							if (strtoul_u(opt, refresh_token[LEFT_OPT], value, &region_left) <
+							    0) {
 								errfnd = true;
 							}
 							break;
 						case WIDTH_OPT:
-							if (strtoul_u(WIDTH_OPT, value, &region_width) < 0) {
+							if (strtoul_u(
+								opt, refresh_token[WIDTH_OPT], value, &region_width) <
+							    0) {
 								errfnd = true;
 							}
 							break;
 						case HEIGHT_OPT:
-							if (strtoul_u(HEIGHT_OPT, value, &region_height) < 0) {
+							if (strtoul_u(
+								opt, refresh_token[HEIGHT_OPT], value, &region_height) <
+							    0) {
 								errfnd = true;
 							}
 							break;
@@ -802,12 +828,14 @@ int
 							image_file = strdup(value);
 							break;
 						case XOFF_OPT:
-							if (strtol_hi(XOFF_OPT, value, &image_x_offset) < 0) {
+							if (strtol_hi(
+								opt, image_token[XOFF_OPT], value, &image_x_offset) < 0) {
 								errfnd = true;
 							}
 							break;
 						case YOFF_OPT:
-							if (strtol_hi(YOFF_OPT, value, &image_y_offset) < 0) {
+							if (strtol_hi(
+								opt, image_token[YOFF_OPT], value, &image_y_offset) < 0) {
 								errfnd = true;
 							}
 							break;
@@ -997,27 +1025,42 @@ int
 							bdit_ot_file = strdup(value);
 							break;
 						case SIZE_OPT:
-							if (strtoul_hu(SIZE_OPT, value, &ot_config.size_pt) < 0) {
+							if (strtoul_hu(opt,
+								       truetype_token[SIZE_OPT],
+								       value,
+								       &ot_config.size_pt) < 0) {
 								errfnd = true;
 							}
 							break;
 						case TM_OPT:
-							if (strtoul_hu(TM_OPT, value, &ot_config.margins.top) < 0) {
+							if (strtoul_hu(opt,
+								       truetype_token[TM_OPT],
+								       value,
+								       &ot_config.margins.top) < 0) {
 								errfnd = true;
 							}
 							break;
 						case BM_OPT:
-							if (strtoul_hu(BM_OPT, value, &ot_config.margins.bottom) < 0) {
+							if (strtoul_hu(opt,
+								       truetype_token[BM_OPT],
+								       value,
+								       &ot_config.margins.bottom) < 0) {
 								errfnd = true;
 							}
 							break;
 						case LM_OPT:
-							if (strtoul_hu(LM_OPT, value, &ot_config.margins.left) < 0) {
+							if (strtoul_hu(opt,
+								       truetype_token[LM_OPT],
+								       value,
+								       &ot_config.margins.left) < 0) {
 								errfnd = true;
 							}
 							break;
 						case RM_OPT:
-							if (strtoul_hu(RM_OPT, value, &ot_config.margins.right) < 0) {
+							if (strtoul_hu(opt,
+								       truetype_token[RM_OPT],
+								       value,
+								       &ot_config.margins.right) < 0) {
 								errfnd = true;
 							}
 							break;
