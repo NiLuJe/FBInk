@@ -372,7 +372,7 @@ int
 	char*     bd_ot_file     = NULL;
 	char*     it_ot_file     = NULL;
 	char*     bdit_ot_file   = NULL;
-	int       errfnd         = 0;
+	bool      errfnd         = false;
 
 	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:", opts, &opt_index)) != -1) {
 		switch (opt) {
@@ -427,7 +427,7 @@ int
 								fprintf(stderr,
 									"Missing value for suboption '%s'\n",
 									refresh_token[WFM_OPT]);
-								errfnd = 1;
+								errfnd = true;
 								continue;
 							}
 
@@ -435,7 +435,7 @@ int
 							break;
 						default:
 							fprintf(stderr, "No match found for token: /%s/\n", value);
-							errfnd = 1;
+							errfnd = true;
 							break;
 					}
 				}
@@ -448,7 +448,7 @@ int
 					    refresh_token[WFM_OPT],
 					    refresh_token[HEIGHT_OPT],
 					    refresh_token[WIDTH_OPT]);
-					errfnd = 1;
+					errfnd = true;
 				} else {
 					is_refresh = true;
 				}
@@ -497,7 +497,7 @@ int
 					fbink_config.fontname = SCIENTIFICAI;
 				} else {
 					fprintf(stderr, "Unknown font name '%s'.\n", optarg);
-					errfnd = 1;
+					errfnd = true;
 				}
 				break;
 			case 'v':
@@ -540,7 +540,7 @@ int
 								fbink_config.halign = EDGE;
 							} else {
 								fprintf(stderr, "Unknown alignment value '%s'.\n", value);
-								errfnd = 1;
+								errfnd = true;
 							}
 							break;
 						case VALIGN_OPT:
@@ -555,18 +555,18 @@ int
 								fbink_config.valign = EDGE;
 							} else {
 								fprintf(stderr, "Unknown alignment value '%s'.\n", value);
-								errfnd = 1;
+								errfnd = true;
 							}
 							break;
 						default:
 							fprintf(stderr, "No match found for token: /%s/\n", value);
-							errfnd = 1;
+							errfnd = true;
 							break;
 					}
 				}
 				if (image_file == NULL) {
 					fprintf(stderr, "Must specify at least '%s'\n", image_token[FILE_OPT]);
-					errfnd = 1;
+					errfnd = true;
 				} else {
 					is_image = true;
 				}
@@ -620,7 +620,7 @@ int
 					fbink_config.fg_color = FG_WHITE;
 				} else {
 					fprintf(stderr, "Unknown color name '%s'.\n", optarg);
-					errfnd = 1;
+					errfnd = true;
 				}
 				break;
 			case 'B':
@@ -658,7 +658,7 @@ int
 					fbink_config.bg_color = BG_WHITE;
 				} else {
 					fprintf(stderr, "Unknown color name '%s'.\n", optarg);
-					errfnd = 1;
+					errfnd = true;
 				}
 				break;
 			case 'L':
@@ -732,7 +732,7 @@ int
 							break;
 						default:
 							fprintf(stderr, "No match found for token: /%s/\n", value);
-							errfnd = 1;
+							errfnd = true;
 							break;
 					}
 				}
@@ -740,14 +740,14 @@ int
 				if (reg_ot_file == NULL && bd_ot_file == NULL && it_ot_file == NULL &&
 				    bdit_ot_file == NULL) {
 					fprintf(stderr, "At least one font style must be specified!\n");
-					errfnd = 1;
+					errfnd = true;
 				} else {
 					is_truetype = true;
 				}
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
-				errfnd = 1;
+				errfnd = true;
 				break;
 		}
 	}
@@ -765,15 +765,15 @@ int
 	int fbfd = -1;
 
 	// Don't abort if we piped something without passing any arguments!
-	if (errfnd == 1 || (argc == 1 && isatty(fileno(stdin)))) {
-		if (errfnd == 1) {
+	if (errfnd || (argc == 1 && isatty(fileno(stdin)))) {
+		if (errfnd) {
 			fprintf(stderr, "\n****\t****\t****\t****\n");
 		}
 		show_helpmsg();
 		// NOTE: Having the actual error message printed *above* the seven billion lines of the help message
 		//       pretty much ensures no one will ever notice it, so remind the user that there's also
 		//       an actual error message to read much higher in their terminal backlog ;p
-		if (errfnd == 1) {
+		if (errfnd) {
 			fprintf(stderr, "\n****\t****\t****\t****\n\n");
 			fprintf(stderr, "Encountered a parsing error, see the top of the output for details!\n");
 		}

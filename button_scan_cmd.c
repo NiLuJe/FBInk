@@ -65,7 +65,7 @@ int
 	bool detect_import     = false;
 	bool do_wait_for_usbms = false;
 	bool force_unplug      = false;
-	int  errfnd            = 0;
+	bool errfnd            = false;
 
 	while ((opt = getopt_long(argc, argv, "pwubhvq", opts, &opt_index)) != -1) {
 		switch (opt) {
@@ -94,12 +94,12 @@ int
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
-				errfnd = 1;
+				errfnd = true;
 				break;
 		}
 	}
 
-	if (errfnd == 1 || argc > optind) {
+	if (errfnd || argc > optind) {
 		show_helpmsg();
 		return ERRCODE(EXIT_FAILURE);
 	}
