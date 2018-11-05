@@ -260,16 +260,16 @@ static void
 
 // Handle a few sanity checks...
 static void
-    put_pixel(FBInkCoordinates* coords, FBInkColor* color)
+    put_pixel(FBInkCoordinates coords, FBInkColor* color)
 {
 	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
-	(*fxpRotateCoords)(coords);
+	(*fxpRotateCoords)(&coords);
 
 	// NOTE: Discard off-screen pixels!
 	//       For instance, when we have a halfcell offset in conjunction with a !isPerfectFit pixel offset,
 	//       when we're padding and centering, the final whitespace of right-padding will have its last
 	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
-	if (coords->x >= vInfo.xres || coords->y >= vInfo.yres) {
+	if (coords.x >= vInfo.xres || coords.y >= vInfo.yres) {
 #ifdef DEBUG
 		// NOTE: This is only enabled in Debug builds because it can be pretty verbose,
 		//       and does not necessarily indicate an actual issue, as we've just explained...
@@ -283,7 +283,7 @@ static void
 	}
 
 	// fbink_init() takes care of setting this global pointer to the right function for the fb's bpp
-	(*fxpPutPixel)(coords, color);
+	(*fxpPutPixel)(&coords, color);
 }
 
 // Helper functions to 'get' a specific pixel's color from the framebuffer
@@ -400,16 +400,16 @@ static void
 
 // Handle a few sanity checks...
 static void
-    get_pixel(FBInkCoordinates* coords, FBInkColor* color)
+    get_pixel(FBInkCoordinates coords, FBInkColor* color)
 {
 	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
-	(*fxpRotateCoords)(coords);
+	(*fxpRotateCoords)(&coords);
 
 	// NOTE: Discard off-screen pixels!
 	//       For instance, when we have a halfcell offset in conjunction with a !isPerfectFit pixel offset,
 	//       when we're padding and centering, the final whitespace of right-padding will have its last
 	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
-	if (coords->x >= vInfo.xres || coords->y >= vInfo.yres) {
+	if (coords.x >= vInfo.xres || coords.y >= vInfo.yres) {
 #ifdef DEBUG
 		// NOTE: This is only enabled in Debug builds because it can be pretty verbose,
 		//       and does not necessarily indicate an actual issue, as we've just explained...
@@ -423,7 +423,7 @@ static void
 	}
 
 	// fbink_init() takes care of setting this global pointer to the right function for the fb's bpp
-	(*fxpGetPixel)(coords, color);
+	(*fxpGetPixel)(&coords, color);
 }
 
 // Helper function to draw a rectangle in given color
@@ -435,7 +435,7 @@ static void
 		for (unsigned short int cx = 0U; cx < w; cx++) {
 			coords.x = (unsigned short int) (x + cx);
 			coords.y = (unsigned short int) (y + cy);
-			put_pixel(&coords, color);
+			put_pixel(coords, color);
 		}
 	}
 	LOG("Filled a %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
@@ -854,7 +854,7 @@ static struct mxcfb_rect
 					for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {                                   \
 						coords.x = (unsigned short int) (cx + k);                                \
 						coords.y = (unsigned short int) (cy + l);                                \
-						put_pixel(&coords, pxC);                                                 \
+						put_pixel(coords, pxC);                                                  \
 					}                                                                                \
 				}                                                                                        \
 			}                                                                                                \
@@ -891,7 +891,7 @@ static struct mxcfb_rect
 						/* Obviously, the closer we get to GRAY7, the less contrast we get */    \
 						if (is_fgpx && !fbink_config->is_fgless) {                               \
 							if (fbink_config->is_overlay) {                                  \
-								get_pixel(&coords, &fbC);                                \
+								get_pixel(coords, &fbC);                                 \
 								fbC.r ^= 0xFF;                                           \
 								/* NOTE: Don't touch g & b if it's not needed! */        \
 								/*       It's especially important on 4bpp, */           \
@@ -903,9 +903,9 @@ static struct mxcfb_rect
 								}                                                        \
 								pxC = &fbC;                                              \
 							}                                                                \
-							put_pixel(&coords, pxC);                                         \
+							put_pixel(coords, pxC);                                          \
 						} else if (!is_fgpx && fbink_config->is_fgless) {                        \
-							put_pixel(&coords, pxC);                                         \
+							put_pixel(coords, pxC);                                          \
 						}                                                                        \
 					}                                                                                \
 				}                                                                                        \
@@ -3500,7 +3500,7 @@ int
 				for (int j = 0; j < max_line_height; j++) {
 					for (unsigned int k = 0U; k < lw; k++) {
 						color.r = color.g = color.b = lnPtr[k] ^ ainv;
-						put_pixel(&paint_point, &color);
+						put_pixel(paint_point, &color);
 						paint_point.x++;
 					}
 					lnPtr += max_lw;
@@ -3522,7 +3522,7 @@ int
 							color.r = color.g = color.b =
 							    (uint8_t) DIV255((pmul_bg + (layer_diff * lnPtr[k])));
 						}
-						put_pixel(&paint_point, &color);
+						put_pixel(paint_point, &color);
 						paint_point.x++;
 					}
 					lnPtr += max_lw;
@@ -3541,18 +3541,18 @@ int
 						if (lnPtr[k] == 0U) {
 							// No coverage (transparent) -> background
 							color.r = color.g = color.b = bgcolor;
-							put_pixel(&paint_point, &color);
+							put_pixel(paint_point, &color);
 						} else if (lnPtr[k] != 0xFF) {
 							// AA, blend it using the coverage mask as alpha,
 							// and the underlying pixel as fg
-							get_pixel(&paint_point, &fb_color);
+							get_pixel(paint_point, &fb_color);
 							color.r = (uint8_t) DIV255(
 							    (pmul_bg + ((fb_color.r - bgcolor) * lnPtr[k])));
 							color.g = (uint8_t) DIV255(
 							    (pmul_bg + ((fb_color.g - bgcolor) * lnPtr[k])));
 							color.b = (uint8_t) DIV255(
 							    (pmul_bg + ((fb_color.b - bgcolor) * lnPtr[k])));
-							put_pixel(&paint_point, &color);
+							put_pixel(paint_point, &color);
 						}
 						paint_point.x++;
 					}
@@ -3565,13 +3565,13 @@ int
 				for (int j = 0; j < max_line_height; j++) {
 					for (unsigned int k = 0U; k < lw; k++) {
 						// AA, blend it using the coverage mask as alpha, and the underlying pixel as fg
-						get_pixel(&paint_point, &fb_color);
+						get_pixel(paint_point, &fb_color);
 						color.r =
 						    (uint8_t) DIV255((pmul_bg + ((fb_color.r - bgcolor) * lnPtr[k])));
 						// Don't touch the low nibble...
 						color.g = fb_color.g;
 						color.b = fb_color.b;
-						put_pixel(&paint_point, &color);
+						put_pixel(paint_point, &color);
 						paint_point.x++;
 					}
 					lnPtr += max_lw;
@@ -3588,18 +3588,18 @@ int
 						if (lnPtr[k] == 0xFF) {
 							// Full coverage (opaque) -> foreground
 							color.r = color.g = color.b = fgcolor;
-							put_pixel(&paint_point, &color);
+							put_pixel(paint_point, &color);
 						} else if (lnPtr[k] != 0U) {
 							// AA, blend it using the coverage mask as alpha,
 							// and the underlying pixel as bg
-							get_pixel(&paint_point, &fb_color);
+							get_pixel(paint_point, &fb_color);
 							color.r = (uint8_t) DIV255(
 							    (MUL255(fb_color.r) + ((fgcolor - fb_color.r) * lnPtr[k])));
 							color.g = (uint8_t) DIV255(
 							    (MUL255(fb_color.g) + ((fgcolor - fb_color.g) * lnPtr[k])));
 							color.b = (uint8_t) DIV255(
 							    (MUL255(fb_color.b) + ((fgcolor - fb_color.b) * lnPtr[k])));
-							put_pixel(&paint_point, &color);
+							put_pixel(paint_point, &color);
 						}
 						paint_point.x++;
 					}
@@ -3612,13 +3612,13 @@ int
 				for (int j = 0; j < max_line_height; j++) {
 					for (unsigned int k = 0U; k < lw; k++) {
 						// AA, blend it using the coverage mask as alpha, and the underlying pixel as bg
-						get_pixel(&paint_point, &fb_color);
+						get_pixel(paint_point, &fb_color);
 						color.r = (uint8_t) DIV255(
 						    (MUL255(fb_color.r) + ((fgcolor - fb_color.r) * lnPtr[k])));
 						// Don't touch the low nibble...
 						color.g = fb_color.g;
 						color.b = fb_color.b;
-						put_pixel(&paint_point, &color);
+						put_pixel(paint_point, &color);
 						paint_point.x++;
 					}
 					lnPtr += max_lw;
@@ -3634,17 +3634,17 @@ int
 					for (unsigned int k = 0U; k < lw; k++) {
 						if (lnPtr[k] == 0xFF) {
 							// Full coverage (opaque) -> foreground
-							get_pixel(&paint_point, &fb_color);
+							get_pixel(paint_point, &fb_color);
 							// We want our foreground to be the inverse of the underlying pixel...
 							color.r = fb_color.r ^ 0xFF;
 							color.g = fb_color.g ^ 0xFF;
 							color.b = fb_color.b ^ 0xFF;
-							put_pixel(&paint_point, &color);
+							put_pixel(paint_point, &color);
 						} else if (lnPtr[k] != 0U) {
 							// AA, blend it using the coverage mask as alpha,
 							// and the underlying pixel as bg
 							// Without forgetting our foreground color trickery...
-							get_pixel(&paint_point, &fb_color);
+							get_pixel(paint_point, &fb_color);
 							color.r = (uint8_t) DIV255(
 							    (MUL255(fb_color.r) +
 							     (((fb_color.r ^ 0xFF) - fb_color.r) * lnPtr[k])));
@@ -3654,7 +3654,7 @@ int
 							color.b = (uint8_t) DIV255(
 							    (MUL255(fb_color.b) +
 							     (((fb_color.b ^ 0xFF) - fb_color.b) * lnPtr[k])));
-							put_pixel(&paint_point, &color);
+							put_pixel(paint_point, &color);
 						}
 						paint_point.x++;
 					}
@@ -3668,14 +3668,14 @@ int
 					for (unsigned int k = 0U; k < lw; k++) {
 						// AA, blend it using the coverage mask as alpha, and the underlying pixel as bg
 						// Without forgetting our foreground color trickery...
-						get_pixel(&paint_point, &fb_color);
+						get_pixel(paint_point, &fb_color);
 						color.r =
 						    (uint8_t) DIV255((MUL255(fb_color.r) +
 								      (((fb_color.r ^ 0xFF) - fb_color.r) * lnPtr[k])));
 						// Don't touch the low nibble...
 						color.g = fb_color.g;
 						color.b = fb_color.b;
-						put_pixel(&paint_point, &color);
+						put_pixel(paint_point, &color);
 						paint_point.x++;
 					}
 					lnPtr += max_lw;

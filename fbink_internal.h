@@ -28,7 +28,7 @@
 #ifndef __FBINK_INTERNAL_H
 #define __FBINK_INTERNAL_H
 
-// No extra fonts, no image support, and no OpenType support in minimal builds
+// // No extra fonts, no image support, and no OpenType support in minimal builds
 #ifndef FBINK_MINIMAL
 #	ifndef FBINK_WITH_FONTS
 #		define FBINK_WITH_FONTS
@@ -317,14 +317,14 @@ static void put_pixel_Gray8(FBInkCoordinates*, FBInkColor*);
 static void put_pixel_RGB24(FBInkCoordinates*, FBInkColor*);
 static void put_pixel_RGB32(FBInkCoordinates*, FBInkColor*);
 static void put_pixel_RGB565(FBInkCoordinates*, FBInkColor*);
-static void put_pixel(FBInkCoordinates*, FBInkColor*);
+static void put_pixel(FBInkCoordinates, FBInkColor*);
 
 static void get_pixel_Gray4(FBInkCoordinates*, FBInkColor*);
 static void get_pixel_Gray8(FBInkCoordinates*, FBInkColor*);
 static void get_pixel_RGB24(FBInkCoordinates*, FBInkColor*);
 static void get_pixel_RGB32(FBInkCoordinates*, FBInkColor*);
 static void get_pixel_RGB565(FBInkCoordinates*, FBInkColor*);
-static void get_pixel(FBInkCoordinates*, FBInkColor*);
+static void get_pixel(FBInkCoordinates, FBInkColor*);
 
 #if defined(FBINK_WITH_IMAGE) || defined(FBINK_WITH_OPENTYPE)
 // This is only needed for alpha blending in the image or OpenType codepath ;).
