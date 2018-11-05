@@ -428,7 +428,11 @@ static void
 
 // Helper function to draw a rectangle in given color
 static void
-    fill_rect(unsigned short int x, unsigned short int y, unsigned short int w, unsigned short int h, FBInkColor* color)
+    fill_rect(unsigned short int x,
+	      unsigned short int y,
+	      unsigned short int w,
+	      unsigned short int h,
+	      const FBInkColor*  color)
 {
 	FBInkCoordinates coords = { 0U };
 	for (unsigned short int cy = 0U; cy < h; cy++) {
@@ -2834,9 +2838,9 @@ static void
 
 int
     fbink_print_ot(int fbfd    UNUSED_BY_MINIMAL,
-		   const char* string UNUSED_BY_MINIMAL,
-		   FBInkOTConfig* cfg UNUSED_BY_MINIMAL,
-		   FBInkConfig* fbCfg UNUSED_BY_MINIMAL)
+		   const char* string   UNUSED_BY_MINIMAL,
+		   const FBInkOTConfig* cfg UNUSED_BY_MINIMAL,
+		   const FBInkConfig* fbCfg UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_OPENTYPE
 	// Abort if we were passed an empty string

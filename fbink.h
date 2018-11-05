@@ -297,7 +297,7 @@ FBINK_API int fbink_printf(int fbfd, const FBInkConfig* fbink_config, const char
 //				Pass a NULL pointer if unneeded.
 // NOTE: Alignment is relative to the printable area, as defined by the margins.
 //       As such, it only makes sense in the context of a single, specific print call.
-FBINK_API int fbink_print_ot(int fbfd, const char* string, FBInkOTConfig* cfg, FBInkConfig* fbCfg);
+FBINK_API int fbink_print_ot(int fbfd, const char* string, const FBInkOTConfig* cfg, const FBInkConfig* fbCfg);
 
 // A simple wrapper around the internal screen refresh handling, without requiring you to include einkfb/mxcfb headers
 // fbfd:		open file descriptor to the framebuffer character device,
