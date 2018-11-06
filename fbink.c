@@ -2126,6 +2126,7 @@ int
 	int fontcount = stbtt_GetNumberOfFonts(data);
 	if (fontcount == 0) {
 		free(data);
+		free(font_info);
 		WARN("File '%s' doesn't appear to be a valid or supported font", filename);
 		return ERRCODE(EXIT_FAILURE);
 	} else if (fontcount > 1) {
@@ -2137,12 +2138,14 @@ int
 	int fontoffset = stbtt_GetFontOffsetForIndex(data, 0);
 	if (fontoffset == -1) {
 		free(data);
+		free(font_info);
 		WARN("File '%s' doesn't appear to contain valid font data at offset %d", filename, fontoffset);
 		return ERRCODE(EXIT_FAILURE);
 	}
 	// And finally, initialize that font
 	// NOTE: We took the long way 'round to try to avoid crashes on invalid data...
 	if (!stbtt_InitFont(font_info, data, fontoffset)) {
+		free(font_info->data);
 		free(font_info);
 		WARN("Error initialising font '%s'", filename);
 		return ERRCODE(EXIT_FAILURE);
