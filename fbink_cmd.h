@@ -199,13 +199,13 @@ static int do_infinite_progress_bar(int, const FBInkConfig*);
 		if ((__typeof__(*result)) val != val) {                                                                                            \
 			fprintf(                                                                                                                   \
 			    stderr,                                                                                                                \
-			    "Loss of precision when casting value '%ld' to a %s for option '%c%s%s' (valid range: %d to %lld).\n",                 \
+			    "Loss of precision when casting value '%ld' to a %s for option '%c%s%s' (valid range: %lld to %lld).\n",               \
 			    val,                                                                                                                   \
 			    TYPENAME(*result),                                                                                                     \
 			    opt,                                                                                                                   \
 			    subopt ? ":" : "",                                                                                                     \
 			    subopt ? subopt : "",                                                                                                  \
-			    (int) TYPEMIN(*result),                                                                                                \
+			    (long long int) TYPEMIN(*result),                                                                                      \
 			    (long long int) TYPEMAX(*result));                                                                                     \
 			return ERRCODE(EINVAL);                                                                                                    \
 		}                                                                                                                                  \
