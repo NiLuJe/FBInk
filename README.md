@@ -67,7 +67,7 @@ And when using shiny TrueType fonts :).
 Unless you're just trying to take it for a spin on a native pure Linux system (`make linux`), you'll need a cross-compiler targeting your, well, target device.
 The Makefile is tailored to automatically detect my own cross-compilation [ToolChain](http://trac.ak-team.com/trac/browser/niluje/Configs/trunk/Kindle/Misc/x-compile.sh) [setups](https://github.com/koreader/koxtoolchain), which I evidently heartily recommend using instead of relying on generic cross-compilation toolchains which may not exactly target the right kernel/libc duo ;).
 
-In case you're using your own toolchain, please note that we require C11 support (GCC >= 4.9, Clang >= 3.0).
+In case you're using your own toolchain, please note that we require C11 support (GCC >= 4.9, Clang >= 3.0) for the CLI tool, and C99 for the library itself.
 
 With that out of the way, the default target (i.e., `make`) will yield a static Kobo build, while `make kobo` will yield a stripped shared build, and additionally package everything the Kobo way. The package found in the Kobo thread is built that way.
 
