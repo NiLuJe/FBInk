@@ -939,24 +939,24 @@ int
 			if (is_truetype) {
 				if (!fbink_cfg.is_quiet) {
 					printf(
-					    "Printing string '%s' @ %hupt, honoring the following margins { top: %hupx, bottom: %hupx, left: %hupx, right: %hupx } (formatted: %s, overlay: %s, backgroundless: %s, foregroundless: %s, inverted: %s, flashing: %s, centered: %s, halign: %hhu, halfway: %s, valign: %hhu, clear screen: %s)\n",
+					    "Printing string '%s' @ %hupt, honoring the following margins { Top: %hupx, Bottom: %hupx, Left: %hupx, Right: %hupx } (formatted: %s, overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, H align: %hhu, halfway: %s, V align: %hhu, clear screen: %s)\n",
 					    string,
 					    ot_config.size_pt,
 					    ot_config.margins.top,
 					    ot_config.margins.bottom,
 					    ot_config.margins.left,
 					    ot_config.margins.right,
-					    ot_config.is_formatted ? "true" : "false",
-					    fbink_cfg.is_overlay ? "true" : "false",
-					    fbink_cfg.is_bgless ? "true" : "false",
-					    fbink_cfg.is_fgless ? "true" : "false",
-					    fbink_cfg.is_inverted ? "true" : "false",
-					    fbink_cfg.is_flashing ? "true" : "false",
-					    fbink_cfg.is_centered ? "true" : "false",
+					    ot_config.is_formatted ? "Y" : "N",
+					    fbink_cfg.is_overlay ? "Y" : "N",
+					    fbink_cfg.is_bgless ? "Y" : "N",
+					    fbink_cfg.is_fgless ? "Y" : "N",
+					    fbink_cfg.is_inverted ? "Y" : "N",
+					    fbink_cfg.is_flashing ? "Y" : "N",
+					    fbink_cfg.is_centered ? "Y" : "N",
 					    fbink_cfg.halign,
-					    fbink_cfg.is_halfway ? "true" : "false",
+					    fbink_cfg.is_halfway ? "Y" : "N",
 					    fbink_cfg.valign,
-					    fbink_cfg.is_cleared ? "true" : "false");
+					    fbink_cfg.is_cleared ? "Y" : "N");
 				}
 
 				if ((linecount = fbink_print_ot(fbfd, string, &ot_config, &fbink_cfg)) < 0) {
@@ -970,25 +970,24 @@ int
 				//       because it knows how much space it already took up ;).
 				ot_config.margins.top = (unsigned short int) linecount;
 				// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
-
 			} else {
 				if (!fbink_cfg.is_quiet) {
 					printf(
-					    "Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (overlay: %s, backgroundless: %s, foregroundless: %s, inverted: %s, flashing: %s, centered: %s, halfway: %s, left padded: %s, clear screen: %s, font: %hhu, font scaling: x%hhu)\n",
+					    "Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, halfway: %s, left padded: %s, clear screen: %s, font: %hhu, font scaling: x%hhu)\n",
 					    string,
 					    fbink_cfg.col,
 					    fbink_cfg.hoffset,
 					    fbink_cfg.row,
 					    fbink_cfg.voffset,
-					    fbink_cfg.is_overlay ? "true" : "false",
-					    fbink_cfg.is_bgless ? "true" : "false",
-					    fbink_cfg.is_fgless ? "true" : "false",
-					    fbink_cfg.is_inverted ? "true" : "false",
-					    fbink_cfg.is_flashing ? "true" : "false",
-					    fbink_cfg.is_centered ? "true" : "false",
-					    fbink_cfg.is_halfway ? "true" : "false",
-					    fbink_cfg.is_padded ? "true" : "false",
-					    fbink_cfg.is_cleared ? "true" : "false",
+					    fbink_cfg.is_overlay ? "Y" : "N",
+					    fbink_cfg.is_bgless ? "Y" : "N",
+					    fbink_cfg.is_fgless ? "Y" : "N",
+					    fbink_cfg.is_inverted ? "Y" : "N",
+					    fbink_cfg.is_flashing ? "Y" : "N",
+					    fbink_cfg.is_centered ? "Y" : "N",
+					    fbink_cfg.is_halfway ? "Y" : "N",
+					    fbink_cfg.is_padded ? "Y" : "N",
+					    fbink_cfg.is_cleared ? "Y" : "N",
 					    fbink_cfg.fontname,
 					    fbink_cfg.fontmult);
 				}
@@ -1049,7 +1048,7 @@ int
 		} else if (is_image) {
 			if (!fbink_cfg.is_quiet) {
 				printf(
-				    "Displaying image '%s' @ column %hd + %hdpx, row %hd + %dpx (halign: %hhu, valign: %hhu, inverted: %s, flattened: %s)\n",
+				    "Displaying image '%s' @ column %hd + %hdpx, row %hd + %dpx (H align: %hhu, V align: %hhu, inverted: %s, flattened: %s)\n",
 				    image_file,
 				    fbink_cfg.col,
 				    image_x_offset,
@@ -1057,8 +1056,8 @@ int
 				    image_y_offset,
 				    fbink_cfg.halign,
 				    fbink_cfg.valign,
-				    fbink_cfg.is_inverted ? "true" : "false",
-				    fbink_cfg.ignore_alpha ? "true" : "false");
+				    fbink_cfg.is_inverted ? "Y" : "N",
+				    fbink_cfg.ignore_alpha ? "Y" : "N");
 			}
 			if (fbink_print_image(fbfd, image_file, image_x_offset, image_y_offset, &fbink_cfg) !=
 			    EXIT_SUCCESS) {
@@ -1073,9 +1072,9 @@ int
 				    progress,
 				    fbink_cfg.row,
 				    fbink_cfg.voffset,
-				    fbink_cfg.is_inverted ? "true" : "false",
-				    fbink_cfg.is_flashing ? "true" : "false",
-				    fbink_cfg.is_cleared ? "true" : "false",
+				    fbink_cfg.is_inverted ? "Y" : "N",
+				    fbink_cfg.is_flashing ? "Y" : "N",
+				    fbink_cfg.is_cleared ? "Y" : "N",
 				    fbink_cfg.fontname,
 				    fbink_cfg.fontmult);
 			}
@@ -1092,9 +1091,9 @@ int
 					    "Displaying an activity bar cycling forever @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s)\n",
 					    fbink_cfg.row,
 					    fbink_cfg.voffset,
-					    fbink_cfg.is_inverted ? "true" : "false",
-					    fbink_cfg.is_flashing ? "true" : "false",
-					    fbink_cfg.is_cleared ? "true" : "false");
+					    fbink_cfg.is_inverted ? "Y" : "N",
+					    fbink_cfg.is_flashing ? "Y" : "N",
+					    fbink_cfg.is_cleared ? "Y" : "N");
 				}
 				// NOTE: In a dedicated function,
 				//       because keeping it inline massively tanks performance in the image codepath,
@@ -1111,9 +1110,9 @@ int
 					    progress,
 					    fbink_cfg.row,
 					    fbink_cfg.voffset,
-					    fbink_cfg.is_inverted ? "true" : "false",
-					    fbink_cfg.is_flashing ? "true" : "false",
-					    fbink_cfg.is_cleared ? "true" : "false");
+					    fbink_cfg.is_inverted ? "Y" : "N",
+					    fbink_cfg.is_flashing ? "Y" : "N",
+					    fbink_cfg.is_cleared ? "Y" : "N");
 				}
 				if (fbink_print_activity_bar(fbfd, progress, &fbink_cfg) != EXIT_SUCCESS) {
 					fprintf(stderr, "Failed to display an activitybar!\n");
