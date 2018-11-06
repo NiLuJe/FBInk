@@ -148,7 +148,7 @@ typedef struct
 	uint8_t            pen_bg_color;        // penFGColor
 	unsigned short int screen_dpi;          // deviceQuirks.screenDPI
 	long int           user_hz;             // USER_HZ
-	const char*        font_name;           // fbink_config->fontname
+	const char*        font_name;           // fbink_cfg->fontname
 	unsigned short int font_w;              // FONTW
 	unsigned short int font_h;              // FONTH
 	unsigned short int max_cols;            // MAXCOLS
@@ -225,7 +225,7 @@ FBINK_API int fbink_close(int fbfd);
 //     or if you modified one of the FBInkConfig fields that affects its results (listed below).
 // fbfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
-// fbink_config:	pointer to an FBInkConfig struct
+// fbink_cfg:	pointer to an FBInkConfig struct
 //				If you wish to customize them, the fields:
 //				is_centered, fontmult, fontname, fg_color, bg_color, no_viewport, is_verbose & is_quiet
 //				MUST be set beforehand.
@@ -236,7 +236,7 @@ FBINK_API int fbink_close(int fbfd);
 //       this needs to be called as many times as necessary to ensure that every following fbink_* call will be made
 //       against a fb state that matches the state it was in during the last fbink_init() call...
 //       c.f., KFMon's handling of this via fbink_is_fb_quirky() to detect the initial 16bpp -> 32bpp switch.
-FBINK_API int fbink_init(int fbfd, const FBInkConfig* fbink_config);
+FBINK_API int fbink_init(int fbfd, const FBInkConfig* fbink_cfg);
 
 // Add an OpenType font to FBInk. Note that at least one font must be added in order to use fbink_print_ot()
 // Returns -(EXIT_FAILURE) on failure, or EXIT_SUCCESS otherwise
@@ -255,10 +255,10 @@ FBINK_API int fbink_add_ot_font(const char* filename, FONT_STYLE_T style);
 FBINK_API int fbink_free_ot_fonts(void);
 
 // Dump a few of our internal state variables to stdout, in a format easily consumable by a shell (i.e., eval)
-FBINK_API void fbink_state_dump(const FBInkConfig* fbink_config);
+FBINK_API void fbink_state_dump(const FBInkConfig* fbink_cfg);
 
 // Dump a few of our internal state variables to the FBInkState struct pointed to by fbink_state
-FBINK_API void fbink_get_state(const FBInkConfig* fbink_config, FBInkState* fbink_state);
+FBINK_API void fbink_get_state(const FBInkConfig* fbink_cfg, FBInkState* fbink_state);
 
 // Print a string on screen.
 // NOTE: The string is expected to be encoded in valid UTF-8, no validation of any kind is done by the library,
@@ -269,8 +269,8 @@ FBINK_API void fbink_get_state(const FBInkConfig* fbink_config, FBInkState* fbin
 // fbfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // string:		UTF-8 encoded string to print
-// fbink_config:	pointer to an FBInkConfig struct
-FBINK_API int fbink_print(int fbfd, const char* string, const FBInkConfig* fbink_config);
+// fbink_cfg:	pointer to an FBInkConfig struct
+FBINK_API int fbink_print(int fbfd, const char* string, const FBInkConfig* fbink_cfg);
 
 // Print a string using an OpenType font. Note the caller MUST init with fbink_init_ot() FIRST.
 // This function uses positive margins (in pixels) instead of rows/columns for positioning and setting the printable area.
@@ -284,24 +284,24 @@ FBINK_API int fbink_print(int fbfd, const char* string, const FBInkConfig* fbink
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // string:		UTF-8 encoded string to print
 // cfg:			Pointer to a FBInkOTConfig struct.
-// fbCfg:		Optional pointer to a FBInkConfig struct. If set, the options
+// fbink_cfg:		Optional pointer to a FBInkConfig struct. If set, the options
 //				is_inverted, is_flashing, is_cleared, is_centered, is_halfway, is_overlay, is_fgless, is_bgless,
 //				fg_color, bg_color, valign, halign will be honored.
 //				Pass a NULL pointer if unneeded.
 // NOTE: Alignment is relative to the printable area, as defined by the margins.
 //       As such, it only makes sense in the context of a single, specific print call.
-FBINK_API int fbink_print_ot(int fbfd, const char* string, const FBInkOTConfig* cfg, const FBInkConfig* fbCfg);
+FBINK_API int fbink_print_ot(int fbfd, const char* string, const FBInkOTConfig* cfg, const FBInkConfig* fbink_cfg);
 
 // Brings printf formatting to fbink_print and fbink_print_ot ;).
 // fbfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // cfg:			Optional pointer to an FBInkOTConfig struct.
-// fbCfg:		Optional pointer to an FBInkConfig struct.
+// fbink_cfg:		Optional pointer to an FBInkConfig struct.
 // NOTE: If cfg is NULL, will call fbink_print, otherwise, fbink_print_ot!
-//       If cfg is valid, fbCfg MAY be NULL (same behavior as fbink_print_ot)
-//       If cfg is NULL, fbCfg MUST be valid
+//       If cfg is valid, fbink_cfg MAY be NULL (same behavior as fbink_print_ot)
+//       If cfg is NULL, fbink_cfg MUST be valid
 // NOTE: Meaning at least one of those two pointers MUST be valid!
-FBINK_API int fbink_printf(int fbfd, const FBInkOTConfig* cfg, const FBInkConfig* fbCfg, const char* fmt, ...)
+FBINK_API int fbink_printf(int fbfd, const FBInkOTConfig* cfg, const FBInkConfig* fbink_cfg, const char* fmt, ...)
     __attribute__((format(printf, 4, 5)));
 
 // A simple wrapper around the internal screen refresh handling, without requiring you to include einkfb/mxcfb headers
@@ -346,22 +346,22 @@ FBINK_API bool fbink_is_fb_quirky(void) __attribute__((deprecated));
 // Returns -(ENOSYS) on Kindle, where this is not needed
 // fdfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
-// fbink_config:	pointer to an FBInkConfig struct
-FBINK_API int fbink_reinit(int fbfd, const FBInkConfig* fbink_config);
+// fbink_cfg:	pointer to an FBInkConfig struct
+FBINK_API int fbink_reinit(int fbfd, const FBInkConfig* fbink_cfg);
 
 // Print a full-width progress bar on screen
 // fdfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // percentage:		0-100 value to set the progress bar's progression
-// fbink_config:	pointer to an FBInkConfig struct (ignores is_overlay, col & hoffset; as well as is_centered & is_padded)
-FBINK_API int fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInkConfig* fbink_config);
+// fbink_cfg:	pointer to an FBInkConfig struct (ignores is_overlay, col & hoffset; as well as is_centered & is_padded)
+FBINK_API int fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInkConfig* fbink_cfg);
 
 // Print a full-width activity bar on screen (i.e., an infinite progress bar)
 // fdfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // progress:		0-16 value to set the progress thumb's position in the bar
-// fbink_config:	pointer to an FBInkConfig struct (ignores col & hoffset; as well as is_centered & is_padded)
-FBINK_API int fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkConfig* fbink_config);
+// fbink_cfg:	pointer to an FBInkConfig struct (ignores col & hoffset; as well as is_centered & is_padded)
+FBINK_API int fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkConfig* fbink_cfg);
 
 // Print an image on screen
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
@@ -372,12 +372,12 @@ FBINK_API int fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkCo
 //				will attempt to read image data from stdin.
 // x_off:		target coordinates, x (honors negative offsets)
 // y_off:		target coordinates, y (honors negative offsets)
-// fbink_config:	pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
+// fbink_cfg:	pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
 FBINK_API int fbink_print_image(int                fbfd,
 				const char*        filename,
 				short int          x_off,
 				short int          y_off,
-				const FBInkConfig* fbink_config);
+				const FBInkConfig* fbink_cfg);
 
 // Print raw scanlines on screen
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
@@ -392,7 +392,7 @@ FBINK_API int fbink_print_image(int                fbfd,
 //				do not pass a padded length (or pad the data itself in any way)!
 // x_off:		target coordinates, x (honors negative offsets)
 // y_off:		target coordinates, y (honors negative offsets)
-// fbink_config:	pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
+// fbink_cfg:	pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
 // NOTE: While we do accept a various range of input formats (as far as component interleaving is concerned),
 //       our display code only handles a few specific combinations, depending on the target hardware.
 //       To make everyone happy, this will transparently handle the pixel format conversion *as needed*,
@@ -407,7 +407,7 @@ FBINK_API int fbink_print_raw_data(int                fbfd,
 				   const size_t       len,
 				   short int          x_off,
 				   short int          y_off,
-				   const FBInkConfig* fbink_config);
+				   const FBInkConfig* fbink_cfg);
 
 // Scan the screen for Kobo's "Connect" button in the "USB plugged in" popup,
 // and optionally generate an input event to press that button.

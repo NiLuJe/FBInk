@@ -57,9 +57,9 @@ int
 					      { "help", no_argument, NULL, 'h' },   { "verbose", no_argument, NULL, 'v' },
 					      { "quiet", no_argument, NULL, 'q' },  { NULL, 0, NULL, 0 } };
 
-	FBInkConfig fbink_config = { 0U };
+	FBInkConfig fbink_cfg = { 0U };
 	// Default to verbose for now
-	fbink_config.is_verbose = true;
+	fbink_cfg.is_verbose = true;
 
 	bool press_button      = false;
 	bool detect_import     = false;
@@ -83,10 +83,10 @@ int
 				detect_import = true;
 				break;
 			case 'v':
-				fbink_config.is_verbose = !fbink_config.is_verbose;
+				fbink_cfg.is_verbose = !fbink_cfg.is_verbose;
 				break;
 			case 'q':
-				fbink_config.is_quiet = !fbink_config.is_quiet;
+				fbink_cfg.is_quiet = !fbink_cfg.is_quiet;
 				break;
 			case 'h':
 				show_helpmsg();
@@ -113,7 +113,7 @@ int
 		fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
 		return ERRCODE(EXIT_FAILURE);
 	}
-	if (fbink_init(fbfd, &fbink_config) == ERRCODE(EXIT_FAILURE)) {
+	if (fbink_init(fbfd, &fbink_cfg) == ERRCODE(EXIT_FAILURE)) {
 		fprintf(stderr, "Failed to initialize FBInk, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;

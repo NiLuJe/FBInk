@@ -230,21 +230,21 @@ static void
 //       keeping this inlined in main massively tanks *image* processing performance (by ~50%!),
 //       when built w/ LTO... o_O.
 static int
-    do_infinite_progress_bar(int fbfd, const FBInkConfig* fbink_config)
+    do_infinite_progress_bar(int fbfd, const FBInkConfig* fbink_cfg)
 {
 	int rv = EXIT_SUCCESS;
 
 	const struct timespec zzz = { 0L, 750000000L };
 	for (;;) {
 		for (uint8_t i = 0; i < 16; i++) {
-			rv = fbink_print_activity_bar(fbfd, i, fbink_config);
+			rv = fbink_print_activity_bar(fbfd, i, fbink_cfg);
 			if (rv != EXIT_SUCCESS) {
 				break;
 			}
 			nanosleep(&zzz, NULL);
 		}
 		for (uint8_t i = 16; i > 0; i--) {
-			rv = fbink_print_activity_bar(fbfd, i, fbink_config);
+			rv = fbink_print_activity_bar(fbfd, i, fbink_cfg);
 			if (rv != EXIT_SUCCESS) {
 				break;
 			}
@@ -330,7 +330,7 @@ int
 					      { "truetype", required_argument, NULL, 't' },
 					      { NULL, 0, NULL, 0 } };
 
-	FBInkConfig fbink_config = { 0 };
+	FBInkConfig fbink_cfg = { 0 };
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-braces"
 	FBInkOTConfig ot_config = { 0 };
@@ -416,42 +416,42 @@ int
 	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
-				if (strtol_hi(opt, NULL, optarg, &fbink_config.row) < 0) {
+				if (strtol_hi(opt, NULL, optarg, &fbink_cfg.row) < 0) {
 					errfnd = true;
 				}
 				break;
 			case 'x':
-				if (strtol_hi(opt, NULL, optarg, &fbink_config.col) < 0) {
+				if (strtol_hi(opt, NULL, optarg, &fbink_cfg.col) < 0) {
 					errfnd = true;
 				}
 				break;
 			case 'Y':
-				if (strtol_hi(opt, NULL, optarg, &fbink_config.voffset) < 0) {
+				if (strtol_hi(opt, NULL, optarg, &fbink_cfg.voffset) < 0) {
 					errfnd = true;
 				}
 				break;
 			case 'X':
-				if (strtol_hi(opt, NULL, optarg, &fbink_config.hoffset) < 0) {
+				if (strtol_hi(opt, NULL, optarg, &fbink_cfg.hoffset) < 0) {
 					errfnd = true;
 				}
 				break;
 			case 'h':
-				fbink_config.is_inverted = true;
+				fbink_cfg.is_inverted = true;
 				break;
 			case 'f':
-				fbink_config.is_flashing = true;
+				fbink_cfg.is_flashing = true;
 				break;
 			case 'c':
-				fbink_config.is_cleared = true;
+				fbink_cfg.is_cleared = true;
 				break;
 			case 'm':
-				fbink_config.is_centered = true;
+				fbink_cfg.is_centered = true;
 				break;
 			case 'M':
-				fbink_config.is_halfway = true;
+				fbink_cfg.is_halfway = true;
 				break;
 			case 'p':
-				fbink_config.is_padded = true;
+				fbink_cfg.is_padded = true;
 				break;
 			case 's':
 				subopts = optarg;
@@ -515,59 +515,59 @@ int
 				}
 				break;
 			case 'S':
-				if (strtoul_hhu(opt, NULL, optarg, &fbink_config.fontmult) < 0) {
+				if (strtoul_hhu(opt, NULL, optarg, &fbink_cfg.fontmult) < 0) {
 					errfnd = true;
 				}
 				break;
 			case 'F':
 				if (strcasecmp(optarg, "IBM") == 0) {
-					fbink_config.fontname = IBM;
+					fbink_cfg.fontname = IBM;
 				} else if (strcasecmp(optarg, "UNSCII") == 0) {
-					fbink_config.fontname = UNSCII;
+					fbink_cfg.fontname = UNSCII;
 				} else if (strcasecmp(optarg, "ALT") == 0) {
-					fbink_config.fontname = UNSCII_ALT;
+					fbink_cfg.fontname = UNSCII_ALT;
 				} else if (strcasecmp(optarg, "THIN") == 0) {
-					fbink_config.fontname = UNSCII_THIN;
+					fbink_cfg.fontname = UNSCII_THIN;
 				} else if (strcasecmp(optarg, "FANTASY") == 0) {
-					fbink_config.fontname = UNSCII_FANTASY;
+					fbink_cfg.fontname = UNSCII_FANTASY;
 				} else if (strcasecmp(optarg, "MCR") == 0) {
-					fbink_config.fontname = UNSCII_MCR;
+					fbink_cfg.fontname = UNSCII_MCR;
 				} else if (strcasecmp(optarg, "TALL") == 0) {
-					fbink_config.fontname = UNSCII_TALL;
+					fbink_cfg.fontname = UNSCII_TALL;
 				} else if (strcasecmp(optarg, "BLOCK") == 0) {
-					fbink_config.fontname = BLOCK;
+					fbink_cfg.fontname = BLOCK;
 				} else if (strcasecmp(optarg, "LEGGIE") == 0) {
-					fbink_config.fontname = LEGGIE;
+					fbink_cfg.fontname = LEGGIE;
 				} else if (strcasecmp(optarg, "VEGGIE") == 0) {
-					fbink_config.fontname = VEGGIE;
+					fbink_cfg.fontname = VEGGIE;
 				} else if (strcasecmp(optarg, "KATES") == 0) {
-					fbink_config.fontname = KATES;
+					fbink_cfg.fontname = KATES;
 				} else if (strcasecmp(optarg, "FKP") == 0) {
-					fbink_config.fontname = FKP;
+					fbink_cfg.fontname = FKP;
 				} else if (strcasecmp(optarg, "CTRLD") == 0) {
-					fbink_config.fontname = CTRLD;
+					fbink_cfg.fontname = CTRLD;
 				} else if (strcasecmp(optarg, "ORP") == 0) {
-					fbink_config.fontname = ORP;
+					fbink_cfg.fontname = ORP;
 				} else if (strcasecmp(optarg, "ORPB") == 0) {
-					fbink_config.fontname = ORPB;
+					fbink_cfg.fontname = ORPB;
 				} else if (strcasecmp(optarg, "ORPI") == 0) {
-					fbink_config.fontname = ORPI;
+					fbink_cfg.fontname = ORPI;
 				} else if (strcasecmp(optarg, "SCIENTIFICA") == 0) {
-					fbink_config.fontname = SCIENTIFICA;
+					fbink_cfg.fontname = SCIENTIFICA;
 				} else if (strcasecmp(optarg, "SCIENTIFICAB") == 0) {
-					fbink_config.fontname = SCIENTIFICAB;
+					fbink_cfg.fontname = SCIENTIFICAB;
 				} else if (strcasecmp(optarg, "SCIENTIFICAI") == 0) {
-					fbink_config.fontname = SCIENTIFICAI;
+					fbink_cfg.fontname = SCIENTIFICAI;
 				} else {
 					fprintf(stderr, "Unknown font name '%s'.\n", optarg);
 					errfnd = true;
 				}
 				break;
 			case 'v':
-				fbink_config.is_verbose = !fbink_config.is_verbose;
+				fbink_cfg.is_verbose = !fbink_cfg.is_verbose;
 				break;
 			case 'q':
-				fbink_config.is_quiet = !fbink_config.is_quiet;
+				fbink_cfg.is_quiet = !fbink_cfg.is_quiet;
 				break;
 			case 'g':
 				subopts = optarg;
@@ -600,13 +600,13 @@ int
 						case HALIGN_OPT:
 							if (strcasecmp(value, "NONE") == 0 ||
 							    strcasecmp(value, "LEFT") == 0) {
-								fbink_config.halign = NONE;
+								fbink_cfg.halign = NONE;
 							} else if (strcasecmp(value, "CENTER") == 0 ||
 								   strcasecmp(value, "MIDDLE") == 0) {
-								fbink_config.halign = CENTER;
+								fbink_cfg.halign = CENTER;
 							} else if (strcasecmp(value, "EDGE") == 0 ||
 								   strcasecmp(value, "RIGHT") == 0) {
-								fbink_config.halign = EDGE;
+								fbink_cfg.halign = EDGE;
 							} else {
 								fprintf(stderr, "Unknown alignment value '%s'.\n", value);
 								errfnd = true;
@@ -615,13 +615,13 @@ int
 						case VALIGN_OPT:
 							if (strcasecmp(value, "NONE") == 0 ||
 							    strcasecmp(value, "TOP") == 0) {
-								fbink_config.valign = NONE;
+								fbink_cfg.valign = NONE;
 							} else if (strcasecmp(value, "CENTER") == 0 ||
 								   strcasecmp(value, "MIDDLE") == 0) {
-								fbink_config.valign = CENTER;
+								fbink_cfg.valign = CENTER;
 							} else if (strcasecmp(value, "EDGE") == 0 ||
 								   strcasecmp(value, "BOTTOM") == 0) {
-								fbink_config.valign = EDGE;
+								fbink_cfg.valign = EDGE;
 							} else {
 								fprintf(stderr, "Unknown alignment value '%s'.\n", value);
 								errfnd = true;
@@ -646,7 +646,7 @@ int
 				image_file = strdup(optarg);
 				break;
 			case 'a':
-				fbink_config.ignore_alpha = true;
+				fbink_cfg.ignore_alpha = true;
 				break;
 			case 'e':
 				is_eval = true;
@@ -656,37 +656,37 @@ int
 				break;
 			case 'C':
 				if (strcasecmp(optarg, "BLACK") == 0) {
-					fbink_config.fg_color = FG_BLACK;
+					fbink_cfg.fg_color = FG_BLACK;
 				} else if (strcasecmp(optarg, "GRAY1") == 0) {
-					fbink_config.fg_color = FG_GRAY1;
+					fbink_cfg.fg_color = FG_GRAY1;
 				} else if (strcasecmp(optarg, "GRAY2") == 0) {
-					fbink_config.fg_color = FG_GRAY2;
+					fbink_cfg.fg_color = FG_GRAY2;
 				} else if (strcasecmp(optarg, "GRAY3") == 0) {
-					fbink_config.fg_color = FG_GRAY3;
+					fbink_cfg.fg_color = FG_GRAY3;
 				} else if (strcasecmp(optarg, "GRAY4") == 0) {
-					fbink_config.fg_color = FG_GRAY4;
+					fbink_cfg.fg_color = FG_GRAY4;
 				} else if (strcasecmp(optarg, "GRAY5") == 0) {
-					fbink_config.fg_color = FG_GRAY5;
+					fbink_cfg.fg_color = FG_GRAY5;
 				} else if (strcasecmp(optarg, "GRAY6") == 0) {
-					fbink_config.fg_color = FG_GRAY6;
+					fbink_cfg.fg_color = FG_GRAY6;
 				} else if (strcasecmp(optarg, "GRAY7") == 0) {
-					fbink_config.fg_color = FG_GRAY7;
+					fbink_cfg.fg_color = FG_GRAY7;
 				} else if (strcasecmp(optarg, "GRAY8") == 0) {
-					fbink_config.fg_color = FG_GRAY8;
+					fbink_cfg.fg_color = FG_GRAY8;
 				} else if (strcasecmp(optarg, "GRAY9") == 0) {
-					fbink_config.fg_color = FG_GRAY9;
+					fbink_cfg.fg_color = FG_GRAY9;
 				} else if (strcasecmp(optarg, "GRAYA") == 0) {
-					fbink_config.fg_color = FG_GRAYA;
+					fbink_cfg.fg_color = FG_GRAYA;
 				} else if (strcasecmp(optarg, "GRAYB") == 0) {
-					fbink_config.fg_color = FG_GRAYB;
+					fbink_cfg.fg_color = FG_GRAYB;
 				} else if (strcasecmp(optarg, "GRAYC") == 0) {
-					fbink_config.fg_color = FG_GRAYC;
+					fbink_cfg.fg_color = FG_GRAYC;
 				} else if (strcasecmp(optarg, "GRAYD") == 0) {
-					fbink_config.fg_color = FG_GRAYD;
+					fbink_cfg.fg_color = FG_GRAYD;
 				} else if (strcasecmp(optarg, "GRAYE") == 0) {
-					fbink_config.fg_color = FG_GRAYE;
+					fbink_cfg.fg_color = FG_GRAYE;
 				} else if (strcasecmp(optarg, "WHITE") == 0) {
-					fbink_config.fg_color = FG_WHITE;
+					fbink_cfg.fg_color = FG_WHITE;
 				} else {
 					fprintf(stderr, "Unknown color name '%s'.\n", optarg);
 					errfnd = true;
@@ -694,37 +694,37 @@ int
 				break;
 			case 'B':
 				if (strcasecmp(optarg, "BLACK") == 0) {
-					fbink_config.bg_color = BG_BLACK;
+					fbink_cfg.bg_color = BG_BLACK;
 				} else if (strcasecmp(optarg, "GRAY1") == 0) {
-					fbink_config.bg_color = BG_GRAY1;
+					fbink_cfg.bg_color = BG_GRAY1;
 				} else if (strcasecmp(optarg, "GRAY2") == 0) {
-					fbink_config.bg_color = BG_GRAY2;
+					fbink_cfg.bg_color = BG_GRAY2;
 				} else if (strcasecmp(optarg, "GRAY3") == 0) {
-					fbink_config.bg_color = BG_GRAY3;
+					fbink_cfg.bg_color = BG_GRAY3;
 				} else if (strcasecmp(optarg, "GRAY4") == 0) {
-					fbink_config.bg_color = BG_GRAY4;
+					fbink_cfg.bg_color = BG_GRAY4;
 				} else if (strcasecmp(optarg, "GRAY5") == 0) {
-					fbink_config.bg_color = BG_GRAY5;
+					fbink_cfg.bg_color = BG_GRAY5;
 				} else if (strcasecmp(optarg, "GRAY6") == 0) {
-					fbink_config.bg_color = BG_GRAY6;
+					fbink_cfg.bg_color = BG_GRAY6;
 				} else if (strcasecmp(optarg, "GRAY7") == 0) {
-					fbink_config.bg_color = BG_GRAY7;
+					fbink_cfg.bg_color = BG_GRAY7;
 				} else if (strcasecmp(optarg, "GRAY8") == 0) {
-					fbink_config.bg_color = BG_GRAY8;
+					fbink_cfg.bg_color = BG_GRAY8;
 				} else if (strcasecmp(optarg, "GRAY9") == 0) {
-					fbink_config.bg_color = BG_GRAY9;
+					fbink_cfg.bg_color = BG_GRAY9;
 				} else if (strcasecmp(optarg, "GRAYA") == 0) {
-					fbink_config.bg_color = BG_GRAYA;
+					fbink_cfg.bg_color = BG_GRAYA;
 				} else if (strcasecmp(optarg, "GRAYB") == 0) {
-					fbink_config.bg_color = BG_GRAYB;
+					fbink_cfg.bg_color = BG_GRAYB;
 				} else if (strcasecmp(optarg, "GRAYC") == 0) {
-					fbink_config.bg_color = BG_GRAYC;
+					fbink_cfg.bg_color = BG_GRAYC;
 				} else if (strcasecmp(optarg, "GRAYD") == 0) {
-					fbink_config.bg_color = BG_GRAYD;
+					fbink_cfg.bg_color = BG_GRAYD;
 				} else if (strcasecmp(optarg, "GRAYE") == 0) {
-					fbink_config.bg_color = BG_GRAYE;
+					fbink_cfg.bg_color = BG_GRAYE;
 				} else if (strcasecmp(optarg, "WHITE") == 0) {
-					fbink_config.bg_color = BG_WHITE;
+					fbink_cfg.bg_color = BG_WHITE;
 				} else {
 					fprintf(stderr, "Unknown color name '%s'.\n", optarg);
 					errfnd = true;
@@ -755,16 +755,16 @@ int
 				}
 				break;
 			case 'o':
-				fbink_config.is_overlay = true;
+				fbink_cfg.is_overlay = true;
 				break;
 			case 'O':
-				fbink_config.is_bgless = true;
+				fbink_cfg.is_bgless = true;
 				break;
 			case 'T':
-				fbink_config.is_fgless = true;
+				fbink_cfg.is_fgless = true;
 				break;
 			case 'V':
-				fbink_config.no_viewport = true;
+				fbink_cfg.no_viewport = true;
 				break;
 			case 't':
 				subopts = optarg;
@@ -849,8 +849,8 @@ int
 
 	// Enforce quiet output when asking for want_linecount, to avoid polluting the output...
 	if (want_linecount) {
-		fbink_config.is_quiet   = true;
-		fbink_config.is_verbose = false;
+		fbink_cfg.is_quiet   = true;
+		fbink_cfg.is_verbose = false;
 	}
 
 	// Assume success, until shit happens ;)
@@ -882,7 +882,7 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
-	if (fbink_init(fbfd, &fbink_config) == ERRCODE(EXIT_FAILURE)) {
+	if (fbink_init(fbfd, &fbink_cfg) == ERRCODE(EXIT_FAILURE)) {
 		fprintf(stderr, "Failed to initialize FBInk, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
@@ -896,7 +896,7 @@ int
 		// And for the OpenType codepath, we'll want to load the fonts only once ;)
 		if (is_truetype) {
 			if (reg_ot_file) {
-				if (!fbink_config.is_quiet) {
+				if (!fbink_cfg.is_quiet) {
 					printf("Loading font '%s' for the Regular style\n", reg_ot_file);
 				}
 				if (fbink_add_ot_font(reg_ot_file, FNT_REGULAR) < 0) {
@@ -904,7 +904,7 @@ int
 				}
 			}
 			if (bd_ot_file) {
-				if (!fbink_config.is_quiet) {
+				if (!fbink_cfg.is_quiet) {
 					printf("Loading font '%s' for the Bold style\n", bd_ot_file);
 				}
 				if (fbink_add_ot_font(bd_ot_file, FNT_BOLD) < 0) {
@@ -912,7 +912,7 @@ int
 				}
 			}
 			if (it_ot_file) {
-				if (!fbink_config.is_quiet) {
+				if (!fbink_cfg.is_quiet) {
 					printf("Loading font '%s' for the Italic style\n", it_ot_file);
 				}
 				if (fbink_add_ot_font(it_ot_file, FNT_ITALIC) < 0) {
@@ -920,7 +920,7 @@ int
 				}
 			}
 			if (bdit_ot_file) {
-				if (!fbink_config.is_quiet) {
+				if (!fbink_cfg.is_quiet) {
 					printf("Loading font '%s' for the Bold Italic style\n", bdit_ot_file);
 				}
 				if (fbink_add_ot_font(bdit_ot_file, FNT_BOLD_ITALIC) < 0) {
@@ -938,7 +938,7 @@ int
 
 			// Did we want to use the OpenType codepath?
 			if (is_truetype) {
-				if (!fbink_config.is_quiet) {
+				if (!fbink_cfg.is_quiet) {
 					printf(
 					    "Printing string '%s' @ %hupt, honoring the following margins { top: %hupx, bottom: %hupx, left: %hupx, right: %hupx } (formatted: %s, overlay: %s, backgroundless: %s, foregroundless: %s, inverted: %s, flashing: %s, centered: %s, halign: %hhu, halfway: %s, valign: %hhu, clear screen: %s)\n",
 					    string,
@@ -948,19 +948,19 @@ int
 					    ot_config.margins.left,
 					    ot_config.margins.right,
 					    ot_config.is_formatted ? "true" : "false",
-					    fbink_config.is_overlay ? "true" : "false",
-					    fbink_config.is_bgless ? "true" : "false",
-					    fbink_config.is_fgless ? "true" : "false",
-					    fbink_config.is_inverted ? "true" : "false",
-					    fbink_config.is_flashing ? "true" : "false",
-					    fbink_config.is_centered ? "true" : "false",
-					    fbink_config.halign,
-					    fbink_config.is_halfway ? "true" : "false",
-					    fbink_config.valign,
-					    fbink_config.is_cleared ? "true" : "false");
+					    fbink_cfg.is_overlay ? "true" : "false",
+					    fbink_cfg.is_bgless ? "true" : "false",
+					    fbink_cfg.is_fgless ? "true" : "false",
+					    fbink_cfg.is_inverted ? "true" : "false",
+					    fbink_cfg.is_flashing ? "true" : "false",
+					    fbink_cfg.is_centered ? "true" : "false",
+					    fbink_cfg.halign,
+					    fbink_cfg.is_halfway ? "true" : "false",
+					    fbink_cfg.valign,
+					    fbink_cfg.is_cleared ? "true" : "false");
 				}
 
-				if ((linecount = fbink_print_ot(fbfd, string, &ot_config, &fbink_config)) < 0) {
+				if ((linecount = fbink_print_ot(fbfd, string, &ot_config, &fbink_cfg)) < 0) {
 					fprintf(stderr, "Failed to print that string!\n");
 					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
@@ -973,28 +973,28 @@ int
 				// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
 
 			} else {
-				if (!fbink_config.is_quiet) {
+				if (!fbink_cfg.is_quiet) {
 					printf(
 					    "Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (overlay: %s, backgroundless: %s, foregroundless: %s, inverted: %s, flashing: %s, centered: %s, halfway: %s, left padded: %s, clear screen: %s, font: %hhu, font scaling: x%hhu)\n",
 					    string,
-					    fbink_config.col,
-					    fbink_config.hoffset,
-					    fbink_config.row,
-					    fbink_config.voffset,
-					    fbink_config.is_overlay ? "true" : "false",
-					    fbink_config.is_bgless ? "true" : "false",
-					    fbink_config.is_fgless ? "true" : "false",
-					    fbink_config.is_inverted ? "true" : "false",
-					    fbink_config.is_flashing ? "true" : "false",
-					    fbink_config.is_centered ? "true" : "false",
-					    fbink_config.is_halfway ? "true" : "false",
-					    fbink_config.is_padded ? "true" : "false",
-					    fbink_config.is_cleared ? "true" : "false",
-					    fbink_config.fontname,
-					    fbink_config.fontmult);
+					    fbink_cfg.col,
+					    fbink_cfg.hoffset,
+					    fbink_cfg.row,
+					    fbink_cfg.voffset,
+					    fbink_cfg.is_overlay ? "true" : "false",
+					    fbink_cfg.is_bgless ? "true" : "false",
+					    fbink_cfg.is_fgless ? "true" : "false",
+					    fbink_cfg.is_inverted ? "true" : "false",
+					    fbink_cfg.is_flashing ? "true" : "false",
+					    fbink_cfg.is_centered ? "true" : "false",
+					    fbink_cfg.is_halfway ? "true" : "false",
+					    fbink_cfg.is_padded ? "true" : "false",
+					    fbink_cfg.is_cleared ? "true" : "false",
+					    fbink_cfg.fontname,
+					    fbink_cfg.fontmult);
 				}
 
-				if ((linecount = fbink_print(fbfd, string, &fbink_config)) < 0) {
+				if ((linecount = fbink_print(fbfd, string, &fbink_cfg)) < 0) {
 					fprintf(stderr, "Failed to print that string!\n");
 					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
@@ -1003,7 +1003,7 @@ int
 				// NOTE: Don't clobber previous entries if multiple strings were passed...
 				//       We make sure to trust print's return value,
 				//       because it knows how much space it already took up ;).
-				fbink_config.row = (short int) (fbink_config.row + linecount);
+				fbink_cfg.row = (short int) (fbink_cfg.row + linecount);
 				// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
 
 				// If we were asked to return the amount of printed lines, honor that,
@@ -1026,14 +1026,14 @@ int
 		}
 	} else {
 		if (is_refresh) {
-			if (!fbink_config.is_quiet) {
+			if (!fbink_cfg.is_quiet) {
 				printf(
 				    "Refreshing the screen from top=%u, left=%u for width=%u, height=%u with %swaveform mode %s\n",
 				    region_top,
 				    region_left,
 				    region_width,
 				    region_height,
-				    fbink_config.is_flashing ? "a flashing " : "",
+				    fbink_cfg.is_flashing ? "a flashing " : "",
 				    region_wfm);
 			}
 			if (fbink_refresh(fbfd,
@@ -1042,45 +1042,45 @@ int
 					  region_width,
 					  region_height,
 					  region_wfm,
-					  fbink_config.is_flashing) != EXIT_SUCCESS) {
+					  fbink_cfg.is_flashing) != EXIT_SUCCESS) {
 				fprintf(stderr, "Failed to refresh the screen as per your specification!\n");
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
 			}
 		} else if (is_image) {
-			if (!fbink_config.is_quiet) {
+			if (!fbink_cfg.is_quiet) {
 				printf(
 				    "Displaying image '%s' @ column %hd + %hdpx, row %hd + %dpx (halign: %hhu, valign: %hhu, inverted: %s, flattened: %s)\n",
 				    image_file,
-				    fbink_config.col,
+				    fbink_cfg.col,
 				    image_x_offset,
-				    fbink_config.row,
+				    fbink_cfg.row,
 				    image_y_offset,
-				    fbink_config.halign,
-				    fbink_config.valign,
-				    fbink_config.is_inverted ? "true" : "false",
-				    fbink_config.ignore_alpha ? "true" : "false");
+				    fbink_cfg.halign,
+				    fbink_cfg.valign,
+				    fbink_cfg.is_inverted ? "true" : "false",
+				    fbink_cfg.ignore_alpha ? "true" : "false");
 			}
-			if (fbink_print_image(fbfd, image_file, image_x_offset, image_y_offset, &fbink_config) !=
+			if (fbink_print_image(fbfd, image_file, image_x_offset, image_y_offset, &fbink_cfg) !=
 			    EXIT_SUCCESS) {
 				fprintf(stderr, "Failed to display that image!\n");
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
 			}
 		} else if (is_progressbar) {
-			if (!fbink_config.is_quiet) {
+			if (!fbink_cfg.is_quiet) {
 				printf(
 				    "Displaying a %hhu%% full progress bar @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, font: %hhu, font scaling: x%hhu)\n",
 				    progress,
-				    fbink_config.row,
-				    fbink_config.voffset,
-				    fbink_config.is_inverted ? "true" : "false",
-				    fbink_config.is_flashing ? "true" : "false",
-				    fbink_config.is_cleared ? "true" : "false",
-				    fbink_config.fontname,
-				    fbink_config.fontmult);
+				    fbink_cfg.row,
+				    fbink_cfg.voffset,
+				    fbink_cfg.is_inverted ? "true" : "false",
+				    fbink_cfg.is_flashing ? "true" : "false",
+				    fbink_cfg.is_cleared ? "true" : "false",
+				    fbink_cfg.fontname,
+				    fbink_cfg.fontmult);
 			}
-			if (fbink_print_progress_bar(fbfd, progress, &fbink_config) != EXIT_SUCCESS) {
+			if (fbink_print_progress_bar(fbfd, progress, &fbink_cfg) != EXIT_SUCCESS) {
 				fprintf(stderr, "Failed to display a progressbar!\n");
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
@@ -1088,42 +1088,42 @@ int
 		} else if (is_activitybar) {
 			// Were we asked to loop forever?
 			if (is_infinite) {
-				if (!fbink_config.is_quiet) {
+				if (!fbink_cfg.is_quiet) {
 					printf(
 					    "Displaying an activity bar cycling forever @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s)\n",
-					    fbink_config.row,
-					    fbink_config.voffset,
-					    fbink_config.is_inverted ? "true" : "false",
-					    fbink_config.is_flashing ? "true" : "false",
-					    fbink_config.is_cleared ? "true" : "false");
+					    fbink_cfg.row,
+					    fbink_cfg.voffset,
+					    fbink_cfg.is_inverted ? "true" : "false",
+					    fbink_cfg.is_flashing ? "true" : "false",
+					    fbink_cfg.is_cleared ? "true" : "false");
 				}
 				// NOTE: In a dedicated function,
 				//       because keeping it inline massively tanks performance in the image codepath,
 				//       for an amazingly weird LTO-related reason :?
-				if (do_infinite_progress_bar(fbfd, &fbink_config) != EXIT_SUCCESS) {
+				if (do_infinite_progress_bar(fbfd, &fbink_cfg) != EXIT_SUCCESS) {
 					fprintf(stderr, "Failed to display a progressbar!\n");
 					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
 				}
 			} else {
-				if (!fbink_config.is_quiet) {
+				if (!fbink_cfg.is_quiet) {
 					printf(
 					    "Displaying an activity bar on step %hhu @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s)\n",
 					    progress,
-					    fbink_config.row,
-					    fbink_config.voffset,
-					    fbink_config.is_inverted ? "true" : "false",
-					    fbink_config.is_flashing ? "true" : "false",
-					    fbink_config.is_cleared ? "true" : "false");
+					    fbink_cfg.row,
+					    fbink_cfg.voffset,
+					    fbink_cfg.is_inverted ? "true" : "false",
+					    fbink_cfg.is_flashing ? "true" : "false",
+					    fbink_cfg.is_cleared ? "true" : "false");
 				}
-				if (fbink_print_activity_bar(fbfd, progress, &fbink_config) != EXIT_SUCCESS) {
+				if (fbink_print_activity_bar(fbfd, progress, &fbink_cfg) != EXIT_SUCCESS) {
 					fprintf(stderr, "Failed to display an activitybar!\n");
 					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
 				}
 			}
 		} else if (is_eval) {
-			fbink_state_dump(&fbink_config);
+			fbink_state_dump(&fbink_cfg);
 		} else if (is_interactive && isatty(fileno(stdin))) {
 			// We asked for interactive mode, and we're really running from a terminal, so, go ahead.
 			char*   line = NULL;
@@ -1134,11 +1134,11 @@ int
 			printf(">>> ");
 			while ((nread = getline(&line, &len, stdin)) != -1) {
 				printf(">>> ");
-				if ((linecnt = fbink_print(fbfd, line, &fbink_config)) < 0) {
+				if ((linecnt = fbink_print(fbfd, line, &fbink_cfg)) < 0) {
 					fprintf(stderr, "Failed to print that string!\n");
 					rv = ERRCODE(EXIT_FAILURE);
 				}
-				fbink_config.row = (short int) (fbink_config.row + linecnt);
+				fbink_cfg.row = (short int) (fbink_cfg.row + linecnt);
 			}
 			free(line);
 		} else {
@@ -1149,11 +1149,11 @@ int
 				ssize_t nread;
 				int     linecnt = -1;
 				while ((nread = getline(&line, &len, stdin)) != -1) {
-					if ((linecnt = fbink_print(fbfd, line, &fbink_config)) < 0) {
+					if ((linecnt = fbink_print(fbfd, line, &fbink_cfg)) < 0) {
 						fprintf(stderr, "Failed to print that string!\n");
 						rv = ERRCODE(EXIT_FAILURE);
 					}
-					fbink_config.row = (short int) (fbink_config.row + linecnt);
+					fbink_cfg.row = (short int) (fbink_cfg.row + linecnt);
 				}
 				free(line);
 

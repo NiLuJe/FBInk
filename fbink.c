@@ -580,14 +580,14 @@ static struct mxcfb_rect
 	 unsigned short int col,
 	 unsigned short int multiline_offset,
 	 bool               halfcell_offset,
-	 const FBInkConfig* fbink_config)
+	 const FBInkConfig* fbink_cfg)
 {
 	LOG("Printing '%s' @ line offset %hu (meaning row %hu)",
 	    text,
 	    multiline_offset,
 	    (unsigned short int) (row + multiline_offset));
 
-	uint8_t invert  = fbink_config->is_inverted ? 0xFF : 0U;
+	uint8_t invert  = fbink_cfg->is_inverted ? 0xFF : 0U;
 	uint8_t fgcolor = penFGColor ^ invert;
 	uint8_t bgcolor = penBGColor ^ invert;
 	// NOTE: It's a grayscale ramp, so r = g = b (= v).
@@ -623,8 +623,8 @@ static struct mxcfb_rect
 	}
 
 	// Clamp h/v offset to safe values
-	short int voffset = fbink_config->voffset;
-	short int hoffset = fbink_config->hoffset;
+	short int voffset = fbink_cfg->voffset;
+	short int hoffset = fbink_cfg->hoffset;
 	// NOTE: This test isn't perfect, but then, if you play with this, you do it knowing the risks...
 	//       It's mainly there so that stupidly large values don't wrap back on screen because of overflow wraparound.
 	if ((uint32_t) abs(voffset) >= viewHeight) {
@@ -715,8 +715,8 @@ static struct mxcfb_rect
 	//       so the final line matches the previous ones, which fell under the charcount == MAXCOLS case,
 	//       while the final one would not if it doesn't fill the line, too ;).
 	// NOTE: In overlay or bgless mode, we don't paint background pixels. This is pure background, so skip it ;).
-	if (!fbink_config->is_overlay && !fbink_config->is_bgless) {
-		if ((charcount == MAXCOLS || (col == 0 && !fbink_config->is_centered && multiline_offset > 0U)) &&
+	if (!fbink_cfg->is_overlay && !fbink_cfg->is_bgless) {
+		if ((charcount == MAXCOLS || (col == 0 && !fbink_cfg->is_centered && multiline_offset > 0U)) &&
 		    pixel_offset > 0U) {
 			LOG("Painting a background rectangle on the left edge on account of pixel_offset");
 			// Make sure we don't leave a hoffset sized gap when we have a positive hoffset...
@@ -747,7 +747,7 @@ static struct mxcfb_rect
 	//       This only applies when pixel_offset *only* accounts for the !isPerfectFit adjustment though,
 	//       because in every other case, the halfcell offset handling neatly pushes everything into place ;).
 	// NOTE: Again, skip this in overlay/bgless mode ;).
-	if (!fbink_config->is_overlay && !fbink_config->is_bgless) {
+	if (!fbink_cfg->is_overlay && !fbink_cfg->is_bgless) {
 		if (charcount == MAXCOLS && !deviceQuirks.isPerfectFit && !halfcell_offset) {
 			// NOTE: !isPerfectFit ensures pixel_offset is non-zero
 			LOG("Painting a background rectangle to fill the dead space on the right edge");
@@ -778,7 +778,7 @@ static struct mxcfb_rect
 	// NOTE: In case of a multi-line centered print, we can't really trust the final col,
 	//       it might be significantly different than the others, and as such, we'd be computing a cropped region.
 	//       Make the region cover the full width of the screen to make sure we won't miss anything.
-	if (multiline_offset > 0U && fbink_config->is_centered &&
+	if (multiline_offset > 0U && fbink_cfg->is_centered &&
 	    (region.left > (0U + viewHoriOrigin) || region.width < screenWidth)) {
 		region.left  = 0U + viewHoriOrigin;
 		region.width = screenWidth;
@@ -835,7 +835,7 @@ static struct mxcfb_rect
 #define RENDER_GLYPH()                                                                                                   \
 	/* NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution), */                   \
 	/*       and from there compute the extra pixels for that single input pixel given our scaling factor... */      \
-	if (!fbink_config->is_overlay && !fbink_config->is_bgless && !fbink_config->is_fgless) {                         \
+	if (!fbink_cfg->is_overlay && !fbink_cfg->is_bgless && !fbink_cfg->is_fgless) {                                  \
 		for (uint8_t y = 0U; y < glyphHeight; y++) {                                                             \
 			/* y: input row, j: first output row after scaling */                                            \
 			j = (unsigned short int) (y * FONTSIZE_MULT);                                                    \
@@ -893,8 +893,8 @@ static struct mxcfb_rect
 						/* In overlay mode, we only print foreground pixels, */                  \
 						/* and we print in the inverse color of the underlying pixel's */        \
 						/* Obviously, the closer we get to GRAY7, the less contrast we get */    \
-						if (is_fgpx && !fbink_config->is_fgless) {                               \
-							if (fbink_config->is_overlay) {                                  \
+						if (is_fgpx && !fbink_cfg->is_fgless) {                                  \
+							if (fbink_cfg->is_overlay) {                                     \
 								get_pixel(coords, &fbC);                                 \
 								fbC.r ^= 0xFF;                                           \
 								/* NOTE: Don't touch g & b if it's not needed! */        \
@@ -908,7 +908,7 @@ static struct mxcfb_rect
 								pxC = &fbC;                                              \
 							}                                                                \
 							put_pixel(coords, pxC);                                          \
-						} else if (!is_fgpx && fbink_config->is_fgless) {                        \
+						} else if (!is_fgpx && fbink_cfg->is_fgless) {                           \
 							put_pixel(coords, pxC);                                          \
 						}                                                                        \
 					}                                                                                \
@@ -1547,7 +1547,7 @@ static const char*
 
 // Get the various fb info & setup global variables
 static int
-    initialize_fbink(int fbfd, const FBInkConfig* fbink_config, bool skip_vinfo)
+    initialize_fbink(int fbfd, const FBInkConfig* fbink_cfg, bool skip_vinfo)
 {
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
@@ -1559,13 +1559,13 @@ static int
 	int rv = EXIT_SUCCESS;
 
 	// Update verbosity flag
-	if (fbink_config->is_verbose) {
+	if (fbink_cfg->is_verbose) {
 		g_isVerbose = true;
 	} else {
 		g_isVerbose = false;
 	}
 	// Update quiet flag
-	if (fbink_config->is_quiet) {
+	if (fbink_cfg->is_quiet) {
 		g_isQuiet = true;
 	} else {
 		g_isQuiet = false;
@@ -1725,7 +1725,7 @@ static int
 	viewWidth      = screenWidth;
 	viewHoriOrigin = 0U;
 	// But on the vertical axis, oh my...
-	if (!fbink_config->no_viewport && deviceQuirks.koboVertOffset != 0) {
+	if (!fbink_cfg->no_viewport && deviceQuirks.koboVertOffset != 0) {
 		viewHeight = screenHeight - (uint32_t) abs(deviceQuirks.koboVertOffset);
 		if (deviceQuirks.koboVertOffset > 0) {
 			// Rows of pixels are hidden at the top
@@ -1759,7 +1759,7 @@ static int
 	//       and we're using this value to set MAXCOLS & MAXROWS, which we *need* to be sane.
 #ifdef FBINK_WITH_FONTS
 	// Setup custom fonts (glyph size, render fx, bitmap fx)
-	switch (fbink_config->fontname) {
+	switch (fbink_cfg->fontname) {
 		case SCIENTIFICA:
 			glyphWidth         = 5U;
 			glyphHeight        = 12U;
@@ -1864,14 +1864,14 @@ static int
 	glyphHeight = 8U;
 	fxpFont8xGetBitmap = &font8x8_get_bitmap;
 
-	if (fbink_config->fontname != IBM) {
+	if (fbink_cfg->fontname != IBM) {
 		ELOG("Custom fonts are not supported in this FBInk build, using IBM instead.");
 	}
 #endif
 
 	// Obey user-specified font scaling multiplier
-	if (fbink_config->fontmult > 0) {
-		FONTSIZE_MULT = fbink_config->fontmult;
+	if (fbink_cfg->fontmult > 0) {
+		FONTSIZE_MULT = fbink_cfg->fontmult;
 		uint8_t max_fontmult;
 
 		// NOTE: Clamp to safe values to avoid a division by zero later if a glyph becomes so big
@@ -1879,7 +1879,7 @@ static int
 		//       We want to ensure available_cols in fbink_print will be > 0, so,
 		//       follow the same heuristics to devise the minimum MAXCOLS we want to enforce...
 		unsigned short int min_maxcols = 1U;
-		if (fbink_config->is_centered) {
+		if (fbink_cfg->is_centered) {
 			min_maxcols++;
 			// NOTE: If that weren't a circular dependency, we'd take care of the isPerfectFit case here,
 			//       but we can't, so instead that corner-case is handled in fbink_print...
@@ -1893,14 +1893,14 @@ static int
 		max_fontmult                = (uint8_t) MIN(max_fontmult_width, max_fontmult_height);
 		if (FONTSIZE_MULT > max_fontmult) {
 			FONTSIZE_MULT = max_fontmult;
-			ELOG("Clamped font size multiplier from %hhu to %hhu", fbink_config->fontmult, max_fontmult);
+			ELOG("Clamped font size multiplier from %hhu to %hhu", fbink_cfg->fontmult, max_fontmult);
 		}
 #else
 		// The default font's glyphs are 8x8, do the least amount of work possible ;).
 		max_fontmult = (uint8_t)(viewWidth / min_maxcols / 8U);
 		if (FONTSIZE_MULT > max_fontmult) {
 			FONTSIZE_MULT = max_fontmult;
-			ELOG("Clamped font size multiplier from %hhu to %hhu", fbink_config->fontmult, max_fontmult);
+			ELOG("Clamped font size multiplier from %hhu to %hhu", fbink_cfg->fontmult, max_fontmult);
 		}
 #endif
 	} else {
@@ -1914,7 +1914,7 @@ static int
 			FONTSIZE_MULT = 4U;    // 32x32
 		}
 #ifdef FBINK_WITH_FONTS
-		if (fbink_config->fontname == BLOCK) {
+		if (fbink_cfg->fontname == BLOCK) {
 			// Block is roughly 4 times wider than other fonts, compensate for that...
 			FONTSIZE_MULT = (uint8_t) MAX(1U, FONTSIZE_MULT / 4U);
 		}
@@ -1926,7 +1926,7 @@ static int
 	ELOG("Fontsize set to %hux%hu (%s base glyph size: %hhux%hhu)",
 	     FONTW,
 	     FONTH,
-	     fontname_to_string(fbink_config->fontname),
+	     fontname_to_string(fbink_cfg->fontname),
 	     glyphWidth,
 	     glyphHeight);
 
@@ -1949,7 +1949,7 @@ static int
 		viewVertOffset = 0U;
 	} else {
 		// NOTE: That should also fall under no_viewport's purview
-		if (!fbink_config->no_viewport) {
+		if (!fbink_cfg->no_viewport) {
 			viewVertOffset = (uint8_t)(((float) (viewHeight - (uint32_t)(FONTH * MAXROWS)) / 2.0f) + 0.5f);
 			ELOG("Vertical fit isn't perfect, shifting rows down by %hhu pixels", viewVertOffset);
 		} else {
@@ -2010,27 +2010,27 @@ static int
 		//       taking into account the inverted cmap on legacy Kindles...
 #ifdef FBINK_FOR_KINDLE
 	if (deviceQuirks.isKindleLegacy) {
-		penFGColor = eInkBGCMap[fbink_config->fg_color];
-		penBGColor = eInkFGCMap[fbink_config->bg_color];
+		penFGColor = eInkBGCMap[fbink_cfg->fg_color];
+		penBGColor = eInkFGCMap[fbink_cfg->bg_color];
 
 		ELOG(
 		    "Pen colors set to #%02X%02X%02X -> #%02X%02X%02X for the foreground and #%02X%02X%02X -> #%02X%02X%02X for the background",
-		    eInkFGCMap[fbink_config->fg_color],
-		    eInkFGCMap[fbink_config->fg_color],
-		    eInkFGCMap[fbink_config->fg_color],
+		    eInkFGCMap[fbink_cfg->fg_color],
+		    eInkFGCMap[fbink_cfg->fg_color],
+		    eInkFGCMap[fbink_cfg->fg_color],
 		    penFGColor,
 		    penFGColor,
 		    penFGColor,
-		    eInkBGCMap[fbink_config->bg_color],
-		    eInkBGCMap[fbink_config->bg_color],
-		    eInkBGCMap[fbink_config->bg_color],
+		    eInkBGCMap[fbink_cfg->bg_color],
+		    eInkBGCMap[fbink_cfg->bg_color],
+		    eInkBGCMap[fbink_cfg->bg_color],
 		    penBGColor,
 		    penBGColor,
 		    penBGColor);
 	} else {
 #endif
-		penFGColor = eInkFGCMap[fbink_config->fg_color];
-		penBGColor = eInkBGCMap[fbink_config->bg_color];
+		penFGColor = eInkFGCMap[fbink_cfg->fg_color];
+		penBGColor = eInkBGCMap[fbink_cfg->bg_color];
 
 		ELOG("Pen colors set to #%02X%02X%02X for the foreground and #%02X%02X%02X for the background",
 		     penFGColor,
@@ -2056,10 +2056,10 @@ cleanup:
 
 // And that's how we expose it to the API ;)
 int
-    fbink_init(int fbfd, const FBInkConfig* fbink_config)
+    fbink_init(int fbfd, const FBInkConfig* fbink_cfg)
 {
 	// Don't skip any ioctls on a first init ;)
-	return initialize_fbink(fbfd, fbink_config, false);
+	return initialize_fbink(fbfd, fbink_cfg, false);
 }
 // Load font from given file path. Up to four font styles may be used by FBInk at any given time.
 int
@@ -2209,7 +2209,7 @@ int
 
 // Dump a few of our internal state variables to stdout, for shell script consumption
 void
-    fbink_state_dump(const FBInkConfig* fbink_config)
+    fbink_state_dump(const FBInkConfig* fbink_cfg)
 {
 	fprintf(
 	    stdout,
@@ -2226,7 +2226,7 @@ void
 	    FONTW,
 	    FONTH,
 	    FONTSIZE_MULT,
-	    fontname_to_string(fbink_config->fontname),
+	    fontname_to_string(fbink_cfg->fontname),
 	    glyphWidth,
 	    glyphHeight,
 	    MAXCOLS,
@@ -2240,7 +2240,7 @@ void
 
 // Dump a few of our internal state variables to the FBInkState struct pointed to by fbink_state
 void
-    fbink_get_state(const FBInkConfig* fbink_config, FBInkState* fbink_state)
+    fbink_get_state(const FBInkConfig* fbink_cfg, FBInkState* fbink_state)
 {
 	if (fbink_state) {
 		fbink_state->view_width       = viewWidth;
@@ -2252,7 +2252,7 @@ void
 		fbink_state->pen_bg_color     = penBGColor;
 		fbink_state->screen_dpi       = deviceQuirks.screenDPI;
 		fbink_state->user_hz          = USER_HZ;
-		fbink_state->font_name        = fontname_to_string(fbink_config->fontname);
+		fbink_state->font_name        = fontname_to_string(fbink_cfg->fontname);
 		fbink_state->font_w           = FONTW;
 		fbink_state->font_h           = FONTH;
 		fbink_state->max_cols         = MAXCOLS;
@@ -2381,7 +2381,7 @@ static void
 
 // Magic happens here!
 int
-    fbink_print(int fbfd, const char* string, const FBInkConfig* fbink_config)
+    fbink_print(int fbfd, const char* string, const FBInkConfig* fbink_cfg)
 {
 	// If we open a fd now, we'll only keep it open for this single print call!
 	// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
@@ -2406,12 +2406,12 @@ int
 
 	// NOTE: Make copies of these so we don't wreck our original struct, since we passed it by reference,
 	//       and we *will* heavily mangle these two...
-	short int col = fbink_config->col;
-	short int row = fbink_config->row;
+	short int col = fbink_cfg->col;
+	short int row = fbink_cfg->row;
 
 	// NOTE: If we asked to print in the middle of the screen, make the specified row an offset from the middle of the screen,
 	//       instead of the top.
-	if (fbink_config->is_halfway) {
+	if (fbink_cfg->is_halfway) {
 		row = (short int) (row + (short int) (MAXROWS / 2U));
 		// NOTE: Clamp to positive values to avoid wrap-around,
 		//       (i.e., -MAX should always be 0, and +MAX always the last row (i.e., MAXROWS - 1)).
@@ -2426,8 +2426,8 @@ int
 	unsigned short int multiline_offset = 0U;
 
 	// Clear screen?
-	if (fbink_config->is_cleared) {
-		clear_screen(fbfd, fbink_config->is_inverted ? penBGColor ^ 0xFF : penBGColor, fbink_config->is_flashing);
+	if (fbink_cfg->is_cleared) {
+		clear_screen(fbfd, fbink_cfg->is_inverted ? penBGColor ^ 0xFF : penBGColor, fbink_cfg->is_flashing);
 	}
 
 	// See if want to position our text relative to the edge of the screen, and not the beginning
@@ -2475,7 +2475,7 @@ int
 	//       as well as one padding character on the right when we have a perfect fit.
 	//       This is to avoid potentially printing stuff too close to the bezel and/or behind the bezel.
 	unsigned short int available_cols = MAXCOLS;
-	if (fbink_config->is_centered) {
+	if (fbink_cfg->is_centered) {
 		// One for the left padding
 		available_cols = (unsigned short int) (available_cols - 1U);
 		if (deviceQuirks.isPerfectFit) {
@@ -2615,7 +2615,7 @@ int
 
 		// Just fudge the column for centering...
 		bool halfcell_offset = false;
-		if (fbink_config->is_centered) {
+		if (fbink_cfg->is_centered) {
 			col = (short int) ((unsigned short int) (MAXCOLS - line_len) / 2U);
 
 			// NOTE: If the line itself is not a perfect fit, ask draw to start drawing half a cell
@@ -2631,7 +2631,7 @@ int
 		}
 
 		// When centered & padded, we need to split the padding in two, left & right.
-		if (fbink_config->is_centered && fbink_config->is_padded) {
+		if (fbink_cfg->is_centered && fbink_cfg->is_padded) {
 			// We always want full padding
 			col = 0;
 
@@ -2664,7 +2664,7 @@ int
 						 string + line_offset,
 						 (int) right_pad,
 						 "");
-		} else if (fbink_config->is_padded) {
+		} else if (fbink_cfg->is_padded) {
 			// NOTE: Rely on the field width for padding ;).
 			// Padding character is a space, which is 1 byte, so that's good enough ;).
 			unsigned int padded_bytes = line_bytes + (unsigned int) (available_cols - line_len);
@@ -2696,7 +2696,7 @@ int
 			      (unsigned short int) col,
 			      multiline_offset,
 			      halfcell_offset,
-			      fbink_config);
+			      fbink_cfg);
 
 		// Next line!
 		multiline_offset++;
@@ -2717,12 +2717,12 @@ int
 	(*fxpRotateRegion)(&region);
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
-	if (fbink_config->is_cleared) {
+	if (fbink_cfg->is_cleared) {
 		fullscreen_region(&region);
 	}
 
 	// Refresh screen
-	if (refresh(fbfd, region, WAVEFORM_MODE_AUTO, fbink_config->is_flashing) != EXIT_SUCCESS) {
+	if (refresh(fbfd, region, WAVEFORM_MODE_AUTO, fbink_cfg->is_flashing) != EXIT_SUCCESS) {
 		WARN("Failed to refresh the screen");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
@@ -2806,7 +2806,7 @@ static void
 
 // printf-like wrapper around fbink_print & fbink_print_ot ;).
 int
-    fbink_printf(int fbfd, const FBInkOTConfig* cfg, const FBInkConfig* fbCfg, const char* fmt, ...)
+    fbink_printf(int fbfd, const FBInkOTConfig* cfg, const FBInkConfig* fbink_cfg, const char* fmt, ...)
 {
 	// Assume success, until shit happens ;)
 	int rv = EXIT_SUCCESS;
@@ -2866,14 +2866,14 @@ int
 	if (cfg) {
 #ifdef FBINK_WITH_OPENTYPE
 		// Then feed our formatted string to fbink_print_ot
-		rv = fbink_print_ot(fbfd, buffer, cfg, fbCfg);
+		rv = fbink_print_ot(fbfd, buffer, cfg, fbink_cfg);
 #else
 		WARN("OpenType support is disabled in this FBInk build");
 		rv = ERRCODE(ENOSYS);
 #endif
 	} else {
 		// Otherwise, feed it to fbink_print instead
-		rv = fbink_print(fbfd, buffer, fbCfg);
+		rv = fbink_print(fbfd, buffer, fbink_cfg);
 	}
 
 	// Cleanup
@@ -2886,7 +2886,7 @@ int
     fbink_print_ot(int fbfd    UNUSED_BY_MINIMAL,
 		   const char* string   UNUSED_BY_MINIMAL,
 		   const FBInkOTConfig* cfg UNUSED_BY_MINIMAL,
-		   const FBInkConfig* fbCfg UNUSED_BY_MINIMAL)
+		   const FBInkConfig* fbink_cfg UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_OPENTYPE
 	// Abort if we were passed an empty string
@@ -3318,17 +3318,17 @@ int
 	bool    is_cleared  = false;
 	bool    is_centered = false;
 	bool    is_halfway  = false;
-	if (fbCfg) {
-		valign      = fbCfg->valign;
-		halign      = fbCfg->halign;
-		is_inverted = fbCfg->is_inverted;
-		is_overlay  = fbCfg->is_overlay;
-		is_bgless   = fbCfg->is_bgless;
-		is_fgless   = fbCfg->is_fgless;
-		is_flashing = fbCfg->is_flashing;
-		is_cleared  = fbCfg->is_cleared;
-		is_centered = fbCfg->is_centered;
-		is_halfway  = fbCfg->is_halfway;
+	if (fbink_cfg) {
+		valign      = fbink_cfg->valign;
+		halign      = fbink_cfg->halign;
+		is_inverted = fbink_cfg->is_inverted;
+		is_overlay  = fbink_cfg->is_overlay;
+		is_bgless   = fbink_cfg->is_bgless;
+		is_fgless   = fbink_cfg->is_fgless;
+		is_flashing = fbink_cfg->is_flashing;
+		is_cleared  = fbink_cfg->is_cleared;
+		is_centered = fbink_cfg->is_centered;
+		is_halfway  = fbink_cfg->is_halfway;
 	} else {
 		is_centered = cfg->is_centered;
 	}
@@ -3918,7 +3918,7 @@ bool
 
 // Reinitialize FBInk in case the framebuffer state has changed
 int
-    fbink_reinit(int fbfd UNUSED_BY_KINDLE, const FBInkConfig* fbink_config UNUSED_BY_KINDLE)
+    fbink_reinit(int fbfd UNUSED_BY_KINDLE, const FBInkConfig* fbink_cfg UNUSED_BY_KINDLE)
 {
 #ifndef FBINK_FOR_KINDLE
 	// NOTE: Don't even try to open/close the fb if we don't have anything to do ;)
@@ -3959,14 +3959,14 @@ int
 			//       Nickel has finished setting up the fb to its liking, we need to reinit!
 			// It's a reinit, so ask to skip the vinfo ioctl we just did
 			ELOG("Detected a change in framebuffer bitdepth, reinitializing...");
-			rv = initialize_fbink(fbfd, fbink_config, true);
+			rv = initialize_fbink(fbfd, fbink_cfg, true);
 		} else if ((old_bpp == 16 && vInfo.bits_per_pixel == 16) && (old_rota != vInfo.rotate)) {
 			// NOTE: If we're still in 16bpp, but the rotation changed,
 			//       pickel has been used to show something (most likely the "three dots" progress bar),
 			//       and we're no longer in the native rotation, we need to reinit!
 			// It's a reinit, so ask to skip the vinfo ioctl we just did
 			ELOG("Detected a change in framebuffer rotation, reinitializing...");
-			rv = initialize_fbink(fbfd, fbink_config, true);
+			rv = initialize_fbink(fbfd, fbink_cfg, true);
 		}
 	} else if (deviceQuirks.canRotate) {
 		// The second step is checking for a rotation change on devices with an accelerometer...
@@ -3992,7 +3992,7 @@ int
 			//       because xres/yres will get inverted, and we need to follow that!
 			// It's a reinit, so ask to skip the vinfo ioctl we just did
 			ELOG("Detected a change in framebuffer rotation, reinitializing...");
-			rv = initialize_fbink(fbfd, fbink_config, true);
+			rv = initialize_fbink(fbfd, fbink_cfg, true);
 		}
 	}
 
@@ -4015,15 +4015,15 @@ cleanup:
 
 // Handle drawing both types of progress bars
 int
-    draw_progress_bars(int fbfd, bool is_infinite, uint8_t value, const FBInkConfig* fbink_config)
+    draw_progress_bars(int fbfd, bool is_infinite, uint8_t value, const FBInkConfig* fbink_cfg)
 {
-	uint8_t invert  = fbink_config->is_inverted ? 0xFF : 0U;
+	uint8_t invert  = fbink_cfg->is_inverted ? 0xFF : 0U;
 	uint8_t fgcolor = penFGColor ^ invert;
 	uint8_t bgcolor = penBGColor ^ invert;
 
 	// Clear screen?
-	if (fbink_config->is_cleared) {
-		clear_screen(fbfd, bgcolor, fbink_config->is_flashing);
+	if (fbink_cfg->is_cleared) {
+		clear_screen(fbfd, bgcolor, fbink_cfg->is_flashing);
 	}
 
 	// Let's go! Start by pilfering some computations from draw...
@@ -4034,7 +4034,7 @@ int
 	// Clamp v offset to safe values
 	// NOTE: This test isn't perfect, but then, if you play with this, you do it knowing the risks...
 	//       It's mainly there so that stupidly large values don't wrap back on screen because of overflow wraparound.
-	short int voffset = fbink_config->voffset;
+	short int voffset = fbink_cfg->voffset;
 	if ((uint32_t) abs(voffset) >= viewHeight) {
 		LOG("The specified vertical offset (%hd) necessarily pushes *all* content out of bounds, discarding it",
 		    voffset);
@@ -4042,8 +4042,8 @@ int
 	}
 
 	// And then some from fbink_print...
-	short int row = fbink_config->row;
-	if (fbink_config->is_halfway) {
+	short int row = fbink_cfg->row;
+	if (fbink_cfg->is_halfway) {
 		row = (short int) (row + (short int) (MAXROWS / 2U));
 		// NOTE: Clamp to positive values to avoid wrap-around,
 		//       (i.e., -MAX should always be 0, and +MAX always the last row (i.e., MAXROWS - 1)).
@@ -4068,7 +4068,7 @@ int
 	unsigned short int left_pos = 0U + viewHoriOrigin;
 
 	// ... unless we were asked to skip background pixels... ;).
-	if (!fbink_config->is_bgless) {
+	if (!fbink_cfg->is_bgless) {
 		fill_rect(left_pos, top_pos, (unsigned short int) screenWidth, FONTH, &bgC);
 	}
 
@@ -4077,11 +4077,11 @@ int
 	FBInkColor borderC;
 	// Handle devices with an inverted palette properly...
 	if (deviceQuirks.isKindleLegacy) {
-		emptyC.r  = fbink_config->is_inverted ? eInkBGCMap[BG_GRAYB] : eInkFGCMap[BG_GRAYB];
-		borderC.r = fbink_config->is_inverted ? eInkBGCMap[BG_GRAY4] : eInkFGCMap[BG_GRAY4];
+		emptyC.r  = fbink_cfg->is_inverted ? eInkBGCMap[BG_GRAYB] : eInkFGCMap[BG_GRAYB];
+		borderC.r = fbink_cfg->is_inverted ? eInkBGCMap[BG_GRAY4] : eInkFGCMap[BG_GRAY4];
 	} else {
-		emptyC.r  = fbink_config->is_inverted ? eInkFGCMap[BG_GRAYB] : eInkBGCMap[BG_GRAYB];
-		borderC.r = fbink_config->is_inverted ? eInkFGCMap[BG_GRAY4] : eInkBGCMap[BG_GRAY4];
+		emptyC.r  = fbink_cfg->is_inverted ? eInkFGCMap[BG_GRAYB] : eInkBGCMap[BG_GRAYB];
+		borderC.r = fbink_cfg->is_inverted ? eInkFGCMap[BG_GRAY4] : eInkBGCMap[BG_GRAY4];
 	}
 	emptyC.g  = emptyC.r;
 	emptyC.b  = emptyC.r;
@@ -4143,12 +4143,7 @@ int
 		}
 
 		// Draw percentage in the middle of the bar...
-		draw(percentage_text,
-		     (unsigned short int) row,
-		     (unsigned short int) col,
-		     0U,
-		     halfcell_offset,
-		     fbink_config);
+		draw(percentage_text, (unsigned short int) row, (unsigned short int) col, 0U, halfcell_offset, fbink_cfg);
 	} else {
 		// This is an infinite progress bar (a.k.a., activity bar)!
 
@@ -4218,7 +4213,7 @@ int
 	(*fxpRotateRegion)(&region);
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
-	if (fbink_config->is_cleared) {
+	if (fbink_cfg->is_cleared) {
 		fullscreen_region(&region);
 	}
 
@@ -4227,7 +4222,7 @@ int
 	//       It has the added benefit of increasing the framerate limit after which the eInk controller risks getting
 	//       confused (unless is_flashing is enabled, since that'll block,
 	//       essentially throttling the bar to the screen's refresh rate).
-	if (refresh(fbfd, region, WAVEFORM_MODE_AUTO, fbink_config->is_flashing) != EXIT_SUCCESS) {
+	if (refresh(fbfd, region, WAVEFORM_MODE_AUTO, fbink_cfg->is_flashing) != EXIT_SUCCESS) {
 		WARN("Failed to refresh the screen");
 		return ERRCODE(EXIT_FAILURE);
 	}
@@ -4237,7 +4232,7 @@ int
 
 // Draw a full-width progress bar
 int
-    fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInkConfig* caller_fbink_config)
+    fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInkConfig* caller_fbink_cfg)
 {
 	// Open the framebuffer if need be...
 	// NOTE: As usual, we *expect* to be initialized at this point!
@@ -4265,16 +4260,16 @@ int
 
 	// We need a local copy of the config struct, because we have a few things to enforce on our end,
 	// and we don't want to mess with the caller's setup (plus, it's const for that very reason anyway).
-	FBInkConfig fbink_config = *caller_fbink_config;
+	FBInkConfig fbink_cfg = *caller_fbink_cfg;
 	// Namely, we need overlay mode to properly print the percentage text,
-	fbink_config.is_overlay = true;
+	fbink_cfg.is_overlay = true;
 	// and no hoffset, because it makes no sense for a full-width bar,
 	// and we don't want the text to be affected by a stray value...
-	fbink_config.hoffset = 0;
+	fbink_cfg.hoffset = 0;
 	// And we enforce centered text internally, so we'll set col ourselves later...
 
 	// And do the work ;).
-	rv = draw_progress_bars(fbfd, false, percentage, &fbink_config);
+	rv = draw_progress_bars(fbfd, false, percentage, &fbink_cfg);
 
 	// Cleanup
 cleanup:
@@ -4290,7 +4285,7 @@ cleanup:
 
 // Draw a full-width activity bar
 int
-    fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkConfig* caller_fbink_config)
+    fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkConfig* caller_fbink_cfg)
 {
 	// Open the framebuffer if need be...
 	// NOTE: As usual, we *expect* to be initialized at this point!
@@ -4310,7 +4305,7 @@ int
 		}
 	}
 
-	// We don't need to fudge with fbink_config, no text to show ;).
+	// We don't need to fudge with fbink_cfg, no text to show ;).
 
 	// Begin by sanitizing the input...
 	if (progress > 16U) {
@@ -4319,7 +4314,7 @@ int
 	}
 
 	// And do the work ;).
-	rv = draw_progress_bars(fbfd, true, progress, caller_fbink_config);
+	rv = draw_progress_bars(fbfd, true, progress, caller_fbink_cfg);
 
 	// Cleanup
 cleanup:
@@ -4536,7 +4531,7 @@ static int
 	       const int          req_n,
 	       short int          x_off,
 	       short int          y_off,
-	       const FBInkConfig* fbink_config)
+	       const FBInkConfig* fbink_cfg)
 {
 	// Open the framebuffer if need be...
 	// NOTE: As usual, we *expect* to be initialized at this point!
@@ -4557,24 +4552,24 @@ static int
 	}
 
 	// Clear screen?
-	if (fbink_config->is_cleared) {
-		clear_screen(fbfd, fbink_config->is_inverted ? penBGColor ^ 0xFF : penBGColor, fbink_config->is_flashing);
+	if (fbink_cfg->is_cleared) {
+		clear_screen(fbfd, fbink_cfg->is_inverted ? penBGColor ^ 0xFF : penBGColor, fbink_cfg->is_flashing);
 	}
 
 	// NOTE: We compute initial offsets from row/col, to help aligning images with text.
-	if (fbink_config->col < 0) {
-		x_off = (short int) (viewHoriOrigin + x_off + (MAX(MAXCOLS + fbink_config->col, 0) * FONTW));
+	if (fbink_cfg->col < 0) {
+		x_off = (short int) (viewHoriOrigin + x_off + (MAX(MAXCOLS + fbink_cfg->col, 0) * FONTW));
 	} else {
-		x_off = (short int) (viewHoriOrigin + x_off + (fbink_config->col * FONTW));
+		x_off = (short int) (viewHoriOrigin + x_off + (fbink_cfg->col * FONTW));
 	}
 	// NOTE: Unless we *actually* specified a row, ignore viewVertOffset
 	//       The rationale being we want to keep being aligned to text rows when we do specify a row,
 	//       but we don't want the extra offset when we don't (in particular, when printing full-screen images).
 	// NOTE: This means that row 0 and row -MAXROWS *will* behave differently, but so be it...
-	if (fbink_config->row < 0) {
-		y_off = (short int) (viewVertOrigin + y_off + (MAX(MAXROWS + fbink_config->row, 0) * FONTH));
-	} else if (fbink_config->row == 0) {
-		y_off = (short int) (viewVertOrigin - viewVertOffset + y_off + (fbink_config->row * FONTH));
+	if (fbink_cfg->row < 0) {
+		y_off = (short int) (viewVertOrigin + y_off + (MAX(MAXROWS + fbink_cfg->row, 0) * FONTH));
+	} else if (fbink_cfg->row == 0) {
+		y_off = (short int) (viewVertOrigin - viewVertOffset + y_off + (fbink_cfg->row * FONTH));
 		// This of course means that row 0 effectively breaks that "align with text" contract if viewVertOffset != 0,
 		// on the off-chance we do explicitly really want to align something to row 0, so, warn about it...
 		// The "print full-screen images" use-case is greatly more prevalent than "actually rely on row 0 alignment" ;).
@@ -4583,13 +4578,13 @@ static int
 			LOG("Ignoring the %hhupx row offset because row is 0!", viewVertOffset);
 		}
 	} else {
-		y_off = (short int) (viewVertOrigin + y_off + (fbink_config->row * FONTH));
+		y_off = (short int) (viewVertOrigin + y_off + (fbink_cfg->row * FONTH));
 	}
 	LOG("Adjusted image display coordinates to (%hd, %hd), after column %hd & row %hd",
 	    x_off,
 	    y_off,
-	    fbink_config->col,
-	    fbink_config->row);
+	    fbink_cfg->col,
+	    fbink_cfg->row);
 
 	bool       fb_is_grayscale = false;
 	bool       fb_is_legacy    = false;
@@ -4619,7 +4614,7 @@ static int
 	}
 
 	// Handle horizontal alignment...
-	switch (fbink_config->halign) {
+	switch (fbink_cfg->halign) {
 		case CENTER:
 			x_off = (short int) (x_off + (int) (viewWidth / 2U));
 			x_off = (short int) (x_off - (w / 2));
@@ -4631,12 +4626,12 @@ static int
 		default:
 			break;
 	}
-	if (fbink_config->halign != NONE) {
+	if (fbink_cfg->halign != NONE) {
 		LOG("Adjusted image display coordinates to (%hd, %hd) after horizontal alignment", x_off, y_off);
 	}
 
 	// Handle vertical alignment...
-	switch (fbink_config->valign) {
+	switch (fbink_cfg->valign) {
 		case CENTER:
 			y_off = (short int) (y_off + (int) (viewHeight / 2U));
 			y_off = (short int) (y_off - (h / 2));
@@ -4648,14 +4643,14 @@ static int
 		default:
 			break;
 	}
-	if (fbink_config->valign != NONE) {
+	if (fbink_cfg->valign != NONE) {
 		LOG("Adjusted image display coordinates to (%hd, %hd) after vertical alignment", x_off, y_off);
 	}
 
 	// Clamp everything to a safe range, because we can't have *anything* going off-screen here.
 	struct mxcfb_rect region;
 	// NOTE: Assign each field individually to avoid a false-positive with Clang's SA...
-	if (fbink_config->row == 0) {
+	if (fbink_cfg->row == 0) {
 		region.top = MIN(screenHeight, (uint32_t) MAX((viewVertOrigin - viewVertOffset), y_off));
 	} else {
 		region.top = MIN(screenHeight, (uint32_t) MAX(viewVertOrigin, y_off));
@@ -4687,7 +4682,7 @@ static int
 	}
 	if (y_off < 0) {
 		// We'll start plotting from the beginning of the *visible* part of the image ;)
-		if (fbink_config->row == 0) {
+		if (fbink_cfg->row == 0) {
 			img_y_off = (unsigned short int) (abs(y_off) + viewVertOrigin - viewVertOffset);
 		} else {
 			img_y_off = (unsigned short int) (abs(y_off) + viewVertOrigin);
@@ -4711,7 +4706,7 @@ static int
 	// Warn if there's an alpha channel, because it's usually a bit more expensive to handle...
 	if (n == 2 || n == 4) {
 		img_has_alpha = true;
-		if (fbink_config->ignore_alpha) {
+		if (fbink_cfg->ignore_alpha) {
 			LOG("Ignoring the image's alpha channel.");
 		} else {
 			LOG("Image has an alpha channel, we'll have to do alpha blending.");
@@ -4723,10 +4718,10 @@ static int
 	uint8_t  invert     = 0U;
 	uint32_t invert_rgb = 0U;
 #	ifdef FBINK_FOR_KINDLE
-	if ((deviceQuirks.isKindleLegacy && !fbink_config->is_inverted) ||
-	    (!deviceQuirks.isKindleLegacy && fbink_config->is_inverted)) {
+	if ((deviceQuirks.isKindleLegacy && !fbink_cfg->is_inverted) ||
+	    (!deviceQuirks.isKindleLegacy && fbink_cfg->is_inverted)) {
 #	else
-	if (fbink_config->is_inverted) {
+	if (fbink_cfg->is_inverted) {
 #	endif
 		invert     = 0xFF;
 		invert_rgb = 0x00FFFFFF;
@@ -4739,7 +4734,7 @@ static int
 	//       we also entirely avoid trying to plot off-screen pixels (on any sides).
 	if (fb_is_grayscale) {
 		// 4bpp & 8bpp
-		if (!fbink_config->ignore_alpha && img_has_alpha) {
+		if (!fbink_cfg->ignore_alpha && img_has_alpha) {
 			if (!fb_is_legacy) {
 				// 8bpp
 				// There's an alpha channel in the image, we'll have to do alpha blending...
@@ -4853,7 +4848,7 @@ static int
 		}
 	} else if (fb_is_true_bgr) {
 		// 24bpp & 32bpp
-		if (!fbink_config->ignore_alpha && img_has_alpha) {
+		if (!fbink_cfg->ignore_alpha && img_has_alpha) {
 			FBInkPixelRGBA img_px;
 			uint8_t        ainv = 0U;
 			size_t         pix_offset;
@@ -5050,7 +5045,7 @@ static int
 		}
 	} else {
 		// 16bpp
-		if (!fbink_config->ignore_alpha && img_has_alpha) {
+		if (!fbink_cfg->ignore_alpha && img_has_alpha) {
 			FBInkCoordinates coords   = { 0U };
 			FBInkColor       bg_color = { 0U };
 			size_t           pix_offset;
@@ -5133,12 +5128,12 @@ static int
 	(*fxpRotateRegion)(&region);
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
-	if (fbink_config->is_cleared) {
+	if (fbink_cfg->is_cleared) {
 		fullscreen_region(&region);
 	}
 
 	// Refresh screen
-	if (refresh(fbfd, region, WAVEFORM_MODE_GC16, fbink_config->is_flashing) != EXIT_SUCCESS) {
+	if (refresh(fbfd, region, WAVEFORM_MODE_GC16, fbink_cfg->is_flashing) != EXIT_SUCCESS) {
 		WARN("Failed to refresh the screen");
 	}
 
@@ -5161,7 +5156,7 @@ int
 		      const char* filename UNUSED_BY_MINIMAL,
 		      short int x_off UNUSED_BY_MINIMAL,
 		      short int y_off    UNUSED_BY_MINIMAL,
-		      const FBInkConfig* fbink_config UNUSED_BY_MINIMAL)
+		      const FBInkConfig* fbink_cfg UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_IMAGE
 	// Assume success, until shit happens ;)
@@ -5171,20 +5166,20 @@ int
 	int req_n;
 	switch (vInfo.bits_per_pixel) {
 		case 4U:
-			req_n = 1 + !fbink_config->ignore_alpha;
+			req_n = 1 + !fbink_cfg->ignore_alpha;
 			break;
 		case 8U:
-			req_n = 1 + !fbink_config->ignore_alpha;
+			req_n = 1 + !fbink_cfg->ignore_alpha;
 			break;
 		case 16U:
-			req_n = 3 + !fbink_config->ignore_alpha;
+			req_n = 3 + !fbink_cfg->ignore_alpha;
 			break;
 		case 24U:
-			req_n = 3 + !fbink_config->ignore_alpha;
+			req_n = 3 + !fbink_cfg->ignore_alpha;
 			break;
 		case 32U:
 		default:
-			req_n = 3 + !fbink_config->ignore_alpha;
+			req_n = 3 + !fbink_cfg->ignore_alpha;
 			break;
 	}
 
@@ -5200,7 +5195,7 @@ int
 	}
 
 	// Finally, draw it on screen
-	if (draw_image(fbfd, data, w, h, n, req_n, x_off, y_off, fbink_config) != EXIT_SUCCESS) {
+	if (draw_image(fbfd, data, w, h, n, req_n, x_off, y_off, fbink_cfg) != EXIT_SUCCESS) {
 		WARN("Failed to display image data on screen");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
@@ -5227,7 +5222,7 @@ int
 			 const size_t len UNUSED_BY_MINIMAL,
 			 short int x_off UNUSED_BY_MINIMAL,
 			 short int y_off    UNUSED_BY_MINIMAL,
-			 const FBInkConfig* fbink_config UNUSED_BY_MINIMAL)
+			 const FBInkConfig* fbink_cfg UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_IMAGE
 	// Assume success, until shit happens ;)
@@ -5239,20 +5234,20 @@ int
 	int req_n;
 	switch (vInfo.bits_per_pixel) {
 		case 4U:
-			req_n = 1 + !fbink_config->ignore_alpha;
+			req_n = 1 + !fbink_cfg->ignore_alpha;
 			break;
 		case 8U:
-			req_n = 1 + !fbink_config->ignore_alpha;
+			req_n = 1 + !fbink_cfg->ignore_alpha;
 			break;
 		case 16U:
-			req_n = 3 + !fbink_config->ignore_alpha;
+			req_n = 3 + !fbink_cfg->ignore_alpha;
 			break;
 		case 24U:
-			req_n = 3 + !fbink_config->ignore_alpha;
+			req_n = 3 + !fbink_cfg->ignore_alpha;
 			break;
 		case 32U:
 		default:
-			req_n = 3 + !fbink_config->ignore_alpha;
+			req_n = 3 + !fbink_cfg->ignore_alpha;
 			break;
 	}
 
@@ -5281,7 +5276,7 @@ int
 	}
 
 	// We should now be able to draw that on screen, knowing that it probably won't horribly implode ;p
-	if (draw_image(fbfd, imgdata, w, h, n, req_n, x_off, y_off, fbink_config) != EXIT_SUCCESS) {
+	if (draw_image(fbfd, imgdata, w, h, n, req_n, x_off, y_off, fbink_cfg) != EXIT_SUCCESS) {
 		WARN("Failed to display image data on screen");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
