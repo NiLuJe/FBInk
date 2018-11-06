@@ -76,7 +76,7 @@
 #			define STBTT_sqrt(x) __builtin_sqrtf(x)
 #			define STBTT_pow(x, y) __builtin_powf(x, y)
 #			define STBTT_fmod(x, y) __builtin_fmodf(x, y)
-// Need to keep double precision for cos, there's an implicit conversion involved
+// Need to keep double precision for cos, because GCC sneakily replaces a PI approximation in stbtt ;)
 #			define STBTT_cos(x) __builtin_cos(x)
 #			define STBTT_acos(x) __builtin_acosf(x)
 #			define STBTT_fabs(x) __builtin_fabsf(x)
