@@ -43,7 +43,7 @@ static int do_infinite_progress_bar(int, const FBInkConfig*);
 // c.f., http://www.robertgamble.net/2012/01/c11-generic-selections.html
 #define TYPENAME(x)                                                                                                      \
 	_Generic((x), _Bool                                                                                              \
-		 : "_Bool", char                                                                                         \
+		 : "bool", char                                                                                          \
 		 : "char", signed char                                                                                   \
 		 : "signed char", unsigned char                                                                          \
 		 : "unsigned char", short int                                                                            \
@@ -56,7 +56,8 @@ static int do_infinite_progress_bar(int, const FBInkConfig*);
 		 : "other")
 
 #define TYPEMIN(x)                                                                                                       \
-	_Generic((x), _Bool : 0, char                                                                                    \
+	_Generic((x), _Bool                                                                                              \
+		 : false, char                                                                                           \
 		 : CHAR_MIN, signed char                                                                                 \
 		 : SCHAR_MIN, unsigned char : 0U, short int                                                              \
 		 : SHRT_MIN, unsigned short int : 0U, int                                                                \
@@ -65,7 +66,8 @@ static int do_infinite_progress_bar(int, const FBInkConfig*);
 		 : -42)
 
 #define TYPEMAX(x)                                                                                                       \
-	_Generic((x), _Bool : 1, char                                                                                    \
+	_Generic((x), _Bool                                                                                              \
+		 : true, char                                                                                            \
 		 : CHAR_MAX, signed char                                                                                 \
 		 : SCHAR_MAX, unsigned char                                                                              \
 		 : UCHAR_MAX, short int                                                                                  \
