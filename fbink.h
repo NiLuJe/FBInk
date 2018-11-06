@@ -346,21 +346,21 @@ FBINK_API bool fbink_is_fb_quirky(void) __attribute__((deprecated));
 // Returns -(ENOSYS) on Kindle, where this is not needed
 // fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
-// fbink_cfg:	pointer to an FBInkConfig struct
+// fbink_cfg:		Pointer to an FBInkConfig struct
 FBINK_API int fbink_reinit(int fbfd, const FBInkConfig* fbink_cfg);
 
 // Print a full-width progress bar on screen
 // fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // percentage:		0-100 value to set the progress bar's progression
-// fbink_cfg:	pointer to an FBInkConfig struct (ignores is_overlay, col & hoffset; as well as is_centered & is_padded)
+// fbink_cfg:		Pointer to an FBInkConfig struct (ignores is_overlay, col & hoffset; as well as is_centered & is_padded)
 FBINK_API int fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInkConfig* fbink_cfg);
 
 // Print a full-width activity bar on screen (i.e., an infinite progress bar)
 // fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // progress:		0-16 value to set the progress thumb's position in the bar
-// fbink_cfg:	pointer to an FBInkConfig struct (ignores col & hoffset; as well as is_centered & is_padded)
+// fbink_cfg:		Pointer to an FBInkConfig struct (ignores col & hoffset; as well as is_centered & is_padded)
 FBINK_API int fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkConfig* fbink_cfg);
 
 // Print an image on screen
