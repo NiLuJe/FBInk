@@ -274,8 +274,8 @@ static void
 		// NOTE: This is only enabled in Debug builds because it can be pretty verbose,
 		//       and does not necessarily indicate an actual issue, as we've just explained...
 		LOG("Put: discarding off-screen pixel @ (%hu, %hu) (out of %ux%u bounds)",
-		    coords->x,
-		    coords->y,
+		    coords.x,
+		    coords.y,
 		    vInfo.xres,
 		    vInfo.yres);
 #endif
@@ -414,8 +414,8 @@ static void
 		// NOTE: This is only enabled in Debug builds because it can be pretty verbose,
 		//       and does not necessarily indicate an actual issue, as we've just explained...
 		LOG("Put: discarding off-screen pixel @ (%hu, %hu) (out of %ux%u bounds)",
-		    coords->x,
-		    coords->y,
+		    coords.x,
+		    coords.y,
 		    vInfo.xres,
 		    vInfo.yres);
 #endif
