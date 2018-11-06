@@ -64,11 +64,11 @@ static int do_infinite_progress_bar(int, const FBInkConfig*);
 #define TYPEMIN(x)                                                                                                       \
 	_Generic((x), _Bool : 0, char                                                                                    \
 		 : CHAR_MIN, signed char                                                                                 \
-		 : SCHAR_MIN, unsigned char : 0, short int                                                               \
-		 : SHRT_MIN, unsigned short int : 0, int                                                                 \
-		 : INT_MIN, unsigned int : 0, long int                                                                   \
-		 : LONG_MIN, unsigned long int : 0, long long int                                                        \
-		 : LLONG_MIN, unsigned long long int : 0, float                                                          \
+		 : SCHAR_MIN, unsigned char : 0U, short int                                                              \
+		 : SHRT_MIN, unsigned short int : 0U, int                                                                \
+		 : INT_MIN, unsigned int : 0U, long int                                                                  \
+		 : LONG_MIN, unsigned long int : 0U, long long int                                                       \
+		 : LLONG_MIN, unsigned long long int : 0U, float                                                         \
 		 : -HUGE_VALF, double                                                                                    \
 		 : -HUGE_VAL, long double                                                                                \
 		 : -HUGE_VALL, default                                                                                   \
@@ -149,14 +149,14 @@ static int do_infinite_progress_bar(int, const FBInkConfig*);
 		if ((__typeof__(*result)) val != val) {                                                                                             \
 			fprintf(                                                                                                                    \
 			    stderr,                                                                                                                 \
-			    "Loss of precision when casting value '%lu' to a %s for option '%c%s%s' (valid range: %d to %d).\n",                    \
+			    "Loss of precision when casting value '%lu' to a %s for option '%c%s%s' (valid range: %u to %llu).\n",                  \
 			    val,                                                                                                                    \
 			    TYPENAME(*result),                                                                                                      \
 			    opt,                                                                                                                    \
 			    subopt ? ":" : "",                                                                                                      \
 			    subopt ? subopt : "",                                                                                                   \
-			    TYPEMIN(*result),                                                                                                       \
-			    TYPEMAX(*result));                                                                                                      \
+			    (unsigned int) TYPEMIN(*result),                                                                                        \
+			    (unsigned long long int) TYPEMAX(*result));                                                                             \
 			return ERRCODE(EINVAL);                                                                                                     \
 		}                                                                                                                                   \
                                                                                                                                                     \
@@ -194,7 +194,7 @@ static int do_infinite_progress_bar(int, const FBInkConfig*);
 		if (*endptr != '\0') {                                                                                                              \
 			fprintf(                                                                                                                    \
 			    stderr,                                                                                                                 \
-			    "Found trailing characters (%s) behind value '%lu' assigned from string '%s' to an option (%c%s%s) expecting an %s.\n", \
+			    "Found trailing characters (%s) behind value '%ld' assigned from string '%s' to an option (%c%s%s) expecting an %s.\n", \
 			    endptr,                                                                                                                 \
 			    val,                                                                                                                    \
 			    str,                                                                                                                    \
@@ -209,14 +209,14 @@ static int do_infinite_progress_bar(int, const FBInkConfig*);
 		if ((__typeof__(*result)) val != val) {                                                                                             \
 			fprintf(                                                                                                                    \
 			    stderr,                                                                                                                 \
-			    "Loss of precision when casting value '%lu' to a %s for option '%c%s%s' (valid range: %d to %d).\n",                    \
+			    "Loss of precision when casting value '%ld' to a %s for option '%c%s%s' (valid range: %d to %lld).\n",                  \
 			    val,                                                                                                                    \
 			    TYPENAME(*result),                                                                                                      \
 			    opt,                                                                                                                    \
 			    subopt ? ":" : "",                                                                                                      \
 			    subopt ? subopt : "",                                                                                                   \
-			    TYPEMIN(*result),                                                                                                       \
-			    TYPEMAX(*result));                                                                                                      \
+			    (int) TYPEMIN(*result),                                                                                                 \
+			    (long long int) TYPEMAX(*result));                                                                                      \
 			return ERRCODE(EINVAL);                                                                                                     \
 		}                                                                                                                                   \
                                                                                                                                                     \
