@@ -624,8 +624,11 @@ int
 					      { "truetype", required_argument, NULL, 't' },
 					      { NULL, 0, NULL, 0 } };
 
-	FBInkConfig   fbink_config = { 0 };
-	FBInkOTConfig ot_config    = { 0 };
+	FBInkConfig fbink_config = { 0 };
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-braces"
+	FBInkOTConfig ot_config = { 0 };
+#pragma GCC diagnostic pop
 
 	enum
 	{

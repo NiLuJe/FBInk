@@ -228,7 +228,10 @@ static void
 	if (!fp) {
 		WARN("Couldn't read from '%s', unable to identify the Cervantes model", HWCONFIG_DEVICE);
 	} else {
+#		pragma GCC diagnostic push
+#		pragma GCC diagnostic ignored "-Wmissing-braces"
 		NTXHWConfig config = { 0 };
+#		pragma GCC diagnostic pop
 
 		if (fseek(fp, HWCONFIG_OFFSET, SEEK_SET) != 0) {
 			WARN("Failed to seek to position 0x%p in '%s'", (void*) HWCONFIG_OFFSET, HWCONFIG_DEVICE);
@@ -394,7 +397,10 @@ static void
 	if (!fp) {
 		WARN("Couldn't read from '%s', unable to identify the Kobo model", HWCONFIG_DEVICE);
 	} else {
+#		pragma GCC diagnostic push
+#		pragma GCC diagnostic ignored "-Wmissing-braces"
 		NTXHWConfig    config  = { 0 };
+#		pragma GCC diagnostic pop
 		unsigned char* payload = NULL;
 
 		if (fseek(fp, HWCONFIG_OFFSET, SEEK_SET) != 0) {

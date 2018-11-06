@@ -2951,11 +2951,14 @@ int
 		rv = ERRCODE(ERANGE);
 		goto cleanup;
 	}
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wmissing-braces"
 	struct
 	{
 		FBInkCoordinates tl;
 		FBInkCoordinates br;
-	} area    = { 0 };
+	} area = { 0 };
+#	pragma GCC diagnostic pop
 	area.tl.x = cfg->margins.left;
 	area.tl.y = (unsigned short int) (cfg->margins.top + (viewVertOrigin - viewVertOffset));
 	area.br.x = (unsigned short int) (viewWidth - cfg->margins.right);
