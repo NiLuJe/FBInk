@@ -2880,54 +2880,62 @@ int
 		    ... UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_OPENTYPE
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
 	// We'll need to store our formatted string somewhere...
-	// NOTE: Unlike fbink_printf, we can't assume a maximum size, so we set the buffer size to the input
-	//       string size, and realloc if we must (which is likely).
-	char*  buffer      = NULL;
-	size_t buffer_size = strlen(fmt) + 1U;
+	// Rely on vsnprintf itself to tell us how many bytes it needs ;).
+	int     ret    = -1;
+	size_t  size   = 0;
+	char*   buffer = NULL;
+	va_list args;
+
+	// Initial vsnprintf run on a NULL pointer, just to determine the required buffer size
+	va_start(args, fmt);
+	ret = vsnprintf(buffer, size, fmt, args);
+	va_end(args);
+
+	// See if vsnprintf made a boo-boo
+	if (ret < 0) {
+		char  buf[256];
+		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		WARN("initial vsnprintf: %s", errstr);
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// We need enough space for NULL-termination (which we make 'wide' for u8 reasons) :).
+	size = (size_t)(ret + 4);
 	// NOTE: We use calloc to make sure it'll always be zero-initialized,
 	//       and the OS is smart enough to make it fast if we don't use the full space anyway (CoW zeroing).
-	buffer = calloc(buffer_size, sizeof(*buffer));
+	buffer = calloc(size, 1U);
 	if (buffer == NULL) {
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
-		WARN("calloc (page): %s", errstr);
-		return ERRCODE(EXIT_FAILURE);
+		WARN("calloc: %s", errstr);
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
 	}
 
-	va_list args;
+	// And now we can actually let vsnprintf do its job, for real ;).
 	va_start(args, fmt);
-	// vsnprintf will ensure we'll always be NULL-terminated (but not NULL-backfilled, hence calloc!) ;).
-	int size = vsnprintf(buffer, buffer_size, fmt, args);
-	// vsnprintf will tell us if it truncated our string to fit the buffer, and by how much. We will need
-	// to realloc if this occurs.
-	// We may as well check for an error from vsnprintf() while we're at it.
-	if (size < 0) {
-		free(buffer);
-		WARN("Could not format string");
-		return ERRCODE(EXIT_FAILURE);
-	} else if ((size_t) size >= buffer_size) {
-		char*  tmp_buf  = NULL;
-		size_t new_size = (size_t) size + 4U;    // Just to be extra safe, use a wide null terminator
-		tmp_buf         = realloc(buffer, new_size);
-		if (tmp_buf == NULL) {
-			free(buffer);
-			char  buf[256];
-			char* errstr = strerror_r(errno, buf, sizeof(buf));
-			WARN("realloc (page): %s", errstr);
-			return ERRCODE(EXIT_FAILURE);
-		}
-		buffer  = tmp_buf;
-		tmp_buf = NULL;
-		// Memset the new buffer, because realloc doesn't
-		memset(buffer, '\0', new_size);
-		// Finally, we call vsnprintf() again, this time with the new buffer that should fit our formatted string
-		vsnprintf(buffer, new_size, fmt, args);
-	}
+	ret = vsnprintf(buffer, size, fmt, args);
 	va_end(args);
 
-	int rv = fbink_print_ot(fbfd, buffer, cfg, fbCfg);
+	// See if vsnprintf made a boo-boo, one final time
+	if (ret < 0) {
+		char  buf[256];
+		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		WARN("vsnprintf: %s", errstr);
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// We've got a formatted buffer! Feed it to fbink_print_ot
+	rv = fbink_print_ot(fbfd, buffer, cfg, fbCfg);
+
 	// Cleanup
+cleanup:
 	free(buffer);
 	return rv;
 #else
