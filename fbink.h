@@ -216,16 +216,16 @@ FBINK_API int fbink_open(void);
 
 // Unmap the framebuffer (if need be) and close its file descriptor
 // (c.f., the recap at the bottom if you're concerned about mmap handling).
-// fbfd:		open file descriptor to the framebuffer character device, as returned by fbink_open()
+// fbfd:		Open file descriptor to the framebuffer character device, as returned by fbink_open()
 FBINK_API int fbink_close(int fbfd);
 
 // Initialize internal variables keeping track of the framebuffer's configuration and state, as well as the device's hardware.
 // MUST be called at least *once* before any fbink_print* functions.
 // CAN safely be called multiple times, but doing so is only necessary if the framebuffer's state has changed,
 //     or if you modified one of the FBInkConfig fields that affects its results (listed below).
-// fbfd:		open file descriptor to the framebuffer character device,
+// fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
-// fbink_cfg:	pointer to an FBInkConfig struct
+// fbink_cfg:		Pointer to an FBInkConfig struct
 //				If you wish to customize them, the fields:
 //				is_centered, fontmult, fontname, fg_color, bg_color, no_viewport, is_verbose & is_quiet
 //				MUST be set beforehand.
@@ -266,10 +266,10 @@ FBINK_API void fbink_get_state(const FBInkConfig* fbink_cfg, FBInkState* fbink_s
 //       c.f., my rant about Kobo's broken libc in fbink_internal.h for more details behind this choice.
 //       Since any decent system built in the last decade should default to UTF-8, that should be pretty much transparent...
 // Returns the amount of lines printed on success (helpful when you keep track of which row you're printing to).
-// fbfd:		open file descriptor to the framebuffer character device,
+// fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // string:		UTF-8 encoded string to print
-// fbink_cfg:	pointer to an FBInkConfig struct
+// fbink_cfg:		Pointer to an FBInkConfig struct
 FBINK_API int fbink_print(int fbfd, const char* string, const FBInkConfig* fbink_cfg);
 
 // Print a string using an OpenType font. Note the caller MUST init with fbink_init_ot() FIRST.
@@ -280,7 +280,7 @@ FBINK_API int fbink_print(int fbfd, const char* string, const FBInkConfig* fbink
 // Returns -(ERANGE) if the provided margins are out of range, or sum to < view height or width
 // Returns -(ENOSYS) if compiled with MINIMAL
 // Returns -(ENODAT) if fbink_init_ot() hasn't yet been called.
-// fbfd:		open file descriptor to the framebuffer character device,
+// fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // string:		UTF-8 encoded string to print
 // cfg:			Pointer to a FBInkOTConfig struct.
@@ -293,7 +293,7 @@ FBINK_API int fbink_print(int fbfd, const char* string, const FBInkConfig* fbink
 FBINK_API int fbink_print_ot(int fbfd, const char* string, const FBInkOTConfig* cfg, const FBInkConfig* fbink_cfg);
 
 // Brings printf formatting to fbink_print and fbink_print_ot ;).
-// fbfd:		open file descriptor to the framebuffer character device,
+// fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // cfg:			Optional pointer to an FBInkOTConfig struct.
 // fbink_cfg:		Optional pointer to an FBInkConfig struct.
@@ -305,7 +305,7 @@ FBINK_API int fbink_printf(int fbfd, const FBInkOTConfig* cfg, const FBInkConfig
     __attribute__((format(printf, 4, 5)));
 
 // A simple wrapper around the internal screen refresh handling, without requiring you to include einkfb/mxcfb headers
-// fbfd:		open file descriptor to the framebuffer character device,
+// fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // region_top:		top field of an mxcfb rectangle
 // region_left:		left field of an mxcfb rectangle
@@ -344,20 +344,20 @@ FBINK_API bool fbink_is_fb_quirky(void) __attribute__((deprecated));
 //       by catching more scenarios where a reinit would be useful,
 //       and it can avoid running the same ioctl twice when an ioctl already done by init is needed to detect a state change.
 // Returns -(ENOSYS) on Kindle, where this is not needed
-// fdfd:		open file descriptor to the framebuffer character device,
+// fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // fbink_cfg:	pointer to an FBInkConfig struct
 FBINK_API int fbink_reinit(int fbfd, const FBInkConfig* fbink_cfg);
 
 // Print a full-width progress bar on screen
-// fdfd:		open file descriptor to the framebuffer character device,
+// fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // percentage:		0-100 value to set the progress bar's progression
 // fbink_cfg:	pointer to an FBInkConfig struct (ignores is_overlay, col & hoffset; as well as is_centered & is_padded)
 FBINK_API int fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInkConfig* fbink_cfg);
 
 // Print a full-width activity bar on screen (i.e., an infinite progress bar)
-// fdfd:		open file descriptor to the framebuffer character device,
+// fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // progress:		0-16 value to set the progress thumb's position in the bar
 // fbink_cfg:	pointer to an FBInkConfig struct (ignores col & hoffset; as well as is_centered & is_padded)
@@ -365,14 +365,14 @@ FBINK_API int fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkCo
 
 // Print an image on screen
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
-// fdfd:		open file descriptor to the framebuffer character device,
+// fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
-// filename:		path to the image file (Supported formats: JPEG, PNG, TGA, BMP, GIF & PNM)
+// filename:		Path to the image file (Supported formats: JPEG, PNG, TGA, BMP, GIF & PNM)
 //				if set to "-" and stdin is not attached to a terminal,
 //				will attempt to read image data from stdin.
-// x_off:		target coordinates, x (honors negative offsets)
-// y_off:		target coordinates, y (honors negative offsets)
-// fbink_cfg:	pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
+// x_off:		Target coordinates, x (honors negative offsets)
+// y_off:		Target coordinates, y (honors negative offsets)
+// fbink_cfg:		Pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
 FBINK_API int fbink_print_image(int                fbfd,
 				const char*        filename,
 				short int          x_off,
@@ -381,18 +381,18 @@ FBINK_API int fbink_print_image(int                fbfd,
 
 // Print raw scanlines on screen
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
-// fdfd:		open file descriptor to the framebuffer character device,
+// fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
-// data:		pointer to a buffer holding the image data (Supported pixel formats: Y/YA/RGB/RGBA,
+// data:		Pointer to a buffer holding the image data (Supported pixel formats: Y/YA/RGB/RGBA,
 //				8-bit components, the first pixel should be the top-left of the image).
-// w:			width (in pixels) of a single scanline of the input image data
-// h:			height (in pixels) of the full image data (i.e., amount of scanlines)
-// len:			*exact* size of the input buffer.
+// w:			Width (in pixels) of a single scanline of the input image data
+// h:			Height (in pixels) of the full image data (i.e., amount of scanlines)
+// len:			*Exact* size of the input buffer.
 //				Input pixel format is simply computed as len / h / w, so this *needs* to be exact,
 //				do not pass a padded length (or pad the data itself in any way)!
-// x_off:		target coordinates, x (honors negative offsets)
-// y_off:		target coordinates, y (honors negative offsets)
-// fbink_cfg:	pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
+// x_off:		Target coordinates, x (honors negative offsets)
+// y_off:		Target coordinates, y (honors negative offsets)
+// fbink_cfg:		Pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
 // NOTE: While we do accept a various range of input formats (as far as component interleaving is concerned),
 //       our display code only handles a few specific combinations, depending on the target hardware.
 //       To make everyone happy, this will transparently handle the pixel format conversion *as needed*,
@@ -422,11 +422,11 @@ FBINK_API int fbink_print_raw_data(int                fbfd,
 // NOTE: For the duration of this call, screen updates should be kept to a minimum: in particular,
 //       we of course expect to be able to see the "Connect" button,
 //       but we also expect the middle section of the final line to be untouched!
-// fdfd:		open file descriptor to the framebuffer character device,
+// fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
-// press_button:	generate an input event to press the button if true,
+// press_button:	Generate an input event to press the button if true,
 //				MAY sleep up to 5s to confirm that input was successful! (unless nosleep is true)
-// nosleep:		if true, don't try to confirm that press_button's input event was successful,
+// nosleep:		If true, don't try to confirm that press_button's input event was successful,
 //				avoiding the nanosleep() calls that might incur...
 // NOTE: Thread-safety obviously goes out the window with press_button enabled,
 //       since you can then only reasonably expect to be able to concurrently run a single instance of that function ;).
@@ -442,9 +442,9 @@ FBINK_API int fbink_button_scan(int fbfd, bool press_button, bool nosleep);
 //	-(EXIT_FAILURE)	when the expected chain of events fails to be detected properly
 //	-(ENODATA)	when there was no new content to import at the end of the USBMS session
 //	-(ETIME)	when we failed to detect the end of the import session itself, because it ran longer than 5 minutes.
-// fdfd:		open file descriptor to the framebuffer character device,
+// fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
-// force_unplug:	after having made sure to be in USBMS mode, generate a fake USB unplug event to force Nickel to wake up.
+// force_unplug:	After having made sure to be in USBMS mode, generate a fake USB unplug event to force Nickel to wake up.
 //				This makes sense if you want to do stuff behind Nickel's back during the USBMS session,
 //				instead of simply monitoring it, especially with fake USBMS sessions ;).
 //				NOTE: Obviously, if this was a real USBMS session, and not an entirely faked one,
