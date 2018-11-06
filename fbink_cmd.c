@@ -383,7 +383,7 @@ static int
 	if ((unsigned short int) val != val) {
 		fprintf(
 		    stderr,
-		    "Loss of precision when casting value '%lu' to an unsigned short int for option '%c%s%s' (valid range: %u to %hu).\n",
+		    "Loss of precision when casting value '%lu' to an unsigned short int for option '%c%s%s' (valid range: %u to %d).\n",
 		    val,
 		    opt,
 		    subopt ? ":" : "",
@@ -453,7 +453,7 @@ static int
 	if ((uint8_t) val != val) {
 		fprintf(
 		    stderr,
-		    "Loss of precision when casting value '%lu' to an uint8_t for option '%c%s%s' (valid range: %u to %hhu).\n",
+		    "Loss of precision when casting value '%lu' to an uint8_t for option '%c%s%s' (valid range: %u to %d).\n",
 		    val,
 		    opt,
 		    subopt ? ":" : "",
@@ -512,7 +512,7 @@ static int
 	if ((short int) val != val) {
 		fprintf(
 		    stderr,
-		    "Loss of precision when casting value '%ld' to a short int for option '%c%s%s' (valid range: %hd to %hd).\n",
+		    "Loss of precision when casting value '%ld' to a short int for option '%c%s%s' (valid range: %d to %d).\n",
 		    val,
 		    opt,
 		    subopt ? ":" : "",
@@ -571,7 +571,7 @@ static int
 	if ((int8_t) val != val) {
 		fprintf(
 		    stderr,
-		    "Loss of precision when casting value '%ld' to an int8_t for option '%c%s%s' (valid range: %hhd to %hhd).\n",
+		    "Loss of precision when casting value '%ld' to an int8_t for option '%c%s%s' (valid range: %d to %d).\n",
 		    val,
 		    opt,
 		    subopt ? ":" : "",
