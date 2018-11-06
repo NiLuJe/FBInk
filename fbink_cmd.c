@@ -310,12 +310,15 @@ static int
 
 	// Make sure there isn't a loss of precision on this arch when casting explictly
 	if ((uint32_t) val != val) {
-		fprintf(stderr,
-			"Loss of precision when casting value '%lu' to an uint32_t for option '%c%s%s'.\n",
-			val,
-			opt,
-			subopt ? ":" : "",
-			subopt ? subopt : "");
+		fprintf(
+		    stderr,
+		    "Loss of precision when casting value '%lu' to an uint32_t for option '%c%s%s' (valid range: %u to %u).\n",
+		    val,
+		    opt,
+		    subopt ? ":" : "",
+		    subopt ? subopt : "",
+		    0U,
+		    UINT32_MAX);
 		return ERRCODE(EINVAL);
 	}
 
@@ -378,12 +381,15 @@ static int
 
 	// Make sure there isn't a loss of precision on this arch when casting explictly
 	if ((unsigned short int) val != val) {
-		fprintf(stderr,
-			"Loss of precision when casting value '%lu' to an unsigned short int for option '%c%s%s'.\n",
-			val,
-			opt,
-			subopt ? ":" : "",
-			subopt ? subopt : "");
+		fprintf(
+		    stderr,
+		    "Loss of precision when casting value '%lu' to an unsigned short int for option '%c%s%s' (valid range: %u to %hu).\n",
+		    val,
+		    opt,
+		    subopt ? ":" : "",
+		    subopt ? subopt : "",
+		    0U,
+		    UINT16_MAX);
 		return ERRCODE(EINVAL);
 	}
 
@@ -445,12 +451,15 @@ static int
 
 	// Make sure there isn't a loss of precision on this arch when casting explictly
 	if ((uint8_t) val != val) {
-		fprintf(stderr,
-			"Loss of precision when casting value '%lu' to an uint8_t for option '%c%s%s'.\n",
-			val,
-			opt,
-			subopt ? ":" : "",
-			subopt ? subopt : "");
+		fprintf(
+		    stderr,
+		    "Loss of precision when casting value '%lu' to an uint8_t for option '%c%s%s' (valid range: %u to %hhu).\n",
+		    val,
+		    opt,
+		    subopt ? ":" : "",
+		    subopt ? subopt : "",
+		    0U,
+		    UINT8_MAX);
 		return ERRCODE(EINVAL);
 	}
 
@@ -501,12 +510,15 @@ static int
 
 	// Make sure there isn't a loss of precision on this arch when casting explictly
 	if ((short int) val != val) {
-		fprintf(stderr,
-			"Loss of precision when casting value '%ld' to a short int for option '%c%s%s'.\n",
-			val,
-			opt,
-			subopt ? ":" : "",
-			subopt ? subopt : "");
+		fprintf(
+		    stderr,
+		    "Loss of precision when casting value '%ld' to a short int for option '%c%s%s' (valid range: %hd to %hd).\n",
+		    val,
+		    opt,
+		    subopt ? ":" : "",
+		    subopt ? subopt : "",
+		    INT16_MIN,
+		    INT16_MAX);
 		return ERRCODE(EINVAL);
 	}
 
@@ -557,12 +569,15 @@ static int
 
 	// Make sure there isn't a loss of precision on this arch when casting explictly
 	if ((int8_t) val != val) {
-		fprintf(stderr,
-			"Loss of precision when casting value '%ld' to an int8_t for option '%c%s%s'.\n",
-			val,
-			opt,
-			subopt ? ":" : "",
-			subopt ? subopt : "");
+		fprintf(
+		    stderr,
+		    "Loss of precision when casting value '%ld' to an int8_t for option '%c%s%s' (valid range: %hhd to %hhd).\n",
+		    val,
+		    opt,
+		    subopt ? ":" : "",
+		    subopt ? subopt : "",
+		    INT8_MIN,
+		    INT8_MAX);
 		return ERRCODE(EINVAL);
 	}
 
