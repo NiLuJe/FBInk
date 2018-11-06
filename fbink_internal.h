@@ -193,15 +193,15 @@
 //     & https://dustri.org/b/min-and-max-macro-considered-harmful.html
 #define MIN(X, Y)                                                                                                        \
 	({                                                                                                               \
-		__typeof__(X) x_ = (X);                                                                                  \
-		__typeof__(Y) y_ = (Y);                                                                                  \
+		__auto_type x_ = (X);                                                                                    \
+		__auto_type y_ = (Y);                                                                                    \
 		(x_ < y_) ? x_ : y_;                                                                                     \
 	})
 
 #define MAX(X, Y)                                                                                                        \
 	({                                                                                                               \
-		__typeof__(X) x__ = (X);                                                                                 \
-		__typeof__(Y) y__ = (Y);                                                                                 \
+		__auto_type x__ = (X);                                                                                   \
+		__auto_type y__ = (Y);                                                                                   \
 		(x__ > y__) ? x__ : y__;                                                                                 \
 	})
 
