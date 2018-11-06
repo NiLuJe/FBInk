@@ -295,8 +295,8 @@ FBINK_API int fbink_print_ot(int fbfd, const char* string, const FBInkOTConfig* 
 // Brings printf formatting to fbink_print and fbink_print_ot ;).
 // fbfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
-// cfg:			Pointer to an FBInkOTConfig struct.
-// fbCfg:		Optional pointer to an FBInkConfig struct.
+// cfg:			Optional Pointer to an FBInkOTConfig struct.
+// fbCfg:		Pointer to an FBInkConfig struct.
 // NOTE: If cfg is NULL, will call fbink_print, otherwise, fbink_print_ot!
 FBINK_API int fbink_printf(int fbfd, const FBInkOTConfig* cfg, const FBInkConfig* fbCfg, const char* fmt, ...)
     __attribute__((format(printf, 4, 5)));
