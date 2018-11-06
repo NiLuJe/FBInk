@@ -456,7 +456,7 @@ static int
 	if ((__typeof__(*result)) val != val) {
 		fprintf(
 		    stderr,
-		    "Loss of precision when casting value '%lu' to a %s for option '%c%s%s' (valid range: %u to %d).\n",
+		    "Loss of precision when casting value '%lu' to a %s for option '%c%s%s' (valid range: %d to %d).\n",
 		    val,
 		    TYPENAME(*result),
 		    opt,

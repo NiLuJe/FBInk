@@ -64,11 +64,11 @@ static int do_infinite_progress_bar(int, const FBInkConfig*);
 #define TYPEMIN(x)                                                                                                       \
 	_Generic((x), _Bool : 0, char                                                                                    \
 		 : CHAR_MIN, signed char                                                                                 \
-		 : SCHAR_MIN, unsigned char : 0U, short int                                                              \
-		 : SHRT_MIN, unsigned short int : 0U, int                                                                \
-		 : INT_MIN, unsigned int : 0U, long int                                                                  \
-		 : LONG_MIN, unsigned long int : 0U, long long int                                                       \
-		 : LLONG_MIN, unsigned long long int : 0U, float                                                         \
+		 : SCHAR_MIN, unsigned char : 0, short int                                                               \
+		 : SHRT_MIN, unsigned short int : 0, int                                                                 \
+		 : INT_MIN, unsigned int : 0, long int                                                                   \
+		 : LONG_MIN, unsigned long int : 0, long long int                                                        \
+		 : LLONG_MIN, unsigned long long int : 0, float                                                          \
 		 : -HUGE_VALF, double                                                                                    \
 		 : -HUGE_VAL, long double                                                                                \
 		 : -HUGE_VALL, default                                                                                   \
