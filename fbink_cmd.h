@@ -39,6 +39,29 @@ static void show_helpmsg(void);
 
 static int do_infinite_progress_bar(int, const FBInkConfig*);
 
+// Sprinkle a bit of C11 in there...
+// c.f., http://www.robertgamble.net/2012/01/c11-generic-selections.html
+#define TYPENAME(x)                                                                                                      \
+	_Generic((x), _Bool: "_Bool", \
+    char: "char", \
+    signed char: "signed char", \
+    unsigned char: "unsigned char", \
+    short int: "short int", \
+    unsigned short int: "unsigned short int", \
+    int: "int", \
+    unsigned int: "unsigned int", \
+    long int: "long int", \
+    unsigned long int: "unsigned long int", \
+    long long int: "long long int", \
+    unsigned long long int: "unsigned long long int", \
+    float: "float", \
+    double: "double", \
+    long double: "long double", \
+    char *: "pointer to char", \
+    void *: "pointer to void", \
+    int *: "pointer to int", \
+    default: "other")
+
 static int strtoul_u(int, const char*, const char*, uint32_t*);
 static int strtoul_hu(int, const char*, const char*, unsigned short int*);
 static int strtoul_hhu(int, const char*, const char*, uint8_t*);

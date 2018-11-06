@@ -404,11 +404,12 @@ static int
 	// NOTE: We want to *reject* negative values (which strtoul does not)!
 	if (strchr(str, '-')) {
 		fprintf(stderr,
-			"Assigned a negative value (%s) to an option (%c%s%s) expecting an uint8_t.\n",
+			"Assigned a negative value (%s) to an option (%c%s%s) expecting a %s.\n",
 			str,
 			opt,
 			subopt ? ":" : "",
-			subopt ? subopt : "");
+			subopt ? subopt : "",
+			TYPENAME(*result));
 		return ERRCODE(EINVAL);
 	}
 
@@ -426,11 +427,12 @@ static int
 
 	if (endptr == str) {
 		fprintf(stderr,
-			"No digits were found in value '%s' assigned to an option (%c%s%s) expecting an uint8_t.\n",
+			"No digits were found in value '%s' assigned to an option (%c%s%s) expecting a %s.\n",
 			str,
 			opt,
 			subopt ? ":" : "",
-			subopt ? subopt : "");
+			subopt ? subopt : "",
+			TYPENAME(*result));
 		return ERRCODE(EINVAL);
 	}
 
@@ -439,22 +441,24 @@ static int
 	if (*endptr != '\0') {
 		fprintf(
 		    stderr,
-		    "Found trailing characters (%s) behind value '%lu' assigned from string '%s' to an option (%c%s%s) expecting an uint8_t.\n",
+		    "Found trailing characters (%s) behind value '%lu' assigned from string '%s' to an option (%c%s%s) expecting an %s.\n",
 		    endptr,
 		    val,
 		    str,
 		    opt,
 		    subopt ? ":" : "",
-		    subopt ? subopt : "");
+		    subopt ? subopt : "",
+		    TYPENAME(*result));
 		return ERRCODE(EINVAL);
 	}
 
 	// Make sure there isn't a loss of precision on this arch when casting explictly
-	if ((uint8_t) val != val) {
+	if ((__typeof__(*result)) val != val) {
 		fprintf(
 		    stderr,
-		    "Loss of precision when casting value '%lu' to an uint8_t for option '%c%s%s' (valid range: %u to %d).\n",
+		    "Loss of precision when casting value '%lu' to a %s for option '%c%s%s' (valid range: %u to %d).\n",
 		    val,
+		    TYPENAME(*result),
 		    opt,
 		    subopt ? ":" : "",
 		    subopt ? subopt : "",
@@ -463,7 +467,7 @@ static int
 		return ERRCODE(EINVAL);
 	}
 
-	*result = (uint8_t) val;
+	*result = (__typeof__(*result)) val;
 	return EXIT_SUCCESS;
 }
 
