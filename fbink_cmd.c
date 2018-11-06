@@ -139,10 +139,9 @@ static void
 	    "\tfbink -t regular=/mnt/onboard/fonts/NotoSans-Regular.ttf,bold=/mnt/onboard/fonts/NotoSans-Bold.ttf,size=24,top=100,bottom=500,left=25,right=50,format \"Hello **world**!\"\n"
 	    "\t\tWill use NotoSans to print 'Hello world!' at 24pt in a display area starting from 100px down the top of the screen to 500px before the bottom of the screen,\n"
 #	endif
-
 	    "\t\tfrom 25px of the left edge of the screen until 50px before the right edge.\n"
 	    "\t\tHonoring the MarkDown syntax, 'Hello' will be printed with the Regular font style, while 'world' will use the Bold font style.\n"
-	    "\t\tNOTE: You will NOT be able to use obfuscated or encrypted fonts. Trying to do so will only lead to a crash!\n"
+	    "\t\tNOTE: You will NOT be able to use obfuscated or encrypted fonts.\n"
 #	ifndef FBINK_FOR_LINUX
 #		ifndef FBINK_FOR_KINDLE
 #			ifndef FBINK_FOR_CERVANTES
