@@ -52,9 +52,7 @@ static int do_infinite_progress_bar(int, const FBInkConfig*);
 		 : "int", unsigned int                                                                                   \
 		 : "unsigned int", long int                                                                              \
 		 : "long int", unsigned long int                                                                         \
-		 : "unsigned long int", long long int                                                                    \
-		 : "long long int", unsigned long long int                                                               \
-		 : "unsigned long long int", default                                                                     \
+		 : "unsigned long int", default                                                                          \
 		 : "other")
 
 #define TYPEMIN(x)                                                                                                       \
@@ -63,8 +61,7 @@ static int do_infinite_progress_bar(int, const FBInkConfig*);
 		 : SCHAR_MIN, unsigned char : 0U, short int                                                              \
 		 : SHRT_MIN, unsigned short int : 0U, int                                                                \
 		 : INT_MIN, unsigned int : 0U, long int                                                                  \
-		 : LONG_MIN, unsigned long int : 0U, long long int                                                       \
-		 : LLONG_MIN, unsigned long long int : 0U, default                                                       \
+		 : LONG_MIN, unsigned long int : 0U, default                                                             \
 		 : -42)
 
 #define TYPEMAX(x)                                                                                                       \
@@ -77,9 +74,7 @@ static int do_infinite_progress_bar(int, const FBInkConfig*);
 		 : INT_MAX, unsigned int                                                                                 \
 		 : UINT_MAX, long int                                                                                    \
 		 : LONG_MAX, unsigned long int                                                                           \
-		 : ULONG_MAX, long long int                                                                              \
-		 : LLONG_MAX, unsigned long long int                                                                     \
-		 : ULLONG_MAX, default : 42)
+		 : ULONG_MAX, default : 42)
 
 // And now we can implement generic, checked strtoul/strtol macros!
 #define strtoul_chk(opt, subopt, str, result)                                                                                                       \
@@ -139,14 +134,14 @@ static int do_infinite_progress_bar(int, const FBInkConfig*);
 		if ((__typeof__(*result)) val != val) {                                                                                             \
 			fprintf(                                                                                                                    \
 			    stderr,                                                                                                                 \
-			    "Loss of precision when casting value '%lu' to an %s for option '%c%s%s' (valid range: %u to %llu).\n",                 \
+			    "Loss of precision when casting value '%lu' to an %s for option '%c%s%s' (valid range: %u to %lu).\n",                  \
 			    val,                                                                                                                    \
 			    TYPENAME(*result),                                                                                                      \
 			    opt,                                                                                                                    \
 			    subopt ? ":" : "",                                                                                                      \
 			    subopt ? subopt : "",                                                                                                   \
 			    (unsigned int) TYPEMIN(*result),                                                                                        \
-			    (unsigned long long int) TYPEMAX(*result));                                                                             \
+			    (unsigned long int) TYPEMAX(*result));                                                                                  \
 			return ERRCODE(EINVAL);                                                                                                     \
 		}                                                                                                                                   \
                                                                                                                                                     \
@@ -199,14 +194,14 @@ static int do_infinite_progress_bar(int, const FBInkConfig*);
 		if ((__typeof__(*result)) val != val) {                                                                                            \
 			fprintf(                                                                                                                   \
 			    stderr,                                                                                                                \
-			    "Loss of precision when casting value '%ld' to a %s for option '%c%s%s' (valid range: %lld to %lld).\n",               \
+			    "Loss of precision when casting value '%ld' to a %s for option '%c%s%s' (valid range: %ld to %ld).\n",                 \
 			    val,                                                                                                                   \
 			    TYPENAME(*result),                                                                                                     \
 			    opt,                                                                                                                   \
 			    subopt ? ":" : "",                                                                                                     \
 			    subopt ? subopt : "",                                                                                                  \
-			    (long long int) TYPEMIN(*result),                                                                                      \
-			    (long long int) TYPEMAX(*result));                                                                                     \
+			    (long int) TYPEMIN(*result),                                                                                           \
+			    (long int) TYPEMAX(*result));                                                                                          \
 			return ERRCODE(EINVAL);                                                                                                    \
 		}                                                                                                                                  \
                                                                                                                                                    \
