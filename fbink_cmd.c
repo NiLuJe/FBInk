@@ -462,8 +462,8 @@ static int
 		    opt,
 		    subopt ? ":" : "",
 		    subopt ? subopt : "",
-		    0U,
-		    UINT8_MAX);
+		    TYPEMIN(*result),
+		    TYPEMAX(*result));
 		return ERRCODE(EINVAL);
 	}
 
