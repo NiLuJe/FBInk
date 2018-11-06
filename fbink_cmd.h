@@ -91,6 +91,140 @@ static int do_infinite_progress_bar(int, const FBInkConfig*);
 		 : HUGE_VAL, long double                                                                                 \
 		 : HUGE_VALL, default : 42)
 
+// And now we can implement generic, checked strtoul/strtol macros!
+#define strtoul_chk(opt, subopt, str, result)                                                                                                       \
+	({                                                                                                                                          \
+		/* NOTE: We want to *reject* negative values (which strtoul does not)! */                                                           \
+		if (strchr(str, '-')) {                                                                                                             \
+			fprintf(stderr,                                                                                                             \
+				"Assigned a negative value (%s) to an option (%c%s%s) expecting a %s.\n",                                           \
+				str,                                                                                                                \
+				opt,                                                                                                                \
+				subopt ? ":" : "",                                                                                                  \
+				subopt ? subopt : "",                                                                                               \
+				TYPENAME(*result));                                                                                                 \
+			return ERRCODE(EINVAL);                                                                                                     \
+		}                                                                                                                                   \
+                                                                                                                                                    \
+		/* Now that we know it's positive, we can go on with strtoul... */                                                                  \
+		char*             endptr;                                                                                                           \
+		unsigned long int val;                                                                                                              \
+                                                                                                                                                    \
+		errno = 0; /* To distinguish success/failure after call */                                                                          \
+		val   = strtoul(str, &endptr, 10);                                                                                                  \
+                                                                                                                                                    \
+		if ((errno == ERANGE && val == ULONG_MAX) || (errno != 0 && val == 0)) {                                                            \
+			perror("[FBInk] strtoul");                                                                                                  \
+			return ERRCODE(EINVAL);                                                                                                     \
+		}                                                                                                                                   \
+                                                                                                                                                    \
+		if (endptr == str) {                                                                                                                \
+			fprintf(stderr,                                                                                                             \
+				"No digits were found in value '%s' assigned to an option (%c%s%s) expecting a %s.\n",                              \
+				str,                                                                                                                \
+				opt,                                                                                                                \
+				subopt ? ":" : "",                                                                                                  \
+				subopt ? subopt : "",                                                                                               \
+				TYPENAME(*result));                                                                                                 \
+			return ERRCODE(EINVAL);                                                                                                     \
+		}                                                                                                                                   \
+                                                                                                                                                    \
+		/* If we got here, strtoul() successfully parsed at least part of a number. */                                                      \
+		/* But we do want to enforce the fact that the input really was *only* an integer value. */                                         \
+		if (*endptr != '\0') {                                                                                                              \
+			fprintf(                                                                                                                    \
+			    stderr,                                                                                                                 \
+			    "Found trailing characters (%s) behind value '%lu' assigned from string '%s' to an option (%c%s%s) expecting an %s.\n", \
+			    endptr,                                                                                                                 \
+			    val,                                                                                                                    \
+			    str,                                                                                                                    \
+			    opt,                                                                                                                    \
+			    subopt ? ":" : "",                                                                                                      \
+			    subopt ? subopt : "",                                                                                                   \
+			    TYPENAME(*result));                                                                                                     \
+			return ERRCODE(EINVAL);                                                                                                     \
+		}                                                                                                                                   \
+                                                                                                                                                    \
+		/* Make sure there isn't a loss of precision on this arch when casting explictly */                                                 \
+		if ((__typeof__(*result)) val != val) {                                                                                             \
+			fprintf(                                                                                                                    \
+			    stderr,                                                                                                                 \
+			    "Loss of precision when casting value '%lu' to a %s for option '%c%s%s' (valid range: %d to %d).\n",                    \
+			    val,                                                                                                                    \
+			    TYPENAME(*result),                                                                                                      \
+			    opt,                                                                                                                    \
+			    subopt ? ":" : "",                                                                                                      \
+			    subopt ? subopt : "",                                                                                                   \
+			    TYPEMIN(*result),                                                                                                       \
+			    TYPEMAX(*result));                                                                                                      \
+			return ERRCODE(EINVAL);                                                                                                     \
+		}                                                                                                                                   \
+                                                                                                                                                    \
+		*result = (__typeof__(*result)) val;                                                                                                \
+		return EXIT_SUCCESS;                                                                                                                \
+	})
+
+#define strtol_chk(opt, subopt, str, result)                                                                                                        \
+	({                                                                                                                                          \
+		/* Go on with strtol... */                                                                                                          \
+		char*    endptr;                                                                                                                    \
+		long int val;                                                                                                                       \
+                                                                                                                                                    \
+		errno = 0; /* To distinguish success/failure after call */                                                                          \
+		val   = strtol(str, &endptr, 10);                                                                                                   \
+                                                                                                                                                    \
+		if ((errno == ERANGE && (val == LONG_MAX || val == LONG_MIN)) || (errno != 0 && val == 0)) {                                        \
+			perror("[FBInk] strtol");                                                                                                   \
+			return ERRCODE(EINVAL);                                                                                                     \
+		}                                                                                                                                   \
+                                                                                                                                                    \
+		if (endptr == str) {                                                                                                                \
+			fprintf(stderr,                                                                                                             \
+				"No digits were found in value '%s' assigned to an option (%c%s%s) expecting a %s.\n",                              \
+				str,                                                                                                                \
+				opt,                                                                                                                \
+				subopt ? ":" : "",                                                                                                  \
+				subopt ? subopt : "",                                                                                               \
+				TYPENAME(*result));                                                                                                 \
+			return ERRCODE(EINVAL);                                                                                                     \
+		}                                                                                                                                   \
+                                                                                                                                                    \
+		/* If we got here, strtol() successfully parsed at least part of a number. */                                                       \
+		/* But we do want to enforce the fact that the input really was *only* an integer value. */                                         \
+		if (*endptr != '\0') {                                                                                                              \
+			fprintf(                                                                                                                    \
+			    stderr,                                                                                                                 \
+			    "Found trailing characters (%s) behind value '%lu' assigned from string '%s' to an option (%c%s%s) expecting an %s.\n", \
+			    endptr,                                                                                                                 \
+			    val,                                                                                                                    \
+			    str,                                                                                                                    \
+			    opt,                                                                                                                    \
+			    subopt ? ":" : "",                                                                                                      \
+			    subopt ? subopt : "",                                                                                                   \
+			    TYPENAME(*result));                                                                                                     \
+			return ERRCODE(EINVAL);                                                                                                     \
+		}                                                                                                                                   \
+                                                                                                                                                    \
+		/* Make sure there isn't a loss of precision on this arch when casting explictly */                                                 \
+		if ((__typeof__(*result)) val != val) {                                                                                             \
+			fprintf(                                                                                                                    \
+			    stderr,                                                                                                                 \
+			    "Loss of precision when casting value '%lu' to a %s for option '%c%s%s' (valid range: %d to %d).\n",                    \
+			    val,                                                                                                                    \
+			    TYPENAME(*result),                                                                                                      \
+			    opt,                                                                                                                    \
+			    subopt ? ":" : "",                                                                                                      \
+			    subopt ? subopt : "",                                                                                                   \
+			    TYPEMIN(*result),                                                                                                       \
+			    TYPEMAX(*result));                                                                                                      \
+			return ERRCODE(EINVAL);                                                                                                     \
+		}                                                                                                                                   \
+                                                                                                                                                    \
+		*result = (__typeof__(*result)) val;                                                                                                \
+		return EXIT_SUCCESS;                                                                                                                \
+	})
+
+// And we'll use those through these...
 static int strtoul_u(int, const char*, const char*, uint32_t*);
 static int strtoul_hu(int, const char*, const char*, unsigned short int*);
 static int strtoul_hhu(int, const char*, const char*, uint8_t*);

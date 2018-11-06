@@ -260,333 +260,35 @@ static int
 static int
     strtoul_u(int opt, const char* subopt, const char* str, uint32_t* result)
 {
-	// NOTE: We want to *reject* negative values (which strtoul does not)!
-	if (strchr(str, '-')) {
-		fprintf(stderr,
-			"Assigned a negative value (%s) to an option (%c%s%s) expecting an uint32_t.\n",
-			str,
-			opt,
-			subopt ? ":" : "",
-			subopt ? subopt : "");
-		return ERRCODE(EINVAL);
-	}
-
-	// Now that we know it's positive, we can go on with strtoul...
-	char*             endptr;
-	unsigned long int val;
-
-	errno = 0;    // To distinguish success/failure after call
-	val   = strtoul(str, &endptr, 10);
-
-	if ((errno == ERANGE && val == ULONG_MAX) || (errno != 0 && val == 0)) {
-		perror("[FBInk] strtoul");
-		return ERRCODE(EINVAL);
-	}
-
-	if (endptr == str) {
-		fprintf(stderr,
-			"No digits were found in value '%s' assigned to an option (%c%s%s) expecting an uint32_t.\n",
-			str,
-			opt,
-			subopt ? ":" : "",
-			subopt ? subopt : "");
-		return ERRCODE(EINVAL);
-	}
-
-	// If we got here, strtoul() successfully parsed at least part of a number.
-	// But we do want to enforce the fact that the input really was *only* an integer value.
-	if (*endptr != '\0') {
-		fprintf(
-		    stderr,
-		    "Found trailing characters (%s) behind value '%lu' assigned from string '%s' to an option (%c%s%s) expecting an uint32_t.\n",
-		    endptr,
-		    val,
-		    str,
-		    opt,
-		    subopt ? ":" : "",
-		    subopt ? subopt : "");
-		return ERRCODE(EINVAL);
-	}
-
-	// Make sure there isn't a loss of precision on this arch when casting explictly
-	if ((uint32_t) val != val) {
-		fprintf(
-		    stderr,
-		    "Loss of precision when casting value '%lu' to an uint32_t for option '%c%s%s' (valid range: %u to %u).\n",
-		    val,
-		    opt,
-		    subopt ? ":" : "",
-		    subopt ? subopt : "",
-		    0U,
-		    UINT32_MAX);
-		return ERRCODE(EINVAL);
-	}
-
-	*result = (uint32_t) val;
-	return EXIT_SUCCESS;
+	strtoul_chk(opt, subopt, str, result);
 }
 
 // Input validation via strtoul, for an unsigned short int
 static int
     strtoul_hu(int opt, const char* subopt, const char* str, unsigned short int* result)
 {
-	// NOTE: We want to *reject* negative values (which strtoul does not)!
-	if (strchr(str, '-')) {
-		fprintf(stderr,
-			"Assigned a negative value (%s) to an option (%c%s%s) expecting an unsigned short int.\n",
-			str,
-			opt,
-			subopt ? ":" : "",
-			subopt ? subopt : "");
-		return ERRCODE(EINVAL);
-	}
-
-	// Now that we know it's positive, we can go on with strtoul...
-	char*             endptr;
-	unsigned long int val;
-
-	errno = 0;    // To distinguish success/failure after call
-	val   = strtoul(str, &endptr, 10);
-
-	if ((errno == ERANGE && val == ULONG_MAX) || (errno != 0 && val == 0)) {
-		perror("[FBInk] strtoul");
-		return ERRCODE(EINVAL);
-	}
-
-	if (endptr == str) {
-		fprintf(
-		    stderr,
-		    "No digits were found in value '%s' assigned to an option (%c%s%s) expecting an unsigned short int.\n",
-		    str,
-		    opt,
-		    subopt ? ":" : "",
-		    subopt ? subopt : "");
-		return ERRCODE(EINVAL);
-	}
-
-	// If we got here, strtoul() successfully parsed at least part of a number.
-	// But we do want to enforce the fact that the input really was *only* an integer value.
-	if (*endptr != '\0') {
-		fprintf(
-		    stderr,
-		    "Found trailing characters (%s) behind value '%lu' assigned from string '%s' to an option (%c%s%s) expecting an unsigned short int.\n",
-		    endptr,
-		    val,
-		    str,
-		    opt,
-		    subopt ? ":" : "",
-		    subopt ? subopt : "");
-		return ERRCODE(EINVAL);
-	}
-
-	// Make sure there isn't a loss of precision on this arch when casting explictly
-	if ((unsigned short int) val != val) {
-		fprintf(
-		    stderr,
-		    "Loss of precision when casting value '%lu' to an unsigned short int for option '%c%s%s' (valid range: %u to %d).\n",
-		    val,
-		    opt,
-		    subopt ? ":" : "",
-		    subopt ? subopt : "",
-		    0U,
-		    UINT16_MAX);
-		return ERRCODE(EINVAL);
-	}
-
-	*result = (unsigned short int) val;
-	return EXIT_SUCCESS;
+	strtoul_chk(opt, subopt, str, result);
 }
 
 // Input validation via strtoul, for an uint8_t
 static int
     strtoul_hhu(int opt, const char* subopt, const char* str, uint8_t* result)
 {
-	// NOTE: We want to *reject* negative values (which strtoul does not)!
-	if (strchr(str, '-')) {
-		fprintf(stderr,
-			"Assigned a negative value (%s) to an option (%c%s%s) expecting a %s.\n",
-			str,
-			opt,
-			subopt ? ":" : "",
-			subopt ? subopt : "",
-			TYPENAME(*result));
-		return ERRCODE(EINVAL);
-	}
-
-	// Now that we know it's positive, we can go on with strtoul...
-	char*             endptr;
-	unsigned long int val;
-
-	errno = 0;    // To distinguish success/failure after call
-	val   = strtoul(str, &endptr, 10);
-
-	if ((errno == ERANGE && val == ULONG_MAX) || (errno != 0 && val == 0)) {
-		perror("[FBInk] strtoul");
-		return ERRCODE(EINVAL);
-	}
-
-	if (endptr == str) {
-		fprintf(stderr,
-			"No digits were found in value '%s' assigned to an option (%c%s%s) expecting a %s.\n",
-			str,
-			opt,
-			subopt ? ":" : "",
-			subopt ? subopt : "",
-			TYPENAME(*result));
-		return ERRCODE(EINVAL);
-	}
-
-	// If we got here, strtoul() successfully parsed at least part of a number.
-	// But we do want to enforce the fact that the input really was *only* an integer value.
-	if (*endptr != '\0') {
-		fprintf(
-		    stderr,
-		    "Found trailing characters (%s) behind value '%lu' assigned from string '%s' to an option (%c%s%s) expecting an %s.\n",
-		    endptr,
-		    val,
-		    str,
-		    opt,
-		    subopt ? ":" : "",
-		    subopt ? subopt : "",
-		    TYPENAME(*result));
-		return ERRCODE(EINVAL);
-	}
-
-	// Make sure there isn't a loss of precision on this arch when casting explictly
-	if ((__typeof__(*result)) val != val) {
-		fprintf(
-		    stderr,
-		    "Loss of precision when casting value '%lu' to a %s for option '%c%s%s' (valid range: %d to %d).\n",
-		    val,
-		    TYPENAME(*result),
-		    opt,
-		    subopt ? ":" : "",
-		    subopt ? subopt : "",
-		    TYPEMIN(*result),
-		    TYPEMAX(*result));
-		return ERRCODE(EINVAL);
-	}
-
-	*result = (__typeof__(*result)) val;
-	return EXIT_SUCCESS;
+	strtoul_chk(opt, subopt, str, result);
 }
 
 // Input validation via strtol, for a short int
 static int
     strtol_hi(int opt, const char* subopt, const char* str, short int* result)
 {
-	// Go on with strtol...
-	char*    endptr;
-	long int val;
-
-	errno = 0;    // To distinguish success/failure after call
-	val   = strtol(str, &endptr, 10);
-
-	if ((errno == ERANGE && (val == LONG_MAX || val == LONG_MIN)) || (errno != 0 && val == 0)) {
-		perror("[FBInk] strtol");
-		return ERRCODE(EINVAL);
-	}
-
-	if (endptr == str) {
-		fprintf(stderr,
-			"No digits were found in value '%s' assigned to an option (%c%s%s) expecting a short int.\n",
-			str,
-			opt,
-			subopt ? ":" : "",
-			subopt ? subopt : "");
-		return ERRCODE(EINVAL);
-	}
-
-	// If we got here, strtol() successfully parsed at least part of a number.
-	// But we do want to enforce the fact that the input really was *only* an integer value.
-	if (*endptr != '\0') {
-		fprintf(
-		    stderr,
-		    "Found trailing characters (%s) behind value '%ld' assigned from string '%s' to an option (%c%s%s) expecting a short int.\n",
-		    endptr,
-		    val,
-		    str,
-		    opt,
-		    subopt ? ":" : "",
-		    subopt ? subopt : "");
-		return ERRCODE(EINVAL);
-	}
-
-	// Make sure there isn't a loss of precision on this arch when casting explictly
-	if ((short int) val != val) {
-		fprintf(
-		    stderr,
-		    "Loss of precision when casting value '%ld' to a short int for option '%c%s%s' (valid range: %d to %d).\n",
-		    val,
-		    opt,
-		    subopt ? ":" : "",
-		    subopt ? subopt : "",
-		    INT16_MIN,
-		    INT16_MAX);
-		return ERRCODE(EINVAL);
-	}
-
-	*result = (short int) val;
-	return EXIT_SUCCESS;
+	strtol_chk(opt, subopt, str, result);
 }
 
 // Input validation via strtol, for an int8_t
 static int
     strtol_hhi(int opt, const char* subopt, const char* str, int8_t* result)
 {
-	// Go on with strtol...
-	char*    endptr;
-	long int val;
-
-	errno = 0;    // To distinguish success/failure after call
-	val   = strtol(str, &endptr, 10);
-
-	if ((errno == ERANGE && (val == LONG_MAX || val == LONG_MIN)) || (errno != 0 && val == 0)) {
-		perror("[FBInk] strtol");
-		return ERRCODE(EINVAL);
-	}
-
-	if (endptr == str) {
-		fprintf(stderr,
-			"No digits were found in value '%s' assigned to an option (%c%s%s) expecting an int8_t.\n",
-			str,
-			opt,
-			subopt ? ":" : "",
-			subopt ? subopt : "");
-		return ERRCODE(EINVAL);
-	}
-
-	// If we got here, strtol() successfully parsed at least part of a number.
-	// But we do want to enforce the fact that the input really was *only* an integer value.
-	if (*endptr != '\0') {
-		fprintf(
-		    stderr,
-		    "Found trailing characters (%s) behind value '%ld' assigned from string '%s' to an option (%c%s%s) expecting an int8_t.\n",
-		    endptr,
-		    val,
-		    str,
-		    opt,
-		    subopt ? ":" : "",
-		    subopt ? subopt : "");
-		return ERRCODE(EINVAL);
-	}
-
-	// Make sure there isn't a loss of precision on this arch when casting explictly
-	if ((int8_t) val != val) {
-		fprintf(
-		    stderr,
-		    "Loss of precision when casting value '%ld' to an int8_t for option '%c%s%s' (valid range: %d to %d).\n",
-		    val,
-		    opt,
-		    subopt ? ":" : "",
-		    subopt ? subopt : "",
-		    INT8_MIN,
-		    INT8_MAX);
-		return ERRCODE(EINVAL);
-	}
-
-	*result = (int8_t) val;
-	return EXIT_SUCCESS;
+	strtol_chk(opt, subopt, str, result);
 }
 
 // Application entry point
