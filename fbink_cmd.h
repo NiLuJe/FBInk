@@ -26,7 +26,6 @@
 #include <errno.h>
 #include <getopt.h>
 #include <limits.h>
-#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
@@ -55,10 +54,7 @@ static int do_infinite_progress_bar(int, const FBInkConfig*);
 		 : "long int", unsigned long int                                                                         \
 		 : "unsigned long int", long long int                                                                    \
 		 : "long long int", unsigned long long int                                                               \
-		 : "unsigned long long int", float                                                                       \
-		 : "float", double                                                                                       \
-		 : "double", long double                                                                                 \
-		 : "long double", default                                                                                \
+		 : "unsigned long long int", default                                                                     \
 		 : "other")
 
 #define TYPEMIN(x)                                                                                                       \
@@ -68,14 +64,11 @@ static int do_infinite_progress_bar(int, const FBInkConfig*);
 		 : SHRT_MIN, unsigned short int : 0U, int                                                                \
 		 : INT_MIN, unsigned int : 0U, long int                                                                  \
 		 : LONG_MIN, unsigned long int : 0U, long long int                                                       \
-		 : LLONG_MIN, unsigned long long int : 0U, float                                                         \
-		 : -HUGE_VALF, double                                                                                    \
-		 : -HUGE_VAL, long double                                                                                \
-		 : -HUGE_VALL, default                                                                                   \
+		 : LLONG_MIN, unsigned long long int : 0U, default                                                       \
 		 : -42)
 
 #define TYPEMAX(x)                                                                                                       \
-	_Generic((x), _Bool : 0, char                                                                                    \
+	_Generic((x), _Bool : 1, char                                                                                    \
 		 : CHAR_MAX, signed char                                                                                 \
 		 : SCHAR_MAX, unsigned char                                                                              \
 		 : UCHAR_MAX, short int                                                                                  \
@@ -86,10 +79,7 @@ static int do_infinite_progress_bar(int, const FBInkConfig*);
 		 : LONG_MAX, unsigned long int                                                                           \
 		 : ULONG_MAX, long long int                                                                              \
 		 : LLONG_MAX, unsigned long long int                                                                     \
-		 : ULLONG_MAX, float                                                                                     \
-		 : HUGE_VALF, double                                                                                     \
-		 : HUGE_VAL, long double                                                                                 \
-		 : HUGE_VALL, default : 42)
+		 : ULLONG_MAX, default : 42)
 
 // And now we can implement generic, checked strtoul/strtol macros!
 #define strtoul_chk(opt, subopt, str, result)                                                                                                       \
