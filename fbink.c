@@ -2744,73 +2744,6 @@ cleanup:
 	return rv;
 }
 
-// printf-like wrapper around fbink_print ;).
-int
-    fbink_printf(int fbfd, const FBInkConfig* fbink_config, const char* fmt, ...)
-{
-	// Assume success, until shit happens ;)
-	int rv = EXIT_SUCCESS;
-
-	// We'll need to store our formatted string somewhere...
-	// Instead of relying on a "large" initial allocation, devised to *probably* handle *most* things right,
-	// rely on vsnprintf itself to tell us how many bytes it needs ;).
-	// c.f., vsnprintf(3) && stdarg(3) && https://stackoverflow.com/q/10069597
-	// (especially as far as the va_start/va_end bracketing is concerned)
-	int     ret    = -1;
-	size_t  size   = 0;
-	char*   buffer = NULL;
-	va_list args;
-
-	// Initial vsnprintf run on a NULL pointer, just to determine the required buffer size
-	va_start(args, fmt);
-	ret = vsnprintf(buffer, size, fmt, args);
-	va_end(args);
-
-	// See if vsnprintf made a boo-boo
-	if (ret < 0) {
-		char  buf[256];
-		char* errstr = strerror_r(errno, buf, sizeof(buf));
-		WARN("initial vsnprintf: %s", errstr);
-		rv = ERRCODE(EXIT_FAILURE);
-		goto cleanup;
-	}
-
-	// We need enough space for NULL-termination (which we make 'wide' for u8 reasons) :).
-	size = (size_t)(ret + 4);
-	// NOTE: We use calloc to make sure it'll always be zero-initialized,
-	//       and the OS is smart enough to make it fast if we don't use the full space anyway (CoW zeroing).
-	buffer = calloc(size, 1U);
-	if (buffer == NULL) {
-		char  buf[256];
-		char* errstr = strerror_r(errno, buf, sizeof(buf));
-		WARN("calloc: %s", errstr);
-		rv = ERRCODE(EXIT_FAILURE);
-		goto cleanup;
-	}
-
-	// And now we can actually let vsnprintf do its job, for real ;).
-	va_start(args, fmt);
-	ret = vsnprintf(buffer, size, fmt, args);
-	va_end(args);
-
-	// See if vsnprintf made a boo-boo, one final time
-	if (ret < 0) {
-		char  buf[256];
-		char* errstr = strerror_r(errno, buf, sizeof(buf));
-		WARN("vsnprintf: %s", errstr);
-		rv = ERRCODE(EXIT_FAILURE);
-		goto cleanup;
-	}
-
-	// We've got a formatted buffer! Feed it to fbink_print
-	rv = fbink_print(fbfd, buffer, fbink_config);
-
-	// Cleanup
-cleanup:
-	free(buffer);
-	return rv;
-}
-
 #ifdef FBINK_WITH_OPENTYPE
 // An extremely rudimentry "markdown" parser. It would probably be wise to cook up something better at some point...
 // This is *italic* text.
@@ -2871,20 +2804,17 @@ static void
 }
 #endif    // FBINK_WITH_OPENTYPE
 
-// printf-like wrapper around fbink_print_ot ;).
+// printf-like wrapper around fbink_print & fbink_print_ot ;).
 int
-    fbink_printf_ot(int fbfd             UNUSED_BY_MINIMAL,
-		    const FBInkOTConfig* cfg UNUSED_BY_MINIMAL,
-		    const FBInkConfig* fbCfg UNUSED_BY_MINIMAL,
-		    const char* fmt UNUSED_BY_MINIMAL,
-		    ... UNUSED_BY_MINIMAL)
+    fbink_printf(int fbfd, const FBInkOTConfig* cfg, const FBInkConfig* fbCfg, const char* fmt, ...)
 {
-#ifdef FBINK_WITH_OPENTYPE
 	// Assume success, until shit happens ;)
 	int rv = EXIT_SUCCESS;
 
 	// We'll need to store our formatted string somewhere...
-	// Rely on vsnprintf itself to tell us how many bytes it needs ;).
+	// Rely on vsnprintf itself to tell us exactly how many bytes it needs ;).
+	// c.f., vsnprintf(3) && stdarg(3) && https://stackoverflow.com/q/10069597
+	// (especially as far as the va_start/va_end bracketing is concerned)
 	int     ret    = -1;
 	size_t  size   = 0;
 	char*   buffer = NULL;
@@ -2931,17 +2861,25 @@ int
 		goto cleanup;
 	}
 
-	// We've got a formatted buffer! Feed it to fbink_print_ot
-	rv = fbink_print_ot(fbfd, buffer, cfg, fbCfg);
+	// Okay, now that we've got a formatted buffer...
+	// Did we get a valid FBInkOTConfig pointer?
+	if (cfg) {
+#ifdef FBINK_WITH_OPENTYPE
+		// Then feed our formatted string to fbink_print_ot
+		rv = fbink_print_ot(fbfd, buffer, cfg, fbCfg);
+#else
+		WARN("OpenType support is disabled in this FBInk build");
+		rv = ERRCODE(ENOSYS);
+#endif
+	} else {
+		// Otherwise, feed it to fbink_print instead
+		rv = fbink_print(fbfd, buffer, fbCfg);
+	}
 
 	// Cleanup
 cleanup:
 	free(buffer);
 	return rv;
-#else
-	WARN("OpenType support is disabled in this FBInk build");
-	return ERRCODE(ENOSYS);
-#endif    // FBINK_WITH_OPENTYPE
 }
 
 int

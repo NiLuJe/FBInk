@@ -272,13 +272,6 @@ FBINK_API void fbink_get_state(const FBInkConfig* fbink_config, FBInkState* fbin
 // fbink_config:	pointer to an FBInkConfig struct
 FBINK_API int fbink_print(int fbfd, const char* string, const FBInkConfig* fbink_config);
 
-// Like fbink_print, but with printf formatting ;).
-// fbfd:		open file descriptor to the framebuffer character device,
-//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
-// fbink_config:	pointer to an FBInkConfig struct
-FBINK_API int fbink_printf(int fbfd, const FBInkConfig* fbink_config, const char* fmt, ...)
-    __attribute__((format(printf, 3, 4)));
-
 // Print a string using an OpenType font. Note the caller MUST init with fbink_init_ot() FIRST.
 // This function uses positive margins (in pixels) instead of rows/columns for positioning and setting the printable area.
 // Returns new top margin for use in subsequent calls, if the return value is positive.
@@ -299,12 +292,13 @@ FBINK_API int fbink_printf(int fbfd, const FBInkConfig* fbink_config, const char
 //       As such, it only makes sense in the context of a single, specific print call.
 FBINK_API int fbink_print_ot(int fbfd, const char* string, const FBInkOTConfig* cfg, const FBInkConfig* fbCfg);
 
-// Like fbink_print_ot, but with printf formatting ;).
+// Brings printf formatting to fbink_print and fbink_print_ot ;).
 // fbfd:		open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
-// cfg:			Pointer to a FBInkOTConfig struct.
-// fbCfg:		Optional pointer to a FBInkConfig struct.
-FBINK_API int fbink_printf_ot(int fbfd, const FBInkOTConfig* cfg, const FBInkConfig* fbCfg, const char* fmt, ...)
+// cfg:			Pointer to an FBInkOTConfig struct.
+// fbCfg:		Optional pointer to an FBInkConfig struct.
+// NOTE: If cfg is NULL, will call fbink_print, otherwise, fbink_print_ot!
+FBINK_API int fbink_printf(int fbfd, const FBInkOTConfig* cfg, const FBInkConfig* fbCfg, const char* fmt, ...)
     __attribute__((format(printf, 4, 5)));
 
 // A simple wrapper around the internal screen refresh handling, without requiring you to include einkfb/mxcfb headers
