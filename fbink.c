@@ -2748,29 +2748,65 @@ cleanup:
 int
     fbink_printf(int fbfd, const FBInkConfig* fbink_config, const char* fmt, ...)
 {
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
 	// We'll need to store our formatted string somewhere...
-	// NOTE: Fit a single page's worth of characters in it, as that's the best we can do anyway.
-	// NOTE: UTF-8 is at most 4 bytes per sequence, make sure we can fit a full page of UTF-8 (+1 'wide' NULL) :).
-	char* buffer = NULL;
+	// Instead of relying on a "large" initial allocation, devised to *probably* handle *most* things right,
+	// rely on vsnprintf itself to tell us how many bytes it needs ;).
+	// c.f., vsnprintf(3) && stdarg(3) && https://stackoverflow.com/q/10069597
+	// (especially as far as the va_start/va_end bracketing is concerned)
+	int     ret    = -1;
+	size_t  size   = 0;
+	char*   buffer = NULL;
+	va_list args;
+
+	// Initial vsnprintf run on a NULL pointer, just to determine the required buffer size
+	va_start(args, fmt);
+	ret = vsnprintf(buffer, size, fmt, args);
+	va_end(args);
+
+	// See if vsnprintf made a boo-boo
+	if (ret < 0) {
+		char  buf[256];
+		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		WARN("initial vsnprintf: %s", errstr);
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// We need enough space for NULL-termination (which we make 'wide' for u8 reasons) :).
+	size = (size_t)(ret + 4);
 	// NOTE: We use calloc to make sure it'll always be zero-initialized,
 	//       and the OS is smart enough to make it fast if we don't use the full space anyway (CoW zeroing).
-	buffer = calloc(((size_t)(MAXCOLS * MAXROWS) + 1U) * 4U, sizeof(*buffer));
+	buffer = calloc(size, 1U);
 	if (buffer == NULL) {
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
-		WARN("calloc (page): %s", errstr);
-		return ERRCODE(EXIT_FAILURE);
+		WARN("calloc: %s", errstr);
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
 	}
 
-	va_list args;
+	// And now we can actually let vsnprintf do its job, for real ;).
 	va_start(args, fmt);
-	// vsnprintf will ensure we'll always be NULL-terminated (but not NULL-backfilled, hence calloc!) ;).
-	vsnprintf(buffer, ((size_t)(MAXCOLS * MAXROWS) * 4U) + 1U, fmt, args);
+	ret = vsnprintf(buffer, size, fmt, args);
 	va_end(args);
 
-	int rv = fbink_print(fbfd, buffer, fbink_config);
+	// See if vsnprintf made a boo-boo, one final time
+	if (ret < 0) {
+		char  buf[256];
+		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		WARN("vsnprintf: %s", errstr);
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// We've got a formatted buffer! Feed it to fbink_print
+	rv = fbink_print(fbfd, buffer, fbink_config);
 
 	// Cleanup
+cleanup:
 	free(buffer);
 	return rv;
 }
