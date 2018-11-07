@@ -1169,7 +1169,9 @@ int
 cleanup:
 	free(image_file);
 
-	fbink_free_ot_fonts();
+	if (is_truetype) {
+		fbink_free_ot_fonts();
+	}
 	free(reg_ot_file);
 	free(bd_ot_file);
 	free(it_ot_file);
