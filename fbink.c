@@ -1704,7 +1704,7 @@ static int
 				//       >_<".
 				fxpRotateCoords = &rotate_coordinates_boot;
 				fxpRotateRegion = &rotate_region_boot;
-				ELOG("Enabled Kobo @ 16bpp boot rotation quirks (%ux%u -> %ux%u)",
+				ELOG("Enabled NTX @ 16bpp boot rotation quirks (%ux%u -> %ux%u)",
 				     vInfo.xres,
 				     vInfo.yres,
 				     screenWidth,
@@ -1712,7 +1712,7 @@ static int
 			} else {
 				fxpRotateCoords = &rotate_coordinates_pickel;
 				fxpRotateRegion = &rotate_region_pickel;
-				ELOG("Enabled Kobo @ 16bpp pickel rotation quirks (%ux%u -> %ux%u)",
+				ELOG("Enabled NTX @ 16bpp pickel rotation quirks (%ux%u -> %ux%u)",
 				     vInfo.xres,
 				     vInfo.yres,
 				     screenWidth,
@@ -1721,6 +1721,7 @@ static int
 		}
 	}
 
+	// NOTE: Well, granted, this next part is (hopefully) Kobo-specific ;).
 	// Handle the Kobo viewport trickery for the few devices with hidden rows of pixels...
 	// Things should generally not be broken-by-design on the horizontal axis...
 	viewWidth      = screenWidth;
