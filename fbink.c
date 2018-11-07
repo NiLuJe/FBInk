@@ -184,7 +184,7 @@ static void
 	unsigned short int ry = (unsigned short int) (screenWidth - coords->x - 1);
 
 // NOTE: This codepath is not production ready, it was just an experiment to wrap my head around framebuffer rotation...
-//       In particular, only CW has been actually confirmed to behave properly (to handle the isKobo16Landscape quirk),
+//       In particular, only CW has been actually confirmed to behave properly (to handle the isNTX16bLandscape quirk),
 //       and region rotation is NOT handled properly/at all.
 //       TL;DR: This is for documentation purposes only, never build w/ MATHS defined ;).
 #	ifdef FBINK_WITH_MATHS_ROTA
@@ -1647,7 +1647,7 @@ static int
 #ifndef FBINK_FOR_KINDLE
 	// NOTE: This applies both to Kobo & Cervantes!
 	// Make sure we default to no rotation shenanigans, to avoid issues on reinit...
-	deviceQuirks.isKobo16Landscape = false;
+	deviceQuirks.isNTX16bLandscape = false;
 	// NOTE: But in some very specific circumstances, that doesn't hold true...
 	//       In particular, Kobos boot with a framebuffer in Landscape orientation (i.e., xres > yres),
 	//       but a viewport in Portrait (the boot progress, as well as Nickel itself are presented in Portrait mode),
@@ -1684,7 +1684,7 @@ static int
 			// Correct screenWidth & screenHeight, so we do all our row/column arithmetics on the right values...
 			screenWidth                    = vInfo.yres;
 			screenHeight                   = vInfo.xres;
-			deviceQuirks.isKobo16Landscape = true;
+			deviceQuirks.isNTX16bLandscape = true;
 			// NOTE: Here be dragons!
 			//       I'm assuming that most devices follow the same pattern as far as rotation is concerned,
 			//       with a few exceptions hardcoded (c.f., identify_kobo in fbink_device_id.c).
@@ -3914,7 +3914,7 @@ bool
     fbink_is_fb_quirky(void)
 {
 	// NOTE: For now, that's easy enough, we only have one ;).
-	return deviceQuirks.isKobo16Landscape;
+	return deviceQuirks.isNTX16bLandscape;
 }
 
 // Reinitialize FBInk in case the framebuffer state has changed
@@ -3923,7 +3923,7 @@ int
 {
 #ifndef FBINK_FOR_KINDLE
 	// NOTE: Don't even try to open/close the fb if we don't have anything to do ;)
-	if (!deviceQuirks.isKobo16Landscape && !deviceQuirks.canRotate) {
+	if (!deviceQuirks.isNTX16bLandscape && !deviceQuirks.canRotate) {
 		return EXIT_SUCCESS;
 	}
 
@@ -3941,11 +3941,11 @@ int
 	//       c.f., https://www.mobileread.com/forums/showpost.php?p=3764776&postcount=229 for more details
 
 	// First step is checking if the device was in a 16bpp mode the last time we ran initialize_fbink...
-	if (deviceQuirks.isKobo16Landscape) {
+	if (deviceQuirks.isNTX16bLandscape) {
 		// Okay, so, store the previous bitdepth & rotation, and check if that changed...
 		uint32_t old_bpp  = vInfo.bits_per_pixel;
 		uint32_t old_rota = vInfo.rotate;
-		// NOTE: Given the fact that we're behind an isKobo16Landscape branch, old_bpp should *always* be 16...
+		// NOTE: Given the fact that we're behind an isNTX16bLandscape branch, old_bpp should *always* be 16...
 
 		// We evidently need to query the current state in order to do that...
 		if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {

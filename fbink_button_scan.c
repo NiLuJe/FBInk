@@ -329,7 +329,7 @@ int
 	// NOTE: RGB565 conversions are complex and potentially slightly lossy,
 	//       with slight rounding/truncation errors that can be different depending on how exactly the conversions were done.
 	//       This matches with what *we* do, hopefully that'll be close enough to what Nickel actually does...
-	if (deviceQuirks.isKobo16Landscape) {
+	if (deviceQuirks.isNTX16bLandscape) {
 		button_color.r = 0xDE;
 		button_color.g = 0xDB;
 		button_color.b = 0xDE;

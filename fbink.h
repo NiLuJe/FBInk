@@ -326,7 +326,7 @@ FBINK_API int fbink_refresh(int         fbfd,
 //       to allow them to call fbink_init again at specific points only (instead of enforcing a reinit on every print).
 //       This is of interest on a few devices, where trying to print based on a "stale" init state would fail,
 //       or produce unwanted results (f.g., rotation).
-// NOTE: Right now, this only checks for the isKobo16Landscape Device Quirk,
+// NOTE: Right now, this only checks for the isNTX16bLandscape Device Quirk,
 //       because that's the only one that is not permanent (i.e., hardware specific),
 //       but instead software specific (here, because of pickel).
 //       In practical terms, this means the Kobo's fb is in 16bpp mode, with its origin in the top-right corner (i.e., Landscape).

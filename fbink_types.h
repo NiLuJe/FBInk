@@ -39,7 +39,7 @@ typedef struct
 	bool               isKindlePearlScreen;
 	bool               isKindleOasis2;
 	bool               isKoboNonMT;
-	bool               isKobo16Landscape;
+	bool               isNTX16bLandscape;
 	bool               isKoboMk7;
 	int8_t             koboVertOffset;
 	uint8_t            ntxBootRota;
