@@ -25,7 +25,7 @@
 // NOTE: This is adapted from KindleTool,
 //       c.f., https://github.com/NiLuJe/KindleTool/blob/master/KindleTool/kindle_tool.h#L189
 static bool
-    is_kindle_device(uint32_t dev, FBInkDeviceQuirks* device_quirks)
+    is_kindle_device(uint32_t dev)
 {
 	switch (dev) {
 		case 0x01:    // K1
@@ -38,16 +38,16 @@ static bool
 		case 0x06:
 		case 0x0A:
 		case 0x0E:    // K4
-			device_quirks->isKindleLegacy = true;
+			deviceQuirks.isKindleLegacy = true;
 			return true;
 		case 0x0F:    // K5
 		case 0x11:
 		case 0x10:
 		case 0x12:
-			device_quirks->isKindlePearlScreen = true;
+			deviceQuirks.isKindlePearlScreen = true;
 			return true;
 		case 0x23:    // K4b
-			device_quirks->isKindleLegacy = true;
+			deviceQuirks.isKindleLegacy = true;
 			return true;
 		case 0x24:    // PW1
 		case 0x1B:
@@ -55,8 +55,8 @@ static bool
 		case 0x1D:
 		case 0x1F:
 		case 0x20:
-			device_quirks->isKindlePearlScreen = true;
-			device_quirks->screenDPI           = 212U;
+			deviceQuirks.isKindlePearlScreen = true;
+			deviceQuirks.screenDPI           = 212U;
 			return true;
 		case 0xD4:    // PW2
 		case 0x5A:
@@ -72,12 +72,12 @@ static bool
 		case 0x62:
 		case 0x61:
 		case 0x5F:
-			device_quirks->screenDPI = 212U;
+			deviceQuirks.screenDPI = 212U;
 			return true;
 		case 0xC6:    // KT2
 			return true;
 		case 0x13:    // KV
-			device_quirks->screenDPI = 300U;
+			deviceQuirks.screenDPI = 300U;
 			return true;
 		case 0x16:    // ??
 		case 0x21:
@@ -87,7 +87,7 @@ static bool
 		case 0x4F:
 		case 0x52:
 		case 0x53:
-			device_quirks->screenDPI = 300U;
+			deviceQuirks.screenDPI = 300U;
 			return true;
 		case 0x07:    // ??
 		case 0x0B:
@@ -102,7 +102,7 @@ static bool
 }
 
 static bool
-    is_kindle_device_new(uint32_t dev, FBInkDeviceQuirks* device_quirks)
+    is_kindle_device_new(uint32_t dev)
 {
 	switch (dev) {
 		case 0x201:    // PW3
@@ -119,7 +119,7 @@ static bool
 		case 0x270:
 		case 0x293:
 		case 0x294:
-			device_quirks->screenDPI = 300U;
+			deviceQuirks.screenDPI = 300U;
 			return true;
 		case 0x20C:    // KOA
 		case 0x20D:
@@ -127,7 +127,7 @@ static bool
 		case 0x21A:
 		case 0x21B:
 		case 0x21C:
-			device_quirks->screenDPI = 300U;
+			deviceQuirks.screenDPI = 300U;
 			return true;
 		case 0x1BC:    // KT3
 		case 0x269:
@@ -148,8 +148,8 @@ static bool
 		case 0x344:
 		case 0x347:
 		case 0x34A:
-			device_quirks->isKindleOasis2 = true;
-			device_quirks->screenDPI      = 300U;
+			deviceQuirks.isKindleOasis2 = true;
+			deviceQuirks.screenDPI      = 300U;
 			return true;
 		default:
 			return false;
@@ -186,7 +186,7 @@ static uint32_t
 // NOTE: This is adapted from KindleTool,
 //       c.f., https://github.com/NiLuJe/KindleTool/blob/master/KindleTool/create.c#L1915
 static void
-    identify_kindle(FBInkDeviceQuirks* device_quirks)
+    identify_kindle(void)
 {
 	FILE* fp = fopen("/proc/usid", "r" STDIO_CLOEXEC);
 	if (!fp) {
@@ -206,13 +206,13 @@ static void
 		// It's in hex, easy peasy.
 		uint32_t dev = (uint32_t) strtoul(device_code, NULL, 16);
 		// Check if it looks like the old device id scheme...
-		if (!is_kindle_device(dev, device_quirks)) {
+		if (!is_kindle_device(dev)) {
 			// ... try the new device ID scheme if it doesn't... (G09[0G1]NNNNNNNNNN)
 			snprintf(device_code, 3 + 1, "%.*s", 3, serial_no + 3);
 			// (these ones are encoded in a slightly custom base 32)
 			dev = from_base(device_code, 32);
 			// ... And if it's not either list, it's truly unknown.
-			if (!is_kindle_device_new(dev, device_quirks)) {
+			if (!is_kindle_device_new(dev)) {
 				WARN("Unidentified Kindle device %s (0x%03X)", device_code, dev);
 			}
 		}
@@ -222,7 +222,7 @@ static void
 // Read pcb id from NTX_HWCONFIG for BQ/Fnac devices, adapted from OKreader's kobo_hwconfig:
 // https://github.com/lgeek/okreader/blob/master/src/kobo_hwconfig/kobo_hwconfig.c
 static void
-    identify_cervantes(FBInkDeviceQuirks* device_quirks)
+    identify_cervantes(void)
 {
 	FILE* fp = fopen(HWCONFIG_DEVICE, "re");
 	if (!fp) {
@@ -257,15 +257,15 @@ static void
 		switch (config.pcb_id) {
 			case 22:    // BQ Cervantes Touch - Fnac Touch (2012-2013)
 			case 23:    // BQ Cervantes TouchLight - Fnac Touch Plus (2012-2013)
-				device_quirks->screenDPI = 167U;
+				deviceQuirks.screenDPI = 167U;
 				break;
 			case 33:    // BQ Cervantes 2013 - Fnac Touch Light (2013)
-				device_quirks->screenDPI = 212U;
+				deviceQuirks.screenDPI = 212U;
 				break;
 			case 51:    // BQ Cervantes 3 - Fnac Touch Light 2 (2016)
 			case 68:    // BQ Cervantes 4
-				device_quirks->isCervantesNew = true;
-				device_quirks->screenDPI      = 300U;
+				deviceQuirks.isCervantesNew = true;
+				deviceQuirks.screenDPI      = 300U;
 				break;
 			default:
 				WARN("Unidentified Cervantes device (%hhu)", config.pcb_id);
@@ -275,7 +275,7 @@ static void
 }
 #	else
 static void
-    set_kobo_quirks(unsigned short int kobo_id, FBInkDeviceQuirks* device_quirks)
+    set_kobo_quirks(unsigned short int kobo_id)
 {
 	// NOTE: Shaky assumption that almost everything follows the same rotation scheme, with:
 	//       Boot rotation is FB_ROTATE_UD, pickel is FB_ROTATE_UR, nickel is FB_ROTATE_CCW
@@ -283,75 +283,75 @@ static void
 	//       As usual, the H2O² is a mystery, the Rev 1 *may* follow this pattern too...
 	//       Or that might be the Rev 2 only, but that would make it diverge from other Mk7, which is weirder.
 	//       c.f., the relevant bit of fbink_init for more details...
-	device_quirks->koboBootRota = FB_ROTATE_UD;
+	deviceQuirks.koboBootRota = FB_ROTATE_UD;
 	// NOTE: Device code list pilfered from
 	//       https://github.com/geek1011/KoboStuff/blob/gh-pages/kobofirmware.js#L11
 	switch (kobo_id) {
 		case 310:    // Touch A/B (trilogy)
 		case 320:    // Touch C (trilogy)
-			device_quirks->isKoboNonMT = true;
+			deviceQuirks.isKoboNonMT = true;
 			break;
 		case 340:    // Mini (pixie)
-			device_quirks->isKoboNonMT = true;
-			device_quirks->screenDPI   = 200U;
+			deviceQuirks.isKoboNonMT = true;
+			deviceQuirks.screenDPI   = 200U;
 			break;
 		case 330:    // Glo (kraken)
-			device_quirks->isKoboNonMT = true;
-			device_quirks->screenDPI   = 212U;
+			deviceQuirks.isKoboNonMT = true;
+			deviceQuirks.screenDPI   = 212U;
 			break;
 		case 371:    // Glo HD (alyssum)
-			device_quirks->screenDPI = 300U;
+			deviceQuirks.screenDPI = 300U;
 			break;
 		case 372:    // Touch 2.0 (pika)
 			break;
 		case 360:    // Aura (phoenix)
 			// NOTE: The bottom 10 pixels *may* be blacked out by Nickel? (TBC!)
-			//device_quirks->koboVertOffset = -10;
-			device_quirks->screenDPI = 212U;
+			//deviceQuirks.koboVertOffset = -10;
+			deviceQuirks.screenDPI = 212U;
 			break;
 		case 350:    // Aura HD (dragon)
-			device_quirks->isKoboNonMT = true;
+			deviceQuirks.isKoboNonMT = true;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
-			device_quirks->koboBootRota = FB_ROTATE_UR;
-			device_quirks->screenDPI    = 265U;
+			deviceQuirks.koboBootRota = FB_ROTATE_UR;
+			deviceQuirks.screenDPI    = 265U;
 			break;
 		case 370:    // Aura H2O (dahlia)
 			// NOTE: The top 11 pixels are blacked out by Nickel (behind the bezel)
-			device_quirks->koboVertOffset = 11;
+			deviceQuirks.koboVertOffset = 11;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
-			device_quirks->koboBootRota = FB_ROTATE_UR;
-			device_quirks->screenDPI    = 265U;
+			deviceQuirks.koboBootRota = FB_ROTATE_UR;
+			deviceQuirks.screenDPI    = 265U;
 			break;
 		case 374:    // Aura H2O² (snow)
-			device_quirks->screenDPI = 265U;
+			deviceQuirks.screenDPI = 265U;
 			break;
 		case 378:    // Aura H2O² r2 (snow)
-			device_quirks->isKoboMk7 = true;
-			device_quirks->screenDPI = 265U;
+			deviceQuirks.isKoboMk7 = true;
+			deviceQuirks.screenDPI = 265U;
 			break;
 		case 373:    // Aura ONE (daylight)
 		case 381:    // Aura ONE LE (daylight)
-			device_quirks->screenDPI = 300U;
+			deviceQuirks.screenDPI = 300U;
 			break;
 		case 375:    // Aura SE (star)
-			device_quirks->screenDPI = 212U;
+			deviceQuirks.screenDPI = 212U;
 			break;
 		case 379:    // Aura SE r2 (star)
-			device_quirks->isKoboMk7 = true;
-			device_quirks->screenDPI = 212U;
+			deviceQuirks.isKoboMk7 = true;
+			deviceQuirks.screenDPI = 212U;
 			break;
 		case 376:    // Clara HD (nova)
-			device_quirks->isKoboMk7 = true;
-			device_quirks->screenDPI = 300U;
+			deviceQuirks.isKoboMk7 = true;
+			deviceQuirks.screenDPI = 300U;
 			break;
 		case 377:    // Forma (frost)
 		case 380:    // Forma (frost)
-			device_quirks->isKoboMk7 = true;
-			device_quirks->canRotate = true;
+			deviceQuirks.isKoboMk7 = true;
+			deviceQuirks.canRotate = true;
 			break;
 		case 0:
 			// Like kobo_config.sh, assume Trilogy as a fallback
-			device_quirks->isKoboNonMT = true;
+			deviceQuirks.isKoboNonMT = true;
 			/* FALLTHROUGH */
 		default:
 			WARN("Unidentified Kobo device code (%hu)", kobo_id);
@@ -362,7 +362,7 @@ static void
 // NOTE: This is lifted from FBGrab,
 //       c.f., http://trac.ak-team.com/trac/browser/niluje/Configs/trunk/Kindle/Misc/FBGrab/fbgrab.c#L808
 static void
-    identify_kobo(FBInkDeviceQuirks* device_quirks)
+    identify_kobo(void)
 {
 	// Get the model from Nickel's version tag file...
 	FILE* fp = fopen("/mnt/onboard/.kobo/version", "re");
@@ -380,7 +380,7 @@ static void
 			// final characters, so that's easy enough to extract without
 			// having to worry about the formatting...
 			kobo_id = (unsigned short int) strtoul(line + (nread - 3), NULL, 10);
-			set_kobo_quirks(kobo_id, device_quirks);
+			set_kobo_quirks(kobo_id);
 		}
 		free(line);
 		fclose(fp);
@@ -410,7 +410,7 @@ static void
 				WARN("Failed to read the NTX HWConfig entry on '%s'", HWCONFIG_DEVICE);
 				fclose(fp);
 				// NOTE: Make it clear we failed to identify the device...
-				set_kobo_quirks(0, device_quirks);
+				set_kobo_quirks(0);
 				return;
 			}
 
@@ -422,7 +422,7 @@ static void
 				     HWCONFIG_DEVICE);
 				fclose(fp);
 				// NOTE: Like rcS, assume it's an old Freescale Trilogy if we can't find an NTX HW tag
-				set_kobo_quirks(0, device_quirks);
+				set_kobo_quirks(0);
 				return;
 			}
 
@@ -433,7 +433,7 @@ static void
 				WARN("Error reading NTX HWConfig payload (unexpected length)");
 				fclose(fp);
 				// NOTE: Make it clear we failed to identify the device...
-				set_kobo_quirks(0, device_quirks);
+				set_kobo_quirks(0);
 				return;
 			}
 		}
@@ -481,20 +481,20 @@ static void
 			WARN("Empty NTX HWConfig payload?");
 		}
 		// And now we can do this, as accurately as if onboard were mounted ;).
-		set_kobo_quirks(kobo_id, device_quirks);
+		set_kobo_quirks(kobo_id);
 	}
 }
 #	endif    // FBINK_FOR_KINDLE
 
 static void
-    identify_device(FBInkDeviceQuirks* device_quirks)
+    identify_device(void)
 {
 #	if defined(FBINK_FOR_KINDLE)
-	identify_kindle(device_quirks);
+	identify_kindle();
 #	elif defined(FBINK_FOR_CERVANTES)
-	identify_cervantes(device_quirks);
+	identify_cervantes();
 #	else
-	identify_kobo(device_quirks);
+	identify_kobo();
 #	endif
 }
 #endif    // !FBINK_FOR_LINUX

@@ -69,12 +69,12 @@ typedef struct __attribute__((__packed__))
 
 #	if defined(FBINK_FOR_KINDLE)
 #		define KINDLE_SERIAL_NO_LENGTH 16
-static bool     is_kindle_device(uint32_t, FBInkDeviceQuirks*);
-static bool     is_kindle_device_new(uint32_t, FBInkDeviceQuirks*);
+static bool     is_kindle_device(uint32_t);
+static bool     is_kindle_device_new(uint32_t);
 static uint32_t from_base(char*, uint8_t);
-static void     identify_kindle(FBInkDeviceQuirks*);
+static void     identify_kindle(void);
 #        elif defined(FBINK_FOR_CERVANTES)
-static void identify_cervantes(FBInkDeviceQuirks*);
+static void identify_cervantes(void);
 #        else
 // List of NTX/Kobo PCB IDs... For a given device,
 // what we get in the NTXHWConfig payload @ index KOBO_HWCFG_CPU corresponds to an index in this array.
@@ -129,11 +129,11 @@ static const char* kobo_disp_res[] = { "800x600",   "1024x758",   "1024x768",   
 				       "2200x1650", "1440x640x4", "1600x1200x4", "1920x1440" };
 */
 
-static void set_kobo_quirks(unsigned short int, FBInkDeviceQuirks*);
-static void identify_kobo(FBInkDeviceQuirks*);
+static void set_kobo_quirks(unsigned short int);
+static void identify_kobo(void);
 #        endif    // FBINK_FOR_KINDLE
 
-static void identify_device(FBInkDeviceQuirks*);
+static void identify_device(void);
 #endif    // !FBINK_FOR_LINUX
 
 #endif

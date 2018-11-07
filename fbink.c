@@ -1576,7 +1576,7 @@ static int
 	if (!deviceQuirks.skipId) {
 #ifndef FBINK_FOR_LINUX
 		// Identify the device's specific model...
-		identify_device(&deviceQuirks);
+		identify_device();
 #	ifdef FBINK_FOR_KINDLE
 		if (deviceQuirks.isKindleLegacy) {
 			ELOG("Enabled Legacy einkfb Kindle quirks");
