@@ -42,7 +42,7 @@ typedef struct
 	bool               isKobo16Landscape;
 	bool               isKoboMk7;
 	int8_t             koboVertOffset;
-	uint8_t            koboBootRota;
+	uint8_t            ntxBootRota;
 	bool               isCervantesNew;
 	unsigned short int screenDPI;
 	bool               canRotate;

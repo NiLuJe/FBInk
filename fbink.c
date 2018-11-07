@@ -1692,7 +1692,7 @@ static int
 			//       - the nickel values on other devices.
 			//       - possibly the pickel values on other devices...
 			//       Yay?
-			if (vInfo.rotate == deviceQuirks.koboBootRota) {
+			if (vInfo.rotate == deviceQuirks.ntxBootRota) {
 				// NOTE: Fun fact: on my H2O, the initial boot rotation appears to be even weirder...
 				//       This rotation shenanigan was tested by running pickel, then rotating the fb via sysfs,
 				//       until I got something that matched what I get during KFMon's boot process.

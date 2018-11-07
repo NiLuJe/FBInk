@@ -283,7 +283,7 @@ static void
 	//       As usual, the H2O² is a mystery, the Rev 1 *may* follow this pattern too...
 	//       Or that might be the Rev 2 only, but that would make it diverge from other Mk7, which is weirder.
 	//       c.f., the relevant bit of fbink_init for more details...
-	deviceQuirks.koboBootRota = FB_ROTATE_UD;
+	deviceQuirks.ntxBootRota = FB_ROTATE_UD;
 	// NOTE: Device code list pilfered from
 	//       https://github.com/geek1011/KoboStuff/blob/gh-pages/kobofirmware.js#L11
 	switch (kobo_id) {
@@ -312,15 +312,15 @@ static void
 		case 350:    // Aura HD (dragon)
 			deviceQuirks.isKoboNonMT = true;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
-			deviceQuirks.koboBootRota = FB_ROTATE_UR;
-			deviceQuirks.screenDPI    = 265U;
+			deviceQuirks.ntxBootRota = FB_ROTATE_UR;
+			deviceQuirks.screenDPI   = 265U;
 			break;
 		case 370:    // Aura H2O (dahlia)
 			// NOTE: The top 11 pixels are blacked out by Nickel (behind the bezel)
 			deviceQuirks.koboVertOffset = 11;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
-			deviceQuirks.koboBootRota = FB_ROTATE_UR;
-			deviceQuirks.screenDPI    = 265U;
+			deviceQuirks.ntxBootRota = FB_ROTATE_UR;
+			deviceQuirks.screenDPI   = 265U;
 			break;
 		case 374:    // Aura H2O² (snow)
 			deviceQuirks.screenDPI = 265U;
