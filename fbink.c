@@ -1645,6 +1645,7 @@ static int
 	fxpRotateCoords = &rotate_coordinates_nop;
 	fxpRotateRegion = &rotate_region_nop;
 #ifndef FBINK_FOR_KINDLE
+	// NOTE: This applies both to Kobo & Cervantes!
 	// Make sure we default to no rotation shenanigans, to avoid issues on reinit...
 	deviceQuirks.isKobo16Landscape = false;
 	// NOTE: But in some very specific circumstances, that doesn't hold true...

@@ -252,6 +252,9 @@ static void
 			return;
 		}
 
+		// NOTE: See the comments in set_kobo_quirks about this.
+		//       I'm hoping there aren't any special snowflakes in the lineup...
+		deviceQuirks.ntxBootRota = FB_ROTATE_UD;
 		// supported devices,
 		// from https://github.com/bq/cervantes/blob/master/bqHAL/Devices/mx508/src/DeviceInfoMx508.cpp#L33-L37
 		switch (config.pcb_id) {
