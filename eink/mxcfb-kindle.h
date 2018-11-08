@@ -230,6 +230,8 @@ enum mxcfb_dithering_mode {
 };
 
 #define FB_POWERDOWN_DISABLE			-1
+/* PW4 */
+#define FB_POWERDOWN_DELAY_MIN_MS		0
 
 struct mxcfb_alt_buffer_data {
 	__u32 phys_addr;
@@ -269,6 +271,23 @@ struct mxcfb_update_data_koa2 {
 	/* end: lab126 added */
 };
 
+/* PW4... Guess what? :D */
+struct mxcfb_update_data_pw4 {
+	struct mxcfb_rect update_region;
+	__u32 waveform_mode;
+	__u32 update_mode;
+	__u32 update_marker;
+	int temp;
+	unsigned int flags;
+	int dither_mode;
+	int quant_bit;
+	struct mxcfb_alt_buffer_data alt_buffer_data;
+	/* start: lab126 added for backward compatible */
+	__u32 hist_bw_waveform_mode;    /*Lab126: Def bw waveform for hist analysis*/
+	__u32 hist_gray_waveform_mode;  /*Lab126: Def gray waveform for hist analysis*/
+	/* end: lab126 added */
+};
+
 /* PW2 */
 struct mxcfb_update_marker_data {
 	__u32 update_marker;
@@ -293,6 +312,7 @@ struct mxcfb_update_data_50x {
  * Needed for driver to perform auto-waveform selection
  */
 /* NOTE: Trimmed down w/ KOA2, see next block */
+/* NOTE: PW4 got 'em back by default... */
 struct mxcfb_waveform_modes {
 	int mode_init;
 	int mode_du;
@@ -369,6 +389,9 @@ struct mxcfb_csc_matrix {
 #define MXCFB_SET_WAVEFORM_MODES_KOA2		_IOW('F', 0x2B, struct mxcfb_waveform_modes_koa2)
 #define MXCFB_SEND_UPDATE_KOA2			_IOW('F', 0x2E, struct mxcfb_update_data_koa2)
 
+/* PW4, same dealio... */
+#define MXCFB_SEND_UPDATE_PW4			_IOW('F', 0x2E, struct mxcfb_update_data_pw4)
+
 
 /* This evolved on the PW2... Rename the Touch/PW1 constant to differentiate the two. */
 #define MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL	_IOW('F', 0x2F, __u32)
@@ -406,9 +429,15 @@ struct mxcfb_csc_matrix {
 /* Deprecated IOCTL for E-ink panel updates, kindle firmware version == 5.0 */
 #define MXCFB_SEND_UPDATE_50X			_IOW('F', 0x2E, struct mxcfb_update_data_50x)
 
-/* KOA2 */
+/* KOA2 & PW4 */
 /* before update with gck16, reduce bl to zero and turn back to original after */
+/*                             start   max             stripe  steps                   */
+/* cognac              4               112             16              (112-4)/16=6.75 */
+/* moonshine   217             1153    (1153-217)/6.75=138     6.75*/
+/* Use same steps as Cognac */
 #define NIGHTMODE_STRIDE_DEFAULT 16  /*default*/
+/* PW4 */
+#define NIGHTMODE_STRIDE_DEFAULT_PW4 138  /*default*/
 struct mxcfb_nightmode_ctrl {
 	int disable; /*1: disable; 0, enable */
 	int start; /* reduced to level for gck16 */
