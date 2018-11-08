@@ -1257,6 +1257,72 @@ static int
 
 	return EXIT_SUCCESS;
 }
+
+// Kindle PaperWhite 4 ([PW4<->??)
+static int
+    refresh_kindle_pw4(int                     fbfd,
+		       const struct mxcfb_rect region,
+		       uint32_t                waveform_mode,
+		       uint32_t                update_mode,
+		       uint32_t                marker)
+{
+	// NOTE: Different mcfb_update_data struct (no ts_* debug fields), but otherwise, identical to the KOA2!
+	struct mxcfb_update_data_pw4 update = {
+		.update_region = region,
+		.waveform_mode = waveform_mode,
+		.update_mode   = update_mode,
+		.update_marker = marker,
+		.temp          = TEMP_USE_AMBIENT,
+		.flags         = (waveform_mode == WAVEFORM_MODE_KOA2_GLD16)
+			     ? EPDC_FLAG_USE_KOA2_REGAL
+			     : (waveform_mode == WAVEFORM_MODE_KOA2_A2 || waveform_mode == WAVEFORM_MODE_DU)
+				   ? EPDC_FLAG_FORCE_MONOCHROME
+				   : 0U,
+		.dither_mode             = EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		.quant_bit               = 0,
+		.alt_buffer_data         = { 0U },
+		.hist_bw_waveform_mode   = WAVEFORM_MODE_DU,
+		.hist_gray_waveform_mode = WAVEFORM_MODE_GC16,
+	};
+
+	int rv;
+	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_PW4, &update);
+
+	if (rv < 0) {
+		char  buf[256];
+		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		WARN("MXCFB_SEND_UPDATE_PW4: %s", errstr);
+		if (errno == EINVAL) {
+			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
+			     region.top,
+			     region.left,
+			     region.width,
+			     region.height);
+		}
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	if (update_mode == UPDATE_MODE_FULL) {
+		struct mxcfb_update_marker_data update_marker = {
+			.update_marker  = marker,
+			.collision_test = 0U,
+		};
+
+		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_marker);
+
+		if (rv < 0) {
+			char  buf[256];
+			char* errstr = strerror_r(errno, buf, sizeof(buf));
+			WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s", errstr);
+			return ERRCODE(EXIT_FAILURE);
+		} else {
+			// NOTE: Timeout is set to 5000ms
+			LOG("Waited %ldms for completion of flashing update %u", (5000 - jiffies_to_ms(rv)), marker);
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
 #	elif defined(FBINK_FOR_CERVANTES)
 // Legacy Cervantes devices (2013)
 static int
@@ -1534,7 +1600,9 @@ static int
 	}
 
 #	if defined(FBINK_FOR_KINDLE)
-	if (deviceQuirks.isKindleOasis2) {
+	if (deviceQuirks.isKindlePW4) {
+		return refresh_kindle_pw4(fbfd, region, wfm, upm, marker);
+	} else if (deviceQuirks.isKindleOasis2) {
 		return refresh_kindle_koa2(fbfd, region, wfm, upm, marker);
 	} else {
 		return refresh_kindle(fbfd, region, wfm, upm, marker);
@@ -1643,6 +1711,8 @@ static int
 			ELOG("Enabled Kindle with Pearl screen quirks");
 		} else if (deviceQuirks.isKindleOasis2) {
 			ELOG("Enabled Kindle Oasis 2 quirks");
+		} else if (deviceQuirks.isKindlePW4) {
+			ELOG("Enabled Kindle PaperWhite 4 quirks");
 		}
 #	else
 		if (deviceQuirks.isKoboNonMT) {
@@ -3868,6 +3938,12 @@ int
 	uint32_t region_wfm = WAVEFORM_MODE_AUTO;
 	// Parse waveform mode...
 #ifdef FBINK_FOR_KINDLE
+	// Is this a KOA2 or a PW4 with new waveforms?
+	bool has_new_wfm = false;
+	if (deviceQuirks.isKindleOasis2 || deviceQuirks.isKindlePW4) {
+		has_new_wfm = true;
+	}
+
 	if (strcasecmp("DU", waveform_mode) == 0) {
 		region_wfm = WAVEFORM_MODE_DU;
 	} else if (strcasecmp("GC16", waveform_mode) == 0) {
@@ -3875,37 +3951,37 @@ int
 	} else if (strcasecmp("GC4", waveform_mode) == 0) {
 		region_wfm = WAVEFORM_MODE_GC4;
 	} else if (strcasecmp("A2", waveform_mode) == 0) {
-		if (deviceQuirks.isKindleOasis2) {
+		if (has_new_wfm) {
 			region_wfm = WAVEFORM_MODE_KOA2_A2;
 		} else {
 			region_wfm = WAVEFORM_MODE_A2;
 		}
 	} else if (strcasecmp("GL16", waveform_mode) == 0) {
-		if (deviceQuirks.isKindleOasis2) {
+		if (has_new_wfm) {
 			region_wfm = WAVEFORM_MODE_KOA2_GL16;
 		} else {
 			region_wfm = WAVEFORM_MODE_GL16;
 		}
 	} else if (strcasecmp("REAGL", waveform_mode) == 0) {
-		if (deviceQuirks.isKindleOasis2) {
+		if (has_new_wfm) {
 			region_wfm = WAVEFORM_MODE_KOA2_REAGL;
 		} else {
 			region_wfm = WAVEFORM_MODE_REAGL;
 		}
 	} else if (strcasecmp("REAGLD", waveform_mode) == 0) {
-		if (deviceQuirks.isKindleOasis2) {
+		if (has_new_wfm) {
 			region_wfm = WAVEFORM_MODE_KOA2_REAGLD;
 		} else {
 			region_wfm = WAVEFORM_MODE_REAGLD;
 		}
 	} else if (strcasecmp("GC16_FAST", waveform_mode) == 0) {
-		if (deviceQuirks.isKindleOasis2) {
+		if (has_new_wfm) {
 			region_wfm = WAVEFORM_MODE_KOA2_GC16_FAST;
 		} else {
 			region_wfm = WAVEFORM_MODE_GC16_FAST;
 		}
 	} else if (strcasecmp("GL16_FAST", waveform_mode) == 0) {
-		if (deviceQuirks.isKindleOasis2) {
+		if (has_new_wfm) {
 			region_wfm = WAVEFORM_MODE_KOA2_GL16_FAST;
 		} else {
 			region_wfm = WAVEFORM_MODE_GL16_FAST;
@@ -3913,20 +3989,20 @@ int
 	} else if (strcasecmp("DU4", waveform_mode) == 0) {
 		region_wfm = WAVEFORM_MODE_DU4;
 	} else if (strcasecmp("GL4", waveform_mode) == 0) {
-		if (deviceQuirks.isKindleOasis2) {
+		if (has_new_wfm) {
 			region_wfm = WAVEFORM_MODE_KOA2_GL4;
 		} else {
 			region_wfm = WAVEFORM_MODE_GL4;
 		}
 	} else if (strcasecmp("GL16_INV", waveform_mode) == 0) {
-		if (deviceQuirks.isKindleOasis2) {
+		if (has_new_wfm) {
 			region_wfm = WAVEFORM_MODE_KOA2_GL16_INV;
 		} else {
 			region_wfm = WAVEFORM_MODE_GL16_INV;
 		}
-	} else if (deviceQuirks.isKindleOasis2 && strcasecmp("GCK16", waveform_mode) == 0) {
+	} else if (has_new_wfm && strcasecmp("GCK16", waveform_mode) == 0) {
 		region_wfm = WAVEFORM_MODE_KOA2_GCK16;
-	} else if (deviceQuirks.isKindleOasis2 && strcasecmp("GLKW16", waveform_mode) == 0) {
+	} else if (has_new_wfm && strcasecmp("GLKW16", waveform_mode) == 0) {
 		region_wfm = WAVEFORM_MODE_KOA2_GLKW16;
 #else
 	if (strcasecmp("DU", waveform_mode) == 0) {

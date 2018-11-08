@@ -151,6 +151,22 @@ static bool
 			deviceQuirks.isKindleOasis2 = true;
 			deviceQuirks.screenDPI      = 300U;
 			return true;
+		case 0x2F7:    // PW4
+		case 0x361:
+		case 0x362:
+		case 0x363:
+		case 0x364:
+		case 0x365:
+		case 0x366:
+		case 0x367:
+		case 0x372:
+		case 0x373:
+		case 0x374:
+		case 0x375:
+		case 0x376:
+			deviceQuirks.isKindlePW4 = true;
+			deviceQuirks.screenDPI   = 300U;
+			return true;
 		default:
 			return false;
 	}
