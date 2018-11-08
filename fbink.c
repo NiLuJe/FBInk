@@ -244,6 +244,60 @@ static void
 	coords->x = rx;
 	coords->y = ry;
 }
+
+/*
+static void
+    rotate_touch_coordinates(FBInkCoordinates* coords, uint8_t rotation)
+{
+	unsigned short int rx;
+	unsigned short int ry;
+
+	// NOTE: Should match *most* Kobo devices...
+	//       Possibly after a rotation ^ deviceQuirks.ntxBootRota if things go wonky?
+	switch(rotation) {
+		case FB_ROTATE_UR:
+			// Could essentially be NOP!
+			rx = coords->x;
+			ry = coords->y;
+			break;
+		case FB_ROTATE_CW:
+			rx = coords->y;
+			ry = (unsigned short int) (screenWidth - coords->x - 1);
+			break;
+		case FB_ROTATE_UD:
+			rx = (unsigned short int) (screenWidth - coords->x - 1);
+			ry = (unsigned short int) (screenHeight - coords->y - 1);
+			break;
+		case FB_ROTATE_CCW:
+			rx = (unsigned short int) (screenHeight - coords->y - 1);
+			ry = coords->x;
+			break;
+	}
+
+	// The H2O²r1, on the other hand, is a special snowflake...
+	switch(rotation) {
+		case FB_ROTATE_UR:
+			rx = coords->x;
+			ry = (unsigned short int) (screenHeight - coords->y - 1);
+			break;
+		case FB_ROTATE_CW:
+			rx = (unsigned short int) (screenHeight - coords->y - 1);
+			ry = (unsigned short int) (screenWidth - coords->x - 1);
+			break;
+		case FB_ROTATE_UD:
+			rx = (unsigned short int) (screenWidth - coords->x - 1);
+			ry = coords->y;
+			break;
+		case FB_ROTATE_CCW:
+			rx = coords->y;
+			ry = coords->x;
+			break;
+	}
+
+	coords->x = rx;
+	coords->y = ry;
+}
+*/
 #endif    // !FBINK_FOR_KINDLE
 
 static void

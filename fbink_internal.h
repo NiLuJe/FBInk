@@ -312,6 +312,7 @@ FBInkOTFonts otFonts = { NULL, NULL, NULL, NULL };
 #ifndef FBINK_FOR_KINDLE
 static void rotate_coordinates_pickel(FBInkCoordinates*);
 static void rotate_coordinates_boot(FBInkCoordinates*);
+//static void rotate_touch_coordinates(FBInkCoordinates*, uint8_t);
 #endif
 static void rotate_coordinates_nop(FBInkCoordinates* __attribute__((unused)));
 
