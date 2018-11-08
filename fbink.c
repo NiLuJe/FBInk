@@ -3911,6 +3911,7 @@ int
 }
 
 // Simple public getter for temporary Device Quirks
+// NOTE: Deprecated, see fbink_reinit instead!
 bool
     fbink_is_fb_quirky(void)
 {
