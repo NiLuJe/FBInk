@@ -254,6 +254,7 @@ static void
 
 	// NOTE: Should match *most* Kobo devices...
 	//       Possibly after a rotation ^ deviceQuirks.ntxBootRota if things go wonky?
+	// c.f., https://patchwork.openembedded.org/patch/149258
 	switch(rotation) {
 		case FB_ROTATE_UR:
 			// Could essentially be NOP!
@@ -274,7 +275,9 @@ static void
 			break;
 	}
 
-	// The H2O²r1, on the other hand, is a special snowflake...
+	// NOTE: The H2O²r1, on the other hand, is a special snowflake...
+	//       (It'll need a dedicated deviceQuirks).
+	// c.f., https://www.mobileread.com/forums/showpost.php?p=3766627&postcount=236
 	switch(rotation) {
 		case FB_ROTATE_UR:
 			rx = coords->x;
