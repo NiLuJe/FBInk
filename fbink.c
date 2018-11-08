@@ -277,7 +277,7 @@ static void
 			break;
 	}
 
-	// NOTE: The H2O²r1, on the other hand, is a special snowflake...
+	// NOTE: The H2O²r1 (possibly r2 as well), on the other hand, is a special snowflake...
 	//       (It'll need a dedicated deviceQuirks).
 	// c.f., https://www.mobileread.com/forums/showpost.php?p=3766627&postcount=236
 	switch(rotation) {
