@@ -247,10 +247,12 @@ static void
 
 /*
 static void
-    rotate_touch_coordinates(FBInkCoordinates* coords, uint8_t rotation)
+    rotate_touch_coordinates(FBInkCoordinates* coords)
 {
 	unsigned short int rx;
 	unsigned short int ry;
+
+	uint32_t rotation = vInfo.rotate;
 
 	// NOTE: Should match *most* Kobo devices...
 	//       Possibly after a rotation ^ deviceQuirks.ntxBootRota if things go wonky?
