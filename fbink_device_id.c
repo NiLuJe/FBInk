@@ -351,6 +351,7 @@ static void
 		case 380:    // Forma (frost)
 			deviceQuirks.isKoboMk7 = true;
 			deviceQuirks.canRotate = true;
+			deviceQuirks.screenDPI = 300U;
 			break;
 		case 0:
 			// Like kobo_config.sh, assume Trilogy as a fallback
