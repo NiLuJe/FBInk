@@ -2286,6 +2286,7 @@ static int
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
 		WARN("mmap: %s", errstr);
+		fbPtr = NULL;
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		isFbMapped = true;
