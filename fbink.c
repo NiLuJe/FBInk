@@ -3509,7 +3509,6 @@ int
 	// Do we need to clear the screen?
 	if (is_cleared) {
 		clear_screen(fbfd, bgcolor, is_flashing);
-		fullscreen_region(&region);
 	}
 
 	uint32_t           tmp_c;
@@ -3900,6 +3899,11 @@ cleanup:
 	    region.height);
 	if (region.width > 0U && region.height > 0U) {
 		(*fxpRotateRegion)(&region);
+		// NOTE: If we asked for a clear screen, fudge the region at the last moment,
+		// so we don't get mangled by previous adjustments...
+		if (is_cleared) {
+			fullscreen_region(&region);
+		}
 		refresh(fbfd, region, WAVEFORM_MODE_AUTO, is_flashing);
 	}
 	free(lines);
