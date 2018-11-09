@@ -3877,7 +3877,8 @@ int
 		}
 		region.height += (unsigned int) max_line_height;
 		if (region.top + region.height > screenHeight) {
-			region.height -= region.top + region.height - screenHeight;
+			// i.e., region.height = screenHeight - region.top;
+			region.height -= (region.top + region.height - screenHeight);
 		}
 		LOG("Finished printing line# %u", line);
 		// And clear our line buffer for next use. The glyph buffer shouldn't need clearing,
