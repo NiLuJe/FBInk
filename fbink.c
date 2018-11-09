@@ -3059,6 +3059,7 @@ int
 	// This also needs to be declared early, as we refresh on cleanup.
 	struct mxcfb_rect region      = { 0U };
 	bool              is_flashing = false;
+	bool              is_cleared  = false;
 
 	// map fb to user mem
 	// NOTE: If we're keeping the fb's fd open, keep this mmap around, too.
@@ -3448,7 +3449,6 @@ int
 	bool    is_overlay  = false;
 	bool    is_bgless   = false;
 	bool    is_fgless   = false;
-	bool    is_cleared  = false;
 	bool    is_centered = false;
 	bool    is_halfway  = false;
 	if (fbink_cfg) {
