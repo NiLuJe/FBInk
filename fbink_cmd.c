@@ -103,7 +103,9 @@ static void
 	    "Options affecting the program's behavior:\n"
 	    "\t-I, --interactive\tEnter a very basic interactive mode.\n"
 	    "\t-L, --linecountcode\tWhen successfully printing text, returns the total amount of printed lines as the process exit code.\n"
+	    "\t\t\t\tNOTE: Will be inaccurate if there are more than 255 rows on screen!\n"
 	    "\t-l, --linecount\t\tWhen successfully printing text, outputs the total amount of printed lines in the final line of output to stdout (NOTE: enforces quiet & non-verbose!).\n"
+	    "\t\t\t\tNOTE: With OT/TTF rendering, will output a top margin value to use as-is instead (or 0 if there's no space left on screen)!\n"
 	    "\t-P, --progressbar NUM\tDraw a NUM%% full progress bar (full-width). Like other alternative modes, does *NOT* have precedence over text printing.\n"
 	    "\t\t\t\tIgnores -o, --overlay; -x, --col; -X, --hoffset; as well as -m, --centered & -p, --padded\n"
 	    "\t-A, --activitybar NUM\tDraw an activity bar on step NUM (full-width). NUM must be between 0 and 16. Like other alternative modes, does *NOT* have precedence over text printing.\n"
@@ -129,7 +131,7 @@ static void
 	    "\t\ttop, bottom, left & right set the margins used to define the display area. Defaults to 0, i.e., the full screen, starting at the top-left corner.\n"
 	    "\t\tIf format is specified, the underscore/star MarkDown syntax will be honored to set the font style (i.e., *italic*, **bold** & ***bold italic***).\n"
 	    "\n"
-	    "\t\tHonors -h, --invert; -f, --flash; -c, --clear; -m, --centered; -M, --halfway; -o, --overlay; -T, --fgless; -O, --bgless; -C, --color; -B, --background\n"
+	    "\t\tHonors -h, --invert; -f, --flash; -c, --clear; -m, --centered; -M, --halfway; -o, --overlay; -T, --fgless; -O, --bgless; -C, --color; -B, --background; -l, --linecount\n"
 	    "\n"
 	    "EXAMPLES:\n"
 #	ifdef FBINK_FOR_KINDLE
@@ -970,6 +972,15 @@ int
 				//       because it knows how much space it already took up ;).
 				ot_config.margins.top = (unsigned short int) linecount;
 				// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
+
+				// If we were asked to return the amount of printed lines, honor that,
+				// provided we actually successfully printed something...
+				// NOTE: We don't support linecode, because POSIX exit codes cap at 255, which is much too low.
+				if (want_linecount && rv >= EXIT_SUCCESS) {
+					// NOTE: fbink_print_ot returns a new top margin value directly,
+					//       no need for any extra computations!
+					total_lines = (unsigned short int) (linecount);
+				}
 			} else {
 				if (!fbink_cfg.is_quiet) {
 					printf(
@@ -1015,7 +1026,7 @@ int
 			}
 		}
 		// And print the total amount of lines we printed, if requested...
-		if (!is_truetype && want_linecount) {
+		if (want_linecount) {
 			if (rv == ERRCODE(EXIT_FAILURE)) {
 				printf("0");
 			} else {
