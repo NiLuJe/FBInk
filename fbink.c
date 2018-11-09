@@ -3056,7 +3056,7 @@ int
 	unsigned char* line_buff  = NULL;
 	unsigned char* glyph_buff = NULL;
 	// This also needs to be declared early, as we refresh on cleanup.
-	struct mxcfb_rect region      = { 0 };
+	struct mxcfb_rect region      = { 0U };
 	bool              is_flashing = false;
 
 	// map fb to user mem
@@ -3070,15 +3070,15 @@ int
 
 	LOG("Printing OpenType text.");
 	// Sanity check the provided margins and calculate the printable area.
-	// We'll cap the margin at 90% for each side. Margins for opposing edges
-	// should sum to less than 100%
-	if (cfg->margins.top > viewHeight || cfg->margins.bottom > viewHeight || cfg->margins.left > viewWidth ||
-	    cfg->margins.right > viewWidth) {
+	// We'll cap the margin at 100% for each side, and margins for opposing edges should sum to less than 100%
+	if (cfg->margins.top >= viewHeight || cfg->margins.bottom >= viewHeight || cfg->margins.left >= viewWidth ||
+	    cfg->margins.right >= viewWidth) {
 		WARN("A margin was out of range (allowed ranges :: Vert < %u  Horiz < %u)", viewHeight, viewWidth);
 		rv = ERRCODE(ERANGE);
 		goto cleanup;
 	}
-	if (cfg->margins.top + cfg->margins.bottom >= viewHeight || cfg->margins.left + cfg->margins.right >= viewWidth) {
+	if ((cfg->margins.top + cfg->margins.bottom) >= viewHeight ||
+	    (cfg->margins.left + cfg->margins.right) >= viewWidth) {
 		WARN("Opposing margins sum to greater than the viewport height or width");
 		rv = ERRCODE(ERANGE);
 		goto cleanup;
@@ -3089,7 +3089,7 @@ int
 	{
 		FBInkCoordinates tl;
 		FBInkCoordinates br;
-	} area = { 0 };
+	} area = { 0U };
 #	pragma GCC diagnostic pop
 	area.tl.x = cfg->margins.left;
 	area.tl.y = (unsigned short int) (cfg->margins.top + (viewVertOrigin - viewVertOffset));
@@ -3112,7 +3112,7 @@ int
 	// Calculate some metrics for every font we have loaded.
 	// Please forgive the repetition here.
 
-	// Declaring these three variables early, so a default can be set
+	// Declaring these three sets of variables early, so a default can be set
 	float sf           = 0.0f;
 	int   max_baseline = 0;
 	int   max_lg       = 0;
@@ -3262,7 +3262,7 @@ int
 	}
 	// Lets find our lines! Nothing fancy, just a simple first fit algorithm, but we do our best not to break inside a word.
 
-	unsigned int       c_index     = 0;
+	unsigned int       c_index     = 0U;
 	unsigned int       tmp_c_index = c_index;
 	uint32_t           c;
 	unsigned short int max_lw = (unsigned short int) (area.br.x - area.tl.x);
@@ -3274,7 +3274,7 @@ int
 	bool         complete_str = false;
 	int          x0, y0, x1, y1, gw, gh, cx;
 	unsigned int lw = 0U;
-	for (line = 0; line < num_lines; line++) {
+	for (line = 0U; line < num_lines; line++) {
 		// Every line has a start character index and an end char index.
 		curr_x                     = 0;
 		lines[line].startCharIndex = c_index;
@@ -3415,8 +3415,8 @@ int
 	}
 	// Let's determine our exact height, so we can determine vertical alignment later if required.
 	LOG("Maximum printable height is %u", print_height);
-	unsigned int curr_print_height = 0;
-	for (line = 0; line < num_lines; line++) {
+	unsigned int curr_print_height = 0U;
+	for (line = 0U; line < num_lines; line++) {
 		if (!lines[line].line_used) {
 			break;
 		}
@@ -3470,10 +3470,10 @@ int
 	// Create a bitmap buffer to render a single line.
 	// We don't render the glyphs directly to the fb here, as we need to do some simple blending,
 	// and it makes it easier to calculate our centering if required.
-	line_buff = calloc(max_lw * (unsigned int) max_line_height, sizeof(*line_buff));
+	line_buff = calloc(max_lw * (size_t) max_line_height, sizeof(*line_buff));
 	// We also don't want to be creating a new buffer for every glyph, so make it roomy, just in case...
-	unsigned int glyph_buffer_dims = font_size_px * (unsigned int) max_line_height * 2U;
-	glyph_buff                     = calloc(glyph_buffer_dims, sizeof(*glyph_buff));
+	size_t glyph_buffer_dims = font_size_px * (size_t) max_line_height * 2U;
+	glyph_buff               = calloc(glyph_buffer_dims, sizeof(*glyph_buff));
 	if (!line_buff || !glyph_buff) {
 		WARN("Line or glyph buffers could not be allocated");
 		rv = ERRCODE(EXIT_FAILURE);
@@ -3481,8 +3481,8 @@ int
 	}
 
 	// Setup the variables needed to render
-	FBInkCoordinates curr_point  = { 0, 0 };
-	FBInkCoordinates ins_point   = { 0, 0 };
+	FBInkCoordinates curr_point  = { 0U, 0U };
+	FBInkCoordinates ins_point   = { 0U, 0U };
 	FBInkCoordinates paint_point = { area.tl.x, area.tl.y };
 	// Set the vertical positioning now
 	if (is_halfway || valign == CENTER) {
@@ -3512,12 +3512,13 @@ int
 	}
 
 	uint32_t           tmp_c;
-	unsigned char *    lnPtr, *glPtr = NULL;
+	unsigned char*     lnPtr = NULL;
+	unsigned char*     glPtr = NULL;
 	unsigned short int start_x;
 
 	bool abort_line = false;
 	// Render!
-	for (line = 0; line < num_lines; line++) {
+	for (line = 0U; line < num_lines; line++) {
 		if (!lines[line].line_used) {
 			break;
 		}
@@ -3525,7 +3526,7 @@ int
 		if (abort_line) {
 			break;
 		}
-		lw = 0;
+		lw = 0U;
 		unsigned int ci;
 		for (ci = lines[line].startCharIndex; ci <= lines[line].endCharIndex;) {
 			if (cfg->is_formatted) {
@@ -3560,11 +3561,10 @@ int
 			gw = x1 - x0;
 			gh = y1 - y0;
 			// Ensure that our glyph size does not exceed the buffer size. Resize the buffer if it does
-			if (gw * gh > (int) glyph_buffer_dims) {
-				unsigned int new_buff_size =
-				    (unsigned int) gw * (unsigned int) gh * 2U * sizeof(unsigned char);
-				unsigned char* tmp_g_buff = NULL;
-				tmp_g_buff                = realloc(glyph_buff, new_buff_size);
+			if ((gw * gh) > (int) glyph_buffer_dims) {
+				size_t         new_buff_size = (size_t) gw * (size_t) gh * 2U * sizeof(*glyph_buff);
+				unsigned char* tmp_g_buff    = NULL;
+				tmp_g_buff                   = realloc(glyph_buff, new_buff_size);
 				if (!tmp_g_buff) {
 					ELOG("Failure resizing glyph buffer");
 					rv = ERRCODE(EXIT_FAILURE);
@@ -3638,7 +3638,7 @@ int
 			}
 			ins_point.y = (unsigned short int) max_baseline;
 		}
-		curr_point.x = 0;
+		curr_point.x = 0U;
 		// Right, we've rendered a line to a bitmap, time to display it.
 
 		if (is_centered || halign == CENTER) {
@@ -3671,7 +3671,7 @@ int
 			LOG("Snipped Line# %u LW down to %u", line, lw);
 		}
 
-		FBInkColor color = { 0 };
+		FBInkColor color = { 0U };
 		start_x          = paint_point.x;
 		lnPtr            = line_buff;
 		// Normal painting to framebuffer. Please forgive the code repetition. Performance...
@@ -3716,7 +3716,7 @@ int
 				}
 			}
 		} else if (is_fgless) {
-			FBInkColor fb_color = { 0 };
+			FBInkColor fb_color = { 0U };
 			uint16_t   pmul_bg  = (uint16_t)(bgcolor * 0xFF);
 			// NOTE: One more branch needed because 4bpp fbs are terrible...
 			if (vInfo.bits_per_pixel > 4U) {
@@ -3765,7 +3765,7 @@ int
 				}
 			}
 		} else if (is_bgless) {
-			FBInkColor fb_color = { 0 };
+			FBInkColor fb_color = { 0U };
 			if (vInfo.bits_per_pixel > 4U) {
 				// 8, 16, 24 & 32bpp
 				for (int j = 0; j < max_line_height; j++) {
@@ -3812,7 +3812,7 @@ int
 				}
 			}
 		} else if (is_overlay) {
-			FBInkColor fb_color = { 0 };
+			FBInkColor fb_color = { 0U };
 			if (vInfo.bits_per_pixel > 4U) {
 				// 8, 16, 24 & 32bpp
 				for (int j = 0; j < max_line_height; j++) {
@@ -3883,7 +3883,7 @@ int
 		// And clear our line buffer for next use. The glyph buffer shouldn't need clearing,
 		// as stbtt_MakeCodepointBitmap() should overwrite it.
 		// NOTE: Fill it with 0 (no coverage -> background)
-		memset(line_buff, 0, (max_lw * (unsigned int) max_line_height * sizeof(*line_buff)));
+		memset(line_buff, 0, (max_lw * (size_t) max_line_height * sizeof(*line_buff)));
 	}
 	if (paint_point.y + max_line_height > area.br.y) {
 		rv = 0;    // Inform the caller there is no room left to print another row.
