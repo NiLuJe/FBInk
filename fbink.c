@@ -2952,7 +2952,8 @@ int
 	char*   buffer = NULL;
 	va_list args;
 
-	// Initial vsnprintf run on a NULL pointer, just to determine the required buffer size
+	// Initial vsnprintf run on a zero length NULL pointer, just to determine the required buffer size
+	// NOTE: see vsnprintf(3), this is a C99 behavior made canon in POSIX.1-2001, honored since glibc 2.1
 	va_start(args, fmt);
 	ret = vsnprintf(buffer, size, fmt, args);
 	va_end(args);
@@ -4481,8 +4482,8 @@ static unsigned char*
 		//       c.f., https://stackoverflow.com/a/44894946
 		unsigned char* imgdata = NULL;
 		unsigned char* temp    = NULL;
-		size_t         size    = 0;
-		size_t         used    = 0;
+		size_t         size    = 0U;
+		size_t         used    = 0U;
 		size_t         nread;
 
 		if (ferror(stdin)) {
@@ -4514,7 +4515,7 @@ static unsigned char*
 			}
 
 			nread = fread(imgdata + used, 1U, CHUNK, stdin);
-			if (nread == 0) {
+			if (nread == 0U) {
 				break;
 			}
 			used += nread;
