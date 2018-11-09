@@ -386,7 +386,7 @@ int
 					 NULL };
 #pragma GCC diagnostic pop
 	char*     subopts;
-	char*     value;
+	char*     value          = NULL;
 	uint32_t  region_top     = 0;
 	uint32_t  region_left    = 0;
 	uint32_t  region_width   = 0;
