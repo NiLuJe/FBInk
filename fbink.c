@@ -1574,6 +1574,12 @@ static int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
+	// NOTE: There are also a number of hardware quirks (which got better on newer devices) related to region alignment,
+	//       that the driver should already be taking care of...
+	//       c.f., epdc_process_update @ mxc_epdc_fb.c or mxc_epdc_v2_fb.c
+	//       If you see strays "unaligned" ... "Copying update before processing" entries in your dmesg, that's it.
+	//       I'm hoping everything handles this sanely, because I really don't want to duplicate the driver's job...
+
 #	ifdef FBINK_FOR_KINDLE
 	if (deviceQuirks.isKindleLegacy) {
 		return refresh_legacy(fbfd, region, is_flashing);
