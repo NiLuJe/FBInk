@@ -3607,7 +3607,7 @@ int
 			// instead of an unsightly vertical shift towards the bottom if we were to tweak the insertion point.
 			cy = (int) curr_point.y;
 			if (cy + y0 < 0) {
-				unsigned short int vclip = abs(cy + y0);
+				unsigned short int vclip = (unsigned short int) abs(cy + y0);
 				LOG("Clipping %hupx off the top of this glpyh", vclip);
 				gh -= vclip;
 				y0 += vclip;
