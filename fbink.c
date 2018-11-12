@@ -3368,6 +3368,7 @@ int
 					lines[line].line_gap -= height_diff;
 				}
 				max_line_height += height_diff;
+				// We have to bump the baseline, too, to make sure this glyph's baseline is aligned with others...
 				max_baseline += height_diff;
 			}
 			// stb_truetype does not appear to create a bounding box for space characters,
@@ -3624,7 +3625,9 @@ int
 			if (cy + y0 < 0) {
 				unsigned short int vclip = (unsigned short int) abs(cy + y0);
 				LOG("Clipping %hupx off the top of this glpyh", vclip);
+				// Clip it
 				gh -= vclip;
+				// Fudge positioning so we don't underflow
 				y0 += vclip;
 			}
 			ins_point.x = (unsigned short int) (curr_point.x + x0);
