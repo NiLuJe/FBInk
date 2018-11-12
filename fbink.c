@@ -3406,8 +3406,8 @@ int
 					u8_dec(string, &c_index);
 					// Ensure we'll have a hard-break here if we can't find a better opportunity
 					lines[line].endCharIndex = c_index;
-					tmp_c_index              = c_index;
-					for (; tmp_c_index > lines[line].startCharIndex; u8_dec(string, &tmp_c_index)) {
+					for (tmp_c_index = c_index; tmp_c_index > lines[line].startCharIndex;
+					     u8_dec(string, &tmp_c_index)) {
 						if (brk_buff[tmp_c_index] == LINEBREAK_ALLOWBREAK) {
 							c_index                  = tmp_c_index;
 							lines[line].endCharIndex = c_index;
