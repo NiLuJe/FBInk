@@ -256,6 +256,48 @@ static int
 	return rv;
 }
 
+// Small helper to handle loading OT fonts
+static void
+    load_ot_fonts(const char*        reg_ot_file,
+		  const char*        bd_ot_file,
+		  const char*        it_ot_file,
+		  const char*        bdit_ot_file,
+		  const FBInkConfig* fbink_cfg)
+{
+	if (reg_ot_file) {
+		if (!fbink_cfg->is_quiet) {
+			printf("Loading font '%s' for the Regular style\n", reg_ot_file);
+		}
+		if (fbink_add_ot_font(reg_ot_file, FNT_REGULAR) < 0) {
+			fprintf(stderr, "Failed to open font file '%s'!\n", reg_ot_file);
+		}
+	}
+	if (bd_ot_file) {
+		if (!fbink_cfg->is_quiet) {
+			printf("Loading font '%s' for the Bold style\n", bd_ot_file);
+		}
+		if (fbink_add_ot_font(bd_ot_file, FNT_BOLD) < 0) {
+			fprintf(stderr, "Failed to open font file '%s'!\n", bd_ot_file);
+		}
+	}
+	if (it_ot_file) {
+		if (!fbink_cfg->is_quiet) {
+			printf("Loading font '%s' for the Italic style\n", it_ot_file);
+		}
+		if (fbink_add_ot_font(it_ot_file, FNT_ITALIC) < 0) {
+			fprintf(stderr, "Failed to open font file '%s'!\n", it_ot_file);
+		}
+	}
+	if (bdit_ot_file) {
+		if (!fbink_cfg->is_quiet) {
+			printf("Loading font '%s' for the Bold Italic style\n", bdit_ot_file);
+		}
+		if (fbink_add_ot_font(bdit_ot_file, FNT_BOLD_ITALIC) < 0) {
+			fprintf(stderr, "Failed to open font file '%s'!\n", bdit_ot_file);
+		}
+	}
+}
+
 // Input validation via strtoul, for an uint32_t
 // Adapted from the same in KFMon ;).
 static int
@@ -896,38 +938,7 @@ int
 
 		// And for the OpenType codepath, we'll want to load the fonts only once ;)
 		if (is_truetype) {
-			if (reg_ot_file) {
-				if (!fbink_cfg.is_quiet) {
-					printf("Loading font '%s' for the Regular style\n", reg_ot_file);
-				}
-				if (fbink_add_ot_font(reg_ot_file, FNT_REGULAR) < 0) {
-					fprintf(stderr, "Failed to open font file '%s'!\n", reg_ot_file);
-				}
-			}
-			if (bd_ot_file) {
-				if (!fbink_cfg.is_quiet) {
-					printf("Loading font '%s' for the Bold style\n", bd_ot_file);
-				}
-				if (fbink_add_ot_font(bd_ot_file, FNT_BOLD) < 0) {
-					fprintf(stderr, "Failed to open font file '%s'!\n", bd_ot_file);
-				}
-			}
-			if (it_ot_file) {
-				if (!fbink_cfg.is_quiet) {
-					printf("Loading font '%s' for the Italic style\n", it_ot_file);
-				}
-				if (fbink_add_ot_font(it_ot_file, FNT_ITALIC) < 0) {
-					fprintf(stderr, "Failed to open font file '%s'!\n", it_ot_file);
-				}
-			}
-			if (bdit_ot_file) {
-				if (!fbink_cfg.is_quiet) {
-					printf("Loading font '%s' for the Bold Italic style\n", bdit_ot_file);
-				}
-				if (fbink_add_ot_font(bdit_ot_file, FNT_BOLD_ITALIC) < 0) {
-					fprintf(stderr, "Failed to open font file '%s'!\n", bdit_ot_file);
-				}
-			}
+			load_ot_fonts(reg_ot_file, bd_ot_file, it_ot_file, bdit_ot_file, &fbink_cfg);
 		}
 
 		// Now that this is out of the way, loop over the leftover arguments, i.e.: the strings ;)
@@ -1140,6 +1151,7 @@ int
 			ssize_t nread;
 			int     linecnt = -1;
 			// Draw a poor man's prompt, which works fairly okay, until we enable verbose mode :D.
+			// NOTE: We limit this to the fixed-cell renderer, as it has a few tweaks to handle this better.
 			printf(">>> ");
 			while ((nread = getline(&line, &len, stdin)) != -1) {
 				printf(">>> ");
@@ -1157,12 +1169,24 @@ int
 				size_t  len  = 0;
 				ssize_t nread;
 				int     linecnt = -1;
-				while ((nread = getline(&line, &len, stdin)) != -1) {
-					if ((linecnt = fbink_print(fbfd, line, &fbink_cfg)) < 0) {
-						fprintf(stderr, "Failed to print that string!\n");
-						rv = ERRCODE(EXIT_FAILURE);
+				// Did we ask for OT rendering?
+				if (is_truetype) {
+					load_ot_fonts(reg_ot_file, bd_ot_file, it_ot_file, bdit_ot_file, &fbink_cfg);
+					while ((nread = getline(&line, &len, stdin)) != -1) {
+						if ((linecnt = fbink_print_ot(fbfd, line, &ot_config, &fbink_cfg)) < 0) {
+							fprintf(stderr, "Failed to print that string!\n");
+							rv = ERRCODE(EXIT_FAILURE);
+						}
+						ot_config.margins.top = (unsigned short int) linecnt;
 					}
-					fbink_cfg.row = (short int) (fbink_cfg.row + linecnt);
+				} else {
+					while ((nread = getline(&line, &len, stdin)) != -1) {
+						if ((linecnt = fbink_print(fbfd, line, &fbink_cfg)) < 0) {
+							fprintf(stderr, "Failed to print that string!\n");
+							rv = ERRCODE(EXIT_FAILURE);
+						}
+						fbink_cfg.row = (short int) (fbink_cfg.row + linecnt);
+					}
 				}
 				free(line);
 
