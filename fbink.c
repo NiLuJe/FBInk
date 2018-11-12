@@ -3411,7 +3411,7 @@ int
 						if (brk_buff[c_index] == LINEBREAK_ALLOWBREAK) {
 							could_break              = true;
 							lines[line].endCharIndex = c_index;
-							LOG("Found a break @ %u", c_index);
+							LOG("Found a break @ #%u", c_index);
 							break;
 						}
 					}
@@ -3421,8 +3421,8 @@ int
 						c_index = tmp_c_index;
 						u8_dec(string, &tmp_c_index);
 						lines[line].endCharIndex = tmp_c_index;
-						//brk_buff[tmp_c_index] = LINEBREAK_MUSTBREAK;
-						LOG("Could not find a break! Enforcing a hard break @ %u", tmp_c_index);
+						// We want to print this character, so, no break flag, and no u8_inc!
+						LOG("Could not find a break! Enforcing a hard break @ #%u", tmp_c_index);
 					}
 					break;
 				}
