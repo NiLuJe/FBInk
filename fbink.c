@@ -3347,13 +3347,25 @@ int
 			// Handle the situation where the metrics may lie, and the glyph descends below what the metrics say.
 			if (max_baseline + y1 > max_line_height) {
 				int height_diff = (max_baseline + y1) - max_line_height;
-				LOG("Height Diff: %d, available LG: %d", height_diff, lines[line].line_gap);
+				LOG("Descend Height Diff: %d, available LG: %d", height_diff, lines[line].line_gap);
 				if (height_diff > lines[line].line_gap) {
 					lines[line].line_gap = 0;
 				} else {
 					lines[line].line_gap -= height_diff;
 				}
 				max_line_height = max_baseline + y1;
+			}
+			// Same thing if it tries to ascend too high...
+			if (max_baseline + y0 < 0) {
+				int height_diff = abs(max_baseline + y0);
+				LOG("Ascend Height Diff: %d, available LG: %d", height_diff, lines[line].line_gap);
+				if (height_diff > lines[line].line_gap) {
+					lines[line].line_gap = 0;
+				} else {
+					lines[line].line_gap -= height_diff;
+				}
+				max_line_height += height_diff;
+				max_baseline += height_diff;
 			}
 			// stb_truetype does not appear to create a bounding box for space characters,
 			// so we need to handle this situation.
@@ -3486,7 +3498,7 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
-	LOG("Max LW: %hu  Max LH: %d  FntSize: %u", max_lw, max_line_height, font_size_px);
+	LOG("Max LW: %hu  Max LH: %d  Max BL: %d  FntSize: %u", max_lw, max_line_height, max_baseline, font_size_px);
 
 	// Setup the variables needed to render
 	FBInkCoordinates curr_point  = { 0U, 0U };
@@ -3591,11 +3603,10 @@ int
 			cy = (int) curr_point.y;
 			if (cy + y0 < 0) {
 				unsigned short int vclip = abs(cy + y0);
+				LOG("Clipping %hupx off the top of this glpyh", vclip);
 				gh -= vclip;
 				y0 += vclip;
 			}
-			LOG("ins_point.x: %hu  x0: %d", ins_point.x, x0);
-			LOG("ins_point.y: %hu  y0: %d", ins_point.y, y0);
 			ins_point.x = (unsigned short int) (curr_point.x + x0);
 			ins_point.y = (unsigned short int) (curr_point.y + y0);
 			// We only increase the lw if the glyph is not a space.
