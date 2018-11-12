@@ -3403,28 +3403,19 @@ int
 				} else {
 					// Note, we need to do this a second time, to get the previous character,
 					// as u8_nextchar() 'consumes' a character.
-					// But remember it first, in case we fail to break...
-					tmp_c_index      = c_index;
-					bool could_break = false;
 					u8_dec(string, &c_index);
+					// Ensure we'll have a hard-break here if we can't find a better opportunity
 					lines[line].endCharIndex = c_index;
-					for (; c_index > lines[line].startCharIndex; u8_dec(string, &c_index)) {
-						if (brk_buff[c_index] == LINEBREAK_ALLOWBREAK) {
-							could_break              = true;
+					tmp_c_index              = c_index;
+					for (; tmp_c_index > lines[line].startCharIndex; u8_dec(string, &tmp_c_index)) {
+						if (brk_buff[tmp_c_index] == LINEBREAK_ALLOWBREAK) {
+							c_index                  = tmp_c_index;
 							lines[line].endCharIndex = c_index;
 							LOG("Found a break @ #%u", c_index);
 							break;
 						}
 					}
-					if (could_break) {
-						u8_inc(string, &c_index);
-					} else {
-						c_index = tmp_c_index;
-						u8_dec(string, &tmp_c_index);
-						lines[line].endCharIndex = tmp_c_index;
-						// We want to print this character, so, no break flag, and no u8_inc!
-						LOG("Could not find a break! Enforcing a hard break @ #%u", tmp_c_index);
-					}
+					u8_inc(string, &c_index);
 					break;
 				}
 			}
