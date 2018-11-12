@@ -3289,7 +3289,9 @@ int
 		lines[line].startCharIndex = c_index;
 		lines[line].line_gap       = max_lg;
 		lines[line].line_used      = true;
+		LOG("Line# %u of %u", line, num_lines);
 		while (c_index < str_len_bytes) {
+			LOG("ci# %u of %zu", c_index, str_len_bytes);
 			if (cfg->is_formatted) {
 				// Check if we need to skip formatting characters
 				if (fmt_buff[c_index] == CH_IGNORE) {
@@ -3381,6 +3383,7 @@ int
 			// Oops, we appear to have advanced too far :)
 			// Better backtrack to see if we can find a suitable break opportunity
 			if (lw > max_lw) {
+				LOG("Looking for a linebreak opportunity . . .");
 				// Is the glyph itself too wide for our printable area? If so, we abort
 				if ((unsigned int) gw >= max_lw) {
 					WARN(
@@ -3396,19 +3399,34 @@ int
 					u8_dec(string, &tmp_c_index);
 					lines[line].endCharIndex = tmp_c_index;
 					u8_inc(string, &c_index);
+					LOG("Can break on current whitespace!");
 					break;
 				} else {
 					// Note, we need to do this a second time, to get the previous character,
 					// as u8_nextchar() 'consumes' a character.
+					// But remember it first, in case we fail to break...
+					tmp_c_index = c_index;
+					bool could_break = false;
 					u8_dec(string, &c_index);
 					lines[line].endCharIndex = c_index;
 					for (; c_index > lines[line].startCharIndex; u8_dec(string, &c_index)) {
 						if (brk_buff[c_index] == LINEBREAK_ALLOWBREAK) {
+							could_break = true;
 							lines[line].endCharIndex = c_index;
+							LOG("Found a break @ %u", c_index);
 							break;
 						}
 					}
-					u8_inc(string, &c_index);
+					if (could_break) {
+						u8_inc(string, &c_index);
+					} else {
+						c_index = tmp_c_index;
+						u8_dec(string, &tmp_c_index);
+						lines[line].endCharIndex = tmp_c_index;
+						//brk_buff[tmp_c_index] = LINEBREAK_MUSTBREAK;
+						LOG("Could not find a break! Enforcing a hard break @ %u", tmp_c_index);
+						//u8_inc(string, &c_index);
+					}
 					break;
 				}
 			}
@@ -3432,7 +3450,7 @@ int
 			break;
 		}
 	}
-	LOG("%u lines to be printed", (line + 1U));
+	LOG("%u lines to be printed", (line + complete_str));
 	if (!complete_str) {
 		LOG("String too long. Truncated to %u characters", (c_index + 1U));
 	}
