@@ -3273,6 +3273,7 @@ int
 	unsigned int       c_index     = 0U;
 	unsigned int       tmp_c_index = c_index;
 	uint32_t           c;
+	int                gi;
 	unsigned short int max_lw = (unsigned short int) (area.br.x - area.tl.x);
 	unsigned int       line;
 	int                max_line_height = max_row_height - max_lg;
@@ -3333,11 +3334,13 @@ int
 				break;
 			}
 			c = u8_nextchar(string, &c_index);
+			// Get the glyph index now, instead of having to look it up each time
+			gi = stbtt_FindGlyphIndex(curr_font, (int) c);
 			// Note, these metrics are unscaled,
 			// we need to use our previously obtained scale factor (sf) to get the metrics as pixels
-			stbtt_GetCodepointHMetrics(curr_font, (int) c, &adv, &lsb);
+			stbtt_GetGlyphHMetrics(curr_font, gi, &adv, &lsb);
 			// But these are already scaled
-			stbtt_GetCodepointBitmapBox(curr_font, (int) c, sf, sf, &x0, &y0, &x1, &y1);
+			stbtt_GetGlyphBitmapBox(curr_font, gi, sf, sf, &x0, &y0, &x1, &y1);
 			gw = x1 - x0;
 			// Ensure that curr_x never goes negative
 			cx = curr_x;
@@ -3412,12 +3415,12 @@ int
 			curr_x += (int) lroundf(sf * (float) adv);
 			// Adjust our x position for kerning, because we can :)
 			if (string[c_index + 1]) {
-				tmp_c_index = c_index;
-				uint32_t c2 = u8_nextchar(string, &tmp_c_index);
+				tmp_c_index  = c_index;
+				uint32_t c2  = u8_nextchar(string, &tmp_c_index);
+				int      g2i = stbtt_FindGlyphIndex(curr_font, (int) c2);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wbad-function-cast"
-				curr_x += (int) lroundf(
-				    sf * (float) stbtt_GetCodepointKernAdvance(curr_font, (int) c, (int) c2));
+				curr_x += (int) lroundf(sf * (float) stbtt_GetGlyphKernAdvance(curr_font, gi, g2i));
 #	pragma GCC diagnostic pop
 			}
 		}
@@ -3531,6 +3534,7 @@ int
 	}
 
 	uint32_t           tmp_c;
+	int                tmp_gi;
 	unsigned char*     lnPtr = NULL;
 	unsigned char*     glPtr = NULL;
 	unsigned short int start_x;
@@ -3575,8 +3579,9 @@ int
 			}
 			curr_point.y = ins_point.y = (unsigned short int) max_baseline;
 			c                          = u8_nextchar(string, &ci);
-			stbtt_GetCodepointHMetrics(curr_font, (int) c, &adv, &lsb);
-			stbtt_GetCodepointBitmapBox(curr_font, (int) c, sf, sf, &x0, &y0, &x1, &y1);
+			gi                         = stbtt_FindGlyphIndex(curr_font, (int) c);
+			stbtt_GetGlyphHMetrics(curr_font, gi, &adv, &lsb);
+			stbtt_GetGlyphBitmapBox(curr_font, gi, sf, sf, &x0, &y0, &x1, &y1);
 			gw = x1 - x0;
 			gh = y1 - y0;
 			// Ensure that our glyph size does not exceed the buffer size. Resize the buffer if it does
@@ -3629,14 +3634,14 @@ int
 				goto cleanup;
 			}
 			if (gw > 0 && fgcolor != bgcolor) {
-				// Because the stbtt_MakeCodepointBitmap documentation is a bit vague on this point,
+				// Because the stbtt_MakeGlyphBitmap documentation is a bit vague on this point,
 				// the parameter 'out_stride' should be the width of the surface in our buffer.
 				// It's designed so that the glyph can be rendered directly to a screen buffer.
 				// For example, if we were rendering directly to a 1080x1440 screen,
 				// out_stride should be set to 1080.
 				// In this case however, we want to render to a 'box' of the dimensions of the glyph,
 				// so we set 'out_stride' to the glyph width.
-				stbtt_MakeCodepointBitmap(curr_font, glyph_buff, gw, gh, gw, sf, sf, (int) c);
+				stbtt_MakeGlyphBitmap(curr_font, glyph_buff, gw, gh, gw, sf, sf, gi);
 				// paint our glyph into the line buffer
 				lnPtr = line_buff + ins_point.x + (max_lw * ins_point.y);
 				glPtr = glyph_buff;
@@ -3658,11 +3663,12 @@ int
 			if (ci < lines[line].endCharIndex) {
 				unsigned int tmp_i = ci;
 				tmp_c              = u8_nextchar(string, &tmp_i);
+				tmp_gi             = stbtt_FindGlyphIndex(curr_font, (int) tmp_c);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wbad-function-cast"
-				curr_point.x = (unsigned short int) (curr_point.x +
-								     lroundf(sf * (float) stbtt_GetCodepointKernAdvance(
-										      curr_font, (int) c, (int) tmp_c)));
+				curr_point.x =
+				    (unsigned short int) (curr_point.x + lroundf(sf * (float) stbtt_GetGlyphKernAdvance(
+											  curr_font, gi, tmp_gi)));
 #	pragma GCC diagnostic pop
 			}
 			ins_point.y = (unsigned short int) max_baseline;
@@ -3918,7 +3924,7 @@ int
 		}
 		LOG("Finished printing line# %u", line);
 		// And clear our line buffer for next use. The glyph buffer shouldn't need clearing,
-		// as stbtt_MakeCodepointBitmap() should overwrite it.
+		// as stbtt_MakeGlyphBitmap() should overwrite it.
 		// NOTE: Fill it with 0 (no coverage -> background)
 		memset(line_buff, 0, (max_lw * (size_t) max_line_height * sizeof(*line_buff)));
 	}
