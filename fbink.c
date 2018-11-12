@@ -3280,7 +3280,7 @@ int
 	// lsb = left side bearing: The horizontal distance from the origin point to left edge of the glyph
 	int          adv, lsb, curr_x;
 	bool         complete_str = false;
-	int          x0, y0, x1, y1, gw, gh, cx;
+	int          x0, y0, x1, y1, gw, gh, cx, cy;
 	unsigned int lw = 0U;
 	for (line = 0U; line < num_lines; line++) {
 		// Every line has a start character index and an end char index.
@@ -3486,6 +3486,7 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
+	LOG("Max LW: %hu  Max LH: %d  FntSize: %u", max_lw, max_line_height, font_size_px);
 
 	// Setup the variables needed to render
 	FBInkCoordinates curr_point  = { 0U, 0U };
@@ -3568,9 +3569,10 @@ int
 			gh = y1 - y0;
 			// Ensure that our glyph size does not exceed the buffer size. Resize the buffer if it does
 			if ((gw * gh) > (int) glyph_buffer_dims) {
-				size_t         new_buff_size = (size_t) gw * (size_t) gh * 2U * sizeof(*glyph_buff);
-				unsigned char* tmp_g_buff    = NULL;
-				tmp_g_buff                   = realloc(glyph_buff, new_buff_size);
+				size_t new_buff_size = (size_t) gw * (size_t) gh * 2U * sizeof(*glyph_buff);
+				LOG("Growing glyph buffer size from %zu to %zu", glyph_buffer_dims, new_buff_size);
+				unsigned char* tmp_g_buff = NULL;
+				tmp_g_buff                = realloc(glyph_buff, new_buff_size);
 				if (!tmp_g_buff) {
 					ELOG("Failure resizing glyph buffer");
 					rv = ERRCODE(EXIT_FAILURE);
@@ -3584,8 +3586,18 @@ int
 			if (cx + x0 < 0) {
 				curr_point.x = (unsigned short int) (curr_point.x + abs(cx + x0));
 			}
+			// Same on the vertical axis, except we'll prefer clipping the top of the glpyh off,
+			// instead of an unsightly vertical shift towards the bottom if we were to tweak the insertion point.
+			cy = (int) curr_point.y;
+			if (cy + y0 < 0) {
+				unsigned short int vclip = abs(cy + y0);
+				gh -= vclip;
+				y0 += vclip;
+			}
+			LOG("ins_point.x: %hu  x0: %d", ins_point.x, x0);
+			LOG("ins_point.y: %hu  y0: %d", ins_point.y, y0);
 			ins_point.x = (unsigned short int) (curr_point.x + x0);
-			ins_point.y = (unsigned short int) (ins_point.y + y0);
+			ins_point.y = (unsigned short int) (curr_point.y + y0);
 			// We only increase the lw if the glyph is not a space.
 			// This hopefully prevent trailing spaces from being printed on a line.
 			if (gw > 0) {
