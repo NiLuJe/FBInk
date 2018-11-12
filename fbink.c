@@ -3452,7 +3452,7 @@ int
 	}
 	LOG("%u lines to be printed", (line + complete_str));
 	if (!complete_str) {
-		LOG("String too long. Truncated to %u characters", (c_index + 1U));
+		LOG("String too long. Truncated to ~%u characters", c_index);
 	}
 	// Let's determine our exact height, so we can determine vertical alignment later if required.
 	LOG("Maximum printable height is %u", print_height);
