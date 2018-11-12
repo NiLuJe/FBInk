@@ -3687,7 +3687,15 @@ int
 			if (abs(layer_diff) == 0xFF) {
 				// If we're painting in B&W, use the mask as-is, it's already B&W ;).
 				// We just need to invert it ;).
-				uint8_t ainv = invert ^ 0xFF;
+				uint8_t ainv = 0xFF;
+#	ifdef FBINK_FOR_KINDLE
+				if ((deviceQuirks.isKindleLegacy && !is_inverted) ||
+				    (!deviceQuirks.isKindleLegacy && is_inverted)) {
+#	else
+				if (is_inverted) {
+#	endif
+					ainv = 0U;
+				}
 				for (int j = 0; j < max_line_height; j++) {
 					for (unsigned int k = 0U; k < lw; k++) {
 						color.r = color.g = color.b = lnPtr[k] ^ ainv;
