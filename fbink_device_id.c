@@ -343,12 +343,12 @@ static void
 			break;
 		case 374:    // Aura H2O² (snow)
 			deviceQuirks.ntxBootRota = FB_ROTATE_UR;
-			deviceQuirks.screenDPI = 265U;
+			deviceQuirks.screenDPI   = 265U;
 			break;
 		case 378:    // Aura H2O² r2 (snow)
-			deviceQuirks.isKoboMk7 = true;
+			deviceQuirks.isKoboMk7   = true;
 			deviceQuirks.ntxBootRota = FB_ROTATE_UR;
-			deviceQuirks.screenDPI = 265U;
+			deviceQuirks.screenDPI   = 265U;
 			break;
 		case 373:    // Aura ONE (daylight)
 		case 381:    // Aura ONE LE (daylight)
