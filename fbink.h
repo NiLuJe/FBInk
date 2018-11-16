@@ -194,10 +194,10 @@ typedef struct
 {
 	struct
 	{
-		short int top;       // Top margin in pixels
-		short int bottom;    // Bottom margin in pixels
-		short int left;      // Left margin in pixels
-		short int right;     // Right margin in pixels
+		short int top;       // Top margin in pixels (if negative, count backwards from the bottom edge)
+		short int bottom;    // Bottom margin in pixels (supports negative values, too)
+		short int left;      // Left margin in pixels (if negative, count backwards from the right edge)
+		short int right;     // Right margin in pixels (supports negative values, too)
 	} margins;
 	unsigned short int size_pt;         // Size of text in points. If not set (0), defaults to 12pt
 	bool               is_centered;     // Horizontal centering
