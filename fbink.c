@@ -3077,16 +3077,47 @@ int
 	}
 
 	LOG("Printing OpenType text.");
+
+	// Handle negative margins (meaning count backwards from the opposite edge)
+	// NOTE: Obviously makes more sense for top & left than for bottom & right.
+	unsigned short int top_margin = 0U;
+	if (cfg->margins.top >= 0) {
+		top_margin = (unsigned short int) cfg->margins.top;
+	} else {
+		top_margin = (unsigned short int) MAX(0, (int) viewHeight - abs(cfg->margins.top));
+		LOG("Adjusted top margin to %hdpx", top_margin);
+	}
+	unsigned short int bottom_margin = 0U;
+	if (cfg->margins.bottom >= 0) {
+		bottom_margin = (unsigned short int) cfg->margins.bottom;
+	} else {
+		bottom_margin = (unsigned short int) MAX(0, (int) viewHeight - abs(cfg->margins.bottom));
+		LOG("Adjusted bottom margin to %hdpx", bottom_margin);
+	}
+	unsigned short int left_margin = 0U;
+	if (cfg->margins.left >= 0) {
+		left_margin = (unsigned short int) cfg->margins.left;
+	} else {
+		left_margin = (unsigned short int) MAX(0, (int) viewWidth - abs(cfg->margins.left));
+		LOG("Adjusted left margin to %hdpx", left_margin);
+	}
+	unsigned short int right_margin = 0U;
+	if (cfg->margins.right >= 0) {
+		right_margin = (unsigned short int) cfg->margins.right;
+	} else {
+		right_margin = (unsigned short int) MAX(0, (int) viewWidth - abs(cfg->margins.right));
+		LOG("Adjusted right margin to %hdpx", right_margin);
+	}
+
 	// Sanity check the provided margins and calculate the printable area.
 	// We'll cap the margin at 100% for each side, and margins for opposing edges should sum to less than 100%
-	if (cfg->margins.top >= viewHeight || cfg->margins.bottom >= viewHeight || cfg->margins.left >= viewWidth ||
-	    cfg->margins.right >= viewWidth) {
+	if (top_margin >= viewHeight || bottom_margin >= viewHeight || left_margin >= viewWidth ||
+	    right_margin >= viewWidth) {
 		WARN("A margin was out of range (allowed ranges :: Vert < %u  Horiz < %u)", viewHeight, viewWidth);
 		rv = ERRCODE(ERANGE);
 		goto cleanup;
 	}
-	if ((cfg->margins.top + cfg->margins.bottom) >= viewHeight ||
-	    (cfg->margins.left + cfg->margins.right) >= viewWidth) {
+	if ((top_margin + bottom_margin) >= viewHeight || (left_margin + right_margin) >= viewWidth) {
 		WARN("Opposing margins sum to greater than the viewport height or width");
 		rv = ERRCODE(ERANGE);
 		goto cleanup;
@@ -3099,10 +3130,10 @@ int
 		FBInkCoordinates br;
 	} area = { 0U };
 #	pragma GCC diagnostic pop
-	area.tl.x = cfg->margins.left;
-	area.tl.y = (unsigned short int) (cfg->margins.top + (viewVertOrigin - viewVertOffset));
-	area.br.x = (unsigned short int) (viewWidth - cfg->margins.right);
-	area.br.y = (unsigned short int) (viewHeight - cfg->margins.bottom);
+	area.tl.x = left_margin;
+	area.tl.y = (unsigned short int) (top_margin + (viewVertOrigin - viewVertOffset));
+	area.br.x = (unsigned short int) (viewWidth - right_margin);
+	area.br.y = (unsigned short int) (viewHeight - bottom_margin);
 	// Set default font size if required
 	unsigned short int size_pt = cfg->size_pt;
 	if (!size_pt) {

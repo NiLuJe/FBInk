@@ -834,34 +834,34 @@ int
 							}
 							break;
 						case TM_OPT:
-							if (strtoul_hu(opt,
-								       truetype_token[TM_OPT],
-								       value,
-								       &ot_config.margins.top) < 0) {
+							if (strtol_hi(opt,
+								      truetype_token[TM_OPT],
+								      value,
+								      &ot_config.margins.top) < 0) {
 								errfnd = true;
 							}
 							break;
 						case BM_OPT:
-							if (strtoul_hu(opt,
-								       truetype_token[BM_OPT],
-								       value,
-								       &ot_config.margins.bottom) < 0) {
+							if (strtol_hi(opt,
+								      truetype_token[BM_OPT],
+								      value,
+								      &ot_config.margins.bottom) < 0) {
 								errfnd = true;
 							}
 							break;
 						case LM_OPT:
-							if (strtoul_hu(opt,
-								       truetype_token[LM_OPT],
-								       value,
-								       &ot_config.margins.left) < 0) {
+							if (strtol_hi(opt,
+								      truetype_token[LM_OPT],
+								      value,
+								      &ot_config.margins.left) < 0) {
 								errfnd = true;
 							}
 							break;
 						case RM_OPT:
-							if (strtoul_hu(opt,
-								       truetype_token[RM_OPT],
-								       value,
-								       &ot_config.margins.right) < 0) {
+							if (strtol_hi(opt,
+								      truetype_token[RM_OPT],
+								      value,
+								      &ot_config.margins.right) < 0) {
 								errfnd = true;
 							}
 							break;
@@ -952,7 +952,7 @@ int
 			if (is_truetype) {
 				if (!fbink_cfg.is_quiet) {
 					printf(
-					    "Printing string '%s' @ %hupt, honoring the following margins { Top: %hupx, Bottom: %hupx, Left: %hupx, Right: %hupx } (formatted: %s, overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, H align: %hhu, halfway: %s, V align: %hhu, clear screen: %s)\n",
+					    "Printing string '%s' @ %hupt, honoring the following margins { Top: %hdpx, Bottom: %hdpx, Left: %hdpx, Right: %hdpx } (formatted: %s, overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, H align: %hhu, halfway: %s, V align: %hhu, clear screen: %s)\n",
 					    string,
 					    ot_config.size_pt,
 					    ot_config.margins.top,
@@ -981,7 +981,7 @@ int
 				// NOTE: Don't clobber previous entries if multiple strings were passed...
 				//       We make sure to trust print's return value,
 				//       because it knows how much space it already took up ;).
-				ot_config.margins.top = (unsigned short int) linecount;
+				ot_config.margins.top = (short int) linecount;
 				// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
 
 				// If we were asked to return the amount of printed lines, honor that,
@@ -1177,7 +1177,7 @@ int
 							fprintf(stderr, "Failed to print that string!\n");
 							rv = ERRCODE(EXIT_FAILURE);
 						}
-						ot_config.margins.top = (unsigned short int) linecnt;
+						ot_config.margins.top = (short int) linecnt;
 					}
 				} else {
 					while ((nread = getline(&line, &len, stdin)) != -1) {
