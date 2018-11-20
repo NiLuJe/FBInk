@@ -307,12 +307,13 @@ FBINK_API int fbink_printf(int fbfd, const FBInkOTConfig* cfg, const FBInkConfig
 // A simple wrapper around the internal screen refresh handling, without requiring you to include einkfb/mxcfb headers
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
-// region_top:		top field of an mxcfb rectangle
-// region_left:		left field of an mxcfb rectangle
+// region_top:		top (y) field of an mxcfb rectangle
+// region_left:		left (x) field of an mxcfb rectangle
 // region_width:	width field of an mxcfb rectangle
 // region_height:	height field of an mxcfb rectangle
 // waveform_mode:	waveform mode (i.e, "GC16")
 // is_flashing:		will ask for a black flash if true
+// NOTE: If you request an empty region (0x0 @ (0, 0), a full-screen refresh will be performed!
 FBINK_API int fbink_refresh(int         fbfd,
 			    uint32_t    region_top,
 			    uint32_t    region_left,

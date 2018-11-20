@@ -4122,6 +4122,11 @@ int
 		.height = region_height,
 	};
 
+	// If region is empty, do a full-screen refresh!
+	if (region.top == 0U && region.left == 0U && region.width == 0U && region.height == 0U) {
+		fullscreen_region(&region);
+	}
+
 	int ret;
 	if (EXIT_SUCCESS != (ret = refresh(fbfd, region, region_wfm, is_flashing))) {
 		WARN("Failed to refresh the screen");
