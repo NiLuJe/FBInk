@@ -1558,14 +1558,21 @@ static int
     refresh(int                     fbfd __attribute__((unused)),
 	    const struct mxcfb_rect region __attribute__((unused)),
 	    uint32_t                waveform_mode __attribute__((unused)),
-	    bool                    is_flashing __attribute__((unused)))
+	    bool                    is_flashing __attribute__((unused)),
+	    bool                    no_refresh __attribute__((unused)))
 {
 	return EXIT_SUCCESS;
 }
 #else
 static int
-    refresh(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode, bool is_flashing)
+    refresh(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode, bool is_flashing, bool no_refresh)
 {
+	// Were we asked to skip refreshes?
+	if (no_refresh) {
+		LOG("Skipping eInk refresh, as requested.");
+		return EXIT_SUCCESS;
+	}
+
 	// NOTE: Discard bogus regions, they can cause a softlock on some devices.
 	//       A 0x0 region is a no go on most devices, while a 1x1 region may only upset some Kindle models.
 	//       Some devices even balk at 1xN or Nx1, so, catch that, too.
@@ -2860,7 +2867,7 @@ int
 	}
 
 	// Refresh screen
-	if (refresh(fbfd, region, WAVEFORM_MODE_AUTO, fbink_cfg->is_flashing) != EXIT_SUCCESS) {
+	if (refresh(fbfd, region, WAVEFORM_MODE_AUTO, fbink_cfg->is_flashing, fbink_cfg->no_refresh) != EXIT_SUCCESS) {
 		WARN("Failed to refresh the screen");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
@@ -3066,6 +3073,7 @@ int
 	struct mxcfb_rect region      = { 0U };
 	bool              is_flashing = false;
 	bool              is_cleared  = false;
+	bool              no_refresh  = false;
 
 	// map fb to user mem
 	// NOTE: If we're keeping the fb's fd open, keep this mmap around, too.
@@ -3521,6 +3529,7 @@ int
 		is_cleared  = fbink_cfg->is_cleared;
 		is_centered = fbink_cfg->is_centered;
 		is_halfway  = fbink_cfg->is_halfway;
+		no_refresh  = fbink_cfg->no_refresh;
 	} else {
 		is_centered = cfg->is_centered;
 	}
@@ -3987,7 +3996,7 @@ cleanup:
 		if (is_cleared) {
 			fullscreen_region(&region);
 		}
-		refresh(fbfd, region, WAVEFORM_MODE_AUTO, is_flashing);
+		refresh(fbfd, region, WAVEFORM_MODE_AUTO, is_flashing, no_refresh);
 	}
 	free(lines);
 	free(brk_buff);
@@ -4128,7 +4137,7 @@ int
 	}
 
 	int ret;
-	if (EXIT_SUCCESS != (ret = refresh(fbfd, region, region_wfm, is_flashing))) {
+	if (EXIT_SUCCESS != (ret = refresh(fbfd, region, region_wfm, is_flashing, false))) {
 		WARN("Failed to refresh the screen");
 	}
 
@@ -4454,7 +4463,7 @@ int
 	//       It has the added benefit of increasing the framerate limit after which the eInk controller risks getting
 	//       confused (unless is_flashing is enabled, since that'll block,
 	//       essentially throttling the bar to the screen's refresh rate).
-	if (refresh(fbfd, region, WAVEFORM_MODE_AUTO, fbink_cfg->is_flashing) != EXIT_SUCCESS) {
+	if (refresh(fbfd, region, WAVEFORM_MODE_AUTO, fbink_cfg->is_flashing, fbink_cfg->no_refresh) != EXIT_SUCCESS) {
 		WARN("Failed to refresh the screen");
 		return ERRCODE(EXIT_FAILURE);
 	}
@@ -5365,7 +5374,7 @@ static int
 	}
 
 	// Refresh screen
-	if (refresh(fbfd, region, WAVEFORM_MODE_GC16, fbink_cfg->is_flashing) != EXIT_SUCCESS) {
+	if (refresh(fbfd, region, WAVEFORM_MODE_GC16, fbink_cfg->is_flashing, fbink_cfg->no_refresh) != EXIT_SUCCESS) {
 		WARN("Failed to refresh the screen");
 	}
 

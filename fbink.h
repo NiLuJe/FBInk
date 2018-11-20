@@ -188,6 +188,7 @@ typedef struct
 	bool      ignore_alpha;    // Ignore any potential alpha channel in source image (i.e., flatten the image)
 	uint8_t   halign;    // Horizontal alignment of images (NONE/LEFT, CENTER, EDGE/RIGHT; c.f., ALIGN_INDEX_T enum)
 	uint8_t   valign;    // Vertical alignment of images (NONE/TOP, CENTER, EDGE/BOTTOM; c.f., ALIGN_INDEX_T enum)
+	bool      no_refresh;    // Skip actually refreshing the eInk screen (useful when drawing in batch)
 } FBInkConfig;
 
 typedef struct
@@ -314,6 +315,7 @@ FBINK_API int fbink_printf(int fbfd, const FBInkOTConfig* cfg, const FBInkConfig
 // waveform_mode:	waveform mode (i.e, "GC16")
 // is_flashing:		will ask for a black flash if true
 // NOTE: If you request an empty region (0x0 @ (0, 0), a full-screen refresh will be performed!
+// NOTE: As you've probably guessed, since it doesn't take an FBInkConfig pointer, this *ignores* no_refresh ;)
 FBINK_API int fbink_refresh(int         fbfd,
 			    uint32_t    region_top,
 			    uint32_t    region_left,

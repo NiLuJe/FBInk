@@ -376,7 +376,7 @@ static int refresh_kobo(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32
 static int refresh_kobo_mk7(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
 #	endif    // FBINK_FOR_KINDLE
 #endif            // !FBINK_FOR_LINUX
-static int refresh(int, const struct mxcfb_rect, uint32_t, bool);
+static int refresh(int, const struct mxcfb_rect, uint32_t, bool, bool);
 
 static int open_fb_fd(int*, bool*);
 
