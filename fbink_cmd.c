@@ -67,6 +67,9 @@ static void
 	    "\t-h, --invert\t\tPrint STRING in <background color> over <foreground color> instead of the reverse.\n"
 	    "\t-f, --flash\t\tAsk the eInk driver to do a black flash when refreshing the area of the screen where STRING will be printed.\n"
 	    "\t-c, --clear\t\tFully clear the screen before printing (obeys --invert).\n"
+#ifndef FBINK_FOR_LINUX
+	    "\t-b, --norefresh\t\tOnly update the framebuffer, but don't actually refresh the eInk screen (useful when drawing in batch).\n"
+#endif
 	    "\t-S, --size\t\tOverride the automatic font scaling multiplier (Default: 0, automatic selection, ranging from 1 (no scaling), to 4 (4x upscaling), depending on screen resolution).\n"
 #ifdef FBINK_WITH_FONTS
 	    "\t\t\t\tNote that user-supplied values will be clamped to safe boundaries (from 1 to around 45 for most fonts, and from 1 to around 30 for TALL).\n"
@@ -372,6 +375,7 @@ int
 					      { "bgless", no_argument, NULL, 'O' },
 					      { "fgless", no_argument, NULL, 'T' },
 					      { "truetype", required_argument, NULL, 't' },
+					      { "norefresh", no_argument, NULL, 'b' },
 					      { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_cfg = { 0 };
@@ -457,7 +461,8 @@ int
 	char*     bdit_ot_file   = NULL;
 	bool      errfnd         = false;
 
-	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:b", opts, &opt_index)) !=
+	       -1) {
 		switch (opt) {
 			case 'y':
 				if (strtol_hi(opt, NULL, optarg, &fbink_cfg.row) < 0) {
@@ -886,6 +891,9 @@ int
 					is_truetype = true;
 				}
 				break;
+			case 'b':
+				fbink_cfg.no_refresh = true;
+				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
 				errfnd = true;
@@ -955,7 +963,7 @@ int
 			if (is_truetype) {
 				if (!fbink_cfg.is_quiet) {
 					printf(
-					    "Printing string '%s' @ %hupt, honoring the following margins { Top: %hdpx, Bottom: %hdpx, Left: %hdpx, Right: %hdpx } (formatted: %s, overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, H align: %hhu, halfway: %s, V align: %hhu, clear screen: %s)\n",
+					    "Printing string '%s' @ %hupt, honoring the following margins { Top: %hdpx, Bottom: %hdpx, Left: %hdpx, Right: %hdpx } (formatted: %s, overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, H align: %hhu, halfway: %s, V align: %hhu, clear screen: %s, skip refresh: %s)\n",
 					    string,
 					    ot_config.size_pt,
 					    ot_config.margins.top,
@@ -972,7 +980,8 @@ int
 					    fbink_cfg.halign,
 					    fbink_cfg.is_halfway ? "Y" : "N",
 					    fbink_cfg.valign,
-					    fbink_cfg.is_cleared ? "Y" : "N");
+					    fbink_cfg.is_cleared ? "Y" : "N",
+					    fbink_cfg.no_refresh ? "Y" : "N");
 				}
 
 				if ((linecount = fbink_print_ot(fbfd, string, &ot_config, &fbink_cfg)) < 0) {
@@ -998,7 +1007,7 @@ int
 			} else {
 				if (!fbink_cfg.is_quiet) {
 					printf(
-					    "Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, halfway: %s, left padded: %s, clear screen: %s, font: %hhu, font scaling: x%hhu)\n",
+					    "Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, halfway: %s, left padded: %s, clear screen: %s, skip refresh: %s, font: %hhu, font scaling: x%hhu)\n",
 					    string,
 					    fbink_cfg.col,
 					    fbink_cfg.hoffset,
@@ -1013,6 +1022,7 @@ int
 					    fbink_cfg.is_halfway ? "Y" : "N",
 					    fbink_cfg.is_padded ? "Y" : "N",
 					    fbink_cfg.is_cleared ? "Y" : "N",
+					    fbink_cfg.no_refresh ? "Y" : "N",
 					    fbink_cfg.fontname,
 					    fbink_cfg.fontmult);
 				}
@@ -1073,7 +1083,7 @@ int
 		} else if (is_image) {
 			if (!fbink_cfg.is_quiet) {
 				printf(
-				    "Displaying image '%s' @ column %hd + %hdpx, row %hd + %dpx (H align: %hhu, V align: %hhu, inverted: %s, flattened: %s)\n",
+				    "Displaying image '%s' @ column %hd + %hdpx, row %hd + %dpx (H align: %hhu, V align: %hhu, inverted: %s, flattened: %s, skip refresh: %s)\n",
 				    image_file,
 				    fbink_cfg.col,
 				    image_x_offset,
@@ -1082,7 +1092,8 @@ int
 				    fbink_cfg.halign,
 				    fbink_cfg.valign,
 				    fbink_cfg.is_inverted ? "Y" : "N",
-				    fbink_cfg.ignore_alpha ? "Y" : "N");
+				    fbink_cfg.ignore_alpha ? "Y" : "N",
+				    fbink_cfg.no_refresh ? "Y" : "N");
 			}
 			if (fbink_print_image(fbfd, image_file, image_x_offset, image_y_offset, &fbink_cfg) !=
 			    EXIT_SUCCESS) {
@@ -1093,13 +1104,14 @@ int
 		} else if (is_progressbar) {
 			if (!fbink_cfg.is_quiet) {
 				printf(
-				    "Displaying a %hhu%% full progress bar @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, font: %hhu, font scaling: x%hhu)\n",
+				    "Displaying a %hhu%% full progress bar @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, skip refresh: %s, font: %hhu, font scaling: x%hhu)\n",
 				    progress,
 				    fbink_cfg.row,
 				    fbink_cfg.voffset,
 				    fbink_cfg.is_inverted ? "Y" : "N",
 				    fbink_cfg.is_flashing ? "Y" : "N",
 				    fbink_cfg.is_cleared ? "Y" : "N",
+				    fbink_cfg.no_refresh ? "Y" : "N",
 				    fbink_cfg.fontname,
 				    fbink_cfg.fontmult);
 			}
@@ -1113,12 +1125,13 @@ int
 			if (is_infinite) {
 				if (!fbink_cfg.is_quiet) {
 					printf(
-					    "Displaying an activity bar cycling forever @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s)\n",
+					    "Displaying an activity bar cycling forever @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, skip refresh: %s)\n",
 					    fbink_cfg.row,
 					    fbink_cfg.voffset,
 					    fbink_cfg.is_inverted ? "Y" : "N",
 					    fbink_cfg.is_flashing ? "Y" : "N",
-					    fbink_cfg.is_cleared ? "Y" : "N");
+					    fbink_cfg.is_cleared ? "Y" : "N",
+					    fbink_cfg.no_refresh ? "Y" : "N");
 				}
 				// NOTE: In a dedicated function,
 				//       because keeping it inline massively tanks performance in the image codepath,
@@ -1131,13 +1144,14 @@ int
 			} else {
 				if (!fbink_cfg.is_quiet) {
 					printf(
-					    "Displaying an activity bar on step %hhu @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s)\n",
+					    "Displaying an activity bar on step %hhu @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, skip refresh: %s)\n",
 					    progress,
 					    fbink_cfg.row,
 					    fbink_cfg.voffset,
 					    fbink_cfg.is_inverted ? "Y" : "N",
 					    fbink_cfg.is_flashing ? "Y" : "N",
-					    fbink_cfg.is_cleared ? "Y" : "N");
+					    fbink_cfg.is_cleared ? "Y" : "N",
+					    fbink_cfg.no_refresh ? "Y" : "N");
 				}
 				if (fbink_print_activity_bar(fbfd, progress, &fbink_cfg) != EXIT_SUCCESS) {
 					fprintf(stderr, "Failed to display an activitybar!\n");
