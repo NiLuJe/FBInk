@@ -546,7 +546,9 @@ int
 				}
 				// Make sure we won't pass an invalid rectangle to the driver, because that'd soft lock,
 				// or a NULL pointer to fbink_refresh, because that would segfault in strcmp ;).
-				if (region_height == 0 || region_width == 0 || region_wfm == NULL) {
+				if (((region_height == 0 || region_width == 0) &&
+				     !(region_top == 0 && region_left == 0 && region_height == 0 && region_width == 0)) ||
+				    region_wfm == NULL) {
 					fprintf(
 					    stderr,
 					    "Suboption '%s' must be specified, as well as non-zero values for '%s' and '%s'\n",
