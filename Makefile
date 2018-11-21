@@ -325,7 +325,7 @@ pic:
 	$(MAKE) static SHARED=true
 
 shared:
-	$(MAKE) sharedlib SHARED=true STANDALONE=true
+	$(MAKE) sharedlib SHARED=true
 	$(MAKE) sharedbin SHARED=true STANDALONE=true
 
 release: shared
