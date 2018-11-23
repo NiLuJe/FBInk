@@ -343,6 +343,7 @@ linux:
 
 cervantes:
 	$(MAKE) strip CERVANTES=true
+	./tools/do_debian_package.sh $(OUT_DIR) armel
 
 kobo: release
 	mkdir -p Kobo/usr/local/fbink/bin Kobo/usr/bin Kobo/usr/local/fbink/lib Kobo/usr/local/fbink/include
