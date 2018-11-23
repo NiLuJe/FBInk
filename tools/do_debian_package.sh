@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# Script to generate debian packages for FBInk. 
+# Script to generate debian packages for FBInk.
 PACKAGE="FBInk"
 AUTHOR="NiLuJe <niluje@gmail.com>"
 DESC_1="FrameBuffer eInker"
@@ -18,9 +18,10 @@ BIN_PATH="${PKG_PATH}/usr/bin"
 DEB_PATH="${PKG_PATH}/DEBIAN"
 CONTROL="${DEB_PATH}/control"
 
-# Get version from git if posible. Fallback to a known version ;p
+# Get version from git if posible. Fallback to defined FBINK_VERSION
 # Note: version string must start with a number
-VERSION="$(git describe 2>/dev/null | sed 's/[^0-9]*//' || echo '1.9.0')"
+FALLBACK_VERSION="$(grep 'define FBINK_VERSION' fbink_internal.h | cut -f2 -d\" | cut -f2 -dv)"
+VERSION="$(git describe 2>/dev/null | sed 's/[^0-9]*//' || echo ${FALLBACK_VERSION})"
 
 # package name
 FULL_NAME="${PACKAGE}-${VERSION}-${TARGET_ARCH}.deb"
