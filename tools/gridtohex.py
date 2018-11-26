@@ -7,7 +7,6 @@
 ##
 
 import re
-import sys
 
 # Convert a binary representation (in string form) to hex
 # c.f., https://stackoverflow.com/q/2072351

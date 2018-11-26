@@ -1,0 +1,17 @@
+# Tag our third-party code as such
+path_classifiers:
+        library:
+                - "font8x8/"
+                - "stb/"
+                - "libunibreak/"
+
+# Our scripts are NOT expected to run on Python 2
+extraction:
+        python:
+                python_setup:
+                        version: 3
+
+# For the hardcoded fontwidth in tools/hextoc.py
+queries:
+        - exclude: py/unreachable-statement
+
