@@ -6,8 +6,6 @@
 #
 ##
 
-import sys
-
 data = "./Kobo_PCB_IDs.txt"
 
 with open(data, "r") as f:
