@@ -1,4 +1,5 @@
 # FBInk
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/NiLuJe/FBInk.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/NiLuJe/FBInk/alerts/) [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/NiLuJe/FBInk.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/NiLuJe/FBInk/context:cpp) [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/NiLuJe/FBInk.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/NiLuJe/FBInk/context:python)
 FrameBuffer eInker
 
 Licensed under the [AGPLv3](/LICENSE).
