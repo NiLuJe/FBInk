@@ -364,7 +364,8 @@ int
 		return snprintf(buf, sz, "\\x%hhX", (unsigned char) ch);
 	else if (ch > 0xFFFF)
 		return snprintf(buf, sz, "\\U%.8X", (uint32_t) ch);
-	else if (ch >= 0x80 && ch <= 0xFFFF)
+	// NOTE: ch <= 0xFFFF by virtue of the previous rung
+	else if (ch >= 0x80)
 		return snprintf(buf, sz, "\\u%.4hX", (unsigned short) ch);
 
 	return snprintf(buf, sz, "%c", (char) ch);

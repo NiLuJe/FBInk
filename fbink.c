@@ -548,7 +548,7 @@ static void
 	//       Anyway, don't clobber that, as it seems to cause softlocks on BQ/Cervantes,
 	//       and be very conservative, using yres instead of yres_virtual, as Qt *may* already rely on that memory region.
 	if (vInfo.bits_per_pixel == 16) {
-		memset(fbPtr, v, fInfo.line_length * vInfo.yres);
+		memset(fbPtr, v, (size_t)(fInfo.line_length * vInfo.yres));
 	} else {
 		// NOTE: fInfo.smem_len should actually match fInfo.line_length * vInfo.yres_virtual on 32bpp ;).
 		//       Which is how things should always be, but, alas, poor Yorick...
@@ -564,7 +564,8 @@ static const unsigned char*
 	// Get the bitmap for the character mapped to that Unicode codepoint
 	if (codepoint <= 0x7F) {
 		return font8x8_basic[codepoint];
-	} else if (codepoint >= 0x80 && codepoint <= 0x9F) {
+		// NOTE: codepoint >= 0x80 by virtue of previous rung
+	} else if (codepoint <= 0x9F) {
 		return font8x8_control[codepoint - 0x80];
 	} else if (codepoint >= 0xA0 && codepoint <= 0xFF) {
 		return font8x8_ext_latin[codepoint - 0xA0];
