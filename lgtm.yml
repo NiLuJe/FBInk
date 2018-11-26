@@ -1,0 +1,12 @@
+# Tag our third-party code as such
+path_classifiers:
+        library:
+                - "font8x8/"
+                - "stb/"
+                - "libunibreak/"
+
+# Our scripts are NOT expected to run on Python 2
+extraction:
+        python_setup:
+                version: 3
+
