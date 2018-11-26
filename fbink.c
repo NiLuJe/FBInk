@@ -565,17 +565,17 @@ static const unsigned char*
 	if (codepoint <= 0x7F) {
 		return font8x8_basic[codepoint];
 	} else if (codepoint <= 0x9F) {
-		// NOTE: codepoint >= 0x80 by virtue of previous rung
+		// NOTE: codepoint >= 0x80 by virtue of the previous rung
 		return font8x8_control[codepoint - 0x80];
 	} else if (codepoint <= 0xFF) {
-		// NOTE: codepoint >= 0xA0 by virtue of previous rung
+		// NOTE: codepoint >= 0xA0 by virtue of the previous rung
 		return font8x8_ext_latin[codepoint - 0xA0];
 	} else if (codepoint >= 0x390 && codepoint <= 0x3C9) {
 		return font8x8_greek[codepoint - 0x390];
 	} else if (codepoint >= 0x2500 && codepoint <= 0x257F) {
 		return font8x8_box[codepoint - 0x2500];
 	} else if (codepoint <= 0x259F) {
-		// NOTE: codepoint >= 0x2580 by virtue of previous rung
+		// NOTE: codepoint >= 0x2580 by virtue of the previous rung
 		return font8x8_block[codepoint - 0x2580];
 	} else if (codepoint >= 0x3040 && codepoint <= 0x309F) {
 		return font8x8_hiragana[codepoint - 0x3040];

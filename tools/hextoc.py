@@ -74,13 +74,13 @@ cp = 0x0
 prevcp = 0x0
 
 pat_cp = "([0-9a-fA-F]{4})"
-if fontwidth <= 8: #lgtm
+if fontwidth <= 8:
 	pat_rows = "([0-9a-fA-F]{2})" * fontheight
-elif fontwidth <= 16: #lgtm
+elif fontwidth <= 16:
 	pat_rows = "([0-9a-fA-F]{4})" * fontheight
-elif fontwidth <= 32: #lgtm
+elif fontwidth <= 32:
 	pat_rows = "([0-9a-fA-F]{8})" * fontheight
-elif fontwidth <= 64: #lgtm
+elif fontwidth <= 64:
 	pat_rows = "([0-9a-fA-F]{16})" * fontheight
 else:
 	print("Unsupported font width (Must be <= 64)!")
@@ -99,13 +99,13 @@ with open(fontfile, "r") as f:
 					print("}}; // {}".format(blockcount))
 					print("")
 					if blocknum == 1:
-						if fontwidth <= 8: #lgtm
+						if fontwidth <= 8:
 							eprint("static const unsigned char*")
-						elif fontwidth <= 16: #lgtm
+						elif fontwidth <= 16:
 							eprint("static const uint16_t*")
-						elif fontwidth <= 32: #lgtm
+						elif fontwidth <= 32:
 							eprint("static const uint32_t*")
-						elif fontwidth <= 64: #lgtm
+						elif fontwidth <= 64:
 							eprint("static const uint64_t*")
 						else:
 							exit(-1)
@@ -123,29 +123,29 @@ with open(fontfile, "r") as f:
 				blocknum += 1
 				blockcount = 1
 				blockcp = cp
-				if fontwidth <= 8: #lgtm
+				if fontwidth <= 8:
 					print("static const unsigned char {}_block{}[][{}] = {{".format(fontname, blocknum, fontheight))
-				elif fontwidth <= 16: #lgtm
+				elif fontwidth <= 16:
 					print("static const uint16_t {}_block{}[][{}] = {{".format(fontname, blocknum, fontheight))
-				elif fontwidth <= 32: #lgtm
+				elif fontwidth <= 32:
 					print("static const uint32_t {}_block{}[][{}] = {{".format(fontname, blocknum, fontheight))
-				elif fontwidth <= 64: #lgtm
+				elif fontwidth <= 64:
 					print("static const uint64_t {}_block{}[][{}] = {{".format(fontname, blocknum, fontheight))
 				else:
 					exit(-1)
 
 			hcp = int(cp, base=16)
 			print(u"\t{", end='')
-			if fontwidth <= 8: #lgtm
+			if fontwidth <= 8:
 				for i in range(fontheight):
 					print(u" {:#04x}".format(hex2f8(m.group(i+2))), end='' if i+1 == fontheight else ',')
-			elif fontwidth <= 16: #lgtm
+			elif fontwidth <= 16:
 				for i in range(fontheight):
 					print(u" {:#06x}".format(hex2f16(m.group(i+2))), end='' if i+1 == fontheight else ',')
-			elif fontwidth <= 32: #lgtm
+			elif fontwidth <= 32:
 				for i in range(fontheight):
 					print(u" {:#010x}".format(hex2f32(m.group(i+2))), end='' if i+1 == fontheight else ',')
-			elif fontwidth <= 64: #lgtm
+			elif fontwidth <= 64:
 				for i in range(fontheight):
 					print(u" {:#018x}".format(hex2f64(m.group(i+2))), end='' if i+1 == fontheight else ',')
 			else:
@@ -157,13 +157,13 @@ print("")
 
 # Handle single block fonts
 if blocknum == 1:
-	if fontwidth <= 8: #lgtm
+	if fontwidth <= 8:
 		eprint("static const unsigned char*")
-	elif fontwidth <= 16: #lgtm
+	elif fontwidth <= 16:
 		eprint("static const uint16_t*")
-	elif fontwidth <= 32: #lgtm
+	elif fontwidth <= 32:
 		eprint("static const uint32_t*")
-	elif fontwidth <= 64: #lgtm
+	elif fontwidth <= 64:
 		eprint("static const uint64_t*")
 	else:
 		exit(-1)
