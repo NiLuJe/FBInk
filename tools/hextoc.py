@@ -74,13 +74,13 @@ cp = 0x0
 prevcp = 0x0
 
 pat_cp = "([0-9a-fA-F]{4})"
-if fontwidth <= 8:
+if fontwidth <= 8: # lgtm[py/unreachable-statement]
 	pat_rows = "([0-9a-fA-F]{2})" * fontheight
-elif fontwidth <= 16:
+elif fontwidth <= 16: # lgtm[py/unreachable-statement]
 	pat_rows = "([0-9a-fA-F]{4})" * fontheight
-elif fontwidth <= 32:
+elif fontwidth <= 32: # lgtm[py/unreachable-statement]
 	pat_rows = "([0-9a-fA-F]{8})" * fontheight
-elif fontwidth <= 64:
+elif fontwidth <= 64: # lgtm[py/unreachable-statement]
 	pat_rows = "([0-9a-fA-F]{16})" * fontheight
 else:
 	print("Unsupported font width (Must be <= 64)!")
@@ -157,13 +157,13 @@ print("")
 
 # Handle single block fonts
 if blocknum == 1:
-	if fontwidth <= 8:
+	if fontwidth <= 8: # lgtm[py/unreachable-statement]
 		eprint("static const unsigned char*")
-	elif fontwidth <= 16:
+	elif fontwidth <= 16: # lgtm[py/unreachable-statement]
 		eprint("static const uint16_t*")
-	elif fontwidth <= 32:
+	elif fontwidth <= 32: # lgtm[py/unreachable-statement]
 		eprint("static const uint32_t*")
-	elif fontwidth <= 64:
+	elif fontwidth <= 64: # lgtm[py/unreachable-statement]
 		eprint("static const uint64_t*")
 	else:
 		exit(-1)
