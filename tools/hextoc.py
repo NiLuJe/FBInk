@@ -20,7 +20,7 @@ import sys
 
 # We'll send the C header to stdout, but our C if/else snippet to stderr... ;).
 # And then use your shell to handle the I/O redirections, because I'm lazy :D.
-# ./hextoc.py > ../fonts/unscii.h 2>> ../fbink_unscii.c
+# ./hextoc.py unscii > ../fonts/unscii.h 2>> ../fbink_unscii.c
 def eprint(*args, **kwargs):
 	print(*args, file=sys.stderr, **kwargs)
 
