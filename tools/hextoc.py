@@ -102,7 +102,6 @@ blocknum = 0
 blockcount = 1
 blockcp = 0x0
 cp = 0x0
-prevblockcp = 0x0
 prevcp = 0x0
 
 pat_cp = "([0-9a-fA-F]{4})"
@@ -155,21 +154,14 @@ with open(fontfile, "r") as f:
 							eprint("\tif (codepoint <= {:#04x}) {{".format(prevcp))
 							eprint("\t\treturn {}_block{}[codepoint];".format(fontname, blocknum))
 					else:
-						if blockcp > prevblockcp + 1 :
-							if blockcp == prevcp:
-								eprint("\t}} else if (codepoint == {:#04x}) {{".format(blockcp))
-								eprint("\t\treturn {}_block{}[0];".format(fontname, blocknum))
-							else:
-								eprint("\t}} else if (codepoint >= {:#04x} && codepoint <= {:#04x}) {{".format(blockcp, prevcp))
-								eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, blockcp))
+						if blockcp == prevcp:
+							eprint("\t}} else if (codepoint == {:#04x}) {{".format(blockcp))
+							eprint("\t\treturn {}_block{}[0];".format(fontname, blocknum))
 						else:
-							# NOTE: Given how we break things down in blocks, this should *never* happen!
-							eprint("\t// NOTE: codepoint >= {:#04x} by virtue of the previous rung".format(blockcp))
-							eprint("\t}} else if (codepoint <= {:#04x}) {{".format(prevcp))
+							eprint("\t}} else if (codepoint >= {:#04x} && codepoint <= {:#04x}) {{".format(blockcp, prevcp))
 							eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, blockcp))
 				blocknum += 1
 				blockcount = 1
-				prevblockcp = blockcp
 				blockcp = hcp
 				if fontwidth <= 8:
 					print("static const unsigned char {}_block{}[][{}] = {{".format(fontname, blocknum, fontheight))
@@ -228,17 +220,11 @@ if blocknum == 1:
 		eprint("\t\treturn {}_block{}[codepoint];".format(fontname, blocknum))
 else:
 	# Otherwise, don't forget the final block ;)
-	if blockcp > prevblockcp + 1 :
-		if blockcp == prevcp:
-			eprint("\t}} else if (codepoint == {:#04x}) {{".format(blockcp))
-			eprint("\t\treturn {}_block{}[0];".format(fontname, blocknum))
-		else:
-			eprint("\t}} else if (codepoint >= {:#04x} && codepoint <= {:#04x}) {{".format(blockcp, prevcp))
-			eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, blockcp))
+	if blockcp == prevcp:
+		eprint("\t}} else if (codepoint == {:#04x}) {{".format(blockcp))
+		eprint("\t\treturn {}_block{}[0];".format(fontname, blocknum))
 	else:
-		# NOTE: Given how we break things down in blocks, this should *never* happen!
-		eprint("\t// NOTE: codepoint >= {:#04x} by virtue of the previous rung".format(blockcp))
-		eprint("\t}} else if (codepoint <= {:#04x}) {{".format(prevcp))
+		eprint("\t}} else if (codepoint >= {:#04x} && codepoint <= {:#04x}) {{".format(blockcp, prevcp))
 		eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, blockcp))
 
 eprint("\t} else {")
