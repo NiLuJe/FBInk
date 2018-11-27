@@ -147,7 +147,7 @@ with open(fontfile, "r") as f:
 						if blockcp > 0 :
 							if blockcp == prevcp:
 								eprint("\tif (codepoint == {:#04x}) {{".format(blockcp))
-								eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, blockcp))
+								eprint("\t\treturn {}_block{}[0];".format(fontname, blocknum))
 							else:
 								eprint("\tif (codepoint >= {:#04x} && codepoint <= {:#04x}) {{".format(blockcp, prevcp))
 								eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, blockcp))
@@ -158,7 +158,7 @@ with open(fontfile, "r") as f:
 						if blockcp > prevblockcp + 1 :
 							if blockcp == prevcp:
 								eprint("\t}} else if (codepoint == {:#04x}) {{".format(blockcp))
-								eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, blockcp))
+								eprint("\t\treturn {}_block{}[0];".format(fontname, blocknum))
 							else:
 								eprint("\t}} else if (codepoint >= {:#04x} && codepoint <= {:#04x}) {{".format(blockcp, prevcp))
 								eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, blockcp))
@@ -219,7 +219,7 @@ if blocknum == 1:
 	if blockcp > 0:
 		if blockcp == prevcp:
 			eprint("\tif (codepoint == {:#04x}) {{".format(blockcp))
-			eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, blockcp))
+			eprint("\t\treturn {}_block{}[0];".format(fontname, blocknum))
 		else:
 			eprint("\tif (codepoint >= {:#04x} && codepoint <= {:#04x}) {{".format(blockcp, prevcp))
 			eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, blockcp))
@@ -231,7 +231,7 @@ else:
 	if blockcp > prevblockcp + 1 :
 		if blockcp == prevcp:
 			eprint("\t}} else if (codepoint == {:#04x}) {{".format(blockcp))
-			eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, blockcp))
+			eprint("\t\treturn {}_block{}[0];".format(fontname, blocknum))
 		else:
 			eprint("\t}} else if (codepoint >= {:#04x} && codepoint <= {:#04x}) {{".format(blockcp, prevcp))
 			eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, blockcp))
