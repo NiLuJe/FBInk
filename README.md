@@ -1,5 +1,5 @@
 # FBInk
-[![License](https://img.shields.io/github/license/NiLuJe/FBInk.svg)](/LICENSE) [![Total alerts](https://img.shields.io/lgtm/alerts/g/NiLuJe/FBInk.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/NiLuJe/FBInk/alerts/) [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/NiLuJe/FBInk.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/NiLuJe/FBInk/context:cpp) [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/NiLuJe/FBInk.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/NiLuJe/FBInk/context:python) [![Latest tag](https://img.shields.io/github/tag-date/NiLuJe/FBInk.svg)](/releases/)
+[![License](https://img.shields.io/github/license/NiLuJe/FBInk.svg)](/LICENSE) [![Total alerts](https://img.shields.io/lgtm/alerts/g/NiLuJe/FBInk.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/NiLuJe/FBInk/alerts/) [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/NiLuJe/FBInk.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/NiLuJe/FBInk/context:cpp) [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/NiLuJe/FBInk.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/NiLuJe/FBInk/context:python) [![Latest tag](https://img.shields.io/github/tag-date/NiLuJe/FBInk.svg)](https://github.com/NiLuJe/FBInk/releases/)
 
 FrameBuffer eInker
 
