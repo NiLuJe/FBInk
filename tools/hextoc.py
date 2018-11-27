@@ -14,6 +14,7 @@
 #
 ##
 
+import os
 import re
 import sys
 
@@ -55,10 +56,34 @@ def hex2f64(v):
 	h = int(v, base=16)
 	return int(bin(h)[2:].zfill(64)[::-1], 2)
 
-fontwidth = 7
-fontheight = 12
-fontfile = "../fonts/scientifica-7x12i.hex"
+# This is the list of fonts we currently process
+font_set = {
+	# name		: (file,			w,	h)
+	"unscii"	: ("unscii-8.hex",		8,	8),
+	"alt"		: ("unscii-8-alt.hex",		8,	8),
+	"thin"		: ("unscii-8-thin.hex",		8,	8),
+	"fantasy"	: ("unscii-8-fantasy.hex",	8,	8),
+	"mcr"		: ("unscii-8-mcr.hex",		8,	8),
+	"tall"		: ("unscii-16.hex",		8,	16),
+	"block"		: ("block.hex",			32,	32),
+	"leggie"	: ("leggie-8x18.hex",		8,	18),
+	"veggie"	: ("leggie-8x16v.hex",		8,	16),
+	"kates"		: ("kates-7x15.hex",		7,	15),
+	"fkp"		: ("fkp-8x16.hex",		8,	16),
+	"ctrld"		: ("ctrld-fixed-8x16r",		8,	16),
+	"orp"		: ("orp-6x12.hex",		6,	12),
+	"orpb"		: ("orp-6x12b.hex",		6,	12),
+	"orpi"		: ("orp-6x12i.hex",		6,	12),
+	"scientifica"	: ("scientifica-5x12.hex",	5,	12),
+	"scientificab"	: ("scientifica-5x12b.hex",	5,	12),
+	"scientificai"	: ("scientifica-7x12i.hex",	7,	12),
+}
+
 fontname = "scientificai"
+
+fontfile = os.path.dirname(os.path.abspath(__file__)) + "/../fonts/" + font_set[fontname][0]
+fontwidth = font_set[fontname][1]
+fontheight = font_set[fontname][2]
 
 print("/*")
 print("* C Header for use with https://github.com/NiLuJe/FBInk")
