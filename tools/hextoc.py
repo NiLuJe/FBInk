@@ -93,7 +93,7 @@ fontheight = font_set[fontname][2]
 
 print("/*")
 print("* C Header for use with https://github.com/NiLuJe/FBInk")
-print("* Converted from Hex font {}".format(fontfile))
+print("* Converted from Hex font {}".format(font_set[fontname][0]))
 print("* With FBInk's tools/hextoc.py")
 print("*/")
 print("")
