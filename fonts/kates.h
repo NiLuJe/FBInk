@@ -1,6 +1,6 @@
 /*
 * C Header for use with https://github.com/NiLuJe/FBInk
-* Converted from Hex font ../fonts/kates-7x15.hex
+* Converted from Hex font kates-7x15.hex
 * With FBInk's tools/hextoc.py
 */
 

@@ -1,6 +1,6 @@
 /*
 * C Header for use with https://github.com/NiLuJe/FBInk
-* Converted from Hex font ../fonts/scientifica-5x12b.hex
+* Converted from Hex font scientifica-5x12b.hex
 * With FBInk's tools/hextoc.py
 */
 

@@ -33,8 +33,8 @@ static const unsigned char*
 		return orp_block4[codepoint - 0x37a];
 	} else if (codepoint >= 0x384 && codepoint <= 0x38a) {
 		return orp_block5[codepoint - 0x384];
-	} else if (codepoint >= 0x38c && codepoint <= 0x38c) {
-		return orp_block6[codepoint - 0x38c];
+	} else if (codepoint == 0x38c) {
+		return orp_block6[0];
 	} else if (codepoint >= 0x38e && codepoint <= 0x3a1) {
 		return orp_block7[codepoint - 0x38e];
 	} else if (codepoint >= 0x3a3 && codepoint <= 0x523) {
@@ -85,12 +85,12 @@ static const unsigned char*
 		return orp_block30[codepoint - 0x1f48];
 	} else if (codepoint >= 0x1f50 && codepoint <= 0x1f57) {
 		return orp_block31[codepoint - 0x1f50];
-	} else if (codepoint >= 0x1f59 && codepoint <= 0x1f59) {
-		return orp_block32[codepoint - 0x1f59];
-	} else if (codepoint >= 0x1f5b && codepoint <= 0x1f5b) {
-		return orp_block33[codepoint - 0x1f5b];
-	} else if (codepoint >= 0x1f5d && codepoint <= 0x1f5d) {
-		return orp_block34[codepoint - 0x1f5d];
+	} else if (codepoint == 0x1f59) {
+		return orp_block32[0];
+	} else if (codepoint == 0x1f5b) {
+		return orp_block33[0];
+	} else if (codepoint == 0x1f5d) {
+		return orp_block34[0];
 	} else if (codepoint >= 0x1f5f && codepoint <= 0x1f7d) {
 		return orp_block35[codepoint - 0x1f5f];
 	} else if (codepoint >= 0x1f80 && codepoint <= 0x1fb4) {
@@ -151,12 +151,12 @@ static const unsigned char*
 		return orp_block63[codepoint - 0x270c];
 	} else if (codepoint >= 0x2729 && codepoint <= 0x274b) {
 		return orp_block64[codepoint - 0x2729];
-	} else if (codepoint >= 0x274d && codepoint <= 0x274d) {
-		return orp_block65[codepoint - 0x274d];
+	} else if (codepoint == 0x274d) {
+		return orp_block65[0];
 	} else if (codepoint >= 0x274f && codepoint <= 0x2752) {
 		return orp_block66[codepoint - 0x274f];
-	} else if (codepoint >= 0x2756 && codepoint <= 0x2756) {
-		return orp_block67[codepoint - 0x2756];
+	} else if (codepoint == 0x2756) {
+		return orp_block67[0];
 	} else if (codepoint >= 0x2758 && codepoint <= 0x275e) {
 		return orp_block68[codepoint - 0x2758];
 	} else if (codepoint >= 0x2761 && codepoint <= 0x2794) {
@@ -167,8 +167,8 @@ static const unsigned char*
 		return orp_block71[codepoint - 0x27b1];
 	} else if (codepoint >= 0x27c0 && codepoint <= 0x27ca) {
 		return orp_block72[codepoint - 0x27c0];
-	} else if (codepoint >= 0x27cc && codepoint <= 0x27cc) {
-		return orp_block73[codepoint - 0x27cc];
+	} else if (codepoint == 0x27cc) {
+		return orp_block73[0];
 	} else if (codepoint >= 0x27d0 && codepoint <= 0x2b4c) {
 		return orp_block74[codepoint - 0x27d0];
 	} else if (codepoint >= 0x2b60 && codepoint <= 0x2b64) {
@@ -181,14 +181,14 @@ static const unsigned char*
 		return orp_block78[codepoint - 0x2c71];
 	} else if (codepoint >= 0x2de0 && codepoint <= 0x2dff) {
 		return orp_block79[codepoint - 0x2de0];
-	} else if (codepoint >= 0xe0b2 && codepoint <= 0xe0b2) {
-		return orp_block80[codepoint - 0xe0b2];
+	} else if (codepoint == 0xe0b2) {
+		return orp_block80[0];
 	} else if (codepoint >= 0xfb00 && codepoint <= 0xfb06) {
 		return orp_block81[codepoint - 0xfb00];
 	} else if (codepoint >= 0xfe20 && codepoint <= 0xfe23) {
 		return orp_block82[codepoint - 0xfe20];
-	} else if (codepoint >= 0xfffd && codepoint <= 0xfffd) {
-		return orp_block83[codepoint - 0xfffd];
+	} else if (codepoint == 0xfffd) {
+		return orp_block83[0];
 	} else {
 		WARN("Codepoint U+%04X is not covered by this font", codepoint);
 		return orp_block1[0];
@@ -208,8 +208,8 @@ static const unsigned char*
 		return orpb_block4[codepoint - 0x37a];
 	} else if (codepoint >= 0x384 && codepoint <= 0x38a) {
 		return orpb_block5[codepoint - 0x384];
-	} else if (codepoint >= 0x38c && codepoint <= 0x38c) {
-		return orpb_block6[codepoint - 0x38c];
+	} else if (codepoint == 0x38c) {
+		return orpb_block6[0];
 	} else if (codepoint >= 0x38e && codepoint <= 0x3a1) {
 		return orpb_block7[codepoint - 0x38e];
 	} else if (codepoint >= 0x3a3 && codepoint <= 0x523) {
@@ -260,12 +260,12 @@ static const unsigned char*
 		return orpb_block30[codepoint - 0x1f48];
 	} else if (codepoint >= 0x1f50 && codepoint <= 0x1f57) {
 		return orpb_block31[codepoint - 0x1f50];
-	} else if (codepoint >= 0x1f59 && codepoint <= 0x1f59) {
-		return orpb_block32[codepoint - 0x1f59];
-	} else if (codepoint >= 0x1f5b && codepoint <= 0x1f5b) {
-		return orpb_block33[codepoint - 0x1f5b];
-	} else if (codepoint >= 0x1f5d && codepoint <= 0x1f5d) {
-		return orpb_block34[codepoint - 0x1f5d];
+	} else if (codepoint == 0x1f59) {
+		return orpb_block32[0];
+	} else if (codepoint == 0x1f5b) {
+		return orpb_block33[0];
+	} else if (codepoint == 0x1f5d) {
+		return orpb_block34[0];
 	} else if (codepoint >= 0x1f5f && codepoint <= 0x1f7d) {
 		return orpb_block35[codepoint - 0x1f5f];
 	} else if (codepoint >= 0x1f80 && codepoint <= 0x1fb4) {
@@ -326,12 +326,12 @@ static const unsigned char*
 		return orpb_block63[codepoint - 0x270c];
 	} else if (codepoint >= 0x2729 && codepoint <= 0x274b) {
 		return orpb_block64[codepoint - 0x2729];
-	} else if (codepoint >= 0x274d && codepoint <= 0x274d) {
-		return orpb_block65[codepoint - 0x274d];
+	} else if (codepoint == 0x274d) {
+		return orpb_block65[0];
 	} else if (codepoint >= 0x274f && codepoint <= 0x2752) {
 		return orpb_block66[codepoint - 0x274f];
-	} else if (codepoint >= 0x2756 && codepoint <= 0x2756) {
-		return orpb_block67[codepoint - 0x2756];
+	} else if (codepoint == 0x2756) {
+		return orpb_block67[0];
 	} else if (codepoint >= 0x2758 && codepoint <= 0x275e) {
 		return orpb_block68[codepoint - 0x2758];
 	} else if (codepoint >= 0x2761 && codepoint <= 0x2794) {
@@ -342,8 +342,8 @@ static const unsigned char*
 		return orpb_block71[codepoint - 0x27b1];
 	} else if (codepoint >= 0x27c0 && codepoint <= 0x27ca) {
 		return orpb_block72[codepoint - 0x27c0];
-	} else if (codepoint >= 0x27cc && codepoint <= 0x27cc) {
-		return orpb_block73[codepoint - 0x27cc];
+	} else if (codepoint == 0x27cc) {
+		return orpb_block73[0];
 	} else if (codepoint >= 0x27d0 && codepoint <= 0x2b4c) {
 		return orpb_block74[codepoint - 0x27d0];
 	} else if (codepoint >= 0x2c60 && codepoint <= 0x2c6f) {
@@ -356,8 +356,8 @@ static const unsigned char*
 		return orpb_block78[codepoint - 0xfb00];
 	} else if (codepoint >= 0xfe20 && codepoint <= 0xfe23) {
 		return orpb_block79[codepoint - 0xfe20];
-	} else if (codepoint >= 0xfffd && codepoint <= 0xfffd) {
-		return orpb_block80[codepoint - 0xfffd];
+	} else if (codepoint == 0xfffd) {
+		return orpb_block80[0];
 	} else {
 		WARN("Codepoint U+%04X is not covered by this font", codepoint);
 		return orpb_block1[0];
@@ -377,8 +377,8 @@ static const unsigned char*
 		return orpi_block4[codepoint - 0x37a];
 	} else if (codepoint >= 0x384 && codepoint <= 0x38a) {
 		return orpi_block5[codepoint - 0x384];
-	} else if (codepoint >= 0x38c && codepoint <= 0x38c) {
-		return orpi_block6[codepoint - 0x38c];
+	} else if (codepoint == 0x38c) {
+		return orpi_block6[0];
 	} else if (codepoint >= 0x38e && codepoint <= 0x3a1) {
 		return orpi_block7[codepoint - 0x38e];
 	} else if (codepoint >= 0x3a3 && codepoint <= 0x523) {
@@ -429,12 +429,12 @@ static const unsigned char*
 		return orpi_block30[codepoint - 0x1f48];
 	} else if (codepoint >= 0x1f50 && codepoint <= 0x1f57) {
 		return orpi_block31[codepoint - 0x1f50];
-	} else if (codepoint >= 0x1f59 && codepoint <= 0x1f59) {
-		return orpi_block32[codepoint - 0x1f59];
-	} else if (codepoint >= 0x1f5b && codepoint <= 0x1f5b) {
-		return orpi_block33[codepoint - 0x1f5b];
-	} else if (codepoint >= 0x1f5d && codepoint <= 0x1f5d) {
-		return orpi_block34[codepoint - 0x1f5d];
+	} else if (codepoint == 0x1f59) {
+		return orpi_block32[0];
+	} else if (codepoint == 0x1f5b) {
+		return orpi_block33[0];
+	} else if (codepoint == 0x1f5d) {
+		return orpi_block34[0];
 	} else if (codepoint >= 0x1f5f && codepoint <= 0x1f7d) {
 		return orpi_block35[codepoint - 0x1f5f];
 	} else if (codepoint >= 0x1f80 && codepoint <= 0x1fb4) {
@@ -495,12 +495,12 @@ static const unsigned char*
 		return orpi_block63[codepoint - 0x270c];
 	} else if (codepoint >= 0x2729 && codepoint <= 0x274b) {
 		return orpi_block64[codepoint - 0x2729];
-	} else if (codepoint >= 0x274d && codepoint <= 0x274d) {
-		return orpi_block65[codepoint - 0x274d];
+	} else if (codepoint == 0x274d) {
+		return orpi_block65[0];
 	} else if (codepoint >= 0x274f && codepoint <= 0x2752) {
 		return orpi_block66[codepoint - 0x274f];
-	} else if (codepoint >= 0x2756 && codepoint <= 0x2756) {
-		return orpi_block67[codepoint - 0x2756];
+	} else if (codepoint == 0x2756) {
+		return orpi_block67[0];
 	} else if (codepoint >= 0x2758 && codepoint <= 0x275e) {
 		return orpi_block68[codepoint - 0x2758];
 	} else if (codepoint >= 0x2761 && codepoint <= 0x2794) {
@@ -511,8 +511,8 @@ static const unsigned char*
 		return orpi_block71[codepoint - 0x27b1];
 	} else if (codepoint >= 0x27c0 && codepoint <= 0x27ca) {
 		return orpi_block72[codepoint - 0x27c0];
-	} else if (codepoint >= 0x27cc && codepoint <= 0x27cc) {
-		return orpi_block73[codepoint - 0x27cc];
+	} else if (codepoint == 0x27cc) {
+		return orpi_block73[0];
 	} else if (codepoint >= 0x27d0 && codepoint <= 0x2b4c) {
 		return orpi_block74[codepoint - 0x27d0];
 	} else if (codepoint >= 0x2c60 && codepoint <= 0x2c6f) {
@@ -525,8 +525,8 @@ static const unsigned char*
 		return orpi_block78[codepoint - 0xfb00];
 	} else if (codepoint >= 0xfe20 && codepoint <= 0xfe23) {
 		return orpi_block79[codepoint - 0xfe20];
-	} else if (codepoint >= 0xfffd && codepoint <= 0xfffd) {
-		return orpi_block80[codepoint - 0xfffd];
+	} else if (codepoint == 0xfffd) {
+		return orpi_block80[0];
 	} else {
 		WARN("Codepoint U+%04X is not covered by this font", codepoint);
 		return orpi_block1[0];

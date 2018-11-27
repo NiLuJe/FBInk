@@ -27,8 +27,8 @@ static const unsigned char*
 		return kates_block1[codepoint];
 	} else if (codepoint >= 0x09 && codepoint <= 0x19) {
 		return kates_block2[codepoint - 0x09];
-	} else if (codepoint >= 0x1b && codepoint <= 0x1b) {
-		return kates_block3[codepoint - 0x1b];
+	} else if (codepoint == 0x1b) {
+		return kates_block3[0];
 	} else if (codepoint >= 0x20 && codepoint <= 0x7e) {
 		return kates_block4[codepoint - 0x20];
 	} else if (codepoint >= 0xa1 && codepoint <= 0xac) {
@@ -57,28 +57,28 @@ static const unsigned char*
 {
 	if (codepoint >= 0x0a && codepoint <= 0xff) {
 		return ctrld_block1[codepoint - 0x0a];
-	} else if (codepoint >= 0x3bb && codepoint <= 0x3bb) {
-		return ctrld_block2[codepoint - 0x3bb];
-	} else if (codepoint >= 0x3c0 && codepoint <= 0x3c0) {
-		return ctrld_block3[codepoint - 0x3c0];
-	} else if (codepoint >= 0x21b5 && codepoint <= 0x21b5) {
-		return ctrld_block4[codepoint - 0x21b5];
-	} else if (codepoint >= 0x25aa && codepoint <= 0x25aa) {
-		return ctrld_block5[codepoint - 0x25aa];
-	} else if (codepoint >= 0x25b4 && codepoint <= 0x25b4) {
-		return ctrld_block6[codepoint - 0x25b4];
-	} else if (codepoint >= 0x25b8 && codepoint <= 0x25b8) {
-		return ctrld_block7[codepoint - 0x25b8];
-	} else if (codepoint >= 0x25be && codepoint <= 0x25be) {
-		return ctrld_block8[codepoint - 0x25be];
-	} else if (codepoint >= 0x25c2 && codepoint <= 0x25c2) {
-		return ctrld_block9[codepoint - 0x25c2];
-	} else if (codepoint >= 0x25c6 && codepoint <= 0x25c6) {
-		return ctrld_block10[codepoint - 0x25c6];
-	} else if (codepoint >= 0x2713 && codepoint <= 0x2713) {
-		return ctrld_block11[codepoint - 0x2713];
-	} else if (codepoint >= 0x2717 && codepoint <= 0x2717) {
-		return ctrld_block12[codepoint - 0x2717];
+	} else if (codepoint == 0x3bb) {
+		return ctrld_block2[0];
+	} else if (codepoint == 0x3c0) {
+		return ctrld_block3[0];
+	} else if (codepoint == 0x21b5) {
+		return ctrld_block4[0];
+	} else if (codepoint == 0x25aa) {
+		return ctrld_block5[0];
+	} else if (codepoint == 0x25b4) {
+		return ctrld_block6[0];
+	} else if (codepoint == 0x25b8) {
+		return ctrld_block7[0];
+	} else if (codepoint == 0x25be) {
+		return ctrld_block8[0];
+	} else if (codepoint == 0x25c2) {
+		return ctrld_block9[0];
+	} else if (codepoint == 0x25c6) {
+		return ctrld_block10[0];
+	} else if (codepoint == 0x2713) {
+		return ctrld_block11[0];
+	} else if (codepoint == 0x2717) {
+		return ctrld_block12[0];
 	} else if (codepoint >= 0xe0a0 && codepoint <= 0xe0a2) {
 		return ctrld_block13[codepoint - 0xe0a0];
 	} else if (codepoint >= 0xe0b0 && codepoint <= 0xe0b3) {

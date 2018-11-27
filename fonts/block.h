@@ -1,6 +1,6 @@
 /*
 * C Header for use with https://github.com/NiLuJe/FBInk
-* Converted from Hex font ../fonts/block.hex
+* Converted from Hex font block.hex
 * With FBInk's tools/hextoc.py
 */
 

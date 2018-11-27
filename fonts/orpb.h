@@ -1,6 +1,6 @@
 /*
 * C Header for use with https://github.com/NiLuJe/FBInk
-* Converted from Hex font ../fonts/orp-6x12b.hex
+* Converted from Hex font orp-6x12b.hex
 * With FBInk's tools/hextoc.py
 */
 

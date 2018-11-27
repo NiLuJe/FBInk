@@ -1,6 +1,6 @@
 /*
 * C Header for use with https://github.com/NiLuJe/FBInk
-* Converted from Hex font ../fonts/ctrld-fixed-8x16r.hex
+* Converted from Hex font ctrld-fixed-8x16r.hex
 * With FBInk's tools/hextoc.py
 */
 

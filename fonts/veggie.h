@@ -1,6 +1,6 @@
 /*
 * C Header for use with https://github.com/NiLuJe/FBInk
-* Converted from Hex font ../fonts/leggie-8x16v.hex
+* Converted from Hex font leggie-8x16v.hex
 * With FBInk's tools/hextoc.py
 */
 
