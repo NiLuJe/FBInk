@@ -1907,60 +1907,55 @@ static int
 #ifdef FBINK_WITH_FONTS
 	// Setup custom fonts (glyph size, render fx, bitmap fx)
 	switch (fbink_cfg->fontname) {
-		case SCIENTIFICA:
-			glyphWidth         = 5U;
+		case SCIENTIFICAI:
+			glyphWidth         = 7U;
 			glyphHeight        = 12U;
-			fxpFont8xGetBitmap = &scientifica_get_bitmap;
+			fxpFont8xGetBitmap = &scientificai_get_bitmap;
 			break;
 		case SCIENTIFICAB:
 			glyphWidth         = 5U;
 			glyphHeight        = 12U;
 			fxpFont8xGetBitmap = &scientificab_get_bitmap;
 			break;
-		case SCIENTIFICAI:
-			glyphWidth         = 7U;
+		case SCIENTIFICA:
+			glyphWidth         = 5U;
 			glyphHeight        = 12U;
-			fxpFont8xGetBitmap = &scientificai_get_bitmap;
-			break;
-		case ORP:
-			glyphWidth         = 6U;
-			glyphHeight        = 12U;
-			fxpFont8xGetBitmap = &orp_get_bitmap;
-			break;
-		case ORPB:
-			glyphWidth         = 6U;
-			glyphHeight        = 12U;
-			fxpFont8xGetBitmap = &orpb_get_bitmap;
+			fxpFont8xGetBitmap = &scientifica_get_bitmap;
 			break;
 		case ORPI:
 			glyphWidth         = 6U;
 			glyphHeight        = 12U;
 			fxpFont8xGetBitmap = &orpi_get_bitmap;
 			break;
-		case KATES:
-			glyphWidth         = 7U;
-			glyphHeight        = 15U;
-			fxpFont8xGetBitmap = &kates_get_bitmap;
+		case ORPB:
+			glyphWidth         = 6U;
+			glyphHeight        = 12U;
+			fxpFont8xGetBitmap = &orpb_get_bitmap;
 			break;
-		case UNSCII_TALL:
+		case ORP:
+			glyphWidth         = 6U;
+			glyphHeight        = 12U;
+			fxpFont8xGetBitmap = &orp_get_bitmap;
+			break;
+		case CTRLD:
 			glyphWidth         = 8U;
 			glyphHeight        = 16U;
-			fxpFont8xGetBitmap = &tall_get_bitmap;
-			break;
-		case VEGGIE:
-			glyphWidth         = 8U;
-			glyphHeight        = 16U;
-			fxpFont8xGetBitmap = &veggie_get_bitmap;
+			fxpFont8xGetBitmap = &ctrld_get_bitmap;
 			break;
 		case FKP:
 			glyphWidth         = 8U;
 			glyphHeight        = 16U;
 			fxpFont8xGetBitmap = &fkp_get_bitmap;
 			break;
-		case CTRLD:
+		case KATES:
+			glyphWidth         = 7U;
+			glyphHeight        = 15U;
+			fxpFont8xGetBitmap = &kates_get_bitmap;
+			break;
+		case VEGGIE:
 			glyphWidth         = 8U;
 			glyphHeight        = 16U;
-			fxpFont8xGetBitmap = &ctrld_get_bitmap;
+			fxpFont8xGetBitmap = &veggie_get_bitmap;
 			break;
 		case LEGGIE:
 			glyphWidth         = 8U;
@@ -1972,6 +1967,11 @@ static int
 			glyphHeight = 32U;
 			// An horizontal resolution > 8 means a different data type...
 			fxpFont32xGetBitmap = &block_get_bitmap;
+			break;
+		case UNSCII_TALL:
+			glyphWidth         = 8U;
+			glyphHeight        = 16U;
+			fxpFont8xGetBitmap = &tall_get_bitmap;
 			break;
 		case UNSCII_MCR:
 			glyphWidth         = 8U;
