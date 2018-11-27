@@ -79,8 +79,14 @@ font_set = {
 	"scientificai"	: ("scientifica-7x12i.hex",	7,	12),
 }
 
-fontname = "scientificai"
+# Get the font name from the first arg passed to the script
+fontname = len(sys.argv) > 1 and sys.argv[1].lower() or "NULL"
+if not fontname in font_set.keys():
+	print("Unknown font name '{}'!".format(fontname))
+	print("Available: {}".format(', '.join([k for k in font_set.keys()])))
+	sys.exit(-1)
 
+# And populate that specific font's settings
 fontfile = os.path.dirname(os.path.abspath(__file__)) + "/../fonts/" + font_set[fontname][0]
 fontwidth = font_set[fontname][1]
 fontheight = font_set[fontname][2]
