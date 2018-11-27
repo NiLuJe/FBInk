@@ -1,6 +1,6 @@
 /*
 * C Header for use with https://github.com/NiLuJe/FBInk
-* Converted from Hex font ../fonts/unscii-8-mcr.hex
+* Converted from Hex font unscii-8-mcr.hex
 * With FBInk's tools/hextoc.py
 */
 
