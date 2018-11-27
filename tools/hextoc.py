@@ -70,7 +70,7 @@ font_set = {
 	"veggie"	: ("leggie-8x16v.hex",		8,	16),
 	"kates"		: ("kates-7x15.hex",		7,	15),
 	"fkp"		: ("fkp-8x16.hex",		8,	16),
-	"ctrld"		: ("ctrld-fixed-8x16r",		8,	16),
+	"ctrld"		: ("ctrld-fixed-8x16r.hex",	8,	16),
 	"orp"		: ("orp-6x12.hex",		6,	12),
 	"orpb"		: ("orp-6x12b.hex",		6,	12),
 	"orpi"		: ("orp-6x12i.hex",		6,	12),
