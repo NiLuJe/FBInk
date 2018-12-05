@@ -665,6 +665,7 @@ static struct mxcfb_rect
 	//       And as we're printing glyphs, we need to iterate over the number of characters/grapheme clusters,
 	//       not bytes.
 	unsigned short int charcount = (unsigned short int) u8_strlen(text);
+	// Flawfinder: ignore
 	LOG("Character count: %hu (over %zu bytes)", charcount, strlen(text));
 
 	// Compute our actual subcell offset in pixels
@@ -2608,6 +2609,7 @@ int
 	}
 
 	// See if we need to break our string down into multiple lines...
+	// Flawfinder: ignore
 	size_t       len       = strlen(string);
 	unsigned int charcount = u8_strlen(string);
 	// Check how much extra storage is used up by multibyte sequences.
@@ -3288,6 +3290,7 @@ int
 	// Now, lets use libunibreak to find the possible break opportunities in our string.
 
 	// Note: we only care about the byte length here
+	// Flawfinder: ignore
 	size_t str_len_bytes = strlen(string);
 	brk_buff             = calloc(str_len_bytes + 1, sizeof(*brk_buff));
 	if (!brk_buff) {
@@ -4371,6 +4374,7 @@ int
 		//       to avoid spurious behavior with u8_strlen later on...
 		char percentage_text[8] = { 0 };
 		snprintf(percentage_text, sizeof(percentage_text), "%hhu%%", value);
+		// Flawfinder: ignore
 		size_t line_len = strlen(percentage_text);
 
 		bool      halfcell_offset = false;

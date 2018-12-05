@@ -317,7 +317,8 @@ unsigned int
 unsigned int
     u8_unescape(char* buf, unsigned int sz, const char* src)
 {
-	unsigned int c = 0, amt;
+	unsigned int c = 0;
+	unsigned int amt;
 	uint32_t     ch;
 	char         temp[4];
 

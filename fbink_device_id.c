@@ -181,6 +181,7 @@ static uint32_t
 	const char* tbl    = "0123456789ABCDEFGHJKLMNPQRSTUVWX";
 	uint32_t    result = 0;
 
+	// Flawfinder: ignore
 	if (base > strlen(tbl)) {
 		WARN("base %hhu is unsupported (too large)", base);
 		return 0;
