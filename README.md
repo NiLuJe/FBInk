@@ -38,10 +38,10 @@ Launch the `fbink` tool with no argument for a quick manual & rundown of its cap
 NOTE: It generally makes *NO* attempt at handling software rotation, because that currently appears to be the right thing to do with both current Kobo FW versions and on Kindle.
 YMMV on older FW, or if something else is fudging with fb rotation, or if your application is implementing rotation in software (i.e., a rotated viewport).
 As far as hardware rotation is concerned, there are a few specific exceptions made for Kobo devices:
-  - Those running in 16bpp mode and appearing to be in landscape mode: since that seems to be their native state, we *attempt* to compensate for this,
-as we can legitimately be used before Nickel itself corrects this.
+-   Those running in 16bpp mode and appearing to be in landscape mode: since that seems to be their native state, we *attempt* to compensate for this,
+    as we can legitimately be used before Nickel itself corrects this.
 
-  - On devices with an accelerometer, like the Forma, where Nickel itself will handle the hardware rotation.
+-   On devices with an accelerometer, like the Forma, where Nickel itself will handle the hardware rotation.
 
 ## How does it look?
 
@@ -77,13 +77,13 @@ With that out of the way, the default target (i.e., `make`) will yield a static 
 There's a few convenience targets for usual build types (`make static` for a static build, `make shared` for a shared build, `make strip` for a stripped static build, `make release` for a stripped shared build, `make debug` for a debug build), as well as a few unusual ones for very specific use cases, usually related to FFI bindings (`make pic` for a PIC static build, or passing `STATIC_LIBM=1` to make to attempt to link against libm statically).
 
 The choice of target platform is handled via a simple variable:
-  - Pass `KINDLE=1` to make for a Kindle build (`make kindle` does that on a stripped static build)
-  - Pass `KINDLE=1 LEGACY=1` to make for a FW 2.x Kindle build (`make legacy` does that on a stripped static build). This basically just disables CLOEXEC, which might not be supported on FW 2.x.
-  - Pass `CERVANTES=1` to make for a BQ/Cervantes build (`make cervantes` does that on a stripped static build)
+-   Pass `KINDLE=1` to make for a Kindle build (`make kindle` does that on a stripped static build)
+-   Pass `KINDLE=1 LEGACY=1` to make for a FW 2.x Kindle build (`make legacy` does that on a stripped static build). This basically just disables CLOEXEC, which might not be supported on FW 2.x.
+-   Pass `CERVANTES=1` to make for a BQ/Cervantes build (`make cervantes` does that on a stripped static build)
 
 The same logic is used to allow for a bit of tailoring:
-  - Pass `MINIMAL=1` to make for a build with limited functionality (only fixed cell font rendering, no image rendering, no extra fonts, no OpenType), which yields a much smaller application & library.
-  - Pass `DEBUG=1` to make for a Debug build, and pass `DEBUG=1 DEBUGFLAGS=1` to make for a Debug build with enforced debug CFLAGS.
+-   Pass `MINIMAL=1` to make for a build with limited functionality (only fixed cell font rendering, no image rendering, no extra fonts, no OpenType), which yields a much smaller application & library.
+-   Pass `DEBUG=1` to make for a Debug build, and pass `DEBUG=1 DEBUGFLAGS=1` to make for a Debug build with enforced debug CFLAGS.
 
 ## NOTES
 
