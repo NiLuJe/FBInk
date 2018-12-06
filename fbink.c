@@ -2609,8 +2609,7 @@ int
 	}
 
 	// See if we need to break our string down into multiple lines...
-	// Flawfinder: ignore
-	size_t       len       = strlen(string);
+	size_t       len       = strlen(string);    // Flawfinder: ignore
 	unsigned int charcount = u8_strlen(string);
 	// Check how much extra storage is used up by multibyte sequences.
 	if (len > charcount) {
@@ -3290,8 +3289,7 @@ int
 	// Now, lets use libunibreak to find the possible break opportunities in our string.
 
 	// Note: we only care about the byte length here
-	// Flawfinder: ignore
-	size_t str_len_bytes = strlen(string);
+	size_t str_len_bytes = strlen(string);    // Flawfinder: ignore
 	brk_buff             = calloc(str_len_bytes + 1, sizeof(*brk_buff));
 	if (!brk_buff) {
 		WARN("Linebreak buffer could not be allocated");
@@ -4374,8 +4372,7 @@ int
 		//       to avoid spurious behavior with u8_strlen later on...
 		char percentage_text[8] = { 0 };
 		snprintf(percentage_text, sizeof(percentage_text), "%hhu%%", value);
-		// Flawfinder: ignore
-		size_t line_len = strlen(percentage_text);
+		size_t line_len = strlen(percentage_text);    // Flawfinder: ignore
 
 		bool      halfcell_offset = false;
 		short int col             = (short int) ((unsigned short int) (MAXCOLS - line_len) / 2U);
