@@ -164,6 +164,8 @@ static bool
 		case 0x374:
 		case 0x375:
 		case 0x376:
+		case 0x402:
+		case 0x403:
 			deviceQuirks.isKindlePW4 = true;
 			deviceQuirks.screenDPI   = 300U;
 			return true;
