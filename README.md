@@ -102,3 +102,5 @@ So that everyone gets to have fun, even if you can't stand C!
 [LuaJIT](https://luajit.org/): [lua-fbink](https://github.com/NiLuJe/lua-fbink) by [@NiLuJe](https://github.com/NiLuJe)
 
 [Python](https://www.python.org/): [py-fbink](https://github.com/NiLuJe/py-fbink) by [@NiLuJe](https://github.com/NiLuJe)
+
+<!-- kate: indent-mode cstyle; indent-width 4; replace-tabs on; remove-trailing-spaces none; -->
