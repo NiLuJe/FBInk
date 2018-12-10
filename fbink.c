@@ -2247,7 +2247,14 @@ int
 	} else {
 		int         fd = fileno(f);
 		struct stat st;
-		fstat(fd, &st);
+		if (fstat(fd, &st) == -1) {
+			char  buf[256];
+			char* errstr = strerror_r(errno, buf, sizeof(buf));
+			WARN("stat: %s", errstr);
+			fclose(f);
+			otInit = false;
+			return ERRCODE(EXIT_FAILURE);
+		}
 		data = calloc(1, (size_t) st.st_size);
 		if (!data) {
 			fclose(f);
