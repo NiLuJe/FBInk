@@ -2250,7 +2250,7 @@ int
 		if (fstat(fd, &st) == -1) {
 			char  buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
-			WARN("stat: %s", errstr);
+			WARN("fstat: %s", errstr);
 			fclose(f);
 			otInit = false;
 			return ERRCODE(EXIT_FAILURE);
