@@ -4687,7 +4687,7 @@ static unsigned char*
 		return NULL;
 	}
 
-	for (int j = 0; j < (int) y; ++j) {
+	for (int j = 0; j < y; ++j) {
 		unsigned char* src  = data + j * x * img_n;
 		unsigned char* dest = good + j * x * req_comp;
 
