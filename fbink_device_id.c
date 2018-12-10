@@ -177,7 +177,7 @@ static bool
 // NOTE: This is from KindleTool,
 //       c.f., https://github.com/NiLuJe/KindleTool/blob/master/KindleTool/convert.c#L82
 static uint32_t
-    from_base(char* num, uint8_t base)
+    from_base(const char* num, uint8_t base)
 {
 	// NOTE: Crockford's Base32, but with the "L" & "U" re-added in?
 	const char* tbl    = "0123456789ABCDEFGHJKLMNPQRSTUVWX";
@@ -190,7 +190,7 @@ static uint32_t
 	}
 
 	// Hi, my name is Neo. I know pointers! (Or not.)
-	for (char* p = num; *p != '\0'; p++) {
+	for (const char* p = num; *p != '\0'; p++) {
 		for (size_t i = 0; tbl[i] != '\0'; i++) {
 			if (*p == tbl[i]) {
 				result = result * base + i;
