@@ -4673,9 +4673,9 @@ static unsigned char*
 // Convert raw image data between various pixel formats
 // NOTE: This is a direct copy of stbi's stbi__convert_format, except that it doesn't free the input buffer.
 static unsigned char*
-    img_convert_px_format(unsigned char* data, int img_n, int req_comp, int x, int y)
+    img_convert_px_format(const unsigned char* data, int img_n, int req_comp, int x, int y)
 {
-	unsigned char* good;
+	unsigned char* good = NULL;
 
 	// NOTE: We're already doing that in fbink_print_raw_data ;)
 	//if (req_comp == img_n) return data;
@@ -4688,8 +4688,8 @@ static unsigned char*
 	}
 
 	for (int j = 0; j < y; ++j) {
-		unsigned char* src  = data + j * x * img_n;
-		unsigned char* dest = good + j * x * req_comp;
+		const unsigned char* src  = data + (j * x * img_n);
+		unsigned char*       dest = good + (j * x * req_comp);
 
 		// NOTE: stbi undef's STBI__CASE, but not STBI__COMBO...
 #	ifdef STBI__COMBO
@@ -4775,15 +4775,15 @@ static unsigned char*
 
 // Draw image data on screen (we inherit a few of the variable types/names from stbi ;))
 static int
-    draw_image(int                fbfd,
-	       unsigned char*     data,
-	       const int          w,
-	       const int          h,
-	       const int          n,
-	       const int          req_n,
-	       short int          x_off,
-	       short int          y_off,
-	       const FBInkConfig* fbink_cfg)
+    draw_image(int                  fbfd,
+	       const unsigned char* data,
+	       const int            w,
+	       const int            h,
+	       const int            n,
+	       const int            req_n,
+	       short int            x_off,
+	       short int            y_off,
+	       const FBInkConfig*   fbink_cfg)
 {
 	// Open the framebuffer if need be...
 	// NOTE: As usual, we *expect* to be initialized at this point!
@@ -5004,7 +5004,7 @@ static int
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// First, we gobble the full image pixel (all 2 bytes)
-						img_px.p = *((uint16_t*) &data[pix_offset]);
+						img_px.p = *((const uint16_t*) &data[pix_offset]);
 #	pragma GCC diagnostic pop
 
 						// Take a shortcut for the most common alpha values (none & full)
@@ -5065,7 +5065,7 @@ static int
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// We gobble the full image pixel (all 2 bytes)
-						img_px.p = *((uint16_t*) &data[pix_offset]);
+						img_px.p = *((const uint16_t*) &data[pix_offset]);
 #	pragma GCC diagnostic pop
 
 						ainv = img_px.color.a ^ 0xFF;
@@ -5120,7 +5120,7 @@ static int
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// First, we gobble the full image pixel (all 4 bytes)
-						img_px.p = *((uint32_t*) &data[pix_offset]);
+						img_px.p = *((const uint32_t*) &data[pix_offset]);
 #	pragma GCC diagnostic pop
 
 						// Take a shortcut for the most common alpha values (none & full)
@@ -5187,7 +5187,7 @@ static int
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// First, we gobble the full image pixel (all 4 bytes)
-						img_px.p = *((uint32_t*) &data[pix_offset]);
+						img_px.p = *((const uint32_t*) &data[pix_offset]);
 #	pragma GCC diagnostic pop
 
 						// Take a shortcut for the most common alpha values (none & full)
@@ -5247,7 +5247,7 @@ static int
 						// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
 						pix_offset = (size_t)((j * req_n * w) + (i * req_n));
 						// Gobble the full image pixel (3 bytes, we don't care about alpha if it's there)
-						img_px.p = *((uint24_t*) &data[pix_offset]);
+						img_px.p = *((const uint24_t*) &data[pix_offset]);
 						// NOTE: Given our typedef trickery, this exactly boils down to a 3 bytes memcpy:
 						//memcpy(&img_px.p, &data[pix_offset], 3 * sizeof(uint8_t));
 
@@ -5274,7 +5274,7 @@ static int
 						// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
 						pix_offset = (size_t)((j * req_n * w) + (i * req_n));
 						// Gobble the full image pixel (3 bytes, we don't care about alpha if it's there)
-						img_px.p = *((uint24_t*) &data[pix_offset]);
+						img_px.p = *((const uint24_t*) &data[pix_offset]);
 						// NOTE: Given our typedef trickery, this exactly boils down to a 3 bytes memcpy:
 						//memcpy(&img_px.p, &data[pix_offset], 3 * sizeof(uint8_t));
 
@@ -5312,7 +5312,7 @@ static int
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 					// Gobble the full image pixel (all 4 bytes)
-					img_px.p = *((uint32_t*) &data[pix_offset]);
+					img_px.p = *((const uint32_t*) &data[pix_offset]);
 #	pragma GCC diagnostic pop
 
 					// Take a shortcut for the most common alpha values (none & full)

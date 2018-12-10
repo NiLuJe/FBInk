@@ -397,9 +397,16 @@ int draw_progress_bars(int, bool, uint8_t, const FBInkConfig*);
 
 #ifdef FBINK_WITH_IMAGE
 static unsigned char* img_load_from_file(const char*, int*, int*, int*, int);
-static unsigned char* img_convert_px_format(unsigned char*, int, int, int, int);
-static int
-    draw_image(int, unsigned char*, const int, const int, const int, const int, short int, short int, const FBInkConfig*);
+static unsigned char* img_convert_px_format(const unsigned char*, int, int, int, int);
+static int            draw_image(int,
+				 const unsigned char*,
+				 const int,
+				 const int,
+				 const int,
+				 const int,
+				 short int,
+				 short int,
+				 const FBInkConfig*);
 #endif
 
 #ifdef FBINK_WITH_OPENTYPE
