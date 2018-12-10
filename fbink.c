@@ -3607,9 +3607,9 @@ int
 		if (abort_line) {
 			break;
 		}
-		lw = 0U;
-		unsigned int ci;
-		for (ci = lines[line].startCharIndex; ci <= lines[line].endCharIndex;) {
+		lw              = 0U;
+		unsigned int ci = lines[line].startCharIndex;
+		while (ci <= lines[line].endCharIndex) {
 			if (cfg->is_formatted) {
 				if (fmt_buff[ci] == CH_IGNORE) {
 					u8_inc(string, &ci);
