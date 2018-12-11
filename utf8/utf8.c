@@ -418,10 +418,10 @@ const char*
 const char*
     u8_memchr(const char* s, uint32_t ch, size_t sz, unsigned int* charn)
 {
-	unsigned int i     = 0;
-	unsigned int lasti = 0;
-	uint32_t     c;
-	unsigned int csz;
+	size_t   i     = 0;
+	size_t   lasti = 0;
+	uint32_t c;
+	uint32_t csz;
 
 	*charn = 0;
 	while (i < sz) {
