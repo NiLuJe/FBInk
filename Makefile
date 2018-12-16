@@ -352,6 +352,10 @@ cervantes:
 	$(CURDIR)/tools/do_debian_package.sh $(OUT_DIR) armel
 
 kobo: release
+ifeq (,$(findstring arm-,$(CC)))
+	echo "You're not using a cross TC, you dummy!"
+	exit 1
+else
 	mkdir -p Kobo/usr/local/fbink/bin Kobo/usr/bin Kobo/usr/local/fbink/lib Kobo/usr/local/fbink/include
 	cp -av $(CURDIR)/Release/fbink Kobo/usr/local/fbink/bin
 	ln -sf /usr/local/fbink/bin/fbink Kobo/usr/bin/fbink
@@ -372,6 +376,7 @@ kobo: release
 	cp -av $(CURDIR)/CREDITS Kobo/CREDITS
 	pushd Kobo && zip -r ../Release/FBInk-$(FBINK_VERSION).zip . && popd
 	mv -v Release/FBInk-$(FBINK_VERSION).zip Kobo/
+endif
 
 clean:
 	rm -rf Kobo/
