@@ -353,8 +353,7 @@ cervantes:
 
 kobo: release
 ifeq (,$(findstring arm-,$(CC)))
-	echo "You're not using a cross TC, you dummy!"
-	exit 1
+	$(error You forgot to setup a cross TC, you dummy!)
 else
 	mkdir -p Kobo/usr/local/fbink/bin Kobo/usr/bin Kobo/usr/local/fbink/lib Kobo/usr/local/fbink/include
 	cp -av $(CURDIR)/Release/fbink Kobo/usr/local/fbink/bin
