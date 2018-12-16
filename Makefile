@@ -351,10 +351,12 @@ cervantes:
 	$(MAKE) strip CERVANTES=true
 	$(CURDIR)/tools/do_debian_package.sh $(OUT_DIR) armel
 
-kobo: release
+armcheck:
 ifeq (,$(findstring arm-,$(CC)))
 	$(error You forgot to setup a cross TC, you dummy!)
-else
+endif
+
+kobo: armcheck release
 	mkdir -p Kobo/usr/local/fbink/bin Kobo/usr/bin Kobo/usr/local/fbink/lib Kobo/usr/local/fbink/include
 	cp -av $(CURDIR)/Release/fbink Kobo/usr/local/fbink/bin
 	ln -sf /usr/local/fbink/bin/fbink Kobo/usr/bin/fbink
@@ -375,7 +377,6 @@ else
 	cp -av $(CURDIR)/CREDITS Kobo/CREDITS
 	pushd Kobo && zip -r ../Release/FBInk-$(FBINK_VERSION).zip . && popd
 	mv -v Release/FBInk-$(FBINK_VERSION).zip Kobo/
-endif
 
 clean:
 	rm -rf Kobo/
@@ -402,4 +403,4 @@ clean:
 	rm -rf Debug/fbink
 	rm -rf Debug/button_scan
 
-.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux kobo clean
+.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo clean
