@@ -369,7 +369,7 @@ static void
 			deviceQuirks.screenDPI = 300U;
 			break;
 		case 377:    // Forma (frost)
-		case 380:    // Forma (frost)
+		case 380:    // Forma 32GB (frost)
 			deviceQuirks.isKoboMk7 = true;
 			deviceQuirks.canRotate = true;
 			deviceQuirks.screenDPI = 300U;
