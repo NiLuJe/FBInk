@@ -2826,9 +2826,22 @@ int
 			unsigned int padded_bytes = line_bytes + (unsigned int) (available_cols - line_len);
 			// NOTE: Don't touch line_len, because we're *adding* new blank characters,
 			//       we're still printing the exact same amount of characters *from our string*.
-			LOG("Padded %u bytes to %u to cover %hu columns", line_bytes, padded_bytes, available_cols);
+			LOG("Left padded %u bytes to %u to cover %hu columns", line_bytes, padded_bytes, available_cols);
 			bytes_printed = snprintf(
 			    line, padded_bytes + 1U, "%*.*s", (int) padded_bytes, (int) line_bytes, string + line_offset);
+		} else if (fbink_cfg->is_rpadded) {
+			// NOTE: Rely on the field width for padding ;).
+			// Padding character is a space, which is 1 byte, so that's good enough ;).
+			unsigned int padded_bytes = line_bytes + (unsigned int) (available_cols - line_len);
+			// NOTE: Don't touch line_len, because we're *adding* new blank characters,
+			//       we're still printing the exact same amount of characters *from our string*.
+			LOG("Right padded %u bytes to %u to cover %hu columns", line_bytes, padded_bytes, available_cols);
+			bytes_printed = snprintf(line,
+						 padded_bytes + 1U,
+						 "%-*.*s",
+						 (int) padded_bytes,
+						 (int) line_bytes,
+						 string + line_offset);
 		} else {
 			// NOTE: Enforce precision for safety.
 			bytes_printed = snprintf(

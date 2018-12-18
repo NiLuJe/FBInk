@@ -62,6 +62,7 @@ static void
 	    "\t-p, --padded\t\tLeft pad STRING with blank spaces.\n"
 	    "\t\t\t\tMost useful when combined with --centered to ensure a line will be completely filled, while still centering STRING,\n"
 	    "\t\t\t\ti.e., padding it on both sides.\n"
+	    "\t-r, --rpadded\t\tRight pad STRING with blank spaces.\n"
 	    "\n"
 	    "Options affecting the message's appearance:\n"
 	    "\t-h, --invert\t\tPrint STRING in <background color> over <foreground color> instead of the reverse.\n"
@@ -354,6 +355,7 @@ int
 					      { "centered", no_argument, NULL, 'm' },
 					      { "halfway", no_argument, NULL, 'M' },
 					      { "padded", no_argument, NULL, 'p' },
+					      { "rpadded", no_argument, NULL, 'r' },
 					      { "refresh", required_argument, NULL, 's' },
 					      { "size", required_argument, NULL, 'S' },
 					      { "font", required_argument, NULL, 'F' },
@@ -461,7 +463,7 @@ int
 	char*     bdit_ot_file   = NULL;
 	bool      errfnd         = false;
 
-	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMps:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:b", opts, &opt_index)) !=
+	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMprs:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:b", opts, &opt_index)) !=
 	       -1) {
 		switch (opt) {
 			case 'y':
@@ -501,6 +503,9 @@ int
 				break;
 			case 'p':
 				fbink_cfg.is_padded = true;
+				break;
+			case 'r':
+				fbink_cfg.is_rpadded = true;
 				break;
 			case 's':
 				subopts = optarg;
@@ -1007,7 +1012,7 @@ int
 			} else {
 				if (!fbink_cfg.is_quiet) {
 					printf(
-					    "Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, halfway: %s, left padded: %s, clear screen: %s, skip refresh: %s, font: %hhu, font scaling: x%hhu)\n",
+					    "Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, halfway: %s, left padded: %s, right padded: %s, clear screen: %s, skip refresh: %s, font: %hhu, font scaling: x%hhu)\n",
 					    string,
 					    fbink_cfg.col,
 					    fbink_cfg.hoffset,
@@ -1021,6 +1026,7 @@ int
 					    fbink_cfg.is_centered ? "Y" : "N",
 					    fbink_cfg.is_halfway ? "Y" : "N",
 					    fbink_cfg.is_padded ? "Y" : "N",
+					    fbink_cfg.is_rpadded ? "Y" : "N",
 					    fbink_cfg.is_cleared ? "Y" : "N",
 					    fbink_cfg.no_refresh ? "Y" : "N",
 					    fbink_cfg.fontname,

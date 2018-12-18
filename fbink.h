@@ -177,6 +177,7 @@ typedef struct
 	short int voffset;         // Vertical offset (in pixels) for text position
 	bool      is_halfway;      // Vertically center the text, honoring row offsets
 	bool      is_padded;       // Pad the text with blanks (on the left, or on both sides if is_centered)
+	bool      is_rpadded;      // Right pad the text with blanks
 	uint8_t   fg_color;        // Requested foreground color for text (c.f., FG_COLOR_INDEX_T enum)
 	uint8_t   bg_color;        // Requested background color for text (c.f., BG_COLOR_INDEX_T enum)
 	bool      is_overlay;      // Don't draw bg, use inverse of fb's underlying pixel as pen fg color
