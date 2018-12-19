@@ -371,6 +371,7 @@ static void
 		case 377:    // Forma (frost)
 		case 380:    // Forma 32GB (frost)
 			deviceQuirks.isKoboMk7 = true;
+			// FIXME: Check if the ntxBootRota stuff still makes sense here (i.e., check the pickel state manually)
 			deviceQuirks.canRotate = true;
 			deviceQuirks.screenDPI = 300U;
 			break;
