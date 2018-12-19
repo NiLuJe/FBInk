@@ -4186,8 +4186,9 @@ int
     fbink_reinit(int fbfd UNUSED_BY_KINDLE, const FBInkConfig* fbink_cfg UNUSED_BY_KINDLE)
 {
 #ifndef FBINK_FOR_KINDLE
+	uint32_t old_bpp = vInfo.bits_per_pixel;
 	// NOTE: Don't even try to open/close the fb if we don't have anything to do ;)
-	if (!deviceQuirks.isNTX16bLandscape && !deviceQuirks.canRotate) {
+	if (old_bpp != 16 && !deviceQuirks.canRotate) {
 		return EXIT_SUCCESS;
 	}
 
@@ -4205,9 +4206,8 @@ int
 	//       c.f., https://www.mobileread.com/forums/showpost.php?p=3764776&postcount=229 for more details
 
 	// First step is checking if the device was in a 16bpp mode the last time we ran initialize_fbink...
-	if (deviceQuirks.isNTX16bLandscape) {
+	if (old_bpp == 16) {
 		// Okay, so, store the previous bitdepth & rotation, and check if that changed...
-		uint32_t old_bpp  = vInfo.bits_per_pixel;
 		uint32_t old_rota = vInfo.rotate;
 		// NOTE: Given the fact that we're behind an isNTX16bLandscape branch, old_bpp should *always* be 16...
 
