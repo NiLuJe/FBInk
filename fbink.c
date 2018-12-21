@@ -4237,6 +4237,10 @@ int
 		// The second step is checking for a rotation change on devices with an accelerometer...
 		// We're doing this outside of the 16bpp branch, because we're concerned with Nickel rotations here,
 		// and Nickel will always run @ 32bpp ;).
+		// NOTE: Given the fact that the Library view currently only supports Portrait/Inverted Portrait,
+		//       this is potentially a tiny bit overkill, but it can't really hurt to future-proof this,
+		//       and better be safe than sorry if we actually happen to be delayed so much that the Reader
+		//       has already started and switched to a Landscape orientation...
 
 		// Okay, so, store the previous rotation, and check if that changed...
 		uint32_t old_rota = vInfo.rotate;
