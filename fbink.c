@@ -1839,6 +1839,9 @@ static int
 			//       - the nickel values on other devices.
 			//       - possibly the pickel values on other devices...
 			//       Yay?
+			// NOTE: The *name* of the rotation quirk *might* be wrong on newer devices (c.f., my notes on a Forma,
+			//       in set_kobo_quirks in fbink_device_id.c),
+			//       but we nonetheless currently appear to do the right thing, so just let sleeping dogs lie...
 			if (vInfo.rotate == deviceQuirks.ntxBootRota) {
 				// NOTE: Fun fact: on my H2O, the initial boot rotation appears to be even weirder...
 				//       This rotation shenanigan was tested by running pickel, then rotating the fb via sysfs,

@@ -305,6 +305,10 @@ static void
 	//       As usual, the H2O² is a mystery, the Rev 1 *may* follow this pattern too...
 	//       Or that might be the Rev 2 only, but that would make it diverge from other Mk7, which is weirder.
 	//       c.f., the relevant bit of fbink_init for more details...
+	// NOTE: On my Forma, pickel behaves a bit differently: it still drops to 16bpp, but appears to prefer FB_ROTATE_CCW,
+	//       as does nickel in the default Portrait orientation (buttons on the right).
+	//       I *think* the boot rota is FB_ROTATE_UR,
+	//       but detecting it as pickel instead appears to do the right thing right now, so I'm not going to mess with it...
 	deviceQuirks.ntxBootRota = FB_ROTATE_UD;
 	// NOTE: Device code list pilfered from
 	//       https://github.com/geek1011/KoboStuff/blob/gh-pages/kobofirmware.js#L11
@@ -371,7 +375,6 @@ static void
 		case 377:    // Forma (frost)
 		case 380:    // Forma 32GB (frost)
 			deviceQuirks.isKoboMk7 = true;
-			// FIXME: Check if the ntxBootRota stuff still makes sense here (i.e., check the pickel state manually)
 			deviceQuirks.canRotate = true;
 			deviceQuirks.screenDPI = 300U;
 			break;
