@@ -217,7 +217,7 @@ static int
 		SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
 	} else if (deviceQuirks.isKoboMk7) {
 		// NOTE: Roughly corresponds to what we call the "Snow" protocol in KOReader.
-		//       Should handle the H2O²r2, (Aura SEr2?), Clara HD
+		//       Should handle the H2O²r2, (Aura SEr2?), Clara HD, Forma
 		//       And possibly the H2O²r1, although this one will need a dedicated quirk to compute the proper x/y coords.
 		SEND_INPUT_EVENT(EV_KEY, BTN_TOOL_FINGER, 1);
 		SEND_INPUT_EVENT(EV_KEY, BTN_TOUCH, 1);
