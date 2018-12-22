@@ -245,6 +245,7 @@ static void
 	coords->y = ry;
 }
 
+#	ifdef FBINK_WITH_BUTTON_SCAN
 static void
     rotate_touch_coordinates(FBInkCoordinates* coords)
 {
@@ -301,7 +302,8 @@ static void
 	coords->x = rx;
 	coords->y = ry;
 }
-#endif    // !FBINK_FOR_KINDLE
+#	endif    // FBINK_WITH_BUTTON_SCAN
+#endif            // !FBINK_FOR_KINDLE
 
 static void
     rotate_coordinates_nop(FBInkCoordinates* coords __attribute__((unused)))
