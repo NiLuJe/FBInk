@@ -245,23 +245,20 @@ static void
 	coords->y = ry;
 }
 
-/*
 static void
     rotate_touch_coordinates(FBInkCoordinates* coords)
 {
-	unsigned short int rx;
-	unsigned short int ry;
+	unsigned short int rx = coords->x;
+	unsigned short int ry = coords->y;
 
-	uint32_t rotation = vInfo.rotate;
+	// NOTE: This appears to do the right thing on the Forma, as long as ntxBootRota is 2, at least...
+	uint32_t rotation = vInfo.rotate ^ deviceQuirks.ntxBootRota;
 
 	// NOTE: Should match *most* Kobo devices...
-	//       Possibly after a rotation ^ deviceQuirks.ntxBootRota if things go wonky?
 	// c.f., https://patchwork.openembedded.org/patch/149258
-	switch(rotation) {
+	switch (rotation) {
 		case FB_ROTATE_UR:
-			// Could essentially be NOP!
-			rx = coords->x;
-			ry = coords->y;
+			// NOP!
 			break;
 		case FB_ROTATE_CW:
 			rx = coords->y;
@@ -280,6 +277,7 @@ static void
 	// NOTE: The H2O²r1 (possibly r2 as well), on the other hand, is a special snowflake...
 	//       (It'll need a dedicated deviceQuirks).
 	// c.f., https://www.mobileread.com/forums/showpost.php?p=3766627&postcount=236
+	/*
 	switch(rotation) {
 		case FB_ROTATE_UR:
 			rx = coords->x;
@@ -298,11 +296,11 @@ static void
 			ry = coords->x;
 			break;
 	}
+	*/
 
 	coords->x = rx;
 	coords->y = ry;
 }
-*/
 #endif    // !FBINK_FOR_KINDLE
 
 static void

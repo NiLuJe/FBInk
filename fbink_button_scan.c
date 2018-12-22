@@ -458,17 +458,24 @@ int
 		LOG("Matched on a %hux%hu button! :)", button_width, button_height);
 
 		// The touch panel has a fixed origin that differs from the framebuffer's... >_<".
-		// FIXME: This probably needs to be rethought on the Forma (c.f., canRotate quirk & fbink_reinit)...
-		//        Playing with rotate_touch_coordinates might help...
-		rotate_coordinates_pickel(&match_coords);
+		// NOTE: On the Forma, take the current rotation into account,
+		//       because the Home screen *can* be shown in Inverted Portrait...
+		if (deviceQuirks.canRotate) {
+			rotate_touch_coordinates(&match_coords);
+		} else {
+			rotate_coordinates_pickel(&match_coords);
+		}
 		ELOG("x=%hu, y=%hu", match_coords.x, match_coords.y);
 
 		// NOTE: The H2O²r1 is a special snowflake, input is rotated 90° in the *other* direction
 		//       (i.e., origin at the bottom-left instead of top-right).
 		//       Hopefully that doesn't apply to the fb itself, too...
-		ELOG("H2O²r1: x=%hu, y=%hu",
-		     (unsigned short int) (screenHeight - match_coords.x - 1),
-		     (unsigned short int) (screenWidth - match_coords.y - 1));
+		// NOTE: Hide that on the Forma, since it's definitely useless there ;).
+		if (!deviceQuirks.canRotate) {
+			ELOG("H2O²r1: x=%hu, y=%hu",
+			     (unsigned short int) (screenHeight - match_coords.x - 1),
+			     (unsigned short int) (screenWidth - match_coords.y - 1));
+		}
 
 		// Press it if requested...
 		if (press_button) {
