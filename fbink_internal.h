@@ -185,7 +185,7 @@
 
 // Fallback version tag...
 #ifndef FBINK_VERSION
-#	define FBINK_VERSION "v1.9.2"
+#	define FBINK_VERSION "v1.9.3"
 #endif
 
 // MIN/MAX with no side-effects,
