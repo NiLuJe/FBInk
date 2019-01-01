@@ -1,6 +1,6 @@
 /*
 	FBInk: FrameBuffer eInker, a tool to print text & images on eInk devices (Kobo/Kindle)
-	Copyright (C) 2018 NiLuJe <ninuje@gmail.com>
+	Copyright (C) 2018-2019 NiLuJe <ninuje@gmail.com>
 
 	Some (8/16/24/32bpp) Linux framebuffer writing routines based on: fbtestfnt.c & fbtest6.c, from
 	http://raspberrycompote.blogspot.com/2014/04/low-level-graphics-on-raspberry-pi-text.html &
