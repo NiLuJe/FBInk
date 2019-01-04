@@ -8,7 +8,7 @@ Housed [here on GitHub](https://github.com/NiLuJe/FBInk).
 
 ## What's it for?
 
-This is intended to fill the void felt by Kobo developpers and tinkerers when they realize they do not have a builtin way to print stuff on the device's screen!
+This is intended to fill the void felt by Kobo developers and tinkerers when they realize they do not have a builtin way to print stuff on the device's screen!
 It's especially cruel when moving to a Kobo, after being used to the ubiquity of `eips` on Kindle...
 
 In short, it prints messages or images on your screen, handling the low-level tinkering with both the Linux framebuffer interface, and the i.MX EPD driver.
@@ -23,7 +23,7 @@ so you could use this to draw on your EFI fb, for instance ;).
 ## How do I install this?
 
 For Kobo devices, there's a discussion thread open [over here](https://www.mobileread.com/forums/showthread.php?t=299110) on MobileRead, where you'll happen to find standalone binaries.
-It's purposefully lacking in detailed instructions, because the target audience is mainly developpers and tinkerers. Think of this as a safety precaution ;).
+It's purposefully lacking in detailed instructions, because the target audience is mainly developers and tinkerers. Think of this as a safety precaution ;).
 
 There's also a sister thread for Kindle devices [over here](https://www.mobileread.com/forums/showthread.php?t=299620) where, besides binaries, you'll also find examples of people doing crazy things with it ;).
 
