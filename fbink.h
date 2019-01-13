@@ -74,7 +74,9 @@ typedef enum
 	ORPI,              // orp (italic)
 	SCIENTIFICA,       // scientifica (regular)
 	SCIENTIFICAB,      // scientifica (bold)
-	SCIENTIFICAI       // scientifica (italic)
+	SCIENTIFICAI,      // scientifica (italic)
+	TERMINUS,          // terminus (regular)
+	TERMINUSB          // terminus (bold)
 } FONT_INDEX_T;
 
 // List of supported font styles

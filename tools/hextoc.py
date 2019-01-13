@@ -77,6 +77,8 @@ font_set = {
 	"scientifica"	: ("scientifica-5x12.hex",	5,	12),
 	"scientificab"	: ("scientifica-5x12b.hex",	5,	12),
 	"scientificai"	: ("scientifica-7x12i.hex",	7,	12),
+	"terminus"	: ("ter-u16n.hex",		8,	16),
+	"terminusb"	: ("ter-u16b.hex",		8,	16),
 }
 
 # Get the font name from the first arg passed to the script

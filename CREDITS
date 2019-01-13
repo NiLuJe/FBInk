@@ -44,3 +44,8 @@ As well as a number of third-party resources (namely, font files):
 	* scientifica (a tall, condensed, bitmap font for geeks), Copyright (c) 2018 Akshay Oppiliappan <nerdypepper@tuta.io>,
 		Licensed under the SIL Open Font License, Version 1.1 (https://opensource.org/licenses/OFL-1.1).
 		(https://github.com/NerdyPepper/scientifica)
+
+	* terminus (a clean, fixed width bitmap font), Copyright (c) 2018 Dimitar Toshkov Zhekov,
+		Licensed under the SIL Open Font License, Version 1.1 (https://opensource.org/licenses/OFL-1.1).
+		(http://terminus-font.sourceforge.net/)
+		Applied variants: td1, br1, ll2, gq2, ao2

@@ -638,6 +638,10 @@ static const char*
 			return "Scientifica Bold";
 		case SCIENTIFICAI:
 			return "Scientifica Italic";
+		case TERMINUS:
+			return "Terminus";
+		case TERMINUSB:
+			return "Terminus Bold";
 #endif
 		default:
 			return "IBM (Default)";
@@ -1920,6 +1924,16 @@ static int
 #ifdef FBINK_WITH_FONTS
 	// Setup custom fonts (glyph size, render fx, bitmap fx)
 	switch (fbink_cfg->fontname) {
+		case TERMINUSB:
+			glyphWidth         = 8U;
+			glyphHeight        = 16U;
+			fxpFont8xGetBitmap = &terminusb_get_bitmap;
+			break;
+		case TERMINUS:
+			glyphWidth         = 8U;
+			glyphHeight        = 16U;
+			fxpFont8xGetBitmap = &terminus_get_bitmap;
+			break;
 		case SCIENTIFICAI:
 			glyphWidth         = 7U;
 			glyphHeight        = 12U;
@@ -5596,6 +5610,8 @@ cleanup:
 #	include "fbink_orp.c"
 // Nerdy Pepper's Scientifica (https://github.com/NerdyPepper/scientifica)
 #	include "fbink_scientifica.c"
+// Dimitar Toshkov Zhekov's Terminus (http://terminus-font.sourceforge.net)
+#	include "fbink_terminus.c"
 // Various other small fonts (c.f., CREDITS for details)
 #	include "fbink_misc_fonts.c"
 #endif

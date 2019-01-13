@@ -81,7 +81,7 @@ static void
 	    "\t-F, --font NAME\t\tRender glyphs from builtin font NAME (Default: IBM).\n"
 #ifdef FBINK_WITH_FONTS
 	    "\t\t\t\tAvailable font families: IBM, UNSCII, ALT, THIN, FANTASY, MCR, TALL, BLOCK,\n"
-	    "\t\t\t\t\t\tLEGGIE, VEGGIE, KATES, FKP, CTRLD, ORP, ORPB, ORPI, SCIENTIFICA, SCIENTIFICAB, SCIENTIFICAI\n"
+	    "\t\t\t\t\t\tLEGGIE, VEGGIE, KATES, FKP, CTRLD, ORP, ORPB, ORPI, SCIENTIFICA, SCIENTIFICAB, SCIENTIFICAI, TERMINUS, TERMINUSB\n"
 #else
 	    "\t\t\t\tAvailable font families: IBM\n"
 #endif
@@ -614,6 +614,10 @@ int
 					fbink_cfg.fontname = SCIENTIFICAB;
 				} else if (strcasecmp(optarg, "SCIENTIFICAI") == 0) {
 					fbink_cfg.fontname = SCIENTIFICAI;
+				} else if (strcasecmp(optarg, "TERMINUS") == 0) {
+					fbink_cfg.fontname = TERMINUS;
+				} else if (strcasecmp(optarg, "TERMINUSB") == 0) {
+					fbink_cfg.fontname = TERMINUSB;
 				} else {
 					fprintf(stderr, "Unknown font name '%s'.\n", optarg);
 					errfnd = true;
