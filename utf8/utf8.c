@@ -11,7 +11,6 @@
   with these routines reserved for higher performance on data known to be
   valid.
 */
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

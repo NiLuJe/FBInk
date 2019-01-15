@@ -4,9 +4,10 @@ This project makes use of a number of third-party libraries, which we'll acknowl
 		Released into the public domain.
 		(https://github.com/dhepper/font8x8)
 
-	* libu8 (Basic UTF-8 manipulation routines), by Jeff Bezanson,
+	* cutef8 (Basic UTF-8 manipulation routines), by Jeff Bezanson,
 		Released into the public domain.
 		(https://www.cprogramming.com/tutorial/unicode.html)
+		(https://github.com/JeffBezanson/cutef8)
 
 	* stb_image (Image loader) and stb_truetype (font renderer), by Sean Barrett,
 		Released into the public domain.

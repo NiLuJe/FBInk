@@ -1,5 +1,5 @@
-#ifndef __LIBU8_H
-#define __LIBU8_H
+#ifndef __CUTEF8_H
+#define __CUTEF8_H
 
 #include <stdarg.h>
 #include <stdbool.h>
