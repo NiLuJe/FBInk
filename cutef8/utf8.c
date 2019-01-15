@@ -772,18 +772,27 @@ int
 				case 0xC:
 				case 0xD:
 					di -= 2;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
 					*((int16_t*) &dest[di]) = *((const int16_t*) &src[si]);
+#pragma GCC diagnostic pop
 					si += 2;
 					break;
 				case 0xE:
 					di -= 3;
-					dest[di]                    = src[si];
+					dest[di] = src[si];
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
 					*((int16_t*) &dest[di + 1]) = *((const int16_t*) &src[si + 1]);
+#pragma GCC diagnostic pop
 					si += 3;
 					break;
 				case 0xF:
 					di -= 4;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
 					*((int32_t*) &dest[di]) = *((const int32_t*) &src[si]);
+#pragma GCC diagnostic pop
 					si += 4;
 					break;
 				default:
