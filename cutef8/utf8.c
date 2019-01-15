@@ -18,7 +18,7 @@
 static const uint32_t offsetsFromUTF8[6] = { 0x00000000UL, 0x00003080UL, 0x000E2080UL,
 					     0x03C82080UL, 0xFA082080UL, 0x82082080UL };
 
-static const char trailingBytesForUTF8[256] = {
+static const unsigned char trailingBytesForUTF8[256] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -295,7 +295,7 @@ size_t
 					ch += (unsigned char) *s++;
 			}
 			ch -= offsetsFromUTF8[nb];
-			w = wcwidth(ch);    // might return -1
+			w = wcwidth((wchar_t) ch);    // might return -1
 			if (w > 0)
 				tot += (size_t) w;
 		}
@@ -401,7 +401,7 @@ size_t
 			digs[dno++] = str[i++];
 		} while (i < ssz && octal_digit(str[i]) && dno < 3);
 		digs[dno] = '\0';
-		ch        = strtoul(digs, NULL, 8);
+		ch        = (uint32_t) strtoul(digs, NULL, 8);
 	} else if ((c0 == 'x' && (ndig = 2)) || (c0 == 'u' && (ndig = 4)) || (c0 == 'U' && (ndig = 8))) {
 		while (i < ssz && hex_digit(str[i]) && dno < ndig) {
 			digs[dno++] = str[i++];
@@ -409,7 +409,7 @@ size_t
 		if (dno == 0)
 			return 0;
 		digs[dno] = '\0';
-		ch        = strtoul(digs, NULL, 16);
+		ch        = (uint32_t) strtoul(digs, NULL, 16);
 	} else {
 		ch = (uint32_t) read_escape_control_char(c0);
 	}
@@ -557,7 +557,7 @@ char*
 	size_t   i     = 0;
 	size_t   lasti = 0;
 	uint32_t c;
-	size_t   csz;
+	uint32_t csz;
 
 	*charn = 0;
 	while (i < sz) {
@@ -754,7 +754,7 @@ int
 }
 
 int
-    u8_reverse(char* dest, char* src, size_t len)
+    u8_reverse(char* dest, const char* src, size_t len)
 {
 	size_t        si = 0;
 	size_t        di = len;
@@ -765,25 +765,25 @@ int
 		c = (unsigned char) src[si];
 		if ((~c) & 0x80) {
 			di--;
-			dest[di] = c;
+			dest[di] = (char) c;
 			si++;
 		} else {
 			switch (c >> 4) {
 				case 0xC:
 				case 0xD:
 					di -= 2;
-					*((int16_t*) &dest[di]) = *((int16_t*) &src[si]);
+					*((int16_t*) &dest[di]) = *((const int16_t*) &src[si]);
 					si += 2;
 					break;
 				case 0xE:
 					di -= 3;
 					dest[di]                    = src[si];
-					*((int16_t*) &dest[di + 1]) = *((int16_t*) &src[si + 1]);
+					*((int16_t*) &dest[di + 1]) = *((const int16_t*) &src[si + 1]);
 					si += 3;
 					break;
 				case 0xF:
 					di -= 4;
-					*((int32_t*) &dest[di]) = *((int32_t*) &src[si]);
+					*((int32_t*) &dest[di]) = *((const int32_t*) &src[si]);
 					si += 4;
 					break;
 				default:
