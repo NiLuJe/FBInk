@@ -247,8 +247,6 @@ size_t
 	return count;
 }
 
-int wcwidth(wchar_t c);
-
 size_t
     u8_strwidth(const char* s)
 {

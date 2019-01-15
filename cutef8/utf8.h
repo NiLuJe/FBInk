@@ -10,6 +10,9 @@
 #include <wchar.h>
 #include <wctype.h>
 
+// So we don't need to define _XOPEN_SOURCE (otherwise, it's in <wchar.h>)
+int wcwidth(wchar_t c);
+
 #ifdef WIN32
 #	include <malloc.h>
 #	define snprintf _snprintf
@@ -19,8 +22,6 @@
 #	endif /* __FreeBSD__ */
 #endif
 #include <assert.h>
-
-extern int locale_is_utf8;
 
 /* is c the start of a utf8 sequence? */
 #define isutf(c) (((c) &0xC0) != 0x80)
