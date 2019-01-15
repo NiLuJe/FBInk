@@ -32,7 +32,7 @@ static const char trailingBytesForUTF8[256] = {
 size_t
     u8_seqlen(const char* s)
 {
-	return trailingBytesForUTF8[(unsigned int) (unsigned char) s[0]] + 1;
+	return trailingBytesForUTF8[(unsigned int) (unsigned char) s[0]] + 1U;
 }
 
 /* returns the # of bytes needed to encode a certain character
@@ -93,22 +93,27 @@ size_t
 			break;
 		ch = 0;
 		switch (nb) {
-				/* these fall through deliberately */
+			// fall through
 			case 5:
 				ch += (unsigned char) *src++;
 				ch <<= 6;
+			// fall through
 			case 4:
 				ch += (unsigned char) *src++;
 				ch <<= 6;
+			// fall through
 			case 3:
 				ch += (unsigned char) *src++;
 				ch <<= 6;
+			// fall through
 			case 2:
 				ch += (unsigned char) *src++;
 				ch <<= 6;
+			// fall through
 			case 1:
 				ch += (unsigned char) *src++;
 				ch <<= 6;
+			// fall through
 			case 0:
 				ch += (unsigned char) *src++;
 		}
@@ -141,25 +146,25 @@ size_t
 		} else if (ch < 0x800) {
 			if (dest >= dest_end - 1)
 				break;
-			*dest++ = (ch >> 6) | 0xC0;
-			*dest++ = (ch & 0x3F) | 0x80;
+			*dest++ = (char) ((ch >> 6) | 0xC0);
+			*dest++ = (char) ((ch & 0x3F) | 0x80);
 		} else if (ch < 0x10000) {
 			if (dest >= dest_end - 2)
 				break;
-			*dest++ = (ch >> 12) | 0xE0;
-			*dest++ = ((ch >> 6) & 0x3F) | 0x80;
-			*dest++ = (ch & 0x3F) | 0x80;
+			*dest++ = (char) ((ch >> 12) | 0xE0);
+			*dest++ = (char) (((ch >> 6) & 0x3F) | 0x80);
+			*dest++ = (char) ((ch & 0x3F) | 0x80);
 		} else if (ch < 0x110000) {
 			if (dest >= dest_end - 3)
 				break;
-			*dest++ = (ch >> 18) | 0xF0;
-			*dest++ = ((ch >> 12) & 0x3F) | 0x80;
-			*dest++ = ((ch >> 6) & 0x3F) | 0x80;
-			*dest++ = (ch & 0x3F) | 0x80;
+			*dest++ = (char) ((ch >> 18) | 0xF0);
+			*dest++ = (char) (((ch >> 12) & 0x3F) | 0x80);
+			*dest++ = (char) (((ch >> 6) & 0x3F) | 0x80);
+			*dest++ = (char) ((ch & 0x3F) | 0x80);
 		}
 		i++;
 	}
-	return (dest - dest0);
+	return (size_t)(dest - dest0);
 }
 
 size_t
@@ -170,21 +175,21 @@ size_t
 		return 1;
 	}
 	if (ch < 0x800) {
-		dest[0] = (ch >> 6) | 0xC0;
-		dest[1] = (ch & 0x3F) | 0x80;
+		dest[0] = (char) ((ch >> 6) | 0xC0);
+		dest[1] = (char) ((ch & 0x3F) | 0x80);
 		return 2;
 	}
 	if (ch < 0x10000) {
-		dest[0] = (ch >> 12) | 0xE0;
-		dest[1] = ((ch >> 6) & 0x3F) | 0x80;
-		dest[2] = (ch & 0x3F) | 0x80;
+		dest[0] = (char) ((ch >> 12) | 0xE0);
+		dest[1] = (char) (((ch >> 6) & 0x3F) | 0x80);
+		dest[2] = (char) ((ch & 0x3F) | 0x80);
 		return 3;
 	}
 	if (ch < 0x110000) {
-		dest[0] = (ch >> 18) | 0xF0;
-		dest[1] = ((ch >> 12) & 0x3F) | 0x80;
-		dest[2] = ((ch >> 6) & 0x3F) | 0x80;
-		dest[3] = (ch & 0x3F) | 0x80;
+		dest[0] = (char) ((ch >> 18) | 0xF0);
+		dest[1] = (char) (((ch >> 12) & 0x3F) | 0x80);
+		dest[2] = (char) (((ch >> 6) & 0x3F) | 0x80);
+		dest[3] = (char) ((ch & 0x3F) | 0x80);
 		return 4;
 	}
 	return 0;
@@ -267,29 +272,34 @@ size_t
 			nb = trailingBytesForUTF8[(unsigned char) sc];
 			ch = 0;
 			switch (nb) {
-					/* these fall through deliberately */
+				// fall through
 				case 5:
 					ch += (unsigned char) *s++;
 					ch <<= 6;
+				// fall through
 				case 4:
 					ch += (unsigned char) *s++;
 					ch <<= 6;
+				// fall through
 				case 3:
 					ch += (unsigned char) *s++;
 					ch <<= 6;
+				// fall through
 				case 2:
 					ch += (unsigned char) *s++;
 					ch <<= 6;
+				// fall through
 				case 1:
 					ch += (unsigned char) *s++;
 					ch <<= 6;
+				// fall through
 				case 0:
 					ch += (unsigned char) *s++;
 			}
 			ch -= offsetsFromUTF8[nb];
 			w = wcwidth(ch);    // might return -1
 			if (w > 0)
-				tot += w;
+				tot += (size_t) w;
 		}
 	}
 	return tot;
@@ -393,7 +403,7 @@ size_t
 			digs[dno++] = str[i++];
 		} while (i < ssz && octal_digit(str[i]) && dno < 3);
 		digs[dno] = '\0';
-		ch        = strtol(digs, NULL, 8);
+		ch        = strtoul(digs, NULL, 8);
 	} else if ((c0 == 'x' && (ndig = 2)) || (c0 == 'u' && (ndig = 4)) || (c0 == 'U' && (ndig = 8))) {
 		while (i < ssz && hex_digit(str[i]) && dno < ndig) {
 			digs[dno++] = str[i++];
@@ -401,7 +411,7 @@ size_t
 		if (dno == 0)
 			return 0;
 		digs[dno] = '\0';
-		ch        = strtol(digs, NULL, 16);
+		ch        = strtoul(digs, NULL, 16);
 	} else {
 		ch = (uint32_t) read_escape_control_char(c0);
 	}
@@ -506,7 +516,7 @@ size_t
 			i0 = i;
 			ch = u8_nextmemchar(src, &i);
 			if (ascii || !iswprint((wint_t) ch)) {
-				buf += u8_escape_wchar(buf, sz - (buf - start), ch);
+				buf += u8_escape_wchar(buf, sz - (size_t)(buf - start), ch);
 			} else {
 				i = i0;
 				do {
@@ -517,7 +527,7 @@ size_t
 	}
 	*buf++ = '\0';
 	*pi    = i;
-	return (buf - start);
+	return (size_t)(buf - start);
 }
 
 char*
@@ -532,7 +542,10 @@ char*
 		c = u8_nextchar(s, &i);
 		if (c == ch) {
 			/* it's const for us, but not necessarily the caller */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
 			return (char*) &s[lasti];
+#pragma GCC diagnostic pop
 		}
 		lasti = i;
 		(*charn)++;
@@ -546,7 +559,7 @@ char*
 	size_t   i     = 0;
 	size_t   lasti = 0;
 	uint32_t c;
-	int      csz;
+	size_t   csz;
 
 	*charn = 0;
 	while (i < sz) {
@@ -559,7 +572,10 @@ char*
 		c -= offsetsFromUTF8[csz - 1];
 
 		if (c == ch) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
 			return (char*) &s[lasti];
+#pragma GCC diagnostic pop
 		}
 		lasti = i;
 		(*charn)++;
@@ -584,7 +600,10 @@ char*
 		tempi = i;
 		c     = u8_nextmemchar(s, &tempi);
 		if (c == ch) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
 			return (char*) &s[i];
+#pragma GCC diagnostic pop
 		}
 		if (i == 0)
 			break;
@@ -624,23 +643,23 @@ size_t
 {
 	int       cnt;
 	int       sz = 0;
-	int       nc;
+	size_t    nc;
 	bool      needfree = false;
 	char*     buf;
 	uint32_t* wcs;
 
 	sz  = 512;
-	buf = (char*) alloca(sz);
-	cnt = vsnprintf(buf, sz, fmt, ap);
+	buf = (char*) alloca((size_t) sz);
+	cnt = vsnprintf(buf, (size_t) sz, fmt, ap);
 	if (cnt < 0)
 		return 0;
 	if (cnt >= sz) {
-		buf      = (char*) malloc(cnt + 1);
+		buf      = (char*) malloc((size_t)(cnt + 1));
 		needfree = true;
-		vsnprintf(buf, cnt + 1, fmt, ap);
+		vsnprintf(buf, (size_t)(cnt + 1), fmt, ap);
 	}
-	wcs     = (uint32_t*) alloca((cnt + 1) * sizeof(uint32_t));
-	nc      = u8_toucs(wcs, (size_t) cnt + 1, buf, cnt);
+	wcs     = (uint32_t*) alloca((size_t)(cnt + 1) * sizeof(uint32_t));
+	nc      = u8_toucs(wcs, (size_t) cnt + 1, buf, (size_t) cnt);
 	wcs[nc] = 0;
 	printf("%ls", (wchar_t*) wcs);
 	if (needfree)
@@ -670,12 +689,12 @@ int
     u8_isvalid(const char* str, size_t length)
 {
 	const unsigned char* p;
-	const unsigned char* pend = (unsigned char*) str + length;
+	const unsigned char* pend = (const unsigned char*) str + length;
 	unsigned char        c;
 	bool                 ret = 1; /* ASCII */
 	size_t               ab;
 
-	for (p = (unsigned char*) str; p < pend; p++) {
+	for (p = (const unsigned char*) str; p < pend; p++) {
 		c = *p;
 		if (c < 128)
 			continue;
