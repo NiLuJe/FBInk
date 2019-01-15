@@ -109,6 +109,8 @@
 //              as this is the encoding it effectively uses internally, without any kind of validation.
 //
 //       Further reading on the subject, in no particular order:
+//           http://bjoern.hoehrmann.de/utf-8/decoder/dfa
+//           https://bitbucket.org/knight666/utf8rewind
 //           https://github.com/benkasminbullock/unicode-c
 //           https://stackoverflow.com/q/7298059
 //           https://github.com/JuliaLang/utf8proc
