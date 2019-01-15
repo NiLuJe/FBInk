@@ -337,7 +337,7 @@ FBINK_API int fbink_refresh(int         fbfd,
 //       but instead software specific (here, because of pickel).
 //       In practical terms, this means the Kobo's fb is in 16bpp mode, with its origin in the top-right corner (i.e., Landscape).
 // NOTE: Deprecated in favor of fbink_reinit ;).
-FBINK_API bool fbink_is_fb_quirky(void) __attribute__((deprecated));
+FBINK_API bool fbink_is_fb_quirky(void) __attribute__((pure, deprecated));
 
 // Attempt to detect changes in framebuffer states (between this call and the last time fbink_init/fbink_reinit was called),
 // doing a reinit (i.e., calling fbink_init again) if needed, while doing the least amount of work possible in the process.

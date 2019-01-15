@@ -32,10 +32,10 @@ int wcwidth(wchar_t c);
 size_t u8_seqlen(const char* s) __attribute__((pure));
 
 /* returns the # of bytes needed to encode a certain character */
-size_t u8_charlen(uint32_t ch);
+size_t u8_charlen(uint32_t ch) __attribute__((const));
 
 /* computes the # of bytes needed to encode a WC string as UTF-8 */
-size_t u8_codingsize(uint32_t* wcstr, size_t n);
+size_t u8_codingsize(uint32_t* wcstr, size_t n) __attribute__((pure));
 
 /* convert UTF-8 data to wide character */
 size_t u8_toucs(uint32_t* dest, size_t sz, const char* src, size_t srcsz);
@@ -53,7 +53,7 @@ size_t u8_offset(const char* str, size_t charnum) __attribute__((pure));
 size_t u8_charnum(const char* s, size_t offset) __attribute__((pure));
 
 /* count the number of characters in a UTF-8 string */
-size_t u8_strlen(const char* s);
+size_t u8_strlen(const char* s) __attribute__((pure));
 
 /* number of columns occupied by a string */
 size_t u8_strwidth(const char* s);
@@ -123,7 +123,7 @@ size_t u8_vprintf(const char* fmt, va_list ap) __attribute__((format(printf, 1, 
 size_t u8_printf(const char* fmt, ...) __attribute__((format(printf, 1, 2)));
 
 /* determine whether a sequence of bytes is valid UTF-8. length is in bytes */
-int u8_isvalid(const char* str, size_t length);
+int u8_isvalid(const char* str, size_t length) __attribute__((pure));
 
 /* reverse a UTF-8 string. len is length in bytes. dest and src must both
    be allocated to at least len+1 bytes. returns 1 for error, 0 otherwise */
