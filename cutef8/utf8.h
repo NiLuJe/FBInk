@@ -74,8 +74,6 @@ void u8_dec(const char* s, size_t* i);
 int octal_digit(const char c) __attribute__((const));
 int hex_digit(const char c) __attribute__((const));
 
-char read_escape_control_char(char c);
-
 /* assuming src points to the character after a backslash, read an
    escape sequence, storing the result in dest and returning the number of
    input characters processed */

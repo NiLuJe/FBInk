@@ -361,7 +361,7 @@ int
 	return ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'));
 }
 
-char
+static char
     read_escape_control_char(char c)
 {
 	if (c == 'n')
