@@ -196,7 +196,7 @@ endif
 
 ##
 # Now that we're done fiddling with flags, let's build stuff!
-LIB_SRCS=fbink.c utf8/utf8.c
+LIB_SRCS=fbink.c cutef8/utf8.c
 # Jump through a few hoops to set a few libunibreak-specific CFLAGS to silence some warnings...
 ifdef MINIMAL
 	LIB_UB_SRCS=
@@ -264,7 +264,7 @@ $(OUT_DIR)/%.o: %.c
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) -o $@ -c $<
 
 outdir:
-	mkdir -p $(OUT_DIR)/shared/utf8 $(OUT_DIR)/static/utf8 $(OUT_DIR)/shared/libunibreak/src $(OUT_DIR)/static/libunibreak/src
+	mkdir -p $(OUT_DIR)/shared/cutef8 $(OUT_DIR)/static/cutef8 $(OUT_DIR)/shared/libunibreak/src $(OUT_DIR)/static/libunibreak/src
 
 all: outdir static
 
@@ -383,22 +383,26 @@ clean:
 	rm -rf Release/*.a
 	rm -rf Release/*.so*
 	rm -rf Release/shared/*.o
-	rm -rf Release/shared/utf8/*.o
+	rm -rf Release/shared/cutef8/*.o
 	rm -rf Release/shared/libunibreak/src/*.o
+	rm -rf Release/shared/utf8
 	rm -rf Release/static/*.o
-	rm -rf Release/static/utf8/*.o
+	rm -rf Release/static/cutef8/*.o
 	rm -rf Release/static/libunibreak/src/*.o
+	rm -rf Release/static/utf8
 	rm -rf Release/*.o
 	rm -rf Release/fbink
 	rm -rf Release/button_scan
 	rm -rf Debug/*.a
 	rm -rf Debug/*.so*
 	rm -rf Debug/shared/*.o
-	rm -rf Debug/shared/utf8/*.o
+	rm -rf Debug/shared/cutef8/*.o
 	rm -rf Debug/shared/libunibreak/src/*.o
+	rm -rf Debug/shared/utf8
 	rm -rf Debug/static/*.o
-	rm -rf Debug/static/utf8/*.o
+	rm -rf Debug/static/cutef8/*.o
 	rm -rf Debug/static/libunibreak/src/*.o
+	rm -rf Debug/static/utf8
 	rm -rf Debug/*.o
 	rm -rf Debug/fbink
 	rm -rf Debug/button_scan
