@@ -143,10 +143,10 @@ typedef union
 // using OpenType/TrueType fonts
 typedef struct FBInkOTLine
 {
-	unsigned int startCharIndex;
-	unsigned int endCharIndex;
-	int          line_gap;
-	bool         line_used;
+	size_t startCharIndex;
+	size_t endCharIndex;
+	int    line_gap;
+	bool   line_used;
 } FBInkOTLine;
 
 typedef struct FBInkOTFonts

@@ -864,7 +864,7 @@ static struct mxcfb_rect
 	}
 
 	// Loop through all the *characters* in the text string
-	unsigned int       bi     = 0U;
+	size_t             bi     = 0U;
 	unsigned short int ci     = 0U;
 	uint32_t           ch     = 0U;
 	FBInkCoordinates   coords = { 0U };
@@ -893,7 +893,7 @@ static struct mxcfb_rect
 	if (glyphWidth <= 8) {
 #endif
 		while ((ch = u8_nextchar(text, &bi)) != 0U) {
-			LOG("Char %hu (@ %hu) out of %hu is @ byte offset %u and is U+%04X",
+			LOG("Char %hu (@ %hu) out of %hu is @ byte offset %zu and is U+%04X",
 			    (unsigned short int) (ci + 1U),
 			    ci,
 			    charcount,
@@ -1031,7 +1031,7 @@ static struct mxcfb_rect
 	*/
 	} else if (glyphWidth <= 32) {
 		while ((ch = u8_nextchar(text, &bi)) != 0U) {
-			LOG("Char %hu (@ %hu) out of %hu is @ byte offset %u and is U+%04X",
+			LOG("Char %hu (@ %hu) out of %hu is @ byte offset %zu and is U+%04X",
 			    (unsigned short int) (ci + 1U),
 			    ci,
 			    charcount,
@@ -2642,11 +2642,11 @@ int
 	}
 
 	// See if we need to break our string down into multiple lines...
-	size_t       len       = strlen(string);    // Flawfinder: ignore
-	unsigned int charcount = u8_strlen(string);
+	size_t len       = strlen(string);    // Flawfinder: ignore
+	size_t charcount = u8_strlen(string);
 	// Check how much extra storage is used up by multibyte sequences.
 	if (len > charcount) {
-		LOG("Extra storage used up by multibyte sequences: %zu bytes (for a total of %u characters over %zu bytes)",
+		LOG("Extra storage used up by multibyte sequences: %zu bytes (for a total of %zu characters over %zu bytes)",
 		    (len - charcount),
 		    charcount,
 		    len);
@@ -2720,25 +2720,25 @@ int
 	// NOTE: Since we re-use line on each iteration of the loop,
 	//       we do also need to clear it at the end of the loop, in preparation of the next iteration.
 
-	LOG("Need %hu lines to print %u characters over %hu available columns", lines, charcount, available_cols);
+	LOG("Need %hu lines to print %zu characters over %hu available columns", lines, charcount, available_cols);
 
 	// Do the initial computation outside the loop,
 	// so we'll be able to re-use line_len to accurately compute chars_left when looping.
 	// NOTE: This is where it gets tricky. With multibyte sequences, 1 byte doesn't necessarily mean 1 char.
 	//       And we need to work both in amount of characters for column/width arithmetic,
 	//       and in bytes for snprintf...
-	unsigned int       chars_left = charcount;
+	size_t             chars_left = charcount;
 	unsigned short int line_len   = 0U;
 	// If we have multiple lines worth of stuff to print, draw it line per line
 	while (chars_left > line_len) {
-		LOG("Line %hu (of ~%hu), previous line was %hu characters long and there were %u characters left to print",
+		LOG("Line %hu (of ~%hu), previous line was %hu characters long and there were %zu characters left to print",
 		    (unsigned short int) (multiline_offset + 1U),
 		    lines,
 		    line_len,
 		    chars_left);
 		// Make sure we don't try to draw off-screen...
 		if (row + multiline_offset >= MAXROWS) {
-			LOG("Can only print %hu lines, discarding the %u characters left!",
+			LOG("Can only print %hu lines, discarding the %zu characters left!",
 			    MAXROWS,
 			    chars_left - line_len);
 			// And that's it, we're done.
@@ -2749,13 +2749,13 @@ int
 		chars_left -= line_len;
 		// And use it to compute the amount of characters to print on *this* line
 		line_len = (unsigned short int) MIN(chars_left, available_cols);
-		LOG("Characters to print: %hu out of the %u remaining ones", line_len, chars_left);
+		LOG("Characters to print: %hu out of the %zu remaining ones", line_len, chars_left);
 
 		// NOTE: Now we just have to switch from characters to bytes, both for line_len & chars_left...
 		// First, get the byte offset of this section of our string (i.e., this line)...
-		unsigned int line_offset = u8_offset(string, charcount - chars_left);
+		size_t line_offset = u8_offset(string, charcount - chars_left);
 		// ... then compute how many bytes we'll need to store it.
-		unsigned int       line_bytes = 0U;
+		size_t             line_bytes = 0U;
 		unsigned short int cn         = 0U;
 		uint32_t           ch         = 0U;
 		while ((ch = u8_nextchar(string + line_offset, &line_bytes)) != 0U) {
@@ -2792,7 +2792,7 @@ int
 				break;
 			}
 		}
-		LOG("Line takes up %u bytes", line_bytes);
+		LOG("Line takes up %zu bytes", line_bytes);
 		int bytes_printed = 0;
 
 		// Just fudge the column for centering...
@@ -2849,19 +2849,25 @@ int
 		} else if (fbink_cfg->is_padded) {
 			// NOTE: Rely on the field width for padding ;).
 			// Padding character is a space, which is 1 byte, so that's good enough ;).
-			unsigned int padded_bytes = line_bytes + (unsigned int) (available_cols - line_len);
+			size_t padded_bytes = line_bytes + (unsigned int) (available_cols - line_len);
 			// NOTE: Don't touch line_len, because we're *adding* new blank characters,
 			//       we're still printing the exact same amount of characters *from our string*.
-			LOG("Left padded %u bytes to %u to cover %hu columns", line_bytes, padded_bytes, available_cols);
+			LOG("Left padded %zu bytes to %zu to cover %hu columns",
+			    line_bytes,
+			    padded_bytes,
+			    available_cols);
 			bytes_printed = snprintf(
 			    line, padded_bytes + 1U, "%*.*s", (int) padded_bytes, (int) line_bytes, string + line_offset);
 		} else if (fbink_cfg->is_rpadded) {
 			// NOTE: Rely on the field width for padding ;).
 			// Padding character is a space, which is 1 byte, so that's good enough ;).
-			unsigned int padded_bytes = line_bytes + (unsigned int) (available_cols - line_len);
+			size_t padded_bytes = line_bytes + (unsigned int) (available_cols - line_len);
 			// NOTE: Don't touch line_len, because we're *adding* new blank characters,
 			//       we're still printing the exact same amount of characters *from our string*.
-			LOG("Right padded %u bytes to %u to cover %hu columns", line_bytes, padded_bytes, available_cols);
+			LOG("Right padded %zu bytes to %zu to cover %hu columns",
+			    line_bytes,
+			    padded_bytes,
+			    available_cols);
 			bytes_printed = snprintf(line,
 						 padded_bytes + 1U,
 						 "%-*.*s",
@@ -3359,8 +3365,8 @@ int
 	}
 	// Lets find our lines! Nothing fancy, just a simple first fit algorithm, but we do our best not to break inside a word.
 
-	unsigned int       c_index     = 0U;
-	unsigned int       tmp_c_index = c_index;
+	size_t             c_index     = 0U;
+	size_t             tmp_c_index = c_index;
 	uint32_t           c;
 	int                gi;
 	unsigned short int max_lw = (unsigned short int) (area.br.x - area.tl.x);
@@ -3413,7 +3419,7 @@ int
 			}
 			// We check for a mandatory break
 			if (brk_buff[c_index] == LINEBREAK_MUSTBREAK) {
-				unsigned int last_index = c_index;
+				size_t last_index = c_index;
 				// We don't want to print the break character
 				u8_dec(string, &last_index);
 				lines[line].endCharIndex = last_index;
@@ -3500,7 +3506,7 @@ int
 						if (brk_buff[tmp_c_index] == LINEBREAK_ALLOWBREAK) {
 							c_index                  = tmp_c_index;
 							lines[line].endCharIndex = c_index;
-							LOG("Found a break @ #%u", c_index);
+							LOG("Found a break @ #%zu", c_index);
 							break;
 						}
 					}
@@ -3530,7 +3536,7 @@ int
 	}
 	LOG("%u lines to be printed", (line + complete_str));
 	if (!complete_str) {
-		LOG("String too long. Truncated to ~%u characters", c_index);
+		LOG("String too long. Truncated to ~%zu characters", c_index);
 	}
 	// Let's determine our exact height, so we can determine vertical alignment later if required.
 	LOG("Maximum printable height is %u", print_height);
@@ -3646,8 +3652,8 @@ int
 		if (abort_line) {
 			break;
 		}
-		lw              = 0U;
-		unsigned int ci = lines[line].startCharIndex;
+		lw        = 0U;
+		size_t ci = lines[line].startCharIndex;
 		while (ci <= lines[line].endCharIndex) {
 			if (cfg->is_formatted) {
 				if (fmt_buff[ci] == CH_IGNORE) {
@@ -3760,9 +3766,9 @@ int
 			}
 			curr_point.x = (unsigned short int) (curr_point.x + lroundf(sf * (float) adv));
 			if (ci < lines[line].endCharIndex) {
-				unsigned int tmp_i = ci;
-				tmp_c              = u8_nextchar(string, &tmp_i);
-				tmp_gi             = stbtt_FindGlyphIndex(curr_font, (int) tmp_c);
+				size_t tmp_i = ci;
+				tmp_c        = u8_nextchar(string, &tmp_i);
+				tmp_gi       = stbtt_FindGlyphIndex(curr_font, (int) tmp_c);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wbad-function-cast"
 				curr_point.x =
