@@ -94,7 +94,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
-// NOTE: This is from https://www.cprogramming.com/tutorial/unicode.html (https://github.com/JeffBezanson/cutef8)
+// NOTE: This is from https://www.cprogramming.com/tutorial/unicode.html (now https://github.com/JeffBezanson/cutef8)
 //       This helps us handling *VALID* UTF-8 properly, since our font does support extended Latin & Greek.
 //       That said, we have no (easy) way of ensuring all input either is or gets converted to valid UTF-8,
 //       because the libc is severely hobbled on Kobo: gconv modules are missing & locales are missing or broken,
@@ -119,7 +119,7 @@
 //           https://www.tldp.org/HOWTO/Unicode-HOWTO-6.html
 //           https://www.cl.cam.ac.uk/~mgk25/unicode.html
 //           https://unicodebook.readthedocs.io/
-#include "utf8/utf8.h"
+#include "cutef8/utf8.h"
 
 // We're going to need a few more things for OpenType support, namely, maths ;).
 #ifdef FBINK_WITH_OPENTYPE
