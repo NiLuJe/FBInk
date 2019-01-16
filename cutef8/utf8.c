@@ -327,6 +327,8 @@ uint32_t
 	return ch;
 }
 
+// NOTE: Actually inspired from https://github.com/JuliaStrings/LegacyStrings.jl/blob/master/src/utf8.jl,
+//       after https://github.com/JuliaLang/julia/pull/11107
 size_t
     u8_strlen(const char* s)
 {
