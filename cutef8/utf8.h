@@ -52,9 +52,6 @@ size_t u8_offset(const char* str, size_t charnum) __attribute__((pure));
 /* byte offset to character number */
 size_t u8_charnum(const char* s, size_t offset) __attribute__((pure));
 
-/* count the number of characters in a UTF-8 string */
-size_t u8_strlen(const char* s) __attribute__((pure));
-
 /* number of columns occupied by a string */
 size_t u8_strwidth(const char* s);
 
@@ -63,6 +60,9 @@ uint32_t u8_nextchar(const char* s, size_t* i);
 
 /* next character without NUL character terminator */
 uint32_t u8_nextmemchar(const char* s, size_t* i);
+
+/* count the number of characters in a UTF-8 string */
+size_t u8_strlen(const char* s) __attribute__((pure));
 
 /* move to next character */
 void u8_inc(const char* s, size_t* i);
