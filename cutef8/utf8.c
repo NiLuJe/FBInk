@@ -328,24 +328,6 @@ uint32_t
 	return ch;
 }
 
-/*
-uint32_t
-    u8_oldnextchar(const char* s, unsigned int* i)
-{
-	uint32_t     ch = 0;
-	unsigned int sz = 0;
-
-	do {
-		ch <<= 6;
-		ch += (unsigned char) s[(*i)++];
-		sz++;
-	} while (s[*i] && !isutf(s[*i]));
-	ch -= offsetsFromUTF8[sz - 1];
-
-	return ch;
-}
-*/
-
 /* number of characters in NUL-terminated string */
 size_t
     u8_strlen(const char* s)
@@ -358,6 +340,66 @@ size_t
 
 	return count;
 }
+
+/*
+// c.f., http://bjoern.hoehrmann.de/utf-8/decoder/dfa
+#define UTF8_ACCEPT 0
+#define UTF8_REJECT 12
+
+static const uint8_t utf8d[] = {
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,  1,  1,  1,
+	1,  1,  1,  1,  1,  1,  1,  1,  1,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  7,  7,
+	7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,
+	7,  7,  7,  8,  8,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,
+	2,  2,  2,  2,  2,  2,  2,  2,  10, 3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  4,  3,  3,  11, 6,  6,
+	6,  5,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,
+
+	0,  12, 24, 36, 60, 96, 84, 12, 12, 12, 48, 72, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 0,  12,
+	12, 12, 12, 12, 0,  12, 0,  12, 12, 12, 24, 12, 12, 12, 12, 12, 24, 12, 24, 12, 12, 12, 12, 12, 12, 12, 12,
+	12, 24, 12, 12, 12, 12, 12, 24, 12, 12, 12, 12, 12, 12, 12, 24, 12, 12, 12, 12, 12, 12, 12, 12, 12, 36, 12,
+	36, 12, 12, 12, 36, 12, 12, 12, 12, 12, 36, 12, 36, 12, 12, 12, 36, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+};
+
+inline static uint32_t
+    decode(uint32_t* state, uint32_t* codep, uint32_t byte)
+{
+	uint32_t type = utf8d[byte];
+
+	*codep = (*state != UTF8_ACCEPT) ? (byte & 0x3fu) | (*codep << 6) : (0xffu >> type) & (byte);
+
+	*state = utf8d[256 + *state + type];
+	return *state;
+}
+
+inline static int
+    countCodePoints(const char* s, size_t* count)
+{
+	uint32_t codepoint;
+	uint32_t state = 0;
+
+	for (*count = 0; *s; ++s)
+		if (!decode(&state, &codepoint, *s))
+			*count += 1;
+
+	return state != UTF8_ACCEPT;
+}
+
+size_t
+    u8_strlen(const char* s)
+{
+	size_t count = 0;
+	if (countCodePoints(s, &count)) {
+		// NOTE: Invalid input!
+		return 0;
+	} else {
+		return count;
+	}
+}
+*/
 
 void
     u8_inc(const char* s, size_t* i)
