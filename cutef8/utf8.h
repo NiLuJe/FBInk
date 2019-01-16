@@ -1,6 +1,13 @@
 #ifndef __CUTEF8_H
 #define __CUTEF8_H
 
+// Because we're pretty much Linux-bound ;).
+#ifndef _GNU_SOURCE
+#	define _GNU_SOURCE
+#endif
+
+#include <alloca.h>
+#include <assert.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -9,19 +16,6 @@
 #include <string.h>
 #include <wchar.h>
 #include <wctype.h>
-
-// So we don't need to define _XOPEN_SOURCE (otherwise, it's in <wchar.h>)
-int wcwidth(wchar_t c);
-
-#ifdef WIN32
-#	include <malloc.h>
-#	define snprintf _snprintf
-#else
-#	ifndef __FreeBSD__
-#		include <alloca.h>
-#	endif /* __FreeBSD__ */
-#endif
-#include <assert.h>
 
 /* is c the start of a utf8 sequence? */
 #define isutf(c) (((c) &0xC0) != 0x80)
