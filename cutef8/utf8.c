@@ -653,6 +653,7 @@ bool
 size_t
     u8_vprintf(const char* fmt, va_list ap)
 {
+	int       ret;
 	size_t    cnt;
 	size_t    sz = 0;
 	size_t    nc;
@@ -662,9 +663,11 @@ size_t
 
 	sz  = 512;
 	buf = (char*) alloca(sz);
-	cnt = vsnprintf(buf, sz, fmt, ap);
-	if ((intptr_t) cnt < 0) {
+	ret = vsnprintf(buf, sz, fmt, ap);
+	if (ret < 0) {
 		return 0;
+	} else {
+		cnt = (size_t) ret;
 	}
 	if (cnt >= sz) {
 		buf      = (char*) malloc(cnt + 1);
