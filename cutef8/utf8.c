@@ -300,7 +300,8 @@ size_t
 					ch += (unsigned char) *s++;
 			}
 			ch -= offsetsFromUTF8[nb];
-			w = wcwidth((wchar_t) ch);    // might return -1
+			w = wcwidth(
+			    (wchar_t) ch);    // might return -1, locale-dependent (Julia now uses utf8proc_charwidth)
 			if (w > 0) {
 				tot += (size_t) w;
 			}
