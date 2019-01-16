@@ -712,8 +712,8 @@ int
 	if (!len) {
 		return 1;
 	}
-	pnt  = (unsigned char*) str;
-	pend = (unsigned char*) str + len;
+	pnt  = (const unsigned char*) str;
+	pend = (const unsigned char*) str + len;
 	// First scan for non-ASCII characters as fast as possible
 	do {
 		if (*pnt++ & 0x80)
