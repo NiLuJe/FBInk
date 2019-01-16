@@ -703,9 +703,15 @@ size_t
 	return cnt;
 }
 
-/* Rewritten completely, original code not based on anything else (NB: but close to what utf8proc does)
+/* Rewritten completely, original code not based on anything else
    length is in bytes, since without knowing whether the string is valid
    it's hard to know how many characters there are! */
+// NOTE: It's very close to what utf8proc does (which makes sense, given the Julia background),
+//       as well as what gnulib/libunistring does, too (https://git.savannah.gnu.org/cgit/gnulib.git/tree/lib/unistr/u8-check.c)
+//       In fact, trying to match the very few discrepancies between this and gnulib
+//       (c.f., https://gist.github.com/NiLuJe/f3056bfaeabd1569a52a1eb9fab0e40d)
+//       yielded the very same results with a quick check against https://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-test.txt ;).
+// TL;DR: Which means I'm keeping this logic untouched, given the high probabilty I'd have of subtly messing something up ;).
 CUTEF8_ISVALID_T
 u8_isvalid(const char* str, size_t len)
 {
