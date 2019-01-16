@@ -350,10 +350,7 @@ size_t
 	size_t i     = 0;
 
 	while (s[i] > 0) {
-		if (s[i++] & 0x80) {
-			(void) (isutf(s[++i]) || isutf(s[++i]) || ++i);
-		}
-		count++;
+		count += isutf(s[i++]);
 	}
 	return count;
 }
