@@ -225,6 +225,7 @@ size_t
     u8_charnum(const char* s, size_t offset)
 {
 	size_t charnum = 0;
+
 	if (offset) {
 		do {
 			// Simply not count continuation bytes
