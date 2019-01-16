@@ -3109,6 +3109,13 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
+	// Abort if we were passed an invalid UTF-8 sequence
+	size_t str_len_bytes = strlen(string);    // Flawfinder: ignore
+	if (u8_isvalid(string, str_len_bytes) == CUTEF8_IS_INVALID) {
+		WARN("Cannot print an invalid UTF-8 sequence");
+		return ERRCODE(EXIT_FAILURE);
+	}
+
 	// Has fbink_add_ot_font() been successfully called yet?
 	if (!otInit) {
 		WARN("No fonts have been loaded");
@@ -3353,8 +3360,7 @@ int
 	// Now, lets use libunibreak to find the possible break opportunities in our string.
 
 	// Note: we only care about the byte length here
-	size_t str_len_bytes = strlen(string);    // Flawfinder: ignore
-	brk_buff             = calloc(str_len_bytes + 1, sizeof(*brk_buff));
+	brk_buff = calloc(str_len_bytes + 1, sizeof(*brk_buff));
 	if (!brk_buff) {
 		WARN("Linebreak buffer could not be allocated");
 		rv = ERRCODE(EXIT_FAILURE);

@@ -110,7 +110,7 @@
 //       TL;DR; for API users: You have to ensure you feed FBInk valid UTF-8 input,
 //              as this is the encoding it effectively uses internally, without any kind of validation.
 //
-//       NOTE: There's a few comments strewn in the code about u8_strlen & using wide-NULLs to avoid issues.
+//       NOTE: There's a few comments strewn in the code about u8_strlen/u8_nextchar & using wide-NULLs to avoid issues.
 //             The underlying issue *might* have been fixed in our current cutef8 build.
 //             That said, I'm not risking anything just to save 3 bytes, so, these quirks stay ;).
 //
