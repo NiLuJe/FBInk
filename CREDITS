@@ -9,6 +9,8 @@ This project makes use of a number of third-party libraries, which we'll acknowl
 		(https://www.cprogramming.com/tutorial/unicode.html)
 		(https://github.com/JeffBezanson/cutef8)
 		(https://github.com/JuliaLang/julia/blob/master/src/support/utf8.c)
+		NOTE: Actually, let's say under the MIT License instead (https://opensource.org/licenses/MIT),
+		      as that's what the bits maintained in Julia fall under ;).
 
 	* stb_image (Image loader) and stb_truetype (font renderer), by Sean Barrett,
 		Released into the public domain.
