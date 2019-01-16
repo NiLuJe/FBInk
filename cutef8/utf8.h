@@ -114,6 +114,9 @@ size_t u8_vprintf(const char* fmt, va_list ap) __attribute__((format(printf, 1, 
 size_t u8_printf(const char* fmt, ...) __attribute__((format(printf, 1, 2)));
 
 /* determine whether a sequence of bytes is valid UTF-8. length is in bytes */
+#define CUTEF8_IS_INVALID 0	// neither valid ASCII nor UTF-8
+#define CUTEF8_IS_ASCII 1	// valid ASCII
+#define CUTEF8_IS_UTF8 2	// valid UTF-8
 int u8_isvalid(const char* str, size_t length) __attribute__((pure));
 
 /* reverse a UTF-8 string. len is length in bytes. dest and src must both
