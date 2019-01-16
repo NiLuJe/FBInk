@@ -128,6 +128,8 @@ endif
 
 # Assume we'll be safe to use by threaded applications...
 EXTRA_CPPFLAGS+=-D_REENTRANT=1
+# We're Linux-bound anyway...
+EXTRA_CPPFLAGS+=-D_GNU_SOURCE
 
 # Toggle Kindle support
 ifdef KINDLE
