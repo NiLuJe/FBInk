@@ -97,7 +97,7 @@
 // NOTE: This is from https://www.cprogramming.com/tutorial/unicode.html
 //         (now https://github.com/JeffBezanson/cutef8)
 //         (as well as https://github.com/JuliaLang/julia/blob/master/src/support/utf8.c)
-//       This helps us handling *VALID* UTF-8 properly, since our font does support extended Latin & Greek.
+//       This helps us handling *VALID* UTF-8 properly, since our fonts can (and do) support non-ASCII scripts.
 //       That said, we have no (easy) way of ensuring all input either is or gets converted to valid UTF-8,
 //       because the libc is severely hobbled on Kobo: gconv modules are missing & locales are missing or broken,
 //       (at the very least), so we can't use iconv and we can't use locale/multibyte aware libc functions,
@@ -109,6 +109,10 @@
 //
 //       TL;DR; for API users: You have to ensure you feed FBInk valid UTF-8 input,
 //              as this is the encoding it effectively uses internally, without any kind of validation.
+//
+//       NOTE: There's a few comments strewn in the code about u8_strlen & using wide-NULLs to avoid issues.
+//             The underlying issue *might* have been fixed in our current cutef8 build.
+//             That said, I'm not risking anything just to save 3 bytes, so, these quirks stay ;).
 //
 //       Further reading on the subject, in no particular order:
 //           http://bjoern.hoehrmann.de/utf-8/decoder/dfa
