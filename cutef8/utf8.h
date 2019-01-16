@@ -52,9 +52,6 @@ size_t u8_strwidth(const char* s);
 /* return next character, updating an index variable */
 uint32_t u8_nextchar(const char* s, size_t* i);
 
-/* next character without NUL character terminator */
-uint32_t u8_nextmemchar(const char* s, size_t* i);
-
 /* count the number of characters in a UTF-8 string */
 size_t u8_strlen(const char* s) __attribute__((pure));
 

@@ -59,7 +59,12 @@ size_t
 	size_t c = 0;
 
 	for (i = 0; i < n; i++) {
-		c += u8_charlen(wcstr[i]);
+		size_t cl = u8_charlen(wcstr[i]);
+		if (cl == 0) {
+			// invalid: encoded as replacement char
+			cl = 3;
+		}
+		c += cl;
 	}
 	return c;
 }
@@ -68,7 +73,6 @@ size_t
    only works for valid UTF-8, i.e. no 5- or 6-byte sequences
    srcsz = source size in bytes
    sz = dest size in # of wide characters
-
    returns # characters converted
    if sz == srcsz+1 (i.e. 4*srcsz+4 bytes), there will always be enough space.
 */
@@ -131,7 +135,6 @@ size_t
 
 /* srcsz = number of source characters
    sz = size of dest buffer in bytes
-
    returns # bytes stored in dest
    the destination string will never be bigger than the source string.
 */
@@ -171,6 +174,14 @@ size_t
 			*dest++ = (char) (((ch >> 12) & 0x3F) | 0x80);
 			*dest++ = (char) (((ch >> 6) & 0x3F) | 0x80);
 			*dest++ = (char) ((ch & 0x3F) | 0x80);
+		} else {
+			if (dest >= dest_end - 2) {
+				break;
+			}
+			// invalid: use replacement char \ufffd
+			*dest++ = (char) 0xef;
+			*dest++ = (char) 0xbf;
+			*dest++ = (char) 0xbd;
 		}
 		i++;
 	}
@@ -202,7 +213,10 @@ size_t
 		dest[3] = (char) ((ch & 0x3F) | 0x80);
 		return 4;
 	}
-	return 0;
+	dest[0] = (char) 0xef;
+	dest[1] = (char) 0xbf;
+	dest[2] = (char) 0xbd;
+	return 3;
 }
 
 /* charnum => byte offset */
@@ -300,49 +314,18 @@ uint32_t
     u8_nextchar(const char* s, size_t* i)
 {
 	uint32_t ch = 0;
-	size_t   sz = 0;
+	size_t   sz;
+	size_t   j;
 
-	do {
-		ch <<= 6;
-		ch += (unsigned char) s[(*i)];
-		sz++;
-	} while (s[*i] && (++(*i)) && !isutf(s[*i]));
-	ch -= offsetsFromUTF8[sz - 1];
-
-	return ch;
-}
-
-/* next character without NUL character terminator */
-uint32_t
-    u8_nextmemchar(const char* s, size_t* i)
-{
-	uint32_t ch = 0;
-	size_t   sz = 0;
-
-	do {
+	sz = u8_seqlen(&s[*i]);
+	for (j = sz; j > 0; j--) {
 		ch <<= 6;
 		ch += (unsigned char) s[(*i)++];
-		sz++;
-	} while (!isutf(s[*i]));
+	}
 	ch -= offsetsFromUTF8[sz - 1];
 
 	return ch;
 }
-
-/* number of characters in NUL-terminated string */
-/*
-size_t
-    u8_strlen(const char* s)
-{
-	size_t count = 0;
-	size_t i     = 0;
-
-	while (u8_nextchar(s, &i) != 0)
-		count++;
-
-	return count;
-}
-*/
 
 size_t
     u8_strlen(const char* s)
@@ -389,7 +372,7 @@ static char
 	} else if (c == 'r') {
 		return '\r';
 	} else if (c == 'e') {
-		return 033;    // '\e'
+		return '\x1B';
 	} else if (c == 'b') {
 		return '\b';
 	} else if (c == 'f') {
@@ -407,13 +390,13 @@ static char
 size_t
     u8_read_escape_sequence(const char* str, size_t ssz, uint32_t* dest)
 {
+	assert(ssz > 0);
 	uint32_t ch;
 	char     digs[10];
 	int      dno = 0;
 	int      ndig;
 	size_t   i  = 1;
 	char     c0 = str[0];
-	assert(ssz > 0);
 
 	if (octal_digit(c0)) {
 		i = 0;
@@ -472,7 +455,7 @@ size_t
 	return c;
 }
 
-static int
+inline static int
     buf_put2c(char* buf, const char* src)
 {
 	buf[0] = src[0];
@@ -491,7 +474,7 @@ int
 		return buf_put2c(buf, "\\t");
 	} else if (ch == L'\r') {
 		return buf_put2c(buf, "\\r");
-	} else if (ch == 033) {    // L'\e'
+	} else if (ch == L'\x1B') {
 		return buf_put2c(buf, "\\e");
 	} else if (ch == L'\b') {
 		return buf_put2c(buf, "\\b");
@@ -519,12 +502,12 @@ int
 size_t
     u8_escape(char* buf, size_t sz, const char* src, size_t* pi, size_t end, bool escape_quotes, bool ascii)
 {
+	assert(sz > 11);
 	size_t   i = *pi;
 	size_t   i0;
 	uint32_t ch;
 	char*    start = buf;
 	char*    blim  = start + sz - 11;
-	assert(sz > 11);
 
 	while (i < end && buf < blim) {
 		// sz-11: leaves room for longest escape sequence
@@ -536,7 +519,7 @@ size_t
 			i++;
 		} else {
 			i0 = i;
-			ch = u8_nextmemchar(src, &i);
+			ch = u8_nextchar(src, &i);
 			if (ascii || !iswprint((wint_t) ch)) {
 				buf += u8_escape_wchar(buf, sz - (size_t)(buf - start), ch);
 			} else {
@@ -622,7 +605,7 @@ char*
 
 	while (1) {
 		tempi = i;
-		c     = u8_nextmemchar(s, &tempi);
+		c     = u8_nextchar(s, &tempi);
 		if (c == ch) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
@@ -644,17 +627,17 @@ char*
 bool
     u8_is_locale_utf8(const char* locale)
 {
-	/* this code based on libutf8 */
-	const char* cp = locale;
-
 	if (locale == NULL) {
 		return false;
 	}
 
-	for (; *cp != '\0' && *cp != '@' && *cp != '+' && *cp != ','; cp++) {
+	/* this code based on libutf8 */
+	const char* cp = locale;
+
+	for (; *cp != '\0' && *cp != '@' && *cp != '+' && *cp != ',' && *cp != ';'; cp++) {
 		if (*cp == '.') {
 			const char* encoding = ++cp;
-			for (; *cp != '\0' && *cp != '@' && *cp != '+' && *cp != ','; cp++) {
+			for (; *cp != '\0' && *cp != '@' && *cp != '+' && *cp != ',' && *cp != ';'; cp++) {
 				;
 			}
 			if ((cp - encoding == 5 && !strncmp(encoding, "UTF-8", 5)) ||
@@ -670,26 +653,26 @@ bool
 size_t
     u8_vprintf(const char* fmt, va_list ap)
 {
-	int       cnt;
-	int       sz = 0;
+	size_t    cnt;
+	size_t    sz = 0;
 	size_t    nc;
 	bool      needfree = false;
 	char*     buf;
 	uint32_t* wcs;
 
 	sz  = 512;
-	buf = (char*) alloca((size_t) sz);
-	cnt = vsnprintf(buf, (size_t) sz, fmt, ap);
-	if (cnt < 0) {
+	buf = (char*) alloca(sz);
+	cnt = vsnprintf(buf, sz, fmt, ap);
+	if ((intptr_t) cnt < 0) {
 		return 0;
 	}
 	if (cnt >= sz) {
-		buf      = (char*) malloc((size_t)(cnt + 1));
+		buf      = (char*) malloc(cnt + 1);
 		needfree = true;
-		vsnprintf(buf, (size_t)(cnt + 1), fmt, ap);
+		vsnprintf(buf, cnt + 1, fmt, ap);
 	}
-	wcs     = (uint32_t*) alloca((size_t)(cnt + 1) * sizeof(uint32_t));
-	nc      = u8_toucs(wcs, (size_t) cnt + 1, buf, (size_t) cnt);
+	wcs     = (uint32_t*) alloca((cnt + 1) * sizeof(uint32_t));
+	nc      = u8_toucs(wcs, cnt + 1, buf, cnt);
 	wcs[nc] = 0;
 	printf("%ls", (wchar_t*) wcs);
 	if (needfree) {
@@ -712,87 +695,81 @@ size_t
 	return cnt;
 }
 
-/* based on the valid_utf8 routine from the PCRE library by Philip Hazel
-
+/* Rewritten completely, original code not based on anything else
    length is in bytes, since without knowing whether the string is valid
    it's hard to know how many characters there are! */
 int
-    u8_isvalid(const char* str, size_t length)
+    u8_isvalid(const char* str, size_t len)
 {
-	const unsigned char* p;
-	const unsigned char* pend = (const unsigned char*) str + length;
-	unsigned char        c;
-	bool                 ret = 1; /* ASCII */
-	size_t               ab;
+	const unsigned char* pnt;     // Current pointer in string
+	const unsigned char* pend;    // End of string
+	unsigned char        byt;     // Current byte
 
-	for (p = (const unsigned char*) str; p < pend; p++) {
-		c = *p;
-		if (c < 128) {
-			continue;
-		}
-		ret = 2; /* non-ASCII UTF-8 */
-		if ((c & 0xc0) != 0xc0) {
+	// Empty strings can be considered valid ASCII
+	if (!len) {
+		return 1;
+	}
+	pnt  = (unsigned char*) str;
+	pend = (unsigned char*) str + len;
+	// First scan for non-ASCII characters as fast as possible
+	do {
+		if (*pnt++ & 0x80)
+			goto chkutf8;
+	} while (pnt < pend);
+	return 1;
+
+	// Check validity of UTF-8 sequences
+chkutf8:
+	if (pnt == pend) {
+		return 0;    // Last byte can't be > 127
+	}
+	byt = pnt[-1];
+	// Must be between 0xc2 and 0xf4 inclusive to be valid
+	if (((uint32_t) byt - 0xc2) > (0xf4 - 0xc2)) {
+		return 0;
+	}
+	if (byt < 0xe0) {    // 2-byte sequence
+		// Must have valid continuation character
+		if ((*pnt++ & 0xc0) != 0x80) {
 			return 0;
 		}
-		ab = trailingBytesForUTF8[c];
-		if (length < ab) {
+	} else if (byt < 0xf0) {    // 3-byte sequence
+		if ((pnt + 1 >= pend) || (*pnt & 0xc0) != 0x80 || (pnt[1] & 0xc0) != 0x80) {
 			return 0;
 		}
-		length -= ab;
-
-		p++;
-		/* Check top bits in the second byte */
-		if ((*p & 0xc0) != 0x80) {
+		// Check for surrogate chars
+		if (byt == 0xed && *pnt > 0x9f) {
 			return 0;
 		}
-
-		/* Check for overlong sequences for each different length */
-		switch (ab) {
-				/* Check for xx00 000x */
-			case 1:
-				if ((c & 0x3e) == 0) {
-					return 0;
-				}
-				continue; /* We know there aren't any more bytes to check */
-
-				/* Check for 1110 0000, xx0x xxxx */
-			case 2:
-				if (c == 0xe0 && (*p & 0x20) == 0) {
-					return 0;
-				}
-				break;
-
-				/* Check for 1111 0000, xx00 xxxx */
-			case 3:
-				if (c == 0xf0 && (*p & 0x30) == 0) {
-					return 0;
-				}
-				break;
-
-				/* Check for 1111 1000, xx00 0xxx */
-			case 4:
-				if (c == 0xf8 && (*p & 0x38) == 0) {
-					return 0;
-				}
-				break;
-
-				/* Check for leading 0xfe or 0xff, and then for 1111 1100, xx00 00xx */
-			case 5:
-				if (c == 0xfe || c == 0xff || (c == 0xfc && (*p & 0x3c) == 0)) {
-					return 0;
-				}
-				break;
+		// Check for overlong encoding
+		if (byt == 0xe0 && *pnt < 0xa0) {
+			return 0;
 		}
-
-		/* Check for valid bytes after the 2nd, if any; all must start 10 */
-		while (--ab > 0) {
-			if ((*(++p) & 0xc0) != 0x80) {
+		pnt += 2;
+	} else {    // 4-byte sequence
+		// Must have 3 valid continuation characters
+		if ((pnt + 2 >= pend) || (*pnt & 0xc0) != 0x80 || (pnt[1] & 0xc0) != 0x80 || (pnt[2] & 0xc0) != 0x80) {
+			return 0;
+		}
+		// Make sure in correct range (0x10000 - 0x10ffff)
+		if (byt == 0xf0) {
+			if (*pnt < 0x90) {
+				return 0;
+			}
+		} else if (byt == 0xf4) {
+			if (*pnt > 0x8f) {
 				return 0;
 			}
 		}
+		pnt += 3;
 	}
-
-	return ret;
+	// Find next non-ASCII characters as fast as possible
+	while (pnt < pend) {
+		if (*pnt++ & 0x80) {
+			goto chkutf8;
+		}
+	}
+	return 2;    // Valid UTF-8
 }
 
 int
