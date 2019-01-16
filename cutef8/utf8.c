@@ -40,24 +40,27 @@ size_t
 size_t
     u8_charlen(uint32_t ch)
 {
-	if (ch < 0x80)
+	if (ch < 0x80) {
 		return 1;
-	else if (ch < 0x800)
+	} else if (ch < 0x800) {
 		return 2;
-	else if (ch < 0x10000)
+	} else if (ch < 0x10000) {
 		return 3;
-	else if (ch < 0x110000)
+	} else if (ch < 0x110000) {
 		return 4;
+	}
 	return 0;
 }
 
 size_t
     u8_codingsize(uint32_t* wcstr, size_t n)
 {
-	size_t i, c = 0;
+	size_t i;
+	size_t c = 0;
 
-	for (i = 0; i < n; i++)
+	for (i = 0; i < n; i++) {
 		c += u8_charlen(wcstr[i]);
+	}
 	return c;
 }
 
@@ -77,20 +80,23 @@ size_t
 	size_t      nb;
 	size_t      i = 0;
 
-	if (sz == 0 || srcsz == 0)
+	if (sz == 0 || srcsz == 0) {
 		return 0;
+	}
 
 	while (i < sz) {
 		if (!isutf(*src)) {    // invalid sequence
 			dest[i++] = 0xFFFD;
 			src++;
-			if (src >= src_end)
+			if (src >= src_end) {
 				break;
+			}
 			continue;
 		}
 		nb = trailingBytesForUTF8[(unsigned char) *src];
-		if (src + nb >= src_end)
+		if (src + nb >= src_end) {
 			break;
+		}
 		ch = 0;
 		switch (nb) {
 			// fall through
@@ -140,23 +146,27 @@ size_t
 	while (i < srcsz) {
 		ch = src[i];
 		if (ch < 0x80) {
-			if (dest >= dest_end)
+			if (dest >= dest_end) {
 				break;
+			}
 			*dest++ = (char) ch;
 		} else if (ch < 0x800) {
-			if (dest >= dest_end - 1)
+			if (dest >= dest_end - 1) {
 				break;
+			}
 			*dest++ = (char) ((ch >> 6) | 0xC0);
 			*dest++ = (char) ((ch & 0x3F) | 0x80);
 		} else if (ch < 0x10000) {
-			if (dest >= dest_end - 2)
+			if (dest >= dest_end - 2) {
 				break;
+			}
 			*dest++ = (char) ((ch >> 12) | 0xE0);
 			*dest++ = (char) (((ch >> 6) & 0x3F) | 0x80);
 			*dest++ = (char) ((ch & 0x3F) | 0x80);
 		} else if (ch < 0x110000) {
-			if (dest >= dest_end - 3)
+			if (dest >= dest_end - 3) {
 				break;
+			}
 			*dest++ = (char) ((ch >> 18) | 0xF0);
 			*dest++ = (char) (((ch >> 12) & 0x3F) | 0x80);
 			*dest++ = (char) (((ch >> 6) & 0x3F) | 0x80);
@@ -236,11 +246,13 @@ size_t
 
 	while (1) {
 		lasti = i;
-		while (s[i] > 0)
+		while (s[i] > 0) {
 			i++;
+		}
 		count += (i - lasti);
-		if (s[i++] == 0)
+		if (s[i++] == 0) {
 			break;
+		}
 		(void) (isutf(s[++i]) || isutf(s[++i]) || ++i);
 		count++;
 	}
@@ -259,8 +271,9 @@ size_t
 	while ((sc = (signed char) *s) != 0) {
 		if (sc >= 0) {
 			s++;
-			if (sc)
+			if (sc) {
 				tot++;
+			}
 		} else {
 			if (!isutf(sc)) {
 				tot++;
@@ -296,8 +309,9 @@ size_t
 			}
 			ch -= offsetsFromUTF8[nb];
 			w = wcwidth((wchar_t) ch);    // might return -1
-			if (w > 0)
+			if (w > 0) {
 				tot += (size_t) w;
+			}
 		}
 	}
 	return tot;
@@ -364,22 +378,23 @@ int
 static char
     read_escape_control_char(char c)
 {
-	if (c == 'n')
+	if (c == 'n') {
 		return '\n';
-	else if (c == 't')
+	} else if (c == 't') {
 		return '\t';
-	else if (c == 'r')
+	} else if (c == 'r') {
 		return '\r';
-	else if (c == 'e')
+	} else if (c == 'e') {
 		return 033;    // '\e'
-	else if (c == 'b')
+	} else if (c == 'b') {
 		return '\b';
-	else if (c == 'f')
+	} else if (c == 'f') {
 		return '\f';
-	else if (c == 'v')
+	} else if (c == 'v') {
 		return '\v';
-	else if (c == 'a')
+	} else if (c == 'a') {
 		return '\a';
+	}
 	return c;
 }
 
@@ -390,9 +405,10 @@ size_t
 {
 	uint32_t ch;
 	char     digs[10];
-	int      dno = 0, ndig;
-	size_t   i   = 1;
-	char     c0  = str[0];
+	int      dno = 0;
+	int      ndig;
+	size_t   i  = 1;
+	char     c0 = str[0];
 	assert(ssz > 0);
 
 	if (octal_digit(c0)) {
@@ -406,8 +422,9 @@ size_t
 		while (i < ssz && hex_digit(str[i]) && dno < ndig) {
 			digs[dno++] = str[i++];
 		}
-		if (dno == 0)
+		if (dno == 0) {
 			return 0;
+		}
 		digs[dno] = '\0';
 		ch        = (uint32_t) strtoul(digs, NULL, 16);
 	} else {
@@ -439,13 +456,15 @@ size_t
 		}
 		src += amt;
 		amt = u8_wc_toutf8(temp, ch);
-		if (amt > sz - c)
+		if (amt > sz - c) {
 			break;
+		}
 		memcpy(&buf[c], temp, amt);
 		c += amt;
 	}
-	if (c < sz)
+	if (c < sz) {
 		buf[c] = '\0';
+	}
 	return c;
 }
 
@@ -462,30 +481,31 @@ int
     u8_escape_wchar(char* buf, size_t sz, uint32_t ch)
 {
 	assert(sz > 2);
-	if (ch == L'\n')
+	if (ch == L'\n') {
 		return buf_put2c(buf, "\\n");
-	else if (ch == L'\t')
+	} else if (ch == L'\t') {
 		return buf_put2c(buf, "\\t");
-	else if (ch == L'\r')
+	} else if (ch == L'\r') {
 		return buf_put2c(buf, "\\r");
-	else if (ch == 033)    // L'\e'
+	} else if (ch == 033) {    // L'\e'
 		return buf_put2c(buf, "\\e");
-	else if (ch == L'\b')
+	} else if (ch == L'\b') {
 		return buf_put2c(buf, "\\b");
-	else if (ch == L'\f')
+	} else if (ch == L'\f') {
 		return buf_put2c(buf, "\\f");
-	else if (ch == L'\v')
+	} else if (ch == L'\v') {
 		return buf_put2c(buf, "\\v");
-	else if (ch == L'\a')
+	} else if (ch == L'\a') {
 		return buf_put2c(buf, "\\a");
-	else if (ch == L'\\')
+	} else if (ch == L'\\') {
 		return buf_put2c(buf, "\\\\");
-	else if (ch < 32 || ch == 0x7f)
+	} else if (ch < 32 || ch == 0x7f) {
 		return snprintf(buf, sz, "\\x%.2hhx", (unsigned char) ch);
-	else if (ch > 0xFFFF)
+	} else if (ch > 0xFFFF) {
 		return snprintf(buf, sz, "\\U%.8x", (uint32_t) ch);
-	else if (ch >= 0x80)
+	} else if (ch >= 0x80) {
 		return snprintf(buf, sz, "\\u%.4hx", (unsigned short) ch);
+	}
 
 	buf[0] = (char) ch;
 	buf[1] = '\0';
@@ -588,11 +608,13 @@ char*
 	size_t   tempi = 0;
 	uint32_t c;
 
-	if (sz == 0)
+	if (sz == 0) {
 		return NULL;
+	}
 
-	while (i && !isutf(s[i]))
+	while (i && !isutf(s[i])) {
 		i--;
+	}
 
 	while (1) {
 		tempi = i;
@@ -603,12 +625,14 @@ char*
 			return (char*) &s[i];
 #pragma GCC diagnostic pop
 		}
-		if (i == 0)
+		if (i == 0) {
 			break;
+		}
 		tempi = i;
 		u8_dec(s, &i);
-		if (i > tempi)
+		if (i > tempi) {
 			break;
+		}
 	}
 	return NULL;
 }
@@ -619,17 +643,20 @@ bool
 	/* this code based on libutf8 */
 	const char* cp = locale;
 
-	if (locale == NULL)
+	if (locale == NULL) {
 		return false;
+	}
 
 	for (; *cp != '\0' && *cp != '@' && *cp != '+' && *cp != ','; cp++) {
 		if (*cp == '.') {
 			const char* encoding = ++cp;
-			for (; *cp != '\0' && *cp != '@' && *cp != '+' && *cp != ','; cp++)
+			for (; *cp != '\0' && *cp != '@' && *cp != '+' && *cp != ','; cp++) {
 				;
+			}
 			if ((cp - encoding == 5 && !strncmp(encoding, "UTF-8", 5)) ||
-			    (cp - encoding == 4 && !strncmp(encoding, "utf8", 4)))
+			    (cp - encoding == 4 && !strncmp(encoding, "utf8", 4))) {
 				return true; /* it's UTF-8 */
+			}
 			break;
 		}
 	}
@@ -649,8 +676,9 @@ size_t
 	sz  = 512;
 	buf = (char*) alloca((size_t) sz);
 	cnt = vsnprintf(buf, (size_t) sz, fmt, ap);
-	if (cnt < 0)
+	if (cnt < 0) {
 		return 0;
+	}
 	if (cnt >= sz) {
 		buf      = (char*) malloc((size_t)(cnt + 1));
 		needfree = true;
@@ -660,8 +688,9 @@ size_t
 	nc      = u8_toucs(wcs, (size_t) cnt + 1, buf, (size_t) cnt);
 	wcs[nc] = 0;
 	printf("%ls", (wchar_t*) wcs);
-	if (needfree)
+	if (needfree) {
 		free(buf);
+	}
 	return nc;
 }
 
@@ -694,59 +723,68 @@ int
 
 	for (p = (const unsigned char*) str; p < pend; p++) {
 		c = *p;
-		if (c < 128)
+		if (c < 128) {
 			continue;
+		}
 		ret = 2; /* non-ASCII UTF-8 */
-		if ((c & 0xc0) != 0xc0)
+		if ((c & 0xc0) != 0xc0) {
 			return 0;
+		}
 		ab = trailingBytesForUTF8[c];
-		if (length < ab)
+		if (length < ab) {
 			return 0;
+		}
 		length -= ab;
 
 		p++;
 		/* Check top bits in the second byte */
-		if ((*p & 0xc0) != 0x80)
+		if ((*p & 0xc0) != 0x80) {
 			return 0;
+		}
 
 		/* Check for overlong sequences for each different length */
 		switch (ab) {
 				/* Check for xx00 000x */
 			case 1:
-				if ((c & 0x3e) == 0)
+				if ((c & 0x3e) == 0) {
 					return 0;
+				}
 				continue; /* We know there aren't any more bytes to check */
 
 				/* Check for 1110 0000, xx0x xxxx */
 			case 2:
-				if (c == 0xe0 && (*p & 0x20) == 0)
+				if (c == 0xe0 && (*p & 0x20) == 0) {
 					return 0;
+				}
 				break;
 
 				/* Check for 1111 0000, xx00 xxxx */
 			case 3:
-				if (c == 0xf0 && (*p & 0x30) == 0)
+				if (c == 0xf0 && (*p & 0x30) == 0) {
 					return 0;
+				}
 				break;
 
 				/* Check for 1111 1000, xx00 0xxx */
 			case 4:
-				if (c == 0xf8 && (*p & 0x38) == 0)
+				if (c == 0xf8 && (*p & 0x38) == 0) {
 					return 0;
+				}
 				break;
 
-				/* Check for leading 0xfe or 0xff,
-               and then for 1111 1100, xx00 00xx */
+				/* Check for leading 0xfe or 0xff, and then for 1111 1100, xx00 00xx */
 			case 5:
-				if (c == 0xfe || c == 0xff || (c == 0xfc && (*p & 0x3c) == 0))
+				if (c == 0xfe || c == 0xff || (c == 0xfc && (*p & 0x3c) == 0)) {
 					return 0;
+				}
 				break;
 		}
 
 		/* Check for valid bytes after the 2nd, if any; all must start 10 */
 		while (--ab > 0) {
-			if ((*(++p) & 0xc0) != 0x80)
+			if ((*(++p) & 0xc0) != 0x80) {
 				return 0;
+			}
 		}
 	}
 
