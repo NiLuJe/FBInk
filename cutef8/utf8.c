@@ -701,8 +701,8 @@ size_t
 /* Rewritten completely, original code not based on anything else
    length is in bytes, since without knowing whether the string is valid
    it's hard to know how many characters there are! */
-int
-    u8_isvalid(const char* str, size_t len)
+CUTEF8_ISVALID_T
+u8_isvalid(const char* str, size_t len)
 {
 	const unsigned char* pnt;     // Current pointer in string
 	const unsigned char* pend;    // End of string
@@ -710,7 +710,7 @@ int
 
 	// Empty strings can be considered valid ASCII
 	if (!len) {
-		return 1;
+		return CUTEF8_IS_ASCII;
 	}
 	pnt  = (const unsigned char*) str;
 	pend = (const unsigned char*) str + len;
@@ -719,49 +719,49 @@ int
 		if (*pnt++ & 0x80)
 			goto chkutf8;
 	} while (pnt < pend);
-	return 1;
+	return CUTEF8_IS_ASCII;
 
 	// Check validity of UTF-8 sequences
 chkutf8:
 	if (pnt == pend) {
-		return 0;    // Last byte can't be > 127
+		return CUTEF8_IS_INVALID;    // Last byte can't be > 127
 	}
 	byt = pnt[-1];
 	// Must be between 0xc2 and 0xf4 inclusive to be valid
 	if (((uint32_t) byt - 0xc2) > (0xf4 - 0xc2)) {
-		return 0;
+		return CUTEF8_IS_INVALID;
 	}
 	if (byt < 0xe0) {    // 2-byte sequence
 		// Must have valid continuation character
 		if ((*pnt++ & 0xc0) != 0x80) {
-			return 0;
+			return CUTEF8_IS_INVALID;
 		}
 	} else if (byt < 0xf0) {    // 3-byte sequence
 		if ((pnt + 1 >= pend) || (*pnt & 0xc0) != 0x80 || (pnt[1] & 0xc0) != 0x80) {
-			return 0;
+			return CUTEF8_IS_INVALID;
 		}
 		// Check for surrogate chars
 		if (byt == 0xed && *pnt > 0x9f) {
-			return 0;
+			return CUTEF8_IS_INVALID;
 		}
 		// Check for overlong encoding
 		if (byt == 0xe0 && *pnt < 0xa0) {
-			return 0;
+			return CUTEF8_IS_INVALID;
 		}
 		pnt += 2;
 	} else {    // 4-byte sequence
 		// Must have 3 valid continuation characters
 		if ((pnt + 2 >= pend) || (*pnt & 0xc0) != 0x80 || (pnt[1] & 0xc0) != 0x80 || (pnt[2] & 0xc0) != 0x80) {
-			return 0;
+			return CUTEF8_IS_INVALID;
 		}
 		// Make sure in correct range (0x10000 - 0x10ffff)
 		if (byt == 0xf0) {
 			if (*pnt < 0x90) {
-				return 0;
+				return CUTEF8_IS_INVALID;
 			}
 		} else if (byt == 0xf4) {
 			if (*pnt > 0x8f) {
-				return 0;
+				return CUTEF8_IS_INVALID;
 			}
 		}
 		pnt += 3;
@@ -772,7 +772,7 @@ chkutf8:
 			goto chkutf8;
 		}
 	}
-	return 2;    // Valid UTF-8
+	return CUTEF8_IS_UTF8;    // Valid UTF-8
 }
 
 int
