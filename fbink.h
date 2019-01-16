@@ -265,11 +265,14 @@ FBINK_API void fbink_state_dump(const FBInkConfig* fbink_cfg);
 FBINK_API void fbink_get_state(const FBInkConfig* fbink_cfg, FBInkState* fbink_state);
 
 // Print a string on screen.
-// NOTE: The string is expected to be encoded in valid UTF-8, no validation of any kind is done by the library,
-//       and we assume a single multibyte sequence will occupy a maximum of 4 bytes.
+// NOTE: The string is expected to be encoded in valid UTF-8:
+//         * Invalid UTF-8 sequences will be *rejected* and the call will abort early with -(EILSEQ)
+//         * We assume a single multibyte sequence will occupy a maximum of 4 bytes.
 //       c.f., my rant about Kobo's broken libc in fbink_internal.h for more details behind this choice.
 //       Since any decent system built in the last decade should default to UTF-8, that should be pretty much transparent...
 // Returns the amount of lines printed on success (helpful when you keep track of which row you're printing to).
+// Returns -(EINVAL) if string is empty.
+// Returns -(EILSEQ) if string is not a valid UTF-8 sequence.
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // string:		UTF-8 encoded string to print
@@ -284,6 +287,8 @@ FBINK_API int fbink_print(int fbfd, const char* string, const FBInkConfig* fbink
 // Returns -(ERANGE) if the provided margins are out of range, or sum to < view height or width
 // Returns -(ENOSYS) if compiled with MINIMAL
 // Returns -(ENODAT) if fbink_init_ot() hasn't yet been called.
+// Returns -(EINVAL) if string is empty.
+// Returns -(EILSEQ) if string is not a valid UTF-8 sequence.
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // string:		UTF-8 encoded string to print

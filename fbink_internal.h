@@ -106,9 +106,12 @@
 //       BusyBox can bypass some of these issues (for its applets) by basically rolling its own
 //       locale/unicode/widechar/multibyte handling, provided you set it up properly ;).
 //       We're left with handling UTF-8 ourselves, and taking great pains to try not to horribly blow up on invalid input.
+//       The situation has improved with the latest cutef8 builds (FBInk >= 1.9.4), since we now have a validation routine,
+//       which we employ to make sure the string passed to fbink_print & fbink_print_ot is a valid UTF-8 sequence.
 //
-//       TL;DR; for API users: You have to ensure you feed FBInk valid UTF-8 input,
-//              as this is the encoding it effectively uses internally, without any kind of validation.
+//       TL;DR; for API users: You have to ensure you feed FBInk *valid* UTF-8 input,
+//              as this is the encoding it effectively uses internally.
+//              Since FBInk 1.9.4, invalid UTF-8 sequences will be *rejected* (there was no kind of validation before).
 //
 //       NOTE: There's a few comments strewn in the code about u8_strlen/u8_nextchar & using wide-NULLs to avoid issues.
 //             The underlying issue *might* have been fixed in our current cutef8 build.

@@ -2568,14 +2568,14 @@ int
 	// Abort if we were passed an empty string
 	if (!*string) {
 		WARN("Cannot print an empty string");
-		return ERRCODE(EXIT_FAILURE);
+		return ERRCODE(EINVAL);
 	}
 
 	// Abort if we were passed an invalid UTF-8 sequence
 	size_t len = strlen(string);    // Flawfinder: ignore
 	if (u8_isvalid(string, len) == CUTEF8_IS_INVALID) {
 		WARN("Cannot print an invalid UTF-8 sequence");
-		return ERRCODE(EXIT_FAILURE);
+		return ERRCODE(EILSEQ);
 	}
 
 	// If we open a fd now, we'll only keep it open for this single print call!
@@ -3106,14 +3106,14 @@ int
 	// Abort if we were passed an empty string
 	if (!*string) {
 		WARN("Cannot print an empty string");
-		return ERRCODE(EXIT_FAILURE);
+		return ERRCODE(EINVAL);
 	}
 
 	// Abort if we were passed an invalid UTF-8 sequence
 	size_t str_len_bytes = strlen(string);    // Flawfinder: ignore
 	if (u8_isvalid(string, str_len_bytes) == CUTEF8_IS_INVALID) {
 		WARN("Cannot print an invalid UTF-8 sequence");
-		return ERRCODE(EXIT_FAILURE);
+		return ERRCODE(EILSEQ);
 	}
 
 	// Has fbink_add_ot_font() been successfully called yet?
