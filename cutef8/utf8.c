@@ -347,10 +347,9 @@ size_t
     u8_strlen(const char* s)
 {
 	size_t count = 0;
-	size_t i     = 0;
 
-	while (s[i] > 0) {
-		count += isutf(s[i++]);
+	while (*s) {
+		count += ((*(const unsigned char*) s++ & 0xc0) != 0x80);
 	}
 	return count;
 }
