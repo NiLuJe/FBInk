@@ -329,6 +329,7 @@ uint32_t
 }
 
 /* number of characters in NUL-terminated string */
+/*
 size_t
     u8_strlen(const char* s)
 {
@@ -338,6 +339,22 @@ size_t
 	while (u8_nextchar(s, &i) != 0)
 		count++;
 
+	return count;
+}
+*/
+
+size_t
+    u8_strlen(const char* s)
+{
+	size_t count = 0;
+	size_t i     = 0;
+
+	while (s[i] > 0) {
+		if (s[i++] & 0x80) {
+			(void) (isutf(s[++i]) || isutf(s[++i]) || ++i);
+		}
+		count++;
+	}
 	return count;
 }
 
