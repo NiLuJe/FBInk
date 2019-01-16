@@ -245,7 +245,7 @@ size_t
 			// Simply not count continuation bytes
 			// Since we are not doing validation anyway, we can just
 			// assume this is a valid UTF-8 string
-			charnum += ((*(const unsigned char*) s++ & 0xc0) != 0x80);
+			charnum += isutf(*(const unsigned char*) s++);
 		} while (--offset);
 	}
 	return charnum;
@@ -338,7 +338,7 @@ size_t
 	size_t count = 0;
 
 	while (*s) {
-		count += ((*(const unsigned char*) s++ & 0xc0) != 0x80);
+		count += isutf(*(const unsigned char*) s++);
 	}
 	return count;
 }
@@ -738,11 +738,11 @@ chkutf8:
 	}
 	if (byt < 0xe0) {    // 2-byte sequence
 		// Must have valid continuation character
-		if ((*pnt++ & 0xc0) != 0x80) {
+		if (isutf(*pnt++)) {
 			return CUTEF8_IS_INVALID;
 		}
 	} else if (byt < 0xf0) {    // 3-byte sequence
-		if ((pnt + 1 >= pend) || (*pnt & 0xc0) != 0x80 || (pnt[1] & 0xc0) != 0x80) {
+		if ((pnt + 1 >= pend) || isutf(*pnt) || isutf(pnt[1])) {
 			return CUTEF8_IS_INVALID;
 		}
 		// Check for surrogate chars
@@ -756,7 +756,7 @@ chkutf8:
 		pnt += 2;
 	} else {    // 4-byte sequence
 		// Must have 3 valid continuation characters
-		if ((pnt + 2 >= pend) || (*pnt & 0xc0) != 0x80 || (pnt[1] & 0xc0) != 0x80 || (pnt[2] & 0xc0) != 0x80) {
+		if ((pnt + 2 >= pend) || isutf(*pnt) || isutf(pnt[1]) || isutf(pnt[2])) {
 			return CUTEF8_IS_INVALID;
 		}
 		// Make sure in correct range (0x10000 - 0x10ffff)
