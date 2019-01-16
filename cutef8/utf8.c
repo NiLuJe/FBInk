@@ -311,6 +311,8 @@ size_t
 }
 
 /* reads the next utf-8 sequence out of a string, updating an index */
+// NOTE: See also https://github.com/JuliaStrings/LegacyStrings.jl/blob/master/src/utf8.jl
+//       & https://github.com/JuliaLang/julia/blob/master/base/strings/string.jl
 uint32_t
     u8_nextchar(const char* s, size_t* i)
 {
@@ -701,7 +703,7 @@ size_t
 	return cnt;
 }
 
-/* Rewritten completely, original code not based on anything else
+/* Rewritten completely, original code not based on anything else (NB: but close to what utf8proc does)
    length is in bytes, since without knowing whether the string is valid
    it's hard to know how many characters there are! */
 CUTEF8_ISVALID_T
