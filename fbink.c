@@ -2565,6 +2565,19 @@ static void
 int
     fbink_print(int fbfd, const char* string, const FBInkConfig* fbink_cfg)
 {
+	// Abort if we were passed an empty string
+	if (!*string) {
+		WARN("Cannot print an empty string");
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Abort if we were passed an invalid UTF-8 sequence
+	size_t len = strlen(string);    // Flawfinder: ignore
+	if (u8_isvalid(string, len) == CUTEF8_IS_INVALID) {
+		WARN("Cannot print an invalid UTF-8 sequence");
+		return ERRCODE(EXIT_FAILURE);
+	}
+
 	// If we open a fd now, we'll only keep it open for this single print call!
 	// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
 	bool keep_fd = true;
@@ -2642,7 +2655,6 @@ int
 	}
 
 	// See if we need to break our string down into multiple lines...
-	size_t len       = strlen(string);    // Flawfinder: ignore
 	size_t charcount = u8_strlen(string);
 	// Check how much extra storage is used up by multibyte sequences.
 	if (len > charcount) {

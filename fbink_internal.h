@@ -125,6 +125,7 @@
 //           https://www.tldp.org/HOWTO/Unicode-HOWTO-6.html
 //           https://www.cl.cam.ac.uk/~mgk25/unicode.html
 //           https://unicodebook.readthedocs.io/
+//           https://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-test.txt
 #include "cutef8/utf8.h"
 
 // We're going to need a few more things for OpenType support, namely, maths ;).
