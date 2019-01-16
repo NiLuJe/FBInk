@@ -677,9 +677,9 @@ static struct mxcfb_rect
 	//       more space (as in columns, not bytes) than (MAXCOLS - col), the maximum printable length.
 	//       And as we're printing glyphs, we need to iterate over the number of characters/grapheme clusters,
 	//       not bytes.
-	unsigned short int charcount = (unsigned short int) u8_strlen(text);
+	size_t charcount = u8_strlen(text);
 	// Flawfinder: ignore
-	LOG("Character count: %hu (over %zu bytes)", charcount, strlen(text));
+	LOG("Character count: %zu (over %zu bytes)", charcount, strlen(text));
 
 	// Compute our actual subcell offset in pixels
 	unsigned short int pixel_offset = 0U;
@@ -864,11 +864,11 @@ static struct mxcfb_rect
 	}
 
 	// Loop through all the *characters* in the text string
-	size_t             bi     = 0U;
-	unsigned short int ci     = 0U;
-	uint32_t           ch     = 0U;
-	FBInkCoordinates   coords = { 0U };
-	FBInkColor*        pxC;
+	size_t           bi     = 0U;
+	size_t           ci     = 0U;
+	uint32_t         ch     = 0U;
+	FBInkCoordinates coords = { 0U };
+	FBInkColor*      pxC;
 	// NOTE: We don't do much sanity checking on hoffset/voffset,
 	//       because we want to allow pushing part of the string off-screen
 	//       (we basically only make sure it won't screw up the region rectangle too badly).
@@ -893,8 +893,8 @@ static struct mxcfb_rect
 	if (glyphWidth <= 8) {
 #endif
 		while ((ch = u8_nextchar(text, &bi)) != 0U) {
-			LOG("Char %hu (@ %hu) out of %hu is @ byte offset %zu and is U+%04X",
-			    (unsigned short int) (ci + 1U),
+			LOG("Char %zu (@ %zu) out of %zu is @ byte offset %zu and is U+%04X",
+			    (ci + 1U),
 			    ci,
 			    charcount,
 			    bi,
@@ -1008,8 +1008,8 @@ static struct mxcfb_rect
 		/*
 	} else if (glyphWidth <= 16) {
 		while ((ch = u8_nextchar(text, &bi)) != 0U) {
-			LOG("Char %hu (@ %hu) out of %hu is @ byte offset %u and is U+%04X",
-			(unsigned short int) (ci + 1U),
+			LOG("Char %zu (@ %zu) out of %zu is @ byte offset %zu and is U+%04X",
+			(ci + 1U),
 			ci,
 			charcount,
 			bi,
@@ -1031,8 +1031,8 @@ static struct mxcfb_rect
 	*/
 	} else if (glyphWidth <= 32) {
 		while ((ch = u8_nextchar(text, &bi)) != 0U) {
-			LOG("Char %hu (@ %hu) out of %hu is @ byte offset %zu and is U+%04X",
-			    (unsigned short int) (ci + 1U),
+			LOG("Char %zu (@ %zu) out of %zu is @ byte offset %zu and is U+%04X",
+			    (ci + 1U),
 			    ci,
 			    charcount,
 			    bi,
@@ -1054,8 +1054,8 @@ static struct mxcfb_rect
 		/*
 	} else if (glyphWidth <= 64) {
 		while ((ch = u8_nextchar(text, &bi)) != 0U) {
-			LOG("Char %hu (@ %hu) out of %hu is @ byte offset %u and is U+%04X",
-			(unsigned short int) (ci + 1U),
+			LOG("Char %zu (@ %zu) out of %zu is @ byte offset %zu and is U+%04X",
+			(ci + 1U),
 			ci,
 			charcount,
 			bi,
