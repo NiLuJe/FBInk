@@ -6,13 +6,13 @@
 #	define _GNU_SOURCE
 #endif
 
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #define UTF8_ACCEPT 0
 #define UTF8_REJECT 12
 
-size_t u8_dfa_strlen(const char* s);
-int u8_dfa_isvalid(const char* str);
+size_t u8_strlen2(const char* s);
+int    u8_isvalid2(const char* s);
 
 #endif
