@@ -2736,8 +2736,10 @@ int
 	// NOTE: This is where it gets tricky. With multibyte sequences, 1 byte doesn't necessarily mean 1 char.
 	//       And we need to work both in amount of characters for column/width arithmetic,
 	//       and in bytes for snprintf...
-	size_t             chars_left = charcount;
-	unsigned short int line_len   = 0U;
+	size_t             chars_left  = charcount;
+	unsigned short int line_len    = 0U;
+	size_t             line_bytes  = 0U;
+	size_t             line_offset = 0U;
 	// If we have multiple lines worth of stuff to print, draw it line per line
 	while (chars_left > line_len) {
 		LOG("Line %hu (of ~%hu), previous line was %hu characters long and there were %zu characters left to print",
@@ -2762,11 +2764,11 @@ int
 
 		// NOTE: Now we just have to switch from characters to bytes, both for line_len & chars_left...
 		// First, get the byte offset of this section of our string (i.e., this line)...
-		size_t line_offset = u8_offset(string, charcount - chars_left);
+		line_offset += line_bytes;
 		// ... then compute how many bytes we'll need to store it.
-		size_t             line_bytes = 0U;
-		unsigned short int cn         = 0U;
-		uint32_t           ch         = 0U;
+		line_bytes            = 0U;
+		unsigned short int cn = 0U;
+		uint32_t           ch = 0U;
 		while ((ch = u8_nextchar(string + line_offset, &line_bytes)) != 0U) {
 			cn++;
 			// NOTE: Honor linefeeds...
