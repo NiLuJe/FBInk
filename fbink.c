@@ -2572,8 +2572,9 @@ int
 	}
 
 	// Abort if we were passed an invalid UTF-8 sequence
-	size_t len = strlen(string);    // Flawfinder: ignore
-	if (!u8_isvalid2(string)) {
+	size_t len       = strlen(string);    // Flawfinder: ignore
+	size_t charcount = u8_strlen2(string);
+	if (charcount == 0) {
 		WARN("Cannot print an invalid UTF-8 sequence");
 		return ERRCODE(EILSEQ);
 	}
@@ -2655,7 +2656,6 @@ int
 	}
 
 	// See if we need to break our string down into multiple lines...
-	size_t charcount = u8_strlen2(string);
 	// Check how much extra storage is used up by multibyte sequences.
 	if (len > charcount) {
 		LOG("Extra storage used up by multibyte sequences: %zu bytes (for a total of %zu characters over %zu bytes)",
