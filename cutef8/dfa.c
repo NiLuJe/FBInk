@@ -30,7 +30,7 @@ inline static uint8_t
 {
 	uint8_t type = utf8d[byte];
 
-	// NOTE: The > UTF8_REJECT variant is a tiny bit slower
+	// NOTE: The > UTF8_REJECT variant is a tiny bit slower, but we hopefully shouldn't need the extra safety it'd provide ;)
 	*codep = (*state != UTF8_ACCEPT) ? (byte & 0x3fu) | (*codep << 6) : (0xffu >> type) & (byte);
 	*state = utf8d[256 + *state + type];
 	return *state;
