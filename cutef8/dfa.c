@@ -46,7 +46,7 @@ inline static int
 	uint8_t state = 0;
 
 	for (*count = 0; *str; ++str) {
-		if (!check(&state, *str)) {
+		if (!check(&state, *(const uint8_t*) str)) {
 			*count += 1;
 		}
 	}
@@ -73,7 +73,7 @@ bool
 	uint8_t state = 0;
 
 	while (*str) {
-		check(&state, *str++);
+		check(&state, *(const uint8_t*) str++);
 	}
 
 	return state == UTF8_ACCEPT;
