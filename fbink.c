@@ -2573,7 +2573,7 @@ int
 
 	// Abort if we were passed an invalid UTF-8 sequence
 	size_t len = strlen(string);    // Flawfinder: ignore
-	if (u8_isvalid2(string) != UTF8_ACCEPT) {
+	if (!u8_isvalid2(string)) {
 		WARN("Cannot print an invalid UTF-8 sequence");
 		return ERRCODE(EILSEQ);
 	}
@@ -3111,7 +3111,7 @@ int
 
 	// Abort if we were passed an invalid UTF-8 sequence
 	size_t str_len_bytes = strlen(string);    // Flawfinder: ignore
-	if (u8_isvalid2(string) != UTF8_ACCEPT) {
+	if (!u8_isvalid2(string)) {
 		WARN("Cannot print an invalid UTF-8 sequence");
 		return ERRCODE(EILSEQ);
 	}
