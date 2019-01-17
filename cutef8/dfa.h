@@ -13,7 +13,9 @@
 #define UTF8_ACCEPT 0
 #define UTF8_REJECT 12
 
+// Returns the # of codepoints in UTF-8 encoded string s (or 0 if s is malformed)
 size_t u8_strlen2(const char* s) __attribute__((pure));
-bool   u8_isvalid2(const char* s) __attribute__((pure));
+// Returns ture if UTF-8 encoded string s is not malformed
+bool u8_isvalid2(const char* s) __attribute__((pure));
 
 #endif

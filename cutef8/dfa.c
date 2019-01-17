@@ -30,6 +30,7 @@ inline static uint32_t
 	return *state;
 }
 
+// Same as decode, but without actually decoding the codepoints, because that's unneeded for validation/counting
 inline static uint32_t
     check(uint32_t* state, uint32_t byte)
 {
@@ -52,6 +53,7 @@ inline static int
 	return state != UTF8_ACCEPT;
 }
 
+// And now what we actually expose...
 size_t
     u8_strlen2(const char* str)
 {
