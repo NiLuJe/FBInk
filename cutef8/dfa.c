@@ -78,3 +78,21 @@ bool
 
 	return state == UTF8_ACCEPT;
 }
+
+// Take a stab at reimplementing u8_nextchar with the dfa decoder...
+// NOTE: Appears to be *ever so slightly* slower, FWIW.
+uint32_t
+    u8_nextchar2(const char* s, size_t* i)
+{
+
+	uint32_t ch    = 0;
+	uint8_t  state = 0;
+
+	while (s[*i]) {
+		if (!decode(&state, &ch, s[(*i)++])) {
+			break;
+		}
+	}
+
+	return ch;
+}
