@@ -92,7 +92,7 @@ uint32_t
 	uint8_t  state = 0;
 
 	while (s[*i]) {
-		if (!decode(&state, &ch, s[(*i)++])) {
+		if (!decode(&state, &ch, (const uint8_t) s[(*i)++])) {
 			break;
 		}
 	}
