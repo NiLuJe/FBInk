@@ -4,7 +4,7 @@ This project makes use of a number of third-party libraries, which we'll acknowl
 		Released into the public domain.
 		(https://github.com/dhepper/font8x8)
 
-	* cutef8 (Basic UTF-8 manipulation routines), by Jeff Bezanson,
+	* cutef8/utf8.* (Basic UTF-8 manipulation routines), by Jeff Bezanson,
 		Released into the public domain.
 		(https://www.cprogramming.com/tutorial/unicode.html)
 		(https://github.com/JeffBezanson/cutef8)
@@ -12,12 +12,16 @@ This project makes use of a number of third-party libraries, which we'll acknowl
 		NOTE: Actually, let's say under the MIT License instead (https://opensource.org/licenses/MIT),
 		      as that's what the bits maintained in Julia fall under ;).
 
+	* cutef8/dfa.* (Flexible and Economical UTF-8 Decoder), by Bjoern Hoehrmann <bjoern@hoehrmann.de>,
+		Licensed under the ISC License (https://opensource.org/licenses/ISC).
+		(http://bjoern.hoehrmann.de/utf-8/decoder/dfa)
+
 	* stb_image (Image loader) and stb_truetype (font renderer), by Sean Barrett,
 		Released into the public domain.
 		(http://nothings.org/stb)
 
 	* libunibreak (Unicode line breaking implementation) by Wu Yongwei, et al
-		Licensed under the Zlib license (https://opensource.org/licenses/Zlib)
+		Licensed under the Zlib license (https://opensource.org/licenses/Zlib).
 		(https://github.com/adah1972/libunibreak)
 
 As well as a number of third-party resources (namely, font files):

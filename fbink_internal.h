@@ -130,6 +130,8 @@
 //           https://unicodebook.readthedocs.io/
 //           https://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-test.txt
 #include "cutef8/utf8.h"
+// NOTE: And we're also using a few things based on http://bjoern.hoehrmann.de/utf-8/decoder/dfa
+#include "cutef8/dfa.h"
 
 // We're going to need a few more things for OpenType support, namely, maths ;).
 #ifdef FBINK_WITH_OPENTYPE

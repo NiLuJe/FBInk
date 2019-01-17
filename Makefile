@@ -198,7 +198,7 @@ endif
 
 ##
 # Now that we're done fiddling with flags, let's build stuff!
-LIB_SRCS=fbink.c cutef8/utf8.c
+LIB_SRCS=fbink.c cutef8/utf8.c cutef8/dfa.c
 # Jump through a few hoops to set a few libunibreak-specific CFLAGS to silence some warnings...
 ifdef MINIMAL
 	LIB_UB_SRCS=

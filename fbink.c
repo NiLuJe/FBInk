@@ -677,7 +677,7 @@ static struct mxcfb_rect
 	//       more space (as in columns, not bytes) than (MAXCOLS - col), the maximum printable length.
 	//       And as we're printing glyphs, we need to iterate over the number of characters/grapheme clusters,
 	//       not bytes.
-	size_t charcount = u8_strlen(text);
+	size_t charcount = u8_dfa_strlen(text);
 	// Flawfinder: ignore
 	LOG("Character count: %zu (over %zu bytes)", charcount, strlen(text));
 
@@ -2573,7 +2573,7 @@ int
 
 	// Abort if we were passed an invalid UTF-8 sequence
 	size_t len = strlen(string);    // Flawfinder: ignore
-	if (u8_isvalid(string, len) == CUTEF8_IS_INVALID) {
+	if (u8_dfa_isvalid(string) == CUTEF8_IS_INVALID) {
 		WARN("Cannot print an invalid UTF-8 sequence");
 		return ERRCODE(EILSEQ);
 	}
@@ -2655,7 +2655,7 @@ int
 	}
 
 	// See if we need to break our string down into multiple lines...
-	size_t charcount = u8_strlen(string);
+	size_t charcount = u8_dfa_strlen(string);
 	// Check how much extra storage is used up by multibyte sequences.
 	if (len > charcount) {
 		LOG("Extra storage used up by multibyte sequences: %zu bytes (for a total of %zu characters over %zu bytes)",
