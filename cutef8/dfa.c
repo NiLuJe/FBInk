@@ -20,6 +20,9 @@ static const uint8_t utf8d[] = {
 	12, 36, 12, 12, 12, 36, 12, 12, 12, 12, 12, 36, 12, 36, 12, 12, 12, 36, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
 };
 
+// NOTE: See https://lists.w3.org/Archives/Public/www-archive/2013Apr/0041.html
+//       for an explanation why the original code used uint32_t for byte (and in turn type) ;).
+//       FWIW, I'm not seeing a noticeable shift in performance on ARM with my GCC 7 TCs.
 inline static uint8_t
     decode(uint8_t* state, uint32_t* codep, uint8_t byte)
 {
