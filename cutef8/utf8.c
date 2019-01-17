@@ -712,7 +712,7 @@ size_t
 //       (c.f., https://gist.github.com/NiLuJe/f3056bfaeabd1569a52a1eb9fab0e40d)
 //       yielded the very same results with a quick check against https://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-test.txt ;).
 // NOTE: FWIW, we also get the same results when using http://bjoern.hoehrmann.de/utf-8/decoder/dfa
-//       (c.f., https://github.com/NiLuJe/FBInk/commit/8612c50aa0b2d93b6c4e5560910c659e0341a556)
+//       (c.f., u8_isvalid2 @ cutef8/dfa.c)
 // TL;DR: Which means I'm keeping this logic untouched, given the high probabilty I'd have of subtly messing something up ;).
 CUTEF8_ISVALID_T
 u8_isvalid(const char* str, size_t len)
