@@ -21,7 +21,7 @@ static const uint8_t utf8d[] = {
 };
 
 // NOTE: See https://lists.w3.org/Archives/Public/www-archive/2013Apr/0041.html
-//       for an explanation why the original code used uint32_t for byte (and in turn type) ;).
+//       for an explanation why the original code used uint32_t for byte (and in turn type & state) ;).
 //       FWIW, I'm not seeing a noticeable shift in performance on ARM with my GCC 7 TCs.
 //       More importantly, the original version is crashy on x86_64 (GCC 8.2)...
 inline static uint8_t
