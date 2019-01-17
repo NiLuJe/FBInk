@@ -20,10 +20,10 @@ static const uint8_t utf8d[] = {
 	12, 36, 12, 12, 12, 36, 12, 12, 12, 12, 12, 36, 12, 36, 12, 12, 12, 36, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
 };
 
-inline static uint32_t
-    decode(uint32_t* state, uint32_t* codep, uint32_t byte)
+inline static uint8_t
+    decode(uint8_t* state, uint32_t* codep, uint8_t byte)
 {
-	uint32_t type = utf8d[byte];
+	uint8_t type = utf8d[byte];
 
 	*codep = (*state != UTF8_ACCEPT) ? (byte & 0x3fu) | (*codep << 6) : (0xffu >> type) & (byte);
 	*state = utf8d[256 + *state + type];
@@ -31,10 +31,10 @@ inline static uint32_t
 }
 
 // Same as decode, but without actually decoding the codepoints, because that's unneeded for validation/counting
-inline static uint32_t
-    check(uint32_t* state, uint32_t byte)
+inline static uint8_t
+    check(uint8_t* state, uint8_t byte)
 {
-	uint32_t type = utf8d[byte];
+	uint8_t type = utf8d[byte];
 
 	*state = utf8d[256 + *state + type];
 	return *state;
@@ -43,7 +43,7 @@ inline static uint32_t
 inline static int
     count_codepoints(const char* str, size_t* count)
 {
-	uint32_t state = 0;
+	uint8_t state = 0;
 
 	for (*count = 0; *str; ++str) {
 		if (!check(&state, *str)) {
@@ -70,7 +70,7 @@ size_t
 bool
     u8_isvalid2(const char* str)
 {
-	uint32_t state = 0;
+	uint8_t state = 0;
 
 	while (*str) {
 		check(&state, *str++);
