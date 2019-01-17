@@ -889,7 +889,7 @@ static struct mxcfb_rect
 #ifdef FBINK_WITH_FONTS
 	if (glyphWidth <= 8) {
 #endif
-		while ((ch = u8_nextchar(text, &bi)) != 0U) {
+		while ((ch = u8_nextchar2(text, &bi)) != 0U) {
 			LOG("Char %zu (@ %zu) out of %zu is @ byte offset %zu and is U+%04X",
 			    (ci + 1U),
 			    ci,
@@ -1004,7 +1004,7 @@ static struct mxcfb_rect
 #ifdef FBINK_WITH_FONTS
 		/*
 	} else if (glyphWidth <= 16) {
-		while ((ch = u8_nextchar(text, &bi)) != 0U) {
+		while ((ch = u8_nextchar2(text, &bi)) != 0U) {
 			LOG("Char %zu (@ %zu) out of %zu is @ byte offset %zu and is U+%04X",
 			(ci + 1U),
 			ci,
@@ -1027,7 +1027,7 @@ static struct mxcfb_rect
 		}
 	*/
 	} else if (glyphWidth <= 32) {
-		while ((ch = u8_nextchar(text, &bi)) != 0U) {
+		while ((ch = u8_nextchar2(text, &bi)) != 0U) {
 			LOG("Char %zu (@ %zu) out of %zu is @ byte offset %zu and is U+%04X",
 			    (ci + 1U),
 			    ci,
@@ -1050,7 +1050,7 @@ static struct mxcfb_rect
 		}
 		/*
 	} else if (glyphWidth <= 64) {
-		while ((ch = u8_nextchar(text, &bi)) != 0U) {
+		while ((ch = u8_nextchar2(text, &bi)) != 0U) {
 			LOG("Char %zu (@ %zu) out of %zu is @ byte offset %zu and is U+%04X",
 			(ci + 1U),
 			ci,
@@ -2769,7 +2769,7 @@ int
 		line_bytes            = 0U;
 		unsigned short int cn = 0U;
 		uint32_t           ch = 0U;
-		while ((ch = u8_nextchar(string + line_offset, &line_bytes)) != 0U) {
+		while ((ch = u8_nextchar2(string + line_offset, &line_bytes)) != 0U) {
 			cn++;
 			// NOTE: Honor linefeeds...
 			//       The main use-case for this is throwing tail'ed logfiles at us and having them
@@ -3445,7 +3445,7 @@ int
 				// And we're done processing this line
 				break;
 			}
-			c = u8_nextchar(string, &c_index);
+			c = u8_nextchar2(string, &c_index);
 			// Get the glyph index now, instead of having to look it up each time
 			gi = stbtt_FindGlyphIndex(curr_font, (int) c);
 			// Note, these metrics are unscaled,
@@ -3535,7 +3535,7 @@ int
 			// Adjust our x position for kerning, because we can :)
 			if (string[c_index + 1]) {
 				tmp_c_index  = c_index;
-				uint32_t c2  = u8_nextchar(string, &tmp_c_index);
+				uint32_t c2  = u8_nextchar2(string, &tmp_c_index);
 				int      g2i = stbtt_FindGlyphIndex(curr_font, (int) c2);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wbad-function-cast"
@@ -3698,7 +3698,7 @@ int
 				}
 			}
 			curr_point.y = ins_point.y = (unsigned short int) max_baseline;
-			c                          = u8_nextchar(string, &ci);
+			c                          = u8_nextchar2(string, &ci);
 			gi                         = stbtt_FindGlyphIndex(curr_font, (int) c);
 			stbtt_GetGlyphHMetrics(curr_font, gi, &adv, &lsb);
 			stbtt_GetGlyphBitmapBox(curr_font, gi, sf, sf, &x0, &y0, &x1, &y1);
@@ -3784,7 +3784,7 @@ int
 			curr_point.x = (unsigned short int) (curr_point.x + lroundf(sf * (float) adv));
 			if (ci < lines[line].endCharIndex) {
 				size_t tmp_i = ci;
-				tmp_c        = u8_nextchar(string, &tmp_i);
+				tmp_c        = u8_nextchar2(string, &tmp_i);
 				tmp_gi       = stbtt_FindGlyphIndex(curr_font, (int) tmp_c);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wbad-function-cast"

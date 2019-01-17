@@ -85,7 +85,6 @@ bool
 }
 
 // Take a stab at reimplementing u8_nextchar with the dfa decoder...
-// NOTE: Appears to be *ever so slightly* slower, FWIW.
 uint32_t
     u8_nextchar2(const char* s, size_t* i)
 {
