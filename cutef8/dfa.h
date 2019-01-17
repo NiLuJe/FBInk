@@ -13,7 +13,7 @@
 #define UTF8_ACCEPT 0
 #define UTF8_REJECT 12
 
-size_t u8_strlen2(const char* s);
-bool   u8_isvalid2(const char* s);
+size_t u8_strlen2(const char* s) __attribute__((pure));
+bool   u8_isvalid2(const char* s) __attribute__((pure));
 
 #endif
