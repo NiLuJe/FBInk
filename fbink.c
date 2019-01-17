@@ -2860,7 +2860,7 @@ int
 		} else if (fbink_cfg->is_padded) {
 			// NOTE: Rely on the field width for padding ;).
 			// Padding character is a space, which is 1 byte, so that's good enough ;).
-			size_t padded_bytes = line_bytes + (unsigned int) (available_cols - line_len);
+			size_t padded_bytes = line_bytes + (size_t)(available_cols - line_len);
 			// NOTE: Don't touch line_len, because we're *adding* new blank characters,
 			//       we're still printing the exact same amount of characters *from our string*.
 			LOG("Left padded %zu bytes to %zu to cover %hu columns",
@@ -2872,7 +2872,7 @@ int
 		} else if (fbink_cfg->is_rpadded) {
 			// NOTE: Rely on the field width for padding ;).
 			// Padding character is a space, which is 1 byte, so that's good enough ;).
-			size_t padded_bytes = line_bytes + (unsigned int) (available_cols - line_len);
+			size_t padded_bytes = line_bytes + (size_t)(available_cols - line_len);
 			// NOTE: Don't touch line_len, because we're *adding* new blank characters,
 			//       we're still printing the exact same amount of characters *from our string*.
 			LOG("Right padded %zu bytes to %zu to cover %hu columns",
@@ -3359,19 +3359,19 @@ int
 	// Now, lets use libunibreak to find the possible break opportunities in our string.
 
 	// Note: we only care about the byte length here
-	brk_buff = calloc(str_len_bytes + 1, sizeof(*brk_buff));
+	brk_buff = calloc(str_len_bytes + 1U, sizeof(*brk_buff));
 	if (!brk_buff) {
 		WARN("Linebreak buffer could not be allocated");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
 
-	set_linebreaks_utf8((const utf8_t*) string, str_len_bytes + 1, "en", brk_buff);
+	set_linebreaks_utf8((const utf8_t*) string, str_len_bytes + 1U, "en", brk_buff);
 	LOG("Finished looking for linebreaks");
 
 	// Parse our string for formatting, if requested
 	if (cfg->is_formatted) {
-		fmt_buff = calloc(str_len_bytes + 1, sizeof(*fmt_buff));
+		fmt_buff = calloc(str_len_bytes + 1U, sizeof(*fmt_buff));
 		if (!fmt_buff) {
 			WARN("Formatted text buffer could not be allocated");
 			rv = ERRCODE(EXIT_FAILURE);

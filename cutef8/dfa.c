@@ -1,7 +1,7 @@
 // Copyright (c) 2008-2010 Bjoern Hoehrmann <bjoern@hoehrmann.de>
 // See http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ for details.
 // NOTE: See also https://github.com/hoehrmann/utf-8-misc
-//       (FWIW, a quick tests of those two variants shows similar performance for my use-cases).
+//       (FWIW, a quick test of those two variants shows similar performance for my use-cases).
 
 #include "dfa.h"
 
@@ -36,7 +36,7 @@ inline static uint8_t
 	return *state;
 }
 
-// Same as decode, but without actually decoding the codepoints, because that's unneeded for validation/counting
+// Same as decode, but without actually decoding the codepoints, because that's unneeded for validation/accounting
 inline static uint8_t
     check(uint8_t* state, uint8_t byte)
 {
@@ -66,7 +66,7 @@ size_t
 	size_t count = 0;
 
 	if (count_codepoints(str, &count)) {
-		// NOTE: UTF-8 input sequence was malformed!
+		// NOTE: Malformed UTF-8 sequence! Return 0, as we treat this as fatal.
 		return 0;
 	} else {
 		return count;
