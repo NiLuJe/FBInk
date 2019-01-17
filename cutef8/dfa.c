@@ -57,14 +57,14 @@ size_t
 	size_t count = 0;
 
 	if (count_codepoints(str, &count)) {
-		// NOTE: Invalid input!
+		// NOTE: UTF-8 input sequence was malformed!
 		return 0;
 	} else {
 		return count;
 	}
 }
 
-int
+bool
     u8_isvalid2(const char* str)
 {
 	uint32_t state = 0;

@@ -6,6 +6,7 @@
 #	define _GNU_SOURCE
 #endif
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -13,6 +14,6 @@
 #define UTF8_REJECT 12
 
 size_t u8_strlen2(const char* s);
-int    u8_isvalid2(const char* s);
+bool   u8_isvalid2(const char* s);
 
 #endif
