@@ -72,6 +72,8 @@ The Makefile is tailored to automatically detect my own cross-compilation [ToolC
 
 In case you're using your own toolchain, please note that we require C11 support (GCC >= 4.9, Clang >= 3.0).
 
+I highly recommend building this with LTO enabled!
+
 With that out of the way, the default target (i.e., `make`) will yield a static Kobo build, while `make kobo` will yield a stripped shared build, and additionally package everything the Kobo way. The package found in the Kobo thread is built this way.
 
 There's a few convenience targets for usual build types (`make static` for a static build, `make shared` for a shared build, `make strip` for a stripped static build, `make release` for a stripped shared build, `make debug` for a debug build), as well as a few unusual ones for very specific use cases, usually related to FFI bindings (`make pic` for a PIC static build, or passing `STATIC_LIBM=1` to make to attempt to link against libm statically).
