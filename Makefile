@@ -56,6 +56,15 @@ ifeq "$(shell expr $(CC_VERSION) \>= 070000)" "1"
 	MOAR_WARNIGS:=1
 endif
 
+# Detect whether our TC is cross (at least as far as the target arch is concerned)
+HOST_ARCH:=$(shell uname -m)
+TARGET_ARCH:=$(shell $(CC) -dumpmachine 2>/dev/null)
+CC_IS_CROSS:=0
+# Host doesn't match target, assume it's a cross TC
+ifeq (,$(findstring $(HOST_ARCH),$(TARGET_ARCH)))
+	CC_IS_CROSS:=1
+endif
+
 ifndef DEBUG
 	# Don't hobble GCC just for the sake of being interposable
 	ifdef SHARED
@@ -80,7 +89,7 @@ ifeq "$(MOAR_WARNIGS)" "1"
 	# NOTE: This doesn't really play nice w/ FORTIFY, leading to an assload of false-positives, unless LTO is enabled
 	ifneq (,$(findstring flto,$(CFLAGS)))
 		# NOTE: On native systems, even w/ LTO, we still get a bunch of false-positive
-		ifdef CROSS_TC
+		ifeq "$(CC_IS_CROSS)" "1"
 			EXTRA_CFLAGS+=-Wformat-truncation=2
 		else
 			EXTRA_CFLAGS+=-Wformat-truncation=1
