@@ -41,24 +41,23 @@ size_t
     u8_charlen(uint32_t ch)
 {
 	if (ch < 0x80) {
-		return 1;
+		return 1U;
 	} else if (ch < 0x800) {
-		return 2;
+		return 2U;
 	} else if (ch < 0x10000) {
-		return 3;
+		return 3U;
 	} else if (ch < 0x110000) {
-		return 4;
+		return 4U;
 	}
-	return 0;
+	return 0U;
 }
 
 size_t
     u8_codingsize(uint32_t* wcstr, size_t n)
 {
-	size_t i;
 	size_t c = 0;
 
-	for (i = 0; i < n; i++) {
+	for (size_t i = 0; i < n; i++) {
 		size_t cl = u8_charlen(wcstr[i]);
 		if (cl == 0) {
 			// invalid: encoded as replacement char
@@ -106,23 +105,23 @@ size_t
 			// fall through
 			case 5:
 				ch += (unsigned char) *src++;
-				ch <<= 6;
+				ch <<= 6U;
 			// fall through
 			case 4:
 				ch += (unsigned char) *src++;
-				ch <<= 6;
+				ch <<= 6U;
 			// fall through
 			case 3:
 				ch += (unsigned char) *src++;
-				ch <<= 6;
+				ch <<= 6U;
 			// fall through
 			case 2:
 				ch += (unsigned char) *src++;
-				ch <<= 6;
+				ch <<= 6U;
 			// fall through
 			case 1:
 				ch += (unsigned char) *src++;
-				ch <<= 6;
+				ch <<= 6U;
 			// fall through
 			case 0:
 				ch += (unsigned char) *src++;
@@ -193,30 +192,30 @@ size_t
 {
 	if (ch < 0x80) {
 		dest[0] = (char) ch;
-		return 1;
+		return 1U;
 	}
 	if (ch < 0x800) {
 		dest[0] = (char) ((ch >> 6) | 0xC0);
 		dest[1] = (char) ((ch & 0x3F) | 0x80);
-		return 2;
+		return 2U;
 	}
 	if (ch < 0x10000) {
 		dest[0] = (char) ((ch >> 12) | 0xE0);
 		dest[1] = (char) (((ch >> 6) & 0x3F) | 0x80);
 		dest[2] = (char) ((ch & 0x3F) | 0x80);
-		return 3;
+		return 3U;
 	}
 	if (ch < 0x110000) {
 		dest[0] = (char) ((ch >> 18) | 0xF0);
 		dest[1] = (char) (((ch >> 12) & 0x3F) | 0x80);
 		dest[2] = (char) (((ch >> 6) & 0x3F) | 0x80);
 		dest[3] = (char) ((ch & 0x3F) | 0x80);
-		return 4;
+		return 4U;
 	}
 	dest[0] = (char) 0xef;
 	dest[1] = (char) 0xbf;
 	dest[2] = (char) 0xbd;
-	return 3;
+	return 3U;
 }
 
 /* charnum => byte offset */
@@ -278,23 +277,23 @@ size_t
 				// fall through
 				case 5:
 					ch += (unsigned char) *s++;
-					ch <<= 6;
+					ch <<= 6U;
 				// fall through
 				case 4:
 					ch += (unsigned char) *s++;
-					ch <<= 6;
+					ch <<= 6U;
 				// fall through
 				case 3:
 					ch += (unsigned char) *s++;
-					ch <<= 6;
+					ch <<= 6U;
 				// fall through
 				case 2:
 					ch += (unsigned char) *s++;
-					ch <<= 6;
+					ch <<= 6U;
 				// fall through
 				case 1:
 					ch += (unsigned char) *s++;
-					ch <<= 6;
+					ch <<= 6U;
 				// fall through
 				case 0:
 					ch += (unsigned char) *s++;
@@ -318,11 +317,10 @@ uint32_t
 {
 	uint32_t ch = 0;
 	size_t   sz;
-	size_t   j;
 
 	sz = u8_seqlen(&s[*i]);
-	for (j = sz; j > 0; j--) {
-		ch <<= 6;
+	for (size_t j = sz; j > 0; j--) {
+		ch <<= 6U;
 		ch += (unsigned char) s[(*i)++];
 	}
 	ch -= offsetsFromUTF8[sz - 1];
@@ -575,7 +573,7 @@ char*
 	while (i < sz) {
 		c = csz = 0;
 		do {
-			c <<= 6;
+			c <<= 6U;
 			c += (unsigned char) s[i++];
 			csz++;
 		} while (i < sz && !isutf(s[i]));
@@ -675,12 +673,12 @@ size_t
 		cnt = (size_t) ret;
 	}
 	if (cnt >= sz) {
-		buf      = (char*) malloc(cnt + 1);
+		buf      = (char*) malloc(cnt + 1U);
 		needfree = true;
-		vsnprintf(buf, cnt + 1, fmt, ap);
+		vsnprintf(buf, cnt + 1U, fmt, ap);
 	}
-	wcs     = (uint32_t*) alloca((cnt + 1) * sizeof(uint32_t));
-	nc      = u8_toucs(wcs, cnt + 1, buf, cnt);
+	wcs     = (uint32_t*) alloca((cnt + 1U) * sizeof(uint32_t));
+	nc      = u8_toucs(wcs, cnt + 1U, buf, cnt);
 	wcs[nc] = 0;
 	printf("%ls", (wchar_t*) wcs);
 	if (needfree) {
@@ -750,7 +748,7 @@ chkutf8:
 			return CUTEF8_IS_INVALID;
 		}
 	} else if (byt < 0xf0) {    // 3-byte sequence
-		if ((pnt + 1 >= pend) || isutf(*pnt) || isutf(pnt[1])) {
+		if ((pnt + 1U >= pend) || isutf(*pnt) || isutf(pnt[1])) {
 			return CUTEF8_IS_INVALID;
 		}
 		// Check for surrogate chars
@@ -761,10 +759,10 @@ chkutf8:
 		if (byt == 0xe0 && *pnt < 0xa0) {
 			return CUTEF8_IS_INVALID;
 		}
-		pnt += 2;
+		pnt += 2U;
 	} else {    // 4-byte sequence
 		// Must have 3 valid continuation characters
-		if ((pnt + 2 >= pend) || isutf(*pnt) || isutf(pnt[1]) || isutf(pnt[2])) {
+		if ((pnt + 2U >= pend) || isutf(*pnt) || isutf(pnt[1]) || isutf(pnt[2])) {
 			return CUTEF8_IS_INVALID;
 		}
 		// Make sure in correct range (0x10000 - 0x10ffff)
@@ -777,7 +775,7 @@ chkutf8:
 				return CUTEF8_IS_INVALID;
 			}
 		}
-		pnt += 3;
+		pnt += 3U;
 	}
 	// Find next non-ASCII characters as fast as possible
 	while (pnt < pend) {
@@ -806,29 +804,29 @@ int
 			switch (c >> 4) {
 				case 0xC:
 				case 0xD:
-					di -= 2;
+					di -= 2U;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
 					*((int16_t*) &dest[di]) = *((const int16_t*) &src[si]);
 #pragma GCC diagnostic pop
-					si += 2;
+					si += 2U;
 					break;
 				case 0xE:
-					di -= 3;
+					di -= 3U;
 					dest[di] = src[si];
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
 					*((int16_t*) &dest[di + 1]) = *((const int16_t*) &src[si + 1]);
 #pragma GCC diagnostic pop
-					si += 3;
+					si += 3U;
 					break;
 				case 0xF:
-					di -= 4;
+					di -= 4U;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
 					*((int32_t*) &dest[di]) = *((const int32_t*) &src[si]);
 #pragma GCC diagnostic pop
-					si += 4;
+					si += 4U;
 					break;
 				default:
 					return 1;
