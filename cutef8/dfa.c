@@ -86,6 +86,7 @@ bool
 }
 
 // Take a stab at reimplementing u8_nextchar with the dfa decoder...
+// NOTE: For shit'n giggles, libunibreak also has its own next_char implementation... (ub_get_next_char_utf8 @ unibreakdef.c)
 uint32_t
     u8_nextchar2(const char* s, size_t* i)
 {
