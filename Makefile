@@ -88,7 +88,8 @@ ifeq "$(MOAR_WARNIGS)" "1"
 	EXTRA_CFLAGS+=-Wformat-signedness
 	# NOTE: This doesn't really play nice w/ FORTIFY, leading to an assload of false-positives, unless LTO is enabled
 	ifneq (,$(findstring flto,$(CFLAGS)))
-		# NOTE: On native systems, even w/ LTO, we still get a bunch of false-positive
+		# NOTE: On native systems, even w/ LTO, we still get a bunch of false-positives
+		#       (potentially because of FORTIFY and/or a much more up to date glibc)
 		ifeq "$(CC_IS_CROSS)" "1"
 			EXTRA_CFLAGS+=-Wformat-truncation=2
 		else
