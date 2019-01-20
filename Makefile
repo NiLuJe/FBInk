@@ -174,10 +174,15 @@ else
 	EXTRA_LDFLAGS+=-L./Release
 endif
 ifdef SHARED
-	LIBS:=-lfbink
+	LIBS+=-lfbink
 else
-	LIBS:=-l:libfbink.a
+	LIBS+=-l:libfbink.a
 endif
+
+# Pick up our vendored build of libunibreak
+EXTRA_LDFLAGS+=-LLibUniBreakBuild/src/.libs
+LIBS+=-l:libunibreak.a
+
 # And with our own rpath for standalone distribution
 ifdef STANDALONE
 	EXTRA_LDFLAGS+=-Wl,-rpath=/usr/local/fbink/lib
@@ -199,12 +204,6 @@ endif
 ##
 # Now that we're done fiddling with flags, let's build stuff!
 LIB_SRCS=fbink.c cutef8/utf8.c cutef8/dfa.c
-# Jump through a few hoops to set a few libunibreak-specific CFLAGS to silence some warnings...
-ifdef MINIMAL
-	LIB_UB_SRCS=
-else
-	LIB_UB_SRCS=libunibreak/src/linebreak.c libunibreak/src/linebreakdata.c libunibreak/src/unibreakdef.c libunibreak/src/linebreakdef.c
-endif
 CMD_SRCS=fbink_cmd.c
 BTN_SRCS=button_scan_cmd.c
 # Unless we're asking for a minimal build, include the Unscii fonts, too
@@ -241,41 +240,37 @@ FBINK_STATIC_NAME:=libfbink.a
 default: all
 
 SHAREDLIB_OBJS:=$(LIB_SRCS:%.c=$(OUT_DIR)/shared/%.o)
-UB_SHAREDLIB_OBJS:=$(LIB_UB_SRCS:%.c=$(OUT_DIR)/shared/%.o)
 STATICLIB_OBJS:=$(LIB_SRCS:%.c=$(OUT_DIR)/static/%.o)
-UB_STATICLIB_OBJS:=$(LIB_UB_SRCS:%.c=$(OUT_DIR)/static/%.o)
 CMD_OBJS:=$(CMD_SRCS:%.c=$(OUT_DIR)/%.o)
 BTN_OBJS:=$(BTN_SRCS:%.c=$(OUT_DIR)/%.o)
 
 # Silence a few warnings, only when specifically compiling libunibreak...
 # c.f., https://stackoverflow.com/q/1305665
-$(UB_SHAREDLIB_OBJS): QUIET_CFLAGS := -Wno-conversion -Wno-sign-conversion -Wno-suggest-attribute=pure
-
-$(UB_STATICLIB_OBJS): QUIET_CFLAGS := -Wno-conversion -Wno-sign-conversion -Wno-suggest-attribute=pure
+QUIET_CFLAGS := -Wno-conversion -Wno-sign-conversion -Wno-suggest-attribute=pure
 
 # Shared lib
 $(OUT_DIR)/shared/%.o: %.c
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(QUIET_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) -o $@ -c $<
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) -o $@ -c $<
 
 # Static lib
 $(OUT_DIR)/static/%.o: %.c
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(QUIET_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) -o $@ -c $<
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) -o $@ -c $<
 
 # CLI front-end
 $(OUT_DIR)/%.o: %.c
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) -o $@ -c $<
 
 outdir:
-	mkdir -p $(OUT_DIR)/shared/cutef8 $(OUT_DIR)/static/cutef8 $(OUT_DIR)/shared/libunibreak/src $(OUT_DIR)/static/libunibreak/src
+	mkdir -p $(OUT_DIR)/shared/cutef8 $(OUT_DIR)/static/cutef8
 
 all: outdir static
 
-staticlib: outdir $(STATICLIB_OBJS) $(UB_STATICLIB_OBJS)
-	$(AR) $(FBINK_STATIC_FLAGS) $(OUT_DIR)/$(FBINK_STATIC_NAME) $(STATICLIB_OBJS) $(UB_STATICLIB_OBJS)
+staticlib: outdir libunibreak.built $(STATICLIB_OBJS)
+	$(AR) $(FBINK_STATIC_FLAGS) $(OUT_DIR)/$(FBINK_STATIC_NAME) $(STATICLIB_OBJS)
 	$(RANLIB) $(OUT_DIR)/$(FBINK_STATIC_NAME)
 
-sharedlib: outdir $(SHAREDLIB_OBJS) $(UB_SHAREDLIB_OBJS)
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(SHAREDLIB_OBJS) $(UB_SHAREDLIB_OBJS)
+sharedlib: outdir libunibreak.built $(SHAREDLIB_OBJS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(SHAREDLIB_OBJS)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME_VER)
 
@@ -353,6 +348,23 @@ cervantes:
 	$(MAKE) strip CERVANTES=true
 	$(CURDIR)/tools/do_debian_package.sh $(OUT_DIR) armel
 
+libunibreak.built:
+	mkdir -p LibUniBreakBuild
+	cd libunibreak && \
+	env NOCONFIGURE=1 ./autogen.sh
+	cd LibUniBreakBuild && \
+	env CPPFLAGS="$(CPPFLAGS) $(EXTRA_CPPFLAGS)" \
+	CFLAGS="$(CFLAGS) $(EXTRA_CFLAGS) $(QUIET_CFLAGS)" \
+	LDFLAGS="$(LDFLAGS)" \
+	../libunibreak/configure \
+	$(if $(CROSS_TC),--host=$(CROSS_TC),) \
+	--enable-static \
+	--disable-shared \
+	$(if $(SHARED),--with-pic=yes,)
+	cd LibUniBreakBuild && \
+	$(MAKE)
+	touch libunibreak.built
+
 armcheck:
 ifeq (,$(findstring arm-,$(CC)))
 	$(error You forgot to setup a cross TC, you dummy!)
@@ -380,17 +392,21 @@ kobo: armcheck release
 	pushd Kobo && zip -r ../Release/FBInk-$(FBINK_VERSION).zip . && popd
 	mv -v Release/FBInk-$(FBINK_VERSION).zip Kobo/
 
+libunibreakclean:
+	cd libunibreak && \
+	git reset --hard
+
 clean:
 	rm -rf Kobo/
 	rm -rf Release/*.a
 	rm -rf Release/*.so*
 	rm -rf Release/shared/*.o
 	rm -rf Release/shared/cutef8/*.o
-	rm -rf Release/shared/libunibreak/src/*.o
+	rm -rf Release/shared/libunibreak
 	rm -rf Release/shared/utf8
 	rm -rf Release/static/*.o
 	rm -rf Release/static/cutef8/*.o
-	rm -rf Release/static/libunibreak/src/*.o
+	rm -rf Release/static/libunibreak
 	rm -rf Release/static/utf8
 	rm -rf Release/*.o
 	rm -rf Release/fbink
@@ -399,14 +415,18 @@ clean:
 	rm -rf Debug/*.so*
 	rm -rf Debug/shared/*.o
 	rm -rf Debug/shared/cutef8/*.o
-	rm -rf Debug/shared/libunibreak/src/*.o
+	rm -rf Debug/shared/libunibreak
 	rm -rf Debug/shared/utf8
 	rm -rf Debug/static/*.o
 	rm -rf Debug/static/cutef8/*.o
-	rm -rf Debug/static/libunibreak/src/*.o
+	rm -rf Debug/static/libunibreak
 	rm -rf Debug/static/utf8
 	rm -rf Debug/*.o
 	rm -rf Debug/fbink
 	rm -rf Debug/button_scan
 
-.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo clean
+distclean: clean libunibreakclean
+	rm -rf LibUniBreakBuild
+	rm -rf libunibreak.built
+
+.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo libunibreakclean clean distclean

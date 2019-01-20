@@ -3,6 +3,9 @@ Release/
 Debug/
 Kobo/
 Kindle/
+# Same, for our vendored libunibreak
+LibUniBreakBuild/
+libunibreak.built
 # KDevelop
 FBInk.kdev4
 .kdev4/
