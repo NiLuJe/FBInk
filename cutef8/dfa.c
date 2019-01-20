@@ -93,6 +93,9 @@ uint32_t
 	uint32_t ch    = 0;
 	uint8_t  state = 0;
 
+	// NOTE: This *should* be safe enough, since we validate our input...
+	//       Otherwise, might want to cap at 4 iterations/bytes? Or @ u8_seqlen iters, like ut8_nextchar?
+	//       With a hard return of 0 if state still != UTF8_ACCEPT once the cap is hit...
 	while (s[*i]) {
 		if (!decode(&state, &ch, (const uint8_t) s[(*i)++])) {
 			break;
