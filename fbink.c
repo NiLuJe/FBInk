@@ -4244,6 +4244,8 @@ int
 			LOG("Unknown (or unsupported) dithering mode '%s', defaulting to PASSTHROUGH", dithering_mode);
 			region_dither = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
 		}
+	} else {
+		LOG("No hardware dithering requested");
 	}
 
 	// NOTE: Right now, we enforce quant_bit to 7 if dithering is enabled (downgraded to 1 for A2 updates).

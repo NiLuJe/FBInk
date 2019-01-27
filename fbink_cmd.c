@@ -1091,13 +1091,14 @@ int
 		if (is_refresh) {
 			if (!fbink_cfg.is_quiet) {
 				printf(
-				    "Refreshing the screen from top=%u, left=%u for width=%u, height=%u with %swaveform mode %s\n",
+				    "Refreshing the screen from top=%u, left=%u for width=%u, height=%u with %swaveform mode %s and dithering mode %s\n",
 				    region_top,
 				    region_left,
 				    region_width,
 				    region_height,
 				    fbink_cfg.is_flashing ? "a flashing " : "",
-				    region_wfm);
+				    region_wfm,
+				    region_dither ? region_dither : "PASSTHROUGH");
 			}
 			if (fbink_refresh(fbfd,
 					  region_top,
