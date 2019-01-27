@@ -69,7 +69,7 @@ static void
 	    "\t-f, --flash\t\tAsk the eInk driver to do a black flash when refreshing the area of the screen where STRING will be printed.\n"
 	    "\t-c, --clear\t\tFully clear the screen before printing (obeys --invert).\n"
 #ifndef FBINK_FOR_LINUX
-	    "\t-d, --dither\t\tRequest hardware (ordered) dithering from the eInk controller, if supported (mainly useful for images).\n"
+	    "\t-D, --dither\t\tRequest hardware (ordered) dithering from the eInk controller, if supported (mainly useful for images).\n"
 	    "\t-b, --norefresh\t\tOnly update the framebuffer, but don't actually refresh the eInk screen (useful when drawing in batch).\n"
 #endif
 	    "\t-S, --size\t\tOverride the automatic font scaling multiplier (Default: 0, automatic selection, ranging from 1 (no scaling), to 4 (4x upscaling), depending on screen resolution).\n"
@@ -381,7 +381,7 @@ int
 					      { "fgless", no_argument, NULL, 'T' },
 					      { "truetype", required_argument, NULL, 't' },
 					      { "norefresh", no_argument, NULL, 'b' },
-					      { "dither", no_argument, NULL, 'd' },
+					      { "dither", no_argument, NULL, 'D' },
 					      { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_cfg = { 0 };
@@ -474,7 +474,7 @@ int
 	char*     bdit_ot_file   = NULL;
 	bool      errfnd         = false;
 
-	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMprs:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bd", opts, &opt_index)) !=
+	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMprs:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bD", opts, &opt_index)) !=
 	       -1) {
 		switch (opt) {
 			case 'y':
@@ -925,7 +925,7 @@ int
 			case 'b':
 				fbink_cfg.no_refresh = true;
 				break;
-			case 'd':
+			case 'D':
 				fbink_cfg.is_dithered = true;
 				break;
 			default:
