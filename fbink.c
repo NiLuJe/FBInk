@@ -2958,7 +2958,7 @@ int
 	if (refresh(fbfd,
 		    region,
 		    WAVEFORM_MODE_AUTO,
-		    EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		    fbink_cfg->is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
 		WARN("Failed to refresh the screen");
@@ -3173,6 +3173,7 @@ int
 	struct mxcfb_rect region      = { 0U };
 	bool              is_flashing = false;
 	bool              is_cleared  = false;
+	bool              is_dithered = false;
 	bool              no_refresh  = false;
 
 	// map fb to user mem
@@ -3628,6 +3629,7 @@ int
 		is_cleared  = fbink_cfg->is_cleared;
 		is_centered = fbink_cfg->is_centered;
 		is_halfway  = fbink_cfg->is_halfway;
+		is_dithered = fbink_cfg->is_dithered;
 		no_refresh  = fbink_cfg->no_refresh;
 	} else {
 		is_centered = cfg->is_centered;
@@ -4095,7 +4097,12 @@ cleanup:
 		if (is_cleared) {
 			fullscreen_region(&region);
 		}
-		refresh(fbfd, region, WAVEFORM_MODE_AUTO, EPDC_FLAG_USE_DITHERING_PASSTHROUGH, is_flashing, no_refresh);
+		refresh(fbfd,
+			region,
+			WAVEFORM_MODE_AUTO,
+			is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+			is_flashing,
+			no_refresh);
 	}
 	free(lines);
 	free(brk_buff);
@@ -4595,7 +4602,7 @@ int
 	if (refresh(fbfd,
 		    region,
 		    WAVEFORM_MODE_AUTO,
-		    EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		    fbink_cfg->is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
 		WARN("Failed to refresh the screen");
@@ -5511,7 +5518,7 @@ static int
 	if (refresh(fbfd,
 		    region,
 		    WAVEFORM_MODE_GC16,
-		    EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		    fbink_cfg->is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
 		WARN("Failed to refresh the screen");

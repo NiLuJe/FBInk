@@ -191,7 +191,8 @@ typedef struct
 	bool      ignore_alpha;    // Ignore any potential alpha channel in source image (i.e., flatten the image)
 	uint8_t   halign;    // Horizontal alignment of images (NONE/LEFT, CENTER, EDGE/RIGHT; c.f., ALIGN_INDEX_T enum)
 	uint8_t   valign;    // Vertical alignment of images (NONE/TOP, CENTER, EDGE/BOTTOM; c.f., ALIGN_INDEX_T enum)
-	bool      no_refresh;    // Skip actually refreshing the eInk screen (useful when drawing in batch)
+	bool      is_dithered;    // Request hardware dithering (if supported)
+	bool      no_refresh;     // Skip actually refreshing the eInk screen (useful when drawing in batch)
 } FBInkConfig;
 
 typedef struct
