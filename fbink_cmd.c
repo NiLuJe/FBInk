@@ -163,11 +163,11 @@ static void
 	    "\n"
 	    "\n"
 	    "You can also eschew printing a STRING, and simply refresh the screen as per your specification, without touching the framebuffer:\n"
-	    "\t-s, --refresh top=NUM,left=NUM,width=NUM,height=NUM,wfm=NAME\n"
+	    "\t-s, --refresh top=NUM,left=NUM,width=NUM,height=NUM,wfm=NAME,dither=NAME\n"
 	    "\n"
 	    "EXAMPLES:\n"
-	    "\tfbink -s top=20,left=10,width=500,height=600,wfm=GC16\n"
-	    "\t\tRefreshes a 500x600 rectangle with its top-left corner at coordinates (10, 20) with a GC16 waveform mode.\n"
+	    "\tfbink -s top=20,left=10,width=500,height=600,wfm=GC16,dither=ORDERED\n"
+	    "\t\tRefreshes a 500x600 rectangle with its top-left corner at coordinates (10, 20) with a GC16 waveform mode and ORDERED hardware dithering.\n"
 	    "\n"
 	    "NOTES:\n"
 	    "\tThe specified rectangle *must* completely fit on screen, or the ioctl will fail.\n"
@@ -176,6 +176,8 @@ static void
 	    "\t\tAs well as GC16_FAST, GL16_FAST, DU4, GL4, GL16_INV, GCK16 & GLKW16 on some Kindles, depending on the model & FW version.\n"
 	    "\t\tUnsupported modes should safely downgrade to AUTO.\n"
 #endif
+	    "\tAvailable dithering modes: PASSTHROUGH, FLOYD_STEINBERG, ATKINSON, ORDERED & QUANT_ONLY\n"
+	    "\t\tNote that this is only supported on recent devices, and that only a subset of these options may actually be supported by the HW (usually, PASSTHROUGH & ORDERED, check dmesg).\n"
 	    "\tNote that this will also honor --flash\n"
 #ifdef FBINK_FOR_KINDLE
 	    "\tNote that specifying a waveform mode is ignored on legacy einkfb devices, because the hardware doesn't expose such capabilities.\n"
@@ -393,6 +395,7 @@ int
 		WIDTH_OPT,
 		HEIGHT_OPT,
 		WFM_OPT,
+		DITHER_OPT,
 	};
 	enum
 	{
@@ -420,8 +423,13 @@ int
 #pragma clang diagnostic ignored "-Wunknown-warning-option"
 #pragma GCC diagnostic ignored "-Wdiscarded-qualifiers"
 #pragma clang diagnostic ignored "-Wincompatible-pointer-types-discards-qualifiers"
-	char* const refresh_token[]  = { [TOP_OPT] = "top",       [LEFT_OPT] = "left", [WIDTH_OPT] = "width",
-                                        [HEIGHT_OPT] = "height", [WFM_OPT] = "wfm",   NULL };
+	char* const refresh_token[]  = { [TOP_OPT]    = "top",
+                                        [LEFT_OPT]   = "left",
+                                        [WIDTH_OPT]  = "width",
+                                        [HEIGHT_OPT] = "height",
+                                        [WFM_OPT]    = "wfm",
+                                        [DITHER_OPT] = "dither",
+                                        NULL };
 	char* const image_token[]    = { [FILE_OPT] = "file",     [XOFF_OPT] = "x",        [YOFF_OPT] = "y",
                                       [HALIGN_OPT] = "halign", [VALIGN_OPT] = "valign", NULL };
 	char* const truetype_token[] = { [REGULAR_OPT]    = "regular",
@@ -443,6 +451,7 @@ int
 	uint32_t  region_width   = 0;
 	uint32_t  region_height  = 0;
 	char*     region_wfm     = NULL;
+	char*     region_dither  = NULL;
 	bool      is_refresh     = false;
 	char*     image_file     = NULL;
 	short int image_x_offset = 0;
@@ -547,6 +556,17 @@ int
 							}
 
 							region_wfm = value;
+							break;
+						case DITHER_OPT:
+							if (value == NULL) {
+								fprintf(stderr,
+									"Missing value for suboption '%s'\n",
+									refresh_token[DITHER_OPT]);
+								errfnd = true;
+								continue;
+							}
+
+							region_dither = value;
 							break;
 						default:
 							fprintf(stderr, "No match found for token: /%s/\n", value);
@@ -1085,6 +1105,7 @@ int
 					  region_width,
 					  region_height,
 					  region_wfm,
+					  region_dither,
 					  fbink_cfg.is_flashing) != EXIT_SUCCESS) {
 				fprintf(stderr, "Failed to refresh the screen as per your specification!\n");
 				rv = ERRCODE(EXIT_FAILURE);
