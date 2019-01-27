@@ -321,15 +321,23 @@ FBINK_API int fbink_printf(int fbfd, const FBInkOTConfig* cfg, const FBInkConfig
 // region_width:	width field of an mxcfb rectangle
 // region_height:	height field of an mxcfb rectangle
 // waveform_mode:	waveform mode (i.e, "GC16")
+// dithering_mode:	dithering mode (i.e., "ORDERED")
+//			NOTE: Only supported on devices with a recent EPDC (>= v2)!
+//			      For Kindle, that's anything since the KOA2 (KOA2, PW4),
+//			      For Kobo, that's anything since Mk.7,
+//			      For Cervantes, that's anything since the Cervantes 3 (Cervantes 3 & 4).
+//			NOTE: Your device may not support anything other than PASSTHROUGH & ORDERED!
 // is_flashing:		will ask for a black flash if true
 // NOTE: If you request an empty region (0x0 @ (0, 0), a full-screen refresh will be performed!
 // NOTE: As you've probably guessed, since it doesn't take an FBInkConfig pointer, this *ignores* no_refresh ;)
+// NOTE: dithering_mode MAY be NULL (in which case, dithering will NOT be requested, i.e., set to PASSTHROUGH)
 FBINK_API int fbink_refresh(int         fbfd,
 			    uint32_t    region_top,
 			    uint32_t    region_left,
 			    uint32_t    region_width,
 			    uint32_t    region_height,
 			    const char* waveform_mode,
+			    const char* dithering_mode,
 			    bool        is_flashing);
 
 // Returns true if the device appears to be in a quirky framebuffer state that *may* require a reinit to produce sane results.

@@ -383,17 +383,17 @@ static long int jiffies_to_ms(long int);
 #	if defined(FBINK_FOR_KINDLE)
 static int refresh_legacy(int, const struct mxcfb_rect, bool);
 static int refresh_kindle(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
-static int refresh_kindle_koa2(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
-static int refresh_kindle_pw4(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
+static int refresh_kindle_koa2(int, const struct mxcfb_rect, uint32_t, uint32_t, int, uint32_t);
+static int refresh_kindle_pw4(int, const struct mxcfb_rect, uint32_t, uint32_t, int, uint32_t);
 #	elif defined(FBINK_FOR_CERVANTES)
 static int refresh_cervantes(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
-static int refresh_cervantes_new(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
+static int refresh_cervantes_new(int, const struct mxcfb_rect, uint32_t, uint32_t, int, uint32_t);
 #	else
 static int refresh_kobo(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
-static int refresh_kobo_mk7(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
+static int refresh_kobo_mk7(int, const struct mxcfb_rect, uint32_t, uint32_t, int, uint32_t);
 #	endif    // FBINK_FOR_KINDLE
 #endif            // !FBINK_FOR_LINUX
-static int refresh(int, const struct mxcfb_rect, uint32_t, bool, bool);
+static int refresh(int, const struct mxcfb_rect, uint32_t, int, bool, bool);
 
 static int open_fb_fd(int*, bool*);
 

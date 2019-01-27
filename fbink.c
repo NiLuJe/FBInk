@@ -1211,6 +1211,7 @@ static int
 			const struct mxcfb_rect region,
 			uint32_t                waveform_mode,
 			uint32_t                update_mode,
+			int                     dithering_mode,
 			uint32_t                marker)
 {
 	struct mxcfb_update_data_koa2 update = {
@@ -1224,8 +1225,10 @@ static int
 			     : (waveform_mode == WAVEFORM_MODE_KOA2_A2 || waveform_mode == WAVEFORM_MODE_DU)
 				   ? EPDC_FLAG_FORCE_MONOCHROME
 				   : 0U,
-		.dither_mode             = EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
-		.quant_bit               = 0,
+		.dither_mode = dithering_mode,
+		.quant_bit   = (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)
+				 ? 0
+				 : (waveform_mode == WAVEFORM_MODE_A2) ? 1 : 7,
 		.alt_buffer_data         = { 0U },
 		.hist_bw_waveform_mode   = WAVEFORM_MODE_DU,
 		.hist_gray_waveform_mode = WAVEFORM_MODE_GC16,
@@ -1278,6 +1281,7 @@ static int
 		       const struct mxcfb_rect region,
 		       uint32_t                waveform_mode,
 		       uint32_t                update_mode,
+		       int                     dithering_mode,
 		       uint32_t                marker)
 {
 	// NOTE: Different mcfb_update_data struct (no ts_* debug fields), but otherwise, identical to the KOA2!
@@ -1292,8 +1296,10 @@ static int
 			     : (waveform_mode == WAVEFORM_MODE_KOA2_A2 || waveform_mode == WAVEFORM_MODE_DU)
 				   ? EPDC_FLAG_FORCE_MONOCHROME
 				   : 0U,
-		.dither_mode             = EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
-		.quant_bit               = 0,
+		.dither_mode = dithering_mode,
+		.quant_bit   = (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)
+				 ? 0
+				 : (waveform_mode == WAVEFORM_MODE_A2) ? 1 : 7,
 		.alt_buffer_data         = { 0U },
 		.hist_bw_waveform_mode   = WAVEFORM_MODE_DU,
 		.hist_gray_waveform_mode = WAVEFORM_MODE_GC16,
@@ -1398,6 +1404,7 @@ static int
 			  const struct mxcfb_rect region,
 			  uint32_t waveform_mode,
 			  uint32_t update_mode,
+			  int dithering_mode,
 			  uint32_t marker)
 {
 	struct mxcfb_update_data_org update = {
@@ -1409,8 +1416,10 @@ static int
 		.flags = (waveform_mode == WAVEFORM_MODE_GLD16)
 			     ? EPDC_FLAG_USE_REGAL
 			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
-		.dither_mode = EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
-		.quant_bit = 0,
+		.dither_mode = dithering_mode,
+		.quant_bit = (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)
+				 ? 0
+				 : (waveform_mode == WAVEFORM_MODE_A2) ? 1 : 7,
 		.alt_buffer_data = { 0U },
 	};
 
@@ -1508,6 +1517,7 @@ static int
 		     const struct mxcfb_rect region,
 		     uint32_t                waveform_mode,
 		     uint32_t                update_mode,
+		     int                     dithering_mode,
 		     uint32_t                marker)
 {
 	struct mxcfb_update_data_v2 update = {
@@ -1519,8 +1529,10 @@ static int
 		.flags         = (waveform_mode == WAVEFORM_MODE_GLD16)
 			     ? EPDC_FLAG_USE_REGAL
 			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
-		.dither_mode     = EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
-		.quant_bit       = 0,
+		.dither_mode = dithering_mode,
+		.quant_bit   = (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)
+				 ? 0
+				 : (waveform_mode == WAVEFORM_MODE_A2) ? 1 : 7,
 		.alt_buffer_data = { 0U },
 	};
 
@@ -1572,6 +1584,7 @@ static int
     refresh(int                     fbfd __attribute__((unused)),
 	    const struct mxcfb_rect region __attribute__((unused)),
 	    uint32_t                waveform_mode __attribute__((unused)),
+	    int                     dithering_mode __attribute__((unused)),
 	    bool                    is_flashing __attribute__((unused)),
 	    bool                    no_refresh __attribute__((unused)))
 {
@@ -1579,7 +1592,12 @@ static int
 }
 #else
 static int
-    refresh(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode, bool is_flashing, bool no_refresh)
+    refresh(int fbfd,
+	    const struct mxcfb_rect region,
+	    uint32_t waveform_mode,
+	    int dithering_mode,
+	    bool is_flashing,
+	    bool no_refresh)
 {
 	// Were we asked to skip refreshes?
 	if (no_refresh) {
@@ -1631,21 +1649,21 @@ static int
 
 #	if defined(FBINK_FOR_KINDLE)
 	if (deviceQuirks.isKindlePW4) {
-		return refresh_kindle_pw4(fbfd, region, wfm, upm, marker);
+		return refresh_kindle_pw4(fbfd, region, wfm, upm, dithering_mode, marker);
 	} else if (deviceQuirks.isKindleOasis2) {
-		return refresh_kindle_koa2(fbfd, region, wfm, upm, marker);
+		return refresh_kindle_koa2(fbfd, region, wfm, upm, dithering_mode, marker);
 	} else {
 		return refresh_kindle(fbfd, region, wfm, upm, marker);
 	}
 #	elif defined(FBINK_FOR_CERVANTES)
 	if (deviceQuirks.isCervantesNew) {
-		return refresh_cervantes_new(fbfd, region, wfm, upm, marker);
+		return refresh_cervantes_new(fbfd, region, wfm, upm, dithering_mode, marker);
 	} else {
 		return refresh_cervantes(fbfd, region, wfm, upm, marker);
 	}
 #	else
 	if (deviceQuirks.isKoboMk7) {
-		return refresh_kobo_mk7(fbfd, region, wfm, upm, marker);
+		return refresh_kobo_mk7(fbfd, region, wfm, upm, dithering_mode, marker);
 	} else {
 		return refresh_kobo(fbfd, region, wfm, upm, marker);
 	}
@@ -2937,7 +2955,12 @@ int
 	}
 
 	// Refresh screen
-	if (refresh(fbfd, region, WAVEFORM_MODE_AUTO, fbink_cfg->is_flashing, fbink_cfg->no_refresh) != EXIT_SUCCESS) {
+	if (refresh(fbfd,
+		    region,
+		    WAVEFORM_MODE_AUTO,
+		    EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		    fbink_cfg->is_flashing,
+		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
 		WARN("Failed to refresh the screen");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
@@ -4072,7 +4095,7 @@ cleanup:
 		if (is_cleared) {
 			fullscreen_region(&region);
 		}
-		refresh(fbfd, region, WAVEFORM_MODE_AUTO, is_flashing, no_refresh);
+		refresh(fbfd, region, WAVEFORM_MODE_AUTO, EPDC_FLAG_USE_DITHERING_PASSTHROUGH, is_flashing, no_refresh);
 	}
 	free(lines);
 	free(brk_buff);
@@ -4100,6 +4123,7 @@ int
 		  uint32_t    region_width,
 		  uint32_t    region_height,
 		  const char* waveform_mode,
+		  const char* dithering_mode,
 		  bool        is_flashing)
 {
 	// Open the framebuffer if need be...
@@ -4200,6 +4224,31 @@ int
 		region_wfm = WAVEFORM_MODE_AUTO;
 	}
 
+	// NOTE: This hardware dithering (handled by the PxP) is only supported since EPDC v2!
+	//       AFAICT, most of our eligible target devices only support PASSTHROUGH & ORDERED...
+	//       (c.f., drivers/dma/pxp/pxp_dma_v3.c)
+	int region_dither = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
+	//
+	if (dithering_mode) {
+		if (strcasecmp("PASSTHROUGH", dithering_mode) == 0) {
+			region_dither = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
+		} else if (strcasecmp("FLOYD_STEINBERG", dithering_mode) == 0) {
+			region_dither = EPDC_FLAG_USE_DITHERING_FLOYD_STEINBERG;
+		} else if (strcasecmp("ATKINSON", dithering_mode) == 0) {
+			region_dither = EPDC_FLAG_USE_DITHERING_ATKINSON;
+		} else if (strcasecmp("ORDERED", dithering_mode) == 0) {
+			region_dither = EPDC_FLAG_USE_DITHERING_ORDERED;
+		} else if (strcasecmp("QUANT_ONLY", dithering_mode) == 0) {
+			region_dither = EPDC_FLAG_USE_DITHERING_QUANT_ONLY;
+		} else {
+			LOG("Unknown (or unsupported) dithering mode '%s', defaulting to PASSTHROUGH", dithering_mode);
+			region_dither = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
+		}
+	}
+
+	// NOTE: Right now, we enforce quant_bit to 7 if dithering is enabled (downgraded to 1 for A2 updates).
+	//       I'm not really sure what use-cases would warrant using a lower value, but I'm open to suggestion ;).
+
 	struct mxcfb_rect region = {
 		.top    = region_top,
 		.left   = region_left,
@@ -4213,7 +4262,7 @@ int
 	}
 
 	int ret;
-	if (EXIT_SUCCESS != (ret = refresh(fbfd, region, region_wfm, is_flashing, false))) {
+	if (EXIT_SUCCESS != (ret = refresh(fbfd, region, region_wfm, region_dither, is_flashing, false))) {
 		WARN("Failed to refresh the screen");
 	}
 
@@ -4541,7 +4590,12 @@ int
 	//       It has the added benefit of increasing the framerate limit after which the eInk controller risks getting
 	//       confused (unless is_flashing is enabled, since that'll block,
 	//       essentially throttling the bar to the screen's refresh rate).
-	if (refresh(fbfd, region, WAVEFORM_MODE_AUTO, fbink_cfg->is_flashing, fbink_cfg->no_refresh) != EXIT_SUCCESS) {
+	if (refresh(fbfd,
+		    region,
+		    WAVEFORM_MODE_AUTO,
+		    EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		    fbink_cfg->is_flashing,
+		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
 		WARN("Failed to refresh the screen");
 		return ERRCODE(EXIT_FAILURE);
 	}
@@ -5452,7 +5506,12 @@ static int
 	}
 
 	// Refresh screen
-	if (refresh(fbfd, region, WAVEFORM_MODE_GC16, fbink_cfg->is_flashing, fbink_cfg->no_refresh) != EXIT_SUCCESS) {
+	if (refresh(fbfd,
+		    region,
+		    WAVEFORM_MODE_GC16,
+		    EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		    fbink_cfg->is_flashing,
+		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
 		WARN("Failed to refresh the screen");
 	}
 
