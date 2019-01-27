@@ -191,7 +191,7 @@ typedef struct
 	bool      ignore_alpha;    // Ignore any potential alpha channel in source image (i.e., flatten the image)
 	uint8_t   halign;    // Horizontal alignment of images (NONE/LEFT, CENTER, EDGE/RIGHT; c.f., ALIGN_INDEX_T enum)
 	uint8_t   valign;    // Vertical alignment of images (NONE/TOP, CENTER, EDGE/BOTTOM; c.f., ALIGN_INDEX_T enum)
-	bool      is_dithered;    // Request hardware dithering (if supported)
+	bool      is_dithered;    // Request (ordered) hardware dithering (if supported).
 	bool      no_refresh;     // Skip actually refreshing the eInk screen (useful when drawing in batch)
 } FBInkConfig;
 
@@ -324,9 +324,9 @@ FBINK_API int fbink_printf(int fbfd, const FBInkOTConfig* cfg, const FBInkConfig
 // waveform_mode:	waveform mode (i.e, "GC16")
 // dithering_mode:	dithering mode (i.e., "ORDERED")
 //			NOTE: Only supported on devices with a recent EPDC (>= v2)!
-//			      For Kindle, that's anything since the KOA2 (KOA2, PW4),
-//			      For Kobo, that's anything since Mk.7,
-//			      For Cervantes, that's anything since the Cervantes 3 (Cervantes 3 & 4).
+//			      For Kindle, that's everything since the KOA2 (KOA2, PW4),
+//			      For Kobo, that's everything since Mk.7,
+//			      For Cervantes, that's everything since the Cervantes 3 (Cervantes 3 & 4).
 //			NOTE: Your device may not support anything other than PASSTHROUGH & ORDERED!
 // is_flashing:		will ask for a black flash if true
 // NOTE: If you request an empty region (0x0 @ (0, 0), a full-screen refresh will be performed!
