@@ -2097,13 +2097,26 @@ static int
 #endif
 	} else {
 		// Set font-size based on screen DPI
-		// (roughly matches: Linux (96), Pearl (167), Carta (212), Carta HD & 7" Carta (265), 7" Carta HD (300))
+		// (roughly matches: Linux (96), Pearl (167), Carta (212), 6.8" Carta (265), 6/7/8" Carta HD (300))
 		if (deviceQuirks.screenDPI <= 212U) {
+			// Most of these should be 6"
 			FONTSIZE_MULT = 2U;    // 16x16
 		} else if (deviceQuirks.screenDPI <= 265U) {
+			// All of these 265dpi devices are from NTX/Kobo, and feature a 6.8" screen,
+			// so we have horizontal space to spare to justify the higher scaling factor ;).
 			FONTSIZE_MULT = 3U;    // 24x24
 		} else {
-			FONTSIZE_MULT = 4U;    // 32x32
+			// NOTE: Try to differentiate between 6" devices and larger screens,
+			//       because we'll want a smaller scaling factor on 6" devices,
+			//       because column space is sparse there ;).
+			uint32_t actual_height = MAX(vInfo.xres, vInfo.yres);
+			if (actual_height <= 1448U) {
+				// That should cover everyone (Voyage/Oasis 1/PaperWHite 3 & 4/Clara HD)
+				FONTSIZE_MULT = 3U;    // 24x24
+			} else {
+				// We have more headroom on larger screens ;) (Oasis 2/Forma)
+				FONTSIZE_MULT = 4U;    // 32x32
+			}
 		}
 #ifdef FBINK_WITH_FONTS
 		if (fbink_cfg->fontname == BLOCK) {
