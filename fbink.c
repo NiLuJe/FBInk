@@ -2111,7 +2111,7 @@ static int
 			//       because column space is sparse there ;).
 			uint32_t actual_height = MAX(vInfo.xres, vInfo.yres);
 			if (actual_height <= 1448U) {
-				// That should cover everyone (Voyage/Oasis 1/PaperWHite 3 & 4/Clara HD)
+				// That should cover everyone (Voyage/Oasis 1/PaperWhite 3 & 4/Clara HD)
 				FONTSIZE_MULT = 3U;    // 24x24
 			} else {
 				// We have more headroom on larger screens ;) (Oasis 2/Forma)
