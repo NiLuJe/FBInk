@@ -2099,7 +2099,7 @@ static int
 		// Set font-size based on screen DPI
 		// (roughly matches: Linux (96), Pearl (167), Carta (212), 6.8" Carta (265), 6/7/8" Carta HD (300))
 		if (deviceQuirks.screenDPI <= 212U) {
-			// Most of these should be 6"
+			// Most of these should be 6", with the notable exception of the DX/DXg ;).
 			FONTSIZE_MULT = 2U;    // 16x16
 		} else if (deviceQuirks.screenDPI <= 265U) {
 			// All of these 265dpi devices are from NTX/Kobo, and feature a 6.8" screen,
@@ -2111,7 +2111,7 @@ static int
 			//       because column space is sparse there ;).
 			uint32_t actual_height = MAX(vInfo.xres, vInfo.yres);
 			if (actual_height <= 1448U) {
-				// That should cover everyone (Voyage/Oasis 1/PaperWhite 3 & 4/Clara HD)
+				// That should cover everyone (Voyage/Oasis 1/PaperWhite 3 & 4/Glo HD/Clara HD)
 				FONTSIZE_MULT = 3U;    // 24x24
 			} else {
 				// We have more headroom on larger screens ;) (Oasis 2/Forma)
