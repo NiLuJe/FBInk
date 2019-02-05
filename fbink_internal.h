@@ -147,22 +147,6 @@
 #	include "eink/einkfb.h"
 #elif defined(FBINK_FOR_CERVANTES)
 #	include "eink/mxcfb-cervantes.h"
-// Because these features are unsupported on Cervantes ;)
-#	ifndef EPDC_FLAG_USE_DITHERING_PASSTHROUGH
-#		define EPDC_FLAG_USE_DITHERING_PASSTHROUGH 0x0
-#	endif
-#	ifndef EPDC_FLAG_USE_DITHERING_FLOYD_STEINBERG
-#		define EPDC_FLAG_USE_DITHERING_FLOYD_STEINBERG 0x0
-#	endif
-#	ifndef EPDC_FLAG_USE_DITHERING_ATKINSON
-#		define EPDC_FLAG_USE_DITHERING_ATKINSON 0x0
-#	endif
-#	ifndef EPDC_FLAG_USE_DITHERING_ORDERED
-#		define EPDC_FLAG_USE_DITHERING_ORDERED 0x0
-#	endif
-#	ifndef EPDC_FLAG_USE_DITHERING_QUANT_ONLY
-#		define EPDC_FLAG_USE_DITHERING_QUANT_ONLY 0x0
-#	endif
 #else
 #	include "eink/mxcfb-kobo.h"
 #endif

@@ -138,6 +138,17 @@ struct mxcfb_rect {
 #define EPDC_FLAG_USE_AAD		0x1000
 #define EPDC_FLAG_USE_DITHERING_NTX_D8	0x100000
 
+// NOTE: This is *UNSUPPORTED* un current devices!
+//       We just happen to need these defined to build ;).
+enum mxcfb_dithering_mode {
+	EPDC_FLAG_USE_DITHERING_PASSTHROUGH = 0x0,
+	EPDC_FLAG_USE_DITHERING_FLOYD_STEINBERG,
+	EPDC_FLAG_USE_DITHERING_ATKINSON,
+	EPDC_FLAG_USE_DITHERING_ORDERED,
+	EPDC_FLAG_USE_DITHERING_QUANT_ONLY,
+	EPDC_FLAG_USE_DITHERING_MAX,
+};
+
 #define FB_POWERDOWN_DISABLE			-1
 
 struct mxcfb_alt_buffer_data {
