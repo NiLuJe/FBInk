@@ -138,7 +138,7 @@ struct mxcfb_rect {
 #define EPDC_FLAG_USE_AAD		0x1000
 #define EPDC_FLAG_USE_DITHERING_NTX_D8	0x100000
 
-// NOTE: This is *UNSUPPORTED* un current devices!
+// NOTE: This is *UNSUPPORTED* on current devices!
 //       We just happen to need these defined to build ;).
 enum mxcfb_dithering_mode {
 	EPDC_FLAG_USE_DITHERING_PASSTHROUGH = 0x0,
