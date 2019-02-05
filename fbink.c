@@ -1345,7 +1345,7 @@ static int
 }
 #	elif defined(FBINK_FOR_CERVANTES)
 // Cervantes devices
-// All of them can use those MX50 "compat" ioctls, much like Kobos.
+// All of them support MX50 "compat" ioctls, much like Kobos.
 static int
     refresh_cervantes(int fbfd,
 		      const struct mxcfb_rect region,
@@ -1383,7 +1383,7 @@ static int
 	}
 
 	// NOTE: We *could* theoretically use MXCFB_WAIT_FOR_UPDATE_COMPLETE2 on 2013+ stuff (C2+)
-	//       But, like on Kobo, don't bother, we'd gain nothing in switching anyway ;).
+	//       But, like on Kobo, don't bother, we'd gain nothing by switching anyway ;).
 	if (update_mode == UPDATE_MODE_FULL) {
 		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &marker);
 
