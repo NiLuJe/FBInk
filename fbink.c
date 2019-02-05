@@ -1451,7 +1451,7 @@ static int
 		if (rv < 0) {
 			char buf[256];
 			char* errstr = strerror_r(errno, buf, sizeof(buf));
-			WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3: %s", errstr);
+			WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE2: %s", errstr);
 			return ERRCODE(EXIT_FAILURE);
 		} else {
 			// NOTE: Timeout is set to 5000ms
