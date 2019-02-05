@@ -240,6 +240,11 @@
 #	define UNUSED_BY_NOTKINDLE
 #	define UNUSED_BY_KINDLE __attribute__((unused))
 #endif
+#ifdef FBINK_FOR_CERVANTES
+#	define UNUSED_BY_CERVANTES __attribute__((unused))
+#else
+#	define UNUSED_BY_CERVANTES
+#endif
 
 // Handle what we send to stdout (i.e., mostly diagnostic stuff, which tends to be verbose, so no FBInk tag)
 #define LOG(fmt, ...)                                                                                                    \
@@ -392,7 +397,7 @@ static int refresh_kobo(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32
 static int refresh_kobo_mk7(int, const struct mxcfb_rect, uint32_t, uint32_t, int, uint32_t);
 #	endif    // FBINK_FOR_KINDLE
 #endif            // !FBINK_FOR_LINUX
-static int refresh(int, const struct mxcfb_rect, uint32_t, int, bool, bool);
+static int refresh(int, const struct mxcfb_rect, uint32_t, int UNUSED_BY_CERVANTES, bool, bool);
 
 static int open_fb_fd(int*, bool*);
 

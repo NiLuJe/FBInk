@@ -1535,7 +1535,7 @@ static int
     refresh(int fbfd,
 	    const struct mxcfb_rect region,
 	    uint32_t waveform_mode,
-	    int dithering_mode,
+	    int dithering_mode UNUSED_BY_CERVANTES,
 	    bool is_flashing,
 	    bool no_refresh)
 {
