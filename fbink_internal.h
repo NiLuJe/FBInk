@@ -387,7 +387,6 @@ static int refresh_kindle_koa2(int, const struct mxcfb_rect, uint32_t, uint32_t,
 static int refresh_kindle_pw4(int, const struct mxcfb_rect, uint32_t, uint32_t, int, uint32_t);
 #	elif defined(FBINK_FOR_CERVANTES)
 static int refresh_cervantes(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
-static int refresh_cervantes_new(int, const struct mxcfb_rect, uint32_t, uint32_t, int, uint32_t);
 #	else
 static int refresh_kobo(int, const struct mxcfb_rect, uint32_t, uint32_t, uint32_t);
 static int refresh_kobo_mk7(int, const struct mxcfb_rect, uint32_t, uint32_t, int, uint32_t);

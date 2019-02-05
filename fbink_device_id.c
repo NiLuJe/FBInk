@@ -286,8 +286,7 @@ static void
 				break;
 			case 51:    // BQ Cervantes 3 - Fnac Touch Light 2 (2016)
 			case 68:    // BQ Cervantes 4
-				deviceQuirks.isCervantesNew = true;
-				deviceQuirks.screenDPI      = 300U;
+				deviceQuirks.screenDPI = 300U;
 				break;
 			default:
 				WARN("Unidentified Cervantes device (%hhu)", config.pcb_id);

@@ -1344,7 +1344,8 @@ static int
 	return EXIT_SUCCESS;
 }
 #	elif defined(FBINK_FOR_CERVANTES)
-// Legacy Cervantes devices (2013)
+// Cervantes devices
+// All of them can use those MX50 "compat" ioctls, much like Kobos.
 static int
     refresh_cervantes(int fbfd,
 		      const struct mxcfb_rect region,
@@ -1381,6 +1382,8 @@ static int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
+	// NOTE: We *could* theoretically use MXCFB_WAIT_FOR_UPDATE_COMPLETE2 on 2013+ stuff (C2+)
+	//       But, like on Kobo, don't bother, we'd gain nothing in switching anyway ;).
 	if (update_mode == UPDATE_MODE_FULL) {
 		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &marker);
 
@@ -1395,69 +1398,6 @@ static int
 		}
 	}
 
-	return EXIT_SUCCESS;
-}
-
-// New cervantes devices (2013+)
-static int
-    refresh_cervantes_new(int fbfd,
-			  const struct mxcfb_rect region,
-			  uint32_t waveform_mode,
-			  uint32_t update_mode,
-			  int dithering_mode,
-			  uint32_t marker)
-{
-	struct mxcfb_update_data_org update = {
-		.update_region = region,
-		.waveform_mode = waveform_mode,
-		.update_mode = update_mode,
-		.update_marker = marker,
-		.temp = TEMP_USE_AMBIENT,
-		.flags = (waveform_mode == WAVEFORM_MODE_GLD16)
-			     ? EPDC_FLAG_USE_REGAL
-			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
-		.dither_mode = dithering_mode,
-		.quant_bit = (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)
-				 ? 0
-				 : (waveform_mode == WAVEFORM_MODE_A2) ? 1 : 7,
-		.alt_buffer_data = { 0U },
-	};
-
-	int rv;
-	rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
-
-	if (rv < 0) {
-		char buf[256];
-		char* errstr = strerror_r(errno, buf, sizeof(buf));
-		WARN("MXCFB_SEND_UPDATE: %s", errstr);
-		if (errno == EINVAL) {
-			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
-			     region.top,
-			     region.left,
-			     region.width,
-			     region.height);
-		}
-		return ERRCODE(EXIT_FAILURE);
-	}
-
-	if (update_mode == UPDATE_MODE_FULL) {
-		struct mxcfb_update_marker_data update_marker = {
-			.update_marker = marker,
-			.collision_test = 0U,
-		};
-
-		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE2, &update_marker);
-
-		if (rv < 0) {
-			char buf[256];
-			char* errstr = strerror_r(errno, buf, sizeof(buf));
-			WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE2: %s", errstr);
-			return ERRCODE(EXIT_FAILURE);
-		} else {
-			// NOTE: Timeout is set to 5000ms
-			LOG("Waited %ldms for completion of flashing update %u", (5000 - jiffies_to_ms(rv)), marker);
-		}
-	}
 	return EXIT_SUCCESS;
 }
 #	else
@@ -1656,11 +1596,7 @@ static int
 		return refresh_kindle(fbfd, region, wfm, upm, marker);
 	}
 #	elif defined(FBINK_FOR_CERVANTES)
-	if (deviceQuirks.isCervantesNew) {
-		return refresh_cervantes_new(fbfd, region, wfm, upm, dithering_mode, marker);
-	} else {
-		return refresh_cervantes(fbfd, region, wfm, upm, marker);
-	}
+	return refresh_cervantes(fbfd, region, wfm, upm, marker);
 #	else
 	if (deviceQuirks.isKoboMk7) {
 		return refresh_kobo_mk7(fbfd, region, wfm, upm, dithering_mode, marker);

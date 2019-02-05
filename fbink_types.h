@@ -44,7 +44,6 @@ typedef struct
 	bool               isKoboMk7;
 	int8_t             koboVertOffset;
 	uint8_t            ntxBootRota;
-	bool               isCervantesNew;
 	unsigned short int screenDPI;
 	bool               canRotate;
 	bool               skipId;
