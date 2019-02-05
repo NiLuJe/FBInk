@@ -1393,8 +1393,8 @@ static int
 			WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s", errstr);
 			return ERRCODE(EXIT_FAILURE);
 		} else {
-			// NOTE: Timeout is set to 10000ms
-			LOG("Waited %ldms for completion of flashing update %u", (10000 - jiffies_to_ms(rv)), marker);
+			// NOTE: Timeout is set to 5000ms
+			LOG("Waited %ldms for completion of flashing update %u", (5000 - jiffies_to_ms(rv)), marker);
 		}
 	}
 
