@@ -24,10 +24,11 @@ OPT_CFLAGS=-O2 -fomit-frame-pointer -pipe
 ifdef DEBUG
 	OUT_DIR=Debug
 	CFLAGS?=$(DEBUG_CFLAGS)
-	EXTRA_CFLAGS+=-DDEBUG
+	EXTRA_CPPFLAGS+=-DDEBUG
 else
 	OUT_DIR=Release
 	CFLAGS?=$(OPT_CFLAGS)
+	EXTRA_CPPFLAGS+=-DNDEBUG
 endif
 
 # Explictly enforce debug CFLAGS for the debug target (vs., simply having DEBUG set in the env)
