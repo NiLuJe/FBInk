@@ -1,6 +1,7 @@
 [submodule "font8x8"]
 	path = font8x8
 	url = https://github.com/NiLuJe/font8x8.git
+	branch = fbink
 [submodule "stb"]
 	path = stb
 	url = https://github.com/NiLuJe/stb.git
