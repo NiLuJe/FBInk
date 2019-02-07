@@ -3,7 +3,8 @@
 	url = https://github.com/NiLuJe/font8x8.git
 [submodule "stb"]
 	path = stb
-	url = https://github.com/nothings/stb.git
+	url = https://github.com/NiLuJe/stb.git
+	branch = fbink
 [submodule "libunibreak"]
 	path = libunibreak
 	url = https://github.com/adah1972/libunibreak
