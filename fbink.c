@@ -71,13 +71,9 @@
 #	pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #	pragma clang diagnostic ignored "-Wunknown-warning-option"
 #	pragma GCC diagnostic ignored "-Wcast-qual"
-#	pragma GCC diagnostic ignored "-Wcast-align"
 #	pragma GCC diagnostic ignored "-Wconversion"
 #	pragma GCC diagnostic ignored "-Wsign-conversion"
-#	pragma GCC diagnostic ignored "-Wduplicated-branches"
-#	pragma GCC diagnostic ignored "-Wunused-parameter"
 #	pragma GCC diagnostic ignored "-Wunused-function"
-#	pragma GCC diagnostic ignored "-Wbad-function-cast"
 #	pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"
 #	include "stb/stb_truetype.h"
 #	pragma GCC diagnostic pop
