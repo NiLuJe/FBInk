@@ -4770,10 +4770,6 @@ static unsigned char*
 		const unsigned char* src  = data + (j * x * img_n);
 		unsigned char*       dest = good + (j * x * req_comp);
 
-		// NOTE: stbi undef's STBI__CASE, but not STBI__COMBO...
-#	ifdef STBI__COMBO
-#		undef STBI__COMBO
-#	endif
 #	define STBI__COMBO(a, b) ((a) *8 + (b))
 #	define STBI__CASE(a, b)                                                                                         \
 		case STBI__COMBO(a, b):                                                                                  \
@@ -4783,7 +4779,8 @@ static unsigned char*
 		switch (STBI__COMBO(img_n, req_comp)) {
 			STBI__CASE(1, 2)
 			{
-				dest[0] = src[0], dest[1] = 255;
+				dest[0] = src[0];
+				dest[1] = 255;
 			}
 			break;
 			STBI__CASE(1, 3)
@@ -4793,7 +4790,8 @@ static unsigned char*
 			break;
 			STBI__CASE(1, 4)
 			{
-				dest[0] = dest[1] = dest[2] = src[0], dest[3] = 255;
+				dest[0] = dest[1] = dest[2] = src[0];
+				dest[3]                     = 255;
 			}
 			break;
 			STBI__CASE(2, 1)
@@ -4808,12 +4806,16 @@ static unsigned char*
 			break;
 			STBI__CASE(2, 4)
 			{
-				dest[0] = dest[1] = dest[2] = src[0], dest[3] = src[1];
+				dest[0] = dest[1] = dest[2] = src[0];
+				dest[3]                     = src[1];
 			}
 			break;
 			STBI__CASE(3, 4)
 			{
-				dest[0] = src[0], dest[1] = src[1], dest[2] = src[2], dest[3] = 255;
+				dest[0] = src[0];
+				dest[1] = src[1];
+				dest[2] = src[2];
+				dest[3] = 255;
 			}
 			break;
 			STBI__CASE(3, 1)
@@ -4823,7 +4825,8 @@ static unsigned char*
 			break;
 			STBI__CASE(3, 2)
 			{
-				dest[0] = stbi__compute_y(src[0], src[1], src[2]), dest[1] = 255;
+				dest[0] = stbi__compute_y(src[0], src[1], src[2]);
+				dest[1] = 255;
 			}
 			break;
 			STBI__CASE(4, 1)
@@ -4833,12 +4836,15 @@ static unsigned char*
 			break;
 			STBI__CASE(4, 2)
 			{
-				dest[0] = stbi__compute_y(src[0], src[1], src[2]), dest[1] = src[3];
+				dest[0] = stbi__compute_y(src[0], src[1], src[2]);
+				dest[1] = src[3];
 			}
 			break;
 			STBI__CASE(4, 3)
 			{
-				dest[0] = src[0], dest[1] = src[1], dest[2] = src[2];
+				dest[0] = src[0];
+				dest[1] = src[1];
+				dest[2] = src[2];
 			}
 			break;
 			default:
