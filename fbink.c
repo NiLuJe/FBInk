@@ -2859,6 +2859,8 @@ int
 			bytes_printed = snprintf(
 			    line, line_bytes + 1U, "%*.*s", (int) line_bytes, (int) line_bytes, string + line_offset);
 		}
+		// NOTE: We don't check for snprintf failure or truncation,
+		//       because I'm fairly confident that truncation is not a risk here...
 		LOG("snprintf wrote %d bytes", bytes_printed);
 
 		// NOTE: And don't forget our wraparound marker (U+2588, a solid black block).
