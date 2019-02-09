@@ -59,7 +59,7 @@ static bool
     wait_for_onboard_state(bool mounted)
 {
 	// c.f., https://stackoverflow.com/questions/5070801
-	int           mfd = open("/proc/mounts", O_RDONLY, 0);
+	int           mfd = open("/proc/mounts", O_RDONLY);
 	struct pollfd pfd;
 
 	uint8_t changes     = 0;
