@@ -3209,6 +3209,7 @@ int
 	int max_row_height = 0;
 	// Calculate some metrics for every font we have loaded.
 	// Please forgive the repetition here.
+	// NOTE: See also stbtt_GetFontBoundingBox?
 
 	// Declaring these three sets of variables early, so a default can be set
 	float sf           = 0.0f;
@@ -3368,6 +3369,8 @@ int
 	int                max_line_height = max_row_height - max_lg;
 	// adv = advance: the horizontal distance along the baseline to the origin of the next glyph
 	// lsb = left side bearing: The horizontal distance from the origin point to left edge of the glyph
+	// NOTE: We're not doing anything with lsb, we're honoring stbtt_GetGlyphBitmapBox's x0 instead.
+	//       Rounding method aside, they should roughly match.
 	int          adv, lsb, curr_x;
 	bool         complete_str = false;
 	int          x0, y0, x1, y1, gw, gh, cx, cy;
