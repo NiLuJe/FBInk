@@ -3748,10 +3748,18 @@ int
 				// NOTE: We keep storing it as an alpha coverage mask, we'll blend it in the final rendering stage
 				for (int j = 0; j < gh; j++) {
 					for (int k = 0; k < gw; k++) {
-						// 0 value pixels are transparent (no coverage),
-						// and our line buffer is already filled with zeroes ;)
+						// NOTE: We skip:
+						//       * 0 value pixels, because they're transparent (no coverage),
+						//         and our line buffer is already filled with zeroes ;)
 						if (glPtr[k] != 0U) {
-							lnPtr[k] = glPtr[k];
+							if (glPtr[k] != 0xFF && lnPtr[k] != 0U) {
+								LOG("AA on %d!", gi);
+								// We're iterating over an AA portion of the glyph,
+								// over an already painted pixel of the line buffer: alpha-blend.
+								lnPtr[k] = (uint8_t) DIV255(((lnPtr[k] * 0xFF) + ((glPtr[k] - lnPtr[k]) * glPtr[k])));
+							} else {
+								lnPtr[k] = glPtr[k];
+							}
 						}
 					}
 					// And advance one scanline. Quick! Hide! Pointer arithmetic
