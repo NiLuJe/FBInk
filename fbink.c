@@ -3757,7 +3757,7 @@ int
 						//         as alpha-blending wouldn't net us much in these very few cases.
 						if (glPtr[k] != 0U) {
 							if (glPtr[k] != 0xFF && lnPtr[k] != 0U) {
-								// NOP!
+								// Glyph AA would be clobbering the line buffer -> NOP!
 							} else {
 								lnPtr[k] = glPtr[k];
 							}
