@@ -3750,13 +3750,14 @@ int
 					for (int k = 0; k < gw; k++) {
 						// NOTE: We skip:
 						//       * 0 value pixels, because they're transparent (no coverage),
-						//         and our line buffer is already filled with zeroes ;)
+						//         and our line buffer is already filled with zeroes ;).
+						//       * 1-254 value pixels (i.e., AA), when they're on top of an
+						//         already set pixel, (f.g., with 'fl' in serif fonts,
+						//         bits of the l's LSB may be positioned over the f's RSB),
+						//         as alpha-blending wouldn't net us much in these very few cases.
 						if (glPtr[k] != 0U) {
 							if (glPtr[k] != 0xFF && lnPtr[k] != 0U) {
-								LOG("AA on %d!", gi);
-								// We're iterating over an AA portion of the glyph,
-								// over an already painted pixel of the line buffer: alpha-blend.
-								lnPtr[k] = (uint8_t) DIV255(((lnPtr[k] * 0xFF) + ((glPtr[k] - lnPtr[k]) * glPtr[k])));
+								// NOP!
 							} else {
 								lnPtr[k] = glPtr[k];
 							}
