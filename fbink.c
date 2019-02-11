@@ -3750,6 +3750,12 @@ int
 				}
 				// NOTE: We only do this dance in the second render pass, because in the first compute one,
 				//       we don't know yet if a space will actually be the last space of a line ;).
+				// NOTE: As should be obvious since we're in the "I'm a space!" branch,
+				//       This only happens when the last character of a line is a space,
+				//       which is common with linebreaking.
+				//       f.g., with my trusty Baskerville, at whatever size it needs to be to break (here, 36),
+				//       "I'm waiting for" will never cause any issue, but "I'm waiting for ",
+				//       (note the final space) *will* ;).
 			}
 
 			// Just in case our arithmetic was off by a pixel or two...
