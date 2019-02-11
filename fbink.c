@@ -3747,6 +3747,8 @@ int
 						}
 					}
 				}
+				// NOTE: We only do this dance in the second render pass, because in the first compute one,
+				//       we don't know yet if a space will actually be the last space of a line ;).
 			}
 
 			// Just in case our arithmetic was off by a pixel or two...
