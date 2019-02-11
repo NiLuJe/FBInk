@@ -3512,13 +3512,11 @@ int
 			curr_x += iroundf(sf * (float) adv);
 			// Adjust our x position for kerning, because we can :)
 			if (string[c_index + 1]) {
-				tmp_c_index  = c_index;
-				uint32_t c2  = u8_nextchar2(string, &tmp_c_index);
-				int      g2i = stbtt_FindGlyphIndex(curr_font, (int) c2);
-#	pragma GCC diagnostic push
-#	pragma GCC diagnostic ignored "-Wbad-function-cast"
-				curr_x += iroundf(sf * (float) stbtt_GetGlyphKernAdvance(curr_font, gi, g2i));
-#	pragma GCC diagnostic pop
+				tmp_c_index   = c_index;
+				uint32_t c2   = u8_nextchar2(string, &tmp_c_index);
+				int      g2i  = stbtt_FindGlyphIndex(curr_font, (int) c2);
+				int      xadv = stbtt_GetGlyphKernAdvance(curr_font, gi, g2i);
+				curr_x += iroundf(sf * (float) xadv);
 			}
 		}
 		// We've run out of string! This is our last line.
@@ -3774,12 +3772,8 @@ int
 				size_t tmp_i = ci;
 				tmp_c        = u8_nextchar2(string, &tmp_i);
 				tmp_gi       = stbtt_FindGlyphIndex(curr_font, (int) tmp_c);
-#	pragma GCC diagnostic push
-#	pragma GCC diagnostic ignored "-Wbad-function-cast"
-				curr_point.x =
-				    (unsigned short int) (curr_point.x + iroundf(sf * (float) stbtt_GetGlyphKernAdvance(
-											  curr_font, gi, tmp_gi)));
-#	pragma GCC diagnostic pop
+				int xadv     = stbtt_GetGlyphKernAdvance(curr_font, gi, tmp_gi);
+				curr_point.x = (unsigned short int) (curr_point.x + iroundf(sf * (float) xadv));
 			}
 			ins_point.y = (unsigned short int) max_baseline;
 		}
