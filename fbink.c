@@ -3718,7 +3718,35 @@ int
 			if (gw != 0) {
 				lw = ins_point.x + (unsigned int) gw;
 			} else {
-				lw = ins_point.x;
+				// NOTE: Slightly hackish attempt at preventing clipping on the final character of a line...
+				if (ci < lines[line].endCharIndex) {
+					// We're not the final character, business as usual.
+					lw = ins_point.x;
+				} else {
+					// We're the final character, and we're a space...
+					// If the last visible glyph was one with protruding serifs (LSB 0, RSB > 0),
+					// that would make LW go backwards, clipping a few pixels off the right edge of the glyph.
+					// (Most likely because the glyph's advance positions us inside the glyph box, by design).
+					// NOTE: Check the 'Current Measured LW' logs for a LW going backwards,
+					//       to pinpoint where this might kick in!
+					if (lw < ins_point.x) {
+						// Growing LW, honor it.
+						lw = ins_point.x;
+					} else {
+						// Decreasing LW, keep the previous one -> NOP!
+						if (lw > max_lw) {
+							// That should never happen, but better be safe than sorry...
+							// Plus, we don't want to abort in the actual LW bounding check later.
+							// We know we won't risk segfaulting,
+							// because we're honoring a previous gw ;).
+							WARN(
+							    "Clamping LW (%u) to Max (%hu) after edge clipping workaround",
+							    lw,
+							    max_lw);
+							lw = max_lw;
+						}
+					}
+				}
 			}
 
 			// Just in case our arithmetic was off by a pixel or two...
