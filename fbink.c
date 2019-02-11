@@ -75,9 +75,6 @@
 #	pragma GCC diagnostic ignored "-Wsign-conversion"
 #	pragma GCC diagnostic ignored "-Wunused-function"
 #	pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"
-#	ifdef __clang__
-#		pragma GCC diagnostic ignored "-Wbad-function-cast"
-#	endif
 #	include "stb/stb_truetype.h"
 #	pragma GCC diagnostic pop
 #endif

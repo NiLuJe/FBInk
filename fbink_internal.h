@@ -63,16 +63,16 @@
 #	include <math.h>
 #	ifdef __clang__
 #		if __has_builtin(__builtin_ceilf)
-#			define iceilf(x) ((int) __builtin_ceilf(x))
-#			define STBTT_iceil(x) ((int) __builtin_ceilf(x))
+#			define iceilf(x) ((int) (__builtin_ceilf(x)))
+#			define STBTT_iceil(x) ((int) (__builtin_ceilf(x)))
 #		endif
 #		if __has_builtin(__builtin_lroundf)
-#			define iroundf(x) ((int) __builtin_lroundf(x))
+#			define iroundf(x) ((int) (__builtin_lroundf(x)))
 #		endif
 #		if __has_builtin(__builtin_floorf)
-#			define ifloorf(x) ((int) __builtin_floorf(x))
+#			define ifloorf(x) ((int) (__builtin_floorf(x)))
 #			define STBTT_floorf(x) __builtin_floorf(x)
-#			define STBTT_ifloor(x) ((int) __builtin_floorf(x))
+#			define STBTT_ifloor(x) ((int) (__builtin_floorf(x)))
 #		endif
 #		if __has_builtin(__builtin_sqrtf)
 #			define STBTT_sqrt(x) __builtin_sqrtf(x)
