@@ -3775,7 +3775,6 @@ int
 				int xadv     = stbtt_GetGlyphKernAdvance(curr_font, gi, tmp_gi);
 				curr_point.x = (unsigned short int) (curr_point.x + iroundf(sf * (float) xadv));
 			}
-			ins_point.y = (unsigned short int) max_baseline;
 		}
 		curr_point.x = 0U;
 		// Right, we've rendered a line to a bitmap, time to display it.
