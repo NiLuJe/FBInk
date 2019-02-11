@@ -3225,9 +3225,9 @@ int
 	if (otFonts.otRegular) {
 		rgSF = stbtt_ScaleForPixelHeight(otFonts.otRegular, (float) font_size_px);
 		stbtt_GetFontVMetrics(otFonts.otRegular, &asc, &desc, &lg);
-		scaled_bl   = (int) (ceilf(rgSF * (float) asc));
-		scaled_desc = (int) (ceilf(rgSF * (float) desc));
-		scaled_lg   = (int) (ceilf(rgSF * (float) lg));
+		scaled_bl   = iceilf(rgSF * (float) asc);
+		scaled_desc = iceilf(rgSF * (float) desc);
+		scaled_lg   = iceilf(rgSF * (float) lg);
 		if (scaled_bl > max_baseline) {
 			max_baseline = scaled_bl;
 		}
@@ -3247,9 +3247,9 @@ int
 	if (otFonts.otItalic) {
 		itSF = stbtt_ScaleForPixelHeight(otFonts.otItalic, (float) font_size_px);
 		stbtt_GetFontVMetrics(otFonts.otItalic, &asc, &desc, &lg);
-		scaled_bl   = (int) (ceilf(itSF * (float) asc));
-		scaled_desc = (int) (ceilf(itSF * (float) desc));
-		scaled_lg   = (int) (ceilf(itSF * (float) lg));
+		scaled_bl   = iceilf(itSF * (float) asc);
+		scaled_desc = iceilf(itSF * (float) desc);
+		scaled_lg   = iceilf(itSF * (float) lg);
 		if (scaled_bl > max_baseline) {
 			max_baseline = scaled_bl;
 		}
@@ -3269,9 +3269,9 @@ int
 	if (otFonts.otBold) {
 		bdSF = stbtt_ScaleForPixelHeight(otFonts.otBold, (float) font_size_px);
 		stbtt_GetFontVMetrics(otFonts.otBold, &asc, &desc, &lg);
-		scaled_bl   = (int) (ceilf(bdSF * (float) asc));
-		scaled_desc = (int) (ceilf(bdSF * (float) desc));
-		scaled_lg   = (int) (ceilf(bdSF * (float) lg));
+		scaled_bl   = iceilf(bdSF * (float) asc);
+		scaled_desc = iceilf(bdSF * (float) desc);
+		scaled_lg   = iceilf(bdSF * (float) lg);
 		if (scaled_bl > max_baseline) {
 			max_baseline = scaled_bl;
 		}
@@ -3291,9 +3291,9 @@ int
 	if (otFonts.otBoldItalic) {
 		bditSF = stbtt_ScaleForPixelHeight(otFonts.otBoldItalic, (float) font_size_px);
 		stbtt_GetFontVMetrics(otFonts.otBoldItalic, &asc, &desc, &lg);
-		scaled_bl   = (int) (ceilf(bditSF * (float) asc));
-		scaled_desc = (int) (ceilf(bditSF * (float) desc));
-		scaled_lg   = (int) (ceilf(bditSF * (float) lg));
+		scaled_bl   = iceilf(bditSF * (float) asc);
+		scaled_desc = iceilf(bditSF * (float) desc);
+		scaled_lg   = iceilf(bditSF * (float) lg);
 		if (scaled_bl > max_baseline) {
 			max_baseline = scaled_bl;
 		}
@@ -3512,7 +3512,7 @@ int
 					break;
 				}
 			}
-			curr_x += (int) lroundf(sf * (float) adv);
+			curr_x += iroundf(sf * (float) adv);
 			// Adjust our x position for kerning, because we can :)
 			if (string[c_index + 1]) {
 				tmp_c_index  = c_index;
@@ -3520,7 +3520,7 @@ int
 				int      g2i = stbtt_FindGlyphIndex(curr_font, (int) c2);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wbad-function-cast"
-				curr_x += (int) lroundf(sf * (float) stbtt_GetGlyphKernAdvance(curr_font, gi, g2i));
+				curr_x += iroundf(sf * (float) stbtt_GetGlyphKernAdvance(curr_font, gi, g2i));
 #	pragma GCC diagnostic pop
 			}
 		}
@@ -3772,7 +3772,7 @@ int
 					lnPtr += max_lw;
 				}
 			}
-			curr_point.x = (unsigned short int) (curr_point.x + lroundf(sf * (float) adv));
+			curr_point.x = (unsigned short int) (curr_point.x + iroundf(sf * (float) adv));
 			if (ci < lines[line].endCharIndex) {
 				size_t tmp_i = ci;
 				tmp_c        = u8_nextchar2(string, &tmp_i);
@@ -3780,7 +3780,7 @@ int
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wbad-function-cast"
 				curr_point.x =
-				    (unsigned short int) (curr_point.x + lroundf(sf * (float) stbtt_GetGlyphKernAdvance(
+				    (unsigned short int) (curr_point.x + iroundf(sf * (float) stbtt_GetGlyphKernAdvance(
 											  curr_font, gi, tmp_gi)));
 #	pragma GCC diagnostic pop
 			}

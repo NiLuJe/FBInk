@@ -49,10 +49,10 @@
 #	endif
 #endif
 
-// Try to use GCC's lceilf builtin if possible...
+// Try to use GCC's iceilf builtin if possible...
 // NOTE: Relies on the fact that:
-//       * Clang implements the __has_builtin macro, but currently not the __builtin_lceilf function
-//       * GCC implements the __builtin_lceilf function, but not the __has_builtin macro
+//       * Clang implements the __has_builtin macro, but currently not the __builtin_iceilf function
+//       * GCC implements the __builtin_iceilf function, but not the __has_builtin macro
 // c.f., https://stackoverflow.com/q/4322352/
 // NOTE: The idea here is to rely as much as possible on GCC builtins.
 //       GCC should mostly have handled this right on its own, we're just giving it a nudge ;).
@@ -62,17 +62,43 @@
 // Since we can't avoid libm, include the standard header, so everyones gets the right declarations
 #	include <math.h>
 #	ifdef __clang__
-#		if __has_builtin(__builtin_lceilf)
-#			define ceilf(x) __builtin_lceilf(x)
+#		if __has_builtin(__builtin_ceilf)
+#			define iceilf(x) ((int) __builtin_ceilf(x))
+#			define STBTT_iceil(x) ((int) __builtin_ceilf(x))
+#		endif
+#		if __has_builtin(__builtin_lroundf)
+#			define iroundf(x) ((int) __builtin_lroundf(x))
+#		endif
+#		if __has_builtin(__builtin_floorf)
+#			define ifloorf(x) ((int) __builtin_floorf(x))
+#			define STBTT_ifloor(x) ((int) __builtin_floorf(x))
+#		endif
+#		if __has_builtin(__builtin_sqrtf)
+#			define STBTT_sqrt(x) __builtin_sqrtf(x)
+#		endif
+#		if __has_builtin(__builtin_powf)
+#			define STBTT_pow(x, y) __builtin_powf(x, y)
+#		endif
+#		if __has_builtin(__builtin_fmodf)
+#			define STBTT_fmod(x, y) __builtin_fmodf(x, y)
+#		endif
+#		if __has_builtin(__builtin_cosf)
+#			define STBTT_cos(x) __builtin_cosf(x)
+#		endif
+#		if __has_builtin(__builtin_acosf)
+#			define STBTT_acos(x) __builtin_acosf(x)
+#		endif
+#		if __has_builtin(__builtin_fabsf)
+#			define STBTT_fabs(x) __builtin_fabsf(x)
 #		endif
 #	else
 // Hide all this behind a C99 check, to try to avoid blowing up on really old GCC versions...
 #		if __STDC_VERSION__ >= 199901L
-#			define ceilf(x) __builtin_lceilf(x)
-#			define lroundf(x) __builtin_lroundf(x)
-#			define floorf(x) __builtin_floorf(x)
-#			define STBTT_ifloor(x) ((int) __builtin_lfloorf(x))
-#			define STBTT_iceil(x) ((int) __builtin_lceilf(x))
+#			define iceilf(x) __builtin_iceilf(x)
+#			define iroundf(x) __builtin_iroundf(x)
+#			define ifloorf(x) __builtin_ifloorf(x)
+#			define STBTT_ifloor(x) __builtin_ifloorf(x)
+#			define STBTT_iceil(x) __builtin_iceilf(x)
 #			define STBTT_sqrt(x) __builtin_sqrtf(x)
 #			define STBTT_pow(x, y) __builtin_powf(x, y)
 #			define STBTT_fmod(x, y) __builtin_fmodf(x, y)
