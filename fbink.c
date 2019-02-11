@@ -3737,7 +3737,7 @@ int
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
 			}
-			if (gw > 0 && fgcolor != bgcolor) {
+			if (gw != 0 && fgcolor != bgcolor) {
 				// Because the stbtt_MakeGlyphBitmap documentation is a bit vague on this point,
 				// the parameter 'out_stride' should be the width of the surface in our buffer.
 				// It's designed so that the glyph can be rendered directly to a screen buffer.
