@@ -3465,10 +3465,11 @@ int
 			}
 			// stb_truetype does not appear to create a bounding box for space characters,
 			// so we need to handle this situation.
-			if (!gw && adv) {
-				lw = (unsigned int) curr_x;
-			} else {
+			// (i.e., stbtt_GetGlyphBitmapBox returns (0, 0, 0, 0) for spaces, so gw is 0)
+			if (gw != 0) {
 				lw = (unsigned int) (curr_x + x0 + gw);
+			} else {
+				lw = (unsigned int) curr_x;
 			}
 			LOG("Current Measured LW: %u  Line# %u", lw, line);
 			// Oops, we appear to have advanced too far :)
@@ -3719,7 +3720,7 @@ int
 			ins_point.y = (unsigned short int) (curr_point.y + y0);
 			// We only increase the lw if the glyph is not a space.
 			// This hopefully prevent trailing spaces from being printed on a line.
-			if (gw > 0) {
+			if (gw != 0) {
 				lw = ins_point.x + (unsigned int) gw;
 			} else {
 				lw = ins_point.x;
