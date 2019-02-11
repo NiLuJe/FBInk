@@ -71,6 +71,7 @@
 #		endif
 #		if __has_builtin(__builtin_floorf)
 #			define ifloorf(x) ((int) __builtin_floorf(x))
+#			define STBTT_floorf(x) __builtin_floorf(x)
 #			define STBTT_ifloor(x) ((int) __builtin_floorf(x))
 #		endif
 #		if __has_builtin(__builtin_sqrtf)
@@ -97,6 +98,7 @@
 #			define iceilf(x) __builtin_iceilf(x)
 #			define iroundf(x) __builtin_iroundf(x)
 #			define ifloorf(x) __builtin_ifloorf(x)
+#			define STBTT_floorf(x) __builtin_floorf(x)
 #			define STBTT_ifloor(x) __builtin_ifloorf(x)
 #			define STBTT_iceil(x) __builtin_iceilf(x)
 #			define STBTT_sqrt(x) __builtin_sqrtf(x)
