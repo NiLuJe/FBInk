@@ -3753,7 +3753,7 @@ int
 				// NOTE: As should be obvious since we're in the "I'm a space!" branch,
 				//       This only happens when the last character of a line is a space,
 				//       which is common with linebreaking.
-				//       f.g., with my trusty Baskerville, at whatever size it needs to be to break (here, 36),
+				//       f.g., with my trusty Bookerly, at whatever size it needs to be to break (here, 36),
 				//       "I'm waiting for" will never cause any issue, but "I'm waiting for ",
 				//       (note the final space) *will* ;).
 			}
