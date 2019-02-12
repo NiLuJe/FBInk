@@ -42,9 +42,9 @@ static void
 	    "\n"
 	    "OPTIONS:\n"
 	    "\t-d, --depth <8|16|24|32>\tSwitch the framebuffer to the supplied bitdepth.\n"
-	    "\t-h, --help\t\tShow this help message.\n"
-	    "\t-v, --verbose\t\tToggle printing diagnostic messages.\n"
-	    "\t-q, --quiet\t\tToggle hiding hardware setup messages, as well as the coordinates themselves.\n"
+	    "\t-h, --help\t\t\tShow this help message.\n"
+	    "\t-v, --verbose\t\t\tToggle printing diagnostic messages.\n"
+	    "\t-q, --quiet\t\t\tToggle hiding diagnostic setup messages.\n"
 	    "\n",
 	    fbink_version());
 	return;
