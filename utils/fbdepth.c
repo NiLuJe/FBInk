@@ -110,7 +110,7 @@ static void
 		perror("ioctl PUT_V");
 	}
 
-	LOG("Bitdepth is now %ubpp (grayscale: %u) [rotate: %u (%s)]\n",
+	LOG("Bitdepth is now %ubpp (grayscale: %u) @ rotate: %u (%s)\n",
 	    vInfo.bits_per_pixel,
 	    vInfo.grayscale,
 	    vInfo.rotate,
@@ -189,11 +189,15 @@ int
 	// Print initial status, and store current vInfo
 	get_fbinfo();
 
-	// let's check how quirky it is...
-	LOG("\nSwitching fb to %ubpp . . .", req_bpp);
-	set_fbinfo(req_bpp);
-	// Recap
-	get_fbinfo();
+	// If we requested a change, do it
+	if (vInfo.bits_per_pixel != req_bpp) {
+		LOG("\nSwitching fb to %ubpp . . .", req_bpp);
+		set_fbinfo(req_bpp);
+		// Recap
+		get_fbinfo();
+	} else {
+		LOG("\nCurrent bitdepth is already %ubpp!", req_bpp);
+	}
 
 	close(fbfd);
 }
