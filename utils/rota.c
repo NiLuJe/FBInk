@@ -88,7 +88,7 @@ int
 	fbfd = open("/dev/fb0", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
 	if (!fbfd) {
 		perror("open");
-		exit(EXIT_FAILURE);
+		return ERRCODE(EXIT_FAILURE);
 	}
 
 	// Print initial status

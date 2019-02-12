@@ -351,10 +351,11 @@ stripbin: $(OUT_DIR)/fbink
 	$(STRIP) --strip-unneeded $(OUT_DIR)/fbink
 endif
 
-# NOTE: No dep to keep things simple, these will hardly ever be built anyway...
-utils:
+utils: outdir
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/rota utils/rota.c
 	$(STRIP) --strip-unneeded $(OUT_DIR)/rota
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbdepth utils/fbdepth.c
+	$(STRIP) --strip-unneeded $(OUT_DIR)/fbdepth
 
 strip: static
 	$(MAKE) stripbin
@@ -456,6 +457,7 @@ clean:
 	rm -rf Release/fbink
 	rm -rf Release/button_scan
 	rm -rf Release/rota
+	rm -rf Release/fbdepth
 	rm -rf Debug/*.a
 	rm -rf Debug/*.so*
 	rm -rf Debug/shared/*.o
@@ -470,6 +472,7 @@ clean:
 	rm -rf Debug/fbink
 	rm -rf Debug/button_scan
 	rm -rf Debug/rota
+	rm -rf Debug/fbdepth
 
 distclean: clean libunibreakclean
 	rm -rf LibUniBreakBuild
