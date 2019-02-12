@@ -120,6 +120,8 @@
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 // NOTE: This is from https://www.cprogramming.com/tutorial/unicode.html
@@ -161,10 +163,9 @@
 // NOTE: And we're also using a few things based on http://bjoern.hoehrmann.de/utf-8/decoder/dfa
 #include "cutef8/dfa.h"
 
-// We're going to need a few more things for OpenType support, namely, maths ;).
+// We're going to need a few more things for OpenType support...
 #ifdef FBINK_WITH_OPENTYPE
-#	include <sys/stat.h>
-// And we need libunibreak for word breaking
+// We need libunibreak for word breaking
 #	include "libunibreak/src/linebreak.h"
 #endif
 

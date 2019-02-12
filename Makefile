@@ -351,6 +351,11 @@ stripbin: $(OUT_DIR)/fbink
 	$(STRIP) --strip-unneeded $(OUT_DIR)/fbink
 endif
 
+# NOTE: No dep to keep things simple, these will hardly ever be built anyway...
+utils:
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/rota utils/rota.c
+	$(STRIP) --strip-unneeded $(OUT_DIR)/rota
+
 strip: static
 	$(MAKE) stripbin
 
@@ -450,6 +455,7 @@ clean:
 	rm -rf Release/*.o
 	rm -rf Release/fbink
 	rm -rf Release/button_scan
+	rm -rf Release/rota
 	rm -rf Debug/*.a
 	rm -rf Debug/*.so*
 	rm -rf Debug/shared/*.o
@@ -463,9 +469,10 @@ clean:
 	rm -rf Debug/*.o
 	rm -rf Debug/fbink
 	rm -rf Debug/button_scan
+	rm -rf Debug/rota
 
 distclean: clean libunibreakclean
 	rm -rf LibUniBreakBuild
 	rm -rf libunibreak.built
 
-.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo libunibreakclean clean distclean
+.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo libunibreakclean utils clean distclean
