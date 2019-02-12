@@ -256,6 +256,7 @@ static void
 	//       i.e., in Nickel, visually, UR is 3, CW is 2, UD is 1, CCW is 0;
 	//       and when sending ioctls, UR returns 0 (match), CW returns 3 (^= 2), UD returns 2 (match), CCW returns 1 (^= 2)
 	//       FWIW, Plato is using ((4 - rotate) % 4), which appears to do the trick, at least as far as the fb is concerned...
+	// NOTE: c.f., mxc_epdc_fb_check_var @ drivers/video/mxc/mxc_epdc_fb.c OR drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c
 	// TL;DR: If and when we need to match touch coordinates in Landscape,
 	//        check that this actually behaves in Nickel's Landscape orientations...
 	uint32_t rotation = vInfo.rotate ^ deviceQuirks.ntxBootRota;
