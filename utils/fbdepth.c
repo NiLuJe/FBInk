@@ -110,7 +110,7 @@ static void
 		perror("ioctl PUT_V");
 	}
 
-	LOG("Bitdepth is now %ubpp (grayscale: %u) [rotate: %u (%s)]",
+	LOG("Bitdepth is now %ubpp (grayscale: %u) [rotate: %u (%s)]\n",
 	    vInfo.bits_per_pixel,
 	    vInfo.grayscale,
 	    vInfo.rotate,
