@@ -393,6 +393,18 @@ FBINK_API int fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkCo
 // x_off:		Target coordinates, x (honors negative offsets)
 // y_off:		Target coordinates, y (honors negative offsets)
 // fbink_cfg:		Pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
+// NOTE: Much like fbink_print_raw_data, for best performance,
+//       an image that decodes in a pixel format close to the one used by the target device fb is best.
+//       Generally, that'd be a Grayscale (color-type 0) PNG, ideally dithered down to the eInk palette
+//       (c.f., https://www.mobileread.com/forums/showpost.php?p=3728291&postcount=17).
+//       If you can't pre-process your images, dithering can be handled by the hardware on recent devices (c.f. is_dithered),
+//       but the pixel format still matters:
+//       On a 32bpp fb, Gray will still be faster than RGB.
+//       On a 8bpp fb, try to only use Gray for the best performance possible,
+//       as an RGB input will need to be grayscaled, making it slower than if it were rendered on a 32bpp fb!
+//       Try to avoid using a 16bpp fb, as conversion to/from RGB565 will generally slow things down.
+//       If you know you won't need to handle an alpha channel, don't forget ignore_alpha, too ;).
+//       As expected, the fastest codepath is Gray on an 8bpp fb ;).
 FBINK_API int fbink_print_image(int                fbfd,
 				const char*        filename,
 				short int          x_off,
