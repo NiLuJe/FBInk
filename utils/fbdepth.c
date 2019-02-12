@@ -25,7 +25,6 @@
 
 #include <getopt.h>
 #include <stdio.h>
-#include <time.h>
 // I feel dirty.
 #include "../fbink.c"
 
@@ -114,17 +113,6 @@ static void
 	    fb_rotate_to_string(vInfo.rotate));
 }
 
-static void
-    do_eet(uint32_t bpp)
-{
-	const struct timespec zzz = { 0L, 250000000L };
-
-	set_fbinfo(bpp);
-	nanosleep(&zzz, NULL);
-	get_fbinfo();
-	nanosleep(&zzz, NULL);
-}
-
 int
     main(int argc, char* argv[])
 {
@@ -196,7 +184,9 @@ int
 
 	// let's check how quirky it is...
 	LOG("\nSwitching fb to %ubpp . . .", req_bpp);
-	do_eet(req_bpp);
+	set_fbinfo(req_bpp);
+	// Recap
+	get_fbinfo();
 
 	close(fbfd);
 }
