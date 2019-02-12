@@ -97,10 +97,14 @@ static void
 
 	// NOTE: We have to counteract the rotation shenanigans the Kernel might be enforcing...
 	//       c.f., mxc_epdc_fb_check_var @ drivers/video/mxc/mxc_epdc_fb.c OR drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c
-	/*
-	vInfo.rotate = (uint32_t) vInfo.rotate ^ 2;
-	LOG("Setting rotate to %u (%s)", vInfo.rotate, fb_rotate_to_string(vInfo.rotate));
-	*/
+	// NOTE: This should cover the H2O and the few other devices suffering from the same quirk...
+	//       The goal being to end up in the *same* effective rotation as before.
+	if (deviceQuirks.ntxBootRota == FB_ROTATE_UR) {
+		vInfo.rotate = (uint32_t) vInfo.rotate ^ 2;
+		LOG("Setting rotate to %u (%s) to account for kernel rotation quirks",
+		    vInfo.rotate,
+		    fb_rotate_to_string(vInfo.rotate));
+	}
 
 	if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
 		perror("ioctl PUT_V");
@@ -171,6 +175,9 @@ int
 		show_helpmsg();
 		return ERRCODE(EXIT_FAILURE);
 	}
+
+	// NOTE: We're going to need to identify the device, to handle rotation quirks...
+	identify_device();
 
 	// NOTE: We only need this for ioctl, hence O_NONBLOCK (as per open(2)).
 	fbfd = open("/dev/fb0", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
