@@ -5094,17 +5094,20 @@ static int
 
 	// Handle inversion if requested, in a way that avoids branching in the loop ;).
 	// And, as an added bonus, plays well with the fact that legacy devices have an inverted color map...
-	uint8_t  invert     = 0U;
-	uint32_t invert_rgb = 0U;
+	uint8_t  inv     = 0U;
+	uint32_t inv_rgb = 0U;
 #	ifdef FBINK_FOR_KINDLE
 	if ((deviceQuirks.isKindleLegacy && !fbink_cfg->is_inverted) ||
 	    (!deviceQuirks.isKindleLegacy && fbink_cfg->is_inverted)) {
 #	else
 	if (fbink_cfg->is_inverted) {
 #	endif
-		invert     = 0xFF;
-		invert_rgb = 0x00FFFFFF;
+		inv     = 0xFF;
+		inv_rgb = 0x00FFFFFF;
 	}
+	// And we'll make 'em constants to eke out a tiny bit of performance...
+	const uint8_t      invert     = inv;
+	const uint32_t     invert_rgb = inv_rgb;
 	unsigned short int i;
 	unsigned short int j;
 	// NOTE: The *slight* duplication is on purpose, to move the branching outside the loop,
@@ -5379,9 +5382,15 @@ static int
 						//memcpy(&img_px.p, &data[pix_offset], 3 * sizeof(uint8_t));
 
 						// Handle BGR & inversion
-						fb_px.color.r = img_px.color.r ^ invert;
-						fb_px.color.g = img_px.color.g ^ invert;
-						fb_px.color.b = img_px.color.b ^ invert;
+						fb_px.color.r = img_px.color.r;
+						fb_px.color.g = img_px.color.g;
+						fb_px.color.b = img_px.color.b;
+						// NOTE: The RGB -> BGR dance precludes us from simply doing a 3 bytes memcpy,
+						//       and our union trickery appears to be faster than building the pixel
+						//       ourselves with something like:
+						//       fb_px.p  = 0xFF<<24U | img_px.color.r<<16U | img_px.color.g<<8U | img_px.color.b;
+						// We still can do the inversion on the full pixel, though ;).
+						fb_px.p ^= invert_rgb;
 
 						// NOTE: Again, assume we can safely skip rotation tweaks
 						pix_offset = (uint32_t)((unsigned short int) (i + x_off) << 2U) +
