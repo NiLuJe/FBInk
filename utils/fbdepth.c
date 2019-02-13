@@ -161,7 +161,16 @@ int
 				switch (req_bpp) {
 					case 8:
 					case 16:
+						break;
 					case 24:
+						// NOTE: Warn that things will probably be wonky...
+						//       I'm not quite sure who's to blame: this tool, FBInk, or the Kernel,
+						//       but I've never ended up in a useful state on my Kobos.
+						//       And I don't have a genuine 24bpp fb device to compare to...
+						fprintf(
+						    stderr,
+						    "Warning! 24bpp handling appears to be broken *somewhere*, you probably don't want to use it!\n\n");
+						break;
 					case 32:
 						break;
 					default:
