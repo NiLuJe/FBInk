@@ -108,6 +108,15 @@ static bool
 		LOG("Setting rotate to %u (%s) to account for kernel rotation quirks",
 		    vInfo.rotate,
 		    fb_rotate_to_string(vInfo.rotate));
+	} else if (deviceQuirks.ntxBootRota == FB_ROTATE_UD && deviceQuirks.isKoboMk7 && deviceQuirks.canRotate &&
+		   deviceQuirks.screenDPI == 300U) {
+		// NOTE: This is for the Forma, which only inverts CW & CCW (i.e., odd numbers)...
+		if ((vInfo.rotate & 0x01) == 1) {
+			vInfo.rotate = (uint32_t) vInfo.rotate ^ 2;
+			LOG("Setting rotate to %u (%s) to account for kernel rotation quirks",
+			    vInfo.rotate,
+			    fb_rotate_to_string(vInfo.rotate));
+		}
 	}
 
 	if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
