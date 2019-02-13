@@ -95,7 +95,7 @@ static bool
 		// NOTE: 1 for Grayscale, 2 for Inverted Grayscale (like on einkfb).
 		//       We obviously don't want to inflict an inverted palette on ourselves ;).
 		//       c.f., GRAYSCALE_* defines @ mxcfb.h
-		vInfo.grayscale = (uint32_t) 1U;
+		vInfo.grayscale = (uint32_t) GRAYSCALE_8BIT;
 		LOG("Setting grayscale to %u", vInfo.grayscale);
 	} else {
 		// NOTE: And of course, 0 for color ;)
