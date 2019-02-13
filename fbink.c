@@ -5388,7 +5388,7 @@ static int
 						// NOTE: The RGB -> BGR dance precludes us from simply doing a 3 bytes memcpy,
 						//       and our union trickery appears to be faster than building the pixel
 						//       ourselves with something like:
-						//       fb_px.p  = 0xFF<<24U | img_px.color.r<<16U | img_px.color.g<<8U | img_px.color.b;
+						//       fb_px.p = 0xFF<<24U | img_px.color.r<<16U | img_px.color.g<<8U | img_px.color.b;
 						// We still can do the inversion on the full pixel, though ;).
 						fb_px.p ^= invert_rgb;
 
@@ -5498,9 +5498,9 @@ static int
 				for (i = img_x_off; i < max_width; i++) {
 					// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
 					pix_offset = (size_t)((j * req_n * w) + (i * req_n));
-					color.r    = data[pix_offset + 0] ^ invert;
-					color.g    = data[pix_offset + 1] ^ invert;
-					color.b    = data[pix_offset + 2] ^ invert;
+					color.r    = data[pix_offset + 0U] ^ invert;
+					color.g    = data[pix_offset + 1U] ^ invert;
+					color.b    = data[pix_offset + 2U] ^ invert;
 
 					coords.x = (unsigned short int) (i + x_off);
 					coords.y = (unsigned short int) (j + y_off);
