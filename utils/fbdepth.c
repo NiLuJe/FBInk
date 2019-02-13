@@ -45,6 +45,8 @@ static void
 	    "\t-h, --help\t\t\tShow this help message.\n"
 	    "\t-v, --verbose\t\t\tToggle printing diagnostic messages.\n"
 	    "\t-q, --quiet\t\t\tToggle hiding diagnostic setup messages.\n"
+	    "\t-g, --get\t\t\tJust output the current bitdepth to stdout.\n"
+	    "\t-G, --getcode\t\t\tJust exit with the current bitdepth as exit code.\n"
 	    "\n",
 	    fbink_version());
 	return;
@@ -148,12 +150,16 @@ int
 					      { "help", no_argument, NULL, 'h' },
 					      { "verbose", no_argument, NULL, 'v' },
 					      { "quiet", no_argument, NULL, 'q' },
+					      { "get", no_argument, NULL, 'g' },
+					      { "getcode", no_argument, NULL, 'G' },
 					      { NULL, 0, NULL, 0 } };
 
-	uint32_t req_bpp = 0U;
-	bool     errfnd  = false;
+	uint32_t req_bpp    = 0U;
+	bool     errfnd     = false;
+	bool     print_bpp  = false;
+	bool     return_bpp = false;
 
-	while ((opt = getopt_long(argc, argv, "d:hvq", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "d:hvqgG", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'd':
 				req_bpp = strtoul(optarg, NULL, 10);
@@ -191,6 +197,12 @@ int
 				show_helpmsg();
 				return EXIT_SUCCESS;
 				break;
+			case 'g':
+				print_bpp = true;
+				break;
+			case 'G':
+				return_bpp = true;
+				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
 				errfnd = true;
@@ -198,9 +210,15 @@ int
 		}
 	}
 
-	if (errfnd || req_bpp == 0U) {
+	if (errfnd || (req_bpp == 0U && !(print_bpp || return_bpp))) {
 		show_helpmsg();
 		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Enforce quiet w/ print_bpp
+	if (print_bpp) {
+		g_isQuiet   = true;
+		g_isVerbose = false;
 	}
 
 	// Assume success, until shit happens ;)
@@ -220,6 +238,18 @@ int
 	if (!get_fbinfo()) {
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
+	}
+
+	// If we just wanted to print/return the current bitdepth, abort early
+	if (print_bpp || return_bpp) {
+		if (print_bpp) {
+			fprintf(stdout, "%u", vInfo.bits_per_pixel);
+		}
+		if (return_bpp) {
+			return (int) vInfo.bits_per_pixel;
+		} else {
+			return EXIT_SUCCESS;
+		}
 	}
 
 	// If we requested a change, do it
