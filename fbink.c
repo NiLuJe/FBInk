@@ -5498,9 +5498,11 @@ static int
 				for (i = img_x_off; i < max_width; i++) {
 					// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
 					pix_offset = (size_t)((j * req_n * w) + (i * req_n));
-					color.r    = data[pix_offset + 0U] ^ invert;
-					color.g    = data[pix_offset + 1U] ^ invert;
-					color.b    = data[pix_offset + 2U] ^ invert;
+					// Gobble the full image pixel (3 bytes, we don't care about alpha if it's there)
+					memcpy(&color, &data[pix_offset], 3 * sizeof(uint8_t));
+					color.r ^= invert;
+					color.g ^= invert;
+					color.b ^= invert;
 
 					coords.x = (unsigned short int) (i + x_off);
 					coords.y = (unsigned short int) (j + y_off);
