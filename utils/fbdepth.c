@@ -52,12 +52,13 @@ static void
 
 int fbfd = -1;
 
-static void
+static bool
     get_fbinfo(void)
 {
 	// Get variable fb info
 	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
 		perror("ioctl GET_V");
+		return false;
 	}
 	LOG("Variable fb info: %ux%u (%ux%u), %ubpp @ rotation: %u (%s)",
 	    vInfo.xres,
@@ -70,14 +71,17 @@ static void
 	// Get fixed fb information
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &fInfo)) {
 		perror("ioctl GET_F");
+		return false;
 	}
 	LOG("Fixed fb info: ID is \"%s\", length of fb mem: %u bytes & line length: %u bytes",
 	    fInfo.id,
 	    fInfo.smem_len,
 	    fInfo.line_length);
+
+	return true;
 }
 
-static void
+static bool
     set_fbinfo(uint32_t bpp)
 {
 	// Set variable fb info
@@ -108,6 +112,7 @@ static void
 
 	if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
 		perror("ioctl PUT_V");
+		return false;
 	}
 
 	LOG("Bitdepth is now %ubpp (grayscale: %u) @ rotate: %u (%s)\n",
@@ -115,6 +120,8 @@ static void
 	    vInfo.grayscale,
 	    vInfo.rotate,
 	    fb_rotate_to_string(vInfo.rotate));
+
+	return true;
 }
 
 int
@@ -176,6 +183,9 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
 	// NOTE: We're going to need to identify the device, to handle rotation quirks...
 	identify_device();
 
@@ -187,17 +197,32 @@ int
 	}
 
 	// Print initial status, and store current vInfo
-	get_fbinfo();
+	if (!get_fbinfo()) {
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
 
 	// If we requested a change, do it
 	if (vInfo.bits_per_pixel != req_bpp) {
 		LOG("\nSwitching fb to %ubpp . . .", req_bpp);
-		set_fbinfo(req_bpp);
+		if (!set_fbinfo(req_bpp)) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
 		// Recap
-		get_fbinfo();
+		if (!get_fbinfo()) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
 	} else {
 		LOG("\nCurrent bitdepth is already %ubpp!", req_bpp);
 	}
 
-	close(fbfd);
+cleanup:
+	if (close(fbfd) != 0) {
+		perror("close");
+		rv = ERRCODE(EXIT_FAILURE);
+	}
+
+	return rv;
 }
