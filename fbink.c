@@ -137,19 +137,25 @@ static void
 static void
     put_pixel_RGB32(const FBInkCoordinates* coords, const FBInkColor* color)
 {
+	// NOTE: We retrofitted a bit of union magic implemented for fbink_print_image for a small performance bump :)
+	FBInkPixelBGRA px;
+
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 4 as every pixel is 4 consecutive bytes
 	size_t pix_offset = (uint32_t)(coords->x << 2U) + (coords->y * fInfo.line_length);
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((unsigned char*) (fbPtr + pix_offset))      = color->b;
-	*((unsigned char*) (fbPtr + pix_offset + 1U)) = color->g;
-	*((unsigned char*) (fbPtr + pix_offset + 2U)) = color->r;
 	// Opaque, always. Note that everything is rendered as opaque, no matter what.
 	// But at least this way we ensure fb grabs are consistent with what's seen on screen.
-	*((unsigned char*) (fbPtr + pix_offset + 3U)) = 0xFF;
+	px.color.a = 0xFF;
+	px.color.r = color->r;
+	px.color.g = color->g;
+	px.color.b = color->b;
 
-	// NOTE: Trying to retrofit FBInkPixelBGRA into this doesn't appear to net us anything noticeable...
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
+	*((uint32_t*) (fbPtr + pix_offset)) = px.p;
+#pragma GCC diagnostic pop
 }
 
 static void
