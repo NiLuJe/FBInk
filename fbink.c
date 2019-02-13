@@ -5562,6 +5562,9 @@ int
 	int rv = EXIT_SUCCESS;
 
 	// Let stbi handle grayscaling for us
+	// NOTE: It does so via an approximation of the Rec601Luma formula, in IM-speak
+	//       (c.f., https://www.imagemagick.org/script/command-line-options.php#intensity)
+	//       (c.f., stbi__compute_y @ stb/stb_image.h)
 	int req_n;
 	switch (vInfo.bits_per_pixel) {
 		case 4U:
