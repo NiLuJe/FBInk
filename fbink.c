@@ -662,9 +662,9 @@ static struct mxcfb_rect
 	    multiline_offset,
 	    (unsigned short int) (row + multiline_offset));
 
-	uint8_t invert  = fbink_cfg->is_inverted ? 0xFF : 0U;
-	uint8_t fgcolor = penFGColor ^ invert;
-	uint8_t bgcolor = penBGColor ^ invert;
+	const uint8_t invert  = fbink_cfg->is_inverted ? 0xFF : 0U;
+	const uint8_t fgcolor = penFGColor ^ invert;
+	const uint8_t bgcolor = penBGColor ^ invert;
 	// NOTE: It's a grayscale ramp, so r = g = b (= v).
 	FBInkColor fgC = { fgcolor, fgC.r, fgC.r };
 	FBInkColor bgC = { bgcolor, bgC.r, bgC.r };
@@ -3627,10 +3627,10 @@ int
 	}
 	region.top = paint_point.y;
 
-	uint8_t   invert     = is_inverted ? 0xFF : 0U;
-	uint8_t   fgcolor    = penFGColor ^ invert;
-	uint8_t   bgcolor    = penBGColor ^ invert;
-	short int layer_diff = (short int) (fgcolor - bgcolor);
+	const uint8_t invert     = is_inverted ? 0xFF : 0U;
+	const uint8_t fgcolor    = penFGColor ^ invert;
+	const uint8_t bgcolor    = penBGColor ^ invert;
+	short int     layer_diff = (short int) (fgcolor - bgcolor);
 
 	// Do we need to clear the screen?
 	if (is_cleared) {
@@ -4391,9 +4391,9 @@ cleanup:
 int
     draw_progress_bars(int fbfd, bool is_infinite, uint8_t value, const FBInkConfig* fbink_cfg)
 {
-	uint8_t invert  = fbink_cfg->is_inverted ? 0xFF : 0U;
-	uint8_t fgcolor = penFGColor ^ invert;
-	uint8_t bgcolor = penBGColor ^ invert;
+	const uint8_t invert  = fbink_cfg->is_inverted ? 0xFF : 0U;
+	const uint8_t fgcolor = penFGColor ^ invert;
+	const uint8_t bgcolor = penBGColor ^ invert;
 
 	// Clear screen?
 	if (fbink_cfg->is_cleared) {
@@ -4402,8 +4402,8 @@ int
 
 	// Let's go! Start by pilfering some computations from draw...
 	// NOTE: It's a grayscale ramp, so r = g = b (= v).
-	FBInkColor fgC = { fgcolor, fgC.r, fgC.r };
-	FBInkColor bgC = { bgcolor, bgC.r, bgC.r };
+	const FBInkColor fgC = { fgcolor, fgC.r, fgC.r };
+	const FBInkColor bgC = { bgcolor, bgC.r, bgC.r };
 
 	// Clamp v offset to safe values
 	// NOTE: This test isn't perfect, but then, if you play with this, you do it knowing the risks...
