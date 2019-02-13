@@ -90,7 +90,9 @@ static bool
 	LOG("Setting bitdepth to %ubpp", vInfo.bits_per_pixel);
 	// Grayscale flag
 	if (bpp == 8U) {
-		// NOTE: 1 for Grayscale, 2 for Inverted Grayscale (like on einkfb)
+		// NOTE: 1 for Grayscale, 2 for Inverted Grayscale (like on einkfb).
+		//       We obviously don't want to inflict an inverted palette on ourselves ;).
+		//       c.f., GRAYSCALE_* defines @ mxcfb.h
 		vInfo.grayscale = (uint32_t) 1U;
 		LOG("Setting grayscale to %u", vInfo.grayscale);
 	} else {
