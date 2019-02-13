@@ -129,9 +129,9 @@ static void
 	size_t pix_offset = coords->x * 3U + coords->y * fInfo.line_length;
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((unsigned char*) (fbPtr + pix_offset))     = color->b;
-	*((unsigned char*) (fbPtr + pix_offset + 1)) = color->g;
-	*((unsigned char*) (fbPtr + pix_offset + 2)) = color->r;
+	*((unsigned char*) (fbPtr + pix_offset))      = color->b;
+	*((unsigned char*) (fbPtr + pix_offset + 1U)) = color->g;
+	*((unsigned char*) (fbPtr + pix_offset + 2U)) = color->r;
 }
 
 static void
@@ -142,12 +142,12 @@ static void
 	size_t pix_offset = (uint32_t)(coords->x << 2U) + (coords->y * fInfo.line_length);
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((unsigned char*) (fbPtr + pix_offset))     = color->b;
-	*((unsigned char*) (fbPtr + pix_offset + 1)) = color->g;
-	*((unsigned char*) (fbPtr + pix_offset + 2)) = color->r;
+	*((unsigned char*) (fbPtr + pix_offset))      = color->b;
+	*((unsigned char*) (fbPtr + pix_offset + 1U)) = color->g;
+	*((unsigned char*) (fbPtr + pix_offset + 2U)) = color->r;
 	// Opaque, always. Note that everything is rendered as opaque, no matter what.
 	// But at least this way we ensure fb grabs are consistent with what's seen on screen.
-	*((unsigned char*) (fbPtr + pix_offset + 3)) = 0xFF;
+	*((unsigned char*) (fbPtr + pix_offset + 3U)) = 0xFF;
 
 	// NOTE: Trying to retrofit FBInkPixelBGRA into this doesn't appear to net us anything noticeable...
 }
@@ -407,8 +407,8 @@ static void
 	size_t pix_offset = coords->x * 3U + coords->y * fInfo.line_length;
 
 	color->b = *((unsigned char*) (fbPtr + pix_offset));
-	color->g = *((unsigned char*) (fbPtr + pix_offset + 1));
-	color->r = *((unsigned char*) (fbPtr + pix_offset + 2));
+	color->g = *((unsigned char*) (fbPtr + pix_offset + 1U));
+	color->r = *((unsigned char*) (fbPtr + pix_offset + 2U));
 }
 
 static void
