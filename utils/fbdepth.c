@@ -252,20 +252,30 @@ int
 		}
 	}
 
-	// If we requested a change, do it
-	if (vInfo.bits_per_pixel != req_bpp) {
-		LOG("\nSwitching fb to %ubpp . . .", req_bpp);
-		if (!set_fbinfo(req_bpp)) {
-			rv = ERRCODE(EXIT_FAILURE);
+	// If a change was requested, do it, but check if it's necessary first
+	if (vInfo.bits_per_pixel == req_bpp) {
+		// Also check that the grayscale flag is flipped properly
+		if ((vInfo.bits_per_pixel == 8U && vInfo.grayscale != GRAYSCALE_8BIT) ||
+		    (vInfo.bits_per_pixel > 8U && vInfo.grayscale != 0U)) {
+			LOG("\nCurrent bitdepth is already %ubpp, but the grayscale flag is bogus!", req_bpp);
+			// Continue, we'll flip the grayscale flag properly
+		} else {
+			LOG("\nCurrent bitdepth is already %ubpp!", req_bpp);
+			// Skip to cleanup, exiting successfully
 			goto cleanup;
 		}
-		// Recap
-		if (!get_fbinfo()) {
-			rv = ERRCODE(EXIT_FAILURE);
-			goto cleanup;
-		}
-	} else {
-		LOG("\nCurrent bitdepth is already %ubpp!", req_bpp);
+	}
+
+	// If we're here, we really want to change the bitdepth ;)
+	LOG("\nSwitching fb to %ubpp . . .", req_bpp);
+	if (!set_fbinfo(req_bpp)) {
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+	// Recap
+	if (!get_fbinfo()) {
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
 	}
 
 cleanup:
