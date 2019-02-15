@@ -4289,15 +4289,23 @@ bool
 }
 
 // Reinitialize FBInk in case the framebuffer state has changed
+// NOTE: We initially (< 1.10.4) tried to limit this to specific scenarios, specifically:
+//         * the bitdepth switch during boot between pickel & nickel
+//         * eventual rotations during the boot between boot & pickel and/or nickel
+//           (c.f., https://www.mobileread.com/forums/showpost.php?p=3764776&postcount=229 for those two points).
+//         * rotation in general on devices with an accelerometer
+//       However, while that accounts for *stock* behavior, that left some custom setups in the lurch, in particular:
+//         * rotation in Nickel may be patched in
+//         * custom software might affect bitdepth or rotation on purpose
+//           (f.g., Plato relies on HW rotation, and KOReader may change the bitdepth).
+//       TL;DR: We now monitor *any* change in bitdepth and/or rotation.
 int
     fbink_reinit(int fbfd UNUSED_BY_KINDLE, const FBInkConfig* fbink_cfg UNUSED_BY_KINDLE)
 {
 #ifndef FBINK_FOR_KINDLE
-	uint32_t old_bpp = vInfo.bits_per_pixel;
-	// NOTE: Don't even try to open/close the fb if we don't have anything to do ;)
-	if (old_bpp != 16 && !deviceQuirks.canRotate) {
-		return EXIT_SUCCESS;
-	}
+	// So, we're concerned with stuff that affects the logical & physical layout, namely, bitdepth & rotation.
+	uint32_t old_bpp  = vInfo.bits_per_pixel;
+	uint32_t old_rota = vInfo.rotate;
 
 	// Open the framebuffer if need be...
 	bool keep_fd = true;
@@ -4308,69 +4316,25 @@ int
 	// Assume success, until shit happens ;)
 	int rv = EXIT_SUCCESS;
 
-	// NOTE: Okay, currently,
-	//       we're aiming to handle the various states the Kobo framebuffer will be in throughout the boot process.
-	//       c.f., https://www.mobileread.com/forums/showpost.php?p=3764776&postcount=229 for more details
-
-	// First step is checking if the device was in a 16bpp mode the last time we ran initialize_fbink...
-	if (old_bpp == 16) {
-		// Okay, so, store the previous bitdepth & rotation, and check if that changed...
-		uint32_t old_rota = vInfo.rotate;
-		// NOTE: Given the fact that we're behind an isNTX16bLandscape branch, old_bpp should *always* be 16...
-
-		// We evidently need to query the current state in order to do that...
-		if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
-			WARN("Error reading variable fb information");
-			rv = ERRCODE(EXIT_FAILURE);
-			goto cleanup;
-		}
-
-		// And do the dance to detect the three states we care about...
-		if (old_bpp == 16 && vInfo.bits_per_pixel == 32) {
-			// NOTE: If we switched from 16bpp to 32bpp,
-			//       Nickel has finished setting up the fb to its liking, we need to reinit!
-			// It's a reinit, so ask to skip the vinfo ioctl we just did
-			ELOG("Detected a change in framebuffer bitdepth, reinitializing...");
-			rv = initialize_fbink(fbfd, fbink_cfg, true);
-		} else if ((old_bpp == 16 && vInfo.bits_per_pixel == 16) && (old_rota != vInfo.rotate)) {
-			// NOTE: If we're still in 16bpp, but the rotation changed,
-			//       pickel has been used to show something (most likely the "three dots" progress bar),
-			//       and we're no longer in the native rotation, we need to reinit!
-			// It's a reinit, so ask to skip the vinfo ioctl we just did
-			ELOG("Detected a change in framebuffer rotation, reinitializing...");
-			rv = initialize_fbink(fbfd, fbink_cfg, true);
-		}
-	} else if (deviceQuirks.canRotate) {
-		// The second step is checking for a rotation change on devices with an accelerometer...
-		// We're doing this outside of the 16bpp branch, because we're concerned with Nickel rotations here,
-		// and Nickel will always run @ 32bpp ;).
-		// NOTE: While the Home & Library views currently only appear to handle Portrait/Inverted Portrait,
-		//       the Search view does handle Landscape/Inverted Landscape, so we do need to catch every rotation ;).
-
-		// Okay, so, store the previous rotation, and check if that changed...
-		uint32_t old_rota = vInfo.rotate;
-
-		// We evidently need to query the current state in order to do that...
-		if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
-			WARN("Error reading variable fb information");
-			rv = ERRCODE(EXIT_FAILURE);
-			goto cleanup;
-		}
-
-		// And see if we were rotated since the last time...
-		if (old_rota != vInfo.rotate) {
-			// NOTE: Nickel properly updates vInfo, and this time, the fb origin properly gets updated, too,
-			//       so we don't need any new rotation tricks, as far as printing is concerned.
-			//       This matches the Kindle behavior (c.f., notes in initialize_fbink).
-			//       This means we mainly need a reinit to catch toggling from/to landscape orientations,
-			//       because xres/yres will get inverted, and we need to follow that!
-			// It's a reinit, so ask to skip the vinfo ioctl we just did
-			ELOG("Detected a change in framebuffer rotation, reinitializing...");
-			rv = initialize_fbink(fbfd, fbink_cfg, true);
-		}
+	// Now that we've stored the relevant bits of the previous state, query the current one...
+	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
+		WARN("Error reading variable fb information");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
 	}
 
-	// And we're done, that's all we care about for now :).
+	// Start with the more drastic change: bitdepth, before checking rotation
+	if (old_bpp != vInfo.bits_per_pixel) {
+		// It's a reinit, so ask to skip the vinfo ioctl we just did
+		ELOG("Detected a change in framebuffer bitdepth, reinitializing...");
+		rv = initialize_fbink(fbfd, fbink_cfg, true);
+	} else if (old_rota != vInfo.rotate) {
+		// It's a reinit, so ask to skip the vinfo ioctl we just did
+		ELOG("Detected a change in framebuffer rotation, reinitializing...");
+		rv = initialize_fbink(fbfd, fbink_cfg, true);
+	}
+
+	// And we're done!
 	// We keep silent when we do nothing, to avoid flooding logs (mainly, KFMon's ;)).
 
 cleanup:
