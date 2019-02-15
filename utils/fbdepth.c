@@ -246,9 +246,10 @@ int
 			fprintf(stdout, "%u", vInfo.bits_per_pixel);
 		}
 		if (return_bpp) {
-			return (int) vInfo.bits_per_pixel;
+			rv = (int) vInfo.bits_per_pixel;
+			goto cleanup;
 		} else {
-			return EXIT_SUCCESS;
+			goto cleanup;
 		}
 	}
 
