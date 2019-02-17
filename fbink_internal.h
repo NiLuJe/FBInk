@@ -443,8 +443,6 @@ static void rotate_region_boot(struct mxcfb_rect*);
 static void rotate_region_nop(struct mxcfb_rect*);
 static void fullscreen_region(struct mxcfb_rect*);
 
-static int fullscreen_clear(int, const FBInkConfig*);
-
 int draw_progress_bars(int, bool, uint8_t, const FBInkConfig*);
 
 #ifdef FBINK_WITH_IMAGE

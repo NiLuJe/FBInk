@@ -441,6 +441,12 @@ FBINK_API int fbink_print_raw_data(int                fbfd,
 				   short int          y_off,
 				   const FBInkConfig* fbink_cfg);
 
+// Just clear the screen, eInk refresh included (or not ;)).
+// fdfd:		Open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
+// fbink_cfg:		Pointer to an FBInkConfig struct (honors is_flashing, is_inverted, is_dithered, no_refresh, pen_*_color)
+FBINK_API int fbink_cls(int fbfd, const FBInkConfig* fbink_cfg);
+
 // Scan the screen for Kobo's "Connect" button in the "USB plugged in" popup,
 // and optionally generate an input event to press that button.
 // KOBO Only! Returns -(ENOSYS) when disabled (!KOBO, as well as MINIMAL builds).

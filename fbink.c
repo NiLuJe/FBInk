@@ -2532,8 +2532,8 @@ static void
 }
 
 // Do a full-screen clear, eInk refresh included
-static int
-    fullscreen_clear(int fbfd, const FBInkConfig* fbink_cfg)
+int
+    fbink_cls(int fbfd, const FBInkConfig* fbink_cfg)
 {
 	// If we open a fd now, we'll only keep it open for this single call!
 	// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
@@ -2590,7 +2590,7 @@ int
 	if (!*string) {
 		// Unless we just want a clear, in which case, bypass everything and just do that.
 		if (fbink_cfg->is_cleared) {
-			return fullscreen_clear(fbfd, fbink_cfg);
+			return fbink_cls(fbfd, fbink_cfg);
 		} else {
 			WARN("Cannot print an empty string");
 			return ERRCODE(EINVAL);
@@ -3142,7 +3142,7 @@ int
 	if (!*string) {
 		// Unless we just want a clear, in which case, bypass everything and just do that.
 		if (fbink_cfg->is_cleared) {
-			return fullscreen_clear(fbfd, fbink_cfg);
+			return fbink_cls(fbfd, fbink_cfg);
 		} else {
 			WARN("Cannot print an empty string");
 			return ERRCODE(EINVAL);

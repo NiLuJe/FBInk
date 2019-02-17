@@ -1255,7 +1255,13 @@ int
 					show_helpmsg();
 				}
 			} else {
-				show_helpmsg();
+				// If we did'nt pass *any* non-positional arguments, but we asked for a screen clear, do it!
+				// This avoids the clunky need to pass an empty string to do that otherwise ;).
+				if (fbink_cfg.is_cleared) {
+					rv = fbink_cls(fbfd, &fbink_cfg);
+				} else {
+					show_helpmsg();
+				}
 			}
 		}
 	}
