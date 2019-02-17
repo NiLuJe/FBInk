@@ -2531,14 +2531,70 @@ static void
 	region->height = vInfo.yres;
 }
 
+// Do a full-screen clear, eInk refresh included
+static int
+    fullscreen_clear(int fbfd, const FBInkConfig* fbink_cfg)
+{
+	// If we open a fd now, we'll only keep it open for this single call!
+	// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// mmap fb to user mem
+	if (!isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	}
+
+	// Clear the screen, and setup a fullscreen refresh.
+	clear_screen(fbfd, fbink_cfg->is_inverted ? penBGColor ^ 0xFF : penBGColor, fbink_cfg->is_flashing);
+	struct mxcfb_rect region = { 0U };
+	fullscreen_region(&region);
+
+	// Refresh screen
+	if (refresh(fbfd,
+		    region,
+		    WAVEFORM_MODE_AUTO,
+		    fbink_cfg->is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		    fbink_cfg->is_flashing,
+		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
+		WARN("Failed to refresh the screen");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// Cleanup
+cleanup:
+	if (isFbMapped && !keep_fd) {
+		unmap_fb();
+	}
+	if (!keep_fd) {
+		close(fbfd);
+	}
+
+	return rv;
+}
+
 // Magic happens here!
 int
     fbink_print(int fbfd, const char* string, const FBInkConfig* fbink_cfg)
 {
 	// Abort if we were passed an empty string
 	if (!*string) {
-		WARN("Cannot print an empty string");
-		return ERRCODE(EINVAL);
+		// Unless we just want a clear, in which case, bypass everything and just do that.
+		if (fbink_cfg->is_cleared) {
+			return fullscreen_clear(fbfd, fbink_cfg);
+		} else {
+			WARN("Cannot print an empty string");
+			return ERRCODE(EINVAL);
+		}
 	}
 
 	// Abort if we were passed an invalid UTF-8 sequence
@@ -3084,8 +3140,13 @@ int
 #ifdef FBINK_WITH_OPENTYPE
 	// Abort if we were passed an empty string
 	if (!*string) {
-		WARN("Cannot print an empty string");
-		return ERRCODE(EINVAL);
+		// Unless we just want a clear, in which case, bypass everything and just do that.
+		if (fbink_cfg->is_cleared) {
+			return fullscreen_clear(fbfd, fbink_cfg);
+		} else {
+			WARN("Cannot print an empty string");
+			return ERRCODE(EINVAL);
+		}
 	}
 
 	// Abort if we were passed an invalid UTF-8 sequence
