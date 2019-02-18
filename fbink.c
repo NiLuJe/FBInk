@@ -4548,24 +4548,23 @@ int
 
 		// We'll want 5% of padding on each side,
 		// with rounding to make sure the bar's size is constant across all percentage values...
-		unsigned short int empty_width = (unsigned short int) ((0.90f * (float) viewWidth) + 0.5f);
-		unsigned short int empty_left  = (unsigned short int) (left_pos + (0.05f * (float) viewWidth) + 0.5f);
+		unsigned short int bar_width = (unsigned short int) ((0.90f * (float) viewWidth) + 0.5f);
+		unsigned short int bar_left  = (unsigned short int) (left_pos + (0.05f * (float) viewWidth) + 0.5f);
 
 		// Draw the border...
-		fill_rect(empty_left, top_pos, (unsigned short int) (empty_width), FONTH, &borderC);
+		fill_rect(bar_left, top_pos, (unsigned short int) (bar_width), FONTH, &borderC);
 		// Draw the empty bar...
-		fill_rect((unsigned short int) (empty_left + 1U),
+		fill_rect((unsigned short int) (bar_left + 1U),
 			  (unsigned short int) (top_pos + 1U),
-			  (unsigned short int) MAX(0, empty_width - 3),
+			  (unsigned short int) MAX(0, bar_width - 3),
 			  (unsigned short int) (FONTH - 3U),
 			  &emptyC);
 
 		// We want our thumb to take 20% of the bar's width
-		unsigned short int thumb_width = (unsigned short int) ((0.20f * empty_width) + 0.5f);
+		unsigned short int thumb_width = (unsigned short int) ((0.20f * bar_width) + 0.5f);
 		// We move the thumb in increment of 5% of the bar's width (i.e., half its width),
 		// with rounding to avoid accumulating drift...
-		unsigned short int thumb_left =
-		    (unsigned short int) (empty_left + ((0.05f * empty_width) * value) + 0.5f);
+		unsigned short int thumb_left = (unsigned short int) (bar_left + ((0.05f * bar_width) * value) + 0.5f);
 
 		// And finally, draw the thumb, which we want to override the border with!
 		fill_rect(thumb_left, top_pos, thumb_width, FONTH, &fgC);
