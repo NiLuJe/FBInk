@@ -4499,13 +4499,6 @@ int
 		unsigned short int fill_left   = (unsigned short int) (left_pos + (0.05f * (float) viewWidth) + 0.5f);
 		unsigned short int empty_width = (unsigned short int) (bar_width - fill_width);
 		unsigned short int empty_left  = (unsigned short int) (fill_left + fill_width);
-		fprintf(stdout,
-			"fill_width %hu\tfill_left %hu\tempty_width %hu\tempty_left %hu\tbar_width %hu\n",
-			fill_width,
-			fill_left,
-			empty_width,
-			empty_left,
-			bar_width);
 
 		// Draw the border...
 		fill_rect(fill_left, top_pos, bar_width, FONTH, &borderC);
