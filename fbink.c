@@ -4493,21 +4493,24 @@ int
 
 		// We'll want 5% of padding on each side,
 		// with rounding to make sure the bar's size is constant across all percentage values...
-		float bar_width = (((0.90f * (float) viewWidth)) + 0.5f);
-		float fill_width =
-		    (((value / 100.0f) * (0.90f * (float) viewWidth)) + 0.5f);
-		float fill_left = (left_pos + (0.05f * (float) viewWidth) + 0.5f);
-		//float empty_width =
-		//    ((((float) (100U - value) / 100.0f) * (0.90f * (float) viewWidth)) + 0.5f);
-		unsigned short int empty_width = (unsigned short int) bar_width - (unsigned short int) fill_width;
-		unsigned short int empty_left = (unsigned short int) fill_left + (unsigned short int) fill_width;
-		//unsigned short int bar_width = (unsigned short int) (fill_width + empty_width);
-		fprintf(stdout, "fill_width %hu\tfill_left %hu\tempty_width %hu\tempty_left %hu\tbar_width %hu\n", (unsigned short int) (unsigned short int) fill_width, (unsigned short int) fill_left, (unsigned short int) empty_width, (unsigned short int) empty_left, (unsigned short int) bar_width);
+		unsigned short int bar_width = (unsigned short int) (((0.90f * (float) viewWidth)) + 0.5f);
+		unsigned short int fill_width =
+		    (unsigned short int) (((value / 100.0f) * (0.90f * (float) viewWidth)) + 0.5f);
+		unsigned short int fill_left   = (unsigned short int) (left_pos + (0.05f * (float) viewWidth) + 0.5f);
+		unsigned short int empty_width = (unsigned short int) (bar_width - fill_width);
+		unsigned short int empty_left  = (unsigned short int) (fill_left + fill_width);
+		fprintf(stdout,
+			"fill_width %hu\tfill_left %hu\tempty_width %hu\tempty_left %hu\tbar_width %hu\n",
+			fill_width,
+			fill_left,
+			empty_width,
+			empty_left,
+			bar_width);
 
 		// Draw the border...
-		fill_rect((unsigned short int) fill_left, top_pos, (unsigned short int) bar_width, FONTH, &borderC);
+		fill_rect(fill_left, top_pos, bar_width, FONTH, &borderC);
 		// Draw the fill bar, which we want to override the border with!
-		fill_rect((unsigned short int) fill_left, top_pos, (unsigned short int) fill_width, FONTH, &fgC);
+		fill_rect(fill_left, top_pos, fill_width, FONTH, &fgC);
 		// And the empty bar...
 		// NOTE: With a minor tweak to keep a double-width border on the bottom & right sides ;).
 		if (value == 0U) {
@@ -4518,7 +4521,7 @@ int
 				  (unsigned short int) (FONTH - 3U),
 				  &emptyC);
 		} else {
-			fill_rect((unsigned short int) empty_left,
+			fill_rect(empty_left,
 				  (unsigned short int) (top_pos + 1U),
 				  (unsigned short int) MAX(0, empty_width - 2),
 				  (unsigned short int) (FONTH - 3U),
