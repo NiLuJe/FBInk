@@ -179,6 +179,9 @@ static void
 #endif
 	    "\tAvailable dithering modes: PASSTHROUGH, FLOYD_STEINBERG, ATKINSON, ORDERED & QUANT_ONLY\n"
 	    "\t\tNote that this is only supported on recent devices, and that only a subset of these options may actually be supported by the HW (usually, PASSTHROUGH & ORDERED, check dmesg).\n"
+#ifdef FBINK_FOR_KINDLE
+	    "\t\tHardware dithering is completely untested on Kindle, and, while the Oasis 2 & PaperWhite 4 *should* support it, they *may* not, or at least not in the way FBInk expects...\n"
+#endif
 	    "\tNote that this will also honor --flash\n"
 #ifdef FBINK_FOR_KINDLE
 	    "\tNote that specifying a waveform mode is ignored on legacy einkfb devices, because the hardware doesn't expose such capabilities.\n"
