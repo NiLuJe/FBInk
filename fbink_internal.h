@@ -208,6 +208,7 @@
 #	include "fbink_orp.h"
 #	include "fbink_scientifica.h"
 #	include "fbink_terminus.h"
+#	include "fbink_fatty.h"
 #	include "fbink_misc_fonts.h"
 #endif
 

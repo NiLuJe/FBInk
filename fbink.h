@@ -76,7 +76,8 @@ typedef enum
 	SCIENTIFICAB,      // scientifica (bold)
 	SCIENTIFICAI,      // scientifica (italic)
 	TERMINUS,          // terminus (regular)
-	TERMINUSB          // terminus (bold)
+	TERMINUSB,         // terminus (bold)
+	FATTY              // fatty
 } FONT_INDEX_T;
 
 // List of supported font styles

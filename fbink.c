@@ -642,6 +642,8 @@ static const char*
 			return "Terminus";
 		case TERMINUSB:
 			return "Terminus Bold";
+		case FATTY:
+			return "Fatty";
 #endif
 		default:
 			return "IBM (Default)";
@@ -1881,6 +1883,11 @@ static int
 #ifdef FBINK_WITH_FONTS
 	// Setup custom fonts (glyph size, render fx, bitmap fx)
 	switch (fbink_cfg->fontname) {
+		case FATTY:
+			glyphWidth         = 7U;
+			glyphHeight        = 16U;
+			fxpFont8xGetBitmap = &fatty_get_bitmap;
+			break;
 		case TERMINUSB:
 			glyphWidth         = 8U;
 			glyphHeight        = 16U;
@@ -5745,6 +5752,8 @@ cleanup:
 #	include "fbink_scientifica.c"
 // Dimitar Toshkov Zhekov's Terminus (http://terminus-font.sourceforge.net)
 #	include "fbink_terminus.c"
+// Tomi Ollila's Fatty (https://github.com/domo141/fatty-bitmap-font)
+#	include "fbink_fatty.c"
 // Various other small fonts (c.f., CREDITS for details)
 #	include "fbink_misc_fonts.c"
 #endif
