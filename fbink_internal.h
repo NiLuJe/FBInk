@@ -210,6 +210,7 @@
 #	include "fbink_terminus.h"
 #	include "fbink_fatty.h"
 #	include "fbink_spleen.h"
+#	include "fbink_tewi.h"
 #	include "fbink_misc_fonts.h"
 #endif
 

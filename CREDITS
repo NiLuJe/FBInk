@@ -65,3 +65,7 @@ As well as a number of third-party resources (namely, font files):
 	* spleen (a monospaced bitmap font), Copyright (c) 2018-2019, Frederic Cambus,
 		Licensed under the 2-Clause BSD License (https://opensource.org/licenses/BSD-2-Clause).
 		(https://github.com/fcambus/spleen)
+
+	* tewi (a small bitmap font), Copyright (c) 2015-2017 lucy <lucy at luz dot lu>,
+		Licensed under the MIT License (https://opensource.org/licenses/MIT).
+		(https://github.com/lucy/tewi-font)

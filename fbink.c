@@ -646,6 +646,10 @@ static const char*
 			return "Fatty";
 		case SPLEEN:
 			return "Spleen";
+		case TEWI:
+			return "Tewi";
+		case TEWIB:
+			return "Tewi Bold";
 #endif
 		default:
 			return "IBM (Default)";
@@ -1883,6 +1887,16 @@ static int
 #ifdef FBINK_WITH_FONTS
 	// Setup custom fonts (glyph size, render fx, bitmap fx)
 	switch (fbink_cfg->fontname) {
+		case TEWIB:
+			glyphWidth         = 6U;
+			glyphHeight        = 13U;
+			fxpFont8xGetBitmap = &tewib_get_bitmap;
+			break;
+		case TEWI:
+			glyphWidth         = 6U;
+			glyphHeight        = 13U;
+			fxpFont8xGetBitmap = &tewi_get_bitmap;
+			break;
 		case SPLEEN:
 			glyphWidth          = 16U;
 			glyphHeight         = 32U;
@@ -5764,6 +5778,8 @@ cleanup:
 #	include "fbink_fatty.c"
 // Frederic Cambus's Spleen (https://github.com/fcambus/spleen)
 #	include "fbink_spleen.c"
+// Lucy Luz's Tewi (https://github.com/lucy/tewi-font)
+#	include "fbink_tewi.c"
 // Various other small fonts (c.f., CREDITS for details)
 #	include "fbink_misc_fonts.c"
 #endif

@@ -78,7 +78,9 @@ typedef enum
 	TERMINUS,          // terminus (regular)
 	TERMINUSB,         // terminus (bold)
 	FATTY,             // fatty
-	SPLEEN             // spleen
+	SPLEEN,            // spleen
+	TEWI,              // tewi (medium)
+	TEWIB              // tewi (bold)
 } FONT_INDEX_T;
 
 // List of supported font styles

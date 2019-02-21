@@ -82,6 +82,8 @@ font_set = {
 	"terminusb"	: ("ter-u16b.hex",		8,	16),
 	"fatty"		: ("fatty7x16-iso10646-1.hex",	7,	16),
 	"spleen"	: ("spleen-16x32.hex",		16,	32),
+	"tewi"		: ("tewi-medium-11.hex",	6,	13),
+	"tewib"		: ("tewi-bold-11.hex",		6,	13),
 }
 
 # Get the font name from the first arg passed to the script
