@@ -53,5 +53,7 @@ cdecl_func(fbink_print_activity_bar)
 cdecl_func(fbink_print_image)
 cdecl_func(fbink_print_raw_data)
 
+cdecl_func(fbink_cls)
+
 cdecl_func(fbink_button_scan)
 cdecl_func(fbink_wait_for_usbms_processing)
