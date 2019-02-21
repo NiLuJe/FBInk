@@ -79,6 +79,13 @@ ifndef DEBUG
 	EXTRA_CFLAGS+=-funroll-loops
 	# More loop/vectorization tweaks
 	#EXTRA_CFLAGS+=-ftree-loop-distribution -ftree-loop-im -ftree-loop-ivcanon -fivopts
+
+	# Enforce LTO if need be (utils won't link without it).
+	# I *highly* recommend building eveyrthing with LTO, though.
+	ifeq (,$(findstring flto,$(CFLAGS)))
+		LTO_JOBS:=$(shell getconf _NPROCESSORS_ONLN 2> /dev/null || sysctl -n hw.ncpu 2> /dev/null || echo 1)
+		LTO_CFLAGS:=-flto=$(LTO_JOBS) -fuse-linker-plugin
+	endif
 endif
 
 # Moar warnings!
@@ -352,9 +359,9 @@ stripbin: $(OUT_DIR)/fbink
 endif
 
 utils: outdir
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/rota utils/rota.c
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/rota utils/rota.c
 	$(STRIP) --strip-unneeded $(OUT_DIR)/rota
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbdepth utils/fbdepth.c
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbdepth utils/fbdepth.c
 	$(STRIP) --strip-unneeded $(OUT_DIR)/fbdepth
 
 strip: static
