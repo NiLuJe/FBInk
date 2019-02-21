@@ -79,13 +79,13 @@ ifndef DEBUG
 	EXTRA_CFLAGS+=-funroll-loops
 	# More loop/vectorization tweaks
 	#EXTRA_CFLAGS+=-ftree-loop-distribution -ftree-loop-im -ftree-loop-ivcanon -fivopts
+endif
 
-	# Enforce LTO if need be (utils won't link without it).
-	# I *highly* recommend building eveyrthing with LTO, though.
-	ifeq (,$(findstring flto,$(CFLAGS)))
-		LTO_JOBS:=$(shell getconf _NPROCESSORS_ONLN 2> /dev/null || sysctl -n hw.ncpu 2> /dev/null || echo 1)
-		LTO_CFLAGS:=-flto=$(LTO_JOBS) -fuse-linker-plugin
-	endif
+# Enforce LTO if need be (utils won't link without it).
+# I *highly* recommend building eveyrthing with LTO, though.
+ifeq (,$(findstring flto,$(CFLAGS)))
+	LTO_JOBS:=$(shell getconf _NPROCESSORS_ONLN 2> /dev/null || sysctl -n hw.ncpu 2> /dev/null || echo 1)
+	LTO_CFLAGS:=-flto=$(LTO_JOBS) -fuse-linker-plugin
 endif
 
 # Moar warnings!
