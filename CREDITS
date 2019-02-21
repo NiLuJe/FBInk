@@ -62,3 +62,6 @@ As well as a number of third-party resources (namely, font files):
 		Licensed under the GNU General Public License version 2+ (https://www.gnu.org/licenses/gpl-2.0.html).
 		(https://github.com/domo141/fatty-bitmap-font)
 
+	* spleen (a monospaced bitmap font), Copyright (c) 2018-2019, Frederic Cambus,
+		Licensed under the 2-Clause BSD License (https://opensource.org/licenses/BSD-2-Clause).
+		(https://github.com/fcambus/spleen)

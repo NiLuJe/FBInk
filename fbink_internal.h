@@ -209,6 +209,7 @@
 #	include "fbink_scientifica.h"
 #	include "fbink_terminus.h"
 #	include "fbink_fatty.h"
+#	include "fbink_spleen.h"
 #	include "fbink_misc_fonts.h"
 #endif
 
@@ -345,7 +346,7 @@ void (*fxpRotateRegion)(struct mxcfb_rect*) = NULL;
 // And the font bitmap getter...
 const unsigned char* (*fxpFont8xGetBitmap)(uint32_t) = NULL;
 #ifdef FBINK_WITH_FONTS
-//const uint16_t* (*fxpFont16xGetBitmap)(uint32_t) = NULL;
+const uint16_t* (*fxpFont16xGetBitmap)(uint32_t) = NULL;
 const uint32_t* (*fxpFont32xGetBitmap)(uint32_t) = NULL;
 //const uint64_t* (*fxpFont64xGetBitmap)(uint32_t) = NULL;
 #endif

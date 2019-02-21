@@ -77,7 +77,8 @@ typedef enum
 	SCIENTIFICAI,      // scientifica (italic)
 	TERMINUS,          // terminus (regular)
 	TERMINUSB,         // terminus (bold)
-	FATTY              // fatty
+	FATTY,             // fatty
+	SPLEEN             // spleen
 } FONT_INDEX_T;
 
 // List of supported font styles

@@ -9,7 +9,7 @@
 #       Right now, fontwidth <= 8 means we store an array of uint8_t, for a <= 16xN font an array of uint16_t,
 #       a <= 32xN one an array of uint32_t, and a <= 64xN one an array of uint64_t ;).
 #       This script currently handles <= 64, as does FBInk (although, on FBInk's side,
-#       the uint16_t & uint64_t codepaths are currently commented out, since they're unneeded with our current font panel).
+#       the uint64_t codepath is currently commented out, since it's unneeded with our current font panel).
 #       As for the conversion process itself, FontForge + gbdfed + a text editor should handle most common cases just fine ;).
 #       In case that wasn't clear, width of intermediary values are supported, it's just a bit of a waste of memory ;).
 #
@@ -81,6 +81,7 @@ font_set = {
 	"terminus"	: ("ter-u16n.hex",		8,	16),
 	"terminusb"	: ("ter-u16b.hex",		8,	16),
 	"fatty"		: ("fatty7x16-iso10646-1.hex",	7,	16),
+	"spleen"	: ("spleen-16x32.hex",		16,	32),
 }
 
 # Get the font name from the first arg passed to the script

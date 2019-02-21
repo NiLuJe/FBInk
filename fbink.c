@@ -644,6 +644,8 @@ static const char*
 			return "Terminus Bold";
 		case FATTY:
 			return "Fatty";
+		case SPLEEN:
+			return "Spleen";
 #endif
 		default:
 			return "IBM (Default)";
@@ -1007,22 +1009,21 @@ static struct mxcfb_rect
 			ci++;
 		}
 #ifdef FBINK_WITH_FONTS
-		/*
 	} else if (glyphWidth <= 16) {
 		while ((ch = u8_nextchar2(text, &bi)) != 0U) {
 			LOG("Char %zu (@ %zu) out of %zu is @ byte offset %zu and is U+%04X",
-			(ci + 1U),
-			ci,
-			charcount,
-			bi,
-			ch);
+			    (ci + 1U),
+			    ci,
+			    charcount,
+			    bi,
+			    ch);
 
 			// Update the x coordinates for this character
 			x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
 
 			// Get the glyph's pixmap (width <= 16 -> uint16_t)
 			const uint16_t* bitmap = NULL;
-			bitmap = (*fxpFont16xGetBitmap)(ch);
+			bitmap                 = (*fxpFont16xGetBitmap)(ch);
 
 			// Render, scale & plot!
 			RENDER_GLYPH();
@@ -1030,7 +1031,6 @@ static struct mxcfb_rect
 			// Next glyph! This serves as the source for the pen position, hence it being used as an index...
 			ci++;
 		}
-	*/
 	} else if (glyphWidth <= 32) {
 		while ((ch = u8_nextchar2(text, &bi)) != 0U) {
 			LOG("Char %zu (@ %zu) out of %zu is @ byte offset %zu and is U+%04X",
@@ -1883,6 +1883,11 @@ static int
 #ifdef FBINK_WITH_FONTS
 	// Setup custom fonts (glyph size, render fx, bitmap fx)
 	switch (fbink_cfg->fontname) {
+		case SPLEEN:
+			glyphWidth          = 16U;
+			glyphHeight         = 32U;
+			fxpFont16xGetBitmap = &spleen_get_bitmap;
+			break;
 		case FATTY:
 			glyphWidth         = 7U;
 			glyphHeight        = 16U;
@@ -2068,6 +2073,9 @@ static int
 		if (fbink_cfg->fontname == BLOCK) {
 			// Block is roughly 4 times wider than other fonts, compensate for that...
 			FONTSIZE_MULT = (uint8_t) MAX(1U, FONTSIZE_MULT / 4U);
+		} else if (fbink_cfg->fontname == SPLEEN) {
+			// Spleen is roughly twice as wide as other fonts, compensate for that...
+			FONTSIZE_MULT = (uint8_t) MAX(1U, FONTSIZE_MULT / 2U);
 		}
 #endif
 	}
@@ -5754,6 +5762,8 @@ cleanup:
 #	include "fbink_terminus.c"
 // Tomi Ollila's Fatty (https://github.com/domo141/fatty-bitmap-font)
 #	include "fbink_fatty.c"
+// Frederic Cambus's Spleen (https://github.com/fcambus/spleen)
+#	include "fbink_spleen.c"
 // Various other small fonts (c.f., CREDITS for details)
 #	include "fbink_misc_fonts.c"
 #endif
