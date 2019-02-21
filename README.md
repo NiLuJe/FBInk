@@ -88,7 +88,7 @@ The same logic is used to allow for a bit of tailoring:
 -   Pass `DEBUG=1` to make for a Debug build, and pass `DEBUG=1 DEBUGFLAGS=1` to make for a Debug build with enforced debug CFLAGS.
 
 Along the way, a few auxiliary tools may crop up in the `utils` folder. `make utils` will do a static build of these (which is the recommended way to do it, as they rather crudely piggyback on FBInk's *internal* API). Currently, these consist of a diagnostic tool regarding rotation behavior, and a tool to properly manipulate the bitdepth on eInk devices.
-These have *only* been tested on Kobo, and should probably be left alone unless you know what you're doing ;).
+They have *only* been tested on Kobo, and should probably be left alone unless you know what you're doing ;).
 
 ## NOTES
 

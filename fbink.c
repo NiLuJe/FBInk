@@ -3717,10 +3717,10 @@ int
 	}
 	region.top = paint_point.y;
 
-	const uint8_t invert     = is_inverted ? 0xFF : 0U;
-	const uint8_t fgcolor    = penFGColor ^ invert;
-	const uint8_t bgcolor    = penBGColor ^ invert;
-	short int     layer_diff = (short int) (fgcolor - bgcolor);
+	const uint8_t   invert     = is_inverted ? 0xFF : 0U;
+	const uint8_t   fgcolor    = penFGColor ^ invert;
+	const uint8_t   bgcolor    = penBGColor ^ invert;
+	const short int layer_diff = (short int) (fgcolor - bgcolor);
 
 	// Do we need to clear the screen?
 	if (is_cleared) {
@@ -5445,10 +5445,10 @@ static int
 						fb_px.color.g = img_px.color.g;
 						fb_px.color.b = img_px.color.b;
 						// NOTE: The RGB -> BGR dance precludes us from simply doing a 3 bytes memcpy,
-						//       and our union trickery appears to be faster than building the pixel
+						//       and our union trickery appears to be faster than packing the pixel
 						//       ourselves with something like:
 						//       fb_px.p = 0xFF<<24U | img_px.color.r<<16U | img_px.color.g<<8U | img_px.color.b;
-						// We still can do the inversion on the full pixel, though ;).
+						// We *can* do the inversion on the full pixel, though ;).
 						fb_px.p ^= invert_rgb;
 
 						// NOTE: Again, assume we can safely skip rotation tweaks

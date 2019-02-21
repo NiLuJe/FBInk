@@ -44,7 +44,7 @@ static void
 	    "\t-d, --depth <8|16|24|32>\tSwitch the framebuffer to the supplied bitdepth.\n"
 	    "\t-h, --help\t\t\tShow this help message.\n"
 	    "\t-v, --verbose\t\t\tToggle printing diagnostic messages.\n"
-	    "\t-q, --quiet\t\t\tToggle hiding diagnostic setup messages.\n"
+	    "\t-q, --quiet\t\t\tToggle hiding diagnostic messages.\n"
 	    "\t-g, --get\t\t\tJust output the current bitdepth to stdout.\n"
 	    "\t-G, --getcode\t\t\tJust exit with the current bitdepth as exit code.\n"
 	    "\n",

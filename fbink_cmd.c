@@ -1266,7 +1266,7 @@ int
 					show_helpmsg();
 				}
 			} else {
-				// If we did'nt pass *any* non-positional arguments, but we asked for a screen clear, do it!
+				// If we didn't pass *any* non-positional arguments, but we asked for a screen clear, do it!
 				// This avoids the clunky need to pass an empty string to do that otherwise ;).
 				// This is at the bottom rung of the if ladder so as not to mess with anything else,
 				// in particular stdin handling...
