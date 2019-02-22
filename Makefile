@@ -82,7 +82,7 @@ ifndef DEBUG
 endif
 
 # Enforce LTO if need be (utils won't link without it).
-# I *highly* recommend building eveyrthing with LTO, though.
+# I *highly* recommend *always* building the full project with LTO, though.
 ifeq (,$(findstring flto,$(CFLAGS)))
 	LTO_JOBS:=$(shell getconf _NPROCESSORS_ONLN 2> /dev/null || sysctl -n hw.ncpu 2> /dev/null || echo 1)
 	LTO_CFLAGS:=-flto=$(LTO_JOBS) -fuse-linker-plugin
