@@ -18,6 +18,8 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// NOTE: This tool was initially posted here: https://www.mobileread.com/forums/showpost.php?p=3786887&postcount=315
+
 // Because we're pretty much Linux-bound ;).
 #ifndef _GNU_SOURCE
 #	define _GNU_SOURCE
