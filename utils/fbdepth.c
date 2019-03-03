@@ -106,6 +106,8 @@ static bool
 	// NOTE: We have to counteract the rotation shenanigans the Kernel might be enforcing...
 	//       c.f., mxc_epdc_fb_check_var @ drivers/video/mxc/mxc_epdc_fb.c OR drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c
 	//       The goal being to end up in the *same* effective rotation as before.
+	// First, remember the current rotation...
+	uint32_t ori_rota = vInfo.rotate;
 	if (deviceQuirks.ntxBootRota == FB_ROTATE_UR) {
 		// NOTE: This should cover the H2O and the few other devices suffering from the same quirk...
 		vInfo.rotate = (uint32_t) vInfo.rotate ^ 2;
@@ -126,6 +128,59 @@ static bool
 	if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
 		perror("ioctl PUT_V");
 		return false;
+	}
+
+	// NOTE: Double-check that we weren't bit by rotation quirks...
+	if (vInfo.rotate != ori_rota) {
+		LOG("\nCurrent rotation (%u) doesn't match the original rotation (%u), attempting to fix it . . .",
+		    vInfo.rotate,
+		    ori_rota);
+
+		// Brute-force it until it matches...
+		for (int i = FB_ROTATE_UR; i <= FB_ROTATE_CCW; i++) {
+			// If we finally got the right orientation, break the loop
+			if (vInfo.rotate == ori_rota) {
+				break;
+			}
+			// Do the i -> i + 1 -> i dance to be extra sure...
+			vInfo.rotate = (uint32_t) i;
+			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
+				perror("ioctl PUT_V");
+				return false;
+			}
+			LOG("Kernel rotation quirk recovery: %d -> %u", i, vInfo.rotate);
+
+			// Don't do anything extra if that was enough...
+			if (vInfo.rotate == ori_rota) {
+				continue;
+			}
+			// Now for i + 1...
+			uint32_t n   = (uint32_t)((i + 1) % 4);
+			vInfo.rotate = n;
+			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
+				perror("ioctl PUT_V");
+				return false;
+			}
+			LOG("Kernel rotation quirk recovery (intermediary @ %d): %u -> %u", i, n, vInfo.rotate);
+
+			// And back to i, if need be...
+			if (vInfo.rotate == ori_rota) {
+				continue;
+			}
+			vInfo.rotate = (uint32_t) i;
+			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
+				perror("ioctl PUT_V");
+				return false;
+			}
+			LOG("Kernel rotation quirk recovery: %d -> %u", i, vInfo.rotate);
+		}
+	}
+
+	// Finally, warn if things *still* look FUBAR...
+	if (vInfo.rotate != ori_rota) {
+		LOG("\nCurrent rotation (%u) doesn't match the original rotation (%u), here be dragons!",
+		    vInfo.rotate,
+		    ori_rota);
 	}
 
 	LOG("Bitdepth is now %ubpp (grayscale: %u) @ rotate: %u (%s)\n",
