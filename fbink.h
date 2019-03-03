@@ -145,9 +145,8 @@ typedef enum
 // List of *potentially* available waveform modes
 typedef enum
 {
-	WFM_AUTO = 0U,
+	WFM_GC16 = 0U,
 	WFM_DU,
-	WFM_GC16,
 	WFM_GC4,
 	WFM_A2,
 	WFM_GL16,
@@ -159,7 +158,8 @@ typedef enum
 	WFM_GL4,
 	WFM_GL16_INV,
 	WFM_GCK16,
-	WFM_GLKW16
+	WFM_GLKW16,
+	WFM_AUTO
 } WFM_MODE_INDEX_T;
 
 // List of *potentially* available HW dithering modes
