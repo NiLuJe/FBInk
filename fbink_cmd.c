@@ -1240,30 +1240,42 @@ int
 				size_t  len  = 0;
 				ssize_t nread;
 				int     linecnt = -1;
-				// Did we ask for OT rendering?
-				if (is_truetype) {
-					load_ot_fonts(reg_ot_file, bd_ot_file, it_ot_file, bdit_ot_file, &fbink_cfg);
-					while ((nread = getline(&line, &len, stdin)) != -1) {
-						if ((linecnt = fbink_print_ot(fbfd, line, &ot_config, &fbink_cfg)) < 0) {
-							fprintf(stderr, "Failed to print that string!\n");
-							rv = ERRCODE(EXIT_FAILURE);
+				// Check that we have stuff to read from stdin first,
+				// as we do *NOT* want an interactive behavior here (c.f., #32).
+				int n;
+				if (ioctl(fileno(stdin), FIONREAD, &n) == 0 && n > 0) {
+					// Did we ask for OT rendering?
+					if (is_truetype) {
+						load_ot_fonts(
+						    reg_ot_file, bd_ot_file, it_ot_file, bdit_ot_file, &fbink_cfg);
+						while ((nread = getline(&line, &len, stdin)) != -1) {
+							if ((linecnt = fbink_print_ot(
+								 fbfd, line, &ot_config, &fbink_cfg)) < 0) {
+								fprintf(stderr, "Failed to print that string!\n");
+								rv = ERRCODE(EXIT_FAILURE);
+							}
+							ot_config.margins.top = (short int) linecnt;
 						}
-						ot_config.margins.top = (short int) linecnt;
-					}
-				} else {
-					while ((nread = getline(&line, &len, stdin)) != -1) {
-						if ((linecnt = fbink_print(fbfd, line, &fbink_cfg)) < 0) {
-							fprintf(stderr, "Failed to print that string!\n");
-							rv = ERRCODE(EXIT_FAILURE);
+					} else {
+						while ((nread = getline(&line, &len, stdin)) != -1) {
+							if ((linecnt = fbink_print(fbfd, line, &fbink_cfg)) < 0) {
+								fprintf(stderr, "Failed to print that string!\n");
+								rv = ERRCODE(EXIT_FAILURE);
+							}
+							fbink_cfg.row = (short int) (fbink_cfg.row + linecnt);
 						}
-						fbink_cfg.row = (short int) (fbink_cfg.row + linecnt);
 					}
+					free(line);
 				}
-				free(line);
 
 				// If nothing was read, show the help
 				if (linecnt == -1) {
-					show_helpmsg();
+					// Except that if we asked for a clear, do it!
+					if (fbink_cfg.is_cleared) {
+						rv = fbink_cls(fbfd, &fbink_cfg);
+					} else {
+						show_helpmsg();
+					}
 				}
 			} else {
 				// If we didn't pass *any* non-positional arguments, but we asked for a screen clear, do it!
