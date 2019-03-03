@@ -5669,7 +5669,7 @@ static int
 	// Refresh screen
 	if (refresh(fbfd,
 		    region,
-		    WAVEFORM_MODE_GC16,
+		    get_wfm_mode(fbink_cfg->wfm_mode),
 		    fbink_cfg->is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
