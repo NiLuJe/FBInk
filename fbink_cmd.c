@@ -1263,8 +1263,26 @@ int
 						} else {
 							show_helpmsg();
 						}
-						// And abort early ;).
-						goto cleanup;
+						// And abort early, if still possible ;).
+						ioctl(fileno(stdin), FIONREAD, &n);
+						if (n == 0) {
+							// Okay, stdin is still empty, we're reasonably sure we can exit safely.
+							goto cleanup;
+						} else {
+							// NOTE: If you're piping something that doesn't *immediately*
+							//       provides us with something to read, this mostly ensures we'll try
+							//       to honor said delayed input.
+							//       This is obviously race-y, but may happen with tail -f like stuff.
+							//       Using this kind of tool in a non-interactive SSH session
+							//       is somewhat discouraged, as you'll have to take care of killing
+							//       said tool yourself!
+							//       (Killing the tool will allow FBInk to exit sanely,
+							//       but FBInk exiting will *NOT* kill the tool itself!
+							//       It'll most likely get re-parented to init instead!).
+							fprintf(
+							    stderr,
+							    "stdin is no longer empty, re-engaging classic blocking behavior!\n");
+						}
 					}
 				}
 
