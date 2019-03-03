@@ -4361,7 +4361,7 @@ static uint32_t
 			waveform_mode = WAVEFORM_MODE_AUTO;
 			break;
 	}
-#endif
+#endif    // FBINK_FOR_KINDLE
 
 	return waveform_mode;
 }

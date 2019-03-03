@@ -466,7 +466,7 @@ int
 	uint32_t  region_height  = 0;
 	char*     region_wfm     = NULL;
 	char*     region_dither  = NULL;
-	uint8_t   region_hwd_idx = HWD_PASSTHROUGH;
+	uint8_t   region_hwd     = HWD_PASSTHROUGH;
 	bool      is_refresh     = false;
 	char*     image_file     = NULL;
 	short int image_x_offset = 0;
@@ -619,15 +619,15 @@ int
 
 							region_dither = value;
 							if (strcasecmp(region_dither, "PASSTHROUGH") == 0) {
-								region_hwd_idx = HWD_PASSTHROUGH;
+								region_hwd = HWD_PASSTHROUGH;
 							} else if (strcasecmp(region_dither, "FLOYD_STEINBERG") == 0) {
-								region_hwd_idx = HWD_FLOYD_STEINBERG;
+								region_hwd = HWD_FLOYD_STEINBERG;
 							} else if (strcasecmp(region_dither, "ATKINSON") == 0) {
-								region_hwd_idx = HWD_ATKINSON;
+								region_hwd = HWD_ATKINSON;
 							} else if (strcasecmp(region_dither, "ORDERED") == 0) {
-								region_hwd_idx = HWD_ORDERED;
+								region_hwd = HWD_ORDERED;
 							} else if (strcasecmp(region_dither, "QUANT_ONLY") == 0) {
-								region_hwd_idx = HWD_QUANT_ONLY;
+								region_hwd = HWD_QUANT_ONLY;
 							} else {
 								fprintf(stderr,
 									"Unknown hardware dithering algorithm '%s'.\n",
@@ -1233,7 +1233,7 @@ int
 					  region_width,
 					  region_height,
 					  fbink_cfg.wfm_mode,
-					  region_hwd_idx,
+					  region_hwd,
 					  fbink_cfg.is_flashing) != EXIT_SUCCESS) {
 				fprintf(stderr, "Failed to refresh the screen as per your specification!\n");
 				rv = ERRCODE(EXIT_FAILURE);

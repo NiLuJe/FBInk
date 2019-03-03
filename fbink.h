@@ -369,7 +369,7 @@ FBINK_API int fbink_printf(int fbfd, const FBInkOTConfig* cfg, const FBInkConfig
 // NOTE: If waveform_mode is set to a bogus or unsupported value, it'll fall back to WFM_AUTO
 //       Be aware that 0 maps to GC16, not AUTO!
 // NOTE: If you do NOT want to request hardware dithering, set dithering_mode to HWD_PASSTHROUGH (i.e., 0).
-//       This is also the fllback value.
+//       This is also the fallback value.
 FBINK_API int fbink_refresh(int      fbfd,
 			    uint32_t region_top,
 			    uint32_t region_left,
