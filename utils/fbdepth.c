@@ -143,6 +143,7 @@ static bool
 				break;
 			}
 			// Do the i -> i + 1 -> i dance to be extra sure...
+			// (This is useful on devices where the kernel *always* switches to the invert orientation, c.f., rota.c)
 			vInfo.rotate = (uint32_t) i;
 			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
 				perror("ioctl PUT_V");
@@ -154,7 +155,8 @@ static bool
 			if (vInfo.rotate == ori_rota) {
 				continue;
 			}
-			// Now for i + 1...
+			// Now for i + 1 w/ wraparound, since the valid rotation range is [0..3] (FB_ROTATE_UR to FB_ROTATE_CCW).
+			// (i.e., a Portrait/Landscape swap to counteract potential side-effects of a kernel-side mandatory invert)
 			uint32_t n   = (uint32_t)((i + 1) % 4);
 			vInfo.rotate = n;
 			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
