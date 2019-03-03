@@ -4353,13 +4353,55 @@ static uint32_t
 			waveform_mode = WAVEFORM_MODE_REAGLD;
 			break;
 		default:
-			LOG("Unknown (or unsupported) waveform mode index '%hhu', defaulting to AUTO", wfm_mode_index);
+			LOG("Unknown (or unsupported) waveform mode '%s' @ index %hhu, defaulting to AUTO",
+			    wfm_to_string(wfm_mode_index),
+			    wfm_mode_index);
 			waveform_mode = WAVEFORM_MODE_AUTO;
 			break;
 	}
 #endif
 
 	return waveform_mode;
+}
+
+// Convert a WFM_MODE_INDEX_T value to a human readable string
+static const char*
+    wfm_to_string(uint8_t wfm_mode_index)
+{
+	switch (wfm_mode_index) {
+		case WFM_GC16:
+			return "GC16";
+		case WFM_DU:
+			return "DU";
+		case WFM_GC4:
+			return "GC4";
+		case WFM_A2:
+			return "A2";
+		case WFM_GL16:
+			return "GL16";
+		case WFM_REAGL:
+			return "REAGL";
+		case WFM_REAGLD:
+			return "REAGLD";
+		case WFM_GC16_FAST:
+			return "GC16 FAST";
+		case WFM_GL16_FAST:
+			return "GL16 FAST";
+		case WFM_DU4:
+			return "DU4";
+		case WFM_GL4:
+			return "GL4";
+		case WFM_GL16_INV:
+			return "GL16 INVERTED";
+		case WFM_GCK16:
+			return "GCK16";
+		case WFM_GLKW16:
+			return "GLKW16";
+		case WFM_AUTO:
+			return "AUTO";
+		default:
+			return "Unknown -> GC16 (Default)";
+	}
 }
 
 // Convert our public HW_DITHER_INDEX_T values to an appropriate dithering mode constant
@@ -4390,13 +4432,34 @@ static int
 			dither_algo = EPDC_FLAG_USE_DITHERING_QUANT_ONLY;
 			break;
 		default:
-			LOG("Unknown (or unsupported) dithering mode index '%hhu', defaulting to PASSTHROUGH",
+			LOG("Unknown (or unsupported) dithering mode '%s' @ index %hhu, defaulting to PASSTHROUGH",
+			    hwd_to_string(hw_dither_index),
 			    hw_dither_index);
 			dither_algo = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
 			break;
 	}
 
 	return dither_algo;
+}
+
+// Convert a HW_DITHER_INDEX_T value to a human readable string
+static const char*
+    hwd_to_string(uint8_t hw_dither_index)
+{
+	switch (hw_dither_index) {
+		case HWD_PASSTHROUGH:
+			return "PASSTHROUGH";
+		case HWD_FLOYD_STEINBERG:
+			return "FLOYD STEINBERG";
+		case HWD_ATKINSON:
+			return "ATKINSON";
+		case HWD_ORDERED:
+			return "ORDERED";
+		case HWD_QUANT_ONLY:
+			return "QUANTIZE ONLY";
+		default:
+			return "Unknown -> PASSTHROUGH (Default)";
+	}
 }
 
 // Small public wrapper around refresh(), without the caller having to depend on mxcfb headers

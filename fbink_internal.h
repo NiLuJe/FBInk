@@ -468,8 +468,10 @@ static void* free_ot_font(stbtt_fontinfo*);
 static void  parse_simple_md(const char*, size_t, unsigned char*);
 #endif
 
-static uint32_t get_wfm_mode(uint8_t);
-static int      get_hwd_mode(uint8_t);
+static uint32_t    get_wfm_mode(uint8_t);
+static const char* wfm_to_string(uint8_t);
+static int         get_hwd_mode(uint8_t);
+static const char* hwd_to_string(uint8_t);
 
 // For identify_device, which we need outside of fbink_device_id.c ;)
 #ifndef FBINK_FOR_LINUX
