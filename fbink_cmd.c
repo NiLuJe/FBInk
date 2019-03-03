@@ -207,6 +207,8 @@ static void
 	    "\t\tDisplays the image \"hello,world.png\", starting at the ninth line plus 11px and the sixth column minus 10px\n"
 	    "\tfbink -g file=hello.png,halign=EDGE,valign=CENTER\n"
 	    "\t\tDisplays the image \"hello.png\", in the middle of the screen, aligned to the right edge.\n"
+	    "\tfbink -g file=hello.png,wfm=A2\n"
+	    "\t\tDisplays the image \"hello.png\", in monochrome.\n"
 	    "\n"
 	    "Options affecting the image's appearance:\n"
 	    "\t-a, --flatten\tIgnore the alpha channel.\n"
