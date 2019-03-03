@@ -17,6 +17,8 @@ cdecl_type(ALIGN_INDEX_T)
 cdecl_type(FG_COLOR_INDEX_T)
 cdecl_type(BG_COLOR_INDEX_T)
 
+cdecl_type(WFM_MODE_INDEX_T)
+cdecl_type(HW_DITHER_INDEX_T)
 
 // Config structs
 cdecl_type(FBInkState)
