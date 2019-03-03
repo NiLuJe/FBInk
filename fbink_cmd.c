@@ -196,8 +196,9 @@ static void
 	    "\n"
 	    "\n"
 	    "You can also eschew printing a STRING, and print an IMAGE at the requested coordinates instead:\n"
-	    "\t-g, --image file=PATH,x=NUM,y=NUM,halign=ALIGN,valign=ALIGN\n"
-	    "\t\tSupported ALIGN values: NONE (or LEFT for halign, TOP for valign), CENTER or MIDDLE, EDGE (or RIGHT for halign, BOTTOM for valign)\n"
+	    "\t-g, --image file=PATH,x=NUM,y=NUM,halign=ALIGN,valign=ALIGN,wfm=NAME\n"
+	    "\t\tSupported ALIGN values: NONE (or LEFT for halign, TOP for valign), CENTER or MIDDLE, EDGE (or RIGHT for halign, BOTTOM for valign).\n"
+	    "\t\tSee -s, --refresh above for supported WFM values, (defaults to GC16 here).\n"
 	    "\n"
 	    "EXAMPLES:\n"
 	    "\tfbink -g file=hello.png\n"
@@ -409,6 +410,7 @@ int
 		YOFF_OPT,
 		HALIGN_OPT,
 		VALIGN_OPT,
+		IMG_WFM_OPT,
 	};
 	enum
 	{
@@ -435,8 +437,13 @@ int
                                         [WFM_OPT]    = "wfm",
                                         [DITHER_OPT] = "dither",
                                         NULL };
-	char* const image_token[]    = { [FILE_OPT] = "file",     [XOFF_OPT] = "x",        [YOFF_OPT] = "y",
-                                      [HALIGN_OPT] = "halign", [VALIGN_OPT] = "valign", NULL };
+	char* const image_token[]    = { [FILE_OPT]    = "file",
+                                      [XOFF_OPT]    = "x",
+                                      [YOFF_OPT]    = "y",
+                                      [HALIGN_OPT]  = "halign",
+                                      [VALIGN_OPT]  = "valign",
+                                      [IMG_WFM_OPT] = "wfm",
+                                      NULL };
 	char* const truetype_token[] = { [REGULAR_OPT]    = "regular",
 					 [BOLD_OPT]       = "bold",
 					 [ITALIC_OPT]     = "italic",
@@ -770,6 +777,53 @@ int
 								fbink_cfg.valign = EDGE;
 							} else {
 								fprintf(stderr, "Unknown alignment value '%s'.\n", value);
+								errfnd = true;
+							}
+							break;
+						case IMG_WFM_OPT:
+							if (value == NULL) {
+								fprintf(stderr,
+									"Missing value for suboption '%s'\n",
+									image_token[IMG_WFM_OPT]);
+								errfnd = true;
+								continue;
+							}
+
+							region_wfm = value;
+							if (strcasecmp(region_wfm, "AUTO") == 0) {
+								fbink_cfg.wfm_mode = WFM_AUTO;
+							} else if (strcasecmp(region_wfm, "DU") == 0) {
+								fbink_cfg.wfm_mode = WFM_DU;
+							} else if (strcasecmp(region_wfm, "GC16") == 0) {
+								fbink_cfg.wfm_mode = WFM_GC16;
+							} else if (strcasecmp(region_wfm, "GC4") == 0) {
+								fbink_cfg.wfm_mode = WFM_GC4;
+							} else if (strcasecmp(region_wfm, "A2") == 0) {
+								fbink_cfg.wfm_mode = WFM_A2;
+							} else if (strcasecmp(region_wfm, "GL16") == 0) {
+								fbink_cfg.wfm_mode = WFM_GL16;
+							} else if (strcasecmp(region_wfm, "REAGL") == 0) {
+								fbink_cfg.wfm_mode = WFM_REAGL;
+							} else if (strcasecmp(region_wfm, "REAGLD") == 0) {
+								fbink_cfg.wfm_mode = WFM_REAGLD;
+							} else if (strcasecmp(region_wfm, "GC16_FAST") == 0) {
+								fbink_cfg.wfm_mode = WFM_GC16_FAST;
+							} else if (strcasecmp(region_wfm, "GL16_FAST") == 0) {
+								fbink_cfg.wfm_mode = WFM_GL16_FAST;
+							} else if (strcasecmp(region_wfm, "DU4") == 0) {
+								fbink_cfg.wfm_mode = WFM_DU4;
+							} else if (strcasecmp(region_wfm, "GL4") == 0) {
+								fbink_cfg.wfm_mode = WFM_GL4;
+							} else if (strcasecmp(region_wfm, "GL16_INV") == 0) {
+								fbink_cfg.wfm_mode = WFM_GL16_INV;
+							} else if (strcasecmp(region_wfm, "GCK16") == 0) {
+								fbink_cfg.wfm_mode = WFM_GCK16;
+							} else if (strcasecmp(region_wfm, "GLKW16") == 0) {
+								fbink_cfg.wfm_mode = WFM_GLKW16;
+							} else {
+								fprintf(stderr,
+									"Unknown waveform update mode '%s'.\n",
+									region_wfm);
 								errfnd = true;
 							}
 							break;
@@ -1186,7 +1240,7 @@ int
 		} else if (is_image) {
 			if (!fbink_cfg.is_quiet) {
 				printf(
-				    "Displaying image '%s' @ column %hd + %hdpx, row %hd + %dpx (H align: %hhu, V align: %hhu, inverted: %s, flattened: %s, dithered: %s, skip refresh: %s)\n",
+				    "Displaying image '%s' @ column %hd + %hdpx, row %hd + %dpx (H align: %hhu, V align: %hhu, inverted: %s, flattened: %s, waveform: %s, dithered: %s, skip refresh: %s)\n",
 				    image_file,
 				    fbink_cfg.col,
 				    image_x_offset,
@@ -1196,6 +1250,7 @@ int
 				    fbink_cfg.valign,
 				    fbink_cfg.is_inverted ? "Y" : "N",
 				    fbink_cfg.ignore_alpha ? "Y" : "N",
+				    region_wfm ? region_wfm : "GC16",
 				    fbink_cfg.is_dithered ? "Y" : "N",
 				    fbink_cfg.no_refresh ? "Y" : "N");
 			}
