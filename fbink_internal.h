@@ -432,6 +432,7 @@ static int refresh_kobo_mk7(int, const struct mxcfb_rect, uint32_t, uint32_t, in
 static int refresh(int, const struct mxcfb_rect, uint32_t, int UNUSED_BY_CERVANTES, bool, bool);
 
 static int open_fb_fd(int*, bool*);
+static int open_fb_fd_nonblock(int*, bool*);
 
 static const char* fb_rotate_to_string(uint32_t);
 static int         initialize_fbink(int, const FBInkConfig*, bool);

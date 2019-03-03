@@ -1648,6 +1648,26 @@ static int
 	return EXIT_SUCCESS;
 }
 
+// And another variant that'll try to get a nonblocking fd when using FBFD_AUTO
+// NOTE: Only use this for functions that don't actually need to write to the fb, and only need an fd for ioctls!
+//       Generally, those won't try to mmap the fb either ;).
+static int
+    open_fb_fd_nonblock(int* fbfd, bool* keep_fd)
+{
+	if (*fbfd == FBFD_AUTO) {
+		// If we're opening a fd now, don't keep it around.
+		*keep_fd = false;
+		// We only need an fd for ioctl, hence O_NONBLOCK (as per open(2)).
+		*fbfd = open("/dev/fb0", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+		if (!*fbfd) {
+			WARN("Error: cannot open framebuffer character device, aborting");
+			return ERRCODE(EXIT_FAILURE);
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
+
 static const char*
     fb_rotate_to_string(uint32_t rotate)
 {
@@ -1669,9 +1689,9 @@ static const char*
 static int
     initialize_fbink(int fbfd, const FBInkConfig* fbink_cfg, bool skip_vinfo)
 {
-	// Open the framebuffer if need be...
+	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
 	bool keep_fd = true;
-	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+	if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
 		return ERRCODE(EXIT_FAILURE);
 	}
 
@@ -4220,9 +4240,9 @@ int
 		  const char* dithering_mode,
 		  bool        is_flashing)
 {
-	// Open the framebuffer if need be...
+	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
 	bool keep_fd = true;
-	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+	if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
 		return ERRCODE(EXIT_FAILURE);
 	}
 
@@ -4397,9 +4417,9 @@ int
 	uint32_t old_bpp  = vInfo.bits_per_pixel;
 	uint32_t old_rota = vInfo.rotate;
 
-	// Open the framebuffer if need be...
+	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
 	bool keep_fd = true;
-	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+	if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
 		return ERRCODE(EXIT_FAILURE);
 	}
 
