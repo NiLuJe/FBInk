@@ -4229,7 +4229,7 @@ cleanup:
 #endif    // FBINK_WITH_OPENTYPE
 }
 
-// Convert our public WFM_MODE_INDEX_T values to an appropriate waveform mode constant for the current device
+// Convert our public WFM_MODE_INDEX_T values to an appropriate mxcfb waveform mode constant for the current device
 static uint32_t
     get_wfm_mode(uint8_t wfm_mode_index)
 {
@@ -4322,7 +4322,9 @@ static uint32_t
 			waveform_mode = WAVEFORM_MODE_KOA2_GLKW16;
 			break;
 		default:
-			LOG("Unknown (or unsupported) waveform mode index '%hhu', defaulting to AUTO", wfm_mode_index);
+			LOG("Unknown (or unsupported) waveform mode '%s' @ index %hhu, defaulting to AUTO",
+			    wfm_to_string(wfm_mode_index),
+			    wfm_mode_index);
 			waveform_mode = WAVEFORM_MODE_AUTO;
 			break;
 	}
@@ -4400,11 +4402,11 @@ static const char*
 		case WFM_AUTO:
 			return "AUTO";
 		default:
-			return "Unknown -> GC16 (Default)";
+			return "Unknown";
 	}
 }
 
-// Convert our public HW_DITHER_INDEX_T values to an appropriate dithering mode constant
+// Convert our public HW_DITHER_INDEX_T values to an appropriate mxcfb dithering mode constant
 static int
     get_hwd_mode(uint8_t hw_dither_index)
 {
@@ -4458,7 +4460,7 @@ static const char*
 		case HWD_QUANT_ONLY:
 			return "QUANTIZE ONLY";
 		default:
-			return "Unknown -> PASSTHROUGH (Default)";
+			return "Unknown";
 	}
 }
 
@@ -4479,13 +4481,11 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
+	// Get the requested waveform mode constant...
 	uint32_t region_wfm = get_wfm_mode(waveform_mode);
 
-	// NOTE: This hardware dithering (handled by the PxP) is only supported since EPDC v2!
-	//       AFAICT, most of our eligible target devices only support PASSTHROUGH & ORDERED...
-	//       (c.f., drivers/dma/pxp/pxp_dma_v3.c)
+	// Same for the dithering mode, if we actually requested dithering...
 	int region_dither = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
-	//
 	if (dithering_mode > 0U) {
 		region_dither = get_hwd_mode(dithering_mode);
 	} else {

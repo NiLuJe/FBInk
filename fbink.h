@@ -366,7 +366,10 @@ FBINK_API int fbink_printf(int fbfd, const FBInkOTConfig* cfg, const FBInkConfig
 // is_flashing:		will ask for a black flash if true
 // NOTE: If you request an empty region (0x0 @ (0, 0), a full-screen refresh will be performed!
 // NOTE: As you've probably guessed, since it doesn't take an FBInkConfig pointer, this *ignores* no_refresh ;)
-// NOTE: dithering_mode MAY be NULL (in which case, dithering will NOT be requested, i.e., set to PASSTHROUGH)
+// NOTE: If waveform_mode is set to a bogus or unsupported value, it'll fall back to WFM_AUTO
+//       Be aware that 0 maps to GC16, not AUTO!
+// NOTE: If you do NOT want to request hardware dithering, set dithering_mode to HWD_PASSTHROUGH (i.e., 0).
+//       This is also the fllback value.
 FBINK_API int fbink_refresh(int      fbfd,
 			    uint32_t region_top,
 			    uint32_t region_left,
