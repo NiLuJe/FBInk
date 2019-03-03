@@ -1270,7 +1270,7 @@ int
 							goto cleanup;
 						} else {
 							// NOTE: If you're piping something that doesn't *immediately*
-							//       provides us with something to read, this mostly ensures we'll try
+							//       provide us with something to read, this mostly ensures we'll try
 							//       to honor said delayed input.
 							//       This is obviously race-y, but may happen with tail -f like stuff.
 							//       Using this kind of tool in a non-interactive SSH session
