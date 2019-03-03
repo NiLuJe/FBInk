@@ -457,6 +457,7 @@ int
 	uint32_t  region_height  = 0;
 	char*     region_wfm     = NULL;
 	char*     region_dither  = NULL;
+	uint8_t   region_hwd_idx = HWD_PASSTHROUGH;
 	bool      is_refresh     = false;
 	char*     image_file     = NULL;
 	short int image_x_offset = 0;
@@ -561,6 +562,42 @@ int
 							}
 
 							region_wfm = value;
+							if (strcasecmp(region_wfm, "AUTO") == 0) {
+								fbink_cfg.wfm_mode = WFM_AUTO;
+							} else if (strcasecmp(region_wfm, "DU") == 0) {
+								fbink_cfg.wfm_mode = WFM_DU;
+							} else if (strcasecmp(region_wfm, "GC16") == 0) {
+								fbink_cfg.wfm_mode = WFM_GC16;
+							} else if (strcasecmp(region_wfm, "GC4") == 0) {
+								fbink_cfg.wfm_mode = WFM_GC4;
+							} else if (strcasecmp(region_wfm, "A2") == 0) {
+								fbink_cfg.wfm_mode = WFM_A2;
+							} else if (strcasecmp(region_wfm, "GL16") == 0) {
+								fbink_cfg.wfm_mode = WFM_GL16;
+							} else if (strcasecmp(region_wfm, "REAGL") == 0) {
+								fbink_cfg.wfm_mode = WFM_REAGL;
+							} else if (strcasecmp(region_wfm, "REAGLD") == 0) {
+								fbink_cfg.wfm_mode = WFM_REAGLD;
+							} else if (strcasecmp(region_wfm, "GC16_FAST") == 0) {
+								fbink_cfg.wfm_mode = WFM_GC16_FAST;
+							} else if (strcasecmp(region_wfm, "GL16_FAST") == 0) {
+								fbink_cfg.wfm_mode = WFM_GL16_FAST;
+							} else if (strcasecmp(region_wfm, "DU4") == 0) {
+								fbink_cfg.wfm_mode = WFM_DU4;
+							} else if (strcasecmp(region_wfm, "GL4") == 0) {
+								fbink_cfg.wfm_mode = WFM_GL4;
+							} else if (strcasecmp(region_wfm, "GL16_INV") == 0) {
+								fbink_cfg.wfm_mode = WFM_GL16_INV;
+							} else if (strcasecmp(region_wfm, "GCK16") == 0) {
+								fbink_cfg.wfm_mode = WFM_GCK16;
+							} else if (strcasecmp(region_wfm, "GLKW16") == 0) {
+								fbink_cfg.wfm_mode = WFM_GLKW16;
+							} else {
+								fprintf(stderr,
+									"Unknown waveform update mode '%s'.\n",
+									region_wfm);
+								errfnd = true;
+							}
 							break;
 						case DITHER_OPT:
 							if (value == NULL) {
@@ -572,6 +609,22 @@ int
 							}
 
 							region_dither = value;
+							if (strcasecmp(region_dither, "PASSTHROUGH") == 0) {
+								region_hwd_idx = HWD_PASSTHROUGH;
+							} else if (strcasecmp(region_dither, "FLOYD_STEINBERG") == 0) {
+								region_hwd_idx = HWD_FLOYD_STEINBERG;
+							} else if (strcasecmp(region_dither, "ATKINSON") == 0) {
+								region_hwd_idx = HWD_ATKINSON;
+							} else if (strcasecmp(region_dither, "ORDERED") == 0) {
+								region_hwd_idx = HWD_ORDERED;
+							} else if (strcasecmp(region_dither, "QUANT_ONLY") == 0) {
+								region_hwd_idx = HWD_QUANT_ONLY;
+							} else {
+								fprintf(stderr,
+									"Unknown hardware dithering algorithm '%s'.\n",
+									region_dither);
+								errfnd = true;
+							}
 							break;
 						default:
 							fprintf(stderr, "No match found for token: /%s/\n", value);
@@ -1123,8 +1176,8 @@ int
 					  region_left,
 					  region_width,
 					  region_height,
-					  region_wfm,
-					  region_dither,
+					  fbink_cfg.wfm_mode,
+					  region_hwd_idx,
 					  fbink_cfg.is_flashing) != EXIT_SUCCESS) {
 				fprintf(stderr, "Failed to refresh the screen as per your specification!\n");
 				rv = ERRCODE(EXIT_FAILURE);

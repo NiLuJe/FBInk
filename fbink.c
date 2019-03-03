@@ -4229,24 +4229,12 @@ cleanup:
 #endif    // FBINK_WITH_OPENTYPE
 }
 
-// Small public wrapper around refresh(), without the caller having to depend on mxcfb headers
-int
-    fbink_refresh(int         fbfd,
-		  uint32_t    region_top,
-		  uint32_t    region_left,
-		  uint32_t    region_width,
-		  uint32_t    region_height,
-		  const char* waveform_mode,
-		  const char* dithering_mode,
-		  bool        is_flashing)
+// Convert our public WFM_MODE_INDEX_T values to an appropriate waveform mode constant for the current device
+static uint32_t
+    get_wfm_mode(uint8_t wfm_mode_index)
 {
-	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
-	bool keep_fd = true;
-	if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
-		return ERRCODE(EXIT_FAILURE);
-	}
+	uint32_t waveform_mode = WAVEFORM_MODE_AUTO;
 
-	uint32_t region_wfm = WAVEFORM_MODE_AUTO;
 	// Parse waveform mode...
 #ifdef FBINK_FOR_KINDLE
 	// Is this a KOA2 or a PW4 with new waveforms?
@@ -4255,109 +4243,188 @@ int
 		has_new_wfm = true;
 	}
 
-	if (strcasecmp("DU", waveform_mode) == 0) {
-		region_wfm = WAVEFORM_MODE_DU;
-	} else if (strcasecmp("GC16", waveform_mode) == 0) {
-		region_wfm = WAVEFORM_MODE_GC16;
-	} else if (strcasecmp("GC4", waveform_mode) == 0) {
-		region_wfm = WAVEFORM_MODE_GC4;
-	} else if (strcasecmp("A2", waveform_mode) == 0) {
-		if (has_new_wfm) {
-			region_wfm = WAVEFORM_MODE_KOA2_A2;
-		} else {
-			region_wfm = WAVEFORM_MODE_A2;
-		}
-	} else if (strcasecmp("GL16", waveform_mode) == 0) {
-		if (has_new_wfm) {
-			region_wfm = WAVEFORM_MODE_KOA2_GL16;
-		} else {
-			region_wfm = WAVEFORM_MODE_GL16;
-		}
-	} else if (strcasecmp("REAGL", waveform_mode) == 0) {
-		if (has_new_wfm) {
-			region_wfm = WAVEFORM_MODE_KOA2_REAGL;
-		} else {
-			region_wfm = WAVEFORM_MODE_REAGL;
-		}
-	} else if (strcasecmp("REAGLD", waveform_mode) == 0) {
-		if (has_new_wfm) {
-			region_wfm = WAVEFORM_MODE_KOA2_REAGLD;
-		} else {
-			region_wfm = WAVEFORM_MODE_REAGLD;
-		}
-	} else if (strcasecmp("GC16_FAST", waveform_mode) == 0) {
-		if (has_new_wfm) {
-			region_wfm = WAVEFORM_MODE_KOA2_GC16_FAST;
-		} else {
-			region_wfm = WAVEFORM_MODE_GC16_FAST;
-		}
-	} else if (strcasecmp("GL16_FAST", waveform_mode) == 0) {
-		if (has_new_wfm) {
-			region_wfm = WAVEFORM_MODE_KOA2_GL16_FAST;
-		} else {
-			region_wfm = WAVEFORM_MODE_GL16_FAST;
-		}
-	} else if (strcasecmp("DU4", waveform_mode) == 0) {
-		region_wfm = WAVEFORM_MODE_DU4;
-	} else if (strcasecmp("GL4", waveform_mode) == 0) {
-		if (has_new_wfm) {
-			region_wfm = WAVEFORM_MODE_KOA2_GL4;
-		} else {
-			region_wfm = WAVEFORM_MODE_GL4;
-		}
-	} else if (strcasecmp("GL16_INV", waveform_mode) == 0) {
-		if (has_new_wfm) {
-			region_wfm = WAVEFORM_MODE_KOA2_GL16_INV;
-		} else {
-			region_wfm = WAVEFORM_MODE_GL16_INV;
-		}
-	} else if (has_new_wfm && strcasecmp("GCK16", waveform_mode) == 0) {
-		region_wfm = WAVEFORM_MODE_KOA2_GCK16;
-	} else if (has_new_wfm && strcasecmp("GLKW16", waveform_mode) == 0) {
-		region_wfm = WAVEFORM_MODE_KOA2_GLKW16;
-#else
-	if (strcasecmp("DU", waveform_mode) == 0) {
-		region_wfm = WAVEFORM_MODE_DU;
-	} else if (strcasecmp("GC16", waveform_mode) == 0) {
-		region_wfm = WAVEFORM_MODE_GC16;
-	} else if (strcasecmp("GC4", waveform_mode) == 0) {
-		region_wfm = WAVEFORM_MODE_GC4;
-	} else if (strcasecmp("A2", waveform_mode) == 0) {
-		region_wfm = WAVEFORM_MODE_A2;
-	} else if (strcasecmp("GL16", waveform_mode) == 0) {
-		region_wfm = WAVEFORM_MODE_GL16;
-	} else if (strcasecmp("REAGL", waveform_mode) == 0) {
-		region_wfm = WAVEFORM_MODE_REAGL;
-	} else if (strcasecmp("REAGLD", waveform_mode) == 0) {
-		region_wfm = WAVEFORM_MODE_REAGLD;
-#endif
-	} else if (strcasecmp("AUTO", waveform_mode) == 0) {
-		region_wfm = WAVEFORM_MODE_AUTO;
-	} else {
-		LOG("Unknown (or unsupported) waveform mode '%s', defaulting to AUTO", waveform_mode);
-		region_wfm = WAVEFORM_MODE_AUTO;
+	switch (wfm_mode_index) {
+		case WFM_AUTO:
+			waveform_mode = WAVEFORM_MODE_AUTO;
+			break;
+		case WFM_DU:
+			waveform_mode = WAVEFORM_MODE_DU;
+			break;
+		case WFM_GC16:
+			waveform_mode = WAVEFORM_MODE_GC16;
+			break;
+		case WFM_GC4:
+			waveform_mode = WAVEFORM_MODE_GC4;
+			break;
+		case WFM_A2:
+			if (has_new_wfm) {
+				waveform_mode = WAVEFORM_MODE_KOA2_A2;
+			} else {
+				waveform_mode = WAVEFORM_MODE_A2;
+			}
+			break;
+		case WFM_GL16:
+			if (has_new_wfm) {
+				waveform_mode = WAVEFORM_MODE_KOA2_GL16;
+			} else {
+				waveform_mode = WAVEFORM_MODE_GL16;
+			}
+			break;
+		case WFM_REAGL:
+			if (has_new_wfm) {
+				waveform_mode = WAVEFORM_MODE_KOA2_REAGL;
+			} else {
+				waveform_mode = WAVEFORM_MODE_REAGL;
+			}
+			break;
+		case WFM_REAGLD:
+			if (has_new_wfm) {
+				waveform_mode = WAVEFORM_MODE_KOA2_REAGLD;
+			} else {
+				waveform_mode = WAVEFORM_MODE_REAGLD;
+			}
+			break;
+		case WFM_GC16_FAST:
+			if (has_new_wfm) {
+				waveform_mode = WAVEFORM_MODE_KOA2_GC16_FAST;
+			} else {
+				waveform_mode = WAVEFORM_MODE_GC16_FAST;
+			}
+			break;
+		case WFM_GL16_FAST:
+			if (has_new_wfm) {
+				waveform_mode = WAVEFORM_MODE_KOA2_GL16_FAST;
+			} else {
+				waveform_mode = WAVEFORM_MODE_GL16_FAST;
+			}
+			break;
+		case WFM_DU4:
+			waveform_mode = WAVEFORM_MODE_DU4;
+			break;
+		case WFM_GL4:
+			if (has_new_wfm) {
+				waveform_mode = WAVEFORM_MODE_KOA2_GL4;
+			} else {
+				waveform_mode = WAVEFORM_MODE_GL4;
+			}
+			break;
+		case WFM_GL16_INV:
+			if (has_new_wfm) {
+				waveform_mode = WAVEFORM_MODE_KOA2_GL16_INV;
+			} else {
+				waveform_mode = WAVEFORM_MODE_GL16_INV;
+			}
+			break;
+		case WFM_GCK16:
+			waveform_mode = WAVEFORM_MODE_KOA2_GCK16;
+			break;
+		case WFM_GLKW16:
+			waveform_mode = WAVEFORM_MODE_KOA2_GLKW16;
+			break;
+		default:
+			LOG("Unknown (or unsupported) waveform mode index '%hhu', defaulting to AUTO", wfm_mode_index);
+			waveform_mode = WAVEFORM_MODE_AUTO;
+			break;
 	}
+#else
+	switch (wfm_mode_index) {
+		case WFM_AUTO:
+			waveform_mode = WAVEFORM_MODE_AUTO;
+			break;
+		case WFM_DU:
+			waveform_mode = WAVEFORM_MODE_DU;
+			break;
+		case WFM_GC16:
+			waveform_mode = WAVEFORM_MODE_GC16;
+			break;
+		case WFM_GC4:
+			waveform_mode = WAVEFORM_MODE_GC4;
+			break;
+		case WFM_A2:
+			waveform_mode = WAVEFORM_MODE_A2;
+			break;
+		case WFM_GL16:
+			waveform_mode = WAVEFORM_MODE_GL16;
+			break;
+		case WFM_REAGL:
+			waveform_mode = WAVEFORM_MODE_REAGL;
+			break;
+		case WFM_REAGLD:
+			waveform_mode = WAVEFORM_MODE_REAGLD;
+			break;
+		default:
+			LOG("Unknown (or unsupported) waveform mode index '%hhu', defaulting to AUTO", wfm_mode_index);
+			waveform_mode = WAVEFORM_MODE_AUTO;
+			break;
+	}
+#endif
+
+	return waveform_mode;
+}
+
+// Convert our public HW_DITHER_INDEX_T values to an appropriate dithering mode constant
+static int
+    get_hwd_mode(uint8_t hw_dither_index)
+{
+
+	// NOTE: This hardware dithering (handled by the PxP) is only supported since EPDC v2!
+	//       AFAICT, most of our eligible target devices only support PASSTHROUGH & ORDERED...
+	//       (c.f., drivers/dma/pxp/pxp_dma_v3.c)
+	int dither_algo = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
+
+	// Parse dithering algo...
+	switch (hw_dither_index) {
+		case HWD_PASSTHROUGH:
+			dither_algo = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
+			break;
+		case HWD_FLOYD_STEINBERG:
+			dither_algo = EPDC_FLAG_USE_DITHERING_FLOYD_STEINBERG;
+			break;
+		case HWD_ATKINSON:
+			dither_algo = EPDC_FLAG_USE_DITHERING_ATKINSON;
+			break;
+		case HWD_ORDERED:
+			dither_algo = EPDC_FLAG_USE_DITHERING_ORDERED;
+			break;
+		case HWD_QUANT_ONLY:
+			dither_algo = EPDC_FLAG_USE_DITHERING_QUANT_ONLY;
+			break;
+		default:
+			LOG("Unknown (or unsupported) dithering mode index '%hhu', defaulting to PASSTHROUGH",
+			    hw_dither_index);
+			dither_algo = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
+			break;
+	}
+
+	return dither_algo;
+}
+
+// Small public wrapper around refresh(), without the caller having to depend on mxcfb headers
+int
+    fbink_refresh(int      fbfd,
+		  uint32_t region_top,
+		  uint32_t region_left,
+		  uint32_t region_width,
+		  uint32_t region_height,
+		  uint8_t  waveform_mode,
+		  uint8_t  dithering_mode,
+		  bool     is_flashing)
+{
+	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
+	bool keep_fd = true;
+	if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	uint32_t region_wfm = get_wfm_mode(waveform_mode);
 
 	// NOTE: This hardware dithering (handled by the PxP) is only supported since EPDC v2!
 	//       AFAICT, most of our eligible target devices only support PASSTHROUGH & ORDERED...
 	//       (c.f., drivers/dma/pxp/pxp_dma_v3.c)
 	int region_dither = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
 	//
-	if (dithering_mode) {
-		if (strcasecmp("PASSTHROUGH", dithering_mode) == 0) {
-			region_dither = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
-		} else if (strcasecmp("FLOYD_STEINBERG", dithering_mode) == 0) {
-			region_dither = EPDC_FLAG_USE_DITHERING_FLOYD_STEINBERG;
-		} else if (strcasecmp("ATKINSON", dithering_mode) == 0) {
-			region_dither = EPDC_FLAG_USE_DITHERING_ATKINSON;
-		} else if (strcasecmp("ORDERED", dithering_mode) == 0) {
-			region_dither = EPDC_FLAG_USE_DITHERING_ORDERED;
-		} else if (strcasecmp("QUANT_ONLY", dithering_mode) == 0) {
-			region_dither = EPDC_FLAG_USE_DITHERING_QUANT_ONLY;
-		} else {
-			LOG("Unknown (or unsupported) dithering mode '%s', defaulting to PASSTHROUGH", dithering_mode);
-			region_dither = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
-		}
+	if (dithering_mode > 0U) {
+		region_dither = get_hwd_mode(dithering_mode);
 	} else {
 		LOG("No hardware dithering requested");
 	}

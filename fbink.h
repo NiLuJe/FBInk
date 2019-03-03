@@ -142,6 +142,36 @@ typedef enum
 	BG_BLACK
 } BG_COLOR_INDEX_T;
 
+// List of *potentially* available waveform modes
+typedef enum
+{
+	WFM_AUTO = 0U,
+	WFM_DU,
+	WFM_GC16,
+	WFM_GC4,
+	WFM_A2,
+	WFM_GL16,
+	WFM_REAGL,
+	WFM_REAGLD,
+	WFM_GC16_FAST,
+	WFM_GL16_FAST,
+	WFM_DU4,
+	WFM_GL4,
+	WFM_GL16_INV,
+	WFM_GCK16,
+	WFM_GLKW16
+} WFM_MODE_INDEX_T;
+
+// List of *potentially* available HW dithering modes
+typedef enum
+{
+	HWD_PASSTHROUGH = 0U,
+	HWD_FLOYD_STEINBERG,
+	HWD_ATKINSON,
+	HWD_ORDERED,
+	HWD_QUANT_ONLY
+} HW_DITHER_INDEX_T;
+
 // A struct to dump FBInk's internal state into, like fbink_state_dump() would, but in C ;)
 typedef struct
 {
@@ -193,8 +223,9 @@ typedef struct
 	bool      is_verbose;      // Print verbose diagnostic informations on stdout
 	bool      is_quiet;        // Hide fbink_init()'s hardware setup info (sent to stderr)
 	bool      ignore_alpha;    // Ignore any potential alpha channel in source image (i.e., flatten the image)
-	uint8_t   halign;    // Horizontal alignment of images (NONE/LEFT, CENTER, EDGE/RIGHT; c.f., ALIGN_INDEX_T enum)
-	uint8_t   valign;    // Vertical alignment of images (NONE/TOP, CENTER, EDGE/BOTTOM; c.f., ALIGN_INDEX_T enum)
+	uint8_t   halign;      // Horizontal alignment of images (NONE/LEFT, CENTER, EDGE/RIGHT; c.f., ALIGN_INDEX_T enum)
+	uint8_t   valign;      // Vertical alignment of images (NONE/TOP, CENTER, EDGE/BOTTOM; c.f., ALIGN_INDEX_T enum)
+	uint8_t   wfm_mode;    // Request a specific waveform mode when printing an image (c.f., WFM_MODE_INDEX_T enum)
 	bool      is_dithered;    // Request (ordered) hardware dithering (if supported).
 	bool      no_refresh;     // Skip actually refreshing the eInk screen (useful when drawing in batch)
 } FBInkConfig;
@@ -325,8 +356,8 @@ FBINK_API int fbink_printf(int fbfd, const FBInkOTConfig* cfg, const FBInkConfig
 // region_left:		left (x) field of an mxcfb rectangle
 // region_width:	width field of an mxcfb rectangle
 // region_height:	height field of an mxcfb rectangle
-// waveform_mode:	waveform mode (i.e, "GC16")
-// dithering_mode:	dithering mode (i.e., "ORDERED")
+// waveform_mode:	waveform mode (i.e, WFM_GC16, c.f., WFM_MODE_INDEX_T enum)
+// dithering_mode:	dithering mode (i.e., HWD_ORDERED, c.f., HW_DITHER_INDEX_T enum)
 //			NOTE: Only supported on devices with a recent EPDC (>= v2)!
 //			      For Kindle, that's everything since the KOA2 (KOA2, PW4),
 //			      For Kobo, that's everything since Mk.7,
@@ -336,14 +367,14 @@ FBINK_API int fbink_printf(int fbfd, const FBInkOTConfig* cfg, const FBInkConfig
 // NOTE: If you request an empty region (0x0 @ (0, 0), a full-screen refresh will be performed!
 // NOTE: As you've probably guessed, since it doesn't take an FBInkConfig pointer, this *ignores* no_refresh ;)
 // NOTE: dithering_mode MAY be NULL (in which case, dithering will NOT be requested, i.e., set to PASSTHROUGH)
-FBINK_API int fbink_refresh(int         fbfd,
-			    uint32_t    region_top,
-			    uint32_t    region_left,
-			    uint32_t    region_width,
-			    uint32_t    region_height,
-			    const char* waveform_mode,
-			    const char* dithering_mode,
-			    bool        is_flashing);
+FBINK_API int fbink_refresh(int      fbfd,
+			    uint32_t region_top,
+			    uint32_t region_left,
+			    uint32_t region_width,
+			    uint32_t region_height,
+			    uint8_t  waveform_mode,
+			    uint8_t  dithering_mode,
+			    bool     is_flashing);
 
 // Returns true if the device appears to be in a quirky framebuffer state that *may* require a reinit to produce sane results.
 // NOTE: The intended use-case is for long running apps which may trigger prints across different framebuffer states,
