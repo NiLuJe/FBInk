@@ -1866,6 +1866,10 @@ static int
 		} else if (vInfo.bits_per_pixel == 8U) {
 			// We also need to account for the fact that KOReader might have switched to 8bpp from this quirky pickel state...
 			if (vInfo.rotate == (deviceQuirks.ntxBootRota ^ 2)) {
+				// NOTE: On affected devices, pickel is helpfully using the invert of the boot rotation ;).
+				//       In normal conditions, the Forma is blissfully immune,
+				//       since pickel defaults to a Portrait orientation there,
+				//       so we don't even enter this xres > yres branch ;).
 				// Correct screenWidth & screenHeight, so we do all our row/column arithmetics on the right values...
 				screenWidth                    = vInfo.yres;
 				screenHeight                   = vInfo.xres;
