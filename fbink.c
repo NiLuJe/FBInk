@@ -1863,6 +1863,22 @@ static int
 				     screenWidth,
 				     screenHeight);
 			}
+		} else if (vInfo.bits_per_pixel == 8U) {
+			// We also need to account for the fact that KOReader might have switched to 8bpp from this quirky pickel state...
+			if (vInfo.rotate == (deviceQuirks.ntxBootRota ^ 2)) {
+				// Correct screenWidth & screenHeight, so we do all our row/column arithmetics on the right values...
+				screenWidth                    = vInfo.yres;
+				screenHeight                   = vInfo.xres;
+				deviceQuirks.isNTX16bLandscape = true;
+				// We only care about the *pickel* state (mainly to avoid false-positives)
+				fxpRotateCoords = &rotate_coordinates_pickel;
+				fxpRotateRegion = &rotate_region_pickel;
+				ELOG("Enabled NTX @ 16bpp pickel rotation quirks (%ux%u -> %ux%u)",
+				     vInfo.xres,
+				     vInfo.yres,
+				     screenWidth,
+				     screenHeight);
+			}
 		}
 	}
 
