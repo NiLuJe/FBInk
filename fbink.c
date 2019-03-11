@@ -1875,6 +1875,9 @@ static int
 				//       since pickel defaults to a Portrait orientation (i.e., xres < yres, despite it being CCW),
 				//       so we don't even enter this xres > yres branch:
 				//       given that, the !canRotate check is simply to future-proof this for custom use-cases ;).
+				// NOTE: Because of course, everything is terrible,
+				//       current unofficial KSM 9 builds for the Forma are doing it wrong:
+				//       they're setting the rota to UR (i.e., like pickel on most !6.8" panels) instead of CCW.
 				// Correct screenWidth & screenHeight, so we do all our row/column arithmetics on the right values...
 				screenWidth                    = vInfo.yres;
 				screenHeight                   = vInfo.xres;
