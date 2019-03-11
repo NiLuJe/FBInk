@@ -258,11 +258,17 @@ static void
 	// NOTE: Try to take into account the various rotation quirks, depending on the device...
 	//       c.f., mxc_epdc_fb_check_var @ drivers/video/mxc/mxc_epdc_fb.c OR drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c
 	if (deviceQuirks.canRotate) {
-		// On the Forma, only Portrait orientations (odd) are inverted...
+		// On the Forma, only Portrait orientations are inverted...
 		// When I say Portrait/Landscape, that's how the device *looks*, which doesn't match the FB_ROTATE_* constants...
-		// i.e., in Nickel, visually, UR is 3, CW is 2, UD is 1, CCW is 0,
+		// i.e., in Nickel, *visually*, UR is 3, CW is 2, UD is 1, CCW is 0,
 		// and when sending ioctls, UR returns 0 (match), CW returns 3 (^= 2), UD returns 2 (match), CCW returns 1 (^= 2).
-		rotation = (4 - rotation) % 4;
+		if (rotation & 0x01) {
+			// Rotation constant is odd (i.e., CW or CCW), invert it.
+			rotation ^= 2;
+		}
+		// NOTE: Plato goes with a simple rotation = (4 - rotation) % 4; which does the exact same thing,
+		//       I just have a harder time wrapping my head around it ;).
+		//       Plus, I'm inclined to believe a simple branch would be faster than a modulo.
 	} else if (deviceQuirks.ntxBootRota == FB_ROTATE_UR) {
 		// On devices with a 6.8" panel, *every* orientation is inverted...
 		// NOTE: The H2O²r2 currently falls in this case,
