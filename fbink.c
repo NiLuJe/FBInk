@@ -1240,9 +1240,7 @@ static int
 		.temp          = TEMP_USE_AMBIENT,
 		.flags         = (waveform_mode == WAVEFORM_MODE_KOA2_GLD16)
 			     ? EPDC_FLAG_USE_KOA2_REGAL
-			     : (waveform_mode == WAVEFORM_MODE_KOA2_A2 || waveform_mode == WAVEFORM_MODE_DU)
-				   ? EPDC_FLAG_FORCE_MONOCHROME
-				   : 0U,
+			     : (waveform_mode == WAVEFORM_MODE_KOA2_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
 		.dither_mode = dithering_mode,
 		.quant_bit   = (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)
 				 ? 0
@@ -1316,9 +1314,7 @@ static int
 		.temp          = TEMP_USE_AMBIENT,
 		.flags         = (waveform_mode == WAVEFORM_MODE_KOA2_GLD16)
 			     ? EPDC_FLAG_USE_KOA2_REGAL
-			     : (waveform_mode == WAVEFORM_MODE_KOA2_A2 || waveform_mode == WAVEFORM_MODE_DU)
-				   ? EPDC_FLAG_FORCE_MONOCHROME
-				   : 0U,
+			     : (waveform_mode == WAVEFORM_MODE_KOA2_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
 		.dither_mode = dithering_mode,
 		.quant_bit   = (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)
 				 ? 0
