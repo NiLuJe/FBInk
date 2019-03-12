@@ -219,7 +219,7 @@ int
 	while ((opt = getopt_long(argc, argv, "d:hvqgG", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'd':
-				req_bpp = strtoul(optarg, NULL, 10);
+				req_bpp = (uint32_t) strtoul(optarg, NULL, 10);
 				// Cheap-ass sanity check
 				switch (req_bpp) {
 					case 8:
