@@ -1246,7 +1246,12 @@ static int
 		.dither_mode = dithering_mode,
 		.quant_bit   = (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)
 				 ? 0
-				 : (waveform_mode == WAVEFORM_MODE_A2) ? 1 : 7,
+				 : (waveform_mode == WAVEFORM_MODE_KOA2_A2 || waveform_mode == WAVEFORM_MODE_DU)
+				       ? 1
+				       : (waveform_mode == WAVEFORM_MODE_GC4 || waveform_mode == WAVEFORM_MODE_KOA2_GL4 ||
+					  waveform_mode == WAVEFORM_MODE_DU4)
+					     ? 3
+					     : 7,
 		.alt_buffer_data         = { 0U },
 		.hist_bw_waveform_mode   = WAVEFORM_MODE_DU,
 		.hist_gray_waveform_mode = WAVEFORM_MODE_GC16,
@@ -1317,7 +1322,12 @@ static int
 		.dither_mode = dithering_mode,
 		.quant_bit   = (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)
 				 ? 0
-				 : (waveform_mode == WAVEFORM_MODE_A2) ? 1 : 7,
+				 : (waveform_mode == WAVEFORM_MODE_KOA2_A2 || waveform_mode == WAVEFORM_MODE_DU)
+				       ? 1
+				       : (waveform_mode == WAVEFORM_MODE_GC4 || waveform_mode == WAVEFORM_MODE_KOA2_GL4 ||
+					  waveform_mode == WAVEFORM_MODE_DU4)
+					     ? 3
+					     : 7,
 		.alt_buffer_data         = { 0U },
 		.hist_bw_waveform_mode   = WAVEFORM_MODE_DU,
 		.hist_gray_waveform_mode = WAVEFORM_MODE_GC16,
@@ -1490,7 +1500,9 @@ static int
 		.dither_mode = dithering_mode,
 		.quant_bit   = (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)
 				 ? 0
-				 : (waveform_mode == WAVEFORM_MODE_A2) ? 1 : 7,
+				 : (waveform_mode == WAVEFORM_MODE_A2 || waveform_mode == WAVEFORM_MODE_DU)
+				       ? 1
+				       : (waveform_mode == WAVEFORM_MODE_GC4) ? 3 : 7,
 		.alt_buffer_data = { 0U },
 	};
 
