@@ -110,7 +110,7 @@ static bool
 	uint32_t ori_rota = vInfo.rotate;
 	if (deviceQuirks.ntxBootRota == FB_ROTATE_UR) {
 		// NOTE: This should cover the H2O and the few other devices suffering from the same quirk...
-		vInfo.rotate = (uint32_t) vInfo.rotate ^ 2;
+		vInfo.rotate ^= 2;
 		LOG("Setting rotate to %u (%s) to account for kernel rotation quirks",
 		    vInfo.rotate,
 		    fb_rotate_to_string(vInfo.rotate));
@@ -118,7 +118,7 @@ static bool
 		   deviceQuirks.screenDPI == 300U) {
 		// NOTE: This is for the Forma, which only inverts CW & CCW (i.e., odd numbers)...
 		if ((vInfo.rotate & 0x01) == 1) {
-			vInfo.rotate = (uint32_t) vInfo.rotate ^ 2;
+			vInfo.rotate ^= 2;
 			LOG("Setting rotate to %u (%s) to account for kernel rotation quirks",
 			    vInfo.rotate,
 			    fb_rotate_to_string(vInfo.rotate));
