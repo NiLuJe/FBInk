@@ -2586,6 +2586,7 @@ int
 }
 
 // Much like rotate_coordinates, but for a mxcfb rectangle
+// c.f., adjust_coordinates @ drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c
 #ifndef FBINK_FOR_KINDLE
 static void
     rotate_region_pickel(struct mxcfb_rect* region)
