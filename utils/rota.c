@@ -117,6 +117,11 @@ int
 	LOG("\nFB_ROTATE_UR to FB_ROTATE_CCW, +2 increments, intermerdiary rota if ==");
 	for (int i = FB_ROTATE_UR; i <= FB_ROTATE_CCW; i += 2) {
 		// If current rotate = to be set value, set += 1 (wrapping at 4) first to swap portrait/landscape
+		// NOTE: Fun fact!
+		//       While the obvious solution would appear to just be to send an ioctl with the *current* rotate value,
+		//       and let the kernel invert it for us, that doesn't work:
+		//       sending an ioctl with the current rotate value doesn't actually change the rotate value at all...
+		//       Echoing it to /sys/class/graphics/fb0/rotate *will* work, though...
 		if (vInfo.rotate == (uint32_t) i) {
 			LOG("Intermerdiary rotation...");
 			do_eet((i + 1) % 4);
