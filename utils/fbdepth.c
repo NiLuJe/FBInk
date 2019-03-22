@@ -146,7 +146,7 @@ static bool
 		    expected_rota);
 
 		// Brute-force it until it matches...
-		for (uint32_t i = vInfo.rotate, j = FB_ROTATE_UR; j <= FB_ROTATE_CCW; i++, j++) {
+		for (uint32_t i = vInfo.rotate, j = FB_ROTATE_UR; j <= FB_ROTATE_CCW; i = (i + 1U) & 3U, j++) {
 			// If we finally got the right orientation, break the loop
 			if (vInfo.rotate == expected_rota) {
 				break;
