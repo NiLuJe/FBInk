@@ -47,6 +47,8 @@ static void
 	    "\t-q, --quiet\t\t\tToggle hiding diagnostic messages.\n"
 	    "\t-g, --get\t\t\tJust output the current bitdepth to stdout.\n"
 	    "\t-G, --getcode\t\t\tJust exit with the current bitdepth as exit code.\n"
+	    "\t-o, --getrota\t\t\tJust output the current rotation to stdout.\n"
+	    "\t-O, --getrotacode\t\t\tJust exit with the current rotation as exit code.\n"
 	    "\n",
 	    fbink_version());
 	return;
@@ -208,14 +210,18 @@ int
 					      { "quiet", no_argument, NULL, 'q' },
 					      { "get", no_argument, NULL, 'g' },
 					      { "getcode", no_argument, NULL, 'G' },
+					      { "getrota", no_argument, NULL, 'o' },
+					      { "getrotacode", no_argument, NULL, 'O' },
 					      { NULL, 0, NULL, 0 } };
 
-	uint32_t req_bpp    = 0U;
-	bool     errfnd     = false;
-	bool     print_bpp  = false;
-	bool     return_bpp = false;
+	uint32_t req_bpp     = 0U;
+	bool     errfnd      = false;
+	bool     print_bpp   = false;
+	bool     return_bpp  = false;
+	bool     print_rota  = false;
+	bool     return_rota = false;
 
-	while ((opt = getopt_long(argc, argv, "d:hvqgG", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "d:hvqgGoO", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'd':
 				req_bpp = (uint32_t) strtoul(optarg, NULL, 10);
@@ -259,6 +265,12 @@ int
 			case 'G':
 				return_bpp = true;
 				break;
+			case 'o':
+				print_rota = true;
+				break;
+			case 'O':
+				return_rota = true;
+				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
 				errfnd = true;
@@ -266,13 +278,13 @@ int
 		}
 	}
 
-	if (errfnd || (req_bpp == 0U && !(print_bpp || return_bpp))) {
+	if (errfnd || (req_bpp == 0U && !(print_bpp || return_bpp || print_rota || return_rota))) {
 		show_helpmsg();
 		return ERRCODE(EXIT_FAILURE);
 	}
 
-	// Enforce quiet w/ print_bpp
-	if (print_bpp) {
+	// Enforce quiet w/ print_*
+	if (print_bpp || print_rota) {
 		g_isQuiet   = true;
 		g_isVerbose = false;
 	}
@@ -303,6 +315,19 @@ int
 		}
 		if (return_bpp) {
 			rv = (int) vInfo.bits_per_pixel;
+			goto cleanup;
+		} else {
+			goto cleanup;
+		}
+	}
+
+	// If we just wanted to print/return the current rotation, abort early
+	if (print_rota || return_rota) {
+		if (print_rota) {
+			fprintf(stdout, "%u", vInfo.rotate);
+		}
+		if (return_rota) {
+			rv = (int) vInfo.rotate;
 			goto cleanup;
 		} else {
 			goto cleanup;
