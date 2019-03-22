@@ -146,7 +146,7 @@ static bool
 		    expected_rota);
 
 		// Brute-force it until it matches...
-		for (int i = FB_ROTATE_UR; i <= FB_ROTATE_CCW; i++) {
+		for (int i = vInfo.rotate, j = FB_ROTATE_UR; j <= FB_ROTATE_CCW; i++, j++) {
 			// If we finally got the right orientation, break the loop
 			if (vInfo.rotate == expected_rota) {
 				break;
