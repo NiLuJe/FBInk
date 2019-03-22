@@ -36,7 +36,7 @@ static void
 	    "\n"
 	    "FBDepth (via FBInk %s)\n"
 	    "\n"
-	    "Usage: fbdepth [-d] <bpp>\n"
+	    "Usage: fbdepth [-d] <bpp> [-r] <rota>\n"
 	    "\n"
 	    "Tiny tool to set the framebuffer bitdepth on eInk devices.\n"
 	    "\n"
@@ -47,6 +47,7 @@ static void
 	    "\t-q, --quiet\t\t\tToggle hiding diagnostic messages.\n"
 	    "\t-g, --get\t\t\tJust output the current bitdepth to stdout.\n"
 	    "\t-G, --getcode\t\t\tJust exit with the current bitdepth as exit code.\n"
+	    "\t-r, --rota <-1|0|1|2|3>\tSwitch the framebuffer to the supplied rotation. -1 is a magic value matching the device-specific Portrait orientation.\n"
 	    "\t-o, --getrota\t\t\tJust output the current rotation to stdout.\n"
 	    "\t-O, --getrotacode\t\t\tJust exit with the current rotation as exit code.\n"
 	    "\n",
@@ -86,7 +87,7 @@ static bool
 }
 
 static bool
-    set_fbinfo(uint32_t bpp)
+    set_fbinfo(uint32_t bpp, int8_t rota)
 {
 	// Set variable fb info
 	// Bitdepth
@@ -108,8 +109,15 @@ static bool
 	// NOTE: We have to counteract the rotation shenanigans the Kernel might be enforcing...
 	//       c.f., mxc_epdc_fb_check_var @ drivers/video/mxc/mxc_epdc_fb.c OR drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c
 	//       The goal being to end up in the *same* effective rotation as before.
-	// First, remember the current rotation...
-	uint32_t ori_rota = vInfo.rotate;
+	// First, remember the current rotation as the expected one...
+	uint32_t expected_rota = vInfo.rotate;
+	// Then, set the requested rotation, if there was one...
+	if (rota != -1) {
+		vInfo.rotate = (uint32_t) rota;
+		LOG("Setting rotate to %u (%s)", vInfo.rotate, fb_rotate_to_string(vInfo.rotate));
+		// And flag it as the expected rota for the sanity checks
+		expected_rota = (uint32_t) rota;
+	}
 	if (deviceQuirks.ntxBootRota == FB_ROTATE_UR) {
 		// NOTE: This should cover the H2O and the few other devices suffering from the same quirk...
 		vInfo.rotate ^= 2;
@@ -132,15 +140,15 @@ static bool
 	}
 
 	// NOTE: Double-check that we weren't bit by rotation quirks...
-	if (vInfo.rotate != ori_rota) {
-		LOG("\nCurrent rotation (%u) doesn't match the original rotation (%u), attempting to fix it . . .",
+	if (vInfo.rotate != expected_rota) {
+		LOG("\nCurrent rotation (%u) doesn't match the expected rotation (%u), attempting to fix it . . .",
 		    vInfo.rotate,
-		    ori_rota);
+		    expected_rota);
 
 		// Brute-force it until it matches...
 		for (int i = FB_ROTATE_UR; i <= FB_ROTATE_CCW; i++) {
 			// If we finally got the right orientation, break the loop
-			if (vInfo.rotate == ori_rota) {
+			if (vInfo.rotate == expected_rota) {
 				break;
 			}
 			// Do the i -> i + 1 -> i dance to be extra sure...
@@ -153,7 +161,7 @@ static bool
 			LOG("Kernel rotation quirk recovery: %d -> %u", i, vInfo.rotate);
 
 			// Don't do anything extra if that was enough...
-			if (vInfo.rotate == ori_rota) {
+			if (vInfo.rotate == expected_rota) {
 				continue;
 			}
 			// Now for i + 1 w/ wraparound, since the valid rotation range is [0..3] (FB_ROTATE_UR to FB_ROTATE_CCW).
@@ -167,7 +175,7 @@ static bool
 			LOG("Kernel rotation quirk recovery (intermediary @ %d): %u -> %u", i, n, vInfo.rotate);
 
 			// And back to i, if need be...
-			if (vInfo.rotate == ori_rota) {
+			if (vInfo.rotate == expected_rota) {
 				continue;
 			}
 			vInfo.rotate = (uint32_t) i;
@@ -180,10 +188,10 @@ static bool
 	}
 
 	// Finally, warn if things *still* look FUBAR...
-	if (vInfo.rotate != ori_rota) {
-		LOG("\nCurrent rotation (%u) doesn't match the original rotation (%u), here be dragons!",
+	if (vInfo.rotate != expected_rota) {
+		LOG("\nCurrent rotation (%u) doesn't match the expected rotation (%u), here be dragons!",
 		    vInfo.rotate,
-		    ori_rota);
+		    expected_rota);
 	}
 
 	LOG("Bitdepth is now %ubpp (grayscale: %u) @ rotate: %u (%s)\n",
@@ -204,24 +212,23 @@ int
 
 	int                        opt;
 	int                        opt_index;
-	static const struct option opts[] = { { "depth", required_argument, NULL, 'd' },
-					      { "help", no_argument, NULL, 'h' },
-					      { "verbose", no_argument, NULL, 'v' },
-					      { "quiet", no_argument, NULL, 'q' },
-					      { "get", no_argument, NULL, 'g' },
-					      { "getcode", no_argument, NULL, 'G' },
-					      { "getrota", no_argument, NULL, 'o' },
-					      { "getrotacode", no_argument, NULL, 'O' },
-					      { NULL, 0, NULL, 0 } };
+	static const struct option opts[] = {
+		{ "depth", required_argument, NULL, 'd' }, { "help", no_argument, NULL, 'h' },
+		{ "verbose", no_argument, NULL, 'v' },     { "quiet", no_argument, NULL, 'q' },
+		{ "get", no_argument, NULL, 'g' },         { "getcode", no_argument, NULL, 'G' },
+		{ "rota", required_argument, NULL, 'r' },  { "getrota", no_argument, NULL, 'o' },
+		{ "getrotacode", no_argument, NULL, 'O' }, { NULL, 0, NULL, 0 }
+	};
 
 	uint32_t req_bpp     = 0U;
+	int8_t   req_rota    = -1;
 	bool     errfnd      = false;
 	bool     print_bpp   = false;
 	bool     return_bpp  = false;
 	bool     print_rota  = false;
 	bool     return_rota = false;
 
-	while ((opt = getopt_long(argc, argv, "d:hvqgGoO", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "d:hvqgGr:oO", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'd':
 				req_bpp = (uint32_t) strtoul(optarg, NULL, 10);
@@ -264,6 +271,27 @@ int
 				break;
 			case 'G':
 				return_bpp = true;
+				break;
+			case 'r':
+				req_rota = (int8_t) strtol(optarg, NULL, 10);
+				// Cheap-ass sanity check
+				switch (req_rota) {
+					case 0:
+					case 1:
+					case 2:
+					case 3:
+						break;
+					case -1:
+						// NOTE: Nickel's Portrait orientation should *always* match BootRota + 1
+						req_rota = (deviceQuirks.ntxBootRota + 1) % 4;
+						LOG("Device's expected Portrait orientation should be '%hhd'!\n",
+						    req_rota);
+						break;
+					default:
+						fprintf(stderr, "Unsupported rotation '%s'!\n", optarg);
+						errfnd = true;
+						break;
+				}
 				break;
 			case 'o':
 				print_rota = true;
@@ -334,23 +362,45 @@ int
 		}
 	}
 
+	// FIXME: Allow setting rota without bpp...
+	//	  Ditch depth 0 check for showhelp, set it to current if req == 0 here, and fix the "Switching" recap to handle that... (current?)
+
 	// If a change was requested, do it, but check if it's necessary first
+	bool is_change_needed = false;
 	if (vInfo.bits_per_pixel == req_bpp) {
 		// Also check that the grayscale flag is flipped properly
 		if ((vInfo.bits_per_pixel == 8U && vInfo.grayscale != GRAYSCALE_8BIT) ||
 		    (vInfo.bits_per_pixel > 8U && vInfo.grayscale != 0U)) {
 			LOG("\nCurrent bitdepth is already %ubpp, but the grayscale flag is bogus!", req_bpp);
-			// Continue, we'll flip the grayscale flag properly
+			// Continue, we'll need to flip the grayscale flag properly
+			is_change_needed = true;
 		} else {
 			LOG("\nCurrent bitdepth is already %ubpp!", req_bpp);
-			// Skip to cleanup, exiting successfully
-			goto cleanup;
+			// No change needed as far as bitdepth is concerned...
 		}
+	} else {
+		is_change_needed = true;
 	}
 
-	// If we're here, we really want to change the bitdepth ;)
-	LOG("\nSwitching fb to %ubpp . . .", req_bpp);
-	if (!set_fbinfo(req_bpp)) {
+	if (vInfo.rotate == req_rota) {
+		LOG("\nCurrent rotation is already %hhd!", req_rota);
+		// No change needed as far as bitdepth is concerned...
+	} else {
+		is_change_needed = true;
+	}
+
+	// If it turns out that no actual change is needed, skip to cleanup, exiting successfully
+	if (!is_change_needed) {
+		goto cleanup;
+	}
+
+	// If we're here, we really want to change the bitdepth and/or rota ;)
+	if (req_rota != -1) {
+		LOG("\nSwitching fb to %ubpp @ rotation %hhd . . .", req_bpp, req_rota);
+	} else {
+		LOG("\nSwitching fb to %ubpp . . .", req_bpp);
+	}
+	if (!set_fbinfo(req_bpp, req_rota)) {
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
