@@ -273,6 +273,8 @@ static void
 		// On devices with a 6.8" panel, *every* orientation is inverted...
 		// NOTE: The H2O²r2 currently falls in this case,
 		//       but it apparently actually behaves like the Forma as far as this is concerned...
+		//       Consider either adding a specific quirk for rotation crap like that,
+		//       or exporting the deviceID in deviceQuirks?
 		rotation ^= 2;
 	}
 
