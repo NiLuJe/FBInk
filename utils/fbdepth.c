@@ -306,7 +306,7 @@ int
 		}
 	}
 
-	if (errfnd || (req_bpp == 0U && !(print_bpp || return_bpp || print_rota || return_rota))) {
+	if (errfnd || !(print_bpp || return_bpp || print_rota || return_rota)) {
 		show_helpmsg();
 		return ERRCODE(EXIT_FAILURE);
 	}
@@ -362,8 +362,10 @@ int
 		}
 	}
 
-	// FIXME: Allow setting rota without bpp...
-	//	  Ditch depth 0 check for showhelp, set it to current if req == 0 here, and fix the "Switching" recap to handle that... (current?)
+	// If no bitdepth was requested, set to the current one, we'll be double-checking if changes are actually needed.
+	if (req_bpp == 0U) {
+		req_bpp = vInfo.bits_per_pixel;
+	}
 
 	// If a change was requested, do it, but check if it's necessary first
 	bool is_change_needed = false;
@@ -396,9 +398,14 @@ int
 
 	// If we're here, we really want to change the bitdepth and/or rota ;)
 	if (req_rota != -1) {
-		LOG("\nSwitching fb to %ubpp @ rotation %hhd . . .", req_bpp, req_rota);
+		LOG("\nSwitching fb to %ubpp%s @ rotation %hhd . . .",
+		    req_bpp,
+		    (req_bpp == vInfo.bits_per_pixel) ? " (current bitdepth)" : "",
+		    req_rota);
 	} else {
-		LOG("\nSwitching fb to %ubpp . . .", req_bpp);
+		LOG("\nSwitching fb to %ubpp%s . . .",
+		    req_bpp,
+		    (req_bpp == vInfo.bits_per_pixel) ? " (current bitdepth)" : "");
 	}
 	if (!set_fbinfo(req_bpp, req_rota)) {
 		rv = ERRCODE(EXIT_FAILURE);
