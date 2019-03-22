@@ -146,19 +146,19 @@ static bool
 		    expected_rota);
 
 		// Brute-force it until it matches...
-		for (int i = vInfo.rotate, j = FB_ROTATE_UR; j <= FB_ROTATE_CCW; i++, j++) {
+		for (uint32_t i = vInfo.rotate, j = FB_ROTATE_UR; j <= FB_ROTATE_CCW; i++, j++) {
 			// If we finally got the right orientation, break the loop
 			if (vInfo.rotate == expected_rota) {
 				break;
 			}
 			// Do the i -> i + 1 -> i dance to be extra sure...
 			// (This is useful on devices where the kernel *always* switches to the invert orientation, c.f., rota.c)
-			vInfo.rotate = (uint32_t) i;
+			vInfo.rotate = i;
 			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
 				perror("ioctl PUT_V");
 				return false;
 			}
-			LOG("Kernel rotation quirk recovery: %d -> %u", i, vInfo.rotate);
+			LOG("Kernel rotation quirk recovery: %u -> %u", i, vInfo.rotate);
 
 			// Don't do anything extra if that was enough...
 			if (vInfo.rotate == expected_rota) {
@@ -166,24 +166,24 @@ static bool
 			}
 			// Now for i + 1 w/ wraparound, since the valid rotation range is [0..3] (FB_ROTATE_UR to FB_ROTATE_CCW).
 			// (i.e., a Portrait/Landscape swap to counteract potential side-effects of a kernel-side mandatory invert)
-			uint32_t n   = (uint32_t)((i + 1) & 3);
+			uint32_t n   = (i + 1U) & 3U;
 			vInfo.rotate = n;
 			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
 				perror("ioctl PUT_V");
 				return false;
 			}
-			LOG("Kernel rotation quirk recovery (intermediary @ %d): %u -> %u", i, n, vInfo.rotate);
+			LOG("Kernel rotation quirk recovery (intermediary @ %u): %u -> %u", i, n, vInfo.rotate);
 
 			// And back to i, if need be...
 			if (vInfo.rotate == expected_rota) {
 				continue;
 			}
-			vInfo.rotate = (uint32_t) i;
+			vInfo.rotate = i;
 			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
 				perror("ioctl PUT_V");
 				return false;
 			}
-			LOG("Kernel rotation quirk recovery: %d -> %u", i, vInfo.rotate);
+			LOG("Kernel rotation quirk recovery: %u -> %u", i, vInfo.rotate);
 		}
 	}
 
