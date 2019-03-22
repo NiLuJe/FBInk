@@ -384,11 +384,14 @@ int
 		is_change_needed = true;
 	}
 
-	if (vInfo.rotate == req_rota) {
-		LOG("\nCurrent rotation is already %hhd!", req_rota);
-		// No change needed as far as bitdepth is concerned...
-	} else {
-		is_change_needed = true;
+	// Same for rotation, if we requested one...
+	if (req_rota != -1) {
+		if (vInfo.rotate == (uint32_t) req_rota) {
+			LOG("\nCurrent rotation is already %hhd!", req_rota);
+			// No change needed as far as bitdepth is concerned...
+		} else {
+			is_change_needed = true;
+		}
 	}
 
 	// If it turns out that no actual change is needed, skip to cleanup, exiting successfully
