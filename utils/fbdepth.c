@@ -38,7 +38,7 @@ static void
 	    "\n"
 	    "Usage: fbdepth [-d] <bpp> [-r] <rota>\n"
 	    "\n"
-	    "Tiny tool to set the framebuffer bitdepth on eInk devices.\n"
+	    "Tiny tool to set the framebuffer bitdepth and/or rotation on eInk devices.\n"
 	    "\n"
 	    "OPTIONS:\n"
 	    "\t-d, --depth <8|16|24|32>\tSwitch the framebuffer to the supplied bitdepth.\n"
@@ -166,7 +166,7 @@ static bool
 			}
 			// Now for i + 1 w/ wraparound, since the valid rotation range is [0..3] (FB_ROTATE_UR to FB_ROTATE_CCW).
 			// (i.e., a Portrait/Landscape swap to counteract potential side-effects of a kernel-side mandatory invert)
-			uint32_t n   = (uint32_t)((i + 1) % 4);
+			uint32_t n   = (uint32_t)((i + 1) & 3);
 			vInfo.rotate = n;
 			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
 				perror("ioctl PUT_V");
@@ -283,7 +283,7 @@ int
 						break;
 					case -1:
 						// NOTE: Nickel's Portrait orientation should *always* match BootRota + 1
-						req_rota = (deviceQuirks.ntxBootRota + 1) % 4;
+						req_rota = (deviceQuirks.ntxBootRota + 1) & 3;
 						LOG("Device's expected Portrait orientation should be '%hhd'!\n",
 						    req_rota);
 						break;
