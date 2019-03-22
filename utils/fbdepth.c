@@ -276,19 +276,20 @@ int
 				req_rota = (int8_t) strtol(optarg, NULL, 10);
 				// Cheap-ass sanity check
 				switch (req_rota) {
-					case 0:
-					case 1:
-					case 2:
-					case 3:
+					case FB_ROTATE_UR:
+					case FB_ROTATE_CW:
+					case FB_ROTATE_UD:
+					case FB_ROTATE_CCW:
 						break;
 					case -1:
 						// NOTE: Nickel's Portrait orientation should *always* match BootRota + 1
 						req_rota = (deviceQuirks.ntxBootRota + 1) & 3;
-						LOG("Device's expected Portrait orientation should be '%hhd'!\n",
-						    req_rota);
+						LOG("Device's expected Portrait orientation should be: %hhd (%s)!\n",
+						    req_rota,
+						    fb_rotate_to_string(req_rota));
 						break;
 					default:
-						fprintf(stderr, "Unsupported rotation '%s'!\n", optarg);
+						fprintf(stderr, "Invalid rotation '%s'!\n", optarg);
 						errfnd = true;
 						break;
 				}
