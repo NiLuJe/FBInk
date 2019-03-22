@@ -286,7 +286,7 @@ int
 						req_rota = (deviceQuirks.ntxBootRota + 1) & 3;
 						LOG("Device's expected Portrait orientation should be: %hhd (%s)!\n",
 						    req_rota,
-						    fb_rotate_to_string(req_rota));
+						    fb_rotate_to_string((uint32_t) req_rota));
 						break;
 					default:
 						fprintf(stderr, "Invalid rotation '%s'!\n", optarg);
