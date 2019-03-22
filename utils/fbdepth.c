@@ -47,9 +47,9 @@ static void
 	    "\t-q, --quiet\t\t\tToggle hiding diagnostic messages.\n"
 	    "\t-g, --get\t\t\tJust output the current bitdepth to stdout.\n"
 	    "\t-G, --getcode\t\t\tJust exit with the current bitdepth as exit code.\n"
-	    "\t-r, --rota <-1|0|1|2|3>\tSwitch the framebuffer to the supplied rotation. -1 is a magic value matching the device-specific Portrait orientation.\n"
+	    "\t-r, --rota <-1|0|1|2|3>\t\tSwitch the framebuffer to the supplied rotation. -1 is a magic value matching the device-specific Portrait orientation.\n"
 	    "\t-o, --getrota\t\t\tJust output the current rotation to stdout.\n"
-	    "\t-O, --getrotacode\t\t\tJust exit with the current rotation as exit code.\n"
+	    "\t-O, --getrotacode\t\tJust exit with the current rotation as exit code.\n"
 	    "\n",
 	    fbink_version());
 	return;
@@ -306,7 +306,7 @@ int
 		}
 	}
 
-	if (errfnd || !(print_bpp || return_bpp || print_rota || return_rota)) {
+	if (errfnd || ((req_bpp == 0U && req_rota == -1) && !(print_bpp || return_bpp || print_rota || return_rota))) {
 		show_helpmsg();
 		return ERRCODE(EXIT_FAILURE);
 	}
