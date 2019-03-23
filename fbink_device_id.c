@@ -29,25 +29,36 @@ static bool
 {
 	switch (dev) {
 		case 0x01:    // K1
+			strncpy(deviceQuirks.deviceName, "1", sizeof(deviceQuirks.deviceName) - 1U);
+			return true;
 		case 0x02:    // K2
 		case 0x03:
+			strncpy(deviceQuirks.deviceName, "2", sizeof(deviceQuirks.deviceName) - 1U);
+			return true;
 		case 0x04:    // KDX
 		case 0x05:
 		case 0x09:
+			strncpy(deviceQuirks.deviceName, "DX", sizeof(deviceQuirks.deviceName) - 1U);
+			return true;
 		case 0x08:    // K3
 		case 0x06:
 		case 0x0A:
+			strncpy(deviceQuirks.deviceName, "3", sizeof(deviceQuirks.deviceName) - 1U);
+			return true;
 		case 0x0E:    // K4
 			deviceQuirks.isKindleLegacy = true;
+			strncpy(deviceQuirks.deviceName, "4", sizeof(deviceQuirks.deviceName) - 1U);
 			return true;
 		case 0x0F:    // K5
 		case 0x11:
 		case 0x10:
 		case 0x12:
 			deviceQuirks.isKindlePearlScreen = true;
+			strncpy(deviceQuirks.deviceName, "Touch", sizeof(deviceQuirks.deviceName) - 1U);
 			return true;
 		case 0x23:    // K4b
 			deviceQuirks.isKindleLegacy = true;
+			strncpy(deviceQuirks.deviceName, "4", sizeof(deviceQuirks.deviceName) - 1U);
 			return true;
 		case 0x24:    // PW1
 		case 0x1B:
@@ -57,6 +68,7 @@ static bool
 		case 0x20:
 			deviceQuirks.isKindlePearlScreen = true;
 			deviceQuirks.screenDPI           = 212U;
+			strncpy(deviceQuirks.deviceName, "PaperWhite", sizeof(deviceQuirks.deviceName) - 1U);
 			return true;
 		case 0xD4:    // PW2
 		case 0x5A:
@@ -73,11 +85,14 @@ static bool
 		case 0x61:
 		case 0x5F:
 			deviceQuirks.screenDPI = 212U;
+			strncpy(deviceQuirks.deviceName, "PaperWhite 2", sizeof(deviceQuirks.deviceName) - 1U);
 			return true;
 		case 0xC6:    // KT2
+			strncpy(deviceQuirks.deviceName, "Basic", sizeof(deviceQuirks.deviceName) - 1U);
 			return true;
 		case 0x13:    // KV
 			deviceQuirks.screenDPI = 300U;
+			strncpy(deviceQuirks.deviceName, "Voyage", sizeof(deviceQuirks.deviceName) - 1U);
 			return true;
 		case 0x16:    // ??
 		case 0x21:
@@ -88,13 +103,16 @@ static bool
 		case 0x52:
 		case 0x53:
 			deviceQuirks.screenDPI = 300U;
+			strncpy(deviceQuirks.deviceName, "Voyage", sizeof(deviceQuirks.deviceName) - 1U);
 			return true;
 		case 0x07:    // ??
 		case 0x0B:
 		case 0x0C:
 		case 0x0D:
 		case 0x99:
+			return true;
 		case 0xDD:    // KT2 AUS
+			strncpy(deviceQuirks.deviceName, "Basic", sizeof(deviceQuirks.deviceName) - 1U);
 			return true;
 		default:
 			return false;
@@ -120,6 +138,7 @@ static bool
 		case 0x293:
 		case 0x294:
 			deviceQuirks.screenDPI = 300U;
+			strncpy(deviceQuirks.deviceName, "PaperWhite 3", sizeof(deviceQuirks.deviceName) - 1U);
 			return true;
 		case 0x20C:    // KOA
 		case 0x20D:
@@ -128,10 +147,12 @@ static bool
 		case 0x21B:
 		case 0x21C:
 			deviceQuirks.screenDPI = 300U;
+			strncpy(deviceQuirks.deviceName, "Oasis", sizeof(deviceQuirks.deviceName) - 1U);
 			return true;
 		case 0x1BC:    // KT3
 		case 0x269:
 		case 0x26A:
+			strncpy(deviceQuirks.deviceName, "Basic 2", sizeof(deviceQuirks.deviceName) - 1U);
 			return true;
 		case 0x295:    // KOA2
 		case 0x296:
@@ -150,6 +171,7 @@ static bool
 		case 0x34A:
 			deviceQuirks.isKindleOasis2 = true;
 			deviceQuirks.screenDPI      = 300U;
+			strncpy(deviceQuirks.deviceName, "Oasis 2", sizeof(deviceQuirks.deviceName) - 1U);
 			return true;
 		case 0x2F7:    // PW4
 		case 0x361:
@@ -168,6 +190,7 @@ static bool
 		case 0x403:
 			deviceQuirks.isKindlePW4 = true;
 			deviceQuirks.screenDPI   = 300U;
+			strncpy(deviceQuirks.deviceName, "PaperWhite 4", sizeof(deviceQuirks.deviceName) - 1U);
 			return true;
 		default:
 			return false;
@@ -233,7 +256,13 @@ static void
 			// ... And if it's not either list, it's truly unknown.
 			if (!is_kindle_device_new(dev)) {
 				WARN("Unidentified Kindle device %s (0x%03X)", device_code, dev);
+			} else {
+				// Store the device ID...
+				deviceQuirks.deviceId = dev;
 			}
+		} else {
+			// Store the device ID...
+			deviceQuirks.deviceId = dev;
 		}
 	}
 }
@@ -271,6 +300,8 @@ static void
 			return;
 		}
 
+		// Store the device ID...
+		deviceQuirks.deviceId = config.pcb_id;
 		// NOTE: See the comments in set_kobo_quirks about this.
 		//       I'm hoping there aren't any special snowflakes in the lineup...
 		deviceQuirks.ntxBootRota = FB_ROTATE_UD;
@@ -278,14 +309,23 @@ static void
 		// from https://github.com/bq/cervantes/blob/master/bqHAL/Devices/mx508/src/DeviceInfoMx508.cpp#L33-L37
 		switch (config.pcb_id) {
 			case 22:    // BQ Cervantes Touch - Fnac Touch (2012-2013)
+				deviceQuirks.screenDPI = 167U;
+				strncpy(deviceQuirks.deviceName, "Touch", sizeof(deviceQuirks.deviceName) - 1U);
+				break;
 			case 23:    // BQ Cervantes TouchLight - Fnac Touch Plus (2012-2013)
 				deviceQuirks.screenDPI = 167U;
+				strncpy(deviceQuirks.deviceName, "TouchLight", sizeof(deviceQuirks.deviceName) - 1U);
 				break;
 			case 33:    // BQ Cervantes 2013 - Fnac Touch Light (2013)
 				deviceQuirks.screenDPI = 212U;
+				strncpy(deviceQuirks.deviceName, "2013", sizeof(deviceQuirks.deviceName) - 1U);
 				break;
 			case 51:    // BQ Cervantes 3 - Fnac Touch Light 2 (2016)
+				deviceQuirks.screenDPI = 300U;
+				strncpy(deviceQuirks.deviceName, "3", sizeof(deviceQuirks.deviceName) - 1U);
+				break;
 			case 68:    // BQ Cervantes 4
+				trncpy(deviceQuirks.deviceName, "4", sizeof(deviceQuirks.deviceName) - 1U);
 				deviceQuirks.screenDPI = 300U;
 				break;
 			default:
@@ -298,6 +338,7 @@ static void
 static void
     set_kobo_quirks(unsigned short int kobo_id)
 {
+	// Store the device ID...
 	deviceQuirks.deviceId = kobo_id;
 	// NOTE: Shaky assumption that almost everything follows the same rotation scheme, with:
 	//       Boot rotation is FB_ROTATE_UD, pickel is FB_ROTATE_UR, nickel is FB_ROTATE_CCW
@@ -550,7 +591,7 @@ static void
 	ELOG("Detected a Kindle %s (0x%02X)", deviceQuirks.deviceName, deviceQuirks.deviceId);
 #	elif defined(FBINK_FOR_CERVANTES)
 	identify_cervantes();
-	ELOG("Detected a Cervantes %s (%hu)", deviceQuirks.deviceName, deviceQuirks.deviceId);
+	ELOG("Detected a BQ Cervantes %s (%hu)", deviceQuirks.deviceName, deviceQuirks.deviceId);
 #	else
 	identify_kobo();
 	ELOG("Detected a Kobo %s (%hu)", deviceQuirks.deviceName, deviceQuirks.deviceId);
