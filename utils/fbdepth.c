@@ -378,6 +378,12 @@ int
 		req_rota = -1;
 	}
 
+	// Ensure the requested rotation is sane (if all is well, this should never be tripped)
+	if (req_rota < -1 || req_rota > FB_ROTATE_CCW) {
+		LOG("Requested rotation (%hhd) is bogus, discarding it!\n", req_rota);
+		req_rota = -1;
+	}
+
 	// If a change was requested, do it, but check if it's necessary first
 	bool is_change_needed = false;
 	if (vInfo.bits_per_pixel == req_bpp) {
