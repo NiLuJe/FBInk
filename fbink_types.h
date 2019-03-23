@@ -47,6 +47,8 @@ typedef struct
 	unsigned short int screenDPI;
 	bool               canRotate;
 	bool               skipId;
+	unsigned short int deviceId;
+	char               deviceName[32];
 } FBInkDeviceQuirks;
 
 // An (x, y) coordinates tuple

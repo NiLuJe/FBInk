@@ -298,6 +298,7 @@ static void
 static void
     set_kobo_quirks(unsigned short int kobo_id)
 {
+	deviceQuirks.deviceId = kobo_id;
 	// NOTE: Shaky assumption that almost everything follows the same rotation scheme, with:
 	//       Boot rotation is FB_ROTATE_UD, pickel is FB_ROTATE_UR, nickel is FB_ROTATE_CCW
 	//       With the exception of the Aura HD and the H2O.
@@ -313,32 +314,42 @@ static void
 	//       https://github.com/geek1011/KoboStuff/blob/gh-pages/kobofirmware.js#L11
 	switch (kobo_id) {
 		case 310:    // Touch A/B (trilogy)
+			deviceQuirks.isKoboNonMT = true;
+			strncpy(deviceQuirks.deviceName, "Touch A/B", sizeof(deviceQuirks.deviceName) - 1U);
+			break;
 		case 320:    // Touch C (trilogy)
 			deviceQuirks.isKoboNonMT = true;
+			strncpy(deviceQuirks.deviceName, "Touch C", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 340:    // Mini (pixie)
 			deviceQuirks.isKoboNonMT = true;
 			deviceQuirks.screenDPI   = 200U;
+			strncpy(deviceQuirks.deviceName, "Mini", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 330:    // Glo (kraken)
 			deviceQuirks.isKoboNonMT = true;
 			deviceQuirks.screenDPI   = 212U;
+			strncpy(deviceQuirks.deviceName, "Glo", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 371:    // Glo HD (alyssum)
 			deviceQuirks.screenDPI = 300U;
+			strncpy(deviceQuirks.deviceName, "Glo HD", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 372:    // Touch 2.0 (pika)
+			strncpy(deviceQuirks.deviceName, "Touch 2.0", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 360:    // Aura (phoenix)
 			// NOTE: The bottom 10 pixels *may* be blacked out by Nickel? (TBC!)
 			//deviceQuirks.koboVertOffset = -10;
 			deviceQuirks.screenDPI = 212U;
+			strncpy(deviceQuirks.deviceName, "Aura", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 350:    // Aura HD (dragon)
 			deviceQuirks.isKoboNonMT = true;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
 			deviceQuirks.ntxBootRota = FB_ROTATE_UR;
 			deviceQuirks.screenDPI   = 265U;
+			strncpy(deviceQuirks.deviceName, "Aura HD", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 370:    // Aura H2O (dahlia)
 			// NOTE: The top 11 pixels are blacked out by Nickel (behind the bezel)
@@ -346,40 +357,57 @@ static void
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
 			deviceQuirks.ntxBootRota = FB_ROTATE_UR;
 			deviceQuirks.screenDPI   = 265U;
+			strncpy(deviceQuirks.deviceName, "H2O", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 374:    // Aura H2O² (snow)
 			deviceQuirks.ntxBootRota = FB_ROTATE_UR;
 			deviceQuirks.screenDPI   = 265U;
+			strncpy(deviceQuirks.deviceName, "H2O²", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 378:    // Aura H2O² r2 (snow)
 			deviceQuirks.isKoboMk7   = true;
 			deviceQuirks.ntxBootRota = FB_ROTATE_UR;
 			deviceQuirks.screenDPI   = 265U;
+			strncpy(deviceQuirks.deviceName, "H2O² r2", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 373:    // Aura ONE (daylight)
+			deviceQuirks.screenDPI = 300U;
+			strncpy(deviceQuirks.deviceName, "Aura One", sizeof(deviceQuirks.deviceName) - 1U);
+			break;
 		case 381:    // Aura ONE LE (daylight)
 			deviceQuirks.screenDPI = 300U;
+			strncpy(deviceQuirks.deviceName, "Aura One LE", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 375:    // Aura SE (star)
 			deviceQuirks.screenDPI = 212U;
+			strncpy(deviceQuirks.deviceName, "Aura SE", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 379:    // Aura SE r2 (star)
 			deviceQuirks.isKoboMk7 = true;
 			deviceQuirks.screenDPI = 212U;
+			strncpy(deviceQuirks.deviceName, "Aura SE r2", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 376:    // Clara HD (nova)
 			deviceQuirks.isKoboMk7 = true;
 			deviceQuirks.screenDPI = 300U;
+			strncpy(deviceQuirks.deviceName, "Clara HD", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 377:    // Forma (frost)
+			deviceQuirks.isKoboMk7 = true;
+			deviceQuirks.canRotate = true;
+			deviceQuirks.screenDPI = 300U;
+			strncpy(deviceQuirks.deviceName, "Forma", sizeof(deviceQuirks.deviceName) - 1U);
+			break;
 		case 380:    // Forma 32GB (frost)
 			deviceQuirks.isKoboMk7 = true;
 			deviceQuirks.canRotate = true;
 			deviceQuirks.screenDPI = 300U;
+			strncpy(deviceQuirks.deviceName, "Forma 32GB", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 0:
 			// Like kobo_config.sh, assume Trilogy as a fallback
 			deviceQuirks.isKoboNonMT = true;
+			strncpy(deviceQuirks.deviceName, "Trilogy?", sizeof(deviceQuirks.deviceName) - 1U);
 			/* FALLTHROUGH */
 		default:
 			WARN("Unidentified Kobo device code (%hu)", kobo_id);
@@ -519,10 +547,13 @@ static void
 {
 #	if defined(FBINK_FOR_KINDLE)
 	identify_kindle();
+	ELOG("Detected a Kindle %s (0x%02X)", deviceQuirks.deviceName, deviceQuirks.deviceId);
 #	elif defined(FBINK_FOR_CERVANTES)
 	identify_cervantes();
+	ELOG("Detected a Cervantes %s (%hu)", deviceQuirks.deviceName, deviceQuirks.deviceId);
 #	else
 	identify_kobo();
+	ELOG("Detected a Kobo %s (%hu)", deviceQuirks.deviceName, deviceQuirks.deviceId);
 #	endif
 }
 #endif    // !FBINK_FOR_LINUX
