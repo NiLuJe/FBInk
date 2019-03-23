@@ -221,7 +221,7 @@ int
 	};
 
 	uint32_t req_bpp     = 0U;
-	int8_t   req_rota    = -1;
+	int8_t   req_rota    = 42;
 	bool     errfnd      = false;
 	bool     print_bpp   = false;
 	bool     return_bpp  = false;
@@ -282,11 +282,7 @@ int
 					case FB_ROTATE_CCW:
 						break;
 					case -1:
-						// NOTE: Nickel's Portrait orientation should *always* match BootRota + 1
-						req_rota = (deviceQuirks.ntxBootRota + 1) & 3;
-						LOG("Device's expected Portrait orientation should be: %hhd (%s)!\n",
-						    req_rota,
-						    fb_rotate_to_string((uint32_t) req_rota));
+						// NOTE: We'll compute it later, as we need the results from identify_device() ;).
 						break;
 					default:
 						fprintf(stderr, "Invalid rotation '%s'!\n", optarg);
@@ -366,6 +362,20 @@ int
 	// If no bitdepth was requested, set to the current one, we'll be double-checking if changes are actually needed.
 	if (req_bpp == 0U) {
 		req_bpp = vInfo.bits_per_pixel;
+	}
+
+	// If the automagic Portrait rotation was requested, compute it
+	if (req_rota == -1) {
+		// NOTE: Nickel's Portrait orientation should *always* match BootRota + 1
+		req_rota = (deviceQuirks.ntxBootRota + 1) & 3;
+		LOG("Device's expected Portrait orientation should be: %hhd (%s)!\n",
+		    req_rota,
+		    fb_rotate_to_string((uint32_t) req_rota));
+	}
+
+	// If no rotation was requested, reset req_rota to our expected sentinel value
+	if (req_rota == 42) {
+		req_rota = -1;
 	}
 
 	// If a change was requested, do it, but check if it's necessary first
