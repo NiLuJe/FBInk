@@ -193,6 +193,7 @@ static bool
 			strncpy(deviceQuirks.deviceName, "PaperWhite 4", sizeof(deviceQuirks.deviceName) - 1U);
 			return true;
 		default:
+			strncpy(deviceQuirks.deviceName, "Unknown!", sizeof(deviceQuirks.deviceName) - 1U);
 			return false;
 	}
 }
@@ -326,6 +327,7 @@ static void
 				break;
 			default:
 				WARN("Unidentified Cervantes device (%hhu)", config.pcb_id);
+				strncpy(deviceQuirks.deviceName, "Unknown!", sizeof(deviceQuirks.deviceName) - 1U);
 				break;
 		}
 	}
@@ -448,6 +450,7 @@ static void
 			/* FALLTHROUGH */
 		default:
 			WARN("Unidentified Kobo device code (%hu)", kobo_id);
+			strncpy(deviceQuirks.deviceName, "Unknown!", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 	}
 }

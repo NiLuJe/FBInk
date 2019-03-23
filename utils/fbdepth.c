@@ -368,7 +368,7 @@ int
 	if (req_rota == -1) {
 		// NOTE: Nickel's Portrait orientation should *always* match BootRota + 1
 		req_rota = (deviceQuirks.ntxBootRota + 1) & 3;
-		LOG("Device's expected Portrait orientation should be: %hhd (%s)!\n",
+		LOG("Device's expected Portrait orientation should be: %hhd (%s)!",
 		    req_rota,
 		    fb_rotate_to_string((uint32_t) req_rota));
 	}
