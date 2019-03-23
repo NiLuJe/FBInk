@@ -303,7 +303,7 @@ int
 		}
 	}
 
-	if (errfnd || ((req_bpp == 0U && req_rota == -1) && !(print_bpp || return_bpp || print_rota || return_rota))) {
+	if (errfnd || ((req_bpp == 0U && req_rota == 42) && !(print_bpp || return_bpp || print_rota || return_rota))) {
 		show_helpmsg();
 		return ERRCODE(EXIT_FAILURE);
 	}
