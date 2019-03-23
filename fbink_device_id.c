@@ -256,14 +256,10 @@ static void
 			// ... And if it's not either list, it's truly unknown.
 			if (!is_kindle_device_new(dev)) {
 				WARN("Unidentified Kindle device %s (0x%03X)", device_code, dev);
-			} else {
-				// Store the device ID...
-				deviceQuirks.deviceId = dev;
 			}
-		} else {
-			// Store the device ID...
-			deviceQuirks.deviceId = dev;
 		}
+		// Store the device ID...
+		deviceQuirks.deviceId = dev;
 	}
 }
 #	elif defined(FBINK_FOR_CERVANTES)
