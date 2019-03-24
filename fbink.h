@@ -175,6 +175,8 @@ typedef enum
 // A struct to dump FBInk's internal state into, like fbink_state_dump() would, but in C ;)
 typedef struct
 {
+	long int           user_hz;             // USER_HZ
+	const char*        font_name;           // fbink_cfg->fontname
 	uint32_t           view_width;          // viewWidth
 	uint32_t           view_height;         // viewHeight
 	uint32_t           screen_width;        // screenWidth
@@ -185,8 +187,6 @@ typedef struct
 	uint8_t            pen_fg_color;        // penFGColor
 	uint8_t            pen_bg_color;        // penFGColor
 	unsigned short int screen_dpi;          // deviceQuirks.screenDPI
-	long int           user_hz;             // USER_HZ
-	const char*        font_name;           // fbink_cfg->fontname
 	unsigned short int font_w;              // FONTW
 	unsigned short int font_h;              // FONTH
 	unsigned short int max_cols;            // MAXCOLS

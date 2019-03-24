@@ -2495,6 +2495,8 @@ void
     fbink_get_state(const FBInkConfig* fbink_cfg, FBInkState* fbink_state)
 {
 	if (fbink_state) {
+		fbink_state->user_hz       = USER_HZ;
+		fbink_state->font_name     = fontname_to_string(fbink_cfg->fontname);
 		fbink_state->view_width    = viewWidth;
 		fbink_state->view_height   = viewHeight;
 		fbink_state->screen_width  = screenWidth;
@@ -2505,8 +2507,6 @@ void
 		fbink_state->pen_fg_color     = penFGColor;
 		fbink_state->pen_bg_color     = penBGColor;
 		fbink_state->screen_dpi       = deviceQuirks.screenDPI;
-		fbink_state->user_hz          = USER_HZ;
-		fbink_state->font_name        = fontname_to_string(fbink_cfg->fontname);
 		fbink_state->font_w           = FONTW;
 		fbink_state->font_h           = FONTH;
 		fbink_state->max_cols         = MAXCOLS;
