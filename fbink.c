@@ -2463,7 +2463,7 @@ void
 {
 	fprintf(
 	    stdout,
-	    "viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu",
+	    "viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName=%s;deviceId=%hu",
 	    viewWidth,
 	    viewHeight,
 	    screenWidth,
@@ -2485,7 +2485,9 @@ void
 	    fInfo.id,
 	    USER_HZ,
 	    penFGColor,
-	    penBGColor);
+	    penBGColor,
+	    deviceQuirks.deviceName,
+	    deviceQuirks.deviceId);
 }
 
 // Dump a few of our internal state variables to the FBInkState struct pointed to by fbink_state
@@ -2493,11 +2495,13 @@ void
     fbink_get_state(const FBInkConfig* fbink_cfg, FBInkState* fbink_state)
 {
 	if (fbink_state) {
-		fbink_state->view_width       = viewWidth;
-		fbink_state->view_height      = viewHeight;
-		fbink_state->screen_width     = screenWidth;
-		fbink_state->screen_height    = screenHeight;
-		fbink_state->bpp              = vInfo.bits_per_pixel;
+		fbink_state->view_width    = viewWidth;
+		fbink_state->view_height   = viewHeight;
+		fbink_state->screen_width  = screenWidth;
+		fbink_state->screen_height = screenHeight;
+		fbink_state->bpp           = vInfo.bits_per_pixel;
+		strncpy(fbink_state->device_name, deviceQuirks.deviceName, sizeof(fbink_state->device_name) - 1);
+		fbink_state->device_id        = deviceQuirks.deviceId;
 		fbink_state->pen_fg_color     = penFGColor;
 		fbink_state->pen_bg_color     = penBGColor;
 		fbink_state->screen_dpi       = deviceQuirks.screenDPI;

@@ -180,6 +180,8 @@ typedef struct
 	uint32_t           screen_width;        // screenWidth
 	uint32_t           screen_height;       // screenHeight
 	uint32_t           bpp;                 // vInfo.bits_per_pixel
+	char               device_name[16];     // deviceQuirks.deviceName
+	unsigned short int device_id;           // deviceQuirks.deviceId
 	uint8_t            pen_fg_color;        // penFGColor
 	uint8_t            pen_bg_color;        // penFGColor
 	unsigned short int screen_dpi;          // deviceQuirks.screenDPI
