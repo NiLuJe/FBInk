@@ -118,13 +118,13 @@ static bool
 		// And flag it as the expected rota for the sanity checks
 		expected_rota = (uint32_t) rota;
 	}
-	if (deviceQuirks.ntxBootRota == FB_ROTATE_UR) {
+	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
 		// NOTE: This should cover the H2O and the few other devices suffering from the same quirk...
 		vInfo.rotate ^= 2;
 		LOG("Setting rotate to %u (%s) to account for kernel rotation quirks",
 		    vInfo.rotate,
 		    fb_rotate_to_string(vInfo.rotate));
-	} else if (deviceQuirks.canRotate) {
+	} else if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ODD_INVERTED) {
 		// NOTE: This is for the Forma, which only inverts CW & CCW (i.e., odd numbers)...
 		if ((vInfo.rotate & 0x01) == 1) {
 			vInfo.rotate ^= 2;
