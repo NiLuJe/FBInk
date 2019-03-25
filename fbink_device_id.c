@@ -349,6 +349,9 @@ static void
 	//       I *think* the boot rota is FB_ROTATE_UR,
 	//       but detecting it as pickel instead appears to do the right thing right now, so I'm not going to mess with it...
 	deviceQuirks.ntxBootRota = FB_ROTATE_UD;
+	// NOTE: Most kernels thankfully don't resort to weird rotation quirks ;).
+	//       c.f., mxc_epdc_fb_check_var @ drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c
+	deviceQuirks.ntxRotaQuirk = NTX_ROTA_STRAIGHT;
 	// NOTE: Device code list pilfered from
 	//       https://github.com/geek1011/KoboStuff/blob/gh-pages/kobofirmware.js#L11
 	switch (kobo_id) {
@@ -386,27 +389,31 @@ static void
 		case 350:    // Aura HD (dragon)
 			deviceQuirks.isKoboNonMT = true;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
-			deviceQuirks.ntxBootRota = FB_ROTATE_UR;
-			deviceQuirks.screenDPI   = 265U;
+			deviceQuirks.ntxBootRota  = FB_ROTATE_UR;
+			deviceQuirks.ntxRotaQuirk = NTX_ROTA_ALL_INVERTED;
+			deviceQuirks.screenDPI    = 265U;
 			strncpy(deviceQuirks.deviceName, "Aura HD", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 370:    // Aura H2O (dahlia)
 			// NOTE: The top 11 pixels are blacked out by Nickel (behind the bezel)
 			deviceQuirks.koboVertOffset = 11;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
-			deviceQuirks.ntxBootRota = FB_ROTATE_UR;
-			deviceQuirks.screenDPI   = 265U;
+			deviceQuirks.ntxBootRota  = FB_ROTATE_UR;
+			deviceQuirks.ntxRotaQuirk = NTX_ROTA_ALL_INVERTED;
+			deviceQuirks.screenDPI    = 265U;
 			strncpy(deviceQuirks.deviceName, "H2O", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 374:    // Aura H2O² (snow)
 			deviceQuirks.ntxBootRota = FB_ROTATE_UR;
-			deviceQuirks.screenDPI   = 265U;
+			// NOTE: Is indeed NTX_ROTA_STRAIGHT
+			deviceQuirks.screenDPI = 265U;
 			strncpy(deviceQuirks.deviceName, "H2O²", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 378:    // Aura H2O² r2 (snow)
 			deviceQuirks.isKoboMk7   = true;
 			deviceQuirks.ntxBootRota = FB_ROTATE_UR;
-			deviceQuirks.screenDPI   = 265U;
+			// NOTE: *Might* be NTX_ROTA_ODD_INVERTED
+			deviceQuirks.screenDPI = 265U;
 			strncpy(deviceQuirks.deviceName, "H2O² r2", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 373:    // Aura ONE (daylight)
@@ -423,24 +430,28 @@ static void
 			break;
 		case 379:    // Aura SE r2 (star)
 			deviceQuirks.isKoboMk7 = true;
+			// NOTE: *Might* be NTX_ROTA_ODD_INVERTED
 			deviceQuirks.screenDPI = 212U;
 			strncpy(deviceQuirks.deviceName, "Aura SE r2", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 376:    // Clara HD (nova)
 			deviceQuirks.isKoboMk7 = true;
+			// NOTE: Is indeed NTX_ROTA_STRAIGHT
 			deviceQuirks.screenDPI = 300U;
 			strncpy(deviceQuirks.deviceName, "Clara HD", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 377:    // Forma (frost)
-			deviceQuirks.isKoboMk7 = true;
-			deviceQuirks.canRotate = true;
-			deviceQuirks.screenDPI = 300U;
+			deviceQuirks.isKoboMk7    = true;
+			deviceQuirks.canRotate    = true;
+			deviceQuirks.ntxRotaQuirk = NTX_ROTA_ODD_INVERTED;
+			deviceQuirks.screenDPI    = 300U;
 			strncpy(deviceQuirks.deviceName, "Forma", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 380:    // Forma 32GB (frost)
-			deviceQuirks.isKoboMk7 = true;
-			deviceQuirks.canRotate = true;
-			deviceQuirks.screenDPI = 300U;
+			deviceQuirks.isKoboMk7    = true;
+			deviceQuirks.canRotate    = true;
+			deviceQuirks.ntxRotaQuirk = NTX_ROTA_ODD_INVERTED;
+			deviceQuirks.screenDPI    = 300U;
 			strncpy(deviceQuirks.deviceName, "Forma 32GB", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 0:

@@ -44,12 +44,21 @@ typedef struct
 	bool               isKoboMk7;
 	int8_t             koboVertOffset;
 	uint8_t            ntxBootRota;
+	uint8_t            ntxRotaQuirk;
 	unsigned short int screenDPI;
 	bool               canRotate;
 	bool               skipId;
 	unsigned short int deviceId;
 	char               deviceName[16];
 } FBInkDeviceQuirks;
+
+// List of NTX rotation quirk types (c.f., mxc_epdc_fb_check_var @ drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c)...
+typedef enum
+{
+	NTX_ROTA_STRAIGHT = 0U,    // No shenanigans
+	NTX_ROTA_ALL_INVERTED,     // Every rotation is inverted by the kernel
+	NTX_ROTA_ODD_INVERTED      // Only Landscape (odd) rotations are inverted by the kernel
+} NTX_ROTA_INDEX_T;
 
 // An (x, y) coordinates tuple
 typedef struct
