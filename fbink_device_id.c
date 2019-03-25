@@ -360,7 +360,7 @@ static void
 				strncpy(deviceQuirks.deviceName, "3", sizeof(deviceQuirks.deviceName) - 1U);
 				break;
 			case 68:    // BQ Cervantes 4
-				trncpy(deviceQuirks.deviceName, "4", sizeof(deviceQuirks.deviceName) - 1U);
+				strncpy(deviceQuirks.deviceName, "4", sizeof(deviceQuirks.deviceName) - 1U);
 				deviceQuirks.screenDPI = 300U;
 				break;
 			default:
