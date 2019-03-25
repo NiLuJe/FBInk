@@ -226,6 +226,44 @@ static uint32_t
 	return result;
 }
 
+// NOTE: This is from KindleTool,
+//       c.f., https://github.com/NiLuJe/KindleTool/blob/master/KindleTool/convert.c#L51
+// Pilfered from http://rosettacode.org/wiki/Non-decimal_radices/Convert#C
+static char*
+    to_base(int64_t num, unsigned int base)
+{
+	// NOTE: Crockford's Base32, but with the "L" & "U" re-added in?
+	const char*  tbl     = "0123456789ABCDEFGHJKLMNPQRSTUVWX";
+	char         buf[66] = { 0 };
+	char*        out;
+	uint64_t     n;
+	unsigned int len = 0U;
+	unsigned int neg = 0U;
+	// Flawfinder: ignore
+	if (base > strlen(tbl)) {
+		WARN("base %u is unsupported (too large).", base);
+		return NULL;
+	}
+
+	// safe against most negative integer
+	n = ((neg = (num < 0))) ? (uint64_t)(~num) + 1 : (uint64_t) num;
+
+	do {
+		buf[len++] = tbl[n % base];
+	} while (n /= base);
+
+	out = malloc(len + neg + 1U);
+	memset(out, 0, len + neg + 1U);
+	for (unsigned int i = neg; len > 0U; i++) {
+		out[i] = buf[--len];
+	}
+	if (neg) {
+		out[0] = '-';
+	}
+
+	return out;
+}
+
 // NOTE: This is adapted from KindleTool,
 //       c.f., https://github.com/NiLuJe/KindleTool/blob/master/KindleTool/create.c#L1915
 static void
@@ -260,7 +298,7 @@ static void
 			}
 		}
 		// Store the device ID...
-		deviceQuirks.deviceId = dev;
+		deviceQuirks.deviceId = (unsigned short int) dev;
 	}
 }
 #	elif defined(FBINK_FOR_CERVANTES)
@@ -598,7 +636,22 @@ static void
 {
 #	if defined(FBINK_FOR_KINDLE)
 	identify_kindle();
-	ELOG("Detected a Kindle %s (0x%02X)", deviceQuirks.deviceName, deviceQuirks.deviceId);
+	if (deviceQuirks.deviceId > 0xFF) {
+		char* dev_id    = NULL;
+		dev_id          = to_base(deviceQuirks.deviceId, 32);
+		const char* pad = "000";
+		ELOG("Detected a Kindle %s (%.*s%s -> 0x%03X)",
+		     deviceQuirks.deviceName,
+		     ((int) strlen(pad) < (int) strlen(dev_id))    // Flawfinder: ignore
+			 ? 0
+			 : (int) strlen(pad) - (int) strlen(dev_id),    // Flawfinder: ignore
+		     pad,
+		     dev_id,
+		     deviceQuirks.deviceId);
+		free(dev_id);
+	} else {
+		ELOG("Detected a Kindle %s (0x%02X)", deviceQuirks.deviceName, deviceQuirks.deviceId);
+	}
 #	elif defined(FBINK_FOR_CERVANTES)
 	identify_cervantes();
 	ELOG("Detected a BQ Cervantes %s (%hu)", deviceQuirks.deviceName, deviceQuirks.deviceId);
