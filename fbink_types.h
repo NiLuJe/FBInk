@@ -34,9 +34,9 @@
 // List of flags for device or screen-specific quirks...
 typedef struct
 {
+	unsigned short int screenDPI;
 	unsigned short int deviceId;
 	char               deviceName[16];
-	unsigned short int screenDPI;
 	bool               isPerfectFit;
 	bool               isKindleLegacy;
 	bool               isKindlePearlScreen;
