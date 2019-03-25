@@ -34,6 +34,9 @@
 // List of flags for device or screen-specific quirks...
 typedef struct
 {
+	unsigned short int deviceId;
+	char               deviceName[16];
+	unsigned short int screenDPI;
 	bool               isPerfectFit;
 	bool               isKindleLegacy;
 	bool               isKindlePearlScreen;
@@ -45,11 +48,8 @@ typedef struct
 	int8_t             koboVertOffset;
 	uint8_t            ntxBootRota;
 	uint8_t            ntxRotaQuirk;
-	unsigned short int screenDPI;
 	bool               canRotate;
 	bool               skipId;
-	unsigned short int deviceId;
-	char               deviceName[16];
 } FBInkDeviceQuirks;
 
 // List of NTX rotation quirk types (c.f., mxc_epdc_fb_check_var @ drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c)...
