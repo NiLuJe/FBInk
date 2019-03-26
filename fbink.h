@@ -172,6 +172,14 @@ typedef enum
 	HWD_QUANT_ONLY
 } HW_DITHER_INDEX_T;
 
+// List of NTX rotation quirk types (c.f., mxc_epdc_fb_check_var @ drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c)...
+typedef enum
+{
+	NTX_ROTA_STRAIGHT = 0U,    // No shenanigans
+	NTX_ROTA_ALL_INVERTED,     // Every rotation is inverted by the kernel
+	NTX_ROTA_ODD_INVERTED      // Only Landscape (odd) rotations are inverted by the kernel
+} NTX_ROTA_INDEX_T;
+
 // A struct to dump FBInk's internal state into, like fbink_state_dump() would, but in C ;)
 typedef struct
 {
@@ -198,6 +206,10 @@ typedef struct
 	uint8_t            glyph_width;         // glyphWidth
 	uint8_t            glyph_height;        // glyphHeight
 	bool               is_perfect_fit;      // deviceQuirks.isPerfectFit
+	bool               is_kobo_non_mt;      // deviceQuirks.isKoboNonMT
+	uint8_t            ntx_boot_rota;       // deviceQuirks.ntxBootRota
+	uint8_t            ntx_rota_quirk;      // deviceQuirks.ntxRotaQuirk
+	bool               can_rotate;          // deviceQuirks.canRotate
 } FBInkState;
 
 // What a FBInk config should look like. Perfectly sane when fully zero-initialized.

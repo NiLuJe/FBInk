@@ -2459,7 +2459,7 @@ void
 {
 	fprintf(
 	    stdout,
-	    "viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName=%s;deviceId=%hu",
+	    "viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName=%s;deviceId=%hu;isKoboNonMT=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;canRotate=%d",
 	    viewWidth,
 	    viewHeight,
 	    screenWidth,
@@ -2483,7 +2483,11 @@ void
 	    penFGColor,
 	    penBGColor,
 	    deviceQuirks.deviceName,
-	    deviceQuirks.deviceId);
+	    deviceQuirks.deviceId,
+	    deviceQuirks.isKoboNonMT,
+	    deviceQuirks.ntxBootRota,
+	    deviceQuirks.ntxRotaQuirk,
+	    deviceQuirks.canRotate);
 }
 
 // Dump a few of our internal state variables to the FBInkState struct pointed to by fbink_state
@@ -2514,6 +2518,10 @@ void
 		fbink_state->glyph_width      = glyphWidth;
 		fbink_state->glyph_height     = glyphHeight;
 		fbink_state->is_perfect_fit   = deviceQuirks.isPerfectFit;
+		fbink_state->is_kobo_non_mt   = deviceQuirks.isKoboNonMT;
+		fbink_state->ntx_boot_rota    = deviceQuirks.ntxBootRota;
+		fbink_state->ntx_rota_quirk   = deviceQuirks.ntxRotaQuirk;
+		fbink_state->can_rotate       = deviceQuirks.canRotate;
 	} else {
 		WARN("Err, it appears we were passed a NULL fbink_state pointer?");
 	}
