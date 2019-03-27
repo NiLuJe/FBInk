@@ -235,7 +235,7 @@ static char*
 	// NOTE: Crockford's Base32, but with the "L" & "U" re-added in?
 	const char*  tbl     = "0123456789ABCDEFGHJKLMNPQRSTUVWX";
 	char         buf[66] = { 0 };
-	char*        out;
+	char*        out     = NULL;
 	uint64_t     n;
 	unsigned int len = 0U;
 	unsigned int neg = 0U;
@@ -253,6 +253,10 @@ static char*
 	} while (n /= base);
 
 	out = malloc(len + neg + 1U);
+	if (out == NULL) {
+		WARN("Error allocating base32 output string buffer");
+		return NULL;
+	}
 	memset(out, 0, len + neg + 1U);
 	for (unsigned int i = neg; len > 0U; i++) {
 		out[i] = buf[--len];

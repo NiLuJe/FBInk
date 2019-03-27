@@ -3506,6 +3506,11 @@ int
 
 	// And allocate the memory for it...
 	lines = calloc(num_lines, sizeof(FBInkOTLine));
+	if (!lines) {
+		WARN("Lines metadata buffer could not be allocated");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
 
 	// Now, lets use libunibreak to find the possible break opportunities in our string.
 
