@@ -391,6 +391,7 @@ static void
 				break;
 			default:
 				WARN("Unidentified Cervantes device (%hhu)", config.pcb_id);
+				// Flawfinder: ignore
 				strncpy(deviceQuirks.deviceName, "Unknown!", sizeof(deviceQuirks.deviceName) - 1U);
 				break;
 		}
