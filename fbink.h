@@ -520,6 +520,7 @@ FBINK_API int fbink_dump(int fbfd, const FBInkConfig* fbink_cfg, FBInkDump* dump
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
 // Otherwise, returns a few different things on failure:
 //	-(ENOTSUP)	when the current rotation or bitdepth doesn't match the dump's
+//	-(EINVAL)	when there's no data to restore
 FBINK_API int fbink_restore(int fbfd, const FBInkConfig* fbink_cfg, FBInkDump* dump);
 
 // Scan the screen for Kobo's "Connect" button in the "USB plugged in" popup,
