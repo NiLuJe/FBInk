@@ -6088,7 +6088,7 @@ int
 		// Region dump, restore line by line
 		// FIXME: 4bpp?
 		uint8_t bpp = dump->bpp / 8U;
-		for (unsigned short int j = dump->y, l = 0U; j < dump->y + dump->h; j++, l++) {
+		for (unsigned short int j = dump->y, l = 0U; l < dump->h; j++, l++) {
 			size_t fb_offset   = (uint32_t)(dump->x * bpp) + (j * fInfo.line_length);
 			size_t dump_offset = l * (dump->w * bpp);
 			memcpy(fbPtr + fb_offset, dump->data + dump_offset, dump->w * bpp);
