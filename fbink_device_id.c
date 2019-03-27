@@ -204,11 +204,10 @@ static uint32_t
     from_base(const char* num, uint8_t base)
 {
 	// NOTE: Crockford's Base32, but with the "L" & "U" re-added in?
-	const char* tbl    = "0123456789ABCDEFGHJKLMNPQRSTUVWX";
-	uint32_t    result = 0U;
+	const char tbl[]  = "0123456789ABCDEFGHJKLMNPQRSTUVWX";
+	uint32_t   result = 0U;
 
-	// Flawfinder: ignore
-	if (base > strlen(tbl)) {
+	if (base >= sizeof(tbl)) {
 		WARN("base %hhu is unsupported (too large)", base);
 		return 0;
 	}
@@ -233,14 +232,14 @@ static char*
     to_base(int64_t num, uint8_t base)
 {
 	// NOTE: Crockford's Base32, but with the "L" & "U" re-added in?
-	const char* tbl     = "0123456789ABCDEFGHJKLMNPQRSTUVWX";
-	char        buf[66] = { 0 };
-	char*       out     = NULL;
-	uint64_t    n;
-	uint32_t    len = 0U;
-	bool        neg = false;
-	// Flawfinder: ignore
-	if (base > strlen(tbl)) {
+	const char tbl[]   = "0123456789ABCDEFGHJKLMNPQRSTUVWX";
+	char       buf[66] = { 0 };
+	char*      out     = NULL;
+	uint64_t   n;
+	uint32_t   len = 0U;
+	bool       neg = false;
+
+	if (base >= sizeof(tbl)) {
 		WARN("base %u is unsupported (too large).", base);
 		return NULL;
 	}
