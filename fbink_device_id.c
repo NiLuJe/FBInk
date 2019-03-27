@@ -251,12 +251,11 @@ static char*
 		buf[len++] = tbl[n % base];
 	} while (n /= base);
 
-	out = malloc(len + neg + 1U);
+	out = calloc(len + neg + 1U, sizeof(*out));
 	if (out == NULL) {
 		WARN("Error allocating base32 output string buffer");
 		return NULL;
 	}
-	memset(out, 0, len + neg + 1U);
 	for (uint32_t i = neg; len > 0U; i++) {
 		out[i] = buf[--len];
 	}
