@@ -71,6 +71,8 @@ int
 	fbink_cfg.is_centered = true;
 	fbink_cfg.is_padded   = true;
 	fbink_cfg.is_halfway  = true;
+	// Inverted to make region restore easier to spot
+	fbink_cfg.is_inverted = true;
 	if (fbink_print(fbfd, "Wheeee!", &fbink_cfg) < 0) {
 		fprintf(stderr, "Failed to print!\n");
 		rv = ERRCODE(EXIT_FAILURE);
@@ -78,6 +80,29 @@ int
 	}
 
 	// Restore
+	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
+		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// Dump a region at the center of the screen
+	fbink_cfg.halign = CENTER;
+	fbink_cfg.valign = CENTER;
+	if (fbink_region_dump(fbfd, 0, 0, 500, 250, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
+		fprintf(stderr, "Failed to dump fb region, aborting . . .\n");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// Print random crap, again
+	if (fbink_print(fbfd, "Wheeee!", &fbink_cfg) < 0) {
+		fprintf(stderr, "Failed to print!\n");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// Restore, again
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
