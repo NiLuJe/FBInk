@@ -6062,7 +6062,7 @@ int
 
 	// Dump a region of the fb
 	// Pilfer the coordinates computations from draw_image ;).
-	// NOTE: We compute initial offsets from row/col, to help aligning images with text.
+	// NOTE: We compute initial offsets from row/col, to help aligning the region with text.
 	if (fbink_cfg->col < 0) {
 		x_off = (short int) (viewHoriOrigin + x_off + (MAX(MAXCOLS + fbink_cfg->col, 0) * FONTW));
 	} else {
@@ -6070,7 +6070,7 @@ int
 	}
 	// NOTE: Unless we *actually* specified a row, ignore viewVertOffset
 	//       The rationale being we want to keep being aligned to text rows when we do specify a row,
-	//       but we don't want the extra offset when we don't (in particular, when printing full-screen images).
+	//       but we don't want the extra offset when we don't (in particular, when dumping what amounts to the full screen).
 	// NOTE: This means that row 0 and row -MAXROWS *will* behave differently, but so be it...
 	if (fbink_cfg->row < 0) {
 		y_off = (short int) (viewVertOrigin + y_off + (MAX(MAXROWS + fbink_cfg->row, 0) * FONTH));
@@ -6078,7 +6078,7 @@ int
 		y_off = (short int) (viewVertOrigin - viewVertOffset + y_off + (fbink_cfg->row * FONTH));
 		// This of course means that row 0 effectively breaks that "align with text" contract if viewVertOffset != 0,
 		// on the off-chance we do explicitly really want to align something to row 0, so, warn about it...
-		// The "print full-screen images" use-case is greatly more prevalent than "actually rely on row 0 alignment" ;).
+		// The "print full-screen data" use-case is greatly more prevalent than "actually rely on row 0 alignment" ;).
 		// And in case that's *really* needed, using -MAXROWS instead of 0 will honor alignment anyway.
 		if (viewVertOffset != 0U) {
 			LOG("Ignoring the %hhupx row offset because row is 0!", viewVertOffset);
@@ -6143,21 +6143,21 @@ int
 	unsigned short int img_x_off = 0;
 	unsigned short int img_y_off = 0;
 	if (x_off < 0) {
-		// We'll start plotting from the beginning of the *visible* part of the image ;)
+		// We'll start dumping from the beginning of the *visible* part of the region ;)
 		img_x_off = (unsigned short int) (abs(x_off) + viewHoriOrigin);
-		// Only if the visible section of the image's width is smaller than our screen's width...
+		// Only if the visible section of the region's width is smaller than our screen's width...
 		if ((uint32_t)(w - img_x_off) < viewWidth) {
 			region.width -= img_x_off;
 		}
 	}
 	if (y_off < 0) {
-		// We'll start plotting from the beginning of the *visible* part of the image ;)
+		// We'll start dumping from the beginning of the *visible* part of the region ;)
 		if (fbink_cfg->row == 0) {
 			img_y_off = (unsigned short int) (abs(y_off) + viewVertOrigin - viewVertOffset);
 		} else {
 			img_y_off = (unsigned short int) (abs(y_off) + viewVertOrigin);
 		}
-		// Only if the visible section of the image's height is smaller than our screen's height...
+		// Only if the visible section of the region's height is smaller than our screen's height...
 		if ((uint32_t)(h - img_y_off) < viewHeight) {
 			region.height -= img_y_off;
 		}
