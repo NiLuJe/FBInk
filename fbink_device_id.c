@@ -240,7 +240,7 @@ static char*
 	bool       neg = false;
 
 	if (base >= sizeof(tbl)) {
-		WARN("base %u is unsupported (too large).", base);
+		WARN("base %hhu is unsupported (too large).", base);
 		return NULL;
 	}
 
