@@ -61,7 +61,7 @@ int
 	}
 
 	// Dump
-	if (fbink_dump(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
+	if (fbink_dump(fbfd, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to dump fb, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;

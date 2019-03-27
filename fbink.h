@@ -237,12 +237,12 @@ typedef struct
 	bool      is_verbose;      // Print verbose diagnostic informations on stdout
 	bool      is_quiet;        // Hide fbink_init()'s hardware setup info (sent to stderr)
 	bool      ignore_alpha;    // Ignore any potential alpha channel in source image (i.e., flatten the image)
-	uint8_t   halign;    // Horizontal alignment of images (NONE/LEFT, CENTER, EDGE/RIGHT; c.f., ALIGN_INDEX_T enum)
-	uint8_t   valign;    // Vertical alignment of images (NONE/TOP, CENTER, EDGE/BOTTOM; c.f., ALIGN_INDEX_T enum)
 	uint8_t
-	     wfm_mode;    // Request a specific waveform mode when printing an image or dump (c.f., WFM_MODE_INDEX_T enum)
-	bool is_dithered;    // Request (ordered) hardware dithering (if supported).
-	bool no_refresh;     // Skip actually refreshing the eInk screen (useful when drawing in batch)
+		halign;    // Horizontal alignment of images/dumps (NONE/LEFT, CENTER, EDGE/RIGHT; c.f., ALIGN_INDEX_T enum)
+	uint8_t valign;    // Vertical alignment of images/dumps (NONE/TOP, CENTER, EDGE/BOTTOM; c.f., ALIGN_INDEX_T enum)
+	uint8_t wfm_mode;    // Request a specific waveform mode when printing an image/dump (c.f., WFM_MODE_INDEX_T enum)
+	bool    is_dithered;    // Request (ordered) hardware dithering (if supported).
+	bool    no_refresh;     // Skip actually refreshing the eInk screen (useful when drawing in batch)
 } FBInkConfig;
 
 typedef struct
@@ -512,15 +512,40 @@ FBINK_API int fbink_print_raw_data(int                fbfd,
 // fbink_cfg:		Pointer to an FBInkConfig struct (honors is_flashing, is_inverted, is_dithered, no_refresh, pen_*_color)
 FBINK_API int fbink_cls(int fbfd, const FBInkConfig* fbink_cfg);
 
-// Dump fb
+// Dump the full screen
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
-FBINK_API int fbink_dump(int fbfd, const FBInkConfig* fbink_cfg, FBInkDump* dump);
+// fdfd:		Open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
+// dump:		Pointer to an FBInkDump struct (will be recycled if already used)
+FBINK_API int fbink_dump(int fbfd, FBInkDump* dump);
 
-// Restore fb
+// Dump a specific region of the screen
+// Returns -(ENOSYS) when image support is disabled (MINIMAL build)
+// fdfd:		Open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
+// x_off:		Dump coordinates, x (honors negative offsets)
+// y_off:		Dump coordinates, y (honors negative offsets)
+// w:			Width of the region to dump
+// h:			Height of the region to dump
+// fbink_cfg:		Pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
+// dump:		Pointer to an FBInkDump struct (will be recycled if already used)
+FBINK_API int fbink_region_dump(int                fbfd,
+				short int          x_off,
+				short int          y_off,
+				unsigned short int w,
+				unsigned short int h,
+				const FBInkConfig* fbink_cfg,
+				FBInkDump*         dump);
+
+// Restore a fb dump
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
 // Otherwise, returns a few different things on failure:
 //	-(ENOTSUP)	when the current rotation or bitdepth doesn't match the dump's
 //	-(EINVAL)	when there's no data to restore
+// fdfd:		Open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
+// fbink_cfg:		Pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
+// dump:		Pointer to an FBInkDump struct, as setup by fbink_dump or fbink_region_dump
 FBINK_API int fbink_restore(int fbfd, const FBInkConfig* fbink_cfg, FBInkDump* dump);
 
 // Scan the screen for Kobo's "Connect" button in the "USB plugged in" popup,

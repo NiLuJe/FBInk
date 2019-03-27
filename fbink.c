@@ -5967,7 +5967,7 @@ cleanup:
 
 // Dump the full fb
 int
-    fbink_dump(int fbfd, const FBInkConfig* fbink_cfg, FBInkDump* dump)
+    fbink_dump(int fbfd, FBInkDump* dump)
 {
 #ifdef FBINK_WITH_IMAGE
 	// Open the framebuffer if need be...
@@ -6014,6 +6014,207 @@ int
 	dump->is_full = true;
 	// And finally, the fb data itself
 	memcpy(dump->data, fbPtr, fInfo.line_length * vInfo.yres);
+
+	// Cleanup
+cleanup:
+	if (isFbMapped && !keep_fd) {
+		unmap_fb();
+	}
+	if (!keep_fd) {
+		close(fbfd);
+	}
+
+	return rv;
+#else
+	WARN("Image support is disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif
+}
+
+// Dump a specific region of the fb
+int
+    fbink_region_dump(int                fbfd,
+		      short int          x_off,
+		      short int          y_off,
+		      unsigned short int w,
+		      unsigned short int h,
+		      const FBInkConfig* fbink_cfg,
+		      FBInkDump*         dump)
+{
+#ifdef FBINK_WITH_IMAGE
+	// Open the framebuffer if need be...
+	// NOTE: As usual, we *expect* to be initialized at this point!
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// mmap the fb if need be...
+	if (!isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	}
+
+	// Dump a region of the fb
+	// Pilfer the coordinates computations from draw_image ;).
+	// NOTE: We compute initial offsets from row/col, to help aligning images with text.
+	if (fbink_cfg->col < 0) {
+		x_off = (short int) (viewHoriOrigin + x_off + (MAX(MAXCOLS + fbink_cfg->col, 0) * FONTW));
+	} else {
+		x_off = (short int) (viewHoriOrigin + x_off + (fbink_cfg->col * FONTW));
+	}
+	// NOTE: Unless we *actually* specified a row, ignore viewVertOffset
+	//       The rationale being we want to keep being aligned to text rows when we do specify a row,
+	//       but we don't want the extra offset when we don't (in particular, when printing full-screen images).
+	// NOTE: This means that row 0 and row -MAXROWS *will* behave differently, but so be it...
+	if (fbink_cfg->row < 0) {
+		y_off = (short int) (viewVertOrigin + y_off + (MAX(MAXROWS + fbink_cfg->row, 0) * FONTH));
+	} else if (fbink_cfg->row == 0) {
+		y_off = (short int) (viewVertOrigin - viewVertOffset + y_off + (fbink_cfg->row * FONTH));
+		// This of course means that row 0 effectively breaks that "align with text" contract if viewVertOffset != 0,
+		// on the off-chance we do explicitly really want to align something to row 0, so, warn about it...
+		// The "print full-screen images" use-case is greatly more prevalent than "actually rely on row 0 alignment" ;).
+		// And in case that's *really* needed, using -MAXROWS instead of 0 will honor alignment anyway.
+		if (viewVertOffset != 0U) {
+			LOG("Ignoring the %hhupx row offset because row is 0!", viewVertOffset);
+		}
+	} else {
+		y_off = (short int) (viewVertOrigin + y_off + (fbink_cfg->row * FONTH));
+	}
+	LOG("Adjusted dump coordinates to (%hd, %hd), after column %hd & row %hd",
+	    x_off,
+	    y_off,
+	    fbink_cfg->col,
+	    fbink_cfg->row);
+
+	// Handle horizontal alignment...
+	switch (fbink_cfg->halign) {
+		case CENTER:
+			x_off = (short int) (x_off + (int) (viewWidth / 2U));
+			x_off = (short int) (x_off - (w / 2));
+			break;
+		case EDGE:
+			x_off = (short int) (x_off + (int) (viewWidth - (uint32_t) w));
+			break;
+		case NONE:
+		default:
+			break;
+	}
+	if (fbink_cfg->halign != NONE) {
+		LOG("Adjusted dump coordinates to (%hd, %hd) after horizontal alignment", x_off, y_off);
+	}
+
+	// Handle vertical alignment...
+	switch (fbink_cfg->valign) {
+		case CENTER:
+			y_off = (short int) (y_off + (int) (viewHeight / 2U));
+			y_off = (short int) (y_off - (h / 2));
+			break;
+		case EDGE:
+			y_off = (short int) (y_off + (int) (viewHeight - (uint32_t) h));
+			break;
+		case NONE:
+		default:
+			break;
+	}
+	if (fbink_cfg->valign != NONE) {
+		LOG("Adjusted dump coordinates to (%hd, %hd) after vertical alignment", x_off, y_off);
+	}
+
+	// Clamp everything to a safe range, because we can't have *anything* going off-screen here.
+	struct mxcfb_rect region;
+	// NOTE: Assign each field individually to avoid a false-positive with Clang's SA...
+	if (fbink_cfg->row == 0) {
+		region.top = MIN(screenHeight, (uint32_t) MAX((viewVertOrigin - viewVertOffset), y_off));
+	} else {
+		region.top = MIN(screenHeight, (uint32_t) MAX(viewVertOrigin, y_off));
+	}
+	region.left   = MIN(screenWidth, (uint32_t) MAX(viewHoriOrigin, x_off));
+	region.width  = MIN(screenWidth - region.left, (uint32_t) w);
+	region.height = MIN(screenHeight - region.top, (uint32_t) h);
+
+	// NOTE: If we ended up with negative display offsets, we should shave those off region.width & region.height,
+	//       when it makes sense to do so,
+	//       but we need to remember the unshaven value for the pixel loop condition,
+	//       to avoid looping on only part of the image.
+	unsigned short int max_width  = (unsigned short int) region.width;
+	unsigned short int max_height = (unsigned short int) region.height;
+	// NOTE: We also need to decide if we start looping at the top left of the image, or if we start later, to
+	//       avoid plotting off-screen pixels when using negative display offsets...
+	unsigned short int img_x_off = 0;
+	unsigned short int img_y_off = 0;
+	if (x_off < 0) {
+		// We'll start plotting from the beginning of the *visible* part of the image ;)
+		img_x_off = (unsigned short int) (abs(x_off) + viewHoriOrigin);
+		max_width = (unsigned short int) (max_width + img_x_off);
+		// Make sure we're not trying to loop past the actual width of the image!
+		max_width = (unsigned short int) MIN(w, max_width);
+		// Only if the visible section of the image's width is smaller than our screen's width...
+		if ((uint32_t)(w - img_x_off) < viewWidth) {
+			region.width -= img_x_off;
+		}
+	}
+	if (y_off < 0) {
+		// We'll start plotting from the beginning of the *visible* part of the image ;)
+		if (fbink_cfg->row == 0) {
+			img_y_off = (unsigned short int) (abs(y_off) + viewVertOrigin - viewVertOffset);
+		} else {
+			img_y_off = (unsigned short int) (abs(y_off) + viewVertOrigin);
+		}
+		max_height = (unsigned short int) (max_height + img_y_off);
+		// Make sure we're not trying to loop past the actual height of the image!
+		max_height = (unsigned short int) MIN(h, max_height);
+		// Only if the visible section of the image's height is smaller than our screen's height...
+		if ((uint32_t)(h - img_y_off) < viewHeight) {
+			region.height -= img_y_off;
+		}
+	}
+	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
+	LOG("Dump becomes visible @ (%hu, %hu) for (%hu, %hu) out of %dx%d pixels",
+	    img_x_off,
+	    img_y_off,
+	    max_width,
+	    max_height,
+	    w,
+	    h);
+
+	// Free current data in case the dump struct is being reused
+	if (dump->data) {
+		LOG("Recycling FBinkDump!");
+		free(dump->data);
+		dump->data = NULL;
+	}
+	// Start by allocating enough memory for a full dump of the computed region...
+	// We're going to need the amount of bytes taken per pixel...
+	// FIXME: 4bpp handling...
+	uint8_t bpp = (uint8_t)(vInfo.bits_per_pixel / 8U);
+	dump->data  = calloc((region.width * bpp) * region.height, sizeof(*dump->data));
+	if (dump->data == NULL) {
+		char  buf[256];
+		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		WARN("calloc (dump->data): %s", errstr);
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+	// Store the current fb state for that dump
+	dump->rota    = (uint8_t) vInfo.rotate;
+	dump->bpp     = (uint8_t) vInfo.bits_per_pixel;
+	dump->x       = (unsigned short int) region.left;
+	dump->y       = (unsigned short int) region.top;
+	dump->w       = (unsigned short int) region.width;
+	dump->h       = (unsigned short int) region.height;
+	dump->is_full = false;
+	// And finally, the fb data itself, scanline per scanline
+	for (unsigned short int j = dump->y, l = 0U; l < dump->h; j++, l++) {
+		size_t dump_offset = (size_t)(l * (dump->w * bpp));
+		size_t fb_offset   = (size_t)(dump->x * bpp) + (j * fInfo.line_length);
+		memcpy(dump->data + dump_offset, fbPtr + fb_offset, (size_t) dump->w * bpp);
+	}
 
 	// Cleanup
 cleanup:
