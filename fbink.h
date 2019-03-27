@@ -237,11 +237,12 @@ typedef struct
 	bool      is_verbose;      // Print verbose diagnostic informations on stdout
 	bool      is_quiet;        // Hide fbink_init()'s hardware setup info (sent to stderr)
 	bool      ignore_alpha;    // Ignore any potential alpha channel in source image (i.e., flatten the image)
-	uint8_t   halign;      // Horizontal alignment of images (NONE/LEFT, CENTER, EDGE/RIGHT; c.f., ALIGN_INDEX_T enum)
-	uint8_t   valign;      // Vertical alignment of images (NONE/TOP, CENTER, EDGE/BOTTOM; c.f., ALIGN_INDEX_T enum)
-	uint8_t   wfm_mode;    // Request a specific waveform mode when printing an image (c.f., WFM_MODE_INDEX_T enum)
-	bool      is_dithered;    // Request (ordered) hardware dithering (if supported).
-	bool      no_refresh;     // Skip actually refreshing the eInk screen (useful when drawing in batch)
+	uint8_t   halign;    // Horizontal alignment of images (NONE/LEFT, CENTER, EDGE/RIGHT; c.f., ALIGN_INDEX_T enum)
+	uint8_t   valign;    // Vertical alignment of images (NONE/TOP, CENTER, EDGE/BOTTOM; c.f., ALIGN_INDEX_T enum)
+	uint8_t
+	     wfm_mode;    // Request a specific waveform mode when printing an image or dump (c.f., WFM_MODE_INDEX_T enum)
+	bool is_dithered;    // Request (ordered) hardware dithering (if supported).
+	bool no_refresh;     // Skip actually refreshing the eInk screen (useful when drawing in batch)
 } FBInkConfig;
 
 typedef struct
@@ -257,6 +258,18 @@ typedef struct
 	bool               is_centered;     // Horizontal centering
 	bool               is_formatted;    // Is string "formatted"? Bold/Italic support only, markdown like syntax
 } FBInkOTConfig;
+
+typedef struct
+{
+	uint8_t            rota;
+	uint8_t            bpp;
+	unsigned short int x;
+	unsigned short int y;
+	unsigned short int w;
+	unsigned short int h;
+	unsigned char*     data;
+	bool               is_full;
+} FBInkDump;
 
 // NOTE: Unless otherwise specified,
 //       stuff returns a negative value (usually -(EXIT_FAILURE)) on failure & EXIT_SUCCESS otherwise ;).
@@ -498,6 +511,16 @@ FBINK_API int fbink_print_raw_data(int                fbfd,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // fbink_cfg:		Pointer to an FBInkConfig struct (honors is_flashing, is_inverted, is_dithered, no_refresh, pen_*_color)
 FBINK_API int fbink_cls(int fbfd, const FBInkConfig* fbink_cfg);
+
+// Dump fb
+// Returns -(ENOSYS) when image support is disabled (MINIMAL build)
+FBINK_API int fbink_dump(int fbfd, const FBInkConfig* fbink_cfg, FBInkDump* dump);
+
+// Restore fb
+// Returns -(ENOSYS) when image support is disabled (MINIMAL build)
+// Otherwise, returns a few different things on failure:
+//	-(ENOTSUP)	when the current rotation or bitdepth doesn't match the dump's
+FBINK_API int fbink_restore(int fbfd, const FBInkConfig* fbink_cfg, FBInkDump* dump);
 
 // Scan the screen for Kobo's "Connect" button in the "USB plugged in" popup,
 // and optionally generate an input event to press that button.

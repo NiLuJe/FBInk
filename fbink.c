@@ -567,7 +567,7 @@ static void
 	//       Anyway, don't clobber that, as it seems to cause softlocks on BQ/Cervantes,
 	//       and be very conservative, using yres instead of yres_virtual, as Qt *may* already rely on that memory region.
 	if (vInfo.bits_per_pixel == 16) {
-		memset(fbPtr, v, (size_t)(fInfo.line_length * vInfo.yres));
+		memset(fbPtr, v, fInfo.line_length * vInfo.yres);
 	} else {
 		// NOTE: fInfo.smem_len should actually match fInfo.line_length * vInfo.yres_virtual on 32bpp ;).
 		//       Which is how things should always be, but, alas, poor Yorick...
@@ -5963,6 +5963,162 @@ cleanup:
 	WARN("Image support is disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
 #endif    // FBINK_WITH_IMAGE
+}
+
+// Dump the full fb
+int
+    fbink_dump(int fbfd, const FBInkConfig* fbink_cfg, FBInkDump* dump)
+{
+#ifdef FBINK_WITH_IMAGE
+	// Open the framebuffer if need be...
+	// NOTE: As usual, we *expect* to be initialized at this point!
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// mmap the fb if need be...
+	if (!isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	}
+
+	// Dump the *full* fb
+	// Free current data in case the dump struct is being reused
+	if (dump->data) {
+		LOG("Recycling FBinkDump!");
+		free(dump->data);
+		dump->data = NULL;
+	}
+	// Start by allocating enough memory for a full dump of the visible screen...
+	dump->data = calloc(fInfo.line_length * vInfo.yres, sizeof(*dump->data));
+	if (dump->data == NULL) {
+		char  buf[256];
+		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		WARN("calloc (dump->data): %s", errstr);
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+	// Store the current fb state for that dump
+	dump->rota    = (uint8_t) vInfo.rotate;
+	dump->bpp     = (uint8_t) vInfo.bits_per_pixel;
+	dump->x       = 0U;
+	dump->y       = 0U;
+	dump->w       = (unsigned short int) vInfo.xres;
+	dump->h       = (unsigned short int) vInfo.yres;
+	dump->is_full = true;
+	// And finally, the fb data itself
+	memcpy(dump->data, fbPtr, fInfo.line_length * vInfo.yres);
+
+	// Cleanup
+cleanup:
+	if (isFbMapped && !keep_fd) {
+		unmap_fb();
+	}
+	if (!keep_fd) {
+		close(fbfd);
+	}
+
+	return rv;
+#else
+	WARN("Image support is disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif
+}
+
+// Restore a fb dump
+int
+    fbink_restore(int fbfd, const FBInkConfig* fbink_cfg, FBInkDump* dump)
+{
+#ifdef FBINK_WITH_IMAGE
+	// Open the framebuffer if need be...
+	// NOTE: As usual, we *expect* to be initialized at this point!
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// mmap the fb if need be...
+	if (!isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	}
+
+	// Restore (if possible)
+	if (!dump->data) {
+		WARN("No dump data to restore!");
+		rv = ERRCODE(EINVAL);
+		goto cleanup;
+	}
+	if (dump->rota != vInfo.rotate) {
+		WARN("Can't restore the dump because of a rotation mismatch: dump: %hhu (%s) vs. fb: %u (%s)",
+		     dump->rota,
+		     fb_rotate_to_string(dump->rota),
+		     vInfo.rotate,
+		     fb_rotate_to_string(vInfo.rotate));
+		rv = ERRCODE(ENOTSUP);
+		goto cleanup;
+	}
+	if (dump->bpp != vInfo.bits_per_pixel) {
+		WARN("Can't restore the dump because of a bitdepth mismatch: dump: %hhu vs. fb: %u",
+		     dump->bpp,
+		     vInfo.bits_per_pixel);
+		rv = ERRCODE(ENOTSUP);
+		goto cleanup;
+	}
+
+	// We'll need a region...
+	struct mxcfb_rect region;
+
+	if (dump->is_full) {
+		// Full dump, easy enough
+		memcpy(fbPtr, dump->data, fInfo.line_length * vInfo.yres);
+		fullscreen_region(&region);
+	}
+
+	// And now, we can refresh the screen
+	// Rotate the region if need be...
+	(*fxpRotateRegion)(&region);
+
+	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
+	if (fbink_cfg->is_cleared) {
+		fullscreen_region(&region);
+	}
+
+	// Refresh screen
+	if (refresh(fbfd,
+		    region,
+		    get_wfm_mode(fbink_cfg->wfm_mode),
+		    fbink_cfg->is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		    fbink_cfg->is_flashing,
+		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
+		WARN("Failed to refresh the screen");
+	}
+
+	// Cleanup
+cleanup:
+	if (isFbMapped && !keep_fd) {
+		unmap_fb();
+	}
+	if (!keep_fd) {
+		close(fbfd);
+	}
+
+	return rv;
+#else
+	WARN("Image support is disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif
 }
 
 // And now, we just bundle auxiliary parts of the public or private API,
