@@ -205,7 +205,7 @@ static uint32_t
 {
 	// NOTE: Crockford's Base32, but with the "L" & "U" re-added in?
 	const char* tbl    = "0123456789ABCDEFGHJKLMNPQRSTUVWX";
-	uint32_t    result = 0;
+	uint32_t    result = 0U;
 
 	// Flawfinder: ignore
 	if (base > strlen(tbl)) {
@@ -230,15 +230,15 @@ static uint32_t
 //       c.f., https://github.com/NiLuJe/KindleTool/blob/master/KindleTool/convert.c#L51
 // Pilfered from http://rosettacode.org/wiki/Non-decimal_radices/Convert#C
 static char*
-    to_base(int64_t num, unsigned int base)
+    to_base(int64_t num, uint8_t base)
 {
 	// NOTE: Crockford's Base32, but with the "L" & "U" re-added in?
-	const char*  tbl     = "0123456789ABCDEFGHJKLMNPQRSTUVWX";
-	char         buf[66] = { 0 };
-	char*        out     = NULL;
-	uint64_t     n;
-	unsigned int len = 0U;
-	unsigned int neg = 0U;
+	const char* tbl     = "0123456789ABCDEFGHJKLMNPQRSTUVWX";
+	char        buf[66] = { 0 };
+	char*       out     = NULL;
+	uint64_t    n;
+	uint32_t    len = 0U;
+	bool        neg = false;
 	// Flawfinder: ignore
 	if (base > strlen(tbl)) {
 		WARN("base %u is unsupported (too large).", base);
@@ -258,7 +258,7 @@ static char*
 		return NULL;
 	}
 	memset(out, 0, len + neg + 1U);
-	for (unsigned int i = neg; len > 0U; i++) {
+	for (uint32_t i = neg; len > 0U; i++) {
 		out[i] = buf[--len];
 	}
 	if (neg) {
