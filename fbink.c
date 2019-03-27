@@ -3192,7 +3192,7 @@ int
 	}
 
 	// We need enough space for NULL-termination (which we make 'wide' for u8 reasons) :).
-	size = (size_t)(ret + 4U);
+	size = (size_t)(ret + 4);
 	// NOTE: We use calloc to make sure it'll always be zero-initialized,
 	//       and the OS is smart enough to make it fast if we don't use the full space anyway (CoW zeroing).
 	buffer = calloc(size, sizeof(*buffer));
