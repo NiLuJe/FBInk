@@ -19,6 +19,7 @@
 */
 
 // NOTE: Fairly useless piece of code basically just there to test the dump/restore functionality ;).
+//       We could arguably plug into stb_image_write to basically reimplement fbgrab...
 
 // Because we're pretty much Linux-bound ;).
 #ifndef _GNU_SOURCE
@@ -39,6 +40,8 @@ int
 	FBInkConfig fbink_cfg = { 0 };
 	FBInkDump   dump      = { 0 };
 	fbink_cfg.is_verbose  = true;
+	// Flash to make stuff more obvious
+	fbink_cfg.is_flashing = true;
 
 	// Assume success, until shit happens ;)
 	int rv = EXIT_SUCCESS;
