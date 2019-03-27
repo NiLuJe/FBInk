@@ -2346,14 +2346,14 @@ int
 			otInit = false;
 			return ERRCODE(EXIT_FAILURE);
 		}
-		data = calloc(1, (size_t) st.st_size);
+		data = calloc((size_t) st.st_size, sizeof(*data));
 		if (!data) {
 			fclose(f);
 			otInit = false;
 			WARN("Error allocating font data buffer");
 			return ERRCODE(EXIT_FAILURE);
 		}
-		if (fread(data, 1, (size_t) st.st_size, f) < (size_t) st.st_size || ferror(f) != 0) {
+		if (fread(data, 1U, (size_t) st.st_size, f) < (size_t) st.st_size || ferror(f) != 0) {
 			free(data);
 			fclose(f);
 			otInit = false;
@@ -2362,7 +2362,7 @@ int
 		}
 		fclose(f);
 	}
-	stbtt_fontinfo* font_info = calloc(1, sizeof(stbtt_fontinfo));
+	stbtt_fontinfo* font_info = calloc(1U, sizeof(stbtt_fontinfo));
 	if (!font_info) {
 		free(data);
 		WARN("Error allocating stbtt_fontinfo struct");
@@ -3192,10 +3192,10 @@ int
 	}
 
 	// We need enough space for NULL-termination (which we make 'wide' for u8 reasons) :).
-	size = (size_t)(ret + 4);
+	size = (size_t)(ret + 4U);
 	// NOTE: We use calloc to make sure it'll always be zero-initialized,
 	//       and the OS is smart enough to make it fast if we don't use the full space anyway (CoW zeroing).
-	buffer = calloc(size, 1U);
+	buffer = calloc(size, sizeof(*buffer));
 	if (buffer == NULL) {
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
