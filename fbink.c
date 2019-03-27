@@ -6086,12 +6086,13 @@ int
 		fullscreen_region(&region);
 	} else {
 		// Region dump, restore line by line
-		// FIXME: 4bpp?
+		// We're going to need the amount of bytes taken per pixel...
+		// FIXME: 4bpp handling...
 		uint8_t bpp = dump->bpp / 8U;
 		for (unsigned short int j = dump->y, l = 0U; l < dump->h; j++, l++) {
-			size_t fb_offset   = (uint32_t)(dump->x * bpp) + (j * fInfo.line_length);
-			size_t dump_offset = l * (dump->w * bpp);
-			memcpy(fbPtr + fb_offset, dump->data + dump_offset, dump->w * bpp);
+			size_t fb_offset   = (size_t)(dump->x * bpp) + (j * fInfo.line_length);
+			size_t dump_offset = (size_t)(l * (dump->w * bpp));
+			memcpy(fbPtr + fb_offset, dump->data + dump_offset, (size_t) dump->w * bpp);
 		}
 		region.left   = dump->x;
 		region.top    = dump->y;
