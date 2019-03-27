@@ -6139,21 +6139,12 @@ int
 	region.height = MIN(screenHeight - region.top, (uint32_t) h);
 
 	// NOTE: If we ended up with negative display offsets, we should shave those off region.width & region.height,
-	//       when it makes sense to do so,
-	//       but we need to remember the unshaven value for the pixel loop condition,
-	//       to avoid looping on only part of the image.
-	unsigned short int max_width  = (unsigned short int) region.width;
-	unsigned short int max_height = (unsigned short int) region.height;
-	// NOTE: We also need to decide if we start looping at the top left of the image, or if we start later, to
-	//       avoid plotting off-screen pixels when using negative display offsets...
+	//       when it makes sense to do so.
 	unsigned short int img_x_off = 0;
 	unsigned short int img_y_off = 0;
 	if (x_off < 0) {
 		// We'll start plotting from the beginning of the *visible* part of the image ;)
 		img_x_off = (unsigned short int) (abs(x_off) + viewHoriOrigin);
-		max_width = (unsigned short int) (max_width + img_x_off);
-		// Make sure we're not trying to loop past the actual width of the image!
-		max_width = (unsigned short int) MIN(w, max_width);
 		// Only if the visible section of the image's width is smaller than our screen's width...
 		if ((uint32_t)(w - img_x_off) < viewWidth) {
 			region.width -= img_x_off;
@@ -6166,20 +6157,17 @@ int
 		} else {
 			img_y_off = (unsigned short int) (abs(y_off) + viewVertOrigin);
 		}
-		max_height = (unsigned short int) (max_height + img_y_off);
-		// Make sure we're not trying to loop past the actual height of the image!
-		max_height = (unsigned short int) MIN(h, max_height);
 		// Only if the visible section of the image's height is smaller than our screen's height...
 		if ((uint32_t)(h - img_y_off) < viewHeight) {
 			region.height -= img_y_off;
 		}
 	}
 	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
-	LOG("Dump becomes visible @ (%hu, %hu) for (%hu, %hu) out of %dx%d pixels",
+	LOG("Dump becomes visible @ (%hu, %hu) for %ux%u out of the requested %dx%d pixels",
 	    img_x_off,
 	    img_y_off,
-	    max_width,
-	    max_height,
+	    region.width,
+	    region.height,
 	    w,
 	    h);
 

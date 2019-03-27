@@ -89,7 +89,7 @@ int
 	// Dump a region at the center of the screen
 	fbink_cfg.halign = CENTER;
 	fbink_cfg.valign = CENTER;
-	if (fbink_region_dump(fbfd, 0, 0, 500, 250, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
+	if (fbink_region_dump(fbfd, -650, -50, 500, 250, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to dump fb region, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
