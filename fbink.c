@@ -567,7 +567,7 @@ static void
 	//       Anyway, don't clobber that, as it seems to cause softlocks on BQ/Cervantes,
 	//       and be very conservative, using yres instead of yres_virtual, as Qt *may* already rely on that memory region.
 	if (vInfo.bits_per_pixel == 16) {
-		memset(fbPtr, v, fInfo.line_length * vInfo.yres);
+		memset(fbPtr, v, (size_t)(fInfo.line_length * vInfo.yres));
 	} else {
 		// NOTE: fInfo.smem_len should actually match fInfo.line_length * vInfo.yres_virtual on 32bpp ;).
 		//       Which is how things should always be, but, alas, poor Yorick...
@@ -6007,7 +6007,7 @@ int
 		dump->data = NULL;
 	}
 	// Start by allocating enough memory for a full dump of the visible screen...
-	dump->data = calloc(fInfo.line_length * vInfo.yres, sizeof(*dump->data));
+	dump->data = calloc((size_t)(fInfo.line_length * vInfo.yres), sizeof(*dump->data));
 	if (dump->data == NULL) {
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
@@ -6024,7 +6024,7 @@ int
 	dump->h       = (unsigned short int) vInfo.yres;
 	dump->is_full = true;
 	// And finally, the fb data itself
-	memcpy(dump->data, fbPtr, fInfo.line_length * vInfo.yres);
+	memcpy(dump->data, fbPtr, (size_t)(fInfo.line_length * vInfo.yres));
 
 	// Cleanup
 cleanup:
@@ -6208,9 +6208,9 @@ int
 			LOG("Updated region.width to %u because of alignment constraints", region.width);
 		}
 		// Two pixels per byte, and we've just ensured to never end up with a decimal when dividing by two ;).
-		dump->data = calloc((region.width >> 1) * region.height, sizeof(*dump->data));
+		dump->data = calloc((size_t)((region.width >> 1) * region.height), sizeof(*dump->data));
 	} else {
-		dump->data = calloc((region.width * bpp) * region.height, sizeof(*dump->data));
+		dump->data = calloc((size_t)((region.width * bpp) * region.height), sizeof(*dump->data));
 	}
 	if (dump->data == NULL) {
 		char  buf[256];
@@ -6309,7 +6309,7 @@ int
 
 	if (dump->is_full) {
 		// Full dump, easy enough
-		memcpy(fbPtr, dump->data, fInfo.line_length * vInfo.yres);
+		memcpy(fbPtr, dump->data, (size_t)(fInfo.line_length * vInfo.yres));
 		fullscreen_region(&region);
 	} else {
 		// Region dump, restore line by line
