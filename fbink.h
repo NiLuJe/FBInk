@@ -517,6 +517,12 @@ FBINK_API int fbink_cls(int fbfd, const FBInkConfig* fbink_cfg);
 // fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // dump:		Pointer to an FBInkDump struct (will be recycled if already used)
+// NOTE: As with all FBInk structs, FBInkDump *must* be zero-initialized.
+//       Storage for the dump will be allocated on the heap by FBInk,
+//       but releasing that memory (i.e., free(dump.data);) is the caller's burden.
+//       Care should be taken not to leave that pointer dangling (i.e., dump.data = NULL;),
+//       as a subsequent call to fbink_*_dump with that same struct would otherwise trip the recycling check,
+//       causing a double free!
 FBINK_API int fbink_dump(int fbfd, FBInkDump* dump);
 
 // Dump a specific region of the screen
@@ -529,6 +535,7 @@ FBINK_API int fbink_dump(int fbfd, FBInkDump* dump);
 // h:			Height of the region to dump
 // fbink_cfg:		Pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
 // dump:		Pointer to an FBInkDump struct (will be recycled if already used)
+// NOTE: The same considerations as in fbink_dump should be taken regarding the handling of FBInkDump structs.
 FBINK_API int fbink_region_dump(int                fbfd,
 				short int          x_off,
 				short int          y_off,
@@ -537,15 +544,18 @@ FBINK_API int fbink_region_dump(int                fbfd,
 				const FBInkConfig* fbink_cfg,
 				FBInkDump*         dump);
 
-// Restore a fb dump
+// Restore a framebuffer dump from fbink_dump/fbink_region_dump
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
 // Otherwise, returns a few different things on failure:
 //	-(ENOTSUP)	when the current rotation or bitdepth doesn't match the dump's
 //	-(EINVAL)	when there's no data to restore
 // fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
-// fbink_cfg:		Pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
+// fbink_cfg:		Pointer to an FBInkConfig struct (honors wfm_mode, is_dithered, is_flashing & no_refresh)
 // dump:		Pointer to an FBInkDump struct, as setup by fbink_dump or fbink_region_dump
+// NOTE: In case the dump was regional, it will be restored in the exact same coordinates it was taken from,
+//       no actual positioning is needed/supported at restore time.
+// NOTE: This does *NOT* free data.dump!
 FBINK_API int fbink_restore(int fbfd, const FBInkConfig* fbink_cfg, FBInkDump* dump);
 
 // Scan the screen for Kobo's "Connect" button in the "USB plugged in" popup,

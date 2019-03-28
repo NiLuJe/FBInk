@@ -113,6 +113,8 @@ int
 cleanup:
 	// Free potential dump data...
 	free(dump.data);
+	// Don't leave it dangling so it doesn't get flagged as recyclable.
+	dump.data = NULL;
 
 	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
 		fprintf(stderr, "Failed to close the framebuffer, aborting . . .\n");
