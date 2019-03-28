@@ -363,6 +363,8 @@ utils: outdir
 	$(STRIP) --strip-unneeded $(OUT_DIR)/rota
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbdepth utils/fbdepth.c
 	$(STRIP) --strip-unneeded $(OUT_DIR)/fbdepth
+
+dump: static
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/dump utils/dump.c $(LIBS)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/dump
 
@@ -489,4 +491,4 @@ distclean: clean libunibreakclean
 	rm -rf LibUniBreakBuild
 	rm -rf libunibreak.built
 
-.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo libunibreakclean utils clean distclean
+.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo libunibreakclean utils dump clean distclean
