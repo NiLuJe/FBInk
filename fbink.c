@@ -6260,7 +6260,7 @@ cleanup:
 
 // Restore a fb dump
 int
-    fbink_restore(int fbfd, const FBInkConfig* fbink_cfg, FBInkDump* dump)
+    fbink_restore(int fbfd, const FBInkConfig* fbink_cfg, const FBInkDump* dump)
 {
 #ifdef FBINK_WITH_IMAGE
 	// Open the framebuffer if need be...

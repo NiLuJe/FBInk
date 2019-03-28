@@ -556,7 +556,7 @@ FBINK_API int fbink_region_dump(int                fbfd,
 // NOTE: In case the dump was regional, it will be restored in the exact same coordinates it was taken from,
 //       no actual positioning is needed/supported at restore time.
 // NOTE: This does *NOT* free data.dump!
-FBINK_API int fbink_restore(int fbfd, const FBInkConfig* fbink_cfg, FBInkDump* dump);
+FBINK_API int fbink_restore(int fbfd, const FBInkConfig* fbink_cfg, const FBInkDump* dump);
 
 // Scan the screen for Kobo's "Connect" button in the "USB plugged in" popup,
 // and optionally generate an input event to press that button.
