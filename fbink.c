@@ -5484,20 +5484,30 @@ static int
 			}
 		} else {
 			// No alpha in image, or ignored
-			size_t           pix_offset;
-			FBInkCoordinates coords = { 0U };
-			for (j = img_y_off; j < max_height; j++) {
-				for (i = img_x_off; i < max_width; i++) {
-					// NOTE: Here, req_n is either 2, or 1 if ignore_alpha, so, no shift trickery ;)
-					pix_offset = (size_t)((j * req_n * w) + (i * req_n));
-					color.r    = data[pix_offset] ^ invert;
+			size_t pix_offset;
+			// We can do a simple copy if the target is 8bpp, the source is 8bpp (no alpha), and we don't invert.
+			if (!fb_is_legacy && req_n == 1 && invert == 0U) {
+				size_t fb_offset;
+				for (j = img_y_off; j < max_height; j++) {
+					pix_offset = (size_t)((j * w) + img_x_off);
+					fb_offset  = (size_t)((j + y_off) * fInfo.line_length) + (img_x_off + x_off);
+					memcpy(fbPtr + fb_offset, data + pix_offset, max_width);
+				}
+			} else {
+				FBInkCoordinates coords = { 0U };
+				for (j = img_y_off; j < max_height; j++) {
+					for (i = img_x_off; i < max_width; i++) {
+						// NOTE: Here, req_n is either 2, or 1 if ignore_alpha, so, no shift trickery ;)
+						pix_offset = (size_t)((j * req_n * w) + (i * req_n));
+						color.r    = data[pix_offset] ^ invert;
 
-					coords.x = (unsigned short int) (i + x_off);
-					coords.y = (unsigned short int) (j + y_off);
+						coords.x = (unsigned short int) (i + x_off);
+						coords.y = (unsigned short int) (j + y_off);
 
-					// NOTE: Again, use the function pointer directly, to skip redundant OOB checks,
-					//       as well as unneeded rotation checks (can't happen at this bpp).
-					(*fxpPutPixel)(&coords, &color);
+						// NOTE: Again, use the function pointer directly, to skip redundant OOB checks,
+						//       as well as unneeded rotation checks (can't happen at this bpp).
+						(*fxpPutPixel)(&coords, &color);
+					}
 				}
 			}
 		}
