@@ -29,23 +29,27 @@ static bool
 {
 	switch (dev) {
 		case 0x01:    // K1
+			deviceQuirks.isKindleLegacy = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "1", sizeof(deviceQuirks.deviceName) - 1U);
 			return true;
 		case 0x02:    // K2
 		case 0x03:
+			deviceQuirks.isKindleLegacy = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "2", sizeof(deviceQuirks.deviceName) - 1U);
 			return true;
 		case 0x04:    // KDX
 		case 0x05:
 		case 0x09:
+			deviceQuirks.isKindleLegacy = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "DX", sizeof(deviceQuirks.deviceName) - 1U);
 			return true;
 		case 0x08:    // K3
 		case 0x06:
 		case 0x0A:
+			deviceQuirks.isKindleLegacy = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "3", sizeof(deviceQuirks.deviceName) - 1U);
 			return true;
