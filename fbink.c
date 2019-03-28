@@ -6188,12 +6188,12 @@ int
 		// Align to the nearest byte boundary to make our life easier...
 		if (region.left & 0x01) {
 			// x is odd, round *down* to the nearest multiple of two (i.e., align to the start of the current byte)
-			region.left &= ~0x01;
+			region.left &= ~0x01u;
 			LOG("Updated region.left to %u because of alignment constraints", region.left);
 		}
 		if (region.width & 0x01) {
 			// w is odd, round *up* to the nearest multiple of two (i.e., align to the end of the current byte)
-			region.width = (region.width + 1) & ~0x01;
+			region.width = (region.width + 1) & ~0x01u;
 			LOG("Updated region.width to %u because of alignment constraints", region.width);
 		}
 		// Two pixels per byte, and we've just ensured to never end up with a decimal when dividing by two ;).
