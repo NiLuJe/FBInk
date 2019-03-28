@@ -5490,7 +5490,8 @@ static int
 				size_t fb_offset;
 				for (j = img_y_off; j < max_height; j++) {
 					pix_offset = (size_t)((j * w) + img_x_off);
-					fb_offset  = (size_t)((j + y_off) * fInfo.line_length) + (img_x_off + x_off);
+					fb_offset  = ((uint32_t)(j + y_off) * fInfo.line_length) +
+						    (unsigned int) (img_x_off + x_off);
 					memcpy(fbPtr + fb_offset, data + pix_offset, max_width);
 				}
 			} else {
