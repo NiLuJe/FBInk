@@ -6171,6 +6171,9 @@ int
 	    w,
 	    h);
 
+	// Rotate the region if need be...
+	(*fxpRotateRegion)(&region);
+
 	// Free current data in case the dump struct is being reused
 	if (dump->data) {
 		LOG("Recycling FBinkDump!");
@@ -6321,15 +6324,6 @@ int
 	}
 
 	// And now, we can refresh the screen
-	// Rotate the region if need be...
-	(*fxpRotateRegion)(&region);
-
-	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
-	if (fbink_cfg->is_cleared) {
-		fullscreen_region(&region);
-	}
-
-	// Refresh screen
 	if (refresh(fbfd,
 		    region,
 		    get_wfm_mode(fbink_cfg->wfm_mode),
