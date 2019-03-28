@@ -5484,20 +5484,31 @@ static int
 			}
 		} else {
 			// No alpha in image, or ignored
-			size_t           pix_offset;
-			FBInkCoordinates coords = { 0U };
-			for (j = img_y_off; j < max_height; j++) {
-				for (i = img_x_off; i < max_width; i++) {
-					// NOTE: Here, req_n is either 2, or 1 if ignore_alpha, so, no shift trickery ;)
-					pix_offset = (size_t)((j * req_n * w) + (i * req_n));
-					color.r    = data[pix_offset] ^ invert;
+			size_t pix_offset;
+			// We can do a simple copy if the target is 8bpp, the source is 8bpp (no alpha), and we don't invert.
+			if (!fb_is_legacy && req_n == 1 && invert == 0U) {
+				size_t fb_offset;
+				for (j = img_y_off; j < max_height; j++) {
+					pix_offset = (size_t)((j * w) + img_x_off);
+					fb_offset  = ((uint32_t)(j + y_off) * fInfo.line_length) +
+						    (unsigned int) (img_x_off + x_off);
+					memcpy(fbPtr + fb_offset, data + pix_offset, max_width);
+				}
+			} else {
+				FBInkCoordinates coords = { 0U };
+				for (j = img_y_off; j < max_height; j++) {
+					for (i = img_x_off; i < max_width; i++) {
+						// NOTE: Here, req_n is either 2, or 1 if ignore_alpha, so, no shift trickery ;)
+						pix_offset = (size_t)((j * req_n * w) + (i * req_n));
+						color.r    = data[pix_offset] ^ invert;
 
-					coords.x = (unsigned short int) (i + x_off);
-					coords.y = (unsigned short int) (j + y_off);
+						coords.x = (unsigned short int) (i + x_off);
+						coords.y = (unsigned short int) (j + y_off);
 
-					// NOTE: Again, use the function pointer directly, to skip redundant OOB checks,
-					//       as well as unneeded rotation checks (can't happen at this bpp).
-					(*fxpPutPixel)(&coords, &color);
+						// NOTE: Again, use the function pointer directly, to skip redundant OOB checks,
+						//       as well as unneeded rotation checks (can't happen at this bpp).
+						(*fxpPutPixel)(&coords, &color);
+					}
 				}
 			}
 		}
@@ -5963,6 +5974,390 @@ cleanup:
 	WARN("Image support is disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
 #endif    // FBINK_WITH_IMAGE
+}
+
+// Dump the full fb
+int
+    fbink_dump(int fbfd, FBInkDump* dump)
+{
+#ifdef FBINK_WITH_IMAGE
+	// Open the framebuffer if need be...
+	// NOTE: As usual, we *expect* to be initialized at this point!
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// mmap the fb if need be...
+	if (!isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	}
+
+	// Dump the *full* fb
+	// Free current data in case the dump struct is being reused
+	if (dump->data) {
+		LOG("Recycling FBinkDump!");
+		free(dump->data);
+		dump->data = NULL;
+	}
+	// Start by allocating enough memory for a full dump of the visible screen...
+	dump->data = calloc((size_t)(fInfo.line_length * vInfo.yres), sizeof(*dump->data));
+	if (dump->data == NULL) {
+		char  buf[256];
+		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		WARN("calloc (dump->data): %s", errstr);
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+	// Store the current fb state for that dump
+	dump->rota    = (uint8_t) vInfo.rotate;
+	dump->bpp     = (uint8_t) vInfo.bits_per_pixel;
+	dump->x       = 0U;
+	dump->y       = 0U;
+	dump->w       = (unsigned short int) vInfo.xres;
+	dump->h       = (unsigned short int) vInfo.yres;
+	dump->is_full = true;
+	// And finally, the fb data itself
+	memcpy(dump->data, fbPtr, (size_t)(fInfo.line_length * vInfo.yres));
+
+	// Cleanup
+cleanup:
+	if (isFbMapped && !keep_fd) {
+		unmap_fb();
+	}
+	if (!keep_fd) {
+		close(fbfd);
+	}
+
+	return rv;
+#else
+	WARN("Image support is disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif
+}
+
+// Dump a specific region of the fb
+int
+    fbink_region_dump(int                fbfd,
+		      short int          x_off,
+		      short int          y_off,
+		      unsigned short int w,
+		      unsigned short int h,
+		      const FBInkConfig* fbink_cfg,
+		      FBInkDump*         dump)
+{
+#ifdef FBINK_WITH_IMAGE
+	// Open the framebuffer if need be...
+	// NOTE: As usual, we *expect* to be initialized at this point!
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// mmap the fb if need be...
+	if (!isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	}
+
+	// Dump a region of the fb
+	// Pilfer the coordinates computations from draw_image ;).
+	// NOTE: We compute initial offsets from row/col, to help aligning the region with text.
+	if (fbink_cfg->col < 0) {
+		x_off = (short int) (viewHoriOrigin + x_off + (MAX(MAXCOLS + fbink_cfg->col, 0) * FONTW));
+	} else {
+		x_off = (short int) (viewHoriOrigin + x_off + (fbink_cfg->col * FONTW));
+	}
+	// NOTE: Unless we *actually* specified a row, ignore viewVertOffset
+	//       The rationale being we want to keep being aligned to text rows when we do specify a row,
+	//       but we don't want the extra offset when we don't (in particular, when dumping what amounts to the full screen).
+	// NOTE: This means that row 0 and row -MAXROWS *will* behave differently, but so be it...
+	if (fbink_cfg->row < 0) {
+		y_off = (short int) (viewVertOrigin + y_off + (MAX(MAXROWS + fbink_cfg->row, 0) * FONTH));
+	} else if (fbink_cfg->row == 0) {
+		y_off = (short int) (viewVertOrigin - viewVertOffset + y_off + (fbink_cfg->row * FONTH));
+		// This of course means that row 0 effectively breaks that "align with text" contract if viewVertOffset != 0,
+		// on the off-chance we do explicitly really want to align something to row 0, so, warn about it...
+		// The "print full-screen data" use-case is greatly more prevalent than "actually rely on row 0 alignment" ;).
+		// And in case that's *really* needed, using -MAXROWS instead of 0 will honor alignment anyway.
+		if (viewVertOffset != 0U) {
+			LOG("Ignoring the %hhupx row offset because row is 0!", viewVertOffset);
+		}
+	} else {
+		y_off = (short int) (viewVertOrigin + y_off + (fbink_cfg->row * FONTH));
+	}
+	LOG("Adjusted dump coordinates to (%hd, %hd), after column %hd & row %hd",
+	    x_off,
+	    y_off,
+	    fbink_cfg->col,
+	    fbink_cfg->row);
+
+	// Handle horizontal alignment...
+	switch (fbink_cfg->halign) {
+		case CENTER:
+			x_off = (short int) (x_off + (int) (viewWidth / 2U));
+			x_off = (short int) (x_off - (w / 2));
+			break;
+		case EDGE:
+			x_off = (short int) (x_off + (int) (viewWidth - (uint32_t) w));
+			break;
+		case NONE:
+		default:
+			break;
+	}
+	if (fbink_cfg->halign != NONE) {
+		LOG("Adjusted dump coordinates to (%hd, %hd) after horizontal alignment", x_off, y_off);
+	}
+
+	// Handle vertical alignment...
+	switch (fbink_cfg->valign) {
+		case CENTER:
+			y_off = (short int) (y_off + (int) (viewHeight / 2U));
+			y_off = (short int) (y_off - (h / 2));
+			break;
+		case EDGE:
+			y_off = (short int) (y_off + (int) (viewHeight - (uint32_t) h));
+			break;
+		case NONE:
+		default:
+			break;
+	}
+	if (fbink_cfg->valign != NONE) {
+		LOG("Adjusted dump coordinates to (%hd, %hd) after vertical alignment", x_off, y_off);
+	}
+
+	// Clamp everything to a safe range, because we can't have *anything* going off-screen here.
+	struct mxcfb_rect region;
+	// NOTE: Assign each field individually to avoid a false-positive with Clang's SA...
+	if (fbink_cfg->row == 0) {
+		region.top = MIN(screenHeight, (uint32_t) MAX((viewVertOrigin - viewVertOffset), y_off));
+	} else {
+		region.top = MIN(screenHeight, (uint32_t) MAX(viewVertOrigin, y_off));
+	}
+	region.left   = MIN(screenWidth, (uint32_t) MAX(viewHoriOrigin, x_off));
+	region.width  = MIN(screenWidth - region.left, (uint32_t) w);
+	region.height = MIN(screenHeight - region.top, (uint32_t) h);
+
+	// NOTE: If we ended up with negative display offsets, we should shave those off region.width & region.height,
+	//       when it makes sense to do so.
+	unsigned short int img_x_off = 0;
+	unsigned short int img_y_off = 0;
+	if (x_off < 0) {
+		// We'll start dumping from the beginning of the *visible* part of the region ;)
+		img_x_off = (unsigned short int) (abs(x_off) + viewHoriOrigin);
+		// Only if the visible section of the region's width is smaller than our screen's width...
+		if ((uint32_t)(w - img_x_off) < viewWidth) {
+			region.width -= img_x_off;
+		}
+	}
+	if (y_off < 0) {
+		// We'll start dumping from the beginning of the *visible* part of the region ;)
+		if (fbink_cfg->row == 0) {
+			img_y_off = (unsigned short int) (abs(y_off) + viewVertOrigin - viewVertOffset);
+		} else {
+			img_y_off = (unsigned short int) (abs(y_off) + viewVertOrigin);
+		}
+		// Only if the visible section of the region's height is smaller than our screen's height...
+		if ((uint32_t)(h - img_y_off) < viewHeight) {
+			region.height -= img_y_off;
+		}
+	}
+	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
+	LOG("Dump becomes visible @ (%hu, %hu) for %ux%u out of the requested %dx%d pixels",
+	    img_x_off,
+	    img_y_off,
+	    region.width,
+	    region.height,
+	    w,
+	    h);
+
+	// Rotate the region if need be...
+	(*fxpRotateRegion)(&region);
+
+	// Free current data in case the dump struct is being reused
+	if (dump->data) {
+		LOG("Recycling FBinkDump!");
+		free(dump->data);
+		dump->data = NULL;
+	}
+	// Start by allocating enough memory for a full dump of the computed region...
+	// We're going to need the amount of bytes taken per pixel...
+	uint8_t bpp = (uint8_t)(vInfo.bits_per_pixel / 8U);
+	// And then to handle 4bpp on its own, because 4/8 == 0 ;).
+	if (vInfo.bits_per_pixel == 4U) {
+		// Align to the nearest byte boundary to make our life easier...
+		if (region.left & 0x01) {
+			// x is odd, round *down* to the nearest multiple of two (i.e., align to the start of the current byte)
+			region.left &= ~0x01u;
+			LOG("Updated region.left to %u because of alignment constraints", region.left);
+		}
+		if (region.width & 0x01) {
+			// w is odd, round *up* to the nearest multiple of two (i.e., align to the end of the current byte)
+			region.width = (region.width + 1) & ~0x01u;
+			LOG("Updated region.width to %u because of alignment constraints", region.width);
+		}
+		// Two pixels per byte, and we've just ensured to never end up with a decimal when dividing by two ;).
+		dump->data = calloc((size_t)((region.width >> 1) * region.height), sizeof(*dump->data));
+	} else {
+		dump->data = calloc((size_t)((region.width * bpp) * region.height), sizeof(*dump->data));
+	}
+	if (dump->data == NULL) {
+		char  buf[256];
+		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		WARN("calloc (dump->data): %s", errstr);
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+	// Store the current fb state for that dump
+	dump->rota    = (uint8_t) vInfo.rotate;
+	dump->bpp     = (uint8_t) vInfo.bits_per_pixel;
+	dump->x       = (unsigned short int) region.left;
+	dump->y       = (unsigned short int) region.top;
+	dump->w       = (unsigned short int) region.width;
+	dump->h       = (unsigned short int) region.height;
+	dump->is_full = false;
+	// And finally, the fb data itself, scanline per scanline
+	if (dump->bpp == 4U) {
+		for (unsigned short int j = dump->y, l = 0U; l < dump->h; j++, l++) {
+			size_t dump_offset = (size_t)(l * (dump->w >> 1));
+			size_t fb_offset   = (size_t)(dump->x >> 1) + (j * fInfo.line_length);
+			memcpy(dump->data + dump_offset, fbPtr + fb_offset, (size_t) dump->w >> 1);
+		}
+	} else {
+		for (unsigned short int j = dump->y, l = 0U; l < dump->h; j++, l++) {
+			size_t dump_offset = (size_t)(l * (dump->w * bpp));
+			size_t fb_offset   = (size_t)(dump->x * bpp) + (j * fInfo.line_length);
+			memcpy(dump->data + dump_offset, fbPtr + fb_offset, (size_t) dump->w * bpp);
+		}
+	}
+
+	// Cleanup
+cleanup:
+	if (isFbMapped && !keep_fd) {
+		unmap_fb();
+	}
+	if (!keep_fd) {
+		close(fbfd);
+	}
+
+	return rv;
+#else
+	WARN("Image support is disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif
+}
+
+// Restore a fb dump
+int
+    fbink_restore(int fbfd, const FBInkConfig* fbink_cfg, const FBInkDump* dump)
+{
+#ifdef FBINK_WITH_IMAGE
+	// Open the framebuffer if need be...
+	// NOTE: As usual, we *expect* to be initialized at this point!
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// mmap the fb if need be...
+	if (!isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	}
+
+	// Restore (if possible)
+	if (!dump->data) {
+		WARN("No dump data to restore!");
+		rv = ERRCODE(EINVAL);
+		goto cleanup;
+	}
+	if (dump->rota != vInfo.rotate) {
+		WARN("Can't restore the dump because of a rotation mismatch: dump: %hhu (%s) vs. fb: %u (%s)",
+		     dump->rota,
+		     fb_rotate_to_string(dump->rota),
+		     vInfo.rotate,
+		     fb_rotate_to_string(vInfo.rotate));
+		rv = ERRCODE(ENOTSUP);
+		goto cleanup;
+	}
+	if (dump->bpp != vInfo.bits_per_pixel) {
+		WARN("Can't restore the dump because of a bitdepth mismatch: dump: %hhu vs. fb: %u",
+		     dump->bpp,
+		     vInfo.bits_per_pixel);
+		rv = ERRCODE(ENOTSUP);
+		goto cleanup;
+	}
+
+	// We'll need a region...
+	struct mxcfb_rect region;
+
+	if (dump->is_full) {
+		// Full dump, easy enough
+		memcpy(fbPtr, dump->data, (size_t)(fInfo.line_length * vInfo.yres));
+		fullscreen_region(&region);
+	} else {
+		// Region dump, restore line by line
+		if (dump->bpp == 4U) {
+			for (unsigned short int j = dump->y, l = 0U; l < dump->h; j++, l++) {
+				size_t fb_offset   = (size_t)(dump->x >> 1) + (j * fInfo.line_length);
+				size_t dump_offset = (size_t)(l * (dump->w >> 1));
+				memcpy(fbPtr + fb_offset, dump->data + dump_offset, (size_t) dump->w >> 1);
+			}
+		} else {
+			// We're going to need the amount of bytes taken per pixel...
+			uint8_t bpp = dump->bpp / 8U;
+			for (unsigned short int j = dump->y, l = 0U; l < dump->h; j++, l++) {
+				size_t fb_offset   = (size_t)(dump->x * bpp) + (j * fInfo.line_length);
+				size_t dump_offset = (size_t)(l * (dump->w * bpp));
+				memcpy(fbPtr + fb_offset, dump->data + dump_offset, (size_t) dump->w * bpp);
+			}
+		}
+		region.left   = dump->x;
+		region.top    = dump->y;
+		region.width  = dump->w;
+		region.height = dump->h;
+	}
+
+	// And now, we can refresh the screen
+	if (refresh(fbfd,
+		    region,
+		    get_wfm_mode(fbink_cfg->wfm_mode),
+		    fbink_cfg->is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		    fbink_cfg->is_flashing,
+		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
+		WARN("Failed to refresh the screen");
+	}
+
+	// Cleanup
+cleanup:
+	if (isFbMapped && !keep_fd) {
+		unmap_fb();
+	}
+	if (!keep_fd) {
+		close(fbfd);
+	}
+
+	return rv;
+#else
+	WARN("Image support is disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif
 }
 
 // And now, we just bundle auxiliary parts of the public or private API,
