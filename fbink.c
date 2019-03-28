@@ -6179,9 +6179,25 @@ int
 	}
 	// Start by allocating enough memory for a full dump of the computed region...
 	// We're going to need the amount of bytes taken per pixel...
-	// FIXME: 4bpp handling...
 	uint8_t bpp = (uint8_t)(vInfo.bits_per_pixel / 8U);
-	dump->data  = calloc((region.width * bpp) * region.height, sizeof(*dump->data));
+	// And then to handle 4bpp on its own, because 4/8 == 0 ;).
+	if (vInfo.bits_per_pixel == 4U) {
+		// Align to the nearest byte boundary to make our life easier...
+		if (region.left & 0x01) {
+			// x is odd, round *down* to the nearest multiple of two (i.e., align to the start of the current byte)
+			region.left &= ~0x01;
+			LOG("Updated region.left to %u because of alignment constraints", region.left);
+		}
+		if (region.width & 0x01) {
+			// w is odd, round *up* to the nearest multiple of two (i.e., align to the end of the current byte)
+			region.width = (region.width + 1) & ~0x01;
+			LOG("Updated region.width to %u because of alignment constraints", region.width);
+		}
+		// Two pixels per byte, and we've just ensured to never end up with a decimal when dividing by two ;).
+		dump->data = calloc((region.width >> 1) * region.height, sizeof(*dump->data));
+	} else {
+		dump->data = calloc((region.width * bpp) * region.height, sizeof(*dump->data));
+	}
 	if (dump->data == NULL) {
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
@@ -6198,10 +6214,18 @@ int
 	dump->h       = (unsigned short int) region.height;
 	dump->is_full = false;
 	// And finally, the fb data itself, scanline per scanline
-	for (unsigned short int j = dump->y, l = 0U; l < dump->h; j++, l++) {
-		size_t dump_offset = (size_t)(l * (dump->w * bpp));
-		size_t fb_offset   = (size_t)(dump->x * bpp) + (j * fInfo.line_length);
-		memcpy(dump->data + dump_offset, fbPtr + fb_offset, (size_t) dump->w * bpp);
+	if (dump->bpp == 4U) {
+		for (unsigned short int j = dump->y, l = 0U; l < dump->h; j++, l++) {
+			size_t dump_offset = (size_t)(l * (dump->w >> 1));
+			size_t fb_offset   = (size_t)(dump->x >> 1) + (j * fInfo.line_length);
+			memcpy(dump->data + dump_offset, fbPtr + fb_offset, (size_t) dump->w >> 1);
+		}
+	} else {
+		for (unsigned short int j = dump->y, l = 0U; l < dump->h; j++, l++) {
+			size_t dump_offset = (size_t)(l * (dump->w * bpp));
+			size_t fb_offset   = (size_t)(dump->x * bpp) + (j * fInfo.line_length);
+			memcpy(dump->data + dump_offset, fbPtr + fb_offset, (size_t) dump->w * bpp);
+		}
 	}
 
 	// Cleanup
@@ -6275,13 +6299,20 @@ int
 		fullscreen_region(&region);
 	} else {
 		// Region dump, restore line by line
-		// We're going to need the amount of bytes taken per pixel...
-		// FIXME: 4bpp handling...
-		uint8_t bpp = dump->bpp / 8U;
-		for (unsigned short int j = dump->y, l = 0U; l < dump->h; j++, l++) {
-			size_t fb_offset   = (size_t)(dump->x * bpp) + (j * fInfo.line_length);
-			size_t dump_offset = (size_t)(l * (dump->w * bpp));
-			memcpy(fbPtr + fb_offset, dump->data + dump_offset, (size_t) dump->w * bpp);
+		if (dump->bpp == 4U) {
+			for (unsigned short int j = dump->y, l = 0U; l < dump->h; j++, l++) {
+				size_t fb_offset   = (size_t)(dump->x >> 1) + (j * fInfo.line_length);
+				size_t dump_offset = (size_t)(l * (dump->w >> 1));
+				memcpy(fbPtr + fb_offset, dump->data + dump_offset, (size_t) dump->w >> 1);
+			}
+		} else {
+			// We're going to need the amount of bytes taken per pixel...
+			uint8_t bpp = dump->bpp / 8U;
+			for (unsigned short int j = dump->y, l = 0U; l < dump->h; j++, l++) {
+				size_t fb_offset   = (size_t)(dump->x * bpp) + (j * fInfo.line_length);
+				size_t dump_offset = (size_t)(l * (dump->w * bpp));
+				memcpy(fbPtr + fb_offset, dump->data + dump_offset, (size_t) dump->w * bpp);
+			}
 		}
 		region.left   = dump->x;
 		region.top    = dump->y;
