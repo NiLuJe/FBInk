@@ -523,6 +523,7 @@ FBINK_API int fbink_cls(int fbfd, const FBInkConfig* fbink_cfg);
 //       Care should be taken not to leave that pointer dangling (i.e., dump.data = NULL;),
 //       as a subsequent call to fbink_*_dump with that same struct would otherwise trip the recycling check,
 //       causing a double free!
+//       There are no error codepaths after storage allocation (i.e., you are assured that it has NOT been allocated on error).
 FBINK_API int fbink_dump(int fbfd, FBInkDump* dump);
 
 // Dump a specific region of the screen
@@ -544,7 +545,7 @@ FBINK_API int fbink_region_dump(int                fbfd,
 				const FBInkConfig* fbink_cfg,
 				FBInkDump*         dump);
 
-// Restore a framebuffer dump from fbink_dump/fbink_region_dump
+// Restore a framebuffer dump made by fbink_dump/fbink_region_dump
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
 // Otherwise, returns a few different things on failure:
 //	-(ENOTSUP)	when the current rotation or bitdepth doesn't match the dump's
@@ -555,6 +556,8 @@ FBINK_API int fbink_region_dump(int                fbfd,
 // dump:		Pointer to an FBInkDump struct, as setup by fbink_dump or fbink_region_dump
 // NOTE: In case the dump was regional, it will be restored in the exact same coordinates it was taken from,
 //       no actual positioning is needed/supported at restore time.
+// NOTE: "current" actually means "at last init/reinit time".
+//       Call fbink_reinit first if you really want to make sure bitdepth/rotation still match.
 // NOTE: This does *NOT* free data.dump!
 FBINK_API int fbink_restore(int fbfd, const FBInkConfig* fbink_cfg, const FBInkDump* dump);
 

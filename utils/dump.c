@@ -86,7 +86,7 @@ int
 		goto cleanup;
 	}
 
-	// Dump a region at the center of the screen
+	// Dump a region at the center of the screen, with a few funky offsets to test that
 	fbink_cfg.halign = CENTER;
 	fbink_cfg.valign = CENTER;
 	if (fbink_region_dump(fbfd, -650, -50, 501, 250, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {

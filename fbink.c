@@ -5488,7 +5488,9 @@ static int
 			// We can do a simple copy if the target is 8bpp, the source is 8bpp (no alpha), and we don't invert.
 			if (!fb_is_legacy && req_n == 1 && invert == 0U) {
 				size_t fb_offset;
+				// Scanline by scanline, as we usually have input/output x offsets to honor
 				for (j = img_y_off; j < max_height; j++) {
+					// NOTE: Again, assume the fb origin is @ (0, 0), which should hold true at that bitdepth.
 					pix_offset = (size_t)((j * w) + img_x_off);
 					fb_offset  = ((uint32_t)(j + y_off) * fInfo.line_length) +
 						    (unsigned int) (img_x_off + x_off);
@@ -5976,7 +5978,7 @@ cleanup:
 #endif    // FBINK_WITH_IMAGE
 }
 
-// Dump the full fb
+// Dump the full fb (first visible screen)
 int
     fbink_dump(int fbfd, FBInkDump* dump)
 {
