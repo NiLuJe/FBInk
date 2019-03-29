@@ -5980,7 +5980,7 @@ cleanup:
 
 // Dump the full fb (first visible screen)
 int
-    fbink_dump(int fbfd, FBInkDump* dump)
+    fbink_dump(int fbfd UNUSED_BY_MINIMAL, FBInkDump* dump UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_IMAGE
 	// Open the framebuffer if need be...
@@ -6046,13 +6046,13 @@ cleanup:
 
 // Dump a specific region of the fb
 int
-    fbink_region_dump(int                fbfd,
-		      short int          x_off,
-		      short int          y_off,
-		      unsigned short int w,
-		      unsigned short int h,
-		      const FBInkConfig* fbink_cfg,
-		      FBInkDump*         dump)
+    fbink_region_dump(int fbfd  UNUSED_BY_MINIMAL,
+		      short int x_off UNUSED_BY_MINIMAL,
+		      short int y_off    UNUSED_BY_MINIMAL,
+		      unsigned short int w UNUSED_BY_MINIMAL,
+		      unsigned short int h UNUSED_BY_MINIMAL,
+		      const FBInkConfig* fbink_cfg UNUSED_BY_MINIMAL,
+		      FBInkDump* dump UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_IMAGE
 	// Open the framebuffer if need be...
@@ -6262,7 +6262,9 @@ cleanup:
 
 // Restore a fb dump
 int
-    fbink_restore(int fbfd, const FBInkConfig* fbink_cfg, const FBInkDump* dump)
+    fbink_restore(int fbfd           UNUSED_BY_MINIMAL,
+		  const FBInkConfig* fbink_cfg UNUSED_BY_MINIMAL,
+		  const FBInkDump* dump UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_IMAGE
 	// Open the framebuffer if need be...
