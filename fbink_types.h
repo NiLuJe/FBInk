@@ -49,6 +49,7 @@ typedef struct
 	uint8_t            ntxBootRota;
 	uint8_t            ntxRotaQuirk;
 	bool               canRotate;
+	bool               canHWInvert;
 	bool               skipId;
 } FBInkDeviceQuirks;
 

@@ -324,6 +324,12 @@ static void
 		}
 		// Store the device ID...
 		deviceQuirks.deviceId = (unsigned short int) dev;
+		// HW invert should be safe on Kindle, so just blacklist einkfb devices
+		if (deviceQuirks.isKindleLegacy) {
+			deviceQuirks.canHWInvert = false;
+		} else {
+			deviceQuirks.canHWInvert = true;
+		}
 	}
 }
 #	elif defined(FBINK_FOR_CERVANTES)
@@ -362,6 +368,8 @@ static void
 
 		// Store the device ID...
 		deviceQuirks.deviceId = config.pcb_id;
+		// Some devices *may* be based on the same board as the Kobo Aura, so, let's be cautious...
+		deviceQuirks.canHWInvert = false;
 		// NOTE: See the comments in set_kobo_quirks about this.
 		//       I'm hoping there aren't any special snowflakes in the lineup...
 		deviceQuirks.ntxBootRota = FB_ROTATE_UD;
@@ -407,6 +415,8 @@ static void
 {
 	// Store the device ID...
 	deviceQuirks.deviceId = kobo_id;
+	// HW Invert should *generally* be safe on Kobo, with a few exceptions...
+	deviceQuirks.canHWInvert = true;
 	// NOTE: Shaky assumption that almost everything follows the same rotation scheme, with:
 	//       Boot rotation is FB_ROTATE_UD, pickel is FB_ROTATE_UR, nickel is FB_ROTATE_CCW
 	//       With the exception of the Aura HD and the H2O.
@@ -458,7 +468,9 @@ static void
 		case 360:    // Aura (phoenix)
 			// NOTE: The bottom 10 pixels *may* be blacked out by Nickel? (TBC!)
 			//deviceQuirks.koboVertOffset = -10;
-			deviceQuirks.screenDPI = 212U;
+			// NOTE: According to the nightmode hack, the Aura's kernel *may* be crashy w/ PxP inversion...
+			deviceQuirks.canHWInvert = false;
+			deviceQuirks.screenDPI   = 212U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Aura", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
