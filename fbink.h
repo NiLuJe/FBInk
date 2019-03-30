@@ -391,7 +391,6 @@ FBINK_API int fbink_printf(int fbfd, const FBInkOTConfig* cfg, const FBInkConfig
 //			NOTE: Only supported on devices with a recent EPDC (>= v2)!
 //			      For Kindle, that's everything since the KOA2 (KOA2, PW4),
 //			      For Kobo, that's everything since Mk.7,
-//			      For Cervantes, that's everything since the Cervantes 3 (Cervantes 3 & 4).
 //			NOTE: Your device may not support anything other than PASSTHROUGH & ORDERED!
 // fbink_cfg:		Pointer to an FBInkConfig struct. Honors wfm_mode, is_nightmode, is_flashing
 // NOTE: If you request an empty region (0x0 @ (0, 0), a full-screen refresh will be performed!
