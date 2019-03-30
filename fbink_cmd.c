@@ -397,7 +397,7 @@ int
 					      { "norefresh", no_argument, NULL, 'b' },
 					      { "dither", no_argument, NULL, 'D' },
 					      { "waveform", required_argument, NULL, 'W' },
-					      { "nightmode", required_argument, NULL, 'H' },
+					      { "nightmode", no_argument, NULL, 'H' },
 					      { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_cfg = { 0 };
@@ -485,8 +485,8 @@ int
 	char*     bdit_ot_file   = NULL;
 	bool      errfnd         = false;
 
-	while ((opt = getopt_long(
-		    argc, argv, "y:x:Y:X:hfcmMprs:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bDW:H:", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMprs:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bDW:H", opts, &opt_index)) !=
+	       -1) {
 		switch (opt) {
 			case 'y':
 				if (strtol_hi(opt, NULL, optarg, &fbink_cfg.row) < 0) {
