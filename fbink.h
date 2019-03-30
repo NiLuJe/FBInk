@@ -145,8 +145,9 @@ typedef enum
 // List of *potentially* available waveform modes
 typedef enum
 {
-	WFM_GC16 = 0U,
+	WFM_AUTO = 0U,
 	WFM_DU,
+	WFM_GC16,
 	WFM_GC4,
 	WFM_A2,
 	WFM_GL16,
@@ -159,7 +160,6 @@ typedef enum
 	WFM_GL16_INV,
 	WFM_GCK16,
 	WFM_GLKW16,
-	WFM_AUTO
 } WFM_MODE_INDEX_T;
 
 // List of *potentially* available HW dithering modes
@@ -240,7 +240,7 @@ typedef struct
 	uint8_t
 		halign;    // Horizontal alignment of images/dumps (NONE/LEFT, CENTER, EDGE/RIGHT; c.f., ALIGN_INDEX_T enum)
 	uint8_t valign;    // Vertical alignment of images/dumps (NONE/TOP, CENTER, EDGE/BOTTOM; c.f., ALIGN_INDEX_T enum)
-	uint8_t wfm_mode;    // Request a specific waveform mode when printing an image/dump (c.f., WFM_MODE_INDEX_T enum)
+	uint8_t wfm_mode;       // Request a specific waveform mode (c.f., WFM_MODE_INDEX_T enum)
 	bool    is_dithered;    // Request (ordered) hardware dithering (if supported).
 	bool    no_refresh;     // Skip actually refreshing the eInk screen (useful when drawing in batch)
 } FBInkConfig;
