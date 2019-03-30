@@ -67,8 +67,18 @@ static void
 	    "Options affecting the message's appearance:\n"
 	    "\t-h, --invert\t\tPrint STRING in <background color> over <foreground color> instead of the reverse.\n"
 	    "\t-f, --flash\t\tAsk the eInk driver to do a black flash when refreshing the area of the screen where STRING will be printed.\n"
+#ifdef FBINK_FOR_KINDLE
+	    "\t\t\t\tNote that on legacy einkfb devices, this may not always be honored by the hardware.\n"
+#endif
 	    "\t-c, --clear\t\tFully clear the screen before printing (obeys --invert). Can be specified on its own, without any STRING.\n"
 #ifndef FBINK_FOR_LINUX
+	    "\t-W, --waveform\t\tRequest a specific waveform update mode from the eInk controller, if supported (mainly useful for images).\n"
+	    "\t\t\t\tAvailable waveform modes: DU, GC16, GC4, A2, GL16, REAGL, REAGLD & AUTO\n"
+#	ifdef FBINK_FOR_KINDLE
+	    "\t\t\t\tAs well as GC16_FAST, GL16_FAST, DU4, GL4, GL16_INV, GCK16 & GLKW16 on some Kindles, depending on the model & FW version.\n"
+	    "\t\t\t\tUnsupported modes should safely downgrade to AUTO.\n"
+	    "\t\t\t\tNote that specifying a waveform mode is ignored on legacy einkfb devices, because the hardware doesn't expose such capabilities.\n"
+#	endif
 	    "\t-D, --dither\t\tRequest (ordered) hardware dithering from the eInk controller, if supported (mainly useful for images).\n"
 	    "\t-b, --norefresh\t\tOnly update the framebuffer, but don't actually refresh the eInk screen (useful when drawing in batch).\n"
 #endif
@@ -137,7 +147,7 @@ static void
 	    "\t\t\tNOTE: If a negative value is supplied, counts backward from the opposite edge. Mostly useful with top & left to position stuff relative to the bottom right corner.\n"
 	    "\t\tIf format is specified, the underscore/star MarkDown syntax will be honored to set the font style (i.e., *italic*, **bold** & ***bold italic***).\n"
 	    "\n"
-	    "\t\tHonors -h, --invert; -f, --flash; -c, --clear; -m, --centered; -M, --halfway; -o, --overlay; -T, --fgless; -O, --bgless; -C, --color; -B, --background; -l, --linecount\n"
+	    "\t\tHonors -h, --invert; -f, --flash; -c, --clear; -W, --waveform; -D, --dither; -b, --norefresh; -m, --centered; -M, --halfway; -o, --overlay; -T, --fgless; -O, --bgless; -C, --color; -B, --background; -l, --linecount\n"
 	    "\n"
 	    "EXAMPLES:\n"
 #	ifdef FBINK_FOR_KINDLE
@@ -164,29 +174,21 @@ static void
 	    "\n"
 	    "\n"
 	    "You can also eschew printing a STRING, and simply refresh the screen as per your specification, without touching the framebuffer:\n"
-	    "\t-s, --refresh top=NUM,left=NUM,width=NUM,height=NUM,wfm=NAME,dither=NAME\n"
+	    "\t-s, --refresh top=NUM,left=NUM,width=NUM,height=NUM,dither=NAME\n"
 	    "\n"
 	    "EXAMPLES:\n"
-	    "\tfbink -s top=20,left=10,width=500,height=600,wfm=GC16,dither=ORDERED\n"
+	    "\tfbink -s top=20,left=10,width=500,height=600,dither=ORDERED -W GC16\n"
 	    "\t\tRefreshes a 500x600 rectangle with its top-left corner at coordinates (10, 20) with a GC16 waveform mode and ORDERED hardware dithering.\n"
 	    "\n"
 	    "NOTES:\n"
 	    "\tThe specified rectangle *must* completely fit on screen, or the ioctl will fail.\n"
-	    "\tAvailable waveform modes: DU, GC16, GC4, A2, GL16, REAGL, REAGLD & AUTO\n"
-#ifdef FBINK_FOR_KINDLE
-	    "\t\tAs well as GC16_FAST, GL16_FAST, DU4, GL4, GL16_INV, GCK16 & GLKW16 on some Kindles, depending on the model & FW version.\n"
-	    "\t\tUnsupported modes should safely downgrade to AUTO.\n"
-#endif
 	    "\tAvailable dithering modes: PASSTHROUGH, FLOYD_STEINBERG, ATKINSON, ORDERED & QUANT_ONLY\n"
 	    "\t\tNote that this is only supported on recent devices, and that only a subset of these options may actually be supported by the HW (usually, PASSTHROUGH & ORDERED, check dmesg).\n"
 #ifdef FBINK_FOR_KINDLE
 	    "\t\tHardware dithering is completely untested on Kindle, and, while the Oasis 2 & PaperWhite 4 *should* support it, they *may* not, or at least not in the way FBInk expects...\n"
 #endif
-	    "\tNote that this will also honor --flash\n"
-#ifdef FBINK_FOR_KINDLE
-	    "\tNote that specifying a waveform mode is ignored on legacy einkfb devices, because the hardware doesn't expose such capabilities.\n"
-	    "\tBut it does (mostly) honor the --flash flag, though.\n"
-#else
+	    "\tNote that this will also honor --waveform & --flash\n"
+#ifndef FBINK_FOR_KINDLE
 	    "\tNote that the arguments are passed as-is to the ioctl, no viewport or rotation quirks are applied!\n"
 #endif
 	    "\tSpecifying one or more STRING takes precedence over this mode.\n"
@@ -196,7 +198,7 @@ static void
 	    "\n"
 	    "\n"
 	    "You can also eschew printing a STRING, and print an IMAGE at the requested coordinates instead:\n"
-	    "\t-g, --image file=PATH,x=NUM,y=NUM,halign=ALIGN,valign=ALIGN,wfm=NAME\n"
+	    "\t-g, --image file=PATH,x=NUM,y=NUM,halign=ALIGN,valign=ALIGN\n"
 	    "\t\tSupported ALIGN values: NONE (or LEFT for halign, TOP for valign), CENTER or MIDDLE, EDGE (or RIGHT for halign, BOTTOM for valign).\n"
 	    "\t\tSee -s, --refresh above for supported WFM values, (defaults to GC16 here).\n"
 	    "\n"
@@ -207,7 +209,7 @@ static void
 	    "\t\tDisplays the image \"hello,world.png\", starting at the ninth line plus 11px and the sixth column minus 10px\n"
 	    "\tfbink -g file=hello.png,halign=EDGE,valign=CENTER\n"
 	    "\t\tDisplays the image \"hello.png\", in the middle of the screen, aligned to the right edge.\n"
-	    "\tfbink -g file=hello.png,wfm=A2\n"
+	    "\tfbink -g file=hello.png -W A2\n"
 	    "\t\tDisplays the image \"hello.png\", in monochrome.\n"
 	    "\n"
 	    "Options affecting the image's appearance:\n"
@@ -220,7 +222,7 @@ static void
 	    "\t\t\tYou can use the --flatten flag to avoid the potential performance penalty by always ignoring alpha.\n"
 	    "\t\tAs an additional quirk, you can't pass paths with commas in it to file. Pass those to the -i, --img flag instead.\n"
 	    "\t\tAnd if you want to read image data from stdin, make sure to pass \"-\" as the file name.\n"
-	    "\tThis honors --flash, as well as --clear & --invert\n"
+	    "\tThis honors --flash, as well as --clear, --waveform, --dither, --norefresh & --invert\n"
 	    "\t\tNote that this also honors --col & --row (taking --size into account), in addition to the coordinates you specify.\n"
 	    "\t\tThe aim is to make it easier to align small images to text.\n"
 	    "\t\tAnd to make pixel-perfect adjustments, you can also specifiy negative values for x & y.\n"
@@ -388,6 +390,7 @@ int
 					      { "truetype", required_argument, NULL, 't' },
 					      { "norefresh", no_argument, NULL, 'b' },
 					      { "dither", no_argument, NULL, 'D' },
+					      { "waveform", required_argument, NULL, 'W' },
 					      { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_cfg = { 0 };
@@ -402,7 +405,6 @@ int
 		LEFT_OPT,
 		WIDTH_OPT,
 		HEIGHT_OPT,
-		WFM_OPT,
 		DITHER_OPT,
 	};
 	enum
@@ -412,7 +414,6 @@ int
 		YOFF_OPT,
 		HALIGN_OPT,
 		VALIGN_OPT,
-		IMG_WFM_OPT,
 	};
 	enum
 	{
@@ -432,20 +433,10 @@ int
 #pragma clang diagnostic ignored "-Wunknown-warning-option"
 #pragma GCC diagnostic ignored "-Wdiscarded-qualifiers"
 #pragma clang diagnostic ignored "-Wincompatible-pointer-types-discards-qualifiers"
-	char* const refresh_token[]  = { [TOP_OPT]    = "top",
-                                        [LEFT_OPT]   = "left",
-                                        [WIDTH_OPT]  = "width",
-                                        [HEIGHT_OPT] = "height",
-                                        [WFM_OPT]    = "wfm",
-                                        [DITHER_OPT] = "dither",
-                                        NULL };
-	char* const image_token[]    = { [FILE_OPT]    = "file",
-                                      [XOFF_OPT]    = "x",
-                                      [YOFF_OPT]    = "y",
-                                      [HALIGN_OPT]  = "halign",
-                                      [VALIGN_OPT]  = "valign",
-                                      [IMG_WFM_OPT] = "wfm",
-                                      NULL };
+	char* const refresh_token[]  = { [TOP_OPT] = "top",       [LEFT_OPT] = "left",     [WIDTH_OPT] = "width",
+                                        [HEIGHT_OPT] = "height", [DITHER_OPT] = "dither", NULL };
+	char* const image_token[]    = { [FILE_OPT] = "file",     [XOFF_OPT] = "x",        [YOFF_OPT] = "y",
+                                      [HALIGN_OPT] = "halign", [VALIGN_OPT] = "valign", NULL };
 	char* const truetype_token[] = { [REGULAR_OPT]    = "regular",
 					 [BOLD_OPT]       = "bold",
 					 [ITALIC_OPT]     = "italic",
@@ -464,7 +455,7 @@ int
 	uint32_t  region_left    = 0;
 	uint32_t  region_width   = 0;
 	uint32_t  region_height  = 0;
-	char*     region_wfm     = NULL;
+	char*     wfm_name       = NULL;
 	char*     region_dither  = NULL;
 	uint8_t   region_hwd     = HWD_PASSTHROUGH;
 	bool      is_refresh     = false;
@@ -487,7 +478,7 @@ int
 	char*     bdit_ot_file   = NULL;
 	bool      errfnd         = false;
 
-	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMprs:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bD", opts, &opt_index)) !=
+	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMprs:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bDW:", opts, &opt_index)) !=
 	       -1) {
 		switch (opt) {
 			case 'y':
@@ -561,53 +552,6 @@ int
 								errfnd = true;
 							}
 							break;
-						case WFM_OPT:
-							if (value == NULL) {
-								fprintf(stderr,
-									"Missing value for suboption '%s'\n",
-									refresh_token[WFM_OPT]);
-								errfnd = true;
-								continue;
-							}
-
-							region_wfm = value;
-							if (strcasecmp(region_wfm, "AUTO") == 0) {
-								fbink_cfg.wfm_mode = WFM_AUTO;
-							} else if (strcasecmp(region_wfm, "DU") == 0) {
-								fbink_cfg.wfm_mode = WFM_DU;
-							} else if (strcasecmp(region_wfm, "GC16") == 0) {
-								fbink_cfg.wfm_mode = WFM_GC16;
-							} else if (strcasecmp(region_wfm, "GC4") == 0) {
-								fbink_cfg.wfm_mode = WFM_GC4;
-							} else if (strcasecmp(region_wfm, "A2") == 0) {
-								fbink_cfg.wfm_mode = WFM_A2;
-							} else if (strcasecmp(region_wfm, "GL16") == 0) {
-								fbink_cfg.wfm_mode = WFM_GL16;
-							} else if (strcasecmp(region_wfm, "REAGL") == 0) {
-								fbink_cfg.wfm_mode = WFM_REAGL;
-							} else if (strcasecmp(region_wfm, "REAGLD") == 0) {
-								fbink_cfg.wfm_mode = WFM_REAGLD;
-							} else if (strcasecmp(region_wfm, "GC16_FAST") == 0) {
-								fbink_cfg.wfm_mode = WFM_GC16_FAST;
-							} else if (strcasecmp(region_wfm, "GL16_FAST") == 0) {
-								fbink_cfg.wfm_mode = WFM_GL16_FAST;
-							} else if (strcasecmp(region_wfm, "DU4") == 0) {
-								fbink_cfg.wfm_mode = WFM_DU4;
-							} else if (strcasecmp(region_wfm, "GL4") == 0) {
-								fbink_cfg.wfm_mode = WFM_GL4;
-							} else if (strcasecmp(region_wfm, "GL16_INV") == 0) {
-								fbink_cfg.wfm_mode = WFM_GL16_INV;
-							} else if (strcasecmp(region_wfm, "GCK16") == 0) {
-								fbink_cfg.wfm_mode = WFM_GCK16;
-							} else if (strcasecmp(region_wfm, "GLKW16") == 0) {
-								fbink_cfg.wfm_mode = WFM_GLKW16;
-							} else {
-								fprintf(stderr,
-									"Unknown waveform update mode '%s'.\n",
-									region_wfm);
-								errfnd = true;
-							}
-							break;
 						case DITHER_OPT:
 							if (value == NULL) {
 								fprintf(stderr,
@@ -617,7 +561,6 @@ int
 								continue;
 							}
 
-							region_dither = value;
 							if (strcasecmp(region_dither, "PASSTHROUGH") == 0) {
 								region_hwd = HWD_PASSTHROUGH;
 							} else if (strcasecmp(region_dither, "FLOYD_STEINBERG") == 0) {
@@ -634,6 +577,8 @@ int
 									region_dither);
 								errfnd = true;
 							}
+							// Remember it in a human-readable format
+							region_dither = strdup(value);
 							break;
 						default:
 							fprintf(stderr, "No match found for token: /%s/\n", value);
@@ -641,17 +586,13 @@ int
 							break;
 					}
 				}
-				// Make sure we won't pass an invalid rectangle to the driver, because that'd soft lock,
-				// or a NULL pointer to fbink_refresh, because that would segfault in strcmp ;).
-				if (((region_height == 0 || region_width == 0) &&
-				     !(region_top == 0 && region_left == 0 && region_height == 0 && region_width == 0)) ||
-				    region_wfm == NULL) {
-					fprintf(
-					    stderr,
-					    "Suboption '%s' must be specified, as well as non-zero values for '%s' and '%s'\n",
-					    refresh_token[WFM_OPT],
-					    refresh_token[HEIGHT_OPT],
-					    refresh_token[WIDTH_OPT]);
+				// Make sure we won't pass an invalid rectangle to the driver, because that'd soft lock.
+				if ((region_height == 0 || region_width == 0) &&
+				    !(region_top == 0 && region_left == 0 && region_height == 0 && region_width == 0)) {
+					fprintf(stderr,
+						"Non-zero values must be specified for suboptions '%s' and '%s'\n",
+						refresh_token[HEIGHT_OPT],
+						refresh_token[WIDTH_OPT]);
 					errfnd = true;
 				} else {
 					is_refresh = true;
@@ -779,53 +720,6 @@ int
 								fbink_cfg.valign = EDGE;
 							} else {
 								fprintf(stderr, "Unknown alignment value '%s'.\n", value);
-								errfnd = true;
-							}
-							break;
-						case IMG_WFM_OPT:
-							if (value == NULL) {
-								fprintf(stderr,
-									"Missing value for suboption '%s'\n",
-									image_token[IMG_WFM_OPT]);
-								errfnd = true;
-								continue;
-							}
-
-							region_wfm = value;
-							if (strcasecmp(region_wfm, "AUTO") == 0) {
-								fbink_cfg.wfm_mode = WFM_AUTO;
-							} else if (strcasecmp(region_wfm, "DU") == 0) {
-								fbink_cfg.wfm_mode = WFM_DU;
-							} else if (strcasecmp(region_wfm, "GC16") == 0) {
-								fbink_cfg.wfm_mode = WFM_GC16;
-							} else if (strcasecmp(region_wfm, "GC4") == 0) {
-								fbink_cfg.wfm_mode = WFM_GC4;
-							} else if (strcasecmp(region_wfm, "A2") == 0) {
-								fbink_cfg.wfm_mode = WFM_A2;
-							} else if (strcasecmp(region_wfm, "GL16") == 0) {
-								fbink_cfg.wfm_mode = WFM_GL16;
-							} else if (strcasecmp(region_wfm, "REAGL") == 0) {
-								fbink_cfg.wfm_mode = WFM_REAGL;
-							} else if (strcasecmp(region_wfm, "REAGLD") == 0) {
-								fbink_cfg.wfm_mode = WFM_REAGLD;
-							} else if (strcasecmp(region_wfm, "GC16_FAST") == 0) {
-								fbink_cfg.wfm_mode = WFM_GC16_FAST;
-							} else if (strcasecmp(region_wfm, "GL16_FAST") == 0) {
-								fbink_cfg.wfm_mode = WFM_GL16_FAST;
-							} else if (strcasecmp(region_wfm, "DU4") == 0) {
-								fbink_cfg.wfm_mode = WFM_DU4;
-							} else if (strcasecmp(region_wfm, "GL4") == 0) {
-								fbink_cfg.wfm_mode = WFM_GL4;
-							} else if (strcasecmp(region_wfm, "GL16_INV") == 0) {
-								fbink_cfg.wfm_mode = WFM_GL16_INV;
-							} else if (strcasecmp(region_wfm, "GCK16") == 0) {
-								fbink_cfg.wfm_mode = WFM_GCK16;
-							} else if (strcasecmp(region_wfm, "GLKW16") == 0) {
-								fbink_cfg.wfm_mode = WFM_GLKW16;
-							} else {
-								fprintf(stderr,
-									"Unknown waveform update mode '%s'.\n",
-									region_wfm);
 								errfnd = true;
 							}
 							break;
@@ -1048,6 +942,44 @@ int
 			case 'D':
 				fbink_cfg.is_dithered = true;
 				break;
+			case 'W':
+				if (strcasecmp(optarg, "AUTO") == 0) {
+					fbink_cfg.wfm_mode = WFM_AUTO;
+				} else if (strcasecmp(optarg, "DU") == 0) {
+					fbink_cfg.wfm_mode = WFM_DU;
+				} else if (strcasecmp(optarg, "GC16") == 0) {
+					fbink_cfg.wfm_mode = WFM_GC16;
+				} else if (strcasecmp(optarg, "GC4") == 0) {
+					fbink_cfg.wfm_mode = WFM_GC4;
+				} else if (strcasecmp(optarg, "A2") == 0) {
+					fbink_cfg.wfm_mode = WFM_A2;
+				} else if (strcasecmp(optarg, "GL16") == 0) {
+					fbink_cfg.wfm_mode = WFM_GL16;
+				} else if (strcasecmp(optarg, "REAGL") == 0) {
+					fbink_cfg.wfm_mode = WFM_REAGL;
+				} else if (strcasecmp(optarg, "REAGLD") == 0) {
+					fbink_cfg.wfm_mode = WFM_REAGLD;
+				} else if (strcasecmp(optarg, "GC16_FAST") == 0) {
+					fbink_cfg.wfm_mode = WFM_GC16_FAST;
+				} else if (strcasecmp(optarg, "GL16_FAST") == 0) {
+					fbink_cfg.wfm_mode = WFM_GL16_FAST;
+				} else if (strcasecmp(optarg, "DU4") == 0) {
+					fbink_cfg.wfm_mode = WFM_DU4;
+				} else if (strcasecmp(optarg, "GL4") == 0) {
+					fbink_cfg.wfm_mode = WFM_GL4;
+				} else if (strcasecmp(optarg, "GL16_INV") == 0) {
+					fbink_cfg.wfm_mode = WFM_GL16_INV;
+				} else if (strcasecmp(optarg, "GCK16") == 0) {
+					fbink_cfg.wfm_mode = WFM_GCK16;
+				} else if (strcasecmp(optarg, "GLKW16") == 0) {
+					fbink_cfg.wfm_mode = WFM_GLKW16;
+				} else {
+					fprintf(stderr, "Unknown waveform update mode '%s'.\n", optarg);
+					errfnd = true;
+				}
+				// Remember it in a human-readable format...
+				wfm_name = strdup(optarg);
+				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
 				errfnd = true;
@@ -1224,7 +1156,7 @@ int
 				    region_width,
 				    region_height,
 				    fbink_cfg.is_flashing ? "a flashing " : "",
-				    region_wfm,
+				    wfm_name,
 				    region_dither ? region_dither : "PASSTHROUGH");
 			}
 			if (fbink_refresh(fbfd,
@@ -1252,7 +1184,7 @@ int
 				    fbink_cfg.valign,
 				    fbink_cfg.is_inverted ? "Y" : "N",
 				    fbink_cfg.ignore_alpha ? "Y" : "N",
-				    region_wfm ? region_wfm : "GC16",
+				    wfm_name ? wfm_name : "AUTO",
 				    fbink_cfg.is_dithered ? "Y" : "N",
 				    fbink_cfg.no_refresh ? "Y" : "N");
 			}
@@ -1442,6 +1374,8 @@ int
 
 	// Cleanup
 cleanup:
+	free(wfm_name);
+	free(region_dither);
 	free(image_file);
 
 	if (is_truetype) {
