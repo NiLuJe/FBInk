@@ -4569,24 +4569,19 @@ static const char*
 
 // Small public wrapper around refresh(), without the caller having to depend on mxcfb headers
 int
-    fbink_refresh(int      fbfd,
-		  uint32_t region_top,
-		  uint32_t region_left,
-		  uint32_t region_width,
-		  uint32_t region_height,
-		  uint8_t  waveform_mode,
-		  uint8_t  dithering_mode,
-		  bool     is_nightmode,
-		  bool     is_flashing)
+    fbink_refresh(int                fbfd,
+		  uint32_t           region_top,
+		  uint32_t           region_left,
+		  uint32_t           region_width,
+		  uint32_t           region_height,
+		  uint8_t            dithering_mode,
+		  const FBInkConfig* fbink_cfg)
 {
 	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
 	bool keep_fd = true;
 	if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
 		return ERRCODE(EXIT_FAILURE);
 	}
-
-	// Get the requested waveform mode constant...
-	uint32_t region_wfm = get_wfm_mode(waveform_mode);
 
 	// Same for the dithering mode, if we actually requested dithering...
 	int region_dither = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
@@ -4595,9 +4590,7 @@ int
 	} else {
 		LOG("No hardware dithering requested");
 	}
-
-	// NOTE: Right now, we enforce quant_bit to 7 if dithering is enabled (downgraded to 1 for A2 updates).
-	//       I'm not really sure what use-cases would warrant using a lower value, but I'm open to suggestion ;).
+	// NOTE: Right now, we enforce quant_bit to what appears to be sane values depending on the waveform mode.
 
 	struct mxcfb_rect region = {
 		.top    = region_top,
@@ -4612,7 +4605,13 @@ int
 	}
 
 	int ret;
-	if (EXIT_SUCCESS != (ret = refresh(fbfd, region, region_wfm, region_dither, is_nightmode, is_flashing, false))) {
+	if (EXIT_SUCCESS != (ret = refresh(fbfd,
+					   region,
+					   get_wfm_mode(fbink_cfg->wfm_mode),
+					   region_dither,
+					   fbink_cfg->is_nightmode,
+					   fbink_cfg->is_flashing,
+					   false))) {
 		WARN("Failed to refresh the screen");
 	}
 

@@ -1174,15 +1174,9 @@ int
 				    region_dither ? region_dither : "PASSTHROUGH",
 				    fbink_cfg.is_nightmode ? "Y" : "N");
 			}
-			if (fbink_refresh(fbfd,
-					  region_top,
-					  region_left,
-					  region_width,
-					  region_height,
-					  fbink_cfg.wfm_mode,
-					  region_hwd,
-					  fbink_cfg.is_nightmode,
-					  fbink_cfg.is_flashing) != EXIT_SUCCESS) {
+			if (fbink_refresh(
+				fbfd, region_top, region_left, region_width, region_height, region_hwd, &fbink_cfg) !=
+			    EXIT_SUCCESS) {
 				fprintf(stderr, "Failed to refresh the screen as per your specification!\n");
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;

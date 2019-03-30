@@ -358,8 +358,8 @@ FBINK_API int fbink_print(int fbfd, const char* string, const FBInkConfig* fbink
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // string:		UTF-8 encoded string to print
-// cfg:			Pointer to a FBInkOTConfig struct.
-// fbink_cfg:		Optional pointer to a FBInkConfig struct. If set, the options
+// cfg:			Pointer to an FBInkOTConfig struct.
+// fbink_cfg:		Optional pointer to an FBInkConfig struct. If set, the options
 //				is_inverted, is_flashing, is_cleared, is_centered, is_halfway, is_overlay, is_fgless, is_bgless,
 //				fg_color, bg_color, valign, halign will be honored.
 //				Pass a NULL pointer if unneeded.
@@ -386,32 +386,24 @@ FBINK_API int fbink_printf(int fbfd, const FBInkOTConfig* cfg, const FBInkConfig
 // region_left:		left (x) field of an mxcfb rectangle
 // region_width:	width field of an mxcfb rectangle
 // region_height:	height field of an mxcfb rectangle
-// waveform_mode:	waveform mode (i.e, WFM_GC16, c.f., WFM_MODE_INDEX_T enum)
 // dithering_mode:	dithering mode (i.e., HWD_ORDERED, c.f., HW_DITHER_INDEX_T enum)
 //			NOTE: Only supported on devices with a recent EPDC (>= v2)!
 //			      For Kindle, that's everything since the KOA2 (KOA2, PW4),
 //			      For Kobo, that's everything since Mk.7,
 //			      For Cervantes, that's everything since the Cervantes 3 (Cervantes 3 & 4).
 //			NOTE: Your device may not support anything other than PASSTHROUGH & ORDERED!
-// is_nightmode:        request HW inversion
-//			NOTE: Only supported on mxcfb (i.e., everything except Legacy Kindles).
-//			      May be disabled on devices where it is known to be crashy.
-// is_flashing:		will ask for a black flash if true
+// fbink_cfg:		Pointer to an FBInkConfig struct. Honors wfm_mode, is_nightmode, is_flashing
 // NOTE: If you request an empty region (0x0 @ (0, 0), a full-screen refresh will be performed!
-// NOTE: As you've probably guessed, since it doesn't take an FBInkConfig pointer, this *ignores* no_refresh ;)
-// NOTE: If waveform_mode is set to a bogus or unsupported value, it'll fall back to WFM_AUTO
-//       Be aware that 0 maps to GC16, not AUTO!
+// NOTE: This *ignores* is_dithered & no_refresh ;)
 // NOTE: If you do NOT want to request hardware dithering, set dithering_mode to HWD_PASSTHROUGH (i.e., 0).
 //       This is also the fallback value.
-FBINK_API int fbink_refresh(int      fbfd,
-			    uint32_t region_top,
-			    uint32_t region_left,
-			    uint32_t region_width,
-			    uint32_t region_height,
-			    uint8_t  waveform_mode,
-			    uint8_t  dithering_mode,
-			    bool     is_nightmode,
-			    bool     is_flashing);
+FBINK_API int fbink_refresh(int                fbfd,
+			    uint32_t           region_top,
+			    uint32_t           region_left,
+			    uint32_t           region_width,
+			    uint32_t           region_height,
+			    uint8_t            dithering_mode,
+			    const FBInkConfig* fbink_cfg);
 
 // Returns true if the device appears to be in a quirky framebuffer state that *may* require a reinit to produce sane results.
 // NOTE: The intended use-case is for long running apps which may trigger prints across different framebuffer states,
