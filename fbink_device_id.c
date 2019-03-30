@@ -722,5 +722,9 @@ static void
 	identify_kobo();
 	ELOG("Detected a Kobo %s (%hu)", deviceQuirks.deviceName, deviceQuirks.deviceId);
 #	endif
+	// Warn if canHWInvert was flipped
+	if (!deviceQuirks.canHWInvert) {
+		ELOG("This device does not support HW inversion");
+	}
 }
 #endif    // !FBINK_FOR_LINUX
