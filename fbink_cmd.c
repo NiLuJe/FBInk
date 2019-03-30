@@ -85,7 +85,7 @@ static void
 #	ifdef FBINK_FOR_KINDLE
 	    "\t\t\t\tNote that requesting nightmode is ignored on legacy einkfb devices, because the hardware doesn't (easily) expose such capabilities.\n"
 #	endif
-	    "\t\t\t\tNote that this may be ignored on some specific devices where it is known to be or have been crashy at some point.\n"
+	    "\t\t\t\tNote that this may be ignored on some specific devices where it is known to be or have been unstable at some point.\n"
 	    "\t-b, --norefresh\t\tOnly update the framebuffer, but don't actually refresh the eInk screen (useful when drawing in batch).\n"
 #endif
 	    "\t-S, --size\t\tOverride the automatic font scaling multiplier (Default: 0, automatic selection, ranging from 1 (no scaling), to 4 (4x upscaling), depending on screen resolution).\n"
@@ -584,8 +584,10 @@ int
 									region_dither);
 								errfnd = true;
 							}
-							// Remember it in a human-readable format
-							region_dither = strdup(value);
+							// Remember non-default values in a human-readable format
+							if (region_hwd != HWD_PASSTHROUGH) {
+								region_dither = strdup(value);
+							}
 							break;
 						default:
 							fprintf(stderr, "No match found for token: /%s/\n", value);
@@ -984,8 +986,10 @@ int
 					fprintf(stderr, "Unknown waveform update mode '%s'.\n", optarg);
 					errfnd = true;
 				}
-				// Remember it in a human-readable format...
-				wfm_name = strdup(optarg);
+				// Remember non-default values in a human-readable format...
+				if (fbink_cfg.wfm_mode != WFM_AUTO) {
+					wfm_name = strdup(optarg);
+				}
 				break;
 			case 'H':
 				fbink_cfg.is_nightmode = true;
