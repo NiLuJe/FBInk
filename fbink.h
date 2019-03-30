@@ -360,8 +360,9 @@ FBINK_API int fbink_print(int fbfd, const char* string, const FBInkConfig* fbink
 // string:		UTF-8 encoded string to print
 // cfg:			Pointer to an FBInkOTConfig struct.
 // fbink_cfg:		Optional pointer to an FBInkConfig struct. If set, the options
-//				is_inverted, is_flashing, is_cleared, is_centered, is_halfway, is_overlay, is_fgless, is_bgless,
-//				fg_color, bg_color, valign, halign will be honored.
+//				is_inverted, is_flashing, is_cleared, is_centered, is_halfway,
+//				is_overlay, is_fgless, is_bgless, fg_color, bg_color, valign, halign,
+//				wfm_mode, is_dithered, is_nightmode, no_refresh will be honored.
 //				Pass a NULL pointer if unneeded.
 // NOTE: Alignment is relative to the printable area, as defined by the margins.
 //       As such, it only makes sense in the context of a single, specific print call.
