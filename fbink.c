@@ -2669,7 +2669,7 @@ int
 	// Refresh screen
 	if (refresh(fbfd,
 		    region,
-		    WAVEFORM_MODE_AUTO,
+		    get_wfm_mode(fbink_cfg->wfm_mode),
 		    fbink_cfg->is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
@@ -3075,7 +3075,7 @@ int
 	// Refresh screen
 	if (refresh(fbfd,
 		    region,
-		    WAVEFORM_MODE_AUTO,
+		    get_wfm_mode(fbink_cfg->wfm_mode),
 		    fbink_cfg->is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
@@ -4270,7 +4270,7 @@ cleanup:
 		}
 		refresh(fbfd,
 			region,
-			WAVEFORM_MODE_AUTO,
+			get_wfm_mode(fbink_cfg->wfm_mode),
 			is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
 			is_flashing,
 			no_refresh);
@@ -4865,7 +4865,7 @@ int
 	//       essentially throttling the bar to the screen's refresh rate).
 	if (refresh(fbfd,
 		    region,
-		    WAVEFORM_MODE_AUTO,
+		    get_wfm_mode(fbink_cfg->wfm_mode),
 		    fbink_cfg->is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
