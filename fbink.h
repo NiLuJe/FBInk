@@ -219,7 +219,8 @@ typedef struct
 	short int col;             // x axis (i.e., column), counts down from the right edge of the screen if negative
 	uint8_t   fontmult;        // Font scaling multiplier (i.e., 4 -> x4), 0 means automatic.
 	uint8_t   fontname;        // Request a specific font (c.f., FONT_INDEX_T enum)
-	bool      is_inverted;     // Invert colors
+	bool      is_inverted;     // Invert colors.
+				   // This is *NOT* mutually exclusive with is_nightmode, and is *always* supported.
 	bool      is_flashing;     // Request a black flash on refresh
 	bool      is_cleared;      // Clear the screen beforehand (honors is_inverted)
 	bool      is_centered;     // Center the text (horizontally)
@@ -242,8 +243,9 @@ typedef struct
 	uint8_t valign;    // Vertical alignment of images/dumps (NONE/TOP, CENTER, EDGE/BOTTOM; c.f., ALIGN_INDEX_T enum)
 	uint8_t wfm_mode;        // Request a specific waveform mode (c.f., WFM_MODE_INDEX_T enum)
 	bool    is_dithered;     // Request (ordered) hardware dithering (if supported).
-	bool    is_nightmode;    // Request hardware inversion (if supported/safe). This does *NOT* override is_inverted!
-	bool    no_refresh;      // Skip actually refreshing the eInk screen (useful when drawing in batch)
+	bool    is_nightmode;    // Request hardware inversion (if supported/safe).
+				 // This is *NOT* mutually exclusive with is_inverted!
+	bool no_refresh;         // Skip actually refreshing the eInk screen (useful when drawing in batch)
 } FBInkConfig;
 
 typedef struct

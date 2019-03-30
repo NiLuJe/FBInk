@@ -81,10 +81,11 @@ static void
 #	endif
 	    "\t-D, --dither\t\tRequest (ordered) hardware dithering from the eInk controller, if supported (mainly useful for images).\n"
 	    "\t-H, --nightmode\t\tRequest full hardware inversion from the eInk controller, if supported.\n"
+	    "\t\t\t\tNote that this can be used *in combination* with -h, --invert! One does not exclude the other, which may lead to some confusing behavior ;).\n"
 #	ifdef FBINK_FOR_KINDLE
 	    "\t\t\t\tNote that requesting nightmode is ignored on legacy einkfb devices, because the hardware doesn't (easily) expose such capabilities.\n"
 #	endif
-	    "\t\t\t\tNote that this may be ignored on some specific devices where is known to be or have been crashy at some point.\n"
+	    "\t\t\t\tNote that this may be ignored on some specific devices where it is known to be or have been crashy at some point.\n"
 	    "\t-b, --norefresh\t\tOnly update the framebuffer, but don't actually refresh the eInk screen (useful when drawing in batch).\n"
 #endif
 	    "\t-S, --size\t\tOverride the automatic font scaling multiplier (Default: 0, automatic selection, ranging from 1 (no scaling), to 4 (4x upscaling), depending on screen resolution).\n"
@@ -152,7 +153,7 @@ static void
 	    "\t\t\tNOTE: If a negative value is supplied, counts backward from the opposite edge. Mostly useful with top & left to position stuff relative to the bottom right corner.\n"
 	    "\t\tIf format is specified, the underscore/star MarkDown syntax will be honored to set the font style (i.e., *italic*, **bold** & ***bold italic***).\n"
 	    "\n"
-	    "\t\tHonors -h, --invert; -f, --flash; -c, --clear; -W, --waveform; -D, --dither; -b, --norefresh; -m, --centered; -M, --halfway; -o, --overlay; -T, --fgless; -O, --bgless; -C, --color; -B, --background; -l, --linecount\n"
+	    "\t\tHonors -h, --invert; -f, --flash; -c, --clear; -W, --waveform; -D, --dither; -H, --nightmode; -b, --norefresh; -m, --centered; -M, --halfway; -o, --overlay; -T, --fgless; -O, --bgless; -C, --color; -B, --background; -l, --linecount\n"
 	    "\n"
 	    "EXAMPLES:\n"
 #	ifdef FBINK_FOR_KINDLE
@@ -192,7 +193,7 @@ static void
 #ifdef FBINK_FOR_KINDLE
 	    "\t\tHardware dithering is completely untested on Kindle, and, while the Oasis 2 & PaperWhite 4 *should* support it, they *may* not, or at least not in the way FBInk expects...\n"
 #endif
-	    "\tNote that this will also honor --waveform & --flash\n"
+	    "\tNote that this will also honor --waveform, --nightmode & --flash\n"
 #ifndef FBINK_FOR_KINDLE
 	    "\tNote that the arguments are passed as-is to the ioctl, no viewport or rotation quirks are applied!\n"
 #endif
@@ -227,7 +228,7 @@ static void
 	    "\t\t\tYou can use the --flatten flag to avoid the potential performance penalty by always ignoring alpha.\n"
 	    "\t\tAs an additional quirk, you can't pass paths with commas in it to file. Pass those to the -i, --img flag instead.\n"
 	    "\t\tAnd if you want to read image data from stdin, make sure to pass \"-\" as the file name.\n"
-	    "\tThis honors --flash, as well as --clear, --waveform, --dither, --norefresh & --invert\n"
+	    "\tThis honors --flash, as well as --clear, --waveform, --dither, --nightmode, --norefresh & --invert\n"
 	    "\t\tNote that this also honors --col & --row (taking --size into account), in addition to the coordinates you specify.\n"
 	    "\t\tThe aim is to make it easier to align small images to text.\n"
 	    "\t\tAnd to make pixel-perfect adjustments, you can also specifiy negative values for x & y.\n"
