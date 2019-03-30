@@ -1049,7 +1049,7 @@ int
 			if (is_truetype) {
 				if (!fbink_cfg.is_quiet) {
 					printf(
-					    "Printing string '%s' @ %hupt, honoring the following margins { Top: %hdpx, Bottom: %hdpx, Left: %hdpx, Right: %hdpx } (formatted: %s, overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, H align: %hhu, halfway: %s, V align: %hhu, clear screen: %s, dithered: %s, skip refresh: %s)\n",
+					    "Printing string '%s' @ %hupt, honoring the following margins { Top: %hdpx, Bottom: %hdpx, Left: %hdpx, Right: %hdpx } (formatted: %s, overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, H align: %hhu, halfway: %s, V align: %hhu, clear screen: %s, waveform: %s, dithered: %s, skip refresh: %s)\n",
 					    string,
 					    ot_config.size_pt,
 					    ot_config.margins.top,
@@ -1067,6 +1067,7 @@ int
 					    fbink_cfg.is_halfway ? "Y" : "N",
 					    fbink_cfg.valign,
 					    fbink_cfg.is_cleared ? "Y" : "N",
+					    wfm_name ? wfm_name : "AUTO",
 					    fbink_cfg.is_dithered ? "Y" : "N",
 					    fbink_cfg.no_refresh ? "Y" : "N");
 				}
@@ -1094,7 +1095,7 @@ int
 			} else {
 				if (!fbink_cfg.is_quiet) {
 					printf(
-					    "Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, halfway: %s, left padded: %s, right padded: %s, clear screen: %s, dithered: %s, skip refresh: %s, font: %hhu, font scaling: x%hhu)\n",
+					    "Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, halfway: %s, left padded: %s, right padded: %s, clear screen: %s, waveform: %s, dithered: %s, skip refresh: %s, font: %hhu, font scaling: x%hhu)\n",
 					    string,
 					    fbink_cfg.col,
 					    fbink_cfg.hoffset,
@@ -1110,6 +1111,7 @@ int
 					    fbink_cfg.is_padded ? "Y" : "N",
 					    fbink_cfg.is_rpadded ? "Y" : "N",
 					    fbink_cfg.is_cleared ? "Y" : "N",
+					    wfm_name ? wfm_name : "AUTO",
 					    fbink_cfg.is_dithered ? "Y" : "N",
 					    fbink_cfg.no_refresh ? "Y" : "N",
 					    fbink_cfg.fontname,
@@ -1156,7 +1158,7 @@ int
 				    region_width,
 				    region_height,
 				    fbink_cfg.is_flashing ? "a flashing " : "",
-				    wfm_name,
+				    wfm_name ? wfm_name : "AUTO",
 				    region_dither ? region_dither : "PASSTHROUGH");
 			}
 			if (fbink_refresh(fbfd,
@@ -1197,13 +1199,14 @@ int
 		} else if (is_progressbar) {
 			if (!fbink_cfg.is_quiet) {
 				printf(
-				    "Displaying a %hhu%% full progress bar @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, dithered: %s, skip refresh: %s, font: %hhu, font scaling: x%hhu)\n",
+				    "Displaying a %hhu%% full progress bar @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, waveform: %s, dithered: %s, skip refresh: %s, font: %hhu, font scaling: x%hhu)\n",
 				    progress,
 				    fbink_cfg.row,
 				    fbink_cfg.voffset,
 				    fbink_cfg.is_inverted ? "Y" : "N",
 				    fbink_cfg.is_flashing ? "Y" : "N",
 				    fbink_cfg.is_cleared ? "Y" : "N",
+				    wfm_name ? wfm_name : "AUTO",
 				    fbink_cfg.is_dithered ? "Y" : "N",
 				    fbink_cfg.no_refresh ? "Y" : "N",
 				    fbink_cfg.fontname,
@@ -1219,12 +1222,13 @@ int
 			if (is_infinite) {
 				if (!fbink_cfg.is_quiet) {
 					printf(
-					    "Displaying an activity bar cycling forever @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, dithered: %s, skip refresh: %s)\n",
+					    "Displaying an activity bar cycling forever @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, waveform: %s, dithered: %s, skip refresh: %s)\n",
 					    fbink_cfg.row,
 					    fbink_cfg.voffset,
 					    fbink_cfg.is_inverted ? "Y" : "N",
 					    fbink_cfg.is_flashing ? "Y" : "N",
 					    fbink_cfg.is_cleared ? "Y" : "N",
+					    wfm_name ? wfm_name : "AUTO",
 					    fbink_cfg.is_dithered ? "Y" : "N",
 					    fbink_cfg.no_refresh ? "Y" : "N");
 				}
@@ -1239,13 +1243,14 @@ int
 			} else {
 				if (!fbink_cfg.is_quiet) {
 					printf(
-					    "Displaying an activity bar on step %hhu @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, dithered: %s, skip refresh: %s)\n",
+					    "Displaying an activity bar on step %hhu @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, waveform: %s, dithered: %s, skip refresh: %s)\n",
 					    progress,
 					    fbink_cfg.row,
 					    fbink_cfg.voffset,
 					    fbink_cfg.is_inverted ? "Y" : "N",
 					    fbink_cfg.is_flashing ? "Y" : "N",
 					    fbink_cfg.is_cleared ? "Y" : "N",
+					    wfm_name ? wfm_name : "AUTO",
 					    fbink_cfg.is_dithered ? "Y" : "N",
 					    fbink_cfg.no_refresh ? "Y" : "N");
 				}
