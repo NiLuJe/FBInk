@@ -240,9 +240,10 @@ typedef struct
 	uint8_t
 		halign;    // Horizontal alignment of images/dumps (NONE/LEFT, CENTER, EDGE/RIGHT; c.f., ALIGN_INDEX_T enum)
 	uint8_t valign;    // Vertical alignment of images/dumps (NONE/TOP, CENTER, EDGE/BOTTOM; c.f., ALIGN_INDEX_T enum)
-	uint8_t wfm_mode;       // Request a specific waveform mode (c.f., WFM_MODE_INDEX_T enum)
-	bool    is_dithered;    // Request (ordered) hardware dithering (if supported).
-	bool    no_refresh;     // Skip actually refreshing the eInk screen (useful when drawing in batch)
+	uint8_t wfm_mode;        // Request a specific waveform mode (c.f., WFM_MODE_INDEX_T enum)
+	bool    is_dithered;     // Request (ordered) hardware dithering (if supported).
+	bool    is_nightmode;    // Request hardware inversion (if supported/safe). This does *NOT* override is_inverted!
+	bool    no_refresh;      // Skip actually refreshing the eInk screen (useful when drawing in batch)
 } FBInkConfig;
 
 typedef struct
@@ -390,6 +391,9 @@ FBINK_API int fbink_printf(int fbfd, const FBInkOTConfig* cfg, const FBInkConfig
 //			      For Kobo, that's everything since Mk.7,
 //			      For Cervantes, that's everything since the Cervantes 3 (Cervantes 3 & 4).
 //			NOTE: Your device may not support anything other than PASSTHROUGH & ORDERED!
+// is_nightmode:        request HW inversion
+//			NOTE: Only supported on mxcfb (i.e., everything except Legacy Kindles).
+//			      May be disabled on devices where it is known to be crashy.
 // is_flashing:		will ask for a black flash if true
 // NOTE: If you request an empty region (0x0 @ (0, 0), a full-screen refresh will be performed!
 // NOTE: As you've probably guessed, since it doesn't take an FBInkConfig pointer, this *ignores* no_refresh ;)
@@ -404,6 +408,7 @@ FBINK_API int fbink_refresh(int      fbfd,
 			    uint32_t region_height,
 			    uint8_t  waveform_mode,
 			    uint8_t  dithering_mode,
+			    bool     is_nightmode,
 			    bool     is_flashing);
 
 // Returns true if the device appears to be in a quirky framebuffer state that *may* require a reinit to produce sane results.

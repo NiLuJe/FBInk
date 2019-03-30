@@ -1160,6 +1160,7 @@ static int
 		   const struct mxcfb_rect region,
 		   uint32_t                waveform_mode,
 		   uint32_t                update_mode,
+		   bool                    is_nightmode,
 		   uint32_t                marker)
 {
 	struct mxcfb_update_data update = {
@@ -1173,6 +1174,10 @@ static int
 		.flags                   = 0U,
 		.alt_buffer_data         = { 0U },
 	};
+
+	if (is_nightmode && deviceQuirks.canHWInvert) {
+		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
+	}
 
 	int rv;
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
@@ -1228,6 +1233,7 @@ static int
 			uint32_t                waveform_mode,
 			uint32_t                update_mode,
 			int                     dithering_mode,
+			bool                    is_nightmode,
 			uint32_t                marker)
 {
 	struct mxcfb_update_data_koa2 update = {
@@ -1254,6 +1260,10 @@ static int
 		.ts_pxp                  = 0U,
 		.ts_epdc                 = 0U,
 	};
+
+	if (is_nightmode && deviceQuirks.canHWInvert) {
+		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
+	}
 
 	int rv;
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_KOA2, &update);
@@ -1301,6 +1311,7 @@ static int
 		       uint32_t                waveform_mode,
 		       uint32_t                update_mode,
 		       int                     dithering_mode,
+		       bool                    is_nightmode,
 		       uint32_t                marker)
 {
 	// NOTE: Different mcfb_update_data struct (no ts_* debug fields), but otherwise, identical to the KOA2!
@@ -1326,6 +1337,10 @@ static int
 		.hist_bw_waveform_mode   = WAVEFORM_MODE_DU,
 		.hist_gray_waveform_mode = WAVEFORM_MODE_GC16,
 	};
+
+	if (is_nightmode && deviceQuirks.canHWInvert) {
+		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
+	}
 
 	int rv;
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_PW4, &update);
@@ -1373,6 +1388,7 @@ static int
 		      const struct mxcfb_rect region,
 		      uint32_t waveform_mode,
 		      uint32_t update_mode,
+		      bool is_nightmode,
 		      uint32_t marker)
 {
 	struct mxcfb_update_data update = {
@@ -1386,6 +1402,10 @@ static int
 			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
 		.alt_buffer_data = { 0U },
 	};
+
+	if (is_nightmode && deviceQuirks.canHWInvert) {
+		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
+	}
 
 	int rv;
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
@@ -1425,7 +1445,12 @@ static int
 #	else
 // Kobo devices ([Mk3<->Mk6])
 static int
-    refresh_kobo(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode, uint32_t update_mode, uint32_t marker)
+    refresh_kobo(int                     fbfd,
+		 const struct mxcfb_rect region,
+		 uint32_t                waveform_mode,
+		 uint32_t                update_mode,
+		 bool                    is_nightmode,
+		 uint32_t                marker)
 {
 	struct mxcfb_update_data_v1_ntx update = {
 		.update_region = region,
@@ -1438,6 +1463,10 @@ static int
 			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
 		.alt_buffer_data = { 0U },
 	};
+
+	if (is_nightmode && deviceQuirks.canHWInvert) {
+		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
+	}
 
 	int rv;
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V1_NTX, &update);
@@ -1480,6 +1509,7 @@ static int
 		     uint32_t                waveform_mode,
 		     uint32_t                update_mode,
 		     int                     dithering_mode,
+		     bool                    is_nightmode,
 		     uint32_t                marker)
 {
 	struct mxcfb_update_data_v2 update = {
@@ -1499,6 +1529,10 @@ static int
 				       : (waveform_mode == WAVEFORM_MODE_GC4) ? 3 : 7,
 		.alt_buffer_data = { 0U },
 	};
+
+	if (is_nightmode && deviceQuirks.canHWInvert) {
+		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
+	}
 
 	int rv;
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V2, &update);
@@ -1549,6 +1583,7 @@ static int
 	    const struct mxcfb_rect region __attribute__((unused)),
 	    uint32_t                waveform_mode __attribute__((unused)),
 	    int                     dithering_mode __attribute__((unused)),
+	    bool                    is_nightmode __attribute__((unused)),
 	    bool                    is_flashing __attribute__((unused)),
 	    bool                    no_refresh __attribute__((unused)))
 {
@@ -1560,6 +1595,7 @@ static int
 	    const struct mxcfb_rect region,
 	    uint32_t waveform_mode,
 	    int dithering_mode UNUSED_BY_CERVANTES,
+	    bool is_nightmode,
 	    bool is_flashing,
 	    bool no_refresh)
 {
@@ -1616,19 +1652,19 @@ static int
 
 #	if defined(FBINK_FOR_KINDLE)
 	if (deviceQuirks.isKindlePW4) {
-		return refresh_kindle_pw4(fbfd, region, wfm, upm, dithering_mode, marker);
+		return refresh_kindle_pw4(fbfd, region, wfm, upm, dithering_mode, is_nightmode, marker);
 	} else if (deviceQuirks.isKindleOasis2) {
-		return refresh_kindle_koa2(fbfd, region, wfm, upm, dithering_mode, marker);
+		return refresh_kindle_koa2(fbfd, region, wfm, upm, dithering_mode, is_nightmode, marker);
 	} else {
-		return refresh_kindle(fbfd, region, wfm, upm, marker);
+		return refresh_kindle(fbfd, region, wfm, upm, is_nightmode, marker);
 	}
 #	elif defined(FBINK_FOR_CERVANTES)
-	return refresh_cervantes(fbfd, region, wfm, upm, marker);
+	return refresh_cervantes(fbfd, region, wfm, upm, is_nightmode, marker);
 #	else
 	if (deviceQuirks.isKoboMk7) {
-		return refresh_kobo_mk7(fbfd, region, wfm, upm, dithering_mode, marker);
+		return refresh_kobo_mk7(fbfd, region, wfm, upm, dithering_mode, is_nightmode, marker);
 	} else {
-		return refresh_kobo(fbfd, region, wfm, upm, marker);
+		return refresh_kobo(fbfd, region, wfm, upm, is_nightmode, marker);
 	}
 #	endif    // FBINK_FOR_KINDLE
 }
@@ -2671,6 +2707,7 @@ int
 		    region,
 		    get_wfm_mode(fbink_cfg->wfm_mode),
 		    fbink_cfg->is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
 		WARN("Failed to refresh the screen");
@@ -3077,6 +3114,7 @@ int
 		    region,
 		    get_wfm_mode(fbink_cfg->wfm_mode),
 		    fbink_cfg->is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
 		WARN("Failed to refresh the screen");
@@ -4272,6 +4310,7 @@ cleanup:
 			region,
 			get_wfm_mode(fbink_cfg->wfm_mode),
 			is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+			fbink_cfg->is_nightmode,
 			is_flashing,
 			no_refresh);
 	}
@@ -4537,6 +4576,7 @@ int
 		  uint32_t region_height,
 		  uint8_t  waveform_mode,
 		  uint8_t  dithering_mode,
+		  bool     is_nightmode,
 		  bool     is_flashing)
 {
 	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
@@ -4572,7 +4612,7 @@ int
 	}
 
 	int ret;
-	if (EXIT_SUCCESS != (ret = refresh(fbfd, region, region_wfm, region_dither, is_flashing, false))) {
+	if (EXIT_SUCCESS != (ret = refresh(fbfd, region, region_wfm, region_dither, is_nightmode, is_flashing, false))) {
 		WARN("Failed to refresh the screen");
 	}
 
@@ -4867,6 +4907,7 @@ int
 		    region,
 		    get_wfm_mode(fbink_cfg->wfm_mode),
 		    fbink_cfg->is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
 		WARN("Failed to refresh the screen");
@@ -5811,6 +5852,7 @@ static int
 		    region,
 		    get_wfm_mode(fbink_cfg->wfm_mode),
 		    fbink_cfg->is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
 		WARN("Failed to refresh the screen");
@@ -6343,6 +6385,7 @@ int
 		    region,
 		    get_wfm_mode(fbink_cfg->wfm_mode),
 		    fbink_cfg->is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
 		WARN("Failed to refresh the screen");

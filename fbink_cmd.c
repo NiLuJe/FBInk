@@ -80,6 +80,11 @@ static void
 	    "\t\t\t\tNote that specifying a waveform mode is ignored on legacy einkfb devices, because the hardware doesn't expose such capabilities.\n"
 #	endif
 	    "\t-D, --dither\t\tRequest (ordered) hardware dithering from the eInk controller, if supported (mainly useful for images).\n"
+	    "\t-H, --nightmode\t\tRequest full hardware inversion from the eInk controller, if supported.\n"
+#	ifdef FBINK_FOR_KINDLE
+	    "\t\t\t\tNote that requesting nightmode is ignored on legacy einkfb devices, because the hardware doesn't (easily) expose such capabilities.\n"
+#	endif
+	    "\t\t\t\tNote that this may be ignored on some specific devices where is known to be or have been crashy at some point.\n"
 	    "\t-b, --norefresh\t\tOnly update the framebuffer, but don't actually refresh the eInk screen (useful when drawing in batch).\n"
 #endif
 	    "\t-S, --size\t\tOverride the automatic font scaling multiplier (Default: 0, automatic selection, ranging from 1 (no scaling), to 4 (4x upscaling), depending on screen resolution).\n"
@@ -391,6 +396,7 @@ int
 					      { "norefresh", no_argument, NULL, 'b' },
 					      { "dither", no_argument, NULL, 'D' },
 					      { "waveform", required_argument, NULL, 'W' },
+					      { "nightmode", required_argument, NULL, 'H' },
 					      { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_cfg = { 0 };
@@ -478,8 +484,8 @@ int
 	char*     bdit_ot_file   = NULL;
 	bool      errfnd         = false;
 
-	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMprs:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bDW:", opts, &opt_index)) !=
-	       -1) {
+	while ((opt = getopt_long(
+		    argc, argv, "y:x:Y:X:hfcmMprs:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bDW:H:", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				if (strtol_hi(opt, NULL, optarg, &fbink_cfg.row) < 0) {
@@ -980,6 +986,9 @@ int
 				// Remember it in a human-readable format...
 				wfm_name = strdup(optarg);
 				break;
+			case 'H':
+				fbink_cfg.is_nightmode = true;
+				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
 				errfnd = true;
@@ -1049,7 +1058,7 @@ int
 			if (is_truetype) {
 				if (!fbink_cfg.is_quiet) {
 					printf(
-					    "Printing string '%s' @ %hupt, honoring the following margins { Top: %hdpx, Bottom: %hdpx, Left: %hdpx, Right: %hdpx } (formatted: %s, overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, H align: %hhu, halfway: %s, V align: %hhu, clear screen: %s, waveform: %s, dithered: %s, skip refresh: %s)\n",
+					    "Printing string '%s' @ %hupt, honoring the following margins { Top: %hdpx, Bottom: %hdpx, Left: %hdpx, Right: %hdpx } (formatted: %s, overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, H align: %hhu, halfway: %s, V align: %hhu, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s)\n",
 					    string,
 					    ot_config.size_pt,
 					    ot_config.margins.top,
@@ -1069,6 +1078,7 @@ int
 					    fbink_cfg.is_cleared ? "Y" : "N",
 					    wfm_name ? wfm_name : "AUTO",
 					    fbink_cfg.is_dithered ? "Y" : "N",
+					    fbink_cfg.is_nightmode ? "Y" : "N",
 					    fbink_cfg.no_refresh ? "Y" : "N");
 				}
 
@@ -1095,7 +1105,7 @@ int
 			} else {
 				if (!fbink_cfg.is_quiet) {
 					printf(
-					    "Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, halfway: %s, left padded: %s, right padded: %s, clear screen: %s, waveform: %s, dithered: %s, skip refresh: %s, font: %hhu, font scaling: x%hhu)\n",
+					    "Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, halfway: %s, left padded: %s, right padded: %s, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s, font: %hhu, font scaling: x%hhu)\n",
 					    string,
 					    fbink_cfg.col,
 					    fbink_cfg.hoffset,
@@ -1113,6 +1123,7 @@ int
 					    fbink_cfg.is_cleared ? "Y" : "N",
 					    wfm_name ? wfm_name : "AUTO",
 					    fbink_cfg.is_dithered ? "Y" : "N",
+					    fbink_cfg.is_nightmode ? "Y" : "N",
 					    fbink_cfg.no_refresh ? "Y" : "N",
 					    fbink_cfg.fontname,
 					    fbink_cfg.fontmult);
@@ -1152,14 +1163,15 @@ int
 		if (is_refresh) {
 			if (!fbink_cfg.is_quiet) {
 				printf(
-				    "Refreshing the screen from top=%u, left=%u for width=%u, height=%u with %swaveform mode %s and dithering mode %s\n",
+				    "Refreshing the screen from top=%u, left=%u for width=%u, height=%u with %swaveform mode %s and dithering mode %s (nightmode: %s)\n",
 				    region_top,
 				    region_left,
 				    region_width,
 				    region_height,
 				    fbink_cfg.is_flashing ? "a flashing " : "",
 				    wfm_name ? wfm_name : "AUTO",
-				    region_dither ? region_dither : "PASSTHROUGH");
+				    region_dither ? region_dither : "PASSTHROUGH",
+				    fbink_cfg.is_nightmode ? "Y" : "N");
 			}
 			if (fbink_refresh(fbfd,
 					  region_top,
@@ -1168,6 +1180,7 @@ int
 					  region_height,
 					  fbink_cfg.wfm_mode,
 					  region_hwd,
+					  fbink_cfg.is_nightmode,
 					  fbink_cfg.is_flashing) != EXIT_SUCCESS) {
 				fprintf(stderr, "Failed to refresh the screen as per your specification!\n");
 				rv = ERRCODE(EXIT_FAILURE);
@@ -1176,7 +1189,7 @@ int
 		} else if (is_image) {
 			if (!fbink_cfg.is_quiet) {
 				printf(
-				    "Displaying image '%s' @ column %hd + %hdpx, row %hd + %dpx (H align: %hhu, V align: %hhu, inverted: %s, flattened: %s, waveform: %s, dithered: %s, skip refresh: %s)\n",
+				    "Displaying image '%s' @ column %hd + %hdpx, row %hd + %dpx (H align: %hhu, V align: %hhu, inverted: %s, flattened: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s)\n",
 				    image_file,
 				    fbink_cfg.col,
 				    image_x_offset,
@@ -1188,6 +1201,7 @@ int
 				    fbink_cfg.ignore_alpha ? "Y" : "N",
 				    wfm_name ? wfm_name : "AUTO",
 				    fbink_cfg.is_dithered ? "Y" : "N",
+				    fbink_cfg.is_nightmode ? "Y" : "N",
 				    fbink_cfg.no_refresh ? "Y" : "N");
 			}
 			if (fbink_print_image(fbfd, image_file, image_x_offset, image_y_offset, &fbink_cfg) !=
@@ -1199,7 +1213,7 @@ int
 		} else if (is_progressbar) {
 			if (!fbink_cfg.is_quiet) {
 				printf(
-				    "Displaying a %hhu%% full progress bar @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, waveform: %s, dithered: %s, skip refresh: %s, font: %hhu, font scaling: x%hhu)\n",
+				    "Displaying a %hhu%% full progress bar @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s, font: %hhu, font scaling: x%hhu)\n",
 				    progress,
 				    fbink_cfg.row,
 				    fbink_cfg.voffset,
@@ -1208,6 +1222,7 @@ int
 				    fbink_cfg.is_cleared ? "Y" : "N",
 				    wfm_name ? wfm_name : "AUTO",
 				    fbink_cfg.is_dithered ? "Y" : "N",
+				    fbink_cfg.is_nightmode ? "Y" : "N",
 				    fbink_cfg.no_refresh ? "Y" : "N",
 				    fbink_cfg.fontname,
 				    fbink_cfg.fontmult);
@@ -1222,7 +1237,7 @@ int
 			if (is_infinite) {
 				if (!fbink_cfg.is_quiet) {
 					printf(
-					    "Displaying an activity bar cycling forever @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, waveform: %s, dithered: %s, skip refresh: %s)\n",
+					    "Displaying an activity bar cycling forever @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s)\n",
 					    fbink_cfg.row,
 					    fbink_cfg.voffset,
 					    fbink_cfg.is_inverted ? "Y" : "N",
@@ -1230,6 +1245,7 @@ int
 					    fbink_cfg.is_cleared ? "Y" : "N",
 					    wfm_name ? wfm_name : "AUTO",
 					    fbink_cfg.is_dithered ? "Y" : "N",
+					    fbink_cfg.is_nightmode ? "Y" : "N",
 					    fbink_cfg.no_refresh ? "Y" : "N");
 				}
 				// NOTE: In a dedicated function,
@@ -1243,7 +1259,7 @@ int
 			} else {
 				if (!fbink_cfg.is_quiet) {
 					printf(
-					    "Displaying an activity bar on step %hhu @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, waveform: %s, dithered: %s, skip refresh: %s)\n",
+					    "Displaying an activity bar on step %hhu @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s)\n",
 					    progress,
 					    fbink_cfg.row,
 					    fbink_cfg.voffset,
@@ -1252,6 +1268,7 @@ int
 					    fbink_cfg.is_cleared ? "Y" : "N",
 					    wfm_name ? wfm_name : "AUTO",
 					    fbink_cfg.is_dithered ? "Y" : "N",
+					    fbink_cfg.is_nightmode ? "Y" : "N",
 					    fbink_cfg.no_refresh ? "Y" : "N");
 				}
 				if (fbink_print_activity_bar(fbfd, progress, &fbink_cfg) != EXIT_SUCCESS) {
