@@ -4312,7 +4312,7 @@ cleanup:
 		}
 		refresh(fbfd,
 			region,
-			wfm_mode,
+			get_wfm_mode(wfm_mode),
 			is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
 			is_nightmode,
 			is_flashing,
