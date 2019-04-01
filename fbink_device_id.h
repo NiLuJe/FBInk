@@ -81,6 +81,7 @@ static void identify_cervantes(void);
 // what we get in the NTXHWConfig payload @ index KOBO_HWCFG_CPU corresponds to an index in this array.
 // Can thankfully be populated from /bin/ntx_hwconfig with the help of strings and a bit of sed, i.e.,
 // sed -re 's/(^)(.*?)($)/"\2",/g' PCB_IDs.txt
+// Double-check w/ ntx_hwconfig -l -s /dev/mmcblk0
 // NOTE: Last updated on 10/27/18, from FW 4.11.11911
 //       Last checked against FW 4.12.12111 on 12/03/18
 /*
