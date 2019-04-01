@@ -82,7 +82,7 @@ static void identify_cervantes(void);
 // Can thankfully be populated from /bin/ntx_hwconfig with the help of strings -n2 and a bit of sed, i.e.,
 // sed -re 's/(^)(.*?)($)/"\2",/g' PCB_IDs.txt
 // Double-check w/ ntx_hwconfig -l -s /dev/mmcblk0
-// NOTE: Last updated on 10/27/18, from FW 4.11.11911
+// NOTE: Last updated on 10/27/18, from FW 4.11.11911 (NTX HwConfig v3.1.6.29.234-20180213)
 //       Last checked against FW 4.12.12111 on 12/03/18
 /*
 static const char* kobo_pcbs[] = { "E60800", "E60810", "E60820", "E90800",  "E90810",  "E60830",  "E60850", "E50800",
@@ -107,24 +107,21 @@ static const unsigned short int kobo_ids[] = { 0, 0, 0,   0,   0,   0,   0, 0,  
 
 // Same idea, but for the various NTX/Kobo Display Panels...
 /*
-static const char* kobo_disp_panel[] = { "6\" Left EPD",      "6\" Right EPD",     "9\" Right EPD",    "5\" Left EPD",
-					 "5\" Right EPD",     "6\" Top EPD",       "6\" Bottom EPD",   "5\" Top EPD",
-					 "5\" Bottom EPD",    "6.8\" Top EPD",     "6.8\" Bottom EPD", "13.3\" Left EPD",
-					 "13.3\" Right EPD",  "13.3\" Bottom EPD", "13.3\" Top EPD",   "7.8\" Bottom EPD",
-					 "7.8\" Top EPD",     "7.8\" Left EPD",    "7.8\" Right EPD",  "7.3\" Bottom EPD",
-					 "7.3\" Top EPD",     "7.3\" Left EPD",    "7.3\" Right EPD",  "4.7\" Bottom EPD",
-					 "4.7\" Top EPD",     "4.7\" Left EPD",    "4.7\" Right EPD",  "10.3\" Top EPD",
-					 "10.3\" Bottom EPD", "10.3\" Left EPD",   "10.3\" Right EPD", "8\" Bottom EPD",
-					 "8\" Top EPD",       "8\" Left EPD",      "8\" Right EPD" };
+static const char* kobo_disp_panel[] = { "6\" Left EPD",     "6\" Right EPD",     "9\" Right EPD",     "5\" Left EPD",
+					 "5\" Right EPD",    "6\" Top EPD",       "6\" Bottom EPD",    "5\" Top EPD",
+					 "5\" Bottom EPD",   "6.8\" Top EPD",     "6.8\" Bottom EPD",  "NC",
+					 "13.3\" Left EPD",  "13.3\" Right EPD",  "13.3\" Bottom EPD", "13.3\" Top EPD",
+					 "7.8\" Bottom EPD", "7.8\" Top EPD",     "7.8\" Left EPD",    "7.8\" Right EPD",
+					 "7.3\" Bottom EPD", "7.3\" Top EPD",     "7.3\" Left EPD",    "7.3\" Right EPD",
+					 "4.7\" Bottom EPD", "4.7\" Top EPD",     "4.7\" Left EPD",    "4.7\" Right EPD",
+					 "10.3\" Top EPD",   "10.3\" Bottom EPD", "10.3\" Left EPD",   "10.3\" Right EPD",
+					 "8\" Bottom EPD",   "8\" Top EPD",       "8\" Left EPD",      "8\" Right EPD" };
 */
-
 // And for the various NTX/Kobo CPUs...
 /*
-static const char* kobo_cpus[] = {
-	"mx35", "m166e", "mx50", "mx6sl", "it8951", "i386", "mx7d", "mx6ull", "mx6sll", "mx6dl"
-};
+static const char* kobo_cpus[] = { "mx35",   "m166e", "mx50", "x86",    "mx6",    "mx6sl",
+				   "it8951", "i386",  "mx7d", "mx6ull", "mx6sll", "mx6dl" };
 */
-
 // And for the various NTX/Kobo Display Resolutions...
 /*
 static const char* kobo_disp_res[] = { "800x600",   "1024x758",   "1024x768",    "1440x1080", "1366x768",

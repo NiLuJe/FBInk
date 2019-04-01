@@ -668,8 +668,8 @@ static void
 				// And now for the fun part, the few device variants that use the same PCB ID...
 				if (kobo_id == 374 || kobo_id == 375) {
 					// Discriminate the Mk.7 version for dual rev models by checking the CPU...
-					// NOTE: kobo_cpus[8] == "mx6sll"
-					if (payload[KOBO_HWCFG_CPU] == 8) {
+					// NOTE: kobo_cpus[10] == "mx6sll"
+					if (payload[KOBO_HWCFG_CPU] == 10) {
 						// Thankfully, that works for both the H2O² (374 -> 378),
 						// and the Aura SE (375 -> 379) ;)
 						kobo_id = (unsigned short int) (kobo_id + 4U);
