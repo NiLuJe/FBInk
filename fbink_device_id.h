@@ -79,7 +79,7 @@ static void identify_cervantes(void);
 #        else
 // List of NTX/Kobo PCB IDs... For a given device,
 // what we get in the NTXHWConfig payload @ index KOBO_HWCFG_CPU corresponds to an index in this array.
-// Can thankfully be populated from /bin/ntx_hwconfig with the help of strings and a bit of sed, i.e.,
+// Can thankfully be populated from /bin/ntx_hwconfig with the help of strings -n2 and a bit of sed, i.e.,
 // sed -re 's/(^)(.*?)($)/"\2",/g' PCB_IDs.txt
 // Double-check w/ ntx_hwconfig -l -s /dev/mmcblk0
 // NOTE: Last updated on 10/27/18, from FW 4.11.11911
@@ -92,18 +92,18 @@ static const char* kobo_pcbs[] = { "E60800", "E60810", "E60820", "E90800",  "E90
 				   "E60Q10", "E60Q20", "E606F0", "E606F0B", "E60Q30",  "E60QB0",  "E60QC0", "A13120",
 				   "E60Q50", "E606G0", "E60Q60", "E60Q80",  "A13130",  "E606H2",  "E60Q90", "ED0Q00",
 				   "E60QA0", "E60QD0", "E60QF0", "E60QH0",  "E60QG0",  "H70000",  "ED0Q10", "E70Q00",
-				   "H40000", "E60QJ0", "E60QL0", "E60QM0",  "E60QK0",  "E70S00",  "T60Q00", "C31Q00",
-				   "E60QN0", "E60U00", "E70Q10", "E60QP0",  "E60QQ0",  "E70Q20",  "T05R00", "M31Q00",
-				   "E60U10", "E60K00", "E80K00", "E70Q30",  "EA0Q00",  "E60R00" };
+				   "H40000", "NC",     "E60QJ0", "E60QL0",  "E60QM0",  "E60QK0",  "E70S00", "T60Q00",
+				   "C31Q00", "E60QN0", "E60U00", "E70Q10",  "E60QP0",  "E60QQ0",  "E70Q20", "T05R00",
+				   "M31Q00", "E60U10", "E60K00", "E80K00",  "E70Q30",  "EA0Q00",  "E60R00" };
 */
 // And match (more or less accurately, for some devices) that to what we've come to know as a device code,
 // because that's what we actually care about...
 // c.f., tools/pcb_to_ids.py
-static const unsigned short int kobo_ids[] = { 0, 0,   0,   0,   0,   0,   0, 0,   0,   0,   0,   0,   310, 0, 0,   0,
-					       0, 0,   0,   0,   310, 310, 0, 0,   330, 0,   0,   340, 350, 0, 0,   0,
-					       0, 0,   360, 360, 0,   330, 0, 0,   0,   370, 0,   0,   0,   0, 371, 0,
-					       0, 0,   0,   0,   0,   0,   0, 373, 0,   0,   375, 374, 0,   0, 375, 0,
-					       0, 375, 0,   0,   0,   0,   0, 0,   376, 376, 377, 0,   0,   0 };
+static const unsigned short int kobo_ids[] = { 0, 0, 0,   0,   0,   0,   0, 0,   0,   0,   0,   0,   310, 0, 0,   0,
+					       0, 0, 0,   0,   310, 310, 0, 0,   330, 0,   0,   340, 350, 0, 0,   0,
+					       0, 0, 360, 360, 0,   330, 0, 0,   0,   370, 0,   0,   0,   0, 371, 0,
+					       0, 0, 0,   0,   0,   0,   0, 373, 0,   0,   0,   375, 374, 0, 0,   375,
+					       0, 0, 375, 0,   0,   0,   0, 0,   0,   376, 376, 380, 0,   0, 0 };
 
 // Same idea, but for the various NTX/Kobo Display Panels...
 /*
