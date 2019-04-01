@@ -26,7 +26,7 @@ static const uint8_t utf8d[] = {
 //       FWIW, I'm not seeing a noticeable shift in performance on ARM with my GCC 7 TCs.
 //       And more importantly, the original version was crashy on x86_64 (GCC 8.2) ;).
 inline static uint8_t
-    decode(uint8_t* state, uint32_t* codep, uint8_t byte)
+    decode(uint8_t* restrict state, uint32_t* restrict codep, uint8_t byte)
 {
 	uint8_t type = utf8d[byte];
 
@@ -38,7 +38,7 @@ inline static uint8_t
 
 // Same as decode, but without actually decoding the codepoints, because that's unneeded for validation/accounting
 inline static uint8_t
-    check(uint8_t* state, uint8_t byte)
+    check(uint8_t* restrict state, uint8_t byte)
 {
 	uint8_t type = utf8d[byte];
 
@@ -47,7 +47,7 @@ inline static uint8_t
 }
 
 inline static int
-    count_codepoints(const char* str, size_t* count)
+    count_codepoints(const char* restrict str, size_t* restrict count)
 {
 	uint8_t state = 0;
 
@@ -61,7 +61,7 @@ inline static int
 
 // And now what we actually expose...
 size_t
-    u8_strlen2(const char* str)
+    u8_strlen2(const char* restrict str)
 {
 	size_t count = 0;
 
@@ -74,7 +74,7 @@ size_t
 }
 
 bool
-    u8_isvalid2(const char* str)
+    u8_isvalid2(const char* restrict str)
 {
 	uint8_t state = 0;
 
@@ -88,7 +88,7 @@ bool
 // Take a stab at reimplementing u8_nextchar with the dfa decoder...
 // NOTE: For shit'n giggles, libunibreak also has its own next_char implementation... (ub_get_next_char_utf8 @ unibreakdef.c)
 uint32_t
-    u8_nextchar2(const char* s, size_t* i)
+    u8_nextchar2(const char* restrict s, size_t* restrict i)
 {
 
 	uint32_t ch    = 0;

@@ -23,7 +23,7 @@
 #define UEOF ((uint32_t) -1)
 
 /* returns length of next utf-8 sequence */
-size_t u8_seqlen(const char* s) __attribute__((pure));
+size_t u8_seqlen(const char* restrict s) __attribute__((pure));
 
 /* returns the # of bytes needed to encode a certain character */
 size_t u8_charlen(uint32_t ch) __attribute__((const));

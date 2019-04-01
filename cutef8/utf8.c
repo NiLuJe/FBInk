@@ -30,7 +30,7 @@ static const unsigned char trailingBytesForUTF8[256] = {
 
 /* returns length of next utf-8 sequence */
 size_t
-    u8_seqlen(const char* s)
+    u8_seqlen(const char* restrict s)
 {
 	return trailingBytesForUTF8[(unsigned int) (unsigned char) s[0]] + 1U;
 }
@@ -342,13 +342,13 @@ size_t
 }
 
 void
-    u8_inc(const char* s, size_t* i)
+    u8_inc(const char* restrict s, size_t* restrict i)
 {
 	(void) (isutf(s[++(*i)]) || isutf(s[++(*i)]) || isutf(s[++(*i)]) || ++(*i));
 }
 
 void
-    u8_dec(const char* s, size_t* i)
+    u8_dec(const char* restrict s, size_t* restrict i)
 {
 	(void) (isutf(s[--(*i)]) || isutf(s[--(*i)]) || isutf(s[--(*i)]) || --(*i));
 }

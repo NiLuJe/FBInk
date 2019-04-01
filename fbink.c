@@ -919,8 +919,8 @@ static struct mxcfb_rect
 			x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
 
 			// Get the glyph's pixmap (width <= 8 -> uint8_t)
-			const unsigned char* bitmap = NULL;
-			bitmap                      = (*fxpFont8xGetBitmap)(ch);
+			const unsigned char* restrict bitmap = NULL;
+			bitmap                               = (*fxpFont8xGetBitmap)(ch);
 
 			// Crappy macro to avoid repeating myself in each branch...
 #define RENDER_GLYPH()                                                                                                   \
@@ -1033,8 +1033,8 @@ static struct mxcfb_rect
 			x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
 
 			// Get the glyph's pixmap (width <= 16 -> uint16_t)
-			const uint16_t* bitmap = NULL;
-			bitmap                 = (*fxpFont16xGetBitmap)(ch);
+			const uint16_t* restrict bitmap = NULL;
+			bitmap                          = (*fxpFont16xGetBitmap)(ch);
 
 			// Render, scale & plot!
 			RENDER_GLYPH();
@@ -1055,8 +1055,8 @@ static struct mxcfb_rect
 			x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
 
 			// Get the glyph's pixmap (width <= 32 -> uint32_t)
-			const uint32_t* bitmap = NULL;
-			bitmap                 = (*fxpFont32xGetBitmap)(ch);
+			const uint32_t* restrict bitmap = NULL;
+			bitmap                          = (*fxpFont32xGetBitmap)(ch);
 
 			// Render, scale & plot!
 			RENDER_GLYPH();
@@ -1078,7 +1078,7 @@ static struct mxcfb_rect
 			x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
 
 			// Get the glyph's pixmap (width <= 64 -> uint64_t)
-			const uint64_t* bitmap = NULL;
+			const uint64_t* restrict bitmap = NULL;
 			bitmap = (*fxpFont64xGetBitmap)(ch);
 
 			// Render, scale & plot!
@@ -2363,8 +2363,8 @@ int
 
 	otInit = true;
 	// Open font from given path, and load into buffer
-	FILE*          f    = fopen(filename, "r" STDIO_CLOEXEC);
-	unsigned char* data = NULL;
+	FILE*          f             = fopen(filename, "r" STDIO_CLOEXEC);
+	unsigned char* restrict data = NULL;
 	if (!f) {
 		char  buf[256];
 		char* errstr = strerror_r(errno, buf, sizeof(buf));
@@ -2760,7 +2760,7 @@ int
 	// Assume success, until shit happens ;)
 	int rv = EXIT_SUCCESS;
 	// We need to declare this early (& sentinel it to NULL) to make our cleanup jumps safe
-	char* line = NULL;
+	char* restrict line = NULL;
 
 	// map fb to user mem
 	// NOTE: If we're keeping the fb's fd open, keep this mmap around, too.
@@ -3209,10 +3209,10 @@ int
 	// Rely on vsnprintf itself to tell us exactly how many bytes it needs ;).
 	// c.f., vsnprintf(3) && stdarg(3) && https://stackoverflow.com/q/10069597
 	// (especially as far as the va_start/va_end bracketing is concerned)
-	int     ret    = -1;
-	size_t  size   = 0;
-	char*   buffer = NULL;
-	va_list args;
+	int    ret            = -1;
+	size_t size           = 0;
+	char* restrict buffer = NULL;
+	va_list        args;
 
 	// Initial vsnprintf run on a zero length NULL pointer, just to determine the required buffer size
 	// NOTE: see vsnprintf(3), this is a C99 behavior made canon in POSIX.1-2001, honored since glibc 2.1
@@ -3325,11 +3325,11 @@ int
 	int rv = EXIT_SUCCESS;
 
 	// Declare buffers early to make cleanup easier
-	FBInkOTLine*   lines      = NULL;
-	char*          brk_buff   = NULL;
-	unsigned char* fmt_buff   = NULL;
-	unsigned char* line_buff  = NULL;
-	unsigned char* glyph_buff = NULL;
+	FBInkOTLine* restrict lines        = NULL;
+	char* restrict brk_buff            = NULL;
+	unsigned char* restrict fmt_buff   = NULL;
+	unsigned char*          line_buff  = NULL;
+	unsigned char*          glyph_buff = NULL;
 	// This also needs to be declared early, as we refresh on cleanup.
 	struct mxcfb_rect region       = { 0U };
 	bool              is_flashing  = false;
@@ -3417,7 +3417,7 @@ int
 	unsigned int font_size_px = (unsigned int) (ppi / 72.0f * size_pt);
 
 	// This is a pointer to whichever font is currently active. It gets updated for every character in the loop, as needed.
-	stbtt_fontinfo* curr_font = NULL;
+	stbtt_fontinfo* restrict curr_font = NULL;
 
 	int max_row_height = 0;
 	// Calculate some metrics for every font we have loaded.
@@ -3853,11 +3853,11 @@ int
 		clear_screen(fbfd, bgcolor, is_flashing);
 	}
 
-	uint32_t           tmp_c;
-	int                tmp_gi;
-	unsigned char*     lnPtr = NULL;
-	unsigned char*     glPtr = NULL;
-	unsigned short int start_x;
+	uint32_t       tmp_c;
+	int            tmp_gi;
+	unsigned char* restrict lnPtr = NULL;
+	unsigned char* restrict glPtr = NULL;
+	unsigned short int      start_x;
 
 	bool abort_line = false;
 	// Render!
