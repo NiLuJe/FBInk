@@ -52,7 +52,7 @@ static bool wait_for_background_color(uint8_t, unsigned short int, unsigned shor
 static bool is_on_connected_screen(void);
 static bool is_on_home_screen(void);
 static bool is_on_import_screen(void);
-static int  generate_button_press(FBInkCoordinates*, bool);
+static int  generate_button_press(FBInkCoordinates* restrict, bool);
 #endif
 
 #endif

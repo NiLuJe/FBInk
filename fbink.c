@@ -88,7 +88,7 @@ const char*
 
 // Helper functions to 'plot' a specific pixel in a given color to the framebuffer
 static void
-    put_pixel_Gray4(const FBInkCoordinates* coords, const FBInkColor* color)
+    put_pixel_Gray4(const FBInkCoordinates* restrict coords, const FBInkColor* restrict color)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x / 2 as every byte holds 2 pixels
@@ -112,7 +112,7 @@ static void
 }
 
 static void
-    put_pixel_Gray8(const FBInkCoordinates* coords, const FBInkColor* color)
+    put_pixel_Gray8(const FBInkCoordinates* restrict coords, const FBInkColor* restrict color)
 {
 	// calculate the pixel's byte offset inside the buffer
 	size_t pix_offset = coords->x + coords->y * fInfo.line_length;
@@ -122,7 +122,7 @@ static void
 }
 
 static void
-    put_pixel_RGB24(const FBInkCoordinates* coords, const FBInkColor* color)
+    put_pixel_RGB24(const FBInkCoordinates* restrict coords, const FBInkColor* restrict color)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 3 as every pixel is 3 consecutive bytes
@@ -135,7 +135,7 @@ static void
 }
 
 static void
-    put_pixel_RGB32(const FBInkCoordinates* coords, const FBInkColor* color)
+    put_pixel_RGB32(const FBInkCoordinates* restrict coords, const FBInkColor* restrict color)
 {
 	// NOTE: We retrofitted a bit of union magic implemented for fbink_print_image for a small performance bump :)
 	FBInkPixelBGRA px;
@@ -159,7 +159,7 @@ static void
 }
 
 static void
-    put_pixel_RGB565(const FBInkCoordinates* coords, const FBInkColor* color)
+    put_pixel_RGB565(const FBInkCoordinates* restrict coords, const FBInkColor* restrict color)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 2 as every pixel is 2 consecutive bytes
@@ -179,7 +179,7 @@ static void
 #ifndef FBINK_FOR_KINDLE
 // Handle rotation quirks...
 static void
-    rotate_coordinates_pickel(FBInkCoordinates* coords)
+    rotate_coordinates_pickel(FBInkCoordinates* restrict coords)
 {
 	// Rotate the coordinates to account for pickel's rotation...
 	unsigned short int rx = coords->y;
@@ -235,7 +235,7 @@ static void
 }
 
 static void
-    rotate_coordinates_boot(FBInkCoordinates* coords)
+    rotate_coordinates_boot(FBInkCoordinates* restrict coords)
 {
 	// Rotate the coordinates to account for the native boot rotation...
 	// NOTE: See the note is fbink_init, this is based on a replicated boot modeset,
@@ -249,7 +249,7 @@ static void
 
 #	ifdef FBINK_WITH_BUTTON_SCAN
 static void
-    rotate_touch_coordinates(FBInkCoordinates* coords)
+    rotate_touch_coordinates(FBInkCoordinates* restrict coords)
 {
 	unsigned short int rx = coords->x;
 	unsigned short int ry = coords->y;
@@ -325,7 +325,7 @@ static void
 #endif            // !FBINK_FOR_KINDLE
 
 static void
-    rotate_coordinates_nop(FBInkCoordinates* coords __attribute__((unused)))
+    rotate_coordinates_nop(FBInkCoordinates* restrict coords __attribute__((unused)))
 {
 	// NOP!
 	// May be smarter than one might think on armv7-a,
@@ -338,7 +338,7 @@ static void
 
 // Handle a few sanity checks...
 static void
-    put_pixel(FBInkCoordinates coords, const FBInkColor* color)
+    put_pixel(FBInkCoordinates coords, const FBInkColor* restrict color)
 {
 	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
 	(*fxpRotateCoords)(&coords);
@@ -370,7 +370,7 @@ static void
 // as well as KOReader's routines
 //       (https://github.com/koreader/koreader-base/blob/b3e72affd0e1ba819d92194b229468452c58836f/ffi/blitbuffer.lua#L292)
 static void
-    get_pixel_Gray4(const FBInkCoordinates* coords, FBInkColor* color)
+    get_pixel_Gray4(const FBInkCoordinates* restrict coords, FBInkColor* restrict color)
 {
 	// NOTE: Expand 4bpp to 8bpp:
 	// (v * 0x11)
@@ -404,7 +404,7 @@ static void
 }
 
 static void
-    get_pixel_Gray8(const FBInkCoordinates* coords, FBInkColor* color)
+    get_pixel_Gray8(const FBInkCoordinates* restrict coords, FBInkColor* restrict color)
 {
 	// calculate the pixel's byte offset inside the buffer
 	size_t pix_offset = coords->x + coords->y * fInfo.line_length;
@@ -413,7 +413,7 @@ static void
 }
 
 static void
-    get_pixel_RGB24(const FBInkCoordinates* coords, FBInkColor* color)
+    get_pixel_RGB24(const FBInkCoordinates* restrict coords, FBInkColor* restrict color)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 3 as every pixel is 3 consecutive bytes
@@ -425,7 +425,7 @@ static void
 }
 
 static void
-    get_pixel_RGB32(const FBInkCoordinates* coords, FBInkColor* color)
+    get_pixel_RGB32(const FBInkCoordinates* restrict coords, FBInkColor* restrict color)
 {
 	// NOTE: We retrofitted a bit of union magic implemented for fbink_print_image for a noticeable performance bump :)
 	FBInkPixelBGRA px;
@@ -446,7 +446,7 @@ static void
 }
 
 static void
-    get_pixel_RGB565(const FBInkCoordinates* coords, FBInkColor* color)
+    get_pixel_RGB565(const FBInkCoordinates* restrict coords, FBInkColor* restrict color)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 2 as every pixel is 2 consecutive bytes
@@ -478,7 +478,7 @@ static void
 
 // Handle a few sanity checks...
 static void
-    get_pixel(FBInkCoordinates coords, FBInkColor* color)
+    get_pixel(FBInkCoordinates coords, FBInkColor* restrict color)
 {
 	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
 	(*fxpRotateCoords)(&coords);
@@ -510,7 +510,7 @@ static void
 	      unsigned short int y,
 	      unsigned short int w,
 	      unsigned short int h,
-	      const FBInkColor*  color)
+	      const FBInkColor* restrict color)
 {
 	FBInkCoordinates coords = { 0U };
 	for (unsigned short int cy = 0U; cy < h; cy++) {
@@ -665,12 +665,12 @@ static const char*
 
 // Helper function for drawing
 static struct mxcfb_rect
-    draw(const char*        text,
-	 unsigned short int row,
-	 unsigned short int col,
-	 unsigned short int multiline_offset,
-	 bool               halfcell_offset,
-	 const FBInkConfig* fbink_cfg)
+    draw(const char* restrict text,
+	 unsigned short int   row,
+	 unsigned short int   col,
+	 unsigned short int   multiline_offset,
+	 bool                 halfcell_offset,
+	 const FBInkConfig* restrict fbink_cfg)
 {
 	LOG("Printing '%s' @ line offset %hu (meaning row %hu)",
 	    text,
@@ -1688,7 +1688,7 @@ int
 
 // Internal version of this which keeps track of whether we were fed an already opened fd or not...
 static int
-    open_fb_fd(int* fbfd, bool* keep_fd)
+    open_fb_fd(int* restrict fbfd, bool* restrict keep_fd)
 {
 	if (*fbfd == FBFD_AUTO) {
 		// If we're opening a fd now, don't keep it around.
@@ -1706,7 +1706,7 @@ static int
 // NOTE: Only use this for functions that don't actually need to write to the fb, and only need an fd for ioctls!
 //       Generally, those won't try to mmap the fb either ;).
 static int
-    open_fb_fd_nonblock(int* fbfd, bool* keep_fd)
+    open_fb_fd_nonblock(int* restrict fbfd, bool* restrict keep_fd)
 {
 	if (*fbfd == FBFD_AUTO) {
 		// If we're opening a fd now, don't keep it around.
@@ -1741,7 +1741,7 @@ static const char*
 
 // Get the various fb info & setup global variables
 static int
-    initialize_fbink(int fbfd, const FBInkConfig* fbink_cfg, bool skip_vinfo)
+    initialize_fbink(int fbfd, const FBInkConfig* restrict fbink_cfg, bool skip_vinfo)
 {
 	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
 	bool keep_fd = true;
@@ -2331,7 +2331,7 @@ cleanup:
 
 // And that's how we expose it to the API ;)
 int
-    fbink_init(int fbfd, const FBInkConfig* fbink_cfg)
+    fbink_init(int fbfd, const FBInkConfig* restrict fbink_cfg)
 {
 	// Don't skip any ioctls on a first init ;)
 	return initialize_fbink(fbfd, fbink_cfg, false);
@@ -2463,7 +2463,7 @@ int
 #ifdef FBINK_WITH_OPENTYPE
 // Free an individual OpenType font structure
 static void*
-    free_ot_font(stbtt_fontinfo* font_info)
+    free_ot_font(stbtt_fontinfo* restrict font_info)
 {
 	if (font_info) {
 		free(font_info->data);    // This is the font data we loaded
@@ -2528,7 +2528,7 @@ void
 
 // Dump a few of our internal state variables to the FBInkState struct pointed to by fbink_state
 void
-    fbink_get_state(const FBInkConfig* fbink_cfg, FBInkState* fbink_state)
+    fbink_get_state(const FBInkConfig* restrict fbink_cfg, FBInkState* restrict fbink_state)
 {
 	if (fbink_state) {
 		fbink_state->user_hz       = USER_HZ;
@@ -2635,7 +2635,7 @@ int
 // c.f., adjust_coordinates @ drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c
 #ifndef FBINK_FOR_KINDLE
 static void
-    rotate_region_pickel(struct mxcfb_rect* region)
+    rotate_region_pickel(struct mxcfb_rect* restrict region)
 {
 	// Rotate the region to account for pickel's rotation...
 	struct mxcfb_rect oregion = *region;
@@ -2647,7 +2647,7 @@ static void
 }
 
 static void
-    rotate_region_boot(struct mxcfb_rect* region)
+    rotate_region_boot(struct mxcfb_rect* restrict region)
 {
 	// Rotate the region to account for the native boot rotation...
 	struct mxcfb_rect oregion = *region;
@@ -2660,14 +2660,14 @@ static void
 #endif    // !FBINK_FOR_KINDLE
 
 static void
-    rotate_region_nop(struct mxcfb_rect* region __attribute__((unused)))
+    rotate_region_nop(struct mxcfb_rect* restrict region __attribute__((unused)))
 {
 	// NOP! See rotate_coordinates_nop for the rationale ;)
 }
 
 // Tweak the region to cover the full screen
 static void
-    fullscreen_region(struct mxcfb_rect* region)
+    fullscreen_region(struct mxcfb_rect* restrict region)
 {
 	region->top    = 0U;
 	region->left   = 0U;
@@ -2677,7 +2677,7 @@ static void
 
 // Do a full-screen clear, eInk refresh included
 int
-    fbink_cls(int fbfd, const FBInkConfig* fbink_cfg)
+    fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg)
 {
 	// If we open a fd now, we'll only keep it open for this single call!
 	// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
@@ -2729,7 +2729,7 @@ cleanup:
 
 // Magic happens here!
 int
-    fbink_print(int fbfd, const char* string, const FBInkConfig* fbink_cfg)
+    fbink_print(int fbfd, const char* restrict string, const FBInkConfig* fbink_cfg)
 {
 	// Abort if we were passed an empty string
 	if (!*string) {
@@ -3145,7 +3145,7 @@ cleanup:
 // This is ***bold italic*** text.
 // As well as their underscore equivalents
 static void
-    parse_simple_md(const char* string, size_t size, unsigned char* result)
+    parse_simple_md(const char* restrict string, size_t size, unsigned char* restrict result)
 {
 	size_t ci = 0;
 	char   ch;
@@ -3200,7 +3200,7 @@ static void
 
 // printf-like wrapper around fbink_print & fbink_print_ot ;).
 int
-    fbink_printf(int fbfd, const FBInkOTConfig* cfg, const FBInkConfig* fbink_cfg, const char* fmt, ...)
+    fbink_printf(int fbfd, const FBInkOTConfig* restrict cfg, const FBInkConfig* restrict fbink_cfg, const char* fmt, ...)
 {
 	// Assume success, until shit happens ;)
 	int rv = EXIT_SUCCESS;
@@ -3279,9 +3279,9 @@ cleanup:
 
 int
     fbink_print_ot(int fbfd    UNUSED_BY_MINIMAL,
-		   const char* string   UNUSED_BY_MINIMAL,
-		   const FBInkOTConfig* cfg UNUSED_BY_MINIMAL,
-		   const FBInkConfig* fbink_cfg UNUSED_BY_MINIMAL)
+		   const char* restrict string UNUSED_BY_MINIMAL,
+		   const FBInkOTConfig* restrict cfg UNUSED_BY_MINIMAL,
+		   const FBInkConfig* restrict fbink_cfg UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_OPENTYPE
 	// Abort if we were passed an empty string
@@ -4579,7 +4579,7 @@ int
 		  uint32_t           region_width,
 		  uint32_t           region_height,
 		  uint8_t            dithering_mode,
-		  const FBInkConfig* fbink_cfg)
+		  const FBInkConfig* restrict fbink_cfg)
 {
 	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
 	bool keep_fd = true;
@@ -4647,7 +4647,7 @@ bool
 //           (f.g., Plato relies on HW rotation, and KOReader may change the bitdepth).
 //       TL;DR: We now monitor *any* change in bitdepth and/or rotation.
 int
-    fbink_reinit(int fbfd UNUSED_BY_KINDLE, const FBInkConfig* fbink_cfg UNUSED_BY_KINDLE)
+    fbink_reinit(int fbfd UNUSED_BY_KINDLE, const FBInkConfig* restrict fbink_cfg UNUSED_BY_KINDLE)
 {
 #ifndef FBINK_FOR_KINDLE
 	// So, we're concerned with stuff that affects the logical & physical layout, namely, bitdepth & rotation.
@@ -4700,7 +4700,7 @@ cleanup:
 
 // Handle drawing both types of progress bars
 int
-    draw_progress_bars(int fbfd, bool is_infinite, uint8_t value, const FBInkConfig* fbink_cfg)
+    draw_progress_bars(int fbfd, bool is_infinite, uint8_t value, const FBInkConfig* restrict fbink_cfg)
 {
 	const uint8_t invert  = fbink_cfg->is_inverted ? 0xFF : 0U;
 	const uint8_t fgcolor = penFGColor ^ invert;
@@ -4922,7 +4922,7 @@ int
 
 // Draw a full-width progress bar
 int
-    fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInkConfig* caller_fbink_cfg)
+    fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInkConfig* restrict caller_fbink_cfg)
 {
 	// Open the framebuffer if need be...
 	// NOTE: As usual, we *expect* to be initialized at this point!
@@ -4975,7 +4975,7 @@ cleanup:
 
 // Draw a full-width activity bar
 int
-    fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkConfig* caller_fbink_cfg)
+    fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkConfig* restrict caller_fbink_cfg)
 {
 	// Open the framebuffer if need be...
 	// NOTE: As usual, we *expect* to be initialized at this point!
@@ -5126,8 +5126,8 @@ static unsigned char*
 	}
 
 	for (int j = 0; j < y; ++j) {
-		const unsigned char* src  = data + (j * x * img_n);
-		unsigned char*       dest = good + (j * x * req_comp);
+		const unsigned char* restrict src = data + (j * x * img_n);
+		unsigned char* restrict dest      = good + (j * x * req_comp);
 
 #	define STBI__COMBO(a, b) ((a) *8 + (b))
 #	define STBI__CASE(a, b)                                                                                         \
@@ -5220,14 +5220,14 @@ static unsigned char*
 // Draw image data on screen (we inherit a few of the variable types/names from stbi ;))
 static int
     draw_image(int                  fbfd,
-	       const unsigned char* data,
-	       const int            w,
-	       const int            h,
-	       const int            n,
-	       const int            req_n,
-	       short int            x_off,
-	       short int            y_off,
-	       const FBInkConfig*   fbink_cfg)
+	       const unsigned char* restrict data,
+	       const int                     w,
+	       const int                     h,
+	       const int                     n,
+	       const int                     req_n,
+	       short int                     x_off,
+	       short int                     y_off,
+	       const FBInkConfig* restrict fbink_cfg)
 {
 	// Open the framebuffer if need be...
 	// NOTE: As usual, we *expect* to be initialized at this point!
@@ -5880,7 +5880,7 @@ int
 		      const char* filename UNUSED_BY_MINIMAL,
 		      short int x_off UNUSED_BY_MINIMAL,
 		      short int y_off    UNUSED_BY_MINIMAL,
-		      const FBInkConfig* fbink_cfg UNUSED_BY_MINIMAL)
+		      const FBInkConfig* restrict fbink_cfg UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_IMAGE
 	// Assume success, until shit happens ;)
@@ -5949,7 +5949,7 @@ int
 			 const size_t len UNUSED_BY_MINIMAL,
 			 short int x_off UNUSED_BY_MINIMAL,
 			 short int y_off    UNUSED_BY_MINIMAL,
-			 const FBInkConfig* fbink_cfg UNUSED_BY_MINIMAL)
+			 const FBInkConfig* restrict fbink_cfg UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_IMAGE
 	// Assume success, until shit happens ;)
@@ -6025,7 +6025,7 @@ cleanup:
 
 // Dump the full fb (first visible screen)
 int
-    fbink_dump(int fbfd UNUSED_BY_MINIMAL, FBInkDump* dump UNUSED_BY_MINIMAL)
+    fbink_dump(int fbfd UNUSED_BY_MINIMAL, FBInkDump* restrict dump UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_IMAGE
 	// Open the framebuffer if need be...
@@ -6096,8 +6096,8 @@ int
 		      short int y_off    UNUSED_BY_MINIMAL,
 		      unsigned short int w UNUSED_BY_MINIMAL,
 		      unsigned short int h UNUSED_BY_MINIMAL,
-		      const FBInkConfig* fbink_cfg UNUSED_BY_MINIMAL,
-		      FBInkDump* dump UNUSED_BY_MINIMAL)
+		      const FBInkConfig* restrict fbink_cfg UNUSED_BY_MINIMAL,
+		      FBInkDump* restrict dump UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_IMAGE
 	// Open the framebuffer if need be...
@@ -6308,8 +6308,8 @@ cleanup:
 // Restore a fb dump
 int
     fbink_restore(int fbfd           UNUSED_BY_MINIMAL,
-		  const FBInkConfig* fbink_cfg UNUSED_BY_MINIMAL,
-		  const FBInkDump* dump UNUSED_BY_MINIMAL)
+		  const FBInkConfig* restrict fbink_cfg UNUSED_BY_MINIMAL,
+		  const FBInkDump* restrict dump UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_IMAGE
 	// Open the framebuffer if need be...

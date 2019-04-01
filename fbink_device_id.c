@@ -236,7 +236,7 @@ static uint32_t
 	}
 
 	// Hi, my name is Neo. I know pointers! (Or not.)
-	for (const char* p = num; *p != '\0'; p++) {
+	for (const char* restrict p = num; *p != '\0'; p++) {
 		for (uint8_t i = 0; tbl[i] != '\0'; i++) {
 			if (*p == tbl[i]) {
 				result = result * base + i;
@@ -609,9 +609,9 @@ static void
 	} else {
 #		pragma GCC diagnostic push
 #		pragma GCC diagnostic ignored "-Wmissing-braces"
-		NTXHWConfig    config  = { 0 };
+		NTXHWConfig    config           = { 0 };
 #		pragma GCC diagnostic pop
-		unsigned char* payload = NULL;
+		unsigned char* restrict payload = NULL;
 
 		if (fseek(fp, HWCONFIG_OFFSET, SEEK_SET) != 0) {
 			WARN("Failed to seek to position 0x%p in '%s'", (void*) HWCONFIG_OFFSET, HWCONFIG_DEVICE);
@@ -702,9 +702,9 @@ static void
 #	if defined(FBINK_FOR_KINDLE)
 	identify_kindle();
 	if (deviceQuirks.deviceId > 0xFF) {
-		char* dev_id    = NULL;
-		dev_id          = to_base(deviceQuirks.deviceId, 32);
-		const char* pad = "000";
+		char* restrict dev_id    = NULL;
+		dev_id                   = to_base(deviceQuirks.deviceId, 32);
+		const char* restrict pad = "000";
 		ELOG("Detected a Kindle %s (%.*s%s -> 0x%03X)",
 		     deviceQuirks.deviceName,
 		     ((int) strlen(pad) < (int) strlen(dev_id))    // Flawfinder: ignore

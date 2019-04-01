@@ -311,7 +311,7 @@ static const uint8_t eInkBGCMap[16] = { 0xFF, 0xEE, 0xDD, 0xCC, 0xBB, 0xAA, 0x99
 					0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11, 0x00 };
 
 // Global variables to store fb/screen info
-unsigned char*           fbPtr      = NULL;
+unsigned char* restrict  fbPtr      = NULL;
 bool                     isFbMapped = false;
 struct fb_var_screeninfo vInfo;
 struct fb_fix_screeninfo fInfo;
@@ -339,11 +339,11 @@ bool g_isQuiet = false;
 // This should be a pretty accurate fallback...
 long int USER_HZ = 100;
 // Pointers to the appropriate put_pixel/get_pixel functions for the fb's bpp
-void (*fxpPutPixel)(const FBInkCoordinates*, const FBInkColor*) = NULL;
-void (*fxpGetPixel)(const FBInkCoordinates*, FBInkColor*)       = NULL;
+void (*fxpPutPixel)(const FBInkCoordinates* restrict, const FBInkColor* restrict) = NULL;
+void (*fxpGetPixel)(const FBInkCoordinates* restrict, FBInkColor* restrict)       = NULL;
 // As well as the appropriate coordinates rotation functions...
-void (*fxpRotateCoords)(FBInkCoordinates*)  = NULL;
-void (*fxpRotateRegion)(struct mxcfb_rect*) = NULL;
+void (*fxpRotateCoords)(FBInkCoordinates* restrict)  = NULL;
+void (*fxpRotateRegion)(struct mxcfb_rect* restrict) = NULL;
 // And the font bitmap getter...
 const unsigned char* (*fxpFont8xGetBitmap)(uint32_t) = NULL;
 #ifdef FBINK_WITH_FONTS
@@ -362,32 +362,32 @@ FBInkOTFonts otFonts = { NULL, NULL, NULL, NULL };
 #endif
 
 #ifndef FBINK_FOR_KINDLE
-static void rotate_coordinates_pickel(FBInkCoordinates*);
-static void rotate_coordinates_boot(FBInkCoordinates*);
+static void rotate_coordinates_pickel(FBInkCoordinates* restrict);
+static void rotate_coordinates_boot(FBInkCoordinates* restrict);
 #	ifdef FBINK_WITH_BUTTON_SCAN
-static void rotate_touch_coordinates(FBInkCoordinates*);
+static void rotate_touch_coordinates(FBInkCoordinates* restrict);
 #	endif
 #endif
-static void rotate_coordinates_nop(FBInkCoordinates* __attribute__((unused)));
+static void rotate_coordinates_nop(FBInkCoordinates* restrict __attribute__((unused)));
 
-static void put_pixel_Gray4(const FBInkCoordinates*, const FBInkColor*);
-static void put_pixel_Gray8(const FBInkCoordinates*, const FBInkColor*);
-static void put_pixel_RGB24(const FBInkCoordinates*, const FBInkColor*);
-static void put_pixel_RGB32(const FBInkCoordinates*, const FBInkColor*);
-static void put_pixel_RGB565(const FBInkCoordinates*, const FBInkColor*);
+static void put_pixel_Gray4(const FBInkCoordinates* restrict, const FBInkColor* restrict);
+static void put_pixel_Gray8(const FBInkCoordinates* restrict, const FBInkColor* restrict);
+static void put_pixel_RGB24(const FBInkCoordinates* restrict, const FBInkColor* restrict);
+static void put_pixel_RGB32(const FBInkCoordinates* restrict, const FBInkColor* restrict);
+static void put_pixel_RGB565(const FBInkCoordinates* restrict, const FBInkColor* restrict);
 // NOTE: We pass coordinates by value here, because a rotation transformation *may* be applied to them,
 //       and that's a rotation that the caller will *never* care about.
-static void put_pixel(FBInkCoordinates, const FBInkColor*);
+static void put_pixel(FBInkCoordinates, const FBInkColor* restrict);
 // NOTE: On the other hand, if you happen to be calling function pointers directly,
 //       it's left to you to not do anything stupid ;)
 
-static void get_pixel_Gray4(const FBInkCoordinates*, FBInkColor*);
-static void get_pixel_Gray8(const FBInkCoordinates*, FBInkColor*);
-static void get_pixel_RGB24(const FBInkCoordinates*, FBInkColor*);
-static void get_pixel_RGB32(const FBInkCoordinates*, FBInkColor*);
-static void get_pixel_RGB565(const FBInkCoordinates*, FBInkColor*);
+static void get_pixel_Gray4(const FBInkCoordinates* restrict, FBInkColor* restrict);
+static void get_pixel_Gray8(const FBInkCoordinates* restrict, FBInkColor* restrict);
+static void get_pixel_RGB24(const FBInkCoordinates* restrict, FBInkColor* restrict);
+static void get_pixel_RGB32(const FBInkCoordinates* restrict, FBInkColor* restrict);
+static void get_pixel_RGB565(const FBInkCoordinates* restrict, FBInkColor* restrict);
 // NOTE: Same as put_pixel ;)
-static void get_pixel(FBInkCoordinates, FBInkColor*);
+static void get_pixel(FBInkCoordinates, FBInkColor* restrict);
 
 #if defined(FBINK_WITH_IMAGE) || defined(FBINK_WITH_OPENTYPE)
 // This is only needed for alpha blending in the image or OpenType codepath ;).
@@ -401,19 +401,23 @@ static void get_pixel(FBInkCoordinates, FBInkColor*);
 #	define MUL255(v) ((v << 8U) - v)
 #endif
 
-static void fill_rect(unsigned short int, unsigned short int, unsigned short int, unsigned short int, const FBInkColor*);
+static void fill_rect(unsigned short int,
+		      unsigned short int,
+		      unsigned short int,
+		      unsigned short int,
+		      const FBInkColor* restrict);
 static void clear_screen(int UNUSED_BY_NOTKINDLE, uint8_t, bool UNUSED_BY_NOTKINDLE);
 
 static const unsigned char* font8x8_get_bitmap(uint32_t);
 
 static const char* fontname_to_string(uint8_t);
 
-static struct mxcfb_rect draw(const char*,
+static struct mxcfb_rect draw(const char* restrict,
 			      unsigned short int,
 			      unsigned short int,
 			      unsigned short int,
 			      bool,
-			      const FBInkConfig*);
+			      const FBInkConfig* restrict);
 
 #ifndef FBINK_FOR_LINUX
 static long int jiffies_to_ms(long int);
@@ -431,41 +435,41 @@ static int refresh_kobo_mk7(int, const struct mxcfb_rect, uint32_t, uint32_t, in
 #endif            // !FBINK_FOR_LINUX
 static int refresh(int, const struct mxcfb_rect, uint32_t, int UNUSED_BY_CERVANTES, bool, bool, bool);
 
-static int open_fb_fd(int*, bool*);
-static int open_fb_fd_nonblock(int*, bool*);
+static int open_fb_fd(int* restrict, bool* restrict);
+static int open_fb_fd_nonblock(int* restrict, bool* restrict);
 
 static const char* fb_rotate_to_string(uint32_t);
-static int         initialize_fbink(int, const FBInkConfig*, bool);
+static int         initialize_fbink(int, const FBInkConfig* restrict, bool);
 
 static int memmap_fb(int);
 static int unmap_fb(void);
 
 #ifndef FBINK_FOR_KINDLE
-static void rotate_region_pickel(struct mxcfb_rect*);
-static void rotate_region_boot(struct mxcfb_rect*);
+static void rotate_region_pickel(struct mxcfb_rect* restrict);
+static void rotate_region_boot(struct mxcfb_rect* restrict);
 #endif
-static void rotate_region_nop(struct mxcfb_rect*);
-static void fullscreen_region(struct mxcfb_rect*);
+static void rotate_region_nop(struct mxcfb_rect* restrict);
+static void fullscreen_region(struct mxcfb_rect* restrict);
 
-int draw_progress_bars(int, bool, uint8_t, const FBInkConfig*);
+int draw_progress_bars(int, bool, uint8_t, const FBInkConfig* restrict);
 
 #ifdef FBINK_WITH_IMAGE
 static unsigned char* img_load_from_file(const char*, int*, int*, int*, int);
 static unsigned char* img_convert_px_format(const unsigned char*, int, int, int, int);
 static int            draw_image(int,
-				 const unsigned char*,
+				 const unsigned char* restrict,
 				 const int,
 				 const int,
 				 const int,
 				 const int,
 				 short int,
 				 short int,
-				 const FBInkConfig*);
+				 const FBInkConfig* restrict);
 #endif
 
 #ifdef FBINK_WITH_OPENTYPE
-static void* free_ot_font(stbtt_fontinfo*);
-static void  parse_simple_md(const char*, size_t, unsigned char*);
+static void* free_ot_font(stbtt_fontinfo* restrict);
+static void  parse_simple_md(const char* restrict, size_t, unsigned char* restrict);
 #endif
 
 static uint32_t    get_wfm_mode(uint8_t);

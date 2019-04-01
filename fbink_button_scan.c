@@ -184,7 +184,7 @@ static bool
 }
 
 static int
-    generate_button_press(FBInkCoordinates* match_coords, bool nosleep)
+    generate_button_press(FBInkCoordinates* restrict match_coords, bool nosleep)
 {
 	LOG("Pressing the Connect button . . .");
 	struct input_event ev;

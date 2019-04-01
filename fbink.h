@@ -183,33 +183,33 @@ typedef enum
 // A struct to dump FBInk's internal state into, like fbink_state_dump() would, but in C ;)
 typedef struct
 {
-	long int           user_hz;             // USER_HZ
-	const char*        font_name;           // fbink_cfg->fontname
-	uint32_t           view_width;          // viewWidth
-	uint32_t           view_height;         // viewHeight
-	uint32_t           screen_width;        // screenWidth
-	uint32_t           screen_height;       // screenHeight
-	uint32_t           bpp;                 // vInfo.bits_per_pixel
-	char               device_name[16];     // deviceQuirks.deviceName
-	unsigned short int device_id;           // deviceQuirks.deviceId
-	uint8_t            pen_fg_color;        // penFGColor
-	uint8_t            pen_bg_color;        // penFGColor
-	unsigned short int screen_dpi;          // deviceQuirks.screenDPI
-	unsigned short int font_w;              // FONTW
-	unsigned short int font_h;              // FONTH
-	unsigned short int max_cols;            // MAXCOLS
-	unsigned short int max_rows;            // MAXROWS
-	uint8_t            view_hori_origin;    // viewHoriOrigin
-	uint8_t            view_vert_origin;    // viewVertOrigin
-	uint8_t            view_vert_offset;    // viewVertOffset
-	uint8_t            fontsize_mult;       // FONTSIZE_MULT
-	uint8_t            glyph_width;         // glyphWidth
-	uint8_t            glyph_height;        // glyphHeight
-	bool               is_perfect_fit;      // deviceQuirks.isPerfectFit
-	bool               is_kobo_non_mt;      // deviceQuirks.isKoboNonMT
-	uint8_t            ntx_boot_rota;       // deviceQuirks.ntxBootRota
-	uint8_t            ntx_rota_quirk;      // deviceQuirks.ntxRotaQuirk
-	bool               can_rotate;          // deviceQuirks.canRotate
+	long int    user_hz;                      // USER_HZ
+	const char* restrict font_name;           // fbink_cfg->fontname
+	uint32_t             view_width;          // viewWidth
+	uint32_t             view_height;         // viewHeight
+	uint32_t             screen_width;        // screenWidth
+	uint32_t             screen_height;       // screenHeight
+	uint32_t             bpp;                 // vInfo.bits_per_pixel
+	char                 device_name[16];     // deviceQuirks.deviceName
+	unsigned short int   device_id;           // deviceQuirks.deviceId
+	uint8_t              pen_fg_color;        // penFGColor
+	uint8_t              pen_bg_color;        // penFGColor
+	unsigned short int   screen_dpi;          // deviceQuirks.screenDPI
+	unsigned short int   font_w;              // FONTW
+	unsigned short int   font_h;              // FONTH
+	unsigned short int   max_cols;            // MAXCOLS
+	unsigned short int   max_rows;            // MAXROWS
+	uint8_t              view_hori_origin;    // viewHoriOrigin
+	uint8_t              view_vert_origin;    // viewVertOrigin
+	uint8_t              view_vert_offset;    // viewVertOffset
+	uint8_t              fontsize_mult;       // FONTSIZE_MULT
+	uint8_t              glyph_width;         // glyphWidth
+	uint8_t              glyph_height;        // glyphHeight
+	bool                 is_perfect_fit;      // deviceQuirks.isPerfectFit
+	bool                 is_kobo_non_mt;      // deviceQuirks.isKoboNonMT
+	uint8_t              ntx_boot_rota;       // deviceQuirks.ntxBootRota
+	uint8_t              ntx_rota_quirk;      // deviceQuirks.ntxRotaQuirk
+	bool                 can_rotate;          // deviceQuirks.canRotate
 } FBInkState;
 
 // What a FBInk config should look like. Perfectly sane when fully zero-initialized.
@@ -270,8 +270,8 @@ typedef struct
 	unsigned short int y;
 	unsigned short int w;
 	unsigned short int h;
-	unsigned char*     data;
-	bool               is_full;
+	unsigned char* restrict data;
+	bool                    is_full;
 } FBInkDump;
 
 // NOTE: Unless otherwise specified,
@@ -306,7 +306,7 @@ FBINK_API int fbink_close(int fbfd);
 //       this needs to be called as many times as necessary to ensure that every following fbink_* call will be made
 //       against a fb state that matches the state it was in during the last fbink_init() call...
 //       c.f., KFMon's handling of this via fbink_is_fb_quirky() to detect the initial 16bpp -> 32bpp switch.
-FBINK_API int fbink_init(int fbfd, const FBInkConfig* fbink_cfg);
+FBINK_API int fbink_init(int fbfd, const FBInkConfig* restrict fbink_cfg);
 
 // Add an OpenType font to FBInk. Note that at least one font must be added in order to use fbink_print_ot()
 // Returns -(EXIT_FAILURE) on failure, or EXIT_SUCCESS otherwise
@@ -325,10 +325,10 @@ FBINK_API int fbink_add_ot_font(const char* filename, FONT_STYLE_T style);
 FBINK_API int fbink_free_ot_fonts(void);
 
 // Dump a few of our internal state variables to stdout, in a format easily consumable by a shell (i.e., eval)
-FBINK_API void fbink_state_dump(const FBInkConfig* fbink_cfg);
+FBINK_API void fbink_state_dump(const FBInkConfig* restrict fbink_cfg);
 
 // Dump a few of our internal state variables to the FBInkState struct pointed to by fbink_state
-FBINK_API void fbink_get_state(const FBInkConfig* fbink_cfg, FBInkState* fbink_state);
+FBINK_API void fbink_get_state(const FBInkConfig* restrict fbink_cfg, FBInkState* restrict fbink_state);
 
 // Print a string on screen.
 // NOTE: The string is expected to be encoded in valid UTF-8:
@@ -343,7 +343,7 @@ FBINK_API void fbink_get_state(const FBInkConfig* fbink_cfg, FBInkState* fbink_s
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // string:		UTF-8 encoded string to print
 // fbink_cfg:		Pointer to an FBInkConfig struct
-FBINK_API int fbink_print(int fbfd, const char* string, const FBInkConfig* fbink_cfg);
+FBINK_API int fbink_print(int fbfd, const char* restrict string, const FBInkConfig* restrict fbink_cfg);
 
 // Print a string using an OpenType font. Note the caller MUST init with fbink_init_ot() FIRST.
 // This function uses positive margins (in pixels) instead of rows/columns for positioning and setting the printable area.
@@ -366,7 +366,10 @@ FBINK_API int fbink_print(int fbfd, const char* string, const FBInkConfig* fbink
 //				Pass a NULL pointer if unneeded.
 // NOTE: Alignment is relative to the printable area, as defined by the margins.
 //       As such, it only makes sense in the context of a single, specific print call.
-FBINK_API int fbink_print_ot(int fbfd, const char* string, const FBInkOTConfig* cfg, const FBInkConfig* fbink_cfg);
+FBINK_API int fbink_print_ot(int         fbfd,
+			     const char* restrict string,
+			     const FBInkOTConfig* restrict cfg,
+			     const FBInkConfig* restrict fbink_cfg);
 
 // Brings printf formatting to fbink_print and fbink_print_ot ;).
 // fbfd:		Open file descriptor to the framebuffer character device,
@@ -377,8 +380,11 @@ FBINK_API int fbink_print_ot(int fbfd, const char* string, const FBInkOTConfig* 
 //       If cfg is valid, fbink_cfg MAY be NULL (same behavior as fbink_print_ot)
 //       If cfg is NULL, fbink_cfg MUST be valid
 // NOTE: Meaning at least one of those two pointers MUST be valid!
-FBINK_API int fbink_printf(int fbfd, const FBInkOTConfig* cfg, const FBInkConfig* fbink_cfg, const char* fmt, ...)
-    __attribute__((format(printf, 4, 5)));
+FBINK_API int fbink_printf(int                  fbfd,
+			   const FBInkOTConfig* restrict cfg,
+			   const FBInkConfig* restrict fbink_cfg,
+			   const char*                 fmt,
+			   ...) __attribute__((format(printf, 4, 5)));
 
 // A simple wrapper around the internal screen refresh handling, without requiring you to include einkfb/mxcfb headers
 // fbfd:		Open file descriptor to the framebuffer character device,
@@ -403,7 +409,7 @@ FBINK_API int fbink_refresh(int                fbfd,
 			    uint32_t           region_width,
 			    uint32_t           region_height,
 			    uint8_t            dithering_mode,
-			    const FBInkConfig* fbink_cfg);
+			    const FBInkConfig* restrict fbink_cfg);
 
 // Returns true if the device appears to be in a quirky framebuffer state that *may* require a reinit to produce sane results.
 // NOTE: The intended use-case is for long running apps which may trigger prints across different framebuffer states,
@@ -431,21 +437,21 @@ FBINK_API bool fbink_is_fb_quirky(void) __attribute__((pure, deprecated));
 // fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // fbink_cfg:		Pointer to an FBInkConfig struct
-FBINK_API int fbink_reinit(int fbfd, const FBInkConfig* fbink_cfg);
+FBINK_API int fbink_reinit(int fbfd, const FBInkConfig* restrict fbink_cfg);
 
 // Print a full-width progress bar on screen
 // fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // percentage:		0-100 value to set the progress bar's progression
 // fbink_cfg:		Pointer to an FBInkConfig struct (ignores is_overlay, col & hoffset; as well as is_centered & is_padded)
-FBINK_API int fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInkConfig* fbink_cfg);
+FBINK_API int fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInkConfig* restrict fbink_cfg);
 
 // Print a full-width activity bar on screen (i.e., an infinite progress bar)
 // fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // progress:		0-16 value to set the progress thumb's position in the bar
 // fbink_cfg:		Pointer to an FBInkConfig struct (ignores col & hoffset; as well as is_centered & is_padded)
-FBINK_API int fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkConfig* fbink_cfg);
+FBINK_API int fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkConfig* restrict fbink_cfg);
 
 // Print an image on screen
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
@@ -473,7 +479,7 @@ FBINK_API int fbink_print_image(int                fbfd,
 				const char*        filename,
 				short int          x_off,
 				short int          y_off,
-				const FBInkConfig* fbink_cfg);
+				const FBInkConfig* restrict fbink_cfg);
 
 // Print raw scanlines on screen
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
@@ -503,13 +509,13 @@ FBINK_API int fbink_print_raw_data(int                fbfd,
 				   const size_t       len,
 				   short int          x_off,
 				   short int          y_off,
-				   const FBInkConfig* fbink_cfg);
+				   const FBInkConfig* restrict fbink_cfg);
 
 // Just clear the screen, eInk refresh included (or not ;)).
 // fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // fbink_cfg:		Pointer to an FBInkConfig struct (honors is_flashing, is_inverted, is_dithered, no_refresh, pen_*_color)
-FBINK_API int fbink_cls(int fbfd, const FBInkConfig* fbink_cfg);
+FBINK_API int fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg);
 
 // Dump the full screen
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
@@ -523,7 +529,7 @@ FBINK_API int fbink_cls(int fbfd, const FBInkConfig* fbink_cfg);
 //       as a subsequent call to fbink_*_dump with that same struct would otherwise trip the recycling check,
 //       causing a double free!
 //       There are no error codepaths after storage allocation (i.e., you are assured that it has NOT been allocated on error).
-FBINK_API int fbink_dump(int fbfd, FBInkDump* dump);
+FBINK_API int fbink_dump(int fbfd, FBInkDump* restrict dump);
 
 // Dump a specific region of the screen
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
@@ -541,8 +547,8 @@ FBINK_API int fbink_region_dump(int                fbfd,
 				short int          y_off,
 				unsigned short int w,
 				unsigned short int h,
-				const FBInkConfig* fbink_cfg,
-				FBInkDump*         dump);
+				const FBInkConfig* restrict fbink_cfg,
+				FBInkDump* restrict dump);
 
 // Restore a framebuffer dump made by fbink_dump/fbink_region_dump
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
@@ -558,7 +564,7 @@ FBINK_API int fbink_region_dump(int                fbfd,
 // NOTE: "current" actually means "at last init/reinit time".
 //       Call fbink_reinit first if you really want to make sure bitdepth/rotation still match.
 // NOTE: This does *NOT* free data.dump!
-FBINK_API int fbink_restore(int fbfd, const FBInkConfig* fbink_cfg, const FBInkDump* dump);
+FBINK_API int fbink_restore(int fbfd, const FBInkConfig* restrict fbink_cfg, const FBInkDump* restrict dump);
 
 // Scan the screen for Kobo's "Connect" button in the "USB plugged in" popup,
 // and optionally generate an input event to press that button.
