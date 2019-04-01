@@ -538,16 +538,18 @@ static void
 			strncpy(deviceQuirks.deviceName, "Clara HD", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 377:    // Forma (frost)
-			deviceQuirks.isKoboMk7    = true;
-			deviceQuirks.canRotate    = true;
+			deviceQuirks.isKoboMk7 = true;
+			deviceQuirks.canRotate = true;
+			// NOTE: Because Mk.7 and KOBO_HWCFG_DisplayBusWidth (35) is "16Bits_mirror" (3)
 			deviceQuirks.ntxRotaQuirk = NTX_ROTA_ODD_INVERTED;
 			deviceQuirks.screenDPI    = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Forma", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		case 380:    // Forma 32GB (frost)
-			deviceQuirks.isKoboMk7    = true;
-			deviceQuirks.canRotate    = true;
+			deviceQuirks.isKoboMk7 = true;
+			deviceQuirks.canRotate = true;
+			// NOTE: Because Mk.7 and KOBO_HWCFG_DisplayBusWidth (35) is "16Bits_mirror" (3)
 			deviceQuirks.ntxRotaQuirk = NTX_ROTA_ODD_INVERTED;
 			deviceQuirks.screenDPI    = 300U;
 			// Flawfinder: ignore

@@ -64,6 +64,8 @@ typedef struct __attribute__((__packed__))
 // NOTE: This one was added in v1.0, while the original NTX Touch was only on v0.7,
 //       which is why we handle this dynamically, instead of relying on a fixed-size struct...
 #			define KOBO_HWCFG_DisplayResolution 31
+// NOTE: This one tells us a bit about the potential rotation trickeries on some models...
+#			define KOBO_HWCFG_DisplayBusWidth 35
 #		endif    // FBINK_FOR_CERVANTES
 #	endif            // !FBINK_FOR_KINDLE
 
@@ -127,6 +129,10 @@ static const char* kobo_cpus[] = { "mx35",   "m166e", "mx50", "x86",    "mx6",  
 static const char* kobo_disp_res[] = { "800x600",   "1024x758",   "1024x768",    "1440x1080", "1366x768",
 				       "1448x1072", "1600x1200",  "400x375x2",   "1872x1404", "960x540",
 				       "2200x1650", "1440x640x4", "1600x1200x4", "1920x1440" };
+*/
+// And for the various NTX/Kobo Display Bus Widths...
+/*
+static const char* kobo_disp_busw[] = { "8Bits", "16Bits", "8Bits_mirror", "16Bits_mirror", "NC" };
 */
 
 static void set_kobo_quirks(unsigned short int);
