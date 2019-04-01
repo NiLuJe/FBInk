@@ -79,6 +79,10 @@ ifndef DEBUG
 	EXTRA_CFLAGS+=-funroll-loops
 	# More loop/vectorization tweaks
 	#EXTRA_CFLAGS+=-ftree-loop-distribution -ftree-loop-im -ftree-loop-ivcanon -fivopts
+	# (Extremely verbose) debug info about the auto-vectorization pass...
+	#EXTRA_CFLAGS+=-fopt-info-vec-all=vecall.txt
+	# Much less verbose info about successfully vectorized sections
+	#EXTRA_CFLAGS+=-fopt-info-vec
 endif
 
 # Enforce LTO if need be (utils won't link without it).
