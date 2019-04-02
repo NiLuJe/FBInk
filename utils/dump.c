@@ -233,15 +233,15 @@ int
 			goto cleanup;
 		}
 
-		// We need to do a *full* reinit (i.e., init ;p) to disable H/V centering,
-		// so that fbink_print_raw_data honors our dump coordinates as-is, without re-centering them ;).
-		fprintf(stdout, "[11] FULL REINIT\n");
-		fbink_cfg.is_centered = false;
-		fbink_cfg.is_halfway  = false;
-		fbink_init(fbfd, &fbink_cfg);
+		// Disable H & V centering, so that fbink_print_raw_data honors our dump coordinates as-is,
+		// without re-centering them ;).
+		fbink_cfg.halign = NONE;
+		fbink_cfg.valign = NONE;
+		// We need to disable viewport shenanigans, too...
+		// We leave invert on, to make stuff more obvious, though ;).
 
 		// Then try to ninja restore it via fbink_print_raw_data...
-		fprintf(stdout, "[12] PRINT RAW\n");
+		fprintf(stdout, "[11] PRINT RAW\n");
 		if (fbink_print_raw_data(
 			fbfd, dump.data, dump.w, dump.h, dump.size, (short int) dump.x, (short int) dump.y, &fbink_cfg) !=
 		    ERRCODE(EXIT_SUCCESS)) {
