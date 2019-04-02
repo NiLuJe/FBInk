@@ -81,6 +81,8 @@ ifndef DEBUG
 	#EXTRA_CFLAGS+=-ftree-loop-distribution -ftree-loop-im -ftree-loop-ivcanon -fivopts
 	# (Extremely verbose) debug info about the auto-vectorization pass...
 	#EXTRA_CFLAGS+=-fopt-info-vec-all=vecall.txt
+	# Rather verbose debug info about unvectorized blocks/loops
+	#EXTRA_CFLAGS+=-fopt-info-vec-missed=vecmissed.txt
 	# Much less verbose info about successfully (or partially successfully) vectorized sections
 	#EXTRA_CFLAGS+=-fopt-info-vec
 endif
