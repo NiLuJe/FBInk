@@ -6072,7 +6072,7 @@ int
 	dump->bpp     = (uint8_t) vInfo.bits_per_pixel;
 	dump->x       = 0U;
 	dump->y       = 0U;
-	dump->w       = (unsigned short int) vInfo.xres;
+	dump->w       = (unsigned short int) vInfo.xres_virtual;
 	dump->h       = (unsigned short int) vInfo.yres;
 	dump->is_full = true;
 	// And finally, the fb data itself
