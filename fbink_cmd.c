@@ -552,7 +552,7 @@ int
 							if (value == NULL) {
 								fprintf(stderr,
 									"Missing value for suboption '%s'\n",
-									refresh_token[TOP_OPT]);
+									refresh_token[LEFT_OPT]);
 								errfnd = true;
 								break;
 							}
@@ -565,7 +565,7 @@ int
 							if (value == NULL) {
 								fprintf(stderr,
 									"Missing value for suboption '%s'\n",
-									refresh_token[TOP_OPT]);
+									refresh_token[WIDTH_OPT]);
 								errfnd = true;
 								break;
 							}
@@ -579,7 +579,7 @@ int
 							if (value == NULL) {
 								fprintf(stderr,
 									"Missing value for suboption '%s'\n",
-									refresh_token[TOP_OPT]);
+									refresh_token[HEIGHT_OPT]);
 								errfnd = true;
 								break;
 							}
@@ -713,6 +713,13 @@ int
 				while (*subopts != '\0' && !errfnd) {
 					switch (getsubopt(&subopts, image_token, &value)) {
 						case FILE_OPT:
+							if (value == NULL) {
+								fprintf(stderr,
+									"Missing value for suboption '%s'\n",
+									image_token[FILE_OPT]);
+								errfnd = true;
+								break;
+							}
 							// NOTE: As a hack to support paths with a comma,
 							//       which we can't handle via getsubopt,
 							//       we have *two* ways of specifying image_file,
@@ -721,18 +728,39 @@ int
 							image_file = strdup(value);
 							break;
 						case XOFF_OPT:
+							if (value == NULL) {
+								fprintf(stderr,
+									"Missing value for suboption '%s'\n",
+									image_token[XOFF_OPT]);
+								errfnd = true;
+								break;
+							}
 							if (strtol_hi(
 								opt, image_token[XOFF_OPT], value, &image_x_offset) < 0) {
 								errfnd = true;
 							}
 							break;
 						case YOFF_OPT:
+							if (value == NULL) {
+								fprintf(stderr,
+									"Missing value for suboption '%s'\n",
+									image_token[YOFF_OPT]);
+								errfnd = true;
+								break;
+							}
 							if (strtol_hi(
 								opt, image_token[YOFF_OPT], value, &image_y_offset) < 0) {
 								errfnd = true;
 							}
 							break;
 						case HALIGN_OPT:
+							if (value == NULL) {
+								fprintf(stderr,
+									"Missing value for suboption '%s'\n",
+									image_token[HALIGN_OPT]);
+								errfnd = true;
+								break;
+							}
 							if (strcasecmp(value, "NONE") == 0 ||
 							    strcasecmp(value, "LEFT") == 0) {
 								fbink_cfg.halign = NONE;
@@ -748,6 +776,13 @@ int
 							}
 							break;
 						case VALIGN_OPT:
+							if (value == NULL) {
+								fprintf(stderr,
+									"Missing value for suboption '%s'\n",
+									image_token[VALIGN_OPT]);
+								errfnd = true;
+								break;
+							}
 							if (strcasecmp(value, "NONE") == 0 ||
 							    strcasecmp(value, "TOP") == 0) {
 								fbink_cfg.valign = NONE;
@@ -906,18 +941,53 @@ int
 				while (*subopts != '\0' && !errfnd) {
 					switch (getsubopt(&subopts, truetype_token, &value)) {
 						case REGULAR_OPT:
+							if (value == NULL) {
+								fprintf(stderr,
+									"Missing value for suboption '%s'\n",
+									truetype_token[REGULAR_OPT]);
+								errfnd = true;
+								break;
+							}
 							reg_ot_file = strdup(value);
 							break;
 						case BOLD_OPT:
+							if (value == NULL) {
+								fprintf(stderr,
+									"Missing value for suboption '%s'\n",
+									truetype_token[BOLD_OPT]);
+								errfnd = true;
+								break;
+							}
 							bd_ot_file = strdup(value);
 							break;
 						case ITALIC_OPT:
+							if (value == NULL) {
+								fprintf(stderr,
+									"Missing value for suboption '%s'\n",
+									truetype_token[ITALIC_OPT]);
+								errfnd = true;
+								break;
+							}
 							it_ot_file = strdup(value);
 							break;
 						case BOLDITALIC_OPT:
+							if (value == NULL) {
+								fprintf(stderr,
+									"Missing value for suboption '%s'\n",
+									truetype_token[BOLDITALIC_OPT]);
+								errfnd = true;
+								break;
+							}
 							bdit_ot_file = strdup(value);
 							break;
 						case SIZE_OPT:
+							if (value == NULL) {
+								fprintf(stderr,
+									"Missing value for suboption '%s'\n",
+									truetype_token[SIZE_OPT]);
+								errfnd = true;
+								break;
+							}
 							if (strtoul_hu(opt,
 								       truetype_token[SIZE_OPT],
 								       value,
@@ -926,6 +996,13 @@ int
 							}
 							break;
 						case TM_OPT:
+							if (value == NULL) {
+								fprintf(stderr,
+									"Missing value for suboption '%s'\n",
+									truetype_token[TM_OPT]);
+								errfnd = true;
+								break;
+							}
 							if (strtol_hi(opt,
 								      truetype_token[TM_OPT],
 								      value,
@@ -934,6 +1011,13 @@ int
 							}
 							break;
 						case BM_OPT:
+							if (value == NULL) {
+								fprintf(stderr,
+									"Missing value for suboption '%s'\n",
+									truetype_token[BM_OPT]);
+								errfnd = true;
+								break;
+							}
 							if (strtol_hi(opt,
 								      truetype_token[BM_OPT],
 								      value,
@@ -942,6 +1026,13 @@ int
 							}
 							break;
 						case LM_OPT:
+							if (value == NULL) {
+								fprintf(stderr,
+									"Missing value for suboption '%s'\n",
+									truetype_token[LM_OPT]);
+								errfnd = true;
+								break;
+							}
 							if (strtol_hi(opt,
 								      truetype_token[LM_OPT],
 								      value,
@@ -950,6 +1041,13 @@ int
 							}
 							break;
 						case RM_OPT:
+							if (value == NULL) {
+								fprintf(stderr,
+									"Missing value for suboption '%s'\n",
+									truetype_token[RM_OPT]);
+								errfnd = true;
+								break;
+							}
 							if (strtol_hi(opt,
 								      truetype_token[RM_OPT],
 								      value,
