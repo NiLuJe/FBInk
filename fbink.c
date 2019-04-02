@@ -6068,12 +6068,13 @@ int
 		goto cleanup;
 	}
 	// Store the current fb state for that dump
-	dump->rota    = (uint8_t) vInfo.rotate;
-	dump->bpp     = (uint8_t) vInfo.bits_per_pixel;
+	dump->size    = (size_t)(fInfo.line_length * vInfo.yres);
 	dump->x       = 0U;
 	dump->y       = 0U;
 	dump->w       = (unsigned short int) vInfo.xres_virtual;
 	dump->h       = (unsigned short int) vInfo.yres;
+	dump->rota    = (uint8_t) vInfo.rotate;
+	dump->bpp     = (uint8_t) vInfo.bits_per_pixel;
 	dump->is_full = true;
 	// And finally, the fb data itself
 	memcpy(dump->data, fbPtr, (size_t)(fInfo.line_length * vInfo.yres));
@@ -6272,21 +6273,23 @@ int
 		goto cleanup;
 	}
 	// Store the current fb state for that dump
-	dump->rota    = (uint8_t) vInfo.rotate;
-	dump->bpp     = (uint8_t) vInfo.bits_per_pixel;
 	dump->x       = (unsigned short int) region.left;
 	dump->y       = (unsigned short int) region.top;
 	dump->w       = (unsigned short int) region.width;
 	dump->h       = (unsigned short int) region.height;
+	dump->rota    = (uint8_t) vInfo.rotate;
+	dump->bpp     = (uint8_t) vInfo.bits_per_pixel;
 	dump->is_full = false;
 	// And finally, the fb data itself, scanline per scanline
 	if (dump->bpp == 4U) {
+		dump->size = (size_t)((dump->w >> 1) * dump->h);
 		for (unsigned short int j = dump->y, l = 0U; l < dump->h; j++, l++) {
 			size_t dump_offset = (size_t)(l * (dump->w >> 1));
 			size_t fb_offset   = (size_t)(dump->x >> 1) + (j * fInfo.line_length);
 			memcpy(dump->data + dump_offset, fbPtr + fb_offset, (size_t) dump->w >> 1);
 		}
 	} else {
+		dump->size = (size_t)((dump->w * bpp) * dump->h);
 		for (unsigned short int j = dump->y, l = 0U; l < dump->h; j++, l++) {
 			size_t dump_offset = (size_t)(l * (dump->w * bpp));
 			size_t fb_offset   = (size_t)(dump->x * bpp) + (j * fInfo.line_length);
@@ -6342,7 +6345,7 @@ int
 		goto cleanup;
 	}
 	if (dump->rota != vInfo.rotate) {
-		WARN("Can't restore the dump because of a rotation mismatch: dump: %hhu (%s) vs. fb: %u (%s)",
+		WARN("Can't restore the dump because of a rotation mismatch! dump: %hhu (%s) vs. fb: %u (%s)",
 		     dump->rota,
 		     fb_rotate_to_string(dump->rota),
 		     vInfo.rotate,
@@ -6351,9 +6354,30 @@ int
 		goto cleanup;
 	}
 	if (dump->bpp != vInfo.bits_per_pixel) {
-		WARN("Can't restore the dump because of a bitdepth mismatch: dump: %hhu vs. fb: %u",
+		WARN("Can't restore the dump because of a bitdepth mismatch! dump: %hhu vs. fb: %u",
 		     dump->bpp,
 		     vInfo.bits_per_pixel);
+		rv = ERRCODE(ENOTSUP);
+		goto cleanup;
+	}
+	if (dump->w > vInfo.xres_virtual) {
+		WARN("Can't restore the dump because it's wider than the screen! dump: %hu vs. fb: %u",
+		     dump->w,
+		     vInfo.xres_virtual);
+		rv = ERRCODE(ENOTSUP);
+		goto cleanup;
+	}
+	if (dump->h > vInfo.yres) {
+		WARN("Can't restore the dump because it's taller than the screen! dump: %hu vs. fb: %u",
+		     dump->h,
+		     vInfo.yres);
+		rv = ERRCODE(ENOTSUP);
+		goto cleanup;
+	}
+	if (dump->size > fInfo.smem_len) {
+		WARN("Can't restore the dump because it's larger than the framebuffer! dump: %zu vs. fb: %u",
+		     dump->size,
+		     fInfo.smem_len);
 		rv = ERRCODE(ENOTSUP);
 		goto cleanup;
 	}

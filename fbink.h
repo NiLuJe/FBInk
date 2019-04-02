@@ -264,13 +264,14 @@ typedef struct
 
 typedef struct
 {
-	uint8_t            rota;
-	uint8_t            bpp;
-	unsigned short int x;
-	unsigned short int y;
-	unsigned short int w;
-	unsigned short int h;
 	unsigned char* restrict data;
+	size_t                  size;
+	unsigned short int      x;
+	unsigned short int      y;
+	unsigned short int      w;
+	unsigned short int      h;
+	uint8_t                 rota;
+	uint8_t                 bpp;
 	bool                    is_full;
 } FBInkDump;
 
@@ -553,7 +554,8 @@ FBINK_API int fbink_region_dump(int                fbfd,
 // Restore a framebuffer dump made by fbink_dump/fbink_region_dump
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
 // Otherwise, returns a few different things on failure:
-//	-(ENOTSUP)	when the current rotation or bitdepth doesn't match the dump's
+//	-(ENOTSUP)	when the dump cannot be restored because it wasn't taken in the current bitdepth and/or rotation,
+//			or because it's wider/taller/larger than the current framebuffer.
 //	-(EINVAL)	when there's no data to restore
 // fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
