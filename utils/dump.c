@@ -238,10 +238,14 @@ int
 		fbink_cfg.halign = NONE;
 		fbink_cfg.valign = NONE;
 		// We need to disable viewport shenanigans, too...
+		fbink_cfg.no_viewport = true;
+		// no_viewport requires a *full* reinit (i.e., init) to be taken into account...
+		fprintf(stdout, "[11] FULL REINIT\n");
+		fbink_init(fbfd, &fbink_cfg);
 		// We leave invert on, to make stuff more obvious, though ;).
 
-		// Then try to ninja restore it via fbink_print_raw_data...
-		fprintf(stdout, "[11] PRINT RAW\n");
+		// Then ninja restore it via fbink_print_raw_data, which will handle the 32bpp-to-8bpp conversion for us...
+		fprintf(stdout, "[12] PRINT RAW\n");
 		if (fbink_print_raw_data(
 			fbfd, dump.data, dump.w, dump.h, dump.size, (short int) dump.x, (short int) dump.y, &fbink_cfg) !=
 		    ERRCODE(EXIT_SUCCESS)) {
@@ -251,7 +255,7 @@ int
 		}
 
 		// Switch back to 32bpp
-		fprintf(stdout, "[12] SWITCH TO 32BPP\n");
+		fprintf(stdout, "[13] SWITCH TO 32BPP\n");
 		if (!set_bpp(fbfd, 32U, &fbink_state)) {
 			fprintf(stderr, "Failed to swap bitdepth, aborting . . .\n");
 			rv = ERRCODE(EXIT_FAILURE);
