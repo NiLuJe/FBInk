@@ -5463,7 +5463,7 @@ static int
 							coords.x = (unsigned short int) (i + x_off);
 							coords.y = (unsigned short int) (j + y_off);
 
-							(*fxpPutPixel)(&coords, &color);
+							put_pixel_Gray8(&coords, &color);
 						} else if (img_px.color.a == 0) {
 							// Transparent! Keep fb as-is.
 						} else {
@@ -5472,10 +5472,10 @@ static int
 							// We need to know what this pixel currently looks like in the framebuffer...
 							coords.x = (unsigned short int) (i + x_off);
 							coords.y = (unsigned short int) (j + y_off);
-							// NOTE: We use the the function pointers directly, to avoid the OOB checks,
+							// NOTE: We use the the pixel functions directly, to avoid the OOB checks,
 							//       because we know we're only processing on-screen pixels,
 							//       and we don't care about the rotation checks at this bpp :).
-							(*fxpGetPixel)(&coords, &bg_color);
+							get_pixel_Gray8(&coords, &bg_color);
 
 							ainv = img_px.color.a ^ 0xFF;
 							// Don't forget to honor inversion
@@ -5484,7 +5484,7 @@ static int
 							color.r = (uint8_t) DIV255(
 							    ((img_px.color.v * img_px.color.a) + (bg_color.r * ainv)));
 
-							(*fxpPutPixel)(&coords, &color);
+							put_pixel_Gray8(&coords, &color);
 						}
 					}
 				}
@@ -5502,10 +5502,10 @@ static int
 						// We need to know what this pixel currently looks like in the framebuffer...
 						coords.x = (unsigned short int) (i + x_off);
 						coords.y = (unsigned short int) (j + y_off);
-						// NOTE: We use the the function pointers directly, to avoid the OOB checks,
+						// NOTE: We use the the pixel function directly, to avoid the OOB checks,
 						//       because we know we're only processing on-screen pixels,
 						//       and we don't care about the rotation checks at this bpp :).
-						(*fxpGetPixel)(&coords, &bg_color);
+						get_pixel_Gray4(&coords, &bg_color);
 
 						// NOTE: In this branch, req_n == 2, so we can do << 1 instead of * 2 ;).
 						pix_offset = (size_t)(((j << 1U) * w) + (i << 1U));
@@ -5522,7 +5522,7 @@ static int
 						color.r = (uint8_t) DIV255(
 						    ((img_px.color.v * img_px.color.a) + (bg_color.r * ainv)));
 
-						(*fxpPutPixel)(&coords, &color);
+						put_pixel_Gray4(&coords, &color);
 					}
 				}
 			}
@@ -5551,9 +5551,14 @@ static int
 						coords.x = (unsigned short int) (i + x_off);
 						coords.y = (unsigned short int) (j + y_off);
 
-						// NOTE: Again, use the function pointer directly, to skip redundant OOB checks,
+						// NOTE: Again, use the pixel functions directly, to skip redundant OOB checks,
 						//       as well as unneeded rotation checks (can't happen at this bpp).
-						(*fxpPutPixel)(&coords, &color);
+						// NOTE: GCC appears to be smart enough to hoist that branch out of the loop ;).
+						if (!fb_is_legacy) {
+							put_pixel_Gray8(&coords, &color);
+						} else {
+							put_pixel_Gray4(&coords, &color);
+						}
 					}
 				}
 			}
@@ -5793,7 +5798,7 @@ static int
 						coords.x = (unsigned short int) (i + x_off);
 						coords.y = (unsigned short int) (j + y_off);
 						(*fxpRotateCoords)(&coords);
-						(*fxpPutPixel)(&coords, &color);
+						put_pixel_RGB565(&coords, &color);
 					} else if (img_px.color.a == 0) {
 						// Transparent! Keep fb as-is.
 					} else {
@@ -5803,7 +5808,7 @@ static int
 						coords.x = (unsigned short int) (i + x_off);
 						coords.y = (unsigned short int) (j + y_off);
 						(*fxpRotateCoords)(&coords);
-						(*fxpGetPixel)(&coords, &bg_color);
+						get_pixel_RGB565(&coords, &bg_color);
 
 						// Don't forget to honor inversion
 						img_px.p ^= invert_rgb;
@@ -5815,7 +5820,7 @@ static int
 						color.b = (uint8_t) DIV255(
 						    ((img_px.color.b * img_px.color.a) + (bg_color.b * ainv)));
 
-						(*fxpPutPixel)(&coords, &color);
+						put_pixel_RGB565(&coords, &color);
 					}
 				}
 			}
@@ -5836,7 +5841,7 @@ static int
 					coords.y = (unsigned short int) (j + y_off);
 					// NOTE: Again, we can only skip the OOB checks at this bpp.
 					(*fxpRotateCoords)(&coords);
-					(*fxpPutPixel)(&coords, &color);
+					put_pixel_RGB565(&coords, &color);
 				}
 			}
 		}
