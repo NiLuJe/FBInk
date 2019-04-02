@@ -623,7 +623,7 @@ int
 							// Accept bogus suboptions to somewhat fake a "takes optional arguments"
 							// behavior, without the syntax quirks the real thing would enforce
 							// on the short option syntax...
-							fprintf(stderr, "Accepting bogus suboption token /%s/\n", value);
+							fprintf(stderr, "Ignoring bogus suboption token /%s/\n", value);
 							break;
 					}
 				}
