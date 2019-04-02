@@ -531,6 +531,9 @@ FBINK_API int fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg);
 //       as a subsequent call to fbink_*_dump with that same struct would otherwise trip the recycling check,
 //       causing a double free!
 //       There are no error codepaths after storage allocation (i.e., you are assured that it has NOT been allocated on error).
+// NOTE: On *most* devices (the exceptions being 4bpp & 16bpp fbs),
+//       the data being dumped is perfectly valid input for fbink_print_raw_data,
+//       in case you'd ever want to do some more exotic things with it...
 FBINK_API int fbink_dump(int fbfd, FBInkDump* restrict dump);
 
 // Dump a specific region of the screen
