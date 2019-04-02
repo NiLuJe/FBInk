@@ -208,7 +208,6 @@ static void
 	    "You can also eschew printing a STRING, and print an IMAGE at the requested coordinates instead:\n"
 	    "\t-g, --image file=PATH,x=NUM,y=NUM,halign=ALIGN,valign=ALIGN\n"
 	    "\t\tSupported ALIGN values: NONE (or LEFT for halign, TOP for valign), CENTER or MIDDLE, EDGE (or RIGHT for halign, BOTTOM for valign).\n"
-	    "\t\tSee -s, --refresh above for supported WFM values, (defaults to GC16 here).\n"
 	    "\n"
 	    "EXAMPLES:\n"
 	    "\tfbink -g file=hello.png\n"
