@@ -29,9 +29,17 @@
 #include "../fbink.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <linux/fb.h>
+#include <sys/ioctl.h>
 
 // We want to return negative values on failure, always
 #define ERRCODE(e) (-(e))
+
+static bool
+    set_fbinfo(uint32_t bpp, int8_t rota)
+{
+
+}
 
 int
     main(void)
@@ -108,6 +116,106 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
+
+	// And now for some fun stuff, provided we're starting from a 32bpp fb...
+	FBInkState fbink_state = { 0 };
+	fbink_get_state(&fbink_cfg, &fbink_state);
+	if (fbink_state.bpp == 32U) {
+		// Switch to 8bpp (c.f., fbdepth.c)
+		struct fb_var_screeninfo fb_vinfo;
+		if (ioctl(fbfd, FBIOGET_VSCREENINFO, &fb_vinfo)) {
+			perror("ioctl GET_V");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+		struct fb_fix_screeninfo fb_finfo;
+		if (ioctl(fbfd, FBIOGET_FSCREENINFO, &fb_finfo)) {
+			perror("ioctl GET_F");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+
+		uint32_t expected_rota = fb_vinfo.rotate;
+		fb_vinfo.bits_per_pixel = (uint32_t) 8U;
+		fb_vinfo.grayscale = (uint32_t) 1U;
+		if (fbink_state.ntx_rota_quirk == NTX_ROTA_ALL_INVERTED) {
+			// NOTE: This should cover the H2O and the few other devices suffering from the same quirk...
+			fb_vinfo.rotate ^= 2;
+		} else if (fbink_state.ntx_rota_quirk  == NTX_ROTA_ODD_INVERTED) {
+			// NOTE: This is for the Forma, which only inverts CW & CCW (i.e., odd numbers)...
+			if ((fb_vinfo.rotate & 0x01) == 1) {
+				fb_vinfo.rotate ^= 2;
+			}
+		}
+
+		if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &fb_vinfo)) {
+			perror("ioctl PUT_V");
+			return false;
+		}
+
+		if (fb_vinfo.rotate != expected_rota) {
+			// Brute-force it until it matches...
+			for (uint32_t i = fb_vinfo.rotate, j = FB_ROTATE_UR; j <= FB_ROTATE_CCW; i = (i + 1U) & 3U, j++) {
+				// If we finally got the right orientation, break the loop
+				if (fb_vinfo.rotate == expected_rota) {
+					break;
+				}
+				// Do the i -> i + 1 -> i dance to be extra sure...
+				// (This is useful on devices where the kernel *always* switches to the invert orientation, c.f., rota.c)
+				fb_vinfo.rotate = i;
+				if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &fb_vinfo)) {
+					perror("ioctl PUT_V");
+					rv = ERRCODE(EXIT_FAILURE);
+					goto cleanup;
+				}
+
+				// Don't do anything extra if that was enough...
+				if (fb_vinfo.rotate == expected_rota) {
+					continue;
+				}
+				// Now for i + 1 w/ wraparound, since the valid rotation range is [0..3] (FB_ROTATE_UR to FB_ROTATE_CCW).
+				// (i.e., a Portrait/Landscape swap to counteract potential side-effects of a kernel-side mandatory invert)
+				uint32_t n   = (i + 1U) & 3U;
+				fb_vinfo.rotate = n;
+				if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &fb_vinfo)) {
+					perror("ioctl PUT_V");
+					rv = ERRCODE(EXIT_FAILURE);
+					goto cleanup;
+				}
+
+				// And back to i, if need be...
+				if (fb_vinfo.rotate == expected_rota) {
+					continue;
+				}
+				fb_vinfo.rotate = i;
+				if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &fb_vinfo)) {
+					perror("ioctl PUT_V");
+					rv = ERRCODE(EXIT_FAILURE);
+					goto cleanup;
+				}
+			}
+		}
+
+		// Re-init fbink so it registers the bitdepth switch
+		fbink_reinit(fbfd, &fbink_cfg);
+
+		// Print random crap, once more
+		if (fbink_print(fbfd, "Wheeee!", &fbink_cfg) < 0) {
+			fprintf(stderr, "Failed to print!\n");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+
+		// Watch the restore fail because of a bitdepth mismatch
+		if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
+			fprintf(stderr, "Failed to restore fb, as expected :)\n");
+		} else {
+			fprintf(stderr, "Err, dump was restored *despite* a bitdepth mismatch ?!\n");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	}
+
 
 	// Cleanup
 cleanup:
