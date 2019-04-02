@@ -183,7 +183,7 @@ static void
 	    "\t-s, --refresh top=NUM,left=NUM,width=NUM,height=NUM,dither=NAME\n"
 	    "\n"
 	    "EXAMPLES:\n"
-	    "\tfbink --refresh=top=20,left=10,width=500,height=600,dither=ORDERED -W GC16\n"
+	    "\tfbink -s top=20,left=10,width=500,height=600,dither=ORDERED -W GC16\n"
 	    "\t\tRefreshes a 500x600 rectangle with its top-left corner at coordinates (10, 20) with a GC16 waveform mode and ORDERED hardware dithering.\n"
 	    "\n"
 	    "NOTES:\n"
@@ -197,8 +197,9 @@ static void
 #ifndef FBINK_FOR_KINDLE
 	    "\tNote that the arguments are passed as-is to the ioctl, no viewport or rotation quirks are applied!\n"
 #endif
-	    "\tWhen using the short form, suboptions must *immediately* follow the flag, without any space (i.e., -swidth=50,height=50 and not -s width=50,height=50).\n"
-	    "\tThis is a quirk to allow using -s on its own without any suboptions, for a full-screen refresh.\n"
+	    "\tIf you just want a full-screen refresh (which will honor -f, --flash), simply pass a single bogus suboption,\n"
+	    "\tf.g., fbink -s foo\n"
+	    "\n"
 	    "\tSpecifying one or more STRING takes precedence over this mode.\n"
 #ifdef FBINK_WITH_IMAGE
 	    "\n"
@@ -374,7 +375,7 @@ int
 					      { "halfway", no_argument, NULL, 'M' },
 					      { "padded", no_argument, NULL, 'p' },
 					      { "rpadded", no_argument, NULL, 'r' },
-					      { "refresh", optional_argument, NULL, 's' },
+					      { "refresh", required_argument, NULL, 's' },
 					      { "size", required_argument, NULL, 'S' },
 					      { "font", required_argument, NULL, 'F' },
 					      { "verbose", no_argument, NULL, 'v' },
@@ -486,8 +487,8 @@ int
 	char*     bdit_ot_file   = NULL;
 	bool      errfnd         = false;
 
-	while ((opt = getopt_long(
-		    argc, argv, "y:x:Y:X:hfcmMprs::S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bDW:H", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "y:x:Y:X:hfcmMprs:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bDW:H", opts, &opt_index)) !=
+	       -1) {
 		switch (opt) {
 			case 'y':
 				if (strtol_hi(opt, NULL, optarg, &fbink_cfg.row) < 0) {
@@ -532,8 +533,7 @@ int
 				break;
 			case 's':
 				subopts = optarg;
-				// NOTE: We have to check for optarg being 0 first, because this takes *optional* arguments...
-				while (optarg != 0 && *subopts != '\0' && !errfnd) {
+				while (*subopts != '\0' && !errfnd) {
 					switch (getsubopt(&subopts, refresh_token, &value)) {
 						case TOP_OPT:
 							if (value == NULL) {
@@ -620,8 +620,10 @@ int
 							}
 							break;
 						default:
-							fprintf(stderr, "No match found for token: /%s/\n", value);
-							errfnd = true;
+							// Accept bogus suboptions to somewhat fake a "takes optional arguments"
+							// behavior, without the syntax quirks the real thing would enforce
+							// on the short option syntax...
+							fprintf(stderr, "Accepting bogus suboption token /%s/\n", value);
 							break;
 					}
 				}
