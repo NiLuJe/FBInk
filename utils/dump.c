@@ -145,6 +145,7 @@ int
 	}
 
 	// Dump
+	fprintf(stdout, "[01] DUMP FULL\n");
 	if (fbink_dump(fbfd, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to dump fb, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
@@ -152,6 +153,7 @@ int
 	}
 
 	// Print random crap
+	fprintf(stdout, "[02] PRINT\n");
 	fbink_cfg.is_centered = true;
 	fbink_cfg.is_padded   = true;
 	fbink_cfg.is_halfway  = true;
@@ -164,6 +166,7 @@ int
 	}
 
 	// Restore
+	fprintf(stdout, "[03] RESTORE\n");
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
@@ -171,6 +174,7 @@ int
 	}
 
 	// Dump a region at the center of the screen, with a few funky offsets to test that
+	fprintf(stdout, "[04] DUMP REGION\n");
 	fbink_cfg.halign = CENTER;
 	fbink_cfg.valign = CENTER;
 	if (fbink_region_dump(fbfd, -650, -50, 501, 250, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
@@ -180,6 +184,7 @@ int
 	}
 
 	// Print random crap, again
+	fprintf(stdout, "[05] PRINT\n");
 	if (fbink_print(fbfd, "Wheeee!", &fbink_cfg) < 0) {
 		fprintf(stderr, "Failed to print!\n");
 		rv = ERRCODE(EXIT_FAILURE);
@@ -187,6 +192,7 @@ int
 	}
 
 	// Restore, again
+	fprintf(stdout, "[06] RESTORE\n");
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
@@ -198,6 +204,7 @@ int
 	fbink_get_state(&fbink_cfg, &fbink_state);
 	if (fbink_state.bpp == 32U) {
 		// Switch to 8bpp (c.f., fbdepth.c)
+		fprintf(stdout, "[07] SWITCH TO 8BPP\n");
 		if (!set_bpp(fbfd, 8U, &fbink_state)) {
 			fprintf(stderr, "Failed to swap bitdepth, aborting . . .\n");
 			rv = ERRCODE(EXIT_FAILURE);
@@ -205,9 +212,11 @@ int
 		}
 
 		// Re-init fbink so it registers the bitdepth switch
+		fprintf(stdout, "[08] REINIT\n");
 		fbink_reinit(fbfd, &fbink_cfg);
 
 		// Print random crap, once more
+		fprintf(stdout, "[09] PRINT\n");
 		if (fbink_print(fbfd, "Wheeee!", &fbink_cfg) < 0) {
 			fprintf(stderr, "Failed to print!\n");
 			rv = ERRCODE(EXIT_FAILURE);
@@ -215,6 +224,7 @@ int
 		}
 
 		// Watch the restore fail because of a bitdepth mismatch
+		fprintf(stdout, "[10] RESTORE MISMATCH\n");
 		if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 			fprintf(stderr, "Failed to restore fb, as expected :)\n");
 		} else {
@@ -223,8 +233,17 @@ int
 			goto cleanup;
 		}
 
+		// We need to do a *full* reinit (i.e., init ;p) to disable H/V centering,
+		// so that fbink_print_raw_data honors our dump coordinates as-is, without re-centering them ;).
+		fprintf(stdout, "[11] FULL REINIT\n");
+		fbink_cfg.is_centered = false;
+		fbink_cfg.is_halfway  = false;
+		fbink_init(fbfd, &fbink_cfg);
+
 		// Then try to ninja restore it via fbink_print_raw_data...
-		if (fbink_print_raw_data(fbfd, dump.data, dump.w, dump.h, dump.size, dump.x, dump.y, &fbink_cfg) !=
+		fprintf(stdout, "[12] PRINT RAW\n");
+		if (fbink_print_raw_data(
+			fbfd, dump.data, dump.w, dump.h, dump.size, (short int) dump.x, (short int) dump.y, &fbink_cfg) !=
 		    ERRCODE(EXIT_SUCCESS)) {
 			fprintf(stderr, "Failed to print raw data!\n");
 			rv = ERRCODE(EXIT_FAILURE);
@@ -232,6 +251,7 @@ int
 		}
 
 		// Switch back to 32bpp
+		fprintf(stdout, "[12] SWITCH TO 32BPP\n");
 		if (!set_bpp(fbfd, 32U, &fbink_state)) {
 			fprintf(stderr, "Failed to swap bitdepth, aborting . . .\n");
 			rv = ERRCODE(EXIT_FAILURE);

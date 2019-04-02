@@ -298,7 +298,8 @@ FBINK_API int fbink_close(int fbfd);
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // fbink_cfg:		Pointer to an FBInkConfig struct
 //				If you wish to customize them, the fields:
-//				is_centered, fontmult, fontname, fg_color, bg_color, no_viewport, is_verbose & is_quiet
+//				is_centered, is_halfway, fontmult, fontname,
+//				fg_color, bg_color, no_viewport, is_verbose & is_quiet
 //				MUST be set beforehand.
 //				This means you MUST call fbink_init() again when you update them, too!
 // NOTE: By virtue of, well, setting global variables, do NOT consider this thread-safe.
