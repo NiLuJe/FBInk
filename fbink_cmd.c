@@ -533,6 +533,7 @@ int
 				break;
 			case 's':
 				subopts = optarg;
+				// NOTE: We have to check for optarg being 0 first, because this takes *optional* arguments...
 				while (optarg != 0 && *subopts != '\0' && !errfnd) {
 					switch (getsubopt(&subopts, refresh_token, &value)) {
 						case TOP_OPT:
