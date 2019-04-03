@@ -115,7 +115,7 @@ static void
     put_pixel_Gray8(const FBInkCoordinates* restrict coords, const FBInkColor* restrict color)
 {
 	// calculate the pixel's byte offset inside the buffer
-	size_t pix_offset = coords->x + coords->y * fInfo.line_length;
+	size_t pix_offset = coords->x + (coords->y * fInfo.line_length);
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	*((unsigned char*) (fbPtr + pix_offset)) = color->r;
@@ -126,7 +126,7 @@ static void
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 3 as every pixel is 3 consecutive bytes
-	size_t pix_offset = coords->x * 3U + coords->y * fInfo.line_length;
+	size_t pix_offset = (coords->x * 3U) + (coords->y * fInfo.line_length);
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	*((unsigned char*) (fbPtr + pix_offset))      = color->b;
@@ -407,7 +407,7 @@ static void
     get_pixel_Gray8(const FBInkCoordinates* restrict coords, FBInkColor* restrict color)
 {
 	// calculate the pixel's byte offset inside the buffer
-	size_t pix_offset = coords->x + coords->y * fInfo.line_length;
+	size_t pix_offset = coords->x + (coords->y * fInfo.line_length);
 
 	color->r = *((unsigned char*) (fbPtr + pix_offset));
 }
@@ -417,7 +417,7 @@ static void
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 3 as every pixel is 3 consecutive bytes
-	size_t pix_offset = coords->x * 3U + coords->y * fInfo.line_length;
+	size_t pix_offset = (coords->x * 3U) + (coords->y * fInfo.line_length);
 
 	color->b = *((unsigned char*) (fbPtr + pix_offset));
 	color->g = *((unsigned char*) (fbPtr + pix_offset + 1U));
