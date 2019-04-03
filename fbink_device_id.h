@@ -121,14 +121,14 @@ static const char* kobo_disp_panel[] = { "6\" Left EPD",     "6\" Right EPD",   
 */
 // And for the various NTX/Kobo CPUs...
 /*
-static const char* kobo_cpus[] = { "mx35",   "m166e", "mx50", "x86",    "mx6",    "mx6sl",
-				   "it8951", "i386",  "mx7d", "mx6ull", "mx6sll", "mx6dl" };
+static const char* kobo_cpus[] = { "mx35", "m166e", "mx50",   "x86",    "mx6",   "mx6sl", "it8951",
+				   "i386", "mx7d",  "mx6ull", "mx6sll", "mx6dl", "rk3368" };
 */
 // And for the various NTX/Kobo Display Resolutions...
 /*
-static const char* kobo_disp_res[] = { "800x600",   "1024x758",   "1024x768",    "1440x1080", "1366x768",
-				       "1448x1072", "1600x1200",  "400x375x2",   "1872x1404", "960x540",
-				       "2200x1650", "1440x640x4", "1600x1200x4", "1920x1440" };
+static const char* kobo_disp_res[] = { "800x600",   "1024x758",  "1024x768",   "1440x1080",   "1366x768",
+				       "1448x1072", "1600x1200", "400x375x2",  "1872x1404",   "960x540",
+				       "NC",        "2200x1650", "1440x640x4", "1600x1200x4", "1920x1440" };
 */
 // And for the various NTX/Kobo Display Bus Widths...
 /*
