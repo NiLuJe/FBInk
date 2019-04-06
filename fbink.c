@@ -512,12 +512,39 @@ static void
 	      unsigned short int h,
 	      const FBInkColor* restrict color)
 {
-	FBInkCoordinates coords = { 0U };
-	for (unsigned short int cy = 0U; cy < h; cy++) {
-		for (unsigned short int cx = 0U; cx < w; cx++) {
-			coords.x = (unsigned short int) (x + cx);
-			coords.y = (unsigned short int) (y + cy);
-			put_pixel(coords, color);
+	// Bounds-checking, to ensure the memset won't do stupid things...
+	if (x + w > screenWidth) {
+		w = (unsigned short int) (w - ((unsigned short int) (x + w) - screenWidth));
+		LOG("Chopped rectangle width to %hu", w);
+	}
+	if (y + h > screenHeight) {
+		h = (unsigned short int) (h - ((unsigned short int) (y + h) - screenHeight));
+		LOG("Chopped rectangle height to %hu", h);
+	}
+
+	if (vInfo.bits_per_pixel < 8U) {
+		// Go with pixel plotting @ 4bpp to keep this simple...
+		FBInkCoordinates coords = { 0U };
+		for (unsigned short int cy = 0U; cy < h; cy++) {
+			for (unsigned short int cx = 0U; cx < w; cx++) {
+				coords.x = (unsigned short int) (x + cx);
+				coords.y = (unsigned short int) (y + cy);
+				put_pixel_Gray4(&coords, color);
+			}
+		}
+	} else {
+		struct mxcfb_rect region = {
+			.top    = y,
+			.left   = x,
+			.width  = w,
+			.height = h,
+		};
+		uint8_t bpp = (uint8_t)(vInfo.bits_per_pixel >> 3U);
+
+		(*fxpRotateRegion)(&region);
+		for (size_t j = region.top; j < region.top + region.height; j++) {
+			uint8_t* p = fbPtr + (fInfo.line_length * j) + (bpp * region.left);
+			memset(p, color->r, bpp * region.width);
 		}
 	}
 	LOG("Filled a %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
