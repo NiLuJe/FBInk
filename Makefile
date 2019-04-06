@@ -85,6 +85,8 @@ ifndef DEBUG
 	#EXTRA_CFLAGS+=-fopt-info-vec-missed=vecmissed.txt
 	# Much less verbose info about successfully (or partially successfully) vectorized sections
 	#EXTRA_CFLAGS+=-fopt-info-vec
+	# GProf
+	#EXTRA_CFLAGS+=-g -pg -fno-omit-frame-pointer
 endif
 
 # Enforce LTO if need be (utils won't link without it).
