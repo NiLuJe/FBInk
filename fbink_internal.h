@@ -401,7 +401,11 @@ static void get_pixel(FBInkCoordinates, FBInkColor* restrict);
 #	define MUL255(v) ((v << 8U) - v)
 #endif
 
-static void fill_rect(unsigned short int, unsigned short int, unsigned short int, unsigned short int, uint8_t);
+static void fill_rect(unsigned short int,
+		      unsigned short int,
+		      unsigned short int,
+		      unsigned short int,
+		      const FBInkColor* restrict);
 static void clear_screen(int UNUSED_BY_NOTKINDLE, uint8_t, bool UNUSED_BY_NOTKINDLE);
 
 static const unsigned char* font8x8_get_bitmap(uint32_t);

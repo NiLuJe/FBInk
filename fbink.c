@@ -506,7 +506,11 @@ static void
 
 // Helper function to draw a rectangle in given color
 static void
-    fill_rect(unsigned short int x, unsigned short int y, unsigned short int w, unsigned short int h, uint8_t v)
+    fill_rect(unsigned short int x,
+	      unsigned short int y,
+	      unsigned short int w,
+	      unsigned short int h,
+	      const FBInkColor* restrict color)
 {
 	// Bounds-checking, to ensure the memset won't do stupid things...
 	if (x + w > screenWidth) {
@@ -521,12 +525,11 @@ static void
 	if (vInfo.bits_per_pixel < 8U) {
 		// Go with pixel plotting @ 4bpp to keep this simple...
 		FBInkCoordinates coords = { 0U };
-		FBInkColor       color  = { v, v, v };
 		for (unsigned short int cy = 0U; cy < h; cy++) {
 			for (unsigned short int cx = 0U; cx < w; cx++) {
 				coords.x = (unsigned short int) (x + cx);
 				coords.y = (unsigned short int) (y + cy);
-				put_pixel_Gray4(&coords, &color);
+				put_pixel_Gray4(&coords, color);
 			}
 		}
 	} else {
@@ -541,7 +544,7 @@ static void
 		(*fxpRotateRegion)(&region);
 		for (size_t j = region.top; j < region.top + region.height; j++) {
 			uint8_t* p = fbPtr + (fInfo.line_length * j) + (bpp * region.left);
-			memset(p, v, bpp * region.width);
+			memset(p, color->r, bpp * region.width);
 		}
 	}
 	LOG("Filled a %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
@@ -841,7 +844,7 @@ static struct mxcfb_rect
 			    (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			    pixel_offset,    // Don't append hoffset here, to make it clear stuff moved to the right.
 			    FONTH,
-			    bgcolor);
+			    &bgC);
 			// Correct width, to include that bit of content, too, if needed
 			if (region.width < screenWidth) {
 				region.width += pixel_offset;
@@ -874,7 +877,7 @@ static struct mxcfb_rect
 			    (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			    pixel_offset,    // Don't append abs(hoffset) here, to make it clear stuff moved to the left.
 			    FONTH,
-			    bgcolor);
+			    &bgC);
 			// If it's not already the case, update region to the full width,
 			// because we've just plugged a hole at the very right edge of a full line.
 			if (region.width < screenWidth) {
@@ -4778,7 +4781,7 @@ int
 
 	// ... unless we were asked to skip background pixels... ;).
 	if (!fbink_cfg->is_bgless) {
-		fill_rect(left_pos, top_pos, (unsigned short int) screenWidth, FONTH, bgcolor);
+		fill_rect(left_pos, top_pos, (unsigned short int) screenWidth, FONTH, &bgC);
 	}
 
 	// NOTE: We always use the same BG_ constant in order to get a rough inverse by just swapping to the inverted LUT ;).
@@ -4811,9 +4814,9 @@ int
 		unsigned short int empty_left  = (unsigned short int) (fill_left + fill_width);
 
 		// Draw the border...
-		fill_rect(fill_left, top_pos, bar_width, FONTH, borderC.r);
+		fill_rect(fill_left, top_pos, bar_width, FONTH, &borderC);
 		// Draw the fill bar, which we want to override the border with!
-		fill_rect(fill_left, top_pos, fill_width, FONTH, fgcolor);
+		fill_rect(fill_left, top_pos, fill_width, FONTH, &fgC);
 		// And the empty bar...
 		// NOTE: With a minor tweak to keep a double-width border on the bottom & right sides ;).
 		if (value == 0U) {
@@ -4822,13 +4825,13 @@ int
 				  (unsigned short int) (top_pos + 1U),
 				  (unsigned short int) MAX(0, empty_width - 3),
 				  (unsigned short int) (FONTH - 3U),
-				  emptyC.r);
+				  &emptyC);
 		} else {
 			fill_rect(empty_left,
 				  (unsigned short int) (top_pos + 1U),
 				  (unsigned short int) MAX(0, empty_width - 2),
 				  (unsigned short int) (FONTH - 3U),
-				  emptyC.r);
+				  &emptyC);
 		}
 
 		// We enforce centering for the percentage text...
@@ -4862,13 +4865,13 @@ int
 		unsigned short int bar_left  = (unsigned short int) (left_pos + (0.05f * (float) viewWidth) + 0.5f);
 
 		// Draw the border...
-		fill_rect(bar_left, top_pos, (unsigned short int) (bar_width), FONTH, borderC.r);
+		fill_rect(bar_left, top_pos, (unsigned short int) (bar_width), FONTH, &borderC);
 		// Draw the empty bar...
 		fill_rect((unsigned short int) (bar_left + 1U),
 			  (unsigned short int) (top_pos + 1U),
 			  (unsigned short int) MAX(0, bar_width - 3),
 			  (unsigned short int) (FONTH - 3U),
-			  emptyC.r);
+			  &emptyC);
 
 		// We want our thumb to take 20% of the bar's width
 		unsigned short int thumb_width = (unsigned short int) ((0.20f * bar_width) + 0.5f);
@@ -4877,7 +4880,7 @@ int
 		unsigned short int thumb_left = (unsigned short int) (bar_left + ((0.05f * bar_width) * value) + 0.5f);
 
 		// And finally, draw the thumb, which we want to override the border with!
-		fill_rect(thumb_left, top_pos, thumb_width, FONTH, fgcolor);
+		fill_rect(thumb_left, top_pos, thumb_width, FONTH, &fgC);
 
 		// Draw an ellipsis in the middle of the thumb...
 		uint8_t ellipsis_size = (uint8_t)(FONTH / 3U);
@@ -4889,7 +4892,7 @@ int
 				  (unsigned short int) (top_pos + ellipsis_size),
 				  ellipsis_size,
 				  ellipsis_size,
-				  bgcolor);
+				  &bgC);
 		}
 	}
 
