@@ -522,30 +522,74 @@ static void
 		LOG("Chopped rectangle height to %hu", h);
 	}
 
-	if (vInfo.bits_per_pixel < 8U) {
-		// Go with pixel plotting @ 4bpp to keep this simple...
-		FBInkCoordinates coords = { 0U };
-		for (unsigned short int cy = 0U; cy < h; cy++) {
-			for (unsigned short int cx = 0U; cx < w; cx++) {
-				coords.x = (unsigned short int) (x + cx);
-				coords.y = (unsigned short int) (y + cy);
-				put_pixel_Gray4(&coords, color);
+	switch (vInfo.bits_per_pixel) {
+		case 4U: {
+			// Go with pixel plotting @ 4bpp to keep this simple...
+			FBInkCoordinates coords = { 0U };
+			for (unsigned short int cy = 0U; cy < h; cy++) {
+				for (unsigned short int cx = 0U; cx < w; cx++) {
+					coords.x = (unsigned short int) (x + cx);
+					coords.y = (unsigned short int) (y + cy);
+					put_pixel_Gray4(&coords, color);
+				}
 			}
-		}
-	} else {
-		struct mxcfb_rect region = {
-			.top    = y,
-			.left   = x,
-			.width  = w,
-			.height = h,
-		};
-		uint8_t bpp = (uint8_t)(vInfo.bits_per_pixel >> 3U);
+		} break;
+		case 8U: {
+			struct mxcfb_rect region = {
+				.top    = y,
+				.left   = x,
+				.width  = w,
+				.height = h,
+			};
 
-		(*fxpRotateRegion)(&region);
-		for (size_t j = region.top; j < region.top + region.height; j++) {
-			uint8_t* p = fbPtr + (fInfo.line_length * j) + (bpp * region.left);
-			memset(p, color->r, bpp * region.width);
-		}
+			(*fxpRotateRegion)(&region);
+			for (size_t j = region.top; j < region.top + region.height; j++) {
+				uint8_t* p = fbPtr + (fInfo.line_length * j) + region.left;
+				memset(p, color->r, region.width);
+			}
+		} break;
+		case 16U: {
+			struct mxcfb_rect region = {
+				.top    = y,
+				.left   = x,
+				.width  = w,
+				.height = h,
+			};
+
+			(*fxpRotateRegion)(&region);
+			for (size_t j = region.top; j < region.top + region.height; j++) {
+				uint8_t* p = fbPtr + (fInfo.line_length * j) + (region.left << 1);
+				memset(p, color->r, region.width << 1);
+			}
+		} break;
+		case 24U: {
+			struct mxcfb_rect region = {
+				.top    = y,
+				.left   = x,
+				.width  = w,
+				.height = h,
+			};
+
+			(*fxpRotateRegion)(&region);
+			for (size_t j = region.top; j < region.top + region.height; j++) {
+				uint8_t* p = fbPtr + (fInfo.line_length * j) + (region.left * 3U);
+				memset(p, color->r, region.width * 3U);
+			}
+		} break;
+		case 32U: {
+			struct mxcfb_rect region = {
+				.top    = y,
+				.left   = x,
+				.width  = w,
+				.height = h,
+			};
+
+			(*fxpRotateRegion)(&region);
+			for (size_t j = region.top; j < region.top + region.height; j++) {
+				uint8_t* p = fbPtr + (fInfo.line_length * j) + (region.left << 2);
+				memset(p, color->r, region.width << 2);
+			}
+		} break;
 	}
 	LOG("Filled a %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
 }
