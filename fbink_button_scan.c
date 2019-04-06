@@ -27,9 +27,9 @@ static bool
     is_onboard_state(bool mounted)
 {
 	// c.f., http://program-nix.blogspot.com/2008/08/c-language-check-filesystem-is-mounted.html
-	FILE*          mtab       = NULL;
-	struct mntent* part       = NULL;
-	bool           is_mounted = false;
+	FILE* restrict mtab                = NULL;
+	struct mntent* restrict part       = NULL;
+	bool                    is_mounted = false;
 
 	if ((mtab = setmntent("/proc/mounts", "r")) != NULL) {
 		while ((part = getmntent(mtab)) != NULL) {

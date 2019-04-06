@@ -540,8 +540,8 @@ static void
 		if (is_flashing && v == eInkFGCMap[BG_WHITE]) {
 			if (ioctl(fbfd, FBIO_EINK_CLEAR_SCREEN, EINK_CLEAR_SCREEN) < 0) {
 				// NOTE: perror() is not thread-safe...
-				char  buf[256];
-				char* errstr = strerror_r(errno, buf, sizeof(buf));
+				char        buf[256];
+				const char* errstr = strerror_r(errno, buf, sizeof(buf));
 				WARN("FBIO_EINK_CLEAR_SCREEN: %s", errstr);
 				// Just warn, this is non-fatal ;).
 			}
@@ -1141,8 +1141,8 @@ static int
 
 	if (rv < 0) {
 		// NOTE: perror() is not thread-safe...
-		char  buf[256];
-		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		char        buf[256];
+		const char* errstr = strerror_r(errno, buf, sizeof(buf));
 		if (is_fs) {
 			WARN("FBIO_EINK_UPDATE_DISPLAY: %s", errstr);
 		} else {
@@ -1183,8 +1183,8 @@ static int
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
 
 	if (rv < 0) {
-		char  buf[256];
-		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		char        buf[256];
+		const char* errstr = strerror_r(errno, buf, sizeof(buf));
 		WARN("MXCFB_SEND_UPDATE: %s", errstr);
 		if (errno == EINVAL) {
 			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
@@ -1209,8 +1209,8 @@ static int
 		}
 
 		if (rv < 0) {
-			char  buf[256];
-			char* errstr = strerror_r(errno, buf, sizeof(buf));
+			char        buf[256];
+			const char* errstr = strerror_r(errno, buf, sizeof(buf));
 			if (deviceQuirks.isKindlePearlScreen) {
 				WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL: %s", errstr);
 			} else {
@@ -1269,8 +1269,8 @@ static int
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_KOA2, &update);
 
 	if (rv < 0) {
-		char  buf[256];
-		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		char        buf[256];
+		const char* errstr = strerror_r(errno, buf, sizeof(buf));
 		WARN("MXCFB_SEND_UPDATE_KOA2: %s", errstr);
 		if (errno == EINVAL) {
 			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
@@ -1291,8 +1291,8 @@ static int
 		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_marker);
 
 		if (rv < 0) {
-			char  buf[256];
-			char* errstr = strerror_r(errno, buf, sizeof(buf));
+			char        buf[256];
+			const char* errstr = strerror_r(errno, buf, sizeof(buf));
 			WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s", errstr);
 			return ERRCODE(EXIT_FAILURE);
 		} else {
@@ -1346,8 +1346,8 @@ static int
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_PW4, &update);
 
 	if (rv < 0) {
-		char  buf[256];
-		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		char        buf[256];
+		const char* errstr = strerror_r(errno, buf, sizeof(buf));
 		WARN("MXCFB_SEND_UPDATE_PW4: %s", errstr);
 		if (errno == EINVAL) {
 			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
@@ -1368,8 +1368,8 @@ static int
 		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_marker);
 
 		if (rv < 0) {
-			char  buf[256];
-			char* errstr = strerror_r(errno, buf, sizeof(buf));
+			char        buf[256];
+			const char* errstr = strerror_r(errno, buf, sizeof(buf));
 			WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s", errstr);
 			return ERRCODE(EXIT_FAILURE);
 		} else {
@@ -1412,7 +1412,7 @@ static int
 
 	if (rv < 0) {
 		char buf[256];
-		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		const char* errstr = strerror_r(errno, buf, sizeof(buf));
 		WARN("MXCFB_SEND_UPDATE: %s", errstr);
 		if (errno == EINVAL) {
 			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
@@ -1431,7 +1431,7 @@ static int
 
 		if (rv < 0) {
 			char buf[256];
-			char* errstr = strerror_r(errno, buf, sizeof(buf));
+			const char* errstr = strerror_r(errno, buf, sizeof(buf));
 			WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s", errstr);
 			return ERRCODE(EXIT_FAILURE);
 		} else {
@@ -1472,8 +1472,8 @@ static int
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V1_NTX, &update);
 
 	if (rv < 0) {
-		char  buf[256];
-		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		char        buf[256];
+		const char* errstr = strerror_r(errno, buf, sizeof(buf));
 		WARN("MXCFB_SEND_UPDATE_V1_NTX: %s", errstr);
 		if (errno == EINVAL) {
 			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
@@ -1489,8 +1489,8 @@ static int
 		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1, &marker);
 
 		if (rv < 0) {
-			char  buf[256];
-			char* errstr = strerror_r(errno, buf, sizeof(buf));
+			char        buf[256];
+			const char* errstr = strerror_r(errno, buf, sizeof(buf));
 			WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1: %s", errstr);
 			return ERRCODE(EXIT_FAILURE);
 		} else {
@@ -1538,8 +1538,8 @@ static int
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V2, &update);
 
 	if (rv < 0) {
-		char  buf[256];
-		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		char        buf[256];
+		const char* errstr = strerror_r(errno, buf, sizeof(buf));
 		WARN("MXCFB_SEND_UPDATE_V2: %s", errstr);
 		if (errno == EINVAL) {
 			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
@@ -1560,8 +1560,8 @@ static int
 		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3, &update_marker);
 
 		if (rv < 0) {
-			char  buf[256];
-			char* errstr = strerror_r(errno, buf, sizeof(buf));
+			char        buf[256];
+			const char* errstr = strerror_r(errno, buf, sizeof(buf));
 			WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3: %s", errstr);
 			return ERRCODE(EXIT_FAILURE);
 		} else {
@@ -2366,8 +2366,8 @@ int
 	FILE*          f             = fopen(filename, "r" STDIO_CLOEXEC);
 	unsigned char* restrict data = NULL;
 	if (!f) {
-		char  buf[256];
-		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		char        buf[256];
+		const char* errstr = strerror_r(errno, buf, sizeof(buf));
 		WARN("fopen: %s", errstr);
 		otInit = false;
 		return ERRCODE(EXIT_FAILURE);
@@ -2375,8 +2375,8 @@ int
 		int         fd = fileno(f);
 		struct stat st;
 		if (fstat(fd, &st) == -1) {
-			char  buf[256];
-			char* errstr = strerror_r(errno, buf, sizeof(buf));
+			char        buf[256];
+			const char* errstr = strerror_r(errno, buf, sizeof(buf));
 			WARN("fstat: %s", errstr);
 			fclose(f);
 			otInit = false;
@@ -2575,8 +2575,8 @@ static int
 	//       See also the Cervantes quirk documented in clear_screen...
 	fbPtr = (unsigned char*) mmap(NULL, fInfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
 	if (fbPtr == MAP_FAILED) {
-		char  buf[256];
-		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		char        buf[256];
+		const char* errstr = strerror_r(errno, buf, sizeof(buf));
 		WARN("mmap: %s", errstr);
 		fbPtr = NULL;
 		return ERRCODE(EXIT_FAILURE);
@@ -2592,8 +2592,8 @@ static int
     unmap_fb(void)
 {
 	if (munmap(fbPtr, fInfo.smem_len) < 0) {
-		char  buf[256];
-		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		char        buf[256];
+		const char* errstr = strerror_r(errno, buf, sizeof(buf));
 		WARN("munmap: %s", errstr);
 		return ERRCODE(EXIT_FAILURE);
 	} else {
@@ -2621,8 +2621,8 @@ int
 
 	if (fbfd != FBFD_AUTO) {
 		if (close(fbfd) < 0) {
-			char  buf[256];
-			char* errstr = strerror_r(errno, buf, sizeof(buf));
+			char        buf[256];
+			const char* errstr = strerror_r(errno, buf, sizeof(buf));
 			WARN("close: %s", errstr);
 			return ERRCODE(EXIT_FAILURE);
 		}
@@ -2886,8 +2886,8 @@ int
 	//       (+ 1 'wide' NULL, wide to make sure u8_strlen won't skip over it).
 	line = calloc((MAXCOLS + 1U) * 4U, sizeof(*line));
 	if (line == NULL) {
-		char  buf[256];
-		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		char        buf[256];
+		const char* errstr = strerror_r(errno, buf, sizeof(buf));
 		WARN("calloc (line): %s", errstr);
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
@@ -3222,8 +3222,8 @@ int
 
 	// See if vsnprintf made a boo-boo
 	if (ret < 0) {
-		char  buf[256];
-		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		char        buf[256];
+		const char* errstr = strerror_r(errno, buf, sizeof(buf));
 		WARN("initial vsnprintf: %s", errstr);
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
@@ -3235,8 +3235,8 @@ int
 	//       and the OS is smart enough to make it fast if we don't use the full space anyway (CoW zeroing).
 	buffer = calloc(size, sizeof(*buffer));
 	if (buffer == NULL) {
-		char  buf[256];
-		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		char        buf[256];
+		const char* errstr = strerror_r(errno, buf, sizeof(buf));
 		WARN("calloc: %s", errstr);
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
@@ -3249,8 +3249,8 @@ int
 
 	// See if vsnprintf made a boo-boo, one final time
 	if (ret < 0) {
-		char  buf[256];
-		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		char        buf[256];
+		const char* errstr = strerror_r(errno, buf, sizeof(buf));
 		WARN("vsnprintf: %s", errstr);
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
@@ -6061,8 +6061,8 @@ int
 	// Start by allocating enough memory for a full dump of the visible screen...
 	dump->data = calloc((size_t)(fInfo.line_length * vInfo.yres), sizeof(*dump->data));
 	if (dump->data == NULL) {
-		char  buf[256];
-		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		char        buf[256];
+		const char* errstr = strerror_r(errno, buf, sizeof(buf));
 		WARN("calloc (dump->data): %s", errstr);
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
@@ -6266,8 +6266,8 @@ int
 		dump->data = calloc((size_t)((region.width * bpp) * region.height), sizeof(*dump->data));
 	}
 	if (dump->data == NULL) {
-		char  buf[256];
-		char* errstr = strerror_r(errno, buf, sizeof(buf));
+		char        buf[256];
+		const char* errstr = strerror_r(errno, buf, sizeof(buf));
 		WARN("calloc (dump->data): %s", errstr);
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
