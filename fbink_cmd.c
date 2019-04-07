@@ -207,8 +207,10 @@ static void
 	    "\n"
 	    "\n"
 	    "You can also eschew printing a STRING, and print an IMAGE at the requested coordinates instead:\n"
-	    "\t-g, --image file=PATH,x=NUM,y=NUM,halign=ALIGN,valign=ALIGN\n"
+	    "\t-g, --image file=PATH,x=NUM,y=NUM,halign=ALIGN,valign=ALIGN,dither\n"
 	    "\t\tSupported ALIGN values: NONE (or LEFT for halign, TOP for valign), CENTER or MIDDLE, EDGE (or RIGHT for halign, BOTTOM for valign).\n"
+	    "\t\tIf dither is specified, *software* dithering (ordered, 8x8) will be applied to the image, ensuring it'll match the eInk palette exactly.\n"
+	    "\t\tThis is *NOT* mutually exclusive with -D, --dither!\n"
 	    "\n"
 	    "EXAMPLES:\n"
 	    "\tfbink -g file=hello.png\n"
@@ -423,6 +425,7 @@ int
 		YOFF_OPT,
 		HALIGN_OPT,
 		VALIGN_OPT,
+		SW_DITHER_OPT,
 	};
 	enum
 	{
@@ -444,8 +447,13 @@ int
 #pragma clang diagnostic ignored "-Wincompatible-pointer-types-discards-qualifiers"
 	char* const refresh_token[]  = { [TOP_OPT] = "top",       [LEFT_OPT] = "left",     [WIDTH_OPT] = "width",
                                         [HEIGHT_OPT] = "height", [DITHER_OPT] = "dither", NULL };
-	char* const image_token[]    = { [FILE_OPT] = "file",     [XOFF_OPT] = "x",        [YOFF_OPT] = "y",
-                                      [HALIGN_OPT] = "halign", [VALIGN_OPT] = "valign", NULL };
+	char* const image_token[]    = { [FILE_OPT]      = "file",
+                                      [XOFF_OPT]      = "x",
+                                      [YOFF_OPT]      = "y",
+                                      [HALIGN_OPT]    = "halign",
+                                      [VALIGN_OPT]    = "valign",
+                                      [SW_DITHER_OPT] = "dither",
+                                      NULL };
 	char* const truetype_token[] = { [REGULAR_OPT]    = "regular",
 					 [BOLD_OPT]       = "bold",
 					 [ITALIC_OPT]     = "italic",
@@ -799,6 +807,9 @@ int
 								errfnd = true;
 							}
 							break;
+						case SW_DITHER_OPT:
+							fbink_cfg.sw_dithering = true;
+							break;
 						default:
 							fprintf(stderr, "No match found for token: /%s/\n", value);
 							errfnd = true;
@@ -1079,8 +1090,7 @@ int
 				fbink_cfg.no_refresh = true;
 				break;
 			case 'D':
-				fbink_cfg.is_dithered  = true;
-				fbink_cfg.sw_dithering = true;
+				fbink_cfg.is_dithered = true;
 				break;
 			case 'W':
 				if (strcasecmp(optarg, "AUTO") == 0) {
@@ -1319,7 +1329,7 @@ int
 		} else if (is_image) {
 			if (!fbink_cfg.is_quiet) {
 				printf(
-				    "Displaying image '%s' @ column %hd + %hdpx, row %hd + %dpx (H align: %hhu, V align: %hhu, inverted: %s, flattened: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s)\n",
+				    "Displaying image '%s' @ column %hd + %hdpx, row %hd + %dpx (H align: %hhu, V align: %hhu, inverted: %s, flattened: %s, waveform: %s, HW dithered: %s, SW dithered: %s, nightmode: %s, skip refresh: %s)\n",
 				    image_file,
 				    fbink_cfg.col,
 				    image_x_offset,
@@ -1331,6 +1341,7 @@ int
 				    fbink_cfg.ignore_alpha ? "Y" : "N",
 				    wfm_name ? wfm_name : "AUTO",
 				    fbink_cfg.is_dithered ? "Y" : "N",
+				    fbink_cfg.sw_dithering ? "Y" : "N",
 				    fbink_cfg.is_nightmode ? "Y" : "N",
 				    fbink_cfg.no_refresh ? "Y" : "N");
 			}
