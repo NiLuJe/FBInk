@@ -5244,6 +5244,45 @@ static unsigned char*
 	return good;
 }
 
+// Dither an 8-bit grayscale value down to the 16c eInk palette (ordered, 8x8)
+// c.f., https://en.wikipedia.org/wiki/Ordered_dithering
+// & https://github.com/ImageMagick/ImageMagick/blob/ecfeac404e75f304004f0566557848c53030bad6/MagickCore/threshold.c#L1627
+static uint8_t
+    dither_o8x8(unsigned short int x, unsigned short int y, uint8_t v)
+{
+	// c.f., https://github.com/ImageMagick/ImageMagick/blob/ecfeac404e75f304004f0566557848c53030bad6/config/thresholds.xml#L107
+	static const uint8_t threshold_map_o8x8[] = { 1,  49, 13, 61, 4,  52, 16, 64, 33, 17, 45, 29, 36, 20, 48, 32,
+						      9,  57, 5,  53, 12, 60, 8,  56, 41, 25, 37, 21, 44, 28, 40, 24,
+						      3,  51, 15, 63, 2,  50, 14, 62, 35, 19, 47, 31, 34, 18, 46, 30,
+						      11, 59, 7,  55, 10, 58, 6,  54, 43, 27, 39, 23, 42, 26, 38, 22 };
+
+	// Constants:
+	// Quantum = 8; Levels = 16; map Divisor = 65
+	// QuantumRange = 0xFF
+	// QuantumScale = 1.0 / QuantumRange
+	//
+	// threshold = QuantumScale * v * ((L-1) * (D-1) + 1)
+	int16_t t = (int16_t) DIV255(v * ((15U << 6) + 1U));
+	// level = t / (D-1);
+	int16_t l = (t >> 6);
+	// t -= l * (D-1);
+	t = (int16_t)(t - (l << 6));
+
+	// map width & height = 8
+	// c = ClampToQuantum((l+(t >= map[(x % mw) + mw * (y % mh)])) * QuantumRange / (L-1));
+	int16_t q = (int16_t)((l + (t >= threshold_map_o8x8[(x & 7U) + 8U * (y & 7U)])) * 17);
+	uint8_t p;
+	if (q > 0xFF) {
+		p = 0xFF;
+	} else if (q < 0) {
+		p = 0;
+	} else {
+		p = (uint8_t) q;
+	}
+
+	return p;
+}
+
 // Draw image data on screen (we inherit a few of the variable types/names from stbi ;))
 static int
     draw_image(int                  fbfd,

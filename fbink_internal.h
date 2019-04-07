@@ -456,6 +456,7 @@ int draw_progress_bars(int, bool, uint8_t, const FBInkConfig* restrict);
 #ifdef FBINK_WITH_IMAGE
 static unsigned char* img_load_from_file(const char*, int*, int*, int*, int);
 static unsigned char* img_convert_px_format(const unsigned char*, int, int, int, int);
+static uint8_t        dither_o8x8(unsigned short int, unsigned short int, uint8_t);
 static int            draw_image(int,
 				 const unsigned char* restrict,
 				 const int,
