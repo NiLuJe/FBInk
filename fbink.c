@@ -5244,9 +5244,14 @@ static unsigned char*
 	return good;
 }
 
-// Dither an 8-bit grayscale value down to the 16c eInk palette (ordered, 8x8)
+// Quantize an 8-bit color value down to a palette of 16 evenly spaced colors, using an ordered 8x8 dithering pattern.
+// With a grayscale input, this happens to match the eInk palette perfectly ;).
+// If the input is not grayscale, and the output fb is not grayscale either,
+// this usually still happens to match the eInk palette after the EPDC's own quantization pass.
 // c.f., https://en.wikipedia.org/wiki/Ordered_dithering
 // & https://github.com/ImageMagick/ImageMagick/blob/ecfeac404e75f304004f0566557848c53030bad6/MagickCore/threshold.c#L1627
+// NOTE: As the references imply, this is straight from ImageMagick,
+//       with only minor simplifications to enforce Q8 & avoid fp maths.
 static uint8_t
     dither_o8x8(unsigned short int x, unsigned short int y, uint8_t v)
 {
@@ -5271,16 +5276,16 @@ static uint8_t
 	// map width & height = 8
 	// c = ClampToQuantum((l+(t >= map[(x % mw) + mw * (y % mh)])) * QuantumRange / (L-1));
 	int16_t q = (int16_t)((l + (t >= threshold_map_o8x8[(x & 7U) + 8U * (y & 7U)])) * 17);
-	uint8_t p;
+	uint8_t c;
 	if (q > 0xFF) {
-		p = 0xFF;
+		c = 0xFF;
 	} else if (q < 0) {
-		p = 0;
+		c = 0;
 	} else {
-		p = (uint8_t) q;
+		c = (uint8_t) q;
 	}
 
-	return p;
+	return c;
 }
 
 // Draw image data on screen (we inherit a few of the variable types/names from stbi ;))
@@ -5525,6 +5530,10 @@ static int
 							// Fully opaque, we can blit the image (almost) directly.
 							// We do need to honor inversion ;).
 							color.r = img_px.color.v ^ invert;
+							// SW dithering
+							if (fbink_cfg->sw_dithering) {
+								color.r = dither_o8x8(i, j, color.r);
+							}
 
 							coords.x = (unsigned short int) (i + x_off);
 							coords.y = (unsigned short int) (j + y_off);
@@ -5549,6 +5558,10 @@ static int
 							// Blend it!
 							color.r = (uint8_t) DIV255(
 							    ((img_px.color.v * img_px.color.a) + (bg_color.r * ainv)));
+							// SW dithering
+							if (fbink_cfg->sw_dithering) {
+								color.r = dither_o8x8(i, j, color.r);
+							}
 
 							put_pixel_Gray8(&coords, &color);
 						}
@@ -5587,6 +5600,10 @@ static int
 						// Blend it!
 						color.r = (uint8_t) DIV255(
 						    ((img_px.color.v * img_px.color.a) + (bg_color.r * ainv)));
+						// SW dithering
+						if (fbink_cfg->sw_dithering) {
+							color.r = dither_o8x8(i, j, color.r);
+						}
 
 						put_pixel_Gray4(&coords, &color);
 					}
@@ -5595,8 +5612,9 @@ static int
 		} else {
 			// No alpha in image, or ignored
 			size_t pix_offset;
-			// We can do a simple copy if the target is 8bpp, the source is 8bpp (no alpha), and we don't invert.
-			if (!fb_is_legacy && req_n == 1 && invert == 0U) {
+			// We can do a simple copy if the target is 8bpp, the source is 8bpp (no alpha), we don't invert,
+			// and we don't dither.
+			if (!fb_is_legacy && req_n == 1 && invert == 0U && !fbink_cfg->sw_dithering) {
 				size_t fb_offset;
 				// Scanline by scanline, as we usually have input/output x offsets to honor
 				for (j = img_y_off; j < max_height; j++) {
@@ -5613,6 +5631,10 @@ static int
 						// NOTE: Here, req_n is either 2, or 1 if ignore_alpha, so, no shift trickery ;)
 						pix_offset = (size_t)((j * req_n * w) + (i * req_n));
 						color.r    = data[pix_offset] ^ invert;
+						// SW dithering
+						if (fbink_cfg->sw_dithering) {
+							color.r = dither_o8x8(i, j, color.r);
+						}
 
 						coords.x = (unsigned short int) (i + x_off);
 						coords.y = (unsigned short int) (j + y_off);
@@ -5659,9 +5681,17 @@ static int
 							// Fully opaque, we can blit the image (almost) directly.
 							// We do need to handle BGR and honor inversion ;).
 							img_px.p ^= invert_rgb;
-							fb_px.color.r = img_px.color.r;
-							fb_px.color.g = img_px.color.g;
-							fb_px.color.b = img_px.color.b;
+							// And software dithering... Not a fan of the extra branching,
+							// but that's probably the best we can do.
+							if (fbink_cfg->sw_dithering) {
+								fb_px.color.r = dither_o8x8(i, j, img_px.color.r);
+								fb_px.color.g = dither_o8x8(i, j, img_px.color.g);
+								fb_px.color.b = dither_o8x8(i, j, img_px.color.b);
+							} else {
+								fb_px.color.r = img_px.color.r;
+								fb_px.color.g = img_px.color.g;
+								fb_px.color.b = img_px.color.b;
+							}
 
 							pix_offset =
 							    (uint32_t)((unsigned short int) (i + x_off) << 2U) +
@@ -5695,6 +5725,12 @@ static int
 							    ((img_px.color.g * img_px.color.a) + (bg_px.color.r * ainv)));
 							fb_px.color.b = (uint8_t) DIV255(
 							    ((img_px.color.b * img_px.color.a) + (bg_px.color.b * ainv)));
+							// SW dithering
+							if (fbink_cfg->sw_dithering) {
+								fb_px.color.r = dither_o8x8(i, j, fb_px.color.r);
+								fb_px.color.g = dither_o8x8(i, j, fb_px.color.g);
+								fb_px.color.b = dither_o8x8(i, j, fb_px.color.b);
+							}
 
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
@@ -5726,9 +5762,16 @@ static int
 							// Fully opaque, we can blit the image (almost) directly.
 							// We do need to handle BGR and honor inversion ;).
 							img_px.p ^= invert_rgb;
-							fb_px.color.r = img_px.color.r;
-							fb_px.color.g = img_px.color.g;
-							fb_px.color.b = img_px.color.b;
+							// SW dithering
+							if (fbink_cfg->sw_dithering) {
+								fb_px.color.r = dither_o8x8(i, j, img_px.color.r);
+								fb_px.color.g = dither_o8x8(i, j, img_px.color.g);
+								fb_px.color.b = dither_o8x8(i, j, img_px.color.b);
+							} else {
+								fb_px.color.r = img_px.color.r;
+								fb_px.color.g = img_px.color.g;
+								fb_px.color.b = img_px.color.b;
+							}
 
 							pix_offset =
 							    (uint32_t)((unsigned short int) (i + x_off) << 2U) +
@@ -5756,6 +5799,12 @@ static int
 							    ((img_px.color.g * img_px.color.a) + (bg_px.color.r * ainv)));
 							fb_px.color.b = (uint8_t) DIV255(
 							    ((img_px.color.b * img_px.color.a) + (bg_px.color.b * ainv)));
+							// SW dithering
+							if (fbink_cfg->sw_dithering) {
+								fb_px.color.r = dither_o8x8(i, j, fb_px.color.r);
+								fb_px.color.g = dither_o8x8(i, j, fb_px.color.g);
+								fb_px.color.b = dither_o8x8(i, j, fb_px.color.b);
+							}
 
 							// And we write the full blended pixel to the fb (all 3 bytes)
 							*((uint24_t*) (fbPtr + pix_offset)) = fb_px.p;
@@ -5782,10 +5831,16 @@ static int
 						// NOTE: Given our typedef trickery, this exactly boils down to a 3 bytes memcpy:
 						//memcpy(&img_px.p, &data[pix_offset], 3 * sizeof(uint8_t));
 
-						// Handle BGR & inversion
-						fb_px.color.r = img_px.color.r;
-						fb_px.color.g = img_px.color.g;
-						fb_px.color.b = img_px.color.b;
+						// Handle BGR, inversion & SW dithering
+						if (fbink_cfg->sw_dithering) {
+							fb_px.color.r = dither_o8x8(i, j, img_px.color.r);
+							fb_px.color.g = dither_o8x8(i, j, img_px.color.g);
+							fb_px.color.b = dither_o8x8(i, j, img_px.color.b);
+						} else {
+							fb_px.color.r = img_px.color.r;
+							fb_px.color.g = img_px.color.g;
+							fb_px.color.b = img_px.color.b;
+						}
 						// NOTE: The RGB -> BGR dance precludes us from simply doing a 3 bytes memcpy,
 						//       and our union trickery appears to be faster than packing the pixel
 						//       ourselves with something like:
@@ -5815,10 +5870,16 @@ static int
 						// NOTE: Given our typedef trickery, this exactly boils down to a 3 bytes memcpy:
 						//memcpy(&img_px.p, &data[pix_offset], 3 * sizeof(uint8_t));
 
-						// Handle BGR & inversion
-						fb_px.color.r = img_px.color.r ^ invert;
-						fb_px.color.g = img_px.color.g ^ invert;
-						fb_px.color.b = img_px.color.b ^ invert;
+						// Handle BGR, inversion & SW dithering
+						if (fbink_cfg->sw_dithering) {
+							fb_px.color.r = dither_o8x8(i, j, img_px.color.r ^ invert);
+							fb_px.color.g = dither_o8x8(i, j, img_px.color.g ^ invert);
+							fb_px.color.b = dither_o8x8(i, j, img_px.color.b ^ invert);
+						} else {
+							fb_px.color.r = img_px.color.r ^ invert;
+							fb_px.color.g = img_px.color.g ^ invert;
+							fb_px.color.b = img_px.color.b ^ invert;
+						}
 
 						// NOTE: Again, assume we can safely skip rotation tweaks
 						pix_offset = (uint32_t)((unsigned short int) (i + x_off) << 2U) +
@@ -5857,9 +5918,16 @@ static int
 						// Fully opaque, we can blit the image (almost) directly.
 						// We do need to handle BGR and honor inversion ;).
 						img_px.p ^= invert_rgb;
-						color.r = img_px.color.r;
-						color.g = img_px.color.g;
-						color.b = img_px.color.b;
+						// SW dithering
+						if (fbink_cfg->sw_dithering) {
+							color.r = dither_o8x8(i, j, img_px.color.r);
+							color.g = dither_o8x8(i, j, img_px.color.g);
+							color.b = dither_o8x8(i, j, img_px.color.b);
+						} else {
+							color.r = img_px.color.r;
+							color.g = img_px.color.g;
+							color.b = img_px.color.b;
+						}
 
 						coords.x = (unsigned short int) (i + x_off);
 						coords.y = (unsigned short int) (j + y_off);
@@ -5885,6 +5953,12 @@ static int
 						    ((img_px.color.g * img_px.color.a) + (bg_color.r * ainv)));
 						color.b = (uint8_t) DIV255(
 						    ((img_px.color.b * img_px.color.a) + (bg_color.b * ainv)));
+						// SW dithering
+						if (fbink_cfg->sw_dithering) {
+							color.r = dither_o8x8(i, j, color.r);
+							color.g = dither_o8x8(i, j, color.g);
+							color.b = dither_o8x8(i, j, color.b);
+						}
 
 						put_pixel_RGB565(&coords, &color);
 					}
@@ -5899,9 +5973,16 @@ static int
 				for (i = img_x_off; i < max_width; i++) {
 					// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
 					pix_offset = (size_t)((j * req_n * w) + (i * req_n));
-					color.r    = data[pix_offset + 0U] ^ invert;
-					color.g    = data[pix_offset + 1U] ^ invert;
-					color.b    = data[pix_offset + 2U] ^ invert;
+					// SW dithering
+					if (fbink_cfg->sw_dithering) {
+						color.r = dither_o8x8(i, j, data[pix_offset + 0U] ^ invert);
+						color.g = dither_o8x8(i, j, data[pix_offset + 1U] ^ invert);
+						color.b = dither_o8x8(i, j, data[pix_offset + 2U] ^ invert);
+					} else {
+						color.r = data[pix_offset + 0U] ^ invert;
+						color.g = data[pix_offset + 1U] ^ invert;
+						color.b = data[pix_offset + 2U] ^ invert;
+					}
 
 					coords.x = (unsigned short int) (i + x_off);
 					coords.y = (unsigned short int) (j + y_off);

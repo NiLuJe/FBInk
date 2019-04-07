@@ -1079,7 +1079,8 @@ int
 				fbink_cfg.no_refresh = true;
 				break;
 			case 'D':
-				fbink_cfg.is_dithered = true;
+				fbink_cfg.is_dithered  = true;
+				fbink_cfg.sw_dithering = true;
 				break;
 			case 'W':
 				if (strcasecmp(optarg, "AUTO") == 0) {

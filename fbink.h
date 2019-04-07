@@ -243,7 +243,9 @@ typedef struct
 	uint8_t valign;    // Vertical alignment of images/dumps (NONE/TOP, CENTER, EDGE/BOTTOM; c.f., ALIGN_INDEX_T enum)
 	uint8_t wfm_mode;        // Request a specific waveform mode (c.f., WFM_MODE_INDEX_T enum; defaults to AUTO)
 	bool    is_dithered;     // Request (ordered) hardware dithering (if supported).
-	bool    is_nightmode;    // Request hardware inversion (if supported/safe).
+	bool    sw_dithering;    // Request (ordered) *software* dithering when printing an image.
+				 // This is *NOT* mutually exclusive with is_dithered!
+	bool is_nightmode;       // Request hardware inversion (if supported/safe).
 				 // This is *NOT* mutually exclusive with is_inverted!
 	bool no_refresh;         // Skip actually refreshing the eInk screen (useful when drawing in batch)
 } FBInkConfig;
