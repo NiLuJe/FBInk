@@ -524,9 +524,9 @@ static void
 
 	if (vInfo.bits_per_pixel < 8U) {
 		// Go with pixel plotting @ 4bpp to keep this simple...
-		FBInkCoordinates coords = { 0U };
 		for (unsigned short int cy = 0U; cy < h; cy++) {
 			for (unsigned short int cx = 0U; cx < w; cx++) {
+				FBInkCoordinates coords;
 				coords.x = (unsigned short int) (x + cx);
 				coords.y = (unsigned short int) (y + cy);
 				put_pixel_Gray4(&coords, color);
