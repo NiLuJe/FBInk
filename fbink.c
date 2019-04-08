@@ -5499,10 +5499,8 @@ static int
 		inv_rgb = 0x00FFFFFF;
 	}
 	// And we'll make 'em constants to eke out a tiny bit of performance...
-	const uint8_t      invert     = inv;
-	const uint32_t     invert_rgb = inv_rgb;
-	unsigned short int i;
-	unsigned short int j;
+	const uint8_t  invert     = inv;
+	const uint32_t invert_rgb = inv_rgb;
 	// NOTE: The *slight* duplication is on purpose, to move the branching outside the loop,
 	//       and make use of a few different blitting tweaks depending on the situation...
 	//       And since we can easily do so from here,
@@ -5515,15 +5513,12 @@ static int
 				// There's an alpha channel in the image, we'll have to do alpha blending...
 				// c.f., https://en.wikipedia.org/wiki/Alpha_compositing
 				//       https://blogs.msdn.microsoft.com/shawnhar/2009/11/06/premultiplied-alpha/
-				FBInkCoordinates coords   = { 0U };
-				FBInkColor       bg_color = { 0U };
-				size_t           pix_offset;
+				FBInkCoordinates coords;
 				FBInkPixelG8A    img_px;
-				uint8_t          ainv = 0U;
-				for (j = img_y_off; j < max_height; j++) {
-					for (i = img_x_off; i < max_width; i++) {
+				for (unsigned short int j = img_y_off; j < max_height; j++) {
+					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// NOTE: In this branch, req_n == 2, so we can do << 1 instead of * 2 ;).
-						pix_offset = (size_t)(((j << 1U) * w) + (i << 1U));
+						size_t pix_offset = (size_t)(((j << 1U) * w) + (i << 1U));
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// First, we gobble the full image pixel (all 2 bytes)
@@ -5555,9 +5550,10 @@ static int
 							// NOTE: We use the the pixel functions directly, to avoid the OOB checks,
 							//       because we know we're only processing on-screen pixels,
 							//       and we don't care about the rotation checks at this bpp :).
+							FBInkColor bg_color;
 							get_pixel_Gray8(&coords, &bg_color);
 
-							ainv = img_px.color.a ^ 0xFF;
+							uint8_t ainv = img_px.color.a ^ 0xFF;
 							// Don't forget to honor inversion
 							img_px.color.v ^= invert;
 							// Blend it!
@@ -5576,13 +5572,10 @@ static int
 				// 4bpp
 				// NOTE: The fact that the fb stores two pixels per byte means we can't take any shortcut,
 				//       because they may only apply to one of those two pixels...
-				FBInkCoordinates coords   = { 0U };
 				FBInkColor       bg_color = { 0U };
-				size_t           pix_offset;
-				FBInkPixelG8A    img_px;
-				uint8_t          ainv = 0U;
-				for (j = img_y_off; j < max_height; j++) {
-					for (i = img_x_off; i < max_width; i++) {
+				FBInkCoordinates coords;
+				for (unsigned short int j = img_y_off; j < max_height; j++) {
+					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// We need to know what this pixel currently looks like in the framebuffer...
 						coords.x = (unsigned short int) (i + x_off);
 						coords.y = (unsigned short int) (j + y_off);
@@ -5592,14 +5585,15 @@ static int
 						get_pixel_Gray4(&coords, &bg_color);
 
 						// NOTE: In this branch, req_n == 2, so we can do << 1 instead of * 2 ;).
-						pix_offset = (size_t)(((j << 1U) * w) + (i << 1U));
+						size_t        pix_offset = (size_t)(((j << 1U) * w) + (i << 1U));
+						FBInkPixelG8A img_px;
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// We gobble the full image pixel (all 2 bytes)
 						img_px.p = *((const uint16_t*) &data[pix_offset]);
 #	pragma GCC diagnostic pop
 
-						ainv = img_px.color.a ^ 0xFF;
+						uint8_t ainv = img_px.color.a ^ 0xFF;
 						// Don't forget to honor inversion
 						img_px.color.v ^= invert;
 						// Blend it!
@@ -5616,26 +5610,24 @@ static int
 			}
 		} else {
 			// No alpha in image, or ignored
-			size_t pix_offset;
 			// We can do a simple copy if the target is 8bpp, the source is 8bpp (no alpha), we don't invert,
 			// and we don't dither.
 			if (!fb_is_legacy && req_n == 1 && invert == 0U && !fbink_cfg->sw_dithering) {
-				size_t fb_offset;
 				// Scanline by scanline, as we usually have input/output x offsets to honor
-				for (j = img_y_off; j < max_height; j++) {
+				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					// NOTE: Again, assume the fb origin is @ (0, 0), which should hold true at that bitdepth.
-					pix_offset = (size_t)((j * w) + img_x_off);
-					fb_offset  = ((uint32_t)(j + y_off) * fInfo.line_length) +
-						    (unsigned int) (img_x_off + x_off);
+					size_t pix_offset = (size_t)((j * w) + img_x_off);
+					size_t fb_offset  = ((uint32_t)(j + y_off) * fInfo.line_length) +
+							   (unsigned int) (img_x_off + x_off);
 					memcpy(fbPtr + fb_offset, data + pix_offset, max_width);
 				}
 			} else {
-				FBInkCoordinates coords = { 0U };
-				for (j = img_y_off; j < max_height; j++) {
-					for (i = img_x_off; i < max_width; i++) {
+				FBInkCoordinates coords;
+				for (unsigned short int j = img_y_off; j < max_height; j++) {
+					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// NOTE: Here, req_n is either 2, or 1 if ignore_alpha, so, no shift trickery ;)
-						pix_offset = (size_t)((j * req_n * w) + (i * req_n));
-						color.r    = data[pix_offset] ^ invert;
+						size_t pix_offset = (size_t)((j * req_n * w) + (i * req_n));
+						color.r           = data[pix_offset] ^ invert;
 						// SW dithering
 						if (fbink_cfg->sw_dithering) {
 							color.r = dither_o8x8(i, j, color.r);
@@ -5660,7 +5652,6 @@ static int
 		// 24bpp & 32bpp
 		if (!fbink_cfg->ignore_alpha && img_has_alpha) {
 			FBInkPixelRGBA img_px;
-			uint8_t        ainv = 0U;
 			size_t         pix_offset;
 			if (!fb_is_24bpp) {
 				// 32bpp
@@ -5668,8 +5659,8 @@ static int
 				FBInkPixelBGRA bg_px;
 				// This is essentially a constant in our case... (c.f., put_pixel_RGB32)
 				fb_px.color.a = 0xFF;
-				for (j = img_y_off; j < max_height; j++) {
-					for (i = img_x_off; i < max_width; i++) {
+				for (unsigned short int j = img_y_off; j < max_height; j++) {
+					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// NOTE: We should be able to skip rotation hacks at this bpp...
 
 						// Yeah, I know, GCC...
@@ -5710,7 +5701,7 @@ static int
 							// Transparent! Keep fb as-is.
 						} else {
 							// Alpha blending...
-							ainv = img_px.color.a ^ 0xFF;
+							uint8_t ainv = img_px.color.a ^ 0xFF;
 
 							pix_offset =
 							    (uint32_t)((unsigned short int) (i + x_off) << 2U) +
@@ -5749,8 +5740,8 @@ static int
 				// 24bpp
 				FBInkPixelBGR fb_px;
 				FBInkPixelBGR bg_px;
-				for (j = img_y_off; j < max_height; j++) {
-					for (i = img_x_off; i < max_width; i++) {
+				for (unsigned short int j = img_y_off; j < max_height; j++) {
+					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// NOTE: We should be able to skip rotation hacks at this bpp...
 
 						// Yeah, I know, GCC...
@@ -5787,7 +5778,7 @@ static int
 							// Transparent! Keep fb as-is.
 						} else {
 							// Alpha blending...
-							ainv = img_px.color.a ^ 0xFF;
+							uint8_t ainv = img_px.color.a ^ 0xFF;
 
 							pix_offset =
 							    (uint32_t)((unsigned short int) (i + x_off) << 2U) +
@@ -5819,7 +5810,6 @@ static int
 			}
 		} else {
 			// No alpha in image, or ignored
-			size_t pix_offset;
 			// We don't care about image alpha in this branch, so we don't even store it.
 			FBInkPixelRGB img_px;
 			if (!fb_is_24bpp) {
@@ -5827,10 +5817,10 @@ static int
 				FBInkPixelBGRA fb_px;
 				// This is essentially a constant in our case...
 				fb_px.color.a = 0xFF;
-				for (j = img_y_off; j < max_height; j++) {
-					for (i = img_x_off; i < max_width; i++) {
+				for (unsigned short int j = img_y_off; j < max_height; j++) {
+					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
-						pix_offset = (size_t)((j * req_n * w) + (i * req_n));
+						size_t pix_offset = (size_t)((j * req_n * w) + (i * req_n));
 						// Gobble the full image pixel (3 bytes, we don't care about alpha if it's there)
 						img_px.p = *((const uint24_t*) &data[pix_offset]);
 						// NOTE: Given our typedef trickery, this exactly boils down to a 3 bytes memcpy:
@@ -5866,10 +5856,10 @@ static int
 			} else {
 				// 24bpp
 				FBInkPixelBGR fb_px;
-				for (j = img_y_off; j < max_height; j++) {
-					for (i = img_x_off; i < max_width; i++) {
+				for (unsigned short int j = img_y_off; j < max_height; j++) {
+					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
-						pix_offset = (size_t)((j * req_n * w) + (i * req_n));
+						size_t pix_offset = (size_t)((j * req_n * w) + (i * req_n));
 						// Gobble the full image pixel (3 bytes, we don't care about alpha if it's there)
 						img_px.p = *((const uint24_t*) &data[pix_offset]);
 						// NOTE: Given our typedef trickery, this exactly boils down to a 3 bytes memcpy:
@@ -5901,17 +5891,14 @@ static int
 	} else {
 		// 16bpp
 		if (!fbink_cfg->ignore_alpha && img_has_alpha) {
-			FBInkCoordinates coords   = { 0U };
-			FBInkColor       bg_color = { 0U };
-			size_t           pix_offset;
+			FBInkCoordinates coords;
 			FBInkPixelRGBA   img_px;
-			uint8_t          ainv = 0U;
-			for (j = img_y_off; j < max_height; j++) {
-				for (i = img_x_off; i < max_width; i++) {
+			for (unsigned short int j = img_y_off; j < max_height; j++) {
+				for (unsigned short int i = img_x_off; i < max_width; i++) {
 					// NOTE: Same general idea as the fb_is_grayscale case,
 					//       except at this bpp we then have to handle rotation ourselves...
 					// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
-					pix_offset = (size_t)(((j << 2U) * w) + (i << 2U));
+					size_t pix_offset = (size_t)(((j << 2U) * w) + (i << 2U));
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 					// Gobble the full image pixel (all 4 bytes)
@@ -5942,11 +5929,12 @@ static int
 						// Transparent! Keep fb as-is.
 					} else {
 						// Alpha blending...
-						ainv = img_px.color.a ^ 0xFF;
+						uint8_t ainv = img_px.color.a ^ 0xFF;
 
 						coords.x = (unsigned short int) (i + x_off);
 						coords.y = (unsigned short int) (j + y_off);
 						(*fxpRotateCoords)(&coords);
+						FBInkColor bg_color;
 						get_pixel_RGB565(&coords, &bg_color);
 
 						// Don't forget to honor inversion
@@ -5971,13 +5959,11 @@ static int
 			}
 		} else {
 			// No alpha in image, or ignored
-			size_t           pix_offset;
-			FBInkCoordinates coords = { 0U };
 			// NOTE: For some reason, reading the image 3 or 4 bytes at once doesn't win us anything, here...
-			for (j = img_y_off; j < max_height; j++) {
-				for (i = img_x_off; i < max_width; i++) {
+			for (unsigned short int j = img_y_off; j < max_height; j++) {
+				for (unsigned short int i = img_x_off; i < max_width; i++) {
 					// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
-					pix_offset = (size_t)((j * req_n * w) + (i * req_n));
+					size_t pix_offset = (size_t)((j * req_n * w) + (i * req_n));
 					// SW dithering
 					if (fbink_cfg->sw_dithering) {
 						color.r = dither_o8x8(i, j, data[pix_offset + 0U] ^ invert);
@@ -5989,6 +5975,7 @@ static int
 						color.b = data[pix_offset + 2U] ^ invert;
 					}
 
+					FBInkCoordinates coords;
 					coords.x = (unsigned short int) (i + x_off);
 					coords.y = (unsigned short int) (j + y_off);
 					// NOTE: Again, we can only skip the OOB checks at this bpp.
