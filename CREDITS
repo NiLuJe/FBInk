@@ -24,6 +24,23 @@ This project makes use of a number of third-party libraries, which we'll acknowl
 		Licensed under the Zlib license (https://opensource.org/licenses/Zlib).
 		(https://github.com/adah1972/libunibreak)
 
+It also bundles a few specific routines based on others' work:
+
+	* Some (the 8/16/24/32bpp put_pixel_* variants) Linux framebuffer writing routines based on: fbtestfnt.c & fbtest6.c, from
+		http://raspberrycompote.blogspot.com/2014/04/low-level-graphics-on-raspberry-pi-text.html &
+		https://raspberrycompote.blogspot.com/2013/03/low-level-graphics-on-raspberry-pi-part_8.html
+		Original works by J-P Rosti (a.k.a -rst- and 'Raspberry Compote'),
+		Licensed under the Creative Commons Attribution 3.0 Unported License
+		(http://creativecommons.org/licenses/by/3.0/deed.en_US)
+
+	* Ordered dithering routine (dither_o8x8) completely based on ImageMagick's implementation,
+		(OrderedDitherImage @ https://github.com/ImageMagick/ImageMagick/blob/master/MagickCore/threshold.c),
+		Copyright 1999-2019 ImageMagick Studio LLC,
+		Licensed under the ImageMagick License,
+		(https://imagemagick.org/script/license.php)
+
+	* When in doubt, check the source code, it's heavily commented, and sources are always referenced.
+
 As well as a number of third-party resources (namely, font files):
 
 	* unscii (Bitmapped Unicode fonts), by Viznut,
