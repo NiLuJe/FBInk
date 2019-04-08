@@ -5529,10 +5529,11 @@ static int
 						if (img_px.color.a == 0xFF) {
 							// Fully opaque, we can blit the image (almost) directly.
 							// We do need to honor inversion ;).
-							color.r = img_px.color.v ^ invert;
-							// SW dithering
+							// And SW dithering
 							if (fbink_cfg->sw_dithering) {
-								color.r = dither_o8x8(i, j, color.r);
+								color.r = dither_o8x8(i, j, img_px.color.v ^ invert);
+							} else {
+								color.r = img_px.color.v ^ invert;
 							}
 
 							coords.x = (unsigned short int) (i + x_off);
@@ -5626,10 +5627,11 @@ static int
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// NOTE: Here, req_n is either 2, or 1 if ignore_alpha, so, no shift trickery ;)
 						size_t pix_offset = (size_t)((j * req_n * w) + (i * req_n));
-						color.r           = data[pix_offset] ^ invert;
 						// SW dithering
 						if (fbink_cfg->sw_dithering) {
-							color.r = dither_o8x8(i, j, color.r);
+							color.r = dither_o8x8(i, j, data[pix_offset] ^ invert);
+						} else {
+							color.r = data[pix_offset] ^ invert;
 						}
 
 						FBInkCoordinates coords;
