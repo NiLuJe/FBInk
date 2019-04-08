@@ -5267,6 +5267,8 @@ static uint8_t
 	// QuantumScale = 1.0 / QuantumRange
 	//
 	// threshold = QuantumScale * v * ((L-1) * (D-1) + 1)
+	// NOTE: The initial computation of t (specifically, what we pass to DIV255) would overflow an uint8_t.
+	//       So jump to shorts, and do it signed to be extra careful, although I don't *think* we can ever underflow here.
 	int16_t t = (int16_t) DIV255(v * ((15U << 6) + 1U));
 	// level = t / (D-1);
 	int16_t l = (t >> 6);
