@@ -5720,7 +5720,7 @@ static int
 							fb_px.color.r = (uint8_t) DIV255(
 							    ((img_px.color.r * img_px.color.a) + (bg_px.color.r * ainv)));
 							fb_px.color.g = (uint8_t) DIV255(
-							    ((img_px.color.g * img_px.color.a) + (bg_px.color.r * ainv)));
+							    ((img_px.color.g * img_px.color.a) + (bg_px.color.g * ainv)));
 							fb_px.color.b = (uint8_t) DIV255(
 							    ((img_px.color.b * img_px.color.a) + (bg_px.color.b * ainv)));
 							// SW dithering
