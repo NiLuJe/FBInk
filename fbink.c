@@ -5572,11 +5572,11 @@ static int
 				// 4bpp
 				// NOTE: The fact that the fb stores two pixels per byte means we can't take any shortcut,
 				//       because they may only apply to one of those two pixels...
-				FBInkColor       bg_color = { 0U };
-				FBInkCoordinates coords;
+				FBInkColor bg_color = { 0U };
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// We need to know what this pixel currently looks like in the framebuffer...
+						FBInkCoordinates coords;
 						coords.x = (unsigned short int) (i + x_off);
 						coords.y = (unsigned short int) (j + y_off);
 						// NOTE: We use the the pixel function directly, to avoid the OOB checks,
@@ -5622,7 +5622,6 @@ static int
 					memcpy(fbPtr + fb_offset, data + pix_offset, max_width);
 				}
 			} else {
-				FBInkCoordinates coords;
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// NOTE: Here, req_n is either 2, or 1 if ignore_alpha, so, no shift trickery ;)
@@ -5633,6 +5632,7 @@ static int
 							color.r = dither_o8x8(i, j, color.r);
 						}
 
+						FBInkCoordinates coords;
 						coords.x = (unsigned short int) (i + x_off);
 						coords.y = (unsigned short int) (j + y_off);
 
@@ -5656,7 +5656,6 @@ static int
 			if (!fb_is_24bpp) {
 				// 32bpp
 				FBInkPixelBGRA fb_px;
-				FBInkPixelBGRA bg_px;
 				// This is essentially a constant in our case... (c.f., put_pixel_RGB32)
 				fb_px.color.a = 0xFF;
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
@@ -5706,6 +5705,7 @@ static int
 							pix_offset =
 							    (uint32_t)((unsigned short int) (i + x_off) << 2U) +
 							    ((unsigned short int) (j + y_off) * fInfo.line_length);
+							FBInkPixelBGRA bg_px;
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 							// Again, read the full pixel from the framebuffer (all 4 bytes)
@@ -5739,7 +5739,6 @@ static int
 			} else {
 				// 24bpp
 				FBInkPixelBGR fb_px;
-				FBInkPixelBGR bg_px;
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// NOTE: We should be able to skip rotation hacks at this bpp...
@@ -5784,6 +5783,7 @@ static int
 							    (uint32_t)((unsigned short int) (i + x_off) << 2U) +
 							    ((unsigned short int) (j + y_off) * fInfo.line_length);
 							// Again, read the full pixel from the framebuffer (all 3 bytes)
+							FBInkPixelBGR bg_px;
 							bg_px.p = *((uint24_t*) (fbPtr + pix_offset));
 
 							// Don't forget to honor inversion
@@ -5811,7 +5811,6 @@ static int
 		} else {
 			// No alpha in image, or ignored
 			// We don't care about image alpha in this branch, so we don't even store it.
-			FBInkPixelRGB img_px;
 			if (!fb_is_24bpp) {
 				// 32bpp
 				FBInkPixelBGRA fb_px;
@@ -5822,6 +5821,7 @@ static int
 						// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
 						size_t pix_offset = (size_t)((j * req_n * w) + (i * req_n));
 						// Gobble the full image pixel (3 bytes, we don't care about alpha if it's there)
+						FBInkPixelRGB img_px;
 						img_px.p = *((const uint24_t*) &data[pix_offset]);
 						// NOTE: Given our typedef trickery, this exactly boils down to a 3 bytes memcpy:
 						//memcpy(&img_px.p, &data[pix_offset], 3 * sizeof(uint8_t));
@@ -5855,17 +5855,18 @@ static int
 				}
 			} else {
 				// 24bpp
-				FBInkPixelBGR fb_px;
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
 						size_t pix_offset = (size_t)((j * req_n * w) + (i * req_n));
 						// Gobble the full image pixel (3 bytes, we don't care about alpha if it's there)
+						FBInkPixelRGB img_px;
 						img_px.p = *((const uint24_t*) &data[pix_offset]);
 						// NOTE: Given our typedef trickery, this exactly boils down to a 3 bytes memcpy:
 						//memcpy(&img_px.p, &data[pix_offset], 3 * sizeof(uint8_t));
 
 						// Handle BGR, inversion & SW dithering
+						FBInkPixelBGR fb_px;
 						if (fbink_cfg->sw_dithering) {
 							fb_px.color.r = dither_o8x8(i, j, img_px.color.r ^ invert);
 							fb_px.color.g = dither_o8x8(i, j, img_px.color.g ^ invert);
@@ -5892,13 +5893,13 @@ static int
 		// 16bpp
 		if (!fbink_cfg->ignore_alpha && img_has_alpha) {
 			FBInkCoordinates coords;
-			FBInkPixelRGBA   img_px;
 			for (unsigned short int j = img_y_off; j < max_height; j++) {
 				for (unsigned short int i = img_x_off; i < max_width; i++) {
 					// NOTE: Same general idea as the fb_is_grayscale case,
 					//       except at this bpp we then have to handle rotation ourselves...
 					// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
-					size_t pix_offset = (size_t)(((j << 2U) * w) + (i << 2U));
+					size_t         pix_offset = (size_t)(((j << 2U) * w) + (i << 2U));
+					FBInkPixelRGBA img_px;
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 					// Gobble the full image pixel (all 4 bytes)
