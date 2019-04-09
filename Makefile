@@ -316,7 +316,7 @@ $(OUT_DIR)/%.o: %.c
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) -o $@ -c $<
 
 outdir:
-	mkdir -p $(OUT_DIR)/shared/cutef8 $(OUT_DIR)/static/cutef8 $(OUT_DIR)/shared/libunibreak/src $(OUT_DIR)/static/libunibreak/src
+	mkdir -p $(OUT_DIR)/shared/cutef8 $(OUT_DIR)/static/cutef8 $(OUT_DIR)/shared/libunibreak/src $(OUT_DIR)/static/libunibreak/src $(OUT_DIR)/shared/qimagescale $(OUT_DIR)/static/qimagescale
 
 all: outdir static
 
@@ -479,10 +479,12 @@ clean:
 	rm -rf Release/shared/*.o
 	rm -rf Release/shared/cutef8/*.o
 	rm -rf Release/shared/libunibreak/src/*.o
+	rm -rf Release/shared/qimagescale/src/*.o
 	rm -rf Release/shared/utf8
 	rm -rf Release/static/*.o
 	rm -rf Release/static/cutef8/*.o
 	rm -rf Release/static/libunibreak/src/*.o
+	rm -rf Release/static/qimagescale/src/*.o
 	rm -rf Release/static/utf8
 	rm -rf Release/*.o
 	rm -rf Release/fbink
@@ -495,10 +497,12 @@ clean:
 	rm -rf Debug/shared/*.o
 	rm -rf Debug/shared/cutef8/*.o
 	rm -rf Debug/shared/libunibreak/src/*.o
+	rm -rf Debug/shared/qimagescale/src/*.o
 	rm -rf Debug/shared/utf8
 	rm -rf Debug/static/*.o
 	rm -rf Debug/static/cutef8/*.o
 	rm -rf Debug/static/libunibreak/src/*.o
+	rm -rf Debug/static/qimagescale/src/*.o
 	rm -rf Debug/static/utf8
 	rm -rf Debug/*.o
 	rm -rf Debug/fbink
