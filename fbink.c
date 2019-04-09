@@ -5288,12 +5288,12 @@ static uint8_t
 	int16_t q = (int16_t)((l + (t >= threshold_map_o8x8[(x & 7U) + 8U * (y & 7U)])) * 17);
 	// NOTE: For some arcane reason, on ARM (at least), this is noticeably faster than Pillow's CLIP8 macro.
 	//       Following this logic with ternary operators yields similar results,
-	//       so I'm gessing it's lt 256 part of Pillow's macro that doesn't agree with GCC/ARM...
+	//       so I'm gessing it's the < 256 part of Pillow's macro that doesn't agree with GCC/ARM...
 	uint8_t c;
 	if (q > 0xFF) {
 		c = 0xFF;
 	} else if (q < 0) {
-		c = 0;
+		c = 0U;
 	} else {
 		c = (uint8_t) q;
 	}
