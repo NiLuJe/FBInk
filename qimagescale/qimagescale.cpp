@@ -92,7 +92,7 @@ namespace QImageScale {
     static int* qimageCalcXPoints(int sw, int dw);
     static int* qimageCalcApoints(int s, int d, int up);
     static QImageScaleInfo* qimageFreeScaleInfo(QImageScaleInfo *isi);
-    static QImageScaleInfo *qimageCalcScaleInfo(const QImage &img, int sw, int sh, int dw, int dh, char aa);
+    static QImageScaleInfo *qimageCalcScaleInfo(const unsigned char* img, int sw, int sh, int sn, int dw, int dh, char aa);
 }
 
 using namespace QImageScale;
@@ -219,15 +219,15 @@ static QImageScaleInfo* QImageScale::qimageFreeScaleInfo(QImageScaleInfo *isi)
     return 0;
 }
 
-static QImageScaleInfo* QImageScale::qimageCalcScaleInfo(const QImage &img,
-                                                         int sw, int sh,
+static QImageScaleInfo* QImageScale::qimageCalcScaleInfo(const unsigned char* img,
+                                                         int sw, int sh, int sn,
                                                          int dw, int dh, char aa)
 {
     QImageScaleInfo *isi;
     int scw, sch;
 
-    scw = dw * qlonglong(img.width()) / sw;
-    sch = dh * qlonglong(img.height()) / sh;
+    scw = dw;
+    sch = dh;
 
     isi = new QImageScaleInfo;
     if (!isi)
@@ -235,18 +235,18 @@ static QImageScaleInfo* QImageScale::qimageCalcScaleInfo(const QImage &img,
 
     isi->xup_yup = (qAbs(dw) >= sw) + ((qAbs(dh) >= sh) << 1);
 
-    isi->xpoints = qimageCalcXPoints(img.width(), scw);
+    isi->xpoints = qimageCalcXPoints(sw, scw);
     if (!isi->xpoints)
         return qimageFreeScaleInfo(isi);
-    isi->ypoints = qimageCalcYPoints((const unsigned int *)img.scanLine(0),
-                                     img.bytesPerLine() / 4, img.height(), sch);
+    isi->ypoints = qimageCalcYPoints((const unsigned int *)img,
+                                     sw * sn / 4, sh, sch);
     if (!isi->ypoints)
         return qimageFreeScaleInfo(isi);
     if (aa) {
-        isi->xapoints = qimageCalcApoints(img.width(), scw, isi->xup_yup & 1);
+        isi->xapoints = qimageCalcApoints(sw, scw, isi->xup_yup & 1);
         if (!isi->xapoints)
             return qimageFreeScaleInfo(isi);
-        isi->yapoints = qimageCalcApoints(img.height(), sch, isi->xup_yup & 2);
+        isi->yapoints = qimageCalcApoints(sh, sch, isi->xup_yup & 2);
         if (!isi->yapoints)
             return qimageFreeScaleInfo(isi);
     }
@@ -724,7 +724,7 @@ unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, int s
         return buffer;
 
     QImageScaleInfo *scaleinfo =
-        qimageCalcScaleInfo(src, sw, sh, dw, dh, true);
+        qimageCalcScaleInfo(src, sw, sh, sn, dw, dh, true);
     if (!scaleinfo)
         return buffer;
 
