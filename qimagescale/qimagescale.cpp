@@ -733,7 +733,7 @@ unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, int s
         return buffer;
 
     // FIXME: posisx_memalign?
-    buffer = (unsigned char*) malloc(dw * dh * sn * 2);
+    buffer = (unsigned char*) malloc(dw * dh * 4);
     if (buffer == nullptr) {
         std::cerr << "qSmoothScaleImage: out of memory, returning null!";
         qimageFreeScaleInfo(scaleinfo);
