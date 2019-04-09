@@ -86,6 +86,7 @@ static inline __attribute__((always_inline)) uint INTERPOLATE_PIXEL_256(uint x, 
 
 #endif
 
+// NOTE: Unlike the SIMD qimagescale_* routines, these ones seem to offer a very small performance gain.
 #if defined(__SSE2__)
 static inline __attribute__((always_inline)) uint interpolate_4_pixels_sse2(__m128i vt, __m128i vb, uint distx, uint disty)
 {
