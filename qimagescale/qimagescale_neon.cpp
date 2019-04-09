@@ -38,10 +38,9 @@
 ****************************************************************************/
 
 #include "qimagescale_p.h"
-#include "qimage.h"
-#include <private/qsimd_p.h>
 
 #if defined(__ARM_NEON__)
+#include <arm_neon.h>
 
 using namespace QImageScale;
 

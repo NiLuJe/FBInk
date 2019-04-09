@@ -41,6 +41,9 @@
 #define QDRAWHELPER_P_H
 
 #include "qglobal.h"
+#if defined(__ARM_NEON) || defined(__ARM_NEON__)
+#include <arm_neon.h>
+#endif
 
 #if __SIZEOF_POINTER__ == 8 // 64-bit versions
 
