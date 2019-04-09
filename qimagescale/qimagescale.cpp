@@ -731,6 +731,7 @@ unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, int s
 
     // SSE/NEON friendly alignment, just in case...
     void *ptr;
+    // NOTE: Output format is always RGBA!
     if (posix_memalign(&ptr, 16, dw * dh * 4) != 0) {
         std::cerr << "qSmoothScaleImage: out of memory, returning null!";
         qimageFreeScaleInfo(scaleinfo);

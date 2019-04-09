@@ -6075,7 +6075,8 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
-	// Scale it w/ QtImageScale (FIXME: RGB/RGBA only!)
+	// Scale it w/ QtImageScale
+	// FIXME: It only accepts RGB/RGBA input!
 	unsigned char* restrict sdata = NULL;
 	sdata                         = qSmoothScaleImage(data, w, h, req_n, viewWidth, viewHeight);
 	if (sdata == NULL) {
@@ -6084,6 +6085,7 @@ int
 	}
 
 	// Finally, draw it on screen
+	// NOTE: qSmoothScaleImage always outputs RGBA!
 	if (draw_image(fbfd, sdata, viewWidth, viewHeight, n, 4, x_off, y_off, fbink_cfg) != EXIT_SUCCESS) {
 		WARN("Failed to display image data on screen");
 		rv = ERRCODE(EXIT_FAILURE);
