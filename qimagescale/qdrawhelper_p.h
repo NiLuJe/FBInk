@@ -44,6 +44,22 @@
 #if defined(__ARM_NEON) || defined(__ARM_NEON__)
 #include <arm_neon.h>
 #endif
+#if defined(__SSE2__)
+#include <immintrin.h>
+#include <x86intrin.h>
+#endif
+
+#if defined(__GNUC__)
+#  if (defined(__i386) || defined(__i386__) || defined(_M_IX86)) && defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER)
+#    define Q_DECL_VECTORCALL __attribute__((sseregparm,regparm(3)))
+#  else
+#    define Q_DECL_VECTORCALL
+#  endif
+#elif defined(_MSC_VER)
+#  define Q_DECL_VECTORCALL __vectorcall
+#else
+#  define Q_DECL_VECTORCALL
+#endif
 
 #if __SIZEOF_POINTER__ == 8 // 64-bit versions
 

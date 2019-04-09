@@ -38,11 +38,10 @@
 ****************************************************************************/
 
 #include "qimagescale_p.h"
-#include "qimage.h"
-#include <private/qdrawhelper_x86_p.h>
-#include <private/qsimd_p.h>
 
-#if defined(QT_COMPILER_SUPPORTS_SSE4_1)
+#if defined(__SSE4_1__)
+#include <immintrin.h>
+#include <x86intrin.h>
 
 using namespace QImageScale;
 
