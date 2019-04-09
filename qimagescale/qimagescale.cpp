@@ -350,7 +350,9 @@ static void qt_qimageScaleAARGBA(QImageScaleInfo *isi, unsigned int *dest,
             qt_qimageScaleAARGBA_up_x_down_y_sse4<false>(isi, dest, dw, dh, dow, sow);
         else
 #elif defined(__ARM_NEON__)
+/*
         qt_qimageScaleAARGBA_up_x_down_y_neon<false>(isi, dest, dw, dh, dow, sow);
+*/
 #endif
         qt_qimageScaleAARGBA_up_x_down_y(isi, dest, dw, dh, dow, sow);
     }
@@ -361,7 +363,9 @@ static void qt_qimageScaleAARGBA(QImageScaleInfo *isi, unsigned int *dest,
             qt_qimageScaleAARGBA_down_x_up_y_sse4<false>(isi, dest, dw, dh, dow, sow);
         else
 #elif defined(__ARM_NEON__)
+/*
         qt_qimageScaleAARGBA_down_x_up_y_neon<false>(isi, dest, dw, dh, dow, sow);
+*/
 #endif
         qt_qimageScaleAARGBA_down_x_up_y(isi, dest, dw, dh, dow, sow);
     }
@@ -372,7 +376,9 @@ static void qt_qimageScaleAARGBA(QImageScaleInfo *isi, unsigned int *dest,
             qt_qimageScaleAARGBA_down_xy_sse4<false>(isi, dest, dw, dh, dow, sow);
         else
 #elif defined(__ARM_NEON__)
+/*
         qt_qimageScaleAARGBA_down_xy_neon<false>(isi, dest, dw, dh, dow, sow);
+*/
 #endif
         qt_qimageScaleAARGBA_down_xy(isi, dest, dw, dh, dow, sow);
     }
