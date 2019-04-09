@@ -348,35 +348,35 @@ static void qt_qimageScaleAARGBA(QImageScaleInfo *isi, unsigned int *dest,
     }
     /* if we're scaling down vertically */
     else if (isi->xup_yup == 1) {
+/*
 #if defined(__SSE4_1__)
         qt_qimageScaleAARGBA_up_x_down_y_sse4<false>(isi, dest, dw, dh, dow, sow);
-/*
 #elif defined(__ARM_NEON__)
         qt_qimageScaleAARGBA_up_x_down_y_neon<false>(isi, dest, dw, dh, dow, sow);
-*/
 #endif
+*/
         qt_qimageScaleAARGBA_up_x_down_y(isi, dest, dw, dh, dow, sow);
     }
     /* if we're scaling down horizontally */
     else if (isi->xup_yup == 2) {
+/*
 #if defined(__SSE4_1__)
         qt_qimageScaleAARGBA_down_x_up_y_sse4<false>(isi, dest, dw, dh, dow, sow);
-/*
 #elif defined(__ARM_NEON__)
         qt_qimageScaleAARGBA_down_x_up_y_neon<false>(isi, dest, dw, dh, dow, sow);
-*/
 #endif
+*/
         qt_qimageScaleAARGBA_down_x_up_y(isi, dest, dw, dh, dow, sow);
     }
     /* if we're scaling down horizontally & vertically */
     else {
+/*
 #if defined(__SSE4_1__)
         qt_qimageScaleAARGBA_down_xy_sse4<false>(isi, dest, dw, dh, dow, sow);
-/*
 #elif defined(__ARM_NEON__)
         qt_qimageScaleAARGBA_down_xy_neon<false>(isi, dest, dw, dh, dow, sow);
-*/
 #endif
+*/
         qt_qimageScaleAARGBA_down_xy(isi, dest, dw, dh, dow, sow);
     }
 }
@@ -547,35 +547,35 @@ static void qt_qimageScaleAARGB(QImageScaleInfo *isi, unsigned int *dest,
     }
     /* if we're scaling down vertically */
     else if (isi->xup_yup == 1) {
+/*
 #if defined(__SSE4_1__)
         qt_qimageScaleAARGBA_up_x_down_y_sse4<true>(isi, dest, dw, dh, dow, sow);
-/*
 #elif defined(__ARM_NEON__)
         qt_qimageScaleAARGBA_up_x_down_y_neon<true>(isi, dest, dw, dh, dow, sow);
-*/
 #endif
+*/
         qt_qimageScaleAARGB_up_x_down_y(isi, dest, dw, dh, dow, sow);
     }
     /* if we're scaling down horizontally */
     else if (isi->xup_yup == 2) {
+/*
 #if defined(__SSE4_1__)
         qt_qimageScaleAARGBA_down_x_up_y_sse4<true>(isi, dest, dw, dh, dow, sow);
-/*
 #elif defined(__ARM_NEON__)
         qt_qimageScaleAARGBA_down_x_up_y_neon<true>(isi, dest, dw, dh, dow, sow);
-*/
 #endif
+*/
         qt_qimageScaleAARGB_down_x_up_y(isi, dest, dw, dh, dow, sow);
     }
     /* if we're scaling down horizontally & vertically */
     else {
+/*
 #if defined(__SSE4_1__)
         qt_qimageScaleAARGBA_down_xy_sse4<true>(isi, dest, dw, dh, dow, sow);
-/*
 #elif defined(__ARM_NEON__)
         qt_qimageScaleAARGBA_down_xy_neon<true>(isi, dest, dw, dh, dow, sow);
-*/
 #endif
+*/
         qt_qimageScaleAARGB_down_xy(isi, dest, dw, dh, dow, sow);
     }
 }
