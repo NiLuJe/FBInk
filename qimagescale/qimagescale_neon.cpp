@@ -43,8 +43,6 @@
 
 #if defined(__ARM_NEON__)
 
-QT_BEGIN_NAMESPACE
-
 using namespace QImageScale;
 
 inline static uint32x4_t qt_qimageScaleAARGBA_helper(const unsigned int *pix, int xyap, int Cxy, int step)
@@ -209,7 +207,5 @@ template void qt_qimageScaleAARGBA_down_xy_neon<false>(QImageScaleInfo *isi, uns
 
 template void qt_qimageScaleAARGBA_down_xy_neon<true>(QImageScaleInfo *isi, unsigned int *dest,
                                                       int dw, int dh, int dow, int sow);
-
-QT_END_NAMESPACE
 
 #endif

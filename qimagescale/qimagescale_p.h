@@ -50,10 +50,6 @@
 // We mean it.
 //
 
-#include <qimage.h>
-
-QT_BEGIN_NAMESPACE
-
 /*
   This version accepts only supported formats.
 */
@@ -68,7 +64,5 @@ namespace QImageScale {
         int xup_yup{0};
     };
 }
-
-QT_END_NAMESPACE
 
 #endif

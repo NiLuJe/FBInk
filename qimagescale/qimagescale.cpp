@@ -38,11 +38,6 @@
 ****************************************************************************/
 #include "qimagescale_p.h"
 
-#include "qimage.h"
-#include "qcolor.h"
-
-QT_BEGIN_NAMESPACE
-
 /*
  * Copyright (C) 2004, 2005 Daniel M. Duley
  *
@@ -752,5 +747,3 @@ QImage qSmoothScaleImage(const QImage &src, int dw, int dh)
     qimageFreeScaleInfo(scaleinfo);
     return buffer;
 }
-
-QT_END_NAMESPACE
