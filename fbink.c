@@ -5058,7 +5058,7 @@ cleanup:
 static unsigned char*
     img_load_from_file(const char* filename, int* w, int* h, int* n, int req_n)
 {
-	unsigned char* data = NULL;
+	unsigned char* restrict data = NULL;
 
 	// Read image either from stdin (provided we're not running from a terminal), or a file
 	if (strcmp(filename, "-") == 0 && !isatty(fileno(stdin))) {
@@ -6066,10 +6066,10 @@ int
 	}
 
 	// Decode image via stbi
-	unsigned char* data = NULL;
-	int            w;
-	int            h;
-	int            n;
+	unsigned char* restrict data = NULL;
+	int                     w;
+	int                     h;
+	int                     n;
 	data = img_load_from_file(filename, &w, &h, &n, req_n);
 	if (data == NULL) {
 		WARN("Failed to decode image data from '%s'", filename);
