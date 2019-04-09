@@ -53,7 +53,7 @@ typedef short qint16;              /* 16 bit signed */
 typedef unsigned short quint16;    /* 16 bit unsigned */
 typedef int qint32;                /* 32 bit signed */
 typedef unsigned int quint32;      /* 32 bit unsigned */
-#if defined(Q_OS_WIN) && !defined(Q_CC_GNU)
+#if defined(_WIN32) && !defined(__GNUC__)
 #  define Q_INT64_C(c) c ## i64    /* signed 64 bit constant */
 #  define Q_UINT64_C(c) c ## ui64   /* unsigned 64 bit constant */
 typedef __int64 qint64;            /* 64 bit signed */
