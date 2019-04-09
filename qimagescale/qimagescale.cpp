@@ -726,9 +726,9 @@ unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, int s
     if (!scaleinfo)
         return buffer;
 
-    // SIMD friendly alignment, just in case...
+    // SSE/NEON friendly alignment, just in case...
     void *ptr;
-    if (posix_memalign(&ptr, __SIZEOF_POINTER__, dw * dh * 4) != 0) {
+    if (posix_memalign(&ptr, 16, dw * dh * 4) != 0) {
         std::cerr << "qSmoothScaleImage: out of memory, returning null!";
         qimageFreeScaleInfo(scaleinfo);
         return nullptr;
