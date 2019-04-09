@@ -37,6 +37,7 @@
 **
 ****************************************************************************/
 #include "qimagescale_p.h"
+#include <stdint.h>
 
 /*
  * Copyright (C) 2004, 2005 Daniel M. Duley
@@ -106,7 +107,7 @@ static const unsigned int** QImageScale::qimageCalcYPoints(const unsigned int *s
 {
     const unsigned int **p;
     int j = 0, rv = 0;
-    qint64 val, inc;
+    int64_t val, inc;
 
     if (dh < 0) {
         dh = -dh;
@@ -116,7 +117,7 @@ static const unsigned int** QImageScale::qimageCalcYPoints(const unsigned int *s
 
     int up = qAbs(dh) >= sh;
     val = up ? 0x8000 * sh / dh - 0x8000 : 0;
-    inc = (((qint64)sh) << 16) / dh;
+    inc = (((int64_t)sh) << 16) / dh;
     for (int i = 0; i < dh; i++) {
         p[j++] = src + qMax(0LL, val >> 16) * sw;
         val += inc;
@@ -134,7 +135,7 @@ static const unsigned int** QImageScale::qimageCalcYPoints(const unsigned int *s
 static int* QImageScale::qimageCalcXPoints(int sw, int dw)
 {
     int *p, j = 0, rv = 0;
-    qint64 val, inc;
+    int64_t val, inc;
 
     if (dw < 0) {
         dw = -dw;
@@ -144,7 +145,7 @@ static int* QImageScale::qimageCalcXPoints(int sw, int dw)
 
     int up = qAbs(dw) >= sw;
     val = up ? 0x8000 * sw / dw - 0x8000 : 0;
-    inc = (((qint64)sw) << 16) / dw;
+    inc = (((int64_t)sw) << 16) / dw;
     for (int i = 0; i < dw; i++) {
         p[j++] = qMax(0LL, val >> 16);
         val += inc;
@@ -172,8 +173,8 @@ static int* QImageScale::qimageCalcApoints(int s, int d, int up)
 
     if (up) {
         /* scaling up */
-        qint64 val = 0x8000 * s / d - 0x8000;
-        qint64 inc = (((qint64)s) << 16) / d;
+        int64_t val = 0x8000 * s / d - 0x8000;
+        int64_t inc = (((int64_t)s) << 16) / d;
         for (int i = 0; i < d; i++) {
             int pos = val >> 16;
             if (pos < 0)
@@ -186,8 +187,8 @@ static int* QImageScale::qimageCalcApoints(int s, int d, int up)
         }
     } else {
         /* scaling down */
-        qint64 val = 0;
-        qint64 inc = (((qint64)s) << 16) / d;
+        int64_t val = 0;
+        int64_t inc = (((int64_t)s) << 16) / d;
         int Cp = (((d << 14) + s - 1) / s);
         for (int i = 0; i < d; i++) {
             int ap = ((0x10000 - (val & 0xffff)) * Cp) >> 16;

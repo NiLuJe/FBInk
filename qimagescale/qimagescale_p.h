@@ -50,10 +50,7 @@
 // We mean it.
 //
 
-/*
-  This version accepts only supported formats.
-*/
-QImage qSmoothScaleImage(const QImage &img, int w, int h);
+unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, int sn, int dw, int dh);
 
 namespace QImageScale {
     struct QImageScaleInfo {
