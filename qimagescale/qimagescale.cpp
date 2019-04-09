@@ -38,6 +38,7 @@
 ****************************************************************************/
 #include "qglobal.h"
 #include "qimagescale_p.h"
+#include "qdrawhelper_p.h"
 #include <stdlib.h>
 #include <iostream>
 

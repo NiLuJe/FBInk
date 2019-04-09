@@ -74,6 +74,15 @@ typedef qint64 qlonglong;
 typedef quint64 qulonglong;
 
 /*
+   Useful type definitions for Qt
+*/
+
+typedef unsigned char uchar;
+typedef unsigned short ushort;
+typedef unsigned int uint;
+typedef unsigned long ulong;
+
+/*
    Utility macros and inline functions
 */
 
