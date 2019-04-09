@@ -349,8 +349,10 @@ static void qt_qimageScaleAARGBA(QImageScaleInfo *isi, unsigned int *dest,
         if (qCpuHasFeature(SSE4_1))
             qt_qimageScaleAARGBA_up_x_down_y_sse4<false>(isi, dest, dw, dh, dow, sow);
         else
+/*
 #elif defined(__ARM_NEON__)
         qt_qimageScaleAARGBA_up_x_down_y_neon<false>(isi, dest, dw, dh, dow, sow);
+*/
 #endif
         qt_qimageScaleAARGBA_up_x_down_y(isi, dest, dw, dh, dow, sow);
     }
@@ -360,8 +362,10 @@ static void qt_qimageScaleAARGBA(QImageScaleInfo *isi, unsigned int *dest,
         if (qCpuHasFeature(SSE4_1))
             qt_qimageScaleAARGBA_down_x_up_y_sse4<false>(isi, dest, dw, dh, dow, sow);
         else
+/*
 #elif defined(__ARM_NEON__)
         qt_qimageScaleAARGBA_down_x_up_y_neon<false>(isi, dest, dw, dh, dow, sow);
+*/
 #endif
         qt_qimageScaleAARGBA_down_x_up_y(isi, dest, dw, dh, dow, sow);
     }
@@ -371,8 +375,10 @@ static void qt_qimageScaleAARGBA(QImageScaleInfo *isi, unsigned int *dest,
         if (qCpuHasFeature(SSE4_1))
             qt_qimageScaleAARGBA_down_xy_sse4<false>(isi, dest, dw, dh, dow, sow);
         else
+/*
 #elif defined(__ARM_NEON__)
         qt_qimageScaleAARGBA_down_xy_neon<false>(isi, dest, dw, dh, dow, sow);
+*/
 #endif
         qt_qimageScaleAARGBA_down_xy(isi, dest, dw, dh, dow, sow);
     }
@@ -548,8 +554,10 @@ static void qt_qimageScaleAARGB(QImageScaleInfo *isi, unsigned int *dest,
         if (qCpuHasFeature(SSE4_1))
             qt_qimageScaleAARGBA_up_x_down_y_sse4<true>(isi, dest, dw, dh, dow, sow);
         else
+/*
 #elif defined(__ARM_NEON__)
         qt_qimageScaleAARGBA_up_x_down_y_neon<true>(isi, dest, dw, dh, dow, sow);
+*/
 #endif
         qt_qimageScaleAARGB_up_x_down_y(isi, dest, dw, dh, dow, sow);
     }
@@ -559,8 +567,10 @@ static void qt_qimageScaleAARGB(QImageScaleInfo *isi, unsigned int *dest,
         if (qCpuHasFeature(SSE4_1))
             qt_qimageScaleAARGBA_down_x_up_y_sse4<true>(isi, dest, dw, dh, dow, sow);
         else
+/*
 #elif defined(__ARM_NEON__)
         qt_qimageScaleAARGBA_down_x_up_y_neon<true>(isi, dest, dw, dh, dow, sow);
+*/
 #endif
         qt_qimageScaleAARGB_down_x_up_y(isi, dest, dw, dh, dow, sow);
     }
@@ -570,8 +580,10 @@ static void qt_qimageScaleAARGB(QImageScaleInfo *isi, unsigned int *dest,
         if (qCpuHasFeature(SSE4_1))
             qt_qimageScaleAARGBA_down_xy_sse4<true>(isi, dest, dw, dh, dow, sow);
         else
+/*
 #elif defined(__ARM_NEON__)
         qt_qimageScaleAARGBA_down_xy_neon<true>(isi, dest, dw, dh, dow, sow);
+*/
 #endif
         qt_qimageScaleAARGB_down_xy(isi, dest, dw, dh, dow, sow);
     }
