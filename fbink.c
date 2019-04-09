@@ -4552,7 +4552,6 @@ static const char*
 static int
     get_hwd_mode(uint8_t hw_dither_index)
 {
-
 	// NOTE: This hardware dithering (handled by the PxP) is only supported since EPDC v2!
 	//       AFAICT, most of our eligible target devices only support PASSTHROUGH & ORDERED...
 	//       (c.f., drivers/dma/pxp/pxp_dma_v3.c)

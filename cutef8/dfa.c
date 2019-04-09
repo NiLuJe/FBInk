@@ -90,7 +90,6 @@ bool
 uint32_t
     u8_nextchar2(const char* restrict s, size_t* restrict i)
 {
-
 	uint32_t ch    = 0;
 	uint8_t  state = 0;
 
