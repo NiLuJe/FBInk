@@ -717,32 +717,30 @@ static void qt_qimageScaleAARGB_down_xy(QImageScaleInfo *isi, unsigned int *dest
     }
 }
 
-QImage qSmoothScaleImage(const QImage &src, int dw, int dh)
+unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, int sn, int dw, int dh)
 {
-    QImage buffer;
-    if (src.isNull() || dw <= 0 || dh <= 0)
+    unsigned char* buffer = NULL;
+    if (src == NULL || dw <= 0 || dh <= 0)
         return buffer;
 
-    int w = src.width();
-    int h = src.height();
     QImageScaleInfo *scaleinfo =
-        qimageCalcScaleInfo(src, w, h, dw, dh, true);
+        qimageCalcScaleInfo(src, sw, sh, dw, dh, true);
     if (!scaleinfo)
         return buffer;
 
-    buffer = QImage(dw, dh, src.format());
-    if (buffer.isNull()) {
-        qWarning("QImage: out of memory, returning null");
+    buffer = malloc(dw * dh * sn);
+    if (buffer == NULL) {
+        fprintf(stderr, "qSmoothScaleImage: out of memory, returning null!\n");
         qimageFreeScaleInfo(scaleinfo);
-        return QImage();
+        return NULL;
     }
 
-    if (src.hasAlphaChannel())
-        qt_qimageScaleAARGBA(scaleinfo, (unsigned int *)buffer.scanLine(0),
-                             dw, dh, dw, src.bytesPerLine() / 4);
+    if (sn == 4)
+        qt_qimageScaleAARGBA(scaleinfo, (unsigned int *)buffer,
+                             dw, dh, dw, sw);
     else
-        qt_qimageScaleAARGB(scaleinfo, (unsigned int *)buffer.scanLine(0),
-                            dw, dh, dw, src.bytesPerLine() / 4);
+        qt_qimageScaleAARGB(scaleinfo, (unsigned int *)buffer,
+                            dw, dh, dw, sw * sn / 4);
 
     qimageFreeScaleInfo(scaleinfo);
     return buffer;
