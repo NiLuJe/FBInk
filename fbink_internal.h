@@ -401,7 +401,7 @@ static void get_pixel(FBInkCoordinates, FBInkColor* restrict);
 			__auto_type _v = (V) + 128;                                                                      \
 			(((_v >> 8U) + _v) >> 8U);                                                                       \
 		})
-// NOTE: On the other hand, for mul, every decent compiler seem to figure that one on its own, regardless of architecture ;).
+// NOTE: On the other hand, for mul, every decent compiler seems to figure that one on its own, regardless of architecture ;).
 //       (... most of the time, i.e., when it's on its own).
 #	define MUL255(V)                                                                                                \
 		({                                                                                                       \
