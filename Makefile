@@ -236,6 +236,8 @@ ifndef MINIMAL
 	else
 		LIBS+=-lm
 	endif
+	# C++
+	EXTRA_LDFLAGS+=-static-libstdc++
 endif
 
 ##
