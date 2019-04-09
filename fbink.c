@@ -6076,8 +6076,8 @@ int
 	}
 
 	// Scale it w/ QtImageScale (FIXME: RGB/RGBA only!)
-	unsigned char* sdata = NULL;
-	sdata = qSmoothScaleImage(data, w, h, req_n, viewWidth, viewHeight);
+	unsigned char* restrict sdata = NULL;
+	sdata                         = qSmoothScaleImage(data, w, h, req_n, viewWidth, viewHeight);
 	if (sdata == NULL) {
 		WARN("Failed to resize image");
 		return ERRCODE(EXIT_FAILURE);
