@@ -39,6 +39,15 @@ It also bundles a few specific routines based on others' work:
 		Licensed under the ImageMagick License,
 		(https://imagemagick.org/script/license.php)
 
+	* This experimental (in the purest sense of the word, this won't ever make it to master) branch bundles Qt5's qSmoothScaleImage implementation,
+		(https://github.com/qt/qtbase/blob/dev/src/gui/painting/qimagescale.cpp),
+		Copyright (C) 2016 The Qt Company Ltd,
+		Licensed under the GNU Lesser General Public License version 3 (http://www.gnu.org/licenses/lgpl.html),
+		An implementation originally (C) Daniel M. Duley, that is itself based on imlib2,
+		Copyright (C) Carsten Haitzler and various contributors.
+		Licensed under the New BSD License (http://www.opensource.org/licenses/bsd-license.php),
+		(https://git.enlightenment.org/legacy/imlib2.git/tree/src/lib/scale.c).
+
 	* When in doubt, check the source code, it's heavily commented, and sources are always referenced.
 
 As well as a number of third-party resources (namely, font files):
