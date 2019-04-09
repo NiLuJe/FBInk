@@ -6075,8 +6075,16 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
+	// Scale it w/ QtImageScale (FIXME: RGB/RGBA only!)
+	unsigned char* sdata = NULL;
+	sdata = qSmoothScaleImage(data, w, h, req_n, viewWidth, viewHeight);
+	if (sdata == NULL) {
+		WARN("Failed to resize image");
+		return ERRCODE(EXIT_FAILURE);
+	}
+
 	// Finally, draw it on screen
-	if (draw_image(fbfd, data, w, h, n, req_n, x_off, y_off, fbink_cfg) != EXIT_SUCCESS) {
+	if (draw_image(fbfd, sdata, viewWidth, viewHeight, n, req_n, x_off, y_off, fbink_cfg) != EXIT_SUCCESS) {
 		WARN("Failed to display image data on screen");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;

@@ -342,8 +342,8 @@ endif
 
 ifdef WITH_BUTTON_SCAN
 staticbin: outdir $(OUT_DIR)/$(FBINK_STATIC_NAME) $(CMD_OBJS) $(BTN_OBJS)
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbink $(CMD_OBJS) $(LIBS)
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/button_scan $(BTN_OBJS) $(LIBS)
+	$(CXX) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbink $(CMD_OBJS) $(LIBS)
+	$(CXX) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/button_scan $(BTN_OBJS) $(LIBS)
 else
 staticbin: outdir $(OUT_DIR)/$(FBINK_STATIC_NAME) $(CMD_OBJS)
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbink $(CMD_OBJS) $(LIBS)
@@ -479,12 +479,12 @@ clean:
 	rm -rf Release/shared/*.o
 	rm -rf Release/shared/cutef8/*.o
 	rm -rf Release/shared/libunibreak/src/*.o
-	rm -rf Release/shared/qimagescale/src/*.o
+	rm -rf Release/shared/qimagescale/*.o
 	rm -rf Release/shared/utf8
 	rm -rf Release/static/*.o
 	rm -rf Release/static/cutef8/*.o
 	rm -rf Release/static/libunibreak/src/*.o
-	rm -rf Release/static/qimagescale/src/*.o
+	rm -rf Release/static/qimagescale/*.o
 	rm -rf Release/static/utf8
 	rm -rf Release/*.o
 	rm -rf Release/fbink
@@ -497,12 +497,12 @@ clean:
 	rm -rf Debug/shared/*.o
 	rm -rf Debug/shared/cutef8/*.o
 	rm -rf Debug/shared/libunibreak/src/*.o
-	rm -rf Debug/shared/qimagescale/src/*.o
+	rm -rf Debug/shared/qimagescale/*.o
 	rm -rf Debug/shared/utf8
 	rm -rf Debug/static/*.o
 	rm -rf Debug/static/cutef8/*.o
 	rm -rf Debug/static/libunibreak/src/*.o
-	rm -rf Debug/static/qimagescale/src/*.o
+	rm -rf Debug/static/qimagescale/*.o
 	rm -rf Debug/static/utf8
 	rm -rf Debug/*.o
 	rm -rf Debug/fbink
