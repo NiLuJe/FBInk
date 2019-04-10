@@ -52,7 +52,7 @@
 
 namespace FBInk {
 
-extern "C" unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, int sn, int dw, int dh);
+extern "C" unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, bool ignore_alpha, int dw, int dh);
 
 namespace QImageScale {
     struct QImageScaleInfo {

@@ -742,11 +742,15 @@ static void qt_qimageScaleAARGB_down_xy(QImageScaleInfo *isi, unsigned int *dest
     }
 }
 
-unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, int sn, int dw, int dh)
+unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, bool ignore_alpha, int dw, int dh)
 {
     unsigned char* buffer = nullptr;
     if (src == nullptr || dw <= 0 || dh <= 0)
         return buffer;
+
+    // NOTE: We enforce 32bpp input buffers, because that's what Qt uses, even for RGB with no alpha.
+    //       (the pixelformat constant is helpfully named RGB32 to remind you of that ;)).
+    int sn = 4;
 
     QImageScaleInfo *scaleinfo =
         qimageCalcScaleInfo(src, sw, sh, sn, dw, dh, true);
@@ -756,7 +760,7 @@ unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, int s
     // SSE/NEON friendly alignment, just in case...
     void *ptr;
     // NOTE: Output format is always RGBA!
-    if (posix_memalign(&ptr, 16, dw * dh * 4) != 0) {
+    if (posix_memalign(&ptr, 16, dw * dh * sn) != 0) {
         std::cerr << "qSmoothScaleImage: out of memory, returning null!";
         qimageFreeScaleInfo(scaleinfo);
         return nullptr;
@@ -764,10 +768,11 @@ unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, int s
         buffer = (unsigned char*) ptr;
     }
 
-    if (sn == 4) {
+    if (!ignore_alpha) {
         qt_qimageScaleAARGBA(scaleinfo, (unsigned int *)buffer,
-                             dw, dh, dw, sw);
+                             dw, dh, dw, sw * sn / 4);
     } else {
+        // NOTE: Input buffer is still 32bpp, we just skip *processing* of the alpha channel.
         qt_qimageScaleAARGB(scaleinfo, (unsigned int *)buffer,
                             dw, dh, dw, sw * sn / 4);
     }

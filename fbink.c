@@ -6064,6 +6064,16 @@ int
 			break;
 	}
 
+	// NOTE: QImageScale only accepts RGBA input (i.e., RGB is stored @ 32bpp, with 8 unused bits).
+	//       We, on the other hand, store RGB in 24bits, so, that won't do...
+	//       TL;DR: Request RGBA from stbi to ensure a 32bpp buffer,
+	//              stbi will set the alpha bytes to 0xFF if the input doesn't have any alpha,
+	//              but that's not relevant, as we'll ask QImageScale to ignore alpha *processing* w/ ignore_alpha
+	// NOTE: That said, if input *has* an alpha channel, QImageScale expects premultiplied alpha,
+	//       while stbi leaves it untouched, meaning straight alpha in the vast majority of cases...
+	LOG("Enforcing 32bpp buffers for scaling!");
+	req_n = 4;
+
 	// Decode image via stbi
 	unsigned char* restrict data = NULL;
 	int                     w;
@@ -6075,17 +6085,12 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
-	// Scale it w/ QtImageScale
-	// FIXME: It only accepts RGB/RGBA input!
+	// Scale it w/ QImageScale
 	unsigned char* restrict sdata = NULL;
-	sdata                         = qSmoothScaleImage(data, w, h, req_n, viewWidth, viewHeight);
+	sdata                         = qSmoothScaleImage(data, w, h, fbink_cfg->ignore_alpha, viewWidth, viewHeight);
 	if (sdata == NULL) {
 		WARN("Failed to resize image");
 		return ERRCODE(EXIT_FAILURE);
-	} else {
-		// NOTE: qSmoothScaleImage always outputs RGBA!
-		n = 4;
-		req_n = 4;
 	}
 
 	// Finally, draw it on screen
