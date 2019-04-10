@@ -44,11 +44,13 @@
 #include <stdlib.h>
 #include <iostream>
 
+#ifndef FBINK_QIS_NO_SIMD
 #if defined(__ARM_NEON__)
 #include "qimagescale_neon.cpp"
 #endif
 #if defined(__SSE4_1__)
 #include "qimagescale_sse4.cpp"
+#endif
 #endif
 
 namespace FBInk {
@@ -278,6 +280,7 @@ static void qt_qimageScaleAARGBA_down_x_up_y(QImageScaleInfo *isi, unsigned int 
 static void qt_qimageScaleAARGBA_down_xy(QImageScaleInfo *isi, unsigned int *dest,
                                          int dw, int dh, int dow, int sow);
 
+#ifndef FBINK_QIS_NO_SIMD
 #if defined(__SSE4_1__)
 template<bool RGB>
 void qt_qimageScaleAARGBA_up_x_down_y_sse4(QImageScaleInfo *isi, unsigned int *dest,
@@ -300,6 +303,7 @@ void qt_qimageScaleAARGBA_down_x_up_y_neon(QImageScaleInfo *isi, unsigned int *d
 template<bool RGB>
 void qt_qimageScaleAARGBA_down_xy_neon(QImageScaleInfo *isi, unsigned int *dest,
                                        int dw, int dh, int dow, int sow);
+#endif
 #endif
 
 static void qt_qimageScaleAARGBA_up_xy(QImageScaleInfo *isi, unsigned int *dest,
@@ -350,36 +354,45 @@ static void qt_qimageScaleAARGBA(QImageScaleInfo *isi, unsigned int *dest,
     }
     /* if we're scaling down vertically */
     else if (isi->xup_yup == 1) {
-/*
+#ifndef FBINK_QIS_NO_SIMD
 #if defined(__SSE4_1__)
         qt_qimageScaleAARGBA_up_x_down_y_sse4<false>(isi, dest, dw, dh, dow, sow);
 #elif defined(__ARM_NEON__)
         qt_qimageScaleAARGBA_up_x_down_y_neon<false>(isi, dest, dw, dh, dow, sow);
-#endif
-*/
+#else
         qt_qimageScaleAARGBA_up_x_down_y(isi, dest, dw, dh, dow, sow);
+#endif
+#else
+        qt_qimageScaleAARGBA_up_x_down_y(isi, dest, dw, dh, dow, sow);
+#endif
     }
     /* if we're scaling down horizontally */
     else if (isi->xup_yup == 2) {
-/*
+#ifndef FBINK_QIS_NO_SIMD
 #if defined(__SSE4_1__)
         qt_qimageScaleAARGBA_down_x_up_y_sse4<false>(isi, dest, dw, dh, dow, sow);
 #elif defined(__ARM_NEON__)
         qt_qimageScaleAARGBA_down_x_up_y_neon<false>(isi, dest, dw, dh, dow, sow);
-#endif
-*/
+#else
         qt_qimageScaleAARGBA_down_x_up_y(isi, dest, dw, dh, dow, sow);
+#endif
+#else
+        qt_qimageScaleAARGBA_down_x_up_y(isi, dest, dw, dh, dow, sow);
+#endif
     }
     /* if we're scaling down horizontally & vertically */
     else {
-/*
+#ifndef FBINK_QIS_NO_SIMD
 #if defined(__SSE4_1__)
         qt_qimageScaleAARGBA_down_xy_sse4<false>(isi, dest, dw, dh, dow, sow);
 #elif defined(__ARM_NEON__)
         qt_qimageScaleAARGBA_down_xy_neon<false>(isi, dest, dw, dh, dow, sow);
-#endif
-*/
+#else
         qt_qimageScaleAARGBA_down_xy(isi, dest, dw, dh, dow, sow);
+#endif
+#else
+        qt_qimageScaleAARGBA_down_xy(isi, dest, dw, dh, dow, sow);
+#endif
     }
 }
 
@@ -549,36 +562,45 @@ static void qt_qimageScaleAARGB(QImageScaleInfo *isi, unsigned int *dest,
     }
     /* if we're scaling down vertically */
     else if (isi->xup_yup == 1) {
-/*
+#ifndef FBINK_QIS_NO_SIMD
 #if defined(__SSE4_1__)
         qt_qimageScaleAARGBA_up_x_down_y_sse4<true>(isi, dest, dw, dh, dow, sow);
 #elif defined(__ARM_NEON__)
         qt_qimageScaleAARGBA_up_x_down_y_neon<true>(isi, dest, dw, dh, dow, sow);
-#endif
-*/
+#else
         qt_qimageScaleAARGB_up_x_down_y(isi, dest, dw, dh, dow, sow);
+#endif
+#else
+        qt_qimageScaleAARGB_up_x_down_y(isi, dest, dw, dh, dow, sow);
+#endif
     }
     /* if we're scaling down horizontally */
     else if (isi->xup_yup == 2) {
-/*
+#ifndef FBINK_QIS_NO_SIMD
 #if defined(__SSE4_1__)
         qt_qimageScaleAARGBA_down_x_up_y_sse4<true>(isi, dest, dw, dh, dow, sow);
 #elif defined(__ARM_NEON__)
         qt_qimageScaleAARGBA_down_x_up_y_neon<true>(isi, dest, dw, dh, dow, sow);
-#endif
-*/
+#else
         qt_qimageScaleAARGB_down_x_up_y(isi, dest, dw, dh, dow, sow);
+#endif
+#else
+        qt_qimageScaleAARGB_down_x_up_y(isi, dest, dw, dh, dow, sow);
+#endif
     }
     /* if we're scaling down horizontally & vertically */
     else {
-/*
+#ifndef FBINK_QIS_NO_SIMD
 #if defined(__SSE4_1__)
         qt_qimageScaleAARGBA_down_xy_sse4<true>(isi, dest, dw, dh, dow, sow);
 #elif defined(__ARM_NEON__)
         qt_qimageScaleAARGBA_down_xy_neon<true>(isi, dest, dw, dh, dow, sow);
-#endif
-*/
+#else
         qt_qimageScaleAARGB_down_xy(isi, dest, dw, dh, dow, sow);
+#endif
+#else
+        qt_qimageScaleAARGB_down_xy(isi, dest, dw, dh, dow, sow);
+#endif
     }
 }
 
