@@ -41,37 +41,13 @@
 #ifndef QGLOBAL_H
 #define QGLOBAL_H
 
-#ifdef __cplusplus
-#  include <type_traits>
-#  include <cstddef>
-#  include <utility>
-#endif
-
-typedef signed char qint8;         /* 8 bit signed */
-typedef unsigned char quint8;      /* 8 bit unsigned */
-typedef short qint16;              /* 16 bit signed */
-typedef unsigned short quint16;    /* 16 bit unsigned */
-typedef int qint32;                /* 32 bit signed */
-typedef unsigned int quint32;      /* 32 bit unsigned */
 #if defined(_WIN32) && !defined(__GNUC__)
-#  define Q_INT64_C(c) c ## i64    /* signed 64 bit constant */
-#  define Q_UINT64_C(c) c ## ui64   /* unsigned 64 bit constant */
 typedef __int64 qint64;            /* 64 bit signed */
 typedef unsigned __int64 quint64;  /* 64 bit unsigned */
 #else
-#ifdef __cplusplus
-#  define Q_INT64_C(c) static_cast<long long>(c ## LL)     /* signed 64 bit constant */
-#  define Q_UINT64_C(c) static_cast<unsigned long long>(c ## ULL) /* unsigned 64 bit constant */
-#else
-#  define Q_INT64_C(c) ((long long)(c ## LL))               /* signed 64 bit constant */
-#  define Q_UINT64_C(c) ((unsigned long long)(c ## ULL))    /* unsigned 64 bit constant */
-#endif
 typedef long long qint64;           /* 64 bit signed */
 typedef unsigned long long quint64; /* 64 bit unsigned */
 #endif
-
-typedef qint64 qlonglong;
-typedef quint64 qulonglong;
 
 /*
    Useful type definitions for Qt
@@ -93,8 +69,5 @@ template <typename T>
 constexpr inline const T &qMin(const T &a, const T &b) { return (a < b) ? a : b; }
 template <typename T>
 constexpr inline const T &qMax(const T &a, const T &b) { return (a < b) ? b : a; }
-template <typename T>
-constexpr inline const T &qBound(const T &min, const T &val, const T &max)
-{ return qMax(min, qMin(max, val)); }
 
 #endif /* QGLOBAL_H */
