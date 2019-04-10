@@ -255,6 +255,10 @@ static QImageScaleInfo* QImageScale::qimageCalcScaleInfo(const unsigned char* im
     isi->xpoints = qimageCalcXPoints(sw, scw);
     if (!isi->xpoints)
         return qimageFreeScaleInfo(isi);
+    // NOTE: We use sw directly as a simplification. Technically, it's img bytes-per-lines / bytes-per-pixel
+    //       (i.e., img's width * number of color components / sizeof(uint32_t) for unpadded packed pixels).
+    //       As we enforce 32bpp input, n is 4, as is sizeof(uint32_t), hence using width directly ;).
+    // NOTE: Qt's Rgba64 codepath *still* divides by 4, so, err, double-check that?
     isi->ypoints = qimageCalcYPoints((const unsigned int *)img,
                                      sw, sh, sch);
     if (!isi->ypoints)
@@ -766,6 +770,9 @@ unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, bool 
         buffer = (unsigned char*) ptr;
     }
 
+    // NOTE: See comment in qimageCalcScaleInfo regarding our simplification of using sw directly.
+    //       Here, the Rgba64 codepath *does* divide by 8, because it casts buffer to QRgba64 *,
+    //       which I imagine is an uint64_t ;).
     if (!ignore_alpha) {
         qt_qimageScaleAARGBA(scaleinfo, (unsigned int *)buffer,
                              dw, dh, dw, sw);
