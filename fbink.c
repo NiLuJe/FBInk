@@ -6064,7 +6064,7 @@ int
 			break;
 	}
 
-	// NOTE: QImageScale only accepts RGBA input (i.e., RGB is stored @ 32bpp, with 8 unused bits).
+	// NOTE: QImageScale only accepts RGBA input (i.e., RGBA, or RGB stored @ 32bpp, with 8 unused bits).
 	//       We, on the other hand, store RGB in 24bits, so, that won't do...
 	//       TL;DR: Request RGBA from stbi to ensure a 32bpp buffer,
 	//              stbi will set the alpha bytes to 0xFF if the input doesn't have any alpha,
