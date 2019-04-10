@@ -6082,11 +6082,14 @@ int
 	if (sdata == NULL) {
 		WARN("Failed to resize image");
 		return ERRCODE(EXIT_FAILURE);
+	} else {
+		// NOTE: qSmoothScaleImage always outputs RGBA!
+		n = 4;
+		req_n = 4;
 	}
 
 	// Finally, draw it on screen
-	// NOTE: qSmoothScaleImage always outputs RGBA!
-	if (draw_image(fbfd, sdata, viewWidth, viewHeight, n, 4, x_off, y_off, fbink_cfg) != EXIT_SUCCESS) {
+	if (draw_image(fbfd, sdata, viewWidth, viewHeight, n, req_n, x_off, y_off, fbink_cfg) != EXIT_SUCCESS) {
 		WARN("Failed to display image data on screen");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
