@@ -128,8 +128,6 @@ static inline uint interpolate_4_pixels(const uint t[], const uint b[], uint dis
     return interpolate_4_pixels_sse2(vt, vb, distx, disty);
 }
 
-static constexpr inline bool hasFastInterpolate4() { return true; }
-
 #elif defined(__ARM_NEON__)
 static inline __attribute__((always_inline)) uint interpolate_4_pixels_neon(uint32x2_t vt32, uint32x2_t vb32, uint distx, uint disty)
 {
@@ -163,8 +161,6 @@ static inline uint interpolate_4_pixels(const uint t[], const uint b[], uint dis
     return interpolate_4_pixels_neon(vt32, vb32, distx, disty);
 }
 
-static constexpr inline bool hasFastInterpolate4() { return true; }
-
 #else
 static inline uint interpolate_4_pixels(uint tl, uint tr, uint bl, uint br, uint distx, uint disty)
 {
@@ -179,8 +175,6 @@ static inline uint interpolate_4_pixels(const uint t[], const uint b[], uint dis
 {
     return interpolate_4_pixels(t[0], t[1], b[0], b[1], distx, disty);
 }
-
-static constexpr inline bool hasFastInterpolate4() { return false; }
 #endif
 
 }

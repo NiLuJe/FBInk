@@ -40,7 +40,6 @@
 #include "qimagescale_p.h"
 
 #if defined(__ARM_NEON__)
-#include <arm_neon.h>
 
 namespace FBInk {
 

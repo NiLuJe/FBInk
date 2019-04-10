@@ -40,8 +40,6 @@
 #include "qimagescale_p.h"
 
 #if defined(__SSE4_1__)
-#include <immintrin.h>
-#include <x86intrin.h>
 
 namespace FBInk {
 
