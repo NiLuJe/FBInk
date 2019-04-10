@@ -239,9 +239,7 @@ ifndef MINIMAL
 	# C++, and we're using a GCC version approximately seven billion years ahead of our targets...
 	EXTRA_LDFLAGS+=-static-libstdc++
 	# NOTE: We forcibly disable the SIMD paths in QImageScale!
-	#       In my quick tests, they performed significantly worse than the pure C++ version, for some reason :?
-	#       This is *especially* true of the NEON variant, and ARM is our primary target,
-	#       but the SSE 4.1 one was also a tad slower (on a Skylake).
+	#       In my quick tests, they performed very slightly worse than the pure C++ version :?
 	#       Keeping in mind that we're using aggressive CFLAGS, with auto-vectorization.
 	EXTRA_CPPFLAGS+=-DFBINK_QIS_NO_SIMD
 endif
