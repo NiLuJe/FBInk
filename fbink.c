@@ -6071,6 +6071,8 @@ int
 	//              but that's not relevant, as we'll ask QImageScale to ignore alpha *processing* w/ ignore_alpha
 	// NOTE: That said, if input *has* an alpha channel, QImageScale expects premultiplied alpha,
 	//       while stbi leaves it untouched, meaning straight alpha in the vast majority of cases...
+	// FIXME: This currently breaks output on <= 8bpp fbs,
+	//        as draw_image assumes req_n to be 1 or 2 (depending on ignore_alpha) when targeting 8 & 4bpp fbs...
 	if (req_n != 4) {
 		LOG("Enforcing 32bpp buffer for scaling!");
 		req_n = 4;
