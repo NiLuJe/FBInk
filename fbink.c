@@ -6071,8 +6071,10 @@ int
 	//              but that's not relevant, as we'll ask QImageScale to ignore alpha *processing* w/ ignore_alpha
 	// NOTE: That said, if input *has* an alpha channel, QImageScale expects premultiplied alpha,
 	//       while stbi leaves it untouched, meaning straight alpha in the vast majority of cases...
-	LOG("Enforcing 32bpp buffers for scaling!");
-	req_n = 4;
+	if (req_n != 4) {
+		LOG("Enforcing 32bpp buffer for scaling!");
+		req_n = 4;
+	}
 
 	// Decode image via stbi
 	unsigned char* restrict data = NULL;
