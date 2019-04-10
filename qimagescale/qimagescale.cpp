@@ -759,7 +759,7 @@ unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, bool 
     void *ptr;
     // NOTE: Output format is always RGBA! So make enough room for 4 bytes per pixel ;).
     if (posix_memalign(&ptr, 16, dw * dh * 4) != 0) {
-        std::cerr << "qSmoothScaleImage: out of memory, returning null!";
+        std::cerr << "qSmoothScaleImage: out of memory, returning null!" << std::endl;
         qimageFreeScaleInfo(scaleinfo);
         return nullptr;
     } else {
