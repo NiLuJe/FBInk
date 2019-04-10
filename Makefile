@@ -238,10 +238,12 @@ ifndef MINIMAL
 	endif
 	# C++, and we're using a GCC version approximately seven billion years ahead of our targets...
 	EXTRA_LDFLAGS+=-static-libstdc++
-	# NOTE: We forcibly disable the SIMD paths in QImageScale!
+	# NOTE: We forcibly disable the NEON codepaths in QImageScale!
 	#       In my quick tests, they performed very slightly worse than the pure C++ version :?
 	#       Keeping in mind that we're using aggressive CFLAGS, with auto-vectorization.
-	EXTRA_CPPFLAGS+=-DFBINK_QIS_NO_SIMD
+	ifdef CROSS_TC
+		EXTRA_CPPFLAGS+=-DFBINK_QIS_NO_SIMD
+	endif
 endif
 
 ##
