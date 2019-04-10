@@ -42,6 +42,8 @@
 #if defined(__ARM_NEON__)
 #include <arm_neon.h>
 
+namespace FBInk {
+
 using namespace QImageScale;
 
 inline static uint32x4_t qt_qimageScaleAARGBA_helper(const unsigned int *pix, int xyap, int Cxy, int step)
@@ -206,5 +208,6 @@ template void qt_qimageScaleAARGBA_down_xy_neon<false>(QImageScaleInfo *isi, uns
 
 template void qt_qimageScaleAARGBA_down_xy_neon<true>(QImageScaleInfo *isi, unsigned int *dest,
                                                       int dw, int dh, int dow, int sow);
+}
 
 #endif

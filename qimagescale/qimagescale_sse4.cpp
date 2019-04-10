@@ -43,6 +43,8 @@
 #include <immintrin.h>
 #include <x86intrin.h>
 
+namespace FBInk {
+
 using namespace QImageScale;
 
 inline static __m128i Q_DECL_VECTORCALL
@@ -216,5 +218,7 @@ template void qt_qimageScaleAARGBA_down_xy_sse4<false>(QImageScaleInfo *isi, uns
 
 template void qt_qimageScaleAARGBA_down_xy_sse4<true>(QImageScaleInfo *isi, unsigned int *dest,
                                                       int dw, int dh, int dow, int sow);
+
+}
 
 #endif

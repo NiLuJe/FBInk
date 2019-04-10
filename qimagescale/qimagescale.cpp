@@ -44,6 +44,15 @@
 #include <stdlib.h>
 #include <iostream>
 
+#if defined(__ARM_NEON__)
+#include "qimagescale_neon.cpp"
+#endif
+#if defined(__SSE4_1__)
+#include "qimagescale_sse4.cpp"
+#endif
+
+namespace FBInk {
+
 /*
  * Copyright (C) 2004, 2005 Daniel M. Duley
  *
@@ -100,13 +109,6 @@ namespace QImageScale {
     static QImageScaleInfo* qimageFreeScaleInfo(QImageScaleInfo *isi);
     static QImageScaleInfo *qimageCalcScaleInfo(const unsigned char* img, int sw, int sh, int sn, int dw, int dh, char aa);
 }
-
-#if defined(__ARM_NEON__)
-#include "qimagescale_neon.cpp"
-#endif
-#if defined(__SSE4_1__)
-#include "qimagescale_sse4.cpp"
-#endif
 
 using namespace QImageScale;
 
@@ -750,4 +752,6 @@ unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, int s
 
     qimageFreeScaleInfo(scaleinfo);
     return buffer;
+}
+
 }

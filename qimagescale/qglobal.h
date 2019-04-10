@@ -41,6 +41,8 @@
 #ifndef QGLOBAL_H
 #define QGLOBAL_H
 
+namespace FBInk {
+
 #if defined(_WIN32) && !defined(__GNUC__)
 typedef __int64 qint64;            /* 64 bit signed */
 typedef unsigned __int64 quint64;  /* 64 bit unsigned */
@@ -48,6 +50,8 @@ typedef unsigned __int64 quint64;  /* 64 bit unsigned */
 typedef long long qint64;           /* 64 bit signed */
 typedef unsigned long long quint64; /* 64 bit unsigned */
 #endif
+
+}
 
 /*
    Useful type definitions for Qt
@@ -57,6 +61,8 @@ typedef unsigned char uchar;
 typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned long ulong;
+
+namespace FBInk {
 
 /*
    Utility macros and inline functions
@@ -69,5 +75,7 @@ template <typename T>
 constexpr inline const T &qMin(const T &a, const T &b) { return (a < b) ? a : b; }
 template <typename T>
 constexpr inline const T &qMax(const T &a, const T &b) { return (a < b) ? b : a; }
+
+}
 
 #endif /* QGLOBAL_H */

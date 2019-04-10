@@ -49,6 +49,8 @@
 #include <x86intrin.h>
 #endif
 
+namespace FBInk {
+
 #if defined(__GNUC__)
 #  if (defined(__i386) || defined(__i386__) || defined(_M_IX86)) && defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER)
 #    define Q_DECL_VECTORCALL __attribute__((sseregparm,regparm(3)))
@@ -179,7 +181,8 @@ static inline uint interpolate_4_pixels(const uint t[], const uint b[], uint dis
 }
 
 static constexpr inline bool hasFastInterpolate4() { return false; }
-
 #endif
+
+}
 
 #endif // QDRAWHELPER_P_H

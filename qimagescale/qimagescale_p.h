@@ -50,6 +50,8 @@
 // We mean it.
 //
 
+namespace FBInk {
+
 extern "C" unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, int sn, int dw, int dh);
 
 namespace QImageScale {
@@ -60,6 +62,8 @@ namespace QImageScale {
         int *yapoints{nullptr};
         int xup_yup{0};
     };
+}
+
 }
 
 #endif

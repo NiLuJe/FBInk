@@ -40,10 +40,9 @@
 #ifndef QRGB_H
 #define QRGB_H
 
-typedef unsigned int QRgb;                        // RGB triplet
+namespace FBInk {
 
-// non-namespaced Qt global variable
-const QRgb  RGB_MASK    = 0x00ffffff;     // masks RGB values
+typedef unsigned int QRgb;                        // RGB triplet
 
 inline constexpr int qRed(QRgb rgb)                // get red part of RGB
 { return ((rgb >> 16) & 0xff); }
@@ -62,5 +61,7 @@ inline constexpr QRgb qRgb(int r, int g, int b)// set RGB value
 
 inline constexpr QRgb qRgba(int r, int g, int b, int a)// set RGBA value
 { return ((a & 0xffu) << 24) | ((r & 0xffu) << 16) | ((g & 0xffu) << 8) | (b & 0xffu); }
+
+}
 
 #endif // QRGB_H
