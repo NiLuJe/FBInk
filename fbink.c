@@ -6074,7 +6074,7 @@ int
 	// FIXME: This currently breaks output on <= 8bpp fbs,
 	//        as draw_image assumes req_n to be 1 or 2 (depending on ignore_alpha) when targeting 8 & 4bpp fbs...
 	// FIXME: Actually handle user-specifiec scaled_w & scaled_h values, honoring AR if only one of them is !0,
-	//        and skipping scaling entirely if both are are 0.
+	//        and skipping scaling entirely if both are are 0. Make them signed to accept -1 to mean viewWidth/viewHeight.
 	if (req_n != 4) {
 		LOG("Enforcing 32bpp buffer for scaling!");
 		req_n = 4;
