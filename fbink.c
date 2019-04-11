@@ -199,7 +199,7 @@ static void
 //       TL;DR: This is for documentation purposes only, never build w/ MATHS defined ;).
 #	ifdef FBINK_WITH_MATHS_ROTA
 	uint8_t rotation = FB_ROTATE_CW;
-	// i.e., Î¸ (c.f., https://en.wikipedia.org/wiki/Cartesian_coordinate_system#Rotation)
+	// i.e., ? (c.f., https://en.wikipedia.org/wiki/Cartesian_coordinate_system#Rotation)
 	double rangle = ((rotation * 90) * M_PI / 180.0);
 	double fxp    = coords->x * cos(rangle) - coords->y * sin(rangle);
 	double fyp    = coords->x * sin(rangle) + coords->y * cos(rangle);
@@ -302,7 +302,7 @@ static void
 			break;
 	}
 
-	// NOTE: The H2OÂ²r1 (possibly r2 as well), on the other hand, is a special snowflake...
+	// NOTE: The H2O²r1 (possibly r2 as well), on the other hand, is a special snowflake...
 	//       (It'll need a dedicated deviceQuirks).
 	// c.f., https://www.mobileread.com/forums/showpost.php?p=3766627&postcount=236
 	/*
@@ -1762,13 +1762,13 @@ static const char*
 {
 	switch (rotate) {
 		case FB_ROTATE_UR:
-			return "Upright, 0Â°";
+			return "Upright, 0°";
 		case FB_ROTATE_CW:
-			return "Clockwise, 90Â°";
+			return "Clockwise, 90°";
 		case FB_ROTATE_UD:
-			return "Upside Down, 180Â°";
+			return "Upside Down, 180°";
 		case FB_ROTATE_CCW:
-			return "Counter Clockwise, 270Â°";
+			return "Counter Clockwise, 270°";
 		default:
 			return "Unknown?!";
 	}
@@ -3110,7 +3110,7 @@ int
 		if (wrapped_line && line_len < available_cols) {
 			LOG("Capping the line with a solid block to make it clearer it has wrapped around...");
 			strcat(line, "\u2588");
-			// NOTE: U+2588 (â–ˆ) is a multibyte sequence, namely, it takes 3 bytes
+			// NOTE: U+2588 (?) is a multibyte sequence, namely, it takes 3 bytes
 			bytes_printed += 3;
 		}
 
@@ -6074,7 +6074,7 @@ int
 	// FIXME: This currently breaks output on <= 8bpp fbs,
 	//        as draw_image assumes req_n to be 1 or 2 (depending on ignore_alpha) when targeting 8 & 4bpp fbs...
 	// FIXME: Actually handle user-specifiec scaled_w & scaled_h values, honoring AR if only one of them is !0,
-	//        and skipping scaling entirely if both are are 0.
+	//        and skipping scaling entirely if both are are 0. Make them signed to accept -1 to mean viewWidth/viewHeight.
 	if (req_n != 4) {
 		LOG("Enforcing 32bpp buffer for scaling!");
 		req_n = 4;
