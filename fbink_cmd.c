@@ -1123,6 +1123,8 @@ int
 					fbink_cfg.wfm_mode = WFM_GCK16;
 				} else if (strcasecmp(optarg, "GLKW16") == 0) {
 					fbink_cfg.wfm_mode = WFM_GLKW16;
+				} else if (strcasecmp(optarg, "INIT") == 0) {
+					fbink_cfg.wfm_mode = WFM_INIT;
 				} else {
 					fprintf(stderr, "Unknown waveform update mode '%s'.\n", optarg);
 					errfnd = true;

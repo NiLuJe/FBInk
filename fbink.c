@@ -4386,6 +4386,9 @@ static uint32_t
 	}
 
 	switch (wfm_mode_index) {
+		case WFM_INIT:
+			waveform_mode = WAVEFORM_MODE_INIT;
+			break;
 		case WFM_AUTO:
 			waveform_mode = WAVEFORM_MODE_AUTO;
 			break;
@@ -4472,6 +4475,9 @@ static uint32_t
 	}
 #else
 	switch (wfm_mode_index) {
+		case WFM_INIT:
+			waveform_mode = WAVEFORM_MODE_INIT;
+			break;
 		case WFM_AUTO:
 			waveform_mode = WAVEFORM_MODE_AUTO;
 			break;
@@ -4543,6 +4549,8 @@ static const char*
 			return "GLKW16";
 		case WFM_AUTO:
 			return "AUTO";
+		case WFM_INIT:
+			return "INIT";
 		default:
 			return "Unknown";
 	}

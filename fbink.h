@@ -160,6 +160,7 @@ typedef enum
 	WFM_GL16_INV,
 	WFM_GCK16,
 	WFM_GLKW16,
+	WFM_INIT,
 } WFM_MODE_INDEX_T;
 
 // List of *potentially* available HW dithering modes
