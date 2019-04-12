@@ -214,6 +214,16 @@ static bool
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "PaperWhite 4", sizeof(deviceQuirks.deviceName) - 1U);
 			return true;
+		case 0x414:
+		case 0x3CF:
+		case 0x3D0:
+		case 0x3D1:
+		case 0x3D2:
+		case 0x3AB:
+			deviceQuirks.isKindlePW4 = true;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "Basic 3", sizeof(deviceQuirks.deviceName) - 1U);
+			return true;
 		default:
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Unknown!", sizeof(deviceQuirks.deviceName) - 1U);
