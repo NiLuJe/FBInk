@@ -209,7 +209,7 @@ static bool
 		case 0x376:
 		case 0x402:
 		case 0x403:
-			deviceQuirks.isKindlePW4 = true;
+			deviceQuirks.isKindleRex = true;
 			deviceQuirks.screenDPI   = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "PaperWhite 4", sizeof(deviceQuirks.deviceName) - 1U);
@@ -220,7 +220,7 @@ static bool
 		case 0x3D1:
 		case 0x3D2:
 		case 0x3AB:
-			deviceQuirks.isKindlePW4 = true;
+			deviceQuirks.isKindleRex = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Basic 3", sizeof(deviceQuirks.deviceName) - 1U);
 			return true;

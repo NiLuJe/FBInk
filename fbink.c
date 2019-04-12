@@ -1339,9 +1339,9 @@ static int
 	return EXIT_SUCCESS;
 }
 
-// Kindle PaperWhite 4 ([PW4<->??)
+// Kindle PaperWhite 4 & Basic 3 ([PW4<->??)
 static int
-    refresh_kindle_pw4(int                     fbfd,
+    refresh_kindle_rex(int                     fbfd,
 		       const struct mxcfb_rect region,
 		       uint32_t                waveform_mode,
 		       uint32_t                update_mode,
@@ -1350,7 +1350,7 @@ static int
 		       uint32_t                marker)
 {
 	// NOTE: Different mcfb_update_data struct (no ts_* debug fields), but otherwise, identical to the KOA2!
-	struct mxcfb_update_data_pw4 update = {
+	struct mxcfb_update_data_rex update = {
 		.update_region = region,
 		.waveform_mode = waveform_mode,
 		.update_mode   = update_mode,
@@ -1378,12 +1378,12 @@ static int
 	}
 
 	int rv;
-	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_PW4, &update);
+	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_REX, &update);
 
 	if (rv < 0) {
 		char        buf[256];
 		const char* errstr = strerror_r(errno, buf, sizeof(buf));
-		WARN("MXCFB_SEND_UPDATE_PW4: %s", errstr);
+		WARN("MXCFB_SEND_UPDATE_REX: %s", errstr);
 		if (errno == EINVAL) {
 			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
 			     region.top,
@@ -1686,8 +1686,8 @@ static int
 	}
 
 #	if defined(FBINK_FOR_KINDLE)
-	if (deviceQuirks.isKindlePW4) {
-		return refresh_kindle_pw4(fbfd, region, wfm, upm, dithering_mode, is_nightmode, marker);
+	if (deviceQuirks.isKindleRex) {
+		return refresh_kindle_rex(fbfd, region, wfm, upm, dithering_mode, is_nightmode, marker);
 	} else if (deviceQuirks.isKindleOasis2) {
 		return refresh_kindle_koa2(fbfd, region, wfm, upm, dithering_mode, is_nightmode, marker);
 	} else {
@@ -1813,8 +1813,8 @@ static int
 			ELOG("Enabled Kindle with Pearl screen quirks");
 		} else if (deviceQuirks.isKindleOasis2) {
 			ELOG("Enabled Kindle Oasis 2 quirks");
-		} else if (deviceQuirks.isKindlePW4) {
-			ELOG("Enabled Kindle PaperWhite 4 quirks");
+		} else if (deviceQuirks.isKindleRex) {
+			ELOG("Enabled Kindle Rex platform quirks");
 		}
 #	else
 		if (deviceQuirks.isKoboNonMT) {
@@ -4379,9 +4379,9 @@ static uint32_t
 
 	// Parse waveform mode...
 #ifdef FBINK_FOR_KINDLE
-	// Is this a KOA2 or a PW4 with new waveforms?
+	// Is this a KOA2 or a Rex with new waveforms?
 	bool has_new_wfm = false;
-	if (deviceQuirks.isKindleOasis2 || deviceQuirks.isKindlePW4) {
+	if (deviceQuirks.isKindleOasis2 || deviceQuirks.isKindleRex) {
 		has_new_wfm = true;
 	}
 

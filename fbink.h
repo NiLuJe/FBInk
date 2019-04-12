@@ -400,7 +400,7 @@ FBINK_API int fbink_printf(int                  fbfd,
 // region_height:	height field of an mxcfb rectangle
 // dithering_mode:	dithering mode (i.e., HWD_ORDERED, c.f., HW_DITHER_INDEX_T enum)
 //			NOTE: Only supported on devices with a recent EPDC (>= v2)!
-//			      For Kindle, that's everything since the KOA2 (KOA2, PW4),
+//			      For Kindle, that's everything since the KOA2 (KOA2, PW4, KT4),
 //			      For Kobo, that's everything since Mk.7,
 //			NOTE: Your device may not support anything other than PASSTHROUGH & ORDERED!
 // fbink_cfg:		Pointer to an FBInkConfig struct. Honors wfm_mode, is_nightmode, is_flashing
