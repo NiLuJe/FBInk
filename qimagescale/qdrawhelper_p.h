@@ -88,6 +88,15 @@ static inline __attribute__((always_inline)) uint INTERPOLATE_PIXEL_256(uint x, 
 
 #endif
 
+static inline __attribute__((always_inline)) uchar INTERPOLATE_8BPP_PIXEL_256(uchar x, uint a, uchar y, uint b) {
+    uint t = x * a + y * b;
+    t >>= 8;
+
+    uint tx = (x >> 8) * a + (y >> 8) * b;
+    tx |= t;
+    return (uchar) tx;
+}
+
 // NOTE: Unlike the SIMD qimagescale_* routines, these ones seem to offer a very small performance gain.
 #if defined(__SSE2__)
 static inline __attribute__((always_inline)) uint interpolate_4_pixels_sse2(__m128i vt, __m128i vb, uint distx, uint disty)
@@ -176,6 +185,20 @@ static inline uint interpolate_4_pixels(const uint t[], const uint b[], uint dis
     return interpolate_4_pixels(t[0], t[1], b[0], b[1], distx, disty);
 }
 #endif
+
+static inline uchar interpolate_4_8bpp_pixels(uchar tl, uchar tr, uchar bl, uchar br, uint distx, uint disty)
+{
+    uint idistx = 256 - distx;
+    uint idisty = 256 - disty;
+    uchar xtop = INTERPOLATE_8BPP_PIXEL_256(tl, idistx, tr, distx);
+    uchar xbot = INTERPOLATE_8BPP_PIXEL_256(bl, idistx, br, distx);
+    return INTERPOLATE_8BPP_PIXEL_256(xtop, idisty, xbot, disty);
+}
+
+static inline uchar interpolate_4_8bpp_pixels(const uchar t[], const uchar b[], uint distx, uint disty)
+{
+    return interpolate_4_8bpp_pixels(t[0], t[1], b[0], b[1], distx, disty);
+}
 
 }
 

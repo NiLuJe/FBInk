@@ -463,7 +463,7 @@ static void fullscreen_region(struct mxcfb_rect* restrict);
 int draw_progress_bars(int, bool, uint8_t, const FBInkConfig* restrict);
 
 #ifdef FBINK_WITH_IMAGE
-unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, bool ignore_alpha, int dw, int dh);
+unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, int sn, int dw, int dh);
 
 static unsigned char* img_load_from_file(const char*, int*, int*, int*, int);
 static unsigned char* img_convert_px_format(const unsigned char*, int, int, int, int);
