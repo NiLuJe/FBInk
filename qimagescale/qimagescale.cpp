@@ -965,30 +965,23 @@ void qt_qimageScaleAAY8(QImageScaleInfo *isi, unsigned char *dest,
         qt_qimageScaleAAY8_down_xy(isi, dest, dw, dh, dow, sow);
 }
 
-unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, int sn, int dw, int dh)
+unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, int sn, bool ignore_alpha, int dw, int dh)
 {
     unsigned char* buffer = nullptr;
     if (src == nullptr || dw <= 0 || dh <= 0)
         return buffer;
 
-    // NOTE: For RGB/RGBA input, output format is always RGBA!
-    //       So make enough room for 4 bytes per pixel in these cases ;).
-    // NOTE: In the same way, we enforce 32bpp input buffers for RGB,
-    //       because that's what Qt uses, even for RGB with no alpha.
-    //       (the pixelformat constant is helpfully named RGB32 to remind you of that ;)).
-    int out_n = sn;
-    if (sn == 3) {
-        out_n = 4;
-    }
-
     QImageScaleInfo *scaleinfo =
-        qimageCalcScaleInfo(src, sw, sh, out_n, dw, dh, true);
+        qimageCalcScaleInfo(src, sw, sh, sn, dw, dh, true);
     if (!scaleinfo)
             return buffer;
 
+    // NOTE: For RGB/RGBA input, output format is always RGBA!
+    //       In case our input was RGB, we've already ensured that our input buffer is already 32bpp,
+    //       c.f., comments below.
     // SSE/NEON friendly alignment, just in case...
     void *ptr;
-    if (posix_memalign(&ptr, 16, dw * dh * out_n) != 0) {
+    if (posix_memalign(&ptr, 16, dw * dh * sn) != 0) {
             std::cerr << "qSmoothScaleImage: out of memory, returning null!" << std::endl;
             qimageFreeScaleInfo(scaleinfo);
             return nullptr;
@@ -996,16 +989,21 @@ unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, int s
             buffer = (unsigned char*) ptr;
     }
 
+    // NOTE: In the same way, we enforce 32bpp input buffers for RGB,
+    //       because that's what Qt uses, even for RGB with no alpha.
+    //       (the pixelformat constant is helpfully named RGB32 to remind you of that ;)).
+    //       This is why we'll never get sn == 3 here, FBInk takes care of never allowing that to happen.
     // NOTE: See comment in qimageCalcScaleInfo regarding our simplification of using sw directly.
     switch (sn) {
         case 4:
-                qt_qimageScaleAARGBA(scaleinfo, (unsigned int *)buffer,
-                                    dw, dh, dw, sw);
-                break;
-        case 3:
-                // NOTE: Input buffer is still 32bpp, we just skip *processing* of the alpha channel.
-                qt_qimageScaleAARGB(scaleinfo, (unsigned int *)buffer,
-                                    dw, dh, dw, sw);
+                if (ignore_alpha) {
+                    // NOTE: Input buffer is still 32bpp, we just skip *processing* of the alpha channel.
+                    qt_qimageScaleAARGB(scaleinfo, (unsigned int *)buffer,
+                                        dw, dh, dw, sw);
+                } else {
+                    qt_qimageScaleAARGBA(scaleinfo, (unsigned int *)buffer,
+                                        dw, dh, dw, sw);
+                }
                 break;
         case 2:
                 // Y8A TODO
