@@ -106,16 +106,11 @@ namespace FBInk {
 
 namespace QImageScale {
     static const unsigned int** qimageCalcYPoints(const unsigned int *src, int sw, int sh, int dh);
+    static const unsigned char** qimageCalcYPointsY8(const unsigned char *src, int sw, int sh, int dh);
     static int* qimageCalcXPoints(int sw, int dw);
     static int* qimageCalcApoints(int s, int d, int up);
     static QImageScaleInfo* qimageFreeScaleInfo(QImageScaleInfo *isi);
     static QImageScaleInfo *qimageCalcScaleInfo(const unsigned char* img, int sw, int sh, int sn, int dw, int dh, char aa);
-
-    static const unsigned char** qimageCalcYPointsY8(const unsigned char *src, int sw, int sh, int dh);
-    static int* qimageCalcXPointsY8(int sw, int dw);
-    static int* qimageCalcApointsY8(int s, int d, int up);
-    static QImageScaleInfoY8* qimageFreeScaleInfoY8(QImageScaleInfoY8 *isi);
-    static QImageScaleInfoY8 *qimageCalcScaleInfoY8(const unsigned char* img, int sw, int sh, int sn, int dw, int dh, char aa);
 }
 
 using namespace QImageScale;
@@ -147,6 +142,36 @@ static const unsigned int** QImageScale::qimageCalcYPoints(const unsigned int *s
     if (rv) {
         for (int i = dh / 2; --i >= 0; ) {
             const unsigned int *tmp = p[i];
+            p[i] = p[dh - i - 1];
+            p[dh - i - 1] = tmp;
+        }
+    }
+    return(p);
+}
+
+static const unsigned char** QImageScale::qimageCalcYPointsY8(const unsigned char *src,
+                                                           int sw, int sh, int dh)
+{
+    const unsigned char **p;
+    int j = 0, rv = 0;
+    qint64 val, inc;
+
+    if (dh < 0) {
+        dh = -dh;
+        rv = 1;
+    }
+    p = new const unsigned char* [dh+1];
+
+    int up = qAbs(dh) >= sh;
+    val = up ? 0x8000 * sh / dh - 0x8000 : 0;
+    inc = (((qint64)sh) << 16) / dh;
+    for (int i = 0; i < dh; i++) {
+        p[j++] = src + qMax(0LL, val >> 16) * sw;
+        val += inc;
+    }
+    if (rv) {
+        for (int i = dh / 2; --i >= 0; ) {
+            const unsigned char *tmp = p[i];
             p[i] = p[dh - i - 1];
             p[dh - i - 1] = tmp;
         }
@@ -235,6 +260,7 @@ static QImageScaleInfo* QImageScale::qimageFreeScaleInfo(QImageScaleInfo *isi)
     if (isi) {
         delete[] isi->xpoints;
         delete[] isi->ypoints;
+        delete[] isi->ypoints_y8;
         delete[] isi->xapoints;
         delete[] isi->yapoints;
         delete isi;
@@ -262,13 +288,27 @@ static QImageScaleInfo* QImageScale::qimageCalcScaleInfo(const unsigned char* im
     if (!isi->xpoints)
         return qimageFreeScaleInfo(isi);
     // NOTE: We use sw directly as a simplification. Technically, it's img bytes-per-lines / bytes-per-pixel
-    //       (i.e., img's width * number of color components / sizeof(uint32_t) for unpadded packed pixels).
-    //       As we enforce 32bpp input, n is 4, as is sizeof(uint32_t), hence using width directly ;).
-    // NOTE: Qt's Rgba64 codepath *still* divides by 4, so, err, double-check that?
-    isi->ypoints = qimageCalcYPoints((const unsigned int *)img,
-                                     sw * sn / 4, sh, sch);
-    if (!isi->ypoints)
-        return qimageFreeScaleInfo(isi);
+    //       (i.e., img's width (sw) * number of color components (sn) / sizeof(*img) for unpadded packed pixels).
+    //       This explains the casts and the need for different functions according to pointer width.
+    switch (sn) {
+        case 4:
+            // sn is 4, as is sizeof(uint32_t), hence using width directly ;).
+            isi->ypoints = qimageCalcYPoints((const unsigned int *)img,
+                                            sw, sh, sch);
+            if (!isi->ypoints)
+                return qimageFreeScaleInfo(isi);
+        break;
+        case 1:
+            // sn is 1, as is sizeof(unsigned char), hence using width directly ;).
+            isi->ypoints_y8 = qimageCalcYPointsY8((const unsigned char *)img,
+                                            sw, sh, sch);
+            if (!isi->ypoints_y8)
+                return qimageFreeScaleInfo(isi);
+        break;
+        default:
+            return qimageFreeScaleInfo(isi);
+            break;
+    }
     if (aa) {
         isi->xapoints = qimageCalcApoints(sw, scw, isi->xup_yup & 1);
         if (!isi->xapoints)
@@ -279,163 +319,6 @@ static QImageScaleInfo* QImageScale::qimageCalcScaleInfo(const unsigned char* im
     }
     return isi;
 }
-
-static const unsigned char** QImageScale::qimageCalcYPointsY8(const unsigned char *src,
-                                                           int sw, int sh, int dh)
-{
-    const unsigned char **p;
-    int j = 0, rv = 0;
-    qint64 val, inc;
-
-    if (dh < 0) {
-        dh = -dh;
-        rv = 1;
-    }
-    p = new const unsigned char* [dh+1];
-
-    int up = qAbs(dh) >= sh;
-    val = up ? 0x8000 * sh / dh - 0x8000 : 0;
-    inc = (((qint64)sh) << 16) / dh;
-    for (int i = 0; i < dh; i++) {
-        p[j++] = src + qMax(0LL, val >> 16) * sw;
-        val += inc;
-    }
-    if (rv) {
-        for (int i = dh / 2; --i >= 0; ) {
-            const unsigned char *tmp = p[i];
-            p[i] = p[dh - i - 1];
-            p[dh - i - 1] = tmp;
-        }
-    }
-    return(p);
-}
-
-static int* QImageScale::qimageCalcXPointsY8(int sw, int dw)
-{
-    int *p, j = 0, rv = 0;
-    qint64 val, inc;
-
-    if (dw < 0) {
-        dw = -dw;
-        rv = 1;
-    }
-    p = new int[dw+1];
-
-    int up = qAbs(dw) >= sw;
-    val = up ? 0x8000 * sw / dw - 0x8000 : 0;
-    inc = (((qint64)sw) << 16) / dw;
-    for (int i = 0; i < dw; i++) {
-        p[j++] = qMax(0LL, val >> 16);
-        val += inc;
-    }
-
-    if (rv) {
-        for (int i = dw / 2; --i >= 0; ) {
-            int tmp = p[i];
-            p[i] = p[dw - i - 1];
-            p[dw - i - 1] = tmp;
-        }
-    }
-   return p;
-}
-
-static int* QImageScale::qimageCalcApointsY8(int s, int d, int up)
-{
-    int *p, j = 0, rv = 0;
-
-    if (d < 0) {
-        rv = 1;
-        d = -d;
-    }
-    p = new int[d];
-
-    if (up) {
-        /* scaling up */
-        qint64 val = 0x8000 * s / d - 0x8000;
-        qint64 inc = (((qint64)s) << 16) / d;
-        for (int i = 0; i < d; i++) {
-            int pos = val >> 16;
-            if (pos < 0)
-                p[j++] = 0;
-            else if (pos >= (s - 1))
-                p[j++] = 0;
-            else
-                p[j++] = (val >> 8) - ((val >> 8) & 0xffffff00);
-            val += inc;
-        }
-    } else {
-        /* scaling down */
-        qint64 val = 0;
-        qint64 inc = (((qint64)s) << 16) / d;
-        int Cp = (((d << 14) + s - 1) / s);
-        for (int i = 0; i < d; i++) {
-            int ap = ((0x10000 - (val & 0xffff)) * Cp) >> 16;
-            p[j] = ap | (Cp << 16);
-            j++;
-            val += inc;
-        }
-    }
-    if (rv) {
-        int tmp;
-        for (int i = d / 2; --i >= 0; ) {
-            tmp = p[i];
-            p[i] = p[d - i - 1];
-            p[d - i - 1] = tmp;
-        }
-    }
-    return p;
-}
-
-static QImageScaleInfoY8* QImageScale::qimageFreeScaleInfoY8(QImageScaleInfoY8 *isi)
-{
-    if (isi) {
-        delete[] isi->xpoints;
-        delete[] isi->ypoints;
-        delete[] isi->xapoints;
-        delete[] isi->yapoints;
-        delete isi;
-    }
-    return 0;
-}
-
-static QImageScaleInfoY8* QImageScale::qimageCalcScaleInfoY8(const unsigned char* img,
-                                                         int sw, int sh, int sn,
-                                                         int dw, int dh, char aa)
-{
-    QImageScaleInfoY8 *isi;
-    int scw, sch;
-
-    scw = dw;
-    sch = dh;
-
-    isi = new QImageScaleInfoY8;
-    if (!isi)
-        return 0;
-
-    isi->xup_yup = (qAbs(dw) >= sw) + ((qAbs(dh) >= sh) << 1);
-
-    isi->xpoints = qimageCalcXPointsY8(sw, scw);
-    if (!isi->xpoints)
-        return qimageFreeScaleInfoY8(isi);
-    // NOTE: We use sw directly as a simplification. Technically, it's img bytes-per-lines / bytes-per-pixel
-    //       (i.e., img's width * number of color components / sizeof(uint32_t) for unpadded packed pixels).
-    //       As we enforce 32bpp input, n is 4, as is sizeof(uint32_t), hence using width directly ;).
-    // NOTE: Qt's Rgba64 codepath *still* divides by 4, so, err, double-check that?
-    isi->ypoints = qimageCalcYPointsY8((const unsigned char *)img,
-                                     sw * sn / 1, sh, sch);
-    if (!isi->ypoints)
-        return qimageFreeScaleInfoY8(isi);
-    if (aa) {
-        isi->xapoints = qimageCalcApointsY8(sw, scw, isi->xup_yup & 1);
-        if (!isi->xapoints)
-            return qimageFreeScaleInfoY8(isi);
-        isi->yapoints = qimageCalcApointsY8(sh, sch, isi->xup_yup & 2);
-        if (!isi->yapoints)
-            return qimageFreeScaleInfoY8(isi);
-    }
-    return isi;
-}
-
 
 static void qt_qimageScaleAARGBA_up_x_down_y(QImageScaleInfo *isi, unsigned int *dest,
                                              int dw, int dh, int dow, int sow);
@@ -920,10 +803,10 @@ inline static void qt_qimageScaleAAY8_helper(const unsigned char *pix, int xyap,
     v += *pix * j;
 }
 
-static void qt_qimageScaleAAY8_up_xy(QImageScaleInfoY8 *isi, unsigned char *dest,
+static void qt_qimageScaleAAY8_up_xy(QImageScaleInfo *isi, unsigned char *dest,
                                        int dw, int dh, int dow, int sow)
 {
-    const unsigned char **ypoints = (const unsigned char **)isi->ypoints;
+    const unsigned char **ypoints = (const unsigned char **)isi->ypoints_y8;
     int *xpoints = isi->xpoints;
     int *xapoints = isi->xapoints;
     int *yapoints = isi->yapoints;
@@ -958,10 +841,10 @@ static void qt_qimageScaleAAY8_up_xy(QImageScaleInfoY8 *isi, unsigned char *dest
     }
 }
 
-static void qt_qimageScaleAAY8_up_x_down_y(QImageScaleInfoY8 *isi, unsigned char *dest,
+static void qt_qimageScaleAAY8_up_x_down_y(QImageScaleInfo *isi, unsigned char *dest,
                                              int dw, int dh, int dow, int sow)
 {
-    const unsigned char **ypoints = (const unsigned char **)isi->ypoints;
+    const unsigned char **ypoints = (const unsigned char **)isi->ypoints_y8;
     int *xpoints = isi->xpoints;
     int *xapoints = isi->xapoints;
     int *yapoints = isi->yapoints;
@@ -989,10 +872,10 @@ static void qt_qimageScaleAAY8_up_x_down_y(QImageScaleInfoY8 *isi, unsigned char
     }
 }
 
-static void qt_qimageScaleAAY8_down_x_up_y(QImageScaleInfoY8 *isi, unsigned char *dest,
+static void qt_qimageScaleAAY8_down_x_up_y(QImageScaleInfo *isi, unsigned char *dest,
                                              int dw, int dh, int dow, int sow)
 {
-    const unsigned char **ypoints = (const unsigned char **)isi->ypoints;
+    const unsigned char **ypoints = (const unsigned char **)isi->ypoints_y8;
     int *xpoints = isi->xpoints;
     int *xapoints = isi->xapoints;
     int *yapoints = isi->yapoints;
@@ -1022,16 +905,16 @@ static void qt_qimageScaleAAY8_down_x_up_y(QImageScaleInfoY8 *isi, unsigned char
     }
 }
 
-#define DIV255(V)                                                                                        \
-({                                                                                                       \
-	auto _v = (V) + 128;                                                                      \
-	(((_v >> 8U) + _v) >> 8U);                                                                       \
+#define DIV255(V)                                                                                    \
+({                                                                                                   \
+    auto _v = (V) + 128;                                                                             \
+    (((_v >> 8U) + _v) >> 8U);                                                                       \
 })
 
-static void qt_qimageScaleAAY8_down_xy(QImageScaleInfoY8 *isi, unsigned char *dest,
+static void qt_qimageScaleAAY8_down_xy(QImageScaleInfo *isi, unsigned char *dest,
                                          int dw, int dh, int dow, int sow)
 {
-    const unsigned char **ypoints = (const unsigned char **)isi->ypoints;
+    const unsigned char **ypoints = (const unsigned char **)isi->ypoints_y8;
     int *xpoints = isi->xpoints;
     int *xapoints = isi->xapoints;
     int *yapoints = isi->yapoints;
@@ -1069,7 +952,7 @@ static void qt_qimageScaleAAY8_down_xy(QImageScaleInfoY8 *isi, unsigned char *de
     }
 }
 
-void qt_qimageScaleAAY8(QImageScaleInfoY8 *isi, unsigned char *dest,
+void qt_qimageScaleAAY8(QImageScaleInfo *isi, unsigned char *dest,
                           int dw, int dh, int dow, int sow)
 {
     if (isi->xup_yup == 3)
@@ -1098,88 +981,42 @@ unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, int s
         out_n = 4;
     }
 
+    QImageScaleInfo *scaleinfo =
+        qimageCalcScaleInfo(src, sw, sh, out_n, dw, dh, true);
+    if (!scaleinfo)
+            return buffer;
+
+    // SSE/NEON friendly alignment, just in case...
+    void *ptr;
+    if (posix_memalign(&ptr, 16, dw * dh * out_n) != 0) {
+            std::cerr << "qSmoothScaleImage: out of memory, returning null!" << std::endl;
+            qimageFreeScaleInfo(scaleinfo);
+            return nullptr;
+    } else {
+            buffer = (unsigned char*) ptr;
+    }
 
     // NOTE: See comment in qimageCalcScaleInfo regarding our simplification of using sw directly.
-    //       Here, the Rgba64 codepath *does* divide by 8, because it casts buffer to QRgba64 *,
-    //       which I imagine is an uint64_t ;).
-	switch(sn) {
-		case 4:
-			{
-			QImageScaleInfo *scaleinfo =
-				qimageCalcScaleInfo(src, sw, sh, out_n, dw, dh, true);
-			if (!scaleinfo)
-				return buffer;
+    switch (sn) {
+        case 4:
+                qt_qimageScaleAARGBA(scaleinfo, (unsigned int *)buffer,
+                                    dw, dh, dw, sw);
+                break;
+        case 3:
+                // NOTE: Input buffer is still 32bpp, we just skip *processing* of the alpha channel.
+                qt_qimageScaleAARGB(scaleinfo, (unsigned int *)buffer,
+                                    dw, dh, dw, sw);
+                break;
+        case 2:
+                // Y8A TODO
+                break;
+        case 1:
+                qt_qimageScaleAAY8(scaleinfo, (unsigned char *)buffer,
+                                    dw, dh, dw, sw);
+                break;
+    }
 
-			// SSE/NEON friendly alignment, just in case...
-			void *ptr;
-			if (posix_memalign(&ptr, 16, dw * dh * out_n) != 0) {
-				std::cerr << "qSmoothScaleImage: out of memory, returning null!" << std::endl;
-				qimageFreeScaleInfo(scaleinfo);
-				return nullptr;
-			} else {
-				buffer = (unsigned char*) ptr;
-			}
-
-			qt_qimageScaleAARGBA(scaleinfo, (unsigned int *)buffer,
-						dw, dh, dw, sw);
-
-			qimageFreeScaleInfo(scaleinfo);
-			}
-			break;
-		case 3:
-			{
-			QImageScaleInfo *scaleinfo =
-				qimageCalcScaleInfo(src, sw, sh, out_n, dw, dh, true);
-			if (!scaleinfo)
-				return buffer;
-
-			// SSE/NEON friendly alignment, just in case...
-			void *ptr;
-			if (posix_memalign(&ptr, 16, dw * dh * out_n) != 0) {
-				std::cerr << "qSmoothScaleImage: out of memory, returning null!" << std::endl;
-				qimageFreeScaleInfo(scaleinfo);
-				return nullptr;
-			} else {
-				buffer = (unsigned char*) ptr;
-			}
-
-			// NOTE: Input buffer is still 32bpp, we just skip *processing* of the alpha channel.
-			qt_qimageScaleAARGB(scaleinfo, (unsigned int *)buffer,
-						dw, dh, dw, sw);
-
-			qimageFreeScaleInfo(scaleinfo);
-			}
-			break;
-		case 2:
-			{
-			// Y8A TODO
-			}
-			break;
-		case 1:
-			{
-			QImageScaleInfoY8 *scaleinfo =
-				qimageCalcScaleInfoY8(src, sw, sh, out_n, dw, dh, true);
-			if (!scaleinfo)
-				return buffer;
-
-			// SSE/NEON friendly alignment, just in case...
-			void *ptr;
-			if (posix_memalign(&ptr, 16, dw * dh * out_n) != 0) {
-				std::cerr << "qSmoothScaleImage: out of memory, returning null!" << std::endl;
-				qimageFreeScaleInfoY8(scaleinfo);
-				return nullptr;
-			} else {
-				buffer = (unsigned char*) ptr;
-			}
-
-			qt_qimageScaleAAY8(scaleinfo, (unsigned char *)buffer,
-						dw, dh, dw, sw);
-
-			qimageFreeScaleInfoY8(scaleinfo);
-			}
-			break;
-	}
-
+    qimageFreeScaleInfo(scaleinfo);
     return buffer;
 }
 
