@@ -1168,9 +1168,13 @@ static void qt_qimageScaleAAY8A_down_xy(QImageScaleInfo *isi, unsigned short *de
             qt_qimageScaleAAY8A_helper(sptr, xap, Cx, 1, vx, ax);
 
             v += ((vx>>6) * j);
+            v = DIV255(v >> 14);
+            v = v > 0xFF ? 0xFF : v < 0 ? 0 : v;
             a += ((ax>>6) * j);
+            a = DIV255(a >> 14);
+            a = a > 0xFF ? 0xFF : a < 0 ? 0 : a;
 
-            *dptr = qY8A((v >> 14), (a >> 14));
+            *dptr = qY8A(v, a);
             dptr++;
         }
     }
