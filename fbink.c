@@ -6077,6 +6077,7 @@ int
 	// Was scaling requested?
 	bool want_scaling = false;
 	if (scaled_width != 0 || scaled_height != 0) {
+		LOG("Image scaling requested!");
 		want_scaling = true;
 	}
 
@@ -6122,6 +6123,8 @@ int
 			float aspect  = (float) w / (float) h;
 			scaled_height = scaled_width / aspect + 0.5f;
 		}
+
+		LOG("Scaling image from %dx%d to %hdx%hd . . .", w, h, scaled_width, scaled_height);
 
 		sdata = qSmoothScaleImage(data, w, h, req_n, fbink_cfg->ignore_alpha, scaled_width, scaled_height);
 		if (sdata == NULL) {
