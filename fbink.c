@@ -6041,7 +6041,9 @@ int
     fbink_print_image(int fbfd    UNUSED_BY_MINIMAL,
 		      const char* filename UNUSED_BY_MINIMAL,
 		      short int x_off UNUSED_BY_MINIMAL,
-		      short int y_off    UNUSED_BY_MINIMAL,
+		      short int y_off UNUSED_BY_MINIMAL,
+		      short int scaled_width UNUSED_BY_MINIMAL,
+		      short int scaled_height UNUSED_BY_MINIMAL,
 		      const FBInkConfig* restrict fbink_cfg UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_IMAGE
@@ -6072,16 +6074,28 @@ int
 			break;
 	}
 
-	// NOTE: QImageScale only accepts RGBA input (i.e., RGBA, or RGB stored @ 32bpp, with 8 unused bits).
+	// Was scaling requested?
+	bool want_scaling = false;
+	if (scaled_width != 0 || scaled_height != 0) {
+		want_scaling = true;
+	}
+
+	// Set to viewport dimensions if requested...
+	if (scaled_width == -1) {
+		scaled_width = viewWidth;
+	}
+	if (scaled_height == -1) {
+		scaled_height = viewHeight;
+	}
+
+	// NOTE: QImageScale only accepts Y8, Y8A and RGBA input (i.e., RGBA, or RGB stored @ 32bpp, with 8 unused bits).
 	//       We, on the other hand, store RGB in 24bits, so, that won't do...
-	//       TL;DR: Request RGBA from stbi to ensure a 32bpp buffer,
+	//       TL;DR: When outputting RGB, request RGBA from stbi instead to ensure a 32bpp buffer,
 	//              stbi will set the alpha bytes to 0xFF if the input doesn't have any alpha,
 	//              but that's not relevant, as we'll ask QImageScale to ignore alpha *processing* w/ ignore_alpha
 	// NOTE: That said, if input *has* an alpha channel, QImageScale expects premultiplied alpha,
 	//       while stbi leaves it untouched, meaning straight alpha in the vast majority of cases...
-	// FIXME: Actually handle user-specified scaled_w & scaled_h values, honoring AR if only one of them is !0,
-	//        and skipping scaling entirely if both are are 0. Make them signed to accept -1 to mean viewWidth/viewHeight.
-	if (req_n == 3) {
+	if (want_scaling && req_n == 3) {
 		LOG("Enforcing 32bpp buffer for scaling!");
 		req_n = 4;
 	}
@@ -6097,19 +6111,38 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
-	// Scale it w/ QImageScale
 	unsigned char* restrict sdata = NULL;
-	sdata                         = qSmoothScaleImage(data, w, h, req_n, fbink_cfg->ignore_alpha, viewWidth, viewHeight);
-	if (sdata == NULL) {
-		WARN("Failed to resize image");
-		return ERRCODE(EXIT_FAILURE);
-	}
+	// Scale it w/ QImageScale, if requested
+	if (want_scaling) {
+		// NOTE: Handle AR if scaling was requested on one side only...
+		if (want_scaling && (scaled_width == 0 && scaled_height != 0)) {
+			float aspect = (float) w / (float) h;
+			scaled_width = scaled_height * aspect + 0.5f;
+		} else if (want_scaling && (scaled_width != 0 && scaled_height == 0)) {
+			float aspect  = (float) w / (float) h;
+			scaled_height = scaled_width / aspect + 0.5f;
+		}
 
-	// Finally, draw it on screen
-	if (draw_image(fbfd, sdata, viewWidth, viewHeight, n, req_n, x_off, y_off, fbink_cfg) != EXIT_SUCCESS) {
-		WARN("Failed to display image data on screen");
-		rv = ERRCODE(EXIT_FAILURE);
-		goto cleanup;
+		sdata = qSmoothScaleImage(data, w, h, req_n, fbink_cfg->ignore_alpha, scaled_width, scaled_height);
+		if (sdata == NULL) {
+			WARN("Failed to resize image");
+			return ERRCODE(EXIT_FAILURE);
+		}
+
+		// We're drawing the scaled data, at the requested scaled resolution
+		if (draw_image(fbfd, sdata, scaled_width, scaled_height, n, req_n, x_off, y_off, fbink_cfg) !=
+		    EXIT_SUCCESS) {
+			WARN("Failed to display image data on screen");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	} else {
+		// We're drawing the original unscaled data at its native resolution
+		if (draw_image(fbfd, data, w, h, n, req_n, x_off, y_off, fbink_cfg) != EXIT_SUCCESS) {
+			WARN("Failed to display image data on screen");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
 	}
 
 	// Cleanup

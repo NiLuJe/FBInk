@@ -484,6 +484,8 @@ FBINK_API int fbink_print_image(int                fbfd,
 				const char*        filename,
 				short int          x_off,
 				short int          y_off,
+				short int          scaled_width,
+				short int          scaled_height,
 				const FBInkConfig* restrict fbink_cfg);
 
 // Print raw scanlines on screen
@@ -499,7 +501,13 @@ FBINK_API int fbink_print_image(int                fbfd,
 //				do not pass a padded length (or pad the data itself in any way)!
 // x_off:		Target coordinates, x (honors negative offsets)
 // y_off:		Target coordinates, y (honors negative offsets)
+// scaled_width:        Request scaling to the specified width, or to the viewport's width if set to -1
+// scaled_height:	Request scaling to the specified height, or to the viewport's height if set to -1
 // fbink_cfg:		Pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
+// NOTE: If both scaled_width & scaled_height are set to 0, no scaling is done.
+//       If only *one* of them is set to 0, the aspect ratio will be honored based on the requested dimension of the other side.
+// NOTE: Scaling is inherently costly. I highly recommend not relying on it,
+//       preferring instead proper preprocessing of your input images.
 // NOTE: While we do accept a various range of input formats (as far as component interleaving is concerned),
 //       our display code only handles a few specific combinations, depending on the target hardware.
 //       To make everyone happy, this will transparently handle the pixel format conversion *as needed*,

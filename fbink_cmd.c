@@ -207,10 +207,12 @@ static void
 	    "\n"
 	    "\n"
 	    "You can also eschew printing a STRING, and print an IMAGE at the requested coordinates instead:\n"
-	    "\t-g, --image file=PATH,x=NUM,y=NUM,halign=ALIGN,valign=ALIGN,dither\n"
+	    "\t-g, --image file=PATH,x=NUM,y=NUM,halign=ALIGN,valign=ALIGN,w=NUM,h=NUM,dither\n"
 	    "\t\tSupported ALIGN values: NONE (or LEFT for halign, TOP for valign), CENTER or MIDDLE, EDGE (or RIGHT for halign, BOTTOM for valign).\n"
 	    "\t\tIf dither is specified, *software* dithering (ordered, 8x8) will be applied to the image, ensuring it'll match the eInk palette exactly.\n"
 	    "\t\tThis is *NOT* mutually exclusive with -D, --dither!\n"
+	    "\t\tw & h *may* be used to request scaling. If one of them is set to 0, aspect ratio will be respected. Set to -1 to request the viewport's dimension for that side.\n"
+	    "\t\tThey both default to 0, meaning no scaling will be done.\n
 	    "\n"
 	    "EXAMPLES:\n"
 	    "\tfbink -g file=hello.png\n"
@@ -425,6 +427,8 @@ int
 		YOFF_OPT,
 		HALIGN_OPT,
 		VALIGN_OPT,
+		SCALED_WIDTH_OPT,
+		SCALED_HEIGHT_OPT,
 		SW_DITHER_OPT,
 	};
 	enum
@@ -447,13 +451,9 @@ int
 #pragma clang diagnostic ignored "-Wincompatible-pointer-types-discards-qualifiers"
 	char* const refresh_token[]  = { [TOP_OPT] = "top",       [LEFT_OPT] = "left",     [WIDTH_OPT] = "width",
                                         [HEIGHT_OPT] = "height", [DITHER_OPT] = "dither", NULL };
-	char* const image_token[]    = { [FILE_OPT]      = "file",
-                                      [XOFF_OPT]      = "x",
-                                      [YOFF_OPT]      = "y",
-                                      [HALIGN_OPT]    = "halign",
-                                      [VALIGN_OPT]    = "valign",
-                                      [SW_DITHER_OPT] = "dither",
-                                      NULL };
+	char* const image_token[]    = { [FILE_OPT] = "file",       [XOFF_OPT] = "x",           [YOFF_OPT] = "y",
+                                      [HALIGN_OPT] = "halign",   [VALIGN_OPT] = "valign",    [SCALED_WIDTH_OPT] = "w",
+                                      [SCALED_HEIGHT_OPT] = "h", [SW_DITHER_OPT] = "dither", NULL };
 	char* const truetype_token[] = { [REGULAR_OPT]    = "regular",
 					 [BOLD_OPT]       = "bold",
 					 [ITALIC_OPT]     = "italic",
@@ -479,6 +479,8 @@ int
 	char*     image_file     = NULL;
 	short int image_x_offset = 0;
 	short int image_y_offset = 0;
+	short int image_scaled_w = 0;
+	short int image_scaled_h = 0;
 	bool      is_image       = false;
 	bool      is_eval        = false;
 	bool      is_interactive = false;
@@ -804,6 +806,36 @@ int
 								fbink_cfg.valign = EDGE;
 							} else {
 								fprintf(stderr, "Unknown alignment value '%s'.\n", value);
+								errfnd = true;
+							}
+							break;
+						case SCALED_WIDTH_OPT:
+							if (value == NULL) {
+								fprintf(stderr,
+									"Missing value for suboption '%s'\n",
+									image_token[SCALED_WIDTH_OPT]);
+								errfnd = true;
+								break;
+							}
+							if (strtol_hi(opt,
+								      image_token[SCALED_WIDTH_OPT],
+								      value,
+								      &image_scaled_w) < 0) {
+								errfnd = true;
+							}
+							break;
+						case SCALED_HEIGHT_OPT:
+							if (value == NULL) {
+								fprintf(stderr,
+									"Missing value for suboption '%s'\n",
+									image_token[SCALED_HEIGHT_OPT]);
+								errfnd = true;
+								break;
+							}
+							if (strtol_hi(opt,
+								      image_token[SCALED_HEIGHT_OPT],
+								      value,
+								      &image_scaled_h) < 0) {
 								errfnd = true;
 							}
 							break;
@@ -1331,12 +1363,14 @@ int
 		} else if (is_image) {
 			if (!fbink_cfg.is_quiet) {
 				printf(
-				    "Displaying image '%s' @ column %hd + %hdpx, row %hd + %dpx (H align: %hhu, V align: %hhu, inverted: %s, flattened: %s, waveform: %s, HW dithered: %s, SW dithered: %s, nightmode: %s, skip refresh: %s)\n",
+				    "Displaying image '%s' @ column %hd + %hdpx, row %hd + %dpx (scaling: %hdx%hd, H align: %hhu, V align: %hhu, inverted: %s, flattened: %s, waveform: %s, HW dithered: %s, SW dithered: %s, nightmode: %s, skip refresh: %s)\n",
 				    image_file,
 				    fbink_cfg.col,
 				    image_x_offset,
 				    fbink_cfg.row,
 				    image_y_offset,
+				    image_scaled_w,
+				    image_scaled_h,
 				    fbink_cfg.halign,
 				    fbink_cfg.valign,
 				    fbink_cfg.is_inverted ? "Y" : "N",
@@ -1347,8 +1381,13 @@ int
 				    fbink_cfg.is_nightmode ? "Y" : "N",
 				    fbink_cfg.no_refresh ? "Y" : "N");
 			}
-			if (fbink_print_image(fbfd, image_file, image_x_offset, image_y_offset, &fbink_cfg) !=
-			    EXIT_SUCCESS) {
+			if (fbink_print_image(fbfd,
+					      image_file,
+					      image_x_offset,
+					      image_y_offset,
+					      image_scaled_w,
+					      image_scaled_h,
+					      &fbink_cfg) != EXIT_SUCCESS) {
 				fprintf(stderr, "Failed to display that image!\n");
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
