@@ -6116,10 +6116,27 @@ int
 	// Scale it w/ QImageScale, if requested
 	if (want_scaling) {
 		// NOTE: Handle AR if scaling was requested on one side only...
-		if (want_scaling && (scaled_width == 0 && scaled_height != 0)) {
+		if (scaled_width < -1 || scaled_height < -1) {
+			float aspect = (float) w / (float) h;
+			if (w > h) {
+				scaled_width  = viewWidth;
+				scaled_height = scaled_width / aspect + 0.5f;
+				if (scaled_height > viewHeight) {
+					scaled_height = viewHeight;
+					scaled_width  = scaled_height * aspect + 0.5f;
+				}
+			} else {
+				scaled_height = viewHeight;
+				scaled_width  = scaled_height * aspect + 0.5f;
+				if (scaled_width > viewWidth) {
+					scaled_width  = viewWidth;
+					scaled_height = scaled_width / aspect + 0.5f;
+				}
+			}
+		} else if (scaled_width == 0 && scaled_height != 0) {
 			float aspect = (float) w / (float) h;
 			scaled_width = scaled_height * aspect + 0.5f;
-		} else if (want_scaling && (scaled_width != 0 && scaled_height == 0)) {
+		} else if (scaled_width != 0 && scaled_height == 0) {
 			float aspect  = (float) w / (float) h;
 			scaled_height = scaled_width / aspect + 0.5f;
 		}

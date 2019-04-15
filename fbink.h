@@ -506,6 +506,8 @@ FBINK_API int fbink_print_image(int                fbfd,
 // fbink_cfg:		Pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
 // NOTE: If both scaled_width & scaled_height are set to 0, no scaling is done.
 //       If only *one* of them is set to 0, the aspect ratio will be honored based on the requested dimension of the other side.
+//       If either of them is set to something < -1, the image will be downscaled/upscaled to the largest possible dimensions,
+//       while still fitting on screen, and while still honoring aspect ratio.
 // NOTE: Scaling is inherently costly. I highly recommend not relying on it,
 //       preferring instead proper preprocessing of your input images.
 // NOTE: While we do accept a various range of input formats (as far as component interleaving is concerned),
