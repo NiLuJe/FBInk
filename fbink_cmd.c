@@ -212,7 +212,7 @@ static void
 	    "\t\tIf dither is specified, *software* dithering (ordered, 8x8) will be applied to the image, ensuring it'll match the eInk palette exactly.\n"
 	    "\t\tThis is *NOT* mutually exclusive with -D, --dither!\n"
 	    "\t\tw & h *may* be used to request scaling. If one of them is set to 0, aspect ratio will be respected. Set to -1 to request the viewport's dimension for that side.\n"
-	    "\t\tThey both default to 0, meaning no scaling will be done.\n
+	    "\t\tThey both default to 0, meaning no scaling will be done.\n"
 	    "\n"
 	    "EXAMPLES:\n"
 	    "\tfbink -g file=hello.png\n"
