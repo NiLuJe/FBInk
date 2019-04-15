@@ -59,6 +59,7 @@ namespace QImageScale {
         int *xpoints{nullptr};
         const unsigned int **ypoints{nullptr};
         const unsigned char **ypoints_y8{nullptr};
+        const unsigned short **ypoints_y8a{nullptr};
         int *xapoints{nullptr};
         int *yapoints{nullptr};
         int xup_yup{0};

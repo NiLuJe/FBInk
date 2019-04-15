@@ -107,6 +107,7 @@ namespace FBInk {
 namespace QImageScale {
     static const unsigned int** qimageCalcYPoints(const unsigned int *src, int sw, int sh, int dh);
     static const unsigned char** qimageCalcYPointsY8(const unsigned char *src, int sw, int sh, int dh);
+    static const unsigned short** qimageCalcYPointsY8A(const unsigned short *src, int sw, int sh, int dh);
     static int* qimageCalcXPoints(int sw, int dw);
     static int* qimageCalcApoints(int s, int d, int up);
     static QImageScaleInfo* qimageFreeScaleInfo(QImageScaleInfo *isi);
@@ -172,6 +173,36 @@ static const unsigned char** QImageScale::qimageCalcYPointsY8(const unsigned cha
     if (rv) {
         for (int i = dh / 2; --i >= 0; ) {
             const unsigned char *tmp = p[i];
+            p[i] = p[dh - i - 1];
+            p[dh - i - 1] = tmp;
+        }
+    }
+    return(p);
+}
+
+static const unsigned short** QImageScale::qimageCalcYPointsY8A(const unsigned short *src,
+                                                           int sw, int sh, int dh)
+{
+    const unsigned short **p;
+    int j = 0, rv = 0;
+    qint64 val, inc;
+
+    if (dh < 0) {
+        dh = -dh;
+        rv = 1;
+    }
+    p = new const unsigned short* [dh+1];
+
+    int up = qAbs(dh) >= sh;
+    val = up ? 0x8000 * sh / dh - 0x8000 : 0;
+    inc = (((qint64)sh) << 16) / dh;
+    for (int i = 0; i < dh; i++) {
+        p[j++] = src + qMax(0LL, val >> 16) * sw;
+        val += inc;
+    }
+    if (rv) {
+        for (int i = dh / 2; --i >= 0; ) {
+            const unsigned short *tmp = p[i];
             p[i] = p[dh - i - 1];
             p[dh - i - 1] = tmp;
         }
@@ -261,6 +292,7 @@ static QImageScaleInfo* QImageScale::qimageFreeScaleInfo(QImageScaleInfo *isi)
         delete[] isi->xpoints;
         delete[] isi->ypoints;
         delete[] isi->ypoints_y8;
+        delete[] isi->ypoints_y8a;
         delete[] isi->xapoints;
         delete[] isi->yapoints;
         delete isi;
@@ -296,6 +328,13 @@ static QImageScaleInfo* QImageScale::qimageCalcScaleInfo(const unsigned char* im
             isi->ypoints = qimageCalcYPoints((const unsigned int *)img,
                                             sw, sh, sch);
             if (!isi->ypoints)
+                return qimageFreeScaleInfo(isi);
+        break;
+        case 2:
+            // sn is 2, as is sizeof(unsigned short), hence using width directly ;).
+            isi->ypoints_y8a = qimageCalcYPointsY8A((const unsigned short *)img,
+                                            sw, sh, sch);
+            if (!isi->ypoints_y8a)
                 return qimageFreeScaleInfo(isi);
         break;
         case 1:
@@ -965,6 +1004,191 @@ void qt_qimageScaleAAY8(QImageScaleInfo *isi, unsigned char *dest,
         qt_qimageScaleAAY8_down_xy(isi, dest, dw, dh, dow, sow);
 }
 
+inline constexpr int qY(unsigned short y8a)
+{ return (y8a & 0xff); }
+inline constexpr int qA(unsigned short y8a)
+{ return (y8a >> 8); }
+inline constexpr unsigned short qY8A(int y, int a)
+{ return ((a & 0xffu) << 8) | (y & 0xffu); }
+
+
+inline static void qt_qimageScaleAAY8A_helper(const unsigned short *pix, int xyap, int Cxy, int step, int &v, int &a)
+{
+    v = qY(*pix) * xyap;
+    a = qA(*pix) * xyap;
+    int j;
+    for (j = (1 << 14) - xyap; j > Cxy; j -= Cxy) {
+        pix += step;
+        v += qY(*pix) * Cxy;
+        a += qA(*pix) * Cxy;
+    }
+    pix += step;
+    v += qY(*pix) * j;
+    a += qA(*pix) * j;
+}
+
+static void qt_qimageScaleAAY8A_up_xy(QImageScaleInfo *isi, unsigned short *dest,
+                                       int dw, int dh, int dow, int sow)
+{
+    const unsigned short **ypoints = (const unsigned short **)isi->ypoints_y8a;
+    int *xpoints = isi->xpoints;
+    int *xapoints = isi->xapoints;
+    int *yapoints = isi->yapoints;
+
+    /* go through every scanline in the output buffer */
+    for (int y = 0; y < dh; y++) {
+        /* calculate the source line we'll scan from */
+        const unsigned short *sptr = ypoints[y];
+        unsigned short *dptr = dest + (y * dow);
+        const int yap = yapoints[y];
+        if (yap > 0) {
+            for (int x = 0; x < dw; x++) {
+                const unsigned short *pix = sptr + xpoints[x];
+                const int xap = xapoints[x];
+                if (xap > 0)
+                    *dptr = interpolate_4_16bpp_pixels(pix, pix + sow, xap, yap);
+                else
+                    *dptr = INTERPOLATE_16BPP_PIXEL_256(pix[0], 256 - yap, pix[sow], yap);
+                dptr++;
+            }
+        } else {
+            for (int x = 0; x < dw; x++) {
+                const unsigned short *pix = sptr + xpoints[x];
+                const int xap = xapoints[x];
+                if (xap > 0)
+                    *dptr = INTERPOLATE_16BPP_PIXEL_256(pix[0], 256 - xap, pix[1], xap);
+                else
+                    *dptr = pix[0];
+                dptr++;
+            }
+        }
+    }
+}
+
+static void qt_qimageScaleAAY8A_up_x_down_y(QImageScaleInfo *isi, unsigned short *dest,
+                                             int dw, int dh, int dow, int sow)
+{
+    const unsigned short **ypoints = (const unsigned short **)isi->ypoints_y8a;
+    int *xpoints = isi->xpoints;
+    int *xapoints = isi->xapoints;
+    int *yapoints = isi->yapoints;
+
+    for (int y = 0; y < dh; y++) {
+        int Cy = (yapoints[y]) >> 16;
+        int yap = (yapoints[y]) & 0xffff;
+
+        unsigned short *dptr = dest + (y * dow);
+        for (int x = 0; x < dw; x++) {
+            const unsigned short *sptr = ypoints[y] + xpoints[x];
+            int v, a;
+            qt_qimageScaleAAY8A_helper(sptr, yap, Cy, sow, v, a);
+
+            int xap = xapoints[x];
+            if (xap > 0) {
+                int vv, aa;
+                qt_qimageScaleAAY8A_helper(sptr + 1, yap, Cy, sow, vv, aa);
+
+                v = v * (256 - xap);
+                a = a * (256 - xap);
+                v = (v + (vv * xap)) >> 8;
+                a = (a + (aa * xap)) >> 8;
+            }
+            *dptr++ = qY8A(v >> 14, a >> 14);
+        }
+    }
+}
+
+static void qt_qimageScaleAAY8A_down_x_up_y(QImageScaleInfo *isi, unsigned short *dest,
+                                             int dw, int dh, int dow, int sow)
+{
+    const unsigned short **ypoints = (const unsigned short **)isi->ypoints_y8a;
+    int *xpoints = isi->xpoints;
+    int *xapoints = isi->xapoints;
+    int *yapoints = isi->yapoints;
+
+    /* go through every scanline in the output buffer */
+    for (int y = 0; y < dh; y++) {
+        unsigned short *dptr = dest + (y * dow);
+        for (int x = 0; x < dw; x++) {
+            int Cx = xapoints[x] >> 16;
+            int xap = xapoints[x] & 0xffff;
+
+            const unsigned short *sptr = ypoints[y] + xpoints[x];
+            int v, a;
+            qt_qimageScaleAAY8A_helper(sptr, xap, Cx, 1, v, a);
+
+            int yap = yapoints[y];
+            if (yap > 0) {
+                int vv, aa;
+                qt_qimageScaleAAY8A_helper(sptr + sow, xap, Cx, 1, vv, aa);
+
+                v = v * (256 - yap);
+                a = a * (256 - yap);
+                v = (v + (vv * yap)) >> 8;
+                a = (a + (aa * yap)) >> 8;
+            }
+            *dptr = qY8A(v >> 14, a >> 14);
+            dptr++;
+        }
+    }
+}
+
+static void qt_qimageScaleAAY8A_down_xy(QImageScaleInfo *isi, unsigned short *dest,
+                                         int dw, int dh, int dow, int sow)
+{
+    const unsigned short **ypoints = (const unsigned short **)isi->ypoints_y8a;
+    int *xpoints = isi->xpoints;
+    int *xapoints = isi->xapoints;
+    int *yapoints = isi->yapoints;
+
+    for (int y = 0; y < dh; y++) {
+        int Cy = (yapoints[y]) >> 16;
+        int yap = (yapoints[y]) & 0xffff;
+
+        unsigned short *dptr = dest + (y * dow);
+        for (int x = 0; x < dw; x++) {
+            int Cx = xapoints[x] >> 16;
+            int xap = xapoints[x] & 0xffff;
+
+            const unsigned short *sptr = ypoints[y] + xpoints[x];
+            int vx, ax;
+            qt_qimageScaleAAY8A_helper(sptr, xap, Cx, 1, vx, ax);
+
+            int v = ((vx>>6) * yap);
+            int a = ((ax>>6) * yap);
+
+            int j;
+            for (j = (1 << 14) - yap; j > Cy; j -= Cy) {
+                sptr += sow;
+                qt_qimageScaleAAY8A_helper(sptr, xap, Cx, 1, vx, ax);
+                v += ((vx>>6) * Cy);
+                a += ((ax>>6) * Cy);
+            }
+            sptr += sow;
+            qt_qimageScaleAAY8A_helper(sptr, xap, Cx, 1, vx, ax);
+
+            v += ((vx>>6) * j);
+            a += ((ax>>6) * j);
+
+            *dptr = qY8A((v >> 14), (a >> 14));
+            dptr++;
+        }
+    }
+}
+
+void qt_qimageScaleAAY8A(QImageScaleInfo *isi, unsigned short *dest,
+                          int dw, int dh, int dow, int sow)
+{
+    if (isi->xup_yup == 3)
+        qt_qimageScaleAAY8A_up_xy(isi, dest, dw, dh, dow, sow);
+    else if (isi->xup_yup == 1)
+        qt_qimageScaleAAY8A_up_x_down_y(isi, dest, dw, dh, dow, sow);
+    else if (isi->xup_yup == 2)
+        qt_qimageScaleAAY8A_down_x_up_y(isi, dest, dw, dh, dow, sow);
+    else
+        qt_qimageScaleAAY8A_down_xy(isi, dest, dw, dh, dow, sow);
+}
+
 unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, int sn, bool ignore_alpha, int dw, int dh)
 {
     unsigned char* buffer = nullptr;
@@ -1006,7 +1230,8 @@ unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, int s
                 }
                 break;
         case 2:
-                // Y8A TODO
+                qt_qimageScaleAAY8A(scaleinfo, (unsigned short *)buffer,
+                                    dw, dh, dw, sw);
                 break;
         case 1:
                 qt_qimageScaleAAY8(scaleinfo, (unsigned char *)buffer,
