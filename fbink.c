@@ -6083,10 +6083,10 @@ int
 
 	// Set to viewport dimensions if requested...
 	if (scaled_width == -1) {
-		scaled_width = viewWidth;
+		scaled_width = (short int) viewWidth;
 	}
 	if (scaled_height == -1) {
-		scaled_height = viewHeight;
+		scaled_height = (short int) viewHeight;
 	}
 
 	// NOTE: QImageScale only accepts Y8, Y8A and RGBA input (i.e., RGBA, or RGB stored @ 32bpp, with 8 unused bits).
@@ -6119,26 +6119,26 @@ int
 		if (scaled_width < -1 || scaled_height < -1) {
 			float aspect = (float) w / (float) h;
 			if (w > h) {
-				scaled_width  = viewWidth;
-				scaled_height = scaled_width / aspect + 0.5f;
-				if (scaled_height > viewHeight) {
-					scaled_height = viewHeight;
-					scaled_width  = scaled_height * aspect + 0.5f;
+				scaled_width  = (short int) viewWidth;
+				scaled_height = (short int) (scaled_width / aspect + 0.5f);
+				if (scaled_height > (short int) viewHeight) {
+					scaled_height = (short int) viewHeight;
+					scaled_width  = (short int) (scaled_height * aspect + 0.5f);
 				}
 			} else {
-				scaled_height = viewHeight;
-				scaled_width  = scaled_height * aspect + 0.5f;
-				if (scaled_width > viewWidth) {
-					scaled_width  = viewWidth;
-					scaled_height = scaled_width / aspect + 0.5f;
+				scaled_height = (short int) viewHeight;
+				scaled_width  = (short int) (scaled_height * aspect + 0.5f);
+				if (scaled_width > (short int) viewWidth) {
+					scaled_width  = (short int) viewWidth;
+					scaled_height = (short int) (scaled_width / aspect + 0.5f);
 				}
 			}
 		} else if (scaled_width == 0 && scaled_height != 0) {
 			float aspect = (float) w / (float) h;
-			scaled_width = scaled_height * aspect + 0.5f;
+			scaled_width = (short int) (scaled_height * aspect + 0.5f);
 		} else if (scaled_width != 0 && scaled_height == 0) {
 			float aspect  = (float) w / (float) h;
-			scaled_height = scaled_width / aspect + 0.5f;
+			scaled_height = (short int) (scaled_width / aspect + 0.5f);
 		}
 
 		LOG("Scaling image from %dx%d to %hdx%hd . . .", w, h, scaled_width, scaled_height);
