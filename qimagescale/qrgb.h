@@ -40,28 +40,34 @@
 #ifndef QRGB_H
 #define QRGB_H
 
-namespace FBInk {
+// RGB triplet
+typedef unsigned int QRgb;
 
-typedef unsigned int QRgb;                        // RGB triplet
+// get red part of RGB
+#define qRed(rgb) ((rgb >> 16) & 0xff)
 
-inline constexpr int qRed(QRgb rgb)                // get red part of RGB
-{ return ((rgb >> 16) & 0xff); }
+// get green part of RGB
+#define qGreen(rgb) ((rgb >> 8) & 0xff)
 
-inline constexpr int qGreen(QRgb rgb)                // get green part of RGB
-{ return ((rgb >> 8) & 0xff); }
+// get blue part of RGB
+#define qBlue(rgb) (rgb & 0xff)
 
-inline constexpr int qBlue(QRgb rgb)                // get blue part of RGB
-{ return (rgb & 0xff); }
+// get alpha part of RGBA
+#define qAlpha(rgb) (rgb >> 24)
 
-inline constexpr int qAlpha(QRgb rgb)                // get alpha part of RGBA
-{ return rgb >> 24; }
+// set RGB value
+#define qRgb(r, g, b) ((0xffu << 24) | ((r & 0xffu) << 16) | ((g & 0xffu) << 8) | (b & 0xffu))
 
-inline constexpr QRgb qRgb(int r, int g, int b)// set RGB value
-{ return (0xffu << 24) | ((r & 0xffu) << 16) | ((g & 0xffu) << 8) | (b & 0xffu); }
+// set RGBA value
+#define qRgba(r, g, b, a) (((a & 0xffu) << 24) | ((r & 0xffu) << 16) | ((g & 0xffu) << 8) | (b & 0xffu))
 
-inline constexpr QRgb qRgba(int r, int g, int b, int a)// set RGBA value
-{ return ((a & 0xffu) << 24) | ((r & 0xffu) << 16) | ((g & 0xffu) << 8) | (b & 0xffu); }
+// Get gray part of Y8A
+#define qY(y8a) (y8a & 0xff)
 
-}
+// Get alpha part of Y8A
+#define qA(y8a) (y8a >> 8)
+
+// Pack a Y8A pixel
+#define qY8A(y, a) (((a & 0xffu) << 8) | (y & 0xffu))
 
 #endif // QRGB_H

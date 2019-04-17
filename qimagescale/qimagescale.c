@@ -1004,14 +1004,6 @@ void qt_qimageScaleAAY8(QImageScaleInfo *isi, unsigned char *dest,
         qt_qimageScaleAAY8_down_xy(isi, dest, dw, dh, dow, sow);
 }
 
-inline constexpr int qY(unsigned short y8a)
-{ return (y8a & 0xff); }
-inline constexpr int qA(unsigned short y8a)
-{ return (y8a >> 8); }
-inline constexpr unsigned short qY8A(int y, int a)
-{ return ((a & 0xffu) << 8) | (y & 0xffu); }
-
-
 inline static void qt_qimageScaleAAY8A_helper(const unsigned short *pix, int xyap, int Cxy, int step, int &v, int &a)
 {
     v = qY(*pix) * xyap;
