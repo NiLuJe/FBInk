@@ -70,10 +70,10 @@ typedef unsigned int QRgb;
 // Pack a Y8A pixel
 #define qY8A(y, a) (((a & 0xffu) << 8) | (y & 0xffu))
 
-#define DIV255(V)                                                                                    \
-({                                                                                                   \
-    __auto_type _v = (V) + 128;                                                                      \
-    (((_v >> 8U) + _v) >> 8U);                                                                       \
-})
+#define DIV255(V)                                                                                                        \
+	({                                                                                                               \
+		__auto_type _v = (V) + 128;                                                                              \
+		(((_v >> 8U) + _v) >> 8U);                                                                               \
+	})
 
-#endif // QRGB_H
+#endif    // QRGB_H

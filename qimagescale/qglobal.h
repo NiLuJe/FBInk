@@ -42,40 +42,40 @@
 #define QGLOBAL_H
 
 // NOTE: Not using stdint.h because uint64_t is unsigned long on 64bit, not unsigned long long
-typedef long long qint64;           /* 64 bit signed */
+typedef long long          qint64;  /* 64 bit signed */
 typedef unsigned long long quint64; /* 64 bit unsigned */
 
 /*
    Useful type definitions for Qt
 */
 
-typedef unsigned char uchar;
+typedef unsigned char  uchar;
 typedef unsigned short ushort;
-typedef unsigned int uint;
-typedef unsigned long ulong;
+typedef unsigned int   uint;
+typedef unsigned long  ulong;
 
 /*
    Utility macros and inline functions
 */
 
-#define qAbs(T)                                                                                          \
-({                                                                                                       \
-	__auto_type __t__ = (T);                                                                         \
-	__t__ >= 0 ? __t__ : -__t__;                                                                     \
-})
+#define qAbs(T)                                                                                                          \
+	({                                                                                                               \
+		__auto_type __t__ = (T);                                                                                 \
+		__t__ >= 0 ? __t__ : -__t__;                                                                             \
+	})
 
-#define qMin(A, B)                                                                                       \
-({                                                                                                       \
-	__auto_type __a = (A);                                                                           \
-	__auto_type __b = (B);                                                                           \
-	(__a < __b) ? __a : __b;                                                                         \
-})
+#define qMin(A, B)                                                                                                       \
+	({                                                                                                               \
+		__auto_type __a = (A);                                                                                   \
+		__auto_type __b = (B);                                                                                   \
+		(__a < __b) ? __a : __b;                                                                                 \
+	})
 
-#define qMax(A, B)                                                                                       \
-({                                                                                                       \
-	__auto_type a__ = (A);                                                                           \
-	__auto_type b__ = (B);                                                                           \
-	(a__ < b__) ? b__ : a__;                                                                         \
-})
+#define qMax(A, B)                                                                                                       \
+	({                                                                                                               \
+		__auto_type a__ = (A);                                                                                   \
+		__auto_type b__ = (B);                                                                                   \
+		(a__ < b__) ? b__ : a__;                                                                                 \
+	})
 
 #endif /* QGLOBAL_H */

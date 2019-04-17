@@ -54,14 +54,15 @@
 
 unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, int sn, bool ignore_alpha, int dw, int dh);
 
-typedef struct {
-	int *xpoints;
-	const unsigned int **ypoints;
-	const unsigned char **ypoints_y8;
-	const unsigned short **ypoints_y8a;
-	int *xapoints;
-	int *yapoints;
-	int xup_yup;
+typedef struct
+{
+	int*                   xpoints;
+	const unsigned int**   ypoints;
+	const unsigned char**  ypoints_y8;
+	const unsigned short** ypoints_y8a;
+	int*                   xapoints;
+	int*                   yapoints;
+	int                    xup_yup;
 } QImageScaleInfo;
 
 #endif

@@ -42,185 +42,206 @@
 
 #include "qglobal.h"
 #if defined(__ARM_NEON) || defined(__ARM_NEON__)
-#include <arm_neon.h>
+#	include <arm_neon.h>
 #endif
 #if defined(__SSE2__)
-#include <immintrin.h>
-#include <x86intrin.h>
+#	include <immintrin.h>
+#	include <x86intrin.h>
 #endif
 
 #if defined(__GNUC__)
-#  if (defined(__i386) || defined(__i386__) || defined(_M_IX86)) && defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER)
-#    define Q_DECL_VECTORCALL __attribute__((sseregparm,regparm(3)))
-#  else
-#    define Q_DECL_VECTORCALL
-#  endif
+#	if (defined(__i386) || defined(__i386__) || defined(_M_IX86)) && defined(__GNUC__) && !defined(__clang__) &&    \
+	    !defined(__INTEL_COMPILER)
+#		define Q_DECL_VECTORCALL __attribute__((sseregparm, regparm(3)))
+#	else
+#		define Q_DECL_VECTORCALL
+#	endif
 #elif defined(_MSC_VER)
-#  define Q_DECL_VECTORCALL __vectorcall
+#	define Q_DECL_VECTORCALL __vectorcall
 #else
-#  define Q_DECL_VECTORCALL
+#	define Q_DECL_VECTORCALL
 #endif
 
-#if __SIZEOF_POINTER__ == 8 // 64-bit versions
+#if __SIZEOF_POINTER__ == 8    // 64-bit versions
 
-static inline __attribute__((always_inline)) uint INTERPOLATE_PIXEL_256(uint x, uint a, uint y, uint b) {
-    quint64 t = ((((quint64)(x)) | (((quint64)(x)) << 24)) & 0x00ff00ff00ff00ff) * a;
-    t += ((((quint64)(y)) | (((quint64)(y)) << 24)) & 0x00ff00ff00ff00ff) * b;
-    t >>= 8;
-    t &= 0x00ff00ff00ff00ff;
-    return ((uint)(t)) | ((uint)(t >> 24));
+static inline __attribute__((always_inline)) uint
+    INTERPOLATE_PIXEL_256(uint x, uint a, uint y, uint b)
+{
+	quint64 t = ((((quint64)(x)) | (((quint64)(x)) << 24)) & 0x00ff00ff00ff00ff) * a;
+	t += ((((quint64)(y)) | (((quint64)(y)) << 24)) & 0x00ff00ff00ff00ff) * b;
+	t >>= 8;
+	t &= 0x00ff00ff00ff00ff;
+	return ((uint)(t)) | ((uint)(t >> 24));
 }
 
-#else // 32-bit versions
+#else    // 32-bit versions
 
-static inline __attribute__((always_inline)) uint INTERPOLATE_PIXEL_256(uint x, uint a, uint y, uint b) {
-    uint t = (x & 0xff00ff) * a + (y & 0xff00ff) * b;
-    t >>= 8;
-    t &= 0xff00ff;
+static inline __attribute__((always_inline)) uint
+    INTERPOLATE_PIXEL_256(uint x, uint a, uint y, uint b)
+{
+	uint t = (x & 0xff00ff) * a + (y & 0xff00ff) * b;
+	t >>= 8;
+	t &= 0xff00ff;
 
-    x = ((x >> 8) & 0xff00ff) * a + ((y >> 8) & 0xff00ff) * b;
-    x &= 0xff00ff00;
-    x |= t;
-    return x;
+	x = ((x >> 8) & 0xff00ff) * a + ((y >> 8) & 0xff00ff) * b;
+	x &= 0xff00ff00;
+	x |= t;
+	return x;
 }
 
 #endif
 
-static inline __attribute__((always_inline)) uchar INTERPOLATE_8BPP_PIXEL_256(uchar x, uint a, uchar y, uint b) {
-    uint t = x * a + y * b;
-    t >>= 8;
+static inline __attribute__((always_inline)) uchar
+    INTERPOLATE_8BPP_PIXEL_256(uchar x, uint a, uchar y, uint b)
+{
+	uint t = x * a + y * b;
+	t >>= 8;
 
-    uint tx = (x >> 8) * a + (y >> 8) * b;
-    tx |= t;
-    return (uchar) tx;
+	uint tx = (x >> 8) * a + (y >> 8) * b;
+	tx |= t;
+	return (uchar) tx;
 }
 
-static inline __attribute__((always_inline)) ushort INTERPOLATE_16BPP_PIXEL_256(ushort x, uint a, ushort y, uint b) {
-    uint t = (x & 0xff) * a + (y & 0xff) * b;
-    t >>= 8;
-    t &= 0xff;
+static inline __attribute__((always_inline)) ushort
+    INTERPOLATE_16BPP_PIXEL_256(ushort x, uint a, ushort y, uint b)
+{
+	uint t = (x & 0xff) * a + (y & 0xff) * b;
+	t >>= 8;
+	t &= 0xff;
 
-    uint tx = ((x >> 8) & 0xff) * a + ((y >> 8) & 0xff) * b;
-    tx &= 0xff00;
-    tx |= t;
-    return (ushort) tx;
+	uint tx = ((x >> 8) & 0xff) * a + ((y >> 8) & 0xff) * b;
+	tx &= 0xff00;
+	tx |= t;
+	return (ushort) tx;
 }
 
 // NOTE: Unlike the SIMD qimagescale_* routines, these ones seem to offer a very small performance gain.
 #if defined(__SSE2__)
-static inline __attribute__((always_inline)) uint interpolate_4_pixels_sse2(__m128i vt, __m128i vb, uint distx, uint disty)
+static inline __attribute__((always_inline)) uint
+    interpolate_4_pixels_sse2(__m128i vt, __m128i vb, uint distx, uint disty)
 {
-    // First interpolate top and bottom pixels in parallel.
-    vt = _mm_unpacklo_epi8(vt, _mm_setzero_si128());
-    vb = _mm_unpacklo_epi8(vb, _mm_setzero_si128());
-    vt = _mm_mullo_epi16(vt, _mm_set1_epi16(256 - disty));
-    vb = _mm_mullo_epi16(vb, _mm_set1_epi16(disty));
-    __m128i vlr = _mm_add_epi16(vt, vb);
-    vlr = _mm_srli_epi16(vlr, 8);
-    // vlr now contains the result of the first two interpolate calls vlr = unpacked((xright << 64) | xleft)
+	// First interpolate top and bottom pixels in parallel.
+	vt          = _mm_unpacklo_epi8(vt, _mm_setzero_si128());
+	vb          = _mm_unpacklo_epi8(vb, _mm_setzero_si128());
+	vt          = _mm_mullo_epi16(vt, _mm_set1_epi16(256 - disty));
+	vb          = _mm_mullo_epi16(vb, _mm_set1_epi16(disty));
+	__m128i vlr = _mm_add_epi16(vt, vb);
+	vlr         = _mm_srli_epi16(vlr, 8);
+	// vlr now contains the result of the first two interpolate calls vlr = unpacked((xright << 64) | xleft)
 
-    // Now the last interpolate between left and right..
-    const __m128i vidistx = _mm_shufflelo_epi16(_mm_cvtsi32_si128(256 - distx), _MM_SHUFFLE(0, 0, 0, 0));
-    const __m128i vdistx = _mm_shufflelo_epi16(_mm_cvtsi32_si128(distx), _MM_SHUFFLE(0, 0, 0, 0));
-    const __m128i vmulx = _mm_unpacklo_epi16(vidistx, vdistx);
-    vlr = _mm_unpacklo_epi16(vlr, _mm_srli_si128(vlr, 8));
-    // vlr now contains the colors of left and right interleaved { la, ra, lr, rr, lg, rg, lb, rb }
-    vlr = _mm_madd_epi16(vlr, vmulx); // Multiply and horizontal add.
-    vlr = _mm_srli_epi32(vlr, 8);
-    vlr = _mm_packs_epi32(vlr, vlr);
-    vlr = _mm_packus_epi16(vlr, vlr);
-    return _mm_cvtsi128_si32(vlr);
+	// Now the last interpolate between left and right..
+	const __m128i vidistx = _mm_shufflelo_epi16(_mm_cvtsi32_si128(256 - distx), _MM_SHUFFLE(0, 0, 0, 0));
+	const __m128i vdistx  = _mm_shufflelo_epi16(_mm_cvtsi32_si128(distx), _MM_SHUFFLE(0, 0, 0, 0));
+	const __m128i vmulx   = _mm_unpacklo_epi16(vidistx, vdistx);
+	vlr                   = _mm_unpacklo_epi16(vlr, _mm_srli_si128(vlr, 8));
+	// vlr now contains the colors of left and right interleaved { la, ra, lr, rr, lg, rg, lb, rb }
+	vlr = _mm_madd_epi16(vlr, vmulx);    // Multiply and horizontal add.
+	vlr = _mm_srli_epi32(vlr, 8);
+	vlr = _mm_packs_epi32(vlr, vlr);
+	vlr = _mm_packus_epi16(vlr, vlr);
+	return _mm_cvtsi128_si32(vlr);
 }
 
-static inline uint interpolate_4_pixels(uint tl, uint tr, uint bl, uint br, uint distx, uint disty)
+static inline uint
+    interpolate_4_pixels(uint tl, uint tr, uint bl, uint br, uint distx, uint disty)
 {
-    __m128i vt = _mm_unpacklo_epi32(_mm_cvtsi32_si128(tl), _mm_cvtsi32_si128(tr));
-    __m128i vb = _mm_unpacklo_epi32(_mm_cvtsi32_si128(bl), _mm_cvtsi32_si128(br));
-    return interpolate_4_pixels_sse2(vt, vb, distx, disty);
+	__m128i vt = _mm_unpacklo_epi32(_mm_cvtsi32_si128(tl), _mm_cvtsi32_si128(tr));
+	__m128i vb = _mm_unpacklo_epi32(_mm_cvtsi32_si128(bl), _mm_cvtsi32_si128(br));
+	return interpolate_4_pixels_sse2(vt, vb, distx, disty);
 }
 
-static inline uint interpolate_4_pixels_arr(const uint t[], const uint b[], uint distx, uint disty)
+static inline uint
+    interpolate_4_pixels_arr(const uint t[], const uint b[], uint distx, uint disty)
 {
-    __m128i vt = _mm_loadl_epi64((const __m128i*)t);
-    __m128i vb = _mm_loadl_epi64((const __m128i*)b);
-    return interpolate_4_pixels_sse2(vt, vb, distx, disty);
+	__m128i vt = _mm_loadl_epi64((const __m128i*) t);
+	__m128i vb = _mm_loadl_epi64((const __m128i*) b);
+	return interpolate_4_pixels_sse2(vt, vb, distx, disty);
 }
 
 #elif defined(__ARM_NEON__)
-static inline __attribute__((always_inline)) uint interpolate_4_pixels_neon(uint32x2_t vt32, uint32x2_t vb32, uint distx, uint disty)
+static inline __attribute__((always_inline)) uint
+    interpolate_4_pixels_neon(uint32x2_t vt32, uint32x2_t vb32, uint distx, uint disty)
 {
-    uint16x8_t vt16 = vmovl_u8(vreinterpret_u8_u32(vt32));
-    uint16x8_t vb16 = vmovl_u8(vreinterpret_u8_u32(vb32));
-    vt16 = vmulq_n_u16(vt16, 256 - disty);
-    vt16 = vmlaq_n_u16(vt16, vb16, disty);
-    vt16 = vshrq_n_u16(vt16, 8);
-    uint16x4_t vl16 = vget_low_u16(vt16);
-    uint16x4_t vr16 = vget_high_u16(vt16);
-    vl16 = vmul_n_u16(vl16, 256 - distx);
-    vl16 = vmla_n_u16(vl16, vr16, distx);
-    vl16 = vshr_n_u16(vl16, 8);
-    uint8x8_t vr = vmovn_u16(vcombine_u16(vl16, vl16));
-    return vget_lane_u32(vreinterpret_u32_u8(vr), 0);
+	uint16x8_t vt16 = vmovl_u8(vreinterpret_u8_u32(vt32));
+	uint16x8_t vb16 = vmovl_u8(vreinterpret_u8_u32(vb32));
+	vt16            = vmulq_n_u16(vt16, 256 - disty);
+	vt16            = vmlaq_n_u16(vt16, vb16, disty);
+	vt16            = vshrq_n_u16(vt16, 8);
+	uint16x4_t vl16 = vget_low_u16(vt16);
+	uint16x4_t vr16 = vget_high_u16(vt16);
+	vl16            = vmul_n_u16(vl16, 256 - distx);
+	vl16            = vmla_n_u16(vl16, vr16, distx);
+	vl16            = vshr_n_u16(vl16, 8);
+	uint8x8_t vr    = vmovn_u16(vcombine_u16(vl16, vl16));
+	return vget_lane_u32(vreinterpret_u32_u8(vr), 0);
 }
 
-static inline uint interpolate_4_pixels(uint tl, uint tr, uint bl, uint br, uint distx, uint disty)
+static inline uint
+    interpolate_4_pixels(uint tl, uint tr, uint bl, uint br, uint distx, uint disty)
 {
-    uint32x2_t vt32 = vmov_n_u32(tl);
-    uint32x2_t vb32 = vmov_n_u32(bl);
-    vt32 = vset_lane_u32(tr, vt32, 1);
-    vb32 = vset_lane_u32(br, vb32, 1);
-    return interpolate_4_pixels_neon(vt32, vb32, distx, disty);
+	uint32x2_t vt32 = vmov_n_u32(tl);
+	uint32x2_t vb32 = vmov_n_u32(bl);
+	vt32            = vset_lane_u32(tr, vt32, 1);
+	vb32            = vset_lane_u32(br, vb32, 1);
+	return interpolate_4_pixels_neon(vt32, vb32, distx, disty);
 }
 
-static inline uint interpolate_4_pixels_arr(const uint t[], const uint b[], uint distx, uint disty)
+static inline uint
+    interpolate_4_pixels_arr(const uint t[], const uint b[], uint distx, uint disty)
 {
-    uint32x2_t vt32 = vld1_u32(t);
-    uint32x2_t vb32 = vld1_u32(b);
-    return interpolate_4_pixels_neon(vt32, vb32, distx, disty);
+	uint32x2_t vt32 = vld1_u32(t);
+	uint32x2_t vb32 = vld1_u32(b);
+	return interpolate_4_pixels_neon(vt32, vb32, distx, disty);
 }
 
 #else
-static inline uint interpolate_4_pixels(uint tl, uint tr, uint bl, uint br, uint distx, uint disty)
+static inline uint
+    interpolate_4_pixels(uint tl, uint tr, uint bl, uint br, uint distx, uint disty)
 {
-    uint idistx = 256 - distx;
-    uint idisty = 256 - disty;
-    uint xtop = INTERPOLATE_PIXEL_256(tl, idistx, tr, distx);
-    uint xbot = INTERPOLATE_PIXEL_256(bl, idistx, br, distx);
-    return INTERPOLATE_PIXEL_256(xtop, idisty, xbot, disty);
+	uint idistx = 256 - distx;
+	uint idisty = 256 - disty;
+	uint xtop   = INTERPOLATE_PIXEL_256(tl, idistx, tr, distx);
+	uint xbot   = INTERPOLATE_PIXEL_256(bl, idistx, br, distx);
+	return INTERPOLATE_PIXEL_256(xtop, idisty, xbot, disty);
 }
 
-static inline uint interpolate_4_pixels_arr(const uint t[], const uint b[], uint distx, uint disty)
+static inline uint
+    interpolate_4_pixels_arr(const uint t[], const uint b[], uint distx, uint disty)
 {
-    return interpolate_4_pixels(t[0], t[1], b[0], b[1], distx, disty);
+	return interpolate_4_pixels(t[0], t[1], b[0], b[1], distx, disty);
 }
 #endif
 
-static inline uchar interpolate_4_8bpp_pixels(uchar tl, uchar tr, uchar bl, uchar br, uint distx, uint disty)
+static inline uchar
+    interpolate_4_8bpp_pixels(uchar tl, uchar tr, uchar bl, uchar br, uint distx, uint disty)
 {
-    uint idistx = 256 - distx;
-    uint idisty = 256 - disty;
-    uchar xtop = INTERPOLATE_8BPP_PIXEL_256(tl, idistx, tr, distx);
-    uchar xbot = INTERPOLATE_8BPP_PIXEL_256(bl, idistx, br, distx);
-    return INTERPOLATE_8BPP_PIXEL_256(xtop, idisty, xbot, disty);
+	uint  idistx = 256 - distx;
+	uint  idisty = 256 - disty;
+	uchar xtop   = INTERPOLATE_8BPP_PIXEL_256(tl, idistx, tr, distx);
+	uchar xbot   = INTERPOLATE_8BPP_PIXEL_256(bl, idistx, br, distx);
+	return INTERPOLATE_8BPP_PIXEL_256(xtop, idisty, xbot, disty);
 }
 
-static inline uchar interpolate_4_8bpp_pixels_arr(const uchar t[], const uchar b[], uint distx, uint disty)
+static inline uchar
+    interpolate_4_8bpp_pixels_arr(const uchar t[], const uchar b[], uint distx, uint disty)
 {
-    return interpolate_4_8bpp_pixels(t[0], t[1], b[0], b[1], distx, disty);
+	return interpolate_4_8bpp_pixels(t[0], t[1], b[0], b[1], distx, disty);
 }
 
-static inline ushort interpolate_4_16bpp_pixels(ushort tl, ushort tr, ushort bl, ushort br, uint distx, uint disty)
+static inline ushort
+    interpolate_4_16bpp_pixels(ushort tl, ushort tr, ushort bl, ushort br, uint distx, uint disty)
 {
-    uint idistx = 256 - distx;
-    uint idisty = 256 - disty;
-    ushort xtop = INTERPOLATE_16BPP_PIXEL_256(tl, idistx, tr, distx);
-    ushort xbot = INTERPOLATE_16BPP_PIXEL_256(bl, idistx, br, distx);
-    return INTERPOLATE_16BPP_PIXEL_256(xtop, idisty, xbot, disty);
+	uint   idistx = 256 - distx;
+	uint   idisty = 256 - disty;
+	ushort xtop   = INTERPOLATE_16BPP_PIXEL_256(tl, idistx, tr, distx);
+	ushort xbot   = INTERPOLATE_16BPP_PIXEL_256(bl, idistx, br, distx);
+	return INTERPOLATE_16BPP_PIXEL_256(xtop, idisty, xbot, disty);
 }
 
-static inline ushort interpolate_4_16bpp_pixels_arr(const ushort t[], const ushort b[], uint distx, uint disty)
+static inline ushort
+    interpolate_4_16bpp_pixels_arr(const ushort t[], const ushort b[], uint distx, uint disty)
 {
-    return interpolate_4_16bpp_pixels(t[0], t[1], b[0], b[1], distx, disty);
+	return interpolate_4_16bpp_pixels(t[0], t[1], b[0], b[1], distx, disty);
 }
 
-#endif // QDRAWHELPER_P_H
+#endif    // QDRAWHELPER_P_H
