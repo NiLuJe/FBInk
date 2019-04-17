@@ -92,7 +92,6 @@ qt_qimageScaleAARGBA_up_x_down_y_neon(QImageScaleInfo *isi, unsigned int *dest,
             const uint16x4_t vx16 = vmovn_u32(vx);
             const uint8x8_t vx8 = vmovn_u16(vcombine_u16(vx16, vx16));
             *dptr = vget_lane_u32(vreinterpret_u32_u8(vx8), 0);
-            *dptr |= 0xff000000;
             dptr++;
         }
     }
@@ -130,6 +129,7 @@ qt_qimageScaleAARGB_up_x_down_y_neon(QImageScaleInfo *isi, unsigned int *dest,
             const uint16x4_t vx16 = vmovn_u32(vx);
             const uint8x8_t vx8 = vmovn_u16(vcombine_u16(vx16, vx16));
             *dptr = vget_lane_u32(vreinterpret_u32_u8(vx8), 0);
+            *dptr |= 0xff000000;
             dptr++;
         }
     }
@@ -167,7 +167,6 @@ qt_qimageScaleAARGBA_down_x_up_y_neon(QImageScaleInfo *isi, unsigned int *dest,
             const uint16x4_t vx16 = vmovn_u32(vx);
             const uint8x8_t vx8 = vmovn_u16(vcombine_u16(vx16, vx16));
             *dptr = vget_lane_u32(vreinterpret_u32_u8(vx8), 0);
-            *dptr |= 0xff000000;
             dptr++;
         }
     }
@@ -205,6 +204,7 @@ qt_qimageScaleAARGB_down_x_up_y_neon(QImageScaleInfo *isi, unsigned int *dest,
             const uint16x4_t vx16 = vmovn_u32(vx);
             const uint8x8_t vx8 = vmovn_u16(vcombine_u16(vx16, vx16));
             *dptr = vget_lane_u32(vreinterpret_u32_u8(vx8), 0);
+            *dptr |= 0xff000000;
             dptr++;
         }
     }
@@ -251,7 +251,6 @@ qt_qimageScaleAARGBA_down_xy_neon(QImageScaleInfo *isi, unsigned int *dest,
             const uint16x4_t vx16 = vmovn_u32(vx);
             const uint8x8_t vx8 = vmovn_u16(vcombine_u16(vx16, vx16));
             *dptr = vget_lane_u32(vreinterpret_u32_u8(vx8), 0);
-            *dptr |= 0xff000000;
             dptr++;
         }
     }
@@ -298,6 +297,7 @@ qt_qimageScaleAARGB_down_xy_neon(QImageScaleInfo *isi, unsigned int *dest,
             const uint16x4_t vx16 = vmovn_u32(vx);
             const uint8x8_t vx8 = vmovn_u16(vcombine_u16(vx16, vx16));
             *dptr = vget_lane_u32(vreinterpret_u32_u8(vx8), 0);
+            *dptr |= 0xff000000;
             dptr++;
         }
     }

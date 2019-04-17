@@ -50,6 +50,8 @@
 // We mean it.
 //
 
+#include <stdbool.h>
+
 unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, int sn, bool ignore_alpha, int dw, int dh);
 
 typedef struct {
