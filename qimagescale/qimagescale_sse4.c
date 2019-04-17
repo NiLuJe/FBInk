@@ -41,10 +41,6 @@
 
 #if defined(__SSE4_1__)
 
-namespace FBInk {
-
-using namespace QImageScale;
-
 inline static __m128i Q_DECL_VECTORCALL
 qt_qimageScaleAARGBA_helper(const unsigned int *pix, int xyap, int Cxy, int step, const __m128i vxyap, const __m128i vCxy)
 {
@@ -62,8 +58,8 @@ qt_qimageScaleAARGBA_helper(const unsigned int *pix, int xyap, int Cxy, int step
     return vx;
 }
 
-template<bool RGB>
-void qt_qimageScaleAARGBA_up_x_down_y_sse4(QImageScaleInfo *isi, unsigned int *dest,
+inline static void
+qt_qimageScaleAARGBA_up_x_down_y_sse4(QImageScaleInfo *isi, unsigned int *dest,
                                            int dw, int dh, int dow, int sow)
 {
     const unsigned int **ypoints = isi->ypoints;
@@ -100,15 +96,57 @@ void qt_qimageScaleAARGBA_up_x_down_y_sse4(QImageScaleInfo *isi, unsigned int *d
             vx = _mm_packus_epi32(vx, _mm_setzero_si128());
             vx = _mm_packus_epi16(vx, _mm_setzero_si128());
             *dptr = _mm_cvtsi128_si32(vx);
-            if (RGB)
-                *dptr |= 0xff000000;
+            *dptr |= 0xff000000;
             dptr++;
         }
     }
 }
 
-template<bool RGB>
-void qt_qimageScaleAARGBA_down_x_up_y_sse4(QImageScaleInfo *isi, unsigned int *dest,
+inline static void
+qt_qimageScaleAARGB_up_x_down_y_sse4(QImageScaleInfo *isi, unsigned int *dest,
+                                           int dw, int dh, int dow, int sow)
+{
+    const unsigned int **ypoints = isi->ypoints;
+    int *xpoints = isi->xpoints;
+    int *xapoints = isi->xapoints;
+    int *yapoints = isi->yapoints;
+
+    const __m128i v256 = _mm_set1_epi32(256);
+
+    /* go through every scanline in the output buffer */
+    for (int y = 0; y < dh; y++) {
+        int Cy = yapoints[y] >> 16;
+        int yap = yapoints[y] & 0xffff;
+        const __m128i vCy = _mm_set1_epi32(Cy);
+        const __m128i vyap = _mm_set1_epi32(yap);
+
+        unsigned int *dptr = dest + (y * dow);
+        for (int x = 0; x < dw; x++) {
+            const unsigned int *sptr = ypoints[y] + xpoints[x];
+            __m128i vx = qt_qimageScaleAARGBA_helper(sptr, yap, Cy, sow, vyap, vCy);
+
+            int xap = xapoints[x];
+            if (xap > 0) {
+                const __m128i vxap = _mm_set1_epi32(xap);
+                const __m128i vinvxap = _mm_sub_epi32(v256, vxap);
+                __m128i vr = qt_qimageScaleAARGBA_helper(sptr + 1, yap, Cy, sow, vyap, vCy);
+
+                vx = _mm_mullo_epi32(vx, vinvxap);
+                vr = _mm_mullo_epi32(vr, vxap);
+                vx = _mm_add_epi32(vx, vr);
+                vx = _mm_srli_epi32(vx, 8);
+            }
+            vx = _mm_srli_epi32(vx, 14);
+            vx = _mm_packus_epi32(vx, _mm_setzero_si128());
+            vx = _mm_packus_epi16(vx, _mm_setzero_si128());
+            *dptr = _mm_cvtsi128_si32(vx);
+            dptr++;
+        }
+    }
+}
+
+inline static void
+qt_qimageScaleAARGBA_down_x_up_y_sse4(QImageScaleInfo *isi, unsigned int *dest,
                                            int dw, int dh, int dow, int sow)
 {
     const unsigned int **ypoints = isi->ypoints;
@@ -145,15 +183,57 @@ void qt_qimageScaleAARGBA_down_x_up_y_sse4(QImageScaleInfo *isi, unsigned int *d
             vx = _mm_packus_epi32(vx, _mm_setzero_si128());
             vx = _mm_packus_epi16(vx, _mm_setzero_si128());
             *dptr = _mm_cvtsi128_si32(vx);
-            if (RGB)
-                *dptr |= 0xff000000;
+            *dptr |= 0xff000000;
             dptr++;
         }
     }
 }
 
-template<bool RGB>
-void qt_qimageScaleAARGBA_down_xy_sse4(QImageScaleInfo *isi, unsigned int *dest,
+inline static void
+qt_qimageScaleAARGB_down_x_up_y_sse4(QImageScaleInfo *isi, unsigned int *dest,
+                                           int dw, int dh, int dow, int sow)
+{
+    const unsigned int **ypoints = isi->ypoints;
+    int *xpoints = isi->xpoints;
+    int *xapoints = isi->xapoints;
+    int *yapoints = isi->yapoints;
+
+    const __m128i v256 = _mm_set1_epi32(256);
+
+    /* go through every scanline in the output buffer */
+    for (int y = 0; y < dh; y++) {
+        unsigned int *dptr = dest + (y * dow);
+        for (int x = 0; x < dw; x++) {
+            int Cx = xapoints[x] >> 16;
+            int xap = xapoints[x] & 0xffff;
+            const __m128i vCx = _mm_set1_epi32(Cx);
+            const __m128i vxap = _mm_set1_epi32(xap);
+
+            const unsigned int *sptr = ypoints[y] + xpoints[x];
+            __m128i vx = qt_qimageScaleAARGBA_helper(sptr, xap, Cx, 1, vxap, vCx);
+
+            int yap = yapoints[y];
+            if (yap > 0) {
+                const __m128i vyap = _mm_set1_epi32(yap);
+                const __m128i vinvyap = _mm_sub_epi32(v256, vyap);
+                __m128i vr = qt_qimageScaleAARGBA_helper(sptr + sow, xap, Cx, 1, vxap, vCx);
+
+                vx = _mm_mullo_epi32(vx, vinvyap);
+                vr = _mm_mullo_epi32(vr, vyap);
+                vx = _mm_add_epi32(vx, vr);
+                vx = _mm_srli_epi32(vx, 8);
+            }
+            vx = _mm_srli_epi32(vx, 14);
+            vx = _mm_packus_epi32(vx, _mm_setzero_si128());
+            vx = _mm_packus_epi16(vx, _mm_setzero_si128());
+            *dptr = _mm_cvtsi128_si32(vx);
+            dptr++;
+        }
+    }
+}
+
+inline static void
+qt_qimageScaleAARGBA_down_xy_sse4(QImageScaleInfo *isi, unsigned int *dest,
                                        int dw, int dh, int dow, int sow)
 {
     const unsigned int **ypoints = isi->ypoints;
@@ -192,31 +272,55 @@ void qt_qimageScaleAARGBA_down_xy_sse4(QImageScaleInfo *isi, unsigned int *dest,
             vr = _mm_packus_epi32(vr, _mm_setzero_si128());
             vr = _mm_packus_epi16(vr, _mm_setzero_si128());
             *dptr = _mm_cvtsi128_si32(vr);
-            if (RGB)
-                *dptr |= 0xff000000;
+            *dptr |= 0xff000000;
             dptr++;
         }
     }
 }
 
-template void qt_qimageScaleAARGBA_up_x_down_y_sse4<false>(QImageScaleInfo *isi, unsigned int *dest,
-                                                           int dw, int dh, int dow, int sow);
+inline static void
+qt_qimageScaleAARGB_down_xy_sse4(QImageScaleInfo *isi, unsigned int *dest,
+                                       int dw, int dh, int dow, int sow)
+{
+    const unsigned int **ypoints = isi->ypoints;
+    int *xpoints = isi->xpoints;
+    int *xapoints = isi->xapoints;
+    int *yapoints = isi->yapoints;
 
-template void qt_qimageScaleAARGBA_up_x_down_y_sse4<true>(QImageScaleInfo *isi, unsigned int *dest,
-                                                          int dw, int dh, int dow, int sow);
+    for (int y = 0; y < dh; y++) {
+        int Cy = yapoints[y] >> 16;
+        int yap = yapoints[y] & 0xffff;
+        const __m128i vCy = _mm_set1_epi32(Cy);
+        const __m128i vyap = _mm_set1_epi32(yap);
 
-template void qt_qimageScaleAARGBA_down_x_up_y_sse4<false>(QImageScaleInfo *isi, unsigned int *dest,
-                                                           int dw, int dh, int dow, int sow);
+        unsigned int *dptr = dest + (y * dow);
+        for (int x = 0; x < dw; x++) {
+            const int Cx = xapoints[x] >> 16;
+            const int xap = xapoints[x] & 0xffff;
+            const __m128i vCx = _mm_set1_epi32(Cx);
+            const __m128i vxap = _mm_set1_epi32(xap);
 
-template void qt_qimageScaleAARGBA_down_x_up_y_sse4<true>(QImageScaleInfo *isi, unsigned int *dest,
-                                                          int dw, int dh, int dow, int sow);
+            const unsigned int *sptr = ypoints[y] + xpoints[x];
+            __m128i vx = qt_qimageScaleAARGBA_helper(sptr, xap, Cx, 1, vxap, vCx);
+            __m128i vr = _mm_mullo_epi32(_mm_srli_epi32(vx, 4), vyap);
 
-template void qt_qimageScaleAARGBA_down_xy_sse4<false>(QImageScaleInfo *isi, unsigned int *dest,
-                                                       int dw, int dh, int dow, int sow);
+            int j;
+            for (j = (1 << 14) - yap; j > Cy; j -= Cy) {
+                sptr += sow;
+                vx = qt_qimageScaleAARGBA_helper(sptr, xap, Cx, 1, vxap, vCx);
+                vr = _mm_add_epi32(vr, _mm_mullo_epi32(_mm_srli_epi32(vx, 4), vCy));
+            }
+            sptr += sow;
+            vx = qt_qimageScaleAARGBA_helper(sptr, xap, Cx, 1, vxap, vCx);
+            vr = _mm_add_epi32(vr, _mm_mullo_epi32(_mm_srli_epi32(vx, 4), _mm_set1_epi32(j)));
 
-template void qt_qimageScaleAARGBA_down_xy_sse4<true>(QImageScaleInfo *isi, unsigned int *dest,
-                                                      int dw, int dh, int dow, int sow);
-
+            vr = _mm_srli_epi32(vr, 24);
+            vr = _mm_packus_epi32(vr, _mm_setzero_si128());
+            vr = _mm_packus_epi16(vr, _mm_setzero_si128());
+            *dptr = _mm_cvtsi128_si32(vr);
+            dptr++;
+        }
+    }
 }
 
 #endif
