@@ -49,8 +49,6 @@
 #include <x86intrin.h>
 #endif
 
-namespace FBInk {
-
 #if defined(__GNUC__)
 #  if (defined(__i386) || defined(__i386__) || defined(_M_IX86)) && defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER)
 #    define Q_DECL_VECTORCALL __attribute__((sseregparm,regparm(3)))
@@ -141,7 +139,7 @@ static inline uint interpolate_4_pixels(uint tl, uint tr, uint bl, uint br, uint
     return interpolate_4_pixels_sse2(vt, vb, distx, disty);
 }
 
-static inline uint interpolate_4_pixels(const uint t[], const uint b[], uint distx, uint disty)
+static inline uint interpolate_4_pixels_arr(const uint t[], const uint b[], uint distx, uint disty)
 {
     __m128i vt = _mm_loadl_epi64((const __m128i*)t);
     __m128i vb = _mm_loadl_epi64((const __m128i*)b);
@@ -174,7 +172,7 @@ static inline uint interpolate_4_pixels(uint tl, uint tr, uint bl, uint br, uint
     return interpolate_4_pixels_neon(vt32, vb32, distx, disty);
 }
 
-static inline uint interpolate_4_pixels(const uint t[], const uint b[], uint distx, uint disty)
+static inline uint interpolate_4_pixels_arr(const uint t[], const uint b[], uint distx, uint disty)
 {
     uint32x2_t vt32 = vld1_u32(t);
     uint32x2_t vb32 = vld1_u32(b);
@@ -191,7 +189,7 @@ static inline uint interpolate_4_pixels(uint tl, uint tr, uint bl, uint br, uint
     return INTERPOLATE_PIXEL_256(xtop, idisty, xbot, disty);
 }
 
-static inline uint interpolate_4_pixels(const uint t[], const uint b[], uint distx, uint disty)
+static inline uint interpolate_4_pixels_arr(const uint t[], const uint b[], uint distx, uint disty)
 {
     return interpolate_4_pixels(t[0], t[1], b[0], b[1], distx, disty);
 }
@@ -206,7 +204,7 @@ static inline uchar interpolate_4_8bpp_pixels(uchar tl, uchar tr, uchar bl, ucha
     return INTERPOLATE_8BPP_PIXEL_256(xtop, idisty, xbot, disty);
 }
 
-static inline uchar interpolate_4_8bpp_pixels(const uchar t[], const uchar b[], uint distx, uint disty)
+static inline uchar interpolate_4_8bpp_pixels_arr(const uchar t[], const uchar b[], uint distx, uint disty)
 {
     return interpolate_4_8bpp_pixels(t[0], t[1], b[0], b[1], distx, disty);
 }
@@ -220,11 +218,9 @@ static inline ushort interpolate_4_16bpp_pixels(ushort tl, ushort tr, ushort bl,
     return INTERPOLATE_16BPP_PIXEL_256(xtop, idisty, xbot, disty);
 }
 
-static inline ushort interpolate_4_16bpp_pixels(const ushort t[], const ushort b[], uint distx, uint disty)
+static inline ushort interpolate_4_16bpp_pixels_arr(const ushort t[], const ushort b[], uint distx, uint disty)
 {
     return interpolate_4_16bpp_pixels(t[0], t[1], b[0], b[1], distx, disty);
-}
-
 }
 
 #endif // QDRAWHELPER_P_H
