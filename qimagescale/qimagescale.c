@@ -46,10 +46,10 @@
 
 #ifndef FBINK_QIS_NO_SIMD
 #if defined(__ARM_NEON__)
-#include "qimagescale_neon.cpp"
+#include "qimagescale_neon.c"
 #endif
 #if defined(__SSE4_1__)
-#include "qimagescale_sse4.cpp"
+#include "qimagescale_sse4.c"
 #endif
 #endif
 

@@ -64,11 +64,11 @@
 #if __SIZEOF_POINTER__ == 8 // 64-bit versions
 
 static inline __attribute__((always_inline)) uint INTERPOLATE_PIXEL_256(uint x, uint a, uint y, uint b) {
-    quint64 t = (((quint64(x)) | ((quint64(x)) << 24)) & 0x00ff00ff00ff00ff) * a;
-    t += (((quint64(y)) | ((quint64(y)) << 24)) & 0x00ff00ff00ff00ff) * b;
+    quint64 t = ((((quint64)(x)) | (((quint64)(x)) << 24)) & 0x00ff00ff00ff00ff) * a;
+    t += ((((quint64)(y)) | (((quint64)(y)) << 24)) & 0x00ff00ff00ff00ff) * b;
     t >>= 8;
     t &= 0x00ff00ff00ff00ff;
-    return (uint(t)) | (uint(t >> 24));
+    return ((uint)(t)) | ((uint)(t >> 24));
 }
 
 #else // 32-bit versions
