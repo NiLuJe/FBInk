@@ -64,14 +64,14 @@ typedef unsigned long ulong;
 	__t__ >= 0 ? __t__ : -__t__;                                                                     \
 })
 
-#define qMin(A, B)
+#define qMin(A, B)                                                                                       \
 ({                                                                                                       \
 	__auto_type __a = (A);                                                                           \
 	__auto_type __b = (B);                                                                           \
 	(__a < __b) ? __a : __b;                                                                         \
 })
 
-#define qMax(A, B)
+#define qMax(A, B)                                                                                       \
 ({                                                                                                       \
 	__auto_type a__ = (A);                                                                           \
 	__auto_type b__ = (B);                                                                           \

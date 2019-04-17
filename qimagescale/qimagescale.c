@@ -125,7 +125,7 @@ static const unsigned int** qimageCalcYPoints(const unsigned int *src,
         dh = -dh;
         rv = 1;
     }
-    p = new const unsigned int* [dh+1];
+    p = malloc((dh + 1) * sizeof(src));
 
     int up = qAbs(dh) >= sh;
     val = up ? 0x8000 * sh / dh - 0x8000 : 0;
@@ -155,7 +155,7 @@ static const unsigned char** qimageCalcYPointsY8(const unsigned char *src,
         dh = -dh;
         rv = 1;
     }
-    p = new const unsigned char* [dh+1];
+    p = malloc((dh + 1) * sizeof(src));
 
     int up = qAbs(dh) >= sh;
     val = up ? 0x8000 * sh / dh - 0x8000 : 0;
@@ -185,7 +185,7 @@ static const unsigned short** qimageCalcYPointsY8A(const unsigned short *src,
         dh = -dh;
         rv = 1;
     }
-    p = new const unsigned short* [dh+1];
+    p = malloc((dh + 1) * sizeof(src));
 
     int up = qAbs(dh) >= sh;
     val = up ? 0x8000 * sh / dh - 0x8000 : 0;
@@ -213,7 +213,7 @@ static int* qimageCalcXPoints(int sw, int dw)
         dw = -dw;
         rv = 1;
     }
-    p = new int[dw+1];
+    p = malloc((dw + 1) * sizeof(int));
 
     int up = qAbs(dw) >= sw;
     val = up ? 0x8000 * sw / dw - 0x8000 : 0;
@@ -241,7 +241,7 @@ static int* qimageCalcApoints(int s, int d, int up)
         rv = 1;
         d = -d;
     }
-    p = new int[d];
+    p = malloc(d * sizeof(int));
 
     if (up) {
         /* scaling up */
@@ -283,15 +283,15 @@ static int* qimageCalcApoints(int s, int d, int up)
 static QImageScaleInfo* qimageFreeScaleInfo(QImageScaleInfo *isi)
 {
     if (isi) {
-        delete[] isi->xpoints;
-        delete[] isi->ypoints;
-        delete[] isi->ypoints_y8;
-        delete[] isi->ypoints_y8a;
-        delete[] isi->xapoints;
-        delete[] isi->yapoints;
-        delete isi;
+        free(isi->xpoints);
+        free(isi->ypoints);
+        free(isi->ypoints_y8);
+        free(isi->ypoints_y8a);
+        free(isi->xapoints);
+        free(isi->yapoints);
+        free(isi);
     }
-    return 0;
+    return NULL;
 }
 
 static QImageScaleInfo* qimageCalcScaleInfo(const unsigned char* img,
@@ -304,9 +304,9 @@ static QImageScaleInfo* qimageCalcScaleInfo(const unsigned char* img,
     scw = dw;
     sch = dh;
 
-    isi = new QImageScaleInfo;
+    isi = calloc(1U, sizeof(QImageScaleInfo));
     if (!isi)
-        return 0;
+        return NULL;
 
     isi->xup_yup = (qAbs(dw) >= sw) + ((qAbs(dh) >= sh) << 1);
 
