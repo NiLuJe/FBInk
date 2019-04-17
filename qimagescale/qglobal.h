@@ -41,17 +41,9 @@
 #ifndef QGLOBAL_H
 #define QGLOBAL_H
 
-namespace FBInk {
-
-#if defined(_WIN32) && !defined(__GNUC__)
-typedef __int64 qint64;            /* 64 bit signed */
-typedef unsigned __int64 quint64;  /* 64 bit unsigned */
-#else
+// NOTE: Not using stdint.h because uint64_t is unsigned long on 64bit, not unsigned long long
 typedef long long qint64;           /* 64 bit signed */
 typedef unsigned long long quint64; /* 64 bit unsigned */
-#endif
-
-}
 
 /*
    Useful type definitions for Qt
@@ -62,20 +54,28 @@ typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned long ulong;
 
-namespace FBInk {
-
 /*
    Utility macros and inline functions
 */
 
-template <typename T>
-constexpr inline T qAbs(const T &t) { return t >= 0 ? t : -t; }
+#define qAbs(T)                                                                                          \
+({                                                                                                       \
+	__auto_type __t__ = (T);                                                                         \
+	__t__ >= 0 ? __t__ : -__t__;                                                                     \
+})
 
-template <typename T>
-constexpr inline const T &qMin(const T &a, const T &b) { return (a < b) ? a : b; }
-template <typename T>
-constexpr inline const T &qMax(const T &a, const T &b) { return (a < b) ? b : a; }
+#define qMin(A, B)
+({                                                                                                       \
+	__auto_type __a = (A);                                                                           \
+	__auto_type __b = (B);                                                                           \
+	(__a < __b) ? __a : __b;                                                                         \
+})
 
-}
+#define qMax(A, B)
+({                                                                                                       \
+	__auto_type a__ = (A);                                                                           \
+	__auto_type b__ = (B);                                                                           \
+	(a__ < b__) ? b__ : a__;                                                                         \
+})
 
 #endif /* QGLOBAL_H */
