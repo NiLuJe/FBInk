@@ -41,7 +41,7 @@
 
 #if defined(__ARM_NEON__)
 
-inline static uint32x4_t qt_qimageScaleAARGBA_helper(const unsigned int *pix, int xyap, int Cxy, int step)
+inline static uint32x4_t qt_qimageScaleAARGBA_helper_neon(const unsigned int *pix, int xyap, int Cxy, int step)
 {
     uint32x2_t vpix32 = vmov_n_u32(*pix);
     uint16x4_t vpix16 = vget_low_u16(vmovl_u8(vreinterpret_u8_u32(vpix32)));
@@ -77,11 +77,11 @@ qt_qimageScaleAARGBA_up_x_down_y_neon(QImageScaleInfo *isi, unsigned int *dest,
         unsigned int *dptr = dest + (y * dow);
         for (int x = 0; x < dw; x++) {
             const unsigned int *sptr = ypoints[y] + xpoints[x];
-            uint32x4_t vx = qt_qimageScaleAARGBA_helper(sptr, yap, Cy, sow);
+            uint32x4_t vx = qt_qimageScaleAARGBA_helper_neon(sptr, yap, Cy, sow);
 
             int xap = xapoints[x];
             if (xap > 0) {
-                uint32x4_t vr = qt_qimageScaleAARGBA_helper(sptr + 1, yap, Cy, sow);
+                uint32x4_t vr = qt_qimageScaleAARGBA_helper_neon(sptr + 1, yap, Cy, sow);
 
                 vx = vmulq_n_u32(vx, 256 - xap);
                 vr = vmulq_n_u32(vr, xap);
@@ -114,11 +114,11 @@ qt_qimageScaleAARGB_up_x_down_y_neon(QImageScaleInfo *isi, unsigned int *dest,
         unsigned int *dptr = dest + (y * dow);
         for (int x = 0; x < dw; x++) {
             const unsigned int *sptr = ypoints[y] + xpoints[x];
-            uint32x4_t vx = qt_qimageScaleAARGBA_helper(sptr, yap, Cy, sow);
+            uint32x4_t vx = qt_qimageScaleAARGBA_helper_neon(sptr, yap, Cy, sow);
 
             int xap = xapoints[x];
             if (xap > 0) {
-                uint32x4_t vr = qt_qimageScaleAARGBA_helper(sptr + 1, yap, Cy, sow);
+                uint32x4_t vr = qt_qimageScaleAARGBA_helper_neon(sptr + 1, yap, Cy, sow);
 
                 vx = vmulq_n_u32(vx, 256 - xap);
                 vr = vmulq_n_u32(vr, xap);
@@ -152,11 +152,11 @@ qt_qimageScaleAARGBA_down_x_up_y_neon(QImageScaleInfo *isi, unsigned int *dest,
             int xap = xapoints[x] & 0xffff;
 
             const unsigned int *sptr = ypoints[y] + xpoints[x];
-            uint32x4_t vx = qt_qimageScaleAARGBA_helper(sptr, xap, Cx, 1);
+            uint32x4_t vx = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
 
             int yap = yapoints[y];
             if (yap > 0) {
-                uint32x4_t vr = qt_qimageScaleAARGBA_helper(sptr + sow, xap, Cx, 1);
+                uint32x4_t vr = qt_qimageScaleAARGBA_helper_neon(sptr + sow, xap, Cx, 1);
 
                 vx = vmulq_n_u32(vx, 256 - yap);
                 vr = vmulq_n_u32(vr, yap);
@@ -189,11 +189,11 @@ qt_qimageScaleAARGB_down_x_up_y_neon(QImageScaleInfo *isi, unsigned int *dest,
             int xap = xapoints[x] & 0xffff;
 
             const unsigned int *sptr = ypoints[y] + xpoints[x];
-            uint32x4_t vx = qt_qimageScaleAARGBA_helper(sptr, xap, Cx, 1);
+            uint32x4_t vx = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
 
             int yap = yapoints[y];
             if (yap > 0) {
-                uint32x4_t vr = qt_qimageScaleAARGBA_helper(sptr + sow, xap, Cx, 1);
+                uint32x4_t vr = qt_qimageScaleAARGBA_helper_neon(sptr + sow, xap, Cx, 1);
 
                 vx = vmulq_n_u32(vx, 256 - yap);
                 vr = vmulq_n_u32(vr, yap);
@@ -229,20 +229,20 @@ qt_qimageScaleAARGBA_down_xy_neon(QImageScaleInfo *isi, unsigned int *dest,
             const int xap = xapoints[x] & 0xffff;
 
             const unsigned int *sptr = ypoints[y] + xpoints[x];
-            uint32x4_t vx = qt_qimageScaleAARGBA_helper(sptr, xap, Cx, 1);
+            uint32x4_t vx = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
             vx = vshrq_n_u32(vx, 4);
             uint32x4_t vr = vmulq_n_u32(vx, yap);
 
             int j;
             for (j = (1 << 14) - yap; j > Cy; j -= Cy) {
                 sptr += sow;
-                vx = qt_qimageScaleAARGBA_helper(sptr, xap, Cx, 1);
+                vx = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
                 vx = vshrq_n_u32(vx, 4);
                 vx = vmulq_n_u32(vx, Cy);
                 vr = vaddq_u32(vr, vx);
             }
             sptr += sow;
-            vx = qt_qimageScaleAARGBA_helper(sptr, xap, Cx, 1);
+            vx = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
             vx = vshrq_n_u32(vx, 4);
             vx = vmulq_n_u32(vx, j);
             vr = vaddq_u32(vr, vx);
@@ -275,20 +275,20 @@ qt_qimageScaleAARGB_down_xy_neon(QImageScaleInfo *isi, unsigned int *dest,
             const int xap = xapoints[x] & 0xffff;
 
             const unsigned int *sptr = ypoints[y] + xpoints[x];
-            uint32x4_t vx = qt_qimageScaleAARGBA_helper(sptr, xap, Cx, 1);
+            uint32x4_t vx = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
             vx = vshrq_n_u32(vx, 4);
             uint32x4_t vr = vmulq_n_u32(vx, yap);
 
             int j;
             for (j = (1 << 14) - yap; j > Cy; j -= Cy) {
                 sptr += sow;
-                vx = qt_qimageScaleAARGBA_helper(sptr, xap, Cx, 1);
+                vx = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
                 vx = vshrq_n_u32(vx, 4);
                 vx = vmulq_n_u32(vx, Cy);
                 vr = vaddq_u32(vr, vx);
             }
             sptr += sow;
-            vx = qt_qimageScaleAARGBA_helper(sptr, xap, Cx, 1);
+            vx = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
             vx = vshrq_n_u32(vx, 4);
             vx = vmulq_n_u32(vx, j);
             vr = vaddq_u32(vr, vx);
