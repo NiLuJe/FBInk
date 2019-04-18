@@ -6300,9 +6300,9 @@ int
 			scaled_height = (unsigned short int) (scaled_width / aspect + 0.5f);
 		}
 
-		LOG("Scaling image from %dx%d to %hdx%hd . . .", w, h, scaled_width, scaled_height);
+		LOG("Scaling image data from %dx%d to %hdx%hd . . .", w, h, scaled_width, scaled_height);
 
-		sdata = qSmoothScaleImage(data, w, h, req_n, fbink_cfg->ignore_alpha, scaled_width, scaled_height);
+		sdata = qSmoothScaleImage(imgdata, w, h, req_n, fbink_cfg->ignore_alpha, scaled_width, scaled_height);
 		if (sdata == NULL) {
 			WARN("Failed to resize image");
 			return ERRCODE(EXIT_FAILURE);
