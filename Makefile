@@ -238,9 +238,7 @@ ifndef MINIMAL
 	endif
 	# NOTE: We can optionally forcibly disable the NEON/SSE4 codepaths in QImageScale!
 	#       Although, generally, the SIMD variants are a bit faster ;).
-	#ifdef CROSS_TC
-	#	EXTRA_CPPFLAGS+=-DFBINK_QIS_NO_SIMD
-	#endif
+	#EXTRA_CPPFLAGS+=-DFBINK_QIS_NO_SIMD
 endif
 
 ##
