@@ -124,7 +124,7 @@ static const unsigned int**
 		dh = -dh;
 		rv = 1;
 	}
-	p = malloc((dh + 1) * sizeof(src));
+	p = malloc((size_t)(dh + 1) * sizeof(src));
 
 	int up = qAbs(dh) >= sh;
 	val    = up ? 0x8000 * sh / dh - 0x8000 : 0;
@@ -154,7 +154,7 @@ static const unsigned char**
 		dh = -dh;
 		rv = 1;
 	}
-	p = malloc((dh + 1) * sizeof(src));
+	p = malloc((size_t)(dh + 1) * sizeof(src));
 
 	int up = qAbs(dh) >= sh;
 	val    = up ? 0x8000 * sh / dh - 0x8000 : 0;
@@ -184,7 +184,7 @@ static const unsigned short**
 		dh = -dh;
 		rv = 1;
 	}
-	p = malloc((dh + 1) * sizeof(src));
+	p = malloc((size_t)(dh + 1) * sizeof(src));
 
 	int up = qAbs(dh) >= sh;
 	val    = up ? 0x8000 * sh / dh - 0x8000 : 0;
@@ -213,13 +213,13 @@ static int*
 		dw = -dw;
 		rv = 1;
 	}
-	p = malloc((dw + 1) * sizeof(int));
+	p = malloc((size_t)(dw + 1) * sizeof(int));
 
 	int up = qAbs(dw) >= sw;
 	val    = up ? 0x8000 * sw / dw - 0x8000 : 0;
 	inc    = (((qint64) sw) << 16) / dw;
 	for (int i = 0; i < dw; i++) {
-		p[j++] = qMax(0LL, val >> 16);
+		p[j++] = (int) qMax(0LL, val >> 16);
 		val += inc;
 	}
 
@@ -242,20 +242,20 @@ static int*
 		rv = 1;
 		d  = -d;
 	}
-	p = malloc(d * sizeof(int));
+	p = malloc((size_t) d * sizeof(int));
 
 	if (up) {
 		/* scaling up */
 		qint64 val = 0x8000 * s / d - 0x8000;
 		qint64 inc = (((qint64) s) << 16) / d;
 		for (int i = 0; i < d; i++) {
-			int pos = val >> 16;
+			int pos = (int) (val >> 16);
 			if (pos < 0)
 				p[j++] = 0;
 			else if (pos >= (s - 1))
 				p[j++] = 0;
 			else
-				p[j++] = (val >> 8) - ((val >> 8) & 0xffffff00);
+				p[j++] = (int) ((val >> 8) - ((val >> 8) & 0xffffff00));
 			val += inc;
 		}
 	} else {
@@ -264,7 +264,7 @@ static int*
 		qint64 inc = (((qint64) s) << 16) / d;
 		int    Cp  = (((d << 14) + s - 1) / s);
 		for (int i = 0; i < d; i++) {
-			int ap = ((0x10000 - (val & 0xffff)) * Cp) >> 16;
+			int ap = (int) (((0x10000 - (val & 0xffff)) * Cp) >> 16);
 			p[j]   = ap | (Cp << 16);
 			j++;
 			val += inc;
@@ -320,13 +320,19 @@ static QImageScaleInfo*
 	switch (sn) {
 		case 4:
 			// sn is 4, as is sizeof(uint32_t), hence using width directly ;).
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
 			isi->ypoints = qimageCalcYPoints((const unsigned int*) img, sw, sh, sch);
+#pragma GCC diagnostic pop
 			if (!isi->ypoints)
 				return qimageFreeScaleInfo(isi);
 			break;
 		case 2:
 			// sn is 2, as is sizeof(unsigned short), hence using width directly ;).
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
 			isi->ypoints_y8a = qimageCalcYPointsY8A((const unsigned short*) img, sw, sh, sch);
+#pragma GCC diagnostic pop
 			if (!isi->ypoints_y8a)
 				return qimageFreeScaleInfo(isi);
 			break;
