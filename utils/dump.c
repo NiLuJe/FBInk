@@ -254,8 +254,22 @@ int
 			goto cleanup;
 		}
 
+		// One more time, with a x2 scaling
+		fbink_cfg.halign = CENTER;
+		fbink_cfg.valign = CENTER;
+		fbink_cfg.scaled_height = (short int) (dump.h * 2U);
+		fbink_cfg.scaled_width = (short int) (dump.w * 2U);
+		fprintf(stdout, "[13] SCALED PRINT RAW\n");
+		if (fbink_print_raw_data(
+			fbfd, dump.data, dump.w, dump.h, dump.size, (short int) dump.x, (short int) dump.y, &fbink_cfg) !=
+		    ERRCODE(EXIT_SUCCESS)) {
+			fprintf(stderr, "Failed to print raw data!\n");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+
 		// Switch back to 32bpp
-		fprintf(stdout, "[13] SWITCH TO 32BPP\n");
+		fprintf(stdout, "[14] SWITCH TO 32BPP\n");
 		if (!set_bpp(fbfd, 32U, &fbink_state)) {
 			fprintf(stderr, "Failed to swap bitdepth, aborting . . .\n");
 			rv = ERRCODE(EXIT_FAILURE);
