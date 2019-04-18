@@ -56,10 +56,10 @@ typedef unsigned int QRgb;
 #define qAlpha(rgb) (rgb >> 24)
 
 // set RGB value
-#define qRgb(r, g, b) ((0xffu << 24) | ((r & 0xffu) << 16) | ((g & 0xffu) << 8) | (b & 0xffu))
+#define qRgb(r, g, b) ((0xff << 24) | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff))
 
 // set RGBA value
-#define qRgba(r, g, b, a) (((a & 0xffu) << 24) | ((r & 0xffu) << 16) | ((g & 0xffu) << 8) | (b & 0xffu))
+#define qRgba(r, g, b, a) (((a & 0xff) << 24) | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff))
 
 // Get gray part of Y8A
 #define qY(y8a) (y8a & 0xff)

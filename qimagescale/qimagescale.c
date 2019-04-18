@@ -596,7 +596,7 @@ static void
 				b = (b + (bb * xap)) >> 8;
 				a = (a + (aa * xap)) >> 8;
 			}
-			*dptr++ = qRgba(r >> 14, g >> 14, b >> 14, a >> 14);
+			*dptr++ = (unsigned int) qRgba(r >> 14, g >> 14, b >> 14, a >> 14);
 		}
 	}
 }
@@ -636,7 +636,7 @@ static void
 				b = (b + (bb * yap)) >> 8;
 				a = (a + (aa * yap)) >> 8;
 			}
-			*dptr = qRgba(r >> 14, g >> 14, b >> 14, a >> 14);
+			*dptr = (unsigned int) qRgba(r >> 14, g >> 14, b >> 14, a >> 14);
 			dptr++;
 		}
 	}
@@ -687,7 +687,7 @@ static void
 			b += ((bx >> 4) * j);
 			a += ((ax >> 4) * j);
 
-			*dptr = qRgba(r >> 24, g >> 24, b >> 24, a >> 24);
+			*dptr = (unsigned int) qRgba(r >> 24, g >> 24, b >> 24, a >> 24);
 			dptr++;
 		}
 	}
@@ -805,7 +805,7 @@ static void
 				g = (g + (gg * xap)) >> 8;
 				b = (b + (bb * xap)) >> 8;
 			}
-			*dptr++ = qRgb(r >> 14, g >> 14, b >> 14);
+			*dptr++ = (unsigned int) qRgb(r >> 14, g >> 14, b >> 14);
 		}
 	}
 }
@@ -843,7 +843,7 @@ static void
 				g = (g + (gg * yap)) >> 8;
 				b = (b + (bb * yap)) >> 8;
 			}
-			*dptr++ = qRgb(r >> 14, g >> 14, b >> 14);
+			*dptr++ = (unsigned int) qRgb(r >> 14, g >> 14, b >> 14);
 		}
 	}
 }
@@ -891,7 +891,7 @@ static void
 			g += (gx >> 4) * j;
 			b += (bx >> 4) * j;
 
-			*dptr = qRgb(r >> 24, g >> 24, b >> 24);
+			*dptr = (unsigned int) qRgb(r >> 24, g >> 24, b >> 24);
 			dptr++;
 		}
 	}
