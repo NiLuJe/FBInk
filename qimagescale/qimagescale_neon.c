@@ -46,18 +46,18 @@ inline static uint32x4_t
 {
 	uint32x2_t vpix32 = vmov_n_u32(*pix);
 	uint16x4_t vpix16 = vget_low_u16(vmovl_u8(vreinterpret_u8_u32(vpix32)));
-	uint32x4_t vx     = vmull_n_u16(vpix16, xyap);
+	uint32x4_t vx     = vmull_n_u16(vpix16, (uint16_t) xyap);
 	int        i;
 	for (i = (1 << 14) - xyap; i > Cxy; i -= Cxy) {
 		pix += step;
 		vpix32 = vmov_n_u32(*pix);
 		vpix16 = vget_low_u16(vmovl_u8(vreinterpret_u8_u32(vpix32)));
-		vx     = vaddq_u32(vx, vmull_n_u16(vpix16, Cxy));
+		vx     = vaddq_u32(vx, vmull_n_u16(vpix16, (uint16_t) Cxy));
 	}
 	pix += step;
 	vpix32 = vmov_n_u32(*pix);
 	vpix16 = vget_low_u16(vmovl_u8(vreinterpret_u8_u32(vpix32)));
-	vx     = vaddq_u32(vx, vmull_n_u16(vpix16, i));
+	vx     = vaddq_u32(vx, vmull_n_u16(vpix16, (uint16_t) i));
 	return vx;
 }
 
@@ -83,8 +83,8 @@ inline static void
 			if (xap > 0) {
 				uint32x4_t vr = qt_qimageScaleAARGBA_helper_neon(sptr + 1, yap, Cy, sow);
 
-				vx = vmulq_n_u32(vx, 256 - xap);
-				vr = vmulq_n_u32(vr, xap);
+				vx = vmulq_n_u32(vx, (uint32_t)(256 - xap));
+				vr = vmulq_n_u32(vr, (uint32_t) xap);
 				vx = vaddq_u32(vx, vr);
 				vx = vshrq_n_u32(vx, 8);
 			}
@@ -119,8 +119,8 @@ inline static void
 			if (xap > 0) {
 				uint32x4_t vr = qt_qimageScaleAARGBA_helper_neon(sptr + 1, yap, Cy, sow);
 
-				vx = vmulq_n_u32(vx, 256 - xap);
-				vr = vmulq_n_u32(vr, xap);
+				vx = vmulq_n_u32(vx, (uint32_t)(256 - xap));
+				vr = vmulq_n_u32(vr, (uint32_t) xap);
 				vx = vaddq_u32(vx, vr);
 				vx = vshrq_n_u32(vx, 8);
 			}
@@ -156,8 +156,8 @@ inline static void
 			if (yap > 0) {
 				uint32x4_t vr = qt_qimageScaleAARGBA_helper_neon(sptr + sow, xap, Cx, 1);
 
-				vx = vmulq_n_u32(vx, 256 - yap);
-				vr = vmulq_n_u32(vr, yap);
+				vx = vmulq_n_u32(vx, (uint32_t)(256 - yap));
+				vr = vmulq_n_u32(vr, (uint32_t) yap);
 				vx = vaddq_u32(vx, vr);
 				vx = vshrq_n_u32(vx, 8);
 			}
@@ -192,8 +192,8 @@ inline static void
 			if (yap > 0) {
 				uint32x4_t vr = qt_qimageScaleAARGBA_helper_neon(sptr + sow, xap, Cx, 1);
 
-				vx = vmulq_n_u32(vx, 256 - yap);
-				vr = vmulq_n_u32(vr, yap);
+				vx = vmulq_n_u32(vx, (uint32_t)(256 - yap));
+				vr = vmulq_n_u32(vr, (uint32_t) yap);
 				vx = vaddq_u32(vx, vr);
 				vx = vshrq_n_u32(vx, 8);
 			}
@@ -227,20 +227,20 @@ inline static void
 			const unsigned int* sptr = ypoints[y] + xpoints[x];
 			uint32x4_t          vx   = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
 			vx                       = vshrq_n_u32(vx, 4);
-			uint32x4_t vr            = vmulq_n_u32(vx, yap);
+			uint32x4_t vr            = vmulq_n_u32(vx, (uint32_t) yap);
 
 			int j;
 			for (j = (1 << 14) - yap; j > Cy; j -= Cy) {
 				sptr += sow;
 				vx = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
 				vx = vshrq_n_u32(vx, 4);
-				vx = vmulq_n_u32(vx, Cy);
+				vx = vmulq_n_u32(vx, (uint32_t) Cy);
 				vr = vaddq_u32(vr, vx);
 			}
 			sptr += sow;
 			vx = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
 			vx = vshrq_n_u32(vx, 4);
-			vx = vmulq_n_u32(vx, j);
+			vx = vmulq_n_u32(vx, (uint32_t) j);
 			vr = vaddq_u32(vr, vx);
 
 			vx                    = vshrq_n_u32(vr, 24);
@@ -272,20 +272,20 @@ inline static void
 			const unsigned int* sptr = ypoints[y] + xpoints[x];
 			uint32x4_t          vx   = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
 			vx                       = vshrq_n_u32(vx, 4);
-			uint32x4_t vr            = vmulq_n_u32(vx, yap);
+			uint32x4_t vr            = vmulq_n_u32(vx, (uint32_t) yap);
 
 			int j;
 			for (j = (1 << 14) - yap; j > Cy; j -= Cy) {
 				sptr += sow;
 				vx = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
 				vx = vshrq_n_u32(vx, 4);
-				vx = vmulq_n_u32(vx, Cy);
+				vx = vmulq_n_u32(vx, (uint32_t) Cy);
 				vr = vaddq_u32(vr, vx);
 			}
 			sptr += sow;
 			vx = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
 			vx = vshrq_n_u32(vx, 4);
-			vx = vmulq_n_u32(vx, j);
+			vx = vmulq_n_u32(vx, (uint32_t) j);
 			vr = vaddq_u32(vr, vx);
 
 			vx                    = vshrq_n_u32(vr, 24);

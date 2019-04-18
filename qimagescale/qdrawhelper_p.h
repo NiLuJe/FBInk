@@ -97,7 +97,7 @@ static inline __attribute__((always_inline)) uchar
 	uint t = x * a + y * b;
 	t >>= 8;
 
-	uint tx = (x >> 8) * a + (y >> 8) * b;
+	uint tx = ((uint)(x >> 8) * a) + ((uint)(y >> 8) * b);
 	tx |= t;
 	return (uchar) tx;
 }
@@ -164,13 +164,13 @@ static inline __attribute__((always_inline)) uint
 {
 	uint16x8_t vt16 = vmovl_u8(vreinterpret_u8_u32(vt32));
 	uint16x8_t vb16 = vmovl_u8(vreinterpret_u8_u32(vb32));
-	vt16            = vmulq_n_u16(vt16, 256 - disty);
-	vt16            = vmlaq_n_u16(vt16, vb16, disty);
+	vt16            = vmulq_n_u16(vt16, (uint16_t)(256 - disty));
+	vt16            = vmlaq_n_u16(vt16, vb16, (uint16_t) disty);
 	vt16            = vshrq_n_u16(vt16, 8);
 	uint16x4_t vl16 = vget_low_u16(vt16);
 	uint16x4_t vr16 = vget_high_u16(vt16);
-	vl16            = vmul_n_u16(vl16, 256 - distx);
-	vl16            = vmla_n_u16(vl16, vr16, distx);
+	vl16            = vmul_n_u16(vl16, (uint16_t)(256 - distx));
+	vl16            = vmla_n_u16(vl16, vr16, (uint16_t) distx);
 	vl16            = vshr_n_u16(vl16, 8);
 	uint8x8_t vr    = vmovn_u16(vcombine_u16(vl16, vl16));
 	return vget_lane_u32(vreinterpret_u32_u8(vr), 0);
