@@ -236,7 +236,7 @@ ifndef MINIMAL
 	else
 		LIBS+=-lm
 	endif
-	# NOTE: We can optionally forcibly disable the NEON codepaths in QImageScale!
+	# NOTE: We can optionally forcibly disable the NEON/SSE4 codepaths in QImageScale!
 	#       Although, generally, the SIMD variants are a bit faster ;).
 	#ifdef CROSS_TC
 	#	EXTRA_CPPFLAGS+=-DFBINK_QIS_NO_SIMD
@@ -291,7 +291,7 @@ default: all
 
 SHAREDLIB_OBJS:=$(LIB_SRCS:%.c=$(OUT_DIR)/shared/%.o)
 UB_SHAREDLIB_OBJS:=$(LIB_UB_SRCS:%.c=$(OUT_DIR)/shared/%.o)
-QT_SHAREDLIB_OBJS:=$(LIB_QT_SRCS:%.cpp=$(OUT_DIR)/shared/%.o)
+QT_SHAREDLIB_OBJS:=$(LIB_QT_SRCS:%.c=$(OUT_DIR)/shared/%.o)
 STATICLIB_OBJS:=$(LIB_SRCS:%.c=$(OUT_DIR)/static/%.o)
 UB_STATICLIB_OBJS:=$(LIB_UB_SRCS:%.c=$(OUT_DIR)/static/%.o)
 QT_STATICLIB_OBJS:=$(LIB_QT_SRCS:%.c=$(OUT_DIR)/static/%.o)
