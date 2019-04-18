@@ -993,6 +993,9 @@ static struct mxcfb_rect
 						if (deviceQuirks.isNTX16bLandscape) {                                    \
 							(*fxpRotateCoords)(&coords);                                     \
 						}                                                                        \
+						if (coords.x >= vInfo.xres || coords.y >= vInfo.yres) {                  \
+							continue;                                                        \
+						}                                                                        \
 						switch (vInfo.bits_per_pixel) {                                          \
 							case 4:                                                          \
 								put_pixel_Gray4(&coords, pxC);                           \
