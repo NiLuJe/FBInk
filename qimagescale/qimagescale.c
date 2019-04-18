@@ -351,11 +351,13 @@ static QImageScaleInfo*
 	return isi;
 }
 
+#if defined(FBINK_QIS_NO_SIMD) || !(defined(__SSE4_1__) || defined(__ARM_NEON__))
 static void qt_qimageScaleAARGBA_up_x_down_y(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow);
 
 static void qt_qimageScaleAARGBA_down_x_up_y(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow);
 
 static void qt_qimageScaleAARGBA_down_xy(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow);
+#endif
 
 #ifndef FBINK_QIS_NO_SIMD
 #	if defined(__SSE4_1__)
@@ -551,6 +553,7 @@ inline static void
 	*a += qAlpha(*pix) * j;
 }
 
+#if defined(FBINK_QIS_NO_SIMD) || !(defined(__SSE4_1__) || defined(__ARM_NEON__))
 static void
     qt_qimageScaleAARGBA_up_x_down_y(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
 {
@@ -588,7 +591,9 @@ static void
 		}
 	}
 }
+#endif
 
+#if defined(FBINK_QIS_NO_SIMD) || !(defined(__SSE4_1__) || defined(__ARM_NEON__))
 static void
     qt_qimageScaleAARGBA_down_x_up_y(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
 {
@@ -627,7 +632,9 @@ static void
 		}
 	}
 }
+#endif
 
+#if defined(FBINK_QIS_NO_SIMD) || !(defined(__SSE4_1__) || defined(__ARM_NEON__))
 static void
     qt_qimageScaleAARGBA_down_xy(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
 {
@@ -676,12 +683,15 @@ static void
 		}
 	}
 }
+#endif
 
+#if defined(FBINK_QIS_NO_SIMD) || !(defined(__SSE4_1__) || defined(__ARM_NEON__))
 static void qt_qimageScaleAARGB_up_x_down_y(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow);
 
 static void qt_qimageScaleAARGB_down_x_up_y(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow);
 
 static void qt_qimageScaleAARGB_down_xy(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow);
+#endif
 
 /* scale by area sampling - IGNORE the ALPHA byte*/
 static void
@@ -754,6 +764,7 @@ inline static void
 	*b += qBlue(*pix) * j;
 }
 
+#if defined(FBINK_QIS_NO_SIMD) || !(defined(__SSE4_1__) || defined(__ARM_NEON__))
 static void
     qt_qimageScaleAARGB_up_x_down_y(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
 {
@@ -789,7 +800,9 @@ static void
 		}
 	}
 }
+#endif
 
+#if defined(FBINK_QIS_NO_SIMD) || !(defined(__SSE4_1__) || defined(__ARM_NEON__))
 static void
     qt_qimageScaleAARGB_down_x_up_y(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
 {
@@ -825,7 +838,9 @@ static void
 		}
 	}
 }
+#endif
 
+#if defined(FBINK_QIS_NO_SIMD) || !(defined(__SSE4_1__) || defined(__ARM_NEON__))
 static void
     qt_qimageScaleAARGB_down_xy(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
 {
@@ -872,6 +887,7 @@ static void
 		}
 	}
 }
+#endif
 
 inline static void
     qt_qimageScaleAAY8_helper(const unsigned char* pix, int xyap, int Cxy, int step, int* v)
