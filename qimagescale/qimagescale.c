@@ -1045,7 +1045,7 @@ static void
 	}
 }
 
-void
+static void
     qt_qimageScaleAAY8(QImageScaleInfo* isi, unsigned char* dest, int dw, int dh, int dow, int sow)
 {
 	if (isi->xup_yup == 3)
@@ -1227,7 +1227,7 @@ static void
 	}
 }
 
-void
+static void
     qt_qimageScaleAAY8A(QImageScaleInfo* isi, unsigned short* dest, int dw, int dh, int dow, int sow)
 {
 	if (isi->xup_yup == 3)
@@ -1256,7 +1256,7 @@ unsigned char*
 	//       c.f., comments below.
 	// SSE/NEON friendly alignment, just in case...
 	void* ptr;
-	if (posix_memalign(&ptr, 16, dw * dh * sn) != 0) {
+	if (posix_memalign(&ptr, 16, (size_t)(dw * dh * sn)) != 0) {
 		fprintf(stderr, "qSmoothScaleImage: out of memory, returning null!\n");
 		qimageFreeScaleInfo(scaleinfo);
 		return NULL;
@@ -1273,13 +1273,22 @@ unsigned char*
 		case 4:
 			if (ignore_alpha) {
 				// NOTE: Input buffer is still 32bpp, we just skip *processing* of the alpha channel.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
 				qt_qimageScaleAARGB(scaleinfo, (unsigned int*) buffer, dw, dh, dw, sw);
+#pragma GCC diagnostic pop
 			} else {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
 				qt_qimageScaleAARGBA(scaleinfo, (unsigned int*) buffer, dw, dh, dw, sw);
+#pragma GCC diagnostic pop
 			}
 			break;
 		case 2:
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
 			qt_qimageScaleAAY8A(scaleinfo, (unsigned short*) buffer, dw, dh, dw, sw);
+#pragma GCC diagnostic pop
 			break;
 		case 1:
 			qt_qimageScaleAAY8(scaleinfo, (unsigned char*) buffer, dw, dh, dw, sw);
