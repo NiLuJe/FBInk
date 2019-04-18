@@ -6041,9 +6041,7 @@ int
     fbink_print_image(int fbfd    UNUSED_BY_MINIMAL,
 		      const char* filename UNUSED_BY_MINIMAL,
 		      short int x_off UNUSED_BY_MINIMAL,
-		      short int y_off UNUSED_BY_MINIMAL,
-		      short int scaled_width UNUSED_BY_MINIMAL,
-		      short int scaled_height UNUSED_BY_MINIMAL,
+		      short int y_off    UNUSED_BY_MINIMAL,
 		      const FBInkConfig* restrict fbink_cfg UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_IMAGE
@@ -6075,17 +6073,20 @@ int
 	}
 
 	// Was scaling requested?
-	bool want_scaling = false;
-	if (scaled_width != 0 || scaled_height != 0) {
+	bool               want_scaling = false;
+	unsigned short int scaled_width = fbink_cfg->scaled_width > 0 ? (unsigned short int) fbink_cfg->scaled_width : 0;
+	unsigned short int scaled_height =
+	    fbink_cfg->scaled_height > 0 ? (unsigned short int) fbink_cfg->scaled_height : 0;
+	if (fbink_cfg->scaled_width != 0 || fbink_cfg->scaled_height != 0) {
 		LOG("Image scaling requested!");
 		want_scaling = true;
 
 		// Set to viewport dimensions if requested...
-		if (scaled_width == -1) {
-			scaled_width = (short int) viewWidth;
+		if (fbink_cfg->scaled_width == -1) {
+			scaled_width = (unsigned short int) viewWidth;
 		}
-		if (scaled_height == -1) {
-			scaled_height = (short int) viewHeight;
+		if (fbink_cfg->scaled_height == -1) {
+			scaled_height = (unsigned short int) viewHeight;
 		}
 
 		// NOTE: QImageScale only accepts Y8, Y8A and RGBA input (i.e., RGBA, or RGB stored @ 32bpp, with 8 unused bits).
@@ -6116,29 +6117,29 @@ int
 	// Scale it w/ QImageScale, if requested
 	if (want_scaling) {
 		// NOTE: Handle AR if scaling was requested on one side only...
-		if (scaled_width < -1 || scaled_height < -1) {
+		if (fbink_cfg->scaled_width < -1 || fbink_cfg->scaled_height < -1) {
 			float aspect = (float) w / (float) h;
 			if (w > h) {
-				scaled_width  = (short int) viewWidth;
-				scaled_height = (short int) (scaled_width / aspect + 0.5f);
-				if (scaled_height > (short int) viewHeight) {
-					scaled_height = (short int) viewHeight;
-					scaled_width  = (short int) (scaled_height * aspect + 0.5f);
+				scaled_width  = (unsigned short int) viewWidth;
+				scaled_height = (unsigned short int) (scaled_width / aspect + 0.5f);
+				if (scaled_height > viewHeight) {
+					scaled_height = (unsigned short int) viewHeight;
+					scaled_width  = (unsigned short int) (scaled_height * aspect + 0.5f);
 				}
 			} else {
-				scaled_height = (short int) viewHeight;
-				scaled_width  = (short int) (scaled_height * aspect + 0.5f);
-				if (scaled_width > (short int) viewWidth) {
-					scaled_width  = (short int) viewWidth;
-					scaled_height = (short int) (scaled_width / aspect + 0.5f);
+				scaled_height = (unsigned short int) viewHeight;
+				scaled_width  = (unsigned short int) (scaled_height * aspect + 0.5f);
+				if (scaled_width > viewWidth) {
+					scaled_width  = (unsigned short int) viewWidth;
+					scaled_height = (unsigned short int) (scaled_width / aspect + 0.5f);
 				}
 			}
-		} else if (scaled_width == 0 && scaled_height != 0) {
+		} else if (fbink_cfg->scaled_width == 0 && fbink_cfg->scaled_height != 0) {
 			float aspect = (float) w / (float) h;
-			scaled_width = (short int) (scaled_height * aspect + 0.5f);
-		} else if (scaled_width != 0 && scaled_height == 0) {
+			scaled_width = (unsigned short int) (scaled_height * aspect + 0.5f);
+		} else if (fbink_cfg->scaled_width != 0 && fbink_cfg->scaled_height == 0) {
 			float aspect  = (float) w / (float) h;
-			scaled_height = (short int) (scaled_width / aspect + 0.5f);
+			scaled_height = (unsigned short int) (scaled_width / aspect + 0.5f);
 		}
 
 		LOG("Scaling image from %dx%d to %hdx%hd . . .", w, h, scaled_width, scaled_height);

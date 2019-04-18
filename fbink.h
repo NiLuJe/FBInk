@@ -242,13 +242,19 @@ typedef struct
 	uint8_t
 		halign;    // Horizontal alignment of images/dumps (NONE/LEFT, CENTER, EDGE/RIGHT; c.f., ALIGN_INDEX_T enum)
 	uint8_t valign;    // Vertical alignment of images/dumps (NONE/TOP, CENTER, EDGE/BOTTOM; c.f., ALIGN_INDEX_T enum)
-	uint8_t wfm_mode;        // Request a specific waveform mode (c.f., WFM_MODE_INDEX_T enum; defaults to AUTO)
-	bool    is_dithered;     // Request (ordered) hardware dithering (if supported).
-	bool    sw_dithering;    // Request (ordered) *software* dithering when printing an image.
-				 // This is *NOT* mutually exclusive with is_dithered!
-	bool is_nightmode;       // Request hardware inversion (if supported/safe).
-				 // This is *NOT* mutually exclusive with is_inverted!
-	bool no_refresh;         // Skip actually refreshing the eInk screen (useful when drawing in batch)
+	short int scaled_width;     // Output scaling of images/dumps (0 for no scaling, -1 for viewport width)
+	short int scaled_height;    // Output scaling of images/dumps (0 for no scaling, -1 for viewport height)
+				    // If only *one* of them is left at 0, the image's aspect ratio will be honored.
+				    // If *either* of them is set to < -1, fit to screen while respecting AR.
+				    // NOTE: Scaling is inherently costly. I highly recommend not relying on it,
+				    //       preferring instead proper preprocessing of your input images.
+	uint8_t wfm_mode;           // Request a specific waveform mode (c.f., WFM_MODE_INDEX_T enum; defaults to AUTO)
+	bool    is_dithered;        // Request (ordered) hardware dithering (if supported).
+	bool    sw_dithering;       // Request (ordered) *software* dithering when printing an image.
+				    // This is *NOT* mutually exclusive with is_dithered!
+	bool is_nightmode;          // Request hardware inversion (if supported/safe).
+				    // This is *NOT* mutually exclusive with is_inverted!
+	bool no_refresh;            // Skip actually refreshing the eInk screen (useful when drawing in batch)
 } FBInkConfig;
 
 typedef struct
@@ -484,8 +490,6 @@ FBINK_API int fbink_print_image(int                fbfd,
 				const char*        filename,
 				short int          x_off,
 				short int          y_off,
-				short int          scaled_width,
-				short int          scaled_height,
 				const FBInkConfig* restrict fbink_cfg);
 
 // Print raw scanlines on screen
@@ -501,15 +505,7 @@ FBINK_API int fbink_print_image(int                fbfd,
 //				do not pass a padded length (or pad the data itself in any way)!
 // x_off:		Target coordinates, x (honors negative offsets)
 // y_off:		Target coordinates, y (honors negative offsets)
-// scaled_width:        Request scaling to the specified width, or to the viewport's width if set to -1
-// scaled_height:	Request scaling to the specified height, or to the viewport's height if set to -1
 // fbink_cfg:		Pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
-// NOTE: If both scaled_width & scaled_height are set to 0, no scaling is done.
-//       If only *one* of them is set to 0, the aspect ratio will be honored based on the requested dimension of the other side.
-//       If either of them is set to something < -1, the image will be downscaled/upscaled to the largest possible dimensions,
-//       while still fitting on screen, and while still honoring aspect ratio.
-// NOTE: Scaling is inherently costly. I highly recommend not relying on it,
-//       preferring instead proper preprocessing of your input images.
 // NOTE: While we do accept a various range of input formats (as far as component interleaving is concerned),
 //       our display code only handles a few specific combinations, depending on the target hardware.
 //       To make everyone happy, this will transparently handle the pixel format conversion *as needed*,

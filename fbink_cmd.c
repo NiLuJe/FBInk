@@ -481,8 +481,6 @@ int
 	char*     image_file     = NULL;
 	short int image_x_offset = 0;
 	short int image_y_offset = 0;
-	short int image_scaled_w = 0;
-	short int image_scaled_h = 0;
 	bool      is_image       = false;
 	bool      is_eval        = false;
 	bool      is_interactive = false;
@@ -822,7 +820,7 @@ int
 							if (strtol_hi(opt,
 								      image_token[SCALED_WIDTH_OPT],
 								      value,
-								      &image_scaled_w) < 0) {
+								      &fbink_cfg.scaled_width) < 0) {
 								errfnd = true;
 							}
 							break;
@@ -837,7 +835,7 @@ int
 							if (strtol_hi(opt,
 								      image_token[SCALED_HEIGHT_OPT],
 								      value,
-								      &image_scaled_h) < 0) {
+								      &fbink_cfg.scaled_height) < 0) {
 								errfnd = true;
 							}
 							break;
@@ -1371,8 +1369,8 @@ int
 				    image_x_offset,
 				    fbink_cfg.row,
 				    image_y_offset,
-				    image_scaled_w,
-				    image_scaled_h,
+				    fbink_cfg.scaled_width,
+				    fbink_cfg.scaled_height,
 				    fbink_cfg.halign,
 				    fbink_cfg.valign,
 				    fbink_cfg.is_inverted ? "Y" : "N",
@@ -1383,13 +1381,8 @@ int
 				    fbink_cfg.is_nightmode ? "Y" : "N",
 				    fbink_cfg.no_refresh ? "Y" : "N");
 			}
-			if (fbink_print_image(fbfd,
-					      image_file,
-					      image_x_offset,
-					      image_y_offset,
-					      image_scaled_w,
-					      image_scaled_h,
-					      &fbink_cfg) != EXIT_SUCCESS) {
+			if (fbink_print_image(fbfd, image_file, image_x_offset, image_y_offset, &fbink_cfg) !=
+			    EXIT_SUCCESS) {
 				fprintf(stderr, "Failed to display that image!\n");
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
