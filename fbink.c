@@ -989,7 +989,27 @@ static struct mxcfb_rect
 					for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {                                   \
 						coords.x = (unsigned short int) (cx + k);                                \
 						coords.y = (unsigned short int) (cy + l);                                \
-						put_pixel(coords, pxC);                                                  \
+						/* Right now, fxpRotateCoords is only NOP when !isNTX16bLandscape */     \
+						if (deviceQuirks.isNTX16bLandscape) {                                    \
+							(*fxpRotateCoords)(&coords);                                     \
+						}                                                                        \
+						switch (vInfo.bits_per_pixel) {                                          \
+							case 4:                                                          \
+								put_pixel_Gray4(&coords, pxC);                           \
+								break;                                                   \
+							case 8:                                                          \
+								put_pixel_Gray8(&coords, pxC);                           \
+								break;                                                   \
+							case 16:                                                         \
+								put_pixel_RGB565(&coords, pxC);                          \
+								break;                                                   \
+							case 24:                                                         \
+								put_pixel_RGB24(&coords, pxC);                           \
+								break;                                                   \
+							case 32:                                                         \
+								put_pixel_RGB32(&coords, pxC);                           \
+								break;                                                   \
+						}                                                                        \
 					}                                                                                \
 				}                                                                                        \
 			}                                                                                                \
