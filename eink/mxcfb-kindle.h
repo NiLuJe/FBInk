@@ -272,7 +272,7 @@ struct mxcfb_update_data_koa2 {
 };
 
 /* PW4... Guess what? :D */
-struct mxcfb_update_data_pw4 {
+struct mxcfb_update_data_rex {
 	struct mxcfb_rect update_region;
 	__u32 waveform_mode;
 	__u32 update_mode;
@@ -390,7 +390,7 @@ struct mxcfb_csc_matrix {
 #define MXCFB_SEND_UPDATE_KOA2			_IOW('F', 0x2E, struct mxcfb_update_data_koa2)
 
 /* PW4, same dealio... */
-#define MXCFB_SEND_UPDATE_PW4			_IOW('F', 0x2E, struct mxcfb_update_data_pw4)
+#define MXCFB_SEND_UPDATE_REX			_IOW('F', 0x2E, struct mxcfb_update_data_rex)
 
 
 /* This evolved on the PW2... Rename the Touch/PW1 constant to differentiate the two. */
@@ -437,7 +437,7 @@ struct mxcfb_csc_matrix {
 /* Use same steps as Cognac */
 #define NIGHTMODE_STRIDE_DEFAULT 16  /*default*/
 /* PW4 */
-#define NIGHTMODE_STRIDE_DEFAULT_PW4 138  /*default*/
+#define NIGHTMODE_STRIDE_DEFAULT_REX 138  /*default*/
 struct mxcfb_nightmode_ctrl {
 	int disable; /*1: disable; 0, enable */
 	int start; /* reduced to level for gck16 */

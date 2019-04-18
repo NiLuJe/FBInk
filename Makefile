@@ -6,12 +6,14 @@
 #       i.e., source ~SVN/Configs/trunk/Kindle/Misc/x-compile.sh kobo env bare
 ifdef CROSS_TC
 	CC=$(CROSS_TC)-gcc
+	CXX=$(CROSS_TC)-g++
 	STRIP=$(CROSS_TC)-strip
 	# NOTE: This relies on GCC plugins! Enforce AR & RANLIB to point to their real binary and not the GCC wrappers if your TC doesn't support that!
 	AR=$(CROSS_TC)-gcc-ar
 	RANLIB=$(CROSS_TC)-gcc-ranlib
 else
 	CC?=gcc
+	CXX?=g++
 	STRIP?=strip
 	AR?=gcc-ar
 	RANLIB?=gcc-ranlib
@@ -24,10 +26,12 @@ OPT_CFLAGS=-O2 -fomit-frame-pointer -pipe
 ifdef DEBUG
 	OUT_DIR=Debug
 	CFLAGS?=$(DEBUG_CFLAGS)
+	CXXFLAGS?=$(DEBUG_CFLAGS)
 	EXTRA_CPPFLAGS+=-DDEBUG
 else
 	OUT_DIR=Release
 	CFLAGS?=$(OPT_CFLAGS)
+	CXXFLAGS?=$(OPT_CFLAGS)
 	EXTRA_CPPFLAGS+=-DNDEBUG
 endif
 
@@ -232,6 +236,11 @@ ifndef MINIMAL
 	else
 		LIBS+=-lm
 	endif
+	# NOTE: We can optionally forcibly disable the NEON/SSE4 codepaths in QImageScale!
+	#       Although, generally, the SIMD variants are a bit faster ;).
+	#ifdef CROSS_TC
+	#	EXTRA_CPPFLAGS+=-DFBINK_QIS_NO_SIMD
+	#endif
 endif
 
 ##
@@ -240,8 +249,10 @@ LIB_SRCS=fbink.c cutef8/utf8.c cutef8/dfa.c
 # Jump through a few hoops to set a few libunibreak-specific CFLAGS to silence some warnings...
 ifdef MINIMAL
 	LIB_UB_SRCS=
+	LIB_QT_SRCS=
 else
 	LIB_UB_SRCS=libunibreak/src/linebreak.c libunibreak/src/linebreakdata.c libunibreak/src/unibreakdef.c libunibreak/src/linebreakdef.c
+	LIB_QT_SRCS=qimagescale/qimagescale.c
 endif
 CMD_SRCS=fbink_cmd.c
 BTN_SRCS=button_scan_cmd.c
@@ -280,8 +291,10 @@ default: all
 
 SHAREDLIB_OBJS:=$(LIB_SRCS:%.c=$(OUT_DIR)/shared/%.o)
 UB_SHAREDLIB_OBJS:=$(LIB_UB_SRCS:%.c=$(OUT_DIR)/shared/%.o)
+QT_SHAREDLIB_OBJS:=$(LIB_QT_SRCS:%.c=$(OUT_DIR)/shared/%.o)
 STATICLIB_OBJS:=$(LIB_SRCS:%.c=$(OUT_DIR)/static/%.o)
 UB_STATICLIB_OBJS:=$(LIB_UB_SRCS:%.c=$(OUT_DIR)/static/%.o)
+QT_STATICLIB_OBJS:=$(LIB_QT_SRCS:%.c=$(OUT_DIR)/static/%.o)
 CMD_OBJS:=$(CMD_SRCS:%.c=$(OUT_DIR)/%.o)
 BTN_OBJS:=$(BTN_SRCS:%.c=$(OUT_DIR)/%.o)
 
@@ -304,7 +317,7 @@ $(OUT_DIR)/%.o: %.c
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) -o $@ -c $<
 
 outdir:
-	mkdir -p $(OUT_DIR)/shared/cutef8 $(OUT_DIR)/static/cutef8 $(OUT_DIR)/shared/libunibreak/src $(OUT_DIR)/static/libunibreak/src
+	mkdir -p $(OUT_DIR)/shared/cutef8 $(OUT_DIR)/static/cutef8 $(OUT_DIR)/shared/libunibreak/src $(OUT_DIR)/static/libunibreak/src $(OUT_DIR)/shared/qimagescale $(OUT_DIR)/static/qimagescale
 
 all: outdir static
 
@@ -318,12 +331,12 @@ sharedlib: outdir libunibreak.built $(SHAREDLIB_OBJS)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME_VER)
 else
-staticlib: outdir $(STATICLIB_OBJS) $(UB_STATICLIB_OBJS)
-	$(AR) $(FBINK_STATIC_FLAGS) $(OUT_DIR)/$(FBINK_STATIC_NAME) $(STATICLIB_OBJS) $(UB_STATICLIB_OBJS)
+staticlib: outdir $(STATICLIB_OBJS) $(UB_STATICLIB_OBJS) $(QT_STATICLIB_OBJS)
+	$(AR) $(FBINK_STATIC_FLAGS) $(OUT_DIR)/$(FBINK_STATIC_NAME) $(STATICLIB_OBJS) $(UB_STATICLIB_OBJS) $(QT_STATICLIB_OBJS)
 	$(RANLIB) $(OUT_DIR)/$(FBINK_STATIC_NAME)
 
-sharedlib: outdir $(SHAREDLIB_OBJS) $(UB_SHAREDLIB_OBJS)
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(SHAREDLIB_OBJS) $(UB_SHAREDLIB_OBJS)
+sharedlib: outdir $(SHAREDLIB_OBJS) $(UB_SHAREDLIB_OBJS) $(QT_SHAREDLIB_OBJS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(SHAREDLIB_OBJS) $(UB_SHAREDLIB_OBJS) $(QT_SHAREDLIB_OBJS)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME_VER)
 endif
@@ -467,10 +480,12 @@ clean:
 	rm -rf Release/shared/*.o
 	rm -rf Release/shared/cutef8/*.o
 	rm -rf Release/shared/libunibreak/src/*.o
+	rm -rf Release/shared/qimagescale/*.o
 	rm -rf Release/shared/utf8
 	rm -rf Release/static/*.o
 	rm -rf Release/static/cutef8/*.o
 	rm -rf Release/static/libunibreak/src/*.o
+	rm -rf Release/static/qimagescale/*.o
 	rm -rf Release/static/utf8
 	rm -rf Release/*.o
 	rm -rf Release/fbink
@@ -483,10 +498,12 @@ clean:
 	rm -rf Debug/shared/*.o
 	rm -rf Debug/shared/cutef8/*.o
 	rm -rf Debug/shared/libunibreak/src/*.o
+	rm -rf Debug/shared/qimagescale/*.o
 	rm -rf Debug/shared/utf8
 	rm -rf Debug/static/*.o
 	rm -rf Debug/static/cutef8/*.o
 	rm -rf Debug/static/libunibreak/src/*.o
+	rm -rf Debug/static/qimagescale/*.o
 	rm -rf Debug/static/utf8
 	rm -rf Debug/*.o
 	rm -rf Debug/fbink

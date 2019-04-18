@@ -160,6 +160,7 @@ typedef enum
 	WFM_GL16_INV,
 	WFM_GCK16,
 	WFM_GLKW16,
+	WFM_INIT,
 } WFM_MODE_INDEX_T;
 
 // List of *potentially* available HW dithering modes
@@ -241,13 +242,19 @@ typedef struct
 	uint8_t
 		halign;    // Horizontal alignment of images/dumps (NONE/LEFT, CENTER, EDGE/RIGHT; c.f., ALIGN_INDEX_T enum)
 	uint8_t valign;    // Vertical alignment of images/dumps (NONE/TOP, CENTER, EDGE/BOTTOM; c.f., ALIGN_INDEX_T enum)
-	uint8_t wfm_mode;        // Request a specific waveform mode (c.f., WFM_MODE_INDEX_T enum; defaults to AUTO)
-	bool    is_dithered;     // Request (ordered) hardware dithering (if supported).
-	bool    sw_dithering;    // Request (ordered) *software* dithering when printing an image.
-				 // This is *NOT* mutually exclusive with is_dithered!
-	bool is_nightmode;       // Request hardware inversion (if supported/safe).
-				 // This is *NOT* mutually exclusive with is_inverted!
-	bool no_refresh;         // Skip actually refreshing the eInk screen (useful when drawing in batch)
+	short int scaled_width;     // Output width of images/dumps (0 for no scaling, -1 for viewport width)
+	short int scaled_height;    // Output height of images/dumps (0 for no scaling, -1 for viewport height)
+				    // If only *one* of them is left at 0, the image's aspect ratio will be honored.
+				    // If *either* of them is set to < -1, fit to screen while respecting AR.
+				    // NOTE: Scaling is inherently costly. I highly recommend not relying on it,
+				    //       preferring instead proper preprocessing of your input images.
+	uint8_t wfm_mode;           // Request a specific waveform mode (c.f., WFM_MODE_INDEX_T enum; defaults to AUTO)
+	bool    is_dithered;        // Request (ordered) hardware dithering (if supported).
+	bool    sw_dithering;       // Request (ordered) *software* dithering when printing an image.
+				    // This is *NOT* mutually exclusive with is_dithered!
+	bool is_nightmode;          // Request hardware inversion (if supported/safe).
+				    // This is *NOT* mutually exclusive with is_inverted!
+	bool no_refresh;            // Skip actually refreshing the eInk screen (useful when drawing in batch)
 } FBInkConfig;
 
 typedef struct
@@ -399,7 +406,7 @@ FBINK_API int fbink_printf(int                  fbfd,
 // region_height:	height field of an mxcfb rectangle
 // dithering_mode:	dithering mode (i.e., HWD_ORDERED, c.f., HW_DITHER_INDEX_T enum)
 //			NOTE: Only supported on devices with a recent EPDC (>= v2)!
-//			      For Kindle, that's everything since the KOA2 (KOA2, PW4),
+//			      For Kindle, that's everything since the KOA2 (KOA2, PW4, KT4),
 //			      For Kobo, that's everything since Mk.7,
 //			NOTE: Your device may not support anything other than PASSTHROUGH & ORDERED!
 // fbink_cfg:		Pointer to an FBInkConfig struct. Honors wfm_mode, is_nightmode, is_flashing

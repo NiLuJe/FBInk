@@ -434,7 +434,7 @@ static long int jiffies_to_ms(long int);
 static int refresh_legacy(int, const struct mxcfb_rect, bool);
 static int refresh_kindle(int, const struct mxcfb_rect, uint32_t, uint32_t, bool, uint32_t);
 static int refresh_kindle_koa2(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
-static int refresh_kindle_pw4(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
+static int refresh_kindle_rex(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
 #	elif defined(FBINK_FOR_CERVANTES)
 static int refresh_cervantes(int, const struct mxcfb_rect, uint32_t, uint32_t, bool, uint32_t);
 #	else
@@ -463,6 +463,8 @@ static void fullscreen_region(struct mxcfb_rect* restrict);
 int draw_progress_bars(int, bool, uint8_t, const FBInkConfig* restrict);
 
 #ifdef FBINK_WITH_IMAGE
+unsigned char* qSmoothScaleImage(const unsigned char* src, int sw, int sh, int sn, bool ignore_alpha, int dw, int dh);
+
 static unsigned char* img_load_from_file(const char*, int*, int*, int*, int);
 static unsigned char* img_convert_px_format(const unsigned char*, int, int, int, int);
 static uint8_t        dither_o8x8(unsigned short int, unsigned short int, uint8_t);
