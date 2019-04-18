@@ -921,9 +921,11 @@ static void
 				const unsigned char* pix = sptr + xpoints[x];
 				const int            xap = xapoints[x];
 				if (xap > 0)
-					*dptr = interpolate_4_8bpp_pixels_arr(pix, pix + sow, xap, yap);
+					*dptr = interpolate_4_8bpp_pixels_arr(
+					    pix, pix + sow, (unsigned int) xap, (unsigned int) yap);
 				else
-					*dptr = INTERPOLATE_8BPP_PIXEL_256(pix[0], 256 - yap, pix[sow], yap);
+					*dptr = INTERPOLATE_8BPP_PIXEL_256(
+					    pix[0], (unsigned int) (256 - yap), pix[sow], (unsigned int) yap);
 				dptr++;
 			}
 		} else {
@@ -931,7 +933,8 @@ static void
 				const unsigned char* pix = sptr + xpoints[x];
 				const int            xap = xapoints[x];
 				if (xap > 0)
-					*dptr = INTERPOLATE_8BPP_PIXEL_256(pix[0], 256 - xap, pix[1], xap);
+					*dptr = INTERPOLATE_8BPP_PIXEL_256(
+					    pix[0], (unsigned int) (256 - xap), pix[1], (unsigned int) xap);
 				else
 					*dptr = pix[0];
 				dptr++;
@@ -966,7 +969,7 @@ static void
 				v = v * (256 - xap);
 				v = (v + (vv * xap)) >> 8;
 			}
-			*dptr++ = (v >> 14);
+			*dptr++ = (unsigned char) (v >> 14);
 		}
 	}
 }
@@ -998,7 +1001,7 @@ static void
 				v = v * (256 - yap);
 				v = (v + (vv * yap)) >> 8;
 			}
-			*dptr = (v >> 14);
+			*dptr = (unsigned char) (v >> 14);
 			dptr++;
 		}
 	}
@@ -1039,7 +1042,7 @@ static void
 			v += ((vx >> 6) * j);
 
 			v     = DIV255(v >> 14);
-			*dptr = v > 0xFF ? 0xFF : v < 0 ? 0 : v;
+			*dptr = v > 0xFF ? 0xFF : v < 0 ? 0 : (unsigned char) v;
 			dptr++;
 		}
 	}
@@ -1093,9 +1096,11 @@ static void
 				const unsigned short* pix = sptr + xpoints[x];
 				const int             xap = xapoints[x];
 				if (xap > 0)
-					*dptr = interpolate_4_16bpp_pixels_arr(pix, pix + sow, xap, yap);
+					*dptr = interpolate_4_16bpp_pixels_arr(
+					    pix, pix + sow, (unsigned int) xap, (unsigned int) yap);
 				else
-					*dptr = INTERPOLATE_16BPP_PIXEL_256(pix[0], 256 - yap, pix[sow], yap);
+					*dptr = INTERPOLATE_16BPP_PIXEL_256(
+					    pix[0], (unsigned int) (256 - yap), pix[sow], (unsigned int) yap);
 				dptr++;
 			}
 		} else {
@@ -1103,7 +1108,8 @@ static void
 				const unsigned short* pix = sptr + xpoints[x];
 				const int             xap = xapoints[x];
 				if (xap > 0)
-					*dptr = INTERPOLATE_16BPP_PIXEL_256(pix[0], 256 - xap, pix[1], xap);
+					*dptr = INTERPOLATE_16BPP_PIXEL_256(
+					    pix[0], (unsigned int) (256 - xap), pix[1], (unsigned int) xap);
 				else
 					*dptr = pix[0];
 				dptr++;
