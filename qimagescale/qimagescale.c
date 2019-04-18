@@ -460,9 +460,11 @@ static void
 				const unsigned int* pix = sptr + xpoints[x];
 				const int           xap = xapoints[x];
 				if (xap > 0)
-					*dptr = interpolate_4_pixels_arr(pix, pix + sow, xap, yap);
+					*dptr = interpolate_4_pixels_arr(
+					    pix, pix + sow, (unsigned int) xap, (unsigned int) yap);
 				else
-					*dptr = INTERPOLATE_PIXEL_256(pix[0], 256 - yap, pix[sow], yap);
+					*dptr = INTERPOLATE_PIXEL_256(
+					    pix[0], (unsigned int) (256 - yap), pix[sow], (unsigned int) yap);
 				dptr++;
 			}
 		} else {
@@ -470,7 +472,8 @@ static void
 				const unsigned int* pix = sptr + xpoints[x];
 				const int           xap = xapoints[x];
 				if (xap > 0)
-					*dptr = INTERPOLATE_PIXEL_256(pix[0], 256 - xap, pix[1], xap);
+					*dptr = INTERPOLATE_PIXEL_256(
+					    pix[0], (unsigned int) (256 - xap), pix[1], (unsigned int) xap);
 				else
 					*dptr = pix[0];
 				dptr++;
@@ -534,23 +537,23 @@ static void
 inline static void
     qt_qimageScaleAARGBA_helper(const unsigned int* pix, int xyap, int Cxy, int step, int* r, int* g, int* b, int* a)
 {
-	*r = qRed(*pix) * xyap;
-	*g = qGreen(*pix) * xyap;
-	*b = qBlue(*pix) * xyap;
-	*a = qAlpha(*pix) * xyap;
+	*r = (int) qRed(*pix) * xyap;
+	*g = (int) qGreen(*pix) * xyap;
+	*b = (int) qBlue(*pix) * xyap;
+	*a = (int) qAlpha(*pix) * xyap;
 	int j;
 	for (j = (1 << 14) - xyap; j > Cxy; j -= Cxy) {
 		pix += step;
-		*r += qRed(*pix) * Cxy;
-		*g += qGreen(*pix) * Cxy;
-		*b += qBlue(*pix) * Cxy;
-		*a += qAlpha(*pix) * Cxy;
+		*r += (int) qRed(*pix) * Cxy;
+		*g += (int) qGreen(*pix) * Cxy;
+		*b += (int) qBlue(*pix) * Cxy;
+		*a += (int) qAlpha(*pix) * Cxy;
 	}
 	pix += step;
-	*r += qRed(*pix) * j;
-	*g += qGreen(*pix) * j;
-	*b += qBlue(*pix) * j;
-	*a += qAlpha(*pix) * j;
+	*r += (int) qRed(*pix) * j;
+	*g += (int) qGreen(*pix) * j;
+	*b += (int) qBlue(*pix) * j;
+	*a += (int) qAlpha(*pix) * j;
 }
 
 #if defined(FBINK_QIS_NO_SIMD) || !(defined(__SSE4_1__) || defined(__ARM_NEON__))
@@ -748,20 +751,20 @@ static void
 inline static void
     qt_qimageScaleAARGB_helper(const unsigned int* pix, int xyap, int Cxy, int step, int* r, int* g, int* b)
 {
-	*r = qRed(*pix) * xyap;
-	*g = qGreen(*pix) * xyap;
-	*b = qBlue(*pix) * xyap;
+	*r = (int) qRed(*pix) * xyap;
+	*g = (int) qGreen(*pix) * xyap;
+	*b = (int) qBlue(*pix) * xyap;
 	int j;
 	for (j = (1 << 14) - xyap; j > Cxy; j -= Cxy) {
 		pix += step;
-		*r += qRed(*pix) * Cxy;
-		*g += qGreen(*pix) * Cxy;
-		*b += qBlue(*pix) * Cxy;
+		*r += (int) qRed(*pix) * Cxy;
+		*g += (int) qGreen(*pix) * Cxy;
+		*b += (int) qBlue(*pix) * Cxy;
 	}
 	pix += step;
-	*r += qRed(*pix) * j;
-	*g += qGreen(*pix) * j;
-	*b += qBlue(*pix) * j;
+	*r += (int) qRed(*pix) * j;
+	*g += (int) qGreen(*pix) * j;
+	*b += (int) qBlue(*pix) * j;
 }
 
 #if defined(FBINK_QIS_NO_SIMD) || !(defined(__SSE4_1__) || defined(__ARM_NEON__))
