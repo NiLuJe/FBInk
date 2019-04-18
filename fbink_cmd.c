@@ -608,20 +608,20 @@ int
 								continue;
 							}
 
-							if (strcasecmp(region_dither, "PASSTHROUGH") == 0) {
+							if (strcasecmp(value, "PASSTHROUGH") == 0) {
 								region_hwd = HWD_PASSTHROUGH;
-							} else if (strcasecmp(region_dither, "FLOYD_STEINBERG") == 0) {
+							} else if (strcasecmp(value, "FLOYD_STEINBERG") == 0) {
 								region_hwd = HWD_FLOYD_STEINBERG;
-							} else if (strcasecmp(region_dither, "ATKINSON") == 0) {
+							} else if (strcasecmp(value, "ATKINSON") == 0) {
 								region_hwd = HWD_ATKINSON;
-							} else if (strcasecmp(region_dither, "ORDERED") == 0) {
+							} else if (strcasecmp(value, "ORDERED") == 0) {
 								region_hwd = HWD_ORDERED;
-							} else if (strcasecmp(region_dither, "QUANT_ONLY") == 0) {
+							} else if (strcasecmp(value, "QUANT_ONLY") == 0) {
 								region_hwd = HWD_QUANT_ONLY;
 							} else {
 								fprintf(stderr,
 									"Unknown hardware dithering algorithm '%s'.\n",
-									region_dither);
+									value);
 								errfnd = true;
 							}
 							// Remember non-default values in a human-readable format
