@@ -6079,26 +6079,26 @@ int
 	if (scaled_width != 0 || scaled_height != 0) {
 		LOG("Image scaling requested!");
 		want_scaling = true;
-	}
 
-	// Set to viewport dimensions if requested...
-	if (scaled_width == -1) {
-		scaled_width = (short int) viewWidth;
-	}
-	if (scaled_height == -1) {
-		scaled_height = (short int) viewHeight;
-	}
+		// Set to viewport dimensions if requested...
+		if (scaled_width == -1) {
+			scaled_width = (short int) viewWidth;
+		}
+		if (scaled_height == -1) {
+			scaled_height = (short int) viewHeight;
+		}
 
-	// NOTE: QImageScale only accepts Y8, Y8A and RGBA input (i.e., RGBA, or RGB stored @ 32bpp, with 8 unused bits).
-	//       We, on the other hand, store RGB in 24bits, so, that won't do...
-	//       TL;DR: When outputting RGB, request RGBA from stbi instead to ensure a 32bpp buffer,
-	//              stbi will set the alpha bytes to 0xFF if the input doesn't have any alpha,
-	//              but that's not relevant, as we'll ask QImageScale to ignore alpha *processing* w/ ignore_alpha
-	// NOTE: That said, if input *has* an alpha channel, QImageScale expects premultiplied alpha,
-	//       while stbi leaves it untouched, meaning straight alpha in the vast majority of cases...
-	if (want_scaling && req_n == 3) {
-		LOG("Enforcing 32bpp buffer for scaling!");
-		req_n = 4;
+		// NOTE: QImageScale only accepts Y8, Y8A and RGBA input (i.e., RGBA, or RGB stored @ 32bpp, with 8 unused bits).
+		//       We, on the other hand, store RGB in 24bits, so, that won't do...
+		//       TL;DR: When outputting RGB, request RGBA from stbi instead to ensure a 32bpp buffer,
+		//              stbi will set the alpha bytes to 0xFF if the input doesn't have any alpha,
+		//              but that's not relevant, as we'll ask QImageScale to ignore alpha *processing* w/ ignore_alpha
+		// NOTE: That said, if input *has* an alpha channel, QImageScale expects premultiplied alpha,
+		//       while stbi leaves it untouched, meaning straight alpha in the vast majority of cases...
+		if (req_n == 3) {
+			LOG("Enforcing 32bpp buffer for scaling!");
+			req_n = 4;
+		}
 	}
 
 	// Decode image via stbi
