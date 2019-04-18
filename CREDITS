@@ -39,7 +39,7 @@ It also bundles a few specific routines based on others' work:
 		Licensed under the ImageMagick License,
 		(https://imagemagick.org/script/license.php)
 
-	* This experimental (in the purest sense of the word, this won't ever make it to master) branch bundles Qt5's qSmoothScaleImage implementation,
+	* The image scaling routine (qimagescale/*) is Qt5's qSmoothScaleImage implementation, ripped out of Qt and ported back to C,
 		(https://github.com/qt/qtbase/blob/dev/src/gui/painting/qimagescale.cpp),
 		Copyright (C) 2016 The Qt Company Ltd,
 		Licensed under the GNU Lesser General Public License version 3 (http://www.gnu.org/licenses/lgpl.html),
