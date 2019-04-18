@@ -123,15 +123,15 @@ static inline __attribute__((always_inline)) uint
 	// First interpolate top and bottom pixels in parallel.
 	vt          = _mm_unpacklo_epi8(vt, _mm_setzero_si128());
 	vb          = _mm_unpacklo_epi8(vb, _mm_setzero_si128());
-	vt          = _mm_mullo_epi16(vt, _mm_set1_epi16(256 - disty));
-	vb          = _mm_mullo_epi16(vb, _mm_set1_epi16(disty));
+	vt          = _mm_mullo_epi16(vt, _mm_set1_epi16((short int) (256 - disty)));
+	vb          = _mm_mullo_epi16(vb, _mm_set1_epi16((short int) disty));
 	__m128i vlr = _mm_add_epi16(vt, vb);
 	vlr         = _mm_srli_epi16(vlr, 8);
 	// vlr now contains the result of the first two interpolate calls vlr = unpacked((xright << 64) | xleft)
 
 	// Now the last interpolate between left and right..
-	const __m128i vidistx = _mm_shufflelo_epi16(_mm_cvtsi32_si128(256 - distx), _MM_SHUFFLE(0, 0, 0, 0));
-	const __m128i vdistx  = _mm_shufflelo_epi16(_mm_cvtsi32_si128(distx), _MM_SHUFFLE(0, 0, 0, 0));
+	const __m128i vidistx = _mm_shufflelo_epi16(_mm_cvtsi32_si128((int) (256 - distx)), _MM_SHUFFLE(0, 0, 0, 0));
+	const __m128i vdistx  = _mm_shufflelo_epi16(_mm_cvtsi32_si128((int) distx), _MM_SHUFFLE(0, 0, 0, 0));
 	const __m128i vmulx   = _mm_unpacklo_epi16(vidistx, vdistx);
 	vlr                   = _mm_unpacklo_epi16(vlr, _mm_srli_si128(vlr, 8));
 	// vlr now contains the colors of left and right interleaved { la, ra, lr, rr, lg, rg, lb, rb }
@@ -139,14 +139,14 @@ static inline __attribute__((always_inline)) uint
 	vlr = _mm_srli_epi32(vlr, 8);
 	vlr = _mm_packs_epi32(vlr, vlr);
 	vlr = _mm_packus_epi16(vlr, vlr);
-	return _mm_cvtsi128_si32(vlr);
+	return (uint) _mm_cvtsi128_si32(vlr);
 }
 
 static inline uint
     interpolate_4_pixels(uint tl, uint tr, uint bl, uint br, uint distx, uint disty)
 {
-	__m128i vt = _mm_unpacklo_epi32(_mm_cvtsi32_si128(tl), _mm_cvtsi32_si128(tr));
-	__m128i vb = _mm_unpacklo_epi32(_mm_cvtsi32_si128(bl), _mm_cvtsi32_si128(br));
+	__m128i vt = _mm_unpacklo_epi32(_mm_cvtsi32_si128((int) tl), _mm_cvtsi32_si128((int) tr));
+	__m128i vb = _mm_unpacklo_epi32(_mm_cvtsi32_si128((int) bl), _mm_cvtsi32_si128((int) br));
 	return interpolate_4_pixels_sse2(vt, vb, distx, disty);
 }
 

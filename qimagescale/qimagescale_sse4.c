@@ -41,7 +41,7 @@
 
 #if defined(__SSE4_1__)
 
-inline static __m128i Q_DECL_VECTORCALL
+static inline __m128i Q_DECL_VECTORCALL
 		      qt_qimageScaleAARGBA_helper_sse4(const unsigned int* pix,
 						       int                 xyap,
 						       int                 Cxy,
@@ -49,21 +49,21 @@ inline static __m128i Q_DECL_VECTORCALL
 						       const __m128i       vxyap,
 						       const __m128i       vCxy)
 {
-	__m128i vpix = _mm_cvtepu8_epi32(_mm_cvtsi32_si128(*pix));
+	__m128i vpix = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) *pix));
 	__m128i vx   = _mm_mullo_epi32(vpix, vxyap);
 	int     i;
 	for (i = (1 << 14) - xyap; i > Cxy; i -= Cxy) {
 		pix += step;
-		vpix = _mm_cvtepu8_epi32(_mm_cvtsi32_si128(*pix));
+		vpix = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) *pix));
 		vx   = _mm_add_epi32(vx, _mm_mullo_epi32(vpix, vCxy));
 	}
 	pix += step;
-	vpix = _mm_cvtepu8_epi32(_mm_cvtsi32_si128(*pix));
+	vpix = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) *pix));
 	vx   = _mm_add_epi32(vx, _mm_mullo_epi32(vpix, _mm_set1_epi32(i)));
 	return vx;
 }
 
-inline static void
+static inline void
     qt_qimageScaleAARGBA_up_x_down_y_sse4(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
 {
 	const unsigned int** ypoints  = isi->ypoints;
@@ -99,14 +99,14 @@ inline static void
 			vx    = _mm_srli_epi32(vx, 14);
 			vx    = _mm_packus_epi32(vx, _mm_setzero_si128());
 			vx    = _mm_packus_epi16(vx, _mm_setzero_si128());
-			*dptr = _mm_cvtsi128_si32(vx);
+			*dptr = (unsigned int) _mm_cvtsi128_si32(vx);
 			*dptr |= 0xff000000;
 			dptr++;
 		}
 	}
 }
 
-inline static void
+static inline void
     qt_qimageScaleAARGB_up_x_down_y_sse4(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
 {
 	const unsigned int** ypoints  = isi->ypoints;
@@ -142,13 +142,13 @@ inline static void
 			vx    = _mm_srli_epi32(vx, 14);
 			vx    = _mm_packus_epi32(vx, _mm_setzero_si128());
 			vx    = _mm_packus_epi16(vx, _mm_setzero_si128());
-			*dptr = _mm_cvtsi128_si32(vx);
+			*dptr = (unsigned int) _mm_cvtsi128_si32(vx);
 			dptr++;
 		}
 	}
 }
 
-inline static void
+static inline void
     qt_qimageScaleAARGBA_down_x_up_y_sse4(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
 {
 	const unsigned int** ypoints  = isi->ypoints;
@@ -184,14 +184,14 @@ inline static void
 			vx    = _mm_srli_epi32(vx, 14);
 			vx    = _mm_packus_epi32(vx, _mm_setzero_si128());
 			vx    = _mm_packus_epi16(vx, _mm_setzero_si128());
-			*dptr = _mm_cvtsi128_si32(vx);
+			*dptr = (unsigned int) _mm_cvtsi128_si32(vx);
 			*dptr |= 0xff000000;
 			dptr++;
 		}
 	}
 }
 
-inline static void
+static inline void
     qt_qimageScaleAARGB_down_x_up_y_sse4(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
 {
 	const unsigned int** ypoints  = isi->ypoints;
@@ -227,13 +227,13 @@ inline static void
 			vx    = _mm_srli_epi32(vx, 14);
 			vx    = _mm_packus_epi32(vx, _mm_setzero_si128());
 			vx    = _mm_packus_epi16(vx, _mm_setzero_si128());
-			*dptr = _mm_cvtsi128_si32(vx);
+			*dptr = (unsigned int) _mm_cvtsi128_si32(vx);
 			dptr++;
 		}
 	}
 }
 
-inline static void
+static inline void
     qt_qimageScaleAARGBA_down_xy_sse4(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
 {
 	const unsigned int** ypoints  = isi->ypoints;
@@ -271,14 +271,14 @@ inline static void
 			vr    = _mm_srli_epi32(vr, 24);
 			vr    = _mm_packus_epi32(vr, _mm_setzero_si128());
 			vr    = _mm_packus_epi16(vr, _mm_setzero_si128());
-			*dptr = _mm_cvtsi128_si32(vr);
+			*dptr = (unsigned int) _mm_cvtsi128_si32(vr);
 			*dptr |= 0xff000000;
 			dptr++;
 		}
 	}
 }
 
-inline static void
+static inline void
     qt_qimageScaleAARGB_down_xy_sse4(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
 {
 	const unsigned int** ypoints  = isi->ypoints;
@@ -316,7 +316,7 @@ inline static void
 			vr    = _mm_srli_epi32(vr, 24);
 			vr    = _mm_packus_epi32(vr, _mm_setzero_si128());
 			vr    = _mm_packus_epi16(vr, _mm_setzero_si128());
-			*dptr = _mm_cvtsi128_si32(vr);
+			*dptr = (unsigned int) _mm_cvtsi128_si32(vr);
 			dptr++;
 		}
 	}

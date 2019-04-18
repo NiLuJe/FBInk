@@ -41,7 +41,7 @@
 
 #if defined(__ARM_NEON__)
 
-inline static uint32x4_t
+static inline uint32x4_t
     qt_qimageScaleAARGBA_helper_neon(const unsigned int* pix, int xyap, int Cxy, int step)
 {
 	uint32x2_t vpix32 = vmov_n_u32(*pix);
@@ -61,7 +61,7 @@ inline static uint32x4_t
 	return vx;
 }
 
-inline static void
+static inline void
     qt_qimageScaleAARGBA_up_x_down_y_neon(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
 {
 	const unsigned int** ypoints  = isi->ypoints;
@@ -97,7 +97,7 @@ inline static void
 	}
 }
 
-inline static void
+static inline void
     qt_qimageScaleAARGB_up_x_down_y_neon(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
 {
 	const unsigned int** ypoints  = isi->ypoints;
@@ -134,7 +134,7 @@ inline static void
 	}
 }
 
-inline static void
+static inline void
     qt_qimageScaleAARGBA_down_x_up_y_neon(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
 {
 	const unsigned int** ypoints  = isi->ypoints;
@@ -170,7 +170,7 @@ inline static void
 	}
 }
 
-inline static void
+static inline void
     qt_qimageScaleAARGB_down_x_up_y_neon(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
 {
 	const unsigned int** ypoints  = isi->ypoints;
@@ -207,7 +207,7 @@ inline static void
 	}
 }
 
-inline static void
+static inline void
     qt_qimageScaleAARGBA_down_xy_neon(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
 {
 	const unsigned int** ypoints  = isi->ypoints;
@@ -252,7 +252,7 @@ inline static void
 	}
 }
 
-inline static void
+static inline void
     qt_qimageScaleAARGB_down_xy_neon(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
 {
 	const unsigned int** ypoints  = isi->ypoints;
