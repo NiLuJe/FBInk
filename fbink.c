@@ -6116,7 +6116,7 @@ int
 	unsigned char* restrict sdata = NULL;
 	// Scale it w/ QImageScale, if requested
 	if (want_scaling) {
-		// NOTE: Handle AR if scaling was requested on one side only...
+		// NOTE: Handle AR if best fit was requested, or if scaling was requested on one side only...
 		if (fbink_cfg->scaled_width < -1 || fbink_cfg->scaled_height < -1) {
 			float aspect = (float) w / (float) h;
 			if (w > h) {
@@ -6222,6 +6222,37 @@ int
 
 	LOG("Requested %d color channels, supplied data had %d", req_n, n);
 
+	// Was scaling requested?
+	unsigned char* restrict sdata        = NULL;
+	bool                    want_scaling = false;
+	unsigned short int scaled_width = fbink_cfg->scaled_width > 0 ? (unsigned short int) fbink_cfg->scaled_width : 0;
+	unsigned short int scaled_height =
+	    fbink_cfg->scaled_height > 0 ? (unsigned short int) fbink_cfg->scaled_height : 0;
+	if (fbink_cfg->scaled_width != 0 || fbink_cfg->scaled_height != 0) {
+		LOG("Image scaling requested!");
+		want_scaling = true;
+
+		// Set to viewport dimensions if requested...
+		if (fbink_cfg->scaled_width == -1) {
+			scaled_width = (unsigned short int) viewWidth;
+		}
+		if (fbink_cfg->scaled_height == -1) {
+			scaled_height = (unsigned short int) viewHeight;
+		}
+
+		// NOTE: QImageScale only accepts Y8, Y8A and RGBA input (i.e., RGBA, or RGB stored @ 32bpp, with 8 unused bits).
+		//       We, on the other hand, store RGB in 24bits, so, that won't do...
+		//       TL;DR: When outputting RGB, request RGBA from stbi instead to ensure a 32bpp buffer,
+		//              stbi will set the alpha bytes to 0xFF if the input doesn't have any alpha,
+		//              but that's not relevant, as we'll ask QImageScale to ignore alpha *processing* w/ ignore_alpha
+		// NOTE: That said, if input *has* an alpha channel, QImageScale expects premultiplied alpha,
+		//       while stbi leaves it untouched, meaning straight alpha in the vast majority of cases...
+		if (req_n == 3) {
+			LOG("Enforcing 32bpp buffer for scaling!");
+			req_n = 4;
+		}
+	}
+
 	// If there's a mismatch between the components in the input data vs. what the fb expects,
 	// re-interleave the data w/ stbi's help...
 	unsigned char* imgdata = NULL;
@@ -6241,11 +6272,56 @@ int
 		imgdata = data;
 	}
 
-	// We should now be able to draw that on screen, knowing that it probably won't horribly implode ;p
-	if (draw_image(fbfd, imgdata, w, h, n, req_n, x_off, y_off, fbink_cfg) != EXIT_SUCCESS) {
-		WARN("Failed to display image data on screen");
-		rv = ERRCODE(EXIT_FAILURE);
-		goto cleanup;
+	// Scale it w/ QImageScale, if requested
+	if (want_scaling) {
+		// NOTE: Handle AR if best fit was requested, or if scaling was requested on one side only...
+		if (fbink_cfg->scaled_width < -1 || fbink_cfg->scaled_height < -1) {
+			float aspect = (float) w / (float) h;
+			if (w > h) {
+				scaled_width  = (unsigned short int) viewWidth;
+				scaled_height = (unsigned short int) (scaled_width / aspect + 0.5f);
+				if (scaled_height > viewHeight) {
+					scaled_height = (unsigned short int) viewHeight;
+					scaled_width  = (unsigned short int) (scaled_height * aspect + 0.5f);
+				}
+			} else {
+				scaled_height = (unsigned short int) viewHeight;
+				scaled_width  = (unsigned short int) (scaled_height * aspect + 0.5f);
+				if (scaled_width > viewWidth) {
+					scaled_width  = (unsigned short int) viewWidth;
+					scaled_height = (unsigned short int) (scaled_width / aspect + 0.5f);
+				}
+			}
+		} else if (fbink_cfg->scaled_width == 0 && fbink_cfg->scaled_height != 0) {
+			float aspect = (float) w / (float) h;
+			scaled_width = (unsigned short int) (scaled_height * aspect + 0.5f);
+		} else if (fbink_cfg->scaled_width != 0 && fbink_cfg->scaled_height == 0) {
+			float aspect  = (float) w / (float) h;
+			scaled_height = (unsigned short int) (scaled_width / aspect + 0.5f);
+		}
+
+		LOG("Scaling image from %dx%d to %hdx%hd . . .", w, h, scaled_width, scaled_height);
+
+		sdata = qSmoothScaleImage(data, w, h, req_n, fbink_cfg->ignore_alpha, scaled_width, scaled_height);
+		if (sdata == NULL) {
+			WARN("Failed to resize image");
+			return ERRCODE(EXIT_FAILURE);
+		}
+
+		// We're drawing the scaled data, at the requested scaled resolution
+		if (draw_image(fbfd, sdata, scaled_width, scaled_height, n, req_n, x_off, y_off, fbink_cfg) !=
+		    EXIT_SUCCESS) {
+			WARN("Failed to display image data on screen");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	} else {
+		// We should now be able to draw that on screen, knowing that it probably won't horribly implode ;p
+		if (draw_image(fbfd, imgdata, w, h, n, req_n, x_off, y_off, fbink_cfg) != EXIT_SUCCESS) {
+			WARN("Failed to display image data on screen");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
 	}
 
 	// Cleanup
@@ -6254,6 +6330,8 @@ cleanup:
 	if (req_n != n) {
 		stbi_image_free(imgdata);
 	}
+	// And the scaled buffer
+	free(sdata);
 
 	return rv;
 #else
