@@ -255,10 +255,10 @@ int
 		}
 
 		// One more time, with a x2 scaling
-		fbink_cfg.halign = CENTER;
-		fbink_cfg.valign = CENTER;
+		fbink_cfg.halign        = CENTER;
+		fbink_cfg.valign        = CENTER;
 		fbink_cfg.scaled_height = (short int) (dump.h * 2U);
-		fbink_cfg.scaled_width = (short int) (dump.w * 2U);
+		fbink_cfg.scaled_width  = (short int) (dump.w * 2U);
 		fprintf(stdout, "[13] SCALED PRINT RAW\n");
 		if (fbink_print_raw_data(
 			fbfd, dump.data, dump.w, dump.h, dump.size, (short int) dump.x, (short int) dump.y, &fbink_cfg) !=
