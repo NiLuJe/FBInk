@@ -242,8 +242,8 @@ typedef struct
 	uint8_t
 		halign;    // Horizontal alignment of images/dumps (NONE/LEFT, CENTER, EDGE/RIGHT; c.f., ALIGN_INDEX_T enum)
 	uint8_t valign;    // Vertical alignment of images/dumps (NONE/TOP, CENTER, EDGE/BOTTOM; c.f., ALIGN_INDEX_T enum)
-	short int scaled_width;     // Output scaling of images/dumps (0 for no scaling, -1 for viewport width)
-	short int scaled_height;    // Output scaling of images/dumps (0 for no scaling, -1 for viewport height)
+	short int scaled_width;     // Output width of images/dumps (0 for no scaling, -1 for viewport width)
+	short int scaled_height;    // Output height of images/dumps (0 for no scaling, -1 for viewport height)
 				    // If only *one* of them is left at 0, the image's aspect ratio will be honored.
 				    // If *either* of them is set to < -1, fit to screen while respecting AR.
 				    // NOTE: Scaling is inherently costly. I highly recommend not relying on it,
