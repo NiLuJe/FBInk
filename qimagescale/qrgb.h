@@ -68,7 +68,7 @@ typedef unsigned int QRgb;
 #define qA(y8a) (y8a >> 8)
 
 // Pack a Y8A pixel
-#define qY8A(y, a) (((a & 0xffu) << 8) | (y & 0xffu))
+#define qY8A(y, a) (((a & 0xff) << 8) | (y & 0xff))
 
 #define DIV255(V)                                                                                                        \
 	({                                                                                                               \

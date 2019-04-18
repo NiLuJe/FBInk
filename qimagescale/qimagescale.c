@@ -1140,7 +1140,7 @@ static void
 				v = (v + (vv * xap)) >> 8;
 				a = (a + (aa * xap)) >> 8;
 			}
-			*dptr++ = qY8A(v >> 14, a >> 14);
+			*dptr++ = (unsigned short int) qY8A(v >> 14, a >> 14);
 		}
 	}
 }
@@ -1174,7 +1174,7 @@ static void
 				v = (v + (vv * yap)) >> 8;
 				a = (a + (aa * yap)) >> 8;
 			}
-			*dptr = qY8A(v >> 14, a >> 14);
+			*dptr = (unsigned short int) qY8A(v >> 14, a >> 14);
 			dptr++;
 		}
 	}
@@ -1221,7 +1221,7 @@ static void
 			a = DIV255(a >> 14);
 			a = a > 0xFF ? 0xFF : a < 0 ? 0 : a;
 
-			*dptr = qY8A(v, a);
+			*dptr = (unsigned short int) qY8A(v, a);
 			dptr++;
 		}
 	}
