@@ -5,12 +5,12 @@
 # NOTE: We want the "bare" variant of the TC env, to make sure we vendor the right stuff...
 #       i.e., source ~SVN/Configs/trunk/Kindle/Misc/x-compile.sh kobo env bare
 ifdef CROSS_TC
-	CC=$(CROSS_TC)-gcc
-	CXX=$(CROSS_TC)-g++
-	STRIP=$(CROSS_TC)-strip
+	CC:=$(CROSS_TC)-gcc
+	CXX:=$(CROSS_TC)-g++
+	STRIP:=$(CROSS_TC)-strip
 	# NOTE: This relies on GCC plugins! Enforce AR & RANLIB to point to their real binary and not the GCC wrappers if your TC doesn't support that!
-	AR=$(CROSS_TC)-gcc-ar
-	RANLIB=$(CROSS_TC)-gcc-ranlib
+	AR:=$(CROSS_TC)-gcc-ar
+	RANLIB:=$(CROSS_TC)-gcc-ranlib
 else
 	CC?=gcc
 	CXX?=g++
@@ -19,17 +19,17 @@ else
 	RANLIB?=gcc-ranlib
 endif
 
-DEBUG_CFLAGS=-Og -fno-omit-frame-pointer -pipe -g
+DEBUG_CFLAGS:=-Og -fno-omit-frame-pointer -pipe -g
 # Fallback CFLAGS, we honor the env first and foremost!
-OPT_CFLAGS=-O2 -fomit-frame-pointer -pipe
+OPT_CFLAGS:=-O2 -fomit-frame-pointer -pipe
 
 ifdef DEBUG
-	OUT_DIR=Debug
+	OUT_DIR:=Debug
 	CFLAGS?=$(DEBUG_CFLAGS)
 	CXXFLAGS?=$(DEBUG_CFLAGS)
 	EXTRA_CPPFLAGS+=-DDEBUG
 else
-	OUT_DIR=Release
+	OUT_DIR:=Release
 	CFLAGS?=$(OPT_CFLAGS)
 	CXXFLAGS?=$(OPT_CFLAGS)
 	EXTRA_CPPFLAGS+=-DNDEBUG
@@ -184,7 +184,7 @@ ifdef LINUX
 endif
 
 # A version tag...
-FBINK_VERSION=$(shell git describe)
+FBINK_VERSION:=$(shell git describe)
 ifdef KINDLE
 	LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kindle"'
 else
@@ -243,17 +243,17 @@ endif
 
 ##
 # Now that we're done fiddling with flags, let's build stuff!
-LIB_SRCS=fbink.c cutef8/utf8.c cutef8/dfa.c
+LIB_SRCS:=fbink.c cutef8/utf8.c cutef8/dfa.c
 # Jump through a few hoops to set a few libunibreak-specific CFLAGS to silence some warnings...
 ifdef MINIMAL
-	LIB_UB_SRCS=
-	LIB_QT_SRCS=
+	LIB_UB_SRCS:=
+	LIB_QT_SRCS:=
 else
-	LIB_UB_SRCS=libunibreak/src/linebreak.c libunibreak/src/linebreakdata.c libunibreak/src/unibreakdef.c libunibreak/src/linebreakdef.c
-	LIB_QT_SRCS=qimagescale/qimagescale.c
+	LIB_UB_SRCS:=libunibreak/src/linebreak.c libunibreak/src/linebreakdata.c libunibreak/src/unibreakdef.c libunibreak/src/linebreakdef.c
+	LIB_QT_SRCS:=qimagescale/qimagescale.c
 endif
-CMD_SRCS=fbink_cmd.c
-BTN_SRCS=button_scan_cmd.c
+CMD_SRCS:=fbink_cmd.c
+BTN_SRCS:=button_scan_cmd.c
 # Unless we're asking for a minimal build, include the Unscii fonts, too
 ifdef MINIMAL
 	EXTRA_CPPFLAGS+=-DFBINK_MINIMAL
