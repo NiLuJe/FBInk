@@ -301,7 +301,8 @@ FBINK_API int fbink_close(int fbfd);
 
 // Initialize internal variables keeping track of the framebuffer's configuration and state, as well as the device's hardware.
 // MUST be called at least *once* before any fbink_print* functions.
-// CAN safely be called multiple times, but doing so is only necessary if the framebuffer's state has changed,
+// CAN safely be called multiple times,
+//     but doing so is only necessary if the framebuffer's state has changed (although fbink_reinit is preferred in this case),
 //     or if you modified one of the FBInkConfig fields that affects its results (listed below).
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
@@ -313,10 +314,9 @@ FBINK_API int fbink_close(int fbfd);
 //				This means you MUST call fbink_init() again when you update them, too!
 // NOTE: By virtue of, well, setting global variables, do NOT consider this thread-safe.
 //       The rest of the API should be, though, so make sure you init in your main thread *before* threading begins...
-// NOTE: On devices where the fb state can change (i.e., Kobos switching between 16bpp & 32bpp),
-//       this needs to be called as many times as necessary to ensure that every following fbink_* call will be made
-//       against a fb state that matches the state it was in during the last fbink_init() call...
-//       c.f., KFMon's handling of this via fbink_is_fb_quirky() to detect the initial 16bpp -> 32bpp switch.
+// NOTE: If you just need to make sure the framebuffer state is still up to date before an fbink_* call,
+//       (f.g., because you're running on a Kobo, which may switch from 16bpp to 32bpp, or simply change orientation),
+//       prefer using fbink_reinit instead of calling fbink_init *again*, as it's tailored for this use case.
 FBINK_API int fbink_init(int fbfd, const FBInkConfig* restrict fbink_cfg);
 
 // Add an OpenType font to FBInk. Note that at least one font must be added in order to use fbink_print_ot()
@@ -444,6 +444,8 @@ FBINK_API bool fbink_is_fb_quirky(void) __attribute__((pure, deprecated));
 // NOTE: This obviously supercedes fbink_is_fb_quirky, because it should be smarter,
 //       by catching more scenarios where a reinit would be useful,
 //       and it can avoid running the same ioctl twice when an ioctl already done by init is needed to detect a state change.
+// NOTE: Using fbink_reinit does NOT lift the requirement of having to run fbink_init at least ONCE,
+//       i.e., you cannot replace the initial fbink_init call by fbink_reinit!
 // Returns -(ENOSYS) on Kindle, where this is not needed
 // fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
