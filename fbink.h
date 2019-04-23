@@ -300,7 +300,7 @@ FBINK_API int fbink_open(void);
 FBINK_API int fbink_close(int fbfd);
 
 // Initialize internal variables keeping track of the framebuffer's configuration and state, as well as the device's hardware.
-// MUST be called at least *once* before any fbink_print* functions.
+// MUST be called at least *once* before any fbink_print* or fbink dump/restore functions.
 // CAN safely be called multiple times,
 //     but doing so is only necessary if the framebuffer's state has changed (although fbink_reinit is preferred in this case),
 //     or if you modified one of the FBInkConfig fields that affects its results (listed below).
@@ -317,6 +317,7 @@ FBINK_API int fbink_close(int fbfd);
 // NOTE: If you just need to make sure the framebuffer state is still up to date before an fbink_* call,
 //       (f.g., because you're running on a Kobo, which may switch from 16bpp to 32bpp, or simply change orientation),
 //       prefer using fbink_reinit instead of calling fbink_init *again*, as it's tailored for this use case.
+//       c.f., KFMon for an example of this use case in the wild.
 FBINK_API int fbink_init(int fbfd, const FBInkConfig* restrict fbink_cfg);
 
 // Add an OpenType font to FBInk. Note that at least one font must be added in order to use fbink_print_ot()
@@ -324,7 +325,7 @@ FBINK_API int fbink_init(int fbfd, const FBInkConfig* restrict fbink_cfg);
 // filename:		The font file path. This should be a valid *.otf or *.ttf font
 // style:		Defines the specific style of the specified font (FNT_REGULAR, FNT_ITALIC, FNT_BOLD, FNT_BOLD_ITALIC)
 // NOTE: You MUST free the fonts loaded when you are done by calling fbink_free_ot_fonts()
-// NOTE: You may replace a font without first calling free
+// NOTE: You MAY replace a font without first calling free
 // NOTE: Default fonts are secreted away in /usr/java/lib/fonts on Kindle,
 //       and in /usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/fonts on Kobo,
 //       but you can't use the Kobo ones because they're obfuscated...
@@ -356,11 +357,10 @@ FBINK_API void fbink_get_state(const FBInkConfig* restrict fbink_cfg, FBInkState
 // fbink_cfg:		Pointer to an FBInkConfig struct
 FBINK_API int fbink_print(int fbfd, const char* restrict string, const FBInkConfig* restrict fbink_cfg);
 
-// Print a string using an OpenType font. Note the caller MUST init with fbink_init_ot() FIRST.
+// Print a string using an OpenType font. Note that the caller MUST init with fbink_init_ot() FIRST.
 // This function uses positive margins (in pixels) instead of rows/columns for positioning and setting the printable area.
 // Returns new top margin for use in subsequent calls, if the return value is positive.
-// 		A zero return value indicates there is no room left to print another row of text at the current
-// 		margins or font size.
+// NOTE: A zero return value indicates there is no room left to print another row of text at the current margins or font size.
 // Returns -(ERANGE) if the provided margins are out of range, or sum to < view height or width
 // Returns -(ENOSYS) if compiled with MINIMAL
 // Returns -(ENODAT) if fbink_init_ot() hasn't yet been called.
@@ -427,7 +427,7 @@ FBINK_API int fbink_refresh(int                fbfd,
 //       to allow them to call fbink_init again at specific points only (instead of enforcing a reinit on every print).
 //       This is of interest on a few devices, where trying to print based on a "stale" init state would fail,
 //       or produce unwanted results (f.g., rotation).
-// NOTE: Right now, this only checks for the isNTX16bLandscape Device Quirk,
+// NOTE: Right now, this only checks for the isNTX16bLandscape device quirk,
 //       because that's the only one that is not permanent (i.e., hardware specific),
 //       but instead software specific (here, because of pickel).
 //       In practical terms, this means the Kobo's fb is in 16bpp mode, with its origin in the top-right corner (i.e., Landscape).
@@ -481,13 +481,16 @@ FBINK_API int fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkCo
 //       Generally, that'd be a Grayscale (color-type 0) PNG, ideally dithered down to the eInk palette
 //       (c.f., https://www.mobileread.com/forums/showpost.php?p=3728291&postcount=17).
 //       If you can't pre-process your images, dithering can be handled by the hardware on recent devices (c.f. is_dithered),
-//       but the pixel format still matters:
+//       or by FBInk itself (c.f., sw_dithering), but the pixel format still matters:
 //       On a 32bpp fb, Gray will still be faster than RGB.
 //       On a 8bpp fb, try to only use Gray for the best performance possible,
 //       as an RGB input will need to be grayscaled, making it slower than if it were rendered on a 32bpp fb!
 //       Try to avoid using a 16bpp fb, as conversion to/from RGB565 will generally slow things down.
 //       If you know you won't need to handle an alpha channel, don't forget ignore_alpha, too ;).
 //       As expected, the fastest codepath is Gray on an 8bpp fb ;).
+// NOTE: There's a direct copy fast path in the very specific case of printing a Grayscale image *without* alpha,
+//       inversion or dithering on an 8bpp fb.
+// NOTE: No such luck on 32bpp, because of a required RGB <-> BGR conversion ;).
 FBINK_API int fbink_print_image(int                fbfd,
 				const char*        filename,
 				short int          x_off,
