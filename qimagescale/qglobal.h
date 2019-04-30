@@ -41,9 +41,14 @@
 #ifndef QGLOBAL_H
 #define QGLOBAL_H
 
-// NOTE: Not using stdint.h because uint64_t is unsigned long on 64bit, not unsigned long long
-typedef long long          qint64;  /* 64 bit signed */
-typedef unsigned long long quint64; /* 64 bit unsigned */
+// NOTE: Using stdint.h will ensure consistent results, no matter the data model.
+//       Not that we care terribly about that, since we're Linux only,
+//       and the only "tricky" case for this is usually Win64 ;).
+//       c.f., https://en.cppreference.com/w/cpp/language/types
+//           & https://docs.microsoft.com/en-us/cpp/c-runtime-library/standard-types?view=vs-2019
+#include <stdint.h>
+typedef int64_t  qint64;  /* 64 bit signed */
+typedef uint64_t quint64; /* 64 bit unsigned */
 
 /*
    Useful type definitions for Qt
