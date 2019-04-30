@@ -287,14 +287,14 @@ FBINK_STATIC_NAME:=libfbink.a
 
 default: all
 
-SHAREDLIB_OBJS:=$(LIB_SRCS:%.c=$(OUT_DIR)/shared/%.o)
-UB_SHAREDLIB_OBJS:=$(LIB_UB_SRCS:%.c=$(OUT_DIR)/shared/%.o)
-QT_SHAREDLIB_OBJS:=$(LIB_QT_SRCS:%.c=$(OUT_DIR)/shared/%.o)
-STATICLIB_OBJS:=$(LIB_SRCS:%.c=$(OUT_DIR)/static/%.o)
-UB_STATICLIB_OBJS:=$(LIB_UB_SRCS:%.c=$(OUT_DIR)/static/%.o)
-QT_STATICLIB_OBJS:=$(LIB_QT_SRCS:%.c=$(OUT_DIR)/static/%.o)
-CMD_OBJS:=$(CMD_SRCS:%.c=$(OUT_DIR)/%.o)
-BTN_OBJS:=$(BTN_SRCS:%.c=$(OUT_DIR)/%.o)
+SHAREDLIB_OBJS:=$(addprefix $(OUT_DIR)/shared/, $(LIB_SRCS:.c=.o))
+UB_SHAREDLIB_OBJS:=$(addprefix $(OUT_DIR)/shared/, $(LIB_UB_SRCS:.c=.o))
+QT_SHAREDLIB_OBJS:=$(addprefix $(OUT_DIR)/shared/, $(LIB_QT_SRCS:.c=.o))
+STATICLIB_OBJS:=$(addprefix $(OUT_DIR)/static/, $(LIB_SRCS:.c=.o))
+UB_STATICLIB_OBJS:=$(addprefix $(OUT_DIR)/static/, $(LIB_UB_SRCS:.c=.o))
+QT_STATICLIB_OBJS:=$(addprefix $(OUT_DIR)/static/, $(LIB_QT_SRCS:.c=.o))
+CMD_OBJS:=$(addprefix $(OUT_DIR)/, $(CMD_SRCS:.c=.o))
+BTN_OBJS:=$(addprefix $(OUT_DIR)/, $(BTN_SRCS:.c=.o))
 
 # Silence a few warnings, only when specifically compiling libunibreak...
 # c.f., https://stackoverflow.com/q/1305665
