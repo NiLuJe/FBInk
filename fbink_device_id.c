@@ -308,7 +308,7 @@ static void
 	if (!fp) {
 		WARN("Cannot open /proc/usid (not running on a Kindle?)");
 	} else {
-		unsigned char serial_no[KINDLE_SERIAL_NO_LENGTH] = { '\0' };
+		unsigned char serial_no[KINDLE_SERIAL_NO_LENGTH] = { 0 };
 		if (fread(serial_no, sizeof(unsigned char), KINDLE_SERIAL_NO_LENGTH, fp) < KINDLE_SERIAL_NO_LENGTH ||
 		    ferror(fp) != 0) {
 			WARN("Error reading /proc/usid (unexpected length)");
@@ -316,7 +316,7 @@ static void
 		fclose(fp);
 
 		// Get the device code...
-		char device_code[3 + 1] = { '\0' };
+		char device_code[3 + 1] = { 0 };
 		// NOTE: Slice the bracketed section out of the S/N: B0[17]NNNNNNNNNNNN
 		snprintf(device_code, 2 + 1, "%.*s", 2, serial_no + 2);
 		// It's in hex, easy peasy.
