@@ -587,7 +587,7 @@ static void
 	// Get the model from Nickel's version tag file...
 	FILE* fp = fopen("/mnt/onboard/.kobo/version", "re");
 	if (!fp) {
-		WARN("Couldn't find a Kobo version tag (onboard unmounted or not running on a Kobo?)");
+		ELOG("Couldn't find a Kobo version tag (onboard unmounted or not running on a Kobo?)!");
 	} else {
 		// NOTE: I'm not entirely sure this will always have a fixed length, so,
 		//       rely on getline()'s dynamic allocation to be safe...
