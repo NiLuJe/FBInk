@@ -117,7 +117,7 @@ ifeq "$(MOAR_WARNIGS)" "1"
 		endif
 	else
 		EXTRA_CFLAGS+=-Wformat-truncation=1
-		# NOTE: GCC 9 is more verbose, so nerf that, too, when building w/o LTO...
+		# NOTE: GCC 9 is more verbose, so nerf that, too, when building w/o LTO on native systems...
 		ifneq "$(CC_IS_CROSS)" "1"
 			EXTRA_CFLAGS+=-Wno-stringop-truncation
 		endif
