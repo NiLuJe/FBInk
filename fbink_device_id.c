@@ -32,12 +32,16 @@ static bool
 			deviceQuirks.isKindleLegacy = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "1", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Fiona", sizeof(deviceQuirks.deviceCodename) - 1U);
 			return true;
 		case 0x02:    // K2
 		case 0x03:
 			deviceQuirks.isKindleLegacy = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "2", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Turing", sizeof(deviceQuirks.deviceCodename) - 1U);
 			return true;
 		case 0x04:    // KDX
 		case 0x05:
@@ -45,6 +49,8 @@ static bool
 			deviceQuirks.isKindleLegacy = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "DX", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Nell", sizeof(deviceQuirks.deviceCodename) - 1U);
 			return true;
 		case 0x08:    // K3
 		case 0x06:
@@ -52,11 +58,15 @@ static bool
 			deviceQuirks.isKindleLegacy = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "3", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Shasta", sizeof(deviceQuirks.deviceCodename) - 1U);
 			return true;
 		case 0x0E:    // K4
 			deviceQuirks.isKindleLegacy = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "4", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Tequila", sizeof(deviceQuirks.deviceCodename) - 1U);
 			return true;
 		case 0x0F:    // K5
 		case 0x11:
@@ -65,11 +75,15 @@ static bool
 			deviceQuirks.isKindlePearlScreen = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Touch", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Whitney", sizeof(deviceQuirks.deviceCodename) - 1U);
 			return true;
 		case 0x23:    // K4b
 			deviceQuirks.isKindleLegacy = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "4", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Sauza", sizeof(deviceQuirks.deviceCodename) - 1U);
 			return true;
 		case 0x24:    // PW1
 		case 0x1B:
@@ -81,6 +95,8 @@ static bool
 			deviceQuirks.screenDPI           = 212U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "PaperWhite", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Celeste", sizeof(deviceQuirks.deviceCodename) - 1U);
 			return true;
 		case 0xD4:    // PW2
 		case 0x5A:
@@ -99,15 +115,21 @@ static bool
 			deviceQuirks.screenDPI = 212U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "PaperWhite 2", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Pinot", sizeof(deviceQuirks.deviceCodename) - 1U);
 			return true;
 		case 0xC6:    // KT2
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Basic", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Bourbon", sizeof(deviceQuirks.deviceCodename) - 1U);
 			return true;
 		case 0x13:    // KV
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Voyage", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Icewine", sizeof(deviceQuirks.deviceCodename) - 1U);
 			return true;
 		case 0x16:    // ??
 		case 0x21:
@@ -120,6 +142,8 @@ static bool
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Voyage", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Icewine", sizeof(deviceQuirks.deviceCodename) - 1U);
 			return true;
 		case 0x07:    // ??
 		case 0x0B:
@@ -130,6 +154,8 @@ static bool
 		case 0xDD:    // KT2 AUS
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Basic", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Bourbon", sizeof(deviceQuirks.deviceCodename) - 1U);
 			return true;
 		default:
 			return false;
@@ -157,6 +183,8 @@ static bool
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "PaperWhite 3", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Muscat", sizeof(deviceQuirks.deviceCodename) - 1U);
 			return true;
 		case 0x20C:    // KOA
 		case 0x20D:
@@ -167,12 +195,16 @@ static bool
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Oasis", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Whisky", sizeof(deviceQuirks.deviceCodename) - 1U);
 			return true;
 		case 0x1BC:    // KT3
 		case 0x269:
 		case 0x26A:
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Basic 2", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Eanab", sizeof(deviceQuirks.deviceCodename) - 1U);
 			return true;
 		case 0x295:    // KOA2
 		case 0x296:
@@ -193,6 +225,8 @@ static bool
 			deviceQuirks.screenDPI      = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Oasis 2", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Cognac", sizeof(deviceQuirks.deviceCodename) - 1U);
 			return true;
 		case 0x2F7:    // PW4
 		case 0x361:
@@ -213,6 +247,8 @@ static bool
 			deviceQuirks.screenDPI   = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "PaperWhite 4", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Moonshine", sizeof(deviceQuirks.deviceCodename) - 1U);
 			return true;
 		case 0x414:
 		case 0x3CF:
@@ -223,6 +259,8 @@ static bool
 			deviceQuirks.isKindleRex = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Basic 3", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Jaeger", sizeof(deviceQuirks.deviceCodename) - 1U);
 			return true;
 		default:
 			// Flawfinder: ignore
