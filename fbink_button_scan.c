@@ -62,8 +62,8 @@ static bool
 	int           mfd = open("/proc/mounts", O_RDONLY);
 	struct pollfd pfd;
 
-	uint8_t changes     = 0;
-	uint8_t max_changes = 5;
+	uint8_t changes     = 0U;
+	uint8_t max_changes = 6U;
 	pfd.fd              = mfd;
 	pfd.events          = POLLERR | POLLPRI;
 	pfd.revents         = 0;
