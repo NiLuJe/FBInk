@@ -1686,7 +1686,8 @@ static int
 	// NOTE: Make sure update_marker is valid, an invalid marker *may* hang the kernel instead of failing gracefully,
 	//       depending on the device/FW...
 	if (marker == 0U) {
-		marker = (70U + 66U + 73U + 78U + 75U);
+		marker = ('F' + 'B' + 'I' + 'n' + 'k');
+		// i.e.,  70  + 66  + 73  + 110 + 107
 	}
 
 #	if defined(FBINK_FOR_KINDLE)
