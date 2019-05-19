@@ -867,24 +867,34 @@ static void
 		char* restrict dev_id    = NULL;
 		dev_id                   = to_base(deviceQuirks.deviceId, 32);
 		const char* restrict pad = "000";
-		ELOG("Detected a Kindle %s (%.*s%s -> 0x%03X)",
+		ELOG("Detected a Kindle %s (%.*s%s -> 0x%03X => %s on %s)",
 		     deviceQuirks.deviceName,
 		     ((int) strlen(pad) < (int) strlen(dev_id))    // Flawfinder: ignore
 			 ? 0
 			 : (int) strlen(pad) - (int) strlen(dev_id),    // Flawfinder: ignore
 		     pad,
 		     dev_id,
-		     deviceQuirks.deviceId);
+		     deviceQuirks.deviceId,
+		     deviceQuirks.deviceCodename,
+		     deviceQuirks.devicePlatform);
 		free(dev_id);
 	} else {
-		ELOG("Detected a Kindle %s (0x%02X)", deviceQuirks.deviceName, deviceQuirks.deviceId);
+		ELOG("Detected a Kindle %s (0x%02X => %s on %s)",
+		     deviceQuirks.deviceName,
+		     deviceQuirks.deviceId,
+		     deviceQuirks.deviceCodename,
+		     deviceQuirks.devicePlatform);
 	}
 #	elif defined(FBINK_FOR_CERVANTES)
 	identify_cervantes();
 	ELOG("Detected a BQ Cervantes %s (%hu)", deviceQuirks.deviceName, deviceQuirks.deviceId);
 #	else
 	identify_kobo();
-	ELOG("Detected a Kobo %s (%hu)", deviceQuirks.deviceName, deviceQuirks.deviceId);
+	ELOG("Detected a Kobo %s (%hu => %s @ %s)",
+	     deviceQuirks.deviceName,
+	     deviceQuirks.deviceId,
+	     deviceQuirks.deviceCodename,
+	     deviceQuirks.devicePlatform);
 #	endif
 	// Warn if canHWInvert was flipped
 	if (!deviceQuirks.canHWInvert) {
