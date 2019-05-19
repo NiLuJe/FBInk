@@ -1681,8 +1681,7 @@ static int
 	uint32_t upm = is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
 	// We'll want to increment the marker on each subsequent calls (for API users)
 	static uint32_t marker_counter = 0U;
-	uint32_t marker = (uint32_t) getpid() + marker_counter;
-	marker_counter++;
+	uint32_t marker = (uint32_t) getpid() + marker_counter++;
 
 	// NOTE: Make sure update_marker is valid, an invalid marker *may* hang the kernel instead of failing gracefully,
 	//       depending on the device/FW...
