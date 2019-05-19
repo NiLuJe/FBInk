@@ -1679,7 +1679,7 @@ static int
 	// So, handle this common switcheroo here...
 	uint32_t wfm = (is_flashing && waveform_mode == WAVEFORM_MODE_AUTO) ? WAVEFORM_MODE_GC16 : waveform_mode;
 	uint32_t upm = is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
-	// We'll want to increment the marker on each subsequent calls (for API users)
+	// We'll want to increment the marker on each subsequent calls (for API users), hence the static storage
 	static uint32_t marker_counter = 0U;
 	uint32_t marker = (uint32_t) getpid() + marker_counter++;
 
