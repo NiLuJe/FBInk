@@ -2535,7 +2535,7 @@ void
 {
 	fprintf(
 	    stdout,
-	    "viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName=%s;deviceId=%hu;isKoboNonMT=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;canRotate=%d",
+	    "viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID=%s;USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName=%s;deviceId=%hu;deviceCodename=%s;devicePlatform=%s;isKoboNonMT=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;canRotate=%d",
 	    viewWidth,
 	    viewHeight,
 	    screenWidth,
@@ -2560,6 +2560,8 @@ void
 	    penBGColor,
 	    deviceQuirks.deviceName,
 	    deviceQuirks.deviceId,
+	    deviceQuirks.deviceCodename,
+	    deviceQuirks.devicePlatform,
 	    deviceQuirks.isKoboNonMT,
 	    deviceQuirks.ntxBootRota,
 	    deviceQuirks.ntxRotaQuirk,
@@ -2578,7 +2580,11 @@ void
 		fbink_state->screen_width  = screenWidth;
 		fbink_state->screen_height = screenHeight;
 		fbink_state->bpp           = vInfo.bits_per_pixel;
-		strncpy(fbink_state->device_name, deviceQuirks.deviceName, sizeof(fbink_state->device_name) - 1);
+		strncpy(fbink_state->device_name, deviceQuirks.deviceName, sizeof(fbink_state->device_name) - 1U);
+		strncpy(
+		    fbink_state->device_codename, deviceQuirks.deviceCodename, sizeof(fbink_state->device_codename) - 1U);
+		strncpy(
+		    fbink_state->device_platform, deviceQuirks.devicePlatform, sizeof(fbink_state->device_platform) - 1U);
 		fbink_state->device_id        = deviceQuirks.deviceId;
 		fbink_state->pen_fg_color     = penFGColor;
 		fbink_state->pen_bg_color     = penBGColor;
