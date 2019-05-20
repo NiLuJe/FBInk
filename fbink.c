@@ -5307,16 +5307,7 @@ static uint8_t
 	// NOTE: For some arcane reason, on ARM (at least), this is noticeably faster than Pillow's CLIP8 macro.
 	//       Following this logic with ternary operators yields similar results,
 	//       so I'm guessing it's the < 256 part of Pillow's macro that doesn't agree with GCC/ARM...
-	uint8_t c;
-	if (q > 0xFF) {
-		c = 0xFF;
-	} else if (q < 0) {
-		c = 0U;
-	} else {
-		c = (uint8_t) q;
-	}
-
-	return c;
+	return (q > UINT8_MAX ? UINT8_MAX : q < 0 ? 0U : (uint8_t) q);
 }
 
 // Draw image data on screen (we inherit a few of the variable types/names from stbi ;))
