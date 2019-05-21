@@ -249,7 +249,8 @@ typedef struct
 				    // If only *one* of them is left at 0, the image's aspect ratio will be honored.
 				    // If *either* of them is set to < -1, fit to screen while respecting AR.
 				    // NOTE: Scaling is inherently costly. I highly recommend not relying on it,
-				    //       preferring instead proper preprocessing of your input images.
+				    //       preferring instead proper preprocessing of your input images,
+				    //       c.f., https://www.mobileread.com/forums/showpost.php?p=3728291&postcount=17
 	uint8_t wfm_mode;           // Request a specific waveform mode (c.f., WFM_MODE_INDEX_T enum; defaults to AUTO)
 	bool    is_dithered;        // Request (ordered) hardware dithering (if supported).
 	bool    sw_dithering;       // Request (ordered) *software* dithering when printing an image.
