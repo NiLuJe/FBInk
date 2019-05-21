@@ -6240,20 +6240,9 @@ int
 	// Was scaling requested?
 	unsigned char* restrict sdata        = NULL;
 	bool                    want_scaling = false;
-	unsigned short int scaled_width = fbink_cfg->scaled_width > 0 ? (unsigned short int) fbink_cfg->scaled_width : 0;
-	unsigned short int scaled_height =
-	    fbink_cfg->scaled_height > 0 ? (unsigned short int) fbink_cfg->scaled_height : 0;
 	if (fbink_cfg->scaled_width != 0 || fbink_cfg->scaled_height != 0) {
 		LOG("Image scaling requested!");
 		want_scaling = true;
-
-		// Set to viewport dimensions if requested...
-		if (fbink_cfg->scaled_width == -1) {
-			scaled_width = (unsigned short int) viewWidth;
-		}
-		if (fbink_cfg->scaled_height == -1) {
-			scaled_height = (unsigned short int) viewHeight;
-		}
 
 		// NOTE: QImageScale only accepts Y8, Y8A and RGBA input (i.e., RGBA, or RGB stored @ 32bpp, with 8 unused bits).
 		//       We, on the other hand, store RGB in 24bits, so, that won't do...
@@ -6289,33 +6278,57 @@ int
 
 	// Scale it w/ QImageScale, if requested
 	if (want_scaling) {
+		// Make sure the scaled dimensions start sane...
+		unsigned short int scaled_width;
+		if (fbink_cfg->scaled_width > 0) {
+			// Honor the specified dimension
+			scaled_width = (unsigned short int) fbink_cfg->scaled_width;
+		} else if (fbink_cfg->scaled_width < 0) {
+			// -1 or less -> use the viewport's dimension
+			scaled_width = (unsigned short int) viewWidth;
+		} else {
+			// 0 -> No scaling requested
+			scaled_width = (unsigned short int) w;
+		}
+		unsigned short int scaled_height;
+		if (fbink_cfg->scaled_height > 0) {
+			// Honor the specified dimension
+			scaled_height = (unsigned short int) fbink_cfg->scaled_height;
+		} else if (fbink_cfg->scaled_height < 0) {
+			// -1 or less -> use the viewport's dimension
+			scaled_height = (unsigned short int) viewHeight;
+		} else {
+			// 0 -> No scaling requested
+			scaled_height = (unsigned short int) h;
+		}
+
 		// NOTE: Handle AR if best fit was requested, or if scaling was requested on one side only...
 		if (fbink_cfg->scaled_width < -1 || fbink_cfg->scaled_height < -1) {
 			float aspect = (float) w / (float) h;
-			if (w > h) {
-				scaled_width  = (unsigned short int) viewWidth;
-				scaled_height = (unsigned short int) (scaled_width / aspect + 0.5f);
-				if (scaled_height > viewHeight) {
-					scaled_height = (unsigned short int) viewHeight;
-					scaled_width  = (unsigned short int) (scaled_height * aspect + 0.5f);
-				}
+			// We want to fit the image *inside* the viewport, so, enforce our starting scaled dimensions...
+			scaled_width  = (unsigned short int) viewWidth;
+			scaled_height = (unsigned short int) viewHeight;
+			// NOTE: Loosely based on Qt's QSize boundedTo implementation
+			//       c.f., QSize::scaled @ https://github.com/qt/qtbase/blob/dev/src/corelib/tools/qsize.cpp
+			unsigned short int rescaled_width = (unsigned short int) (scaled_height * aspect + 0.5f);
+			// NOTE: One would simply have to check for >= instead of <= to implement
+			//       Qt::KeepAspectRatioByExpanding instead of Qt::KeepAspectRatio
+			if (rescaled_width <= scaled_width) {
+				scaled_width = rescaled_width;
 			} else {
-				scaled_height = (unsigned short int) viewHeight;
-				scaled_width  = (unsigned short int) (scaled_height * aspect + 0.5f);
-				if (scaled_width > viewWidth) {
-					scaled_width  = (unsigned short int) viewWidth;
-					scaled_height = (unsigned short int) (scaled_width / aspect + 0.5f);
-				}
+				scaled_height = (unsigned short int) (scaled_width / aspect + 0.5f);
 			}
 		} else if (fbink_cfg->scaled_width == 0 && fbink_cfg->scaled_height != 0) {
+			// ?xH, compute width, honoring AR
 			float aspect = (float) w / (float) h;
 			scaled_width = (unsigned short int) (scaled_height * aspect + 0.5f);
 		} else if (fbink_cfg->scaled_width != 0 && fbink_cfg->scaled_height == 0) {
+			// Wx?, compute height, honoring AR
 			float aspect  = (float) w / (float) h;
 			scaled_height = (unsigned short int) (scaled_width / aspect + 0.5f);
 		}
 
-		LOG("Scaling image data from %dx%d to %hdx%hd . . .", w, h, scaled_width, scaled_height);
+		LOG("Scaling image data from %dx%d to %hux%hu . . .", w, h, scaled_width, scaled_height);
 
 		sdata = qSmoothScaleImage(imgdata, w, h, req_n, fbink_cfg->ignore_alpha, scaled_width, scaled_height);
 		if (sdata == NULL) {
