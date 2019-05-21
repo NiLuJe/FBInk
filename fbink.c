@@ -5294,20 +5294,19 @@ static uint8_t
 	//
 	// threshold = QuantumScale * v * ((L-1) * (D-1) + 1)
 	// NOTE: The initial computation of t (specifically, what we pass to DIV255) would overflow an uint8_t.
-	//       So jump to shorts, and do it signed to be extra careful, although I don't *think* we can ever underflow here.
-	int16_t t = (int16_t) DIV255(v * ((15U << 6) + 1U));
+	uint32_t t = DIV255(v * ((15U << 6) + 1U));
 	// level = t / (D-1);
-	int16_t l = (t >> 6);
+	uint32_t l = (t >> 6);
 	// t -= l * (D-1);
-	t = (int16_t)(t - (l << 6));
+	t = (t - (l << 6));
 
 	// map width & height = 8
 	// c = ClampToQuantum((l+(t >= map[(x % mw) + mw * (y % mh)])) * QuantumRange / (L-1));
-	int16_t q = (int16_t)((l + (t >= threshold_map_o8x8[(x & 7U) + 8U * (y & 7U)])) * 17);
+	uint32_t q = ((l + (t >= threshold_map_o8x8[(x & 7U) + 8U * (y & 7U)])) * 17);
 	// NOTE: For some arcane reason, on ARM (at least), this is noticeably faster than Pillow's CLIP8 macro.
 	//       Whether using ternary operators or an if ladder yields identical results (... except with Clang),
 	//       so I'm guessing it's the < 256 part of Pillow's macro that doesn't agree with GCC/ARM...
-	return (q > UINT8_MAX ? UINT8_MAX : q < 0 ? 0U : (uint8_t) q);
+	return (q > UINT8_MAX ? UINT8_MAX : (uint8_t) q);
 }
 
 // Draw image data on screen (we inherit a few of the variable types/names from stbi ;))
