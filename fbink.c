@@ -6145,8 +6145,7 @@ int
 			if (rescaled_width <= scaled_width) {
 				scaled_width = rescaled_width;
 			} else {
-				aspect        = (float) h / (float) w;
-				scaled_height = (unsigned short int) (scaled_width * aspect + 0.5f);
+				scaled_height = (unsigned short int) (scaled_width / aspect + 0.5f);
 			}
 		} else if (fbink_cfg->scaled_width == 0 && fbink_cfg->scaled_height != 0) {
 			// ?xH, compute width, honoring AR
