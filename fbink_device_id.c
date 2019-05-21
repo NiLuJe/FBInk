@@ -580,8 +580,8 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case 360:    // Aura (phoenix)
-			// NOTE: The bottom 10 pixels *may* be blacked out by Nickel? (TBC!)
-			//deviceQuirks.koboVertOffset = -10;
+			// NOTE: The bottom 10 pixels are blacked out by Nickel (behind the bezel)
+			deviceQuirks.koboVertOffset = -10;
 			// NOTE: According to the nightmode hack, the Aura's kernel *may* be crashy w/ PxP inversion...
 			deviceQuirks.canHWInvert = false;
 			deviceQuirks.screenDPI   = 212U;
