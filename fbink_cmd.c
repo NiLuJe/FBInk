@@ -848,17 +848,15 @@ int
 							break;
 					}
 				}
-				if (image_file == NULL) {
-					fprintf(stderr, "Must specify at least '%s'\n", image_token[FILE_OPT]);
-					errfnd = true;
-				} else {
-					is_image = true;
-				}
+				// NOTE: We delay checking image_file to allow using -i both before AND after -g,
+				//       or even on its own!
+				is_image = true;
 				break;
 			case 'i':
 				// Free a potentially previously set value...
 				free(image_file);
 				image_file = strdup(optarg);
+				is_image   = true;
 				break;
 			case 'a':
 				fbink_cfg.ignore_alpha = true;
@@ -1174,6 +1172,15 @@ int
 				errfnd = true;
 				break;
 		}
+	}
+
+	// Now we can make sure we passed an image file to print, one way or another
+	if (is_image && image_file == NULL) {
+		fprintf(
+		    stderr,
+		    "A path to an image file *must* be specified, either via the '%s' suboption of the -g, --image flag; or via the -i, --img flag!\n",
+		    image_token[FILE_OPT]);
+		errfnd = true;
 	}
 
 	// Enforce quiet output when asking for want_linecount, to avoid polluting the output...
