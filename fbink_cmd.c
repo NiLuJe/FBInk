@@ -225,6 +225,8 @@ static void
 	    "\t\tDisplays the image \"hello.png\", in the middle of the screen, aligned to the right edge.\n"
 	    "\tfbink -g file=hello.png -W A2\n"
 	    "\t\tDisplays the image \"hello.png\", in monochrome.\n"
+	    "\tfbink -i wheee.png\n"
+	    "\t\tDisplays the image \"wheee.png\" with the default settings.\n"
 	    "\n"
 	    "Options affecting the image's appearance:\n"
 	    "\t-a, --flatten\tIgnore the alpha channel.\n"
