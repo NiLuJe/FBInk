@@ -5294,6 +5294,9 @@ static uint8_t
 	//
 	// threshold = QuantumScale * v * ((L-1) * (D-1) + 1)
 	// NOTE: The initial computation of t (specifically, what we pass to DIV255) would overflow an uint8_t.
+	//       With a Q8 input value, we're at no risk of ever underflowing, so, keep to unsigned maths.
+	//       Technically, an uint16_t would be wide enough, but it gains us nothing,
+	//       and requires a few explicit casts to make GCC happy ;).
 	uint32_t t = DIV255(v * ((15U << 6) + 1U));
 	// level = t / (D-1);
 	uint32_t l = (t >> 6);
@@ -5303,9 +5306,7 @@ static uint8_t
 	// map width & height = 8
 	// c = ClampToQuantum((l+(t >= map[(x % mw) + mw * (y % mh)])) * QuantumRange / (L-1));
 	uint32_t q = ((l + (t >= threshold_map_o8x8[(x & 7U) + 8U * (y & 7U)])) * 17);
-	// NOTE: For some arcane reason, on ARM (at least), this is noticeably faster than Pillow's CLIP8 macro.
-	//       Whether using ternary operators or an if ladder yields identical results (... except with Clang),
-	//       so I'm guessing it's the < 256 part of Pillow's macro that doesn't agree with GCC/ARM...
+	// NOTE: We're doing unsigned maths, so, clamping is basically MIN(q, UINT8_MAX) ;).
 	return (q > UINT8_MAX ? UINT8_MAX : (uint8_t) q);
 }
 
