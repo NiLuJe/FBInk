@@ -27,6 +27,16 @@ static const uint16_t*
 		return spleen_block1[codepoint - 0x20];
 	} else if (codepoint >= 0xa0 && codepoint <= 0xff) {
 		return spleen_block2[codepoint - 0xa0];
+	} else if (codepoint >= 0x104 && codepoint <= 0x107) {
+		return spleen_block3[codepoint - 0x104];
+	} else if (codepoint >= 0x118 && codepoint <= 0x119) {
+		return spleen_block4[codepoint - 0x118];
+	} else if (codepoint >= 0x141 && codepoint <= 0x144) {
+		return spleen_block5[codepoint - 0x141];
+	} else if (codepoint >= 0x15a && codepoint <= 0x15b) {
+		return spleen_block6[codepoint - 0x15a];
+	} else if (codepoint >= 0x179 && codepoint <= 0x17c) {
+		return spleen_block7[codepoint - 0x179];
 	} else {
 		WARN("Codepoint U+%04X is not covered by this font", codepoint);
 		return spleen_block1[0];
