@@ -81,7 +81,7 @@ static bool
 	//       in which case we might block for a while...
 	while (poll(&pfd, 1, -1) >= 0) {
 		if (pfd.revents & POLLERR) {
-			LOG("Mountpoints changed (iteration nr. %hhu of %hhu)", ++changes, max_changes);
+			LOG("Mountpoints changed (iteration nr. %d of %hhu)", ++changes, max_changes);
 
 			// Stop polling once we know onboard is in the requested state...
 			if (is_onboard_state(mounted)) {
