@@ -355,6 +355,9 @@ const uint32_t* (*fxpFont32xGetBitmap)(uint32_t) = NULL;
 // Where we track device/screen-specific quirks
 FBInkDeviceQuirks deviceQuirks = { 0 };
 
+// Where we track the last drawn rectangle
+FBInkRect lastRect = { 0 };
+
 #ifdef FBINK_WITH_OPENTYPE
 // Information about the currently loaded OpenType font
 bool         otInit  = false;
@@ -459,6 +462,8 @@ static void rotate_region_boot(struct mxcfb_rect* restrict);
 #endif
 static void rotate_region_nop(struct mxcfb_rect* restrict);
 static void fullscreen_region(struct mxcfb_rect* restrict);
+
+static void set_last_rect(const struct mxcfb_rect* restrict, bool);
 
 int draw_progress_bars(int, bool, uint8_t, const FBInkConfig* restrict);
 

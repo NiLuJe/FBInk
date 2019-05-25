@@ -2775,6 +2775,27 @@ cleanup:
 	return rv;
 }
 
+// Utility function to handle get_last_rect & print_rect stuff
+static void
+    set_last_rect(const struct mxcfb_rect* restrict region, bool print_rect)
+{
+	// Start by storing the region
+	lastRect.top    = (unsigned short int) region->top;
+	lastRect.left   = (unsigned short int) region->left;
+	lastRect.width  = (unsigned short int) region->width;
+	lastRect.height = (unsigned short int) region->height;
+
+	// Print it, eval friendly, if requested
+	if (print_rect) {
+		fprintf(stdout,
+			"lastRect_Top=%hu;lastRect_Left=%hu;lastRect_Width=%hu;lastRect_Height=%hu",
+			lastRect.top,
+			lastRect.left,
+			lastRect.width,
+			lastRect.height);
+	}
+}
+
 // Magic happens here!
 int
     fbink_print(int fbfd, const char* restrict string, const FBInkConfig* fbink_cfg)
@@ -3149,6 +3170,9 @@ int
 		//memset(line, 0, ((MAXCOLS + 1U) * 4U) * sizeof(*line));
 	}
 
+	// Handle the last rect stuff...
+	set_last_rect(&region, fbink_cfg->print_rect);
+
 	// Rotate the region if need be...
 	(*fxpRotateRegion)(&region);
 
@@ -3385,6 +3409,7 @@ int
 	uint8_t           wfm_mode     = WFM_AUTO;
 	bool              is_dithered  = false;
 	bool              is_nightmode = false;
+	bool              print_rect   = false;
 	bool              no_refresh   = false;
 
 	// map fb to user mem
@@ -3850,6 +3875,7 @@ int
 		wfm_mode     = fbink_cfg->wfm_mode;
 		is_dithered  = fbink_cfg->is_dithered;
 		is_nightmode = fbink_cfg->is_nightmode;
+		print_rect   = fbink_cfg->print_rect;
 		no_refresh   = fbink_cfg->no_refresh;
 	} else {
 		is_centered = cfg->is_centered;
@@ -4352,6 +4378,9 @@ cleanup:
 	    region.width,
 	    region.height);
 	if (region.width > 0U && region.height > 0U) {
+		// Handle the last rect stuff...
+		set_last_rect(&region, print_rect);
+
 		(*fxpRotateRegion)(&region);
 		// NOTE: If we asked for a clear screen, fudge the region at the last moment,
 		// so we don't get mangled by previous adjustments...
@@ -4947,6 +4976,9 @@ int
 			LOG("Adjusted region top to account for vertical offset pushing part of the content off-screen");
 		}
 	}
+
+	// Handle the last rect stuff...
+	set_last_rect(&region, fbink_cfg->print_rect);
 
 	// Rotate the region if need be...
 	(*fxpRotateRegion)(&region);
@@ -6010,6 +6042,9 @@ static int
 		}
 	}
 
+	// Handle the last rect stuff...
+	set_last_rect(&region, fbink_cfg->print_rect);
+
 	// Rotate the region if need be...
 	(*fxpRotateRegion)(&region);
 
@@ -6781,6 +6816,13 @@ cleanup:
 	WARN("Image support is disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
 #endif
+}
+
+// Return a copy of the last drawn rectangle coordinates/dimensions
+FBInkRect
+    fbink_get_last_rect(void)
+{
+	return lastRect;
 }
 
 // And now, we just bundle auxiliary parts of the public or private API,
