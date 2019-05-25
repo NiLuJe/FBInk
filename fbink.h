@@ -601,8 +601,8 @@ FBINK_API int fbink_region_dump(int                fbfd,
 // NOTE: This does *NOT* free data.dump!
 FBINK_API int fbink_restore(int fbfd, const FBInkConfig* restrict fbink_cfg, const FBInkDump* restrict dump);
 
-// Returns the coordinates & dimensions of the last thing that was *drawn*
-// Returns an empty (i.e., {0, 0, 0, 0}) rectangle on failure.
+// Return the coordinates & dimensions of the last thing that was *drawn*
+// Returns an empty (i.e., {0, 0, 0, 0}) rectangle if nothing was drawn.
 // NOTE: These are unfiltered *framebuffer* coordinates.
 //       If your goal is to use that for input detection, mapping that to input coordinates is your responsibility.
 //       On Kobo, fbink_get_state should contain enough data to help you figure out what kinds of quirks you need to account for.
@@ -612,7 +612,7 @@ FBINK_API int fbink_restore(int fbfd, const FBInkConfig* restrict fbink_cfg, con
 //       i.e., it corresponds to what's drawn to the fb, not necessarily to what's refreshed on screen.
 // NOTE: On devices where we may fudge the coordinates to account for broken rotation (i.e., Kobos @ 16bpp),
 //       these are the *rotated* coordinates!
-//       i.e., they *will* match with what we actually send to mxcfb (and where we actually wrote on the fb)!
+//       i.e., they *will* match with what we actually send to mxcfb (and where we actually drawn on the fb)!
 FBINK_API FBInkRect fbink_get_last_rect(void);
 
 // Scan the screen for Kobo's "Connect" button in the "USB plugged in" popup,
