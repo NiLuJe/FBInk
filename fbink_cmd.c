@@ -127,6 +127,7 @@ static void
 	    "\t\t\t\tNOTE: Will be inaccurate if there are more than 255 rows on screen!\n"
 	    "\t-l, --linecount\t\tWhen successfully printing text, outputs the total amount of printed lines in the final line of output to stdout (NOTE: enforces quiet & non-verbose!).\n"
 	    "\t\t\t\tNOTE: With OT/TTF rendering, will output a top margin value to use as-is instead (or 0 if there's no space left on screen)!\n"
+	    "\t-E, --coordinates\t\tWhen printing something, outputs the coordinates & dimensions of what was printed to stdout, in a format easily consumable by eval (NOTE: enforces quiet & non-verbose!).\n"
 	    "\t-P, --progressbar NUM\tDraw a NUM%% full progress bar (full-width). Like other alternative modes, does *NOT* have precedence over text printing.\n"
 	    "\t\t\t\tIgnores -o, --overlay; -x, --col; -X, --hoffset; as well as -m, --centered & -p, --padded\n"
 	    "\t-A, --activitybar NUM\tDraw an activity bar on step NUM (full-width). NUM must be between 0 and 16. Like other alternative modes, does *NOT* have precedence over text printing.\n"
@@ -408,6 +409,7 @@ int
 					      { "dither", no_argument, NULL, 'D' },
 					      { "waveform", required_argument, NULL, 'W' },
 					      { "nightmode", no_argument, NULL, 'H' },
+					      { "coordinates", no_argument, NULL, 'E' },
 					      { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_cfg = { 0 };
@@ -951,6 +953,9 @@ int
 			case 'l':
 				want_linecount = true;
 				break;
+			case 'E':
+				fbink_cfg.print_rect = true;
+				break;
 			case 'P':
 				is_progressbar = true;
 				if (strtoul_hhu(opt, NULL, optarg, &progress) < 0) {
@@ -1185,8 +1190,16 @@ int
 		errfnd = true;
 	}
 
-	// Enforce quiet output when asking for want_linecount, to avoid polluting the output...
-	if (want_linecount) {
+	// We can't have two different types of consumable metadata being sent to stdout.
+	// Use the API if you need more flexibility.
+	if (want_linecount && fbink_cfg.print_rect) {
+		fprintf(stderr,
+			"Incompatible options: -E, --coordinates cannot be used in conjunction with -l, --linecount!\n");
+		errfnd = true;
+	}
+
+	// Enforce quiet output when asking for want_linecount or print_rect, to avoid polluting the output...
+	if (want_linecount || fbink_cfg.print_rect) {
 		fbink_cfg.is_quiet   = true;
 		fbink_cfg.is_verbose = false;
 	}
