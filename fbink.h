@@ -212,6 +212,7 @@ typedef struct
 	bool                 is_kobo_non_mt;         // deviceQuirks.isKoboNonMT
 	uint8_t              ntx_boot_rota;          // deviceQuirks.ntxBootRota
 	uint8_t              ntx_rota_quirk;         // deviceQuirks.ntxRotaQuirk
+	uint8_t              current_rota;           // vInfo.rotate
 	bool                 can_rotate;             // deviceQuirks.canRotate
 } FBInkState;
 
@@ -257,9 +258,13 @@ typedef struct
 				    // This is *NOT* mutually exclusive with is_dithered!
 	bool is_nightmode;          // Request hardware inversion (if supported/safe).
 				    // This is *NOT* mutually exclusive with is_inverted!
+	bool print_rect;            // Print the coordinates & dimensions of what was drawn to stdout,
+				    // in an eval friendly format.
+				    // NOTE: API users should prefer fbink_get_last_rect, which is much less clunky.
 	bool no_refresh;            // Skip actually refreshing the eInk screen (useful when drawing in batch)
 } FBInkConfig;
 
+// Same, but for OT/TTF specific stuff
 typedef struct
 {
 	struct
@@ -274,6 +279,7 @@ typedef struct
 	bool               is_formatted;    // Is string "formatted"? Bold/Italic support only, markdown like syntax
 } FBInkOTConfig;
 
+// For use with fbink_dump & fbink_restore
 typedef struct
 {
 	unsigned char* restrict data;
@@ -286,6 +292,15 @@ typedef struct
 	uint8_t                 bpp;
 	bool                    is_full;
 } FBInkDump;
+
+// This maps to an mxcfb rectangle, used for fbink_get_last_rect
+typedef struct
+{
+	unsigned short int top;     // y
+	unsigned short int left;    // x
+	unsigned short int width;
+	unsigned short int height;
+} FBInkRect;
 
 // NOTE: Unless otherwise specified,
 //       stuff returns a negative value (usually -(EXIT_FAILURE)) on failure & EXIT_SUCCESS otherwise ;).
@@ -588,6 +603,13 @@ FBINK_API int fbink_region_dump(int                fbfd,
 //       Call fbink_reinit first if you really want to make sure bitdepth/rotation still match.
 // NOTE: This does *NOT* free data.dump!
 FBINK_API int fbink_restore(int fbfd, const FBInkConfig* restrict fbink_cfg, const FBInkDump* restrict dump);
+
+// Returns the coordinates & dimensions of the last thing that was *drawn*
+// Returns an empty (i.e., {0, 0, 0, 0}) rectangle on failure.
+// NOTE: These are *framebuffer* coordinates.
+//       If your goal is to use that for input detection, mapping that to input coordinates is your responsibility.
+//       On Kobo, fbink_get_state should contain enough data to help you figure out what kinds of quirks you need to account for.
+FBINK_API FBInkRect fbink_get_last_rect(void);
 
 // Scan the screen for Kobo's "Connect" button in the "USB plugged in" popup,
 // and optionally generate an input event to press that button.

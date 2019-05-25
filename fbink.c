@@ -2535,7 +2535,7 @@ void
 {
 	fprintf(
 	    stdout,
-	    "viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isKoboNonMT=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;canRotate=%d",
+	    "viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isKoboNonMT=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;currentRota=%u;canRotate=%d",
 	    viewWidth,
 	    viewHeight,
 	    screenWidth,
@@ -2565,6 +2565,7 @@ void
 	    deviceQuirks.isKoboNonMT,
 	    deviceQuirks.ntxBootRota,
 	    deviceQuirks.ntxRotaQuirk,
+	    vInfo.rotate,
 	    deviceQuirks.canRotate);
 }
 
@@ -2603,6 +2604,7 @@ void
 		fbink_state->is_kobo_non_mt   = deviceQuirks.isKoboNonMT;
 		fbink_state->ntx_boot_rota    = deviceQuirks.ntxBootRota;
 		fbink_state->ntx_rota_quirk   = deviceQuirks.ntxRotaQuirk;
+		fbink_state->current_rota     = (uint8_t) vInfo.rotate;
 		fbink_state->can_rotate       = deviceQuirks.canRotate;
 	} else {
 		WARN("Err, it appears we were passed a NULL fbink_state pointer?");
