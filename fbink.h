@@ -613,8 +613,9 @@ FBINK_API int fbink_restore(int fbfd, const FBInkConfig* restrict fbink_cfg, con
 //       this will get updated regardless of no_refresh,
 //       and will ignore what is_flashing might do to make the refresh region fullscreen.
 //       i.e., it corresponds to what's drawn to the fb, not necessarily to what's refreshed on screen.
-// NOTE: On devices where we may fudge the fb rotation (i.e., Kobos @ 16bpp), these are the *native*, *unrotated* coordinates!
-//       i.e., they will *not* match with what we actually send to mxcfb!
+// NOTE: On devices where we may fudge the coordinates to account for broken rotation (i.e., Kobos @ 16bpp),
+//       these are the *rotated* coordinates!
+//       i.e., they *will* match with what we actually send to mxcfb (and where we actually wrote on the fb)!
 FBINK_API FBInkRect fbink_get_last_rect(void);
 
 // Scan the screen for Kobo's "Connect" button in the "USB plugged in" popup,

@@ -3170,11 +3170,11 @@ int
 		//memset(line, 0, ((MAXCOLS + 1U) * 4U) * sizeof(*line));
 	}
 
-	// Handle the last rect stuff...
-	set_last_rect(&region, fbink_cfg->print_rect);
-
 	// Rotate the region if need be...
 	(*fxpRotateRegion)(&region);
+
+	// Handle the last rect stuff...
+	set_last_rect(&region, fbink_cfg->print_rect);
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
 	if (fbink_cfg->is_cleared) {
@@ -4378,10 +4378,9 @@ cleanup:
 	    region.width,
 	    region.height);
 	if (region.width > 0U && region.height > 0U) {
+		(*fxpRotateRegion)(&region);
 		// Handle the last rect stuff...
 		set_last_rect(&region, print_rect);
-
-		(*fxpRotateRegion)(&region);
 		// NOTE: If we asked for a clear screen, fudge the region at the last moment,
 		// so we don't get mangled by previous adjustments...
 		if (is_cleared) {
@@ -4977,11 +4976,11 @@ int
 		}
 	}
 
-	// Handle the last rect stuff...
-	set_last_rect(&region, fbink_cfg->print_rect);
-
 	// Rotate the region if need be...
 	(*fxpRotateRegion)(&region);
+
+	// Handle the last rect stuff...
+	set_last_rect(&region, fbink_cfg->print_rect);
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
 	if (fbink_cfg->is_cleared) {
@@ -6042,11 +6041,11 @@ static int
 		}
 	}
 
-	// Handle the last rect stuff...
-	set_last_rect(&region, fbink_cfg->print_rect);
-
 	// Rotate the region if need be...
 	(*fxpRotateRegion)(&region);
+
+	// Handle the last rect stuff...
+	set_last_rect(&region, fbink_cfg->print_rect);
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
 	if (fbink_cfg->is_cleared) {
