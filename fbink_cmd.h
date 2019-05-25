@@ -42,6 +42,8 @@ static int do_infinite_progress_bar(int, const FBInkConfig*);
 
 static void load_ot_fonts(const char*, const char*, const char*, const char*, const FBInkConfig*);
 
+static void print_lastrect(void);
+
 // Sprinkle a bit of C11 in there...
 // c.f., http://www.robertgamble.net/2012/01/c11-generic-selections.html
 #define TYPENAME(x)                                                                                                      \

@@ -258,9 +258,6 @@ typedef struct
 				    // This is *NOT* mutually exclusive with is_dithered!
 	bool is_nightmode;          // Request hardware inversion (if supported/safe).
 				    // This is *NOT* mutually exclusive with is_inverted!
-	bool print_rect;            // Print the coordinates & dimensions of what was drawn to stdout,
-				    // in an eval friendly format.
-				    // NOTE: API users should prefer fbink_get_last_rect, which is much less clunky.
 	bool no_refresh;            // Skip actually refreshing the eInk screen (useful when drawing in batch)
 } FBInkConfig;
 

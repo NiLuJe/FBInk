@@ -331,6 +331,20 @@ static void
 	}
 }
 
+// Small utility function for want_lastrect
+static void
+    print_lastrect(void)
+{
+	// No need to check for error, it will return {0, 0, 0, 0} on failure anyway ;).
+	FBInkRect last_rect = fbink_get_last_rect();
+	fprintf(stdout,
+		"lastRect_Top=%hu;lastRect_Left=%hu;lastRect_Width=%hu;lastRect_Height=%hu",
+		last_rect.top,
+		last_rect.left,
+		last_rect.width,
+		last_rect.height);
+}
+
 // Input validation via strtoul, for an uint32_t
 // Adapted from the same in KFMon ;).
 static int
@@ -490,6 +504,7 @@ int
 	bool      is_interactive = false;
 	bool      want_linecode  = false;
 	bool      want_linecount = false;
+	bool      want_lastrect  = false;
 	bool      is_progressbar = false;
 	bool      is_activitybar = false;
 	bool      is_infinite    = false;
@@ -954,7 +969,7 @@ int
 				want_linecount = true;
 				break;
 			case 'E':
-				fbink_cfg.print_rect = true;
+				want_lastrect = true;
 				break;
 			case 'P':
 				is_progressbar = true;
@@ -1192,14 +1207,14 @@ int
 
 	// We can't have two different types of consumable metadata being sent to stdout.
 	// Use the API if you need more flexibility.
-	if (want_linecount && fbink_cfg.print_rect) {
+	if (want_linecount && want_lastrect) {
 		fprintf(stderr,
 			"Incompatible options: -E, --coordinates cannot be used in conjunction with -l, --linecount!\n");
 		errfnd = true;
 	}
 
-	// Enforce quiet output when asking for want_linecount or print_rect, to avoid polluting the output...
-	if (want_linecount || fbink_cfg.print_rect) {
+	// Enforce quiet output when asking for want_linecount or want_lastrect, to avoid polluting the output...
+	if (want_linecount || want_lastrect) {
 		fbink_cfg.is_quiet   = true;
 		fbink_cfg.is_verbose = false;
 	}
@@ -1352,6 +1367,12 @@ int
 					total_lines = (unsigned short int) (total_lines + linecount);
 				}
 			}
+
+			// Print the coordinates & dimensions of what we wrote, if requested
+			// NOTE: This'll be slightly unwieldy for multi prints, but, eh.
+			if (want_lastrect) {
+				print_lastrect();
+			}
 		}
 		// And print the total amount of lines we printed, if requested...
 		if (want_linecount) {
@@ -1408,6 +1429,11 @@ int
 				fprintf(stderr, "Failed to display that image!\n");
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
+			} else {
+				// Print the coordinates & dimensions of what we've drawn, if requested
+				if (want_lastrect) {
+					print_lastrect();
+				}
 			}
 		} else if (is_progressbar) {
 			if (!fbink_cfg.is_quiet) {
@@ -1430,6 +1456,11 @@ int
 				fprintf(stderr, "Failed to display a progressbar!\n");
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
+			} else {
+				// Print the coordinates & dimensions of what we've drawn, if requested
+				if (want_lastrect) {
+					print_lastrect();
+				}
 			}
 		} else if (is_activitybar) {
 			// Were we asked to loop forever?
@@ -1474,6 +1505,11 @@ int
 					fprintf(stderr, "Failed to display an activitybar!\n");
 					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
+				} else {
+					// Print the coordinates & dimensions of what we've drawn, if requested
+					if (want_lastrect) {
+						print_lastrect();
+					}
 				}
 			}
 		} else if (is_eval) {

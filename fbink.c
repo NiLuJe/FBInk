@@ -2775,25 +2775,15 @@ cleanup:
 	return rv;
 }
 
-// Utility function to handle get_last_rect & print_rect stuff
+// Utility function to handle get_last_rect tracking
 static void
-    set_last_rect(const struct mxcfb_rect* restrict region, bool print_rect)
+    set_last_rect(const struct mxcfb_rect* restrict region)
 {
-	// Start by storing the region
+	// Remember the region we've just drawn to
 	lastRect.top    = (unsigned short int) region->top;
 	lastRect.left   = (unsigned short int) region->left;
 	lastRect.width  = (unsigned short int) region->width;
 	lastRect.height = (unsigned short int) region->height;
-
-	// Print it, eval friendly, if requested
-	if (print_rect) {
-		fprintf(stdout,
-			"lastRect_Top=%hu;lastRect_Left=%hu;lastRect_Width=%hu;lastRect_Height=%hu",
-			lastRect.top,
-			lastRect.left,
-			lastRect.width,
-			lastRect.height);
-	}
 }
 
 // Magic happens here!
@@ -3174,7 +3164,7 @@ int
 	(*fxpRotateRegion)(&region);
 
 	// Handle the last rect stuff...
-	set_last_rect(&region, fbink_cfg->print_rect);
+	set_last_rect(&region);
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
 	if (fbink_cfg->is_cleared) {
@@ -3409,7 +3399,6 @@ int
 	uint8_t           wfm_mode     = WFM_AUTO;
 	bool              is_dithered  = false;
 	bool              is_nightmode = false;
-	bool              print_rect   = false;
 	bool              no_refresh   = false;
 
 	// map fb to user mem
@@ -3875,7 +3864,6 @@ int
 		wfm_mode     = fbink_cfg->wfm_mode;
 		is_dithered  = fbink_cfg->is_dithered;
 		is_nightmode = fbink_cfg->is_nightmode;
-		print_rect   = fbink_cfg->print_rect;
 		no_refresh   = fbink_cfg->no_refresh;
 	} else {
 		is_centered = cfg->is_centered;
@@ -4380,7 +4368,7 @@ cleanup:
 	if (region.width > 0U && region.height > 0U) {
 		(*fxpRotateRegion)(&region);
 		// Handle the last rect stuff...
-		set_last_rect(&region, print_rect);
+		set_last_rect(&region);
 		// NOTE: If we asked for a clear screen, fudge the region at the last moment,
 		// so we don't get mangled by previous adjustments...
 		if (is_cleared) {
@@ -4980,7 +4968,7 @@ int
 	(*fxpRotateRegion)(&region);
 
 	// Handle the last rect stuff...
-	set_last_rect(&region, fbink_cfg->print_rect);
+	set_last_rect(&region);
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
 	if (fbink_cfg->is_cleared) {
@@ -6045,7 +6033,7 @@ static int
 	(*fxpRotateRegion)(&region);
 
 	// Handle the last rect stuff...
-	set_last_rect(&region, fbink_cfg->print_rect);
+	set_last_rect(&region);
 
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
 	if (fbink_cfg->is_cleared) {

@@ -463,7 +463,7 @@ static void rotate_region_boot(struct mxcfb_rect* restrict);
 static void rotate_region_nop(struct mxcfb_rect* restrict);
 static void fullscreen_region(struct mxcfb_rect* restrict);
 
-static void set_last_rect(const struct mxcfb_rect* restrict, bool);
+static void set_last_rect(const struct mxcfb_rect* restrict);
 
 int draw_progress_bars(int, bool, uint8_t, const FBInkConfig* restrict);
 
