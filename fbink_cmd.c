@@ -1369,7 +1369,8 @@ int
 			}
 
 			// Print the coordinates & dimensions of what we wrote, if requested
-			// NOTE: This'll be slightly unwieldy for multi prints, but, eh.
+			// NOTE: This'll be slightly unwieldy for multi prints, but, as things are printed in order,
+			//       the final line will be canon.
 			if (want_lastrect) {
 				print_lastrect();
 			}
