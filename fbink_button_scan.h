@@ -31,7 +31,32 @@
 #	include <poll.h>
 #	include <time.h>
 
-// NOTE: My TC's kernel is too old for some newer event codes...
+// NOTE: My TC's kernel may be too old for some newer event codes...
+//       c.f., /usr/include/linux/input-event-codes.h
+#	ifndef SYN_MT_REPORT
+#		define SYN_MT_REPORT 2
+#	endif
+#	ifndef ABS_MT_TOUCH_MAJOR
+#		define ABS_MT_TOUCH_MAJOR 0x30
+#	endif
+#	ifndef ABS_MT_TOUCH_MINOR
+#		define ABS_MT_TOUCH_MINOR 0x31
+#	endif
+#	ifndef ABS_MT_WIDTH_MAJOR
+#		define ABS_MT_WIDTH_MAJOR 0x32
+#	endif
+#	ifndef ABS_MT_ORIENTATION
+#		define ABS_MT_ORIENTATION 0x34
+#	endif
+#	ifndef ABS_MT_POSITION_X
+#		define ABS_MT_POSITION_X 0x35
+#	endif
+#	ifndef ABS_MT_POSITION_Y
+#		define ABS_MT_POSITION_Y 0x36
+#	endif
+#	ifndef ABS_MT_TRACKING_ID
+#		define ABS_MT_TRACKING_ID 0x39
+#	endif
 #	ifndef ABS_MT_PRESSURE
 #		define ABS_MT_PRESSURE 0x3a
 #	endif
