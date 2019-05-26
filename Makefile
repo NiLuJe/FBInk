@@ -59,6 +59,9 @@ endif
 ifeq "$(shell expr $(CC_VERSION) \>= 070000)" "1"
 	# This is GCC >= 7
 	MOAR_WARNIGS:=1
+else
+	# We may be silencing warnings unknown to older compilers via pragmas, so don't warn about those...
+	EXTRA_CFLAGS+=-Wno-pragmas
 endif
 
 # Detect whether our TC is cross (at least as far as the target arch is concerned)
