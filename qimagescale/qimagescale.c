@@ -541,7 +541,7 @@ static void
 }
 
 #if defined(FBINK_QIS_NO_SIMD) || !(defined(__SSE4_1__) || defined(__ARM_NEON__))
-static inline void
+static inline __attribute__((always_inline)) void
     qt_qimageScaleAARGBA_helper(const unsigned int* pix, int xyap, int Cxy, int step, int* r, int* g, int* b, int* a)
 {
 	*r = (int) qRed(*pix) * xyap;
@@ -749,7 +749,7 @@ static void
 }
 
 #if defined(FBINK_QIS_NO_SIMD) || !(defined(__SSE4_1__) || defined(__ARM_NEON__))
-static inline void
+static inline __attribute__((always_inline)) void
     qt_qimageScaleAARGB_helper(const unsigned int* pix, int xyap, int Cxy, int step, int* r, int* g, int* b)
 {
 	*r = (int) qRed(*pix) * xyap;
@@ -888,7 +888,7 @@ static void
 }
 #endif    // FBINK_QIS_NO_SIMD || !(__SSE4_1__ || __ARM_NEON__)
 
-static inline void
+static inline __attribute__((always_inline)) void
     qt_qimageScaleAAY8_helper(const unsigned char* pix, int xyap, int Cxy, int step, int* v)
 {
 	*v = *pix * xyap;
@@ -1060,7 +1060,7 @@ static void
 		qt_qimageScaleAAY8_down_xy(isi, dest, dw, dh, dow, sow);
 }
 
-static inline void
+static inline __attribute__((always_inline)) void
     qt_qimageScaleAAY8A_helper(const unsigned short* pix, int xyap, int Cxy, int step, int* v, int* a)
 {
 	*v = qY(*pix) * xyap;

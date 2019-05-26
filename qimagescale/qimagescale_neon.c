@@ -41,7 +41,7 @@
 
 #if defined(__ARM_NEON__)
 
-static inline uint32x4_t
+static inline __attribute__((always_inline)) uint32x4_t
     qt_qimageScaleAARGBA_helper_neon(const unsigned int* pix, int xyap, int Cxy, int step)
 {
 	uint32x2_t vpix32 = vmov_n_u32(*pix);
