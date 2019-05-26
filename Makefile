@@ -107,9 +107,10 @@ endif
 # NOTE: We require C11 support (GCC >= 4.9, Clang >= 3.0), so enforce that on older compilers,
 #       because otherwise the errors generated are highly unhelpful...
 ifeq "$(CC_IS_CLANG)" "0"
-	# NOTE: GCC 6.1.0 switched to gnu11 & gnu++14, so only tweak older ones.
+	# NOTE: GCC 5.1.0 switched to gnu11, while GCC 6.1.0 switched to gnu++14, so only tweak older ones.
+	#       We only care about C here, so enforce gnu11 on GCC < 5.1
 	#       c.f., https://stackoverflow.com/q/14737104 for a nice recap.
-	ifeq "$(shell expr $(CC_VERSION) \< 060100)" "1"
+	ifeq "$(shell expr $(CC_VERSION) \< 050100)" "1"
 		EXTRA_CFLAGS+=-std=gnu11
 	endif
 endif
