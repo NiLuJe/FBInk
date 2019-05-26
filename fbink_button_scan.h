@@ -32,6 +32,9 @@
 #	include <time.h>
 
 // NOTE: My TC's kernel is too old for some newer event codes...
+#	ifndef ABS_MT_PRESSURE
+#		define ABS_MT_PRESSURE 0x3a
+#	endif
 #	ifndef ABS_MT_DISTANCE
 #		define ABS_MT_DISTANCE 0x3b
 #	endif
