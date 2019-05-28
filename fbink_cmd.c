@@ -1514,6 +1514,10 @@ int
 				}
 			}
 		} else if (is_eval) {
+			// Allow doing a clear at the same time
+			if (fbink_cfg.is_cleared) {
+				rv = fbink_cls(fbfd, &fbink_cfg);
+			}
 			fbink_state_dump(&fbink_cfg);
 		} else if (is_interactive && isatty(fileno(stdin))) {
 			// We asked for interactive mode, and we're really running from a terminal, so, go ahead.
