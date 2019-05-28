@@ -252,7 +252,7 @@ static void
 	    "\n"
 	    "NOTES:\n"
 	    "\tShell script writers can also use the -e, --eval flag to have fbink just spit out a few of its internal state variables to stdout,\n"
-	    "\t\tf.g., eval $(fbink -qe)\n"
+	    "\t\tf.g., eval $(fbink -e)\n"
 	    "\n",
 	    fbink_version());
 
@@ -1213,8 +1213,8 @@ int
 		errfnd = true;
 	}
 
-	// Enforce quiet output when asking for want_linecount or want_lastrect, to avoid polluting the output...
-	if (want_linecount || want_lastrect) {
+	// Enforce quiet output when asking for is_eval, want_linecount or want_lastrect, to avoid polluting the output...
+	if (is_eval || want_linecount || want_lastrect) {
 		fbink_cfg.is_quiet   = true;
 		fbink_cfg.is_verbose = false;
 	}
