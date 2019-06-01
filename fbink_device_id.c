@@ -281,6 +281,12 @@ static bool
 		case 0x376:
 		case 0x402:
 		case 0x403:
+		case 0x4D8:
+		case 0x4D9:
+		case 0x4DA:
+		case 0x4DB:
+		case 0x4DC:
+		case 0x4DD:
 			deviceQuirks.isKindleRex = true;
 			deviceQuirks.screenDPI   = 300U;
 			// Flawfinder: ignore
