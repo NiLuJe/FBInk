@@ -31,6 +31,8 @@ cdecl_type(FBInkOTConfig)
 
 cdecl_type(FBInkDump)
 
+cdecl_type(FBInkRect)
+
 // API
 cdecl_func(fbink_version)
 
@@ -64,6 +66,8 @@ cdecl_func(fbink_cls)
 cdecl_func(fbink_dump)
 cdecl_func(fbink_region_dump)
 cdecl_func(fbink_restore)
+
+cdecl_func(fbink_get_last_rect)
 
 cdecl_func(fbink_button_scan)
 cdecl_func(fbink_wait_for_usbms_processing)
