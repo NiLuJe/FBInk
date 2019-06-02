@@ -1286,7 +1286,7 @@ int
 		// Double the usual size
 		FBInkState fbink_state = { 0 };
 		fbink_get_state(&fbink_cfg, &fbink_state);
-		fbink_cfg.fontmult = fbink_state.fontsize_mult << 1U;
+		fbink_cfg.fontmult = (uint8_t)(fbink_state.fontsize_mult << 1U);
 		// The actual "infinite progress bar" behavior is CLI-only, so it needs to be passed as an arg ;).
 	}
 
