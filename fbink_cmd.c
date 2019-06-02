@@ -1218,7 +1218,7 @@ int
 		errfnd = true;
 	}
 
-	// Enforce quiet output when asking for is_fake, is_eval, want_linecount or want_lastrect, to avoid polluting the output...
+	// Enforce quiet output when asking for is_mimic, is_eval, want_linecount or want_lastrect, to avoid polluting the output...
 	if (is_mimic || is_eval || want_linecount || want_lastrect) {
 		fbink_cfg.is_quiet   = true;
 		fbink_cfg.is_verbose = false;
