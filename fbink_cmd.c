@@ -424,6 +424,7 @@ int
 					      { "waveform", required_argument, NULL, 'W' },
 					      { "nightmode", no_argument, NULL, 'H' },
 					      { "coordinates", no_argument, NULL, 'E' },
+					      { "fake", no_argument, NULL, 'z' },
 					      { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_cfg = { 0 };
@@ -508,6 +509,7 @@ int
 	bool      is_progressbar = false;
 	bool      is_activitybar = false;
 	bool      is_infinite    = false;
+	bool      is_fake        = false;
 	uint8_t   progress       = 0;
 	bool      is_truetype    = false;
 	char*     reg_ot_file    = NULL;
@@ -517,7 +519,7 @@ int
 	bool      errfnd         = false;
 
 	while ((opt = getopt_long(
-		    argc, argv, "y:x:Y:X:hfcmMprs:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bDW:HE", opts, &opt_index)) != -1) {
+		    argc, argv, "y:x:Y:X:hfcmMprs:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bDW:HEz", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				if (strtol_hi(opt, NULL, optarg, &fbink_cfg.row) < 0) {
@@ -1189,6 +1191,9 @@ int
 			case 'H':
 				fbink_cfg.is_nightmode = true;
 				break;
+			case 'z':
+				is_fake = true;
+				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
 				errfnd = true;
@@ -1242,6 +1247,21 @@ int
 		goto cleanup;
 	}
 
+	// Were we asked to fake on-animator?
+	if (is_fake) {
+		// Small bit of crazyness, c.f., https://stackoverflow.com/q/31747247
+		char fake_name[] = "on-animator.sh";
+		if (strcmp(argv[0], fake_name)) {
+			argv[0] = fake_name;
+			execv("/proc/self/exe", argv);
+
+			// This should never really happen...
+			fprintf(stderr, "Couldn't fake our process name, aborting . . .\n");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	}
+
 	// Open framebuffer and keep it around, then setup globals.
 	if (ERRCODE(EXIT_FAILURE) == (fbfd = fbink_open())) {
 		fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
@@ -1252,6 +1272,22 @@ int
 		fprintf(stderr, "Failed to initialize FBInk, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
+	}
+
+	// If we're asking to mimic on-animator, set the relevant options...
+	if (is_fake) {
+		// Quiet
+		fbink_cfg.is_quiet   = true;
+		fbink_cfg.is_verbose = false;
+		// In the middle of the screen
+		fbink_cfg.is_halfway = true;
+		// Fast
+		fbink_cfg.wfm_mode = WFM_A2;
+		// Double the usual size
+		FBInkState fbink_state = { 0 };
+		fbink_get_state(&fbink_cfg, &fbink_state);
+		fbink_cfg.fontmult = fbink_state.fontsize_mult << 1U;
+		// The actual "infinite progress bar" behavior is CLI-only, so it needs to be passed as an arg ;).
 	}
 
 	char* string;
