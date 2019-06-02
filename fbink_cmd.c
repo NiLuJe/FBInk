@@ -1218,8 +1218,8 @@ int
 		errfnd = true;
 	}
 
-	// Enforce quiet output when asking for is_eval, want_linecount or want_lastrect, to avoid polluting the output...
-	if (is_eval || want_linecount || want_lastrect) {
+	// Enforce quiet output when asking for is_fake, is_eval, want_linecount or want_lastrect, to avoid polluting the output...
+	if (is_fake || is_eval || want_linecount || want_lastrect) {
 		fbink_cfg.is_quiet   = true;
 		fbink_cfg.is_verbose = false;
 	}
@@ -1276,9 +1276,6 @@ int
 
 	// If we're asking to mimic on-animator, set the relevant options...
 	if (is_fake) {
-		// Quiet
-		fbink_cfg.is_quiet   = true;
-		fbink_cfg.is_verbose = false;
 		// In the middle of the screen
 		fbink_cfg.is_halfway = true;
 		// Fast
@@ -1287,6 +1284,8 @@ int
 		FBInkState fbink_state = { 0 };
 		fbink_get_state(&fbink_cfg, &fbink_state);
 		fbink_cfg.fontmult = (uint8_t)(fbink_state.fontsize_mult << 1U);
+		// Don't forget that fontmult requires a reinit...
+		fbink_init(fbfd, &fbink_cfg);
 		// The actual "infinite progress bar" behavior is CLI-only, so it needs to be passed as an arg ;).
 	}
 
