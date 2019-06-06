@@ -1261,13 +1261,17 @@ int
 
 	// If we're asking to mimic on-animator, set the relevant options...
 	if (is_mimic) {
-		// In the middle of the screen
-		fbink_cfg.is_halfway = true;
-		// Fast
-		fbink_cfg.wfm_mode = WFM_A2;
-		// Double the usual size
+		// We'll need to know a few things about the current device...
 		FBInkState fbink_state = { 0 };
 		fbink_get_state(&fbink_cfg, &fbink_state);
+		// In the middle of the screen
+		fbink_cfg.is_halfway = true;
+		// Fast...
+		// ...except on Mk. 7, where A2 can be all kinds of weird...
+		if (strcmp(fbink_state.device_platform, "Mark 7") != 0) {
+			fbink_cfg.wfm_mode = WFM_A2;
+		}
+		// Double the usual size
 		fbink_cfg.fontmult = (uint8_t)(fbink_state.fontsize_mult << 1U);
 		// Don't forget that fontmult requires a reinit...
 		fbink_init(fbfd, &fbink_cfg);
