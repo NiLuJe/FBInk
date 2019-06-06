@@ -399,6 +399,7 @@ static void get_pixel(FBInkCoordinates, FBInkColor* restrict);
 //     & https://github.com/python-pillow/Pillow/blob/master/src/libImaging/ImagingUtils.h
 // NOTE: May not actually be faster on x86_64, where most compilers will do better with a simple (v / 255U),
 //       but on ARM, which is what we mainly care about, this yields better results... ;).
+// NOTE: See also SDL2 & pixman for some fairly hardcore blitting trickery ;).
 #	define DIV255(V)                                                                                                \
 		({                                                                                                       \
 			__auto_type _v = (V) + 128;                                                                      \
