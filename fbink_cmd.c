@@ -1266,11 +1266,8 @@ int
 		fbink_get_state(&fbink_cfg, &fbink_state);
 		// In the middle of the screen
 		fbink_cfg.is_halfway = true;
-		// Fast...
-		// ...except on Mk. 7, where A2 can be all kinds of weird...
-		if (strcmp(fbink_state.device_platform, "Mark 7") != 0) {
-			fbink_cfg.wfm_mode = WFM_A2;
-		}
+		// Fast
+		fbink_cfg.wfm_mode = WFM_A2;
 		// Double the usual size
 		fbink_cfg.fontmult = (uint8_t)(fbink_state.fontsize_mult << 1U);
 		// Don't forget that fontmult requires a reinit...

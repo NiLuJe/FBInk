@@ -4836,8 +4836,16 @@ int
 		emptyC.r  = fbink_cfg->is_inverted ? eInkBGCMap[BG_GRAYB] : eInkFGCMap[BG_GRAYB];
 		borderC.r = fbink_cfg->is_inverted ? eInkBGCMap[BG_GRAY4] : eInkFGCMap[BG_GRAY4];
 	} else {
-		emptyC.r  = fbink_cfg->is_inverted ? eInkFGCMap[BG_GRAYB] : eInkBGCMap[BG_GRAYB];
-		borderC.r = fbink_cfg->is_inverted ? eInkFGCMap[BG_GRAY4] : eInkBGCMap[BG_GRAY4];
+		if (fbink_cfg->wfm_mode == WFM_A2) {
+			// NOTE: If we're using A2 refresh mode, we'll be enforcing monochrome anyway...
+			//       Making sure we do that on our end (... at least with default bg/fg colors anyway ;),
+			//       avoids weird behavior on devices where A2 can otherwise be quirky, like Kobo Mk. 7
+			emptyC.r  = bgcolor;
+			borderC.r = fgcolor;
+		} else {
+			emptyC.r  = fbink_cfg->is_inverted ? eInkFGCMap[BG_GRAYB] : eInkBGCMap[BG_GRAYB];
+			borderC.r = fbink_cfg->is_inverted ? eInkFGCMap[BG_GRAY4] : eInkBGCMap[BG_GRAY4];
+		}
 	}
 	emptyC.g  = emptyC.r;
 	emptyC.b  = emptyC.r;
