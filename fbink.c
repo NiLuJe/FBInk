@@ -1204,15 +1204,16 @@ static int
 		   uint32_t                marker)
 {
 	struct mxcfb_update_data update = {
-		.update_region           = region,
-		.waveform_mode           = waveform_mode,
-		.update_mode             = update_mode,
-		.update_marker           = marker,
-		.hist_bw_waveform_mode   = WAVEFORM_MODE_DU,
-		.hist_gray_waveform_mode = WAVEFORM_MODE_GC16_FAST,
-		.temp                    = TEMP_USE_AUTO,
-		.flags                   = (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
-		.alt_buffer_data         = { 0U },
+		.update_region         = region,
+		.waveform_mode         = waveform_mode,
+		.update_mode           = update_mode,
+		.update_marker         = marker,
+		.hist_bw_waveform_mode = (waveform_mode == WAVEFORM_MODE_REAGL) ? WAVEFORM_MODE_REAGL : WAVEFORM_MODE_DU,
+		.hist_gray_waveform_mode =
+		    (waveform_mode == WAVEFORM_MODE_REAGL) ? WAVEFORM_MODE_REAGL : WAVEFORM_MODE_GC16_FAST,
+		.temp            = TEMP_USE_AUTO,
+		.flags           = (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
+		.alt_buffer_data = { 0U },
 	};
 
 	if (is_nightmode && deviceQuirks.canHWInvert) {
@@ -1294,11 +1295,13 @@ static int
 					  waveform_mode == WAVEFORM_MODE_DU4)
 					     ? 3
 					     : 7,
-		.alt_buffer_data         = { 0U },
-		.hist_bw_waveform_mode   = WAVEFORM_MODE_DU,
-		.hist_gray_waveform_mode = WAVEFORM_MODE_GC16,
-		.ts_pxp                  = 0U,
-		.ts_epdc                 = 0U,
+		.alt_buffer_data = { 0U },
+		.hist_bw_waveform_mode =
+		    (waveform_mode == WAVEFORM_MODE_KOA2_REAGL) ? WAVEFORM_MODE_KOA2_REAGL : WAVEFORM_MODE_DU,
+		.hist_gray_waveform_mode =
+		    (waveform_mode == WAVEFORM_MODE_KOA2_REAGL) ? WAVEFORM_MODE_KOA2_REAGL : WAVEFORM_MODE_GC16,
+		.ts_pxp  = 0U,
+		.ts_epdc = 0U,
 	};
 
 	if (is_nightmode && deviceQuirks.canHWInvert) {
@@ -1373,9 +1376,11 @@ static int
 					  waveform_mode == WAVEFORM_MODE_DU4)
 					     ? 3
 					     : 7,
-		.alt_buffer_data         = { 0U },
-		.hist_bw_waveform_mode   = WAVEFORM_MODE_DU,
-		.hist_gray_waveform_mode = WAVEFORM_MODE_GC16,
+		.alt_buffer_data = { 0U },
+		.hist_bw_waveform_mode =
+		    (waveform_mode == WAVEFORM_MODE_KOA2_REAGL) ? WAVEFORM_MODE_KOA2_REAGL : WAVEFORM_MODE_DU,
+		.hist_gray_waveform_mode =
+		    (waveform_mode == WAVEFORM_MODE_KOA2_REAGL) ? WAVEFORM_MODE_KOA2_REAGL : WAVEFORM_MODE_GC16,
 	};
 
 	if (is_nightmode && deviceQuirks.canHWInvert) {
