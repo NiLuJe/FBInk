@@ -387,8 +387,7 @@ FBINK_API int fbink_print(int fbfd, const char* restrict string, const FBInkConf
 // Returns -(ENOSPC) if no_truncation is true, and string needs to be truncated to fit in the available draw area.
 // NOTE:             This *cannot* prevent *drawing* truncated content on screen in *every* case,
 //                   because broken metrics may skew our initial computations.
-//                   As such, if the intent is to compute a "best fit" font size,
-//                   no_truncation ought to be combined with no_refresh...
+//                   On eInk, we do inhibit the screen *refresh*, though (but truncated content *has* been rendered to the fb).
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // string:		UTF-8 encoded string to print
