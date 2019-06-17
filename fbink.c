@@ -3819,7 +3819,8 @@ int
 			break;
 		}
 	}
-	LOG("%u lines to be printed", (line + complete_str));
+	unsigned int computed_lines_amount = line + complete_str;
+	LOG("%u lines to be printed", computed_lines_amount);
 	if (!complete_str) {
 		LOG("String too long. Truncated to ~%zu characters", c_index);
 	}
@@ -4351,7 +4352,7 @@ int
 		paint_point.x = area.tl.x;
 		if (paint_point.y + max_line_height > area.br.y) {
 			abort_line = true;
-			LOG("Ran out of drawing area at the end of line# %u!", line);
+			LOG("Ran out of drawing area at the end of line# %u after ~%zu characters!", line, ci);
 		}
 		region.height += (unsigned int) max_line_height;
 		if (region.top + region.height > screenHeight) {
@@ -4370,6 +4371,12 @@ int
 	}
 	// Recap the actual amount of printed lines, as broken metrics may affect what we initially computed ;).
 	LOG("Printed %u visible lines", line);
+	// Warn if there was an unforeseen truncation (potentially because of broken metrics)...
+	if (line < computed_lines_amount) {
+		LOG("Rendering took more space than expected, string was truncated to %u lines instead of %u!",
+		    line,
+		    computed_lines_amount);
+	}
 cleanup:
 	// Rotate our eink refresh region before refreshing
 	LOG("Refreshing region from LEFT: %u, TOP: %u, WIDTH: %u, HEIGHT: %u",
