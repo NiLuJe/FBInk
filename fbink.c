@@ -3348,7 +3348,8 @@ int
     fbink_print_ot(int fbfd    UNUSED_BY_MINIMAL,
 		   const char* restrict string UNUSED_BY_MINIMAL,
 		   const FBInkOTConfig* restrict cfg UNUSED_BY_MINIMAL,
-		   const FBInkConfig* restrict fbink_cfg UNUSED_BY_MINIMAL)
+		   const FBInkConfig* restrict fbink_cfg UNUSED_BY_MINIMAL,
+		   FBInkOTFit* restrict fit UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_OPENTYPE
 	// Abort if we were passed an empty string
@@ -3850,6 +3851,12 @@ int
 		}
 	}
 	LOG("Actual print height is %u", curr_print_height);
+
+	// Remember that in fit if it's a valid pointer...
+	if (fit) {
+		fit->computed_lines = (unsigned short int) computed_lines_amount;
+		fit->truncated      = !complete_str;
+	}
 
 	// Abort early if we detected a truncation and the user flagged that as a failure.
 	if (cfg->no_truncation && !complete_str) {
@@ -4385,11 +4392,22 @@ int
 	}
 	// Recap the actual amount of printed lines, as broken metrics may affect what we initially computed ;).
 	LOG("Printed %u visible lines", line);
+
+	// Remember that in fit if it's a valid pointer...
+	if (fit) {
+		fit->rendered_lines = (unsigned short int) line;
+	}
+
 	// Warn if there was an unforeseen truncation (potentially because of broken metrics)...
 	if (line < computed_lines_amount) {
 		LOG("Rendering took more space than expected, string was truncated to %u lines instead of %u!",
 		    line,
 		    computed_lines_amount);
+
+		// Remember that in fit if it's a valid pointer...
+		if (fit) {
+			fit->truncated = !complete_str;
+		}
 
 		// Abort if the user flagged that as a failure.
 		if (cfg->no_truncation) {
