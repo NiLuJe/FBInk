@@ -3328,7 +3328,7 @@ int
 	if (cfg) {
 #ifdef FBINK_WITH_OPENTYPE
 		// Then feed our formatted string to fbink_print_ot
-		rv = fbink_print_ot(fbfd, buffer, cfg, fbink_cfg);
+		rv = fbink_print_ot(fbfd, buffer, cfg, fbink_cfg, NULL);
 #else
 		WARN("OpenType support is disabled in this FBInk build");
 		rv = ERRCODE(ENOSYS);
