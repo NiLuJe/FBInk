@@ -1440,7 +1440,8 @@ int
 					    fbink_cfg.no_refresh ? "Y" : "N");
 				}
 
-				if ((linecount = fbink_print_ot(fbfd, string, &ot_config, &fbink_cfg)) < 0) {
+				FBInkOTFit ot_fit = { 0U };
+				if ((linecount = fbink_print_ot(fbfd, string, &ot_config, &fbink_cfg, &ot_fit)) < 0) {
 					fprintf(stderr, "Failed to print that string!\n");
 					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
@@ -1452,6 +1453,10 @@ int
 				ot_config.margins.top = (short int) linecount;
 				if (!fbink_cfg.is_quiet) {
 					printf("Next line should start @ top=%hd\n", ot_config.margins.top);
+					printf("Rendered %hu lines out of the %hu expected%s\n",
+					       ot_fit.rendered_lines,
+					       ot_fit.computed_lines,
+					       ot_fit.truncated ? ", string was truncated" : ".");
 				}
 				// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
 
@@ -1741,7 +1746,9 @@ int
 				if (is_truetype) {
 					load_ot_fonts(reg_ot_file, bd_ot_file, it_ot_file, bdit_ot_file, &fbink_cfg);
 					while ((nread = getline(&line, &len, stdin)) != -1) {
-						if ((linecnt = fbink_print_ot(fbfd, line, &ot_config, &fbink_cfg)) < 0) {
+						FBInkOTFit ot_fit = { 0U };
+						if ((linecnt = fbink_print_ot(
+							 fbfd, line, &ot_config, &fbink_cfg, &ot_fit)) < 0) {
 							fprintf(stderr, "Failed to print that string!\n");
 							rv = ERRCODE(EXIT_FAILURE);
 						}
@@ -1749,6 +1756,10 @@ int
 						if (!fbink_cfg.is_quiet) {
 							printf("Next line should start @ top=%hd\n",
 							       ot_config.margins.top);
+							printf("Rendered %hu lines out of the %hu expected%s\n",
+							       ot_fit.rendered_lines,
+							       ot_fit.computed_lines,
+							       ot_fit.truncated ? ", string was truncated" : ".");
 						}
 					}
 				} else {
