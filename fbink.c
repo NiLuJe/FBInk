@@ -3416,6 +3416,13 @@ int
 		}
 	}
 
+	// Make sure we return accurate data in case the fit struct is being recycled...
+	if (fit) {
+		fit->computed_lines = 0U;
+		fit->rendered_lines = 0U;
+		fit->truncated      = false;
+	}
+
 	LOG("Printing OpenType text.");
 
 	// Handle negative margins (meaning count backwards from the opposite edge)

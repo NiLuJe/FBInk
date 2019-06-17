@@ -287,7 +287,7 @@ typedef struct
 			   computed_lines;    // Expected amount of lines needed to print the string, according to font metrics.
 	unsigned short int rendered_lines;    // Actually rendered amount of lines
 					      // Will stay 0 in case of an early abort,
-	    // or < computed_lines in case of an unexpected truncation due to broken metrics.
+	// or < computed_lines in case of an unexpected truncation due to broken metrics.
 	bool truncated;    // true if the string was truncated (at computation or rendering time).
 } FBInkOTFit;
 
@@ -414,7 +414,6 @@ FBINK_API int fbink_print(int fbfd, const char* restrict string, const FBInkConf
 // fit:			Optional pointer to an FBInkOTFit struct.
 //				If set, it will return information about the amount of lines needed to render the string at the
 //				requested font size, and whether it was truncated or not.
-//				NOTE: Should be zero-initalized before *each* call!
 //				Pass a NULL pointer if unneeded.
 // NOTE: Alignment is relative to the printable area, as defined by the margins.
 //       As such, it only makes sense in the context of a single, specific print call.
