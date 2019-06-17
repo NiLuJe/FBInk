@@ -1450,6 +1450,9 @@ int
 				//       We make sure to trust print's return value,
 				//       because it knows how much space it already took up ;).
 				ot_config.margins.top = (short int) linecount;
+				if (!fbink_cfg.is_quiet) {
+					printf("Next line should start @ top=%hd\n", ot_config.margins.top);
+				}
 				// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
 
 				// If we were asked to return the amount of printed lines, honor that,
@@ -1497,6 +1500,9 @@ int
 				//       We make sure to trust print's return value,
 				//       because it knows how much space it already took up ;).
 				fbink_cfg.row = (short int) (fbink_cfg.row + linecount);
+				if (!fbink_cfg.is_quiet) {
+					printf("Next line should start @ row %hd\n", fbink_cfg.row);
+				}
 				// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
 
 				// If we were asked to return the amount of printed lines, honor that,
@@ -1740,6 +1746,10 @@ int
 							rv = ERRCODE(EXIT_FAILURE);
 						}
 						ot_config.margins.top = (short int) linecnt;
+						if (!fbink_cfg.is_quiet) {
+							printf("Next line should start @ top=%hd\n",
+							       ot_config.margins.top);
+						}
 					}
 				} else {
 					while ((nread = getline(&line, &len, stdin)) != -1) {
@@ -1748,6 +1758,9 @@ int
 							rv = ERRCODE(EXIT_FAILURE);
 						}
 						fbink_cfg.row = (short int) (fbink_cfg.row + linecnt);
+						if (!fbink_cfg.is_quiet) {
+							printf("Next line should start @ row %hd\n", fbink_cfg.row);
+						}
 					}
 				}
 				free(line);
