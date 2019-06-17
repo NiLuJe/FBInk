@@ -4395,9 +4395,7 @@ int
 		if (cfg->no_truncation) {
 			LOG("Requested late abort on truncation!");
 			rv = ERRCODE(ENOSPC);
-			// Inhibit the pending refresh, too.
-			region.width  = 0U;
-			region.height = 0U;
+			// NOTE: Do *NOT* inhibit the pending refresh, to avoid screwing with set_last_rect ;).
 			goto cleanup;
 		}
 	}
