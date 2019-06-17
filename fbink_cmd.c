@@ -466,6 +466,8 @@ int
 		LM_OPT,
 		RM_OPT,
 		FMT_OPT,
+		COMPUTE_OPT,
+		NOTRUNC_OPT,
 	};
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
@@ -487,6 +489,8 @@ int
 					 [LM_OPT]         = "left",
 					 [RM_OPT]         = "right",
 					 [FMT_OPT]        = "format",
+					 [COMPUTE_OPT]    = "compute",
+					 [NOTRUNC_OPT]    = "notrunc",
 					 NULL };
 #pragma GCC diagnostic pop
 	char*     subopts;
@@ -1217,6 +1221,12 @@ int
 						case FMT_OPT:
 							ot_config.is_formatted = true;
 							break;
+						case COMPUTE_OPT:
+							ot_config.compute_only = true;
+							break;
+						case NOTRUNC_OPT:
+							ot_config.no_truncation = true;
+							break;
 						default:
 							fprintf(stderr,
 								"No match found for token: /%s/ for -%c, --%s\n",
@@ -1416,7 +1426,7 @@ int
 			if (is_truetype) {
 				if (!fbink_cfg.is_quiet) {
 					printf(
-					    "Printing string '%s' @ %hupt, honoring the following margins { Top: %hdpx, Bottom: %hdpx, Left: %hdpx, Right: %hdpx } (formatted: %s, overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, H align: %hhu, halfway: %s, V align: %hhu, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s)\n",
+					    "Printing string '%s' @ %hupt, honoring the following margins { Top: %hdpx, Bottom: %hdpx, Left: %hdpx, Right: %hdpx } (formatted: %s, compute only: %s, no truncation: %s, overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, H align: %hhu, halfway: %s, V align: %hhu, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s)\n",
 					    string,
 					    ot_config.size_pt,
 					    ot_config.margins.top,
@@ -1424,6 +1434,8 @@ int
 					    ot_config.margins.left,
 					    ot_config.margins.right,
 					    ot_config.is_formatted ? "Y" : "N",
+					    ot_config.compute_only ? "Y" : "N",
+					    ot_config.no_truncation ? "Y" : "N",
 					    fbink_cfg.is_overlay ? "Y" : "N",
 					    fbink_cfg.is_bgless ? "Y" : "N",
 					    fbink_cfg.is_fgless ? "Y" : "N",
