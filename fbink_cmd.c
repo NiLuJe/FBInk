@@ -564,27 +564,26 @@ int
 			case 'r':
 				fbink_cfg.is_rpadded = true;
 				break;
-			case 's':
+			case 's': {
+				// We'll want our longform name for diagnostic messages...
+				const char* opt_longname = NULL;
+				// Look it up if we were passed the short form...
+				if (opt_index == -1) {
+					for (opt_index = 0; opts[opt_index].name; opt_index++) {
+						if (opts[opt_index].val == opt) {
+							opt_longname = opts[opt_index].name;
+							break;
+						}
+					}
+				} else {
+					opt_longname = opts[opt_index].name;
+				}
+
 				subopts = optarg;
 				while (*subopts != '\0' && !errfnd) {
 					switch (getsubopt(&subopts, refresh_token, &value)) {
 						case TOP_OPT:
 							if (value == NULL) {
-								const char* opt_longname = NULL;
-								// Look it up if we were passed the short form...
-								if (opt_index == -1) {
-									fprintf(stderr, "Longform lookup...\n");
-									for (opt_index = 0; opts[opt_index].name;
-									     opt_index++) {
-										if (opts[opt_index].val == opt) {
-											opt_longname =
-											    opts[opt_index].name;
-											break;
-										}
-									}
-								} else {
-									opt_longname = opts[opt_index].name;
-								}
 								fprintf(stderr,
 									"Missing value for suboption '%s' of --%s, -%c\n",
 									refresh_token[TOP_OPT],
@@ -600,21 +599,6 @@ int
 							break;
 						case LEFT_OPT:
 							if (value == NULL) {
-								const char* opt_longname = NULL;
-								// Look it up if we were passed the short form...
-								if (opt_index == -1) {
-									fprintf(stderr, "Longform lookup...\n");
-									for (opt_index = 0; opts[opt_index].name;
-									     opt_index++) {
-										if (opts[opt_index].val == opt) {
-											opt_longname =
-											    opts[opt_index].name;
-											break;
-										}
-									}
-								} else {
-									opt_longname = opts[opt_index].name;
-								}
 								fprintf(stderr,
 									"Missing value for suboption '%s' of --%s, -%c\n",
 									refresh_token[LEFT_OPT],
@@ -630,21 +614,6 @@ int
 							break;
 						case WIDTH_OPT:
 							if (value == NULL) {
-								const char* opt_longname = NULL;
-								// Look it up if we were passed the short form...
-								if (opt_index == -1) {
-									fprintf(stderr, "Longform lookup...\n");
-									for (opt_index = 0; opts[opt_index].name;
-									     opt_index++) {
-										if (opts[opt_index].val == opt) {
-											opt_longname =
-											    opts[opt_index].name;
-											break;
-										}
-									}
-								} else {
-									opt_longname = opts[opt_index].name;
-								}
 								fprintf(stderr,
 									"Missing value for suboption '%s' of --%s, -%c\n",
 									refresh_token[WIDTH_OPT],
@@ -661,21 +630,6 @@ int
 							break;
 						case HEIGHT_OPT:
 							if (value == NULL) {
-								const char* opt_longname = NULL;
-								// Look it up if we were passed the short form...
-								if (opt_index == -1) {
-									fprintf(stderr, "Longform lookup...\n");
-									for (opt_index = 0; opts[opt_index].name;
-									     opt_index++) {
-										if (opts[opt_index].val == opt) {
-											opt_longname =
-											    opts[opt_index].name;
-											break;
-										}
-									}
-								} else {
-									opt_longname = opts[opt_index].name;
-								}
 								fprintf(stderr,
 									"Missing value for suboption '%s' of --%s, -%c\n",
 									refresh_token[HEIGHT_OPT],
@@ -692,21 +646,6 @@ int
 							break;
 						case DITHER_OPT:
 							if (value == NULL) {
-								const char* opt_longname = NULL;
-								// Look it up if we were passed the short form...
-								if (opt_index == -1) {
-									fprintf(stderr, "Longform lookup...\n");
-									for (opt_index = 0; opts[opt_index].name;
-									     opt_index++) {
-										if (opts[opt_index].val == opt) {
-											opt_longname =
-											    opts[opt_index].name;
-											break;
-										}
-									}
-								} else {
-									opt_longname = opts[opt_index].name;
-								}
 								fprintf(stderr,
 									"Missing value for suboption '%s' of --%s, -%c\n",
 									refresh_token[DITHER_OPT],
@@ -741,7 +680,11 @@ int
 							// Accept bogus suboptions to somewhat fake a "takes optional arguments"
 							// behavior, without the syntax quirks the real thing would enforce
 							// on the short option syntax...
-							fprintf(stderr, "Ignoring bogus suboption token /%s/\n", value);
+							fprintf(stderr,
+								"Ignoring bogus suboption token /%s/ for --%s, -%c\n",
+								value,
+								opt_longname,
+								opt);
 							break;
 					}
 				}
@@ -757,6 +700,7 @@ int
 					is_refresh = true;
 				}
 				break;
+			}
 			case 'S':
 				if (strtoul_hhu(opt, NULL, optarg, &fbink_cfg.fontmult) < 0) {
 					errfnd = true;
