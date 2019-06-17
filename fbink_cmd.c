@@ -1456,7 +1456,7 @@ int
 					printf("Rendered %hu lines out of the %hu expected%s\n",
 					       ot_fit.rendered_lines,
 					       ot_fit.computed_lines,
-					       ot_fit.truncated ? ", string was truncated" : ".");
+					       ot_fit.truncated ? ", string was truncated." : ".");
 				}
 				// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
 
@@ -1759,7 +1759,7 @@ int
 							printf("Rendered %hu lines out of the %hu expected%s\n",
 							       ot_fit.rendered_lines,
 							       ot_fit.computed_lines,
-							       ot_fit.truncated ? ", string was truncated" : ".");
+							       ot_fit.truncated ? ", string was truncated." : ".");
 						}
 					}
 				} else {

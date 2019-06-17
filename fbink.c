@@ -4413,7 +4413,7 @@ int
 
 		// Remember that in fit if it's a valid pointer...
 		if (fit) {
-			fit->truncated = !complete_str;
+			fit->truncated = true;
 		}
 
 		// Abort if the user flagged that as a failure.
