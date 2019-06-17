@@ -673,7 +673,7 @@ int
 							}
 							// Remember non-default values in a human-readable format
 							if (region_hwd != HWD_PASSTHROUGH) {
-								region_dither = strdup(value);
+								region_dither = value;
 							}
 							break;
 						default:
@@ -803,12 +803,7 @@ int
 								errfnd = true;
 								break;
 							}
-							// NOTE: As a hack to support paths with a comma,
-							//       which we can't handle via getsubopt,
-							//       we have *two* ways of specifying image_file,
-							//       so make sure we're not dup'ing twice...
-							free(image_file);
-							image_file = strdup(value);
+							image_file = value;
 							break;
 						case XOFF_OPT:
 							if (value == NULL) {
@@ -941,9 +936,7 @@ int
 				break;
 			}
 			case 'i':
-				// Free a potentially previously set value...
-				free(image_file);
-				image_file = strdup(optarg);
+				image_file = optarg;
 				is_image   = true;
 				break;
 			case 'a':
@@ -1098,7 +1091,7 @@ int
 								errfnd = true;
 								break;
 							}
-							reg_ot_file = strdup(value);
+							reg_ot_file = value;
 							break;
 						case BOLD_OPT:
 							if (value == NULL) {
@@ -1110,7 +1103,7 @@ int
 								errfnd = true;
 								break;
 							}
-							bd_ot_file = strdup(value);
+							bd_ot_file = value;
 							break;
 						case ITALIC_OPT:
 							if (value == NULL) {
@@ -1122,7 +1115,7 @@ int
 								errfnd = true;
 								break;
 							}
-							it_ot_file = strdup(value);
+							it_ot_file = value;
 							break;
 						case BOLDITALIC_OPT:
 							if (value == NULL) {
@@ -1134,7 +1127,7 @@ int
 								errfnd = true;
 								break;
 							}
-							bdit_ot_file = strdup(value);
+							bdit_ot_file = value;
 							break;
 						case SIZE_OPT:
 							if (value == NULL) {
@@ -1289,7 +1282,7 @@ int
 				}
 				// Remember non-default values in a human-readable format...
 				if (fbink_cfg.wfm_mode != WFM_AUTO) {
-					wfm_name = strdup(optarg);
+					wfm_name = optarg;
 				}
 				break;
 			case 'H':
@@ -1784,17 +1777,9 @@ int
 
 	// Cleanup
 cleanup:
-	free(wfm_name);
-	free(region_dither);
-	free(image_file);
-
 	if (is_truetype) {
 		fbink_free_ot_fonts();
 	}
-	free(reg_ot_file);
-	free(bd_ot_file);
-	free(it_ot_file);
-	free(bdit_ot_file);
 
 	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
 		fprintf(stderr, "Failed to close the framebuffer, aborting . . .\n");
