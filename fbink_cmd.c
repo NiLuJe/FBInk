@@ -585,10 +585,10 @@ int
 						case TOP_OPT:
 							if (value == NULL) {
 								fprintf(stderr,
-									"Missing value for suboption '%s' of --%s, -%c\n",
+									"Missing value for suboption '%s' of -%c, --%s\n",
 									refresh_token[TOP_OPT],
-									opt_longname,
-									opt);
+									opt,
+									opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -600,10 +600,10 @@ int
 						case LEFT_OPT:
 							if (value == NULL) {
 								fprintf(stderr,
-									"Missing value for suboption '%s' of --%s, -%c\n",
+									"Missing value for suboption '%s' of -%c, --%s\n",
 									refresh_token[LEFT_OPT],
-									opt_longname,
-									opt);
+									opt,
+									opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -615,10 +615,10 @@ int
 						case WIDTH_OPT:
 							if (value == NULL) {
 								fprintf(stderr,
-									"Missing value for suboption '%s' of --%s, -%c\n",
+									"Missing value for suboption '%s' of -%c, --%s\n",
 									refresh_token[WIDTH_OPT],
-									opt_longname,
-									opt);
+									opt,
+									opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -631,10 +631,10 @@ int
 						case HEIGHT_OPT:
 							if (value == NULL) {
 								fprintf(stderr,
-									"Missing value for suboption '%s' of --%s, -%c\n",
+									"Missing value for suboption '%s' of -%c, --%s\n",
 									refresh_token[HEIGHT_OPT],
-									opt_longname,
-									opt);
+									opt,
+									opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -647,10 +647,10 @@ int
 						case DITHER_OPT:
 							if (value == NULL) {
 								fprintf(stderr,
-									"Missing value for suboption '%s' of --%s, -%c\n",
+									"Missing value for suboption '%s' of -%c, --%s\n",
 									refresh_token[DITHER_OPT],
-									opt_longname,
-									opt);
+									opt,
+									opt_longname);
 								errfnd = true;
 								continue;
 							}
@@ -681,10 +681,10 @@ int
 							// behavior, without the syntax quirks the real thing would enforce
 							// on the short option syntax...
 							fprintf(stderr,
-								"Ignoring bogus suboption token /%s/ for --%s, -%c\n",
+								"Ignoring bogus suboption token /%s/ for -%c, --%s\n",
 								value,
-								opt_longname,
-								opt);
+								opt,
+								opt_longname);
 							break;
 					}
 				}
