@@ -1348,6 +1348,25 @@ int
 		if (errfnd) {
 			fprintf(stderr, "\n****\t****\t****\t****\n\n");
 			fprintf(stderr, "Encountered a parsing error, see the top of the output for details!\n");
+			// Recap the exact invocation, as seen by getopt,
+			// (note that it will reorder argv so that non-option arguments end up at the end).
+			fprintf(stderr, "\n");
+			fprintf(stderr, "This was the exact invocation that triggered this error:\n\n");
+			for (int i = 0; i < argc; i++) {
+				fprintf(stderr, "%s%s", argv[i], i == argc - 1 ? "\n" : " ");
+			}
+			// Then detail it...
+			fprintf(stderr, "\nBroken down argument per argument:\n\n");
+			for (int i = 0; i < optind; i++) {
+				fprintf(stderr, "argv[%d]: `%s`\n", i, argv[i]);
+			}
+			// And then non-option arguments
+			if (optind < argc) {
+				fprintf(stderr, "\nAnd the following non-option arguments:\n\n");
+				for (int i = optind; i < argc; i++) {
+					fprintf(stderr, "argv[%d]: `%s`\n", i, argv[i]);
+				}
+			}
 		}
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
