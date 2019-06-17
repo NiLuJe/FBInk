@@ -274,6 +274,9 @@ typedef struct
 	unsigned short int size_pt;         // Size of text in points. If not set (0), defaults to 12pt
 	bool               is_centered;     // Horizontal centering
 	bool               is_formatted;    // Is string "formatted"? Bold/Italic support only, markdown like syntax
+	bool               compute_only;    // Abort early after the line-break computation pass (no actual rendering).
+	bool no_truncation;                 // Abort as early as possible (but not necessarily before the rendering pass),
+					    // if the string cannot fit in the available area at the current font size.
 } FBInkOTConfig;
 
 // For use with fbink_dump & fbink_restore
@@ -381,6 +384,11 @@ FBINK_API int fbink_print(int fbfd, const char* restrict string, const FBInkConf
 // Returns -(ENODAT) if fbink_init_ot() hasn't yet been called.
 // Returns -(EINVAL) if string is empty.
 // Returns -(EILSEQ) if string is not a valid UTF-8 sequence.
+// Returns -(ENOSPC) if no_truncation is true, and string needs to be truncated to fit in the available draw area.
+// NOTE:             This *cannot* prevent *drawing* truncated content on screen in *every* case,
+//                   because broken metrics may skew our initial computations.
+//                   As such, if the intent is to compute a "best fit" font size,
+//                   no_truncation ought to be combined with no_refresh...
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // string:		UTF-8 encoded string to print
