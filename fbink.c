@@ -3596,8 +3596,12 @@ int
 		rv = ERRCODE(ENOENT);
 		goto cleanup;
 	}
-	LOG("Max BL: %d  Max Desc: %d  Max LG: %d", max_baseline, max_desc, max_lg);
 	max_row_height = max_baseline + abs(max_desc) + max_lg;
+	LOG("Max BL: %d  Max Desc: %d  Max LG: %d  =>  Max LH (according to metrics): %d",
+	    max_baseline,
+	    max_desc,
+	    max_lg,
+	    max_row_height);
 	// And if max_row_height was not changed from zero, this is also an unrecoverable error.
 	// Also guards against a potential divide-by-zero in the following calculation
 	if (max_row_height <= 0) {
@@ -4347,6 +4351,7 @@ int
 		paint_point.x = area.tl.x;
 		if (paint_point.y + max_line_height > area.br.y) {
 			abort_line = true;
+			LOG("Ran out of drawing area at the end of line# %u!", line);
 		}
 		region.height += (unsigned int) max_line_height;
 		if (region.top + region.height > screenHeight) {
@@ -4363,6 +4368,8 @@ int
 	} else {
 		rv = paint_point.y;    // inform the caller what their next top margin should be to follow on
 	}
+	// Recap the actual amount of printed lines, as broken metrics may affect what we initially computed ;).
+	LOG("Printed %u visible lines", line);
 cleanup:
 	// Rotate our eink refresh region before refreshing
 	LOG("Refreshing region from LEFT: %u, TOP: %u, WIDTH: %u, HEIGHT: %u",
