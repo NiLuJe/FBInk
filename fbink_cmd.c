@@ -385,8 +385,7 @@ static int
 int
     main(int argc, char* argv[])
 {
-	char* value_ptr = NULL;
-	int   opt;
+	int opt;
 	// NOTE: getopt_long will only update when passed a *long* option,
 	//       so we need to do the matching ourselves when we were passed *short* options, hence the sentinel value...
 	int                        opt_index = -1;
@@ -674,8 +673,6 @@ int
 							}
 							// Remember non-default values in a human-readable format
 							if (region_hwd != HWD_PASSTHROUGH) {
-								fprintf(stderr, "value: %p -> %s\n", value, value);
-								value_ptr     = value;
 								region_dither = strdup(value);
 							}
 							break;
@@ -1374,12 +1371,6 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
-
-	// Recap argv ptrs:
-	for (int i = 0; i < argc; i++) {
-		fprintf(stderr, "argv[%d]: %p -> %s\n", i, argv[i], argv[i]);
-	}
-	fprintf(stderr, "value_ptr: %p -> %s\n", value_ptr, value_ptr);
 
 	// Open framebuffer and keep it around, then setup globals.
 	if (ERRCODE(EXIT_FAILURE) == (fbfd = fbink_open())) {
