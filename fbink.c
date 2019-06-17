@@ -3851,6 +3851,20 @@ int
 	}
 	LOG("Actual print height is %u", curr_print_height);
 
+	// Abort early if we detected a truncation and the user flagged that as a failure.
+	if (cfg->no_truncation && !complete_str) {
+		LOG("Requested early abort on truncation!");
+		rv = ERRCODE(ENOSPC);
+		goto cleanup;
+	}
+
+	// If we only asked for a computation pass, abort now (successfully).
+	if (cfg->compute_only) {
+		LOG("Requested early abort after computation pass");
+		rv = EXIT_SUCCESS;
+		goto cleanup;
+	}
+
 	// Let's get some rendering options from FBInkConfig
 	uint8_t valign      = NONE;
 	uint8_t halign      = NONE;
@@ -4376,6 +4390,16 @@ int
 		LOG("Rendering took more space than expected, string was truncated to %u lines instead of %u!",
 		    line,
 		    computed_lines_amount);
+
+		// Abort if the user flagged that as a failure.
+		if (cfg->no_truncation) {
+			LOG("Requested late abort on truncation!");
+			rv = ERRCODE(ENOSPC);
+			// Inhibit the pending refresh, too.
+			region.width  = 0U;
+			region.height = 0U;
+			goto cleanup;
+		}
 	}
 cleanup:
 	// Rotate our eink refresh region before refreshing
