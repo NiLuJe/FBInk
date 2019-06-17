@@ -385,47 +385,49 @@ static int
 int
     main(int argc, char* argv[])
 {
-	int                        opt;
-	int                        opt_index;
-	static const struct option opts[] = { { "row", required_argument, NULL, 'y' },
-					      { "col", required_argument, NULL, 'x' },
-					      { "voffset", required_argument, NULL, 'Y' },
-					      { "hoffset", required_argument, NULL, 'X' },
-					      { "invert", no_argument, NULL, 'h' },
-					      { "flash", no_argument, NULL, 'f' },
-					      { "clear", no_argument, NULL, 'c' },
-					      { "centered", no_argument, NULL, 'm' },
-					      { "halfway", no_argument, NULL, 'M' },
-					      { "padded", no_argument, NULL, 'p' },
-					      { "rpadded", no_argument, NULL, 'r' },
-					      { "refresh", required_argument, NULL, 's' },
-					      { "size", required_argument, NULL, 'S' },
-					      { "font", required_argument, NULL, 'F' },
-					      { "verbose", no_argument, NULL, 'v' },
-					      { "quiet", no_argument, NULL, 'q' },
-					      { "image", required_argument, NULL, 'g' },
-					      { "img", required_argument, NULL, 'i' },
-					      { "flatten", no_argument, NULL, 'a' },
-					      { "eval", no_argument, NULL, 'e' },
-					      { "interactive", no_argument, NULL, 'I' },
-					      { "color", required_argument, NULL, 'C' },
-					      { "background", required_argument, NULL, 'B' },
-					      { "linecountcode", no_argument, NULL, 'L' },
-					      { "linecount", no_argument, NULL, 'l' },
-					      { "progressbar", required_argument, NULL, 'P' },
-					      { "activitybar", required_argument, NULL, 'A' },
-					      { "noviewport", no_argument, NULL, 'V' },
-					      { "overlay", no_argument, NULL, 'o' },
-					      { "bgless", no_argument, NULL, 'O' },
-					      { "fgless", no_argument, NULL, 'T' },
-					      { "truetype", required_argument, NULL, 't' },
-					      { "norefresh", no_argument, NULL, 'b' },
-					      { "dither", no_argument, NULL, 'D' },
-					      { "waveform", required_argument, NULL, 'W' },
-					      { "nightmode", no_argument, NULL, 'H' },
-					      { "coordinates", no_argument, NULL, 'E' },
-					      { "mimic", no_argument, NULL, 'Z' },
-					      { NULL, 0, NULL, 0 } };
+	int opt;
+	// NOTE: getopt_long will only update when passed a *long* option,
+	//       so we need to do the matching ourselves when we were passed *short* options, hence the sentinel value...
+	int                        opt_index = -1;
+	static const struct option opts[]    = { { "row", required_argument, NULL, 'y' },
+                                              { "col", required_argument, NULL, 'x' },
+                                              { "voffset", required_argument, NULL, 'Y' },
+                                              { "hoffset", required_argument, NULL, 'X' },
+                                              { "invert", no_argument, NULL, 'h' },
+                                              { "flash", no_argument, NULL, 'f' },
+                                              { "clear", no_argument, NULL, 'c' },
+                                              { "centered", no_argument, NULL, 'm' },
+                                              { "halfway", no_argument, NULL, 'M' },
+                                              { "padded", no_argument, NULL, 'p' },
+                                              { "rpadded", no_argument, NULL, 'r' },
+                                              { "refresh", required_argument, NULL, 's' },
+                                              { "size", required_argument, NULL, 'S' },
+                                              { "font", required_argument, NULL, 'F' },
+                                              { "verbose", no_argument, NULL, 'v' },
+                                              { "quiet", no_argument, NULL, 'q' },
+                                              { "image", required_argument, NULL, 'g' },
+                                              { "img", required_argument, NULL, 'i' },
+                                              { "flatten", no_argument, NULL, 'a' },
+                                              { "eval", no_argument, NULL, 'e' },
+                                              { "interactive", no_argument, NULL, 'I' },
+                                              { "color", required_argument, NULL, 'C' },
+                                              { "background", required_argument, NULL, 'B' },
+                                              { "linecountcode", no_argument, NULL, 'L' },
+                                              { "linecount", no_argument, NULL, 'l' },
+                                              { "progressbar", required_argument, NULL, 'P' },
+                                              { "activitybar", required_argument, NULL, 'A' },
+                                              { "noviewport", no_argument, NULL, 'V' },
+                                              { "overlay", no_argument, NULL, 'o' },
+                                              { "bgless", no_argument, NULL, 'O' },
+                                              { "fgless", no_argument, NULL, 'T' },
+                                              { "truetype", required_argument, NULL, 't' },
+                                              { "norefresh", no_argument, NULL, 'b' },
+                                              { "dither", no_argument, NULL, 'D' },
+                                              { "waveform", required_argument, NULL, 'W' },
+                                              { "nightmode", no_argument, NULL, 'H' },
+                                              { "coordinates", no_argument, NULL, 'E' },
+                                              { "mimic", no_argument, NULL, 'Z' },
+                                              { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_cfg = { 0 };
 #pragma GCC diagnostic push
@@ -568,9 +570,26 @@ int
 					switch (getsubopt(&subopts, refresh_token, &value)) {
 						case TOP_OPT:
 							if (value == NULL) {
+								const char* opt_longname = NULL;
+								// Look it up if we were passed the short form...
+								if (opt_index == -1) {
+									fprintf(stderr, "Longform lookup...\n");
+									for (opt_index = 0; opts[opt_index].name;
+									     opt_index++) {
+										if (opts[opt_index].val == opt) {
+											opt_longname =
+											    opts[opt_index].name;
+											break;
+										}
+									}
+								} else {
+									opt_longname = opts[opt_index].name;
+								}
 								fprintf(stderr,
-									"Missing value for suboption '%s'\n",
-									refresh_token[TOP_OPT]);
+									"Missing value for suboption '%s' of --%s, -%c\n",
+									refresh_token[TOP_OPT],
+									opt_longname,
+									opt);
 								errfnd = true;
 								break;
 							}
@@ -581,9 +600,26 @@ int
 							break;
 						case LEFT_OPT:
 							if (value == NULL) {
+								const char* opt_longname = NULL;
+								// Look it up if we were passed the short form...
+								if (opt_index == -1) {
+									fprintf(stderr, "Longform lookup...\n");
+									for (opt_index = 0; opts[opt_index].name;
+									     opt_index++) {
+										if (opts[opt_index].val == opt) {
+											opt_longname =
+											    opts[opt_index].name;
+											break;
+										}
+									}
+								} else {
+									opt_longname = opts[opt_index].name;
+								}
 								fprintf(stderr,
-									"Missing value for suboption '%s'\n",
-									refresh_token[LEFT_OPT]);
+									"Missing value for suboption '%s' of --%s, -%c\n",
+									refresh_token[LEFT_OPT],
+									opt_longname,
+									opt);
 								errfnd = true;
 								break;
 							}
@@ -594,9 +630,26 @@ int
 							break;
 						case WIDTH_OPT:
 							if (value == NULL) {
+								const char* opt_longname = NULL;
+								// Look it up if we were passed the short form...
+								if (opt_index == -1) {
+									fprintf(stderr, "Longform lookup...\n");
+									for (opt_index = 0; opts[opt_index].name;
+									     opt_index++) {
+										if (opts[opt_index].val == opt) {
+											opt_longname =
+											    opts[opt_index].name;
+											break;
+										}
+									}
+								} else {
+									opt_longname = opts[opt_index].name;
+								}
 								fprintf(stderr,
-									"Missing value for suboption '%s'\n",
-									refresh_token[WIDTH_OPT]);
+									"Missing value for suboption '%s' of --%s, -%c\n",
+									refresh_token[WIDTH_OPT],
+									opt_longname,
+									opt);
 								errfnd = true;
 								break;
 							}
@@ -608,9 +661,26 @@ int
 							break;
 						case HEIGHT_OPT:
 							if (value == NULL) {
+								const char* opt_longname = NULL;
+								// Look it up if we were passed the short form...
+								if (opt_index == -1) {
+									fprintf(stderr, "Longform lookup...\n");
+									for (opt_index = 0; opts[opt_index].name;
+									     opt_index++) {
+										if (opts[opt_index].val == opt) {
+											opt_longname =
+											    opts[opt_index].name;
+											break;
+										}
+									}
+								} else {
+									opt_longname = opts[opt_index].name;
+								}
 								fprintf(stderr,
-									"Missing value for suboption '%s'\n",
-									refresh_token[HEIGHT_OPT]);
+									"Missing value for suboption '%s' of --%s, -%c\n",
+									refresh_token[HEIGHT_OPT],
+									opt_longname,
+									opt);
 								errfnd = true;
 								break;
 							}
@@ -622,9 +692,26 @@ int
 							break;
 						case DITHER_OPT:
 							if (value == NULL) {
+								const char* opt_longname = NULL;
+								// Look it up if we were passed the short form...
+								if (opt_index == -1) {
+									fprintf(stderr, "Longform lookup...\n");
+									for (opt_index = 0; opts[opt_index].name;
+									     opt_index++) {
+										if (opts[opt_index].val == opt) {
+											opt_longname =
+											    opts[opt_index].name;
+											break;
+										}
+									}
+								} else {
+									opt_longname = opts[opt_index].name;
+								}
 								fprintf(stderr,
-									"Missing value for suboption '%s'\n",
-									refresh_token[DITHER_OPT]);
+									"Missing value for suboption '%s' of --%s, -%c\n",
+									refresh_token[DITHER_OPT],
+									opt_longname,
+									opt);
 								errfnd = true;
 								continue;
 							}
@@ -1199,6 +1286,8 @@ int
 				errfnd = true;
 				break;
 		}
+		// Reset opt_index to our sentinel value, so we can lookup the longform's name when the shortform is passed...
+		opt_index = -1;
 	}
 
 	// Now we can make sure we passed an image file to print, one way or another
