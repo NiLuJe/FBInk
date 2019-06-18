@@ -275,9 +275,9 @@ typedef struct
 	bool               is_centered;     // Horizontal centering
 	bool               is_formatted;    // Is string "formatted"? Bold/Italic support only, markdown like syntax
 	bool               compute_only;    // Abort early after the line-break computation pass (no actual rendering).
-					    // NOTE: This is early enough that it will *NOT* be able to predict *every*
-					    //       potential case of truncation.
-	    //       In particular, broken metrics may yield a late truncation at rendering time.
+	    // NOTE: This is early enough that it will *NOT* be able to predict *every*
+	    //       potential case of truncation.
+	//       In particular, broken metrics may yield a late truncation at rendering time.
 	bool no_truncation;    // Abort as early as possible (but not necessarily before the rendering pass),
 			       // if the string cannot fit in the available area at the current font size.
 } FBInkOTConfig;
@@ -400,13 +400,13 @@ FBINK_API int fbink_print(int fbfd, const char* restrict string, const FBInkConf
 // Returns -(EINVAL) if string is empty.
 // Returns -(EILSEQ) if string is not a valid UTF-8 sequence.
 // Returns -(ENOSPC) if no_truncation is true, and string needs to be truncated to fit in the available draw area.
-// NOTE:             This *cannot* prevent *drawing* truncated content on screen in *every* case,
-//                   because broken metrics may skew our initial computations.
-//                   As such, if the intent is to compute a "best fit" font size,
-//                   no_truncation ought to be combined with no_refresh on eInk,
-//                   (as we otherwise do *NOT* inhibit the refresh, in order to preserve get_last_rect's accuracy).
-//                   You'll also probably want to do a cheaper compute_only pass first,
-//                   to catch more obviously predicatble truncations.
+//		     NOTE: This *cannot* prevent *drawing* truncated content on screen in *every* case,
+//			   because broken metrics may skew our initial computations.
+//			   As such, if the intent is to compute a "best fit" font size,
+//			   no_truncation ought to be combined with no_refresh on eInk,
+//			   (as we otherwise do *NOT* inhibit the refresh, in order to preserve get_last_rect's accuracy).
+//			   You'll also probably want to do a cheaper compute_only pass first,
+//			   to catch more obviously predictable truncations.
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // string:		UTF-8 encoded string to print
@@ -417,8 +417,8 @@ FBINK_API int fbink_print(int fbfd, const char* restrict string, const FBInkConf
 //				wfm_mode, is_dithered, is_nightmode, no_refresh will be honored.
 //				Pass a NULL pointer if unneeded.
 // fit:			Optional pointer to an FBInkOTFit struct.
-//				If set, it will return information about the amount of lines needed to render the string at the
-//				requested font size, and whether it was truncated or not.
+//				If set, it will be used to return information about the amount of lines needed to render
+//				the string at the requested font size, and whether it was truncated or not.
 //				Pass a NULL pointer if unneeded.
 // NOTE: Alignment is relative to the printable area, as defined by the margins.
 //       As such, it only makes sense in the context of a single, specific print call.
