@@ -1488,10 +1488,9 @@ int
 				}
 				// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
 
-				// If we were asked to return the amount of printed lines, honor that,
-				// provided we actually successfully printed something...
+				// If we were asked to return the amount of printed lines, honor that...
 				// NOTE: We don't support linecode, because POSIX exit codes cap at 255, which is much too low.
-				if (want_linecount && rv >= EXIT_SUCCESS) {
+				if (want_linecount) {
 					// NOTE: fbink_print_ot returns a new top margin value directly,
 					//       no need for any extra computations!
 					total_lines = (unsigned short int) (linecount);
@@ -1538,12 +1537,11 @@ int
 				}
 				// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
 
-				// If we were asked to return the amount of printed lines, honor that,
-				// provided we actually successfully printed something...
-				if (want_linecode && rv >= EXIT_SUCCESS) {
+				// If we were asked to return the amount of printed lines, honor that...
+				if (want_linecode) {
 					rv += linecount;
 				}
-				if (want_linecount && rv >= EXIT_SUCCESS) {
+				if (want_linecount) {
 					total_lines = (unsigned short int) (total_lines + linecount);
 				}
 			}
@@ -1567,11 +1565,7 @@ int
 					ot_fit.rendered_lines,
 					ot_fit.truncated);
 			} else {
-				if (rv == ERRCODE(EXIT_FAILURE)) {
-					printf("0");
-				} else {
-					printf("%hu", total_lines);
-				}
+				printf("%hu", total_lines);
 			}
 		}
 	} else {
