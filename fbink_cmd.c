@@ -127,6 +127,7 @@ static void
 	    "\t\t\t\tNOTE: Will be inaccurate if there are more than 255 rows on screen!\n"
 	    "\t-l, --linecount\t\tWhen successfully printing text, outputs the total amount of printed lines in the final line of output to stdout (NOTE: enforces quiet & non-verbose!).\n"
 	    "\t\t\t\tNOTE: With OT/TTF rendering, will output a top margin value to use as-is instead (or 0 if there's no space left on screen)!\n"
+	    "\t\t\t\t      The OT/TTF codepath also returns more data, including the results of the line-breaking computations, so it's in an eval-friendly format instead.\n"
 	    "\t-E, --coordinates\t\tWhen printing something, outputs the coordinates & dimensions of what was printed to stdout, in a format easily consumable by eval (NOTE: enforces quiet & non-verbose!).\n"
 	    "\t-P, --progressbar NUM\tDraw a NUM%% full progress bar (full-width). Like other alternative modes, does *NOT* have precedence over text printing.\n"
 	    "\t\t\t\tIgnores -o, --overlay; -x, --col; -X, --hoffset; as well as -m, --centered & -p, --padded\n"
@@ -156,7 +157,7 @@ static void
 	    "\t\tIf notrunc is specified, truncation will be considered a failure.\n"
 	    "\t\tNOTE: This may not prevent drawing/refreshing the screen if the truncation couldn't be predicted at compute time!\n"
 	    "\t\t      On the CLI, this will prevent you from making use of the returned computation info, as this will chain a CLI abort.\n"
-	    "\t\tIf compute is specified, no rendering will be done, and only the line-breaking computation pass will run.\n"
+	    "\t\tIf compute is specified, no rendering will be done, and only the line-breaking computation pass will run. You'll generally want to use that combined with -l, --linecount.\n"
 	    "\n"
 	    "\t\tHonors -h, --invert; -f, --flash; -c, --clear; -W, --waveform; -D, --dither; -H, --nightmode; -b, --norefresh; -m, --centered; -M, --halfway; -o, --overlay; -T, --fgless; -O, --bgless; -C, --color; -B, --background; -l, --linecount\n"
 	    "\n"
@@ -438,6 +439,7 @@ int
 #pragma GCC diagnostic ignored "-Wmissing-braces"
 	FBInkOTConfig ot_config = { 0 };
 #pragma GCC diagnostic pop
+	FBInkOTFit ot_fit = { 0 };
 
 	enum
 	{
@@ -1456,7 +1458,6 @@ int
 					    fbink_cfg.no_refresh ? "Y" : "N");
 				}
 
-				FBInkOTFit ot_fit = { 0U };
 				if ((linecount = fbink_print_ot(fbfd, string, &ot_config, &fbink_cfg, &ot_fit)) < 0) {
 					fprintf(stderr, "Failed to print that string");
 					// In case we asked to flag truncation as a failure, figure out what happened...
@@ -1556,10 +1557,21 @@ int
 		}
 		// And print the total amount of lines we printed, if requested...
 		if (want_linecount) {
-			if (rv == ERRCODE(EXIT_FAILURE)) {
-				printf("0");
+			if (is_truetype) {
+				// OT has a more detailed feedback, with the line-breaking computation results,
+				// so it's in an eval friendly format instead...
+				fprintf(stdout,
+					"next_top=%hu;computed_lines=%hu;rendered_lines=%hu;truncated=%d;",
+					total_lines,
+					ot_fit.computed_lines,
+					ot_fit.rendered_lines,
+					ot_fit.truncated);
 			} else {
-				printf("%u", total_lines);
+				if (rv == ERRCODE(EXIT_FAILURE)) {
+					printf("0");
+				} else {
+					printf("%hu", total_lines);
+				}
 			}
 		}
 	} else {
@@ -1773,7 +1785,6 @@ int
 				if (is_truetype) {
 					load_ot_fonts(reg_ot_file, bd_ot_file, it_ot_file, bdit_ot_file, &fbink_cfg);
 					while ((nread = getline(&line, &len, stdin)) != -1) {
-						FBInkOTFit ot_fit = { 0U };
 						if ((linecnt = fbink_print_ot(
 							 fbfd, line, &ot_config, &fbink_cfg, &ot_fit)) < 0) {
 							fprintf(stderr, "Failed to print that string");
