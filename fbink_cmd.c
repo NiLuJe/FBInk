@@ -1458,7 +1458,18 @@ int
 
 				FBInkOTFit ot_fit = { 0U };
 				if ((linecount = fbink_print_ot(fbfd, string, &ot_config, &fbink_cfg, &ot_fit)) < 0) {
-					fprintf(stderr, "Failed to print that string!\n");
+					fprintf(stderr, "Failed to print that string");
+					// In case we asked to flag truncation as a failure, figure out what happened...
+					if (linecount == ERRCODE(ENOSPC)) {
+						if (ot_fit.rendered_lines > 0) {
+							fprintf(stderr, " because it was truncated at rendering time!\n");
+						} else {
+							fprintf(stderr,
+								" because it would have been rendered truncated!\n");
+						}
+					} else {
+						fprintf(stderr, "!\n");
+					}
 					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
 				}
@@ -1765,7 +1776,21 @@ int
 						FBInkOTFit ot_fit = { 0U };
 						if ((linecnt = fbink_print_ot(
 							 fbfd, line, &ot_config, &fbink_cfg, &ot_fit)) < 0) {
-							fprintf(stderr, "Failed to print that string!\n");
+							fprintf(stderr, "Failed to print that string");
+							// In case we asked to flag truncation as a failure, figure out what happened...
+							if (linecnt == ERRCODE(ENOSPC)) {
+								if (ot_fit.rendered_lines > 0) {
+									fprintf(
+									    stderr,
+									    " because it was truncated at rendering time!\n");
+								} else {
+									fprintf(
+									    stderr,
+									    " because it would have been rendered truncated!\n");
+								}
+							} else {
+								fprintf(stderr, "!\n");
+							}
 							rv = ERRCODE(EXIT_FAILURE);
 						}
 						ot_config.margins.top = (short int) linecnt;
