@@ -129,6 +129,8 @@ static void
 	    "\t\t\t\tNOTE: With OT/TTF rendering, will output a top margin value to use as-is instead (or 0 if there's no space left on screen)!\n"
 	    "\t\t\t\t      The OT/TTF codepath also returns more data, including the results of the line-breaking computations, so it's in an eval-friendly format instead.\n"
 	    "\t-E, --coordinates\t\tWhen printing something, outputs the coordinates & dimensions of what was printed to stdout, in a format easily consumable by eval (NOTE: enforces quiet & non-verbose!).\n"
+	    "\t\t\t\tNOTE: For both -l, --linecount & -E, --coordinates, output will only be sent to stdout on *success*. On error, the usual error message is sent to stderr.\n"
+	    "\t\t\t\t      Given that, you may want to store stdout only in a variable and check the return code for success before running eval on that var!\n"
 	    "\t-P, --progressbar NUM\tDraw a NUM%% full progress bar (full-width). Like other alternative modes, does *NOT* have precedence over text printing.\n"
 	    "\t\t\t\tIgnores -o, --overlay; -x, --col; -X, --hoffset; as well as -m, --centered & -p, --padded\n"
 	    "\t-A, --activitybar NUM\tDraw an activity bar on step NUM (full-width). NUM must be between 0 and 16. Like other alternative modes, does *NOT* have precedence over text printing.\n"
