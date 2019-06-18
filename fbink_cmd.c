@@ -579,6 +579,7 @@ int
 				const char* opt_longname = NULL;
 				// Look it up if we were passed the short form...
 				if (opt_index == -1) {
+					// Loop until we hit the final NULL entry
 					for (opt_index = 0; opts[opt_index].name; opt_index++) {
 						if (opts[opt_index].val == opt) {
 							opt_longname = opts[opt_index].name;
@@ -786,6 +787,7 @@ int
 				const char* opt_longname = NULL;
 				// Look it up if we were passed the short form...
 				if (opt_index == -1) {
+					// Loop until we hit the final NULL entry
 					for (opt_index = 0; opts[opt_index].name; opt_index++) {
 						if (opts[opt_index].val == opt) {
 							opt_longname = opts[opt_index].name;
@@ -1078,6 +1080,7 @@ int
 				const char* opt_longname = NULL;
 				// Look it up if we were passed the short form...
 				if (opt_index == -1) {
+					// Loop until we hit the final NULL entry
 					for (opt_index = 0; opts[opt_index].name; opt_index++) {
 						if (opts[opt_index].val == opt) {
 							opt_longname = opts[opt_index].name;
