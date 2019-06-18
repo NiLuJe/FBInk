@@ -275,8 +275,11 @@ typedef struct
 	bool               is_centered;     // Horizontal centering
 	bool               is_formatted;    // Is string "formatted"? Bold/Italic support only, markdown like syntax
 	bool               compute_only;    // Abort early after the line-break computation pass (no actual rendering).
-	bool no_truncation;                 // Abort as early as possible (but not necessarily before the rendering pass),
-					    // if the string cannot fit in the available area at the current font size.
+	    // NOTE: This is early enough that it will *NOT* be able to predict *every*
+	    //       potential case of truncation.
+	    //       In particular, broken metrics may yield a late truncation at rendering time.
+	bool no_truncation;    // Abort as early as possible (but not necessarily before the rendering pass),
+			       // if the string cannot fit in the available area at the current font size.
 } FBInkOTConfig;
 
 // Optionally used with fbink_print_ot, if you need more details about the line-breaking computations,
