@@ -275,8 +275,8 @@ typedef struct
 	bool               is_centered;     // Horizontal centering
 	bool               is_formatted;    // Is string "formatted"? Bold/Italic support only, markdown like syntax
 	bool               compute_only;    // Abort early after the line-break computation pass (no actual rendering).
-	    // NOTE: This is early enough that it will *NOT* be able to predict *every*
-	    //       potential case of truncation.
+					    // NOTE: This is early enough that it will *NOT* be able to predict *every*
+					    //       potential case of truncation.
 	    //       In particular, broken metrics may yield a late truncation at rendering time.
 	bool no_truncation;    // Abort as early as possible (but not necessarily before the rendering pass),
 			       // if the string cannot fit in the available area at the current font size.
@@ -405,6 +405,8 @@ FBINK_API int fbink_print(int fbfd, const char* restrict string, const FBInkConf
 //                   As such, if the intent is to compute a "best fit" font size,
 //                   no_truncation ought to be combined with no_refresh on eInk,
 //                   (as we otherwise do *NOT* inhibit the refresh, in order to preserve get_last_rect's accuracy).
+//                   You'll also probably want to do a cheaper compute_only pass first,
+//                   to catch more obviously predicatble truncations.
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // string:		UTF-8 encoded string to print
