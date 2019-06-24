@@ -3717,7 +3717,8 @@ int
 				LOG("Found a hard break @ idx %zu", c_index);
 				size_t last_index = c_index;
 				// We don't want to print the break character,
-				// but if it's the first character, we shouldn't try to look backwards...
+				// but if it's the first character in the buffer, we shouldn't try to look backwards,
+				// as u8_dec would blow past the start of the buffer...
 				if (c_index > 0) {
 					u8_dec(string, &last_index);
 				}
@@ -3729,8 +3730,9 @@ int
 					u8_inc(string, &c_index);
 					LOG("Set char idx to %zu", c_index);
 				} else {
-					// But if we have a leading linefeed,
-					// make sure we won't try to render it by ensuring startCharIndex > endCharIndex...
+					// But if the first character in the buffer was a hard break,
+					// make sure we won't try to render it by ensuring startCharIndex > endCharIndex,
+					// since we've just set endCharIndex to 0 above...
 					u8_inc(string, &c_index);
 					lines[line].startCharIndex = c_index;
 					LOG("Fudging startCharIndex to match new char idx %zu because of a leading hard break", c_index);
@@ -3798,34 +3800,46 @@ int
 					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
 				}
-				// Reset the index to our current character (c_index is ahead by one at this point)
+				// Reset the index to our current character (c_index is ahead by one at this point).
+				// We're behind u8_nextchar2, so this u8_dec is safe.
 				u8_dec(string, &c_index);
-				// If the current glyph is a space, handle that now.
-				if (brk_buff[c_index] == LINEBREAK_ALLOWBREAK) {
-					tmp_c_index = c_index;
-					u8_dec(string, &tmp_c_index);
-					lines[line].endCharIndex = tmp_c_index;
-					lines[line].has_a_break = true;
-					u8_inc(string, &c_index);
-					LOG("Can break on current whitespace!");
-					break;
-				} else {
-					// Note, we need to do this a second time, to get the previous character,
-					// as u8_nextchar() 'consumes' a character.
-					u8_dec(string, &c_index);
-					// Ensure we'll have a hard-break here if we can't find a better opportunity
-					lines[line].endCharIndex = c_index;
-					lines[line].has_a_break = true;
-					for (tmp_c_index = c_index; tmp_c_index > lines[line].startCharIndex;
-					     u8_dec(string, &tmp_c_index)) {
-						if (brk_buff[tmp_c_index] == LINEBREAK_ALLOWBREAK) {
-							c_index                  = tmp_c_index;
-							lines[line].endCharIndex = c_index;
-							LOG("Found a break @ #%zu", c_index);
-							break;
+				// But beyond this point, we have to make sure c_index is > 0,
+				// because u8_dec would happily blow past our buffer, and leave us with an underflowed c_index...
+				if (c_index > 0) {
+					// If the current glyph is a space, handle that now.
+					if (brk_buff[c_index] == LINEBREAK_ALLOWBREAK) {
+						tmp_c_index = c_index;
+						LOG("Break is allowed @ idx %zu", tmp_c_index);
+						u8_dec(string, &tmp_c_index);
+						lines[line].endCharIndex = tmp_c_index;
+						lines[line].has_a_break = true;
+						u8_inc(string, &c_index);
+						LOG("Can break on current whitespace!");
+						break;
+					} else {
+						// Note, we need to do this a second time, to get the previous character,
+						// as u8_nextchar() 'consumes' a character.
+						u8_dec(string, &c_index);
+						// Ensure we'll have a hard-break here if we can't find a better opportunity
+						lines[line].endCharIndex = c_index;
+						lines[line].has_a_break = true;
+						LOG("Flagging a last-resort hard break @ idx %zu", c_index);
+						// That u8_dec is safe because startCharIndex will always be >= 0
+						for (tmp_c_index = c_index; tmp_c_index > lines[line].startCharIndex;
+						u8_dec(string, &tmp_c_index)) {
+							LOG("Checking for a potential break @ idx %zu", tmp_c_index);
+							if (brk_buff[tmp_c_index] == LINEBREAK_ALLOWBREAK) {
+								c_index                  = tmp_c_index;
+								lines[line].endCharIndex = c_index;
+								LOG("Found a break @ #%zu", c_index);
+								break;
+							}
 						}
+						u8_inc(string, &c_index);
+						break;
 					}
-					u8_inc(string, &c_index);
+				} else {
+					// Let the EOS check handle it...
 					break;
 				}
 			}
@@ -3844,6 +3858,7 @@ int
 			LOG("Reached EOS!");
 			// Don't clobber an existing legitimate break...
 			if (!lines[line].has_a_break) {
+				// That u8_dec is safe because str_len_bytes will always be > 0 as we abort on an empty string.
 				u8_dec(string, &c_index);
 				lines[line].endCharIndex = c_index;
 				lines[line].has_a_break = true;
