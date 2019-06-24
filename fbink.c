@@ -3679,7 +3679,6 @@ int
 		lines[line].line_gap       = max_lg;
 		lines[line].line_used      = true;
 		while (c_index < str_len_bytes) {
-			LOG("c_index is %zu vs. str_len_bytes: %zu", c_index, str_len_bytes);
 			if (cfg->is_formatted) {
 				// Check if we need to skip formatting characters
 				if (fmt_buff[c_index] == CH_IGNORE) {
@@ -3714,7 +3713,7 @@ int
 			}
 			// We check for a mandatory break
 			if (brk_buff[c_index] == LINEBREAK_MUSTBREAK) {
-				LOG("Found a hard break @ idx %zu", c_index);
+				LOG("Found a hard break @ #%zu", c_index);
 				size_t last_index = c_index;
 				// We don't want to print the break character,
 				// but if it's the first character in the buffer, we shouldn't try to look backwards,
@@ -3723,26 +3722,21 @@ int
 					u8_dec(string, &last_index);
 				}
 				lines[line].endCharIndex = last_index;
-				lines[line].has_a_break = true;
-				LOG("Set endCharIndex for line #%u @ idx %zu", line, last_index);
+				lines[line].has_a_break  = true;
 				// We want our next line to start after this breakpoint
 				if (c_index > 0) {
 					u8_inc(string, &c_index);
-					LOG("Set char idx to %zu", c_index);
 				} else {
 					// But if the first character in the buffer was a hard break,
 					// make sure we won't try to render it by ensuring startCharIndex > endCharIndex,
 					// since we've just set endCharIndex to 0 above...
 					u8_inc(string, &c_index);
 					lines[line].startCharIndex = c_index;
-					LOG("Fudging startCharIndex to match new char idx %zu because of a leading hard break", c_index);
 				}
 				// And we're done processing this line
 				break;
 			}
-			LOG("Char index is %zu", c_index);
 			c = u8_nextchar2(string, &c_index);
-			LOG("Char is U+%04X", c);
 			// Get the glyph index now, instead of having to look it up each time
 			gi = stbtt_FindGlyphIndex(curr_font, (int) c);
 			// Note, these metrics are unscaled,
@@ -3809,12 +3803,11 @@ int
 					// If the current glyph is a space, handle that now.
 					if (brk_buff[c_index] == LINEBREAK_ALLOWBREAK) {
 						tmp_c_index = c_index;
-						LOG("Break is allowed @ idx %zu", tmp_c_index);
 						u8_dec(string, &tmp_c_index);
 						lines[line].endCharIndex = tmp_c_index;
-						lines[line].has_a_break = true;
+						lines[line].has_a_break  = true;
 						u8_inc(string, &c_index);
-						LOG("Can break on current whitespace!");
+						LOG("Can break on current whitespace @ #%zu", c_index);
 						break;
 					} else {
 						// Note, we need to do this a second time, to get the previous character,
@@ -3822,12 +3815,11 @@ int
 						u8_dec(string, &c_index);
 						// Ensure we'll have a hard-break here if we can't find a better opportunity
 						lines[line].endCharIndex = c_index;
-						lines[line].has_a_break = true;
-						LOG("Flagging a last-resort hard break @ idx %zu", c_index);
+						lines[line].has_a_break  = true;
+						LOG("Flagging a last-resort break @ #%zu", c_index);
 						// That u8_dec is safe because startCharIndex will always be >= 0
 						for (tmp_c_index = c_index; tmp_c_index > lines[line].startCharIndex;
-						u8_dec(string, &tmp_c_index)) {
-							LOG("Checking for a potential break @ idx %zu", tmp_c_index);
+						     u8_dec(string, &tmp_c_index)) {
 							if (brk_buff[tmp_c_index] == LINEBREAK_ALLOWBREAK) {
 								c_index                  = tmp_c_index;
 								lines[line].endCharIndex = c_index;
@@ -3855,16 +3847,15 @@ int
 		}
 		// We've run out of string! This is our last line.
 		if (c_index >= str_len_bytes) {
-			LOG("Reached EOS!");
 			// Don't clobber an existing legitimate break...
 			if (!lines[line].has_a_break) {
 				// That u8_dec is safe because str_len_bytes will always be > 0 as we abort on an empty string.
 				u8_dec(string, &c_index);
 				lines[line].endCharIndex = c_index;
-				lines[line].has_a_break = true;
-				LOG("Set endCharIndex for line #%u @ idx %zu", line, c_index);
+				lines[line].has_a_break  = true;
+				LOG("Flagging a mandatory break at EOS @ #%zu", c_index);
 			}
-			complete_str             = true;
+			complete_str = true;
 			break;
 		}
 	}
@@ -4039,10 +4030,7 @@ int
 				}
 			}
 			curr_point.y = ins_point.y = (unsigned short int) max_baseline;
-			LOG("Render: Char index is %zu", ci);
 			c                          = u8_nextchar2(string, &ci);
-			LOG("Render: Char is U+%04X", c);
-			LOG("Render: Char is flagged as %d", brk_buff[ci]);
 			gi                         = stbtt_FindGlyphIndex(curr_font, (int) c);
 			stbtt_GetGlyphHMetrics(curr_font, gi, &adv, &lsb);
 			stbtt_GetGlyphBitmapBox(curr_font, gi, sf, sf, &x0, &y0, &x1, &y1);
