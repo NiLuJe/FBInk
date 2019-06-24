@@ -3811,7 +3811,7 @@ int
 						break;
 					} else {
 						// Note, we need to do this a second time, to get the previous character,
-						// as u8_nextchar() 'consumes' a character.
+						// as u8_nextchar2() 'consumes' a character.
 						u8_dec(string, &c_index);
 						// Ensure we'll have a hard-break here if we can't find a better opportunity
 						lines[line].endCharIndex = c_index;
