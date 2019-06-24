@@ -3794,7 +3794,7 @@ int
 					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
 				}
-				// Reset the index to our current character (c_index is ahead by one at this point).
+				// Reset the index to our current character (c_index is ahead by one grapheme at this point).
 				// We're behind u8_nextchar2, so this u8_dec is safe.
 				u8_dec(string, &c_index);
 				// But beyond this point, we have to make sure c_index is > 0,
@@ -3806,8 +3806,8 @@ int
 						u8_dec(string, &tmp_c_index);
 						lines[line].endCharIndex = tmp_c_index;
 						lines[line].has_a_break  = true;
-						u8_inc(string, &c_index);
 						LOG("Can break on current whitespace @ #%zu", c_index);
+						u8_inc(string, &c_index);
 						break;
 					} else {
 						// Note, we need to do this a second time, to get the previous character,
