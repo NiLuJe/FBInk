@@ -152,6 +152,7 @@ typedef struct FBInkOTLine
 	size_t endCharIndex;
 	int    line_gap;
 	bool   line_used;
+	bool   has_a_break;
 } FBInkOTLine;
 
 typedef struct FBInkOTFonts
