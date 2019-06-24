@@ -3725,8 +3725,16 @@ int
 				lines[line].has_a_break = true;
 				LOG("Set endCharIndex for line #%u @ idx %zu", line, last_index);
 				// We want our next line to start after this breakpoint
-				u8_inc(string, &c_index);
-				LOG("Set char idx to %zu", c_index);
+				if (c_index > 0) {
+					u8_inc(string, &c_index);
+					LOG("Set char idx to %zu", c_index);
+				} else {
+					// But if we have a leading linefeed,
+					// make sure we won't try to render it by ensuring startCharIndex > endCharIndex...
+					u8_inc(string, &c_index);
+					lines[line].startCharIndex = c_index;
+					LOG("Fudging startCharIndex to match new char idx %zu because of a leading hard break", c_index);
+				}
 				// And we're done processing this line
 				break;
 			}
