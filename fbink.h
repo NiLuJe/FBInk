@@ -345,12 +345,17 @@ FBINK_API int fbink_close(int fbfd);
 //				no_viewport, is_verbose & is_quiet
 //				MUST be set beforehand.
 //				This means you MUST call fbink_init() again when you update them, too!
+//				(This also means the effects from those fields "stick" across the lifetime of your application,
+//				or until a subsequent fbink_init() (or effective fbink_reinit()) call gets fed different values).
 // NOTE: By virtue of, well, setting global variables, do NOT consider this thread-safe.
 //       The rest of the API should be, though, so make sure you init in your main thread *before* threading begins...
 // NOTE: If you just need to make sure the framebuffer state is still up to date before an fbink_* call,
 //       (f.g., because you're running on a Kobo, which may switch from 16bpp to 32bpp, or simply change orientation),
 //       prefer using fbink_reinit instead of calling fbink_init *again*, as it's tailored for this use case.
 //       c.f., KFMon for an example of this use case in the wild.
+// NOTE: You can perfectly well keep a few different FBInkConfig structs around, instead of modifying the same one over and over.
+//       Just remember that some fields *require* an fbink_init() call to be taken into account (see above),
+//       but if the only fields that differ don't fall into that category, you do *NOT* need an fbink_init() per FBInkConfig...
 FBINK_API int fbink_init(int fbfd, const FBInkConfig* restrict fbink_cfg);
 
 // Add an OpenType font to FBInk. Note that at least one font must be added in order to use fbink_print_ot()
