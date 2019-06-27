@@ -84,6 +84,8 @@ font_set = {
 	"spleen"	: ("spleen-16x32.hex",		16,	32),
 	"tewi"		: ("tewi-medium-11.hex",	6,	13),
 	"tewib"		: ("tewi-bold-11.hex",		6,	13),
+	"topaz"		: ("TopazPlus-8x16.hex",	8,	16),
+	"microknight"	: ("MicroKnightPlus-8x16.hex",	8,	16),
 }
 
 # Get the font name from the first arg passed to the script
