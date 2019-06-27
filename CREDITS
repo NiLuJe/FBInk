@@ -95,3 +95,13 @@ As well as a number of third-party resources (namely, font files):
 	* tewi (a small bitmap font), Copyright (c) 2015-2017 lucy <lucy at luz dot lu>,
 		Licensed under the MIT License (https://opensource.org/licenses/MIT).
 		(https://github.com/lucy/tewi-font)
+
+	* TopazPlus (an Amiga font), (c) dMG/t!s^dS!,
+		Licensed under the GNU General Public License, Font Exception (http://www.gnu.org/licenses/gpl-faq.html#FontException).
+		Based on Topaz, (c) AmigaInc.
+		(https://www.trueschool.se/html/fonts.html)
+
+	* MicroKnightPlus (an Amiga font), (c) dMG/t!s^dS!,
+		Licensed under the GNU General Public License, Font Exception (http://www.gnu.org/licenses/gpl-faq.html#FontException).
+		Based on MicroKnight, (c) Unknown author.
+		(https://www.trueschool.se/html/fonts.html)
