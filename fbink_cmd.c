@@ -393,8 +393,8 @@ int
     main(int argc, char* argv[])
 {
 	int opt;
-	// NOTE: getopt_long will only update when passed a *long* option,
-	//       so we need to do the matching ourselves when we were passed *short* options, hence the sentinel value...
+	// NOTE: getopt_long will only update opt_index when passed a *long* option,
+	//       so we need to do the matching ourselves when we're passed *short* options, hence the sentinel value...
 	int                        opt_index = -1;
 	static const struct option opts[]    = { { "row", required_argument, NULL, 'y' },
                                               { "col", required_argument, NULL, 'x' },
