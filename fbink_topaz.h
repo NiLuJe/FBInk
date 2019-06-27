@@ -28,6 +28,6 @@
 #include "fonts/topaz.h"
 
 // NOTE: Should technically be pure, but we can get away with const, according to https://lwn.net/Articles/285332/
-static const uint8_t* topaz_get_bitmap(uint32_t codepoint) __attribute__((const));
+static const unsigned char* topaz_get_bitmap(uint32_t codepoint) __attribute__((const));
 
 #endif
