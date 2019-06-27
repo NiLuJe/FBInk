@@ -3039,7 +3039,7 @@ int
 				// even if the reflowing changes that'll cause mean we might not end up using it.
 				lines++;
 				// Don't decrement the byte index, we want to print the LF,
-				// (it'll render as a blank), mostly to make padding look nicer,
+				// (it'll render as a blank with *most* fonts), mostly to make padding look nicer,
 				// but also so that line_bytes matches line_len ;).
 				// And finally, as we've explained earlier, trim line_len to where we stopped.
 				LOG("Line length was %hu characters, but LF is character number %u", line_len, cn);
