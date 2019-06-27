@@ -80,7 +80,9 @@ typedef enum
 	FATTY,             // fatty
 	SPLEEN,            // spleen
 	TEWI,              // tewi (medium)
-	TEWIB              // tewi (bold)
+	TEWIB,             // tewi (bold)
+	TOPAZ,             // Topaz+ A1200
+	MICROKNIGHT        // MicroKnight+
 } FONT_INDEX_T;
 
 // List of supported font styles

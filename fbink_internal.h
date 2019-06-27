@@ -213,6 +213,8 @@
 #	include "fbink_spleen.h"
 #	include "fbink_tewi.h"
 #	include "fbink_misc_fonts.h"
+#	include "fbink_topaz.h"
+#	include "fbink_microknight.h"
 #endif
 
 // NOTE: CLOEXEC shenanigans...

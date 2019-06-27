@@ -697,6 +697,10 @@ static const char*
 			return "Tewi";
 		case TEWIB:
 			return "Tewi Bold";
+		case TOPAZ:
+			return "Topaz+ A1200";
+		case MICROKNIGHT:
+			return "MicroKnight+";
 #endif
 		default:
 			return "IBM (Default)";
@@ -2034,6 +2038,16 @@ static int
 #ifdef FBINK_WITH_FONTS
 	// Setup custom fonts (glyph size, render fx, bitmap fx)
 	switch (fbink_cfg->fontname) {
+		case MICROKNIGHT:
+			glyphWidth         = 8U;
+			glyphHeight        = 16U;
+			fxpFont8xGetBitmap = &microknight_get_bitmap;
+			break;
+		case TOPAZ:
+			glyphWidth         = 8U;
+			glyphHeight        = 16U;
+			fxpFont8xGetBitmap = &topaz_get_bitmap;
+			break;
 		case TEWIB:
 			glyphWidth         = 6U;
 			glyphHeight        = 13U;
@@ -6949,6 +6963,9 @@ FBInkRect
 #	include "fbink_tewi.c"
 // Various other small fonts (c.f., CREDITS for details)
 #	include "fbink_misc_fonts.c"
+// Amiga fonts (https://www.trueschool.se/html/fonts.html)
+#	include "fbink_topaz.c"
+#	include "fbink_microknight.c"
 #endif
 // Contains fbink_button_scan's implementation, Kobo only, and has a bit of Linux MT input thrown in ;).
 #include "fbink_button_scan.c"
