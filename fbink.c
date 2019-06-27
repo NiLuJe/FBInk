@@ -3018,15 +3018,18 @@ int
 		// First, get the byte offset of this section of our string (i.e., this line)...
 		line_offset += line_bytes;
 		// ... then compute how many bytes we'll need to store it.
-		line_bytes            = 0U;
-		unsigned short int cn = 0U;
-		uint32_t           ch = 0U;
+		line_bytes                   = 0U;
+		unsigned short int cn        = 0U;
+		uint32_t           ch        = 0U;
+		bool               caught_lf = false;
 		while ((ch = u8_nextchar2(string + line_offset, &line_bytes)) != 0U) {
 			cn++;
 			// NOTE: Honor linefeeds...
 			//       The main use-case for this is throwing tail'ed logfiles at us and having them
 			//       be readable instead of a jumbled glued together mess ;).
 			if (ch == 0x0A) {
+				// Remember that, we'll fudge it to a blank later
+				caught_lf = true;
 				LOG("Caught a linefeed!");
 				// NOTE: We're essentially forcing a reflow by cutting the line mid-stream,
 				//       so we have to update our counters...
@@ -3039,7 +3042,8 @@ int
 				// even if the reflowing changes that'll cause mean we might not end up using it.
 				lines++;
 				// Don't decrement the byte index, we want to print the LF,
-				// (it'll render as a blank with *most* fonts), mostly to make padding look nicer,
+				// (which we'll replace with a blank, to account for fonts with a visible LF glyph),
+				// mostly to make padding look nicer,
 				// but also so that line_bytes matches line_len ;).
 				// And finally, as we've explained earlier, trim line_len to where we stopped.
 				LOG("Line length was %hu characters, but LF is character number %u", line_len, cn);
@@ -3145,6 +3149,15 @@ int
 		// NOTE: We don't check for snprintf failure or truncation,
 		//       because I'm fairly confident that truncation is not a risk here...
 		LOG("snprintf wrote %d bytes", bytes_printed);
+
+		// NOTE: If we caught a LF, replace it with a blank to make it behave with fonts that have a visible LF glyph...
+		if (caught_lf) {
+			// We can't rely on line_bytes as the exact position of the LF, since padding may have moved it...
+			char* lf = strrchr(line, 0x0A);
+			if (lf) {
+				*lf = 0x20;
+			}
+		}
 
 		// NOTE: And don't forget our wraparound marker (U+2588, a solid black block).
 		//       We don't need nor even *want* to add it if the line is already full,
