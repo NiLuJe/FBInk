@@ -196,7 +196,9 @@
 #include "font8x8/font8x8_ext_latin.h"
 #include "font8x8/font8x8_greek.h"
 #include "font8x8/font8x8_hiragana.h"
-// NOTE: See https://github.com/ansilove/BlockZone for an awesome vector version of this IBM VGA font ;).
+// NOTE: See https://github.com/ansilove/BlockZone for an awesome vector version of the 8x16 VGA variant of this IBM font ;).
+// NOTE: As well as https://int10h.org/oldschool-pc-fonts for both vector & bitmap versions of most IMB fonts!
+// NOTE: And https://farsil.github.io/ibmfonts for BDF conversions, in case gbdfed wasn't enough ;).'
 
 // Where our (internal) typedefs dwell...
 #include "fbink_types.h"
