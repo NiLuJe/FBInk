@@ -222,7 +222,7 @@ static void print_lastrect(void);
 
 #define strtof_chk(opt, subopt, str, result)                                                                             \
 	({                                                                                                               \
-		/* NOTE: We want to *reject* negative values (which strtoul does not)! */                                \
+		/* NOTE: We want to *reject* negative values */                                                          \
 		if (strchr(str, '-')) {                                                                                  \
 			fprintf(stderr,                                                                                  \
 				"Assigned a negative value (%s) to an option (%c%s%s) expecting a positive %s.\n",       \
@@ -258,7 +258,7 @@ static void print_lastrect(void);
 		}                                                                                                        \
                                                                                                                          \
 		/* If we got here, strtof() successfully parsed at least part of a number. */                            \
-		/* But we do want to enforce the fact that the input really was *only* an integer value. */              \
+		/* But we do want to enforce the fact that the input really was *only* a decimal value. */               \
 		if (*endptr != '\0') {                                                                                   \
 			fprintf(stderr,                                                                                  \
 				"Found trailing characters (%s) behind value '%f' assigned from string '%s' "            \
@@ -276,7 +276,7 @@ static void print_lastrect(void);
 		/* Reject infinity */                                                                                    \
 		if (val == INFINITY || val == -INFINITY) {                                                               \
 			fprintf(stderr,                                                                                  \
-				"Assigned infinity (%s) to an option (%c%s%s) expecting a positive %s.\n",               \
+				"Assigned infinity (%s) to an option (%c%s%s) expecting a %s.\n",                        \
 				str,                                                                                     \
 				opt,                                                                                     \
 				subopt ? ":" : "",                                                                       \
@@ -287,14 +287,13 @@ static void print_lastrect(void);
                                                                                                                          \
 		/* Reject NaN */                                                                                         \
 		if (isnan(val)) {                                                                                        \
-			fprintf(                                                                                         \
-			    stderr,                                                                                      \
-			    "Assigned value (%s) that is Not a Number to an option (%c%s%s) expecting a positive %s.\n", \
-			    str,                                                                                         \
-			    opt,                                                                                         \
-			    subopt ? ":" : "",                                                                           \
-			    subopt ? subopt : "",                                                                        \
-			    TYPENAME(*result));                                                                          \
+			fprintf(stderr,                                                                                  \
+				"Assigned a value (%s) that is Not a Number to an option (%c%s%s) expecting a %s.\n",    \
+				str,                                                                                     \
+				opt,                                                                                     \
+				subopt ? ":" : "",                                                                       \
+				subopt ? subopt : "",                                                                    \
+				TYPENAME(*result));                                                                      \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
