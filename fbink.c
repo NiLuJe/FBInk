@@ -3517,7 +3517,7 @@ int
 	area.br.x = (unsigned short int) (viewWidth - right_margin);
 	area.br.y = (unsigned short int) (viewHeight - bottom_margin);
 	// Set default font size if required
-	unsigned short int size_pt = cfg->size_pt;
+	float size_pt = cfg->size_pt;
 	if (!size_pt) {
 		size_pt = 12U;
 	}

@@ -26,6 +26,7 @@
 #include <errno.h>
 #include <getopt.h>
 #include <limits.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
@@ -57,7 +58,8 @@ static void print_lastrect(void);
 		 : "int", unsigned int                                                                                   \
 		 : "unsigned int", long int                                                                              \
 		 : "long int", unsigned long int                                                                         \
-		 : "unsigned long int", default                                                                          \
+		 : "unsigned long int", float                                                                            \
+		 : "float", default                                                                                      \
 		 : "other")
 
 #define TYPEMIN(x)                                                                                                       \
@@ -67,7 +69,8 @@ static void print_lastrect(void);
 		 : SCHAR_MIN, unsigned char : 0U, short int                                                              \
 		 : SHRT_MIN, unsigned short int : 0U, int                                                                \
 		 : INT_MIN, unsigned int : 0U, long int                                                                  \
-		 : LONG_MIN, unsigned long int : 0U, default                                                             \
+		 : LONG_MIN, unsigned long int : 0U, float                                                               \
+		 : -HUGE_VALF, default                                                                                   \
 		 : -42)
 
 #define TYPEMAX(x)                                                                                                       \
@@ -81,7 +84,8 @@ static void print_lastrect(void);
 		 : INT_MAX, unsigned int                                                                                 \
 		 : UINT_MAX, long int                                                                                    \
 		 : LONG_MAX, unsigned long int                                                                           \
-		 : ULONG_MAX, default : 42)
+		 : ULONG_MAX, float                                                                                      \
+		 : HUGE_VALF, default : 42)
 
 // And now we can implement generic, checked strtoul/strtol macros!
 #define strtoul_chk(opt, subopt, str, result)                                                                            \
@@ -216,11 +220,84 @@ static void print_lastrect(void);
 		return EXIT_SUCCESS;                                                                                     \
 	})
 
+#define strtof_chk(opt, subopt, str, result)                                                                             \
+	({                                                                                                               \
+		/* NOTE: We want to *reject* negative values (which strtoul does not)! */                                \
+		if (strchr(str, '-')) {                                                                                  \
+			fprintf(stderr,                                                                                  \
+				"Assigned a negative value (%s) to an option (%c%s%s) expecting a positive %s.\n",       \
+				str,                                                                                     \
+				opt,                                                                                     \
+				subopt ? ":" : "",                                                                       \
+				subopt ? subopt : "",                                                                    \
+				TYPENAME(*result));                                                                      \
+			return ERRCODE(EINVAL);                                                                          \
+		}                                                                                                        \
+                                                                                                                         \
+		/* Now that we know it's positive, we can go on with strtof... */                                        \
+		char* endptr;                                                                                            \
+		float val;                                                                                               \
+                                                                                                                         \
+		errno = 0; /* To distinguish success/failure after call */                                               \
+		val   = strtof(str, &endptr);                                                                            \
+                                                                                                                         \
+		if ((errno == ERANGE && (val == HUGE_VALF || val == -HUGE_VALF)) || (errno != 0 && val == 0)) {          \
+			perror("[FBInk] strtof");                                                                        \
+			return ERRCODE(EINVAL);                                                                          \
+		}                                                                                                        \
+                                                                                                                         \
+		if (endptr == str) {                                                                                     \
+			fprintf(stderr,                                                                                  \
+				"No digits were found in value '%s' assigned to an option (%c%s%s) expecting a %s.\n",   \
+				str,                                                                                     \
+				opt,                                                                                     \
+				subopt ? ":" : "",                                                                       \
+				subopt ? subopt : "",                                                                    \
+				TYPENAME(*result));                                                                      \
+			return ERRCODE(EINVAL);                                                                          \
+		}                                                                                                        \
+                                                                                                                         \
+		/* If we got here, strtof() successfully parsed at least part of a number. */                            \
+		/* But we do want to enforce the fact that the input really was *only* an integer value. */              \
+		if (*endptr != '\0') {                                                                                   \
+			fprintf(stderr,                                                                                  \
+				"Found trailing characters (%s) behind value '%f' assigned from string '%s' "            \
+				"to an option (%c%s%s) expecting a %s.\n",                                               \
+				endptr,                                                                                  \
+				val,                                                                                     \
+				str,                                                                                     \
+				opt,                                                                                     \
+				subopt ? ":" : "",                                                                       \
+				subopt ? subopt : "",                                                                    \
+				TYPENAME(*result));                                                                      \
+			return ERRCODE(EINVAL);                                                                          \
+		}                                                                                                        \
+                                                                                                                         \
+		/* Make sure there isn't a loss of precision on this arch when casting explictly */                      \
+		if ((__typeof__(*result)) val != val) {                                                                  \
+			fprintf(stderr,                                                                                  \
+				"Loss of precision when casting value '%f' to a %s for option '%c%s%s' "                 \
+				"(valid range: %f to %f).\n",                                                            \
+				val,                                                                                     \
+				TYPENAME(*result),                                                                       \
+				opt,                                                                                     \
+				subopt ? ":" : "",                                                                       \
+				subopt ? subopt : "",                                                                    \
+				(float) TYPEMIN(*result),                                                                \
+				(float) TYPEMAX(*result));                                                               \
+			return ERRCODE(EINVAL);                                                                          \
+		}                                                                                                        \
+                                                                                                                         \
+		*result = (__typeof__(*result)) val;                                                                     \
+		return EXIT_SUCCESS;                                                                                     \
+	})
+
 // And we'll use those through these...
 static int strtoul_u(int, const char*, const char*, uint32_t*);
 static int strtoul_hu(int, const char*, const char*, unsigned short int*);
 static int strtoul_hhu(int, const char*, const char*, uint8_t*);
 static int strtol_hi(int, const char*, const char*, short int*);
 static int strtol_hhi(int, const char*, const char*, int8_t*);
+static int strtof_pos(int, const char*, const char*, float*);
 
 #endif

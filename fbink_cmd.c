@@ -388,6 +388,14 @@ static int
 	strtol_chk(opt, subopt, str, result);
 }
 
+// In the same vein, but for strtof, for a *positive* float
+// Input validation via strtol, for an int8_t
+static int
+    strtof_pos(int opt, const char* subopt, const char* str, float* result)
+{
+	strtof_chk(opt, subopt, str, result);
+}
+
 // Application entry point
 int
     main(int argc, char* argv[])
@@ -1160,7 +1168,7 @@ int
 								errfnd = true;
 								break;
 							}
-							if (strtoul_hu(opt,
+							if (strtof_pos(opt,
 								       truetype_token[SIZE_OPT],
 								       value,
 								       &ot_config.size_pt) < 0) {
@@ -1443,7 +1451,7 @@ int
 			if (is_truetype) {
 				if (!fbink_cfg.is_quiet) {
 					printf(
-					    "Printing string '%s' @ %hupt, honoring the following margins { Top: %hdpx, Bottom: %hdpx, Left: %hdpx, Right: %hdpx } (formatted: %s, compute only: %s, no truncation: %s, overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, H align: %hhu, halfway: %s, V align: %hhu, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s)\n",
+					    "Printing string '%s' @ %.1fpt, honoring the following margins { Top: %hdpx, Bottom: %hdpx, Left: %hdpx, Right: %hdpx } (formatted: %s, compute only: %s, no truncation: %s, overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, H align: %hhu, halfway: %s, V align: %hhu, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s)\n",
 					    string,
 					    ot_config.size_pt,
 					    ot_config.margins.top,
