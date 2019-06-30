@@ -152,7 +152,7 @@ static void
 	    "OpenType & TrueType font support:\n"
 	    "\t-t, --truetype regular=FILE,bold=FILE,italic=FILE,bolditalic=FILE,size=NUM,top=NUM,bottom=NUM,left=NUM,right=NUM,format,notrunc,compute\n"
 	    "\t\tregular, bold, italic & bolditalic should point to the font file matching their respective font style. At least one of them MUST be specified.\n"
-	    "\t\tsize sets the rendering size, in points. Defaults to 12pt if unset.\n"
+	    "\t\tsize sets the rendering size, in points. Defaults to 12pt if unset. Can be a decimal value.\n"
 	    "\t\ttop, bottom, left & right set the margins used to define the display area. Defaults to 0, i.e., the full screen, starting at the top-left corner.\n"
 	    "\t\t\tNOTE: If a negative value is supplied, counts backward from the opposite edge. Mostly useful with top & left to position stuff relative to the bottom right corner.\n"
 	    "\t\tIf format is specified, the underscore/star MarkDown syntax will be honored to set the font style (i.e., *italic*, **bold** & ***bold italic***).\n"

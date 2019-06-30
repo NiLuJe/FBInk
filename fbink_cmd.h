@@ -26,6 +26,7 @@
 #include <errno.h>
 #include <getopt.h>
 #include <limits.h>
+#include <locale.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -238,8 +239,20 @@ static void print_lastrect(void);
 		char* endptr;                                                                                            \
 		float val;                                                                                               \
                                                                                                                          \
+		/* NOTE: Use the POSIX variant to enforce a specific locale, */                                          \
+		/*       ensuring the radix point character will always be a dot, and not a comma, */                    \
+		/*       because that wouldn't play nice with getsubopt... */                                            \
+		locale_t c_loc;                                                                                          \
+		c_loc = newlocale(LC_NUMERIC_MASK, "C", (locale_t) 0);                                                   \
+		if (c_loc == (locale_t) 0) {                                                                             \
+			perror("[FBInk] newlocale");                                                                     \
+			return ERRCODE(EINVAL);                                                                          \
+		}                                                                                                        \
+                                                                                                                         \
 		errno = 0; /* To distinguish success/failure after call */                                               \
-		val   = strtof(str, &endptr);                                                                            \
+		val   = strtof_l(str, &endptr, c_loc);                                                                   \
+                                                                                                                         \
+		freelocale(c_loc);                                                                                       \
                                                                                                                          \
 		if ((errno == ERANGE && (val == HUGE_VALF || val == -HUGE_VALF)) || (errno != 0 && val == 0)) {          \
 			perror("[FBInk] strtof");                                                                        \
