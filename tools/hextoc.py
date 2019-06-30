@@ -86,6 +86,7 @@ font_set = {
 	"tewib"		: ("tewi-bold-11.hex",		6,	13),
 	"topaz"		: ("TopazPlus-8x16.hex",	8,	16),
 	"microknight"	: ("MicroKnightPlus-8x16.hex",	8,	16),
+	"vga"		: ("iv8x16u.hex",		8,	16),
 }
 
 # Get the font name from the first arg passed to the script

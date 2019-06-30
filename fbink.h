@@ -82,7 +82,8 @@ typedef enum
 	TEWI,              // tewi (medium)
 	TEWIB,             // tewi (bold)
 	TOPAZ,             // Topaz+ A1200
-	MICROKNIGHT        // MicroKnight+
+	MICROKNIGHT,       // MicroKnight+
+	VGA                // IBM VGA 8x16
 } FONT_INDEX_T;
 
 // List of supported font styles

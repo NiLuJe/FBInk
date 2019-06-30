@@ -98,7 +98,7 @@ static void
 	    "\t-F, --font NAME\t\tRender glyphs from builtin font NAME (Default: IBM).\n"
 #ifdef FBINK_WITH_FONTS
 	    "\t\t\t\tAvailable font families: IBM, UNSCII, ALT, THIN, FANTASY, MCR, TALL, BLOCK,\n"
-	    "\t\t\t\t\t\tLEGGIE, VEGGIE, KATES, FKP, CTRLD, ORP, ORPB, ORPI, SCIENTIFICA, SCIENTIFICAB, SCIENTIFICAI, TERMINUS, TERMINUSB, FATTY, SPLEEN, TEWI, TEWIB, TOPAZ, MICROKNIGHT\n"
+	    "\t\t\t\t\t\tLEGGIE, VEGGIE, KATES, FKP, CTRLD, ORP, ORPB, ORPI, SCIENTIFICA, SCIENTIFICAB, SCIENTIFICAI, TERMINUS, TERMINUSB, FATTY, SPLEEN, TEWI, TEWIB, TOPAZ, MICROKNIGHT, VGA\n"
 #else
 	    "\t\t\t\tAvailable font families: IBM\n"
 #endif
@@ -777,6 +777,8 @@ int
 					fbink_cfg.fontname = TOPAZ;
 				} else if (strcasecmp(optarg, "MICROKNIGHT") == 0) {
 					fbink_cfg.fontname = MICROKNIGHT;
+				} else if (strcasecmp(optarg, "VGA") == 0) {
+					fbink_cfg.fontname = VGA;
 				} else {
 					fprintf(stderr, "Unknown font name '%s'.\n", optarg);
 					errfnd = true;

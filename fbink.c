@@ -701,6 +701,8 @@ static const char*
 			return "Topaz+ A1200";
 		case MICROKNIGHT:
 			return "MicroKnight+";
+		case VGA:
+			return "IBM VGA";
 #endif
 		default:
 			return "IBM (Default)";
@@ -2038,6 +2040,11 @@ static int
 #ifdef FBINK_WITH_FONTS
 	// Setup custom fonts (glyph size, render fx, bitmap fx)
 	switch (fbink_cfg->fontname) {
+		case VGA:
+			glyphWidth         = 8U;
+			glyphHeight        = 16U;
+			fxpFont8xGetBitmap = &vga_get_bitmap;
+			break;
 		case MICROKNIGHT:
 			glyphWidth         = 8U;
 			glyphHeight        = 16U;
@@ -6980,6 +6987,8 @@ FBInkRect
 // Amiga fonts (https://www.trueschool.se/html/fonts.html)
 #	include "fbink_topaz.c"
 #	include "fbink_microknight.c"
+// VGA variant of the IBM font (https://farsil.github.io/ibmfonts & https://int10h.org/oldschool-pc-fonts)
+#	include "fbink_vga.c"
 #endif
 // Contains fbink_button_scan's implementation, Kobo only, and has a bit of Linux MT input thrown in ;).
 #include "fbink_button_scan.c"

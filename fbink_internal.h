@@ -217,6 +217,7 @@
 #	include "fbink_misc_fonts.h"
 #	include "fbink_topaz.h"
 #	include "fbink_microknight.h"
+#	include "fbink_vga.h"
 #endif
 
 // NOTE: CLOEXEC shenanigans...
