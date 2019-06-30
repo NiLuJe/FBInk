@@ -3518,8 +3518,9 @@ int
 	area.br.y = (unsigned short int) (viewHeight - bottom_margin);
 	// Set default font size if required
 	float size_pt = cfg->size_pt;
-	// NOTE: That should be good enough to check for 0.0f...
-	if (!size_pt) {
+	// NOTE: Technically, using the iszero() macro ought to be enough, but of course,
+	//       it wasn't available in the glibc versions we target...
+	if (!isnormal(size_pt)) {
 		size_pt = 12.0f;
 	}
 	// We should have a fairly accurate idea of what the screen DPI is...
