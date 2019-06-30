@@ -381,8 +381,7 @@ static int
 	strtol_chk(opt, subopt, str, result);
 }
 
-// In the same vein, but for strtof, for a *positive* float
-// Input validation via strtol, for an int8_t
+// In the same vein, but with strtof, for a *positive* float
 static int
     strtof_pos(int opt, const char* subopt, const char* str, float* result)
 {

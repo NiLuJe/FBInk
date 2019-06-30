@@ -286,22 +286,11 @@ static void print_lastrect(void);
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
-		/* Reject infinity */                                                                                    \
-		if (val == INFINITY || val == -INFINITY) {                                                               \
+		/* Reject infinity & NaN */                                                                              \
+		if (!isfinite(val)) {                                                                                    \
 			fprintf(stderr,                                                                                  \
-				"Assigned infinity (%s) to an option (%c%s%s) expecting a %s.\n",                        \
-				str,                                                                                     \
-				opt,                                                                                     \
-				subopt ? ":" : "",                                                                       \
-				subopt ? subopt : "",                                                                    \
-				TYPENAME(*result));                                                                      \
-			return ERRCODE(EINVAL);                                                                          \
-		}                                                                                                        \
-                                                                                                                         \
-		/* Reject NaN */                                                                                         \
-		if (isnan(val)) {                                                                                        \
-			fprintf(stderr,                                                                                  \
-				"Assigned a value (%s) that is Not a Number to an option (%c%s%s) expecting a %s.\n",    \
+				"Assigned a non-finite value (%f from '%s') to an option (%c%s%s) expecting a %s.\n",    \
+				val,                                                                                     \
 				str,                                                                                     \
 				opt,                                                                                     \
 				subopt ? ":" : "",                                                                       \
