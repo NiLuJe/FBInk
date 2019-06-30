@@ -105,3 +105,10 @@ As well as a number of third-party resources (namely, font files):
 		Licensed under the GNU General Public License, Font Exception (http://www.gnu.org/licenses/gpl-faq.html#FontException).
 		Based on MicroKnight, (c) Unknown author.
 		(https://www.trueschool.se/html/fonts.html)
+
+	* vga, (IBM VGA 8x16 font), BDF conversion (c) 2016 farsil,
+		Licensed under the Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0) (https://creativecommons.org/licenses/by-sa/4.0/).
+		(https://farsil.github.io/ibmfonts)
+		Based on glyphs from PxPlus IBM VGA8, by VileR,
+		Licensed under the Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0) (https://creativecommons.org/licenses/by-sa/4.0/).
+		(https://int10h.org/oldschool-pc-fonts)
