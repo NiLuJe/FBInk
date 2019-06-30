@@ -3518,13 +3518,14 @@ int
 	area.br.y = (unsigned short int) (viewHeight - bottom_margin);
 	// Set default font size if required
 	float size_pt = cfg->size_pt;
+	// NOTE: That should be good enough to check for 0.0f...
 	if (!size_pt) {
-		size_pt = 12U;
+		size_pt = 12.0f;
 	}
 	// We should have a fairly accurate idea of what the screen DPI is...
 	unsigned short int ppi = deviceQuirks.screenDPI;
 	// Given the ppi, convert point height to pixels. Note, 1pt is 1/72th of an inch
-	unsigned int font_size_px = (unsigned int) (ppi / 72.0f * size_pt);
+	unsigned int font_size_px = (unsigned int) iroundf(ppi / 72.0f * size_pt);
 
 	// This is a pointer to whichever font is currently active. It gets updated for every character in the loop, as needed.
 	stbtt_fontinfo* restrict curr_font = NULL;
