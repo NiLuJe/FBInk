@@ -108,4 +108,9 @@ So that everyone gets to have fun, even if you can't stand C!
 
 [Python](https://www.python.org/): [py-fbink](https://github.com/NiLuJe/py-fbink) by [@NiLuJe](https://github.com/NiLuJe)
 
+Note that as the API may not be entirely stable on master, these are all tethered to a specific tag (generally, the latest release). You should honor that requirement, or all hell will break loose ;).
+I generally attempt to keep breakages to a minimum, or barring that, make the upgrade paths as painless as possible, but, there you have it, supporting new stuff often means existing stuff has to work slightly differently.
+
+I try to detail API/ABI breakages in each tag's comments, but a good way to visualize that is of course to diff the single public header ;).
+
 <!-- kate: indent-mode cstyle; indent-width 4; replace-tabs on; remove-trailing-spaces none; -->
