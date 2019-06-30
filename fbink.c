@@ -3518,8 +3518,9 @@ int
 	area.br.y = (unsigned short int) (viewHeight - bottom_margin);
 	// Set default font size if required
 	float size_pt = cfg->size_pt;
-	// NOTE: Technically, using the iszero() macro ought to be enough, but of course,
-	//       it wasn't available in the glibc versions we target...
+	// NOTE: Technically, using the iszero() macro ought to be enough (at least for values coming from our CLI tool),
+	//       but of course, it wasn't yet available in the glibc versions we target (as it's from TS 18661-1:2014)...
+	//       c.f., https://www.gnu.org/software/libc/manual/html_node/Floating-Point-Classes.html#Floating-Point-Classes
 	if (!isnormal(size_pt)) {
 		size_pt = 12.0f;
 	}
