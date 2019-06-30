@@ -360,13 +360,6 @@ static int
 	strtoul_chk(opt, subopt, str, result);
 }
 
-// Input validation via strtoul, for an unsigned short int
-static int
-    strtoul_hu(int opt, const char* subopt, const char* str, unsigned short int* result)
-{
-	strtoul_chk(opt, subopt, str, result);
-}
-
 // Input validation via strtoul, for an uint8_t
 static int
     strtoul_hhu(int opt, const char* subopt, const char* str, uint8_t* result)

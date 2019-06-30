@@ -273,6 +273,31 @@ static void print_lastrect(void);
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
+		/* Reject infinity */                                                                                    \
+		if (val == INFINITY || val == -INFINITY) {                                                               \
+			fprintf(stderr,                                                                                  \
+				"Assigned infinity (%s) to an option (%c%s%s) expecting a positive %s.\n",               \
+				str,                                                                                     \
+				opt,                                                                                     \
+				subopt ? ":" : "",                                                                       \
+				subopt ? subopt : "",                                                                    \
+				TYPENAME(*result));                                                                      \
+			return ERRCODE(EINVAL);                                                                          \
+		}                                                                                                        \
+                                                                                                                         \
+		/* Reject NaN */                                                                                         \
+		if (isnan(val)) {                                                                                        \
+			fprintf(                                                                                         \
+			    stderr,                                                                                      \
+			    "Assigned value (%s) that is Not a Number to an option (%c%s%s) expecting a positive %s.\n", \
+			    str,                                                                                         \
+			    opt,                                                                                         \
+			    subopt ? ":" : "",                                                                           \
+			    subopt ? subopt : "",                                                                        \
+			    TYPENAME(*result));                                                                          \
+			return ERRCODE(EINVAL);                                                                          \
+		}                                                                                                        \
+                                                                                                                         \
 		/* Make sure there isn't a loss of precision on this arch when casting explictly */                      \
 		if ((__typeof__(*result)) val != val) {                                                                  \
 			fprintf(stderr,                                                                                  \
@@ -294,7 +319,6 @@ static void print_lastrect(void);
 
 // And we'll use those through these...
 static int strtoul_u(int, const char*, const char*, uint32_t*);
-static int strtoul_hu(int, const char*, const char*, unsigned short int*);
 static int strtoul_hhu(int, const char*, const char*, uint8_t*);
 static int strtol_hi(int, const char*, const char*, short int*);
 static int strtol_hhi(int, const char*, const char*, int8_t*);
