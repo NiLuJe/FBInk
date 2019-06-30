@@ -201,56 +201,46 @@ static const unsigned char*
 		return vga_block88[0];
 	} else if (codepoint >= 0x2550 && codepoint <= 0x256c) {
 		return vga_block89[codepoint - 0x2550];
-	} else if (codepoint >= 0x2580 && codepoint <= 0x2581) {
+	} else if (codepoint >= 0x2580 && codepoint <= 0x25a1) {
 		return vga_block90[codepoint - 0x2580];
-	} else if (codepoint == 0x2584) {
-		return vga_block91[0];
-	} else if (codepoint == 0x2588) {
-		return vga_block92[0];
-	} else if (codepoint == 0x258c) {
-		return vga_block93[0];
-	} else if (codepoint >= 0x2590 && codepoint <= 0x2593) {
-		return vga_block94[codepoint - 0x2590];
-	} else if (codepoint >= 0x25a0 && codepoint <= 0x25a1) {
-		return vga_block95[codepoint - 0x25a0];
 	} else if (codepoint >= 0x25aa && codepoint <= 0x25ac) {
-		return vga_block96[codepoint - 0x25aa];
+		return vga_block91[codepoint - 0x25aa];
 	} else if (codepoint == 0x25b2) {
-		return vga_block97[0];
+		return vga_block92[0];
 	} else if (codepoint == 0x25ba) {
-		return vga_block98[0];
+		return vga_block93[0];
 	} else if (codepoint == 0x25bc) {
-		return vga_block99[0];
+		return vga_block94[0];
 	} else if (codepoint == 0x25c4) {
-		return vga_block100[0];
+		return vga_block95[0];
 	} else if (codepoint >= 0x25ca && codepoint <= 0x25cb) {
-		return vga_block101[codepoint - 0x25ca];
+		return vga_block96[codepoint - 0x25ca];
 	} else if (codepoint == 0x25cf) {
-		return vga_block102[0];
+		return vga_block97[0];
 	} else if (codepoint >= 0x25d8 && codepoint <= 0x25d9) {
-		return vga_block103[codepoint - 0x25d8];
+		return vga_block98[codepoint - 0x25d8];
 	} else if (codepoint == 0x25e6) {
-		return vga_block104[0];
+		return vga_block99[0];
 	} else if (codepoint >= 0x263a && codepoint <= 0x263c) {
-		return vga_block105[codepoint - 0x263a];
+		return vga_block100[codepoint - 0x263a];
 	} else if (codepoint == 0x2640) {
-		return vga_block106[0];
+		return vga_block101[0];
 	} else if (codepoint == 0x2642) {
-		return vga_block107[0];
+		return vga_block102[0];
 	} else if (codepoint == 0x2660) {
-		return vga_block108[0];
+		return vga_block103[0];
 	} else if (codepoint == 0x2663) {
-		return vga_block109[0];
+		return vga_block104[0];
 	} else if (codepoint >= 0x2665 && codepoint <= 0x2666) {
-		return vga_block110[codepoint - 0x2665];
+		return vga_block105[codepoint - 0x2665];
 	} else if (codepoint >= 0x266a && codepoint <= 0x266b) {
-		return vga_block111[codepoint - 0x266a];
+		return vga_block106[codepoint - 0x266a];
 	} else if (codepoint == 0x2713) {
-		return vga_block112[0];
+		return vga_block107[0];
 	} else if (codepoint >= 0xfb01 && codepoint <= 0xfb02) {
-		return vga_block113[codepoint - 0xfb01];
+		return vga_block108[codepoint - 0xfb01];
 	} else if (codepoint == 0xfffd) {
-		return vga_block114[0];
+		return vga_block109[0];
 	} else {
 		WARN("Codepoint U+%04X is not covered by this font", codepoint);
 		return vga_block1[0];
