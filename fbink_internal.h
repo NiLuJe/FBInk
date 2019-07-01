@@ -335,6 +335,8 @@ unsigned short int       FONTH          = 8U;
 uint8_t                  FONTSIZE_MULT  = 1U;
 uint8_t                  penFGColor     = 0x00;
 uint8_t                  penBGColor     = 0xFF;
+FBInkPixel               penFGPixel;
+FBInkPixel               penBGPixel;
 // Slightly arbitrary-ish fallback values
 unsigned short int MAXROWS = 45U;
 unsigned short int MAXCOLS = 32U;
@@ -378,6 +380,8 @@ static void rotate_touch_coordinates(FBInkCoordinates* restrict);
 #	endif
 #endif
 static void rotate_coordinates_nop(FBInkCoordinates* restrict __attribute__((unused)));
+
+static uint16_t pack_rgb565(uint8_t, uint8_t, uint8_t);
 
 static void put_pixel_Gray4(const FBInkCoordinates* restrict, const FBInkPixel* restrict);
 static void put_pixel_Gray8(const FBInkCoordinates* restrict, const FBInkPixel* restrict);

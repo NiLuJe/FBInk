@@ -94,6 +94,13 @@ const char*
 	return FBINK_VERSION;
 }
 
+// #RGB -> RGB565
+static uint16_t
+    pack_rgb565(uint8_t r, uint8_t g, uint8_t b)
+{
+	return (uint16_t)(((r >> 3U) << 11U) | ((g >> 2U) << 5U) | (b >> 3U));
+}
+
 // Helper functions to 'plot' a specific pixel in a given color to the framebuffer
 static void
     put_pixel_Gray4(const FBInkCoordinates* restrict coords, const FBInkPixel* restrict px)
@@ -713,28 +720,19 @@ static struct mxcfb_rect
 	    multiline_offset,
 	    (unsigned short int) (row + multiline_offset));
 
-	const uint8_t invert  = fbink_cfg->is_inverted ? 0xFF : 0U;
-	const uint8_t fgcolor = penFGColor ^ invert;
-	const uint8_t bgcolor = penBGColor ^ invert;
-	// NOTE: It's a grayscale ramp, so r = g = b (= v).
-	FBInkPixel fgP;
-	FBInkPixel bgP;
-	// TODO: Move that to a helper function?
-	switch (vInfo.bits_per_pixel) {
-		case 4U:
-		case 8U:
-			fgP.gray8 = fgcolor;
-			bgP.gray8 = bgcolor;
-			break;
-		case 16U:
-			// TODO: Make an rgb565 packer helper
-			break;
-		case 24U:
-		case 32U:
-			fgP.bgra.color.a = 0xFF;
-			fgP.bgra.color.r = fgP.bgra.color.g = fgP.bgra.color.b = fgcolor;
-			bgP.bgra.color.a = 0xFF;
-			bgP.bgra.color.r = bgP.bgra.color.g = bgP.bgra.color.b = bgcolor;
+	FBInkPixel fgP = penFGPixel;
+	FBInkPixel bgP = penBGPixel;
+	if (fbink_cfg->is_inverted) {
+		// NOTE: And, of course, RGB565 is terrible. Inverting the lossy packed value would be even lossier...
+		if (vInfo.bits_per_pixel == 16U) {
+			const uint8_t fgcolor = penFGColor ^ 0xFF;
+			const uint8_t bgcolor = penBGColor ^ 0xFF;
+			fgP.rgb565 = pack_rgb565(fgcolor, fgcolor, fgcolor);
+			bgP.rgb565 = pack_rgb565(bgcolor, bgcolor, bgcolor);
+		} else {
+			fgP.bgra.p ^= 0x00FFFFFF;
+			bgP.bgra.p ^= 0x00FFFFFF;
+		}
 	}
 
 	// Adjust row in case we're a continuation of a multi-line print...
@@ -2325,38 +2323,8 @@ static int
 	//       Otherwise, we'd probably have to compare the previous smem_len to the new, and to
 	//       mremap fbPtr if isFbMapped in case they differ (and the old smem_len != 0, which would indicate a first init).
 
-	// Use the appropriate get/put pixel functions...
-	switch (vInfo.bits_per_pixel) {
-		case 4U:
-			fxpPutPixel = &put_pixel_Gray4;
-			fxpGetPixel = &get_pixel_Gray4;
-			break;
-		case 8U:
-			fxpPutPixel = &put_pixel_Gray8;
-			fxpGetPixel = &get_pixel_Gray8;
-			break;
-		case 16U:
-			fxpPutPixel = &put_pixel_RGB565;
-			fxpGetPixel = &get_pixel_RGB565;
-			break;
-		case 24U:
-			fxpPutPixel = &put_pixel_RGB24;
-			fxpGetPixel = &get_pixel_RGB24;
-			break;
-		case 32U:
-			fxpPutPixel = &put_pixel_RGB32;
-			fxpGetPixel = &get_pixel_RGB32;
-			break;
-		default:
-			// Huh oh... Should never happen!
-			WARN("Unsupported framebuffer bpp");
-			rv = ERRCODE(EXIT_FAILURE);
-			goto cleanup;
-			break;
-	}
-
-		// NOTE: Now that we know which device we're running on, setup pen colors,
-		//       taking into account the inverted cmap on legacy Kindles...
+	// NOTE: Now that we know which device we're running on, setup pen colors,
+	//       taking into account the inverted cmap on legacy Kindles...
 #ifdef FBINK_FOR_KINDLE
 	if (deviceQuirks.isKindleLegacy) {
 		penFGColor = eInkBGCMap[fbink_cfg->fg_color];
@@ -2391,6 +2359,48 @@ static int
 #ifdef FBINK_FOR_KINDLE
 	}
 #endif
+
+	// Use the appropriate get/put pixel functions, and pack the pen colors into the appropriate pixel format...
+	switch (vInfo.bits_per_pixel) {
+		case 4U:
+			fxpPutPixel = &put_pixel_Gray4;
+			fxpGetPixel = &get_pixel_Gray4;
+			penFGPixel.gray8 = penFGColor;
+			penBGPixel.gray8 = penBGColor;
+			break;
+		case 8U:
+			fxpPutPixel = &put_pixel_Gray8;
+			fxpGetPixel = &get_pixel_Gray8;
+			penFGPixel.gray8 = penFGColor;
+			penBGPixel.gray8 = penBGColor;
+			break;
+		case 16U:
+			fxpPutPixel = &put_pixel_RGB565;
+			fxpGetPixel = &get_pixel_RGB565;
+			penFGPixel.rgb565 = pack_rgb565(penFGColor, penFGColor, penFGColor);
+			penBGPixel.rgb565 = pack_rgb565(penBGColor, penBGColor, penBGColor);
+			break;
+		case 24U:
+			fxpPutPixel = &put_pixel_RGB24;
+			fxpGetPixel = &get_pixel_RGB24;
+			penFGPixel.bgra.color.r = penFGPixel.bgra.color.g = penFGPixel.bgra.color.b = penFGColor;
+			penBGPixel.bgra.color.r = penBGPixel.bgra.color.g = penBGPixel.bgra.color.b = penBGColor;
+			break;
+		case 32U:
+			fxpPutPixel = &put_pixel_RGB32;
+			fxpGetPixel = &get_pixel_RGB32;
+			penFGPixel.bgra.color.a = 0xFF;
+			penFGPixel.bgra.color.r = penFGPixel.bgra.color.g = penFGPixel.bgra.color.b = penFGColor;
+			penBGPixel.bgra.color.a = 0xFF;
+			penBGPixel.bgra.color.r = penBGPixel.bgra.color.g = penBGPixel.bgra.color.b = penBGColor;
+			break;
+		default:
+			// Huh oh... Should never happen!
+			WARN("Unsupported framebuffer bpp");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+			break;
+	}
 
 	// NOTE: Do we want to keep the fb0 fd open, or simply close it for now?
 	//       Useful because we probably want to close it to keep open fds to a minimum when used as a library,
