@@ -336,9 +336,10 @@ static void
 // Handle a few sanity checks...
 // NOTE: If you can, prefer using the right put_pixel_* function directly.
 //       While the bounds checking is generally rather cheap,
+//       (i.e., (*fxpPutPixel) is only marginally faster than put_pixel()),
 //       the overhead of going through the function pointers is rather large
-//       (i.e., put_pixel() can be twice as slow as put_pixel_Gray8()).
-//       It's still faster than branching or switching, though ;).
+//       (i.e., put_pixel() can be twice as slow as put_pixel_*()).
+//       On our target HW, it's still faster than branching or switching, though ;).
 static void
     put_pixel(FBInkCoordinates coords, const FBInkPixel* restrict px)
 {
