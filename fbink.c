@@ -4927,6 +4927,10 @@ cleanup:
 int
     draw_progress_bars(int fbfd, bool is_infinite, uint8_t value, const FBInkConfig* restrict fbink_cfg)
 {
+	const uint8_t invert  = fbink_cfg->is_inverted ? 0xFF : 0U;
+	const uint8_t fgcolor = penFGColor ^ invert;
+	const uint8_t bgcolor = penBGColor ^ invert;
+
 	// Clear screen?
 	if (fbink_cfg->is_cleared) {
 		clear_screen(fbfd, bgcolor, fbink_cfg->is_flashing);
@@ -4938,8 +4942,6 @@ int
 	if (fbink_cfg->is_inverted) {
 		// NOTE: And, of course, RGB565 is terrible. Inverting the lossy packed value would be even lossier...
 		if (vInfo.bits_per_pixel == 16U) {
-			const uint8_t fgcolor = penFGColor ^ 0xFF;
-			const uint8_t bgcolor = penBGColor ^ 0xFF;
 			fgP.rgb565 = pack_rgb565(fgcolor, fgcolor, fgcolor);
 			bgP.rgb565 = pack_rgb565(bgcolor, bgcolor, bgcolor);
 		} else {
@@ -5001,8 +5003,8 @@ int
 			// NOTE: If we're using A2 refresh mode, we'll be enforcing monochrome anyway...
 			//       Making sure we do that on our end (... at least with default bg/fg colors anyway ;),
 			//       avoids weird behavior on devices where A2 can otherwise be quirky, like Kobo Mk. 7
-			emptyC  = fbink_cfg->is_inverted ? penBGColor ^ 0xFF : penBGColor;
-			borderC = fbink_cfg->is_inverted ? penFGColor ^ 0xFF : penFGColor;
+			emptyC  = bgcolor;
+			borderC = fgcolor;
 		} else {
 			emptyC  = fbink_cfg->is_inverted ? eInkFGCMap[BG_GRAYB] : eInkBGCMap[BG_GRAYB];
 			borderC = fbink_cfg->is_inverted ? eInkFGCMap[BG_GRAY4] : eInkBGCMap[BG_GRAY4];
