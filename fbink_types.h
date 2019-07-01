@@ -143,6 +143,15 @@ typedef union
 	} color;
 } FBInkPixelBGR;
 
+// And a super type that we can use for every target bitdepth we support
+// (We need a single data type because of our function pointers shenanigans...)
+typedef union
+{
+	FBInkPixelBGRA bgra;
+	uint16_t rgb565;
+	uint8_t gray8;
+} FBInkPixel;
+
 #ifdef FBINK_WITH_OPENTYPE
 // Stores the information necessary to render a line of text
 // using OpenType/TrueType fonts

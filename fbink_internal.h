@@ -345,7 +345,7 @@ bool g_isQuiet = false;
 // This should be a pretty accurate fallback...
 long int USER_HZ = 100;
 // Pointers to the appropriate put_pixel/get_pixel functions for the fb's bpp
-void (*fxpPutPixel)(const FBInkCoordinates* restrict, const FBInkColor* restrict) = NULL;
+void (*fxpPutPixel)(const FBInkCoordinates* restrict, const FBInkPixel* restrict) = NULL;
 void (*fxpGetPixel)(const FBInkCoordinates* restrict, FBInkColor* restrict)       = NULL;
 // As well as the appropriate coordinates rotation functions...
 void (*fxpRotateCoords)(FBInkCoordinates* restrict)  = NULL;
@@ -379,14 +379,14 @@ static void rotate_touch_coordinates(FBInkCoordinates* restrict);
 #endif
 static void rotate_coordinates_nop(FBInkCoordinates* restrict __attribute__((unused)));
 
-static void put_pixel_Gray4(const FBInkCoordinates* restrict, const FBInkColor* restrict);
-static void put_pixel_Gray8(const FBInkCoordinates* restrict, const FBInkColor* restrict);
-static void put_pixel_RGB24(const FBInkCoordinates* restrict, const FBInkColor* restrict);
-static void put_pixel_RGB32(const FBInkCoordinates* restrict, const FBInkColor* restrict);
-static void put_pixel_RGB565(const FBInkCoordinates* restrict, const FBInkColor* restrict);
+static void put_pixel_Gray4(const FBInkCoordinates* restrict, const FBInkPixel* restrict);
+static void put_pixel_Gray8(const FBInkCoordinates* restrict, const FBInkPixel* restrict);
+static void put_pixel_RGB24(const FBInkCoordinates* restrict, const FBInkPixel* restrict);
+static void put_pixel_RGB32(const FBInkCoordinates* restrict, const FBInkPixel* restrict);
+static void put_pixel_RGB565(const FBInkCoordinates* restrict, const FBInkPixel* restrict);
 // NOTE: We pass coordinates by value here, because a rotation transformation *may* be applied to them,
 //       and that's a rotation that the caller will *never* care about.
-static void put_pixel(FBInkCoordinates, const FBInkColor* restrict);
+static void put_pixel(FBInkCoordinates, const FBInkPixel* restrict);
 // NOTE: On the other hand, if you happen to be calling function pointers directly,
 //       it's left to you to not do anything stupid ;)
 
@@ -424,7 +424,7 @@ static void fill_rect(unsigned short int,
 		      unsigned short int,
 		      unsigned short int,
 		      unsigned short int,
-		      const FBInkColor* restrict);
+		      const FBInkPixel* restrict);
 static void clear_screen(int UNUSED_BY_NOTKINDLE, uint8_t, bool UNUSED_BY_NOTKINDLE);
 
 static const unsigned char* font8x8_get_bitmap(uint32_t);

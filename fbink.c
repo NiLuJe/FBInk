@@ -96,7 +96,7 @@ const char*
 
 // Helper functions to 'plot' a specific pixel in a given color to the framebuffer
 static void
-    put_pixel_Gray4(const FBInkCoordinates* restrict coords, const FBInkColor* restrict color)
+    put_pixel_Gray4(const FBInkCoordinates* restrict coords, const FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x / 2 as every byte holds 2 pixels
@@ -109,65 +109,54 @@ static void
 	// We can't address nibbles directly, so this takes some shenanigans...
 	if ((coords->x & 0x01) == 0) {
 		// Even pixel: high nibble
-		*((unsigned char*) (fbPtr + pix_offset)) = (color->r & 0xF0);
+		*((unsigned char*) (fbPtr + pix_offset)) = (px->gray8 & 0xF0);
 		// Squash to 4bpp, and write to the top/left nibble
 		// or: ((v >> 4) << 4)
 	} else {
 		// Odd pixel: low nibble
 		// ORed to avoid clobbering our even pixel
-		*((unsigned char*) (fbPtr + pix_offset)) |= (color->r >> 4U);
+		*((unsigned char*) (fbPtr + pix_offset)) |= (px->gray8 >> 4U);
 	}
 }
 
 static void
-    put_pixel_Gray8(const FBInkCoordinates* restrict coords, const FBInkColor* restrict color)
+    put_pixel_Gray8(const FBInkCoordinates* restrict coords, const FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
 	size_t pix_offset = coords->x + (coords->y * fInfo.line_length);
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((unsigned char*) (fbPtr + pix_offset)) = color->r;
+	*((unsigned char*) (fbPtr + pix_offset)) = px->gray8;
 }
 
 static void
-    put_pixel_RGB24(const FBInkCoordinates* restrict coords, const FBInkColor* restrict color)
+    put_pixel_RGB24(const FBInkCoordinates* restrict coords, const FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 3 as every pixel is 3 consecutive bytes
 	size_t pix_offset = (coords->x * 3U) + (coords->y * fInfo.line_length);
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((unsigned char*) (fbPtr + pix_offset))      = color->b;
-	*((unsigned char*) (fbPtr + pix_offset + 1U)) = color->g;
-	*((unsigned char*) (fbPtr + pix_offset + 2U)) = color->r;
+	*((unsigned char*) (fbPtr + pix_offset))      = px->bgra.color.b;
+	*((unsigned char*) (fbPtr + pix_offset + 1U)) = px->bgra.color.g;
+	*((unsigned char*) (fbPtr + pix_offset + 2U)) = px->bgra.color.r;
 }
 
 static void
-    put_pixel_RGB32(const FBInkCoordinates* restrict coords, const FBInkColor* restrict color)
+    put_pixel_RGB32(const FBInkCoordinates* restrict coords, const FBInkPixel* restrict px)
 {
-	// NOTE: We retrofitted a bit of union magic implemented for fbink_print_image for a small performance bump :)
-	FBInkPixelBGRA px;
-
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 4 as every pixel is 4 consecutive bytes
 	size_t pix_offset = (uint32_t)(coords->x << 2U) + (coords->y * fInfo.line_length);
 
-	// now this is about the same as 'fbp[pix_offset] = value'
-	// Opaque, always. Note that everything is rendered as opaque, no matter what.
-	// But at least this way we ensure fb grabs are consistent with what's seen on screen.
-	px.color.a = 0xFF;
-	px.color.r = color->r;
-	px.color.g = color->g;
-	px.color.b = color->b;
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
-	*((uint32_t*) (fbPtr + pix_offset)) = px.p;
+	*((uint32_t*) (fbPtr + pix_offset)) = px->bgra.p;
 #pragma GCC diagnostic pop
 }
 
 static void
-    put_pixel_RGB565(const FBInkCoordinates* restrict coords, const FBInkColor* restrict color)
+    put_pixel_RGB565(const FBInkCoordinates* restrict coords, const FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 2 as every pixel is 2 consecutive bytes
@@ -175,12 +164,12 @@ static void
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	// but a bit more complicated for RGB565
-	uint16_t c = (uint16_t)(((color->r >> 3U) << 11U) | ((color->g >> 2U) << 5U) | (color->b >> 3U));
+	//uint16_t c = (uint16_t)(((color->r >> 3U) << 11U) | ((color->g >> 2U) << 5U) | (color->b >> 3U));
 	// or: c = ((r / 8) * 2048) + ((g / 4) * 32) + (b / 8);
 	// write 'two bytes at once', much to GCC's dismay...
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
-	*((uint16_t*) (fbPtr + pix_offset)) = c;
+	*((uint16_t*) (fbPtr + pix_offset)) = px->rgb565;
 #pragma GCC diagnostic pop
 }
 
@@ -351,7 +340,7 @@ static void
 //       (i.e., put_pixel() can be twice as slow as put_pixel_Gray8()).
 //       It's still faster than branching or switching, though ;).
 static void
-    put_pixel(FBInkCoordinates coords, const FBInkColor* restrict color)
+    put_pixel(FBInkCoordinates coords, const FBInkPixel* restrict px)
 {
 	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
 	(*fxpRotateCoords)(&coords);
@@ -374,7 +363,7 @@ static void
 	}
 
 	// fbink_init() takes care of setting this global pointer to the right function for the fb's bpp
-	(*fxpPutPixel)(&coords, color);
+	(*fxpPutPixel)(&coords, px);
 }
 
 // Helper functions to 'get' a specific pixel's color from the framebuffer
@@ -523,7 +512,7 @@ static void
 	      unsigned short int y,
 	      unsigned short int w,
 	      unsigned short int h,
-	      const FBInkColor* restrict color)
+	      const FBInkPixel* restrict px)
 {
 	// Bounds-checking, to ensure the memset won't do stupid things...
 	if (x + w > screenWidth) {
@@ -542,7 +531,7 @@ static void
 				FBInkCoordinates coords;
 				coords.x = (unsigned short int) (x + cx);
 				coords.y = (unsigned short int) (y + cy);
-				put_pixel_Gray4(&coords, color);
+				put_pixel_Gray4(&coords, px);
 			}
 		}
 	} else {
@@ -557,7 +546,7 @@ static void
 		(*fxpRotateRegion)(&region);
 		for (size_t j = region.top; j < region.top + region.height; j++) {
 			uint8_t* p = fbPtr + (fInfo.line_length * j) + (bpp * region.left);
-			memset(p, color->r, bpp * region.width);
+			memset(p, px->gray8, bpp * region.width);
 		}
 	}
 	LOG("Filled a %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
@@ -727,8 +716,25 @@ static struct mxcfb_rect
 	const uint8_t fgcolor = penFGColor ^ invert;
 	const uint8_t bgcolor = penBGColor ^ invert;
 	// NOTE: It's a grayscale ramp, so r = g = b (= v).
-	FBInkColor fgC = { fgcolor, fgC.r, fgC.r };
-	FBInkColor bgC = { bgcolor, bgC.r, bgC.r };
+	FBInkPixel fgP;
+	FBInkPixel bgP;
+	// TODO: Move that to a helper function?
+	switch (vInfo.bits_per_pixel) {
+		case 4U:
+		case 8U:
+			fgP.gray8 = fgcolor;
+			bgP.gray8 = bgcolor;
+			break;
+		case 16U:
+			// TODO: Make an rgb565 packer helper
+			break;
+		case 24U:
+		case 32U:
+			fgP.bgra.color.a = 0xFF;
+			fgP.bgra.color.r = fgP.bgra.color.g = fgP.bgra.color.b = fgcolor;
+			bgP.bgra.color.a = 0xFF;
+			bgP.bgra.color.r = bgP.bgra.color.g = bgP.bgra.color.b = bgcolor;
+	}
 
 	// Adjust row in case we're a continuation of a multi-line print...
 	row = (unsigned short int) (row + multiline_offset);
@@ -863,7 +869,7 @@ static struct mxcfb_rect
 			    (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			    pixel_offset,    // Don't append hoffset here, to make it clear stuff moved to the right.
 			    FONTH,
-			    &bgC);
+			    &bgP);
 			// Correct width, to include that bit of content, too, if needed
 			if (region.width < screenWidth) {
 				region.width += pixel_offset;
@@ -896,7 +902,7 @@ static struct mxcfb_rect
 			    (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
 			    pixel_offset,    // Don't append abs(hoffset) here, to make it clear stuff moved to the left.
 			    FONTH,
-			    &bgC);
+			    &bgP);
 			// If it's not already the case, update region to the full width,
 			// because we've just plugged a hole at the very right edge of a full line.
 			if (region.width < screenWidth) {
@@ -929,7 +935,7 @@ static struct mxcfb_rect
 	size_t           ci     = 0U;
 	uint32_t         ch     = 0U;
 	FBInkCoordinates coords = { 0U };
-	FBInkColor*      pxC;
+	FBInkPixel*      pxC;
 	// NOTE: We don't do much sanity checking on hoffset/voffset,
 	//       because we want to allow pushing part of the string off-screen
 	//       (we basically only make sure it won't screw up the region rectangle too badly).
@@ -982,10 +988,10 @@ static struct mxcfb_rect
 				/* Each element encodes a full row, we access a column's bit in that row by shifting. */ \
 				if (bitmap[y] & 1U << x) {                                                               \
 					/* bit was set, pixel is fg! */                                                  \
-					pxC = &fgC;                                                                      \
+					pxC = &fgP;                                                                      \
 				} else {                                                                                 \
 					/* bit was unset, pixel is bg */                                                 \
-					pxC = &bgC;                                                                      \
+					pxC = &bgP;                                                                      \
 				}                                                                                        \
 				/* Initial coordinates, before we generate the extra pixels from the scaling factor */   \
 				cx = (unsigned short int) (x_offs + i);                                                  \
@@ -1012,11 +1018,11 @@ static struct mxcfb_rect
 				/* Each element encodes a full row, we access a column's bit in that row by shifting. */ \
 				if (bitmap[y] & 1U << x) {                                                               \
 					/* bit was set, pixel is fg! */                                                  \
-					pxC     = &fgC;                                                                  \
+					pxC     = &fgP;                                                                  \
 					is_fgpx = true;                                                                  \
 				} else {                                                                                 \
 					/* bit was unset, pixel is bg */                                                 \
-					pxC     = &bgC;                                                                  \
+					pxC     = &bgP;                                                                  \
 					is_fgpx = false;                                                                 \
 				}                                                                                        \
 				/* Initial coordinates, before we generate the extra pixels from the scaling factor */   \
@@ -1037,12 +1043,13 @@ static struct mxcfb_rect
 								/* NOTE: Don't touch g & b if it's not needed! */        \
 								/*       It's especially important on 4bpp, */           \
 								/*       to avoid clobbering the low nibble, */          \
-								/*       which we store in b... */                       \
+								/*       which we store in r... */                       \
 								if (vInfo.bits_per_pixel > 8U) {                         \
 									fbC.g ^= 0xFF;                                   \
 									fbC.b ^= 0xFF;                                   \
 								}                                                        \
-								pxC = &fbC;                                              \
+								/* TODO: See how best to handle get_pixel on the Color vs. Pixel front... */ \
+								pxC->bgra.color.r = fbC.r;                                              \
 							}                                                                \
 							put_pixel(coords, pxC);                                          \
 						} else if (!is_fgpx && fbink_cfg->is_fgless) {                           \
@@ -4920,8 +4927,25 @@ int
 
 	// Let's go! Start by pilfering some computations from draw...
 	// NOTE: It's a grayscale ramp, so r = g = b (= v).
-	const FBInkColor fgC = { fgcolor, fgC.r, fgC.r };
-	const FBInkColor bgC = { bgcolor, bgC.r, bgC.r };
+	FBInkPixel fgP;
+	FBInkPixel bgP;
+	// TODO: Move that to a helper function?
+	switch (vInfo.bits_per_pixel) {
+		case 4U:
+		case 8U:
+			fgP.gray8 = fgcolor;
+			bgP.gray8 = bgcolor;
+			break;
+		case 16U:
+			// TODO: Make an rgb565 packer helper
+			break;
+		case 24U:
+		case 32U:
+			fgP.bgra.color.a = 0xFF;
+			fgP.bgra.color.r = fgP.bgra.color.g = fgP.bgra.color.b = fgcolor;
+			bgP.bgra.color.a = 0xFF;
+			bgP.bgra.color.r = bgP.bgra.color.g = bgP.bgra.color.b = bgcolor;
+	}
 
 	// Clamp v offset to safe values
 	// NOTE: This test isn't perfect, but then, if you play with this, you do it knowing the risks...
@@ -4961,7 +4985,7 @@ int
 
 	// ... unless we were asked to skip background pixels... ;).
 	if (!fbink_cfg->is_bgless) {
-		fill_rect(left_pos, top_pos, (unsigned short int) screenWidth, FONTH, &bgC);
+		fill_rect(left_pos, top_pos, (unsigned short int) screenWidth, FONTH, &bgP);
 	}
 
 	// NOTE: We always use the same BG_ constant in order to get a rough inverse by just swapping to the inverted LUT ;).
@@ -4987,6 +5011,26 @@ int
 	emptyC.b  = emptyC.r;
 	borderC.g = borderC.r;
 	borderC.b = borderC.r;
+	// TODO: Simplify...
+	FBInkPixel emptyP;
+	FBInkPixel borderP;
+	// TODO: Move that to a helper function?
+	switch (vInfo.bits_per_pixel) {
+		case 4U:
+		case 8U:
+			emptyP.gray8 = emptyC.r;
+			borderP.gray8 = borderC.r;
+			break;
+		case 16U:
+			// TODO: Make an rgb565 packer helper
+			break;
+		case 24U:
+		case 32U:
+			emptyP.bgra.color.a = 0xFF;
+			emptyP.bgra.color.r = emptyP.bgra.color.g = emptyP.bgra.color.b = emptyC.r;
+			borderP.bgra.color.a = 0xFF;
+			borderP.bgra.color.r = borderP.bgra.color.g = borderP.bgra.color.b = borderC.r;
+	}
 
 	// Which kind of bar did we request?
 	if (!is_infinite) {
@@ -5002,9 +5046,9 @@ int
 		unsigned short int empty_left  = (unsigned short int) (fill_left + fill_width);
 
 		// Draw the border...
-		fill_rect(fill_left, top_pos, bar_width, FONTH, &borderC);
+		fill_rect(fill_left, top_pos, bar_width, FONTH, &borderP);
 		// Draw the fill bar, which we want to override the border with!
-		fill_rect(fill_left, top_pos, fill_width, FONTH, &fgC);
+		fill_rect(fill_left, top_pos, fill_width, FONTH, &fgP);
 		// And the empty bar...
 		// NOTE: With a minor tweak to keep a double-width border on the bottom & right sides ;).
 		if (value == 0U) {
@@ -5013,13 +5057,13 @@ int
 				  (unsigned short int) (top_pos + 1U),
 				  (unsigned short int) MAX(0, empty_width - 3),
 				  (unsigned short int) (FONTH - 3U),
-				  &emptyC);
+				  &emptyP);
 		} else {
 			fill_rect(empty_left,
 				  (unsigned short int) (top_pos + 1U),
 				  (unsigned short int) MAX(0, empty_width - 2),
 				  (unsigned short int) (FONTH - 3U),
-				  &emptyC);
+				  &emptyP);
 		}
 
 		// We enforce centering for the percentage text...
@@ -5053,13 +5097,13 @@ int
 		unsigned short int bar_left  = (unsigned short int) (left_pos + (0.05f * (float) viewWidth) + 0.5f);
 
 		// Draw the border...
-		fill_rect(bar_left, top_pos, (unsigned short int) (bar_width), FONTH, &borderC);
+		fill_rect(bar_left, top_pos, (unsigned short int) (bar_width), FONTH, &borderP);
 		// Draw the empty bar...
 		fill_rect((unsigned short int) (bar_left + 1U),
 			  (unsigned short int) (top_pos + 1U),
 			  (unsigned short int) MAX(0, bar_width - 3),
 			  (unsigned short int) (FONTH - 3U),
-			  &emptyC);
+			  &emptyP);
 
 		// We want our thumb to take 20% of the bar's width
 		unsigned short int thumb_width = (unsigned short int) ((0.20f * bar_width) + 0.5f);
@@ -5068,7 +5112,7 @@ int
 		unsigned short int thumb_left = (unsigned short int) (bar_left + ((0.05f * bar_width) * value) + 0.5f);
 
 		// And finally, draw the thumb, which we want to override the border with!
-		fill_rect(thumb_left, top_pos, thumb_width, FONTH, &fgC);
+		fill_rect(thumb_left, top_pos, thumb_width, FONTH, &fgP);
 
 		// Draw an ellipsis in the middle of the thumb...
 		uint8_t ellipsis_size = (uint8_t)(FONTH / 3U);
@@ -5080,7 +5124,7 @@ int
 				  (unsigned short int) (top_pos + ellipsis_size),
 				  ellipsis_size,
 				  ellipsis_size,
-				  &bgC);
+				  &bgP);
 		}
 	}
 
