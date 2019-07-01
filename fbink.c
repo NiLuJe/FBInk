@@ -4927,35 +4927,25 @@ cleanup:
 int
     draw_progress_bars(int fbfd, bool is_infinite, uint8_t value, const FBInkConfig* restrict fbink_cfg)
 {
-	const uint8_t invert  = fbink_cfg->is_inverted ? 0xFF : 0U;
-	const uint8_t fgcolor = penFGColor ^ invert;
-	const uint8_t bgcolor = penBGColor ^ invert;
-
 	// Clear screen?
 	if (fbink_cfg->is_cleared) {
 		clear_screen(fbfd, bgcolor, fbink_cfg->is_flashing);
 	}
 
 	// Let's go! Start by pilfering some computations from draw...
-	// NOTE: It's a grayscale ramp, so r = g = b (= v).
-	FBInkPixel fgP;
-	FBInkPixel bgP;
-	// TODO: Move that to a helper function?
-	switch (vInfo.bits_per_pixel) {
-		case 4U:
-		case 8U:
-			fgP.gray8 = fgcolor;
-			bgP.gray8 = bgcolor;
-			break;
-		case 16U:
-			// TODO: Make an rgb565 packer helper
-			break;
-		case 24U:
-		case 32U:
-			fgP.bgra.color.a = 0xFF;
-			fgP.bgra.color.r = fgP.bgra.color.g = fgP.bgra.color.b = fgcolor;
-			bgP.bgra.color.a = 0xFF;
-			bgP.bgra.color.r = bgP.bgra.color.g = bgP.bgra.color.b = bgcolor;
+	FBInkPixel fgP = penFGPixel;
+	FBInkPixel bgP = penBGPixel;
+	if (fbink_cfg->is_inverted) {
+		// NOTE: And, of course, RGB565 is terrible. Inverting the lossy packed value would be even lossier...
+		if (vInfo.bits_per_pixel == 16U) {
+			const uint8_t fgcolor = penFGColor ^ 0xFF;
+			const uint8_t bgcolor = penBGColor ^ 0xFF;
+			fgP.rgb565 = pack_rgb565(fgcolor, fgcolor, fgcolor);
+			bgP.rgb565 = pack_rgb565(bgcolor, bgcolor, bgcolor);
+		} else {
+			fgP.bgra.p ^= 0x00FFFFFF;
+			bgP.bgra.p ^= 0x00FFFFFF;
+		}
 	}
 
 	// Clamp v offset to safe values
@@ -5000,47 +4990,44 @@ int
 	}
 
 	// NOTE: We always use the same BG_ constant in order to get a rough inverse by just swapping to the inverted LUT ;).
-	FBInkColor emptyC;
-	FBInkColor borderC;
+	uint8_t emptyC;
+	uint8_t borderC;
 	// Handle devices with an inverted palette properly...
 	if (deviceQuirks.isKindleLegacy) {
-		emptyC.r  = fbink_cfg->is_inverted ? eInkBGCMap[BG_GRAYB] : eInkFGCMap[BG_GRAYB];
-		borderC.r = fbink_cfg->is_inverted ? eInkBGCMap[BG_GRAY4] : eInkFGCMap[BG_GRAY4];
+		emptyC  = fbink_cfg->is_inverted ? eInkBGCMap[BG_GRAYB] : eInkFGCMap[BG_GRAYB];
+		borderC = fbink_cfg->is_inverted ? eInkBGCMap[BG_GRAY4] : eInkFGCMap[BG_GRAY4];
 	} else {
 		if (fbink_cfg->wfm_mode == WFM_A2) {
 			// NOTE: If we're using A2 refresh mode, we'll be enforcing monochrome anyway...
 			//       Making sure we do that on our end (... at least with default bg/fg colors anyway ;),
 			//       avoids weird behavior on devices where A2 can otherwise be quirky, like Kobo Mk. 7
-			emptyC.r  = bgcolor;
-			borderC.r = fgcolor;
+			emptyC  = fbink_cfg->is_inverted ? penBGColor ^ 0xFF : penBGColor;
+			borderC = fbink_cfg->is_inverted ? penFGColor ^ 0xFF : penFGColor;
 		} else {
-			emptyC.r  = fbink_cfg->is_inverted ? eInkFGCMap[BG_GRAYB] : eInkBGCMap[BG_GRAYB];
-			borderC.r = fbink_cfg->is_inverted ? eInkFGCMap[BG_GRAY4] : eInkBGCMap[BG_GRAY4];
+			emptyC  = fbink_cfg->is_inverted ? eInkFGCMap[BG_GRAYB] : eInkBGCMap[BG_GRAYB];
+			borderC = fbink_cfg->is_inverted ? eInkFGCMap[BG_GRAY4] : eInkBGCMap[BG_GRAY4];
 		}
 	}
-	emptyC.g  = emptyC.r;
-	emptyC.b  = emptyC.r;
-	borderC.g = borderC.r;
-	borderC.b = borderC.r;
-	// TODO: Simplify...
+	// Pack that into the right pixel format...
 	FBInkPixel emptyP;
 	FBInkPixel borderP;
-	// TODO: Move that to a helper function?
 	switch (vInfo.bits_per_pixel) {
 		case 4U:
 		case 8U:
-			emptyP.gray8 = emptyC.r;
-			borderP.gray8 = borderC.r;
+			emptyP.gray8 = emptyC;
+			borderP.gray8 = borderC;
 			break;
 		case 16U:
-			// TODO: Make an rgb565 packer helper
+			emptyP.rgb565 = pack_rgb565(emptyC, emptyC, emptyC);
+			borderP.rgb565 = pack_rgb565(borderC, borderC, borderC);
 			break;
 		case 24U:
 		case 32U:
 			emptyP.bgra.color.a = 0xFF;
-			emptyP.bgra.color.r = emptyP.bgra.color.g = emptyP.bgra.color.b = emptyC.r;
+			emptyP.bgra.color.r = emptyP.bgra.color.g = emptyP.bgra.color.b = emptyC;
 			borderP.bgra.color.a = 0xFF;
-			borderP.bgra.color.r = borderP.bgra.color.g = borderP.bgra.color.b = borderC.r;
+			borderP.bgra.color.r = borderP.bgra.color.g = borderP.bgra.color.b = borderC;
+			break;
 	}
 
 	// Which kind of bar did we request?
