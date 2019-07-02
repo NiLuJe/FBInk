@@ -346,11 +346,16 @@ static void
 //       (i.e., (*fxpPutPixel) is only marginally faster than put_pixel()),
 //       the overhead of going through the function pointers is rather large
 //       (i.e., put_pixel() can be twice as slow as put_pixel_*()).
-//       On our target HW, it's still faster than branching or switching, though ;).
+//       On our target HW, it's often slightly faster than branching or switching, though ;).
+//       On modern processors, branching should eventually take the lead, though,
+//       and in this case (ha!) appears to behave better than switching...
+//       Which is why we now branch via an if ladder.
 static void
     put_pixel(FBInkCoordinates coords, const FBInkPixel* restrict px)
 {
 	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
+	// fbink_init() takes care of setting this global pointer to the right function...
+	// NOTE: In this case, going through the function pointer is *noticeably* faster than branching...
 	(*fxpRotateCoords)(&coords);
 
 	// NOTE: Discard off-screen pixels!
@@ -370,8 +375,18 @@ static void
 		return;
 	}
 
-	// fbink_init() takes care of setting this global pointer to the right function for the fb's bpp
-	(*fxpPutPixel)(&coords, px);
+	// NOTE: Hmm, here, an if ladder appears to be ever so *slightly* faster than going through the function pointer...
+	if (vInfo.bits_per_pixel == 4U) {
+		put_pixel_Gray4(&coords, px);
+	} else if (vInfo.bits_per_pixel == 8U) {
+		put_pixel_Gray8(&coords, px);
+	} else if (vInfo.bits_per_pixel == 16U) {
+		put_pixel_RGB565(&coords, px);
+	} else if (vInfo.bits_per_pixel == 24U) {
+		put_pixel_RGB24(&coords, px);
+	} else if (vInfo.bits_per_pixel == 32U) {
+		put_pixel_RGB32(&coords, px);
+	}
 }
 
 // Helper functions to 'get' a specific pixel's color from the framebuffer
