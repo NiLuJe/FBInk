@@ -523,13 +523,20 @@ static void
 	      const FBInkPixel* restrict px)
 {
 	// Bounds-checking, to ensure the memset won't do stupid things...
+	// Do signed maths, to account for the fact that x or y might already be OOB!
 	if (x + w > screenWidth) {
-		w = (unsigned short int) (w - ((unsigned short int) (x + w) - screenWidth));
+		w = (unsigned short int) MAX(0, (w - ((x + w) - (int) screenWidth)));
 		LOG("Chopped rectangle width to %hu", w);
 	}
 	if (y + h > screenHeight) {
-		h = (unsigned short int) (h - ((unsigned short int) (y + h) - screenHeight));
+		h = (unsigned short int) MAX(0, (h - ((y + h) - (int) screenHeight)));
 		LOG("Chopped rectangle height to %hu", h);
+	}
+
+	// Abort early if that left us with an empty rectangle ;).
+	if (w == 0U || h == 0U) {
+		LOG("Skipped empty %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
+		return;
 	}
 
 	if (vInfo.bits_per_pixel < 8U) {
@@ -995,14 +1002,7 @@ static struct mxcfb_rect
 				/* Initial coordinates, before we generate the extra pixels from the scaling factor */   \
 				cx = (unsigned short int) (x_offs + i);                                                  \
 				cy = (unsigned short int) (y_offs + j);                                                  \
-				/* NOTE: Apply our scaling factor in both dimensions! */                                 \
-				for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {                                           \
-					for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {                                   \
-						coords.x = (unsigned short int) (cx + k);                                \
-						coords.y = (unsigned short int) (cy + l);                                \
-						put_pixel(coords, pxC);                                                  \
-					}                                                                                \
-				}                                                                                        \
+				fill_rect(cx, cy, FONTSIZE_MULT, FONTSIZE_MULT, pxC);                                    \
 			}                                                                                                \
 		}                                                                                                        \
 	} else {                                                                                                         \
