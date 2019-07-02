@@ -98,6 +98,7 @@ const char*
 static uint16_t
     pack_rgb565(uint8_t r, uint8_t g, uint8_t b)
 {
+	// ((r / 8) * 2048) + ((g / 4) * 32) + (b / 8);
 	return (uint16_t)(((r >> 3U) << 11U) | ((g >> 2U) << 5U) | (b >> 3U));
 }
 
@@ -156,6 +157,7 @@ static void
 	// note: x * 4 as every pixel is 4 consecutive bytes
 	size_t pix_offset = (uint32_t)(coords->x << 2U) + (coords->y * fInfo.line_length);
 
+	// write the four bytes at once
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
 	*((uint32_t*) (fbPtr + pix_offset)) = px->bgra.p;
@@ -169,11 +171,7 @@ static void
 	// note: x * 2 as every pixel is 2 consecutive bytes
 	size_t pix_offset = (uint32_t)(coords->x << 1U) + (coords->y * fInfo.line_length);
 
-	// now this is about the same as 'fbp[pix_offset] = value'
-	// but a bit more complicated for RGB565
-	//uint16_t c = (uint16_t)(((color->r >> 3U) << 11U) | ((color->g >> 2U) << 5U) | (color->b >> 3U));
-	// or: c = ((r / 8) * 2048) + ((g / 4) * 32) + (b / 8);
-	// write 'two bytes at once', much to GCC's dismay...
+	// write the two bytes at once, much to GCC's dismay...
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
 	*((uint16_t*) (fbPtr + pix_offset)) = px->rgb565;
