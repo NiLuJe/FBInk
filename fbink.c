@@ -496,6 +496,7 @@ static void
     get_pixel(FBInkCoordinates coords, FBInkPixel* restrict px)
 {
 	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
+	// fbink_init() takes care of setting this global pointer to the right function...
 	(*fxpRotateCoords)(&coords);
 
 	// NOTE: Discard off-screen pixels!
@@ -515,9 +516,18 @@ static void
 		return;
 	}
 
-	// fbink_init() takes care of setting this global pointer to the right function for the fb's bpp
-	// TODO: If ladder here, too?
-	(*fxpGetPixel)(&coords, px);
+	// NOTE: Hmm, here, an if ladder appears to be ever so *slightly* faster than going through the function pointer...
+	if (vInfo.bits_per_pixel == 4U) {
+		get_pixel_Gray4(&coords, px);
+	} else if (vInfo.bits_per_pixel == 8U) {
+		get_pixel_Gray8(&coords, px);
+	} else if (vInfo.bits_per_pixel == 16U) {
+		get_pixel_RGB565(&coords, px);
+	} else if (vInfo.bits_per_pixel == 24U) {
+		get_pixel_RGB24(&coords, px);
+	} else if (vInfo.bits_per_pixel == 32U) {
+		get_pixel_RGB32(&coords, px);
+	}
 }
 
 // Helper function to draw a rectangle in given color
