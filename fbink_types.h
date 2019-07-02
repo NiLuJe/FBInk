@@ -149,7 +149,12 @@ typedef union
 {
 	FBInkPixelBGRA bgra;
 	uint16_t rgb565;
-	uint8_t gray8;
+	uint8_t gray8;	// Will point to bgra.color.b
+	struct
+	{
+		uint8_t hi;	// Will point to bgra.color.b
+		uint8_t lo;	// Will point to bgra.color.g
+	} gray4;
 } FBInkPixel;
 
 #ifdef FBINK_WITH_OPENTYPE

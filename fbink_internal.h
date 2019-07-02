@@ -348,7 +348,7 @@ bool g_isQuiet = false;
 long int USER_HZ = 100;
 // Pointers to the appropriate put_pixel/get_pixel functions for the fb's bpp
 void (*fxpPutPixel)(const FBInkCoordinates* restrict, const FBInkPixel* restrict) = NULL;
-void (*fxpGetPixel)(const FBInkCoordinates* restrict, FBInkColor* restrict)       = NULL;
+void (*fxpGetPixel)(const FBInkCoordinates* restrict, FBInkPixel* restrict)       = NULL;
 // As well as the appropriate coordinates rotation functions...
 void (*fxpRotateCoords)(FBInkCoordinates* restrict)  = NULL;
 void (*fxpRotateRegion)(struct mxcfb_rect* restrict) = NULL;
@@ -394,13 +394,13 @@ static void put_pixel(FBInkCoordinates, const FBInkPixel* restrict);
 // NOTE: On the other hand, if you happen to be calling function pointers directly,
 //       it's left to you to not do anything stupid ;)
 
-static void get_pixel_Gray4(const FBInkCoordinates* restrict, FBInkColor* restrict);
-static void get_pixel_Gray8(const FBInkCoordinates* restrict, FBInkColor* restrict);
-static void get_pixel_RGB24(const FBInkCoordinates* restrict, FBInkColor* restrict);
-static void get_pixel_RGB32(const FBInkCoordinates* restrict, FBInkColor* restrict);
-static void get_pixel_RGB565(const FBInkCoordinates* restrict, FBInkColor* restrict);
+static void get_pixel_Gray4(const FBInkCoordinates* restrict, FBInkPixel* restrict);
+static void get_pixel_Gray8(const FBInkCoordinates* restrict, FBInkPixel* restrict);
+static void get_pixel_RGB24(const FBInkCoordinates* restrict, FBInkPixel* restrict);
+static void get_pixel_RGB32(const FBInkCoordinates* restrict, FBInkPixel* restrict);
+static void get_pixel_RGB565(const FBInkCoordinates* restrict, FBInkPixel* restrict);
 // NOTE: Same as put_pixel ;)
-static void get_pixel(FBInkCoordinates, FBInkColor* restrict);
+static void get_pixel(FBInkCoordinates, FBInkPixel* restrict);
 
 #if defined(FBINK_WITH_IMAGE) || defined(FBINK_WITH_OPENTYPE)
 // This is only needed for alpha blending in the image or OpenType codepath ;).

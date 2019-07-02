@@ -393,7 +393,7 @@ static void
 // as well as KOReader's routines
 //       (https://github.com/koreader/koreader-base/blob/b3e72affd0e1ba819d92194b229468452c58836f/ffi/blitbuffer.lua#L292)
 static void
-    get_pixel_Gray4(const FBInkCoordinates* restrict coords, FBInkColor* restrict color)
+    get_pixel_Gray4(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
 	// NOTE: Expand 4bpp to 8bpp:
 	// (v * 0x11)
@@ -411,97 +411,89 @@ static void
 
 		// Even pixel: high nibble
 		uint8_t v = (b & 0xF0);
-		color->r  = (v | (v >> 4U));
+		px->gray4.hi = (v | (v >> 4U));
 		// pull the top/left nibble, expanded to 8bit
 		// or: (uint8_t)((((b) >> 4) & 0x0F) * 0x11);
 
 		// We need to get the low nibble *now*, before it gets clobbered by our alpha-blending put...
 		// Thankfully, we have two empty channels in our color struct that we can use ;).
-		color->g = (uint8_t)((b & 0x0F) * 0x11);
+		px->gray4.lo = (uint8_t)((b & 0x0F) * 0x11);
 		// or: pull the low/right nibble, expanded to 8bit
 	} else {
 		// Odd pixel: low nibble
 		// We just have to point to what we got during the even pixel pass ;).
-		color->r = color->g;
+		px->gray8 = px->gray4.lo;
 	}
+	// NOTE: c.f., FBInkPixel typedef in fbink_types.h for details on the union shenanigans...
+	//       In short: gray8 -> gray4.hi -> bgra.color.b
+	//                          gray4.lo -> bgra.color.g
 }
 
 static void
-    get_pixel_Gray8(const FBInkCoordinates* restrict coords, FBInkColor* restrict color)
+    get_pixel_Gray8(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
 	size_t pix_offset = coords->x + (coords->y * fInfo.line_length);
 
-	color->r = *((unsigned char*) (fbPtr + pix_offset));
+	px->gray8 = *((unsigned char*) (fbPtr + pix_offset));
 }
 
 static void
-    get_pixel_RGB24(const FBInkCoordinates* restrict coords, FBInkColor* restrict color)
+    get_pixel_RGB24(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 3 as every pixel is 3 consecutive bytes
 	size_t pix_offset = (coords->x * 3U) + (coords->y * fInfo.line_length);
 
-	color->b = *((unsigned char*) (fbPtr + pix_offset));
-	color->g = *((unsigned char*) (fbPtr + pix_offset + 1U));
-	color->r = *((unsigned char*) (fbPtr + pix_offset + 2U));
+	px->bgra.color.b = *((unsigned char*) (fbPtr + pix_offset));
+	px->bgra.color.g = *((unsigned char*) (fbPtr + pix_offset + 1U));
+	px->bgra.color.r = *((unsigned char*) (fbPtr + pix_offset + 2U));
 }
 
 static void
-    get_pixel_RGB32(const FBInkCoordinates* restrict coords, FBInkColor* restrict color)
+    get_pixel_RGB32(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
-	// NOTE: We retrofitted a bit of union magic implemented for fbink_print_image for a noticeable performance bump :)
-	FBInkPixelBGRA px;
-
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 4 as every pixel is 4 consecutive bytes, which we read in one go
 	size_t pix_offset = (uint32_t)(coords->x << 2U) + (coords->y * fInfo.line_length);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
-	px.p = *((uint32_t*) (fbPtr + pix_offset));
+	px->bgra.p = *((uint32_t*) (fbPtr + pix_offset));
 #pragma GCC diagnostic pop
-	color->b = px.color.b;
-	color->g = px.color.g;
-	color->r = px.color.r;
-	// NOTE: We don't care about alpha, we always assume it's opaque,
-	//       as that's how it behaves.
+	// TODO: See if we're okay, or if we need to explictly enforce alpha to 0xFF...
 }
 
 static void
-    get_pixel_RGB565(const FBInkCoordinates* restrict coords, FBInkColor* restrict color)
+    get_pixel_RGB565(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 2 as every pixel is 2 consecutive bytes
 	size_t pix_offset = (uint32_t)(coords->x << 1U) + (coords->y * fInfo.line_length);
 
 	// NOTE: We're assuming RGB565 and not BGR565 here (as well as in put_pixel)...
-	uint16_t v;
-	uint8_t  r;
-	uint8_t  g;
-	uint8_t  b;
 	// Like put_pixel_RGB565, read those two consecutive bytes at once
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
-	v = *((uint16_t*) (fbPtr + pix_offset));
+	const uint16_t v = *((const uint16_t*) (fbPtr + pix_offset));
 #pragma GCC diagnostic pop
 
 	// NOTE: c.f., https://stackoverflow.com/q/2442576
 	//       I feel that this approach tracks better with what we do in put_pixel_RGB565,
 	//       and I have an easier time following it than the previous approach ported from KOReader.
 	//       Both do exactly the same thing, though ;).
-	r = (uint8_t)((v & 0xF800) >> 11U);
-	g = (v & 0x07E0) >> 5U;
-	b = (v & 0x001F);
+	const uint8_t r = (uint8_t)((v & 0xF800) >> 11U);
+	const uint8_t g = (v & 0x07E0) >> 5U;
+	const uint8_t b = (v & 0x001F);
 
-	color->r = (uint8_t)((r << 3U) | (r >> 2U));
-	color->g = (uint8_t)((g << 2U) | (g >> 4U));
-	color->b = (uint8_t)((b << 3U) | (b >> 2U));
+	px->bgra.color.r = (uint8_t)((r << 3U) | (r >> 2U));
+	px->bgra.color.g = (uint8_t)((g << 2U) | (g >> 4U));
+	px->bgra.color.b = (uint8_t)((b << 3U) | (b >> 2U));
 }
 
 // Handle a few sanity checks...
 static void
-    get_pixel(FBInkCoordinates coords, FBInkColor* restrict color)
+    get_pixel(FBInkCoordinates coords, FBInkPixel* restrict px)
 {
 	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
 	(*fxpRotateCoords)(&coords);
@@ -524,7 +516,8 @@ static void
 	}
 
 	// fbink_init() takes care of setting this global pointer to the right function for the fb's bpp
-	(*fxpGetPixel)(&coords, color);
+	// TODO: If ladder here, too?
+	(*fxpGetPixel)(&coords, px);
 }
 
 // Helper function to draw a rectangle in given color
@@ -1024,7 +1017,7 @@ static struct mxcfb_rect
 			}                                                                                                \
 		}                                                                                                        \
 	} else {                                                                                                         \
-		FBInkColor fbC     = { 0U };                                                                             \
+		FBInkPixel fbP     = { 0U };                                                                             \
 		bool       is_fgpx = false;                                                                              \
 		for (uint8_t y = 0U; y < glyphHeight; y++) {                                                             \
 			/* y: input row, j: first output row after scaling */                                            \
@@ -1055,18 +1048,17 @@ static struct mxcfb_rect
 						/* Obviously, the closer we get to GRAY7, the less contrast we get */    \
 						if (is_fgpx && !fbink_cfg->is_fgless) {                                  \
 							if (fbink_cfg->is_overlay) {                                     \
-								get_pixel(coords, &fbC);                                 \
-								fbC.r ^= 0xFF;                                           \
-								/* NOTE: Don't touch g & b if it's not needed! */        \
+								get_pixel(coords, &fbP);                                 \
+								fbP.gray8 ^= 0xFF;                                           \
+								/* NOTE: Don't touch g & r if it's not needed! */        \
 								/*       It's especially important on 4bpp, */           \
 								/*       to avoid clobbering the low nibble, */          \
-								/*       which we store in r... */                       \
+								/*       which we store in g... */                       \
 								if (vInfo.bits_per_pixel > 8U) {                         \
-									fbC.g ^= 0xFF;                                   \
-									fbC.b ^= 0xFF;                                   \
+									fbP.bgra.color.g ^= 0xFF;                                   \
+									fbP.bgra.color.r ^= 0xFF;                                   \
 								}                                                        \
-								/* TODO: See how best to handle get_pixel on the Color vs. Pixel front... */ \
-								pxC->bgra.color.r = fbC.r;                                              \
+								pxC = &fbP;                                              \
 							}                                                                \
 							put_pixel(coords, pxC);                                          \
 						} else if (!is_fgpx && fbink_cfg->is_fgless) {                           \
