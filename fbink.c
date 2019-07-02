@@ -95,7 +95,7 @@ const char*
 }
 
 // #RGB -> RGB565
-static uint16_t
+static inline uint16_t
     pack_rgb565(uint8_t r, uint8_t g, uint8_t b)
 {
 	// ((r / 8) * 2048) + ((g / 4) * 32) + (b / 8);
