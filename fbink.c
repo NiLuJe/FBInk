@@ -947,7 +947,7 @@ static struct mxcfb_rect
 	size_t           ci     = 0U;
 	uint32_t         ch     = 0U;
 	FBInkCoordinates coords = { 0U };
-	FBInkPixel*      pxC;
+	FBInkPixel*      pxP;
 	// NOTE: We don't do much sanity checking on hoffset/voffset,
 	//       because we want to allow pushing part of the string off-screen
 	//       (we basically only make sure it won't screw up the region rectangle too badly).
@@ -1004,16 +1004,16 @@ static struct mxcfb_rect
 				/* Each element encodes a full row, we access a column's bit in that row by shifting. */ \
 				if (bitmap[y] & 1U << x) {                                                               \
 					/* bit was set, pixel is fg! */                                                  \
-					pxC = &fgP;                                                                      \
+					pxP = &fgP;                                                                      \
 				} else {                                                                                 \
 					/* bit was unset, pixel is bg */                                                 \
-					pxC = &bgP;                                                                      \
+					pxP = &bgP;                                                                      \
 				}                                                                                        \
 				/* Initial coordinates, before we generate the extra pixels from the scaling factor */   \
 				cx = (unsigned short int) (x_offs + i);                                                  \
 				cy = (unsigned short int) (y_offs + j);                                                  \
 				/* We already know the final pixel value, so we can take a shortcut w/ fill_rect :) */   \
-				fill_rect(cx, cy, FONTSIZE_MULT, FONTSIZE_MULT, pxC);                                    \
+				fill_rect(cx, cy, FONTSIZE_MULT, FONTSIZE_MULT, pxP);                                    \
 			}                                                                                                \
 		}                                                                                                        \
 	} else {                                                                                                         \
@@ -1028,11 +1028,11 @@ static struct mxcfb_rect
 				/* Each element encodes a full row, we access a column's bit in that row by shifting. */ \
 				if (bitmap[y] & 1U << x) {                                                               \
 					/* bit was set, pixel is fg! */                                                  \
-					pxC     = &fgP;                                                                  \
+					pxP     = &fgP;                                                                  \
 					is_fgpx = true;                                                                  \
 				} else {                                                                                 \
 					/* bit was unset, pixel is bg */                                                 \
-					pxC     = &bgP;                                                                  \
+					pxP     = &bgP;                                                                  \
 					is_fgpx = false;                                                                 \
 				}                                                                                        \
 				/* Initial coordinates, before we generate the extra pixels from the scaling factor */   \
@@ -1058,11 +1058,11 @@ static struct mxcfb_rect
 									fbP.bgra.color.g ^= 0xFF;                                   \
 									fbP.bgra.color.r ^= 0xFF;                                   \
 								}                                                        \
-								pxC = &fbP;                                              \
+								pxP = &fbP;                                              \
 							}                                                                \
-							put_pixel(coords, pxC);                                          \
+							put_pixel(coords, pxP);                                          \
 						} else if (!is_fgpx && fbink_cfg->is_fgless) {                           \
-							put_pixel(coords, pxC);                                          \
+							put_pixel(coords, pxP);                                          \
 						}                                                                        \
 					}                                                                                \
 				}                                                                                        \
