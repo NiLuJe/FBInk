@@ -991,7 +991,11 @@ static struct mxcfb_rect
 
 			// Get the glyph's pixmap (width <= 8 -> uint8_t)
 			const unsigned char* restrict bitmap = NULL;
+#ifdef FBINK_WITH_FONTS
 			bitmap                               = (*fxpFont8xGetBitmap)(ch);
+#else
+			bitmap                               = font8x8_get_bitmap(ch);
+#endif
 
 			// Crappy macro to avoid repeating myself in each branch...
 #define RENDER_GLYPH()                                                                                                   \
