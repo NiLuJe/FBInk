@@ -1002,6 +1002,7 @@ static struct mxcfb_rect
 				/* Initial coordinates, before we generate the extra pixels from the scaling factor */   \
 				cx = (unsigned short int) (x_offs + i);                                                  \
 				cy = (unsigned short int) (y_offs + j);                                                  \
+				/* We already know the final pixel value, so we can take a shortcut w/ fill_rect :) */   \
 				fill_rect(cx, cy, FONTSIZE_MULT, FONTSIZE_MULT, pxC);                                    \
 			}                                                                                                \
 		}                                                                                                        \
