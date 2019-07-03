@@ -574,6 +574,19 @@ static void
 				put_pixel_Gray4(&coords, px);
 			}
 		}
+	} else if (vInfo.bits_per_pixel == 16U && px->gray8 != 0x00 && px->gray8 != 0xFF) {
+		// Same thing @ 16bpp if we're not doing black or white, as those are the only colors in our palette
+		// that pack into two indentical bytes when packed as RGB565... -_-".
+		FBInkPixel packed_px;
+		packed_px.rgb565 = pack_rgb565(px->bgra.color.r, px->bgra.color.g, px->bgra.color.b);
+		for (unsigned short int cy = 0U; cy < h; cy++) {
+			for (unsigned short int cx = 0U; cx < w; cx++) {
+				FBInkCoordinates coords;
+				coords.x = (unsigned short int) (x + cx);
+				coords.y = (unsigned short int) (y + cy);
+				put_pixel_RGB565(&coords, &packed_px);
+			}
+		}
 	} else {
 		struct mxcfb_rect region = {
 			.top    = y,
