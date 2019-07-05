@@ -114,7 +114,7 @@ static bool
 	// which would cause it to potentially already be black (or transparent) in Nickel...
 	FBInkCoordinates coords = { (unsigned short int) (viewWidth / 2U), (unsigned short int) (viewHeight - 1) };
 	(*fxpRotateCoords)(&coords);
-	FBInkColor color = { 0U };
+	FBInkPixel pixel = { 0U };
 
 	// We loop for <timeout> seconds at most, waking up every <granularity> ms...
 	unsigned short int iterations;
@@ -129,19 +129,34 @@ static bool
 		// Wait <granularity> ms . . .
 		nanosleep(&zzz, NULL);
 
-		(*fxpGetPixel)(&coords, &color);
-		LOG("On iteration nr. %hhu of %hu, pixel (%hu, %hu) was #%02hhX%02hhX%02hhX",
-		    i,
-		    iterations,
-		    coords.x,
-		    coords.y,
-		    color.r,
-		    color.g,
-		    color.b);
+		(*fxpGetPixel)(&coords, &pixel);
+		// NOTE: get_pixel_* will only set gray8 @ 4 & 8bpp! (It will unpack RGB565 to RGB32, though ;)).
+		if (vInfo.bits_per_pixel > 8U) {
+			LOG("On iteration nr. %hhu of %hu, pixel (%hu, %hu) was #%02hhX%02hhX%02hhX",
+			i,
+			iterations,
+			coords.x,
+			coords.y,
+			pixel.bgra.color.r,
+			pixel.bgra.color.g,
+			pixel.bgra.color.b);
 
-		// Got it!
-		if (color.r == v && color.g == v && color.b == v) {
-			return true;
+			// Got it!
+			if (pixel.bgra.color.r == v && pixel.bgra.color.g == v && pixel.bgra.color.b == v) {
+				return true;
+			}
+		} else {
+			LOG("On iteration nr. %hhu of %hu, pixel (%hu, %hu) was #%02hhX",
+			i,
+			iterations,
+			coords.x,
+			coords.y,
+			pixel.gray8);
+
+			// Got it!
+			if (pixel.gray8 == v) {
+				return true;
+			}
 		}
 	}
 
@@ -335,7 +350,7 @@ int
 		button_color.b = 0xDE;
 	}
 
-	FBInkColor         color         = { 0U };
+	FBInkPixel         pixel         = { 0U };
 	FBInkCoordinates   coords        = { 0U };
 	unsigned short int button_width  = 0U;
 	unsigned short int match_count   = 0U;
@@ -387,9 +402,10 @@ int
 
 			// Handle 16bpp rotation (hopefully applies in Nickel, too ;D)
 			(*fxpRotateCoords)(&coords);
-			(*fxpGetPixel)(&coords, &color);
+			(*fxpGetPixel)(&coords, &pixel);
 
-			if (color.r == button_color.r && color.g == button_color.g && color.b == button_color.b) {
+			// NOTE: Again, get_pixel_* will only set gray8 @ 4 & 8bpp
+			if ((vInfo.bits_per_pixel > 8U && pixel.bgra.color.r == button_color.r && pixel.bgra.color.g == button_color.g && pixel.bgra.color.b == button_color.b) || (vInfo.bits_per_pixel <= 8U && pixel.gray8 == button_color.b)) {
 				// Found a pixel of the right color for a button...
 				button_width++;
 			} else {
@@ -435,9 +451,10 @@ int
 			coords.y = j;
 
 			(*fxpRotateCoords)(&coords);
-			(*fxpGetPixel)(&coords, &color);
+			(*fxpGetPixel)(&coords, &pixel);
 
-			if (color.r == button_color.r && color.g == button_color.g && color.b == button_color.b) {
+			// NOTE: Again, with the gray/rgb dance...
+			if ((vInfo.bits_per_pixel > 8U && pixel.bgra.color.r == button_color.r && pixel.bgra.color.g == button_color.g && pixel.bgra.color.b == button_color.b) || (vInfo.bits_per_pixel <= 8U && pixel.gray8 == button_color.b)) {
 				// Found a pixel of the right color for a button...
 				button_height++;
 			} else {
