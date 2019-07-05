@@ -419,7 +419,7 @@ static void
 		uint8_t b          = *((unsigned char*) (fbPtr + pix_offset));
 
 		// Even pixel: high nibble
-		uint8_t v = (b & 0xF0);
+		uint8_t v    = (b & 0xF0);
 		px->gray4.hi = (v | (v >> 4U));
 		// pull the top/left nibble, expanded to 8bit
 		// or: (uint8_t)((((b) >> 4) & 0x0F) * 0x11);
@@ -772,8 +772,8 @@ static struct mxcfb_rect
 		if (vInfo.bits_per_pixel == 16U) {
 			const uint8_t fgcolor = penFGColor ^ 0xFF;
 			const uint8_t bgcolor = penBGColor ^ 0xFF;
-			fgP.rgb565 = pack_rgb565(fgcolor, fgcolor, fgcolor);
-			bgP.rgb565 = pack_rgb565(bgcolor, bgcolor, bgcolor);
+			fgP.rgb565            = pack_rgb565(fgcolor, fgcolor, fgcolor);
+			bgP.rgb565            = pack_rgb565(bgcolor, bgcolor, bgcolor);
 		} else {
 			fgP.bgra.p ^= 0x00FFFFFF;
 			bgP.bgra.p ^= 0x00FFFFFF;
@@ -1017,9 +1017,9 @@ static struct mxcfb_rect
 			// Get the glyph's pixmap (width <= 8 -> uint8_t)
 			const unsigned char* restrict bitmap = NULL;
 #ifdef FBINK_WITH_FONTS
-			bitmap                               = (*fxpFont8xGetBitmap)(ch);
+			bitmap = (*fxpFont8xGetBitmap)(ch);
 #else
-			bitmap                               = font8x8_get_bitmap(ch);
+		bitmap = font8x8_get_bitmap(ch);
 #endif
 
 			// Crappy macro to avoid repeating myself in each branch...
@@ -1081,22 +1081,22 @@ static struct mxcfb_rect
 						if (is_fgpx && !fbink_cfg->is_fgless) {                                  \
 							if (fbink_cfg->is_overlay) {                                     \
 								get_pixel(coords, &fbP);                                 \
-								fbP.gray8 ^= 0xFF;                                           \
+								fbP.gray8 ^= 0xFF;                                       \
 								/* NOTE: Don't touch g & r if it's not needed! */        \
 								/*       It's especially important on 4bpp, */           \
 								/*       to avoid clobbering the low nibble, */          \
 								/*       which we store in g... */                       \
 								if (vInfo.bits_per_pixel > 8U) {                         \
-									fbP.bgra.color.g ^= 0xFF;                                   \
-									fbP.bgra.color.r ^= 0xFF;                                   \
+									fbP.bgra.color.g ^= 0xFF;                        \
+									fbP.bgra.color.r ^= 0xFF;                        \
 								}                                                        \
 								pxP = &fbP;                                              \
-								put_pixel(coords, pxP, false);                                          \
-							} else {                                                               \
-								put_pixel(coords, pxP, true);                                          \
-							} \
+								put_pixel(coords, pxP, false);                           \
+							} else {                                                         \
+								put_pixel(coords, pxP, true);                            \
+							}                                                                \
 						} else if (!is_fgpx && fbink_cfg->is_fgless) {                           \
-							put_pixel(coords, pxP, true);                                          \
+							put_pixel(coords, pxP, true);                                    \
 						}                                                                        \
 					}                                                                                \
 				}                                                                                        \
@@ -2407,35 +2407,35 @@ static int
 	// Use the appropriate get/put pixel functions, and pack the pen colors into the appropriate pixel format...
 	switch (vInfo.bits_per_pixel) {
 		case 4U:
-			fxpPutPixel = &put_pixel_Gray4;
-			fxpGetPixel = &get_pixel_Gray4;
+			fxpPutPixel      = &put_pixel_Gray4;
+			fxpGetPixel      = &get_pixel_Gray4;
 			penFGPixel.gray8 = penFGColor;
 			penBGPixel.gray8 = penBGColor;
 			break;
 		case 8U:
-			fxpPutPixel = &put_pixel_Gray8;
-			fxpGetPixel = &get_pixel_Gray8;
+			fxpPutPixel      = &put_pixel_Gray8;
+			fxpGetPixel      = &get_pixel_Gray8;
 			penFGPixel.gray8 = penFGColor;
 			penBGPixel.gray8 = penBGColor;
 			break;
 		case 16U:
-			fxpPutPixel = &put_pixel_RGB565;
-			fxpGetPixel = &get_pixel_RGB565;
+			fxpPutPixel       = &put_pixel_RGB565;
+			fxpGetPixel       = &get_pixel_RGB565;
 			penFGPixel.rgb565 = pack_rgb565(penFGColor, penFGColor, penFGColor);
 			penBGPixel.rgb565 = pack_rgb565(penBGColor, penBGColor, penBGColor);
 			break;
 		case 24U:
-			fxpPutPixel = &put_pixel_RGB24;
-			fxpGetPixel = &get_pixel_RGB24;
+			fxpPutPixel             = &put_pixel_RGB24;
+			fxpGetPixel             = &get_pixel_RGB24;
 			penFGPixel.bgra.color.r = penFGPixel.bgra.color.g = penFGPixel.bgra.color.b = penFGColor;
 			penBGPixel.bgra.color.r = penBGPixel.bgra.color.g = penBGPixel.bgra.color.b = penBGColor;
 			break;
 		case 32U:
-			fxpPutPixel = &put_pixel_RGB32;
-			fxpGetPixel = &get_pixel_RGB32;
+			fxpPutPixel             = &put_pixel_RGB32;
+			fxpGetPixel             = &get_pixel_RGB32;
 			penFGPixel.bgra.color.a = 0xFF;
 			penFGPixel.bgra.color.r = penFGPixel.bgra.color.g = penFGPixel.bgra.color.b = penFGColor;
-			penBGPixel.bgra.color.a = 0xFF;
+			penBGPixel.bgra.color.a                                                     = 0xFF;
 			penBGPixel.bgra.color.r = penBGPixel.bgra.color.g = penBGPixel.bgra.color.b = penBGColor;
 			break;
 		default:
@@ -4079,8 +4079,8 @@ int
 	const uint8_t   fgcolor    = penFGColor ^ invert;
 	const uint8_t   bgcolor    = penBGColor ^ invert;
 	const short int layer_diff = (short int) (fgcolor - bgcolor);
-	FBInkPixel fgP = penFGPixel;
-	FBInkPixel bgP = penBGPixel;
+	FBInkPixel      fgP        = penFGPixel;
+	FBInkPixel      bgP        = penBGPixel;
 	if (is_inverted) {
 		// NOTE: And, of course, RGB565 is terrible. Inverting the lossy packed value would be even lossier...
 		if (vInfo.bits_per_pixel == 16U) {
@@ -4315,8 +4315,8 @@ int
 
 		FBInkPixel pixel;
 		pixel.bgra.color.a = 0xFF;
-		start_x          = paint_point.x;
-		lnPtr            = line_buff;
+		start_x            = paint_point.x;
+		lnPtr              = line_buff;
 		// Normal painting to framebuffer. Please forgive the code repetition. Performance...
 		// What we get from stbtt is an alpha coverage mask, hence the need for alpha-blending for anti-aliasing.
 		// As it's obviously expensive, we try to avoid it if possible (on fully opaque & fully transparent pixels).
@@ -4335,7 +4335,8 @@ int
 				}
 				for (int j = 0; j < max_line_height; j++) {
 					for (unsigned int k = 0U; k < lw; k++) {
-						pixel.bgra.color.r = pixel.bgra.color.g = pixel.bgra.color.b = lnPtr[k] ^ ainv;
+						pixel.bgra.color.r = pixel.bgra.color.g = pixel.bgra.color.b =
+						    lnPtr[k] ^ ainv;
 						put_pixel(paint_point, &pixel, false);
 						paint_point.x++;
 					}
@@ -4369,8 +4370,8 @@ int
 				}
 			}
 		} else if (is_fgless) {
-			FBInkPixel fb_px = { 0U };
-			uint16_t   pmul_bg  = (uint16_t)(bgcolor * 0xFF);
+			FBInkPixel fb_px   = { 0U };
+			uint16_t   pmul_bg = (uint16_t)(bgcolor * 0xFF);
 			// NOTE: One more branch needed because 4bpp fbs are terrible...
 			if (vInfo.bits_per_pixel > 4U) {
 				// 8, 16, 24 & 32bpp
@@ -4431,11 +4432,14 @@ int
 							// and the underlying pixel as bg
 							get_pixel(paint_point, &fb_px);
 							pixel.bgra.color.r = (uint8_t) DIV255(
-							    (MUL255(fb_px.bgra.color.r) + ((fgcolor - fb_px.bgra.color.r) * lnPtr[k])));
+							    (MUL255(fb_px.bgra.color.r) +
+							     ((fgcolor - fb_px.bgra.color.r) * lnPtr[k])));
 							pixel.bgra.color.g = (uint8_t) DIV255(
-							    (MUL255(fb_px.bgra.color.g) + ((fgcolor - fb_px.bgra.color.g) * lnPtr[k])));
+							    (MUL255(fb_px.bgra.color.g) +
+							     ((fgcolor - fb_px.bgra.color.g) * lnPtr[k])));
 							pixel.bgra.color.b = (uint8_t) DIV255(
-							    (MUL255(fb_px.bgra.color.b) + ((fgcolor - fb_px.bgra.color.b) * lnPtr[k])));
+							    (MUL255(fb_px.bgra.color.b) +
+							     ((fgcolor - fb_px.bgra.color.b) * lnPtr[k])));
 							put_pixel(paint_point, &pixel, false);
 						}
 						paint_point.x++;
@@ -4481,13 +4485,16 @@ int
 							get_pixel(paint_point, &fb_px);
 							pixel.bgra.color.r = (uint8_t) DIV255(
 							    (MUL255(fb_px.bgra.color.r) +
-							     (((fb_px.bgra.color.r ^ 0xFF) - fb_px.bgra.color.r) * lnPtr[k])));
+							     (((fb_px.bgra.color.r ^ 0xFF) - fb_px.bgra.color.r) *
+							      lnPtr[k])));
 							pixel.bgra.color.g = (uint8_t) DIV255(
 							    (MUL255(fb_px.bgra.color.g) +
-							     (((fb_px.bgra.color.g ^ 0xFF) - fb_px.bgra.color.g) * lnPtr[k])));
+							     (((fb_px.bgra.color.g ^ 0xFF) - fb_px.bgra.color.g) *
+							      lnPtr[k])));
 							pixel.bgra.color.b = (uint8_t) DIV255(
 							    (MUL255(fb_px.bgra.color.b) +
-							     (((fb_px.bgra.color.b ^ 0xFF) - fb_px.bgra.color.b) * lnPtr[k])));
+							     (((fb_px.bgra.color.b ^ 0xFF) - fb_px.bgra.color.b) *
+							      lnPtr[k])));
 							put_pixel(paint_point, &pixel, false);
 						}
 						paint_point.x++;
@@ -4503,9 +4510,9 @@ int
 						// AA, blend it using the coverage mask as alpha, and the underlying pixel as bg
 						// Without forgetting our foreground color trickery...
 						get_pixel(paint_point, &fb_px);
-						pixel.gray4.hi =
-						    (uint8_t) DIV255((MUL255(fb_px.gray4.hi) +
-								      (((fb_px.gray4.hi ^ 0xFF) - fb_px.gray4.hi) * lnPtr[k])));
+						pixel.gray4.hi = (uint8_t) DIV255(
+						    (MUL255(fb_px.gray4.hi) +
+						     (((fb_px.gray4.hi ^ 0xFF) - fb_px.gray4.hi) * lnPtr[k])));
 						// Don't touch the low nibble...
 						pixel.gray4.lo = fb_px.gray4.lo;
 						put_pixel(paint_point, &pixel, true);
@@ -5070,18 +5077,18 @@ int
 	switch (vInfo.bits_per_pixel) {
 		case 4U:
 		case 8U:
-			emptyP.gray8 = emptyC;
+			emptyP.gray8  = emptyC;
 			borderP.gray8 = borderC;
 			break;
 		case 16U:
-			emptyP.rgb565 = pack_rgb565(emptyC, emptyC, emptyC);
+			emptyP.rgb565  = pack_rgb565(emptyC, emptyC, emptyC);
 			borderP.rgb565 = pack_rgb565(borderC, borderC, borderC);
 			break;
 		case 24U:
 		case 32U:
 			emptyP.bgra.color.a = 0xFF;
 			emptyP.bgra.color.r = emptyP.bgra.color.g = emptyP.bgra.color.b = emptyC;
-			borderP.bgra.color.a = 0xFF;
+			borderP.bgra.color.a                                            = 0xFF;
 			borderP.bgra.color.r = borderP.bgra.color.g = borderP.bgra.color.b = borderC;
 			break;
 	}
@@ -6206,7 +6213,8 @@ static int
 							pixel.bgra.color.b = img_px.color.b;
 						}
 						// Pack it
-						pixel.rgb565 = pack_rgb565(pixel.bgra.color.r, pixel.bgra.color.g, pixel.bgra.color.b);
+						pixel.rgb565 = pack_rgb565(
+						    pixel.bgra.color.r, pixel.bgra.color.g, pixel.bgra.color.b);
 
 						coords.x = (unsigned short int) (i + x_off);
 						coords.y = (unsigned short int) (j + y_off);
@@ -6240,7 +6248,8 @@ static int
 							pixel.bgra.color.b = dither_o8x8(i, j, pixel.bgra.color.b);
 						}
 						// Pack it
-						pixel.rgb565 = pack_rgb565(pixel.bgra.color.r, pixel.bgra.color.g, pixel.bgra.color.b);
+						pixel.rgb565 = pack_rgb565(
+						    pixel.bgra.color.r, pixel.bgra.color.g, pixel.bgra.color.b);
 
 						put_pixel_RGB565(&coords, &pixel);
 					}
@@ -6264,7 +6273,8 @@ static int
 						pixel.bgra.color.b = data[pix_offset + 2U] ^ invert;
 					}
 					// Pack it
-					pixel.rgb565 = pack_rgb565(pixel.bgra.color.r, pixel.bgra.color.g, pixel.bgra.color.b);
+					pixel.rgb565 =
+					    pack_rgb565(pixel.bgra.color.r, pixel.bgra.color.g, pixel.bgra.color.b);
 
 					FBInkCoordinates coords;
 					coords.x = (unsigned short int) (i + x_off);

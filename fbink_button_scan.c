@@ -133,13 +133,13 @@ static bool
 		// NOTE: get_pixel_* will only set gray8 @ 4 & 8bpp! (It will unpack RGB565 to RGB32, though ;)).
 		if (vInfo.bits_per_pixel > 8U) {
 			LOG("On iteration nr. %hhu of %hu, pixel (%hu, %hu) was #%02hhX%02hhX%02hhX",
-			i,
-			iterations,
-			coords.x,
-			coords.y,
-			pixel.bgra.color.r,
-			pixel.bgra.color.g,
-			pixel.bgra.color.b);
+			    i,
+			    iterations,
+			    coords.x,
+			    coords.y,
+			    pixel.bgra.color.r,
+			    pixel.bgra.color.g,
+			    pixel.bgra.color.b);
 
 			// Got it!
 			if (pixel.bgra.color.r == v && pixel.bgra.color.g == v && pixel.bgra.color.b == v) {
@@ -147,11 +147,11 @@ static bool
 			}
 		} else {
 			LOG("On iteration nr. %hhu of %hu, pixel (%hu, %hu) was #%02hhX",
-			i,
-			iterations,
-			coords.x,
-			coords.y,
-			pixel.gray8);
+			    i,
+			    iterations,
+			    coords.x,
+			    coords.y,
+			    pixel.gray8);
 
 			// Got it!
 			if (pixel.gray8 == v) {
@@ -405,7 +405,9 @@ int
 			(*fxpGetPixel)(&coords, &pixel);
 
 			// NOTE: Again, get_pixel_* will only set gray8 @ 4 & 8bpp
-			if ((vInfo.bits_per_pixel > 8U && pixel.bgra.color.r == button_color.r && pixel.bgra.color.g == button_color.g && pixel.bgra.color.b == button_color.b) || (vInfo.bits_per_pixel <= 8U && pixel.gray8 == button_color.b)) {
+			if ((vInfo.bits_per_pixel > 8U && pixel.bgra.color.r == button_color.r &&
+			     pixel.bgra.color.g == button_color.g && pixel.bgra.color.b == button_color.b) ||
+			    (vInfo.bits_per_pixel <= 8U && pixel.gray8 == button_color.b)) {
 				// Found a pixel of the right color for a button...
 				button_width++;
 			} else {
@@ -454,7 +456,9 @@ int
 			(*fxpGetPixel)(&coords, &pixel);
 
 			// NOTE: Again, with the gray/rgb dance...
-			if ((vInfo.bits_per_pixel > 8U && pixel.bgra.color.r == button_color.r && pixel.bgra.color.g == button_color.g && pixel.bgra.color.b == button_color.b) || (vInfo.bits_per_pixel <= 8U && pixel.gray8 == button_color.b)) {
+			if ((vInfo.bits_per_pixel > 8U && pixel.bgra.color.r == button_color.r &&
+			     pixel.bgra.color.g == button_color.g && pixel.bgra.color.b == button_color.b) ||
+			    (vInfo.bits_per_pixel <= 8U && pixel.gray8 == button_color.b)) {
 				// Found a pixel of the right color for a button...
 				button_height++;
 			} else {
