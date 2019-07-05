@@ -125,6 +125,8 @@ static void
 		// ORed to avoid clobbering our even pixel
 		*((unsigned char*) (fbPtr + pix_offset)) |= (px->gray8 >> 4U);
 	}
+	// NOTE: This generally means artefacts happen if you don't start drawing on an even pixel,
+	//       and end drawing on an odd pixel...
 }
 
 static void
@@ -437,6 +439,7 @@ static void
 		//       One way to break that assumption is with an odd scaling factor:
 		//       In this case, using overlay mode in the fixed cell rendering codepath will lead to bogus edge colors,
 		//       (usually, on the left side).
+		//       See also the NOTE in put_pixel_Gray4...
 	}
 	// NOTE: c.f., FBInkPixel typedef in fbink_types.h for details on the union shenanigans...
 	//       In short: gray8 -> gray4.hi -> bgra.color.b
