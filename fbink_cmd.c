@@ -99,6 +99,7 @@ static void
 #ifdef FBINK_WITH_FONTS
 	    "\t\t\t\tAvailable font families: IBM, UNSCII, ALT, THIN, FANTASY, MCR, TALL, BLOCK,\n"
 	    "\t\t\t\t\t\tLEGGIE, VEGGIE, KATES, FKP, CTRLD, ORP, ORPB, ORPI, SCIENTIFICA, SCIENTIFICAB, SCIENTIFICAI, TERMINUS, TERMINUSB, FATTY, SPLEEN, TEWI, TEWIB, TOPAZ, MICROKNIGHT, VGA\n"
+	    "\t\t\t\tNOTE: On low dpi, 600x800 devices, ORP or TEWI's form factor may feel more familiar at default scaling.\n"
 #else
 	    "\t\t\t\tAvailable font families: IBM\n"
 #endif
