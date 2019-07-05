@@ -347,8 +347,8 @@ bool g_isQuiet = false;
 // This should be a pretty accurate fallback...
 long int USER_HZ = 100;
 // Pointers to the appropriate put_pixel/get_pixel functions for the fb's bpp
-void (*fxpPutPixel)(const FBInkCoordinates* restrict, const FBInkPixel* restrict) = NULL;
-void (*fxpGetPixel)(const FBInkCoordinates* restrict, FBInkPixel* restrict)       = NULL;
+//void (*fxpPutPixel)(const FBInkCoordinates* restrict, const FBInkPixel* restrict) = NULL;
+//void (*fxpGetPixel)(const FBInkCoordinates* restrict, FBInkPixel* restrict)       = NULL;
 // As well as the appropriate coordinates rotation functions...
 void (*fxpRotateCoords)(FBInkCoordinates* restrict)  = NULL;
 void (*fxpRotateRegion)(struct mxcfb_rect* restrict) = NULL;
