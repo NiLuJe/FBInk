@@ -1033,19 +1033,18 @@ static struct mxcfb_rect
 			for (uint8_t x = 0U; x < glyphWidth; x++) {                                                      \
 				/* x: input column, i: first output column after scaling */                              \
 				i = (unsigned short int) (x * FONTSIZE_MULT);                                            \
-				/* Each element encodes a full row, we access a column's bit in that row by shifting. */ \
-				if (bitmap[y] & 1U << x) {                                                               \
-					/* bit was set, pixel is fg! */                                                  \
-					pxP = &fgP;                                                                      \
-				} else {                                                                                 \
-					/* bit was unset, pixel is bg */                                                 \
-					pxP = &bgP;                                                                      \
-				}                                                                                        \
 				/* Initial coordinates, before we generate the extra pixels from the scaling factor */   \
 				cx = (unsigned short int) (x_offs + i);                                                  \
 				cy = (unsigned short int) (y_offs + j);                                                  \
-				/* We already know the final pixel value, so we can take a shortcut w/ fill_rect :) */   \
-				fill_rect(cx, cy, FONTSIZE_MULT, FONTSIZE_MULT, pxP);                                    \
+				/* Each element encodes a full row, we access a column's bit in that row by shifting. */ \
+				if (bitmap[y] & 1U << x) {                                                               \
+					/* bit was set, pixel is fg! */                                                  \
+					/* Handle scaling by drawing a FONTSIZE_MULTpx square per pixel ;) */            \
+					fill_rect(cx, cy, FONTSIZE_MULT, FONTSIZE_MULT, &fgP);                           \
+				} else {                                                                                 \
+					/* bit was unset, pixel is bg */                                                 \
+					fill_rect(cx, cy, FONTSIZE_MULT, FONTSIZE_MULT, &bgP);                           \
+				}                                                                                        \
 			}                                                                                                \
 		}                                                                                                        \
 	} else {                                                                                                         \
@@ -4422,8 +4421,7 @@ int
 					for (unsigned int k = 0U; k < lw; k++) {
 						if (lnPtr[k] == 0xFF) {
 							// Full coverage (opaque) -> foreground
-							pixel = fgP;
-							put_pixel(paint_point, &pixel, true);
+							put_pixel(paint_point, &fgP, true);
 						} else if (lnPtr[k] != 0U) {
 							// AA, blend it using the coverage mask as alpha,
 							// and the underlying pixel as bg
