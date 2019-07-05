@@ -5645,7 +5645,7 @@ static int
 	bool       fb_is_24bpp     = false;
 	bool       fb_is_true_bgr  = false;
 	bool       img_has_alpha   = false;
-	FBInkColor color           = { 0U };
+	FBInkPixel pixel           = { 0U };
 	// Use boolean flags to make the mess of branching slightly more human-readable later...
 	switch (vInfo.bits_per_pixel) {
 		case 4U:
@@ -5813,15 +5813,15 @@ static int
 							// We do need to honor inversion ;).
 							// And SW dithering
 							if (fbink_cfg->sw_dithering) {
-								color.r = dither_o8x8(i, j, img_px.color.v ^ invert);
+								pixel.gray8 = dither_o8x8(i, j, img_px.color.v ^ invert);
 							} else {
-								color.r = img_px.color.v ^ invert;
+								pixel.gray8 = img_px.color.v ^ invert;
 							}
 
 							coords.x = (unsigned short int) (i + x_off);
 							coords.y = (unsigned short int) (j + y_off);
 
-							put_pixel_Gray8(&coords, &color);
+							put_pixel_Gray8(&coords, &pixel);
 						} else if (img_px.color.a == 0) {
 							// Transparent! Keep fb as-is.
 						} else {
@@ -5833,21 +5833,21 @@ static int
 							// NOTE: We use the the pixel functions directly, to avoid the OOB checks,
 							//       because we know we're only processing on-screen pixels,
 							//       and we don't care about the rotation checks at this bpp :).
-							FBInkColor bg_color;
-							get_pixel_Gray8(&coords, &bg_color);
+							FBInkPixel bg_px;
+							get_pixel_Gray8(&coords, &bg_px);
 
 							uint8_t ainv = img_px.color.a ^ 0xFF;
 							// Don't forget to honor inversion
 							img_px.color.v ^= invert;
 							// Blend it!
-							color.r = (uint8_t) DIV255(
-							    ((img_px.color.v * img_px.color.a) + (bg_color.r * ainv)));
+							pixel.gray8 = (uint8_t) DIV255(
+							    ((img_px.color.v * img_px.color.a) + (bg_px.gray8 * ainv)));
 							// SW dithering
 							if (fbink_cfg->sw_dithering) {
-								color.r = dither_o8x8(i, j, color.r);
+								pixel.gray8 = dither_o8x8(i, j, pixel.gray8);
 							}
 
-							put_pixel_Gray8(&coords, &color);
+							put_pixel_Gray8(&coords, &pixel);
 						}
 					}
 				}
@@ -5855,7 +5855,7 @@ static int
 				// 4bpp
 				// NOTE: The fact that the fb stores two pixels per byte means we can't take any shortcut,
 				//       because they may only apply to one of those two pixels...
-				FBInkColor bg_color = { 0U };
+				FBInkPixel bg_px = { 0U };
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// We need to know what this pixel currently looks like in the framebuffer...
@@ -5865,7 +5865,7 @@ static int
 						// NOTE: We use the the pixel function directly, to avoid the OOB checks,
 						//       because we know we're only processing on-screen pixels,
 						//       and we don't care about the rotation checks at this bpp :).
-						get_pixel_Gray4(&coords, &bg_color);
+						get_pixel_Gray4(&coords, &bg_px);
 
 						// NOTE: In this branch, req_n == 2, so we can do << 1 instead of * 2 ;).
 						size_t        pix_offset = (size_t)(((j << 1U) * w) + (i << 1U));
@@ -5880,14 +5880,14 @@ static int
 						// Don't forget to honor inversion
 						img_px.color.v ^= invert;
 						// Blend it!
-						color.r = (uint8_t) DIV255(
-						    ((img_px.color.v * img_px.color.a) + (bg_color.r * ainv)));
+						pixel.gray8 = (uint8_t) DIV255(
+						    ((img_px.color.v * img_px.color.a) + (bg_px.gray8 * ainv)));
 						// SW dithering
 						if (fbink_cfg->sw_dithering) {
-							color.r = dither_o8x8(i, j, color.r);
+							pixel.gray8 = dither_o8x8(i, j, pixel.gray8);
 						}
 
-						put_pixel_Gray4(&coords, &color);
+						put_pixel_Gray4(&coords, &pixel);
 					}
 				}
 			}
@@ -5911,9 +5911,9 @@ static int
 						size_t pix_offset = (size_t)((j * req_n * w) + (i * req_n));
 						// SW dithering
 						if (fbink_cfg->sw_dithering) {
-							color.r = dither_o8x8(i, j, data[pix_offset] ^ invert);
+							pixel.gray8 = dither_o8x8(i, j, data[pix_offset] ^ invert);
 						} else {
-							color.r = data[pix_offset] ^ invert;
+							pixel.gray8 = data[pix_offset] ^ invert;
 						}
 
 						FBInkCoordinates coords;
@@ -5924,9 +5924,9 @@ static int
 						//       as well as unneeded rotation checks (can't happen at this bpp).
 						// NOTE: GCC appears to be smart enough to hoist that branch out of the loop ;).
 						if (!fb_is_legacy) {
-							put_pixel_Gray8(&coords, &color);
+							put_pixel_Gray8(&coords, &pixel);
 						} else {
-							put_pixel_Gray4(&coords, &color);
+							put_pixel_Gray4(&coords, &pixel);
 						}
 					}
 				}
@@ -6197,19 +6197,21 @@ static int
 						img_px.p ^= invert_rgb;
 						// SW dithering
 						if (fbink_cfg->sw_dithering) {
-							color.r = dither_o8x8(i, j, img_px.color.r);
-							color.g = dither_o8x8(i, j, img_px.color.g);
-							color.b = dither_o8x8(i, j, img_px.color.b);
+							pixel.bgra.color.r = dither_o8x8(i, j, img_px.color.r);
+							pixel.bgra.color.g = dither_o8x8(i, j, img_px.color.g);
+							pixel.bgra.color.b = dither_o8x8(i, j, img_px.color.b);
 						} else {
-							color.r = img_px.color.r;
-							color.g = img_px.color.g;
-							color.b = img_px.color.b;
+							pixel.bgra.color.r = img_px.color.r;
+							pixel.bgra.color.g = img_px.color.g;
+							pixel.bgra.color.b = img_px.color.b;
 						}
+						// Pack it
+						pixel.rgb565 = pack_rgb565(pixel.bgra.color.r, pixel.bgra.color.g, pixel.bgra.color.b);
 
 						coords.x = (unsigned short int) (i + x_off);
 						coords.y = (unsigned short int) (j + y_off);
 						(*fxpRotateCoords)(&coords);
-						put_pixel_RGB565(&coords, &color);
+						put_pixel_RGB565(&coords, &pixel);
 					} else if (img_px.color.a == 0) {
 						// Transparent! Keep fb as-is.
 					} else {
@@ -6219,26 +6221,28 @@ static int
 						coords.x = (unsigned short int) (i + x_off);
 						coords.y = (unsigned short int) (j + y_off);
 						(*fxpRotateCoords)(&coords);
-						FBInkColor bg_color;
-						get_pixel_RGB565(&coords, &bg_color);
+						FBInkPixel bg_px;
+						get_pixel_RGB565(&coords, &bg_px);
 
 						// Don't forget to honor inversion
 						img_px.p ^= invert_rgb;
 						// Blend it, we get our BGR swap in the process ;).
-						color.r = (uint8_t) DIV255(
-						    ((img_px.color.r * img_px.color.a) + (bg_color.r * ainv)));
-						color.g = (uint8_t) DIV255(
-						    ((img_px.color.g * img_px.color.a) + (bg_color.g * ainv)));
-						color.b = (uint8_t) DIV255(
-						    ((img_px.color.b * img_px.color.a) + (bg_color.b * ainv)));
+						pixel.bgra.color.r = (uint8_t) DIV255(
+						    ((img_px.color.r * img_px.color.a) + (bg_px.bgra.color.r * ainv)));
+						pixel.bgra.color.g = (uint8_t) DIV255(
+						    ((img_px.color.g * img_px.color.a) + (bg_px.bgra.color.g * ainv)));
+						pixel.bgra.color.b = (uint8_t) DIV255(
+						    ((img_px.color.b * img_px.color.a) + (bg_px.bgra.color.b * ainv)));
 						// SW dithering
 						if (fbink_cfg->sw_dithering) {
-							color.r = dither_o8x8(i, j, color.r);
-							color.g = dither_o8x8(i, j, color.g);
-							color.b = dither_o8x8(i, j, color.b);
+							pixel.bgra.color.r = dither_o8x8(i, j, pixel.bgra.color.r);
+							pixel.bgra.color.g = dither_o8x8(i, j, pixel.bgra.color.g);
+							pixel.bgra.color.b = dither_o8x8(i, j, pixel.bgra.color.b);
 						}
+						// Pack it
+						pixel.rgb565 = pack_rgb565(pixel.bgra.color.r, pixel.bgra.color.g, pixel.bgra.color.b);
 
-						put_pixel_RGB565(&coords, &color);
+						put_pixel_RGB565(&coords, &pixel);
 					}
 				}
 			}
@@ -6251,21 +6255,23 @@ static int
 					size_t pix_offset = (size_t)((j * req_n * w) + (i * req_n));
 					// SW dithering
 					if (fbink_cfg->sw_dithering) {
-						color.r = dither_o8x8(i, j, data[pix_offset + 0U] ^ invert);
-						color.g = dither_o8x8(i, j, data[pix_offset + 1U] ^ invert);
-						color.b = dither_o8x8(i, j, data[pix_offset + 2U] ^ invert);
+						pixel.bgra.color.r = dither_o8x8(i, j, data[pix_offset + 0U] ^ invert);
+						pixel.bgra.color.g = dither_o8x8(i, j, data[pix_offset + 1U] ^ invert);
+						pixel.bgra.color.b = dither_o8x8(i, j, data[pix_offset + 2U] ^ invert);
 					} else {
-						color.r = data[pix_offset + 0U] ^ invert;
-						color.g = data[pix_offset + 1U] ^ invert;
-						color.b = data[pix_offset + 2U] ^ invert;
+						pixel.bgra.color.r = data[pix_offset + 0U] ^ invert;
+						pixel.bgra.color.g = data[pix_offset + 1U] ^ invert;
+						pixel.bgra.color.b = data[pix_offset + 2U] ^ invert;
 					}
+					// Pack it
+					pixel.rgb565 = pack_rgb565(pixel.bgra.color.r, pixel.bgra.color.g, pixel.bgra.color.b);
 
 					FBInkCoordinates coords;
 					coords.x = (unsigned short int) (i + x_off);
 					coords.y = (unsigned short int) (j + y_off);
 					// NOTE: Again, we can only skip the OOB checks at this bpp.
 					(*fxpRotateCoords)(&coords);
-					put_pixel_RGB565(&coords, &color);
+					put_pixel_RGB565(&coords, &pixel);
 				}
 			}
 		}
