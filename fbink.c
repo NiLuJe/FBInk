@@ -600,6 +600,7 @@ static void
 				FBInkCoordinates coords;
 				coords.x = (unsigned short int) (x + cx);
 				coords.y = (unsigned short int) (y + cy);
+				(*fxpRotateCoords)(&coords);
 				put_pixel_RGB565(&coords, &packed_px);
 			}
 		}
@@ -619,7 +620,7 @@ static void
 		}
 	}
 #ifdef DEBUG
-	LOG("Filled a %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
+	LOG("Filled a #%02hhX %hux%hu rectangle @ (%hu, %hu)", px->gray8, w, h, x, y);
 #endif
 }
 
