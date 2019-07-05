@@ -4350,12 +4350,10 @@ int
 					for (unsigned int k = 0U; k < lw; k++) {
 						if (lnPtr[k] == 0U) {
 							// No coverage (transparent) -> background
-							pixel = bgP;
-							put_pixel(paint_point, &pixel, true);
+							put_pixel(paint_point, &bgP, true);
 						} else if (lnPtr[k] == 0xFF) {
 							// Full coverage (opaque) -> foreground
-							pixel = fgP;
-							put_pixel(paint_point, &pixel, true);
+							put_pixel(paint_point, &fgP, true);
 						} else {
 							// AA, blend it using the coverage mask as alpha
 							pixel.bgra.color.r = pixel.bgra.color.g = pixel.bgra.color.b =
@@ -4379,8 +4377,7 @@ int
 					for (unsigned int k = 0U; k < lw; k++) {
 						if (lnPtr[k] == 0U) {
 							// No coverage (transparent) -> background
-							pixel = bgP;
-							put_pixel(paint_point, &pixel, true);
+							put_pixel(paint_point, &bgP, true);
 						} else if (lnPtr[k] != 0xFF) {
 							// AA, blend it using the coverage mask as alpha,
 							// and the underlying pixel as fg
