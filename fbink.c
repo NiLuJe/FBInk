@@ -433,6 +433,10 @@ static void
 		// Odd pixel: low nibble
 		// We just have to point to what we got during the even pixel pass ;).
 		px->gray8 = px->gray4.lo;
+		// NOTE: Obviously, this behaves as expected only if there actually *was* a previous even pass...
+		//       One way to break that assumption is with an odd scaling factor:
+		//       In this case, using overlay mode in the fixed cell rendering codepath will lead to bogus edge colors,
+		//       (usually, on the left side).
 	}
 	// NOTE: c.f., FBInkPixel typedef in fbink_types.h for details on the union shenanigans...
 	//       In short: gray8 -> gray4.hi -> bgra.color.b
