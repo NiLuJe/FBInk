@@ -561,16 +561,22 @@ static void
 	// Do signed maths, to account for the fact that x or y might already be OOB!
 	if (x + w > screenWidth) {
 		w = (unsigned short int) MAX(0, (w - ((x + w) - (int) screenWidth)));
+#ifdef DEBUG
 		LOG("Chopped rectangle width to %hu", w);
+#endif
 	}
 	if (y + h > screenHeight) {
 		h = (unsigned short int) MAX(0, (h - ((y + h) - (int) screenHeight)));
+#ifdef DEBUG
 		LOG("Chopped rectangle height to %hu", h);
+#endif
 	}
 
 	// Abort early if that left us with an empty rectangle ;).
 	if (w == 0U || h == 0U) {
+#ifdef DEBUG
 		LOG("Skipped empty %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
+#endif
 		return;
 	}
 
@@ -612,7 +618,9 @@ static void
 			memset(p, px->gray8, bpp * region.width);
 		}
 	}
+#ifdef DEBUG
 	LOG("Filled a %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
+#endif
 }
 
 // Helper function to clear the screen - fill whole screen with given color
