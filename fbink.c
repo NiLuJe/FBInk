@@ -2410,31 +2410,31 @@ static int
 	switch (vInfo.bits_per_pixel) {
 		case 4U:
 			//fxpPutPixel      = &put_pixel_Gray4;
-			//fxpGetPixel      = &get_pixel_Gray4;
+			fxpGetPixel      = &get_pixel_Gray4;
 			penFGPixel.gray8 = penFGColor;
 			penBGPixel.gray8 = penBGColor;
 			break;
 		case 8U:
 			//fxpPutPixel      = &put_pixel_Gray8;
-			//fxpGetPixel      = &get_pixel_Gray8;
+			fxpGetPixel      = &get_pixel_Gray8;
 			penFGPixel.gray8 = penFGColor;
 			penBGPixel.gray8 = penBGColor;
 			break;
 		case 16U:
 			//fxpPutPixel       = &put_pixel_RGB565;
-			//fxpGetPixel       = &get_pixel_RGB565;
+			fxpGetPixel       = &get_pixel_RGB565;
 			penFGPixel.rgb565 = pack_rgb565(penFGColor, penFGColor, penFGColor);
 			penBGPixel.rgb565 = pack_rgb565(penBGColor, penBGColor, penBGColor);
 			break;
 		case 24U:
 			//fxpPutPixel             = &put_pixel_RGB24;
-			//fxpGetPixel             = &get_pixel_RGB24;
+			fxpGetPixel             = &get_pixel_RGB24;
 			penFGPixel.bgra.color.r = penFGPixel.bgra.color.g = penFGPixel.bgra.color.b = penFGColor;
 			penBGPixel.bgra.color.r = penBGPixel.bgra.color.g = penBGPixel.bgra.color.b = penBGColor;
 			break;
 		case 32U:
 			//fxpPutPixel             = &put_pixel_RGB32;
-			//fxpGetPixel             = &get_pixel_RGB32;
+			fxpGetPixel             = &get_pixel_RGB32;
 			penFGPixel.bgra.color.a = 0xFF;
 			penFGPixel.bgra.color.r = penFGPixel.bgra.color.g = penFGPixel.bgra.color.b = penFGColor;
 			penBGPixel.bgra.color.a                                                     = 0xFF;
