@@ -172,6 +172,7 @@ static void
 	size_t pix_offset = (uint32_t)(coords->x << 1U) + (coords->y * fInfo.line_length);
 
 	// write the two bytes at once, much to GCC's dismay...
+	// NOTE: Input pixel *has* to be properly packed to RGB565 first (via pack_rgb565, c.f., put_pixel)!
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
 	*((uint16_t*) (fbPtr + pix_offset)) = px->rgb565;
@@ -415,17 +416,17 @@ static void
 	if ((coords->x & 0x01) == 0) {
 		// calculate the pixel's byte offset inside the buffer
 		// note: x / 2 as every byte holds 2 pixels
-		size_t  pix_offset = (coords->x >> 1U) + (coords->y * fInfo.line_length);
-		uint8_t b          = *((unsigned char*) (fbPtr + pix_offset));
+		size_t        pix_offset = (coords->x >> 1U) + (coords->y * fInfo.line_length);
+		const uint8_t b          = *((const unsigned char*) (fbPtr + pix_offset));
 
 		// Even pixel: high nibble
-		uint8_t v    = (b & 0xF0);
-		px->gray4.hi = (v | (v >> 4U));
+		const uint8_t v = (b & 0xF0);
+		px->gray4.hi    = (v | (v >> 4U));
 		// pull the top/left nibble, expanded to 8bit
 		// or: (uint8_t)((((b) >> 4) & 0x0F) * 0x11);
 
 		// We need to get the low nibble *now*, before it gets clobbered by our alpha-blending put...
-		// Thankfully, we have two empty channels in our color struct that we can use ;).
+		// Thankfully, we have a dedicated spot for that in our FBInkPixel struct ;).
 		px->gray4.lo = (uint8_t)((b & 0x0F) * 0x11);
 		// or: pull the low/right nibble, expanded to 8bit
 	} else {
@@ -470,7 +471,8 @@ static void
 #pragma GCC diagnostic ignored "-Wcast-align"
 	px->bgra.p = *((uint32_t*) (fbPtr + pix_offset));
 #pragma GCC diagnostic pop
-	// TODO: See if we're okay, or if we need to explictly enforce alpha to 0xFF...
+	// NOTE: We generally don't care about alpha, we always assume it's opaque, as that's how it behaves.
+	//       We *do* pickup the actual alpha value, here, though.
 }
 
 static void
@@ -487,6 +489,7 @@ static void
 	const uint16_t v = *((const uint16_t*) (fbPtr + pix_offset));
 #pragma GCC diagnostic pop
 
+	// NOTE: Unpack to RGB32, because we have no use for RGB565, it's terrible.
 	// NOTE: c.f., https://stackoverflow.com/q/2442576
 	//       I feel that this approach tracks better with what we do in put_pixel_RGB565,
 	//       and I have an easier time following it than the previous approach ported from KOReader.
