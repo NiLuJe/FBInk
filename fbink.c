@@ -5084,6 +5084,7 @@ int
 			break;
 		case 24U:
 		case 32U:
+		default:
 			emptyP.bgra.color.a = 0xFF;
 			emptyP.bgra.color.r = emptyP.bgra.color.g = emptyP.bgra.color.b = emptyC;
 			borderP.bgra.color.a                                            = 0xFF;

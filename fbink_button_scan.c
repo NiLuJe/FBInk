@@ -130,7 +130,8 @@ static bool
 		nanosleep(&zzz, NULL);
 
 		(*fxpGetPixel)(&coords, &pixel);
-		// NOTE: get_pixel_* will only set gray8 @ 4 & 8bpp! (It will unpack RGB565 to RGB32, though ;)).
+		// NOTE: get_pixel_* will only set gray8 (leaving at least bgra.color.r untouched) @ 4 & 8bpp!
+		//       (It will unpack RGB565 to RGB32, though ;)).
 		if (vInfo.bits_per_pixel > 8U) {
 			LOG("On iteration nr. %hhu of %hu, pixel (%hu, %hu) was #%02hhX%02hhX%02hhX",
 			    i,
