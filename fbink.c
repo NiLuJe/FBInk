@@ -344,10 +344,10 @@ static void
 //       (i.e., (*fxpPutPixel) is only marginally faster than put_pixel()),
 //       the overhead of going through the function pointers is rather large
 //       (i.e., put_pixel() can be twice as slow as put_pixel_*()).
-//       On our target HW, it's often slightly faster than branching or switching, though ;).
-//       On modern processors, branching should eventually take the lead, though,
-//       and in this case (ha!) appears to behave better than switching...
-//       Which is why we now branch via an if ladder.
+//       On the oldest of our target HW, it's often *slightly* faster than branching or switching, though ;).
+//       But on modern processors, even on our target HW, branching should eventually take the lead, though,
+//       and in this case (ha!) appears to behave *noticeably* better than switching...
+//       Which is why we now branch via an if ladder, as it should offer marginally better performance on newer devices.
 static void
     put_pixel(FBInkCoordinates coords, const FBInkPixel* restrict px, bool rgb565_packed)
 {
