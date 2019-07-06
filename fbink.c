@@ -4394,8 +4394,8 @@ int
 					for (unsigned int k = 0U; k < lw; k++) {
 						// AA, blend it using the coverage mask as alpha, and the underlying pixel as fg
 						get_pixel(paint_point, &fb_px);
-						pixel.gray4.hi =
-						    (uint8_t) DIV255((pmul_bg + ((fb_px.gray4.hi - bgcolor) * lnPtr[k])));
+						pixel.gray8 =
+						    (uint8_t) DIV255((pmul_bg + ((fb_px.gray8 - bgcolor) * lnPtr[k])));
 						put_pixel(paint_point, &pixel, false);
 						paint_point.x++;
 					}
@@ -4440,8 +4440,8 @@ int
 					for (unsigned int k = 0U; k < lw; k++) {
 						// AA, blend it using the coverage mask as alpha, and the underlying pixel as bg
 						get_pixel(paint_point, &fb_px);
-						pixel.gray4.hi = (uint8_t) DIV255(
-						    (MUL255(fb_px.gray4.hi) + ((fgcolor - fb_px.gray4.hi) * lnPtr[k])));
+						pixel.gray8 = (uint8_t) DIV255(
+						    (MUL255(fb_px.gray8) + ((fgcolor - fb_px.gray8) * lnPtr[k])));
 						put_pixel(paint_point, &pixel, false);
 						paint_point.x++;
 					}
@@ -4494,9 +4494,9 @@ int
 						// AA, blend it using the coverage mask as alpha, and the underlying pixel as bg
 						// Without forgetting our foreground color trickery...
 						get_pixel(paint_point, &fb_px);
-						pixel.gray4.hi = (uint8_t) DIV255(
-						    (MUL255(fb_px.gray4.hi) +
-						     (((fb_px.gray4.hi ^ 0xFF) - fb_px.gray4.hi) * lnPtr[k])));
+						pixel.gray8 =
+						    (uint8_t) DIV255((MUL255(fb_px.gray8) +
+								      (((fb_px.gray8 ^ 0xFF) - fb_px.gray8) * lnPtr[k])));
 						put_pixel(paint_point, &pixel, false);
 						paint_point.x++;
 					}
