@@ -129,8 +129,6 @@ static void
 		// ORed to avoid clobbering our even pixel
 		*((unsigned char*) (fbPtr + pix_offset)) = (unsigned char) ((b & 0xF0) | (px->gray8 >> 4U));
 	}
-	// NOTE: This generally means artefacts happen if you don't start drawing on an even pixel,
-	//       and end drawing on an odd pixel...
 }
 
 static void
