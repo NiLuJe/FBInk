@@ -335,6 +335,8 @@ unsigned short int       FONTH          = 8U;
 uint8_t                  FONTSIZE_MULT  = 1U;
 uint8_t                  penFGColor     = 0x00;
 uint8_t                  penBGColor     = 0xFF;
+FBInkPixel               penFGPixel;
+FBInkPixel               penBGPixel;
 // Slightly arbitrary-ish fallback values
 unsigned short int MAXROWS = 45U;
 unsigned short int MAXCOLS = 32U;
@@ -345,8 +347,8 @@ bool g_isQuiet = false;
 // This should be a pretty accurate fallback...
 long int USER_HZ = 100;
 // Pointers to the appropriate put_pixel/get_pixel functions for the fb's bpp
-void (*fxpPutPixel)(const FBInkCoordinates* restrict, const FBInkColor* restrict) = NULL;
-void (*fxpGetPixel)(const FBInkCoordinates* restrict, FBInkColor* restrict)       = NULL;
+//void (*fxpPutPixel)(const FBInkCoordinates* restrict, const FBInkPixel* restrict) = NULL;
+void (*fxpGetPixel)(const FBInkCoordinates* restrict, FBInkPixel* restrict) = NULL;
 // As well as the appropriate coordinates rotation functions...
 void (*fxpRotateCoords)(FBInkCoordinates* restrict)  = NULL;
 void (*fxpRotateRegion)(struct mxcfb_rect* restrict) = NULL;
@@ -379,24 +381,26 @@ static void rotate_touch_coordinates(FBInkCoordinates* restrict);
 #endif
 static void rotate_coordinates_nop(FBInkCoordinates* restrict __attribute__((unused)));
 
-static void put_pixel_Gray4(const FBInkCoordinates* restrict, const FBInkColor* restrict);
-static void put_pixel_Gray8(const FBInkCoordinates* restrict, const FBInkColor* restrict);
-static void put_pixel_RGB24(const FBInkCoordinates* restrict, const FBInkColor* restrict);
-static void put_pixel_RGB32(const FBInkCoordinates* restrict, const FBInkColor* restrict);
-static void put_pixel_RGB565(const FBInkCoordinates* restrict, const FBInkColor* restrict);
+static inline uint16_t pack_rgb565(uint8_t, uint8_t, uint8_t);
+
+static void put_pixel_Gray4(const FBInkCoordinates* restrict, const FBInkPixel* restrict);
+static void put_pixel_Gray8(const FBInkCoordinates* restrict, const FBInkPixel* restrict);
+static void put_pixel_RGB24(const FBInkCoordinates* restrict, const FBInkPixel* restrict);
+static void put_pixel_RGB32(const FBInkCoordinates* restrict, const FBInkPixel* restrict);
+static void put_pixel_RGB565(const FBInkCoordinates* restrict, const FBInkPixel* restrict);
 // NOTE: We pass coordinates by value here, because a rotation transformation *may* be applied to them,
 //       and that's a rotation that the caller will *never* care about.
-static void put_pixel(FBInkCoordinates, const FBInkColor* restrict);
+static void put_pixel(FBInkCoordinates, const FBInkPixel* restrict, bool);
 // NOTE: On the other hand, if you happen to be calling function pointers directly,
 //       it's left to you to not do anything stupid ;)
 
-static void get_pixel_Gray4(const FBInkCoordinates* restrict, FBInkColor* restrict);
-static void get_pixel_Gray8(const FBInkCoordinates* restrict, FBInkColor* restrict);
-static void get_pixel_RGB24(const FBInkCoordinates* restrict, FBInkColor* restrict);
-static void get_pixel_RGB32(const FBInkCoordinates* restrict, FBInkColor* restrict);
-static void get_pixel_RGB565(const FBInkCoordinates* restrict, FBInkColor* restrict);
+static void get_pixel_Gray4(const FBInkCoordinates* restrict, FBInkPixel* restrict);
+static void get_pixel_Gray8(const FBInkCoordinates* restrict, FBInkPixel* restrict);
+static void get_pixel_RGB24(const FBInkCoordinates* restrict, FBInkPixel* restrict);
+static void get_pixel_RGB32(const FBInkCoordinates* restrict, FBInkPixel* restrict);
+static void get_pixel_RGB565(const FBInkCoordinates* restrict, FBInkPixel* restrict);
 // NOTE: Same as put_pixel ;)
-static void get_pixel(FBInkCoordinates, FBInkColor* restrict);
+static void get_pixel(FBInkCoordinates, FBInkPixel* restrict);
 
 #if defined(FBINK_WITH_IMAGE) || defined(FBINK_WITH_OPENTYPE)
 // This is only needed for alpha blending in the image or OpenType codepath ;).
@@ -424,7 +428,7 @@ static void fill_rect(unsigned short int,
 		      unsigned short int,
 		      unsigned short int,
 		      unsigned short int,
-		      const FBInkColor* restrict);
+		      const FBInkPixel* restrict);
 static void clear_screen(int UNUSED_BY_NOTKINDLE, uint8_t, bool UNUSED_BY_NOTKINDLE);
 
 static const unsigned char* font8x8_get_bitmap(uint32_t);
