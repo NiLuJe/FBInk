@@ -28,6 +28,7 @@ cdecl_type(FBInkState)
 cdecl_type(FBInkConfig)
 
 cdecl_type(FBInkOTConfig)
+cdecl_type(FBInkOTFit)
 
 cdecl_type(FBInkDump)
 
