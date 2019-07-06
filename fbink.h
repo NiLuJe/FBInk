@@ -333,6 +333,7 @@ FBINK_API int fbink_open(void);
 // Unmap the framebuffer (if need be) and close its file descriptor
 // (c.f., the recap at the bottom if you're concerned about mmap handling).
 // fbfd:		Open file descriptor to the framebuffer character device, as returned by fbink_open()
+// NOTE: This is safe to call if fbfd is FBFD_AUTO
 FBINK_API int fbink_close(int fbfd);
 
 // Initialize internal variables keeping track of the framebuffer's configuration and state, as well as the device's hardware.
