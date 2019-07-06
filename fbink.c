@@ -1095,15 +1095,7 @@ static struct mxcfb_rect
 						if (is_fgpx && !fbink_cfg->is_fgless) {                                  \
 							if (fbink_cfg->is_overlay) {                                     \
 								get_pixel(coords, &fbP);                                 \
-								fbP.gray8 ^= 0xFF;                                       \
-								/* NOTE: Don't touch g & r if it's not needed! */        \
-								/*       It's especially important on 4bpp, */           \
-								/*       to avoid clobbering the low nibble, */          \
-								/*       which we store in g... */                       \
-								if (vInfo.bits_per_pixel > 8U) {                         \
-									fbP.bgra.color.g ^= 0xFF;                        \
-									fbP.bgra.color.r ^= 0xFF;                        \
-								}                                                        \
+								fbP.bgra.p ^= 0x00FFFFFF;                                \
 								pxP = &fbP;                                              \
 								put_pixel(coords, pxP, false);                           \
 							} else {                                                         \
