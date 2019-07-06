@@ -114,16 +114,19 @@ static void
 	// (v >> 4)
 	// or: v * 16 / 256
 
+	// First, we'll need the current full byte to make sure we never clobber a nibble...
+	const uint8_t b = *((unsigned char*) (fbPtr + pix_offset));
 	// We can't address nibbles directly, so this takes some shenanigans...
 	if ((coords->x & 0x01) == 0) {
 		// Even pixel: high nibble
-		*((unsigned char*) (fbPtr + pix_offset)) = (px->gray8 & 0xF0);
+		// ORed to avoid clobbering our odd pixel
+		*((unsigned char*) (fbPtr + pix_offset)) = (unsigned char) ((b & 0x0F) | (px->gray8 & 0xF0));
 		// Squash to 4bpp, and write to the top/left nibble
 		// or: ((v >> 4) << 4)
 	} else {
 		// Odd pixel: low nibble
 		// ORed to avoid clobbering our even pixel
-		*((unsigned char*) (fbPtr + pix_offset)) |= (px->gray8 >> 4U);
+		*((unsigned char*) (fbPtr + pix_offset)) = (unsigned char) ((b & 0xF0) | (px->gray8 >> 4U));
 	}
 	// NOTE: This generally means artefacts happen if you don't start drawing on an even pixel,
 	//       and end drawing on an odd pixel...
