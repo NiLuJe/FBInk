@@ -4396,8 +4396,6 @@ int
 						get_pixel(paint_point, &fb_px);
 						pixel.gray4.hi =
 						    (uint8_t) DIV255((pmul_bg + ((fb_px.gray4.hi - bgcolor) * lnPtr[k])));
-						// Don't touch the low nibble...
-						pixel.gray4.lo = fb_px.gray4.lo;
 						put_pixel(paint_point, &pixel, false);
 						paint_point.x++;
 					}
@@ -4444,8 +4442,6 @@ int
 						get_pixel(paint_point, &fb_px);
 						pixel.gray4.hi = (uint8_t) DIV255(
 						    (MUL255(fb_px.gray4.hi) + ((fgcolor - fb_px.gray4.hi) * lnPtr[k])));
-						// Don't touch the low nibble...
-						pixel.gray4.lo = fb_px.gray4.lo;
 						put_pixel(paint_point, &pixel, false);
 						paint_point.x++;
 					}
@@ -4501,8 +4497,6 @@ int
 						pixel.gray4.hi = (uint8_t) DIV255(
 						    (MUL255(fb_px.gray4.hi) +
 						     (((fb_px.gray4.hi ^ 0xFF) - fb_px.gray4.hi) * lnPtr[k])));
-						// Don't touch the low nibble...
-						pixel.gray4.lo = fb_px.gray4.lo;
 						put_pixel(paint_point, &pixel, false);
 						paint_point.x++;
 					}
