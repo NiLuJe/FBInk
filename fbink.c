@@ -116,6 +116,7 @@ static void
 
 	// First, we'll need the current full byte to make sure we never clobber a nibble...
 	const uint8_t b = *((unsigned char*) (fbPtr + pix_offset));
+
 	// We can't address nibbles directly, so this takes some shenanigans...
 	if ((coords->x & 0x01) == 0) {
 		// Even pixel: high nibble
@@ -410,6 +411,10 @@ static void
 static void
     get_pixel_Gray4(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
+	// calculate the pixel's byte offset inside the buffer
+	// note: x / 2 as every byte holds 2 pixels
+	size_t pix_offset = (coords->x >> 1U) + (coords->y * fInfo.line_length);
+
 	// NOTE: Expand 4bpp to 8bpp:
 	// (v * 0x11)
 	// Byte to nibble (c.f., https://en.wikipedia.org/wiki/Nibble)
@@ -418,31 +423,19 @@ static void
 	// Lo:
 	// ((b) & 0x0F)
 
-	if ((coords->x & 0x01) == 0) {
-		// calculate the pixel's byte offset inside the buffer
-		// note: x / 2 as every byte holds 2 pixels
-		size_t        pix_offset = (coords->x >> 1U) + (coords->y * fInfo.line_length);
-		const uint8_t b          = *((const unsigned char*) (fbPtr + pix_offset));
+	// We'll need the full byte first...
+	const uint8_t b = *((const unsigned char*) (fbPtr + pix_offset));
 
+	if ((coords->x & 0x01) == 0) {
 		// Even pixel: high nibble
 		const uint8_t v = (b & 0xF0);
-		px->gray4.hi    = (v | (v >> 4U));
+		px->gray8       = (v | (v >> 4U));
 		// pull the top/left nibble, expanded to 8bit
 		// or: (uint8_t)((((b) >> 4) & 0x0F) * 0x11);
-
-		// We need to get the low nibble *now*, before it gets clobbered by our alpha-blending put...
-		// Thankfully, we have a dedicated spot for that in our FBInkPixel struct ;).
-		px->gray4.lo = (uint8_t)((b & 0x0F) * 0x11);
-		// or: pull the low/right nibble, expanded to 8bit
 	} else {
 		// Odd pixel: low nibble
-		// We just have to point to what we got during the even pixel pass ;).
-		px->gray8 = px->gray4.lo;
-		// NOTE: Obviously, this behaves as expected only if there actually *was* a previous even pass...
-		//       One way to break that assumption is with an odd scaling factor:
-		//       In this case, using overlay mode in the fixed cell rendering codepath will lead to bogus edge colors,
-		//       (usually, on the left side).
-		//       See also the NOTE in put_pixel_Gray4...
+		px->gray8 = (uint8_t)((b & 0x0F) * 0x11);
+		// or: pull the low/right nibble, expanded to 8bit
 	}
 	// NOTE: c.f., FBInkPixel typedef in fbink_types.h for details on the union shenanigans...
 	//       In short: gray8 -> gray4.hi -> bgra.color.b
