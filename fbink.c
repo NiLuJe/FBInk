@@ -4305,20 +4305,6 @@ int
 			region.width = lw;
 		}
 
-		// NOTE: Snip a couple pixels off on 4bpp fbs to workaround a bizarre interaction,
-		//       that'd leave us with an extra column of white pixels.
-		//       Most likely another case of the low nibble getting clobbered...
-		if (vInfo.bits_per_pixel < 8U) {
-			if (((paint_point.x + lw) & 0x01) == 0) {
-				// If we end printing on an even pixel, snip off 2 pixels
-				lw = (unsigned int) MAX(0, (int) (lw - 2));
-			} else {
-				// If we end printing on an *odd* pixel, snip off 1 pixel
-				lw = (unsigned int) MAX(0, (int) (lw - 1));
-			}
-			LOG("Snipped Line# %u LW down to %u", line, lw);
-		}
-
 		FBInkPixel pixel;
 		pixel.bgra.color.a = 0xFF;
 		start_x            = paint_point.x;
