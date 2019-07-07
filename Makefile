@@ -264,13 +264,18 @@ endif
 # Now that we're done fiddling with flags, let's build stuff!
 LIB_SRCS:=fbink.c cutef8/utf8.c cutef8/dfa.c
 # Jump through a few hoops to set a few libunibreak-specific CFLAGS to silence some warnings...
+LIB_UB_SRCS:=libunibreak/src/linebreak.c libunibreak/src/linebreakdata.c libunibreak/src/unibreakdef.c libunibreak/src/linebreakdef.c
+LIB_QT_SRCS:=qimagescale/qimagescale.c
+# We don't need any of that in MINIMAL builds
 ifdef MINIMAL
-	LIB_UB_SRCS:=
-	LIB_QT_SRCS:=
-else
-	LIB_UB_SRCS:=libunibreak/src/linebreak.c libunibreak/src/linebreakdata.c libunibreak/src/unibreakdef.c libunibreak/src/linebreakdef.c
-	LIB_QT_SRCS:=qimagescale/qimagescale.c
+	ifndef OPENTYPE
+		LIB_UB_SRCS:=
+	endif
+	ifndef IMAGE
+		LIB_QT_SRCS:=
+	endif
 endif
+
 CMD_SRCS:=fbink_cmd.c
 BTN_SRCS:=button_scan_cmd.c
 # Unless we're asking for a minimal build, include the Unscii fonts, too
@@ -291,9 +296,25 @@ else
 	endif
 endif
 
+# Support tweaking a MINIMAL build to still include extra bitmap fonts
+ifdef FONTS
+	EXTRA_CPPFLAGS+=-DFBINK_WITH_FONTS
+endif
+
 # Support tweaking a MINIMAL build to still include image support
 ifdef IMAGE
 	EXTRA_CPPFLAGS+=-DFBINK_WITH_IMAGE
+endif
+
+# Support tweaking a MINIMAL build to still include OpenType support
+ifdef OPENTYPE
+	EXTRA_CPPFLAGS+=-DFBINK_WITH_OPENTYPE
+endif
+
+# Support tweaking a MINIMAL build to still include button scan support
+ifdef BUTTON_SCAN
+	WITH_BUTTON_SCAN:=True
+	EXTRA_CPPFLAGS+=-DFBINK_WITH_BUTTON_SCAN
 endif
 
 # How we handle our library creation
