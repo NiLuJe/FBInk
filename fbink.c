@@ -483,7 +483,7 @@ static void
 	// note: x * 2 as every pixel is 2 consecutive bytes
 	size_t pix_offset = (uint32_t)(coords->x << 1U) + (coords->y * fInfo.line_length);
 
-	// NOTE: We're assuming RGB565 and not BGR565 here (as well as in put_pixel)...
+	// NOTE: We're honoring the fb's bitfield offsets here (B: 0, G: >> 5, R: >> 11)
 	// Like put_pixel_RGB565, read those two consecutive bytes at once
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
