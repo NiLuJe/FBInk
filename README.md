@@ -79,13 +79,19 @@ With that out of the way, the default target (i.e., `make`) will yield a static 
 There's a few convenience targets for usual build types (`make static` for a static build, `make shared` for a shared build, `make strip` for a stripped static build, `make release` for a stripped shared build, `make debug` for a debug build), as well as a few unusual ones for very specific use cases, usually related to FFI bindings (`make pic` for a PIC static build, or passing `STATIC_LIBM=1` to make to attempt to link against libm statically).
 
 The choice of target platform is handled via a simple variable:
--   Pass `KINDLE=1` to make for a Kindle build (`make kindle` does that on a stripped static build)
+-   Pass `KINDLE=1` to make for a Kindle build (`make kindle` does that on a stripped static build).
 -   Pass `KINDLE=1 LEGACY=1` to make for a FW 2.x Kindle build (`make legacy` does that on a stripped static build). This basically just disables CLOEXEC, which might not be supported on FW 2.x.
--   Pass `CERVANTES=1` to make for a BQ/Cervantes build (`make cervantes` does that on a stripped static build)
+-   Pass `CERVANTES=1` to make for a BQ/Cervantes build (`make cervantes` does that on a stripped static build).
 
 The same logic is used to allow for a bit of tailoring:
 -   Pass `MINIMAL=1` to make for a build with limited functionality (only fixed cell font rendering, no image rendering, no extra fonts, no OpenType), which yields a much smaller application & library.
 -   Pass `DEBUG=1` to make for a Debug build, and pass `DEBUG=1 DEBUGFLAGS=1` to make for a Debug build with enforced debug CFLAGS.
+
+You can also *append* features one by one to a `MINIMAL` build:
+-   Pass `FONTS=1` to add support for the extra bundled fixed-cell fonts.
+-   Pass `IMAGE=1` to add image support.
+-   Pass `OPENTYPE=1` to add OTF/TTF font rendering support.
+-   Pass `BUTTON_SCAN=1` to add support for the Kobo-specific button scan stuff.
 
 Along the way, a few auxiliary tools may crop up in the `utils` folder. `make utils` will do a static build of these (which is the recommended way to do it, as they rather crudely piggyback on FBInk's *internal* API). Currently, these consist of a diagnostic tool regarding rotation behavior, and a tool to properly manipulate the bitdepth on eInk devices.
 They have *only* been tested on Kobo, and should probably be left alone unless you know what you're doing ;).
