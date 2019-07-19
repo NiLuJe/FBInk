@@ -3582,18 +3582,23 @@ int
 	area.tl.y = (unsigned short int) (top_margin + (viewVertOrigin - viewVertOffset));
 	area.br.x = (unsigned short int) (viewWidth - right_margin);
 	area.br.y = (unsigned short int) (viewHeight - bottom_margin);
-	// Set default font size if required
-	float size_pt = cfg->size_pt;
-	// NOTE: Technically, using the iszero() macro ought to be enough (at least for values coming from our CLI tool),
-	//       but of course, it wasn't yet available in the glibc versions we target (as it's from TS 18661-1:2014)...
-	//       c.f., https://www.gnu.org/software/libc/manual/html_node/Floating-Point-Classes.html#Floating-Point-Classes
-	if (!isnormal(size_pt)) {
-		size_pt = 12.0f;
+	// Font size can be specified in pixels or in points. Pixels take precedence.
+	unsigned short int font_size_px = cfg->size_px;
+	// If it wasn't specified in pixels, then it was specified in points (which is also how the default is handled).
+	if (font_size_px == 0U) {
+		// Set default font size if required
+		float size_pt = cfg->size_pt;
+		// NOTE: Technically, using the iszero() macro ought to be enough (at least for values coming from our CLI tool),
+		//       but of course, it wasn't yet available in the glibc versions we target (as it's from TS 18661-1:2014)...
+		//       c.f., https://www.gnu.org/software/libc/manual/html_node/Floating-Point-Classes.html#Floating-Point-Classes
+		if (!isnormal(size_pt)) {
+			size_pt = 12.0f;
+		}
+		// We should have a fairly accurate idea of what the screen DPI is...
+		unsigned short int ppi = deviceQuirks.screenDPI;
+		// Given the ppi, convert point height to pixels. Note, 1pt is 1/72th of an inch
+		font_size_px = (unsigned int) iroundf(ppi / 72.0f * size_pt);
 	}
-	// We should have a fairly accurate idea of what the screen DPI is...
-	unsigned short int ppi = deviceQuirks.screenDPI;
-	// Given the ppi, convert point height to pixels. Note, 1pt is 1/72th of an inch
-	unsigned int font_size_px = (unsigned int) iroundf(ppi / 72.0f * size_pt);
 
 	// This is a pointer to whichever font is currently active. It gets updated for every character in the loop, as needed.
 	stbtt_fontinfo* restrict curr_font = NULL;
@@ -4057,7 +4062,7 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
-	LOG("Max LW: %hu  Max LH: %d  Max BL: %d  FntSize: %u", max_lw, max_line_height, max_baseline, font_size_px);
+	LOG("Max LW: %hu  Max LH: %d  Max BL: %d  FntSize: %hu", max_lw, max_line_height, max_baseline, font_size_px);
 
 	// Setup the variables needed to render
 	FBInkCoordinates curr_point  = { 0U, 0U };
