@@ -320,6 +320,7 @@ static void print_lastrect(void);
 
 // And we'll use those through these...
 static int strtoul_u(int, const char*, const char*, uint32_t*);
+static int strtoul_hu(int, const char*, const char*, uint16_t*);
 static int strtoul_hhu(int, const char*, const char*, uint8_t*);
 static int strtol_hi(int, const char*, const char*, short int*);
 static int strtol_hhi(int, const char*, const char*, int8_t*);

@@ -361,6 +361,13 @@ static int
 	strtoul_chk(opt, subopt, str, result);
 }
 
+// Input validation via strtoul, for an uint16_t
+static int
+    strtoul_hu(int opt, const char* subopt, const char* str, uint16_t* result)
+{
+	strtoul_chk(opt, subopt, str, result);
+}
+
 // Input validation via strtoul, for an uint8_t
 static int
     strtoul_hhu(int opt, const char* subopt, const char* str, uint8_t* result)
@@ -470,6 +477,7 @@ int
 		ITALIC_OPT,
 		BOLDITALIC_OPT,
 		SIZE_OPT,
+		PX_OPT,
 		TM_OPT,
 		BM_OPT,
 		LM_OPT,
@@ -488,19 +496,13 @@ int
 	char* const image_token[]    = { [FILE_OPT] = "file",       [XOFF_OPT] = "x",           [YOFF_OPT] = "y",
                                       [HALIGN_OPT] = "halign",   [VALIGN_OPT] = "valign",    [SCALED_WIDTH_OPT] = "w",
                                       [SCALED_HEIGHT_OPT] = "h", [SW_DITHER_OPT] = "dither", NULL };
-	char* const truetype_token[] = { [REGULAR_OPT]    = "regular",
-					 [BOLD_OPT]       = "bold",
-					 [ITALIC_OPT]     = "italic",
-					 [BOLDITALIC_OPT] = "bolditalic",
-					 [SIZE_OPT]       = "size",
-					 [TM_OPT]         = "top",
-					 [BM_OPT]         = "bottom",
-					 [LM_OPT]         = "left",
-					 [RM_OPT]         = "right",
-					 [FMT_OPT]        = "format",
-					 [COMPUTE_OPT]    = "compute",
-					 [NOTRUNC_OPT]    = "notrunc",
-					 NULL };
+	char* const truetype_token[] = { [REGULAR_OPT] = "regular", [BOLD_OPT] = "bold",
+					 [ITALIC_OPT] = "italic",   [BOLDITALIC_OPT] = "bolditalic",
+					 [SIZE_OPT] = "size",       [PX_OPT] = "px",
+					 [TM_OPT] = "top",          [BM_OPT] = "bottom",
+					 [LM_OPT] = "left",         [RM_OPT] = "right",
+					 [FMT_OPT] = "format",      [COMPUTE_OPT] = "compute",
+					 [NOTRUNC_OPT] = "notrunc", NULL };
 #pragma GCC diagnostic pop
 	char*     subopts;
 	char*     value          = NULL;
@@ -1168,6 +1170,22 @@ int
 								errfnd = true;
 							}
 							break;
+						case PX_OPT:
+							if (value == NULL) {
+								fprintf(stderr,
+									"Missing value for suboption '%s' of -%c, --%s\n",
+									truetype_token[PX_OPT],
+									opt,
+									opt_longname);
+								errfnd = true;
+								break;
+							}
+							if (strtoul_hu(
+								opt, truetype_token[PX_OPT], value, &ot_config.size_px) <
+							    0) {
+								errfnd = true;
+							}
+							break;
 						case TM_OPT:
 							if (value == NULL) {
 								fprintf(stderr,
@@ -1444,9 +1462,10 @@ int
 			if (is_truetype) {
 				if (!fbink_cfg.is_quiet) {
 					printf(
-					    "Printing string '%s' @ %.1fpt, honoring the following margins { Top: %hdpx, Bottom: %hdpx, Left: %hdpx, Right: %hdpx } (formatted: %s, compute only: %s, no truncation: %s, overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, H align: %hhu, halfway: %s, V align: %hhu, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s)\n",
+					    "Printing string '%s' @ %.1fpt (or %hupx), honoring the following margins { Top: %hdpx, Bottom: %hdpx, Left: %hdpx, Right: %hdpx } (formatted: %s, compute only: %s, no truncation: %s, overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, H align: %hhu, halfway: %s, V align: %hhu, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s)\n",
 					    string,
 					    ot_config.size_pt,
+					    ot_config.size_px,
 					    ot_config.margins.top,
 					    ot_config.margins.bottom,
 					    ot_config.margins.left,
