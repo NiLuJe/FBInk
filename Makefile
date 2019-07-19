@@ -296,25 +296,33 @@ else
 	endif
 endif
 
-# Support tweaking a MINIMAL build to still include extra bitmap fonts
-ifdef FONTS
-	EXTRA_CPPFLAGS+=-DFBINK_WITH_FONTS
-endif
+# Manage modular MINIMAL builds...
+ifdef MINIMAL
+	# Support tweaking a MINIMAL build to still include extra bitmap fonts
+	ifdef FONTS
+		EXTRA_CPPFLAGS+=-DFBINK_WITH_FONTS
+	endif
 
-# Support tweaking a MINIMAL build to still include image support
-ifdef IMAGE
-	EXTRA_CPPFLAGS+=-DFBINK_WITH_IMAGE
-endif
+	# Support tweaking a MINIMAL build to still include image support
+	ifdef IMAGE
+		EXTRA_CPPFLAGS+=-DFBINK_WITH_IMAGE
+	endif
 
-# Support tweaking a MINIMAL build to still include OpenType support
-ifdef OPENTYPE
-	EXTRA_CPPFLAGS+=-DFBINK_WITH_OPENTYPE
-endif
+	# Support tweaking a MINIMAL build to still include OpenType support
+	ifdef OPENTYPE
+		EXTRA_CPPFLAGS+=-DFBINK_WITH_OPENTYPE
+		ifdef STATIC_LIBM
+			LIBS+=-l:libm.a
+		else
+			LIBS+=-lm
+		endif
+	endif
 
-# Support tweaking a MINIMAL build to still include button scan support
-ifdef BUTTON_SCAN
-	WITH_BUTTON_SCAN:=True
-	EXTRA_CPPFLAGS+=-DFBINK_WITH_BUTTON_SCAN
+	# Support tweaking a MINIMAL build to still include button scan support
+	ifdef BUTTON_SCAN
+		WITH_BUTTON_SCAN:=True
+		EXTRA_CPPFLAGS+=-DFBINK_WITH_BUTTON_SCAN
+	endif
 endif
 
 # How we handle our library creation
