@@ -403,20 +403,27 @@ static void
 		fclose(fp);
 
 		// Get the device code...
-		char device_code[3 + 1] = { 0 };
-		// NOTE: Slice the bracketed section out of the S/N: B0[17]NNNNNNNNNNNN
-		snprintf(device_code, 2 + 1, "%.*s", 2, serial_no + 2);
-		// It's in hex, easy peasy.
-		uint32_t dev = (uint32_t) strtoul(device_code, NULL, 16);
-		// Check if it looks like the old device id scheme...
-		if (!is_kindle_device(dev)) {
-			// ... try the new device ID scheme if it doesn't... (G09[0G1]NNNNNNNNNN)
+		char     device_code[3 + 1] = { 0 };
+		uint32_t dev                = 0U;
+		// NOTE: If the S/N starts with B or 9, assume it's an older device with an hexadecimal device code
+		if (serial_no[0] == 'B' || serial_no[0] == '9') {
+			// NOTE: Slice the bracketed section out of the S/N: B0[17]NNNNNNNNNNNN
+			snprintf(device_code, 2 + 1, "%.*s", 2, serial_no + 2);
+			// It's in hex, easy peasy.
+			dev = (uint32_t) strtoul(device_code, NULL, 16);
+			// Check if that looks like a known id in the old device id scheme...
+			if (!is_kindle_device(dev)) {
+				WARN("Unidentified Kindle device %s (0x%02X) [%.6s]", device_code, dev, serial_no);
+			}
+		} else {
+			// Otherwise, assume it's the new base32-ish format (so far, all of those S/N start with a 'G').
+			// NOTE: Slice the bracketed section out of the S/N: (G09[0G1]NNNNNNNNNN)
 			snprintf(device_code, 3 + 1, "%.*s", 3, serial_no + 3);
 			// (these ones are encoded in a slightly custom base 32)
 			dev = from_base(device_code, 32);
-			// ... And if it's not either list, it's truly unknown.
+			// Check if that looks like a known id in the new device id scheme...
 			if (!is_kindle_device_new(dev)) {
-				WARN("Unidentified Kindle device %s (0x%03X)", device_code, dev);
+				WARN("Unidentified Kindle device %s (0x%03X) [%.6s]", device_code, dev, serial_no);
 			}
 		}
 		// Store the device ID...
