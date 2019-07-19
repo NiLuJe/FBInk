@@ -3597,7 +3597,7 @@ int
 		// We should have a fairly accurate idea of what the screen DPI is...
 		unsigned short int ppi = deviceQuirks.screenDPI;
 		// Given the ppi, convert point height to pixels. Note, 1pt is 1/72th of an inch
-		font_size_px = (unsigned int) iroundf(ppi / 72.0f * size_pt);
+		font_size_px = (unsigned short int) iroundf(ppi / 72.0f * size_pt);
 	}
 
 	// This is a pointer to whichever font is currently active. It gets updated for every character in the loop, as needed.
