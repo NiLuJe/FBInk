@@ -53,6 +53,7 @@ static bool
 		case 0x05:
 		case 0x09:
 			deviceQuirks.isKindleLegacy = true;
+			deviceQuirks.screenDPI      = 150U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "DX", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
