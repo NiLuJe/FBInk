@@ -1369,12 +1369,12 @@ static int
 	}
 
 	int rv;
-	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_KOA2, &update);
+	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_ZELDA, &update);
 
 	if (rv < 0) {
 		char        buf[256];
 		const char* errstr = strerror_r(errno, buf, sizeof(buf));
-		WARN("MXCFB_SEND_UPDATE_KOA2: %s", errstr);
+		WARN("MXCFB_SEND_UPDATE_ZELDA: %s", errstr);
 		if (errno == EINVAL) {
 			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
 			     region.top,
