@@ -297,7 +297,7 @@ static bool
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Rex", sizeof(deviceQuirks.devicePlatform) - 1U);
 			return true;
-		case 0x414:
+		case 0x414:    // KT4
 		case 0x3CF:
 		case 0x3D0:
 		case 0x3D1:
@@ -310,6 +310,21 @@ static bool
 			strncpy(deviceQuirks.deviceCodename, "Jaeger", sizeof(deviceQuirks.deviceCodename) - 1U);
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Rex", sizeof(deviceQuirks.devicePlatform) - 1U);
+			return true;
+		case 0x434:    // KOA3
+		case 0x3D8:
+		case 0x3D7:
+		case 0x3D6:
+		case 0x3D5:
+		case 0x3D4:
+			deviceQuirks.isKindleZelda = true;
+			deviceQuirks.screenDPI     = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "Oasis 3", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Stinger", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Zelda", sizeof(deviceQuirks.devicePlatform) - 1U);
 			return true;
 		default:
 			// Flawfinder: ignore
