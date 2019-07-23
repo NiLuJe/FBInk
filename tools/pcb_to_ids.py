@@ -11,6 +11,7 @@ data = "./Kobo_PCB_IDs.txt"
 with open(data, "r") as f:
 	for line in f:
 		if line.startswith("E60610D"):
+			# NOTE: This is an educated guess. kobo_config puts every E60610* in the "trilogy" basket...
 			# Touch C (trilogy) [320]
 			print("320,")
 		elif line.startswith("E60610"):
