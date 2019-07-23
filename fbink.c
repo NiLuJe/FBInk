@@ -1327,15 +1327,15 @@ static int
 	return EXIT_SUCCESS;
 }
 
-// Kindle Oasis 2 ([KOA2<->??)
+// Kindle Oasis 2 & Oasis 3 ([KOA2<->??)
 static int
-    refresh_kindle_koa2(int                     fbfd,
-			const struct mxcfb_rect region,
-			uint32_t                waveform_mode,
-			uint32_t                update_mode,
-			int                     dithering_mode,
-			bool                    is_nightmode,
-			uint32_t                marker)
+    refresh_kindle_zelda(int                     fbfd,
+			 const struct mxcfb_rect region,
+			 uint32_t                waveform_mode,
+			 uint32_t                update_mode,
+			 int                     dithering_mode,
+			 bool                    is_nightmode,
+			 uint32_t                marker)
 {
 	struct mxcfb_update_data_koa2 update = {
 		.update_region = region,
@@ -1758,8 +1758,8 @@ static int
 #	if defined(FBINK_FOR_KINDLE)
 	if (deviceQuirks.isKindleRex) {
 		return refresh_kindle_rex(fbfd, region, wfm, upm, dithering_mode, is_nightmode, marker);
-	} else if (deviceQuirks.isKindleOasis2) {
-		return refresh_kindle_koa2(fbfd, region, wfm, upm, dithering_mode, is_nightmode, marker);
+	} else if (deviceQuirks.isKindleZelda) {
+		return refresh_kindle_zelda(fbfd, region, wfm, upm, dithering_mode, is_nightmode, marker);
 	} else {
 		return refresh_kindle(fbfd, region, wfm, upm, is_nightmode, marker);
 	}
@@ -1881,8 +1881,8 @@ static int
 			ELOG("Enabled Legacy einkfb Kindle quirks");
 		} else if (deviceQuirks.isKindlePearlScreen) {
 			ELOG("Enabled Kindle with Pearl screen quirks");
-		} else if (deviceQuirks.isKindleOasis2) {
-			ELOG("Enabled Kindle Oasis 2 quirks");
+		} else if (deviceQuirks.isKindleZelda) {
+			ELOG("Enabled Kindle Zelda platform quirks");
 		} else if (deviceQuirks.isKindleRex) {
 			ELOG("Enabled Kindle Rex platform quirks");
 		}
@@ -4608,9 +4608,9 @@ static uint32_t
 
 	// Parse waveform mode...
 #ifdef FBINK_FOR_KINDLE
-	// Is this a KOA2 or a Rex with new waveforms?
+	// Is this a Zelda or a Rex with new waveforms?
 	bool has_new_wfm = false;
-	if (deviceQuirks.isKindleOasis2 || deviceQuirks.isKindleRex) {
+	if (deviceQuirks.isKindleZelda || deviceQuirks.isKindleRex) {
 		has_new_wfm = true;
 	}
 

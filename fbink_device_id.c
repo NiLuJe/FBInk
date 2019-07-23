@@ -258,8 +258,8 @@ static bool
 		case 0x344:
 		case 0x347:
 		case 0x34A:
-			deviceQuirks.isKindleOasis2 = true;
-			deviceQuirks.screenDPI      = 300U;
+			deviceQuirks.isKindleZelda = true;
+			deviceQuirks.screenDPI     = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Oasis 2", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
