@@ -788,7 +788,7 @@ static void
 		NTXHWConfig    config              = { 0 };
 #		pragma GCC diagnostic pop
 		unsigned char* restrict payload    = NULL;
-		size_t                  blockcount = 0U;
+		uint64_t                blockcount = 0U;
 
 		if (fseek(fp, HWCONFIG_OFFSET, SEEK_SET) != 0) {
 			WARN("Failed to seek to position 0x%p in '%s'", (void*) HWCONFIG_OFFSET, HWCONFIG_DEVICE);
@@ -868,7 +868,7 @@ static void
 					}
 				} else if (kobo_id == 373 || kobo_id == 377) {
 					// Discriminate 32GB variants...
-					if (blockcount / (1024U * 1024U * 1024U) > 8U) {
+					if ((blockcount / (1024U * 1024U * 1024U)) > 8U) {
 						if (kobo_id == 373) {
 							// Aura ONE (daylight) [373] -> Aura ONE LE (daylight) [381]
 							kobo_id = 381;
