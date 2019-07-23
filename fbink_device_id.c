@@ -868,6 +868,8 @@ static void
 					}
 				} else if (kobo_id == 373 || kobo_id == 377) {
 					// Discriminate 32GB variants...
+					// NOTE: We compare against 8GB, but in practice, given storage shenanigans and
+					//       the truncation involved here, we end up with 7 on 8GB devices ;).
 					if ((blockcount / (1024U * 1024U * 1024U)) > 8U) {
 						if (kobo_id == 373) {
 							// Aura ONE (daylight) [373] -> Aura ONE LE (daylight) [381]
