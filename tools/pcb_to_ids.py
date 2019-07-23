@@ -10,9 +10,11 @@ data = "./Kobo_PCB_IDs.txt"
 
 with open(data, "r") as f:
 	for line in f:
-		if line.startswith("E60610"):
-			# Touch A/B (trilogy) [310]
+		if line.startswith("E60610D"):
 			# Touch C (trilogy) [320]
+			print("320,")
+		elif line.startswith("E60610"):
+			# Touch A/B (trilogy) [310]
 			print("310,")
 		elif line.startswith("E60QB") or line.startswith("E606B"):
 			# Glo (kraken) [330]
