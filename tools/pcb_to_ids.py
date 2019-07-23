@@ -42,14 +42,15 @@ with open(data, "r") as f:
 			print("376,")
 		elif line.startswith("E60QL") or line.startswith("E60U0") or line.startswith("T60Q0"):
 			# Aura SE (star) [375]
-			# Aura SE r2 (star) [379] (NOTE: Mildy inaccurate, because the r2 is a Mk7, unlike the r1)
+			# Aura SE r2 (star) [379] (if mx6sll)
 			print("375,")
 		elif line.startswith("E60QM"):
 			# Aura H2O² (snow) [374]
-			# Aura H2O² r2 (snow) [378] (NOTE: Mildy inaccurate, because the r2 is a Mk7, unlike the r1)
+			# Aura H2O² r2 (snow) [378] (if mx6sll)
 			print("374,")
 		elif line.startswith("E80K0"):
-			# Forma (frost) [380]
+			# Forma (frost) [377]
+			# Forma 32GB (frost) [380]
 			print("380,")
 		else:
 			print("0,")
