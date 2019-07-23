@@ -35,7 +35,7 @@ with open(data, "r") as f:
 			print("360,")
 		elif line.startswith("E70Q0"):
 			# Aura ONE (daylight) [373]
-			# Aura ONE LE (daylight) [381]
+			# Aura ONE LE (daylight) [381] (if 32GB)
 			print("373,")
 		elif line.startswith("E60K0") or line.startswith("E60U1"):
 			# Clara HD (nova) [376]
@@ -50,7 +50,7 @@ with open(data, "r") as f:
 			print("374,")
 		elif line.startswith("E80K0"):
 			# Forma (frost) [377]
-			# Forma 32GB (frost) [380]
-			print("380,")
+			# Forma 32GB (frost) [380] (if 32GB)
+			print("377,")
 		else:
 			print("0,")

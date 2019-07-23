@@ -25,6 +25,8 @@
 #include "fbink.h"
 #include "fbink_internal.h"
 
+#include <linux/fs.h>
+
 #ifndef FBINK_FOR_LINUX
 #	ifndef FBINK_FOR_KINDLE
 // NOTE: This is NTX's homegrown hardware tagging, c.f., arch/arm/mach-imx/ntx_hwconfig.h in a Kobo kernel, for instance
@@ -106,7 +108,7 @@ static const unsigned short int kobo_ids[] = { 0, 0,   0,   0,   0, 0,   0,   0,
 					       0, 0,   310, 310, 0, 0,   330, 0, 0, 340, 350, 0, 0,   0, 0, 0, 360, 360,
 					       0, 330, 0,   0,   0, 370, 0,   0, 0, 0,   371, 0, 0,   0, 0, 0, 0,   0,
 					       0, 373, 0,   0,   0, 375, 374, 0, 0, 375, 0,   0, 375, 0, 0, 0, 0,   0,
-					       0, 376, 376, 380, 0, 0,   0,   0, 0, 0,   0,   0 };
+					       0, 376, 376, 377, 0, 0,   0,   0, 0, 0,   0,   0 };
 
 // Same idea, but for the various NTX/Kobo Display Panels...
 /*

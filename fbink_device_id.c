@@ -785,9 +785,10 @@ static void
 	} else {
 #		pragma GCC diagnostic push
 #		pragma GCC diagnostic ignored "-Wmissing-braces"
-		NTXHWConfig    config           = { 0 };
+		NTXHWConfig    config              = { 0 };
 #		pragma GCC diagnostic pop
-		unsigned char* restrict payload = NULL;
+		unsigned char* restrict payload    = NULL;
+		size_t                  blockcount = 0U;
 
 		if (fseek(fp, HWCONFIG_OFFSET, SEEK_SET) != 0) {
 			WARN("Failed to seek to position 0x%p in '%s'", (void*) HWCONFIG_OFFSET, HWCONFIG_DEVICE);
@@ -821,6 +822,12 @@ static void
 				// NOTE: Make it clear we failed to identify the device...
 				set_kobo_quirks(0);
 				return;
+			}
+
+			// We'll also need the total storage space to discriminate 32GB devices...
+			if (ioctl(fileno(fp), BLKGETSIZE64, &blockcount)) {
+				// Make that non-fatal
+				WARN("Error requesting block device size");
 			}
 		}
 		fclose(fp);
@@ -858,6 +865,17 @@ static void
 					if (payload[KOBO_HWCFG_DisplayResolution] == 0) {
 						// Glo HD (Alyssum) [371] -> Touch 2.0 (Pika) [372]
 						kobo_id = 372;
+					}
+				} else if (kobo_id == 373 || kobo_id == 377) {
+					// Discriminate 32GB variants...
+					if (blockcount / (1024U * 1024U * 1024U) > 8U) {
+						if (kobo_id == 373) {
+							// Aura ONE (daylight) [373] -> Aura ONE LE (daylight) [381]
+							kobo_id = 381;
+						} else if (kobo_id == 377) {
+							// Forma (frost) [377] -> Forma 32GB (frost) [380]
+							kobo_id = 380;
+						}
 					}
 				}
 			}
