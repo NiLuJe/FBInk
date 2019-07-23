@@ -1337,7 +1337,7 @@ static int
 			 bool                    is_nightmode,
 			 uint32_t                marker)
 {
-	struct mxcfb_update_data_koa2 update = {
+	struct mxcfb_update_data_zelda update = {
 		.update_region = region,
 		.waveform_mode = waveform_mode,
 		.update_mode   = update_mode,

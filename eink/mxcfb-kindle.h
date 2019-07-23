@@ -219,6 +219,9 @@ struct mxcfb_rect {
 /* KOA2 */
 #define EPD_MATERIAL_CARTA_1_2			0x02
 
+/* KOA3 */
+#define EPD_MATERIAL_V400			0x03
+
 /* KOA2 */
 enum mxcfb_dithering_mode {
 	EPDC_FLAG_USE_DITHERING_PASSTHROUGH = 0x0,
@@ -253,7 +256,7 @@ struct mxcfb_update_data {
 };
 
 /* KOA2... Once again breaking backward compat. */
-struct mxcfb_update_data_koa2 {
+struct mxcfb_update_data_zelda {
 	struct mxcfb_rect update_region;
 	__u32 waveform_mode;
 	__u32 update_mode;
@@ -340,7 +343,7 @@ struct mxcfb_waveform_modes {
 };
 
 /* KOA2... Breaking backward compat. */
-struct mxcfb_waveform_modes_koa2 {
+struct mxcfb_waveform_modes_zelda {
 	int mode_init;
 	int mode_du;
 	int mode_gc4;
@@ -386,8 +389,8 @@ struct mxcfb_csc_matrix {
 #define MXCFB_SEND_UPDATE			_IOW('F', 0x2E, struct mxcfb_update_data)
 
 /* KOA2, because backward compat went kablooey */
-#define MXCFB_SET_WAVEFORM_MODES_KOA2		_IOW('F', 0x2B, struct mxcfb_waveform_modes_koa2)
-#define MXCFB_SEND_UPDATE_KOA2			_IOW('F', 0x2E, struct mxcfb_update_data_koa2)
+#define MXCFB_SET_WAVEFORM_MODES_ZELDA		_IOW('F', 0x2B, struct mxcfb_waveform_modes_zelda)
+#define MXCFB_SEND_UPDATE_ZELDA			_IOW('F', 0x2E, struct mxcfb_update_data_zelda)
 
 /* PW4, same dealio... */
 #define MXCFB_SEND_UPDATE_REX			_IOW('F', 0x2E, struct mxcfb_update_data_rex)
@@ -406,7 +409,7 @@ struct mxcfb_csc_matrix {
 #define MXCFB_SET_RESUME			_IOW('F', 0x35, __u32)
 
 /* KOA2 */
-#define MXCFB_GET_WORK_BUFFER_KOA2		_IOWR('F', 0x34, unsigned long)
+#define MXCFB_GET_WORK_BUFFER_ZELDA		_IOWR('F', 0x34, unsigned long)
 #define MXCFB_DISABLE_EPDC_ACCESS		_IO('F', 0x35)
 #define MXCFB_ENABLE_EPDC_ACCESS		_IO('F', 0x36)
 
