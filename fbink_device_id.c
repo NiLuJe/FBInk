@@ -826,7 +826,7 @@ static void
 
 			// We'll also need the total storage space to discriminate 32GB devices...
 			if (ioctl(fileno(fp), BLKGETSIZE64, &blockcount)) {
-				// Make that non-fatal
+				// Make that non-fatal, as the distinction is purely cosmetic for our purposes
 				WARN("Error requesting block device size");
 			}
 		}
