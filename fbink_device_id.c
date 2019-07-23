@@ -785,10 +785,10 @@ static void
 	} else {
 #		pragma GCC diagnostic push
 #		pragma GCC diagnostic ignored "-Wmissing-braces"
-		NTXHWConfig    config              = { 0 };
+		NTXHWConfig    config               = { 0 };
 #		pragma GCC diagnostic pop
-		unsigned char* restrict payload    = NULL;
-		uint64_t                blockcount = 0U;
+		unsigned char* restrict payload     = NULL;
+		uint64_t                storagesize = 0U;
 
 		if (fseek(fp, HWCONFIG_OFFSET, SEEK_SET) != 0) {
 			WARN("Failed to seek to position 0x%p in '%s'", (void*) HWCONFIG_OFFSET, HWCONFIG_DEVICE);
@@ -825,7 +825,7 @@ static void
 			}
 
 			// We'll also need the total storage space to discriminate 32GB devices...
-			if (ioctl(fileno(fp), BLKGETSIZE64, &blockcount)) {
+			if (ioctl(fileno(fp), BLKGETSIZE64, &storagesize)) {
 				// Make that non-fatal, as the distinction is purely cosmetic for our purposes
 				WARN("Error requesting block device size");
 			}
@@ -870,7 +870,7 @@ static void
 					// Discriminate 32GB variants...
 					// NOTE: We compare against 8GB, but in practice, given storage shenanigans and
 					//       the truncation involved here, we end up with 7 on 8GB devices ;).
-					if ((blockcount / (1024U * 1024U * 1024U)) > 8U) {
+					if ((storagesize / (1024U * 1024U * 1024U)) > 8U) {
 						if (kobo_id == 373) {
 							// Aura ONE (daylight) [373] -> Aura ONE LE (daylight) [381]
 							kobo_id = 381;
