@@ -17,10 +17,13 @@
  *   Upstream could afford to break backward compatibility, we can't,
  *   so all the KOA2 pre/suffixing is ours. -- NiLuJe
  *
- * - Frankensteined w/ Rex (PW4 & KT4) stuff
+ * - Frankensteined w/ Rex (PW4 & KT4) stuff -- NiLuJe
  *
  * - Frankensteined w/ KOA3 stuff
  *   Consolidated as Zelda w/ the KOA2 stuff
+ *   Note that most of it is actually shared w/ Rex,
+ *   although some fancier features may not actually work on lower end Rex devices
+ *   (i.e., the KT4). -- NiLuJe
  *
  */
 
