@@ -1343,23 +1343,23 @@ static int
 		.update_mode   = update_mode,
 		.update_marker = marker,
 		.temp          = TEMP_USE_AMBIENT,
-		.flags         = (waveform_mode == WAVEFORM_MODE_KOA2_GLD16)
-			     ? EPDC_FLAG_USE_KOA2_REGAL
-			     : (waveform_mode == WAVEFORM_MODE_KOA2_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
+		.flags         = (waveform_mode == WAVEFORM_MODE_ZELDA_GLD16)
+			     ? EPDC_FLAG_USE_ZELDA_REGAL
+			     : (waveform_mode == WAVEFORM_MODE_ZELDA_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
 		.dither_mode = dithering_mode,
 		.quant_bit   = (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)
 				 ? 0
-				 : (waveform_mode == WAVEFORM_MODE_KOA2_A2 || waveform_mode == WAVEFORM_MODE_DU)
+				 : (waveform_mode == WAVEFORM_MODE_ZELDA_A2 || waveform_mode == WAVEFORM_MODE_DU)
 				       ? 1
-				       : (waveform_mode == WAVEFORM_MODE_GC4 || waveform_mode == WAVEFORM_MODE_KOA2_GL4 ||
-					  waveform_mode == WAVEFORM_MODE_DU4)
+				       : (waveform_mode == WAVEFORM_MODE_GC4 ||
+					  waveform_mode == WAVEFORM_MODE_ZELDA_GL4 || waveform_mode == WAVEFORM_MODE_DU4)
 					     ? 3
 					     : 7,
 		.alt_buffer_data = { 0U },
 		.hist_bw_waveform_mode =
-		    (waveform_mode == WAVEFORM_MODE_KOA2_REAGL) ? WAVEFORM_MODE_KOA2_REAGL : WAVEFORM_MODE_DU,
+		    (waveform_mode == WAVEFORM_MODE_ZELDA_REAGL) ? WAVEFORM_MODE_ZELDA_REAGL : WAVEFORM_MODE_DU,
 		.hist_gray_waveform_mode =
-		    (waveform_mode == WAVEFORM_MODE_KOA2_REAGL) ? WAVEFORM_MODE_KOA2_REAGL : WAVEFORM_MODE_GC16,
+		    (waveform_mode == WAVEFORM_MODE_ZELDA_REAGL) ? WAVEFORM_MODE_ZELDA_REAGL : WAVEFORM_MODE_GC16,
 		.ts_pxp  = 0U,
 		.ts_epdc = 0U,
 	};
@@ -1424,23 +1424,23 @@ static int
 		.update_mode   = update_mode,
 		.update_marker = marker,
 		.temp          = TEMP_USE_AMBIENT,
-		.flags         = (waveform_mode == WAVEFORM_MODE_KOA2_GLD16)
-			     ? EPDC_FLAG_USE_KOA2_REGAL
-			     : (waveform_mode == WAVEFORM_MODE_KOA2_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
+		.flags         = (waveform_mode == WAVEFORM_MODE_ZELDA_GLD16)
+			     ? EPDC_FLAG_USE_ZELDA_REGAL
+			     : (waveform_mode == WAVEFORM_MODE_ZELDA_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
 		.dither_mode = dithering_mode,
 		.quant_bit   = (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)
 				 ? 0
-				 : (waveform_mode == WAVEFORM_MODE_KOA2_A2 || waveform_mode == WAVEFORM_MODE_DU)
+				 : (waveform_mode == WAVEFORM_MODE_ZELDA_A2 || waveform_mode == WAVEFORM_MODE_DU)
 				       ? 1
-				       : (waveform_mode == WAVEFORM_MODE_GC4 || waveform_mode == WAVEFORM_MODE_KOA2_GL4 ||
-					  waveform_mode == WAVEFORM_MODE_DU4)
+				       : (waveform_mode == WAVEFORM_MODE_GC4 ||
+					  waveform_mode == WAVEFORM_MODE_ZELDA_GL4 || waveform_mode == WAVEFORM_MODE_DU4)
 					     ? 3
 					     : 7,
 		.alt_buffer_data = { 0U },
 		.hist_bw_waveform_mode =
-		    (waveform_mode == WAVEFORM_MODE_KOA2_REAGL) ? WAVEFORM_MODE_KOA2_REAGL : WAVEFORM_MODE_DU,
+		    (waveform_mode == WAVEFORM_MODE_ZELDA_REAGL) ? WAVEFORM_MODE_ZELDA_REAGL : WAVEFORM_MODE_DU,
 		.hist_gray_waveform_mode =
-		    (waveform_mode == WAVEFORM_MODE_KOA2_REAGL) ? WAVEFORM_MODE_KOA2_REAGL : WAVEFORM_MODE_GC16,
+		    (waveform_mode == WAVEFORM_MODE_ZELDA_REAGL) ? WAVEFORM_MODE_ZELDA_REAGL : WAVEFORM_MODE_GC16,
 	};
 
 	if (is_nightmode && deviceQuirks.canHWInvert) {
@@ -4633,42 +4633,42 @@ static uint32_t
 			break;
 		case WFM_A2:
 			if (has_new_wfm) {
-				waveform_mode = WAVEFORM_MODE_KOA2_A2;
+				waveform_mode = WAVEFORM_MODE_ZELDA_A2;
 			} else {
 				waveform_mode = WAVEFORM_MODE_A2;
 			}
 			break;
 		case WFM_GL16:
 			if (has_new_wfm) {
-				waveform_mode = WAVEFORM_MODE_KOA2_GL16;
+				waveform_mode = WAVEFORM_MODE_ZELDA_GL16;
 			} else {
 				waveform_mode = WAVEFORM_MODE_GL16;
 			}
 			break;
 		case WFM_REAGL:
 			if (has_new_wfm) {
-				waveform_mode = WAVEFORM_MODE_KOA2_REAGL;
+				waveform_mode = WAVEFORM_MODE_ZELDA_REAGL;
 			} else {
 				waveform_mode = WAVEFORM_MODE_REAGL;
 			}
 			break;
 		case WFM_REAGLD:
 			if (has_new_wfm) {
-				waveform_mode = WAVEFORM_MODE_KOA2_REAGLD;
+				waveform_mode = WAVEFORM_MODE_ZELDA_REAGLD;
 			} else {
 				waveform_mode = WAVEFORM_MODE_REAGLD;
 			}
 			break;
 		case WFM_GC16_FAST:
 			if (has_new_wfm) {
-				waveform_mode = WAVEFORM_MODE_KOA2_GC16_FAST;
+				waveform_mode = WAVEFORM_MODE_ZELDA_GC16_FAST;
 			} else {
 				waveform_mode = WAVEFORM_MODE_GC16_FAST;
 			}
 			break;
 		case WFM_GL16_FAST:
 			if (has_new_wfm) {
-				waveform_mode = WAVEFORM_MODE_KOA2_GL16_FAST;
+				waveform_mode = WAVEFORM_MODE_ZELDA_GL16_FAST;
 			} else {
 				waveform_mode = WAVEFORM_MODE_GL16_FAST;
 			}
@@ -4678,23 +4678,23 @@ static uint32_t
 			break;
 		case WFM_GL4:
 			if (has_new_wfm) {
-				waveform_mode = WAVEFORM_MODE_KOA2_GL4;
+				waveform_mode = WAVEFORM_MODE_ZELDA_GL4;
 			} else {
 				waveform_mode = WAVEFORM_MODE_GL4;
 			}
 			break;
 		case WFM_GL16_INV:
 			if (has_new_wfm) {
-				waveform_mode = WAVEFORM_MODE_KOA2_GL16_INV;
+				waveform_mode = WAVEFORM_MODE_ZELDA_GL16_INV;
 			} else {
 				waveform_mode = WAVEFORM_MODE_GL16_INV;
 			}
 			break;
 		case WFM_GCK16:
-			waveform_mode = WAVEFORM_MODE_KOA2_GCK16;
+			waveform_mode = WAVEFORM_MODE_ZELDA_GCK16;
 			break;
 		case WFM_GLKW16:
-			waveform_mode = WAVEFORM_MODE_KOA2_GLKW16;
+			waveform_mode = WAVEFORM_MODE_ZELDA_GLKW16;
 			break;
 		default:
 			LOG("Unknown (or unsupported) waveform mode '%s' @ index %hhu, defaulting to AUTO",
