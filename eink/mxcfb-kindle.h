@@ -16,6 +16,12 @@
  * - Frankensteined w/ KOA2 stuff
  *   Upstream could afford to break backward compatibility, we can't,
  *   so all the KOA2 pre/suffixing is ours. -- NiLuJe
+ *
+ * - Frankensteined w/ Rex (PW4 & KT4) stuff
+ *
+ * - Frankensteined w/ KOA3 stuff
+ *   Consolidated as Zelda w/ the KOA2 stuff
+ *
  */
 
 /*

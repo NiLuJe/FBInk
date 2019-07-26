@@ -1417,7 +1417,7 @@ static int
 		       bool                    is_nightmode,
 		       uint32_t                marker)
 {
-	// NOTE: Different mcfb_update_data struct (no ts_* debug fields), but otherwise, identical to the KOA2!
+	// NOTE: Different mcfb_update_data struct (no ts_* debug fields), but otherwise, identical to the zelda one!
 	struct mxcfb_update_data_rex update = {
 		.update_region = region,
 		.waveform_mode = waveform_mode,
