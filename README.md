@@ -3,7 +3,7 @@
 
 FrameBuffer eInker
 
-Licensed under the [AGPLv3](/LICENSE).
+Licensed under the [GPLv3+](/LICENSE).
 Housed [here on GitHub](https://github.com/NiLuJe/FBInk).
 
 ## What's it for?
@@ -31,7 +31,7 @@ As an example of usage in the wild, see [KFMon](https://github.com/NiLuJe/kfmon)
 
 ## How can I tinker with it?
 
-The tool is available both as a commandline utility, and as a shared or static library for C projects (beware, though, it's licensed under the AGPLv3+, not the LGPL).
+The tool is available both as a commandline utility, and as a shared or static library for C projects (beware, though, it's licensed under the GPLv3+, not the LGPL).
 See the [public header](fbink.h) for basic API usage.
 Launch the `fbink` tool with no argument for a quick manual & rundown of its capabilities.
 
