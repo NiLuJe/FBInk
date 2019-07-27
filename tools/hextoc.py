@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
 # Very naive script to build a C array out of Unifont's hex format.
 # Assumes 8x8 or 8x16 glyphs
 # Tested on Unscii & its fun variants (http://pelulamu.net/unscii/)
