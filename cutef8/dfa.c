@@ -28,11 +28,11 @@ static const uint8_t utf8d[] = {
 inline static uint8_t
     decode(uint8_t* restrict state, uint32_t* restrict codep, uint8_t byte)
 {
-	uint8_t type = utf8d[byte];
+	const uint8_t type = utf8d[byte];
 
 	// NOTE: The > UTF8_REJECT variant is a tiny bit slower, but we hopefully shouldn't need the extra safety it'd provide ;)
-	*codep = (*state != UTF8_ACCEPT) ? (byte & 0x3fu) | (*codep << 6) : (0xffu >> type) & (byte);
-	*state = utf8d[256 + *state + type];
+	*codep = (*state != UTF8_ACCEPT) ? (byte & 0x3fu) | (*codep << 6u) : (0xffu >> type) & (byte);
+	*state = utf8d[256u + *state + type];
 	return *state;
 }
 
@@ -40,9 +40,9 @@ inline static uint8_t
 inline static uint8_t
     check(uint8_t* restrict state, uint8_t byte)
 {
-	uint8_t type = utf8d[byte];
+	const uint8_t type = utf8d[byte];
 
-	*state = utf8d[256 + *state + type];
+	*state = utf8d[256u + *state + type];
 	return *state;
 }
 
