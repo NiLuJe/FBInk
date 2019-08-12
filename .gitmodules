@@ -5,7 +5,7 @@
 [submodule "stb"]
 	path = stb
 	url = https://github.com/NiLuJe/stb.git
-	branch = fbink-1.12.1
+	branch = fbink-1.18.1
 [submodule "libunibreak"]
 	path = libunibreak
 	url = https://github.com/adah1972/libunibreak
