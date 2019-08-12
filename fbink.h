@@ -513,14 +513,16 @@ FBINK_API int fbink_reinit(int fbfd, const FBInkConfig* restrict fbink_cfg);
 // fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // percentage:		0-100 value to set the progress bar's progression
-// fbink_cfg:		Pointer to an FBInkConfig struct (ignores is_overlay, col & hoffset; as well as is_centered & is_padded)
+// fbink_cfg:		Pointer to an FBInkConfig struct (ignores is_overlay, col & hoffset;
+//				as well as is_centered & is_padded)
 FBINK_API int fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInkConfig* restrict fbink_cfg);
 
 // Print a full-width activity bar on screen (i.e., an infinite progress bar)
 // fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // progress:		0-16 value to set the progress thumb's position in the bar
-// fbink_cfg:		Pointer to an FBInkConfig struct (ignores col & hoffset; as well as is_centered & is_padded)
+// fbink_cfg:		Pointer to an FBInkConfig struct (ignores is_overlay, is_bgless, is_fgless, col & hoffset;
+//				as well as is_centered & is_padded)
 FBINK_API int fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkConfig* restrict fbink_cfg);
 
 // Print an image on screen
@@ -587,7 +589,8 @@ FBINK_API int fbink_print_raw_data(int                fbfd,
 // Just clear the screen, eInk refresh included (or not ;)).
 // fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
-// fbink_cfg:		Pointer to an FBInkConfig struct (honors is_flashing, is_inverted, is_dithered, no_refresh, pen_*_color)
+// fbink_cfg:		Pointer to an FBInkConfig struct (honors is_inverted, wfm_mode, is_dithered, is_nightmode, is_flashing,
+//				as well as no_refresh, pen_fg_color & pen_bg_color)
 FBINK_API int fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg);
 
 // Dump the full screen
@@ -634,7 +637,7 @@ FBINK_API int fbink_region_dump(int                fbfd,
 //	-(EINVAL)	when there's no data to restore
 // fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
-// fbink_cfg:		Pointer to an FBInkConfig struct (honors wfm_mode, is_dithered, is_flashing, is_nightmode & no_refresh)
+// fbink_cfg:		Pointer to an FBInkConfig struct (honors wfm_mode, is_dithered, is_nightmode, is_flashing & no_refresh)
 // dump:		Pointer to an FBInkDump struct, as setup by fbink_dump or fbink_region_dump
 // NOTE: In case the dump was regional, it will be restored in the exact same coordinates it was taken from,
 //       no actual positioning is needed/supported at restore time.
@@ -643,7 +646,7 @@ FBINK_API int fbink_region_dump(int                fbfd,
 //       (i.e., is_dithered vs. sw_dithering, and is_nightmode vs. is_inverted).
 //       At most common bitdepths, you can somewhat work around these restrictions, obviously at a performance premium,
 //       by using fbink_print_raw_data instead (see the relevant notes for fbink_dump), with a few quirky caveats...
-//       c.f., the last few tests in utils/dump.c
+//       c.f., the last few tests in utils/dump.c for highly convoluted examples that I don't recommend replicating in production.
 // NOTE: "current" actually means "at last init/reinit time".
 //       Call fbink_reinit first if you really want to make sure bitdepth/rotation still match.
 // NOTE: This does *NOT* free data.dump!
