@@ -72,6 +72,7 @@ static void
 	    "\t\t\t\tNote that on legacy einkfb devices, this may not always be honored by the hardware.\n"
 #endif
 	    "\t-c, --clear\t\tFully clear the screen before printing (obeys --invert). Can be specified on its own, without any STRING.\n"
+	    "\t\t\t\tNOTE: If your intent is to simply clear the screen and *nothing else*, use -k, --cls instead!\n"
 #ifndef FBINK_FOR_LINUX
 	    "\t-W, --waveform\t\tRequest a specific waveform update mode from the eInk controller, if supported (mainly useful for images).\n"
 	    "\t\t\t\tAvailable waveform modes: DU, GC16, GC4, A2, GL16, REAGL, REAGLD & AUTO\n"
@@ -444,6 +445,7 @@ int
                                               { "nightmode", no_argument, NULL, 'H' },
                                               { "coordinates", no_argument, NULL, 'E' },
                                               { "mimic", no_argument, NULL, 'Z' },
+                                              { "cls", no_argument, NULL, 'k' },
                                               { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_cfg = { 0 };
@@ -529,6 +531,7 @@ int
 	bool      is_activitybar = false;
 	bool      is_infinite    = false;
 	bool      is_mimic       = false;
+	bool      is_cls         = false;
 	uint8_t   progress       = 0;
 	bool      is_truetype    = false;
 	char*     reg_ot_file    = NULL;
@@ -537,8 +540,9 @@ int
 	char*     bdit_ot_file   = NULL;
 	bool      errfnd         = false;
 
+	// NOTE: c.f., https://codegolf.stackexchange.com/q/148228 to sort this mess when I need to find an available letter ;p
 	while ((opt = getopt_long(
-		    argc, argv, "y:x:Y:X:hfcmMprs:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bDW:HEZ", opts, &opt_index)) != -1) {
+		    argc, argv, "y:x:Y:X:hfcmMprs:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bDW:HEZk", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				if (strtol_hi(opt, NULL, optarg, &fbink_cfg.row) < 0) {
@@ -1339,6 +1343,9 @@ int
 			case 'Z':
 				is_mimic = true;
 				break;
+			case 'k':
+				is_cls = true;
+				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
 				errfnd = true;
@@ -1422,6 +1429,12 @@ int
 	if (fbink_init(fbfd, &fbink_cfg) == ERRCODE(EXIT_FAILURE)) {
 		fprintf(stderr, "Failed to initialize FBInk, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// If we're asking for a simple clear screen *only*, do it now, and then abort early.
+	if (is_cls) {
+		rv = fbink_cls(fbfd, &fbink_cfg);
 		goto cleanup;
 	}
 
