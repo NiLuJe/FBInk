@@ -634,10 +634,16 @@ FBINK_API int fbink_region_dump(int                fbfd,
 //	-(EINVAL)	when there's no data to restore
 // fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
-// fbink_cfg:		Pointer to an FBInkConfig struct (honors wfm_mode, is_dithered, is_flashing & no_refresh)
+// fbink_cfg:		Pointer to an FBInkConfig struct (honors wfm_mode, is_dithered, is_flashing, is_nightmode & no_refresh)
 // dump:		Pointer to an FBInkDump struct, as setup by fbink_dump or fbink_region_dump
 // NOTE: In case the dump was regional, it will be restored in the exact same coordinates it was taken from,
 //       no actual positioning is needed/supported at restore time.
+// NOTE: This does not support any kind of software processing, at all!
+//       If you somehow need inversion or dithering, it has to be supported at the hardware level at refresh time by your device,
+//       (i.e., is_dithered vs. sw_dithering, and is_nightmode vs. is_inverted).
+//       At most common bitdepths, you can somewhat work around these restrictions, obviously at a performance premium,
+//       by using fbink_print_raw_data instead (see the relevant notes for fbink_dump), with a few quirky caveats...
+//       c.f., the last few tests in utils/dump.c
 // NOTE: "current" actually means "at last init/reinit time".
 //       Call fbink_reinit first if you really want to make sure bitdepth/rotation still match.
 // NOTE: This does *NOT* free data.dump!

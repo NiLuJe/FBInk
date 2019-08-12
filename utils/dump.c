@@ -158,7 +158,7 @@ int
 	fbink_cfg.is_centered = true;
 	fbink_cfg.is_padded   = true;
 	fbink_cfg.is_halfway  = true;
-	// Inverted to make region restore easier to spot
+	// Invert the text to make the subsequent region restore easier to spot
 	fbink_cfg.is_inverted = true;
 	if (fbink_print(fbfd, "Wheeee!", &fbink_cfg) < 0) {
 		fprintf(stderr, "Failed to print!\n");
