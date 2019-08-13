@@ -2613,6 +2613,7 @@ int
 			otFonts.otBoldItalic = font_info;
 			break;
 	}
+
 	ELOG("Font '%s' loaded for style '%s'", filename, font_style_to_string(style));
 	return EXIT_SUCCESS;
 #else
@@ -2631,6 +2632,7 @@ static int
 		free(font_info);
 		// Don't leave a dangling pointer
 		font_info = NULL;
+
 		return EXIT_SUCCESS;
 	} else {
 		return ERRCODE(EINVAL);
@@ -2655,6 +2657,7 @@ int
 	if (free_ot_font(otFonts.otBoldItalic) == EXIT_SUCCESS) {
 		LOG("Released Bold Italic font data");
 	}
+
 	return EXIT_SUCCESS;
 #else
 	WARN("OpenType support is disabled in this FBInk build");
@@ -7100,6 +7103,16 @@ int
 		free(dump->data);
 		// Don't leave a dangling pointer, ensuring a subsequent dump() won't try to recycle this struct again.
 		dump->data = NULL;
+		// Invalidate the metadata while we're here
+		dump->size    = 0U;
+		dump->x       = 0U;
+		dump->y       = 0U;
+		dump->w       = 0U;
+		dump->h       = 0U;
+		dump->rota    = 0U;
+		dump->bpp     = 0U;
+		dump->is_full = false;
+
 		return EXIT_SUCCESS;
 	} else {
 		return ERRCODE(EINVAL);
