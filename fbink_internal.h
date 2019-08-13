@@ -490,8 +490,8 @@ static int            draw_image(int,
 #endif
 
 #ifdef FBINK_WITH_OPENTYPE
-static void* free_ot_font(stbtt_fontinfo* restrict);
-static void  parse_simple_md(const char* restrict, size_t, unsigned char* restrict);
+static void free_ot_font(stbtt_fontinfo* restrict);
+static void parse_simple_md(const char* restrict, size_t, unsigned char* restrict);
 #endif
 
 static uint32_t    get_wfm_mode(uint8_t);

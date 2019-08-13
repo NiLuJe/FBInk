@@ -2569,19 +2569,19 @@ int
 	// NOTE: We make sure we free any previous allocation first!
 	switch (style) {
 		case FNT_REGULAR:
-			otFonts.otRegular = free_ot_font(otFonts.otRegular);
+			free_ot_font(otFonts.otRegular);
 			otFonts.otRegular = font_info;
 			break;
 		case FNT_ITALIC:
-			otFonts.otItalic = free_ot_font(otFonts.otItalic);
+			free_ot_font(otFonts.otItalic);
 			otFonts.otItalic = font_info;
 			break;
 		case FNT_BOLD:
-			otFonts.otBold = free_ot_font(otFonts.otBold);
+			free_ot_font(otFonts.otBold);
 			otFonts.otBold = font_info;
 			break;
 		case FNT_BOLD_ITALIC:
-			otFonts.otBoldItalic = free_ot_font(otFonts.otBoldItalic);
+			free_ot_font(otFonts.otBoldItalic);
 			otFonts.otBoldItalic = font_info;
 			break;
 	}
@@ -2595,14 +2595,15 @@ int
 
 #ifdef FBINK_WITH_OPENTYPE
 // Free an individual OpenType font structure
-static void*
+static void
     free_ot_font(stbtt_fontinfo* restrict font_info)
 {
 	if (font_info) {
 		free(font_info->data);    // This is the font data we loaded
 		free(font_info);
 	}
-	return NULL;
+	// Don't leave a dangling pointer
+	font_info = NULL;
 }
 #endif    // FBINK_WITH_OPENTYPE
 
