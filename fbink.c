@@ -2569,23 +2569,31 @@ int
 	// NOTE: We make sure we free any previous allocation first!
 	switch (style) {
 		case FNT_REGULAR:
-			free_ot_font(otFonts.otRegular);
+			if (free_ot_font(otFonts.otRegular) == EXIT_SUCCESS) {
+				LOG("Replacing an existing Regular font style!");
+			}
 			otFonts.otRegular = font_info;
 			break;
 		case FNT_ITALIC:
-			free_ot_font(otFonts.otItalic);
+			if (free_ot_font(otFonts.otItalic) == EXIT_SUCCESS) {
+				LOG("Replacing an existing Italic font style!");
+			}
 			otFonts.otItalic = font_info;
 			break;
 		case FNT_BOLD:
-			free_ot_font(otFonts.otBold);
+			if (free_ot_font(otFonts.otBold) == EXIT_SUCCESS) {
+				LOG("Replacing an existing Bold font style!");
+			}
 			otFonts.otBold = font_info;
 			break;
 		case FNT_BOLD_ITALIC:
-			free_ot_font(otFonts.otBoldItalic);
+			if (free_ot_font(otFonts.otBoldItalic) == EXIT_SUCCESS) {
+				LOG("Replacing an existing BoldItalic font style!");
+			}
 			otFonts.otBoldItalic = font_info;
 			break;
 	}
-	ELOG("Font '%s' loaded", filename);
+	ELOG("Font '%s' loaded for style %d", filename, style);
 	return EXIT_SUCCESS;
 #else
 	WARN("OpenType support is disabled in this FBInk build");
@@ -2595,15 +2603,18 @@ int
 
 #ifdef FBINK_WITH_OPENTYPE
 // Free an individual OpenType font structure
-static void
+static int
     free_ot_font(stbtt_fontinfo* restrict font_info)
 {
 	if (font_info) {
 		free(font_info->data);    // This is the font data we loaded
 		free(font_info);
+		// Don't leave a dangling pointer
+		font_info = NULL;
+		return EXIT_SUCCESS;
+	} else {
+		return ERRCODE(EINVAL);
 	}
-	// Don't leave a dangling pointer
-	font_info = NULL;
 }
 #endif    // FBINK_WITH_OPENTYPE
 
@@ -2612,10 +2623,18 @@ int
     fbink_free_ot_fonts(void)
 {
 #ifdef FBINK_WITH_OPENTYPE
-	free_ot_font(otFonts.otRegular);
-	free_ot_font(otFonts.otItalic);
-	free_ot_font(otFonts.otBold);
-	free_ot_font(otFonts.otBoldItalic);
+	if (free_ot_font(otFonts.otRegular) == EXIT_SUCCESS) {
+		LOG("Released Regular font data");
+	}
+	if (free_ot_font(otFonts.otItalic) == EXIT_SUCCESS) {
+		LOG("Released Italic font data");
+	}
+	if (free_ot_font(otFonts.otBold) == EXIT_SUCCESS) {
+		LOG("Released Bold font data");
+	}
+	if (free_ot_font(otFonts.otBoldItalic) == EXIT_SUCCESS) {
+		LOG("Released BoldItalic font data");
+	}
 	return EXIT_SUCCESS;
 #else
 	WARN("OpenType support is disabled in this FBInk build");
