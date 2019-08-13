@@ -2469,6 +2469,26 @@ int
 	// Don't skip any ioctls on a first init ;)
 	return initialize_fbink(fbfd, fbink_cfg, false);
 }
+
+#ifdef FBINK_WITH_OPENTYPE
+static const char*
+    font_style_to_string(uint8_t style)
+{
+	switch (style) {
+		case FNT_REGULAR:
+			return "Regular";
+		case FNT_ITALIC:
+			return "Italic";
+		case FNT_BOLD:
+			return "Bold";
+		case FNT_BOLD_ITALIC:
+			return "Bold Italic";
+		default:
+			return "Unknown?!";
+	}
+}
+#endif    // FBINK_WITH_OPENTYPE
+
 // Load font from given file path. Up to four font styles may be used by FBInk at any given time.
 int
     fbink_add_ot_font(const char* filename UNUSED_BY_MINIMAL, FONT_STYLE_T style UNUSED_BY_MINIMAL)
@@ -2588,12 +2608,12 @@ int
 			break;
 		case FNT_BOLD_ITALIC:
 			if (free_ot_font(otFonts.otBoldItalic) == EXIT_SUCCESS) {
-				LOG("Replacing an existing BoldItalic font style!");
+				LOG("Replacing an existing Bold Italic font style!");
 			}
 			otFonts.otBoldItalic = font_info;
 			break;
 	}
-	ELOG("Font '%s' loaded for style %d", filename, style);
+	ELOG("Font '%s' loaded for style '%s'", filename, font_style_to_string(style));
 	return EXIT_SUCCESS;
 #else
 	WARN("OpenType support is disabled in this FBInk build");
@@ -2633,7 +2653,7 @@ int
 		LOG("Released Bold font data");
 	}
 	if (free_ot_font(otFonts.otBoldItalic) == EXIT_SUCCESS) {
-		LOG("Released BoldItalic font data");
+		LOG("Released Bold Italic font data");
 	}
 	return EXIT_SUCCESS;
 #else
