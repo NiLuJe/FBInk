@@ -604,6 +604,7 @@ FBINK_API int fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg);
 //       Care should be taken not to leave that pointer dangling (i.e., dump.data = NULL;),
 //       as a subsequent call to fbink_*_dump with that same struct would otherwise trip the recycling check,
 //       causing a double free!
+//       You can use the fbink_free_dump_data() helper function to do just that.
 //       There are no error codepaths after storage allocation (i.e., you are assured that it has NOT been allocated on error).
 // NOTE: On *most* devices (the exceptions being 4bpp & 16bpp fbs),
 //       the data being dumped is perfectly valid input for fbink_print_raw_data,

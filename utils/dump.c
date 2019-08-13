@@ -28,6 +28,7 @@
 #endif
 
 #include "../fbink.h"
+#include <errno.h>
 #include <linux/fb.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -281,9 +282,10 @@ int
 	// Cleanup
 cleanup:
 	// Free potential dump data...
-	free(dump.data);
-	// Don't leave it dangling so it doesn't get flagged as recyclable.
-	dump.data = NULL;
+	if (fbink_free_dump_data(&dump) == ERRCODE(EINVAL)) {
+		fprintf(stderr, "There was no dump data to release!\n");
+		rv = ERRCODE(EXIT_FAILURE);
+	}
 
 	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
 		fprintf(stderr, "Failed to close the framebuffer, aborting . . .\n");
