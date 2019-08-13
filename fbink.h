@@ -652,6 +652,17 @@ FBINK_API int fbink_region_dump(int                fbfd,
 // NOTE: This does *NOT* free data.dump!
 FBINK_API int fbink_restore(int fbfd, const FBInkConfig* restrict fbink_cfg, const FBInkDump* restrict dump);
 
+// Free the data allocated by a previous fbink_dump() or fbink_region_dump() call.
+// Returns -(ENOSYS) when image support is disabled (MINIMAL build)
+// Otherwise, returns a few different things on failure:
+//	-(EINVAL)	when the dump has already been freed.
+// dump:		Pointer to an FBInkDump struct
+// NOTE: You MUST call this when you have no further use for this specific data.
+// NOTE: But, you MAY re-use a single FBInkDump struct across different dump() calls *without* calling this in between,
+//       as dump() will implicitly free a dirty struct in order to recycle it.
+//
+FBINK_API int fbink_free_dump_data(FBInkDump* restrict dump);
+
 // Return the coordinates & dimensions of the last thing that was *drawn*
 // Returns an empty (i.e., {0, 0, 0, 0}) rectangle if nothing was drawn.
 // NOTE: These are unfiltered *framebuffer* coordinates.

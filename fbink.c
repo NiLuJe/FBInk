@@ -6705,7 +6705,7 @@ cleanup:
 #else
 	WARN("Image support is disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
-#endif
+#endif    // FBINK_WITH_IMAGE
 }
 
 // Dump a specific region of the fb
@@ -6923,7 +6923,7 @@ cleanup:
 #else
 	WARN("Image support is disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
-#endif
+#endif    // FBINK_WITH_IMAGE
 }
 
 // Restore a fb dump
@@ -7049,7 +7049,26 @@ cleanup:
 #else
 	WARN("Image support is disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
-#endif
+#endif    // FBINK_WITH_IMAGE
+}
+
+// Explicitly frees the FBInkDump *data* allocated by fbink_dump & fbink_region_dump
+int
+    fbink_free_dump_data(FBInkDump* restrict dump UNUSED_BY_MINIMAL)
+{
+#ifdef FBINK_WITH_IMAGE
+	if (dump->data) {
+		free(dump->data);
+		// Don't leave a dangling pointer, ensuring a subsequent dump() won't try to recycle this struct again.
+		dump->data = NULL;
+		return EXIT_SUCCESS;
+	} else {
+		return ERRCODE(EINVAL);
+	}
+#else
+	WARN("Image support is disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif    // FBINK_WITH_IMAGE
 }
 
 // Return a copy of the last drawn rectangle coordinates/dimensions
