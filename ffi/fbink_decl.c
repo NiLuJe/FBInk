@@ -67,6 +67,7 @@ cdecl_func(fbink_cls)
 cdecl_func(fbink_dump)
 cdecl_func(fbink_region_dump)
 cdecl_func(fbink_restore)
+cdecl_func(fbink_free_dump_data)
 
 cdecl_func(fbink_get_last_rect)
 
