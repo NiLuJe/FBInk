@@ -2671,7 +2671,7 @@ void
 {
 	fprintf(
 	    stdout,
-	    "viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isKoboNonMT=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;currentRota=%u;canRotate=%d;",
+	    "viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isKoboNonMT=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;",
 	    viewWidth,
 	    viewHeight,
 	    screenWidth,
@@ -2702,6 +2702,7 @@ void
 	    deviceQuirks.isKoboNonMT,
 	    deviceQuirks.ntxBootRota,
 	    deviceQuirks.ntxRotaQuirk,
+	    deviceQuirks.isNTX16bLandscape,
 	    vInfo.rotate,
 	    deviceQuirks.canRotate);
 }
@@ -2723,26 +2724,27 @@ void
 		    fbink_state->device_codename, deviceQuirks.deviceCodename, sizeof(fbink_state->device_codename) - 1U);
 		strncpy(
 		    fbink_state->device_platform, deviceQuirks.devicePlatform, sizeof(fbink_state->device_platform) - 1U);
-		fbink_state->device_id        = deviceQuirks.deviceId;
-		fbink_state->pen_fg_color     = penFGColor;
-		fbink_state->pen_bg_color     = penBGColor;
-		fbink_state->screen_dpi       = deviceQuirks.screenDPI;
-		fbink_state->font_w           = FONTW;
-		fbink_state->font_h           = FONTH;
-		fbink_state->max_cols         = MAXCOLS;
-		fbink_state->max_rows         = MAXROWS;
-		fbink_state->view_hori_origin = viewHoriOrigin;
-		fbink_state->view_vert_origin = viewVertOrigin;
-		fbink_state->view_vert_offset = viewVertOffset;
-		fbink_state->fontsize_mult    = FONTSIZE_MULT;
-		fbink_state->glyph_width      = glyphWidth;
-		fbink_state->glyph_height     = glyphHeight;
-		fbink_state->is_perfect_fit   = deviceQuirks.isPerfectFit;
-		fbink_state->is_kobo_non_mt   = deviceQuirks.isKoboNonMT;
-		fbink_state->ntx_boot_rota    = deviceQuirks.ntxBootRota;
-		fbink_state->ntx_rota_quirk   = deviceQuirks.ntxRotaQuirk;
-		fbink_state->current_rota     = (uint8_t) vInfo.rotate;
-		fbink_state->can_rotate       = deviceQuirks.canRotate;
+		fbink_state->device_id               = deviceQuirks.deviceId;
+		fbink_state->pen_fg_color            = penFGColor;
+		fbink_state->pen_bg_color            = penBGColor;
+		fbink_state->screen_dpi              = deviceQuirks.screenDPI;
+		fbink_state->font_w                  = FONTW;
+		fbink_state->font_h                  = FONTH;
+		fbink_state->max_cols                = MAXCOLS;
+		fbink_state->max_rows                = MAXROWS;
+		fbink_state->view_hori_origin        = viewHoriOrigin;
+		fbink_state->view_vert_origin        = viewVertOrigin;
+		fbink_state->view_vert_offset        = viewVertOffset;
+		fbink_state->fontsize_mult           = FONTSIZE_MULT;
+		fbink_state->glyph_width             = glyphWidth;
+		fbink_state->glyph_height            = glyphHeight;
+		fbink_state->is_perfect_fit          = deviceQuirks.isPerfectFit;
+		fbink_state->is_kobo_non_mt          = deviceQuirks.isKoboNonMT;
+		fbink_state->ntx_boot_rota           = deviceQuirks.ntxBootRota;
+		fbink_state->ntx_rota_quirk          = deviceQuirks.ntxRotaQuirk;
+		fbink_state->is_ntx_quirky_landscape = deviceQuirks.isNTX16bLandscape;
+		fbink_state->current_rota            = (uint8_t) vInfo.rotate;
+		fbink_state->can_rotate              = deviceQuirks.canRotate;
 	} else {
 		WARN("Err, it appears we were passed a NULL fbink_state pointer?");
 	}
