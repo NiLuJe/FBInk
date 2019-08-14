@@ -188,36 +188,36 @@ typedef enum
 // A struct to dump FBInk's internal state into, like fbink_state_dump() would, but in C ;)
 typedef struct
 {
-	long int    user_hz;                         // USER_HZ
-	const char* restrict font_name;              // fbink_cfg->fontname
-	uint32_t             view_width;             // viewWidth
-	uint32_t             view_height;            // viewHeight
-	uint32_t             screen_width;           // screenWidth
-	uint32_t             screen_height;          // screenHeight
+	long int    user_hz;                  // USER_HZ (should pretty much always be 100)
+	const char* restrict font_name;       // fbink_cfg->fontname (c.f., fontname_to_string())
+	uint32_t             view_width;      // viewWidth (MAY be different than screen_width on devices with a viewport)
+	uint32_t             view_height;     // viewHeight (ditto)
+	uint32_t             screen_width;    // screenWidth (Effective width, check isNTX16bLandscape)
+	uint32_t             screen_height;          // screenHeight (ditto)
 	uint32_t             bpp;                    // vInfo.bits_per_pixel
 	char                 device_name[16];        // deviceQuirks.deviceName
 	char                 device_codename[16];    // deviceQuirks.deviceCodename
 	char                 device_platform[16];    // deviceQuirks.devicePlatform
-	unsigned short int   device_id;              // deviceQuirks.deviceId
+	unsigned short int   device_id;              // deviceQuirks.deviceId (decimal value, even on Kindle!)
 	uint8_t              pen_fg_color;           // penFGColor
-	uint8_t              pen_bg_color;           // penFGColor
+	uint8_t              pen_bg_color;           // penBGColor
 	unsigned short int   screen_dpi;             // deviceQuirks.screenDPI
-	unsigned short int   font_w;                 // FONTW
-	unsigned short int   font_h;                 // FONTH
-	unsigned short int   max_cols;               // MAXCOLS
-	unsigned short int   max_rows;               // MAXROWS
-	uint8_t              view_hori_origin;       // viewHoriOrigin
-	uint8_t              view_vert_origin;       // viewVertOrigin
-	uint8_t              view_vert_offset;       // viewVertOffset
-	uint8_t              fontsize_mult;          // FONTSIZE_MULT
-	uint8_t              glyph_width;            // glyphWidth
-	uint8_t              glyph_height;           // glyphHeight
-	bool                 is_perfect_fit;         // deviceQuirks.isPerfectFit
-	bool                 is_kobo_non_mt;         // deviceQuirks.isKoboNonMT
-	uint8_t              ntx_boot_rota;          // deviceQuirks.ntxBootRota
-	uint8_t              ntx_rota_quirk;         // deviceQuirks.ntxRotaQuirk
-	uint8_t              current_rota;           // vInfo.rotate
-	bool                 can_rotate;             // deviceQuirks.canRotate
+	unsigned short int   font_w;                 // FONTW (effective width of a glyph cell, i.e. scaled)
+	unsigned short int   font_h;                 // FONTH (effective height of a glyph cell, i.e. scaled)
+	unsigned short int   max_cols;               // MAXCOLS (at current cell size)
+	unsigned short int   max_rows;               // MAXROWS (ditto)
+	uint8_t view_hori_origin;    // viewHoriOrigin (will be non-zero on devices with a horizontal viewport)
+	uint8_t view_vert_origin;    // viewVertOrigin (origin in px of row 0, includes viewport + viewVertOffset)
+	uint8_t view_vert_offset;    // viewVertOffset (shift in px needed to vertically balance rows)
+	uint8_t fontsize_mult;       // FONTSIZE_MULT (current cell scaling multiplier)
+	uint8_t glyph_width;         // glyphWidth (native width of a glyph cell, i.e. unscaled)
+	uint8_t glyph_height;        // glyphHeight (native height of a glyph cell, i.e. unscaled)
+	bool    is_perfect_fit;      // deviceQuirks.isPerfectFit (true if horizontal column balance is perfect)
+	bool    is_kobo_non_mt;      // deviceQuirks.isKoboNonMT (device is a Kobo with no MultiTouch input)
+	uint8_t ntx_boot_rota;       // deviceQuirks.ntxBootRota (Native rotation at boot)
+	uint8_t ntx_rota_quirk;      // deviceQuirks.ntxRotaQuirk (c.f., NTX_ROTA_INDEX_T)
+	uint8_t current_rota;        // vInfo.rotate (current rotation)
+	bool    can_rotate;          // deviceQuirks.canRotate (device has a gyro)
 } FBInkState;
 
 // What a FBInk config should look like. Perfectly sane when fully zero-initialized.
@@ -384,6 +384,8 @@ FBINK_API int fbink_free_ot_fonts(void);
 FBINK_API void fbink_state_dump(const FBInkConfig* restrict fbink_cfg);
 
 // Dump a few of our internal state variables to the FBInkState struct pointed to by fbink_state
+// NOTE: This includes quite a few useful things related to device identification, c.f., the FBInkState struct ;).
+//       You can also peek at the output of fbink -e to get a hint at what the data actually looks like.
 FBINK_API void fbink_get_state(const FBInkConfig* restrict fbink_cfg, FBInkState* restrict fbink_state);
 
 // Print a string on screen.
