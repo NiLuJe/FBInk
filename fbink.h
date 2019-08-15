@@ -739,5 +739,6 @@ FBINK_API int fbink_wait_for_usbms_processing(int fbfd, bool force_unplug);
 // print*(FBFD_AUTO, ...)
 //
 // See fbink_cmd.c for an example of the former, and KFMon for an example of the latter.
+// NOTE: Although fairly stupid in practice, utils/dump.c is less convoluted than fbink_cmd.c, making it worth a look...
 
 #endif

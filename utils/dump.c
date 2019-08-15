@@ -135,7 +135,7 @@ int
 	// Init FBInk
 	int fbfd = -1;
 	// Open framebuffer and keep it around, then setup globals.
-	if (ERRCODE(EXIT_FAILURE) == (fbfd = fbink_open())) {
+	if ((fbfd = fbink_open()) == ERRCODE(EXIT_FAILURE)) {
 		fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
