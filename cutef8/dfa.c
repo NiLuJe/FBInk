@@ -87,6 +87,8 @@ bool
 
 // Take a stab at reimplementing u8_nextchar with the dfa decoder...
 // NOTE: For shit'n giggles, libunibreak also has its own next_char implementation... (ub_get_next_char_utf8 @ unibreakdef.c)
+// NOTE: As does glib, which should ensure a fairly battle-tested implementation...
+//       (c.f., https://github.com/GNOME/glib/blob/master/glib/gutf8.c)
 uint32_t
     u8_nextchar2(const char* restrict s, size_t* restrict i)
 {
