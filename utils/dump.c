@@ -201,8 +201,8 @@ int
 		goto cleanup;
 	}
 
-	// Restore, this time with a positive crop on both sides
-	fprintf(stdout, "[06b] RESTORE w/ +CROP\n");
+	// Restore, this time with a L + T crop
+	fprintf(stdout, "[06b] RESTORE w/ L+T CROP\n");
 	dump.l_crop = 25;
 	dump.t_crop = 30;
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
@@ -214,16 +214,33 @@ int
 	dump.l_crop = 0U;
 	dump.t_crop = 0U;
 
-	// Restore, this time with a negative crop on both sides
+	// Restore, this time with a R + B crop
 	dump.r_crop = 25;
 	dump.b_crop = 30;
-	fprintf(stdout, "[06c] RESTORE w/ -CROP\n");
+	fprintf(stdout, "[06c] RESTORE w/ R+B CROP\n");
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
 	// Forget about the crop for the other tests
+	dump.r_crop = 0U;
+	dump.b_crop = 0U;
+
+	// Restore, this time with a crop on all sides
+	dump.l_crop = 15;
+	dump.t_crop = 30;
+	dump.r_crop = 20;
+	dump.b_crop = 25;
+	fprintf(stdout, "[06c] RESTORE w/ T+B+L+R CROP\n");
+	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
+		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+	// Forget about the crop for the other tests
+	dump.l_crop = 0U;
+	dump.t_crop = 0U;
 	dump.r_crop = 0U;
 	dump.b_crop = 0U;
 
