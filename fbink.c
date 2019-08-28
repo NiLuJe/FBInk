@@ -7056,7 +7056,7 @@ int
 			}
 		} else {
 			// We're going to need the amount of bytes taken per pixel...
-			uint8_t bpp = dump->bpp / 8U;
+			const uint8_t bpp = dump->bpp / 8U;
 			for (unsigned short int j = dump->y, l = 0U; l < dump->h; j++, l++) {
 				size_t fb_offset   = (size_t)(dump->x * bpp) + (j * fInfo.line_length);
 				size_t dump_offset = (size_t)(l * (dump->w * bpp));
