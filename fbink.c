@@ -6715,8 +6715,10 @@ int
 		free(dump->data);
 		dump->data = NULL;
 		// Reset the crop settings
-		dump->w_crop = 0;
-		dump->h_crop = 0;
+		dump->t_crop = 0U;
+		dump->b_crop = 0U;
+		dump->l_crop = 0U;
+		dump->r_crop = 0U;
 	}
 	// Start by allocating enough memory for a full dump of the visible screen...
 	dump->data = calloc((size_t)(fInfo.line_length * vInfo.yres), sizeof(*dump->data));
@@ -6904,8 +6906,10 @@ int
 		free(dump->data);
 		dump->data = NULL;
 		// Reset the crop settings
-		dump->w_crop = 0;
-		dump->h_crop = 0;
+		dump->t_crop = 0U;
+		dump->b_crop = 0U;
+		dump->l_crop = 0U;
+		dump->r_crop = 0U;
 	}
 	// Start by allocating enough memory for a full dump of the computed region...
 	// We're going to need the amount of bytes taken per pixel...
@@ -7044,18 +7048,22 @@ int
 		rv = ERRCODE(ENOTSUP);
 		goto cleanup;
 	}
-	if (dump->is_full && (dump->w_crop != 0 || dump->h_crop != 0)) {
+	if (dump->is_full && (dump->t_crop != 0U || dump->b_crop != 0U || dump->l_crop != 0U || dump->r_crop != 0U)) {
 		WARN("Can't crop a full-screen dump!");
 		rv = ERRCODE(ENOTSUP);
 		goto cleanup;
 	}
-	if (abs(dump->w_crop) >= dump->w) {
-		WARN("Can't crop more than the dump's width! crop: %hd vs. dump: %hu", dump->w_crop, dump->w);
+	if ((dump->l_crop + dump->r_crop) >= dump->w) {
+		WARN("Can't crop more than the dump's width! crop: %d vs. dump: %hu",
+		     (dump->l_crop + dump->r_crop),
+		     dump->w);
 		rv = ERRCODE(ENOTSUP);
 		goto cleanup;
 	}
-	if (abs(dump->h_crop) >= dump->h) {
-		WARN("Can't crop more than the dump's height! crop: %hd vs. dump: %hu", dump->h_crop, dump->h);
+	if ((dump->t_crop + dump->b_crop) >= dump->h) {
+		WARN("Can't crop more than the dump's height! crop: %d vs. dump: %hu",
+		     (dump->t_crop + dump->b_crop),
+		     dump->h);
 		rv = ERRCODE(ENOTSUP);
 		goto cleanup;
 	}
@@ -7069,7 +7077,7 @@ int
 		fullscreen_region(&region);
 	} else {
 		// NOTE: The crop codepath is perfectly safe with no cropping, it's just a little bit hairier to follow...
-		if (dump->w_crop == 0 && dump->h_crop == 0) {
+		if (dump->t_crop == 0U && dump->b_crop == 0U && dump->l_crop == 0U && dump->r_crop == 0U) {
 			// Region dump, restore line by line
 			if (dump->bpp == 4U) {
 				for (unsigned short int j = dump->y, l = 0U; l < dump->h; j++, l++) {
@@ -7092,12 +7100,12 @@ int
 			region.height = dump->h;
 		} else {
 			// Handle cropping shenanigans...
-			const unsigned short int x_skip = (unsigned short int) (dump->w_crop > 0 ? dump->w_crop : 0);
+			const unsigned short int x_skip = dump->l_crop;
 			const unsigned short int x      = (unsigned short int) (dump->x + x_skip);
-			const unsigned short int y_skip = (unsigned short int) (dump->h_crop > 0 ? dump->h_crop : 0);
+			const unsigned short int y_skip = dump->t_crop;
 			const unsigned short int y      = (unsigned short int) (dump->y + y_skip);
-			const unsigned short int w      = (unsigned short int) (dump->w - abs(dump->w_crop));
-			const unsigned short int h      = (unsigned short int) (dump->h - abs(dump->h_crop));
+			const unsigned short int w      = (unsigned short int) (dump->w - (dump->l_crop + dump->r_crop));
+			const unsigned short int h      = (unsigned short int) (dump->h - (dump->t_crop + dump->b_crop));
 			// Region dump, restore line by line
 			if (dump->bpp == 4U) {
 				for (unsigned short int j = y, l = 0U; l < h; j++, l++) {
@@ -7163,8 +7171,10 @@ int
 		dump->y       = 0U;
 		dump->w       = 0U;
 		dump->h       = 0U;
-		dump->w_crop  = 0;
-		dump->h_crop  = 0;
+		dump->t_crop  = 0U;
+		dump->b_crop  = 0U;
+		dump->l_crop  = 0U;
+		dump->r_crop  = 0U;
 		dump->rota    = 0U;
 		dump->bpp     = 0U;
 		dump->is_full = false;

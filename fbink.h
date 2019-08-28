@@ -309,11 +309,13 @@ typedef struct
 	unsigned short int      y;
 	unsigned short int      w;
 	unsigned short int      h;
-	short int w_crop;    // At restore, crop this amount of columns (in pixels, from the left if > 0, right if < 0)
-	short int h_crop;    // At restore, crop this amount of rows (in pixels, from the top if > 0, bottom if < 0)
-	uint8_t   rota;
-	uint8_t   bpp;
-	bool      is_full;
+	unsigned short int      t_crop;    // At restore, crop this amount of rows from the top (in pixels)
+	unsigned short int      b_crop;    // At restore, crop this amount of rows from the bottom (in pixels)
+	unsigned short int      l_crop;    // At restore, crop this amount of columns from the left (in pixels)
+	unsigned short int      r_crop;    // At restore, crop this amount of columns from the right (in pixels)
+	uint8_t                 rota;
+	uint8_t                 bpp;
+	bool                    is_full;
 } FBInkDump;
 
 // This maps to an mxcfb rectangle, used for fbink_get_last_rect
