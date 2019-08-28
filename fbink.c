@@ -7068,33 +7068,57 @@ int
 		memcpy(fbPtr, dump->data, (size_t)(fInfo.line_length * vInfo.yres));
 		fullscreen_region(&region);
 	} else {
-		// Handle cropping shenanigans...
-		const unsigned short int x_skip = (unsigned short int) (dump->w_crop > 0 ? dump->w_crop : 0);
-		const unsigned short int x      = (unsigned short int) (dump->x + x_skip);
-		const unsigned short int y_skip = (unsigned short int) (dump->h_crop > 0 ? dump->h_crop : 0);
-		const unsigned short int y      = (unsigned short int) (dump->y + y_skip);
-		const unsigned short int w      = (unsigned short int) (dump->w - abs(dump->w_crop));
-		const unsigned short int h      = (unsigned short int) (dump->h - abs(dump->h_crop));
-		// Region dump, restore line by line
-		if (dump->bpp == 4U) {
-			for (unsigned short int j = y, l = 0U; l < h; j++, l++) {
-				size_t fb_offset   = (size_t)(x >> 1U) + (j * fInfo.line_length);
-				size_t dump_offset = (size_t)((x_skip >> 1U) + ((y_skip + l) * (dump->w >> 1U)));
-				memcpy(fbPtr + fb_offset, dump->data + dump_offset, (size_t) w >> 1U);
+		// NOTE: The crop codepath is perfectly safe with no cropping, it's just a little bit hairier to follow...
+		if (dump->w_crop == 0 && dump->w_crop == 0) {
+			// Region dump, restore line by line
+			if (dump->bpp == 4U) {
+				for (unsigned short int j = dump->y, l = 0U; l < dump->h; j++, l++) {
+					size_t fb_offset   = (size_t)(dump->x >> 1U) + (j * fInfo.line_length);
+					size_t dump_offset = (size_t)(l * (dump->w >> 1U));
+					memcpy(fbPtr + fb_offset, dump->data + dump_offset, (size_t) dump->w >> 1U);
+				}
+			} else {
+				// We're going to need the amount of bytes taken per pixel...
+				const uint8_t bpp = dump->bpp >> 3U;
+				for (unsigned short int j = dump->y, l = 0U; l < dump->h; j++, l++) {
+					size_t fb_offset   = (size_t)(dump->x * bpp) + (j * fInfo.line_length);
+					size_t dump_offset = (size_t)(l * (dump->w * bpp));
+					memcpy(fbPtr + fb_offset, dump->data + dump_offset, (size_t) dump->w * bpp);
+				}
 			}
+			region.left   = dump->x;
+			region.top    = dump->y;
+			region.width  = dump->w;
+			region.height = dump->h;
 		} else {
-			// We're going to need the amount of bytes taken per pixel...
-			const uint8_t bpp = dump->bpp >> 3U;
-			for (unsigned short int j = y, l = 0U; l < h; j++, l++) {
-				size_t fb_offset   = (size_t)(x * bpp) + (j * fInfo.line_length);
-				size_t dump_offset = (size_t)((x_skip * bpp) + ((y_skip + l) * (dump->w * bpp)));
-				memcpy(fbPtr + fb_offset, dump->data + dump_offset, (size_t) w * bpp);
+			// Handle cropping shenanigans...
+			const unsigned short int x_skip = (unsigned short int) (dump->w_crop > 0 ? dump->w_crop : 0);
+			const unsigned short int x      = (unsigned short int) (dump->x + x_skip);
+			const unsigned short int y_skip = (unsigned short int) (dump->h_crop > 0 ? dump->h_crop : 0);
+			const unsigned short int y      = (unsigned short int) (dump->y + y_skip);
+			const unsigned short int w      = (unsigned short int) (dump->w - abs(dump->w_crop));
+			const unsigned short int h      = (unsigned short int) (dump->h - abs(dump->h_crop));
+			// Region dump, restore line by line
+			if (dump->bpp == 4U) {
+				for (unsigned short int j = y, l = 0U; l < h; j++, l++) {
+					size_t fb_offset   = (size_t)(x >> 1U) + (j * fInfo.line_length);
+					size_t dump_offset = (size_t)((x_skip >> 1U) + ((y_skip + l) * (dump->w >> 1U)));
+					memcpy(fbPtr + fb_offset, dump->data + dump_offset, (size_t) w >> 1U);
+				}
+			} else {
+				// We're going to need the amount of bytes taken per pixel...
+				const uint8_t bpp = dump->bpp >> 3U;
+				for (unsigned short int j = y, l = 0U; l < h; j++, l++) {
+					size_t fb_offset   = (size_t)(x * bpp) + (j * fInfo.line_length);
+					size_t dump_offset = (size_t)((x_skip * bpp) + ((y_skip + l) * (dump->w * bpp)));
+					memcpy(fbPtr + fb_offset, dump->data + dump_offset, (size_t) w * bpp);
+				}
 			}
+			region.left   = x;
+			region.top    = y;
+			region.width  = w;
+			region.height = h;
 		}
-		region.left   = x;
-		region.top    = y;
-		region.width  = w;
-		region.height = h;
 	}
 
 	// And now, we can refresh the screen
