@@ -401,7 +401,8 @@ FBINK_API void fbink_get_state(const FBInkConfig* restrict fbink_cfg, FBInkState
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // string:		UTF-8 encoded string to print
-// fbink_cfg:		Pointer to an FBInkConfig struct
+// fbink_cfg:		Pointer to an FBInkConfig struct.
+//				Honors every field not specifically related to image/dump support.
 FBINK_API int fbink_print(int fbfd, const char* restrict string, const FBInkConfig* restrict fbink_cfg);
 
 // Print a string using an OpenType font. Note that the caller MUST init with fbink_init_ot() FIRST.
@@ -425,7 +426,7 @@ FBINK_API int fbink_print(int fbfd, const char* restrict string, const FBInkConf
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // string:		UTF-8 encoded string to print
 // cfg:			Pointer to an FBInkOTConfig struct.
-// fbink_cfg:		Optional pointer to an FBInkConfig struct. If set, the options
+// fbink_cfg:		Optional pointer to an FBInkConfig struct. If set, the fields
 //				is_inverted, is_flashing, is_cleared, is_centered, is_halfway,
 //				is_overlay, is_fgless, is_bgless, fg_color, bg_color, valign, halign,
 //				wfm_mode, is_dithered, is_nightmode, no_refresh will be honored.
@@ -537,7 +538,9 @@ FBINK_API int fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkCo
 //				will attempt to read image data from stdin.
 // x_off:		Target coordinates, x (honors negative offsets)
 // y_off:		Target coordinates, y (honors negative offsets)
-// fbink_cfg:		Pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
+// fbink_cfg:		Pointer to an FBInkConfig struct.
+//				Where positioning is concerned, honors any combination of halign/valign, row/col & x_off/y_off;
+//				otherwise, honors pretty much every other field not specifically concerned with text rendering.
 // NOTE: Much like fbink_print_raw_data, for best performance,
 //       an image that decodes in a pixel format close to the one used by the target device fb is best.
 //       Generally, that'd be a Grayscale (color-type 0) PNG, ideally dithered down to the eInk palette
@@ -572,7 +575,9 @@ FBINK_API int fbink_print_image(int                fbfd,
 //				do not pass a padded length (or pad the data itself in any way)!
 // x_off:		Target coordinates, x (honors negative offsets)
 // y_off:		Target coordinates, y (honors negative offsets)
-// fbink_cfg:		Pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off)
+// fbink_cfg:		Pointer to an FBInkConfig struct.
+//				Where positioning is concerned, honors any combination of halign/valign, row/col & x_off/y_off;
+//				otherwise, honors pretty much every other field not specifically concerned with text rendering.
 // NOTE: While we do accept a various range of input formats (as far as component interleaving is concerned),
 //       our display code only handles a few specific combinations, depending on the target hardware.
 //       To make everyone happy, this will transparently handle the pixel format conversion *as needed*,
