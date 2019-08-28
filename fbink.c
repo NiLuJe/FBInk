@@ -6714,6 +6714,9 @@ int
 		LOG("Recycling FBinkDump!");
 		free(dump->data);
 		dump->data = NULL;
+		// Reset the crop settings
+		dump->w_crop = 0;
+		dump->h_crop = 0;
 	}
 	// Start by allocating enough memory for a full dump of the visible screen...
 	dump->data = calloc((size_t)(fInfo.line_length * vInfo.yres), sizeof(*dump->data));
@@ -6900,6 +6903,9 @@ int
 		LOG("Recycling FBinkDump!");
 		free(dump->data);
 		dump->data = NULL;
+		// Reset the crop settings
+		dump->w_crop = 0;
+		dump->h_crop = 0;
 	}
 	// Start by allocating enough memory for a full dump of the computed region...
 	// We're going to need the amount of bytes taken per pixel...
@@ -7038,6 +7044,21 @@ int
 		rv = ERRCODE(ENOTSUP);
 		goto cleanup;
 	}
+	if (dump->is_full && (dump->w_crop != 0 || dump->h_crop != 0)) {
+		WARN("Can't crop a full-screen dump!");
+		rv = ERRCODE(ENOTSUP);
+		goto cleanup;
+	}
+	if (abs(dump->w_crop) >= dump->w) {
+		WARN("Can't crop more than the dump's width! crop: %hd vs. dump: %hu", dump->w_crop, dump->w);
+		rv = ERRCODE(ENOTSUP);
+		goto cleanup;
+	}
+	if (abs(dump->h_crop) >= dump->h) {
+		WARN("Can't crop more than the dump's height! crop: %hd vs. dump: %hu", dump->h_crop, dump->h);
+		rv = ERRCODE(ENOTSUP);
+		goto cleanup;
+	}
 
 	// We'll need a region...
 	struct mxcfb_rect region;
@@ -7047,26 +7068,33 @@ int
 		memcpy(fbPtr, dump->data, (size_t)(fInfo.line_length * vInfo.yres));
 		fullscreen_region(&region);
 	} else {
+		// Handle cropping shenanigans...
+		const unsigned short int x_skip = (dump->w_crop > 0 ? dump->w_crop : 0U);
+		const unsigned short int x      = dump->x + x_skip;
+		const unsigned short int y_skip = (dump->h_crop > 0 ? dump->h_crop : 0U);
+		const unsigned short int y      = dump->y + y_skip;
+		const unsigned short int w      = dump->w - abs(dump->w_crop);
+		const unsigned short int h      = dump->h - abs(dump->h_crop);
 		// Region dump, restore line by line
 		if (dump->bpp == 4U) {
-			for (unsigned short int j = dump->y, l = 0U; l < dump->h; j++, l++) {
-				size_t fb_offset   = (size_t)(dump->x >> 1) + (j * fInfo.line_length);
-				size_t dump_offset = (size_t)(l * (dump->w >> 1));
-				memcpy(fbPtr + fb_offset, dump->data + dump_offset, (size_t) dump->w >> 1);
+			for (unsigned short int j = y, l = 0U; l < h; j++, l++) {
+				size_t fb_offset   = (size_t)(x >> 1U) + (j * fInfo.line_length);
+				size_t dump_offset = (size_t)((x_skip >> 1U) + ((y_skip + l) * (dump->w >> 1U)));
+				memcpy(fbPtr + fb_offset, dump->data + dump_offset, (size_t) w >> 1U);
 			}
 		} else {
 			// We're going to need the amount of bytes taken per pixel...
-			const uint8_t bpp = dump->bpp / 8U;
-			for (unsigned short int j = dump->y, l = 0U; l < dump->h; j++, l++) {
-				size_t fb_offset   = (size_t)(dump->x * bpp) + (j * fInfo.line_length);
-				size_t dump_offset = (size_t)(l * (dump->w * bpp));
-				memcpy(fbPtr + fb_offset, dump->data + dump_offset, (size_t) dump->w * bpp);
+			const uint8_t bpp = dump->bpp >> 3U;
+			for (unsigned short int j = y, l = 0U; l < h; j++, l++) {
+				size_t fb_offset   = (size_t)(x * bpp) + (j * fInfo.line_length);
+				size_t dump_offset = (size_t)((x_skip * bpp) + ((y_skip + l) * (dump->w * bpp)));
+				memcpy(fbPtr + fb_offset, dump->data + dump_offset, (size_t) w * bpp);
 			}
 		}
-		region.left   = dump->x;
-		region.top    = dump->y;
-		region.width  = dump->w;
-		region.height = dump->h;
+		region.left   = x;
+		region.top    = y;
+		region.width  = w;
+		region.height = h;
 	}
 
 	// And now, we can refresh the screen
@@ -7111,6 +7139,8 @@ int
 		dump->y       = 0U;
 		dump->w       = 0U;
 		dump->h       = 0U;
+		dump->w_crop  = 0;
+		dump->h_crop  = 0;
 		dump->rota    = 0U;
 		dump->bpp     = 0U;
 		dump->is_full = false;

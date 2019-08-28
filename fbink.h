@@ -309,9 +309,11 @@ typedef struct
 	unsigned short int      y;
 	unsigned short int      w;
 	unsigned short int      h;
-	uint8_t                 rota;
-	uint8_t                 bpp;
-	bool                    is_full;
+	short int w_crop;    // At restore, crop this amount of columns (in pixels, from the left if > 0, right if < 0)
+	short int h_crop;    // At restore, crop this amount of rows (in pixels, from the top if > 0, bottom if < 0)
+	uint8_t   rota;
+	uint8_t   bpp;
+	bool      is_full;
 } FBInkDump;
 
 // This maps to an mxcfb rectangle, used for fbink_get_last_rect
@@ -614,6 +616,7 @@ FBINK_API int fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg);
 //       causing a double free!
 //       You can use the fbink_free_dump_data() helper function to do just that.
 //       There are no error codepaths after storage allocation (i.e., you are assured that it has NOT been allocated on error).
+//       Note that a recycling *will* clear the crop settings!
 // NOTE: On *most* devices (the exceptions being 4bpp & 16bpp fbs),
 //       the data being dumped is perfectly valid input for fbink_print_raw_data,
 //       in case you'd ever want to do some more exotic things with it...
@@ -642,7 +645,7 @@ FBINK_API int fbink_region_dump(int                fbfd,
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
 // Otherwise, returns a few different things on failure:
 //	-(ENOTSUP)	when the dump cannot be restored because it wasn't taken in the current bitdepth and/or rotation,
-//			or because it's wider/taller/larger than the current framebuffer.
+//			or because it's wider/taller/larger than the current framebuffer, or if the crop is invalid.
 //	-(EINVAL)	when there's no data to restore
 // fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
@@ -658,6 +661,10 @@ FBINK_API int fbink_region_dump(int                fbfd,
 //       c.f., the last few tests in utils/dump.c for highly convoluted examples that I don't recommend replicating in production.
 // NOTE: "current" actually means "at last init/reinit time".
 //       Call fbink_reinit first if you really want to make sure bitdepth/rotation still match.
+// NOTE: If you need to crop a dump, you can do so via the w_crop & h_crop fields of the FBInkDump struct.
+//       These are the only fields you should ever modify yourself.
+//       Cropping will be done in-place (i.e., don't tweak x & y to compensate for positioning yourself)!
+//       You'll also need to flip the is_full field if you ever need to crop a full dump.
 // NOTE: This does *NOT* free data.dump!
 FBINK_API int fbink_restore(int fbfd, const FBInkConfig* restrict fbink_cfg, const FBInkDump* restrict dump);
 
