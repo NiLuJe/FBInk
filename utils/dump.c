@@ -201,6 +201,29 @@ int
 		goto cleanup;
 	}
 
+	// Restore, this time with a positive crop on both sides
+	fprintf(stdout, "[06b] RESTORE w/ +CROP\n");
+	dump.w_crop = 25;
+	dump.h_crop = 30;
+	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
+		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// Restore, this time with a negative crop on both sides
+	dump.w_crop = -25;
+	dump.h_crop = -30;
+	fprintf(stdout, "[06c] RESTORE w/ -CROP\n");
+	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
+		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+	// Forget about the crop for the other tests
+	dump.w_crop = 0;
+	dump.h_crop = 0;
+
 	// And now for some fun stuff, provided we're starting from a 32bpp fb...
 	FBInkState fbink_state = { 0 };
 	fbink_get_state(&fbink_cfg, &fbink_state);
