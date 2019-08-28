@@ -7069,7 +7069,7 @@ int
 		fullscreen_region(&region);
 	} else {
 		// NOTE: The crop codepath is perfectly safe with no cropping, it's just a little bit hairier to follow...
-		if (dump->w_crop == 0 && dump->w_crop == 0) {
+		if (dump->w_crop == 0 && dump->h_crop == 0) {
 			// Region dump, restore line by line
 			if (dump->bpp == 4U) {
 				for (unsigned short int j = dump->y, l = 0U; l < dump->h; j++, l++) {
