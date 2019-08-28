@@ -663,7 +663,7 @@ FBINK_API int fbink_region_dump(int                fbfd,
 //       c.f., the last few tests in utils/dump.c for highly convoluted examples that I don't recommend replicating in production.
 // NOTE: "current" actually means "at last init/reinit time".
 //       Call fbink_reinit first if you really want to make sure bitdepth/rotation still match.
-// NOTE: If you need to crop a dump, you can do so via the w_crop & h_crop fields of the FBInkDump struct.
+// NOTE: If you need to crop a dump, you can do so via the *_crop fields of the FBInkDump struct.
 //       These are the only fields you should ever modify yourself.
 //       Cropping will be done in-place (i.e., don't tweak x & y to compensate for positioning yourself)!
 //       You'll also need to flip the is_full field if you ever need to crop a full dump.
