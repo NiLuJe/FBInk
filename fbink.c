@@ -7069,12 +7069,12 @@ int
 		fullscreen_region(&region);
 	} else {
 		// Handle cropping shenanigans...
-		const unsigned short int x_skip = (dump->w_crop > 0 ? dump->w_crop : 0U);
-		const unsigned short int x      = dump->x + x_skip;
-		const unsigned short int y_skip = (dump->h_crop > 0 ? dump->h_crop : 0U);
-		const unsigned short int y      = dump->y + y_skip;
-		const unsigned short int w      = dump->w - abs(dump->w_crop);
-		const unsigned short int h      = dump->h - abs(dump->h_crop);
+		const unsigned short int x_skip = (unsigned short int) (dump->w_crop > 0 ? dump->w_crop : 0);
+		const unsigned short int x      = (unsigned short int) (dump->x + x_skip);
+		const unsigned short int y_skip = (unsigned short int) (dump->h_crop > 0 ? dump->h_crop : 0);
+		const unsigned short int y      = (unsigned short int) (dump->y + y_skip);
+		const unsigned short int w      = (unsigned short int) (dump->w - abs(dump->w_crop));
+		const unsigned short int h      = (unsigned short int) (dump->h - abs(dump->h_crop));
 		// Region dump, restore line by line
 		if (dump->bpp == 4U) {
 			for (unsigned short int j = y, l = 0U; l < h; j++, l++) {
