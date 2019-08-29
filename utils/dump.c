@@ -33,6 +33,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/ioctl.h>
+#include <unistd.h>
 
 // We want to return negative values on failure, always
 #define ERRCODE(e) (-(e))
@@ -232,6 +233,7 @@ int
 	}
 	// Forget about the crop for the other tests
 	dump.cropped = (const FBInkRect){ 0U };
+	//sleep(1);
 
 	// Restore, this time with a negative L + T crop
 	fprintf(stdout, "[06b-] RESTORE w/ (-) L+T CROP\n");
@@ -247,6 +249,7 @@ int
 	}
 	// Forget about the crop for the other tests
 	dump.cropped = (const FBInkRect){ 0U };
+	//sleep(1);
 
 	// Restore, this time with a positive R + B crop
 	dump.cropped = dump.area;
@@ -260,12 +263,13 @@ int
 	}
 	// Forget about the crop for the other tests
 	dump.cropped = (const FBInkRect){ 0U };
+	//sleep(1);
 
 	// Restore, this time with a negative R + B crop (i.e., the overlap will match the full dump area)
 	dump.cropped = dump.area;
 	dump.cropped.width += 25;
 	dump.cropped.height += 30;
-	fprintf(stdout, "[06c+] RESTORE w/ (-) R+B CROP\n");
+	fprintf(stdout, "[06c-] RESTORE w/ (-) R+B CROP\n");
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
@@ -273,6 +277,7 @@ int
 	}
 	// Forget about the crop for the other tests
 	dump.cropped = (const FBInkRect){ 0U };
+	//sleep(1);
 
 	// Restore, this time with a crop on all sides
 	dump.cropped = dump.area;
@@ -285,6 +290,21 @@ int
 	fprintf(stdout, "[06c] RESTORE w/ T+B+L+R CROP\n");
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+	// Forget about the crop for the other tests
+	dump.cropped = (const FBInkRect){ 0U };
+	//sleep(1);
+
+	// This should fail to restore (no overlap)
+	dump.cropped = dump.area;
+	dump.cropped.left += dump.area.width;
+	fprintf(stdout, "[06c] RESTORE w/ broken CROP\n");
+	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
+		fprintf(stderr, "Failed to restore fb, as expected :)\n");
+	} else {
+		fprintf(stderr, "Err, dump was restored *despite* a non-overlapping crop ?!\n");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}

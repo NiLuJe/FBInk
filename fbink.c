@@ -7158,17 +7158,17 @@ int
 			    MIN(dump->area.top + dump->area.height, dump->cropped.top + dump->cropped.height);
 			const unsigned short int w = x2 - x1;
 			const unsigned short int h = y2 - y1;
-			LOG("AREA: (%hu, %hu) %hux%hu",
+			LOG("The dump area (%hu, %hu) %hux%hu",
 			    dump->area.left,
 			    dump->area.top,
 			    dump->area.width,
 			    dump->area.height);
-			LOG("CROP: (%hu, %hu) %hux%hu",
+			LOG("and crop rectangle (%hu, %hu) %hux%hu",
 			    dump->cropped.left,
 			    dump->cropped.top,
 			    dump->cropped.width,
 			    dump->cropped.height);
-			LOG("OVERLAP: (%hu, %hu, %hu, %hu) %hux%hu", x1, y1, x2, y2, w, h);
+			LOG("intersect as (%hu, %hu, %hu, %hu) %hux%hu", x1, y1, x2, y2, w, h);
 			// Region dump, restore line by line
 			if (dump->bpp == 4U) {
 				for (unsigned short int j = y, l = 0U; l < h; j++, l++) {
