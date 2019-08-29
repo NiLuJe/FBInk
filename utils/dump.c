@@ -221,10 +221,10 @@ int
 
 	// Restore, this time with a positive L + T crop
 	fprintf(stdout, "[06b+] RESTORE w/ (+) L+T CROP\n");
-	dump.cropped = dump.area;
-	dump.cropped.left += 25;
+	dump.cropped      = dump.area;
+	dump.cropped.left = (unsigned short int) (dump.cropped.left + 25U);
 	//dump.cropped.width -= 25;	// Not strictly necessary, will be computed when building the intersection rectangle
-	dump.cropped.top += 30;
+	dump.cropped.top = (unsigned short int) (dump.cropped.top + 30U);
 	//dump.cropped.height -= 30;	// Ditto
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
@@ -238,9 +238,9 @@ int
 	// Restore, this time with a negative L + T crop
 	fprintf(stdout, "[06b-] RESTORE w/ (-) L+T CROP\n");
 	dump.cropped      = dump.area;
-	dump.cropped.left = MAX(0, dump.cropped.left - 25);
+	dump.cropped.left = (unsigned short int) MAX(0, dump.cropped.left - 25);
 	//dump.cropped.width -= 25;	// Not strictly necessary, will be computed when building the intersection rectangle
-	dump.cropped.top -= 30;
+	dump.cropped.top = (unsigned short int) MAX(0, dump.cropped.top - 30);
 	//dump.cropped.height -= 30;	// Ditto
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
@@ -252,9 +252,9 @@ int
 	//sleep(1);
 
 	// Restore, this time with a positive R + B crop
-	dump.cropped = dump.area;
-	dump.cropped.width -= 25;
-	dump.cropped.height -= 30;
+	dump.cropped        = dump.area;
+	dump.cropped.width  = (unsigned short int) MAX(0, dump.cropped.width - 25);
+	dump.cropped.height = (unsigned short int) MAX(0, dump.cropped.height - 30);
 	fprintf(stdout, "[06c+] RESTORE w/ (+) R+B CROP\n");
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
@@ -266,9 +266,9 @@ int
 	//sleep(1);
 
 	// Restore, this time with a negative R + B crop (i.e., the overlap will match the full dump area)
-	dump.cropped = dump.area;
-	dump.cropped.width += 25;
-	dump.cropped.height += 30;
+	dump.cropped        = dump.area;
+	dump.cropped.width  = (unsigned short int) (dump.cropped.width + 25U);
+	dump.cropped.height = (unsigned short int) (dump.cropped.height + 30U);
 	fprintf(stdout, "[06c-] RESTORE w/ (-) R+B CROP\n");
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
@@ -280,13 +280,13 @@ int
 	//sleep(1);
 
 	// Restore, this time with a crop on all sides
-	dump.cropped = dump.area;
-	dump.cropped.left += 15;
-	dump.cropped.width -= 15;
-	dump.cropped.top += 30;
-	dump.cropped.height -= 30;
-	dump.cropped.width -= 20;
-	dump.cropped.height -= 25;
+	dump.cropped        = dump.area;
+	dump.cropped.left   = (unsigned short int) (dump.cropped.left + 15U);
+	dump.cropped.width  = (unsigned short int) MAX(0, dump.cropped.width - 15);
+	dump.cropped.top    = (unsigned short int) (dump.cropped.top + 30U);
+	dump.cropped.height = (unsigned short int) MAX(0, dump.cropped.height - 30);
+	dump.cropped.width  = (unsigned short int) MAX(0, dump.cropped.width - 20);
+	dump.cropped.height = (unsigned short int) MAX(0, dump.cropped.height - 25);
 	fprintf(stdout, "[06c] RESTORE w/ T+B+L+R CROP\n");
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
@@ -298,8 +298,8 @@ int
 	//sleep(1);
 
 	// This should fail to restore (no overlap)
-	dump.cropped = dump.area;
-	dump.cropped.left += dump.area.width;
+	dump.cropped      = dump.area;
+	dump.cropped.left = (unsigned short int) (dump.cropped.left + dump.area.width);
 	fprintf(stdout, "[06c] RESTORE w/ broken CROP\n");
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, as expected :)\n");
