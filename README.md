@@ -31,9 +31,9 @@ As an example of usage in the wild, see [KFMon](https://github.com/NiLuJe/kfmon)
 
 ## How can I tinker with it?
 
-The tool is available both as a commandline utility, and as a shared or static library for C projects (beware, though, it's licensed under the GPLv3+, not the LGPL).
-See the [public header](fbink.h) for basic API usage.
-Launch the `fbink` tool with no argument for a quick manual & rundown of its capabilities.
+A CLI utility is available, built around the same public API that can be used via a shared or static library for C projects, or via FFI in other languages (beware, though, it's licensed under the GPLv3+, not the LGPL).
+The gist of the documentation is composed of the various comments in the [public header](fbink.h), detailing how the API can be used, and what for. Don't hesitate to contact me if things appear unclear!
+You can also launch the `fbink` CLI tool itself with no argument for a quick manual & rundown of its capabilities.
 
 NOTE: It generally makes *NO* attempt at handling software rotation, because that currently appears to be the right thing to do with both current Kobo FW versions and on Kindle.
 YMMV on older FW, or if something else is fudging with fb rotation, or if your application is implementing rotation in software (i.e., a rotated viewport).
