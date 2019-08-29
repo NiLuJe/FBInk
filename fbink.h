@@ -51,6 +51,9 @@
 #	define FBINK_LOCAL
 #endif
 
+//
+////
+//
 // Magic number for automatic fbfd handling
 #define FBFD_AUTO -1
 
@@ -224,32 +227,31 @@ typedef struct
 // What a FBInk config should look like. Perfectly sane when fully zero-initialized.
 typedef struct
 {
-	short int row;             // y axis (i.e., line), counts down from the bottom of the screen if negative
-	short int col;             // x axis (i.e., column), counts down from the right edge of the screen if negative
-	uint8_t   fontmult;        // Font scaling multiplier (i.e., 4 -> x4), 0 means automatic.
-	uint8_t   fontname;        // Request a specific font (c.f., FONT_INDEX_T enum)
-	bool      is_inverted;     // Invert colors.
-				   // This is *NOT* mutually exclusive with is_nightmode, and is *always* supported.
-	bool      is_flashing;     // Request a black flash on refresh
-	bool      is_cleared;      // Clear the screen beforehand (honors is_inverted)
-	bool      is_centered;     // Center the text (horizontally)
-	short int hoffset;         // Horizontal offset (in pixels) for text position
-	short int voffset;         // Vertical offset (in pixels) for text position
-	bool      is_halfway;      // Vertically center the text, honoring row offsets
-	bool      is_padded;       // Pad the text with blanks (on the left, or on both sides if is_centered)
-	bool      is_rpadded;      // Right pad the text with blanks
-	uint8_t   fg_color;        // Requested foreground color for text (c.f., FG_COLOR_INDEX_T enum)
-	uint8_t   bg_color;        // Requested background color for text (c.f., BG_COLOR_INDEX_T enum)
-	bool      is_overlay;      // Don't draw bg, use inverse of fb's underlying pixel as pen fg color
-	bool      is_bgless;       // Don't draw bg (mutually exclusive with is_overlay)
-	bool      is_fgless;       // Don't draw fg (takes precendence over is_overlay/is_bgless)
-	bool      no_viewport;     // Ignore viewport corrections, whether hardware-related on Kobo, or to center rows
-	bool      is_verbose;      // Print verbose diagnostic informations on stdout
-	bool      is_quiet;        // Hide fbink_init()'s hardware setup info (sent to stderr)
-	bool      ignore_alpha;    // Ignore any potential alpha channel in source image (i.e., flatten the image)
-	uint8_t
-		halign;    // Horizontal alignment of images/dumps (NONE/LEFT, CENTER, EDGE/RIGHT; c.f., ALIGN_INDEX_T enum)
-	uint8_t valign;    // Vertical alignment of images/dumps (NONE/TOP, CENTER, EDGE/BOTTOM; c.f., ALIGN_INDEX_T enum)
+	short int row;              // y axis (i.e., line), counts down from the bottom of the screen if negative
+	short int col;              // x axis (i.e., column), counts down from the right edge of the screen if negative
+	uint8_t   fontmult;         // Font scaling multiplier (i.e., 4 -> x4), 0 means automatic.
+	uint8_t   fontname;         // Request a specific font (c.f., FONT_INDEX_T enum)
+	bool      is_inverted;      // Invert colors.
+				    // This is *NOT* mutually exclusive with is_nightmode, and is *always* supported.
+	bool      is_flashing;      // Request a black flash on refresh
+	bool      is_cleared;       // Clear the screen beforehand (honors is_inverted)
+	bool      is_centered;      // Center the text (horizontally)
+	short int hoffset;          // Horizontal offset (in pixels) for text position
+	short int voffset;          // Vertical offset (in pixels) for text position
+	bool      is_halfway;       // Vertically center the text, honoring row offsets
+	bool      is_padded;        // Pad the text with blanks (on the left, or on both sides if is_centered)
+	bool      is_rpadded;       // Right pad the text with blanks
+	uint8_t   fg_color;         // Requested foreground color for text (c.f., FG_COLOR_INDEX_T enum)
+	uint8_t   bg_color;         // Requested background color for text (c.f., BG_COLOR_INDEX_T enum)
+	bool      is_overlay;       // Don't draw bg and use inverse of fb's underlying pixel as pen fg color
+	bool      is_bgless;        // Don't draw bg (mutually exclusive with is_overlay)
+	bool      is_fgless;        // Don't draw fg (takes precendence over is_overlay/is_bgless)
+	bool      no_viewport;      // Ignore viewport corrections, whether hardware-related on Kobo, or to center rows
+	bool      is_verbose;       // Print verbose diagnostic informations on stdout
+	bool      is_quiet;         // Hide fbink_init()'s hardware setup info (sent to stderr)
+	bool      ignore_alpha;     // Ignore any potential alpha channel in source image (i.e., flatten the image)
+	uint8_t   halign;           // Horizontal alignment of images/dumps (c.f., ALIGN_INDEX_T enum)
+	uint8_t   valign;           // Vertical alignment of images/dumps (c.f., ALIGN_INDEX_T enum)
 	short int scaled_width;     // Output width of images/dumps (0 for no scaling, -1 for viewport width)
 	short int scaled_height;    // Output height of images/dumps (0 for no scaling, -1 for viewport height)
 				    // If only *one* of them is left at 0, the image's aspect ratio will be honored.
@@ -271,9 +273,9 @@ typedef struct
 {
 	struct
 	{
-		short int top;       // Top margin in pixels (if negative, count backwards from the bottom edge)
+		short int top;       // Top margin in pixels (if negative, counts backwards from the bottom edge)
 		short int bottom;    // Bottom margin in pixels (supports negative values, too)
-		short int left;      // Left margin in pixels (if negative, count backwards from the right edge)
+		short int left;      // Left margin in pixels (if negative, counts backwards from the right edge)
 		short int right;     // Right margin in pixels (supports negative values, too)
 	} margins;
 	float              size_pt;         // Size of text in points. If not set (0.0f), defaults to 12pt
@@ -292,10 +294,9 @@ typedef struct
 // for instance if you want to dynamically compute a best-fit font size for n lines in a specific area.
 typedef struct
 {
-	unsigned short int
-			   computed_lines;    // Expected amount of lines needed to print the string, according to font metrics.
-	unsigned short int rendered_lines;    // Actually rendered amount of lines
-					      // Will stay 0 in case of an early abort (or a compute_only run),
+	unsigned short int computed_lines;    // Expected amount of lines needed, according to font metrics.
+	unsigned short int rendered_lines;    // Actually rendered amount of lines.
+	//                                       Will stay 0 in case of an early abort (or a compute_only run),
 	//                                       or < computed_lines in case of an unexpected truncation due to broken metrics.
 	bool truncated;    // true if the string was truncated (at computation or rendering time).
 } FBInkOTFit;
@@ -321,6 +322,9 @@ typedef struct
 	bool      is_full;
 } FBInkDump;
 
+//
+////
+//
 // NOTE: Unless otherwise specified,
 //       stuff returns a negative value (usually -(EXIT_FAILURE)) on failure & EXIT_SUCCESS otherwise ;).
 
@@ -328,7 +332,7 @@ typedef struct
 FBINK_API const char* fbink_version(void) __attribute__((const));
 
 // Open the framebuffer character device,
-// Returns the newly opened file descriptor
+// and returns the newly opened file descriptor
 FBINK_API int fbink_open(void);
 
 // Unmap the framebuffer (if need be) and close its file descriptor
@@ -338,12 +342,12 @@ FBINK_API int fbink_open(void);
 FBINK_API int fbink_close(int fbfd);
 
 // Initialize internal variables keeping track of the framebuffer's configuration and state, as well as the device's hardware.
-// MUST be called at least *once* before any fbink_print* or fbink dump/restore functions.
+// MUST be called at least *once* before any fbink_print* or fbink_dump/restore functions.
 // CAN safely be called multiple times,
 //     but doing so is only necessary if the framebuffer's state has changed (although fbink_reinit is preferred in this case),
 //     or if you modified one of the FBInkConfig fields that affects its results (listed below).
 // fbfd:		Open file descriptor to the framebuffer character device,
-//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
+//				if set to FBFD_AUTO, the fb is opened for the duration of this call
 // fbink_cfg:		Pointer to an FBInkConfig struct
 //				If you wish to customize them, the fields:
 //				is_centered, fontmult, fontname, fg_color, bg_color,
@@ -458,7 +462,7 @@ FBINK_API int fbink_printf(int                  fbfd,
 
 // A simple wrapper around the internal screen refresh handling, without requiring you to include einkfb/mxcfb headers
 // fbfd:		Open file descriptor to the framebuffer character device,
-//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
+//				if set to FBFD_AUTO, the fb is opened for the duration of this call
 // region_top:		top (y) field of an mxcfb rectangle
 // region_left:		left (x) field of an mxcfb rectangle
 // region_width:	width field of an mxcfb rectangle
@@ -506,13 +510,13 @@ FBINK_API bool fbink_is_fb_quirky(void) __attribute__((pure, deprecated));
 // NOTE: Using fbink_reinit does NOT lift the requirement of having to run fbink_init at least ONCE,
 //       i.e., you cannot replace the initial fbink_init call by fbink_reinit!
 // Returns -(ENOSYS) on Kindle, where this is not needed
-// fdfd:		Open file descriptor to the framebuffer character device,
-//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
+// fbfd:		Open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened for the duration of this call
 // fbink_cfg:		Pointer to an FBInkConfig struct
 FBINK_API int fbink_reinit(int fbfd, const FBInkConfig* restrict fbink_cfg);
 
 // Print a full-width progress bar on screen
-// fdfd:		Open file descriptor to the framebuffer character device,
+// fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // percentage:		0-100 value to set the progress bar's progression
 // fbink_cfg:		Pointer to an FBInkConfig struct (ignores is_overlay, col & hoffset;
@@ -520,7 +524,7 @@ FBINK_API int fbink_reinit(int fbfd, const FBInkConfig* restrict fbink_cfg);
 FBINK_API int fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInkConfig* restrict fbink_cfg);
 
 // Print a full-width activity bar on screen (i.e., an infinite progress bar)
-// fdfd:		Open file descriptor to the framebuffer character device,
+// fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // progress:		0-16 value to set the progress thumb's position in the bar
 // fbink_cfg:		Pointer to an FBInkConfig struct (ignores is_overlay, is_bgless, is_fgless, col & hoffset;
@@ -529,7 +533,7 @@ FBINK_API int fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkCo
 
 // Print an image on screen
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
-// fdfd:		Open file descriptor to the framebuffer character device,
+// fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // filename:		Path to the image file (Supported formats: JPEG, PNG, TGA, BMP, GIF & PNM)
 //				if set to "-" and stdin is not attached to a terminal,
@@ -562,7 +566,7 @@ FBINK_API int fbink_print_image(int                fbfd,
 
 // Print raw scanlines on screen
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
-// fdfd:		Open file descriptor to the framebuffer character device,
+// fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // data:		Pointer to a buffer holding the image data (Supported pixel formats: Y/YA/RGB/RGBA,
 //				8-bit components, the first pixel should be the top-left of the image).
@@ -593,7 +597,7 @@ FBINK_API int fbink_print_raw_data(int                fbfd,
 				   const FBInkConfig* restrict fbink_cfg);
 
 // Just clear the screen, eInk refresh included (or not ;)).
-// fdfd:		Open file descriptor to the framebuffer character device,
+// fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // fbink_cfg:		Pointer to an FBInkConfig struct (honors is_inverted, wfm_mode, is_dithered, is_nightmode, is_flashing,
 //				as well as no_refresh, pen_fg_color & pen_bg_color)
@@ -601,7 +605,7 @@ FBINK_API int fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg);
 
 // Dump the full screen
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
-// fdfd:		Open file descriptor to the framebuffer character device,
+// fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // dump:		Pointer to an FBInkDump struct (will be recycled if already used)
 // NOTE: As with all FBInk structs, FBInkDump *must* be zero-initialized.
@@ -620,7 +624,7 @@ FBINK_API int fbink_dump(int fbfd, FBInkDump* restrict dump);
 
 // Dump a specific region of the screen
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
-// fdfd:		Open file descriptor to the framebuffer character device,
+// fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // x_off:		Dump coordinates, x (honors negative offsets)
 // y_off:		Dump coordinates, y (honors negative offsets)
@@ -643,7 +647,7 @@ FBINK_API int fbink_region_dump(int                fbfd,
 //	-(ENOTSUP)	when the dump cannot be restored because it wasn't taken in the current bitdepth and/or rotation,
 //			or because it's wider/taller/larger than the current framebuffer, or if the crop is invalid (OOB).
 //	-(EINVAL)	when there's no data to restore
-// fdfd:		Open file descriptor to the framebuffer character device,
+// fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // fbink_cfg:		Pointer to an FBInkConfig struct (honors wfm_mode, is_dithered, is_nightmode, is_flashing & no_refresh)
 // dump:		Pointer to an FBInkDump struct, as setup by fbink_dump or fbink_region_dump
@@ -705,7 +709,7 @@ FBINK_API FBInkRect fbink_get_last_rect(void);
 // NOTE: For the duration of this call, screen updates should be kept to a minimum: in particular,
 //       we of course expect to be able to see the "Connect" button,
 //       but we also expect the middle section of the final line to be untouched!
-// fdfd:		Open file descriptor to the framebuffer character device,
+// fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // press_button:	Generate an input event to press the button if true,
 //				MAY sleep up to 5s to confirm that input was successful! (unless nosleep is true)
@@ -725,7 +729,7 @@ FBINK_API int fbink_button_scan(int fbfd, bool press_button, bool nosleep);
 //	-(EXIT_FAILURE)	when the expected chain of events fails to be detected properly
 //	-(ENODATA)	when there was no new content to import at the end of the USBMS session
 //	-(ETIME)	when we failed to detect the end of the import session itself, because it ran longer than 5 minutes.
-// fdfd:		Open file descriptor to the framebuffer character device,
+// fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
 // force_unplug:	After having made sure to be in USBMS mode, generate a fake USB unplug event to force Nickel to wake up.
 //				This makes sense if you want to do stuff behind Nickel's back during the USBMS session,
