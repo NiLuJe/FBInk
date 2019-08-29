@@ -33,7 +33,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/ioctl.h>
-#include <unistd.h>
 
 // We want to return negative values on failure, always
 #define ERRCODE(e) (-(e))
@@ -233,7 +232,6 @@ int
 	}
 	// Forget about the crop for the other tests
 	dump.clip = (const FBInkRect){ 0U };
-	//sleep(1);
 
 	// Restore, this time with a negative L + T crop
 	fprintf(stdout, "[06b-] RESTORE w/ (-) L+T CROP\n");
@@ -249,7 +247,6 @@ int
 	}
 	// Forget about the crop for the other tests
 	dump.clip = (const FBInkRect){ 0U };
-	//sleep(1);
 
 	// Restore, this time with a positive R + B crop
 	dump.clip        = dump.area;
@@ -263,7 +260,6 @@ int
 	}
 	// Forget about the crop for the other tests
 	dump.clip = (const FBInkRect){ 0U };
-	//sleep(1);
 
 	// Restore, this time with a negative R + B crop (i.e., the overlap will match the full dump area)
 	dump.clip        = dump.area;
@@ -277,7 +273,6 @@ int
 	}
 	// Forget about the crop for the other tests
 	dump.clip = (const FBInkRect){ 0U };
-	//sleep(1);
 
 	// Restore, this time with a crop on all sides
 	dump.clip        = dump.area;
@@ -295,7 +290,6 @@ int
 	}
 	// Forget about the crop for the other tests
 	dump.clip = (const FBInkRect){ 0U };
-	//sleep(1);
 
 	// This should fail to restore (no overlap)
 	dump.clip      = dump.area;
