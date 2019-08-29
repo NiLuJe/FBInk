@@ -314,10 +314,7 @@ typedef struct
 {
 	unsigned char* restrict data;
 	size_t                  size;
-	unsigned short int      x;
-	unsigned short int      y;
-	unsigned short int      w;
-	unsigned short int      h;
+	FBInkRect               area;
 	unsigned short int      t_crop;    // At restore, crop this amount of rows from the top (in pixels)
 	unsigned short int      b_crop;    // At restore, crop this amount of rows from the bottom (in pixels)
 	unsigned short int      l_crop;    // At restore, crop this amount of columns from the left (in pixels)
