@@ -248,11 +248,24 @@ int
 	// Forget about the crop for the other tests
 	dump.cropped = (const FBInkRect){ 0U };
 
-	// Restore, this time with a R + B crop
+	// Restore, this time with a positive R + B crop
 	dump.cropped = dump.area;
 	dump.cropped.width -= 25;
 	dump.cropped.height -= 30;
-	fprintf(stdout, "[06c] RESTORE w/ R+B CROP\n");
+	fprintf(stdout, "[06c+] RESTORE w/ (+) R+B CROP\n");
+	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
+		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+	// Forget about the crop for the other tests
+	dump.cropped = (const FBInkRect){ 0U };
+
+	// Restore, this time with a negative R + B crop (i.e., the overlap will match the full dump area)
+	dump.cropped = dump.area;
+	dump.cropped.width += 25;
+	dump.cropped.height += 30;
+	fprintf(stdout, "[06c+] RESTORE w/ (-) R+B CROP\n");
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);

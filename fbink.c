@@ -7084,20 +7084,6 @@ int
 			rv = ERRCODE(ENOTSUP);
 			goto cleanup;
 		}
-		if (dump->cropped.width > dump->area.width) {
-			WARN("Cropped width can't be larger than the dump's width! crop: %hu vs. dump: %hu",
-			     dump->cropped.width,
-			     dump->area.width);
-			rv = ERRCODE(ENOTSUP);
-			goto cleanup;
-		}
-		if (dump->cropped.height > dump->area.height) {
-			WARN("Cropped height can't be larger than the dump's height! crop: %hu vs. dump: %hu",
-			     dump->cropped.height,
-			     dump->area.height);
-			rv = ERRCODE(ENOTSUP);
-			goto cleanup;
-		}
 		// TODO: Overlap/clipping check
 	}
 
