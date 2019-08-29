@@ -37,6 +37,23 @@
 // We want to return negative values on failure, always
 #define ERRCODE(e) (-(e))
 
+// MIN/MAX with no side-effects,
+// c.f., https://gcc.gnu.org/onlinedocs/cpp/Duplication-of-Side-Effects.html#Duplication-of-Side-Effects
+//     & https://dustri.org/b/min-and-max-macro-considered-harmful.html
+#define MIN(X, Y)                                                                                                        \
+	({                                                                                                               \
+		__auto_type x_ = (X);                                                                                    \
+		__auto_type y_ = (Y);                                                                                    \
+		(x_ < y_) ? x_ : y_;                                                                                     \
+	})
+
+#define MAX(X, Y)                                                                                                        \
+	({                                                                                                               \
+		__auto_type x__ = (X);                                                                                   \
+		__auto_type y__ = (Y);                                                                                   \
+		(x__ > y__) ? x__ : y__;                                                                                 \
+	})
+
 // "Small" helper for bitdepth switch... (c.f., fbdepth.c)
 static bool
     set_bpp(int fbfd, uint32_t bpp, const FBInkState* restrict fbink_state)
@@ -218,8 +235,8 @@ int
 
 	// Restore, this time with a negative L + T crop
 	fprintf(stdout, "[06b-] RESTORE w/ (-) L+T CROP\n");
-	dump.cropped = dump.area;
-	dump.cropped.left -= 25;
+	dump.cropped      = dump.area;
+	dump.cropped.left = MAX(0, dump.cropped.left - 25);
 	//dump.cropped.width -= 25;	// Not strictly necessary, will be computed when building the intersection rectangle
 	dump.cropped.top -= 30;
 	//dump.cropped.height -= 30;	// Ditto
