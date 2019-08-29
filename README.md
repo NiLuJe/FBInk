@@ -8,10 +8,10 @@ Housed [here on GitHub](https://github.com/NiLuJe/FBInk).
 
 ## What's it for?
 
-This is intended to fill the void felt by Kobo developers and tinkerers when they realize they do not have a builtin way to print stuff on the device's screen!
+This is intended to fill the void felt by Kobo developers and tinkerers when they realize they do not have a builtin way to print stuff on the device's screen!  
 It's especially cruel when moving to a Kobo, after being used to the ubiquity of `eips` on Kindle...
 
-In short, it prints messages or images on your screen, handling the low-level tinkering with both the Linux framebuffer interface, and the i.MX EPDC.
+In short, it prints messages or images on your screen, handling the low-level tinkering with both the Linux framebuffer interface, and the i.MX EPDC.  
 It's been tested on Kobo, Kindle and BQ Cervantes, but porting it to other Linux, i.MX eInk devices should be trivial (hell, even Sipix support shouldn't be too hard).
 
 By default, text rendering relies on bundled fixed cell bitmap fonts ([see this post](https://www.mobileread.com/forums/showpost.php?p=3765426&postcount=31) for a small sampling),
@@ -36,12 +36,12 @@ See also the various bindings in other languages, which often include a few exam
 
 ## How can I tinker with it?
 
-A CLI utility is available, built around the same public API that can be used via a shared or static library for C projects, or via FFI in other languages (beware, though, it's licensed under the GPLv3+, not the LGPL).
-The gist of the documentation is composed of the various comments in the [public header](fbink.h), detailing how the API can be used, and what for. Don't hesitate to contact me if things appear unclear!
+A CLI utility is available, built around the same public API that can be used via a shared or static library for C projects, or via FFI in other languages (beware, though, it's licensed under the GPLv3+, not the LGPL).  
+The gist of the documentation is composed of the various comments in the [public header](fbink.h), detailing how the API can be used, and what for. Don't hesitate to contact me if things appear unclear!  
 You can also launch the `fbink` CLI tool itself with no argument for a quick manual & rundown of its capabilities.
 
-NOTE: It generally makes *NO* attempt at handling software rotation, because that currently appears to be the right thing to do with both current Kobo FW versions and on Kindle.
-YMMV on older FW, or if something else is fudging with fb rotation, or if your application is implementing rotation in software (i.e., a rotated viewport).
+NOTE: It generally makes *NO* attempt at handling software rotation, because that currently appears to be the right thing to do with both current Kobo FW versions and on Kindle.  
+YMMV on older FW, or if something else is fudging with fb rotation, or if your application is implementing rotation in software (i.e., a rotated viewport).  
 As far as hardware rotation is concerned, there are a few specific exceptions made for Kobo devices:
 -   Those running in 16bpp mode and appearing to be in landscape mode: since that seems to be their native state, we *attempt* to compensate for this,
     as we can legitimately be used before Nickel itself corrects this.
@@ -72,7 +72,7 @@ And when using shiny TrueType fonts :).
 
 ## How do I build it?
 
-Unless you're just trying to take it for a spin on a native pure Linux system (`make linux`), you'll need a cross-compiler targeting your, well, target device.
+Unless you're just trying to take it for a spin on a native pure Linux system (`make linux`), you'll need a cross-compiler targeting your, well, target device.  
 The Makefile is tailored to automatically detect my own cross-compilation [ToolChain](http://trac.ak-team.com/trac/browser/niluje/Configs/trunk/Kindle/Misc/x-compile.sh) [setups](https://github.com/koreader/koxtoolchain), which I evidently heartily recommend using instead of relying on generic cross-compilation toolchains which may not exactly target the right kernel/libc duo ;).
 
 In case you're using your own toolchain, please note that we require C11 support (GCC >= 4.9, Clang >= 3.0).
@@ -98,7 +98,7 @@ You can also *append* features one by one to a `MINIMAL` build:
 -   Pass `OPENTYPE=1` to add OTF/TTF font rendering support.
 -   Pass `BUTTON_SCAN=1` to add support for the Kobo-specific button scan stuff.
 
-Along the way, a few auxiliary tools may crop up in the `utils` folder. `make utils` will do a static build of these (which is the recommended way to do it, as they rather crudely piggyback on FBInk's *internal* API). Currently, these consist of a diagnostic tool regarding rotation behavior, and a tool to properly manipulate the bitdepth on eInk devices.
+Along the way, a few auxiliary tools may crop up in the `utils` folder. `make utils` will do a static build of these (which is the recommended way to do it, as they rather crudely piggyback on FBInk's *internal* API). Currently, these consist of a diagnostic tool regarding rotation behavior, and a tool to properly manipulate the bitdepth on eInk devices.  
 They have *only* been tested on Kobo, and should probably be left alone unless you know what you're doing ;). One of these ([`fbdepth`](https://github.com/NiLuJe/FBInk/blob/master/utils/fbdepth.c)) is used by [KOReader](https://github.com/koreader/koreader) to enforce a sane rotation and switch to a more efficient bitdepth.
 
 There's also a fairly stupid [example](https://github.com/NiLuJe/FBInk/blob/master/utils/dump.c) showcasing the dump/restore API that can be built via `make dump`.
@@ -121,7 +121,7 @@ So that everyone gets to have fun, even if you can't stand C!
 
 [Python](https://www.python.org/): [py-fbink](https://github.com/NiLuJe/py-fbink) by [@NiLuJe](https://github.com/NiLuJe)
 
-Note that as the API may not be entirely stable on master, these are all tethered to a specific tag (generally, the latest release). You should honor that requirement, or all hell will break loose ;).
+Note that as the API may not be entirely stable on master, these are all tethered to a specific tag (generally, the latest release). You should honor that requirement, or all hell will break loose ;).  
 I generally attempt to keep breakages to a minimum, or barring that, make the upgrade paths as painless as possible, but, there you have it, supporting new stuff often means existing stuff has to work slightly differently.
 
 I try to detail API/ABI breakages in each tag's comments, but a good way to visualize that is of course to diff the single public header ;).
