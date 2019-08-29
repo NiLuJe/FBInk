@@ -300,6 +300,15 @@ typedef struct
 	bool truncated;    // true if the string was truncated (at computation or rendering time).
 } FBInkOTFit;
 
+// This maps to an mxcfb rectangle, used for fbink_get_last_rect, as well as in FBInkDump
+typedef struct
+{
+	unsigned short int left;    // x
+	unsigned short int top;     // y
+	unsigned short int width;
+	unsigned short int height;
+} FBInkRect;
+
 // For use with fbink_dump & fbink_restore
 typedef struct
 {
@@ -317,15 +326,6 @@ typedef struct
 	uint8_t                 bpp;
 	bool                    is_full;
 } FBInkDump;
-
-// This maps to an mxcfb rectangle, used for fbink_get_last_rect
-typedef struct
-{
-	unsigned short int top;     // y
-	unsigned short int left;    // x
-	unsigned short int width;
-	unsigned short int height;
-} FBInkRect;
 
 // NOTE: Unless otherwise specified,
 //       stuff returns a negative value (usually -(EXIT_FAILURE)) on failure & EXIT_SUCCESS otherwise ;).

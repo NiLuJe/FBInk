@@ -2919,8 +2919,8 @@ static void
     set_last_rect(const struct mxcfb_rect* restrict region)
 {
 	// Remember the region we've just drawn to
-	lastRect.top    = (unsigned short int) region->top;
 	lastRect.left   = (unsigned short int) region->left;
+	lastRect.top    = (unsigned short int) region->top;
 	lastRect.width  = (unsigned short int) region->width;
 	lastRect.height = (unsigned short int) region->height;
 }

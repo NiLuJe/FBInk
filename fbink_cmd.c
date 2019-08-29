@@ -349,9 +349,9 @@ static void
 	// No need to check for error, it will return {0, 0, 0, 0} on failure anyway ;).
 	FBInkRect last_rect = fbink_get_last_rect();
 	fprintf(stdout,
-		"lastRect_Top=%hu;lastRect_Left=%hu;lastRect_Width=%hu;lastRect_Height=%hu;",
-		last_rect.top,
+		"lastRect_Left=%hu;lastRect_Top=%hu;lastRect_Width=%hu;lastRect_Height=%hu;",
 		last_rect.left,
+		last_rect.top,
 		last_rect.width,
 		last_rect.height);
 }
