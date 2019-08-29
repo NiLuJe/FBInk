@@ -315,10 +315,7 @@ typedef struct
 	unsigned char* restrict data;
 	size_t                  size;
 	FBInkRect               area;
-	unsigned short int      t_crop;    // At restore, crop this amount of rows from the top (in pixels)
-	unsigned short int      b_crop;    // At restore, crop this amount of rows from the bottom (in pixels)
-	unsigned short int      l_crop;    // At restore, crop this amount of columns from the left (in pixels)
-	unsigned short int      r_crop;    // At restore, crop this amount of columns from the right (in pixels)
+	FBInkRect               cropped;    // Only restore this rectangular area of the dump
 	uint8_t                 rota;
 	uint8_t                 bpp;
 	bool                    is_full;
