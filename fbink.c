@@ -7095,12 +7095,12 @@ int
 			goto cleanup;
 		}
 		if (!(dump->area.top < dump->clip.top + dump->clip.height)) {
-			WARN("Clip rectangle is outside the dumped area (on the top)");
+			WARN("Clip rectangle is outside the dumped area (at the top)");
 			rv = ERRCODE(ENOTSUP);
 			goto cleanup;
 		}
 		if (!(dump->area.top + dump->area.height > dump->clip.top)) {
-			WARN("Clip rectangle is outside the dumped area (on the bottom)");
+			WARN("Clip rectangle is outside the dumped area (at the bottom)");
 			rv = ERRCODE(ENOTSUP);
 			goto cleanup;
 		}
