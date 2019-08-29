@@ -7084,7 +7084,27 @@ int
 			rv = ERRCODE(ENOTSUP);
 			goto cleanup;
 		}
-		// TODO: Overlap/clipping check
+		// Overlap check (c.f., https://stackoverflow.com/q/306316)
+		if (!(dump->area.left < dump->cropped.left + dump->cropped.width)) {
+			WARN("Cropped rectangle is outside the dumped area (on the left)");
+			rv = ERRCODE(ENOTSUP);
+			goto cleanup;
+		}
+		if (!(dump->area.left + dump->area.width > dump->cropped.left)) {
+			WARN("Cropped rectangle is outside the dumped area (on the right)");
+			rv = ERRCODE(ENOTSUP);
+			goto cleanup;
+		}
+		if (!(dump->area.top < dump->cropped.top + dump->cropped.height)) {
+			WARN("Cropped rectangle is outside the dumped area (on the top)");
+			rv = ERRCODE(ENOTSUP);
+			goto cleanup;
+		}
+		if (!(dump->area.top + dump->area.height > dump->cropped.top)) {
+			WARN("Cropped rectangle is outside the dumped area (on the bottom)");
+			rv = ERRCODE(ENOTSUP);
+			goto cleanup;
+		}
 	}
 
 	// We'll need a region...
@@ -7129,6 +7149,7 @@ int
 			const unsigned short int y = (unsigned short int) (dump->area.top + y_skip);
 			// NOTE: We only want to display the intersection between the full dump area and the cropped rectangle...
 			//       The earlier overlap check should ensure the sanity of the resulting rectangle here.
+			//       c.f., https://stackoverflow.com/q/19753134
 			const unsigned short int x1 = MAX(dump->area.left, dump->cropped.left);
 			const unsigned short int y1 = MAX(dump->area.top, dump->cropped.top);
 			const unsigned short int x2 =

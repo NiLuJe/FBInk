@@ -315,10 +315,11 @@ typedef struct
 	unsigned char* restrict data;
 	size_t                  size;
 	FBInkRect               area;
-	FBInkRect cropped;    // Only restore this rectangular area of the screen (has to overlap w/ the dump)
-	uint8_t   rota;
-	uint8_t   bpp;
-	bool      is_full;
+	FBInkRect
+		cropped;    // On restore, only restore this rectangular area of the screen (has to overlap w/ the dump's area)
+	uint8_t rota;
+	uint8_t bpp;
+	bool    is_full;
 } FBInkDump;
 
 // NOTE: Unless otherwise specified,
@@ -641,7 +642,7 @@ FBINK_API int fbink_region_dump(int                fbfd,
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build)
 // Otherwise, returns a few different things on failure:
 //	-(ENOTSUP)	when the dump cannot be restored because it wasn't taken in the current bitdepth and/or rotation,
-//			or because it's wider/taller/larger than the current framebuffer, or if the crop is invalid.
+//			or because it's wider/taller/larger than the current framebuffer, or if the crop is invalid (OOB).
 //	-(EINVAL)	when there's no data to restore
 // fdfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call
