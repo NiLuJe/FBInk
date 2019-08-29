@@ -50,11 +50,11 @@ As far as hardware rotation is concerned, there are a few specific exceptions ma
 
 ## How does it look?
 
-Like this for its text printing facilities :).
+A few basic examples of the fixed cell text rendering...
 
 ![FBInk on a Kobo H2O](https://raw.githubusercontent.com/NiLuJe/FBInk/master/resources/fbink_readme.png)
 
-And like this when displaying an image :).
+Or if we drop an image in there...
 
 ![FBInk 1.2.0 on a Kobo H2O](https://raw.githubusercontent.com/NiLuJe/FBInk/master/resources/fbink_image.png)
 
@@ -62,7 +62,7 @@ And with all the bells and whistles of working transparency, even on ancient har
 
 ![FBInk 1.2.5 on a Kindle 3](https://raw.githubusercontent.com/NiLuJe/FBInk/master/resources/fbink_alpha.png)
 
-And with a few other fonts, as well as a progress bar...
+Here's a few other fonts, as well as a progress bar...
 
 ![FBInk 1.6.2 on a Kobo H2O](https://raw.githubusercontent.com/NiLuJe/FBInk/master/resources/fbink_bars.png)
 
