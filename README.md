@@ -99,7 +99,7 @@ You can also *append* features one by one to a `MINIMAL` build:
 -   Pass `BUTTON_SCAN=1` to add support for the Kobo-specific button scan stuff.
 
 Along the way, a few auxiliary tools may crop up in the `utils` folder. `make utils` will do a static build of these (which is the recommended way to do it, as they rather crudely piggyback on FBInk's *internal* API). Currently, these consist of a diagnostic tool regarding rotation behavior, and a tool to properly manipulate the bitdepth on eInk devices.
-They have *only* been tested on Kobo, and should probably be left alone unless you know what you're doing ;).
+They have *only* been tested on Kobo, and should probably be left alone unless you know what you're doing ;). One of these ([`fbdepth`](https://github.com/NiLuJe/FBInk/blob/master/utils/fbdepth.c)) is used by [KOReader](https://github.com/koreader/koreader) to enforce a sane rotation and switch to a more efficient bitdepth.
 
 There's also a fairly stupid example showcasing the dump/restore API that can be built via `make dump`.
 
