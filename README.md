@@ -29,7 +29,10 @@ It's purposefully lacking in detailed instructions, because the target audience 
 
 There's also a sister thread for Kindle devices [over here](https://www.mobileread.com/forums/showthread.php?t=299620) where, besides binaries, you'll also find examples of people doing crazy things with it ;).
 
+In practice, most Kindle & Kobo users will in fact get it for free, as it's bundled with most of my [packages](http://www.mobileread.com/forums/showthread.php?t=225030).
+
 As an example of usage in the wild, see [KFMon](https://github.com/NiLuJe/kfmon), where I'm using it to provide visual feedback, or [kobo-rclone](https://github.com/shermp/kobo-rclone), where it's also used for screen scraping. We're also using it in [KOReader](https://github.com/koreader/koreader), to make the OTA update process more user-friendly.
+See also the various bindings in other languages, which often include a few examples.
 
 ## How can I tinker with it?
 
