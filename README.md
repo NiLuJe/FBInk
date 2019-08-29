@@ -77,7 +77,7 @@ The Makefile is tailored to automatically detect my own cross-compilation [ToolC
 
 In case you're using your own toolchain, please note that we require C11 support (GCC >= 4.9, Clang >= 3.0).
 
-I highly recommend building this with LTO enabled!
+Provided you're not using an older compiler, I highly recommend building this with LTO enabled!
 
 With that out of the way, the default target (i.e., `make`) will yield a static Kobo build, while `make kobo` will yield a stripped shared build, and additionally package everything the Kobo way. The package found in the Kobo thread is built this way.
 
