@@ -315,10 +315,10 @@ typedef struct
 	unsigned char* restrict data;
 	size_t                  size;
 	FBInkRect               area;
-	FBInkRect               cropped;    // Only restore this rectangular area of the dump
-	uint8_t                 rota;
-	uint8_t                 bpp;
-	bool                    is_full;
+	FBInkRect cropped;    // Only restore this rectangular area of the screen (has to overlap w/ the dump)
+	uint8_t   rota;
+	uint8_t   bpp;
+	bool      is_full;
 } FBInkDump;
 
 // NOTE: Unless otherwise specified,

@@ -201,22 +201,40 @@ int
 		goto cleanup;
 	}
 
-	// Restore, this time with a L + T crop
-	fprintf(stdout, "[06b] RESTORE w/ L+T CROP\n");
-	dump.l_crop = 25;
-	dump.t_crop = 30;
+	// Restore, this time with a positive L + T crop
+	fprintf(stdout, "[06b+] RESTORE w/ (+) L+T CROP\n");
+	dump.cropped = dump.area;
+	dump.cropped.left += 25;
+	//dump.cropped.width -= 25;	// Not strictly necessary, will be computed when building the intersection rectangle
+	dump.cropped.top += 30;
+	//dump.cropped.height -= 30;	// Ditto
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
 	// Forget about the crop for the other tests
-	dump.l_crop = 0U;
-	dump.t_crop = 0U;
+	dump.cropped = (const FBInkRect){ 0U };
+
+	// Restore, this time with a negative L + T crop
+	fprintf(stdout, "[06b-] RESTORE w/ (-) L+T CROP\n");
+	dump.cropped = dump.area;
+	dump.cropped.left -= 25;
+	//dump.cropped.width -= 25;	// Not strictly necessary, will be computed when building the intersection rectangle
+	dump.cropped.top -= 30;
+	//dump.cropped.height -= 30;	// Ditto
+	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
+		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+	// Forget about the crop for the other tests
+	dump.cropped = (const FBInkRect){ 0U };
 
 	// Restore, this time with a R + B crop
-	dump.r_crop = 25;
-	dump.b_crop = 30;
+	dump.cropped = dump.area;
+	dump.cropped.width -= 25;
+	dump.cropped.height -= 30;
 	fprintf(stdout, "[06c] RESTORE w/ R+B CROP\n");
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
@@ -224,14 +242,16 @@ int
 		goto cleanup;
 	}
 	// Forget about the crop for the other tests
-	dump.r_crop = 0U;
-	dump.b_crop = 0U;
+	dump.cropped = (const FBInkRect){ 0U };
 
 	// Restore, this time with a crop on all sides
-	dump.l_crop = 15;
-	dump.t_crop = 30;
-	dump.r_crop = 20;
-	dump.b_crop = 25;
+	dump.cropped = dump.area;
+	dump.cropped.left += 15;
+	dump.cropped.width -= 15;
+	dump.cropped.top += 30;
+	dump.cropped.height -= 30;
+	dump.cropped.width -= 20;
+	dump.cropped.height -= 25;
 	fprintf(stdout, "[06c] RESTORE w/ T+B+L+R CROP\n");
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
@@ -239,10 +259,7 @@ int
 		goto cleanup;
 	}
 	// Forget about the crop for the other tests
-	dump.l_crop = 0U;
-	dump.t_crop = 0U;
-	dump.r_crop = 0U;
-	dump.b_crop = 0U;
+	dump.cropped = (const FBInkRect){ 0U };
 
 	// And now for some fun stuff, provided we're starting from a 32bpp fb...
 	FBInkState fbink_state = { 0 };
