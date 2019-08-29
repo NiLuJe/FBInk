@@ -7059,6 +7059,34 @@ int
 			rv = ERRCODE(ENOTSUP);
 			goto cleanup;
 		}
+		if (dump->cropped.width > vInfo.xres_virtual) {
+			WARN("Cropped rectangle is wider than the screen! crop: %hu vs. fb: %u",
+			dump->cropped.width,
+			vInfo.xres_virtual);
+			rv = ERRCODE(ENOTSUP);
+			goto cleanup;
+		}
+		if (dump->cropped.height > vInfo.yres) {
+			WARN("Cropped rectangle is taller than the screen! crop: %hu vs. fb: %u",
+			dump->cropped.height,
+			vInfo.yres);
+			rv = ERRCODE(ENOTSUP);
+			goto cleanup;
+		}
+		if (dump->cropped.left >= vInfo.xres) {
+			WARN("Cropped rectangle's left edge is OOB! crop: %hu vs. fb: %u",
+			dump->cropped.left,
+			vInfo.xres);
+			rv = ERRCODE(ENOTSUP);
+			goto cleanup;
+		}
+		if (dump->cropped.top >= vInfo.yres) {
+			WARN("Cropped rectangle's top edge is OOB! crop: %hu vs. fb: %u",
+			dump->cropped.top,
+			vInfo.yres);
+			rv = ERRCODE(ENOTSUP);
+			goto cleanup;
+		}
 		if (dump->cropped.width > dump->area.width) {
 			WARN("Cropped width can't be larger than the dump's width! crop: %hu vs. dump: %hu",
 			     dump->cropped.width,
