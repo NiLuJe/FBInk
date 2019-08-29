@@ -315,7 +315,7 @@ typedef struct
 	unsigned char* restrict data;
 	size_t                  size;
 	FBInkRect               area;
-	FBInkRect cropped;    // Only restore this rectangular area of the screen (has to intersect w/ the dump's area)
+	FBInkRect clip;    // Only restore this rectangular area of the screen (has to intersect w/ the dump's area)
 	uint8_t   rota;
 	uint8_t   bpp;
 	bool      is_full;
@@ -612,7 +612,7 @@ FBINK_API int fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg);
 //       causing a double free!
 //       You can use the fbink_free_dump_data() helper function to do just that.
 //       There are no error codepaths after storage allocation (i.e., you are assured that it has NOT been allocated on error).
-//       Note that a recycling *will* clear the crop settings!
+//       Note that a recycling *will* clear the clip FBInkRect!
 // NOTE: On *most* devices (the exceptions being 4bpp & 16bpp fbs),
 //       the data being dumped is perfectly valid input for fbink_print_raw_data,
 //       in case you'd ever want to do some more exotic things with it...
@@ -657,9 +657,9 @@ FBINK_API int fbink_region_dump(int                fbfd,
 //       c.f., the last few tests in utils/dump.c for highly convoluted examples that I don't recommend replicating in production.
 // NOTE: "current" actually means "at last init/reinit time".
 //       Call fbink_reinit first if you really want to make sure bitdepth/rotation still match.
-// NOTE: If you need to restore only part of a dump, you can do so via the cropped field of the FBInkDump struct.
+// NOTE: If you need to restore only part of a dump, you can do so via the clip field of the FBInkDump struct.
 //       This FBInkRect is the only field you should ever modify yourself.
-//       This cropped rectangle is relative to the *screen*, not the dump's area (i.e., these are absolute screen coordinates).
+//       This clip rectangle is relative to the *screen*, not the dump's area (i.e., these are absolute screen coordinates).
 //       As such, it has to intersect with the dump's area, or the call will fail.
 //       And while it can safely completely overlap the dump's area, it still needs to be constrained to the screen's dimension.
 //       Of course, only the intersection of this rectangle with the dump's area will be restored.

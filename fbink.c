@@ -6715,7 +6715,7 @@ int
 		free(dump->data);
 		dump->data = NULL;
 		// Reset the crop settings
-		dump->cropped = (const FBInkRect){ 0U };
+		dump->clip = (const FBInkRect){ 0U };
 	}
 	// Start by allocating enough memory for a full dump of the visible screen...
 	dump->data = calloc((size_t)(fInfo.line_length * vInfo.yres), sizeof(*dump->data));
@@ -6903,7 +6903,7 @@ int
 		free(dump->data);
 		dump->data = NULL;
 		// Reset the crop settings
-		dump->cropped = (const FBInkRect){ 0U };
+		dump->clip = (const FBInkRect){ 0U };
 	}
 	// Start by allocating enough memory for a full dump of the computed region...
 	// We're going to need the amount of bytes taken per pixel...
@@ -7043,65 +7043,64 @@ int
 		goto cleanup;
 	}
 	// Cropping related sanity checks...
-	if (dump->cropped.width != 0U || dump->cropped.height != 0U) {
+	if (dump->clip.width != 0U || dump->clip.height != 0U) {
 		if (dump->is_full) {
 			WARN("Can't crop a full-screen dump!");
 			rv = ERRCODE(ENOTSUP);
 			goto cleanup;
 		}
-		if (dump->cropped.width == 0U) {
+		if (dump->clip.width == 0U) {
 			WARN("Cropped width can't be zero!");
 			rv = ERRCODE(ENOTSUP);
 			goto cleanup;
 		}
-		if (dump->cropped.height == 0U) {
+		if (dump->clip.height == 0U) {
 			WARN("Cropped height can't be zero!");
 			rv = ERRCODE(ENOTSUP);
 			goto cleanup;
 		}
-		if (dump->cropped.width > vInfo.xres_virtual) {
-			WARN("Cropped rectangle is wider than the screen! crop: %hu vs. fb: %u",
-			     dump->cropped.width,
+		if (dump->clip.width > vInfo.xres_virtual) {
+			WARN("Clip rectangle is wider than the screen! clip: %hu vs. fb: %u",
+			     dump->clip.width,
 			     vInfo.xres_virtual);
 			rv = ERRCODE(ENOTSUP);
 			goto cleanup;
 		}
-		if (dump->cropped.height > vInfo.yres) {
-			WARN("Cropped rectangle is taller than the screen! crop: %hu vs. fb: %u",
-			     dump->cropped.height,
+		if (dump->clip.height > vInfo.yres) {
+			WARN("Clip rectangle is taller than the screen! clip: %hu vs. fb: %u",
+			     dump->clip.height,
 			     vInfo.yres);
 			rv = ERRCODE(ENOTSUP);
 			goto cleanup;
 		}
-		if (dump->cropped.left >= vInfo.xres) {
-			WARN(
-			    "Cropped rectangle's left edge is OOB! crop: %hu vs. fb: %u", dump->cropped.left, vInfo.xres);
+		if (dump->clip.left >= vInfo.xres) {
+			WARN("Clip rectangle's left edge is OOB! clip: %hu vs. fb: %u", dump->clip.left, vInfo.xres);
 			rv = ERRCODE(ENOTSUP);
 			goto cleanup;
 		}
-		if (dump->cropped.top >= vInfo.yres) {
-			WARN("Cropped rectangle's top edge is OOB! crop: %hu vs. fb: %u", dump->cropped.top, vInfo.yres);
+		if (dump->clip.top >= vInfo.yres) {
+			WARN("Clip rectangle's top edge is OOB! clip: %hu vs. fb: %u", dump->clip.top, vInfo.yres);
 			rv = ERRCODE(ENOTSUP);
 			goto cleanup;
 		}
 		// Overlap check (c.f., https://stackoverflow.com/q/306316)
-		if (!(dump->area.left < dump->cropped.left + dump->cropped.width)) {
-			WARN("Cropped rectangle is outside the dumped area (on the left)");
+		if (!(dump->area.left < dump->clip.left + dump->clip.width)) {
+			WARN("Clip rectangle is outside the dumped area (on the left)");
 			rv = ERRCODE(ENOTSUP);
 			goto cleanup;
 		}
-		if (!(dump->area.left + dump->area.width > dump->cropped.left)) {
-			WARN("Cropped rectangle is outside the dumped area (on the right)");
+		if (!(dump->area.left + dump->area.width > dump->clip.left)) {
+			WARN("Clip rectangle is outside the dumped area (on the right)");
 			rv = ERRCODE(ENOTSUP);
 			goto cleanup;
 		}
-		if (!(dump->area.top < dump->cropped.top + dump->cropped.height)) {
-			WARN("Cropped rectangle is outside the dumped area (on the top)");
+		if (!(dump->area.top < dump->clip.top + dump->clip.height)) {
+			WARN("Clip rectangle is outside the dumped area (on the top)");
 			rv = ERRCODE(ENOTSUP);
 			goto cleanup;
 		}
-		if (!(dump->area.top + dump->area.height > dump->cropped.top)) {
-			WARN("Cropped rectangle is outside the dumped area (on the bottom)");
+		if (!(dump->area.top + dump->area.height > dump->clip.top)) {
+			WARN("Clip rectangle is outside the dumped area (on the bottom)");
 			rv = ERRCODE(ENOTSUP);
 			goto cleanup;
 		}
@@ -7116,7 +7115,7 @@ int
 		fullscreen_region(&region);
 	} else {
 		// NOTE: The crop codepath is perfectly safe with no cropping, it's just a little bit hairier to follow...
-		if (dump->cropped.width == 0U && dump->cropped.height == 0U) {
+		if (dump->clip.width == 0U && dump->clip.height == 0U) {
 			// Region dump, restore line by line
 			if (dump->bpp == 4U) {
 				for (unsigned short int j = dump->area.top, l = 0U; l < dump->area.height; j++, l++) {
@@ -7141,24 +7140,22 @@ int
 			region.height = dump->area.height;
 		} else {
 			// Handle cropping shenanigans...
-			const unsigned short int x_skip =
-			    dump->cropped.left > dump->area.left
-				? (unsigned short int) (dump->cropped.left - dump->area.left)
-				: 0U;
-			const unsigned short int x      = (unsigned short int) (dump->area.left + x_skip);
-			const unsigned short int y_skip = dump->cropped.top > dump->area.top
-							      ? (unsigned short int) (dump->cropped.top - dump->area.top)
+			const unsigned short int x_skip = dump->clip.left > dump->area.left
+							      ? (unsigned short int) (dump->clip.left - dump->area.left)
 							      : 0U;
+			const unsigned short int x = (unsigned short int) (dump->area.left + x_skip);
+			const unsigned short int y_skip =
+			    dump->clip.top > dump->area.top ? (unsigned short int) (dump->clip.top - dump->area.top) : 0U;
 			const unsigned short int y = (unsigned short int) (dump->area.top + y_skip);
-			// NOTE: We only want to display the intersection between the full dump area and the cropped rectangle...
+			// NOTE: We only want to display the intersection between the full dump area and the clip rectangle...
 			//       The earlier overlap check should ensure the sanity of the resulting rectangle here.
 			//       c.f., https://stackoverflow.com/q/19753134
-			const unsigned short int x1 = (unsigned short int) MAX(dump->area.left, dump->cropped.left);
-			const unsigned short int y1 = (unsigned short int) MAX(dump->area.top, dump->cropped.top);
+			const unsigned short int x1 = (unsigned short int) MAX(dump->area.left, dump->clip.left);
+			const unsigned short int y1 = (unsigned short int) MAX(dump->area.top, dump->clip.top);
 			const unsigned short int x2 = (unsigned short int) MIN(dump->area.left + dump->area.width,
-									       dump->cropped.left + dump->cropped.width);
+									       dump->clip.left + dump->clip.width);
 			const unsigned short int y2 = (unsigned short int) MIN(dump->area.top + dump->area.height,
-									       dump->cropped.top + dump->cropped.height);
+									       dump->clip.top + dump->clip.height);
 			const unsigned short int w  = (unsigned short int) (x2 - x1);
 			const unsigned short int h  = (unsigned short int) (y2 - y1);
 			LOG("The dump area (%hu, %hu) %hux%hu",
@@ -7166,11 +7163,11 @@ int
 			    dump->area.top,
 			    dump->area.width,
 			    dump->area.height);
-			LOG("and crop rectangle (%hu, %hu) %hux%hu",
-			    dump->cropped.left,
-			    dump->cropped.top,
-			    dump->cropped.width,
-			    dump->cropped.height);
+			LOG("and clip rectangle (%hu, %hu) %hux%hu",
+			    dump->clip.left,
+			    dump->clip.top,
+			    dump->clip.width,
+			    dump->clip.height);
 			LOG("intersect as (%hu, %hu, %hu, %hu) %hux%hu", x1, y1, x2, y2, w, h);
 			// Region dump, restore line by line
 			if (dump->bpp == 4U) {
@@ -7236,7 +7233,7 @@ int
 		// Invalidate the metadata while we're here
 		dump->size    = 0U;
 		dump->area    = (const FBInkRect){ 0U };
-		dump->cropped = (const FBInkRect){ 0U };
+		dump->clip    = (const FBInkRect){ 0U };
 		dump->rota    = 0U;
 		dump->bpp     = 0U;
 		dump->is_full = false;
