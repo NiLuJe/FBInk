@@ -7142,22 +7142,25 @@ int
 		} else {
 			// Handle cropping shenanigans...
 			const unsigned short int x_skip =
-			    dump->cropped.left > dump->area.left ? dump->cropped.left - dump->area.left : 0U;
-			const unsigned short int x = (unsigned short int) (dump->area.left + x_skip);
-			const unsigned short int y_skip =
-			    dump->cropped.top > dump->area.top ? dump->cropped.top - dump->area.top : 0U;
+			    dump->cropped.left > dump->area.left
+				? (unsigned short int) (dump->cropped.left - dump->area.left)
+				: 0U;
+			const unsigned short int x      = (unsigned short int) (dump->area.left + x_skip);
+			const unsigned short int y_skip = dump->cropped.top > dump->area.top
+							      ? (unsigned short int) (dump->cropped.top - dump->area.top)
+							      : 0U;
 			const unsigned short int y = (unsigned short int) (dump->area.top + y_skip);
 			// NOTE: We only want to display the intersection between the full dump area and the cropped rectangle...
 			//       The earlier overlap check should ensure the sanity of the resulting rectangle here.
 			//       c.f., https://stackoverflow.com/q/19753134
-			const unsigned short int x1 = MAX(dump->area.left, dump->cropped.left);
-			const unsigned short int y1 = MAX(dump->area.top, dump->cropped.top);
-			const unsigned short int x2 =
-			    MIN(dump->area.left + dump->area.width, dump->cropped.left + dump->cropped.width);
-			const unsigned short int y2 =
-			    MIN(dump->area.top + dump->area.height, dump->cropped.top + dump->cropped.height);
-			const unsigned short int w = x2 - x1;
-			const unsigned short int h = y2 - y1;
+			const unsigned short int x1 = (unsigned short int) MAX(dump->area.left, dump->cropped.left);
+			const unsigned short int y1 = (unsigned short int) MAX(dump->area.top, dump->cropped.top);
+			const unsigned short int x2 = (unsigned short int) MIN(dump->area.left + dump->area.width,
+									       dump->cropped.left + dump->cropped.width);
+			const unsigned short int y2 = (unsigned short int) MIN(dump->area.top + dump->area.height,
+									       dump->cropped.top + dump->cropped.height);
+			const unsigned short int w  = (unsigned short int) (x2 - x1);
+			const unsigned short int h  = (unsigned short int) (y2 - y1);
 			LOG("The dump area (%hu, %hu) %hux%hu",
 			    dump->area.left,
 			    dump->area.top,
