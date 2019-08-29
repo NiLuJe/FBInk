@@ -315,11 +315,10 @@ typedef struct
 	unsigned char* restrict data;
 	size_t                  size;
 	FBInkRect               area;
-	FBInkRect
-		cropped;    // On restore, only restore this rectangular area of the screen (has to overlap w/ the dump's area)
-	uint8_t rota;
-	uint8_t bpp;
-	bool    is_full;
+	FBInkRect cropped;    // Only restore this rectangular area of the screen (has to intersect w/ the dump's area)
+	uint8_t   rota;
+	uint8_t   bpp;
+	bool      is_full;
 } FBInkDump;
 
 // NOTE: Unless otherwise specified,
@@ -658,10 +657,13 @@ FBINK_API int fbink_region_dump(int                fbfd,
 //       c.f., the last few tests in utils/dump.c for highly convoluted examples that I don't recommend replicating in production.
 // NOTE: "current" actually means "at last init/reinit time".
 //       Call fbink_reinit first if you really want to make sure bitdepth/rotation still match.
-// NOTE: If you need to crop a dump, you can do so via the *_crop fields of the FBInkDump struct.
-//       These are the only fields you should ever modify yourself.
-//       Cropping will be done in-place (i.e., don't tweak x & y to compensate for positioning yourself)!
-//       You'll also need to flip the is_full field if you ever need to crop a full dump.
+// NOTE: If you need to restore only part of a dump, you can do so via the cropped field of the FBInkDump struct.
+//       This FBInkRect is the only field you should ever modify yourself.
+//       This cropped rectangle is relative to the *screen*, not the dump's area (i.e., these are absolute screen coordinates).
+//       As such, it has to intersect with the dump's area, or the call will fail.
+//       And while it can safely completely overlap the dump's area, it still needs to be constrained to the screen's dimension.
+//       Of course, only the intersection of this rectangle with the dump's area will be restored.
+//       Be aware that you'll also need to flip the is_full field yourself first if you ever need to crop a full dump.
 // NOTE: This does *NOT* free data.dump!
 FBINK_API int fbink_restore(int fbfd, const FBInkConfig* restrict fbink_cfg, const FBInkDump* restrict dump);
 
