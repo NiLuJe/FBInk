@@ -73,7 +73,8 @@ And when using shiny TrueType fonts :).
 ## How do I build it?
 
 Unless you're just trying to take it for a spin on a native pure Linux system (`make linux`), you'll need a cross-compiler targeting your, well, target device.  
-The Makefile is tailored to automatically detect my own cross-compilation [ToolChain](http://trac.ak-team.com/trac/browser/niluje/Configs/trunk/Kindle/Misc/x-compile.sh) [setups](https://github.com/koreader/koxtoolchain), which I evidently heartily recommend using instead of relying on generic cross-compilation toolchains which may not exactly target the right kernel/libc duo ;).
+The Makefile is tailored to automatically detect my own cross-compilation [ToolChain](http://trac.ak-team.com/trac/browser/niluje/Configs/trunk/Kindle/Misc/x-compile.sh) [setups](https://github.com/koreader/koxtoolchain), which I evidently heartily recommend using instead of relying on generic cross-compilation toolchains which may not exactly target the right kernel/libc duo ;).  
+Using the koxtoolchain frontend should make building one of these a fairly painless process.
 
 In case you're using your own toolchain, please note that we require C11 support (GCC >= 4.9, Clang >= 3.0).
 
