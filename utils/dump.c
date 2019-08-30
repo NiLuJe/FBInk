@@ -218,12 +218,16 @@ int
 		goto cleanup;
 	}
 
+	// We'll be needing some info for the following tests...
+	FBInkState fbink_state = { 0 };
+	fbink_get_state(&fbink_cfg, &fbink_state);
+
 	// Restore, this time with a positive L + T crop
 	fprintf(stdout, "[06b+] RESTORE w/ (+) L+T CROP\n");
 	dump.clip      = dump.area;
-	dump.clip.left = (unsigned short int) (dump.clip.left + 25U);
+	dump.clip.left = (unsigned short int) MIN(dump.clip.left + 25U, fbink_state.screen_width);
 	//dump.clip.width -= 25;	// Not strictly necessary, will be computed when building the intersection rectangle
-	dump.clip.top = (unsigned short int) (dump.clip.top + 30U);
+	dump.clip.top = (unsigned short int) MIN(dump.clip.top + 30U, fbink_state.screen_height);
 	//dump.clip.height -= 30;	// Ditto
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
@@ -263,8 +267,8 @@ int
 
 	// Restore, this time with a negative R + B crop (i.e., the overlap will match the full dump area)
 	dump.clip        = dump.area;
-	dump.clip.width  = (unsigned short int) (dump.clip.width + 25U);
-	dump.clip.height = (unsigned short int) (dump.clip.height + 30U);
+	dump.clip.width  = (unsigned short int) MIN(dump.clip.width + 25U, fbink_state.screen_width);
+	dump.clip.height = (unsigned short int) MIN(dump.clip.height + 30U, fbink_state.screen_height);
 	fprintf(stdout, "[06c-] RESTORE w/ (-) R+B CROP\n");
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
@@ -276,9 +280,9 @@ int
 
 	// Restore, this time with a crop on all sides
 	dump.clip        = dump.area;
-	dump.clip.left   = (unsigned short int) (dump.clip.left + 15U);
+	dump.clip.left   = (unsigned short int) MIN(dump.clip.left + 15U, fbink_state.screen_width);
 	dump.clip.width  = (unsigned short int) MAX(0, dump.clip.width - 15);
-	dump.clip.top    = (unsigned short int) (dump.clip.top + 30U);
+	dump.clip.top    = (unsigned short int) MIN(dump.clip.top + 30U, fbink_state.screen_height);
 	dump.clip.height = (unsigned short int) MAX(0, dump.clip.height - 30);
 	dump.clip.width  = (unsigned short int) MAX(0, dump.clip.width - 20);
 	dump.clip.height = (unsigned short int) MAX(0, dump.clip.height - 25);
@@ -293,7 +297,7 @@ int
 
 	// This should fail to restore (no overlap)
 	dump.clip      = dump.area;
-	dump.clip.left = (unsigned short int) (dump.clip.left + dump.area.width);
+	dump.clip.left = (unsigned short int) MIN(dump.clip.left + dump.area.width, fbink_state.screen_width);
 	fprintf(stdout, "[06c] RESTORE w/ broken CROP\n");
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, as expected :)\n");
@@ -306,8 +310,6 @@ int
 	dump.clip = (const FBInkRect){ 0U };
 
 	// And now for some fun stuff, provided we're starting from a 32bpp fb...
-	FBInkState fbink_state = { 0 };
-	fbink_get_state(&fbink_cfg, &fbink_state);
 	if (fbink_state.bpp == 32U) {
 		// Switch to 8bpp (c.f., fbdepth.c)
 		fprintf(stdout, "[07] SWITCH TO 8BPP\n");
