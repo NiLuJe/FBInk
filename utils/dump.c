@@ -296,8 +296,9 @@ int
 	dump.clip = (const FBInkRect){ 0U };
 
 	// This should fail to restore (no overlap)
-	dump.clip      = dump.area;
-	dump.clip.left = (unsigned short int) MIN(dump.clip.left + dump.area.width, fbink_state.screen_width);
+	dump.clip = dump.area;
+	dump.clip.left =
+	    (unsigned short int) MIN((unsigned short int) (dump.clip.left + dump.area.width), fbink_state.screen_width);
 	fprintf(stdout, "[06c] RESTORE w/ broken CROP\n");
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, as expected :)\n");
