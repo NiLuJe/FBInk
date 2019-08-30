@@ -304,6 +304,7 @@ typedef struct
 } FBInkOTFit;
 
 // This maps to an mxcfb rectangle, used for fbink_get_last_rect, as well as in FBInkDump
+// NOTE: Unlike an mxcfb rectangle, left (x) comes *before* top (y)!
 typedef struct
 {
 	unsigned short int left;    // x
@@ -470,6 +471,7 @@ FBINK_API int fbink_printf(int                  fbfd,
 
 //
 // A simple wrapper around the internal screen refresh handling, without requiring you to include einkfb/mxcfb headers.
+// NOTE: Unlike FBInkRect, we *do* honor the original mxcfb rect order here (top before left).
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
 // region_top:		top (y) field of an mxcfb rectangle.
