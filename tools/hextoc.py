@@ -3,11 +3,10 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# Very naive script to build a C array out of Unifont's hex format.
-# Assumes 8x8 or 8x16 glyphs
+# Somewhat naive script to build a C array out of Unifont's hex format.
 # Tested on Unscii & its fun variants (http://pelulamu.net/unscii/)
 # NOTE: You can probably get something working out of BDF fonts, either via gbdfed, bdfe, or Unifont's bdfimplode/unibdf2hex,
-#       (in order of preference), but if the horizontal resolution is > 8, that implies code tweaks to handle it right.
+#       (in order of preference), but if the horizontal resolution is > 8, that may imply code tweaks to handle it right.
 #       Right now, fontwidth <= 8 means we store an array of uint8_t, for a <= 16xN font an array of uint16_t,
 #       a <= 32xN one an array of uint32_t, and a <= 64xN one an array of uint64_t ;).
 #       This script currently handles <= 64, as does FBInk (although, on FBInk's side,
