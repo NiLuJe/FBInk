@@ -286,7 +286,7 @@ int
 	dump.clip.height = (unsigned short int) MAX(0, dump.clip.height - 30);
 	dump.clip.width  = (unsigned short int) MAX(0, dump.clip.width - 20);
 	dump.clip.height = (unsigned short int) MAX(0, dump.clip.height - 25);
-	fprintf(stdout, "[06c] RESTORE w/ T+B+L+R CROP\n");
+	fprintf(stdout, "[06d] RESTORE w/ T+B+L+R CROP\n");
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
@@ -299,7 +299,7 @@ int
 	dump.clip = dump.area;
 	dump.clip.left =
 	    (unsigned short int) MIN((unsigned short int) (dump.clip.left + dump.area.width), fbink_state.screen_width);
-	fprintf(stdout, "[06c] RESTORE w/ broken CROP\n");
+	fprintf(stdout, "[06e] RESTORE w/ broken CROP\n");
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, as expected :)\n");
 	} else {
