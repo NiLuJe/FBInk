@@ -57,6 +57,7 @@
 // Magic number for automatic fbfd handling
 #define FBFD_AUTO -1
 
+//
 // List of available fonts
 typedef enum
 {
@@ -188,6 +189,7 @@ typedef enum
 	NTX_ROTA_ODD_INVERTED      // Only Landscape (odd) rotations are inverted by the kernel
 } NTX_ROTA_INDEX_T;
 
+//
 // A struct to dump FBInk's internal state into, like fbink_state_dump() would, but in C ;)
 typedef struct
 {
@@ -331,6 +333,7 @@ typedef struct
 // Returns the version of the currently loaded FBInk library.
 FBINK_API const char* fbink_version(void) __attribute__((const));
 
+//
 // Open the framebuffer character device,
 // and returns the newly opened file descriptor.
 FBINK_API int fbink_open(void);
@@ -367,22 +370,7 @@ FBINK_API int fbink_close(int fbfd);
 //       but if the only fields that differ don't fall into that category, you do *NOT* need an fbink_init() per FBInkConfig...
 FBINK_API int fbink_init(int fbfd, const FBInkConfig* restrict fbink_cfg);
 
-// Add an OpenType font to FBInk.
-// NOTE: At least one font must be added in order to use fbink_print_ot().
-// filename:		Path to the font file. This should be a valid *.otf or *.ttf font.
-// style:		Defines the specific style of the specified font (FNT_REGULAR, FNT_ITALIC, FNT_BOLD or FNT_BOLD_ITALIC).
-// NOTE: You MUST free the fonts loaded when you are done with all of them by calling fbink_free_ot_fonts().
-// NOTE: You MAY replace a font without first calling fbink_free_ot_fonts().
-// NOTE: Default fonts are secreted away in /usr/java/lib/fonts on Kindle,
-//       and in /usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/fonts on Kobo,
-//       but you can't use the Kobo ones because they're obfuscated...
-//       Which leads me to a final, critical warning:
-// NOTE: Don't try to pass non-font files or encrypted/obfuscated font files, because it *will* horribly segfault!
-FBINK_API int fbink_add_ot_font(const char* filename, FONT_STYLE_T style);
-
-// Free all loaded OpenType fonts. You MUST call this when you have finished all OT printing.
-FBINK_API int fbink_free_ot_fonts(void);
-
+//
 // Dump a few of our internal state variables to stdout, in a format easily consumable by a shell (i.e., eval).
 FBINK_API void fbink_state_dump(const FBInkConfig* restrict fbink_cfg);
 
@@ -391,6 +379,7 @@ FBINK_API void fbink_state_dump(const FBInkConfig* restrict fbink_cfg);
 //       You can also peek at the output of fbink -e to get a hint of what the data actually looks like.
 FBINK_API void fbink_get_state(const FBInkConfig* restrict fbink_cfg, FBInkState* restrict fbink_state);
 
+//
 // Print a string on screen.
 // NOTE: The string is expected to be encoded in valid UTF-8:
 //         * Invalid UTF-8 sequences will be *rejected* and the call will abort early with -(EILSEQ)
@@ -406,6 +395,23 @@ FBINK_API void fbink_get_state(const FBInkConfig* restrict fbink_cfg, FBInkState
 // fbink_cfg:		Pointer to an FBInkConfig struct.
 //				Honors every field not specifically related to image/dump support.
 FBINK_API int fbink_print(int fbfd, const char* restrict string, const FBInkConfig* restrict fbink_cfg);
+
+//
+// Add an OpenType font to FBInk.
+// NOTE: At least one font must be added in order to use fbink_print_ot().
+// filename:		Path to the font file. This should be a valid *.otf or *.ttf font.
+// style:		Defines the specific style of the specified font (FNT_REGULAR, FNT_ITALIC, FNT_BOLD or FNT_BOLD_ITALIC).
+// NOTE: You MUST free the fonts loaded when you are done with all of them by calling fbink_free_ot_fonts().
+// NOTE: You MAY replace a font without first calling fbink_free_ot_fonts().
+// NOTE: Default fonts are secreted away in /usr/java/lib/fonts on Kindle,
+//       and in /usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/fonts on Kobo,
+//       but you can't use the Kobo ones because they're obfuscated...
+//       Which leads me to a final, critical warning:
+// NOTE: Don't try to pass non-font files or encrypted/obfuscated font files, because it *will* horribly segfault!
+FBINK_API int fbink_add_ot_font(const char* filename, FONT_STYLE_T style);
+
+// Free all loaded OpenType fonts. You MUST call this when you have finished all OT printing.
+FBINK_API int fbink_free_ot_fonts(void);
 
 // Print a string using an OpenType font.
 // NOTE: The caller MUST have loaded at least one font via fbink_add_ot_font() FIRST.
@@ -446,6 +452,7 @@ FBINK_API int fbink_print_ot(int         fbfd,
 			     const FBInkConfig* restrict fbink_cfg,
 			     FBInkOTFit* restrict fit);
 
+//
 // Brings printf formatting to fbink_print and fbink_print_ot ;).
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
@@ -461,6 +468,7 @@ FBINK_API int fbink_printf(int                  fbfd,
 			   const char*                 fmt,
 			   ...) __attribute__((format(printf, 4, 5)));
 
+//
 // A simple wrapper around the internal screen refresh handling, without requiring you to include einkfb/mxcfb headers.
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
@@ -486,6 +494,7 @@ FBINK_API int fbink_refresh(int                fbfd,
 			    uint8_t            dithering_mode,
 			    const FBInkConfig* restrict fbink_cfg);
 
+//
 // Returns true if the device appears to be in a quirky framebuffer state that *may* require a reinit to produce sane results.
 // NOTE: The intended use-case is for long running apps which may trigger prints across different framebuffer states,
 //       to allow them to call fbink_init again at specific points only (instead of enforcing a reinit on every print).
@@ -516,6 +525,7 @@ FBINK_API bool fbink_is_fb_quirky(void) __attribute__((pure, deprecated));
 // fbink_cfg:		Pointer to an FBInkConfig struct.
 FBINK_API int fbink_reinit(int fbfd, const FBInkConfig* restrict fbink_cfg);
 
+//
 // Print a full-width progress bar on screen.
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
@@ -532,6 +542,7 @@ FBINK_API int fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInk
 //				as well as is_centered & is_padded).
 FBINK_API int fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkConfig* restrict fbink_cfg);
 
+//
 // Print an image on screen.
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build).
 // fbfd:		Open file descriptor to the framebuffer character device,
@@ -597,6 +608,7 @@ FBINK_API int fbink_print_raw_data(int                fbfd,
 				   short int          y_off,
 				   const FBInkConfig* restrict fbink_cfg);
 
+//
 // Just clear the screen, eInk refresh included (or not ;)).
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
@@ -604,6 +616,7 @@ FBINK_API int fbink_print_raw_data(int                fbfd,
 //				as well as no_refresh, pen_fg_color & pen_bg_color).
 FBINK_API int fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg);
 
+//
 // Dump the full screen.
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build).
 // fbfd:		Open file descriptor to the framebuffer character device,
@@ -682,6 +695,7 @@ FBINK_API int fbink_restore(int fbfd, const FBInkConfig* restrict fbink_cfg, con
 //       as dump() will implicitly free a dirty struct in order to recycle it.
 FBINK_API int fbink_free_dump_data(FBInkDump* restrict dump);
 
+//
 // Return the coordinates & dimensions of the last thing that was *drawn*.
 // Returns an empty (i.e., {0, 0, 0, 0}) rectangle if nothing was drawn.
 // NOTE: These are unfiltered *framebuffer* coordinates.
@@ -696,6 +710,7 @@ FBINK_API int fbink_free_dump_data(FBInkDump* restrict dump);
 //       i.e., they *will* match with what we actually send to mxcfb (and where we actually drew on the fb)!
 FBINK_API FBInkRect fbink_get_last_rect(void);
 
+//
 // Scan the screen for Kobo's "Connect" button in the "USB plugged in" popup,
 // and optionally generate an input event to press that button.
 // KOBO Only! Returns -(ENOSYS) when disabled (!KOBO, as well as MINIMAL builds).
@@ -741,6 +756,8 @@ FBINK_API int fbink_button_scan(int fbfd, bool press_button, bool nosleep);
 //       since you can then only reasonably expect to be able to concurrently run a single instance of that function ;).
 FBINK_API int fbink_wait_for_usbms_processing(int fbfd, bool force_unplug);
 
+//
+///
 //
 // When you intend to keep the framebuffer fd open for the lifecycle of your program:
 // fd = open() -> init(fd, ...) -> print*(fd, ...) -> ... -> close(fd)

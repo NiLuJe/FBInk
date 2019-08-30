@@ -30,9 +30,9 @@ cdecl_type(FBInkConfig)
 cdecl_type(FBInkOTConfig)
 cdecl_type(FBInkOTFit)
 
-cdecl_type(FBInkDump)
-
 cdecl_type(FBInkRect)
+
+cdecl_type(FBInkDump)
 
 // API
 cdecl_func(fbink_version)
@@ -41,14 +41,15 @@ cdecl_func(fbink_open)
 cdecl_func(fbink_close)
 cdecl_func(fbink_init)
 
-cdecl_func(fbink_add_ot_font)
-cdecl_func(fbink_free_ot_fonts)
-
 cdecl_func(fbink_state_dump)
 cdecl_func(fbink_get_state)
 
 cdecl_func(fbink_print)
+
+cdecl_func(fbink_add_ot_font)
+cdecl_func(fbink_free_ot_fonts)
 cdecl_func(fbink_print_ot)
+
 cdecl_func(fbink_printf)
 
 cdecl_func(fbink_refresh)
