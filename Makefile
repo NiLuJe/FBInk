@@ -86,6 +86,11 @@ ifndef DEBUG
 	# Enable loop unrolling & vectorization in the hope it'll do something smart with our pixel loops
 	EXTRA_CFLAGS+=-ftree-vectorize
 	EXTRA_CFLAGS+=-funroll-loops
+	# Graphite stuff
+	#EXTRA_CFLAGS+=-fgraphite
+	#EXTRA_CFLAGS+=-fgraphite-identity
+	#EXTRA_CFLAGS+=-floop-nest-optimize
+	#EXTRA_CFLAGS+=-floop-parallelize-all
 	# More loop/vectorization tweaks
 	#EXTRA_CFLAGS+=-ftree-loop-distribution -ftree-loop-im -ftree-loop-ivcanon -fivopts
 	# (Extremely verbose) debug info about the auto-vectorization pass...
