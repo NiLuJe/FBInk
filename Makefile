@@ -86,7 +86,7 @@ ifndef DEBUG
 	# Enable loop unrolling & vectorization in the hope it'll do something smart with our pixel loops
 	EXTRA_CFLAGS+=-ftree-vectorize
 	EXTRA_CFLAGS+=-funroll-loops
-	# Graphite stuff (none of my TCs build w/ graphite enabled, and it doesn't have to have a noticeable impact anyway).
+	# Graphite stuff (none of my TCs are built w/ graphite enabled, and it doesn't seem to have a noticeable impact anyway).
 	#EXTRA_CFLAGS+=-fgraphite
 	#EXTRA_CFLAGS+=-fgraphite-identity
 	#EXTRA_CFLAGS+=-floop-nest-optimize
