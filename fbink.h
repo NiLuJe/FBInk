@@ -482,7 +482,7 @@ FBINK_API int fbink_printf(int                  fbfd,
 //			NOTE: Only supported on devices with a recent EPDC (>= v2)!
 //			      On Kindle, that's everything since the KOA2 (KOA2, PW4, KT4, KOA3),
 //			      On Kobo, that's everything since Mk.7.
-//			NOTE: Even then, your device may not support anything other than PASSTHROUGH & ORDERED!
+//			NOTE: Even then, your device may not actually support anything other than PASSTHROUGH & ORDERED!
 // fbink_cfg:		Pointer to an FBInkConfig struct. Honors wfm_mode, is_nightmode, is_flashing.
 // NOTE: If you request an empty region (0x0 @ (0, 0), a full-screen refresh will be performed!
 // NOTE: This *ignores* is_dithered & no_refresh ;).
