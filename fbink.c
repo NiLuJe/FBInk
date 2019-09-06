@@ -5126,6 +5126,14 @@ int
 			break;
 	}
 
+	// Start setting up the screen refresh...
+	struct mxcfb_rect region = {
+		.top    = top_pos,
+		.left   = left_pos,
+		.width  = screenWidth,
+		.height = FONTH,
+	};
+
 	// Which kind of bar did we request?
 	if (!is_infinite) {
 		// This is a real progress bar ;).
@@ -5182,6 +5190,13 @@ int
 
 		// Draw percentage in the middle of the bar...
 		draw(percentage_text, (unsigned short int) row, (unsigned short int) col, 0U, halfcell_offset, fbink_cfg);
+
+		// Don't refresh beyond the borders of the bar if we're backgroundless...
+		// This is especially important w/ A2 wfm mode, as it *will* quantize the existing color to B&W!
+		if (fbink_cfg->is_bgless) {
+			region.left  = fill_left;
+			region.width = bar_width;
+		}
 	} else {
 		// This is an infinite progress bar (a.k.a., activity bar)!
 
@@ -5220,15 +5235,14 @@ int
 				  ellipsis_size,
 				  &bgP);
 		}
-	}
 
-	// Start setting up the screen refresh...
-	struct mxcfb_rect region = {
-		.top    = top_pos,
-		.left   = left_pos,
-		.width  = screenWidth,
-		.height = FONTH,
-	};
+		// Don't refresh beyond the borders of the bar if we're backgroundless...
+		// This is especially important w/ A2 wfm mode, as it *will* quantize the existing color to B&W!
+		if (fbink_cfg->is_bgless) {
+			region.left  = bar_left;
+			region.width = bar_width;
+		}
+	}
 
 	// V offset handling is the pits.
 	if (voffset != 0 || viewVertOrigin != 0) {

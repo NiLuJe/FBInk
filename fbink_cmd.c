@@ -1443,6 +1443,8 @@ int
 		// We'll need to know a few things about the current device...
 		FBInkState fbink_state = { 0 };
 		fbink_get_state(&fbink_cfg, &fbink_state);
+		// Make it backgroundless, to play nicer with whatever might already be on the edge of the screen
+		fbink_cfg.is_bgless = true;
 		// In the middle of the screen
 		fbink_cfg.is_halfway = true;
 		// Fast

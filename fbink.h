@@ -540,7 +540,7 @@ FBINK_API int fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInk
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
 // progress:		0-16 value to set the progress thumb's position in the bar.
-// fbink_cfg:		Pointer to an FBInkConfig struct (ignores is_overlay, is_bgless, is_fgless, col & hoffset;
+// fbink_cfg:		Pointer to an FBInkConfig struct (ignores is_overlay, is_fgless, col & hoffset;
 //				as well as is_centered & is_padded).
 FBINK_API int fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkConfig* restrict fbink_cfg);
 
