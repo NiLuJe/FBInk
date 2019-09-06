@@ -4577,6 +4577,9 @@ int
 		rv = 0;    // Inform the caller there is no room left to print another row.
 	} else {
 		rv = paint_point.y;    // inform the caller what their next top margin should be to follow on
+		// NOTE: Don't forget to subtract the hardware viewport shenanigans, to avoid applying the viewport twice,
+		//       since the next print_ot call will add this to top_margin again...
+		rv -= (viewVertOrigin - viewVertOffset);
 	}
 	// Recap the actual amount of printed lines, as broken metrics may affect what we initially computed ;).
 	LOG("Printed %u visible lines", line);
