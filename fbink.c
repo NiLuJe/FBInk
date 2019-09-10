@@ -4999,7 +4999,7 @@ int
 
 // Small public wrapper around wait_for_submission(), without the caller having to depend on mxcfb headers
 int
-    fbink_wait_for_submission(int fbfd, uint32_t marker, const FBInkConfig* restrict fbink_cfg)
+    fbink_wait_for_submission(int fbfd, uint32_t marker)
 {
 	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
 	bool keep_fd = true;
