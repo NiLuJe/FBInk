@@ -1664,6 +1664,8 @@ int
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
 			} else {
+				// TODO: Make this confiurable!
+				fbink_wait_for_submission(fbfd, LAST_MARKER);
 				// Print the coordinates & dimensions of what we've drawn, if requested
 				if (want_lastrect) {
 					print_lastrect();

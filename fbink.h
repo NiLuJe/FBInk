@@ -56,6 +56,8 @@
 //
 // Magic number for automatic fbfd handling
 #define FBFD_AUTO -1
+// As 0 is an invalid marker value, we can coopt it to try to retrieve our own last sent marker
+#define LAST_MARKER 0U
 
 //
 // List of available fonts
@@ -501,7 +503,7 @@ FBINK_API int fbink_refresh(int                fbfd,
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
 // marker:		The update marker you want to wait for.
-// NOTE: If you request an invalid marker (0), the marker from the last update sent by this FBInk session will be used instead.
+// NOTE: If you request waiting for LAST_MARKER (0U), the marker from the last update sent by this FBInk session will be used instead.
 //       If there aren't any, the call will fail and return -(EINVAL)!
 FBINK_API int fbink_wait_for_submission(int fbfd, uint32_t marker);
 
