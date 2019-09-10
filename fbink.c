@@ -1272,8 +1272,12 @@ static int
 		WARN("MXCFB_WAIT_FOR_UPDATE_SUBMISSION: %s", errstr);
 		return ERRCODE(EXIT_FAILURE);
 	} else {
-		// NOTE: Timeout is set to 5000ms
-		LOG("Waited %ldms for submission of update %u", (5000 - jiffies_to_ms(rv)), marker);
+		if (rv == 0) {
+			LOG("Update %u has already fully been submitted", marker);
+		} else {
+			// NOTE: Timeout is set to 5000ms
+			LOG("Waited %ldms for submission of update %u", (5000 - jiffies_to_ms(rv)), marker);
+		}
 	}
 
 	return EXIT_SUCCESS;
@@ -5013,7 +5017,7 @@ int
 	// Try to retrieve the last sent marker, if any, if we passed marker 0...
 	if (marker == 0U) {
 		marker = lastMarker;
-		LOG("Retrieved last sent update marker: %u", marker);
+		LOG("Retrieved marker from the last update sent: %u", marker);
 	}
 
 	// Don't try to wait for an invalid marker!
