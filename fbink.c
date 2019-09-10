@@ -1256,7 +1256,27 @@ static int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
-	return rv;
+	return EXIT_SUCCESS;
+}
+
+// All mxcfb Kindle devices ([K5<->??)
+static int
+    wait_for_submission_kindle(int fbfd, uint32_t marker)
+{
+	int rv;
+	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_SUBMISSION, &marker);
+
+	if (rv < 0) {
+		char        buf[256];
+		const char* errstr = strerror_r(errno, buf, sizeof(buf));
+		WARN("MXCFB_WAIT_FOR_UPDATE_SUBMISSION: %s", errstr);
+		return ERRCODE(EXIT_FAILURE);
+	} else {
+		// NOTE: Timeout is set to 5000ms
+		LOG("Waited %ldms for submission of update %u", (5000 - jiffies_to_ms(rv)), marker);
+	}
+
+	return EXIT_SUCCESS;
 }
 
 // Touch Kindle devices ([K5<->]KOA2)
@@ -1779,6 +1799,28 @@ static int
 #	endif    // FBINK_FOR_KINDLE
 }
 #endif            // FBINK_FOR_LINUX
+
+// Same thing for WAIT_FOR_UPDATE_SUBMISSION requests...
+#ifndef FBINK_FOR_KINDLE
+// This is only implemented on Kindle kernels...
+static int
+    wait_for_submission(int fbfd __attribute__((unused)), uint32_t marker __attribute__((unused)))
+{
+	// NOTE: Much like refresh() on !eInk, silently return EXIT_SUCCESS instead of -ENOSYS...
+	return EXIT_SUCCESS;
+}
+#else
+static int
+    wait_for_submission(int fbfd, uint32_t marker)
+{
+	// Only implemented for mxcfb Kindles...
+	if (deviceQuirks.isKindleLegacy) {
+		return EXIT_SUCCESS;
+	} else {
+		return wait_for_submission_kindle(fbfd, marker);
+	}
+}
+#endif    // FBINK_FOR_KINDLE
 
 // Open the framebuffer file & return the opened fd
 int
@@ -4942,6 +4984,30 @@ int
 					   fbink_cfg->is_flashing,
 					   false))) {
 		WARN("Failed to refresh the screen");
+	}
+
+	if (!keep_fd) {
+		close(fbfd);
+	}
+
+	return ret;
+}
+
+// Small public wrapper around wait_for_submission(), without the caller having to depend on mxcfb headers
+int
+    fbink_wait_for_submission(int fbfd, uint32_t marker, const FBInkConfig* restrict fbink_cfg)
+{
+	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
+	bool keep_fd = true;
+	if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// TODO: Handle retrieving the last sent marker automagically (if marker == 0).
+
+	int ret;
+	if (EXIT_SUCCESS != (ret = wait_for_submission(fbfd, marker))) {
+		WARN("Failed to wait for submission of update %u", marker);
 	}
 
 	if (!keep_fd) {

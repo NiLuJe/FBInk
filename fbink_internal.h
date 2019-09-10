@@ -440,6 +440,7 @@ static struct mxcfb_rect draw(const char* restrict,
 static long int jiffies_to_ms(long int);
 #	if defined(FBINK_FOR_KINDLE)
 static int refresh_legacy(int, const struct mxcfb_rect, bool);
+static int wait_for_submission_kindle(int, uint32_t);
 static int refresh_kindle(int, const struct mxcfb_rect, uint32_t, uint32_t, bool, uint32_t);
 static int refresh_kindle_zelda(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
 static int refresh_kindle_rex(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
@@ -451,6 +452,7 @@ static int refresh_kobo_mk7(int, const struct mxcfb_rect, uint32_t, uint32_t, in
 #	endif    // FBINK_FOR_KINDLE
 #endif            // !FBINK_FOR_LINUX
 static int refresh(int, const struct mxcfb_rect, uint32_t, int UNUSED_BY_CERVANTES, bool, bool, bool);
+static int wait_for_submission(int, uint32_t);
 
 static int open_fb_fd(int* restrict, bool* restrict);
 static int open_fb_fd_nonblock(int* restrict, bool* restrict);
