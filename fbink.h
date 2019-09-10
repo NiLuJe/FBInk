@@ -497,11 +497,13 @@ FBINK_API int fbink_refresh(int                fbfd,
 			    const FBInkConfig* restrict fbink_cfg);
 
 // A simple wrapper around the MXFB_WAIT_FOR_UPDATE_SUBMISSION ioctl, without requiring you to include einkfb/mxcfb headers.
+// Returns -(EINVAL) when the update marker is invalid.
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
 // marker:		The update marker you want to wait for.
 // fbink_cfg:		Pointer to an FBInkConfig struct. FIXME: Probably won't need it in the end.
-// TODO: If you request an invalid marker (0), the ioctl will be requested against the last update sent (if any)!
+// NOTE: If you request an invalid marker (0), the marker from the last update sent will be used instead.
+//       If there aren't any, the call will fail and return -(EINVAL)!
 FBINK_API int fbink_wait_for_submission(int fbfd, uint32_t marker, const FBInkConfig* restrict fbink_cfg);
 
 //

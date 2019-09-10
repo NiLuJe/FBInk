@@ -331,6 +331,7 @@ uint8_t                  penFGColor     = 0x00;
 uint8_t                  penBGColor     = 0xFF;
 FBInkPixel               penFGPixel;
 FBInkPixel               penBGPixel;
+uint32_t                 lastMarker = 0U;
 // Slightly arbitrary-ish fallback values
 unsigned short int MAXROWS = 45U;
 unsigned short int MAXCOLS = 32U;

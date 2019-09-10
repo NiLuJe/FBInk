@@ -1769,32 +1769,36 @@ static int
 	// So, handle this common switcheroo here...
 	uint32_t wfm = (is_flashing && waveform_mode == WAVEFORM_MODE_AUTO) ? WAVEFORM_MODE_GC16 : waveform_mode;
 	uint32_t upm = is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
-	// We'll want to increment the marker on each subsequent calls (for API users), hence the static storage
-	static uint32_t marker_counter = 0U;
-	uint32_t marker = (uint32_t) getpid() + marker_counter++;
+	// We'll want to increment the marker on each subsequent calls (for API users)...
+	if (lastMarker == 0U) {
+		// Seed it with our PID
+		lastMarker = (uint32_t) getpid();
+	} else {
+		lastMarker++;
+	}
 
 	// NOTE: Make sure update_marker is valid, an invalid marker *may* hang the kernel instead of failing gracefully,
 	//       depending on the device/FW...
-	if (marker == 0U) {
-		marker = ('F' + 'B' + 'I' + 'n' + 'k');
+	if (lastMarker == 0U) {
+		lastMarker = ('F' + 'B' + 'I' + 'n' + 'k');
 		// i.e.,  70  + 66  + 73  + 110 + 107
 	}
 
 #	if defined(FBINK_FOR_KINDLE)
 	if (deviceQuirks.isKindleRex) {
-		return refresh_kindle_rex(fbfd, region, wfm, upm, dithering_mode, is_nightmode, marker);
+		return refresh_kindle_rex(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
 	} else if (deviceQuirks.isKindleZelda) {
-		return refresh_kindle_zelda(fbfd, region, wfm, upm, dithering_mode, is_nightmode, marker);
+		return refresh_kindle_zelda(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
 	} else {
-		return refresh_kindle(fbfd, region, wfm, upm, is_nightmode, marker);
+		return refresh_kindle(fbfd, region, wfm, upm, is_nightmode, lastMarker);
 	}
 #	elif defined(FBINK_FOR_CERVANTES)
-	return refresh_cervantes(fbfd, region, wfm, upm, is_nightmode, marker);
+	return refresh_cervantes(fbfd, region, wfm, upm, is_nightmode, lastMarker);
 #	else
 	if (deviceQuirks.isKoboMk7) {
-		return refresh_kobo_mk7(fbfd, region, wfm, upm, dithering_mode, is_nightmode, marker);
+		return refresh_kobo_mk7(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
 	} else {
-		return refresh_kobo(fbfd, region, wfm, upm, is_nightmode, marker);
+		return refresh_kobo(fbfd, region, wfm, upm, is_nightmode, lastMarker);
 	}
 #	endif    // FBINK_FOR_KINDLE
 }
@@ -5003,18 +5007,32 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
-	// TODO: Handle retrieving the last sent marker automagically (if marker == 0).
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
 
-	int ret;
-	if (EXIT_SUCCESS != (ret = wait_for_submission(fbfd, marker))) {
+	// Try to retrieve the last sent marker, if any, if we passed marker 0...
+	if (marker == 0U) {
+		marker = lastMarker;
+		LOG("Retrieved last sent update marker: %u", marker);
+	}
+
+	// Don't try to wait for an invalid marker!
+	if (marker == 0U) {
+		WARN("Cannot wait for an invalid update marker");
+		rv = ERRCODE(EINVAL);
+		goto cleanup;
+	}
+
+	if (EXIT_SUCCESS != (rv = wait_for_submission(fbfd, marker))) {
 		WARN("Failed to wait for submission of update %u", marker);
 	}
 
+cleanup:
 	if (!keep_fd) {
 		close(fbfd);
 	}
 
-	return ret;
+	return rv;
 }
 
 // Simple public getter for temporary Device Quirks
