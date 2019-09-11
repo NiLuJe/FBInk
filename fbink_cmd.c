@@ -1598,17 +1598,16 @@ int
 					total_lines = (unsigned short int) (total_lines + linecount);
 				}
 			}
-
-			if (wait_for) {
-				fbink_wait_for_submission(fbfd, LAST_MARKER);
-				fbink_wait_for_complete(fbfd, LAST_MARKER);
-			}
-			// Print the coordinates & dimensions of what we wrote, if requested
-			// NOTE: This'll be slightly unwieldy for multi prints, but, as things are printed in order,
-			//       the final line will be canon.
-			if (want_lastrect) {
-				print_lastrect();
-			}
+		}
+		// NOTE: For multi-args prints, we'll only wait for the *last* print
+		if (wait_for) {
+			fbink_wait_for_submission(fbfd, LAST_MARKER);
+			fbink_wait_for_complete(fbfd, LAST_MARKER);
+		}
+		// Print the coordinates & dimensions of what we wrote, if requested
+		// NOTE: For multi-args prints, we'll only print the rect from the *last* print
+		if (want_lastrect) {
+			print_lastrect();
 		}
 		// And print the total amount of lines we printed, if requested...
 		if (want_linecount) {
@@ -1799,10 +1798,10 @@ int
 		} else {
 			// If all else failed, try reading from stdin, provided we're not running from a terminal ;).
 			if (!isatty(fileno(stdin))) {
-				char*   line = NULL;
-				size_t  len  = 0;
-				ssize_t nread;
-				int     linecnt = -1;
+				char*          line = NULL;
+				size_t         len  = 0;
+				ssize_t        nread;
+				int            linecnt    = -1;
 				unsigned short totallines = 0U;
 
 				// If we're being run from a non-interactive SSH session, abort early if stdin is empty,
@@ -1926,12 +1925,13 @@ int
 					}
 					if (want_linecount) {
 						if (is_truetype) {
-							fprintf(stdout,
-								"next_top=%hu;computed_lines=%hu;rendered_lines=%hu;truncated=%d;",
-								totallines,
-								ot_fit.computed_lines,
-								ot_fit.rendered_lines,
-								ot_fit.truncated);
+							fprintf(
+							    stdout,
+							    "next_top=%hu;computed_lines=%hu;rendered_lines=%hu;truncated=%d;",
+							    totallines,
+							    ot_fit.computed_lines,
+							    ot_fit.rendered_lines,
+							    ot_fit.truncated);
 						} else {
 							printf("%hu", totallines);
 						}
