@@ -507,8 +507,10 @@ static void        parse_simple_md(const char* restrict, size_t, unsigned char* 
 
 static uint32_t    get_wfm_mode(uint8_t);
 static const char* wfm_to_string(uint8_t);
+#ifndef FBINK_FOR_LINUX
 static int         get_hwd_mode(uint8_t);
 static const char* hwd_to_string(uint8_t);
+#endif
 
 // For identify_device, which we need outside of fbink_device_id.c ;)
 #ifndef FBINK_FOR_LINUX

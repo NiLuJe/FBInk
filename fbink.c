@@ -4889,6 +4889,7 @@ static const char*
 	}
 }
 
+#ifndef FBINK_FOR_LINUX
 // Convert our public HW_DITHER_INDEX_T values to an appropriate mxcfb dithering mode constant
 static int
     get_hwd_mode(uint8_t hw_dither_index)
@@ -4945,6 +4946,7 @@ static const char*
 			return "Unknown";
 	}
 }
+#endif    // !FBINK_FOR_LINUX
 
 // Small public wrapper around refresh(), without the caller having to depend on mxcfb headers
 int
@@ -5003,7 +5005,7 @@ int
 #else
 	WARN("e-Ink screen refreshes require an e-Ink device");
 	return ERRCODE(ENOSYS);
-#endif
+#endif    // !FBINK_FOR_LINUX
 }
 
 // Small public wrapper around wait_for_submission(), without the caller having to depend on mxcfb headers
