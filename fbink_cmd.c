@@ -347,7 +347,37 @@ static void
 	}
 }
 
-// Small utility function for want_lastrect
+// Small utility functions for want_lastrect
+static void
+    compute_lastrect(void)
+{
+	// No need to check for error, it will return {0, 0, 0, 0} on failure anyway ;).
+	FBInkRect last_rect = fbink_get_last_rect();
+
+	// If that's the first call, simply use last_rect as-is
+	if (total_rect.width == 0U && total_rect.height == 0U) {
+		total_rect = last_rect;
+	} else {
+		// Otherwise, build a rect that overlaps w/ every previous rects...
+		total_rect.top   = (unsigned short int) MIN(total_rect.top, last_rect.top);
+		total_rect.left  = (unsigned short int) MIN(total_rect.left, last_rect.left);
+		total_rect.width = (unsigned short int) MAX(total_rect.width, last_rect.width);
+		// That works as long as we only print top to bottom...
+		total_rect.height = (unsigned short int) ((last_rect.top + last_rect.height) - total_rect.top);
+	}
+}
+
+static void
+    recap_lastrect(void)
+{
+	fprintf(stdout,
+		"lastRect_Left=%hu;lastRect_Top=%hu;lastRect_Width=%hu;lastRect_Height=%hu;",
+		total_rect.left,
+		total_rect.top,
+		total_rect.width,
+		total_rect.height);
+}
+
 static void
     print_lastrect(void)
 {
@@ -1603,6 +1633,11 @@ int
 					total_lines = (unsigned short int) (total_lines + linecount);
 				}
 			}
+			// This is slightly tricky for multi-args prints...
+			// We'll compute a super rectangle that includes every line's rectangle.
+			if (want_lastrect) {
+				compute_lastrect();
+			}
 		}
 		// NOTE: For multi-args prints, we'll only wait for the *last* print
 		if (wait_for) {
@@ -1611,10 +1646,10 @@ int
 #endif
 			fbink_wait_for_complete(fbfd, LAST_MARKER);
 		}
-		// Print the coordinates & dimensions of what we wrote, if requested
-		// NOTE: For multi-args prints, we'll only print the rect from the *last* print
+		// Print the coordinates & dimensions of *everything* we wrote, if requested
+		// NOTE: For multi-args prints, that means a synthetic rect that encompasses the full thing.
 		if (want_lastrect) {
-			print_lastrect();
+			recap_lastrect();
 		}
 		// And print the total amount of lines we printed, if requested...
 		if (want_linecount) {
@@ -1900,6 +1935,9 @@ int
 						if (want_linecount) {
 							totallines = (unsigned short int) (linecnt);
 						}
+						if (want_lastrect) {
+							compute_lastrect();
+						}
 					}
 				} else {
 					while ((nread = getline(&line, &len, stdin)) != -1) {
@@ -1917,6 +1955,9 @@ int
 						}
 						if (want_linecount) {
 							totallines = (unsigned short int) (totallines + linecnt);
+						}
+						if (want_lastrect) {
+							compute_lastrect();
 						}
 					}
 				}
@@ -1938,7 +1979,7 @@ int
 						fbink_wait_for_complete(fbfd, LAST_MARKER);
 					}
 					if (want_lastrect) {
-						print_lastrect();
+						recap_lastrect();
 					}
 					if (want_linecount) {
 						if (is_truetype) {

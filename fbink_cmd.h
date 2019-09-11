@@ -39,12 +39,32 @@
 // FBInk always returns negative values on failure
 #define ERRCODE(e) (-(e))
 
+// MIN/MAX with no side-effects,
+// c.f., https://gcc.gnu.org/onlinedocs/cpp/Duplication-of-Side-Effects.html#Duplication-of-Side-Effects
+//     & https://dustri.org/b/min-and-max-macro-considered-harmful.html
+#define MIN(X, Y)                                                                                                        \
+	({                                                                                                               \
+		__auto_type x_ = (X);                                                                                    \
+		__auto_type y_ = (Y);                                                                                    \
+		(x_ < y_) ? x_ : y_;                                                                                     \
+	})
+
+#define MAX(X, Y)                                                                                                        \
+	({                                                                                                               \
+		__auto_type x__ = (X);                                                                                   \
+		__auto_type y__ = (Y);                                                                                   \
+		(x__ > y__) ? x__ : y__;                                                                                 \
+	})
+
 static void show_helpmsg(void);
 
 static int do_infinite_progress_bar(int, const FBInkConfig*);
 
 static void load_ot_fonts(const char*, const char*, const char*, const char*, const FBInkConfig*);
 
+FBInkRect   total_rect = { 0U };
+static void compute_lastrect(void);
+static void recap_lastrect(void);
 static void print_lastrect(void);
 
 // Sprinkle a bit of C11 in there...
