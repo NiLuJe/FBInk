@@ -534,9 +534,13 @@ FBINK_API int fbink_wait_for_complete(int fbfd, uint32_t marker);
 //       right before sending a flashing one, for example.
 // NOTE: Prior to FBInk 1.20.0, we used to *enforce* a wait_for_complete *after* *every* flashing (FULL) update.
 //       This was originally done to mimic eips's behavior when displaying an image.
-//       While blocking right after a refresh made some kind of sense for a one-off CLI tool, it's questionable for API users:
+//       While blocking right after a refresh made sense for a one-off CLI tool, it's different for API users:
 //       in most cases, it probably makes more sense to only block *before* the *following* flashing refresh,
 //       thus ensuring that the wait will be shorter (or null), since time has probably passed between those two refreshes.
+//       But if you know that you won't be busy for a while after a flashing update, it might make sense to wait right after it,
+//       in order to avoid an ioctl on the next refresh that might end up hurting reactivity...
+//       Incidentally, as all of this depends on specific use-case, this is why this is entirely left to the user,
+//       and that there's no compatibility flag in FBInkConfig to restore the FBInk < 1.20 behavior ;).
 
 //
 // Returns true if the device appears to be in a quirky framebuffer state that *may* require a reinit to produce sane results.
