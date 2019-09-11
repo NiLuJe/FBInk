@@ -1343,7 +1343,7 @@ static int
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		if (rv == 0) {
-			LOG("Update %u has already fully been submitted", marker);
+			LOG("Update %u has already fully been completed", marker);
 		} else {
 			// NOTE: Timeout is set to 5000ms
 			LOG("Waited %ldms for completion of update %u", (5000 - jiffies_to_ms(rv)), marker);
@@ -1371,7 +1371,7 @@ static int
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		if (rv == 0) {
-			LOG("Update %u has already fully been submitted", marker);
+			LOG("Update %u has already fully been completed", marker);
 		} else {
 			// NOTE: Timeout is set to 5000ms
 			LOG("Waited %ldms for completion of update %u", (5000 - jiffies_to_ms(rv)), marker);
@@ -1563,7 +1563,7 @@ static int
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		if (rv == 0) {
-			LOG("Update %u has already fully been submitted", marker);
+			LOG("Update %u has already fully been completed", marker);
 		} else {
 			// NOTE: Timeout is set to 5000ms
 			LOG("Waited %ldms for completion of update %u", (5000 - jiffies_to_ms(rv)), marker);
@@ -1631,7 +1631,7 @@ static int
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		if (rv == 0) {
-			LOG("Update %u has already fully been submitted", marker);
+			LOG("Update %u has already fully been completed", marker);
 		} else {
 			// NOTE: Timeout is set to 10000ms
 			LOG("Waited %ldms for completion of update %u", (10000 - jiffies_to_ms(rv)), marker);
@@ -1710,7 +1710,7 @@ static int
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		if (rv == 0) {
-			LOG("Update %u has already fully been submitted", marker);
+			LOG("Update %u has already fully been completed", marker);
 		} else {
 			// NOTE: Timeout is set to 5000ms
 			LOG("Waited %ldms for completion of update %u", (5000 - jiffies_to_ms(rv)), marker);
