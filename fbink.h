@@ -520,7 +520,7 @@ FBINK_API int fbink_wait_for_submission(int fbfd, uint32_t marker);
 //       If there aren't any, the call will fail and return -(EINVAL)!
 FBINK_API int fbink_wait_for_complete(int fbfd, uint32_t marker);
 // NOTE: For most single-threaded use-cases, you *probably* don't need to bother with this,
-//       as all your writes to the framebuffer would obviously be serialized.
+//       as all your writes to the framebuffer should obviously be serialized.
 //       I encourage you to strace your stock reader to see how it makes use of those ioctls:
 //       they're mostly used before and/or after FULL (i.e., flashing) updates,
 //       to make sure they don't get affected by surrounding updates.
@@ -537,10 +537,10 @@ FBINK_API int fbink_wait_for_complete(int fbfd, uint32_t marker);
 //       While blocking right after a refresh made sense for a one-off CLI tool, it's different for API users:
 //       in most cases, it probably makes more sense to only block *before* the *following* flashing refresh,
 //       thus ensuring that the wait will be shorter (or null), since time has probably passed between those two refreshes.
-//       But if you know that you won't be busy for a while after a flashing update, it might make sense to wait right after it,
+//       But, if you know that you won't be busy for a while after a flashing update, it might make sense to wait right after it,
 //       in order to avoid an ioctl on the next refresh that might end up hurting reactivity...
-//       Incidentally, as all of this depends on specific use-case, this is why this is entirely left to the user,
-//       and that there's no compatibility flag in FBInkConfig to restore the FBInk < 1.20 behavior ;).
+//       Incidentally, as all of this depends on specific use-cases, this is why this is entirely left to the user,
+//       and why there's no compatibility flag in FBInkConfig to restore the FBInk < 1.20 behavior ;).
 
 //
 // Returns true if the device appears to be in a quirky framebuffer state that *may* require a reinit to produce sane results.
