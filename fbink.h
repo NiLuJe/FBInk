@@ -532,6 +532,11 @@ FBINK_API int fbink_wait_for_complete(int fbfd, uint32_t marker);
 // NOTE: See KOReader's mxc_update @ https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer_mxcfb.lua
 //       for some fancier examples in a complex application, where one might want to wait for completion of previous updates
 //       right before sending a flashing one, for example.
+// NOTE: Prior to FBInk 1.20.0, we used to *enforce* a wait_for_complete *after* *every* flashing (FULL) update.
+//       This was originally done to mimic eips's behavior when displaying an image.
+//       While blocking right after a refresh made some kind of sense for a one-off CLI tool, it's questionable for API users:
+//       in most cases, it probably makes more sense to only block *before* the *following* flashing refresh,
+//       thus ensuring that the wait will be shorter (or null), since time has probably passed between those two refreshes.
 
 //
 // Returns true if the device appears to be in a quirky framebuffer state that *may* require a reinit to produce sane results.
