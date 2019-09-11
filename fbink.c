@@ -1836,18 +1836,8 @@ static int
 	}
 }
 #	endif    // FBINK_FOR_KINDLE
-#endif            // !FBINK_FOR_LINUX
 
 // Same thing for WAIT_FOR_UPDATE_COMPLETE requests...
-#ifdef FBINK_FOR_LINUX
-// NOP when we don't have an eInk screen ;).
-static int
-    wait_for_complete(int fbfd __attribute__((unused)), uint32_t marker __attribute__((unused)))
-{
-	// NOTE: Much like refresh(), silently return EXIT_SUCCESS instead of -ENOSYS...
-	return EXIT_SUCCESS;
-}
-#else
 static int
     wait_for_complete(int fbfd, uint32_t marker)
 {
@@ -1870,7 +1860,7 @@ static int
 	}
 #	endif    // FBINK_FOR_KINDLE
 }
-#endif            // FBINK_FOR_LINUX
+#endif    // !FBINK_FOR_LINUX
 
 // Open the framebuffer file & return the opened fd
 int

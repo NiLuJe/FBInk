@@ -469,8 +469,8 @@ static int refresh(int, const struct mxcfb_rect, uint32_t, int UNUSED_BY_CERVANT
 #	if defined(FBINK_FOR_KINDLE)
 static int wait_for_submission(int, uint32_t);
 #	endif
-#endif
 static int wait_for_complete(int, uint32_t);
+#endif
 
 static int open_fb_fd(int* restrict, bool* restrict);
 static int open_fb_fd_nonblock(int* restrict, bool* restrict);
