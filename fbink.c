@@ -1822,15 +1822,9 @@ static int
 #endif            // FBINK_FOR_LINUX
 
 // Same thing for WAIT_FOR_UPDATE_SUBMISSION requests...
-#ifndef FBINK_FOR_KINDLE
+#ifndef FBINK_FOR_LINUX
+#	if defined(FBINK_FOR_KINDLE)
 // This is only implemented on Kindle kernels...
-static int
-    wait_for_submission(int fbfd __attribute__((unused)), uint32_t marker __attribute__((unused)))
-{
-	// NOTE: Much like refresh() on !eInk, silently return EXIT_SUCCESS instead of -ENOSYS...
-	return EXIT_SUCCESS;
-}
-#else
 static int
     wait_for_submission(int fbfd, uint32_t marker)
 {
@@ -1841,7 +1835,8 @@ static int
 		return wait_for_submission_kindle(fbfd, marker);
 	}
 }
-#endif    // FBINK_FOR_KINDLE
+#	endif    // FBINK_FOR_KINDLE
+#endif            // !FBINK_FOR_LINUX
 
 // Same thing for WAIT_FOR_UPDATE_COMPLETE requests...
 #ifdef FBINK_FOR_LINUX
