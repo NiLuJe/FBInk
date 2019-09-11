@@ -352,19 +352,31 @@ static void
     compute_lastrect(void)
 {
 	// No need to check for error, it will return {0, 0, 0, 0} on failure anyway ;).
-	FBInkRect last_rect = fbink_get_last_rect();
+	FBInkRect                 last_rect = fbink_get_last_rect();
+	static FBInkRect          prev_rect = { 0U };
+	static unsigned short int bottom    = 0U;
 
 	// If that's the first call, simply use last_rect as-is
 	if (total_rect.width == 0U && total_rect.height == 0U) {
 		total_rect = last_rect;
 	} else {
 		// Otherwise, build a rect that overlaps w/ every previous rects...
-		total_rect.top   = (unsigned short int) MIN(total_rect.top, last_rect.top);
+		total_rect.top = (unsigned short int) MIN(total_rect.top, last_rect.top);
+		if (last_rect.top > prev_rect.top) {
+			// Top to bottom...
+			total_rect.height =
+			    (unsigned short int) (MAX((last_rect.top + last_rect.height), bottom) - total_rect.top);
+		} else {
+			// Last print is *above* the previous one! (cell rendering can wrap around).
+			bottom            = (unsigned short int) (prev_rect.top + prev_rect.height);
+			total_rect.height = (unsigned short int) (bottom - last_rect.top);
+		}
 		total_rect.left  = (unsigned short int) MIN(total_rect.left, last_rect.left);
 		total_rect.width = (unsigned short int) MAX(total_rect.width, last_rect.width);
-		// That works as long as we only print top to bottom...
-		total_rect.height = (unsigned short int) ((last_rect.top + last_rect.height) - total_rect.top);
 	}
+
+	// Remember the previous rect to detect wraparounds...
+	prev_rect = last_rect;
 }
 
 static void
