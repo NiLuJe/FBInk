@@ -499,25 +499,27 @@ FBINK_API int fbink_refresh(int                fbfd,
 			    uint8_t            dithering_mode,
 			    const FBInkConfig* restrict fbink_cfg);
 
-// A simple wrapper around the MXFB_WAIT_FOR_UPDATE_SUBMISSION ioctl, without requiring you to include mxcfb headers.
+// A simple wrapper around the MXCFB_WAIT_FOR_UPDATE_SUBMISSION ioctl, without requiring you to include mxcfb headers.
 // Returns -(EINVAL) when the update marker is invalid.
-// Returns -(ENOSYS) on devices where this ioctl is unsupported
+// Returns -(ENOSYS) on devices where this ioctl is unsupported.
 // NOTE: It is only implemented by Kindle kernels (K5+)!
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
 // marker:		The update marker you want to wait for.
 // NOTE: If marker is set to LAST_MARKER (0U), the one from the last update sent by this FBInk session will be used instead.
 //       If there aren't any, the call will fail and return -(EINVAL)!
+// NOTE: Waiting for a random marker *should* simply return early.
 FBINK_API int fbink_wait_for_submission(int fbfd, uint32_t marker);
 
-// A simple wrapper around the MXFB_WAIT_FOR_UPDATE_COMPLETE ioctl, without requiring you to include mxcfb headers.
+// A simple wrapper around the MXCFB_WAIT_FOR_UPDATE_COMPLETE ioctl, without requiring you to include mxcfb headers.
 // Returns -(EINVAL) when the update marker is invalid.
-// Returns -(ENOSYS) on non-eInk devices (i.e., pure Linux builds)
+// Returns -(ENOSYS) on non-eInk devices (i.e., pure Linux builds).
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
 // marker:		The update marker you want to wait for.
 // NOTE: If marker is set to LAST_MARKER (0U), the one from the last update sent by this FBInk session will be used instead.
 //       If there aren't any, the call will fail and return -(EINVAL)!
+// NOTE: Waiting for a random marker *should* simply return early.
 FBINK_API int fbink_wait_for_complete(int fbfd, uint32_t marker);
 // NOTE: For most single-threaded use-cases, you *probably* don't need to bother with this,
 //       as all your writes to the framebuffer should obviously be serialized.
@@ -536,10 +538,10 @@ FBINK_API int fbink_wait_for_complete(int fbfd, uint32_t marker);
 //       This was originally done to mimic eips's behavior when displaying an image.
 //       While blocking right after a refresh made sense for a one-off CLI tool, it's different for API users:
 //       in most cases, it probably makes more sense to only block *before* the *following* flashing refresh,
-//       thus ensuring that the wait will be shorter (or null), since time has probably passed between those two refreshes.
+//       thus ensuring that the wait will be shorter (or near zero), since time has probably passed between those two refreshes.
 //       But, if you know that you won't be busy for a while after a flashing update, it might make sense to wait right after it,
 //       in order to avoid an ioctl on the next refresh that might end up hurting reactivity...
-//       Incidentally, as all of this depends on specific use-cases, this is why this is entirely left to the user,
+//       Incidentally, as all of this depends on specific use-cases, this is why it is entirely left to the user,
 //       and why there's no compatibility flag in FBInkConfig to restore the FBInk < 1.20 behavior ;).
 
 //

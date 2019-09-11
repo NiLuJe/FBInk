@@ -1205,7 +1205,7 @@ static struct mxcfb_rect
 // NOTE: This should be fairly accurate, given USER_HZ (i.e., 100Hz -> to the dozen ms, +/- rounding).
 //       This can be confirmed w/ manual timing via clock_gettime(CLOCK_MONOTONIC) ;).
 // NOTE: Fun fact, waiting for a FULL update is hardly any longer than waiting for a PARTIAL one.
-//       Apparently, the gist of the differences lie in the waveform mode, not the update mode or the region size.
+//       Apparently, the gist of the differences lies in the waveform mode, not the update mode or the region size.
 static long int
     jiffies_to_ms(long int jiffies)
 {
