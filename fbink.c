@@ -2675,25 +2675,25 @@ int
 	// NOTE: We make sure we free any previous allocation first!
 	switch (style) {
 		case FNT_REGULAR:
-			if (free_ot_font(otFonts.otRegular) == EXIT_SUCCESS) {
+			if (free_ot_font(&otFonts.otRegular) == EXIT_SUCCESS) {
 				LOG("Replacing an existing Regular font style!");
 			}
 			otFonts.otRegular = font_info;
 			break;
 		case FNT_ITALIC:
-			if (free_ot_font(otFonts.otItalic) == EXIT_SUCCESS) {
+			if (free_ot_font(&otFonts.otItalic) == EXIT_SUCCESS) {
 				LOG("Replacing an existing Italic font style!");
 			}
 			otFonts.otItalic = font_info;
 			break;
 		case FNT_BOLD:
-			if (free_ot_font(otFonts.otBold) == EXIT_SUCCESS) {
+			if (free_ot_font(&otFonts.otBold) == EXIT_SUCCESS) {
 				LOG("Replacing an existing Bold font style!");
 			}
 			otFonts.otBold = font_info;
 			break;
 		case FNT_BOLD_ITALIC:
-			if (free_ot_font(otFonts.otBoldItalic) == EXIT_SUCCESS) {
+			if (free_ot_font(&otFonts.otBoldItalic) == EXIT_SUCCESS) {
 				LOG("Replacing an existing Bold Italic font style!");
 			}
 			otFonts.otBoldItalic = font_info;
@@ -2711,13 +2711,13 @@ int
 #ifdef FBINK_WITH_OPENTYPE
 // Free an individual OpenType font structure
 static int
-    free_ot_font(stbtt_fontinfo* restrict font_info)
+    free_ot_font(stbtt_fontinfo** restrict font_info)
 {
-	if (font_info) {
-		free(font_info->data);    // This is the font data we loaded
-		free(font_info);
+	if (*font_info) {
+		free((*font_info)->data);    // This is the font data we loaded
+		free(*font_info);
 		// Don't leave a dangling pointer
-		font_info = NULL;
+		*font_info = NULL;
 
 		return EXIT_SUCCESS;
 	} else {
@@ -2731,16 +2731,16 @@ int
     fbink_free_ot_fonts(void)
 {
 #ifdef FBINK_WITH_OPENTYPE
-	if (free_ot_font(otFonts.otRegular) == EXIT_SUCCESS) {
+	if (free_ot_font(&otFonts.otRegular) == EXIT_SUCCESS) {
 		LOG("Released Regular font data");
 	}
-	if (free_ot_font(otFonts.otItalic) == EXIT_SUCCESS) {
+	if (free_ot_font(&otFonts.otItalic) == EXIT_SUCCESS) {
 		LOG("Released Italic font data");
 	}
-	if (free_ot_font(otFonts.otBold) == EXIT_SUCCESS) {
+	if (free_ot_font(&otFonts.otBold) == EXIT_SUCCESS) {
 		LOG("Released Bold font data");
 	}
-	if (free_ot_font(otFonts.otBoldItalic) == EXIT_SUCCESS) {
+	if (free_ot_font(&otFonts.otBoldItalic) == EXIT_SUCCESS) {
 		LOG("Released Bold Italic font data");
 	}
 
