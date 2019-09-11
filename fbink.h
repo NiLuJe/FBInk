@@ -519,6 +519,19 @@ FBINK_API int fbink_wait_for_submission(int fbfd, uint32_t marker);
 // NOTE: If marker is set to LAST_MARKER (0U), the one from the last update sent by this FBInk session will be used instead.
 //       If there aren't any, the call will fail and return -(EINVAL)!
 FBINK_API int fbink_wait_for_complete(int fbfd, uint32_t marker);
+// NOTE: For most single-threaded use-cases, you *probably* don't need to bother with this,
+//       as all your writes to the framebuffer would obviously be serialized.
+//       I encourage you to strace your stock reader to see how it makes use of those ioctls:
+//       they're mostly used before and/or after FULL (i.e., flashing) updates,
+//       to make sure they don't get affected by surrounding updates.
+//       They can also be used to more predictably fence A2 updates.
+//       In fact, for the most part, you can think of them as a kind of vsync fence.
+//       Be aware that the ioctl will block for (relatively) longer than it takes for the refresh to visually end,
+//       and that the delay depends for the most part on the waveform mode (flashing & region size have a much smaller impact).
+//       With some waveform modes (mainly A2/DU), it'll return significantly earlier if the region's fb content hasn't changed.
+// NOTE: See KOReader's mxc_update @ https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer_mxcfb.lua
+//       for some fancier examples in a complex application, where one might want to wait for completion of previous updates
+//       right before sending a flashing one, for example.
 
 //
 // Returns true if the device appears to be in a quirky framebuffer state that *may* require a reinit to produce sane results.
