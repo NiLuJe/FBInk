@@ -5026,7 +5026,6 @@ int
 	if (marker == LAST_MARKER) {
 		if (lastMarker != LAST_MARKER) {
 			marker = lastMarker;
-			LOG("Retrieved marker from the last update sent: %u", marker);
 		} else {
 			// Otherwise, don't even try to wait for an invalid marker!
 			WARN("No previous update found, cannot wait for an invalid update marker");
