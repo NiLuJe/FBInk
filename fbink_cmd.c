@@ -1803,6 +1803,7 @@ int
 				size_t  len  = 0;
 				ssize_t nread;
 				int     linecnt = -1;
+				unsigned short totallines = 0U;
 
 				// If we're being run from a non-interactive SSH session, abort early if stdin is empty,
 				// as we do *NOT* want an interactive behavior here (c.f., #32).
@@ -1881,6 +1882,10 @@ int
 							       ot_fit.computed_lines,
 							       ot_fit.truncated ? ", string was truncated." : ".");
 						}
+
+						if (want_linecount) {
+							totallines = (unsigned short int) (linecnt);
+						}
 					}
 				} else {
 					while ((nread = getline(&line, &len, stdin)) != -1) {
@@ -1891,6 +1896,13 @@ int
 						fbink_cfg.row = (short int) (fbink_cfg.row + linecnt);
 						if (!fbink_cfg.is_quiet) {
 							printf("Next line should start @ row %hd\n", fbink_cfg.row);
+						}
+
+						if (want_linecode) {
+							rv += linecnt;
+						}
+						if (want_linecount) {
+							totallines = (unsigned short int) (totallines + linecnt);
 						}
 					}
 				}
@@ -1903,6 +1915,26 @@ int
 						rv = fbink_cls(fbfd, &fbink_cfg);
 					} else {
 						show_helpmsg();
+					}
+				} else {
+					if (wait_for) {
+						fbink_wait_for_submission(fbfd, LAST_MARKER);
+						fbink_wait_for_complete(fbfd, LAST_MARKER);
+					}
+					if (want_lastrect) {
+						print_lastrect();
+					}
+					if (want_linecount) {
+						if (is_truetype) {
+							fprintf(stdout,
+								"next_top=%hu;computed_lines=%hu;rendered_lines=%hu;truncated=%d;",
+								totallines,
+								ot_fit.computed_lines,
+								ot_fit.rendered_lines,
+								ot_fit.truncated);
+						} else {
+							printf("%hu", totallines);
+						}
 					}
 				}
 			} else {
