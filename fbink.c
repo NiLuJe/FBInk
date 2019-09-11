@@ -5023,16 +5023,16 @@ int
 	int rv = EXIT_SUCCESS;
 
 	// Try to retrieve the last sent marker, if any, if we passed marker 0...
-	if (marker == 0U) {
-		marker = lastMarker;
-		LOG("Retrieved marker from the last update sent: %u", marker);
-	}
-
-	// Don't try to wait for an invalid marker!
-	if (marker == 0U) {
-		WARN("Cannot wait for an invalid update marker");
-		rv = ERRCODE(EINVAL);
-		goto cleanup;
+	if (marker == LAST_MARKER) {
+		if (lastMarker != LAST_MARKER) {
+			marker = lastMarker;
+			LOG("Retrieved marker from the last update sent: %u", marker);
+		} else {
+			// Otherwise, don't even try to wait for an invalid marker!
+			WARN("No previous update found, cannot wait for an invalid update marker");
+			rv = ERRCODE(EINVAL);
+			goto cleanup;
+		}
 	}
 
 	if (EXIT_SUCCESS != (rv = wait_for_submission(fbfd, marker))) {
