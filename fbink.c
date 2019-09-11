@@ -1843,6 +1843,40 @@ static int
 }
 #endif    // FBINK_FOR_KINDLE
 
+// Same thing for WAIT_FOR_UPDATE_COMPLETE requests...
+#ifdef FBINK_FOR_LINUX
+// NOP when we don't have an eInk screen ;).
+static int
+    wait_for_complete(int fbfd __attribute__((unused)), uint32_t marker __attribute__((unused)))
+{
+	// NOTE: Much like refresh(), silently return EXIT_SUCCESS instead of -ENOSYS...
+	return EXIT_SUCCESS;
+}
+#else
+static int
+    wait_for_complete(int fbfd, uint32_t marker)
+{
+#	if defined(FBINK_FOR_KINDLE)
+	if (deviceQuirks.isKindleLegacy) {
+		// MXCFB only ;).
+		return EXIT_SUCCESS;
+	} else if (deviceQuirks.isKindlePearlScreen) {
+		return wait_for_complete_kindle_pearl(fbfd, marker);
+	} else {
+		return wait_for_complete_kindle(fbfd, marker);
+	}
+#	elif defined(FBINK_FOR_CERVANTES)
+	return wait_for_complete_cervantes(fbfd, marker);
+#	else
+	if (deviceQuirks.isKoboMk7) {
+		return wait_for_complete_kobo_mk7(fbfd, marker);
+	} else {
+		return wait_for_complete_kobo(fbfd, marker);
+	}
+#	endif    // FBINK_FOR_KINDLE
+}
+#endif            // FBINK_FOR_LINUX
+
 // Open the framebuffer file & return the opened fd
 int
     fbink_open(void)
@@ -5061,6 +5095,48 @@ cleanup:
 	WARN("Waiting for update submission is only supported on Kindle");
 	return ERRCODE(ENOSYS);
 #endif    // FBINK_FOR_KINDLE
+}
+
+// Small public wrapper around wait_for_complete(), without the caller having to depend on mxcfb headers
+int
+    fbink_wait_for_complete(int fbfd UNUSED_BY_LINUX, uint32_t marker UNUSED_BY_LINUX)
+{
+#ifndef FBINK_FOR_LINUX
+	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
+	bool keep_fd = true;
+	if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// Try to retrieve the last sent marker, if any, if we passed marker 0...
+	if (marker == LAST_MARKER) {
+		if (lastMarker != LAST_MARKER) {
+			marker = lastMarker;
+		} else {
+			// Otherwise, don't even try to wait for an invalid marker!
+			WARN("No previous update found, cannot wait for an invalid update marker");
+			rv = ERRCODE(EINVAL);
+			goto cleanup;
+		}
+	}
+
+	if (EXIT_SUCCESS != (rv = wait_for_complete(fbfd, marker))) {
+		WARN("Failed to wait for completion of update %u", marker);
+	}
+
+cleanup:
+	if (!keep_fd) {
+		close(fbfd);
+	}
+
+	return rv;
+#else
+	WARN("Waiting for update completion requires an e-Ink device");
+	return ERRCODE(ENOSYS);
+#endif    // !FBINK_FOR_LINUX
 }
 
 // Simple public getter for temporary Device Quirks

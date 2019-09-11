@@ -499,16 +499,26 @@ FBINK_API int fbink_refresh(int                fbfd,
 			    uint8_t            dithering_mode,
 			    const FBInkConfig* restrict fbink_cfg);
 
-// A simple wrapper around the MXFB_WAIT_FOR_UPDATE_SUBMISSION ioctl, without requiring you to include einkfb/mxcfb headers.
+// A simple wrapper around the MXFB_WAIT_FOR_UPDATE_SUBMISSION ioctl, without requiring you to include mxcfb headers.
 // Returns -(EINVAL) when the update marker is invalid.
 // Returns -(ENOSYS) on devices where this ioctl is unsupported
 // NOTE: It is only implemented by Kindle kernels (K5+)!
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
 // marker:		The update marker you want to wait for.
-// NOTE: If you request waiting for LAST_MARKER (0U), the marker from the last update sent by this FBInk session will be used instead.
+// NOTE: If marker is set to LAST_MARKER (0U), the one from the last update sent by this FBInk session will be used instead.
 //       If there aren't any, the call will fail and return -(EINVAL)!
 FBINK_API int fbink_wait_for_submission(int fbfd, uint32_t marker);
+
+// A simple wrapper around the MXFB_WAIT_FOR_UPDATE_COMPLETE ioctl, without requiring you to include mxcfb headers.
+// Returns -(EINVAL) when the update marker is invalid.
+// Returns -(ENOSYS) on non-eInk devices (i.e., pure Linux builds)
+// fbfd:		Open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened for the duration of this call.
+// marker:		The update marker you want to wait for.
+// NOTE: If marker is set to LAST_MARKER (0U), the one from the last update sent by this FBInk session will be used instead.
+//       If there aren't any, the call will fail and return -(EINVAL)!
+FBINK_API int fbink_wait_for_complete(int fbfd, uint32_t marker);
 
 //
 // Returns true if the device appears to be in a quirky framebuffer state that *may* require a reinit to produce sane results.
