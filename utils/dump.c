@@ -191,6 +191,7 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
+	fbink_wait_for_complete(fbfd, LAST_MARKER);
 
 	// Dump a region at the center of the screen, with a few funky offsets to test that
 	fprintf(stdout, "[04] DUMP REGION\n");
@@ -217,6 +218,7 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
+	fbink_wait_for_complete(fbfd, LAST_MARKER);
 
 	// We'll be needing some info for the following tests...
 	FBInkState fbink_state = { 0 };
@@ -234,6 +236,7 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
+	fbink_wait_for_complete(fbfd, LAST_MARKER);
 	// Forget about the crop for the other tests
 	dump.clip = (const FBInkRect){ 0U };
 
@@ -249,6 +252,7 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
+	fbink_wait_for_complete(fbfd, LAST_MARKER);
 	// Forget about the crop for the other tests
 	dump.clip = (const FBInkRect){ 0U };
 
@@ -262,6 +266,7 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
+	fbink_wait_for_complete(fbfd, LAST_MARKER);
 	// Forget about the crop for the other tests
 	dump.clip = (const FBInkRect){ 0U };
 
@@ -275,6 +280,7 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
+	fbink_wait_for_complete(fbfd, LAST_MARKER);
 	// Forget about the crop for the other tests
 	dump.clip = (const FBInkRect){ 0U };
 
@@ -292,6 +298,7 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
+	fbink_wait_for_complete(fbfd, LAST_MARKER);
 	// Forget about the crop for the other tests
 	dump.clip = (const FBInkRect){ 0U };
 
@@ -367,6 +374,7 @@ int
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
+		fbink_wait_for_complete(fbfd, LAST_MARKER);
 
 		// One more time, with a x2 scaling
 		fbink_cfg.halign        = CENTER;
@@ -386,6 +394,7 @@ int
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
+		fbink_wait_for_complete(fbfd, LAST_MARKER);
 
 		// Switch back to 32bpp
 		fprintf(stdout, "[14] SWITCH TO 32BPP\n");
