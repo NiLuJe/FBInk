@@ -446,6 +446,7 @@ int
                                               { "coordinates", no_argument, NULL, 'E' },
                                               { "mimic", no_argument, NULL, 'Z' },
                                               { "cls", no_argument, NULL, 'k' },
+                                              { "wait", no_argument, NULL, 'w' },
                                               { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_cfg = { 0 };
@@ -532,6 +533,7 @@ int
 	bool      is_infinite    = false;
 	bool      is_mimic       = false;
 	bool      is_cls         = false;
+	bool      wait_for       = false;
 	uint8_t   progress       = 0;
 	bool      is_truetype    = false;
 	char*     reg_ot_file    = NULL;
@@ -542,7 +544,7 @@ int
 
 	// NOTE: c.f., https://codegolf.stackexchange.com/q/148228 to sort this mess when I need to find an available letter ;p
 	while ((opt = getopt_long(
-		    argc, argv, "y:x:Y:X:hfcmMprs:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bDW:HEZk", opts, &opt_index)) != -1) {
+		    argc, argv, "y:x:Y:X:hfcmMprs:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bDW:HEZkw", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				if (strtol_hi(opt, NULL, optarg, &fbink_cfg.row) < 0) {
@@ -1346,6 +1348,9 @@ int
 			case 'k':
 				is_cls = true;
 				break;
+			case 'w':
+				wait_for = true;
+				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
 				errfnd = true;
@@ -1521,6 +1526,11 @@ int
 					}
 					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
+				} else {
+					if (wait_for) {
+						fbink_wait_for_submission(fbfd, LAST_MARKER);
+						fbink_wait_for_complete(fbfd, LAST_MARKER);
+					}
 				}
 
 				// NOTE: Don't clobber previous entries if multiple strings were passed...
@@ -1574,6 +1584,11 @@ int
 					fprintf(stderr, "Failed to print that string!\n");
 					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
+				} else {
+					if (wait_for) {
+						fbink_wait_for_submission(fbfd, LAST_MARKER);
+						fbink_wait_for_complete(fbfd, LAST_MARKER);
+					}
 				}
 
 				// NOTE: Don't clobber previous entries if multiple strings were passed...
@@ -1636,6 +1651,11 @@ int
 				fprintf(stderr, "Failed to refresh the screen as per your specification!\n");
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
+			} else {
+				if (wait_for) {
+					fbink_wait_for_submission(fbfd, LAST_MARKER);
+					fbink_wait_for_complete(fbfd, LAST_MARKER);
+				}
 			}
 		} else if (is_image) {
 			if (!fbink_cfg.is_quiet) {
@@ -1664,8 +1684,10 @@ int
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
 			} else {
-				// TODO: Make this confiurable!
-				fbink_wait_for_submission(fbfd, LAST_MARKER);
+				if (wait_for) {
+					fbink_wait_for_submission(fbfd, LAST_MARKER);
+					fbink_wait_for_complete(fbfd, LAST_MARKER);
+				}
 				// Print the coordinates & dimensions of what we've drawn, if requested
 				if (want_lastrect) {
 					print_lastrect();
@@ -1693,6 +1715,10 @@ int
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
 			} else {
+				if (wait_for) {
+					fbink_wait_for_submission(fbfd, LAST_MARKER);
+					fbink_wait_for_complete(fbfd, LAST_MARKER);
+				}
 				// Print the coordinates & dimensions of what we've drawn, if requested
 				if (want_lastrect) {
 					print_lastrect();
@@ -1742,6 +1768,10 @@ int
 					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
 				} else {
+					if (wait_for) {
+						fbink_wait_for_submission(fbfd, LAST_MARKER);
+						fbink_wait_for_complete(fbfd, LAST_MARKER);
+					}
 					// Print the coordinates & dimensions of what we've drawn, if requested
 					if (want_lastrect) {
 						print_lastrect();
