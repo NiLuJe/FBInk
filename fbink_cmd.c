@@ -89,7 +89,12 @@ static void
 #	endif
 	    "\t\t\t\tNote that this may be ignored on some specific devices where it is known to be or have been unstable at some point.\n"
 	    "\t-b, --norefresh\t\tOnly update the framebuffer, but don't actually refresh the eInk screen (useful when drawing in batch).\n"
-#endif
+	    "\t-w, --wait\t\tBlock until the kernel has finished processing the last update we sent, if any.\n"
+	    "\t\t\t\tThe actual delay depends for the most part on the waveform mode that was used.\n"
+	    "\t\t\t\tSee the API documentation around fbink_wait_for_submission & fbink_wait_for_complete for more details.\n"
+	    "\t\t\t\tAs a point of reference, eips only does a wait_for_complete after the flashing refresh of an image.\n"
+	    "\t\t\t\tWe used to do that by default for *all* flashing updates until FBInk 1.20.0.\n"
+#endif    //!FBINK_FOR_LINUX
 	    "\t-S, --size\t\tOverride the automatic font scaling multiplier (Default: 0, automatic selection, ranging from 1 (no scaling), to 4 (4x upscaling), depending on screen resolution).\n"
 #ifdef FBINK_WITH_FONTS
 	    "\t\t\t\tNote that user-supplied values will be clamped to safe boundaries (from 1 to around 45 for most fonts, and from 1 to around 30 for TALL).\n"
