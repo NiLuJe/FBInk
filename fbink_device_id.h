@@ -88,8 +88,7 @@ static void identify_cervantes(void);
 // Can thankfully be populated from /bin/ntx_hwconfig with the help of strings -n2 and a bit of sed, i.e.,
 // sed -re 's/(^)(.*?)($)/"\2",/g' Kobo_PCB_IDs.txt
 // Double-check w/ ntx_hwconfig -l -s /dev/mmcblk0
-// NOTE: Last updated on 04/03/19, from FW 4.13.12638 (NTX HwConfig v3.1.6.29.247-20181001)
-//       Still up to date as of 07/22/19 with FW 4.16.13162
+// NOTE: Last updated on 09/11/19, from FW 4.16.13337 (NTX HwConfig v3.1.6.30.254-20190121)
 /*
 static const char* kobo_pcbs[] = {
 	"E60800", "E60810", "E60820",  "E90800", "E90810", "E60830", "E60850", "E50800", "E50810", "E60860",  "E60MT2",
@@ -99,17 +98,17 @@ static const char* kobo_pcbs[] = {
 	"A13130", "E606H2", "E60Q90",  "ED0Q00", "E60QA0", "E60QD0", "E60QF0", "E60QH0", "E60QG0", "H70000",  "ED0Q10",
 	"E70Q00", "H40000", "NC",      "E60QJ0", "E60QL0", "E60QM0", "E60QK0", "E70S00", "T60Q00", "C31Q00",  "E60QN0",
 	"E60U00", "E70Q10", "E60QP0",  "E60QQ0", "E70Q20", "T05R00", "M31Q00", "E60U10", "E60K00", "E80K00",  "E70Q30",
-	"EA0Q00", "E60QR0", "ED0R00",  "E60QU0", "E60U20", "M35QE0", "E60QT0"
+	"EA0Q00", "E60QR0", "ED0R00",  "E60QU0", "E60U20", "M35QE0", "E60QT0", "E70Q50", "T60U00", "E60QV0",  "E70K00"
 };
 */
 // And match (more or less accurately, for some devices) that to what we've come to know as a device code,
 // because that's what we actually care about...
 // c.f., tools/pcb_to_ids.py
-static const unsigned short int kobo_ids[] = { 0, 0,   0,   0,   0, 0,   0,   0, 0, 0,   0,   0, 310, 0, 0, 0, 0,   0,
-					       0, 0,   310, 320, 0, 0,   330, 0, 0, 340, 350, 0, 0,   0, 0, 0, 360, 360,
-					       0, 330, 0,   0,   0, 370, 0,   0, 0, 0,   371, 0, 0,   0, 0, 0, 0,   0,
-					       0, 373, 0,   0,   0, 375, 374, 0, 0, 375, 0,   0, 375, 0, 0, 0, 0,   0,
-					       0, 376, 376, 377, 0, 0,   0,   0, 0, 0,   0,   0 };
+static const unsigned short int kobo_ids[] = { 0, 0,   0,   0,   0, 0,   0,   0, 0, 0,   0,   0, 310, 0, 0, 0,  0,   0,
+					       0, 0,   310, 320, 0, 0,   330, 0, 0, 340, 350, 0, 0,   0, 0, 0,  360, 360,
+					       0, 330, 0,   0,   0, 370, 0,   0, 0, 0,   371, 0, 0,   0, 0, 0,  0,   0,
+					       0, 373, 0,   0,   0, 375, 374, 0, 0, 375, 0,   0, 375, 0, 0, 0,  0,   0,
+					       0, 376, 376, 377, 0, 0,   0,   0, 0, 0,   0,   0, 0,   0, 0, 384 };
 
 // Same idea, but for the various NTX/Kobo Display Panels...
 /*
@@ -121,7 +120,8 @@ static const char* kobo_disp_panel[] = { "6\" Left EPD",     "6\" Right EPD",   
 					 "7.3\" Bottom EPD", "7.3\" Top EPD",     "7.3\" Left EPD",    "7.3\" Right EPD",
 					 "4.7\" Bottom EPD", "4.7\" Top EPD",     "4.7\" Left EPD",    "4.7\" Right EPD",
 					 "10.3\" Top EPD",   "10.3\" Bottom EPD", "10.3\" Left EPD",   "10.3\" Right EPD",
-					 "8\" Bottom EPD",   "8\" Top EPD",       "8\" Left EPD",      "8\" Right EPD" };
+					 "8\" Bottom EPD",   "8\" Top EPD",       "8\" Left EPD",      "8\" Right EPD",
+					 "7\" Bottom EPD",   "7\" Top EPD",       "7\" Left EPD",      "7\" Right EPD" };
 */
 // And for the various NTX/Kobo CPUs...
 /*
@@ -130,9 +130,9 @@ static const char* kobo_cpus[] = { "mx35", "m166e", "mx50",   "x86",    "mx6",  
 */
 // And for the various NTX/Kobo Display Resolutions...
 /*
-static const char* kobo_disp_res[] = { "800x600",   "1024x758",  "1024x768",   "1440x1080",   "1366x768",
-				       "1448x1072", "1600x1200", "400x375x2",  "1872x1404",   "960x540",
-				       "NC",        "2200x1650", "1440x640x4", "1600x1200x4", "1920x1440" };
+static const char* kobo_disp_res[] = { "800x600",    "1024x758",    "1024x768",  "1440x1080", "1366x768", "1448x1072",
+				       "1600x1200",  "400x375x2",   "1872x1404", "960x540",   "NC",       "2200x1650",
+				       "1440x640x4", "1600x1200x4", "1920x1440", "1264x1680" };
 */
 // And for the various NTX/Kobo Display Bus Widths...
 /*

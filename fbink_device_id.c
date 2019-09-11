@@ -747,6 +747,19 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
+		case 384:    // Libra (storm)
+			deviceQuirks.isKoboMk7 = true;
+			deviceQuirks.canRotate = true;
+			// FIXME (TBC): Because Mk.7 and KOBO_HWCFG_DisplayBusWidth (35) is "16Bits_mirror" (3)
+			deviceQuirks.ntxRotaQuirk = NTX_ROTA_ODD_INVERTED;
+			deviceQuirks.screenDPI    = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "Libra", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Storm", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
 		case 0:
 			// Like kobo_config.sh, assume Trilogy as a fallback
 			deviceQuirks.isKoboNonMT = true;

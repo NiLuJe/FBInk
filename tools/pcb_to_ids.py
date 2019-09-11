@@ -55,5 +55,8 @@ with open(data, "r") as f:
 			# Forma (frost) [377]
 			# Forma 32GB (frost) [380] (if 32GB)
 			print("377,")
+		elif line.startswith("E70K0"):
+			# Libra (storm) [384]
+			print("384,")
 		else:
 			print("0,")
