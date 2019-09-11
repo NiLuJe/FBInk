@@ -544,6 +544,12 @@ FBINK_API int fbink_wait_for_complete(int fbfd, uint32_t marker);
 //       Incidentally, as all of this depends on specific use-cases, this is why it is entirely left to the user,
 //       and why there's no compatibility flag in FBInkConfig to restore the FBInk < 1.20 behavior ;).
 
+// Return the update marker from the last *refresh* (explicit or implicit) done in this FBInk session.
+// NOTE: Returns LAST_MARKER (0U) if there wasn't any, or on non-eInk devices (i.e., pure Linux builds).
+// NOTE: Mainly useful if you want to do fairly fancy stuff with wait_for_complete/wait_for_submission,
+//       otherwise, simply passing LAST_MARKER to 'em should do the trick.
+FBINK_API uint32_t fbink_get_last_marker(void);
+
 //
 // Returns true if the device appears to be in a quirky framebuffer state that *may* require a reinit to produce sane results.
 // NOTE: The intended use-case is for long running apps which may trigger prints across different framebuffer states,

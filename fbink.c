@@ -5124,6 +5124,18 @@ cleanup:
 #endif    // !FBINK_FOR_LINUX
 }
 
+// Simple public getter for lastMarker
+uint32_t
+    fbink_get_last_marker(void)
+{
+#ifndef FBINK_FOR_LINUX
+	return lastMarker;
+#else
+	WARN("Waiting for updates requires an e-Ink device");
+	return LAST_MARKER;
+#endif    // !FBINK_FOR_LINUX
+}
+
 // Simple public getter for temporary Device Quirks
 // NOTE: Deprecated, see fbink_reinit instead!
 bool
