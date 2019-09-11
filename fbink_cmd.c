@@ -1606,7 +1606,9 @@ int
 		}
 		// NOTE: For multi-args prints, we'll only wait for the *last* print
 		if (wait_for) {
+#ifdef FBINK_FOR_KINDLE
 			fbink_wait_for_submission(fbfd, LAST_MARKER);
+#endif
 			fbink_wait_for_complete(fbfd, LAST_MARKER);
 		}
 		// Print the coordinates & dimensions of what we wrote, if requested
@@ -1651,7 +1653,9 @@ int
 				goto cleanup;
 			} else {
 				if (wait_for) {
+#ifdef FBINK_FOR_KINDLE
 					fbink_wait_for_submission(fbfd, LAST_MARKER);
+#endif
 					fbink_wait_for_complete(fbfd, LAST_MARKER);
 				}
 			}
@@ -1683,7 +1687,9 @@ int
 				goto cleanup;
 			} else {
 				if (wait_for) {
+#ifdef FBINK_FOR_KINDLE
 					fbink_wait_for_submission(fbfd, LAST_MARKER);
+#endif
 					fbink_wait_for_complete(fbfd, LAST_MARKER);
 				}
 				// Print the coordinates & dimensions of what we've drawn, if requested
@@ -1714,7 +1720,9 @@ int
 				goto cleanup;
 			} else {
 				if (wait_for) {
+#ifdef FBINK_FOR_KINDLE
 					fbink_wait_for_submission(fbfd, LAST_MARKER);
+#endif
 					fbink_wait_for_complete(fbfd, LAST_MARKER);
 				}
 				// Print the coordinates & dimensions of what we've drawn, if requested
@@ -1767,7 +1775,9 @@ int
 					goto cleanup;
 				} else {
 					if (wait_for) {
+#ifdef FBINK_FOR_KINDLE
 						fbink_wait_for_submission(fbfd, LAST_MARKER);
+#endif
 						fbink_wait_for_complete(fbfd, LAST_MARKER);
 					}
 					// Print the coordinates & dimensions of what we've drawn, if requested
@@ -1922,7 +1932,9 @@ int
 					}
 				} else {
 					if (wait_for) {
+#ifdef FBINK_FOR_KINDLE
 						fbink_wait_for_submission(fbfd, LAST_MARKER);
+#endif
 						fbink_wait_for_complete(fbfd, LAST_MARKER);
 					}
 					if (want_lastrect) {
