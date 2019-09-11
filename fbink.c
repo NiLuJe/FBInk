@@ -1326,30 +1326,55 @@ static int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
-	if (update_mode == UPDATE_MODE_FULL) {
-		if (deviceQuirks.isKindlePearlScreen) {
-			rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL, &marker);
-		} else {
-			struct mxcfb_update_marker_data update_marker = {
-				.update_marker  = marker,
-				.collision_test = 0U,
-			};
+	return EXIT_SUCCESS;
+}
 
-			rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_marker);
-		}
+// Touch Kindle devices with a Pearl screen ([K5<->PW1])
+static int
+    wait_for_complete_kindle_pearl(int fbfd, uint32_t marker)
+{
+	int rv;
+	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL, &marker);
 
-		if (rv < 0) {
-			char        buf[256];
-			const char* errstr = strerror_r(errno, buf, sizeof(buf));
-			if (deviceQuirks.isKindlePearlScreen) {
-				WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL: %s", errstr);
-			} else {
-				WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s", errstr);
-			}
-			return ERRCODE(EXIT_FAILURE);
+	if (rv < 0) {
+		char        buf[256];
+		const char* errstr = strerror_r(errno, buf, sizeof(buf));
+		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL: %s", errstr);
+		return ERRCODE(EXIT_FAILURE);
+	} else {
+		if (rv == 0) {
+			LOG("Update %u has already fully been submitted", marker);
 		} else {
 			// NOTE: Timeout is set to 5000ms
-			LOG("Waited %ldms for completion of flashing update %u", (5000 - jiffies_to_ms(rv)), marker);
+			LOG("Waited %ldms for completion of update %u", (5000 - jiffies_to_ms(rv)), marker);
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
+
+// Touch Kindle devices with a Carta screen ([PW2<->??)
+static int
+    wait_for_complete_kindle(int fbfd, uint32_t marker)
+{
+	struct mxcfb_update_marker_data update_marker = {
+		.update_marker  = marker,
+		.collision_test = 0U,
+	};
+	int rv;
+	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_marker);
+
+	if (rv < 0) {
+		char        buf[256];
+		const char* errstr = strerror_r(errno, buf, sizeof(buf));
+		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s", errstr);
+		return ERRCODE(EXIT_FAILURE);
+	} else {
+		if (rv == 0) {
+			LOG("Update %u has already fully been submitted", marker);
+		} else {
+			// NOTE: Timeout is set to 5000ms
+			LOG("Waited %ldms for completion of update %u", (5000 - jiffies_to_ms(rv)), marker);
 		}
 	}
 
@@ -1414,25 +1439,6 @@ static int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
-	if (update_mode == UPDATE_MODE_FULL) {
-		struct mxcfb_update_marker_data update_marker = {
-			.update_marker  = marker,
-			.collision_test = 0U,
-		};
-
-		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_marker);
-
-		if (rv < 0) {
-			char        buf[256];
-			const char* errstr = strerror_r(errno, buf, sizeof(buf));
-			WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s", errstr);
-			return ERRCODE(EXIT_FAILURE);
-		} else {
-			// NOTE: Timeout is set to 5000ms
-			LOG("Waited %ldms for completion of flashing update %u", (5000 - jiffies_to_ms(rv)), marker);
-		}
-	}
-
 	return EXIT_SUCCESS;
 }
 
@@ -1493,25 +1499,6 @@ static int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
-	if (update_mode == UPDATE_MODE_FULL) {
-		struct mxcfb_update_marker_data update_marker = {
-			.update_marker  = marker,
-			.collision_test = 0U,
-		};
-
-		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_marker);
-
-		if (rv < 0) {
-			char        buf[256];
-			const char* errstr = strerror_r(errno, buf, sizeof(buf));
-			WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s", errstr);
-			return ERRCODE(EXIT_FAILURE);
-		} else {
-			// NOTE: Timeout is set to 5000ms
-			LOG("Waited %ldms for completion of flashing update %u", (5000 - jiffies_to_ms(rv)), marker);
-		}
-	}
-
 	return EXIT_SUCCESS;
 }
 #	elif defined(FBINK_FOR_CERVANTES)
@@ -1558,19 +1545,28 @@ static int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
-	// NOTE: We *could* theoretically use MXCFB_WAIT_FOR_UPDATE_COMPLETE2 on 2013+ stuff (C2+)
-	//       But, like on Kobo, don't bother, we'd gain nothing by switching anyway ;).
-	if (update_mode == UPDATE_MODE_FULL) {
-		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &marker);
+	return EXIT_SUCCESS;
+}
 
-		if (rv < 0) {
-			char buf[256];
-			const char* errstr = strerror_r(errno, buf, sizeof(buf));
-			WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s", errstr);
-			return ERRCODE(EXIT_FAILURE);
+// NOTE: We *could* theoretically use MXCFB_WAIT_FOR_UPDATE_COMPLETE2 on 2013+ stuff (C2+)
+//       But, like on Kobo, don't bother, we'd gain nothing by switching anyway ;).
+static int
+    wait_for_complete_cervantes(int fbfd, uint32_t marker)
+{
+	int rv;
+	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &marker);
+
+	if (rv < 0) {
+		char buf[256];
+		const char* errstr = strerror_r(errno, buf, sizeof(buf));
+		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %s", errstr);
+		return ERRCODE(EXIT_FAILURE);
+	} else {
+		if (rv == 0) {
+			LOG("Update %u has already fully been submitted", marker);
 		} else {
 			// NOTE: Timeout is set to 5000ms
-			LOG("Waited %ldms for completion of flashing update %u", (5000 - jiffies_to_ms(rv)), marker);
+			LOG("Waited %ldms for completion of update %u", (5000 - jiffies_to_ms(rv)), marker);
 		}
 	}
 
@@ -1619,17 +1615,26 @@ static int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
-	if (update_mode == UPDATE_MODE_FULL) {
-		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1, &marker);
+	return EXIT_SUCCESS;
+}
 
-		if (rv < 0) {
-			char        buf[256];
-			const char* errstr = strerror_r(errno, buf, sizeof(buf));
-			WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1: %s", errstr);
-			return ERRCODE(EXIT_FAILURE);
+static int
+    wait_for_complete_kobo(int fbfd, uint32_t marker)
+{
+	int rv;
+	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1, &marker);
+
+	if (rv < 0) {
+		char        buf[256];
+		const char* errstr = strerror_r(errno, buf, sizeof(buf));
+		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1: %s", errstr);
+		return ERRCODE(EXIT_FAILURE);
+	} else {
+		if (rv == 0) {
+			LOG("Update %u has already fully been submitted", marker);
 		} else {
 			// NOTE: Timeout is set to 10000ms
-			LOG("Waited %ldms for completion of flashing update %u", (10000 - jiffies_to_ms(rv)), marker);
+			LOG("Waited %ldms for completion of update %u", (10000 - jiffies_to_ms(rv)), marker);
 		}
 	}
 
@@ -1685,22 +1690,30 @@ static int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
-	if (update_mode == UPDATE_MODE_FULL) {
-		struct mxcfb_update_marker_data update_marker = {
-			.update_marker  = marker,
-			.collision_test = 0U,
-		};
+	return EXIT_SUCCESS;
+}
 
-		rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3, &update_marker);
+static int
+    wait_for_complete_kobo_mk7(int fbfd, uint32_t marker)
+{
+	struct mxcfb_update_marker_data update_marker = {
+		.update_marker  = marker,
+		.collision_test = 0U,
+	};
+	int rv;
+	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3, &update_marker);
 
-		if (rv < 0) {
-			char        buf[256];
-			const char* errstr = strerror_r(errno, buf, sizeof(buf));
-			WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3: %s", errstr);
-			return ERRCODE(EXIT_FAILURE);
+	if (rv < 0) {
+		char        buf[256];
+		const char* errstr = strerror_r(errno, buf, sizeof(buf));
+		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3: %s", errstr);
+		return ERRCODE(EXIT_FAILURE);
+	} else {
+		if (rv == 0) {
+			LOG("Update %u has already fully been submitted", marker);
 		} else {
 			// NOTE: Timeout is set to 5000ms
-			LOG("Waited %ldms for completion of flashing update %u", (5000 - jiffies_to_ms(rv)), marker);
+			LOG("Waited %ldms for completion of update %u", (5000 - jiffies_to_ms(rv)), marker);
 		}
 	}
 
