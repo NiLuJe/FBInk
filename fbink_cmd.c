@@ -1526,11 +1526,6 @@ int
 					}
 					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
-				} else {
-					if (wait_for) {
-						fbink_wait_for_submission(fbfd, LAST_MARKER);
-						fbink_wait_for_complete(fbfd, LAST_MARKER);
-					}
 				}
 
 				// NOTE: Don't clobber previous entries if multiple strings were passed...
@@ -1584,11 +1579,6 @@ int
 					fprintf(stderr, "Failed to print that string!\n");
 					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
-				} else {
-					if (wait_for) {
-						fbink_wait_for_submission(fbfd, LAST_MARKER);
-						fbink_wait_for_complete(fbfd, LAST_MARKER);
-					}
 				}
 
 				// NOTE: Don't clobber previous entries if multiple strings were passed...
@@ -1609,6 +1599,10 @@ int
 				}
 			}
 
+			if (wait_for) {
+				fbink_wait_for_submission(fbfd, LAST_MARKER);
+				fbink_wait_for_complete(fbfd, LAST_MARKER);
+			}
 			// Print the coordinates & dimensions of what we wrote, if requested
 			// NOTE: This'll be slightly unwieldy for multi prints, but, as things are printed in order,
 			//       the final line will be canon.
