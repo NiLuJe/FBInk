@@ -474,6 +474,7 @@ FBINK_API int fbink_printf(int                  fbfd,
 //
 // A simple wrapper around the internal screen refresh handling, without requiring you to include einkfb/mxcfb headers.
 // NOTE: Unlike FBInkRect, we *do* honor the original mxcfb rect order here (top before left).
+// Returns -(ENOSYS) on non-eInk devices (i.e., pure Linux builds)
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
 // region_top:		top (y) field of an mxcfb rectangle.
@@ -500,6 +501,8 @@ FBINK_API int fbink_refresh(int                fbfd,
 
 // A simple wrapper around the MXFB_WAIT_FOR_UPDATE_SUBMISSION ioctl, without requiring you to include einkfb/mxcfb headers.
 // Returns -(EINVAL) when the update marker is invalid.
+// Returns -(ENOSYS) on devices where this ioctl is unsupported
+// NOTE: It is only implemented by Kindle kernels (K5+)!
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
 // marker:		The update marker you want to wait for.

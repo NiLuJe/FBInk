@@ -4948,14 +4948,15 @@ static const char*
 
 // Small public wrapper around refresh(), without the caller having to depend on mxcfb headers
 int
-    fbink_refresh(int                fbfd,
-		  uint32_t           region_top,
-		  uint32_t           region_left,
-		  uint32_t           region_width,
-		  uint32_t           region_height,
-		  uint8_t            dithering_mode,
-		  const FBInkConfig* restrict fbink_cfg)
+    fbink_refresh(int fbfd UNUSED_BY_LINUX,
+		  uint32_t region_top UNUSED_BY_LINUX,
+		  uint32_t region_left UNUSED_BY_LINUX,
+		  uint32_t region_width UNUSED_BY_LINUX,
+		  uint32_t region_height UNUSED_BY_LINUX,
+		  uint8_t dithering_mode UNUSED_BY_LINUX,
+		  const FBInkConfig* restrict fbink_cfg UNUSED_BY_LINUX)
 {
+#ifndef FBINK_FOR_LINUX
 	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
 	bool keep_fd = true;
 	if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
@@ -4999,12 +5000,17 @@ int
 	}
 
 	return ret;
+#else
+	WARN("e-Ink screen refreshes require an e-Ink device");
+	return ERRCODE(ENOSYS);
+#endif
 }
 
 // Small public wrapper around wait_for_submission(), without the caller having to depend on mxcfb headers
 int
-    fbink_wait_for_submission(int fbfd, uint32_t marker)
+    fbink_wait_for_submission(int fbfd UNUSED_BY_NOTKINDLE, uint32_t marker UNUSED_BY_NOTKINDLE)
 {
+#ifdef FBINK_FOR_KINDLE
 	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
 	bool keep_fd = true;
 	if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
@@ -5037,6 +5043,10 @@ cleanup:
 	}
 
 	return rv;
+#else
+	WARN("Waiting for update submission is only supported on Kindle");
+	return ERRCODE(ENOSYS);
+#endif    // FBINK_FOR_KINDLE
 }
 
 // Simple public getter for temporary Device Quirks

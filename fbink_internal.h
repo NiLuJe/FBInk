@@ -277,6 +277,13 @@
 #else
 #	define UNUSED_BY_CERVANTES
 #endif
+#ifndef FBINK_FOR_LINUX
+#	define UNUSED_BY_NOTLINUX __attribute__((unused))
+#	define UNUSED_BY_LINUX
+#else
+#	define UNUSED_BY_NOTLINUX
+#	define UNUSED_BY_LINUX __attribute__((unused))
+#endif
 
 // Handle what we send to stdout (i.e., mostly diagnostic stuff, which tends to be verbose, so no FBInk tag)
 #define LOG(fmt, ...)                                                                                                    \
