@@ -523,7 +523,13 @@ FBINK_API int fbink_wait_for_submission(int fbfd, uint32_t marker);
 FBINK_API int fbink_wait_for_complete(int fbfd, uint32_t marker);
 // NOTE: For most single-threaded use-cases, you *probably* don't need to bother with this,
 //       as all your writes to the framebuffer should obviously be serialized.
-//       I encourage you to strace your stock reader to see how it makes use of those ioctls:
+// NOTE: All our target devices should default to the QUEUE_AND_MERGE update scheme,
+//       which means the EPDC itself will attempt to bundle updates together in order to do the least amount of work possible.
+//       (By work, I mean moving the eInk capsules around, i.e., limiting to amount of effective refreshes).
+//       A fun example of this can be seen with the dump/restore tests in utils/dump.c:
+//       By default, it will call fbink_wait_for_complete at sensible times, but if you pass a random argument to it,
+//       it won't: the difference that makes in practcie should be extremely obvious, especially for the first set of tests!
+// NOTE: I encourage you to strace your stock reader to see how it makes use of those ioctls:
 //       they're mostly used before and/or after FULL (i.e., flashing) updates,
 //       to make sure they don't get affected by surrounding updates.
 //       They can also be used to more predictably fence A2 updates.
