@@ -5019,13 +5019,13 @@ int
 	}
 
 	int ret;
-	if (EXIT_SUCCESS != (ret = refresh(fbfd,
-					   region,
-					   get_wfm_mode(fbink_cfg->wfm_mode),
-					   region_dither,
-					   fbink_cfg->is_nightmode,
-					   fbink_cfg->is_flashing,
-					   false))) {
+	if ((ret = refresh(fbfd,
+			   region,
+			   get_wfm_mode(fbink_cfg->wfm_mode),
+			   region_dither,
+			   fbink_cfg->is_nightmode,
+			   fbink_cfg->is_flashing,
+			   false)) != EXIT_SUCCESS) {
 		WARN("Failed to refresh the screen");
 	}
 
@@ -5066,7 +5066,7 @@ int
 		}
 	}
 
-	if (EXIT_SUCCESS != (rv = wait_for_submission(fbfd, marker))) {
+	if ((rv = wait_for_submission(fbfd, marker)) != EXIT_SUCCESS) {
 		WARN("Failed to wait for submission of update %u", marker);
 	}
 
@@ -5108,7 +5108,7 @@ int
 		}
 	}
 
-	if (EXIT_SUCCESS != (rv = wait_for_complete(fbfd, marker))) {
+	if ((rv = wait_for_complete(fbfd, marker)) != EXIT_SUCCESS) {
 		WARN("Failed to wait for completion of update %u", marker);
 	}
 
@@ -5384,7 +5384,7 @@ int
 		draw(percentage_text, (unsigned short int) row, (unsigned short int) col, 0U, halfcell_offset, fbink_cfg);
 
 		// Don't refresh beyond the borders of the bar if we're backgroundless...
-		// This is especially important w/ A2 wfm mode, as it *will* quantize the existing color to B&W!
+		// This is especially important w/ A2 wfm mode, as it *will* quantize the existing pixels down to B&W!
 		if (fbink_cfg->is_bgless) {
 			region.left  = fill_left;
 			region.width = bar_width;
@@ -5429,7 +5429,7 @@ int
 		}
 
 		// Don't refresh beyond the borders of the bar if we're backgroundless...
-		// This is especially important w/ A2 wfm mode, as it *will* quantize the existing color to B&W!
+		// This is especially important w/ A2 wfm mode, as it *will* quantize the existing pixels down to B&W!
 		if (fbink_cfg->is_bgless) {
 			region.left  = bar_left;
 			region.width = bar_width;
