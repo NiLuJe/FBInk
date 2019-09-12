@@ -89,7 +89,7 @@ static void
 #	endif
 	    "\t\t\t\tNote that this may be ignored on some specific devices where it is known to be or have been unstable at some point.\n"
 	    "\t-b, --norefresh\t\tOnly update the framebuffer, but don't actually refresh the eInk screen (useful when drawing in batch).\n"
-	    "\t-w, --wait\t\tBlock until the kernel has finished processing the last update we sent, if any.\n"
+	    "\t-w, --wait\t\tBlock until the kernel has finished processing the *last* update we sent, if any.\n"
 	    "\t\t\t\tThe actual delay depends for the most part on the waveform mode that was used.\n"
 	    "\t\t\t\tSee the API documentation around fbink_wait_for_submission & fbink_wait_for_complete for more details.\n"
 	    "\t\t\t\tAs a point of reference, eips only does a wait_for_complete after the flashing refresh of an image.\n"
