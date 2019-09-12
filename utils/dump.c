@@ -137,7 +137,7 @@ static bool
 }
 
 int
-    main(void)
+    main(int argc, char* argv[] __attribute__((unused)))
 {
 	// Setup FBInk
 	FBInkConfig fbink_cfg = { 0 };
@@ -145,6 +145,13 @@ int
 	fbink_cfg.is_verbose  = true;
 	// Flash to make stuff more obvious
 	fbink_cfg.is_flashing = true;
+
+	// Quick'n dirty way to disable wait_for_complete, because this makes a fun testcase of how the EPDC handles merging...
+	bool wait_for = true;
+	if (argc > 1) {
+		wait_for = false;
+		fprintf(stdout, "Enabled non-blocking refreshes, expect massive optimization (merging) from the EPDC!\n");
+	}
 
 	// Assume success, until shit happens ;)
 	int rv = EXIT_SUCCESS;
@@ -191,7 +198,9 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
-	fbink_wait_for_complete(fbfd, LAST_MARKER);
+	if (wait_for) {
+		fbink_wait_for_complete(fbfd, LAST_MARKER);
+	}
 
 	// Dump a region at the center of the screen, with a few funky offsets to test that
 	fprintf(stdout, "[04] DUMP REGION\n");
@@ -218,7 +227,9 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
-	fbink_wait_for_complete(fbfd, LAST_MARKER);
+	if (wait_for) {
+		fbink_wait_for_complete(fbfd, LAST_MARKER);
+	}
 
 	// We'll be needing some info for the following tests...
 	FBInkState fbink_state = { 0 };
@@ -236,7 +247,9 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
-	fbink_wait_for_complete(fbfd, LAST_MARKER);
+	if (wait_for) {
+		fbink_wait_for_complete(fbfd, LAST_MARKER);
+	}
 	// Forget about the crop for the other tests
 	dump.clip = (const FBInkRect){ 0U };
 
@@ -252,7 +265,9 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
-	fbink_wait_for_complete(fbfd, LAST_MARKER);
+	if (wait_for) {
+		fbink_wait_for_complete(fbfd, LAST_MARKER);
+	}
 	// Forget about the crop for the other tests
 	dump.clip = (const FBInkRect){ 0U };
 
@@ -266,7 +281,9 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
-	fbink_wait_for_complete(fbfd, LAST_MARKER);
+	if (wait_for) {
+		fbink_wait_for_complete(fbfd, LAST_MARKER);
+	}
 	// Forget about the crop for the other tests
 	dump.clip = (const FBInkRect){ 0U };
 
@@ -280,7 +297,9 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
-	fbink_wait_for_complete(fbfd, LAST_MARKER);
+	if (wait_for) {
+		fbink_wait_for_complete(fbfd, LAST_MARKER);
+	}
 	// Forget about the crop for the other tests
 	dump.clip = (const FBInkRect){ 0U };
 
@@ -298,7 +317,9 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
-	fbink_wait_for_complete(fbfd, LAST_MARKER);
+	if (wait_for) {
+		fbink_wait_for_complete(fbfd, LAST_MARKER);
+	}
 	// Forget about the crop for the other tests
 	dump.clip = (const FBInkRect){ 0U };
 
@@ -374,7 +395,9 @@ int
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
-		fbink_wait_for_complete(fbfd, LAST_MARKER);
+		if (wait_for) {
+			fbink_wait_for_complete(fbfd, LAST_MARKER);
+		}
 
 		// One more time, with a x2 scaling
 		fbink_cfg.halign        = CENTER;
@@ -394,7 +417,9 @@ int
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
-		fbink_wait_for_complete(fbfd, LAST_MARKER);
+		if (wait_for) {
+			fbink_wait_for_complete(fbfd, LAST_MARKER);
+		}
 
 		// Switch back to 32bpp
 		fprintf(stdout, "[14] SWITCH TO 32BPP\n");
