@@ -483,6 +483,7 @@ int
 		// The touch panel has a fixed origin that differs from the framebuffer's... >_<".
 		// NOTE: On the Forma, take the current rotation into account,
 		//       because the Home screen *can* be shown in Inverted Portrait...
+		// TODO: Double-check if that holds up on the Libra...
 		if (deviceQuirks.canRotate) {
 			rotate_touch_coordinates(&match_coords);
 		} else {
