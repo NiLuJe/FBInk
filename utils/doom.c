@@ -234,7 +234,7 @@ static void
     do_fire_fs(void)
 {
 	const uint32_t vertViewport = (uint32_t)(viewVertOrigin - viewVertOffset);
-	// Burn bay, burn!
+	// Burn baby, burn!
 	// NOTE: Switching the outer loop to the y one leads to different interactions w/ the PXP & the EPDC...
 	//       Also, slightly uglier flames ;p.
 	for (uint32_t x = 0U; x < fInfo.line_length; x++) {
@@ -298,14 +298,16 @@ static void
     spread_fire(size_t offset, uint32_t x, uint32_t y)
 {
 	uint8_t pixel = *((uint8_t*) (fbPtr + offset));
+	//printf("(%u, %u) is 0x%02X\n", x, y, pixel);
 	if (pixel == palette[0U]) {
 		*((uint8_t*) (fbPtr + offset - fInfo.line_length)) = palette[0U];
 	} else {
 		const size_t random = (rand() * 3) & 3;
 		// Make sure we stay within our window...
-		const size_t shift                              = (y * FIRE_WIDTH + x) - random + 1U;
+		const size_t shift                              = ((y - fire_y_origin) * FIRE_WIDTH + (x - fire_x_origin)) - random + 1U;
 		const size_t dst_y                              = shift / FIRE_WIDTH;
 		const size_t dst_x                              = shift % FIRE_WIDTH;
+		printf("(%u, %u) -> (%zu, %zu)\n", x, y, dst_x, dst_y);
 		const size_t dst                                = dst_y * fInfo.line_length + dst_x;
 		*((uint8_t*) (fbPtr + dst - fInfo.line_length)) = (uint8_t)(pixel - (random & 1U));
 	}
@@ -314,17 +316,17 @@ static void
 static void
     do_fire(void)
 {
-	const uint32_t vertViewport = (uint32_t)(viewVertOrigin - viewVertOffset);
-	// Burn bay, burn!
+	// Burn baby, burn!
 	// NOTE: Switching the outer loop to the y one leads to different interactions w/ the PXP & the EPDC...
 	//       Also, slightly uglier flames ;p.
-	for (uint32_t x = fire_x_origin; x < FIRE_WIDTH; x++) {
-		for (uint32_t y = 1U + fire_y_origin; y < FIRE_HEIGHT + vertViewport; y++) {
+	for (uint32_t x = fire_x_origin; x < FIRE_WIDTH + fire_x_origin; x++) {
+		for (uint32_t y = 1U + fire_y_origin; y < FIRE_HEIGHT + fire_y_origin; y++) {
 			spread_fire(y * fInfo.line_length + x, x, y);
 		}
 	}
 }
 
+// Main entry point
 int
     main(int argc, char* argv[])
 {
