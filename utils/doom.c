@@ -544,9 +544,9 @@ int
 			if (is_timed) {
 				struct timespec t1;
 				clock_gettime(CLOCK_MONOTONIC, &t1);
-				float frame_time =
-				    ((((t1.tv_sec * BILLION) + t1.tv_nsec) - ((t0.tv_sec * BILLION) + t0.tv_nsec)) /
-				     MILLION);
+				float frame_time = ((float) (((t1.tv_sec * BILLION) + t1.tv_nsec) -
+							     ((t0.tv_sec * BILLION) + t0.tv_nsec)) /
+						    MILLION);
 				printf("%.1f FPS (%.3fms)\n", THOUSAND / frame_time, frame_time);
 			}
 		}
@@ -568,9 +568,9 @@ int
 			if (is_timed) {
 				struct timespec t1;
 				clock_gettime(CLOCK_MONOTONIC, &t1);
-				float frame_time =
-				    ((((t1.tv_sec * BILLION) + t1.tv_nsec) - ((t0.tv_sec * BILLION) + t0.tv_nsec)) /
-				     MILLION);
+				float frame_time = ((float) (((t1.tv_sec * BILLION) + t1.tv_nsec) -
+							     ((t0.tv_sec * BILLION) + t0.tv_nsec)) /
+						    MILLION);
 				printf("%.1f FPS (%.3fms)\n", THOUSAND / frame_time, frame_time);
 			}
 			// NOTE: Slowing things down (i.e., putting a dynamic nanosleep() around here)
