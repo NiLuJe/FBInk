@@ -237,6 +237,7 @@ static void
 	const uint32_t vertViewport = (uint32_t)(viewVertOrigin - viewVertOffset);
 	// Burn bay, burn!
 	// NOTE: Switching the outer loop to the y one leads to different interactions w/ the PXP & the EPDC...
+	//       Also, slightly uglier flames ;p.
 	for (uint32_t x = 0U; x < fInfo.line_length; x++) {
 		for (uint32_t y = 1U + vertViewport; y < viewHeight + vertViewport; y++) {
 			spread_fire(y * fInfo.line_length + x);
