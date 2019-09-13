@@ -442,6 +442,7 @@ static void
 	    "\t-t, --time\t\t\tPrint frame timings.\n"
 	    "\t-W, --wfm\t\t\tSet waveform mode.\n"
 	    "\t-d, --dither\t\t\tUse HW dithering.\n"
+	    "\t-l, --limit\t\t\tFramerate cap (in FPS).\n"
 	    "\n",
 	    fbink_version());
 	return;
@@ -457,13 +458,17 @@ int
 
 	int                        opt;
 	int                        opt_index;
-	static const struct option opts[] = {
-		{ "help", no_argument, NULL, 'h' },   { "verbose", no_argument, NULL, 'v' },
-		{ "quiet", no_argument, NULL, 'q' },  { "fs", no_argument, NULL, 'f' },
-		{ "flash", no_argument, NULL, 'F' },  { "scale", required_argument, NULL, 'S' },
-		{ "time", no_argument, NULL, 't' },   { "wfm", no_argument, NULL, 'W' },
-		{ "dither", no_argument, NULL, 'd' }, { NULL, 0, NULL, 0 }
-	};
+	static const struct option opts[] = { { "help", no_argument, NULL, 'h' },
+					      { "verbose", no_argument, NULL, 'v' },
+					      { "quiet", no_argument, NULL, 'q' },
+					      { "fs", no_argument, NULL, 'f' },
+					      { "flash", no_argument, NULL, 'F' },
+					      { "scale", required_argument, NULL, 'S' },
+					      { "time", no_argument, NULL, 't' },
+					      { "wfm", no_argument, NULL, 'W' },
+					      { "dither", no_argument, NULL, 'd' },
+					      { "limit", required_argument, NULL, 'l' },
+					      { NULL, 0, NULL, 0 } };
 
 	// We need to be @ 8bpp
 	uint32_t req_bpp  = 8U;
@@ -476,10 +481,12 @@ int
 	bool    is_timed       = false;
 	bool    is_dithered    = false;
 	uint8_t scaling_factor = 1U;
+	uint8_t frame_cap      = 24U;
+	bool    is_capped      = false;
 
 	bool errfnd = false;
 
-	while ((opt = getopt_long(argc, argv, "hvqfFS:tW:d", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hvqfFS:tW:dl:", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'v':
 				g_isQuiet   = false;
@@ -545,6 +552,12 @@ int
 				break;
 			case 'd':
 				is_dithered = true;
+				break;
+			case 'l':
+				frame_cap = (uint8_t) strtoul(optarg, NULL, 10);
+				is_capped = true;
+				// Requires frame timing!
+				is_timed = true;
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
@@ -654,12 +667,16 @@ int
 		fbink_cfg.is_flashing = true;
 	}
 
+	// Setup dithering
 	uint8_t dithering;
 	if (is_dithered) {
 		dithering = EPDC_FLAG_USE_DITHERING_ORDERED;
 	} else {
 		dithering = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
 	}
+
+	// Setup framecap
+	const long sleep_cap = BILLION / frame_cap;
 
 	fbink_init(fbfd, &fbink_cfg);
 	// We also need to mmap the fb
@@ -683,10 +700,17 @@ int
 			if (is_timed) {
 				struct timespec t1;
 				clock_gettime(CLOCK_MONOTONIC, &t1);
-				float frame_time = ((float) (((t1.tv_sec * BILLION) + t1.tv_nsec) -
-							     ((t0.tv_sec * BILLION) + t0.tv_nsec)) /
-						    MILLION);
+				const long frame_time_ns =
+				    ((t1.tv_sec * BILLION) + t1.tv_nsec) - ((t0.tv_sec * BILLION) + t0.tv_nsec);
+				const float frame_time = ((float) (frame_time_ns) / MILLION);
 				printf("%.1f FPS (%.3f ms)\n", THOUSAND / frame_time, frame_time);
+				// Slow down?
+				if (is_capped) {
+					if (frame_time_ns < sleep_cap) {
+						const struct timespec zzz = { 0L, sleep_cap - frame_time_ns };
+						nanosleep(&zzz, NULL);
+					}
+				}
 			}
 		}
 	} else if (scaling_factor > 1U) {
@@ -705,13 +729,18 @@ int
 			if (is_timed) {
 				struct timespec t1;
 				clock_gettime(CLOCK_MONOTONIC, &t1);
-				float frame_time = ((float) (((t1.tv_sec * BILLION) + t1.tv_nsec) -
-							     ((t0.tv_sec * BILLION) + t0.tv_nsec)) /
-						    MILLION);
+				const long frame_time_ns =
+				    ((t1.tv_sec * BILLION) + t1.tv_nsec) - ((t0.tv_sec * BILLION) + t0.tv_nsec);
+				const float frame_time = ((float) (frame_time_ns) / MILLION);
 				printf("%.1f FPS (%.3f ms)\n", THOUSAND / frame_time, frame_time);
+				// Slow down?
+				if (is_capped) {
+					if (frame_time_ns < sleep_cap) {
+						const struct timespec zzz = { 0L, sleep_cap - frame_time_ns };
+						nanosleep(&zzz, NULL);
+					}
+				}
 			}
-			// NOTE: Slowing things down (i.e., putting a dynamic nanosleep() around here)
-			//       might actually yield *better* results, by not flooding the EPDC too much...
 		}
 	} else {
 		setup_fire();
@@ -725,13 +754,18 @@ int
 			if (is_timed) {
 				struct timespec t1;
 				clock_gettime(CLOCK_MONOTONIC, &t1);
-				float frame_time = ((float) (((t1.tv_sec * BILLION) + t1.tv_nsec) -
-							     ((t0.tv_sec * BILLION) + t0.tv_nsec)) /
-						    MILLION);
+				const long frame_time_ns =
+				    ((t1.tv_sec * BILLION) + t1.tv_nsec) - ((t0.tv_sec * BILLION) + t0.tv_nsec);
+				const float frame_time = ((float) (frame_time_ns) / MILLION);
 				printf("%.1f FPS (%.3f ms)\n", THOUSAND / frame_time, frame_time);
+				// Slow down?
+				if (is_capped) {
+					if (frame_time_ns < sleep_cap) {
+						const struct timespec zzz = { 0L, sleep_cap - frame_time_ns };
+						nanosleep(&zzz, NULL);
+					}
+				}
 			}
-			// NOTE: Slowing things down (i.e., putting a dynamic nanosleep() around here)
-			//       might actually yield *better* results, by not flooding the EPDC too much...
 		}
 	}
 
