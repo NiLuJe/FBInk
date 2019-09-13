@@ -643,7 +643,7 @@ static void
 			deviceQuirks.ntxRotaQuirk = NTX_ROTA_ALL_INVERTED;
 			deviceQuirks.screenDPI    = 265U;
 			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "H2O", sizeof(deviceQuirks.deviceName) - 1U);
+			strncpy(deviceQuirks.deviceName, "Aura H2O", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "Dahlia", sizeof(deviceQuirks.deviceCodename) - 1U);
 			// Flawfinder: ignore
@@ -654,7 +654,7 @@ static void
 			// NOTE: Is indeed NTX_ROTA_STRAIGHT
 			deviceQuirks.screenDPI = 265U;
 			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "H2O²", sizeof(deviceQuirks.deviceName) - 1U);
+			strncpy(deviceQuirks.deviceName, "Aura H2O²", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "Snow", sizeof(deviceQuirks.deviceCodename) - 1U);
 			// Flawfinder: ignore
@@ -666,7 +666,7 @@ static void
 			// NOTE: *Might* be NTX_ROTA_ODD_INVERTED
 			deviceQuirks.screenDPI = 265U;
 			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "H2O² r2", sizeof(deviceQuirks.deviceName) - 1U);
+			strncpy(deviceQuirks.deviceName, "Aura H2O² r2", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "Snow", sizeof(deviceQuirks.deviceCodename) - 1U);
 			// Flawfinder: ignore
@@ -747,14 +747,14 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 384:    // Libra (storm)
+		case 384:    // Libra H2O (storm)
 			deviceQuirks.isKoboMk7 = true;
 			deviceQuirks.canRotate = true;
 			// FIXME (TBC): Because Mk.7 and KOBO_HWCFG_DisplayBusWidth (35) is "16Bits_mirror" (3)
 			deviceQuirks.ntxRotaQuirk = NTX_ROTA_ODD_INVERTED;
 			deviceQuirks.screenDPI    = 300U;
 			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Libra", sizeof(deviceQuirks.deviceName) - 1U);
+			strncpy(deviceQuirks.deviceName, "Libra H2O", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "Storm", sizeof(deviceQuirks.deviceCodename) - 1U);
 			// Flawfinder: ignore
