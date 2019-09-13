@@ -382,7 +382,17 @@ int
 		goto cleanup;
 	}
 
+	// Setup FBInk
 	FBInkConfig fbink_cfg = { 0U };
+	fbink_init(fbfd, &fbink_cfg);
+	// We also need to mmap the fb
+	if (!isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	}
+
 	// Fire!
 	setup_fire();
 	while (true) {
