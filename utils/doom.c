@@ -38,7 +38,7 @@ static void
 	    "\n"
 	    "Doom Fire (via FBInk %s)\n"
 	    "\n"
-	    "Usage: doom [?]\n"
+	    "Usage: doom [-f]\n"
 	    "\n"
 	    "Shiny!\n"
 	    "\n"
@@ -46,6 +46,7 @@ static void
 	    "\t-h, --help\t\t\tShow this help message.\n"
 	    "\t-v, --verbose\t\t\tToggle printing diagnostic messages.\n"
 	    "\t-q, --quiet\t\t\tToggle hiding diagnostic messages.\n"
+	    "\t-f, --fs\t\t\tBurn all the things!\n"
 	    "\n",
 	    fbink_version());
 	return;
@@ -203,8 +204,6 @@ static bool
 // c.f., http://fabiensanglard.net/doom_fire_psx/index.html
 //     & https://github.com/fabiensanglard/DoomFirePSX/blob/master/flames.html
 //     & https://github.com/cylgom/ly/blob/master/src/draw.c
-// TODO: Try doing it in a smaller region, because doing it full-screen is taking its toll on the CPU...
-//       Will have to mangle the offsets properly...
 static const uint8_t fire_colors[][3] = {
 	{ 0x07, 0x07, 0x07 }, { 0x1F, 0x07, 0x07 }, { 0x2F, 0x0F, 0x07 }, { 0x47, 0x0F, 0x07 }, { 0x57, 0x17, 0x07 },
 	{ 0x67, 0x1F, 0x07 }, { 0x77, 0x1F, 0x07 }, { 0x8F, 0x27, 0x07 }, { 0x9F, 0x2F, 0x07 }, { 0xAF, 0x3F, 0x07 },
@@ -218,21 +217,39 @@ static const uint8_t fire_colors[][3] = {
 
 uint8_t palette[sizeof(fire_colors) / sizeof(*fire_colors)];
 
+static unsigned int
+    find_palette_id(uint8_t v)
+{
+	for (uint8_t i = 0U; i < sizeof(palette); i++) {
+		if (palette[i] == v) {
+			return i;
+		}
+	}
+
+	// Should hopefully never happen...
+	return 0U;
+}
+
 static void
-    spread_fire(size_t offset)
+    spread_fire_fs(size_t offset)
 {
 	uint8_t pixel = *((uint8_t*) (fbPtr + offset));
 	if (pixel == palette[0U]) {
 		*((uint8_t*) (fbPtr + offset - fInfo.line_length)) = palette[0U];
 	} else {
-		size_t random                                   = (rand() * 3) & 3;
-		size_t dst                                      = offset - random + 1U;
-		*((uint8_t*) (fbPtr + dst - fInfo.line_length)) = (uint8_t)(pixel - (random & 1U));
+		const size_t random = (rand() * 3) & 3;
+		const size_t dst    = offset - random + 1U;
+		// NOTE: Using a pixel value instead of a palette index behaves approximately okay, FWIW ;).
+		//*((uint8_t*) (fbPtr + dst - fInfo.line_length)) = (uint8_t)(pixel - (random & 1U));
+		// That said, we're supposed to play with the palette, so, do so ;).
+		// Find the palette id for the current pixel
+		const unsigned int pal_idx                      = find_palette_id(pixel);
+		*((uint8_t*) (fbPtr + dst - fInfo.line_length)) = palette[pal_idx - (random & 1U)];
 	}
 }
 
 static void
-    do_fire(void)
+    do_fire_fs(void)
 {
 	const uint32_t vertViewport = (uint32_t)(viewVertOrigin - viewVertOffset);
 	// Burn bay, burn!
@@ -240,13 +257,13 @@ static void
 	//       Also, slightly uglier flames ;p.
 	for (uint32_t x = 0U; x < fInfo.line_length; x++) {
 		for (uint32_t y = 1U + vertViewport; y < viewHeight + vertViewport; y++) {
-			spread_fire(y * fInfo.line_length + x);
+			spread_fire_fs(y * fInfo.line_length + x);
 		}
 	}
 }
 
 static void
-    setup_fire(void)
+    setup_fire_fs(void)
 {
 	// Convert the palette to Grayscale
 	for (uint8_t i = 0U; i < sizeof(palette); i++) {
@@ -263,6 +280,71 @@ static void
 	    0U, (unsigned short int) (viewHeight + vertViewport - 1U), (unsigned short int) fInfo.line_length, 1U, &px);
 }
 
+// And now for a -- hopefully -- slightly less taxing version, in a smaller window...
+#define FIRE_WIDTH 320U
+#define FIRE_HEIGHT 168U
+unsigned short int fire_y_origin;
+unsigned short int fire_x_origin;
+
+static void
+    setup_fire(void)
+{
+	// Convert the palette to Grayscale
+	for (uint8_t i = 0U; i < sizeof(palette); i++) {
+		palette[i] = stbi__compute_y(fire_colors[i][0], fire_colors[i][1], fire_colors[i][2]);
+	}
+
+	// Compute window position (centered)
+	const uint32_t vertViewport = (uint32_t)(viewVertOrigin - viewVertOffset);
+	fire_y_origin               = (unsigned short int) (viewHeight / 2U - FIRE_HEIGHT / 2U + vertViewport);
+	fire_x_origin               = (unsigned short int) (viewWidth / 2U - FIRE_WIDTH / 2U);
+
+	// Fill the window w/ color 0
+	const FBInkPixel bg = { .gray8 = palette[0U] };
+	fill_rect(fire_x_origin, fire_y_origin, FIRE_WIDTH, FIRE_HEIGHT, &bg);
+
+	// Set the bottom line to the final color
+	const FBInkPixel fire = { .gray8 = palette[sizeof(palette) - 1U] };
+	fill_rect(fire_x_origin,
+		  (unsigned short int) (fire_y_origin + FIRE_HEIGHT - 1U),
+		  (unsigned short int) FIRE_WIDTH,
+		  1U,
+		  &fire);
+}
+
+static void
+    spread_fire(size_t offset, uint32_t x, uint32_t y)
+{
+	uint8_t pixel = *((uint8_t*) (fbPtr + offset));
+	if (pixel == palette[0U]) {
+		*((uint8_t*) (fbPtr + offset - fInfo.line_length)) = palette[0U];
+	} else {
+		const size_t random = (rand() * 3) & 3;
+		// Make sure we stay within our window...
+		const size_t shift = (y * FIRE_WIDTH + x) - random + 1U;
+		const size_t dst_y = shift / FIRE_WIDTH;
+		const size_t dst_x = shift % FIRE_WIDTH;
+		const size_t dst   = dst_y * fInfo.line_length + dst_x;
+		// Find the palette id for the current pixel
+		const unsigned int pal_idx                      = find_palette_id(pixel);
+		*((uint8_t*) (fbPtr + dst - fInfo.line_length)) = palette[pal_idx - (random & 1U)];
+	}
+}
+
+static void
+    do_fire(void)
+{
+	const uint32_t vertViewport = (uint32_t)(viewVertOrigin - viewVertOffset);
+	// Burn bay, burn!
+	// NOTE: Switching the outer loop to the y one leads to different interactions w/ the PXP & the EPDC...
+	//       Also, slightly uglier flames ;p.
+	for (uint32_t x = fire_x_origin; x < FIRE_WIDTH; x++) {
+		for (uint32_t y = 1U + fire_y_origin; y < FIRE_HEIGHT + vertViewport; y++) {
+			spread_fire(y * fInfo.line_length + x, x, y);
+		}
+	}
+}
+
 int
     main(int argc, char* argv[])
 {
@@ -275,14 +357,16 @@ int
 	static const struct option opts[] = { { "help", no_argument, NULL, 'h' },
 					      { "verbose", no_argument, NULL, 'v' },
 					      { "quiet", no_argument, NULL, 'q' },
+					      { "fs", no_argument, NULL, 'f' },
 					      { NULL, 0, NULL, 0 } };
 
 	// We need to be @ 8bpp
 	uint32_t req_bpp  = 8U;
 	int8_t   req_rota = -1;
+	bool     is_fs    = false;
 	bool     errfnd   = false;
 
-	while ((opt = getopt_long(argc, argv, "hvq", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hvqf", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'v':
 				g_isQuiet   = false;
@@ -295,6 +379,9 @@ int
 			case 'h':
 				show_helpmsg();
 				return EXIT_SUCCESS;
+				break;
+			case 'f':
+				is_fs = true;
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
@@ -414,10 +501,24 @@ int
 	}
 
 	// Fire!
-	setup_fire();
-	while (true) {
-		do_fire();
-		fbink_refresh(fbfd, 0U, 0U, 0U, 0U, EPDC_FLAG_USE_DITHERING_PASSTHROUGH, &fbink_cfg);
+	if (is_fs) {
+		setup_fire_fs();
+		while (true) {
+			do_fire_fs();
+			fbink_refresh(fbfd, 0U, 0U, 0U, 0U, EPDC_FLAG_USE_DITHERING_PASSTHROUGH, &fbink_cfg);
+		}
+	} else {
+		setup_fire();
+		while (true) {
+			do_fire();
+			fbink_refresh(fbfd,
+				      fire_y_origin,
+				      fire_x_origin,
+				      FIRE_WIDTH,
+				      FIRE_HEIGHT,
+				      EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+				      &fbink_cfg);
+		}
 	}
 
 cleanup:
