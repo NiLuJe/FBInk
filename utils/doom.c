@@ -219,9 +219,12 @@ static const uint8_t fire_colors[][3] = {
 uint8_t palette[sizeof(fire_colors) / sizeof(*fire_colors)];
 
 // If I dumbly quantize that to the eInk palette, that's what this ends up as...
+// NOTE: That doesn't work so well in practice, though...
+/*
 static const uint8_t palette_eink[] = { 0x00, 0x11, 0x11, 0x22, 0x33, 0x33, 0x44, 0x55, 0x55, 0x66, 0x77, 0x77, 0x88,
 					0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x99, 0x99, 0x99, 0x99, 0x99, 0xAA,
 					0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xCC, 0xDD, 0xEE, 0xFF };
+*/
 
 static unsigned int
     find_palette_id(uint8_t v)
@@ -246,6 +249,11 @@ static void
 		const size_t random                             = (rand() * 3) & 3;
 		const size_t dst                                = offset - random + 1U;
 		*((uint8_t*) (fbPtr + dst - fInfo.line_length)) = (uint8_t)(pixel - (random & 1U));
+		// Huh, if we go the palette way here, the fire doesn't reach as high...
+		/*
+		const unsigned int pal_idx                      = find_palette_id(pixel);
+		*((uint8_t*) (fbPtr + dst - fInfo.line_length)) = palette[(pal_idx - (random & 1U))];
+		*/
 	}
 }
 
@@ -509,8 +517,15 @@ int
 	if (is_fs) {
 		setup_fire_fs();
 		while (true) {
+			struct timespec t0;
+			clock_gettime(CLOCK_MONOTONIC, &t0);
 			do_fire_fs();
 			fbink_refresh(fbfd, 0U, 0U, 0U, 0U, EPDC_FLAG_USE_DITHERING_PASSTHROUGH, &fbink_cfg);
+			struct timespec t1;
+			clock_gettime(CLOCK_MONOTONIC, &t1);
+			float frame_time =
+			    ((((t1.tv_sec * BILLION) + t1.tv_nsec) - ((t0.tv_sec * BILLION) + t0.tv_nsec)) / MILLION);
+			printf("%.1f FPS (%.3fms)\n", THOUSAND / frame_time, frame_time);
 		}
 	} else {
 		setup_fire();
