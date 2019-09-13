@@ -236,10 +236,9 @@ static void
 {
 	const uint32_t vertViewport = (uint32_t)(viewVertOrigin - viewVertOffset);
 	// Burn bay, burn!
-	// NOTE: In the original code, the outer loop is on width, which is potentially slightly less efficient.
-	//       At a quick glance, results seem similar, and it definitely helps the PXP & the EPDC, so, eh.
-	for (uint32_t y = 1U + vertViewport; y < viewHeight + vertViewport; y++) {
-		for (uint32_t x = 0U; x < fInfo.line_length; x++) {
+	// NOTE: Switching the outer loop to y leds to different interactions w/ the PXP & the EPDC...
+	for (uint32_t x = 0U; x < fInfo.line_length; x++) {
+		for (uint32_t y = 1U + vertViewport; y < viewHeight + vertViewport; y++) {
 			spread_fire(y * fInfo.line_length + x);
 		}
 	}
