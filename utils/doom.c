@@ -203,6 +203,8 @@ static bool
 // c.f., http://fabiensanglard.net/doom_fire_psx/index.html
 //     & https://github.com/fabiensanglard/DoomFirePSX/blob/master/flames.html
 //     & https://github.com/cylgom/ly/blob/master/src/draw.c
+// TODO: Try doing it in a smaller region, because doing it full-screen is taking its toll on the CPU...
+//       Will have to mangle the offsets properly...
 static const uint8_t fire_colors[][3] = {
 	{ 0x07, 0x07, 0x07 }, { 0x1F, 0x07, 0x07 }, { 0x2F, 0x0F, 0x07 }, { 0x47, 0x0F, 0x07 }, { 0x57, 0x17, 0x07 },
 	{ 0x67, 0x1F, 0x07 }, { 0x77, 0x1F, 0x07 }, { 0x8F, 0x27, 0x07 }, { 0x9F, 0x2F, 0x07 }, { 0xAF, 0x3F, 0x07 },
@@ -234,6 +236,7 @@ static void
 {
 	const uint32_t vertViewport = (uint32_t)(viewVertOrigin - viewVertOffset);
 	// Burn bay, burn!
+	// FIXME: Does it still behave if we loop the more efficient way( y before x)?
 	for (uint32_t x = 0U; x < fInfo.line_length; x++) {
 		for (uint32_t y = 1U + vertViewport; y < viewHeight + vertViewport; y++) {
 			spread_fire(y * fInfo.line_length + x);
@@ -372,13 +375,13 @@ int
 	if (is_change_needed) {
 		if (req_rota != -1) {
 			LOG("\nSwitching fb to %ubpp%s @ rotation %hhd . . .",
-			req_bpp,
-			(req_bpp == vInfo.bits_per_pixel) ? " (current bitdepth)" : "",
-			req_rota);
+			    req_bpp,
+			    (req_bpp == vInfo.bits_per_pixel) ? " (current bitdepth)" : "",
+			    req_rota);
 		} else {
 			LOG("\nSwitching fb to %ubpp%s . . .",
-			req_bpp,
-			(req_bpp == vInfo.bits_per_pixel) ? " (current bitdepth)" : "");
+			    req_bpp,
+			    (req_bpp == vInfo.bits_per_pixel) ? " (current bitdepth)" : "");
 		}
 		if (!set_fbinfo(req_bpp, req_rota)) {
 			rv = ERRCODE(EXIT_FAILURE);
