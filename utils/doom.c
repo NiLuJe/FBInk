@@ -416,6 +416,37 @@ static void
 	}
 }
 
+static void
+    drown_fire_scaled(size_t offset, uint32_t x, uint32_t y, uint8_t scale)
+{
+	uint8_t pixel = *((uint8_t*) (fire_canvas + offset));
+	if (pixel > palette[0U]) {
+		const size_t random = rand() & 3;
+		// We'll need the palette id of the current pixel so we can swap it to another *palette* color!
+		const unsigned int pal_idx = find_palette_id(pixel);
+		// Update the source canvas
+		*((uint8_t*) (fire_canvas + offset)) = palette[(pal_idx - random)];
+		// Update the fb
+		const FBInkPixel px = { .gray8 = palette[(pal_idx - random)] };
+		fill_rect((unsigned short int) (fire_x_origin + (x * scale)),
+			  (unsigned short int) (fire_y_origin + (y * scale)),
+			  scale,
+			  scale,
+			  &px);
+	}
+}
+
+static void
+    stop_fire_scaled(uint8_t scale)
+{
+	// Psssshhhhht!
+	for (uint32_t y = FIRE_HEIGHT - 1U; y > FIRE_HEIGHT - (FIRE_HEIGHT / 28U) - 1U; y--) {
+		for (uint32_t x = 0U; x < FIRE_WIDTH; x++) {
+			drown_fire_scaled(y * FIRE_WIDTH + x, x, y, scale);
+		}
+	}
+}
+
 #define BILLION 1000000000L
 #define MILLION 1000000.f
 #define THOUSAND 1000
@@ -720,10 +751,15 @@ int
 		scaling_factor = (uint8_t) MIN(scaling_factor, viewWidth / FIRE_HEIGHT);
 
 		setup_fire_scaled(scaling_factor);
+		size_t i = 0U;
 		while (true) {
+			i++;
 			struct timespec t0;
 			if (is_timed) {
 				clock_gettime(CLOCK_MONOTONIC, &t0);
+			}
+			if (i > 200U) {
+				stop_fire_scaled(scaling_factor);
 			}
 			do_fire_scaled(scaling_factor);
 			fbink_refresh(
