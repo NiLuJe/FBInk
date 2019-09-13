@@ -217,6 +217,19 @@ static const uint8_t fire_colors[][3] = {
 
 uint8_t palette[sizeof(fire_colors) / sizeof(*fire_colors)];
 
+static unsigned int
+    find_palette_id(uint8_t v)
+{
+	for (uint8_t i = 0U; i < sizeof(palette); i++) {
+		if (palette[i] == v) {
+			return i;
+		}
+	}
+
+	// Should hopefully never happen...
+	return 0U;
+}
+
 static void
     spread_fire_fs(size_t offset)
 {
@@ -298,18 +311,18 @@ static void
     spread_fire(size_t offset, uint32_t x, uint32_t y)
 {
 	uint8_t pixel = *((uint8_t*) (fbPtr + offset));
-	//printf("(%u, %u) is 0x%02X\n", x, y, pixel);
 	if (pixel == palette[0U]) {
 		*((uint8_t*) (fbPtr + offset - fInfo.line_length)) = palette[0U];
 	} else {
 		const size_t random = (rand() * 3) & 3;
 		// Make sure we stay within our window...
-		const size_t shift                              = ((y - fire_y_origin) * FIRE_WIDTH + (x - fire_x_origin)) - random + 1U;
-		const size_t dst_y                              = shift / FIRE_WIDTH + fire_y_origin;
-		const size_t dst_x                              = shift % FIRE_WIDTH + fire_x_origin;
-		printf("(%u, %u) -> (%zu, %zu)\n", x, y, dst_x, dst_y);
-		const size_t dst                                = dst_y * fInfo.line_length + dst_x;
-		*((uint8_t*) (fbPtr + dst - fInfo.line_length)) = (uint8_t)(pixel - (random & 1U));
+		const size_t shift = ((y - fire_y_origin) * FIRE_WIDTH + (x - fire_x_origin)) - random + 1U;
+		const size_t dst_y = shift / FIRE_WIDTH + fire_y_origin;
+		const size_t dst_x = shift % FIRE_WIDTH + fire_x_origin;
+		const size_t dst   = dst_y * fInfo.line_length + dst_x;
+		// We'll need the palette id of the current pixel so we can swap it to another *palette* color!
+		const unsigned int pal_idx                      = find_palette_id(pixel);
+		*((uint8_t*) (fbPtr + dst - fInfo.line_length)) = palette[(pal_idx - (random & 1U))];
 	}
 }
 
