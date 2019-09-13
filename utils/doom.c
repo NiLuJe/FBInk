@@ -474,6 +474,7 @@ static void
 	    "\t-W, --wfm\t\t\tSet waveform mode.\n"
 	    "\t-d, --dither\t\t\tUse HW dithering.\n"
 	    "\t-l, --limit\t\t\tFramerate cap (in FPS).\n"
+	    "\t-c, --cap\t\t\tOverride the rendering iteration cap.\n"
 	    "\n",
 	    fbink_version());
 	return;
@@ -489,17 +490,14 @@ int
 
 	int                        opt;
 	int                        opt_index;
-	static const struct option opts[] = { { "help", no_argument, NULL, 'h' },
-					      { "verbose", no_argument, NULL, 'v' },
-					      { "quiet", no_argument, NULL, 'q' },
-					      { "fs", no_argument, NULL, 'f' },
-					      { "flash", no_argument, NULL, 'F' },
-					      { "scale", required_argument, NULL, 'S' },
-					      { "time", no_argument, NULL, 't' },
-					      { "wfm", no_argument, NULL, 'W' },
-					      { "dither", no_argument, NULL, 'd' },
-					      { "limit", required_argument, NULL, 'l' },
-					      { NULL, 0, NULL, 0 } };
+	static const struct option opts[] = {
+		{ "help", no_argument, NULL, 'h' },      { "verbose", no_argument, NULL, 'v' },
+		{ "quiet", no_argument, NULL, 'q' },     { "fs", no_argument, NULL, 'f' },
+		{ "flash", no_argument, NULL, 'F' },     { "scale", required_argument, NULL, 'S' },
+		{ "time", no_argument, NULL, 't' },      { "wfm", no_argument, NULL, 'W' },
+		{ "dither", no_argument, NULL, 'd' },    { "limit", required_argument, NULL, 'l' },
+		{ "cap", required_argument, NULL, 'c' }, { NULL, 0, NULL, 0 }
+	};
 
 	// We need to be @ 8bpp
 	uint32_t req_bpp  = 8U;
@@ -507,13 +505,14 @@ int
 
 	FBInkConfig fbink_cfg = { 0U };
 
-	bool    is_fs          = false;
-	bool    is_flashing    = false;
-	bool    is_timed       = false;
-	bool    is_dithered    = false;
-	uint8_t scaling_factor = 1U;
-	uint8_t frame_cap      = 24U;
-	bool    is_capped      = false;
+	bool     is_fs          = false;
+	bool     is_flashing    = false;
+	bool     is_timed       = false;
+	bool     is_dithered    = false;
+	uint8_t  scaling_factor = 1U;
+	uint8_t  frame_cap      = 24U;
+	uint16_t iter_cap       = 250U;
+	bool     is_capped      = false;
 
 	bool errfnd = false;
 
@@ -589,6 +588,9 @@ int
 				is_capped = true;
 				// Requires frame timing!
 				is_timed = true;
+				break;
+			case 'c':
+				iter_cap = (uint16_t) strtoul(optarg, NULL, 10);
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
@@ -753,17 +755,24 @@ int
 		setup_fire_scaled(scaling_factor);
 		size_t i = 0U;
 		while (true) {
+			if (i > (iter_cap + iter_cap / 2U)) {
+				break;
+			}
 			i++;
+
 			struct timespec t0;
 			if (is_timed) {
 				clock_gettime(CLOCK_MONOTONIC, &t0);
 			}
-			if (i > 200U) {
+
+			if (i > iter_cap) {
 				stop_fire_scaled(scaling_factor);
 			}
 			do_fire_scaled(scaling_factor);
+
 			fbink_refresh(
 			    fbfd, fire_y_origin, fire_x_origin, scaled_Width, scaled_Height, dithering, &fbink_cfg);
+
 			if (is_timed) {
 				struct timespec t1;
 				clock_gettime(CLOCK_MONOTONIC, &t1);
@@ -771,6 +780,7 @@ int
 				    ((t1.tv_sec * BILLION) + t1.tv_nsec) - ((t0.tv_sec * BILLION) + t0.tv_nsec);
 				const float frame_time = ((float) (frame_time_ns) / MILLION);
 				printf("%.1f FPS (%.3f ms)\n", THOUSAND / frame_time, frame_time);
+
 				// Slow down?
 				if (is_capped) {
 					if (frame_time_ns < sleep_cap) {
