@@ -676,6 +676,8 @@ int
 	}
 
 	// Setup framecap
+	// NOTE: Interesting to check how far stuff can go (especially A2)...
+	//       FWIW, on my H2O, going over ~8fps starts triggering jittery behavior (i.e., intermittent stalls).
 	const long sleep_cap = BILLION / frame_cap;
 
 	fbink_init(fbfd, &fbink_cfg);
