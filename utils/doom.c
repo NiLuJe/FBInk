@@ -236,9 +236,10 @@ static void
 {
 	const uint32_t vertViewport = (uint32_t)(viewVertOrigin - viewVertOffset);
 	// Burn bay, burn!
-	// FIXME: Does it still behave if we loop the more efficient way( y before x)?
-	for (uint32_t x = 0U; x < fInfo.line_length; x++) {
-		for (uint32_t y = 1U + vertViewport; y < viewHeight + vertViewport; y++) {
+	// NOTE: In the original code, the outer loop is on width, which is potentially slightly less efficient.
+	//       At a quick glance, results seem similar, and it definitely helps the PXP & the EPDC, so, eh.
+	for (uint32_t y = 1U + vertViewport; y < viewHeight + vertViewport; y++) {
+		for (uint32_t x = 0U; x < fInfo.line_length; x++) {
 			spread_fire(y * fInfo.line_length + x);
 		}
 	}
@@ -396,6 +397,12 @@ int
 
 	// Setup FBInk
 	FBInkConfig fbink_cfg = { 0U };
+
+	// NOTE: We pretty much need flashing updates, otherwise the ghosting heavily mangles the effect ;).
+	// The downside is that it's murder to look at full-screen... :D.
+	// A good middle-ground would be to only pepper a flashing update periodically?
+	//fbink_cfg.is_flashing = true;
+
 	fbink_init(fbfd, &fbink_cfg);
 	// We also need to mmap the fb
 	if (!isFbMapped) {
