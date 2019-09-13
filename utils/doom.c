@@ -218,6 +218,11 @@ static const uint8_t fire_colors[][3] = {
 
 uint8_t palette[sizeof(fire_colors) / sizeof(*fire_colors)];
 
+// If I dumbly quantize that to the eInk palette, that's what this ends up as...
+static const uint8_t palette_eink[] = { 0x00, 0x11, 0x11, 0x22, 0x33, 0x33, 0x44, 0x55, 0x55, 0x66, 0x77, 0x77, 0x88,
+					0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x99, 0x99, 0x99, 0x99, 0x99, 0xAA,
+					0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xCC, 0xDD, 0xEE, 0xFF };
+
 static unsigned int
     find_palette_id(uint8_t v)
 {
@@ -525,6 +530,8 @@ int
 			float frame_time =
 			    ((((t1.tv_sec * BILLION) + t1.tv_nsec) - ((t0.tv_sec * BILLION) + t0.tv_nsec)) / MILLION);
 			printf("%.1f FPS (%.3fms)\n", THOUSAND / frame_time, frame_time);
+			// NOTE: Slowing things down (i.e., putting a dynamic nanosleep() around here)
+			//       might actually yield *better* results, by not flooding the EPDC too much...
 		}
 	}
 
