@@ -204,6 +204,15 @@ static const uint8_t palette_eink[] = { 0x00, 0x11, 0x11, 0x22, 0x33, 0x33, 0x44
 					0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xCC, 0xDD, 0xEE, 0xFF };
 */
 
+static void
+    setup_palette(void)
+{
+	// Convert the palette to Grayscale
+	for (uint8_t i = 0U; i < sizeof(palette); i++) {
+		palette[i] = stbi__compute_y(fire_colors[i][0], fire_colors[i][1], fire_colors[i][2]);
+	}
+}
+
 static unsigned int
     find_palette_id(uint8_t v)
 {
@@ -253,9 +262,7 @@ static void
     setup_fire_fs(void)
 {
 	// Convert the palette to Grayscale
-	for (uint8_t i = 0U; i < sizeof(palette); i++) {
-		palette[i] = stbi__compute_y(fire_colors[i][0], fire_colors[i][1], fire_colors[i][2]);
-	}
+	setup_palette();
 
 	// Fill the whole screen w/ color 0
 	memset(fbPtr, palette[0U], fInfo.smem_len);
@@ -277,9 +284,7 @@ static void
     setup_fire(void)
 {
 	// Convert the palette to Grayscale
-	for (uint8_t i = 0U; i < sizeof(palette); i++) {
-		palette[i] = stbi__compute_y(fire_colors[i][0], fire_colors[i][1], fire_colors[i][2]);
-	}
+	setup_palette();
 
 	// Compute window position (centered)
 	const uint32_t vertViewport = (uint32_t)(viewVertOrigin - viewVertOffset);
@@ -327,6 +332,71 @@ static void
 	for (uint32_t x = fire_x_origin; x < FIRE_WIDTH + fire_x_origin; x++) {
 		for (uint32_t y = 1U + fire_y_origin; y < FIRE_HEIGHT + fire_y_origin; y++) {
 			spread_fire(y * fInfo.line_length + x, x, y);
+		}
+	}
+}
+
+// And a slight variation with scaling...
+uint32_t scaled_Width  = FIRE_WIDTH;
+uint32_t scaled_Height = FIRE_HEIGHT;
+
+static void
+    setup_fire_scaled(uint8_t scale)
+{
+	// Convert the palette to Grayscale
+	setup_palette();
+
+	// Compute window size
+	scaled_Width  = scale * FIRE_WIDTH;
+	scaled_Height = scale * FIRE_HEIGHT;
+
+	// Compute window position (centered)
+	const uint32_t vertViewport = (uint32_t)(viewVertOrigin - viewVertOffset);
+	fire_y_origin               = (unsigned short int) (viewHeight / 2U - scaled_Height / 2U + vertViewport);
+	fire_x_origin               = (unsigned short int) (viewWidth / 2U - scaled_Width / 2U);
+
+	// Fill the window w/ color 0
+	const FBInkPixel bg = { .gray8 = palette[0U] };
+	fill_rect(fire_x_origin, fire_y_origin, scaled_Width, scaled_Height, &bg);
+
+	// Set the bottom line to the final color
+	const FBInkPixel fire = { .gray8 = palette[sizeof(palette) - 1U] };
+	fill_rect(fire_x_origin,
+		  (unsigned short int) (fire_y_origin + scaled_Height - 1U),
+		  (unsigned short int) scaled_Width,
+		  1U,
+		  &fire);
+}
+
+static void
+    spread_fire_scaled(size_t offset, uint32_t x, uint32_t y, uint8_t scale)
+{
+	uint8_t pixel = *((uint8_t*) (fbPtr + offset));
+	if (pixel == palette[0U]) {
+		const FBInkPixel px = { .gray8 = palette[0U] };
+		fill_rect(x, y - 1U, scale, scale, &px);
+	} else {
+		const size_t random = (rand() * 3) & 3;
+		// Make sure we stay within our window...
+		const size_t shift = ((y - fire_y_origin) * scaled_Width + (x - fire_x_origin)) - random + 1U;
+		const size_t dst_y = shift / scaled_Width + fire_y_origin;
+		const size_t dst_x = shift % scaled_Width + fire_x_origin;
+		// We'll need the palette id of the current pixel so we can swap it to another *palette* color!
+		const unsigned int pal_idx = find_palette_id(pixel);
+		const FBInkPixel   px      = { .gray8 = palette[(pal_idx - (random & 1U))] };
+		fill_rect(dst_x, dst_y - 1U, scale, scale, &px);
+	}
+}
+
+static void
+    do_fire_scaled(uint8_t scale)
+{
+	// Burn baby, burn!
+	// NOTE: Switching the outer loop to the y one leads to different interactions w/ the PXP & the EPDC...
+	//       Also, slightly uglier flames ;p.
+	for (uint32_t x = fire_x_origin; x < scaled_Width + fire_x_origin; x = x + scale) {
+		for (uint32_t y = 1U + fire_y_origin; y < scaled_Height + fire_y_origin; y++) {
+			spread_fire_scaled(y * fInfo.line_length + x, x, y, scale);
 		}
 	}
 }
@@ -547,8 +617,37 @@ int
 				float frame_time = ((float) (((t1.tv_sec * BILLION) + t1.tv_nsec) -
 							     ((t0.tv_sec * BILLION) + t0.tv_nsec)) /
 						    MILLION);
-				printf("%.1f FPS (%.3fms)\n", THOUSAND / frame_time, frame_time);
+				printf("%.1f FPS (%.3f ms)\n", THOUSAND / frame_time, frame_time);
 			}
+		}
+	} else if (scaling_factor > 1U) {
+		// Start by clamping the scaling factor to safe values...
+		scaling_factor = MIN(scaling_factor, viewWidth / FIRE_HEIGHT);
+
+		setup_fire_scaled(scaling_factor);
+		while (true) {
+			struct timespec t0;
+			if (is_timed) {
+				clock_gettime(CLOCK_MONOTONIC, &t0);
+			}
+			do_fire_scaled(scaling_factor);
+			fbink_refresh(fbfd,
+				      fire_y_origin,
+				      fire_x_origin,
+				      scaled_Width,
+				      scaled_Height,
+				      EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+				      &fbink_cfg);
+			if (is_timed) {
+				struct timespec t1;
+				clock_gettime(CLOCK_MONOTONIC, &t1);
+				float frame_time = ((float) (((t1.tv_sec * BILLION) + t1.tv_nsec) -
+							     ((t0.tv_sec * BILLION) + t0.tv_nsec)) /
+						    MILLION);
+				printf("%.1f FPS (%.3f ms)\n", THOUSAND / frame_time, frame_time);
+			}
+			// NOTE: Slowing things down (i.e., putting a dynamic nanosleep() around here)
+			//       might actually yield *better* results, by not flooding the EPDC too much...
 		}
 	} else {
 		setup_fire();
@@ -571,7 +670,7 @@ int
 				float frame_time = ((float) (((t1.tv_sec * BILLION) + t1.tv_nsec) -
 							     ((t0.tv_sec * BILLION) + t0.tv_nsec)) /
 						    MILLION);
-				printf("%.1f FPS (%.3fms)\n", THOUSAND / frame_time, frame_time);
+				printf("%.1f FPS (%.3f ms)\n", THOUSAND / frame_time, frame_time);
 			}
 			// NOTE: Slowing things down (i.e., putting a dynamic nanosleep() around here)
 			//       might actually yield *better* results, by not flooding the EPDC too much...
