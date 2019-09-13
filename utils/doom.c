@@ -339,6 +339,7 @@ static void
 // And a slight variation with scaling...
 uint32_t scaled_Width  = FIRE_WIDTH;
 uint32_t scaled_Height = FIRE_HEIGHT;
+uint8_t fire_canvas[FIRE_WIDTH * FIRE_HEIGHT];
 
 static void
     setup_fire_scaled(uint8_t scale)
@@ -358,6 +359,8 @@ static void
 	// Fill the window w/ color 0
 	const FBInkPixel bg = { .gray8 = palette[0U] };
 	fill_rect(fire_x_origin, fire_y_origin, scaled_Width, scaled_Height, &bg);
+	// And the source canvas
+	memset(fire_canvas, palette[0U], sizeof(fire_canvas));
 
 	// Set the bottom line to the final color
 	const FBInkPixel fire = { .gray8 = palette[sizeof(palette) - 1U] };
@@ -366,21 +369,28 @@ static void
 		  (unsigned short int) scaled_Width,
 		  scale,
 		  &fire);
+	// Again, the source canvas
+	memset(fire_canvas + ((FIRE_HEIGHT - 1U) * FIRE_WIDTH), palette[sizeof(palette) - 1U], FIRE_WIDTH);
 }
 
 static void
     spread_fire_scaled(size_t offset, uint32_t x, uint32_t y, uint8_t scale)
 {
-	uint8_t pixel = *((uint8_t*) (fbPtr + offset));
+	uint8_t pixel = *((uint8_t*) (fire_canvas + offset));
 	if (pixel == palette[0U]) {
+		// Update the source canvas
+		*((uint8_t*) (fire_canvas + offset - FIRE_WIDTH)) = palette[0U];
+		// Update the fb
 		const FBInkPixel px = { .gray8 = palette[0U] };
-		fill_rect(x, y - 1U, scale, scale, &px);
+		fill_rect(fire_x_origin + x * scale, fire_y_origin + y * scale - 1U, scale, scale, &px);
 	} else {
 		const size_t random = (rand() * 3) & 3;
-		// Make sure we stay within our window...
-		const size_t shift = ((y - fire_y_origin) * scaled_Width + (x - fire_x_origin)) - random + 1U;
-		const size_t dst_y = shift / scaled_Width + fire_y_origin;
-		const size_t dst_x = shift % scaled_Width + fire_x_origin;
+		// Update the source canvas
+		const size_t dst                                = offset - random + 1U;
+		*((uint8_t*) (fire_canvas + dst - FIRE_WIDTH)) = (uint8_t)(pixel - (random & 1U));
+		// Update the fb
+		const size_t dst_y = dst / FIRE_WIDTH * scale + fire_y_origin;
+		const size_t dst_x = dst % FIRE_WIDTH * scale + fire_x_origin;
 		// We'll need the palette id of the current pixel so we can swap it to another *palette* color!
 		const unsigned int pal_idx = find_palette_id(pixel);
 		const FBInkPixel   px      = { .gray8 = palette[(pal_idx - (random & 1U))] };
@@ -394,9 +404,9 @@ static void
 	// Burn baby, burn!
 	// NOTE: Switching the outer loop to the y one leads to different interactions w/ the PXP & the EPDC...
 	//       Also, slightly uglier flames ;p.
-	for (uint32_t x = fire_x_origin; x < scaled_Width + fire_x_origin; x = x + scale) {
-		for (uint32_t y = 1U + fire_y_origin; y < scaled_Height + fire_y_origin; y++) {
-			spread_fire_scaled(y * fInfo.line_length + x, x, y, scale);
+	for (uint32_t x = 0U; x < FIRE_WIDTH; x++) {
+		for (uint32_t y = 1U; y < FIRE_HEIGHT; y++) {
+			spread_fire_scaled(y * FIRE_WIDTH + x, x, y, scale);
 		}
 	}
 }
