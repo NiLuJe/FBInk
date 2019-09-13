@@ -216,33 +216,32 @@ static const uint8_t fire_colors[][3] = {
 
 uint8_t palette[sizeof(fire_colors) / sizeof(*fire_colors)];
 
-void
+static void
     spread_fire(size_t offset)
 {
-	uint8_t pixel = *((unsigned char*) (fbPtr + offset));
+	uint8_t pixel = *((uint8_t*) (fbPtr + offset));
 	if (pixel == palette[0U]) {
-		*((unsigned char*) (fbPtr + offset - viewWidth)) = palette[0U];
+		*((uint8_t*) (fbPtr + offset - viewWidth)) = palette[0U];
 	} else {
-		size_t random                                 = (rand() * 3U) & 3;
-		size_t dst                                    = offset - random + 1U;
-		*((unsigned char*) (fbPtr + dst - viewWidth)) = pixel - (random & 1);
+		size_t random                           = (rand() * 3) & 3;
+		size_t dst                              = offset - random + 1U;
+		*((uint8_t*) (fbPtr + dst - viewWidth)) = (uint8_t)(pixel - (random & 1U));
 	}
 }
 
-void
+static void
     do_fire(void)
 {
+	const uint32_t vertViewport = (uint32_t)(viewVertOrigin - viewVertOffset);
 	// Burn bay, burn!
 	for (uint32_t x = 0U; x < viewWidth; x++) {
-		for (uint32_t y = 1U + (viewVertOrigin - viewVertOffset);
-		     y < viewHeight + (viewVertOrigin - viewVertOffset);
-		     y++) {
+		for (uint32_t y = 1U + vertViewport; y < viewHeight + vertViewport; y++) {
 			spread_fire(y * viewWidth + x);
 		}
 	}
 }
 
-void
+static void
     setup_fire(void)
 {
 	// Convert the palette to Grayscale
@@ -254,8 +253,9 @@ void
 	memset(fbPtr, palette[0U], fInfo.smem_len);
 
 	// Set the bottom line to the final color
-	const FBInkPixel px = { .gray8 = palette[sizeof(palette) - 1U] };
-	fill_rect(0U, viewHeight + (viewVertOrigin - viewVertOffset) - 1U, viewWidth, 1U, &px);
+	const FBInkPixel px           = { .gray8 = palette[sizeof(palette) - 1U] };
+	const uint32_t   vertViewport = (uint32_t)(viewVertOrigin - viewVertOffset);
+	fill_rect(0U, (unsigned short int) (viewHeight + vertViewport - 1U), (unsigned short int) viewWidth, 1U, &px);
 }
 
 int
@@ -341,20 +341,16 @@ int
 	}
 
 	// If a change was requested, do it, but check if it's necessary first
-	bool is_change_needed = false;
 	if (vInfo.bits_per_pixel == req_bpp) {
 		// Also check that the grayscale flag is flipped properly
 		if ((vInfo.bits_per_pixel == 8U && vInfo.grayscale != GRAYSCALE_8BIT) ||
 		    (vInfo.bits_per_pixel > 8U && vInfo.grayscale != 0U)) {
 			LOG("\nCurrent bitdepth is already %ubpp, but the grayscale flag is bogus!", req_bpp);
 			// Continue, we'll need to flip the grayscale flag properly
-			is_change_needed = true;
 		} else {
 			LOG("\nCurrent bitdepth is already %ubpp!", req_bpp);
 			// No change needed as far as bitdepth is concerned...
 		}
-	} else {
-		is_change_needed = true;
 	}
 
 	// Same for rotation, if we requested one...
@@ -362,8 +358,6 @@ int
 		if (vInfo.rotate == (uint32_t) req_rota) {
 			LOG("\nCurrent rotation is already %hhd!", req_rota);
 			// No change needed as far as rotation is concerned...
-		} else {
-			is_change_needed = true;
 		}
 	}
 
