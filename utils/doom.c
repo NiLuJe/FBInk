@@ -428,7 +428,7 @@ static void
 	    "\n"
 	    "Doom Fire (via FBInk %s)\n"
 	    "\n"
-	    "Usage: doom [-f | -S] -Ft\n"
+	    "Usage: doom [-f | -S] -Ftd [-A | -D]\n"
 	    "\n"
 	    "Shiny!\n"
 	    "\n"
@@ -440,6 +440,9 @@ static void
 	    "\t-F, --flash\t\t\tUse flashing updates.\n"
 	    "\t-S, --scale\t\t\tScale factor.\n"
 	    "\t-t, --time\t\t\tPrint frame timings.\n"
+	    "\t-A, --a2\t\t\tUse A2 waveform mode.\n"
+	    "\t-D, --du\t\t\tUse DU waveform mode.\n"
+	    "\t-d, --dither\t\t\tUse HW dithering.\n"
 	    "\n",
 	    fbink_version());
 	return;
@@ -455,21 +458,31 @@ int
 
 	int                        opt;
 	int                        opt_index;
-	static const struct option opts[] = {
-		{ "help", no_argument, NULL, 'h' },  { "verbose", no_argument, NULL, 'v' },
-		{ "quiet", no_argument, NULL, 'q' }, { "fs", no_argument, NULL, 'f' },
-		{ "flash", no_argument, NULL, 'F' }, { "scale", required_argument, NULL, 'S' },
-		{ "time", no_argument, NULL, 't' },  { NULL, 0, NULL, 0 }
-	};
+	static const struct option opts[] = { { "help", no_argument, NULL, 'h' },
+					      { "verbose", no_argument, NULL, 'v' },
+					      { "quiet", no_argument, NULL, 'q' },
+					      { "fs", no_argument, NULL, 'f' },
+					      { "flash", no_argument, NULL, 'F' },
+					      { "scale", required_argument, NULL, 'S' },
+					      { "time", no_argument, NULL, 't' },
+					      { "a2", no_argument, NULL, 'A' },
+					      { "du", no_argument, NULL, 'D' },
+					      { "dither", no_argument, NULL, 'd' },
+					      { NULL, 0, NULL, 0 } };
 
 	// We need to be @ 8bpp
-	uint32_t req_bpp        = 8U;
-	int8_t   req_rota       = -1;
-	bool     is_fs          = false;
-	bool     is_flashing    = false;
-	bool     is_timed       = false;
-	uint8_t  scaling_factor = 1U;
-	bool     errfnd         = false;
+	uint32_t req_bpp  = 8U;
+	int8_t   req_rota = -1;
+
+	FBInkConfig fbink_cfg = { 0U };
+
+	bool    is_fs          = false;
+	bool    is_flashing    = false;
+	bool    is_timed       = false;
+	bool    is_dithered    = false;
+	uint8_t scaling_factor = 1U;
+
+	bool errfnd = false;
 
 	while ((opt = getopt_long(argc, argv, "hvqfFS:t", opts, &opt_index)) != -1) {
 		switch (opt) {
@@ -496,6 +509,15 @@ int
 				break;
 			case 't':
 				is_timed = true;
+				break;
+			case 'A':
+				fbink_cfg.wfm_mode = WFM_A2;
+				break;
+			case 'D':
+				fbink_cfg.wfm_mode = WFM_DU;
+				break;
+			case 'd':
+				is_dithered = true;
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
@@ -598,13 +620,18 @@ int
 	}
 
 	// Setup FBInk
-	FBInkConfig fbink_cfg = { 0U };
-
 	// NOTE: We pretty much need flashing updates, otherwise the ghosting heavily mangles the effect ;).
 	// The downside is that it's murder to look at full-screen... :D.
 	// A good middle-ground would perhaps be to only pepper a flashing update periodically?
 	if (is_flashing) {
 		fbink_cfg.is_flashing = true;
+	}
+
+	uint8_t dithering;
+	if (is_dithered) {
+		dithering = EPDC_FLAG_USE_DITHERING_ORDERED;
+	} else {
+		dithering = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
 	}
 
 	fbink_init(fbfd, &fbink_cfg);
@@ -625,7 +652,7 @@ int
 				clock_gettime(CLOCK_MONOTONIC, &t0);
 			}
 			do_fire_fs();
-			fbink_refresh(fbfd, 0U, 0U, 0U, 0U, EPDC_FLAG_USE_DITHERING_PASSTHROUGH, &fbink_cfg);
+			fbink_refresh(fbfd, 0U, 0U, 0U, 0U, dithering, &fbink_cfg);
 			if (is_timed) {
 				struct timespec t1;
 				clock_gettime(CLOCK_MONOTONIC, &t1);
@@ -646,13 +673,8 @@ int
 				clock_gettime(CLOCK_MONOTONIC, &t0);
 			}
 			do_fire_scaled(scaling_factor);
-			fbink_refresh(fbfd,
-				      fire_y_origin,
-				      fire_x_origin,
-				      scaled_Width,
-				      scaled_Height,
-				      EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
-				      &fbink_cfg);
+			fbink_refresh(
+			    fbfd, fire_y_origin, fire_x_origin, scaled_Width, scaled_Height, dithering, &fbink_cfg);
 			if (is_timed) {
 				struct timespec t1;
 				clock_gettime(CLOCK_MONOTONIC, &t1);
@@ -672,13 +694,7 @@ int
 				clock_gettime(CLOCK_MONOTONIC, &t0);
 			}
 			do_fire();
-			fbink_refresh(fbfd,
-				      fire_y_origin,
-				      fire_x_origin,
-				      FIRE_WIDTH,
-				      FIRE_HEIGHT,
-				      EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
-				      &fbink_cfg);
+			fbink_refresh(fbfd, fire_y_origin, fire_x_origin, FIRE_WIDTH, FIRE_HEIGHT, dithering, &fbink_cfg);
 			if (is_timed) {
 				struct timespec t1;
 				clock_gettime(CLOCK_MONOTONIC, &t1);
