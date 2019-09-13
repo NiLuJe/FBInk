@@ -249,10 +249,9 @@ int
 	// NOTE: We're going to need to identify the device, to handle rotation quirks...
 	identify_device();
 
-	// NOTE: We only need this for ioctl, hence O_NONBLOCK (as per open(2)).
-	fbfd = open("/dev/fb0", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
-	if (!fbfd) {
-		perror("open");
+	// NOTE: We'll need to write to the fb
+	if ((fbfd = fbink_open()) == ERRCODE(EXIT_FAILURE)) {
+		fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
 		return ERRCODE(EXIT_FAILURE);
 	}
 
@@ -333,8 +332,8 @@ int
 	// TODO: Doom!
 
 cleanup:
-	if (close(fbfd) != 0) {
-		perror("close");
+	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
+		fprintf(stderr, "Failed to close the framebuffer, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
 	}
 
