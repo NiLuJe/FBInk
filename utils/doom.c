@@ -339,7 +339,7 @@ static void
 // And a slight variation with scaling...
 uint32_t scaled_Width  = FIRE_WIDTH;
 uint32_t scaled_Height = FIRE_HEIGHT;
-uint8_t fire_canvas[FIRE_WIDTH * FIRE_HEIGHT];
+uint8_t  fire_canvas[FIRE_WIDTH * FIRE_HEIGHT];
 
 static void
     setup_fire_scaled(uint8_t scale)
@@ -386,14 +386,14 @@ static void
 	} else {
 		const size_t random = (rand() * 3) & 3;
 		// Update the source canvas
-		const size_t dst                                = offset - random + 1U;
-		*((uint8_t*) (fire_canvas + dst - FIRE_WIDTH)) = (uint8_t)(pixel - (random & 1U));
-		// Update the fb
-		const size_t dst_y = dst / FIRE_WIDTH * scale + fire_y_origin;
-		const size_t dst_x = dst % FIRE_WIDTH * scale + fire_x_origin;
+		const size_t dst = offset - random + 1U;
 		// We'll need the palette id of the current pixel so we can swap it to another *palette* color!
-		const unsigned int pal_idx = find_palette_id(pixel);
-		const FBInkPixel   px      = { .gray8 = palette[(pal_idx - (random & 1U))] };
+		const unsigned int pal_idx                     = find_palette_id(pixel);
+		*((uint8_t*) (fire_canvas + dst - FIRE_WIDTH)) = palette[(pal_idx - (random & 1U))];
+		// Update the fb
+		const size_t     dst_y = dst / FIRE_WIDTH * scale + fire_y_origin;
+		const size_t     dst_x = dst % FIRE_WIDTH * scale + fire_x_origin;
+		const FBInkPixel px    = { .gray8 = palette[(pal_idx - (random & 1U))] };
 		fill_rect(dst_x, dst_y - 1U, scale, scale, &px);
 	}
 }
