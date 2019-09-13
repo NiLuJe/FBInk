@@ -217,19 +217,6 @@ static const uint8_t fire_colors[][3] = {
 
 uint8_t palette[sizeof(fire_colors) / sizeof(*fire_colors)];
 
-static unsigned int
-    find_palette_id(uint8_t v)
-{
-	for (uint8_t i = 0U; i < sizeof(palette); i++) {
-		if (palette[i] == v) {
-			return i;
-		}
-	}
-
-	// Should hopefully never happen...
-	return 0U;
-}
-
 static void
     spread_fire_fs(size_t offset)
 {
@@ -237,14 +224,9 @@ static void
 	if (pixel == palette[0U]) {
 		*((uint8_t*) (fbPtr + offset - fInfo.line_length)) = palette[0U];
 	} else {
-		const size_t random = (rand() * 3) & 3;
-		const size_t dst    = offset - random + 1U;
-		// NOTE: Using a pixel value instead of a palette index behaves approximately okay, FWIW ;).
-		//*((uint8_t*) (fbPtr + dst - fInfo.line_length)) = (uint8_t)(pixel - (random & 1U));
-		// That said, we're supposed to play with the palette, so, do so ;).
-		// Find the palette id for the current pixel
-		const unsigned int pal_idx                      = find_palette_id(pixel);
-		*((uint8_t*) (fbPtr + dst - fInfo.line_length)) = palette[pal_idx - (random & 1U)];
+		const size_t random                             = (rand() * 3) & 3;
+		const size_t dst                                = offset - random + 1U;
+		*((uint8_t*) (fbPtr + dst - fInfo.line_length)) = (uint8_t)(pixel - (random & 1U));
 	}
 }
 
@@ -321,13 +303,11 @@ static void
 	} else {
 		const size_t random = (rand() * 3) & 3;
 		// Make sure we stay within our window...
-		const size_t shift = (y * FIRE_WIDTH + x) - random + 1U;
-		const size_t dst_y = shift / FIRE_WIDTH;
-		const size_t dst_x = shift % FIRE_WIDTH;
-		const size_t dst   = dst_y * fInfo.line_length + dst_x;
-		// Find the palette id for the current pixel
-		const unsigned int pal_idx                      = find_palette_id(pixel);
-		*((uint8_t*) (fbPtr + dst - fInfo.line_length)) = palette[pal_idx - (random & 1U)];
+		const size_t shift                              = (y * FIRE_WIDTH + x) - random + 1U;
+		const size_t dst_y                              = shift / FIRE_WIDTH;
+		const size_t dst_x                              = shift % FIRE_WIDTH;
+		const size_t dst                                = dst_y * fInfo.line_length + dst_x;
+		*((uint8_t*) (fbPtr + dst - fInfo.line_length)) = (uint8_t)(pixel - (random & 1U));
 	}
 }
 
