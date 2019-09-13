@@ -358,7 +358,8 @@ static void
 
 	// Fill the window w/ color 0
 	const FBInkPixel bg = { .gray8 = palette[0U] };
-	fill_rect(fire_x_origin, fire_y_origin, scaled_Width, scaled_Height, &bg);
+	fill_rect(
+	    fire_x_origin, fire_y_origin, (unsigned short int) scaled_Width, (unsigned short int) scaled_Height, &bg);
 	// And the source canvas
 	memset(fire_canvas, palette[0U], sizeof(fire_canvas));
 
@@ -382,7 +383,11 @@ static void
 		*((uint8_t*) (fire_canvas + offset - FIRE_WIDTH)) = palette[0U];
 		// Update the fb
 		const FBInkPixel px = { .gray8 = palette[0U] };
-		fill_rect(fire_x_origin + x * scale, fire_y_origin + y * scale - 1U, scale, scale, &px);
+		fill_rect((unsigned short int) (fire_x_origin + (x * scale)),
+			  (unsigned short int) (fire_y_origin + ((y * scale) - 1U)),
+			  scale,
+			  scale,
+			  &px);
 	} else {
 		const size_t random = (rand() * 3) & 3;
 		// Update the source canvas
@@ -394,7 +399,7 @@ static void
 		const size_t     dst_y = dst / FIRE_WIDTH * scale + fire_y_origin;
 		const size_t     dst_x = dst % FIRE_WIDTH * scale + fire_x_origin;
 		const FBInkPixel px    = { .gray8 = palette[(pal_idx - (random & 1U))] };
-		fill_rect(dst_x, dst_y - 1U, scale, scale, &px);
+		fill_rect((unsigned short int) dst_x, (unsigned short int) (dst_y - 1U), scale, scale, &px);
 	}
 }
 
@@ -632,7 +637,7 @@ int
 		}
 	} else if (scaling_factor > 1U) {
 		// Start by clamping the scaling factor to safe values...
-		scaling_factor = MIN(scaling_factor, viewWidth / FIRE_HEIGHT);
+		scaling_factor = (uint8_t) MIN(scaling_factor, viewWidth / FIRE_HEIGHT);
 
 		setup_fire_scaled(scaling_factor);
 		while (true) {
