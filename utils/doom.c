@@ -26,6 +26,7 @@
 
 #include <getopt.h>
 #include <stdio.h>
+#include <stdlib.h>
 // I feel dirty.
 #include "../fbink.c"
 
@@ -35,22 +36,16 @@ static void
 {
 	printf(
 	    "\n"
-	    "FBDepth (via FBInk %s)\n"
+	    "Doom Fire (via FBInk %s)\n"
 	    "\n"
-	    "Usage: fbdepth [-d] <bpp> [-r] <rota>\n"
+	    "Usage: doom [?]\n"
 	    "\n"
-	    "Tiny tool to set the framebuffer bitdepth and/or rotation on eInk devices.\n"
+	    "Shiny!\n"
 	    "\n"
 	    "OPTIONS:\n"
-	    "\t-d, --depth <8|16|24|32>\tSwitch the framebuffer to the supplied bitdepth.\n"
 	    "\t-h, --help\t\t\tShow this help message.\n"
 	    "\t-v, --verbose\t\t\tToggle printing diagnostic messages.\n"
 	    "\t-q, --quiet\t\t\tToggle hiding diagnostic messages.\n"
-	    "\t-g, --get\t\t\tJust output the current bitdepth to stdout.\n"
-	    "\t-G, --getcode\t\t\tJust exit with the current bitdepth as exit code.\n"
-	    "\t-r, --rota <-1|0|1|2|3>\t\tSwitch the framebuffer to the supplied rotation. -1 is a magic value matching the device-specific Portrait orientation.\n"
-	    "\t-o, --getrota\t\t\tJust output the current rotation to stdout.\n"
-	    "\t-O, --getrotacode\t\tJust exit with the current rotation as exit code.\n"
 	    "\n",
 	    fbink_version());
 	return;
@@ -204,6 +199,70 @@ static bool
 	return true;
 }
 
+// Shiny DOOM Fire effect
+// c.f., http://fabiensanglard.net/doom_fire_psx/index.html
+//     & https://github.com/fabiensanglard/DoomFirePSX/blob/master/flames.html
+//     & https://github.com/cylgom/ly/blob/master/src/draw.c
+// TODO: Try doing it in a smaller region, because doing it full-screen is taking its toll on the CPU...
+//       Will have to mangle the offsets properly...
+static const uint8_t fire_colors[][3] = {
+	{ 0x07, 0x07, 0x07 }, { 0x1F, 0x07, 0x07 }, { 0x2F, 0x0F, 0x07 }, { 0x47, 0x0F, 0x07 }, { 0x57, 0x17, 0x07 },
+	{ 0x67, 0x1F, 0x07 }, { 0x77, 0x1F, 0x07 }, { 0x8F, 0x27, 0x07 }, { 0x9F, 0x2F, 0x07 }, { 0xAF, 0x3F, 0x07 },
+	{ 0xBF, 0x47, 0x07 }, { 0xC7, 0x47, 0x07 }, { 0xDF, 0x4F, 0x07 }, { 0xDF, 0x57, 0x07 }, { 0xDF, 0x57, 0x07 },
+	{ 0xD7, 0x5F, 0x07 }, { 0xD7, 0x5F, 0x07 }, { 0xD7, 0x67, 0x0F }, { 0xCF, 0x6F, 0x0F }, { 0xCF, 0x77, 0x0F },
+	{ 0xCF, 0x7F, 0x0F }, { 0xCF, 0x87, 0x17 }, { 0xC7, 0x87, 0x17 }, { 0xC7, 0x8F, 0x17 }, { 0xC7, 0x97, 0x1F },
+	{ 0xBF, 0x9F, 0x1F }, { 0xBF, 0x9F, 0x1F }, { 0xBF, 0xA7, 0x27 }, { 0xBF, 0xA7, 0x27 }, { 0xBF, 0xAF, 0x2F },
+	{ 0xB7, 0xAF, 0x2F }, { 0xB7, 0xB7, 0x2F }, { 0xB7, 0xB7, 0x37 }, { 0xCF, 0xCF, 0x6F }, { 0xDF, 0xDF, 0x9F },
+	{ 0xEF, 0xEF, 0xC7 }, { 0xFF, 0xFF, 0xFF },
+};
+
+uint8_t palette[sizeof(fire_colors) / sizeof(*fire_colors)];
+
+static void
+    spread_fire(size_t offset)
+{
+	uint8_t pixel = *((uint8_t*) (fbPtr + offset));
+	if (pixel == palette[0U]) {
+		*((uint8_t*) (fbPtr + offset - fInfo.line_length)) = palette[0U];
+	} else {
+		size_t random                                   = (rand() * 3) & 3;
+		size_t dst                                      = offset - random + 1U;
+		*((uint8_t*) (fbPtr + dst - fInfo.line_length)) = (uint8_t)(pixel - (random & 1U));
+	}
+}
+
+static void
+    do_fire(void)
+{
+	const uint32_t vertViewport = (uint32_t)(viewVertOrigin - viewVertOffset);
+	// Burn bay, burn!
+	// NOTE: Switching the outer loop to the y one leads to different interactions w/ the PXP & the EPDC...
+	//       Also, slightly uglier flames ;p.
+	for (uint32_t x = 0U; x < fInfo.line_length; x++) {
+		for (uint32_t y = 1U + vertViewport; y < viewHeight + vertViewport; y++) {
+			spread_fire(y * fInfo.line_length + x);
+		}
+	}
+}
+
+static void
+    setup_fire(void)
+{
+	// Convert the palette to Grayscale
+	for (uint8_t i = 0U; i < sizeof(palette); i++) {
+		palette[i] = stbi__compute_y(fire_colors[i][0], fire_colors[i][1], fire_colors[i][2]);
+	}
+
+	// Fill the whole screen w/ color 0
+	memset(fbPtr, palette[0U], fInfo.smem_len);
+
+	// Set the bottom line to the final color
+	const FBInkPixel px           = { .gray8 = palette[sizeof(palette) - 1U] };
+	const uint32_t   vertViewport = (uint32_t)(viewVertOrigin - viewVertOffset);
+	fill_rect(
+	    0U, (unsigned short int) (viewHeight + vertViewport - 1U), (unsigned short int) fInfo.line_length, 1U, &px);
+}
+
 int
     main(int argc, char* argv[])
 {
@@ -213,48 +272,18 @@ int
 
 	int                        opt;
 	int                        opt_index;
-	static const struct option opts[] = {
-		{ "depth", required_argument, NULL, 'd' }, { "help", no_argument, NULL, 'h' },
-		{ "verbose", no_argument, NULL, 'v' },     { "quiet", no_argument, NULL, 'q' },
-		{ "get", no_argument, NULL, 'g' },         { "getcode", no_argument, NULL, 'G' },
-		{ "rota", required_argument, NULL, 'r' },  { "getrota", no_argument, NULL, 'o' },
-		{ "getrotacode", no_argument, NULL, 'O' }, { NULL, 0, NULL, 0 }
-	};
+	static const struct option opts[] = { { "help", no_argument, NULL, 'h' },
+					      { "verbose", no_argument, NULL, 'v' },
+					      { "quiet", no_argument, NULL, 'q' },
+					      { NULL, 0, NULL, 0 } };
 
-	uint32_t req_bpp     = 0U;
-	int8_t   req_rota    = 42;
-	bool     errfnd      = false;
-	bool     print_bpp   = false;
-	bool     return_bpp  = false;
-	bool     print_rota  = false;
-	bool     return_rota = false;
+	// We need to be @ 8bpp
+	uint32_t req_bpp  = 8U;
+	int8_t   req_rota = -1;
+	bool     errfnd   = false;
 
-	while ((opt = getopt_long(argc, argv, "d:hvqgGr:oO", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hvq", opts, &opt_index)) != -1) {
 		switch (opt) {
-			case 'd':
-				req_bpp = (uint32_t) strtoul(optarg, NULL, 10);
-				// Cheap-ass sanity check
-				switch (req_bpp) {
-					case 8:
-					case 16:
-						break;
-					case 24:
-						// NOTE: Warn that things will probably be wonky...
-						//       I'm not quite sure who's to blame: this tool, FBInk, or the Kernel,
-						//       but I've never ended up in a useful state on my Kobos.
-						//       And I don't have a genuine 24bpp fb device to compare to...
-						fprintf(
-						    stderr,
-						    "Warning! 24bpp handling appears to be broken *somewhere*, you probably don't want to use it!\n\n");
-						break;
-					case 32:
-						break;
-					default:
-						fprintf(stderr, "Unsupported bitdepth '%s'!\n", optarg);
-						errfnd = true;
-						break;
-				}
-				break;
 			case 'v':
 				g_isQuiet   = false;
 				g_isVerbose = true;
@@ -267,36 +296,6 @@ int
 				show_helpmsg();
 				return EXIT_SUCCESS;
 				break;
-			case 'g':
-				print_bpp = true;
-				break;
-			case 'G':
-				return_bpp = true;
-				break;
-			case 'r':
-				req_rota = (int8_t) strtol(optarg, NULL, 10);
-				// Cheap-ass sanity check
-				switch (req_rota) {
-					case FB_ROTATE_UR:
-					case FB_ROTATE_CW:
-					case FB_ROTATE_UD:
-					case FB_ROTATE_CCW:
-						break;
-					case -1:
-						// NOTE: We'll compute it later, as we need the results from identify_device() ;).
-						break;
-					default:
-						fprintf(stderr, "Invalid rotation '%s'!\n", optarg);
-						errfnd = true;
-						break;
-				}
-				break;
-			case 'o':
-				print_rota = true;
-				break;
-			case 'O':
-				return_rota = true;
-				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
 				errfnd = true;
@@ -304,15 +303,9 @@ int
 		}
 	}
 
-	if (errfnd || ((req_bpp == 0U && req_rota == 42) && !(print_bpp || return_bpp || print_rota || return_rota))) {
+	if (errfnd) {
 		show_helpmsg();
 		return ERRCODE(EXIT_FAILURE);
-	}
-
-	// Enforce quiet w/ print_*
-	if (print_bpp || print_rota) {
-		g_isQuiet   = true;
-		g_isVerbose = false;
 	}
 
 	// Assume success, until shit happens ;)
@@ -321,10 +314,9 @@ int
 	// NOTE: We're going to need to identify the device, to handle rotation quirks...
 	identify_device();
 
-	// NOTE: We only need this for ioctl, hence O_NONBLOCK (as per open(2)).
-	fbfd = open("/dev/fb0", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
-	if (fbfd == -1) {
-		perror("open");
+	// NOTE: We'll need to write to the fb, so do a full open
+	if ((fbfd = fbink_open()) == ERRCODE(EXIT_FAILURE)) {
+		fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
 		return ERRCODE(EXIT_FAILURE);
 	}
 
@@ -332,37 +324,6 @@ int
 	if (!get_fbinfo()) {
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
-	}
-
-	// If we just wanted to print/return the current bitdepth, abort early
-	if (print_bpp || return_bpp) {
-		if (print_bpp) {
-			fprintf(stdout, "%u", vInfo.bits_per_pixel);
-		}
-		if (return_bpp) {
-			rv = (int) vInfo.bits_per_pixel;
-			goto cleanup;
-		} else {
-			goto cleanup;
-		}
-	}
-
-	// If we just wanted to print/return the current rotation, abort early
-	if (print_rota || return_rota) {
-		if (print_rota) {
-			fprintf(stdout, "%u", vInfo.rotate);
-		}
-		if (return_rota) {
-			rv = (int) vInfo.rotate;
-			goto cleanup;
-		} else {
-			goto cleanup;
-		}
-	}
-
-	// If no bitdepth was requested, set to the current one, we'll be double-checking if changes are actually needed.
-	if (req_bpp == 0U) {
-		req_bpp = vInfo.bits_per_pixel;
 	}
 
 	// If the automagic Portrait rotation was requested, compute it
@@ -412,35 +373,56 @@ int
 		}
 	}
 
-	// If it turns out that no actual changes are needed, skip to cleanup, exiting successfully
-	if (!is_change_needed) {
-		goto cleanup;
+	// If we're here, we really want to change the bitdepth and/or rota ;)
+	if (is_change_needed) {
+		if (req_rota != -1) {
+			LOG("\nSwitching fb to %ubpp%s @ rotation %hhd . . .",
+			    req_bpp,
+			    (req_bpp == vInfo.bits_per_pixel) ? " (current bitdepth)" : "",
+			    req_rota);
+		} else {
+			LOG("\nSwitching fb to %ubpp%s . . .",
+			    req_bpp,
+			    (req_bpp == vInfo.bits_per_pixel) ? " (current bitdepth)" : "");
+		}
+		if (!set_fbinfo(req_bpp, req_rota)) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+		// Recap
+		if (!get_fbinfo()) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
 	}
 
-	// If we're here, we really want to change the bitdepth and/or rota ;)
-	if (req_rota != -1) {
-		LOG("\nSwitching fb to %ubpp%s @ rotation %hhd . . .",
-		    req_bpp,
-		    (req_bpp == vInfo.bits_per_pixel) ? " (current bitdepth)" : "",
-		    req_rota);
-	} else {
-		LOG("\nSwitching fb to %ubpp%s . . .",
-		    req_bpp,
-		    (req_bpp == vInfo.bits_per_pixel) ? " (current bitdepth)" : "");
+	// Setup FBInk
+	FBInkConfig fbink_cfg = { 0U };
+
+	// NOTE: We pretty much need flashing updates, otherwise the ghosting heavily mangles the effect ;).
+	// The downside is that it's murder to look at full-screen... :D.
+	// A good middle-ground would perhaps be to only pepper a flashing update periodically?
+	//fbink_cfg.is_flashing = true;
+
+	fbink_init(fbfd, &fbink_cfg);
+	// We also need to mmap the fb
+	if (!isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
 	}
-	if (!set_fbinfo(req_bpp, req_rota)) {
-		rv = ERRCODE(EXIT_FAILURE);
-		goto cleanup;
-	}
-	// Recap
-	if (!get_fbinfo()) {
-		rv = ERRCODE(EXIT_FAILURE);
-		goto cleanup;
+
+	// Fire!
+	setup_fire();
+	while (true) {
+		do_fire();
+		fbink_refresh(fbfd, 0U, 0U, 0U, 0U, EPDC_FLAG_USE_DITHERING_PASSTHROUGH, &fbink_cfg);
 	}
 
 cleanup:
-	if (close(fbfd) != 0) {
-		perror("close");
+	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
+		fprintf(stderr, "Failed to close the framebuffer, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
 	}
 

@@ -89,7 +89,7 @@ int
 
 	// NOTE: We only need this for ioctl, hence O_NONBLOCK (as per open(2)).
 	fbfd = open("/dev/fb0", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
-	if (!fbfd) {
+	if (fbfd == -1) {
 		perror("open");
 		return ERRCODE(EXIT_FAILURE);
 	}

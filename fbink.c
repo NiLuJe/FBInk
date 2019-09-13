@@ -1870,7 +1870,7 @@ int
 
 	// Open the framebuffer file for reading and writing
 	fbfd = open("/dev/fb0", O_RDWR | O_CLOEXEC);
-	if (!fbfd) {
+	if (fbfd == -1) {
 		WARN("Error: cannot open framebuffer character device");
 		return ERRCODE(EXIT_FAILURE);
 	}

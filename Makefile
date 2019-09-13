@@ -441,6 +441,8 @@ utils: | outdir
 	$(STRIP) --strip-unneeded $(OUT_DIR)/rota
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbdepth utils/fbdepth.c
 	$(STRIP) --strip-unneeded $(OUT_DIR)/fbdepth
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/doom utils/doom.c
+	$(STRIP) --strip-unneeded $(OUT_DIR)/doom
 
 dump: static
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/dump utils/dump.c $(LIBS)
@@ -549,6 +551,7 @@ clean:
 	rm -rf Release/button_scan
 	rm -rf Release/rota
 	rm -rf Release/fbdepth
+	rm -rf Release/doom
 	rm -rf Release/dump
 	rm -rf Debug/*.a
 	rm -rf Debug/*.so*
@@ -567,6 +570,7 @@ clean:
 	rm -rf Debug/button_scan
 	rm -rf Debug/rota
 	rm -rf Debug/fbdepth
+	rm -rf Debug/doom
 	rm -rf Debug/dump
 
 distclean: clean libunibreakclean
