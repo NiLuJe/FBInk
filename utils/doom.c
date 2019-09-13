@@ -305,8 +305,8 @@ static void
 		const size_t random = (rand() * 3) & 3;
 		// Make sure we stay within our window...
 		const size_t shift                              = ((y - fire_y_origin) * FIRE_WIDTH + (x - fire_x_origin)) - random + 1U;
-		const size_t dst_y                              = shift / FIRE_WIDTH;
-		const size_t dst_x                              = shift % FIRE_WIDTH;
+		const size_t dst_y                              = shift / FIRE_WIDTH + fire_y_origin;
+		const size_t dst_x                              = shift % FIRE_WIDTH + fire_x_origin;
 		printf("(%u, %u) -> (%zu, %zu)\n", x, y, dst_x, dst_y);
 		const size_t dst                                = dst_y * fInfo.line_length + dst_x;
 		*((uint8_t*) (fbPtr + dst - fInfo.line_length)) = (uint8_t)(pixel - (random & 1U));
