@@ -342,16 +342,20 @@ int
 	}
 
 	// If a change was requested, do it, but check if it's necessary first
+	bool is_change_needed = false;
 	if (vInfo.bits_per_pixel == req_bpp) {
 		// Also check that the grayscale flag is flipped properly
 		if ((vInfo.bits_per_pixel == 8U && vInfo.grayscale != GRAYSCALE_8BIT) ||
 		    (vInfo.bits_per_pixel > 8U && vInfo.grayscale != 0U)) {
 			LOG("\nCurrent bitdepth is already %ubpp, but the grayscale flag is bogus!", req_bpp);
 			// Continue, we'll need to flip the grayscale flag properly
+			is_change_needed = true;
 		} else {
 			LOG("\nCurrent bitdepth is already %ubpp!", req_bpp);
 			// No change needed as far as bitdepth is concerned...
 		}
+	} else {
+		is_change_needed = true;
 	}
 
 	// Same for rotation, if we requested one...
@@ -359,28 +363,32 @@ int
 		if (vInfo.rotate == (uint32_t) req_rota) {
 			LOG("\nCurrent rotation is already %hhd!", req_rota);
 			// No change needed as far as rotation is concerned...
+		} else {
+			is_change_needed = true;
 		}
 	}
 
 	// If we're here, we really want to change the bitdepth and/or rota ;)
-	if (req_rota != -1) {
-		LOG("\nSwitching fb to %ubpp%s @ rotation %hhd . . .",
-		    req_bpp,
-		    (req_bpp == vInfo.bits_per_pixel) ? " (current bitdepth)" : "",
-		    req_rota);
-	} else {
-		LOG("\nSwitching fb to %ubpp%s . . .",
-		    req_bpp,
-		    (req_bpp == vInfo.bits_per_pixel) ? " (current bitdepth)" : "");
-	}
-	if (!set_fbinfo(req_bpp, req_rota)) {
-		rv = ERRCODE(EXIT_FAILURE);
-		goto cleanup;
-	}
-	// Recap
-	if (!get_fbinfo()) {
-		rv = ERRCODE(EXIT_FAILURE);
-		goto cleanup;
+	if (is_change_needed) {
+		if (req_rota != -1) {
+			LOG("\nSwitching fb to %ubpp%s @ rotation %hhd . . .",
+			req_bpp,
+			(req_bpp == vInfo.bits_per_pixel) ? " (current bitdepth)" : "",
+			req_rota);
+		} else {
+			LOG("\nSwitching fb to %ubpp%s . . .",
+			req_bpp,
+			(req_bpp == vInfo.bits_per_pixel) ? " (current bitdepth)" : "");
+		}
+		if (!set_fbinfo(req_bpp, req_rota)) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+		// Recap
+		if (!get_fbinfo()) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
 	}
 
 	// Setup FBInk
