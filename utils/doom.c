@@ -31,28 +31,6 @@
 // I feel dirty.
 #include "../fbink.c"
 
-// Help message
-static void
-    show_helpmsg(void)
-{
-	printf(
-	    "\n"
-	    "Doom Fire (via FBInk %s)\n"
-	    "\n"
-	    "Usage: doom [-f]\n"
-	    "\n"
-	    "Shiny!\n"
-	    "\n"
-	    "OPTIONS:\n"
-	    "\t-h, --help\t\t\tShow this help message.\n"
-	    "\t-v, --verbose\t\t\tToggle printing diagnostic messages.\n"
-	    "\t-q, --quiet\t\t\tToggle hiding diagnostic messages.\n"
-	    "\t-f, --fs\t\t\tBurn all the things!\n"
-	    "\n",
-	    fbink_version());
-	return;
-}
-
 int fbfd = -1;
 
 static bool
@@ -357,6 +335,31 @@ static void
 #define MILLION 1000000.f
 #define THOUSAND 1000
 
+// Help message
+static void
+    show_helpmsg(void)
+{
+	printf(
+	    "\n"
+	    "Doom Fire (via FBInk %s)\n"
+	    "\n"
+	    "Usage: doom [-f | -S] -Ft\n"
+	    "\n"
+	    "Shiny!\n"
+	    "\n"
+	    "OPTIONS:\n"
+	    "\t-h, --help\t\t\tShow this help message.\n"
+	    "\t-v, --verbose\t\t\tToggle printing diagnostic messages.\n"
+	    "\t-q, --quiet\t\t\tToggle hiding diagnostic messages.\n"
+	    "\t-f, --fs\t\t\tBurn all the things!\n"
+	    "\t-F, --flash\t\t\tUse flashing updates.\n"
+	    "\t-S, --scale\t\t\tScale factor.\n"
+	    "\t-t, --time\t\t\tPrint frame timings.\n"
+	    "\n",
+	    fbink_version());
+	return;
+}
+
 // Main entry point
 int
     main(int argc, char* argv[])
@@ -367,19 +370,23 @@ int
 
 	int                        opt;
 	int                        opt_index;
-	static const struct option opts[] = { { "help", no_argument, NULL, 'h' },
-					      { "verbose", no_argument, NULL, 'v' },
-					      { "quiet", no_argument, NULL, 'q' },
-					      { "fs", no_argument, NULL, 'f' },
-					      { NULL, 0, NULL, 0 } };
+	static const struct option opts[] = {
+		{ "help", no_argument, NULL, 'h' },  { "verbose", no_argument, NULL, 'v' },
+		{ "quiet", no_argument, NULL, 'q' }, { "fs", no_argument, NULL, 'f' },
+		{ "flash", no_argument, NULL, 'F' }, { "scale", required_argument, NULL, 'S' },
+		{ "time", no_argument, NULL, 't' },  { NULL, 0, NULL, 0 }
+	};
 
 	// We need to be @ 8bpp
-	uint32_t req_bpp  = 8U;
-	int8_t   req_rota = -1;
-	bool     is_fs    = false;
-	bool     errfnd   = false;
+	uint32_t req_bpp        = 8U;
+	int8_t   req_rota       = -1;
+	bool     is_fs          = false;
+	bool     is_flashing    = false;
+	bool     is_timed       = false;
+	uint8_t  scaling_factor = 1U;
+	bool     errfnd         = false;
 
-	while ((opt = getopt_long(argc, argv, "hvqf", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hvqfFS:t", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'v':
 				g_isQuiet   = false;
@@ -395,6 +402,15 @@ int
 				break;
 			case 'f':
 				is_fs = true;
+				break;
+			case 'F':
+				is_flashing = true;
+				break;
+			case 'S':
+				scaling_factor = (uint8_t) strtoul(optarg, NULL, 10);
+				break;
+			case 't':
+				is_timed = true;
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
@@ -502,7 +518,9 @@ int
 	// NOTE: We pretty much need flashing updates, otherwise the ghosting heavily mangles the effect ;).
 	// The downside is that it's murder to look at full-screen... :D.
 	// A good middle-ground would perhaps be to only pepper a flashing update periodically?
-	//fbink_cfg.is_flashing = true;
+	if (is_flashing) {
+		fbink_cfg.is_flashing = true;
+	}
 
 	fbink_init(fbfd, &fbink_cfg);
 	// We also need to mmap the fb
@@ -518,20 +536,27 @@ int
 		setup_fire_fs();
 		while (true) {
 			struct timespec t0;
-			clock_gettime(CLOCK_MONOTONIC, &t0);
+			if (is_timed) {
+				clock_gettime(CLOCK_MONOTONIC, &t0);
+			}
 			do_fire_fs();
 			fbink_refresh(fbfd, 0U, 0U, 0U, 0U, EPDC_FLAG_USE_DITHERING_PASSTHROUGH, &fbink_cfg);
-			struct timespec t1;
-			clock_gettime(CLOCK_MONOTONIC, &t1);
-			float frame_time =
-			    ((((t1.tv_sec * BILLION) + t1.tv_nsec) - ((t0.tv_sec * BILLION) + t0.tv_nsec)) / MILLION);
-			printf("%.1f FPS (%.3fms)\n", THOUSAND / frame_time, frame_time);
+			if (is_timed) {
+				struct timespec t1;
+				clock_gettime(CLOCK_MONOTONIC, &t1);
+				float frame_time =
+				    ((((t1.tv_sec * BILLION) + t1.tv_nsec) - ((t0.tv_sec * BILLION) + t0.tv_nsec)) /
+				     MILLION);
+				printf("%.1f FPS (%.3fms)\n", THOUSAND / frame_time, frame_time);
+			}
 		}
 	} else {
 		setup_fire();
 		while (true) {
 			struct timespec t0;
-			clock_gettime(CLOCK_MONOTONIC, &t0);
+			if (is_timed) {
+				clock_gettime(CLOCK_MONOTONIC, &t0);
+			}
 			do_fire();
 			fbink_refresh(fbfd,
 				      fire_y_origin,
@@ -540,11 +565,14 @@ int
 				      FIRE_HEIGHT,
 				      EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
 				      &fbink_cfg);
-			struct timespec t1;
-			clock_gettime(CLOCK_MONOTONIC, &t1);
-			float frame_time =
-			    ((((t1.tv_sec * BILLION) + t1.tv_nsec) - ((t0.tv_sec * BILLION) + t0.tv_nsec)) / MILLION);
-			printf("%.1f FPS (%.3fms)\n", THOUSAND / frame_time, frame_time);
+			if (is_timed) {
+				struct timespec t1;
+				clock_gettime(CLOCK_MONOTONIC, &t1);
+				float frame_time =
+				    ((((t1.tv_sec * BILLION) + t1.tv_nsec) - ((t0.tv_sec * BILLION) + t0.tv_nsec)) /
+				     MILLION);
+				printf("%.1f FPS (%.3fms)\n", THOUSAND / frame_time, frame_time);
+			}
 			// NOTE: Slowing things down (i.e., putting a dynamic nanosleep() around here)
 			//       might actually yield *better* results, by not flooding the EPDC too much...
 		}
