@@ -27,6 +27,7 @@
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 // I feel dirty.
 #include "../fbink.c"
 
@@ -339,6 +340,10 @@ static void
 	}
 }
 
+#define BILLION 1000000000L
+#define MILLION 1000000.f
+#define THOUSAND 1000
+
 // Main entry point
 int
     main(int argc, char* argv[])
@@ -505,6 +510,8 @@ int
 	} else {
 		setup_fire();
 		while (true) {
+			struct timespec t0;
+			clock_gettime(CLOCK_MONOTONIC, &t0);
 			do_fire();
 			fbink_refresh(fbfd,
 				      fire_y_origin,
@@ -513,6 +520,11 @@ int
 				      FIRE_HEIGHT,
 				      EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
 				      &fbink_cfg);
+			struct timespec t1;
+			clock_gettime(CLOCK_MONOTONIC, &t1);
+			float frame_time =
+			    ((((t1.tv_sec * BILLION) + t1.tv_nsec) - ((t0.tv_sec * BILLION) + t0.tv_nsec)) / MILLION);
+			printf("%.1f FPS (%.3fms)\n", THOUSAND / frame_time, frame_time);
 		}
 	}
 
