@@ -725,13 +725,23 @@ int
 	// Fire!
 	if (is_fs) {
 		setup_fire_fs();
+
+		size_t i = 0U;
 		while (true) {
+			if (i > (iter_cap + iter_cap / 2U)) {
+				break;
+			}
+			i++;
+
 			struct timespec t0;
 			if (is_timed) {
 				clock_gettime(CLOCK_MONOTONIC, &t0);
 			}
+
 			do_fire_fs();
+
 			fbink_refresh(fbfd, 0U, 0U, 0U, 0U, dithering, &fbink_cfg);
+
 			if (is_timed) {
 				struct timespec t1;
 				clock_gettime(CLOCK_MONOTONIC, &t1);
@@ -739,6 +749,7 @@ int
 				    ((t1.tv_sec * BILLION) + t1.tv_nsec) - ((t0.tv_sec * BILLION) + t0.tv_nsec);
 				const float frame_time = ((float) (frame_time_ns) / MILLION);
 				printf("%.1f FPS (%.3f ms)\n", THOUSAND / frame_time, frame_time);
+
 				// Slow down?
 				if (is_capped) {
 					if (frame_time_ns < sleep_cap) {
@@ -753,6 +764,7 @@ int
 		scaling_factor = (uint8_t) MIN(scaling_factor, viewWidth / FIRE_HEIGHT);
 
 		setup_fire_scaled(scaling_factor);
+
 		size_t i = 0U;
 		while (true) {
 			if (i > (iter_cap + iter_cap / 2U)) {
@@ -792,13 +804,23 @@ int
 		}
 	} else {
 		setup_fire();
+
+		size_t i = 0U;
 		while (true) {
+			if (i > (iter_cap + iter_cap / 2U)) {
+				break;
+			}
+			i++;
+
 			struct timespec t0;
 			if (is_timed) {
 				clock_gettime(CLOCK_MONOTONIC, &t0);
 			}
+
 			do_fire();
+
 			fbink_refresh(fbfd, fire_y_origin, fire_x_origin, FIRE_WIDTH, FIRE_HEIGHT, dithering, &fbink_cfg);
+
 			if (is_timed) {
 				struct timespec t1;
 				clock_gettime(CLOCK_MONOTONIC, &t1);
@@ -806,6 +828,7 @@ int
 				    ((t1.tv_sec * BILLION) + t1.tv_nsec) - ((t0.tv_sec * BILLION) + t0.tv_nsec);
 				const float frame_time = ((float) (frame_time_ns) / MILLION);
 				printf("%.1f FPS (%.3f ms)\n", THOUSAND / frame_time, frame_time);
+
 				// Slow down?
 				if (is_capped) {
 					if (frame_time_ns < sleep_cap) {
