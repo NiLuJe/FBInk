@@ -236,7 +236,7 @@ static void
 {
 	const uint32_t vertViewport = (uint32_t)(viewVertOrigin - viewVertOffset);
 	// Burn bay, burn!
-	// NOTE: Switching the outer loop to y leds to different interactions w/ the PXP & the EPDC...
+	// NOTE: Switching the outer loop to the y one leads to different interactions w/ the PXP & the EPDC...
 	for (uint32_t x = 0U; x < fInfo.line_length; x++) {
 		for (uint32_t y = 1U + vertViewport; y < viewHeight + vertViewport; y++) {
 			spread_fire(y * fInfo.line_length + x);
@@ -276,6 +276,7 @@ int
 					      { "quiet", no_argument, NULL, 'q' },
 					      { NULL, 0, NULL, 0 } };
 
+	// We need to be @ 8bpp
 	uint32_t req_bpp  = 8U;
 	int8_t   req_rota = -1;
 	bool     errfnd   = false;
@@ -312,7 +313,7 @@ int
 	// NOTE: We're going to need to identify the device, to handle rotation quirks...
 	identify_device();
 
-	// NOTE: We'll need to write to the fb
+	// NOTE: We'll need to write to the fb, so do a full open
 	if ((fbfd = fbink_open()) == ERRCODE(EXIT_FAILURE)) {
 		fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
 		return ERRCODE(EXIT_FAILURE);
@@ -399,7 +400,7 @@ int
 
 	// NOTE: We pretty much need flashing updates, otherwise the ghosting heavily mangles the effect ;).
 	// The downside is that it's murder to look at full-screen... :D.
-	// A good middle-ground would be to only pepper a flashing update periodically?
+	// A good middle-ground would perhaps be to only pepper a flashing update periodically?
 	//fbink_cfg.is_flashing = true;
 
 	fbink_init(fbfd, &fbink_cfg);
