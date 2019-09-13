@@ -236,7 +236,7 @@ static void
 	// Burn bay, burn!
 	for (uint32_t x = 0U; x < viewWidth; x++) {
 		for (uint32_t y = 1U + vertViewport; y < viewHeight + vertViewport; y++) {
-			spread_fire(y * viewWidth + x);
+			spread_fire(y * fInfo.line_length + x);
 		}
 	}
 }
