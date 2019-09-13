@@ -364,7 +364,7 @@ static void
 	fill_rect(fire_x_origin,
 		  (unsigned short int) (fire_y_origin + scaled_Height - 1U),
 		  (unsigned short int) scaled_Width,
-		  1U,
+		  scale,
 		  &fire);
 }
 
