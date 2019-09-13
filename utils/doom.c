@@ -221,11 +221,11 @@ static void
 {
 	uint8_t pixel = *((uint8_t*) (fbPtr + offset));
 	if (pixel == palette[0U]) {
-		*((uint8_t*) (fbPtr + offset - viewWidth)) = palette[0U];
+		*((uint8_t*) (fbPtr + offset - fInfo.line_length)) = palette[0U];
 	} else {
-		size_t random                           = (rand() * 3) & 3;
-		size_t dst                              = offset - random + 1U;
-		*((uint8_t*) (fbPtr + dst - viewWidth)) = (uint8_t)(pixel - (random & 1U));
+		size_t random                                   = (rand() * 3) & 3;
+		size_t dst                                      = offset - random + 1U;
+		*((uint8_t*) (fbPtr + dst - fInfo.line_length)) = (uint8_t)(pixel - (random & 1U));
 	}
 }
 
@@ -234,7 +234,7 @@ static void
 {
 	const uint32_t vertViewport = (uint32_t)(viewVertOrigin - viewVertOffset);
 	// Burn bay, burn!
-	for (uint32_t x = 0U; x < viewWidth; x++) {
+	for (uint32_t x = 0U; x < fInfo.line_length; x++) {
 		for (uint32_t y = 1U + vertViewport; y < viewHeight + vertViewport; y++) {
 			spread_fire(y * fInfo.line_length + x);
 		}
@@ -255,7 +255,8 @@ static void
 	// Set the bottom line to the final color
 	const FBInkPixel px           = { .gray8 = palette[sizeof(palette) - 1U] };
 	const uint32_t   vertViewport = (uint32_t)(viewVertOrigin - viewVertOffset);
-	fill_rect(0U, (unsigned short int) (viewHeight + vertViewport - 1U), (unsigned short int) viewWidth, 1U, &px);
+	fill_rect(
+	    0U, (unsigned short int) (viewHeight + vertViewport - 1U), (unsigned short int) fInfo.line_length, 1U, &px);
 }
 
 int
