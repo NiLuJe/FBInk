@@ -440,8 +440,7 @@ static void
 	    "\t-F, --flash\t\t\tUse flashing updates.\n"
 	    "\t-S, --scale\t\t\tScale factor.\n"
 	    "\t-t, --time\t\t\tPrint frame timings.\n"
-	    "\t-A, --a2\t\t\tUse A2 waveform mode.\n"
-	    "\t-D, --du\t\t\tUse DU waveform mode.\n"
+	    "\t-W, --wfm\t\t\tSet waveform mode.\n"
 	    "\t-d, --dither\t\t\tUse HW dithering.\n"
 	    "\n",
 	    fbink_version());
@@ -458,17 +457,13 @@ int
 
 	int                        opt;
 	int                        opt_index;
-	static const struct option opts[] = { { "help", no_argument, NULL, 'h' },
-					      { "verbose", no_argument, NULL, 'v' },
-					      { "quiet", no_argument, NULL, 'q' },
-					      { "fs", no_argument, NULL, 'f' },
-					      { "flash", no_argument, NULL, 'F' },
-					      { "scale", required_argument, NULL, 'S' },
-					      { "time", no_argument, NULL, 't' },
-					      { "a2", no_argument, NULL, 'A' },
-					      { "du", no_argument, NULL, 'D' },
-					      { "dither", no_argument, NULL, 'd' },
-					      { NULL, 0, NULL, 0 } };
+	static const struct option opts[] = {
+		{ "help", no_argument, NULL, 'h' },   { "verbose", no_argument, NULL, 'v' },
+		{ "quiet", no_argument, NULL, 'q' },  { "fs", no_argument, NULL, 'f' },
+		{ "flash", no_argument, NULL, 'F' },  { "scale", required_argument, NULL, 'S' },
+		{ "time", no_argument, NULL, 't' },   { "wfm", no_argument, NULL, 'W' },
+		{ "dither", no_argument, NULL, 'd' }, { NULL, 0, NULL, 0 }
+	};
 
 	// We need to be @ 8bpp
 	uint32_t req_bpp  = 8U;
@@ -484,7 +479,7 @@ int
 
 	bool errfnd = false;
 
-	while ((opt = getopt_long(argc, argv, "hvqfFS:t", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hvqfFS:tW:d", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'v':
 				g_isQuiet   = false;
@@ -510,11 +505,43 @@ int
 			case 't':
 				is_timed = true;
 				break;
-			case 'A':
-				fbink_cfg.wfm_mode = WFM_A2;
-				break;
-			case 'D':
-				fbink_cfg.wfm_mode = WFM_DU;
+			case 'W':
+				if (strcasecmp(optarg, "AUTO") == 0) {
+					fbink_cfg.wfm_mode = WFM_AUTO;
+				} else if (strcasecmp(optarg, "DU") == 0) {
+					fbink_cfg.wfm_mode = WFM_DU;
+				} else if (strcasecmp(optarg, "GC16") == 0) {
+					fbink_cfg.wfm_mode = WFM_GC16;
+				} else if (strcasecmp(optarg, "GC4") == 0) {
+					fbink_cfg.wfm_mode = WFM_GC4;
+				} else if (strcasecmp(optarg, "A2") == 0) {
+					fbink_cfg.wfm_mode = WFM_A2;
+				} else if (strcasecmp(optarg, "GL16") == 0) {
+					fbink_cfg.wfm_mode = WFM_GL16;
+				} else if (strcasecmp(optarg, "REAGL") == 0) {
+					fbink_cfg.wfm_mode = WFM_REAGL;
+				} else if (strcasecmp(optarg, "REAGLD") == 0) {
+					fbink_cfg.wfm_mode = WFM_REAGLD;
+				} else if (strcasecmp(optarg, "GC16_FAST") == 0) {
+					fbink_cfg.wfm_mode = WFM_GC16_FAST;
+				} else if (strcasecmp(optarg, "GL16_FAST") == 0) {
+					fbink_cfg.wfm_mode = WFM_GL16_FAST;
+				} else if (strcasecmp(optarg, "DU4") == 0) {
+					fbink_cfg.wfm_mode = WFM_DU4;
+				} else if (strcasecmp(optarg, "GL4") == 0) {
+					fbink_cfg.wfm_mode = WFM_GL4;
+				} else if (strcasecmp(optarg, "GL16_INV") == 0) {
+					fbink_cfg.wfm_mode = WFM_GL16_INV;
+				} else if (strcasecmp(optarg, "GCK16") == 0) {
+					fbink_cfg.wfm_mode = WFM_GCK16;
+				} else if (strcasecmp(optarg, "GLKW16") == 0) {
+					fbink_cfg.wfm_mode = WFM_GLKW16;
+				} else if (strcasecmp(optarg, "INIT") == 0) {
+					fbink_cfg.wfm_mode = WFM_INIT;
+				} else {
+					fprintf(stderr, "Unknown waveform update mode '%s'.\n", optarg);
+					errfnd = true;
+				}
 				break;
 			case 'd':
 				is_dithered = true;
