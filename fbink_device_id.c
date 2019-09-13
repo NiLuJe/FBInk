@@ -748,6 +748,7 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case 384:    // Libra H2O (storm)
+			// FIXME (TBC): ntxBootRota?
 			deviceQuirks.isKoboMk7 = true;
 			deviceQuirks.canRotate = true;
 			// FIXME (TBC): Because Mk.7 and KOBO_HWCFG_DisplayBusWidth (35) is "16Bits_mirror" (3)
