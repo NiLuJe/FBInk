@@ -62,7 +62,8 @@ static bool
 	return true;
 }
 
-#ifndef FBINK_FOR_KINDLE
+#ifndef FBINK_FOR_LINUX
+#	ifndef FBINK_FOR_KINDLE
 static bool
     set_fbinfo(uint32_t bpp, int8_t rota)
 {
@@ -179,7 +180,8 @@ static bool
 
 	return true;
 }
-#endif    // !FBINK_FOR_KINDLE
+#	endif    // !FBINK_FOR_KINDLE
+#endif            // !FBINK_FOR_LINUX
 
 // Shiny DOOM Fire effect
 // c.f., http://fabiensanglard.net/doom_fire_psx/index.html
@@ -501,11 +503,13 @@ int
 		{ "cap", required_argument, NULL, 'c' }, { NULL, 0, NULL, 0 }
 	};
 
+#ifndef FBINK_FOR_LINUX
 	// We need to be @ 8bpp
 	uint32_t req_bpp = 8U;
-#ifndef FBINK_FOR_KINDLE
+#	ifndef FBINK_FOR_KINDLE
 	int8_t req_rota = -1;
-#endif
+#	endif
+#endif    // !FBINK_FOR_LINUX
 
 	FBInkConfig fbink_cfg = { 0U };
 
