@@ -451,6 +451,69 @@ static void
 	}
 }
 
+#ifdef FBINK_FOR_LINUX
+static unsigned int
+    find_palette_id_32(uint8_t r, uint8_t g, uint8_t b)
+{
+	for (uint8_t i = 0U; i < sizeof(palette); i++) {
+		if (fire_colors[i][0U] == r && fire_colors[i][1U] == g && fire_colors[i][2U] == b) {
+			return i;
+		}
+	}
+
+	// Should hopefully never happen...
+	return 0U;
+}
+
+static void
+    spread_fire_32(size_t offset)
+{
+	FBInkPixel px;
+	px.bgra.p = *((uint32_t*) (fbPtr + offset));
+	if (px.bgra.color.r == fire_colors[0U][0U] && px.bgra.color.g == fire_colors[0U][1U] &&
+	    px.bgra.color.b == fire_colors[0U][2U]) {
+		*((uint32_t*) (fbPtr + offset - fInfo.line_length)) = px.bgra.p;
+	} else {
+		const size_t       random  = (rand() * 3) & 3;
+		const size_t       dst     = offset - random + 1U;
+		const unsigned int pal_idx = find_palette_id_32(px.bgra.color.r, px.bgra.color.g, px.bgra.color.b);
+		px.bgra.color.r            = fire_colors[(pal_idx - (random & 1U))][0U];
+		px.bgra.color.g            = fire_colors[(pal_idx - (random & 1U))][1U];
+		px.bgra.color.b            = fire_colors[(pal_idx - (random & 1U))][2U];
+		*((uint32_t*) (fbPtr + dst - fInfo.line_length)) = px.bgra.p;
+	}
+}
+
+static void
+    do_fire_32(void)
+{
+	// Burn baby, burn!
+	// NOTE: Switching the outer loop to the y one leads to different interactions w/ the PXP & the EPDC...
+	//       Also, slightly uglier flames ;p.
+	for (uint32_t x = 0U; x < viewWidth; x++) {
+		for (uint32_t y = 1U; y < viewHeight; y++) {
+			spread_fire_fs(y * fInfo.line_length + (x << 2U));
+		}
+	}
+}
+
+static void
+    setup_fire_32(void)
+{
+	// Fill the whole screen w/ color 0
+	const FBInkPixel bg = { .bgra.color.r = fire_colors[0U][0U],
+				.bgra.color.g = fire_colors[0U][1U],
+				.bgra.color.b = fire_colors[0U][2U] };
+	fill_rect(0U, 0U, (unsigned short int) viewWidth, (unsigned short int) viewHeight, &bg);
+
+	// Set the bottom line to the final color
+	const FBInkPixel px = { .bgra.color.r = fire_colors[sizeof(palette) - 1U][0U],
+				.bgra.color.g = fire_colors[sizeof(palette) - 1U][1U],
+				.bgra.color.b = fire_colors[sizeof(palette) - 1U][2U] };
+	fill_rect(0U, (unsigned short int) (viewHeight - 1U), (unsigned short int) viewWidth, 1U, &px);
+}
+#endif    // FBINK_FOR_LINUX
+
 #define BILLION 1000000000L
 #define MILLION 1000000.f
 #define THOUSAND 1000
@@ -748,6 +811,7 @@ int
 	}
 
 	// Fire!
+#ifndef FBINK_FOR_LINUX
 	if (is_fs) {
 		setup_fire_fs();
 
@@ -864,6 +928,51 @@ int
 			}
 		}
 	}
+#else
+	if (vInfo.bits_per_pixel != 32U) {
+		fprintf(stderr, "Requires a 32bpp fb!\n");
+		return ERRCODE(ENOSYS);
+	}
+
+	setup_fire_32();
+
+	size_t i = 0U;
+	while (true) {
+		if (i > (iter_cap + iter_cap / 2U)) {
+			break;
+		}
+		i++;
+
+		struct timespec t0;
+		if (is_timed) {
+			clock_gettime(CLOCK_MONOTONIC, &t0);
+		}
+
+		/*
+		if (i > iter_cap) {
+			stop_fire_32();
+		}
+		*/
+		do_fire_32();
+
+		if (is_timed) {
+			struct timespec t1;
+			clock_gettime(CLOCK_MONOTONIC, &t1);
+			const long frame_time_ns =
+			    ((t1.tv_sec * BILLION) + t1.tv_nsec) - ((t0.tv_sec * BILLION) + t0.tv_nsec);
+			const float frame_time = ((float) (frame_time_ns) / MILLION);
+			printf("%.1f FPS (%.3f ms)\n", THOUSAND / frame_time, frame_time);
+
+			// Slow down?
+			if (is_capped) {
+				if (frame_time_ns < sleep_cap) {
+					const struct timespec zzz = { 0L, sleep_cap - frame_time_ns };
+					nanosleep(&zzz, NULL);
+				}
+			}
+		}
+	}
+#endif    // !FBINK_FOR_LINUX
 
 cleanup:
 	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
