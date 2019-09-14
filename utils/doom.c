@@ -616,8 +616,10 @@ int
 	// Assume success, until shit happens ;)
 	int rv = EXIT_SUCCESS;
 
+#ifndef FBINK_FOR_LINUX
 	// NOTE: We're going to need to identify the device, to handle rotation quirks...
 	identify_device();
+#endif
 
 	// NOTE: We'll need to write to the fb, so do a full open
 	if ((fbfd = fbink_open()) == ERRCODE(EXIT_FAILURE)) {
@@ -631,7 +633,8 @@ int
 		goto cleanup;
 	}
 
-#ifndef FBINK_FOR_KINDLE
+#ifndef FBINK_FOR_LINUX
+#	ifndef FBINK_FOR_KINDLE
 	// If the automagic Portrait rotation was requested, compute it
 	if (req_rota == -1) {
 		// NOTE: Nickel's Portrait orientation should *always* match BootRota + 1
@@ -701,12 +704,13 @@ int
 			goto cleanup;
 		}
 	}
-#else
+#	else
 	if (vInfo.bits_per_pixel != req_bpp) {
 		fprintf(stderr, "Requires a K4+!\n");
 		return ERRCODE(ENOSYS);
 	}
-#endif    // !FBINK_FOR_KINDLE
+#	endif    // !FBINK_FOR_KINDLE
+#endif            // !FBINK_FOR_LINUX
 
 	// Setup FBInk
 	// NOTE: We pretty much need flashing updates, otherwise the ghosting heavily mangles the effect ;).
