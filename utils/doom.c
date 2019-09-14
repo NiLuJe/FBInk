@@ -459,7 +459,7 @@ static void
 	    "\n"
 	    "Doom Fire (via FBInk %s)\n"
 	    "\n"
-	    "Usage: doom [-f | -S] -Ftd [-A | -D]\n"
+	    "Usage: doom [-f | -S] -FtWdlc\n"
 	    "\n"
 	    "Shiny!\n"
 	    "\n"
