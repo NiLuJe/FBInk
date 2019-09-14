@@ -627,6 +627,7 @@ int
 		goto cleanup;
 	}
 
+#ifndef FBINK_FOR_KINDLE
 	// If the automagic Portrait rotation was requested, compute it
 	if (req_rota == -1) {
 		// NOTE: Nickel's Portrait orientation should *always* match BootRota + 1
@@ -696,6 +697,7 @@ int
 			goto cleanup;
 		}
 	}
+#endif    // !FBINK_FOR_KINDLE
 
 	// Setup FBInk
 	// NOTE: We pretty much need flashing updates, otherwise the ghosting heavily mangles the effect ;).
