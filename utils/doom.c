@@ -452,6 +452,7 @@ static void
 }
 
 #ifdef FBINK_FOR_LINUX
+// FIXME: Slow & crashy ;).
 static unsigned int
     find_palette_id_32(uint8_t r, uint8_t g, uint8_t b)
 {
@@ -488,11 +489,9 @@ static void
     do_fire_32(void)
 {
 	// Burn baby, burn!
-	// NOTE: Switching the outer loop to the y one leads to different interactions w/ the PXP & the EPDC...
-	//       Also, slightly uglier flames ;p.
 	for (uint32_t x = 0U; x < viewWidth; x++) {
 		for (uint32_t y = 1U; y < viewHeight; y++) {
-			spread_fire_fs(y * fInfo.line_length + (x << 2U));
+			spread_fire_32((y * fInfo.line_length) + (x << 2U));
 		}
 	}
 }

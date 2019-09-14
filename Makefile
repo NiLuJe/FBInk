@@ -439,7 +439,7 @@ endif
 ifdef LINUX
 utils: | outdir
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/doom utils/doom.c -lrt
-	$(STRIP) --strip-unneeded $(OUT_DIR)/doom
+	#$(STRIP) --strip-unneeded $(OUT_DIR)/doom
 else
 utils: | outdir
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/rota utils/rota.c
