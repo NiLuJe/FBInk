@@ -198,6 +198,7 @@ static const uint8_t fire_colors[][3] = {
 	{ 0xEF, 0xEF, 0xC7 }, { 0xFF, 0xFF, 0xFF },
 };
 
+#ifndef FBINK_FOR_LINUX
 uint8_t palette[sizeof(fire_colors) / sizeof(*fire_colors)];
 
 // If I dumbly quantize that to the eInk palette, that's what this ends up as...
@@ -279,8 +280,8 @@ static void
 }
 
 // And now for a -- hopefully -- slightly less taxing version, in a smaller window...
-#define FIRE_WIDTH 320U
-#define FIRE_HEIGHT 168U
+#	define FIRE_WIDTH 320U
+#	define FIRE_HEIGHT 168U
 unsigned short int fire_y_origin;
 unsigned short int fire_x_origin;
 
@@ -451,12 +452,13 @@ static void
 	}
 }
 
-#ifdef FBINK_FOR_LINUX
+#else
+
 // FIXME: Slow & crashy ;).
 static unsigned int
     find_palette_id_32(uint8_t r, uint8_t g, uint8_t b)
 {
-	for (uint8_t i = 0U; i < sizeof(palette); i++) {
+	for (uint8_t i = 0U; i < sizeof(fire_colors) / sizeof(*fire_colors); i++) {
 		if (fire_colors[i][0U] == r && fire_colors[i][1U] == g && fire_colors[i][2U] == b) {
 			return i;
 		}
@@ -478,9 +480,10 @@ static void
 		const size_t       random  = (rand() * 3) & 3;
 		const size_t       dst     = offset - random + 1U;
 		const unsigned int pal_idx = find_palette_id_32(px.bgra.color.r, px.bgra.color.g, px.bgra.color.b);
-		px.bgra.color.r            = fire_colors[(pal_idx - (random & 1U))][0U];
-		px.bgra.color.g            = fire_colors[(pal_idx - (random & 1U))][1U];
-		px.bgra.color.b            = fire_colors[(pal_idx - (random & 1U))][2U];
+		const size_t       idx     = pal_idx - (random & 1U);
+		px.bgra.color.r            = fire_colors[idx][0U];
+		px.bgra.color.g            = fire_colors[idx][1U];
+		px.bgra.color.b            = fire_colors[idx][2U];
 		*((uint32_t*) (fbPtr + dst - fInfo.line_length)) = px.bgra.p;
 	}
 }
@@ -506,12 +509,13 @@ static void
 	fill_rect(0U, 0U, (unsigned short int) viewWidth, (unsigned short int) viewHeight, &bg);
 
 	// Set the bottom line to the final color
-	const FBInkPixel px = { .bgra.color.r = fire_colors[sizeof(palette) - 1U][0U],
-				.bgra.color.g = fire_colors[sizeof(palette) - 1U][1U],
-				.bgra.color.b = fire_colors[sizeof(palette) - 1U][2U] };
+	const size_t     idx = sizeof(fire_colors) / sizeof(*fire_colors) - 1U;
+	const FBInkPixel px  = { .bgra.color.r = fire_colors[idx][0U],
+                                .bgra.color.g = fire_colors[idx][1U],
+                                .bgra.color.b = fire_colors[idx][2U] };
 	fill_rect(0U, (unsigned short int) (viewHeight - 1U), (unsigned short int) viewWidth, 1U, &px);
 }
-#endif    // FBINK_FOR_LINUX
+#endif    // !FBINK_FOR_LINUX
 
 #define BILLION 1000000000L
 #define MILLION 1000000.f
