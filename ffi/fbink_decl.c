@@ -7,6 +7,7 @@
 
 // Constants
 cdecl_const(FBFD_AUTO)
+cdecl_const(LAST_MARKER)
 
 // Typedefs
 cdecl_type(FONT_INDEX_T)
@@ -53,6 +54,9 @@ cdecl_func(fbink_print_ot)
 cdecl_func(fbink_printf)
 
 cdecl_func(fbink_refresh)
+cdecl_func(fbink_wait_for_submission)
+cdecl_func(fbink_wait_for_complete)
+cdecl_func(fbink_get_last_marker)
 
 //cdecl_func(fbink_is_fb_quirky)
 cdecl_func(fbink_reinit)
