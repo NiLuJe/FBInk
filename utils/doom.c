@@ -723,6 +723,7 @@ int
 	// Setup framecap
 	// NOTE: Interesting to check how far stuff can go (especially A2)...
 	//       FWIW, on my H2O, going over ~8fps starts triggering jittery behavior (i.e., intermittent stalls).
+	//       On the other hand, my PW2 can take >24fps without flinching (it does feature a few fancier _FAST wfm modes).
 	const long sleep_cap = BILLION / frame_cap;
 
 	fbink_init(fbfd, &fbink_cfg);
