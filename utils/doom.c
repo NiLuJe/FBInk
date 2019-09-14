@@ -26,8 +26,10 @@
 
 // NOTE: We need image support (chiefly for stbi__compute_y)
 //       A MINIMAL + IMAGE build is still recommended, because otherwise fbink_init() has to pull all the extra fonts in...
-#ifndef FBINK_FOR_IMAGE
-#	error Cannot build this tool without Image support!
+#ifdef FBINK_MINIMAL
+#	ifndef FBINK_WITH_IMAGE
+#		error Cannot build this tool without Image support!
+#	endif
 #endif
 
 #include <getopt.h>
