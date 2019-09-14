@@ -790,6 +790,7 @@ int
 		fbink_cfg.is_flashing = true;
 	}
 
+#ifndef FBINK_FOR_LINUX
 	// Setup dithering
 	uint8_t dithering;
 	if (is_dithered) {
@@ -797,6 +798,7 @@ int
 	} else {
 		dithering = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
 	}
+#endif
 
 	// Setup framecap
 	// NOTE: Interesting to check how far stuff can go (especially A2)...
