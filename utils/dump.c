@@ -55,6 +55,7 @@
 	})
 
 // "Small" helper for bitdepth switch... (c.f., fbdepth.c)
+#ifndef FBINK_FOR_LINUX
 static bool
     set_bpp(int fbfd, uint32_t bpp, const FBInkState* restrict fbink_state)
 {
@@ -135,6 +136,7 @@ static bool
 
 	return true;
 }
+#endif    // !FBINK_FOR_LINUX
 
 int
     main(int argc, char* argv[] __attribute__((unused)))
@@ -338,6 +340,7 @@ int
 	// Forget about the crop for the other tests
 	dump.clip = (const FBInkRect){ 0U };
 
+#ifndef FBINK_FOR_LINUX
 	// And now for some fun stuff, provided we're starting from a 32bpp fb...
 	if (fbink_state.bpp == 32U) {
 		// Switch to 8bpp (c.f., fbdepth.c)
@@ -429,6 +432,7 @@ int
 			goto cleanup;
 		}
 	}
+#endif    // !FBINK_FOR_LINUX
 
 	// Cleanup
 cleanup:
