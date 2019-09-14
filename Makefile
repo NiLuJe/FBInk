@@ -187,20 +187,23 @@ EXTRA_CPPFLAGS+=-D_GNU_SOURCE
 
 # Toggle Kindle support
 ifdef KINDLE
-	FEATURES_CPPFLAGS+=-DFBINK_FOR_KINDLE
+	TARGET_CPPFLAGS+=-DFBINK_FOR_KINDLE
 endif
 # Toggle Legacy Kindle support
 ifdef LEGACY
-	FEATURES_CPPFLAGS+=-DFBINK_FOR_LEGACY
+	TARGET_CPPFLAGS+=-DFBINK_FOR_LEGACY
 endif
 # Toggle Bq Cervantes support
 ifdef CERVANTES
-	FEATURES_CPPFLAGS+=-DFBINK_FOR_CERVANTES
+	TARGET_CPPFLAGS+=-DFBINK_FOR_CERVANTES
 endif
 # Toggle generic Linux support
 ifdef LINUX
-	FEATURES_CPPFLAGS+=-DFBINK_FOR_LINUX
+	TARGET_CPPFLAGS+=-DFBINK_FOR_LINUX
 endif
+
+# And that should definitely be honored by everything, so, add it to EXTRA_CPPFLAGS
+EXTRA_CPPFLAGS+=$(TARGET_CPPFLAGS)
 
 # A version tag...
 FBINK_VERSION:=$(shell git describe)
