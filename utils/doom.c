@@ -697,6 +697,11 @@ int
 			goto cleanup;
 		}
 	}
+#else
+	if (vInfo.bits_per_pixel != req_bpp) {
+		fprintf(stderr, "Requires a K4+!\n");
+		return ERRCODE(ENOSYS);
+	}
 #endif    // !FBINK_FOR_KINDLE
 
 	// Setup FBInk
