@@ -325,6 +325,13 @@ ifdef MINIMAL
 	endif
 endif
 
+# On the other hand, we want to enforce MINIMAL features for the tools that don't link against FBInk,
+# but instead piggyback on the internal API via fbink.c + LTO...
+TOOLS_CPPFLAGS+=-DFBINK_MINIMAL
+# Except from doom, because it needs Image support...
+DOOM_CPPFLAGS:=$(TOOLS_CPPFLAGS)
+DOOM_CPPFLAGS+=-DFBINK_WITH_IMAGE
+
 # How we handle our library creation
 FBINK_SHARED_FLAGS:=-shared -Wl,-soname,libfbink.so.1
 FBINK_SHARED_NAME_FILE:=libfbink.so.1.0.0
@@ -438,14 +445,14 @@ endif
 
 ifdef LINUX
 utils: | outdir
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/doom utils/doom.c -lrt
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(DOOM_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/doom utils/doom.c -lrt
 else
 utils: | outdir
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/rota utils/rota.c
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(TOOLS_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/rota utils/rota.c
 	$(STRIP) --strip-unneeded $(OUT_DIR)/rota
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbdepth utils/fbdepth.c
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(TOOLS_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbdepth utils/fbdepth.c
 	$(STRIP) --strip-unneeded $(OUT_DIR)/fbdepth
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/doom utils/doom.c -lrt
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(DOOM_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/doom utils/doom.c -lrt
 	$(STRIP) --strip-unneeded $(OUT_DIR)/doom
 endif
 
