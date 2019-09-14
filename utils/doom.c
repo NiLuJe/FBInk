@@ -604,6 +604,11 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
+#ifdef FBINK_FOR_LINUX
+	fprintf(stderr, "Requires an e-Ink device!\n");
+	return ERRCODE(ENOSYS);
+#endif
+
 	// Assume success, until shit happens ;)
 	int rv = EXIT_SUCCESS;
 
