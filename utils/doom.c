@@ -214,7 +214,7 @@ static void
 {
 	// Convert the palette to Grayscale
 	for (uint8_t i = 0U; i < sizeof(palette); i++) {
-		palette[i] = stbi__compute_y(fire_colors[i][0], fire_colors[i][1], fire_colors[i][2]);
+		palette[i] = stbi__compute_y(fire_colors[i][0U], fire_colors[i][1U], fire_colors[i][2U]);
 	}
 }
 
