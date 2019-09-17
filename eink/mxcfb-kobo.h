@@ -2,7 +2,8 @@
  * Copyright (C) 2004-2015 Freescale Semiconductor, Inc. All Rights Reserved.
  *
  * - slightly modified (commented out include of fb.h) for Lua integration
- * - Frankensteined w/ Mark6 stuff -- NiLuJe
+ * - Frankensteined w/ Mark 6 stuff -- NiLuJe
+ * - Frankensteined w/ Mark 7 stuff -- NiLuJe
  */
 
 /*
