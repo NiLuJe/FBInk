@@ -753,8 +753,9 @@ static void
 			//       And panel is *actually* in Portrait. Finally!
 			deviceQuirks.ntxBootRota = FB_ROTATE_UR;
 			deviceQuirks.canRotate   = true;
-			// FIXME (TBC): Because Mk.7 and KOBO_HWCFG_DisplayBusWidth (35) is "16Bits_mirror" (3)
-			deviceQuirks.ntxRotaQuirk = NTX_ROTA_ODD_INVERTED;
+			// NOTE: This one deserves a specific entry, because the H2O² also happens to be UR + STRAIGHT,
+			//       but it is decidedly *NOT* sane ;).
+			deviceQuirks.ntxRotaQuirk = NTX_ROTA_SANE;
 			deviceQuirks.screenDPI    = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Libra H2O", sizeof(deviceQuirks.deviceName) - 1U);

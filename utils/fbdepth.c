@@ -367,11 +367,12 @@ int
 
 	// If the automagic Portrait rotation was requested, compute it
 	if (req_rota == -1) {
-		// NOTE: Nickel's Portrait orientation should *always* match BootRota + 1
-		// FIXME: Not on the Libra ;).
-		//        Add a SANE rota quirk? (means STRAIGHT + Natively Portrait?).
-		//        Or a new "Natively Portrait" quirk?
-		req_rota = (deviceQuirks.ntxBootRota + 1) & 3;
+		// NOTE: For *most* devices, Nickel's Portrait orientation should *always* match BootRota + 1
+		//       Thankfully, the Libra appears to be ushering in a new era filled with puppies and rainbows,
+		//       and, hopefully, less insane rotation quirks ;).
+		if (deviceQuirks.ntxRotaQuirk != NTX_ROTA_SANE) {
+			req_rota = (deviceQuirks.ntxBootRota + 1) & 3;
+		}
 		LOG("Device's expected Portrait orientation should be: %hhd (%s)!",
 		    req_rota,
 		    fb_rotate_to_string((uint32_t) req_rota));
