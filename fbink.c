@@ -2047,6 +2047,7 @@ static int
 	//       Be aware that pickel, on the other hand, will forcibly drop back to this modeset!
 	//       In fact, if you manage to run *before* pickel (i.e., before on-animator),
 	//       you'll notice that it's in yet another rotation at very early boot (CCW?)...
+	// NOTE: The Libra finally appears to have put a stop to this madness (it boots UR, with an UR panel).
 	if (vInfo.xres > vInfo.yres) {
 		// NOTE: PW2:
 		//         vInfo.rotate == 2 in Landscape (vs. 3 in Portrait mode), w/ the xres/yres switch in Landscape,
