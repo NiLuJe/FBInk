@@ -748,9 +748,11 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case 384:    // Libra H2O (storm)
-			// FIXME (TBC): ntxBootRota?
 			deviceQuirks.isKoboMk7 = true;
-			deviceQuirks.canRotate = true;
+			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UR, nickel is FB_ROTATE_UR
+			//       And panel is *actually* in Portrait. Finally!
+			deviceQuirks.ntxBootRota = FB_ROTATE_UR;
+			deviceQuirks.canRotate   = true;
 			// FIXME (TBC): Because Mk.7 and KOBO_HWCFG_DisplayBusWidth (35) is "16Bits_mirror" (3)
 			deviceQuirks.ntxRotaQuirk = NTX_ROTA_ODD_INVERTED;
 			deviceQuirks.screenDPI    = 300U;
