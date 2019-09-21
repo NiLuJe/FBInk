@@ -305,6 +305,29 @@
 // Always shown, always tagged, and always ends with a bang.
 #define WARN(fmt, ...) ({ fprintf(stderr, "[FBInk] " fmt "!\n", ##__VA_ARGS__); })
 
+// Make sure strerror_r behaves as expected...
+// For instance, musl will happily keep _GNU_SOURCE defined, but exports the XSI prototype...
+#if defined(__GLIBC__) && defined(_GNU_SOURCE)
+#	define ERRPRINT(call)                                                                                           \
+		({                                                                                                       \
+			char        buf[256];                                                                            \
+			const char* errstr = strerror_r(errno, buf, sizeof(buf));                                        \
+			WARN(#call ": %s", errstr);                                                                      \
+		})
+#else
+#	define ERRPRINT(call)                                                                                           \
+		({                                                                                                       \
+			char buf[256];                                                                                   \
+			int  ret = strerror_r(errno, buf, sizeof(buf));                                                  \
+			if (ret != 0) {                                                                                  \
+				/* Most implementations will leave errno untouched */                                    \
+				WARN(#call ": Failed to describe errno %d (strerror_r: %d)", errno, ret);                \
+			} else {                                                                                         \
+				WARN(#call ": %s", buf);                                                                 \
+			}                                                                                                \
+		})
+#endif
+
 // We want to return negative values on failure, always
 #define ERRCODE(e) (-(e))
 

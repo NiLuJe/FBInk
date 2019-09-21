@@ -2849,9 +2849,7 @@ static int
 	//       See also the Cervantes quirk documented in clear_screen...
 	fbPtr = (unsigned char*) mmap(NULL, fInfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
 	if (fbPtr == MAP_FAILED) {
-		char        buf[256];
-		const char* errstr = strerror_r(errno, buf, sizeof(buf));
-		WARN("mmap: %s", errstr);
+		ERRPRINT(mmap);
 		fbPtr = NULL;
 		return ERRCODE(EXIT_FAILURE);
 	} else {
