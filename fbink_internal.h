@@ -320,7 +320,7 @@
 			char buf[1024];                                                                                  \
 			int  ret = strerror_r(errno, buf, sizeof(buf));                                                  \
 			if (ret != 0) {                                                                                  \
-				/* Most implementations will leave errno untouched */                                    \
+				/* Most implementations will leave errno untouched, as they should */                    \
 				WARN(#call ": Failed to describe errno %d (strerror_r: %d)", errno, ret);                \
 			} else {                                                                                         \
 				WARN(#call ": %s", buf);                                                                 \
