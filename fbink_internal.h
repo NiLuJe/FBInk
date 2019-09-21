@@ -310,14 +310,14 @@
 #if defined(__GLIBC__) && defined(_GNU_SOURCE)
 #	define ERRPRINT(call)                                                                                           \
 		({                                                                                                       \
-			char        buf[256];                                                                            \
+			char        buf[1024];                                                                           \
 			const char* errstr = strerror_r(errno, buf, sizeof(buf));                                        \
 			WARN(#call ": %s", errstr);                                                                      \
 		})
 #else
 #	define ERRPRINT(call)                                                                                           \
 		({                                                                                                       \
-			char buf[256];                                                                                   \
+			char buf[1024];                                                                                  \
 			int  ret = strerror_r(errno, buf, sizeof(buf));                                                  \
 			if (ret != 0) {                                                                                  \
 				/* Most implementations will leave errno untouched */                                    \
