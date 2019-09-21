@@ -321,7 +321,9 @@
 			int  ret = strerror_r(errno, buf, sizeof(buf));                                                  \
 			if (ret != 0) {                                                                                  \
 				/* Most implementations will leave errno untouched, as they should */                    \
-				WARN(#call ": Failed to describe errno %d (strerror_r: %d)", errno, ret);                \
+				WARN(#call ": Failed! And we failed to describe its errno %d (strerror_r: %d)",          \
+				     errno,                                                                              \
+				     ret);                                                                               \
 			} else {                                                                                         \
 				WARN(#call ": %s", buf);                                                                 \
 			}                                                                                                \
