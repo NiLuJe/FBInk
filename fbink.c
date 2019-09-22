@@ -635,7 +635,6 @@ static void
 		// NOTE: We're on inverted palette devices, hence the use of the "wrong" LUT...
 		if (is_flashing && v == eInkFGCMap[BG_WHITE]) {
 			if (ioctl(fbfd, FBIO_EINK_CLEAR_SCREEN, EINK_CLEAR_SCREEN) < 0) {
-				// NOTE: perror() is not thread-safe...
 				ERRPRINT(FBIO_EINK_CLEAR_SCREEN);
 				// Just warn, this is non-fatal ;).
 			}
@@ -1243,7 +1242,6 @@ static int
 	}
 
 	if (rv < 0) {
-		// NOTE: perror() is not thread-safe...
 		if (is_fs) {
 			ERRPRINT(FBIO_EINK_UPDATE_DISPLAY);
 		} else {
