@@ -284,6 +284,8 @@ static void
 
 	// NOTE: Should match *most* Kobo devices...
 	// c.f., https://patchwork.openembedded.org/patch/149258
+	// NOTE: See also create_and_get_mt_pdata @ drivers/input/touchscreen/cyttsp5_devtree.c,
+	//       there may be method to this madness...
 	switch (rotation) {
 		case FB_ROTATE_UR:
 			// NOP!
