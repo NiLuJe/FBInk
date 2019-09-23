@@ -36,7 +36,7 @@
 // c.f., https://gcc.gnu.org/wiki/Visibility
 #if __GNUC__ >= 4
 #	define DLL_PUBLIC __attribute__((visibility("default")))
-#	define DLL_LOCAL __attribute__((visibility("hidden")))
+#	define DLL_LOCAL  __attribute__((visibility("hidden")))
 #else
 #	define DLL_PUBLIC
 #	define DLL_LOCAL
@@ -44,7 +44,7 @@
 
 // Are we actually building the shared lib?
 #ifdef FBINK_SHAREDLIB
-#	define FBINK_API DLL_PUBLIC
+#	define FBINK_API   DLL_PUBLIC
 #	define FBINK_LOCAL DLL_LOCAL
 #else
 #	define FBINK_API

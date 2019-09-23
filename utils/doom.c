@@ -288,7 +288,7 @@ static void
 }
 
 // And now for a -- hopefully -- slightly less taxing version, in a smaller window...
-#	define FIRE_WIDTH 320U
+#	define FIRE_WIDTH  320U
 #	define FIRE_HEIGHT 168U
 unsigned short int fire_y_origin;
 unsigned short int fire_x_origin;
@@ -525,8 +525,8 @@ static void
 }
 #endif    // !FBINK_FOR_LINUX
 
-#define BILLION 1000000000L
-#define MILLION 1000000.f
+#define BILLION  1000000000L
+#define MILLION  1000000.f
 #define THOUSAND 1000
 
 // Help message

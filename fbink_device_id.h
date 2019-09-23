@@ -33,7 +33,7 @@
 // NOTE: This is NTX's homegrown hardware tagging, c.f., arch/arm/mach-imx/ntx_hwconfig.h in a Kobo kernel, for instance
 #		define HWCONFIG_DEVICE "/dev/mmcblk0"
 #		define HWCONFIG_OFFSET (1024 * 512)
-#		define HWCONFIG_MAGIC "HW CONFIG "
+#		define HWCONFIG_MAGIC  "HW CONFIG "
 #		ifdef FBINK_FOR_CERVANTES
 // Keep it to the minimum on Cervantes
 typedef struct __attribute__((__packed__))
@@ -61,15 +61,15 @@ typedef struct __attribute__((__packed__))
 	uint8_t len;    // Length (in bytes) of the full payload, header excluded (up to 70 on v3.1)
 } NTXHWConfig;
 // Index of the few fields we're interested in inside the payload...
-#			define KOBO_HWCFG_PCB 0
+#			define KOBO_HWCFG_PCB               0
 // NOTE: This one *might* help w/ ntxBootRota, although a direct mapping seems impossible...
-#			define KOBO_HWCFG_DisplayPanel 10
-#			define KOBO_HWCFG_CPU 27
+#			define KOBO_HWCFG_DisplayPanel      10
+#			define KOBO_HWCFG_CPU               27
 // NOTE: This one was added in v1.0, while the original NTX Touch was only on v0.7,
 //       which is why we handle this dynamically, instead of relying on a fixed-size struct...
 #			define KOBO_HWCFG_DisplayResolution 31
 // NOTE: This one tells us a bit about the potential rotation trickeries on some models (ntxRotaQuirk)...
-#			define KOBO_HWCFG_DisplayBusWidth 35
+#			define KOBO_HWCFG_DisplayBusWidth   35
 #		endif    // FBINK_FOR_CERVANTES
 #	endif            // !FBINK_FOR_KINDLE
 

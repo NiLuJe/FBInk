@@ -57,14 +57,14 @@
 #	include <math.h>
 #	ifdef __clang__
 #		if __has_builtin(__builtin_ceilf)
-#			define iceilf(x) ((int) (__builtin_ceilf(x)))
+#			define iceilf(x)      ((int) (__builtin_ceilf(x)))
 #			define STBTT_iceil(x) ((int) (__builtin_ceilf(x)))
 #		endif
 #		if __has_builtin(__builtin_lroundf)
 #			define iroundf(x) ((int) (__builtin_lroundf(x)))
 #		endif
 #		if __has_builtin(__builtin_floorf)
-#			define ifloorf(x) ((int) (__builtin_floorf(x)))
+#			define ifloorf(x)      ((int) (__builtin_floorf(x)))
 #			define STBTT_floorf(x) __builtin_floorf(x)
 #			define STBTT_ifloor(x) ((int) (__builtin_floorf(x)))
 #		endif
@@ -89,19 +89,19 @@
 #	else
 // Hide all this behind a C99 check, to try to avoid blowing up on really old GCC versions...
 #		if __STDC_VERSION__ >= 199901L
-#			define iceilf(x) __builtin_iceilf(x)
-#			define iroundf(x) __builtin_iroundf(x)
-#			define ifloorf(x) __builtin_ifloorf(x)
-#			define STBTT_floorf(x) __builtin_floorf(x)
-#			define STBTT_ifloor(x) __builtin_ifloorf(x)
-#			define STBTT_iceil(x) __builtin_iceilf(x)
-#			define STBTT_sqrt(x) __builtin_sqrtf(x)
-#			define STBTT_pow(x, y) __builtin_powf(x, y)
+#			define iceilf(x)        __builtin_iceilf(x)
+#			define iroundf(x)       __builtin_iroundf(x)
+#			define ifloorf(x)       __builtin_ifloorf(x)
+#			define STBTT_floorf(x)  __builtin_floorf(x)
+#			define STBTT_ifloor(x)  __builtin_ifloorf(x)
+#			define STBTT_iceil(x)   __builtin_iceilf(x)
+#			define STBTT_sqrt(x)    __builtin_sqrtf(x)
+#			define STBTT_pow(x, y)  __builtin_powf(x, y)
 #			define STBTT_fmod(x, y) __builtin_fmodf(x, y)
 // Need to keep double precision for cos, because GCC sneakily replaces a PI approximation in stbtt ;)
-#			define STBTT_cos(x) __builtin_cos(x)
-#			define STBTT_acos(x) __builtin_acosf(x)
-#			define STBTT_fabs(x) __builtin_fabsf(x)
+#			define STBTT_cos(x)     __builtin_cos(x)
+#			define STBTT_acos(x)    __builtin_acosf(x)
+#			define STBTT_fabs(x)    __builtin_fabsf(x)
 #		endif
 #	endif
 #endif
