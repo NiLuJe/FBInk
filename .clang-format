@@ -56,7 +56,7 @@ CompactNamespaces: false
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
 ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 4
-Cpp11BracedListStyle: true
+Cpp11BracedListStyle: false
 DerivePointerAlignment: false
 DisableFormat:   false
 ExperimentalAutoDetectBinPacking: false
@@ -121,7 +121,7 @@ SpaceInEmptyParentheses: false
 SpacesBeforeTrailingComments: 4
 SpacesInAngles:  false
 SpacesInCStyleCastParentheses: false
-SpacesInContainerLiterals: false
+SpacesInContainerLiterals: true
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 Standard:        Cpp11
