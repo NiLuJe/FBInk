@@ -196,7 +196,7 @@ typedef enum
 // A struct to dump FBInk's internal state into, like fbink_state_dump() would, but in C ;)
 typedef struct
 {
-	long int    user_hz;                 // USER_HZ (should pretty much always be 100)
+	long int             user_hz;        // USER_HZ (should pretty much always be 100)
 	const char* restrict font_name;      // fbink_cfg->fontname (c.f., fontname_to_string())
 	uint32_t             view_width;     // viewWidth (MAY be different than screen_width on devices with a viewport)
 	uint32_t             view_height;    // viewHeight (ditto)
@@ -450,11 +450,11 @@ FBINK_API int fbink_free_ot_fonts(void);
 //				Pass a NULL pointer if unneeded.
 // NOTE: Alignment is relative to the printable area, as defined by the margins.
 //       As such, it only makes sense in the context of a single, specific print call.
-FBINK_API int fbink_print_ot(int         fbfd,
-			     const char* restrict string,
+FBINK_API int fbink_print_ot(int                           fbfd,
+			     const char* restrict          string,
 			     const FBInkOTConfig* restrict cfg,
-			     const FBInkConfig* restrict fbink_cfg,
-			     FBInkOTFit* restrict fit);
+			     const FBInkConfig* restrict   fbink_cfg,
+			     FBInkOTFit* restrict          fit);
 
 //
 // Brings printf formatting to fbink_print and fbink_print_ot ;).
@@ -466,10 +466,10 @@ FBINK_API int fbink_print_ot(int         fbfd,
 //       If cfg is valid, fbink_cfg MAY be NULL (same behavior as fbink_print_ot).
 //       If cfg is NULL, fbink_cfg MUST be valid.
 // NOTE: Meaning at least one of those two pointers MUST be valid!
-FBINK_API int fbink_printf(int                  fbfd,
+FBINK_API int fbink_printf(int                           fbfd,
 			   const FBInkOTConfig* restrict cfg,
-			   const FBInkConfig* restrict fbink_cfg,
-			   const char*                 fmt,
+			   const FBInkConfig* restrict   fbink_cfg,
+			   const char*                   fmt,
 			   ...) __attribute__((format(printf, 4, 5)));
 
 //
@@ -492,12 +492,12 @@ FBINK_API int fbink_printf(int                  fbfd,
 // NOTE: This *ignores* is_dithered & no_refresh ;).
 // NOTE: If you do NOT want to request hardware dithering, set dithering_mode to HWD_PASSTHROUGH (i.e., 0).
 //       This is also the fallback value.
-FBINK_API int fbink_refresh(int                fbfd,
-			    uint32_t           region_top,
-			    uint32_t           region_left,
-			    uint32_t           region_width,
-			    uint32_t           region_height,
-			    uint8_t            dithering_mode,
+FBINK_API int fbink_refresh(int                         fbfd,
+			    uint32_t                    region_top,
+			    uint32_t                    region_left,
+			    uint32_t                    region_width,
+			    uint32_t                    region_height,
+			    uint8_t                     dithering_mode,
 			    const FBInkConfig* restrict fbink_cfg);
 
 // A simple wrapper around the MXCFB_WAIT_FOR_UPDATE_SUBMISSION ioctl, without requiring you to include mxcfb headers.
@@ -633,10 +633,10 @@ FBINK_API int fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkCo
 // NOTE: There's a direct copy fast path in the very specific case of printing a Grayscale image *without* alpha,
 //       inversion or dithering on an 8bpp fb.
 // NOTE: No such luck on 32bpp, because of a mandatory RGB <-> BGR conversion ;).
-FBINK_API int fbink_print_image(int                fbfd,
-				const char*        filename,
-				short int          x_off,
-				short int          y_off,
+FBINK_API int fbink_print_image(int                         fbfd,
+				const char*                 filename,
+				short int                   x_off,
+				short int                   y_off,
 				const FBInkConfig* restrict fbink_cfg);
 
 // Print raw scanlines on screen (packed pixels).
@@ -662,13 +662,13 @@ FBINK_API int fbink_print_image(int                fbfd,
 //       If this is a concern to you, make sure your input buffer is formatted in a manner adapted to your output device:
 //       Generally, that'd be RGBA (32bpp) on Kobo (or RGB (24bpp) with ignore_alpha),
 //       and YA (grayscale + alpha) on Kindle (or Y (8bpp) with ignore_alpha).
-FBINK_API int fbink_print_raw_data(int                fbfd,
-				   unsigned char*     data,
-				   const int          w,
-				   const int          h,
-				   const size_t       len,
-				   short int          x_off,
-				   short int          y_off,
+FBINK_API int fbink_print_raw_data(int                         fbfd,
+				   unsigned char*              data,
+				   const int                   w,
+				   const int                   h,
+				   const size_t                len,
+				   short int                   x_off,
+				   short int                   y_off,
 				   const FBInkConfig* restrict fbink_cfg);
 
 //
@@ -710,13 +710,13 @@ FBINK_API int fbink_dump(int fbfd, FBInkDump* restrict dump);
 // fbink_cfg:		Pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off).
 // dump:		Pointer to an FBInkDump struct (will be recycled if already used).
 // NOTE: The same considerations as in fbink_dump should be taken regarding the handling of FBInkDump structs.
-FBINK_API int fbink_region_dump(int                fbfd,
-				short int          x_off,
-				short int          y_off,
-				unsigned short int w,
-				unsigned short int h,
+FBINK_API int fbink_region_dump(int                         fbfd,
+				short int                   x_off,
+				short int                   y_off,
+				unsigned short int          w,
+				unsigned short int          h,
 				const FBInkConfig* restrict fbink_cfg,
-				FBInkDump* restrict dump);
+				FBInkDump* restrict         dump);
 
 // Restore a framebuffer dump made by fbink_dump/fbink_region_dump.
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build).

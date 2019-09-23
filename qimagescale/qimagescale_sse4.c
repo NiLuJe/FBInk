@@ -42,12 +42,12 @@
 #if defined(__SSE4_1__)
 
 static inline __attribute__((always_inline)) __m128i Q_DECL_VECTORCALL
-						     qt_qimageScaleAARGBA_helper_sse4(const unsigned int* pix,
-										      int                 xyap,
-										      int                 Cxy,
-										      int                 step,
-										      const __m128i       vxyap,
-										      const __m128i       vCxy)
+    qt_qimageScaleAARGBA_helper_sse4(const unsigned int* pix,
+				     int                 xyap,
+				     int                 Cxy,
+				     int                 step,
+				     const __m128i       vxyap,
+				     const __m128i       vCxy)
 {
 	__m128i vpix = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) *pix));
 	__m128i vx   = _mm_mullo_epi32(vpix, vxyap);

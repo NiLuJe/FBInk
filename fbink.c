@@ -56,17 +56,17 @@
 // We can't use stbi_failure_reason as it's not thread-safe, so ditch the strings
 #	define STBI_NO_FAILURE_STRINGS
 // Disable a bunch of very verbose but mostly harmless warnings
-#	pragma GCC diagnostic push
-#	pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#	pragma GCC diagnostic   push
+#	pragma GCC diagnostic   ignored "-Wunknown-pragmas"
 #	pragma clang diagnostic ignored "-Wunknown-warning-option"
-#	pragma GCC diagnostic ignored "-Wcast-qual"
-#	pragma GCC diagnostic ignored "-Wcast-align"
-#	pragma GCC diagnostic ignored "-Wconversion"
-#	pragma GCC diagnostic ignored "-Wsign-conversion"
-#	pragma GCC diagnostic ignored "-Wduplicated-branches"
-#	pragma GCC diagnostic ignored "-Wunused-parameter"
-#	pragma GCC diagnostic ignored "-Wunused-function"
-#	pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"
+#	pragma GCC diagnostic   ignored "-Wcast-qual"
+#	pragma GCC diagnostic   ignored "-Wcast-align"
+#	pragma GCC diagnostic   ignored "-Wconversion"
+#	pragma GCC diagnostic   ignored "-Wsign-conversion"
+#	pragma GCC diagnostic   ignored "-Wduplicated-branches"
+#	pragma GCC diagnostic   ignored "-Wunused-parameter"
+#	pragma GCC diagnostic   ignored "-Wunused-function"
+#	pragma GCC diagnostic   ignored "-Wsuggest-attribute=pure"
 #	include "stb/stb_image.h"
 #	pragma GCC diagnostic pop
 #endif
@@ -76,14 +76,14 @@
 // Make it private, we don't need it anywhere else
 #	define STBTT_STATIC
 // stb_truetype is.... noisy
-#	pragma GCC diagnostic push
-#	pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#	pragma GCC diagnostic   push
+#	pragma GCC diagnostic   ignored "-Wunknown-pragmas"
 #	pragma clang diagnostic ignored "-Wunknown-warning-option"
-#	pragma GCC diagnostic ignored "-Wcast-qual"
-#	pragma GCC diagnostic ignored "-Wconversion"
-#	pragma GCC diagnostic ignored "-Wsign-conversion"
-#	pragma GCC diagnostic ignored "-Wunused-function"
-#	pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"
+#	pragma GCC diagnostic   ignored "-Wcast-qual"
+#	pragma GCC diagnostic   ignored "-Wconversion"
+#	pragma GCC diagnostic   ignored "-Wsign-conversion"
+#	pragma GCC diagnostic   ignored "-Wunused-function"
+#	pragma GCC diagnostic   ignored "-Wsuggest-attribute=pure"
 #	include "stb/stb_truetype.h"
 #	pragma GCC diagnostic pop
 #endif
@@ -548,10 +548,10 @@ static void
 
 // Helper function to draw a rectangle in given color
 static void
-    fill_rect(unsigned short int x,
-	      unsigned short int y,
-	      unsigned short int w,
-	      unsigned short int h,
+    fill_rect(unsigned short int         x,
+	      unsigned short int         y,
+	      unsigned short int         w,
+	      unsigned short int         h,
 	      const FBInkPixel* restrict px)
 {
 	// Bounds-checking, to ensure the memset won't do stupid things...
@@ -766,11 +766,11 @@ static const char*
 
 // Helper function for drawing
 static struct mxcfb_rect
-    draw(const char* restrict text,
-	 unsigned short int   row,
-	 unsigned short int   col,
-	 unsigned short int   multiline_offset,
-	 bool                 halfcell_offset,
+    draw(const char* restrict        text,
+	 unsigned short int          row,
+	 unsigned short int          col,
+	 unsigned short int          multiline_offset,
+	 bool                        halfcell_offset,
 	 const FBInkConfig* restrict fbink_cfg)
 {
 	LOG("Printing '%s' @ line offset %hu (meaning row %hu)",
@@ -2575,7 +2575,7 @@ int
 
 	otInit = true;
 	// Open font from given path, and load into buffer
-	FILE*          f             = fopen(filename, "r" STDIO_CLOEXEC);
+	FILE*                   f    = fopen(filename, "r" STDIO_CLOEXEC);
 	unsigned char* restrict data = NULL;
 	if (!f) {
 		ERRPRINT(fopen);
@@ -3471,8 +3471,8 @@ int
 	// Rely on vsnprintf itself to tell us exactly how many bytes it needs ;).
 	// c.f., vsnprintf(3) && stdarg(3) && https://stackoverflow.com/q/10069597
 	// (especially as far as the va_start/va_end bracketing is concerned)
-	int    ret            = -1;
-	size_t size           = 0;
+	int            ret    = -1;
+	size_t         size   = 0;
 	char* restrict buffer = NULL;
 	va_list        args;
 
@@ -3534,11 +3534,11 @@ cleanup:
 }
 
 int
-    fbink_print_ot(int fbfd    UNUSED_BY_MINIMAL,
-		   const char* restrict string UNUSED_BY_MINIMAL,
-		   const FBInkOTConfig* restrict cfg UNUSED_BY_MINIMAL,
+    fbink_print_ot(int fbfd                              UNUSED_BY_MINIMAL,
+		   const char* restrict string           UNUSED_BY_MINIMAL,
+		   const FBInkOTConfig* restrict cfg     UNUSED_BY_MINIMAL,
 		   const FBInkConfig* restrict fbink_cfg UNUSED_BY_MINIMAL,
-		   FBInkOTFit* restrict fit UNUSED_BY_MINIMAL)
+		   FBInkOTFit* restrict fit              UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_OPENTYPE
 	// Abort if we were passed an empty string
@@ -3582,8 +3582,8 @@ int
 	int rv = EXIT_SUCCESS;
 
 	// Declare buffers early to make cleanup easier
-	FBInkOTLine* restrict lines        = NULL;
-	char* restrict brk_buff            = NULL;
+	FBInkOTLine* restrict   lines      = NULL;
+	char* restrict          brk_buff   = NULL;
 	unsigned char* restrict fmt_buff   = NULL;
 	unsigned char*          line_buff  = NULL;
 	unsigned char*          glyph_buff = NULL;
@@ -4194,8 +4194,8 @@ int
 		clear_screen(fbfd, bgcolor, is_flashing);
 	}
 
-	uint32_t       tmp_c;
-	int            tmp_gi;
+	uint32_t                tmp_c;
+	int                     tmp_gi;
 	unsigned char* restrict lnPtr = NULL;
 	unsigned char* restrict glPtr = NULL;
 	unsigned short int      start_x;
@@ -4937,12 +4937,12 @@ static const char*
 
 // Small public wrapper around refresh(), without the caller having to depend on mxcfb headers
 int
-    fbink_refresh(int fbfd UNUSED_BY_LINUX,
-		  uint32_t region_top UNUSED_BY_LINUX,
-		  uint32_t region_left UNUSED_BY_LINUX,
-		  uint32_t region_width UNUSED_BY_LINUX,
-		  uint32_t region_height UNUSED_BY_LINUX,
-		  uint8_t dithering_mode UNUSED_BY_LINUX,
+    fbink_refresh(int fbfd                              UNUSED_BY_LINUX,
+		  uint32_t region_top                   UNUSED_BY_LINUX,
+		  uint32_t region_left                  UNUSED_BY_LINUX,
+		  uint32_t region_width                 UNUSED_BY_LINUX,
+		  uint32_t region_height                UNUSED_BY_LINUX,
+		  uint8_t dithering_mode                UNUSED_BY_LINUX,
 		  const FBInkConfig* restrict fbink_cfg UNUSED_BY_LINUX)
 {
 #ifndef FBINK_FOR_LINUX
@@ -5643,8 +5643,8 @@ static unsigned char*
 	}
 
 	for (int j = 0; j < y; ++j) {
-		const unsigned char* restrict src = data + (j * x * img_n);
-		unsigned char* restrict dest      = good + (j * x * req_comp);
+		const unsigned char* restrict src  = data + (j * x * img_n);
+		unsigned char* restrict       dest = good + (j * x * req_comp);
 
 #	define STBI__COMBO(a, b) ((a) *8 + (b))
 #	define STBI__CASE(a, b)                                                                                         \
@@ -5778,7 +5778,7 @@ static uint8_t
 
 // Draw image data on screen (we inherit a few of the variable types/names from stbi ;))
 static int
-    draw_image(int                  fbfd,
+    draw_image(int                           fbfd,
 	       const unsigned char* restrict data,
 	       const int                     w,
 	       const int                     h,
@@ -5786,7 +5786,7 @@ static int
 	       const int                     req_n,
 	       short int                     x_off,
 	       short int                     y_off,
-	       const FBInkConfig* restrict fbink_cfg)
+	       const FBInkConfig* restrict   fbink_cfg)
 {
 	// Open the framebuffer if need be...
 	// NOTE: As usual, we *expect* to be initialized at this point!
@@ -6518,10 +6518,10 @@ cleanup:
 
 // Draw an image on screen
 int
-    fbink_print_image(int fbfd    UNUSED_BY_MINIMAL,
-		      const char* filename UNUSED_BY_MINIMAL,
-		      short int x_off UNUSED_BY_MINIMAL,
-		      short int y_off    UNUSED_BY_MINIMAL,
+    fbink_print_image(int fbfd                              UNUSED_BY_MINIMAL,
+		      const char* filename                  UNUSED_BY_MINIMAL,
+		      short int x_off                       UNUSED_BY_MINIMAL,
+		      short int y_off                       UNUSED_BY_MINIMAL,
 		      const FBInkConfig* restrict fbink_cfg UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_IMAGE
@@ -6674,13 +6674,13 @@ cleanup:
 
 // Draw raw (supposedly image) data on screen
 int
-    fbink_print_raw_data(int fbfd       UNUSED_BY_MINIMAL,
-			 unsigned char* data UNUSED_BY_MINIMAL,
-			 const int w UNUSED_BY_MINIMAL,
-			 const int h  UNUSED_BY_MINIMAL,
-			 const size_t len UNUSED_BY_MINIMAL,
-			 short int x_off UNUSED_BY_MINIMAL,
-			 short int y_off    UNUSED_BY_MINIMAL,
+    fbink_print_raw_data(int fbfd                              UNUSED_BY_MINIMAL,
+			 unsigned char* data                   UNUSED_BY_MINIMAL,
+			 const int w                           UNUSED_BY_MINIMAL,
+			 const int h                           UNUSED_BY_MINIMAL,
+			 const size_t len                      UNUSED_BY_MINIMAL,
+			 short int x_off                       UNUSED_BY_MINIMAL,
+			 short int y_off                       UNUSED_BY_MINIMAL,
 			 const FBInkConfig* restrict fbink_cfg UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_IMAGE
@@ -6915,13 +6915,13 @@ cleanup:
 
 // Dump a specific region of the fb
 int
-    fbink_region_dump(int fbfd  UNUSED_BY_MINIMAL,
-		      short int x_off UNUSED_BY_MINIMAL,
-		      short int y_off    UNUSED_BY_MINIMAL,
-		      unsigned short int w UNUSED_BY_MINIMAL,
-		      unsigned short int h UNUSED_BY_MINIMAL,
+    fbink_region_dump(int fbfd                              UNUSED_BY_MINIMAL,
+		      short int x_off                       UNUSED_BY_MINIMAL,
+		      short int y_off                       UNUSED_BY_MINIMAL,
+		      unsigned short int w                  UNUSED_BY_MINIMAL,
+		      unsigned short int h                  UNUSED_BY_MINIMAL,
 		      const FBInkConfig* restrict fbink_cfg UNUSED_BY_MINIMAL,
-		      FBInkDump* restrict dump UNUSED_BY_MINIMAL)
+		      FBInkDump* restrict dump              UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_IMAGE
 	// Open the framebuffer if need be...
@@ -7133,9 +7133,9 @@ cleanup:
 
 // Restore a fb dump
 int
-    fbink_restore(int fbfd           UNUSED_BY_MINIMAL,
+    fbink_restore(int fbfd                              UNUSED_BY_MINIMAL,
 		  const FBInkConfig* restrict fbink_cfg UNUSED_BY_MINIMAL,
-		  const FBInkDump* restrict dump UNUSED_BY_MINIMAL)
+		  const FBInkDump* restrict dump        UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_IMAGE
 	// Open the framebuffer if need be...
