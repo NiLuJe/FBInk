@@ -478,7 +478,11 @@ int
 	}
 
 	if (gotcha) {
-		LOG("Matched on a %hux%hu button! :)", button_width, button_height);
+		LOG("Matched on a %hux%hu button centered @ (%hu, %hu)! :)",
+		    button_width,
+		    button_height,
+		    match_coords.x,
+		    match_coords.y);
 
 		// The touch panel has a fixed origin that differs from the framebuffer's... >_<".
 		// NOTE: On the Forma, take the current rotation into account,
@@ -489,14 +493,14 @@ int
 		} else {
 			rotate_coordinates_pickel(&match_coords);
 		}
-		ELOG("x=%hu, y=%hu", match_coords.x, match_coords.y);
+		ELOG("Transformed for input -> x=%hu, y=%hu", match_coords.x, match_coords.y);
 
 		// NOTE: The H2O²r1 is a special snowflake, input is rotated 90° in the *other* direction
 		//       (i.e., origin at the bottom-left instead of top-right).
 		//       Hopefully that doesn't apply to the fb itself, too...
 		// NOTE: Hide that on the Forma, since it's definitely useless there ;).
 		if (!deviceQuirks.canRotate) {
-			ELOG("H2O²r1: x=%hu, y=%hu",
+			ELOG("Transformed for H2O²r1 input -> x=%hu, y=%hu",
 			     (unsigned short int) (screenHeight - match_coords.x - 1),
 			     (unsigned short int) (screenWidth - match_coords.y - 1));
 		}
