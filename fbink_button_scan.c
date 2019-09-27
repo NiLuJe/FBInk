@@ -487,7 +487,9 @@ int
 		// The touch panel has a fixed origin that differs from the framebuffer's... >_<".
 		// NOTE: On the Forma, take the current rotation into account,
 		//       because the Home screen *can* be shown in Inverted Portrait...
-		// TODO: Double-check if that holds up on the Libra...
+		//       Note that while rotate_touch_coordinates handles Landscape orientations just fine,
+		//       the various optimizations that limit the area to scan and the size of the button to match
+		//       are completely tailored for Portrait orientations, and would probably need tweaking for Landscape...
 		if (deviceQuirks.canRotate) {
 			rotate_touch_coordinates(&match_coords);
 		} else {
