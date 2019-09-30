@@ -156,21 +156,21 @@ with open(fontfile, "r") as f:
 						eprint("{")
 						if blockcp > 0 :
 							if blockcp == prevcp:
-								eprint("\tif (codepoint == {:#04x}) {{".format(blockcp))
+								eprint("\tif (codepoint == {:#04x}u) {{".format(blockcp))
 								eprint("\t\treturn {}_block{}[0];".format(fontname, blocknum))
 							else:
-								eprint("\tif (codepoint >= {:#04x} && codepoint <= {:#04x}) {{".format(blockcp, prevcp))
-								eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, blockcp))
+								eprint("\tif (codepoint >= {:#04x}u && codepoint <= {:#04x}u) {{".format(blockcp, prevcp))
+								eprint("\t\treturn {}_block{}[codepoint - {:#04x}u];".format(fontname, blocknum, blockcp))
 						else:
-							eprint("\tif (codepoint <= {:#04x}) {{".format(prevcp))
+							eprint("\tif (codepoint <= {:#04x}u) {{".format(prevcp))
 							eprint("\t\treturn {}_block{}[codepoint];".format(fontname, blocknum))
 					else:
 						if blockcp == prevcp:
-							eprint("\t}} else if (codepoint == {:#04x}) {{".format(blockcp))
+							eprint("\t}} else if (codepoint == {:#04x}u) {{".format(blockcp))
 							eprint("\t\treturn {}_block{}[0];".format(fontname, blocknum))
 						else:
-							eprint("\t}} else if (codepoint >= {:#04x} && codepoint <= {:#04x}) {{".format(blockcp, prevcp))
-							eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, blockcp))
+							eprint("\t}} else if (codepoint >= {:#04x}u && codepoint <= {:#04x}u) {{".format(blockcp, prevcp))
+							eprint("\t\treturn {}_block{}[codepoint - {:#04x}u];".format(fontname, blocknum, blockcp))
 				blocknum += 1
 				blockcount = 1
 				blockcp = hcp
@@ -221,22 +221,22 @@ if blocknum == 1:
 	eprint("{")
 	if blockcp > 0:
 		if blockcp == prevcp:
-			eprint("\tif (codepoint == {:#04x}) {{".format(blockcp))
+			eprint("\tif (codepoint == {:#04x}u) {{".format(blockcp))
 			eprint("\t\treturn {}_block{}[0];".format(fontname, blocknum))
 		else:
-			eprint("\tif (codepoint >= {:#04x} && codepoint <= {:#04x}) {{".format(blockcp, prevcp))
-			eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, blockcp))
+			eprint("\tif (codepoint >= {:#04x}u && codepoint <= {:#04x}u) {{".format(blockcp, prevcp))
+			eprint("\t\treturn {}_block{}[codepoint - {:#04x}u];".format(fontname, blocknum, blockcp))
 	else:
-		eprint("\tif (codepoint <= {:#04x}) {{".format(prevcp))
+		eprint("\tif (codepoint <= {:#04x}u) {{".format(prevcp))
 		eprint("\t\treturn {}_block{}[codepoint];".format(fontname, blocknum))
 else:
 	# Otherwise, don't forget the final block ;)
 	if blockcp == prevcp:
-		eprint("\t}} else if (codepoint == {:#04x}) {{".format(blockcp))
+		eprint("\t}} else if (codepoint == {:#04x}u) {{".format(blockcp))
 		eprint("\t\treturn {}_block{}[0];".format(fontname, blocknum))
 	else:
-		eprint("\t}} else if (codepoint >= {:#04x} && codepoint <= {:#04x}) {{".format(blockcp, prevcp))
-		eprint("\t\treturn {}_block{}[codepoint - {:#04x}];".format(fontname, blocknum, blockcp))
+		eprint("\t}} else if (codepoint >= {:#04x}u && codepoint <= {:#04x}u) {{".format(blockcp, prevcp))
+		eprint("\t\treturn {}_block{}[codepoint - {:#04x}u];".format(fontname, blocknum, blockcp))
 
 eprint("\t} else {")
 eprint('\t\tWARN("Codepoint U+%04X is not covered by this font", codepoint);')
