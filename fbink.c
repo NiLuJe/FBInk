@@ -3145,7 +3145,7 @@ int
 	//       (+ 1 'wide' NULL, wide to make sure u8_strlen won't skip over it).
 	line = calloc((MAXCOLS + 1U) * 4U, sizeof(*line));
 	if (line == NULL) {
-		ERRPRINT(calloc(line));
+		ERRPRINT(line calloc);
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -6893,7 +6893,7 @@ int
 	// Start by allocating enough memory for a full dump of the visible screen...
 	dump->data = calloc((size_t)(fInfo.line_length * vInfo.yres), sizeof(*dump->data));
 	if (dump->data == NULL) {
-		ERRPRINT(calloc(dump->data));
+		ERRPRINT(dump->data calloc);
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -7098,7 +7098,7 @@ int
 		dump->data = calloc((size_t)((region.width * bpp) * region.height), sizeof(*dump->data));
 	}
 	if (dump->data == NULL) {
-		ERRPRINT(calloc(dump->data));
+		ERRPRINT(dump->data calloc);
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
