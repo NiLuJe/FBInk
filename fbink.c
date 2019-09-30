@@ -280,9 +280,19 @@ static void
 	} else if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
 		// On *some* devices with a 6.8" panel, *every* orientation is inverted...
 		rotation ^= 2;
+	} else if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_SANE) {
+		// TODO: This is for the Libra, double-check that it holds up...
+		// The reasoning being to try to match the Forma's behavior:
+		// UR -> 3 ^ 2 -> CW / CW -> 2 -> UD / UD -> 1 ^ 2 -> CCW / CCW -> 0 -> UR
+		// The format being: *effective* orientation (i.e., user-facing) -> actual fb rotate value -> input transform
+		// Wich means we essentially want:
+		// UR -> CW / CW -> UD / UD -> CCW / CCW -> UR
+		// Given the fact that the Libra's panel is finally Portrait, and kept @ UR (boot, pickel & nickel),
+		// effective orientation & fb rotate value should always match,
+		// that means we just need to shift by +90°, one CW rotation.
+		// I suspect this bit of insanity was actually mangled back in for backwards compatibility w/ NTX shenanigans...
+		rotation = (rotation + 1) & 3;
 	}
-	// TODO: Double-check if that holds up on the Libra...
-	//       It probably won't without something like rotation = (rotation + 1) & 3 (i.e., shift by +90°, one CW rotation).
 
 	// NOTE: Should match *most* Kobo devices...
 	// c.f., https://patchwork.openembedded.org/patch/149258
