@@ -28,14 +28,26 @@ static const uint16_t*
 		return spleen_block1[codepoint - 0x20];
 	} else if (codepoint >= 0xa0 && codepoint <= 0x17f) {
 		return spleen_block2[codepoint - 0xa0];
+	} else if (codepoint >= 0x2018 && codepoint <= 0x2019) {
+		return spleen_block3[codepoint - 0x2018];
+	} else if (codepoint >= 0x201c && codepoint <= 0x201d) {
+		return spleen_block4[codepoint - 0x201c];
+	} else if (codepoint == 0x2022) {
+		return spleen_block5[0];
+	} else if (codepoint == 0x2026) {
+		return spleen_block6[0];
 	} else if (codepoint == 0x20ac) {
-		return spleen_block3[0];
-	} else if (codepoint >= 0x2500 && codepoint <= 0x257f) {
-		return spleen_block4[codepoint - 0x2500];
+		return spleen_block7[0];
+	} else if (codepoint >= 0x2500 && codepoint <= 0x259f) {
+		return spleen_block8[codepoint - 0x2500];
+	} else if (codepoint >= 0x2630 && codepoint <= 0x2637) {
+		return spleen_block9[codepoint - 0x2630];
 	} else if (codepoint >= 0x2800 && codepoint <= 0x28ff) {
-		return spleen_block5[codepoint - 0x2800];
+		return spleen_block10[codepoint - 0x2800];
+	} else if (codepoint >= 0xe0a0 && codepoint <= 0xe0a1) {
+		return spleen_block11[codepoint - 0xe0a0];
 	} else if (codepoint >= 0xe0b0 && codepoint <= 0xe0b3) {
-		return spleen_block6[codepoint - 0xe0b0];
+		return spleen_block12[codepoint - 0xe0b0];
 	} else {
 		WARN("Codepoint U+%04X is not covered by this font", codepoint);
 		return spleen_block1[0];
