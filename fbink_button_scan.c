@@ -340,16 +340,16 @@ int
 	}
 
 	// Wheee! (Default to the proper value on 32bpp FW)
-	FBInkColor button_color = { 0xD9, 0xD9, 0xD9 };
+	FBInkColor button_color = { 0xD9u, 0xD9u, 0xD9u };
 
 	// And handle yet another bit of 16bpp weirdness...
 	// NOTE: RGB565 conversions are complex and potentially slightly lossy,
 	//       with slight rounding/truncation errors that can be different depending on how exactly the conversions were done.
 	//       This matches with what *we* do, hopefully that'll be close enough to what Nickel actually does...
 	if (deviceQuirks.isNTX16bLandscape) {
-		button_color.r = 0xDE;
-		button_color.g = 0xDB;
-		button_color.b = 0xDE;
+		button_color.r = 0xDEu;
+		button_color.g = 0xDBu;
+		button_color.b = 0xDEu;
 	}
 
 	FBInkPixel         pixel         = { 0U };

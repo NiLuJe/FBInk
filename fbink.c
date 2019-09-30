@@ -119,16 +119,16 @@ static void
 	const uint8_t b = *((unsigned char*) (fbPtr + pix_offset));
 
 	// We can't address nibbles directly, so this takes some shenanigans...
-	if ((coords->x & 0x01) == 0) {
+	if ((coords->x & 0x01u) == 0U) {
 		// Even pixel: high nibble
 		// ORed to avoid clobbering our odd pixel
-		*((unsigned char*) (fbPtr + pix_offset)) = (unsigned char) ((b & 0x0F) | (px->gray8 & 0xF0));
+		*((unsigned char*) (fbPtr + pix_offset)) = (unsigned char) ((b & 0x0Fu) | (px->gray8 & 0xF0u));
 		// Squash to 4bpp, and write to the top/left nibble
 		// or: ((v >> 4) << 4)
 	} else {
 		// Odd pixel: low nibble
 		// ORed to avoid clobbering our even pixel
-		*((unsigned char*) (fbPtr + pix_offset)) = (unsigned char) ((b & 0xF0) | (px->gray8 >> 4U));
+		*((unsigned char*) (fbPtr + pix_offset)) = (unsigned char) ((b & 0xF0u) | (px->gray8 >> 4U));
 	}
 }
 
@@ -270,16 +270,16 @@ static void
 		// When I say Portrait/Landscape, that's how the device *looks*, which doesn't match the FB_ROTATE_* constants...
 		// i.e., in Nickel, *visually*, UR is 3, CW is 2, UD is 1, CCW is 0,
 		// and when sending ioctls, UR returns 0 (match), CW returns 3 (^= 2), UD returns 2 (match), CCW returns 1 (^= 2).
-		if (rotation & 0x01) {
+		if (rotation & 0x01u) {
 			// Rotation constant is odd (i.e., CW or CCW), invert it.
-			rotation ^= 2;
+			rotation ^= 2U;
 		}
 		// NOTE: Plato goes with a simple rotation = (4 - rotation) % 4; which does the exact same thing,
 		//       I just have a harder time wrapping my head around it ;).
 		//       Plus, I'm inclined to believe a simple branch would be faster than a modulo.
 	} else if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
 		// On *some* devices with a 6.8" panel, *every* orientation is inverted...
-		rotation ^= 2;
+		rotation ^= 2U;
 	} else if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_SANE) {
 		// TODO: This is for the Libra, double-check that it holds up...
 		// The reasoning being to try to match the Forma's behavior:
@@ -291,7 +291,7 @@ static void
 		// effective orientation & fb rotate value should always match,
 		// that means we just need to shift by +90°, one CW rotation.
 		// I suspect this bit of insanity was actually mangled back in for backwards compatibility w/ NTX shenanigans...
-		rotation = (rotation + 1) & 3;
+		rotation = (rotation + 1U) & 3U;
 	}
 
 	// NOTE: Should match *most* Kobo devices...
@@ -439,15 +439,15 @@ static void
 	// We'll need the full byte first...
 	const uint8_t b = *((const unsigned char*) (fbPtr + pix_offset));
 
-	if ((coords->x & 0x01) == 0) {
+	if ((coords->x & 0x01u) == 0U) {
 		// Even pixel: high nibble
-		const uint8_t v = (b & 0xF0);
+		const uint8_t v = (b & 0xF0u);
 		px->gray8       = (v | (v >> 4U));
 		// pull the top/left nibble, expanded to 8bit
 		// or: (uint8_t)((((b) >> 4) & 0x0F) * 0x11);
 	} else {
 		// Odd pixel: low nibble
-		px->gray8 = (uint8_t)((b & 0x0F) * 0x11);
+		px->gray8 = (uint8_t)((b & 0x0Fu) * 0x11u);
 		// or: pull the low/right nibble, expanded to 8bit
 	}
 	// NOTE: c.f., FBInkPixel typedef in fbink_types.h for details on the union shenanigans...
@@ -510,9 +510,9 @@ static void
 	//       I feel that this approach tracks better with what we do in put_pixel_RGB565,
 	//       and I have an easier time following it than the previous approach ported from KOReader.
 	//       Both do exactly the same thing, though ;).
-	const uint8_t r = (uint8_t)((v & 0xF800) >> 11U);
-	const uint8_t g = (v & 0x07E0) >> 5U;
-	const uint8_t b = (v & 0x001F);
+	const uint8_t r = (uint8_t)((v & 0xF800u) >> 11U);
+	const uint8_t g = (v & 0x07E0u) >> 5U;
+	const uint8_t b = (v & 0x001Fu);
 
 	px->bgra.color.r = (uint8_t)((r << 3U) | (r >> 2U));
 	px->bgra.color.g = (uint8_t)((g << 2U) | (g >> 4U));
@@ -599,7 +599,7 @@ static void
 				put_pixel_Gray4(&coords, px);
 			}
 		}
-	} else if (vInfo.bits_per_pixel == 16U && px->gray8 != 0x00 && px->gray8 != 0xFF) {
+	} else if (vInfo.bits_per_pixel == 16U && px->gray8 != 0x00u && px->gray8 != 0xFFu) {
 		// Same thing @ 16bpp if we're not doing black or white, as those are the only colors in our palette
 		// that pack into two indentical bytes when packed as RGB565... -_-".
 		FBInkPixel packed_px;
@@ -688,20 +688,20 @@ static const unsigned char*
     font8x8_get_bitmap(uint32_t codepoint)
 {
 	// Get the bitmap for the character mapped to that Unicode codepoint
-	if (codepoint <= 0x7F) {
+	if (codepoint <= 0x7Fu) {
 		return font8x8_basic[codepoint];
-	} else if (codepoint >= 0x80 && codepoint <= 0x9F) {    // lgtm [cpp/constant-comparison]
-		return font8x8_control[codepoint - 0x80];
-	} else if (codepoint >= 0xA0 && codepoint <= 0xFF) {    // lgtm [cpp/constant-comparison]
-		return font8x8_ext_latin[codepoint - 0xA0];
-	} else if (codepoint >= 0x390 && codepoint <= 0x3C9) {
-		return font8x8_greek[codepoint - 0x390];
-	} else if (codepoint >= 0x2500 && codepoint <= 0x257F) {
-		return font8x8_box[codepoint - 0x2500];
-	} else if (codepoint >= 0x2580 && codepoint <= 0x259F) {    // lgtm [cpp/constant-comparison]
-		return font8x8_block[codepoint - 0x2580];
-	} else if (codepoint >= 0x3040 && codepoint <= 0x309F) {
-		return font8x8_hiragana[codepoint - 0x3040];
+	} else if (codepoint >= 0x80u && codepoint <= 0x9Fu) {    // lgtm [cpp/constant-comparison]
+		return font8x8_control[codepoint - 0x80u];
+	} else if (codepoint >= 0xA0u && codepoint <= 0xFFu) {    // lgtm [cpp/constant-comparison]
+		return font8x8_ext_latin[codepoint - 0xA0u];
+	} else if (codepoint >= 0x390u && codepoint <= 0x3C9u) {
+		return font8x8_greek[codepoint - 0x390u];
+	} else if (codepoint >= 0x2500u && codepoint <= 0x257Fu) {
+		return font8x8_box[codepoint - 0x2500u];
+	} else if (codepoint >= 0x2580u && codepoint <= 0x259Fu) {    // lgtm [cpp/constant-comparison]
+		return font8x8_block[codepoint - 0x2580u];
+	} else if (codepoint >= 0x3040u && codepoint <= 0x309Fu) {
+		return font8x8_hiragana[codepoint - 0x3040u];
 	} else {
 		// NOTE: Print a blank space for unknown codepoints
 		WARN("Codepoint U+%04X is not covered by this font", codepoint);
@@ -795,13 +795,13 @@ static struct mxcfb_rect
 	if (fbink_cfg->is_inverted) {
 		// NOTE: And, of course, RGB565 is terrible. Inverting the lossy packed value would be even lossier...
 		if (vInfo.bits_per_pixel == 16U) {
-			const uint8_t fgcolor = penFGColor ^ 0xFF;
-			const uint8_t bgcolor = penBGColor ^ 0xFF;
+			const uint8_t fgcolor = penFGColor ^ 0xFFu;
+			const uint8_t bgcolor = penBGColor ^ 0xFFu;
 			fgP.rgb565            = pack_rgb565(fgcolor, fgcolor, fgcolor);
 			bgP.rgb565            = pack_rgb565(bgcolor, bgcolor, bgcolor);
 		} else {
-			fgP.bgra.p ^= 0x00FFFFFF;
-			bgP.bgra.p ^= 0x00FFFFFF;
+			fgP.bgra.p ^= 0x00FFFFFFu;
+			bgP.bgra.p ^= 0x00FFFFFFu;
 		}
 	}
 
@@ -1105,7 +1105,7 @@ static struct mxcfb_rect
 						if (is_fgpx && !fbink_cfg->is_fgless) {                                  \
 							if (fbink_cfg->is_overlay) {                                     \
 								get_pixel(coords, &fbP);                                 \
-								fbP.bgra.p ^= 0x00FFFFFF;                                \
+								fbP.bgra.p ^= 0x00FFFFFFu;                               \
 								pxP = &fbP;                                              \
 								put_pixel(coords, pxP, false);                           \
 							} else {                                                         \
@@ -2509,9 +2509,9 @@ static int
 		case 32U:
 			//fxpPutPixel             = &put_pixel_RGB32;
 			fxpGetPixel             = &get_pixel_RGB32;
-			penFGPixel.bgra.color.a = 0xFF;
+			penFGPixel.bgra.color.a = 0xFFu;
 			penFGPixel.bgra.color.r = penFGPixel.bgra.color.g = penFGPixel.bgra.color.b = penFGColor;
-			penBGPixel.bgra.color.a                                                     = 0xFF;
+			penBGPixel.bgra.color.a                                                     = 0xFFu;
 			penBGPixel.bgra.color.r = penBGPixel.bgra.color.g = penBGPixel.bgra.color.b = penBGColor;
 			break;
 		default:
@@ -2946,7 +2946,7 @@ int
 	}
 
 	// Clear the screen, and setup a fullscreen refresh.
-	clear_screen(fbfd, fbink_cfg->is_inverted ? penBGColor ^ 0xFF : penBGColor, fbink_cfg->is_flashing);
+	clear_screen(fbfd, fbink_cfg->is_inverted ? penBGColor ^ 0xFFu : penBGColor, fbink_cfg->is_flashing);
 	struct mxcfb_rect region = { 0U };
 	fullscreen_region(&region);
 
@@ -3053,7 +3053,7 @@ int
 
 	// Clear screen?
 	if (fbink_cfg->is_cleared) {
-		clear_screen(fbfd, fbink_cfg->is_inverted ? penBGColor ^ 0xFF : penBGColor, fbink_cfg->is_flashing);
+		clear_screen(fbfd, fbink_cfg->is_inverted ? penBGColor ^ 0xFFu : penBGColor, fbink_cfg->is_flashing);
 	}
 
 	// See if want to position our text relative to the edge of the screen, and not the beginning
@@ -3206,7 +3206,7 @@ int
 			// NOTE: Honor linefeeds...
 			//       The main use-case for this is throwing tail'ed logfiles at us and having them
 			//       be readable instead of a jumbled glued together mess ;).
-			if (ch == 0x0A) {
+			if (ch == 0x0Au) {
 				// Remember that, we'll fudge it to a blank later
 				caught_lf = true;
 				LOG("Caught a linefeed!");
@@ -3335,7 +3335,7 @@ int
 			char* lf = strrchr(line, 0x0A);
 			if (lf) {
 				// LF -> space
-				*lf = 0x20;
+				*lf = 0x20u;
 			}
 		}
 
@@ -4184,7 +4184,7 @@ int
 	}
 	region.top = paint_point.y;
 
-	const uint8_t   invert     = is_inverted ? 0xFF : 0U;
+	const uint8_t   invert     = is_inverted ? 0xFFu : 0U;
 	const uint8_t   fgcolor    = penFGColor ^ invert;
 	const uint8_t   bgcolor    = penBGColor ^ invert;
 	const short int layer_diff = (short int) (fgcolor - bgcolor);
@@ -4196,8 +4196,8 @@ int
 			fgP.rgb565 = pack_rgb565(fgcolor, fgcolor, fgcolor);
 			bgP.rgb565 = pack_rgb565(bgcolor, bgcolor, bgcolor);
 		} else {
-			fgP.bgra.p ^= 0x00FFFFFF;
-			bgP.bgra.p ^= 0x00FFFFFF;
+			fgP.bgra.p ^= 0x00FFFFFFu;
+			bgP.bgra.p ^= 0x00FFFFFFu;
 		}
 	}
 
@@ -4368,7 +4368,7 @@ int
 						//         bits of the l's LSB may be positioned over the f's RSB),
 						//         as alpha-blending wouldn't net us much in these very few cases.
 						if (glPtr[k] != 0U) {
-							if (glPtr[k] != 0xFF && lnPtr[k] != 0U) {
+							if (glPtr[k] != 0xFFu && lnPtr[k] != 0U) {
 								// Glyph AA would be clobbering the line buffer -> NOP!
 							} else {
 								lnPtr[k] = glPtr[k];
@@ -4409,17 +4409,17 @@ int
 		}
 
 		FBInkPixel pixel;
-		pixel.bgra.color.a = 0xFF;
+		pixel.bgra.color.a = 0xFFu;
 		start_x            = paint_point.x;
 		lnPtr              = line_buff;
 		// Normal painting to framebuffer. Please forgive the code repetition. Performance...
 		// What we get from stbtt is an alpha coverage mask, hence the need for alpha-blending for anti-aliasing.
 		// As it's obviously expensive, we try to avoid it if possible (on fully opaque & fully transparent pixels).
 		if (!is_overlay && !is_fgless && !is_bgless) {
-			if (abs(layer_diff) == 0xFF) {
+			if (abs(layer_diff) == 0xFFu) {
 				// If we're painting in B&W, use the mask as-is, it's already B&W ;).
 				// We just need to invert it ;).
-				uint8_t ainv = 0xFF;
+				uint8_t ainv = 0xFFu;
 #	ifdef FBINK_FOR_KINDLE
 				if ((deviceQuirks.isKindleLegacy && !is_inverted) ||
 				    (!deviceQuirks.isKindleLegacy && is_inverted)) {
@@ -4440,13 +4440,13 @@ int
 					paint_point.y++;
 				}
 			} else {
-				uint16_t pmul_bg = (uint16_t)(bgcolor * 0xFF);
+				uint16_t pmul_bg = (uint16_t)(bgcolor * 0xFFu);
 				for (int j = 0; j < max_line_height; j++) {
 					for (unsigned int k = 0U; k < lw; k++) {
 						if (lnPtr[k] == 0U) {
 							// No coverage (transparent) -> background
 							put_pixel(paint_point, &bgP, true);
-						} else if (lnPtr[k] == 0xFF) {
+						} else if (lnPtr[k] == 0xFFu) {
 							// Full coverage (opaque) -> foreground
 							put_pixel(paint_point, &fgP, true);
 						} else {
@@ -4464,7 +4464,7 @@ int
 			}
 		} else if (is_fgless) {
 			FBInkPixel fb_px   = { 0U };
-			uint16_t   pmul_bg = (uint16_t)(bgcolor * 0xFF);
+			uint16_t   pmul_bg = (uint16_t)(bgcolor * 0xFFu);
 			// NOTE: One more branch needed because 4bpp fbs are terrible...
 			if (vInfo.bits_per_pixel > 4U) {
 				// 8, 16, 24 & 32bpp
@@ -4473,7 +4473,7 @@ int
 						if (lnPtr[k] == 0U) {
 							// No coverage (transparent) -> background
 							put_pixel(paint_point, &bgP, true);
-						} else if (lnPtr[k] != 0xFF) {
+						} else if (lnPtr[k] != 0xFFu) {
 							// AA, blend it using the coverage mask as alpha,
 							// and the underlying pixel as fg
 							get_pixel(paint_point, &fb_px);
@@ -4513,7 +4513,7 @@ int
 				// 8, 16, 24 & 32bpp
 				for (int j = 0; j < max_line_height; j++) {
 					for (unsigned int k = 0U; k < lw; k++) {
-						if (lnPtr[k] == 0xFF) {
+						if (lnPtr[k] == 0xFFu) {
 							// Full coverage (opaque) -> foreground
 							put_pixel(paint_point, &fgP, true);
 						} else if (lnPtr[k] != 0U) {
@@ -4559,11 +4559,11 @@ int
 				// 8, 16, 24 & 32bpp
 				for (int j = 0; j < max_line_height; j++) {
 					for (unsigned int k = 0U; k < lw; k++) {
-						if (lnPtr[k] == 0xFF) {
+						if (lnPtr[k] == 0xFFu) {
 							// Full coverage (opaque) -> foreground
 							get_pixel(paint_point, &fb_px);
 							// We want our foreground to be the inverse of the underlying pixel...
-							pixel.bgra.p = fb_px.bgra.p ^ 0x00FFFFFF;
+							pixel.bgra.p = fb_px.bgra.p ^ 0x00FFFFFFu;
 							put_pixel(paint_point, &pixel, false);
 						} else if (lnPtr[k] != 0U) {
 							// AA, blend it using the coverage mask as alpha,
@@ -5179,7 +5179,7 @@ cleanup:
 int
     draw_progress_bars(int fbfd, bool is_infinite, uint8_t value, const FBInkConfig* restrict fbink_cfg)
 {
-	const uint8_t invert  = fbink_cfg->is_inverted ? 0xFF : 0U;
+	const uint8_t invert  = fbink_cfg->is_inverted ? 0xFFu : 0U;
 	const uint8_t fgcolor = penFGColor ^ invert;
 	const uint8_t bgcolor = penBGColor ^ invert;
 
@@ -5197,8 +5197,8 @@ int
 			fgP.rgb565 = pack_rgb565(fgcolor, fgcolor, fgcolor);
 			bgP.rgb565 = pack_rgb565(bgcolor, bgcolor, bgcolor);
 		} else {
-			fgP.bgra.p ^= 0x00FFFFFF;
-			bgP.bgra.p ^= 0x00FFFFFF;
+			fgP.bgra.p ^= 0x00FFFFFFu;
+			bgP.bgra.p ^= 0x00FFFFFFu;
 		}
 	}
 
@@ -5278,9 +5278,9 @@ int
 		case 24U:
 		case 32U:
 		default:
-			emptyP.bgra.color.a = 0xFF;
+			emptyP.bgra.color.a = 0xFFu;
 			emptyP.bgra.color.r = emptyP.bgra.color.g = emptyP.bgra.color.b = emptyC;
-			borderP.bgra.color.a                                            = 0xFF;
+			borderP.bgra.color.a                                            = 0xFFu;
 			borderP.bgra.color.r = borderP.bgra.color.g = borderP.bgra.color.b = borderC;
 			break;
 	}
@@ -5773,15 +5773,15 @@ static uint8_t
 	//       With a Q8 input value, we're at no risk of ever underflowing, so, keep to unsigned maths.
 	//       Technically, an uint16_t would be wide enough, but it gains us nothing,
 	//       and requires a few explicit casts to make GCC happy ;).
-	uint32_t t = DIV255(v * ((15U << 6) + 1U));
+	uint32_t t = DIV255(v * ((15U << 6U) + 1U));
 	// level = t / (D-1);
-	uint32_t l = (t >> 6);
+	uint32_t l = (t >> 6U);
 	// t -= l * (D-1);
-	t = (t - (l << 6));
+	t = (t - (l << 6U));
 
 	// map width & height = 8
 	// c = ClampToQuantum((l+(t >= map[(x % mw) + mw * (y % mh)])) * QuantumRange / (L-1));
-	uint32_t q = ((l + (t >= threshold_map_o8x8[(x & 7U) + 8U * (y & 7U)])) * 17);
+	uint32_t q = ((l + (t >= threshold_map_o8x8[(x & 7U) + 8U * (y & 7U)])) * 17U);
 	// NOTE: We're doing unsigned maths, so, clamping is basically MIN(q, UINT8_MAX) ;).
 	//       The only overflow we should ever catch should be for a few white (v = 0xFF) input pixels
 	//       that get shifted to the next step (i.e., q = 272 (0xFF + 17)).
@@ -5820,7 +5820,7 @@ static int
 
 	// Clear screen?
 	if (fbink_cfg->is_cleared) {
-		clear_screen(fbfd, fbink_cfg->is_inverted ? penBGColor ^ 0xFF : penBGColor, fbink_cfg->is_flashing);
+		clear_screen(fbfd, fbink_cfg->is_inverted ? penBGColor ^ 0xFFu : penBGColor, fbink_cfg->is_flashing);
 	}
 
 	// NOTE: We compute initial offsets from row/col, to help aligning images with text.
@@ -5990,8 +5990,8 @@ static int
 #	else
 	if (fbink_cfg->is_inverted) {
 #	endif
-		inv     = 0xFF;
-		inv_rgb = 0x00FFFFFF;
+		inv     = 0xFFu;
+		inv_rgb = 0x00FFFFFFu;
 	}
 	// And we'll make 'em constants to eke out a tiny bit of performance...
 	const uint8_t  invert     = inv;
@@ -6021,7 +6021,7 @@ static int
 #	pragma GCC diagnostic pop
 
 						// Take a shortcut for the most common alpha values (none & full)
-						if (img_px.color.a == 0xFF) {
+						if (img_px.color.a == 0xFFu) {
 							// Fully opaque, we can blit the image (almost) directly.
 							// We do need to honor inversion ;).
 							// And SW dithering
@@ -6049,7 +6049,7 @@ static int
 							FBInkPixel bg_px;
 							get_pixel_Gray8(&coords, &bg_px);
 
-							uint8_t ainv = img_px.color.a ^ 0xFF;
+							uint8_t ainv = img_px.color.a ^ 0xFFu;
 							// Don't forget to honor inversion
 							img_px.color.v ^= invert;
 							// Blend it!
@@ -6089,7 +6089,7 @@ static int
 						img_px.p = *((const uint16_t*) &data[pix_offset]);
 #	pragma GCC diagnostic pop
 
-						uint8_t ainv = img_px.color.a ^ 0xFF;
+						uint8_t ainv = img_px.color.a ^ 0xFFu;
 						// Don't forget to honor inversion
 						img_px.color.v ^= invert;
 						// Blend it!
@@ -6154,7 +6154,7 @@ static int
 				// 32bpp
 				FBInkPixelBGRA fb_px;
 				// This is essentially a constant in our case... (c.f., put_pixel_RGB32)
-				fb_px.color.a = 0xFF;
+				fb_px.color.a = 0xFFu;
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// NOTE: We should be able to skip rotation hacks at this bpp...
@@ -6169,7 +6169,7 @@ static int
 #	pragma GCC diagnostic pop
 
 						// Take a shortcut for the most common alpha values (none & full)
-						if (img_px.color.a == 0xFF) {
+						if (img_px.color.a == 0xFFu) {
 							// Fully opaque, we can blit the image (almost) directly.
 							// We do need to handle BGR and honor inversion ;).
 							img_px.p ^= invert_rgb;
@@ -6197,7 +6197,7 @@ static int
 							// Transparent! Keep fb as-is.
 						} else {
 							// Alpha blending...
-							uint8_t ainv = img_px.color.a ^ 0xFF;
+							uint8_t ainv = img_px.color.a ^ 0xFFu;
 
 							pix_offset =
 							    (uint32_t)((unsigned short int) (i + x_off) << 2U) +
@@ -6250,7 +6250,7 @@ static int
 #	pragma GCC diagnostic pop
 
 						// Take a shortcut for the most common alpha values (none & full)
-						if (img_px.color.a == 0xFF) {
+						if (img_px.color.a == 0xFFu) {
 							// Fully opaque, we can blit the image (almost) directly.
 							// We do need to handle BGR and honor inversion ;).
 							img_px.p ^= invert_rgb;
@@ -6274,7 +6274,7 @@ static int
 							// Transparent! Keep fb as-is.
 						} else {
 							// Alpha blending...
-							uint8_t ainv = img_px.color.a ^ 0xFF;
+							uint8_t ainv = img_px.color.a ^ 0xFFu;
 
 							pix_offset =
 							    (uint32_t)((unsigned short int) (i + x_off) << 2U) +
@@ -6312,7 +6312,7 @@ static int
 				// 32bpp
 				FBInkPixelBGRA fb_px;
 				// This is essentially a constant in our case...
-				fb_px.color.a = 0xFF;
+				fb_px.color.a = 0xFFu;
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
@@ -6404,7 +6404,7 @@ static int
 #	pragma GCC diagnostic pop
 
 					// Take a shortcut for the most common alpha values (none & full)
-					if (img_px.color.a == 0xFF) {
+					if (img_px.color.a == 0xFFu) {
 						// Fully opaque, we can blit the image (almost) directly.
 						// We do need to handle BGR and honor inversion ;).
 						img_px.p ^= invert_rgb;
@@ -6430,7 +6430,7 @@ static int
 						// Transparent! Keep fb as-is.
 					} else {
 						// Alpha blending...
-						uint8_t ainv = img_px.color.a ^ 0xFF;
+						uint8_t ainv = img_px.color.a ^ 0xFFu;
 
 						coords.x = (unsigned short int) (i + x_off);
 						coords.y = (unsigned short int) (j + y_off);
@@ -7082,12 +7082,12 @@ int
 	// And then to handle 4bpp on its own, because 4/8 == 0 ;).
 	if (vInfo.bits_per_pixel == 4U) {
 		// Align to the nearest byte boundary to make our life easier...
-		if (region.left & 0x01) {
+		if (region.left & 0x01u) {
 			// x is odd, round *down* to the nearest multiple of two (i.e., align to the start of the current byte)
 			region.left &= ~0x01u;
 			LOG("Updated region.left to %u because of alignment constraints", region.left);
 		}
-		if (region.width & 0x01) {
+		if (region.width & 0x01u) {
 			// w is odd, round *up* to the nearest multiple of two (i.e., align to the end of the current byte)
 			region.width = (region.width + 1) & ~0x01u;
 			LOG("Updated region.width to %u because of alignment constraints", region.width);

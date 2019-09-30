@@ -29,7 +29,7 @@ static bool
     is_kindle_device(uint32_t dev)
 {
 	switch (dev) {
-		case 0x01:    // K1
+		case 0x01u:    // K1
 			deviceQuirks.isKindleLegacy = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "1", sizeof(deviceQuirks.deviceName) - 1U);
@@ -40,8 +40,8 @@ static bool
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "ADS", sizeof(deviceQuirks.devicePlatform) - 1U);
 			return true;
-		case 0x02:    // K2
-		case 0x03:
+		case 0x02u:    // K2
+		case 0x03u:
 			deviceQuirks.isKindleLegacy = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "2", sizeof(deviceQuirks.deviceName) - 1U);
@@ -50,9 +50,9 @@ static bool
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mario", sizeof(deviceQuirks.devicePlatform) - 1U);
 			return true;
-		case 0x04:    // KDX
-		case 0x05:
-		case 0x09:
+		case 0x04u:    // KDX
+		case 0x05u:
+		case 0x09u:
 			deviceQuirks.isKindleLegacy = true;
 			deviceQuirks.screenDPI      = 150U;
 			// Flawfinder: ignore
@@ -63,9 +63,9 @@ static bool
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mario", sizeof(deviceQuirks.devicePlatform) - 1U);
 			return true;
-		case 0x08:    // K3
-		case 0x06:
-		case 0x0A:
+		case 0x08u:    // K3
+		case 0x06u:
+		case 0x0Au:
 			deviceQuirks.isKindleLegacy = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "3", sizeof(deviceQuirks.deviceName) - 1U);
@@ -74,7 +74,7 @@ static bool
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Luigi", sizeof(deviceQuirks.devicePlatform) - 1U);
 			return true;
-		case 0x0E:    // K4
+		case 0x0Eu:    // K4
 			deviceQuirks.isKindleLegacy = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "4", sizeof(deviceQuirks.deviceName) - 1U);
@@ -83,10 +83,10 @@ static bool
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Yoshi", sizeof(deviceQuirks.devicePlatform) - 1U);
 			return true;
-		case 0x0F:    // K5
-		case 0x11:
-		case 0x10:
-		case 0x12:
+		case 0x0Fu:    // K5
+		case 0x11u:
+		case 0x10u:
+		case 0x12u:
 			deviceQuirks.isKindlePearlScreen = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Touch", sizeof(deviceQuirks.deviceName) - 1U);
@@ -95,7 +95,7 @@ static bool
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Yoshi", sizeof(deviceQuirks.devicePlatform) - 1U);
 			return true;
-		case 0x23:    // K4b
+		case 0x23u:    // K4b
 			deviceQuirks.isKindleLegacy = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "4", sizeof(deviceQuirks.deviceName) - 1U);
@@ -104,12 +104,12 @@ static bool
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Yoshi", sizeof(deviceQuirks.devicePlatform) - 1U);
 			return true;
-		case 0x24:    // PW1
-		case 0x1B:
-		case 0x1C:
-		case 0x1D:
-		case 0x1F:
-		case 0x20:
+		case 0x24u:    // PW1
+		case 0x1Bu:
+		case 0x1Cu:
+		case 0x1Du:
+		case 0x1Fu:
+		case 0x20u:
 			deviceQuirks.isKindlePearlScreen = true;
 			deviceQuirks.screenDPI           = 212U;
 			// Flawfinder: ignore
@@ -120,20 +120,20 @@ static bool
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Yoshime", sizeof(deviceQuirks.devicePlatform) - 1U);
 			return true;
-		case 0xD4:    // PW2
-		case 0x5A:
-		case 0xD5:
-		case 0xD6:
-		case 0xD7:
-		case 0xD8:
-		case 0xF2:
-		case 0x17:
-		case 0x60:
-		case 0xF4:
-		case 0xF9:
-		case 0x62:
-		case 0x61:
-		case 0x5F:
+		case 0xD4u:    // PW2
+		case 0x5Au:
+		case 0xD5u:
+		case 0xD6u:
+		case 0xD7u:
+		case 0xD8u:
+		case 0xF2u:
+		case 0x17u:
+		case 0x60u:
+		case 0xF4u:
+		case 0xF9u:
+		case 0x62u:
+		case 0x61u:
+		case 0x5Fu:
 			deviceQuirks.screenDPI = 212U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "PaperWhite 2", sizeof(deviceQuirks.deviceName) - 1U);
@@ -142,7 +142,7 @@ static bool
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Wario", sizeof(deviceQuirks.devicePlatform) - 1U);
 			return true;
-		case 0xC6:    // KT2
+		case 0xC6u:    // KT2
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Basic", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -150,7 +150,7 @@ static bool
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Wario", sizeof(deviceQuirks.devicePlatform) - 1U);
 			return true;
-		case 0x13:    // KV
+		case 0x13u:    // KV
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Voyage", sizeof(deviceQuirks.deviceName) - 1U);
@@ -159,14 +159,14 @@ static bool
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Wario", sizeof(deviceQuirks.devicePlatform) - 1U);
 			return true;
-		case 0x16:    // ??
-		case 0x21:
+		case 0x16u:    // ??
+		case 0x21u:
 			return true;
-		case 0x54:    // KV
-		case 0x2A:
-		case 0x4F:
-		case 0x52:
-		case 0x53:
+		case 0x54u:    // KV
+		case 0x2Au:
+		case 0x4Fu:
+		case 0x52u:
+		case 0x53u:
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Voyage", sizeof(deviceQuirks.deviceName) - 1U);
@@ -175,13 +175,13 @@ static bool
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Wario", sizeof(deviceQuirks.devicePlatform) - 1U);
 			return true;
-		case 0x07:    // ??
-		case 0x0B:
-		case 0x0C:
-		case 0x0D:
-		case 0x99:
+		case 0x07u:    // ??
+		case 0x0Bu:
+		case 0x0Cu:
+		case 0x0Du:
+		case 0x99u:
 			return true;
-		case 0xDD:    // KT2 AUS
+		case 0xDDu:    // KT2 AUS
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Basic", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -198,20 +198,20 @@ static bool
     is_kindle_device_new(uint32_t dev)
 {
 	switch (dev) {
-		case 0x201:    // PW3
-		case 0x202:
-		case 0x204:
-		case 0x205:
-		case 0x206:
-		case 0x207:
-		case 0x26B:
-		case 0x26C:
-		case 0x26D:
-		case 0x26E:
-		case 0x26F:
-		case 0x270:
-		case 0x293:
-		case 0x294:
+		case 0x201u:    // PW3
+		case 0x202u:
+		case 0x204u:
+		case 0x205u:
+		case 0x206u:
+		case 0x207u:
+		case 0x26Bu:
+		case 0x26Cu:
+		case 0x26Du:
+		case 0x26Eu:
+		case 0x26Fu:
+		case 0x270u:
+		case 0x293u:
+		case 0x294u:
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "PaperWhite 3", sizeof(deviceQuirks.deviceName) - 1U);
@@ -220,12 +220,12 @@ static bool
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Wario", sizeof(deviceQuirks.devicePlatform) - 1U);
 			return true;
-		case 0x20C:    // KOA
-		case 0x20D:
-		case 0x219:
-		case 0x21A:
-		case 0x21B:
-		case 0x21C:
+		case 0x20Cu:    // KOA
+		case 0x20Du:
+		case 0x219u:
+		case 0x21Au:
+		case 0x21Bu:
+		case 0x21Cu:
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Oasis", sizeof(deviceQuirks.deviceName) - 1U);
@@ -234,9 +234,9 @@ static bool
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Duet", sizeof(deviceQuirks.devicePlatform) - 1U);
 			return true;
-		case 0x1BC:    // KT3
-		case 0x269:
-		case 0x26A:
+		case 0x1BCu:    // KT3
+		case 0x269u:
+		case 0x26Au:
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Basic 2", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -244,21 +244,21 @@ static bool
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Heisenberg", sizeof(deviceQuirks.devicePlatform) - 1U);
 			return true;
-		case 0x295:    // KOA2
-		case 0x296:
-		case 0x297:
-		case 0x298:
-		case 0x2E1:
-		case 0x2E2:
-		case 0x2E6:
-		case 0x2E7:
-		case 0x2E8:
-		case 0x341:
-		case 0x342:
-		case 0x343:
-		case 0x344:
-		case 0x347:
-		case 0x34A:
+		case 0x295u:    // KOA2
+		case 0x296u:
+		case 0x297u:
+		case 0x298u:
+		case 0x2E1u:
+		case 0x2E2u:
+		case 0x2E6u:
+		case 0x2E7u:
+		case 0x2E8u:
+		case 0x341u:
+		case 0x342u:
+		case 0x343u:
+		case 0x344u:
+		case 0x347u:
+		case 0x34Au:
 			deviceQuirks.isKindleZelda = true;
 			deviceQuirks.screenDPI     = 300U;
 			// Flawfinder: ignore
@@ -268,27 +268,27 @@ static bool
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Zelda", sizeof(deviceQuirks.devicePlatform) - 1U);
 			return true;
-		case 0x2F7:    // PW4
-		case 0x361:
-		case 0x362:
-		case 0x363:
-		case 0x364:
-		case 0x365:
-		case 0x366:
-		case 0x367:
-		case 0x372:
-		case 0x373:
-		case 0x374:
-		case 0x375:
-		case 0x376:
-		case 0x402:
-		case 0x403:
-		case 0x4D8:
-		case 0x4D9:
-		case 0x4DA:
-		case 0x4DB:
-		case 0x4DC:
-		case 0x4DD:
+		case 0x2F7u:    // PW4
+		case 0x361u:
+		case 0x362u:
+		case 0x363u:
+		case 0x364u:
+		case 0x365u:
+		case 0x366u:
+		case 0x367u:
+		case 0x372u:
+		case 0x373u:
+		case 0x374u:
+		case 0x375u:
+		case 0x376u:
+		case 0x402u:
+		case 0x403u:
+		case 0x4D8u:
+		case 0x4D9u:
+		case 0x4DAu:
+		case 0x4DBu:
+		case 0x4DCu:
+		case 0x4DDu:
 			deviceQuirks.isKindleRex = true;
 			deviceQuirks.screenDPI   = 300U;
 			// Flawfinder: ignore
@@ -298,12 +298,12 @@ static bool
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Rex", sizeof(deviceQuirks.devicePlatform) - 1U);
 			return true;
-		case 0x414:    // KT4
-		case 0x3CF:
-		case 0x3D0:
-		case 0x3D1:
-		case 0x3D2:
-		case 0x3AB:
+		case 0x414u:    // KT4
+		case 0x3CFu:
+		case 0x3D0u:
+		case 0x3D1u:
+		case 0x3D2u:
+		case 0x3ABu:
 			deviceQuirks.isKindleRex = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Basic 3", sizeof(deviceQuirks.deviceName) - 1U);
@@ -312,12 +312,12 @@ static bool
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Rex", sizeof(deviceQuirks.devicePlatform) - 1U);
 			return true;
-		case 0x434:    // KOA3
-		case 0x3D8:
-		case 0x3D7:
-		case 0x3D6:
-		case 0x3D5:
-		case 0x3D4:
+		case 0x434u:    // KOA3
+		case 0x3D8u:
+		case 0x3D7u:
+		case 0x3D6u:
+		case 0x3D5u:
+		case 0x3D4u:
 			deviceQuirks.isKindleZelda = true;
 			deviceQuirks.screenDPI     = 300U;
 			// Flawfinder: ignore
@@ -436,7 +436,7 @@ static void
 			// NOTE: Slice the bracketed section out of the S/N: (G09[0G1]NNNNNNNNNN)
 			snprintf(device_code, 3 + 1, "%.*s", 3, serial_no + 3);
 			// (these ones are encoded in a slightly custom base 32)
-			dev = from_base(device_code, 32);
+			dev = from_base(device_code, 32U);
 			// Check if that looks like a known id in the new device id scheme...
 			if (!is_kindle_device_new(dev)) {
 				WARN("Unidentified Kindle device %s (0x%03X) [%.6s]", device_code, dev, serial_no);
@@ -496,27 +496,27 @@ static void
 		// supported devices,
 		// from https://github.com/bq/cervantes/blob/master/bqHAL/Devices/mx508/src/DeviceInfoMx508.cpp#L33-L37
 		switch (config.pcb_id) {
-			case 22:    // BQ Cervantes Touch - Fnac Touch (2012-2013)
+			case 22U:    // BQ Cervantes Touch - Fnac Touch (2012-2013)
 				deviceQuirks.screenDPI = 167U;
 				// Flawfinder: ignore
 				strncpy(deviceQuirks.deviceName, "Touch", sizeof(deviceQuirks.deviceName) - 1U);
 				break;
-			case 23:    // BQ Cervantes TouchLight - Fnac Touch Plus (2012-2013)
+			case 23U:    // BQ Cervantes TouchLight - Fnac Touch Plus (2012-2013)
 				deviceQuirks.screenDPI = 167U;
 				// Flawfinder: ignore
 				strncpy(deviceQuirks.deviceName, "TouchLight", sizeof(deviceQuirks.deviceName) - 1U);
 				break;
-			case 33:    // BQ Cervantes 2013 - Fnac Touch Light (2013)
+			case 33U:    // BQ Cervantes 2013 - Fnac Touch Light (2013)
 				deviceQuirks.screenDPI = 212U;
 				// Flawfinder: ignore
 				strncpy(deviceQuirks.deviceName, "2013", sizeof(deviceQuirks.deviceName) - 1U);
 				break;
-			case 51:    // BQ Cervantes 3 - Fnac Touch Light 2 (2016)
+			case 51U:    // BQ Cervantes 3 - Fnac Touch Light 2 (2016)
 				deviceQuirks.screenDPI = 300U;
 				// Flawfinder: ignore
 				strncpy(deviceQuirks.deviceName, "3", sizeof(deviceQuirks.deviceName) - 1U);
 				break;
-			case 68:    // BQ Cervantes 4
+			case 68U:    // BQ Cervantes 4
 				deviceQuirks.screenDPI = 300U;
 				// Flawfinder: ignore
 				strncpy(deviceQuirks.deviceName, "4", sizeof(deviceQuirks.deviceName) - 1U);
@@ -554,7 +554,7 @@ static void
 	// NOTE: Device code list pilfered from
 	//       https://github.com/geek1011/KoboStuff/blob/gh-pages/kobofirmware.js#L11
 	switch (kobo_id) {
-		case 310:    // Touch A/B (trilogy)
+		case 310U:    // Touch A/B (trilogy)
 			deviceQuirks.isKoboNonMT = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Touch A/B", sizeof(deviceQuirks.deviceName) - 1U);
@@ -563,7 +563,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 3", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 320:    // Touch C (trilogy)
+		case 320U:    // Touch C (trilogy)
 			deviceQuirks.isKoboNonMT = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Touch C", sizeof(deviceQuirks.deviceName) - 1U);
@@ -572,7 +572,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 4", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 340:    // Mini (pixie)
+		case 340U:    // Mini (pixie)
 			deviceQuirks.isKoboNonMT = true;
 			deviceQuirks.screenDPI   = 200U;
 			// Flawfinder: ignore
@@ -582,7 +582,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 4", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 330:    // Glo (kraken)
+		case 330U:    // Glo (kraken)
 			deviceQuirks.isKoboNonMT = true;
 			deviceQuirks.screenDPI   = 212U;
 			// Flawfinder: ignore
@@ -592,7 +592,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 4", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 371:    // Glo HD (alyssum)
+		case 371U:    // Glo HD (alyssum)
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Glo HD", sizeof(deviceQuirks.deviceName) - 1U);
@@ -601,7 +601,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 372:    // Touch 2.0 (pika)
+		case 372U:    // Touch 2.0 (pika)
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Touch 2.0", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -609,7 +609,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 360:    // Aura (phoenix)
+		case 360U:    // Aura (phoenix)
 			// NOTE: The bottom 10 pixels are blacked out by Nickel (behind the bezel)
 			deviceQuirks.koboVertOffset = -10;
 			// NOTE: According to the nightmode hack, the Aura's kernel *may* be crashy w/ PxP inversion...
@@ -622,7 +622,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 5", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 350:    // Aura HD (dragon)
+		case 350U:    // Aura HD (dragon)
 			deviceQuirks.isKoboNonMT = true;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
 			deviceQuirks.ntxBootRota  = FB_ROTATE_UR;
@@ -635,7 +635,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 4", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 370:    // Aura H2O (dahlia)
+		case 370U:    // Aura H2O (dahlia)
 			// NOTE: The top 11 pixels are blacked out by Nickel (behind the bezel)
 			deviceQuirks.koboVertOffset = 11;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
@@ -649,7 +649,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 5", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 374:    // Aura H2O² (snow)
+		case 374U:    // Aura H2O² (snow)
 			deviceQuirks.ntxBootRota = FB_ROTATE_UR;
 			// NOTE: Is indeed NTX_ROTA_STRAIGHT
 			deviceQuirks.screenDPI = 265U;
@@ -660,7 +660,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 378:    // Aura H2O² r2 (snow)
+		case 378U:    // Aura H2O² r2 (snow)
 			deviceQuirks.isKoboMk7   = true;
 			deviceQuirks.ntxBootRota = FB_ROTATE_UR;
 			// NOTE: *Might* be NTX_ROTA_ODD_INVERTED
@@ -672,7 +672,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 373:    // Aura ONE (daylight)
+		case 373U:    // Aura ONE (daylight)
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Aura One", sizeof(deviceQuirks.deviceName) - 1U);
@@ -681,7 +681,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 381:    // Aura ONE LE (daylight)
+		case 381U:    // Aura ONE LE (daylight)
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Aura One LE", sizeof(deviceQuirks.deviceName) - 1U);
@@ -690,7 +690,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 375:    // Aura SE (star)
+		case 375U:    // Aura SE (star)
 			deviceQuirks.screenDPI = 212U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Aura SE", sizeof(deviceQuirks.deviceName) - 1U);
@@ -699,7 +699,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 379:    // Aura SE r2 (star)
+		case 379U:    // Aura SE r2 (star)
 			deviceQuirks.isKoboMk7 = true;
 			// NOTE: *Might* be NTX_ROTA_ODD_INVERTED
 			deviceQuirks.screenDPI = 212U;
@@ -710,7 +710,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 376:    // Clara HD (nova)
+		case 376U:    // Clara HD (nova)
 			deviceQuirks.isKoboMk7 = true;
 			// NOTE: Is indeed NTX_ROTA_STRAIGHT
 			deviceQuirks.screenDPI = 300U;
@@ -721,7 +721,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 377:    // Forma (frost)
+		case 377U:    // Forma (frost)
 			deviceQuirks.isKoboMk7 = true;
 			deviceQuirks.canRotate = true;
 			// NOTE: Because Mk.7 and KOBO_HWCFG_DisplayBusWidth (35) is "16Bits_mirror" (3)
@@ -734,7 +734,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 380:    // Forma 32GB (frost)
+		case 380U:    // Forma 32GB (frost)
 			deviceQuirks.isKoboMk7 = true;
 			deviceQuirks.canRotate = true;
 			// NOTE: Because Mk.7 and KOBO_HWCFG_DisplayBusWidth (35) is "16Bits_mirror" (3)
@@ -747,7 +747,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 384:    // Libra H2O (storm)
+		case 384U:    // Libra H2O (storm)
 			deviceQuirks.isKoboMk7 = true;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UR, nickel is FB_ROTATE_UR
 			//       And panel is *actually* in Portrait. Finally!
@@ -764,7 +764,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 0:
+		case 0U:
 			// Like kobo_config.sh, assume Trilogy as a fallback
 			deviceQuirks.isKoboNonMT = true;
 			// Flawfinder: ignore
@@ -866,7 +866,7 @@ static void
 		fclose(fp);
 
 		// As per /bin/kobo_config.sh, match PCB IDs to Product IDs via a LUT...
-		unsigned short int kobo_id = 0;
+		unsigned short int kobo_id = 0U;
 		// Mainly to make GCC happy, because if alloca failed, we're screwed anyway.
 		if (payload) {
 			/*
@@ -884,32 +884,32 @@ static void
 				kobo_id = kobo_ids[payload[KOBO_HWCFG_PCB]];
 
 				// And now for the fun part, the few device variants that use the same PCB ID...
-				if (kobo_id == 374 || kobo_id == 375) {
+				if (kobo_id == 374U || kobo_id == 375U) {
 					// Discriminate the Mk.7 version for dual rev models by checking the CPU...
 					// NOTE: kobo_cpus[10] == "mx6sll"
-					if (payload[KOBO_HWCFG_CPU] == 10) {
+					if (payload[KOBO_HWCFG_CPU] == 10U) {
 						// Thankfully, that works for both the H2O² (374 -> 378),
 						// and the Aura SE (375 -> 379) ;)
 						kobo_id = (unsigned short int) (kobo_id + 4U);
 					}
-				} else if (kobo_id == 371) {
+				} else if (kobo_id == 371U) {
 					// Discriminate Alyssum from Pika, by checking the Display Resolution...
 					// NOTE: kobo_disp_res[0] == "800x600"
-					if (payload[KOBO_HWCFG_DisplayResolution] == 0) {
+					if (payload[KOBO_HWCFG_DisplayResolution] == 0U) {
 						// Glo HD (Alyssum) [371] -> Touch 2.0 (Pika) [372]
-						kobo_id = 372;
+						kobo_id = 372U;
 					}
-				} else if (kobo_id == 373 || kobo_id == 377) {
+				} else if (kobo_id == 373U || kobo_id == 377U) {
 					// Discriminate 32GB variants...
 					// NOTE: We compare against 8GB, but in practice, given storage shenanigans and
 					//       the truncation involved here, we end up with 7 on 8GB devices ;).
 					if ((storagesize / (1024U * 1024U * 1024U)) > 8U) {
-						if (kobo_id == 373) {
+						if (kobo_id == 373U) {
 							// Aura ONE (daylight) [373] -> Aura ONE LE (daylight) [381]
-							kobo_id = 381;
-						} else if (kobo_id == 377) {
+							kobo_id = 381U;
+						} else if (kobo_id == 377U) {
 							// Forma (frost) [377] -> Forma 32GB (frost) [380]
-							kobo_id = 380;
+							kobo_id = 380U;
 						}
 					}
 				}
@@ -930,9 +930,9 @@ static void
 {
 #	if defined(FBINK_FOR_KINDLE)
 	identify_kindle();
-	if (deviceQuirks.deviceId > 0xFF) {
+	if (deviceQuirks.deviceId > 0xFFu) {
 		char* restrict dev_id    = NULL;
-		dev_id                   = to_base(deviceQuirks.deviceId, 32);
+		dev_id                   = to_base(deviceQuirks.deviceId, 32U);
 		const char* restrict pad = "000";
 		ELOG("Detected a Kindle %s (%.*s%s -> 0x%03X => %s on %s)",
 		     deviceQuirks.deviceName,
