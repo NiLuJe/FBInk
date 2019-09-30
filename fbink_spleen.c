@@ -24,30 +24,30 @@
 static const uint16_t*
     spleen_get_bitmap(uint32_t codepoint)
 {
-	if (codepoint >= 0x20 && codepoint <= 0x7f) {
-		return spleen_block1[codepoint - 0x20];
-	} else if (codepoint >= 0xa0 && codepoint <= 0x17f) {
-		return spleen_block2[codepoint - 0xa0];
-	} else if (codepoint >= 0x2018 && codepoint <= 0x2019) {
-		return spleen_block3[codepoint - 0x2018];
-	} else if (codepoint >= 0x201c && codepoint <= 0x201d) {
-		return spleen_block4[codepoint - 0x201c];
-	} else if (codepoint == 0x2022) {
+	if (codepoint >= 0x20u && codepoint <= 0x7fu) {
+		return spleen_block1[codepoint - 0x20u];
+	} else if (codepoint >= 0xa0u && codepoint <= 0x17fu) {
+		return spleen_block2[codepoint - 0xa0u];
+	} else if (codepoint >= 0x2018u && codepoint <= 0x2019u) {
+		return spleen_block3[codepoint - 0x2018u];
+	} else if (codepoint >= 0x201cu && codepoint <= 0x201du) {
+		return spleen_block4[codepoint - 0x201cu];
+	} else if (codepoint == 0x2022u) {
 		return spleen_block5[0];
-	} else if (codepoint == 0x2026) {
+	} else if (codepoint == 0x2026u) {
 		return spleen_block6[0];
-	} else if (codepoint == 0x20ac) {
+	} else if (codepoint == 0x20acu) {
 		return spleen_block7[0];
-	} else if (codepoint >= 0x2500 && codepoint <= 0x259f) {
-		return spleen_block8[codepoint - 0x2500];
-	} else if (codepoint >= 0x2630 && codepoint <= 0x2637) {
-		return spleen_block9[codepoint - 0x2630];
-	} else if (codepoint >= 0x2800 && codepoint <= 0x28ff) {
-		return spleen_block10[codepoint - 0x2800];
-	} else if (codepoint >= 0xe0a0 && codepoint <= 0xe0a1) {
-		return spleen_block11[codepoint - 0xe0a0];
-	} else if (codepoint >= 0xe0b0 && codepoint <= 0xe0b3) {
-		return spleen_block12[codepoint - 0xe0b0];
+	} else if (codepoint >= 0x2500u && codepoint <= 0x259fu) {
+		return spleen_block8[codepoint - 0x2500u];
+	} else if (codepoint >= 0x2630u && codepoint <= 0x2637u) {
+		return spleen_block9[codepoint - 0x2630u];
+	} else if (codepoint >= 0x2800u && codepoint <= 0x28ffu) {
+		return spleen_block10[codepoint - 0x2800u];
+	} else if (codepoint >= 0xe0a0u && codepoint <= 0xe0a1u) {
+		return spleen_block11[codepoint - 0xe0a0u];
+	} else if (codepoint >= 0xe0b0u && codepoint <= 0xe0b3u) {
+		return spleen_block12[codepoint - 0xe0b0u];
 	} else {
 		WARN("Codepoint U+%04X is not covered by this font", codepoint);
 		return spleen_block1[0];
