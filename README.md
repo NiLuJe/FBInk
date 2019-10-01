@@ -46,7 +46,7 @@ As far as hardware rotation is concerned, there are a few specific exceptions ma
 -   Those running in 16bpp mode and appearing to be in landscape mode: since that seems to be their native state, we *attempt* to compensate for this,
     as we can legitimately be used before Nickel itself corrects this.
 
--   On devices with an accelerometer, like the Forma, where Nickel itself will handle the hardware rotation.
+-   On devices with an accelerometer, like the Forma & Libra, where Nickel itself will handle the hardware rotation.
 
 ## How does it look?
 
