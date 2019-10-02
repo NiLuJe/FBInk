@@ -672,7 +672,7 @@ int
 	bool      is_mimic       = false;
 	bool      is_cls         = false;
 	bool      is_daemon      = false;
-	uint8_t   daemon_lines   = 1U;
+	uint8_t   daemon_lines   = 0U;
 	bool      wait_for       = false;
 	uint8_t   progress       = 0;
 	bool      is_truetype    = false;
