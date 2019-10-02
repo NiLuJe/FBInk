@@ -1523,7 +1523,8 @@ int
 		errfnd = true;
 	}
 
-	// Error out if daemon mode is enabled with incompatible options (basically anything that isn't is_truetype or nothing).
+	// Error out if daemon mode is enabled with incompatible options
+	// (basically anything that isn't is_truetype, is_*bar or nothing).
 	if (is_daemon &&
 	    (is_image || want_linecode || want_linecount || want_lastrect || is_eval || is_interactive || is_cls)) {
 		fprintf(stderr,
@@ -1666,7 +1667,7 @@ int
 		// Then poll it to react when someone writes to it...
 		// NOTE: Since the write end will only be open for very short amount of times, we prefer polling,
 		//       otherwise, read would spend most of its time busy-looping on EOF...
-		// NOTE: See we POLLHUP note below for the reasoning behing opening it RW and not RO...
+		// NOTE: See the POLLHUP note below for the reasoning behing opening it RW and not RO...
 		pipefd = open(pipePath, O_RDWR | O_NONBLOCK | O_CLOEXEC);
 		if (pipefd == -1) {
 			perror("open");
@@ -1687,6 +1688,7 @@ int
 		struct pollfd pfd;
 		pfd.fd     = pipefd;
 		pfd.events = POLLIN;
+		// Forevah'!
 		while (1) {
 			int pn = poll(&pfd, 1, -1);
 			if (pn == -1) {

@@ -61,7 +61,7 @@
 		(x__ > y__) ? x__ : y__;                                                                                 \
 	})
 
-// Where our named pipe lives (/tmp should be a safe bet on every support platform)
+// Where our named pipe lives (/tmp should be a safe bet on every supported platform)
 #define FBINK_PIPE "/tmp/fbink-fifo"
 
 static void show_helpmsg(void);
