@@ -278,13 +278,13 @@ static void
 	    "\tWhile, for example, setting it to 1 will ensure every print will start at the same coordinates.\n"
 	    "\tIn this mode, fbink will daemonize instantly, and then print its PID to stdout. You should consume stdout, and check the return code:\n"
 	    "\tif it's 0, then you have a guarantee that what you've grabbed from stdout is *strictly* a PID.\n"
-	    "\tBy default, it will create a named pipe for IPC: /tmp/fbink (if the file already exists, whatever type it may be, FBInk will abort).\n"
+	    "\tBy default, it will create a named pipe for IPC: " FBINK_PIPE " (if the file already exists, whatever type it may be, FBInk will abort).\n"
 	    "\tYou can ask for a custom path by setting FBINK_NAMED_PIPE to an absolute path in your environment.\n"
 	    "\tCreating and removing that FIFO is FBInk's responsibility. Don't create it yourself.\n"
 	    "\tMake sure you kill FBInk via SIGTERM so it has a chance to remove it itself on exit.\n"
 	    "\t(Otherwise, you may want to ensure that yourself *before* starting it in daemon mode).\n"
 	    "\tWith the technicalities out of the way, it's then as simple as writing to that pipe for stuff to show up on screen ;).\n"
-	    "\tf.g., echo -n 'Hello World!' > /tmp/fbink\n"
+	    "\tf.g., echo -n 'Hello World!' > " FBINK_PIPE "\n"
 	    "\tRemember that LFs are honored!\n"
 	    "\n",
 	    fbink_version());

@@ -62,7 +62,7 @@
 	})
 
 // Where our named pipe lives (/tmp should be a safe bet on every support platform)
-#define FBINK_PIPE "/tmp/fbink"
+#define FBINK_PIPE "/tmp/fbink-fifo"
 
 static void show_helpmsg(void);
 
