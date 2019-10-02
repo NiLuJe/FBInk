@@ -1661,10 +1661,16 @@ int
 			goto cleanup;
 		}
 
+		// Make sure we only load fonts once... Best not mangle the paths, as we no longer have a visible stderr ;).
+		if (is_truetype) {
+			load_ot_fonts(reg_ot_file, bd_ot_file, it_ot_file, bdit_ot_file, &fbink_cfg);
+		}
+
 		// We'll need to keep track of the amount of printed lines to honor daemon_lines...
 		int linecount = -1;
 		unsigned short int total_lines = 0U;
 		short int initial_row = fbink_cfg.row;
+		short int initial_top = ot_config.margins.top;
 
 		struct pollfd pfd;
 		pfd.fd     = fd;
@@ -1711,8 +1717,19 @@ int
 								fbink_print_activity_bar(fbfd, bar_val, &fbink_cfg);
 							}
 						}
+					} else if (is_truetype) {
+						linecount = fbink_print_ot(fbfd, buf, &ot_config, &fbink_cfg, &ot_fit);
+
+						// Move to the next line, unless it'd make us blow past daemon_lines...
+						total_lines = (unsigned short int) (total_lines + ot_fit.rendered_lines);
+						if (daemon_lines == 0U || total_lines < daemon_lines) {
+							ot_config.margins.top = (short int) linecount;
+						} else {
+							// Reset to original settings...
+							total_lines = 0U;
+							ot_config.margins.top = (short int) initial_top;
+						}
 					} else {
-						// FIXME: Handle ttf (load/clear fonts)
 						linecount = fbink_print(fbfd, buf, &fbink_cfg);
 
 						// Move to the next line, unless it'd make us blow past daemon_lines...
