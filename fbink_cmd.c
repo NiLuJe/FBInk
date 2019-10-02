@@ -1661,7 +1661,6 @@ int
 		}
 
 		// We'll need to keep track of the amount of printed lines to honor daemon_lines...
-		// TODO: Allow daemon_lines 0 to mean always honor...
 		int linecount = -1;
 		unsigned short int total_lines = 0U;
 		short int initial_row = fbink_cfg.row;
@@ -1707,7 +1706,7 @@ int
 
 					// Move to the next line, unless it'd make us blow past daemon_lines...
 					total_lines = (unsigned short int) (total_lines + linecount);
-					if (total_lines < daemon_lines) {
+					if (daemon_lines == 0U || total_lines < daemon_lines) {
 						fbink_cfg.row = (short int) (fbink_cfg.row + linecount);
 					} else {
 						// Reset to original settings...
