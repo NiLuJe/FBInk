@@ -1433,8 +1433,9 @@ int
 		errfnd = true;
 	}
 
-	// Enforce quiet output when asking for is_mimic, is_eval, want_linecount or want_lastrect, to avoid polluting the output...
-	if (is_mimic || is_eval || want_linecount || want_lastrect) {
+	// Enforce quiet output when asking for is_daemon, is_mimic, is_eval, want_linecount or want_lastrect,
+	// to avoid polluting the output...
+	if (is_daemon | is_mimic || is_eval || want_linecount || want_lastrect) {
 		fbink_cfg.is_quiet   = true;
 		fbink_cfg.is_verbose = false;
 	}
@@ -1522,10 +1523,11 @@ int
 	// If we're asking to run in daemon mode, that takes precedence over nearly everything.
 	if (is_daemon) {
 		// TODO: Actually daemonize ;).
-		// TODO: Enforce quiet.
 
 		// Start by creating our named pipe, in case it doesn't exit yet
 		// FIXME: We never delete it, allow re-using an existing pipe (... provided it's actually a pipe).
+		// TODO: Allow using a specific pipe, in case we'd want multiple daemons with different settings?
+		//       Possibly via an env var?
 		rv = mkfifo(FBINK_PIPE, 0666);
 		if (rv != 0) {
 			perror("mkfifo");
