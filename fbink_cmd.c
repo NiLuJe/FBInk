@@ -1544,6 +1544,8 @@ int
 
 		// We'll need to keep track of the amount of printed lines to honor daemon_lines...
 		int linecount = -1;
+		unsigned short int total_lines = 0U;
+		short int initial_row = fbink_cfg.row;
 
 		struct pollfd pfd;
 		pfd.fd     = fd;
@@ -1582,6 +1584,16 @@ int
 						rv = ERRCODE(EXIT_FAILURE);
 						goto cleanup;
 					}
+
+					// Move to the next line, unless it'd make us blow past daemon_lines...
+					total_lines = (unsigned short int) (total_lines + linecount);
+					if (total_lines < daemon_lines) {
+						fbink_cfg.row = (short int) (fbink_cfg.row + linecount);
+					} else {
+						// Reset to original settings...
+						total_lines = 0U;
+						fbink_cfg.row = initial_row;
+					}
 				}
 				// NOTE: The first writer will invariably end up closing its end of the pipe.
 				//       This means POLLHUP will be set from that point on,
@@ -1594,7 +1606,7 @@ int
 
 		// Unreachable ;).
 		// FIXME: Add this to cleanup
-		// FIXME: And a SIGTERM handler (for the unlink :/)?
+		// FIXME: And a SIGTERM/SIGINT/SIGQUIT handler (for the unlink :/)?
 		close(fd);
 		unlink(FBINK_PIPE);
 	}
