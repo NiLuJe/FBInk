@@ -25,6 +25,7 @@
 #include "fbink.h"
 
 #include <errno.h>
+#include <fcntl.h>
 #include <getopt.h>
 #include <limits.h>
 #include <locale.h>
@@ -32,7 +33,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <poll.h>
 #include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -55,6 +59,9 @@
 		__auto_type y__ = (Y);                                                                                   \
 		(x__ > y__) ? x__ : y__;                                                                                 \
 	})
+
+// Where our named pipe lives (/tmp should be a safe bet on every support platform)
+#define FBINK_PIPE "/tmp/fbink"
 
 static void show_helpmsg(void);
 

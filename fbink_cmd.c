@@ -494,6 +494,7 @@ int
                                               { "mimic", no_argument, NULL, 'Z' },
                                               { "cls", no_argument, NULL, 'k' },
                                               { "wait", no_argument, NULL, 'w' },
+{ "daemon", required_argument, NULL, 'd' },
                                               { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_cfg = { 0 };
@@ -580,6 +581,8 @@ int
 	bool      is_infinite    = false;
 	bool      is_mimic       = false;
 	bool      is_cls         = false;
+	bool      is_daemon      = false;
+	uint8_t   daemon_lines   = 1U;
 	bool      wait_for       = false;
 	uint8_t   progress       = 0;
 	bool      is_truetype    = false;
@@ -591,7 +594,7 @@ int
 
 	// NOTE: c.f., https://codegolf.stackexchange.com/q/148228 to sort this mess when I need to find an available letter ;p
 	while ((opt = getopt_long(
-		    argc, argv, "y:x:Y:X:hfcmMprs:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bDW:HEZkw", opts, &opt_index)) != -1) {
+		    argc, argv, "y:x:Y:X:hfcmMprs:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bDW:HEZkwd:", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				if (strtol_hi(opt, NULL, optarg, &fbink_cfg.row) < 0) {
@@ -1398,6 +1401,12 @@ int
 			case 'w':
 				wait_for = true;
 				break;
+			case 'd':
+				if (strtoul_hhu(opt, NULL, optarg, &daemon_lines) < 0) {
+					errfnd = true;
+				}
+				is_daemon = true;
+				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
 				errfnd = true;
@@ -1508,6 +1517,82 @@ int
 		// Infinite activity bar
 		is_activitybar = true;
 		is_infinite    = true;
+	}
+
+	// If we're asking to run in daemon mode, that takes precedence over nearly everything.
+	if (is_daemon) {
+		// TODO: Actually daemonize ;).
+		// TODO: Enforce quiet.
+
+		// Start by creating our named pipe, in case it doesn't exit yet
+		// FIXME: We never delete it, allow re-using an existing pipe (... provided it's actually a pipe).
+		rv = mkfifo(FBINK_PIPE, 0666);
+		if (rv != 0) {
+			perror("mkfifo");
+			goto cleanup;
+		}
+
+		// Then poll it to react when someone writes to it...
+		// NOTE: Since the write end will only be open for very short amount of times, we prefer polling,
+		//       otherwise, read would spend most of its time busy-looping on EOF...
+		int fd = open(FBINK_PIPE, O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+		if (fd == -1) {
+			perror("open");
+			goto cleanup;
+		}
+
+		// We'll need to keep track of the amount of printed lines to honor daemon_lines...
+		int linecount = -1;
+
+		struct pollfd pfd;
+		pfd.fd     = fd;
+		pfd.events = POLLIN;
+		while (1) {
+			int pn = poll(&pfd, 1, -1);
+			if (pn == -1) {
+				if (errno == EINTR) {
+					continue;
+				}
+				perror("poll");
+				rv = pn;
+				goto cleanup;
+			}
+
+			if (pn > 0) {
+				if (pfd.revents & POLLIN) {
+					// We've got data to read, do it!
+					char buf[PIPE_BUF] = { 0 };
+					ssize_t bytes_read = read(pfd.fd, buf, sizeof(buf));
+					if (bytes_read == -1 && errno != EAGAIN) {
+						perror("read");
+						rv = bytes_read;
+						goto cleanup;
+					}
+
+					// The poll should have ensured we have something to read, but, just in case...
+					if (bytes_read <= 0) {
+						continue;
+					}
+
+					// FIXME: Handle daemon_lines properly.
+					// FIXME: Handle ttf
+					if ((linecount = fbink_print(fbfd, buf, &fbink_cfg)) < 0) {
+						fprintf(stderr, "Failed to print that string!\n");
+						rv = ERRCODE(EXIT_FAILURE);
+						goto cleanup;
+					}
+				}
+				if (pfd.revents & POLLHUP) {
+					fprintf(stderr, "HANGUP!\n");
+				}
+			}
+		}
+
+		// Unreachable ;).
+		// FIXME: Add this to cleanup
+		// FIXME: And a SIGTERM handler (for the unlink :/)?
+		close(fd);
+		unlink(FBINK_PIPE);
 	}
 
 	char* string;
