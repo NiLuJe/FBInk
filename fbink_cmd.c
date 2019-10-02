@@ -286,6 +286,7 @@ static void
 	    "\tWith the technicalities out of the way, it's then as simple as writing to that pipe for stuff to show up on screen ;).\n"
 	    "\tf.g., echo -n 'Hello World!' > " FBINK_PIPE "\n"
 	    "\tRemember that LFs are honored!\n"
+	    "\tAlso, the daemon will NOT abort on errors, and it redirects stdout & stderr to /dev/null, so errors & bogus input will be silently ignored!\n"
 	    "\n",
 	    fbink_version());
 
@@ -1698,6 +1699,7 @@ int
 					// First things first, do an explicit reinit, as we might have been running for a while.
 					fbink_reinit(fbfd, &fbink_cfg);
 
+					// NOTE: In every case, we *ignore* errors in order not to silently die on bogus input...
 					// If we're drawing a bar, make sure we were fed vaguely valid input...
 					if (is_progressbar || is_activitybar) {
 						uint8_t bar_val = 0U;
@@ -1711,12 +1713,7 @@ int
 						}
 					} else {
 						// FIXME: Handle ttf (load/clear fonts)
-						// FIXME: Perservere on error.
-						if ((linecount = fbink_print(fbfd, buf, &fbink_cfg)) < 0) {
-							fprintf(stderr, "Failed to print that string!\n");
-							rv = ERRCODE(EXIT_FAILURE);
-							goto cleanup;
-						}
+						linecount = fbink_print(fbfd, buf, &fbink_cfg);
 
 						// Move to the next line, unless it'd make us blow past daemon_lines...
 						total_lines = (unsigned short int) (total_lines + linecount);
