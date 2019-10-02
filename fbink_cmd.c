@@ -277,9 +277,11 @@ static void
 
 // Fun helpers for the daemon mode...
 static void
-    cleanup_handler(int signum)
+    cleanup_handler(int signum __attribute__((unused)))
 {
 	unlink(FBINK_PIPE);
+	// And enforce an exit, otherwise our non-blocking syscalls will happily resume after an EINTR ;).
+	exit(EXIT_SUCCESS);
 }
 
 // Truly infinite progress bar
@@ -1533,7 +1535,7 @@ int
 
 		// Ensure we'll cleanup behind us...
 		struct sigaction new_action = { 0 };
-		new_action.sa_handler = cleanup_handler;
+		new_action.sa_handler = &cleanup_handler;
 		sigemptyset(&new_action.sa_mask);
 		new_action.sa_flags = 0;
 		if ((rv = sigaction(SIGTERM, &new_action, NULL) < 0)) {

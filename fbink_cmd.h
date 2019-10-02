@@ -66,7 +66,7 @@
 
 static void show_helpmsg(void);
 
-static void cleanup_handler(int);
+static void cleanup_handler(int __attribute__((unused)));
 
 static int do_infinite_progress_bar(int, const FBInkConfig*);
 
