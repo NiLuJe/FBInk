@@ -278,6 +278,7 @@ static void
 	    "\tWhile, for example, setting it to 1 will ensure every print will start at the same coordinates.\n"
 	    "\tIn this mode, fbink will daemonize instantly, and then print its PID to stdout. You should consume stdout, and check the return code:\n"
 	    "\tif it's 0, then you have a guarantee that what you've grabbed from stdout is *strictly* a PID.\n"
+	    "\tYou can send a kill -0 to that PID to check for an early abort.\n"
 	    "\tBy default, it will create a named pipe for IPC: " FBINK_PIPE " (if the file already exists, whatever type it may be, FBInk will abort).\n"
 	    "\tYou can ask for a custom path by setting FBINK_NAMED_PIPE to an absolute path in your environment.\n"
 	    "\tCreating and removing that FIFO is FBInk's responsibility. Don't create it yourself.\n"
