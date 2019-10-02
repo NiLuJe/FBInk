@@ -1722,7 +1722,8 @@ int
 
 						// Move to the next line, unless it'd make us blow past daemon_lines...
 						total_lines = (unsigned short int) (total_lines + ot_fit.rendered_lines);
-						if (daemon_lines == 0U || total_lines < daemon_lines) {
+						// NOTE: A return value of 0 means not enough space for a new line...
+						if ((daemon_lines == 0U || total_lines < daemon_lines) && linecount > 0) {
 							ot_config.margins.top = (short int) linecount;
 						} else {
 							// Reset to original settings...
@@ -1734,7 +1735,7 @@ int
 
 						// Move to the next line, unless it'd make us blow past daemon_lines...
 						total_lines = (unsigned short int) (total_lines + linecount);
-						if (daemon_lines == 0U || total_lines < daemon_lines) {
+						if ((daemon_lines == 0U || total_lines < daemon_lines) && linecount >= 0) {
 							fbink_cfg.row = (short int) (fbink_cfg.row + linecount);
 						} else {
 							// Reset to original settings...
