@@ -1535,7 +1535,8 @@ int
 		// Then poll it to react when someone writes to it...
 		// NOTE: Since the write end will only be open for very short amount of times, we prefer polling,
 		//       otherwise, read would spend most of its time busy-looping on EOF...
-		int fd = open(FBINK_PIPE, O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+		// NOTE: See we POLLHUP note below for the reasoning behing opening it RW and not RO...
+		int fd = open(FBINK_PIPE, O_RDWR | O_NONBLOCK | O_CLOEXEC);
 		if (fd == -1) {
 			perror("open");
 			goto cleanup;
@@ -1575,16 +1576,19 @@ int
 					}
 
 					// FIXME: Handle daemon_lines properly.
-					// FIXME: Handle ttf
+					// FIXME: Handle ttf (load/clear fonts)
 					if ((linecount = fbink_print(fbfd, buf, &fbink_cfg)) < 0) {
 						fprintf(stderr, "Failed to print that string!\n");
 						rv = ERRCODE(EXIT_FAILURE);
 						goto cleanup;
 					}
 				}
-				if (pfd.revents & POLLHUP) {
-					fprintf(stderr, "HANGUP!\n");
-				}
+				// NOTE: The first writer will invariably end up closing its end of the pipe.
+				//       This means POLLHUP will be set from that point on,
+				//       and the only way to clear it would be to close our reader...
+				//       We don't want to do that, so, just ignore POLLHUP,
+				//       and prevent it from ever happening in the first place,
+				//       by ensuring we ourselves are considered as a writer (by opening the pipe RDWR) ;).
 			}
 		}
 
