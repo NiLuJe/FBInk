@@ -74,7 +74,7 @@ static int do_infinite_progress_bar(int, const FBInkConfig*);
 
 static void load_ot_fonts(const char*, const char*, const char*, const char*, const FBInkConfig*);
 
-FBInkRect   total_rect = { 0U };
+FBInkRect   totalRect = { 0U };
 static void compute_lastrect(void);
 static void recap_lastrect(void);
 static void print_lastrect(void);

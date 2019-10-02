@@ -297,7 +297,7 @@ static void
 static void
     cleanup_handler(int signum __attribute__((unused)))
 {
-	unlink(FBINK_PIPE);
+	unlink(pipePath);
 	// And enforce an exit, otherwise our non-blocking syscalls will happily resume after an EINTR ;).
 	exit(EXIT_SUCCESS);
 }
@@ -1642,12 +1642,17 @@ int
 			goto cleanup;
 		}
 
+		// If we want to use a custom pipe name, honor that...
+		char *custom_pipe = getenv("FBINK_NAMED_PIPE");
+		if (custom_pipe) {
+			strncpy(pipePath, custom_pipe, sizeof(pipePath) - 1U);
+		} else {
+			strncpy(pipePath, FBINK_PIPE, sizeof(pipePath) - 1U);
+		}
+
 		// Start by creating our named pipe.
 		// NOTE: You cannot re-use an existing pipe!
-		// TODO: Allow using a specific pipe, in case we'd want multiple daemons with different settings?
-		//       Possibly via an env var?
-		//       It'd need to be snprintf'ed in a global for the signal handler...
-		rv = mkfifo(FBINK_PIPE, 0666);
+		rv = mkfifo(pipePath, 0666);
 		if (rv != 0) {
 			perror("mkfifo");
 			goto cleanup;
@@ -1657,7 +1662,7 @@ int
 		// NOTE: Since the write end will only be open for very short amount of times, we prefer polling,
 		//       otherwise, read would spend most of its time busy-looping on EOF...
 		// NOTE: See we POLLHUP note below for the reasoning behing opening it RW and not RO...
-		pipefd = open(FBINK_PIPE, O_RDWR | O_NONBLOCK | O_CLOEXEC);
+		pipefd = open(pipePath, O_RDWR | O_NONBLOCK | O_CLOEXEC);
 		if (pipefd == -1) {
 			perror("open");
 			goto cleanup;
@@ -2282,7 +2287,7 @@ cleanup:
 		if (pipefd != -1) {
 			close(pipefd);
 		}
-		unlink(FBINK_PIPE);
+		unlink(pipePath);
 	}
 
 	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
