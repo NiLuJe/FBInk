@@ -1517,7 +1517,13 @@ int
 		errfnd = true;
 	}
 
-	// FIXME: Error out if daemon mode is enabled with incompatible option (image, anything that prints to stdout)
+	// Error out if daemon mode is enabled with incompatible options (basically anything that isn't is_truetype or nothing).
+	// FIXME: Allow progress/activity bar, though...
+	if (is_daemon && (is_image || want_linecode || want_linecount || want_lastrect || is_eval || is_interactive || is_progressbar || is_activitybar || is_cls)) {
+		fprintf(stderr,
+			"Incompatible options: -d, --daemon can only be used for simple text only workflows!\n");
+		errfnd = true;
+	}
 
 	// Enforce quiet output when asking for is_daemon, is_mimic, is_eval, want_linecount or want_lastrect,
 	// to avoid polluting the output...
