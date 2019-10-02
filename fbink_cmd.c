@@ -344,11 +344,12 @@ static int
 	fprintf(stdout, "%ld\n", (long) getpid());
 	fflush(stdout);
 
-	// Redirect stdin & stdout to /dev/null
+	// Redirect stdin, stdout & stderr to /dev/null
 	if ((fd = open("/dev/null", O_RDWR)) != -1) {
 		dup2(fd, fileno(stdin));
 		dup2(fd, fileno(stdout));
-		if (fd > 2) {
+		dup2(fd, fileno(stderr));
+		if (fd > 3) {
 			close(fd);
 		}
 	} else {
