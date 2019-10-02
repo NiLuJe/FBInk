@@ -272,7 +272,7 @@ static void
 	    "\n"
 	    "\n"
 	    "NOTES:\n"
-	    "\tFor more complex & long-running use-cases involving *text only*, you can also switch to daemon mode, via -d, --daemon\n"
+	    "\tFor more complex & long-running use-cases involving *text* only (or a progress/activity bar), you can also switch to daemon mode, via -d, --daemon\n"
 	    "\tIt expects a single argument: the amount of lines consecutive prints can occupy before wrapping back to the original coordinates.\n"
 	    "\tIt it's set to 0, the behavior matches what usually happens when you pass multiple strings to FBInk (i.e., the only wrapping happens at screen egde).\n"
 	    "\tWhile, for example, setting it to 1 will ensure every print will start at the same coordinates.\n"
@@ -1518,10 +1518,9 @@ int
 	}
 
 	// Error out if daemon mode is enabled with incompatible options (basically anything that isn't is_truetype or nothing).
-	// FIXME: Allow progress/activity bar, though...
-	if (is_daemon && (is_image || want_linecode || want_linecount || want_lastrect || is_eval || is_interactive || is_progressbar || is_activitybar || is_cls)) {
+	if (is_daemon && (is_image || want_linecode || want_linecount || want_lastrect || is_eval || is_interactive || is_cls)) {
 		fprintf(stderr,
-			"Incompatible options: -d, --daemon can only be used for simple text only workflows!\n");
+			"Incompatible options: -d, --daemon can only be used for simple text or bar only workflows!\n");
 		errfnd = true;
 	}
 
@@ -1698,21 +1697,35 @@ int
 					// First things first, do an explicit reinit, as we might have been running for a while.
 					fbink_reinit(fbfd, &fbink_cfg);
 
-					// FIXME: Handle ttf (load/clear fonts)
-					if ((linecount = fbink_print(fbfd, buf, &fbink_cfg)) < 0) {
-						fprintf(stderr, "Failed to print that string!\n");
-						rv = ERRCODE(EXIT_FAILURE);
-						goto cleanup;
-					}
-
-					// Move to the next line, unless it'd make us blow past daemon_lines...
-					total_lines = (unsigned short int) (total_lines + linecount);
-					if (daemon_lines == 0U || total_lines < daemon_lines) {
-						fbink_cfg.row = (short int) (fbink_cfg.row + linecount);
+					// If we're drawing a bar, make sure we were fed vaguely valid input...
+					if (is_progressbar || is_activitybar) {
+						uint8_t value = 0U;
+						if (strtoul_hhu('d', NULL, buf, &value) == 0) {
+							// It's a number, let the API deal with OOB values.
+							if (is_progressbar) {
+								fbink_print_progress_bar(fbfd, value, &fbink_cfg);
+							} else {
+								fbink_print_activity_bar(fbfd, value, &fbink_cfg);
+							}
+						}
 					} else {
-						// Reset to original settings...
-						total_lines = 0U;
-						fbink_cfg.row = initial_row;
+						// FIXME: Handle ttf (load/clear fonts)
+						// FIXME: Perservere on error.
+						if ((linecount = fbink_print(fbfd, buf, &fbink_cfg)) < 0) {
+							fprintf(stderr, "Failed to print that string!\n");
+							rv = ERRCODE(EXIT_FAILURE);
+							goto cleanup;
+						}
+
+						// Move to the next line, unless it'd make us blow past daemon_lines...
+						total_lines = (unsigned short int) (total_lines + linecount);
+						if (daemon_lines == 0U || total_lines < daemon_lines) {
+							fbink_cfg.row = (short int) (fbink_cfg.row + linecount);
+						} else {
+							// Reset to original settings...
+							total_lines = 0U;
+							fbink_cfg.row = initial_row;
+						}
 					}
 				}
 				// NOTE: The first writer will invariably end up closing its end of the pipe.
