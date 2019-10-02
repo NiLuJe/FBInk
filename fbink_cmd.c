@@ -1538,6 +1538,8 @@ int
 	// Declare it a tiny bit early to make cleanup handling safe
 	// (fbink_close is safe to call with fbfd set to -1 and/or the mmap not actually done).
 	int fbfd = -1;
+	// Same idea for the pipe fd in daemon mode
+	int pipefd = -1;
 
 	// Don't abort if we piped something without passing any arguments!
 	if (errfnd || (argc == 1 && isatty(fileno(stdin)))) {
@@ -1655,8 +1657,8 @@ int
 		// NOTE: Since the write end will only be open for very short amount of times, we prefer polling,
 		//       otherwise, read would spend most of its time busy-looping on EOF...
 		// NOTE: See we POLLHUP note below for the reasoning behing opening it RW and not RO...
-		int fd = open(FBINK_PIPE, O_RDWR | O_NONBLOCK | O_CLOEXEC);
-		if (fd == -1) {
+		pipefd = open(FBINK_PIPE, O_RDWR | O_NONBLOCK | O_CLOEXEC);
+		if (pipefd == -1) {
 			perror("open");
 			goto cleanup;
 		}
@@ -1673,7 +1675,7 @@ int
 		short int initial_top = ot_config.margins.top;
 
 		struct pollfd pfd;
-		pfd.fd     = fd;
+		pfd.fd     = pipefd;
 		pfd.events = POLLIN;
 		while (1) {
 			int pn = poll(&pfd, 1, -1);
@@ -1756,9 +1758,7 @@ int
 		}
 
 		// Unreachable ;).
-		// FIXME: Add this to cleanup?
-		close(fd);
-		unlink(FBINK_PIPE);
+		goto cleanup;
 	}
 
 	char* string;
@@ -2276,6 +2276,13 @@ int
 cleanup:
 	if (is_truetype) {
 		fbink_free_ot_fonts();
+	}
+
+	if (is_daemon) {
+		if (pipefd != -1) {
+			close(pipefd);
+		}
+		unlink(FBINK_PIPE);
 	}
 
 	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
