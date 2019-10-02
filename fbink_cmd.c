@@ -1734,7 +1734,9 @@ int
 						linecount = fbink_print(fbfd, buf, &fbink_cfg);
 
 						// Move to the next line, unless it'd make us blow past daemon_lines...
-						total_lines = (unsigned short int) (total_lines + linecount);
+						if (linecount > 0) {
+							total_lines = (unsigned short int) (total_lines + linecount);
+						}
 						if ((daemon_lines == 0U || total_lines < daemon_lines) && linecount >= 0) {
 							fbink_cfg.row = (short int) (fbink_cfg.row + linecount);
 						} else {
