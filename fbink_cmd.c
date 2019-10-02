@@ -269,6 +269,23 @@ static void
 	    "NOTES:\n"
 	    "\tShell script writers can also use the -e, --eval flag to have fbink just spit out a few of its internal state variables to stdout,\n"
 	    "\t\tf.g., eval $(fbink -e)\n"
+	    "\n"
+	    "\n"
+	    "NOTES:\n"
+	    "\tFor more complex & long-running use-cases involving *text only*, you can also switch to daemon mode, via -d, --daemon\n"
+	    "\tIt expects a single argument: the amount of lines consecutive prints can occupy before wrapping back to the original coordinates.\n"
+	    "\tIt it's set to 0, the behavior matches what usually happens when you pass multiple strings to FBInk (i.e., the only wrapping happens at screen egde).\n"
+	    "\tWhile, for example, setting it to 1 will ensure every print will start at the same coordinates.\n"
+	    "\tIn this mode, fbink will daemonize instantly, and then print its PID to stdout. You should consume stdout, and check the return code:\n"
+	    "\tif it's 0, then you have a guarantee that what you've grabbed from stdout is *strictly* a PID.\n"
+	    "\tBy default, it will create a named pipe for IPC: /tmp/fbink (if the file already exists, whatever type it may be, FBInk will abort).\n"
+	    "\tYou can ask for a custom path by setting FBINK_NAMED_PIPE to an absolute path in your environment.\n"
+	    "\tCreating and removing that FIFO is FBInk's responsibility. Don't create it yourself.\n"
+	    "\tMake sure you kill FBInk via SIGTERM so it has a chance to remove it itself on exit.\n"
+	    "\t(Otherwise, you may want to ensure that yourself *before* starting it in daemon mode).\n"
+	    "\tWith the technicalities out of the way, it's then as simple as writing to that pipe for stuff to show up on screen ;).\n"
+	    "\tf.g., echo -n 'Hello World!' > /tmp/fbink\n"
+	    "\tRemember that LFs are honored!\n"
 	    "\n",
 	    fbink_version());
 
@@ -1500,6 +1517,8 @@ int
 		errfnd = true;
 	}
 
+	// FIXME: Error out if daemon mode is enabled with incompatible option (image, anything that prints to stdout)
+
 	// Enforce quiet output when asking for is_daemon, is_mimic, is_eval, want_linecount or want_lastrect,
 	// to avoid polluting the output...
 	if (is_daemon | is_mimic || is_eval || want_linecount || want_lastrect) {
@@ -1636,6 +1655,7 @@ int
 		}
 
 		// We'll need to keep track of the amount of printed lines to honor daemon_lines...
+		// TODO: Allow daemon_lines 0 to mean always honor...
 		int linecount = -1;
 		unsigned short int total_lines = 0U;
 		short int initial_row = fbink_cfg.row;
@@ -1669,6 +1689,8 @@ int
 					if (bytes_read <= 0) {
 						continue;
 					}
+
+					// TODO: reinit
 
 					// FIXME: Handle ttf (load/clear fonts)
 					if ((linecount = fbink_print(fbfd, buf, &fbink_cfg)) < 0) {
