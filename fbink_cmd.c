@@ -1695,7 +1695,8 @@ int
 						continue;
 					}
 
-					// TODO: reinit
+					// First things first, do an explicit reinit, as we might have been running for a while.
+					fbink_reinit(fbfd, &fbink_cfg);
 
 					// FIXME: Handle ttf (load/clear fonts)
 					if ((linecount = fbink_print(fbfd, buf, &fbink_cfg)) < 0) {
