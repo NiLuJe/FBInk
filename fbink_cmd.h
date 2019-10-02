@@ -30,10 +30,11 @@
 #include <limits.h>
 #include <locale.h>
 #include <math.h>
+#include <poll.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
-#include <poll.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -64,6 +65,8 @@
 #define FBINK_PIPE "/tmp/fbink"
 
 static void show_helpmsg(void);
+
+static void cleanup_handler(int);
 
 static int do_infinite_progress_bar(int, const FBInkConfig*);
 

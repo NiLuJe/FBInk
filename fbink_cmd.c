@@ -275,6 +275,13 @@ static void
 	return;
 }
 
+// Fun helpers for the daemon mode...
+static void
+    cleanup_handler(int signum)
+{
+	unlink(FBINK_PIPE);
+}
+
 // Truly infinite progress bar
 // NOTE: Punted off to a dedicated function to workaround an amazingly weird & obscure performance issue:
 //       keeping this inlined in main massively tanks *image* processing performance (by ~50%!),
@@ -1524,10 +1531,29 @@ int
 	if (is_daemon) {
 		// TODO: Actually daemonize ;).
 
-		// Start by creating our named pipe, in case it doesn't exit yet
-		// FIXME: We never delete it, allow re-using an existing pipe (... provided it's actually a pipe).
+		// Ensure we'll cleanup behind us...
+		struct sigaction new_action = { 0 };
+		new_action.sa_handler = cleanup_handler;
+		sigemptyset(&new_action.sa_mask);
+		new_action.sa_flags = 0;
+		if ((rv = sigaction(SIGTERM, &new_action, NULL) < 0)) {
+			perror("sigaction (TERM)");
+			goto cleanup;
+		}
+		if ((rv = sigaction(SIGINT, &new_action, NULL) < 0)) {
+			perror("sigaction (INT)");
+			goto cleanup;
+		}
+		if ((rv = sigaction(SIGQUIT, &new_action, NULL) < 0)) {
+			perror("sigaction (QUIT)");
+			goto cleanup;
+		}
+
+		// Start by creating our named pipe.
+		// NOTE: You cannot re-use an existing pipe!
 		// TODO: Allow using a specific pipe, in case we'd want multiple daemons with different settings?
 		//       Possibly via an env var?
+		//       It'd need to be snprintf'ed in a global for the signal handler...
 		rv = mkfifo(FBINK_PIPE, 0666);
 		if (rv != 0) {
 			perror("mkfifo");
@@ -1607,8 +1633,7 @@ int
 		}
 
 		// Unreachable ;).
-		// FIXME: Add this to cleanup
-		// FIXME: And a SIGTERM/SIGINT/SIGQUIT handler (for the unlink :/)?
+		// FIXME: Add this to cleanup?
 		close(fd);
 		unlink(FBINK_PIPE);
 	}
