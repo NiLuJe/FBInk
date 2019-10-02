@@ -443,22 +443,22 @@ static void
 	static unsigned short int bottom    = 0U;
 
 	// If that's the first call, simply use last_rect as-is
-	if (total_rect.width == 0U && total_rect.height == 0U) {
-		total_rect = last_rect;
+	if (totalRect.width == 0U && totalRect.height == 0U) {
+		totalRect = last_rect;
 	} else {
 		// Otherwise, build a rect that overlaps w/ every previous rects...
-		total_rect.top = (unsigned short int) MIN(total_rect.top, last_rect.top);
+		totalRect.top = (unsigned short int) MIN(totalRect.top, last_rect.top);
 		if (last_rect.top > prev_rect.top) {
 			// Top to bottom...
-			total_rect.height =
-			    (unsigned short int) (MAX((last_rect.top + last_rect.height), bottom) - total_rect.top);
+			totalRect.height =
+			    (unsigned short int) (MAX((last_rect.top + last_rect.height), bottom) - totalRect.top);
 		} else {
 			// Last print is *above* the previous one! (cell rendering can wrap around).
 			bottom            = (unsigned short int) (prev_rect.top + prev_rect.height);
-			total_rect.height = (unsigned short int) (bottom - last_rect.top);
+			totalRect.height = (unsigned short int) (bottom - last_rect.top);
 		}
-		total_rect.left  = (unsigned short int) MIN(total_rect.left, last_rect.left);
-		total_rect.width = (unsigned short int) MAX(total_rect.width, last_rect.width);
+		totalRect.left  = (unsigned short int) MIN(totalRect.left, last_rect.left);
+		totalRect.width = (unsigned short int) MAX(totalRect.width, last_rect.width);
 	}
 
 	// Remember the previous rect to detect wraparounds...
@@ -470,10 +470,10 @@ static void
 {
 	fprintf(stdout,
 		"lastRect_Left=%hu;lastRect_Top=%hu;lastRect_Width=%hu;lastRect_Height=%hu;",
-		total_rect.left,
-		total_rect.top,
-		total_rect.width,
-		total_rect.height);
+		totalRect.left,
+		totalRect.top,
+		totalRect.width,
+		totalRect.height);
 }
 
 static void
