@@ -323,6 +323,10 @@ static int
 	// Make sure we keep honoring rcS's umask
 	umask(022);    // Flawfinder: ignore
 
+	// Before we close the shop down, output our final PID to stdout...
+	fprintf(stdout, "%ld\n", (long) getpid());
+	fflush(stdout);
+
 	// Redirect stdin & stdout to /dev/null
 	if ((fd = open("/dev/null", O_RDWR)) != -1) {
 		dup2(fd, fileno(stdin));
@@ -1591,8 +1595,6 @@ int
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
-
-		// FIXME: Hmm, this makes retrieving the PID of the deamon slightly trickier...
 
 		// Ensure we'll cleanup behind us...
 		struct sigaction new_action = { 0 };
