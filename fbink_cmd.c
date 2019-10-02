@@ -1699,13 +1699,13 @@ int
 
 					// If we're drawing a bar, make sure we were fed vaguely valid input...
 					if (is_progressbar || is_activitybar) {
-						uint8_t value = 0U;
-						if (strtoul_hhu('d', NULL, buf, &value) == 0) {
+						uint8_t bar_val = 0U;
+						if (strtoul_hhu('d', NULL, buf, &bar_val) == 0) {
 							// It's a number, let the API deal with OOB values.
 							if (is_progressbar) {
-								fbink_print_progress_bar(fbfd, value, &fbink_cfg);
+								fbink_print_progress_bar(fbfd, bar_val, &fbink_cfg);
 							} else {
-								fbink_print_activity_bar(fbfd, value, &fbink_cfg);
+								fbink_print_activity_bar(fbfd, bar_val, &fbink_cfg);
 							}
 						}
 					} else {
