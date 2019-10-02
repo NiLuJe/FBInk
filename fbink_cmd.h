@@ -36,8 +36,8 @@
 #include <string.h>
 #include <strings.h>
 #include <sys/ioctl.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -66,9 +66,9 @@
 
 static void show_helpmsg(void);
 
-char pipePath[PATH_MAX] = { 0 };
+char        pipePath[PATH_MAX] = { 0 };
 static void cleanup_handler(int __attribute__((unused)));
-static int daemonize(void);
+static int  daemonize(void);
 
 static int do_infinite_progress_bar(int, const FBInkConfig*);
 

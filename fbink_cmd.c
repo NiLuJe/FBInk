@@ -279,13 +279,15 @@ static void
 	    "\tIn this mode, fbink will daemonize instantly, and then print its PID to stdout. You should consume stdout, and check the return code:\n"
 	    "\tif it's 0, then you have a guarantee that what you've grabbed from stdout is *strictly* a PID.\n"
 	    "\tYou can send a kill -0 to that PID to check for an early abort.\n"
-	    "\tBy default, it will create a named pipe for IPC: " FBINK_PIPE " (if the file already exists, whatever type it may be, FBInk will abort).\n"
+	    "\tBy default, it will create a named pipe for IPC: " FBINK_PIPE
+	    " (if the file already exists, whatever type it may be, FBInk will abort).\n"
 	    "\tYou can ask for a custom path by setting FBINK_NAMED_PIPE to an absolute path in your environment.\n"
 	    "\tCreating and removing that FIFO is FBInk's responsibility. Don't create it yourself.\n"
 	    "\tMake sure you kill FBInk via SIGTERM so it has a chance to remove it itself on exit.\n"
 	    "\t(Otherwise, you may want to ensure that yourself *before* starting it in daemon mode).\n"
 	    "\tWith the technicalities out of the way, it's then as simple as writing to that pipe for stuff to show up on screen ;).\n"
-	    "\tf.g., echo -n 'Hello World!' > " FBINK_PIPE "\n"
+	    "\tf.g., echo -n 'Hello World!' > " FBINK_PIPE
+	    "\n"
 	    "\tRemember that LFs are honored!\n"
 	    "\tAlso, the daemon will NOT abort on errors, and it redirects stdout & stderr to /dev/null, so errors & bogus input will be silently ignored!\n"
 	    "\n",
@@ -455,7 +457,7 @@ static void
 			    (unsigned short int) (MAX((last_rect.top + last_rect.height), bottom) - totalRect.top);
 		} else {
 			// Last print is *above* the previous one! (cell rendering can wrap around).
-			bottom            = (unsigned short int) (prev_rect.top + prev_rect.height);
+			bottom           = (unsigned short int) (prev_rect.top + prev_rect.height);
 			totalRect.height = (unsigned short int) (bottom - last_rect.top);
 		}
 		totalRect.left  = (unsigned short int) MIN(totalRect.left, last_rect.left);
@@ -581,7 +583,7 @@ int
                                               { "mimic", no_argument, NULL, 'Z' },
                                               { "cls", no_argument, NULL, 'k' },
                                               { "wait", no_argument, NULL, 'w' },
-{ "daemon", required_argument, NULL, 'd' },
+                                              { "daemon", required_argument, NULL, 'd' },
                                               { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_cfg = { 0 };
@@ -1521,7 +1523,8 @@ int
 	}
 
 	// Error out if daemon mode is enabled with incompatible options (basically anything that isn't is_truetype or nothing).
-	if (is_daemon && (is_image || want_linecode || want_linecount || want_lastrect || is_eval || is_interactive || is_cls)) {
+	if (is_daemon &&
+	    (is_image || want_linecode || want_linecount || want_lastrect || is_eval || is_interactive || is_cls)) {
 		fprintf(stderr,
 			"Incompatible options: -d, --daemon can only be used for simple text or bar only workflows!\n");
 		errfnd = true;
@@ -1627,7 +1630,7 @@ int
 
 		// Ensure we'll cleanup behind us...
 		struct sigaction new_action = { 0 };
-		new_action.sa_handler = &cleanup_handler;
+		new_action.sa_handler       = &cleanup_handler;
 		sigemptyset(&new_action.sa_mask);
 		new_action.sa_flags = 0;
 		if ((rv = sigaction(SIGTERM, &new_action, NULL) < 0)) {
@@ -1644,7 +1647,7 @@ int
 		}
 
 		// If we want to use a custom pipe name, honor that...
-		char *custom_pipe = getenv("FBINK_NAMED_PIPE");
+		char* custom_pipe = getenv("FBINK_NAMED_PIPE");
 		if (custom_pipe) {
 			strncpy(pipePath, custom_pipe, sizeof(pipePath) - 1U);
 		} else {
@@ -1675,10 +1678,10 @@ int
 		}
 
 		// We'll need to keep track of the amount of printed lines to honor daemon_lines...
-		int linecount = -1;
+		int                linecount   = -1;
 		unsigned short int total_lines = 0U;
-		short int initial_row = fbink_cfg.row;
-		short int initial_top = ot_config.margins.top;
+		short int          initial_row = fbink_cfg.row;
+		short int          initial_top = ot_config.margins.top;
 
 		struct pollfd pfd;
 		pfd.fd     = pipefd;
@@ -1697,8 +1700,8 @@ int
 			if (pn > 0) {
 				if (pfd.revents & POLLIN) {
 					// We've got data to read, do it!
-					char buf[PIPE_BUF] = { 0 };
-					ssize_t bytes_read = read(pfd.fd, buf, sizeof(buf));
+					char    buf[PIPE_BUF] = { 0 };
+					ssize_t bytes_read    = read(pfd.fd, buf, sizeof(buf));
 					if (bytes_read == -1 && errno != EAGAIN) {
 						perror("read");
 						rv = bytes_read;
@@ -1735,7 +1738,7 @@ int
 							ot_config.margins.top = (short int) linecount;
 						} else {
 							// Reset to original settings...
-							total_lines = 0U;
+							total_lines           = 0U;
 							ot_config.margins.top = (short int) initial_top;
 						}
 					} else {
@@ -1745,11 +1748,12 @@ int
 						if (linecount > 0) {
 							total_lines = (unsigned short int) (total_lines + linecount);
 						}
-						if ((daemon_lines == 0U || total_lines < daemon_lines) && linecount >= 0) {
+						if ((daemon_lines == 0U || total_lines < daemon_lines) &&
+						    linecount >= 0) {
 							fbink_cfg.row = (short int) (fbink_cfg.row + linecount);
 						} else {
 							// Reset to original settings...
-							total_lines = 0U;
+							total_lines   = 0U;
 							fbink_cfg.row = initial_row;
 						}
 					}
