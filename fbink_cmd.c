@@ -150,7 +150,7 @@ static void
 	    "\tYou can specify multiple STRINGs in a single invocation of fbink, each consecutive one will be printed on the subsequent line.\n"
 	    "\t\tAlthough it's worth mentioning that this will lead to undesirable results when combined with --clear,\n"
 	    "\t\tbecause the screen is cleared before each STRING, meaning you'll only get to see the final one.\n"
-	    "\tIf you want to properly print a long string, better do it in a single argument, fbink will do its best to spread it over multiple lines sanely.\n"
+	    "\tIf you want to properly print a long string, better do it in a single argument, FBInk will do its best to spread it over multiple lines sanely.\n"
 	    "\tIt will also honor the linefeed character (and I do mean the actual control character, not the human-readable escape sequence),\n"
 	    "\twhich comes in handy when passing a few lines of logs straight from tail as an argument.\n"
 #ifdef FBINK_WITH_OPENTYPE
@@ -267,7 +267,7 @@ static void
 	    "\n"
 	    "\n"
 	    "NOTES:\n"
-	    "\tShell script writers can also use the -e, --eval flag to have fbink just spit out a few of its internal state variables to stdout,\n"
+	    "\tShell script writers can also use the -e, --eval flag to have FBInk just spit out a few of its internal state variables to stdout,\n"
 	    "\t\tf.g., eval $(fbink -e)\n"
 	    "\n"
 	    "\n"
@@ -276,20 +276,21 @@ static void
 	    "\tIt expects a single argument: the amount of lines consecutive prints can occupy before wrapping back to the original coordinates.\n"
 	    "\tIt it's set to 0, the behavior matches what usually happens when you pass multiple strings to FBInk (i.e., the only wrapping happens at screen egde).\n"
 	    "\tWhile, for example, setting it to 1 will ensure every print will start at the same coordinates.\n"
-	    "\tIn this mode, fbink will daemonize instantly, and then print its PID to stdout. You should consume stdout, and check the return code:\n"
+	    "\tIn this mode, FBInk will daemonize instantly, and then print its PID to stdout. You should consume stdout, and check the return code:\n"
 	    "\tif it's 0, then you have a guarantee that what you've grabbed from stdout is *strictly* a PID.\n"
-	    "\tYou can send a kill -0 to that PID to check for an early abort.\n"
+	    "\tYou can then send a kill -0 to that PID to check for an early abort.\n"
 	    "\tBy default, it will create a named pipe for IPC: " FBINK_PIPE
 	    " (if the file already exists, whatever type it may be, FBInk will abort).\n"
 	    "\tYou can ask for a custom path by setting FBINK_NAMED_PIPE to an absolute path in your environment.\n"
 	    "\tCreating and removing that FIFO is FBInk's responsibility. Don't create it yourself.\n"
 	    "\tMake sure you kill FBInk via SIGTERM so it has a chance to remove it itself on exit.\n"
-	    "\t(Otherwise, you may want to ensure that yourself *before* starting it in daemon mode).\n"
+	    "\t(Otherwise, you may want to ensure that it doesn't already exist *before* launching a daemon mode session).\n"
 	    "\tWith the technicalities out of the way, it's then as simple as writing to that pipe for stuff to show up on screen ;).\n"
 	    "\tf.g., echo -n 'Hello World!' > " FBINK_PIPE
 	    "\n"
 	    "\tRemember that LFs are honored!\n"
-	    "\tAlso, the daemon will NOT abort on errors, and it redirects stdout & stderr to /dev/null, so errors & bogus input will be silently ignored!\n"
+	    "\tAlso, the daemon will NOT abort on FBInk errors, and it redirects stdout & stderr to /dev/null, so errors & bogus input will be silently ignored!\n"
+	    "\tIt can abort on early setup errors, though, before *or* after having redirected stderr...\n"
 	    "\n",
 	    fbink_version());
 
