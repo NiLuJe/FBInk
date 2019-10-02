@@ -284,6 +284,60 @@ static void
 	exit(EXIT_SUCCESS);
 }
 
+// Because daemon() only appeared in glibc 2.21 (and doesn't double-fork anyway)
+static int
+    daemonize(void)
+{
+	int fd;
+
+	switch (fork()) {
+		case -1:
+			return -1;
+		case 0:
+			break;
+		default:
+			_exit(EXIT_SUCCESS);
+	}
+
+	if (setsid() == -1) {
+		return -1;
+	}
+
+	// Double fork, for... reasons!
+	// In practical terms, this ensures we get re-parented to init *now*.
+	// Ignore SIGHUP while we're there, since we don't want to be killed by it.
+	signal(SIGHUP, SIG_IGN);
+	switch (fork()) {
+		case -1:
+			return -1;
+		case 0:
+			break;
+		default:
+			_exit(EXIT_SUCCESS);
+	}
+
+	if (chdir("/tmp") == -1) {
+		return -1;
+	}
+
+	// Make sure we keep honoring rcS's umask
+	umask(022);    // Flawfinder: ignore
+
+	// Redirect stdin & stdout to /dev/null
+	if ((fd = open("/dev/null", O_RDWR)) != -1) {
+		dup2(fd, fileno(stdin));
+		dup2(fd, fileno(stdout));
+		if (fd > 2) {
+			close(fd);
+		}
+	} else {
+		fprintf(stderr, "Failed to redirect stdin & stdout to /dev/null\n");
+		return -1;
+	}
+
+	return 0;
+}
+
 // Truly infinite progress bar
 // NOTE: Punted off to a dedicated function to workaround an amazingly weird & obscure performance issue:
 //       keeping this inlined in main massively tanks *image* processing performance (by ~50%!),
@@ -1531,7 +1585,14 @@ int
 
 	// If we're asking to run in daemon mode, that takes precedence over nearly everything.
 	if (is_daemon) {
-		// TODO: Actually daemonize ;).
+		// Fly, little daemon!
+		if (daemonize() != 0) {
+			fprintf(stderr, "Failed to daemonize, aborting!\n");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+
+		// FIXME: Hmm, this makes retrieving the PID of the deamon slightly trickier...
 
 		// Ensure we'll cleanup behind us...
 		struct sigaction new_action = { 0 };
@@ -1607,7 +1668,6 @@ int
 						continue;
 					}
 
-					// FIXME: Handle daemon_lines properly.
 					// FIXME: Handle ttf (load/clear fonts)
 					if ((linecount = fbink_print(fbfd, buf, &fbink_cfg)) < 0) {
 						fprintf(stderr, "Failed to print that string!\n");
