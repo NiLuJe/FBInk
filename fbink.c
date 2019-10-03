@@ -4635,8 +4635,8 @@ int
 		rv -= (viewVertOrigin - viewVertOffset);
 		// NOTE: The same idea applies to vertical centering, we don't want to apply it twice...
 		if (is_halfway || valign == CENTER) {
-			rv -= ((print_height - curr_print_height) / 2U);
-			rv += curr_print_height;
+			rv = rv - (int) ((print_height - curr_print_height) / 2U);
+			rv = rv + (int) curr_print_height;
 		}
 	}
 	// Recap the actual amount of printed lines, as broken metrics may affect what we initially computed ;).
