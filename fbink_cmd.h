@@ -66,7 +66,7 @@
 
 static void show_helpmsg(void);
 
-char        pipePath[PATH_MAX] = { 0 };
+const char* pipePath = NULL;
 static void cleanup_handler(int __attribute__((unused)));
 static int  daemonize(void);
 

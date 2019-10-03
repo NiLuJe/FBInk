@@ -303,6 +303,8 @@ static void
 {
 	unlink(pipePath);
 	// And enforce an exit, otherwise our non-blocking syscalls will happily resume after an EINTR ;).
+	// NOTE: I feel slightly dirty not handling the usual cleanup ourselves,
+	//       be we're not doing anything Linux itself won't clean up on process termination...
 	exit(EXIT_SUCCESS);
 }
 
@@ -1649,11 +1651,11 @@ int
 		}
 
 		// If we want to use a custom pipe name, honor that...
-		char* custom_pipe = getenv("FBINK_NAMED_PIPE");
+		const char* custom_pipe = getenv("FBINK_NAMED_PIPE");
 		if (custom_pipe) {
-			strncpy(pipePath, custom_pipe, sizeof(pipePath) - 1U);
+			pipePath = custom_pipe;
 		} else {
-			strncpy(pipePath, FBINK_PIPE, sizeof(pipePath) - 1U);
+			pipePath = FBINK_PIPE;
 		}
 
 		// Start by creating our named pipe.
