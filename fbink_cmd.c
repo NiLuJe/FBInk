@@ -301,7 +301,9 @@ static void
 static void
     cleanup_handler(int signum __attribute__((unused)))
 {
-	unlink(pipePath);
+	if (pipePath) {
+		unlink(pipePath);
+	}
 	// And enforce an exit, otherwise our non-blocking syscalls will happily resume after an EINTR ;).
 	// NOTE: I feel slightly dirty not handling the usual cleanup ourselves,
 	//       be we're not doing anything Linux itself won't clean up on process termination...
@@ -1663,6 +1665,8 @@ int
 		rv = mkfifo(pipePath, 0666);
 		if (rv != 0) {
 			perror("mkfifo");
+			// Make sure we won't delete the pipe, in case it's not ours...
+			pipePath = NULL;
 			goto cleanup;
 		}
 
@@ -1673,6 +1677,8 @@ int
 		pipefd = open(pipePath, O_RDWR | O_NONBLOCK | O_CLOEXEC);
 		if (pipefd == -1) {
 			perror("open");
+			// Same here, don't delete the pipe in case it's not ours...
+			pipePath = NULL;
 			goto cleanup;
 		}
 
@@ -2297,7 +2303,9 @@ cleanup:
 		if (pipefd != -1) {
 			close(pipefd);
 		}
-		unlink(pipePath);
+		if (pipePath) {
+			unlink(pipePath);
+		}
 	}
 
 	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
