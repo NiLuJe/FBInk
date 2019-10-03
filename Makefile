@@ -13,6 +13,12 @@ ifdef CROSS_TC
 	# NOTE: This relies on GCC plugins! Enforce AR & RANLIB to point to their real binary and not the GCC wrappers if your TC doesn't support that!
 	AR:=$(CROSS_TC)-gcc-ar
 	RANLIB:=$(CROSS_TC)-gcc-ranlib
+else ifdef CROSS_COMPILE
+	CC:=$(CROSS_COMPILE)cc
+	CXX:=$(CROSS_COMPILE)cxx
+	STRIP:=$(CROSS_COMPILE)strip
+	AR:=$(CROSS_COMPILE)gcc-ar
+	RANLIB:=$(CROSS_COMPILE)gcc-ranlib
 else
 	CC?=gcc
 	CXX?=g++
