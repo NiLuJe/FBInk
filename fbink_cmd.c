@@ -314,8 +314,6 @@ static void
 static int
     daemonize(void)
 {
-	int fd;
-
 	switch (fork()) {
 		case -1:
 			return -1;
@@ -354,6 +352,7 @@ static int
 	fflush(stdout);
 
 	// Redirect stdin, stdout & stderr to /dev/null
+	int fd = -1;
 	if ((fd = open("/dev/null", O_RDWR)) != -1) {
 		dup2(fd, fileno(stdin));
 		dup2(fd, fileno(stdout));
