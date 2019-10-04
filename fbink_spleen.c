@@ -44,7 +44,7 @@ static const uint16_t*
 		return spleen_block9[codepoint - 0x2630u];
 	} else if (codepoint >= 0x2800u && codepoint <= 0x28ffu) {
 		return spleen_block10[codepoint - 0x2800u];
-	} else if (codepoint >= 0xe0a0u && codepoint <= 0xe0a1u) {
+	} else if (codepoint >= 0xe0a0u && codepoint <= 0xe0a2u) {
 		return spleen_block11[codepoint - 0xe0a0u];
 	} else if (codepoint >= 0xe0b0u && codepoint <= 0xe0b3u) {
 		return spleen_block12[codepoint - 0xe0b0u];
