@@ -446,30 +446,29 @@ static void
 {
 	// No need to check for error, it will return {0, 0, 0, 0} on failure anyway ;).
 	FBInkRect                 last_rect = fbink_get_last_rect();
-	static FBInkRect          prev_rect = { 0U };
-	static unsigned short int bottom    = 0U;
+	static unsigned short int max_y2    = 0U;
 
 	// If that's the first call, simply use last_rect as-is
 	if (totalRect.width == 0U && totalRect.height == 0U) {
 		totalRect = last_rect;
+
+		// Don't forget to keep track of the bottom of our first rectangle, though ;).
+		unsigned short int y2 = (unsigned short int) (last_rect.top + last_rect.height);
+		max_y2                = y2;
 	} else {
 		// Otherwise, build a rect that overlaps w/ every previous rects...
-		totalRect.top = (unsigned short int) MIN(totalRect.top, last_rect.top);
-		if (last_rect.top > prev_rect.top) {
-			// Top to bottom...
-			totalRect.height =
-			    (unsigned short int) (MAX((last_rect.top + last_rect.height), bottom) - totalRect.top);
-		} else {
-			// Last print is *above* the previous one! (cell rendering can wrap around).
-			bottom           = (unsigned short int) (prev_rect.top + prev_rect.height);
-			totalRect.height = (unsigned short int) (bottom - last_rect.top);
-		}
+		totalRect.top   = (unsigned short int) MIN(totalRect.top, last_rect.top);
 		totalRect.left  = (unsigned short int) MIN(totalRect.left, last_rect.left);
 		totalRect.width = (unsigned short int) MAX(totalRect.width, last_rect.width);
+		// Height is a wee bit trickier, as we *can* wraparound, so last_rect might be *above* totalRect...
+		// Se we compute the absolute y coordinate of the bottom of both rectangles, keep the largest one,
+		// and re-compute height.
+		unsigned short int y2 =
+		    (unsigned short int) MAX(totalRect.top + totalRect.height, last_rect.top + last_rect.height);
+		// Remember the largest y2 we ever encountered so we can compute height properly
+		max_y2           = (unsigned short int) MAX(max_y2, y2);
+		totalRect.height = (unsigned short int) (max_y2 - totalRect.top);
 	}
-
-	// Remember the previous rect to detect wraparounds...
-	prev_rect = last_rect;
 }
 
 static void
