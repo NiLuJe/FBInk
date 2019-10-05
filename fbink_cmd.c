@@ -1709,8 +1709,9 @@ int
 			if (pn > 0) {
 				if (pfd.revents & POLLIN) {
 					// We've got data to read, do it!
-					char    buf[PIPE_BUF] = { 0 };
-					ssize_t bytes_read    = read(pfd.fd, buf, sizeof(buf));
+					char buf[PIPE_BUF] = { 0 };
+					// Flawfinder: ignore
+					ssize_t bytes_read = read(pfd.fd, buf, sizeof(buf));
 					if (bytes_read == -1 && errno != EAGAIN) {
 						perror("read");
 						rv = bytes_read;
