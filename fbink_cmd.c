@@ -1649,15 +1649,15 @@ int
 		sigemptyset(&new_action.sa_mask);
 		new_action.sa_flags = 0;
 		if ((rv = sigaction(SIGTERM, &new_action, NULL) < 0)) {
-			perror("sigaction (TERM)");
+			WARN("sigaction (TERM): %s", strerror(errno));
 			goto cleanup;
 		}
 		if ((rv = sigaction(SIGINT, &new_action, NULL) < 0)) {
-			perror("sigaction (INT)");
+			WARN("sigaction (INT): %s", strerror(errno));
 			goto cleanup;
 		}
 		if ((rv = sigaction(SIGQUIT, &new_action, NULL) < 0)) {
-			perror("sigaction (QUIT)");
+			WARN("sigaction (QUIT): %s", strerror(errno));
 			goto cleanup;
 		}
 
@@ -1673,7 +1673,7 @@ int
 		// NOTE: You cannot re-use an existing pipe!
 		rv = mkfifo(pipePath, 0666);
 		if (rv != 0) {
-			perror("mkfifo");
+			WARN("mkfifo: %s", strerror(errno));
 			// Make sure we won't delete the pipe, in case it's not ours...
 			pipePath = NULL;
 			goto cleanup;
@@ -1685,13 +1685,13 @@ int
 		// NOTE: See the POLLHUP note below for the reasoning behing opening it RW and not RO...
 		pipefd = open(pipePath, O_RDWR | O_NONBLOCK | O_CLOEXEC);
 		if (pipefd == -1) {
-			perror("open");
+			WARN("open: %s", strerror(errno));
 			// Same here, don't delete the pipe in case it's not ours...
 			pipePath = NULL;
 			goto cleanup;
 		}
 
-		// Make sure we only load fonts once... Best not mangle the paths, as we no longer have a visible stderr ;).
+		// Make sure we only load fonts once...
 		if (is_truetype) {
 			load_ot_fonts(reg_ot_file, bd_ot_file, it_ot_file, bdit_ot_file, &fbink_cfg);
 		}
@@ -1712,7 +1712,7 @@ int
 				if (errno == EINTR) {
 					continue;
 				}
-				perror("poll");
+				WARN("poll; %s", strerror(errno));
 				rv = pn;
 				goto cleanup;
 			}
@@ -1724,7 +1724,7 @@ int
 					// Flawfinder: ignore
 					ssize_t bytes_read = read(pfd.fd, buf, sizeof(buf));
 					if (bytes_read == -1 && errno != EAGAIN) {
-						perror("read");
+						WARN("read: %s", strerror(errno));
 						rv = bytes_read;
 						goto cleanup;
 					}
