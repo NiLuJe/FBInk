@@ -83,9 +83,9 @@ bool toSysLog = false;
 #define ELOG(fmt, ...)                                                                                                   \
 	({                                                                                                               \
 		if (toSysLog) {                                                                                          \
-			syslog(LOG_NOTICE, "[FBInk] " fmt, ##__VA_ARGS__);                                               \
+			syslog(LOG_NOTICE, "[CLI] " fmt, ##__VA_ARGS__);                                                 \
 		} else {                                                                                                 \
-			fprintf(stderr, "[FBInk] " fmt "\n", ##__VA_ARGS__);                                             \
+			fprintf(stderr, "[CLI] " fmt "\n", ##__VA_ARGS__);                                               \
 		}                                                                                                        \
 	})
 
@@ -94,9 +94,9 @@ bool toSysLog = false;
 #define WARN(fmt, ...)                                                                                                   \
 	({                                                                                                               \
 		if (toSysLog) {                                                                                          \
-			syslog(LOG_ERR, "[FBInk] " fmt "!", ##__VA_ARGS__);                                              \
+			syslog(LOG_ERR, "[CLI] " fmt "!", ##__VA_ARGS__);                                                \
 		} else {                                                                                                 \
-			fprintf(stderr, "[FBInk] " fmt "!\n", ##__VA_ARGS__);                                            \
+			fprintf(stderr, "[CLI] " fmt "!\n", ##__VA_ARGS__);                                              \
 		}                                                                                                        \
 	})
 
