@@ -1512,6 +1512,11 @@ int
 		opt_index = -1;
 	}
 
+	// If we're logging to syslog, do an explicit openlog with our ID as soon as possible...
+	if (g_toSysLog) {
+		openlog("fbink", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_DAEMON);
+	}
+
 	// Now we can make sure we passed an image file to print, one way or another
 	if (is_image && image_file == NULL) {
 		WARN(
@@ -2302,6 +2307,10 @@ cleanup:
 	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
 		ELOG("Failed to close the framebuffer, aborting . . .");
 		rv = ERRCODE(EXIT_FAILURE);
+	}
+
+	if (g_toSysLog) {
+		closelog();
 	}
 
 	return rv;
