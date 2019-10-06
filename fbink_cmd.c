@@ -503,12 +503,11 @@ static void
 static void
     recap_lastrect(void)
 {
-	fprintf(stdout,
-		"lastRect_Left=%hu;lastRect_Top=%hu;lastRect_Width=%hu;lastRect_Height=%hu;",
-		totalRect.left,
-		totalRect.top,
-		totalRect.width,
-		totalRect.height);
+	printf("lastRect_Left=%hu;lastRect_Top=%hu;lastRect_Width=%hu;lastRect_Height=%hu;",
+	       totalRect.left,
+	       totalRect.top,
+	       totalRect.width,
+	       totalRect.height);
 }
 
 static void
@@ -516,12 +515,11 @@ static void
 {
 	// No need to check for error, it will return {0, 0, 0, 0} on failure anyway ;).
 	FBInkRect last_rect = fbink_get_last_rect();
-	fprintf(stdout,
-		"lastRect_Left=%hu;lastRect_Top=%hu;lastRect_Width=%hu;lastRect_Height=%hu;",
-		last_rect.left,
-		last_rect.top,
-		last_rect.width,
-		last_rect.height);
+	printf("lastRect_Left=%hu;lastRect_Top=%hu;lastRect_Width=%hu;lastRect_Height=%hu;",
+	       last_rect.left,
+	       last_rect.top,
+	       last_rect.width,
+	       last_rect.height);
 }
 
 // Input validation via strtoul, for an uint32_t
@@ -1947,12 +1945,11 @@ int
 			if (is_truetype) {
 				// OT has a more detailed feedback, with the line-breaking computation results,
 				// so it's in an eval friendly format instead...
-				fprintf(stdout,
-					"next_top=%hu;computed_lines=%hu;rendered_lines=%hu;truncated=%d;",
-					total_lines,
-					ot_fit.computed_lines,
-					ot_fit.rendered_lines,
-					ot_fit.truncated);
+				printf("next_top=%hu;computed_lines=%hu;rendered_lines=%hu;truncated=%d;",
+				       total_lines,
+				       ot_fit.computed_lines,
+				       ot_fit.rendered_lines,
+				       ot_fit.truncated);
 			} else {
 				printf("%hu", total_lines);
 			}
@@ -2262,8 +2259,7 @@ int
 					}
 					if (want_linecount) {
 						if (is_truetype) {
-							fprintf(
-							    stdout,
+							printf(
 							    "next_top=%hu;computed_lines=%hu;rendered_lines=%hu;truncated=%d;",
 							    totallines,
 							    ot_fit.computed_lines,
