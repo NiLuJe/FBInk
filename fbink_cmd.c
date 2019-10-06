@@ -330,13 +330,8 @@ static void
 static void
     cleanup_handler(int signum __attribute__((unused)))
 {
-	if (pipePath) {
-		unlink(pipePath);
-	}
-	// And enforce an exit, otherwise our non-blocking syscalls will happily resume after an EINTR ;).
-	// NOTE: I feel slightly dirty not handling the usual cleanup ourselves,
-	//       be we're not doing anything Linux itself won't clean up on process termination...
-	exit(EXIT_SUCCESS);
+	// Our main loop handles EINTR, and will abort cleanly once it sees that flag
+	g_timeToDie = true;
 }
 
 // Because daemon() only appeared in glibc 2.21 (and doesn't double-fork anyway)
@@ -677,40 +672,41 @@ int
 					 [FMT_OPT] = "format",      [COMPUTE_OPT] = "compute",
 					 [NOTRUNC_OPT] = "notrunc", NULL };
 #pragma GCC diagnostic pop
-	char*     subopts;
-	char*     value          = NULL;
-	uint32_t  region_top     = 0;
-	uint32_t  region_left    = 0;
-	uint32_t  region_width   = 0;
-	uint32_t  region_height  = 0;
-	char*     wfm_name       = NULL;
-	char*     region_dither  = NULL;
-	uint8_t   region_hwd     = HWD_PASSTHROUGH;
-	bool      is_refresh     = false;
-	char*     image_file     = NULL;
-	short int image_x_offset = 0;
-	short int image_y_offset = 0;
-	bool      is_image       = false;
-	bool      is_eval        = false;
-	bool      is_interactive = false;
-	bool      want_linecode  = false;
-	bool      want_linecount = false;
-	bool      want_lastrect  = false;
-	bool      is_progressbar = false;
-	bool      is_activitybar = false;
-	bool      is_infinite    = false;
-	bool      is_mimic       = false;
-	bool      is_cls         = false;
-	bool      is_daemon      = false;
-	uint8_t   daemon_lines   = 0U;
-	bool      wait_for       = false;
-	uint8_t   progress       = 0;
-	bool      is_truetype    = false;
-	char*     reg_ot_file    = NULL;
-	char*     bd_ot_file     = NULL;
-	char*     it_ot_file     = NULL;
-	char*     bdit_ot_file   = NULL;
-	bool      errfnd         = false;
+	char*       subopts;
+	char*       value          = NULL;
+	uint32_t    region_top     = 0;
+	uint32_t    region_left    = 0;
+	uint32_t    region_width   = 0;
+	uint32_t    region_height  = 0;
+	char*       wfm_name       = NULL;
+	char*       region_dither  = NULL;
+	uint8_t     region_hwd     = HWD_PASSTHROUGH;
+	bool        is_refresh     = false;
+	char*       image_file     = NULL;
+	short int   image_x_offset = 0;
+	short int   image_y_offset = 0;
+	bool        is_image       = false;
+	bool        is_eval        = false;
+	bool        is_interactive = false;
+	bool        want_linecode  = false;
+	bool        want_linecount = false;
+	bool        want_lastrect  = false;
+	bool        is_progressbar = false;
+	bool        is_activitybar = false;
+	bool        is_infinite    = false;
+	bool        is_mimic       = false;
+	bool        is_cls         = false;
+	const char* pipe_path      = NULL;
+	bool        is_daemon      = false;
+	uint8_t     daemon_lines   = 0U;
+	bool        wait_for       = false;
+	uint8_t     progress       = 0;
+	bool        is_truetype    = false;
+	char*       reg_ot_file    = NULL;
+	char*       bd_ot_file     = NULL;
+	char*       it_ot_file     = NULL;
+	char*       bdit_ot_file   = NULL;
+	bool        errfnd         = false;
 
 	// NOTE: c.f., https://codegolf.stackexchange.com/q/148228 to sort this mess when I need to find an available letter ;p
 	while ((opt = getopt_long(
@@ -1677,18 +1673,18 @@ int
 		// If we want to use a custom pipe name, honor that...
 		const char* custom_pipe = getenv("FBINK_NAMED_PIPE");
 		if (custom_pipe) {
-			pipePath = custom_pipe;
+			pipe_path = custom_pipe;
 		} else {
-			pipePath = FBINK_PIPE;
+			pipe_path = FBINK_PIPE;
 		}
 
 		// Start by creating our named pipe.
 		// NOTE: You cannot re-use an existing pipe!
-		rv = mkfifo(pipePath, 0666);
+		rv = mkfifo(pipe_path, 0666);
 		if (rv != 0) {
 			WARN("mkfifo: %s", strerror(errno));
 			// Make sure we won't delete the pipe, in case it's not ours...
-			pipePath = NULL;
+			pipe_path = NULL;
 			goto cleanup;
 		}
 
@@ -1696,11 +1692,11 @@ int
 		// NOTE: Since the write end will only be open for very short amount of times, we prefer polling,
 		//       otherwise, read would spend most of its time busy-looping on EOF...
 		// NOTE: See the POLLHUP note below for the reasoning behing opening it RW and not RO...
-		pipefd = open(pipePath, O_RDWR | O_NONBLOCK | O_CLOEXEC);
+		pipefd = open(pipe_path, O_RDWR | O_NONBLOCK | O_CLOEXEC);
 		if (pipefd == -1) {
 			WARN("open: %s", strerror(errno));
 			// Same here, don't delete the pipe in case it's not ours...
-			pipePath = NULL;
+			pipe_path = NULL;
 			goto cleanup;
 		}
 
@@ -1720,6 +1716,12 @@ int
 		pfd.events = POLLIN;
 		// Forevah'!
 		while (1) {
+			// If we caught one of the signals we setup earlier, it's time to die ;).
+			if (g_timeToDie) {
+				ELOG("Caught a cleanup signal, winding down . . .");
+				goto cleanup;
+			}
+
 			int pn = poll(&pfd, 1, -1);
 			if (pn == -1) {
 				if (errno == EINTR) {
@@ -2310,8 +2312,8 @@ cleanup:
 		if (pipefd != -1) {
 			close(pipefd);
 		}
-		if (pipePath) {
-			unlink(pipePath);
+		if (pipe_path) {
+			unlink(pipe_path);
 		}
 	}
 

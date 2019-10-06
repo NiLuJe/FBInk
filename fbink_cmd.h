@@ -102,7 +102,8 @@ bool toSysLog = false;
 
 static void show_helpmsg(void);
 
-const char* pipePath = NULL;
+// For our cleanup signal handler....
+bool        g_timeToDie = false;
 static void cleanup_handler(int __attribute__((unused)));
 static int  daemonize(void);
 
