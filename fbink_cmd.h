@@ -104,7 +104,8 @@ static void show_helpmsg(void);
 
 // For our cleanup signal handler....
 bool        g_timeToDie = false;
-static void cleanup_handler(int __attribute__((unused)));
+int         g_sigCaught;
+static void cleanup_handler(int);
 static int  daemonize(void);
 
 static int do_infinite_progress_bar(int, const FBInkConfig*);

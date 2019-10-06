@@ -328,10 +328,11 @@ static void
 
 // Fun helpers for the daemon mode...
 static void
-    cleanup_handler(int signum __attribute__((unused)))
+    cleanup_handler(int signum)
 {
 	// Our main loop handles EINTR, and will abort cleanly once it sees that flag
 	g_timeToDie = true;
+	g_sigCaught = signum;
 }
 
 // Because daemon() only appeared in glibc 2.21 (and doesn't double-fork anyway)
@@ -1718,7 +1719,7 @@ int
 		while (1) {
 			// If we caught one of the signals we setup earlier, it's time to die ;).
 			if (g_timeToDie) {
-				ELOG("Caught a cleanup signal, winding down . . .");
+				ELOG("Caught a cleanup signal (%s), winding down . . .", strsignal(g_sigCaught));
 				goto cleanup;
 			}
 
