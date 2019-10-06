@@ -320,6 +320,7 @@ static void
 	    "\tRemember that LFs are honored!\n"
 	    "\tAlso, the daemon will NOT abort on FBInk errors, and it redirects stdout & stderr to /dev/null, so errors & bogus input will be silently ignored!\n"
 	    "\tIt can abort on early setup errors, though, before *or* after having redirected stderr...\n"
+	    "\tIt does enforce logging to the syslog, though, but, again, early commandline parsing errors may still be sent to stderr...\n"
 	    "\n",
 	    fbink_version());
 
