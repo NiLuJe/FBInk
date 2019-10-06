@@ -1737,6 +1737,9 @@ int
 					// Flawfinder: ignore
 					ssize_t bytes_read = read(pfd.fd, buf, sizeof(buf));
 					if (bytes_read == -1 && errno != EAGAIN) {
+						if (errno == EINTR) {
+							continue;
+						}
 						WARN("read: %s", strerror(errno));
 						rv = bytes_read;
 						goto cleanup;
