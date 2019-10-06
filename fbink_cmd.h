@@ -67,12 +67,12 @@
 
 // We'll need a global instead of relying on the FBInkConfig field, because we're using these macros in various places:
 // where we have a *pointer* to an FBInkConfig struct, where we have an *instance* of it, or where we have nothing...
-bool g_toSysLog = false;
+bool toSysLog = false;
 
 // Handle what we send to stdout (i.e., mostly recaps, no FBInk tag)
 #define LOG(fmt, ...)                                                                                                    \
 	({                                                                                                               \
-		if (g_toSysLog) {                                                                                        \
+		if (toSysLog) {                                                                                          \
 			syslog(LOG_INFO, fmt, ##__VA_ARGS__);                                                            \
 		} else {                                                                                                 \
 			fprintf(stdout, fmt "\n", ##__VA_ARGS__);                                                        \
@@ -82,7 +82,7 @@ bool g_toSysLog = false;
 // And then what we send to stderr (add an FBInk tag to make it clear where it comes from)
 #define ELOG(fmt, ...)                                                                                                   \
 	({                                                                                                               \
-		if (g_toSysLog) {                                                                                        \
+		if (toSysLog) {                                                                                          \
 			syslog(LOG_NOTICE, "[FBInk] " fmt, ##__VA_ARGS__);                                               \
 		} else {                                                                                                 \
 			fprintf(stderr, "[FBInk] " fmt "\n", ##__VA_ARGS__);                                             \
@@ -93,7 +93,7 @@ bool g_toSysLog = false;
 // Always shown, always tagged, and always ends with a bang.
 #define WARN(fmt, ...)                                                                                                   \
 	({                                                                                                               \
-		if (g_toSysLog) {                                                                                        \
+		if (toSysLog) {                                                                                          \
 			syslog(LOG_ERR, "[FBInk] " fmt "!", ##__VA_ARGS__);                                              \
 		} else {                                                                                                 \
 			fprintf(stderr, "[FBInk] " fmt "!\n", ##__VA_ARGS__);                                            \

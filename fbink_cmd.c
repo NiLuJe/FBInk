@@ -1501,7 +1501,7 @@ int
 				break;
 			case 'G':
 				fbink_cfg.to_syslog = !fbink_cfg.to_syslog;
-				g_toSysLog          = fbink_cfg.to_syslog;
+				toSysLog            = fbink_cfg.to_syslog;
 				break;
 			default:
 				ELOG("?? Unknown option code 0%o ??", (unsigned int) opt);
@@ -1513,7 +1513,7 @@ int
 	}
 
 	// If we're logging to syslog, do an explicit openlog with our ID as soon as possible...
-	if (g_toSysLog) {
+	if (toSysLog) {
 		openlog("fbink", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_DAEMON);
 	}
 
@@ -1550,7 +1550,7 @@ int
 	// Enforce logging to syslog for is_daemon
 	if (is_daemon) {
 		fbink_cfg.to_syslog = true;
-		g_toSysLog          = true;
+		toSysLog            = true;
 	}
 
 	// Assume success, until shit happens ;)
@@ -1578,7 +1578,7 @@ int
 			ELOG("");
 			ELOG("This was the exact invocation that triggered this error:\n");
 			for (int i = 0; i < argc; i++) {
-				if (g_toSysLog) {
+				if (toSysLog) {
 					syslog(LOG_NOTICE, "[FBInk] %s%s", argv[i], i == argc - 1 ? "" : " ");
 				} else {
 					fprintf(stderr, "[FBInk] %s%s", argv[i], i == argc - 1 ? "\n" : " ");
@@ -2309,7 +2309,7 @@ cleanup:
 		rv = ERRCODE(EXIT_FAILURE);
 	}
 
-	if (g_toSysLog) {
+	if (toSysLog) {
 		closelog();
 	}
 
