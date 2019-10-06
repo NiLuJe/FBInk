@@ -1717,7 +1717,7 @@ int
 				if (errno == EINTR) {
 					continue;
 				}
-				WARN("poll; %s", strerror(errno));
+				WARN("poll: %s", strerror(errno));
 				rv = pn;
 				goto cleanup;
 			}

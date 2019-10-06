@@ -162,13 +162,12 @@ static void print_lastrect(void);
 	({                                                                                                               \
 		/* NOTE: We want to *reject* negative values (which strtoul does not)! */                                \
 		if (strchr(str, '-')) {                                                                                  \
-			fprintf(stderr,                                                                                  \
-				"Assigned a negative value (%s) to an option (%c%s%s) expecting an %s.\n",               \
-				str,                                                                                     \
-				opt,                                                                                     \
-				subopt ? ":" : "",                                                                       \
-				subopt ? subopt : "",                                                                    \
-				TYPENAME(*result));                                                                      \
+			ELOG("Assigned a negative value (%s) to an option (%c%s%s) expecting an %s.",                    \
+			     str,                                                                                        \
+			     opt,                                                                                        \
+			     subopt ? ":" : "",                                                                          \
+			     subopt ? subopt : "",                                                                       \
+			     TYPENAME(*result));                                                                         \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
@@ -180,49 +179,48 @@ static void print_lastrect(void);
 		val   = strtoul(str, &endptr, 10);                                                                       \
                                                                                                                          \
 		if ((errno == ERANGE && val == ULONG_MAX) || (errno != 0 && val == 0)) {                                 \
-			perror("[FBInk] strtoul");                                                                       \
+			WARN("strtoul: %s", strerror(errno));                                                            \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
 		if (endptr == str) {                                                                                     \
-			fprintf(stderr,                                                                                  \
-				"No digits were found in value '%s' assigned to an option (%c%s%s) expecting an %s.\n",  \
-				str,                                                                                     \
-				opt,                                                                                     \
-				subopt ? ":" : "",                                                                       \
-				subopt ? subopt : "",                                                                    \
-				TYPENAME(*result));                                                                      \
+			ELOG("No digits were found in value '%s' assigned to an option (%c%s%s) expecting an %s.",       \
+			     str,                                                                                        \
+			     opt,                                                                                        \
+			     subopt ? ":" : "",                                                                          \
+			     subopt ? subopt : "",                                                                       \
+			     TYPENAME(*result));                                                                         \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
 		/* If we got here, strtoul() successfully parsed at least part of a number. */                           \
 		/* But we do want to enforce the fact that the input really was *only* an integer value. */              \
 		if (*endptr != '\0') {                                                                                   \
-			fprintf(stderr,                                                                                  \
-				"Found trailing characters (%s) behind value '%lu' assigned from string '%s' "           \
-				"to an option (%c%s%s) expecting an %s.\n",                                              \
-				endptr,                                                                                  \
-				val,                                                                                     \
-				str,                                                                                     \
-				opt,                                                                                     \
-				subopt ? ":" : "",                                                                       \
-				subopt ? subopt : "",                                                                    \
-				TYPENAME(*result));                                                                      \
+			ELOG(                                                                                            \
+			    "Found trailing characters (%s) behind value '%lu' assigned from string '%s' "               \
+			    "to an option (%c%s%s) expecting an %s.",                                                    \
+			    endptr,                                                                                      \
+			    val,                                                                                         \
+			    str,                                                                                         \
+			    opt,                                                                                         \
+			    subopt ? ":" : "",                                                                           \
+			    subopt ? subopt : "",                                                                        \
+			    TYPENAME(*result));                                                                          \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
 		/* Make sure there isn't a loss of precision on this arch when casting explictly */                      \
 		if ((__typeof__(*result)) val != val) {                                                                  \
-			fprintf(stderr,                                                                                  \
-				"Loss of precision when casting value '%lu' to an %s for option '%c%s%s' "               \
-				"(valid range: %u to %lu).\n",                                                           \
-				val,                                                                                     \
-				TYPENAME(*result),                                                                       \
-				opt,                                                                                     \
-				subopt ? ":" : "",                                                                       \
-				subopt ? subopt : "",                                                                    \
-				(unsigned int) TYPEMIN(*result),                                                         \
-				(unsigned long int) TYPEMAX(*result));                                                   \
+			ELOG(                                                                                            \
+			    "Loss of precision when casting value '%lu' to an %s for option '%c%s%s' "                   \
+			    "(valid range: %u to %lu).",                                                                 \
+			    val,                                                                                         \
+			    TYPENAME(*result),                                                                           \
+			    opt,                                                                                         \
+			    subopt ? ":" : "",                                                                           \
+			    subopt ? subopt : "",                                                                        \
+			    (unsigned int) TYPEMIN(*result),                                                             \
+			    (unsigned long int) TYPEMAX(*result));                                                       \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
@@ -240,49 +238,48 @@ static void print_lastrect(void);
 		val   = strtol(str, &endptr, 10);                                                                        \
                                                                                                                          \
 		if ((errno == ERANGE && (val == LONG_MAX || val == LONG_MIN)) || (errno != 0 && val == 0)) {             \
-			perror("[FBInk] strtol");                                                                        \
+			WARN("strtol: %s", strerror(errno));                                                             \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
 		if (endptr == str) {                                                                                     \
-			fprintf(stderr,                                                                                  \
-				"No digits were found in value '%s' assigned to an option (%c%s%s) expecting a %s.\n",   \
-				str,                                                                                     \
-				opt,                                                                                     \
-				subopt ? ":" : "",                                                                       \
-				subopt ? subopt : "",                                                                    \
-				TYPENAME(*result));                                                                      \
+			ELOG("No digits were found in value '%s' assigned to an option (%c%s%s) expecting a %s.",        \
+			     str,                                                                                        \
+			     opt,                                                                                        \
+			     subopt ? ":" : "",                                                                          \
+			     subopt ? subopt : "",                                                                       \
+			     TYPENAME(*result));                                                                         \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
 		/* If we got here, strtol() successfully parsed at least part of a number. */                            \
 		/* But we do want to enforce the fact that the input really was *only* an integer value. */              \
 		if (*endptr != '\0') {                                                                                   \
-			fprintf(stderr,                                                                                  \
-				"Found trailing characters (%s) behind value '%ld' assigned from string '%s' "           \
-				"to an option (%c%s%s) expecting a %s.\n",                                               \
-				endptr,                                                                                  \
-				val,                                                                                     \
-				str,                                                                                     \
-				opt,                                                                                     \
-				subopt ? ":" : "",                                                                       \
-				subopt ? subopt : "",                                                                    \
-				TYPENAME(*result));                                                                      \
+			ELOG(                                                                                            \
+			    "Found trailing characters (%s) behind value '%ld' assigned from string '%s' "               \
+			    "to an option (%c%s%s) expecting a %s.",                                                     \
+			    endptr,                                                                                      \
+			    val,                                                                                         \
+			    str,                                                                                         \
+			    opt,                                                                                         \
+			    subopt ? ":" : "",                                                                           \
+			    subopt ? subopt : "",                                                                        \
+			    TYPENAME(*result));                                                                          \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
 		/* Make sure there isn't a loss of precision on this arch when casting explictly */                      \
 		if ((__typeof__(*result)) val != val) {                                                                  \
-			fprintf(stderr,                                                                                  \
-				"Loss of precision when casting value '%ld' to a %s for option '%c%s%s' "                \
-				"(valid range: %ld to %ld).\n",                                                          \
-				val,                                                                                     \
-				TYPENAME(*result),                                                                       \
-				opt,                                                                                     \
-				subopt ? ":" : "",                                                                       \
-				subopt ? subopt : "",                                                                    \
-				(long int) TYPEMIN(*result),                                                             \
-				(long int) TYPEMAX(*result));                                                            \
+			ELOG(                                                                                            \
+			    "Loss of precision when casting value '%ld' to a %s for option '%c%s%s' "                    \
+			    "(valid range: %ld to %ld).",                                                                \
+			    val,                                                                                         \
+			    TYPENAME(*result),                                                                           \
+			    opt,                                                                                         \
+			    subopt ? ":" : "",                                                                           \
+			    subopt ? subopt : "",                                                                        \
+			    (long int) TYPEMIN(*result),                                                                 \
+			    (long int) TYPEMAX(*result));                                                                \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
@@ -294,13 +291,12 @@ static void print_lastrect(void);
 	({                                                                                                               \
 		/* NOTE: We want to *reject* negative values */                                                          \
 		if (strchr(str, '-')) {                                                                                  \
-			fprintf(stderr,                                                                                  \
-				"Assigned a negative value (%s) to an option (%c%s%s) expecting a positive %s.\n",       \
-				str,                                                                                     \
-				opt,                                                                                     \
-				subopt ? ":" : "",                                                                       \
-				subopt ? subopt : "",                                                                    \
-				TYPENAME(*result));                                                                      \
+			ELOG("Assigned a negative value (%s) to an option (%c%s%s) expecting a positive %s.",            \
+			     str,                                                                                        \
+			     opt,                                                                                        \
+			     subopt ? ":" : "",                                                                          \
+			     subopt ? subopt : "",                                                                       \
+			     TYPENAME(*result));                                                                         \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
@@ -314,7 +310,7 @@ static void print_lastrect(void);
 		locale_t c_loc;                                                                                          \
 		c_loc = newlocale(LC_NUMERIC_MASK, "C", (locale_t) 0);                                                   \
 		if (c_loc == (locale_t) 0) {                                                                             \
-			perror("[FBInk] newlocale");                                                                     \
+			WARN("newlocale: %s", strerror(errno));                                                          \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
@@ -324,62 +320,60 @@ static void print_lastrect(void);
 		freelocale(c_loc);                                                                                       \
                                                                                                                          \
 		if ((errno == ERANGE && (val == HUGE_VALF || val == -HUGE_VALF)) || (errno != 0 && val == 0)) {          \
-			perror("[FBInk] strtof");                                                                        \
+			WARN("strtof: %s", strerror(errno));                                                             \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
 		if (endptr == str) {                                                                                     \
-			fprintf(stderr,                                                                                  \
-				"No digits were found in value '%s' assigned to an option (%c%s%s) expecting a %s.\n",   \
-				str,                                                                                     \
-				opt,                                                                                     \
-				subopt ? ":" : "",                                                                       \
-				subopt ? subopt : "",                                                                    \
-				TYPENAME(*result));                                                                      \
+			ELOG("No digits were found in value '%s' assigned to an option (%c%s%s) expecting a %s.",        \
+			     str,                                                                                        \
+			     opt,                                                                                        \
+			     subopt ? ":" : "",                                                                          \
+			     subopt ? subopt : "",                                                                       \
+			     TYPENAME(*result));                                                                         \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
 		/* If we got here, strtof() successfully parsed at least part of a number. */                            \
 		/* But we do want to enforce the fact that the input really was *only* a decimal value. */               \
 		if (*endptr != '\0') {                                                                                   \
-			fprintf(stderr,                                                                                  \
-				"Found trailing characters (%s) behind value '%f' assigned from string '%s' "            \
-				"to an option (%c%s%s) expecting a %s.\n",                                               \
-				endptr,                                                                                  \
-				val,                                                                                     \
-				str,                                                                                     \
-				opt,                                                                                     \
-				subopt ? ":" : "",                                                                       \
-				subopt ? subopt : "",                                                                    \
-				TYPENAME(*result));                                                                      \
+			ELOG(                                                                                            \
+			    "Found trailing characters (%s) behind value '%f' assigned from string '%s' "                \
+			    "to an option (%c%s%s) expecting a %s.",                                                     \
+			    endptr,                                                                                      \
+			    val,                                                                                         \
+			    str,                                                                                         \
+			    opt,                                                                                         \
+			    subopt ? ":" : "",                                                                           \
+			    subopt ? subopt : "",                                                                        \
+			    TYPENAME(*result));                                                                          \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
 		/* Reject infinity & NaN */                                                                              \
 		if (!isfinite(val)) {                                                                                    \
-			fprintf(stderr,                                                                                  \
-				"Assigned a non-finite value (%f from '%s') to an option (%c%s%s) expecting a %s.\n",    \
-				val,                                                                                     \
-				str,                                                                                     \
-				opt,                                                                                     \
-				subopt ? ":" : "",                                                                       \
-				subopt ? subopt : "",                                                                    \
-				TYPENAME(*result));                                                                      \
+			ELOG("Assigned a non-finite value (%f from '%s') to an option (%c%s%s) expecting a %s.",         \
+			     val,                                                                                        \
+			     str,                                                                                        \
+			     opt,                                                                                        \
+			     subopt ? ":" : "",                                                                          \
+			     subopt ? subopt : "",                                                                       \
+			     TYPENAME(*result));                                                                         \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
 		/* Make sure there isn't a loss of precision on this arch when casting explictly */                      \
 		if ((__typeof__(*result)) val != val) {                                                                  \
-			fprintf(stderr,                                                                                  \
-				"Loss of precision when casting value '%f' to a %s for option '%c%s%s' "                 \
-				"(valid range: %f to %f).\n",                                                            \
-				val,                                                                                     \
-				TYPENAME(*result),                                                                       \
-				opt,                                                                                     \
-				subopt ? ":" : "",                                                                       \
-				subopt ? subopt : "",                                                                    \
-				(float) TYPEMIN(*result),                                                                \
-				(float) TYPEMAX(*result));                                                               \
+			ELOG(                                                                                            \
+			    "Loss of precision when casting value '%f' to a %s for option '%c%s%s' "                     \
+			    "(valid range: %f to %f).",                                                                  \
+			    val,                                                                                         \
+			    TYPENAME(*result),                                                                           \
+			    opt,                                                                                         \
+			    subopt ? ":" : "",                                                                           \
+			    subopt ? subopt : "",                                                                        \
+			    (float) TYPEMIN(*result),                                                                    \
+			    (float) TYPEMAX(*result));                                                                   \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
