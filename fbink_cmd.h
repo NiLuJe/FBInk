@@ -38,6 +38,7 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <syslog.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -63,6 +64,41 @@
 
 // Where our named pipe lives (/tmp should be a safe bet on every supported platform)
 #define FBINK_PIPE "/tmp/fbink-fifo"
+
+// We'll need a global instead of relying on the FBInkConfig field, because we're using these macros in various places:
+// where we have a *pointer* to an FBInkConfig struct, where we have an *instance* of it, or where we have nothing...
+bool g_toSysLog = false;
+
+// Handle what we send to stdout (i.e., mostly recaps, no FBInk tag)
+#define LOG(fmt, ...)                                                                                                    \
+	({                                                                                                               \
+		if (g_toSysLog) {                                                                                        \
+			syslog(LOG_INFO, fmt, ##__VA_ARGS__);                                                            \
+		} else {                                                                                                 \
+			fprintf(stdout, fmt "\n", ##__VA_ARGS__);                                                        \
+		}                                                                                                        \
+	})
+
+// And then what we send to stderr (add an FBInk tag to make it clear where it comes from)
+#define ELOG(fmt, ...)                                                                                                   \
+	({                                                                                                               \
+		if (g_toSysLog) {                                                                                        \
+			syslog(LOG_NOTICE, "[FBInk] " fmt, ##__VA_ARGS__);                                               \
+		} else {                                                                                                 \
+			fprintf(stderr, "[FBInk] " fmt "\n", ##__VA_ARGS__);                                             \
+		}                                                                                                        \
+	})
+
+// And a simple wrapper for actual warnings on error codepaths. Should only be used for warnings before a return/exit.
+// Always shown, always tagged, and always ends with a bang.
+#define WARN(fmt, ...)                                                                                                   \
+	({                                                                                                               \
+		if (g_toSysLog) {                                                                                        \
+			syslog(LOG_ERR, "[FBInk] " fmt "!", ##__VA_ARGS__);                                              \
+		} else {                                                                                                 \
+			fprintf(stderr, "[FBInk] " fmt "!\n", ##__VA_ARGS__);                                            \
+		}                                                                                                        \
+	})
 
 static void show_helpmsg(void);
 

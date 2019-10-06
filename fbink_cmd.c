@@ -155,6 +155,8 @@ static void
 	    "Options affecting the program's verbosity:\n"
 	    "\t-v, --verbose\tToggle printing diagnostic messages.\n"
 	    "\t-q, --quiet\tToggle hiding hardware setup messages.\n"
+	    "\t-G, --syslog\tSend output to syslog instead of stdout & stderr.\n"
+	    "\t\t\t\tOught to be the first flag passed, otherwise, some commandline parsing errors might not honor it.\n"
 	    "\n"
 	    "Options affecting the program's behavior:\n"
 	    "\t-I, --interactive\tEnter a very basic interactive mode.\n"
@@ -388,7 +390,7 @@ static int
 			close(fd);
 		}
 	} else {
-		fprintf(stderr, "Failed to redirect stdin & stdout to /dev/null\n");
+		WARN("Failed to redirect stdin & stdout to /dev/null");
 		return -1;
 	}
 
@@ -435,34 +437,34 @@ static void
 {
 	if (reg_ot_file) {
 		if (!fbink_cfg->is_quiet) {
-			printf("Loading font '%s' for the Regular style\n", reg_ot_file);
+			LOG("Loading font '%s' for the Regular style", reg_ot_file);
 		}
 		if (fbink_add_ot_font(reg_ot_file, FNT_REGULAR) < 0) {
-			fprintf(stderr, "Failed to open font file '%s'!\n", reg_ot_file);
+			WARN("Failed to open font file '%s'", reg_ot_file);
 		}
 	}
 	if (bd_ot_file) {
 		if (!fbink_cfg->is_quiet) {
-			printf("Loading font '%s' for the Bold style\n", bd_ot_file);
+			LOG("Loading font '%s' for the Bold style", bd_ot_file);
 		}
 		if (fbink_add_ot_font(bd_ot_file, FNT_BOLD) < 0) {
-			fprintf(stderr, "Failed to open font file '%s'!\n", bd_ot_file);
+			WARN("Failed to open font file '%s'", bd_ot_file);
 		}
 	}
 	if (it_ot_file) {
 		if (!fbink_cfg->is_quiet) {
-			printf("Loading font '%s' for the Italic style\n", it_ot_file);
+			LOG("Loading font '%s' for the Italic style", it_ot_file);
 		}
 		if (fbink_add_ot_font(it_ot_file, FNT_ITALIC) < 0) {
-			fprintf(stderr, "Failed to open font file '%s'!\n", it_ot_file);
+			WARN("Failed to open font file '%s'", it_ot_file);
 		}
 	}
 	if (bdit_ot_file) {
 		if (!fbink_cfg->is_quiet) {
-			printf("Loading font '%s' for the Bold Italic style\n", bdit_ot_file);
+			LOG("Loading font '%s' for the Bold Italic style", bdit_ot_file);
 		}
 		if (fbink_add_ot_font(bdit_ot_file, FNT_BOLD_ITALIC) < 0) {
-			fprintf(stderr, "Failed to open font file '%s'!\n", bdit_ot_file);
+			WARN("Failed to open font file '%s'", bdit_ot_file);
 		}
 	}
 }
@@ -614,6 +616,7 @@ int
                                               { "cls", no_argument, NULL, 'k' },
                                               { "wait", no_argument, NULL, 'w' },
                                               { "daemon", required_argument, NULL, 'd' },
+                                              { "syslog", no_argument, NULL, 'G' },
                                               { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_cfg = { 0 };
@@ -713,7 +716,7 @@ int
 
 	// NOTE: c.f., https://codegolf.stackexchange.com/q/148228 to sort this mess when I need to find an available letter ;p
 	while ((opt = getopt_long(
-		    argc, argv, "y:x:Y:X:hfcmMprs:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bDW:HEZkwd:", opts, &opt_index)) != -1) {
+		    argc, argv, "y:x:Y:X:hfcmMprs:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bDW:HEZkwd:G", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				if (strtol_hi(opt, NULL, optarg, &fbink_cfg.row) < 0) {
@@ -777,11 +780,10 @@ int
 					switch (getsubopt(&subopts, refresh_token, &value)) {
 						case TOP_OPT:
 							if (value == NULL) {
-								fprintf(stderr,
-									"Missing value for suboption '%s' of -%c, --%s\n",
-									refresh_token[TOP_OPT],
-									opt,
-									opt_longname);
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     refresh_token[TOP_OPT],
+								     opt,
+								     opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -792,11 +794,10 @@ int
 							break;
 						case LEFT_OPT:
 							if (value == NULL) {
-								fprintf(stderr,
-									"Missing value for suboption '%s' of -%c, --%s\n",
-									refresh_token[LEFT_OPT],
-									opt,
-									opt_longname);
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     refresh_token[LEFT_OPT],
+								     opt,
+								     opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -807,11 +808,10 @@ int
 							break;
 						case WIDTH_OPT:
 							if (value == NULL) {
-								fprintf(stderr,
-									"Missing value for suboption '%s' of -%c, --%s\n",
-									refresh_token[WIDTH_OPT],
-									opt,
-									opt_longname);
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     refresh_token[WIDTH_OPT],
+								     opt,
+								     opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -823,11 +823,10 @@ int
 							break;
 						case HEIGHT_OPT:
 							if (value == NULL) {
-								fprintf(stderr,
-									"Missing value for suboption '%s' of -%c, --%s\n",
-									refresh_token[HEIGHT_OPT],
-									opt,
-									opt_longname);
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     refresh_token[HEIGHT_OPT],
+								     opt,
+								     opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -839,11 +838,10 @@ int
 							break;
 						case DITHER_OPT:
 							if (value == NULL) {
-								fprintf(stderr,
-									"Missing value for suboption '%s' of -%c, --%s\n",
-									refresh_token[DITHER_OPT],
-									opt,
-									opt_longname);
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     refresh_token[DITHER_OPT],
+								     opt,
+								     opt_longname);
 								errfnd = true;
 								continue;
 							}
@@ -859,9 +857,7 @@ int
 							} else if (strcasecmp(value, "QUANT_ONLY") == 0) {
 								region_hwd = HWD_QUANT_ONLY;
 							} else {
-								fprintf(stderr,
-									"Unknown hardware dithering algorithm '%s'.\n",
-									value);
+								ELOG("Unknown hardware dithering algorithm '%s'.", value);
 								errfnd = true;
 							}
 							// Remember non-default values in a human-readable format
@@ -873,20 +869,18 @@ int
 							// Accept bogus suboptions to somewhat fake a "takes optional arguments"
 							// behavior, without the syntax quirks the real thing would enforce
 							// on the short option syntax...
-							fprintf(stderr,
-								"Ignoring bogus suboption token /%s/ for -%c, --%s\n",
-								value,
-								opt,
-								opt_longname);
+							ELOG("Ignoring bogus suboption token /%s/ for -%c, --%s",
+							     value,
+							     opt,
+							     opt_longname);
 							break;
 					}
 				}
 				// Make sure we won't pass an invalid rectangle to the driver, because that'd soft lock.
 				if ((region_height == 0 || region_width == 0) &&
 				    !(region_top == 0 && region_left == 0 && region_height == 0 && region_width == 0)) {
-					fprintf(
-					    stderr,
-					    "Non-zero values must be specified for suboptions '%s' and '%s' of -%c, --%s\n",
+					ELOG(
+					    "Non-zero values must be specified for suboptions '%s' and '%s' of -%c, --%s",
 					    refresh_token[HEIGHT_OPT],
 					    refresh_token[WIDTH_OPT],
 					    opt,
@@ -960,7 +954,7 @@ int
 				} else if (strcasecmp(optarg, "VGA") == 0) {
 					fbink_cfg.fontname = VGA;
 				} else {
-					fprintf(stderr, "Unknown font name '%s'.\n", optarg);
+					ELOG("Unknown font name '%s'.", optarg);
 					errfnd = true;
 				}
 				break;
@@ -995,11 +989,10 @@ int
 					switch (getsubopt(&subopts, image_token, &value)) {
 						case FILE_OPT:
 							if (value == NULL) {
-								fprintf(stderr,
-									"Missing value for suboption '%s' of -%c, --%s\n",
-									image_token[FILE_OPT],
-									opt,
-									opt_longname);
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     image_token[FILE_OPT],
+								     opt,
+								     opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -1007,11 +1000,10 @@ int
 							break;
 						case XOFF_OPT:
 							if (value == NULL) {
-								fprintf(stderr,
-									"Missing value for suboption '%s' of -%c, --%s\n",
-									image_token[XOFF_OPT],
-									opt,
-									opt_longname);
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     image_token[XOFF_OPT],
+								     opt,
+								     opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -1022,11 +1014,10 @@ int
 							break;
 						case YOFF_OPT:
 							if (value == NULL) {
-								fprintf(stderr,
-									"Missing value for suboption '%s' of -%c, --%s\n",
-									image_token[YOFF_OPT],
-									opt,
-									opt_longname);
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     image_token[YOFF_OPT],
+								     opt,
+								     opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -1037,11 +1028,10 @@ int
 							break;
 						case HALIGN_OPT:
 							if (value == NULL) {
-								fprintf(stderr,
-									"Missing value for suboption '%s' of -%c, --%s\n",
-									image_token[HALIGN_OPT],
-									opt,
-									opt_longname);
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     image_token[HALIGN_OPT],
+								     opt,
+								     opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -1055,17 +1045,16 @@ int
 								   strcasecmp(value, "RIGHT") == 0) {
 								fbink_cfg.halign = EDGE;
 							} else {
-								fprintf(stderr, "Unknown alignment value '%s'.\n", value);
+								ELOG("Unknown alignment value '%s'.", value);
 								errfnd = true;
 							}
 							break;
 						case VALIGN_OPT:
 							if (value == NULL) {
-								fprintf(stderr,
-									"Missing value for suboption '%s' of -%c, --%s\n",
-									image_token[VALIGN_OPT],
-									opt,
-									opt_longname);
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     image_token[VALIGN_OPT],
+								     opt,
+								     opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -1079,17 +1068,16 @@ int
 								   strcasecmp(value, "BOTTOM") == 0) {
 								fbink_cfg.valign = EDGE;
 							} else {
-								fprintf(stderr, "Unknown alignment value '%s'.\n", value);
+								ELOG("Unknown alignment value '%s'.", value);
 								errfnd = true;
 							}
 							break;
 						case SCALED_WIDTH_OPT:
 							if (value == NULL) {
-								fprintf(stderr,
-									"Missing value for suboption '%s' of -%c, --%s\n",
-									image_token[SCALED_WIDTH_OPT],
-									opt,
-									opt_longname);
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     image_token[SCALED_WIDTH_OPT],
+								     opt,
+								     opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -1102,11 +1090,10 @@ int
 							break;
 						case SCALED_HEIGHT_OPT:
 							if (value == NULL) {
-								fprintf(stderr,
-									"Missing value for suboption '%s' of -%c, --%s\n",
-									image_token[SCALED_HEIGHT_OPT],
-									opt,
-									opt_longname);
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     image_token[SCALED_HEIGHT_OPT],
+								     opt,
+								     opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -1121,11 +1108,10 @@ int
 							fbink_cfg.sw_dithering = true;
 							break;
 						default:
-							fprintf(stderr,
-								"No match found for token: /%s/ for -%c, --%s\n",
-								value,
-								opt,
-								opt_longname);
+							ELOG("No match found for token: /%s/ for -%c, --%s",
+							     value,
+							     opt,
+							     opt_longname);
 							errfnd = true;
 							break;
 					}
@@ -1182,7 +1168,7 @@ int
 				} else if (strcasecmp(optarg, "WHITE") == 0) {
 					fbink_cfg.fg_color = FG_WHITE;
 				} else {
-					fprintf(stderr, "Unknown color name '%s'.\n", optarg);
+					ELOG("Unknown color name '%s'.", optarg);
 					errfnd = true;
 				}
 				break;
@@ -1220,7 +1206,7 @@ int
 				} else if (strcasecmp(optarg, "WHITE") == 0) {
 					fbink_cfg.bg_color = BG_WHITE;
 				} else {
-					fprintf(stderr, "Unknown color name '%s'.\n", optarg);
+					ELOG("Unknown color name '%s'.", optarg);
 					errfnd = true;
 				}
 				break;
@@ -1284,11 +1270,10 @@ int
 					switch (getsubopt(&subopts, truetype_token, &value)) {
 						case REGULAR_OPT:
 							if (value == NULL) {
-								fprintf(stderr,
-									"Missing value for suboption '%s' of -%c, --%s\n",
-									truetype_token[REGULAR_OPT],
-									opt,
-									opt_longname);
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     truetype_token[REGULAR_OPT],
+								     opt,
+								     opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -1296,11 +1281,10 @@ int
 							break;
 						case BOLD_OPT:
 							if (value == NULL) {
-								fprintf(stderr,
-									"Missing value for suboption '%s' of -%c, --%s\n",
-									truetype_token[BOLD_OPT],
-									opt,
-									opt_longname);
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     truetype_token[BOLD_OPT],
+								     opt,
+								     opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -1308,11 +1292,10 @@ int
 							break;
 						case ITALIC_OPT:
 							if (value == NULL) {
-								fprintf(stderr,
-									"Missing value for suboption '%s' of -%c, --%s\n",
-									truetype_token[ITALIC_OPT],
-									opt,
-									opt_longname);
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     truetype_token[ITALIC_OPT],
+								     opt,
+								     opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -1320,11 +1303,10 @@ int
 							break;
 						case BOLDITALIC_OPT:
 							if (value == NULL) {
-								fprintf(stderr,
-									"Missing value for suboption '%s' of -%c, --%s\n",
-									truetype_token[BOLDITALIC_OPT],
-									opt,
-									opt_longname);
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     truetype_token[BOLDITALIC_OPT],
+								     opt,
+								     opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -1332,11 +1314,10 @@ int
 							break;
 						case SIZE_OPT:
 							if (value == NULL) {
-								fprintf(stderr,
-									"Missing value for suboption '%s' of -%c, --%s\n",
-									truetype_token[SIZE_OPT],
-									opt,
-									opt_longname);
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     truetype_token[SIZE_OPT],
+								     opt,
+								     opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -1349,11 +1330,10 @@ int
 							break;
 						case PX_OPT:
 							if (value == NULL) {
-								fprintf(stderr,
-									"Missing value for suboption '%s' of -%c, --%s\n",
-									truetype_token[PX_OPT],
-									opt,
-									opt_longname);
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     truetype_token[PX_OPT],
+								     opt,
+								     opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -1365,11 +1345,10 @@ int
 							break;
 						case TM_OPT:
 							if (value == NULL) {
-								fprintf(stderr,
-									"Missing value for suboption '%s' of -%c, --%s\n",
-									truetype_token[TM_OPT],
-									opt,
-									opt_longname);
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     truetype_token[TM_OPT],
+								     opt,
+								     opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -1382,11 +1361,10 @@ int
 							break;
 						case BM_OPT:
 							if (value == NULL) {
-								fprintf(stderr,
-									"Missing value for suboption '%s' of -%c, --%s\n",
-									truetype_token[BM_OPT],
-									opt,
-									opt_longname);
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     truetype_token[BM_OPT],
+								     opt,
+								     opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -1399,11 +1377,10 @@ int
 							break;
 						case LM_OPT:
 							if (value == NULL) {
-								fprintf(stderr,
-									"Missing value for suboption '%s' of -%c, --%s\n",
-									truetype_token[LM_OPT],
-									opt,
-									opt_longname);
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     truetype_token[LM_OPT],
+								     opt,
+								     opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -1416,11 +1393,10 @@ int
 							break;
 						case RM_OPT:
 							if (value == NULL) {
-								fprintf(stderr,
-									"Missing value for suboption '%s' of -%c, --%s\n",
-									truetype_token[RM_OPT],
-									opt,
-									opt_longname);
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     truetype_token[RM_OPT],
+								     opt,
+								     opt_longname);
 								errfnd = true;
 								break;
 							}
@@ -1441,11 +1417,10 @@ int
 							ot_config.no_truncation = true;
 							break;
 						default:
-							fprintf(stderr,
-								"No match found for token: /%s/ for -%c, --%s\n",
-								value,
-								opt,
-								opt_longname);
+							ELOG("No match found for token: /%s/ for -%c, --%s",
+							     value,
+							     opt,
+							     opt_longname);
 							errfnd = true;
 							break;
 					}
@@ -1453,7 +1428,7 @@ int
 				// Make sure we've passed at least one font style
 				if (reg_ot_file == NULL && bd_ot_file == NULL && it_ot_file == NULL &&
 				    bdit_ot_file == NULL) {
-					fprintf(stderr, "At least one font style must be specified!\n");
+					WARN("At least one font style must be specified");
 					errfnd = true;
 				} else {
 					is_truetype = true;
@@ -1500,7 +1475,7 @@ int
 				} else if (strcasecmp(optarg, "INIT") == 0) {
 					fbink_cfg.wfm_mode = WFM_INIT;
 				} else {
-					fprintf(stderr, "Unknown waveform update mode '%s'.\n", optarg);
+					ELOG("Unknown waveform update mode '%s'.", optarg);
 					errfnd = true;
 				}
 				// Remember non-default values in a human-readable format...
@@ -1526,8 +1501,12 @@ int
 				}
 				is_daemon = true;
 				break;
+			case 'G':
+				fbink_cfg.to_syslog = !fbink_cfg.to_syslog;
+				g_toSysLog          = fbink_cfg.to_syslog;
+				break;
 			default:
-				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
+				ELOG("?? Unknown option code 0%o ??", (unsigned int) opt);
 				errfnd = true;
 				break;
 		}
@@ -1537,9 +1516,8 @@ int
 
 	// Now we can make sure we passed an image file to print, one way or another
 	if (is_image && image_file == NULL) {
-		fprintf(
-		    stderr,
-		    "A path to an image file *must* be specified, either via the '%s' suboption of the -g, --image flag; or via the -i, --img flag!\n",
+		WARN(
+		    "A path to an image file *must* be specified, either via the '%s' suboption of the -g, --image flag; or via the -i, --img flag",
 		    image_token[FILE_OPT]);
 		errfnd = true;
 	}
@@ -1547,8 +1525,7 @@ int
 	// We can't have two different types of consumable metadata being sent to stdout.
 	// Use the API if you need more flexibility.
 	if (want_linecount && want_lastrect) {
-		fprintf(stderr,
-			"Incompatible options: -E, --coordinates cannot be used in conjunction with -l, --linecount!\n");
+		WARN("Incompatible options: -E, --coordinates cannot be used in conjunction with -l, --linecount");
 		errfnd = true;
 	}
 
@@ -1556,8 +1533,7 @@ int
 	// (basically anything that isn't is_truetype, is_*bar or nothing).
 	if (is_daemon &&
 	    (is_image || want_linecode || want_linecount || want_lastrect || is_eval || is_interactive || is_cls)) {
-		fprintf(stderr,
-			"Incompatible options: -d, --daemon can only be used for simple text or bar only workflows!\n");
+		WARN("Incompatible options: -d, --daemon can only be used for simple text or bar only workflows");
 		errfnd = true;
 	}
 
@@ -1566,6 +1542,12 @@ int
 	if (is_daemon | is_mimic || is_eval || want_linecount || want_lastrect) {
 		fbink_cfg.is_quiet   = true;
 		fbink_cfg.is_verbose = false;
+	}
+
+	// Enforce logging to syslog for is_daemon
+	if (is_daemon) {
+		fbink_cfg.to_syslog = true;
+		g_toSysLog          = true;
 	}
 
 	// Assume success, until shit happens ;)
@@ -1579,32 +1561,36 @@ int
 	// Don't abort if we piped something without passing any arguments!
 	if (errfnd || (argc == 1 && isatty(fileno(stdin)))) {
 		if (errfnd) {
-			fprintf(stderr, "\n****\t****\t****\t****\n");
+			ELOG("\n****\t****\t****\t****");
 		}
 		show_helpmsg();
 		// NOTE: Having the actual error message printed *above* the seven billion lines of the help message
 		//       pretty much ensures no one will ever notice it, so remind the user that there's also
 		//       an actual error message to read much higher in their terminal backlog ;p
 		if (errfnd) {
-			fprintf(stderr, "\n****\t****\t****\t****\n\n");
-			fprintf(stderr, "Encountered a parsing error, see the top of the output for details!\n");
+			ELOG("\n****\t****\t****\t****\n");
+			WARN("Encountered a parsing error, see the top of the output for details");
 			// Recap the exact invocation, as seen by getopt,
 			// (note that it will reorder argv so that non-option arguments end up at the end).
-			fprintf(stderr, "\n");
-			fprintf(stderr, "This was the exact invocation that triggered this error:\n\n");
+			ELOG("");
+			ELOG("This was the exact invocation that triggered this error:\n");
 			for (int i = 0; i < argc; i++) {
-				fprintf(stderr, "%s%s", argv[i], i == argc - 1 ? "\n" : " ");
+				if (g_toSysLog) {
+					syslog(LOG_NOTICE, "[FBInk] %s%s", argv[i], i == argc - 1 ? "" : " ");
+				} else {
+					fprintf(stderr, "[FBInk] %s%s", argv[i], i == argc - 1 ? "\n" : " ");
+				}
 			}
 			// Then detail it...
-			fprintf(stderr, "\nBroken down argument per argument:\n\n");
+			ELOG("\nBroken down argument per argument:\n");
 			for (int i = 0; i < optind; i++) {
-				fprintf(stderr, "argv[%d]: `%s`\n", i, argv[i]);
+				ELOG("argv[%d]: `%s`", i, argv[i]);
 			}
 			// And then non-option arguments
 			if (optind < argc) {
-				fprintf(stderr, "\nAnd the following non-option arguments:\n\n");
+				ELOG("\nAnd the following non-option arguments:\n");
 				for (int i = optind; i < argc; i++) {
-					fprintf(stderr, "argv[%d]: `%s`\n", i, argv[i]);
+					ELOG("argv[%d]: `%s`", i, argv[i]);
 				}
 			}
 		}
@@ -1614,12 +1600,12 @@ int
 
 	// Open framebuffer and keep it around, then setup globals.
 	if ((fbfd = fbink_open()) == ERRCODE(EXIT_FAILURE)) {
-		fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
+		ELOG("Failed to open the framebuffer, aborting . . .");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
 	if (fbink_init(fbfd, &fbink_cfg) == ERRCODE(EXIT_FAILURE)) {
-		fprintf(stderr, "Failed to initialize FBInk, aborting . . .\n");
+		ELOG("Failed to initialize FBInk, aborting . . .");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -1654,7 +1640,7 @@ int
 	if (is_daemon) {
 		// Fly, little daemon!
 		if (daemonize() != 0) {
-			fprintf(stderr, "Failed to daemonize, aborting!\n");
+			WARN("Failed to daemonize, aborting");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
@@ -1828,8 +1814,7 @@ int
 			// Did we want to use the OpenType codepath?
 			if (is_truetype) {
 				if (!fbink_cfg.is_quiet) {
-					printf(
-					    "Printing string '%s' @ %.1fpt (or %hupx), honoring the following margins { Top: %hdpx, Bottom: %hdpx, Left: %hdpx, Right: %hdpx } (formatted: %s, compute only: %s, no truncation: %s, overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, H align: %hhu, halfway: %s, V align: %hhu, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s)\n",
+					LOG("Printing string '%s' @ %.1fpt (or %hupx), honoring the following margins { Top: %hdpx, Bottom: %hdpx, Left: %hdpx, Right: %hdpx } (formatted: %s, compute only: %s, no truncation: %s, overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, H align: %hhu, halfway: %s, V align: %hhu, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s)",
 					    string,
 					    ot_config.size_pt,
 					    ot_config.size_px,
@@ -1857,17 +1842,14 @@ int
 				}
 
 				if ((linecount = fbink_print_ot(fbfd, string, &ot_config, &fbink_cfg, &ot_fit)) < 0) {
-					fprintf(stderr, "Failed to print that string");
+					WARN("Failed to print that string");
 					// In case we asked to flag truncation as a failure, figure out what happened...
 					if (linecount == ERRCODE(ENOSPC)) {
 						if (ot_fit.rendered_lines > 0) {
-							fprintf(stderr, " because it was truncated at rendering time!\n");
+							ELOG("Because it was truncated at rendering time.");
 						} else {
-							fprintf(stderr,
-								" because it would have been rendered truncated!\n");
+							ELOG("Because it would have been rendered truncated.");
 						}
-					} else {
-						fprintf(stderr, "!\n");
 					}
 					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
@@ -1878,11 +1860,11 @@ int
 				//       because it knows how much space it already took up ;).
 				ot_config.margins.top = (short int) linecount;
 				if (!fbink_cfg.is_quiet) {
-					printf("Next line should start @ top=%hd\n", ot_config.margins.top);
-					printf("Rendered %hu lines out of the %hu expected%s\n",
-					       ot_fit.rendered_lines,
-					       ot_fit.computed_lines,
-					       ot_fit.truncated ? ", string was truncated." : ".");
+					LOG("Next line should start @ top=%hd", ot_config.margins.top);
+					LOG("Rendered %hu lines out of the %hu expected%s",
+					    ot_fit.rendered_lines,
+					    ot_fit.computed_lines,
+					    ot_fit.truncated ? ", string was truncated." : ".");
 				}
 				// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
 
@@ -1895,8 +1877,7 @@ int
 				}
 			} else {
 				if (!fbink_cfg.is_quiet) {
-					printf(
-					    "Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, halfway: %s, left padded: %s, right padded: %s, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s, font: %hhu, font scaling: x%hhu)\n",
+					LOG("Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, halfway: %s, left padded: %s, right padded: %s, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s, font: %hhu, font scaling: x%hhu)",
 					    string,
 					    fbink_cfg.col,
 					    fbink_cfg.hoffset,
@@ -1921,7 +1902,7 @@ int
 				}
 
 				if ((linecount = fbink_print(fbfd, string, &fbink_cfg)) < 0) {
-					fprintf(stderr, "Failed to print that string!\n");
+					WARN("Failed to print that string");
 					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
 				}
@@ -1931,7 +1912,7 @@ int
 				//       because it knows how much space it already took up ;).
 				fbink_cfg.row = (short int) (fbink_cfg.row + linecount);
 				if (!fbink_cfg.is_quiet) {
-					printf("Next line should start @ row %hd\n", fbink_cfg.row);
+					LOG("Next line should start @ row %hd", fbink_cfg.row);
 				}
 				// NOTE: By design, if you ask for a clear screen, only the final print will stay on screen ;).
 
@@ -1979,8 +1960,7 @@ int
 	} else {
 		if (is_refresh) {
 			if (!fbink_cfg.is_quiet) {
-				printf(
-				    "Refreshing the screen from top=%u, left=%u for width=%u, height=%u with %swaveform mode %s and dithering mode %s (nightmode: %s)\n",
+				LOG("Refreshing the screen from top=%u, left=%u for width=%u, height=%u with %swaveform mode %s and dithering mode %s (nightmode: %s)",
 				    region_top,
 				    region_left,
 				    region_width,
@@ -1993,7 +1973,7 @@ int
 			if (fbink_refresh(
 				fbfd, region_top, region_left, region_width, region_height, region_hwd, &fbink_cfg) !=
 			    EXIT_SUCCESS) {
-				fprintf(stderr, "Failed to refresh the screen as per your specification!\n");
+				WARN("Failed to refresh the screen as per your specification");
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
 			} else {
@@ -2006,8 +1986,7 @@ int
 			}
 		} else if (is_image) {
 			if (!fbink_cfg.is_quiet) {
-				printf(
-				    "Displaying image '%s' @ column %hd + %hdpx, row %hd + %dpx (scaling: %hdx%hd, H align: %hhu, V align: %hhu, inverted: %s, flattened: %s, waveform: %s, HW dithered: %s, SW dithered: %s, nightmode: %s, skip refresh: %s)\n",
+				LOG("Displaying image '%s' @ column %hd + %hdpx, row %hd + %dpx (scaling: %hdx%hd, H align: %hhu, V align: %hhu, inverted: %s, flattened: %s, waveform: %s, HW dithered: %s, SW dithered: %s, nightmode: %s, skip refresh: %s)",
 				    image_file,
 				    fbink_cfg.col,
 				    image_x_offset,
@@ -2027,7 +2006,7 @@ int
 			}
 			if (fbink_print_image(fbfd, image_file, image_x_offset, image_y_offset, &fbink_cfg) !=
 			    EXIT_SUCCESS) {
-				fprintf(stderr, "Failed to display that image!\n");
+				WARN("Failed to display that image");
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
 			} else {
@@ -2044,8 +2023,7 @@ int
 			}
 		} else if (is_progressbar) {
 			if (!fbink_cfg.is_quiet) {
-				printf(
-				    "Displaying a %hhu%% full progress bar @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s, font: %hhu, font scaling: x%hhu)\n",
+				LOG("Displaying a %hhu%% full progress bar @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s, font: %hhu, font scaling: x%hhu)",
 				    progress,
 				    fbink_cfg.row,
 				    fbink_cfg.voffset,
@@ -2060,7 +2038,7 @@ int
 				    fbink_cfg.fontmult);
 			}
 			if (fbink_print_progress_bar(fbfd, progress, &fbink_cfg) != EXIT_SUCCESS) {
-				fprintf(stderr, "Failed to display a progressbar!\n");
+				WARN("Failed to display a progressbar");
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
 			} else {
@@ -2079,8 +2057,7 @@ int
 			// Were we asked to loop forever?
 			if (is_infinite) {
 				if (!fbink_cfg.is_quiet) {
-					printf(
-					    "Displaying an activity bar cycling forever @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s)\n",
+					LOG("Displaying an activity bar cycling forever @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s)",
 					    fbink_cfg.row,
 					    fbink_cfg.voffset,
 					    fbink_cfg.is_inverted ? "Y" : "N",
@@ -2095,14 +2072,13 @@ int
 				//       because keeping it inline massively tanks performance in the image codepath,
 				//       for an amazingly weird LTO-related reason :?
 				if (do_infinite_progress_bar(fbfd, &fbink_cfg) != EXIT_SUCCESS) {
-					fprintf(stderr, "Failed to display a progressbar!\n");
+					WARN("Failed to display a progressbar");
 					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
 				}
 			} else {
 				if (!fbink_cfg.is_quiet) {
-					printf(
-					    "Displaying an activity bar on step %hhu @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s)\n",
+					LOG("Displaying an activity bar on step %hhu @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s)",
 					    progress,
 					    fbink_cfg.row,
 					    fbink_cfg.voffset,
@@ -2115,7 +2091,7 @@ int
 					    fbink_cfg.no_refresh ? "Y" : "N");
 				}
 				if (fbink_print_activity_bar(fbfd, progress, &fbink_cfg) != EXIT_SUCCESS) {
-					fprintf(stderr, "Failed to display an activitybar!\n");
+					WARN("Failed to display an activitybar");
 					rv = ERRCODE(EXIT_FAILURE);
 					goto cleanup;
 				} else {
@@ -2149,7 +2125,7 @@ int
 			while ((nread = getline(&line, &len, stdin)) != -1) {
 				printf(">>> ");
 				if ((linecnt = fbink_print(fbfd, line, &fbink_cfg)) < 0) {
-					fprintf(stderr, "Failed to print that string!\n");
+					WARN("Failed to print that string");
 					rv = ERRCODE(EXIT_FAILURE);
 				}
 				fbink_cfg.row = (short int) (fbink_cfg.row + linecnt);
@@ -2177,9 +2153,8 @@ int
 					if (ioctl(fileno(stdin), FIONREAD, &n) == 0 && n == 0) {
 						// Okay, stdin was empty *at call time*,
 						// don't even try to wait for us to have someting to read from it...
-						fprintf(
-						    stderr,
-						    "This is a non-interactive SSH session and stdin is *currently* empty, enforcing non-blocking behavior by aborting early!\n");
+						WARN(
+						    "This is a non-interactive SSH session and stdin is *currently* empty, enforcing non-blocking behavior by aborting early");
 						// We're not printing anything, so, do the usual clear or help dance.
 						if (fbink_cfg.is_cleared) {
 							rv = fbink_cls(fbfd, &fbink_cfg);
@@ -2202,9 +2177,8 @@ int
 							//       (Killing the tool will allow FBInk to exit sanely,
 							//       but FBInk exiting will *NOT* kill the tool itself!
 							//       It'll most likely get re-parented to init instead!).
-							fprintf(
-							    stderr,
-							    "stdin is no longer empty, re-engaging classic blocking behavior!\n");
+							WARN(
+							    "stdin is no longer empty, re-engaging classic blocking behavior");
 						}
 					}
 				}
@@ -2215,31 +2189,26 @@ int
 					while ((nread = getline(&line, &len, stdin)) != -1) {
 						if ((linecnt = fbink_print_ot(
 							 fbfd, line, &ot_config, &fbink_cfg, &ot_fit)) < 0) {
-							fprintf(stderr, "Failed to print that string");
+							WARN("Failed to print that string");
 							// In case we asked to flag truncation as a failure, figure out what happened...
 							if (linecnt == ERRCODE(ENOSPC)) {
 								if (ot_fit.rendered_lines > 0) {
-									fprintf(
-									    stderr,
-									    " because it was truncated at rendering time!\n");
+									ELOG(
+									    "Because it was truncated at rendering time.");
 								} else {
-									fprintf(
-									    stderr,
-									    " because it would have been rendered truncated!\n");
+									ELOG(
+									    "Because it would have been rendered truncated.");
 								}
-							} else {
-								fprintf(stderr, "!\n");
 							}
 							rv = ERRCODE(EXIT_FAILURE);
 						}
 						ot_config.margins.top = (short int) linecnt;
 						if (!fbink_cfg.is_quiet) {
-							printf("Next line should start @ top=%hd\n",
-							       ot_config.margins.top);
-							printf("Rendered %hu lines out of the %hu expected%s\n",
-							       ot_fit.rendered_lines,
-							       ot_fit.computed_lines,
-							       ot_fit.truncated ? ", string was truncated." : ".");
+							LOG("Next line should start @ top=%hd", ot_config.margins.top);
+							LOG("Rendered %hu lines out of the %hu expected%s",
+							    ot_fit.rendered_lines,
+							    ot_fit.computed_lines,
+							    ot_fit.truncated ? ", string was truncated." : ".");
 						}
 
 						if (want_linecount) {
@@ -2252,12 +2221,12 @@ int
 				} else {
 					while ((nread = getline(&line, &len, stdin)) != -1) {
 						if ((linecnt = fbink_print(fbfd, line, &fbink_cfg)) < 0) {
-							fprintf(stderr, "Failed to print that string!\n");
+							WARN("Failed to print that string");
 							rv = ERRCODE(EXIT_FAILURE);
 						}
 						fbink_cfg.row = (short int) (fbink_cfg.row + linecnt);
 						if (!fbink_cfg.is_quiet) {
-							printf("Next line should start @ row %hd\n", fbink_cfg.row);
+							LOG("Next line should start @ row %hd", fbink_cfg.row);
 						}
 
 						if (want_linecode) {
@@ -2335,7 +2304,7 @@ cleanup:
 	}
 
 	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
-		fprintf(stderr, "Failed to close the framebuffer, aborting . . .\n");
+		ELOG("Failed to close the framebuffer, aborting . . .");
 		rv = ERRCODE(EXIT_FAILURE);
 	}
 
