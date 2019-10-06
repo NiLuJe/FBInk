@@ -1940,6 +1940,12 @@ static int
 	} else {
 		g_isQuiet = false;
 	}
+	// Update syslog flag
+	if (fbink_cfg->to_syslog) {
+		g_toSysLog = true;
+	} else {
+		g_toSysLog = false;
+	}
 
 	// Start with some more generic stuff, not directly related to the framebuffer.
 	// As all this stuff is pretty much set in stone, we'll only query it once.

@@ -271,6 +271,7 @@ typedef struct
 	bool is_nightmode;          // Request hardware inversion (if supported/safe).
 				    // This is *NOT* mutually exclusive with is_inverted!
 	bool no_refresh;            // Skip actually refreshing the eInk screen (useful when drawing in batch)
+	bool to_syslog;             // Send messages & errors to the syslog instead of stdout/stderr
 } FBInkConfig;
 
 // Same, but for OT/TTF specific stuff
@@ -358,7 +359,7 @@ FBINK_API int fbink_close(int fbfd);
 // fbink_cfg:		Pointer to an FBInkConfig struct.
 //				If you wish to customize them, the fields:
 //				is_centered, fontmult, fontname, fg_color, bg_color,
-//				no_viewport, is_verbose & is_quiet
+//				no_viewport, is_verbose, is_quiet & to_syslog
 //				MUST be set beforehand.
 //				This means you MUST call fbink_init() again when you update them, too!
 //				(This also means the effects from those fields "stick" across the lifetime of your application,

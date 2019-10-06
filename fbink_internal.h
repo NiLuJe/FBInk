@@ -116,6 +116,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <syslog.h>
 #include <unistd.h>
 
 // NOTE: This is from https://www.cprogramming.com/tutorial/unicode.html
@@ -289,7 +290,11 @@
 #define LOG(fmt, ...)                                                                                                    \
 	({                                                                                                               \
 		if (g_isVerbose) {                                                                                       \
-			fprintf(stdout, fmt "\n", ##__VA_ARGS__);                                                        \
+			if (g_toSysLog) {                                                                                \
+				syslog(LOG_INFO, fmt, ##__VA_ARGS__);                                                    \
+			} else {                                                                                         \
+				fprintf(stdout, fmt "\n", ##__VA_ARGS__);                                                \
+			}                                                                                                \
 		}                                                                                                        \
 	})
 
@@ -297,13 +302,24 @@
 #define ELOG(fmt, ...)                                                                                                   \
 	({                                                                                                               \
 		if (!g_isQuiet) {                                                                                        \
-			fprintf(stderr, "[FBInk] " fmt "\n", ##__VA_ARGS__);                                             \
+			if (g_toSysLog) {                                                                                \
+				syslog(LOG_NOTICE, "[FBInk] " fmt, ##__VA_ARGS__);                                       \
+			} else {                                                                                         \
+				fprintf(stderr, "[FBInk] " fmt "\n", ##__VA_ARGS__);                                     \
+			}                                                                                                \
 		}                                                                                                        \
 	})
 
 // And a simple wrapper for actual warnings on error codepaths. Should only be used for warnings before a return/exit.
 // Always shown, always tagged, and always ends with a bang.
-#define WARN(fmt, ...) ({ fprintf(stderr, "[FBInk] " fmt "!\n", ##__VA_ARGS__); })
+#define WARN(fmt, ...)                                                                                                   \
+	({                                                                                                               \
+		if (g_toSysLog) {                                                                                        \
+			syslog(LOG_ERR, "[FBInk] " fmt "!", ##__VA_ARGS__);                                              \
+		} else {                                                                                                 \
+			fprintf(stderr, "[FBInk] " fmt "!\n", ##__VA_ARGS__);                                            \
+		}                                                                                                        \
+	})
 
 // NOTE: perror is not thread-safe, so we use strerror_r, we just have to make sure it behaves as expected,
 //       because the GNU variant has a different signature, and assuming _GNU_SOURCE ensures we'll get it doesn't hold...
@@ -372,6 +388,8 @@ unsigned short int MAXCOLS = 32U;
 bool g_isVerbose = false;
 // Quiet is for fbink_init's hardware setup info
 bool g_isQuiet = false;
+// Whether we log to stdout/stderr or the syslog
+bool g_toSysLog = false;
 // This should be a pretty accurate fallback...
 long int USER_HZ = 100;
 // Pointers to the appropriate put_pixel/get_pixel functions for the fb's bpp
