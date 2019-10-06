@@ -332,9 +332,10 @@ static void
 {
 	// Our main loop handles EINTR, and will abort cleanly once it sees that flag
 	g_timeToDie = true;
-	// NOTE: I'm not quite sure if there's any guarantee the memory this points to will be valid outside of the handler,
-	//       but that seems to behave...
-	g_sigCaught = siginfo;
+	// NOTE: I have no idea how long that pointer is supposed to be safe to use, so, make a copy of the fields we care about.
+	g_sigCaught.signo = siginfo->si_signo;
+	g_sigCaught.pid   = siginfo->si_pid;
+	g_sigCaught.uid   = siginfo->si_uid;
 }
 
 // Because daemon() only appeared in glibc 2.21 (and doesn't double-fork anyway)
@@ -1722,9 +1723,9 @@ int
 			// If we caught one of the signals we setup earlier, it's time to die ;).
 			if (g_timeToDie) {
 				ELOG("Caught a cleanup signal (%s by UID: %ld, PID: %ld), winding down . . .",
-				     strsignal(g_sigCaught->si_signo),
-				     (long int) g_sigCaught->si_uid,
-				     (long int) g_sigCaught->si_pid);
+				     strsignal(g_sigCaught.signo),
+				     (long int) g_sigCaught.uid,
+				     (long int) g_sigCaught.pid);
 				goto cleanup;
 			}
 
