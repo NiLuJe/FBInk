@@ -156,7 +156,7 @@ static void
 	    "\t-v, --verbose\tToggle printing diagnostic messages.\n"
 	    "\t-q, --quiet\tToggle hiding hardware setup messages.\n"
 	    "\t-G, --syslog\tSend output to syslog instead of stdout & stderr.\n"
-	    "\t\t\t\tOught to be the first flag passed, otherwise, some commandline parsing errors might not honor it.\n"
+	    "\t\t\tOught to be the first flag passed, otherwise, some commandline parsing errors might not honor it.\n"
 	    "\n"
 	    "Options affecting the program's behavior:\n"
 	    "\t-I, --interactive\tEnter a very basic interactive mode.\n"
