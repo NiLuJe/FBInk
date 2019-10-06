@@ -332,6 +332,8 @@ static void
 {
 	// Our main loop handles EINTR, and will abort cleanly once it sees that flag
 	g_timeToDie = true;
+	// NOTE: I'm not quite sure if there's any guarantee the memory this points to will be valid outside of the handler,
+	//       but that seems to behave...
 	g_sigCaught = siginfo;
 }
 
