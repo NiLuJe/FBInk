@@ -103,7 +103,8 @@ bool toSysLog = false;
 static void show_helpmsg(void);
 
 // For our cleanup signal handler....
-bool g_timeToDie = false;
+volatile sig_atomic_t g_timeToDie = 0;
+// NOTE: We're less concerned with the atomicity of the siginfo stuff...
 typedef struct
 {
 	int   signo;

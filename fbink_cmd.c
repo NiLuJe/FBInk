@@ -331,7 +331,7 @@ static void
     cleanup_handler(int signum __attribute__((unused)), siginfo_t* siginfo, void* context __attribute__((unused)))
 {
 	// Our main loop handles EINTR, and will abort cleanly once it sees that flag
-	g_timeToDie = true;
+	g_timeToDie = 1;
 	// NOTE: I have no idea how long that pointer is supposed to be safe to use, so, make a copy of the fields we care about.
 	g_sigCaught.signo = siginfo->si_signo;
 	g_sigCaught.pid   = siginfo->si_pid;
@@ -1721,7 +1721,7 @@ int
 		// Forevah'!
 		while (1) {
 			// If we caught one of the signals we setup earlier, it's time to die ;).
-			if (g_timeToDie) {
+			if (g_timeToDie != 0) {
 				ELOG("Caught a cleanup signal (%s by UID: %ld, PID: %ld), winding down . . .",
 				     strsignal(g_sigCaught.signo),
 				     (long int) g_sigCaught.uid,
