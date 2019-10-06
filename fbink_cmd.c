@@ -1564,34 +1564,42 @@ int
 	// Don't abort if we piped something without passing any arguments!
 	if (errfnd || (argc == 1 && isatty(fileno(stdin)))) {
 		if (errfnd) {
-			ELOG("\n****\t****\t****\t****");
+			if (!toSysLog) {
+				fprintf(stderr, "\n****\t****\t****\t****\n");
+			}
 		}
 		show_helpmsg();
 		// NOTE: Having the actual error message printed *above* the seven billion lines of the help message
 		//       pretty much ensures no one will ever notice it, so remind the user that there's also
 		//       an actual error message to read much higher in their terminal backlog ;p
 		if (errfnd) {
-			ELOG("\n****\t****\t****\t****\n");
+			if (!toSysLog) {
+				fprintf(stderr, "\n****\t****\t****\t****\n\n");
+			}
 			WARN("Encountered a parsing error, see the top of the output for details");
 			// Recap the exact invocation, as seen by getopt,
 			// (note that it will reorder argv so that non-option arguments end up at the end).
-			ELOG("");
-			ELOG("This was the exact invocation that triggered this error:\n");
-			for (int i = 0; i < argc; i++) {
-				if (toSysLog) {
-					syslog(LOG_NOTICE, "[FBInk] %s%s", argv[i], i == argc - 1 ? "" : " ");
-				} else {
-					fprintf(stderr, "[FBInk] %s%s", argv[i], i == argc - 1 ? "\n" : " ");
-				}
+			if (!toSysLog) {
+				fprintf(stderr, "\n");
 			}
-			// Then detail it...
-			ELOG("\nBroken down argument per argument:\n");
+			ELOG("This was the exact invocation that triggered this error:\n");
+			if (!toSysLog) {
+				for (int i = 0; i < argc; i++) {
+					fprintf(stderr, "%s%s", argv[i], i == argc - 1 ? "\n" : " ");
+				}
+				// Then detail it...
+				fprintf(stderr, "\n");
+				ELOG("Broken down argument per argument:\n");
+			}
 			for (int i = 0; i < optind; i++) {
 				ELOG("argv[%d]: `%s`", i, argv[i]);
 			}
 			// And then non-option arguments
 			if (optind < argc) {
-				ELOG("\nAnd the following non-option arguments:\n");
+				if (!toSysLog) {
+					fprintf(stderr, "\n");
+				}
+				ELOG("And the following non-option arguments:\n");
 				for (int i = optind; i < argc; i++) {
 					ELOG("argv[%d]: `%s`", i, argv[i]);
 				}
