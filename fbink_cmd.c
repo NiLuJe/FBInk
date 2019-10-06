@@ -1743,7 +1743,7 @@ int
 							continue;
 						}
 						WARN("read: %s", strerror(errno));
-						rv = bytes_read;
+						rv = ERRCODE(EXIT_FAILURE);
 						goto cleanup;
 					}
 
