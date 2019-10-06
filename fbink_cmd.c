@@ -1508,6 +1508,12 @@ int
 		opt_index = -1;
 	}
 
+	// Enforce logging to syslog for is_daemon
+	if (is_daemon) {
+		fbink_cfg.to_syslog = true;
+		toSysLog            = true;
+	}
+
 	// If we're logging to syslog, do an explicit openlog with our ID as soon as possible...
 	if (toSysLog) {
 		openlog("fbink", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_DAEMON);
@@ -1541,12 +1547,6 @@ int
 	if (is_daemon | is_mimic || is_eval || want_linecount || want_lastrect) {
 		fbink_cfg.is_quiet   = true;
 		fbink_cfg.is_verbose = false;
-	}
-
-	// Enforce logging to syslog for is_daemon
-	if (is_daemon) {
-		fbink_cfg.to_syslog = true;
-		toSysLog            = true;
 	}
 
 	// Assume success, until shit happens ;)
