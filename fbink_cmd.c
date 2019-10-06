@@ -328,11 +328,11 @@ static void
 
 // Fun helpers for the daemon mode...
 static void
-    cleanup_handler(int signum)
+    cleanup_handler(int signum __attribute__((unused)), siginfo_t* siginfo, void* context __attribute__((unused)))
 {
 	// Our main loop handles EINTR, and will abort cleanly once it sees that flag
 	g_timeToDie = true;
-	g_sigCaught = signum;
+	g_sigCaught = siginfo;
 }
 
 // Because daemon() only appeared in glibc 2.21 (and doesn't double-fork anyway)
@@ -1655,9 +1655,9 @@ int
 
 		// Ensure we'll cleanup behind us...
 		struct sigaction new_action = { 0 };
-		new_action.sa_handler       = &cleanup_handler;
+		new_action.sa_sigaction     = &cleanup_handler;
 		sigemptyset(&new_action.sa_mask);
-		new_action.sa_flags = 0;
+		new_action.sa_flags = SA_SIGINFO;
 		if ((rv = sigaction(SIGTERM, &new_action, NULL) < 0)) {
 			WARN("sigaction (TERM): %s", strerror(errno));
 			goto cleanup;
@@ -1719,7 +1719,10 @@ int
 		while (1) {
 			// If we caught one of the signals we setup earlier, it's time to die ;).
 			if (g_timeToDie) {
-				ELOG("Caught a cleanup signal (%s), winding down . . .", strsignal(g_sigCaught));
+				ELOG("Caught a cleanup signal (%s by UID: %ld, PID: %ld), winding down . . .",
+				     strsignal(g_sigCaught->si_signo),
+				     (long int) g_sigCaught->si_uid,
+				     (long int) g_sigCaught->si_pid);
 				goto cleanup;
 			}
 
