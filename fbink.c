@@ -2687,7 +2687,7 @@ int
 			break;
 	}
 
-	ELOG("Font '%s' loaded for style '%s'", filename, font_style_to_string(style));
+	ELOG("Font '%s' loaded for style '%s'", filename, font_style_to_string((uint8_t) style));
 	return EXIT_SUCCESS;
 #else
 	WARN("OpenType support is disabled in this FBInk build");
