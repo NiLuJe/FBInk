@@ -28,10 +28,37 @@ static void
 	printf(
 	    "\n"
 #ifdef FBINK_MINIMAL
-	    "FBInk %s [Minimalistic build]\n"
+	    "FBInk %s [Modular build:"
+	    " Fonts="
+#	ifdef FBINK_WITH_FONTS
+	    "Yes"
+#	else
+	    "No"
+#	endif    // FBINK_WITH_FONTS
+	    " Image="
+#	ifdef FBINK_WITH_IMAGE
+	    "Yes"
+#	else
+	    "No"
+#	endif    // FBINK_WITH_IMAGE
+	    " OpenType="
+#	ifdef FBINK_WITH_OPENTYPE
+	    "Yes"
+#	else
+	    "No"
+#	endif    // FBINK_WITH_OPENTYPE
+#	if !defined(FBINK_FOR_KINDLE) && !defined(FBINK_FOR_CERVANTES) && !defined(FBINK_FOR_LINUX)
+	    " ButtonScan="
+#		ifdef FBINK_WITH_BUTTON_SCAN
+	    "Yes"
+#		else
+	    "No"
+#		endif    // FBINK_WITH_BUTTON_SCAN
+#	endif            // FBINK_FOR_KOBO
+	    "]\n"
 #else
 	    "FBInk %s\n"
-#endif
+#endif    // FBINK_MINIMAL
 	    "\n"
 	    "Usage: fbink [OPTIONS] [STRING]\n"
 	    "\n"
