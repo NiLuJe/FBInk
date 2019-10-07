@@ -188,7 +188,7 @@ static void print_lastrect(void);
 		val   = strtoul(str, &endptr, 10);                                                                       \
                                                                                                                          \
 		if ((errno == ERANGE && val == ULONG_MAX) || (errno != 0 && val == 0)) {                                 \
-			WARN("strtoul: %s", strerror(errno));                                                            \
+			WARN("strtoul: %m");                                                                             \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
@@ -247,7 +247,7 @@ static void print_lastrect(void);
 		val   = strtol(str, &endptr, 10);                                                                        \
                                                                                                                          \
 		if ((errno == ERANGE && (val == LONG_MAX || val == LONG_MIN)) || (errno != 0 && val == 0)) {             \
-			WARN("strtol: %s", strerror(errno));                                                             \
+			WARN("strtol: %m");                                                                              \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
@@ -319,7 +319,7 @@ static void print_lastrect(void);
 		locale_t c_loc;                                                                                          \
 		c_loc = newlocale(LC_NUMERIC_MASK, "C", (locale_t) 0);                                                   \
 		if (c_loc == (locale_t) 0) {                                                                             \
-			WARN("newlocale: %s", strerror(errno));                                                          \
+			WARN("newlocale: %m");                                                                           \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
@@ -329,7 +329,7 @@ static void print_lastrect(void);
 		freelocale(c_loc);                                                                                       \
                                                                                                                          \
 		if ((errno == ERANGE && (val == HUGE_VALF || val == -HUGE_VALF)) || (errno != 0 && val == 0)) {          \
-			WARN("strtof: %s", strerror(errno));                                                             \
+			WARN("strtof: %m");                                                                              \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \

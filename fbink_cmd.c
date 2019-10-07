@@ -1665,15 +1665,15 @@ int
 		sigemptyset(&new_action.sa_mask);
 		new_action.sa_flags = SA_SIGINFO;
 		if ((rv = sigaction(SIGTERM, &new_action, NULL) != 0)) {
-			WARN("sigaction (TERM): %s", strerror(errno));
+			WARN("sigaction (TERM): %m");
 			goto cleanup;
 		}
 		if ((rv = sigaction(SIGINT, &new_action, NULL) != 0)) {
-			WARN("sigaction (INT): %s", strerror(errno));
+			WARN("sigaction (INT): %m");
 			goto cleanup;
 		}
 		if ((rv = sigaction(SIGQUIT, &new_action, NULL) != 0)) {
-			WARN("sigaction (QUIT): %s", strerror(errno));
+			WARN("sigaction (QUIT): %m");
 			goto cleanup;
 		}
 
@@ -1689,7 +1689,7 @@ int
 		// NOTE: You cannot re-use an existing pipe!
 		rv = mkfifo(pipe_path, 0666);
 		if (rv != 0) {
-			WARN("mkfifo: %s", strerror(errno));
+			WARN("mkfifo: %m");
 			// Make sure we won't delete the pipe, in case it's not ours...
 			pipe_path = NULL;
 			goto cleanup;
@@ -1701,7 +1701,7 @@ int
 		// NOTE: See the POLLHUP note below for the reasoning behing opening it RW and not RO...
 		pipefd = open(pipe_path, O_RDWR | O_NONBLOCK | O_CLOEXEC);
 		if (pipefd == -1) {
-			WARN("open: %s", strerror(errno));
+			WARN("open: %m");
 			// Same here, don't delete the pipe in case it's not ours...
 			pipe_path = NULL;
 			goto cleanup;
@@ -1737,7 +1737,7 @@ int
 				if (errno == EINTR) {
 					continue;
 				}
-				WARN("poll: %s", strerror(errno));
+				WARN("poll: %m");
 				rv = pn;
 				goto cleanup;
 			}
@@ -1752,7 +1752,7 @@ int
 						if (errno == EINTR) {
 							continue;
 						}
-						WARN("read: %s", strerror(errno));
+						WARN("read: %m");
 						rv = ERRCODE(EXIT_FAILURE);
 						goto cleanup;
 					}
