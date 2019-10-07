@@ -7,12 +7,15 @@
 # NOTE: We want the "bare" variant of the TC env, to make sure we vendor the right stuff...
 #       i.e., source ~SVN/Configs/trunk/Kindle/Misc/x-compile.sh kobo env bare
 ifdef CROSS_TC
-	CC:=$(CROSS_TC)-gcc
-	CXX:=$(CROSS_TC)-g++
-	STRIP:=$(CROSS_TC)-strip
-	# NOTE: This relies on GCC plugins! Enforce AR & RANLIB to point to their real binary and not the GCC wrappers if your TC doesn't support that!
-	AR:=$(CROSS_TC)-gcc-ar
-	RANLIB:=$(CROSS_TC)-gcc-ranlib
+	# If we requested CROSS_TC + Clang, assume we know what we're doing, and that is everything is setup the right way already...
+	ifneq "$(CC)" "clang"
+		CC:=$(CROSS_TC)-gcc
+		CXX:=$(CROSS_TC)-g++
+		STRIP:=$(CROSS_TC)-strip
+		# NOTE: This relies on GCC plugins! Enforce AR & RANLIB to point to their real binary and not the GCC wrappers if your TC doesn't support that!
+		AR:=$(CROSS_TC)-gcc-ar
+		RANLIB:=$(CROSS_TC)-gcc-ranlib
+	endif
 else ifdef CROSS_COMPILE
 	CC:=$(CROSS_COMPILE)cc
 	CXX:=$(CROSS_COMPILE)cxx
