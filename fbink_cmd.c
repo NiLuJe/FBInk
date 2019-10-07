@@ -345,6 +345,7 @@ static int
 {
 	switch (fork()) {
 		case -1:
+			WARN("initial fork: %m");
 			return -1;
 		case 0:
 			break;
@@ -353,6 +354,7 @@ static int
 	}
 
 	if (setsid() == -1) {
+		WARN("setsid: %m");
 		return -1;
 	}
 
@@ -360,10 +362,12 @@ static int
 	// In practical terms, this ensures we get re-parented to init *now*.
 	// Ignore SIGHUP while we're there, since we don't want to be killed by it.
 	if (signal(SIGHUP, SIG_IGN) == SIG_ERR) {
+		WARN("signal: %m");
 		return -1;
 	}
 	switch (fork()) {
 		case -1:
+			WARN("final fork: %m");
 			return -1;
 		case 0:
 			break;
@@ -372,6 +376,7 @@ static int
 	}
 
 	if (chdir("/tmp") == -1) {
+		WARN("chdir: %m");
 		return -1;
 	}
 
@@ -392,7 +397,7 @@ static int
 			close(fd);
 		}
 	} else {
-		WARN("Failed to redirect stdin & stdout to /dev/null");
+		WARN("Failed to redirect stdin & stdout to /dev/null (open: %m)");
 		return -1;
 	}
 
