@@ -321,32 +321,6 @@
 		}                                                                                                        \
 	})
 
-// NOTE: perror is not thread-safe, so we use strerror_r, we just have to make sure it behaves as expected,
-//       because the GNU variant has a different signature, and assuming _GNU_SOURCE ensures we'll get it doesn't hold...
-//       For instance, musl will happily keep _GNU_SOURCE defined, but exports the XSI prototype anyway...
-#if defined(__GLIBC__) && defined(_GNU_SOURCE)
-#	define ERRPRINT(call)                                                                                           \
-		({                                                                                                       \
-			char        buf[256];                                                                            \
-			const char* errstr = strerror_r(errno, buf, sizeof(buf));                                        \
-			WARN(#call ": %s", errstr);                                                                      \
-		})
-#else
-#	define ERRPRINT(call)                                                                                           \
-		({                                                                                                       \
-			char buf[256];                                                                                   \
-			int  ret = strerror_r(errno, buf, sizeof(buf));                                                  \
-			if (ret != 0) {                                                                                  \
-				/* Most implementations will leave errno untouched, as they should */                    \
-				WARN(#call ": Failed! And we failed to describe its errno %d (strerror_r: %d)",          \
-				     errno,                                                                              \
-				     ret);                                                                               \
-			} else {                                                                                         \
-				WARN(#call ": %s", buf);                                                                 \
-			}                                                                                                \
-		})
-#endif
-
 // We want to return negative values on failure, always
 #define ERRCODE(e) (-(e))
 

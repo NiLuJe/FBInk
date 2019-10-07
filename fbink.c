@@ -649,7 +649,7 @@ static void
 		// NOTE: We're on inverted palette devices, hence the use of the "wrong" LUT...
 		if (is_flashing && v == eInkFGCMap[BG_WHITE]) {
 			if (ioctl(fbfd, FBIO_EINK_CLEAR_SCREEN, EINK_CLEAR_SCREEN) < 0) {
-				ERRPRINT(FBIO_EINK_CLEAR_SCREEN);
+				WARN("FBIO_EINK_CLEAR_SCREEN: %m");
 				// Just warn, this is non-fatal ;).
 			}
 
@@ -1257,9 +1257,9 @@ static int
 
 	if (rv < 0) {
 		if (is_fs) {
-			ERRPRINT(FBIO_EINK_UPDATE_DISPLAY);
+			WARN("FBIO_EINK_UPDATE_DISPLAY: %m");
 		} else {
-			ERRPRINT(FBIO_EINK_UPDATE_DISPLAY_AREA);
+			WARN("FBIO_EINK_UPDATE_DISPLAY_AREA: %m");
 		}
 		return ERRCODE(EXIT_FAILURE);
 	}
@@ -1275,7 +1275,7 @@ static int
 	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_SUBMISSION, &marker);
 
 	if (rv < 0) {
-		ERRPRINT(MXCFB_WAIT_FOR_UPDATE_SUBMISSION);
+		WARN("MXCFB_WAIT_FOR_UPDATE_SUBMISSION: %m");
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		if (rv == 0) {
@@ -1319,7 +1319,7 @@ static int
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
 
 	if (rv < 0) {
-		ERRPRINT(MXCFB_SEND_UPDATE);
+		WARN("MXCFB_SEND_UPDATE: %m");
 		if (errno == EINVAL) {
 			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
 			     region.top,
@@ -1341,7 +1341,7 @@ static int
 	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL, &marker);
 
 	if (rv < 0) {
-		ERRPRINT(MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL);
+		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL: %m");
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		if (rv == 0) {
@@ -1367,7 +1367,7 @@ static int
 	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_marker);
 
 	if (rv < 0) {
-		ERRPRINT(MXCFB_WAIT_FOR_UPDATE_COMPLETE);
+		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %m");
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		if (rv == 0) {
@@ -1426,7 +1426,7 @@ static int
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_ZELDA, &update);
 
 	if (rv < 0) {
-		ERRPRINT(MXCFB_SEND_UPDATE_ZELDA);
+		WARN("MXCFB_SEND_UPDATE_ZELDA: %m");
 		if (errno == EINVAL) {
 			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
 			     region.top,
@@ -1484,7 +1484,7 @@ static int
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_REX, &update);
 
 	if (rv < 0) {
-		ERRPRINT(MXCFB_SEND_UPDATE_REX);
+		WARN("MXCFB_SEND_UPDATE_REX: %m");
 		if (errno == EINVAL) {
 			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
 			     region.top,
@@ -1528,7 +1528,7 @@ static int
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
 
 	if (rv < 0) {
-		ERRPRINT(MXCFB_SEND_UPDATE);
+		WARN("MXCFB_SEND_UPDATE: %m");
 		if (errno == EINVAL) {
 			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
 			     region.top,
@@ -1551,7 +1551,7 @@ static int
 	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &marker);
 
 	if (rv < 0) {
-		ERRPRINT(MXCFB_WAIT_FOR_UPDATE_COMPLETE);
+		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %m");
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		if (rv == 0) {
@@ -1594,7 +1594,7 @@ static int
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V1_NTX, &update);
 
 	if (rv < 0) {
-		ERRPRINT(MXCFB_SEND_UPDATE_V1_NTX);
+		WARN("MXCFB_SEND_UPDATE_V1_NTX: %m");
 		if (errno == EINVAL) {
 			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
 			     region.top,
@@ -1615,7 +1615,7 @@ static int
 	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1, &marker);
 
 	if (rv < 0) {
-		ERRPRINT(MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1);
+		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1: %m");
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		if (rv == 0) {
@@ -1665,7 +1665,7 @@ static int
 	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V2, &update);
 
 	if (rv < 0) {
-		ERRPRINT(MXCFB_SEND_UPDATE_V2);
+		WARN("MXCFB_SEND_UPDATE_V2: %m");
 		if (errno == EINVAL) {
 			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
 			     region.top,
@@ -1690,7 +1690,7 @@ static int
 	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3, &update_marker);
 
 	if (rv < 0) {
-		ERRPRINT(MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3);
+		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3: %m");
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		if (rv == 0) {
@@ -2596,14 +2596,14 @@ int
 	FILE*                   f    = fopen(filename, "r" STDIO_CLOEXEC);
 	unsigned char* restrict data = NULL;
 	if (!f) {
-		ERRPRINT(fopen);
+		WARN("fopen: %m");
 		otInit = false;
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		int         fd = fileno(f);
 		struct stat st;
 		if (fstat(fd, &st) == -1) {
-			ERRPRINT(fstat);
+			WARN("fstat: %m");
 			fclose(f);
 			otInit = false;
 			return ERRCODE(EXIT_FAILURE);
@@ -2835,7 +2835,7 @@ static int
 	//       See also the Cervantes quirk documented in clear_screen...
 	fbPtr = (unsigned char*) mmap(NULL, fInfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
 	if (fbPtr == MAP_FAILED) {
-		ERRPRINT(mmap);
+		WARN("mmap: %m");
 		fbPtr = NULL;
 		return ERRCODE(EXIT_FAILURE);
 	} else {
@@ -2850,7 +2850,7 @@ static int
     unmap_fb(void)
 {
 	if (munmap(fbPtr, fInfo.smem_len) < 0) {
-		ERRPRINT(munmap);
+		WARN("munmap: %m");
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		// NOTE: Don't forget to reset those state flags,
@@ -2877,7 +2877,7 @@ int
 
 	if (fbfd != FBFD_AUTO) {
 		if (close(fbfd) < 0) {
-			ERRPRINT(close);
+			WARN("close: %m");
 			return ERRCODE(EXIT_FAILURE);
 		}
 	}
@@ -3151,7 +3151,7 @@ int
 	//       (+ 1 'wide' NULL, wide to make sure u8_strlen won't skip over it).
 	line = calloc((MAXCOLS + 1U) * 4U, sizeof(*line));
 	if (line == NULL) {
-		ERRPRINT(line calloc);
+		WARN("line calloc: %m");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -3502,7 +3502,7 @@ int
 
 	// See if vsnprintf made a boo-boo
 	if (ret < 0) {
-		ERRPRINT(initial vsnprintf);
+		WARN("initial vsnprintf: %m");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -3513,7 +3513,7 @@ int
 	//       and the OS is smart enough to make it fast if we don't use the full space anyway (CoW zeroing).
 	buffer = calloc(size, sizeof(*buffer));
 	if (buffer == NULL) {
-		ERRPRINT(calloc);
+		WARN("calloc: %m");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -3525,7 +3525,7 @@ int
 
 	// See if vsnprintf made a boo-boo, one final time
 	if (ret < 0) {
-		ERRPRINT(vsnprintf);
+		WARN("vsnprintf: %m");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -6904,7 +6904,7 @@ int
 	// Start by allocating enough memory for a full dump of the visible screen...
 	dump->data = calloc((size_t)(fInfo.line_length * vInfo.yres), sizeof(*dump->data));
 	if (dump->data == NULL) {
-		ERRPRINT(dump->data calloc);
+		WARN("dump->data calloc: %m");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -7109,7 +7109,7 @@ int
 		dump->data = calloc((size_t)((region.width * bpp) * region.height), sizeof(*dump->data));
 	}
 	if (dump->data == NULL) {
-		ERRPRINT(dump->data calloc);
+		WARN("dump->data calloc: %m");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
