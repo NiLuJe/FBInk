@@ -359,7 +359,9 @@ static int
 	// Double fork, for... reasons!
 	// In practical terms, this ensures we get re-parented to init *now*.
 	// Ignore SIGHUP while we're there, since we don't want to be killed by it.
-	signal(SIGHUP, SIG_IGN);
+	if (signal(SIGHUP, SIG_IGN) == SIG_ERR) {
+		return -1;
+	}
 	switch (fork()) {
 		case -1:
 			return -1;
@@ -1662,15 +1664,15 @@ int
 		new_action.sa_sigaction     = &cleanup_handler;
 		sigemptyset(&new_action.sa_mask);
 		new_action.sa_flags = SA_SIGINFO;
-		if ((rv = sigaction(SIGTERM, &new_action, NULL) < 0)) {
+		if ((rv = sigaction(SIGTERM, &new_action, NULL) != 0)) {
 			WARN("sigaction (TERM): %s", strerror(errno));
 			goto cleanup;
 		}
-		if ((rv = sigaction(SIGINT, &new_action, NULL) < 0)) {
+		if ((rv = sigaction(SIGINT, &new_action, NULL) != 0)) {
 			WARN("sigaction (INT): %s", strerror(errno));
 			goto cleanup;
 		}
-		if ((rv = sigaction(SIGQUIT, &new_action, NULL) < 0)) {
+		if ((rv = sigaction(SIGQUIT, &new_action, NULL) != 0)) {
 			WARN("sigaction (QUIT): %s", strerror(errno));
 			goto cleanup;
 		}
