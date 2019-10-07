@@ -389,7 +389,7 @@ static char*
 
 	out = calloc(len + neg + 1U, sizeof(*out));
 	if (out == NULL) {
-		WARN("Error allocating base32 output string buffer");
+		WARN("Error allocating base32 output string buffer: %m");
 		return NULL;
 	}
 	for (uint32_t i = neg; len > 0U; i++) {
@@ -409,7 +409,7 @@ static void
 {
 	FILE* fp = fopen("/proc/usid", "r" STDIO_CLOEXEC);
 	if (!fp) {
-		WARN("Cannot open /proc/usid (not running on a Kindle?)");
+		WARN("Cannot open /proc/usid (%m). Not running on a Kindle?");
 	} else {
 		unsigned char serial_no[KINDLE_SERIAL_NO_LENGTH] = { 0 };
 		if (fread(serial_no, sizeof(unsigned char), KINDLE_SERIAL_NO_LENGTH, fp) < KINDLE_SERIAL_NO_LENGTH ||
@@ -460,7 +460,7 @@ static void
 {
 	FILE* fp = fopen(HWCONFIG_DEVICE, "re");
 	if (!fp) {
-		WARN("Couldn't read from '%s', unable to identify the Cervantes model", HWCONFIG_DEVICE);
+		WARN("Couldn't read from '%s' (%m), unable to identify the Cervantes model", HWCONFIG_DEVICE);
 	} else {
 #		pragma GCC diagnostic push
 #		pragma GCC diagnostic ignored "-Wmissing-braces"
@@ -468,7 +468,7 @@ static void
 #		pragma GCC diagnostic pop
 
 		if (fseek(fp, HWCONFIG_OFFSET, SEEK_SET) != 0) {
-			WARN("Failed to seek to position 0x%p in '%s'", (void*) HWCONFIG_OFFSET, HWCONFIG_DEVICE);
+			WARN("Failed to seek to position 0x%p in '%s': %m", (void*) HWCONFIG_OFFSET, HWCONFIG_DEVICE);
 		} else {
 			if (fread(&config, sizeof(config), 1, fp) < 1 || ferror(fp) != 0) {
 				WARN("Failed to read the NTX HWConfig entry on '%s'", HWCONFIG_DEVICE);
@@ -814,7 +814,7 @@ static void
 	//       So try to do it the hard way, via the NTXHWConfig tag...
 	fp = fopen(HWCONFIG_DEVICE, "re");
 	if (!fp) {
-		WARN("Couldn't read from '%s', unable to identify the Kobo model", HWCONFIG_DEVICE);
+		WARN("Couldn't read from '%s' (%m), unable to identify the Kobo model", HWCONFIG_DEVICE);
 	} else {
 #		pragma GCC diagnostic push
 #		pragma GCC diagnostic ignored "-Wmissing-braces"
@@ -824,7 +824,7 @@ static void
 		uint64_t                storagesize = 0U;
 
 		if (fseek(fp, HWCONFIG_OFFSET, SEEK_SET) != 0) {
-			WARN("Failed to seek to position 0x%p in '%s'", (void*) HWCONFIG_OFFSET, HWCONFIG_DEVICE);
+			WARN("Failed to seek to position 0x%p in '%s': %m", (void*) HWCONFIG_OFFSET, HWCONFIG_DEVICE);
 		} else {
 			if (fread(&config, sizeof(config), 1, fp) < 1 || ferror(fp) != 0) {
 				WARN("Failed to read the NTX HWConfig entry on '%s'", HWCONFIG_DEVICE);
@@ -860,7 +860,7 @@ static void
 			// We'll also need the total storage space to discriminate 32GB devices...
 			if (ioctl(fileno(fp), BLKGETSIZE64, &storagesize)) {
 				// Make that non-fatal, as the distinction is purely cosmetic for our purposes
-				WARN("Error requesting block device size");
+				WARN("Error requesting block device size: %m");
 			}
 		}
 		fclose(fp);

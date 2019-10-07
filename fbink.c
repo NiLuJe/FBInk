@@ -1855,7 +1855,7 @@ int
 	// Open the framebuffer file for reading and writing
 	fbfd = open("/dev/fb0", O_RDWR | O_CLOEXEC);
 	if (fbfd == -1) {
-		WARN("Error: cannot open framebuffer character device");
+		WARN("Cannot open framebuffer character device: %m");
 		return ERRCODE(EXIT_FAILURE);
 	}
 
@@ -1890,7 +1890,7 @@ static int
 		// We only need an fd for ioctl, hence O_NONBLOCK (as per open(2)).
 		*fbfd = open("/dev/fb0", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
 		if (!*fbfd) {
-			WARN("Error: cannot open framebuffer character device, aborting");
+			WARN("Cannot open framebuffer character device (%m), aborting");
 			return ERRCODE(EXIT_FAILURE);
 		}
 	}
@@ -2002,7 +2002,7 @@ static int
 	// Get variable screen information (unless we were asked to skip it, because we've already populated it elsewhere)
 	if (!skip_vinfo) {
 		if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
-			WARN("Error reading variable fb information");
+			WARN("Error reading variable fb information: %m");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
@@ -2436,7 +2436,7 @@ static int
 
 	// Get fixed screen information
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &fInfo)) {
-		WARN("Error reading fixed fb information");
+		WARN("Error reading fixed fb information: %m");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -2610,9 +2610,9 @@ int
 		}
 		data = calloc((size_t) st.st_size, sizeof(*data));
 		if (!data) {
+			WARN("Error allocating font data buffer: %m");
 			fclose(f);
 			otInit = false;
-			WARN("Error allocating font data buffer");
 			return ERRCODE(EXIT_FAILURE);
 		}
 		if (fread(data, 1U, (size_t) st.st_size, f) < (size_t) st.st_size || ferror(f) != 0) {
@@ -2626,8 +2626,8 @@ int
 	}
 	stbtt_fontinfo* font_info = calloc(1U, sizeof(stbtt_fontinfo));
 	if (!font_info) {
+		WARN("Error allocating stbtt_fontinfo struct: %m");
 		free(data);
-		WARN("Error allocating stbtt_fontinfo struct");
 		return ERRCODE(EXIT_FAILURE);
 	}
 	// First, check if we can actually find a recognizable font format in the data...
@@ -3841,7 +3841,7 @@ int
 	// And allocate the memory for it...
 	lines = calloc(num_lines, sizeof(FBInkOTLine));
 	if (!lines) {
-		WARN("Lines metadata buffer could not be allocated");
+		WARN("Lines metadata buffer could not be allocated: %m");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -3851,7 +3851,7 @@ int
 	// Note: we only care about the byte length here
 	brk_buff = calloc(str_len_bytes + 1U, sizeof(*brk_buff));
 	if (!brk_buff) {
-		WARN("Linebreak buffer could not be allocated");
+		WARN("Linebreak buffer could not be allocated: %m");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -3863,7 +3863,7 @@ int
 	if (cfg->is_formatted) {
 		fmt_buff = calloc(str_len_bytes + 1U, sizeof(*fmt_buff));
 		if (!fmt_buff) {
-			WARN("Formatted text buffer could not be allocated");
+			WARN("Formatted text buffer could not be allocated: %m");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
@@ -4164,7 +4164,7 @@ int
 	size_t glyph_buffer_dims = font_size_px * (size_t) max_line_height * 2U;
 	glyph_buff               = calloc(glyph_buffer_dims, sizeof(*glyph_buff));
 	if (!line_buff || !glyph_buff) {
-		WARN("Line or glyph buffers could not be allocated");
+		WARN("Line or glyph buffers could not be allocated: %m");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -5153,7 +5153,7 @@ int
 
 	// Now that we've stored the relevant bits of the previous state, query the current one...
 	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
-		WARN("Error reading variable fb information");
+		WARN("Error reading variable fb information: %m");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -5596,8 +5596,8 @@ static unsigned char*
 				// OOM check
 				temp = realloc(imgdata, size);
 				if (temp == NULL) {
+					WARN("realloc: %m");
 					free(imgdata);
-					WARN("realloc: out of memory");
 					return NULL;
 				}
 				imgdata = temp;
@@ -5622,8 +5622,8 @@ static unsigned char*
 		/*
 		temp = realloc(imgdata, used + 1U);
 		if (temp == NULL) {
+			WARN("realloc: %m");
 			free(imgdata);
-			WARN("realloc: out of memory!");
 			return NULL;
 		}
 		imgdata       = temp;
@@ -7225,17 +7225,17 @@ int
 	// Cropping related sanity checks...
 	if (dump->clip.width != 0U || dump->clip.height != 0U) {
 		if (dump->is_full) {
-			WARN("Can't crop a full-screen dump!");
+			WARN("Can't crop a full-screen dump");
 			rv = ERRCODE(ENOTSUP);
 			goto cleanup;
 		}
 		if (dump->clip.width == 0U) {
-			WARN("Cropped width can't be zero!");
+			WARN("Cropped width can't be zero");
 			rv = ERRCODE(ENOTSUP);
 			goto cleanup;
 		}
 		if (dump->clip.height == 0U) {
-			WARN("Cropped height can't be zero!");
+			WARN("Cropped height can't be zero");
 			rv = ERRCODE(ENOTSUP);
 			goto cleanup;
 		}
