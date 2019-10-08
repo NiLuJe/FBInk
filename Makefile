@@ -113,6 +113,14 @@ ifndef DEBUG
 	#EXTRA_CFLAGS+=-fopt-info-vec
 	# When playing with GProf
 	#EXTRA_CFLAGS+=-g -pg -fno-omit-frame-pointer
+	##
+	# Clang's version of optimization reports
+	# c.f., https://clang.llvm.org/docs/UsersManual.html#options-to-emit-optimization-reports)
+	#    &  https://llvm.org/docs/Vectorizers.html#diagnostics
+	ifeq "$(CC_IS_CLANG)" "1"
+		# NOTE: ThinLTO appears to be inhibiting those reports from the vectorizer...
+		#EXTRA_CFLAGS+=-Rpass-analysis=loop-vectorize -gline-tables-only -gcolumn-info -fsave-optimization-record
+	endif
 endif
 
 # Enforce LTO if need be (utils won't link without it).
