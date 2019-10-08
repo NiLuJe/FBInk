@@ -98,21 +98,23 @@ ifndef DEBUG
 	EXTRA_CFLAGS+=-ftree-vectorize
 	EXTRA_CFLAGS+=-funroll-loops
 	# Graphite stuff (none of my TCs are built w/ graphite enabled, and it doesn't seem to have a noticeable impact anyway).
-	#EXTRA_CFLAGS+=-fgraphite
-	#EXTRA_CFLAGS+=-fgraphite-identity
-	#EXTRA_CFLAGS+=-floop-nest-optimize
-	#EXTRA_CFLAGS+=-floop-parallelize-all
-	# More loop/vectorization tweaks
-	#EXTRA_CFLAGS+=-ftree-loop-distribution -ftree-loop-im -ftree-loop-ivcanon -fivopts
-	# (Extremely verbose) debug info about the auto-vectorization pass...
-	# NOTE: Much more useful since GCC 9!
-	#EXTRA_CFLAGS+=-fopt-info-vec-all=vecall.txt
-	# Rather verbose debug info about unvectorized blocks/loops
-	#EXTRA_CFLAGS+=-fopt-info-vec-missed=vecmissed.txt
-	# Much less verbose info about successfully (or partially successfully) vectorized sections
-	#EXTRA_CFLAGS+=-fopt-info-vec
-	# When playing with GProf
-	#EXTRA_CFLAGS+=-g -pg -fno-omit-frame-pointer
+	ifneq "$(CC_IS_CLANG)" "1"
+		#EXTRA_CFLAGS+=-fgraphite
+		#EXTRA_CFLAGS+=-fgraphite-identity
+		#EXTRA_CFLAGS+=-floop-nest-optimize
+		#EXTRA_CFLAGS+=-floop-parallelize-all
+		# More loop/vectorization tweaks
+		#EXTRA_CFLAGS+=-ftree-loop-distribution -ftree-loop-im -ftree-loop-ivcanon -fivopts
+		# (Extremely verbose) debug info about the auto-vectorization pass...
+		# NOTE: Much more useful since GCC 9!
+		#EXTRA_CFLAGS+=-fopt-info-vec-all=vecall.txt
+		# Rather verbose debug info about unvectorized blocks/loops
+		#EXTRA_CFLAGS+=-fopt-info-vec-missed=vecmissed.txt
+		# Much less verbose info about successfully (or partially successfully) vectorized sections
+		#EXTRA_CFLAGS+=-fopt-info-vec
+		# When playing with GProf
+		#EXTRA_CFLAGS+=-g -pg -fno-omit-frame-pointer
+	endif
 	##
 	# Clang's version of optimization reports
 	# c.f., https://clang.llvm.org/docs/UsersManual.html#options-to-emit-optimization-reports)
@@ -120,6 +122,8 @@ ifndef DEBUG
 	ifeq "$(CC_IS_CLANG)" "1"
 		# NOTE: ThinLTO appears to be inhibiting those reports from the vectorizer...
 		#EXTRA_CFLAGS+=-Rpass-analysis=loop-vectorize -gline-tables-only -gcolumn-info -fsave-optimization-record
+		# Here be dragons ;).
+		#EXTRA_CFLAGS+=-Rpass-analysis=loop-* -mllvm -enable-loop-distribute
 	endif
 endif
 
