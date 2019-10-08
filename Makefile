@@ -79,7 +79,7 @@ endif
 
 # Detect whether our TC is cross (at least as far as the target arch is concerned)
 HOST_ARCH:=$(shell uname -m)
-TARGET_ARCH:=$(shell $(CC) -dumpmachine 2>/dev/null)
+TARGET_ARCH:=$(shell $(CC) $(CFLAGS) -dumpmachine 2>/dev/null)
 CC_IS_CROSS:=0
 # Host doesn't match target, assume it's a cross TC
 ifeq (,$(findstring $(HOST_ARCH),$(TARGET_ARCH)))
@@ -157,7 +157,7 @@ ifeq "$(MOAR_WARNIGS)" "1"
 	# NOTE: This doesn't really play nice w/ FORTIFY, leading to an assload of false-positives, unless LTO is enabled
 	ifeq (,$(findstring flto,$(CFLAGS)))
 		# NOTE: GCC 9 is more verbose, so nerf that, too, when building w/o LTO on native systems...
-		ifneq "$(CC_IS_CROSS)" "1"
+		ifeq "$(CC_IS_CROSS)" "0"
 			EXTRA_CFLAGS+=-Wno-stringop-truncation
 		endif
 	endif
