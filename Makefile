@@ -8,7 +8,7 @@
 #       i.e., source ~SVN/Configs/trunk/Kindle/Misc/x-compile.sh kobo env bare
 ifdef CROSS_TC
 	# NOTE: If we have a CROSS_TC toolchain w/ CC set to Clang,
-	#       assume we know what we're doing, and that everything is setup the right way already (i.e., env clang)...
+	#       assume we know what we're doing, and that everything is setup the right way already (i.e., via x-compile.sh tc env clang)...
 	ifneq "$(CC)" "clang"
 		CC:=$(CROSS_TC)-gcc
 		CXX:=$(CROSS_TC)-g++
