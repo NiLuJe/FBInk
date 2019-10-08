@@ -397,7 +397,7 @@ static int
 			close(fd);
 		}
 	} else {
-		WARN("Failed to redirect stdin & stdout to /dev/null (open: %m)");
+		WARN("Failed to redirect stdin, stdout & stderr to /dev/null (open: %m)");
 		return -1;
 	}
 
