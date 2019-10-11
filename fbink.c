@@ -5665,6 +5665,7 @@ static unsigned char*
 		return NULL;
 	}
 
+	// NOTE: Using restricted pointers is enough to make vectorizers happy, no need for ivdep pragmas ;).
 	for (int j = 0; j < y; ++j) {
 		const unsigned char* restrict src  = data + (j * x * img_n);
 		unsigned char* restrict       dest = good + (j * x * req_comp);
