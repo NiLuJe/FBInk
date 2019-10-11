@@ -576,16 +576,25 @@ clean:
 	rm -rf Release/*.a
 	rm -rf Release/*.so*
 	rm -rf Release/shared/*.o
+	rm -rf Release/shared/*.opt.yaml
 	rm -rf Release/shared/cutef8/*.o
+	rm -rf Release/shared/cutef8/*.opt.yaml
 	rm -rf Release/shared/libunibreak/src/*.o
+	rm -rf Release/shared/libunibreak/src/*.opt.yaml
 	rm -rf Release/shared/qimagescale/*.o
+	rm -rf Release/shared/qimagescale/*.opt.yaml
 	rm -rf Release/shared/utf8
 	rm -rf Release/static/*.o
+	rm -rf Release/static/*.opt.yaml
 	rm -rf Release/static/cutef8/*.o
+	rm -rf Release/static/cutef8/*.opt.yaml
 	rm -rf Release/static/libunibreak/src/*.o
+	rm -rf Release/static/libunibreak/src/*.opt.yaml
 	rm -rf Release/static/qimagescale/*.o
+	rm -rf Release/static/qimagescale/*.opt.yaml
 	rm -rf Release/static/utf8
 	rm -rf Release/*.o
+	rm -rf Release/*.opt.yaml
 	rm -rf Release/fbink
 	rm -rf Release/button_scan
 	rm -rf Release/rota
@@ -595,16 +604,25 @@ clean:
 	rm -rf Debug/*.a
 	rm -rf Debug/*.so*
 	rm -rf Debug/shared/*.o
+	rm -rf Debug/shared/*.opt.yaml
 	rm -rf Debug/shared/cutef8/*.o
+	rm -rf Debug/shared/cutef8/*.opt.yaml
 	rm -rf Debug/shared/libunibreak/src/*.o
+	rm -rf Debug/shared/libunibreak/src/*.opt.yaml
 	rm -rf Debug/shared/qimagescale/*.o
+	rm -rf Debug/shared/qimagescale/*.opt.yaml
 	rm -rf Debug/shared/utf8
 	rm -rf Debug/static/*.o
+	rm -rf Debug/static/*.opt.yaml
 	rm -rf Debug/static/cutef8/*.o
+	rm -rf Debug/static/cutef8/*.opt.yaml
 	rm -rf Debug/static/libunibreak/src/*.o
+	rm -rf Debug/static/libunibreak/src/*.opt.yaml
 	rm -rf Debug/static/qimagescale/*.o
+	rm -rf Debug/static/qimagescale/*.opt.yaml
 	rm -rf Debug/static/utf8
 	rm -rf Debug/*.o
+	rm -rf Debug/*.opt.yaml
 	rm -rf Debug/fbink
 	rm -rf Debug/button_scan
 	rm -rf Debug/rota
