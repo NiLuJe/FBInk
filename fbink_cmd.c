@@ -2053,12 +2053,15 @@ int
 			}
 		} else if (is_progressbar) {
 			if (!fbink_cfg.is_quiet) {
-				LOG("Displaying a %hhu%% full progress bar @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s, font: %hhu, font scaling: x%hhu)",
+				LOG("Displaying a %hhu%% full progress bar @ row %hd + %hdpx (no FG: %s, no BG: %s, inverted: %s, flashing: %s, halfway: %s, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s, font: %hhu, font scaling: x%hhu)",
 				    progress,
 				    fbink_cfg.row,
 				    fbink_cfg.voffset,
+				    fbink_cfg.is_fgless ? "Y" : "N",
+				    fbink_cfg.is_bgless ? "Y" : "N",
 				    fbink_cfg.is_inverted ? "Y" : "N",
 				    fbink_cfg.is_flashing ? "Y" : "N",
+				    fbink_cfg.is_halfway ? "Y" : "N",
 				    fbink_cfg.is_cleared ? "Y" : "N",
 				    wfm_name ? wfm_name : "AUTO",
 				    fbink_cfg.is_dithered ? "Y" : "N",
@@ -2087,11 +2090,13 @@ int
 			// Were we asked to loop forever?
 			if (is_infinite) {
 				if (!fbink_cfg.is_quiet) {
-					LOG("Displaying an activity bar cycling forever @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s)",
+					LOG("Displaying an activity bar cycling forever @ row %hd + %hdpx (no BG: %s, inverted: %s, flashing: %s, halfway: %s, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s)",
 					    fbink_cfg.row,
 					    fbink_cfg.voffset,
+					    fbink_cfg.is_bgless ? "Y" : "N",
 					    fbink_cfg.is_inverted ? "Y" : "N",
 					    fbink_cfg.is_flashing ? "Y" : "N",
+					    fbink_cfg.is_halfway ? "Y" : "N",
 					    fbink_cfg.is_cleared ? "Y" : "N",
 					    wfm_name ? wfm_name : "AUTO",
 					    fbink_cfg.is_dithered ? "Y" : "N",
@@ -2108,12 +2113,14 @@ int
 				}
 			} else {
 				if (!fbink_cfg.is_quiet) {
-					LOG("Displaying an activity bar on step %hhu @ row %hd + %hdpx (inverted: %s, flashing: %s, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s)",
+					LOG("Displaying an activity bar on step %hhu @ row %hd + %hdpx (no BG: %s, inverted: %s, flashing: %s, halfway: %s, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s)",
 					    progress,
 					    fbink_cfg.row,
 					    fbink_cfg.voffset,
+					    fbink_cfg.is_bgless ? "Y" : "N",
 					    fbink_cfg.is_inverted ? "Y" : "N",
 					    fbink_cfg.is_flashing ? "Y" : "N",
+					    fbink_cfg.is_halfway ? "Y" : "N",
 					    fbink_cfg.is_cleared ? "Y" : "N",
 					    wfm_name ? wfm_name : "AUTO",
 					    fbink_cfg.is_dithered ? "Y" : "N",
