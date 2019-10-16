@@ -237,7 +237,7 @@ int
 
 	// NOTE: Another approach could be to copy the (full?) front buffer to the overlay buffer *before*
 	//       rendering the new stuff to the overlay buffer (with surgical precision, this time),
-	//       but that's still one memcpy...
+	//       but that's still one extra memcpy...
 cleanup:
 	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
 		fprintf(stderr, "Failed to close the framebuffer, aborting . . .\n");
