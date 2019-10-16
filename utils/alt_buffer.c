@@ -32,7 +32,7 @@
 unsigned char* altPtr  = NULL;
 uint32_t       altAddr = 0U;
 
-// NOTE: We go with the legacy ioctls for simplicty's sake.
+// NOTE: We go with the legacy ioctls for simplicity's sake.
 static int
     refresh_kobo_alt(int                     fbfd,
 		     const struct mxcfb_rect region,
@@ -155,7 +155,7 @@ int
 	// We'll be sleeping between tests
 	const struct timespec zzz = { 1L, 250000000L };
 
-	// Out shiny marker
+	// Our shiny marker
 	uint32_t marker = 41U;
 
 	// Refresh w/ the front buffer
@@ -208,7 +208,7 @@ int
 	//       and the wait will block for roughly twice the amount of time as for a single update...
 
 	// NOTE: That still leaves the DIY approach of pulling the missing region from the front buffer,
-	//       and copying it to the overlay buffer, and updating from the overlay buffer.
+	//       and copying it to the overlay buffer, and then updating from the overlay buffer.
 	//       Or vice-versa...
 	fprintf(stdout, "[06] Bottom quarter gray overlay buffer (memcpy + ioctl)\n");
 	region.top    = vInfo.yres / 2U;
