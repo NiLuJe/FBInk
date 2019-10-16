@@ -25,6 +25,7 @@
 #endif
 
 #include <stdio.h>
+#include <time.h>
 // I feel dirty.
 #include "../fbink.c"
 
@@ -151,27 +152,52 @@ int
 	// Paint the overlay buffer black
 	memset(altPtr, eInkFGCMap[0], (size_t)(fInfo.line_length * vInfo.yres));
 
+	// We'll be sleeping between tests
+	const struct timespec zzz = { 0L, 750000000L };
+
 	// Refresh w/ the front buffer
 	struct mxcfb_rect region = { 0U };
 	fullscreen_region(&region);
+	fprintf(stdout, "[01] White front buffer\n");
 	refresh_kobo(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, 42);
 	fbink_wait_for_complete(fbfd, 42);
+	nanosleep(&zzz, NULL);
 
 	// Refresh w/ the overlay buffer
+	fprintf(stdout, "[02] Black overlay buffer\n");
 	refresh_kobo_alt(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, 42);
 	fbink_wait_for_complete(fbfd, 42);
+	nanosleep(&zzz, NULL);
 
 	// Back to the front buffer
+	fprintf(stdout, "[03] White front buffer\n");
 	refresh_kobo(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, 42);
 	fbink_wait_for_complete(fbfd, 42);
+	nanosleep(&zzz, NULL);
 
 	// Now paint the alt buffer dark gray
+	// NOTE: We could also tweak a fill_rect to the right ptr if we needed more control,
+	//       but this is good enough for a PoC ;).
 	memset(altPtr, eInkFGCMap[3], (size_t)(fInfo.line_length * vInfo.yres));
 
 	// And only display the bottom half of it
 	region.top    = vInfo.yres / 2U;
 	region.height = vInfo.yres / 2U;
+	fprintf(stdout, "[04] Bottom half gray overlay buffer\n");
 	refresh_kobo_alt(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, 42);
+	fbink_wait_for_complete(fbfd, 42);
+	nanosleep(&zzz, NULL);
+
+	// Now, if we want to print a smaller region of the alt buffer, on top of the *full* front buffer,
+	// we have to get slightly more creative, since region & alt_region must match...
+	// Start by restoring the front buffer in the region we've just refreshed from the alt...
+	fprintf(stdout, "[05] Bottom quarter gray overlay buffer\n");
+	refresh_kobo(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, 42);
+	// Then refresh a smaller bit of the alt buffer...
+	region.top    = vInfo.yres / 4U * 3U;
+	region.height = vInfo.yres / 4U;
+	refresh_kobo_alt(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, 42);
+	// And only *now*, we wait, to hopefully let the EPDC merge those two...
 	fbink_wait_for_complete(fbfd, 42);
 
 cleanup:
