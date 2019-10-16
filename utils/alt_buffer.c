@@ -120,9 +120,9 @@ int
 		}
 	}
 
-	// NOTE: We mmap for *full* fb (smem_len), so we don't need another mapping for the alt buffer,
-	//       since it has to be *inside* the fb.
-	// NOTE: That does imply we need scratch space for a shadow buffer, which means 32bpp is out.
+	// NOTE: We mmap the *full* fb (smem_len), so we don't need another mapping for the alt buffer,
+	//       since it has to be *inside* the fb memory.
+	// NOTE: That does imply we need enough scratch space for a shadow buffer, which means 32bpp is out.
 	//       Since no-one in their right mind should be using RGB565, that leaves 8bpp ;).
 	if (vInfo.bits_per_pixel != 8U) {
 		fprintf(stderr, "Not running @ 8bpp, not enough memory for an overlay buffer . . .\n");
