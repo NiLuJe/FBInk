@@ -479,6 +479,8 @@ utils: | outdir
 	$(STRIP) --strip-unneeded $(OUT_DIR)/rota
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(TOOLS_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbdepth utils/fbdepth.c
 	$(STRIP) --strip-unneeded $(OUT_DIR)/fbdepth
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(TOOLS_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/alt_buffer utils/alt_buffer.c
+	$(STRIP) --strip-unneeded $(OUT_DIR)/alt_buffer
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(DOOM_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/doom utils/doom.c -lrt
 	$(STRIP) --strip-unneeded $(OUT_DIR)/doom
 endif
@@ -599,6 +601,7 @@ clean:
 	rm -rf Release/button_scan
 	rm -rf Release/rota
 	rm -rf Release/fbdepth
+	rm -rf Release/alt_buffer
 	rm -rf Release/doom
 	rm -rf Release/dump
 	rm -rf Debug/*.a
@@ -627,6 +630,7 @@ clean:
 	rm -rf Debug/button_scan
 	rm -rf Debug/rota
 	rm -rf Debug/fbdepth
+	rm -rf Debug/alt_buffer
 	rm -rf Debug/doom
 	rm -rf Debug/dump
 
