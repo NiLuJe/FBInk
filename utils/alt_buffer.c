@@ -43,8 +43,8 @@ static int
 	// NOTE: I'm not quite sure which region controls what...
 	//       What's for sure is that passing an empty region will timeout!
 	struct mxcfb_alt_buffer_data_ntx alt = {
-		.virt_addr = NULL,
-		.phys_addr = *altPtr,
+		.virt_addr = altPtr,
+		.phys_addr = fInfo.smem_start + (vInfo.yres_virtual * fInfo.line_length),
 		.width = vInfo.xres_virtual,
 		.height = vInfo.yres,
 		.alt_update_region = alt_region,
@@ -151,7 +151,8 @@ int
 	//       It also ought to be exactly halfway through smem_len ;).
 	altPtr = fbPtr + (vInfo.yres_virtual * fInfo.line_length);
 	// Print raw pointer values...
-	fprintf(stdout, "fbPtr: %p vs. altPtr: %p (Bounds: %#zx to %#zx)\n", fbPtr, altPtr, (size_t) fInfo.smem_start, (size_t) (fInfo.smem_start + fInfo.smem_len));
+	fprintf(stdout, "fbPtr: %p vs. altPtr: %p\n", fbPtr, altPtr);
+	fprintf(stdout, "altPhysAddr: %#zx (Bounds: %#zx to %#zx)\n", (size_t) (fInfo.smem_start + (vInfo.yres_virtual * fInfo.line_length)), (size_t) fInfo.smem_start, (size_t) (fInfo.smem_start + fInfo.smem_len));
 
 	// We start with something simple:
 	// Paint the front buffer white
