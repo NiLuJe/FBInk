@@ -194,7 +194,7 @@ int
 	// Now, if we want to print a smaller region of the alt buffer, on top of the *full* front buffer,
 	// we have to get slightly more creative, since region & alt_region must match...
 	// Start by restoring the front buffer in the region we've just refreshed from the alt...
-	fprintf(stdout, "[05] Bottom quarter gray overlay buffer\n");
+	fprintf(stdout, "[05] Bottom quarter gray overlay buffer (ioctl x 2)\n");
 	refresh_kobo(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, ++marker);
 	// Then refresh a smaller bit of the alt buffer...
 	region.top    = vInfo.yres / 4U * 3U;
@@ -202,9 +202,38 @@ int
 	refresh_kobo_alt(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, ++marker);
 	// And only *now*, we wait, to hopefully let the EPDC merge those two...
 	fbink_wait_for_complete(fbfd, marker);
+	nanosleep(&zzz, NULL);
 	// NOTE: In practice, getting the two to merge appears to be tricky, which makes the whole thing slightly less appealing...
 	//       No matter the wfm mode, and no matter which combination of FULL/PARTIAL between the two, they won't merge,
 	//       and the wait will block for roughly twice the amount of time as for a single update...
+
+	// NOTE: That still leaves the DIY approach of pulling the missing region from the front buffer,
+	//       and copying it to the overlay buffer, and updating from the overlay buffer.
+	//       Or vice-versa...
+	fprintf(stdout, "[06] Bottom quarter gray overlay buffer (memcpy + ioctl)\n");
+	region.top    = vInfo.yres / 2U;
+	region.height = vInfo.yres / 4U;
+	// Copy the third quarter slice of the screen from the front to the overlay buffer
+	memcpy(altPtr + (region.top * fInfo.line_length),
+	       fbPtr + (region.top * fInfo.line_length),
+	       region.height * fInfo.line_length);
+	region.top    = vInfo.yres / 2U;
+	region.height = vInfo.yres / 2U;
+	// Display the spliced bottom half of the screen from the overlay buffer
+	refresh_kobo_alt(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, ++marker);
+	fbink_wait_for_complete(fbfd, marker);
+	nanosleep(&zzz, NULL);
+
+	// Run the double ioctl variant again, to double-check...
+	fprintf(stdout, "[07] Bottom quarter gray overlay buffer (ioctl x 2)\n");
+	refresh_kobo(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, ++marker);
+	// Then refresh a smaller bit of the alt buffer...
+	region.top    = vInfo.yres / 4U * 3U;
+	region.height = vInfo.yres / 4U;
+	refresh_kobo_alt(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, ++marker);
+	// And only *now*, we wait, to hopefully let the EPDC merge those two...
+	fbink_wait_for_complete(fbfd, marker);
+	nanosleep(&zzz, NULL);
 
 cleanup:
 	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
