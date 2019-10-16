@@ -28,26 +28,26 @@
 // I feel dirty.
 #include "../fbink.c"
 
-unsigned char *altPtr = NULL;
+unsigned char* altPtr  = NULL;
 uint32_t       altAddr = 0U;
 
 // NOTE: We go with the legacy ioctls for simplicty's sake.
 static int
     refresh_kobo_alt(int                     fbfd,
-		 const struct mxcfb_rect region,
-		 uint32_t                waveform_mode,
-		 uint32_t                update_mode,
-		 bool                    is_nightmode,
-		 uint32_t                marker)
+		     const struct mxcfb_rect region,
+		     uint32_t                waveform_mode,
+		     uint32_t                update_mode,
+		     bool                    is_nightmode,
+		     uint32_t                marker)
 {
 	// NOTE: Alternate update region dimensions must match screen update region dimensions.
 	//       (Yes, that's a straight quote from the driver :D).
 	// NOTE: virt_addr seems to be unused (in fact, it's gone from newer versions of the struct).
 	struct mxcfb_alt_buffer_data_ntx alt = {
-		.virt_addr = NULL,
-		.phys_addr = altAddr,
-		.width = vInfo.xres_virtual,
-		.height = vInfo.yres,
+		.virt_addr         = NULL,
+		.phys_addr         = altAddr,
+		.width             = vInfo.xres_virtual,
+		.height            = vInfo.yres,
 		.alt_update_region = region,
 	};
 
@@ -98,7 +98,6 @@ static void
 	region->height = 0U;
 }
 
-
 int
     main(void)
 {
@@ -145,11 +144,15 @@ int
 	// NOTE: We know that yoffset is always 0, which is why we never bothered with it for fbPtr.
 	//       So our buffer simply starts at yres_virt * line_length!
 	//       It also ought to be exactly halfway through smem_len ;).
-	altPtr = fbPtr + (vInfo.yres_virtual * fInfo.line_length);
+	altPtr  = fbPtr + (vInfo.yres_virtual * fInfo.line_length);
 	altAddr = fInfo.smem_start + (vInfo.yres_virtual * fInfo.line_length);
 	// Print raw pointer values...
 	fprintf(stdout, "fbPtr: %p vs. altPtr: %p\n", fbPtr, altPtr);
-	fprintf(stdout, "altAddr: %#x (Bounds: %#zx to %#zx)\n", altAddr, (size_t) fInfo.smem_start, (size_t) (fInfo.smem_start + fInfo.smem_len));
+	fprintf(stdout,
+		"altAddr: %#x (Bounds: %#zx to %#zx)\n",
+		altAddr,
+		(size_t) fInfo.smem_start,
+		(size_t)(fInfo.smem_start + fInfo.smem_len));
 
 	// We start with something simple:
 	// Paint the front buffer white
@@ -167,8 +170,6 @@ int
 	// refresh w/ the overlay buffer
 	refresh_kobo_alt(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, 42);
 	fbink_wait_for_complete(fbfd, 42);
-
-
 
 cleanup:
 	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
