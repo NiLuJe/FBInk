@@ -105,6 +105,7 @@ They have *only* been tested on Kobo, and should probably be left alone unless y
 There's also a fairly stupid [example](https://github.com/NiLuJe/FBInk/blob/master/utils/dump.c) showcasing the dump/restore API that can be built via `make dump`.  
 Another stupid [demo](https://github.com/NiLuJe/FBInk/blob/master/utils/doom.c) based on the PSX Doom fire effect was implemented, to stress-test the EPDC in a mildly interesting manner.  
 
+If you ever were curious about the whole mxcfb alt_buffer shindig, you can take a look at this [PoC](https://github.com/NiLuJe/FBInk/blob/master/utils/alt_buffer.c).
 ## NOTES
 
 Kindle support covers the full Kindle lineup, starting from the K2.
