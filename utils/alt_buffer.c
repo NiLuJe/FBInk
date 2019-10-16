@@ -42,9 +42,9 @@ static int
 {
 	// NOTE: Alternate update region dimensions must match screen update region dimensions.
 	//       (Yes, that's a straight quote from the driver :D).
-	// NOTE: I'm farily sure virt_addr could be NULL.
+	// NOTE: virt_addr seems to be unused (in fact, it's gone from newer versions of the struct).
 	struct mxcfb_alt_buffer_data_ntx alt = {
-		.virt_addr = altPtr,
+		.virt_addr = NULL,
 		.phys_addr = altAddr,
 		.width = vInfo.xres_virtual,
 		.height = vInfo.yres,
