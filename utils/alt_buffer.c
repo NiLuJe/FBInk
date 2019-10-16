@@ -88,16 +88,6 @@ static int
 	return EXIT_SUCCESS;
 }
 
-// Tweak the region to cover the full screen
-static void
-    empty_region(struct mxcfb_rect* restrict region)
-{
-	region->top    = 0U;
-	region->left   = 0U;
-	region->width  = 0U;
-	region->height = 0U;
-}
-
 int
     main(void)
 {
@@ -167,7 +157,20 @@ int
 	refresh_kobo(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, 42);
 	fbink_wait_for_complete(fbfd, 42);
 
-	// refresh w/ the overlay buffer
+	// Refresh w/ the overlay buffer
+	refresh_kobo_alt(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, 42);
+	fbink_wait_for_complete(fbfd, 42);
+
+	// Back to the front buffer
+	refresh_kobo(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, 42);
+	fbink_wait_for_complete(fbfd, 42);
+
+	// Now paint the alt buffer dark gray
+	memset(altPtr, eInkFGCMap[3], (size_t)(fInfo.line_length * vInfo.yres));
+
+	// And only display the bottom half of it
+	region.top    = vInfo.yres / 2U;
+	region.height = vInfo.yres / 2U;
 	refresh_kobo_alt(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, 42);
 	fbink_wait_for_complete(fbfd, 42);
 
