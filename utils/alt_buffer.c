@@ -203,7 +203,7 @@ int
 	// And only *now*, we wait, to hopefully let the EPDC merge those two...
 	fbink_wait_for_complete(fbfd, marker);
 	nanosleep(&zzz, NULL);
-	// NOTE: In practice, getting the two to merge appears to be tricky, which makes the whole thing slightly less appealing...
+	// NOTE: In practice, getting the two to merge appears tricky, which makes the whole thing slightly less appealing...
 	//       No matter the wfm mode, and no matter which combination of FULL/PARTIAL between the two, they won't merge,
 	//       and the wait will block for roughly twice the amount of time as for a single update...
 
@@ -235,6 +235,9 @@ int
 	fbink_wait_for_complete(fbfd, marker);
 	nanosleep(&zzz, NULL);
 
+	// NOTE: Another approach could be to copy the (full?) front buffer to the overlay buffer *before*
+	//       rendering the new stuff to the overlay buffer (with surgical precision, this time),
+	//       but that's still one memcpy...
 cleanup:
 	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
 		fprintf(stderr, "Failed to close the framebuffer, aborting . . .\n");
