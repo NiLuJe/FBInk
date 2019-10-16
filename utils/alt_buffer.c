@@ -29,6 +29,7 @@
 #include "../fbink.c"
 
 unsigned char *altPtr = NULL;
+uint32_t       altAddr = 0U;
 
 // NOTE: We go with the legacy ioctls for simplicty's sake.
 static int
@@ -41,9 +42,10 @@ static int
 {
 	// NOTE: Alternate update region dimensions must match screen update region dimensions.
 	//       (Yes, that's a straight quote from the driver :D).
+	// NOTE: I'm farily sure virt_addr could be NULL.
 	struct mxcfb_alt_buffer_data_ntx alt = {
 		.virt_addr = altPtr,
-		.phys_addr = fInfo.smem_start + (vInfo.yres_virtual * fInfo.line_length),
+		.phys_addr = altAddr,
 		.width = vInfo.xres_virtual,
 		.height = vInfo.yres,
 		.alt_update_region = region,
@@ -144,9 +146,10 @@ int
 	//       So our buffer simply starts at yres_virt * line_length!
 	//       It also ought to be exactly halfway through smem_len ;).
 	altPtr = fbPtr + (vInfo.yres_virtual * fInfo.line_length);
+	altAddr = fInfo.smem_start + (vInfo.yres_virtual * fInfo.line_length);
 	// Print raw pointer values...
 	fprintf(stdout, "fbPtr: %p vs. altPtr: %p\n", fbPtr, altPtr);
-	fprintf(stdout, "altPhysAddr: %#zx (Bounds: %#zx to %#zx)\n", (size_t) (fInfo.smem_start + (vInfo.yres_virtual * fInfo.line_length)), (size_t) fInfo.smem_start, (size_t) (fInfo.smem_start + fInfo.smem_len));
+	fprintf(stdout, "altAddr: %#x (Bounds: %#zx to %#zx)\n", altAddr, (size_t) fInfo.smem_start, (size_t) (fInfo.smem_start + fInfo.smem_len));
 
 	// We start with something simple:
 	// Paint the front buffer white
