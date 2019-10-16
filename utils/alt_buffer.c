@@ -34,20 +34,19 @@ unsigned char *altPtr = NULL;
 static int
     refresh_kobo_alt(int                     fbfd,
 		 const struct mxcfb_rect region,
-		 const struct mxcfb_rect alt_region,
 		 uint32_t                waveform_mode,
 		 uint32_t                update_mode,
 		 bool                    is_nightmode,
 		 uint32_t                marker)
 {
-	// NOTE: I'm not quite sure which region controls what...
-	//       What's for sure is that passing an empty region will timeout!
+	// NOTE: Alternate update region dimensions must match screen update region dimensions.
+	//       (Yes, that's a straight quote from the driver :D).
 	struct mxcfb_alt_buffer_data_ntx alt = {
 		.virt_addr = altPtr,
 		.phys_addr = fInfo.smem_start + (vInfo.yres_virtual * fInfo.line_length),
 		.width = vInfo.xres_virtual,
 		.height = vInfo.yres,
-		.alt_update_region = alt_region,
+		.alt_update_region = region,
 	};
 
 	struct mxcfb_update_data_v1_ntx update = {
@@ -80,11 +79,6 @@ static int
 			     region.left,
 			     region.width,
 			     region.height);
-			WARN("alt_update_region={top=%u, left=%u, width=%u, height=%u}",
-			     alt_region.top,
-			     alt_region.left,
-			     alt_region.width,
-			     alt_region.height);
 		}
 		return ERRCODE(EXIT_FAILURE);
 	}
@@ -168,10 +162,7 @@ int
 	fbink_wait_for_complete(fbfd, 42);
 
 	// refresh w/ the overlay buffer
-	struct mxcfb_rect alt_region = { 0U };
-	//empty_region(&region);
-	fullscreen_region(&alt_region);
-	refresh_kobo_alt(fbfd, region, alt_region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, 42);
+	refresh_kobo_alt(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, 42);
 	fbink_wait_for_complete(fbfd, 42);
 
 
