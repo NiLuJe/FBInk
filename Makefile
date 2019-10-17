@@ -488,7 +488,7 @@ ifndef CERVANTES
 ifndef LEGACY
 ifndef KINDLE
 alt: | outdir
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(TOOLS_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/alt_buffer utils/alt_buffer.c
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(DOOM_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/alt_buffer utils/alt_buffer.c
 	$(STRIP) --strip-unneeded $(OUT_DIR)/alt_buffer
 endif
 endif

@@ -24,10 +24,20 @@
 #	define _GNU_SOURCE
 #endif
 
+// NOTE: We need image support (chiefly for stbi__compute_y)
+//       A MINIMAL + IMAGE build is still recommended, because otherwise fbink_init() has to pull all the extra fonts in...
+#ifdef FBINK_MINIMAL
+#	ifndef FBINK_WITH_IMAGE
+#		error Cannot build this tool without Image support!
+#	endif
+#endif
+
 #include <stdio.h>
 #include <time.h>
 // I feel dirty.
 #include "../fbink.c"
+// Really dirty.
+#include "../qimagescale/qimagescale.c"
 
 unsigned char* altPtr  = NULL;
 uint32_t       altAddr = 0U;
@@ -89,6 +99,13 @@ static int
 	return EXIT_SUCCESS;
 }
 
+// Cheap trick to get FBInk to draw to a different buffer ;).
+static void
+    flip_draw_buffer(unsigned char* const buff_ptr)
+{
+	fbPtr = buff_ptr;
+}
+
 int
     main(void)
 {
@@ -144,6 +161,9 @@ int
 		altAddr,
 		(size_t) fInfo.smem_start,
 		(size_t)(fInfo.smem_start + fInfo.smem_len));
+	// Remember which is which, so we can easily flip to a specific draw buffer
+	unsigned char* const front_buffer = fbPtr;
+	unsigned char* const alt_buffer   = altPtr;
 
 	// We start with something simple:
 	// Paint the front buffer white
@@ -153,7 +173,7 @@ int
 	memset(altPtr, eInkFGCMap[0], (size_t)(fInfo.line_length * vInfo.yres));
 
 	// We'll be sleeping between tests
-	const struct timespec zzz = { 1L, 250000000L };
+	const struct timespec zzz = { 1L, 500000000L };
 
 	// Our shiny marker
 	uint32_t marker = 41U;
@@ -238,6 +258,99 @@ int
 	// NOTE: Another approach could be to copy the (full?) front buffer to the overlay buffer *before*
 	//       rendering the new stuff to the overlay buffer (with surgical precision, this time),
 	//       but that's still one extra memcpy...
+
+	//
+	///
+	///
+	// NOTE: Once more, with feeling.
+	//       This time, with images, both to test flipping FBInk's draw buffer,
+	//       and confirm that there aren't any stride issues...
+	// NOTE: Image filenames hardcoded because I'm lazy (1.png, 2.png, 3.png).
+	//       They should ideally be at least screen-sized ;).
+	fbink_cfg.ignore_alpha = true;
+	// We'll be handling the refreshes, of course... ;)
+	fbink_cfg.no_refresh = true;
+
+	// Render "1.png" to the front buffer
+	fprintf(stdout, "[08] Rendering 1.png to front buffer\n");
+	flip_draw_buffer(front_buffer);    // Redundant
+	fbink_print_image(fbfd, "1.png", 0, 0, &fbink_cfg);
+
+	// Render "2.png" to the overlay buffer
+	fprintf(stdout, "[09] Rendering 2.png to overlay buffer\n");
+	flip_draw_buffer(alt_buffer);
+	fbink_print_image(fbfd, "2.png", 0, 0, &fbink_cfg);
+
+	// Refresh w/ the front buffer
+	fullscreen_region(&region);
+	fprintf(stdout, "[10] Full front buffer\n");
+	refresh_kobo(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, ++marker);
+	fbink_wait_for_complete(fbfd, marker);
+	nanosleep(&zzz, NULL);
+
+	// Refresh w/ the overlay buffer
+	fprintf(stdout, "[11] Full overlay buffer\n");
+	refresh_kobo_alt(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, ++marker);
+	fbink_wait_for_complete(fbfd, marker);
+	nanosleep(&zzz, NULL);
+
+	// Back to the front buffer
+	fprintf(stdout, "[12] Full front buffer\n");
+	refresh_kobo(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, ++marker);
+	fbink_wait_for_complete(fbfd, marker);
+	nanosleep(&zzz, NULL);
+
+	// Render "3.png" to the overlay buffer
+	fprintf(stdout, "[13] Rendering 3.png to overlay buffer\n");
+	flip_draw_buffer(alt_buffer);    // Redundant
+	fbink_print_image(fbfd, "3.png", 0, 0, &fbink_cfg);
+
+	// And only display the bottom half of it
+	region.top    = vInfo.yres / 2U;
+	region.height = vInfo.yres / 2U;
+	fprintf(stdout, "[14] Bottom half overlay buffer\n");
+	refresh_kobo_alt(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, ++marker);
+	fbink_wait_for_complete(fbfd, marker);
+	nanosleep(&zzz, NULL);
+
+	// Bottom quarter of the overlay buffer, on top of the full front buffer
+	fprintf(stdout, "[15] Bottom quarter overlay buffer (ioctl x 2)\n");
+	refresh_kobo(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, ++marker);
+	// Then refresh a smaller bit of the alt buffer...
+	region.top    = vInfo.yres / 4U * 3U;
+	region.height = vInfo.yres / 4U;
+	refresh_kobo_alt(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, ++marker);
+	// And only *now*, we wait, to hopefully let the EPDC merge those two...
+	fbink_wait_for_complete(fbfd, marker);
+	nanosleep(&zzz, NULL);
+
+	// Same, but by splicing the fb buffers ourselves
+	fprintf(stdout, "[16] Bottom quarter overlay buffer (memcpy + ioctl)\n");
+	region.top    = vInfo.yres / 2U;
+	region.height = vInfo.yres / 4U;
+	// Copy the third quarter slice of the screen from the front to the overlay buffer
+	// NOTE: Flip back to the front buffer first, otherwise fbPtr still == altPtr ;).
+	flip_draw_buffer(front_buffer);
+	memcpy(altPtr + (region.top * fInfo.line_length),
+	       fbPtr + (region.top * fInfo.line_length),
+	       region.height * fInfo.line_length);
+	region.top    = vInfo.yres / 2U;
+	region.height = vInfo.yres / 2U;
+	// Display the spliced bottom half of the screen from the overlay buffer
+	refresh_kobo_alt(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, ++marker);
+	fbink_wait_for_complete(fbfd, marker);
+	nanosleep(&zzz, NULL);
+
+	// Run the double ioctl variant again, to double-check...
+	fprintf(stdout, "[17] Bottom quarter overlay buffer (ioctl x 2)\n");
+	refresh_kobo(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, ++marker);
+	// Then refresh a smaller bit of the alt buffer...
+	region.top    = vInfo.yres / 4U * 3U;
+	region.height = vInfo.yres / 4U;
+	refresh_kobo_alt(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL, false, ++marker);
+	// And only *now*, we wait, to hopefully let the EPDC merge those two...
+	fbink_wait_for_complete(fbfd, marker);
+	nanosleep(&zzz, NULL);
 cleanup:
 	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
 		fprintf(stderr, "Failed to close the framebuffer, aborting . . .\n");
