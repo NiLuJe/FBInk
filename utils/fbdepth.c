@@ -373,7 +373,7 @@ int
 		if (deviceQuirks.ntxRotaQuirk != NTX_ROTA_SANE) {
 			req_rota = (deviceQuirks.ntxBootRota + 1) & 3;
 		} else {
-			req_rota = deviceQuirks.ntxBootRota;
+			req_rota = (int8_t) deviceQuirks.ntxBootRota;
 		}
 		LOG("Device's expected Portrait orientation should be: %hhd (%s)!",
 		    req_rota,
