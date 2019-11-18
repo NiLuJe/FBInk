@@ -1029,12 +1029,7 @@ static struct mxcfb_rect
 	if (glyphWidth <= 8) {
 #endif
 		while ((ch = u8_nextchar2(text, &bi)) != 0U) {
-			LOG("Char %zu (@ cell %zu) out of %zu is @ byte offset %zu and is U+%04X",
-			    (ci + 1U),
-			    ci,
-			    charcount,
-			    bi,
-			    ch);
+			LOG("Char %zu out of %zu is @ byte offset %zu and is U+%04X", (ci + 1U), charcount, bi, ch);
 
 			// Update the x coordinates for this character
 			x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
