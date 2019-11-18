@@ -3173,13 +3173,13 @@ int
 	// NOTE: This is where it gets tricky. With multibyte sequences, 1 byte doesn't necessarily mean 1 char.
 	//       And we need to work both in amount of characters for column/width arithmetic,
 	//       and in bytes for snprintf...
-	size_t             chars_left  = charcount;
-	unsigned short int line_len    = 0U;
-	size_t             line_bytes  = 0U;
-	size_t             line_offset = 0U;
+	size_t chars_left  = charcount;
+	size_t line_len    = 0U;
+	size_t line_bytes  = 0U;
+	size_t line_offset = 0U;
 	// If we have multiple lines worth of stuff to print, draw it line per line
 	while (chars_left > line_len) {
-		LOG("Line %hu (of ~%hu), previous line was %hu characters long and there were %zu characters left to print",
+		LOG("Line %hu (of ~%hu), previous line was %zu characters long and there were %zu characters left to print",
 		    (unsigned short int) (multiline_offset + 1U),
 		    lines,
 		    line_len,
@@ -3196,17 +3196,17 @@ int
 		// Compute the amount of characters left to print...
 		chars_left -= line_len;
 		// And use it to compute the amount of characters to print on *this* line
-		line_len = (unsigned short int) MIN(chars_left, available_cols);
-		LOG("Characters to print: %hu out of the %zu remaining ones", line_len, chars_left);
+		line_len = (size_t) MIN(chars_left, available_cols);
+		LOG("Characters to print: %zu out of the %zu remaining ones", line_len, chars_left);
 
 		// NOTE: Now we just have to switch from characters to bytes, both for line_len & chars_left...
 		// First, get the byte offset of this section of our string (i.e., this line)...
 		line_offset += line_bytes;
 		// ... then compute how many bytes we'll need to store it.
-		line_bytes                   = 0U;
-		unsigned short int cn        = 0U;
-		uint32_t           ch        = 0U;
-		bool               caught_lf = false;
+		line_bytes         = 0U;
+		size_t   cn        = 0U;
+		uint32_t ch        = 0U;
+		bool     caught_lf = false;
 		while ((ch = u8_nextchar2(string + line_offset, &line_bytes)) != 0U) {
 			cn++;
 			// NOTE: Honor linefeeds...
@@ -3231,11 +3231,11 @@ int
 				// mostly to make padding look nicer,
 				// but also so that line_bytes matches line_len ;).
 				// And finally, as we've explained earlier, trim line_len to where we stopped.
-				LOG("Line length was %hu characters, but LF is character number %u", line_len, cn);
+				LOG("Line length was %zu characters, but LF is character number %zu", line_len, cn);
 				line_len = cn;
 				// Don't touch line_offset, the beginning of our line has not changed,
 				// only its length was cut short.
-				LOG("Adjusted lines to %hu & line_len to %hu", lines, line_len);
+				LOG("Adjusted lines to %hu & line_len to %zu", lines, line_len);
 				// And of course we break, because that was the whole point of this shenanigan!
 				break;
 			}
@@ -3275,7 +3275,7 @@ int
 			unsigned short int right_pad = (unsigned short int) (MAXCOLS - line_len - left_pad);
 
 			// Compute the effective right padding value for science!
-			LOG("Total size: %hu + %hu + %hu = %hu",
+			LOG("Total size: %hu + %zu + %hu = %hu",
 			    left_pad,
 			    line_len,
 			    right_pad,
