@@ -126,7 +126,7 @@ static bool
 		iterations = 1U;
 	}
 	const struct timespec zzz = { 0L, (long int) (granularity * 1000000L) };
-	for (uint8_t i = 1U; i <= iterations; i++) {
+	for (unsigned short int i = 1U; i <= iterations; i++) {
 		// Wait <granularity> ms . . .
 		nanosleep(&zzz, NULL);
 
@@ -134,7 +134,7 @@ static bool
 		// NOTE: get_pixel_* will only set gray8 (leaving at least bgra.color.r untouched) @ 4 & 8bpp!
 		//       (It will unpack RGB565 to RGB32, though ;)).
 		if (vInfo.bits_per_pixel > 8U) {
-			LOG("On iteration nr. %hhu of %hu, pixel (%hu, %hu) was #%02hhX%02hhX%02hhX",
+			LOG("On iteration nr. %hu of %hu, pixel (%hu, %hu) was #%02hhX%02hhX%02hhX",
 			    i,
 			    iterations,
 			    coords.x,
@@ -148,7 +148,7 @@ static bool
 				return true;
 			}
 		} else {
-			LOG("On iteration nr. %hhu of %hu, pixel (%hu, %hu) was #%02hhX",
+			LOG("On iteration nr. %hu of %hu, pixel (%hu, %hu) was #%02hhX",
 			    i,
 			    iterations,
 			    coords.x,
