@@ -263,7 +263,7 @@ char*
 		*b++ = (char) (0x80 | ((cp >> 6) & 0x3F));
 		*b++ = (char) (0x80 | (cp & 0x3F));
 	} else {
-		// \uFFFD
+		// Invalid -> \uFFFD
 		*b++ = (char) 0xEF;
 		*b++ = (char) 0xBF;
 		*b++ = (char) 0xBD;
