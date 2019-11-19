@@ -783,32 +783,32 @@ static int
 {
 	// NOTE: Cut that short, we'll rarely pass stuff larger than that, and if we ever do, padding be damned.
 	/*
-	if (x >= 1000000000) {
+	if (x >= 1000000000u) {
 		return 10;
 	}
-	if (x >= 100000000) {
+	if (x >= 100000000u) {
 		return 9;
 	}
-	if (x >= 10000000) {
+	if (x >= 10000000u) {
 		return 8;
 	}
-	if (x >= 1000000) {
+	if (x >= 1000000u) {
 		return 7;
 	}
-	if (x >= 100000) {
+	if (x >= 100000u) {
 		return 6;
 	}
 	*/
-	if (x >= 10000) {
+	if (x >= 10000u) {
 		return 5;
 	}
-	if (x >= 1000) {
+	if (x >= 1000u) {
 		return 4;
 	}
-	if (x >= 100) {
+	if (x >= 100u) {
 		return 3;
 	}
-	if (x >= 10) {
+	if (x >= 10u) {
 		return 2;
 	}
 	return 1;
@@ -1060,7 +1060,9 @@ static struct mxcfb_rect
 	unsigned short int cx;
 	unsigned short int cy;
 
-	// We'll also need the amount of zero padding we'll want for logging...
+	// We'll also need to compute the amount of zero padding we'll want for logging...
+	// i.e., we'll use the amount of digits in the text's length in bytes as the printf field width.
+	// We cap at 5 because that should cover most sane use-cases.
 	int pad_len = zu_print_length(txtlength);
 
 	// NOTE: Extra code duplication because the glyph's bitmap data type depends on the glyph's width,
