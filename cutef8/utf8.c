@@ -244,29 +244,29 @@ char*
 	char*       b       = utf8;
 
 	if (cp < 0x80) {
-		*b++ = cp;
+		*b++ = (char) cp;
 	} else if (cp < 0x800) {
-		*b++ = 192 + cp / 64;
-		*b++ = 128 + cp % 64;
-	} else if (cp - 0xd800u < 0x800) {
+		*b++ = (char) (192 + cp / 64);
+		*b++ = (char) (128 + cp % 64);
+	} else if (cp - 0xD800u < 0x800) {
 		// \uFFFD
-		*b++ = 0xef;
-		*b++ = 0xbf;
-		*b++ = 0xbd;
+		*b++ = (char) 0xEF;
+		*b++ = (char) 0xBF;
+		*b++ = (char) 0xBD;
 	} else if (cp < 0x10000) {
-		*b++ = 224 + cp / 4096;
-		*b++ = 128 + cp / 64 % 64;
-		*b++ = 128 + cp % 64;
+		*b++ = (char) (224 + cp / 4096);
+		*b++ = (char) (128 + cp / 64 % 64);
+		*b++ = (char) (128 + cp % 64);
 	} else if (cp < 0x110000) {
-		*b++ = 240 + cp / 262144;
-		*b++ = 128 + cp / 4096 % 64;
-		*b++ = 128 + cp / 64 % 64;
-		*b++ = 128 + cp % 64;
+		*b++ = (char) (240 + cp / 262144);
+		*b++ = (char) (128 + cp / 4096 % 64);
+		*b++ = (char) (128 + cp / 64 % 64);
+		*b++ = (char) (128 + cp % 64);
 	} else {
 		// \uFFFD
-		*b++ = 0xef;
-		*b++ = 0xbf;
-		*b++ = 0xbd;
+		*b++ = (char) 0xEF;
+		*b++ = (char) 0xBF;
+		*b++ = (char) 0xBD;
 	}
 
 	// NUL terminate and return pointer to start
