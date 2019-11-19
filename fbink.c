@@ -1001,6 +1001,7 @@ static struct mxcfb_rect
 
 	// Loop through all the *characters* in the text string
 	size_t           bi     = 0U;
+	size_t           ch_bi  = bi;
 	size_t           ci     = 0U;
 	uint32_t         ch     = 0U;
 	FBInkCoordinates coords = { 0U };
@@ -1032,12 +1033,14 @@ static struct mxcfb_rect
 			LOG("Char %zu out of %zu is @ byte offset %zu and is U+%04X (%s)",
 			    (ci + 1U),
 			    charcount,
-			    bi,
+			    ch_bi,
 			    ch,
 			    u8_cp_to_utf8(ch));
 
 			// Update the x coordinates for this character
 			x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
+			// Remember the next char's byte offset for next iteration's logging
+			ch_bi = bi;
 
 			// Get the glyph's pixmap (width <= 8 -> uint8_t)
 			const unsigned char* restrict bitmap = NULL;
@@ -1137,12 +1140,14 @@ static struct mxcfb_rect
 			LOG("Char %zu out of %zu is @ byte offset %zu and is U+%04X (%s)",
 			    (ci + 1U),
 			    charcount,
-			    bi,
+			    ch_bi,
 			    ch,
 			    u8_cp_to_utf8(ch));
 
 			// Update the x coordinates for this character
 			x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
+			// Remember the next char's byte offset for next iteration's logging
+			ch_bi = bi;
 
 			// Get the glyph's pixmap (width <= 16 -> uint16_t)
 			const uint16_t* restrict bitmap = NULL;
@@ -1159,12 +1164,14 @@ static struct mxcfb_rect
 			LOG("Char %zu out of %zu is @ byte offset %zu and is U+%04X (%s)",
 			    (ci + 1U),
 			    charcount,
-			    bi,
+			    ch_bi,
 			    ch,
 			    u8_cp_to_utf8(ch));
 
 			// Update the x coordinates for this character
 			x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
+			// Remember the next char's byte offset for next iteration's logging
+			ch_bi = bi;
 
 			// Get the glyph's pixmap (width <= 32 -> uint32_t)
 			const uint32_t* restrict bitmap = NULL;
@@ -1182,12 +1189,14 @@ static struct mxcfb_rect
 			LOG("Char %zu out of %zu is @ byte offset %zu and is U+%04X (%s)",
 			    (ci + 1U),
 			    charcount,
-			    bi,
+			    ch_bi,
 			    ch,
 			    u8_cp_to_utf8(ch));
 
 			// Update the x coordinates for this character
 			x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
+			// Remember the next char's byte offset for next iteration's logging
+			ch_bi = bi;
 
 			// Get the glyph's pixmap (width <= 64 -> uint64_t)
 			const uint64_t* restrict bitmap = NULL;
