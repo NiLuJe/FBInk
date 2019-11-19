@@ -240,28 +240,28 @@ fffd:
 char*
     u8_cp_to_utf8(uint32_t cp)
 {
-	static char utf8[4] = { 0 };
+	static char utf8[5] = { 0 };
 	char*       b       = utf8;
 
 	if (cp < 0x80) {
 		*b++ = (char) cp;
 	} else if (cp < 0x800) {
-		*b++ = (char) (192 + cp / 64);
-		*b++ = (char) (128 + cp % 64);
+		*b++ = (char) (0xC0 | (cp >> 6));
+		*b++ = (char) (0x80 | (cp & 0x3F));
 	} else if (cp - 0xD800u < 0x800) {
-		// \uFFFD
+		// Surrogates -> \uFFFD
 		*b++ = (char) 0xEF;
 		*b++ = (char) 0xBF;
 		*b++ = (char) 0xBD;
 	} else if (cp < 0x10000) {
-		*b++ = (char) (224 + cp / 4096);
-		*b++ = (char) (128 + cp / 64 % 64);
-		*b++ = (char) (128 + cp % 64);
+		*b++ = (char) (0xE0 | (cp >> 12));
+		*b++ = (char) (0x80 | ((cp >> 6) & 0x3F));
+		*b++ = (char) (0x80 | (cp & 0x3F));
 	} else if (cp < 0x110000) {
-		*b++ = (char) (240 + cp / 262144);
-		*b++ = (char) (128 + cp / 4096 % 64);
-		*b++ = (char) (128 + cp / 64 % 64);
-		*b++ = (char) (128 + cp % 64);
+		*b++ = (char) (0xF0 | (cp >> 18));
+		*b++ = (char) (0x80 | ((cp >> 12) & 0x3F));
+		*b++ = (char) (0x80 | ((cp >> 6) & 0x3F));
+		*b++ = (char) (0x80 | (cp & 0x3F));
 	} else {
 		// \uFFFD
 		*b++ = (char) 0xEF;
