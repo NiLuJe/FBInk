@@ -549,7 +549,7 @@ int
 		return buf_put2c(buf, "\\a");
 	} else if (ch == L'\\') {
 		return buf_put2c(buf, "\\\\");
-	} else if (ch < 32 || ch == 0x7f) {
+	} else if (ch < 32 || ch == 0x7F) {
 		return snprintf(buf, sz, "\\x%.2hhx", (unsigned char) ch);
 	} else if (ch > 0xFFFF) {
 		return snprintf(buf, sz, "\\U%.8x", (uint32_t) ch);
@@ -798,25 +798,25 @@ chkutf8:
 		return CUTEF8_IS_INVALID;    // Last byte can't be > 127
 	}
 	byt = pnt[-1];
-	// Must be between 0xc2 and 0xf4 inclusive to be valid
-	if (((uint32_t) byt - 0xc2) > (0xf4 - 0xc2)) {
+	// Must be between 0xC2 and 0xF4 inclusive to be valid
+	if (((uint32_t) byt - 0xC2) > (0xF4 - 0xC2)) {
 		return CUTEF8_IS_INVALID;
 	}
-	if (byt < 0xe0) {    // 2-byte sequence
+	if (byt < 0xE0) {    // 2-byte sequence
 		// Must have valid continuation character
 		if (isutf(*pnt++)) {
 			return CUTEF8_IS_INVALID;
 		}
-	} else if (byt < 0xf0) {    // 3-byte sequence
+	} else if (byt < 0xF0) {    // 3-byte sequence
 		if ((pnt + 1U >= pend) || isutf(*pnt) || isutf(pnt[1])) {
 			return CUTEF8_IS_INVALID;
 		}
 		// Check for surrogate chars
-		if (byt == 0xed && *pnt > 0x9f) {
+		if (byt == 0xED && *pnt > 0x9F) {
 			return CUTEF8_IS_INVALID;
 		}
 		// Check for overlong encoding
-		if (byt == 0xe0 && *pnt < 0xa0) {
+		if (byt == 0xE0 && *pnt < 0xA0) {
 			return CUTEF8_IS_INVALID;
 		}
 		pnt += 2U;
@@ -825,13 +825,13 @@ chkutf8:
 		if ((pnt + 2U >= pend) || isutf(*pnt) || isutf(pnt[1]) || isutf(pnt[2])) {
 			return CUTEF8_IS_INVALID;
 		}
-		// Make sure in correct range (0x10000 - 0x10ffff)
-		if (byt == 0xf0) {
+		// Make sure in correct range (0x10000 - 0x10FFFF)
+		if (byt == 0xF0) {
 			if (*pnt < 0x90) {
 				return CUTEF8_IS_INVALID;
 			}
-		} else if (byt == 0xf4) {
-			if (*pnt > 0x8f) {
+		} else if (byt == 0xF4) {
+			if (*pnt > 0x8F) {
 				return CUTEF8_IS_INVALID;
 			}
 		}

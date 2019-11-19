@@ -31,7 +31,7 @@ inline static uint8_t
 	const uint8_t type = utf8d[byte];
 
 	// NOTE: The > UTF8_REJECT variant is a tiny bit slower, but we hopefully shouldn't need the extra safety it'd provide ;)
-	*codep = (*state != UTF8_ACCEPT) ? (byte & 0x3fu) | (*codep << 6u) : (0xffu >> type) & (byte);
+	*codep = (*state != UTF8_ACCEPT) ? (byte & 0x3Fu) | (*codep << 6u) : (0xFFu >> type) & (byte);
 	*state = utf8d[256u + *state + type];
 	return *state;
 }
