@@ -309,6 +309,7 @@ size_t
 	return charnum;
 }
 
+// NOTE: See https://github.com/mattn/wcwidth.c & https://github.com/joshuarubin/wcwidth9 if libc wcwidth usage is problematic.
 size_t
     u8_strwidth(const char* s)
 {
