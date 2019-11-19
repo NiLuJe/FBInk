@@ -776,6 +776,25 @@ static const char*
 	}
 }
 
+// KISS helper function to count the amount of digits in an integer (for dynamic padding purpose in printf calls)
+// c.f., https://stackoverflow.com/a/3069580
+static int uint_print_length(unsigned int x) {
+	if (x >= 1000000000) return 10;
+	if (x >= 100000000)  return 9;
+	if (x >= 10000000)   return 8;
+	if (x >= 1000000)    return 7;
+	if (x >= 100000)     return 6;
+	if (x >= 10000)      return 5;
+	if (x >= 1000)       return 4;
+	if (x >= 100)        return 3;
+	if (x >= 10)         return 2;
+	return 1;
+}
+
+static int int_print_length(int x) {
+	return x < 0 ? uint_print_length(-x) + 1 : uint_print_length(x);
+}
+
 // Helper function for drawing
 static struct mxcfb_rect
     draw(const char* restrict        text,
@@ -814,8 +833,9 @@ static struct mxcfb_rect
 	//       And as we're printing glyphs, we need to iterate over the number of characters/grapheme clusters,
 	//       not bytes.
 	size_t charcount = u8_strlen2(text);
+	size_t txtlength = strlen(text);
 	// Flawfinder: ignore
-	LOG("Character count: %zu (over %zu bytes)", charcount, strlen(text));
+	LOG("Character count: %zu (over %zu bytes)", charcount, txtlength);
 
 	// Compute our actual subcell offset in pixels
 	unsigned short int pixel_offset = 0U;
@@ -1021,6 +1041,9 @@ static struct mxcfb_rect
 	unsigned short int cx;
 	unsigned short int cy;
 
+	// We'll also need the amount of zero padding we'll want for logging...
+	int pad_len = uint_print_length(txtlength);
+
 	// NOTE: Extra code duplication because the glyph's bitmap data type depends on the glyph's width,
 	//       so, one way or another, we have to duplicate the inner loops,
 	//       but we want to inline this *and* branch outside the loops,
@@ -1030,9 +1053,12 @@ static struct mxcfb_rect
 	if (glyphWidth <= 8) {
 #endif
 		while ((ch = u8_nextchar2(text, &bi)) != 0U) {
-			LOG("Char %zu out of %zu is @ byte offset %zu and is U+%04X (%s)",
+			LOG("Char %.*zu out of %.*zu is @ byte offset %.*zu and is U+%04X (%s)",
+			    pad_len,
 			    (ci + 1U),
+			    pad_len,
 			    charcount,
+			    pad_len,
 			    ch_bi,
 			    ch,
 			    u8_cp_to_utf8(ch));
