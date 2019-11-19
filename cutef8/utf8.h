@@ -40,6 +40,9 @@ size_t u8_toutf8(char* dest, size_t sz, const uint32_t* src, size_t srcsz);
 /* single character to UTF-8, returns # bytes written */
 size_t u8_wc_toutf8(char* dest, uint32_t ch);
 
+/* same, but return a pointer to a static internal buffer */
+char* u8_cp_to_utf8(uint32_t cp);
+
 /* character number to byte offset */
 size_t u8_offset(const char* str, size_t charnum) __attribute__((pure));
 

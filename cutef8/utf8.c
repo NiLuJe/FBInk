@@ -235,6 +235,45 @@ fffd:
 	return 3U;
 }
 
+// Variant that uses a static internal buffer, and returns a pointer to it.
+// Mainly used for debugging/verbose logging.
+char*
+    u8_cp_to_utf8(uint32_t cp)
+{
+	static char utf8[4] = { 0 };
+	char*       b       = utf8;
+
+	if (cp < 0x80) {
+		*b++ = cp;
+	} else if (cp < 0x800) {
+		*b++ = 192 + cp / 64;
+		*b++ = 128 + cp % 64;
+	} else if (cp - 0xd800u < 0x800) {
+		// \uFFFD
+		*b++ = 0xef;
+		*b++ = 0xbf;
+		*b++ = 0xbd;
+	} else if (cp < 0x10000) {
+		*b++ = 224 + cp / 4096;
+		*b++ = 128 + cp / 64 % 64;
+		*b++ = 128 + cp % 64;
+	} else if (cp < 0x110000) {
+		*b++ = 240 + cp / 262144;
+		*b++ = 128 + cp / 4096 % 64;
+		*b++ = 128 + cp / 64 % 64;
+		*b++ = 128 + cp % 64;
+	} else {
+		// \uFFFD
+		*b++ = 0xef;
+		*b++ = 0xbf;
+		*b++ = 0xbd;
+	}
+
+	// NUL terminate and return pointer to start
+	*b++ = '\0';
+	return utf8;
+}
+
 /* charnum => byte offset */
 size_t
     u8_offset(const char* s, size_t charnum)
