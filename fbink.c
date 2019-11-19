@@ -1184,9 +1184,12 @@ static struct mxcfb_rect
 #ifdef FBINK_WITH_FONTS
 	} else if (glyphWidth <= 16) {
 		while ((ch = u8_nextchar2(text, &bi)) != 0U) {
-			LOG("Char %zu out of %zu is @ byte offset %zu and is U+%04X (%s)",
+			LOG("Char %.*zu out of %.*zu is @ byte offset %.*zu and is U+%04X (%s)",
+			    pad_len,
 			    (ci + 1U),
+			    pad_len,
 			    charcount,
+			    pad_len,
 			    ch_bi,
 			    ch,
 			    u8_cp_to_utf8(ch));
@@ -1208,9 +1211,12 @@ static struct mxcfb_rect
 		}
 	} else if (glyphWidth <= 32) {
 		while ((ch = u8_nextchar2(text, &bi)) != 0U) {
-			LOG("Char %zu out of %zu is @ byte offset %zu and is U+%04X (%s)",
+			LOG("Char %.*zu out of %.*zu is @ byte offset %.*zu and is U+%04X (%s)",
+			    pad_len,
 			    (ci + 1U),
+			    pad_len,
 			    charcount,
+			    pad_len,
 			    ch_bi,
 			    ch,
 			    u8_cp_to_utf8(ch));
@@ -1233,9 +1239,12 @@ static struct mxcfb_rect
 		/*
 	} else if (glyphWidth <= 64) {
 		while ((ch = u8_nextchar2(text, &bi)) != 0U) {
-			LOG("Char %zu out of %zu is @ byte offset %zu and is U+%04X (%s)",
+			LOG("Char %.*zu out of %.*zu is @ byte offset %.*zu and is U+%04X (%s)",
+			    pad_len,
 			    (ci + 1U),
+			    pad_len,
 			    charcount,
+			    pad_len,
 			    ch_bi,
 			    ch,
 			    u8_cp_to_utf8(ch));
