@@ -455,8 +455,7 @@ static const unsigned char* font8x8_get_bitmap(uint32_t);
 
 static const char* fontname_to_string(uint8_t);
 
-static int uint_print_length(unsigned int x);
-static int int_print_length(int x);
+static int zu_print_length(size_t);
 
 static struct mxcfb_rect draw(const char* restrict,
 			      unsigned short int,

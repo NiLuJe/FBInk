@@ -776,23 +776,42 @@ static const char*
 	}
 }
 
-// KISS helper function to count the amount of digits in an integer (for dynamic padding purpose in printf calls)
+// KISS helper function to count the amount of digits in an integer (for dynamic padding purposes in printf calls)
 // c.f., https://stackoverflow.com/a/3069580
-static int uint_print_length(unsigned int x) {
-	if (x >= 1000000000) return 10;
-	if (x >= 100000000)  return 9;
-	if (x >= 10000000)   return 8;
-	if (x >= 1000000)    return 7;
-	if (x >= 100000)     return 6;
-	if (x >= 10000)      return 5;
-	if (x >= 1000)       return 4;
-	if (x >= 100)        return 3;
-	if (x >= 10)         return 2;
+static int
+    zu_print_length(size_t x)
+{
+	// NOTE: Cut that short, we'll rarely pass stuff larger than that, and if we ever do, padding be damned.
+	/*
+	if (x >= 1000000000) {
+		return 10;
+	}
+	if (x >= 100000000) {
+		return 9;
+	}
+	if (x >= 10000000) {
+		return 8;
+	}
+	if (x >= 1000000) {
+		return 7;
+	}
+	if (x >= 100000) {
+		return 6;
+	}
+	*/
+	if (x >= 10000) {
+		return 5;
+	}
+	if (x >= 1000) {
+		return 4;
+	}
+	if (x >= 100) {
+		return 3;
+	}
+	if (x >= 10) {
+		return 2;
+	}
 	return 1;
-}
-
-static int int_print_length(int x) {
-	return x < 0 ? uint_print_length(-x) + 1 : uint_print_length(x);
 }
 
 // Helper function for drawing
@@ -1042,7 +1061,7 @@ static struct mxcfb_rect
 	unsigned short int cy;
 
 	// We'll also need the amount of zero padding we'll want for logging...
-	int pad_len = uint_print_length(txtlength);
+	int pad_len = zu_print_length(txtlength);
 
 	// NOTE: Extra code duplication because the glyph's bitmap data type depends on the glyph's width,
 	//       so, one way or another, we have to duplicate the inner loops,
