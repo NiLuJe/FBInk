@@ -44,6 +44,9 @@ size_t
 		return 1U;
 	} else if (ch < 0x800) {
 		return 2U;
+	} else if (ch - 0xD800u < 0x800) {
+		// Surrogates
+		return 0U;
 	} else if (ch < 0x10000) {
 		return 3U;
 	} else if (ch < 0x110000) {
@@ -158,14 +161,14 @@ size_t
 			}
 			*dest++ = (char) ((ch >> 6) | 0xC0);
 			*dest++ = (char) ((ch & 0x3F) | 0x80);
-		} else if (ch - 0xd800u < 0x800) {
+		} else if (ch - 0xD800u < 0x800) {
 			if (dest >= dest_end - 2) {
 				break;
 			}
-			// invalid: use replacement char \ufffd
-			*dest++ = (char) 0xef;
-			*dest++ = (char) 0xbf;
-			*dest++ = (char) 0xbd;
+			// invalid (surrogates): use replacement char \uFFFD
+			*dest++ = (char) 0xEF;
+			*dest++ = (char) 0xBF;
+			*dest++ = (char) 0xBD;
 		} else if (ch < 0x10000) {
 			if (dest >= dest_end - 2) {
 				break;
@@ -185,10 +188,10 @@ size_t
 			if (dest >= dest_end - 2) {
 				break;
 			}
-			// invalid: use replacement char \ufffd
-			*dest++ = (char) 0xef;
-			*dest++ = (char) 0xbf;
-			*dest++ = (char) 0xbd;
+			// invalid: use replacement char \uFFFD
+			*dest++ = (char) 0xEF;
+			*dest++ = (char) 0xBF;
+			*dest++ = (char) 0xBD;
 		}
 		i++;
 	}
@@ -212,7 +215,7 @@ size_t
 		dest[1] = (char) ((ch & 0x3F) | 0x80);
 		return 2U;
 	}
-	if (ch - 0xd800u < 0x800) {
+	if (ch - 0xD800u < 0x800) {
 		goto fffd;
 	}
 	if (ch < 0x10000) {
@@ -229,9 +232,9 @@ size_t
 		return 4U;
 	}
 fffd:
-	dest[0] = (char) 0xef;
-	dest[1] = (char) 0xbf;
-	dest[2] = (char) 0xbd;
+	dest[0] = (char) 0xEF;
+	dest[1] = (char) 0xBF;
+	dest[2] = (char) 0xBD;
 	return 3U;
 }
 
