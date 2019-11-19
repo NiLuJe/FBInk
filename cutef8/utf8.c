@@ -158,6 +158,14 @@ size_t
 			}
 			*dest++ = (char) ((ch >> 6) | 0xC0);
 			*dest++ = (char) ((ch & 0x3F) | 0x80);
+		} else if (ch - 0xd800u < 0x800) {
+			if (dest >= dest_end - 2) {
+				break;
+			}
+			// invalid: use replacement char \ufffd
+			*dest++ = (char) 0xef;
+			*dest++ = (char) 0xbf;
+			*dest++ = (char) 0xbd;
 		} else if (ch < 0x10000) {
 			if (dest >= dest_end - 2) {
 				break;
@@ -187,6 +195,11 @@ size_t
 	return (size_t)(dest - dest0);
 }
 
+// NOTE: See also https://stackoverflow.com/a/38492214
+//                https://stackoverflow.com/a/4609989
+//                https://gist.github.com/MightyPork/52eda3e5677b4b03524e40c9f0ab1da5
+//                https://gist.github.com/tylerneylon/9773800
+//              & https://rosettacode.org/wiki/UTF-8_encode_and_decode#C
 size_t
     u8_wc_toutf8(char* dest, uint32_t ch)
 {
@@ -198,6 +211,9 @@ size_t
 		dest[0] = (char) ((ch >> 6) | 0xC0);
 		dest[1] = (char) ((ch & 0x3F) | 0x80);
 		return 2U;
+	}
+	if (ch - 0xd800u < 0x800) {
+		goto fffd;
 	}
 	if (ch < 0x10000) {
 		dest[0] = (char) ((ch >> 12) | 0xE0);
@@ -212,6 +228,7 @@ size_t
 		dest[3] = (char) ((ch & 0x3F) | 0x80);
 		return 4U;
 	}
+fffd:
 	dest[0] = (char) 0xef;
 	dest[1] = (char) 0xbf;
 	dest[2] = (char) 0xbd;
