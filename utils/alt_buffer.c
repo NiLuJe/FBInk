@@ -38,6 +38,8 @@
 #include "../fbink.c"
 // Really dirty.
 #include "../qimagescale/qimagescale.c"
+// Really, really dirty (for u8_cp_to_utf8).
+#include "../cutef8/utf8.c"
 
 unsigned char* altPtr  = NULL;
 uint32_t       altAddr = 0U;
