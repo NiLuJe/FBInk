@@ -704,7 +704,7 @@ static const unsigned char*
 		return font8x8_hiragana[codepoint - 0x3040u];
 	} else {
 		// NOTE: Print a blank space for unknown codepoints
-		WARN("Codepoint U+%04X is not covered by this font", codepoint);
+		WARN("Codepoint U+%04X (%s) is not covered by this font", codepoint, u8_cp_to_utf8(codepoint));
 		return font8x8_basic[0];
 	}
 }
@@ -1134,7 +1134,12 @@ static struct mxcfb_rect
 #ifdef FBINK_WITH_FONTS
 	} else if (glyphWidth <= 16) {
 		while ((ch = u8_nextchar2(text, &bi)) != 0U) {
-			LOG("Char %zu out of %zu is @ byte offset %zu and is U+%04X", (ci + 1U), charcount, bi, ch);
+			LOG("Char %zu out of %zu is @ byte offset %zu and is U+%04X (%s)",
+			    (ci + 1U),
+			    charcount,
+			    bi,
+			    ch,
+			    u8_cp_to_utf8(ch));
 
 			// Update the x coordinates for this character
 			x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
@@ -1151,7 +1156,12 @@ static struct mxcfb_rect
 		}
 	} else if (glyphWidth <= 32) {
 		while ((ch = u8_nextchar2(text, &bi)) != 0U) {
-			LOG("Char %zu out of %zu is @ byte offset %zu and is U+%04X", (ci + 1U), charcount, bi, ch);
+			LOG("Char %zu out of %zu is @ byte offset %zu and is U+%04X (%s)",
+			    (ci + 1U),
+			    charcount,
+			    bi,
+			    ch,
+			    u8_cp_to_utf8(ch));
 
 			// Update the x coordinates for this character
 			x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
@@ -1169,7 +1179,12 @@ static struct mxcfb_rect
 		/*
 	} else if (glyphWidth <= 64) {
 		while ((ch = u8_nextchar2(text, &bi)) != 0U) {
-			LOG("Char %zu out of %zu is @ byte offset %zu and is U+%04X", (ci + 1U), charcount, bi, ch);
+			LOG("Char %zu out of %zu is @ byte offset %zu and is U+%04X (%s)",
+			    (ci + 1U),
+			    charcount,
+			    bi,
+			    ch,
+			    u8_cp_to_utf8(ch));
 
 			// Update the x coordinates for this character
 			x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
