@@ -790,15 +790,14 @@ static void
 	} else {
 		// NOTE: I'm not entirely sure this will always have a fixed length, so,
 		//       rely on getline()'s dynamic allocation to be safe...
-		char*              line = NULL;
-		size_t             len  = 0;
-		ssize_t            nread;
-		unsigned short int kobo_id = 0;
+		char*   line = NULL;
+		size_t  len  = 0;
+		ssize_t nread;
 		while ((nread = getline(&line, &len, fp)) != -1) {
 			// Thankfully, the device code is always located in the three
 			// final characters, so that's easy enough to extract without
 			// having to worry about the formatting...
-			kobo_id = (unsigned short int) strtoul(line + (nread - 3), NULL, 10);
+			unsigned short int kobo_id = (unsigned short int) strtoul(line + (nread - 3), NULL, 10);
 			set_kobo_quirks(kobo_id);
 		}
 		free(line);
