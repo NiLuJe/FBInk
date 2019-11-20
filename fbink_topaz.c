@@ -24,10 +24,10 @@
 static const unsigned char*
     topaz_get_bitmap(uint32_t codepoint)
 {
-	if (codepoint <= 0xff) {
+	if (codepoint <= 0xffu) {
 		return topaz_block1[codepoint];
 	} else {
-		WARN("Codepoint U+%04X is not covered by this font", codepoint);
+		WARN("Codepoint U+%04X (%s) is not covered by this font", codepoint, u8_cp_to_utf8(codepoint));
 		return topaz_block1[0];
 	}
 }

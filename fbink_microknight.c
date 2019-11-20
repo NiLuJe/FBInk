@@ -24,10 +24,10 @@
 static const unsigned char*
     microknight_get_bitmap(uint32_t codepoint)
 {
-	if (codepoint <= 0xff) {
+	if (codepoint <= 0xffu) {
 		return microknight_block1[codepoint];
 	} else {
-		WARN("Codepoint U+%04X is not covered by this font", codepoint);
+		WARN("Codepoint U+%04X (%s) is not covered by this font", codepoint, u8_cp_to_utf8(codepoint));
 		return microknight_block1[0];
 	}
 }

@@ -24,10 +24,10 @@
 static const uint32_t*
     block_get_bitmap(uint32_t codepoint)
 {
-	if (codepoint >= 0x20 && codepoint <= 0x7e) {
-		return block_block1[codepoint - 0x20];
+	if (codepoint >= 0x20u && codepoint <= 0x7eu) {
+		return block_block1[codepoint - 0x20u];
 	} else {
-		WARN("Codepoint U+%04X is not covered by this font", codepoint);
+		WARN("Codepoint U+%04X (%s) is not covered by this font", codepoint, u8_cp_to_utf8(codepoint));
 		return block_block1[0];
 	}
 }

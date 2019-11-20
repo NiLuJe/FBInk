@@ -49,7 +49,7 @@ static const uint16_t*
 	} else if (codepoint >= 0xe0b0u && codepoint <= 0xe0b3u) {
 		return spleen_block12[codepoint - 0xe0b0u];
 	} else {
-		WARN("Codepoint U+%04X is not covered by this font", codepoint);
+		WARN("Codepoint U+%04X (%s) is not covered by this font", codepoint, u8_cp_to_utf8(codepoint));
 		return spleen_block1[0];
 	}
 }

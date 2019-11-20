@@ -319,7 +319,7 @@ static const unsigned char*
 	} else if (codepoint == 0xfffdu) {
 		return terminus_block147[0];
 	} else {
-		WARN("Codepoint U+%04X is not covered by this font", codepoint);
+		WARN("Codepoint U+%04X (%s) is not covered by this font", codepoint, u8_cp_to_utf8(codepoint));
 		return terminus_block1[0];
 	}
 }
@@ -622,7 +622,7 @@ static const unsigned char*
 	} else if (codepoint == 0xfffdu) {
 		return terminusb_block147[0];
 	} else {
-		WARN("Codepoint U+%04X is not covered by this font", codepoint);
+		WARN("Codepoint U+%04X (%s) is not covered by this font", codepoint, u8_cp_to_utf8(codepoint));
 		return terminusb_block1[0];
 	}
 }
