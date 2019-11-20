@@ -447,7 +447,7 @@ size_t
     u8_read_escape_sequence(const char* str, size_t ssz, uint32_t* dest)
 {
 	assert(ssz > 0);
-	uint32_t ch;
+	uint32_t ch = 0;
 	char     digs[10];
 	int      dno = 0;
 	int      ndig;

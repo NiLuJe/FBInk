@@ -41,13 +41,13 @@
 // Really dirty (gor u8_cp_to_utf8).
 #include "../cutef8/utf8.c"
 
-int fbfd = -1;
+int fbFd = -1;
 
 static bool
     get_fbinfo(void)
 {
 	// Get variable fb info
-	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
+	if (ioctl(fbFd, FBIOGET_VSCREENINFO, &vInfo)) {
 		perror("ioctl GET_V");
 		return false;
 	}
@@ -60,7 +60,7 @@ static bool
 	    vInfo.rotate,
 	    fb_rotate_to_string(vInfo.rotate));
 	// Get fixed fb information
-	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &fInfo)) {
+	if (ioctl(fbFd, FBIOGET_FSCREENINFO, &fInfo)) {
 		perror("ioctl GET_F");
 		return false;
 	}
@@ -122,7 +122,7 @@ static bool
 		}
 	}
 
-	if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
+	if (ioctl(fbFd, FBIOPUT_VSCREENINFO, &vInfo)) {
 		perror("ioctl PUT_V");
 		return false;
 	}
@@ -142,7 +142,7 @@ static bool
 			// Do the i -> i + 1 -> i dance to be extra sure...
 			// (This is useful on devices where the kernel *always* switches to the invert orientation, c.f., rota.c)
 			vInfo.rotate = i;
-			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
+			if (ioctl(fbFd, FBIOPUT_VSCREENINFO, &vInfo)) {
 				perror("ioctl PUT_V");
 				return false;
 			}
@@ -156,7 +156,7 @@ static bool
 			// (i.e., a Portrait/Landscape swap to counteract potential side-effects of a kernel-side mandatory invert)
 			uint32_t n   = (i + 1U) & 3U;
 			vInfo.rotate = n;
-			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
+			if (ioctl(fbFd, FBIOPUT_VSCREENINFO, &vInfo)) {
 				perror("ioctl PUT_V");
 				return false;
 			}
@@ -167,7 +167,7 @@ static bool
 				continue;
 			}
 			vInfo.rotate = i;
-			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
+			if (ioctl(fbFd, FBIOPUT_VSCREENINFO, &vInfo)) {
 				perror("ioctl PUT_V");
 				return false;
 			}
@@ -209,7 +209,7 @@ static const uint8_t fire_colors[][3] = {
 };
 
 #ifndef FBINK_FOR_LINUX
-uint8_t palette[sizeof(fire_colors) / sizeof(*fire_colors)];
+uint8_t fire_palette[sizeof(fire_colors) / sizeof(*fire_colors)];
 
 // If I dumbly quantize that to the eInk palette, that's what this ends up as...
 // NOTE: That doesn't work so well in practice, though...
@@ -223,16 +223,16 @@ static void
     setup_palette(void)
 {
 	// Convert the palette to Grayscale
-	for (uint8_t i = 0U; i < sizeof(palette); i++) {
-		palette[i] = stbi__compute_y(fire_colors[i][0U], fire_colors[i][1U], fire_colors[i][2U]);
+	for (uint8_t i = 0U; i < sizeof(fire_palette); i++) {
+		fire_palette[i] = stbi__compute_y(fire_colors[i][0U], fire_colors[i][1U], fire_colors[i][2U]);
 	}
 }
 
 static unsigned int
     find_palette_id(uint8_t v)
 {
-	for (uint8_t i = 0U; i < sizeof(palette); i++) {
-		if (palette[i] == v) {
+	for (uint8_t i = 0U; i < sizeof(fire_palette); i++) {
+		if (fire_palette[i] == v) {
 			return i;
 		}
 	}
@@ -245,8 +245,8 @@ static void
     spread_fire_fs(size_t offset)
 {
 	uint8_t pixel = *((uint8_t*) (fbPtr + offset));
-	if (pixel == palette[0U]) {
-		*((uint8_t*) (fbPtr + offset - fInfo.line_length)) = palette[0U];
+	if (pixel == fire_palette[0U]) {
+		*((uint8_t*) (fbPtr + offset - fInfo.line_length)) = fire_palette[0U];
 	} else {
 		const size_t random                             = (rand() * 3) & 3;
 		const size_t dst                                = offset - random + 1U;
@@ -254,7 +254,7 @@ static void
 		// Huh, if we go the palette way here, the fire doesn't reach as high...
 		/*
 		const unsigned int pal_idx                      = find_palette_id(pixel);
-		*((uint8_t*) (fbPtr + dst - fInfo.line_length)) = palette[(pal_idx - (random & 1U))];
+		*((uint8_t*) (fbPtr + dst - fInfo.line_length)) = fire_palette[(pal_idx - (random & 1U))];
 		*/
 	}
 }
@@ -280,10 +280,10 @@ static void
 	setup_palette();
 
 	// Fill the whole screen w/ color 0
-	memset(fbPtr, palette[0U], fInfo.smem_len);
+	memset(fbPtr, fire_palette[0U], fInfo.smem_len);
 
 	// Set the bottom line to the final color
-	const FBInkPixel px           = { .gray8 = palette[sizeof(palette) - 1U] };
+	const FBInkPixel px           = { .gray8 = fire_palette[sizeof(fire_palette) - 1U] };
 	const uint32_t   vertViewport = (uint32_t)(viewVertOrigin - viewVertOffset);
 	fill_rect(
 	    0U, (unsigned short int) (viewHeight + vertViewport - 1U), (unsigned short int) fInfo.line_length, 1U, &px);
@@ -307,11 +307,11 @@ static void
 	fire_x_origin               = (unsigned short int) (viewWidth / 2U - FIRE_WIDTH / 2U);
 
 	// Fill the window w/ color 0
-	const FBInkPixel bg = { .gray8 = palette[0U] };
+	const FBInkPixel bg = { .gray8 = fire_palette[0U] };
 	fill_rect(fire_x_origin, fire_y_origin, FIRE_WIDTH, FIRE_HEIGHT, &bg);
 
 	// Set the bottom line to the final color
-	const FBInkPixel fire = { .gray8 = palette[sizeof(palette) - 1U] };
+	const FBInkPixel fire = { .gray8 = fire_palette[sizeof(fire_palette) - 1U] };
 	fill_rect(fire_x_origin,
 		  (unsigned short int) (fire_y_origin + FIRE_HEIGHT - 1U),
 		  (unsigned short int) FIRE_WIDTH,
@@ -323,8 +323,8 @@ static void
     spread_fire(size_t offset, uint32_t x, uint32_t y)
 {
 	uint8_t pixel = *((uint8_t*) (fbPtr + offset));
-	if (pixel == palette[0U]) {
-		*((uint8_t*) (fbPtr + offset - fInfo.line_length)) = palette[0U];
+	if (pixel == fire_palette[0U]) {
+		*((uint8_t*) (fbPtr + offset - fInfo.line_length)) = fire_palette[0U];
 	} else {
 		const size_t random = (rand() * 3) & 3;
 		// Make sure we stay within our window...
@@ -334,7 +334,7 @@ static void
 		const size_t dst   = dst_y * fInfo.line_length + dst_x;
 		// We'll need the palette id of the current pixel so we can swap it to another *palette* color!
 		const unsigned int pal_idx                      = find_palette_id(pixel);
-		*((uint8_t*) (fbPtr + dst - fInfo.line_length)) = palette[(pal_idx - (random & 1U))];
+		*((uint8_t*) (fbPtr + dst - fInfo.line_length)) = fire_palette[(pal_idx - (random & 1U))];
 	}
 }
 
@@ -372,32 +372,32 @@ static void
 	fire_x_origin               = (unsigned short int) (viewWidth / 2U - scaled_Width / 2U);
 
 	// Fill the window w/ color 0
-	const FBInkPixel bg = { .gray8 = palette[0U] };
+	const FBInkPixel bg = { .gray8 = fire_palette[0U] };
 	fill_rect(
 	    fire_x_origin, fire_y_origin, (unsigned short int) scaled_Width, (unsigned short int) scaled_Height, &bg);
 	// And the source canvas
-	memset(fire_canvas, palette[0U], sizeof(fire_canvas));
+	memset(fire_canvas, fire_palette[0U], sizeof(fire_canvas));
 
 	// Set the bottom line to the final color
-	const FBInkPixel fire = { .gray8 = palette[sizeof(palette) - 1U] };
+	const FBInkPixel fire = { .gray8 = fire_palette[sizeof(fire_palette) - 1U] };
 	fill_rect(fire_x_origin,
 		  (unsigned short int) (fire_y_origin + scaled_Height - 1U),
 		  (unsigned short int) scaled_Width,
 		  scale,
 		  &fire);
 	// Again, the source canvas
-	memset(fire_canvas + ((FIRE_HEIGHT - 1U) * FIRE_WIDTH), palette[sizeof(palette) - 1U], FIRE_WIDTH);
+	memset(fire_canvas + ((FIRE_HEIGHT - 1U) * FIRE_WIDTH), fire_palette[sizeof(fire_palette) - 1U], FIRE_WIDTH);
 }
 
 static void
     spread_fire_scaled(size_t offset, uint32_t x, uint32_t y, uint8_t scale)
 {
 	uint8_t pixel = *((uint8_t*) (fire_canvas + offset));
-	if (pixel == palette[0U]) {
+	if (pixel == fire_palette[0U]) {
 		// Update the source canvas
-		*((uint8_t*) (fire_canvas + offset - FIRE_WIDTH)) = palette[0U];
+		*((uint8_t*) (fire_canvas + offset - FIRE_WIDTH)) = fire_palette[0U];
 		// Update the fb
-		const FBInkPixel px = { .gray8 = palette[0U] };
+		const FBInkPixel px = { .gray8 = fire_palette[0U] };
 		fill_rect((unsigned short int) (fire_x_origin + (x * scale)),
 			  (unsigned short int) (fire_y_origin + ((y * scale) - 1U)),
 			  scale,
@@ -409,11 +409,11 @@ static void
 		const size_t dst = offset - random + 1U;
 		// We'll need the palette id of the current pixel so we can swap it to another *palette* color!
 		const unsigned int pal_idx                     = find_palette_id(pixel);
-		*((uint8_t*) (fire_canvas + dst - FIRE_WIDTH)) = palette[(pal_idx - (random & 1U))];
+		*((uint8_t*) (fire_canvas + dst - FIRE_WIDTH)) = fire_palette[(pal_idx - (random & 1U))];
 		// Update the fb
 		const size_t     dst_y = dst / FIRE_WIDTH * scale + fire_y_origin;
 		const size_t     dst_x = dst % FIRE_WIDTH * scale + fire_x_origin;
-		const FBInkPixel px    = { .gray8 = palette[(pal_idx - (random & 1U))] };
+		const FBInkPixel px    = { .gray8 = fire_palette[(pal_idx - (random & 1U))] };
 		fill_rect((unsigned short int) dst_x, (unsigned short int) (dst_y - 1U), scale, scale, &px);
 	}
 }
@@ -435,14 +435,14 @@ static void
     drown_fire_scaled(size_t offset, uint32_t x, uint32_t y, uint8_t scale)
 {
 	uint8_t pixel = *((uint8_t*) (fire_canvas + offset));
-	if (pixel > palette[0U]) {
+	if (pixel > fire_palette[0U]) {
 		const size_t random = rand() & 3;
 		// We'll need the palette id of the current pixel so we can swap it to another *palette* color!
 		const unsigned int pal_idx = find_palette_id(pixel);
 		// Update the source canvas
-		*((uint8_t*) (fire_canvas + offset)) = palette[(pal_idx - random)];
+		*((uint8_t*) (fire_canvas + offset)) = fire_palette[(pal_idx - random)];
 		// Update the fb
-		const FBInkPixel px = { .gray8 = palette[(pal_idx - random)] };
+		const FBInkPixel px = { .gray8 = fire_palette[(pal_idx - random)] };
 		fill_rect((unsigned short int) (fire_x_origin + (x * scale)),
 			  (unsigned short int) (fire_y_origin + (y * scale)),
 			  scale,
@@ -702,7 +702,7 @@ int
 #endif
 
 	// NOTE: We'll need to write to the fb, so do a full open
-	if ((fbfd = fbink_open()) == ERRCODE(EXIT_FAILURE)) {
+	if ((fbFd = fbink_open()) == ERRCODE(EXIT_FAILURE)) {
 		fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
 		return ERRCODE(EXIT_FAILURE);
 	}
@@ -825,10 +825,10 @@ int
 	//       On the other hand, it does feature hardware dithering, and this yields pretty neat results w/ DU @ 24 fps...
 	const long sleep_cap = BILLION / frame_cap;
 
-	fbink_init(fbfd, &fbink_cfg);
+	fbink_init(fbFd, &fbink_cfg);
 	// We also need to mmap the fb
 	if (!isFbMapped) {
-		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+		if (memmap_fb(fbFd) != EXIT_SUCCESS) {
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
@@ -853,7 +853,7 @@ int
 
 			do_fire_fs();
 
-			fbink_refresh(fbfd, 0U, 0U, 0U, 0U, dithering, &fbink_cfg);
+			fbink_refresh(fbFd, 0U, 0U, 0U, 0U, dithering, &fbink_cfg);
 
 			if (is_timed) {
 				struct timespec t1;
@@ -896,7 +896,7 @@ int
 			do_fire_scaled(scaling_factor);
 
 			fbink_refresh(
-			    fbfd, fire_y_origin, fire_x_origin, scaled_Width, scaled_Height, dithering, &fbink_cfg);
+			    fbFd, fire_y_origin, fire_x_origin, scaled_Width, scaled_Height, dithering, &fbink_cfg);
 
 			if (is_timed) {
 				struct timespec t1;
@@ -932,7 +932,7 @@ int
 
 			do_fire();
 
-			fbink_refresh(fbfd, fire_y_origin, fire_x_origin, FIRE_WIDTH, FIRE_HEIGHT, dithering, &fbink_cfg);
+			fbink_refresh(fbFd, fire_y_origin, fire_x_origin, FIRE_WIDTH, FIRE_HEIGHT, dithering, &fbink_cfg);
 
 			if (is_timed) {
 				struct timespec t1;
@@ -999,7 +999,7 @@ int
 #endif    // !FBINK_FOR_LINUX
 
 cleanup:
-	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
+	if (fbink_close(fbFd) == ERRCODE(EXIT_FAILURE)) {
 		fprintf(stderr, "Failed to close the framebuffer, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
 	}

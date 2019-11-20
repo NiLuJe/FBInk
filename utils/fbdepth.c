@@ -56,13 +56,13 @@ static void
 	return;
 }
 
-int fbfd = -1;
+int fbFd = -1;
 
 static bool
     get_fbinfo(void)
 {
 	// Get variable fb info
-	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
+	if (ioctl(fbFd, FBIOGET_VSCREENINFO, &vInfo)) {
 		perror("ioctl GET_V");
 		return false;
 	}
@@ -75,7 +75,7 @@ static bool
 	    vInfo.rotate,
 	    fb_rotate_to_string(vInfo.rotate));
 	// Get fixed fb information
-	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &fInfo)) {
+	if (ioctl(fbFd, FBIOGET_FSCREENINFO, &fInfo)) {
 		perror("ioctl GET_F");
 		return false;
 	}
@@ -135,7 +135,7 @@ static bool
 		}
 	}
 
-	if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
+	if (ioctl(fbFd, FBIOPUT_VSCREENINFO, &vInfo)) {
 		perror("ioctl PUT_V");
 		return false;
 	}
@@ -155,7 +155,7 @@ static bool
 			// Do the i -> i + 1 -> i dance to be extra sure...
 			// (This is useful on devices where the kernel *always* switches to the invert orientation, c.f., rota.c)
 			vInfo.rotate = i;
-			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
+			if (ioctl(fbFd, FBIOPUT_VSCREENINFO, &vInfo)) {
 				perror("ioctl PUT_V");
 				return false;
 			}
@@ -169,7 +169,7 @@ static bool
 			// (i.e., a Portrait/Landscape swap to counteract potential side-effects of a kernel-side mandatory invert)
 			uint32_t n   = (i + 1U) & 3U;
 			vInfo.rotate = n;
-			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
+			if (ioctl(fbFd, FBIOPUT_VSCREENINFO, &vInfo)) {
 				perror("ioctl PUT_V");
 				return false;
 			}
@@ -180,7 +180,7 @@ static bool
 				continue;
 			}
 			vInfo.rotate = i;
-			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
+			if (ioctl(fbFd, FBIOPUT_VSCREENINFO, &vInfo)) {
 				perror("ioctl PUT_V");
 				return false;
 			}
@@ -322,8 +322,8 @@ int
 	identify_device();
 
 	// NOTE: We only need this for ioctl, hence O_NONBLOCK (as per open(2)).
-	fbfd = open("/dev/fb0", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
-	if (fbfd == -1) {
+	fbFd = open("/dev/fb0", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+	if (fbFd == -1) {
 		perror("open");
 		return ERRCODE(EXIT_FAILURE);
 	}
@@ -445,7 +445,7 @@ int
 	}
 
 cleanup:
-	if (close(fbfd) != 0) {
+	if (close(fbFd) != 0) {
 		perror("close");
 		rv = ERRCODE(EXIT_FAILURE);
 	}

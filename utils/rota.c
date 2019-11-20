@@ -31,13 +31,13 @@
 // I feel dirty.
 #include "../fbink.c"
 
-int fbfd = -1;
+int fbFd = -1;
 
 static void
     get_fbinfo(void)
 {
 	// Get variable fb info
-	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
+	if (ioctl(fbFd, FBIOGET_VSCREENINFO, &vInfo)) {
 		perror("ioctl GET_V");
 	}
 	LOG("Variable fb info: %ux%u, %ubpp @ rotation: %u (%s)",
@@ -47,7 +47,7 @@ static void
 	    vInfo.rotate,
 	    fb_rotate_to_string(vInfo.rotate));
 	// Get fixed fb information
-	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &fInfo)) {
+	if (ioctl(fbFd, FBIOGET_FSCREENINFO, &fInfo)) {
 		perror("ioctl GET_F");
 	}
 	LOG("Fixed fb info: ID is \"%s\", length of fb mem: %u bytes & line length: %u bytes",
@@ -63,7 +63,7 @@ static void
 	vInfo.rotate = (uint32_t) rota;
 	LOG("Setting rotate to %u (%s)", vInfo.rotate, fb_rotate_to_string(vInfo.rotate));
 
-	if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
+	if (ioctl(fbFd, FBIOPUT_VSCREENINFO, &vInfo)) {
 		perror("ioctl PUT_V");
 	}
 
@@ -88,8 +88,8 @@ int
 	g_isVerbose = true;
 
 	// NOTE: We only need this for ioctl, hence O_NONBLOCK (as per open(2)).
-	fbfd = open("/dev/fb0", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
-	if (fbfd == -1) {
+	fbFd = open("/dev/fb0", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+	if (fbFd == -1) {
 		perror("open");
 		return ERRCODE(EXIT_FAILURE);
 	}
@@ -146,5 +146,5 @@ int
 		}
 	}
 
-	close(fbfd);
+	close(fbFd);
 }

@@ -992,13 +992,11 @@ static struct mxcfb_rect
 				}
 			}
 		}
-	}
 
-	// NOTE: In some cases, we also have a matching hole to patch on the right side...
-	//       This only applies when pixel_offset *only* accounts for the !isPerfectFit adjustment though,
-	//       because in every other case, the halfcell offset handling neatly pushes everything into place ;).
-	// NOTE: Again, skip this in overlay/bgless mode ;).
-	if (!fbink_cfg->is_overlay && !fbink_cfg->is_bgless) {
+		// NOTE: In some cases, we also have a matching hole to patch on the right side...
+		//       This only applies when pixel_offset *only* accounts for the !isPerfectFit adjustment though,
+		//       because in every other case, the halfcell offset handling neatly pushes everything into place ;).
+		// NOTE: Again, skip this in overlay/bgless mode ;).
 		if (charcount == MAXCOLS && !deviceQuirks.isPerfectFit && !halfcell_offset) {
 			// NOTE: !isPerfectFit ensures pixel_offset is non-zero
 			LOG("Painting a background rectangle to fill the dead space on the right edge");
@@ -3492,11 +3490,11 @@ cleanup:
 static void
     parse_simple_md(const char* restrict string, size_t size, unsigned char* restrict result)
 {
-	size_t ci = 0;
-	char   ch;
+	size_t ci        = 0;
 	bool   is_italic = false;
 	bool   is_bold   = false;
 	while (ci < size) {
+		char ch;
 		switch (ch = string[ci]) {
 			case '*':
 			case '_':
@@ -3704,28 +3702,28 @@ int
 		top_margin = (unsigned short int) cfg->margins.top;
 	} else {
 		top_margin = (unsigned short int) MAX(0, (int) viewHeight - abs(cfg->margins.top));
-		LOG("Adjusted top margin to %hdpx", top_margin);
+		LOG("Adjusted top margin to %hupx", top_margin);
 	}
 	unsigned short int bottom_margin = 0U;
 	if (cfg->margins.bottom >= 0) {
 		bottom_margin = (unsigned short int) cfg->margins.bottom;
 	} else {
 		bottom_margin = (unsigned short int) MAX(0, (int) viewHeight - abs(cfg->margins.bottom));
-		LOG("Adjusted bottom margin to %hdpx", bottom_margin);
+		LOG("Adjusted bottom margin to %hupx", bottom_margin);
 	}
 	unsigned short int left_margin = 0U;
 	if (cfg->margins.left >= 0) {
 		left_margin = (unsigned short int) cfg->margins.left;
 	} else {
 		left_margin = (unsigned short int) MAX(0, (int) viewWidth - abs(cfg->margins.left));
-		LOG("Adjusted left margin to %hdpx", left_margin);
+		LOG("Adjusted left margin to %hupx", left_margin);
 	}
 	unsigned short int right_margin = 0U;
 	if (cfg->margins.right >= 0) {
 		right_margin = (unsigned short int) cfg->margins.right;
 	} else {
 		right_margin = (unsigned short int) MAX(0, (int) viewWidth - abs(cfg->margins.right));
-		LOG("Adjusted right margin to %hdpx", right_margin);
+		LOG("Adjusted right margin to %hupx", right_margin);
 	}
 
 	// Sanity check the provided margins and calculate the printable area.
@@ -5639,7 +5637,6 @@ static unsigned char*
 		unsigned char* temp    = NULL;
 		size_t         size    = 0U;
 		size_t         used    = 0U;
-		size_t         nread;
 
 		if (ferror(stdin)) {
 			WARN("Failed to read image data from stdin");
@@ -5669,7 +5666,8 @@ static unsigned char*
 				temp    = NULL;
 			}
 
-			nread = fread(imgdata + used, 1U, CHUNK, stdin);
+			// cppcheck-suppress
+			size_t nread = fread(imgdata + used, 1U, CHUNK, stdin);
 			if (nread == 0U) {
 				break;
 			}
