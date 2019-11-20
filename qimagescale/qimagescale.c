@@ -271,9 +271,8 @@ static int*
 		}
 	}
 	if (rv) {
-		int tmp;
 		for (int i = d / 2; --i >= 0;) {
-			tmp          = p[i];
+			int tmp      = p[i];
 			p[i]         = p[d - i - 1];
 			p[d - i - 1] = tmp;
 		}
