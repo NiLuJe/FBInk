@@ -2155,12 +2155,12 @@ int
 			char*   line = NULL;
 			size_t  len  = 0;
 			ssize_t nread;
-			int     linecnt = -1;
 			// Draw a poor man's prompt, which works fairly okay, until we enable verbose mode :D.
 			// NOTE: We limit this to the fixed-cell renderer, as it has a few tweaks to handle this better.
 			printf(">>> ");
 			while ((nread = getline(&line, &len, stdin)) != -1) {
 				printf(">>> ");
+				int linecnt;
 				if ((linecnt = fbink_print(fbfd, line, &fbink_cfg)) < 0) {
 					WARN("Failed to print that string");
 					rv = ERRCODE(EXIT_FAILURE);
