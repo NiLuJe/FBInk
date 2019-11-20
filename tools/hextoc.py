@@ -245,7 +245,7 @@ else:
 		eprint("\t\treturn {}_block{}[codepoint - {:#04x}u];".format(fontname, blocknum, blockcp))
 
 eprint("\t} else {")
-eprint('\t\tWARN("Codepoint U+%04X is not covered by this font", codepoint);')
+eprint('\t\tWARN("Codepoint U+%04X (%s) is not covered by this font", codepoint, u8_cp_to_utf8(codepoint));')
 eprint("\t\treturn {}_block1[0];".format(fontname))
 eprint("\t}")
 eprint("}")
