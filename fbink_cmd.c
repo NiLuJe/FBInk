@@ -1669,15 +1669,15 @@ int
 		new_action.sa_sigaction     = &cleanup_handler;
 		sigemptyset(&new_action.sa_mask);
 		new_action.sa_flags = SA_SIGINFO;
-		if ((rv = sigaction(SIGTERM, &new_action, NULL) != 0)) {
+		if ((rv = sigaction(SIGTERM, &new_action, NULL)) != 0) {
 			WARN("sigaction (TERM): %m");
 			goto cleanup;
 		}
-		if ((rv = sigaction(SIGINT, &new_action, NULL) != 0)) {
+		if ((rv = sigaction(SIGINT, &new_action, NULL)) != 0) {
 			WARN("sigaction (INT): %m");
 			goto cleanup;
 		}
-		if ((rv = sigaction(SIGQUIT, &new_action, NULL) != 0)) {
+		if ((rv = sigaction(SIGQUIT, &new_action, NULL)) != 0) {
 			WARN("sigaction (QUIT): %m");
 			goto cleanup;
 		}
