@@ -162,7 +162,10 @@ with open(fontfile, "r") as f:
 								eprint("\tif (codepoint >= {:#04x}u && codepoint <= {:#04x}u) {{".format(blockcp, prevcp))
 								eprint("\t\treturn {}_block{}[codepoint - {:#04x}u];".format(fontname, blocknum, blockcp))
 						else:
-							eprint("\tif (codepoint <= {:#04x}u) {{".format(prevcp))
+							if prevcp == 0:
+								eprint("\tif (codepoint == {:#04x}u) {{".format(prevcp))
+							else:
+								eprint("\tif (codepoint <= {:#04x}u) {{".format(prevcp))
 							eprint("\t\treturn {}_block{}[codepoint];".format(fontname, blocknum))
 					else:
 						if blockcp == prevcp:
@@ -227,7 +230,10 @@ if blocknum == 1:
 			eprint("\tif (codepoint >= {:#04x}u && codepoint <= {:#04x}u) {{".format(blockcp, prevcp))
 			eprint("\t\treturn {}_block{}[codepoint - {:#04x}u];".format(fontname, blocknum, blockcp))
 	else:
-		eprint("\tif (codepoint <= {:#04x}u) {{".format(prevcp))
+		if prevcp == 0:
+			eprint("\tif (codepoint == {:#04x}u) {{".format(prevcp))
+		else:
+			eprint("\tif (codepoint <= {:#04x}u) {{".format(prevcp))
 		eprint("\t\treturn {}_block{}[codepoint];".format(fontname, blocknum))
 else:
 	# Otherwise, don't forget the final block ;)
