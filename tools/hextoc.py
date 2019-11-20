@@ -92,7 +92,7 @@ font_set = {
 
 # Get the font name from the first arg passed to the script
 fontname = len(sys.argv) > 1 and sys.argv[1].lower() or "NULL"
-if not fontname in font_set.keys():
+if fontname not in font_set.keys():
 	print("Unknown font name '{}'!".format(fontname))
 	print("Available: {}".format(', '.join([k for k in font_set.keys()])))
 	sys.exit(-1)
