@@ -81,10 +81,8 @@ size_t
 size_t
     u8_toucs(uint32_t* dest, size_t sz, const char* src, size_t srcsz)
 {
-	uint32_t    ch;
 	const char* src_end = src + srcsz;
-	size_t      nb;
-	size_t      i = 0;
+	size_t      i       = 0;
 
 	if (sz == 0 || srcsz == 0) {
 		return 0;
@@ -99,11 +97,11 @@ size_t
 			}
 			continue;
 		}
-		nb = trailingBytesForUTF8[(unsigned char) *src];
+		size_t nb = trailingBytesForUTF8[(unsigned char) *src];
 		if (src + nb >= src_end) {
 			break;
 		}
-		ch = 0;
+		uint32_t ch = 0;
 		switch (nb) {
 			// fall through
 			case 5:
@@ -143,13 +141,12 @@ size_t
 size_t
     u8_toutf8(char* dest, size_t sz, const uint32_t* src, size_t srcsz)
 {
-	uint32_t ch;
-	size_t   i        = 0;
-	char*    dest0    = dest;
-	char*    dest_end = dest + sz;
+	size_t i        = 0;
+	char*  dest0    = dest;
+	char*  dest_end = dest + sz;
 
 	while (i < srcsz) {
-		ch = src[i];
+		uint32_t ch = src[i];
 		if (ch < 0x80) {
 			if (dest >= dest_end) {
 				break;
@@ -313,10 +310,7 @@ size_t
 size_t
     u8_strwidth(const char* s)
 {
-	uint32_t    ch;
-	size_t      nb;
 	size_t      tot = 0;
-	int         w;
 	signed char sc;
 
 	while ((sc = (signed char) *s) != 0) {
@@ -331,8 +325,8 @@ size_t
 				s++;
 				continue;
 			}
-			nb = trailingBytesForUTF8[(unsigned char) sc];
-			ch = 0;
+			size_t   nb = trailingBytesForUTF8[(unsigned char) sc];
+			uint32_t ch = 0;
 			switch (nb) {
 				// fall through
 				case 5:
@@ -359,7 +353,7 @@ size_t
 					ch += (unsigned char) *s++;
 			}
 			ch -= offsetsFromUTF8[nb];
-			w = wcwidth(
+			int w = wcwidth(
 			    (wchar_t) ch);    // might return -1, locale-dependent (Julia now uses utf8proc_charwidth)
 			if (w > 0) {
 				tot += (size_t) w;
@@ -376,9 +370,8 @@ uint32_t
     u8_nextchar(const char* s, size_t* i)
 {
 	uint32_t ch = 0;
-	size_t   sz;
 
-	sz = u8_seqlen(&s[*i]);
+	size_t sz = u8_seqlen(&s[*i]);
 	for (size_t j = sz; j > 0; j--) {
 		ch <<= 6U;
 		ch += (unsigned char) s[(*i)++];
@@ -566,11 +559,10 @@ size_t
     u8_escape(char* buf, size_t sz, const char* src, size_t* pi, size_t end, bool escape_quotes, bool ascii)
 {
 	assert(sz > 11);
-	size_t   i = *pi;
-	size_t   i0;
-	uint32_t ch;
-	char*    start = buf;
-	char*    blim  = start + sz - 11;
+	size_t i = *pi;
+	size_t i0;
+	char*  start = buf;
+	char*  blim  = start + sz - 11;
 
 	while (i < end && buf < blim) {
 		// sz-11: leaves room for longest escape sequence
@@ -581,8 +573,8 @@ size_t
 			buf += buf_put2c(buf, "\\\\");
 			i++;
 		} else {
-			i0 = i;
-			ch = u8_nextchar(src, &i);
+			i0          = i;
+			uint32_t ch = u8_nextchar(src, &i);
 			if (ascii || !iswprint((wint_t) ch)) {
 				buf += u8_escape_wchar(buf, sz - (size_t)(buf - start), ch);
 			} else {
@@ -601,13 +593,12 @@ size_t
 char*
     u8_strchr(const char* s, uint32_t ch, size_t* charn)
 {
-	size_t   i     = 0;
-	size_t   lasti = 0;
-	uint32_t c;
+	size_t i     = 0;
+	size_t lasti = 0;
 
 	*charn = 0;
 	while (s[i]) {
-		c = u8_nextchar(s, &i);
+		uint32_t c = u8_nextchar(s, &i);
 		if (c == ch) {
 			/* it's const for us, but not necessarily the caller */
 #pragma GCC diagnostic push
@@ -624,14 +615,13 @@ char*
 char*
     u8_memchr(const char* s, uint32_t ch, size_t sz, size_t* charn)
 {
-	size_t   i     = 0;
-	size_t   lasti = 0;
-	uint32_t c;
-	uint32_t csz;
+	size_t i     = 0;
+	size_t lasti = 0;
 
 	*charn = 0;
 	while (i < sz) {
-		c = csz = 0;
+		uint32_t csz;
+		uint32_t c = csz = 0;
 		do {
 			c <<= 6U;
 			c += (unsigned char) s[i++];
@@ -654,9 +644,7 @@ char*
 char*
     u8_memrchr(const char* s, uint32_t ch, size_t sz)
 {
-	size_t   i     = sz - 1;
-	size_t   tempi = 0;
-	uint32_t c;
+	size_t i = sz - 1;
 
 	if (sz == 0) {
 		return NULL;
@@ -667,8 +655,8 @@ char*
 	}
 
 	while (1) {
-		tempi = i;
-		c     = u8_nextchar(s, &tempi);
+		size_t   tempi = i;
+		uint32_t c     = u8_nextchar(s, &tempi);
 		if (c == ch) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
@@ -716,17 +704,13 @@ bool
 size_t
     u8_vprintf(const char* fmt, va_list ap)
 {
-	int       ret;
-	size_t    cnt;
-	size_t    sz = 0;
-	size_t    nc;
-	bool      needfree = false;
-	char*     buf;
-	uint32_t* wcs;
+	size_t cnt;
+	size_t sz       = 0;
+	bool   needfree = false;
 
-	sz  = 512;
-	buf = (char*) alloca(sz);
-	ret = vsnprintf(buf, sz, fmt, ap);
+	sz        = 512;
+	char* buf = (char*) alloca(sz);
+	int   ret = vsnprintf(buf, sz, fmt, ap);
 	if (ret < 0) {
 		return 0;
 	} else {
@@ -737,9 +721,9 @@ size_t
 		needfree = true;
 		vsnprintf(buf, cnt + 1U, fmt, ap);
 	}
-	wcs     = (uint32_t*) alloca((cnt + 1U) * sizeof(uint32_t));
-	nc      = u8_toucs(wcs, cnt + 1U, buf, cnt);
-	wcs[nc] = 0;
+	uint32_t* wcs = (uint32_t*) alloca((cnt + 1U) * sizeof(uint32_t));
+	size_t    nc  = u8_toucs(wcs, cnt + 1U, buf, cnt);
+	wcs[nc]       = 0;
 	printf("%ls", (wchar_t*) wcs);
 	if (needfree) {
 		free(buf);
@@ -750,12 +734,11 @@ size_t
 size_t
     u8_printf(const char* fmt, ...)
 {
-	size_t  cnt;
 	va_list args;
 
 	va_start(args, fmt);
 
-	cnt = u8_vprintf(fmt, args);
+	size_t cnt = u8_vprintf(fmt, args);
 
 	va_end(args);
 	return cnt;
@@ -849,13 +832,12 @@ chkutf8:
 int
     u8_reverse(char* dest, const char* src, size_t len)
 {
-	size_t        si = 0;
-	size_t        di = len;
-	unsigned char c;
+	size_t si = 0;
+	size_t di = len;
 
 	dest[di] = '\0';
 	while (si < len) {
-		c = (unsigned char) src[si];
+		unsigned char c = (unsigned char) src[si];
 		if ((~c) & 0x80) {
 			di--;
 			dest[di] = (char) c;
