@@ -381,7 +381,7 @@ static char*
 	}
 
 	// safe against most negative integer
-	n = ((neg = (num < 0))) ? (uint64_t)(~num) + 1 : (uint64_t) num;
+	n = (neg = (num < 0)) ? (uint64_t)(~num) + 1 : (uint64_t) num;
 
 	do {
 		buf[len++] = tbl[n % base];
