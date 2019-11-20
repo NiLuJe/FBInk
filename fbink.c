@@ -1037,10 +1037,10 @@ static struct mxcfb_rect
 	}
 
 	// Loop through all the *characters* in the text string
-	size_t           bi     = 0U;
-	size_t           ch_bi  = bi;
-	size_t           ci     = 0U;
-	uint32_t         ch     = 0U;
+	size_t           bi    = 0U;
+	size_t           ch_bi = bi;
+	size_t           ci    = 0U;
+	uint32_t         ch;
 	FBInkCoordinates coords = { 0U };
 	FBInkPixel*      pxP;
 	// NOTE: We don't do much sanity checking on hoffset/voffset,
@@ -1051,7 +1051,6 @@ static struct mxcfb_rect
 	//       we rely on wraparound on underflow to still point to (large, but positive) off-screen coordinates.
 	unsigned short int x_base_offs = (unsigned short int) ((col * FONTW) + pixel_offset + hoffset + viewHoriOrigin);
 	unsigned short int y_offs      = (unsigned short int) ((row * FONTH) + voffset + viewVertOrigin);
-	unsigned short int x_offs      = 0U;
 
 	unsigned short int i;
 	unsigned short int j;
@@ -1083,7 +1082,7 @@ static struct mxcfb_rect
 			    u8_cp_to_utf8(ch));
 
 			// Update the x coordinates for this character
-			x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
+			unsigned short int x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
 			// Remember the next char's byte offset for next iteration's logging
 			ch_bi = bi;
 
@@ -1193,7 +1192,7 @@ static struct mxcfb_rect
 			    u8_cp_to_utf8(ch));
 
 			// Update the x coordinates for this character
-			x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
+			unsigned short int x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
 			// Remember the next char's byte offset for next iteration's logging
 			ch_bi = bi;
 
@@ -1220,7 +1219,7 @@ static struct mxcfb_rect
 			    u8_cp_to_utf8(ch));
 
 			// Update the x coordinates for this character
-			x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
+			unsigned short int x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
 			// Remember the next char's byte offset for next iteration's logging
 			ch_bi = bi;
 
@@ -1248,7 +1247,7 @@ static struct mxcfb_rect
 			    u8_cp_to_utf8(ch));
 
 			// Update the x coordinates for this character
-			x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
+			unsigned short int x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
 			// Remember the next char's byte offset for next iteration's logging
 			ch_bi = bi;
 
@@ -5666,7 +5665,7 @@ static unsigned char*
 				temp    = NULL;
 			}
 
-			// cppcheck-suppress
+			// cppcheck-suppress nullPointerArithmetic ; imgdata can't be NULL
 			size_t nread = fread(imgdata + used, 1U, CHUNK, stdin);
 			if (nread == 0U) {
 				break;
@@ -6092,6 +6091,7 @@ static int
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// First, we gobble the full image pixel (all 2 bytes)
+						// cppcheck-suppress unreadVariable ; false-positive (union)
 						img_px.p = *((const uint16_t*) &data[pix_offset]);
 #	pragma GCC diagnostic pop
 
@@ -6229,6 +6229,7 @@ static int
 				// 32bpp
 				FBInkPixelBGRA fb_px;
 				// This is essentially a constant in our case... (c.f., put_pixel_RGB32)
+				// cppcheck-suppress unreadVariable ; false-positive (union)
 				fb_px.color.a = 0xFFu;
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
@@ -6240,6 +6241,7 @@ static int
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// First, we gobble the full image pixel (all 4 bytes)
+						// cppcheck-suppress unreadVariable ; false-positive (union)
 						img_px.p = *((const uint32_t*) &data[pix_offset]);
 #	pragma GCC diagnostic pop
 
@@ -6247,6 +6249,7 @@ static int
 						if (img_px.color.a == 0xFFu) {
 							// Fully opaque, we can blit the image (almost) directly.
 							// We do need to handle BGR and honor inversion ;).
+							// cppcheck-suppress unreadVariable ; false-positive (union)
 							img_px.p ^= invert_rgb;
 							// And software dithering... Not a fan of the extra branching,
 							// but that's probably the best we can do.
@@ -6285,6 +6288,7 @@ static int
 #	pragma GCC diagnostic pop
 
 							// Don't forget to honor inversion
+							// cppcheck-suppress unreadVariable ; false-positive (union)
 							img_px.p ^= invert_rgb;
 							// Blend it, we get our BGR swap in the process ;).
 							fb_px.color.r = (uint8_t) DIV255(
@@ -6321,6 +6325,7 @@ static int
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// First, we gobble the full image pixel (all 4 bytes)
+						// cppcheck-suppress unreadVariable ; false-positive (union)
 						img_px.p = *((const uint32_t*) &data[pix_offset]);
 #	pragma GCC diagnostic pop
 
@@ -6328,6 +6333,7 @@ static int
 						if (img_px.color.a == 0xFFu) {
 							// Fully opaque, we can blit the image (almost) directly.
 							// We do need to handle BGR and honor inversion ;).
+							// cppcheck-suppress unreadVariable ; false-positive (union)
 							img_px.p ^= invert_rgb;
 							// SW dithering
 							if (fbink_cfg->sw_dithering) {
@@ -6359,6 +6365,7 @@ static int
 							bg_px.p = *((uint24_t*) (fbPtr + pix_offset));
 
 							// Don't forget to honor inversion
+							// cppcheck-suppress unreadVariable ; false-positive (union)
 							img_px.p ^= invert_rgb;
 							// Blend it, we get our BGR swap in the process ;).
 							fb_px.color.r = (uint8_t) DIV255(
@@ -6387,6 +6394,7 @@ static int
 				// 32bpp
 				FBInkPixelBGRA fb_px;
 				// This is essentially a constant in our case...
+				// cppcheck-suppress unreadVariable ; false-positive (union)
 				fb_px.color.a = 0xFFu;
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
@@ -6400,12 +6408,18 @@ static int
 
 						// Handle BGR, inversion & SW dithering
 						if (fbink_cfg->sw_dithering) {
+							// cppcheck-suppress unreadVariable ; false-positive (union)
 							fb_px.color.r = dither_o8x8(i, j, img_px.color.r);
+							// cppcheck-suppress unreadVariable ; false-positive (union)
 							fb_px.color.g = dither_o8x8(i, j, img_px.color.g);
+							// cppcheck-suppress unreadVariable ; false-positive (union)
 							fb_px.color.b = dither_o8x8(i, j, img_px.color.b);
 						} else {
+							// cppcheck-suppress unreadVariable ; false-positive (union)
 							fb_px.color.r = img_px.color.r;
+							// cppcheck-suppress unreadVariable ; false-positive (union)
 							fb_px.color.g = img_px.color.g;
+							// cppcheck-suppress unreadVariable ; false-positive (union)
 							fb_px.color.b = img_px.color.b;
 						}
 						// NOTE: The RGB -> BGR dance precludes us from simply doing a 3 bytes memcpy,

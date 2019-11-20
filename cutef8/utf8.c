@@ -705,10 +705,9 @@ size_t
     u8_vprintf(const char* fmt, va_list ap)
 {
 	size_t cnt;
-	size_t sz       = 0;
 	bool   needfree = false;
-
-	sz        = 512;
+	size_t sz       = 512;
+	// cppcheck-suppress allocaCalled
 	char* buf = (char*) alloca(sz);
 	int   ret = vsnprintf(buf, sz, fmt, ap);
 	if (ret < 0) {
@@ -721,6 +720,7 @@ size_t
 		needfree = true;
 		vsnprintf(buf, cnt + 1U, fmt, ap);
 	}
+	// cppcheck-suppress allocaCalled
 	uint32_t* wcs = (uint32_t*) alloca((cnt + 1U) * sizeof(uint32_t));
 	size_t    nc  = u8_toucs(wcs, cnt + 1U, buf, cnt);
 	wcs[nc]       = 0;

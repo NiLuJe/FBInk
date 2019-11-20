@@ -257,6 +257,7 @@ int
 
 	// Restore, this time with a negative L + T crop
 	fprintf(stdout, "[06b-] RESTORE w/ (-) L+T CROP\n");
+	// cppcheck-suppress redundantAssignment ; true, but the previous clear is kept for clarity
 	dump.clip      = dump.area;
 	dump.clip.left = (unsigned short int) MAX(0, dump.clip.left - 25);
 	//dump.clip.width -= 25;	// Not strictly necessary, will be computed when building the intersection rectangle
@@ -274,6 +275,7 @@ int
 	dump.clip = (const FBInkRect){ 0U };
 
 	// Restore, this time with a positive R + B crop
+	// cppcheck-suppress redundantAssignment ; ditto
 	dump.clip        = dump.area;
 	dump.clip.width  = (unsigned short int) MAX(0, dump.clip.width - 25);
 	dump.clip.height = (unsigned short int) MAX(0, dump.clip.height - 30);
@@ -290,6 +292,7 @@ int
 	dump.clip = (const FBInkRect){ 0U };
 
 	// Restore, this time with a negative R + B crop (i.e., the overlap will match the full dump area)
+	// cppcheck-suppress redundantAssignment ; ditto
 	dump.clip        = dump.area;
 	dump.clip.width  = (unsigned short int) MIN(dump.clip.width + 25U, fbink_state.screen_width);
 	dump.clip.height = (unsigned short int) MIN(dump.clip.height + 30U, fbink_state.screen_height);
@@ -306,6 +309,7 @@ int
 	dump.clip = (const FBInkRect){ 0U };
 
 	// Restore, this time with a crop on all sides
+	// cppcheck-suppress redundantAssignment ; ditto
 	dump.clip        = dump.area;
 	dump.clip.left   = (unsigned short int) MIN(dump.clip.left + 15U, fbink_state.screen_width);
 	dump.clip.width  = (unsigned short int) MAX(0, dump.clip.width - 15);
@@ -326,6 +330,7 @@ int
 	dump.clip = (const FBInkRect){ 0U };
 
 	// This should fail to restore (no overlap)
+	// cppcheck-suppress redundantAssignment ; ditto
 	dump.clip = dump.area;
 	dump.clip.left =
 	    (unsigned short int) MIN((unsigned short int) (dump.clip.left + dump.area.width), fbink_state.screen_width);
