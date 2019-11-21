@@ -233,7 +233,20 @@
 
 // Fallback version tag...
 #ifndef FBINK_VERSION
-#	define FBINK_VERSION "v1.20.2"
+#	define FBINK_FALLBACK_VERSION "v1.20.2-git"
+#	ifdef FBINK_FOR_KINDLE
+#		define FBINK_VERSION FBINK_FALLBACK_VERSION " for Kindle"
+#	else
+#		ifdef FBINK_FOR_CERVANTES
+#			define FBINK_VERSION FBINK_FALLBACK_VERSION " for Cervantes"
+#		else
+#			ifdef FBINK_FOR_LINUX
+#				define FBINK_VERSION FBINK_FALLBACK_VERSION " for Linux"
+#			else
+#				define FBINK_VERSION FBINK_FALLBACK_VERSION " for Kobo"
+#			endif
+#		endif
+#	endif
 #endif
 
 // MIN/MAX with no side-effects,

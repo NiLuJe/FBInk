@@ -231,16 +231,19 @@ EXTRA_CPPFLAGS+=$(TARGET_CPPFLAGS)
 
 # A version tag...
 FBINK_VERSION:=$(shell git describe)
-ifdef KINDLE
-	LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kindle"'
-else
-	ifdef CERVANTES
-		LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Cervantes"'
+# Only use it if we got something useful out of git describe...
+ifdef FBINK_VERSION
+	ifdef KINDLE
+		LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kindle"'
 	else
-		ifdef LINUX
-			LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Linux"'
+		ifdef CERVANTES
+			LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Cervantes"'
 		else
-			LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kobo"'
+			ifdef LINUX
+				LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Linux"'
+			else
+				LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kobo"'
+			endif
 		endif
 	endif
 endif
