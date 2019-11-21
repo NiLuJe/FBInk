@@ -230,6 +230,7 @@ endif
 EXTRA_CPPFLAGS+=$(TARGET_CPPFLAGS)
 
 # A version tag...
+# NOTE: Don't redirect stderr, so we can get an idea of what happened when things go wrong...
 FBINK_VERSION:=$(shell git describe)
 # Only use it if we got something useful out of git describe...
 ifdef FBINK_VERSION
@@ -246,6 +247,9 @@ ifdef FBINK_VERSION
 			endif
 		endif
 	endif
+else
+	# Just so we don't use an empty var down the line...
+	FBINK_VERSION:=git
 endif
 
 # NOTE: Always use as-needed to avoid unecessary DT_NEEDED entries :)
