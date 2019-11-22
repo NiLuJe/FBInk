@@ -38,7 +38,7 @@
 #include <time.h>
 // I feel dirty.
 #include "../fbink.c"
-// Really dirty (gor u8_cp_to_utf8).
+// Really dirty (for u8_cp_to_utf8).
 #include "../cutef8/utf8.c"
 
 int fbFd = -1;
