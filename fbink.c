@@ -319,6 +319,8 @@ static void
 	// NOTE: The H2O²r1 (possibly r2 as well), on the other hand, is a special snowflake...
 	//       (It'll need a dedicated deviceQuirks).
 	// c.f., https://www.mobileread.com/forums/showpost.php?p=3766627&postcount=236
+	//     & https://github.com/baskerville/plato/commit/5181eaf0b48a9e1201b6ea5751c2af108512f74f
+	//     & https://github.com/baskerville/plato/commit/bf7af35eef9c29250d206687738b4888f40ecab1
 	/*
 	switch(rotation) {
 		case FB_ROTATE_UR:
