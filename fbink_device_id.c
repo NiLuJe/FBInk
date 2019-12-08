@@ -553,6 +553,8 @@ static void
 	deviceQuirks.ntxRotaQuirk = NTX_ROTA_STRAIGHT;
 	// NOTE: Device code list pilfered from
 	//       https://github.com/geek1011/KoboStuff/blob/gh-pages/kobofirmware.js#L11
+	//       See also https://github.com/geek1011/koboutils/pull/1 and the links referenced there
+	//       for all you ever wanted to know about Kobo codenames ;).
 	switch (kobo_id) {
 		case 310U:    // Touch A/B (trilogy)
 			deviceQuirks.isKoboNonMT = true;
