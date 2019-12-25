@@ -4504,6 +4504,16 @@ int
 		} else if (cfg->padding == VERT_PADDING) {
 			region.top = area.tl.y;
 			region.height = area.br.y - area.tl.y;
+			if (!is_overlay && !is_bgless) {
+				// First line? Top padding (top edge of the drawing area to initial pen position)
+				if (line == 0U) {
+					fill_rect(paint_point.x, region.top, region.width, region.height - paint_point.y, &bgP);
+				}
+				// Final line? Bottom padding (final pen position to bottom edge of the drawing area)
+				if (line == num_lines - 1U) {
+					fill_rect(paint_point.x, paint_point.y + curr_print_height, region.width, viewHeight - (paint_point.y + curr_print_height), &bgP);
+				}
+			}
 		} else if (cfg->padding == FULL_PADDING) {
 			region.left = area.tl.x;
 			region.top = area.tl.y;
