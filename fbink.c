@@ -4253,15 +4253,6 @@ int
 		region.left = paint_point.x;
 	}
 	region.top = paint_point.y;
-	// Padding will obviously override this ;).
-	if (cfg->padding == HORI_PADDING) {
-		region.left = area.tl.x;
-	} else if (cfg->padding == VERT_PADDING) {
-		region.top = area.tl.y;
-	} else if (cfg->padding == FULL_PADDING) {
-		region.left = area.tl.x;
-		region.top = area.tl.y;
-	}
 
 	const uint8_t   invert     = is_inverted ? 0xFFu : 0U;
 	const uint8_t   fgcolor    = penFGColor ^ invert;
@@ -4283,6 +4274,20 @@ int
 	// Do we need to clear the screen?
 	if (is_cleared) {
 		clear_screen(fbfd, bgcolor, is_flashing);
+	}
+
+	// Handle padding related region tweaks
+	if (cfg->padding == HORI_PADDING) {
+		region.left = area.tl.x;
+	} else if (cfg->padding == VERT_PADDING) {
+		region.top = area.tl.y;
+	} else if (cfg->padding == FULL_PADDING) {
+		region.left = area.tl.x;
+		region.top = area.tl.y;
+		// That's easy enough, simply fill the drawing area with the bg color before rendering anything
+		if (!is_overlay && !is_bgless) {
+			fill_rect(region.left, region.top, region.width, region.height, &bgP);
+		}
 	}
 
 	uint32_t                tmp_c;
