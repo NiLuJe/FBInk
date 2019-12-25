@@ -4513,7 +4513,7 @@ int
 				// Final line? Bottom padding (final pen position to bottom edge of the drawing area)
 				if (lines[line].line_gap == 0) {
 					LOG("Last line");
-					fill_rect(paint_point.x, paint_point.y + curr_print_height, region.width, screenHeight - (paint_point.y + curr_print_height), &bgP);
+					fill_rect(paint_point.x, paint_point.y + curr_print_height, region.width, (viewHeight + (viewVertOrigin - viewVertOffset)) - (paint_point.y + curr_print_height), &bgP);
 				}
 			}
 		} else if (cfg->padding == FULL_PADDING) {
