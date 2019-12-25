@@ -4286,7 +4286,7 @@ int
 		region.top = area.tl.y;
 		// That's easy enough, simply fill the drawing area with the bg color before rendering anything
 		if (!is_overlay && !is_bgless) {
-			fill_rect(region.left, region.top, area.br.x - area.tl.x, area.br.y - area.tl.y, &bgP);
+			fill_rect(region.left, region.top, max_lw, print_height, &bgP);
 		}
 	}
 
@@ -4517,8 +4517,8 @@ int
 		} else if (cfg->padding == FULL_PADDING) {
 			region.left = area.tl.x;
 			region.top = area.tl.y;
-			region.width = area.br.x - area.tl.x;
-			region.height = area.br.y - area.tl.y;
+			region.width = max_lw;
+			region.height = print_height;
 		}
 
 		FBInkPixel pixel;
@@ -4729,9 +4729,12 @@ int
 			abort_line = true;
 			LOG("Ran out of drawing area at the end of line# %u after ~%zu characters!", line, ci);
 		}
-		region.height += (unsigned int) max_line_height;
-		if (region.top + region.height > screenHeight) {
-			region.height = (screenHeight - region.top);
+		// Don't fudge region again if we're padding vertically
+		if (cfg->padding != VERT_PADDING && cfg->padding != FULL_PADDING) {
+			region.height += (unsigned int) max_line_height;
+			if (region.top + region.height > screenHeight) {
+				region.height = (screenHeight - region.top);
+			}
 		}
 		LOG("Finished printing line# %u", line);
 		// And clear our line buffer for next use. The glyph buffer shouldn't need clearing,
