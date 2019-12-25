@@ -110,6 +110,15 @@ typedef enum
 	EDGE          // i.e., RIGHT for halign, BOTTOM for valign
 } ALIGN_INDEX_T;
 
+// List of available padding values
+typedef enum
+{
+	NO_PADDING = 0U,
+	HORI_PADDING,
+	VERT_PADDING,
+	FULL_PADDING
+} PADDING_INDEX_T;
+
 // List of available colors in the eInk color map
 // NOTE: This is split in FG & BG to ensure that the default values lead to a sane result (i.e., black on white)
 typedef enum
@@ -287,6 +296,9 @@ typedef struct
 	float              size_pt;         // Size of text in points. If not set (0.0f), defaults to 12pt
 	unsigned short int size_px;         // Size of text in pixels. Optional, but takes precedence over size_pt.
 	bool               is_centered;     // Horizontal centering
+	uint8_t            padding;         // Pad the drawing area (i.e., paint it in the background color),
+					    // unlike in the fixed-cell codepath, this always applies to both sides,
+					    // no matter the chosen axis. (c.f., PADDING_INDEX_T enum)
 	bool               is_formatted;    // Is string "formatted"? Bold/Italic support only, markdown like syntax
 	bool               compute_only;    // Abort early after the line-break computation pass (no actual rendering).
 	//                                     NOTE: This is early enough that it will *NOT* be able to predict *every*

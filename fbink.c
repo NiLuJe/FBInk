@@ -4253,6 +4253,15 @@ int
 		region.left = paint_point.x;
 	}
 	region.top = paint_point.y;
+	// Padding will obviously override this ;).
+	if (cfg->padding == HORI_PADDING) {
+		region.left = area.tl.x;
+	} else if (cfg->padding == VERT_PADDING) {
+		region.top = area.tl.y;
+	} else if (cfg->padding == FULL_PADDING) {
+		region.left = area.tl.x;
+		region.top = area.tl.y;
+	}
 
 	const uint8_t   invert     = is_inverted ? 0xFFu : 0U;
 	const uint8_t   fgcolor    = penFGColor ^ invert;
@@ -4461,7 +4470,6 @@ int
 		}
 		curr_point.x = 0U;
 		// Right, we've rendered a line to a bitmap, time to display it.
-
 		if (is_centered || halign == CENTER) {
 			paint_point.x = (unsigned short int) (paint_point.x + ((max_lw - lw) / 2U));
 			if (paint_point.x < region.left) {
@@ -4476,6 +4484,21 @@ int
 			}
 		} else if (lw > region.width) {
 			region.width = lw;
+		}
+		// Handle padding...
+		if (cfg->padding == HORI_PADDING) {
+			region.left = area.tl.x;
+			region.width = area.br.x - area.tl.x;
+			fill_rect(region.left, paint_point.y, paint_point.x - region.left, curr_print_height, &bgP);
+			fill_rect(paint_point.x + lw, paint_point.y, region.width - (paint_point.x + lw), curr_print_height, &bgP);
+		} else if (cfg->padding == VERT_PADDING) {
+			region.top = area.tl.y;
+			region.height = area.br.y - area.tl.y;
+		} else if (cfg->padding == FULL_PADDING) {
+			region.left = area.tl.x;
+			region.top = area.tl.y;
+			region.width = area.br.x - area.tl.x;
+			region.height = area.br.y - area.tl.y;
 		}
 
 		FBInkPixel pixel;

@@ -662,6 +662,7 @@ int
 		BM_OPT,
 		LM_OPT,
 		RM_OPT,
+		PADDING_OPT,
 		FMT_OPT,
 		COMPUTE_OPT,
 		NOTRUNC_OPT,
@@ -681,6 +682,7 @@ int
 					 [SIZE_OPT] = "size",       [PX_OPT] = "px",
 					 [TM_OPT] = "top",          [BM_OPT] = "bottom",
 					 [LM_OPT] = "left",         [RM_OPT] = "right",
+					 [PADDING_OPT] = "padding",
 					 [FMT_OPT] = "format",      [COMPUTE_OPT] = "compute",
 					 [NOTRUNC_OPT] = "notrunc", NULL };
 #pragma GCC diagnostic pop
@@ -1410,6 +1412,32 @@ int
 								      truetype_token[RM_OPT],
 								      value,
 								      &ot_config.margins.right) < 0) {
+								errfnd = true;
+							}
+							break;
+						case PADDING_OPT:
+							if (value == NULL) {
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     truetype_token[PADDING_OPT],
+								     opt,
+								     opt_longname);
+								errfnd = true;
+								break;
+							}
+							if (strcasecmp(value, "NONE") == 0 ||
+							    strcasecmp(value, "NO") == 0) {
+								ot_config.padding = NO_PADDING;
+							} else if (strcasecmp(value, "HORIZONTAL") == 0 ||
+								   strcasecmp(value, "HORI") == 0) {
+								ot_config.padding = HORI_PADDING;
+							} else if (strcasecmp(value, "VERTICAL") == 0 ||
+								   strcasecmp(value, "VERT") == 0) {
+								ot_config.padding = VERT_PADDING;
+							} else if (strcasecmp(value, "BOTH") == 0 ||
+								   strcasecmp(value, "FULL") == 0) {
+								ot_config.padding = FULL_PADDING;
+							} else {
+								ELOG("Unknown padding value '%s'.", value);
 								errfnd = true;
 							}
 							break;
