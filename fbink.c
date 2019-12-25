@@ -4507,12 +4507,10 @@ int
 			if (!is_overlay && !is_bgless) {
 				// First line? Top padding (top edge of the drawing area to initial pen position)
 				if (line == 0U) {
-					LOG("First line");
 					fill_rect(paint_point.x, region.top, region.width, paint_point.y - region.top, &bgP);
 				}
 				// Final line? Bottom padding (final pen position to bottom edge of the drawing area)
 				if (lines[line].line_gap == 0) {
-					LOG("Last line");
 					fill_rect(paint_point.x, paint_point.y + curr_print_height, region.width, (viewHeight + (viewVertOrigin - viewVertOffset)) - (paint_point.y + curr_print_height), &bgP);
 				}
 			}
