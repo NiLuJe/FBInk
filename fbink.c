@@ -4286,7 +4286,7 @@ int
 		region.top = area.tl.y;
 		// That's easy enough, simply fill the drawing area with the bg color before rendering anything
 		if (!is_overlay && !is_bgless) {
-			fill_rect(region.left, region.top, region.width, region.height, &bgP);
+			fill_rect(region.left, region.top, area.br.x - area.tl.x, area.br.y - area.tl.y, &bgP);
 		}
 	}
 
