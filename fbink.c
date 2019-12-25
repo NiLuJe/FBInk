@@ -4489,8 +4489,13 @@ int
 		if (cfg->padding == HORI_PADDING) {
 			region.left = area.tl.x;
 			region.width = area.br.x - area.tl.x;
-			fill_rect(region.left, paint_point.y, paint_point.x - region.left, curr_print_height, &bgP);
-			fill_rect(paint_point.x + lw, paint_point.y, viewWidth - (paint_point.x + lw), curr_print_height, &bgP);
+			// Unless we're in a backgroundless drawing mode, draw the padding rectangles...
+			if (!is_overlay && !is_bgless) {
+				// Left padding (left edge of the drawing area to initial pen position)
+				fill_rect(region.left, paint_point.y, paint_point.x - region.left, curr_print_height, &bgP);
+				// Right padding (final pen position to the right edge of the drawing area)
+				fill_rect(paint_point.x + lw, paint_point.y, viewWidth - (paint_point.x + lw), curr_print_height, &bgP);
+			}
 		} else if (cfg->padding == VERT_PADDING) {
 			region.top = area.tl.y;
 			region.height = area.br.y - area.tl.y;
