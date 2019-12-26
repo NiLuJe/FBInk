@@ -184,7 +184,7 @@
 #elif defined(FBINK_FOR_KOBO)
 #	include "eink/mxcfb-kobo.h"
 #elif defined(FBINK_FOR_LINUX)
-// Fallback, because, even on straight Linux, we require some mxcfb typedefs for some of our own function protoypes...
+// Fallback, because, even on straight Linux, we require a few mxcfb typedefs for some of our own function prototypes...
 #	include "eink/mxcfb-kobo.h"
 #endif
 
