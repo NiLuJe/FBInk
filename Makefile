@@ -225,6 +225,10 @@ endif
 ifdef LINUX
 	TARGET_CPPFLAGS+=-DFBINK_FOR_LINUX
 endif
+# Toggle Kobo support
+ifdef KOBO
+	TARGET_CPPFLAGS+=-DFBINK_FOR_KOBO
+endif
 
 # And that should definitely be honored by everything, so, add it to EXTRA_CPPFLAGS
 EXTRA_CPPFLAGS+=$(TARGET_CPPFLAGS)
@@ -243,7 +247,9 @@ ifdef FBINK_VERSION
 			ifdef LINUX
 				LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Linux"'
 			else
-				LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kobo"'
+				ifdef KOBO
+					LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kobo"'
+				endif
 			endif
 		endif
 	endif
@@ -320,13 +326,9 @@ else
 	FEATURES_CPPFLAGS+=-DFBINK_WITH_IMAGE
 	FEATURES_CPPFLAGS+=-DFBINK_WITH_OPENTYPE
 	# Connect button scanning is Kobo specific
-	ifndef KINDLE
-		ifndef CERVANTES
-			ifndef LINUX
-				WITH_BUTTON_SCAN:=True
-				FEATURES_CPPFLAGS+=-DFBINK_WITH_BUTTON_SCAN
-			endif
-		endif
+	ifdef KOBO
+		WITH_BUTTON_SCAN:=True
+		FEATURES_CPPFLAGS+=-DFBINK_WITH_BUTTON_SCAN
 	endif
 endif
 
@@ -490,16 +492,10 @@ utils: | outdir
 	$(STRIP) --strip-unneeded $(OUT_DIR)/doom
 endif
 
-ifndef LINUX
-ifndef CERVANTES
-ifndef LEGACY
-ifndef KINDLE
+ifdef KOBO
 alt: | outdir
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(DOOM_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/alt_buffer utils/alt_buffer.c
 	$(STRIP) --strip-unneeded $(OUT_DIR)/alt_buffer
-endif
-endif
-endif
 endif
 
 dump: static
@@ -564,7 +560,8 @@ ifeq (,$(findstring arm-,$(CC)))
 	$(error You forgot to setup a cross TC, you dummy!)
 endif
 
-kobo: armcheck release
+kobo: armcheck
+	$(MAKE) release KOBO=true
 	mkdir -p Kobo/usr/local/fbink/bin Kobo/usr/bin Kobo/usr/local/fbink/lib Kobo/usr/local/fbink/include
 	cp -av $(CURDIR)/Release/fbink Kobo/usr/local/fbink/bin
 	ln -sf /usr/local/fbink/bin/fbink Kobo/usr/bin/fbink
