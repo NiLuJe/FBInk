@@ -27,7 +27,9 @@
 #ifndef FBINK_FOR_KINDLE
 #	ifndef FBINK_FOR_CERVANTES
 #		ifndef FBINK_FOR_LINUX
-#			define FBINK_FOR_KOBO
+#			ifndef FBINK_FOR_KOBO
+#				define FBINK_FOR_KOBO
+#			endif
 #		endif
 #	endif
 #endif
