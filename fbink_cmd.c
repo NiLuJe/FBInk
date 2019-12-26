@@ -683,14 +683,21 @@ int
 	char* const image_token[]    = { [FILE_OPT] = "file",       [XOFF_OPT] = "x",           [YOFF_OPT] = "y",
                                       [HALIGN_OPT] = "halign",   [VALIGN_OPT] = "valign",    [SCALED_WIDTH_OPT] = "w",
                                       [SCALED_HEIGHT_OPT] = "h", [SW_DITHER_OPT] = "dither", NULL };
-	char* const truetype_token[] = { [REGULAR_OPT] = "regular", [BOLD_OPT] = "bold",
-					 [ITALIC_OPT] = "italic",   [BOLDITALIC_OPT] = "bolditalic",
-					 [SIZE_OPT] = "size",       [PX_OPT] = "px",
-					 [TM_OPT] = "top",          [BM_OPT] = "bottom",
-					 [LM_OPT] = "left",         [RM_OPT] = "right",
-					 [PADDING_OPT] = "padding",
-					 [FMT_OPT] = "format",      [COMPUTE_OPT] = "compute",
-					 [NOTRUNC_OPT] = "notrunc", NULL };
+	char* const truetype_token[] = { [REGULAR_OPT]    = "regular",
+					 [BOLD_OPT]       = "bold",
+					 [ITALIC_OPT]     = "italic",
+					 [BOLDITALIC_OPT] = "bolditalic",
+					 [SIZE_OPT]       = "size",
+					 [PX_OPT]         = "px",
+					 [TM_OPT]         = "top",
+					 [BM_OPT]         = "bottom",
+					 [LM_OPT]         = "left",
+					 [RM_OPT]         = "right",
+					 [PADDING_OPT]    = "padding",
+					 [FMT_OPT]        = "format",
+					 [COMPUTE_OPT]    = "compute",
+					 [NOTRUNC_OPT]    = "notrunc",
+					 NULL };
 #pragma GCC diagnostic pop
 	char*       subopts;
 	char*       value          = NULL;

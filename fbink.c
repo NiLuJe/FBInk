@@ -4283,17 +4283,21 @@ int
 		region.top = area.tl.y;
 	} else if (cfg->padding == FULL_PADDING) {
 		region.left = area.tl.x;
-		region.top = area.tl.y;
+		region.top  = area.tl.y;
 		// That's easy enough, simply fill the drawing area with the bg color before rendering anything
 		if (!is_overlay && !is_bgless) {
-			fill_rect((unsigned short int) region.left, (unsigned short int)  region.top, max_lw, (unsigned short int) print_height, &bgP);
+			fill_rect((unsigned short int) region.left,
+				  (unsigned short int) region.top,
+				  max_lw,
+				  (unsigned short int) print_height,
+				  &bgP);
 		}
 	}
 
 	uint32_t                tmp_c;
 	int                     tmp_gi;
-	unsigned char* restrict lnPtr = NULL;
-	unsigned char* restrict glPtr = NULL;
+	unsigned char* restrict lnPtr   = NULL;
+	unsigned char* restrict glPtr   = NULL;
 	unsigned short int      start_x = area.tl.x;
 
 	bool abort_line = false;
@@ -4492,28 +4496,40 @@ int
 		}
 		// Handle padding...
 		if (cfg->padding == HORI_PADDING) {
-			region.left = area.tl.x;
+			region.left  = area.tl.x;
 			region.width = max_lw;
 			// Unless we're in a backgroundless drawing mode, draw the padding rectangles...
 			if (!is_overlay && !is_bgless) {
 				// Left padding (left edge of the drawing area to initial pen position)
-				fill_rect((unsigned short int) region.left, paint_point.y, (unsigned short int) (paint_point.x - region.left), (unsigned short int) curr_print_height, &bgP);
+				fill_rect((unsigned short int) region.left,
+					  paint_point.y,
+					  (unsigned short int) (paint_point.x - region.left),
+					  (unsigned short int) curr_print_height,
+					  &bgP);
 				// Right padding (final pen position to the right edge of the drawing area)
-				fill_rect((unsigned short int) (paint_point.x + lw), paint_point.y, (unsigned short int) (viewWidth - (paint_point.x + lw)), (unsigned short int) curr_print_height, &bgP);
+				fill_rect((unsigned short int) (paint_point.x + lw),
+					  paint_point.y,
+					  (unsigned short int) (viewWidth - (paint_point.x + lw)),
+					  (unsigned short int) curr_print_height,
+					  &bgP);
 			}
 		} else if (cfg->padding == VERT_PADDING) {
-			region.top = area.tl.y;
+			region.top    = area.tl.y;
 			region.height = print_height;
 			if (!is_overlay && !is_bgless) {
 				// First line? Top padding (top edge of the drawing area to initial pen position)
 				if (line == 0U) {
-					fill_rect(paint_point.x, (unsigned short int) region.top, (unsigned short int) lw, (unsigned short int) (paint_point.y - region.top), &bgP);
+					fill_rect(paint_point.x,
+						  (unsigned short int) region.top,
+						  (unsigned short int) lw,
+						  (unsigned short int) (paint_point.y - region.top),
+						  &bgP);
 				}
 			}
 		} else if (cfg->padding == FULL_PADDING) {
-			region.left = area.tl.x;
-			region.top = area.tl.y;
-			region.width = max_lw;
+			region.left   = area.tl.x;
+			region.top    = area.tl.y;
+			region.width  = max_lw;
 			region.height = print_height;
 		}
 
@@ -4747,7 +4763,12 @@ int
 			//       since we're rendering/computing line width line by line, we can't do that ;).
 			//       This makes vertical padding a bit gimmicky in practice.
 			//       Thankfully, there's a full padding mode available ;).
-			fill_rect(start_x, paint_point.y, (unsigned short int) lw, (unsigned short int) ((viewHeight + (uint32_t) (viewVertOrigin - viewVertOffset)) - paint_point.y), &bgP);
+			fill_rect(start_x,
+				  paint_point.y,
+				  (unsigned short int) lw,
+				  (unsigned short int) ((viewHeight + (uint32_t)(viewVertOrigin - viewVertOffset)) -
+							paint_point.y),
+				  &bgP);
 		}
 	}
 	if (paint_point.y + max_line_height > area.br.y) {
