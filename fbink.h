@@ -296,9 +296,11 @@ typedef struct
 	float              size_pt;         // Size of text in points. If not set (0.0f), defaults to 12pt
 	unsigned short int size_px;         // Size of text in pixels. Optional, but takes precedence over size_pt.
 	bool               is_centered;     // Horizontal centering
-	uint8_t            padding;         // Pad the drawing area (i.e., paint it in the background color),
-					    // unlike in the fixed-cell codepath, this always applies to both sides,
-					    // no matter the chosen axis. (c.f., PADDING_INDEX_T enum)
+	uint8_t            padding;         // Pad the drawing area (i.e., paint it in the background color).
+					    // Unlike in the fixed-cell codepath, this always applies to both sides (L&R/T&B),
+					    // no matter the chosen axis. (c.f., PADDING_INDEX_T enum.)
+					    // f.g., HORI_PADDING is useful to prevent overlaps when drawing
+					    // consecutive strings on the same line(s).
 	bool               is_formatted;    // Is string "formatted"? Bold/Italic support only, markdown like syntax
 	bool               compute_only;    // Abort early after the line-break computation pass (no actual rendering).
 	//                                     NOTE: This is early enough that it will *NOT* be able to predict *every*
