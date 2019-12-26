@@ -4511,7 +4511,13 @@ int
 					LOG("First line #%u of %u", line, num_lines);
 					fill_rect(paint_point.x, region.top, lw, paint_point.y - region.top, &bgP);
 				}
-				// Final line? Bottom padding (final pen position to bottom edge of the drawing area)
+				// Final(-ish) line? Bottom padding (final pen position to bottom edge of the drawing area)
+				// NOTE: Because we're rendering line by line, from top to bottom, if, say,
+				//       the second line is wider than the first,
+				//       the top padding will be narrower than the bottom padding.
+				// NOTE: That said, as we basically take this branch on nearly every non-first line,
+				//       the bottom padding should usually be as wide as the widest line.
+				// NOTE: If that top/bottom discrepancy is a problem, switch to full padding.
 				if (lines[line].line_gap == 0) {
 					LOG("Final line #%u of %u", line, num_lines);
 					fill_rect(paint_point.x, paint_point.y + max_line_height, lw, (viewHeight + (viewVertOrigin - viewVertOffset)) - (paint_point.y + max_line_height), &bgP);
