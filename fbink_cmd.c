@@ -152,7 +152,7 @@ static void
 	    "\t\t\t\tObviously ignores -h, --invert & -C, --color *as far as glyphs are concerned*.\n"
 	    "\t\t\t\t-B, --background is still honored if you combine this with -c, --clear\n"
 	    "\t-O, --bgless\t\tDon't draw background pixels.\n"
-	    "\t\t\t\tObviously mutually exclusive with -o, --overlay, because it's simply a subset of what overlay does. If both are enabled by mistake, -o, --overlay takes precedence.\n"
+	    "\t\t\t\tObviously mutually exclusive with -o, --overlay, because it's simply a subset of what overlay does. If both are enabled, -o, --overlay takes precedence.\n"
 	    "\t-T, --fgless\t\tDon't draw foreground pixels.\n"
 	    "\t\t\t\tMutually exclusive with -o, --overlay or -O, --bgless, and takes precedence over them.\n"
 	    "\n"
