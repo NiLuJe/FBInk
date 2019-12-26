@@ -1628,7 +1628,7 @@ static int
 
 	return EXIT_SUCCESS;
 }
-#	else
+#	elif defined(FBINK_FOR_KOBO)
 // Kobo devices ([Mk3<->Mk6])
 static int
     refresh_kobo(int                     fbfd,
@@ -1859,7 +1859,7 @@ static int
 	}
 #	elif defined(FBINK_FOR_CERVANTES)
 	return refresh_cervantes(fbfd, region, wfm, upm, is_nightmode, lastMarker);
-#	else
+#	elif defined(FBINK_FOR_KOBO)
 	if (deviceQuirks.isKoboMk7) {
 		return refresh_kobo_mk7(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
 	} else {
