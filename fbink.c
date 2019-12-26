@@ -4511,17 +4511,6 @@ int
 					LOG("First line #%u of %u", line, num_lines);
 					fill_rect(paint_point.x, region.top, lw, paint_point.y - region.top, &bgP);
 				}
-				// Final(-ish) line? Bottom padding (final pen position to bottom edge of the drawing area)
-				// NOTE: Because we're rendering line by line, from top to bottom, if, say,
-				//       the second line is wider than the first,
-				//       the top padding will be narrower than the bottom padding.
-				// NOTE: That said, as we basically take this branch on nearly every non-first line,
-				//       the bottom padding should usually be as wide as the widest line.
-				// NOTE: If that top/bottom discrepancy is a problem, switch to full padding.
-				if (lines[line].line_gap == 0) {
-					LOG("Final line #%u of %u", line, num_lines);
-					fill_rect(paint_point.x, paint_point.y + max_line_height, lw, (viewHeight + (viewVertOrigin - viewVertOffset)) - (paint_point.y + max_line_height), &bgP);
-				}
 			}
 		} else if (cfg->padding == FULL_PADDING) {
 			region.left = area.tl.x;
@@ -4750,6 +4739,19 @@ int
 		// as stbtt_MakeGlyphBitmap() should overwrite it.
 		// NOTE: Fill it with 0 (no coverage -> background)
 		memset(line_buff, 0, (max_lw * (size_t) max_line_height * sizeof(*line_buff)));
+	}
+	// Now that we're sure we've got nothing left to print, handle bottom padding...
+	if (cfg->padding == VERT_PADDING) {
+		if (!is_overlay && !is_bgless) {
+			// Final line? Bottom padding (final pen position to bottom edge of the drawing area)
+			// NOTE: Top padding is based on the first line's width, and bottom padding on the last line's width.
+			//       Ideally, both would be based on the widest line's width instead, but,
+			//       since we're rendering/computing line width line by line, we can't do that ;).
+			//       This makes vertical padding a bit gimmicky in practice.
+			//       Thankfully, there's a full padding mode available ;).
+			LOG("Final line #%u of %u", line, num_lines);
+			fill_rect(start_x, paint_point.y, lw, (viewHeight + (viewVertOrigin - viewVertOffset)) - paint_point.y, &bgP);
+		}
 	}
 	if (paint_point.y + max_line_height > area.br.y) {
 		rv = 0;    // Inform the caller there is no room left to print another row.
