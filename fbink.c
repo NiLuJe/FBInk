@@ -184,7 +184,7 @@ static void
 #pragma GCC diagnostic pop
 }
 
-#ifndef FBINK_FOR_KINDLE
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 // Handle rotation quirks...
 static void
     rotate_coordinates_pickel(FBInkCoordinates* restrict coords)
@@ -346,7 +346,7 @@ static void
 	coords->y = ry;
 }
 #	endif    // FBINK_WITH_BUTTON_SCAN
-#endif            // !FBINK_FOR_KINDLE
+#endif            // FBINK_FOR_KOBO || FBINK_FOR_CERVANTES
 
 static void
     rotate_coordinates_nop(FBInkCoordinates* restrict coords __attribute__((unused)))
@@ -1900,7 +1900,7 @@ static int
 	}
 #	elif defined(FBINK_FOR_CERVANTES)
 	return wait_for_complete_cervantes(fbfd, marker);
-#	else
+#	elif defined(FBINK_FOR_KOBO)
 	if (deviceQuirks.isKoboMk7) {
 		return wait_for_complete_kobo_mk7(fbfd, marker);
 	} else {
@@ -2017,7 +2017,7 @@ static int
 #ifndef FBINK_FOR_LINUX
 		// Identify the device's specific model...
 		identify_device();
-#	ifdef FBINK_FOR_KINDLE
+#	if defined(FBINK_FOR_KINDLE)
 		if (deviceQuirks.isKindleLegacy) {
 			ELOG("Enabled Legacy einkfb Kindle quirks");
 		} else if (deviceQuirks.isKindlePearlScreen) {
@@ -2027,7 +2027,7 @@ static int
 		} else if (deviceQuirks.isKindleRex) {
 			ELOG("Enabled Kindle Rex platform quirks");
 		}
-#	else
+#	elif defined(FBINK_FOR_KOBO)
 		if (deviceQuirks.isKoboNonMT) {
 			ELOG("Enabled Kobo w/o Multi-Touch quirks");
 		} else if (deviceQuirks.isKoboMk7) {
@@ -2086,7 +2086,7 @@ static int
 	// NOTE: This needs to be NOP by default, no matter the target device ;).
 	fxpRotateCoords = &rotate_coordinates_nop;
 	fxpRotateRegion = &rotate_region_nop;
-#ifndef FBINK_FOR_KINDLE
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 	// NOTE: This applies both to Kobo & Cervantes!
 	// Make sure we default to no rotation shenanigans, to avoid issues on reinit...
 	deviceQuirks.isNTX16bLandscape = false;
@@ -2635,9 +2635,7 @@ int
     fbink_add_ot_font(const char* filename UNUSED_BY_MINIMAL, FONT_STYLE_T style UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_OPENTYPE
-#	ifndef FBINK_FOR_LINUX
-#		ifndef FBINK_FOR_KINDLE
-#			ifndef FBINK_FOR_CERVANTES
+#	ifdef FBINK_FOR_KOBO
 	// NOTE: Bail if we were passed a Kobo system font, as they're obfuscated,
 	//       and some of them risk crashing stbtt because of bogus data...
 	const char blacklist[] = "/usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/fonts/";
@@ -2645,8 +2643,6 @@ int
 		WARN("Cannot use font '%s': it's an obfuscated Kobo system font", filename + sizeof(blacklist) - 1);
 		return ERRCODE(EXIT_FAILURE);
 	}
-#			endif
-#		endif
 #	endif
 
 	// Init libunibreak the first time we're called
@@ -2951,7 +2947,7 @@ int
 
 // Much like rotate_coordinates, but for a mxcfb rectangle
 // c.f., adjust_coordinates @ drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c
-#ifndef FBINK_FOR_KINDLE
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 static void
     rotate_region_pickel(struct mxcfb_rect* restrict region)
 {
@@ -2975,7 +2971,7 @@ static void
 	region->width  = oregion.height;
 	region->height = oregion.width;
 }
-#endif    // !FBINK_FOR_KINDLE
+#endif    // FBINK_FOR_KOBO || FBINK_FOR_CERVANTES
 
 static void
     rotate_region_nop(struct mxcfb_rect* restrict region __attribute__((unused)))

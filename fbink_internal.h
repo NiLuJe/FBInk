@@ -22,6 +22,16 @@
 #ifndef __FBINK_INTERNAL_H
 #define __FBINK_INTERNAL_H
 
+// Make sure that KOBO is our default/fallback platform.
+// NOTE: The Makefile already takes care of this, this is mainly to make my IDE happy.
+#ifndef FBINK_FOR_KINDLE
+#	ifndef FBINK_FOR_CERVANTES
+#		ifndef FBINK_FOR_LINUX
+#			define FBINK_FOR_KOBO
+#		endif
+#	endif
+#endif
+
 // No extra fonts, no image support, and no OpenType support in minimal builds
 #ifndef FBINK_MINIMAL
 #	ifndef FBINK_WITH_FONTS
@@ -34,11 +44,9 @@
 #		define FBINK_WITH_OPENTYPE
 #	endif
 // Connect button scanning is Kobo specific
-#	ifndef FBINK_FOR_KINDLE
-#		ifndef FBINK_FOR_CERVANTES
-#			ifndef FBINK_WITH_BUTTON_SCAN
-#				define FBINK_WITH_BUTTON_SCAN
-#			endif
+#	ifdef FBINK_FOR_KOBO
+#		ifndef FBINK_WITH_BUTTON_SCAN
+#			define FBINK_WITH_BUTTON_SCAN
 #		endif
 #	endif
 #endif
@@ -171,7 +179,7 @@
 #	include "eink/einkfb.h"
 #elif defined(FBINK_FOR_CERVANTES)
 #	include "eink/mxcfb-cervantes.h"
-#else
+#elif defined(FBINK_FOR_KOBO)
 #	include "eink/mxcfb-kobo.h"
 #endif
 
@@ -243,7 +251,11 @@
 #			ifdef FBINK_FOR_LINUX
 #				define FBINK_VERSION FBINK_FALLBACK_VERSION " for Linux"
 #			else
-#				define FBINK_VERSION FBINK_FALLBACK_VERSION " for Kobo"
+#				ifdef FBINK_FOR_KOBO
+#					define FBINK_VERSION FBINK_FALLBACK_VERSION " for Kobo"
+#				else
+#					define FBINK_VERSION FBINK_FALLBACK_VERSION
+#				endif
 #			endif
 #		endif
 #	endif
@@ -405,7 +417,7 @@ bool         otInit  = false;
 FBInkOTFonts otFonts = { NULL, NULL, NULL, NULL };
 #endif
 
-#ifndef FBINK_FOR_KINDLE
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 static void rotate_coordinates_pickel(FBInkCoordinates* restrict);
 static void rotate_coordinates_boot(FBInkCoordinates* restrict);
 #	ifdef FBINK_WITH_BUTTON_SCAN
@@ -490,7 +502,7 @@ static int refresh_kindle_rex(int, const struct mxcfb_rect, uint32_t, uint32_t, 
 #	elif defined(FBINK_FOR_CERVANTES)
 static int refresh_cervantes(int, const struct mxcfb_rect, uint32_t, uint32_t, bool, uint32_t);
 static int wait_for_complete_cervantes(int, uint32_t);
-#	else
+#	elif defined(FBINK_FOR_KOBO)
 static int refresh_kobo(int, const struct mxcfb_rect, uint32_t, uint32_t, bool, uint32_t);
 static int wait_for_complete_kobo(int, uint32_t);
 static int refresh_kobo_mk7(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
@@ -514,7 +526,7 @@ static int         initialize_fbink(int, const FBInkConfig* restrict, bool);
 static int memmap_fb(int);
 static int unmap_fb(void);
 
-#ifndef FBINK_FOR_KINDLE
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 static void rotate_region_pickel(struct mxcfb_rect* restrict);
 static void rotate_region_boot(struct mxcfb_rect* restrict);
 #endif

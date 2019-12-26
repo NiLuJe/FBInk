@@ -29,12 +29,12 @@
 #include <linux/fs.h>
 
 #ifndef FBINK_FOR_LINUX
-#	ifndef FBINK_FOR_KINDLE
+#	if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 // NOTE: This is NTX's homegrown hardware tagging, c.f., arch/arm/mach-imx/ntx_hwconfig.h in a Kobo kernel, for instance
 #		define HWCONFIG_DEVICE "/dev/mmcblk0"
 #		define HWCONFIG_OFFSET (1024 * 512)
 #		define HWCONFIG_MAGIC  "HW CONFIG "
-#		ifdef FBINK_FOR_CERVANTES
+#		if defined(FBINK_FOR_CERVANTES)
 // Keep it to the minimum on Cervantes
 typedef struct __attribute__((__packed__))
 {
@@ -47,7 +47,7 @@ typedef struct __attribute__((__packed__))
 	// Header stops here, actual data follows
 	uint8_t pcb_id;    // First field is the PCB ID, which dictates the device model, the only thing we care about ;)
 } NTXHWConfig;
-#		else
+#		elif defined(FBINK_FOR_KOBO)
 // On Kobo, we'll need dig a little deeper to pickup the CPU & display resolution, too.
 // So we'll first read the header only, because its size is fixed,
 // and then trust it to tell us how much data there is to read for the payload.
@@ -71,7 +71,7 @@ typedef struct __attribute__((__packed__))
 // NOTE: This one tells us a bit about the potential rotation trickeries on some models (ntxRotaQuirk)...
 #			define KOBO_HWCFG_DisplayBusWidth   35
 #		endif    // FBINK_FOR_CERVANTES
-#	endif            // !FBINK_FOR_KINDLE
+#	endif            // FBINK_FOR_KOBO || FBINK_FOR_CERVANTES
 
 #	if defined(FBINK_FOR_KINDLE)
 #		define KINDLE_SERIAL_NO_LENGTH 16
@@ -82,7 +82,7 @@ static char*    to_base(int64_t, uint8_t);
 static void     identify_kindle(void);
 #        elif defined(FBINK_FOR_CERVANTES)
 static void identify_cervantes(void);
-#        else
+#        elif defined(FBINK_FOR_KOBO)
 // List of NTX/Kobo PCB IDs... For a given device,
 // what we get in the NTXHWConfig payload @ index KOBO_HWCFG_CPU corresponds to an index in this array.
 // Can thankfully be populated from /bin/ntx_hwconfig with the help of strings -n2 and a bit of sed, i.e.,

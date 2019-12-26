@@ -47,7 +47,7 @@ static void
 #	else
 	    "No"
 #	endif    // FBINK_WITH_OPENTYPE
-#	if !defined(FBINK_FOR_KINDLE) && !defined(FBINK_FOR_CERVANTES) && !defined(FBINK_FOR_LINUX)
+#	if defined(FBINK_FOR_KOBO)
 	    " ButtonScan="
 #		ifdef FBINK_WITH_BUTTON_SCAN
 	    "Yes"
@@ -218,12 +218,8 @@ static void
 	    "\t\tfrom 25px of the left edge of the screen until 50px before the right edge.\n"
 	    "\t\tHonoring the MarkDown syntax, 'Hello' will be printed with the Regular font style, while 'world' will use the Bold font style.\n"
 	    "\t\tNOTE: You will NOT be able to use obfuscated or encrypted fonts.\n"
-#	ifndef FBINK_FOR_LINUX
-#		ifndef FBINK_FOR_KINDLE
-#			ifndef FBINK_FOR_CERVANTES
+#	ifdef FBINK_FOR_KOBO
 	    "\t\tPlease note that this means you will NOT be able to use system fonts on Kobo, because they're all obfuscated.\n"
-#			endif
-#		endif
 #	endif
 	    "\n"
 #endif
@@ -246,7 +242,7 @@ static void
 	    "\t\tHardware dithering is completely untested on Kindle, and, while the Oasis 2 & PaperWhite 4 *should* support it, they *may* not, or at least not in the way FBInk expects...\n"
 #endif
 	    "\tNote that this will also honor --waveform, --nightmode & --flash\n"
-#ifndef FBINK_FOR_KINDLE
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 	    "\tNote that the arguments are passed as-is to the ioctl, no viewport or rotation quirks are applied!\n"
 #endif
 	    "\tIf you just want a full-screen refresh (which will honor -f, --flash), simply pass a single bogus suboption,\n"

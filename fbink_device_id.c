@@ -529,7 +529,7 @@ static void
 		}
 	}
 }
-#	else
+#	elif defined(FBINK_FOR_KOBO)
 static void
     set_kobo_quirks(unsigned short int kobo_id)
 {
@@ -957,7 +957,7 @@ static void
 #	elif defined(FBINK_FOR_CERVANTES)
 	identify_cervantes();
 	ELOG("Detected a BQ Cervantes %s (%hu)", deviceQuirks.deviceName, deviceQuirks.deviceId);
-#	else
+#	elif defined(FBINK_FOR_KOBO)
 	identify_kobo();
 	ELOG("Detected a Kobo %s (%hu => %s @ %s)",
 	     deviceQuirks.deviceName,
