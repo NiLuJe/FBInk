@@ -4628,52 +4628,6 @@ int
 					paint_point.y++;
 				}
 			}
-		} else if (is_bgless) {
-			FBInkPixel fb_px = { 0U };
-			if (vInfo.bits_per_pixel > 4U) {
-				// 8, 16, 24 & 32bpp
-				for (int j = 0; j < max_line_height; j++) {
-					for (unsigned int k = 0U; k < lw; k++) {
-						if (lnPtr[k] == 0xFFu) {
-							// Full coverage (opaque) -> foreground
-							put_pixel(paint_point, &fgP, true);
-						} else if (lnPtr[k] != 0U) {
-							// AA, blend it using the coverage mask as alpha,
-							// and the underlying pixel as bg
-							get_pixel(paint_point, &fb_px);
-							pixel.bgra.color.r = (uint8_t) DIV255(
-							    (MUL255(fb_px.bgra.color.r) +
-							     ((fgcolor - fb_px.bgra.color.r) * lnPtr[k])));
-							pixel.bgra.color.g = (uint8_t) DIV255(
-							    (MUL255(fb_px.bgra.color.g) +
-							     ((fgcolor - fb_px.bgra.color.g) * lnPtr[k])));
-							pixel.bgra.color.b = (uint8_t) DIV255(
-							    (MUL255(fb_px.bgra.color.b) +
-							     ((fgcolor - fb_px.bgra.color.b) * lnPtr[k])));
-							put_pixel(paint_point, &pixel, false);
-						}
-						paint_point.x++;
-					}
-					lnPtr += max_lw;
-					paint_point.x = start_x;
-					paint_point.y++;
-				}
-			} else {
-				// 4bpp...
-				for (int j = 0; j < max_line_height; j++) {
-					for (unsigned int k = 0U; k < lw; k++) {
-						// AA, blend it using the coverage mask as alpha, and the underlying pixel as bg
-						get_pixel(paint_point, &fb_px);
-						pixel.gray8 = (uint8_t) DIV255(
-						    (MUL255(fb_px.gray8) + ((fgcolor - fb_px.gray8) * lnPtr[k])));
-						put_pixel(paint_point, &pixel, false);
-						paint_point.x++;
-					}
-					lnPtr += max_lw;
-					paint_point.x = start_x;
-					paint_point.y++;
-				}
-			}
 		} else if (is_overlay) {
 			FBInkPixel fb_px = { 0U };
 			if (vInfo.bits_per_pixel > 4U) {
@@ -4721,6 +4675,52 @@ int
 						pixel.gray8 =
 						    (uint8_t) DIV255((MUL255(fb_px.gray8) +
 								      (((fb_px.gray8 ^ 0xFF) - fb_px.gray8) * lnPtr[k])));
+						put_pixel(paint_point, &pixel, false);
+						paint_point.x++;
+					}
+					lnPtr += max_lw;
+					paint_point.x = start_x;
+					paint_point.y++;
+				}
+			}
+		} else if (is_bgless) {
+			FBInkPixel fb_px = { 0U };
+			if (vInfo.bits_per_pixel > 4U) {
+				// 8, 16, 24 & 32bpp
+				for (int j = 0; j < max_line_height; j++) {
+					for (unsigned int k = 0U; k < lw; k++) {
+						if (lnPtr[k] == 0xFFu) {
+							// Full coverage (opaque) -> foreground
+							put_pixel(paint_point, &fgP, true);
+						} else if (lnPtr[k] != 0U) {
+							// AA, blend it using the coverage mask as alpha,
+							// and the underlying pixel as bg
+							get_pixel(paint_point, &fb_px);
+							pixel.bgra.color.r = (uint8_t) DIV255(
+							    (MUL255(fb_px.bgra.color.r) +
+							     ((fgcolor - fb_px.bgra.color.r) * lnPtr[k])));
+							pixel.bgra.color.g = (uint8_t) DIV255(
+							    (MUL255(fb_px.bgra.color.g) +
+							     ((fgcolor - fb_px.bgra.color.g) * lnPtr[k])));
+							pixel.bgra.color.b = (uint8_t) DIV255(
+							    (MUL255(fb_px.bgra.color.b) +
+							     ((fgcolor - fb_px.bgra.color.b) * lnPtr[k])));
+							put_pixel(paint_point, &pixel, false);
+						}
+						paint_point.x++;
+					}
+					lnPtr += max_lw;
+					paint_point.x = start_x;
+					paint_point.y++;
+				}
+			} else {
+				// 4bpp...
+				for (int j = 0; j < max_line_height; j++) {
+					for (unsigned int k = 0U; k < lw; k++) {
+						// AA, blend it using the coverage mask as alpha, and the underlying pixel as bg
+						get_pixel(paint_point, &fb_px);
+						pixel.gray8 = (uint8_t) DIV255(
+						    (MUL255(fb_px.gray8) + ((fgcolor - fb_px.gray8) * lnPtr[k])));
 						put_pixel(paint_point, &pixel, false);
 						paint_point.x++;
 					}
