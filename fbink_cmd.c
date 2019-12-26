@@ -55,10 +55,14 @@ static void
 	    "No"
 #		endif    // FBINK_WITH_BUTTON_SCAN
 #	endif            // FBINK_FOR_KOBO
-	    "]\n"
+	    "]"
 #else
-	    "FBInk %s\n"
+	    "FBInk %s"
 #endif    // FBINK_MINIMAL
+#ifdef DEBUG
+	    " [DEBUG]"
+#endif
+	    "\n"
 	    "\n"
 	    "Usage: fbink [OPTIONS] [STRING]\n"
 	    "\n"
@@ -194,7 +198,7 @@ static void
 	    "\t\ttop, bottom, left & right set the margins used to define the display area. Defaults to 0, i.e., the full screen, starting at the top-left corner.\n"
 	    "\t\t\tNOTE: If a negative value is supplied, counts backward from the opposite edge. Mostly useful with top & left to position stuff relative to the bottom right corner.\n"
 	    "\t\tpadding can optionally be set to ensure the drawing area on both sides of the printed content is padded with the background color on one or both axis.\n"
-	    "\t\t\tAvailable padding axis: HORIZONTAL, VERTICAL, or BOTH (Defaults to NONE). Useful to avoid overlaps on consecutive prints at the same position.\n"
+	    "\t\t\tAvailable padding axis: HORIZONTAL, VERTICAL, or BOTH (Defaults to NONE). Useful to avoid overlaps on consecutive prints at the same coordinates.\n"
 	    "\t\tIf format is specified, the underscore/star MarkDown syntax will be honored to set the font style (i.e., *italic*, **bold** & ***bold italic***).\n"
 	    "\t\tIf notrunc is specified, truncation will be considered a failure.\n"
 	    "\t\tNOTE: This may not prevent drawing/refreshing the screen if the truncation couldn't be predicted at compute time!\n"
