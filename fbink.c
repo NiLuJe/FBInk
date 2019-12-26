@@ -571,6 +571,7 @@ static void
 	// Bounds-checking, to ensure the memset won't do stupid things...
 	// Do signed maths, to account for the fact that x or y might already be OOB!
 	if (x + w > screenWidth) {
+		LOG("x: %hu + w: %hu > sW: %u", x, w, screenWidth);
 		w = (unsigned short int) MAX(0, (w - ((x + w) - (int) screenWidth)));
 #ifdef DEBUG
 		LOG("Chopped rectangle width to %hu", w);
@@ -4493,7 +4494,7 @@ int
 		// Handle padding...
 		if (cfg->padding == HORI_PADDING) {
 			region.left = area.tl.x;
-			region.width = area.br.x - area.tl.x;
+			region.width = max_lw;
 			// Unless we're in a backgroundless drawing mode, draw the padding rectangles...
 			if (!is_overlay && !is_bgless) {
 				// Left padding (left edge of the drawing area to initial pen position)
@@ -4507,11 +4508,13 @@ int
 			if (!is_overlay && !is_bgless) {
 				// First line? Top padding (top edge of the drawing area to initial pen position)
 				if (line == 0U) {
-					fill_rect(paint_point.x, region.top, region.width, paint_point.y - region.top, &bgP);
+					LOG("First line #%u of %u", line, num_lines);
+					fill_rect(paint_point.x, region.top, lw, paint_point.y - region.top, &bgP);
 				}
 				// Final line? Bottom padding (final pen position to bottom edge of the drawing area)
 				if (lines[line].line_gap == 0) {
-					fill_rect(paint_point.x, paint_point.y + curr_print_height, region.width, (viewHeight + (viewVertOrigin - viewVertOffset)) - (paint_point.y + curr_print_height), &bgP);
+					LOG("Final line #%u of %u", line, num_lines);
+					fill_rect(paint_point.x, paint_point.y + max_line_height, lw, (viewHeight + (viewVertOrigin - viewVertOffset)) - (paint_point.y + max_line_height), &bgP);
 				}
 			}
 		} else if (cfg->padding == FULL_PADDING) {
