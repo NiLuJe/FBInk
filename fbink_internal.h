@@ -183,6 +183,9 @@
 #	include "eink/mxcfb-cervantes.h"
 #elif defined(FBINK_FOR_KOBO)
 #	include "eink/mxcfb-kobo.h"
+#elif defined(FBINK_FOR_LINUX)
+// Fallback, because, even on straight Linux, we require some mxcfb typedefs...
+#	include "eink/mxcfb-kobo.h"
 #endif
 
 // NOTE: This is from https://github.com/dhepper/font8x8
