@@ -209,6 +209,18 @@ EXTRA_CPPFLAGS+=-D_REENTRANT=1
 # We're Linux-bound anyway...
 EXTRA_CPPFLAGS+=-D_GNU_SOURCE
 
+# Backward compatibility shenanigan: before FBINK_FOR_KOBO was implemented, we assumed KOBO was the default/fallback platform.
+# Keep honoring that.
+ifndef LINUX
+ifndef CERVANTES
+ifndef LEGACY
+ifndef KINDLE
+	KOBO=true
+endif
+endif
+endif
+endif
+
 # Toggle Kindle support
 ifdef KINDLE
 	TARGET_CPPFLAGS+=-DFBINK_FOR_KINDLE
@@ -249,6 +261,9 @@ ifdef FBINK_VERSION
 			else
 				ifdef KOBO
 					LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kobo"'
+				else
+					# NOTE: Should never happen!
+					LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION)"'
 				endif
 			endif
 		endif
