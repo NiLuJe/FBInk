@@ -571,7 +571,6 @@ static void
 	// Bounds-checking, to ensure the memset won't do stupid things...
 	// Do signed maths, to account for the fact that x or y might already be OOB!
 	if (x + w > screenWidth) {
-		LOG("x: %hu + w: %hu > sW: %u", x, w, screenWidth);
 		w = (unsigned short int) MAX(0, (w - ((x + w) - (int) screenWidth)));
 #ifdef DEBUG
 		LOG("Chopped rectangle width to %hu", w);
@@ -4508,7 +4507,6 @@ int
 			if (!is_overlay && !is_bgless) {
 				// First line? Top padding (top edge of the drawing area to initial pen position)
 				if (line == 0U) {
-					LOG("First line #%u of %u", line, num_lines);
 					fill_rect(paint_point.x, region.top, lw, paint_point.y - region.top, &bgP);
 				}
 			}
@@ -4749,7 +4747,6 @@ int
 			//       since we're rendering/computing line width line by line, we can't do that ;).
 			//       This makes vertical padding a bit gimmicky in practice.
 			//       Thankfully, there's a full padding mode available ;).
-			LOG("Final line #%u of %u", line, num_lines);
 			fill_rect(start_x, paint_point.y, lw, (viewHeight + (viewVertOrigin - viewVertOffset)) - paint_point.y, &bgP);
 		}
 	}
