@@ -4295,7 +4295,7 @@ int
 	int                     tmp_gi;
 	unsigned char* restrict lnPtr = NULL;
 	unsigned char* restrict glPtr = NULL;
-	unsigned short int      start_x;
+	unsigned short int      start_x = area.tl.x;
 
 	bool abort_line = false;
 	// Render!
