@@ -1731,7 +1731,7 @@ int
 		// NOTE: You cannot re-use an existing pipe!
 		rv = mkfifo(pipe_path, 0666);
 		if (rv != 0) {
-			WARN("mkfifo: %m");
+			WARN("mkfifo(%s): %m", pipe_path);
 			// Make sure we won't delete the pipe, in case it's not ours...
 			pipe_path = NULL;
 			goto cleanup;
@@ -1743,7 +1743,7 @@ int
 		// NOTE: See the POLLHUP note below for the reasoning behing opening it RW and not RO...
 		pipefd = open(pipe_path, O_RDWR | O_NONBLOCK | O_CLOEXEC);
 		if (pipefd == -1) {
-			WARN("open: %m");
+			WARN("open(%s): %m", pipe_path);
 			// Same here, don't delete the pipe in case it's not ours...
 			pipe_path = NULL;
 			goto cleanup;
@@ -2369,10 +2369,14 @@ cleanup:
 
 	if (is_daemon) {
 		if (pipefd != -1) {
-			close(pipefd);
+			if (close(pipefd) != 0) {
+				WARN("close: %m");
+			}
 		}
 		if (pipe_path) {
-			unlink(pipe_path);
+			if (unlink(pipe_path) != 0) {
+				WARN("unlink(%s): %m", pipe_path);
+			}
 		}
 	}
 
