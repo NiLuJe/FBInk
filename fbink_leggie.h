@@ -1,6 +1,6 @@
 /*
 	FBInk: FrameBuffer eInker, a tool to print text & images on eInk devices (Kobo/Kindle)
-	Copyright (C) 2018-2019 NiLuJe <ninuje@gmail.com>
+	Copyright (C) 2018-2020 NiLuJe <ninuje@gmail.com>
 	SPDX-License-Identifier: GPL-3.0-or-later
 
 	----
