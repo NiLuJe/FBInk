@@ -816,7 +816,10 @@ int
 				// NOTE: We'll need to remember the original, full suboption string for diagnostic messages,
 				//       because getsubopt will rewrite it during processing...
 				if (subopts && *subopts != '\0') {
-					full_subopts = strdupa(subopts);
+					// Only remember the first offending suboption list...
+					if (!errfnd) {
+						full_subopts = strdupa(subopts);
+					}
 				}
 
 				while (subopts && *subopts != '\0' && !errfnd) {
@@ -930,6 +933,10 @@ int
 				} else {
 					is_refresh = true;
 				}
+				// Only remember this if there was a parsing error.
+				if (!errfnd) {
+					full_subopts = NULL;
+				}
 				break;
 			}
 			case 'S':
@@ -1025,7 +1032,10 @@ int
 				// NOTE: We'll need to remember the original, full suboption string for diagnostic messages,
 				//       because getsubopt will rewrite it during processing...
 				if (subopts && *subopts != '\0') {
-					full_subopts = strdupa(subopts);
+					// Only remember the first offending suboption list...
+					if (!errfnd) {
+						full_subopts = strdupa(subopts);
+					}
 				}
 				// NOTE: I'm not terribly fond of getsubopt in general, especially here with the comma limitation
 				//       for filenames, but it does make sense to keep image-specific options separate...
@@ -1165,6 +1175,10 @@ int
 				// NOTE: We delay checking image_file to allow using -i both before AND after -g,
 				//       or even on its own!
 				is_image = true;
+				// Only remember this if there was a parsing error.
+				if (!errfnd) {
+					full_subopts = NULL;
+				}
 				break;
 			}
 			case 'i':
@@ -1315,7 +1329,10 @@ int
 				// NOTE: We'll need to remember the original, full suboption string for diagnostic messages,
 				//       because getsubopt will rewrite it during processing...
 				if (subopts && *subopts != '\0') {
-					full_subopts = strdupa(subopts);
+					// Only remember the first offending suboption list...
+					if (!errfnd) {
+						full_subopts = strdupa(subopts);
+					}
 				}
 				while (*subopts != '\0' && !errfnd) {
 					switch (getsubopt(&subopts, truetype_token, &value)) {
@@ -1510,6 +1527,10 @@ int
 				} else {
 					is_truetype = true;
 				}
+				// Only remember this if there was a parsing error.
+				if (!errfnd) {
+					full_subopts = NULL;
+				}
 				break;
 			}
 			case 'b':
@@ -1595,7 +1616,10 @@ int
 				// NOTE: We'll need to remember the original, full suboption string for diagnostic messages,
 				//       because getsubopt will rewrite it during processing...
 				if (subopts && *subopts != '\0') {
-					full_subopts = strdupa(subopts);
+					// Only remember the first offending suboption list...
+					if (!errfnd) {
+						full_subopts = strdupa(subopts);
+					}
 				}
 
 				while (subopts && *subopts != '\0' && !errfnd) {
@@ -1677,6 +1701,10 @@ int
 					errfnd = true;
 				} else {
 					is_cls = true;
+				}
+				// Only remember this if there was a parsing error.
+				if (!errfnd) {
+					full_subopts = NULL;
 				}
 				break;
 			}
@@ -1786,9 +1814,9 @@ int
 			for (int i = 0; i < optind; i++) {
 				ELOG("argv[%d]: `%s`", i, argv[i]);
 			}
-			// If there was a subopt parsing error, print the original, full suboptions string
+			// If there was a subopt parsing error, print the original offending suboption list
 			if (full_subopts) {
-				ELOG("Original complete suboption string: %s\n", full_subopts);
+				ELOG("Complete offending suboption string: %s\n", full_subopts);
 			}
 			// And then non-option arguments
 			if (optind < argc) {
