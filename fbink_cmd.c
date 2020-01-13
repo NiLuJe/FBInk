@@ -620,7 +620,7 @@ int
                                               { "nightmode", no_argument, NULL, 'H' },
                                               { "coordinates", no_argument, NULL, 'E' },
                                               { "mimic", no_argument, NULL, 'Z' },
-                                              { "cls", no_argument, NULL, 'k' },
+                                              { "cls", optional_argument, NULL, 'k' },
                                               { "wait", no_argument, NULL, 'w' },
                                               { "daemon", required_argument, NULL, 'd' },
                                               { "syslog", no_argument, NULL, 'G' },
@@ -694,6 +694,10 @@ int
 					 [COMPUTE_OPT]    = "compute",
 					 [NOTRUNC_OPT]    = "notrunc",
 					 NULL };
+	// Recycle the refresh enum ;).
+	char* const cls_token[] = {
+		[TOP_OPT] = "top", [LEFT_OPT] = "left", [WIDTH_OPT] = "width", [HEIGHT_OPT] = "height", NULL
+	};
 #pragma GCC diagnostic pop
 	char*       full_subopts = NULL;
 	char*       subopts;
@@ -734,7 +738,8 @@ int
 
 	// NOTE: c.f., https://codegolf.stackexchange.com/q/148228 to sort this mess when I need to find an available letter ;p
 	while ((opt = getopt_long(
-		    argc, argv, "y:x:Y:X:hfcmMprs::S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bDW:HEZkwd:G", opts, &opt_index)) != -1) {
+		    argc, argv, "y:x:Y:X:hfcmMprs::S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bDW:HEZk::wd:G", opts, &opt_index)) !=
+	       -1) {
 		switch (opt) {
 			case 'y':
 				if (strtol_hi(opt, NULL, optarg, &fbink_cfg.row) < 0) {
@@ -1556,9 +1561,120 @@ int
 			case 'Z':
 				is_mimic = true;
 				break;
-			case 'k':
-				is_cls = true;
+			case 'k': {
+				// We'll want our longform name for diagnostic messages...
+				const char* opt_longname = NULL;
+				// Look it up if we were passed the short form...
+				if (opt_index == -1) {
+					// Loop until we hit the final NULL entry
+					for (opt_index = 0; opts[opt_index].name; opt_index++) {
+						if (opts[opt_index].val == opt) {
+							opt_longname = opts[opt_index].name;
+							break;
+						}
+					}
+				} else {
+					opt_longname = opts[opt_index].name;
+				}
+
+				// NOTE: Nasty bit of trickery to make getopt's optional_argument actually useful...
+				//       Hat trick (& explanation) courtesy of https://stackoverflow.com/a/32575314
+				//       If `optarg` isn't set and argv[optind] doesn't look like another option,
+				//       then assume it's our parameter and overtly modify optind to compensate.
+				if (!optarg && argv[optind] != NULL && argv[optind][0] != '-') {
+					subopts = argv[optind++];
+				} else {
+					subopts = optarg;
+				}
+
+				// NOTE: We'll need to remember the original, full suboption string for diagnostic messages,
+				//       because getsubopt will rewrite it during processing...
+				if (subopts && *subopts != '\0') {
+					full_subopts = strdupa(subopts);
+				}
+
+				while (subopts && *subopts != '\0' && !errfnd) {
+					switch (getsubopt(&subopts, cls_token, &value)) {
+						case TOP_OPT:
+							if (value == NULL) {
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     cls_token[TOP_OPT],
+								     opt,
+								     opt_longname);
+								errfnd = true;
+								break;
+							}
+							if (strtoul_u(opt, cls_token[TOP_OPT], value, &region_top) < 0) {
+								errfnd = true;
+							}
+							break;
+						case LEFT_OPT:
+							if (value == NULL) {
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     cls_token[LEFT_OPT],
+								     opt,
+								     opt_longname);
+								errfnd = true;
+								break;
+							}
+							if (strtoul_u(opt, cls_token[LEFT_OPT], value, &region_left) <
+							    0) {
+								errfnd = true;
+							}
+							break;
+						case WIDTH_OPT:
+							if (value == NULL) {
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     cls_token[WIDTH_OPT],
+								     opt,
+								     opt_longname);
+								errfnd = true;
+								break;
+							}
+							if (strtoul_u(opt, cls_token[WIDTH_OPT], value, &region_width) <
+							    0) {
+								errfnd = true;
+							}
+							break;
+						case HEIGHT_OPT:
+							if (value == NULL) {
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     cls_token[HEIGHT_OPT],
+								     opt,
+								     opt_longname);
+								errfnd = true;
+								break;
+							}
+							if (strtoul_u(opt, cls_token[HEIGHT_OPT], value, &region_height) <
+							    0) {
+								errfnd = true;
+							}
+							break;
+						default:
+							ELOG("No match found for token: /%s/ for -%c, --%s",
+							     value,
+							     opt,
+							     opt_longname);
+							errfnd = true;
+							break;
+					}
+				}
+				// Minor sanity check of the rectangle now,
+				// allowing us later to simply unconditionally build an FBInkRect out of it.
+				if ((region_height == 0 || region_width == 0) &&
+				    !(region_top == 0 && region_left == 0 && region_height == 0 && region_width == 0)) {
+					ELOG(
+					    "Non-zero values must be specified for suboptions '%s' and '%s' of -%c, --%s",
+					    cls_token[HEIGHT_OPT],
+					    cls_token[WIDTH_OPT],
+					    opt,
+					    opt_longname);
+					errfnd = true;
+				} else {
+					is_cls = true;
+				}
 				break;
+			}
 			case 'w':
 				wait_for = true;
 				break;
@@ -1698,7 +1814,10 @@ int
 
 	// If we're asking for a simple clear screen *only*, do it now, and then abort early.
 	if (is_cls) {
-		rv = fbink_cls(fbfd, &fbink_cfg, NULL);
+		const FBInkRect cls_rect = {
+			.left = region_left, .top = region_top, .width = region_width, .height = region_height
+		};
+		rv = fbink_cls(fbfd, &fbink_cfg, &cls_rect);
 		goto cleanup;
 	}
 
