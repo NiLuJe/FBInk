@@ -245,8 +245,8 @@ static void
 #if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 	    "\tNote that the arguments are passed as-is to the ioctl, no viewport or rotation quirks are applied!\n"
 #endif
-	    "\tIf you just want a full-screen refresh (which will honor -f, --flash), simply pass a single bogus suboption,\n"
-	    "\tf.g., fbink -s foo\n"
+	    "\tIf you just want a full-screen refresh (which will honor -f, --flash), don't pass any suboptions,\n"
+	    "\tf.g., fbink -s\n"
 	    "\n"
 	    "\tSpecifying one or more STRING takes precedence over this mode.\n"
 #ifdef FBINK_WITH_IMAGE
@@ -593,7 +593,7 @@ int
                                               { "halfway", no_argument, NULL, 'M' },
                                               { "padded", no_argument, NULL, 'p' },
                                               { "rpadded", no_argument, NULL, 'r' },
-                                              { "refresh", required_argument, NULL, 's' },
+                                              { "refresh", optional_argument, NULL, 's' },
                                               { "size", required_argument, NULL, 'S' },
                                               { "font", required_argument, NULL, 'F' },
                                               { "verbose", no_argument, NULL, 'v' },
@@ -733,7 +733,7 @@ int
 
 	// NOTE: c.f., https://codegolf.stackexchange.com/q/148228 to sort this mess when I need to find an available letter ;p
 	while ((opt = getopt_long(
-		    argc, argv, "y:x:Y:X:hfcmMprs:S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bDW:HEZkwd:G", opts, &opt_index)) != -1) {
+		    argc, argv, "y:x:Y:X:hfcmMprs::S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bDW:HEZkwd:G", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				if (strtol_hi(opt, NULL, optarg, &fbink_cfg.row) < 0) {
@@ -792,8 +792,16 @@ int
 					opt_longname = opts[opt_index].name;
 				}
 
-				subopts = optarg;
-				while (*subopts != '\0' && !errfnd) {
+				// NOTE: Nasty bit of trickery to make getopt's optional_argument actually useful...
+				//       Hat trick (& explanation) courtesy of https://stackoverflow.com/a/32575314
+				//       If `optarg` isn't set and argv[optind] doesn't look like another option,
+				//       then assume it's our parameter and overtly modify optind to compensate.
+				if (!optarg && argv[optind] != NULL && argv[optind][0] != '-') {
+					subopts = argv[optind++];
+				} else {
+					subopts = optarg;
+				}
+				while (subopts && *subopts != '\0' && !errfnd) {
 					switch (getsubopt(&subopts, refresh_token, &value)) {
 						case TOP_OPT:
 							if (value == NULL) {
@@ -883,13 +891,11 @@ int
 							}
 							break;
 						default:
-							// Accept bogus suboptions to somewhat fake a "takes optional arguments"
-							// behavior, without the syntax quirks the real thing would enforce
-							// on the short option syntax...
-							ELOG("Ignoring bogus suboption token /%s/ for -%c, --%s",
+							ELOG("No match found for token: /%s/ for -%c, --%s",
 							     value,
 							     opt,
 							     opt_longname);
+							errfnd = true;
 							break;
 					}
 				}
