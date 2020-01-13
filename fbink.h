@@ -248,7 +248,7 @@ typedef struct
 	bool      is_inverted;      // Invert colors.
 				    // This is *NOT* mutually exclusive with is_nightmode, and is *always* supported.
 	bool      is_flashing;      // Request a black flash on refresh
-	bool      is_cleared;       // Clear the screen beforehand (honors is_inverted)
+	bool      is_cleared;       // Clear the full screen beforehand (honors bg_color & is_inverted)
 	bool      is_centered;      // Center the text (horizontally)
 	short int hoffset;          // Horizontal offset (in pixels) for text position
 	short int voffset;          // Vertical offset (in pixels) for text position
