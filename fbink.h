@@ -692,7 +692,7 @@ FBINK_API int fbink_print_raw_data(int                         fbfd,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
 // fbink_cfg:		Pointer to an FBInkConfig struct (honors is_inverted, wfm_mode, is_dithered, is_nightmode, is_flashing,
 //				as well as no_refresh & bg_color).
-// rect:		Optional pointer to an FBInkRect (as, say, from fbink_get_last_rect) rectangle,
+// rect:		Optional pointer to an FBInkRect rectangle (as, say, returned by fbink_get_last_rect),
 //				describing the specific region of screen to clear (in absolute coordinates).
 //				If the rectangle is empty (i.e., width or height is zero) or the pointer is NULL,
 //				the full screen will be cleared.
