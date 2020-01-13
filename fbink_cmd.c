@@ -806,8 +806,7 @@ int
 				// NOTE: We'll need to remember the original, full suboption string for diagnostic messages,
 				//       because getsubopt will rewrite it during processing...
 				if (subopts && *subopts != '\0') {
-					free(full_subopts);
-					full_subopts = strdup(subopts);
+					full_subopts = strdupa(subopts);
 				}
 
 				while (subopts && *subopts != '\0' && !errfnd) {
@@ -1016,8 +1015,7 @@ int
 				// NOTE: We'll need to remember the original, full suboption string for diagnostic messages,
 				//       because getsubopt will rewrite it during processing...
 				if (subopts && *subopts != '\0') {
-					free(full_subopts);
-					full_subopts = strdup(subopts);
+					full_subopts = strdupa(subopts);
 				}
 				// NOTE: I'm not terribly fond of getsubopt in general, especially here with the comma limitation
 				//       for filenames, but it does make sense to keep image-specific options separate...
@@ -1307,8 +1305,7 @@ int
 				// NOTE: We'll need to remember the original, full suboption string for diagnostic messages,
 				//       because getsubopt will rewrite it during processing...
 				if (subopts && *subopts != '\0') {
-					free(full_subopts);
-					full_subopts = strdup(subopts);
+					full_subopts = strdupa(subopts);
 				}
 				while (*subopts != '\0' && !errfnd) {
 					switch (getsubopt(&subopts, truetype_token, &value)) {
