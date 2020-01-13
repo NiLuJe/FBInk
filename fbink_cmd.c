@@ -102,11 +102,13 @@ static void
 #ifdef FBINK_FOR_KINDLE
 	    "\t\t\t\tNote that on legacy einkfb devices, this may not always be honored by the hardware.\n"
 #endif
-	    "\t-c, --clear\t\tClear the full screen before printing (honors -B, --background; -h, --invert; -H, --nightmode; -W, --waveform; -b, --norefresh).\n"
+	    "\t-c, --clear\t\tClear the full screen before printing.\n"
+	    "\t\t\t\tHonors -B, --background; -h, --invert; -H, --nightmode; -W, --waveform; -b, --norefresh.\n"
 	    "\t\t\t\tCan be specified on its own, without any STRING.\n"
 	    "\t\t\t\tNOTE: If your intent is to simply clear the screen and *nothing else*, use -k, --cls instead!\n"
 	    "\t-k, --cls top=NUM,left=NUM,width=NUM,height=NUM\n"
-	    "\t\t\t\tClear the screen (or a region of it), and abort early. Honors -B, --background; -h, --invert; -H, --nightmode; -W, --waveform; -b, --norefresh.\n"
+	    "\t\t\t\tClear the screen (or a region of it), and abort early.\n"
+	    "\t\t\t\tHonors -B, --background; -h, --invert; -H, --nightmode; -W, --waveform; -b, --norefresh.\n"
 	    "\t\t\t\tThis takes precedence over *everything* and will abort as soon as it's done.\n"
 	    "\t\t\t\tIf you just want a full-screen clear (which will honor -f, --flash), don't pass any suboptions,\n"
 	    "\t\t\t\tf.g., fbink -k\n"
