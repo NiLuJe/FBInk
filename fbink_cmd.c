@@ -695,6 +695,7 @@ int
 					 [NOTRUNC_OPT]    = "notrunc",
 					 NULL };
 #pragma GCC diagnostic pop
+	char*       full_subopts = NULL;
 	char*       subopts;
 	char*       value          = NULL;
 	uint32_t    region_top     = 0;
@@ -801,6 +802,14 @@ int
 				} else {
 					subopts = optarg;
 				}
+
+				// NOTE: We'll need to remember the original, full suboption string for diagnostic messages,
+				//       because getsubopt will rewrite it during processing...
+				if (subopts && *subopts != '\0') {
+					free(full_subopts);
+					full_subopts = strdup(subopts);
+				}
+
 				while (subopts && *subopts != '\0' && !errfnd) {
 					switch (getsubopt(&subopts, refresh_token, &value)) {
 						case TOP_OPT:
@@ -1004,6 +1013,12 @@ int
 				}
 
 				subopts = optarg;
+				// NOTE: We'll need to remember the original, full suboption string for diagnostic messages,
+				//       because getsubopt will rewrite it during processing...
+				if (subopts && *subopts != '\0') {
+					free(full_subopts);
+					full_subopts = strdup(subopts);
+				}
 				// NOTE: I'm not terribly fond of getsubopt in general, especially here with the comma limitation
 				//       for filenames, but it does make sense to keep image-specific options separate...
 				//       The same argument could be made against moving x_off/y_off to hoffset/voffset now
@@ -1289,6 +1304,12 @@ int
 				}
 
 				subopts = optarg;
+				// NOTE: We'll need to remember the original, full suboption string for diagnostic messages,
+				//       because getsubopt will rewrite it during processing...
+				if (subopts && *subopts != '\0') {
+					free(full_subopts);
+					full_subopts = strdup(subopts);
+				}
 				while (*subopts != '\0' && !errfnd) {
 					switch (getsubopt(&subopts, truetype_token, &value)) {
 						case REGULAR_OPT:
@@ -1634,7 +1655,7 @@ int
 				fprintf(stderr, "\n");
 			}
 			// NOTE: Almost, because getsubopt rewrites argv (it replaces commas with NULLs),
-			//       which mean we don't have access to the original string anymore.
+			//       which means we don't have access to the original string anymore...
 			ELOG("This was the (almost) exact invocation that triggered this error:\n");
 			if (!toSysLog) {
 				for (int i = 0; i < argc; i++) {
@@ -1646,6 +1667,10 @@ int
 			}
 			for (int i = 0; i < optind; i++) {
 				ELOG("argv[%d]: `%s`", i, argv[i]);
+			}
+			// If there was a subopt parsing error, print the original, full suboptions string
+			if (full_subopts) {
+				ELOG("Original complete suboption string: %s\n", full_subopts);
 			}
 			// And then non-option arguments
 			if (optind < argc) {
