@@ -1814,10 +1814,12 @@ int
 
 	// If we're asking for a simple clear screen *only*, do it now, and then abort early.
 	if (is_cls) {
-		const FBInkRect cls_rect = {
-			.left = region_left, .top = region_top, .width = region_width, .height = region_height
-		};
-		rv = fbink_cls(fbfd, &fbink_cfg, &cls_rect);
+		FBInkRect cls_rect = { 0 };
+		cls_rect.left      = (unsigned short int) region_left;
+		cls_rect.top       = (unsigned short int) region_top;
+		cls_rect.width     = (unsigned short int) region_width;
+		cls_rect.height    = (unsigned short int) region_height;
+		rv                 = fbink_cls(fbfd, &fbink_cfg, &cls_rect);
 		goto cleanup;
 	}
 
