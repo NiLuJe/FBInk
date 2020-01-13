@@ -102,8 +102,13 @@ static void
 #ifdef FBINK_FOR_KINDLE
 	    "\t\t\t\tNote that on legacy einkfb devices, this may not always be honored by the hardware.\n"
 #endif
-	    "\t-c, --clear\t\tClear the full screen before printing (honors --background & --invert). Can be specified on its own, without any STRING.\n"
+	    "\t-c, --clear\t\tClear the full screen before printing (honors -B, --background & -h, --invert). Can be specified on its own, without any STRING.\n"
 	    "\t\t\t\tNOTE: If your intent is to simply clear the screen and *nothing else*, use -k, --cls instead!\n"
+	    "\t-k, --cls top=NUM,left=NUM,width=NUM,height=NUM\n"
+	    "\t\t\t\tClear the screen (or a region of it), and abort early. Honors -B, --background & -h, --invert.\n"
+	    "\t\t\t\tThis takes precedence over *everything* and will abort as soon as it's done.\n"
+	    "\t\t\t\tIf you just want a full-screen clear (which will honor -f, --flash), don't pass any suboptions,\n"
+	    "\t\t\t\tf.g., fbink -k\n"
 #ifndef FBINK_FOR_LINUX
 	    "\t-W, --waveform\t\tRequest a specific waveform update mode from the eInk controller, if supported (mainly useful for images).\n"
 	    "\t\t\t\tAvailable waveform modes: DU, GC16, GC4, A2, GL16, REAGL, REAGLD & AUTO\n"
