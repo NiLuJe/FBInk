@@ -1668,7 +1668,7 @@ int
 
 	// If we're asking for a simple clear screen *only*, do it now, and then abort early.
 	if (is_cls) {
-		rv = fbink_cls(fbfd, &fbink_cfg);
+		rv = fbink_cls(fbfd, &fbink_cfg, NULL);
 		goto cleanup;
 	}
 
@@ -2184,7 +2184,7 @@ int
 		} else if (is_eval) {
 			// Allow doing a clear at the same time
 			if (fbink_cfg.is_cleared) {
-				rv = fbink_cls(fbfd, &fbink_cfg);
+				rv = fbink_cls(fbfd, &fbink_cfg, NULL);
 			}
 			fbink_state_dump(&fbink_cfg);
 		} else if (is_interactive && isatty(fileno(stdin))) {
@@ -2231,7 +2231,7 @@ int
 						    "This is a non-interactive SSH session and stdin is *currently* empty, enforcing non-blocking behavior by aborting early");
 						// We're not printing anything, so, do the usual clear or help dance.
 						if (fbink_cfg.is_cleared) {
-							rv = fbink_cls(fbfd, &fbink_cfg);
+							rv = fbink_cls(fbfd, &fbink_cfg, NULL);
 						} else {
 							show_helpmsg();
 						}
@@ -2320,7 +2320,7 @@ int
 				if (linecnt == -1) {
 					// Except that if we asked for a clear, do it!
 					if (fbink_cfg.is_cleared) {
-						rv = fbink_cls(fbfd, &fbink_cfg);
+						rv = fbink_cls(fbfd, &fbink_cfg, NULL);
 					} else {
 						show_helpmsg();
 					}
@@ -2353,7 +2353,7 @@ int
 				// This is at the bottom rung of the if ladder so as not to mess with anything else,
 				// in particular stdin handling...
 				if (fbink_cfg.is_cleared) {
-					rv = fbink_cls(fbfd, &fbink_cfg);
+					rv = fbink_cls(fbfd, &fbink_cfg, NULL);
 				} else {
 					show_helpmsg();
 				}

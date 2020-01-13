@@ -3083,7 +3083,7 @@ int
 	if (!*string) {
 		// Unless we just want a clear, in which case, bypass everything and just do that.
 		if (fbink_cfg->is_cleared) {
-			return fbink_cls(fbfd, fbink_cfg);
+			return fbink_cls(fbfd, fbink_cfg, NULL);
 		} else {
 			WARN("Cannot print an empty string");
 			return ERRCODE(EINVAL);
@@ -3646,7 +3646,7 @@ int
 	if (!*string) {
 		// Unless we just want a clear, in which case, bypass everything and just do that.
 		if (fbink_cfg->is_cleared) {
-			return fbink_cls(fbfd, fbink_cfg);
+			return fbink_cls(fbfd, fbink_cfg, NULL);
 		} else {
 			WARN("Cannot print an empty string");
 			return ERRCODE(EINVAL);
