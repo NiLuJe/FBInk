@@ -1633,7 +1633,9 @@ int
 			if (!toSysLog) {
 				fprintf(stderr, "\n");
 			}
-			ELOG("This was the exact invocation that triggered this error:\n");
+			// NOTE: Almost, because getsubopt rewrites argv (it replaces commas with NULLs),
+			//       which mean we don't have access to the original string anymore.
+			ELOG("This was the (almost) exact invocation that triggered this error:\n");
 			if (!toSysLog) {
 				for (int i = 0; i < argc; i++) {
 					fprintf(stderr, "%s%s", argv[i], i == argc - 1 ? "\n" : " ");
