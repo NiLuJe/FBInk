@@ -687,12 +687,16 @@ FBINK_API int fbink_print_raw_data(int                         fbfd,
 				   const FBInkConfig* restrict fbink_cfg);
 
 //
-// Just clear the screen, eInk refresh included (or not ;)).
+// Just clear the screen (or a region of it), eInk refresh included (or not ;)).
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
 // fbink_cfg:		Pointer to an FBInkConfig struct (honors is_inverted, wfm_mode, is_dithered, is_nightmode, is_flashing,
-//				as well as no_refresh, pen_fg_color & pen_bg_color).
-FBINK_API int fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg);
+//				as well as no_refresh & bg_color).
+// rect:		Optional pointer to an FBInkRect (as, say, from fbink_get_last_rect) rectangle,
+//				describing the specific region of screen to clear (in absolute coordinates).
+//				If the rectangle is empty (i.e., width or height is zero) or the pointer is NULL,
+//				the full screen will be cleared.
+FBINK_API int fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg, const FBInkRect* restrict rect);
 
 //
 // Dump the full screen.

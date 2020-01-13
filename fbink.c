@@ -2991,7 +2991,7 @@ static void
 
 // Do a full-screen clear, eInk refresh included
 int
-    fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg)
+    fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg, const FBInkRect* restrict rect)
 {
 	// If we open a fd now, we'll only keep it open for this single call!
 	// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
@@ -3011,10 +3011,33 @@ int
 		}
 	}
 
-	// Clear the screen, and setup a fullscreen refresh.
-	clear_screen(fbfd, fbink_cfg->is_inverted ? penBGColor ^ 0xFFu : penBGColor, fbink_cfg->is_flashing);
+	// We'll need a matching region for the refresh...
 	struct mxcfb_rect region = { 0U };
-	fullscreen_region(&region);
+
+	// Did we request a regional clear?
+	if (!rect || (rect->width == 0U || rect->height == 0U)) {
+		// Nope -> full-screen
+		clear_screen(fbfd, fbink_cfg->is_inverted ? penBGColor ^ 0xFFu : penBGColor, fbink_cfg->is_flashing);
+		fullscreen_region(&region);
+	} else {
+		// Yes -> simply fill a rectangle w/ the bg color
+		FBInkPixel bgP = penBGPixel;
+		if (fbink_cfg->is_inverted) {
+			// NOTE: And, of course, RGB565 is terrible. Inverting the lossy packed value would be even lossier...
+			if (vInfo.bits_per_pixel == 16U) {
+				const uint8_t bgcolor = penBGColor ^ 0xFFu;
+				bgP.rgb565            = pack_rgb565(bgcolor, bgcolor, bgcolor);
+			} else {
+				bgP.bgra.p ^= 0x00FFFFFFu;
+			}
+		}
+		fill_rect(rect->left, rect->top, rect->width, rect->height, &bgP);
+		// And update the region...
+		region.top    = rect->top;
+		region.left   = rect->left;
+		region.width  = rect->width;
+		region.height = rect->height;
+	}
 
 	// Refresh screen
 	if (refresh(fbfd,
