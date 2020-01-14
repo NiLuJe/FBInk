@@ -649,6 +649,9 @@ static void
 		//       not that that's a great comparison, since we hardly ever manage to coax a *real* full flash
 		//       out of einkfb... This appears to do it (i.e., ~800ms)!
 		// NOTE: We're on inverted palette devices, hence the use of the "wrong" LUT...
+		// NOTE: We're calling clear_screen to handle is_cleared,
+		//       which means we're probably refreshing twice in these cases...
+		//       Oh, well...
 		if (is_flashing && v == eInkFGCMap[BG_WHITE]) {
 			if (ioctl(fbfd, FBIO_EINK_CLEAR_SCREEN, EINK_CLEAR_SCREEN) < 0) {
 				WARN("FBIO_EINK_CLEAR_SCREEN: %m");
