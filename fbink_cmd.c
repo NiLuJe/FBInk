@@ -111,7 +111,7 @@ static void
 	    "\t\t\t\tHonors -B, --background; -h, --invert; -H, --nightmode; -W, --waveform; -b, --norefresh.\n"
 	    "\t\t\t\tThis takes precedence over *everything* and will abort as soon as it's done.\n"
 	    "\t\t\t\tIf you just want a full-screen clear (which will honor -f, --flash), don't pass any suboptions,\n"
-	    "\t\t\t\tf.g., fbink -k\n"
+	    "\t\t\t\tf.g., fbink -k (if you group short options together, it needs to be the last in its group, i.e., -fk and not -kf).\n"
 #ifndef FBINK_FOR_LINUX
 	    "\t-W, --waveform\t\tRequest a specific waveform update mode from the eInk controller, if supported (mainly useful for images).\n"
 	    "\t\t\t\tAvailable waveform modes: DU, GC16, GC4, A2, GL16, REAGL, REAGLD & AUTO\n"
@@ -254,7 +254,7 @@ static void
 	    "\tNote that the arguments are passed as-is to the ioctl, no viewport or rotation quirks are applied!\n"
 #endif
 	    "\tIf you just want a full-screen refresh (which will honor -f, --flash), don't pass any suboptions,\n"
-	    "\tf.g., fbink -s\n"
+	    "\tf.g., fbink -s (if you group short options together, it needs to be the last in its group, i.e., -fs and not -sf).\n"
 	    "\n"
 	    "\tSpecifying one or more STRING takes precedence over this mode.\n"
 #ifdef FBINK_WITH_IMAGE
