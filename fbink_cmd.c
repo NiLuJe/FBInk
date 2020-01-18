@@ -247,7 +247,7 @@ static void
 	    "\tAvailable dithering modes: PASSTHROUGH, FLOYD_STEINBERG, ATKINSON, ORDERED & QUANT_ONLY\n"
 	    "\t\tNote that this is only supported on recent devices, and that only a subset of these options may actually be supported by the HW (usually, PASSTHROUGH & ORDERED, check dmesg).\n"
 #ifdef FBINK_FOR_KINDLE
-	    "\t\tHardware dithering is completely untested on Kindle, and, while the Oasis 2 & PaperWhite 4 *should* support it, they *may* not, or at least not in the way FBInk expects...\n"
+	    "\t\tHardware dithering is completely untested on Kindle, and, while the Oasis 2, PaperWhite 4 & Oasis 3 *should* support it, they *may* not, or at least not in the way FBInk expects...\n"
 #endif
 	    "\tNote that this will also honor --waveform, --nightmode & --flash\n"
 #if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
