@@ -1564,6 +1564,74 @@ static int
 
 	return EXIT_SUCCESS;
 }
+#	elif defined(FBINK_FOR_REMARKABLE)
+static int
+    refresh_remarkable(int fbfd,
+		       const struct mxcfb_rect region,
+		       uint32_t waveform_mode,
+		       uint32_t update_mode,
+		       int dithering_mode,
+		       bool is_nightmode,
+		       uint32_t marker)
+{
+	struct mxcfb_update_data update = {
+		.update_region = region,
+		.waveform_mode = waveform_mode,
+		.update_mode   = update_mode,
+		.update_marker = marker,
+		.temp          = TEMP_USE_AMBIENT,
+		.flags         = 0,
+		.dither_mode = dithering_mode,
+		.quant_bit   = 0,
+		.alt_buffer_data = { 0U }
+	};
+
+	if (is_nightmode && deviceQuirks.canHWInvert) {
+		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
+	}
+
+	int rv;
+	rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
+
+	if (rv < 0) {
+		WARN("MXCFB_SEND_UPDATE: %m");
+		if (errno == EINVAL) {
+			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
+			     region.top,
+			     region.left,
+			     region.width,
+			     region.height);
+		}
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static int
+    wait_for_complete_remarkable(int fbfd, uint32_t marker)
+{
+	struct mxcfb_update_marker_data update_data = {
+		.update_marker  = marker,
+		.collision_test = 0
+	};
+	int rv;
+	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_data);
+
+	if (rv < 0) {
+		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %m");
+		return ERRCODE(EXIT_FAILURE);
+	} else {
+		if (rv == 0) {
+			LOG("Update %u has already fully been completed", marker);
+		} else {
+			// NOTE: Timeout is set to 5000ms
+			LOG("Waited %ldms for completion of update %u", (5000 - jiffies_to_ms(rv)), marker);
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
 #	elif defined(FBINK_FOR_CERVANTES)
 // Cervantes devices
 // All of them support MX50 "compat" ioctls, much like Kobos.
@@ -1868,6 +1936,8 @@ static int
 	} else {
 		return refresh_kobo(fbfd, region, wfm, upm, is_nightmode, lastMarker);
 	}
+#	elif defined(FBINK_FOR_REMARKABLE)
+	return refresh_remarkable(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
 #	endif    // FBINK_FOR_KINDLE
 }
 #endif            // FBINK_FOR_LINUX
@@ -1909,6 +1979,8 @@ static int
 	} else {
 		return wait_for_complete_kobo(fbfd, marker);
 	}
+#	elif defined(FBINK_FOR_REMARKABLE)
+	return wait_for_complete_remarkable(fbfd, marker);
 #	endif    // FBINK_FOR_KINDLE
 }
 #endif    // !FBINK_FOR_LINUX
@@ -4969,6 +5041,42 @@ static uint32_t
 			break;
 		case WFM_GLKW16:
 			waveform_mode = WAVEFORM_MODE_ZELDA_GLKW16;
+			break;
+		default:
+			LOG("Unknown (or unsupported) waveform mode '%s' @ index %hhu, defaulting to AUTO",
+			    wfm_to_string(wfm_mode_index),
+			    wfm_mode_index);
+			waveform_mode = WAVEFORM_MODE_AUTO;
+			break;
+	}
+#elif defined(FBINK_FOR_REMARKABLE)
+	switch (wfm_mode_index) {
+		case WFM_INIT:
+			waveform_mode = WAVEFORM_MODE_GC16;
+			break;
+		case WFM_AUTO:
+			waveform_mode = WAVEFORM_MODE_AUTO;
+			break;
+		case WFM_DU:
+			waveform_mode = WAVEFORM_MODE_DU;
+			break;
+		case WFM_GC16:
+			waveform_mode = WAVEFORM_MODE_GC16;
+			break;
+		case WFM_GC4:
+			waveform_mode = WAVEFORM_MODE_GL4;
+			break;
+		case WFM_A2:
+			waveform_mode = WAVEFORM_MODE_DU;
+			break;
+		case WFM_GL16:
+			waveform_mode = WAVEFORM_MODE_GC16;
+			break;
+		case WFM_REAGL:
+			waveform_mode = WAVEFORM_MODE_REAGL;
+			break;
+		case WFM_REAGLD:
+			waveform_mode = WAVEFORM_MODE_REAGLD;
 			break;
 		default:
 			LOG("Unknown (or unsupported) waveform mode '%s' @ index %hhu, defaulting to AUTO",
