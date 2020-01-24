@@ -18,6 +18,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/* Original source:
+ * https://github.com/reMarkable/linux/blob/zero-gravitas/include/uapi/linux/mxcfb.h
+ * added waveform modes from libremarkable:
+ * https://github.com/canselcik/libremarkable/blob/master/src/framebuffer/common.rs#L338
+ */
+
 /*
  * @file uapi/linux/mxcfb.h
  *
@@ -95,6 +101,7 @@ struct mxcfb_rect {
 #define UPDATE_MODE_FULL			0x1
 
 // These modes added by copying values from libremarkable
+#define WAVEFORM_MODE_INIT			0
 #define WAVEFORM_MODE_DU			1
 #define WAVEFORM_MODE_GC16			2
 #define WAVEFORM_MODE_GC16_FAST		3

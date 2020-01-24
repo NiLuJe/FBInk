@@ -5049,42 +5049,6 @@ static uint32_t
 			waveform_mode = WAVEFORM_MODE_AUTO;
 			break;
 	}
-#elif defined(FBINK_FOR_REMARKABLE)
-	switch (wfm_mode_index) {
-		case WFM_INIT:
-			waveform_mode = WAVEFORM_MODE_GC16;
-			break;
-		case WFM_AUTO:
-			waveform_mode = WAVEFORM_MODE_AUTO;
-			break;
-		case WFM_DU:
-			waveform_mode = WAVEFORM_MODE_DU;
-			break;
-		case WFM_GC16:
-			waveform_mode = WAVEFORM_MODE_GC16;
-			break;
-		case WFM_GC4:
-			waveform_mode = WAVEFORM_MODE_GL4;
-			break;
-		case WFM_A2:
-			waveform_mode = WAVEFORM_MODE_DU;
-			break;
-		case WFM_GL16:
-			waveform_mode = WAVEFORM_MODE_GC16;
-			break;
-		case WFM_REAGL:
-			waveform_mode = WAVEFORM_MODE_REAGL;
-			break;
-		case WFM_REAGLD:
-			waveform_mode = WAVEFORM_MODE_REAGLD;
-			break;
-		default:
-			LOG("Unknown (or unsupported) waveform mode '%s' @ index %hhu, defaulting to AUTO",
-			    wfm_to_string(wfm_mode_index),
-			    wfm_mode_index);
-			waveform_mode = WAVEFORM_MODE_AUTO;
-			break;
-	}
 #else
 	switch (wfm_mode_index) {
 		case WFM_INIT:
@@ -5100,13 +5064,25 @@ static uint32_t
 			waveform_mode = WAVEFORM_MODE_GC16;
 			break;
 		case WFM_GC4:
+#ifdef FBINK_FOR_REMARKABLE
+			waveform_mode = WAVEFORM_MODE_GC16_FAST;
+#else
 			waveform_mode = WAVEFORM_MODE_GC4;
+#endif
 			break;
 		case WFM_A2:
+#ifdef FBINK_FOR_REMARKABLE
+			waveform_mode = WAVEFORM_MODE_GLR16;
+#else
 			waveform_mode = WAVEFORM_MODE_A2;
+#endif
 			break;
 		case WFM_GL16:
+#ifdef FBINK_FOR_REMARKABLE
+			waveform_mode = WAVEFORM_MODE_GLD16;
+#else
 			waveform_mode = WAVEFORM_MODE_GL16;
+#endif
 			break;
 		case WFM_REAGL:
 			waveform_mode = WAVEFORM_MODE_REAGL;
