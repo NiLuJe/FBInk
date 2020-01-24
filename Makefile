@@ -243,7 +243,7 @@ endif
 ifdef KOBO
 	TARGET_CPPFLAGS+=-DFBINK_FOR_KOBO
 endif
-# Toggle remarkable support
+# Toggle reMarkable support
 ifdef REMARKABLE
 	TARGET_CPPFLAGS+=-DFBINK_FOR_REMARKABLE
 endif

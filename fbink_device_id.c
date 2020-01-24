@@ -965,7 +965,7 @@ static void
 	     deviceQuirks.deviceCodename,
 	     deviceQuirks.devicePlatform);
 #	elif defined(FBINK_FOR_REMARKABLE)
-	ELOG("Detected a Remarkable");
+	ELOG("Detected a reMarkable");
 #	endif
 	// Warn if canHWInvert was flipped
 	if (!deviceQuirks.canHWInvert) {

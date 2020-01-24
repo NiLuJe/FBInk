@@ -258,7 +258,7 @@
 #			define FBINK_VERSION FBINK_FALLBACK_VERSION " for Cervantes"
 #		else
 #			ifdef FBINK_FOR_REMARKABLE
-#				define FBINK_VERSION FBINK_FALLBACK_VERSION " for Remarkable"
+#				define FBINK_VERSION FBINK_FALLBACK_VERSION " for reMarkable"
 #			else
 #				ifdef FBINK_FOR_LINUX
 #					define FBINK_VERSION FBINK_FALLBACK_VERSION " for Linux"
