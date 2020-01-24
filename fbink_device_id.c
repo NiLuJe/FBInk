@@ -927,6 +927,16 @@ static void
 }
 #	endif    // FBINK_FOR_KINDLE
 
+#ifdef FBINK_FOR_REMARKABLE
+static void
+    identify_remarkable(void)
+{
+    deviceQuirks.screenDPI = 226;
+    deviceQuirks.canHWInvert = true;
+    strncpy(deviceQuirks.deviceName, "reMarkable", sizeof(deviceQuirks.deviceName) - 1U);
+}
+#endif
+
 static void
     identify_device(void)
 {
@@ -965,6 +975,7 @@ static void
 	     deviceQuirks.deviceCodename,
 	     deviceQuirks.devicePlatform);
 #	elif defined(FBINK_FOR_REMARKABLE)
+	identify_remarkable();
 	ELOG("Detected a reMarkable");
 #	endif
 	// Warn if canHWInvert was flipped
