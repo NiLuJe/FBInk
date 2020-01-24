@@ -316,6 +316,11 @@
 #else
 #	define UNUSED_BY_CERVANTES
 #endif
+#ifdef FBINK_FOR_REMARKABLE
+#	define UNUSED_BY_REMARKABLE __attribute__((unused))
+#else
+#	define UNUSED_BY_REMARKABLE
+#endif
 #ifndef FBINK_FOR_LINUX
 #	define UNUSED_BY_NOTLINUX __attribute__((unused))
 #	define UNUSED_BY_LINUX
@@ -516,7 +521,7 @@ static int refresh_kindle_rex(int, const struct mxcfb_rect, uint32_t, uint32_t, 
 static int refresh_cervantes(int, const struct mxcfb_rect, uint32_t, uint32_t, bool, uint32_t);
 static int wait_for_complete_cervantes(int, uint32_t);
 #	elif defined(FBINK_FOR_REMARKABLE)
-static int refresh_remarkable(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
+static int refresh_remarkable(int, const struct mxcfb_rect, uint32_t, uint32_t, bool, uint32_t);
 static int wait_for_complete_remarkable(int, uint32_t);
 #	elif defined(FBINK_FOR_KOBO)
 static int refresh_kobo(int, const struct mxcfb_rect, uint32_t, uint32_t, bool, uint32_t);

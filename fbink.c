@@ -1570,7 +1570,6 @@ static int
 		       const struct mxcfb_rect region,
 		       uint32_t waveform_mode,
 		       uint32_t update_mode,
-		       int dithering_mode,
 		       bool is_nightmode,
 		       uint32_t marker)
 {
@@ -1581,7 +1580,8 @@ static int
 		.update_marker = marker,
 		.temp          = TEMP_USE_AMBIENT,
 		.flags         = 0,
-		.dither_mode = dithering_mode,
+		/* dither not actually used by driver */
+		.dither_mode = 0,
 		.quant_bit   = 0,
 		.alt_buffer_data = { 0U }
 	};
@@ -1860,7 +1860,7 @@ static int
     refresh(int fbfd,
 	    const struct mxcfb_rect region,
 	    uint32_t waveform_mode,
-	    int dithering_mode UNUSED_BY_CERVANTES,
+	    int dithering_mode UNUSED_BY_CERVANTES UNUSED_BY_REMARKABLE,
 	    bool is_nightmode,
 	    bool is_flashing,
 	    bool no_refresh)
@@ -1937,7 +1937,7 @@ static int
 		return refresh_kobo(fbfd, region, wfm, upm, is_nightmode, lastMarker);
 	}
 #	elif defined(FBINK_FOR_REMARKABLE)
-	return refresh_remarkable(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
+	return refresh_remarkable(fbfd, region, wfm, upm, is_nightmode, lastMarker);
 #	endif    // FBINK_FOR_KINDLE
 }
 #endif            // FBINK_FOR_LINUX
