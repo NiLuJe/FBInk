@@ -933,6 +933,9 @@ static void
 {
     deviceQuirks.screenDPI = 226;
     deviceQuirks.canHWInvert = true;
+    deviceQuirks.ntxBootRota = FB_ROTATE_CW;
+    deviceQuirks.ntxRotaQuirk = NTX_ROTA_SANE;
+    deviceQuirks.canRotate = true;
     strncpy(deviceQuirks.deviceName, "reMarkable", sizeof(deviceQuirks.deviceName) - 1U);
 }
 #endif
