@@ -1646,7 +1646,7 @@ static int
 					    .waveform_mode   = waveform_mode,
 					    .update_mode     = update_mode,
 					    .update_marker   = marker,
-					    .temp            = TEMP_USE_AMBIENT,
+					    .temp            = TEMP_USE_REMARKABLE,
 					    .flags           = 0U,
 					    .dither_mode     = 0,
 					    .quant_bit       = 0,
