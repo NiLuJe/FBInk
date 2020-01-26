@@ -1677,7 +1677,7 @@ static int
 static int
     wait_for_complete_remarkable(int fbfd, uint32_t marker)
 {
-	struct mxcfb_update_marker_data update_data = { .update_marker = marker, .collision_test = 0 };
+	struct mxcfb_update_marker_data update_data = { .update_marker = marker, .collision_test = 0U };
 	int                             rv;
 	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_data);
 
