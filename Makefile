@@ -269,7 +269,7 @@ ifdef FBINK_VERSION
 					LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kobo"'
 				else
 					ifdef REMARKABLE
-						LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Remarkable"'
+						LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for reMarkable"'
 					else
 						# NOTE: Should never happen!
 						LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION)"'

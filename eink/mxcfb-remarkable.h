@@ -20,8 +20,8 @@
 
 /* Original source:
  * https://github.com/reMarkable/linux/blob/zero-gravitas/include/uapi/linux/mxcfb.h
- * added waveform modes from libremarkable:
- * https://github.com/canselcik/libremarkable/blob/master/src/framebuffer/common.rs#L338
+ * Waveform modes constants from libremarkable:
+ * https://github.com/canselcik/libremarkable
  */
 
 /*
@@ -100,23 +100,31 @@ struct mxcfb_rect {
 #define UPDATE_MODE_PARTIAL			0x0
 #define UPDATE_MODE_FULL			0x1
 
-// These modes added by copying values from libremarkable
+// Findings courtesy of libremarkable
+// c.f., https://github.com/canselcik/libremarkable/blob/67ff7ea3926319a6d33a216a2b8c1f679916aa3c/src/framebuffer/common.rs#L338
 #define WAVEFORM_MODE_INIT			0
 #define WAVEFORM_MODE_DU			1
 #define WAVEFORM_MODE_GC16			2
-#define WAVEFORM_MODE_GC16_FAST		3
-#define WAVEFORM_MODE_GL16_FAST		6
+#define WAVEFORM_MODE_GC16_FAST			3
+
+#define WAVEFORM_MODE_GL16_FAST			6
 #define WAVEFORM_MODE_DU4			7
 #define WAVEFORM_MODE_REAGL			8
-#define WAVEFORM_MODE_REAGLD		9
+#define WAVEFORM_MODE_REAGLD			9
 #define WAVEFORM_MODE_GL4			0xA
-#define WAVEFORM_MODE_GL16_INV		0xB
+#define WAVEFORM_MODE_GL16_INV			0xB
 
+// NOTE: This might actually be A2?
+//       On every other platform, GLR16 == REAGL && GLD16 == REAGLD
 #define WAVEFORM_MODE_GLR16			4
+// NOTE: Which would actually make this GL16?
 #define WAVEFORM_MODE_GLD16			5
 #define WAVEFORM_MODE_AUTO			257
 
 #define TEMP_USE_AMBIENT			0x1000
+
+// Again, pilfered from libremarkable ;).
+#define TEMP_USE_REMARKABLE			0x0018
 
 #define EPDC_FLAG_ENABLE_INVERSION		0x01
 #define EPDC_FLAG_FORCE_MONOCHROME		0x02

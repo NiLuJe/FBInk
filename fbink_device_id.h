@@ -142,6 +142,8 @@ static const char* kobo_disp_busw[] = { "8Bits", "16Bits", "8Bits_mirror", "16Bi
 
 static void set_kobo_quirks(unsigned short int);
 static void identify_kobo(void);
+#        elif defined(FBINK_FOR_REMARKABLE)
+static void identify_remarkable(void);
 #        endif    // FBINK_FOR_KINDLE
 
 static void identify_device(void);

@@ -1564,74 +1564,6 @@ static int
 
 	return EXIT_SUCCESS;
 }
-#	elif defined(FBINK_FOR_REMARKABLE)
-static int
-    refresh_remarkable(int fbfd,
-		       const struct mxcfb_rect region,
-		       uint32_t waveform_mode,
-		       uint32_t update_mode,
-		       bool is_nightmode,
-		       uint32_t marker)
-{
-	struct mxcfb_update_data update = {
-		.update_region = region,
-		.waveform_mode = waveform_mode,
-		.update_mode   = update_mode,
-		.update_marker = marker,
-		.temp          = TEMP_USE_AMBIENT,
-		.flags         = 0,
-		/* dither not actually used by driver */
-		.dither_mode = 0,
-		.quant_bit   = 0,
-		.alt_buffer_data = { 0U }
-	};
-
-	if (is_nightmode && deviceQuirks.canHWInvert) {
-		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
-	}
-
-	int rv;
-	rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
-
-	if (rv < 0) {
-		WARN("MXCFB_SEND_UPDATE: %m");
-		if (errno == EINVAL) {
-			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
-			     region.top,
-			     region.left,
-			     region.width,
-			     region.height);
-		}
-		return ERRCODE(EXIT_FAILURE);
-	}
-
-	return EXIT_SUCCESS;
-}
-
-static int
-    wait_for_complete_remarkable(int fbfd, uint32_t marker)
-{
-	struct mxcfb_update_marker_data update_data = {
-		.update_marker  = marker,
-		.collision_test = 0
-	};
-	int rv;
-	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_data);
-
-	if (rv < 0) {
-		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %m");
-		return ERRCODE(EXIT_FAILURE);
-	} else {
-		if (rv == 0) {
-			LOG("Update %u has already fully been completed", marker);
-		} else {
-			// NOTE: Timeout is set to 5000ms
-			LOG("Waited %ldms for completion of update %u", (5000 - jiffies_to_ms(rv)), marker);
-		}
-	}
-
-	return EXIT_SUCCESS;
-}
 #	elif defined(FBINK_FOR_CERVANTES)
 // Cervantes devices
 // All of them support MX50 "compat" ioctls, much like Kobos.
@@ -1684,6 +1616,70 @@ static int
 {
 	int rv;
 	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &marker);
+
+	if (rv < 0) {
+		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %m");
+		return ERRCODE(EXIT_FAILURE);
+	} else {
+		if (rv == 0) {
+			LOG("Update %u has already fully been completed", marker);
+		} else {
+			// NOTE: Timeout is set to 5000ms
+			LOG("Waited %ldms for completion of update %u", (5000 - jiffies_to_ms(rv)), marker);
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
+#	elif defined(FBINK_FOR_REMARKABLE)
+static int
+    refresh_remarkable(int                     fbfd,
+		       const struct mxcfb_rect region,
+		       uint32_t                waveform_mode,
+		       uint32_t                update_mode,
+		       bool                    is_nightmode,
+		       uint32_t                marker)
+{
+	// NOTE: Actually uses the V1 epdc driver, hence dither & quant_bit being unused.
+	// TODO: Set EPDC_FLAG_FORCE_MONOCHROME accordingly when the actual A2 waveform mode is identified.
+	struct mxcfb_update_data update = { .update_region   = region,
+					    .waveform_mode   = waveform_mode,
+					    .update_mode     = update_mode,
+					    .update_marker   = marker,
+					    .temp            = TEMP_USE_AMBIENT,
+					    .flags           = 0U,
+					    .dither_mode     = 0,
+					    .quant_bit       = 0,
+					    .alt_buffer_data = { 0U } };
+
+	if (is_nightmode && deviceQuirks.canHWInvert) {
+		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
+	}
+
+	int rv;
+	rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
+
+	if (rv < 0) {
+		WARN("MXCFB_SEND_UPDATE: %m");
+		if (errno == EINVAL) {
+			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
+			     region.top,
+			     region.left,
+			     region.width,
+			     region.height);
+		}
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static int
+    wait_for_complete_remarkable(int fbfd, uint32_t marker)
+{
+	struct mxcfb_update_marker_data update_data = { .update_marker = marker, .collision_test = 0 };
+	int                             rv;
+	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_data);
 
 	if (rv < 0) {
 		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %m");
@@ -1930,14 +1926,14 @@ static int
 	}
 #	elif defined(FBINK_FOR_CERVANTES)
 	return refresh_cervantes(fbfd, region, wfm, upm, is_nightmode, lastMarker);
+#	elif defined(FBINK_FOR_REMARKABLE)
+	return refresh_remarkable(fbfd, region, wfm, upm, is_nightmode, lastMarker);
 #	elif defined(FBINK_FOR_KOBO)
 	if (deviceQuirks.isKoboMk7) {
 		return refresh_kobo_mk7(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
 	} else {
 		return refresh_kobo(fbfd, region, wfm, upm, is_nightmode, lastMarker);
 	}
-#	elif defined(FBINK_FOR_REMARKABLE)
-	return refresh_remarkable(fbfd, region, wfm, upm, is_nightmode, lastMarker);
 #	endif    // FBINK_FOR_KINDLE
 }
 #endif            // FBINK_FOR_LINUX
@@ -5064,25 +5060,25 @@ static uint32_t
 			waveform_mode = WAVEFORM_MODE_GC16;
 			break;
 		case WFM_GC4:
-#ifdef FBINK_FOR_REMARKABLE
+#	ifdef FBINK_FOR_REMARKABLE
 			waveform_mode = WAVEFORM_MODE_GC16_FAST;
-#else
+#	else
 			waveform_mode = WAVEFORM_MODE_GC4;
-#endif
+#	endif
 			break;
 		case WFM_A2:
-#ifdef FBINK_FOR_REMARKABLE
+#	ifdef FBINK_FOR_REMARKABLE
 			waveform_mode = WAVEFORM_MODE_GLR16;
-#else
+#	else
 			waveform_mode = WAVEFORM_MODE_A2;
-#endif
+#	endif
 			break;
 		case WFM_GL16:
-#ifdef FBINK_FOR_REMARKABLE
+#	ifdef FBINK_FOR_REMARKABLE
 			waveform_mode = WAVEFORM_MODE_GLD16;
-#else
+#	else
 			waveform_mode = WAVEFORM_MODE_GL16;
-#endif
+#	endif
 			break;
 		case WFM_REAGL:
 			waveform_mode = WAVEFORM_MODE_REAGL;

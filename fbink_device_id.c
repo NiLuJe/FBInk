@@ -925,20 +925,22 @@ static void
 		set_kobo_quirks(kobo_id);
 	}
 }
-#	endif    // FBINK_FOR_KINDLE
-
-#ifdef FBINK_FOR_REMARKABLE
+#	elif defined(FBINK_FOR_REMARKABLE)
 static void
     identify_remarkable(void)
 {
-    deviceQuirks.screenDPI = 226;
-    deviceQuirks.canHWInvert = true;
-    deviceQuirks.ntxBootRota = FB_ROTATE_CW;
-    deviceQuirks.ntxRotaQuirk = NTX_ROTA_SANE;
-    deviceQuirks.canRotate = true;
-    strncpy(deviceQuirks.deviceName, "reMarkable", sizeof(deviceQuirks.deviceName) - 1U);
+	deviceQuirks.screenDPI   = 226;
+	deviceQuirks.canHWInvert = true;
+	// NOTE: Not actually an NTX board (AFAIK), but useful nonetheless for fbdepth ;).
+	deviceQuirks.ntxBootRota  = FB_ROTATE_CW;
+	deviceQuirks.ntxRotaQuirk = NTX_ROTA_SANE;
+	deviceQuirks.canRotate    = true;
+	// Flawfinder: ignore
+	strncpy(deviceQuirks.deviceName, "reMarkable", sizeof(deviceQuirks.deviceName) - 1U);
+	// Flawfinder: ignore
+	strncpy(deviceQuirks.deviceCodename, "Zero Gravitas", sizeof(deviceQuirks.deviceCodename) - 1U);
 }
-#endif
+#	endif    // FBINK_FOR_KINDLE
 
 static void
     identify_device(void)
@@ -979,7 +981,7 @@ static void
 	     deviceQuirks.devicePlatform);
 #	elif defined(FBINK_FOR_REMARKABLE)
 	identify_remarkable();
-	ELOG("Detected a reMarkable");
+	ELOG("Detected a reMarkable (%s)", deviceQuirks.deviceCodename);
 #	endif
 	// Warn if canHWInvert was flipped
 	if (!deviceQuirks.canHWInvert) {
