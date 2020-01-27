@@ -124,7 +124,7 @@ struct mxcfb_rect {
 #define WAVEFORM_MODE_GL16			WAVEFORM_MODE_GLD16
 // NOTE: That one can't be bogus, because it's actually used by the driver to check for obviously invalid modes ;).
 //       Also, it's consistent with other platforms.
-//       Speaking of other platforms, GLR16 == REAGL & GLD16 == REAGLD ;).
+//       Speaking of other platforms, usually, GLR16 == REAGL & GLD16 == REAGLD ;).
 #define WAVEFORM_MODE_AUTO			257
 
 #define TEMP_USE_AMBIENT			0x1000

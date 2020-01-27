@@ -5054,6 +5054,9 @@ static uint32_t
 			break;
 	}
 #elif defined(FBINK_FOR_REMARKABLE)
+	// NOTE: Let's go with a dedicated switch for the reMarkable,
+	//       because we don't actually have sane constant names in the upstream kernel,
+	//       so most of these are guesswork based on libremarkable's findings.
 	switch (wfm_mode_index) {
 		case WFM_INIT:
 			waveform_mode = WAVEFORM_MODE_INIT;
