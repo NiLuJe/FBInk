@@ -215,7 +215,9 @@ ifndef LINUX
 ifndef CERVANTES
 ifndef LEGACY
 ifndef KINDLE
+ifndef REMARKABLE
 	KOBO=true
+endif
 endif
 endif
 endif
@@ -241,6 +243,10 @@ endif
 ifdef KOBO
 	TARGET_CPPFLAGS+=-DFBINK_FOR_KOBO
 endif
+# Toggle reMarkable support
+ifdef REMARKABLE
+	TARGET_CPPFLAGS+=-DFBINK_FOR_REMARKABLE
+endif
 
 # And that should definitely be honored by everything, so, add it to EXTRA_CPPFLAGS
 EXTRA_CPPFLAGS+=$(TARGET_CPPFLAGS)
@@ -262,8 +268,12 @@ ifdef FBINK_VERSION
 				ifdef KOBO
 					LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kobo"'
 				else
-					# NOTE: Should never happen!
-					LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION)"'
+					ifdef REMARKABLE
+						LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for reMarkable"'
+					else
+						# NOTE: Should never happen!
+						LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION)"'
+					endif
 				endif
 			endif
 		endif
@@ -553,6 +563,9 @@ cervantes:
 	$(MAKE) strip CERVANTES=true
 	$(CURDIR)/tools/do_debian_package.sh $(OUT_DIR) armel
 
+remarkable:
+	$(MAKE) strip REMARKABLE=true
+
 libunibreak.built:
 	mkdir -p LibUniBreakBuild
 	cd libunibreak && \
@@ -667,4 +680,4 @@ distclean: clean libunibreakclean
 	rm -rf LibUniBreakBuild
 	rm -rf libunibreak.built
 
-.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo libunibreakclean utils alt dump clean distclean
+.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable libunibreakclean utils alt dump clean distclean

@@ -114,12 +114,16 @@ static void
 	    "\t\t\t\tf.g., fbink -k (if you group short options together, it needs to be the last in its group, i.e., -fk and not -kf).\n"
 #ifndef FBINK_FOR_LINUX
 	    "\t-W, --waveform\t\tRequest a specific waveform update mode from the eInk controller, if supported (mainly useful for images).\n"
-	    "\t\t\t\tAvailable waveform modes: DU, GC16, GC4, A2, GL16, REAGL, REAGLD & AUTO\n"
-#	ifdef FBINK_FOR_KINDLE
+	    "\t\t\t\tAvailable waveform modes: DU, GC16, A2, GL16, REAGL, REAGLD & AUTO\n"
+#	if defined(FBINK_FOR_KINDLE)
 	    "\t\t\t\tAs well as GC16_FAST, GL16_FAST, DU4, GL4, GL16_INV, GCK16 & GLKW16 on some Kindles, depending on the model & FW version.\n"
-	    "\t\t\t\tUnsupported modes should safely downgrade to AUTO.\n"
 	    "\t\t\t\tNote that specifying a waveform mode is ignored on legacy einkfb devices, because the hardware doesn't expose such capabilities.\n"
+#	elif defined(FBINK_FOR_REMARKABLE)
+	    "\t\t\t\tAs well as GC16_FAST, GL16_FAST, DU4, GL4, GL16_INV.\n"
+#	else
+	    "\t\t\t\tAs well as GC4.\n"
 #	endif
+	    "\t\t\t\tUnsupported modes should safely downgrade to AUTO.\n"
 	    "\t-D, --dither\t\tRequest (ordered) hardware dithering from the eInk controller, if supported (mainly useful for images).\n"
 	    "\t-H, --nightmode\t\tRequest full hardware inversion from the eInk controller, if supported.\n"
 	    "\t\t\t\tNote that this can be used *in combination* with -h, --invert! One does not exclude the other, which may lead to some confusing behavior ;).\n"

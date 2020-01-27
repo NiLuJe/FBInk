@@ -28,7 +28,9 @@
 #	ifndef FBINK_FOR_CERVANTES
 #		ifndef FBINK_FOR_LINUX
 #			ifndef FBINK_FOR_KOBO
-#				define FBINK_FOR_KOBO
+#				ifndef FBINK_FOR_REMARKABLE
+#					define FBINK_FOR_KOBO
+#				endif
 #			endif
 #		endif
 #	endif
@@ -183,6 +185,8 @@
 #	include "eink/mxcfb-cervantes.h"
 #elif defined(FBINK_FOR_KOBO)
 #	include "eink/mxcfb-kobo.h"
+#elif defined(FBINK_FOR_REMARKABLE)
+#	include "eink/mxcfb-remarkable.h"
 #elif defined(FBINK_FOR_LINUX)
 // Fallback, because, even on straight Linux, we require a few mxcfb typedefs for some of our own function prototypes...
 #	include "eink/mxcfb-kobo.h"
@@ -253,13 +257,17 @@
 #		ifdef FBINK_FOR_CERVANTES
 #			define FBINK_VERSION FBINK_FALLBACK_VERSION " for Cervantes"
 #		else
-#			ifdef FBINK_FOR_LINUX
-#				define FBINK_VERSION FBINK_FALLBACK_VERSION " for Linux"
+#			ifdef FBINK_FOR_REMARKABLE
+#				define FBINK_VERSION FBINK_FALLBACK_VERSION " for reMarkable"
 #			else
-#				ifdef FBINK_FOR_KOBO
-#					define FBINK_VERSION FBINK_FALLBACK_VERSION " for Kobo"
+#				ifdef FBINK_FOR_LINUX
+#					define FBINK_VERSION FBINK_FALLBACK_VERSION " for Linux"
 #				else
-#					define FBINK_VERSION FBINK_FALLBACK_VERSION
+#					ifdef FBINK_FOR_KOBO
+#						define FBINK_VERSION FBINK_FALLBACK_VERSION " for Kobo"
+#					else
+#						define FBINK_VERSION FBINK_FALLBACK_VERSION
+#					endif
 #				endif
 #			endif
 #		endif
@@ -307,6 +315,11 @@
 #	define UNUSED_BY_CERVANTES __attribute__((unused))
 #else
 #	define UNUSED_BY_CERVANTES
+#endif
+#ifdef FBINK_FOR_REMARKABLE
+#	define UNUSED_BY_REMARKABLE __attribute__((unused))
+#else
+#	define UNUSED_BY_REMARKABLE
 #endif
 #ifndef FBINK_FOR_LINUX
 #	define UNUSED_BY_NOTLINUX __attribute__((unused))
@@ -507,6 +520,9 @@ static int refresh_kindle_rex(int, const struct mxcfb_rect, uint32_t, uint32_t, 
 #	elif defined(FBINK_FOR_CERVANTES)
 static int refresh_cervantes(int, const struct mxcfb_rect, uint32_t, uint32_t, bool, uint32_t);
 static int wait_for_complete_cervantes(int, uint32_t);
+#	elif defined(FBINK_FOR_REMARKABLE)
+static int refresh_remarkable(int, const struct mxcfb_rect, uint32_t, uint32_t, bool, uint32_t);
+static int wait_for_complete_remarkable(int, uint32_t);
 #	elif defined(FBINK_FOR_KOBO)
 static int refresh_kobo(int, const struct mxcfb_rect, uint32_t, uint32_t, bool, uint32_t);
 static int wait_for_complete_kobo(int, uint32_t);

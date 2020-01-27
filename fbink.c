@@ -1631,6 +1631,78 @@ static int
 
 	return EXIT_SUCCESS;
 }
+#	elif defined(FBINK_FOR_REMARKABLE)
+static int
+    refresh_remarkable(int                     fbfd,
+		       const struct mxcfb_rect region,
+		       uint32_t                waveform_mode,
+		       uint32_t                update_mode,
+		       bool                    is_nightmode,
+		       uint32_t                marker)
+{
+	// NOTE: Actually uses the V1 epdc driver, hence dither_mode & quant_bit being unused.
+	// NOTE: The USE_DITHERING flags (based on Atkison's algo) *ought* to be supported, though,
+	//       but the only available choices are Y1 (monochrome) and Y4, so it's not as useful in practice,
+	//       especially with no clear identification of a Y4-friendly waveform mode,
+	//       (i.e., no GC4, and no conclusive tests with DU4 & GL4)...
+	//       Y1 might work/be mildly useful for A2 & DU, though.
+	struct mxcfb_update_data update = { .update_region = region,
+					    .waveform_mode = waveform_mode,
+					    .update_mode   = update_mode,
+					    .update_marker = marker,
+					    .temp          = TEMP_USE_REMARKABLE,
+					    .flags         = (waveform_mode == WAVEFORM_MODE_REAGLD)
+							 ? EPDC_FLAG_USE_REGAL
+							 : (waveform_mode == WAVEFORM_MODE_A2)
+							       ? EPDC_FLAG_FORCE_MONOCHROME
+							       : 0U,
+					    .dither_mode     = 0,
+					    .quant_bit       = 0,
+					    .alt_buffer_data = { 0U } };
+
+	if (is_nightmode && deviceQuirks.canHWInvert) {
+		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
+	}
+
+	int rv;
+	rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
+
+	if (rv < 0) {
+		WARN("MXCFB_SEND_UPDATE: %m");
+		if (errno == EINVAL) {
+			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
+			     region.top,
+			     region.left,
+			     region.width,
+			     region.height);
+		}
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static int
+    wait_for_complete_remarkable(int fbfd, uint32_t marker)
+{
+	struct mxcfb_update_marker_data update_data = { .update_marker = marker, .collision_test = 0U };
+	int                             rv;
+	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_data);
+
+	if (rv < 0) {
+		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %m");
+		return ERRCODE(EXIT_FAILURE);
+	} else {
+		if (rv == 0) {
+			LOG("Update %u has already fully been completed", marker);
+		} else {
+			// NOTE: Timeout is set to 5000ms
+			LOG("Waited %ldms for completion of update %u", (5000 - jiffies_to_ms(rv)), marker);
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
 #	elif defined(FBINK_FOR_KOBO)
 // Kobo devices ([Mk3<->Mk6])
 static int
@@ -1792,7 +1864,7 @@ static int
     refresh(int fbfd,
 	    const struct mxcfb_rect region,
 	    uint32_t waveform_mode,
-	    int dithering_mode UNUSED_BY_CERVANTES,
+	    int dithering_mode UNUSED_BY_CERVANTES UNUSED_BY_REMARKABLE,
 	    bool is_nightmode,
 	    bool is_flashing,
 	    bool no_refresh)
@@ -1862,6 +1934,8 @@ static int
 	}
 #	elif defined(FBINK_FOR_CERVANTES)
 	return refresh_cervantes(fbfd, region, wfm, upm, is_nightmode, lastMarker);
+#	elif defined(FBINK_FOR_REMARKABLE)
+	return refresh_remarkable(fbfd, region, wfm, upm, is_nightmode, lastMarker);
 #	elif defined(FBINK_FOR_KOBO)
 	if (deviceQuirks.isKoboMk7) {
 		return refresh_kobo_mk7(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
@@ -1909,6 +1983,8 @@ static int
 	} else {
 		return wait_for_complete_kobo(fbfd, marker);
 	}
+#	elif defined(FBINK_FOR_REMARKABLE)
+	return wait_for_complete_remarkable(fbfd, marker);
 #	endif    // FBINK_FOR_KINDLE
 }
 #endif    // !FBINK_FOR_LINUX
@@ -4882,7 +4958,7 @@ static uint32_t
 	uint32_t waveform_mode = WAVEFORM_MODE_AUTO;
 
 	// Parse waveform mode...
-#ifdef FBINK_FOR_KINDLE
+#if defined(FBINK_FOR_KINDLE)
 	// Is this a Zelda or a Rex with new waveforms?
 	bool has_new_wfm = false;
 	if (deviceQuirks.isKindleZelda || deviceQuirks.isKindleRex) {
@@ -4969,6 +5045,57 @@ static uint32_t
 			break;
 		case WFM_GLKW16:
 			waveform_mode = WAVEFORM_MODE_ZELDA_GLKW16;
+			break;
+		default:
+			LOG("Unknown (or unsupported) waveform mode '%s' @ index %hhu, defaulting to AUTO",
+			    wfm_to_string(wfm_mode_index),
+			    wfm_mode_index);
+			waveform_mode = WAVEFORM_MODE_AUTO;
+			break;
+	}
+#elif defined(FBINK_FOR_REMARKABLE)
+	// NOTE: Let's go with a dedicated switch for the reMarkable,
+	//       because we don't actually have sane constant names in the upstream kernel,
+	//       so most of these are guesswork based on libremarkable's findings.
+	switch (wfm_mode_index) {
+		case WFM_INIT:
+			waveform_mode = WAVEFORM_MODE_INIT;
+			break;
+		case WFM_AUTO:
+			waveform_mode = WAVEFORM_MODE_AUTO;
+			break;
+		case WFM_DU:
+			waveform_mode = WAVEFORM_MODE_DU;
+			break;
+		case WFM_GC16:
+			waveform_mode = WAVEFORM_MODE_GC16;
+			break;
+		case WFM_GC16_FAST:
+			waveform_mode = WAVEFORM_MODE_GC16_FAST;
+			break;
+		case WFM_A2:
+			waveform_mode = WAVEFORM_MODE_A2;
+			break;
+		case WFM_GL16:
+			waveform_mode = WAVEFORM_MODE_GL16;
+			break;
+		case WFM_GL16_FAST:
+			waveform_mode = WAVEFORM_MODE_GL16_FAST;
+			break;
+		case WFM_DU4:
+			waveform_mode = WAVEFORM_MODE_DU4;
+			break;
+		case WFM_REAGL:
+			waveform_mode = WAVEFORM_MODE_REAGL;
+			break;
+		case WFM_REAGLD:
+			waveform_mode = WAVEFORM_MODE_REAGLD;
+			break;
+		case WFM_GL4:
+			waveform_mode = WAVEFORM_MODE_GL4;
+			break;
+		case WFM_GL16_INV:
+			waveform_mode = WAVEFORM_MODE_GL16_INV;
 			break;
 		default:
 			LOG("Unknown (or unsupported) waveform mode '%s' @ index %hhu, defaulting to AUTO",
