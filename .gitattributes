@@ -153,8 +153,17 @@
 *.go		text diff=golang
 
 ## Web
+# Source code
 *.htm		text diff=html
 *.html		text diff=html
 *.xhtml		text diff=html
 *.scss		text diff=css
+
+# Fonts
+*.ttf		binary
+*.eot		binary
+*.fon		binary
+*.otf		binary
+*.woff		binary
+*.woff2		binary
 
