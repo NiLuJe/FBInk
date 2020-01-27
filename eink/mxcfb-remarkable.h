@@ -114,11 +114,17 @@ struct mxcfb_rect {
 #define WAVEFORM_MODE_GL4			0xA
 #define WAVEFORM_MODE_GL16_INV			0xB
 
-// NOTE: This might actually be A2?
-//       On every other platform, GLR16 == REAGL && GLD16 == REAGLD
+// NOTE: Those leftover constants from the upstream kernel sources are *extremely* confusingly named.
+//       libremarkable tests & comments hinted that this one was actually A2, which we've also confirmed.
 #define WAVEFORM_MODE_GLR16			4
-// NOTE: Which would actually make this GL16?
+#define WAVEFORM_MODE_A2			WAVEFORM_MODE_GLR16
+// NOTE: Which would actually make this GL16 (purely by virtue of GL16 *usually* being A2 + 1)?
+//       Practical tests have yielded weird results, but with a weirdness consistent with GL16_FAST at least ^^.
 #define WAVEFORM_MODE_GLD16			5
+#define WAVEFORM_MODE_GL16			WAVEFORM_MODE_GLD16
+// NOTE: That one can't be bogus, because it's actually used by the driver to check for obviously invalid modes ;).
+//       Also, it's consistent with other platforms.
+//       Speaking of other platforms, GLR16 == REAGL & GLD16 == REAGLD ;).
 #define WAVEFORM_MODE_AUTO			257
 
 #define TEMP_USE_AMBIENT			0x1000
