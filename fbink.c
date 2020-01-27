@@ -1641,13 +1641,16 @@ static int
 		       uint32_t                marker)
 {
 	// NOTE: Actually uses the V1 epdc driver, hence dither & quant_bit being unused.
-	// TODO: Set EPDC_FLAG_FORCE_MONOCHROME accordingly when the actual A2 waveform mode is identified.
-	struct mxcfb_update_data update = { .update_region   = region,
-					    .waveform_mode   = waveform_mode,
-					    .update_mode     = update_mode,
-					    .update_marker   = marker,
-					    .temp            = TEMP_USE_REMARKABLE,
-					    .flags           = 0U,
+	struct mxcfb_update_data update = { .update_region = region,
+					    .waveform_mode = waveform_mode,
+					    .update_mode   = update_mode,
+					    .update_marker = marker,
+					    .temp          = TEMP_USE_REMARKABLE,
+					    .flags         = (waveform_mode == WAVEFORM_MODE_REAGLD)
+							 ? EPDC_FLAG_USE_REGAL
+							 : (waveform_mode == WAVEFORM_MODE_A2)
+							       ? EPDC_FLAG_FORCE_MONOCHROME
+							       : 0U,
 					    .dither_mode     = 0,
 					    .quant_bit       = 0,
 					    .alt_buffer_data = { 0U } };
