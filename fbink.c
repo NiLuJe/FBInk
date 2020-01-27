@@ -5071,12 +5071,10 @@ static uint32_t
 			waveform_mode = WAVEFORM_MODE_GC16_FAST;
 			break;
 		case WFM_A2:
-			// NOTE: Yeah, the constants inherited from the Kernel/libremarkable are confusing here...
-			waveform_mode = WAVEFORM_MODE_GLR16;
+			waveform_mode = WAVEFORM_MODE_A2;
 			break;
 		case WFM_GL16:
-			// NOTE: Yeah, the constants inherited from the Kernel/libremarkable are confusing here...
-			waveform_mode = WAVEFORM_MODE_GLD16;
+			waveform_mode = WAVEFORM_MODE_GL16;
 			break;
 		case WFM_GL16_FAST:
 			waveform_mode = WAVEFORM_MODE_GL16_FAST;
