@@ -1641,6 +1641,11 @@ static int
 		       uint32_t                marker)
 {
 	// NOTE: Actually uses the V1 epdc driver, hence dither & quant_bit being unused.
+	// NOTE: The USE_DITHERING flags (based on Atkison's algo) *ought* to be supported, though,
+	//       but the only available choices are Y1 (monochrome) and Y4, so it's not as useful in practice,
+	//       especially with no clear identification of a Y4-friendly waveform mode,
+	//       (i.e., no GC4, and no conclusive tests with DU4 & GL4)...
+	//       Y1 might work/be mildly useful for A2 & DU, though.
 	struct mxcfb_update_data update = { .update_region = region,
 					    .waveform_mode = waveform_mode,
 					    .update_mode   = update_mode,
