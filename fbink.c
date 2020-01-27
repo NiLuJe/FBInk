@@ -1338,8 +1338,7 @@ static int
 static int
     wait_for_submission_kindle(int fbfd, uint32_t marker)
 {
-	int rv;
-	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_SUBMISSION, &marker);
+	int rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_SUBMISSION, &marker);
 
 	if (rv < 0) {
 		WARN("MXCFB_WAIT_FOR_UPDATE_SUBMISSION: %m");
@@ -1382,8 +1381,7 @@ static int
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
 	}
 
-	int rv;
-	rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
+	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
 
 	if (rv < 0) {
 		WARN("MXCFB_SEND_UPDATE: %m");
@@ -1404,8 +1402,7 @@ static int
 static int
     wait_for_complete_kindle_pearl(int fbfd, uint32_t marker)
 {
-	int rv;
-	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL, &marker);
+	int rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL, &marker);
 
 	if (rv < 0) {
 		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL: %m");
@@ -1430,8 +1427,7 @@ static int
 		.update_marker  = marker,
 		.collision_test = 0U,
 	};
-	int rv;
-	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_marker);
+	int rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_marker);
 
 	if (rv < 0) {
 		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %m");
@@ -1489,8 +1485,7 @@ static int
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
 	}
 
-	int rv;
-	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_ZELDA, &update);
+	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE_ZELDA, &update);
 
 	if (rv < 0) {
 		WARN("MXCFB_SEND_UPDATE_ZELDA: %m");
@@ -1547,8 +1542,7 @@ static int
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
 	}
 
-	int rv;
-	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_REX, &update);
+	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE_REX, &update);
 
 	if (rv < 0) {
 		WARN("MXCFB_SEND_UPDATE_REX: %m");
@@ -1591,8 +1585,7 @@ static int
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
 	}
 
-	int rv;
-	rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
+	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
 
 	if (rv < 0) {
 		WARN("MXCFB_SEND_UPDATE: %m");
@@ -1614,8 +1607,7 @@ static int
 static int
     wait_for_complete_cervantes(int fbfd, uint32_t marker)
 {
-	int rv;
-	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &marker);
+	int rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &marker);
 
 	if (rv < 0) {
 		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %m");
@@ -1664,8 +1656,7 @@ static int
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
 	}
 
-	int rv;
-	rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
+	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
 
 	if (rv < 0) {
 		WARN("MXCFB_SEND_UPDATE: %m");
@@ -1686,8 +1677,7 @@ static int
     wait_for_complete_remarkable(int fbfd, uint32_t marker)
 {
 	struct mxcfb_update_marker_data update_data = { .update_marker = marker, .collision_test = 0U };
-	int                             rv;
-	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_data);
+	int                             rv          = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_data);
 
 	if (rv < 0) {
 		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %m");
@@ -1729,8 +1719,7 @@ static int
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
 	}
 
-	int rv;
-	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V1_NTX, &update);
+	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V1_NTX, &update);
 
 	if (rv < 0) {
 		WARN("MXCFB_SEND_UPDATE_V1_NTX: %m");
@@ -1750,8 +1739,7 @@ static int
 static int
     wait_for_complete_kobo(int fbfd, uint32_t marker)
 {
-	int rv;
-	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1, &marker);
+	int rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1, &marker);
 
 	if (rv < 0) {
 		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1: %m");
@@ -1800,8 +1788,7 @@ static int
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
 	}
 
-	int rv;
-	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V2, &update);
+	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V2, &update);
 
 	if (rv < 0) {
 		WARN("MXCFB_SEND_UPDATE_V2: %m");
@@ -1825,8 +1812,7 @@ static int
 		.update_marker  = marker,
 		.collision_test = 0U,
 	};
-	int rv;
-	rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3, &update_marker);
+	int rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3, &update_marker);
 
 	if (rv < 0) {
 		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3: %m");

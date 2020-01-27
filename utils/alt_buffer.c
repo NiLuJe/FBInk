@@ -83,8 +83,7 @@ static int
 	// And, of course, use the alt buffer ;).
 	update.flags |= EPDC_FLAG_USE_ALT_BUFFER;
 
-	int rv;
-	rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V1_NTX, &update);
+	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V1_NTX, &update);
 
 	if (rv < 0) {
 		WARN("MXCFB_SEND_UPDATE_V1_NTX w/ alt buffer: %m");
