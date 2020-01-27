@@ -1640,7 +1640,7 @@ static int
 		       bool                    is_nightmode,
 		       uint32_t                marker)
 {
-	// NOTE: Actually uses the V1 epdc driver, hence dither & quant_bit being unused.
+	// NOTE: Actually uses the V1 epdc driver, hence dither_mode & quant_bit being unused.
 	// NOTE: The USE_DITHERING flags (based on Atkison's algo) *ought* to be supported, though,
 	//       but the only available choices are Y1 (monochrome) and Y4, so it's not as useful in practice,
 	//       especially with no clear identification of a Y4-friendly waveform mode,
