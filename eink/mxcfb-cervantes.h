@@ -15,6 +15,9 @@
  * http://www.gnu.org/copyleft/lgpl.html
  */
 
+// NOTE: Upstream kernels available here: https://github.com/bq/linux-e60qh2/tree/e60qh2 (as well as the other linux- repos).
+//       See also https://blog.bq.com/es/bq-ereaders-developers-program/
+
 /*
  * @file arch-mxc/   mxcfb.h
  *

@@ -1,3 +1,5 @@
+//  NOTE: Upstream kernels available here: https://www.amazon.com/gp/help/customer/display.html?nodeId=200203720
+
 #ifndef _EINKFB_H
 #define _EINKFB_H
 
@@ -35,7 +37,7 @@ struct raw_image_t
     int xres,		// image's width, in pixels
         yres,		// image's height
         bpp;		// image's pixel (bit) depth
-    
+
     __u8  start[]; 	// actual start of image
 };
 typedef struct raw_image_t raw_image_t;
@@ -46,7 +48,7 @@ struct image_t
         xlen,       // image's actual width, used for rowbyte & memory size calculations
         yres,       // image's height
         bpp;        // image's pixel (bit) depth
-        
+
     __u8  *start;     // pointer to start of image
 };
 typedef struct image_t image_t;
@@ -62,17 +64,17 @@ enum splash_screen_type
 
     //splash_screen_powering_off_wireless,   // Deprecated.
     //splash_screen_powering_on_wireless,    // Deprecated.
-    
+
     //splash_screen_exit,                    // Deprecated.
     splash_screen_logo = 5,
-    
+
     //splash_screen_usb_internal,            // Deprecated.
     //splash_screen_usb_external,            // Deprecated.
     //splash_screen_usb,                     // Deprecated.
-    
+
     //splash_screen_sleep,                   // Deprecated.
     //splash_screen_update,                  // Deprecated.
-    
+
     //num_splash_screens,                    // Deprecated.
 
     // Composite splash screens & messages.
@@ -81,22 +83,22 @@ enum splash_screen_type
     //splash_screen_drivemode_1,              // Deprecated.
     //splash_screen_drivemode_2,              // Deprecated.
     //splash_screen_drivemode_3,              // Deprecated.
-    
+
     splash_screen_power_off_clear_screen = 16,// Message: clear screen and power down controller.
     //splash_screen_screen_saver_picture,     // Deprecated.
-    
+
     splash_screen_shim_picture = 18,          // Message: shim wants a picture displayed.
 
     splash_screen_lowbatt,                    // Picture: Not composite, post-legacy ordering (Mario only).
     splash_screen_reboot,                     // Picture: Composite (not used on Fiona).
-    
-    splash_screen_update_initial,             // Composite software-update screens. 
+
+    splash_screen_update_initial,             // Composite software-update screens.
     splash_screen_update_success,             //
     splash_screen_update_failure,             //
     splash_screen_update_failure_no_wait,     //
-    
+
     splash_screen_repair_needed,              // More composite screens.
-    splash_screen_boot,                       // 
+    splash_screen_boot,                       //
 
     splash_screen_invalid = -1
 };
@@ -119,20 +121,20 @@ enum fx_type
     //
     fx_mask = 11,                           // Only for use with update_area_t's non-NULL buffer which_fx.
     fx_buf_is_mask = 14,                    // Same as fx_mask, but doesn't require a doubling (i.e., the buffer & mask are the same).
-    
+
     fx_none = -1,                           // No legacy-FX to apply.
-    
+
     // Screen-update FX, supported by HAL.
     //
     fx_flash = 20,                          // Only for use with update_area_t (for faking a flashing update).
     fx_invert = 21,                         // Only for use with update_area_t (only inverts output data).
-        
-    fx_update_partial = 0,                  // Higher-speed, lower-fidelity update at bit depth's number of grays (aka non-flashing). 
+
+    fx_update_partial = 0,                  // Higher-speed, lower-fidelity update at bit depth's number of grays (aka non-flashing).
     fx_update_full = 1,                     // Higher-fidelity, lower speed update at bit depth's number of grays (aka flashing).
-    
+
     fx_update_fast = 2,                     // Sacrifices all fidelity for speed (will be non-flashing).
     fx_update_slow = 3,                     // Sacrifices any speed for fidelity (will be flashing).
-    
+
     fx_buffer_load = 99,                    // Just load the hardware buffer; don't update the display.
     fx_buffer_display_partial = 100,        // Display whatever's in the hardware's buffer, non-flashing style.
     fx_buffer_display_full = 101            // Display whatever's in the hardware's buffer, flashing style.
@@ -160,7 +162,7 @@ typedef enum fx_type fx_type;
      (fx_buffer_display_partial == (f)) ||  \
      (fx_update_partial == (f))         ||  \
      (fx_update_fast == (f)))
-     
+
 #define UPDATE_AREA_FULL(f)                 \
     (UPDATE_AREA_FX(f)                  ||  \
      (fx_buffer_display_full == (f))    ||  \
@@ -191,7 +193,7 @@ typedef enum fx_type fx_type;
     ((fx_buffer_load == (f))            ||  \
      (fx_buffer_display_partial == (f)) ||  \
      (fx_buffer_display_full == (f)))
-     
+
 #define SKIP_BUFFERS_EQUAL(f, c)            \
     (UPDATE_MODE_BUFFER(f)              ||  \
      (fx_update_slow == (f))            ||  \
@@ -214,7 +216,7 @@ struct fx_t
 {
     fx_type     update_mode,                // Screen-update FX:  fx_update_full | fx_update_partial.
                 which_fx;                   // Shim (legacy) FX.
-    
+
     int         num_exclude_rects;          // 0..MAX_EXCLUDE_RECTS.
     rect_t      exclude_rects[MAX_EXCLUDE_RECTS];
 };
@@ -239,9 +241,9 @@ struct update_area_t
     //
     int         x1, y1,                     // Top-left...
                 x2, y2;                     // ...bottom-right.
-    
+
     fx_type     which_fx;                   // FX to use.
-        
+
     __u8        *buffer;                    // If NULL, extract from framebuffer, top-left to bottom-right, by rowbytes.
 };
 typedef struct update_area_t update_area_t;
@@ -274,10 +276,10 @@ typedef enum orientation_t orientation_t;
 
 #define ORIENTATION_PORTRAIT(o)     \
     ((orientation_portrait == (o))  || (orientation_portrait_upside_down == (o)))
-    
+
 #define ORIENTATION_LANDSCAPE(o)    \
     ((orientation_landscape == (o)) || (orientation_landscape_upside_down == (o)))
-    
+
 #define ORIENTATION_SAME(o1, o2)    \
     ((ORIENTATION_PORTRAIT(o1)  && ORIENTATION_PORTRAIT(o2)) || \
      (ORIENTATION_LANDSCAPE(o1) && ORIENTATION_LANDSCAPE(o2)))
@@ -286,10 +288,10 @@ enum einkfb_events_t
 {
     einkfb_event_update_display = 0,        // FBIO_EINK_UPDATE_DISPLAY
     einkfb_event_update_display_area,       // FBIO_EINK_UPDATE_DISPLAY_AREA
-    
+
     einkfb_event_blank_display,             // FBIOBLANK (fb.h)
     einkfb_event_rotate_display,            // FBIO_EINK_SET_DISPLAY_ORIENTATION
-    
+
     einkfb_event_null = -1
 };
 typedef enum einkfb_events_t einkfb_events_t;
@@ -297,16 +299,16 @@ typedef enum einkfb_events_t einkfb_events_t;
 struct einkfb_event_t
 {
     einkfb_events_t event;                  // Not all einkfb_events_t use all of the einkfb_event_t fields.
-    
+
     fx_type         update_mode;            // Screen-update FX:  fx_update_full | fx_update_partial.
-    
+
     // Note:  The bottom-right (x2, y2) coordinate is actually such that (x2 - x1) and (y2 - y1)
     //        are xres and yres, respectively, when normally xres and yres would be
     //        (x2 - x1) + 1 and (y2 - y1) + 1, respectively.
     //
     int             x1, y1,                 // Top-left...
                     x2, y2;                 // ...bottom-right.
-                    
+
     orientation_t   orientation;            // Display rotated into this orientation.
 };
 typedef struct einkfb_event_t einkfb_event_t;
@@ -323,7 +325,7 @@ enum progressbar_badge_t
 {
     progressbar_badge_success,
     progressbar_badge_failure,
-    
+
     progressbar_badge_none
 };
 typedef enum progressbar_badge_t progressbar_badge_t;
@@ -338,14 +340,14 @@ typedef enum sleep_behavior_t sleep_behavior_t;
 enum contrast_t
 {
     contrast_off,
-    
+
     contrast_light,
     contrast_medium,
     contrast_dark,
-    
+
     contrast_lighter,
     contrast_lightest,
-    
+
     contrast_darker,
     contrast_darkest
 };

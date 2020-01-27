@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2004-2015 Freescale Semiconductor, Inc. All Rights Reserved.
  *
+ * NOTE: Upstream kernels available here: https://github.com/kobolabs/Kobo-Reader/tree/master/hw
  * - slightly modified (commented out include of fb.h) for Lua integration
  * - Frankensteined w/ Mark 6 stuff -- NiLuJe
  * - Frankensteined w/ Mark 7 stuff -- NiLuJe

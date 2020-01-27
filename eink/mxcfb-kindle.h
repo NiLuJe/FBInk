@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2004-2015 Freescale Semiconductor, Inc. All Rights Reserved.
  *
+ * NOTE: Upstream kernels available here: https://www.amazon.com/gp/help/customer/display.html?nodeId=200203720
+ *
  * - Modified by houqp, added mxcfb_update_data struct from GeekMaster's
  *   video player, refer to:
  *   http://www.mobileread.com/forums/showthread.php?t=177455&page=10
