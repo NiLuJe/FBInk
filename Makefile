@@ -91,12 +91,17 @@ ifndef DEBUG
 	ifdef SHARED
 		ifeq "$(CC_IS_CLANG)" "0"
 			# Applies when building a shared library as well as just PIC in general.
+			# Fun fact: apparently the default on Clang ;).
 			SHARED_CFLAGS+=-fno-semantic-interposition
 		endif
 	endif
 	# Enable loop unrolling & vectorization in the hope it'll do something smart with our pixel loops
 	EXTRA_CFLAGS+=-ftree-vectorize
 	EXTRA_CFLAGS+=-funroll-loops
+	# Always match GCC >= 10 new default
+	ifeq "$(CC_IS_CLANG)" "0"
+		EXTRA_CFLAGS+=-fno-common
+	endif
 	##
 	# Graphite stuff (none of my TCs are built w/ graphite enabled, and it doesn't seem to have a noticeable impact anyway).
 	ifeq "$(CC_IS_CLANG)" "0"
