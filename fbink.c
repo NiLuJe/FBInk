@@ -601,19 +601,29 @@ static void
 				put_pixel_Gray4(&coords, px);
 			}
 		}
-	} else if (vInfo.bits_per_pixel == 16U && px->gray8 != 0x00u && px->gray8 != 0xFFu) {
-		// Same thing @ 16bpp if we're not doing black or white, as those are the only colors in our palette
-		// that pack into two indentical bytes when packed as RGB565... -_-".
-		FBInkPixel packed_px;
-		packed_px.rgb565 = pack_rgb565(px->bgra.color.r, px->bgra.color.g, px->bgra.color.b);
-		for (unsigned short int cy = 0U; cy < h; cy++) {
-			for (unsigned short int cx = 0U; cx < w; cx++) {
-				FBInkCoordinates coords;
-				coords.x = (unsigned short int) (x + cx);
-				coords.y = (unsigned short int) (y + cy);
-				(*fxpRotateCoords)(&coords);
-				put_pixel_RGB565(&coords, &packed_px);
-			}
+	} else if (vInfo.bits_per_pixel == 16U) {
+		// Same thing @ 16bpp, because except for black or white, we're not sure the requested color
+		// will pack into two indentical bytes when packed as RGB565... -_-".
+		const uint16_t v = y8ToRGB565[px->gray8];
+		ELOG("pack: %#06x vs. LUT: %#06x for RGB: #%02X%02X%02X (Y8: %02X) [RGB565: %#06x]\n", pack_rgb565(px->bgra.color.r, px->bgra.color.g, px->bgra.color.b), y8ToRGB565[px->gray8], px->bgra.color.r, px->bgra.color.g, px->bgra.color.b, px->gray8, px->rgb565);
+
+		struct mxcfb_rect region = {
+			.top    = y,
+			.left   = x,
+			.width  = w,
+			.height = h,
+		};
+		(*fxpRotateRegion)(&region);
+
+		// And that's a cheap-ass manual memset16, let's hope the compiler can do something fun with that...
+		for (size_t j = region.top; j < region.top + region.height; j++) {
+			const size_t px_offset = ((fInfo.line_length * j) + (region.left << 1U));
+			uint16_t* p = (uint16_t*) (fbPtr + px_offset);
+			size_t px_count = region.width;
+
+			while(px_count--) {
+				*p++ = v;
+			};
 		}
 	} else {
 		struct mxcfb_rect region = {
