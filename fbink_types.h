@@ -63,6 +63,11 @@ typedef struct
 	unsigned short int y;
 } FBInkCoordinates;
 
+// Crappy flags for RGB656 handling in put_pixel...
+#define PX_IS_RGB32	0u
+#define PX_IS_RGB565	1u
+#define PX_IS_GRAY8	2u
+
 // A color, as an (r, g, b) triplet for an 8-bit per component, 3 channel color
 // NOTE: For grayscale, r = g = b (= v), so we assume v is r for simplicity's sake.
 typedef struct

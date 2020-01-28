@@ -371,7 +371,7 @@ static void
 //       and in this case (ha!) appears to behave *noticeably* better than switching...
 //       Which is why we now branch via an if ladder, as it should offer marginally better performance on newer devices.
 static void
-    put_pixel(FBInkCoordinates coords, const FBInkPixel* restrict px, bool rgb565_packed)
+    put_pixel(FBInkCoordinates coords, const FBInkPixel* restrict px, uint8_t px_fmt)
 {
 	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
 	// fbink_init() takes care of setting this global pointer to the right function...
@@ -402,7 +402,7 @@ static void
 		put_pixel_Gray8(&coords, px);
 	} else if (vInfo.bits_per_pixel == 16U) {
 		// Do we need to pack the pixel, first?
-		if (rgb565_packed) {
+		if (px_fmt == PX_IS_RGB565) {
 			// Nope :)
 			put_pixel_RGB565(&coords, px);
 		} else {
@@ -1169,12 +1169,12 @@ static struct mxcfb_rect
 								get_pixel(coords, &fbP);                                 \
 								fbP.bgra.p ^= 0x00FFFFFFu;                               \
 								pxP = &fbP;                                              \
-								put_pixel(coords, pxP, false);                           \
+								put_pixel(coords, pxP, PX_IS_RGB32);                     \
 							} else {                                                         \
-								put_pixel(coords, pxP, true);                            \
+								put_pixel(coords, pxP, PX_IS_RGB565);                    \
 							}                                                                \
 						} else if (!is_fgpx && fbink_cfg->is_fgless) {                           \
-							put_pixel(coords, pxP, true);                                    \
+							put_pixel(coords, pxP, PX_IS_RGB565);                            \
 						}                                                                        \
 					}                                                                                \
 				}                                                                                        \
@@ -4651,7 +4651,7 @@ int
 					for (unsigned int k = 0U; k < lw; k++) {
 						pixel.bgra.color.r = pixel.bgra.color.g = pixel.bgra.color.b =
 						    lnPtr[k] ^ ainv;
-						put_pixel(paint_point, &pixel, false);
+						put_pixel(paint_point, &pixel, PX_IS_GRAY8);
 						paint_point.x++;
 					}
 					lnPtr += max_lw;
@@ -4664,15 +4664,15 @@ int
 					for (unsigned int k = 0U; k < lw; k++) {
 						if (lnPtr[k] == 0U) {
 							// No coverage (transparent) -> background
-							put_pixel(paint_point, &bgP, true);
+							put_pixel(paint_point, &bgP, PX_IS_RGB565);
 						} else if (lnPtr[k] == 0xFFu) {
 							// Full coverage (opaque) -> foreground
-							put_pixel(paint_point, &fgP, true);
+							put_pixel(paint_point, &fgP, PX_IS_RGB565);
 						} else {
 							// AA, blend it using the coverage mask as alpha
 							pixel.bgra.color.r = pixel.bgra.color.g = pixel.bgra.color.b =
 							    (uint8_t) DIV255((pmul_bg + (layer_diff * lnPtr[k])));
-							put_pixel(paint_point, &pixel, false);
+							put_pixel(paint_point, &pixel, PX_IS_RGB32);
 						}
 						paint_point.x++;
 					}
@@ -4691,7 +4691,7 @@ int
 					for (unsigned int k = 0U; k < lw; k++) {
 						if (lnPtr[k] == 0U) {
 							// No coverage (transparent) -> background
-							put_pixel(paint_point, &bgP, true);
+							put_pixel(paint_point, &bgP, PX_IS_RGB565);
 						} else if (lnPtr[k] != 0xFFu) {
 							// AA, blend it using the coverage mask as alpha,
 							// and the underlying pixel as fg
@@ -4702,7 +4702,7 @@ int
 							    (pmul_bg + ((fb_px.bgra.color.g - bgcolor) * lnPtr[k])));
 							pixel.bgra.color.b = (uint8_t) DIV255(
 							    (pmul_bg + ((fb_px.bgra.color.b - bgcolor) * lnPtr[k])));
-							put_pixel(paint_point, &pixel, false);
+							put_pixel(paint_point, &pixel, PX_IS_RGB32);
 						}
 						paint_point.x++;
 					}
@@ -4718,7 +4718,7 @@ int
 						get_pixel(paint_point, &fb_px);
 						pixel.gray8 =
 						    (uint8_t) DIV255((pmul_bg + ((fb_px.gray8 - bgcolor) * lnPtr[k])));
-						put_pixel(paint_point, &pixel, false);
+						put_pixel(paint_point, &pixel, PX_IS_GRAY8);
 						paint_point.x++;
 					}
 					lnPtr += max_lw;
@@ -4737,7 +4737,7 @@ int
 							get_pixel(paint_point, &fb_px);
 							// We want our foreground to be the inverse of the underlying pixel...
 							pixel.bgra.p = fb_px.bgra.p ^ 0x00FFFFFFu;
-							put_pixel(paint_point, &pixel, false);
+							put_pixel(paint_point, &pixel, PX_IS_RGB32);
 						} else if (lnPtr[k] != 0U) {
 							// AA, blend it using the coverage mask as alpha,
 							// and the underlying pixel as bg
@@ -4755,7 +4755,7 @@ int
 							    (MUL255(fb_px.bgra.color.b) +
 							     (((fb_px.bgra.color.b ^ 0xFF) - fb_px.bgra.color.b) *
 							      lnPtr[k])));
-							put_pixel(paint_point, &pixel, false);
+							put_pixel(paint_point, &pixel, PX_IS_RGB32);
 						}
 						paint_point.x++;
 					}
@@ -4773,7 +4773,7 @@ int
 						pixel.gray8 =
 						    (uint8_t) DIV255((MUL255(fb_px.gray8) +
 								      (((fb_px.gray8 ^ 0xFF) - fb_px.gray8) * lnPtr[k])));
-						put_pixel(paint_point, &pixel, false);
+						put_pixel(paint_point, &pixel, PX_IS_GRAY8);
 						paint_point.x++;
 					}
 					lnPtr += max_lw;
@@ -4789,7 +4789,7 @@ int
 					for (unsigned int k = 0U; k < lw; k++) {
 						if (lnPtr[k] == 0xFFu) {
 							// Full coverage (opaque) -> foreground
-							put_pixel(paint_point, &fgP, true);
+							put_pixel(paint_point, &fgP, PX_IS_RGB565);
 						} else if (lnPtr[k] != 0U) {
 							// AA, blend it using the coverage mask as alpha,
 							// and the underlying pixel as bg
@@ -4803,7 +4803,7 @@ int
 							pixel.bgra.color.b = (uint8_t) DIV255(
 							    (MUL255(fb_px.bgra.color.b) +
 							     ((fgcolor - fb_px.bgra.color.b) * lnPtr[k])));
-							put_pixel(paint_point, &pixel, false);
+							put_pixel(paint_point, &pixel, PX_IS_RGB32);
 						}
 						paint_point.x++;
 					}
@@ -4819,7 +4819,7 @@ int
 						get_pixel(paint_point, &fb_px);
 						pixel.gray8 = (uint8_t) DIV255(
 						    (MUL255(fb_px.gray8) + ((fgcolor - fb_px.gray8) * lnPtr[k])));
-						put_pixel(paint_point, &pixel, false);
+						put_pixel(paint_point, &pixel, PX_IS_GRAY8);
 						paint_point.x++;
 					}
 					lnPtr += max_lw;
