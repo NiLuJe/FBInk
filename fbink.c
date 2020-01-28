@@ -608,7 +608,7 @@ static void
 	} else if (vInfo.bits_per_pixel == 16U) {
 		// Things are a bit trickier @ 16bpp, because except for black or white, we're not sure the requested color
 		// will be composed of two indentical bytes when packed as RGB565... -_-".
-		// NOTE: As fill_rect was originally designed to only ever be fed Gray8 colors from the eInk palette,
+		// NOTE: Silver lining: as fill_rect was originally designed to only ever be fed eInk palette colors,
 		//       we have a guarantee that the input pixel is already packed, so we can use px->rgb565 ;).
 
 		struct mxcfb_rect region = {
