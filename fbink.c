@@ -407,8 +407,7 @@ static void
 			put_pixel_RGB565(&coords, px);
 		} else if (px_fmt == PXFMT_GRAY8) {
 			// Yes, but we can use a LUT :|
-			FBInkPixel packed_px;
-			packed_px.rgb565 = y8ToRGB565[px->gray8];
+			const FBInkPixel packed_px = { .rgb565 = y8ToRGB565[px->gray8] };
 			put_pixel_RGB565(&coords, &packed_px);
 		} else {
 			// Yep :(
