@@ -104,7 +104,7 @@ struct mxcfb_rect {
 // c.f., https://github.com/canselcik/libremarkable/blob/67ff7ea3926319a6d33a216a2b8c1f679916aa3c/src/framebuffer/common.rs#L338
 // NOTE: Those constant names seem to be inspired from https://github.com/fread-ink/inkwave
 //       (which was itself built around Kindle waveforms, which is why some of those names will look familiar if you check mxcfb-kindle.h ;)).
-// NOTE: Also added relevant enum names from libqsgepaper.a  as inline comments (AFAICT, here be dragons!).
+// NOTE: Also added relevant enum names from libqsgepaper.a (it's part of the official SDK) as inline comments (AFAICT, here be dragons!).
 #define WAVEFORM_MODE_INIT			0	// EPFrameBuffer::WaveformMode::Initialize		EPFrameBuffer::Waveform::INIT
 #define WAVEFORM_MODE_DU			1	// EPFrameBuffer::WaveformMode::Mono			EPFrameBuffer::Waveform::DU
 #define WAVEFORM_MODE_GC16			2	// EPFrameBuffer::WaveformMode::HighQualityGrayscale	EPFrameBuffer::Waveform::GC16
