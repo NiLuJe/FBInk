@@ -105,6 +105,8 @@ struct mxcfb_rect {
 // NOTE: Those constant names seem to be inspired from https://github.com/fread-ink/inkwave
 //       (which was itself built around Kindle waveforms, which is why some of those names will look familiar if you check mxcfb-kindle.h ;)).
 // NOTE: Also added relevant enum names from libqsgepaper.a (it's part of the official SDK) as inline comments (AFAICT, here be dragons!).
+// NOTE: Speaking of inkwave, it seems to confirm that the firmware blob only ships 5 different waveform modes, so I'd trust EPFrameBuffer::WaveformMode ;).
+//       Still, it was designed with Kindle firmware blobs in mind, so, take that with a grain of salt nonetheless.
 #define WAVEFORM_MODE_INIT			0	// EPFrameBuffer::WaveformMode::Initialize		EPFrameBuffer::Waveform::INIT
 #define WAVEFORM_MODE_DU			1	// EPFrameBuffer::WaveformMode::Mono			EPFrameBuffer::Waveform::DU
 #define WAVEFORM_MODE_GC16			2	// EPFrameBuffer::WaveformMode::HighQualityGrayscale	EPFrameBuffer::Waveform::GC16
