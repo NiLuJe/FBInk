@@ -616,6 +616,7 @@ static void
 		(*fxpRotateRegion)(&region);
 
 		// And that's a cheap-ass manual memset16, let's hope the compiler can do something fun with that...
+		// That's the exact pattern used by the Linux kernel (c.f., memset16 @ lib/string.c), so, here's hoping ;).
 		for (size_t j = region.top; j < region.top + region.height; j++) {
 			const size_t px_offset = ((fInfo.line_length * j) + (region.left << 1U));
 #pragma GCC diagnostic push
