@@ -850,8 +850,8 @@ static struct mxcfb_rect
 		if (vInfo.bits_per_pixel == 16U) {
 			const uint8_t fgcolor = penFGColor ^ 0xFFu;
 			const uint8_t bgcolor = penBGColor ^ 0xFFu;
-			fgP.rgb565            = pack_rgb565(fgcolor, fgcolor, fgcolor);
-			bgP.rgb565            = pack_rgb565(bgcolor, bgcolor, bgcolor);
+			fgP.rgb565            = y8ToRGB565[fgcolor];
+			bgP.rgb565            = y8ToRGB565[bgcolor];
 		} else {
 			fgP.bgra.p ^= 0x00FFFFFFu;
 			bgP.bgra.p ^= 0x00FFFFFFu;
@@ -2642,8 +2642,8 @@ static int
 		case 16U:
 			//fxpPutPixel       = &put_pixel_RGB565;
 			fxpGetPixel       = &get_pixel_RGB565;
-			penFGPixel.rgb565 = pack_rgb565(penFGColor, penFGColor, penFGColor);
-			penBGPixel.rgb565 = pack_rgb565(penBGColor, penBGColor, penBGColor);
+			penFGPixel.rgb565 = y8ToRGB565[penFGColor];
+			penBGPixel.rgb565 = y8ToRGB565[penBGColor];
 			break;
 		case 24U:
 			//fxpPutPixel             = &put_pixel_RGB24;
@@ -3101,7 +3101,7 @@ int
 			// NOTE: And, of course, RGB565 is terrible. Inverting the lossy packed value would be even lossier...
 			if (vInfo.bits_per_pixel == 16U) {
 				const uint8_t bgcolor = penBGColor ^ 0xFFu;
-				bgP.rgb565            = pack_rgb565(bgcolor, bgcolor, bgcolor);
+				bgP.rgb565            = y8ToRGB565[bgcolor];
 			} else {
 				bgP.bgra.p ^= 0x00FFFFFFu;
 			}
@@ -4357,8 +4357,8 @@ int
 	if (is_inverted) {
 		// NOTE: And, of course, RGB565 is terrible. Inverting the lossy packed value would be even lossier...
 		if (vInfo.bits_per_pixel == 16U) {
-			fgP.rgb565 = pack_rgb565(fgcolor, fgcolor, fgcolor);
-			bgP.rgb565 = pack_rgb565(bgcolor, bgcolor, bgcolor);
+			fgP.rgb565 = y8ToRGB565[fgcolor];
+			bgP.rgb565 = y8ToRGB565[bgcolor];
 		} else {
 			fgP.bgra.p ^= 0x00FFFFFFu;
 			bgP.bgra.p ^= 0x00FFFFFFu;
@@ -5490,8 +5490,8 @@ int
 	if (fbink_cfg->is_inverted) {
 		// NOTE: And, of course, RGB565 is terrible. Inverting the lossy packed value would be even lossier...
 		if (vInfo.bits_per_pixel == 16U) {
-			fgP.rgb565 = pack_rgb565(fgcolor, fgcolor, fgcolor);
-			bgP.rgb565 = pack_rgb565(bgcolor, bgcolor, bgcolor);
+			fgP.rgb565 = y8ToRGB565[fgcolor];
+			bgP.rgb565 = y8ToRGB565[bgcolor];
 		} else {
 			fgP.bgra.p ^= 0x00FFFFFFu;
 			bgP.bgra.p ^= 0x00FFFFFFu;
@@ -5568,8 +5568,8 @@ int
 			borderP.gray8 = borderC;
 			break;
 		case 16U:
-			emptyP.rgb565  = pack_rgb565(emptyC, emptyC, emptyC);
-			borderP.rgb565 = pack_rgb565(borderC, borderC, borderC);
+			emptyP.rgb565  = y8ToRGB565[emptyC];
+			borderP.rgb565 = y8ToRGB565[borderC];
 			break;
 		case 24U:
 		case 32U:
