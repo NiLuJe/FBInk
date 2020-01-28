@@ -4679,7 +4679,7 @@ int
 							// AA, blend it using the coverage mask as alpha
 							pixel.bgra.color.r = pixel.bgra.color.g = pixel.bgra.color.b =
 							    (uint8_t) DIV255((pmul_bg + (layer_diff * lnPtr[k])));
-							put_pixel(paint_point, &pixel, false, false);
+							put_pixel(paint_point, &pixel, false, true);
 						}
 						paint_point.x++;
 					}
