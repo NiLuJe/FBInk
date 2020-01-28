@@ -102,25 +102,26 @@ struct mxcfb_rect {
 
 // Findings courtesy of libremarkable
 // c.f., https://github.com/canselcik/libremarkable/blob/67ff7ea3926319a6d33a216a2b8c1f679916aa3c/src/framebuffer/common.rs#L338
-#define WAVEFORM_MODE_INIT			0
-#define WAVEFORM_MODE_DU			1
-#define WAVEFORM_MODE_GC16			2
-#define WAVEFORM_MODE_GC16_FAST			3
+// Also added relevant enum names from libqsgepaper.a (AFAICT, here be dragons!).
+#define WAVEFORM_MODE_INIT			0	// EPFrameBuffer::WaveformMode::Initialize		EPFrameBuffer::Waveform::INIT
+#define WAVEFORM_MODE_DU			1	// EPFrameBuffer::WaveformMode::Mono			EPFrameBuffer::Waveform::DU
+#define WAVEFORM_MODE_GC16			2	// EPFrameBuffer::WaveformMode::HighQualityGrayscale	EPFrameBuffer::Waveform::GC16
+#define WAVEFORM_MODE_GC16_FAST			3	// EPFrameBuffer::WaveformMode::Grayscale		EPFrameBuffer::Waveform::GL16
 
-#define WAVEFORM_MODE_GL16_FAST			6
-#define WAVEFORM_MODE_DU4			7
-#define WAVEFORM_MODE_REAGL			8
-#define WAVEFORM_MODE_REAGLD			9
+#define WAVEFORM_MODE_GL16_FAST			6	// 							EPFrameBuffer::Waveform::A2
+#define WAVEFORM_MODE_DU4			7	// 							EPFrameBuffer::Waveform::DU4
+#define WAVEFORM_MODE_REAGL			8	// EPFrameBuffer::WaveformMode::Highlight		EPFrameBuffer::Waveform::UNKNOWN
+#define WAVEFORM_MODE_REAGLD			9	// 							EPFrameBuffer::Waveform::INIT2
 #define WAVEFORM_MODE_GL4			0xA
 #define WAVEFORM_MODE_GL16_INV			0xB
 
 // NOTE: Those leftover constants from the upstream kernel sources are *extremely* confusingly named.
 //       libremarkable tests & comments hinted that this one was actually A2, which we've also confirmed.
-#define WAVEFORM_MODE_GLR16			4
+#define WAVEFORM_MODE_GLR16			4	// 							EPFrameBuffer::Waveform::GLR16
 #define WAVEFORM_MODE_A2			WAVEFORM_MODE_GLR16
 // NOTE: Which would actually make this GL16 (purely by virtue of GL16 *usually* being A2 + 1)?
 //       Practical tests have yielded weird results, but with a weirdness consistent with GL16_FAST at least ^^.
-#define WAVEFORM_MODE_GLD16			5
+#define WAVEFORM_MODE_GLD16			5	// 							EPFrameBuffer::Waveform::GLD16
 #define WAVEFORM_MODE_GL16			WAVEFORM_MODE_GLD16
 // NOTE: That one can't be bogus, because it's actually used by the driver to check for obviously invalid modes ;).
 //       Also, it's consistent with other platforms.
