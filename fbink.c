@@ -371,7 +371,7 @@ static void
 //       and in this case (ha!) appears to behave *noticeably* better than switching...
 //       Which is why we now branch via an if ladder, as it should offer marginally better performance on newer devices.
 static void
-    put_pixel(FBInkCoordinates coords, const FBInkPixel* restrict px, bool is_rgb565, bool is_gray8)
+    put_pixel(FBInkCoordinates coords, const FBInkPixel* restrict px, bool is_rgb565)
 {
 	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
 	// fbink_init() takes care of setting this global pointer to the right function...
@@ -404,17 +404,13 @@ static void
 		// Do we need to pack the pixel, first?
 		if (is_rgb565) {
 			// Nope :)
-			return put_pixel_RGB565(&coords, px);
+			put_pixel_RGB565(&coords, px);
+		} else {
+			// Yep :(
+			FBInkPixel packed_px;
+			packed_px.rgb565 = pack_rgb565(px->bgra.color.r, px->bgra.color.g, px->bgra.color.b);
+			put_pixel_RGB565(&coords, &packed_px);
 		}
-		if (is_gray8) {
-			// Yes, but we can use a LUT :|
-			const FBInkPixel packed_px = { .rgb565 = y8ToRGB565[px->gray8] };
-			return put_pixel_RGB565(&coords, &packed_px);
-		}
-		// Yep :(
-		FBInkPixel packed_px;
-		packed_px.rgb565 = pack_rgb565(px->bgra.color.r, px->bgra.color.g, px->bgra.color.b);
-		return put_pixel_RGB565(&coords, &packed_px);
 	} else if (vInfo.bits_per_pixel == 24U) {
 		put_pixel_RGB24(&coords, px);
 	} else if (vInfo.bits_per_pixel == 32U) {
@@ -857,8 +853,8 @@ static struct mxcfb_rect
 		if (vInfo.bits_per_pixel == 16U) {
 			const uint8_t fgcolor = penFGColor ^ 0xFFu;
 			const uint8_t bgcolor = penBGColor ^ 0xFFu;
-			fgP.rgb565            = y8ToRGB565[fgcolor];
-			bgP.rgb565            = y8ToRGB565[bgcolor];
+			fgP.rgb565            = pack_rgb565(fgcolor, fgcolor, fgcolor);
+			bgP.rgb565            = pack_rgb565(bgcolor, bgcolor, bgcolor);
 		} else {
 			fgP.bgra.p ^= 0x00FFFFFFu;
 			bgP.bgra.p ^= 0x00FFFFFFu;
@@ -1176,12 +1172,12 @@ static struct mxcfb_rect
 								get_pixel(coords, &fbP);                                 \
 								fbP.bgra.p ^= 0x00FFFFFFu;                               \
 								pxP = &fbP;                                              \
-								put_pixel(coords, pxP, false, false);                    \
+								put_pixel(coords, pxP, false);                           \
 							} else {                                                         \
-								put_pixel(coords, pxP, true, false);                     \
+								put_pixel(coords, pxP, true);                            \
 							}                                                                \
 						} else if (!is_fgpx && fbink_cfg->is_fgless) {                           \
-							put_pixel(coords, pxP, true, false);                             \
+							put_pixel(coords, pxP, true);                                    \
 						}                                                                        \
 					}                                                                                \
 				}                                                                                        \
@@ -2649,8 +2645,8 @@ static int
 		case 16U:
 			//fxpPutPixel       = &put_pixel_RGB565;
 			fxpGetPixel       = &get_pixel_RGB565;
-			penFGPixel.rgb565 = y8ToRGB565[penFGColor];
-			penBGPixel.rgb565 = y8ToRGB565[penBGColor];
+			penFGPixel.rgb565 = pack_rgb565(penFGColor, penFGColor, penFGColor);
+			penBGPixel.rgb565 = pack_rgb565(penBGColor, penBGColor, penBGColor);
 			break;
 		case 24U:
 			//fxpPutPixel             = &put_pixel_RGB24;
@@ -3108,7 +3104,7 @@ int
 			// NOTE: And, of course, RGB565 is terrible. Inverting the lossy packed value would be even lossier...
 			if (vInfo.bits_per_pixel == 16U) {
 				const uint8_t bgcolor = penBGColor ^ 0xFFu;
-				bgP.rgb565            = y8ToRGB565[bgcolor];
+				bgP.rgb565            = pack_rgb565(bgcolor, bgcolor, bgcolor);
 			} else {
 				bgP.bgra.p ^= 0x00FFFFFFu;
 			}
@@ -4364,8 +4360,8 @@ int
 	if (is_inverted) {
 		// NOTE: And, of course, RGB565 is terrible. Inverting the lossy packed value would be even lossier...
 		if (vInfo.bits_per_pixel == 16U) {
-			fgP.rgb565 = y8ToRGB565[fgcolor];
-			bgP.rgb565 = y8ToRGB565[bgcolor];
+			fgP.rgb565 = pack_rgb565(fgcolor, fgcolor, fgcolor);
+			bgP.rgb565 = pack_rgb565(bgcolor, bgcolor, bgcolor);
 		} else {
 			fgP.bgra.p ^= 0x00FFFFFFu;
 			bgP.bgra.p ^= 0x00FFFFFFu;
@@ -4658,7 +4654,7 @@ int
 					for (unsigned int k = 0U; k < lw; k++) {
 						pixel.bgra.color.r = pixel.bgra.color.g = pixel.bgra.color.b =
 						    lnPtr[k] ^ ainv;
-						put_pixel(paint_point, &pixel, false, true);
+						put_pixel(paint_point, &pixel, false);
 						paint_point.x++;
 					}
 					lnPtr += max_lw;
@@ -4671,15 +4667,15 @@ int
 					for (unsigned int k = 0U; k < lw; k++) {
 						if (lnPtr[k] == 0U) {
 							// No coverage (transparent) -> background
-							put_pixel(paint_point, &bgP, true, false);
+							put_pixel(paint_point, &bgP, true);
 						} else if (lnPtr[k] == 0xFFu) {
 							// Full coverage (opaque) -> foreground
-							put_pixel(paint_point, &fgP, true, false);
+							put_pixel(paint_point, &fgP, true);
 						} else {
 							// AA, blend it using the coverage mask as alpha
 							pixel.bgra.color.r = pixel.bgra.color.g = pixel.bgra.color.b =
 							    (uint8_t) DIV255((pmul_bg + (layer_diff * lnPtr[k])));
-							put_pixel(paint_point, &pixel, false, true);
+							put_pixel(paint_point, &pixel, false);
 						}
 						paint_point.x++;
 					}
@@ -4698,7 +4694,7 @@ int
 					for (unsigned int k = 0U; k < lw; k++) {
 						if (lnPtr[k] == 0U) {
 							// No coverage (transparent) -> background
-							put_pixel(paint_point, &bgP, true, false);
+							put_pixel(paint_point, &bgP, true);
 						} else if (lnPtr[k] != 0xFFu) {
 							// AA, blend it using the coverage mask as alpha,
 							// and the underlying pixel as fg
@@ -4709,7 +4705,7 @@ int
 							    (pmul_bg + ((fb_px.bgra.color.g - bgcolor) * lnPtr[k])));
 							pixel.bgra.color.b = (uint8_t) DIV255(
 							    (pmul_bg + ((fb_px.bgra.color.b - bgcolor) * lnPtr[k])));
-							put_pixel(paint_point, &pixel, false, false);
+							put_pixel(paint_point, &pixel, false);
 						}
 						paint_point.x++;
 					}
@@ -4725,7 +4721,7 @@ int
 						get_pixel(paint_point, &fb_px);
 						pixel.gray8 =
 						    (uint8_t) DIV255((pmul_bg + ((fb_px.gray8 - bgcolor) * lnPtr[k])));
-						put_pixel(paint_point, &pixel, false, true);
+						put_pixel(paint_point, &pixel, false);
 						paint_point.x++;
 					}
 					lnPtr += max_lw;
@@ -4744,7 +4740,7 @@ int
 							get_pixel(paint_point, &fb_px);
 							// We want our foreground to be the inverse of the underlying pixel...
 							pixel.bgra.p = fb_px.bgra.p ^ 0x00FFFFFFu;
-							put_pixel(paint_point, &pixel, false, false);
+							put_pixel(paint_point, &pixel, false);
 						} else if (lnPtr[k] != 0U) {
 							// AA, blend it using the coverage mask as alpha,
 							// and the underlying pixel as bg
@@ -4762,7 +4758,7 @@ int
 							    (MUL255(fb_px.bgra.color.b) +
 							     (((fb_px.bgra.color.b ^ 0xFF) - fb_px.bgra.color.b) *
 							      lnPtr[k])));
-							put_pixel(paint_point, &pixel, false, false);
+							put_pixel(paint_point, &pixel, false);
 						}
 						paint_point.x++;
 					}
@@ -4780,7 +4776,7 @@ int
 						pixel.gray8 =
 						    (uint8_t) DIV255((MUL255(fb_px.gray8) +
 								      (((fb_px.gray8 ^ 0xFF) - fb_px.gray8) * lnPtr[k])));
-						put_pixel(paint_point, &pixel, false, true);
+						put_pixel(paint_point, &pixel, false);
 						paint_point.x++;
 					}
 					lnPtr += max_lw;
@@ -4796,7 +4792,7 @@ int
 					for (unsigned int k = 0U; k < lw; k++) {
 						if (lnPtr[k] == 0xFFu) {
 							// Full coverage (opaque) -> foreground
-							put_pixel(paint_point, &fgP, true, false);
+							put_pixel(paint_point, &fgP, true);
 						} else if (lnPtr[k] != 0U) {
 							// AA, blend it using the coverage mask as alpha,
 							// and the underlying pixel as bg
@@ -4810,7 +4806,7 @@ int
 							pixel.bgra.color.b = (uint8_t) DIV255(
 							    (MUL255(fb_px.bgra.color.b) +
 							     ((fgcolor - fb_px.bgra.color.b) * lnPtr[k])));
-							put_pixel(paint_point, &pixel, false, false);
+							put_pixel(paint_point, &pixel, false);
 						}
 						paint_point.x++;
 					}
@@ -4826,7 +4822,7 @@ int
 						get_pixel(paint_point, &fb_px);
 						pixel.gray8 = (uint8_t) DIV255(
 						    (MUL255(fb_px.gray8) + ((fgcolor - fb_px.gray8) * lnPtr[k])));
-						put_pixel(paint_point, &pixel, false, true);
+						put_pixel(paint_point, &pixel, false);
 						paint_point.x++;
 					}
 					lnPtr += max_lw;
@@ -5497,8 +5493,8 @@ int
 	if (fbink_cfg->is_inverted) {
 		// NOTE: And, of course, RGB565 is terrible. Inverting the lossy packed value would be even lossier...
 		if (vInfo.bits_per_pixel == 16U) {
-			fgP.rgb565 = y8ToRGB565[fgcolor];
-			bgP.rgb565 = y8ToRGB565[bgcolor];
+			fgP.rgb565 = pack_rgb565(fgcolor, fgcolor, fgcolor);
+			bgP.rgb565 = pack_rgb565(bgcolor, bgcolor, bgcolor);
 		} else {
 			fgP.bgra.p ^= 0x00FFFFFFu;
 			bgP.bgra.p ^= 0x00FFFFFFu;
@@ -5575,8 +5571,8 @@ int
 			borderP.gray8 = borderC;
 			break;
 		case 16U:
-			emptyP.rgb565  = y8ToRGB565[emptyC];
-			borderP.rgb565 = y8ToRGB565[borderC];
+			emptyP.rgb565  = pack_rgb565(emptyC, emptyC, emptyC);
+			borderP.rgb565 = pack_rgb565(borderC, borderC, borderC);
 			break;
 		case 24U:
 		case 32U:

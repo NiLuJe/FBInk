@@ -376,8 +376,9 @@ static const uint8_t eInkFGCMap[16] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66
 static const uint8_t eInkBGCMap[16] = { 0xFF, 0xEE, 0xDD, 0xCC, 0xBB, 0xAA, 0x99, 0x88,
 					0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11, 0x00 };
 
-// And this one has a crappy Y8 -> RGB565 LUT, which is probably not really much (if any) faster than pack_rgb565() ;).
-#include "fbink_rgb565.h"
+// NOTE: And this one has a crappy Y8 -> RGB565 LUT, which, as I was mostly expecting,
+//       is not noticeably faster than pack_rgb565() in our use-cases ;).
+//#include "fbink_rgb565.h"
 
 // Global variables to store fb/screen info
 unsigned char* restrict  fbPtr      = NULL;
@@ -456,7 +457,7 @@ static void put_pixel_RGB32(const FBInkCoordinates* restrict, const FBInkPixel* 
 static void put_pixel_RGB565(const FBInkCoordinates* restrict, const FBInkPixel* restrict);
 // NOTE: We pass coordinates by value here, because a rotation transformation *may* be applied to them,
 //       and that's a rotation that the caller will *never* care about.
-static void put_pixel(FBInkCoordinates, const FBInkPixel* restrict, bool, bool);
+static void put_pixel(FBInkCoordinates, const FBInkPixel* restrict, bool);
 // NOTE: On the other hand, if you happen to be calling function pointers directly,
 //       it's left to you to not do anything stupid ;)
 
