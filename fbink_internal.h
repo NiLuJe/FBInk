@@ -456,7 +456,7 @@ static void put_pixel_RGB32(const FBInkCoordinates* restrict, const FBInkPixel* 
 static void put_pixel_RGB565(const FBInkCoordinates* restrict, const FBInkPixel* restrict);
 // NOTE: We pass coordinates by value here, because a rotation transformation *may* be applied to them,
 //       and that's a rotation that the caller will *never* care about.
-static void put_pixel(FBInkCoordinates, const FBInkPixel* restrict, uint8_t);
+static void put_pixel(FBInkCoordinates, const FBInkPixel* restrict, bool, bool);
 // NOTE: On the other hand, if you happen to be calling function pointers directly,
 //       it's left to you to not do anything stupid ;)
 
