@@ -622,10 +622,13 @@ static void
 		// And that's a cheap-ass manual memset16, let's hope the compiler can do something fun with that...
 		for (size_t j = region.top; j < region.top + region.height; j++) {
 			const size_t px_offset = ((fInfo.line_length * j) + (region.left << 1U));
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
 			uint16_t* p = (uint16_t*) (fbPtr + px_offset);
+#pragma GCC diagnostic pop
 			size_t px_count = region.width;
 
-			while(px_count--) {
+			while (px_count--) {
 				*p++ = px->rgb565;
 			};
 		}
@@ -1173,12 +1176,12 @@ static struct mxcfb_rect
 								get_pixel(coords, &fbP);                                 \
 								fbP.bgra.p ^= 0x00FFFFFFu;                               \
 								pxP = &fbP;                                              \
-								put_pixel(coords, pxP, false, false);                     \
+								put_pixel(coords, pxP, false, false);                    \
 							} else {                                                         \
-								put_pixel(coords, pxP, true, false);                    \
+								put_pixel(coords, pxP, true, false);                     \
 							}                                                                \
 						} else if (!is_fgpx && fbink_cfg->is_fgless) {                           \
-							put_pixel(coords, pxP, true, false);                            \
+							put_pixel(coords, pxP, true, false);                             \
 						}                                                                        \
 					}                                                                                \
 				}                                                                                        \
