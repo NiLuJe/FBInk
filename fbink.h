@@ -165,6 +165,7 @@ typedef enum
 // NOTE: On EPDC v1 devices, REAGL & REAGLD generally expect to *always* be flashing.
 //       This is currently left at your own discretion, though.
 //       c.f., https://github.com/NiLuJe/FBInk/commit/32acece78f7cc92b06faa4a668feead260b8ce24
+// NOTE: See the various mxcfb headers in the eink folder for more details about what's availabke on your platform.
 typedef enum
 {
 	WFM_AUTO = 0U,
