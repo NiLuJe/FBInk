@@ -123,7 +123,7 @@ static void
 #	else
 	    "\t\t\t\tAs well as GC4.\n"
 #	endif
-	    "\t\t\t\tUnsupported modes should safely downgrade to AUTO.\n"
+	    "\t\t\t\tUnsupported modes should safely downgrade to AUTO. On some devices, REAGL & REAGLD expect to be flashing in order to behave properly.\n"
 	    "\t-D, --dither\t\tRequest (ordered) hardware dithering from the eInk controller, if supported (mainly useful for images).\n"
 	    "\t-H, --nightmode\t\tRequest full hardware inversion from the eInk controller, if supported.\n"
 	    "\t\t\t\tNote that this can be used *in combination* with -h, --invert! One does not exclude the other, which may lead to some confusing behavior ;).\n"

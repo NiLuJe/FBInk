@@ -161,7 +161,10 @@ typedef enum
 	BG_BLACK
 } BG_COLOR_INDEX_T;
 
-// List of *potentially* available waveform modes
+// List of *potentially* available waveform modes.
+// NOTE: On EPDC v1 devices, REAGL & REAGLD generally expect to *always* be flashing.
+//       This is currently left at your own discretion, though.
+//       c.f., https://github.com/NiLuJe/FBInk/commit/32acece78f7cc92b06faa4a668feead260b8ce24
 typedef enum
 {
 	WFM_AUTO = 0U,
