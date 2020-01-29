@@ -5142,10 +5142,12 @@ static const char*
     wfm_to_string(uint8_t wfm_mode_index)
 {
 	switch (wfm_mode_index) {
-		case WFM_GC16:
-			return "GC16";
+		case WFM_AUTO:
+			return "AUTO";
 		case WFM_DU:
 			return "DU";
+		case WFM_GC16:
+			return "GC16";
 		case WFM_GC4:
 			return "GC4";
 		case WFM_A2:
@@ -5170,10 +5172,12 @@ static const char*
 			return "GCK16";
 		case WFM_GLKW16:
 			return "GLKW16";
-		case WFM_AUTO:
-			return "AUTO";
 		case WFM_INIT:
 			return "INIT";
+		case WFM_UNKNOWN:
+			return "UNKNOWN (Highlight?)";
+		case WFM_INIT2:
+			return "INIT2?";
 		default:
 			return "Unknown";
 	}
