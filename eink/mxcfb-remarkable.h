@@ -20,8 +20,10 @@
 
 /* Original source:
  * https://github.com/reMarkable/linux/blob/zero-gravitas/include/uapi/linux/mxcfb.h
- * Waveform modes constants from libremarkable:
+ * Waveform modes constants originally from libremarkable:
  * https://github.com/canselcik/libremarkable
+ * Then later cleaned up up thanks to the official SDK:
+ * https://remarkable.engineering/
  */
 
 /*
@@ -101,6 +103,7 @@ struct mxcfb_rect {
 #define UPDATE_MODE_FULL			0x1
 
 // Findings courtesy of libremarkable
+/*
 // c.f., https://github.com/canselcik/libremarkable/blob/67ff7ea3926319a6d33a216a2b8c1f679916aa3c/src/framebuffer/common.rs#L338
 // NOTE: Those constant names seem to be inspired from https://github.com/fread-ink/inkwave
 //       (which was itself built around Kindle waveforms, which is why some of those names will look familiar if you check mxcfb-kindle.h ;)).
@@ -131,10 +134,28 @@ struct mxcfb_rect {
 //       Also, it's consistent with other platforms.
 //       Speaking of other platforms, usually, GLR16 == REAGL & GLD16 == REAGLD ;).
 #define WAVEFORM_MODE_AUTO			257
+*/
+
+// Let's honor <epframebuffer.h> instead, it's slightly less confusing ;).
+// c.f., https://github.com/NiLuJe/FBInk/pull/41#issuecomment-579579351
+#define WAVEFORM_MODE_INIT			0
+#define WAVEFORM_MODE_DU			1
+#define WAVEFORM_MODE_GC16			2
+#define WAVEFORM_MODE_GL16			3
+#define WAVEFORM_MODE_GLR16			4
+#define WAVEFORM_MODE_GLD16			5
+#define WAVEFORM_MODE_A2			6
+#define WAVEFORM_MODE_DU4			7
+#define WAVEFORM_MODE_UNKNOWN			8
+#define WAVEFORM_MODE_INIT2			9
+
+#define WAVEFORM_MODE_AUTO			257
 
 #define TEMP_USE_AMBIENT			0x1000
 
 // Again, pilfered from libremarkable ;).
+// In practice, only appears to be used in conjunction w/ DU
+// (c.f., https://github.com/NiLuJe/FBInk/pull/41#issuecomment-579424194)
 #define TEMP_USE_REMARKABLE			0x0018
 
 #define EPDC_FLAG_ENABLE_INVERSION		0x01
@@ -145,7 +166,7 @@ struct mxcfb_rect {
 #define EPDC_FLAG_GROUP_UPDATE			0x400
 #define EPDC_FLAG_USE_DITHERING_Y1		0x2000
 #define EPDC_FLAG_USE_DITHERING_Y4		0x4000
-#define EPDC_FLAG_USE_REGAL				0x8000
+#define EPDC_FLAG_USE_REGAL			0x8000
 
 enum mxcfb_dithering_mode {
 	EPDC_FLAG_USE_DITHERING_PASSTHROUGH = 0x0,
