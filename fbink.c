@@ -1652,19 +1652,19 @@ static int
 	//       especially with no clear identification of a Y4-friendly waveform mode,
 	//       (i.e., no GC4, and no conclusive tests with DU4 & GL4)...
 	//       Y1 might work/be mildly useful for A2 & DU, though.
-	struct mxcfb_update_data update = { .update_region = region,
-					    .waveform_mode = waveform_mode,
-					    .update_mode   = update_mode,
-					    .update_marker = marker,
-					    .temp          = TEMP_USE_REMARKABLE,
-					    .flags         = (waveform_mode == WAVEFORM_MODE_REAGLD)
-							 ? EPDC_FLAG_USE_REGAL
-							 : (waveform_mode == WAVEFORM_MODE_A2)
-							       ? EPDC_FLAG_FORCE_MONOCHROME
-							       : 0U,
-					    .dither_mode     = 0,
-					    .quant_bit       = 0,
-					    .alt_buffer_data = { 0U } };
+	struct mxcfb_update_data update = {
+		.update_region = region,
+		.waveform_mode = waveform_mode,
+		.update_mode   = update_mode,
+		.update_marker = marker,
+		.temp          = (waveform_mode == WAVEFORM_MODE_DU) ? TEMP_USE_REMARKABLE : TEMP_USE_AMBIENT,
+		.flags         = (waveform_mode == WAVEFORM_MODE_GLD16)
+			     ? EPDC_FLAG_USE_REGAL
+			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
+		.dither_mode     = 0,
+		.quant_bit       = 0,
+		.alt_buffer_data = { 0U }
+	};
 
 	if (is_nightmode && deviceQuirks.canHWInvert) {
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
