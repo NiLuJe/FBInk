@@ -1799,6 +1799,15 @@ static int
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
 	}
 
+	// NOTE: When dithering is enabled, you generally want to get rid of FORCE_MONOCHROME...
+	//       It's a given for EPDC V1 dithering flags, but, for EPDC V2, both get applied,
+	//       but dithering is severely hampered, which yields B&W with severe patterning.
+	//       It does hide the vectorization? artefacts (i.e., the 4 visible horizontal "bands" of processing), though.
+	if (dithering_mode != EPDC_FLAG_USE_DITHERING_PASSTHROUGH) {
+		// EPDC V2 here, where we prefer the newer PxP alternatives, so no need to mess with the old dithering flags.
+		update.flags &= ~EPDC_FLAG_FORCE_MONOCHROME;
+	}
+
 	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V2, &update);
 
 	if (rv < 0) {
