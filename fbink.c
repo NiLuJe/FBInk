@@ -1777,6 +1777,15 @@ static int
 		     bool                    is_nightmode,
 		     uint32_t                marker)
 {
+	// Did we request legacy dithering?
+	bool use_legacy_dithering = false;
+	if (dithering_mode == HWD_LEGACY) {
+		// Make sure we won't setup EPDC V2 dithering
+		dithering_mode = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
+		// And make sure we'll setup EPDC V1 flags later
+		use_legacy_dithering = true;
+	}
+
 	struct mxcfb_update_data_v2 update = {
 		.update_region = region,
 		.waveform_mode = waveform_mode,
@@ -1803,9 +1812,23 @@ static int
 	//       It's a given for EPDC V1 dithering flags, but, for EPDC V2, both get applied,
 	//       but dithering is severely hampered, which yields B&W with severe patterning.
 	//       It does hide the vectorization? artefacts (i.e., the 4 visible horizontal "bands" of processing), though.
-	if (dithering_mode != EPDC_FLAG_USE_DITHERING_PASSTHROUGH) {
+	if (use_legacy_dithering || dithering_mode != EPDC_FLAG_USE_DITHERING_PASSTHROUGH) {
 		// EPDC V2 here, where we prefer the newer PxP alternatives, so no need to mess with the old dithering flags.
 		update.flags &= ~EPDC_FLAG_FORCE_MONOCHROME;
+	}
+
+	// And setup EPDC V1 dithering
+	if (use_legacy_dithering) {
+		if (waveform_mode == WAVEFORM_MODE_A2 || waveform_mode == WAVEFORM_MODE_DU) {
+			update.flags |= EPDC_FLAG_USE_DITHERING_Y1;
+		} else if (waveform_mode == WAVEFORM_MODE_GC4) {
+			// NOTE: Generally much less useful/pleasing than Y1.
+			//       Then again, it's not any better with EPDC V2 dithering, either ;).
+			update.flags |= EPDC_FLAG_USE_DITHERING_Y4;
+		}
+		// NOTE: EPDC_FLAG_USE_DITHERING_NTX_D8 is gone on Mk. 7.
+		//       Which makes sense: ORDERED @ q7 looks pretty neat, and it's handled by the PxP.
+		//       On the other hand, Y1 will generally yield more pleasing results than ORDERED @ q1.
 	}
 
 	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V2, &update);
@@ -5219,6 +5242,10 @@ static int
 		case HWD_QUANT_ONLY:
 			dither_algo = EPDC_FLAG_USE_DITHERING_QUANT_ONLY;
 			break;
+		case HWD_LEGACY:
+			// NOTE: We'll fudge that back to PASSTHROUGH inside the platform-specific refresh calls...
+			dither_algo = HWD_LEGACY;
+			break;
 		default:
 			LOG("Unknown (or unsupported) dithering mode '%s' @ index %hhu, defaulting to PASSTHROUGH",
 			    hwd_to_string(hw_dither_index),
@@ -5245,6 +5272,8 @@ static const char*
 			return "ORDERED";
 		case HWD_QUANT_ONLY:
 			return "QUANTIZE ONLY";
+		case HWD_LEGACY:
+			return "LEGACY";
 		default:
 			return "Unknown";
 	}
