@@ -1864,6 +1864,13 @@ int
 		cls_rect.width     = (unsigned short int) region_width;
 		cls_rect.height    = (unsigned short int) region_height;
 		rv                 = fbink_cls(fbfd, &fbink_cfg, &cls_rect);
+
+		if (wait_for) {
+#ifdef FBINK_FOR_KINDLE
+			rv = fbink_wait_for_submission(fbfd, LAST_MARKER);
+#endif
+			rv = fbink_wait_for_complete(fbfd, LAST_MARKER);
+		}
 		goto cleanup;
 	}
 
@@ -2381,6 +2388,7 @@ int
 			if (fbink_cfg.is_cleared) {
 				rv = fbink_cls(fbfd, &fbink_cfg, NULL);
 			}
+			// NOTE: Do not honor wait_for here, as it'd probably be unwanted...
 			fbink_state_dump(&fbink_cfg);
 		} else if (is_interactive && isatty(fileno(stdin))) {
 			// We asked for interactive mode, and we're really running from a terminal, so, go ahead.
@@ -2427,6 +2435,7 @@ int
 						// We're not printing anything, so, do the usual clear or help dance.
 						if (fbink_cfg.is_cleared) {
 							rv = fbink_cls(fbfd, &fbink_cfg, NULL);
+							// NOTE: Same thing here, we'll forgo wait_for in this edge case...
 						} else {
 							show_helpmsg();
 						}
@@ -2516,6 +2525,13 @@ int
 					// Except that if we asked for a clear, do it!
 					if (fbink_cfg.is_cleared) {
 						rv = fbink_cls(fbfd, &fbink_cfg, NULL);
+
+						if (wait_for) {
+#ifdef FBINK_FOR_KINDLE
+							rv = fbink_wait_for_submission(fbfd, LAST_MARKER);
+#endif
+							rv = fbink_wait_for_complete(fbfd, LAST_MARKER);
+						}
 					} else {
 						show_helpmsg();
 					}
@@ -2549,6 +2565,13 @@ int
 				// in particular stdin handling...
 				if (fbink_cfg.is_cleared) {
 					rv = fbink_cls(fbfd, &fbink_cfg, NULL);
+
+					if (wait_for) {
+#ifdef FBINK_FOR_KINDLE
+						rv = fbink_wait_for_submission(fbfd, LAST_MARKER);
+#endif
+						rv = fbink_wait_for_complete(fbfd, LAST_MARKER);
+					}
 				} else {
 					show_helpmsg();
 				}
