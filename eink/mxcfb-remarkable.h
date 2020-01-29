@@ -142,6 +142,7 @@ struct mxcfb_rect {
 #define WAVEFORM_MODE_DU			1
 #define WAVEFORM_MODE_GC16			2
 #define WAVEFORM_MODE_GL16			3
+// Here be dragons! (still). In particular, I'd like to clear up the A2 situation for sure...
 #define WAVEFORM_MODE_GLR16			4
 #define WAVEFORM_MODE_GLD16			5
 #define WAVEFORM_MODE_A2			6
