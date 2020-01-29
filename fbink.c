@@ -1379,9 +1379,11 @@ static int
 		   uint32_t                marker)
 {
 	struct mxcfb_update_data update = {
-		.update_region         = region,
-		.waveform_mode         = waveform_mode,
-		.update_mode           = update_mode,
+		.update_region = region,
+		.waveform_mode = waveform_mode,
+		.update_mode   = (waveform_mode == WAVEFORM_MODE_REAGL || waveform_mode == WAVEFORM_MODE_REAGLD)
+				   ? UPDATE_MODE_FULL
+				   : update_mode,
 		.update_marker         = marker,
 		.hist_bw_waveform_mode = (waveform_mode == WAVEFORM_MODE_REAGL) ? WAVEFORM_MODE_REAGL : WAVEFORM_MODE_DU,
 		.hist_gray_waveform_mode =
@@ -1471,7 +1473,9 @@ static int
 	struct mxcfb_update_data_zelda update = {
 		.update_region = region,
 		.waveform_mode = waveform_mode,
-		.update_mode   = update_mode,
+		.update_mode = (waveform_mode == WAVEFORM_MODE_ZELDA_GLR16 || waveform_mode == WAVEFORM_MODE_ZELDA_GLD16)
+				   ? UPDATE_MODE_FULL
+				   : update_mode,
 		.update_marker = marker,
 		.temp          = TEMP_USE_AMBIENT,
 		.flags         = (waveform_mode == WAVEFORM_MODE_ZELDA_GLD16)
@@ -1530,7 +1534,9 @@ static int
 	struct mxcfb_update_data_rex update = {
 		.update_region = region,
 		.waveform_mode = waveform_mode,
-		.update_mode   = update_mode,
+		.update_mode = (waveform_mode == WAVEFORM_MODE_ZELDA_GLR16 || waveform_mode == WAVEFORM_MODE_ZELDA_GLD16)
+				   ? UPDATE_MODE_FULL
+				   : update_mode,
 		.update_marker = marker,
 		.temp          = TEMP_USE_AMBIENT,
 		.flags         = (waveform_mode == WAVEFORM_MODE_ZELDA_GLD16)
@@ -1586,7 +1592,9 @@ static int
 	struct mxcfb_update_data update = {
 		.update_region = region,
 		.waveform_mode = waveform_mode,
-		.update_mode = update_mode,
+		.update_mode = (waveform_mode == WAVEFORM_MODE_REAGL || waveform_mode == WAVEFORM_MODE_REAGLD)
+				   ? UPDATE_MODE_FULL
+				   : update_mode,
 		.update_marker = marker,
 		.temp = TEMP_USE_AMBIENT,
 		.flags = (waveform_mode == WAVEFORM_MODE_REAGLD)
@@ -1652,16 +1660,19 @@ static int
 	//       especially with no clear identification of a Y4-friendly waveform mode,
 	//       (i.e., no GC4, and no conclusive tests with DU4 & GL4)...
 	//       Y1 might work/be mildly useful for A2 & DU, though.
-	struct mxcfb_update_data update = { .update_region = region,
-					    .waveform_mode = waveform_mode,
-					    .update_mode   = update_mode,
-					    .update_marker = marker,
-					    .temp          = (waveform_mode == WAVEFORM_MODE_DU) ? TEMP_USE_REMARKABLE
-											: TEMP_USE_AMBIENT,
-					    .flags = (waveform_mode == WAVEFORM_MODE_GLD16) ? EPDC_FLAG_USE_REGAL : 0U,
-					    .dither_mode     = 0,
-					    .quant_bit       = 0,
-					    .alt_buffer_data = { 0U } };
+	struct mxcfb_update_data update = {
+		.update_region = region,
+		.waveform_mode = waveform_mode,
+		.update_mode   = (waveform_mode == WAVEFORM_MODE_GLR16 || waveform_mode == WAVEFORM_MODE_GLD16)
+				   ? UPDATE_MODE_FULL
+				   : update_mode,
+		.update_marker   = marker,
+		.temp            = (waveform_mode == WAVEFORM_MODE_DU) ? TEMP_USE_REMARKABLE : TEMP_USE_AMBIENT,
+		.flags           = (waveform_mode == WAVEFORM_MODE_GLD16) ? EPDC_FLAG_USE_REGAL : 0U,
+		.dither_mode     = 0,
+		.quant_bit       = 0,
+		.alt_buffer_data = { 0U }
+	};
 
 	if (is_nightmode && deviceQuirks.canHWInvert) {
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
@@ -1717,7 +1728,9 @@ static int
 	struct mxcfb_update_data_v1_ntx update = {
 		.update_region = region,
 		.waveform_mode = waveform_mode,
-		.update_mode   = update_mode,
+		.update_mode   = (waveform_mode == WAVEFORM_MODE_REAGL || waveform_mode == WAVEFORM_MODE_REAGLD)
+				   ? UPDATE_MODE_FULL
+				   : update_mode,
 		.update_marker = marker,
 		.temp          = TEMP_USE_AMBIENT,
 		.flags         = (waveform_mode == WAVEFORM_MODE_REAGLD)
@@ -1777,6 +1790,7 @@ static int
 		     bool                    is_nightmode,
 		     uint32_t                marker)
 {
+	// NOTE: EPDC v2, no need to make REAGL updates FULL ;).
 	struct mxcfb_update_data_v2 update = {
 		.update_region = region,
 		.waveform_mode = waveform_mode,
