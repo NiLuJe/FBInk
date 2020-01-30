@@ -588,6 +588,10 @@ static void        parse_simple_md(const char* restrict, size_t, unsigned char* 
 static uint32_t    get_wfm_mode(uint8_t);
 static const char* wfm_to_string(uint8_t);
 #ifndef FBINK_FOR_LINUX
+#	ifdef FBINK_FOR_KINDLE
+static const char* kindle_wfm_to_string(uint32_t);
+static const char* kindle_zelda_wfm_to_string(uint32_t);
+#	endif
 static int         get_hwd_mode(uint8_t);
 static const char* hwd_to_string(uint8_t);
 #endif

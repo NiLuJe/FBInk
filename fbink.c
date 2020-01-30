@@ -1435,6 +1435,13 @@ static int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
+	LOG("hist_bw_waveform_mode is now %#03x (%s)",
+	    update.hist_bw_waveform_mode,
+	    kindle_wfm_to_string(update.hist_bw_waveform_mode));
+	LOG("hist_gray_waveform_mode is now %#03x (%s)",
+	    update.hist_gray_waveform_mode,
+	    kindle_wfm_to_string(update.hist_gray_waveform_mode));
+
 	return EXIT_SUCCESS;
 }
 
@@ -1568,6 +1575,13 @@ static int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
+	LOG("hist_bw_waveform_mode is now %#03x (%s)",
+	    update.hist_bw_waveform_mode,
+	    kindle_zelda_wfm_to_string(update.hist_bw_waveform_mode));
+	LOG("hist_gray_waveform_mode is now %#03x (%s)",
+	    update.hist_gray_waveform_mode,
+	    kindle_zelda_wfm_to_string(update.hist_gray_waveform_mode));
+
 	return EXIT_SUCCESS;
 }
 
@@ -1653,6 +1667,13 @@ static int
 		}
 		return ERRCODE(EXIT_FAILURE);
 	}
+
+	LOG("hist_bw_waveform_mode is now %#03x (%s)",
+	    update.hist_bw_waveform_mode,
+	    kindle_zelda_wfm_to_string(update.hist_bw_waveform_mode));
+	LOG("hist_gray_waveform_mode is now %#03x (%s)",
+	    update.hist_gray_waveform_mode,
+	    kindle_zelda_wfm_to_string(update.hist_gray_waveform_mode));
 
 	return EXIT_SUCCESS;
 }
@@ -5314,6 +5335,76 @@ static const char*
 }
 
 #ifndef FBINK_FOR_LINUX
+#	ifdef FBINK_FOR_KINDLE
+// Convert an mxcfb WAVEFORM_MODE value to a human readable string
+static const char*
+    kindle_wfm_to_string(uint32_t wfm_mode)
+{
+	switch (wfm_mode) {
+		case WAVEFORM_MODE_INIT:
+			return "INIT";
+		case WAVEFORM_MODE_DU:
+			return "DU";
+		case WAVEFORM_MODE_GC16:
+			return "GC16";
+		case WAVEFORM_MODE_GC16_FAST:
+			return "GC16 FAST";
+		case WAVEFORM_MODE_A2:
+			return "A2";
+		case WAVEFORM_MODE_GL16:
+			return "GL16";
+		case WAVEFORM_MODE_GL16_FAST:
+			return "GL16 FAST";
+		case WAVEFORM_MODE_DU4:
+			return "DU4";
+		case WAVEFORM_MODE_REAGL:
+			return "REAGL";
+		case WAVEFORM_MODE_REAGLD:
+			return "REAGLD";
+		case WAVEFORM_MODE_GL4:
+			return "GL4";
+		case WAVEFORM_MODE_GL16_INV:
+			return "GL16 INVERTED";
+		case WAVEFORM_MODE_AUTO:
+			return "AUTO";
+		default:
+			return "Unknown";
+	}
+}
+
+// Same, but for Zelda/Rex constants
+static const char*
+    kindle_zelda_wfm_to_string(uint32_t wfm_mode)
+{
+	switch (wfm_mode) {
+		case WAVEFORM_MODE_INIT:
+			return "INIT";
+		case WAVEFORM_MODE_DU:
+			return "DU";
+		case WAVEFORM_MODE_GC16:
+			return "GC16";
+		case WAVEFORM_MODE_ZELDA_GL16:
+			return "GL16";
+		case WAVEFORM_MODE_ZELDA_GLR16:
+			return "REAGL";
+		case WAVEFORM_MODE_ZELDA_GLD16:
+			return "REAGLD";
+		case WAVEFORM_MODE_ZELDA_A2:
+			return "A2";
+		case WAVEFORM_MODE_DU4:
+			return "DU4";
+		case WAVEFORM_MODE_ZELDA_GCK16:
+			return "GCK16";
+		case WAVEFORM_MODE_ZELDA_GLKW16:
+			return "GLKW16";
+		case WAVEFORM_MODE_AUTO:
+			return "AUTO";
+		default:
+			return "Unknown";
+	}
+}
+#	endif    // FBINK_FOR_KINDLE
+
 // Convert our public HW_DITHER_INDEX_T values to an appropriate mxcfb dithering mode constant
 static int
     get_hwd_mode(uint8_t hw_dither_index)
