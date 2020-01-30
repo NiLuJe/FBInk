@@ -1380,6 +1380,7 @@ static int
 		   const struct mxcfb_rect region,
 		   uint32_t                waveform_mode,
 		   uint32_t                update_mode,
+		   int                     dithering_mode,
 		   bool                    is_nightmode,
 		   uint32_t                marker)
 {
@@ -1398,6 +1399,24 @@ static int
 
 	if (is_nightmode && deviceQuirks.canHWInvert) {
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
+	}
+
+	// NOTE: When dithering is enabled, you generally want to get rid of FORCE_MONOCHROME, because it gets applied *first*...
+	if (dithering_mode == HWD_LEGACY) {
+		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
+
+		// And now we can deal with the algo selection :).
+		if (waveform_mode == WAVEFORM_MODE_A2 || waveform_mode == WAVEFORM_MODE_DU) {
+			// NOTE: Unlike other platforms, might be a Sierra Lite matrix instead of Atkinson's
+			update.flags |= EPDC_FLAG_USE_DITHERING_Y1;
+		} else if (waveform_mode == WAVEFORM_MODE_DU4 || waveform_mode == WAVEFORM_MODE_GL4) {
+			// NOTE: That is also Kindle-specific...
+			//       There's also a EPDC_FLAG_FORCE_Y2 flag.
+			update.flags |= EPDC_FLAG_USE_DITHERING_Y2;
+		} else {
+			// NOTE: Generally much less pleasing/useful than Y1 or Y2. Actually barely visible on my PW2.
+			update.flags |= EPDC_FLAG_USE_DITHERING_Y4;
+		}
 	}
 
 	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
@@ -2006,7 +2025,7 @@ static int
 	} else if (deviceQuirks.isKindleZelda) {
 		return refresh_kindle_zelda(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
 	} else {
-		return refresh_kindle(fbfd, region, wfm, upm, is_nightmode, lastMarker);
+		return refresh_kindle(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
 	}
 #	elif defined(FBINK_FOR_CERVANTES)
 	return refresh_cervantes(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);

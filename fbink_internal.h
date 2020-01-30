@@ -516,7 +516,7 @@ static long int jiffies_to_ms(long int);
 #	if defined(FBINK_FOR_KINDLE)
 static int refresh_legacy(int, const struct mxcfb_rect, bool);
 static int wait_for_submission_kindle(int, uint32_t);
-static int refresh_kindle(int, const struct mxcfb_rect, uint32_t, uint32_t, bool, uint32_t);
+static int refresh_kindle(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
 static int wait_for_complete_kindle_pearl(int, uint32_t);
 static int wait_for_complete_kindle(int, uint32_t);
 static int refresh_kindle_zelda(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
