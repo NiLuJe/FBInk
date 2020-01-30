@@ -196,7 +196,10 @@ typedef enum
 	HWD_ATKINSON,
 	HWD_ORDERED,
 	HWD_QUANT_ONLY,
-	HWD_LEGACY    // Use legacy EPDC V1 dithering instead (if available). Generally SW, Atkinson Y8->Y1.
+	HWD_LEGACY    // Use legacy EPDC V1 dithering instead (if available).
+	//               Note that it is *not* offloaded to the PxP, it's purely software, in-kernel.
+	//               Usually based on Atkinson's algo. The most useful one being the Y8->Y1 one,
+	//               which we request with A2/DU refreshes.
 } HW_DITHER_INDEX_T;
 
 // List of NTX rotation quirk types (c.f., mxc_epdc_fb_check_var @ drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c)...
