@@ -555,7 +555,7 @@ static void
 	    "\t-S, --scale\t\t\tScale factor.\n"
 	    "\t-t, --time\t\t\tPrint frame timings.\n"
 	    "\t-W, --wfm\t\t\tSet waveform mode.\n"
-	    "\t-d, --dither\t\t\tUse HW dithering.\n"
+	    "\t-d, --dither\t\t\tSet dithering mode.\n"
 	    "\t-l, --limit\t\t\tFramerate cap (in FPS).\n"
 	    "\t-c, --cap\t\t\tOverride the rendering iteration cap.\n"
 	    "\n",
@@ -574,12 +574,12 @@ int
 	int                        opt;
 	int                        opt_index;
 	static const struct option opts[] = {
-		{ "help", no_argument, NULL, 'h' },      { "verbose", no_argument, NULL, 'v' },
-		{ "quiet", no_argument, NULL, 'q' },     { "fs", no_argument, NULL, 'f' },
-		{ "flash", no_argument, NULL, 'F' },     { "scale", required_argument, NULL, 'S' },
-		{ "time", no_argument, NULL, 't' },      { "wfm", no_argument, NULL, 'W' },
-		{ "dither", no_argument, NULL, 'd' },    { "limit", required_argument, NULL, 'l' },
-		{ "cap", required_argument, NULL, 'c' }, { NULL, 0, NULL, 0 }
+		{ "help", no_argument, NULL, 'h' },         { "verbose", no_argument, NULL, 'v' },
+		{ "quiet", no_argument, NULL, 'q' },        { "fs", no_argument, NULL, 'f' },
+		{ "flash", no_argument, NULL, 'F' },        { "scale", required_argument, NULL, 'S' },
+		{ "time", no_argument, NULL, 't' },         { "wfm", required_argument, NULL, 'W' },
+		{ "dither", required_argument, NULL, 'd' }, { "limit", required_argument, NULL, 'l' },
+		{ "cap", required_argument, NULL, 'c' },    { NULL, 0, NULL, 0 }
 	};
 
 #ifndef FBINK_FOR_LINUX
@@ -595,7 +595,6 @@ int
 	bool     is_fs          = false;
 	bool     is_flashing    = false;
 	bool     is_timed       = false;
-	bool     is_dithered    = false;
 	uint8_t  scaling_factor = 1U;
 	uint8_t  frame_cap      = 24U;
 	uint16_t iter_cap       = 250U;
@@ -603,7 +602,7 @@ int
 
 	bool errfnd = false;
 
-	while ((opt = getopt_long(argc, argv, "hvqfFS:tW:dl:", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hvqfFS:tW:dl:c:", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'v':
 				g_isQuiet   = false;
@@ -662,13 +661,32 @@ int
 					fbink_cfg.wfm_mode = WFM_GLKW16;
 				} else if (strcasecmp(optarg, "INIT") == 0) {
 					fbink_cfg.wfm_mode = WFM_INIT;
+				} else if (strcasecmp(optarg, "UNKNOWN") == 0) {
+					fbink_cfg.wfm_mode = WFM_UNKNOWN;
+				} else if (strcasecmp(optarg, "INIT2") == 0) {
+					fbink_cfg.wfm_mode = WFM_INIT2;
 				} else {
-					fprintf(stderr, "Unknown waveform update mode '%s'.\n", optarg);
+					ELOG("Unknown waveform update mode '%s'.", optarg);
 					errfnd = true;
 				}
 				break;
 			case 'd':
-				is_dithered = true;
+				if (strcasecmp(optarg, "PASSTHROUGH") == 0) {
+					fbink_cfg.dithering_mode = HWD_PASSTHROUGH;
+				} else if (strcasecmp(optarg, "FLOYD_STEINBERG") == 0) {
+					fbink_cfg.dithering_mode = HWD_FLOYD_STEINBERG;
+				} else if (strcasecmp(optarg, "ATKINSON") == 0) {
+					fbink_cfg.dithering_mode = HWD_ATKINSON;
+				} else if (strcasecmp(optarg, "ORDERED") == 0) {
+					fbink_cfg.dithering_mode = HWD_ORDERED;
+				} else if (strcasecmp(optarg, "QUANT_ONLY") == 0) {
+					fbink_cfg.dithering_mode = HWD_QUANT_ONLY;
+				} else if (strcasecmp(optarg, "LEGACY") == 0) {
+					fbink_cfg.dithering_mode = HWD_LEGACY;
+				} else {
+					ELOG("Unknown hardware dithering algorithm '%s'.", optarg);
+					errfnd = true;
+				}
 				break;
 			case 'l':
 				frame_cap = (uint8_t) strtoul(optarg, NULL, 10);
@@ -810,16 +828,6 @@ int
 		fbink_cfg.is_flashing = true;
 	}
 
-#ifndef FBINK_FOR_LINUX
-	// Setup dithering
-	uint8_t dithering;
-	if (is_dithered) {
-		dithering = EPDC_FLAG_USE_DITHERING_ORDERED;
-	} else {
-		dithering = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
-	}
-#endif
-
 	// Setup framecap
 	// NOTE: Interesting to check how far stuff can go (especially A2)...
 	//       FWIW, on my H2O, going over ~8fps starts triggering jittery behavior (i.e., intermittent stalls).
@@ -857,7 +865,7 @@ int
 
 			do_fire_fs();
 
-			fbink_refresh(fbFd, 0U, 0U, 0U, 0U, dithering, &fbink_cfg);
+			fbink_refresh(fbFd, 0U, 0U, 0U, 0U, &fbink_cfg);
 
 			if (is_timed) {
 				struct timespec t1;
@@ -899,8 +907,7 @@ int
 			}
 			do_fire_scaled(scaling_factor);
 
-			fbink_refresh(
-			    fbFd, fire_y_origin, fire_x_origin, scaled_Width, scaled_Height, dithering, &fbink_cfg);
+			fbink_refresh(fbFd, fire_y_origin, fire_x_origin, scaled_Width, scaled_Height, &fbink_cfg);
 
 			if (is_timed) {
 				struct timespec t1;
@@ -936,7 +943,7 @@ int
 
 			do_fire();
 
-			fbink_refresh(fbFd, fire_y_origin, fire_x_origin, FIRE_WIDTH, FIRE_HEIGHT, dithering, &fbink_cfg);
+			fbink_refresh(fbFd, fire_y_origin, fire_x_origin, FIRE_WIDTH, FIRE_HEIGHT, &fbink_cfg);
 
 			if (is_timed) {
 				struct timespec t1;
