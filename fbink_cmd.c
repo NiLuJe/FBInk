@@ -125,7 +125,12 @@ static void
 #	endif
 	    "\t\t\t\tUnsupported modes should safely downgrade to AUTO. On some devices, REAGL & REAGLD expect to be flashing in order to behave properly.\n"
 	    "\t-D, --dither\t\tRequest a specific hardware dithering mode from the eInk controller, if supported (mainly useful for images).\n"
-	    "\t\t\t\tAvailable dithering modes: ORDERED & LEGACY\n"
+	    "\t\t\t\tAvailable dithering modes: PASSTHROUGH, FLOYD_STEINBERG, ATKINSON, ORDERED, QUANT_ONLY & LEGACY\n"
+	    "\t\t\t\tNote that this is only supported on recent devices, and that only a subset of these options may actually be supported by the HW (usually, PASSTHROUGH & ORDERED, check dmesg).\n"
+	    "\t\t\t\tLEGACY may be supported on more devices, but what exactly it does in practice (and how well it works) depends on the exact device.\n"
+#	ifdef FBINK_FOR_KINDLE
+	    "\t\t\t\tTrue (i.e., not LEGACY) hardware dithering is completely untested on Kindle, and, while the Oasis 2, PaperWhite 4 & Oasis 3 *should* support it, they *may* not, or at least not in the way FBInk expects...\n"
+#	endif
 	    "\t-H, --nightmode\t\tRequest full hardware inversion from the eInk controller, if supported.\n"
 	    "\t\t\t\tNote that this can be used *in combination* with -h, --invert! One does not exclude the other, which may lead to some confusing behavior ;).\n"
 #	ifdef FBINK_FOR_KINDLE
@@ -244,17 +249,11 @@ static void
 	    "\t-s, --refresh top=NUM,left=NUM,width=NUM,height=NUM,dither=NAME\n"
 	    "\n"
 	    "EXAMPLES:\n"
-	    "\tfbink -s top=20,left=10,width=500,height=600,dither=ORDERED -W GC16\n"
+	    "\tfbink -s top=20,left=10,width=500,height=600 -W GC16 -D ORDERED\n"
 	    "\t\tRefreshes a 500x600 rectangle with its top-left corner at coordinates (10, 20) with a GC16 waveform mode and ORDERED hardware dithering.\n"
 	    "\n"
 	    "NOTES:\n"
 	    "\tThe specified rectangle *must* completely fit on screen, or the ioctl will fail.\n"
-	    "\tAvailable dithering modes: PASSTHROUGH, FLOYD_STEINBERG, ATKINSON, ORDERED, QUANT_ONLY & LEGACY\n"
-	    "\t\tNote that this is only supported on recent devices, and that only a subset of these options may actually be supported by the HW (usually, PASSTHROUGH & ORDERED, check dmesg).\n"
-	    "\t\tLEGACY may be supported on more devices, but what exactly it does in practice (and how well it works) depends on the exact device.\n"
-#ifdef FBINK_FOR_KINDLE
-	    "\t\tHardware dithering is completely untested on Kindle, and, while the Oasis 2, PaperWhite 4 & Oasis 3 *should* support it, they *may* not, or at least not in the way FBInk expects...\n"
-#endif
 	    "\tNote that this will also honor --waveform, --nightmode & --flash\n"
 #if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 	    "\tNote that the arguments are passed as-is to the ioctl, no viewport or rotation quirks are applied!\n"
@@ -653,7 +652,6 @@ int
 		LEFT_OPT,
 		WIDTH_OPT,
 		HEIGHT_OPT,
-		DITHER_OPT,
 	};
 	enum
 	{
@@ -688,8 +686,9 @@ int
 #pragma clang diagnostic ignored "-Wunknown-warning-option"
 #pragma GCC diagnostic   ignored "-Wdiscarded-qualifiers"
 #pragma clang diagnostic ignored "-Wincompatible-pointer-types-discards-qualifiers"
-	char* const refresh_token[]  = { [TOP_OPT] = "top",       [LEFT_OPT] = "left",     [WIDTH_OPT] = "width",
-                                        [HEIGHT_OPT] = "height", [DITHER_OPT] = "dither", NULL };
+	char* const refresh_token[] = {
+		[TOP_OPT] = "top", [LEFT_OPT] = "left", [WIDTH_OPT] = "width", [HEIGHT_OPT] = "height", NULL
+	};
 	char* const image_token[]    = { [FILE_OPT] = "file",       [XOFF_OPT] = "x",           [YOFF_OPT] = "y",
                                       [HALIGN_OPT] = "halign",   [VALIGN_OPT] = "valign",    [SCALED_WIDTH_OPT] = "w",
                                       [SCALED_HEIGHT_OPT] = "h", [SW_DITHER_OPT] = "dither", NULL };
@@ -722,8 +721,6 @@ int
 	uint32_t    region_height  = 0;
 	char*       hwd_name       = NULL;
 	char*       wfm_name       = NULL;
-	char*       region_dither  = NULL;
-	uint8_t     region_hwd     = HWD_PASSTHROUGH;
 	bool        is_refresh     = false;
 	char*       image_file     = NULL;
 	short int   image_x_offset = 0;
@@ -890,37 +887,6 @@ int
 								opt, refresh_token[HEIGHT_OPT], value, &region_height) <
 							    0) {
 								errfnd = true;
-							}
-							break;
-						case DITHER_OPT:
-							if (value == NULL) {
-								ELOG("Missing value for suboption '%s' of -%c, --%s",
-								     refresh_token[DITHER_OPT],
-								     opt,
-								     opt_longname);
-								errfnd = true;
-								continue;
-							}
-
-							if (strcasecmp(value, "PASSTHROUGH") == 0) {
-								region_hwd = HWD_PASSTHROUGH;
-							} else if (strcasecmp(value, "FLOYD_STEINBERG") == 0) {
-								region_hwd = HWD_FLOYD_STEINBERG;
-							} else if (strcasecmp(value, "ATKINSON") == 0) {
-								region_hwd = HWD_ATKINSON;
-							} else if (strcasecmp(value, "ORDERED") == 0) {
-								region_hwd = HWD_ORDERED;
-							} else if (strcasecmp(value, "QUANT_ONLY") == 0) {
-								region_hwd = HWD_QUANT_ONLY;
-							} else if (strcasecmp(value, "LEGACY") == 0) {
-								region_hwd = HWD_LEGACY;
-							} else {
-								ELOG("Unknown hardware dithering algorithm '%s'.", value);
-								errfnd = true;
-							}
-							// Remember non-default values in a human-readable format
-							if (region_hwd != HWD_PASSTHROUGH) {
-								region_dither = value;
 							}
 							break;
 						default:
@@ -2271,11 +2237,10 @@ int
 				    region_height,
 				    fbink_cfg.is_flashing ? "a flashing " : "",
 				    wfm_name ? wfm_name : "AUTO",
-				    region_dither ? region_dither : "PASSTHROUGH",
+				    hwd_name ? hwd_name : "PASSTHROUGH",
 				    fbink_cfg.is_nightmode ? "Y" : "N");
 			}
-			if (fbink_refresh(
-				fbfd, region_top, region_left, region_width, region_height, region_hwd, &fbink_cfg) !=
+			if (fbink_refresh(fbfd, region_top, region_left, region_width, region_height, &fbink_cfg) !=
 			    EXIT_SUCCESS) {
 				WARN("Failed to refresh the screen as per your specification");
 				rv = ERRCODE(EXIT_FAILURE);
