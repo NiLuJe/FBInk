@@ -9,9 +9,6 @@
 #
 ##
 
-import os
-import sys
-
 def pack_rgb565(v):
 	# Grayscale, so r = g = b = v
 	return (((v >> 3) << 11) | ((v >> 2) << 5) | (v >> 3))
