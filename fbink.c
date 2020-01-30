@@ -1648,15 +1648,11 @@ static int
 		       const struct mxcfb_rect region,
 		       uint32_t                waveform_mode,
 		       uint32_t                update_mode,
+		       int                     dithering_mode,
 		       bool                    is_nightmode,
 		       uint32_t                marker)
 {
 	// NOTE: Actually uses the V1 epdc driver, hence dither_mode & quant_bit being unused.
-	// NOTE: The USE_DITHERING flags (based on Atkison's algo) *ought* to be supported, though,
-	//       but the only available choices are Y1 (monochrome) and Y4, so it's not as useful in practice,
-	//       especially with no clear identification of a Y4-friendly waveform mode,
-	//       (i.e., no GC4, and no conclusive tests with DU4 & GL4)...
-	//       Y1 might work/be mildly useful for A2 & DU, though.
 	struct mxcfb_update_data update = { .update_region = region,
 					    .waveform_mode = waveform_mode,
 					    .update_mode   = update_mode,
@@ -1670,6 +1666,19 @@ static int
 
 	if (is_nightmode && deviceQuirks.canHWInvert) {
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
+	}
+
+	// NOTE: When dithering is enabled, you generally want to get rid of FORCE_MONOCHROME, because it gets applied *first*...
+	if (dithering_mode == HWD_LEGACY) {
+		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
+
+		// And now we can deal with the algo selection :).
+		if (waveform_mode == WAVEFORM_MODE_A2 || waveform_mode == WAVEFORM_MODE_DU) {
+			update.flags |= EPDC_FLAG_USE_DITHERING_Y1;
+		} else {
+			// NOTE: Nothing better than Y4 is available.
+			update.flags |= EPDC_FLAG_USE_DITHERING_Y4;
+		}
 	}
 
 	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
@@ -1914,7 +1923,7 @@ static int
     refresh(int fbfd,
 	    const struct mxcfb_rect region,
 	    uint32_t waveform_mode,
-	    int dithering_mode UNUSED_BY_CERVANTES UNUSED_BY_REMARKABLE,
+	    int dithering_mode UNUSED_BY_CERVANTES,
 	    bool is_nightmode,
 	    bool is_flashing,
 	    bool no_refresh)
@@ -1985,7 +1994,7 @@ static int
 #	elif defined(FBINK_FOR_CERVANTES)
 	return refresh_cervantes(fbfd, region, wfm, upm, is_nightmode, lastMarker);
 #	elif defined(FBINK_FOR_REMARKABLE)
-	return refresh_remarkable(fbfd, region, wfm, upm, is_nightmode, lastMarker);
+	return refresh_remarkable(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
 #	elif defined(FBINK_FOR_KOBO)
 	if (deviceQuirks.isKoboMk7) {
 		return refresh_kobo_mk7(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
