@@ -595,9 +595,10 @@ static void
 		// Go with pixel plotting @ 4bpp to keep this simple...
 		for (unsigned short int cy = 0U; cy < h; cy++) {
 			for (unsigned short int cx = 0U; cx < w; cx++) {
-				FBInkCoordinates coords;
-				coords.x = (unsigned short int) (x + cx);
-				coords.y = (unsigned short int) (y + cy);
+				const FBInkCoordinates coords = {
+					.x = (unsigned short int) (x + cx),
+					.y = (unsigned short int) (y + cy),
+				};
 				put_pixel_Gray4(&coords, px);
 			}
 		}
