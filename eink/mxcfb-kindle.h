@@ -183,7 +183,7 @@ struct mxcfb_rect {
 /* Display temperature */
 #define TEMP_USE_AMBIENT			0x1000
 /* Gone w/ KOA2 */
-#define TEMP_USE_PAPYRUS			0X1001
+#define TEMP_USE_PAPYRUS			0x1001
 
 /* PW2, Gone w/ KOA2 */
 #define TEMP_USE_AUTO				0x1001
