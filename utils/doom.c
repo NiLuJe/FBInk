@@ -542,7 +542,7 @@ static void
 	    "\n"
 	    "Doom Fire (via FBInk %s)\n"
 	    "\n"
-	    "Usage: doom [-f | -S] -FtWdlc\n"
+	    "Usage: doom [-f | -S] -FtWDlc\n"
 	    "\n"
 	    "Shiny!\n"
 	    "\n"
@@ -555,7 +555,7 @@ static void
 	    "\t-S, --scale\t\t\tScale factor.\n"
 	    "\t-t, --time\t\t\tPrint frame timings.\n"
 	    "\t-W, --wfm\t\t\tSet waveform mode.\n"
-	    "\t-d, --dither\t\t\tSet dithering mode.\n"
+	    "\t-D, --dither\t\t\tSet dithering mode.\n"
 	    "\t-l, --limit\t\t\tFramerate cap (in FPS).\n"
 	    "\t-c, --cap\t\t\tOverride the rendering iteration cap.\n"
 	    "\n",
@@ -578,7 +578,7 @@ int
 		{ "quiet", no_argument, NULL, 'q' },        { "fs", no_argument, NULL, 'f' },
 		{ "flash", no_argument, NULL, 'F' },        { "scale", required_argument, NULL, 'S' },
 		{ "time", no_argument, NULL, 't' },         { "wfm", required_argument, NULL, 'W' },
-		{ "dither", required_argument, NULL, 'd' }, { "limit", required_argument, NULL, 'l' },
+		{ "dither", required_argument, NULL, 'D' }, { "limit", required_argument, NULL, 'l' },
 		{ "cap", required_argument, NULL, 'c' },    { NULL, 0, NULL, 0 }
 	};
 
@@ -602,7 +602,7 @@ int
 
 	bool errfnd = false;
 
-	while ((opt = getopt_long(argc, argv, "hvqfFS:tW:dl:c:", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hvqfFS:tW:Dl:c:", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'v':
 				g_isQuiet   = false;
@@ -670,7 +670,7 @@ int
 					errfnd = true;
 				}
 				break;
-			case 'd':
+			case 'D':
 				if (strcasecmp(optarg, "PASSTHROUGH") == 0) {
 					fbink_cfg.dithering_mode = HWD_PASSTHROUGH;
 				} else if (strcasecmp(optarg, "FLOYD_STEINBERG") == 0) {
