@@ -3150,7 +3150,7 @@ int
 	if (refresh(fbfd,
 		    region,
 		    get_wfm_mode(fbink_cfg->wfm_mode),
-		    fbink_cfg->is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		    get_hwd_mode(fbink_cfg->dithering_mode),
 		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
@@ -3583,7 +3583,7 @@ int
 	if (refresh(fbfd,
 		    region,
 		    get_wfm_mode(fbink_cfg->wfm_mode),
-		    fbink_cfg->is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		    get_hwd_mode(fbink_cfg->dithering_mode),
 		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
@@ -3796,13 +3796,13 @@ int
 	unsigned char*          line_buff  = NULL;
 	unsigned char*          glyph_buff = NULL;
 	// This also needs to be declared early, as we refresh on cleanup.
-	struct mxcfb_rect region       = { 0U };
-	bool              is_flashing  = false;
-	bool              is_cleared   = false;
-	uint8_t           wfm_mode     = WFM_AUTO;
-	bool              is_dithered  = false;
-	bool              is_nightmode = false;
-	bool              no_refresh   = false;
+	struct mxcfb_rect region         = { 0U };
+	bool              is_flashing    = false;
+	bool              is_cleared     = false;
+	uint8_t           wfm_mode       = WFM_AUTO;
+	uint8_t           dithering_mode = HWD_PASSTHROUGH;
+	bool              is_nightmode   = false;
+	bool              no_refresh     = false;
 
 	// map fb to user mem
 	// NOTE: If we're keeping the fb's fd open, keep this mmap around, too.
@@ -4326,20 +4326,20 @@ int
 	bool    is_centered = false;
 	bool    is_halfway  = false;
 	if (fbink_cfg) {
-		valign       = fbink_cfg->valign;
-		halign       = fbink_cfg->halign;
-		is_inverted  = fbink_cfg->is_inverted;
-		is_overlay   = fbink_cfg->is_overlay;
-		is_bgless    = fbink_cfg->is_bgless;
-		is_fgless    = fbink_cfg->is_fgless;
-		is_flashing  = fbink_cfg->is_flashing;
-		is_cleared   = fbink_cfg->is_cleared;
-		is_centered  = fbink_cfg->is_centered;
-		is_halfway   = fbink_cfg->is_halfway;
-		wfm_mode     = fbink_cfg->wfm_mode;
-		is_dithered  = fbink_cfg->is_dithered;
-		is_nightmode = fbink_cfg->is_nightmode;
-		no_refresh   = fbink_cfg->no_refresh;
+		valign         = fbink_cfg->valign;
+		halign         = fbink_cfg->halign;
+		is_inverted    = fbink_cfg->is_inverted;
+		is_overlay     = fbink_cfg->is_overlay;
+		is_bgless      = fbink_cfg->is_bgless;
+		is_fgless      = fbink_cfg->is_fgless;
+		is_flashing    = fbink_cfg->is_flashing;
+		is_cleared     = fbink_cfg->is_cleared;
+		is_centered    = fbink_cfg->is_centered;
+		is_halfway     = fbink_cfg->is_halfway;
+		wfm_mode       = fbink_cfg->wfm_mode;
+		dithering_mode = fbink_cfg->dithering_mode;
+		is_nightmode   = fbink_cfg->is_nightmode;
+		no_refresh     = fbink_cfg->no_refresh;
 	} else {
 		is_centered = cfg->is_centered;
 	}
@@ -4956,7 +4956,7 @@ cleanup:
 		refresh(fbfd,
 			region,
 			get_wfm_mode(wfm_mode),
-			is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+			get_hwd_mode(dithering_mode),
 			is_nightmode,
 			is_flashing,
 			no_refresh);
@@ -5770,7 +5770,7 @@ int
 	if (refresh(fbfd,
 		    region,
 		    get_wfm_mode(fbink_cfg->wfm_mode),
-		    fbink_cfg->is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		    get_hwd_mode(fbink_cfg->dithering_mode),
 		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
@@ -6856,7 +6856,7 @@ static int
 	if (refresh(fbfd,
 		    region,
 		    get_wfm_mode(fbink_cfg->wfm_mode),
-		    fbink_cfg->is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		    get_hwd_mode(fbink_cfg->dithering_mode),
 		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
@@ -7715,7 +7715,7 @@ int
 	if (refresh(fbfd,
 		    region,
 		    get_wfm_mode(fbink_cfg->wfm_mode),
-		    fbink_cfg->is_dithered ? EPDC_FLAG_USE_DITHERING_ORDERED : EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		    get_hwd_mode(fbink_cfg->dithering_mode),
 		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {

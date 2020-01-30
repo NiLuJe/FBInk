@@ -287,13 +287,14 @@ typedef struct
 				    //       preferring instead proper preprocessing of your input images,
 				    //       c.f., https://www.mobileread.com/forums/showpost.php?p=3728291&postcount=17
 	uint8_t wfm_mode;           // Request a specific waveform mode (c.f., WFM_MODE_INDEX_T enum; defaults to AUTO)
-	bool    is_dithered;        // Request (ordered) hardware dithering (if supported).
-	bool    sw_dithering;       // Request (ordered) *software* dithering when printing an image.
-				    // This is *NOT* mutually exclusive with is_dithered!
-	bool is_nightmode;          // Request hardware inversion (if supported/safe).
-				    // This is *NOT* mutually exclusive with is_inverted!
-	bool no_refresh;            // Skip actually refreshing the eInk screen (useful when drawing in batch)
-	bool to_syslog;             // Send messages & errors to the syslog instead of stdout/stderr
+	uint8_t
+	     dithering_mode;    // Request a specific dithering mode (c.f., HW_DITHER_INDEX_T enum; defaults to PASSTHROUGH).
+	bool sw_dithering;    // Request (ordered) *software* dithering when printing an image.
+	    // This is *NOT* mutually exclusive with is_dithered!
+	bool is_nightmode;    // Request hardware inversion (if supported/safe).
+	    // This is *NOT* mutually exclusive with is_inverted!
+	bool no_refresh;    // Skip actually refreshing the eInk screen (useful when drawing in batch)
+	bool to_syslog;     // Send messages & errors to the syslog instead of stdout/stderr
 } FBInkConfig;
 
 // Same, but for OT/TTF specific stuff

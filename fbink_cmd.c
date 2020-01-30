@@ -124,7 +124,8 @@ static void
 	    "\t\t\t\tAs well as GC4.\n"
 #	endif
 	    "\t\t\t\tUnsupported modes should safely downgrade to AUTO. On some devices, REAGL & REAGLD expect to be flashing in order to behave properly.\n"
-	    "\t-D, --dither\t\tRequest (ordered) hardware dithering from the eInk controller, if supported (mainly useful for images).\n"
+	    "\t-D, --dither\t\tRequest a specific hardware dithering mode from the eInk controller, if supported (mainly useful for images).\n"
+	    "\t\t\t\tAvailable dithering modes: ORDERED & LEGACY\n"
 	    "\t-H, --nightmode\t\tRequest full hardware inversion from the eInk controller, if supported.\n"
 	    "\t\t\t\tNote that this can be used *in combination* with -h, --invert! One does not exclude the other, which may lead to some confusing behavior ;).\n"
 #	ifdef FBINK_FOR_KINDLE
@@ -248,8 +249,9 @@ static void
 	    "\n"
 	    "NOTES:\n"
 	    "\tThe specified rectangle *must* completely fit on screen, or the ioctl will fail.\n"
-	    "\tAvailable dithering modes: PASSTHROUGH, FLOYD_STEINBERG, ATKINSON, ORDERED & QUANT_ONLY\n"
+	    "\tAvailable dithering modes: PASSTHROUGH, FLOYD_STEINBERG, ATKINSON, ORDERED, QUANT_ONLY & LEGACY\n"
 	    "\t\tNote that this is only supported on recent devices, and that only a subset of these options may actually be supported by the HW (usually, PASSTHROUGH & ORDERED, check dmesg).\n"
+	    "\t\tLEGACY may be supported on more devices, but what exactly it does in practice (and how well it works) depends on the exact device.\n"
 #ifdef FBINK_FOR_KINDLE
 	    "\t\tHardware dithering is completely untested on Kindle, and, while the Oasis 2, PaperWhite 4 & Oasis 3 *should* support it, they *may* not, or at least not in the way FBInk expects...\n"
 #endif
@@ -627,7 +629,7 @@ int
                                               { "fgless", no_argument, NULL, 'T' },
                                               { "truetype", required_argument, NULL, 't' },
                                               { "norefresh", no_argument, NULL, 'b' },
-                                              { "dither", no_argument, NULL, 'D' },
+                                              { "dither", optional_argument, NULL, 'D' },
                                               { "waveform", required_argument, NULL, 'W' },
                                               { "nightmode", no_argument, NULL, 'H' },
                                               { "coordinates", no_argument, NULL, 'E' },
@@ -718,6 +720,7 @@ int
 	uint32_t    region_left    = 0;
 	uint32_t    region_width   = 0;
 	uint32_t    region_height  = 0;
+	char*       hwd_name       = NULL;
 	char*       wfm_name       = NULL;
 	char*       region_dither  = NULL;
 	uint8_t     region_hwd     = HWD_PASSTHROUGH;
@@ -750,7 +753,7 @@ int
 
 	// NOTE: c.f., https://codegolf.stackexchange.com/q/148228 to sort this mess when I need to find an available letter ;p
 	while ((opt = getopt_long(
-		    argc, argv, "y:x:Y:X:hfcmMprs::S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bDW:HEZk::wd:G", opts, &opt_index)) !=
+		    argc, argv, "y:x:Y:X:hfcmMprs::S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bD::W:HEZk::wd:G", opts, &opt_index)) !=
 	       -1) {
 		switch (opt) {
 			case 'y':
@@ -909,6 +912,8 @@ int
 								region_hwd = HWD_ORDERED;
 							} else if (strcasecmp(value, "QUANT_ONLY") == 0) {
 								region_hwd = HWD_QUANT_ONLY;
+							} else if (strcasecmp(value, "LEGACY") == 0) {
+								region_hwd = HWD_LEGACY;
 							} else {
 								ELOG("Unknown hardware dithering algorithm '%s'.", value);
 								errfnd = true;
@@ -1544,7 +1549,37 @@ int
 				fbink_cfg.no_refresh = true;
 				break;
 			case 'D':
-				fbink_cfg.is_dithered = true;
+				// NOTE: Nasty bit of trickery to make getopt's optional_argument actually useful...
+				//       Hat trick (& explanation) courtesy of https://stackoverflow.com/a/32575314
+				//       If `optarg` isn't set and argv[optind] doesn't look like another option,
+				//       then assume it's our parameter and overtly modify optind to compensate.
+				if (!optarg && argv[optind] != NULL && argv[optind][0] != '-') {
+					optarg = argv[optind++];
+				}
+
+				// If no specific mode was passed, assume ORDERED
+				fbink_cfg.dithering_mode = HWD_ORDERED;
+
+				if (strcasecmp(optarg, "PASSTHROUGH") == 0) {
+					fbink_cfg.dithering_mode = HWD_PASSTHROUGH;
+				} else if (strcasecmp(optarg, "FLOYD_STEINBERG") == 0) {
+					fbink_cfg.dithering_mode = HWD_FLOYD_STEINBERG;
+				} else if (strcasecmp(optarg, "ATKINSON") == 0) {
+					fbink_cfg.dithering_mode = HWD_ATKINSON;
+				} else if (strcasecmp(optarg, "ORDERED") == 0) {
+					fbink_cfg.dithering_mode = HWD_ORDERED;
+				} else if (strcasecmp(optarg, "QUANT_ONLY") == 0) {
+					fbink_cfg.dithering_mode = HWD_QUANT_ONLY;
+				} else if (strcasecmp(optarg, "LEGACY") == 0) {
+					fbink_cfg.dithering_mode = HWD_LEGACY;
+				} else {
+					ELOG("Unknown hardware dithering algorithm '%s'.", optarg);
+					errfnd = true;
+				}
+				// Remember non-default values in a human-readable format...
+				if (fbink_cfg.dithering_mode != HWD_PASSTHROUGH) {
+					hwd_name = optarg;
+				}
 				break;
 			case 'W':
 				if (strcasecmp(optarg, "AUTO") == 0) {
@@ -2084,7 +2119,7 @@ int
 			// Did we want to use the OpenType codepath?
 			if (is_truetype) {
 				if (!fbink_cfg.is_quiet) {
-					LOG("Printing string '%s' @ %.1fpt (or %hupx), honoring the following margins { Top: %hdpx, Bottom: %hdpx, Left: %hdpx, Right: %hdpx } (formatted: %s, compute only: %s, no truncation: %s, overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, H align: %hhu, halfway: %s, V align: %hhu, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s)",
+					LOG("Printing string '%s' @ %.1fpt (or %hupx), honoring the following margins { Top: %hdpx, Bottom: %hdpx, Left: %hdpx, Right: %hdpx } (formatted: %s, compute only: %s, no truncation: %s, overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, H align: %hhu, halfway: %s, V align: %hhu, clear screen: %s, waveform: %s, dithering: %s, nightmode: %s, skip refresh: %s)",
 					    string,
 					    ot_config.size_pt,
 					    ot_config.size_px,
@@ -2106,7 +2141,7 @@ int
 					    fbink_cfg.valign,
 					    fbink_cfg.is_cleared ? "Y" : "N",
 					    wfm_name ? wfm_name : "AUTO",
-					    fbink_cfg.is_dithered ? "Y" : "N",
+					    hwd_name ? hwd_name : "PASSTHROUGH",
 					    fbink_cfg.is_nightmode ? "Y" : "N",
 					    fbink_cfg.no_refresh ? "Y" : "N");
 				}
@@ -2147,7 +2182,7 @@ int
 				}
 			} else {
 				if (!fbink_cfg.is_quiet) {
-					LOG("Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, halfway: %s, left padded: %s, right padded: %s, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s, font: %hhu, font scaling: x%hhu)",
+					LOG("Printing string '%s' @ column %hd + %hdpx, row %hd + %hdpx (overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, halfway: %s, left padded: %s, right padded: %s, clear screen: %s, waveform: %s, dithering: %s, nightmode: %s, skip refresh: %s, font: %hhu, font scaling: x%hhu)",
 					    string,
 					    fbink_cfg.col,
 					    fbink_cfg.hoffset,
@@ -2164,7 +2199,7 @@ int
 					    fbink_cfg.is_rpadded ? "Y" : "N",
 					    fbink_cfg.is_cleared ? "Y" : "N",
 					    wfm_name ? wfm_name : "AUTO",
-					    fbink_cfg.is_dithered ? "Y" : "N",
+					    hwd_name ? hwd_name : "PASSTHROUGH",
 					    fbink_cfg.is_nightmode ? "Y" : "N",
 					    fbink_cfg.no_refresh ? "Y" : "N",
 					    fbink_cfg.fontname,
@@ -2255,7 +2290,7 @@ int
 			}
 		} else if (is_image) {
 			if (!fbink_cfg.is_quiet) {
-				LOG("Displaying image '%s' @ column %hd + %hdpx, row %hd + %dpx (scaling: %hdx%hd, H align: %hhu, V align: %hhu, inverted: %s, flattened: %s, waveform: %s, HW dithered: %s, SW dithered: %s, nightmode: %s, skip refresh: %s)",
+				LOG("Displaying image '%s' @ column %hd + %hdpx, row %hd + %dpx (scaling: %hdx%hd, H align: %hhu, V align: %hhu, inverted: %s, flattened: %s, waveform: %s, HW dithering: %s, SW dithered: %s, nightmode: %s, skip refresh: %s)",
 				    image_file,
 				    fbink_cfg.col,
 				    image_x_offset,
@@ -2268,7 +2303,7 @@ int
 				    fbink_cfg.is_inverted ? "Y" : "N",
 				    fbink_cfg.ignore_alpha ? "Y" : "N",
 				    wfm_name ? wfm_name : "AUTO",
-				    fbink_cfg.is_dithered ? "Y" : "N",
+				    hwd_name ? hwd_name : "PASSTHROUGH",
 				    fbink_cfg.sw_dithering ? "Y" : "N",
 				    fbink_cfg.is_nightmode ? "Y" : "N",
 				    fbink_cfg.no_refresh ? "Y" : "N");
@@ -2292,7 +2327,7 @@ int
 			}
 		} else if (is_progressbar) {
 			if (!fbink_cfg.is_quiet) {
-				LOG("Displaying a %hhu%% full progress bar @ row %hd + %hdpx (no FG: %s, no BG: %s, inverted: %s, flashing: %s, halfway: %s, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s, font: %hhu, font scaling: x%hhu)",
+				LOG("Displaying a %hhu%% full progress bar @ row %hd + %hdpx (no FG: %s, no BG: %s, inverted: %s, flashing: %s, halfway: %s, clear screen: %s, waveform: %s, dithering: %s, nightmode: %s, skip refresh: %s, font: %hhu, font scaling: x%hhu)",
 				    progress,
 				    fbink_cfg.row,
 				    fbink_cfg.voffset,
@@ -2303,7 +2338,7 @@ int
 				    fbink_cfg.is_halfway ? "Y" : "N",
 				    fbink_cfg.is_cleared ? "Y" : "N",
 				    wfm_name ? wfm_name : "AUTO",
-				    fbink_cfg.is_dithered ? "Y" : "N",
+				    hwd_name ? hwd_name : "PASSTHROUGH",
 				    fbink_cfg.is_nightmode ? "Y" : "N",
 				    fbink_cfg.no_refresh ? "Y" : "N",
 				    fbink_cfg.fontname,
@@ -2329,7 +2364,7 @@ int
 			// Were we asked to loop forever?
 			if (is_infinite) {
 				if (!fbink_cfg.is_quiet) {
-					LOG("Displaying an activity bar cycling forever @ row %hd + %hdpx (no BG: %s, inverted: %s, flashing: %s, halfway: %s, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s)",
+					LOG("Displaying an activity bar cycling forever @ row %hd + %hdpx (no BG: %s, inverted: %s, flashing: %s, halfway: %s, clear screen: %s, waveform: %s, dithering: %s, nightmode: %s, skip refresh: %s)",
 					    fbink_cfg.row,
 					    fbink_cfg.voffset,
 					    fbink_cfg.is_bgless ? "Y" : "N",
@@ -2338,7 +2373,7 @@ int
 					    fbink_cfg.is_halfway ? "Y" : "N",
 					    fbink_cfg.is_cleared ? "Y" : "N",
 					    wfm_name ? wfm_name : "AUTO",
-					    fbink_cfg.is_dithered ? "Y" : "N",
+					    hwd_name ? hwd_name : "PASSTHROUGH",
 					    fbink_cfg.is_nightmode ? "Y" : "N",
 					    fbink_cfg.no_refresh ? "Y" : "N");
 				}
@@ -2352,7 +2387,7 @@ int
 				}
 			} else {
 				if (!fbink_cfg.is_quiet) {
-					LOG("Displaying an activity bar on step %hhu @ row %hd + %hdpx (no BG: %s, inverted: %s, flashing: %s, halfway: %s, clear screen: %s, waveform: %s, dithered: %s, nightmode: %s, skip refresh: %s)",
+					LOG("Displaying an activity bar on step %hhu @ row %hd + %hdpx (no BG: %s, inverted: %s, flashing: %s, halfway: %s, clear screen: %s, waveform: %s, dithering: %s, nightmode: %s, skip refresh: %s)",
 					    progress,
 					    fbink_cfg.row,
 					    fbink_cfg.voffset,
@@ -2362,7 +2397,7 @@ int
 					    fbink_cfg.is_halfway ? "Y" : "N",
 					    fbink_cfg.is_cleared ? "Y" : "N",
 					    wfm_name ? wfm_name : "AUTO",
-					    fbink_cfg.is_dithered ? "Y" : "N",
+					    hwd_name ? hwd_name : "PASSTHROUGH",
 					    fbink_cfg.is_nightmode ? "Y" : "N",
 					    fbink_cfg.no_refresh ? "Y" : "N");
 				}
