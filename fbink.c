@@ -591,7 +591,7 @@ static void
 		return;
 	}
 
-	if (vInfo.bits_per_pixel < 8U) {
+	if (vInfo.bits_per_pixel == 4U) {
 		// Go with pixel plotting @ 4bpp to keep this simple...
 		for (unsigned short int cy = 0U; cy < h; cy++) {
 			for (unsigned short int cx = 0U; cx < w; cx++) {
@@ -600,6 +600,20 @@ static void
 				coords.y = (unsigned short int) (y + cy);
 				put_pixel_Gray4(&coords, px);
 			}
+		}
+	} else if (vInfo.bits_per_pixel == 8U) {
+		struct mxcfb_rect region = {
+			.top    = y,
+			.left   = x,
+			.width  = w,
+			.height = h,
+		};
+
+		// NOTE: fxpRotateRegion is never set at 8bpp :).
+		//(*fxpRotateRegion)(&region);
+		for (size_t j = region.top; j < region.top + region.height; j++) {
+			uint8_t* p = fbPtr + (fInfo.line_length * j) + (region.left);
+			memset(p, px->gray8, region.width);
 		}
 	} else if (vInfo.bits_per_pixel == 16U) {
 		// Things are a bit trickier @ 16bpp, because except for black or white, we're not sure the requested color
@@ -629,19 +643,33 @@ static void
 				*p++ = px->rgb565;
 			};
 		}
-	} else {
+	} else if (vInfo.bits_per_pixel == 24U) {
 		struct mxcfb_rect region = {
 			.top    = y,
 			.left   = x,
 			.width  = w,
 			.height = h,
 		};
-		uint8_t bpp = (uint8_t)(vInfo.bits_per_pixel >> 3U);
 
-		(*fxpRotateRegion)(&region);
+		// NOTE: fxpRotateRegion is never set at 24bpp :).
+		//(*fxpRotateRegion)(&region);
 		for (size_t j = region.top; j < region.top + region.height; j++) {
-			uint8_t* p = fbPtr + (fInfo.line_length * j) + (bpp * region.left);
-			memset(p, px->gray8, bpp * region.width);
+			uint8_t* p = fbPtr + (fInfo.line_length * j) + (region.left * 3U);
+			memset(p, px->gray8, region.width * 3U);
+		}
+	} else if (vInfo.bits_per_pixel == 32U) {
+		struct mxcfb_rect region = {
+			.top    = y,
+			.left   = x,
+			.width  = w,
+			.height = h,
+		};
+
+		// NOTE: fxpRotateRegion is never set at 32bpp :).
+		//(*fxpRotateRegion)(&region);
+		for (size_t j = region.top; j < region.top + region.height; j++) {
+			uint8_t* p = fbPtr + (fInfo.line_length * j) + (region.left << 2U);
+			memset(p, px->gray8, region.width << 2U);
 		}
 	}
 #ifdef DEBUG
