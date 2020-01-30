@@ -528,7 +528,7 @@ static int wait_for_complete_cervantes(int, uint32_t);
 static int refresh_remarkable(int, const struct mxcfb_rect, uint32_t, uint32_t, bool, uint32_t);
 static int wait_for_complete_remarkable(int, uint32_t);
 #	elif defined(FBINK_FOR_KOBO)
-static int refresh_kobo(int, const struct mxcfb_rect, uint32_t, uint32_t, bool, uint32_t);
+static int refresh_kobo(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
 static int wait_for_complete_kobo(int, uint32_t);
 static int refresh_kobo_mk7(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
 static int wait_for_complete_kobo_mk7(int, uint32_t);
