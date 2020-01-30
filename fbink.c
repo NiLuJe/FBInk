@@ -1392,8 +1392,10 @@ static int
 		.hist_bw_waveform_mode = (waveform_mode == WAVEFORM_MODE_REAGL) ? WAVEFORM_MODE_REAGL : WAVEFORM_MODE_DU,
 		.hist_gray_waveform_mode =
 		    (waveform_mode == WAVEFORM_MODE_REAGL) ? WAVEFORM_MODE_REAGL : WAVEFORM_MODE_GC16_FAST,
-		.temp            = TEMP_USE_AUTO,
-		.flags           = (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
+		.temp  = TEMP_USE_AUTO,
+		.flags = (waveform_mode == WAVEFORM_MODE_REAGLD)
+			     ? EPDC_FLAG_USE_REAGLD
+			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
 		.alt_buffer_data = { 0U },
 	};
 
