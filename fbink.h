@@ -287,14 +287,13 @@ typedef struct
 				    //       preferring instead proper preprocessing of your input images,
 				    //       c.f., https://www.mobileread.com/forums/showpost.php?p=3728291&postcount=17
 	uint8_t wfm_mode;           // Request a specific waveform mode (c.f., WFM_MODE_INDEX_T enum; defaults to AUTO)
-	uint8_t
-	     dithering_mode;    // Request a specific dithering mode (c.f., HW_DITHER_INDEX_T enum; defaults to PASSTHROUGH).
-	bool sw_dithering;    // Request (ordered) *software* dithering when printing an image.
-	    // This is *NOT* mutually exclusive with is_dithered!
-	bool is_nightmode;    // Request hardware inversion (if supported/safe).
-	    // This is *NOT* mutually exclusive with is_inverted!
-	bool no_refresh;    // Skip actually refreshing the eInk screen (useful when drawing in batch)
-	bool to_syslog;     // Send messages & errors to the syslog instead of stdout/stderr
+	uint8_t dithering_mode;    // Request a specific dithering mode (c.f., HW_DITHER_INDEX_T; defaults to PASSTHROUGH)
+	bool    sw_dithering;      // Request (ordered) *software* dithering when printing an image.
+				   // This is *NOT* mutually exclusive with dithering_mode!
+	bool is_nightmode;         // Request hardware inversion (if supported/safe).
+				   // This is *NOT* mutually exclusive with is_inverted!
+	bool no_refresh;           // Skip actually refreshing the eInk screen (useful when drawing in batch)
+	bool to_syslog;            // Send messages & errors to the syslog instead of stdout/stderr
 } FBInkConfig;
 
 // Same, but for OT/TTF specific stuff
@@ -471,7 +470,7 @@ FBINK_API int fbink_free_ot_fonts(void);
 // fbink_cfg:		Optional pointer to an FBInkConfig struct. If set, the fields
 //				is_inverted, is_flashing, is_cleared, is_centered, is_halfway,
 //				is_overlay, is_fgless, is_bgless, fg_color, bg_color, valign, halign,
-//				wfm_mode, is_dithered, is_nightmode, no_refresh will be honored.
+//				wfm_mode, dithering_mode, is_nightmode, no_refresh will be honored.
 //				Pass a NULL pointer if unneeded.
 // fit:			Optional pointer to an FBInkOTFit struct.
 //				If set, it will be used to return information about the amount of lines needed to render
@@ -518,7 +517,7 @@ FBINK_API int fbink_printf(int                           fbfd,
 //			NOTE: Even then, your device may not actually support anything other than PASSTHROUGH & ORDERED!
 // fbink_cfg:		Pointer to an FBInkConfig struct. Honors wfm_mode, is_nightmode, is_flashing.
 // NOTE: If you request an empty region (0x0 @ (0, 0), a full-screen refresh will be performed!
-// NOTE: This *ignores* is_dithered & no_refresh ;).
+// NOTE: This *ignores* dithering_mode & no_refresh ;).
 // NOTE: If you do NOT want to request hardware dithering, set dithering_mode to HWD_PASSTHROUGH (i.e., 0).
 //       This is also the fallback value.
 FBINK_API int fbink_refresh(int                         fbfd,
@@ -651,7 +650,7 @@ FBINK_API int fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkCo
 //       an image that decodes in a pixel format close to the one used by the target device fb is best.
 //       Generally, that'd be a Grayscale (color-type 0) PNG, ideally dithered down to the eInk palette
 //       (c.f., https://www.mobileread.com/forums/showpost.php?p=3728291&postcount=17).
-//       If you can't pre-process your images, dithering can be handled by the hardware on recent devices (c.f. is_dithered),
+//       If you can't pre-process your images, dithering can be handled by the hardware on recent devices (c.f. dithering_mode),
 //       or by FBInk itself (c.f., sw_dithering), but the pixel format still matters:
 //       On a 32bpp fb, Gray will still be faster than RGB.
 //       On a 8bpp fb, try to only use Gray for the best performance possible,
@@ -704,7 +703,7 @@ FBINK_API int fbink_print_raw_data(int                         fbfd,
 // Just clear the screen (or a region of it), eInk refresh included (or not ;)).
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
-// fbink_cfg:		Pointer to an FBInkConfig struct (honors is_inverted, wfm_mode, is_dithered, is_nightmode, is_flashing,
+// fbink_cfg:		Pointer to an FBInkConfig struct (honors is_inverted, wfm_mode, dithering_mode, is_nightmode, is_flashing,
 //				as well as no_refresh & bg_color).
 // rect:		Optional pointer to an FBInkRect rectangle (as, say, returned by fbink_get_last_rect),
 //				describing the specific region of screen to clear (in absolute coordinates).
@@ -759,13 +758,14 @@ FBINK_API int fbink_region_dump(int                         fbfd,
 //	-(EINVAL)	when there's no data to restore.
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
-// fbink_cfg:		Pointer to an FBInkConfig struct (honors wfm_mode, is_dithered, is_nightmode, is_flashing & no_refresh).
+// fbink_cfg:		Pointer to an FBInkConfig struct (honors wfm_mode, dithering_mode, is_nightmode,
+//				is_flashing & no_refresh).
 // dump:		Pointer to an FBInkDump struct, as setup by fbink_dump or fbink_region_dump.
 // NOTE: In case the dump was regional, it will be restored in the exact same coordinates it was taken from,
 //       no actual positioning is needed/supported at restore time.
 // NOTE: This does not support any kind of software processing, at all!
 //       If you somehow need inversion or dithering, it has to be supported at the hardware level at refresh time by your device,
-//       (i.e., is_dithered vs. sw_dithering, and is_nightmode vs. is_inverted).
+//       (i.e., dithering_mode vs. sw_dithering, and is_nightmode vs. is_inverted).
 //       At most common bitdepths, you can somewhat work around these restrictions, obviously at a performance premium,
 //       by using fbink_print_raw_data instead (see the relevant notes for fbink_dump), with a few quirky caveats...
 //       c.f., the last few tests in utils/dump.c for highly convoluted examples that I don't recommend replicating in production.
