@@ -646,7 +646,7 @@ static void
 		// NOTE: fxpRotateRegion is never set at 32bpp :).
 		for (size_t j = y; j < y + h; j++) {
 			uint8_t* p = fbPtr + (fInfo.line_length * j) + (x << 2U);
-			memset(p, px->gray8, w << 2U);
+			memset(p, px->gray8, (size_t)(w << 2U));
 		}
 	}
 #ifdef DEBUG
