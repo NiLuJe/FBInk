@@ -1523,28 +1523,30 @@ int
 					optarg = argv[optind++];
 				}
 
-				// If no specific mode was passed, assume ORDERED
-				fbink_cfg.dithering_mode = HWD_ORDERED;
-
-				if (strcasecmp(optarg, "PASSTHROUGH") == 0) {
-					fbink_cfg.dithering_mode = HWD_PASSTHROUGH;
-				} else if (strcasecmp(optarg, "FLOYD_STEINBERG") == 0) {
-					fbink_cfg.dithering_mode = HWD_FLOYD_STEINBERG;
-				} else if (strcasecmp(optarg, "ATKINSON") == 0) {
-					fbink_cfg.dithering_mode = HWD_ATKINSON;
-				} else if (strcasecmp(optarg, "ORDERED") == 0) {
+				if (!optarg) {
+					// If no specific mode was passed, assume ORDERED
 					fbink_cfg.dithering_mode = HWD_ORDERED;
-				} else if (strcasecmp(optarg, "QUANT_ONLY") == 0) {
-					fbink_cfg.dithering_mode = HWD_QUANT_ONLY;
-				} else if (strcasecmp(optarg, "LEGACY") == 0) {
-					fbink_cfg.dithering_mode = HWD_LEGACY;
 				} else {
-					ELOG("Unknown hardware dithering algorithm '%s'.", optarg);
-					errfnd = true;
-				}
-				// Remember non-default values in a human-readable format...
-				if (fbink_cfg.dithering_mode != HWD_PASSTHROUGH) {
-					hwd_name = optarg;
+					if (strcasecmp(optarg, "PASSTHROUGH") == 0) {
+						fbink_cfg.dithering_mode = HWD_PASSTHROUGH;
+					} else if (strcasecmp(optarg, "FLOYD_STEINBERG") == 0) {
+						fbink_cfg.dithering_mode = HWD_FLOYD_STEINBERG;
+					} else if (strcasecmp(optarg, "ATKINSON") == 0) {
+						fbink_cfg.dithering_mode = HWD_ATKINSON;
+					} else if (strcasecmp(optarg, "ORDERED") == 0) {
+						fbink_cfg.dithering_mode = HWD_ORDERED;
+					} else if (strcasecmp(optarg, "QUANT_ONLY") == 0) {
+						fbink_cfg.dithering_mode = HWD_QUANT_ONLY;
+					} else if (strcasecmp(optarg, "LEGACY") == 0) {
+						fbink_cfg.dithering_mode = HWD_LEGACY;
+					} else {
+						ELOG("Unknown hardware dithering algorithm '%s'.", optarg);
+						errfnd = true;
+					}
+					// Remember non-default values in a human-readable format...
+					if (fbink_cfg.dithering_mode != HWD_PASSTHROUGH) {
+						hwd_name = optarg;
+					}
 				}
 				break;
 			case 'W':
