@@ -2271,34 +2271,6 @@ static int
 				     screenWidth,
 				     screenHeight);
 			}
-		} else if (vInfo.bits_per_pixel == 8U) {
-			// We also need to account for the fact that KOReader *might* have switched to 8bpp,
-			// and done so from this quirky pickel state (as that's what KSM emulates).
-			// We explicitly skip this check on the Forma, despite it being unreachable under normal circumstances:
-			// because someone, some day, might want to take advantage of an 8bpp fb *AND* do hardware rotations,
-			// and we don't want to misbehave there ;).
-			if (!deviceQuirks.canRotate && vInfo.rotate == (deviceQuirks.ntxBootRota ^ 2)) {
-				// NOTE: On affected devices, pickel is helpfully using the invert of the boot rotation ;).
-				// NOTE: As mentioned earlier, in normal conditions, the Forma is blissfully immune,
-				//       since pickel defaults to a Portrait orientation (i.e., xres < yres, despite it being CCW),
-				//       so we don't even enter this xres > yres branch:
-				//       given that, the !canRotate check is simply to future-proof this for custom use-cases ;).
-				// NOTE: Because of course, everything is terrible,
-				//       current unofficial KSM 9 builds for the Forma are doing it wrong:
-				//       they're setting the rota to UR (i.e., like pickel on most !6.8" panels) instead of CCW.
-				// Correct screenWidth & screenHeight, so we do all our row/column arithmetics on the right values...
-				screenWidth                    = vInfo.yres;
-				screenHeight                   = vInfo.xres;
-				deviceQuirks.isNTX16bLandscape = true;
-				// We only care about the *pickel* state (mainly to avoid false-positives)
-				fxpRotateCoords = &rotate_coordinates_pickel;
-				fxpRotateRegion = &rotate_region_pickel;
-				ELOG("Enabled NTX @ 16bpp pickel rotation quirks (%ux%u -> %ux%u)",
-				     vInfo.xres,
-				     vInfo.yres,
-				     screenWidth,
-				     screenHeight);
-			}
 		}
 	}
 
