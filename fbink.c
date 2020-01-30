@@ -603,18 +603,10 @@ static void
 			}
 		}
 	} else if (vInfo.bits_per_pixel == 8U) {
-		struct mxcfb_rect region = {
-			.top    = y,
-			.left   = x,
-			.width  = w,
-			.height = h,
-		};
-
 		// NOTE: fxpRotateRegion is never set at 8bpp :).
-		//(*fxpRotateRegion)(&region);
-		for (size_t j = region.top; j < region.top + region.height; j++) {
-			uint8_t* p = fbPtr + (fInfo.line_length * j) + (region.left);
-			memset(p, px->gray8, region.width);
+		for (size_t j = y; j < y + h; j++) {
+			uint8_t* p = fbPtr + (fInfo.line_length * j) + (x);
+			memset(p, px->gray8, w);
 		}
 	} else if (vInfo.bits_per_pixel == 16U) {
 		// Things are a bit trickier @ 16bpp, because except for black or white, we're not sure the requested color
@@ -645,32 +637,16 @@ static void
 			};
 		}
 	} else if (vInfo.bits_per_pixel == 24U) {
-		struct mxcfb_rect region = {
-			.top    = y,
-			.left   = x,
-			.width  = w,
-			.height = h,
-		};
-
 		// NOTE: fxpRotateRegion is never set at 24bpp :).
-		//(*fxpRotateRegion)(&region);
-		for (size_t j = region.top; j < region.top + region.height; j++) {
-			uint8_t* p = fbPtr + (fInfo.line_length * j) + (region.left * 3U);
-			memset(p, px->gray8, region.width * 3U);
+		for (size_t j = y; j < y + h; j++) {
+			uint8_t* p = fbPtr + (fInfo.line_length * j) + (x * 3U);
+			memset(p, px->gray8, w * 3U);
 		}
 	} else if (vInfo.bits_per_pixel == 32U) {
-		struct mxcfb_rect region = {
-			.top    = y,
-			.left   = x,
-			.width  = w,
-			.height = h,
-		};
-
 		// NOTE: fxpRotateRegion is never set at 32bpp :).
-		//(*fxpRotateRegion)(&region);
-		for (size_t j = region.top; j < region.top + region.height; j++) {
-			uint8_t* p = fbPtr + (fInfo.line_length * j) + (region.left << 2U);
-			memset(p, px->gray8, region.width << 2U);
+		for (size_t j = y; j < y + h; j++) {
+			uint8_t* p = fbPtr + (fInfo.line_length * j) + (x << 2U);
+			memset(p, px->gray8, w << 2U);
 		}
 	}
 #ifdef DEBUG
