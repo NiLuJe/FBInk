@@ -117,6 +117,8 @@ BQ Cervantes support has been contributed by [@pazos](https://github.com/pazos) 
 
 reMarkable support has been contributed by [@tcrs](https://github.com/tcrs) ([#41](https://github.com/NiLuJe/FBInk/pull/41)).
 
+If, instead of *writing* to the framebuffer, you want to *grab* a PNG snapshot of it (which can come in handy), I have a heavily modified version of [FBGrab](http://trac.ak-team.com/trac/browser/niluje/Configs/trunk/Kindle/Misc/FBGrab) that should sanely deal with the various quirks of eInk framebuffers ;).
+
 ## Bindings in other languages
 
 So that everyone gets to have fun, even if you can't stand C!
