@@ -5286,7 +5286,6 @@ int
 		  uint32_t region_left                  UNUSED_BY_LINUX,
 		  uint32_t region_width                 UNUSED_BY_LINUX,
 		  uint32_t region_height                UNUSED_BY_LINUX,
-		  uint8_t dithering_mode                UNUSED_BY_LINUX,
 		  const FBInkConfig* restrict fbink_cfg UNUSED_BY_LINUX)
 {
 #ifndef FBINK_FOR_LINUX
@@ -5297,13 +5296,13 @@ int
 	}
 
 	// Same for the dithering mode, if we actually requested dithering...
-	int region_dither = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
-	if (dithering_mode > 0U) {
-		region_dither = get_hwd_mode(dithering_mode);
-	} else {
+	if (fbink_cfg->dithering_mode == HWD_PASSTHROUGH) {
 		LOG("No hardware dithering requested");
+	} else if (fbink_cfg->dithering_mode == HWD_LEGACY) {
+		LOG("Legacy in-kernel software dithering requested");
 	}
 	// NOTE: Right now, we enforce quant_bit to what appears to be sane values depending on the waveform mode.
+	//       We do the same for actual algorithm selection w/ LEGACY.
 
 	struct mxcfb_rect region = {
 		.top    = region_top,
@@ -5321,7 +5320,7 @@ int
 	if ((ret = refresh(fbfd,
 			   region,
 			   get_wfm_mode(fbink_cfg->wfm_mode),
-			   region_dither,
+			   get_hwd_mode(fbink_cfg->dithering_mode),
 			   fbink_cfg->is_nightmode,
 			   fbink_cfg->is_flashing,
 			   false)) != EXIT_SUCCESS) {

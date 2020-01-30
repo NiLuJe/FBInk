@@ -510,22 +510,22 @@ FBINK_API int fbink_printf(int                           fbfd,
 // region_left:		left (x) field of an mxcfb rectangle.
 // region_width:	width field of an mxcfb rectangle.
 // region_height:	height field of an mxcfb rectangle.
-// dithering_mode:	dithering mode (f.g., HWD_ORDERED, c.f., HW_DITHER_INDEX_T enum).
-//			NOTE: Only supported on devices with a recent EPDC (>= v2)!
-//			      On Kindle, that's everything since the KOA2 (KOA2, PW4, KT4, KOA3),
-//			      On Kobo, that's everything since Mk.7.
-//			NOTE: Even then, your device may not actually support anything other than PASSTHROUGH & ORDERED!
-// fbink_cfg:		Pointer to an FBInkConfig struct. Honors wfm_mode, is_nightmode, is_flashing.
+// fbink_cfg:		Pointer to an FBInkConfig struct. Honors wfm_mode, dithering_mode, is_nightmode, is_flashing.
 // NOTE: If you request an empty region (0x0 @ (0, 0), a full-screen refresh will be performed!
-// NOTE: This *ignores* dithering_mode & no_refresh ;).
-// NOTE: If you do NOT want to request hardware dithering, set dithering_mode to HWD_PASSTHROUGH (i.e., 0).
+// NOTE: This *ignores* no_refresh ;).
+// NOTE: As far as dithering is concerned, c.f., HW_DITHER_INDEX_T enum.
+//	 True HW dithering is only supported on devices with a recent EPDC (>= v2)!
+//	 On Kindle, that's everything since the KOA2 (KOA2, PW4, KT4, KOA3),
+//	 On Kobo, that's everything since Mk.7.
+// NOTE: Even then, your device may not actually support anything other than PASSTHROUGH & ORDERED!
+//	 On slightly older devices, the EPDC may support some sort of in-kernel software dithering, hence HWD_LEGACY.
+// NOTE: If you do NOT want to request any dithering, set FBInkConfig's dithering_mode field to HWD_PASSTHROUGH (i.e., 0).
 //       This is also the fallback value.
 FBINK_API int fbink_refresh(int                         fbfd,
 			    uint32_t                    region_top,
 			    uint32_t                    region_left,
 			    uint32_t                    region_width,
 			    uint32_t                    region_height,
-			    uint8_t                     dithering_mode,
 			    const FBInkConfig* restrict fbink_cfg);
 
 // A simple wrapper around the MXCFB_WAIT_FOR_UPDATE_SUBMISSION ioctl, without requiring you to include mxcfb headers.
