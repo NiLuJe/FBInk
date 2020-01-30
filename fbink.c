@@ -1585,6 +1585,7 @@ static int
 		      const struct mxcfb_rect region,
 		      uint32_t waveform_mode,
 		      uint32_t update_mode,
+		      int dithering_mode,
 		      bool is_nightmode,
 		      uint32_t marker)
 {
@@ -1602,6 +1603,22 @@ static int
 
 	if (is_nightmode && deviceQuirks.canHWInvert) {
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
+	}
+
+	// NOTE: When dithering is enabled, you generally want to get rid of FORCE_MONOCHROME, because it gets applied *first*...
+	if (dithering_mode == HWD_LEGACY) {
+		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
+
+		// And now we can deal with the algo selection :).
+		if (waveform_mode == WAVEFORM_MODE_A2 || waveform_mode == WAVEFORM_MODE_DU) {
+			update.flags |= EPDC_FLAG_USE_DITHERING_Y1;
+		} else if (waveform_mode == WAVEFORM_MODE_GC4) {
+			// NOTE: Generally much less useful/pleasing than Y1. Then again, GC4 is an odd duck to begin with.
+			update.flags |= EPDC_FLAG_USE_DITHERING_Y4;
+		} else {
+			// NOTE: I have no idea how this looks ;).
+			update.flags |= EPDC_FLAG_USE_DITHERING_NTX_D8;
+		}
 	}
 
 	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
@@ -1923,7 +1940,7 @@ static int
     refresh(int fbfd,
 	    const struct mxcfb_rect region,
 	    uint32_t waveform_mode,
-	    int dithering_mode UNUSED_BY_CERVANTES,
+	    int dithering_mode,
 	    bool is_nightmode,
 	    bool is_flashing,
 	    bool no_refresh)
@@ -1992,7 +2009,7 @@ static int
 		return refresh_kindle(fbfd, region, wfm, upm, is_nightmode, lastMarker);
 	}
 #	elif defined(FBINK_FOR_CERVANTES)
-	return refresh_cervantes(fbfd, region, wfm, upm, is_nightmode, lastMarker);
+	return refresh_cervantes(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
 #	elif defined(FBINK_FOR_REMARKABLE)
 	return refresh_remarkable(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
 #	elif defined(FBINK_FOR_KOBO)
