@@ -1821,9 +1821,9 @@ static int
 	if (use_legacy_dithering) {
 		if (waveform_mode == WAVEFORM_MODE_A2 || waveform_mode == WAVEFORM_MODE_DU) {
 			update.flags |= EPDC_FLAG_USE_DITHERING_Y1;
-		} else if (waveform_mode == WAVEFORM_MODE_GC4) {
+		} else {
 			// NOTE: Generally much less useful/pleasing than Y1.
-			//       Then again, it's not any better with EPDC V2 dithering, either ;).
+			//       Then again, it's not any better with EPDC V2 dithering @ q3, either ;).
 			update.flags |= EPDC_FLAG_USE_DITHERING_Y4;
 		}
 		// NOTE: EPDC_FLAG_USE_DITHERING_NTX_D8 is gone on Mk. 7.
