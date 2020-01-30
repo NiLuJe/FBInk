@@ -1814,7 +1814,7 @@ static int
 	//       It does hide the vectorization? artefacts (i.e., the 4 visible horizontal "bands" of processing), though.
 	if (use_legacy_dithering || dithering_mode != EPDC_FLAG_USE_DITHERING_PASSTHROUGH) {
 		// EPDC V2 here, where we prefer the newer PxP alternatives, so no need to mess with the old dithering flags.
-		update.flags &= ~EPDC_FLAG_FORCE_MONOCHROME;
+		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
 	}
 
 	// And setup EPDC V1 dithering
