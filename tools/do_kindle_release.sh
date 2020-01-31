@@ -23,9 +23,9 @@ for my_tc in K3 K5 PW2 ; do
 	# We'll want to bundle a shared lib, too, because TCC won't like an LTO archive ;).
 	make clean
 	if [[ "${KINDLE_TC}" == "K3" ]] ; then
-		make sharedlib striplib SHARED=true KINDLE=true LEGACY=true
+		make ${JOBSFLAGS} sharedlib striplib SHARED=true KINDLE=true LEGACY=true
 	else
-		make sharedlib striplib SHARED=true KINDLE=true
+		make ${JOBSFLAGS} sharedlib striplib SHARED=true KINDLE=true
 	fi
 
 	cp -av Release/libfbink.so.1.0.0 ${KINDLE_TC}/lib/libfbink.so.1.0.0
@@ -33,6 +33,15 @@ for my_tc in K3 K5 PW2 ; do
 	ln -sf libfbink.so.1.0.0 ${KINDLE_TC}/lib/libfbink.so.1
 
 	make clean
+
+	# And we'll want the doom demo, too
+	if [[ "${KINDLE_TC}" != "K3" ]] ; then
+		make ${JOBSFLAGS} utils KINDLE=true
+
+		cp -av Release/doom ${KINDLE_TC}/bin/doom
+
+		make clean
+	fi
 done
 
 # Package it...
