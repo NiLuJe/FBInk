@@ -1921,6 +1921,10 @@ static int
 		     bool                    is_nightmode,
 		     uint32_t                marker)
 {
+	// NOTE: On Mk. 7 devices, for reasons that are unclear (and under circumstances which are equally unclear),
+	//       the EPDC may repeatedly ignore the requested flags and/or dither_mode...
+	//       A fb rotation *usually* jog things up, but other events may also clear things up...
+
 	// Did we request legacy dithering?
 	bool use_legacy_dithering = false;
 	if (dithering_mode == HWD_LEGACY) {
