@@ -1520,14 +1520,12 @@ static int
 			     ? EPDC_FLAG_USE_ZELDA_REGAL
 			     : (waveform_mode == WAVEFORM_MODE_ZELDA_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
 		.dither_mode = dithering_mode,
-		.quant_bit   = (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)
-				 ? 0
-				 : (waveform_mode == WAVEFORM_MODE_ZELDA_A2 || waveform_mode == WAVEFORM_MODE_DU)
-				       ? 1
-				       : (waveform_mode == WAVEFORM_MODE_GC4 ||
-					  waveform_mode == WAVEFORM_MODE_ZELDA_GL4 || waveform_mode == WAVEFORM_MODE_DU4)
-					     ? 3
-					     : 7,
+		.quant_bit =
+		    (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)
+			? 0
+			: (waveform_mode == WAVEFORM_MODE_ZELDA_A2 || waveform_mode == WAVEFORM_MODE_DU)
+			      ? 1
+			      : (waveform_mode == WAVEFORM_MODE_ZELDA_GL4 || waveform_mode == WAVEFORM_MODE_DU4) ? 3 : 7,
 		.alt_buffer_data = { 0U },
 		.hist_bw_waveform_mode =
 		    (waveform_mode == WAVEFORM_MODE_ZELDA_REAGL) ? WAVEFORM_MODE_ZELDA_REAGL : WAVEFORM_MODE_DU,
@@ -1615,14 +1613,12 @@ static int
 			     ? EPDC_FLAG_USE_ZELDA_REGAL
 			     : (waveform_mode == WAVEFORM_MODE_ZELDA_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
 		.dither_mode = dithering_mode,
-		.quant_bit   = (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)
-				 ? 0
-				 : (waveform_mode == WAVEFORM_MODE_ZELDA_A2 || waveform_mode == WAVEFORM_MODE_DU)
-				       ? 1
-				       : (waveform_mode == WAVEFORM_MODE_GC4 ||
-					  waveform_mode == WAVEFORM_MODE_ZELDA_GL4 || waveform_mode == WAVEFORM_MODE_DU4)
-					     ? 3
-					     : 7,
+		.quant_bit =
+		    (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)
+			? 0
+			: (waveform_mode == WAVEFORM_MODE_ZELDA_A2 || waveform_mode == WAVEFORM_MODE_DU)
+			      ? 1
+			      : (waveform_mode == WAVEFORM_MODE_ZELDA_GL4 || waveform_mode == WAVEFORM_MODE_DU4) ? 3 : 7,
 		.alt_buffer_data = { 0U },
 		.hist_bw_waveform_mode =
 		    (waveform_mode == WAVEFORM_MODE_ZELDA_REAGL) ? WAVEFORM_MODE_ZELDA_REAGL : WAVEFORM_MODE_DU,
