@@ -602,7 +602,7 @@ int
 
 	bool errfnd = false;
 
-	while ((opt = getopt_long(argc, argv, "hvqfFS:tW:Dl:c:", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hvqfFS:tW:D:l:c:", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'v':
 				g_isQuiet   = false;
