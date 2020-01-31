@@ -558,6 +558,7 @@ static void
 	    "\t-D, --dither\t\t\tSet dithering mode.\n"
 	    "\t-l, --limit\t\t\tFramerate cap (in FPS).\n"
 	    "\t-c, --cap\t\t\tOverride the rendering iteration cap.\n"
+	    "\t-r, --rota <-1|0|1|2|3>\t\tSwitch the framebuffer to the supplied rotation. -1 is a magic value matching the device-specific Portrait orientation.\n"
 	    "\n",
 	    fbink_version());
 	return;
@@ -573,22 +574,25 @@ int
 
 	int                        opt;
 	int                        opt_index;
-	static const struct option opts[] = {
-		{ "help", no_argument, NULL, 'h' },         { "verbose", no_argument, NULL, 'v' },
-		{ "quiet", no_argument, NULL, 'q' },        { "fs", no_argument, NULL, 'f' },
-		{ "flash", no_argument, NULL, 'F' },        { "scale", required_argument, NULL, 'S' },
-		{ "time", no_argument, NULL, 't' },         { "wfm", required_argument, NULL, 'W' },
-		{ "dither", required_argument, NULL, 'D' }, { "limit", required_argument, NULL, 'l' },
-		{ "cap", required_argument, NULL, 'c' },    { NULL, 0, NULL, 0 }
-	};
+	static const struct option opts[] = { { "help", no_argument, NULL, 'h' },
+					      { "verbose", no_argument, NULL, 'v' },
+					      { "quiet", no_argument, NULL, 'q' },
+					      { "fs", no_argument, NULL, 'f' },
+					      { "flash", no_argument, NULL, 'F' },
+					      { "scale", required_argument, NULL, 'S' },
+					      { "time", no_argument, NULL, 't' },
+					      { "wfm", required_argument, NULL, 'W' },
+					      { "dither", required_argument, NULL, 'D' },
+					      { "limit", required_argument, NULL, 'l' },
+					      { "cap", required_argument, NULL, 'c' },
+					      { "rota", required_argument, NULL, 'r' },
+					      { NULL, 0, NULL, 0 } };
 
 #ifndef FBINK_FOR_LINUX
 	// We need to be @ 8bpp
 	uint32_t req_bpp = 8U;
-#	ifndef FBINK_FOR_KINDLE
-	int8_t req_rota = -1;
-#	endif
 #endif    // !FBINK_FOR_LINUX
+	int8_t req_rota = -1;
 
 	FBInkConfig fbink_cfg = { 0U };
 
@@ -602,7 +606,7 @@ int
 
 	bool errfnd = false;
 
-	while ((opt = getopt_long(argc, argv, "hvqfFS:tW:D:l:c:", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hvqfFS:tW:D:l:c:r:", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'v':
 				g_isQuiet   = false;
@@ -696,6 +700,24 @@ int
 				break;
 			case 'c':
 				iter_cap = (uint16_t) strtoul(optarg, NULL, 10);
+				break;
+			case 'r':
+				req_rota = (int8_t) strtol(optarg, NULL, 10);
+				// Cheap-ass sanity check
+				switch (req_rota) {
+					case FB_ROTATE_UR:
+					case FB_ROTATE_CW:
+					case FB_ROTATE_UD:
+					case FB_ROTATE_CCW:
+						break;
+					case -1:
+						// NOTE: We'll compute it later, as we need the results from identify_device() ;).
+						break;
+					default:
+						fprintf(stderr, "Invalid rotation '%s'!\n", optarg);
+						errfnd = true;
+						break;
+				}
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
