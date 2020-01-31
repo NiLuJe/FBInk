@@ -5332,7 +5332,7 @@ static const char*
 
 #ifndef FBINK_FOR_LINUX
 #	ifdef FBINK_FOR_KINDLE
-// Convert an mxcfb WAVEFORM_MODE value to a human readable string
+// Convert a platform-specifc mxcfb WAVEFORM_MODE value to a human readable string
 static const char*
     kindle_wfm_to_string(uint32_t wfm_mode)
 {

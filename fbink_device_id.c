@@ -360,7 +360,7 @@ static uint32_t
 		}
 		// If we reach this, we ran through the full Base32 table without a match, this is bad!
 		if (!match) {
-			WARN("Input character '%c' is out of range!", *p);
+			WARN("Input character '%c' is out of range", *p);
 			return 0;
 		}
 	}
@@ -938,7 +938,7 @@ static void
 {
 	deviceQuirks.screenDPI   = 226;
 	deviceQuirks.canHWInvert = true;
-	// NOTE: Not actually an NTX board (AFAIK), but useful nonetheless for fbdepth ;).
+	// NOTE: Not actually an NTX board, but useful nonetheless for fbdepth ;).
 	deviceQuirks.ntxBootRota  = FB_ROTATE_CW;
 	deviceQuirks.ntxRotaQuirk = NTX_ROTA_SANE;
 	deviceQuirks.canRotate    = true;
