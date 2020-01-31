@@ -1504,9 +1504,9 @@ static int
 	// Did we request legacy dithering?
 	bool use_legacy_dithering = false;
 	if (dithering_mode == HWD_LEGACY) {
-		// Make sure we won't setup EPDC V2 dithering
+		// Make sure we won't setup EPDC v2 dithering
 		dithering_mode = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
-		// And make sure we'll setup EPDC V1 flags later
+		// And make sure we'll setup EPDC v1 flags later
 		use_legacy_dithering = true;
 	}
 
@@ -1542,20 +1542,20 @@ static int
 	}
 
 	// NOTE: When dithering is enabled, you generally want to get rid of FORCE_MONOCHROME, because it gets applied *first*...
-	//       That'd render EPDC V1 dithering useless, and as for EPDC V2, this only yields B&W with severe patterning.
+	//       That'd render EPDC v1 dithering useless, and as for EPDC v2, this only yields B&W with severe patterning.
 	//       It does help hide the vectorization? artefacts (i.e., the 4 visible horizontal "bands" of processing), though.
 	if (use_legacy_dithering || dithering_mode != EPDC_FLAG_USE_DITHERING_PASSTHROUGH) {
-		// EPDC V2 here, where we prefer the newer PxP alternatives, so no need to mess with the old dithering flags.
+		// EPDC v2 here, where we prefer the newer PxP alternatives, so no need to mess with the old dithering flags.
 		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
 	}
 
-	// And setup EPDC V1 dithering
+	// And setup EPDC v1 dithering
 	if (use_legacy_dithering) {
 		if (waveform_mode == WAVEFORM_MODE_ZELDA_A2 || waveform_mode == WAVEFORM_MODE_DU) {
 			update.flags |= EPDC_FLAG_USE_DITHERING_Y1;
 		} else {
 			// NOTE: Generally much less useful/pleasing than Y1.
-			//       Then again, it's not any better with EPDC V2 dithering @ q3, either ;).
+			//       Then again, it's not any better with EPDC v2 dithering @ q3, either ;).
 			update.flags |= EPDC_FLAG_USE_ZELDA_DITHERING_Y4;
 		}
 		// NOTE: EPDC_FLAG_USE_DITHERING_Y2 is gone on Zelda/Rex.
@@ -1598,9 +1598,9 @@ static int
 	// Did we request legacy dithering?
 	bool use_legacy_dithering = false;
 	if (dithering_mode == HWD_LEGACY) {
-		// Make sure we won't setup EPDC V2 dithering
+		// Make sure we won't setup EPDC v2 dithering
 		dithering_mode = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
-		// And make sure we'll setup EPDC V1 flags later
+		// And make sure we'll setup EPDC v1 flags later
 		use_legacy_dithering = true;
 	}
 
@@ -1635,20 +1635,20 @@ static int
 	}
 
 	// NOTE: When dithering is enabled, you generally want to get rid of FORCE_MONOCHROME, because it gets applied *first*...
-	//       That'd render EPDC V1 dithering useless, and as for EPDC V2, this only yields B&W with severe patterning.
+	//       That'd render EPDC v1 dithering useless, and as for EPDC v2, this only yields B&W with severe patterning.
 	//       It does help hide the vectorization? artefacts (i.e., the 4 visible horizontal "bands" of processing), though.
 	if (use_legacy_dithering || dithering_mode != EPDC_FLAG_USE_DITHERING_PASSTHROUGH) {
-		// EPDC V2 here, where we prefer the newer PxP alternatives, so no need to mess with the old dithering flags.
+		// EPDC v2 here, where we prefer the newer PxP alternatives, so no need to mess with the old dithering flags.
 		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
 	}
 
-	// And setup EPDC V1 dithering
+	// And setup EPDC v1 dithering
 	if (use_legacy_dithering) {
 		if (waveform_mode == WAVEFORM_MODE_ZELDA_A2 || waveform_mode == WAVEFORM_MODE_DU) {
 			update.flags |= EPDC_FLAG_USE_DITHERING_Y1;
 		} else {
 			// NOTE: Generally much less useful/pleasing than Y1.
-			//       Then again, it's not any better with EPDC V2 dithering @ q3, either ;).
+			//       Then again, it's not any better with EPDC v2 dithering @ q3, either ;).
 			update.flags |= EPDC_FLAG_USE_ZELDA_DITHERING_Y4;
 		}
 		// NOTE: EPDC_FLAG_USE_DITHERING_Y2 is gone on Zelda/Rex.
@@ -1928,9 +1928,9 @@ static int
 	// Did we request legacy dithering?
 	bool use_legacy_dithering = false;
 	if (dithering_mode == HWD_LEGACY) {
-		// Make sure we won't setup EPDC V2 dithering
+		// Make sure we won't setup EPDC v2 dithering
 		dithering_mode = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
-		// And make sure we'll setup EPDC V1 flags later
+		// And make sure we'll setup EPDC v1 flags later
 		use_legacy_dithering = true;
 	}
 
@@ -1957,20 +1957,20 @@ static int
 	}
 
 	// NOTE: When dithering is enabled, you generally want to get rid of FORCE_MONOCHROME, because it gets applied *first*...
-	//       That'd render EPDC V1 dithering useless, and as for EPDC V2, this only yields B&W with severe patterning.
+	//       That'd render EPDC v1 dithering useless, and as for EPDC v2, this only yields B&W with severe patterning.
 	//       It does help hide the vectorization? artefacts (i.e., the 4 visible horizontal "bands" of processing), though.
 	if (use_legacy_dithering || dithering_mode != EPDC_FLAG_USE_DITHERING_PASSTHROUGH) {
-		// EPDC V2 here, where we prefer the newer PxP alternatives, so no need to mess with the old dithering flags.
+		// EPDC v2 here, where we prefer the newer PxP alternatives, so no need to mess with the old dithering flags.
 		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
 	}
 
-	// And setup EPDC V1 dithering
+	// And setup EPDC v1 dithering
 	if (use_legacy_dithering) {
 		if (waveform_mode == WAVEFORM_MODE_A2 || waveform_mode == WAVEFORM_MODE_DU) {
 			update.flags |= EPDC_FLAG_USE_DITHERING_Y1;
 		} else {
 			// NOTE: Generally much less useful/pleasing than Y1.
-			//       Then again, it's not any better with EPDC V2 dithering @ q3, either ;).
+			//       Then again, it's not any better with EPDC v2 dithering @ q3, either ;).
 			update.flags |= EPDC_FLAG_USE_DITHERING_Y4;
 		}
 		// NOTE: EPDC_FLAG_USE_DITHERING_NTX_D8 is gone on Mk. 7.

@@ -196,7 +196,7 @@ typedef enum
 	HWD_ATKINSON,
 	HWD_ORDERED,
 	HWD_QUANT_ONLY,
-	HWD_LEGACY = 0xFFu,    // Use legacy EPDC V1 dithering instead (if available).
+	HWD_LEGACY = 0xFFu,    // Use legacy EPDC v1 dithering instead (if available).
 	//                        Note that it is *not* offloaded to the PxP, it's purely software, in-kernel.
 	//                        Usually based on Atkinson's algo. The most useful one being the Y8->Y1 one,
 	//                        which we request with A2/DU refreshes.
