@@ -22,7 +22,7 @@
  * https://github.com/reMarkable/linux/blob/zero-gravitas/include/uapi/linux/mxcfb.h
  * Waveform modes constants originally from libremarkable:
  * https://github.com/canselcik/libremarkable
- * Then later cleaned up up thanks to the official SDK:
+ * Then later cleaned up thanks to the official SDK:
  * https://remarkable.engineering/
  */
 
