@@ -142,13 +142,21 @@ struct mxcfb_rect {
 #define WAVEFORM_MODE_DU			1
 #define WAVEFORM_MODE_GC16			2
 #define WAVEFORM_MODE_GL16			3
-// Here be dragons! (still). In particular, I'd like to clear up the A2 situation for sure...
+// NOTE: Here be dragons!
+//       xochitl itself will never use any of those, and despite what's detailed in <epframebuffer.h>,
+//       testing on production devices reveals that no-one really should either, actually ;).
+//       c.f., https://github.com/NiLuJe/FBInk/pull/41#issuecomment-580926264
+/*
 #define WAVEFORM_MODE_GLR16			4
 #define WAVEFORM_MODE_GLD16			5
 #define WAVEFORM_MODE_A2			6
 #define WAVEFORM_MODE_DU4			7
 #define WAVEFORM_MODE_UNKNOWN			8
 #define WAVEFORM_MODE_INIT2			9
+*/
+// NOTE: The only thing we can salvage is what's quite likely actually A2, according both to testing,
+//       and poking at the binary firmware blob.
+#define WAVEFORM_MODE_A2			4
 
 #define WAVEFORM_MODE_AUTO			257
 
