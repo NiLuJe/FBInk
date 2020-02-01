@@ -1772,7 +1772,7 @@ static int
 					    .update_marker = marker,
 					    .temp          = (waveform_mode == WAVEFORM_MODE_DU) ? TEMP_USE_REMARKABLE
 											: TEMP_USE_AMBIENT,
-					    .flags = (waveform_mode == WAVEFORM_MODE_GLD16) ? EPDC_FLAG_USE_REGAL : 0U,
+					    .flags           = 0U,
 					    .dither_mode     = 0,
 					    .quant_bit       = 0,
 					    .alt_buffer_data = { 0U } };
