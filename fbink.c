@@ -713,6 +713,10 @@ static void
     checkerboard_screen(void)
 {
 	uint8_t  bpp       = (uint8_t)(vInfo.bits_per_pixel >> 3U);
+	// Might need to use *_virtual instead to ensure it's always evenly divisble by 16
+	// (thanks to EPDC alignment constraints).
+	// I happened to be testing on a Forma, where xres == xres_virtual and yres == yres_virtual,
+	// and both are evenly divisible by 16.
 	uint32_t px_stride = (MIN(vInfo.xres, vInfo.yres) >> 4U);
 
 	bool checker = false;
