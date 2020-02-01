@@ -5205,7 +5205,7 @@ static uint32_t
 	// NOTE: Let's go with a dedicated switch for the reMarkable,
 	//       because we don't actually have sane constant names in the upstream kernel,
 	//       and some of what's detailed in the SDK's <epframebuffer.h> looks slightly weird...
-	// NOTE: See https://github.com/NiLuJe/FBInk/pull/41#issuecomment-579012002 if you want to help make this more accurate!
+	// NOTE: See https://github.com/NiLuJe/FBInk/pull/41#issuecomment-579012002 if you want to check for yourself ;).
 	switch (wfm_mode_index) {
 		case WFM_INIT:
 			waveform_mode = WAVEFORM_MODE_INIT;
@@ -5222,15 +5222,18 @@ static uint32_t
 		case WFM_GL16:
 			waveform_mode = WAVEFORM_MODE_GL16;
 			break;
+		/*
 		case WFM_REAGL:
 			waveform_mode = WAVEFORM_MODE_GLR16;
 			break;
 		case WFM_REAGLD:
 			waveform_mode = WAVEFORM_MODE_GLD16;
 			break;
+		*/
 		case WFM_A2:
 			waveform_mode = WAVEFORM_MODE_A2;
 			break;
+		/*
 		case WFM_DU4:
 			waveform_mode = WAVEFORM_MODE_DU4;
 			break;
@@ -5240,6 +5243,7 @@ static uint32_t
 		case WFM_INIT2:
 			waveform_mode = WAVEFORM_MODE_INIT2;
 			break;
+		*/
 		default:
 			LOG("Unknown (or unsupported) waveform mode '%s' @ index %hhu, defaulting to AUTO",
 			    wfm_to_string(wfm_mode_index),
