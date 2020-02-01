@@ -1987,6 +1987,7 @@ static int
 	// NOTE: When dithering is enabled, you generally want to get rid of FORCE_MONOCHROME, because it gets applied *first*...
 	//       That'd render EPDC v1 dithering useless, and as for EPDC v2, this only yields B&W with severe patterning.
 	//       It does help hide the vectorization? artefacts (i.e., the 4 visible horizontal "bands" of processing), though.
+	//       Fun fact: I don't see those bands @ UR (provided I manage to get the kernel to honor the flags/dither_mode...).
 	if (use_legacy_dithering || dithering_mode != EPDC_FLAG_USE_DITHERING_PASSTHROUGH) {
 		// EPDC v2 here, where we prefer the newer PxP alternatives, so no need to mess with the old dithering flags.
 		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
