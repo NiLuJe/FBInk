@@ -497,6 +497,7 @@ static void fill_rect(unsigned short int,
 		      unsigned short int,
 		      const FBInkPixel* restrict);
 static void clear_screen(int UNUSED_BY_NOTKINDLE, uint8_t, bool UNUSED_BY_NOTKINDLE);
+//static void checkerboard_screen(void);
 
 static const unsigned char* font8x8_get_bitmap(uint32_t);
 

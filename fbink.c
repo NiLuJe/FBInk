@@ -707,6 +707,29 @@ static void
 #endif
 }
 
+/*
+// Same thing, but with a FG/BG checkerboard pattern instead of a uniform BG
+static void
+    checkerboard_screen(void)
+{
+	uint8_t  bpp       = (uint8_t)(vInfo.bits_per_pixel >> 3U);
+	uint32_t px_stride = (MIN(vInfo.xres, vInfo.yres) >> 4U);
+
+	bool checker = false;
+	for (size_t y = 0U; y < vInfo.yres; y++) {
+		// Alternate initial color every px_stride lines,
+		// (depending on whether the amount of vertical squares we've already painted (i.e., y/stride) is even or odd).
+		checker = !!((y / px_stride) & 1);
+		for (size_t x = 0U; x < vInfo.xres; x += px_stride) {
+			memset(fbPtr + ((y * fInfo.line_length) + (x * bpp)),
+			       checker ? penBGColor : penFGColor,
+			       (size_t)(px_stride * bpp));
+			checker = !checker;
+		}
+	}
+}
+*/
+
 // Return the font8x8 bitmap for a specific Unicode codepoint
 static const unsigned char*
     font8x8_get_bitmap(uint32_t codepoint)
