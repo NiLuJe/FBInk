@@ -712,7 +712,7 @@ static void
 static void
     checkerboard_screen(void)
 {
-	uint8_t bpp = (uint8_t)(vInfo.bits_per_pixel >> 3U);
+	const uint8_t bpp = (uint8_t)(vInfo.bits_per_pixel >> 3U);
 	// NOTE: EPDC alignment constraints ensure that xres_virtual will be evenly divisble by 16,
 	//       (as it's aligned to the next multiple of 32).
 	const uint32_t px_stride = vInfo.xres_virtual >> 4U;
