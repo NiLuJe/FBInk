@@ -698,7 +698,17 @@ static void
 	//       Anyway, don't clobber that, as it seems to cause softlocks on BQ/Cervantes,
 	//       and be very conservative, using yres instead of yres_virtual, as Qt *may* already rely on that memory region.
 	if (vInfo.bits_per_pixel == 16) {
-		memset(fbPtr, v, (size_t)(fInfo.line_length * vInfo.yres));
+		// NOTE: Besides, we can't use a straight memset, since we need pixels to be properly packed for RGB565...
+		//       Se we whip up a quick memset16, like fill_rect() does.
+		const uint16_t px       = pack_rgb565(v, v, v);
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
+		uint16_t*      p        = (uint16_t*) fbPtr;
+#	pragma GCC diagnostic pop
+		size_t         px_count = vInfo.xres_virtual * vInfo.yres;
+		while (px_count--) {
+			*p++ = px;
+		};
 	} else {
 		// NOTE: fInfo.smem_len should actually match fInfo.line_length * vInfo.yres_virtual on 32bpp ;).
 		//       Which is how things should always be, but, alas, poor Yorick...
@@ -723,7 +733,7 @@ static void
 		// (depending on whether the amount of vertical squares we've already painted (i.e., y/stride) is even or odd).
 		checker = !!((y / px_stride) & 1);
 		for (size_t x = 0U; x < vInfo.xres_virtual; x += px_stride) {
-			// NOTE: That's a bit of a shortcut @ RGB565, but, eh, we already take the same one w/ clear_screen...
+			// NOTE: That's a bit of a shortcut @ RGB565 since we're not using properly packed pixels...
 			memset(fbPtr + ((y * fInfo.line_length) + (x * bpp)),
 			       checker ? penBGColor : penFGColor,
 			       (size_t)(px_stride * bpp));
