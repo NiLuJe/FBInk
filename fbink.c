@@ -1766,16 +1766,17 @@ static int
 		       uint32_t                marker)
 {
 	// NOTE: Actually uses the V1 epdc driver, hence dither_mode & quant_bit being unused.
-	struct mxcfb_update_data update = { .update_region = region,
-					    .waveform_mode = waveform_mode,
-					    .update_mode   = update_mode,
-					    .update_marker = marker,
-					    .temp          = (waveform_mode == WAVEFORM_MODE_DU) ? TEMP_USE_REMARKABLE
-											: TEMP_USE_AMBIENT,
-					    .flags           = 0U,
-					    .dither_mode     = 0,
-					    .quant_bit       = 0,
-					    .alt_buffer_data = { 0U } };
+	struct mxcfb_update_data update = {
+		.update_region   = region,
+		.waveform_mode   = waveform_mode,
+		.update_mode     = update_mode,
+		.update_marker   = marker,
+		.temp            = (waveform_mode == WAVEFORM_MODE_DU) ? TEMP_USE_REMARKABLE : TEMP_USE_AMBIENT,
+		.flags           = (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
+		.dither_mode     = 0,
+		.quant_bit       = 0,
+		.alt_buffer_data = { 0U }
+	};
 
 	if (is_nightmode && deviceQuirks.canHWInvert) {
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
