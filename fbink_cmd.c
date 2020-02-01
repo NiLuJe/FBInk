@@ -127,7 +127,7 @@ static void
 	    "\t-D, --dither\t\tRequest a specific hardware dithering mode from the eInk controller, if supported (mainly useful for images).\n"
 	    "\t\t\t\tAvailable dithering modes: PASSTHROUGH, FLOYD_STEINBERG, ATKINSON, ORDERED, QUANT_ONLY & LEGACY\n"
 	    "\t\t\t\tNote that this is only supported on recent devices, and that only a subset of these options may actually be supported by the HW (usually, PASSTHROUGH & ORDERED, check dmesg).\n"
-	    "\t\t\t\tLEGACY may be supported on more devices, but what exactly it does in practice (and how well it works) depends on the exact device.\n"
+	    "\t\t\t\tLEGACY may be supported on more devices, but what exactly it does in practice (and how well it works) depends on the exact device and/or FW version.\n"
 #	ifdef FBINK_FOR_KINDLE
 	    "\t\t\t\tTrue (i.e., not LEGACY) hardware dithering is completely untested on Kindle, and, while the Oasis 2, PaperWhite 4 & Oasis 3 *should* support it, they *may* not, or at least not in the way FBInk expects...\n"
 #	endif
