@@ -64,7 +64,6 @@
 #	pragma GCC diagnostic   ignored "-Wconversion"
 #	pragma GCC diagnostic   ignored "-Wsign-conversion"
 #	pragma GCC diagnostic   ignored "-Wduplicated-branches"
-#	pragma GCC diagnostic   ignored "-Wunused-parameter"
 #	pragma GCC diagnostic   ignored "-Wunused-function"
 #	pragma GCC diagnostic   ignored "-Wsuggest-attribute=pure"
 #	pragma GCC diagnostic   ignored "-Wundef"
