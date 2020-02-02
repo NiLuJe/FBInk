@@ -67,6 +67,7 @@
 #	pragma GCC diagnostic   ignored "-Wunused-parameter"
 #	pragma GCC diagnostic   ignored "-Wunused-function"
 #	pragma GCC diagnostic   ignored "-Wsuggest-attribute=pure"
+#	pragma GCC diagnostic   ignored "-Wundef"
 #	include "stb/stb_image.h"
 #	pragma GCC diagnostic pop
 #endif
