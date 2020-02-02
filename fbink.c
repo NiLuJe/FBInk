@@ -5448,6 +5448,7 @@ static const char*
 	}
 }
 #	endif    // FBINK_FOR_KINDLE
+#endif            // !FBINK_FOR_LINUX
 
 // Convert our public HW_DITHER_INDEX_T values to an appropriate mxcfb dithering mode constant
 static int
@@ -5511,7 +5512,6 @@ static const char*
 			return "Unknown";
 	}
 }
-#endif    // !FBINK_FOR_LINUX
 
 // Small public wrapper around refresh(), without the caller having to depend on mxcfb headers
 int

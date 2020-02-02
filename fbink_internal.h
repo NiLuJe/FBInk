@@ -593,9 +593,9 @@ static const char* wfm_to_string(uint8_t);
 static const char* kindle_wfm_to_string(uint32_t);
 static const char* kindle_zelda_wfm_to_string(uint32_t);
 #	endif
+#endif
 static int         get_hwd_mode(uint8_t);
 static const char* hwd_to_string(uint8_t);
-#endif
 
 // For identify_device, which we need outside of fbink_device_id.c ;)
 #ifndef FBINK_FOR_LINUX
