@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -xe
 
 # Daisy-chain the three Kindle builds, and package it all
 for my_tc in K3 K5 PW2 ; do
@@ -23,9 +23,11 @@ for my_tc in K3 K5 PW2 ; do
 	# We'll want to bundle a shared lib, too, because TCC won't like an LTO archive ;).
 	make clean
 	if [[ "${KINDLE_TC}" == "K3" ]] ; then
-		make ${JOBSFLAGS} sharedlib striplib SHARED=true KINDLE=true LEGACY=true
+		make ${JOBSFLAGS} sharedlib SHARED=true KINDLE=true LEGACY=true
+		make ${JOBSFLAGS} striplib SHARED=true KINDLE=true LEGACY=true
 	else
-		make ${JOBSFLAGS} sharedlib striplib SHARED=true KINDLE=true
+		make ${JOBSFLAGS} sharedlib SHARED=true KINDLE=true
+		make ${JOBSFLAGS} striplib SHARED=true KINDLE=true
 	fi
 
 	cp -av Release/libfbink.so.1.0.0 ${KINDLE_TC}/lib/libfbink.so.1.0.0
