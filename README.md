@@ -132,6 +132,6 @@ So that everyone gets to have fun, even if you can't stand C!
 Note that as the API may not be entirely stable on master, these are all tethered to a specific tag (generally, the latest release). You should honor that requirement, or all hell will break loose ;).  
 I generally attempt to keep breakages to a minimum, or barring that, make the upgrade paths as painless as possible, but, there you have it, supporting new stuff often means existing stuff has to work slightly differently.
 
-I try to detail API/ABI breakages in each tag's comments, but a good way to visualize that is of course to diff the single public header ;).
+I try to detail API/ABI breakages in each tag's comments, but a good way to visualize that is of course to diff the single public header (or, for a quick contextless overview, the [minimal headers generated for FFI bindings](https://github.com/NiLuJe/lua-fbink/commit/a467e796ca6b11119f450527fa211baa7de7307d)) ;).
 
 <!-- kate: indent-mode cstyle; indent-width 4; replace-tabs on; remove-trailing-spaces none; -->
