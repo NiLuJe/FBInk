@@ -15,6 +15,7 @@ cdecl_type(FONT_INDEX_T)
 cdecl_type(FONT_STYLE_T)
 
 cdecl_type(ALIGN_INDEX_T)
+cdecl_type(PADDING_INDEX_T)
 
 cdecl_type(FG_COLOR_INDEX_T)
 cdecl_type(BG_COLOR_INDEX_T)
