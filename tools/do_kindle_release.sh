@@ -1,4 +1,4 @@
-#!/bin/bash -xe
+#!/bin/bash -e
 
 # Daisy-chain the three Kindle builds, and package it all
 for my_tc in K3 K5 PW2 ; do
