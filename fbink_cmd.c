@@ -111,7 +111,7 @@ static void
 	    "\t\t\t\tHonors -B, --background; -h, --invert; -H, --nightmode; -W, --waveform; -D, --dither; -b, --norefresh; -w, --wait.\n"
 	    "\t\t\t\tThis takes precedence over *everything* and will abort as soon as it's done.\n"
 	    "\t\t\t\tIf you just want a full-screen clear (which will honor -f, --flash), don't pass any suboptions,\n"
-	    "\t\t\t\tf.g., fbink -k (if you group short options together, it needs to be the last in its group, i.e., -fk and not -kf).\n"
+	    "\t\t\t\te.g., fbink -k (if you group short options together, it needs to be the last in its group, i.e., -fk and not -kf).\n"
 #ifndef FBINK_FOR_LINUX
 	    "\t-W, --waveform\t\tRequest a specific waveform update mode from the eInk controller, if supported (mainly useful for images).\n"
 	    "\t\t\t\tAvailable waveform modes: A2, DU, GL16, GC16 & AUTO\n"
@@ -259,7 +259,7 @@ static void
 	    "\tNote that the arguments are passed as-is to the ioctl, no viewport or rotation quirks are applied!\n"
 #endif
 	    "\tIf you just want a full-screen refresh (which will honor -f, --flash), don't pass any suboptions,\n"
-	    "\tf.g., fbink -s (if you group short options together, it needs to be the last in its group, i.e., -fs and not -sf).\n"
+	    "\te.g., fbink -s (if you group short options together, it needs to be the last in its group, i.e., -fs and not -sf).\n"
 	    "\n"
 	    "\tSpecifying one or more STRING takes precedence over this mode.\n"
 #ifdef FBINK_WITH_IMAGE
@@ -312,7 +312,7 @@ static void
 	    "\n"
 	    "NOTES:\n"
 	    "\tShell script writers can also use the -e, --eval flag to have FBInk just spit out a few of its internal state variables to stdout,\n"
-	    "\t\tf.g., eval $(fbink -e)\n"
+	    "\t\te.g., eval $(fbink -e)\n"
 	    "\n"
 	    "\n"
 	    "NOTES:\n"
@@ -330,7 +330,7 @@ static void
 	    "\tMake sure you kill FBInk via SIGTERM so it has a chance to remove it itself on exit.\n"
 	    "\t(Otherwise, you may want to ensure that it doesn't already exist *before* launching a daemon mode session).\n"
 	    "\tWith the technicalities out of the way, it's then as simple as writing to that pipe for stuff to show up on screen ;).\n"
-	    "\tf.g., echo -n 'Hello World!' > " FBINK_PIPE
+	    "\te.g., echo -n 'Hello World!' > " FBINK_PIPE
 	    "\n"
 	    "\tRemember that LFs are honored!\n"
 	    "\tAlso, the daemon will NOT abort on FBInk errors, and it redirects stdout & stderr to /dev/null, so errors & bogus input will be silently ignored!\n"

@@ -312,7 +312,7 @@ typedef struct
 	uint8_t            padding;        // Pad the drawing area (i.e., paint it in the background color).
 	//                                    Unlike in the fixed-cell codepath, this always applies to both sides (L&R/T&B),
 	//                                    no matter the chosen axis. (c.f., PADDING_INDEX_T enum.)
-	//                                    f.g., HORI_PADDING is useful to prevent overlaps when drawing
+	//                                    e.g., HORI_PADDING is useful to prevent overlaps when drawing
 	//                                    consecutive strings on the same line(s).
 	bool is_formatted;    // Is string "formatted"? Bold/Italic support only, markdown like syntax
 	bool compute_only;    // Abort early after the line-break computation pass (no actual rendering).
@@ -394,7 +394,7 @@ FBINK_API int fbink_close(int fbfd);
 // NOTE: By virtue of, well, setting global variables, do NOT consider this thread-safe.
 //       The rest of the API should be, though, so make sure you init in your main thread *before* threading begins...
 // NOTE: If you just need to make sure the framebuffer state is still up to date before an fbink_* call,
-//       (f.g., because you're running on a Kobo, which may switch from 16bpp to 32bpp, or simply change orientation),
+//       (e.g., because you're running on a Kobo, which may switch from 16bpp to 32bpp, or simply change orientation),
 //       prefer using fbink_reinit instead of calling fbink_init *again*, as it's tailored for this use case.
 //       c.f., KFMon for an example of this use case in the wild.
 // NOTE: You can perfectly well keep a few different FBInkConfig structs around, instead of modifying the same one over and over.
@@ -590,7 +590,7 @@ FBINK_API uint32_t fbink_get_last_marker(void);
 // NOTE: The intended use-case is for long running apps which may trigger prints across different framebuffer states,
 //       to allow them to call fbink_init again at specific points only (instead of enforcing a reinit on every print).
 //       This is of interest on a few devices, where trying to print based on a "stale" init state would fail,
-//       or produce unwanted results (f.g., rotation).
+//       or produce unwanted results (e.g., rotation).
 // NOTE: Right now, this only checks for the isNTX16bLandscape device quirk,
 //       because that's the only one that is not permanent (i.e., hardware specific),
 //       but instead software specific (here, because of pickel).
@@ -604,7 +604,7 @@ FBINK_API bool fbink_is_fb_quirky(void) __attribute__((pure, deprecated));
 //       to allow them to ensure they'll be using up-to-date init data at key points in their lifecycle
 //       (without needing to bruteforce a full reinit on every print).
 //       This is of interest on a few devices, where trying to print based on a "stale" init state would at worst fail,
-//       at best produce unwanted results (f.g., after a bitdepth change or a hw rotation).
+//       at best produce unwanted results (e.g., after a bitdepth change or a hw rotation).
 // NOTE: This obviously supercedes fbink_is_fb_quirky, because it should be smarter,
 //       by catching more scenarios where a reinit would be useful,
 //       and it can avoid running the same ioctl twice when an ioctl already done by init is needed to detect a state change.

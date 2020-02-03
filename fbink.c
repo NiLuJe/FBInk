@@ -1961,7 +1961,7 @@ static int
 	//       the EPDC may repeatedly ignore the requested flags and/or dither_mode...
 	//       A fb rotation *usually* jog things up, but other events may also clear things up...
 	//       Being UR @ 8bpp seems to exacerbate the issue, FWIW...
-	//           f.g., @ 8bpp, a clear_screen right after the UR rotation will fairly reproducibly trigger this behavior...
+	//           e.g., @ 8bpp, a clear_screen right after the UR rotation will fairly reproducibly trigger this behavior...
 
 	// Did we request legacy dithering?
 	bool use_legacy_dithering = false;
@@ -4702,7 +4702,7 @@ int
 				// NOTE: As should be obvious since we're in the "I'm a space!" branch,
 				//       This only happens when the last character of a line is a space,
 				//       which is common with linebreaking.
-				//       f.g., with my trusty Bookerly, at whatever size it needs to be to break (here, 36),
+				//       e.g., with my trusty Bookerly, at whatever size it needs to be to break (here, 36),
 				//       "I'm waiting for" will never cause any issue, but "I'm waiting for ",
 				//       (note the final space) *will* ;).
 			}
@@ -4737,7 +4737,7 @@ int
 						//       * 0 value pixels, because they're transparent (no coverage),
 						//         and our line buffer is already filled with zeroes ;).
 						//       * 1-254 value pixels (i.e., AA), when they're on top of an
-						//         already set pixel, (f.g., with 'fl' in serif fonts,
+						//         already set pixel, (e.g., with 'fl' in serif fonts,
 						//         bits of the l's LSB may be positioned over the f's RSB),
 						//         as alpha-blending wouldn't net us much in these very few cases.
 						if (glPtr[k] != 0U) {
@@ -5685,7 +5685,7 @@ bool
 //       However, while that accounts for *stock* behavior, that left some custom setups in the lurch, in particular:
 //         * rotation in Nickel may be patched in
 //         * custom software might affect bitdepth or rotation on purpose
-//           (f.g., Plato relies on HW rotation, and KOReader may change the bitdepth).
+//           (e.g., Plato relies on HW rotation, and KOReader may change the bitdepth).
 //       TL;DR: We now monitor *any* change in bitdepth and/or rotation.
 int
     fbink_reinit(int fbfd UNUSED_BY_KINDLE, const FBInkConfig* restrict fbink_cfg UNUSED_BY_KINDLE)
