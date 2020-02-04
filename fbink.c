@@ -95,7 +95,7 @@ const char*
 }
 
 // #RGB -> RGB565
-static inline uint16_t
+static inline __attribute__((always_inline)) uint16_t
     pack_rgb565(uint8_t r, uint8_t g, uint8_t b)
 {
 	// ((r / 8) * 2048) + ((g / 4) * 32) + (b / 8);
@@ -103,7 +103,7 @@ static inline uint16_t
 }
 
 // Helper functions to 'plot' a specific pixel in a given color to the framebuffer
-static void
+static inline __attribute__((always_inline)) void
     put_pixel_Gray4(const FBInkCoordinates* restrict coords, const FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
@@ -131,7 +131,7 @@ static void
 	}
 }
 
-static void
+static inline __attribute__((always_inline)) void
     put_pixel_Gray8(const FBInkCoordinates* restrict coords, const FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
@@ -141,7 +141,7 @@ static void
 	*((unsigned char*) (fbPtr + pix_offset)) = px->gray8;
 }
 
-static void
+static inline __attribute__((always_inline)) void
     put_pixel_RGB24(const FBInkCoordinates* restrict coords, const FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
@@ -154,7 +154,7 @@ static void
 	*((unsigned char*) (fbPtr + pix_offset + 2U)) = px->bgra.color.r;
 }
 
-static void
+static inline __attribute__((always_inline)) void
     put_pixel_RGB32(const FBInkCoordinates* restrict coords, const FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
@@ -168,7 +168,7 @@ static void
 #pragma GCC diagnostic pop
 }
 
-static void
+static inline __attribute__((always_inline)) void
     put_pixel_RGB565(const FBInkCoordinates* restrict coords, const FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
@@ -369,7 +369,7 @@ static void
 //       But on modern processors, even on our target HW, branching should eventually take the lead, though,
 //       and in this case (ha!) appears to behave *noticeably* better than switching...
 //       Which is why we now branch via an if ladder, as it should offer marginally better performance on newer devices.
-static void
+static inline __attribute__((always_inline)) void
     put_pixel(FBInkCoordinates coords, const FBInkPixel* restrict px, bool is_rgb565)
 {
 	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
@@ -422,7 +422,7 @@ static void
 //       (http://trac.ak-team.com/trac/browser/niluje/Configs/trunk/Kindle/Misc/FBGrab/fbgrab.c#L402)
 // as well as KOReader's routines
 //       (https://github.com/koreader/koreader-base/blob/b3e72affd0e1ba819d92194b229468452c58836f/ffi/blitbuffer.lua#L292)
-static void
+static inline __attribute__((always_inline)) void
     get_pixel_Gray4(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
@@ -456,7 +456,7 @@ static void
 	//                          gray4.lo -> bgra.color.g
 }
 
-static void
+static inline __attribute__((always_inline)) void
     get_pixel_Gray8(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
@@ -465,7 +465,7 @@ static void
 	px->gray8 = *((unsigned char*) (fbPtr + pix_offset));
 }
 
-static void
+static inline __attribute__((always_inline)) void
     get_pixel_RGB24(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
@@ -477,7 +477,7 @@ static void
 	px->bgra.color.r = *((unsigned char*) (fbPtr + pix_offset + 2U));
 }
 
-static void
+static inline __attribute__((always_inline)) void
     get_pixel_RGB32(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
@@ -492,7 +492,7 @@ static void
 	//       We *do* pickup the actual alpha value, here, though.
 }
 
-static void
+static inline __attribute__((always_inline)) void
     get_pixel_RGB565(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
@@ -521,7 +521,7 @@ static void
 }
 
 // Handle a few sanity checks...
-static void
+static inline __attribute__((always_inline)) void
     get_pixel(FBInkCoordinates coords, FBInkPixel* restrict px)
 {
 	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
