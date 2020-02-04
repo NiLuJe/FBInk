@@ -448,6 +448,7 @@ static void rotate_touch_coordinates(FBInkCoordinates* restrict);
 #endif
 static void rotate_coordinates_nop(FBInkCoordinates* restrict __attribute__((unused)));
 
+// NOTE: Making sure all of those are inlined helps fbink_print_ot (c.f., #43).
 static inline __attribute__((always_inline)) uint16_t pack_rgb565(uint8_t, uint8_t, uint8_t);
 
 static inline __attribute__((always_inline)) void put_pixel_Gray4(const FBInkCoordinates* restrict,
@@ -497,6 +498,7 @@ static inline __attribute__((always_inline)) void get_pixel(FBInkCoordinates, FB
 		})
 #endif
 
+// NOTE: Enforced inlining on fill_rect currently doesn't gain us anything, on the other hand.
 static void fill_rect(unsigned short int,
 		      unsigned short int,
 		      unsigned short int,
