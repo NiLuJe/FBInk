@@ -168,6 +168,12 @@ ifeq "$(MOAR_WARNIGS)" "1"
 	endif
 	EXTRA_CFLAGS+=-Wnull-dereference
 	EXTRA_CFLAGS+=-Wuninitialized
+	ifeq (flto,$(findstring flto,$(CFLAGS)))
+		# NOTE: Inlining put_pixel in fbink_print_ot triggers a few -Wmaybe-uninitialized when we pass grayscale pixels...
+		#       Actually harmless, because they trip in an RGB565 codepath, which we make sure always get fed RGB32.
+		#       Unfortunately, since they're tripped at link-time, I can't pragma'em away :/.
+		EXTRA_CFLAGS+=-Wno-maybe-uninitialized
+	endif
 	EXTRA_CFLAGS+=-Wduplicated-branches -Wduplicated-cond
 	EXTRA_CFLAGS+=-Wundef
 	EXTRA_CFLAGS+=-Wbad-function-cast

@@ -149,9 +149,15 @@ static inline __attribute__((always_inline)) void
 	size_t pix_offset = (coords->x * 3U) + (coords->y * fInfo.line_length);
 
 	// now this is about the same as 'fbp[pix_offset] = value'
-	*((unsigned char*) (fbPtr + pix_offset))      = px->bgra.color.b;
-	*((unsigned char*) (fbPtr + pix_offset + 1U)) = px->bgra.color.g;
-	*((unsigned char*) (fbPtr + pix_offset + 2U)) = px->bgra.color.r;
+	// NOTE: Technically legitimate warning. In practice, we always pass RGB32 pixels in 24bpp codepaths.
+#pragma GCC diagnostic   push
+#pragma GCC diagnostic   ignored "-Wunknown-pragmas"
+#pragma clang diagnostic ignored "-Wunknown-warning-option"
+#pragma GCC diagnostic   ignored "-Wmaybe-uninitialized"
+        *((unsigned char*) (fbPtr + pix_offset))      = px->bgra.color.b;
+        *((unsigned char*) (fbPtr + pix_offset + 1U)) = px->bgra.color.g;
+        *((unsigned char*) (fbPtr + pix_offset + 2U)) = px->bgra.color.r;
+#pragma GCC diagnostic pop
 }
 
 static inline __attribute__((always_inline)) void
@@ -407,7 +413,13 @@ static inline __attribute__((always_inline)) void
 		} else {
 			// Yep :(
 			FBInkPixel packed_px;
-			packed_px.rgb565 = pack_rgb565(px->bgra.color.r, px->bgra.color.g, px->bgra.color.b);
+			// NOTE: Technically legitimate warning. In practice, we always pass RGB32 pixels in 16bpp codepaths.
+#pragma GCC diagnostic   push
+#pragma GCC diagnostic   ignored "-Wunknown-pragmas"
+#pragma clang diagnostic ignored "-Wunknown-warning-option"
+#pragma GCC diagnostic   ignored "-Wmaybe-uninitialized"
+                        packed_px.rgb565 = pack_rgb565(px->bgra.color.r, px->bgra.color.g, px->bgra.color.b);
+#pragma GCC diagnostic pop
 			put_pixel_RGB565(&coords, &packed_px);
 		}
 	} else if (vInfo.bits_per_pixel == 24U) {
