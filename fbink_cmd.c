@@ -2521,7 +2521,7 @@ int
 					while ((nread = getdelim(&line, &len, line_delim, stdin)) != -1) {
 						// As long as we're not the first printed line,
 						// go back to the previous line if the first character of this "new" line is a CR.
-						if (fbink_cfg.row != initial_row && *line == '\r') {
+						if (is_koreader && fbink_cfg.row != initial_row && *line == '\r') {
 							fbink_cfg.row--;
 						}
 						if ((linecnt = fbink_print(fbfd, line, &fbink_cfg)) < 0) {
