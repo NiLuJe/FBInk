@@ -633,6 +633,7 @@ int
                                               { "nightmode", no_argument, NULL, 'H' },
                                               { "coordinates", no_argument, NULL, 'E' },
                                               { "mimic", no_argument, NULL, 'Z' },
+                                              { "koreader", no_argument, NULL, 'z' },
                                               { "cls", optional_argument, NULL, 'k' },
                                               { "wait", no_argument, NULL, 'w' },
                                               { "daemon", required_argument, NULL, 'd' },
@@ -735,6 +736,7 @@ int
 	bool        is_activitybar = false;
 	bool        is_infinite    = false;
 	bool        is_mimic       = false;
+	bool        is_koreader    = false;
 	bool        is_cls         = false;
 	const char* pipe_path      = NULL;
 	bool        is_daemon      = false;
@@ -750,7 +752,7 @@ int
 
 	// NOTE: c.f., https://codegolf.stackexchange.com/q/148228 to sort this mess when I need to find an available letter ;p
 	while ((opt = getopt_long(
-		    argc, argv, "y:x:Y:X:hfcmMprs::S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bD::W:HEZk::wd:G", opts, &opt_index)) !=
+		    argc, argv, "y:x:Y:X:hfcmMprs::S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bD::W:HEZzk::wd:G", opts, &opt_index)) !=
 	       -1) {
 		switch (opt) {
 			case 'y':
@@ -1600,6 +1602,9 @@ int
 				break;
 			case 'Z':
 				is_mimic = true;
+				break;
+			case 'z':
+				is_koreader = true;
 				break;
 			case 'k': {
 				// We'll want our longform name for diagnostic messages...
@@ -2463,10 +2468,22 @@ int
 					}
 				}
 
+				// NOTE: In KOReader, we'll be piping zsync2's output, which includes a progressbar...
+				//       That progressbar refreshes itself via a simple CR. This means there's no LF.
+				//       But that's what getline looks for in order to return a line...
+				//       Instead, we've mangled zsync2's logging to end on a NULL byte,
+				//       which is what we'll use as a line separator instead...
+				int line_delim;
+				if (is_koreader) {
+					line_delim = '\0';
+				} else {
+					line_delim = '\n';
+				}
+
 				// Did we ask for OT rendering?
 				if (is_truetype) {
 					load_ot_fonts(reg_ot_file, bd_ot_file, it_ot_file, bdit_ot_file, &fbink_cfg);
-					while ((nread = getline(&line, &len, stdin)) != -1) {
+					while ((nread = getdelim(&line, &len, line_delim, stdin)) != -1) {
 						if ((linecnt = fbink_print_ot(
 							 fbfd, line, &ot_config, &fbink_cfg, &ot_fit)) < 0) {
 							WARN("Failed to print that string");
@@ -2499,7 +2516,14 @@ int
 						}
 					}
 				} else {
-					while ((nread = getline(&line, &len, stdin)) != -1) {
+					// Remember the original line for CR handling...
+					short int initial_row = fbink_cfg.row;
+					while ((nread = getdelim(&line, &len, line_delim, stdin)) != -1) {
+						// As long as we're not the first printed line,
+						// go back to the previous line if the first character of this "new" line is a CR.
+						if (fbink_cfg.row != initial_row && *line == '\r') {
+							fbink_cfg.row--;
+						}
 						if ((linecnt = fbink_print(fbfd, line, &fbink_cfg)) < 0) {
 							WARN("Failed to print that string");
 							rv = ERRCODE(EXIT_FAILURE);
