@@ -154,7 +154,7 @@ int
 	//       So our buffer simply starts at yres_virt * line_length!
 	//       It also ought to be exactly halfway through smem_len ;).
 	altPtr  = fbPtr + (vInfo.yres_virtual * fInfo.line_length);
-	altAddr = fInfo.smem_start + (vInfo.yres_virtual * fInfo.line_length);
+	altAddr = (uint32_t)(fInfo.smem_start + (vInfo.yres_virtual * fInfo.line_length));
 	// Print raw pointer values...
 	fprintf(stdout, "fbPtr: %p vs. altPtr: %p\n", fbPtr, altPtr);
 	fprintf(stdout,
