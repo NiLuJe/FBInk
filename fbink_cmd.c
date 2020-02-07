@@ -2532,7 +2532,7 @@ int
 								cr_seen = false;
 							}
 						}
-						if ((linecnt = fbink_print(fbfd, line, &fbink_cfg)) < 0) {
+						if ((linecnt = fbink_print(fbfd, line + cr_seen, &fbink_cfg)) < 0) {
 							WARN("Failed to print that string");
 							rv = ERRCODE(EXIT_FAILURE);
 						}
