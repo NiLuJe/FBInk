@@ -2515,15 +2515,13 @@ int
 					} else {
 						line_delim = '\n';
 					}
-					// And also remember the original line for CR handling...
-					short int initial_row = fbink_cfg.row;
-					bool      cr_seen     = false;
+					bool cr_seen = false;
 
 					while ((nread = getdelim(&line, &len, line_delim, stdin)) != -1) {
 						// As long as we're not the first printed line, or the first CR in a while,
 						// go back to the previous line if the first character of this "new" line is a CR.
 						if (is_koreader) {
-							if (fbink_cfg.row != initial_row && cr_seen && *line == '\r') {
+							if (cr_seen && *line == '\r') {
 								fbink_cfg.row = (short int) (fbink_cfg.row - linecnt);
 							}
 							if (*line == '\r') {
