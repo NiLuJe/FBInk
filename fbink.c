@@ -1447,6 +1447,8 @@ static int
 		   bool                    is_nightmode,
 		   uint32_t                marker)
 {
+	// NOTE: The hist_* fields are probably used to color the final decision AUTO will take,
+	//       hence our conservative choices...
 	struct mxcfb_update_data update = {
 		.update_region         = region,
 		.waveform_mode         = waveform_mode,
