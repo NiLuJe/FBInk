@@ -42,6 +42,7 @@ static void
 	    "\t-h, --help\tShow this help message.\n"
 	    "\t-v, --verbose\tToggle printing diagnostic messages.\n"
 	    "\t-q, --quiet\tToggle hiding hardware setup messages, as well as the coordinates themselves.\n"
+	    "\t-G, --syslog\tSend output to syslog instead of stdout & stderr.\n"
 	    "\n",
 	    fbink_version());
 	return;
@@ -53,10 +54,15 @@ int
 {
 	int                        opt;
 	int                        opt_index;
-	static const struct option opts[] = { { "press", no_argument, NULL, 'p' },  { "wait", no_argument, NULL, 'w' },
-					      { "unplug", no_argument, NULL, 'u' }, { "both", no_argument, NULL, 'b' },
-					      { "help", no_argument, NULL, 'h' },   { "verbose", no_argument, NULL, 'v' },
-					      { "quiet", no_argument, NULL, 'q' },  { NULL, 0, NULL, 0 } };
+	static const struct option opts[] = { { "press", no_argument, NULL, 'p' },
+					      { "wait", no_argument, NULL, 'w' },
+					      { "unplug", no_argument, NULL, 'u' },
+					      { "both", no_argument, NULL, 'b' },
+					      { "help", no_argument, NULL, 'h' },
+					      { "verbose", no_argument, NULL, 'v' },
+					      { "quiet", no_argument, NULL, 'q' },
+					      { "syslog", no_argument, NULL, 'G' },
+					      { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_cfg = { 0U };
 	// Default to verbose for now
@@ -68,7 +74,7 @@ int
 	bool force_unplug      = false;
 	bool errfnd            = false;
 
-	while ((opt = getopt_long(argc, argv, "pwubhvq", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "pwubhvqG", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'p':
 				press_button = true;
@@ -88,6 +94,9 @@ int
 				break;
 			case 'q':
 				fbink_cfg.is_quiet = !fbink_cfg.is_quiet;
+				break;
+			case 'G':
+				fbink_cfg.to_syslog = !fbink_cfg.to_syslog;
 				break;
 			case 'h':
 				show_helpmsg();
