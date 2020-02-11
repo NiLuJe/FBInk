@@ -656,8 +656,24 @@ static void
 	} else if (vInfo.bits_per_pixel == 32U) {
 		// NOTE: fxpRotateRegion is never set at 32bpp :).
 		for (size_t j = y; j < y + h; j++) {
+			// NOTE: When targeting an eInk screen, we can afford to write bogus data in the alpha byte,
+			//       as it's essentially ignored there...
+			//       But otherwise, go with a cheap memset32 so we preserve the alpha value of our input pixel...
+#ifdef FBINK_FOR_LINUX
+			const size_t px_offset = ((fInfo.line_length * j) + (x << 2U));
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
+			uint32_t* p = (uint32_t*) (fbPtr + px_offset);
+#	pragma GCC diagnostic pop
+			size_t px_count = w;
+
+			while (px_count--) {
+				*p++ = px->bgra.p;
+			};
+#else
 			uint8_t* p = fbPtr + (fInfo.line_length * j) + (x << 2U);
 			memset(p, px->gray8, (size_t)(w << 2U));
+#endif
 		}
 	}
 #ifdef DEBUG
@@ -711,12 +727,12 @@ static void
 	if (vInfo.bits_per_pixel == 16) {
 		// NOTE: Besides, we can't use a straight memset, since we need pixels to be properly packed for RGB565...
 		//       Se we whip up a quick memset16, like fill_rect() does.
-		const uint16_t px       = pack_rgb565(v, v, v);
+		const uint16_t px = pack_rgb565(v, v, v);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
-		uint16_t*      p        = (uint16_t*) fbPtr;
+		uint16_t* p = (uint16_t*) fbPtr;
 #	pragma GCC diagnostic pop
-		size_t         px_count = vInfo.xres_virtual * vInfo.yres;
+		size_t px_count = vInfo.xres_virtual * vInfo.yres;
 		while (px_count--) {
 			*p++ = px;
 		};
