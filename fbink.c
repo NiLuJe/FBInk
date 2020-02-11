@@ -660,7 +660,7 @@ static void
 			//       as it's essentially ignored there...
 			//       But otherwise, go with a cheap memset32 so we preserve the alpha value of our input pixel...
 #ifdef FBINK_FOR_LINUX
-			const size_t px_offset = ((fInfo.line_length * j) + (x << 2U));
+			const size_t px_offset = ((fInfo.line_length * j) + (size_t)(x << 2U));
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 			uint32_t* p = (uint32_t*) (fbPtr + px_offset);
