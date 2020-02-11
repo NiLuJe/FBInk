@@ -3333,6 +3333,10 @@ int
 		region.height = rect->height;
 	}
 
+	// Rotate the region if need be, and remember the rect...
+	(*fxpRotateRegion)(&region);
+	set_last_rect(&region);
+
 	// Refresh screen
 	if (refresh(fbfd,
 		    region,
