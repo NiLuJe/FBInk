@@ -1879,6 +1879,10 @@ int
 #endif
 			rv = fbink_wait_for_complete(fbfd, LAST_MARKER);
 		}
+
+		if (want_lastrect) {
+			print_lastrect();
+		}
 		goto cleanup;
 	}
 
