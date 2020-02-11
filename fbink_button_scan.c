@@ -171,7 +171,7 @@ static bool
 {
 	// USB Connected screen has a black background
 	LOG("Waiting for the 'USB Connected' screen . . .");
-	return wait_for_background_color(eInkBGCMap[BG_BLACK], 5U, 250U);
+	return wait_for_background_color(eInkBGCMap[BG_BLACK], 10U, 250U);
 }
 
 static bool
@@ -180,7 +180,7 @@ static bool
 	// Home screen has a white background
 	LOG("Waiting for the 'Home' screen . . .");
 	// NOTE: This one *might* need a slightly larger timeout, just to be safe...
-	return wait_for_background_color(eInkBGCMap[BG_WHITE], 6U, 250U);
+	return wait_for_background_color(eInkBGCMap[BG_WHITE], 12U, 250U);
 }
 
 static bool
@@ -188,7 +188,7 @@ static bool
 {
 	// Import screen has a black background
 	LOG("Waiting for the 'Content Import' screen . . .");
-	return wait_for_background_color(eInkBGCMap[BG_BLACK], 5U, 250U);
+	return wait_for_background_color(eInkBGCMap[BG_BLACK], 10U, 250U);
 }
 
 static bool
