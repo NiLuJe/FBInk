@@ -621,7 +621,7 @@ kobo: armcheck
 	cp -av $(CURDIR)/README.md Kobo/README.md
 	cp -av $(CURDIR)/LICENSE Kobo/LICENSE
 	cp -av $(CURDIR)/CREDITS Kobo/CREDITS
-	pushd Kobo && zip -r ../Release/FBInk-$(FBINK_VERSION).zip . && popd
+	cd Kobo && zip -r ../Release/FBInk-$(FBINK_VERSION).zip .
 	mv -v Release/FBInk-$(FBINK_VERSION).zip Kobo/
 
 libunibreakclean:
