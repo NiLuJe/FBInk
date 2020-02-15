@@ -732,7 +732,7 @@ static void
 #	pragma GCC diagnostic ignored "-Wcast-align"
 		uint16_t* p = (uint16_t*) fbPtr;
 #	pragma GCC diagnostic pop
-		size_t px_count = vInfo.xres_virtual * vInfo.yres;
+		size_t px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
 		while (px_count--) {
 			*p++ = px;
 		};
