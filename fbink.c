@@ -1995,6 +1995,7 @@ static int
 	// NOTE: Setting both EPDC_FLAG_FORCE_MONOCHROME and EPDC_FLAG_ENABLE_INVERSION on non-A2/DU waveform modes also
 	//       seems like a great way to trigger this...
 	//       c.f., https://github.com/baskerville/plato/issues/79
+	//       But even with DU, if you pile on a dither_mode or a USE_DITHERING flag on top of that, it may still go haywire.
 	// NOTE: Speaking of FORCE_MONOCHROME, see the notes below in refresh(). Like on other devices, we enforce it for A2.
 	//       Which means you'll generally only want to be using A2 on *already* mostly B&W content,
 	//       as otherwise things risk going a bit wonky.
