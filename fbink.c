@@ -1995,6 +1995,11 @@ static int
 	// NOTE: Setting both EPDC_FLAG_FORCE_MONOCHROME and EPDC_FLAG_ENABLE_INVERSION on non-A2/DU waveform modes also
 	//       seems like a great way to trigger this...
 	//       c.f., https://github.com/baskerville/plato/issues/79
+	// NOTE: Speaking of FORCE_MONOCHROME, see the notes below in refresh(). Like on other devices, we enforce it for A2.
+	//       Which means you'll generally only want to be using A2 on *already* mostly B&W content,
+	//       as otherwise things risk going a bit wonky.
+	//       That pretty much leaves button highlights in UIs (which is precisely what nickel uses it for).
+	//       If you need a more reliable alternative, prefer DU (which'll barely be any slower anyway).
 
 	// Did we request legacy dithering?
 	bool use_legacy_dithering = false;
@@ -2145,11 +2150,11 @@ static int
 	// NOTE: While the fixed-cell codepath, when rendering in B&W, would be the perfect candidate for using A2 waveform mode,
 	//       it's all kinds of fucked up on Kobos (especially when combined w/ FORCE_MONOCHROME),
 	//       and may lead to disappearing text or weird blending depending on the surrounding fb content...
-	//       It only shows up properly when FULL, which isn't great...
+	//       It may only show up properly when FULL, which isn't great...
 	// NOTE: On the Forma, the (apparently randomly) broken A2 behavior is exacerbated if the FB is UR @ 8bpp...
 	//       Which is intriguing, because that should make the driver's job easier (except maybe not on latest epdc v2 revs),
 	//       c.f., epdc_submit_work_func @ drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c
-	//       It is *definitely* much worse w/ FORCE_MONOCHROME (since it'll affect the full region),
+	//       It is *definitely* much worse w/ FORCE_MONOCHROME (since that'll affect the entire region),
 	//       and FULL obviously won't help with that.
 	// NOTE: And while we're on the fun quirks train: FULL never flashes w/ AUTO on (some?) Kobos,
 	//       so request GC16 if we want a flash...
@@ -5957,7 +5962,7 @@ int
 
 		// Don't refresh beyond the borders of the bar if we're backgroundless...
 		// This is especially important w/ A2 wfm mode,
-		// as FORCE_MONOCHROME *will* quantize the existing pixels down to B&W!
+		// as FORCE_MONOCHROME *will* quantize the region's existing pixels down to B&W!
 		if (fbink_cfg->is_bgless) {
 			region.left  = fill_left;
 			region.width = bar_width;
@@ -6003,7 +6008,7 @@ int
 
 		// Don't refresh beyond the borders of the bar if we're backgroundless...
 		// This is especially important w/ A2 wfm mode,
-		// as FORCE_MONOCHROME *will* quantize the existing pixels down to B&W!
+		// as FORCE_MONOCHROME *will* quantize the region's existing pixels down to B&W!
 		if (fbink_cfg->is_bgless) {
 			region.left  = bar_left;
 			region.width = bar_width;
