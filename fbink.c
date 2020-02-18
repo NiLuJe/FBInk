@@ -1996,6 +1996,7 @@ static int
 	//       seems like a great way to trigger this...
 	//       c.f., https://github.com/baskerville/plato/issues/79
 	//       But even with DU, if you pile on a dither_mode or a USE_DITHERING flag on top of that, it may still go haywire.
+	//       The main culprit appears to be FORCE_MONOCHROME here, as I can't break DU without it in this case ;).
 	// NOTE: Speaking of FORCE_MONOCHROME, see the notes below in refresh(). Like on other devices, we enforce it for A2.
 	//       Which means you'll generally only want to be using A2 on *already* mostly B&W content,
 	//       as otherwise things risk going a bit wonky.
