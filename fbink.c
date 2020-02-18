@@ -2038,6 +2038,7 @@ static int
 	//       That'd render EPDC v1 dithering useless, and as for EPDC v2, this only yields B&W with severe patterning.
 	//       It does help hide the vectorization? artefacts (i.e., the 4 visible horizontal "bands" of processing), though.
 	//       Fun fact: I don't see those bands @ UR (provided I manage to get the kernel to honor the flags/dither_mode...).
+	//       Unfortunately, that's not the native Portrait orientation on the Forma... (it is on the Libra, though).
 	if (use_legacy_dithering || dithering_mode != EPDC_FLAG_USE_DITHERING_PASSTHROUGH) {
 		// EPDC v2 here, where we prefer the newer PxP alternatives, so no need to mess with the old dithering flags.
 		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
@@ -2054,7 +2055,8 @@ static int
 		}
 		// NOTE: EPDC_FLAG_USE_DITHERING_NTX_D8 is gone on Mk. 7.
 		//       Which makes sense: ORDERED @ q7 looks pretty neat, and it's handled by the PxP.
-		//       On the other hand, Y1 will generally yield more pleasing results than ORDERED @ q1.
+		//       On the other hand, Y1 will generally yield more pleasing results than ORDERED @ q1,
+		//       (even @ rota UR, where the q1 dithering pattern appears to be less obvious and much less glitchy).
 	}
 
 	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V2, &update);
