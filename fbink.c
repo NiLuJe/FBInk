@@ -2142,12 +2142,15 @@ static int
 		return refresh_legacy(fbfd, region, is_flashing);
 	}
 #	endif
-	// NOTE: While we'd be perfect candidates for using A2 waveform mode, it's all kinds of fucked up on Kobos,
+	// NOTE: While the fixed-cell codepath, when rendering in B&W, would be the perfect candidate for using A2 waveform mode,
+	//       it's all kinds of fucked up on Kobos (especially when combined w/ FORCE_MONOCHROME),
 	//       and may lead to disappearing text or weird blending depending on the surrounding fb content...
 	//       It only shows up properly when FULL, which isn't great...
 	// NOTE: On the Forma, the (apparently randomly) broken A2 behavior is exacerbated if the FB is UR @ 8bpp...
 	//       Which is intriguing, because that should make the driver's job easier (except maybe not on latest epdc v2 revs),
 	//       c.f., epdc_submit_work_func @ drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c
+	//       It is *definitely* much worse w/ FORCE_MONOCHROME (since it'll affect the full region),
+	//       and FULL obviously won't help with that.
 	// NOTE: And while we're on the fun quirks train: FULL never flashes w/ AUTO on (some?) Kobos,
 	//       so request GC16 if we want a flash...
 	// NOTE: FWIW, DU behaves properly when PARTIAL, but doesn't flash when FULL.
@@ -5855,7 +5858,8 @@ int
 		if (fbink_cfg->wfm_mode == WFM_A2) {
 			// NOTE: If we're using A2 refresh mode, we'll be enforcing monochrome anyway...
 			//       Making sure we do that on our end (... at least with default bg/fg colors anyway ;),
-			//       avoids weird behavior on devices where A2 can otherwise be quirky, like Kobo Mk. 7
+			//       avoids weird behavior on devices where A2 + FORCE_MONOCHROME can otherwise be quirky,
+			//       like Kobo Mk. 7
 			emptyC  = bgcolor;
 			borderC = fgcolor;
 		} else {
@@ -5952,7 +5956,8 @@ int
 		draw(percentage_text, (unsigned short int) row, (unsigned short int) col, 0U, halfcell_offset, fbink_cfg);
 
 		// Don't refresh beyond the borders of the bar if we're backgroundless...
-		// This is especially important w/ A2 wfm mode, as it *will* quantize the existing pixels down to B&W!
+		// This is especially important w/ A2 wfm mode,
+		// as FORCE_MONOCHROME *will* quantize the existing pixels down to B&W!
 		if (fbink_cfg->is_bgless) {
 			region.left  = fill_left;
 			region.width = bar_width;
@@ -5997,7 +6002,8 @@ int
 		}
 
 		// Don't refresh beyond the borders of the bar if we're backgroundless...
-		// This is especially important w/ A2 wfm mode, as it *will* quantize the existing pixels down to B&W!
+		// This is especially important w/ A2 wfm mode,
+		// as FORCE_MONOCHROME *will* quantize the existing pixels down to B&W!
 		if (fbink_cfg->is_bgless) {
 			region.left  = bar_left;
 			region.width = bar_width;
