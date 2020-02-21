@@ -32,6 +32,12 @@
 #include <stdint.h>
 #include <stdio.h>
 
+// Be friendly with C++ compilers (both GCC & Clang support __restrict__).
+#ifdef __cplusplus
+#	define restrict __restrict__
+extern "C" {
+#endif
+
 // Symbol visibility shenanigans...
 // c.f., https://gcc.gnu.org/wiki/Visibility
 #if __GNUC__ >= 4
@@ -868,5 +874,9 @@ FBINK_API int fbink_wait_for_usbms_processing(int fbfd, bool force_unplug);
 //
 // See fbink_cmd.c for an example of the former, and KFMon for an example of the latter.
 // NOTE: Although fairly stupid in practice, utils/dump.c is less convoluted than fbink_cmd.c, making it worth a look...
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
