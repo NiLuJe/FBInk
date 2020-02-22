@@ -2316,6 +2316,83 @@ static const char*
 	}
 }
 
+// Update our internal representation of pen colors (i.e., packed into the right pixel format).
+static int
+    update_pen_colors(const FBInkConfig* restrict fbink_cfg)
+{
+	int rv = EXIT_SUCCESS;
+
+	// NOTE: Now that we know which device we're running on, setup pen colors,
+	//       taking into account the inverted cmap on legacy Kindles...
+#ifdef FBINK_FOR_KINDLE
+	if (deviceQuirks.isKindleLegacy) {
+		penFGColor = eInkBGCMap[fbink_cfg->fg_color];
+		penBGColor = eInkFGCMap[fbink_cfg->bg_color];
+
+		ELOG(
+		    "Pen colors set to #%02X%02X%02X -> #%02X%02X%02X for the foreground and #%02X%02X%02X -> #%02X%02X%02X for the background",
+		    eInkFGCMap[fbink_cfg->fg_color],
+		    eInkFGCMap[fbink_cfg->fg_color],
+		    eInkFGCMap[fbink_cfg->fg_color],
+		    penFGColor,
+		    penFGColor,
+		    penFGColor,
+		    eInkBGCMap[fbink_cfg->bg_color],
+		    eInkBGCMap[fbink_cfg->bg_color],
+		    eInkBGCMap[fbink_cfg->bg_color],
+		    penBGColor,
+		    penBGColor,
+		    penBGColor);
+	} else {
+#endif
+		penFGColor = eInkFGCMap[fbink_cfg->fg_color];
+		penBGColor = eInkBGCMap[fbink_cfg->bg_color];
+
+		ELOG("Pen colors set to #%02X%02X%02X for the foreground and #%02X%02X%02X for the background",
+		     penFGColor,
+		     penFGColor,
+		     penFGColor,
+		     penBGColor,
+		     penBGColor,
+		     penBGColor);
+#ifdef FBINK_FOR_KINDLE
+	}
+#endif
+
+	// Pack the pen colors into the appropriate pixel format...
+	switch (vInfo.bits_per_pixel) {
+		case 4U:
+			penFGPixel.gray8 = penFGColor;
+			penBGPixel.gray8 = penBGColor;
+			break;
+		case 8U:
+			penFGPixel.gray8 = penFGColor;
+			penBGPixel.gray8 = penBGColor;
+			break;
+		case 16U:
+			penFGPixel.rgb565 = pack_rgb565(penFGColor, penFGColor, penFGColor);
+			penBGPixel.rgb565 = pack_rgb565(penBGColor, penBGColor, penBGColor);
+			break;
+		case 24U:
+			penFGPixel.bgra.color.r = penFGPixel.bgra.color.g = penFGPixel.bgra.color.b = penFGColor;
+			penBGPixel.bgra.color.r = penBGPixel.bgra.color.g = penBGPixel.bgra.color.b = penBGColor;
+			break;
+		case 32U:
+			penFGPixel.bgra.color.a = 0xFFu;
+			penFGPixel.bgra.color.r = penFGPixel.bgra.color.g = penFGPixel.bgra.color.b = penFGColor;
+			penBGPixel.bgra.color.a                                                     = 0xFFu;
+			penBGPixel.bgra.color.r = penBGPixel.bgra.color.g = penBGPixel.bgra.color.b = penBGColor;
+			break;
+		default:
+			// Huh oh... Should never happen!
+			WARN("Unsupported framebuffer bpp");
+			rv = ERRCODE(EXIT_FAILURE);
+			break;
+	}
+
+	return rv;
+}
+
 // Get the various fb info & setup global variables
 static int
     initialize_fbink(int fbfd, const FBInkConfig* restrict fbink_cfg, bool skip_vinfo)
@@ -2822,76 +2899,32 @@ static int
 	//       Otherwise, we'd probably have to compare the previous smem_len to the new, and to
 	//       mremap fbPtr if isFbMapped in case they differ (and the old smem_len != 0, which would indicate a first init).
 
-	// NOTE: Now that we know which device we're running on, setup pen colors,
-	//       taking into account the inverted cmap on legacy Kindles...
-#ifdef FBINK_FOR_KINDLE
-	if (deviceQuirks.isKindleLegacy) {
-		penFGColor = eInkBGCMap[fbink_cfg->fg_color];
-		penBGColor = eInkFGCMap[fbink_cfg->bg_color];
-
-		ELOG(
-		    "Pen colors set to #%02X%02X%02X -> #%02X%02X%02X for the foreground and #%02X%02X%02X -> #%02X%02X%02X for the background",
-		    eInkFGCMap[fbink_cfg->fg_color],
-		    eInkFGCMap[fbink_cfg->fg_color],
-		    eInkFGCMap[fbink_cfg->fg_color],
-		    penFGColor,
-		    penFGColor,
-		    penFGColor,
-		    eInkBGCMap[fbink_cfg->bg_color],
-		    eInkBGCMap[fbink_cfg->bg_color],
-		    eInkBGCMap[fbink_cfg->bg_color],
-		    penBGColor,
-		    penBGColor,
-		    penBGColor);
-	} else {
-#endif
-		penFGColor = eInkFGCMap[fbink_cfg->fg_color];
-		penBGColor = eInkBGCMap[fbink_cfg->bg_color];
-
-		ELOG("Pen colors set to #%02X%02X%02X for the foreground and #%02X%02X%02X for the background",
-		     penFGColor,
-		     penFGColor,
-		     penFGColor,
-		     penBGColor,
-		     penBGColor,
-		     penBGColor);
-#ifdef FBINK_FOR_KINDLE
+	// Pack the pen colors into the right pixel format...
+	if (update_pen_colors(fbink_cfg) != EXIT_SUCCESS) {
+		goto cleanup;
 	}
-#endif
 
-	// Use the appropriate get/put pixel functions, and pack the pen colors into the appropriate pixel format...
+	// Use the appropriate get/put pixel functions...
 	switch (vInfo.bits_per_pixel) {
 		case 4U:
-			//fxpPutPixel      = &put_pixel_Gray4;
-			fxpGetPixel      = &get_pixel_Gray4;
-			penFGPixel.gray8 = penFGColor;
-			penBGPixel.gray8 = penBGColor;
+			//fxpPutPixel = &put_pixel_Gray4;
+			fxpGetPixel = &get_pixel_Gray4;
 			break;
 		case 8U:
-			//fxpPutPixel      = &put_pixel_Gray8;
-			fxpGetPixel      = &get_pixel_Gray8;
-			penFGPixel.gray8 = penFGColor;
-			penBGPixel.gray8 = penBGColor;
+			//fxpPutPixel = &put_pixel_Gray8;
+			fxpGetPixel = &get_pixel_Gray8;
 			break;
 		case 16U:
-			//fxpPutPixel       = &put_pixel_RGB565;
-			fxpGetPixel       = &get_pixel_RGB565;
-			penFGPixel.rgb565 = pack_rgb565(penFGColor, penFGColor, penFGColor);
-			penBGPixel.rgb565 = pack_rgb565(penBGColor, penBGColor, penBGColor);
+			//fxpPutPixel = &put_pixel_RGB565;
+			fxpGetPixel = &get_pixel_RGB565;
 			break;
 		case 24U:
-			//fxpPutPixel             = &put_pixel_RGB24;
-			fxpGetPixel             = &get_pixel_RGB24;
-			penFGPixel.bgra.color.r = penFGPixel.bgra.color.g = penFGPixel.bgra.color.b = penFGColor;
-			penBGPixel.bgra.color.r = penBGPixel.bgra.color.g = penBGPixel.bgra.color.b = penBGColor;
+			//fxpPutPixel = &put_pixel_RGB24;
+			fxpGetPixel = &get_pixel_RGB24;
 			break;
 		case 32U:
-			//fxpPutPixel             = &put_pixel_RGB32;
-			fxpGetPixel             = &get_pixel_RGB32;
-			penFGPixel.bgra.color.a = 0xFFu;
-			penFGPixel.bgra.color.r = penFGPixel.bgra.color.g = penFGPixel.bgra.color.b = penFGColor;
-			penBGPixel.bgra.color.a                                                     = 0xFFu;
-			penBGPixel.bgra.color.r = penBGPixel.bgra.color.g = penBGPixel.bgra.color.b = penBGColor;
+			//fxpPutPixel = &put_pixel_RGB32;
+			fxpGetPixel = &get_pixel_RGB32;
 			break;
 		default:
 			// Huh oh... Should never happen!
@@ -5794,6 +5827,13 @@ cleanup:
 	WARN("Reinitilization is not needed on Kindle devices :)");
 	return ERRCODE(ENOSYS);
 #endif    // !FBINK_FOR_KINDLE
+}
+
+// Public wrapper around update_pen_colors
+int
+    fbink_update_pen_colors(const FBInkConfig* restrict fbink_cfg)
+{
+	return update_pen_colors(fbink_cfg);
 }
 
 // Handle drawing both types of progress bars
