@@ -641,10 +641,20 @@ FBINK_API int fbink_reinit(int fbfd, const FBInkConfig* restrict fbink_cfg);
 // fbink_cfg:		Pointer to an FBInkConfig struct (honors fg_color & bg_color).
 FBINK_API int fbink_update_pen_colors(const FBInkConfig* restrict fbink_cfg);
 
-// ALternatively, you can choose to set the pan colors *directly*, without relying on FBInk's eInk palette handling.
+// Alternatively, you can choose to set the pen colors *directly*, without relying on FBInk's eInk palette handling.
+// This is mostly of interest if you want to use color values you're getting from somewhere outside FBInk.
+// You will *NOT* have to call fbink_update_pen_colors() when using these, they'll take care of updating the internal state.
+// NOTE: The *optional* quantization pass *should* match what the EPDC itself will do anyway (i.e., it's redundant).
+// y:			8-bit luminance value
+// quantize:		If true, round to the nearest eInk palette color.
 FBINK_API int fbink_set_fg_pen_gray(uint8_t y, bool quantize);
-FBINK_API int fbink_set_fg_pen_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a, bool quantize);
 FBINK_API int fbink_set_bg_pen_gray(uint8_t y, bool quantize);
+// r:			8-bit red component value
+// g:			8-bit green component value
+// b:			8-bit blue component value
+// a:			8-bit alpha component value (opaque is 0xFFu).
+// quantize:		If true, round to the nearest eInk palette color. This implies a grayscaling pass!
+FBINK_API int fbink_set_fg_pen_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a, bool quantize);
 FBINK_API int fbink_set_bg_pen_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a, bool quantize);
 
 //

@@ -2345,6 +2345,11 @@ static int
 		v = y;
 	}
 
+	// If we asked for quantization on an RGB value, we're now effectively using that as grayscale ;).
+	if (quantize && !is_y8) {
+		is_y8 = true;
+	}
+
 	// NOTE: We need to take into account the inverted cmap on Legacy Kindles...
 #ifdef FBINK_FOR_KINDLE
 	if (deviceQuirks.isKindleLegacy) {
