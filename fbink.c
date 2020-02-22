@@ -3889,20 +3889,18 @@ static int
 	if (region.width + region.left > screenWidth) {
 		region.width = screenWidth - region.left;
 		LOG("Clamped region.width to %u", region.width);
-	} else {
-		LOG("Updated region.width to %u", region.width);
 	}
+	LOG("Updated region.left to %u", region.left);
 	region.top = y_offs;
 	if (region.height + region.top > screenHeight) {
 		region.height = screenHeight - region.top;
 		LOG("Clamped region.height to %u", region.height);
-	} else {
-		LOG("Updated region.height to %u", region.height);
 	}
+	LOG("Updated region.top to %u", region.top);
 
 	// Did we want a background rectangle?
 	if (do_clear) {
-		fill_rect(region.left, region.top, region.width, region.top, &penBGPixel);
+		fill_rect(region.left, region.top, region.width, region.height, &penBGPixel);
 	}
 
 
