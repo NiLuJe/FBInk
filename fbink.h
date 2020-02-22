@@ -641,6 +641,12 @@ FBINK_API int fbink_reinit(int fbfd, const FBInkConfig* restrict fbink_cfg);
 // fbink_cfg:		Pointer to an FBInkConfig struct (honors fg_color & bg_color).
 FBINK_API int fbink_update_pen_colors(const FBInkConfig* restrict fbink_cfg);
 
+// ALternatively, you can choose to set the pan colors *directly*, without relying on FBInk's eInk palette handling.
+FBINK_API int fbink_set_fg_pen_gray(uint8_t y, bool quantize);
+FBINK_API int fbink_set_fg_pen_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a, bool quantize);
+FBINK_API int fbink_set_bg_pen_gray(uint8_t y, bool quantize);
+FBINK_API int fbink_set_bg_pen_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a, bool quantize);
+
 //
 // Print a full-width progress bar on screen.
 // fbfd:		Open file descriptor to the framebuffer character device,

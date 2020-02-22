@@ -2316,6 +2316,191 @@ static const char*
 	}
 }
 
+// Used to manually set the pen colors
+static int
+    set_pen_color(bool is_fg, bool is_y8, bool quantize, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+{
+	int rv = EXIT_SUCCESS;
+
+	// Do we need to grayscale it?
+	uint8_t y;
+	if (is_y8) {
+		// If we passed a Grayscale pixel, r = g = b ;).
+		y = r;
+	} else {
+		// NOTE: We inline stbi__compute_y to avoid needing to depend on FBINK_WITH_IMAGE
+		y = (uint8_t)(((r * 77U) + (g * 150U) + (29U * b)) >> 8U);
+	}
+	// NOTE: In set_rgb, we need to enforce grayscale if bpp < 16!
+
+	// Do we need to match that to the nearest palette color?
+	// NOTE: Given that the eInk palette is effectively composed of every multiple of 0x11,
+	//       it becomes as simple as rounding to the nearest multiple of 0x11 ;).
+	//       c.f., https://stackoverflow.com/a/29557629
+	//           & https://stackoverflow.com/a/38117380
+	//       as well as https://stackoverflow.com/questions/3407012
+	uint8_t v;
+	if (quantize) {
+		v = ((y + 0x11u / 2U) / 0x11u) * 0x11u;
+	} else {
+		v = y;
+	}
+
+	// NOTE: We need to take into account the inverted cmap on Legacy Kindles...
+#ifdef FBINK_FOR_KINDLE
+	if (deviceQuirks.isKindleLegacy) {
+		if (is_fg) {
+			penFGColor = v ^ 0xFFu;
+			ELOG("Foreground pen color set to #%02X -> #%02X", v, penFGColor);
+		} else {
+			penBGColor = v ^ 0xFFu;
+			ELOG("Background pen color set to #%02X -> #%02X", v, penBGColor);
+		}
+	} else {
+#endif
+		// NOTE: penFGColor/penBGColor are designed to be grayscale only,
+		//       but if we passed an RGBA value, we'll actually honor it for penFGPixel & penBGPixel!
+		if (is_fg) {
+			penFGColor = v;
+			if (is_y8) {
+				ELOG("Foreground pen color set to #%02X", penFGColor);
+			} else {
+				ELOG("Foreground pen color set to #%02X%02X%02X%02X (grayscaled: #%02X)",
+				     r,
+				     g,
+				     b,
+				     a,
+				     penFGColor);
+			}
+		} else {
+			penBGColor = v;
+			if (is_y8) {
+				ELOG("Background pen color set to #%02X", penBGColor);
+			} else {
+				ELOG("Background pen color set to #%02X%02X%02X%02X (grayscaled: #%02X)",
+				     r,
+				     g,
+				     b,
+				     a,
+				     penBGColor);
+			}
+		}
+#ifdef FBINK_FOR_KINDLE
+	}
+#endif
+
+	// Pack the pen colors into the appropriate pixel format...
+	switch (vInfo.bits_per_pixel) {
+		case 4U:
+			if (is_fg) {
+				penFGPixel.gray8 = penFGColor;
+			} else {
+				penBGPixel.gray8 = penBGColor;
+			}
+			break;
+		case 8U:
+			if (is_fg) {
+				penFGPixel.gray8 = penFGColor;
+			} else {
+				penBGPixel.gray8 = penBGColor;
+			}
+			break;
+		case 16U:
+			if (is_fg) {
+				if (is_y8) {
+					penFGPixel.rgb565 = pack_rgb565(penFGColor, penFGColor, penFGColor);
+				} else {
+					penFGPixel.rgb565 = pack_rgb565(r, g, b);
+				}
+			} else {
+				if (is_y8) {
+					penBGPixel.rgb565 = pack_rgb565(penBGColor, penBGColor, penBGColor);
+				} else {
+					penBGPixel.rgb565 = pack_rgb565(r, g, b);
+				}
+			}
+			break;
+		case 24U:
+			if (is_fg) {
+				if (is_y8) {
+					penFGPixel.bgra.color.r = penFGPixel.bgra.color.g = penFGPixel.bgra.color.b =
+					    penFGColor;
+				} else {
+					penFGPixel.bgra.color.r = r;
+					penFGPixel.bgra.color.g = g;
+					penFGPixel.bgra.color.b = b;
+				}
+			} else {
+				if (is_y8) {
+					penBGPixel.bgra.color.r = penBGPixel.bgra.color.g = penBGPixel.bgra.color.b =
+					    penBGColor;
+				} else {
+					penBGPixel.bgra.color.r = r;
+					penBGPixel.bgra.color.g = g;
+					penBGPixel.bgra.color.b = b;
+				}
+			}
+			break;
+		case 32U:
+			if (is_fg) {
+				if (is_y8) {
+					penFGPixel.bgra.color.a = 0xFFu;
+					penFGPixel.bgra.color.r = penFGPixel.bgra.color.g = penFGPixel.bgra.color.b =
+					    penFGColor;
+				} else {
+					penFGPixel.bgra.color.r = r;
+					penFGPixel.bgra.color.g = g;
+					penFGPixel.bgra.color.b = b;
+					penFGPixel.bgra.color.a = a;
+				}
+			} else {
+				if (is_y8) {
+					penBGPixel.bgra.color.a = 0xFFu;
+					penBGPixel.bgra.color.r = penBGPixel.bgra.color.g = penBGPixel.bgra.color.b =
+					    penBGColor;
+				} else {
+					penBGPixel.bgra.color.r = r;
+					penBGPixel.bgra.color.g = g;
+					penBGPixel.bgra.color.b = b;
+					penBGPixel.bgra.color.a = a;
+				}
+			}
+			break;
+		default:
+			// Huh oh... Should never happen!
+			WARN("Unsupported framebuffer bpp");
+			rv = ERRCODE(EXIT_FAILURE);
+			break;
+	}
+
+	return rv;
+}
+
+// Public wrappers around set_pen_color
+int
+    fbink_set_fg_pen_gray(uint8_t y, bool quantize)
+{
+	return set_pen_color(true, true, quantize, y, y, y, 0xFFu);
+}
+
+int
+    fbink_set_fg_pen_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a, bool quantize)
+{
+	return set_pen_color(true, false, quantize, r, g, b, a);
+}
+
+int
+    fbink_set_bg_pen_gray(uint8_t y, bool quantize)
+{
+	return set_pen_color(false, true, quantize, y, y, y, 0xFFu);
+}
+
+int
+    fbink_set_bg_pen_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a, bool quantize)
+{
+	return set_pen_color(false, false, quantize, r, g, b, a);
+}
+
 // Update our internal representation of pen colors (i.e., packed into the right pixel format).
 static int
     update_pen_colors(const FBInkConfig* restrict fbink_cfg)
