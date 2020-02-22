@@ -5763,10 +5763,20 @@ int
 		// It's a reinit, so ask to skip the vinfo ioctl we just did
 		ELOG("Detected a change in framebuffer bitdepth, reinitializing...");
 		rv = initialize_fbink(fbfd, fbink_cfg, true);
+
+		// If it went fine, make the caller aware
+		if (rv == EXIT_SUCCESS) {
+			rv = OK_BPP_CHANGE;
+		}
 	} else if (old_rota != vInfo.rotate) {
 		// It's a reinit, so ask to skip the vinfo ioctl we just did
 		ELOG("Detected a change in framebuffer rotation, reinitializing...");
 		rv = initialize_fbink(fbfd, fbink_cfg, true);
+
+		// If it went fine, make the caller aware
+		if (rv == EXIT_SUCCESS) {
+			rv = OK_ROTA_CHANGE;
+		}
 	}
 
 	// And we're done!

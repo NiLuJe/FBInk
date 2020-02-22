@@ -604,6 +604,9 @@ FBINK_API uint32_t fbink_get_last_marker(void);
 // NOTE: Deprecated in favor of fbink_reinit ;).
 FBINK_API bool fbink_is_fb_quirky(void) __attribute__((pure, deprecated));
 
+// We'll need those for fbink_reinit (start > 256 to stay clear of errno values)
+#define OK_BPP_CHANGE  (1 << 9)
+#define OK_ROTA_CHANGE (1 << 10)
 // Attempt to detect changes in framebuffer states (between this call and the last time fbink_init/fbink_reinit was called),
 // doing a reinit (i.e., calling fbink_init again) if needed, while doing the least amount of work possible in the process.
 // NOTE: The intended use-case is for long running apps which may trigger prints across different framebuffer states,
@@ -617,6 +620,13 @@ FBINK_API bool fbink_is_fb_quirky(void) __attribute__((pure, deprecated));
 // NOTE: Using fbink_reinit does NOT lift the requirement of having to run fbink_init at least ONCE,
 //       i.e., you cannot replace the initial fbink_init call by fbink_reinit!
 // Returns -(ENOSYS) on Kindle, where this is not needed.
+// Returns OK_BPP_CHANGE if reinitialization was *successful* following a bitdepth change.
+// Returns OK_ROTA_CHANGE if reinitialization was *successful* following a rotation change.
+//       If *both* bitdepth & rotation changed, OK_BPP_CHANGE takes precedence.
+// NOTE: This means that it may return a *positive* non-zero value on *success*.
+//       This is helpful for callers that need to track FBInk's internal state via fbink_get_state(),
+//       because a reinit *might* affect the screen layout, signaling that their current state copy *may* be stale.
+// NOTE: In turn, this means that a simple EXIT_SUCCESS means that no reinitialization was needed.
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
 // fbink_cfg:		Pointer to an FBInkConfig struct.
