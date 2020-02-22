@@ -2340,7 +2340,7 @@ static int
 	//       as well as https://stackoverflow.com/questions/3407012
 	uint8_t v;
 	if (quantize) {
-		v = ((y + 0x11u / 2U) / 0x11u) * 0x11u;
+		v = (uint8_t)(((y + 0x11u / 2U) / 0x11u) * 0x11u);
 	} else {
 		v = y;
 	}
