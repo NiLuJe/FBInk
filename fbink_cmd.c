@@ -2189,6 +2189,13 @@ int
 					goto cleanup;
 				}
 
+				// NOTE: quick'n dirty debug
+				// Then clear it.
+				const struct timespec zzz = { 0L, 750000000L };
+				nanosleep(&zzz, NULL);
+				fbink_grid_clear(fbfd, &fbink_cfg, linecount, strlen(string));
+
+
 				// NOTE: Don't clobber previous entries if multiple strings were passed...
 				//       We make sure to trust print's return value,
 				//       because it knows how much space it already took up ;).

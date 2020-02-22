@@ -3599,6 +3599,353 @@ cleanup:
 	return rv;
 }
 
+// Handle cls & refresh, but for grid-based coordinates (i.e., like draw())
+static int
+    grid_to_region(int fbfd, const FBInkConfig* restrict fbink_cfg, unsigned short int rows, unsigned short int cols, bool do_clear)
+{
+	// If we open a fd now, we'll only keep it open for this single call!
+	// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// mmap fb to user mem
+	if (!isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	}
+
+	// NOTE: Since the idea is to play nice with draw(),
+	//       that implies duplicating its whole set of insane positioning tweaks...
+
+	// NOTE: Starting with the initial row/col handling from fbink_print...
+	// NOTE: Make copies of these so we don't wreck our original struct, since we passed it by reference,
+	//       and we *will* heavily mangle these two...
+	short int col = fbink_cfg->col;
+	short int row = fbink_cfg->row;
+
+	// NOTE: If we asked to print in the middle of the screen, make the specified row an offset from the middle of the screen,
+	//       instead of the top.
+	if (fbink_cfg->is_halfway) {
+		row = (short int) (row + (short int) (MAXROWS / 2U));
+		// NOTE: Clamp to positive values to avoid wrap-around,
+		//       (i.e., -MAX should always be 0, and +MAX always the last row (i.e., MAXROWS - 1)).
+		//       Our default behavior of starting negative rows from the bottom essentially amounts to valign == bottom,
+		//       which is not desirable when we explicitly asked for center ;).
+		row = (short int) MIN(MAX(0, row), (MAXROWS - 1));
+		LOG("Adjusted row to %hd for vertical centering", row);
+	}
+
+	// See if want to position our text relative to the edge of the screen, and not the beginning
+	if (col < 0) {
+		col = (short int) MAX(MAXCOLS + col, 0);
+	}
+	if (row < 0) {
+		row = (short int) MAX(MAXROWS + row, 0);
+	}
+	LOG("Adjusted position: column %hd, row %hd", col, row);
+
+	// Clamp coordinates to the screen, to avoid blowing up ;).
+	if (col >= MAXCOLS) {
+		col = (short int) (MAXCOLS - 1U);
+		LOG("Clamped column to %hd", col);
+	}
+	// NOTE: For lines, we attempt to do something potentially a bit less destructive, namely,
+	//       wrapping back to the top of the screen.
+	//       This seems like a better way to handle large dumps of data over stdin, for instance,
+	//       as well as a slightly less cryptic behavior when in interactive mode...
+	//       In any case, we're always going to overwrite something, but that way,
+	//       stuff shown on screen should be more or less consistent,
+	//       instead of overwriting over and over again the final line at the bottom of the screen...
+	bool wrapped_line = false;
+	while (row >= MAXROWS) {
+		row = (short int) (row - MAXROWS);
+		LOG("Wrapped row back to %hd", row);
+		// Remember that, so we'll append something to our line to make the wraparound clearer...
+		wrapped_line = true;
+	}
+
+	// Compute the amount of characters we can actually print on *one* line given the column we start on...
+	// NOTE: When centered, we enforce one padding character on the left,
+	//       as well as one padding character on the right when we have a perfect fit.
+	//       This is to avoid potentially printing stuff too close to the bezel and/or behind the bezel.
+	unsigned short int available_cols = MAXCOLS;
+	if (fbink_cfg->is_centered) {
+		// One for the left padding
+		available_cols = (unsigned short int) (available_cols - 1U);
+		if (deviceQuirks.isPerfectFit) {
+			// And one for the right padding
+			available_cols = (unsigned short int) (available_cols - 1U);
+			// NOTE: If that makes us fall to 0 (because of high font scaling),
+			//       set it to 1 to avoid a division by zero, and warn that centering will be slightly off.
+			//       This takes a *really* unlucky perfect fit at high font sizes to actually happen...
+			if (available_cols == 0U) {
+				available_cols = 1U;
+				LOG("Enforced a minimum of 1 available column to compensate for an unlucky perfect fit at high font scaling! Centering may be slightly off.");
+			}
+		}
+	} else {
+		// Otherwise, col will be fixed, so, trust it.
+		available_cols = (unsigned short int) (available_cols - col);
+	}
+
+	// Move our initial row up if we add so much lines that some of it goes off-screen...
+	if (row + rows > MAXROWS) {
+		row = (short int) MIN(row - ((row + rows) - MAXROWS), MAXROWS);
+	}
+	LOG("Final position: column %hd, row %hd", col, row);
+
+	// Just fudge the column for centering...
+	bool halfcell_offset = false;
+	if (fbink_cfg->is_centered) {
+		col = (short int) ((unsigned short int) (MAXCOLS - cols) / 2U);
+
+		// NOTE: If the line itself is not a perfect fit, ask draw to start drawing half a cell
+		//       to the right to compensate, in order to achieve perfect centering...
+		//       This piggybacks a bit on the !isPerfectFit compensation done in draw,
+		//       which already does subcell placement ;).
+		if (((unsigned short int) col * 2U) + cols != MAXCOLS) {
+			LOG("Line is not a perfect fit, fudging centering by one half of a cell to the right");
+			// NOTE: Flag it for correction in draw
+			halfcell_offset = true;
+		}
+		LOG("Adjusted column to %hd for centering", col);
+	}
+
+	// When centered & padded, we need to split the padding in two, left & right.
+	if (fbink_cfg->is_centered && fbink_cfg->is_padded) {
+		// We always want full padding
+		col = 0;
+	}
+
+	// NOTE: And then, the truly insane draw() bits...
+	// Compute our actual subcell offset in pixels
+	unsigned short int pixel_offset = 0U;
+	// Do we have a centering induced halfcell adjustment to correct?
+	if (halfcell_offset) {
+		pixel_offset = FONTW / 2U;
+		LOG("Incrementing pixel_offset by %hu pixels to account for a halfcell centering tweak", pixel_offset);
+	}
+	// Do we have a permanent adjustment to make because of dead space on the right edge?
+	if (!deviceQuirks.isPerfectFit) {
+		// We correct by half of said dead space, since we want perfect centering ;).
+		unsigned short int deadzone_offset =
+		    (unsigned short int) (viewWidth - (unsigned short int) (MAXCOLS * FONTW)) / 2U;
+		pixel_offset = (unsigned short int) (pixel_offset + deadzone_offset);
+		LOG("Incrementing pixel_offset by %hu pixels to compensate for dead space on the right edge",
+		    deadzone_offset);
+	}
+
+	// Clamp h/v offset to safe values
+	short int voffset = fbink_cfg->voffset;
+	short int hoffset = fbink_cfg->hoffset;
+	// NOTE: This test isn't perfect, but then, if you play with this, you do it knowing the risks...
+	//       It's mainly there so that stupidly large values don't wrap back on screen because of overflow wraparound.
+	if ((uint32_t) abs(voffset) >= viewHeight) {
+		LOG("The specified vertical offset (%hd) necessarily pushes *all* content out of bounds, discarding it",
+		    voffset);
+		voffset = 0;
+	}
+	if ((uint32_t) abs(hoffset) >= viewWidth) {
+		LOG("The specified horizontal offset (%hd) necessarily pushes *all* content out of bounds, discarding it",
+		    hoffset);
+		hoffset = 0;
+	}
+
+	// Compute the dimension of the screen region we'll paint to
+	struct mxcfb_rect region = {
+		.top    = (uint32_t) MAX(0 + (viewVertOrigin - viewVertOffset),
+                                      ((row * FONTH) + voffset + viewVertOrigin)),
+		.left   = (uint32_t) MAX(0 + viewHoriOrigin, ((col * FONTW) + hoffset + viewHoriOrigin)),
+		.width  = (uint32_t)(cols * FONTW),
+		.height = (uint32_t)(rows * FONTH),
+	};
+
+	// Recap final offset values
+	if (hoffset != 0 || viewHoriOrigin != 0) {
+		LOG("Adjusting horizontal pen position by %hd pixels, as requested, plus %hhu pixels, as mandated by the native viewport",
+		    hoffset,
+		    viewHoriOrigin);
+		// Clamp region to sane values if h/v offset is pushing stuff off-screen
+		if ((region.width + region.left + pixel_offset) > screenWidth) {
+			region.width = (uint32_t) MAX(0, (short int) (screenWidth - region.left - pixel_offset));
+			LOG("Adjusted region width to account for horizontal offset pushing part of the content off-screen");
+		}
+		if ((region.left + pixel_offset) >= screenWidth) {
+			region.left = screenWidth - pixel_offset - 1;
+			LOG("Adjusted region left to account for horizontal offset pushing part of the content off-screen");
+		}
+	}
+	if (voffset != 0 || viewVertOrigin != 0) {
+		LOG("Adjusting vertical pen position by %hd pixels, as requested, plus %hhu pixels, as mandated by the native viewport",
+		    voffset,
+		    viewVertOrigin);
+		// Clamp region to sane values if h/v offset is pushing stuff off-screen
+		if ((region.top + region.height) > screenHeight) {
+			region.height = (uint32_t) MAX(0, (short int) (screenHeight - region.top));
+			LOG("Adjusted region height to account for vertical offset pushing part of the content off-screen");
+		}
+		if (region.top >= screenHeight) {
+			region.top = screenHeight - 1;
+			LOG("Adjusted region top to account for vertical offset pushing part of the content off-screen");
+		}
+	}
+
+	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
+
+	// Do we have a pixel offset to honor?
+	if (pixel_offset > 0U) {
+		LOG("Moving pen %hu pixels to the right to honor subcell centering adjustments", pixel_offset);
+		// NOTE: We need to update the start of our region rectangle if it doesn't already cover the full line,
+		//       i.e., when we're not padding + centering.
+		if (cols != MAXCOLS) {
+			if ((hoffset + viewHoriOrigin) == 0) {
+				region.left += pixel_offset;
+				LOG("Updated region.left to %u", region.left);
+			} else {
+				// Things are a bit more complex when hoffset is involved...
+				// We basically have to re-do the maths from scratch,
+				// do it signed to catch corner-cases interactions between col/hoffset/pixel_offset,
+				// and clamp it to safe values!
+				if ((hoffset + viewHoriOrigin) < 0) {
+					region.left =
+					    (uint32_t) MAX(0 + viewHoriOrigin,
+							   ((col * FONTW) + hoffset + viewHoriOrigin + pixel_offset));
+				} else {
+					region.left = (uint32_t) MIN(
+					    (uint32_t)((col * FONTW) + hoffset + viewHoriOrigin + pixel_offset),
+					    (screenWidth - 1U));
+				}
+				LOG("Updated region.left to %u", region.left);
+			}
+		}
+	}
+
+	// If we're a full line, we need to fill the space that honoring our offset has left vacant on the left edge...
+	// NOTE: In overlay or bgless mode, we don't paint background pixels. This is pure background, so skip it ;).
+	// FIXME: This is *probably* overkill here?
+	if (!fbink_cfg->is_overlay && !fbink_cfg->is_bgless) {
+		if (cols == MAXCOLS && pixel_offset > 0U) {
+			LOG("Extra background rectangle on the left edge on account of pixel_offset");
+			// Correct width, to include that bit of content, too, if needed
+			if (region.width < screenWidth) {
+				region.width += pixel_offset;
+				// And make sure it's properly clamped, because we can't necessarily rely on left & width
+				// being entirely acurate either because of the multiline print override,
+				// or because of a bit of subcell placement overshoot trickery (c.f., comment in put_pixel).
+				if (region.width + region.left > screenWidth) {
+					region.width = screenWidth - region.left;
+					LOG("Clamped region.width to %u", region.width);
+				} else {
+					LOG("Updated region.width to %u", region.width);
+				}
+			}
+		}
+
+		// NOTE: In some cases, we also have a matching hole to patch on the right side...
+		//       This only applies when pixel_offset *only* accounts for the !isPerfectFit adjustment though,
+		//       because in every other case, the halfcell offset handling neatly pushes everything into place ;).
+		// NOTE: Again, skip this in overlay/bgless mode ;).
+		if (cols == MAXCOLS && !deviceQuirks.isPerfectFit && !halfcell_offset) {
+			// NOTE: !isPerfectFit ensures pixel_offset is non-zero
+			LOG("Extra background rectangle to fill the dead space on the right edge");
+			// If it's not already the case, update region to the full width,
+			// because we've just plugged a hole at the very right edge of a full line.
+			if (region.width < screenWidth) {
+				region.width = screenWidth;
+				// Keep making sure it's properly clamped, interaction w/ hoffset can push us over the edge.
+				if (region.width + region.left > screenWidth) {
+					region.width = screenWidth - region.left;
+					LOG("Clamped region.width to %u", region.width);
+				} else {
+					LOG("Updated region.width to %u", region.width);
+				}
+			}
+		}
+	}
+
+	// Loop through all the *characters* in the text string
+	// NOTE: We don't do much sanity checking on hoffset/voffset,
+	//       because we want to allow pushing part of the string off-screen
+	//       (we basically only make sure it won't screw up the region rectangle too badly).
+	//       put_pixel is checked, and will discard off-screen pixels safely.
+	//       Because we store the final position in an unsigned value, this means that, to some extent,
+	//       we rely on wraparound on underflow to still point to (large, but positive) off-screen coordinates.
+	unsigned short int x_base_offs = (unsigned short int) ((col * FONTW) + pixel_offset + hoffset + viewHoriOrigin);
+	unsigned short int y_offs      = (unsigned short int) ((row * FONTH) + voffset + viewVertOrigin);
+
+	// Here, this means we'll *probably* have to clamp the final region's width/height...
+	LOG("Region: top=%u, left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
+	LOG("Offsets: x_base_offs=%hu, y_offs=%hu", x_base_offs, y_offs);
+
+	// So, do yet another clamping pass...
+	region.left = x_base_offs;
+	if (region.width + region.left > screenWidth) {
+		region.width = screenWidth - region.left;
+		LOG("Clamped region.width to %u", region.width);
+	} else {
+		LOG("Updated region.width to %u", region.width);
+	}
+	region.top = y_offs;
+	if (region.height + region.top > screenHeight) {
+		region.height = screenHeight - region.top;
+		LOG("Clamped region.height to %u", region.height);
+	} else {
+		LOG("Updated region.height to %u", region.height);
+	}
+
+	// Did we want a background rectangle?
+	if (do_clear) {
+		fill_rect(region.left, region.top, region.width, region.top, &penBGPixel);
+	}
+
+
+	// Rotate the region if need be, and remember the rect...
+	(*fxpRotateRegion)(&region);
+	set_last_rect(&region);
+
+	// Refresh screen
+	if (refresh(fbfd,
+		    region,
+		    get_wfm_mode(fbink_cfg->wfm_mode),
+		    get_hwd_mode(fbink_cfg->dithering_mode),
+		    fbink_cfg->is_nightmode,
+		    fbink_cfg->is_flashing,
+		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
+		WARN("Failed to refresh the screen");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// Cleanup
+cleanup:
+	if (isFbMapped && !keep_fd) {
+		unmap_fb();
+	}
+	if (!keep_fd) {
+		close(fbfd);
+	}
+
+	return rv;
+}
+
+// Public wrappers around grid_to_region
+int fbink_grid_clear(int fbfd, const FBInkConfig* restrict fbink_cfg, unsigned short int rows, unsigned short int cols)
+{
+	return grid_to_region(fbfd, fbink_cfg, rows, cols, true);
+}
+
+int fbink_grid_refresh(int fbfd, const FBInkConfig* restrict fbink_cfg, unsigned short int rows, unsigned short int cols)
+{
+	return grid_to_region(fbfd, fbink_cfg, rows, cols, false);
+}
+
 // Utility function to handle get_last_rect tracking
 static void
     set_last_rect(const struct mxcfb_rect* restrict region)

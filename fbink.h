@@ -752,6 +752,10 @@ FBINK_API int fbink_print_raw_data(int                         fbfd,
 //				the full screen will be cleared.
 FBINK_API int fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg, const FBInkRect* restrict rect);
 
+// Same idea, but honoring col/row/hoffset/voffset like fbink_print
+FBINK_API int fbink_grid_clear(int fbfd, const FBInkConfig* restrict fbink_cfg, unsigned short int rows, unsigned short int cols);
+FBINK_API int fbink_grid_refresh(int fbfd, const FBInkConfig* restrict fbink_cfg, unsigned short int rows, unsigned short int cols);
+
 //
 // Dump the full screen.
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build).
