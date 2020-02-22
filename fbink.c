@@ -2331,7 +2331,6 @@ static int
 		// NOTE: We inline stbi__compute_y to avoid needing to depend on FBINK_WITH_IMAGE
 		y = (uint8_t)(((r * 77U) + (g * 150U) + (29U * b)) >> 8U);
 	}
-	// NOTE: In set_rgb, we need to enforce grayscale if bpp < 16!
 
 	// Do we need to match that to the nearest palette color?
 	// NOTE: Given that the eInk palette is effectively composed of every multiple of 0x11,
