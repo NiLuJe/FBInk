@@ -2193,6 +2193,7 @@ int
 				// Then clear it.
 				const struct timespec zzz = { 0L, 750000000L };
 				nanosleep(&zzz, NULL);
+				fbink_set_bg_pen_gray(0x88u, false);
 				fbink_grid_clear(fbfd, &fbink_cfg, linecount, strlen(string));
 
 

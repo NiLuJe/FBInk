@@ -3722,6 +3722,12 @@ static int
 	if (fbink_cfg->is_centered && fbink_cfg->is_padded) {
 		// We always want full padding
 		col = 0;
+
+		// We'll essentially pad to the edge of the screen
+		cols = MAXCOLS;
+	} else if (fbink_cfg->is_padded || fbink_cfg->is_rpadded) {
+		// We'll essentially pad to the edge of the drawable area
+		cols = available_cols;
 	}
 
 	// NOTE: And then, the truly insane draw() bits...
