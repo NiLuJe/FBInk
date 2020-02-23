@@ -3720,7 +3720,7 @@ static int
 	}
 
 	// When centered & padded, we need to split the padding in two, left & right.
-	if (fbink_cfg->is_centered && fbink_cfg->is_padded) {
+	if (fbink_cfg->is_centered && (fbink_cfg->is_padded || fbink_cfg->is_rpadded)) {
 		// We always want full padding
 		col = 0;
 
@@ -4210,7 +4210,7 @@ int
 		}
 
 		// When centered & padded, we need to split the padding in two, left & right.
-		if (fbink_cfg->is_centered && fbink_cfg->is_padded) {
+		if (fbink_cfg->is_centered && (fbink_cfg->is_padded || fbink_cfg->is_rpadded)) {
 			// We always want full padding
 			col = 0;
 
