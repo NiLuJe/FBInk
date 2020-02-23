@@ -3599,7 +3599,7 @@ cleanup:
 	return rv;
 }
 
-// Handle cls & refresh, but for grid-based coordinates (i.e., like draw())
+// Handle cls & refresh, but for grid-based coordinates (i.e., like fbink_print()'s draw())
 static int
     grid_to_region(int                         fbfd,
 		   unsigned short int          rows,
@@ -3721,7 +3721,7 @@ static int
 		LOG("Adjusted column to %hd for centering", col);
 	}
 
-	// When centered & padded, we need to split the padding in two, left & right.
+	// Handle centering & padding
 	if (fbink_cfg->is_centered && (fbink_cfg->is_padded || fbink_cfg->is_rpadded)) {
 		// We always want full padding
 		col = 0;
@@ -3729,7 +3729,7 @@ static int
 		// We'll essentially pad to the edge of the screen
 		cols = MAXCOLS;
 	} else if (fbink_cfg->is_padded || fbink_cfg->is_rpadded) {
-		// We'll essentially pad to the edge of the drawable area
+		// We'll essentially pad to the edge of the available area
 		cols = available_cols;
 	}
 
