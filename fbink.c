@@ -3876,35 +3876,6 @@ static int
 		}
 	}
 
-	// Loop through all the *characters* in the text string
-	// NOTE: We don't do much sanity checking on hoffset/voffset,
-	//       because we want to allow pushing part of the string off-screen
-	//       (we basically only make sure it won't screw up the region rectangle too badly).
-	//       put_pixel is checked, and will discard off-screen pixels safely.
-	//       Because we store the final position in an unsigned value, this means that, to some extent,
-	//       we rely on wraparound on underflow to still point to (large, but positive) off-screen coordinates.
-	// FIXME: Or is *this* overkill?
-	unsigned short int x_base_offs = (unsigned short int) ((col * FONTW) + pixel_offset + hoffset + viewHoriOrigin);
-	unsigned short int y_offs      = (unsigned short int) ((row * FONTH) + voffset + viewVertOrigin);
-
-	// Here, this means we'll *probably* have to clamp the final region's width/height...
-	LOG("Region:     top=%u,\t       left=%u, width=%u, height=%u", region.top, region.left, region.width, region.height);
-	LOG("Offsets: y_offs=%hu,\tx_base_offs=%hu,", y_offs, x_base_offs);
-
-	// So, do yet another clamping pass...
-	region.left = x_base_offs;
-	if (region.width + region.left > screenWidth) {
-		region.width = screenWidth - region.left;
-		LOG("Clamped region.width to %u", region.width);
-	}
-	LOG("Updated region.left to %u", region.left);
-	region.top = y_offs;
-	if (region.height + region.top > screenHeight) {
-		region.height = screenHeight - region.top;
-		LOG("Clamped region.height to %u", region.height);
-	}
-	LOG("Updated region.top to %u", region.top);
-
 	// Did we want a background rectangle?
 	if (do_clear) {
 		fill_rect(region.left, region.top, region.width, region.height, &penBGPixel);
