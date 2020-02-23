@@ -67,7 +67,7 @@ extern "C" {
 
 // NOTE: There's a dirty bit of trickery involved here to coerce enums into a specific data type (instead of an int):
 //       * The packed attribute, which does locally what GCC's -fshort-enums does globally,
-//         ensuring the underlying data type is only as wide as the actual values require.
+//         ensuring the enum's data type is only as wide as the actual values require.
 //       * A tail element with a value corresponding to the MAX of the target data type,
 //         mainly used to enforce an unsigned data type.
 //       BUT, while this "works" in C, this is essentially non-standard, and would break most automatic bindings,
@@ -80,35 +80,35 @@ extern "C" {
 // List of available fonts
 typedef enum
 {
-	IBM = 0U,          // font8x8
-	UNSCII,            // unscii-8
-	UNSCII_ALT,        // unscii-8-alt
-	UNSCII_THIN,       // unscii-8-thin
-	UNSCII_FANTASY,    // unscii-8-fantasy
-	UNSCII_MCR,        // unscii-8-mcr
-	UNSCII_TALL,       // unscii-16
-	BLOCK,             // block
-	LEGGIE,            // leggie (regular)
-	VEGGIE,            // leggie EGA/VGA/FB
-	KATES,             // kates (nexus)
-	FKP,               // fkp
-	CTRLD,             // ctrld
-	ORP,               // orp (regular)
-	ORPB,              // orp (bold)
-	ORPI,              // orp (italic)
-	SCIENTIFICA,       // scientifica (regular)
-	SCIENTIFICAB,      // scientifica (bold)
-	SCIENTIFICAI,      // scientifica (italic)
-	TERMINUS,          // terminus (regular)
-	TERMINUSB,         // terminus (bold)
-	FATTY,             // fatty
-	SPLEEN,            // spleen
-	TEWI,              // tewi (medium)
-	TEWIB,             // tewi (bold)
-	TOPAZ,             // Topaz+ A1200
-	MICROKNIGHT,       // MicroKnight+
-	VGA,               // IBM VGA 8x16
-	FONT_MAX = 0xFFu,  // uint8_t
+	IBM = 0U,            // font8x8
+	UNSCII,              // unscii-8
+	UNSCII_ALT,          // unscii-8-alt
+	UNSCII_THIN,         // unscii-8-thin
+	UNSCII_FANTASY,      // unscii-8-fantasy
+	UNSCII_MCR,          // unscii-8-mcr
+	UNSCII_TALL,         // unscii-16
+	BLOCK,               // block
+	LEGGIE,              // leggie (regular)
+	VEGGIE,              // leggie EGA/VGA/FB
+	KATES,               // kates (nexus)
+	FKP,                 // fkp
+	CTRLD,               // ctrld
+	ORP,                 // orp (regular)
+	ORPB,                // orp (bold)
+	ORPI,                // orp (italic)
+	SCIENTIFICA,         // scientifica (regular)
+	SCIENTIFICAB,        // scientifica (bold)
+	SCIENTIFICAI,        // scientifica (italic)
+	TERMINUS,            // terminus (regular)
+	TERMINUSB,           // terminus (bold)
+	FATTY,               // fatty
+	SPLEEN,              // spleen
+	TEWI,                // tewi (medium)
+	TEWIB,               // tewi (bold)
+	TOPAZ,               // Topaz+ A1200
+	MICROKNIGHT,         // MicroKnight+
+	VGA,                 // IBM VGA 8x16
+	FONT_MAX = 0xFFu,    // uint8_t
 } __attribute__((packed)) FONT_INDEX_E;
 typedef uint8_t FONT_INDEX_T;
 
@@ -119,17 +119,17 @@ typedef enum
 	FNT_ITALIC,
 	FNT_BOLD,
 	FNT_BOLD_ITALIC,
-	FNT_MAX = 0xFFu,  // uint8_t
+	FNT_MAX = 0xFFu,    // uint8_t
 } __attribute__((packed)) FONT_STYLE_E;
 typedef uint8_t FONT_STYLE_T;
 
 // List of available halign/valign values
 typedef enum
 {
-	NONE = 0U,    // i.e., LEFT for halign, TOP for valign
-	CENTER,       //
-	EDGE,          // i.e., RIGHT for halign, BOTTOM for valign
-	ALIGN_MAX = 0xFFu, // uint8_t
+	NONE = 0U,            // i.e., LEFT for halign, TOP for valign
+	CENTER,               //
+	EDGE,                 // i.e., RIGHT for halign, BOTTOM for valign
+	ALIGN_MAX = 0xFFu,    // uint8_t
 } __attribute__((packed)) ALIGN_INDEX_E;
 typedef uint8_t ALIGN_INDEX_T;
 
@@ -140,7 +140,7 @@ typedef enum
 	HORI_PADDING,
 	VERT_PADDING,
 	FULL_PADDING,
-	MAX_PADDING = 0xFFu, // uint8_t
+	MAX_PADDING = 0xFFu,    // uint8_t
 } __attribute__((packed)) PADDING_INDEX_E;
 typedef uint8_t PADDING_INDEX_T;
 
@@ -164,7 +164,7 @@ typedef enum
 	FG_GRAYD,
 	FG_GRAYE,
 	FG_WHITE,
-	FG_MAX = 0xFFu, // uint8_t
+	FG_MAX = 0xFFu,    // uint8_t
 } __attribute__((packed)) FG_COLOR_INDEX_E;
 typedef uint8_t FG_COLOR_INDEX_T;
 
@@ -186,7 +186,7 @@ typedef enum
 	BG_GRAY2,
 	BG_GRAY1,
 	BG_BLACK,
-	BG_MAX = 0xFFu, // uint8_t
+	BG_MAX = 0xFFu,    // uint8_t
 } __attribute__((packed)) BG_COLOR_INDEX_E;
 typedef uint8_t BG_COLOR_INDEX_T;
 
@@ -215,7 +215,7 @@ typedef enum
 	WFM_INIT,
 	WFM_UNKNOWN,
 	WFM_INIT2,
-	WFM_MAX = 0xFFu, // uint8_t
+	WFM_MAX = 0xFFu,    // uint8_t
 } __attribute__((packed)) WFM_MODE_INDEX_E;
 typedef uint8_t WFM_MODE_INDEX_T;
 
@@ -244,7 +244,7 @@ typedef enum
 	//                            Optionally, bonus points if that's actually UR, and the panel is natively mounted UR,
 	//                            like on the Kobo Libra.
 	//                            Triple whammy if the touch layer rotation matches!
-	NTX_ROTA_MAX = 0xFFu,      // uint8_t
+	NTX_ROTA_MAX = 0xFFu,    // uint8_t
 } __attribute__((packed)) NTX_ROTA_INDEX_E;
 typedef uint8_t NTX_ROTA_INDEX_T;
 
@@ -279,7 +279,7 @@ typedef struct
 	bool    is_perfect_fit;      // deviceQuirks.isPerfectFit (horizontal column balance is perfect over viewWidth)
 	bool    is_kobo_non_mt;      // deviceQuirks.isKoboNonMT (device is a Kobo with no MultiTouch input support)
 	uint8_t ntx_boot_rota;       // deviceQuirks.ntxBootRota (Native rotation at boot)
-	NTX_ROTA_INDEX_T ntx_rota_quirk;      // deviceQuirks.ntxRotaQuirk (c.f., utils/dump.c)
+	NTX_ROTA_INDEX_T ntx_rota_quirk;    // deviceQuirks.ntxRotaQuirk (c.f., utils/dump.c)
 	bool    is_ntx_quirky_landscape;    // deviceQuirks.isNTX16bLandscape (rotation compensation is in effect)
 	uint8_t current_rota;               // vInfo.rotate (current rotation, c.f., <linux/fb.h>)
 	bool    can_rotate;                 // deviceQuirks.canRotate (device has a gyro)
@@ -288,46 +288,46 @@ typedef struct
 // What a FBInk config should look like. Perfectly sane when fully zero-initialized.
 typedef struct
 {
-	short int row;              // y axis (i.e., line), counts down from the bottom of the screen if negative
-	short int col;              // x axis (i.e., column), counts down from the right edge of the screen if negative
-	uint8_t   fontmult;         // Font scaling multiplier (i.e., 4 -> x4), 0 means automatic.
-	FONT_INDEX_T fontname;         // Request a specific font
-	bool      is_inverted;      // Invert colors.
-				    // This is *NOT* mutually exclusive with is_nightmode, and is *always* supported.
-	bool      is_flashing;      // Request a black flash on refresh
-	bool      is_cleared;       // Clear the full screen beforehand (honors bg_color & is_inverted)
-	bool      is_centered;      // Center the text (horizontally)
-	short int hoffset;          // Horizontal offset (in pixels) for text position
-	short int voffset;          // Vertical offset (in pixels) for text position
-	bool      is_halfway;       // Vertically center the text, honoring row offsets
-	bool      is_padded;        // Pad the text with blanks (on the left, or on both sides if is_centered)
-	bool      is_rpadded;       // Right pad the text with blanks
-	FG_COLOR_INDEX_T   fg_color;         // Requested foreground color for text (palette index)
-	BG_COLOR_INDEX_T   bg_color;         // Requested background color for text (palette index)
-	bool      is_overlay;       // Don't draw bg and use inverse of fb's underlying pixel as pen fg color
-	bool      is_bgless;        // Don't draw bg (mutually exclusive with is_overlay, which will take precedence)
-	bool      is_fgless;        // Don't draw fg (takes precendence over is_overlay/is_bgless)
-	bool      no_viewport;      // Ignore viewport corrections, whether hardware-related on Kobo, or to center rows
-	bool      is_verbose;       // Print verbose diagnostic informations on stdout
-	bool      is_quiet;         // Hide fbink_init()'s hardware setup info (sent to stderr)
-	bool      ignore_alpha;     // Ignore any potential alpha channel in source image (i.e., flatten the image)
-	ALIGN_INDEX_T   halign;           // Horizontal alignment of images/dumps
-	ALIGN_INDEX_T   valign;           // Vertical alignment of images/dumps
-	short int scaled_width;     // Output width of images/dumps (0 for no scaling, -1 for viewport width)
-	short int scaled_height;    // Output height of images/dumps (0 for no scaling, -1 for viewport height)
-				    // If only *one* of them is left at 0, the image's aspect ratio will be honored.
-				    // If *either* of them is set to < -1, fit to screen while respecting AR.
-				    // NOTE: Scaling is inherently costly. I highly recommend not relying on it,
-				    //       preferring instead proper preprocessing of your input images,
-				    //       c.f., https://www.mobileread.com/forums/showpost.php?p=3728291&postcount=17
-	WFM_MODE_INDEX_T wfm_mode;           // Request a specific waveform mode (defaults to AUTO)
+	short int    row;            // y axis (i.e., line), counts down from the bottom of the screen if negative
+	short int    col;            // x axis (i.e., column), counts down from the right edge of the screen if negative
+	uint8_t      fontmult;       // Font scaling multiplier (i.e., 4 -> x4), 0 means automatic.
+	FONT_INDEX_T fontname;       // Request a specific font
+	bool         is_inverted;    // Invert colors.
+	//				This is *NOT* mutually exclusive with is_nightmode, and is *always* supported.
+	bool             is_flashing;    // Request a black flash on refresh
+	bool             is_cleared;     // Clear the full screen beforehand (honors bg_color & is_inverted)
+	bool             is_centered;    // Center the text (horizontally)
+	short int        hoffset;        // Horizontal offset (in pixels) for text position
+	short int        voffset;        // Vertical offset (in pixels) for text position
+	bool             is_halfway;     // Vertically center the text, honoring row offsets
+	bool             is_padded;      // Pad the text with blanks (on the left, or on both sides if is_centered)
+	bool             is_rpadded;     // Right pad the text with blanks
+	FG_COLOR_INDEX_T fg_color;       // Requested foreground color for text (palette index)
+	BG_COLOR_INDEX_T bg_color;       // Requested background color for text (palette index)
+	bool             is_overlay;     // Don't draw bg and use inverse of fb's underlying pixel as pen fg color
+	bool             is_bgless;      // Don't draw bg (mutually exclusive with is_overlay, which will take precedence)
+	bool             is_fgless;      // Don't draw fg (takes precendence over is_overlay/is_bgless)
+	bool          no_viewport;     // Ignore viewport corrections, whether hardware-related on Kobo, or to center rows
+	bool          is_verbose;      // Print verbose diagnostic informations on stdout
+	bool          is_quiet;        // Hide fbink_init()'s hardware setup info (sent to stderr)
+	bool          ignore_alpha;    // Ignore any potential alpha channel in source image (i.e., flatten the image)
+	ALIGN_INDEX_T halign;          // Horizontal alignment of images/dumps
+	ALIGN_INDEX_T valign;          // Vertical alignment of images/dumps
+	short int     scaled_width;    // Output width of images/dumps (0 for no scaling, -1 for viewport width)
+	short int     scaled_height;    // Output height of images/dumps (0 for no scaling, -1 for viewport height)
+	//				    If only *one* of them is left at 0, the image's aspect ratio will be honored.
+	//				    If *either* of them is set to < -1, fit to screen while respecting AR.
+	//				    NOTE: Scaling is inherently costly. I highly recommend not relying on it,
+	//				    preferring instead proper preprocessing of your input images,
+	//				    c.f., https://www.mobileread.com/forums/showpost.php?p=3728291&postcount=17
+	WFM_MODE_INDEX_T  wfm_mode;          // Request a specific waveform mode (defaults to AUTO)
 	HW_DITHER_INDEX_T dithering_mode;    // Request a specific dithering mode (defaults to PASSTHROUGH)
-	bool    sw_dithering;      // Request (ordered) *software* dithering when printing an image.
-				   // This is *NOT* mutually exclusive with dithering_mode!
-	bool is_nightmode;         // Request hardware inversion (if supported/safe).
-				   // This is *NOT* mutually exclusive with is_inverted!
-	bool no_refresh;           // Skip actually refreshing the eInk screen (useful when drawing in batch)
-	bool to_syslog;            // Send messages & errors to the syslog instead of stdout/stderr
+	bool              sw_dithering;      // Request (ordered) *software* dithering when printing an image.
+					     // This is *NOT* mutually exclusive with dithering_mode!
+	bool is_nightmode;                   // Request hardware inversion (if supported/safe).
+					     // This is *NOT* mutually exclusive with is_inverted!
+	bool no_refresh;                     // Skip actually refreshing the eInk screen (useful when drawing in batch)
+	bool to_syslog;                      // Send messages & errors to the syslog instead of stdout/stderr
 } FBInkConfig;
 
 // Same, but for OT/TTF specific stuff
