@@ -3835,7 +3835,6 @@ static int
 
 	// If we're a full line, we need to fill the space that honoring our offset has left vacant on the left edge...
 	// NOTE: In overlay or bgless mode, we don't paint background pixels. This is pure background, so skip it ;).
-	// FIXME: This is *probably* overkill here?
 	if (!fbink_cfg->is_overlay && !fbink_cfg->is_bgless) {
 		if (cols == MAXCOLS && pixel_offset > 0U) {
 			LOG("Extra background rectangle on the left edge on account of pixel_offset");
