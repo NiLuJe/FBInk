@@ -3617,11 +3617,13 @@ static int
 	// Assume success, until shit happens ;)
 	int rv = EXIT_SUCCESS;
 
-	// mmap fb to user mem
-	if (!isFbMapped) {
-		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
-			rv = ERRCODE(EXIT_FAILURE);
-			goto cleanup;
+	// mmap fb to user mem if need be
+	if (do_clear) {
+		if (!isFbMapped) {
+			if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+				rv = ERRCODE(EXIT_FAILURE);
+				goto cleanup;
+			}
 		}
 	}
 
@@ -3875,7 +3877,7 @@ static int
 		}
 	}
 
-	// Did we want to paint a background rectangle?
+	// Did we want to paint a background rectangle (i.e., to mimic fbink_cls)?
 	if (do_clear) {
 		fill_rect((unsigned short int) region.left,
 			  (unsigned short int) region.top,
@@ -3903,8 +3905,10 @@ static int
 
 	// Cleanup
 cleanup:
-	if (isFbMapped && !keep_fd) {
-		unmap_fb();
+	if (do_clear) {
+		if (isFbMapped && !keep_fd) {
+			unmap_fb();
+		}
 	}
 	if (!keep_fd) {
 		close(fbfd);
