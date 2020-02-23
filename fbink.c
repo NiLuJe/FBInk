@@ -3663,12 +3663,9 @@ static int
 	//       In any case, we're always going to overwrite something, but that way,
 	//       stuff shown on screen should be more or less consistent,
 	//       instead of overwriting over and over again the final line at the bottom of the screen...
-	bool wrapped_line = false;
 	while (row >= MAXROWS) {
 		row = (short int) (row - MAXROWS);
 		LOG("Wrapped row back to %hd", row);
-		// Remember that, so we'll append something to our line to make the wraparound clearer...
-		wrapped_line = true;
 	}
 
 	// Compute the amount of characters we can actually print on *one* line given the column we start on...
