@@ -754,13 +754,13 @@ FBINK_API int fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg, const F
 
 // Same idea, but honoring col/row/hoffset/voffset like fbink_print
 FBINK_API int fbink_grid_clear(int                         fbfd,
-			       const FBInkConfig* restrict fbink_cfg,
 			       unsigned short int          rows,
-			       unsigned short int          cols);
+			       unsigned short int          cols,
+			       const FBInkConfig* restrict fbink_cfg);
 FBINK_API int fbink_grid_refresh(int                         fbfd,
-				 const FBInkConfig* restrict fbink_cfg,
 				 unsigned short int          rows,
-				 unsigned short int          cols);
+				 unsigned short int          cols,
+				 const FBInkConfig* restrict fbink_cfg);
 
 //
 // Dump the full screen.

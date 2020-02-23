@@ -2194,7 +2194,7 @@ int
 				const struct timespec zzz = { 0L, 750000000L };
 				nanosleep(&zzz, NULL);
 				fbink_set_bg_pen_gray(0x88u, false);
-				fbink_grid_clear(fbfd, &fbink_cfg, linecount, strlen(string));
+				fbink_grid_clear(fbfd, linecount + 2, strlen(string), &fbink_cfg);
 
 				// NOTE: Don't clobber previous entries if multiple strings were passed...
 				//       We make sure to trust print's return value,

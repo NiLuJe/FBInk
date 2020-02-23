@@ -3602,10 +3602,10 @@ cleanup:
 // Handle cls & refresh, but for grid-based coordinates (i.e., like draw())
 static int
     grid_to_region(int                         fbfd,
-		   const FBInkConfig* restrict fbink_cfg,
 		   unsigned short int          rows,
 		   unsigned short int          cols,
-		   bool                        do_clear)
+		   bool                        do_clear,
+		   const FBInkConfig* restrict fbink_cfg)
 {
 	// If we open a fd now, we'll only keep it open for this single call!
 	// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
@@ -3625,8 +3625,8 @@ static int
 		}
 	}
 
-	// NOTE: Since the idea is to play nice with draw(),
-	//       that implies duplicating its whole set of insane positioning tweaks...
+	// NOTE: Since the idea is to play nice with fbink_print()/draw(),
+	//       that implies duplicating their whole set of insane positioning tweaks...
 
 	// NOTE: Starting with the initial row/col handling from fbink_print...
 	// NOTE: Make copies of these so we don't wreck our original struct, since we passed it by reference,
@@ -3915,15 +3915,15 @@ cleanup:
 
 // Public wrappers around grid_to_region
 int
-    fbink_grid_clear(int fbfd, const FBInkConfig* restrict fbink_cfg, unsigned short int rows, unsigned short int cols)
+    fbink_grid_clear(int fbfd, unsigned short int rows, unsigned short int cols, const FBInkConfig* restrict fbink_cfg)
 {
-	return grid_to_region(fbfd, fbink_cfg, rows, cols, true);
+	return grid_to_region(fbfd, rows, cols, true, fbink_cfg);
 }
 
 int
-    fbink_grid_refresh(int fbfd, const FBInkConfig* restrict fbink_cfg, unsigned short int rows, unsigned short int cols)
+    fbink_grid_refresh(int fbfd, unsigned short int rows, unsigned short int cols, const FBInkConfig* restrict fbink_cfg)
 {
-	return grid_to_region(fbfd, fbink_cfg, rows, cols, false);
+	return grid_to_region(fbfd, rows, cols, false, fbink_cfg);
 }
 
 // Utility function to handle get_last_rect tracking
