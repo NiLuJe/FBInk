@@ -11,18 +11,28 @@ cdecl_const(FBFD_AUTO)
 cdecl_const(LAST_MARKER)
 
 // Typedefs
+cdecl_type(FONT_INDEX_E)
 cdecl_type(FONT_INDEX_T)
+
+cdecl_type(FONT_STYLE_E)
 cdecl_type(FONT_STYLE_T)
 
+cdecl_type(ALIGN_INDEX_E)
 cdecl_type(ALIGN_INDEX_T)
+cdecl_type(PADDING_INDEX_E)
 cdecl_type(PADDING_INDEX_T)
 
+cdecl_type(FG_COLOR_INDEX_E)
 cdecl_type(FG_COLOR_INDEX_T)
+cdecl_type(BG_COLOR_INDEX_E)
 cdecl_type(BG_COLOR_INDEX_T)
 
+cdecl_type(WFM_MODE_INDEX_E)
 cdecl_type(WFM_MODE_INDEX_T)
+cdecl_type(HW_DITHER_INDEX_E)
 cdecl_type(HW_DITHER_INDEX_T)
 
+cdecl_type(NTX_ROTA_INDEX_E)
 cdecl_type(NTX_ROTA_INDEX_T)
 
 // Config structs
@@ -61,7 +71,15 @@ cdecl_func(fbink_wait_for_complete)
 cdecl_func(fbink_get_last_marker)
 
 //cdecl_func(fbink_is_fb_quirky)
+cdecl_const(OK_BPP_CHANGE)
+cdecl_const(OK_ROTA_CHANGE)
 cdecl_func(fbink_reinit)
+
+cdecl_func(fbink_update_pen_colors)
+cdecl_func(fbink_set_fg_pen_gray)
+cdecl_func(fbink_set_bg_pen_gray)
+cdecl_func(fbink_set_fg_pen_rgba)
+cdecl_func(fbink_set_bg_pen_rgba)
 
 cdecl_func(fbink_print_progress_bar)
 cdecl_func(fbink_print_activity_bar)
@@ -70,6 +88,9 @@ cdecl_func(fbink_print_image)
 cdecl_func(fbink_print_raw_data)
 
 cdecl_func(fbink_cls)
+
+cdecl_func(fbink_grid_clear)
+cdecl_func(fbink_grid_refresh)
 
 cdecl_func(fbink_dump)
 cdecl_func(fbink_region_dump)
