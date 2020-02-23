@@ -5,6 +5,10 @@
 
 // Keep this in the same order as fbink.h
 // Mostly to make it easier to update, but also because Lua can be finicky with the order in which stuff is declared.
+// NOTE: Python's cFFI cdef() function doesn't support attributes (c.f., https://cffi.readthedocs.io/en/latest/cdef.html#ffi-cdef-limitations).
+//       That means a bit of manual cleanup will be needed there ;).
+//       But this isn't an actual issue in practice for us, though:
+//       there's a const function attribute, and the packed enums which we only access through a properly typed typedef.
 
 // Constants
 cdecl_const(FBFD_AUTO)
