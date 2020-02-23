@@ -119,9 +119,9 @@ typedef enum
 	FNT_ITALIC,
 	FNT_BOLD,
 	FNT_BOLD_ITALIC,
-	FNT_MAX = 0xFFu,    // uint8_t
-} __attribute__((packed)) FONT_STYLE_E;
-typedef uint8_t FONT_STYLE_T;
+} FONT_STYLE_E;
+// NOTE: This one is not packed to avoid breaking ABI w/ fbink_add_ot_font
+typedef int FONT_STYLE_T;
 
 // List of available halign/valign values
 typedef enum
