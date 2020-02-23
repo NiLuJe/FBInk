@@ -800,9 +800,10 @@ FBINK_API int fbink_grid_clear(int                         fbfd,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
 // fbink_cfg:		Pointer to an FBInkConfig struct (honors col, row, is_halfway, is_centered, is_padded, is_rpadded,
 //				voffset, hoffset, is_overlay, is_bgless,
-//				wfm_mode, dithering_mode, is_nightmode, is_flashing, no_refresh).
+//				wfm_mode, dithering_mode, is_nightmode, is_flashing).
 // rows:		Amount of rows to refresh (i.e., height).
 // cols:		Amount of columns to refresh (i.e., width).
+// NOTE: This *ignores* no_refresh ;).
 FBINK_API int fbink_grid_refresh(int                         fbfd,
 				 unsigned short int          rows,
 				 unsigned short int          cols,

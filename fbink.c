@@ -3897,7 +3897,7 @@ static int
 		    get_hwd_mode(fbink_cfg->dithering_mode),
 		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
-		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
+		    do_clear ? fbink_cfg->no_refresh : false) != EXIT_SUCCESS) {
 		WARN("Failed to refresh the screen");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
