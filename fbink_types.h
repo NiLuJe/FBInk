@@ -181,7 +181,8 @@ typedef enum
 	CH_REGULAR,
 	CH_ITALIC,
 	CH_BOLD,
-	CH_BOLD_ITALIC
+	CH_BOLD_ITALIC,
+	CH_MAX = 0xFFu,    // uint8_t
 } __attribute__((packed)) CHARACTER_FONT_E;
 typedef uint8_t CHARACTER_FONT_T;
 #endif    // FBINK_WITH_OPENTYPE
