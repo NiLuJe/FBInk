@@ -558,6 +558,8 @@ static void
 	// NOTE: Most kernels thankfully don't resort to weird rotation quirks ;).
 	//       c.f., mxc_epdc_fb_check_var @ drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c
 	deviceQuirks.ntxRotaQuirk = NTX_ROTA_STRAIGHT;
+
+	ELOG("sizeof(FBInkDeviceQuirks): %zu / sizeof(NTX_ROTA_INDEX_T): %zu / sizeof(NTX_ROTA_INDEX_E): %zu", sizeof(FBInkDeviceQuirks), sizeof(NTX_ROTA_INDEX_T), sizeof(NTX_ROTA_INDEX_E));
 	// NOTE: Device code list pilfered from
 	//       https://github.com/geek1011/KoboStuff/blob/gh-pages/kobofirmware.js#L11
 	//       See also https://github.com/geek1011/koboutils/pull/1 and the links referenced there

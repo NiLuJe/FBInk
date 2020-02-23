@@ -65,6 +65,17 @@ extern "C" {
 // As 0 is an invalid marker value, we can coopt it to try to retrieve our own last sent marker
 #define LAST_MARKER 0U
 
+// NOTE: There's a dirty bit of trickery involved here to coerce enums into a specific data type (instead of an int):
+//       * The packed attribute, which does locally what GCC's -fshort-enums does globally,
+//         ensuring the underlying data type is only as wide as the actual values require.
+//       * A tail element with a value corresponding to the MAX of the target data type,
+//         mainly used to enforce an unsigned data type.
+//       BUT, while this "works" in C, this is essentially non-standard, and would break most automatic bindings,
+//       which happily assume we're not breaking the C standard, and as such expect an enum to be int-sized...
+//       So, in addition to that, instead of using the enum's typedef directly, we go through an explicit typedef.
+//       This obviously still works in C because enums are dumb, they're basically unscoped constants,
+//       and this makes bindings happy because they'll have an explicit typedef to rely on.
+//       Fun fact: this is essentially what the Go bindings were already doing ;).
 //
 // List of available fonts
 typedef enum
@@ -96,8 +107,10 @@ typedef enum
 	TEWIB,             // tewi (bold)
 	TOPAZ,             // Topaz+ A1200
 	MICROKNIGHT,       // MicroKnight+
-	VGA                // IBM VGA 8x16
-} FONT_INDEX_T;
+	VGA,               // IBM VGA 8x16
+	FONT_MAX = 0xFFu,  // uint8_t
+} __attribute__((packed)) FONT_INDEX_E;
+typedef uint8_t FONT_INDEX_T;
 
 // List of supported font styles
 typedef enum
@@ -105,16 +118,20 @@ typedef enum
 	FNT_REGULAR = 0U,
 	FNT_ITALIC,
 	FNT_BOLD,
-	FNT_BOLD_ITALIC
-} FONT_STYLE_T;
+	FNT_BOLD_ITALIC,
+	FNT_MAX = 0xFFu,  // uint8_t
+} __attribute__((packed)) FONT_STYLE_E;
+typedef uint8_t FONT_STYLE_T;
 
 // List of available halign/valign values
 typedef enum
 {
 	NONE = 0U,    // i.e., LEFT for halign, TOP for valign
 	CENTER,       //
-	EDGE          // i.e., RIGHT for halign, BOTTOM for valign
-} ALIGN_INDEX_T;
+	EDGE,          // i.e., RIGHT for halign, BOTTOM for valign
+	ALIGN_MAX = 0xFFu, // uint8_t
+} __attribute__((packed)) ALIGN_INDEX_E;
+typedef uint8_t ALIGN_INDEX_T;
 
 // List of available padding values
 typedef enum
@@ -122,8 +139,10 @@ typedef enum
 	NO_PADDING = 0U,
 	HORI_PADDING,
 	VERT_PADDING,
-	FULL_PADDING
-} PADDING_INDEX_T;
+	FULL_PADDING,
+	MAX_PADDING = 0xFFu, // uint8_t
+} __attribute__((packed)) PADDING_INDEX_E;
+typedef uint8_t PADDING_INDEX_T;
 
 // List of available colors in the eInk color map
 // NOTE: This is split in FG & BG to ensure that the default values lead to a sane result (i.e., black on white)
@@ -144,8 +163,10 @@ typedef enum
 	FG_GRAYC,
 	FG_GRAYD,
 	FG_GRAYE,
-	FG_WHITE
-} FG_COLOR_INDEX_T;
+	FG_WHITE,
+	FG_MAX = 0xFFu, // uint8_t
+} __attribute__((packed)) FG_COLOR_INDEX_E;
+typedef uint8_t FG_COLOR_INDEX_T;
 
 typedef enum
 {
@@ -164,8 +185,10 @@ typedef enum
 	BG_GRAY3,
 	BG_GRAY2,
 	BG_GRAY1,
-	BG_BLACK
-} BG_COLOR_INDEX_T;
+	BG_BLACK,
+	BG_MAX = 0xFFu, // uint8_t
+} __attribute__((packed)) BG_COLOR_INDEX_E;
+typedef uint8_t BG_COLOR_INDEX_T;
 
 // List of *potentially* available waveform modes.
 // NOTE: On EPDC v1 (as well as all Kindle) devices, REAGL & REAGLD generally expect to *always* be flashing.
@@ -192,7 +215,9 @@ typedef enum
 	WFM_INIT,
 	WFM_UNKNOWN,
 	WFM_INIT2,
-} WFM_MODE_INDEX_T;
+	WFM_MAX = 0xFFu, // uint8_t
+} __attribute__((packed)) WFM_MODE_INDEX_E;
+typedef uint8_t WFM_MODE_INDEX_T;
 
 // List of *potentially* available HW dithering modes
 typedef enum
@@ -206,7 +231,8 @@ typedef enum
 	//                        Note that it is *not* offloaded to the PxP, it's purely software, in-kernel.
 	//                        Usually based on Atkinson's algo. The most useful one being the Y8->Y1 one,
 	//                        which we request with A2/DU refreshes.
-} HW_DITHER_INDEX_T;
+} __attribute__((packed)) HW_DITHER_INDEX_E;
+typedef uint8_t HW_DITHER_INDEX_T;
 
 // List of NTX rotation quirk types (c.f., mxc_epdc_fb_check_var @ drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c)...
 typedef enum
@@ -214,11 +240,13 @@ typedef enum
 	NTX_ROTA_STRAIGHT = 0U,    // No shenanigans (at least as far as ioctls are concerned)
 	NTX_ROTA_ALL_INVERTED,     // Every rotation is inverted by the kernel
 	NTX_ROTA_ODD_INVERTED,     // Only Landscape (odd) rotations are inverted by the kernel
-	NTX_ROTA_SANE              // NTX_ROTA_STRAIGHT, and ntxBootRota is the native Portrait orientation.
+	NTX_ROTA_SANE,             // NTX_ROTA_STRAIGHT, and ntxBootRota is the native Portrait orientation.
 	//                            Optionally, bonus points if that's actually UR, and the panel is natively mounted UR,
 	//                            like on the Kobo Libra.
 	//                            Triple whammy if the touch layer rotation matches!
-} NTX_ROTA_INDEX_T;
+	NTX_ROTA_MAX = 0xFFu,      // uint8_t
+} __attribute__((packed)) NTX_ROTA_INDEX_E;
+typedef uint8_t NTX_ROTA_INDEX_T;
 
 //
 // A struct to dump FBInk's internal state into, like fbink_state_dump() would, but in C ;)
@@ -235,7 +263,7 @@ typedef struct
 	char     device_codename[16];       // deviceQuirks.deviceCodename
 	char     device_platform[16];       // deviceQuirks.devicePlatform (often a codename, too)
 	unsigned short int device_id;       // deviceQuirks.deviceId (decimal value, c.f., identify_device() on Kindle!)
-	uint8_t            pen_fg_color;    // penFGColor (grayscale)
+	uint8_t            pen_fg_color;    // penFGColor (Actual grayscale value, not FG_COLOR_INDEX_T)
 	uint8_t            pen_bg_color;    // penBGColor (ditto)
 	unsigned short int screen_dpi;      // deviceQuirks.screenDPI
 	unsigned short int font_w;          // FONTW (effective width of a glyph cell, i.e. scaled)
@@ -251,7 +279,7 @@ typedef struct
 	bool    is_perfect_fit;      // deviceQuirks.isPerfectFit (horizontal column balance is perfect over viewWidth)
 	bool    is_kobo_non_mt;      // deviceQuirks.isKoboNonMT (device is a Kobo with no MultiTouch input support)
 	uint8_t ntx_boot_rota;       // deviceQuirks.ntxBootRota (Native rotation at boot)
-	uint8_t ntx_rota_quirk;      // deviceQuirks.ntxRotaQuirk (c.f., NTX_ROTA_INDEX_T & utils/dump.c)
+	NTX_ROTA_INDEX_T ntx_rota_quirk;      // deviceQuirks.ntxRotaQuirk (c.f., utils/dump.c)
 	bool    is_ntx_quirky_landscape;    // deviceQuirks.isNTX16bLandscape (rotation compensation is in effect)
 	uint8_t current_rota;               // vInfo.rotate (current rotation, c.f., <linux/fb.h>)
 	bool    can_rotate;                 // deviceQuirks.canRotate (device has a gyro)
@@ -263,7 +291,7 @@ typedef struct
 	short int row;              // y axis (i.e., line), counts down from the bottom of the screen if negative
 	short int col;              // x axis (i.e., column), counts down from the right edge of the screen if negative
 	uint8_t   fontmult;         // Font scaling multiplier (i.e., 4 -> x4), 0 means automatic.
-	uint8_t   fontname;         // Request a specific font (c.f., FONT_INDEX_T enum)
+	FONT_INDEX_T fontname;         // Request a specific font
 	bool      is_inverted;      // Invert colors.
 				    // This is *NOT* mutually exclusive with is_nightmode, and is *always* supported.
 	bool      is_flashing;      // Request a black flash on refresh
@@ -274,8 +302,8 @@ typedef struct
 	bool      is_halfway;       // Vertically center the text, honoring row offsets
 	bool      is_padded;        // Pad the text with blanks (on the left, or on both sides if is_centered)
 	bool      is_rpadded;       // Right pad the text with blanks
-	uint8_t   fg_color;         // Requested foreground color for text (c.f., FG_COLOR_INDEX_T enum)
-	uint8_t   bg_color;         // Requested background color for text (c.f., BG_COLOR_INDEX_T enum)
+	FG_COLOR_INDEX_T   fg_color;         // Requested foreground color for text (palette index)
+	BG_COLOR_INDEX_T   bg_color;         // Requested background color for text (palette index)
 	bool      is_overlay;       // Don't draw bg and use inverse of fb's underlying pixel as pen fg color
 	bool      is_bgless;        // Don't draw bg (mutually exclusive with is_overlay, which will take precedence)
 	bool      is_fgless;        // Don't draw fg (takes precendence over is_overlay/is_bgless)
@@ -283,8 +311,8 @@ typedef struct
 	bool      is_verbose;       // Print verbose diagnostic informations on stdout
 	bool      is_quiet;         // Hide fbink_init()'s hardware setup info (sent to stderr)
 	bool      ignore_alpha;     // Ignore any potential alpha channel in source image (i.e., flatten the image)
-	uint8_t   halign;           // Horizontal alignment of images/dumps (c.f., ALIGN_INDEX_T enum)
-	uint8_t   valign;           // Vertical alignment of images/dumps (c.f., ALIGN_INDEX_T enum)
+	ALIGN_INDEX_T   halign;           // Horizontal alignment of images/dumps
+	ALIGN_INDEX_T   valign;           // Vertical alignment of images/dumps
 	short int scaled_width;     // Output width of images/dumps (0 for no scaling, -1 for viewport width)
 	short int scaled_height;    // Output height of images/dumps (0 for no scaling, -1 for viewport height)
 				    // If only *one* of them is left at 0, the image's aspect ratio will be honored.
@@ -292,8 +320,8 @@ typedef struct
 				    // NOTE: Scaling is inherently costly. I highly recommend not relying on it,
 				    //       preferring instead proper preprocessing of your input images,
 				    //       c.f., https://www.mobileread.com/forums/showpost.php?p=3728291&postcount=17
-	uint8_t wfm_mode;           // Request a specific waveform mode (c.f., WFM_MODE_INDEX_T enum; defaults to AUTO)
-	uint8_t dithering_mode;    // Request a specific dithering mode (c.f., HW_DITHER_INDEX_T; defaults to PASSTHROUGH)
+	WFM_MODE_INDEX_T wfm_mode;           // Request a specific waveform mode (defaults to AUTO)
+	HW_DITHER_INDEX_T dithering_mode;    // Request a specific dithering mode (defaults to PASSTHROUGH)
 	bool    sw_dithering;      // Request (ordered) *software* dithering when printing an image.
 				   // This is *NOT* mutually exclusive with dithering_mode!
 	bool is_nightmode;         // Request hardware inversion (if supported/safe).
@@ -315,9 +343,9 @@ typedef struct
 	float              size_pt;        // Size of text in points. If not set (0.0f), defaults to 12pt
 	unsigned short int size_px;        // Size of text in pixels. Optional, but takes precedence over size_pt.
 	bool               is_centered;    // Horizontal centering
-	uint8_t            padding;        // Pad the drawing area (i.e., paint it in the background color).
+	PADDING_INDEX_T    padding;        // Pad the drawing area (i.e., paint it in the background color).
 	//                                    Unlike in the fixed-cell codepath, this always applies to both sides (L&R/T&B),
-	//                                    no matter the chosen axis. (c.f., PADDING_INDEX_T enum.)
+	//                                    no matter the chosen axis.
 	//                                    e.g., HORI_PADDING is useful to prevent overlaps when drawing
 	//                                    consecutive strings on the same line(s).
 	bool is_formatted;    // Is string "formatted"? Bold/Italic support only, markdown like syntax
@@ -520,7 +548,7 @@ FBINK_API int fbink_printf(int                           fbfd,
 // fbink_cfg:		Pointer to an FBInkConfig struct. Honors wfm_mode, dithering_mode, is_nightmode, is_flashing.
 // NOTE: If you request an empty region (0x0 @ (0, 0), a full-screen refresh will be performed!
 // NOTE: This *ignores* no_refresh ;).
-// NOTE: As far as dithering is concerned, c.f., HW_DITHER_INDEX_T enum.
+// NOTE: As far as dithering is concerned, c.f., HW_DITHER_INDEX_E enum.
 //	 True HW dithering is only supported on devices with a recent EPDC (>= v2)!
 //	 On Kindle, that's everything since the KOA2 (KOA2, PW4, KT4, KOA3),
 //	 On Kobo, that's everything since Mk.7.

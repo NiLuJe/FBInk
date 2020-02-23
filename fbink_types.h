@@ -50,7 +50,7 @@ typedef struct
 	bool               isKoboMk7;
 	int8_t             koboVertOffset;
 	uint8_t            ntxBootRota;
-	uint8_t            ntxRotaQuirk;
+	NTX_ROTA_INDEX_T   ntxRotaQuirk;
 	bool               canRotate;
 	bool               canHWInvert;
 	bool               skipId;
@@ -182,7 +182,8 @@ typedef enum
 	CH_ITALIC,
 	CH_BOLD,
 	CH_BOLD_ITALIC
-} CHARACTER_FONT_T;
+} __attribute__((packed)) CHARACTER_FONT_E;
+typedef uint8_t CHARACTER_FONT_T;
 #endif    // FBINK_WITH_OPENTYPE
 
 #endif
