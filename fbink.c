@@ -3601,7 +3601,11 @@ cleanup:
 
 // Handle cls & refresh, but for grid-based coordinates (i.e., like draw())
 static int
-    grid_to_region(int fbfd, const FBInkConfig* restrict fbink_cfg, unsigned short int rows, unsigned short int cols, bool do_clear)
+    grid_to_region(int                         fbfd,
+		   const FBInkConfig* restrict fbink_cfg,
+		   unsigned short int          rows,
+		   unsigned short int          cols,
+		   bool                        do_clear)
 {
 	// If we open a fd now, we'll only keep it open for this single call!
 	// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
@@ -3763,9 +3767,8 @@ static int
 
 	// Compute the dimension of the screen region we'll paint to
 	struct mxcfb_rect region = {
-		.top    = (uint32_t) MAX(0 + (viewVertOrigin - viewVertOffset),
-                                      ((row * FONTH) + voffset + viewVertOrigin)),
-		.left   = (uint32_t) MAX(0 + viewHoriOrigin, ((col * FONTW) + hoffset + viewHoriOrigin)),
+		.top  = (uint32_t) MAX(0 + (viewVertOrigin - viewVertOffset), ((row * FONTH) + voffset + viewVertOrigin)),
+		.left = (uint32_t) MAX(0 + viewHoriOrigin, ((col * FONTW) + hoffset + viewHoriOrigin)),
 		.width  = (uint32_t)(cols * FONTW),
 		.height = (uint32_t)(rows * FONTH),
 	};
@@ -3872,11 +3875,14 @@ static int
 		}
 	}
 
-	// Did we want a background rectangle?
+	// Did we want to paint a background rectangle?
 	if (do_clear) {
-		fill_rect(region.left, region.top, region.width, region.height, &penBGPixel);
+		fill_rect((unsigned short int) region.left,
+			  (unsigned short int) region.top,
+			  (unsigned short int) region.width,
+			  (unsigned short int) region.height,
+			  &penBGPixel);
 	}
-
 
 	// Rotate the region if need be, and remember the rect...
 	(*fxpRotateRegion)(&region);
@@ -3908,12 +3914,14 @@ cleanup:
 }
 
 // Public wrappers around grid_to_region
-int fbink_grid_clear(int fbfd, const FBInkConfig* restrict fbink_cfg, unsigned short int rows, unsigned short int cols)
+int
+    fbink_grid_clear(int fbfd, const FBInkConfig* restrict fbink_cfg, unsigned short int rows, unsigned short int cols)
 {
 	return grid_to_region(fbfd, fbink_cfg, rows, cols, true);
 }
 
-int fbink_grid_refresh(int fbfd, const FBInkConfig* restrict fbink_cfg, unsigned short int rows, unsigned short int cols)
+int
+    fbink_grid_refresh(int fbfd, const FBInkConfig* restrict fbink_cfg, unsigned short int rows, unsigned short int cols)
 {
 	return grid_to_region(fbfd, fbink_cfg, rows, cols, false);
 }
