@@ -791,11 +791,11 @@ FBINK_API int fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg, const F
 // fbink_cfg:		Pointer to an FBInkConfig struct (honors col, row, is_halfway, is_centered, is_padded, is_rpadded,
 //				voffset, hoffset, is_overlay, is_bgless,
 //				wfm_mode, dithering_mode, is_nightmode, is_flashing, no_refresh).
-// rows:		Amount of rows to clear (i.e., height).
 // cols:		Amount of columns to clear (i.e., width).
+// rows:		Amount of rows to clear (i.e., height).
 FBINK_API int fbink_grid_clear(int                         fbfd,
-			       unsigned short int          rows,
 			       unsigned short int          cols,
+			       unsigned short int          rows,
 			       const FBInkConfig* restrict fbink_cfg);
 
 // Like fbink_refresh, but instead of absolute coordinates, rely on grid coordinates like fbink_print.
@@ -805,12 +805,12 @@ FBINK_API int fbink_grid_clear(int                         fbfd,
 // fbink_cfg:		Pointer to an FBInkConfig struct (honors col, row, is_halfway, is_centered, is_padded, is_rpadded,
 //				voffset, hoffset, is_overlay, is_bgless,
 //				wfm_mode, dithering_mode, is_nightmode, is_flashing).
-// rows:		Amount of rows to refresh (i.e., height).
 // cols:		Amount of columns to refresh (i.e., width).
+// rows:		Amount of rows to refresh (i.e., height).
 // NOTE: This *ignores* no_refresh ;).
 FBINK_API int fbink_grid_refresh(int                         fbfd,
-				 unsigned short int          rows,
 				 unsigned short int          cols,
+				 unsigned short int          rows,
 				 const FBInkConfig* restrict fbink_cfg);
 
 //
