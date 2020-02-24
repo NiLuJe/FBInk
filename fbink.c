@@ -2318,7 +2318,7 @@ static const char*
 
 // Used to manually set the pen colors
 static int
-    set_pen_color(bool is_fg, bool is_y8, bool quantize, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+    set_pen_color(bool is_fg, bool is_y8, bool quantize, bool update, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {
 	int rv = EXIT_SUCCESS;
 
@@ -2348,6 +2348,19 @@ static int
 	// If we asked for quantization on an RGB value, we're now effectively using that as grayscale ;).
 	if (quantize && !is_y8) {
 		is_y8 = true;
+	}
+
+	// If it's already the current color, bail early-ish.
+	if (update) {
+		if (is_fg) {
+			if (v == penFGColor) {
+				return EXIT_SUCCESS;
+			}
+		} else {
+			if (v == penBGColor) {
+				return EXIT_SUCCESS;
+			}
+		}
 	}
 
 	// NOTE: We need to take into account the inverted cmap on Legacy Kindles...
@@ -2482,27 +2495,27 @@ static int
 
 // Public wrappers around set_pen_color
 int
-    fbink_set_fg_pen_gray(uint8_t y, bool quantize)
+    fbink_set_fg_pen_gray(uint8_t y, bool quantize, bool update)
 {
-	return set_pen_color(true, true, quantize, y, y, y, 0xFFu);
+	return set_pen_color(true, true, quantize, update, y, y, y, 0xFFu);
 }
 
 int
-    fbink_set_fg_pen_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a, bool quantize)
+    fbink_set_fg_pen_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a, bool quantize, bool update)
 {
-	return set_pen_color(true, false, quantize, r, g, b, a);
+	return set_pen_color(true, false, quantize, update, r, g, b, a);
 }
 
 int
-    fbink_set_bg_pen_gray(uint8_t y, bool quantize)
+    fbink_set_bg_pen_gray(uint8_t y, bool quantize, bool update)
 {
-	return set_pen_color(false, true, quantize, y, y, y, 0xFFu);
+	return set_pen_color(false, true, quantize, update, y, y, y, 0xFFu);
 }
 
 int
-    fbink_set_bg_pen_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a, bool quantize)
+    fbink_set_bg_pen_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a, bool quantize, bool update)
 {
-	return set_pen_color(false, false, quantize, r, g, b, a);
+	return set_pen_color(false, false, quantize, update, r, g, b, a);
 }
 
 // Update our internal representation of pen colors (i.e., packed into the right pixel format).

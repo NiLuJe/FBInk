@@ -80,6 +80,7 @@ cdecl_const(OK_ROTA_CHANGE)
 cdecl_func(fbink_reinit)
 
 cdecl_func(fbink_update_pen_colors)
+cdecl_const(OK_ALREADY_SAME)
 cdecl_func(fbink_set_fg_pen_gray)
 cdecl_func(fbink_set_bg_pen_gray)
 cdecl_func(fbink_set_fg_pen_rgba)
