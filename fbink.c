@@ -3615,8 +3615,8 @@ cleanup:
 // Handle cls & refresh, but for grid-based coordinates (i.e., like fbink_print()'s draw())
 static int
     grid_to_region(int                         fbfd,
-		   unsigned short int          rows,
 		   unsigned short int          cols,
+		   unsigned short int          rows,
 		   bool                        do_clear,
 		   const FBInkConfig* restrict fbink_cfg)
 {
@@ -3932,15 +3932,15 @@ cleanup:
 
 // Public wrappers around grid_to_region
 int
-    fbink_grid_clear(int fbfd, unsigned short int rows, unsigned short int cols, const FBInkConfig* restrict fbink_cfg)
+    fbink_grid_clear(int fbfd, unsigned short int cols, unsigned short int rows, const FBInkConfig* restrict fbink_cfg)
 {
-	return grid_to_region(fbfd, rows, cols, true, fbink_cfg);
+	return grid_to_region(fbfd, cols, rows, true, fbink_cfg);
 }
 
 int
-    fbink_grid_refresh(int fbfd, unsigned short int rows, unsigned short int cols, const FBInkConfig* restrict fbink_cfg)
+    fbink_grid_refresh(int fbfd, unsigned short int cols, unsigned short int rows, const FBInkConfig* restrict fbink_cfg)
 {
-	return grid_to_region(fbfd, rows, cols, false, fbink_cfg);
+	return grid_to_region(fbfd, cols, rows, false, fbink_cfg);
 }
 
 // Utility function to handle get_last_rect tracking
