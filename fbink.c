@@ -2354,11 +2354,11 @@ static int
 	if (update) {
 		if (is_fg) {
 			if (v == penFGColor) {
-				return EXIT_SUCCESS;
+				return OK_ALREADY_SAME;
 			}
 		} else {
 			if (v == penBGColor) {
-				return EXIT_SUCCESS;
+				return OK_ALREADY_SAME;
 			}
 		}
 	}
