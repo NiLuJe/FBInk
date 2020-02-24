@@ -669,7 +669,7 @@ FBINK_API int fbink_reinit(int fbfd, const FBInkConfig* restrict fbink_cfg);
 // fbink_cfg:		Pointer to an FBInkConfig struct (honors fg_color & bg_color).
 FBINK_API int fbink_update_pen_colors(const FBInkConfig* restrict fbink_cfg);
 
-// We'll need those for fbink_set_*_pen_*(start > 256 to stay clear of errno values)
+// We'll need those for fbink_set_*_pen_* (start > 256 to stay clear of errno values)
 #define OK_ALREADY_SAME (1 << 9)
 // Alternatively, you can choose to set the pen colors *directly*, without relying on FBInk's eInk palette handling.
 // This is mostly of interest if you want to use color values you're getting from somewhere outside FBInk.
@@ -686,6 +686,7 @@ FBINK_API int fbink_set_bg_pen_gray(uint8_t y, bool quantize, bool update);
 // a:			8-bit alpha component value (opaque is 0xFFu).
 // quantize:		If true, round to the nearest eInk palette color. This implies a grayscaling pass!
 // update:		If true, abort early and return OK_ALREADY_SAME if that's already the current color.
+//			Keep in mind that the comparison is done *after* grayscaling, even without quantize set.
 FBINK_API int fbink_set_fg_pen_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a, bool quantize, bool update);
 FBINK_API int fbink_set_bg_pen_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a, bool quantize, bool update);
 

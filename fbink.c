@@ -2351,6 +2351,9 @@ static int
 	}
 
 	// If it's already the current color, bail early-ish.
+	// NOTE: Always make the comparison in grayscale to KISS.
+	//       RGB565 would be tricky to handle as the packing is lossy,
+	//       but we could arguably check RGB & RGBA properly at >= 24bpp...
 	if (update) {
 		if (is_fg) {
 			if (v == penFGColor) {
