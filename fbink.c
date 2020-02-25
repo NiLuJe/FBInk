@@ -8324,13 +8324,19 @@ int
 			LOG("Updated region.width to %u because of alignment constraints", region.width);
 		}
 		// Two pixels per byte, and we've just ensured to never end up with a decimal when dividing by two ;).
-		dump->data = calloc((size_t)((region.width >> 1U) * region.height), sizeof(*dump->data));
+		dump->stride = (size_t)(region.width >> 1U);
+		dump->size   = (size_t)(dump->stride * region.height);
+		dump->data   = calloc(dump->size, sizeof(*dump->data));
 	} else {
-		dump->data = calloc((size_t)((region.width * bpp) * region.height), sizeof(*dump->data));
+		dump->stride = (size_t)(region.width * bpp);
+		dump->size   = (size_t)(dump->stride * region.height);
+		dump->data   = calloc(dump->size, sizeof(*dump->data));
 	}
 	if (dump->data == NULL) {
-		WARN("dump->data calloc: %m");
-		rv = ERRCODE(EXIT_FAILURE);
+		WARN("dump->data %zu bytes calloc: %m", dump->size);
+		dump->stride = 0U;
+		dump->size   = 0U;
+		rv           = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
 	// Store the current fb state for that dump
@@ -8343,16 +8349,12 @@ int
 	dump->is_full     = false;
 	// And finally, the fb data itself, scanline per scanline
 	if (dump->bpp == 4U) {
-		dump->stride = (size_t)(dump->area.width >> 1U);
-		dump->size   = (size_t)(dump->stride * dump->area.height);
 		for (unsigned short int j = dump->area.top, l = 0U; l < dump->area.height; j++, l++) {
 			size_t dump_offset = (size_t)(l * dump->stride);
 			size_t fb_offset   = (size_t)(dump->area.left >> 1U) + (j * fInfo.line_length);
 			memcpy(dump->data + dump_offset, fbPtr + fb_offset, dump->stride);
 		}
 	} else {
-		dump->stride = (size_t)(dump->area.width * bpp);
-		dump->size   = (size_t)(dump->stride * dump->area.height);
 		for (unsigned short int j = dump->area.top, l = 0U; l < dump->area.height; j++, l++) {
 			size_t dump_offset = (size_t)(l * dump->stride);
 			size_t fb_offset   = (size_t)(dump->area.left * bpp) + (j * fInfo.line_length);
