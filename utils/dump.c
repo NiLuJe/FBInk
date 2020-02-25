@@ -408,19 +408,15 @@ int
 		}
 
 		// One more time, with a x2 scaling
+		// We tweak the offsets to potentially push part of it offscreen, to test the bounds checking.
 		fbink_cfg.halign        = CENTER;
 		fbink_cfg.valign        = CENTER;
 		fbink_cfg.scaled_height = (short int) (dump.area.height * 2U);
 		fbink_cfg.scaled_width  = (short int) (dump.area.width * 2U);
 		fprintf(stdout, "[13] SCALED PRINT RAW\n");
-		if (fbink_print_raw_data(fbfd,
-					 dump.data,
-					 dump.area.width,
-					 dump.area.height,
-					 dump.size,
-					 (short int) dump.area.left,
-					 (short int) dump.area.top,
-					 &fbink_cfg) != ERRCODE(EXIT_SUCCESS)) {
+		if (fbink_print_raw_data(
+			fbfd, dump.data, dump.area.width, dump.area.height, dump.size, 125, 550, &fbink_cfg) !=
+		    ERRCODE(EXIT_SUCCESS)) {
 			fprintf(stderr, "Failed to print raw data!\n");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
