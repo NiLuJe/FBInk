@@ -365,7 +365,7 @@ int
 	// Restore the sane dump area
 	dump.area = orig_area;
 
-	// And while we on the crazy train, let's do a manual unchecked crop...
+	// And while we're on the crazy train, let's do a manual unchecked crop...
 	dump.area.left   = (unsigned short int) (dump.area.left + 500U);
 	dump.area.top    = (unsigned short int) (dump.area.top - 250U);
 	dump.area.width  = (unsigned short int) (dump.area.width - 50U);
@@ -376,13 +376,13 @@ int
 	//       (left + width) <= screen_width
 	//       (top + height) <= screen_height
 	// So, let's do it...
-	dump.area.left = MIN(dump.area.left, fbink_state.screen_width - 1U);
-	dump.area.top  = MIN(dump.area.top, fbink_state.screen_height - 1U);
+	dump.area.left = (unsigned short int) MIN(dump.area.left, fbink_state.screen_width - 1U);
+	dump.area.top  = (unsigned short int) MIN(dump.area.top, fbink_state.screen_height - 1U);
 	if (dump.area.left + dump.area.width > fbink_state.screen_width) {
-		dump.area.width = fbink_state.screen_width - dump.area.left;
+		dump.area.width = (unsigned short int) (fbink_state.screen_width - dump.area.left);
 	}
 	if (dump.area.top + dump.area.height > fbink_state.screen_height) {
-		dump.area.height = fbink_state.screen_height - dump.area.top;
+		dump.area.height = (unsigned short int) (fbink_state.screen_height - dump.area.top);
 	}
 	fprintf(stdout, "[06g] RESTORE w/ MOVE + RAW CROP\n");
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
