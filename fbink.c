@@ -8577,15 +8577,16 @@ int
 			if (dump->bpp == 4U) {
 				for (unsigned short int j = y, l = 0U; l < h; j++, l++) {
 					size_t fb_offset   = (size_t)(x >> 1U) + (j * fInfo.line_length);
-					size_t dump_offset = (size_t)((x_skip >> 1U) + ((y_skip + l) * dump->stride));
+					size_t dump_offset = (x_skip >> 1U) + ((size_t)(y_skip + l) * dump->stride);
 					memcpy(fbPtr + fb_offset, dump->data + dump_offset, (size_t) w >> 1U);
 				}
 			} else {
 				// We're going to need the amount of bytes taken per pixel...
 				const uint8_t bpp = dump->bpp >> 3U;
 				for (unsigned short int j = y, l = 0U; l < h; j++, l++) {
-					size_t fb_offset   = (size_t)(x * bpp) + (j * fInfo.line_length);
-					size_t dump_offset = (size_t)((x_skip * bpp) + ((y_skip + l) * dump->stride));
+					size_t fb_offset = (size_t)(x * bpp) + (j * fInfo.line_length);
+					size_t dump_offset =
+					    (size_t)(x_skip * bpp) + ((size_t)(y_skip + l) * dump->stride);
 					memcpy(fbPtr + fb_offset, dump->data + dump_offset, (size_t) w * bpp);
 				}
 			}
