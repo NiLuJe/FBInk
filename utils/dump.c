@@ -365,14 +365,17 @@ int
 	// Restore the sane dump area
 	dump.area = orig_area;
 
-	// In practice, that means:
-	dump.area.left = (unsigned short int) (dump.area.left + 500U);    // Making sure 0 < left < screen_width
-	dump.area.top  = (unsigned short int) (dump.area.top - 250U);     // Making sure 0 < top < screen_height
-	// And if you add a manual crop, while we on the crazy train...
-	dump.area.width = (unsigned short int) (dump.area.width - 50U);    // Making sure (left + width) <= screen_width
-	dump.area.height =
-	    (unsigned short int) (dump.area.height - 125U);    // Making sure (top + height) <= screen_height
-	fprintf(stdout, "[06g] RESTORE w/ MOVE + CROP\n");
+	// And while we on the crazy train, let's do a manual unchecked crop...
+	dump.area.left   = (unsigned short int) (dump.area.left + 500U);
+	dump.area.top    = (unsigned short int) (dump.area.top - 250U);
+	dump.area.width  = (unsigned short int) (dump.area.width - 50U);
+	dump.area.height = (unsigned short int) (dump.area.height - 125U);
+	// NOTE: In practice, to avoid issues, you'd have to make sure:
+	//       0 <= left < screen_width
+	//       0 <= top < screen_height
+	//       (left + width) <= screen_width
+	//       (top + height) <= screen_height
+	fprintf(stdout, "[06g] RESTORE w/ MOVE + RAW CROP\n");
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
