@@ -345,6 +345,43 @@ int
 	// Forget about the crop for the other tests
 	dump.clip = (const FBInkRect){ 0U };
 
+	// Now, for something slightly crazy, which I don't necessarily recommend relying on,
+	// restore, but at a different position.
+	// NOTE: Absolute no safety checks are done by FBInk.
+	//       Making sure you don't go off-screen, or blow past a scanline or screen boundary is *your* responsibility.
+	// First, keep a copy of the original, sane dump area around.
+	const FBInkRect orig_area = dump.area;
+	dump.area.left += 250U;
+	dump.area.top -= 125U;
+	fprintf(stdout, "[06f] RESTORE w/ MOVE\n");
+	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
+		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+	if (wait_for) {
+		fbink_wait_for_complete(fbfd, LAST_MARKER);
+	}
+	// Restore the sane dump area
+	dump.area = orig_area;
+
+	// In practice, that means:
+	dump.area.left += 500U; // Making sure 0 < left < screen_width
+	dump.area.top -= 250U;  // Making sure 0 < top < screen_height
+	dump.area.width -= 50U; // Making sure (left + width) <= screen_width
+	dump.area.height -= 125U;  // Making sure (top + height) <= screen_height
+	fprintf(stdout, "[06g] RESTORE w/ MOVE + CROP\n");
+	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
+		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+	if (wait_for) {
+		fbink_wait_for_complete(fbfd, LAST_MARKER);
+	}
+	// Restore the sane dump area
+	dump.area = orig_area;
+
 #ifndef FBINK_FOR_LINUX
 	// And now for some fun stuff, provided we're starting from a 32bpp fb...
 	if (fbink_state.bpp == 32U) {
