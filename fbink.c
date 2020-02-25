@@ -8122,7 +8122,7 @@ int
 	}
 	// Start by allocating enough memory for a full dump of the visible screen...
 	dump->stride = fInfo.line_length;
-	dump->size   = (size_t)(fInfo.line_length * vInfo.yres);
+	dump->size   = (size_t)(dump->stride * vInfo.yres);
 	dump->data   = calloc(dump->size, sizeof(*dump->data));
 	if (dump->data == NULL) {
 		WARN("dump->data %zu bytes calloc: %m", dump->size);
@@ -8140,7 +8140,7 @@ int
 	dump->bpp         = (uint8_t) vInfo.bits_per_pixel;
 	dump->is_full     = true;
 	// And finally, the fb data itself
-	memcpy(dump->data, fbPtr, (size_t)(fInfo.line_length * vInfo.yres));
+	memcpy(dump->data, fbPtr, dump->size);
 
 	// Cleanup
 cleanup:
