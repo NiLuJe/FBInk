@@ -8121,15 +8121,17 @@ int
 		dump->clip = (const FBInkRect){ 0U };
 	}
 	// Start by allocating enough memory for a full dump of the visible screen...
-	dump->data = calloc((size_t)(fInfo.line_length * vInfo.yres), sizeof(*dump->data));
+	dump->stride = fInfo.line_length;
+	dump->size   = (size_t)(fInfo.line_length * vInfo.yres);
+	dump->data   = calloc(dump->size, sizeof(*dump->data));
 	if (dump->data == NULL) {
-		WARN("dump->data calloc: %m");
-		rv = ERRCODE(EXIT_FAILURE);
+		WARN("dump->data %zu bytes calloc: %m", dump->size);
+		dump->stride = 0U;
+		dump->size   = 0U;
+		rv           = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
 	// Store the current fb state for that dump
-	dump->stride      = fInfo.line_length;
-	dump->size        = (size_t)(fInfo.line_length * vInfo.yres);
 	dump->area.left   = 0U;
 	dump->area.top    = 0U;
 	dump->area.width  = (unsigned short int) vInfo.xres_virtual;

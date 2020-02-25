@@ -347,13 +347,14 @@ int
 
 	// Now, for something slightly crazy, which I don't necessarily recommend relying on,
 	// restore, but at a different position.
-	// NOTE: Absolute no safety checks are done by FBInk.
+	// NOTE: As far as this specific trick is concerned, absolutely no safety checks are done by FBInk
+	//       (i.e., it utterly *trusts* the content of the FBInkDump struct).
 	//       Making sure you don't go off-screen, or blow past a scanline or screen boundary is *your* responsibility.
 	// First, keep a copy of the original, sane dump area around.
 	const FBInkRect orig_area = dump.area;
 	dump.area.left            = (unsigned short int) (dump.area.left + 250U);
 	dump.area.top             = (unsigned short int) (dump.area.top - 125U);
-	fprintf(stdout, "[06f] RESTORE w/ MOVE\n");
+	fprintf(stdout, "[06f] CRAZY RESTORE w/ MOVE\n");
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
@@ -365,7 +366,7 @@ int
 	// Restore the sane dump area
 	dump.area = orig_area;
 
-	// And while we're on the crazy train, let's do a manual unchecked crop...
+	// And while we're on the crazy train, let's do a manual unchecked crop on top of that move...
 	dump.area.left   = (unsigned short int) (dump.area.left + 500U);
 	dump.area.top    = (unsigned short int) (dump.area.top - 250U);
 	dump.area.width  = (unsigned short int) (dump.area.width - 50U);
@@ -384,7 +385,7 @@ int
 	if (dump.area.top + dump.area.height > fbink_state.screen_height) {
 		dump.area.height = (unsigned short int) (fbink_state.screen_height - dump.area.top);
 	}
-	fprintf(stdout, "[06g] RESTORE w/ MOVE + RAW CROP\n");
+	fprintf(stdout, "[06g] CRAZY RESTORE w/ MOVE + RAW CROP\n");
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
