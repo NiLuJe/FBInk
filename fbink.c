@@ -2598,19 +2598,10 @@ static int
 	return rv;
 }
 
-// Get the various fb info & setup global variables
-static int
-    initialize_fbink(int fbfd, const FBInkConfig* restrict fbink_cfg, bool skip_vinfo)
+// Update the global logging verbosity flags
+static void
+    update_verbosity(const FBInkConfig* restrict fbink_cfg)
 {
-	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
-	bool keep_fd = true;
-	if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
-		return ERRCODE(EXIT_FAILURE);
-	}
-
-	// Assume success, until shit happens ;)
-	int rv = EXIT_SUCCESS;
-
 	// Update verbosity flag
 	if (fbink_cfg->is_verbose) {
 		g_isVerbose = true;
@@ -2629,6 +2620,22 @@ static int
 	} else {
 		g_toSysLog = false;
 	}
+}
+
+// Get the various fb info & setup global variables
+static int
+    initialize_fbink(int fbfd, const FBInkConfig* restrict fbink_cfg, bool skip_vinfo)
+{
+	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
+	bool keep_fd = true;
+	if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	update_verbosity(fbink_cfg);
 
 	// Start with some more generic stuff, not directly related to the framebuffer.
 	// As all this stuff is pretty much set in stone, we'll only query it once.
@@ -6370,6 +6377,13 @@ int
     fbink_update_pen_colors(const FBInkConfig* restrict fbink_cfg)
 {
 	return update_pen_colors(fbink_cfg);
+}
+
+// Public wrapper around update_verbosity
+void
+    fbink_update_verbosity(const FBInkConfig* restrict fbink_cfg)
+{
+	return update_verbosity(fbink_cfg);
 }
 
 // Handle drawing both types of progress bars

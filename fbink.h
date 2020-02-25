@@ -426,6 +426,7 @@ FBINK_API int fbink_close(int fbfd);
 //				(This also means the effects from those fields "stick" across the lifetime of your application,
 //				or until a subsequent fbink_init() (or effective fbink_reinit()) call gets fed different values).
 //				NOTE: For fg_color & bg_color, see fbink_update_pen_colors().
+//				NOTE: For is_verbose, is_quiet & to_syslog, see fbink_update_verbosity().
 // NOTE: By virtue of, well, setting global variables, do NOT consider this thread-safe.
 //       The rest of the API should be, though, so make sure you init in your main thread *before* threading begins...
 // NOTE: If you just need to make sure the framebuffer state is still up to date before an fbink_* call,
@@ -660,6 +661,13 @@ FBINK_API bool fbink_is_fb_quirky(void) __attribute__((pure, deprecated));
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
 // fbink_cfg:		Pointer to an FBInkConfig struct.
 FBINK_API int fbink_reinit(int fbfd, const FBInkConfig* restrict fbink_cfg);
+
+// Update FBInk's internal verbosity flags
+// As mentioned in fbink_init(), the is_verbose, is_quiet & to_syslog fields in an FBInkConfig
+// are only processed at initialization time.
+// This function allows doing *just* that, without having to go through a more costly full (re)-init.
+// fbink_cfg:		Pointer to an FBInkConfig struct (is_verbose, is_quiet & to_syslog).
+FBINK_API void fbink_update_verbosity(const FBInkConfig* restrict fbink_cfg);
 
 // Update FBInk's internal representation of pen colors
 // As mentioned in fbink_init(), the fg_color & bg_color fields in an FBInkConfig are only processed at initialization time.
