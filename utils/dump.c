@@ -351,8 +351,8 @@ int
 	//       Making sure you don't go off-screen, or blow past a scanline or screen boundary is *your* responsibility.
 	// First, keep a copy of the original, sane dump area around.
 	const FBInkRect orig_area = dump.area;
-	dump.area.left += 250U;
-	dump.area.top -= 125U;
+	dump.area.left            = (unsigned short int) (dump.area.left + 250U);
+	dump.area.top             = (unsigned short int) (dump.area.top - 125U);
 	fprintf(stdout, "[06f] RESTORE w/ MOVE\n");
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
@@ -366,10 +366,12 @@ int
 	dump.area = orig_area;
 
 	// In practice, that means:
-	dump.area.left += 500U; // Making sure 0 < left < screen_width
-	dump.area.top -= 250U;  // Making sure 0 < top < screen_height
-	dump.area.width -= 50U; // Making sure (left + width) <= screen_width
-	dump.area.height -= 125U;  // Making sure (top + height) <= screen_height
+	dump.area.left = (unsigned short int) (dump.area.left + 500U);    // Making sure 0 < left < screen_width
+	dump.area.top  = (unsigned short int) (dump.area.top - 250U);     // Making sure 0 < top < screen_height
+	// And if you add a manual crop, while we on the crazy train...
+	dump.area.width = (unsigned short int) (dump.area.width - 50U);    // Making sure (left + width) <= screen_width
+	dump.area.height =
+	    (unsigned short int) (dump.area.height - 125U);    // Making sure (top + height) <= screen_height
 	fprintf(stdout, "[06g] RESTORE w/ MOVE + CROP\n");
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
