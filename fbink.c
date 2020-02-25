@@ -8128,6 +8128,7 @@ int
 		goto cleanup;
 	}
 	// Store the current fb state for that dump
+	dump->stride      = fInfo.line_length;
 	dump->size        = (size_t)(fInfo.line_length * vInfo.yres);
 	dump->area.left   = 0U;
 	dump->area.top    = 0U;
@@ -8308,7 +8309,7 @@ int
 	}
 	// Start by allocating enough memory for a full dump of the computed region...
 	// We're going to need the amount of bytes taken per pixel...
-	uint8_t bpp = (uint8_t)(vInfo.bits_per_pixel / 8U);
+	const uint8_t bpp = (uint8_t)(vInfo.bits_per_pixel >> 3U);
 	// And then to handle 4bpp on its own, because 4/8 == 0 ;).
 	if (vInfo.bits_per_pixel == 4U) {
 		// Align to the nearest byte boundary to make our life easier...
@@ -8319,11 +8320,11 @@ int
 		}
 		if (region.width & 0x01u) {
 			// w is odd, round *up* to the nearest multiple of two (i.e., align to the end of the current byte)
-			region.width = (region.width + 1) & ~0x01u;
+			region.width = (region.width + 1U) & ~0x01u;
 			LOG("Updated region.width to %u because of alignment constraints", region.width);
 		}
 		// Two pixels per byte, and we've just ensured to never end up with a decimal when dividing by two ;).
-		dump->data = calloc((size_t)((region.width >> 1) * region.height), sizeof(*dump->data));
+		dump->data = calloc((size_t)((region.width >> 1U) * region.height), sizeof(*dump->data));
 	} else {
 		dump->data = calloc((size_t)((region.width * bpp) * region.height), sizeof(*dump->data));
 	}
@@ -8342,18 +8343,20 @@ int
 	dump->is_full     = false;
 	// And finally, the fb data itself, scanline per scanline
 	if (dump->bpp == 4U) {
-		dump->size = (size_t)((dump->area.width >> 1) * dump->area.height);
+		dump->stride = (size_t)(dump->area.width >> 1U);
+		dump->size   = (size_t)(dump->stride * dump->area.height);
 		for (unsigned short int j = dump->area.top, l = 0U; l < dump->area.height; j++, l++) {
-			size_t dump_offset = (size_t)(l * (dump->area.width >> 1));
-			size_t fb_offset   = (size_t)(dump->area.left >> 1) + (j * fInfo.line_length);
-			memcpy(dump->data + dump_offset, fbPtr + fb_offset, (size_t) dump->area.width >> 1);
+			size_t dump_offset = (size_t)(l * dump->stride);
+			size_t fb_offset   = (size_t)(dump->area.left >> 1U) + (j * fInfo.line_length);
+			memcpy(dump->data + dump_offset, fbPtr + fb_offset, dump->stride);
 		}
 	} else {
-		dump->size = (size_t)((dump->area.width * bpp) * dump->area.height);
+		dump->stride = (size_t)(dump->area.width * bpp);
+		dump->size   = (size_t)(dump->stride * dump->area.height);
 		for (unsigned short int j = dump->area.top, l = 0U; l < dump->area.height; j++, l++) {
-			size_t dump_offset = (size_t)(l * (dump->area.width * bpp));
+			size_t dump_offset = (size_t)(l * dump->stride);
 			size_t fb_offset   = (size_t)(dump->area.left * bpp) + (j * fInfo.line_length);
-			memcpy(dump->data + dump_offset, fbPtr + fb_offset, (size_t) dump->area.width * bpp);
+			memcpy(dump->data + dump_offset, fbPtr + fb_offset, dump->stride);
 		}
 	}
 
@@ -8510,7 +8513,7 @@ int
 
 	if (dump->is_full) {
 		// Full dump, easy enough
-		memcpy(fbPtr, dump->data, (size_t)(fInfo.line_length * vInfo.yres));
+		memcpy(fbPtr, dump->data, dump->size);
 		fullscreen_region(&region);
 	} else {
 		// NOTE: The crop codepath is perfectly safe with no cropping, it's just a little bit hairier to follow...
@@ -8519,7 +8522,7 @@ int
 			if (dump->bpp == 4U) {
 				for (unsigned short int j = dump->area.top, l = 0U; l < dump->area.height; j++, l++) {
 					size_t fb_offset   = (size_t)(dump->area.left >> 1U) + (j * fInfo.line_length);
-					size_t dump_offset = (size_t)(l * (dump->area.width >> 1U));
+					size_t dump_offset = (size_t)(l * dump->stride);
 					memcpy(
 					    fbPtr + fb_offset, dump->data + dump_offset, (size_t) dump->area.width >> 1U);
 				}
@@ -8528,7 +8531,7 @@ int
 				const uint8_t bpp = dump->bpp >> 3U;
 				for (unsigned short int j = dump->area.top, l = 0U; l < dump->area.height; j++, l++) {
 					size_t fb_offset   = (size_t)(dump->area.left * bpp) + (j * fInfo.line_length);
-					size_t dump_offset = (size_t)(l * (dump->area.width * bpp));
+					size_t dump_offset = (size_t)(l * dump->stride);
 					memcpy(
 					    fbPtr + fb_offset, dump->data + dump_offset, (size_t) dump->area.width * bpp);
 				}
@@ -8571,18 +8574,16 @@ int
 			// Region dump, restore line by line
 			if (dump->bpp == 4U) {
 				for (unsigned short int j = y, l = 0U; l < h; j++, l++) {
-					size_t fb_offset = (size_t)(x >> 1U) + (j * fInfo.line_length);
-					size_t dump_offset =
-					    (size_t)((x_skip >> 1U) + ((y_skip + l) * (dump->area.width >> 1U)));
+					size_t fb_offset   = (size_t)(x >> 1U) + (j * fInfo.line_length);
+					size_t dump_offset = (size_t)((x_skip >> 1U) + ((y_skip + l) * dump->stride));
 					memcpy(fbPtr + fb_offset, dump->data + dump_offset, (size_t) w >> 1U);
 				}
 			} else {
 				// We're going to need the amount of bytes taken per pixel...
 				const uint8_t bpp = dump->bpp >> 3U;
 				for (unsigned short int j = y, l = 0U; l < h; j++, l++) {
-					size_t fb_offset = (size_t)(x * bpp) + (j * fInfo.line_length);
-					size_t dump_offset =
-					    (size_t)((x_skip * bpp) + ((y_skip + l) * (dump->area.width * bpp)));
+					size_t fb_offset   = (size_t)(x * bpp) + (j * fInfo.line_length);
+					size_t dump_offset = (size_t)((x_skip * bpp) + ((y_skip + l) * dump->stride));
 					memcpy(fbPtr + fb_offset, dump->data + dump_offset, (size_t) w * bpp);
 				}
 			}

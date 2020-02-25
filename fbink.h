@@ -382,6 +382,7 @@ typedef struct
 typedef struct
 {
 	unsigned char* restrict data;
+	size_t                  stride;
 	size_t                  size;
 	FBInkRect               area;
 	FBInkRect clip;    // Only restore this rectangular area of the screen (has to intersect w/ the dump's area)
