@@ -375,6 +375,15 @@ int
 	//       0 <= top < screen_height
 	//       (left + width) <= screen_width
 	//       (top + height) <= screen_height
+	// So, let's do it...
+	dump.area.left = MIN(dump.area.left, fbink_state.screen_width - 1U);
+	dump.area.top  = MIN(dump.area.top, fbink_state.screen_height - 1U);
+	if (dump.area.left + dump.area.width > fbink_state.screen_width) {
+		dump.area.width = fbink_state.screen_width - dump.area.left;
+	}
+	if (dump.area.top + dump.area.height > fbink_state.screen_height) {
+		dump.area.height = fbink_state.screen_height - dump.area.top;
+	}
 	fprintf(stdout, "[06g] RESTORE w/ MOVE + RAW CROP\n");
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
