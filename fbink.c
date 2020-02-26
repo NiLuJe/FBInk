@@ -8305,15 +8305,7 @@ int
 	if (dump->data) {
 		LOG("Recycling FBinkDump!");
 		free(dump->data);
-		dump->data = NULL;
-		// Invalidate the metadata while we're here
-		dump->stride  = 0U;
-		dump->size    = 0U;
-		dump->area    = (const FBInkRect){ 0U };
-		dump->clip    = (const FBInkRect){ 0U };
-		dump->rota    = 0U;
-		dump->bpp     = 0U;
-		dump->is_full = false;
+		memset(dump, 0, sizeof(*dump));
 	}
 	// Start by allocating enough memory for a full dump of the computed region...
 	// We're going to need the amount of bytes taken per pixel...
@@ -8639,16 +8631,9 @@ int
 #ifdef FBINK_WITH_IMAGE
 	if (dump->data) {
 		free(dump->data);
-		// Don't leave a dangling pointer, ensuring a subsequent dump() won't try to recycle this struct again.
-		dump->data = NULL;
-		// Invalidate the metadata while we're here
-		dump->stride  = 0U;
-		dump->size    = 0U;
-		dump->area    = (const FBInkRect){ 0U };
-		dump->clip    = (const FBInkRect){ 0U };
-		dump->rota    = 0U;
-		dump->bpp     = 0U;
-		dump->is_full = false;
+		// Clear the struct, both to clear the metadata, and to make sure not to leave a dangling pointer,
+		// ensuring a subsequent dump() won't try to recycle this struct again.
+		memset(dump, 0, sizeof(*dump));
 
 		return EXIT_SUCCESS;
 	} else {
