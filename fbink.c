@@ -8306,8 +8306,14 @@ int
 		LOG("Recycling FBinkDump!");
 		free(dump->data);
 		dump->data = NULL;
-		// Reset the crop settings
-		dump->clip = (const FBInkRect){ 0U };
+		// Invalidate the metadata while we're here
+		dump->stride  = 0U;
+		dump->size    = 0U;
+		dump->area    = (const FBInkRect){ 0U };
+		dump->clip    = (const FBInkRect){ 0U };
+		dump->rota    = 0U;
+		dump->bpp     = 0U;
+		dump->is_full = false;
 	}
 	// Start by allocating enough memory for a full dump of the computed region...
 	// We're going to need the amount of bytes taken per pixel...
@@ -8636,6 +8642,7 @@ int
 		// Don't leave a dangling pointer, ensuring a subsequent dump() won't try to recycle this struct again.
 		dump->data = NULL;
 		// Invalidate the metadata while we're here
+		dump->stride  = 0U;
 		dump->size    = 0U;
 		dump->area    = (const FBInkRect){ 0U };
 		dump->clip    = (const FBInkRect){ 0U };
