@@ -23,7 +23,7 @@ AlwaysBreakAfterReturnType: AllDefinitions
 AlwaysBreakBeforeMultilineStrings: true
 AlwaysBreakTemplateDeclarations: true
 BinPackArguments: false
-InsertTrailingCommas: None
+#InsertTrailingCommas: None
 BinPackParameters: false
 BraceWrapping:
   AfterCaseLabel:  false
@@ -38,7 +38,7 @@ BraceWrapping:
   AfterExternBlock: false
   BeforeCatch:     false
   BeforeElse:      false
-  BeforeLambdaBody: false
+  #BeforeLambdaBody: false
   IndentBraces:    false
   SplitEmptyFunction: true
   SplitEmptyRecord: false
@@ -81,7 +81,7 @@ IncludeCategories:
     SortPriority:    0
 IncludeIsMainRegex: '(_test)?$'
 IncludeIsMainSourceRegex: ''
-IndentCaseBlocks: false
+#IndentCaseBlocks: false
 IndentCaseLabels: true
 IndentGotoLabels: false
 IndentPPDirectives: AfterHash
@@ -98,7 +98,7 @@ NamespaceIndentation: All
 #NamespaceMacros: ['TESTSUITE']
 ObjCBinPackProtocolList: Auto
 ObjCBlockIndentWidth: 8
-ObjCBreakBeforeNestedBlockParam: true
+#ObjCBreakBeforeNestedBlockParam: true
 ObjCSpaceAfterProperty: true
 ObjCSpaceBeforeProtocolList: false
 PenaltyBreakAssignment: 2
