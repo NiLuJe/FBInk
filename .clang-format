@@ -12,7 +12,7 @@ AlignTrailingComments: true
 AllowAllArgumentsOnNextLine: true
 AllowAllConstructorInitializersOnNextLine: true
 AllowAllParametersOfDeclarationOnNextLine: false
-AllowShortBlocksOnASingleLine: false
+AllowShortBlocksOnASingleLine: Empty
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: Never
@@ -23,11 +23,12 @@ AlwaysBreakAfterReturnType: AllDefinitions
 AlwaysBreakBeforeMultilineStrings: true
 AlwaysBreakTemplateDeclarations: true
 BinPackArguments: false
+InsertTrailingCommas: None
 BinPackParameters: false
 BraceWrapping:
   AfterCaseLabel:  false
   AfterClass:      true
-  AfterControlStatement: false
+  AfterControlStatement: Never
   AfterEnum:       true
   AfterFunction:   true
   AfterNamespace:  false
@@ -37,6 +38,7 @@ BraceWrapping:
   AfterExternBlock: false
   BeforeCatch:     false
   BeforeElse:      false
+  BeforeLambdaBody: false
   IndentBraces:    false
   SplitEmptyFunction: true
   SplitEmptyRecord: false
@@ -44,11 +46,11 @@ BraceWrapping:
 BreakAfterJavaFieldAnnotations: false
 BreakBeforeBinaryOperators: None
 BreakBeforeBraces: Custom
-BreakBeforeInheritanceComma: true
+BreakBeforeInheritanceComma: false
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializersBeforeComma: false
-BreakConstructorInitializers: BeforeColon
-BreakInheritanceList: BeforeColon
+BreakConstructorInitializers: AfterColon
+BreakInheritanceList: AfterColon
 BreakStringLiterals: false
 ColumnLimit:     122
 CommentPragmas:  '^ IWYU pragma:'
@@ -57,11 +59,12 @@ ConstructorInitializerAllOnOneLineOrOnePerLine: false
 ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 4
 Cpp11BracedListStyle: false
+DeriveLineEnding: false
 DerivePointerAlignment: false
 DisableFormat:   false
 ExperimentalAutoDetectBinPacking: false
 FixNamespaceComments: true
-ForEachMacros:   
+ForEachMacros:
   - foreach
   - Q_FOREACH
   - BOOST_FOREACH
@@ -69,15 +72,18 @@ IncludeBlocks:   Preserve
 IncludeCategories:
   - Regex:           '^"(llvm|llvm-c|clang|clang-c)/'
     Priority:        2
+    SortPriority:    0
   - Regex:           '^(<|"(gtest|gmock|isl|json)/)'
     Priority:        3
-  - Regex:           '<[[:alnum:].]+>'
-    Priority:        4
+    SortPriority:    0
   - Regex:           '.*'
     Priority:        1
+    SortPriority:    0
 IncludeIsMainRegex: '(_test)?$'
+IncludeIsMainSourceRegex: ''
+IndentCaseBlocks: false
 IndentCaseLabels: true
-#IndentGotoLabels: false
+IndentGotoLabels: false
 IndentPPDirectives: AfterHash
 IndentWidth:     8
 IndentWrappedFunctionNames: true
@@ -92,6 +98,7 @@ NamespaceIndentation: All
 #NamespaceMacros: ['TESTSUITE']
 ObjCBinPackProtocolList: Auto
 ObjCBlockIndentWidth: 8
+ObjCBreakBeforeNestedBlockParam: true
 ObjCSpaceAfterProperty: true
 ObjCSpaceBeforeProtocolList: false
 PenaltyBreakAssignment: 2
@@ -99,11 +106,11 @@ PenaltyBreakBeforeFirstCallParameter: 19
 PenaltyBreakComment: 300
 PenaltyBreakFirstLessLess: 120
 PenaltyBreakString: 1000
-#PenaltyBreakTemplateDeclaration
+PenaltyBreakTemplateDeclaration: 10
 PenaltyExcessCharacter: 1000000
 PenaltyReturnTypeOnItsOwnLine: 200
 PointerAlignment: Left
-#RawStringFormats
+#RawStringFormats:
 ReflowComments:  false
 SortIncludes:    true
 SortUsingDeclarations: true
@@ -116,18 +123,23 @@ SpaceBeforeCtorInitializerColon: true
 SpaceBeforeInheritanceColon: true
 SpaceBeforeParens: ControlStatements
 SpaceBeforeRangeBasedForLoopColon: true
-#SpaceInEmptyBlock: false
+SpaceBeforeSquareBrackets: false
+SpaceInEmptyBlock: false
 SpaceInEmptyParentheses: false
 SpacesBeforeTrailingComments: 4
 SpacesInAngles:  false
 SpacesInCStyleCastParentheses: false
+SpacesInConditionalStatement: false
 SpacesInContainerLiterals: true
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
-Standard:        Cpp11
-StatementMacros: ['Q_UNUSED']
+Standard:        Latest
+StatementMacros:
+  - Q_UNUSED
+  - QT_REQUIRE_VERSION
 TabWidth:        8
 TypenameMacros: ['STACK_OF', 'LIST_ENTRY']
+UseCRLF:         false
 UseTab:          ForContinuationAndIndentation
 ...
 
