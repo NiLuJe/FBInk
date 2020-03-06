@@ -1428,7 +1428,7 @@ static struct mxcfb_rect
 					/* Initial coordinates, before we generate the extra pixels from the scaling factor */ \
 					cx = (unsigned short int) (x_offs + i);                                                \
 				}                                                                                              \
-				/* If we're the final pixel of the line, draw the final stripe no matter what */               \
+				/* If we're the final pixel of the glyph, draw the final stripe no matter what */              \
 				if (x + 1U == glyphWidth) {                                                                    \
 					if (last_px_type == 1) {                                                               \
 						(*fxpFillRectChecked)(cx,                                                      \
