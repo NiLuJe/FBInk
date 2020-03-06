@@ -1378,7 +1378,7 @@ static struct mxcfb_rect
 			/* 1 is fg, 0 is bg, first pixel could be either, so, -1 */                                            \
 			int8_t last_px_type      = -1;                                                                         \
 			bool   initial_stripe_px = true;                                                                       \
-			/* Precompute the initial coordinates for the first char of the line */                                \
+			/* Precompute the initial coordinates for the first pixel of the glyph */                              \
 			i  = 0U;                                                                                               \
 			cx = x_offs;                                                                                           \
 			for (uint8_t x = 0U; x < glyphWidth; x++) {                                                            \
