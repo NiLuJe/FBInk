@@ -1365,116 +1365,133 @@ static struct mxcfb_rect
 			ch_bi = bi;
 
 			// Crappy macro to avoid repeating myself in each branch...
-#define RENDER_GLYPH()                                                                                                   \
-	/* NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution), */                   \
-	/*       and from there compute the extra pixels for that single input pixel given our scaling factor... */      \
-	if (!fbink_cfg->is_overlay && !fbink_cfg->is_bgless && !fbink_cfg->is_fgless) {                                  \
-		for (uint8_t y = 0U; y < glyphHeight; y++) {                                                             \
-			/* y: input row, j: first output row after scaling */                                            \
-			j = (unsigned short int) (y * FONTSIZE_MULT);                                                    \
-			cy = (unsigned short int) (y_offs + j);                                                  \
-			unsigned short int px_count = 0U; \
-			/* We'll need to remember whether the previous pixel was already using the same color... */ \
-			/* 1 is fg, 0 is bg, first pixel could be either, so, -1 */ \
-			int8_t last_px_type = -1; \
-			bool initial_stripe_px = true; \
-			/* Precompute the initial coordinates for the first char of the line */ \
-			i = 0U; \
-			cx = x_offs; \
-			for (uint8_t x = 0U; x < glyphWidth; x++) {                                                      \
-				/* Each element encodes a full row, we access a column's bit in that row by shifting. */ \
-				if (bitmap[y] & 1U << x) {                                                               \
-					/* bit was set, pixel is fg! */                                                  \
-					if (x == 0U || last_px_type == 1) { \
-						/* First column, or continuation of a fg color stripe */ \
-						px_count++; \
-						initial_stripe_px = false; \
-					} else { \
-						/* Handle scaling by drawing a FONTSIZE_MULTpx square per pixel, batched in a single stripe per same-color streak ;) */            \
-						/* Note that we're printing the *previous* color's stripe, so, bg! */ \
-						(*fxpFillRect)(cx, cy, (unsigned short int) (FONTSIZE_MULT * px_count), FONTSIZE_MULT, &bgP);                      \
-						/* Which means we're already one pixel deep into a new stripe */ \
-						px_count = 1U; \
-						initial_stripe_px = true; \
-					} \
-					last_px_type = 1; \
-				} else {                                                                                 \
-					/* bit was unset, pixel is bg */                                                 \
-					if (x == 0U || last_px_type == 0) { \
-						/* First column, or continuation of a bg color stripe */ \
-						px_count++; \
-						initial_stripe_px = false; \
-					} else { \
-						/* Note that we're printing the *previous* color's stripe, so, fg! */ \
-						(*fxpFillRect)(cx, cy, (unsigned short int) (FONTSIZE_MULT * px_count), FONTSIZE_MULT, &fgP);                      \
-						px_count = 1U; \
-						initial_stripe_px = true; \
-					} \
-					last_px_type = 0; \
-				} \
-				/* If we're the first pixel of a new stripe, compute the coordinates of the stripe's start */ \
-				if (initial_stripe_px) { \
-					/* x: input column, i: first output column after scaling */                              \
-					i = (unsigned short int) (x * FONTSIZE_MULT);                                            \
-					/* Initial coordinates, before we generate the extra pixels from the scaling factor */   \
-					cx = (unsigned short int) (x_offs + i);                                                  \
-				} \
-				/* If we're the final pixel of the line, draw the final stripe no matter what */ \
-				if (x + 1U == glyphWidth) { \
-					if (last_px_type == 1) { \
-						(*fxpFillRect)(cx, cy, (unsigned short int) (FONTSIZE_MULT * px_count), FONTSIZE_MULT, &fgP); \
-					} else { \
-						(*fxpFillRect)(cx, cy, (unsigned short int) (FONTSIZE_MULT * px_count), FONTSIZE_MULT, &bgP); \
-					} \
-				} \
-			}                                                                                                \
-		}                                                                                                        \
-	} else {                                                                                                         \
-		FBInkPixel fbP     = { 0U };                                                                             \
-		bool       is_fgpx = false;                                                                              \
-		for (uint8_t y = 0U; y < glyphHeight; y++) {                                                             \
-			/* y: input row, j: first output row after scaling */                                            \
-			j = (unsigned short int) (y * FONTSIZE_MULT);                                                    \
-			cy = (unsigned short int) (y_offs + j);                                                  \
-			for (uint8_t x = 0U; x < glyphWidth; x++) {                                                      \
-				/* x: input column, i: first output column after scaling */                              \
-				i = (unsigned short int) (x * FONTSIZE_MULT);                                            \
-				/* Each element encodes a full row, we access a column's bit in that row by shifting. */ \
-				if (bitmap[y] & 1U << x) {                                                               \
-					/* bit was set, pixel is fg! */                                                  \
-					pxP     = &fgP;                                                                  \
-					is_fgpx = true;                                                                  \
-				} else {                                                                                 \
-					/* bit was unset, pixel is bg */                                                 \
-					pxP     = &bgP;                                                                  \
-					is_fgpx = false;                                                                 \
-				}                                                                                        \
-				/* Initial coordinates, before we generate the extra pixels from the scaling factor */   \
-				cx = (unsigned short int) (x_offs + i);                                                  \
-				/* NOTE: Apply our scaling factor in both dimensions! */                                 \
-				for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {                                           \
-					coords.y = (unsigned short int) (cy + l);                                \
-					for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {                                   \
-						coords.x = (unsigned short int) (cx + k);                                \
-						/* In overlay mode, we only print foreground pixels, */                  \
-						/* and we print in the inverse color of the underlying pixel's */        \
-						/* Obviously, the closer we get to GRAY7, the less contrast we get */    \
-						if (is_fgpx && !fbink_cfg->is_fgless) {                                  \
-							if (fbink_cfg->is_overlay) {                                     \
-								get_pixel(coords, &fbP);                                 \
-								fbP.bgra.p ^= 0x00FFFFFFu;                               \
-								pxP = &fbP;                                              \
-								put_pixel(coords, pxP, false);                           \
-							} else {                                                         \
-								put_pixel(coords, pxP, true);                            \
-							}                                                                \
-						} else if (!is_fgpx && fbink_cfg->is_fgless) {                           \
-							put_pixel(coords, pxP, true);                                    \
-						}                                                                        \
-					}                                                                                \
-				}                                                                                        \
-			}                                                                                                \
-		}                                                                                                        \
+#define RENDER_GLYPH()                                                                                                         \
+	/* NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution), */                         \
+	/*       and from there compute the extra pixels for that single input pixel given our scaling factor... */            \
+	if (!fbink_cfg->is_overlay && !fbink_cfg->is_bgless && !fbink_cfg->is_fgless) {                                        \
+		for (uint8_t y = 0U; y < glyphHeight; y++) {                                                                   \
+			/* y: input row, j: first output row after scaling */                                                  \
+			j                           = (unsigned short int) (y * FONTSIZE_MULT);                                \
+			cy                          = (unsigned short int) (y_offs + j);                                       \
+			unsigned short int px_count = 0U;                                                                      \
+			/* We'll need to remember whether the previous pixel was already using the same color... */            \
+			/* 1 is fg, 0 is bg, first pixel could be either, so, -1 */                                            \
+			int8_t last_px_type      = -1;                                                                         \
+			bool   initial_stripe_px = true;                                                                       \
+			/* Precompute the initial coordinates for the first char of the line */                                \
+			i  = 0U;                                                                                               \
+			cx = x_offs;                                                                                           \
+			for (uint8_t x = 0U; x < glyphWidth; x++) {                                                            \
+				/* Each element encodes a full row, we access a column's bit in that row by shifting. */       \
+				if (bitmap[y] & 1U << x) {                                                                     \
+					/* bit was set, pixel is fg! */                                                        \
+					if (x == 0U || last_px_type == 1) {                                                    \
+						/* First column, or continuation of a fg color stripe */                       \
+						px_count++;                                                                    \
+						initial_stripe_px = false;                                                     \
+					} else {                                                                               \
+						/* Handle scaling by drawing a FONTSIZE_MULT pixels high rectangle, batched */ \
+						/* in a FONTSIZE_MULT * px_count wide stripe per same-color streak ;) */       \
+						/* Note that we're printing the *previous* color's stripe, so, bg! */          \
+						(*fxpFillRect)(cx,                                                             \
+							       cy,                                                             \
+							       (unsigned short int) (FONTSIZE_MULT * px_count),                \
+							       FONTSIZE_MULT,                                                  \
+							       &bgP);                                                          \
+						/* Which means we're already one pixel deep into a new stripe */               \
+						px_count          = 1U;                                                        \
+						initial_stripe_px = true;                                                      \
+					}                                                                                      \
+					last_px_type = 1;                                                                      \
+				} else {                                                                                       \
+					/* bit was unset, pixel is bg */                                                       \
+					if (x == 0U || last_px_type == 0) {                                                    \
+						/* First column, or continuation of a bg color stripe */                       \
+						px_count++;                                                                    \
+						initial_stripe_px = false;                                                     \
+					} else {                                                                               \
+						/* Note that we're printing the *previous* color's stripe, so, fg! */          \
+						(*fxpFillRect)(cx,                                                             \
+							       cy,                                                             \
+							       (unsigned short int) (FONTSIZE_MULT * px_count),                \
+							       FONTSIZE_MULT,                                                  \
+							       &fgP);                                                          \
+						px_count          = 1U;                                                        \
+						initial_stripe_px = true;                                                      \
+					}                                                                                      \
+					last_px_type = 0;                                                                      \
+				}                                                                                              \
+				/* If we're the first pixel of a new stripe, compute the coordinates of the stripe's start */  \
+				if (initial_stripe_px) {                                                                       \
+					/* x: input column, i: first output column after scaling */                            \
+					i = (unsigned short int) (x * FONTSIZE_MULT);                                          \
+					/* Initial coordinates, before we generate the extra pixels from the scaling factor */ \
+					cx = (unsigned short int) (x_offs + i);                                                \
+				}                                                                                              \
+				/* If we're the final pixel of the line, draw the final stripe no matter what */               \
+				if (x + 1U == glyphWidth) {                                                                    \
+					if (last_px_type == 1) {                                                               \
+						(*fxpFillRect)(cx,                                                             \
+							       cy,                                                             \
+							       (unsigned short int) (FONTSIZE_MULT * px_count),                \
+							       FONTSIZE_MULT,                                                  \
+							       &fgP);                                                          \
+					} else {                                                                               \
+						(*fxpFillRect)(cx,                                                             \
+							       cy,                                                             \
+							       (unsigned short int) (FONTSIZE_MULT * px_count),                \
+							       FONTSIZE_MULT,                                                  \
+							       &bgP);                                                          \
+					}                                                                                      \
+				}                                                                                              \
+			}                                                                                                      \
+		}                                                                                                              \
+	} else {                                                                                                               \
+		FBInkPixel fbP     = { 0U };                                                                                   \
+		bool       is_fgpx = false;                                                                                    \
+		for (uint8_t y = 0U; y < glyphHeight; y++) {                                                                   \
+			/* y: input row, j: first output row after scaling */                                                  \
+			j  = (unsigned short int) (y * FONTSIZE_MULT);                                                         \
+			cy = (unsigned short int) (y_offs + j);                                                                \
+			for (uint8_t x = 0U; x < glyphWidth; x++) {                                                            \
+				/* x: input column, i: first output column after scaling */                                    \
+				i = (unsigned short int) (x * FONTSIZE_MULT);                                                  \
+				/* Each element encodes a full row, we access a column's bit in that row by shifting. */       \
+				if (bitmap[y] & 1U << x) {                                                                     \
+					/* bit was set, pixel is fg! */                                                        \
+					pxP     = &fgP;                                                                        \
+					is_fgpx = true;                                                                        \
+				} else {                                                                                       \
+					/* bit was unset, pixel is bg */                                                       \
+					pxP     = &bgP;                                                                        \
+					is_fgpx = false;                                                                       \
+				}                                                                                              \
+				/* Initial coordinates, before we generate the extra pixels from the scaling factor */         \
+				cx = (unsigned short int) (x_offs + i);                                                        \
+				/* NOTE: Apply our scaling factor in both dimensions! */                                       \
+				for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {                                                 \
+					coords.y = (unsigned short int) (cy + l);                                              \
+					for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {                                         \
+						coords.x = (unsigned short int) (cx + k);                                      \
+						/* In overlay mode, we only print foreground pixels, */                        \
+						/* and we print in the inverse color of the underlying pixel's */              \
+						/* Obviously, the closer we get to GRAY7, the less contrast we get */          \
+						if (is_fgpx && !fbink_cfg->is_fgless) {                                        \
+							if (fbink_cfg->is_overlay) {                                           \
+								get_pixel(coords, &fbP);                                       \
+								fbP.bgra.p ^= 0x00FFFFFFu;                                     \
+								pxP = &fbP;                                                    \
+								put_pixel(coords, pxP, false);                                 \
+							} else {                                                               \
+								put_pixel(coords, pxP, true);                                  \
+							}                                                                      \
+						} else if (!is_fgpx && fbink_cfg->is_fgless) {                                 \
+							put_pixel(coords, pxP, true);                                          \
+						}                                                                              \
+					}                                                                                      \
+				}                                                                                              \
+			}                                                                                                      \
+		}                                                                                                              \
 	}
 
 			// Fast-path through spaces, which are always going to be a FONTWxFONTH bg rectangle.
@@ -1498,7 +1515,7 @@ static struct mxcfb_rect
 #ifdef FBINK_WITH_FONTS
 				bitmap = (*fxpFont8xGetBitmap)(ch);
 #else
-				bitmap = font8x8_get_bitmap(ch);
+			bitmap = font8x8_get_bitmap(ch);
 #endif
 				RENDER_GLYPH();
 			}
