@@ -1249,7 +1249,7 @@ static struct mxcfb_rect
 		    pixel_offset > 0U) {
 			LOG("Painting a background rectangle on the left edge on account of pixel_offset");
 			// Make sure we don't leave a hoffset sized gap when we have a positive hoffset...
-			(*fxpFillRect)(
+			(*fxpFillRectChecked)(
 			    hoffset > 0 ? (unsigned short int) (hoffset + viewHoriOrigin)
 					: (unsigned short int) (0U + viewHoriOrigin),
 			    (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
@@ -1279,7 +1279,7 @@ static struct mxcfb_rect
 			// NOTE: !isPerfectFit ensures pixel_offset is non-zero
 			LOG("Painting a background rectangle to fill the dead space on the right edge");
 			// Make sure we don't leave a hoffset sized gap when we have a negative hoffset...
-			(*fxpFillRect)(
+			(*fxpFillRectChecked)(
 			    hoffset < 0 ? (unsigned short int) (screenWidth - pixel_offset -
 								(unsigned short int) abs(hoffset) - viewHoriOrigin)
 					: (unsigned short int) (screenWidth - pixel_offset - viewHoriOrigin),
@@ -1393,11 +1393,11 @@ static struct mxcfb_rect
 						/* Handle scaling by drawing a FONTSIZE_MULT pixels high rectangle, batched */ \
 						/* in a FONTSIZE_MULT * px_count wide stripe per same-color streak ;) */       \
 						/* Note that we're printing the *previous* color's stripe, so, bg! */          \
-						(*fxpFillRect)(cx,                                                             \
-							       cy,                                                             \
-							       (unsigned short int) (FONTSIZE_MULT * px_count),                \
-							       FONTSIZE_MULT,                                                  \
-							       &bgP);                                                          \
+						(*fxpFillRectChecked)(cx,                                                      \
+								      cy,                                                      \
+								      (unsigned short int) (FONTSIZE_MULT * px_count),         \
+								      FONTSIZE_MULT,                                           \
+								      &bgP);                                                   \
 						/* Which means we're already one pixel deep into a new stripe */               \
 						px_count          = 1U;                                                        \
 						initial_stripe_px = true;                                                      \
@@ -1411,11 +1411,11 @@ static struct mxcfb_rect
 						initial_stripe_px = false;                                                     \
 					} else {                                                                               \
 						/* Note that we're printing the *previous* color's stripe, so, fg! */          \
-						(*fxpFillRect)(cx,                                                             \
-							       cy,                                                             \
-							       (unsigned short int) (FONTSIZE_MULT * px_count),                \
-							       FONTSIZE_MULT,                                                  \
-							       &fgP);                                                          \
+						(*fxpFillRectChecked)(cx,                                                      \
+								      cy,                                                      \
+								      (unsigned short int) (FONTSIZE_MULT * px_count),         \
+								      FONTSIZE_MULT,                                           \
+								      &fgP);                                                   \
 						px_count          = 1U;                                                        \
 						initial_stripe_px = true;                                                      \
 					}                                                                                      \
@@ -1431,17 +1431,17 @@ static struct mxcfb_rect
 				/* If we're the final pixel of the line, draw the final stripe no matter what */               \
 				if (x + 1U == glyphWidth) {                                                                    \
 					if (last_px_type == 1) {                                                               \
-						(*fxpFillRect)(cx,                                                             \
-							       cy,                                                             \
-							       (unsigned short int) (FONTSIZE_MULT * px_count),                \
-							       FONTSIZE_MULT,                                                  \
-							       &fgP);                                                          \
+						(*fxpFillRectChecked)(cx,                                                      \
+								      cy,                                                      \
+								      (unsigned short int) (FONTSIZE_MULT * px_count),         \
+								      FONTSIZE_MULT,                                           \
+								      &fgP);                                                   \
 					} else {                                                                               \
-						(*fxpFillRect)(cx,                                                             \
-							       cy,                                                             \
-							       (unsigned short int) (FONTSIZE_MULT * px_count),                \
-							       FONTSIZE_MULT,                                                  \
-							       &bgP);                                                          \
+						(*fxpFillRectChecked)(cx,                                                      \
+								      cy,                                                      \
+								      (unsigned short int) (FONTSIZE_MULT * px_count),         \
+								      FONTSIZE_MULT,                                           \
+								      &bgP);                                                   \
 					}                                                                                      \
 				}                                                                                              \
 			}                                                                                                      \
@@ -1498,16 +1498,7 @@ static struct mxcfb_rect
 			if (ch == ' ') {
 				// Unless we're not printing bg pixels, of course ;).
 				if (!fbink_cfg->is_overlay && !fbink_cfg->is_bgless) {
-					// If current space is the final column of the line, do a checked fill_rect,
-					// because it might overflow when we have a halfcell offset
-					// in conjunction with a !isPerfectFit pixel offset,
-					// when we're padding and centering.
-					// c.f., the existing OOB checks in get/put pixel ;).
-					if (ci + 1U == MAXCOLS) {
-						(*fxpFillRectChecked)(x_offs, y_offs, FONTW, FONTH, &bgP);
-					} else {
-						(*fxpFillRect)(x_offs, y_offs, FONTW, FONTH, &bgP);
-					}
+					(*fxpFillRectChecked)(x_offs, y_offs, FONTW, FONTH, &bgP);
 				}
 			} else {
 				// Get the glyph's pixmap (width <= 8 -> uint8_t)
@@ -1551,16 +1542,7 @@ static struct mxcfb_rect
 			if (ch == ' ') {
 				// Unless we're not printing bg pixels, of course ;).
 				if (!fbink_cfg->is_overlay && !fbink_cfg->is_bgless) {
-					// If current space is the final column of the line, do a checked fill_rect,
-					// because it might overflow when we have a halfcell offset
-					// in conjunction with a !isPerfectFit pixel offset,
-					// when we're padding and centering.
-					// c.f., the existing OOB checks in get/put pixel ;).
-					if (ci + 1U == MAXCOLS) {
-						(*fxpFillRectChecked)(x_offs, y_offs, FONTW, FONTH, &bgP);
-					} else {
-						(*fxpFillRect)(x_offs, y_offs, FONTW, FONTH, &bgP);
-					}
+					(*fxpFillRectChecked)(x_offs, y_offs, FONTW, FONTH, &bgP);
 				}
 			} else {
 				// Get the glyph's pixmap (width <= 16 -> uint16_t)
@@ -1595,16 +1577,7 @@ static struct mxcfb_rect
 			if (ch == ' ') {
 				// Unless we're not printing bg pixels, of course ;).
 				if (!fbink_cfg->is_overlay && !fbink_cfg->is_bgless) {
-					// If current space is the final column of the line, do a checked fill_rect,
-					// because it might overflow when we have a halfcell offset
-					// in conjunction with a !isPerfectFit pixel offset,
-					// when we're padding and centering.
-					// c.f., the existing OOB checks in get/put pixel ;).
-					if (ci + 1U == MAXCOLS) {
-						(*fxpFillRectChecked)(x_offs, y_offs, FONTW, FONTH, &bgP);
-					} else {
-						(*fxpFillRect)(x_offs, y_offs, FONTW, FONTH, &bgP);
-					}
+					(*fxpFillRectChecked)(x_offs, y_offs, FONTW, FONTH, &bgP);
 				}
 			} else {
 				// Get the glyph's pixmap (width <= 32 -> uint32_t)
@@ -1640,16 +1613,7 @@ static struct mxcfb_rect
 			if (ch == ' ') {
 				// Unless we're not printing bg pixels, of course ;).
 				if (!fbink_cfg->is_overlay && !fbink_cfg->is_bgless) {
-					// If current space is the final column of the line, do a checked fill_rect,
-					// because it might overflow when we have a halfcell offset
-					// in conjunction with a !isPerfectFit pixel offset,
-					// when we're padding and centering.
-					// c.f., the existing OOB checks in get/put pixel ;).
-					if (ci + 1U == MAXCOLS) {
-						(*fxpFillRectChecked)(x_offs, y_offs, FONTW, FONTH, &bgP);
-					} else {
-						(*fxpFillRect)(x_offs, y_offs, FONTW, FONTH, &bgP);
-					}
+					(*fxpFillRectChecked)(x_offs, y_offs, FONTW, FONTH, &bgP);
 				}
 			} else {
 				// Get the glyph's pixmap (width <= 64 -> uint64_t)
@@ -4227,11 +4191,11 @@ static int
 
 	// Did we want to paint a background rectangle (i.e., to mimic fbink_cls)?
 	if (do_clear) {
-		(*fxpFillRect)((unsigned short int) region.left,
-			       (unsigned short int) region.top,
-			       (unsigned short int) region.width,
-			       (unsigned short int) region.height,
-			       &penBGPixel);
+		(*fxpFillRectChecked)((unsigned short int) region.left,
+				      (unsigned short int) region.top,
+				      (unsigned short int) region.width,
+				      (unsigned short int) region.height,
+				      &penBGPixel);
 	}
 
 	// Rotate the region if need be, and remember the rect...
@@ -6776,7 +6740,7 @@ int
 
 	// ... unless we were asked to skip background pixels... ;).
 	if (!fbink_cfg->is_bgless) {
-		(*fxpFillRect)(left_pos, top_pos, (unsigned short int) screenWidth, FONTH, &bgP);
+		(*fxpFillRectChecked)(left_pos, top_pos, (unsigned short int) screenWidth, FONTH, &bgP);
 	}
 
 	// NOTE: We always use the same BG_ constant in order to get a rough inverse by just swapping to the inverted LUT ;).
@@ -6844,24 +6808,24 @@ int
 		unsigned short int empty_left  = (unsigned short int) (fill_left + fill_width);
 
 		// Draw the border...
-		(*fxpFillRect)(fill_left, top_pos, bar_width, FONTH, &borderP);
+		(*fxpFillRectChecked)(fill_left, top_pos, bar_width, FONTH, &borderP);
 		// Draw the fill bar, which we want to override the border with!
-		(*fxpFillRect)(fill_left, top_pos, fill_width, FONTH, &fgP);
+		(*fxpFillRectChecked)(fill_left, top_pos, fill_width, FONTH, &fgP);
 		// And the empty bar...
 		// NOTE: With a minor tweak to keep a double-width border on the bottom & right sides ;).
 		if (value == 0U) {
 			// Keep the left border alone!
-			(*fxpFillRect)((unsigned short int) (empty_left + 1U),
-				       (unsigned short int) (top_pos + 1U),
-				       (unsigned short int) MAX(0, empty_width - 3),
-				       (unsigned short int) (FONTH - 3U),
-				       &emptyP);
+			(*fxpFillRectChecked)((unsigned short int) (empty_left + 1U),
+					      (unsigned short int) (top_pos + 1U),
+					      (unsigned short int) MAX(0, empty_width - 3),
+					      (unsigned short int) (FONTH - 3U),
+					      &emptyP);
 		} else {
-			(*fxpFillRect)(empty_left,
-				       (unsigned short int) (top_pos + 1U),
-				       (unsigned short int) MAX(0, empty_width - 2),
-				       (unsigned short int) (FONTH - 3U),
-				       &emptyP);
+			(*fxpFillRectChecked)(empty_left,
+					      (unsigned short int) (top_pos + 1U),
+					      (unsigned short int) MAX(0, empty_width - 2),
+					      (unsigned short int) (FONTH - 3U),
+					      &emptyP);
 		}
 
 		// We enforce centering for the percentage text...
@@ -6903,13 +6867,13 @@ int
 		unsigned short int bar_left  = (unsigned short int) (left_pos + (0.05f * (float) viewWidth) + 0.5f);
 
 		// Draw the border...
-		(*fxpFillRect)(bar_left, top_pos, (unsigned short int) (bar_width), FONTH, &borderP);
+		(*fxpFillRectChecked)(bar_left, top_pos, (unsigned short int) (bar_width), FONTH, &borderP);
 		// Draw the empty bar...
-		(*fxpFillRect)((unsigned short int) (bar_left + 1U),
-			       (unsigned short int) (top_pos + 1U),
-			       (unsigned short int) MAX(0, bar_width - 3),
-			       (unsigned short int) (FONTH - 3U),
-			       &emptyP);
+		(*fxpFillRectChecked)((unsigned short int) (bar_left + 1U),
+				      (unsigned short int) (top_pos + 1U),
+				      (unsigned short int) MAX(0, bar_width - 3),
+				      (unsigned short int) (FONTH - 3U),
+				      &emptyP);
 
 		// We want our thumb to take 20% of the bar's width
 		unsigned short int thumb_width = (unsigned short int) ((0.20f * bar_width) + 0.5f);
@@ -6918,19 +6882,19 @@ int
 		unsigned short int thumb_left = (unsigned short int) (bar_left + ((0.05f * bar_width) * value) + 0.5f);
 
 		// And finally, draw the thumb, which we want to override the border with!
-		(*fxpFillRect)(thumb_left, top_pos, thumb_width, FONTH, &fgP);
+		(*fxpFillRectChecked)(thumb_left, top_pos, thumb_width, FONTH, &fgP);
 
 		// Draw an ellipsis in the middle of the thumb...
 		uint8_t ellipsis_size = (uint8_t)(FONTH / 3U);
 		// Three dots = two spaces, 3 + 2 = 5 ;).
 		unsigned short int ellipsis_left = (unsigned short int) ((thumb_width - (5U * ellipsis_size)) / 2U);
 		for (uint8_t i = 0U; i < 3U; i++) {
-			(*fxpFillRect)((unsigned short int) (thumb_left + ellipsis_left +
-							     (unsigned short int) (i * 2U * ellipsis_size)),
-				       (unsigned short int) (top_pos + ellipsis_size),
-				       ellipsis_size,
-				       ellipsis_size,
-				       &bgP);
+			(*fxpFillRectChecked)((unsigned short int) (thumb_left + ellipsis_left +
+								    (unsigned short int) (i * 2U * ellipsis_size)),
+					      (unsigned short int) (top_pos + ellipsis_size),
+					      ellipsis_size,
+					      ellipsis_size,
+					      &bgP);
 		}
 
 		// Don't refresh beyond the borders of the bar if we're backgroundless...

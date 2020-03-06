@@ -120,6 +120,8 @@ ifndef DEBUG
 		#EXTRA_CFLAGS+=-fopt-info-vec
 		# When playing with GProf
 		#EXTRA_CFLAGS+=-g -pg -fno-omit-frame-pointer
+		# When I just want my debug prints in a release build ;p.
+		EXTRA_CFLAGS+=-DDEBUG
 	endif
 	##
 	# Clang's version of optimization reports
