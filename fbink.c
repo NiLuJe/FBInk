@@ -834,9 +834,9 @@ static void
 #endif
 	}
 
-#ifdef DEBUG
+//#ifdef DEBUG
 	LOG("Filled a #%02hhX %hux%hu rectangle @ (%hu, %hu)", px->gray8, w, h, x, y);
-#endif
+//#endif
 }
 
 static void
@@ -1380,21 +1380,69 @@ static struct mxcfb_rect
 		for (uint8_t y = 0U; y < glyphHeight; y++) {                                                             \
 			/* y: input row, j: first output row after scaling */                                            \
 			j = (unsigned short int) (y * FONTSIZE_MULT);                                                    \
+			cy = (unsigned short int) (y_offs + j);                                                  \
+			unsigned short int px_count = 0U; \
+			short int last_px_type = -1; \
+			bool initial_stripe_px = true; \
 			for (uint8_t x = 0U; x < glyphWidth; x++) {                                                      \
-				/* x: input column, i: first output column after scaling */                              \
-				i = (unsigned short int) (x * FONTSIZE_MULT);                                            \
-				/* Initial coordinates, before we generate the extra pixels from the scaling factor */   \
-				cx = (unsigned short int) (x_offs + i);                                                  \
-				cy = (unsigned short int) (y_offs + j);                                                  \
+				if (x == 0U) { \
+					/* x: input column, i: first output column after scaling */                              \
+					i = (unsigned short int) (x * FONTSIZE_MULT);                                            \
+					/* Initial coordinates, before we generate the extra pixels from the scaling factor */   \
+					cx = (unsigned short int) (x_offs + i);                                                  \
+					LOG("Update cx to %hu for x: %hhu, y: %hhu", cx, x, y); \
+				} \
 				/* Each element encodes a full row, we access a column's bit in that row by shifting. */ \
 				if (bitmap[y] & 1U << x) {                                                               \
 					/* bit was set, pixel is fg! */                                                  \
-					/* Handle scaling by drawing a FONTSIZE_MULTpx square per pixel ;) */            \
-					(*fxpFillRect)(cx, cy, FONTSIZE_MULT, FONTSIZE_MULT, &fgP);                      \
+					if (x == 0U || last_px_type == 1) { \
+						px_count++; \
+						initial_stripe_px = false; \
+						LOG("Update fg px_count to %hu for x: %hhu, y: %hhu", px_count, x, y); \
+						if (x + 1U == glyphWidth) { \
+							(*fxpFillRect)(cx, cy, (unsigned short int) (FONTSIZE_MULT * px_count), FONTSIZE_MULT, &fgP); \
+						} \
+					} else { \
+						/* Handle scaling by drawing a FONTSIZE_MULTpx square per pixel, batched in a single stripe per same-color streak ;) */            \
+						/* Note that we're printing the *previous* color's stripe, so, bg! */ \
+						(*fxpFillRect)(cx, cy, (unsigned short int) (FONTSIZE_MULT * px_count), FONTSIZE_MULT, &bgP);                      \
+						px_count = 1U; \
+						initial_stripe_px = true; \
+						LOG("Reset fg px_count to 1 for x: %hhu, y: %hhu", x, y); \
+					} \
+					last_px_type = 1; \
 				} else {                                                                                 \
 					/* bit was unset, pixel is bg */                                                 \
-					(*fxpFillRect)(cx, cy, FONTSIZE_MULT, FONTSIZE_MULT, &bgP);                      \
+					if (x == 0U || last_px_type == 0) { \
+						px_count++; \
+						initial_stripe_px = false; \
+						LOG("Update bg px_count to %hu for x: %hhu, y: %hhu", px_count, x, y); \
+						if (x + 1U == glyphWidth) { \
+							(*fxpFillRect)(cx, cy, (unsigned short int) (FONTSIZE_MULT * px_count), FONTSIZE_MULT, &bgP); \
+						} \
+					} else { \
+						/* Note that we're printing the *previous* color's stripe, so, fg! */ \
+						(*fxpFillRect)(cx, cy, (unsigned short int) (FONTSIZE_MULT * px_count), FONTSIZE_MULT, &fgP);                      \
+						px_count = 1U; \
+						initial_stripe_px = true; \
+						LOG("Reset bg px_count to 1 for x: %hhu, y: %hhu", x, y); \
+					} \
+					last_px_type = 0; \
 				}                                                                                        \
+				if (initial_stripe_px) { \
+					/* x: input column, i: first output column after scaling */                              \
+					i = (unsigned short int) (x * FONTSIZE_MULT);                                            \
+					/* Initial coordinates, before we generate the extra pixels from the scaling factor */   \
+					cx = (unsigned short int) (x_offs + i);                                                  \
+					LOG("Update cx to %hu for x: %hhu, y: %hhu", cx, x, y); \
+				} \
+				if (x + 1U == glyphWidth) { \
+					if (bitmap[y] & 1U << x) { \
+						(*fxpFillRect)(cx, cy, (unsigned short int) (FONTSIZE_MULT * px_count), FONTSIZE_MULT, &fgP); \
+					} else { \
+						(*fxpFillRect)(cx, cy, (unsigned short int) (FONTSIZE_MULT * px_count), FONTSIZE_MULT, &bgP); \
+					} \
+				} \
 			}                                                                                                \
 		}                                                                                                        \
 	} else {                                                                                                         \
@@ -1403,6 +1451,7 @@ static struct mxcfb_rect
 		for (uint8_t y = 0U; y < glyphHeight; y++) {                                                             \
 			/* y: input row, j: first output row after scaling */                                            \
 			j = (unsigned short int) (y * FONTSIZE_MULT);                                                    \
+			cy = (unsigned short int) (y_offs + j);                                                  \
 			for (uint8_t x = 0U; x < glyphWidth; x++) {                                                      \
 				/* x: input column, i: first output column after scaling */                              \
 				i = (unsigned short int) (x * FONTSIZE_MULT);                                            \
@@ -1418,12 +1467,11 @@ static struct mxcfb_rect
 				}                                                                                        \
 				/* Initial coordinates, before we generate the extra pixels from the scaling factor */   \
 				cx = (unsigned short int) (x_offs + i);                                                  \
-				cy = (unsigned short int) (y_offs + j);                                                  \
 				/* NOTE: Apply our scaling factor in both dimensions! */                                 \
 				for (uint8_t l = 0U; l < FONTSIZE_MULT; l++) {                                           \
+					coords.y = (unsigned short int) (cy + l);                                \
 					for (uint8_t k = 0U; k < FONTSIZE_MULT; k++) {                                   \
 						coords.x = (unsigned short int) (cx + k);                                \
-						coords.y = (unsigned short int) (cy + l);                                \
 						/* In overlay mode, we only print foreground pixels, */                  \
 						/* and we print in the inverse color of the underlying pixel's */        \
 						/* Obviously, the closer we get to GRAY7, the less contrast we get */    \
