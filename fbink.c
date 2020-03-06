@@ -1384,14 +1384,10 @@ static struct mxcfb_rect
 			unsigned short int px_count = 0U; \
 			short int last_px_type = -1; \
 			bool initial_stripe_px = true; \
+			/* Coordinates for the first char */ \
+			i = 0U; \
+			cx = x_offs; \
 			for (uint8_t x = 0U; x < glyphWidth; x++) {                                                      \
-				if (x == 0U) { \
-					/* x: input column, i: first output column after scaling */                              \
-					i = (unsigned short int) (x * FONTSIZE_MULT);                                            \
-					/* Initial coordinates, before we generate the extra pixels from the scaling factor */   \
-					cx = (unsigned short int) (x_offs + i);                                                  \
-					LOG("Update cx to %hu for x: %hhu, y: %hhu", cx, x, y); \
-				} \
 				/* Each element encodes a full row, we access a column's bit in that row by shifting. */ \
 				if (bitmap[y] & 1U << x) {                                                               \
 					/* bit was set, pixel is fg! */                                                  \
@@ -1399,9 +1395,6 @@ static struct mxcfb_rect
 						px_count++; \
 						initial_stripe_px = false; \
 						LOG("Update fg px_count to %hu for x: %hhu, y: %hhu", px_count, x, y); \
-						if (x + 1U == glyphWidth) { \
-							(*fxpFillRect)(cx, cy, (unsigned short int) (FONTSIZE_MULT * px_count), FONTSIZE_MULT, &fgP); \
-						} \
 					} else { \
 						/* Handle scaling by drawing a FONTSIZE_MULTpx square per pixel, batched in a single stripe per same-color streak ;) */            \
 						/* Note that we're printing the *previous* color's stripe, so, bg! */ \
@@ -1417,9 +1410,6 @@ static struct mxcfb_rect
 						px_count++; \
 						initial_stripe_px = false; \
 						LOG("Update bg px_count to %hu for x: %hhu, y: %hhu", px_count, x, y); \
-						if (x + 1U == glyphWidth) { \
-							(*fxpFillRect)(cx, cy, (unsigned short int) (FONTSIZE_MULT * px_count), FONTSIZE_MULT, &bgP); \
-						} \
 					} else { \
 						/* Note that we're printing the *previous* color's stripe, so, fg! */ \
 						(*fxpFillRect)(cx, cy, (unsigned short int) (FONTSIZE_MULT * px_count), FONTSIZE_MULT, &fgP);                      \
