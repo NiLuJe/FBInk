@@ -421,6 +421,11 @@ void (*fxpFillRect)(unsigned short int,
 		    unsigned short int,
 		    unsigned short int,
 		    const FBInkPixel* restrict)                             = NULL;
+void (*fxpFillRectChecked)(unsigned short int,
+			   unsigned short int,
+			   unsigned short int,
+			   unsigned short int,
+			   const FBInkPixel* restrict)                      = NULL;
 // As well as the appropriate coordinates rotation functions...
 void (*fxpRotateCoords)(FBInkCoordinates* restrict)  = NULL;
 void (*fxpRotateRegion)(struct mxcfb_rect* restrict) = NULL;
@@ -510,26 +515,51 @@ static void fill_rect_Gray4(unsigned short int,
 			    unsigned short int,
 			    unsigned short int,
 			    const FBInkPixel* restrict);
+static void fill_rect_Gray4_checked(unsigned short int,
+				    unsigned short int,
+				    unsigned short int,
+				    unsigned short int,
+				    const FBInkPixel* restrict);
 static void fill_rect_Gray8(unsigned short int,
 			    unsigned short int,
 			    unsigned short int,
 			    unsigned short int,
 			    const FBInkPixel* restrict);
+static void fill_rect_Gray8_checked(unsigned short int,
+				    unsigned short int,
+				    unsigned short int,
+				    unsigned short int,
+				    const FBInkPixel* restrict);
 static void fill_rect_RGB565(unsigned short int,
 			     unsigned short int,
 			     unsigned short int,
 			     unsigned short int,
 			     const FBInkPixel* restrict);
+static void fill_rect_RGB565_checked(unsigned short int,
+				     unsigned short int,
+				     unsigned short int,
+				     unsigned short int,
+				     const FBInkPixel* restrict);
 static void fill_rect_RGB24(unsigned short int,
 			    unsigned short int,
 			    unsigned short int,
 			    unsigned short int,
 			    const FBInkPixel* restrict);
+static void fill_rect_RGB24_checked(unsigned short int,
+				    unsigned short int,
+				    unsigned short int,
+				    unsigned short int,
+				    const FBInkPixel* restrict);
 static void fill_rect_RGB32(unsigned short int,
 			    unsigned short int,
 			    unsigned short int,
 			    unsigned short int,
 			    const FBInkPixel* restrict);
+static void fill_rect_RGB32_checked(unsigned short int,
+				    unsigned short int,
+				    unsigned short int,
+				    unsigned short int,
+				    const FBInkPixel* restrict);
 static void clear_screen(int UNUSED_BY_NOTKINDLE, uint8_t, bool UNUSED_BY_NOTKINDLE);
 //static void checkerboard_screen(void);
 

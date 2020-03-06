@@ -579,29 +579,6 @@ static void
 		    unsigned short int         h,
 		    const FBInkPixel* restrict px)
 {
-	// Bounds-checking, to ensure the memset won't do stupid things...
-	// Do signed maths, to account for the fact that x or y might already be OOB!
-	if (x + w > screenWidth) {
-		w = (unsigned short int) MAX(0, (w - ((x + w) - (int) screenWidth)));
-#ifdef DEBUG
-		LOG("Chopped rectangle width to %hu", w);
-#endif
-	}
-	if (y + h > screenHeight) {
-		h = (unsigned short int) MAX(0, (h - ((y + h) - (int) screenHeight)));
-#ifdef DEBUG
-		LOG("Chopped rectangle height to %hu", h);
-#endif
-	}
-
-	// Abort early if that left us with an empty rectangle ;).
-	if (w == 0U || h == 0U) {
-#ifdef DEBUG
-		LOG("Skipped empty %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
-#endif
-		return;
-	}
-
 	// Go with pixel plotting @ 4bpp to keep this simple...
 	for (unsigned short int cy = 0U; cy < h; cy++) {
 		for (unsigned short int cx = 0U; cx < w; cx++) {
@@ -619,11 +596,11 @@ static void
 }
 
 static void
-    fill_rect_Gray8(unsigned short int         x,
-		    unsigned short int         y,
-		    unsigned short int         w,
-		    unsigned short int         h,
-		    const FBInkPixel* restrict px)
+    fill_rect_Gray4_checked(unsigned short int         x,
+			    unsigned short int         y,
+			    unsigned short int         w,
+			    unsigned short int         h,
+			    const FBInkPixel* restrict px)
 {
 	// Bounds-checking, to ensure the memset won't do stupid things...
 	// Do signed maths, to account for the fact that x or y might already be OOB!
@@ -648,6 +625,16 @@ static void
 		return;
 	}
 
+	return fill_rect_Gray4(x, y, w, h, px);
+}
+
+static void
+    fill_rect_Gray8(unsigned short int         x,
+		    unsigned short int         y,
+		    unsigned short int         w,
+		    unsigned short int         h,
+		    const FBInkPixel* restrict px)
+{
 	// NOTE: fxpRotateRegion is never set at 8bpp :).
 	for (size_t j = y; j < y + h; j++) {
 		uint8_t* p = fbPtr + (fInfo.line_length * j) + (x);
@@ -660,16 +647,14 @@ static void
 }
 
 static void
-    fill_rect_RGB565(unsigned short int         x,
-		     unsigned short int         y,
-		     unsigned short int         w,
-		     unsigned short int         h,
-		     const FBInkPixel* restrict px)
+    fill_rect_Gray8_checked(unsigned short int         x,
+			    unsigned short int         y,
+			    unsigned short int         w,
+			    unsigned short int         h,
+			    const FBInkPixel* restrict px)
 {
 	// Bounds-checking, to ensure the memset won't do stupid things...
 	// Do signed maths, to account for the fact that x or y might already be OOB!
-	// NOTE: Unlike put_pixel, we check against screenWidth/screenHeight instead of xres/yres because we're doing this
-	//       *before* fxpRotateRegion!
 	if (x + w > screenWidth) {
 		w = (unsigned short int) MAX(0, (w - ((x + w) - (int) screenWidth)));
 #ifdef DEBUG
@@ -691,6 +676,16 @@ static void
 		return;
 	}
 
+	return fill_rect_Gray8(x, y, w, h, px);
+}
+
+static void
+    fill_rect_RGB565(unsigned short int         x,
+		     unsigned short int         y,
+		     unsigned short int         w,
+		     unsigned short int         h,
+		     const FBInkPixel* restrict px)
+{
 	// Things are a bit trickier @ 16bpp, because except for black or white, we're not sure the requested color
 	// will be composed of two indentical bytes when packed as RGB565... -_-".
 	// NOTE: Silver lining: as fill_rect was originally designed to only ever be fed eInk palette colors,
@@ -725,14 +720,16 @@ static void
 }
 
 static void
-    fill_rect_RGB24(unsigned short int         x,
-		    unsigned short int         y,
-		    unsigned short int         w,
-		    unsigned short int         h,
-		    const FBInkPixel* restrict px)
+    fill_rect_RGB565_checked(unsigned short int         x,
+			     unsigned short int         y,
+			     unsigned short int         w,
+			     unsigned short int         h,
+			     const FBInkPixel* restrict px)
 {
 	// Bounds-checking, to ensure the memset won't do stupid things...
 	// Do signed maths, to account for the fact that x or y might already be OOB!
+	// NOTE: Unlike put_pixel, we check against screenWidth/screenHeight instead of xres/yres because we're doing this
+	//       *before* fxpRotateRegion!
 	if (x + w > screenWidth) {
 		w = (unsigned short int) MAX(0, (w - ((x + w) - (int) screenWidth)));
 #ifdef DEBUG
@@ -754,6 +751,16 @@ static void
 		return;
 	}
 
+	return fill_rect_RGB565(x, y, w, h, px);
+}
+
+static void
+    fill_rect_RGB24(unsigned short int         x,
+		    unsigned short int         y,
+		    unsigned short int         w,
+		    unsigned short int         h,
+		    const FBInkPixel* restrict px)
+{
 	// NOTE: fxpRotateRegion is never set at 24bpp :).
 	for (size_t j = y; j < y + h; j++) {
 		uint8_t* p = fbPtr + (fInfo.line_length * j) + (x * 3U);
@@ -766,11 +773,11 @@ static void
 }
 
 static void
-    fill_rect_RGB32(unsigned short int         x,
-		    unsigned short int         y,
-		    unsigned short int         w,
-		    unsigned short int         h,
-		    const FBInkPixel* restrict px)
+    fill_rect_RGB24_checked(unsigned short int         x,
+			    unsigned short int         y,
+			    unsigned short int         w,
+			    unsigned short int         h,
+			    const FBInkPixel* restrict px)
 {
 	// Bounds-checking, to ensure the memset won't do stupid things...
 	// Do signed maths, to account for the fact that x or y might already be OOB!
@@ -795,6 +802,16 @@ static void
 		return;
 	}
 
+	return fill_rect_RGB24(x, y, w, h, px);
+}
+
+static void
+    fill_rect_RGB32(unsigned short int         x,
+		    unsigned short int         y,
+		    unsigned short int         w,
+		    unsigned short int         h,
+		    const FBInkPixel* restrict px)
+{
 	// NOTE: fxpRotateRegion is never set at 32bpp :).
 	for (size_t j = y; j < y + h; j++) {
 		// NOTE: When targeting an eInk screen, we can afford to write bogus data in the alpha byte,
@@ -820,6 +837,39 @@ static void
 #ifdef DEBUG
 	LOG("Filled a #%02hhX %hux%hu rectangle @ (%hu, %hu)", px->gray8, w, h, x, y);
 #endif
+}
+
+static void
+    fill_rect_RGB32_checked(unsigned short int         x,
+			    unsigned short int         y,
+			    unsigned short int         w,
+			    unsigned short int         h,
+			    const FBInkPixel* restrict px)
+{
+	// Bounds-checking, to ensure the memset won't do stupid things...
+	// Do signed maths, to account for the fact that x or y might already be OOB!
+	if (x + w > screenWidth) {
+		w = (unsigned short int) MAX(0, (w - ((x + w) - (int) screenWidth)));
+#ifdef DEBUG
+		LOG("Chopped rectangle width to %hu", w);
+#endif
+	}
+	if (y + h > screenHeight) {
+		h = (unsigned short int) MAX(0, (h - ((y + h) - (int) screenHeight)));
+#ifdef DEBUG
+		LOG("Chopped rectangle height to %hu", h);
+#endif
+	}
+
+	// Abort early if that left us with an empty rectangle ;).
+	if (w == 0U || h == 0U) {
+#ifdef DEBUG
+		LOG("Skipped empty %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
+#endif
+		return;
+	}
+
+	return fill_rect_RGB32(x, y, w, h, px);
 }
 
 // Helper function to clear the screen - fill whole screen with given color
@@ -1399,12 +1449,16 @@ static struct mxcfb_rect
 			if (ch == ' ') {
 				// Unless we're not printing bg pixels, of course ;).
 				if (!fbink_cfg->is_overlay && !fbink_cfg->is_bgless) {
-					(*fxpFillRect)(x_offs, y_offs, FONTW, FONTH, &bgP);
-					// If current space (ci + 1) is the final column of the line, do a checked fill_rect,
+					// If current space is the final column of the line, do a checked fill_rect,
 					// because it might overflow when we have a halfcell offset
 					// in conjunction with a !isPerfectFit pixel offset,
 					// when we're padding and centering.
 					// c.f., the existing OOB checks in get/put pixel ;).
+					if (ci + 1U == MAXCOLS) {
+						(*fxpFillRectChecked)(x_offs, y_offs, FONTW, FONTH, &bgP);
+					} else {
+						(*fxpFillRect)(x_offs, y_offs, FONTW, FONTH, &bgP);
+					}
 				}
 			} else {
 				RENDER_GLYPH();
@@ -3274,28 +3328,33 @@ static int
 	switch (vInfo.bits_per_pixel) {
 		case 4U:
 			//fxpPutPixel = &put_pixel_Gray4;
-			fxpGetPixel = &get_pixel_Gray4;
-			fxpFillRect = &fill_rect_Gray4;
+			fxpGetPixel        = &get_pixel_Gray4;
+			fxpFillRect        = &fill_rect_Gray4;
+			fxpFillRectChecked = &fill_rect_Gray4_checked;
 			break;
 		case 8U:
 			//fxpPutPixel = &put_pixel_Gray8;
-			fxpGetPixel = &get_pixel_Gray8;
-			fxpFillRect = &fill_rect_Gray8;
+			fxpGetPixel        = &get_pixel_Gray8;
+			fxpFillRect        = &fill_rect_Gray8;
+			fxpFillRectChecked = &fill_rect_Gray8_checked;
 			break;
 		case 16U:
 			//fxpPutPixel = &put_pixel_RGB565;
-			fxpGetPixel = &get_pixel_RGB565;
-			fxpFillRect = &fill_rect_RGB565;
+			fxpGetPixel        = &get_pixel_RGB565;
+			fxpFillRect        = &fill_rect_RGB565;
+			fxpFillRectChecked = &fill_rect_RGB565_checked;
 			break;
 		case 24U:
 			//fxpPutPixel = &put_pixel_RGB24;
-			fxpGetPixel = &get_pixel_RGB24;
-			fxpFillRect = &fill_rect_RGB24;
+			fxpGetPixel        = &get_pixel_RGB24;
+			fxpFillRect        = &fill_rect_RGB24;
+			fxpFillRectChecked = &fill_rect_RGB24_checked;
 			break;
 		case 32U:
 			//fxpPutPixel = &put_pixel_RGB32;
-			fxpGetPixel = &get_pixel_RGB32;
-			fxpFillRect = &fill_rect_RGB32;
+			fxpGetPixel        = &get_pixel_RGB32;
+			fxpFillRect        = &fill_rect_RGB32;
+			fxpFillRectChecked = &fill_rect_RGB32_checked;
 			break;
 		default:
 			// Huh oh... Should never happen!
