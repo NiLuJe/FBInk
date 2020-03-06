@@ -1382,9 +1382,11 @@ static struct mxcfb_rect
 			j = (unsigned short int) (y * FONTSIZE_MULT);                                                    \
 			cy = (unsigned short int) (y_offs + j);                                                  \
 			unsigned short int px_count = 0U; \
+			/* We'll need to remember whether the previous pixel was already using the same color... */ \
+			/* 1 is fg, 0 is bg, first pixel could be either, so, -1 */ \
 			short int last_px_type = -1; \
 			bool initial_stripe_px = true; \
-			/* Coordinates for the first char */ \
+			/* Precompute the coordinates for the first char of the line */ \
 			i = 0U; \
 			cx = x_offs; \
 			for (uint8_t x = 0U; x < glyphWidth; x++) {                                                      \
@@ -1399,6 +1401,7 @@ static struct mxcfb_rect
 						/* Handle scaling by drawing a FONTSIZE_MULTpx square per pixel, batched in a single stripe per same-color streak ;) */            \
 						/* Note that we're printing the *previous* color's stripe, so, bg! */ \
 						(*fxpFillRect)(cx, cy, (unsigned short int) (FONTSIZE_MULT * px_count), FONTSIZE_MULT, &bgP);                      \
+						/* Which means we're already one pixel deep into a new stripe */ \
 						px_count = 1U; \
 						initial_stripe_px = true; \
 						LOG("Reset fg px_count to 1 for x: %hhu, y: %hhu", x, y); \
@@ -1418,7 +1421,8 @@ static struct mxcfb_rect
 						LOG("Reset bg px_count to 1 for x: %hhu, y: %hhu", x, y); \
 					} \
 					last_px_type = 0; \
-				}                                                                                        \
+				} \
+				/* If we're the first pixel of a new stripe, compute the coordinates of the stripe's start */ \
 				if (initial_stripe_px) { \
 					/* x: input column, i: first output column after scaling */                              \
 					i = (unsigned short int) (x * FONTSIZE_MULT);                                            \
@@ -1426,8 +1430,9 @@ static struct mxcfb_rect
 					cx = (unsigned short int) (x_offs + i);                                                  \
 					LOG("Update cx to %hu for x: %hhu, y: %hhu", cx, x, y); \
 				} \
+				/* If we're the final pixel of the line, draw the final stripe no matter what */ \
 				if (x + 1U == glyphWidth) { \
-					if (bitmap[y] & 1U << x) { \
+					if (last_px_type == 1) { \
 						(*fxpFillRect)(cx, cy, (unsigned short int) (FONTSIZE_MULT * px_count), FONTSIZE_MULT, &fgP); \
 					} else { \
 						(*fxpFillRect)(cx, cy, (unsigned short int) (FONTSIZE_MULT * px_count), FONTSIZE_MULT, &bgP); \
