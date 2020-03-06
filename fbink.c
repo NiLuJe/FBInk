@@ -1395,7 +1395,20 @@ static struct mxcfb_rect
 		}                                                                                                        \
 	}
 
-			RENDER_GLYPH();
+			// Fast-path through spaces, which are always going to be a FONTWxFONTH bg rectangle.
+			if (ch == ' ') {
+				// Unless we're not printing bg pixels, of course ;).
+				if (!fbink_cfg->is_overlay && !fbink_cfg->is_bgless) {
+					(*fxpFillRect)(x_offs, y_offs, FONTW, FONTH, &bgP);
+					// If current space (ci + 1) is the final column of the line, do a checked fill_rect,
+					// because it might overflow when we have a halfcell offset
+					// in conjunction with a !isPerfectFit pixel offset,
+					// when we're padding and centering.
+					// c.f., the existing OOB checks in get/put pixel ;).
+				}
+			} else {
+				RENDER_GLYPH();
+			}
 			// NOTE: If we did not mirror the bitmasks during conversion,
 			//       another approach to the fact that Unifont's hex format encodes columns in the reverse order
 			//       is simply to access columns in the reverse order ;).
