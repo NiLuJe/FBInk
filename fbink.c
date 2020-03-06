@@ -1364,14 +1364,6 @@ static struct mxcfb_rect
 			// Remember the next char's byte offset for next iteration's logging
 			ch_bi = bi;
 
-			// Get the glyph's pixmap (width <= 8 -> uint8_t)
-			const unsigned char* restrict bitmap = NULL;
-#ifdef FBINK_WITH_FONTS
-			bitmap = (*fxpFont8xGetBitmap)(ch);
-#else
-		bitmap = font8x8_get_bitmap(ch);
-#endif
-
 			// Crappy macro to avoid repeating myself in each branch...
 #define RENDER_GLYPH()                                                                                                   \
 	/* NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution), */                   \
@@ -1501,6 +1493,13 @@ static struct mxcfb_rect
 					}
 				}
 			} else {
+				// Get the glyph's pixmap (width <= 8 -> uint8_t)
+				const unsigned char* restrict bitmap = NULL;
+#ifdef FBINK_WITH_FONTS
+				bitmap = (*fxpFont8xGetBitmap)(ch);
+#else
+				bitmap = font8x8_get_bitmap(ch);
+#endif
 				RENDER_GLYPH();
 			}
 			// NOTE: If we did not mirror the bitmasks during conversion,
@@ -1531,10 +1530,6 @@ static struct mxcfb_rect
 			// Remember the next char's byte offset for next iteration's logging
 			ch_bi = bi;
 
-			// Get the glyph's pixmap (width <= 16 -> uint16_t)
-			const uint16_t* restrict bitmap = NULL;
-			bitmap                          = (*fxpFont16xGetBitmap)(ch);
-
 			// Fast-path through spaces, which are always going to be a FONTWxFONTH bg rectangle.
 			if (ch == ' ') {
 				// Unless we're not printing bg pixels, of course ;).
@@ -1551,6 +1546,10 @@ static struct mxcfb_rect
 					}
 				}
 			} else {
+				// Get the glyph's pixmap (width <= 16 -> uint16_t)
+				const uint16_t* restrict bitmap = NULL;
+				bitmap                          = (*fxpFont16xGetBitmap)(ch);
+
 				// Render, scale & plot!
 				RENDER_GLYPH();
 			}
@@ -1575,10 +1574,6 @@ static struct mxcfb_rect
 			// Remember the next char's byte offset for next iteration's logging
 			ch_bi = bi;
 
-			// Get the glyph's pixmap (width <= 32 -> uint32_t)
-			const uint32_t* restrict bitmap = NULL;
-			bitmap                          = (*fxpFont32xGetBitmap)(ch);
-
 			// Fast-path through spaces, which are always going to be a FONTWxFONTH bg rectangle.
 			if (ch == ' ') {
 				// Unless we're not printing bg pixels, of course ;).
@@ -1595,6 +1590,10 @@ static struct mxcfb_rect
 					}
 				}
 			} else {
+				// Get the glyph's pixmap (width <= 32 -> uint32_t)
+				const uint32_t* restrict bitmap = NULL;
+				bitmap                          = (*fxpFont32xGetBitmap)(ch);
+
 				// Render, scale & plot!
 				RENDER_GLYPH();
 			}
@@ -1620,10 +1619,6 @@ static struct mxcfb_rect
 			// Remember the next char's byte offset for next iteration's logging
 			ch_bi = bi;
 
-			// Get the glyph's pixmap (width <= 64 -> uint64_t)
-			const uint64_t* restrict bitmap = NULL;
-			bitmap = (*fxpFont64xGetBitmap)(ch);
-
 			// Fast-path through spaces, which are always going to be a FONTWxFONTH bg rectangle.
 			if (ch == ' ') {
 				// Unless we're not printing bg pixels, of course ;).
@@ -1640,6 +1635,10 @@ static struct mxcfb_rect
 					}
 				}
 			} else {
+				// Get the glyph's pixmap (width <= 64 -> uint64_t)
+				const uint64_t* restrict bitmap = NULL;
+				bitmap = (*fxpFont64xGetBitmap)(ch);
+
 				// Render, scale & plot!
 				RENDER_GLYPH();
 			}
