@@ -834,9 +834,9 @@ static void
 #endif
 	}
 
-//#ifdef DEBUG
+#ifdef DEBUG
 	LOG("Filled a #%02hhX %hux%hu rectangle @ (%hu, %hu)", px->gray8, w, h, x, y);
-//#endif
+#endif
 }
 
 static void
@@ -1397,7 +1397,6 @@ static struct mxcfb_rect
 						/* First column, or continuation of a fg color stripe */ \
 						px_count++; \
 						initial_stripe_px = false; \
-						LOG("Update fg px_count to %hu for x: %hhu, y: %hhu", px_count, x, y); \
 					} else { \
 						/* Handle scaling by drawing a FONTSIZE_MULTpx square per pixel, batched in a single stripe per same-color streak ;) */            \
 						/* Note that we're printing the *previous* color's stripe, so, bg! */ \
@@ -1405,7 +1404,6 @@ static struct mxcfb_rect
 						/* Which means we're already one pixel deep into a new stripe */ \
 						px_count = 1U; \
 						initial_stripe_px = true; \
-						LOG("Reset fg px_count to 1 for x: %hhu, y: %hhu", x, y); \
 					} \
 					last_px_type = 1; \
 				} else {                                                                                 \
@@ -1414,13 +1412,11 @@ static struct mxcfb_rect
 						/* First column, or continuation of a bg color stripe */ \
 						px_count++; \
 						initial_stripe_px = false; \
-						LOG("Update bg px_count to %hu for x: %hhu, y: %hhu", px_count, x, y); \
 					} else { \
 						/* Note that we're printing the *previous* color's stripe, so, fg! */ \
 						(*fxpFillRect)(cx, cy, (unsigned short int) (FONTSIZE_MULT * px_count), FONTSIZE_MULT, &fgP);                      \
 						px_count = 1U; \
 						initial_stripe_px = true; \
-						LOG("Reset bg px_count to 1 for x: %hhu, y: %hhu", x, y); \
 					} \
 					last_px_type = 0; \
 				} \
@@ -1430,7 +1426,6 @@ static struct mxcfb_rect
 					i = (unsigned short int) (x * FONTSIZE_MULT);                                            \
 					/* Initial coordinates, before we generate the extra pixels from the scaling factor */   \
 					cx = (unsigned short int) (x_offs + i);                                                  \
-					LOG("Update cx to %hu for x: %hhu, y: %hhu", cx, x, y); \
 				} \
 				/* If we're the final pixel of the line, draw the final stripe no matter what */ \
 				if (x + 1U == glyphWidth) { \
