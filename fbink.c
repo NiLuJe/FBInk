@@ -1384,7 +1384,7 @@ static struct mxcfb_rect
 			unsigned short int px_count = 0U; \
 			/* We'll need to remember whether the previous pixel was already using the same color... */ \
 			/* 1 is fg, 0 is bg, first pixel could be either, so, -1 */ \
-			short int last_px_type = -1; \
+			int8_t last_px_type = -1; \
 			bool initial_stripe_px = true; \
 			/* Precompute the coordinates for the first char of the line */ \
 			i = 0U; \
