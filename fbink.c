@@ -3854,7 +3854,7 @@ int
 				bgP.bgra.p ^= 0x00FFFFFFu;
 			}
 		}
-		(*fxpFillRect)(rect->left, rect->top, rect->width, rect->height, &bgP);
+		(*fxpFillRectChecked)(rect->left, rect->top, rect->width, rect->height, &bgP);
 		// And update the region...
 		region.top    = rect->top;
 		region.left   = rect->left;
