@@ -1386,7 +1386,7 @@ static struct mxcfb_rect
 			/* 1 is fg, 0 is bg, first pixel could be either, so, -1 */ \
 			int8_t last_px_type = -1; \
 			bool initial_stripe_px = true; \
-			/* Precompute the coordinates for the first char of the line */ \
+			/* Precompute the initial coordinates for the first char of the line */ \
 			i = 0U; \
 			cx = x_offs; \
 			for (uint8_t x = 0U; x < glyphWidth; x++) {                                                      \
@@ -1394,6 +1394,7 @@ static struct mxcfb_rect
 				if (bitmap[y] & 1U << x) {                                                               \
 					/* bit was set, pixel is fg! */                                                  \
 					if (x == 0U || last_px_type == 1) { \
+						/* First column, or continuation of a fg color stripe */ \
 						px_count++; \
 						initial_stripe_px = false; \
 						LOG("Update fg px_count to %hu for x: %hhu, y: %hhu", px_count, x, y); \
@@ -1410,6 +1411,7 @@ static struct mxcfb_rect
 				} else {                                                                                 \
 					/* bit was unset, pixel is bg */                                                 \
 					if (x == 0U || last_px_type == 0) { \
+						/* First column, or continuation of a bg color stripe */ \
 						px_count++; \
 						initial_stripe_px = false; \
 						LOG("Update bg px_count to %hu for x: %hhu, y: %hhu", px_count, x, y); \
