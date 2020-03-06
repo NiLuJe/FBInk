@@ -1495,8 +1495,25 @@ static struct mxcfb_rect
 			const uint16_t* restrict bitmap = NULL;
 			bitmap                          = (*fxpFont16xGetBitmap)(ch);
 
-			// Render, scale & plot!
-			RENDER_GLYPH();
+			// Fast-path through spaces, which are always going to be a FONTWxFONTH bg rectangle.
+			if (ch == ' ') {
+				// Unless we're not printing bg pixels, of course ;).
+				if (!fbink_cfg->is_overlay && !fbink_cfg->is_bgless) {
+					// If current space is the final column of the line, do a checked fill_rect,
+					// because it might overflow when we have a halfcell offset
+					// in conjunction with a !isPerfectFit pixel offset,
+					// when we're padding and centering.
+					// c.f., the existing OOB checks in get/put pixel ;).
+					if (ci + 1U == MAXCOLS) {
+						(*fxpFillRectChecked)(x_offs, y_offs, FONTW, FONTH, &bgP);
+					} else {
+						(*fxpFillRect)(x_offs, y_offs, FONTW, FONTH, &bgP);
+					}
+				}
+			} else {
+				// Render, scale & plot!
+				RENDER_GLYPH();
+			}
 
 			// Next glyph! This serves as the source for the pen position, hence it being used as an index...
 			ci++;
@@ -1522,8 +1539,25 @@ static struct mxcfb_rect
 			const uint32_t* restrict bitmap = NULL;
 			bitmap                          = (*fxpFont32xGetBitmap)(ch);
 
-			// Render, scale & plot!
-			RENDER_GLYPH();
+			// Fast-path through spaces, which are always going to be a FONTWxFONTH bg rectangle.
+			if (ch == ' ') {
+				// Unless we're not printing bg pixels, of course ;).
+				if (!fbink_cfg->is_overlay && !fbink_cfg->is_bgless) {
+					// If current space is the final column of the line, do a checked fill_rect,
+					// because it might overflow when we have a halfcell offset
+					// in conjunction with a !isPerfectFit pixel offset,
+					// when we're padding and centering.
+					// c.f., the existing OOB checks in get/put pixel ;).
+					if (ci + 1U == MAXCOLS) {
+						(*fxpFillRectChecked)(x_offs, y_offs, FONTW, FONTH, &bgP);
+					} else {
+						(*fxpFillRect)(x_offs, y_offs, FONTW, FONTH, &bgP);
+					}
+				}
+			} else {
+				// Render, scale & plot!
+				RENDER_GLYPH();
+			}
 
 			// Next glyph! This serves as the source for the pen position, hence it being used as an index...
 			ci++;
@@ -1550,8 +1584,25 @@ static struct mxcfb_rect
 			const uint64_t* restrict bitmap = NULL;
 			bitmap = (*fxpFont64xGetBitmap)(ch);
 
-			// Render, scale & plot!
-			RENDER_GLYPH();
+			// Fast-path through spaces, which are always going to be a FONTWxFONTH bg rectangle.
+			if (ch == ' ') {
+				// Unless we're not printing bg pixels, of course ;).
+				if (!fbink_cfg->is_overlay && !fbink_cfg->is_bgless) {
+					// If current space is the final column of the line, do a checked fill_rect,
+					// because it might overflow when we have a halfcell offset
+					// in conjunction with a !isPerfectFit pixel offset,
+					// when we're padding and centering.
+					// c.f., the existing OOB checks in get/put pixel ;).
+					if (ci + 1U == MAXCOLS) {
+						(*fxpFillRectChecked)(x_offs, y_offs, FONTW, FONTH, &bgP);
+					} else {
+						(*fxpFillRect)(x_offs, y_offs, FONTW, FONTH, &bgP);
+					}
+				}
+			} else {
+				// Render, scale & plot!
+				RENDER_GLYPH();
+			}
 
 			// Next glyph! This serves as the source for the pen position, hence it being used as an index...
 			ci++;
