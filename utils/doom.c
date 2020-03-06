@@ -285,7 +285,7 @@ static void
 	// Set the bottom line to the final color
 	const FBInkPixel px           = { .gray8 = fire_palette[sizeof(fire_palette) - 1U] };
 	const uint32_t   vertViewport = (uint32_t)(viewVertOrigin - viewVertOffset);
-	fill_rect(
+	(*fxpFillRect)(
 	    0U, (unsigned short int) (viewHeight + vertViewport - 1U), (unsigned short int) fInfo.line_length, 1U, &px);
 }
 
@@ -308,15 +308,15 @@ static void
 
 	// Fill the window w/ color 0
 	const FBInkPixel bg = { .gray8 = fire_palette[0U] };
-	fill_rect(fire_x_origin, fire_y_origin, FIRE_WIDTH, FIRE_HEIGHT, &bg);
+	(*fxpFillRect)(fire_x_origin, fire_y_origin, FIRE_WIDTH, FIRE_HEIGHT, &bg);
 
 	// Set the bottom line to the final color
 	const FBInkPixel fire = { .gray8 = fire_palette[sizeof(fire_palette) - 1U] };
-	fill_rect(fire_x_origin,
-		  (unsigned short int) (fire_y_origin + FIRE_HEIGHT - 1U),
-		  (unsigned short int) FIRE_WIDTH,
-		  1U,
-		  &fire);
+	(*fxpFillRect)(fire_x_origin,
+		       (unsigned short int) (fire_y_origin + FIRE_HEIGHT - 1U),
+		       (unsigned short int) FIRE_WIDTH,
+		       1U,
+		       &fire);
 }
 
 static void
@@ -373,18 +373,18 @@ static void
 
 	// Fill the window w/ color 0
 	const FBInkPixel bg = { .gray8 = fire_palette[0U] };
-	fill_rect(
+	(*fxpFillRect)(
 	    fire_x_origin, fire_y_origin, (unsigned short int) scaled_Width, (unsigned short int) scaled_Height, &bg);
 	// And the source canvas
 	memset(fire_canvas, fire_palette[0U], sizeof(fire_canvas));
 
 	// Set the bottom line to the final color
 	const FBInkPixel fire = { .gray8 = fire_palette[sizeof(fire_palette) - 1U] };
-	fill_rect(fire_x_origin,
-		  (unsigned short int) (fire_y_origin + scaled_Height - 1U),
-		  (unsigned short int) scaled_Width,
-		  scale,
-		  &fire);
+	(*fxpFillRect)(fire_x_origin,
+		       (unsigned short int) (fire_y_origin + scaled_Height - 1U),
+		       (unsigned short int) scaled_Width,
+		       scale,
+		       &fire);
 	// Again, the source canvas
 	memset(fire_canvas + ((FIRE_HEIGHT - 1U) * FIRE_WIDTH), fire_palette[sizeof(fire_palette) - 1U], FIRE_WIDTH);
 }
@@ -398,11 +398,11 @@ static void
 		*((uint8_t*) (fire_canvas + offset - FIRE_WIDTH)) = fire_palette[0U];
 		// Update the fb
 		const FBInkPixel px = { .gray8 = fire_palette[0U] };
-		fill_rect((unsigned short int) (fire_x_origin + (x * scale)),
-			  (unsigned short int) (fire_y_origin + ((y * scale) - 1U)),
-			  scale,
-			  scale,
-			  &px);
+		(*fxpFillRect)((unsigned short int) (fire_x_origin + (x * scale)),
+			       (unsigned short int) (fire_y_origin + ((y * scale) - 1U)),
+			       scale,
+			       scale,
+			       &px);
 	} else {
 		const size_t random = (rand() * 3) & 3;
 		// Update the source canvas
@@ -414,7 +414,7 @@ static void
 		const size_t     dst_y = dst / FIRE_WIDTH * scale + fire_y_origin;
 		const size_t     dst_x = dst % FIRE_WIDTH * scale + fire_x_origin;
 		const FBInkPixel px    = { .gray8 = fire_palette[(pal_idx - (random & 1U))] };
-		fill_rect((unsigned short int) dst_x, (unsigned short int) (dst_y - 1U), scale, scale, &px);
+		(*fxpFillRect)((unsigned short int) dst_x, (unsigned short int) (dst_y - 1U), scale, scale, &px);
 	}
 }
 
@@ -443,11 +443,11 @@ static void
 		*((uint8_t*) (fire_canvas + offset)) = fire_palette[(pal_idx - random)];
 		// Update the fb
 		const FBInkPixel px = { .gray8 = fire_palette[(pal_idx - random)] };
-		fill_rect((unsigned short int) (fire_x_origin + (x * scale)),
-			  (unsigned short int) (fire_y_origin + (y * scale)),
-			  scale,
-			  scale,
-			  &px);
+		(*fxpFillRect)((unsigned short int) (fire_x_origin + (x * scale)),
+			       (unsigned short int) (fire_y_origin + (y * scale)),
+			       scale,
+			       scale,
+			       &px);
 	}
 }
 
@@ -519,14 +519,14 @@ static void
 	const FBInkPixel bg = { .bgra.color.r = fire_colors[0U][0U],
 				.bgra.color.g = fire_colors[0U][1U],
 				.bgra.color.b = fire_colors[0U][2U] };
-	fill_rect(0U, 0U, (unsigned short int) viewWidth, (unsigned short int) viewHeight, &bg);
+	(*fxpFillRect)(0U, 0U, (unsigned short int) viewWidth, (unsigned short int) viewHeight, &bg);
 
 	// Set the bottom line to the final color
 	const size_t     idx = sizeof(fire_colors) / sizeof(*fire_colors) - 1U;
 	const FBInkPixel px  = { .bgra.color.r = fire_colors[idx][0U],
                                 .bgra.color.g = fire_colors[idx][1U],
                                 .bgra.color.b = fire_colors[idx][2U] };
-	fill_rect(0U, (unsigned short int) (viewHeight - 1U), (unsigned short int) viewWidth, 1U, &px);
+	(*fxpFillRect)(0U, (unsigned short int) (viewHeight - 1U), (unsigned short int) viewWidth, 1U, &px);
 }
 #endif    // !FBINK_FOR_LINUX
 

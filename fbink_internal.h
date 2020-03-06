@@ -416,6 +416,11 @@ long int USER_HZ = 100;
 // Pointers to the appropriate put_pixel/get_pixel functions for the fb's bpp
 //void (*fxpPutPixel)(const FBInkCoordinates* restrict, const FBInkPixel* restrict) = NULL;
 void (*fxpGetPixel)(const FBInkCoordinates* restrict, FBInkPixel* restrict) = NULL;
+void (*fxpFillRect)(unsigned short int,
+		    unsigned short int,
+		    unsigned short int,
+		    unsigned short int,
+		    const FBInkPixel* restrict)                             = NULL;
 // As well as the appropriate coordinates rotation functions...
 void (*fxpRotateCoords)(FBInkCoordinates* restrict)  = NULL;
 void (*fxpRotateRegion)(struct mxcfb_rect* restrict) = NULL;
@@ -499,11 +504,32 @@ static inline __attribute__((always_inline)) void get_pixel(FBInkCoordinates, FB
 #endif
 
 // NOTE: Enforced inlining on fill_rect currently doesn't gain us anything, on the other hand.
-static void fill_rect(unsigned short int,
-		      unsigned short int,
-		      unsigned short int,
-		      unsigned short int,
-		      const FBInkPixel* restrict);
+//       Which is why we went with a function pointer to bitdepth-specific branchless variants ;).
+static void fill_rect_Gray4(unsigned short int,
+			    unsigned short int,
+			    unsigned short int,
+			    unsigned short int,
+			    const FBInkPixel* restrict);
+static void fill_rect_Gray8(unsigned short int,
+			    unsigned short int,
+			    unsigned short int,
+			    unsigned short int,
+			    const FBInkPixel* restrict);
+static void fill_rect_RGB565(unsigned short int,
+			     unsigned short int,
+			     unsigned short int,
+			     unsigned short int,
+			     const FBInkPixel* restrict);
+static void fill_rect_RGB24(unsigned short int,
+			    unsigned short int,
+			    unsigned short int,
+			    unsigned short int,
+			    const FBInkPixel* restrict);
+static void fill_rect_RGB32(unsigned short int,
+			    unsigned short int,
+			    unsigned short int,
+			    unsigned short int,
+			    const FBInkPixel* restrict);
 static void clear_screen(int UNUSED_BY_NOTKINDLE, uint8_t, bool UNUSED_BY_NOTKINDLE);
 //static void checkerboard_screen(void);
 

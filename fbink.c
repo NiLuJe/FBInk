@@ -571,13 +571,13 @@ static inline __attribute__((always_inline)) void
 	}
 }
 
-// Helper function to draw a rectangle in given color
+// Helper functions to draw a rectangle in a given color
 static void
-    fill_rect(unsigned short int         x,
-	      unsigned short int         y,
-	      unsigned short int         w,
-	      unsigned short int         h,
-	      const FBInkPixel* restrict px)
+    fill_rect_Gray4(unsigned short int         x,
+		    unsigned short int         y,
+		    unsigned short int         w,
+		    unsigned short int         h,
+		    const FBInkPixel* restrict px)
 {
 	// Bounds-checking, to ensure the memset won't do stupid things...
 	// Do signed maths, to account for the fact that x or y might already be OOB!
@@ -602,80 +602,221 @@ static void
 		return;
 	}
 
-	if (vInfo.bits_per_pixel == 4U) {
-		// Go with pixel plotting @ 4bpp to keep this simple...
-		for (unsigned short int cy = 0U; cy < h; cy++) {
-			for (unsigned short int cx = 0U; cx < w; cx++) {
-				const FBInkCoordinates coords = {
-					.x = (unsigned short int) (x + cx),
-					.y = (unsigned short int) (y + cy),
-				};
-				put_pixel_Gray4(&coords, px);
-			}
-		}
-	} else if (vInfo.bits_per_pixel == 8U) {
-		// NOTE: fxpRotateRegion is never set at 8bpp :).
-		for (size_t j = y; j < y + h; j++) {
-			uint8_t* p = fbPtr + (fInfo.line_length * j) + (x);
-			memset(p, px->gray8, w);
-		}
-	} else if (vInfo.bits_per_pixel == 16U) {
-		// Things are a bit trickier @ 16bpp, because except for black or white, we're not sure the requested color
-		// will be composed of two indentical bytes when packed as RGB565... -_-".
-		// NOTE: Silver lining: as fill_rect was originally designed to only ever be fed eInk palette colors,
-		//       we have a guarantee that the input pixel is already packed, so we can use px->rgb565 ;).
-
-		struct mxcfb_rect region = {
-			.top    = y,
-			.left   = x,
-			.width  = w,
-			.height = h,
-		};
-		(*fxpRotateRegion)(&region);
-
-		// And that's a cheap-ass manual memset16, let's hope the compiler can do something fun with that...
-		// That's the exact pattern used by the Linux kernel (c.f., memset16 @ lib/string.c), so, here's hoping ;).
-		for (size_t j = region.top; j < region.top + region.height; j++) {
-			const size_t px_offset = ((fInfo.line_length * j) + (region.left << 1U));
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-align"
-			uint16_t* p = (uint16_t*) (fbPtr + px_offset);
-#pragma GCC diagnostic pop
-			size_t px_count = region.width;
-
-			while (px_count--) {
-				*p++ = px->rgb565;
+	// Go with pixel plotting @ 4bpp to keep this simple...
+	for (unsigned short int cy = 0U; cy < h; cy++) {
+		for (unsigned short int cx = 0U; cx < w; cx++) {
+			const FBInkCoordinates coords = {
+				.x = (unsigned short int) (x + cx),
+				.y = (unsigned short int) (y + cy),
 			};
-		}
-	} else if (vInfo.bits_per_pixel == 24U) {
-		// NOTE: fxpRotateRegion is never set at 24bpp :).
-		for (size_t j = y; j < y + h; j++) {
-			uint8_t* p = fbPtr + (fInfo.line_length * j) + (x * 3U);
-			memset(p, px->gray8, w * 3U);
-		}
-	} else if (vInfo.bits_per_pixel == 32U) {
-		// NOTE: fxpRotateRegion is never set at 32bpp :).
-		for (size_t j = y; j < y + h; j++) {
-			// NOTE: When targeting an eInk screen, we can afford to write bogus data in the alpha byte,
-			//       as it's essentially ignored there...
-			//       But otherwise, go with a cheap memset32 so we preserve the alpha value of our input pixel...
-#ifdef FBINK_FOR_LINUX
-			const size_t px_offset = ((fInfo.line_length * j) + (size_t)(x << 2U));
-#	pragma GCC diagnostic push
-#	pragma GCC diagnostic ignored "-Wcast-align"
-			uint32_t* p = (uint32_t*) (fbPtr + px_offset);
-#	pragma GCC diagnostic pop
-			size_t px_count = w;
-
-			while (px_count--) {
-				*p++ = px->bgra.p;
-			};
-#else
-			uint8_t* p = fbPtr + (fInfo.line_length * j) + (x << 2U);
-			memset(p, px->gray8, (size_t)(w << 2U));
-#endif
+			put_pixel_Gray4(&coords, px);
 		}
 	}
+
+#ifdef DEBUG
+	LOG("Filled a #%02hhX %hux%hu rectangle @ (%hu, %hu)", px->gray8, w, h, x, y);
+#endif
+}
+
+static void
+    fill_rect_Gray8(unsigned short int         x,
+		    unsigned short int         y,
+		    unsigned short int         w,
+		    unsigned short int         h,
+		    const FBInkPixel* restrict px)
+{
+	// Bounds-checking, to ensure the memset won't do stupid things...
+	// Do signed maths, to account for the fact that x or y might already be OOB!
+	if (x + w > screenWidth) {
+		w = (unsigned short int) MAX(0, (w - ((x + w) - (int) screenWidth)));
+#ifdef DEBUG
+		LOG("Chopped rectangle width to %hu", w);
+#endif
+	}
+	if (y + h > screenHeight) {
+		h = (unsigned short int) MAX(0, (h - ((y + h) - (int) screenHeight)));
+#ifdef DEBUG
+		LOG("Chopped rectangle height to %hu", h);
+#endif
+	}
+
+	// Abort early if that left us with an empty rectangle ;).
+	if (w == 0U || h == 0U) {
+#ifdef DEBUG
+		LOG("Skipped empty %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
+#endif
+		return;
+	}
+
+	// NOTE: fxpRotateRegion is never set at 8bpp :).
+	for (size_t j = y; j < y + h; j++) {
+		uint8_t* p = fbPtr + (fInfo.line_length * j) + (x);
+		memset(p, px->gray8, w);
+	}
+
+#ifdef DEBUG
+	LOG("Filled a #%02hhX %hux%hu rectangle @ (%hu, %hu)", px->gray8, w, h, x, y);
+#endif
+}
+
+static void
+    fill_rect_RGB565(unsigned short int         x,
+		     unsigned short int         y,
+		     unsigned short int         w,
+		     unsigned short int         h,
+		     const FBInkPixel* restrict px)
+{
+	// Bounds-checking, to ensure the memset won't do stupid things...
+	// Do signed maths, to account for the fact that x or y might already be OOB!
+	// NOTE: Unlike put_pixel, we check against screenWidth/screenHeight instead of xres/yres because we're doing this
+	//       *before* fxpRotateRegion!
+	if (x + w > screenWidth) {
+		w = (unsigned short int) MAX(0, (w - ((x + w) - (int) screenWidth)));
+#ifdef DEBUG
+		LOG("Chopped rectangle width to %hu", w);
+#endif
+	}
+	if (y + h > screenHeight) {
+		h = (unsigned short int) MAX(0, (h - ((y + h) - (int) screenHeight)));
+#ifdef DEBUG
+		LOG("Chopped rectangle height to %hu", h);
+#endif
+	}
+
+	// Abort early if that left us with an empty rectangle ;).
+	if (w == 0U || h == 0U) {
+#ifdef DEBUG
+		LOG("Skipped empty %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
+#endif
+		return;
+	}
+
+	// Things are a bit trickier @ 16bpp, because except for black or white, we're not sure the requested color
+	// will be composed of two indentical bytes when packed as RGB565... -_-".
+	// NOTE: Silver lining: as fill_rect was originally designed to only ever be fed eInk palette colors,
+	//       we have a guarantee that the input pixel is already packed, so we can use px->rgb565 ;).
+
+	struct mxcfb_rect region = {
+		.top    = y,
+		.left   = x,
+		.width  = w,
+		.height = h,
+	};
+	(*fxpRotateRegion)(&region);
+
+	// And that's a cheap-ass manual memset16, let's hope the compiler can do something fun with that...
+	// That's the exact pattern used by the Linux kernel (c.f., memset16 @ lib/string.c), so, here's hoping ;).
+	for (size_t j = region.top; j < region.top + region.height; j++) {
+		const size_t px_offset = ((fInfo.line_length * j) + (region.left << 1U));
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
+		uint16_t* p = (uint16_t*) (fbPtr + px_offset);
+#pragma GCC diagnostic pop
+		size_t px_count = region.width;
+
+		while (px_count--) {
+			*p++ = px->rgb565;
+		};
+	}
+
+#ifdef DEBUG
+	LOG("Filled a #%02hhX %hux%hu rectangle @ (%hu, %hu)", px->gray8, w, h, x, y);
+#endif
+}
+
+static void
+    fill_rect_RGB24(unsigned short int         x,
+		    unsigned short int         y,
+		    unsigned short int         w,
+		    unsigned short int         h,
+		    const FBInkPixel* restrict px)
+{
+	// Bounds-checking, to ensure the memset won't do stupid things...
+	// Do signed maths, to account for the fact that x or y might already be OOB!
+	if (x + w > screenWidth) {
+		w = (unsigned short int) MAX(0, (w - ((x + w) - (int) screenWidth)));
+#ifdef DEBUG
+		LOG("Chopped rectangle width to %hu", w);
+#endif
+	}
+	if (y + h > screenHeight) {
+		h = (unsigned short int) MAX(0, (h - ((y + h) - (int) screenHeight)));
+#ifdef DEBUG
+		LOG("Chopped rectangle height to %hu", h);
+#endif
+	}
+
+	// Abort early if that left us with an empty rectangle ;).
+	if (w == 0U || h == 0U) {
+#ifdef DEBUG
+		LOG("Skipped empty %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
+#endif
+		return;
+	}
+
+	// NOTE: fxpRotateRegion is never set at 24bpp :).
+	for (size_t j = y; j < y + h; j++) {
+		uint8_t* p = fbPtr + (fInfo.line_length * j) + (x * 3U);
+		memset(p, px->gray8, w * 3U);
+	}
+
+#ifdef DEBUG
+	LOG("Filled a #%02hhX %hux%hu rectangle @ (%hu, %hu)", px->gray8, w, h, x, y);
+#endif
+}
+
+static void
+    fill_rect_RGB32(unsigned short int         x,
+		    unsigned short int         y,
+		    unsigned short int         w,
+		    unsigned short int         h,
+		    const FBInkPixel* restrict px)
+{
+	// Bounds-checking, to ensure the memset won't do stupid things...
+	// Do signed maths, to account for the fact that x or y might already be OOB!
+	if (x + w > screenWidth) {
+		w = (unsigned short int) MAX(0, (w - ((x + w) - (int) screenWidth)));
+#ifdef DEBUG
+		LOG("Chopped rectangle width to %hu", w);
+#endif
+	}
+	if (y + h > screenHeight) {
+		h = (unsigned short int) MAX(0, (h - ((y + h) - (int) screenHeight)));
+#ifdef DEBUG
+		LOG("Chopped rectangle height to %hu", h);
+#endif
+	}
+
+	// Abort early if that left us with an empty rectangle ;).
+	if (w == 0U || h == 0U) {
+#ifdef DEBUG
+		LOG("Skipped empty %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
+#endif
+		return;
+	}
+
+	// NOTE: fxpRotateRegion is never set at 32bpp :).
+	for (size_t j = y; j < y + h; j++) {
+		// NOTE: When targeting an eInk screen, we can afford to write bogus data in the alpha byte,
+		//       as it's essentially ignored there...
+		//       But otherwise, go with a cheap memset32 so we preserve the alpha value of our input pixel...
+#ifdef FBINK_FOR_LINUX
+		const size_t px_offset = ((fInfo.line_length * j) + (size_t)(x << 2U));
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
+		uint32_t* p = (uint32_t*) (fbPtr + px_offset);
+#	pragma GCC diagnostic pop
+		size_t px_count = w;
+
+		while (px_count--) {
+			*p++ = px->bgra.p;
+		};
+#else
+		uint8_t* p = fbPtr + (fInfo.line_length * j) + (x << 2U);
+		memset(p, px->gray8, (size_t)(w << 2U));
+#endif
+	}
+
 #ifdef DEBUG
 	LOG("Filled a #%02hhX %hux%hu rectangle @ (%hu, %hu)", px->gray8, w, h, x, y);
 #endif
@@ -1058,7 +1199,7 @@ static struct mxcfb_rect
 		    pixel_offset > 0U) {
 			LOG("Painting a background rectangle on the left edge on account of pixel_offset");
 			// Make sure we don't leave a hoffset sized gap when we have a positive hoffset...
-			fill_rect(
+			(*fxpFillRect)(
 			    hoffset > 0 ? (unsigned short int) (hoffset + viewHoriOrigin)
 					: (unsigned short int) (0U + viewHoriOrigin),
 			    (unsigned short int) (region.top + (unsigned short int) (multiline_offset * FONTH)),
@@ -1088,7 +1229,7 @@ static struct mxcfb_rect
 			// NOTE: !isPerfectFit ensures pixel_offset is non-zero
 			LOG("Painting a background rectangle to fill the dead space on the right edge");
 			// Make sure we don't leave a hoffset sized gap when we have a negative hoffset...
-			fill_rect(
+			(*fxpFillRect)(
 			    hoffset < 0 ? (unsigned short int) (screenWidth - pixel_offset -
 								(unsigned short int) abs(hoffset) - viewHoriOrigin)
 					: (unsigned short int) (screenWidth - pixel_offset - viewHoriOrigin),
@@ -1199,10 +1340,10 @@ static struct mxcfb_rect
 				if (bitmap[y] & 1U << x) {                                                               \
 					/* bit was set, pixel is fg! */                                                  \
 					/* Handle scaling by drawing a FONTSIZE_MULTpx square per pixel ;) */            \
-					fill_rect(cx, cy, FONTSIZE_MULT, FONTSIZE_MULT, &fgP);                           \
+					(*fxpFillRect)(cx, cy, FONTSIZE_MULT, FONTSIZE_MULT, &fgP);                      \
 				} else {                                                                                 \
 					/* bit was unset, pixel is bg */                                                 \
-					fill_rect(cx, cy, FONTSIZE_MULT, FONTSIZE_MULT, &bgP);                           \
+					(*fxpFillRect)(cx, cy, FONTSIZE_MULT, FONTSIZE_MULT, &bgP);                      \
 				}                                                                                        \
 			}                                                                                                \
 		}                                                                                                        \
@@ -3121,22 +3262,27 @@ static int
 		case 4U:
 			//fxpPutPixel = &put_pixel_Gray4;
 			fxpGetPixel = &get_pixel_Gray4;
+			fxpFillRect = &fill_rect_Gray4;
 			break;
 		case 8U:
 			//fxpPutPixel = &put_pixel_Gray8;
 			fxpGetPixel = &get_pixel_Gray8;
+			fxpFillRect = &fill_rect_Gray8;
 			break;
 		case 16U:
 			//fxpPutPixel = &put_pixel_RGB565;
 			fxpGetPixel = &get_pixel_RGB565;
+			fxpFillRect = &fill_rect_RGB565;
 			break;
 		case 24U:
 			//fxpPutPixel = &put_pixel_RGB24;
 			fxpGetPixel = &get_pixel_RGB24;
+			fxpFillRect = &fill_rect_RGB24;
 			break;
 		case 32U:
 			//fxpPutPixel = &put_pixel_RGB32;
 			fxpGetPixel = &get_pixel_RGB32;
+			fxpFillRect = &fill_rect_RGB32;
 			break;
 		default:
 			// Huh oh... Should never happen!
@@ -3585,7 +3731,7 @@ int
 				bgP.bgra.p ^= 0x00FFFFFFu;
 			}
 		}
-		fill_rect(rect->left, rect->top, rect->width, rect->height, &bgP);
+		(*fxpFillRect)(rect->left, rect->top, rect->width, rect->height, &bgP);
 		// And update the region...
 		region.top    = rect->top;
 		region.left   = rect->left;
@@ -3902,11 +4048,11 @@ static int
 
 	// Did we want to paint a background rectangle (i.e., to mimic fbink_cls)?
 	if (do_clear) {
-		fill_rect((unsigned short int) region.left,
-			  (unsigned short int) region.top,
-			  (unsigned short int) region.width,
-			  (unsigned short int) region.height,
-			  &penBGPixel);
+		(*fxpFillRect)((unsigned short int) region.left,
+			       (unsigned short int) region.top,
+			       (unsigned short int) region.width,
+			       (unsigned short int) region.height,
+			       &penBGPixel);
 	}
 
 	// Rotate the region if need be, and remember the rect...
@@ -5194,11 +5340,11 @@ int
 		region.top  = area.tl.y;
 		// That's easy enough, simply fill the drawing area with the bg color before rendering anything
 		if (!is_overlay && !is_bgless) {
-			fill_rect((unsigned short int) region.left,
-				  (unsigned short int) region.top,
-				  max_lw,
-				  (unsigned short int) print_height,
-				  &bgP);
+			(*fxpFillRect)((unsigned short int) region.left,
+				       (unsigned short int) region.top,
+				       max_lw,
+				       (unsigned short int) print_height,
+				       &bgP);
 		}
 	}
 
@@ -5409,17 +5555,17 @@ int
 			// Unless we're in a backgroundless drawing mode, draw the padding rectangles...
 			if (!is_overlay && !is_bgless) {
 				// Left padding (left edge of the drawing area to initial pen position)
-				fill_rect((unsigned short int) region.left,
-					  paint_point.y,
-					  (unsigned short int) (paint_point.x - region.left),
-					  (unsigned short int) curr_print_height,
-					  &bgP);
+				(*fxpFillRect)((unsigned short int) region.left,
+					       paint_point.y,
+					       (unsigned short int) (paint_point.x - region.left),
+					       (unsigned short int) curr_print_height,
+					       &bgP);
 				// Right padding (final pen position to the right edge of the drawing area)
-				fill_rect((unsigned short int) (paint_point.x + lw),
-					  paint_point.y,
-					  (unsigned short int) (viewWidth - (paint_point.x + lw)),
-					  (unsigned short int) curr_print_height,
-					  &bgP);
+				(*fxpFillRect)((unsigned short int) (paint_point.x + lw),
+					       paint_point.y,
+					       (unsigned short int) (viewWidth - (paint_point.x + lw)),
+					       (unsigned short int) curr_print_height,
+					       &bgP);
 			}
 		} else if (cfg->padding == VERT_PADDING) {
 			region.top    = area.tl.y;
@@ -5427,11 +5573,11 @@ int
 			if (!is_overlay && !is_bgless) {
 				// First line? Top padding (top edge of the drawing area to initial pen position)
 				if (line == 0U) {
-					fill_rect(paint_point.x,
-						  (unsigned short int) region.top,
-						  (unsigned short int) lw,
-						  (unsigned short int) (paint_point.y - region.top),
-						  &bgP);
+					(*fxpFillRect)(paint_point.x,
+						       (unsigned short int) region.top,
+						       (unsigned short int) lw,
+						       (unsigned short int) (paint_point.y - region.top),
+						       &bgP);
 				}
 			}
 		} else if (cfg->padding == FULL_PADDING) {
@@ -5671,12 +5817,12 @@ int
 			//       since we're rendering/computing line width line by line, we can't do that ;).
 			//       This makes vertical padding a bit gimmicky in practice.
 			//       Thankfully, there's a full padding mode available ;).
-			fill_rect(start_x,
-				  paint_point.y,
-				  (unsigned short int) lw,
-				  (unsigned short int) ((viewHeight + (uint32_t)(viewVertOrigin - viewVertOffset)) -
-							paint_point.y),
-				  &bgP);
+			(*fxpFillRect)(start_x,
+				       paint_point.y,
+				       (unsigned short int) lw,
+				       (unsigned short int) ((viewHeight + (uint32_t)(viewVertOrigin - viewVertOffset)) -
+							     paint_point.y),
+				       &bgP);
 		}
 	}
 	if (paint_point.y + max_line_height > area.br.y) {
@@ -6451,7 +6597,7 @@ int
 
 	// ... unless we were asked to skip background pixels... ;).
 	if (!fbink_cfg->is_bgless) {
-		fill_rect(left_pos, top_pos, (unsigned short int) screenWidth, FONTH, &bgP);
+		(*fxpFillRect)(left_pos, top_pos, (unsigned short int) screenWidth, FONTH, &bgP);
 	}
 
 	// NOTE: We always use the same BG_ constant in order to get a rough inverse by just swapping to the inverted LUT ;).
@@ -6519,24 +6665,24 @@ int
 		unsigned short int empty_left  = (unsigned short int) (fill_left + fill_width);
 
 		// Draw the border...
-		fill_rect(fill_left, top_pos, bar_width, FONTH, &borderP);
+		(*fxpFillRect)(fill_left, top_pos, bar_width, FONTH, &borderP);
 		// Draw the fill bar, which we want to override the border with!
-		fill_rect(fill_left, top_pos, fill_width, FONTH, &fgP);
+		(*fxpFillRect)(fill_left, top_pos, fill_width, FONTH, &fgP);
 		// And the empty bar...
 		// NOTE: With a minor tweak to keep a double-width border on the bottom & right sides ;).
 		if (value == 0U) {
 			// Keep the left border alone!
-			fill_rect((unsigned short int) (empty_left + 1U),
-				  (unsigned short int) (top_pos + 1U),
-				  (unsigned short int) MAX(0, empty_width - 3),
-				  (unsigned short int) (FONTH - 3U),
-				  &emptyP);
+			(*fxpFillRect)((unsigned short int) (empty_left + 1U),
+				       (unsigned short int) (top_pos + 1U),
+				       (unsigned short int) MAX(0, empty_width - 3),
+				       (unsigned short int) (FONTH - 3U),
+				       &emptyP);
 		} else {
-			fill_rect(empty_left,
-				  (unsigned short int) (top_pos + 1U),
-				  (unsigned short int) MAX(0, empty_width - 2),
-				  (unsigned short int) (FONTH - 3U),
-				  &emptyP);
+			(*fxpFillRect)(empty_left,
+				       (unsigned short int) (top_pos + 1U),
+				       (unsigned short int) MAX(0, empty_width - 2),
+				       (unsigned short int) (FONTH - 3U),
+				       &emptyP);
 		}
 
 		// We enforce centering for the percentage text...
@@ -6578,13 +6724,13 @@ int
 		unsigned short int bar_left  = (unsigned short int) (left_pos + (0.05f * (float) viewWidth) + 0.5f);
 
 		// Draw the border...
-		fill_rect(bar_left, top_pos, (unsigned short int) (bar_width), FONTH, &borderP);
+		(*fxpFillRect)(bar_left, top_pos, (unsigned short int) (bar_width), FONTH, &borderP);
 		// Draw the empty bar...
-		fill_rect((unsigned short int) (bar_left + 1U),
-			  (unsigned short int) (top_pos + 1U),
-			  (unsigned short int) MAX(0, bar_width - 3),
-			  (unsigned short int) (FONTH - 3U),
-			  &emptyP);
+		(*fxpFillRect)((unsigned short int) (bar_left + 1U),
+			       (unsigned short int) (top_pos + 1U),
+			       (unsigned short int) MAX(0, bar_width - 3),
+			       (unsigned short int) (FONTH - 3U),
+			       &emptyP);
 
 		// We want our thumb to take 20% of the bar's width
 		unsigned short int thumb_width = (unsigned short int) ((0.20f * bar_width) + 0.5f);
@@ -6593,19 +6739,19 @@ int
 		unsigned short int thumb_left = (unsigned short int) (bar_left + ((0.05f * bar_width) * value) + 0.5f);
 
 		// And finally, draw the thumb, which we want to override the border with!
-		fill_rect(thumb_left, top_pos, thumb_width, FONTH, &fgP);
+		(*fxpFillRect)(thumb_left, top_pos, thumb_width, FONTH, &fgP);
 
 		// Draw an ellipsis in the middle of the thumb...
 		uint8_t ellipsis_size = (uint8_t)(FONTH / 3U);
 		// Three dots = two spaces, 3 + 2 = 5 ;).
 		unsigned short int ellipsis_left = (unsigned short int) ((thumb_width - (5U * ellipsis_size)) / 2U);
 		for (uint8_t i = 0U; i < 3U; i++) {
-			fill_rect((unsigned short int) (thumb_left + ellipsis_left +
-							(unsigned short int) (i * 2U * ellipsis_size)),
-				  (unsigned short int) (top_pos + ellipsis_size),
-				  ellipsis_size,
-				  ellipsis_size,
-				  &bgP);
+			(*fxpFillRect)((unsigned short int) (thumb_left + ellipsis_left +
+							     (unsigned short int) (i * 2U * ellipsis_size)),
+				       (unsigned short int) (top_pos + ellipsis_size),
+				       ellipsis_size,
+				       ellipsis_size,
+				       &bgP);
 		}
 
 		// Don't refresh beyond the borders of the bar if we're backgroundless...
