@@ -387,6 +387,7 @@ static inline __attribute__((always_inline)) void
 	//       For instance, when we have a halfcell offset in conjunction with a !isPerfectFit pixel offset,
 	//       when we're padding and centering, the final whitespace of right-padding will have its last
 	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
+	//       And, of course, anything using hoffset or voffset can happily push stuff OOB ;).
 	if (coords.x >= vInfo.xres || coords.y >= vInfo.yres) {
 #ifdef DEBUG
 		// NOTE: This is only enabled in Debug builds because it can be pretty verbose,
@@ -544,6 +545,7 @@ static inline __attribute__((always_inline)) void
 	//       For instance, when we have a halfcell offset in conjunction with a !isPerfectFit pixel offset,
 	//       when we're padding and centering, the final whitespace of right-padding will have its last
 	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
+	//       And, of course, anything using hoffset or voffset can happily push stuff OOB ;).
 	if (coords.x >= vInfo.xres || coords.y >= vInfo.yres) {
 #ifdef DEBUG
 		// NOTE: This is only enabled in Debug builds because it can be pretty verbose,
