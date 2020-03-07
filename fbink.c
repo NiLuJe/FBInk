@@ -1497,7 +1497,7 @@ static struct mxcfb_rect
 	}
 
 			// Fast-path through spaces, which are always going to be a FONTWxFONTH bg rectangle.
-			if (ch == ' ') {
+			if (ch == 0x20u) {
 				// Unless we're not printing bg pixels, of course ;).
 				if (!fbink_cfg->is_overlay && !fbink_cfg->is_bgless) {
 					(*fxpFillRectChecked)(x_offs, y_offs, FONTW, FONTH, &bgP);
@@ -1541,7 +1541,7 @@ static struct mxcfb_rect
 			ch_bi = bi;
 
 			// Fast-path through spaces, which are always going to be a FONTWxFONTH bg rectangle.
-			if (ch == ' ') {
+			if (ch == 0x20u) {
 				// Unless we're not printing bg pixels, of course ;).
 				if (!fbink_cfg->is_overlay && !fbink_cfg->is_bgless) {
 					(*fxpFillRectChecked)(x_offs, y_offs, FONTW, FONTH, &bgP);
@@ -1576,7 +1576,7 @@ static struct mxcfb_rect
 			ch_bi = bi;
 
 			// Fast-path through spaces, which are always going to be a FONTWxFONTH bg rectangle.
-			if (ch == ' ') {
+			if (ch == 0x20u) {
 				// Unless we're not printing bg pixels, of course ;).
 				if (!fbink_cfg->is_overlay && !fbink_cfg->is_bgless) {
 					(*fxpFillRectChecked)(x_offs, y_offs, FONTW, FONTH, &bgP);
@@ -1612,7 +1612,7 @@ static struct mxcfb_rect
 			ch_bi = bi;
 
 			// Fast-path through spaces, which are always going to be a FONTWxFONTH bg rectangle.
-			if (ch == ' ') {
+			if (ch == 0x20u) {
 				// Unless we're not printing bg pixels, of course ;).
 				if (!fbink_cfg->is_overlay && !fbink_cfg->is_bgless) {
 					(*fxpFillRectChecked)(x_offs, y_offs, FONTW, FONTH, &bgP);
