@@ -1367,6 +1367,23 @@ static struct mxcfb_rect
 			ch_bi = bi;
 
 			// Crappy macro to avoid repeating myself in each branch...
+			// NOTE: When no special processing is needed, we attempt to speed things up by using fill_rect
+			//       instead of plotting pixels one by one.
+			//       The initial implementation (ca. 2caac37)
+			//       was simply mapping one input pixel to one output scaled square,
+			//       this one (ca. 08a1c29) attempts to merge rectangles in the *current* row.
+			//       My heavily math-challenged attempt at detecting rectangles in both directions
+			//       turned out to be too expensive to compute to be really useful (the gain is roughly null).
+			//       (c.f., https://gist.github.com/NiLuJe/306f33510846bf30e35271f0eee2d263, avert your eyes).
+			//       There's probably much faster math-y ways to do that, but that's not my field ;).
+			//       Even then, it'd probably make more sense to make this a pre-processing step,
+			//       that would generate a different font format to use at runtime,
+			//       one that's basically just a list of rectangles (tl coordinates + wh) to draw.
+			//       Think SVG redux, with a single shape: filled rectangles ;).
+			// NOTE: Suprisingly enough, a variant of the current approach (ca. ae82336),
+			//       in which we start by filling the bg canvas, then only draw fg rectangles,
+			//       did not yield performance improvements across the board:
+			//       only degenerate use-cases (that is, *extremely* long strings) were a tiny bit faster.
 #define RENDER_GLYPH()                                                                                                         \
 	/* NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution), */                         \
 	/*       and from there compute the extra pixels for that single input pixel given our scaling factor... */            \
