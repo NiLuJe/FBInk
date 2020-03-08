@@ -1373,9 +1373,10 @@ static struct mxcfb_rect
 	if (!fbink_cfg->is_overlay && !fbink_cfg->is_bgless && !fbink_cfg->is_fgless) {                                        \
 		for (uint8_t y = 0U; y < glyphHeight; y++) {                                                                   \
 			/* y: input row, j: first output row after scaling */                                                  \
-			j                           = (unsigned short int) (y * FONTSIZE_MULT);                                \
-			cy                          = (unsigned short int) (y_offs + j);                                       \
-			unsigned short int px_count = 0U;                                                                      \
+			j  = (unsigned short int) (y * FONTSIZE_MULT);                                                         \
+			cy = (unsigned short int) (y_offs + j);                                                                \
+			/* First column might be fg or bg, but we're precomputing it anyway */                                 \
+			unsigned short int px_count = 1U;                                                                      \
 			/* We'll need to remember whether the previous pixel was already using the same color... */            \
 			/* 1 is fg, 0 is bg, first pixel could be either, so, -1 */                                            \
 			int8_t last_px_type = -1;                                                                              \
@@ -1392,18 +1393,15 @@ static struct mxcfb_rect
 						/* Continuation of a fg color stripe */                                        \
 						px_count++;                                                                    \
 						initial_stripe_px = false;                                                     \
-					} else {                                                                               \
+					} else if (last_px_type == 0) {                                                        \
 						/* Handle scaling by drawing a FONTSIZE_MULT pixels high rectangle, batched */ \
 						/* in a FONTSIZE_MULT * px_count wide stripe per same-color streak ;) */       \
 						/* Note that we're printing the *previous* color's stripe, so, bg! */          \
-						if (px_count != 0) {                                                           \
-							(*fxpFillRectChecked)(                                                 \
-							    cx,                                                                \
-							    cy,                                                                \
-							    (unsigned short int) (FONTSIZE_MULT * px_count),                   \
-							    FONTSIZE_MULT,                                                     \
-							    &bgP);                                                             \
-						}                                                                              \
+						(*fxpFillRectChecked)(cx,                                                      \
+								      cy,                                                      \
+								      (unsigned short int) (FONTSIZE_MULT * px_count),         \
+								      FONTSIZE_MULT,                                           \
+								      &bgP);                                                   \
 						/* Which means we're already one pixel deep into a new stripe */               \
 						px_count          = 1U;                                                        \
 						initial_stripe_px = true;                                                      \
@@ -1415,16 +1413,13 @@ static struct mxcfb_rect
 						/* Continuation of a bg color stripe */                                        \
 						px_count++;                                                                    \
 						initial_stripe_px = false;                                                     \
-					} else {                                                                               \
+					} else if (last_px_type == 1) {                                                        \
 						/* Note that we're printing the *previous* color's stripe, so, fg! */          \
-						if (px_count != 0) {                                                           \
-							(*fxpFillRectChecked)(                                                 \
-							    cx,                                                                \
-							    cy,                                                                \
-							    (unsigned short int) (FONTSIZE_MULT * px_count),                   \
-							    FONTSIZE_MULT,                                                     \
-							    &fgP);                                                             \
-						}                                                                              \
+						(*fxpFillRectChecked)(cx,                                                      \
+								      cy,                                                      \
+								      (unsigned short int) (FONTSIZE_MULT * px_count),         \
+								      FONTSIZE_MULT,                                           \
+								      &fgP);                                                   \
 						px_count          = 1U;                                                        \
 						initial_stripe_px = true;                                                      \
 					}                                                                                      \
@@ -1439,7 +1434,7 @@ static struct mxcfb_rect
 				}                                                                                              \
 			}                                                                                                      \
 			/* Draw the final fg stripe of the glyph row no matter what */                                         \
-			/* If last_px_type != -1, we're sure px_count > 0 ;) */                                                \
+			/* If last_px_type != -1, we're sure px_count > 0U ;) */                                               \
 			if (last_px_type == 1) {                                                                               \
 				(*fxpFillRectChecked)(                                                                         \
 				    cx, cy, (unsigned short int) (FONTSIZE_MULT * px_count), FONTSIZE_MULT, &fgP);             \
