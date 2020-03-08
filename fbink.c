@@ -1371,8 +1371,6 @@ static struct mxcfb_rect
 	/* NOTE: We only need to loop on the base glyph's dimensions (i.e., the bitmap resolution), */                         \
 	/*       and from there compute the extra pixels for that single input pixel given our scaling factor... */            \
 	if (!fbink_cfg->is_overlay && !fbink_cfg->is_bgless && !fbink_cfg->is_fgless) {                                        \
-		/* Start by painting the full background cell */                                                               \
-		(*fxpFillRectChecked)(x_offs, y_offs, FONTW, FONTH, &bgP);                                                     \
 		for (uint8_t y = 0U; y < glyphHeight; y++) {                                                                   \
 			/* y: input row, j: first output row after scaling */                                                  \
 			j                           = (unsigned short int) (y * FONTSIZE_MULT);                                \
@@ -1395,6 +1393,17 @@ static struct mxcfb_rect
 						px_count++;                                                                    \
 						initial_stripe_px = false;                                                     \
 					} else {                                                                               \
+						/* Handle scaling by drawing a FONTSIZE_MULT pixels high rectangle, batched */ \
+						/* in a FONTSIZE_MULT * px_count wide stripe per same-color streak ;) */       \
+						/* Note that we're printing the *previous* color's stripe, so, bg! */          \
+						if (px_count != 0) {                                                           \
+							(*fxpFillRectChecked)(                                                 \
+							    cx,                                                                \
+							    cy,                                                                \
+							    (unsigned short int) (FONTSIZE_MULT * px_count),                   \
+							    FONTSIZE_MULT,                                                     \
+							    &bgP);                                                             \
+						}                                                                              \
 						/* Which means we're already one pixel deep into a new stripe */               \
 						px_count          = 1U;                                                        \
 						initial_stripe_px = true;                                                      \
@@ -1407,8 +1416,6 @@ static struct mxcfb_rect
 						px_count++;                                                                    \
 						initial_stripe_px = false;                                                     \
 					} else {                                                                               \
-						/* Handle scaling by drawing a FONTSIZE_MULT pixels high rectangle, batched */ \
-						/* in a FONTSIZE_MULT * px_count wide stripe per same-color streak ;) */       \
 						/* Note that we're printing the *previous* color's stripe, so, fg! */          \
 						if (px_count != 0) {                                                           \
 							(*fxpFillRectChecked)(                                                 \
@@ -1436,6 +1443,9 @@ static struct mxcfb_rect
 			if (last_px_type == 1) {                                                                               \
 				(*fxpFillRectChecked)(                                                                         \
 				    cx, cy, (unsigned short int) (FONTSIZE_MULT * px_count), FONTSIZE_MULT, &fgP);             \
+			} else if (last_px_type == 0) {                                                                        \
+				(*fxpFillRectChecked)(                                                                         \
+				    cx, cy, (unsigned short int) (FONTSIZE_MULT * px_count), FONTSIZE_MULT, &bgP);             \
 			}                                                                                                      \
 		}                                                                                                              \
 	} else {                                                                                                               \
