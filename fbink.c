@@ -1393,7 +1393,7 @@ static struct mxcfb_rect
 			j  = (unsigned short int) (y * FONTSIZE_MULT);                                                         \
 			cy = (unsigned short int) (y_offs + j);                                                                \
 			/* First column might be fg or bg, but we're precomputing it anyway */                                 \
-			unsigned short int px_count = 1U;                                                                      \
+			uint8_t px_count = 1U;                                                                                 \
 			/* We'll need to remember whether the previous pixel was already using the same color... */            \
 			/* 1 is fg, 0 is bg, first pixel could be either, so, -1 */                                            \
 			int8_t last_px_type = -1;                                                                              \
