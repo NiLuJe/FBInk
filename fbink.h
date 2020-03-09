@@ -263,7 +263,7 @@ typedef struct
 	char     device_codename[16];       // deviceQuirks.deviceCodename
 	char     device_platform[16];       // deviceQuirks.devicePlatform (often a codename, too)
 	unsigned short int device_id;       // deviceQuirks.deviceId (decimal value, c.f., identify_device() on Kindle!)
-	uint8_t            pen_fg_color;    // penFGColor (Actual grayscale value, not FG_COLOR_INDEX_T)
+	uint8_t            pen_fg_color;    // penFGColor (Actual grayscale value, not FG_COLOR_INDEX_E)
 	uint8_t            pen_bg_color;    // penBGColor (ditto)
 	unsigned short int screen_dpi;      // deviceQuirks.screenDPI
 	unsigned short int font_w;          // FONTW (effective width of a glyph cell, i.e. scaled)
@@ -811,7 +811,7 @@ FBINK_API int fbink_grid_clear(int                         fbfd,
 // Like fbink_refresh, but instead of absolute coordinates, rely on grid coordinates like fbink_print.
 // Honors all the same positioning trickery than fbink_print (i.e., row/col mixed w/ hoffset/voffset).
 // fbfd:		Open file descriptor to the framebuffer character device,
-//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
+//				if set to FBFD_AUTO, the fb is opened for the duration of this call.
 // fbink_cfg:		Pointer to an FBInkConfig struct (honors col, row, is_halfway, is_centered, is_padded, is_rpadded,
 //				voffset, hoffset, is_overlay, is_bgless,
 //				wfm_mode, dithering_mode, is_nightmode, is_flashing).

@@ -1399,7 +1399,7 @@ static struct mxcfb_rect
 			int8_t last_px_type = -1;                                                                              \
 			/* We're already pre-computing the first column below, so start with this false */                     \
 			bool initial_stripe_px = false;                                                                        \
-			/* Precompute the initial coordinates for the first pixel of the glyph */                              \
+			/* Precompute the initial coordinates for the first column of that glyph row */                        \
 			i  = 0U;                                                                                               \
 			cx = x_offs;                                                                                           \
 			for (uint8_t x = 0U; x < glyphWidth; x++) {                                                            \
@@ -2288,6 +2288,7 @@ static int
 	//       seems like a great way to trigger this...
 	//       c.f., https://github.com/baskerville/plato/issues/79
 	//       But even with DU, if you pile on a dither_mode or a USE_DITHERING flag on top of that, it may still go haywire.
+	//       That, or simply queueing a few updates in a short time...
 	//       The main culprit appears to be FORCE_MONOCHROME here, as I can't break DU without it in this case ;).
 	// NOTE: Speaking of FORCE_MONOCHROME, see the notes below in refresh(). Like on other devices, we enforce it for A2.
 	//       Which means you'll generally only want to be using A2 on *already* mostly B&W content,
@@ -2659,6 +2660,7 @@ static int
 		}
 	}
 
+	// NOTE: We're using ELOG here to be consistent w/ fbink_init, and because this affects an internal global state.
 	// NOTE: We need to take into account the inverted cmap on Legacy Kindles...
 #ifdef FBINK_FOR_KINDLE
 	if (deviceQuirks.isKindleLegacy) {
