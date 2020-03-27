@@ -51,7 +51,7 @@ static void
 	    "\t-r, --rota <-1|0|1|2|3>\t\tSwitch the framebuffer to the supplied rotation. -1 is a magic value matching the device-specific Portrait orientation.\n"
 	    "\t-o, --getrota\t\t\tJust output the current rotation to stdout.\n"
 	    "\t-O, --getrotacode\t\tJust exit with the current rotation as exit code.\n"
-	    "\t-H, --nightmode <on|off|toggle>\t\tToggle hardware inversion (8bpp only!).\n"
+	    "\t-H, --nightmode <on|off|toggle>\tToggle hardware inversion (8bpp only, safely ignored otherwise).\n"
 	    "\n",
 	    fbink_version());
 	return;
