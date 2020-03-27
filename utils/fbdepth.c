@@ -409,7 +409,6 @@ int
 				if (strtotristate(optarg, &want_nm) < 0) {
 					fprintf(stderr, "Invalid nightmode state '%s'!\n", optarg);
 					errfnd = true;
-					break;
 				}
 				break;
 			default:
@@ -562,6 +561,7 @@ int
 		is_change_needed = true;
 	}
 
+	// Then bitdepth...
 	if (vInfo.bits_per_pixel == req_bpp) {
 		// Also check that the grayscale flag is flipped properly (again)
 		if (vInfo.grayscale != req_gray) {
