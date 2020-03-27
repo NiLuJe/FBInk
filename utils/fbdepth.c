@@ -520,13 +520,20 @@ int
 		}
 	} else if (want_nm == -1) {
 		// Toggle...
-		// NOTE: Handle bitdepth switches properly?
 		if (req_bpp == 8U) {
-			if (vInfo.grayscale == GRAYSCALE_8BIT) {
+			// NOTE: We check for 0 in case the current bitdepth is not already 8bpp...
+			if (vInfo.grayscale == GRAYSCALE_8BIT || vInfo.grayscale == 0U) {
 				req_gray = GRAYSCALE_8BIT_INVERTED;
 			} else {
 				req_gray = GRAYSCALE_8BIT;
 			}
+		} else if (req_bpp > 8U) {
+			req_gray = 0U;
+		}
+	} else {
+		// Otherwise, make sure we default to sane values for a non-inverted palette...
+		if (req_bpp == 8U) {
+			req_gray = GRAYSCALE_8BIT;
 		} else if (req_bpp > 8U) {
 			req_gray = 0U;
 		}
