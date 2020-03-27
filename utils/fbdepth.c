@@ -129,9 +129,16 @@ static int
 					break;
 				case 'f':
 				case 'F':
-					if (str[2] == '\0') {
-						*result = false;
-						return EXIT_SUCCESS;
+					switch (str[2]) {
+						case 'f':
+						case 'F':
+							if (str[3] == '\0') {
+								*result = false;
+								return EXIT_SUCCESS;
+							}
+							break;
+						default:
+							break;
 					}
 					break;
 				default:
