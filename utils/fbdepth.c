@@ -51,9 +51,108 @@ static void
 	    "\t-r, --rota <-1|0|1|2|3>\t\tSwitch the framebuffer to the supplied rotation. -1 is a magic value matching the device-specific Portrait orientation.\n"
 	    "\t-o, --getrota\t\t\tJust output the current rotation to stdout.\n"
 	    "\t-O, --getrotacode\t\tJust exit with the current rotation as exit code.\n"
+	    "\t-H, --nightmode <on|off|toggle>\t\tToggle hardware inversion.\n"
 	    "\n",
 	    fbink_version());
 	return;
+}
+
+// Pilfered from KFMon, with some minor tweaks to make it tri-state...
+static int
+    strtotristate(const char* restrict str, int8_t* restrict result)
+{
+	if (!str) {
+		WARN("Passed an empty value to a key expecting a tri-state value");
+		return -EINVAL;
+	}
+
+	switch (str[0]) {
+		case 't':
+		case 'T':
+			if (strcasecmp(str, "true") == 0) {
+				*result = true;
+				return EXIT_SUCCESS;
+			} else if (strcasecmp(str, "toggle") == 0) {
+				*result = -1;
+				return EXIT_SUCCESS;
+			}
+			break;
+		case 'y':
+		case 'Y':
+			if (strcasecmp(str, "yes") == 0) {
+				*result = true;
+				return EXIT_SUCCESS;
+			}
+			break;
+		case '1':
+			if (str[1] == '\0') {
+				*result = true;
+				return EXIT_SUCCESS;
+			}
+			break;
+		case 'f':
+		case 'F':
+			if (strcasecmp(str, "false") == 0) {
+				*result = false;
+				return EXIT_SUCCESS;
+			}
+			break;
+		case 'n':
+		case 'N':
+			switch (str[1]) {
+				case 'o':
+				case 'O':
+					if (str[2] == '\0') {
+						*result = false;
+						return EXIT_SUCCESS;
+					}
+					break;
+				default:
+					break;
+			}
+			break;
+		case '0':
+			if (str[1] == '\0') {
+				*result = false;
+				return EXIT_SUCCESS;
+			}
+			break;
+		case 'o':
+		case 'O':
+			switch (str[1]) {
+				case 'n':
+				case 'N':
+					if (str[2] == '\0') {
+						*result = true;
+						return EXIT_SUCCESS;
+					}
+					break;
+				case 'f':
+				case 'F':
+					if (str[2] == '\0') {
+						*result = false;
+						return EXIT_SUCCESS;
+					}
+					break;
+				default:
+					break;
+			}
+			break;
+		case '-':
+			if (str[1] == '1') {
+				if (str[2] == '\0') {
+					*result = -1;
+					return EXIT_SUCCESS;
+				}
+			}
+			break;
+		default:
+			// NOTE: *result is initialized to a sentinel value, leave it alone.
+			break;
+	}
+
+	WARN("Assigned an invalid or malformed value (%s) to a flag expecting a tri-state value", str);
+	return -EINVAL;
 }
 
 int fbFd = -1;
@@ -88,24 +187,15 @@ static bool
 }
 
 static bool
-    set_fbinfo(uint32_t bpp, int8_t rota)
+    set_fbinfo(uint32_t bpp, int8_t rota, uint32_t req_gray)
 {
 	// Set variable fb info
 	// Bitdepth
 	vInfo.bits_per_pixel = bpp;
 	LOG("Setting bitdepth to %ubpp", vInfo.bits_per_pixel);
 	// Grayscale flag
-	if (bpp == 8U) {
-		// NOTE: 1 for Grayscale, 2 for Inverted Grayscale (like on einkfb).
-		//       We obviously don't want to inflict an inverted palette on ourselves ;).
-		//       c.f., GRAYSCALE_* defines @ mxcfb.h
-		vInfo.grayscale = (uint32_t) GRAYSCALE_8BIT;
-		LOG("Setting grayscale to %u", vInfo.grayscale);
-	} else {
-		// NOTE: And of course, 0 for color ;)
-		vInfo.grayscale = (uint32_t) 0U;
-		LOG("Setting grayscale to %u", vInfo.grayscale);
-	}
+	vInfo.grayscale = req_gray;
+	LOG("Setting grayscale to %u", vInfo.grayscale);
 
 	// NOTE: We have to counteract the rotation shenanigans the Kernel might be enforcing...
 	//       c.f., mxc_epdc_fb_check_var @ drivers/video/mxc/mxc_epdc_fb.c OR drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c
@@ -218,18 +308,20 @@ int
 		{ "verbose", no_argument, NULL, 'v' },     { "quiet", no_argument, NULL, 'q' },
 		{ "get", no_argument, NULL, 'g' },         { "getcode", no_argument, NULL, 'G' },
 		{ "rota", required_argument, NULL, 'r' },  { "getrota", no_argument, NULL, 'o' },
-		{ "getrotacode", no_argument, NULL, 'O' }, { NULL, 0, NULL, 0 }
+		{ "getrotacode", no_argument, NULL, 'O' }, { "nightmode", required_argument, NULL, 'H' },
+		{ NULL, 0, NULL, 0 }
 	};
 
 	uint32_t req_bpp     = 0U;
 	int8_t   req_rota    = 42;
+	int8_t   want_nm     = false;
 	bool     errfnd      = false;
 	bool     print_bpp   = false;
 	bool     return_bpp  = false;
 	bool     print_rota  = false;
 	bool     return_rota = false;
 
-	while ((opt = getopt_long(argc, argv, "d:hvqgGr:oO", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "d:hvqgGr:oOH:", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'd':
 				req_bpp = (uint32_t) strtoul(optarg, NULL, 10);
@@ -296,6 +388,13 @@ int
 				break;
 			case 'O':
 				return_rota = true;
+				break;
+			case 'H':
+				if (strtotristate(optarg, &want_nm) < 0) {
+					fprintf(stderr, "Invalid nightmode state '%s'!\n", optarg);
+					errfnd = true;
+					break;
+				}
 				break;
 			default:
 				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
@@ -391,12 +490,52 @@ int
 		req_rota = -1;
 	}
 
+	// Compute the proper grayscale flag given the current bitdepth and whether we want to enable nightmode or not...
+	// TODO: What about einkfb? The K4?
+	uint32_t req_gray = vInfo.grayscale;
+	if (want_nm == true) {
+		// Easy peasy, we rely on the EPDC feature that *toggles* HW inversion, no matter the bitdepth
+		// (by essentially *flipping* the EPDC_FLAG_ENABLE_INVERSION flag).
+		// c.f., epdc_process_update @ mxc_epdc_fb
+		req_gray = GRAYSCALE_8BIT_INVERTED;
+	} else if (want_nm == false) {
+		// Handle 8bpp properly...
+		if (req_bpp == 8U) {
+			req_gray = GRAYSCALE_8BIT;
+		} else {
+			req_gray = 0U;
+		}
+	} else {
+		// Toggle...
+		if (req_bpp == 8U) {
+			if (vInfo.grayscale == GRAYSCALE_8BIT) {
+				req_gray = GRAYSCALE_8BIT_INVERTED;
+			} else {
+				req_gray = GRAYSCALE_8BIT;
+			}
+		} else {
+			if (vInfo.grayscale == 0U) {
+				req_gray = GRAYSCALE_8BIT_INVERTED;
+			} else {
+				req_gray = 0U;
+			}
+		}
+	}
+
 	// If a change was requested, do it, but check if it's necessary first
 	bool is_change_needed = false;
+
+	// Start by checking that the grayscale flag is flipped properly
+	if (vInfo.grayscale == req_gray) {
+		LOG("\nCurrent grayscale flag is already %u!", req_gray);
+		// No change needed as far as grayscale is concerned...
+	} else {
+		is_change_needed = true;
+	}
+
 	if (vInfo.bits_per_pixel == req_bpp) {
-		// Also check that the grayscale flag is flipped properly
-		if ((vInfo.bits_per_pixel == 8U && vInfo.grayscale != GRAYSCALE_8BIT) ||
-		    (vInfo.bits_per_pixel > 8U && vInfo.grayscale != 0U)) {
+		// Also check that the grayscale flag is flipped properly (again)
+		if (vInfo.grayscale != req_gray) {
 			LOG("\nCurrent bitdepth is already %ubpp, but the grayscale flag is bogus!", req_bpp);
 			// Continue, we'll need to flip the grayscale flag properly
 			is_change_needed = true;
@@ -434,7 +573,7 @@ int
 		    req_bpp,
 		    (req_bpp == vInfo.bits_per_pixel) ? " (current bitdepth)" : "");
 	}
-	if (!set_fbinfo(req_bpp, req_rota)) {
+	if (!set_fbinfo(req_bpp, req_rota, req_gray)) {
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
