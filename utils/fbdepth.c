@@ -310,14 +310,17 @@ int
 
 	int                        opt;
 	int                        opt_index;
-	static const struct option opts[] = {
-		{ "depth", required_argument, NULL, 'd' }, { "help", no_argument, NULL, 'h' },
-		{ "verbose", no_argument, NULL, 'v' },     { "quiet", no_argument, NULL, 'q' },
-		{ "get", no_argument, NULL, 'g' },         { "getcode", no_argument, NULL, 'G' },
-		{ "rota", required_argument, NULL, 'r' },  { "getrota", no_argument, NULL, 'o' },
-		{ "getrotacode", no_argument, NULL, 'O' }, { "nightmode", required_argument, NULL, 'H' },
-		{ NULL, 0, NULL, 0 }
-	};
+	static const struct option opts[] = { { "depth", required_argument, NULL, 'd' },
+					      { "help", no_argument, NULL, 'h' },
+					      { "verbose", no_argument, NULL, 'v' },
+					      { "quiet", no_argument, NULL, 'q' },
+					      { "get", no_argument, NULL, 'g' },
+					      { "getcode", no_argument, NULL, 'G' },
+					      { "rota", required_argument, NULL, 'r' },
+					      { "getrota", no_argument, NULL, 'o' },
+					      { "getrotacode", no_argument, NULL, 'O' },
+					      { "nightmode", required_argument, NULL, 'H' },
+					      { NULL, 0, NULL, 0 } };
 
 	uint32_t req_bpp     = 0U;
 	int8_t   req_rota    = 42;
@@ -410,7 +413,8 @@ int
 		}
 	}
 
-	if (errfnd || ((req_bpp == 0U && req_rota == 42 && want_nm == 42) && !(print_bpp || return_bpp || print_rota || return_rota))) {
+	if (errfnd || ((req_bpp == 0U && req_rota == 42 && want_nm == 42) &&
+		       !(print_bpp || return_bpp || print_rota || return_rota))) {
 		show_helpmsg();
 		return ERRCODE(EXIT_FAILURE);
 	}
