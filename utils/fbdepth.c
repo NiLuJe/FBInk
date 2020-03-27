@@ -48,7 +48,11 @@ static void
 	    "\t-q, --quiet\t\t\tToggle hiding diagnostic messages.\n"
 	    "\t-g, --get\t\t\tJust output the current bitdepth to stdout.\n"
 	    "\t-G, --getcode\t\t\tJust exit with the current bitdepth as exit code.\n"
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 	    "\t-r, --rota <-1|0|1|2|3>\t\tSwitch the framebuffer to the supplied rotation. -1 is a magic value matching the device-specific Portrait orientation.\n"
+#else
+	    "\t-r, --rota <0|1|2|3>\t\tSwitch the framebuffer to the supplied rotation.\n"
+#endif
 	    "\t-o, --getrota\t\t\tJust output the current rotation to stdout.\n"
 	    "\t-O, --getrotacode\t\tJust exit with the current rotation as exit code.\n"
 	    "\t-H, --nightmode <on|off|toggle>\tToggle hardware inversion (8bpp only, safely ignored otherwise).\n"
@@ -216,6 +220,7 @@ static bool
 		// And flag it as the expected rota for the sanity checks
 		expected_rota = (uint32_t) rota;
 	}
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
 		// NOTE: This should cover the H2O and the few other devices suffering from the same quirk...
 		vInfo.rotate ^= 2;
@@ -231,6 +236,7 @@ static bool
 			    fb_rotate_to_string(vInfo.rotate));
 		}
 	}
+#endif
 
 	if (ioctl(fbFd, FBIOPUT_VSCREENINFO, &vInfo)) {
 		perror("ioctl PUT_V");
@@ -476,6 +482,7 @@ int
 	}
 
 	// If the automagic Portrait rotation was requested, compute it
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 	if (req_rota == -1) {
 		// NOTE: For *most* devices, Nickel's Portrait orientation should *always* match BootRota + 1
 		//       Thankfully, the Libra appears to be ushering in a new era filled with puppies and rainbows,
@@ -489,6 +496,7 @@ int
 		    req_rota,
 		    fb_rotate_to_string((uint32_t) req_rota));
 	}
+#endif
 
 	// If no rotation was requested, reset req_rota to our expected sentinel value
 	if (req_rota == 42) {
