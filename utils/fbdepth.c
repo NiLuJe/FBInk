@@ -321,7 +321,7 @@ int
 
 	uint32_t req_bpp     = 0U;
 	int8_t   req_rota    = 42;
-	int8_t   want_nm     = false;
+	int8_t   want_nm     = 42;
 	bool     errfnd      = false;
 	bool     print_bpp   = false;
 	bool     return_bpp  = false;
@@ -410,7 +410,7 @@ int
 		}
 	}
 
-	if (errfnd || ((req_bpp == 0U && req_rota == 42) && !(print_bpp || return_bpp || print_rota || return_rota))) {
+	if (errfnd || ((req_bpp == 0U && req_rota == 42 && want_nm == 42) && !(print_bpp || return_bpp || print_rota || return_rota))) {
 		show_helpmsg();
 		return ERRCODE(EXIT_FAILURE);
 	}
@@ -518,8 +518,9 @@ int
 		} else if (req_bpp > 8U) {
 			req_gray = 0U;
 		}
-	} else {
+	} else if (want_nm == -1) {
 		// Toggle...
+		// NOTE: Handle bitdepth switches properly?
 		if (req_bpp == 8U) {
 			if (vInfo.grayscale == GRAYSCALE_8BIT) {
 				req_gray = GRAYSCALE_8BIT_INVERTED;
