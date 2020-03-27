@@ -51,7 +51,7 @@ static void
 	    "\t-r, --rota <-1|0|1|2|3>\t\tSwitch the framebuffer to the supplied rotation. -1 is a magic value matching the device-specific Portrait orientation.\n"
 	    "\t-o, --getrota\t\t\tJust output the current rotation to stdout.\n"
 	    "\t-O, --getrotacode\t\tJust exit with the current rotation as exit code.\n"
-	    "\t-H, --nightmode <on|off|toggle>\t\tToggle hardware inversion.\n"
+	    "\t-H, --nightmode <on|off|toggle>\t\tToggle hardware inversion (8bpp only!).\n"
 	    "\n",
 	    fbink_version());
 	return;
@@ -498,18 +498,24 @@ int
 	}
 
 	// Compute the proper grayscale flag given the current bitdepth and whether we want to enable nightmode or not...
-	// TODO: What about einkfb? The K4?
+	// We rely on the EPDC feature that *toggles* HW inversion, no matter the bitdepth
+	// (by essentially *flipping* the EPDC_FLAG_ENABLE_INVERSION flag, on the kernel side).
+	// c.f., epdc_process_update @ mxc_epdc_fb
+	// In practice, though, grayscale != 0U is *invalid* for > 8bpp (and it does break rendering),
+	// so we only play with this @ 8bpp ;).
+	// NOTE: While we technically don't allow switching to 4bpp, make sure we leave it alone,
+	//       because there are dedicated GRAYSCALE_4BIT & GRAYSCALE_4BIT_INVERTED constants...
 	uint32_t req_gray = vInfo.grayscale;
 	if (want_nm == true) {
-		// Easy peasy, we rely on the EPDC feature that *toggles* HW inversion, no matter the bitdepth
-		// (by essentially *flipping* the EPDC_FLAG_ENABLE_INVERSION flag).
-		// c.f., epdc_process_update @ mxc_epdc_fb
-		req_gray = GRAYSCALE_8BIT_INVERTED;
+		if (req_bpp == 8U) {
+			req_gray = GRAYSCALE_8BIT_INVERTED;
+		} else if (req_bpp > 8U) {
+			req_gray = 0U;
+		}
 	} else if (want_nm == false) {
-		// Handle 8bpp properly...
 		if (req_bpp == 8U) {
 			req_gray = GRAYSCALE_8BIT;
-		} else {
+		} else if (req_bpp > 8U) {
 			req_gray = 0U;
 		}
 	} else {
@@ -520,12 +526,8 @@ int
 			} else {
 				req_gray = GRAYSCALE_8BIT;
 			}
-		} else {
-			if (vInfo.grayscale == 0U) {
-				req_gray = GRAYSCALE_8BIT_INVERTED;
-			} else {
-				req_gray = 0U;
-			}
+		} else if (req_bpp > 8U) {
+			req_gray = 0U;
 		}
 	}
 
