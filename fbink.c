@@ -3066,6 +3066,7 @@ static int
 		//         It supports the four possible rotations, and while it is always using vInfo.rotate == 0,
 		//         xres & yres switch accordingly when in Landscape modes,
 		//         and (0, 0) is always at the top-left of the viewport, so we're always correct.
+		//         NOTE: That's because it relies on einkfb's custom orientation ioctls.
 		//       TL;DR: We can't really rely on rotate to tell us anything reliably actionable, but, thankfully,
 		//              we don't have to do anything extra on Kindles anyway :).
 		// NOTE: The Kobos, on the other hand, at boot, are in 16bpp mode, and appear to be natively rotated CCW
