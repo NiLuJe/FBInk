@@ -611,10 +611,13 @@ static int open_fb_fd(int* restrict, bool* restrict);
 static int open_fb_fd_nonblock(int* restrict, bool* restrict);
 
 static const char* fb_rotate_to_string(uint32_t);
-static int         set_pen_color(bool, bool, bool, bool, uint8_t, uint8_t, uint8_t, uint8_t);
-static int         update_pen_colors(const FBInkConfig* restrict);
-static void        update_verbosity(const FBInkConfig* restrict);
-static int         initialize_fbink(int, const FBInkConfig* restrict, bool);
+#ifdef FBINK_FOR_KINDLE
+static const char* einkfb_orientation_to_string(orientation_t);
+#endif
+static int  set_pen_color(bool, bool, bool, bool, uint8_t, uint8_t, uint8_t, uint8_t);
+static int  update_pen_colors(const FBInkConfig* restrict);
+static void update_verbosity(const FBInkConfig* restrict);
+static int  initialize_fbink(int, const FBInkConfig* restrict, bool);
 
 static int memmap_fb(int);
 static int unmap_fb(void);

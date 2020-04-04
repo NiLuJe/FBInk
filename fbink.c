@@ -2610,6 +2610,26 @@ static const char*
 	}
 }
 
+#ifdef FBINK_FOR_KINDLE
+// einkfb handles rotation via a custom set of ioctls, with a different mapping than the Linux standard...
+static const char*
+    einkfb_orientation_to_string(orientation_t orientation)
+{
+	switch (orientation) {
+		case orientation_portrait:
+			return "Portrait, 0°";
+		case orientation_portrait_upside_down:
+			return "Inverted Portrait (Upside Down), 180°";
+		case orientation_landscape:
+			return "Landscape, 90°";
+		case orientation_landscape_upside_down:
+			return "Inverted Landscape (Upside Down), 270°";
+		default:
+			return "Unknown?!";
+	}
+}
+#endif
+
 // Used to manually set the pen colors
 static int
     set_pen_color(bool is_fg, bool is_y8, bool quantize, bool update, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
@@ -2998,6 +3018,19 @@ static int
 	     vInfo.bits_per_pixel,
 	     vInfo.rotate,
 	     fb_rotate_to_string(vInfo.rotate));
+#ifdef FBINK_FOR_KINDLE
+	// On einkfb, log the effective orientation, too...
+	if (deviceQuirks.isKindleLegacy) {
+		orientation_t orientation = orientation_portrait;
+		if (ioctl(fbfd, FBIO_EINK_GET_DISPLAY_ORIENTATION, &orientation)) {
+			WARN("FBIO_EINK_GET_DISPLAY_ORIENTATION: %m");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+
+		LOG("Actual einkfb orientation: %u (%s)", orientation, einkfb_orientation_to_string(orientation));
+	}
+#endif
 
 	// NOTE: In most every cases, we assume (0, 0) is at the top left of the screen,
 	//       and (xres, yres) at the bottom right, as we should.

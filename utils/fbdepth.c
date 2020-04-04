@@ -167,23 +167,6 @@ static int
 }
 
 #ifdef FBINK_FOR_KINDLE
-static const char*
-    einkfb_orientation_to_string(orientation_t orientation)
-{
-	switch (orientation) {
-		case orientation_portrait:
-			return "Portrait, 0°";
-		case orientation_portrait_upside_down:
-			return "Inverted Portrait (Upside Down), 180°";
-		case orientation_landscape:
-			return "Landscape, 90°";
-		case orientation_landscape_upside_down:
-			return "Inverted Landscape (Upside Down), 270°";
-		default:
-			return "Unknown?!";
-	}
-}
-
 static orientation_t
     linuxfb_rotate_to_einkfb_orientation(uint32_t rotate)
 {
