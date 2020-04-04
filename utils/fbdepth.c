@@ -260,7 +260,7 @@ static bool
 		}
 
 		// Because everything is terrible, it's actually not the same mapping as the Linux fb rotate field...
-		LOG("Actual einkfb orientation: %d (%s)", orientation, einkfb_orientation_to_string(orientation));
+		LOG("Actual einkfb orientation: %u (%s)", orientation, einkfb_orientation_to_string(orientation));
 	}
 #endif
 
@@ -322,8 +322,7 @@ static bool
 			return false;
 		}
 
-		// Because everything is terrible, it's actually not the same mapping as the Linux fb rotate field...
-		LOG("Setting actual einkfb orientation to %d (%s)",
+		LOG("Setting actual einkfb orientation to %u (%s)",
 		    orientation,
 		    einkfb_orientation_to_string(orientation));
 	}
@@ -399,7 +398,7 @@ static bool
 			return false;
 		}
 
-		LOG("Actual einkfb orientation is now %d (%s)", orientation, einkfb_orientation_to_string(orientation));
+		LOG("Actual einkfb orientation is now %u (%s)", orientation, einkfb_orientation_to_string(orientation));
 	}
 #endif
 
