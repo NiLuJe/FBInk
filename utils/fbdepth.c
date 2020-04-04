@@ -51,7 +51,7 @@ static void
 #if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 	    "\t-r, --rota <-1|0|1|2|3>\t\tSwitch the framebuffer to the supplied rotation. -1 is a magic value matching the device-specific Portrait orientation.\n"
 #else
-	    "\t-r, --rota <0|1|2|3>\t\tSwitch the framebuffer to the supplied rotation.\n"
+	    "\t-r, --rota <0|1|2|3>\t\tSwitch the framebuffer to the supplied rotation (Linux FB convention).\n"
 #endif
 	    "\t-o, --getrota\t\t\tJust output the current rotation to stdout.\n"
 	    "\t-O, --getrotacode\t\tJust exit with the current rotation as exit code.\n"
@@ -386,6 +386,7 @@ static bool
 #endif
 
 #ifdef FBINK_FOR_KINDLE
+	// And, again, einkfb is a special snowflake...
 	if (deviceQuirks.isKindleLegacy) {
 		orientation_t orientation = orientation_portrait;
 		if (ioctl(fbFd, FBIO_EINK_GET_DISPLAY_ORIENTATION, &orientation)) {
@@ -693,6 +694,7 @@ int
 				is_change_needed = true;
 			}
 		} else {
+			// On mxcfb, everything's peachy
 			if (vInfo.rotate == (uint32_t) req_rota) {
 				LOG("\nCurrent rotation is already %hhd!", req_rota);
 				// No change needed as far as rotation is concerned...
