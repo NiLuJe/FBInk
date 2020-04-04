@@ -385,11 +385,6 @@ static bool
 	}
 #endif
 
-	LOG("Bitdepth is now %ubpp (grayscale: %u) @ rotate: %u (%s)\n",
-	    vInfo.bits_per_pixel,
-	    vInfo.grayscale,
-	    vInfo.rotate,
-	    fb_rotate_to_string(vInfo.rotate));
 #ifdef FBINK_FOR_KINDLE
 	if (deviceQuirks.isKindleLegacy) {
 		orientation_t orientation = orientation_portrait;
@@ -401,6 +396,11 @@ static bool
 		LOG("Actual einkfb orientation is now %u (%s)", orientation, einkfb_orientation_to_string(orientation));
 	}
 #endif
+	LOG("Bitdepth is now %ubpp (grayscale: %u) @ rotate: %u (%s)\n",
+	    vInfo.bits_per_pixel,
+	    vInfo.grayscale,
+	    vInfo.rotate,
+	    fb_rotate_to_string(vInfo.rotate));
 
 	return true;
 }
