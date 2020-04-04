@@ -3028,7 +3028,7 @@ static int
 			goto cleanup;
 		}
 
-		LOG("Actual einkfb orientation: %u (%s)", orientation, einkfb_orientation_to_string(orientation));
+		ELOG("Actual einkfb orientation: %u (%s)", orientation, einkfb_orientation_to_string(orientation));
 	}
 #endif
 
