@@ -166,6 +166,61 @@ static int
 	return -EINVAL;
 }
 
+#ifdef FBINK_FOR_KINDLE
+static const char*
+    einkfb_orientation_to_string(orientation_t orientation)
+{
+	switch (orientation) {
+		case orientation_portrait:
+			return "Portrait, 0°";
+		case orientation_portrait_upside_down:
+			return "Inverted Portrait (Upside Down), 180°";
+		case orientation_landscape:
+			return "Landscape, 90°";
+		case orientation_landscape_upside_down:
+			return "Inverted Landscape (Upside Down), 270°";
+		default:
+			return "Unknown?!";
+	}
+}
+
+static orientation_t
+    linuxfb_rotate_to_einkfb_orientation(uint32_t rotate)
+{
+	switch (rotate) {
+		case FB_ROTATE_UR:
+			return orientation_portrait;
+		case FB_ROTATE_CW:
+			return orientation_landscape;
+		case FB_ROTATE_UD:
+			return orientation_portrait_upside_down;
+		case FB_ROTATE_CCW:
+			return orientation_landscape_upside_down;
+		default:
+			// Should never happen.
+			return orientation_portrait;
+	}
+}
+
+static uint32_t
+    einkfb_orientation_to_linuxfb_rotate(orientation_t orientation)
+{
+	switch (orientation) {
+		case orientation_portrait:
+			return FB_ROTATE_UR;
+		case orientation_portrait_upside_down:
+			return FB_ROTATE_UD;
+		case orientation_landscape:
+			return FB_ROTATE_CW;
+		case orientation_landscape_upside_down:
+			return FB_ROTATE_CCW;
+		default:
+			// Should never happen.
+			return FB_ROTATE_UR;
+	}
+}
+#endif
+
 int fbFd = -1;
 
 static bool
@@ -193,6 +248,21 @@ static bool
 	    fInfo.id,
 	    fInfo.smem_len,
 	    fInfo.line_length);
+
+#ifdef FBINK_FOR_KINDLE
+	// NOTE: einkfb devices (even the K4, which only uses it as a shim over mxcfb HW)
+	//       don't actually honor the standard Linux fb rotation, and instead rely on a set of custom ioctls...
+	if (deviceQuirks.isKindleLegacy) {
+		orientation_t orientation = orientation_portrait;
+		if (ioctl(fbFd, FBIO_EINK_GET_DISPLAY_ORIENTATION, &orientation)) {
+			perror("ioctl FBIO_EINK_GET_DISPLAY_ORIENTATION");
+			return false;
+		}
+
+		// Because everything is terrible, it's actually not the same mapping as the Linux fb rotate field...
+		LOG("Actual einkfb orientation: %d (%s)", orientation, einkfb_orientation_to_string(orientation));
+	}
+#endif
 
 	return true;
 }
@@ -243,6 +313,23 @@ static bool
 		return false;
 	}
 
+#ifdef FBINK_FOR_KINDLE
+	// Deal once again with einkfb properly...
+	if (deviceQuirks.isKindleLegacy) {
+		orientation_t orientation = linuxfb_rotate_to_einkfb_orientation(expected_rota);
+		if (ioctl(fbFd, FBIO_EINK_SET_DISPLAY_ORIENTATION, orientation)) {
+			perror("ioctl FBIO_EINK_SET_DISPLAY_ORIENTATION");
+			return false;
+		}
+
+		// Because everything is terrible, it's actually not the same mapping as the Linux fb rotate field...
+		LOG("Setting actual einkfb orientation to %d (%s)",
+		    orientation,
+		    einkfb_orientation_to_string(orientation));
+	}
+#endif
+
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 	// NOTE: Double-check that we weren't bit by rotation quirks...
 	if (vInfo.rotate != expected_rota) {
 		LOG("\nCurrent rotation (%u) doesn't match the expected rotation (%u), attempting to fix it . . .",
@@ -297,12 +384,24 @@ static bool
 		    vInfo.rotate,
 		    expected_rota);
 	}
+#endif
 
 	LOG("Bitdepth is now %ubpp (grayscale: %u) @ rotate: %u (%s)\n",
 	    vInfo.bits_per_pixel,
 	    vInfo.grayscale,
 	    vInfo.rotate,
 	    fb_rotate_to_string(vInfo.rotate));
+#ifdef FBINK_FOR_KINDLE
+	if (deviceQuirks.isKindleLegacy) {
+		orientation_t orientation = orientation_portrait;
+		if (ioctl(fbFd, FBIO_EINK_GET_DISPLAY_ORIENTATION, &orientation)) {
+			perror("ioctl FBIO_EINK_GET_DISPLAY_ORIENTATION");
+			return false;
+		}
+
+		LOG("Actual einkfb orientation is now %d (%s)", orientation, einkfb_orientation_to_string(orientation));
+	}
+#endif
 
 	return true;
 }
@@ -578,12 +677,38 @@ int
 
 	// Same for rotation, if we requested one...
 	if (req_rota != -1) {
+#ifdef FBINK_FOR_KINDLE
+		if (deviceQuirks.isKindleLegacy) {
+			// We need to check the effective orientation on einkfb...
+			orientation_t orientation = orientation_portrait;
+			if (ioctl(fbFd, FBIO_EINK_GET_DISPLAY_ORIENTATION, &orientation)) {
+				perror("ioctl FBIO_EINK_GET_DISPLAY_ORIENTATION");
+				return false;
+			}
+
+			uint32_t rotate = einkfb_orientation_to_linuxfb_rotate(orientation);
+			if (rotate == (uint32_t) req_rota) {
+				LOG("\nCurrent rotation is already %hhd!", req_rota);
+				// No change needed as far as rotation is concerned...
+			} else {
+				is_change_needed = true;
+			}
+		} else {
+			if (vInfo.rotate == (uint32_t) req_rota) {
+				LOG("\nCurrent rotation is already %hhd!", req_rota);
+				// No change needed as far as rotation is concerned...
+			} else {
+				is_change_needed = true;
+			}
+		}
+#else
 		if (vInfo.rotate == (uint32_t) req_rota) {
 			LOG("\nCurrent rotation is already %hhd!", req_rota);
 			// No change needed as far as rotation is concerned...
 		} else {
 			is_change_needed = true;
 		}
+#endif
 	}
 
 	// If it turns out that no actual changes are needed, skip to cleanup, exiting successfully
