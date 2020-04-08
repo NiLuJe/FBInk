@@ -780,7 +780,12 @@ static void
 			strncpy(deviceQuirks.deviceName, "Trilogy?", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
 		default:
-			WARN("Unidentified Kobo device code (%hu)", kobo_id);
+			// Print something slightly different if we completely failed to even compute a kobo_id...
+			if (kobo_id == (unsigned short int) -1) {
+				WARN("Failed to compute a Kobo device code");
+			} else {
+				WARN("Unidentified Kobo device code (%hu)", kobo_id);
+			}
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Unknown!", sizeof(deviceQuirks.deviceName) - 1U);
 			break;
