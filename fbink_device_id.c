@@ -778,7 +778,7 @@ static void
 			deviceQuirks.isKoboNonMT = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Trilogy?", sizeof(deviceQuirks.deviceName) - 1U);
-			/* FALLTHROUGH */
+			break;
 		default:
 			WARN("Unidentified Kobo device code (%hu)", kobo_id);
 			// Flawfinder: ignore
@@ -838,7 +838,8 @@ static void
 				WARN("Failed to read the NTX HWConfig entry on '%s'", HWCONFIG_DEVICE);
 				fclose(fp);
 				// NOTE: Make it clear we failed to identify the device...
-				set_kobo_quirks(0);
+				//       i.e., by passing UINT16_MAX instead of 0U, which we use to flag old !NTX devices.
+				set_kobo_quirks((unsigned short int) -1);
 				return;
 			}
 
@@ -850,7 +851,7 @@ static void
 				     HWCONFIG_DEVICE);
 				fclose(fp);
 				// NOTE: Like rcS, assume it's an old Freescale Trilogy if we can't find an NTX HW tag
-				set_kobo_quirks(0);
+				set_kobo_quirks(0U);
 				return;
 			}
 
@@ -862,7 +863,7 @@ static void
 				WARN("Error reading NTX HWConfig payload (unexpected length)");
 				fclose(fp);
 				// NOTE: Make it clear we failed to identify the device...
-				set_kobo_quirks(0);
+				set_kobo_quirks((unsigned short int) -1);
 				return;
 			}
 
