@@ -226,11 +226,11 @@ static const unsigned char*
 		return scientifica_block100[0];
 	} else if (codepoint >= 0xe09eu && codepoint <= 0xe0a2u) {
 		return scientifica_block101[codepoint - 0xe09eu];
-	} else if (codepoint >= 0xe0b0u && codepoint <= 0xe0b5u) {
+	} else if (codepoint >= 0xe0b0u && codepoint <= 0xe0c6u) {
 		return scientifica_block102[codepoint - 0xe0b0u];
-	} else if (codepoint >= 0xe0c0u && codepoint <= 0xe0c6u) {
-		return scientifica_block103[codepoint - 0xe0c0u];
-	} else if (codepoint == 0xe0d1u) {
+	} else if (codepoint >= 0xe0d1u && codepoint <= 0xe0d2u) {
+		return scientifica_block103[codepoint - 0xe0d1u];
+	} else if (codepoint == 0xe0d4u) {
 		return scientifica_block104[0];
 	} else if (codepoint == 0xf031u) {
 		return scientifica_block105[0];
@@ -413,70 +413,72 @@ static const unsigned char*
 		return scientificab_block74[codepoint - 0x25e7u];
 	} else if (codepoint >= 0x2600u && codepoint <= 0x2602u) {
 		return scientificab_block75[codepoint - 0x2600u];
+	} else if (codepoint >= 0x2630u && codepoint <= 0x2637u) {
+		return scientificab_block76[codepoint - 0x2630u];
 	} else if (codepoint == 0x2661u) {
-		return scientificab_block76[0];
-	} else if (codepoint == 0x2665u) {
 		return scientificab_block77[0];
+	} else if (codepoint == 0x2665u) {
+		return scientificab_block78[0];
 	} else if (codepoint >= 0x2669u && codepoint <= 0x266cu) {
-		return scientificab_block78[codepoint - 0x2669u];
+		return scientificab_block79[codepoint - 0x2669u];
 	} else if (codepoint >= 0x2713u && codepoint <= 0x2718u) {
-		return scientificab_block79[codepoint - 0x2713u];
+		return scientificab_block80[codepoint - 0x2713u];
 	} else if (codepoint == 0x272eu) {
-		return scientificab_block80[0];
-	} else if (codepoint == 0x2744u) {
 		return scientificab_block81[0];
+	} else if (codepoint == 0x2744u) {
+		return scientificab_block82[0];
 	} else if (codepoint >= 0x276eu && codepoint <= 0x2771u) {
-		return scientificab_block82[codepoint - 0x276eu];
+		return scientificab_block83[codepoint - 0x276eu];
 	} else if (codepoint >= 0x27c2u && codepoint <= 0x27c4u) {
-		return scientificab_block83[codepoint - 0x27c2u];
+		return scientificab_block84[codepoint - 0x27c2u];
 	} else if (codepoint >= 0x27d8u && codepoint <= 0x27d9u) {
-		return scientificab_block84[codepoint - 0x27d8u];
+		return scientificab_block85[codepoint - 0x27d8u];
 	} else if (codepoint >= 0x27dcu && codepoint <= 0x27deu) {
-		return scientificab_block85[codepoint - 0x27dcu];
+		return scientificab_block86[codepoint - 0x27dcu];
 	} else if (codepoint >= 0x287du && codepoint <= 0x28ffu) {
-		return scientificab_block86[codepoint - 0x287du];
+		return scientificab_block87[codepoint - 0x287du];
 	} else if (codepoint >= 0x2919u && codepoint <= 0x291cu) {
-		return scientificab_block87[codepoint - 0x2919u];
+		return scientificab_block88[codepoint - 0x2919u];
 	} else if (codepoint >= 0x2b5eu && codepoint <= 0x2b62u) {
-		return scientificab_block88[codepoint - 0x2b5eu];
+		return scientificab_block89[codepoint - 0x2b5eu];
 	} else if (codepoint == 0x2b64u) {
-		return scientificab_block89[0];
+		return scientificab_block90[0];
 	} else if (codepoint >= 0x2b80u && codepoint <= 0x2b83u) {
-		return scientificab_block90[codepoint - 0x2b80u];
+		return scientificab_block91[codepoint - 0x2b80u];
 	} else if (codepoint >= 0x30c3u && codepoint <= 0x30c4u) {
-		return scientificab_block91[codepoint - 0x30c3u];
+		return scientificab_block92[codepoint - 0x30c3u];
 	} else if (codepoint == 0x5350u) {
-		return scientificab_block92[0];
+		return scientificab_block93[0];
 	} else if (codepoint >= 0xe09eu && codepoint <= 0xe0a2u) {
-		return scientificab_block93[codepoint - 0xe09eu];
+		return scientificab_block94[codepoint - 0xe09eu];
 	} else if (codepoint >= 0xe0b0u && codepoint <= 0xe0b3u) {
-		return scientificab_block94[codepoint - 0xe0b0u];
+		return scientificab_block95[codepoint - 0xe0b0u];
 	} else if (codepoint >= 0xe0c0u && codepoint <= 0xe0c6u) {
-		return scientificab_block95[codepoint - 0xe0c0u];
+		return scientificab_block96[codepoint - 0xe0c0u];
 	} else if (codepoint == 0xe0d1u) {
-		return scientificab_block96[0];
-	} else if (codepoint == 0xf031u) {
 		return scientificab_block97[0];
+	} else if (codepoint == 0xf031u) {
+		return scientificab_block98[0];
 	} else if (codepoint >= 0xf033u && codepoint <= 0xf03du) {
-		return scientificab_block98[codepoint - 0xf033u];
+		return scientificab_block99[codepoint - 0xf033u];
 	} else if (codepoint >= 0xf057u && codepoint <= 0xf059u) {
-		return scientificab_block99[codepoint - 0xf057u];
+		return scientificab_block100[codepoint - 0xf057u];
 	} else if (codepoint == 0xf061u) {
-		return scientificab_block100[0];
-	} else if (codepoint == 0xf073u) {
 		return scientificab_block101[0];
+	} else if (codepoint == 0xf073u) {
+		return scientificab_block102[0];
 	} else if (codepoint >= 0xf078u && codepoint <= 0xf079u) {
-		return scientificab_block102[codepoint - 0xf078u];
+		return scientificab_block103[codepoint - 0xf078u];
 	} else if (codepoint == 0xf07eu) {
-		return scientificab_block103[0];
+		return scientificab_block104[0];
 	} else if (codepoint >= 0xf0cfu && codepoint <= 0xf0d1u) {
-		return scientificab_block104[codepoint - 0xf0cfu];
+		return scientificab_block105[codepoint - 0xf0cfu];
 	} else if (codepoint >= 0xf0d5u && codepoint <= 0xf0dcu) {
-		return scientificab_block105[codepoint - 0xf0d5u];
+		return scientificab_block106[codepoint - 0xf0d5u];
 	} else if (codepoint >= 0xf0deu && codepoint <= 0xf0e0u) {
-		return scientificab_block106[codepoint - 0xf0deu];
+		return scientificab_block107[codepoint - 0xf0deu];
 	} else if (codepoint >= 0xf0edu && codepoint <= 0xf0f0u) {
-		return scientificab_block107[codepoint - 0xf0edu];
+		return scientificab_block108[codepoint - 0xf0edu];
 	} else {
 		WARN("Codepoint U+%04X (%s) is not covered by this font", codepoint, u8_cp_to_utf8(codepoint));
 		return scientificab_block1[0];
