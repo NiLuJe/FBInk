@@ -109,6 +109,8 @@ print("* Converted from Hex font {}".format(font_set[fontname][0]))
 print("* With FBInk's tools/hextoc.py")
 print("*/")
 print("")
+print("#pragma once")
+print("")
 
 blocknum = 0
 blockcount = 1
