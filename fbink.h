@@ -108,6 +108,8 @@ typedef enum
 	TOPAZ,               // Topaz+ A1200
 	MICROKNIGHT,         // MicroKnight+
 	VGA,                 // IBM VGA 8x16
+	UNIFONT,             // Unifont (single-wide glyphs only)
+	UNIFONTDW,           // Unifont (double-wide glyphs only)
 	FONT_MAX = 0xFFu,    // uint8_t
 } __attribute__((packed)) FONT_INDEX_E;
 typedef uint8_t FONT_INDEX_T;

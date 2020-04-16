@@ -54,6 +54,7 @@
 #		endif
 #	endif
 #endif
+// Bundling Unifont, on the other hand, is *always* optional.
 
 // Try to use GCC's iceilf builtin if possible...
 // NOTE: Relies on the fact that:
@@ -230,6 +231,9 @@
 #	include "fbink_topaz.h"
 #	include "fbink_microknight.h"
 #	include "fbink_vga.h"
+#	ifdef FBINK_WITH_UNIFONT
+#		include "fbink_unifont.h"
+#	endif
 #endif
 
 // NOTE: CLOEXEC shenanigans...

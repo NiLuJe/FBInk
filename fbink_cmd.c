@@ -35,6 +35,12 @@ static void
 #	else
 	    "No"
 #	endif    // FBINK_WITH_FONTS
+	    " Unifont="
+#	ifdef FBINK_WITH_UNIFONT
+	    "Yes"
+#	else
+	    "No"
+#	endif    // FBINK_WITH_UNIFONT
 	    " Image="
 #	ifdef FBINK_WITH_IMAGE
 	    "Yes"
@@ -155,6 +161,9 @@ static void
 #ifdef FBINK_WITH_FONTS
 	    "\t\t\t\tAvailable font families: IBM, UNSCII, ALT, THIN, FANTASY, MCR, TALL, BLOCK,\n"
 	    "\t\t\t\t\t\tLEGGIE, VEGGIE, KATES, FKP, CTRLD, ORP, ORPB, ORPI, SCIENTIFICA, SCIENTIFICAB, SCIENTIFICAI, TERMINUS, TERMINUSB, FATTY, SPLEEN, TEWI, TEWIB, TOPAZ, MICROKNIGHT, VGA\n"
+#	ifdef FBINK_WITH_UNIFONT
+	    "\t\t\t\t\t\tAs well as UNIFONT & UNIFONTDW\n"
+#	endif
 	    "\t\t\t\tNOTE: On low dpi, 600x800 devices, ORP or TEWI's form factor may feel more familiar at default scaling.\n"
 #else
 	    "\t\t\t\tAvailable font families: IBM\n"
@@ -981,6 +990,10 @@ int
 					fbink_cfg.fontname = MICROKNIGHT;
 				} else if (strcasecmp(optarg, "VGA") == 0) {
 					fbink_cfg.fontname = VGA;
+				} else if (strcasecmp(optarg, "UNIFONT") == 0) {
+					fbink_cfg.fontname = UNIFONT;
+				} else if (strcasecmp(optarg, "UNIFONTDW") == 0) {
+					fbink_cfg.fontname = UNIFONTDW;
 				} else {
 					ELOG("Unknown font name '%s'.", optarg);
 					errfnd = true;

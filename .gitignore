@@ -9,6 +9,9 @@ libunibreak.built
 # KDevelop
 FBInk.kdev4
 .kdev4/
+# Uncompressed & split Unifont
+fonts/unifont-8x16.hex
+fonts/unifont-16x16.hex
 # VSCode
 .vscode
 # Global

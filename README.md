@@ -100,6 +100,10 @@ You can also *append* features one by one to a `MINIMAL` build:
 -   Pass `OPENTYPE=1` to add OTF/TTF font rendering support.
 -   Pass `BUTTON_SCAN=1` to add support for the Kobo-specific button scan stuff.
 
+If you *really* need *extreme* Unicode coverage in the fixed-cell codepath, you can also choose to embed GNU Unifont, by passing `UNIFONT=1`.  
+Be warned that this'll add almost 2MB to the binary size, and that the font is actually split in two (double-wide glyphs are punted off to a specific font), which may dampen its usefulness in practice...  
+For obvious reasons, this is *never* enabled by default.
+
 Along the way, a few auxiliary tools may crop up in the `utils` folder. `make utils` will do a static build of these (which is the recommended way to do it, as they rather crudely piggyback on FBInk's *internal* API). Currently, these consist of a diagnostic tool regarding rotation behavior, and a tool to properly manipulate the bitdepth on eInk devices.  
 Most of these have *only* been tested on Kobo, and should probably be left alone unless you know what you're doing ;).  
 The main exception would be ([`fbdepth`](https://github.com/NiLuJe/FBInk/blob/master/utils/fbdepth.c)), which is used by [KOReader](https://github.com/koreader/koreader) on Kobo & reMarkable to enforce a sane rotation and switch to a more efficient bitdepth.

@@ -356,7 +356,7 @@ endif
 
 CMD_SRCS:=fbink_cmd.c
 BTN_SRCS:=button_scan_cmd.c
-# Unless we're asking for a minimal build, include the Unscii fonts, too
+# Unless we're asking for a minimal build, include the other features, except for Unifont.
 ifdef MINIMAL
 	FEATURES_CPPFLAGS+=-DFBINK_MINIMAL
 else
@@ -368,6 +368,10 @@ else
 		WITH_BUTTON_SCAN:=True
 		FEATURES_CPPFLAGS+=-DFBINK_WITH_BUTTON_SCAN
 	endif
+	# Unifont is *always* optional, because it'll add almost 2MB to the binary size!
+	ifdef UNIFONT
+		FEATURES_CPPFLAGS+=-DFBINK_WITH_UNIFONT
+	endif
 endif
 
 # Manage modular MINIMAL builds...
@@ -375,6 +379,10 @@ ifdef MINIMAL
 	# Support tweaking a MINIMAL build to still include extra bitmap fonts
 	ifdef FONTS
 		FEATURES_CPPFLAGS+=-DFBINK_WITH_FONTS
+		# As well as, optionally, the full Unifont...
+		ifdef UNIFONT
+			FEATURES_CPPFLAGS+=-DFBINK_WITH_UNIFONT
+		endif
 	endif
 
 	# Support tweaking a MINIMAL build to still include image support

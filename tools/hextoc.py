@@ -59,6 +59,11 @@ def hex2f64(v):
 	h = int(v, base=16)
 	return int(bin(h)[2:].zfill(64)[::-1], 2)
 
+# NOTE: Unifont is not really monospaced. We ideally ought to honor per-glyph metrics,
+#       but since we can't really do that, we simply seperate single-wide from double-wide glyphs.
+#       zcat unifont-13.0.01.hex.gz | grep -E '^([[:xdigit:]]{4}:)([[:xdigit:]]{32})$' >| unifont-8x16.hex
+#       zcat unifont-13.0.01.hex.gz | grep -E '^([[:xdigit:]]{4}:)([[:xdigit:]]{64})$' >| unifont-16x16.hex
+
 # This is the list of fonts we currently process
 font_set = {
 	# name		: (file,			w,	h)
@@ -89,6 +94,8 @@ font_set = {
 	"topaz"		: ("TopazPlus-8x16.hex",	8,	16),
 	"microknight"	: ("MicroKnightPlus-8x16.hex",	8,	16),
 	"vga"		: ("iv8x16u.hex",		8,	16),
+	"unifont"	: ("unifont-8x16.hex",		8,	16),
+	"unifontdw"	: ("unifont-16x16.hex",		16,	16),
 }
 
 # Get the font name from the first arg passed to the script

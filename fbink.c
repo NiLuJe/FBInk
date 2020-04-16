@@ -1050,6 +1050,12 @@ static const char*
 			return "MicroKnight+";
 		case VGA:
 			return "IBM VGA";
+#	ifdef FBINK_WITH_UNIFONT
+		case UNIFONT:
+			return "Unifont";
+		case UNIFONTDW:
+			return "Unifont (double-wide)";
+#	endif
 #endif
 		default:
 			return "IBM (Default)";
@@ -3299,6 +3305,18 @@ static int
 			glyphHeight        = 8U;
 			fxpFont8xGetBitmap = &unscii_get_bitmap;
 			break;
+#	ifdef FBINK_WITH_UNIFONT
+		case UNIFONT:
+			glyphWidth         = 8U;
+			glyphHeight        = 16U;
+			fxpFont8xGetBitmap = &unifont_get_bitmap;
+			break;
+		case UNIFONTDW:
+			glyphWidth          = 16U;
+			glyphHeight         = 16U;
+			fxpFont16xGetBitmap = &unifontdw_get_bitmap;
+			break;
+#	endif
 		case IBM:
 		default:
 			glyphWidth         = 8U;
@@ -3378,8 +3396,12 @@ static int
 		if (fbink_cfg->fontname == BLOCK) {
 			// Block is roughly 4 times wider than other fonts, compensate for that...
 			FONTSIZE_MULT = (uint8_t) MAX(1U, FONTSIZE_MULT / 4U);
+#	ifdef FBINK_WITH_UNIFONT
+		} else if (fbink_cfg->fontname == SPLEEN || fbink_cfg->fontname == UNIFONTDW) {
+#	else
 		} else if (fbink_cfg->fontname == SPLEEN) {
-			// Spleen is roughly twice as wide as other fonts, compensate for that...
+#	endif
+			// Spleen & Unifont DW are roughly twice as wide as other fonts, compensate for that...
 			FONTSIZE_MULT = (uint8_t) MAX(1U, FONTSIZE_MULT / 2U);
 		}
 #endif
@@ -9027,6 +9049,10 @@ FBInkRect
 #	include "fbink_microknight.c"
 // VGA variant of the IBM font (https://farsil.github.io/ibmfonts & https://int10h.org/oldschool-pc-fonts)
 #	include "fbink_vga.c"
+// GNU Unifont glyphs (http://unifoundry.com/unifont/index.html)
+#	ifdef FBINK_WITH_UNIFONT
+#		include "fbink_unifont.c"
+#	endif
 #endif
 // Contains fbink_button_scan's implementation, Kobo only, and has a bit of Linux MT input thrown in ;).
 #include "fbink_button_scan.c"
