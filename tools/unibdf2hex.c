@@ -3,9 +3,6 @@
 
    Author: Paul Hardy, January 2008
 
-   Note: currently this has hard-coded code points for glyphs extracted
-   from Wen Quan Yi to create the Unifont source file "wqy.hex".
-
    Copyright (C) 2008, 2013 Paul Hardy
 
    LICENSE:
@@ -14,12 +11,12 @@
       it under the terms of the GNU General Public License as published by
       the Free Software Foundation, either version 2 of the License, or
       (at your option) any later version.
-   
+
       This program is distributed in the hope that it will be useful,
       but WITHOUT ANY WARRANTY; without even the implied warranty of
-      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
       GNU General Public License for more details.
-   
+
       You should have received a copy of the GNU General Public License
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -28,8 +25,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define UNISTART 0x3400
-#define UNISTOP 0x4DBF
+#define UNISTART 0x0000
+#define UNISTOP 0xFFFF
 
 #define MAXBUF 256
 
@@ -43,7 +40,7 @@ main()
    char inbuf[MAXBUF];
    int bbxx, bbxy, bbxxoff, bbxyoff;
 
-   int descent=4; /* font descent wrt baseline */
+   int descent=6; /* font descent wrt baseline */
    int startrow;  /* row to start glyph        */
    unsigned rowout;
 
@@ -54,16 +51,7 @@ main()
             If we want this code point, get the BBX (bounding box) and
             BITMAP information.
          */
-         if ((thispoint >= 0x2E80 && thispoint <= 0x2EFF) || // CJK Radicals Supplement
-             (thispoint >= 0x2F00 && thispoint <= 0x2FDF) || // Kangxi Radicals
-             (thispoint >= 0x2FF0 && thispoint <= 0x2FFF) || // Ideographic Description Characters
-             (thispoint >= 0x3001 && thispoint <= 0x303F) || // CJK Symbols and Punctuation (U+3000 is a space)
-             (thispoint >= 0x3100 && thispoint <= 0x312F) || // Bopomofo
-             (thispoint >= 0x31A0 && thispoint <= 0x31BF) || // Bopomofo extend
-             (thispoint >= 0x31C0 && thispoint <= 0x31EF) || // CJK Strokes
-             (thispoint >= 0x3400 && thispoint <= 0x4DBF) || // CJK Unified Ideographs Extension A
-             (thispoint >= 0x4E00 && thispoint <= 0x9FCF) || // CJK Unified Ideographs
-             (thispoint >= 0xF900 && thispoint <= 0xFAFF))   // CJK Compatibility Ideographs
+         if (1)   // NOTE: Squished cp range check (might want to leave a thispoint <= UNISTOP?).
             {
             while (fgets (inbuf, MAXBUF - 1, stdin) != NULL &&
                    strncmp (inbuf, "BBX ", 4) != 0); /* find bounding box */
