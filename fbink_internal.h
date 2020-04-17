@@ -234,6 +234,7 @@
 #	ifdef FBINK_WITH_UNIFONT
 #		include "fbink_unifont.h"
 #	endif
+#	include "fbink_cozette.h"
 #endif
 
 // NOTE: CLOEXEC shenanigans...

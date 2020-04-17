@@ -64,6 +64,10 @@ def hex2f64(v):
 #       zcat unifont-13.0.01.hex.gz | grep -E '^([[:xdigit:]]{4}:)([[:xdigit:]]{32})$' >| unifont-8x16.hex
 #       zcat unifont-13.0.01.hex.gz | grep -E '^([[:xdigit:]]{4}:)([[:xdigit:]]{64})$' >| unifont-16x16.hex
 
+# NOTE: Cozette should be converted to HEX via unibdf2hex, as gbdfed mangles it to oblivion...
+# NOTE: ScientificaI should be converted to HEX via unibdf2hex in order to honor glyph advances,
+#       making it match the witdh of its brethren ;).
+
 # This is the list of fonts we currently process
 font_set = {
 	# name		: (file,			w,	h)
@@ -96,6 +100,7 @@ font_set = {
 	"vga"		: ("iv8x16u.hex",		8,	16),
 	"unifont"	: ("unifont-8x16.hex",		8,	16),
 	"unifontdw"	: ("unifont-16x16.hex",		16,	16),
+	"cozette"       : ("cozette-8x13.hex",		8,	13),
 }
 
 # Get the font name from the first arg passed to the script
@@ -125,7 +130,8 @@ blockcp = 0x0
 cp = 0x0
 prevcp = 0x0
 
-pat_cp = "([0-9a-fA-F]{4})"
+# Cozette actually goes > 0xFFFF, so handle a proper uint32_t range.
+pat_cp = "([0-9a-fA-F]{4,8})"
 if fontwidth <= 8:
 	pat_rows = "([0-9a-fA-F]{2})" * fontheight
 elif fontwidth <= 16:

@@ -160,7 +160,7 @@ static void
 	    "\t-F, --font NAME\t\tRender glyphs from builtin font NAME (Default: IBM).\n"
 #ifdef FBINK_WITH_FONTS
 	    "\t\t\t\tAvailable font families: IBM, UNSCII, ALT, THIN, FANTASY, MCR, TALL, BLOCK,\n"
-	    "\t\t\t\t\t\tLEGGIE, VEGGIE, KATES, FKP, CTRLD, ORP, ORPB, ORPI, SCIENTIFICA, SCIENTIFICAB, SCIENTIFICAI, TERMINUS, TERMINUSB, FATTY, SPLEEN, TEWI, TEWIB, TOPAZ, MICROKNIGHT, VGA\n"
+	    "\t\t\t\t\t\tLEGGIE, VEGGIE, KATES, FKP, CTRLD, ORP, ORPB, ORPI, SCIENTIFICA, SCIENTIFICAB, SCIENTIFICAI, TERMINUS, TERMINUSB, FATTY, SPLEEN, TEWI, TEWIB, TOPAZ, MICROKNIGHT, VGA, COZETTE\n"
 #	ifdef FBINK_WITH_UNIFONT
 	    "\t\t\t\t\t\tAs well as UNIFONT & UNIFONTDW\n"
 #	endif
@@ -994,6 +994,8 @@ int
 					fbink_cfg.fontname = UNIFONT;
 				} else if (strcasecmp(optarg, "UNIFONTDW") == 0) {
 					fbink_cfg.fontname = UNIFONTDW;
+				} else if (strcasecmp(optarg, "COZETTE") == 0) {
+					fbink_cfg.fontname = COZETTE;
 				} else {
 					ELOG("Unknown font name '%s'.", optarg);
 					errfnd = true;

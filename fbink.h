@@ -110,6 +110,7 @@ typedef enum
 	VGA,                 // IBM VGA 8x16
 	UNIFONT,             // Unifont (single-wide glyphs only)
 	UNIFONTDW,           // Unifont (double-wide glyphs only)
+	COZETTE,             // Cozette
 	FONT_MAX = 0xFFu,    // uint8_t
 } __attribute__((packed)) FONT_INDEX_E;
 typedef uint8_t FONT_INDEX_T;

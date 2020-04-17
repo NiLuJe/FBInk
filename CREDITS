@@ -116,3 +116,7 @@ As well as a number of third-party resources (namely, font files):
 	* unifont, tools/unibdf2hex (GNU Unifont glyphs), Copyright (C) 1998-2020 Roman Czyborra, Paul Hardy,  Qianqian Fang, Andrew Miller, Johnnie Weaver, David Corbett, et al.,
 		Licensed under the GNU General Public License version 2+, with the GNU Font Embedding Exception (http://unifoundry.com/LICENSE.txt)
 		(http://unifoundry.com/unifont/index.html)
+
+	* cozette, (A bitmap programming font optimized for coziness), Copyright (c) 2020 Slavfox,
+		Licensed under the MIT License (https://opensource.org/licenses/MIT).
+		(https://github.com/slavfox/Cozette)

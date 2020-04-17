@@ -1056,6 +1056,8 @@ static const char*
 		case UNIFONTDW:
 			return "Unifont (double-wide)";
 #	endif
+		case COZETTE:
+			return "Cozette";
 #endif
 		default:
 			return "IBM (Default)";
@@ -3317,6 +3319,11 @@ static int
 			fxpFont16xGetBitmap = &unifontdw_get_bitmap;
 			break;
 #	endif
+		case COZETTE:
+			glyphWidth          = 8U;
+			glyphHeight         = 13U;
+			fxpFont8xGetBitmap  = &cozette_get_bitmap;
+			break;
 		case IBM:
 		default:
 			glyphWidth         = 8U;
@@ -9053,6 +9060,8 @@ FBInkRect
 #	ifdef FBINK_WITH_UNIFONT
 #		include "fbink_unifont.c"
 #	endif
+// Slavfox's Cozette (https://github.com/slavfox/Cozette)
+#	include "fbink_cozette.c"
 #endif
 // Contains fbink_button_scan's implementation, Kobo only, and has a bit of Linux MT input thrown in ;).
 #include "fbink_button_scan.c"
