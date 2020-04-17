@@ -32,7 +32,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define UNISTOP  0xFFFFFFu
+#define UNISTOP UINT32_MAX
+
+// Font-specific constants
+#define DESCENT 3
+#define BBOX_HEIGHT 13
+// NOTE: Actually handling > 8px wide fonts requires more tweaking,
+//       like restoring uint16_t padding & computations...
+//       c.f., the original unibdf2hex version.
+#define BBOX_WIDTH 8
 
 #define MAXBUF 256
 
@@ -46,7 +54,7 @@ int
 	char inbuf[MAXBUF];
 	int  bbxx, bbxy, bbxxoff, bbxyoff;
 
-	int      descent = 3; /* font descent wrt baseline */
+	int      descent = DESCENT; /* font descent wrt baseline */
 	int      startrow;    /* row to start glyph        */
 	unsigned rowout;
 
@@ -72,8 +80,8 @@ int
 
 				sscanf(&inbuf[4], "%d %d %d %d", &bbxx, &bbxy, &bbxxoff, &bbxyoff);
 
-				// Skip glyph if it's too wide (> 8px)
-				if (bbxx > 8) {
+				// Skip glyph if it's too wide (> BBOX_WIDTHpx)
+				if (bbxx > BBOX_WIDTH) {
 					fprintf(stderr, "Skipping U+%04X because it's too wide!\n", thispoint);
 					skip = true;
 				}
@@ -91,9 +99,9 @@ int
 				// Recap metrics for debugging purposes...
 				fprintf(stderr, "U+%04X metrics: %02dx%02d @ (%02d, %02d) => startrow: %02d\n", thispoint, bbxx, bbxy, bbxxoff, bbxyoff, startrow);
 
-				/* Force everything to 13 pixels tall */
+				/* Force everything to BBOX_HEIGHT pixels tall */
 				if (!skip) {
-					for (i = 13; i > startrow; i--) {
+					for (i = BBOX_HEIGHT; i > startrow; i--) {
 						fprintf(stdout, "00");
 						digitsout += 2;
 					}
@@ -101,11 +109,11 @@ int
 				while (fgets(inbuf, MAXBUF - 1, stdin) != NULL && strncmp(inbuf, "END", 3) != 0) {
 					/* copy bitmap until END */
 					sscanf(inbuf, "%X", &rowout);
-					/* Now force glyph to a 16x13 grid even if they'd fit in 8x13 */
+					/* Now force glyph to a (BBOX_WIDTH*2)xBBOX_HEIGHT grid even if they'd fit in BBOX_WIDTHxBBOX_HEIGHT */
 					/*
-					if (bbxx <= 8) {
-						// shift left for 16x13 glyph
-						rowout <<= 8;
+					if (bbxx <= BBOX_WIDTH) {
+						// shift left for (BBOX_WIDTH*2)xBBOX_HEIGHT glyph
+						rowout <<= BBOX_WIDTH;
 					}
 					*/
 					// Honor the glyph's advance
@@ -116,9 +124,9 @@ int
 					}
 				}
 
-				/* Pad for x13 glyph */
+				/* Pad for xBBOX_HEIGHT glyph */
 				if (!skip) {
-					while (digitsout < (13 * 2)) {
+					while (digitsout < (BBOX_HEIGHT * 2)) {
 						fprintf(stdout, "00");
 						digitsout += 2;
 					}
