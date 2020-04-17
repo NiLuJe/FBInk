@@ -3320,9 +3320,9 @@ static int
 			break;
 #	endif
 		case COZETTE:
-			glyphWidth          = 8U;
-			glyphHeight         = 13U;
-			fxpFont8xGetBitmap  = &cozette_get_bitmap;
+			glyphWidth         = 8U;
+			glyphHeight        = 13U;
+			fxpFont8xGetBitmap = &cozette_get_bitmap;
 			break;
 		case IBM:
 		default:

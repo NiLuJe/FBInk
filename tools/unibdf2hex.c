@@ -27,15 +27,15 @@
 */
 
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define UNISTOP UINT32_MAX
 
 // Font-specific constants
-#define DESCENT 3
+#define DESCENT     3
 #define BBOX_HEIGHT 13
 // NOTE: Actually handling > 8px wide fonts requires more tweaking,
 //       like restoring uint16_t padding & computations...
@@ -47,15 +47,15 @@
 int
     main()
 {
-	int  i;
-	size_t  rowcnt; /* how many rows we've output in a bitmap */
+	int      i;
+	size_t   rowcnt; /* how many rows we've output in a bitmap */
 	uint32_t thispoint;
 	uint32_t thishex;
-	char inbuf[MAXBUF];
-	int  bbxx, bbxy, bbxxoff, bbxyoff;
+	char     inbuf[MAXBUF];
+	int      bbxx, bbxy, bbxxoff, bbxyoff;
 
 	int      descent = DESCENT; /* font descent wrt baseline */
-	int      startrow;    /* row to start glyph        */
+	int      startrow;          /* row to start glyph        */
 	unsigned rowout;
 
 	while (fgets(inbuf, MAXBUF - 1, stdin) != NULL) {
@@ -97,7 +97,14 @@ int
 				/* Print initial blank rows */
 				startrow = descent + bbxyoff + bbxy;
 				// Recap metrics for debugging purposes...
-				fprintf(stderr, "U+%04X metrics: %02dx%02d @ (%02d, %02d) => startrow: %02d\n", thispoint, bbxx, bbxy, bbxxoff, bbxyoff, startrow);
+				fprintf(stderr,
+					"U+%04X metrics: %02dx%02d @ (%02d, %02d) => startrow: %02d\n",
+					thispoint,
+					bbxx,
+					bbxy,
+					bbxxoff,
+					bbxyoff,
+					startrow);
 
 				/* Force everything to BBOX_HEIGHT pixels tall */
 				if (!skip) {
