@@ -48,7 +48,7 @@ int
     main()
 {
 	int  i;
-	int  digitsout; /* how many hex digits we output in a bitmap */
+	size_t  rowcnt; /* how many rows we've output in a bitmap */
 	uint32_t thispoint;
 	uint32_t thishex;
 	char inbuf[MAXBUF];
@@ -93,7 +93,7 @@ int
 				if (!skip) {
 					fprintf(stdout, "%04X:", thispoint);
 				}
-				digitsout = 0;
+				rowcnt = 0U;
 				/* Print initial blank rows */
 				startrow = descent + bbxyoff + bbxy;
 				// Recap metrics for debugging purposes...
@@ -103,7 +103,7 @@ int
 				if (!skip) {
 					for (i = BBOX_HEIGHT; i > startrow; i--) {
 						fprintf(stdout, "00");
-						digitsout += 2;
+						rowcnt++;
 					}
 				}
 				while (fgets(inbuf, MAXBUF - 1, stdin) != NULL && strncmp(inbuf, "END", 3) != 0) {
@@ -120,15 +120,15 @@ int
 					rowout >>= bbxxoff;
 					if (!skip) {
 						fprintf(stdout, "%02X", rowout);
-						digitsout += 2;
+						rowcnt++;
 					}
 				}
 
 				/* Pad for xBBOX_HEIGHT glyph */
 				if (!skip) {
-					while (digitsout < (BBOX_HEIGHT * 2)) {
+					while (rowcnt < BBOX_HEIGHT) {
 						fprintf(stdout, "00");
-						digitsout += 2;
+						rowcnt++;
 					}
 					fprintf(stdout, "\n");
 				}
