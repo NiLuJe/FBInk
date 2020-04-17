@@ -65,6 +65,10 @@ def hex2f64(v):
 #       zcat unifont-13.0.01.hex.gz | grep -E '^([[:xdigit:]]{4}:)([[:xdigit:]]{64})$' >| unifont-16x16.hex
 
 # NOTE: Cozette should be converted to HEX via unibdf2hex, as gbdfed mangles it to oblivion...
+#       The main culprit appears to be the per-glyph advances,
+#       which means that the Vector variant will yield far tighter inter-glyph spacing.
+# NOTE: The same idea applies to Scientifica Italic, where the Vector variant will yield far more pleasing results,
+#       thanks to its aggressive use of negative horizontal advances.
 
 # This is the list of fonts we currently process
 font_set = {
