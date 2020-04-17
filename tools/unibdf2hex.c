@@ -5,6 +5,9 @@
 
    Copyright (C) 2008, 2013 Paul Hardy
 
+   NOTE: I tweaked it to deal with the conversion of Cozette's BDF to HEX,
+         which was all kinds of broken with gbdfed...
+
    LICENSE:
 
       This program is free software: you can redistribute it and/or modify
@@ -48,9 +51,9 @@ int
 		if (strncmp(inbuf, "ENCODING ", 9) == 0) {
 			bool skip = false;
 			sscanf(&inbuf[9], "%d", &thispoint); /* get code point */
-			/* If we want this code point, get the BBX (bounding box) and BITMAP information. */
-			if (1)    // NOTE: Squished cp range check (might want to leave a thispoint <= UNISTOP?).
-			{
+			// Stop at the edge of BMP 0, because ENCODING is -1 above that....
+			if (thispoint >= UNISTART && thispoint <= UNISTOP) {
+				/* If we want this code point, get the BBX (bounding box) and BITMAP information. */
 				while (fgets(inbuf, MAXBUF - 1, stdin) != NULL && strncmp(inbuf, "BBX ", 4) != 0) {
 					/* find bounding box */
 					;
