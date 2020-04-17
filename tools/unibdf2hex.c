@@ -8,6 +8,8 @@
    NOTE: I tweaked it to deal with the conversion of Cozette's BDF to HEX,
          which was all kinds of broken with gbdfed...
 
+   gcc -Wall -Wextra tools/unibdf2hex.c -o tools/unibdf2hex
+
    LICENSE:
 
       This program is free software: you can redistribute it and/or modify
@@ -26,11 +28,11 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define UNISTART 0x0000
-#define UNISTOP  0xFFFF
+#define UNISTOP  0xFFFFFFu
 
 #define MAXBUF 256
 
@@ -39,7 +41,8 @@ int
 {
 	int  i;
 	int  digitsout; /* how many hex digits we output in a bitmap */
-	int  thispoint;
+	uint32_t thispoint;
+	uint32_t thishex;
 	char inbuf[MAXBUF];
 	int  bbxx, bbxy, bbxxoff, bbxyoff;
 
@@ -48,11 +51,19 @@ int
 	unsigned rowout;
 
 	while (fgets(inbuf, MAXBUF - 1, stdin) != NULL) {
+		// Cozette goes above U+FFFF, attempt to handle that...
+		if (strncmp(inbuf, "STARTCHAR ", 10) == 0) {
+			thishex = 0U;
+			sscanf(&inbuf[10], "u%X", &thishex); /* get code point if in uFFFF format */
+		}
 		if (strncmp(inbuf, "ENCODING ", 9) == 0) {
 			bool skip = false;
-			sscanf(&inbuf[9], "%d", &thispoint); /* get code point */
-			// Stop at the edge of BMP 0, because ENCODING is -1 above that....
-			if (thispoint >= UNISTART && thispoint <= UNISTOP) {
+			sscanf(&inbuf[9], "%d", &thispoint); /* get code point (use %d because it may be -1!) */
+			// If cp appears invalid, try to use the value from STARTCHAR...
+			if (thispoint == UINT32_MAX && thishex != 0U) {
+				thispoint = thishex;
+			}
+			if (thispoint <= UNISTOP) {
 				/* If we want this code point, get the BBX (bounding box) and BITMAP information. */
 				while (fgets(inbuf, MAXBUF - 1, stdin) != NULL && strncmp(inbuf, "BBX ", 4) != 0) {
 					/* find bounding box */
@@ -97,6 +108,7 @@ int
 						rowout <<= 8;
 					}
 					*/
+					// Honor the glyph's advance
 					rowout >>= bbxxoff;
 					if (!skip) {
 						fprintf(stdout, "%02X", rowout);
