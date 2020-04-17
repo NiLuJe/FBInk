@@ -71,7 +71,7 @@ int
 			if (thispoint == UINT32_MAX && thishex != 0U) {
 				thispoint = thishex;
 			}
-			if (thispoint <= UNISTOP) {
+			if (thispoint < UNISTOP) {
 				/* If we want this code point, get the BBX (bounding box) and BITMAP information. */
 				while (fgets(inbuf, MAXBUF - 1, stdin) != NULL && strncmp(inbuf, "BBX ", 4) != 0) {
 					/* find bounding box */
