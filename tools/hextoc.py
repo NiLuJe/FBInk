@@ -65,8 +65,6 @@ def hex2f64(v):
 #       zcat unifont-13.0.01.hex.gz | grep -E '^([[:xdigit:]]{4}:)([[:xdigit:]]{64})$' >| unifont-16x16.hex
 
 # NOTE: Cozette should be converted to HEX via unibdf2hex, as gbdfed mangles it to oblivion...
-# NOTE: ScientificaI should be converted to HEX via unibdf2hex in order to honor glyph advances,
-#       making it match the witdh of its brethren ;).
 
 # This is the list of fonts we currently process
 font_set = {

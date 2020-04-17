@@ -129,8 +129,10 @@ int
 						rowout <<= BBOX_WIDTH;
 					}
 					*/
-					// Honor the glyph's advance
-					rowout >>= bbxxoff;
+					// Honor the glyph's advance if it's positive (avoids undefined behavior w/ the shift)...
+					if (bbxxoff > 0) {
+						rowout >>= bbxxoff;
+					}
 					if (!skip) {
 						fprintf(stdout, "%02X", rowout);
 						rowcnt++;
