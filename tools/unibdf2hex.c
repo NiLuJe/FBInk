@@ -8,7 +8,13 @@
    NOTE: I tweaked it to deal with the conversion of Cozette's BDF to HEX,
          which was all kinds of broken with gbdfed...
 
-   gcc -Wall -Wextra tools/unibdf2hex.c -o tools/unibdf2hex
+   Building:
+       gcc -Wall -Wextra tools/unibdf2hex.c -o tools/unibdf2hex
+
+   Usage:
+       tools/unibdf2hex < fonts/cozette.bdf >| fonts/cozette-8x13.hex
+
+   Don't forget to tweak the constants according to the font being converted...
 
    LICENSE:
 
