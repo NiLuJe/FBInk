@@ -1989,9 +1989,9 @@ int
 		short int          initial_row = fbink_cfg.row;
 		short int          initial_top = ot_config.margins.top;
 
-		struct pollfd pfd;
-		pfd.fd     = pipefd;
-		pfd.events = POLLIN;
+		struct pollfd pfd = { 0 };
+		pfd.fd            = pipefd;
+		pfd.events        = POLLIN;
 		// Forevah'!
 		while (1) {
 			// If we caught one of the signals we setup earlier, it's time to die ;).
