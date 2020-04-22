@@ -3937,10 +3937,16 @@ int
 	struct mxcfb_rect region = { 0U };
 
 	// Did we request a regional clear?
+	bool full_clear = false;
 	if (!rect || (rect->width == 0U || rect->height == 0U)) {
 		// Nope -> full-screen
 		clear_screen(fbfd, fbink_cfg->is_inverted ? penBGColor ^ 0xFFu : penBGColor, fbink_cfg->is_flashing);
-		fullscreen_region(&region);
+		full_clear = true;
+		// Set a region for set_last_rect...
+		region.top    = 0U;
+		region.left   = 0U;
+		region.width  = screenWidth;
+		region.height = screenHeight;
 	} else {
 		// Yes -> simply fill a rectangle w/ the bg color
 		FBInkPixel bgP = penBGPixel;
@@ -3961,9 +3967,14 @@ int
 		region.height = rect->height;
 	}
 
-	// Rotate the region if need be, and remember the rect...
+	// Rotate the region if need be...
 	(*fxpRotateRegion)(&region);
+	// Remember the rect...
 	set_last_rect(&region);
+	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
+	if (full_clear) {
+		fullscreen_region(&region);
+	}
 
 	// Refresh screen
 	if (refresh(fbfd,
