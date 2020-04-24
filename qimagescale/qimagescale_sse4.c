@@ -67,16 +67,16 @@ static inline void
     qt_qimageScaleAARGBA_up_x_down_y_sse4(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
 {
 	const unsigned int** ypoints  = isi->ypoints;
-	int*                 xpoints  = isi->xpoints;
-	int*                 xapoints = isi->xapoints;
-	int*                 yapoints = isi->yapoints;
+	const int*           xpoints  = isi->xpoints;
+	const int*           xapoints = isi->xapoints;
+	const int*           yapoints = isi->yapoints;
 
 	const __m128i v256 = _mm_set1_epi32(256);
 
 	/* go through every scanline in the output buffer */
 	for (int y = 0; y < dh; y++) {
-		int           Cy   = yapoints[y] >> 16;
-		int           yap  = yapoints[y] & 0xffff;
+		const int     Cy   = yapoints[y] >> 16;
+		const int     yap  = yapoints[y] & 0xffff;
 		const __m128i vCy  = _mm_set1_epi32(Cy);
 		const __m128i vyap = _mm_set1_epi32(yap);
 
@@ -85,7 +85,7 @@ static inline void
 			const unsigned int* sptr = ypoints[y] + xpoints[x];
 			__m128i             vx   = qt_qimageScaleAARGBA_helper_sse4(sptr, yap, Cy, sow, vyap, vCy);
 
-			int xap = xapoints[x];
+			const int xap = xapoints[x];
 			if (xap > 0) {
 				const __m128i vxap    = _mm_set1_epi32(xap);
 				const __m128i vinvxap = _mm_sub_epi32(v256, vxap);
