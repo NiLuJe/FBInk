@@ -6720,17 +6720,21 @@ int
 
 	// We want to flag each trigger independently
 	if (old_bpp != vInfo.bits_per_pixel) {
-		ELOG("Detected a change in framebuffer bitdepth");
+		ELOG("Detected a change in framebuffer bitdepth (%u -> %u)", old_bpp, vInfo.bits_per_pixel);
 		rf |= OK_BPP_CHANGE;
 	}
 	if (old_rota != vInfo.rotate) {
-		ELOG("Detected a change in framebuffer rotation");
+		ELOG("Detected a change in framebuffer rotation (%u -> %u)", old_rota, vInfo.rotate);
 		rf |= OK_ROTA_CHANGE;
 
 		// A layout change can only happen after a rotation change ;).
 		if (old_xres != vInfo.xres || old_yres != vInfo.yres) {
 			// Technically an orientation change, but layout is less likely to be confused w/ rotation ;).
-			ELOG("Detected a change in framebuffer layout");
+			ELOG("Detected a change in framebuffer layout (%ux%u -> %ux%u)",
+			     old_xres,
+			     old_yres,
+			     vInfo.xres,
+			     vInfo.yres);
 			rf |= OK_LAYOUT_CHANGE;
 		}
 	}
