@@ -2,6 +2,7 @@
 **
 ** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
+** SPDX-License-Identifier: LGPL-3.0-only
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **

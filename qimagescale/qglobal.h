@@ -3,6 +3,7 @@
 ** Copyright (C) 2016 The Qt Company Ltd.
 ** Copyright (C) 2016 Intel Corporation.
 ** Contact: https://www.qt.io/licensing/
+** SPDX-License-Identifier: LGPL-3.0-only
 **
 ** This file is part of the QtCore module of the Qt Toolkit.
 **
