@@ -1970,6 +1970,7 @@ int
 		// NOTE: Since the write end will only be open for very short amount of times, we prefer polling,
 		//       otherwise, read would spend most of its time busy-looping on EOF...
 		// NOTE: See the POLLHUP note below for the reasoning behing opening it RW and not RO...
+		// NOTE: See also this terrific recap: https://stackoverflow.com/a/17384067
 		pipefd = open(pipe_path, O_RDWR | O_NONBLOCK | O_CLOEXEC);
 		if (pipefd == -1) {
 			WARN("open(%s): %m", pipe_path);
@@ -2016,11 +2017,17 @@ int
 			if (pn > 0) {
 				if (pfd.revents & POLLIN) {
 					// We've got data to read, do it!
-					char buf[PIPE_BUF] = { 0 };
-					// Flawfinder: ignore
-					ssize_t bytes_read = read(pfd.fd, buf, sizeof(buf));
-					if (bytes_read == -1 && errno != EAGAIN) {
-						if (errno == EINTR) {
+					char    buf[PIPE_BUF] = { 0 };
+					ssize_t bytes_read    = 0;
+					// NOTE: Retry on EINTR (should be unreachable on Linux,
+					//       c.f., https://stackoverflow.com/a/59795677)
+					do {
+						// Flawfinder: ignore
+						bytes_read = read(pfd.fd, buf, sizeof(buf));
+					} while (bytes_read == -1 && errno == EINTR);
+					if (bytes_read == -1) {
+						if (errno == EAGAIN) {
+							// Back to poll()!
 							continue;
 						}
 						WARN("read: %m");
@@ -2028,7 +2035,7 @@ int
 						goto cleanup;
 					}
 
-					// The poll should have ensured we have something to read, but, just in case...
+					// This should never actually happen.
 					if (bytes_read <= 0) {
 						continue;
 					}
