@@ -6694,8 +6694,11 @@ int
 {
 #ifndef FBINK_FOR_KINDLE
 	// So, we're concerned with stuff that affects the logical & physical layout, namely, bitdepth & rotation.
-	uint32_t old_bpp  = vInfo.bits_per_pixel;
-	uint32_t old_rota = vInfo.rotate;
+	const uint32_t old_bpp  = vInfo.bits_per_pixel;
+	const uint32_t old_rota = vInfo.rotate;
+	// As well as xres & yres to catch layout changes
+	const uint32_t old_xres = vInfo.xres;
+	const uint32_t old_yres = vInfo.yres;
 
 	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
 	bool keep_fd = true;
@@ -6705,6 +6708,8 @@ int
 
 	// Assume success, until shit happens ;)
 	int rv = EXIT_SUCCESS;
+	// We'll track what triggered the reinit in a bitmask
+	int rf = 0;
 
 	// Now that we've stored the relevant bits of the previous state, query the current one...
 	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
@@ -6713,24 +6718,31 @@ int
 		goto cleanup;
 	}
 
-	// Start with the more drastic change: bitdepth, before checking rotation
+	// We want to flag each trigger independently
 	if (old_bpp != vInfo.bits_per_pixel) {
-		// It's a reinit, so ask to skip the vinfo ioctl we just did
-		ELOG("Detected a change in framebuffer bitdepth, reinitializing...");
-		rv = initialize_fbink(fbfd, fbink_cfg, true);
+		ELOG("Detected a change in framebuffer bitdepth");
+		rf |= OK_BPP_CHANGE;
+	}
+	if (old_rota != vInfo.rotate) {
+		ELOG("Detected a change in framebuffer rotation");
+		rf |= OK_ROTA_CHANGE;
 
-		// If it went fine, make the caller aware
-		if (rv == EXIT_SUCCESS) {
-			rv = OK_BPP_CHANGE;
+		// A layout change can only happen after a rotation change ;).
+		if (old_xres != vInfo.xres || old_yres != vInfo.yres) {
+			// Technically an orientation change, but layout is less likely to be confused w/ rotation ;).
+			ELOG("Detected a change in framebuffer layout");
+			rf |= OK_LAYOUT_CHANGE;
 		}
-	} else if (old_rota != vInfo.rotate) {
-		// It's a reinit, so ask to skip the vinfo ioctl we just did
-		ELOG("Detected a change in framebuffer rotation, reinitializing...");
+	}
+
+	// If our bitmask is not empty, it means we have a reinit to do, one where we'll skip the vinfo ioctl we just did.
+	if (rf > 0) {
+		ELOG("Reinitializing...");
 		rv = initialize_fbink(fbfd, fbink_cfg, true);
 
-		// If it went fine, make the caller aware
+		// If it went fine, make the caller aware of why we did it by returning the bitmask
 		if (rv == EXIT_SUCCESS) {
-			rv = OK_ROTA_CHANGE;
+			rv = rf;
 		}
 	}
 
