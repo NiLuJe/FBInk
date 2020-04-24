@@ -2019,7 +2019,7 @@ int
 					// We've got data to read, do it!
 					char    buf[PIPE_BUF] = { 0 };
 					ssize_t bytes_read    = 0;
-					// NOTE: Retry on EINTR (should be unreachable on Linux,
+					// NOTE: Retry on EINTR (should never happen on Linux,
 					//       c.f., https://stackoverflow.com/a/59795677)
 					do {
 						// Flawfinder: ignore
