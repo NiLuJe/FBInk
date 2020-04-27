@@ -893,7 +893,7 @@ static void
 		//       Oh, well...
 		if (is_flashing && v == eInkFGCMap[BG_WHITE]) {
 			if (ioctl(fbfd, FBIO_EINK_CLEAR_SCREEN, EINK_CLEAR_SCREEN) < 0) {
-				WARN("FBIO_EINK_CLEAR_SCREEN: %m");
+				PFWARN("FBIO_EINK_CLEAR_SCREEN: %m");
 				// Just warn, this is non-fatal ;).
 			}
 
@@ -1707,9 +1707,9 @@ static int
 
 	if (rv < 0) {
 		if (is_fs) {
-			WARN("FBIO_EINK_UPDATE_DISPLAY: %m");
+			PFWARN("FBIO_EINK_UPDATE_DISPLAY: %m");
 		} else {
-			WARN("FBIO_EINK_UPDATE_DISPLAY_AREA: %m");
+			PFWARN("FBIO_EINK_UPDATE_DISPLAY_AREA: %m");
 		}
 		return ERRCODE(EXIT_FAILURE);
 	}
@@ -1724,7 +1724,7 @@ static int
 	int rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_SUBMISSION, &marker);
 
 	if (rv < 0) {
-		WARN("MXCFB_WAIT_FOR_UPDATE_SUBMISSION: %m");
+		PFWARN("MXCFB_WAIT_FOR_UPDATE_SUBMISSION: %m");
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		if (rv == 0) {
@@ -1790,7 +1790,7 @@ static int
 	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
 
 	if (rv < 0) {
-		WARN("MXCFB_SEND_UPDATE: %m");
+		PFWARN("MXCFB_SEND_UPDATE: %m");
 		if (errno == EINVAL) {
 			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
 			     region.top,
@@ -1818,7 +1818,7 @@ static int
 	int rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL, &marker);
 
 	if (rv < 0) {
-		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL: %m");
+		PFWARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL: %m");
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		if (rv == 0) {
@@ -1843,7 +1843,7 @@ static int
 	int rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_marker);
 
 	if (rv < 0) {
-		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %m");
+		PFWARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %m");
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		if (rv == 0) {
@@ -1928,7 +1928,7 @@ static int
 	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE_ZELDA, &update);
 
 	if (rv < 0) {
-		WARN("MXCFB_SEND_UPDATE_ZELDA: %m");
+		PFWARN("MXCFB_SEND_UPDATE_ZELDA: %m");
 		if (errno == EINVAL) {
 			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
 			     region.top,
@@ -2018,7 +2018,7 @@ static int
 	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE_REX, &update);
 
 	if (rv < 0) {
-		WARN("MXCFB_SEND_UPDATE_REX: %m");
+		PFWARN("MXCFB_SEND_UPDATE_REX: %m");
 		if (errno == EINVAL) {
 			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
 			     region.top,
@@ -2085,7 +2085,7 @@ static int
 	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
 
 	if (rv < 0) {
-		WARN("MXCFB_SEND_UPDATE: %m");
+		PFWARN("MXCFB_SEND_UPDATE: %m");
 		if (errno == EINVAL) {
 			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
 			     region.top,
@@ -2107,7 +2107,7 @@ static int
 	int rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &marker);
 
 	if (rv < 0) {
-		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %m");
+		PFWARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %m");
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		if (rv == 0) {
@@ -2163,7 +2163,7 @@ static int
 	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
 
 	if (rv < 0) {
-		WARN("MXCFB_SEND_UPDATE: %m");
+		PFWARN("MXCFB_SEND_UPDATE: %m");
 		if (errno == EINVAL) {
 			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
 			     region.top,
@@ -2184,7 +2184,7 @@ static int
 	int                             rv          = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_data);
 
 	if (rv < 0) {
-		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %m");
+		PFWARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %m");
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		if (rv == 0) {
@@ -2243,7 +2243,7 @@ static int
 	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V1_NTX, &update);
 
 	if (rv < 0) {
-		WARN("MXCFB_SEND_UPDATE_V1_NTX: %m");
+		PFWARN("MXCFB_SEND_UPDATE_V1_NTX: %m");
 		if (errno == EINVAL) {
 			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
 			     region.top,
@@ -2263,7 +2263,7 @@ static int
 	int rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1, &marker);
 
 	if (rv < 0) {
-		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1: %m");
+		PFWARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1: %m");
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		if (rv == 0) {
@@ -2362,7 +2362,7 @@ static int
 	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE_V2, &update);
 
 	if (rv < 0) {
-		WARN("MXCFB_SEND_UPDATE_V2: %m");
+		PFWARN("MXCFB_SEND_UPDATE_V2: %m");
 		if (errno == EINVAL) {
 			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
 			     region.top,
@@ -2386,7 +2386,7 @@ static int
 	int rv = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3, &update_marker);
 
 	if (rv < 0) {
-		WARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3: %m");
+		PFWARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3: %m");
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		if (rv == 0) {
@@ -2558,7 +2558,7 @@ int
 	// Open the framebuffer file for reading and writing
 	fbfd = open("/dev/fb0", O_RDWR | O_CLOEXEC);
 	if (fbfd == -1) {
-		WARN("Cannot open framebuffer character device: %m");
+		PFWARN("Cannot open framebuffer character device: %m");
 		return ERRCODE(EXIT_FAILURE);
 	}
 
@@ -2572,7 +2572,7 @@ static int
 	if (*fbfd == FBFD_AUTO) {
 		// If we're opening a fd now, don't keep it around.
 		*keep_fd = false;
-		if (ERRCODE(EXIT_FAILURE) == (*fbfd = fbink_open())) {
+		if ((*fbfd = fbink_open()) == ERRCODE(EXIT_FAILURE)) {
 			WARN("Failed to open the framebuffer character device, aborting");
 			return ERRCODE(EXIT_FAILURE);
 		}
@@ -2592,8 +2592,8 @@ static int
 		*keep_fd = false;
 		// We only need an fd for ioctl, hence O_NONBLOCK (as per open(2)).
 		*fbfd = open("/dev/fb0", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
-		if (!*fbfd) {
-			WARN("Cannot open framebuffer character device (%m), aborting");
+		if (*fbfd == -1) {
+			PFWARN("Cannot open framebuffer character device (%m), aborting");
 			return ERRCODE(EXIT_FAILURE);
 		}
 	}
@@ -3015,7 +3015,7 @@ static int
 	// Get variable screen information (unless we were asked to skip it, because we've already populated it elsewhere)
 	if (!skip_vinfo) {
 		if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
-			WARN("Error reading variable fb information: %m");
+			PFWARN("Error reading variable fb information: %m");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
@@ -3031,7 +3031,7 @@ static int
 	if (deviceQuirks.isKindleLegacy) {
 		orientation_t orientation = orientation_portrait;
 		if (ioctl(fbfd, FBIO_EINK_GET_DISPLAY_ORIENTATION, &orientation)) {
-			WARN("FBIO_EINK_GET_DISPLAY_ORIENTATION: %m");
+			PFWARN("FBIO_EINK_GET_DISPLAY_ORIENTATION: %m");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
@@ -3456,7 +3456,7 @@ static int
 
 	// Get fixed screen information
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &fInfo)) {
-		WARN("Error reading fixed fb information: %m");
+		PFWARN("Error reading fixed fb information: %m");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -3578,21 +3578,21 @@ int
 	FILE*                   f    = fopen(filename, "r" STDIO_CLOEXEC);
 	unsigned char* restrict data = NULL;
 	if (!f) {
-		WARN("fopen: %m");
+		PFWARN("fopen: %m");
 		otInit = false;
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		int         fd = fileno(f);
 		struct stat st;
 		if (fstat(fd, &st) == -1) {
-			WARN("fstat: %m");
+			PFWARN("fstat: %m");
 			fclose(f);
 			otInit = false;
 			return ERRCODE(EXIT_FAILURE);
 		}
 		data = calloc((size_t) st.st_size, sizeof(*data));
 		if (!data) {
-			WARN("Error allocating font data buffer: %m");
+			PFWARN("Error allocating font data buffer: %m");
 			fclose(f);
 			otInit = false;
 			return ERRCODE(EXIT_FAILURE);
@@ -3608,7 +3608,7 @@ int
 	}
 	stbtt_fontinfo* font_info = calloc(1U, sizeof(stbtt_fontinfo));
 	if (!font_info) {
-		WARN("Error allocating stbtt_fontinfo struct: %m");
+		PFWARN("Error allocating stbtt_fontinfo struct: %m");
 		free(data);
 		return ERRCODE(EXIT_FAILURE);
 	}
@@ -3817,7 +3817,7 @@ static int
 	//       See also the Cervantes quirk documented in clear_screen...
 	fbPtr = (unsigned char*) mmap(NULL, fInfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
 	if (fbPtr == MAP_FAILED) {
-		WARN("mmap: %m");
+		PFWARN("mmap: %m");
 		fbPtr = NULL;
 		return ERRCODE(EXIT_FAILURE);
 	} else {
@@ -3832,7 +3832,7 @@ static int
     unmap_fb(void)
 {
 	if (munmap(fbPtr, fInfo.smem_len) < 0) {
-		WARN("munmap: %m");
+		PFWARN("munmap: %m");
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		// NOTE: Don't forget to reset those state flags,
@@ -3859,7 +3859,7 @@ int
 
 	if (fbfd != FBFD_AUTO) {
 		if (close(fbfd) < 0) {
-			WARN("close: %m");
+			PFWARN("close: %m");
 			return ERRCODE(EXIT_FAILURE);
 		}
 	}
@@ -4502,7 +4502,7 @@ int
 	//       (+ 1 'wide' NULL, wide to make sure u8_strlen won't skip over it).
 	line = calloc((MAXCOLS + 1U) * 4U, sizeof(*line));
 	if (line == NULL) {
-		WARN("line calloc: %m");
+		PFWARN("line calloc: %m");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -4853,7 +4853,7 @@ int
 
 	// See if vsnprintf made a boo-boo
 	if (ret < 0) {
-		WARN("initial vsnprintf: %m");
+		PFWARN("initial vsnprintf: %m");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -4864,7 +4864,7 @@ int
 	//       and the OS is smart enough to make it fast if we don't use the full space anyway (CoW zeroing).
 	buffer = calloc(size, sizeof(*buffer));
 	if (buffer == NULL) {
-		WARN("calloc: %m");
+		PFWARN("calloc: %m");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -4876,7 +4876,7 @@ int
 
 	// See if vsnprintf made a boo-boo, one final time
 	if (ret < 0) {
-		WARN("vsnprintf: %m");
+		PFWARN("vsnprintf: %m");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -5192,7 +5192,7 @@ int
 	// And allocate the memory for it...
 	lines = calloc(num_lines, sizeof(FBInkOTLine));
 	if (!lines) {
-		WARN("Lines metadata buffer could not be allocated: %m");
+		PFWARN("Lines metadata buffer could not be allocated: %m");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -5202,7 +5202,7 @@ int
 	// Note: we only care about the byte length here
 	brk_buff = calloc(str_len_bytes + 1U, sizeof(*brk_buff));
 	if (!brk_buff) {
-		WARN("Linebreak buffer could not be allocated: %m");
+		PFWARN("Linebreak buffer could not be allocated: %m");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -5214,7 +5214,7 @@ int
 	if (cfg->is_formatted) {
 		fmt_buff = calloc(str_len_bytes + 1U, sizeof(*fmt_buff));
 		if (!fmt_buff) {
-			WARN("Formatted text buffer could not be allocated: %m");
+			PFWARN("Formatted text buffer could not be allocated: %m");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
@@ -5515,7 +5515,7 @@ int
 	size_t glyph_buffer_dims = font_size_px * (size_t) max_line_height * 2U;
 	glyph_buff               = calloc(glyph_buffer_dims, sizeof(*glyph_buff));
 	if (!line_buff || !glyph_buff) {
-		WARN("Line or glyph buffers could not be allocated: %m");
+		PFWARN("Line or glyph buffers could not be allocated: %m");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -6713,7 +6713,7 @@ int
 
 	// Now that we've stored the relevant bits of the previous state, query the current one...
 	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
-		WARN("Error reading variable fb information: %m");
+		PFWARN("Error reading variable fb information: %m");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -7193,7 +7193,7 @@ static unsigned char*
 				// OOM check
 				temp = realloc(imgdata, size);
 				if (temp == NULL) {
-					WARN("realloc: %m");
+					PFWARN("realloc: %m");
 					free(imgdata);
 					return NULL;
 				}
@@ -7220,7 +7220,7 @@ static unsigned char*
 		/*
 		temp = realloc(imgdata, used + 1U);
 		if (temp == NULL) {
-			WARN("realloc: %m");
+			PFWARN("realloc: %m");
 			free(imgdata);
 			return NULL;
 		}
@@ -8520,7 +8520,7 @@ int
 	dump->size   = (size_t)(dump->stride * vInfo.yres);
 	dump->data   = calloc(dump->size, sizeof(*dump->data));
 	if (dump->data == NULL) {
-		WARN("dump->data %zu bytes calloc: %m", dump->size);
+		PFWARN("dump->data %zu bytes calloc: %m", dump->size);
 		dump->stride = 0U;
 		dump->size   = 0U;
 		rv           = ERRCODE(EXIT_FAILURE);
@@ -8728,7 +8728,7 @@ int
 		dump->data   = calloc(dump->size, sizeof(*dump->data));
 	}
 	if (dump->data == NULL) {
-		WARN("dump->data %zu bytes calloc: %m", dump->size);
+		PFWARN("dump->data %zu bytes calloc: %m", dump->size);
 		dump->stride = 0U;
 		dump->size   = 0U;
 		rv           = ERRCODE(EXIT_FAILURE);

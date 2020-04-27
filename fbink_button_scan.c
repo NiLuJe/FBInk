@@ -208,7 +208,7 @@ static int
 	int                ifd = -1;
 	ifd                    = open("/dev/input/event1", O_WRONLY | O_NONBLOCK | O_CLOEXEC);
 	if (ifd == -1) {
-		WARN("Failed to open input device: %m");
+		PFWARN("Failed to open input device: %m");
 		return ERRCODE(ENODEV);
 	}
 
@@ -591,14 +591,14 @@ int
 		int nfd = -1;
 		nfd     = open("/tmp/nickel-hardware-status", O_WRONLY | O_NONBLOCK | O_CLOEXEC);
 		if (nfd == -1) {
-			WARN("Failed to open Nickel pipe: %m");
+			PFWARN("Failed to open Nickel pipe: %m");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
 
 		const unsigned char cmd[] = "usb plug remove";
 		if (write(nfd, cmd, sizeof(cmd)) < 0) {
-			WARN("Failed to write to Nickel pipe: %m");
+			PFWARN("Failed to write to Nickel pipe: %m");
 			rv = ERRCODE(EXIT_FAILURE);
 			close(nfd);
 			goto cleanup;

@@ -369,7 +369,7 @@ static int
 {
 	switch (fork()) {
 		case -1:
-			WARN("initial fork: %m");
+			PFWARN("initial fork: %m");
 			return -1;
 		case 0:
 			break;
@@ -378,7 +378,7 @@ static int
 	}
 
 	if (setsid() == -1) {
-		WARN("setsid: %m");
+		PFWARN("setsid: %m");
 		return -1;
 	}
 
@@ -386,12 +386,12 @@ static int
 	// In practical terms, this ensures we get re-parented to init *now*.
 	// Ignore SIGHUP while we're there, since we don't want to be killed by it.
 	if (signal(SIGHUP, SIG_IGN) == SIG_ERR) {
-		WARN("signal: %m");
+		PFWARN("signal: %m");
 		return -1;
 	}
 	switch (fork()) {
 		case -1:
-			WARN("final fork: %m");
+			PFWARN("final fork: %m");
 			return -1;
 		case 0:
 			break;
@@ -400,7 +400,7 @@ static int
 	}
 
 	if (chdir("/tmp") == -1) {
-		WARN("chdir: %m");
+		PFWARN("chdir: %m");
 		return -1;
 	}
 
@@ -421,7 +421,7 @@ static int
 			close(fd);
 		}
 	} else {
-		WARN("Failed to redirect stdin, stdout & stderr to /dev/null (open: %m)");
+		PFWARN("Failed to redirect stdin, stdout & stderr to /dev/null (open: %m)");
 		return -1;
 	}
 
@@ -1936,15 +1936,15 @@ int
 		sigemptyset(&new_action.sa_mask);
 		new_action.sa_flags = SA_SIGINFO;
 		if ((rv = sigaction(SIGTERM, &new_action, NULL)) != 0) {
-			WARN("sigaction (TERM): %m");
+			PFWARN("sigaction (TERM): %m");
 			goto cleanup;
 		}
 		if ((rv = sigaction(SIGINT, &new_action, NULL)) != 0) {
-			WARN("sigaction (INT): %m");
+			PFWARN("sigaction (INT): %m");
 			goto cleanup;
 		}
 		if ((rv = sigaction(SIGQUIT, &new_action, NULL)) != 0) {
-			WARN("sigaction (QUIT): %m");
+			PFWARN("sigaction (QUIT): %m");
 			goto cleanup;
 		}
 
@@ -1960,7 +1960,7 @@ int
 		// NOTE: You cannot re-use an existing pipe!
 		rv = mkfifo(pipe_path, 0666);
 		if (rv != 0) {
-			WARN("mkfifo(%s): %m", pipe_path);
+			PFWARN("mkfifo(%s): %m", pipe_path);
 			// Make sure we won't delete the pipe, in case it's not ours...
 			pipe_path = NULL;
 			goto cleanup;
@@ -1973,7 +1973,7 @@ int
 		// NOTE: See also this terrific recap: https://stackoverflow.com/a/17384067
 		pipefd = open(pipe_path, O_RDWR | O_NONBLOCK | O_CLOEXEC);
 		if (pipefd == -1) {
-			WARN("open(%s): %m", pipe_path);
+			PFWARN("open(%s): %m", pipe_path);
 			// Same here, don't delete the pipe in case it's not ours...
 			pipe_path = NULL;
 			goto cleanup;
@@ -2009,7 +2009,7 @@ int
 				if (errno == EINTR) {
 					continue;
 				}
-				WARN("poll: %m");
+				PFWARN("poll: %m");
 				rv = pn;
 				goto cleanup;
 			}
@@ -2030,7 +2030,7 @@ int
 							// Back to poll()!
 							continue;
 						}
-						WARN("read: %m");
+						PFWARN("read: %m");
 						rv = ERRCODE(EXIT_FAILURE);
 						goto cleanup;
 					}
@@ -2646,12 +2646,12 @@ cleanup:
 	if (is_daemon) {
 		if (pipefd != -1) {
 			if (close(pipefd) != 0) {
-				WARN("close: %m");
+				PFWARN("close: %m");
 			}
 		}
 		if (pipe_path) {
 			if (unlink(pipe_path) != 0) {
-				WARN("unlink(%s): %m", pipe_path);
+				PFWARN("unlink(%s): %m", pipe_path);
 			}
 		}
 	}

@@ -369,6 +369,9 @@
 		}                                                                                                        \
 	})
 
+// Same, but with __PRETTY_FUNCTION__ right before fmt
+#define PFWARN(fmt, ...) ({ WARN("[%s] " fmt, __PRETTY_FUNCTION__, ##__VA_ARGS__); })
+
 // We want to return negative values on failure, always
 #define ERRCODE(e) (-(e))
 

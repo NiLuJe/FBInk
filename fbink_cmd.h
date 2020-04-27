@@ -101,6 +101,9 @@ bool toSysLog = false;
 		}                                                                                                        \
 	})
 
+// Same, but with __PRETTY_FUNCTION__ right before fmt
+#define PFWARN(fmt, ...) ({ WARN("[%s] " fmt, __PRETTY_FUNCTION__, ##__VA_ARGS__); })
+
 static void show_helpmsg(void);
 
 // For our cleanup signal handler....
@@ -189,7 +192,7 @@ static void print_lastrect(void);
 		val   = strtoul(str, &endptr, 10);                                                                       \
                                                                                                                          \
 		if ((errno == ERANGE && val == ULONG_MAX) || (errno != 0 && val == 0)) {                                 \
-			WARN("strtoul: %m");                                                                             \
+			PFWARN("strtoul: %m");                                                                           \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
@@ -248,7 +251,7 @@ static void print_lastrect(void);
 		val   = strtol(str, &endptr, 10);                                                                        \
                                                                                                                          \
 		if ((errno == ERANGE && (val == LONG_MAX || val == LONG_MIN)) || (errno != 0 && val == 0)) {             \
-			WARN("strtol: %m");                                                                              \
+			PFWARN("strtol: %m");                                                                            \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
@@ -320,7 +323,7 @@ static void print_lastrect(void);
 		locale_t c_loc;                                                                                          \
 		c_loc = newlocale(LC_NUMERIC_MASK, "C", (locale_t) 0);                                                   \
 		if (c_loc == (locale_t) 0) {                                                                             \
-			WARN("newlocale: %m");                                                                           \
+			PFWARN("newlocale: %m");                                                                         \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
@@ -330,7 +333,7 @@ static void print_lastrect(void);
 		freelocale(c_loc);                                                                                       \
                                                                                                                          \
 		if ((errno == ERANGE && (val == HUGE_VALF || val == -HUGE_VALF)) || (errno != 0 && val == 0)) {          \
-			WARN("strtof: %m");                                                                              \
+			PFWARN("strtof: %m");                                                                            \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
