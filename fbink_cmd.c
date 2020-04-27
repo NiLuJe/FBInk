@@ -385,8 +385,9 @@ static int
 	// Double fork, for... reasons!
 	// In practical terms, this ensures we get re-parented to init *now*.
 	// Ignore SIGHUP while we're there, since we don't want to be killed by it.
-	if (signal(SIGHUP, SIG_IGN) == SIG_ERR) {
-		PFWARN("signal: %m");
+	struct sigaction sa = { .sa_handler = SIG_IGN, .sa_flags = SA_RESTART };
+	if (sigaction(SIGHUP, &sa, NULL) == -1) {
+		PFWARN("sigaction: %m");
 		return -1;
 	}
 	switch (fork()) {
