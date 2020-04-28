@@ -60,14 +60,14 @@ static bool
     wait_for_onboard_state(bool mounted)
 {
 	// c.f., https://stackoverflow.com/questions/5070801
-	int           mfd = open("/proc/mounts", O_RDONLY);
-	struct pollfd pfd;
-
-	uint8_t changes     = 0U;
-	uint8_t max_changes = 6U;
+	int           mfd   = open("/proc/mounts", O_RDONLY);
+	struct pollfd pfd   = { 0 };
 	pfd.fd              = mfd;
 	pfd.events          = POLLERR | POLLPRI;
 	pfd.revents         = 0;
+	uint8_t changes     = 0U;
+	uint8_t max_changes = 6U;
+
 	// Assume success unless proven otherwise ;).
 	bool rb = true;
 

@@ -185,11 +185,9 @@ static void print_lastrect(void);
 		}                                                                                                        \
                                                                                                                          \
 		/* Now that we know it's positive, we can go on with strtoul... */                                       \
-		char*             endptr;                                                                                \
-		unsigned long int val;                                                                                   \
-                                                                                                                         \
-		errno = 0; /* To distinguish success/failure after call */                                               \
-		val   = strtoul(str, &endptr, 10);                                                                       \
+		char* endptr;                                                                                            \
+		errno                 = 0; /* To distinguish success/failure after call */                               \
+		unsigned long int val = strtoul(str, &endptr, 10);                                                       \
                                                                                                                          \
 		if ((errno == ERANGE && val == ULONG_MAX) || (errno != 0 && val == 0)) {                                 \
 			PFWARN("strtoul: %m");                                                                           \
@@ -244,11 +242,9 @@ static void print_lastrect(void);
 #define strtol_chk(opt, subopt, str, result)                                                                             \
 	({                                                                                                               \
 		/* Go on with strtol... */                                                                               \
-		char*    endptr;                                                                                         \
-		long int val;                                                                                            \
-                                                                                                                         \
-		errno = 0; /* To distinguish success/failure after call */                                               \
-		val   = strtol(str, &endptr, 10);                                                                        \
+		char* endptr;                                                                                            \
+		errno        = 0; /* To distinguish success/failure after call */                                        \
+		long int val = strtol(str, &endptr, 10);                                                                 \
                                                                                                                          \
 		if ((errno == ERANGE && (val == LONG_MAX || val == LONG_MIN)) || (errno != 0 && val == 0)) {             \
 			PFWARN("strtol: %m");                                                                            \
@@ -313,10 +309,6 @@ static void print_lastrect(void);
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
-		/* Now that we know it's positive, we can go on with strtof... */                                        \
-		char* endptr;                                                                                            \
-		float val;                                                                                               \
-                                                                                                                         \
 		/* NOTE: Use the POSIX variant to enforce a specific locale, */                                          \
 		/*       ensuring the radix point character will always be a dot, and not a comma, */                    \
 		/*       because that wouldn't play nice with getsubopt... */                                            \
@@ -327,8 +319,10 @@ static void print_lastrect(void);
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
-		errno = 0; /* To distinguish success/failure after call */                                               \
-		val   = strtof_l(str, &endptr, c_loc);                                                                   \
+		/* Now that we know it's positive, we can go on with strtof... */                                        \
+		char* endptr;                                                                                            \
+		errno     = 0; /* To distinguish success/failure after call */                                           \
+		float val = strtof_l(str, &endptr, c_loc);                                                               \
                                                                                                                          \
 		freelocale(c_loc);                                                                                       \
                                                                                                                          \
