@@ -1,0 +1,4 @@
+# c.f., https://docs.kde.org/stable5/en/applications/katepart/config-variables.html
+kate: tab-width 8; indent-width 8; replace-tabs off; eol unix;
+kate-wildcard(Makefile): replace-tabs off; eol unix;
+kate-wildcard(*.md): indent-mode cstyle; indent-width 4; replace-tabs on; remove-trailing-spaces none; eol unix;
