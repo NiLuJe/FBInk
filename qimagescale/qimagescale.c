@@ -117,19 +117,17 @@ static QImageScaleInfo* qimageCalcScaleInfo(const unsigned char* img, int sw, in
 static const unsigned int**
     qimageCalcYPoints(const unsigned int* src, int sw, int sh, int dh)
 {
-	const unsigned int** p;
-	int                  j = 0, rv = 0;
-	qint64               val, inc;
+	int j = 0, rv = 0;
 
 	if (dh < 0) {
 		dh = -dh;
 		rv = 1;
 	}
-	p = malloc((size_t)(dh + 1) * sizeof(src));
+	const unsigned int** p = malloc((size_t)(dh + 1) * sizeof(src));
 
-	const int up = qAbs(dh) >= sh;
-	val          = up ? 0x8000 * sh / dh - 0x8000 : 0;
-	inc          = (((qint64) sh) << 16) / dh;
+	const int    up  = qAbs(dh) >= sh;
+	qint64       val = up ? 0x8000 * sh / dh - 0x8000 : 0;
+	const qint64 inc = (((qint64) sh) << 16) / dh;
 	for (int i = 0; i < dh; i++) {
 		p[j++] = src + qMax(0LL, val >> 16) * sw;
 		val += inc;
@@ -147,19 +145,17 @@ static const unsigned int**
 static const unsigned char**
     qimageCalcYPointsY8(const unsigned char* src, int sw, int sh, int dh)
 {
-	const unsigned char** p;
-	int                   j = 0, rv = 0;
-	qint64                val, inc;
+	int j = 0, rv = 0;
 
 	if (dh < 0) {
 		dh = -dh;
 		rv = 1;
 	}
-	p = malloc((size_t)(dh + 1) * sizeof(src));
+	const unsigned char** p = malloc((size_t)(dh + 1) * sizeof(src));
 
-	const int up = qAbs(dh) >= sh;
-	val          = up ? 0x8000 * sh / dh - 0x8000 : 0;
-	inc          = (((qint64) sh) << 16) / dh;
+	const int    up  = qAbs(dh) >= sh;
+	qint64       val = up ? 0x8000 * sh / dh - 0x8000 : 0;
+	const qint64 inc = (((qint64) sh) << 16) / dh;
 	for (int i = 0; i < dh; i++) {
 		p[j++] = src + qMax(0LL, val >> 16) * sw;
 		val += inc;
@@ -177,19 +173,17 @@ static const unsigned char**
 static const unsigned short**
     qimageCalcYPointsY8A(const unsigned short* src, int sw, int sh, int dh)
 {
-	const unsigned short** p;
-	int                    j = 0, rv = 0;
-	qint64                 val, inc;
+	int j = 0, rv = 0;
 
 	if (dh < 0) {
 		dh = -dh;
 		rv = 1;
 	}
-	p = malloc((size_t)(dh + 1) * sizeof(src));
+	const unsigned short** p = malloc((size_t)(dh + 1) * sizeof(src));
 
-	const int up = qAbs(dh) >= sh;
-	val          = up ? 0x8000 * sh / dh - 0x8000 : 0;
-	inc          = (((qint64) sh) << 16) / dh;
+	const int    up  = qAbs(dh) >= sh;
+	qint64       val = up ? 0x8000 * sh / dh - 0x8000 : 0;
+	const qint64 inc = (((qint64) sh) << 16) / dh;
 	for (int i = 0; i < dh; i++) {
 		p[j++] = src + qMax(0LL, val >> 16) * sw;
 		val += inc;
@@ -207,18 +201,17 @@ static const unsigned short**
 static int*
     qimageCalcXPoints(int sw, int dw)
 {
-	int *  p, j = 0, rv = 0;
-	qint64 val, inc;
+	int j = 0, rv = 0;
 
 	if (dw < 0) {
 		dw = -dw;
 		rv = 1;
 	}
-	p = malloc((size_t)(dw + 1) * sizeof(int));
+	int* p = malloc((size_t)(dw + 1) * sizeof(int));
 
-	const int up = qAbs(dw) >= sw;
-	val          = up ? 0x8000 * sw / dw - 0x8000 : 0;
-	inc          = (((qint64) sw) << 16) / dw;
+	const int    up  = qAbs(dw) >= sw;
+	qint64       val = up ? 0x8000 * sw / dw - 0x8000 : 0;
+	const qint64 inc = (((qint64) sw) << 16) / dw;
 	for (int i = 0; i < dw; i++) {
 		p[j++] = (int) qMax(0LL, val >> 16);
 		val += inc;
@@ -237,13 +230,13 @@ static int*
 static int*
     qimageCalcApoints(int s, int d, int up)
 {
-	int *p, j = 0, rv = 0;
+	int j = 0, rv = 0;
 
 	if (d < 0) {
 		rv = 1;
 		d  = -d;
 	}
-	p = malloc((size_t) d * sizeof(int));
+	int* p = malloc((size_t) d * sizeof(int));
 
 	if (up) {
 		/* scaling up */
@@ -299,13 +292,10 @@ static QImageScaleInfo*
 static QImageScaleInfo*
     qimageCalcScaleInfo(const unsigned char* img, int sw, int sh, int sn, int dw, int dh, char aa)
 {
-	QImageScaleInfo* isi;
-	int              scw, sch;
+	int scw = dw;
+	int sch = dh;
 
-	scw = dw;
-	sch = dh;
-
-	isi = calloc(1U, sizeof(QImageScaleInfo));
+	QImageScaleInfo* isi = calloc(1U, sizeof(QImageScaleInfo));
 	if (!isi)
 		return NULL;
 
