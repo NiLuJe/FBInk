@@ -255,7 +255,7 @@
 
 // Fallback version tag...
 #ifndef FBINK_VERSION
-#	define FBINK_FALLBACK_VERSION "v1.22.0-git"
+#	define FBINK_FALLBACK_VERSION "v1.22.1-git"
 #	ifdef FBINK_FOR_KINDLE
 #		define FBINK_VERSION FBINK_FALLBACK_VERSION " for Kindle"
 #	else
