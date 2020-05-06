@@ -220,7 +220,7 @@ static void print_lastrect(void);
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
-		/* Make sure there isn't a loss of precision on this arch when casting explictly */                      \
+		/* Make sure there isn't a loss of precision on this arch when casting explicitly */                     \
 		if ((__typeof__(*result)) val != val) {                                                                  \
 			ELOG(                                                                                            \
 			    "Loss of precision when casting value '%lu' to an %s for option '%c%s%s' "                   \
@@ -277,7 +277,7 @@ static void print_lastrect(void);
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
-		/* Make sure there isn't a loss of precision on this arch when casting explictly */                      \
+		/* Make sure there isn't a loss of precision on this arch when casting explicitly */                     \
 		if ((__typeof__(*result)) val != val) {                                                                  \
 			ELOG(                                                                                            \
 			    "Loss of precision when casting value '%ld' to a %s for option '%c%s%s' "                    \
@@ -369,7 +369,7 @@ static void print_lastrect(void);
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
                                                                                                                          \
-		/* Make sure there isn't a loss of precision on this arch when casting explictly */                      \
+		/* Make sure there isn't a loss of precision on this arch when casting explicitly */                     \
 		if ((__typeof__(*result)) val != val) {                                                                  \
 			ELOG(                                                                                            \
 			    "Loss of precision when casting value '%f' to a %s for option '%c%s%s' "                     \
