@@ -59,7 +59,7 @@
 // Try to use GCC's iceilf builtin if possible...
 // NOTE: Relies on the fact that:
 //       * Clang implements the __has_builtin macro, but currently not the __builtin_iceilf function
-//       * GCC implements the __builtin_iceilf function, but not the __has_builtin macro
+//       * GCC implements the __builtin_iceilf function, but probably not the __has_builtin macro (it was introduced in GCC 10.1)
 // c.f., https://stackoverflow.com/q/4322352/
 // NOTE: The idea here is to rely as much as possible on GCC builtins.
 //       GCC should mostly have handled this right on its own, we're just giving it a nudge ;).
