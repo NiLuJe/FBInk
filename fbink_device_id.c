@@ -998,7 +998,13 @@ static void
 #	endif
 	// Warn if canHWInvert was flipped
 	if (!deviceQuirks.canHWInvert) {
-		ELOG("This device does not support HW inversion");
+		// NOTE: Allow overriding that via an env var
+		if (getenv("FBINK_ALLOW_HW_INVERT")) {
+			ELOG("Enforced HW inversion support on a device where it may be buggy!");
+			deviceQuirks.canHWInvert = true;
+		} else {
+			ELOG("This device does not support HW inversion");
+		}
 	}
 }
 #endif    // !FBINK_FOR_LINUX

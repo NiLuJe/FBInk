@@ -321,16 +321,19 @@ typedef struct
 	//				    If only *one* of them is left at 0, the image's aspect ratio will be honored.
 	//				    If *either* of them is set to < -1, fit to screen while respecting AR.
 	//				    NOTE: Scaling is inherently costly. I highly recommend not relying on it,
-	//				    preferring instead proper preprocessing of your input images,
-	//				    c.f., https://www.mobileread.com/forums/showpost.php?p=3728291&postcount=17
+	//				          preferring instead proper preprocessing of your input images,
+	//				          c.f., https://www.mobileread.com/forums/showpost.php?p=3728291&postcount=17
 	WFM_MODE_INDEX_T  wfm_mode;          // Request a specific waveform mode (defaults to AUTO)
 	HW_DITHER_INDEX_T dithering_mode;    // Request a specific dithering mode (defaults to PASSTHROUGH)
 	bool              sw_dithering;      // Request (ordered) *software* dithering when printing an image.
 					     // This is *NOT* mutually exclusive with dithering_mode!
 	bool is_nightmode;                   // Request hardware inversion (if supported/safe).
-					     // This is *NOT* mutually exclusive with is_inverted!
-	bool no_refresh;                     // Skip actually refreshing the eInk screen (useful when drawing in batch)
-	bool to_syslog;                      // Send messages & errors to the syslog instead of stdout/stderr
+	//					This is *NOT* mutually exclusive with is_inverted!
+	//					NOTE: If the HW doesn't support inversion, a warning is printed during init.
+	//					      If you're convinced this is in error (i.e., up to date kernel),
+	//					      you can bypass that check by setting FBINK_ALLOW_HW_INVERT in your env.
+	bool no_refresh;    // Skip actually refreshing the eInk screen (useful when drawing in batch)
+	bool to_syslog;     // Send messages & errors to the syslog instead of stdout/stderr
 } FBInkConfig;
 
 // Same, but for OT/TTF specific stuff
