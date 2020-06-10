@@ -36,11 +36,18 @@ for my_tc in K3 K5 PW2 ; do
 
 	make clean
 
-	# And we'll want the doom demo, too
+	# And we'll want fbdepth & the doom demo, too
 	if [[ "${KINDLE_TC}" != "K3" ]] ; then
 		make ${JOBSFLAGS} utils KINDLE=true
 
 		cp -av Release/doom ${KINDLE_TC}/bin/doom
+		cp -av Release/fbdepth ${KINDLE_TC}/bin/fbdepth
+
+		make clean
+	else
+		make ${JOBSFLAGS} utils KINDLE=true LEGACY=true
+
+		cp -av Release/fbdepth ${KINDLE_TC}/bin/fbdepth
 
 		make clean
 	fi
