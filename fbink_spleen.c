@@ -40,14 +40,20 @@ static const uint16_t*
 		return spleen_block7[0];
 	} else if (codepoint >= 0x2500u && codepoint <= 0x259fu) {
 		return spleen_block8[codepoint - 0x2500u];
+	} else if (codepoint == 0x25c6u) {
+		return spleen_block9[0];
+	} else if (codepoint == 0x25cau) {
+		return spleen_block10[0];
 	} else if (codepoint >= 0x2630u && codepoint <= 0x2637u) {
-		return spleen_block9[codepoint - 0x2630u];
+		return spleen_block11[codepoint - 0x2630u];
+	} else if (codepoint >= 0x2665u && codepoint <= 0x2666u) {
+		return spleen_block12[codepoint - 0x2665u];
 	} else if (codepoint >= 0x2800u && codepoint <= 0x28ffu) {
-		return spleen_block10[codepoint - 0x2800u];
+		return spleen_block13[codepoint - 0x2800u];
 	} else if (codepoint >= 0xe0a0u && codepoint <= 0xe0a2u) {
-		return spleen_block11[codepoint - 0xe0a0u];
+		return spleen_block14[codepoint - 0xe0a0u];
 	} else if (codepoint >= 0xe0b0u && codepoint <= 0xe0b3u) {
-		return spleen_block12[codepoint - 0xe0b0u];
+		return spleen_block15[codepoint - 0xe0b0u];
 	} else {
 		WARN("Codepoint U+%04X (%s) is not covered by this font", codepoint, u8_cp_to_utf8(codepoint));
 		return spleen_block1[0];
