@@ -1037,7 +1037,7 @@ int
 				//       for filenames, but it does make sense to keep image-specific options separate...
 				//       The same argument could be made against moving x_off/y_off to hoffset/voffset now
 				//       that we have those in FBInkConfig... (Plus, getting rid of that would break ABI compat).
-				while (*subopts != '\0' && !errfnd) {
+				while (subopts && *subopts != '\0' && !errfnd) {
 					switch (getsubopt(&subopts, image_token, &value)) {
 						case FILE_OPT:
 							if (value == NULL) {
@@ -1330,7 +1330,7 @@ int
 						full_subopts = strdupa(subopts);    // lgtm [cpp/alloca-in-loop]
 					}
 				}
-				while (*subopts != '\0' && !errfnd) {
+				while (subopts && *subopts != '\0' && !errfnd) {
 					switch (getsubopt(&subopts, truetype_token, &value)) {
 						case REGULAR_OPT:
 							if (value == NULL) {
