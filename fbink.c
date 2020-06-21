@@ -3644,6 +3644,7 @@ int
 	// NOTE: We make sure we free any previous allocation first!
 	switch (style) {
 		case FNT_REGULAR:
+		default:
 			if (free_ot_font(&otFonts.otRegular) == EXIT_SUCCESS) {
 				LOG("Replacing an existing Regular font style!");
 			}
