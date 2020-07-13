@@ -7266,6 +7266,7 @@ static unsigned char*
 	good = (unsigned char*) stbi__malloc_mad3(req_comp, x, y, 0);
 	if (good == NULL) {
 		//STBI_FREE(data);
+		WARN("Failed to allocate pixel format conversion buffer: %m");
 		return NULL;
 	}
 
@@ -7353,6 +7354,10 @@ static unsigned char*
 			break;
 			default:
 				STBI_ASSERT(0);
+				//STBI_FREE(data);
+				STBI_FREE(good);
+				WARN("Unsupported pixel format conversion");
+				return NULL;
 		}
 #	undef STBI__CASE
 #	undef STBI__COMBO
