@@ -67,6 +67,8 @@
 #	pragma GCC diagnostic   ignored "-Wsign-conversion"
 #	pragma GCC diagnostic   ignored "-Wduplicated-branches"
 #	pragma GCC diagnostic   ignored "-Wunused-function"
+#	pragma GCC diagnostic   ignored "-Wsign-compare"
+#	pragma GCC diagnostic   ignored "-Wunused-but-set-variable"
 #	pragma GCC diagnostic   ignored "-Wsuggest-attribute=pure"
 #	include "stb/stb_image.h"
 #	pragma GCC diagnostic pop
