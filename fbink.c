@@ -56,7 +56,7 @@
 // We can't use stbi_failure_reason as it's not thread-safe, so ditch the strings
 #	define STBI_NO_FAILURE_STRINGS
 // Prevent attempting to decode ginormous images
-#	define STBI_MAX_DIMENSIONS (1 << 14)
+#	define STBI_MAX_DIMENSIONS (1 << 13)
 // Disable a bunch of very verbose but mostly harmless warnings
 #	pragma GCC diagnostic   push
 #	pragma GCC diagnostic   ignored "-Wunknown-pragmas"
