@@ -773,6 +773,22 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
+		case 382U:                                // Nia (??)
+			deviceQuirks.isKoboMk7 = true;    // FIXME: The switch to iMX6.ULL (a ~900MHz Cortex A7)
+			//                                          might warrant a new Mk?
+			//                                          In any case, it certainly does use the Mk. 7 EPDC ioctls.
+			//                                          In which case, might be time to rename that flag ;).
+			deviceQuirks.ntxBootRota = FB_ROTATE_UR;    // FIXME: TBD! (Keep it mind it replaces the Aura SE).
+			deviceQuirks.ntxRotaQuirk = NTX_ROTA_SANE;    // FIXME: TBD! (Ditto)
+			//                                               Although if it's really an E60U22, that might hold.
+			deviceQuirks.screenDPI = 212U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "Nia", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "??", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Mark 7?", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
 		case 0U:
 			// Like kobo_config.sh, assume Trilogy as a fallback
 			deviceQuirks.isKoboNonMT = true;
