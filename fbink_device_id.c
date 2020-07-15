@@ -779,7 +779,7 @@ static void
 			//                                          In any case, it certainly does use the Mk. 7 EPDC ioctls.
 			//                                          In which case, might be time to rename that flag ;).
 			deviceQuirks.ntxBootRota = FB_ROTATE_UR;    // FIXME: TBD! (Keep it mind it replaces the Aura SE).
-			deviceQuirks.ntxRotaQuirk = NTX_ROTA_SANE;    // FIXME: TBD! (Ditto)
+			deviceQuirks.ntxRotaQuirk = NTX_ROTA_SANE;    // FIXME: TBD! (Ditto, on a board possibly Clara-ish)
 			//                                               Although if it's really an E60U22, that might hold.
 			deviceQuirks.screenDPI = 212U;
 			// Flawfinder: ignore
