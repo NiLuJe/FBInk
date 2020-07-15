@@ -559,8 +559,8 @@ static void
 	//       c.f., mxc_epdc_fb_check_var @ drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c
 	deviceQuirks.ntxRotaQuirk = NTX_ROTA_STRAIGHT;
 	// NOTE: Device code list pilfered from
-	//       https://github.com/geek1011/KoboStuff/blob/gh-pages/kobofirmware.js#L11
-	//       See also https://github.com/geek1011/koboutils/pull/1 and the links referenced there
+	//       https://github.com/pgaskin/KoboStuff/blob/gh-pages/kobofirmware.js#L11
+	//       See also https://github.com/pgaskin/koboutils/pull/1 and the links referenced there
 	//       for all you ever wanted to know about Kobo codenames ;).
 	switch (kobo_id) {
 		case 310U:    // Touch A/B (trilogy)
