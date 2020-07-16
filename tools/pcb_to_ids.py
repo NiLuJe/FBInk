@@ -59,7 +59,7 @@ with open(data, "r") as f:
 			# Libra (storm) [384]
 			print("384,")
 		elif line.startswith("E60U2"):
-			# Nia (??) [382?]
+			# Nia (luna) [382]
 			print("382,")
 		else:
 			print("0,")
