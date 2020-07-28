@@ -2099,7 +2099,6 @@ int
 		goto cleanup;
 	}
 
-	char* string;
 	if (optind < argc) {
 		// We'll need that in the cell rendering codepath
 		unsigned short int total_lines = 0U;
@@ -2111,8 +2110,8 @@ int
 
 		// Now that this is out of the way, loop over the leftover arguments, i.e.: the strings ;)
 		while (optind < argc) {
-			int linecount = -1;
-			string        = argv[optind++];
+			int   linecount = -1;
+			char* string    = argv[optind++];
 			// NOTE: This is probably the point where we'd be validating/converting string to UTF-8,
 			//       if we had an easy way to... (c.f., my rant about Kobo's broken libc in fbink_internal.h)
 
