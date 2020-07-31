@@ -1811,6 +1811,7 @@ static int
 	LOG("hist_gray_waveform_mode is now %#03x (%s)",
 	    update.hist_gray_waveform_mode,
 	    kindle_wfm_to_string(update.hist_gray_waveform_mode));
+	LOG("waveform_mode is now %#03x (%s)", update.waveform_mode, kindle_wfm_to_string(update.waveform_mode));
 
 	return EXIT_SUCCESS;
 }
@@ -1949,6 +1950,7 @@ static int
 	LOG("hist_gray_waveform_mode is now %#03x (%s)",
 	    update.hist_gray_waveform_mode,
 	    kindle_zelda_wfm_to_string(update.hist_gray_waveform_mode));
+	LOG("waveform_mode is now %#03x (%s)", update.waveform_mode, kindle_zelda_wfm_to_string(update.waveform_mode));
 
 	return EXIT_SUCCESS;
 }
@@ -2039,6 +2041,7 @@ static int
 	LOG("hist_gray_waveform_mode is now %#03x (%s)",
 	    update.hist_gray_waveform_mode,
 	    kindle_zelda_wfm_to_string(update.hist_gray_waveform_mode));
+	LOG("waveform_mode is now %#03x (%s)", update.waveform_mode, kindle_zelda_wfm_to_string(update.waveform_mode));
 
 	return EXIT_SUCCESS;
 }
@@ -2099,6 +2102,8 @@ static int
 		}
 		return ERRCODE(EXIT_FAILURE);
 	}
+
+	LOG("waveform_mode is now %#03x (%s)", update.waveform_mode, cervantes_wfm_to_string(update.waveform_mode));
 
 	return EXIT_SUCCESS;
 }
@@ -2177,6 +2182,8 @@ static int
 		}
 		return ERRCODE(EXIT_FAILURE);
 	}
+
+	LOG("waveform_mode is now %#03x (%s)", update.waveform_mode, remarkable_wfm_to_string(update.waveform_mode));
 
 	return EXIT_SUCCESS;
 }
@@ -2257,6 +2264,8 @@ static int
 		}
 		return ERRCODE(EXIT_FAILURE);
 	}
+
+	LOG("waveform_mode is now %#03x (%s)", update.waveform_mode, kobo_wfm_to_string(update.waveform_mode));
 
 	return EXIT_SUCCESS;
 }
@@ -2376,6 +2385,8 @@ static int
 		}
 		return ERRCODE(EXIT_FAILURE);
 	}
+
+	LOG("waveform_mode is now %#03x (%s)", update.waveform_mode, kobo_wfm_to_string(update.waveform_mode));
 
 	return EXIT_SUCCESS;
 }
@@ -6459,6 +6470,87 @@ static const char*
 	}
 }
 #	endif    // FBINK_FOR_KINDLE
+
+#	ifdef FBINK_FOR_CERVANTES
+static const char*
+    cervantes_wfm_to_string(uint32_t wfm_mode)
+{
+	switch (wfm_mode) {
+		case WAVEFORM_MODE_INIT:
+			return "INIT";
+		case WAVEFORM_MODE_DU:
+			return "DU";
+		case WAVEFORM_MODE_GC16:
+			return "GC16";
+		case WAVEFORM_MODE_GC4:
+			return "GC4";
+		case WAVEFORM_MODE_A2:
+			return "A2";
+		case WAVEFORM_MODE_GL16:
+			return "GL16";
+		case WAVEFORM_MODE_REAGL:
+			return "REAGL";
+		case WAVEFORM_MODE_REAGLD:
+			return "REAGLD";
+		case WAVEFORM_MODE_AUTO:
+			return "AUTO";
+		default:
+			return "Unknown";
+	}
+}
+#	endif    // FBINK_FOR_CERVANTES
+
+#	ifdef FBINK_FOR_REMARKABLE
+static const char*
+    remarkable_wfm_to_string(uint32_t wfm_mode)
+{
+	switch (wfm_mode) {
+		case WAVEFORM_MODE_INIT:
+			return "INIT";
+		case WAVEFORM_MODE_DU:
+			return "DU";
+		case WAVEFORM_MODE_GC16:
+			return "GC16";
+		case WAVEFORM_MODE_GL16:
+			return "GL16";
+		case WAVEFORM_MODE_A2:
+			return "A2";
+		case WAVEFORM_MODE_AUTO:
+			return "AUTO";
+		default:
+			return "Unknown";
+	}
+}
+#	endif    // FBINK_FOR_REMARKABLE
+
+#	ifdef FBINK_FOR_KOBO
+static const char*
+    kobo_wfm_to_string(uint32_t wfm_mode)
+{
+	switch (wfm_mode) {
+		case WAVEFORM_MODE_INIT:
+			return "INIT";
+		case WAVEFORM_MODE_DU:
+			return "DU";
+		case WAVEFORM_MODE_GC16:
+			return "GC16";
+		case WAVEFORM_MODE_GC4:
+			return "GC4";
+		case WAVEFORM_MODE_A2:
+			return "A2";
+		case WAVEFORM_MODE_GL16:
+			return "GL16";
+		case WAVEFORM_MODE_REAGL:
+			return "REAGL";
+		case WAVEFORM_MODE_REAGLD:
+			return "REAGLD";
+		case WAVEFORM_MODE_AUTO:
+			return "AUTO";
+		default:
+			return "Unknown";
+	}
+}
+#	endif    // FBINK_FOR_KOBO
 #endif            // !FBINK_FOR_LINUX
 
 // Convert our public HW_DITHER_INDEX_T values to an appropriate mxcfb dithering mode constant
