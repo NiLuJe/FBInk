@@ -30,72 +30,66 @@ static const uint16_t*
 		return spleen_block2[codepoint - 0xa0u];
 	} else if (codepoint >= 0x1cdu && codepoint <= 0x1d4u) {
 		return spleen_block3[codepoint - 0x1cdu];
-	} else if (codepoint >= 0x1e6u && codepoint <= 0x1e9u) {
-		return spleen_block4[codepoint - 0x1e6u];
+	} else if (codepoint >= 0x1e2u && codepoint <= 0x1e3u) {
+		return spleen_block4[codepoint - 0x1e2u];
+	} else if (codepoint >= 0x1e6u && codepoint <= 0x1edu) {
+		return spleen_block5[codepoint - 0x1e6u];
 	} else if (codepoint == 0x1f0u) {
-		return spleen_block5[0];
+		return spleen_block6[0];
 	} else if (codepoint >= 0x1f4u && codepoint <= 0x1f5u) {
-		return spleen_block6[codepoint - 0x1f4u];
-	} else if (codepoint >= 0x1feu && codepoint <= 0x201u) {
-		return spleen_block7[codepoint - 0x1feu];
-	} else if (codepoint >= 0x204u && codepoint <= 0x205u) {
-		return spleen_block8[codepoint - 0x204u];
-	} else if (codepoint >= 0x208u && codepoint <= 0x209u) {
-		return spleen_block9[codepoint - 0x208u];
-	} else if (codepoint >= 0x20cu && codepoint <= 0x20du) {
-		return spleen_block10[codepoint - 0x20cu];
-	} else if (codepoint >= 0x210u && codepoint <= 0x211u) {
-		return spleen_block11[codepoint - 0x210u];
-	} else if (codepoint >= 0x214u && codepoint <= 0x215u) {
-		return spleen_block12[codepoint - 0x214u];
+		return spleen_block7[codepoint - 0x1f4u];
+	} else if (codepoint >= 0x1fcu && codepoint <= 0x217u) {
+		return spleen_block8[codepoint - 0x1fcu];
 	} else if (codepoint >= 0x21eu && codepoint <= 0x21fu) {
-		return spleen_block13[codepoint - 0x21eu];
-	} else if (codepoint >= 0x228u && codepoint <= 0x229u) {
-		return spleen_block14[codepoint - 0x228u];
+		return spleen_block9[codepoint - 0x21eu];
+	} else if (codepoint >= 0x226u && codepoint <= 0x229u) {
+		return spleen_block10[codepoint - 0x226u];
+	} else if (codepoint >= 0x22eu && codepoint <= 0x22fu) {
+		return spleen_block11[codepoint - 0x22eu];
 	} else if (codepoint >= 0x2d8u && codepoint <= 0x2d9u) {
-		return spleen_block15[codepoint - 0x2d8u];
+		return spleen_block12[codepoint - 0x2d8u];
 	} else if (codepoint >= 0x2dbu && codepoint <= 0x2ddu) {
-		return spleen_block16[codepoint - 0x2dbu];
+		return spleen_block13[codepoint - 0x2dbu];
 	} else if (codepoint == 0x2016u) {
-		return spleen_block17[0];
+		return spleen_block14[0];
 	} else if (codepoint >= 0x2018u && codepoint <= 0x2019u) {
-		return spleen_block18[codepoint - 0x2018u];
+		return spleen_block15[codepoint - 0x2018u];
 	} else if (codepoint >= 0x201cu && codepoint <= 0x201du) {
-		return spleen_block19[codepoint - 0x201cu];
+		return spleen_block16[codepoint - 0x201cu];
 	} else if (codepoint == 0x2022u) {
-		return spleen_block20[0];
+		return spleen_block17[0];
 	} else if (codepoint == 0x2026u) {
-		return spleen_block21[0];
+		return spleen_block18[0];
 	} else if (codepoint >= 0x2039u && codepoint <= 0x203au) {
-		return spleen_block22[codepoint - 0x2039u];
+		return spleen_block19[codepoint - 0x2039u];
 	} else if (codepoint == 0x203cu) {
-		return spleen_block23[0];
+		return spleen_block20[0];
 	} else if (codepoint == 0x20acu) {
-		return spleen_block24[0];
+		return spleen_block21[0];
 	} else if (codepoint == 0x2248u) {
-		return spleen_block25[0];
+		return spleen_block22[0];
 	} else if (codepoint >= 0x2500u && codepoint <= 0x259fu) {
-		return spleen_block26[codepoint - 0x2500u];
+		return spleen_block23[codepoint - 0x2500u];
 	} else if (codepoint == 0x25c6u) {
-		return spleen_block27[0];
+		return spleen_block24[0];
 	} else if (codepoint >= 0x25cau && codepoint <= 0x25cbu) {
-		return spleen_block28[codepoint - 0x25cau];
+		return spleen_block25[codepoint - 0x25cau];
 	} else if (codepoint == 0x25cfu) {
-		return spleen_block29[0];
+		return spleen_block26[0];
 	} else if (codepoint >= 0x25d8u && codepoint <= 0x25d9u) {
-		return spleen_block30[codepoint - 0x25d8u];
+		return spleen_block27[codepoint - 0x25d8u];
 	} else if (codepoint >= 0x25e2u && codepoint <= 0x25e5u) {
-		return spleen_block31[codepoint - 0x25e2u];
+		return spleen_block28[codepoint - 0x25e2u];
 	} else if (codepoint >= 0x2630u && codepoint <= 0x2637u) {
-		return spleen_block32[codepoint - 0x2630u];
+		return spleen_block29[codepoint - 0x2630u];
 	} else if (codepoint >= 0x2665u && codepoint <= 0x2666u) {
-		return spleen_block33[codepoint - 0x2665u];
+		return spleen_block30[codepoint - 0x2665u];
 	} else if (codepoint >= 0x2800u && codepoint <= 0x28ffu) {
-		return spleen_block34[codepoint - 0x2800u];
+		return spleen_block31[codepoint - 0x2800u];
 	} else if (codepoint >= 0xe0a0u && codepoint <= 0xe0a2u) {
-		return spleen_block35[codepoint - 0xe0a0u];
+		return spleen_block32[codepoint - 0xe0a0u];
 	} else if (codepoint >= 0xe0b0u && codepoint <= 0xe0b3u) {
-		return spleen_block36[codepoint - 0xe0b0u];
+		return spleen_block33[codepoint - 0xe0b0u];
 	} else {
 		WARN("Codepoint U+%04X (%s) is not covered by this font", codepoint, u8_cp_to_utf8(codepoint));
 		return spleen_block1[0];
