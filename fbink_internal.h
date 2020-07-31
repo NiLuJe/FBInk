@@ -673,14 +673,11 @@ static const char* wfm_to_string(uint8_t);
 static const char* kindle_wfm_to_string(uint32_t);
 static const char* kindle_zelda_wfm_to_string(uint32_t);
 #	endif
-#	ifdef FBINK_FOR_CERVANTES
-static const char* cervantes_wfm_to_string(uint32_t);
+#	if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
+static const char* ntx_wfm_to_string(uint32_t);
 #	endif
 #	ifdef FBINK_FOR_REMARKABLE
 static const char* remarkable_wfm_to_string(uint32_t);
-#	endif
-#	ifdef FBINK_FOR_KOBO
-static const char* kobo_wfm_to_string(uint32_t);
 #	endif
 #endif
 static int         get_hwd_mode(uint8_t);
