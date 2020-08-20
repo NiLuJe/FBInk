@@ -528,9 +528,9 @@ static inline __attribute__((always_inline)) void
 	//       I feel that this approach tracks better with what we do in put_pixel_RGB565,
 	//       and I have an easier time following it than the previous approach ported from KOReader.
 	//       Both do exactly the same thing, though ;).
-	const uint8_t r = (uint8_t)((v & 0xF800u) >> 11U);
-	const uint8_t g = (v & 0x07E0u) >> 5U;
-	const uint8_t b = (v & 0x001Fu);
+	const uint8_t r = (uint8_t)((v & 0xF800u) >> 11U);    // 11111000 00000000 = 0xF800
+	const uint8_t g = (v & 0x07E0u) >> 5U;                // 00000111 11100000 = 0x07E0
+	const uint8_t b = (v & 0x001Fu);                      // 00000000 00011111 = 0x001F
 
 	px->bgra.color.r = (uint8_t)((r << 3U) | (r >> 2U));
 	px->bgra.color.g = (uint8_t)((g << 2U) | (g >> 4U));
