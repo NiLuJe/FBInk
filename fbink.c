@@ -1115,7 +1115,7 @@ static struct mxcfb_rect
 	 bool                        halfcell_offset,
 	 const FBInkConfig* restrict fbink_cfg)
 {
-	LOG("Printing '%s' @ line offset %hu (meaning row %hu)",
+	LOG("Printing `%s` @ line offset %hu (meaning row %hu)",
 	    text,
 	    multiline_offset,
 	    (unsigned short int) (row + multiline_offset));
@@ -3577,7 +3577,7 @@ int
 	//       and some of them risk crashing stbtt because of bogus data...
 	const char blacklist[] = "/usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/fonts/";
 	if (!strncmp(filename, blacklist, sizeof(blacklist) - 1)) {
-		WARN("Cannot use font '%s': it's an obfuscated Kobo system font", filename + sizeof(blacklist) - 1);
+		WARN("Cannot use font `%s`: it's an obfuscated Kobo system font", filename + sizeof(blacklist) - 1);
 		return ERRCODE(EXIT_FAILURE);
 	}
 #	endif
@@ -3616,7 +3616,7 @@ int
 			free(data);
 			fclose(f);
 			otInit = false;
-			WARN("Error reading font file");
+			WARN("Error reading font file `%s`", filename);
 			return ERRCODE(EXIT_FAILURE);
 		}
 		fclose(f);
@@ -3632,10 +3632,10 @@ int
 	if (fontcount == 0) {
 		free(data);
 		free(font_info);
-		WARN("File '%s' doesn't appear to be a valid or supported font", filename);
+		WARN("File `%s` doesn't appear to be a valid or supported font", filename);
 		return ERRCODE(EXIT_FAILURE);
 	} else if (fontcount > 1) {
-		LOG("Font file '%s' appears to be a font collection containing %d fonts, but we'll only use the first one!",
+		LOG("Font file `%s` appears to be a font collection containing %d fonts, but we'll only use the first one!",
 		    filename,
 		    fontcount);
 	}
@@ -3644,7 +3644,7 @@ int
 	if (fontoffset == -1) {
 		free(data);
 		free(font_info);
-		WARN("File '%s' doesn't appear to contain valid font data at offset %d", filename, fontoffset);
+		WARN("File `%s` doesn't appear to contain valid font data at offset %d", filename, fontoffset);
 		return ERRCODE(EXIT_FAILURE);
 	}
 	// And finally, initialize that font
@@ -3652,7 +3652,7 @@ int
 	if (!stbtt_InitFont(font_info, data, fontoffset)) {
 		free(font_info->data);
 		free(font_info);
-		WARN("Error initialising font '%s'", filename);
+		WARN("Error initialising font `%s`", filename);
 		return ERRCODE(EXIT_FAILURE);
 	}
 	// Assign the current font to its appropriate otFonts struct member, depending on the style specified by the caller.
@@ -3685,11 +3685,11 @@ int
 		default:
 			free(font_info->data);
 			free(font_info);
-			WARN("Cannot load font '%s': requested style (%d) is invalid!", filename, style);
+			WARN("Cannot load font `%s`: requested style (%d) is invalid!", filename, style);
 			return ERRCODE(EXIT_FAILURE);
 	}
 
-	ELOG("Font '%s' loaded for style '%s'", filename, font_style_to_string((uint8_t) style));
+	ELOG("Font `%s` loaded for style '%s'", filename, font_style_to_string((uint8_t) style));
 	return EXIT_SUCCESS;
 #else
 	WARN("OpenType support is disabled in this FBInk build");
@@ -7310,7 +7310,7 @@ static unsigned char*
 		data = stbi_load(filename, w, h, n, req_n);
 	}
 	if (data == NULL) {
-		WARN("Failed to open or decode image '%s'", filename);
+		WARN("Failed to open or decode image `%s`", filename);
 		return NULL;
 	}
 
@@ -8293,7 +8293,7 @@ int
 	int                     n;
 	data = img_load_from_file(filename, &w, &h, &n, req_n);
 	if (data == NULL) {
-		WARN("Failed to decode image data from '%s'", filename);
+		WARN("Failed to decode image data from `%s`", filename);
 		return ERRCODE(EXIT_FAILURE);
 	}
 

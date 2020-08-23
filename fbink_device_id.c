@@ -467,7 +467,7 @@ static void
 {
 	FILE* fp = fopen(HWCONFIG_DEVICE, "re");
 	if (!fp) {
-		PFWARN("Couldn't read from '%s' (%m), unable to identify the Cervantes model", HWCONFIG_DEVICE);
+		PFWARN("Couldn't read from `%s` (%m), unable to identify the Cervantes model", HWCONFIG_DEVICE);
 	} else {
 #		pragma GCC diagnostic push
 #		pragma GCC diagnostic ignored "-Wmissing-braces"
@@ -475,10 +475,10 @@ static void
 #		pragma GCC diagnostic pop
 
 		if (fseek(fp, HWCONFIG_OFFSET, SEEK_SET) != 0) {
-			PFWARN("Failed to seek to position 0x%p in '%s': %m", (void*) HWCONFIG_OFFSET, HWCONFIG_DEVICE);
+			PFWARN("Failed to seek to position 0x%p in `%s`: %m", (void*) HWCONFIG_OFFSET, HWCONFIG_DEVICE);
 		} else {
 			if (fread(&config, sizeof(config), 1, fp) < 1 || ferror(fp) != 0) {
-				WARN("Failed to read the NTX HWConfig entry on '%s'", HWCONFIG_DEVICE);
+				WARN("Failed to read the NTX HWConfig entry on `%s`", HWCONFIG_DEVICE);
 				fclose(fp);
 				return;
 			}
@@ -489,7 +489,7 @@ static void
 		//       and not of the string literal (where sizeof would have appended space for a terminating NULL).
 		//       (i.e., here, sizeof(config.magic) == 10 == strlen(HWCONFIG_MAGIC) while sizeof(HWCONFIG_MAGIC) == 11)
 		if (memcmp(config.magic, HWCONFIG_MAGIC, sizeof(config.magic)) != 0) {
-			WARN("Input device '%s' does not appear to contain an NTX HWConfig entry", HWCONFIG_DEVICE);
+			WARN("Block device `%s` does not appear to contain an NTX HWConfig entry", HWCONFIG_DEVICE);
 			return;
 		}
 
@@ -838,7 +838,7 @@ static void
 	//       So try to do it the hard way, via the NTXHWConfig tag...
 	fp = fopen(HWCONFIG_DEVICE, "re");
 	if (!fp) {
-		PFWARN("Couldn't read from '%s' (%m), unable to identify the Kobo model", HWCONFIG_DEVICE);
+		PFWARN("Couldn't read from `%s` (%m), unable to identify the Kobo model", HWCONFIG_DEVICE);
 	} else {
 #		pragma GCC diagnostic push
 #		pragma GCC diagnostic ignored "-Wmissing-braces"
@@ -848,10 +848,10 @@ static void
 		uint64_t                storagesize = 0U;
 
 		if (fseek(fp, HWCONFIG_OFFSET, SEEK_SET) != 0) {
-			PFWARN("Failed to seek to position 0x%p in '%s': %m", (void*) HWCONFIG_OFFSET, HWCONFIG_DEVICE);
+			PFWARN("Failed to seek to position 0x%p in `%s`: %m", (void*) HWCONFIG_OFFSET, HWCONFIG_DEVICE);
 		} else {
 			if (fread(&config, sizeof(config), 1, fp) < 1 || ferror(fp) != 0) {
-				WARN("Failed to read the NTX HWConfig entry on '%s'", HWCONFIG_DEVICE);
+				WARN("Failed to read the NTX HWConfig entry on `%s`", HWCONFIG_DEVICE);
 				fclose(fp);
 				// NOTE: Make it clear we failed to identify the device...
 				//       i.e., by passing UINT16_MAX instead of 0U, which we use to flag old !NTX devices.
@@ -863,7 +863,7 @@ static void
 			//       and not of the string literal (where sizeof would have appended space for a terminating NULL).
 			//       (i.e., here, sizeof(config.magic) == 10 == strlen(HWCONFIG_MAGIC) while sizeof(HWCONFIG_MAGIC) == 11)
 			if (memcmp(config.magic, HWCONFIG_MAGIC, sizeof(config.magic)) != 0) {
-				WARN("Input device '%s' does not appear to contain an NTX HWConfig entry",
+				WARN("Block device `%s` does not appear to contain an NTX HWConfig entry",
 				     HWCONFIG_DEVICE);
 				fclose(fp);
 				// NOTE: Like rcS, assume it's an old Freescale Trilogy if we can't find an NTX HW tag
