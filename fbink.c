@@ -4639,7 +4639,7 @@ int
 		// We don't need any padding if the line is already full...
 		bool can_be_padded = !!(line_len < available_cols);
 		// When centered & padded, we need to split the padding in two, left & right.
-		if ((line_len < MAXCOLS) && (fbink_cfg->is_centered && (fbink_cfg->is_padded || fbink_cfg->is_rpadded))) {
+		if (fbink_cfg->is_centered && (fbink_cfg->is_padded || fbink_cfg->is_rpadded)) {
 			// We always want full padding
 			col = 0;
 
@@ -4649,13 +4649,12 @@ int
 			unsigned short int right_pad = (unsigned short int) (MAXCOLS - line_len - left_pad);
 			// Leave a space for the wraparound marker
 			if (wrapped_line) {
-				// Prefer clipping a byte from the *right* padding
+				// We can either be right or left-padded here, so handle both ;).
 				if (right_pad > 0U) {
 					right_pad -= 1U;
 				} else if (left_pad > 0U) {
 					left_pad -= 1U;
 				} else {
-					// NOTE: The variant of the can_be_padded check *should* ensure this never happens...
 					// No space for the wraparound marker, don't even try to append it later!
 					// (We'd blow the region width!)
 					wrapped_line = false;
