@@ -4637,6 +4637,7 @@ int
 		}
 
 		// We don't need any padding if the line is already full...
+		// (except when centering is involved, because that implies extra trickery that ensures *some* padding).
 		bool can_be_padded = !!(line_len < available_cols);
 		// When centered & padded, we need to split the padding in two, left & right.
 		if (fbink_cfg->is_centered && (fbink_cfg->is_padded || fbink_cfg->is_rpadded)) {
