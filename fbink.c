@@ -4650,9 +4650,9 @@ int
 			// Leave a space for the wraparound marker
 			if (wrapped_line) {
 				// We can either be right or left-padded here, so handle both ;).
-				if (right_pad > 0U) {
+				if (right_pad > 0U) {	// i.e., is_rpadded
 					right_pad -= 1U;
-				} else if (left_pad > 0U) {
+				} else if (left_pad > 0U) {	// i.e., is_padded
 					left_pad -= 1U;
 				}
 				// NOTE: We enforce a MAXCOLS of at least 2 in fbink_init when centering,
