@@ -4636,8 +4636,10 @@ int
 			LOG("Adjusted column to %hd for centering", col);
 		}
 
+		// We don't need any padding if the line is already full...
+		bool can_be_padded = !!(line_len < available_cols);
 		// When centered & padded, we need to split the padding in two, left & right.
-		if (fbink_cfg->is_centered && (fbink_cfg->is_padded || fbink_cfg->is_rpadded)) {
+		if (can_be_padded && (fbink_cfg->is_centered && (fbink_cfg->is_padded || fbink_cfg->is_rpadded))) {
 			// We always want full padding
 			col = 0;
 
@@ -4645,6 +4647,16 @@ int
 			unsigned short int left_pad = (unsigned short int) (MAXCOLS - line_len) / 2U;
 			// As for the right padding, we basically just have to print 'til the edge of the screen
 			unsigned short int right_pad = (unsigned short int) (MAXCOLS - line_len - left_pad);
+			// Leave a space for the wraparound marker, if possible
+			if (wrapped_line) {
+				if (right_pad > 0U) {
+					right_pad -= 1U;
+				} else {
+					// No space for the wraparound marker, don't even try to append it later!
+					// (We'd blow the region width!)
+					wrapped_line = false;
+				}
+			}
 
 			// Compute the effective right padding value for science!
 			LOG("Total size: %hu + %zu + %hu = %hu",
@@ -4670,10 +4682,14 @@ int
 						 string + line_offset,
 						 (int) right_pad,
 						 "");
-		} else if (fbink_cfg->is_padded) {
+		} else if (can_be_padded && fbink_cfg->is_padded) {
 			// NOTE: Rely on the field width for padding ;).
 			// Padding character is a space, which is 1 byte, so that's good enough ;).
 			size_t padded_bytes = line_bytes + (size_t)(available_cols - line_len);
+			// Leave a space for the wraparound marker
+			if (wrapped_line) {
+				padded_bytes -= 1U;
+			}
 			// NOTE: Don't touch line_len, because we're *adding* new blank characters,
 			//       we're still printing the exact same amount of characters *from our string*.
 			LOG("Left padded %zu bytes to %zu to cover %hu columns",
@@ -4682,10 +4698,14 @@ int
 			    available_cols);
 			bytes_printed = snprintf(
 			    line, padded_bytes + 1U, "%*.*s", (int) padded_bytes, (int) line_bytes, string + line_offset);
-		} else if (fbink_cfg->is_rpadded) {
+		} else if (can_be_padded && fbink_cfg->is_rpadded) {
 			// NOTE: Rely on the field width for padding ;).
 			// Padding character is a space, which is 1 byte, so that's good enough ;).
 			size_t padded_bytes = line_bytes + (size_t)(available_cols - line_len);
+			// Leave a space for the wraparound marker
+			if (wrapped_line) {
+				padded_bytes -= 1U;
+			}
 			// NOTE: Don't touch line_len, because we're *adding* new blank characters,
 			//       we're still printing the exact same amount of characters *from our string*.
 			LOG("Right padded %zu bytes to %zu to cover %hu columns",
@@ -4721,7 +4741,7 @@ int
 		//       We don't need nor even *want* to add it if the line is already full,
 		//       (since the idea is to make it clearer when we're potentially mixing up content from two different lines).
 		//       Plus, that'd bork the region in the following draw call, and potentially risk a buffer overflow anyway.
-		if (wrapped_line && line_len < available_cols) {
+		if (wrapped_line && can_be_padded) {
 			LOG("Capping the line with a solid block to make it clearer it has wrapped around...");
 			strcat(line, "\u2588");
 			// NOTE: U+2588 (█) is a multibyte sequence, namely, it takes 3 bytes
