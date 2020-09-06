@@ -4649,10 +4649,10 @@ int
 			unsigned short int right_pad = (unsigned short int) (MAXCOLS - line_len - left_pad);
 			// Leave a space for the wraparound marker
 			if (wrapped_line) {
-				// We can either be right or left-padded here, so handle both ;).
-				if (right_pad > 0U) {	// i.e., is_rpadded
+				// Prefer clipping from the *right* edge
+				if (right_pad > 0U) {
 					right_pad -= 1U;
-				} else if (left_pad > 0U) {	// i.e., is_padded
+				} else if (left_pad > 0U) {
 					left_pad -= 1U;
 				}
 				// NOTE: We enforce a MAXCOLS of at least 2 in fbink_init when centering,
