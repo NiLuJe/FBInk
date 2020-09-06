@@ -5316,12 +5316,12 @@ int
 							sf        = rgSF;
 							break;
 					}
+					if (!curr_font) {
+						WARN("The specified font style was not loaded");
+						rv = ERRCODE(ENOENT);
+						goto cleanup;
+					}
 				}
-			}
-			if (!curr_font) {
-				WARN("The specified font style was not loaded");
-				rv = ERRCODE(ENOENT);
-				goto cleanup;
 			}
 			// We check for a mandatory break
 			if (brk_buff[c_index] == LINEBREAK_MUSTBREAK) {
