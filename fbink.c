@@ -5135,12 +5135,6 @@ int
 		if (scaled_lg > max_lg) {
 			max_lg = scaled_lg;
 		}
-		// Set default font, for when markdown parsing is disabled
-		if (!curr_font) {
-			curr_font = otFonts.otRegular;
-			sf        = rgSF;
-			LOG("Unformatted text defaulting to Regular font style");
-		}
 	}
 	if (otFonts.otItalic) {
 		itSF = stbtt_ScaleForPixelHeight(otFonts.otItalic, (float) font_size_px);
@@ -5156,12 +5150,6 @@ int
 		}
 		if (scaled_lg > max_lg) {
 			max_lg = scaled_lg;
-		}
-		// Set default font, for when markdown parsing is disabled
-		if (!curr_font) {
-			curr_font = otFonts.otItalic;
-			sf        = itSF;
-			LOG("Unformatted text defaulting to Italic font style");
 		}
 	}
 	if (otFonts.otBold) {
@@ -5179,12 +5167,6 @@ int
 		if (scaled_lg > max_lg) {
 			max_lg = scaled_lg;
 		}
-		// Set default font, for when markdown parsing is disabled
-		if (!curr_font) {
-			curr_font = otFonts.otBold;
-			sf        = bdSF;
-			LOG("Unformatted text defaulting to Bold font style");
-		}
 	}
 	if (otFonts.otBoldItalic) {
 		bditSF = stbtt_ScaleForPixelHeight(otFonts.otBoldItalic, (float) font_size_px);
@@ -5201,19 +5183,39 @@ int
 		if (scaled_lg > max_lg) {
 			max_lg = scaled_lg;
 		}
-		// Set default font, for when markdown parsing is disabled
-		if (!curr_font) {
+	}
+
+	// Set the default font style, for when Markdown parsing is disabled.
+	switch (cfg->style) {
+		case FNT_ITALIC:
+			curr_font = otFonts.otItalic;
+			sf        = itSF;
+			LOG("Unformatted text defaulting to Italic font style");
+			break;
+		case FNT_BOLD:
+			curr_font = otFonts.otBold;
+			sf        = bdSF;
+			LOG("Unformatted text defaulting to Bold font style");
+			break;
+		case FNT_BOLD_ITALIC:
 			curr_font = otFonts.otBoldItalic;
 			sf        = bditSF;
 			LOG("Unformatted text defaulting to Bold Italic font style");
-		}
+			break;
+		case FNT_REGULAR:
+		default:
+			curr_font = otFonts.otRegular;
+			sf        = rgSF;
+			LOG("Unformatted text defaulting to Regular font style");
+			break;
 	}
-	// If no font was loaded, exit early. We checked earlier, but just in case...
+	// If no font was loaded, exit early.
 	if (!curr_font) {
-		WARN("No font appears to be loaded");
+		WARN("No font appears to be loaded for the default font style (%d)", cfg->style);
 		rv = ERRCODE(ENOENT);
 		goto cleanup;
 	}
+
 	max_row_height = max_baseline + abs(max_desc) + max_lg;
 	LOG("Max BL: %d  Max Desc: %d  Max LG: %d  =>  Max LH (according to metrics): %d",
 	    max_baseline,
