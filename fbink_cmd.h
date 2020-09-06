@@ -121,7 +121,7 @@ static int   daemonize(void);
 
 static int do_infinite_progress_bar(int, const FBInkConfig*);
 
-static void load_ot_fonts(const char*, const char*, const char*, const char*, const FBInkConfig*);
+static void load_ot_fonts(const char*, const char*, const char*, const char*, const FBInkConfig*, FBInkOTConfig*);
 
 FBInkRect   totalRect = { 0U };
 static void compute_lastrect(void);

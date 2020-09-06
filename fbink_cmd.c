@@ -466,7 +466,8 @@ static void
 		  const char*        bd_ot_file,
 		  const char*        it_ot_file,
 		  const char*        bdit_ot_file,
-		  const FBInkConfig* fbink_cfg)
+		  const FBInkConfig* fbink_cfg,
+		  FBInkOTConfig*     ot_config)
 {
 	if (reg_ot_file) {
 		if (!fbink_cfg->is_quiet) {
@@ -499,6 +500,19 @@ static void
 		if (fbink_add_ot_font(bdit_ot_file, FNT_BOLD_ITALIC) < 0) {
 			WARN("Failed to open font file '%s'", bdit_ot_file);
 		}
+	}
+
+	// NOTE: Backward compatibility to match the behavior of version < 1.22.3 in most cases:
+	//       if a *single* non-Regular style has been loaded, make it the default style.
+	if (bd_ot_file && !reg_ot_file && !it_ot_file && !bdit_ot_file) {
+		ot_config->style = FNT_BOLD;
+		LOG("The only loaded font style was Bold: make it the default style!");
+	} else if (it_ot_file && !reg_ot_file && !bd_ot_file && !bdit_ot_file) {
+		ot_config->style = FNT_ITALIC;
+		LOG("The only loaded font style was Italic: make it the default style!");
+	} else if (bdit_ot_file && !reg_ot_file && !bd_ot_file && !it_ot_file) {
+		ot_config->style = FNT_BOLD_ITALIC;
+		LOG("The only loaded font style was Bold Italic: make it the default style!");
 	}
 }
 
@@ -2005,7 +2019,7 @@ int
 
 		// Make sure we only load fonts once...
 		if (is_truetype) {
-			load_ot_fonts(reg_ot_file, bd_ot_file, it_ot_file, bdit_ot_file, &fbink_cfg);
+			load_ot_fonts(reg_ot_file, bd_ot_file, it_ot_file, bdit_ot_file, &fbink_cfg, &ot_config);
 		}
 
 		// We'll need to keep track of the amount of printed lines to honor daemon_lines...
@@ -2128,7 +2142,7 @@ int
 
 		// And for the OpenType codepath, we'll want to load the fonts only once ;)
 		if (is_truetype) {
-			load_ot_fonts(reg_ot_file, bd_ot_file, it_ot_file, bdit_ot_file, &fbink_cfg);
+			load_ot_fonts(reg_ot_file, bd_ot_file, it_ot_file, bdit_ot_file, &fbink_cfg, &ot_config);
 		}
 
 		// Now that this is out of the way, loop over the leftover arguments, i.e.: the strings ;)
@@ -2520,7 +2534,8 @@ int
 
 				// Did we ask for OT rendering?
 				if (is_truetype) {
-					load_ot_fonts(reg_ot_file, bd_ot_file, it_ot_file, bdit_ot_file, &fbink_cfg);
+					load_ot_fonts(
+					    reg_ot_file, bd_ot_file, it_ot_file, bdit_ot_file, &fbink_cfg, &ot_config);
 					while ((nread = getline(&line, &len, stdin)) != -1) {
 						if ((linecnt = fbink_print_ot(
 							 fbfd, line, &ot_config, &fbink_cfg, &ot_fit)) < 0) {
