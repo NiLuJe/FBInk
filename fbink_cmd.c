@@ -2141,7 +2141,7 @@ int
 			// Did we want to use the OpenType codepath?
 			if (is_truetype) {
 				if (!fbink_cfg.is_quiet) {
-					LOG("Printing string '%s' @ %.1fpt (or %hupx), honoring the following margins { Top: %hdpx, Bottom: %hdpx, Left: %hdpx, Right: %hdpx } (formatted: %s, compute only: %s, no truncation: %s, overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, H align: %hhu, halfway: %s, V align: %hhu, clear screen: %s, waveform: %s, dithering: %s, nightmode: %s, skip refresh: %s)",
+					LOG("Printing string '%s' @ %.1fpt (or %hupx), honoring the following margins { Top: %hdpx, Bottom: %hdpx, Left: %hdpx, Right: %hdpx } (default style: %d, formatted: %s, compute only: %s, no truncation: %s, overlay: %s, no BG: %s, no FG: %s, inverted: %s, flashing: %s, centered: %s, H align: %hhu, halfway: %s, V align: %hhu, clear screen: %s, waveform: %s, dithering: %s, nightmode: %s, skip refresh: %s)",
 					    string,
 					    ot_config.size_pt,
 					    ot_config.size_px,
@@ -2149,6 +2149,7 @@ int
 					    ot_config.margins.bottom,
 					    ot_config.margins.left,
 					    ot_config.margins.right,
+					    ot_config.style,
 					    ot_config.is_formatted ? "Y" : "N",
 					    ot_config.compute_only ? "Y" : "N",
 					    ot_config.no_truncation ? "Y" : "N",
