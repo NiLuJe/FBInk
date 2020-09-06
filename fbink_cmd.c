@@ -218,7 +218,7 @@ static void
 	    "\n"
 	    "\n"
 	    "OpenType & TrueType font support:\n"
-	    "\t-t, --truetype regular=FILE,bold=FILE,italic=FILE,bolditalic=FILE,size=NUM,px=NUM,top=NUM,bottom=NUM,left=NUM,right=NUM,padding=PAD,format,notrunc,compute\n"
+	    "\t-t, --truetype regular=FILE,bold=FILE,italic=FILE,bolditalic=FILE,size=NUM,px=NUM,top=NUM,bottom=NUM,left=NUM,right=NUM,padding=PAD,style=STYLE,format,notrunc,compute\n"
 	    "\t\tregular, bold, italic & bolditalic should point to the font file matching their respective font style. At least one of them MUST be specified.\n"
 	    "\t\tsize sets the rendering size, in points. Defaults to 12pt if unset. Can be a decimal value.\n"
 	    "\t\tpx sets the rendering size, in pixels. Optional. Takes precedence over size if specified.\n"
@@ -226,7 +226,8 @@ static void
 	    "\t\t\tNOTE: If a negative value is supplied, counts backward from the opposite edge. Mostly useful with top & left to position stuff relative to the bottom right corner.\n"
 	    "\t\tpadding can optionally be set to ensure the drawing area on both sides of the printed content is padded with the background color on one or both axis.\n"
 	    "\t\t\tAvailable padding axis: HORIZONTAL, VERTICAL, or BOTH (Defaults to NONE). Useful to avoid overlaps on consecutive prints at the same coordinates.\n"
-	    "\t\tIf format is specified, the underscore/star MarkDown syntax will be honored to set the font style (i.e., *italic*, **bold** & ***bold italic***).\n"
+	    "\t\tIf style is specified, it dictates the default font style to use (e.g., REGULAR, BOLD, ITALIC or BOLD_ITALIC). Defaults to REGULAR.\n"
+	    "\t\tIf format is specified, instead of the default style, the underscore/star MarkDown syntax will be honored to set the font style (i.e., *italic*, **bold** & ***bold italic***).\n"
 	    "\t\tIf notrunc is specified, truncation will be considered a failure.\n"
 	    "\t\tNOTE: This may not prevent drawing/refreshing the screen if the truncation couldn't be predicted at compute time!\n"
 	    "\t\t      On the CLI, this will prevent you from making use of the returned computation info, as this will chain a CLI abort.\n"
@@ -691,6 +692,7 @@ int
 		FMT_OPT,
 		COMPUTE_OPT,
 		NOTRUNC_OPT,
+		STYLE_OPT,
 	};
 #pragma GCC diagnostic   push
 #pragma GCC diagnostic   ignored "-Wunknown-pragmas"
@@ -703,21 +705,14 @@ int
 	char* const image_token[]    = { [FILE_OPT] = "file",       [XOFF_OPT] = "x",           [YOFF_OPT] = "y",
                                       [HALIGN_OPT] = "halign",   [VALIGN_OPT] = "valign",    [SCALED_WIDTH_OPT] = "w",
                                       [SCALED_HEIGHT_OPT] = "h", [SW_DITHER_OPT] = "dither", NULL };
-	char* const truetype_token[] = { [REGULAR_OPT]    = "regular",
-					 [BOLD_OPT]       = "bold",
-					 [ITALIC_OPT]     = "italic",
-					 [BOLDITALIC_OPT] = "bolditalic",
-					 [SIZE_OPT]       = "size",
-					 [PX_OPT]         = "px",
-					 [TM_OPT]         = "top",
-					 [BM_OPT]         = "bottom",
-					 [LM_OPT]         = "left",
-					 [RM_OPT]         = "right",
-					 [PADDING_OPT]    = "padding",
-					 [FMT_OPT]        = "format",
-					 [COMPUTE_OPT]    = "compute",
-					 [NOTRUNC_OPT]    = "notrunc",
-					 NULL };
+	char* const truetype_token[] = { [REGULAR_OPT] = "regular", [BOLD_OPT] = "bold",
+					 [ITALIC_OPT] = "italic",   [BOLDITALIC_OPT] = "bolditalic",
+					 [SIZE_OPT] = "size",       [PX_OPT] = "px",
+					 [TM_OPT] = "top",          [BM_OPT] = "bottom",
+					 [LM_OPT] = "left",         [RM_OPT] = "right",
+					 [PADDING_OPT] = "padding", [FMT_OPT] = "format",
+					 [COMPUTE_OPT] = "compute", [NOTRUNC_OPT] = "notrunc",
+					 [STYLE_OPT] = "style",     NULL };
 	// Recycle the refresh enum ;).
 	char* const cls_token[] = {
 		[TOP_OPT] = "top", [LEFT_OPT] = "left", [WIDTH_OPT] = "width", [HEIGHT_OPT] = "height", NULL
@@ -1505,6 +1500,34 @@ int
 							break;
 						case NOTRUNC_OPT:
 							ot_config.no_truncation = true;
+							break;
+						case STYLE_OPT:
+							if (value == NULL) {
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     truetype_token[STYLE_OPT],
+								     opt,
+								     opt_longname);
+								errfnd = true;
+								break;
+							}
+							if (strcasecmp(value, "REGULAR") == 0 ||
+							    strcasecmp(value, "R") == 0) {
+								ot_config.style = FNT_REGULAR;
+							} else if (strcasecmp(value, "BOLD") == 0 ||
+								   strcasecmp(value, "B") == 0) {
+								ot_config.style = FNT_BOLD;
+							} else if (strcasecmp(value, "ITALIC") == 0 ||
+								   strcasecmp(value, "I") == 0) {
+								ot_config.style = FNT_ITALIC;
+							} else if (strcasecmp(value, "BOLDITALIC") == 0 ||
+								   strcasecmp(value, "BOLD_ITALIC") == 0 ||
+								   strcasecmp(value, "BOLD-ITALIC") == 0 ||
+								   strcasecmp(value, "Z") == 0) {
+								ot_config.style = FNT_BOLD_ITALIC;
+							} else {
+								ELOG("Unknown style value '%s'.", value);
+								errfnd = true;
+							}
 							break;
 						default:
 							ELOG("No match found for token: /%s/ for -%c, --%s",
