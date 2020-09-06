@@ -4651,13 +4651,13 @@ int
 			if (wrapped_line) {
 				// Prefer clipping from the *right* edge
 				if (right_pad > 0U) {
-					right_pad -= 1U;
+					right_pad = (unsigned short int) (right_pad - 1U);
 				} else if (left_pad > 0U) {
-					left_pad -= 1U;
+					left_pad = (unsigned short int) (left_pad - 1U);
 				}
 				// NOTE: We enforce a MAXCOLS of at least 2 in fbink_init when centering,
-				//       so the earlier available_cols tweaks ensure we'll *always* have at least
-				//       1 byte to clip from a padded edge.
+				//       so the earlier available_cols tweaks when centering ensure we'll *always* have at least
+				//       1 byte to clip from one of the padding edge.
 			}
 
 			// Compute the effective right padding value for science!
