@@ -4685,7 +4685,7 @@ int
 						 string + line_offset,
 						 (int) right_pad,
 						 "");
-		} else if (can_be_padded && fbink_cfg->is_padded) {
+		} else if (fbink_cfg->is_padded && can_be_padded) {
 			// NOTE: Rely on the field width for padding ;).
 			// Padding character is a space, which is 1 byte, so that's good enough ;).
 			size_t padded_bytes = line_bytes + (size_t)(available_cols - line_len);
@@ -4701,7 +4701,7 @@ int
 			    available_cols);
 			bytes_printed = snprintf(
 			    line, padded_bytes + 1U, "%*.*s", (int) padded_bytes, (int) line_bytes, string + line_offset);
-		} else if (can_be_padded && fbink_cfg->is_rpadded) {
+		} else if (fbink_cfg->is_rpadded && can_be_padded) {
 			// NOTE: Rely on the field width for padding ;).
 			// Padding character is a space, which is 1 byte, so that's good enough ;).
 			size_t padded_bytes = line_bytes + (size_t)(available_cols - line_len);
