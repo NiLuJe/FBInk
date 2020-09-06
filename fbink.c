@@ -4647,21 +4647,17 @@ int
 			unsigned short int left_pad = (unsigned short int) (MAXCOLS - line_len) / 2U;
 			// As for the right padding, we basically just have to print 'til the edge of the screen
 			unsigned short int right_pad = (unsigned short int) (MAXCOLS - line_len - left_pad);
-			// Leave a space for the wraparound marker, if possible
+			// Leave a space for the wraparound marker
 			if (wrapped_line) {
 				// We can either be right or left-padded here, so handle both ;).
 				if (right_pad > 0U) {
 					right_pad -= 1U;
 				} else if (left_pad > 0U) {
 					left_pad -= 1U;
-				} else {
-					// No space for the wraparound marker, don't even try to append it later!
-					// (We'd blow the region width!)
-					// NOTE: The available_cols tweaks earlier should ensure we mostly *always*
-					//       have a byte of padding to clip...
-					wrapped_line = false;
-					LOG("Not enough padding space to insert a wraparound marker!");
 				}
+				// NOTE: We enforce a MAXCOLS of at least 2 in fbink_init when centering,
+				//       so the earlier available_cols tweaks ensure we'll *always* have at least
+				//       1 byte to clip from a padded edge.
 			}
 
 			// Compute the effective right padding value for science!
