@@ -4639,7 +4639,7 @@ int
 		// We don't need any padding if the line is already full...
 		bool can_be_padded = !!(line_len < available_cols);
 		// When centered & padded, we need to split the padding in two, left & right.
-		if (can_be_padded && (fbink_cfg->is_centered && (fbink_cfg->is_padded || fbink_cfg->is_rpadded))) {
+		if ((line_len < MAXCOLS) && (fbink_cfg->is_centered && (fbink_cfg->is_padded || fbink_cfg->is_rpadded))) {
 			// We always want full padding
 			col = 0;
 
@@ -4647,11 +4647,15 @@ int
 			unsigned short int left_pad = (unsigned short int) (MAXCOLS - line_len) / 2U;
 			// As for the right padding, we basically just have to print 'til the edge of the screen
 			unsigned short int right_pad = (unsigned short int) (MAXCOLS - line_len - left_pad);
-			// Leave a space for the wraparound marker, if possible
+			// Leave a space for the wraparound marker
 			if (wrapped_line) {
+				// Prefer clipping a byte from the *right* padding
 				if (right_pad > 0U) {
 					right_pad -= 1U;
+				} else if (left_pad > 0U) {
+					left_pad -= 1U;
 				} else {
+					// NOTE: The variant of the can_be_padded check *should* ensure this never happens...
 					// No space for the wraparound marker, don't even try to append it later!
 					// (We'd blow the region width!)
 					wrapped_line = false;
@@ -4686,7 +4690,7 @@ int
 			// NOTE: Rely on the field width for padding ;).
 			// Padding character is a space, which is 1 byte, so that's good enough ;).
 			size_t padded_bytes = line_bytes + (size_t)(available_cols - line_len);
-			// Leave a space for the wraparound marker
+			// Leave a space for the wraparound marker (can_be_padded ensures we *can* clip a byte here)
 			if (wrapped_line) {
 				padded_bytes -= 1U;
 			}
@@ -4702,7 +4706,7 @@ int
 			// NOTE: Rely on the field width for padding ;).
 			// Padding character is a space, which is 1 byte, so that's good enough ;).
 			size_t padded_bytes = line_bytes + (size_t)(available_cols - line_len);
-			// Leave a space for the wraparound marker
+			// Leave a space for the wraparound marker (can_be_padded ensures we *can* clip a byte here)
 			if (wrapped_line) {
 				padded_bytes -= 1U;
 			}
