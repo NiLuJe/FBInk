@@ -4647,7 +4647,7 @@ int
 			unsigned short int left_pad = (unsigned short int) (MAXCOLS - line_len) / 2U;
 			// As for the right padding, we basically just have to print 'til the edge of the screen
 			unsigned short int right_pad = (unsigned short int) (MAXCOLS - line_len - left_pad);
-			// Leave a space for the wraparound marker
+			// Leave a space for the wraparound marker, if possible
 			if (wrapped_line) {
 				// We can either be right or left-padded here, so handle both ;).
 				if (right_pad > 0U) {
@@ -4657,7 +4657,10 @@ int
 				} else {
 					// No space for the wraparound marker, don't even try to append it later!
 					// (We'd blow the region width!)
+					// NOTE: The available_cols tweaks earlier should ensure we mostly *always*
+					//       have a byte of padding to clip...
 					wrapped_line = false;
+					LOG("Not enough padding space to insert a wraparound marker!");
 				}
 			}
 
