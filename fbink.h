@@ -341,6 +341,15 @@ typedef struct
 {
 	struct
 	{
+		void* regular;
+		void* italic;
+		void* bold;
+		void* bold_italic;
+	} font;
+	// NOTE: This is essentially a local FBInkOTFonts, in order to use a set of fonts specific to an FBInkOTConfig,
+	//       via fbink_add_ot_font_v2/fbink_free_ot_fonts_v2
+	struct
+	{
 		short int top;       // Top margin in pixels (if negative, counts backwards from the bottom edge)
 		short int bottom;    // Bottom margin in pixels (supports negative values, too)
 		short int left;      // Left margin in pixels (if negative, counts backwards from the right edge)
@@ -485,9 +494,17 @@ FBINK_API int fbink_print(int fbfd, const char* restrict string, const FBInkConf
 //       Which leads me to a final, critical warning:
 // NOTE: Don't try to pass non-font files or encrypted/obfuscated font files, because it *will* horribly segfault!
 FBINK_API int fbink_add_ot_font(const char* filename, FONT_STYLE_T style);
+// Same API and behavior, except that the set of fonts being loaded is tied to this specific FBInkOTConfig instance,
+// instead of being global.
+// In which case, resources MUST be released via fbink_free_ot_fonts_v2()!
+// NOTE: You can mix & match the v2 and legacy API, but for every bink_add_ot_font() there must be an fbink_free_ot_fonts(),
+//       and for every fbink_add_ot_font_v2() there must be an fbink_free_ot_fonts_v2() (with the same FBInkOTConfig instance).
+FBINK_API int fbink_add_ot_font_v2(const char* filename, FONT_STYLE_T style, FBInkOTConfig* restrict cfg);
 
 // Free all loaded OpenType fonts. You MUST call this when you have finished all OT printing.
 FBINK_API int fbink_free_ot_fonts(void);
+// Same, but for a specific FBInkOTConfig instance if fbink_add_ot_font_v2 was used.
+FBINK_API int fbink_free_ot_fonts_v2(FBInkOTConfig* restrict cfg);
 
 // Print a string using an OpenType font.
 // NOTE: The caller MUST have loaded at least one font via fbink_add_ot_font() FIRST.

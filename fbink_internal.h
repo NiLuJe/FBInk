@@ -662,7 +662,9 @@ static int            draw_image(int,
 
 #ifdef FBINK_WITH_OPENTYPE
 static const char* font_style_to_string(uint8_t);
+static int         add_ot_font(const char* UNUSED_BY_MINIMAL, FONT_STYLE_T UNUSED_BY_MINIMAL, FBInkOTFonts* restrict);
 static int         free_ot_font(stbtt_fontinfo** restrict);
+static int         free_ot_fonts(FBInkOTFonts* restrict);
 static void        parse_simple_md(const char* restrict, size_t, unsigned char* restrict);
 #endif
 

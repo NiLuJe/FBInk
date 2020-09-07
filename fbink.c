@@ -3567,9 +3567,11 @@ static const char*
 }
 #endif    // FBINK_WITH_OPENTYPE
 
-// Load font from given file path. Up to four font styles may be used by FBInk at any given time.
-int
-    fbink_add_ot_font(const char* filename UNUSED_BY_MINIMAL, FONT_STYLE_T style UNUSED_BY_MINIMAL)
+// Load OT fonts for fbink_add_ot_font & fbink_add_ot_font_v2
+static int
+    add_ot_font(const char* filename   UNUSED_BY_MINIMAL,
+		FONT_STYLE_T style     UNUSED_BY_MINIMAL,
+		FBInkOTFonts* restrict ot_fonts)
 {
 #ifdef FBINK_WITH_OPENTYPE
 #	ifdef FBINK_FOR_KOBO
@@ -3587,8 +3589,8 @@ int
 		init_linebreak();
 		LOG("Initialized libunibreak");
 	}
-
 	otInit = true;
+
 	// Open font from given path, and load into buffer
 	FILE*                   f    = fopen(filename, "r" STDIO_CLOEXEC);
 	unsigned char* restrict data = NULL;
@@ -3659,28 +3661,28 @@ int
 	// NOTE: We make sure we free any previous allocation first!
 	switch (style) {
 		case FNT_REGULAR:
-			if (free_ot_font(&otFonts.otRegular) == EXIT_SUCCESS) {
+			if (free_ot_font(&ot_fonts->otRegular) == EXIT_SUCCESS) {
 				LOG("Replacing an existing Regular font style!");
 			}
-			otFonts.otRegular = font_info;
+			ot_fonts->otRegular = font_info;
 			break;
 		case FNT_ITALIC:
-			if (free_ot_font(&otFonts.otItalic) == EXIT_SUCCESS) {
+			if (free_ot_font(&ot_fonts->otItalic) == EXIT_SUCCESS) {
 				LOG("Replacing an existing Italic font style!");
 			}
-			otFonts.otItalic = font_info;
+			ot_fonts->otItalic = font_info;
 			break;
 		case FNT_BOLD:
-			if (free_ot_font(&otFonts.otBold) == EXIT_SUCCESS) {
+			if (free_ot_font(&ot_fonts->otBold) == EXIT_SUCCESS) {
 				LOG("Replacing an existing Bold font style!");
 			}
-			otFonts.otBold = font_info;
+			ot_fonts->otBold = font_info;
 			break;
 		case FNT_BOLD_ITALIC:
-			if (free_ot_font(&otFonts.otBoldItalic) == EXIT_SUCCESS) {
+			if (free_ot_font(&ot_fonts->otBoldItalic) == EXIT_SUCCESS) {
 				LOG("Replacing an existing Bold Italic font style!");
 			}
-			otFonts.otBoldItalic = font_info;
+			ot_fonts->otBoldItalic = font_info;
 			break;
 		default:
 			free(font_info->data);
@@ -3695,6 +3697,24 @@ int
 	WARN("OpenType support is disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
 #endif    // FBINK_WITH_OPENTYPE
+}
+
+// Load font from given file path. Up to four font styles may be used by FBInk at any given time.
+int
+    fbink_add_ot_font(const char* filename UNUSED_BY_MINIMAL, FONT_STYLE_T style UNUSED_BY_MINIMAL)
+{
+	// Legacy variant, using a global otFonts
+	return add_ot_font(filename, style, &otFonts);
+}
+
+// Load font from given file path. Up to four font styles may be used per FBInkOTConfig instance.
+int
+    fbink_add_ot_font_v2(const char* filename    UNUSED_BY_MINIMAL,
+			 FONT_STYLE_T style      UNUSED_BY_MINIMAL,
+			 FBInkOTConfig* restrict cfg)
+{
+	// New variant, using a per-FBInkOTConfig instance
+	return add_ot_font(filename, style, (FBInkOTFonts*) &(cfg->font));
 }
 
 #ifdef FBINK_WITH_OPENTYPE
@@ -3715,21 +3735,21 @@ static int
 }
 #endif    // FBINK_WITH_OPENTYPE
 
-// Free all OpenType fonts
-int
-    fbink_free_ot_fonts(void)
+// Free OT fonts for fbink_free_ot_fonts & fbink_free_ot_fonts_v2
+static int
+    free_ot_fonts(FBInkOTFonts* restrict ot_fonts)
 {
 #ifdef FBINK_WITH_OPENTYPE
-	if (free_ot_font(&otFonts.otRegular) == EXIT_SUCCESS) {
+	if (free_ot_font(&ot_fonts->otRegular) == EXIT_SUCCESS) {
 		LOG("Released Regular font data");
 	}
-	if (free_ot_font(&otFonts.otItalic) == EXIT_SUCCESS) {
+	if (free_ot_font(&ot_fonts->otItalic) == EXIT_SUCCESS) {
 		LOG("Released Italic font data");
 	}
-	if (free_ot_font(&otFonts.otBold) == EXIT_SUCCESS) {
+	if (free_ot_font(&ot_fonts->otBold) == EXIT_SUCCESS) {
 		LOG("Released Bold font data");
 	}
-	if (free_ot_font(&otFonts.otBoldItalic) == EXIT_SUCCESS) {
+	if (free_ot_font(&ot_fonts->otBoldItalic) == EXIT_SUCCESS) {
 		LOG("Released Bold Italic font data");
 	}
 
@@ -3738,6 +3758,21 @@ int
 	WARN("OpenType support is disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
 #endif    // FBINK_WITH_OPENTYPE
+}
+
+// Free all OpenType fonts
+int
+    fbink_free_ot_fonts(void)
+{
+	// Legacy variant, using a global otFonts
+	return free_ot_fonts(&otFonts);
+}
+
+int
+    fbink_free_ot_fonts_v2(FBInkOTConfig* cfg)
+{
+	// New variant, using a per-FBInkOTConfig instance
+	return free_ot_fonts((FBInkOTFonts*) &(cfg->font));
 }
 
 // Dump a few of our internal state variables to stdout, for shell script consumption
