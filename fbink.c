@@ -3565,7 +3565,6 @@ static const char*
 			return "Unknown?!";
 	}
 }
-#endif    // FBINK_WITH_OPENTYPE
 
 // Load OT fonts for fbink_add_ot_font & fbink_add_ot_font_v2
 static int
@@ -3573,7 +3572,6 @@ static int
 		FONT_STYLE_T style     UNUSED_BY_MINIMAL,
 		FBInkOTFonts* restrict ot_fonts)
 {
-#ifdef FBINK_WITH_OPENTYPE
 #	ifdef FBINK_FOR_KOBO
 	// NOTE: Bail if we were passed a Kobo system font, as they're obfuscated,
 	//       and some of them risk crashing stbtt because of bogus data...
@@ -3693,18 +3691,20 @@ static int
 
 	ELOG("Font `%s` loaded for style '%s'", filename, font_style_to_string((uint8_t) style));
 	return EXIT_SUCCESS;
-#else
-	WARN("OpenType support is disabled in this FBInk build");
-	return ERRCODE(ENOSYS);
-#endif    // FBINK_WITH_OPENTYPE
 }
+#endif    // FBINK_WITH_OPENTYPE
 
 // Load font from given file path. Up to four font styles may be used by FBInk at any given time.
 int
     fbink_add_ot_font(const char* filename UNUSED_BY_MINIMAL, FONT_STYLE_T style UNUSED_BY_MINIMAL)
 {
+#ifdef FBINK_WITH_OPENTYPE
 	// Legacy variant, using the global otFonts
 	return add_ot_font(filename, style, &otFonts);
+#else
+	WARN("OpenType support is disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif    // FBINK_WITH_OPENTYPE
 }
 
 // Load font from given file path. Up to four font styles may be used per FBInkOTConfig instance.
@@ -3713,8 +3713,13 @@ int
 			 FONT_STYLE_T style      UNUSED_BY_MINIMAL,
 			 FBInkOTConfig* restrict cfg)
 {
+#ifdef FBINK_WITH_OPENTYPE
 	// New variant, using a per-FBInkOTConfig instance
 	return add_ot_font(filename, style, (FBInkOTFonts*) &(cfg->font));
+#else
+	WARN("OpenType support is disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif    // FBINK_WITH_OPENTYPE
 }
 
 #ifdef FBINK_WITH_OPENTYPE
@@ -3733,13 +3738,11 @@ static int
 		return ERRCODE(EINVAL);
 	}
 }
-#endif    // FBINK_WITH_OPENTYPE
 
 // Free OT fonts for fbink_free_ot_fonts & fbink_free_ot_fonts_v2
 static int
     free_ot_fonts(FBInkOTFonts* restrict ot_fonts)
 {
-#ifdef FBINK_WITH_OPENTYPE
 	if (free_ot_font(&ot_fonts->otRegular) == EXIT_SUCCESS) {
 		LOG("Released Regular font data");
 	}
@@ -3754,26 +3757,33 @@ static int
 	}
 
 	return EXIT_SUCCESS;
+}
+#endif    // FBINK_WITH_OPENTYPE
+
+// Free all OpenType fonts (as loaded by fbink_add_ot_font)
+int
+    fbink_free_ot_fonts(void)
+{
+#ifdef FBINK_WITH_OPENTYPE
+	// Legacy variant, using the global otFonts
+	return free_ot_fonts(&otFonts);
 #else
 	WARN("OpenType support is disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
 #endif    // FBINK_WITH_OPENTYPE
 }
 
-// Free all OpenType fonts (as loaded by fbink_add_ot_font)
-int
-    fbink_free_ot_fonts(void)
-{
-	// Legacy variant, using the global otFonts
-	return free_ot_fonts(&otFonts);
-}
-
 // Same, but as loaded bu fbink_add_ot_font_v2 for this specific FBInkOTConfig instance.
 int
     fbink_free_ot_fonts_v2(FBInkOTConfig* cfg)
 {
+#ifdef FBINK_WITH_OPENTYPE
 	// New variant, using a per-FBInkOTConfig instance
 	return free_ot_fonts((FBInkOTFonts*) &(cfg->font));
+#else
+	WARN("OpenType support is disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif    // FBINK_WITH_OPENTYPE
 }
 
 // Dump a few of our internal state variables to stdout, for shell script consumption
