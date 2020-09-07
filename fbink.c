@@ -3657,7 +3657,7 @@ static int
 		WARN("Error initialising font `%s`", filename);
 		return ERRCODE(EXIT_FAILURE);
 	}
-	// Assign the current font to its appropriate otFonts struct member, depending on the style specified by the caller.
+	// Assign the current font to its appropriate FBInkOTFonts struct member, depending on the style specified by the caller.
 	// NOTE: We make sure we free any previous allocation first!
 	switch (style) {
 		case FNT_REGULAR:
@@ -3703,7 +3703,7 @@ static int
 int
     fbink_add_ot_font(const char* filename UNUSED_BY_MINIMAL, FONT_STYLE_T style UNUSED_BY_MINIMAL)
 {
-	// Legacy variant, using a global otFonts
+	// Legacy variant, using the global otFonts
 	return add_ot_font(filename, style, &otFonts);
 }
 
@@ -3764,7 +3764,7 @@ static int
 int
     fbink_free_ot_fonts(void)
 {
-	// Legacy variant, using a global otFonts
+	// Legacy variant, using the global otFonts
 	return free_ot_fonts(&otFonts);
 }
 
@@ -5155,9 +5155,18 @@ int
 	float bditSF       = 0.0f;
 	int   asc, desc, lg;
 	int   scaled_bl, scaled_desc, scaled_lg;
-	if (otFonts.otRegular) {
-		rgSF = stbtt_ScaleForPixelHeight(otFonts.otRegular, (float) font_size_px);
-		stbtt_GetFontVMetrics(otFonts.otRegular, &asc, &desc, &lg);
+
+	// Are we using a local or global FBInkOTFonts?
+	const FBInkOTFonts* ot_fonts = &otFonts;    // Default to the legacy behavior
+	if (cfg->font.regular || cfg->font.italic || cfg->font.bold || cfg->font.bold_italic) {
+		// But if one font has actually been loaded in the FBInkOTConfig instance, use that instead
+		ot_fonts = (const FBInkOTFonts*) &(cfg->font);
+		LOG("Using fonts from the current FBInkOTConfig instance");
+	}
+
+	if (ot_fonts->otRegular) {
+		rgSF = stbtt_ScaleForPixelHeight(ot_fonts->otRegular, (float) font_size_px);
+		stbtt_GetFontVMetrics(ot_fonts->otRegular, &asc, &desc, &lg);
 		scaled_bl   = iceilf(rgSF * (float) asc);
 		scaled_desc = iceilf(rgSF * (float) desc);
 		scaled_lg   = iceilf(rgSF * (float) lg);
@@ -5171,9 +5180,9 @@ int
 			max_lg = scaled_lg;
 		}
 	}
-	if (otFonts.otItalic) {
-		itSF = stbtt_ScaleForPixelHeight(otFonts.otItalic, (float) font_size_px);
-		stbtt_GetFontVMetrics(otFonts.otItalic, &asc, &desc, &lg);
+	if (ot_fonts->otItalic) {
+		itSF = stbtt_ScaleForPixelHeight(ot_fonts->otItalic, (float) font_size_px);
+		stbtt_GetFontVMetrics(ot_fonts->otItalic, &asc, &desc, &lg);
 		scaled_bl   = iceilf(itSF * (float) asc);
 		scaled_desc = iceilf(itSF * (float) desc);
 		scaled_lg   = iceilf(itSF * (float) lg);
@@ -5187,9 +5196,9 @@ int
 			max_lg = scaled_lg;
 		}
 	}
-	if (otFonts.otBold) {
-		bdSF = stbtt_ScaleForPixelHeight(otFonts.otBold, (float) font_size_px);
-		stbtt_GetFontVMetrics(otFonts.otBold, &asc, &desc, &lg);
+	if (ot_fonts->otBold) {
+		bdSF = stbtt_ScaleForPixelHeight(ot_fonts->otBold, (float) font_size_px);
+		stbtt_GetFontVMetrics(ot_fonts->otBold, &asc, &desc, &lg);
 		scaled_bl   = iceilf(bdSF * (float) asc);
 		scaled_desc = iceilf(bdSF * (float) desc);
 		scaled_lg   = iceilf(bdSF * (float) lg);
@@ -5203,9 +5212,9 @@ int
 			max_lg = scaled_lg;
 		}
 	}
-	if (otFonts.otBoldItalic) {
-		bditSF = stbtt_ScaleForPixelHeight(otFonts.otBoldItalic, (float) font_size_px);
-		stbtt_GetFontVMetrics(otFonts.otBoldItalic, &asc, &desc, &lg);
+	if (ot_fonts->otBoldItalic) {
+		bditSF = stbtt_ScaleForPixelHeight(ot_fonts->otBoldItalic, (float) font_size_px);
+		stbtt_GetFontVMetrics(ot_fonts->otBoldItalic, &asc, &desc, &lg);
 		scaled_bl   = iceilf(bditSF * (float) asc);
 		scaled_desc = iceilf(bditSF * (float) desc);
 		scaled_lg   = iceilf(bditSF * (float) lg);
@@ -5223,23 +5232,23 @@ int
 	// Set the default font style, for when Markdown parsing is disabled.
 	switch (cfg->style) {
 		case FNT_ITALIC:
-			curr_font = otFonts.otItalic;
+			curr_font = ot_fonts->otItalic;
 			sf        = itSF;
 			LOG("Unformatted text defaulting to Italic font style");
 			break;
 		case FNT_BOLD:
-			curr_font = otFonts.otBold;
+			curr_font = ot_fonts->otBold;
 			sf        = bdSF;
 			LOG("Unformatted text defaulting to Bold font style");
 			break;
 		case FNT_BOLD_ITALIC:
-			curr_font = otFonts.otBoldItalic;
+			curr_font = ot_fonts->otBoldItalic;
 			sf        = bditSF;
 			LOG("Unformatted text defaulting to Bold Italic font style");
 			break;
 		case FNT_REGULAR:
 		default:
-			curr_font = otFonts.otRegular;
+			curr_font = ot_fonts->otRegular;
 			sf        = rgSF;
 			LOG("Unformatted text defaulting to Regular font style");
 			break;
@@ -5334,20 +5343,20 @@ int
 				} else {
 					switch (fmt_buff[c_index]) {
 						case CH_ITALIC:
-							curr_font = otFonts.otItalic;
+							curr_font = ot_fonts->otItalic;
 							sf        = itSF;
 							break;
 						case CH_BOLD:
-							curr_font = otFonts.otBold;
+							curr_font = ot_fonts->otBold;
 							sf        = bdSF;
 							break;
 						case CH_BOLD_ITALIC:
-							curr_font = otFonts.otBoldItalic;
+							curr_font = ot_fonts->otBoldItalic;
 							sf        = bditSF;
 							break;
 						case CH_REGULAR:
 						default:
-							curr_font = otFonts.otRegular;
+							curr_font = ot_fonts->otRegular;
 							sf        = rgSF;
 							break;
 					}
@@ -5688,19 +5697,19 @@ int
 				} else {
 					switch (fmt_buff[ci]) {
 						case CH_REGULAR:
-							curr_font = otFonts.otRegular;
+							curr_font = ot_fonts->otRegular;
 							sf        = rgSF;
 							break;
 						case CH_ITALIC:
-							curr_font = otFonts.otItalic;
+							curr_font = ot_fonts->otItalic;
 							sf        = itSF;
 							break;
 						case CH_BOLD:
-							curr_font = otFonts.otBold;
+							curr_font = ot_fonts->otBold;
 							sf        = bdSF;
 							break;
 						case CH_BOLD_ITALIC:
-							curr_font = otFonts.otBoldItalic;
+							curr_font = ot_fonts->otBoldItalic;
 							sf        = bditSF;
 							break;
 					}
