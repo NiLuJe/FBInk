@@ -3568,9 +3568,7 @@ static const char*
 
 // Load OT fonts for fbink_add_ot_font & fbink_add_ot_font_v2
 static int
-    add_ot_font(const char* filename   UNUSED_BY_MINIMAL,
-		FONT_STYLE_T style     UNUSED_BY_MINIMAL,
-		FBInkOTFonts* restrict ot_fonts)
+    add_ot_font(const char* filename, FONT_STYLE_T style, FBInkOTFonts* restrict ot_fonts)
 {
 #	ifdef FBINK_FOR_KOBO
 	// NOTE: Bail if we were passed a Kobo system font, as they're obfuscated,
