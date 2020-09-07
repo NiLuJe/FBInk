@@ -64,7 +64,9 @@ cdecl_func(fbink_get_state)
 cdecl_func(fbink_print)
 
 cdecl_func(fbink_add_ot_font)
+cdecl_func(fbink_add_ot_font_v2)
 cdecl_func(fbink_free_ot_fonts)
+cdecl_func(fbink_free_ot_fonts_v2)
 cdecl_func(fbink_print_ot)
 
 cdecl_func(fbink_printf)
