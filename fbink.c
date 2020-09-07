@@ -3659,25 +3659,25 @@ static int
 	// NOTE: We make sure we free any previous allocation first!
 	switch (style) {
 		case FNT_REGULAR:
-			if (free_ot_font(&ot_fonts->otRegular) == EXIT_SUCCESS) {
+			if (free_ot_font(&(ot_fonts->otRegular)) == EXIT_SUCCESS) {
 				LOG("Replacing an existing Regular font style!");
 			}
 			ot_fonts->otRegular = font_info;
 			break;
 		case FNT_ITALIC:
-			if (free_ot_font(&ot_fonts->otItalic) == EXIT_SUCCESS) {
+			if (free_ot_font(&(ot_fonts->otItalic)) == EXIT_SUCCESS) {
 				LOG("Replacing an existing Italic font style!");
 			}
 			ot_fonts->otItalic = font_info;
 			break;
 		case FNT_BOLD:
-			if (free_ot_font(&ot_fonts->otBold) == EXIT_SUCCESS) {
+			if (free_ot_font(&(ot_fonts->otBold)) == EXIT_SUCCESS) {
 				LOG("Replacing an existing Bold font style!");
 			}
 			ot_fonts->otBold = font_info;
 			break;
 		case FNT_BOLD_ITALIC:
-			if (free_ot_font(&ot_fonts->otBoldItalic) == EXIT_SUCCESS) {
+			if (free_ot_font(&(ot_fonts->otBoldItalic)) == EXIT_SUCCESS) {
 				LOG("Replacing an existing Bold Italic font style!");
 			}
 			ot_fonts->otBoldItalic = font_info;
@@ -3743,16 +3743,16 @@ static int
 static int
     free_ot_fonts(FBInkOTFonts* restrict ot_fonts)
 {
-	if (free_ot_font(&ot_fonts->otRegular) == EXIT_SUCCESS) {
+	if (free_ot_font(&(ot_fonts->otRegular)) == EXIT_SUCCESS) {
 		LOG("Released Regular font data");
 	}
-	if (free_ot_font(&ot_fonts->otItalic) == EXIT_SUCCESS) {
+	if (free_ot_font(&(ot_fonts->otItalic)) == EXIT_SUCCESS) {
 		LOG("Released Italic font data");
 	}
-	if (free_ot_font(&ot_fonts->otBold) == EXIT_SUCCESS) {
+	if (free_ot_font(&(ot_fonts->otBold)) == EXIT_SUCCESS) {
 		LOG("Released Bold font data");
 	}
-	if (free_ot_font(&ot_fonts->otBoldItalic) == EXIT_SUCCESS) {
+	if (free_ot_font(&(ot_fonts->otBoldItalic)) == EXIT_SUCCESS) {
 		LOG("Released Bold Italic font data");
 	}
 
