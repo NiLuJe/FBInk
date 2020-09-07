@@ -336,7 +336,7 @@ typedef struct
 	bool to_syslog;     // Send messages & errors to the syslog instead of stdout/stderr
 } FBInkConfig;
 
-// Same, but for OT/TTF specific stuff
+// Same, but for OT/TTF specific stuff. MUST be zero-initialized.
 typedef struct
 {
 	struct
