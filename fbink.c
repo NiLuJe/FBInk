@@ -3760,7 +3760,7 @@ static int
 #endif    // FBINK_WITH_OPENTYPE
 }
 
-// Free all OpenType fonts
+// Free all OpenType fonts (as loaded by fbink_add_ot_font)
 int
     fbink_free_ot_fonts(void)
 {
@@ -3768,6 +3768,7 @@ int
 	return free_ot_fonts(&otFonts);
 }
 
+// Same, but as loaded bu fbink_add_ot_font_v2 for this specific FBInkOTConfig instance.
 int
     fbink_free_ot_fonts_v2(FBInkOTConfig* cfg)
 {
