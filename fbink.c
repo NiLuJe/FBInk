@@ -3709,9 +3709,9 @@ int
 
 // Load font from given file path. Up to four font styles may be used per FBInkOTConfig instance.
 int
-    fbink_add_ot_font_v2(const char* filename    UNUSED_BY_MINIMAL,
-			 FONT_STYLE_T style      UNUSED_BY_MINIMAL,
-			 FBInkOTConfig* restrict cfg)
+    fbink_add_ot_font_v2(const char* filename        UNUSED_BY_MINIMAL,
+			 FONT_STYLE_T style          UNUSED_BY_MINIMAL,
+			 FBInkOTConfig* restrict cfg UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_OPENTYPE
 	// New variant, using a per-FBInkOTConfig instance
@@ -3775,7 +3775,7 @@ int
 
 // Same, but as loaded bu fbink_add_ot_font_v2 for this specific FBInkOTConfig instance.
 int
-    fbink_free_ot_fonts_v2(FBInkOTConfig* cfg)
+    fbink_free_ot_fonts_v2(FBInkOTConfig* cfg UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_OPENTYPE
 	// New variant, using a per-FBInkOTConfig instance
