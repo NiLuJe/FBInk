@@ -3794,7 +3794,7 @@ int
 
 		return rv;
 	} else {
-		// There were no fonts allocated in this FBInkOTConfig!
+		// There were no fonts allocated for this FBInkOTConfig!
 		return ERRCODE(EINVAL);
 	}
 #else
