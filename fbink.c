@@ -3750,7 +3750,11 @@ static int
     free_ot_fonts(FBInkOTFonts* restrict ot_fonts)
 {
 	if (free_ot_font(&(ot_fonts->otRegular)) == EXIT_SUCCESS) {
-		LOG("Released Regular font data");
+		if (ot_fonts == &otFonts) {
+			LOG("Released Regular font data from the global font pool");
+		} else {
+			LOG("Released Regular font data from a local FBInkOTFonts instance (%p)", ot_fonts);
+		}
 	}
 	if (free_ot_font(&(ot_fonts->otItalic)) == EXIT_SUCCESS) {
 		LOG("Released Italic font data");
