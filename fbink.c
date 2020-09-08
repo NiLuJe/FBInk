@@ -3698,6 +3698,7 @@ int
 {
 #ifdef FBINK_WITH_OPENTYPE
 	// Legacy variant, using the global otFonts
+	LOG("Loading font data in the global font pool . . .");
 	return add_ot_font(filename, style, &otFonts);
 #else
 	WARN("OpenType support is disabled in this FBInk build");
@@ -3721,6 +3722,7 @@ int
 		}
 	}
 	// New variant, using a per-FBInkOTConfig instance
+	LOG("Loading font data in a local FBInkOTFonts instance (%p) . . .", cfg->font);
 	return add_ot_font(filename, style, (FBInkOTFonts*) cfg->font);
 #else
 	WARN("OpenType support is disabled in this FBInk build");
@@ -3750,11 +3752,7 @@ static int
     free_ot_fonts(FBInkOTFonts* restrict ot_fonts)
 {
 	if (free_ot_font(&(ot_fonts->otRegular)) == EXIT_SUCCESS) {
-		if (ot_fonts == &otFonts) {
-			LOG("Released Regular font data from the global font pool");
-		} else {
-			LOG("Released Regular font data from a local FBInkOTFonts instance (%p)", ot_fonts);
-		}
+		LOG("Released Regular font data");
 	}
 	if (free_ot_font(&(ot_fonts->otItalic)) == EXIT_SUCCESS) {
 		LOG("Released Italic font data");
@@ -3776,6 +3774,7 @@ int
 {
 #ifdef FBINK_WITH_OPENTYPE
 	// Legacy variant, using the global otFonts
+	LOG("Releasing font data from the global font pool . . .");
 	return free_ot_fonts(&otFonts);
 #else
 	WARN("OpenType support is disabled in this FBInk build");
@@ -3790,6 +3789,7 @@ int
 #ifdef FBINK_WITH_OPENTYPE
 	if (cfg->font) {
 		// New variant, using a per-FBInkOTConfig instance
+		LOG("Releasing font data from a local FBInkOTFonts instance (%p) . . .", cfg->font);
 		int rv = free_ot_fonts((FBInkOTFonts*) cfg->font);
 		// Free the FBInkOTFonts struct itself
 		free(cfg->font);
@@ -5193,11 +5193,11 @@ int
 	if (cfg->font) {
 		// If we have local fonts attached to the FBInkOTConfig instance, use 'em
 		ot_fonts = (const FBInkOTFonts*) cfg->font;
-		LOG("Using fonts from the local FBInkOTConfig instance (%p)", ot_fonts);
+		LOG("Using fonts from a local FBInkOTFonts instance (%p)", ot_fonts);
 	} else {
 		// Otherwise, default to the legacy behavior (i.e., use the global).
 		ot_fonts = &otFonts;
-		LOG("Using fonts from the global fonts pool");
+		LOG("Using fonts from the global font pool");
 	}
 
 	if (ot_fonts->otRegular) {
