@@ -5185,11 +5185,15 @@ int
 	int   scaled_bl, scaled_desc, scaled_lg;
 
 	// Are we using a local or global FBInkOTFonts?
-	const FBInkOTFonts* ot_fonts = &otFonts;    // Default to the legacy behavior (i.e., use the global).
+	const FBInkOTFonts* ot_fonts = NULL;
 	if (cfg->font) {
-		// But if one font has actually been loaded in the FBInkOTConfig instance, use that instead
+		// If we have local fonts attached to the FBInkOTConfig instance, use 'em
 		ot_fonts = (const FBInkOTFonts*) cfg->font;
-		LOG("Using fonts from the current FBInkOTConfig instance");
+		LOG("Using fonts from the local FBInkOTConfig instance (%p)", ot_fonts);
+	} else {
+		// Otherwise, default to the legacy behavior (i.e., use the global).
+		ot_fonts = &otFonts;
+		LOG("Using fonts from the global fonts pool");
 	}
 
 	if (ot_fonts->otRegular) {
