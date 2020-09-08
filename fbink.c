@@ -3712,8 +3712,16 @@ int
 			 FBInkOTConfig* restrict cfg UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_OPENTYPE
+	// Start by allocating an FBInkOTFonts struct, if need be...
+	if (!cfg->font) {
+		cfg->font = calloc(1U, sizeof(FBInkOTFonts));
+		if (!cfg->font) {
+			PFWARN("Error allocating FBInkOTFonts struct: %m");
+			return ERRCODE(EXIT_FAILURE);
+		}
+	}
 	// New variant, using a per-FBInkOTConfig instance
-	return add_ot_font(filename, style, (FBInkOTFonts*) &(cfg->font));
+	return add_ot_font(filename, style, (FBInkOTFonts*) cfg->font);
 #else
 	WARN("OpenType support is disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
@@ -3776,8 +3784,19 @@ int
     fbink_free_ot_fonts_v2(FBInkOTConfig* cfg UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_OPENTYPE
-	// New variant, using a per-FBInkOTConfig instance
-	return free_ot_fonts((FBInkOTFonts*) &(cfg->font));
+	if (cfg->font) {
+		// New variant, using a per-FBInkOTConfig instance
+		int rv = free_ot_fonts((FBInkOTFonts*) cfg->font);
+		// Free the FBInkOTFonts struct itself
+		free(cfg->font);
+		// Don't leave a dangling pointer
+		cfg->font = NULL;
+
+		return rv;
+	} else {
+		// There were no fonts allocated in this FBInkOTConfig!
+		return ERRCODE(EINVAL);
+	}
 #else
 	WARN("OpenType support is disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
@@ -5167,9 +5186,9 @@ int
 
 	// Are we using a local or global FBInkOTFonts?
 	const FBInkOTFonts* ot_fonts = &otFonts;    // Default to the legacy behavior (i.e., use the global).
-	if (cfg->font.regular || cfg->font.italic || cfg->font.bold || cfg->font.bold_italic) {
+	if (cfg->font) {
 		// But if one font has actually been loaded in the FBInkOTConfig instance, use that instead
-		ot_fonts = (const FBInkOTFonts*) &(cfg->font);
+		ot_fonts = (const FBInkOTFonts*) cfg->font;
 		LOG("Using fonts from the current FBInkOTConfig instance");
 	}
 

@@ -339,17 +339,11 @@ typedef struct
 // Same, but for OT/TTF specific stuff. MUST be zero-initialized.
 typedef struct
 {
-	struct
-	{
-		void* regular;
-		void* italic;
-		void* bold;
-		void* bold_italic;
-	} font;
-	// NOTE: This is essentially a local FBInkOTFonts, in order to use a set of fonts specific to an FBInkOTConfig,
-	//       via fbink_add_ot_font_v2/fbink_free_ot_fonts_v2
-	//       Consider it *private*: it needs to be zero-initialized to be sane, but after that,
-	//       it's only used by FBInk itself, not the user.
+	void* font;
+	// NOTE: This is essentially a pointer to a local FBInkOTFonts instance,
+	//       in order to use a set of fonts specific to an FBInkOTConfig, via fbink_add_ot_font_v2/fbink_free_ot_fonts_v2
+	//       Consider it *private*: it needs to be NULL on init to be sane, but after that,
+	//       it's only used & memory managed by FBInk itself (via the aforemented _v2 API), not the user.
 	struct
 	{
 		short int top;       // Top margin in pixels (if negative, counts backwards from the bottom edge)
@@ -505,8 +499,10 @@ FBINK_API int fbink_add_ot_font(const char* filename, FONT_STYLE_T style);
 FBINK_API int fbink_add_ot_font_v2(const char* filename, FONT_STYLE_T style, FBInkOTConfig* restrict cfg);
 
 // Free all loaded OpenType fonts. You MUST call this when you have finished all OT printing.
+// NOTE: Safe to call even if no fonts were actually loaded.
 FBINK_API int fbink_free_ot_fonts(void);
 // Same, but for a specific FBInkOTConfig instance if fbink_add_ot_font_v2 was used.
+// NOTE: Safe to call even if no fonts were actually loaded, in which case it'll return -(EINVAL)!
 FBINK_API int fbink_free_ot_fonts_v2(FBInkOTConfig* restrict cfg);
 
 // Print a string using an OpenType font.
