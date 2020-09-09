@@ -339,11 +339,11 @@ typedef struct
 // Same, but for OT/TTF specific stuff. MUST be zero-initialized.
 typedef struct
 {
-	void* font;
-	// NOTE: This is essentially a pointer to a local FBInkOTFonts instance,
-	//       in order to use a set of fonts specific to an FBInkOTConfig, via fbink_add_ot_font_v2/fbink_free_ot_fonts_v2
-	//       Consider it *private*: it needs to be NULL on init to be sane, but after that,
-	//       it's only used & memory managed by FBInk itself (via the aforemented _v2 API), not the user.
+	void* font;    // NOTE: This is essentially a pointer to a local FBInkOTFonts instance,
+	//                      in order to use a set of fonts specific to an FBInkOTConfig,
+	//                      via fbink_add_ot_font_v2() & fbink_free_ot_fonts_v2().
+	//                      Consider it *private*: it needs to be NULL on init to be sane, but after that,
+	//                      it's only used & memory managed by FBInk itself (via the aforemented _v2 API), not the user.
 	struct
 	{
 		short int top;       // Top margin in pixels (if negative, counts backwards from the bottom edge)
