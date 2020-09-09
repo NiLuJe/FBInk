@@ -3550,7 +3550,7 @@ int
 
 #ifdef FBINK_WITH_OPENTYPE
 static const char*
-    font_style_to_string(uint8_t style)
+    font_style_to_string(FONT_STYLE_T style)
 {
 	switch (style) {
 		case FNT_REGULAR:
@@ -3687,7 +3687,7 @@ static int
 			return ERRCODE(EXIT_FAILURE);
 	}
 
-	ELOG("Font `%s` loaded for style '%s'", filename, font_style_to_string((uint8_t) style));
+	ELOG("Font `%s` loaded for style '%s'", filename, font_style_to_string(style));
 	return EXIT_SUCCESS;
 }
 #endif    // FBINK_WITH_OPENTYPE
@@ -4882,6 +4882,7 @@ cleanup:
 
 #ifdef FBINK_WITH_OPENTYPE
 // An extremely rudimentry "markdown" parser. It would probably be wise to cook up something better at some point...
+// (c.f., https://github.com/mity/md4c for a full-blown implementation of one)
 // This is *italic* text.
 // This is **bold** text.
 // This is ***bold italic*** text.
@@ -4936,6 +4937,26 @@ static void
 				ci++;
 				break;
 		}
+	}
+}
+
+// Small helper for verbose log messages
+static const char*
+    glyph_style_to_string(CHARACTER_FONT_T glyph_style)
+{
+	switch (glyph_style) {
+		case CH_IGNORE:
+			return "Ignore";
+		case CH_REGULAR:
+			return "Regular";
+		case CH_ITALIC:
+			return "Italic";
+		case CH_BOLD:
+			return "Bold";
+		case CH_BOLD_ITALIC:
+			return "Bold Italic";
+		default:
+			return "Unknown?!";
 	}
 }
 #endif    // FBINK_WITH_OPENTYPE
@@ -5291,7 +5312,7 @@ int
 	}
 	// If no font was loaded, exit early.
 	if (!curr_font) {
-		WARN("No font appears to be loaded for the default font style (%d)", cfg->style);
+		WARN("No font appears to be loaded for the default font style (%s)", font_style_to_string(cfg->style));
 		rv = ERRCODE(ENOENT);
 		goto cleanup;
 	}
@@ -5397,7 +5418,8 @@ int
 							break;
 					}
 					if (!curr_font) {
-						WARN("The specified font style (%hhu) was not loaded", fmt_buff[c_index]);
+						WARN("The specified font style (%s) was not loaded",
+						     glyph_style_to_string(fmt_buff[c_index]));
 						rv = ERRCODE(ENOENT);
 						goto cleanup;
 					}
