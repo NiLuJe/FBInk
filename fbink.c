@@ -3782,7 +3782,7 @@ int
 #endif    // FBINK_WITH_OPENTYPE
 }
 
-// Same, but as loaded bu fbink_add_ot_font_v2 for this specific FBInkOTConfig instance.
+// Same, but as loaded by fbink_add_ot_font_v2 for this specific FBInkOTConfig instance.
 int
     fbink_free_ot_fonts_v2(FBInkOTConfig* cfg UNUSED_BY_MINIMAL)
 {
@@ -5397,7 +5397,7 @@ int
 							break;
 					}
 					if (!curr_font) {
-						WARN("The specified font style was not loaded");
+						WARN("The specified font style (%hhu) was not loaded", fmt_buff[c_index]);
 						rv = ERRCODE(ENOENT);
 						goto cleanup;
 					}
