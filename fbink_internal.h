@@ -193,6 +193,8 @@
 #elif defined(FBINK_FOR_POCKETBOOK)
 #	include "eink/mxcfb-pocketbook.h"
 #	include "eink/mxcfb-pocketbook-compat.h"
+// We'll try to avoid being tainted by InkView as much as possible...
+#	include <dlfcn.h>
 #elif defined(FBINK_FOR_LINUX)
 // Fallback, because, even on straight Linux, we require a few mxcfb typedefs for some of our own function prototypes...
 #	include "eink/mxcfb-kobo.h"

@@ -968,14 +968,45 @@ static void
 static void
     identify_pocketbook(void)
 {
-	// FIXME: I'd *really* like to avoid calling InkView here, so, fake it for now...
-	deviceQuirks.screenDPI   = 226;
-	deviceQuirks.canHWInvert = true;
+	char* model_name = NULL;
+	// NOTE: I'm not super happy about calling InkView here,
+	//       so do it in a slightly roundabout way to try to prevent it from wreaking too much havoc...
+	void* inkview = dlopen("libinkview.so", RTLD_LAZY | RTLD_LOCAL);
+	if (!inkview) {
+		ELOG("Failed to load InkView: %s", dlerror());
+	} else {
+		dlerror();
 
-	// Flawfinder: ignore
-	strncpy(deviceQuirks.deviceName, "PocketBook", sizeof(deviceQuirks.deviceName) - 1U);
-	// Flawfinder: ignore
-	strncpy(deviceQuirks.deviceCodename, "Unknown", sizeof(deviceQuirks.deviceCodename) - 1U);
+		// Try to grab the adress for InkView's GetDeviceModel function...
+		char* (*inkview_GetDeviceModel)(void) = NULL;
+		inkview_GetDeviceModel                = dlsym(inkview, "GetDeviceModel");
+
+		char* err = dlerror();
+		if (error != NULL) {
+			ELOG("Failed to obtain GetDeviceModel symbol: %s", err);
+		} else {
+			// NOTE: We may be leaking the string here, since I have no idea what InkView does...
+			char* model = (*inkview_GetDeviceModel)();
+			//       Which is why we make a copy, just in case...
+			model_name = strdupa(model);
+		}
+
+		// Bye InkView! Hopefully your crappy dependencies haven't wreaked too much havoc...
+		dlclose(inkview);
+	}
+
+	if (model_name) {
+		// TODO: Model name dance!
+	} else {
+		// NOTE: Failed to query DeviceModel via InkView, so, fake something...
+		deviceQuirks.screenDPI   = 226;
+		deviceQuirks.canHWInvert = true;
+
+		// Flawfinder: ignore
+		strncpy(deviceQuirks.deviceName, "Unidentified", sizeof(deviceQuirks.deviceName) - 1U);
+		// Flawfinder: ignore
+		strncpy(deviceQuirks.deviceCodename, "Unknown", sizeof(deviceQuirks.deviceCodename) - 1U);
+	}
 }
 #	endif    // FBINK_FOR_KINDLE
 
