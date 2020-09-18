@@ -348,6 +348,11 @@ ifndef MINIMAL
 	#FEATURES_CPPFLAGS+=-DFBINK_QIS_NO_SIMD
 endif
 
+# We need libdl on PocketBook in order to dlopen InkView...
+ifdef POCKETBOOK
+	LIBS+=-ldl
+endif
+
 ##
 # Now that we're done fiddling with flags, let's build stuff!
 LIB_SRCS:=fbink.c cutef8/utf8.c cutef8/dfa.c
