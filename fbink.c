@@ -3144,6 +3144,21 @@ static int
 	}
 #endif
 
+	// Get fixed screen information
+	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &fInfo)) {
+		PFWARN("Error reading fixed fb information: %m");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+	ELOG("Fixed fb info: ID is \"%s\", length of fb mem: %u bytes & line length: %u bytes",
+	     fInfo.id,
+	     fInfo.smem_len,
+	     fInfo.line_length);
+	// NOTE: On a reinit, we're trusting that smem_len will *NOT* have changed,
+	//       which thankfully appears to hold true on our target devices.
+	//       Otherwise, we'd probably have to compare the previous smem_len to the new, and to
+	//       mremap fbPtr if isFbMapped in case they differ (and the old smem_len != 0, which would indicate a first init).
+
 	// NOTE: In most every cases, we assume (0, 0) is at the top left of the screen,
 	//       and (xres, yres) at the bottom right, as we should.
 	screenWidth  = vInfo.xres;
@@ -3557,21 +3572,6 @@ static int
 	// Bake that into the viewport computations,
 	// we'll special-case the image codepath to ignore it when row is unspecified (i.e., 0) ;).
 	viewVertOrigin = (uint8_t)(viewVertOrigin + viewVertOffset);
-
-	// Get fixed screen information
-	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &fInfo)) {
-		PFWARN("Error reading fixed fb information: %m");
-		rv = ERRCODE(EXIT_FAILURE);
-		goto cleanup;
-	}
-	ELOG("Fixed fb info: ID is \"%s\", length of fb mem: %u bytes & line length: %u bytes",
-	     fInfo.id,
-	     fInfo.smem_len,
-	     fInfo.line_length);
-	// NOTE: On a reinit, we're trusting that smem_len will *NOT* have changed,
-	//       which thankfully appears to hold true on our target devices.
-	//       Otherwise, we'd probably have to compare the previous smem_len to the new, and to
-	//       mremap fbPtr if isFbMapped in case they differ (and the old smem_len != 0, which would indicate a first init).
 
 	// Pack the pen colors into the right pixel format...
 	if (update_pen_colors(fbink_cfg) != EXIT_SUCCESS) {
