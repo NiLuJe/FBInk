@@ -234,11 +234,17 @@ struct mxcfb_csc_matrix {
 
 // NOTE: PB631
 #ifdef MX50_IOCTL_IF//[
-#define MXCFB_WAIT_FOR_UPDATE_COMPLETE_PB631	_IOW('F', 0x2F, __u32)
+#define MXCFB_WAIT_FOR_UPDATE_COMPLETE_PB	_IOW('F', 0x2F, __u32)
 #define MXCFB_WAIT_FOR_UPDATE_COMPLETE_PB631_V2 _IOWR('F', 0x35, struct mxcfb_update_marker_data)
 #else //][!MX50_IOCTL_IF
 #define MXCFB_WAIT_FOR_UPDATE_COMPLETE_ANDROID _IOWR('F', 0x35, struct mxcfb_update_marker_data)
 #endif//] MX50_IOCTL_IF
+
+// NOTE: Apparently, everything is terrible, and, while kernels appear to always expect the MXCFB_WAIT_FOR_UPDATE_COMPLETE_PB
+//       command, *some* kernels will apparently try to write back as if it were MXCFB_WAIT_FOR_UPDATE_COMPLETE...
+//       The workaround is to actually setup a mxcfb_update_marker_data struct but use MXCFB_WAIT_FOR_UPDATE_COMPLETE_PB.
+//       >_<".
+//       c.f., https://github.com/koreader/koreader-base/pull/1188 & https://github.com/koreader/koreader/pull/6669
 
 #define MXCFB_SET_PWRDOWN_DELAY		_IOW('F', 0x30, int32_t)
 #define MXCFB_GET_PWRDOWN_DELAY		_IOR('F', 0x31, int32_t)

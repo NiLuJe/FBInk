@@ -2273,11 +2273,14 @@ static int
 static int
     wait_for_complete_pocketbook(int fbfd, uint32_t marker)
 {
+	// NOTE: Yes, some kernels will attempt to write back to the struct,
+	//       despite using an ioctl that should only read an uint32_t...
+	//       c.f., https://github.com/koreader/koreader/pull/6669
 	struct mxcfb_update_marker_data update_data = { .update_marker = marker, .collision_test = 0U };
-	int                             rv          = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_data);
+	int                             rv          = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_PB, &update_data);
 
 	if (rv < 0) {
-		PFWARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %m");
+		PFWARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_PB: %m");
 		return ERRCODE(EXIT_FAILURE);
 	} else {
 		if (rv == 0) {
