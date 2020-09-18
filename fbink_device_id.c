@@ -983,7 +983,7 @@ static void
 			inkview_GetDeviceModel                = dlsym(inkview, "GetDeviceModel");
 
 			char* err = dlerror();
-			if (error != NULL) {
+			if (err != NULL) {
 				ELOG("Failed to obtain GetDeviceModel symbol: %s", err);
 			} else {
 				// NOTE: We may be leaking the string here, since I have no idea what InkView does...
@@ -997,15 +997,129 @@ static void
 		}
 	}
 
+	// Unless otherwise specified, let's allow HW inversion everywhere for now...
+	deviceQuirks.canHWInvert = true;
+
 	if (model_name) {
-		// TODO: Model name dance!
+		// Keep the model name dance in the same order as KOReader...
+		if (strcmp(model_name, "PocketBook 515") == 0) {
+			deviceQuirks.screenDPI = 200U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PB515", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PB606") == 0 || strcmp(model_name, "PocketBook 606") == 0) {
+			deviceQuirks.screenDPI = 212U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PB606", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PocketBook 611") == 0) {
+			deviceQuirks.screenDPI = 167U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PB611", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PocketBook 613") == 0) {
+			deviceQuirks.screenDPI = 167U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PB613B", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PocketBook 614") == 0 || strcmp(model_name, "PocketBook 614W") == 0) {
+			deviceQuirks.screenDPI = 167U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PB614W", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PB615") == 0 || strcmp(model_name, "PB615W") == 0 ||
+			   strcmp(model_name, "PocketBook 615") == 0 || strcmp(model_name, "PocketBook 615W") == 0) {
+			deviceQuirks.screenDPI = 212U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBBLux", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PB616") == 0 || strcmp(model_name, "PB616W") == 0 ||
+			   strcmp(model_name, "PocketBook 616") == 0 || strcmp(model_name, "PocketBook 616W") == 0) {
+			deviceQuirks.screenDPI = 212U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBBLux2", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PocketBook 622") == 0) {
+			deviceQuirks.screenDPI = 167U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBTouch", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PocketBook 623") == 0) {
+			deviceQuirks.screenDPI = 212U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBTouchLux", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PocketBook 624") == 0) {
+			deviceQuirks.screenDPI = 167U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBBTouch", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PB625") == 0) {
+			deviceQuirks.screenDPI = 167U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBBTouch2", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PB626") == 0 || strcmp(model_name, "PB626(2)-TL3") == 0 ||
+			   strcmp(model_name, "PocketBook 626") == 0) {
+			deviceQuirks.screenDPI = 212U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBLux3", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PB627") == 0) {
+			deviceQuirks.screenDPI = 212U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBLux4", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PB628") == 0) {
+			deviceQuirks.screenDPI = 212U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBLux5", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PocketBook 630") == 0) {
+			deviceQuirks.screenDPI = 212U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBSense", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PB631") == 0 || strcmp(model_name, "PocketBook 631") == 0) {
+			deviceQuirks.screenDPI = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBTouchHD", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PB632") == 0) {
+			deviceQuirks.screenDPI = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBTouchHD+", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PB633") == 0) {
+			deviceQuirks.screenDPI = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBColor", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PB640") == 0 || strcmp(model_name, "PocketBook 640") == 0) {
+			deviceQuirks.screenDPI = 167U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBAqua", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PB641") == 0) {
+			deviceQuirks.screenDPI = 212U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBAqua2", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PB650") == 0 || strcmp(model_name, "PocketBook 650") == 0) {
+			deviceQuirks.screenDPI = 212U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBUltra", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PB740") == 0) {
+			deviceQuirks.screenDPI = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBInkPad3", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PB740-2") == 0) {
+			deviceQuirks.screenDPI = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBInkPad3Pro", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PocketBook 840") == 0) {
+			deviceQuirks.screenDPI = 250U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBInkPad", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PB1040") == 0) {
+			deviceQuirks.screenDPI = 227U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PB1040", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else if (strcmp(model_name, "PocketBook Color Lux") == 0) {
+			deviceQuirks.screenDPI          = 125U;
+			deviceQuirks.isPB3BytesPerPixel = true;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBColorLux", sizeof(deviceQuirks.deviceCodename) - 1U);
+		} else {
+			WARN("Unidentified PocketBook model: `%s`", model_name);
+			deviceQuirks.screenDPI = 212U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Unidentified", sizeof(deviceQuirks.deviceCodename) - 1U);
+		}
 	} else {
 		// NOTE: Failed to query DeviceModel via InkView, so, fake something...
-		deviceQuirks.screenDPI   = 226;
-		deviceQuirks.canHWInvert = true;
-
-		// Flawfinder: ignore
-		strncpy(deviceQuirks.deviceName, "Unidentified", sizeof(deviceQuirks.deviceName) - 1U);
+		WARN("Couldn't query PocketBook model name via InkView");
+		deviceQuirks.screenDPI = 212U;
 		// Flawfinder: ignore
 		strncpy(deviceQuirks.deviceCodename, "Unknown", sizeof(deviceQuirks.deviceCodename) - 1U);
 	}
