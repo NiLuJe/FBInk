@@ -304,6 +304,19 @@
 		(x__ > y__) ? x__ : y__;                                                                                 \
 	})
 
+// We'll need those on PocketBook...
+// c.f., <linux/kernel.h>
+#define ALIGN(x, a)                                                                                                      \
+	({                                                                                                               \
+		__auto_type mask__ = (a) -1U;                                                                            \
+		(((x) + (mask__)) & ~(mask__));                                                                          \
+	})
+#define IS_ALIGNED(x, a)                                                                                                 \
+	({                                                                                                               \
+		__auto_type mask__ = (a) -1U;                                                                            \
+		((x) & (mask__)) == 0 ? true : false;                                                                    \
+	})
+
 // NOTE: Some of our ifdef combinations may cause a small number of function arguments to become unused...
 //       Handle the warnings in these cases with a bit of trickery,
 //       by conditionally marking theses arguments as unused ;).
@@ -641,7 +654,10 @@ static const char* einkfb_orientation_to_string(orientation_t);
 static int  set_pen_color(bool, bool, bool, bool, uint8_t, uint8_t, uint8_t, uint8_t);
 static int  update_pen_colors(const FBInkConfig* restrict);
 static void update_verbosity(const FBInkConfig* restrict);
-static int  initialize_fbink(int, const FBInkConfig* restrict, bool);
+#ifdef FBINK_FOR_POCKETBOOK
+static void pocketbook_fix_fb_info(void);
+#endif
+static int initialize_fbink(int, const FBInkConfig* restrict, bool);
 
 static int memmap_fb(int);
 static int unmap_fb(void);

@@ -3049,6 +3049,59 @@ static void
 	}
 }
 
+// On some PocketBook devices, the fb setup as returned by the ioctls is... questionable at best.
+// We'll fudge it back into order here.
+// c.f., the similar logic in https://github.com/koreader/koreader-base/blob/50a965c28fd5ea2100257aa9ce2e62c9c301155c/ffi/framebuffer_linux.lua#L119-L189
+#ifdef FBINK_FOR_POCKETBOOK
+static void
+    pocketbook_fix_fb_info(void)
+{
+	// Not duplicating all the explanations here, c.f., the KOReader snippet linked earlier ;).
+	if (fInfo.id[0] == '\0') {
+		uint32_t xres_virtual = vInfo.xres_virtual;
+		if (!IS_ALIGNED(vInfo.xres_virtual, 32)) {
+			vInfo.xres_virtual = ALIGN(vInfo.xres, 32);
+			ELOG("xres_virtual -> %u", vInfo.xres_virtual);
+		}
+		uint32_t yres_virtual = vInfo.yres_virtual;
+		if (!IS_ALIGNED(vInfo.yres_virtual, 128)) {
+			vInfo.yres_virtual = ALIGN(vInfo.yres, 128);
+			ELOG("yres_virtual -> %u", vInfo.yres_virtual);
+		}
+		uint32_t line_length = fInfo.line_length;
+		fInfo.line_length    = vInfo.xres_virtual * (vInfo.bits_per_pixel >> 3U);
+		ELOG("line_length -> %u", fInfo.line_length);
+
+		size_t fb_size = fInfo.line_length * vInfo.yres_virtual;
+		if (fb_size > fInfo.smem_len) {
+			if (!IS_ALIGNED(yres_virtual, 32)) {
+				vInfo.yres_virtual = ALIGN(vInfo.yres, 32);
+				ELOG("yres_virtual => %u", vInfo.yres_virtual);
+			} else {
+				vInfo.yres_virtual = yres_virtual;
+				ELOG("yres_virtual <- %u", vInfo.yres_virtual);
+			}
+			fb_size = fInfo.line_length * vInfo.yres_virtual;
+
+			if (fb_size > fInfo.smem_len) {
+				fb_size           = fInfo.smem_len;
+				fInfo.line_length = line_length;
+				ELOG("line_length <- %u", fInfo.line_length);
+				vInfo.xres_virtual = xres_virtual;
+				ELOG("xres_virtual <- %u", vInfo.xres_virtual);
+				vInfo.yres_virtual = yres_virtual;
+				ELOG("yres_virtual <- %u", vInfo.yres_virtual);
+			}
+		}
+	}
+
+	if (deviceQuirks.isPB3BytesPerPixel) {
+		vInfo.bits_per_pixel = 24U;
+		vInfo.xres           = vInfo.xres / 3U;
+	}
+}
+#endif    // FBINK_FOR_POCKETBOOK
+
 // Get the various fb info & setup global variables
 static int
     initialize_fbink(int fbfd, const FBInkConfig* restrict fbink_cfg, bool skip_vinfo)
@@ -3158,6 +3211,11 @@ static int
 	//       which thankfully appears to hold true on our target devices.
 	//       Otherwise, we'd probably have to compare the previous smem_len to the new, and to
 	//       mremap fbPtr if isFbMapped in case they differ (and the old smem_len != 0, which would indicate a first init).
+
+#ifdef FBINK_FOR_POCKETBOOK
+	// On PocketBook, fix the broken mess that the ioctls returns...
+	pocketbook_fix_fb_info();
+#endif
 
 	// NOTE: In most every cases, we assume (0, 0) is at the top left of the screen,
 	//       and (xres, yres) at the bottom right, as we should.
@@ -7092,6 +7150,11 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
+
+#	ifdef FBINK_FOR_POCKETBOOK
+	// On PocketBook, fix the broken mess that the ioctls returns...
+	pocketbook_fix_fb_info();
+#	endif
 
 	// We want to flag each trigger independently
 	if (old_bpp != vInfo.bits_per_pixel) {
