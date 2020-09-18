@@ -12,7 +12,7 @@ This is intended to fill the void felt by Kobo developers and tinkerers when the
 It's especially cruel when moving to a Kobo, after being used to the ubiquity of `eips` on Kindle...
 
 In short, it prints messages or images on your screen, handling the low-level tinkering with both the Linux framebuffer interface, and the i.MX EPDC.  
-It's been tested on Kobo, Kindle, BQ Cervantes and reMarkable, but porting it to other Linux, i.MX eInk devices should be trivial (hell, even Sipix support shouldn't be too hard).
+It's been tested on Kobo, Kindle, BQ Cervantes, reMarkable and PocketBook, but porting it to other Linux, i.MX eInk devices should be trivial (hell, even Sipix support shouldn't be too hard).
 
 By default, text rendering relies on bundled fixed cell bitmap fonts ([see this post](https://www.mobileread.com/forums/showpost.php?p=3765426&postcount=31) for a small sampling),
 but thanks to [@shermp](https://github.com/shermp)'s contributions ([#20](https://github.com/NiLuJe/FBInk/pull/20)), you can also rely on full-fledged TrueType/OpenType font rendering!
@@ -89,6 +89,7 @@ The choice of target platform is handled via a simple variable:
 -   Pass `KINDLE=1 LEGACY=1` to make for a FW 2.x Kindle build (`make legacy` does that on a stripped static build). This basically just disables CLOEXEC, which might not be supported on FW 2.x.
 -   Pass `CERVANTES=1` to make for a BQ/Cervantes build (`make cervantes` does that on a stripped static build).
 -   Pass `REMARKABLE=1` to make for a reMarkable build (`make remarkable` does that on a stripped static build).
+-   Pass `POCKETBOOK=1` to make for a PocketBook build (`make pocketbook` does that on a stripped static build).
 
 The same logic is used to allow for a bit of tailoring:
 -   Pass `MINIMAL=1` to make for a build with limited functionality (only fixed cell font rendering, no image rendering, no extra fonts, no OpenType), which yields a much smaller application & library.

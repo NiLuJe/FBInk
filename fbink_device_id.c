@@ -964,6 +964,19 @@ static void
 	// Flawfinder: ignore
 	strncpy(deviceQuirks.deviceCodename, "Zero Gravitas", sizeof(deviceQuirks.deviceCodename) - 1U);
 }
+#	elif defined(FBINK_FOR_POCKETBOOK)
+static void
+    identify_pocketbook(void)
+{
+	// FIXME: I'd *really* like to avoid calling InkView here, so, fake it for now...
+	deviceQuirks.screenDPI   = 226;
+	deviceQuirks.canHWInvert = true;
+
+	// Flawfinder: ignore
+	strncpy(deviceQuirks.deviceName, "PocketBook", sizeof(deviceQuirks.deviceName) - 1U);
+	// Flawfinder: ignore
+	strncpy(deviceQuirks.deviceCodename, "Unknown", sizeof(deviceQuirks.deviceCodename) - 1U);
+}
 #	endif    // FBINK_FOR_KINDLE
 
 static void
@@ -1006,6 +1019,9 @@ static void
 #	elif defined(FBINK_FOR_REMARKABLE)
 	identify_remarkable();
 	ELOG("Detected a reMarkable (%s)", deviceQuirks.deviceCodename);
+#	elif defined(FBINK_FOR_POCKETBOOK)
+	identify_pocketbook();
+	ELOG("Detected a PocketBook (%s)", deviceQuirks.deviceCodename);
 #	endif
 	// Warn if canHWInvert was flipped
 	if (!deviceQuirks.canHWInvert) {

@@ -229,7 +229,9 @@ ifndef CERVANTES
 ifndef LEGACY
 ifndef KINDLE
 ifndef REMARKABLE
+ifndef POCKETBOOK
 	KOBO=true
+endif
 endif
 endif
 endif
@@ -260,6 +262,10 @@ endif
 ifdef REMARKABLE
 	TARGET_CPPFLAGS+=-DFBINK_FOR_REMARKABLE
 endif
+# Toggle PocketBook support
+ifdef POCKETBOOK
+	TARGET_CPPFLAGS+=-DFBINK_FOR_POCKETBOOK
+endif
 
 # And that should definitely be honored by everything, so, add it to EXTRA_CPPFLAGS
 EXTRA_CPPFLAGS+=$(TARGET_CPPFLAGS)
@@ -284,8 +290,12 @@ ifdef FBINK_VERSION
 					ifdef REMARKABLE
 						LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for reMarkable"'
 					else
-						# NOTE: Should never happen!
-						LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION)"'
+						ifdef POCKETBOOK
+							LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for PocketBook"'
+						else
+							# NOTE: Should never happen!
+							LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION)"'
+						endif
 					endif
 				endif
 			endif
@@ -587,6 +597,9 @@ cervantes:
 remarkable:
 	$(MAKE) strip REMARKABLE=true
 
+pocketbook:
+	$(MAKE) strip POCKETBOOK=true
+
 libunibreak.built:
 	mkdir -p LibUniBreakBuild
 	cd libunibreak && \
@@ -703,4 +716,4 @@ distclean: clean libunibreakclean
 	rm -rf LibUniBreakBuild
 	rm -rf libunibreak.built
 
-.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable libunibreakclean utils alt dump clean distclean
+.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean utils alt dump clean distclean

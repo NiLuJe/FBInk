@@ -29,7 +29,9 @@
 #		ifndef FBINK_FOR_LINUX
 #			ifndef FBINK_FOR_KOBO
 #				ifndef FBINK_FOR_REMARKABLE
-#					define FBINK_FOR_KOBO
+#					ifndef FBINK_FOR_POCKETBOOK
+#						define FBINK_FOR_KOBO
+#					endif
 #				endif
 #			endif
 #		endif
@@ -188,6 +190,8 @@
 #	include "eink/mxcfb-kobo.h"
 #elif defined(FBINK_FOR_REMARKABLE)
 #	include "eink/mxcfb-remarkable.h"
+#elif defined(FBINK_FOR_POCKETBOOK)
+#	include "eink/mxcfb-pocketbook.h"
 #elif defined(FBINK_FOR_LINUX)
 // Fallback, because, even on straight Linux, we require a few mxcfb typedefs for some of our own function prototypes...
 #	include "eink/mxcfb-kobo.h"
@@ -265,13 +269,17 @@
 #			ifdef FBINK_FOR_REMARKABLE
 #				define FBINK_VERSION FBINK_FALLBACK_VERSION " for reMarkable"
 #			else
-#				ifdef FBINK_FOR_LINUX
-#					define FBINK_VERSION FBINK_FALLBACK_VERSION " for Linux"
+#				ifdef FBINK_FOR_POCKETBOOK
+#					define FBINK_VERSION FBINK_FALLBACK_VERSION " for PocketBook"
 #				else
-#					ifdef FBINK_FOR_KOBO
-#						define FBINK_VERSION FBINK_FALLBACK_VERSION " for Kobo"
+#					ifdef FBINK_FOR_LINUX
+#						define FBINK_VERSION FBINK_FALLBACK_VERSION " for Linux"
 #					else
-#						define FBINK_VERSION FBINK_FALLBACK_VERSION
+#						ifdef FBINK_FOR_KOBO
+#							define FBINK_VERSION FBINK_FALLBACK_VERSION " for Kobo"
+#						else
+#							define FBINK_VERSION FBINK_FALLBACK_VERSION
+#						endif
 #					endif
 #				endif
 #			endif
@@ -325,6 +333,11 @@
 #	define UNUSED_BY_REMARKABLE __attribute__((unused))
 #else
 #	define UNUSED_BY_REMARKABLE
+#endif
+#ifdef FBINK_FOR_POCKETBOOK
+#	define UNUSED_BY_POCKETBOOK __attribute__((unused))
+#else
+#	define UNUSED_BY_POCKETBOOK
 #endif
 #ifndef FBINK_FOR_LINUX
 #	define UNUSED_BY_NOTLINUX __attribute__((unused))
@@ -600,6 +613,9 @@ static int wait_for_complete_cervantes(int, uint32_t);
 #	elif defined(FBINK_FOR_REMARKABLE)
 static int refresh_remarkable(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
 static int wait_for_complete_remarkable(int, uint32_t);
+#	elif defined(FBINK_FOR_POCKETBOOK)
+static int refresh_pocketbook(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
+static int wait_for_complete_pocketbook(int, uint32_t);
 #	elif defined(FBINK_FOR_KOBO)
 static int refresh_kobo(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
 static int wait_for_complete_kobo(int, uint32_t);
@@ -681,6 +697,9 @@ static const char* ntx_wfm_to_string(uint32_t);
 #	endif
 #	ifdef FBINK_FOR_REMARKABLE
 static const char* remarkable_wfm_to_string(uint32_t);
+#	endif
+#	ifdef FBINK_FOR_POCKETBOOK
+static const char* pocketbook_wfm_to_string(uint32_t);
 #	endif
 #endif
 static int         get_hwd_mode(uint8_t);

@@ -126,6 +126,8 @@ static void
 	    "\t\t\t\tNote that specifying a waveform mode is ignored on legacy einkfb devices, because the hardware doesn't expose such capabilities.\n"
 #	elif !defined(FBINK_FOR_REMARKABLE)
 	    "\t\t\t\tAs well as GC4, REAGL & REAGLD.\n"
+#	elif !defined(FBINK_FOR_POCKETBOOK)
+	    "\t\t\t\tAs well as GC4, A2IN, A2OUT, DU4, REAGL, REAGLD & GC16HQ.\n"
 #	endif
 #	if !defined(FBINK_FOR_REMARKABLE)
 	    "\t\t\t\tUnsupported modes should safely downgrade to AUTO. On some devices, REAGL & REAGLD expect to be flashing in order to behave properly.\n"
@@ -1641,6 +1643,12 @@ int
 					fbink_cfg.wfm_mode = WFM_UNKNOWN;
 				} else if (strcasecmp(optarg, "INIT2") == 0) {
 					fbink_cfg.wfm_mode = WFM_INIT2;
+				} else if (strcasecmp(optarg, "A2IN") == 0) {
+					fbink_cfg.wfm_mode = WFM_A2IN;
+				} else if (strcasecmp(optarg, "A2OUT") == 0) {
+					fbink_cfg.wfm_mode = WFM_A2OUT;
+				} else if (strcasecmp(optarg, "GC16HQ") == 0) {
+					fbink_cfg.wfm_mode = WFM_GC16HQ;
 				} else {
 					ELOG("Unknown waveform update mode '%s'.", optarg);
 					errfnd = true;

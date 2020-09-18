@@ -218,6 +218,9 @@ typedef enum
 	WFM_INIT,
 	WFM_UNKNOWN,
 	WFM_INIT2,
+	WFM_A2IN,
+	WFM_A2OUT,
+	WFM_GC16HQ,
 	WFM_MAX = 0xFFu,    // uint8_t
 } __attribute__((packed)) WFM_MODE_INDEX_E;
 typedef uint8_t WFM_MODE_INDEX_T;

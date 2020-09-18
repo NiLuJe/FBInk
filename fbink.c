@@ -2208,6 +2208,88 @@ static int
 
 	return EXIT_SUCCESS;
 }
+#	elif defined(FBINK_FOR_POCKETBOOK)
+static int
+    refresh_pocketbook(int                     fbfd,
+		       const struct mxcfb_rect region,
+		       uint32_t                waveform_mode,
+		       uint32_t                update_mode,
+		       int                     dithering_mode,
+		       bool                    is_nightmode,
+		       uint32_t                marker)
+{
+	// NOTE: Apparently benefits from the same trick as on rM of enforcing the 24°C table for DU
+	struct mxcfb_update_data update = { .update_region = region,
+					    .waveform_mode = waveform_mode,
+					    .update_mode   = update_mode,
+					    .update_marker = marker,
+					    .temp          = (waveform_mode == WAVEFORM_MODE_DU) ? 24 : TEMP_USE_AMBIENT,
+					    .flags         = (waveform_mode == WAVEFORM_MODE_REAGLD)
+							 ? EPDC_FLAG_USE_AAD
+							 : (waveform_mode == WAVEFORM_MODE_A2)
+							       ? EPDC_FLAG_FORCE_MONOCHROME
+							       : 0U,
+					    .alt_buffer_data = { 0U } };
+
+	if (is_nightmode && deviceQuirks.canHWInvert) {
+		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
+	}
+
+	// NOTE: When dithering is enabled, you generally want to get rid of FORCE_MONOCHROME, because it gets applied *first*...
+	if (dithering_mode == HWD_LEGACY) {
+		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
+
+		// And now we can deal with the algo selection :).
+		if (waveform_mode == WAVEFORM_MODE_A2 || waveform_mode == WAVEFORM_MODE_DU) {
+			update.flags |= EPDC_FLAG_USE_DITHERING_Y1;
+		} else if (waveform_mode == WAVEFORM_MODE_GC4 || waveform_mode == WAVEFORM_MODE_DU4) {
+			// NOTE: Generally much less useful/pleasing than Y1. Then again, GC4 & DU4 are odd ducks to begin with.
+			update.flags |= EPDC_FLAG_USE_DITHERING_Y4;
+		} else {
+			// NOTE: Technically only available on newer kernels (PB631)...
+			update.flags |= EPDC_FLAG_USE_DITHERING_NTX_D8;
+		}
+	}
+
+	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
+
+	if (rv < 0) {
+		PFWARN("MXCFB_SEND_UPDATE: %m");
+		if (errno == EINVAL) {
+			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
+			     region.top,
+			     region.left,
+			     region.width,
+			     region.height);
+		}
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	LOG("waveform_mode is now %#03x (%s)", update.waveform_mode, pocketbook_wfm_to_string(update.waveform_mode));
+
+	return EXIT_SUCCESS;
+}
+
+static int
+    wait_for_complete_pocketbook(int fbfd, uint32_t marker)
+{
+	struct mxcfb_update_marker_data update_data = { .update_marker = marker, .collision_test = 0U };
+	int                             rv          = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &update_data);
+
+	if (rv < 0) {
+		PFWARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE: %m");
+		return ERRCODE(EXIT_FAILURE);
+	} else {
+		if (rv == 0) {
+			LOG("Update %u has already fully been completed", marker);
+		} else {
+			// NOTE: Timeout is set to 5000ms
+			LOG("Waited %ldms for completion of update %u", (5000 - jiffies_to_ms(rv)), marker);
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
 #	elif defined(FBINK_FOR_KOBO)
 // Kobo devices ([Mk3<->Mk6])
 static int
@@ -2511,6 +2593,8 @@ static int
 	return refresh_cervantes(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
 #	elif defined(FBINK_FOR_REMARKABLE)
 	return refresh_remarkable(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
+#	elif defined(FBINK_FOR_POCKETBOOK)
+	return refresh_pocketbook(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
 #	elif defined(FBINK_FOR_KOBO)
 	if (deviceQuirks.isKoboMk7) {
 		return refresh_kobo_mk7(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
@@ -2560,6 +2644,8 @@ static int
 	}
 #	elif defined(FBINK_FOR_REMARKABLE)
 	return wait_for_complete_remarkable(fbfd, marker);
+#	elif defined(FBINK_FOR_POCKETBOOK)
+	return wait_for_complete_pocketbook(fbfd, marker);
 #	endif    // FBINK_FOR_KINDLE
 }
 #endif    // !FBINK_FOR_LINUX
@@ -6440,6 +6526,55 @@ static uint32_t
 			waveform_mode = WAVEFORM_MODE_AUTO;
 			break;
 	}
+#elif defined(FBINK_FOR_POCKETBOOK)
+	// NOTE: PB has a few extra weird waveform modes, so, go with a dedicated branch...
+	switch (wfm_mode_index) {
+		case WFM_INIT:
+			waveform_mode = WAVEFORM_MODE_INIT;
+			break;
+		case WFM_AUTO:
+			waveform_mode = WAVEFORM_MODE_AUTO;
+			break;
+		case WFM_DU:
+			waveform_mode = WAVEFORM_MODE_DU;
+			break;
+		case WFM_GC16:
+			waveform_mode = WAVEFORM_MODE_GC16;
+			break;
+		case WFM_GC4:
+			waveform_mode = WAVEFORM_MODE_GC4;
+			break;
+		case WFM_A2:
+			waveform_mode = WAVEFORM_MODE_A2;
+			break;
+		case WFM_GL16:
+			waveform_mode = WAVEFORM_MODE_GL16;
+			break;
+		case WFM_A2IN:
+			waveform_mode = WAVEFORM_MODE_A2IN;
+			break;
+		case WFM_A2OUT:
+			waveform_mode = WAVEFORM_MODE_A2OUT;
+			break;
+		case WFM_DU4:
+			waveform_mode = WAVEFORM_MODE_DU4;
+			break;
+		case WFM_REAGL:
+			waveform_mode = WAVEFORM_MODE_REAGL;
+			break;
+		case WFM_REAGLD:
+			waveform_mode = WAVEFORM_MODE_REAGLD;
+			break;
+		case WFM_GC16HQ:
+			waveform_mode = WAVEFORM_MODE_GC16HQ;
+			break;
+		default:
+			LOG("Unknown (or unsupported) waveform mode '%s' @ index %hhu, defaulting to AUTO",
+			    wfm_to_string(wfm_mode_index),
+			    wfm_mode_index);
+			waveform_mode = WAVEFORM_MODE_AUTO;
+			break;
+	}
 #else
 	switch (wfm_mode_index) {
 		case WFM_INIT:
@@ -6649,6 +6784,43 @@ static const char*
 	}
 }
 #	endif    // FBINK_FOR_REMARKABLE
+
+#	ifdef FBINK_FOR_POCKETBOOK
+static const char*
+    pocketbook_wfm_to_string(uint32_t wfm_mode)
+{
+	switch (wfm_mode) {
+		case WAVEFORM_MODE_INIT:
+			return "INIT";
+		case WAVEFORM_MODE_DU:
+			return "DU";
+		case WAVEFORM_MODE_GC16:
+			return "GC16";
+		case WAVEFORM_MODE_GC4:
+			return "GC4";
+		case WAVEFORM_MODE_A2:
+			return "A2";
+		case WAVEFORM_MODE_GL16:
+			return "GL16";
+		case WAVEFORM_MODE_A2IN:
+			return "A2IN";
+		case WAVEFORM_MODE_A2OUT:
+			return "A2OUT";
+		case WAVEFORM_MODE_DU4:
+			return "DU4";
+		case WAVEFORM_MODE_REAGL:
+			return "REAGL";
+		case WAVEFORM_MODE_REAGLD:
+			return "REAGLD";
+		case WAVEFORM_MODE_GC16HQ:
+			return "GC16HQ";
+		case WAVEFORM_MODE_AUTO:
+			return "AUTO";
+		default:
+			return "Unknown";
+	}
+}
+#	endif    // FBINK_FOR_POCKETBOOK
 #endif            // !FBINK_FOR_LINUX
 
 // Convert our public HW_DITHER_INDEX_T values to an appropriate mxcfb dithering mode constant
