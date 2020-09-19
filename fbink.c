@@ -3334,11 +3334,28 @@ static int
 		viewHeight     = screenHeight;
 		viewVertOrigin = 0U;
 	}
+#elif defined(FBINK_FOR_POCKETBOOK)
+	// NOTE: Some PocketBook devices have their panel mounted sideways, like the NTX boards we handled above...
+	//       I'm *hoping* this is enough to do the trick, without having to resort to a deviceQuirks flag,
+	//       which is essentially how this is handled in KOReader (via isAlwaysPortrait).
+	//       Obviously, the broadness of this check severely limits the possibility of actually handling hardware rotations
+	//       sanely, but for now, we only want to deal with the default rotation properly...
+	if (vInfo.xres > vInfo.yres) {
+		screenWidth = vInfo.yres;
+		screenHeight = vInfo.xres;
+		fxpRotateCoords = &rotate_coordinates_pickel;
+		fxpRotateRegion = &rotate_region_pickel;
+		ELOG("Enabled PocketBook rotation quirks (%ux%u -> %ux%u)",
+		     vInfo.xres,
+		     vInfo.yres,
+		     screenWidth,
+		     screenHeight);
+	}
 #else
 	// Other devices are generally never broken-by-design (at least not on that front ;))
-	viewWidth = screenWidth;
+	viewWidth      = screenWidth;
 	viewHoriOrigin = 0U;
-	viewHeight = screenHeight;
+	viewHeight     = screenHeight;
 	viewVertOrigin = 0U;
 #endif
 
