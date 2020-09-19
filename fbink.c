@@ -3353,6 +3353,11 @@ static int
 		     screenWidth,
 		     screenHeight);
 	}
+
+	viewWidth = screenWidth;
+	viewHoriOrigin = 0U;
+	viewHeight = screenHeight;
+	viewVertOrigin = 0U;
 #else
 	// Other devices are generally never broken-by-design (at least not on that front ;))
 	viewWidth      = screenWidth;
