@@ -193,7 +193,7 @@ static inline __attribute__((always_inline)) void
 #pragma GCC diagnostic pop
 }
 
-#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES) || defined(FBINK_FOR_POCKETBOOK)
 // Handle rotation quirks...
 static void
     rotate_coordinates_pickel(FBInkCoordinates* restrict coords)
@@ -250,7 +250,9 @@ static void
 	coords->y = ry;
 #	endif
 }
+#endif    // FBINK_FOR_KOBO || FBINK_FOR_CERVANTES || FBINK_FOR_POCKETBOOK
 
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 static void
     rotate_coordinates_boot(FBInkCoordinates* restrict coords)
 {
@@ -4121,7 +4123,7 @@ int
 
 // Much like rotate_coordinates, but for a mxcfb rectangle
 // c.f., adjust_coordinates @ drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c
-#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES) || defined(FBINK_FOR_POCKETBOOK)
 static void
     rotate_region_pickel(struct mxcfb_rect* restrict region)
 {
@@ -4133,7 +4135,9 @@ static void
 	region->width  = oregion.height;
 	region->height = oregion.width;
 }
+#endif    // FBINK_FOR_KOBO || FBINK_FOR_CERVANTES || FBINK_FOR_POCKETBOOK
 
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 static void
     rotate_region_boot(struct mxcfb_rect* restrict region)
 {

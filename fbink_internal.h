@@ -486,8 +486,10 @@ bool         otInit  = false;
 FBInkOTFonts otFonts = { NULL, NULL, NULL, NULL };
 #endif
 
-#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES) || defined(FBINK_FOR_POCKETBOOK)
 static void rotate_coordinates_pickel(FBInkCoordinates* restrict);
+#endif
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 static void rotate_coordinates_boot(FBInkCoordinates* restrict);
 #	ifdef FBINK_WITH_BUTTON_SCAN
 static void rotate_touch_coordinates(FBInkCoordinates* restrict);
@@ -665,8 +667,10 @@ static int initialize_fbink(int, const FBInkConfig* restrict, bool);
 static int memmap_fb(int);
 static int unmap_fb(void);
 
-#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES) || defined(FBINK_FOR_POCKETBOOK)
 static void rotate_region_pickel(struct mxcfb_rect* restrict);
+#endif
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 static void rotate_region_boot(struct mxcfb_rect* restrict);
 #endif
 static void rotate_region_nop(struct mxcfb_rect* restrict);
