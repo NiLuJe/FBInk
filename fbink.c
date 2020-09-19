@@ -636,6 +636,33 @@ static void
 	return fill_rect_Gray4(x, y, w, h, px);
 }
 
+#ifdef FBINK_FOR_POCKETBOOK
+static void
+    fill_rect_Gray8(unsigned short int         x,
+		    unsigned short int         y,
+		    unsigned short int         w,
+		    unsigned short int         h,
+		    const FBInkPixel* restrict px)
+{
+	// NOTE: We may require fxpRotateRegion on PB :(.
+	struct mxcfb_rect region = {
+		.top    = y,
+		.left   = x,
+		.width  = w,
+		.height = h,
+	};
+	(*fxpRotateRegion)(&region);
+
+	for (size_t j = region.top; j < region.top + region.height; j++) {
+		uint8_t* p = fbPtr + (fInfo.line_length * j) + (region.left);
+		memset(p, px->gray8, region.width);
+	}
+
+#	ifdef DEBUG
+	LOG("Filled a #%02hhX %hux%hu rectangle @ (%hu, %hu)", px->gray8, w, h, x, y);
+#	endif
+}
+#else
 static void
     fill_rect_Gray8(unsigned short int         x,
 		    unsigned short int         y,
@@ -649,10 +676,11 @@ static void
 		memset(p, px->gray8, w);
 	}
 
-#ifdef DEBUG
+#	ifdef DEBUG
 	LOG("Filled a #%02hhX %hux%hu rectangle @ (%hu, %hu)", px->gray8, w, h, x, y);
-#endif
+#	endif
 }
+#endif
 
 static void
     fill_rect_Gray8_checked(unsigned short int         x,
@@ -926,12 +954,12 @@ static void
 	if (vInfo.bits_per_pixel == 16) {
 		// NOTE: Besides, we can't use a straight memset, since we need pixels to be properly packed for RGB565...
 		//       Se we whip up a quick memset16, like fill_rect() does.
-		const uint16_t px = pack_rgb565(v, v, v);
+		const uint16_t px       = pack_rgb565(v, v, v);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
-		uint16_t* p = (uint16_t*) fbPtr;
+		uint16_t*      p        = (uint16_t*) fbPtr;
 #	pragma GCC diagnostic pop
-		size_t px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
+		size_t         px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
 		while (px_count--) {
 			*p++ = px;
 		};
@@ -2520,13 +2548,13 @@ static int
 }
 #else
 static int
-    refresh(int fbfd,
+    refresh(int                     fbfd,
 	    const struct mxcfb_rect region,
-	    uint32_t waveform_mode,
-	    int dithering_mode,
-	    bool is_nightmode,
-	    bool is_flashing,
-	    bool no_refresh)
+	    uint32_t                waveform_mode,
+	    int                     dithering_mode,
+	    bool                    is_nightmode,
+	    bool                    is_flashing,
+	    bool                    no_refresh)
 {
 	// Were we asked to skip refreshes?
 	if (no_refresh) {
@@ -3344,8 +3372,8 @@ static int
 	//       Obviously, the broadness of this check severely limits the possibility of actually handling hardware rotations
 	//       sanely, but for now, we only want to deal with the default rotation properly...
 	if (vInfo.xres > vInfo.yres) {
-		screenWidth = vInfo.yres;
-		screenHeight = vInfo.xres;
+		screenWidth     = vInfo.yres;
+		screenHeight    = vInfo.xres;
 		fxpRotateCoords = &rotate_coordinates_pickel;
 		fxpRotateRegion = &rotate_region_pickel;
 		ELOG("Enabled PocketBook rotation quirks (%ux%u -> %ux%u)",
@@ -3355,9 +3383,9 @@ static int
 		     screenHeight);
 	}
 
-	viewWidth = screenWidth;
+	viewWidth      = screenWidth;
 	viewHoriOrigin = 0U;
-	viewHeight = screenHeight;
+	viewHeight     = screenHeight;
 	viewVertOrigin = 0U;
 #else
 	// Other devices are generally never broken-by-design (at least not on that front ;))
@@ -3535,8 +3563,8 @@ static int
 	}
 #else
 	// Default font is IBM
-	glyphWidth = 8U;
-	glyphHeight = 8U;
+	glyphWidth         = 8U;
+	glyphHeight        = 8U;
 	fxpFont8xGetBitmap = &font8x8_get_bitmap;
 
 	if (fbink_cfg->fontname != IBM) {
@@ -8115,6 +8143,9 @@ static int
 							coords.x = (unsigned short int) (i + x_off);
 							coords.y = (unsigned short int) (j + y_off);
 
+#	ifdef FBINK_FOR_POCKETBOOK
+							(*fxpRotateCoords)(&coords);
+#	endif
 							put_pixel_Gray8(&coords, &pixel);
 						} else if (img_px.color.a == 0) {
 							// Transparent! Keep fb as-is.
@@ -8127,6 +8158,10 @@ static int
 							// NOTE: We use the the pixel functions directly, to avoid the OOB checks,
 							//       because we know we're only processing on-screen pixels,
 							//       and we don't care about the rotation checks at this bpp :).
+#	ifdef FBINK_FOR_POCKETBOOK
+							// ... except on PB, where we *may* require rotation...
+							(*fxpRotateCoords)(&coords);
+#	endif
 							FBInkPixel bg_px;
 							get_pixel_Gray8(&coords, &bg_px);
 
@@ -8218,6 +8253,9 @@ static int
 						//       as well as unneeded rotation checks (can't happen at this bpp).
 						// NOTE: GCC appears to be smart enough to hoist that branch out of the loop ;).
 						if (!fb_is_legacy) {
+#	ifdef FBINK_FOR_POCKETBOOK
+							(*fxpRotateCoords)(&coords);
+#	endif
 							put_pixel_Gray8(&coords, &pixel);
 						} else {
 							put_pixel_Gray4(&coords, &pixel);
