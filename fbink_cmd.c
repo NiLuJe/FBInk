@@ -124,7 +124,9 @@ static void
 #	if defined(FBINK_FOR_KINDLE)
 	    "\t\t\t\tAs well as REAGL, REAGLD, GC16_FAST, GL16_FAST, DU4, GL4, GL16_INV, GCK16 & GLKW16 on some Kindles, depending on the model & FW version.\n"
 	    "\t\t\t\tNote that specifying a waveform mode is ignored on legacy einkfb devices, because the hardware doesn't expose such capabilities.\n"
-#	elif !defined(FBINK_FOR_REMARKABLE)
+#	elif defined(FBINK_FOR_POCKETBOOK)
+	    "\t\t\t\tAs well as GC4, A2IN, A2OUT, DU4, REAGL, REAGLD & GC16HQ.\n"
+#	elif defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 	    "\t\t\t\tAs well as GC4, REAGL & REAGLD.\n"
 #	endif
 #	if !defined(FBINK_FOR_REMARKABLE)
@@ -1641,6 +1643,12 @@ int
 					fbink_cfg.wfm_mode = WFM_UNKNOWN;
 				} else if (strcasecmp(optarg, "INIT2") == 0) {
 					fbink_cfg.wfm_mode = WFM_INIT2;
+				} else if (strcasecmp(optarg, "A2IN") == 0) {
+					fbink_cfg.wfm_mode = WFM_A2IN;
+				} else if (strcasecmp(optarg, "A2OUT") == 0) {
+					fbink_cfg.wfm_mode = WFM_A2OUT;
+				} else if (strcasecmp(optarg, "GC16HQ") == 0) {
+					fbink_cfg.wfm_mode = WFM_GC16HQ;
 				} else {
 					ELOG("Unknown waveform update mode '%s'.", optarg);
 					errfnd = true;

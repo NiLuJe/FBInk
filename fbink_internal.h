@@ -29,7 +29,9 @@
 #		ifndef FBINK_FOR_LINUX
 #			ifndef FBINK_FOR_KOBO
 #				ifndef FBINK_FOR_REMARKABLE
-#					define FBINK_FOR_KOBO
+#					ifndef FBINK_FOR_POCKETBOOK
+#						define FBINK_FOR_KOBO
+#					endif
 #				endif
 #			endif
 #		endif
@@ -188,6 +190,11 @@
 #	include "eink/mxcfb-kobo.h"
 #elif defined(FBINK_FOR_REMARKABLE)
 #	include "eink/mxcfb-remarkable.h"
+#elif defined(FBINK_FOR_POCKETBOOK)
+#	include "eink/mxcfb-pocketbook.h"
+#	include "eink/mxcfb-pocketbook-compat.h"
+// We'll try to avoid being tainted by InkView as much as possible...
+#	include <dlfcn.h>
 #elif defined(FBINK_FOR_LINUX)
 // Fallback, because, even on straight Linux, we require a few mxcfb typedefs for some of our own function prototypes...
 #	include "eink/mxcfb-kobo.h"
@@ -265,13 +272,17 @@
 #			ifdef FBINK_FOR_REMARKABLE
 #				define FBINK_VERSION FBINK_FALLBACK_VERSION " for reMarkable"
 #			else
-#				ifdef FBINK_FOR_LINUX
-#					define FBINK_VERSION FBINK_FALLBACK_VERSION " for Linux"
+#				ifdef FBINK_FOR_POCKETBOOK
+#					define FBINK_VERSION FBINK_FALLBACK_VERSION " for PocketBook"
 #				else
-#					ifdef FBINK_FOR_KOBO
-#						define FBINK_VERSION FBINK_FALLBACK_VERSION " for Kobo"
+#					ifdef FBINK_FOR_LINUX
+#						define FBINK_VERSION FBINK_FALLBACK_VERSION " for Linux"
 #					else
-#						define FBINK_VERSION FBINK_FALLBACK_VERSION
+#						ifdef FBINK_FOR_KOBO
+#							define FBINK_VERSION FBINK_FALLBACK_VERSION " for Kobo"
+#						else
+#							define FBINK_VERSION FBINK_FALLBACK_VERSION
+#						endif
 #					endif
 #				endif
 #			endif
@@ -294,6 +305,19 @@
 		__auto_type x__ = (X);                                                                                   \
 		__auto_type y__ = (Y);                                                                                   \
 		(x__ > y__) ? x__ : y__;                                                                                 \
+	})
+
+// We'll need those on PocketBook...
+// c.f., <linux/kernel.h>
+#define ALIGN(x, a)                                                                                                      \
+	({                                                                                                               \
+		__auto_type mask__ = (a) -1U;                                                                            \
+		(((x) + (mask__)) & ~(mask__));                                                                          \
+	})
+#define IS_ALIGNED(x, a)                                                                                                 \
+	({                                                                                                               \
+		__auto_type mask__ = (a) -1U;                                                                            \
+		((x) & (mask__)) == 0 ? true : false;                                                                    \
 	})
 
 // NOTE: Some of our ifdef combinations may cause a small number of function arguments to become unused...
@@ -325,6 +349,11 @@
 #	define UNUSED_BY_REMARKABLE __attribute__((unused))
 #else
 #	define UNUSED_BY_REMARKABLE
+#endif
+#ifdef FBINK_FOR_POCKETBOOK
+#	define UNUSED_BY_POCKETBOOK __attribute__((unused))
+#else
+#	define UNUSED_BY_POCKETBOOK
 #endif
 #ifndef FBINK_FOR_LINUX
 #	define UNUSED_BY_NOTLINUX __attribute__((unused))
@@ -457,8 +486,10 @@ bool         otInit  = false;
 FBInkOTFonts otFonts = { NULL, NULL, NULL, NULL };
 #endif
 
-#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES) || defined(FBINK_FOR_POCKETBOOK)
 static void rotate_coordinates_pickel(FBInkCoordinates* restrict);
+#endif
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 static void rotate_coordinates_boot(FBInkCoordinates* restrict);
 #	ifdef FBINK_WITH_BUTTON_SCAN
 static void rotate_touch_coordinates(FBInkCoordinates* restrict);
@@ -600,6 +631,9 @@ static int wait_for_complete_cervantes(int, uint32_t);
 #	elif defined(FBINK_FOR_REMARKABLE)
 static int refresh_remarkable(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
 static int wait_for_complete_remarkable(int, uint32_t);
+#	elif defined(FBINK_FOR_POCKETBOOK)
+static int refresh_pocketbook(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
+static int wait_for_complete_pocketbook(int, uint32_t);
 #	elif defined(FBINK_FOR_KOBO)
 static int refresh_kobo(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
 static int wait_for_complete_kobo(int, uint32_t);
@@ -625,13 +659,18 @@ static const char* einkfb_orientation_to_string(orientation_t);
 static int  set_pen_color(bool, bool, bool, bool, uint8_t, uint8_t, uint8_t, uint8_t);
 static int  update_pen_colors(const FBInkConfig* restrict);
 static void update_verbosity(const FBInkConfig* restrict);
-static int  initialize_fbink(int, const FBInkConfig* restrict, bool);
+#ifdef FBINK_FOR_POCKETBOOK
+static void pocketbook_fix_fb_info(void);
+#endif
+static int initialize_fbink(int, const FBInkConfig* restrict, bool);
 
 static int memmap_fb(int);
 static int unmap_fb(void);
 
-#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES) || defined(FBINK_FOR_POCKETBOOK)
 static void rotate_region_pickel(struct mxcfb_rect* restrict);
+#endif
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 static void rotate_region_boot(struct mxcfb_rect* restrict);
 #endif
 static void rotate_region_nop(struct mxcfb_rect* restrict);
@@ -681,6 +720,9 @@ static const char* ntx_wfm_to_string(uint32_t);
 #	endif
 #	ifdef FBINK_FOR_REMARKABLE
 static const char* remarkable_wfm_to_string(uint32_t);
+#	endif
+#	ifdef FBINK_FOR_POCKETBOOK
+static const char* pocketbook_wfm_to_string(uint32_t);
 #	endif
 #endif
 static int         get_hwd_mode(uint8_t);

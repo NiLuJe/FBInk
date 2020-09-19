@@ -146,6 +146,8 @@ static void set_kobo_quirks(unsigned short int);
 static void identify_kobo(void);
 #        elif defined(FBINK_FOR_REMARKABLE)
 static void identify_remarkable(void);
+#        elif defined(FBINK_FOR_POCKETBOOK)
+static void identify_pocketbook(void);
 #        endif    // FBINK_FOR_KINDLE
 
 static void identify_device(void);

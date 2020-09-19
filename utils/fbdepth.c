@@ -265,13 +265,17 @@ static bool
 	//       c.f., mxc_epdc_fb_check_var @ drivers/video/mxc/mxc_epdc_fb.c OR drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c
 	//       The goal being to end up in the *same* effective rotation as before.
 	// First, remember the current rotation as the expected one...
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES) || defined(FBINK_FOR_KINDLE)
 	uint32_t expected_rota = vInfo.rotate;
+#endif
 	// Then, set the requested rotation, if there was one...
 	if (rota != -1) {
 		vInfo.rotate = (uint32_t) rota;
 		LOG("Setting rotate to %u (%s)", vInfo.rotate, fb_rotate_to_string(vInfo.rotate));
 		// And flag it as the expected rota for the sanity checks
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES) || defined(FBINK_FOR_KINDLE)
 		expected_rota = (uint32_t) rota;
+#endif
 	}
 #if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {

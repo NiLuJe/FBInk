@@ -229,7 +229,9 @@ ifndef CERVANTES
 ifndef LEGACY
 ifndef KINDLE
 ifndef REMARKABLE
+ifndef POCKETBOOK
 	KOBO=true
+endif
 endif
 endif
 endif
@@ -260,6 +262,10 @@ endif
 ifdef REMARKABLE
 	TARGET_CPPFLAGS+=-DFBINK_FOR_REMARKABLE
 endif
+# Toggle PocketBook support
+ifdef POCKETBOOK
+	TARGET_CPPFLAGS+=-DFBINK_FOR_POCKETBOOK
+endif
 
 # And that should definitely be honored by everything, so, add it to EXTRA_CPPFLAGS
 EXTRA_CPPFLAGS+=$(TARGET_CPPFLAGS)
@@ -284,8 +290,12 @@ ifdef FBINK_VERSION
 					ifdef REMARKABLE
 						LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for reMarkable"'
 					else
-						# NOTE: Should never happen!
-						LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION)"'
+						ifdef POCKETBOOK
+							LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for PocketBook"'
+						else
+							# NOTE: Should never happen!
+							LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION)"'
+						endif
 					endif
 				endif
 			endif
@@ -336,6 +346,12 @@ ifndef MINIMAL
 	# NOTE: We can optionally forcibly disable the NEON/SSE4 codepaths in QImageScale!
 	#       Although, generally, the SIMD variants are a bit faster ;).
 	#FEATURES_CPPFLAGS+=-DFBINK_QIS_NO_SIMD
+endif
+
+# We need libdl on PocketBook in order to dlopen InkView...
+ifdef POCKETBOOK
+	LIBS+=-ldl
+	UTILS_LIBS+=-ldl
 endif
 
 ##
@@ -532,9 +548,9 @@ else
 utils: | outdir
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(TOOLS_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/rota utils/rota.c
 	$(STRIP) --strip-unneeded $(OUT_DIR)/rota
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(TOOLS_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbdepth utils/fbdepth.c
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(TOOLS_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbdepth utils/fbdepth.c $(UTILS_LIBS)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/fbdepth
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(DOOM_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/doom utils/doom.c -lrt
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(DOOM_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/doom utils/doom.c -lrt $(UTILS_LIBS)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/doom
 endif
 
@@ -586,6 +602,9 @@ cervantes:
 
 remarkable:
 	$(MAKE) strip REMARKABLE=true
+
+pocketbook:
+	$(MAKE) strip POCKETBOOK=true
 
 libunibreak.built:
 	mkdir -p LibUniBreakBuild
@@ -703,4 +722,4 @@ distclean: clean libunibreakclean
 	rm -rf LibUniBreakBuild
 	rm -rf libunibreak.built
 
-.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable libunibreakclean utils alt dump clean distclean
+.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean utils alt dump clean distclean

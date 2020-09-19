@@ -193,7 +193,7 @@ static inline __attribute__((always_inline)) void
 #pragma GCC diagnostic pop
 }
 
-#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES) || defined(FBINK_FOR_POCKETBOOK)
 // Handle rotation quirks...
 static void
     rotate_coordinates_pickel(FBInkCoordinates* restrict coords)
@@ -250,7 +250,9 @@ static void
 	coords->y = ry;
 #	endif
 }
+#endif    // FBINK_FOR_KOBO || FBINK_FOR_CERVANTES || FBINK_FOR_POCKETBOOK
 
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 static void
     rotate_coordinates_boot(FBInkCoordinates* restrict coords)
 {
@@ -634,6 +636,33 @@ static void
 	return fill_rect_Gray4(x, y, w, h, px);
 }
 
+#ifdef FBINK_FOR_POCKETBOOK
+static void
+    fill_rect_Gray8(unsigned short int         x,
+		    unsigned short int         y,
+		    unsigned short int         w,
+		    unsigned short int         h,
+		    const FBInkPixel* restrict px)
+{
+	// NOTE: We may require fxpRotateRegion on PB :(.
+	struct mxcfb_rect region = {
+		.top    = y,
+		.left   = x,
+		.width  = w,
+		.height = h,
+	};
+	(*fxpRotateRegion)(&region);
+
+	for (size_t j = region.top; j < region.top + region.height; j++) {
+		uint8_t* p = fbPtr + (fInfo.line_length * j) + (region.left);
+		memset(p, px->gray8, region.width);
+	}
+
+#	ifdef DEBUG
+	LOG("Filled a #%02hhX %hux%hu rectangle @ (%hu, %hu)", px->gray8, w, h, x, y);
+#	endif
+}
+#else
 static void
     fill_rect_Gray8(unsigned short int         x,
 		    unsigned short int         y,
@@ -647,10 +676,11 @@ static void
 		memset(p, px->gray8, w);
 	}
 
-#ifdef DEBUG
+#	ifdef DEBUG
 	LOG("Filled a #%02hhX %hux%hu rectangle @ (%hu, %hu)", px->gray8, w, h, x, y);
-#endif
+#	endif
 }
+#endif
 
 static void
     fill_rect_Gray8_checked(unsigned short int         x,
@@ -924,12 +954,12 @@ static void
 	if (vInfo.bits_per_pixel == 16) {
 		// NOTE: Besides, we can't use a straight memset, since we need pixels to be properly packed for RGB565...
 		//       Se we whip up a quick memset16, like fill_rect() does.
-		const uint16_t px = pack_rgb565(v, v, v);
+		const uint16_t px       = pack_rgb565(v, v, v);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
-		uint16_t* p = (uint16_t*) fbPtr;
+		uint16_t*      p        = (uint16_t*) fbPtr;
 #	pragma GCC diagnostic pop
-		size_t px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
+		size_t         px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
 		while (px_count--) {
 			*p++ = px;
 		};
@@ -2208,6 +2238,91 @@ static int
 
 	return EXIT_SUCCESS;
 }
+#	elif defined(FBINK_FOR_POCKETBOOK)
+static int
+    refresh_pocketbook(int                     fbfd,
+		       const struct mxcfb_rect region,
+		       uint32_t                waveform_mode,
+		       uint32_t                update_mode,
+		       int                     dithering_mode,
+		       bool                    is_nightmode,
+		       uint32_t                marker)
+{
+	// NOTE: Apparently benefits from the same trick as on rM of enforcing the 24°C table for DU
+	struct mxcfb_update_data update = { .update_region = region,
+					    .waveform_mode = waveform_mode,
+					    .update_mode   = update_mode,
+					    .update_marker = marker,
+					    .temp          = (waveform_mode == WAVEFORM_MODE_DU) ? 24 : TEMP_USE_AMBIENT,
+					    .flags         = (waveform_mode == WAVEFORM_MODE_REAGLD)
+							 ? EPDC_FLAG_USE_AAD
+							 : (waveform_mode == WAVEFORM_MODE_A2)
+							       ? EPDC_FLAG_FORCE_MONOCHROME
+							       : 0U,
+					    .alt_buffer_data = { 0U } };
+
+	if (is_nightmode && deviceQuirks.canHWInvert) {
+		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
+	}
+
+	// NOTE: When dithering is enabled, you generally want to get rid of FORCE_MONOCHROME, because it gets applied *first*...
+	if (dithering_mode == HWD_LEGACY) {
+		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
+
+		// And now we can deal with the algo selection :).
+		if (waveform_mode == WAVEFORM_MODE_A2 || waveform_mode == WAVEFORM_MODE_DU) {
+			update.flags |= EPDC_FLAG_USE_DITHERING_Y1;
+		} else if (waveform_mode == WAVEFORM_MODE_GC4 || waveform_mode == WAVEFORM_MODE_DU4) {
+			// NOTE: Generally much less useful/pleasing than Y1. Then again, GC4 & DU4 are odd ducks to begin with.
+			update.flags |= EPDC_FLAG_USE_DITHERING_Y4;
+		} else {
+			// NOTE: Technically only available on newer kernels (PB631)...
+			update.flags |= EPDC_FLAG_USE_DITHERING_NTX_D8;
+		}
+	}
+
+	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
+
+	if (rv < 0) {
+		PFWARN("MXCFB_SEND_UPDATE: %m");
+		if (errno == EINVAL) {
+			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
+			     region.top,
+			     region.left,
+			     region.width,
+			     region.height);
+		}
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	LOG("waveform_mode is now %#03x (%s)", update.waveform_mode, pocketbook_wfm_to_string(update.waveform_mode));
+
+	return EXIT_SUCCESS;
+}
+
+static int
+    wait_for_complete_pocketbook(int fbfd, uint32_t marker)
+{
+	// NOTE: Yes, some kernels will attempt to write back to the struct,
+	//       despite using an ioctl that should only read an uint32_t...
+	//       c.f., https://github.com/koreader/koreader/pull/6669
+	struct mxcfb_update_marker_data update_data = { .update_marker = marker, .collision_test = 0U };
+	int                             rv          = ioctl(fbfd, MXCFB_WAIT_FOR_UPDATE_COMPLETE_PB, &update_data);
+
+	if (rv < 0) {
+		PFWARN("MXCFB_WAIT_FOR_UPDATE_COMPLETE_PB: %m");
+		return ERRCODE(EXIT_FAILURE);
+	} else {
+		if (rv == 0) {
+			LOG("Update %u has already fully been completed", marker);
+		} else {
+			// NOTE: Timeout is set to 5000ms
+			LOG("Waited %ldms for completion of update %u", (5000 - jiffies_to_ms(rv)), marker);
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
 #	elif defined(FBINK_FOR_KOBO)
 // Kobo devices ([Mk3<->Mk6])
 static int
@@ -2433,13 +2548,13 @@ static int
 }
 #else
 static int
-    refresh(int fbfd,
+    refresh(int                     fbfd,
 	    const struct mxcfb_rect region,
-	    uint32_t waveform_mode,
-	    int dithering_mode,
-	    bool is_nightmode,
-	    bool is_flashing,
-	    bool no_refresh)
+	    uint32_t                waveform_mode,
+	    int                     dithering_mode,
+	    bool                    is_nightmode,
+	    bool                    is_flashing,
+	    bool                    no_refresh)
 {
 	// Were we asked to skip refreshes?
 	if (no_refresh) {
@@ -2511,6 +2626,8 @@ static int
 	return refresh_cervantes(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
 #	elif defined(FBINK_FOR_REMARKABLE)
 	return refresh_remarkable(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
+#	elif defined(FBINK_FOR_POCKETBOOK)
+	return refresh_pocketbook(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
 #	elif defined(FBINK_FOR_KOBO)
 	if (deviceQuirks.isKoboMk7) {
 		return refresh_kobo_mk7(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
@@ -2560,6 +2677,8 @@ static int
 	}
 #	elif defined(FBINK_FOR_REMARKABLE)
 	return wait_for_complete_remarkable(fbfd, marker);
+#	elif defined(FBINK_FOR_POCKETBOOK)
+	return wait_for_complete_pocketbook(fbfd, marker);
 #	endif    // FBINK_FOR_KINDLE
 }
 #endif    // !FBINK_FOR_LINUX
@@ -2960,6 +3079,60 @@ static void
 	}
 }
 
+// On some PocketBook devices, the fb setup as returned by the ioctls is... questionable at best.
+// We'll fudge it back into order here.
+// c.f., the similar logic in https://github.com/koreader/koreader-base/blob/50a965c28fd5ea2100257aa9ce2e62c9c301155c/ffi/framebuffer_linux.lua#L119-L189
+#ifdef FBINK_FOR_POCKETBOOK
+static void
+    pocketbook_fix_fb_info(void)
+{
+	ELOG("Virtual resolution: %ux%u", vInfo.xres_virtual, vInfo.yres_virtual);
+	// Not duplicating all the explanations here, c.f., the KOReader snippet linked earlier ;).
+	if (fInfo.id[0] == '\0') {
+		uint32_t xres_virtual = vInfo.xres_virtual;
+		if (!IS_ALIGNED(vInfo.xres_virtual, 32)) {
+			vInfo.xres_virtual = ALIGN(vInfo.xres, 32);
+			ELOG("xres_virtual -> %u", vInfo.xres_virtual);
+		}
+		uint32_t yres_virtual = vInfo.yres_virtual;
+		if (!IS_ALIGNED(vInfo.yres_virtual, 128)) {
+			vInfo.yres_virtual = ALIGN(vInfo.yres, 128);
+			ELOG("yres_virtual -> %u", vInfo.yres_virtual);
+		}
+		uint32_t line_length = fInfo.line_length;
+		fInfo.line_length    = vInfo.xres_virtual * (vInfo.bits_per_pixel >> 3U);
+		ELOG("line_length -> %u", fInfo.line_length);
+
+		size_t fb_size = fInfo.line_length * vInfo.yres_virtual;
+		if (fb_size > fInfo.smem_len) {
+			if (!IS_ALIGNED(yres_virtual, 32)) {
+				vInfo.yres_virtual = ALIGN(vInfo.yres, 32);
+				ELOG("yres_virtual => %u", vInfo.yres_virtual);
+			} else {
+				vInfo.yres_virtual = yres_virtual;
+				ELOG("yres_virtual <- %u", vInfo.yres_virtual);
+			}
+			fb_size = fInfo.line_length * vInfo.yres_virtual;
+
+			if (fb_size > fInfo.smem_len) {
+				fb_size           = fInfo.smem_len;
+				fInfo.line_length = line_length;
+				ELOG("line_length <- %u", fInfo.line_length);
+				vInfo.xres_virtual = xres_virtual;
+				ELOG("xres_virtual <- %u", vInfo.xres_virtual);
+				vInfo.yres_virtual = yres_virtual;
+				ELOG("yres_virtual <- %u", vInfo.yres_virtual);
+			}
+		}
+	}
+
+	if (deviceQuirks.isPB3BytesPerPixel) {
+		vInfo.bits_per_pixel = 24U;
+		vInfo.xres           = vInfo.xres / 3U;
+	}
+}
+#endif    // FBINK_FOR_POCKETBOOK
+
 // Get the various fb info & setup global variables
 static int
     initialize_fbink(int fbfd, const FBInkConfig* restrict fbink_cfg, bool skip_vinfo)
@@ -3053,6 +3226,26 @@ static int
 
 		ELOG("Actual einkfb orientation: %u (%s)", orientation, einkfb_orientation_to_string(orientation));
 	}
+#endif
+
+	// Get fixed screen information
+	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &fInfo)) {
+		PFWARN("Error reading fixed fb information: %m");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+	ELOG("Fixed fb info: ID is \"%s\", length of fb mem: %u bytes & line length: %u bytes",
+	     fInfo.id,
+	     fInfo.smem_len,
+	     fInfo.line_length);
+	// NOTE: On a reinit, we're trusting that smem_len will *NOT* have changed,
+	//       which thankfully appears to hold true on our target devices.
+	//       Otherwise, we'd probably have to compare the previous smem_len to the new, and to
+	//       mremap fbPtr if isFbMapped in case they differ (and the old smem_len != 0, which would indicate a first init).
+
+#ifdef FBINK_FOR_POCKETBOOK
+	// On PocketBook, fix the broken mess that the ioctls returns...
+	pocketbook_fix_fb_info();
 #endif
 
 	// NOTE: In most every cases, we assume (0, 0) is at the top left of the screen,
@@ -3172,11 +3365,33 @@ static int
 		viewHeight     = screenHeight;
 		viewVertOrigin = 0U;
 	}
-#else
-	// Kindle devices are generally never broken-by-design (at least not on that front ;))
-	viewWidth = screenWidth;
+#elif defined(FBINK_FOR_POCKETBOOK)
+	// NOTE: Some PocketBook devices have their panel mounted sideways, like the NTX boards we handled above...
+	//       I'm *hoping* this is enough to do the trick, without having to resort to a deviceQuirks flag,
+	//       which is essentially how this is handled in KOReader (via isAlwaysPortrait).
+	//       Obviously, the broadness of this check severely limits the possibility of actually handling hardware rotations
+	//       sanely, but for now, we only want to deal with the default rotation properly...
+	if (vInfo.xres > vInfo.yres) {
+		screenWidth     = vInfo.yres;
+		screenHeight    = vInfo.xres;
+		fxpRotateCoords = &rotate_coordinates_pickel;
+		fxpRotateRegion = &rotate_region_pickel;
+		ELOG("Enabled PocketBook rotation quirks (%ux%u -> %ux%u)",
+		     vInfo.xres,
+		     vInfo.yres,
+		     screenWidth,
+		     screenHeight);
+	}
+
+	viewWidth      = screenWidth;
 	viewHoriOrigin = 0U;
-	viewHeight = screenHeight;
+	viewHeight     = screenHeight;
+	viewVertOrigin = 0U;
+#else
+	// Other devices are generally never broken-by-design (at least not on that front ;))
+	viewWidth      = screenWidth;
+	viewHoriOrigin = 0U;
+	viewHeight     = screenHeight;
 	viewVertOrigin = 0U;
 #endif
 
@@ -3348,8 +3563,8 @@ static int
 	}
 #else
 	// Default font is IBM
-	glyphWidth = 8U;
-	glyphHeight = 8U;
+	glyphWidth         = 8U;
+	glyphHeight        = 8U;
 	fxpFont8xGetBitmap = &font8x8_get_bitmap;
 
 	if (fbink_cfg->fontname != IBM) {
@@ -3468,21 +3683,6 @@ static int
 	// Bake that into the viewport computations,
 	// we'll special-case the image codepath to ignore it when row is unspecified (i.e., 0) ;).
 	viewVertOrigin = (uint8_t)(viewVertOrigin + viewVertOffset);
-
-	// Get fixed screen information
-	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &fInfo)) {
-		PFWARN("Error reading fixed fb information: %m");
-		rv = ERRCODE(EXIT_FAILURE);
-		goto cleanup;
-	}
-	ELOG("Fixed fb info: ID is \"%s\", length of fb mem: %u bytes & line length: %u bytes",
-	     fInfo.id,
-	     fInfo.smem_len,
-	     fInfo.line_length);
-	// NOTE: On a reinit, we're trusting that smem_len will *NOT* have changed,
-	//       which thankfully appears to hold true on our target devices.
-	//       Otherwise, we'd probably have to compare the previous smem_len to the new, and to
-	//       mremap fbPtr if isFbMapped in case they differ (and the old smem_len != 0, which would indicate a first init).
 
 	// Pack the pen colors into the right pixel format...
 	if (update_pen_colors(fbink_cfg) != EXIT_SUCCESS) {
@@ -3957,7 +4157,7 @@ int
 
 // Much like rotate_coordinates, but for a mxcfb rectangle
 // c.f., adjust_coordinates @ drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c
-#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES) || defined(FBINK_FOR_POCKETBOOK)
 static void
     rotate_region_pickel(struct mxcfb_rect* restrict region)
 {
@@ -3969,7 +4169,9 @@ static void
 	region->width  = oregion.height;
 	region->height = oregion.width;
 }
+#endif    // FBINK_FOR_KOBO || FBINK_FOR_CERVANTES || FBINK_FOR_POCKETBOOK
 
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 static void
     rotate_region_boot(struct mxcfb_rect* restrict region)
 {
@@ -6440,6 +6642,55 @@ static uint32_t
 			waveform_mode = WAVEFORM_MODE_AUTO;
 			break;
 	}
+#elif defined(FBINK_FOR_POCKETBOOK)
+	// NOTE: PB has a few extra weird waveform modes, so, go with a dedicated branch...
+	switch (wfm_mode_index) {
+		case WFM_INIT:
+			waveform_mode = WAVEFORM_MODE_INIT;
+			break;
+		case WFM_AUTO:
+			waveform_mode = WAVEFORM_MODE_AUTO;
+			break;
+		case WFM_DU:
+			waveform_mode = WAVEFORM_MODE_DU;
+			break;
+		case WFM_GC16:
+			waveform_mode = WAVEFORM_MODE_GC16;
+			break;
+		case WFM_GC4:
+			waveform_mode = WAVEFORM_MODE_GC4;
+			break;
+		case WFM_A2:
+			waveform_mode = WAVEFORM_MODE_A2;
+			break;
+		case WFM_GL16:
+			waveform_mode = WAVEFORM_MODE_GL16;
+			break;
+		case WFM_A2IN:
+			waveform_mode = WAVEFORM_MODE_A2IN;
+			break;
+		case WFM_A2OUT:
+			waveform_mode = WAVEFORM_MODE_A2OUT;
+			break;
+		case WFM_DU4:
+			waveform_mode = WAVEFORM_MODE_DU4;
+			break;
+		case WFM_REAGL:
+			waveform_mode = WAVEFORM_MODE_REAGL;
+			break;
+		case WFM_REAGLD:
+			waveform_mode = WAVEFORM_MODE_REAGLD;
+			break;
+		case WFM_GC16HQ:
+			waveform_mode = WAVEFORM_MODE_GC16HQ;
+			break;
+		default:
+			LOG("Unknown (or unsupported) waveform mode '%s' @ index %hhu, defaulting to AUTO",
+			    wfm_to_string(wfm_mode_index),
+			    wfm_mode_index);
+			waveform_mode = WAVEFORM_MODE_AUTO;
+			break;
+	}
 #else
 	switch (wfm_mode_index) {
 		case WFM_INIT:
@@ -6649,6 +6900,43 @@ static const char*
 	}
 }
 #	endif    // FBINK_FOR_REMARKABLE
+
+#	ifdef FBINK_FOR_POCKETBOOK
+static const char*
+    pocketbook_wfm_to_string(uint32_t wfm_mode)
+{
+	switch (wfm_mode) {
+		case WAVEFORM_MODE_INIT:
+			return "INIT";
+		case WAVEFORM_MODE_DU:
+			return "DU";
+		case WAVEFORM_MODE_GC16:
+			return "GC16";
+		case WAVEFORM_MODE_GC4:
+			return "GC4";
+		case WAVEFORM_MODE_A2:
+			return "A2";
+		case WAVEFORM_MODE_GL16:
+			return "GL16";
+		case WAVEFORM_MODE_A2IN:
+			return "A2IN";
+		case WAVEFORM_MODE_A2OUT:
+			return "A2OUT";
+		case WAVEFORM_MODE_DU4:
+			return "DU4";
+		case WAVEFORM_MODE_REAGL:
+			return "REAGL";
+		case WAVEFORM_MODE_REAGLD:
+			return "REAGLD";
+		case WAVEFORM_MODE_GC16HQ:
+			return "GC16HQ";
+		case WAVEFORM_MODE_AUTO:
+			return "AUTO";
+		default:
+			return "Unknown";
+	}
+}
+#	endif    // FBINK_FOR_POCKETBOOK
 #endif            // !FBINK_FOR_LINUX
 
 // Convert our public HW_DITHER_INDEX_T values to an appropriate mxcfb dithering mode constant
@@ -6917,6 +7205,11 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
+
+#	ifdef FBINK_FOR_POCKETBOOK
+	// On PocketBook, fix the broken mess that the ioctls returns...
+	pocketbook_fix_fb_info();
+#	endif
 
 	// We want to flag each trigger independently
 	if (old_bpp != vInfo.bits_per_pixel) {
@@ -7850,6 +8143,9 @@ static int
 							coords.x = (unsigned short int) (i + x_off);
 							coords.y = (unsigned short int) (j + y_off);
 
+#	ifdef FBINK_FOR_POCKETBOOK
+							(*fxpRotateCoords)(&coords);
+#	endif
 							put_pixel_Gray8(&coords, &pixel);
 						} else if (img_px.color.a == 0) {
 							// Transparent! Keep fb as-is.
@@ -7862,6 +8158,10 @@ static int
 							// NOTE: We use the the pixel functions directly, to avoid the OOB checks,
 							//       because we know we're only processing on-screen pixels,
 							//       and we don't care about the rotation checks at this bpp :).
+#	ifdef FBINK_FOR_POCKETBOOK
+							// ... except on PB, where we *may* require rotation...
+							(*fxpRotateCoords)(&coords);
+#	endif
 							FBInkPixel bg_px;
 							get_pixel_Gray8(&coords, &bg_px);
 
@@ -7953,6 +8253,9 @@ static int
 						//       as well as unneeded rotation checks (can't happen at this bpp).
 						// NOTE: GCC appears to be smart enough to hoist that branch out of the loop ;).
 						if (!fb_is_legacy) {
+#	ifdef FBINK_FOR_POCKETBOOK
+							(*fxpRotateCoords)(&coords);
+#	endif
 							put_pixel_Gray8(&coords, &pixel);
 						} else {
 							put_pixel_Gray4(&coords, &pixel);

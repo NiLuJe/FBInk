@@ -53,6 +53,7 @@ typedef struct
 	NTX_ROTA_INDEX_T   ntxRotaQuirk;
 	bool               canRotate;
 	bool               canHWInvert;
+	bool               isPB3BytesPerPixel;
 	bool               skipId;
 } FBInkDeviceQuirks;
 
