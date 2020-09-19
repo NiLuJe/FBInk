@@ -3335,7 +3335,7 @@ static int
 		viewVertOrigin = 0U;
 	}
 #else
-	// Kindle devices are generally never broken-by-design (at least not on that front ;))
+	// Other devices are generally never broken-by-design (at least not on that front ;))
 	viewWidth = screenWidth;
 	viewHoriOrigin = 0U;
 	viewHeight = screenHeight;
