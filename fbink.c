@@ -3058,6 +3058,7 @@ static void
 static void
     pocketbook_fix_fb_info(void)
 {
+	ELOG("Virtual resolution: %ux%u", vInfo.xres_virtual, vInfo.yres_virtual);
 	// Not duplicating all the explanations here, c.f., the KOReader snippet linked earlier ;).
 	if (fInfo.id[0] == '\0') {
 		uint32_t xres_virtual = vInfo.xres_virtual;
