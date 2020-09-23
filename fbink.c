@@ -3371,16 +3371,18 @@ static int
 	//       which is essentially how this is handled in KOReader (via isAlwaysPortrait).
 	//       Obviously, the broadness of this check severely limits the possibility of actually handling hardware rotations
 	//       sanely, but for now, we only want to deal with the default rotation properly...
-	if (vInfo.xres > vInfo.yres) {
-		screenWidth     = vInfo.yres;
-		screenHeight    = vInfo.xres;
-		fxpRotateCoords = &rotate_coordinates_pickel;
-		fxpRotateRegion = &rotate_region_pickel;
-		ELOG("Enabled PocketBook rotation quirks (%ux%u -> %ux%u)",
-		     vInfo.xres,
-		     vInfo.yres,
-		     screenWidth,
-		     screenHeight);
+	if (!getenv("FBINK_NO_SW_ROTA")) {
+		if (vInfo.xres > vInfo.yres) {
+			screenWidth     = vInfo.yres;
+			screenHeight    = vInfo.xres;
+			fxpRotateCoords = &rotate_coordinates_pickel;
+			fxpRotateRegion = &rotate_region_pickel;
+			ELOG("Enabled PocketBook rotation quirks (%ux%u -> %ux%u)",
+			     vInfo.xres,
+			     vInfo.yres,
+			     screenWidth,
+			     screenHeight);
+		}
 	}
 
 	viewWidth      = screenWidth;
