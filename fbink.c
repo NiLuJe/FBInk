@@ -3125,7 +3125,7 @@ static void
 
 				// Trust line_length to compute the amount of *pixels* in a scanline, visible or not,
 				// because that's what we use xres_virtual for throughout the code...
-				vInfo.xres_virtual = fInfo.line_length * 8U / vInfo.bits_per_pixel;
+				vInfo.xres_virtual = (fInfo.line_length << 3U) / vInfo.bits_per_pixel;
 				ELOG("xres_virtual => %u", vInfo.xres_virtual);
 			}
 		}
