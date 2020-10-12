@@ -4,16 +4,18 @@ Language:        Cpp
 AccessModifierOffset: -4
 AlignAfterOpenBracket: Align
 AlignConsecutiveAssignments: true
+AlignConsecutiveBitFields: true
 AlignConsecutiveDeclarations: true
 AlignConsecutiveMacros: true
 AlignEscapedNewlines: Right
-AlignOperands:   true
+AlignOperands: Align
 AlignTrailingComments: true
 AllowAllArgumentsOnNextLine: true
 AllowAllConstructorInitializersOnNextLine: true
 AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortBlocksOnASingleLine: Empty
 AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLambdasOnASingleLine: Empty
@@ -23,7 +25,6 @@ AlwaysBreakAfterReturnType: AllDefinitions
 AlwaysBreakBeforeMultilineStrings: true
 AlwaysBreakTemplateDeclarations: true
 BinPackArguments: false
-#InsertTrailingCommas: None
 BinPackParameters: false
 BraceWrapping:
   AfterCaseLabel:  false
@@ -38,7 +39,8 @@ BraceWrapping:
   AfterExternBlock: false
   BeforeCatch:     false
   BeforeElse:      false
-  #BeforeLambdaBody: false
+  BeforeLambdaBody: false
+  BeforeWhile: false
   IndentBraces:    false
   SplitEmptyFunction: true
   SplitEmptyRecord: false
@@ -81,12 +83,14 @@ IncludeCategories:
     SortPriority:    0
 IncludeIsMainRegex: '(_test)?$'
 IncludeIsMainSourceRegex: ''
-#IndentCaseBlocks: false
+IndentCaseBlocks: false
 IndentCaseLabels: true
+IndentExternBlock: NoIndent
 IndentGotoLabels: false
 IndentPPDirectives: AfterHash
 IndentWidth:     8
 IndentWrappedFunctionNames: true
+InsertTrailingCommas: None
 #JavaImportGroups: ['com.example', 'com', 'org']
 JavaScriptQuotes: Double
 JavaScriptWrapImports: true
@@ -98,7 +102,7 @@ NamespaceIndentation: All
 #NamespaceMacros: ['TESTSUITE']
 ObjCBinPackProtocolList: Auto
 ObjCBlockIndentWidth: 8
-#ObjCBreakBeforeNestedBlockParam: true
+ObjCBreakBeforeNestedBlockParam: true
 ObjCSpaceAfterProperty: true
 ObjCSpaceBeforeProtocolList: false
 PenaltyBreakAssignment: 2
@@ -141,5 +145,6 @@ TabWidth:        8
 TypenameMacros: ['STACK_OF', 'LIST_ENTRY']
 UseCRLF:         false
 UseTab:          ForContinuationAndIndentation
+#WhitespaceSensitiveMacros: ['STRINGIZE', 'PP_STRINGIZE']
 ...
 
