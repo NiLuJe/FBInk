@@ -55,8 +55,8 @@ typedef struct __attribute__((__packed__))
 {
 #			pragma GCC diagnostic push
 #			pragma GCC diagnostic ignored "-Wattributes"
-	char    magic[10] __attribute__((nonstring));     // HWCONFIG_MAGIC (i.e., "HW CONFIG ")
-	char    version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.3" on Mk.7
+	char magic[10] __attribute__((nonstring));     // HWCONFIG_MAGIC (i.e., "HW CONFIG ")
+	char version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.3" on Mk.7
 #			pragma GCC diagnostic pop
 	uint8_t len;    // Length (in bytes) of the full payload, header excluded (up to 72 on v3.3)
 } NTXHWConfig;
@@ -71,7 +71,7 @@ typedef struct __attribute__((__packed__))
 // NOTE: This one tells us a bit about the potential rotation trickeries on some models (ntxRotaQuirk)...
 #			define KOBO_HWCFG_DisplayBusWidth   35
 #		endif    // FBINK_FOR_CERVANTES
-#	endif            // FBINK_FOR_KOBO || FBINK_FOR_CERVANTES
+#	endif    // FBINK_FOR_KOBO || FBINK_FOR_CERVANTES
 
 #	if defined(FBINK_FOR_KINDLE)
 #		define KINDLE_SERIAL_NO_LENGTH 16

@@ -842,7 +842,7 @@ static void
 	} else {
 #		pragma GCC diagnostic push
 #		pragma GCC diagnostic ignored "-Wmissing-braces"
-		NTXHWConfig             config      = { 0 };
+		NTXHWConfig config = { 0 };
 #		pragma GCC diagnostic pop
 		unsigned char* restrict payload     = NULL;
 		uint64_t                storagesize = 0U;

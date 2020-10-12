@@ -65,14 +65,14 @@ static int
 	};
 
 	struct mxcfb_update_data_v1_ntx update = {
-		.update_region = region,
-		.waveform_mode = waveform_mode,
-		.update_mode   = update_mode,
-		.update_marker = marker,
-		.temp          = TEMP_USE_AMBIENT,
-		.flags         = (waveform_mode == WAVEFORM_MODE_REAGLD)
-			     ? EPDC_FLAG_USE_AAD
-			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
+		.update_region   = region,
+		.waveform_mode   = waveform_mode,
+		.update_mode     = update_mode,
+		.update_marker   = marker,
+		.temp            = TEMP_USE_AMBIENT,
+		.flags           = (waveform_mode == WAVEFORM_MODE_REAGLD) ? EPDC_FLAG_USE_AAD
+				   : (waveform_mode == WAVEFORM_MODE_A2)   ? EPDC_FLAG_FORCE_MONOCHROME
+									   : 0U,
 		.alt_buffer_data = alt,
 	};
 

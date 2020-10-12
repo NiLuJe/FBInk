@@ -154,13 +154,13 @@ static inline __attribute__((always_inline)) void
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	// NOTE: Technically legitimate warning. In practice, we always pass RGB32 pixels in 24bpp codepaths.
-#pragma GCC diagnostic   push
-#pragma GCC diagnostic   ignored "-Wunknown-pragmas"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunknown-warning-option"
-#pragma GCC diagnostic   ignored "-Wmaybe-uninitialized"
-        *((unsigned char*) (fbPtr + pix_offset))      = px->bgra.color.b;
-        *((unsigned char*) (fbPtr + pix_offset + 1U)) = px->bgra.color.g;
-        *((unsigned char*) (fbPtr + pix_offset + 2U)) = px->bgra.color.r;
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+	*((unsigned char*) (fbPtr + pix_offset))      = px->bgra.color.b;
+	*((unsigned char*) (fbPtr + pix_offset + 1U)) = px->bgra.color.g;
+	*((unsigned char*) (fbPtr + pix_offset + 2U)) = px->bgra.color.r;
 #pragma GCC diagnostic pop
 }
 
@@ -357,7 +357,7 @@ static void
 	coords->y = ry;
 }
 #	endif    // FBINK_WITH_BUTTON_SCAN
-#endif            // FBINK_FOR_KOBO || FBINK_FOR_CERVANTES
+#endif    // FBINK_FOR_KOBO || FBINK_FOR_CERVANTES
 
 static void
     rotate_coordinates_nop(FBInkCoordinates* restrict coords __attribute__((unused)))
@@ -421,11 +421,11 @@ static inline __attribute__((always_inline)) void
 			// Yep :(
 			FBInkPixel packed_px;
 			// NOTE: Technically legitimate warning. In practice, we always pass RGB32 pixels in 16bpp codepaths.
-#pragma GCC diagnostic   push
-#pragma GCC diagnostic   ignored "-Wunknown-pragmas"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunknown-warning-option"
-#pragma GCC diagnostic   ignored "-Wmaybe-uninitialized"
-                        packed_px.rgb565 = pack_rgb565(px->bgra.color.r, px->bgra.color.g, px->bgra.color.b);
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+			packed_px.rgb565 = pack_rgb565(px->bgra.color.r, px->bgra.color.g, px->bgra.color.b);
 #pragma GCC diagnostic pop
 			put_pixel_RGB565(&coords, &packed_px);
 		}
@@ -954,12 +954,12 @@ static void
 	if (vInfo.bits_per_pixel == 16) {
 		// NOTE: Besides, we can't use a straight memset, since we need pixels to be properly packed for RGB565...
 		//       Se we whip up a quick memset16, like fill_rect() does.
-		const uint16_t px       = pack_rgb565(v, v, v);
+		const uint16_t px = pack_rgb565(v, v, v);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
-		uint16_t*      p        = (uint16_t*) fbPtr;
+		uint16_t* p = (uint16_t*) fbPtr;
 #	pragma GCC diagnostic pop
-		size_t         px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
+		size_t px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
 		while (px_count--) {
 			*p++ = px;
 		};
@@ -1792,10 +1792,10 @@ static int
 		.hist_bw_waveform_mode = (waveform_mode == WAVEFORM_MODE_REAGL) ? WAVEFORM_MODE_REAGL : WAVEFORM_MODE_DU,
 		.hist_gray_waveform_mode =
 		    (waveform_mode == WAVEFORM_MODE_REAGL) ? WAVEFORM_MODE_REAGL : WAVEFORM_MODE_GC16_FAST,
-		.temp  = TEMP_USE_AUTO,
-		.flags = (waveform_mode == WAVEFORM_MODE_REAGLD)
-			     ? EPDC_FLAG_USE_REAGLD
-			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
+		.temp            = TEMP_USE_AUTO,
+		.flags           = (waveform_mode == WAVEFORM_MODE_REAGLD) ? EPDC_FLAG_USE_REAGLD
+				   : (waveform_mode == WAVEFORM_MODE_A2)   ? EPDC_FLAG_FORCE_MONOCHROME
+									   : 0U,
 		.alt_buffer_data = { 0U },
 	};
 
@@ -1912,21 +1912,19 @@ static int
 	}
 
 	struct mxcfb_update_data_zelda update = {
-		.update_region = region,
-		.waveform_mode = waveform_mode,
-		.update_mode   = update_mode,
-		.update_marker = marker,
-		.temp          = TEMP_USE_AMBIENT,
-		.flags         = (waveform_mode == WAVEFORM_MODE_ZELDA_GLD16)
-			     ? EPDC_FLAG_USE_ZELDA_REGAL
-			     : (waveform_mode == WAVEFORM_MODE_ZELDA_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
-		.dither_mode = dithering_mode,
-		.quant_bit =
-		    (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)
-			? 0
-			: (waveform_mode == WAVEFORM_MODE_ZELDA_A2 || waveform_mode == WAVEFORM_MODE_DU)
-			      ? 1
-			      : (waveform_mode == WAVEFORM_MODE_ZELDA_GL4 || waveform_mode == WAVEFORM_MODE_DU4) ? 3 : 7,
+		.update_region   = region,
+		.waveform_mode   = waveform_mode,
+		.update_mode     = update_mode,
+		.update_marker   = marker,
+		.temp            = TEMP_USE_AMBIENT,
+		.flags           = (waveform_mode == WAVEFORM_MODE_ZELDA_GLD16) ? EPDC_FLAG_USE_ZELDA_REGAL
+				   : (waveform_mode == WAVEFORM_MODE_ZELDA_A2)  ? EPDC_FLAG_FORCE_MONOCHROME
+										: 0U,
+		.dither_mode     = dithering_mode,
+		.quant_bit       = (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)                            ? 0
+				   : (waveform_mode == WAVEFORM_MODE_ZELDA_A2 || waveform_mode == WAVEFORM_MODE_DU)   ? 1
+				   : (waveform_mode == WAVEFORM_MODE_ZELDA_GL4 || waveform_mode == WAVEFORM_MODE_DU4) ? 3
+														      : 7,
 		.alt_buffer_data = { 0U },
 		.hist_bw_waveform_mode =
 		    (waveform_mode == WAVEFORM_MODE_ZELDA_REAGL) ? WAVEFORM_MODE_ZELDA_REAGL : WAVEFORM_MODE_DU,
@@ -2006,21 +2004,19 @@ static int
 
 	// NOTE: Different mcfb_update_data struct (no ts_* debug fields), but otherwise, identical to the zelda one!
 	struct mxcfb_update_data_rex update = {
-		.update_region = region,
-		.waveform_mode = waveform_mode,
-		.update_mode   = update_mode,
-		.update_marker = marker,
-		.temp          = TEMP_USE_AMBIENT,
-		.flags         = (waveform_mode == WAVEFORM_MODE_ZELDA_GLD16)
-			     ? EPDC_FLAG_USE_ZELDA_REGAL
-			     : (waveform_mode == WAVEFORM_MODE_ZELDA_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
-		.dither_mode = dithering_mode,
-		.quant_bit =
-		    (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)
-			? 0
-			: (waveform_mode == WAVEFORM_MODE_ZELDA_A2 || waveform_mode == WAVEFORM_MODE_DU)
-			      ? 1
-			      : (waveform_mode == WAVEFORM_MODE_ZELDA_GL4 || waveform_mode == WAVEFORM_MODE_DU4) ? 3 : 7,
+		.update_region   = region,
+		.waveform_mode   = waveform_mode,
+		.update_mode     = update_mode,
+		.update_marker   = marker,
+		.temp            = TEMP_USE_AMBIENT,
+		.flags           = (waveform_mode == WAVEFORM_MODE_ZELDA_GLD16) ? EPDC_FLAG_USE_ZELDA_REGAL
+				   : (waveform_mode == WAVEFORM_MODE_ZELDA_A2)  ? EPDC_FLAG_FORCE_MONOCHROME
+										: 0U,
+		.dither_mode     = dithering_mode,
+		.quant_bit       = (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)                            ? 0
+				   : (waveform_mode == WAVEFORM_MODE_ZELDA_A2 || waveform_mode == WAVEFORM_MODE_DU)   ? 1
+				   : (waveform_mode == WAVEFORM_MODE_ZELDA_GL4 || waveform_mode == WAVEFORM_MODE_DU4) ? 3
+														      : 7,
 		.alt_buffer_data = { 0U },
 		.hist_bw_waveform_mode =
 		    (waveform_mode == WAVEFORM_MODE_ZELDA_REAGL) ? WAVEFORM_MODE_ZELDA_REAGL : WAVEFORM_MODE_DU,
@@ -2093,9 +2089,9 @@ static int
 		.update_mode = update_mode,
 		.update_marker = marker,
 		.temp = TEMP_USE_AMBIENT,
-		.flags = (waveform_mode == WAVEFORM_MODE_REAGLD)
-			     ? EPDC_FLAG_USE_AAD
-			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
+		.flags = (waveform_mode == WAVEFORM_MODE_REAGLD) ? EPDC_FLAG_USE_AAD
+			 : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME
+							       : 0U,
 		.alt_buffer_data = { 0U },
 	};
 
@@ -2254,11 +2250,9 @@ static int
 					    .update_mode   = update_mode,
 					    .update_marker = marker,
 					    .temp          = (waveform_mode == WAVEFORM_MODE_DU) ? 24 : TEMP_USE_AMBIENT,
-					    .flags         = (waveform_mode == WAVEFORM_MODE_REAGLD)
-							 ? EPDC_FLAG_USE_AAD
-							 : (waveform_mode == WAVEFORM_MODE_A2)
-							       ? EPDC_FLAG_FORCE_MONOCHROME
-							       : 0U,
+					    .flags         = (waveform_mode == WAVEFORM_MODE_REAGLD) ? EPDC_FLAG_USE_AAD
+							     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME
+												   : 0U,
 					    .alt_buffer_data = { 0U } };
 
 	if (is_nightmode && deviceQuirks.canHWInvert) {
@@ -2335,14 +2329,14 @@ static int
 		 uint32_t                marker)
 {
 	struct mxcfb_update_data_v1_ntx update = {
-		.update_region = region,
-		.waveform_mode = waveform_mode,
-		.update_mode   = update_mode,
-		.update_marker = marker,
-		.temp          = TEMP_USE_AMBIENT,
-		.flags         = (waveform_mode == WAVEFORM_MODE_REAGLD)
-			     ? EPDC_FLAG_USE_AAD
-			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
+		.update_region   = region,
+		.waveform_mode   = waveform_mode,
+		.update_mode     = update_mode,
+		.update_marker   = marker,
+		.temp            = TEMP_USE_AMBIENT,
+		.flags           = (waveform_mode == WAVEFORM_MODE_REAGLD) ? EPDC_FLAG_USE_AAD
+				   : (waveform_mode == WAVEFORM_MODE_A2)   ? EPDC_FLAG_FORCE_MONOCHROME
+									   : 0U,
 		.alt_buffer_data = { 0U },
 	};
 
@@ -2442,20 +2436,19 @@ static int
 	}
 
 	struct mxcfb_update_data_v2 update = {
-		.update_region = region,
-		.waveform_mode = waveform_mode,
-		.update_mode   = update_mode,
-		.update_marker = marker,
-		.temp          = TEMP_USE_AMBIENT,
-		.flags         = (waveform_mode == WAVEFORM_MODE_GLD16)
-			     ? EPDC_FLAG_USE_REGAL
-			     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
-		.dither_mode = dithering_mode,
-		.quant_bit   = (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)
-				 ? 0
-				 : (waveform_mode == WAVEFORM_MODE_A2 || waveform_mode == WAVEFORM_MODE_DU)
-				       ? 1
-				       : (waveform_mode == WAVEFORM_MODE_GC4) ? 3 : 7,
+		.update_region   = region,
+		.waveform_mode   = waveform_mode,
+		.update_mode     = update_mode,
+		.update_marker   = marker,
+		.temp            = TEMP_USE_AMBIENT,
+		.flags           = (waveform_mode == WAVEFORM_MODE_GLD16) ? EPDC_FLAG_USE_REGAL
+				   : (waveform_mode == WAVEFORM_MODE_A2)  ? EPDC_FLAG_FORCE_MONOCHROME
+									  : 0U,
+		.dither_mode     = dithering_mode,
+		.quant_bit       = (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)                    ? 0
+				   : (waveform_mode == WAVEFORM_MODE_A2 || waveform_mode == WAVEFORM_MODE_DU) ? 1
+				   : (waveform_mode == WAVEFORM_MODE_GC4)                                     ? 3
+													      : 7,
 		.alt_buffer_data = { 0U },
 	};
 
@@ -2530,7 +2523,7 @@ static int
 	return EXIT_SUCCESS;
 }
 #	endif    // FBINK_FOR_KINDLE
-#endif            // !FBINK_FOR_LINUX
+#endif    // !FBINK_FOR_LINUX
 
 // And finally, dispatch the right refresh request for our HW...
 #ifdef FBINK_FOR_LINUX
@@ -2636,7 +2629,7 @@ static int
 	}
 #	endif    // FBINK_FOR_KINDLE
 }
-#endif            // FBINK_FOR_LINUX
+#endif    // FBINK_FOR_LINUX
 
 // Same thing for WAIT_FOR_UPDATE_SUBMISSION requests...
 #ifndef FBINK_FOR_LINUX
@@ -6944,7 +6937,7 @@ static const char*
 	}
 }
 #	endif    // FBINK_FOR_POCKETBOOK
-#endif            // !FBINK_FOR_LINUX
+#endif    // !FBINK_FOR_LINUX
 
 // Convert our public HW_DITHER_INDEX_T values to an appropriate mxcfb dithering mode constant
 static int
@@ -9457,7 +9450,7 @@ int
 			const unsigned short int x_skip = dump->clip.left > dump->area.left
 							      ? (unsigned short int) (dump->clip.left - dump->area.left)
 							      : 0U;
-			const unsigned short int x = (unsigned short int) (dump->area.left + x_skip);
+			const unsigned short int x      = (unsigned short int) (dump->area.left + x_skip);
 			const unsigned short int y_skip =
 			    dump->clip.top > dump->area.top ? (unsigned short int) (dump->clip.top - dump->area.top) : 0U;
 			const unsigned short int y = (unsigned short int) (dump->area.top + y_skip);

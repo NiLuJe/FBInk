@@ -149,10 +149,10 @@ static void print_lastrect(void);
 	_Generic((x), _Bool                                                                                              \
 		 : false, char                                                                                           \
 		 : CHAR_MIN, signed char                                                                                 \
-		 : SCHAR_MIN, unsigned char : 0U, short int                                                              \
+		 : SCHAR_MIN, unsigned char     : 0U, short int                                                          \
 		 : SHRT_MIN, unsigned short int : 0U, int                                                                \
-		 : INT_MIN, unsigned int : 0U, long int                                                                  \
-		 : LONG_MIN, unsigned long int : 0U, float                                                               \
+		 : INT_MIN, unsigned int        : 0U, long int                                                           \
+		 : LONG_MIN, unsigned long int  : 0U, float                                                              \
 		 : -HUGE_VALF, default                                                                                   \
 		 : -42)
 
