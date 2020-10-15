@@ -1123,13 +1123,6 @@ static void
 		// Flawfinder: ignore
 		strncpy(deviceQuirks.deviceCodename, "Unknown", sizeof(deviceQuirks.deviceCodename) - 1U);
 	}
-
-	// Check if the device is running on an AllWinner SoC instead of an NXP one...
-	uint32_t busy = 0U;
-	// Should fail w/ EINVAL on NXP
-	if (!(ioctl(fbfd, EPDC_GET_UPDATE_STATE, &busy) == -1 && errno == EINVAL)) {
-		ELOG("Device appears to be running on an AW B288 SoC!")
-	}
 }
 #	endif    // FBINK_FOR_KINDLE
 
