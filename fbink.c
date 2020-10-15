@@ -3173,7 +3173,7 @@ static int
 		uint32_t aw_busy = 0U;
 		// Should fail w/ EINVAL on NXP
 		if (!(ioctl(fbfd, EPDC_GET_UPDATE_STATE, &aw_busy) == -1 && errno == EINVAL)) {
-			ELOG("Device appears to be running on an AW B288 SoC!")
+			ELOG("Device appears to be running on an AW B288 SoC!");
 		}
 #	endif
 #endif
