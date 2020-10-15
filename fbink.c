@@ -3171,8 +3171,8 @@ static int
 #	elif defined(FBINK_FOR_POCKETBOOK)
 		// Check if the device is running on an AllWinner SoC instead of an NXP one...
 		uint32_t aw_busy = 0U;
-		// Should fail w/ EINVAL on NXP
-		if (!(ioctl(fbfd, EPDC_GET_UPDATE_STATE, &aw_busy) == -1 && errno == EINVAL)) {
+		// Should fail w/ ENOTTY on NXP
+		if (!(ioctl(fbfd, EPDC_GET_UPDATE_STATE, &aw_busy) == -1 && errno == ENOTTY)) {
 			ELOG("Device appears to be running on an AW B288 SoC!");
 		}
 #	endif
