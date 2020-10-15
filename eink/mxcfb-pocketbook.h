@@ -107,13 +107,14 @@ struct mxcfb_rect {
 #define EPDC_WFTYPE_GC16			2
 #define EPDC_WFTYPE_GC4				3
 #define EPDC_WFTYPE_A2				4
-#define EPDC_WFTYPE_GL16			5
+#define EPDC_WFTYPE_GL16			5  // On B288 this is very fast, but flickers, interferes with HWROT.
 #define EPDC_WFTYPE_A2IN			6
 #define EPDC_WFTYPE_A2OUT			7
-#define EPDC_WFTYPE_DU4				8
-#define EPDC_WFTYPE_AA				9
-#define EPDC_WFTYPE_AAD				10
-#define EPDC_WFTYPE_GC16HQ			15
+#define EPDC_WFTYPE_DU4				8  // !B888
+#define EPDC_WFTYPE_AA				9  // !B288
+#define EPDC_WFTYPE_AAD				10 // !B288
+#define EPDC_WFTYPE_GS16			14  // B288 only. Should sit between GC16 and GL16.
+#define EPDC_WFTYPE_GC16HQ			15  // !B288
 // NOTE: Alias that to our usual constant names...
 #define WAVEFORM_MODE_INIT			EPDC_WFTYPE_INIT
 #define WAVEFORM_MODE_DU			EPDC_WFTYPE_DU
@@ -126,6 +127,7 @@ struct mxcfb_rect {
 #define WAVEFORM_MODE_DU4			EPDC_WFTYPE_DU4
 #define WAVEFORM_MODE_REAGL			EPDC_WFTYPE_AA
 #define WAVEFORM_MODE_REAGLD			EPDC_WFTYPE_AAD
+#define WAVEFORM_MODE_GS16			EPDC_WFTYPE_GS16
 #define WAVEFORM_MODE_GC16HQ			EPDC_WFTYPE_GC16HQ
 
 #define WAVEFORM_MODE_AUTO			257
@@ -245,6 +247,9 @@ struct mxcfb_csc_matrix {
 //       The workaround is to actually setup a mxcfb_update_marker_data struct but use MXCFB_WAIT_FOR_UPDATE_COMPLETE_PB.
 //       >_<".
 //       c.f., https://github.com/koreader/koreader-base/pull/1188 & https://github.com/koreader/koreader/pull/6669
+
+// NOTE: This only probes whether the EPDC is busy, we use this to detect B288.
+#define EPDC_GET_UPDATE_STATE		_IOR('F', 0x55, __u32)
 
 #define MXCFB_SET_PWRDOWN_DELAY		_IOW('F', 0x30, int32_t)
 #define MXCFB_GET_PWRDOWN_DELAY		_IOR('F', 0x31, int32_t)

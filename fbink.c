@@ -6684,6 +6684,9 @@ static uint32_t
 		case WFM_GC16HQ:
 			waveform_mode = WAVEFORM_MODE_GC16HQ;
 			break;
+		case WFM_GS16:
+			waveform_mode = WAVEFORM_MODE_GS16;
+			break;
 		default:
 			LOG("Unknown (or unsupported) waveform mode '%s' @ index %hhu, defaulting to AUTO",
 			    wfm_to_string(wfm_mode_index),
@@ -6930,6 +6933,8 @@ static const char*
 			return "REAGLD";
 		case WAVEFORM_MODE_GC16HQ:
 			return "GC16HQ";
+		case WAVEFORM_MODE_GS16:
+			return "GS16";
 		case WAVEFORM_MODE_AUTO:
 			return "AUTO";
 		default:
