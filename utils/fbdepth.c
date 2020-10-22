@@ -59,15 +59,17 @@ static uint8_t
 		// NOTE: This is for the Forma, which only inverts CW & CCW (i.e., odd numbers)...
 		if ((native_portrait & 0x01) == 1) {
 			native_portrait ^= 2;
+		}
+		if ((rotate & 0x01) == 1) {
 			rotate ^= 2;
 		}
 	}
 
 	// Now that we know what the canonical Portrait should look like in native-speak, we should be able to compute the rest...
-	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_SANE || deviceQuirks.ntxRotaQuirk == NTX_ROTA_STRAIGHT) {
-		rota = (rotate - native_portrait) & 3;
-	} else {
+	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
 		rota = (native_portrait - rotate) & 3;
+	} else {
+		rota = (rotate - native_portrait) & 3;
 	}
 
 	return rota;
@@ -98,16 +100,22 @@ static uint8_t
 		// NOTE: This is for the Forma, which only inverts CW & CCW (i.e., odd numbers)...
 		if ((native_portrait & 0x01) == 1) {
 			native_portrait ^= 2;
-			rotate ^= 2;
 		}
 	}
 
 	// Now that we know what the canonical Portrait should look like in native-speak, we should be able to compute the rest...
-	// NOTE: As far as NTX_ROTA_ALL_INVERTED & NTX_ROTA_ODD_INVERTED are concerned, native->canonical == canonical->native ;).
-	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_SANE || deviceQuirks.ntxRotaQuirk == NTX_ROTA_STRAIGHT) {
-		rota = (native_portrait + rotate) & 3;
-	} else {
+	// NOTE: As far as NTX_ROTA_ALL_INVERTED is concerned, native->canonical == canonical->native ;).
+	//       No, don't ask me to explain why: I don't know. Remember, I'm severely maths-impaired.
+	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
 		rota = (native_portrait - rotate) & 3;
+	} else {
+		rota = (native_portrait + rotate) & 3;
+	}
+
+	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ODD_INVERTED) {
+		if ((rota & 0x01) == 1) {
+			rota ^= 2;
+		}
 	}
 
 	return rota;
