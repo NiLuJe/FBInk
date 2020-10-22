@@ -333,15 +333,15 @@ static bool
 			// NOTE: This should cover the H2O and the few other devices suffering from the same quirk...
 			vInfo.rotate ^= 2;
 			LOG("Setting rotate to %u (%s) to account for kernel rotation quirks",
-			vInfo.rotate,
-			fb_rotate_to_string(vInfo.rotate));
+			    vInfo.rotate,
+			    fb_rotate_to_string(vInfo.rotate));
 		} else if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ODD_INVERTED) {
 			// NOTE: This is for the Forma, which only inverts CW & CCW (i.e., odd numbers)...
 			if ((vInfo.rotate & 0x01) == 1) {
 				vInfo.rotate ^= 2;
 				LOG("Setting rotate to %u (%s) to account for kernel rotation quirks",
-				vInfo.rotate,
-				fb_rotate_to_string(vInfo.rotate));
+				    vInfo.rotate,
+				    fb_rotate_to_string(vInfo.rotate));
 			}
 		}
 	}
@@ -469,17 +469,17 @@ int
 					      { "nightmode", required_argument, NULL, 'H' },
 					      { NULL, 0, NULL, 0 } };
 
-	uint32_t req_bpp     = 0U;
-	int8_t   req_rota    = 42;
-	int8_t   want_nm     = 42;
-	bool     errfnd      = false;
-	bool     print_bpp   = false;
-	bool     return_bpp  = false;
-	bool     print_rota  = false;
-	bool     return_rota = false;
+	uint32_t req_bpp          = 0U;
+	int8_t   req_rota         = 42;
+	int8_t   want_nm          = 42;
+	bool     errfnd           = false;
+	bool     print_bpp        = false;
+	bool     return_bpp       = false;
+	bool     print_rota       = false;
+	bool     return_rota      = false;
 	bool     print_canonical  = false;
 	bool     return_canonical = false;
-	bool     canonical_rota = false;
+	bool     canonical_rota   = false;
 
 	while ((opt = getopt_long(argc, argv, "d:hvqgGr:R:oOcCH:", opts, &opt_index)) != -1) {
 		switch (opt) {
@@ -782,8 +782,10 @@ int
 #else
 		// If the requested rota was canonical, translate it to a native one *now*
 		if (canonical_rota) {
-			LOG("\nRequested canonical rota %hhd translates to %hhu for this device", req_rota, kobo_rotation_conversion(req_rota));
-			req_rota = kobo_rotation_conversion(req_rota);
+			LOG("\nRequested canonical rota %hhd translates to %hhu for this device",
+			    req_rota,
+			    kobo_rotation_conversion((uint32_t) req_rota));
+			req_rota = (int8_t) kobo_rotation_conversion((uint32_t) req_rota);
 		}
 		if (vInfo.rotate == (uint32_t) req_rota) {
 			LOG("\nCurrent rotation is already %hhd!", req_rota);
