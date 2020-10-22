@@ -850,6 +850,7 @@ int
 			}
 		}
 #else
+#	if defined(FBINK_FOR_KOBO)
 		// If the requested rota was canonical, translate it to a native one *now*
 		if (canonical_rota) {
 			LOG("\nRequested canonical rota %hhd translates to %hhu for this device",
@@ -857,6 +858,7 @@ int
 			    kobo_canonical_to_native((uint32_t) req_rota));
 			req_rota = (int8_t) kobo_canonical_to_native((uint32_t) req_rota);
 		}
+#	endif
 		if (vInfo.rotate == (uint32_t) req_rota) {
 			LOG("\nCurrent rotation is already %hhd!", req_rota);
 			// No change needed as far as rotation is concerned...
