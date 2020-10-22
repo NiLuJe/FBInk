@@ -51,6 +51,7 @@ static uint8_t
 	}
 
 	// Then, if the kernel happens to mangle rotations, we need to account for it, for *both* parties...
+	// In this direction, the second party is the input (native) rotation.
 	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
 		// NOTE: This should cover the H2O and the few other devices suffering from the same quirk...
 		native_portrait ^= 2;
@@ -95,6 +96,7 @@ static uint8_t
 	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
 		// NOTE: This should cover the H2O and the few other devices suffering from the same quirk...
 		native_portrait ^= 2;
+		// Here, too, because... I don't know, but it works ;p.
 		rotate ^= 2;
 	} else if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ODD_INVERTED) {
 		// NOTE: This is for the Forma, which only inverts CW & CCW (i.e., odd numbers)...
@@ -112,6 +114,7 @@ static uint8_t
 		rota = (native_portrait + rotate) & 3;
 	}
 
+	// As mentioned earlier, we have to handle *both* parties, and in this direction, that's the final result.
 	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ODD_INVERTED) {
 		if ((rota & 0x01) == 1) {
 			rota ^= 2;
