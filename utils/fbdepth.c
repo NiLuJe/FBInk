@@ -593,6 +593,7 @@ int
 				}
 				break;
 			case 'R':
+#if defined(FBINK_FOR_KOBO)
 				if (strcasecmp(optarg, "UR") == 0 || strcasecmp(optarg, "0") == 0) {
 					req_rota = FB_ROTATE_UR;
 				} else if (strcasecmp(optarg, "CW") == 0 || strcasecmp(optarg, "1") == 0) {
@@ -606,6 +607,10 @@ int
 					errfnd = true;
 				}
 				canonical_rota = true;
+#else
+				fprintf(stderr, "This option (-R, --canonicalrota) is not supported on your device!\n");
+				errfnd = true;
+#endif
 				break;
 			case 'o':
 				print_rota = true;
@@ -614,10 +619,22 @@ int
 				return_rota = true;
 				break;
 			case 'c':
+#if defined(FBINK_FOR_KOBO)
 				print_canonical = true;
+#else
+				fprintf(stderr,
+					"This option (-c, --getcanonicalrota) is not supported on your device!\n");
+				errfnd = true;
+#endif
 				break;
 			case 'C':
+#if defined(FBINK_FOR_KOBO)
 				return_canonical = true;
+#else
+				fprintf(stderr,
+					"This option (-C, --getcanonicalrotacode) is not supported on your device!\n");
+				errfnd = true;
+#endif
 				break;
 			case 'H':
 				if (strtotristate(optarg, &want_nm) < 0) {
