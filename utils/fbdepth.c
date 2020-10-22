@@ -101,8 +101,8 @@ static void
 	    "\t-o, --getrota\t\t\tJust output the current rotation to stdout.\n"
 	    "\t-O, --getrotacode\t\tJust exit with the current rotation as exit code.\n"
 #if defined(FBINK_FOR_KOBO)
-	    "\t-o, --getcanonicalrota\t\t\tJust output the current rotation (converted to its canonical representation) to stdout.\n"
-	    "\t-O, --getcanonicalrotacode\t\tJust exit with the current rotation (converted to its canonical representation) as exit code.\n"
+	    "\t-c, --getcanonicalrota\t\t\tJust output the current rotation (converted to its canonical representation) to stdout.\n"
+	    "\t-C, --getcanonicalrotacode\t\tJust exit with the current rotation (converted to its canonical representation) as exit code.\n"
 #endif
 	    "\t-H, --nightmode <on|off|toggle>\tToggle hardware inversion (8bpp only, safely ignored otherwise).\n"
 	    "\n",
