@@ -29,6 +29,43 @@
 // I feel dirty.
 #include "../fbink.c"
 
+#if defined(FBINK_FOR_KOBO)
+static uint8_t
+    rota_to_canonical(uint32_t rotate)
+{
+	uint8_t rota = (uint8_t) rotate;
+
+	// First, we'll need to compute the native Portrait rotation
+	uint8_t native_portrait = FB_ROTATE_UR;
+	// NOTE: For *most* devices, Nickel's Portrait orientation should *always* match BootRota + 1
+	//       Thankfully, the Libra appears to be ushering in a new era filled with puppies and rainbows,
+	//       and, hopefully, less insane rotation quirks ;).
+	if (deviceQuirks.ntxRotaQuirk != NTX_ROTA_SANE) {
+		native_portrait = (deviceQuirks.ntxBootRota + 1) & 3;
+	} else {
+		native_portrait = deviceQuirks.ntxBootRota;
+	}
+
+	// Then, if the kernel happens to mangle rotations, we need to account for it...
+	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
+		// NOTE: This should cover the H2O and the few other devices suffering from the same quirk...
+		native_portrait ^= 2;
+		rotate ^= 2;
+	} else if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ODD_INVERTED) {
+		// NOTE: This is for the Forma, which only inverts CW & CCW (i.e., odd numbers)...
+		if ((native_portrait & 0x01) == 1) {
+			native_portrait ^= 2;
+			rotate ^= 2;
+		}
+	}
+
+	// Now that we know what the canonical Portrait should look like in native-speak, we should be able to compute the rest...
+	rota = (native_portrait - rotate) & 3;
+
+	return rota;
+}
+#endif
+
 // Help message
 static void
     show_helpmsg(void)
@@ -411,6 +448,8 @@ int
 					      { "rota", required_argument, NULL, 'r' },
 					      { "getrota", no_argument, NULL, 'o' },
 					      { "getrotacode", no_argument, NULL, 'O' },
+					      { "getcanonical", no_argument, NULL, 'c' },
+					      { "getcanonicalcode", no_argument, NULL, 'C' },
 					      { "nightmode", required_argument, NULL, 'H' },
 					      { NULL, 0, NULL, 0 } };
 
@@ -422,8 +461,10 @@ int
 	bool     return_bpp  = false;
 	bool     print_rota  = false;
 	bool     return_rota = false;
+	bool     print_canonical  = false;
+	bool     return_canonical = false;
 
-	while ((opt = getopt_long(argc, argv, "d:hvqgGr:oOH:", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "d:hvqgGr:oOcCH:", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'd':
 				req_bpp = (uint32_t) strtoul(optarg, NULL, 10);
@@ -491,6 +532,12 @@ int
 			case 'O':
 				return_rota = true;
 				break;
+			case 'c':
+				print_canonical = true;
+				break;
+			case 'C':
+				return_canonical = true;
+				break;
 			case 'H':
 				if (strtotristate(optarg, &want_nm) < 0) {
 					fprintf(stderr, "Invalid nightmode state '%s'!\n", optarg);
@@ -505,13 +552,13 @@ int
 	}
 
 	if (errfnd || ((req_bpp == 0U && req_rota == 42 && want_nm == 42) &&
-		       !(print_bpp || return_bpp || print_rota || return_rota))) {
+		       !(print_bpp || return_bpp || print_rota || return_rota || print_canonical || return_canonical))) {
 		show_helpmsg();
 		return ERRCODE(EXIT_FAILURE);
 	}
 
 	// Enforce quiet w/ print_*
-	if (print_bpp || print_rota) {
+	if (print_bpp || print_rota || print_canonical) {
 		g_isQuiet   = true;
 		g_isVerbose = false;
 	}
@@ -555,6 +602,19 @@ int
 		}
 		if (return_rota) {
 			rv = (int) vInfo.rotate;
+			goto cleanup;
+		} else {
+			goto cleanup;
+		}
+	}
+
+	// If we just wanted to print/return the current canonical rotation, abort early
+	if (print_canonical || return_canonical) {
+		if (print_canonical) {
+			fprintf(stdout, "%hhu", rota_to_canonical(vInfo.rotate));
+		}
+		if (return_canonical) {
+			rv = (int) rota_to_canonical(vInfo.rotate);
 			goto cleanup;
 		} else {
 			goto cleanup;
