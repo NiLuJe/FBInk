@@ -659,6 +659,7 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 5", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case 374U:    // Aura H2O² (snow)
+			// NOTE: *Might* be UD like the other ROTA_STRAIGHT devices
 			deviceQuirks.ntxBootRota = FB_ROTATE_UR;
 			// NOTE: Is indeed NTX_ROTA_STRAIGHT
 			deviceQuirks.screenDPI = 265U;
