@@ -324,8 +324,10 @@
 //       Handle the warnings in these cases with a bit of trickery,
 //       by conditionally marking theses arguments as unused ;).
 #ifdef FBINK_MINIMAL
+#	define UNUSED_BY_NOTMINIMAL
 #	define UNUSED_BY_MINIMAL __attribute__((unused))
 #else
+#	define UNUSED_BY_NOTMINIMAL __attribute__((unused))
 #	define UNUSED_BY_MINIMAL
 #endif
 #ifndef FBINK_WITH_BUTTON_SCAN
@@ -333,34 +335,47 @@
 #else
 #	define UNUSED_BY_NOBUTTON
 #endif
-#ifndef FBINK_FOR_KINDLE
-#	define UNUSED_BY_NOTKINDLE __attribute__((unused))
-#	define UNUSED_BY_KINDLE
-#else
+#ifdef FBINK_FOR_KINDLE
 #	define UNUSED_BY_NOTKINDLE
 #	define UNUSED_BY_KINDLE __attribute__((unused))
+#else
+#	define UNUSED_BY_NOTKINDLE __attribute__((unused))
+#	define UNUSED_BY_KINDLE
+#endif
+#ifdef FBINK_FOR_KOBO
+#	define UNUSED_BY_NOTKOBO
+#	define UNUSED_BY_KOBO __attribute__((unused))
+#else
+#	define UNUSED_BY_NOTKOBO __attribute__((unused))
+#	define UNUSED_BY_KOBO
 #endif
 #ifdef FBINK_FOR_CERVANTES
+#	define UNUSED_BY_NOTCERVANTES
 #	define UNUSED_BY_CERVANTES __attribute__((unused))
 #else
+#	define UNUSED_BY_NOTCERVANTES __attribute__((unused))
 #	define UNUSED_BY_CERVANTES
 #endif
 #ifdef FBINK_FOR_REMARKABLE
+#	define UNUSED_BY_NOTREMARKABLE
 #	define UNUSED_BY_REMARKABLE __attribute__((unused))
 #else
+#	define UNUSED_BY_NOTREMARKABLE __attribute__((unused))
 #	define UNUSED_BY_REMARKABLE
 #endif
 #ifdef FBINK_FOR_POCKETBOOK
+#	define UNUSED_BY_NOTPOCKETBOOK
 #	define UNUSED_BY_POCKETBOOK __attribute__((unused))
 #else
+#	define UNUSED_BY_NOTPOCKETBOOK __attribute__((unused))
 #	define UNUSED_BY_POCKETBOOK
 #endif
-#ifndef FBINK_FOR_LINUX
-#	define UNUSED_BY_NOTLINUX __attribute__((unused))
-#	define UNUSED_BY_LINUX
-#else
+#ifdef FBINK_FOR_LINUX
 #	define UNUSED_BY_NOTLINUX
 #	define UNUSED_BY_LINUX __attribute__((unused))
+#else
+#	define UNUSED_BY_NOTLINUX __attribute__((unused))
+#	define UNUSED_BY_LINUX
 #endif
 
 // Handle what we send to stdout (i.e., mostly diagnostic stuff, which tends to be verbose, so no FBInk tag)

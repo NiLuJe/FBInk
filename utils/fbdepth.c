@@ -351,7 +351,7 @@ static bool
 }
 
 static bool
-    set_fbinfo(uint32_t bpp, int8_t rota, bool canonical_rota, uint32_t req_gray)
+    set_fbinfo(uint32_t bpp, int8_t rota, bool canonical_rota UNUSED_BY_NOTKOBO, uint32_t req_gray)
 {
 	// Set variable fb info
 	// Bitdepth
@@ -706,6 +706,7 @@ int
 		}
 	}
 
+#if defined(FBINK_FOR_KOBO)
 	// If we just wanted to print/return the current canonical rotation, abort early
 	if (print_canonical || return_canonical) {
 		if (print_canonical) {
@@ -718,6 +719,7 @@ int
 			goto cleanup;
 		}
 	}
+#endif
 
 	// If no bitdepth was requested, set to the current one, we'll be double-checking if changes are actually needed.
 	if (req_bpp == 0U) {
