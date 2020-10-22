@@ -142,12 +142,12 @@ static void
 	    "\t-g, --get\t\t\tJust output the current bitdepth to stdout.\n"
 	    "\t-G, --getcode\t\t\tJust exit with the current bitdepth as exit code.\n"
 #if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
-	    "\t-r, --rota <-1|0|1|2|3 || -1|UR|CW|UD|CCW> \t\tSwitch the framebuffer to the supplied rotation. -1 is a magic value matching the device-specific Portrait orientation.\n"
+	    "\t-r, --rota <-1|0|1|2|3> \t\tSwitch the framebuffer to the supplied rotation. -1 is a magic value matching the device-specific Portrait orientation.\n"
 #else
-	    "\t-r, --rota <0|1|2|3 || UR|CW|UD|CCW>\t\tSwitch the framebuffer to the supplied rotation (Linux FB convention).\n"
+	    "\t-r, --rota <0|1|2|3>\t\tSwitch the framebuffer to the supplied rotation (Linux FB convention).\n"
 #endif
 #if defined(FBINK_FOR_KOBO)
-	    "\t-R, --canonicalrota <0|1|2|3 || UR|CW|UD|CCW>\t\tSwitch the framebuffer to the supplied canonical rotation (Linux FB convention), automagically translating it to the mangled native one. (i.e., requesting UR will ensure the device is actually UR, much like passing -1 to -r, --rota would).\n"
+	    "\t-R, --canonicalrota <UR|CW|UD|CCW>\t\tSwitch the framebuffer to the supplied canonical rotation (Linux FB convention), automagically translating it to the mangled native one. (i.e., requesting UR will ensure the device is actually UR, much like passing -1 to -r, --rota would).\n"
 #endif
 	    "\t-o, --getrota\t\t\tJust output the current rotation to stdout.\n"
 	    "\t-O, --getrotacode\t\tJust exit with the current rotation as exit code.\n"
