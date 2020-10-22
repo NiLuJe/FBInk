@@ -30,8 +30,13 @@
 #include "../fbink.c"
 
 #if defined(FBINK_FOR_KOBO)
+// Try to make sense out of the mess that are native Kobo rotations...
+// Vaguely inspired by Plato's implementation,
+// c.f., https://github.com/baskerville/plato/blob/f45c2da65bc556bc22d664b2f9450f95c550dbf5/src/device.rs#L265-L326
+// except not really, because that didn't work at all on quirky devices ;).
+// The beauty of this is that it works both ways: feed a native rota, get a canonical one; and vice versa :).
 static uint8_t
-    rota_to_canonical(uint32_t rotate)
+    kobo_rotation_conversion(uint32_t rotate)
 {
 	uint8_t rota = (uint8_t) rotate;
 
@@ -46,7 +51,7 @@ static uint8_t
 		native_portrait = deviceQuirks.ntxBootRota;
 	}
 
-	// Then, if the kernel happens to mangle rotations, we need to account for it...
+	// Then, if the kernel happens to mangle rotations, we need to account for it, for *both* parties...
 	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
 		// NOTE: This should cover the H2O and the few other devices suffering from the same quirk...
 		native_portrait ^= 2;
@@ -90,8 +95,15 @@ static void
 #else
 	    "\t-r, --rota <0|1|2|3>\t\tSwitch the framebuffer to the supplied rotation (Linux FB convention).\n"
 #endif
+#if defined(FBINK_FOR_KOBO)
+	    "\t-R, --canonicalrota <0|1|2|3>\t\tSwitch the framebuffer to the supplied canonical rotation (Linux FB convention), automagically translating it to the mangled native one. (i.e., requesting UR will ensure the device is actually UR, much like passing -1 to -r, --rota would).\n"
+#endif
 	    "\t-o, --getrota\t\t\tJust output the current rotation to stdout.\n"
 	    "\t-O, --getrotacode\t\tJust exit with the current rotation as exit code.\n"
+#if defined(FBINK_FOR_KOBO)
+	    "\t-o, --getcanonicalrota\t\t\tJust output the current rotation (converted to its canonical representation) to stdout.\n"
+	    "\t-O, --getcanonicalrotacode\t\tJust exit with the current rotation (converted to its canonical representation) as exit code.\n"
+#endif
 	    "\t-H, --nightmode <on|off|toggle>\tToggle hardware inversion (8bpp only, safely ignored otherwise).\n"
 	    "\n",
 	    fbink_version());
@@ -288,7 +300,7 @@ static bool
 }
 
 static bool
-    set_fbinfo(uint32_t bpp, int8_t rota, uint32_t req_gray)
+    set_fbinfo(uint32_t bpp, int8_t rota, bool canonical_rota, uint32_t req_gray)
 {
 	// Set variable fb info
 	// Bitdepth
@@ -315,19 +327,22 @@ static bool
 #endif
 	}
 #if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
-	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
-		// NOTE: This should cover the H2O and the few other devices suffering from the same quirk...
-		vInfo.rotate ^= 2;
-		LOG("Setting rotate to %u (%s) to account for kernel rotation quirks",
-		    vInfo.rotate,
-		    fb_rotate_to_string(vInfo.rotate));
-	} else if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ODD_INVERTED) {
-		// NOTE: This is for the Forma, which only inverts CW & CCW (i.e., odd numbers)...
-		if ((vInfo.rotate & 0x01) == 1) {
+	// When we do a canonical rotation conversion, this has *already* been taken care of by kobo_rotation_conversion!
+	if (!canonical_rota) {
+		if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
+			// NOTE: This should cover the H2O and the few other devices suffering from the same quirk...
 			vInfo.rotate ^= 2;
 			LOG("Setting rotate to %u (%s) to account for kernel rotation quirks",
-			    vInfo.rotate,
-			    fb_rotate_to_string(vInfo.rotate));
+			vInfo.rotate,
+			fb_rotate_to_string(vInfo.rotate));
+		} else if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ODD_INVERTED) {
+			// NOTE: This is for the Forma, which only inverts CW & CCW (i.e., odd numbers)...
+			if ((vInfo.rotate & 0x01) == 1) {
+				vInfo.rotate ^= 2;
+				LOG("Setting rotate to %u (%s) to account for kernel rotation quirks",
+				vInfo.rotate,
+				fb_rotate_to_string(vInfo.rotate));
+			}
 		}
 	}
 #endif
@@ -446,10 +461,11 @@ int
 					      { "get", no_argument, NULL, 'g' },
 					      { "getcode", no_argument, NULL, 'G' },
 					      { "rota", required_argument, NULL, 'r' },
+					      { "canonicalrota", required_argument, NULL, 'R' },
 					      { "getrota", no_argument, NULL, 'o' },
 					      { "getrotacode", no_argument, NULL, 'O' },
-					      { "getcanonical", no_argument, NULL, 'c' },
-					      { "getcanonicalcode", no_argument, NULL, 'C' },
+					      { "getcanonicalrota", no_argument, NULL, 'c' },
+					      { "getcanonicalrotacode", no_argument, NULL, 'C' },
 					      { "nightmode", required_argument, NULL, 'H' },
 					      { NULL, 0, NULL, 0 } };
 
@@ -463,8 +479,9 @@ int
 	bool     return_rota = false;
 	bool     print_canonical  = false;
 	bool     return_canonical = false;
+	bool     canonical_rota = false;
 
-	while ((opt = getopt_long(argc, argv, "d:hvqgGr:oOcCH:", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "d:hvqgGr:R:oOcCH:", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'd':
 				req_bpp = (uint32_t) strtoul(optarg, NULL, 10);
@@ -525,6 +542,22 @@ int
 						errfnd = true;
 						break;
 				}
+				break;
+			case 'R':
+				req_rota = (int8_t) strtol(optarg, NULL, 10);
+				// Cheap-ass sanity check
+				switch (req_rota) {
+					case FB_ROTATE_UR:
+					case FB_ROTATE_CW:
+					case FB_ROTATE_UD:
+					case FB_ROTATE_CCW:
+						break;
+					default:
+						fprintf(stderr, "Invalid rotation '%s'!\n", optarg);
+						errfnd = true;
+						break;
+				}
+				canonical_rota = true;
 				break;
 			case 'o':
 				print_rota = true;
@@ -611,10 +644,10 @@ int
 	// If we just wanted to print/return the current canonical rotation, abort early
 	if (print_canonical || return_canonical) {
 		if (print_canonical) {
-			fprintf(stdout, "%hhu", rota_to_canonical(vInfo.rotate));
+			fprintf(stdout, "%hhu", kobo_rotation_conversion(vInfo.rotate));
 		}
 		if (return_canonical) {
-			rv = (int) rota_to_canonical(vInfo.rotate);
+			rv = (int) kobo_rotation_conversion(vInfo.rotate);
 			goto cleanup;
 		} else {
 			goto cleanup;
@@ -750,6 +783,11 @@ int
 			}
 		}
 #else
+		// If the requested rota was canonical, translate it to a native one *now*
+		if (canonical_rota) {
+			LOG("\nRequested canonical rota %hhd translates to %hhu for this device", req_rota, kobo_rotation_conversion(req_rota));
+			req_rota = kobo_rotation_conversion(req_rota);
+		}
 		if (vInfo.rotate == (uint32_t) req_rota) {
 			LOG("\nCurrent rotation is already %hhd!", req_rota);
 			// No change needed as far as rotation is concerned...
@@ -775,7 +813,7 @@ int
 		    req_bpp,
 		    (req_bpp == vInfo.bits_per_pixel) ? " (current bitdepth)" : "");
 	}
-	if (!set_fbinfo(req_bpp, req_rota, req_gray)) {
+	if (!set_fbinfo(req_bpp, req_rota, canonical_rota, req_gray)) {
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
