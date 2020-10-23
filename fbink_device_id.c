@@ -650,6 +650,7 @@ static void
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
 			deviceQuirks.ntxBootRota  = FB_ROTATE_UR;
 			deviceQuirks.ntxRotaQuirk = NTX_ROTA_ALL_INVERTED;
+			// Canonical -> native rotation mapping: { UR: 1, CW: 0, UD: 3, CCW: 2 }
 			deviceQuirks.screenDPI    = 265U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Aura H2O", sizeof(deviceQuirks.deviceName) - 1U);
@@ -736,6 +737,7 @@ static void
 			deviceQuirks.canRotate = true;
 			// NOTE: Because Mk.7 and KOBO_HWCFG_DisplayBusWidth (35) is "16Bits_mirror" (3)
 			deviceQuirks.ntxRotaQuirk = NTX_ROTA_ODD_INVERTED;
+			// Canonical -> native rotation mapping: { UR: 3, CW: 2, UD: 1, CCW: 0 }
 			deviceQuirks.screenDPI    = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Forma", sizeof(deviceQuirks.deviceName) - 1U);
