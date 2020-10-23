@@ -661,7 +661,9 @@ devcap: armcheck
 	cp -av $(CURDIR)/Release/fbdepth Kobo
 	cp -av $(CURDIR)/Release/rota Kobo
 	wget "https://svn.ak-team.com/svn/Configs/trunk/Kindle/Kobo_Hacks/USBNetwork/src/usbnet/bin/evtest" -O Kobo/evtest
+	chmod -cvR a+x Kobo/evtest
 	wget "https://svn.ak-team.com/svn/Configs/trunk/Kindle/Kobo_Hacks/USBNetwork/src/usbnet/bin/fbgrab" -O Kobo/fbgrab
+	chmod -cvR a+x Kobo/fbgrab
 	wget "https://svn.ak-team.com/svn/Configs/trunk/Kindle/Kobo_Hacks/USBNetwork/src/usbnet/lib/libpng16.so.16" -O Kobo/libpng16.so.16
 	wget "https://svn.ak-team.com/svn/Configs/trunk/Kindle/Kobo_Hacks/USBNetwork/src/usbnet/lib/libz.so.1" -O Kobo/libz.so.1
 	tar --owner=root --group=root -cvzf Release/Kobo-DevCap-Test.tar.gz -C Kobo .
