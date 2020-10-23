@@ -9,6 +9,7 @@
 
 # Where to?
 DEVCAP_LOG="/mnt/onboard/devcap_log.txt"
+DEVCAP_PIC="/mnt/onboard/devcap_done.png"
 
 # Prefer local binaries
 export PATH=".:${PATH}"
@@ -107,4 +108,7 @@ echo "" >> "${DEVCAP_LOG}"
 echo "* Finished tests on $(date)" >> "${DEVCAP_LOG}"
 echo "" >> "${DEVCAP_LOG}"
 
+# Final recap
 echo "Results compiled in ${DEVCAP_LOG}"
+fbgrab "${DEVCAP_PIC}" >/dev/null 2>&1
+echo "Screengrab saved to ${DEVCAP_PIC}"
