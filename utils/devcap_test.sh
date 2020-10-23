@@ -31,6 +31,9 @@ separator() {
 # Here we go...
 echo "* Starting tests on $(date)" >> "${DEVCAP_LOG}"
 
+# Start from a blank slate
+fbink -q -c -f -w
+
 # Start by dumping the full fb state
 header "FBGrab"
 fbgrab -v /dev/null >> "${DEVCAP_LOG}" 2>&1
