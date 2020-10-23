@@ -96,8 +96,6 @@ static uint8_t
 	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
 		// NOTE: This should cover the H2O and the few other devices suffering from the same quirk...
 		native_portrait ^= 2;
-		// Here, too, because... I don't know, but it works ;p.
-		rotate ^= 2;
 	} else if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ODD_INVERTED) {
 		// NOTE: This is for the Forma, which only inverts CW & CCW (i.e., odd numbers)...
 		if ((native_portrait & 0x01) == 1) {
@@ -115,7 +113,9 @@ static uint8_t
 	}
 
 	// As mentioned earlier, we have to handle *both* parties, and in this direction, that's the final result.
-	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ODD_INVERTED) {
+	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
+		rota ^= 2;
+	} else if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ODD_INVERTED) {
 		if ((rota & 0x01) == 1) {
 			rota ^= 2;
 		}
