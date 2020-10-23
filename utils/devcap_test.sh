@@ -90,6 +90,7 @@ separator
 # Then ask the user to tap the top-left corner of the screen...
 fbink -q -w -Mm -F tewi "⇱ Please tap the top-left corner of the screen ⇱"
 header "EvTest"
+echo "Please tap the top-left corner of the screen in the next 10s!"
 (
 	evtest /dev/input/event1 >> "${DEVCAP_LOG}" 2>&1
 ) &
@@ -102,3 +103,5 @@ separator
 echo "" >> "${DEVCAP_LOG}"
 echo "* Finished tests on $(date)" >> "${DEVCAP_LOG}"
 echo "" >> "${DEVCAP_LOG}"
+
+echo "Results compiled in ${DEVCAP_LOG}"
