@@ -653,6 +653,19 @@ kobo: armcheck
 	cd Kobo && zip -r ../Release/FBInk-$(FBINK_VERSION).zip .
 	mv -v Release/FBInk-$(FBINK_VERSION).zip Kobo/
 
+devcap: armcheck
+	$(MAKE) strip utils KOBO=true
+	mkdir -p Kobo
+	cp -av $(CURDIR)/utils/devcap_test.sh Kobo
+	cp -av $(CURDIR)/Release/fbink Kobo
+	cp -av $(CURDIR)/Release/fbdepth Kobo
+	cp -av $(CURDIR)/Release/rota Kobo
+	wget "https://svn.ak-team.com/svn/Configs/trunk/Kindle/Kobo_Hacks/USBNetwork/src/usbnet/bin/evtest" -O Kobo/evtest
+	wget "https://svn.ak-team.com/svn/Configs/trunk/Kindle/Kobo_Hacks/USBNetwork/src/usbnet/bin/fbgrab" -O Kobo/fbgrab
+	wget "https://svn.ak-team.com/svn/Configs/trunk/Kindle/Kobo_Hacks/USBNetwork/src/usbnet/lib/libpng16.so.16" -O Kobo/libpng16.so.16
+	wget "https://svn.ak-team.com/svn/Configs/trunk/Kindle/Kobo_Hacks/USBNetwork/src/usbnet/lib/libz.so.1" -O Kobo/libz.so.1
+	tar --owner=root --group=root -cvzf Release/Kobo-DevCap-Test.tar.gz -C Kobo .
+
 libunibreakclean:
 	cd libunibreak && \
 	git reset --hard
@@ -688,6 +701,7 @@ clean:
 	rm -rf Release/alt_buffer
 	rm -rf Release/doom
 	rm -rf Release/dump
+	rm -rf Release/Kobo-DevCap-Test.tar.gz
 	rm -rf Debug/*.a
 	rm -rf Debug/*.so*
 	rm -rf Debug/shared/*.o
@@ -717,9 +731,10 @@ clean:
 	rm -rf Debug/alt_buffer
 	rm -rf Debug/doom
 	rm -rf Debug/dump
+	rm -rf Debug/Kobo-DevCap-Test.tar.gz
 
 distclean: clean libunibreakclean
 	rm -rf LibUniBreakBuild
 	rm -rf libunibreak.built
 
-.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean utils alt dump clean distclean
+.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean utils alt dump devcap clean distclean
