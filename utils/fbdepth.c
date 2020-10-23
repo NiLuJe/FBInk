@@ -76,6 +76,8 @@ static uint8_t
 	return rota;
 }
 
+// NOTE: As far as NTX_ROTA_ALL_INVERTED is concerned, native->canonical == canonical->native ;).
+//       No, don't ask me to explain why: I don't know. Remember, I'm severely maths-impaired.
 static uint8_t
     kobo_canonical_to_native(uint32_t rotate)
 {
@@ -104,8 +106,6 @@ static uint8_t
 	}
 
 	// Now that we know what the canonical Portrait should look like in native-speak, we should be able to compute the rest...
-	// NOTE: As far as NTX_ROTA_ALL_INVERTED is concerned, native->canonical == canonical->native ;).
-	//       No, don't ask me to explain why: I don't know. Remember, I'm severely maths-impaired.
 	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
 		rota = (native_portrait - rotate) & 3;
 	} else {
