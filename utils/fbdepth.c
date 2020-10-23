@@ -69,6 +69,8 @@ static uint8_t
 	// Now that we know what the canonical Portrait should look like in native-speak, we should be able to compute the rest...
 	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
 		rota = (native_portrait - rotate) & 3;
+		// NOTE: If we do NOT invert anything, this works, too:
+		//       rota = (4 - (rotate - native_portrait)) & 3;
 	} else {
 		rota = (rotate - native_portrait) & 3;
 	}
@@ -108,6 +110,8 @@ static uint8_t
 	// Now that we know what the canonical Portrait should look like in native-speak, we should be able to compute the rest...
 	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
 		rota = (native_portrait - rotate) & 3;
+		// NOTE: If we do NOT invert native_portrait (but do invert the final result), this works, too:
+		//       rota = (4 - (native_portrait + rotate)) & 3;
 	} else {
 		rota = (native_portrait + rotate) & 3;
 	}
