@@ -114,6 +114,9 @@ There's also a fairly stupid [example](https://github.com/NiLuJe/FBInk/blob/mast
 Another stupid [demo](https://github.com/NiLuJe/FBInk/blob/master/utils/doom.c) based on the PSX Doom fire effect was implemented, to stress-test the EPDC in a mildly interesting manner.  
 
 If you ever were curious about the whole mxcfb alt_buffer shindig, you can take a look at this [PoC](https://github.com/NiLuJe/FBInk/blob/master/utils/alt_buffer.c).
+
+In the same vein, if you're looking into rotation & input shenanigans on Kobo, `make devcap` will build a tarball containing a few binaries and a [devcap_test.sh script](https://github.com/NiLuJe/FBInk/blob/master/utils/devcap_test.sh), that, when run on the target device, will compile quite a bit of info. In particular, if you ever need to report a bug against `fbdepth`, I'll probably ask you to run that and attach the results to the issue ;).
+
 ## NOTES
 
 Kindle support covers the full Kindle lineup, starting from the K2.
