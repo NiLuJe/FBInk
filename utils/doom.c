@@ -859,7 +859,10 @@ int
 	//       On the other hand, it does feature hardware dithering, and this yields pretty neat results w/ DU @ 24 fps...
 	const long sleep_cap = BILLION / frame_cap;
 
-	fbink_init(fbFd, &fbink_cfg);
+	if (fbink_init(fbFd, &fbink_cfg) != EXIT_SUCCESS) {
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
 	// We also need to mmap the fb
 	if (!isFbMapped) {
 		if (memmap_fb(fbFd) != EXIT_SUCCESS) {

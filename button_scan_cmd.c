@@ -123,7 +123,7 @@ int
 		fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
 		return ERRCODE(EXIT_FAILURE);
 	}
-	if (fbink_init(fbfd, &fbink_cfg) == ERRCODE(EXIT_FAILURE)) {
+	if (fbink_init(fbfd, &fbink_cfg) != EXIT_SUCCESS) {
 		fprintf(stderr, "Failed to initialize FBInk, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;

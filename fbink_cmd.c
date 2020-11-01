@@ -1921,7 +1921,7 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
-	if (fbink_init(fbfd, &fbink_cfg) == ERRCODE(EXIT_FAILURE)) {
+	if (fbink_init(fbfd, &fbink_cfg) != EXIT_SUCCESS) {
 		ELOG("Failed to initialize FBInk, aborting . . .");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;

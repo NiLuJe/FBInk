@@ -166,7 +166,7 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
-	if (fbink_init(fbfd, &fbink_cfg) == ERRCODE(EXIT_FAILURE)) {
+	if (fbink_init(fbfd, &fbink_cfg) != EXIT_SUCCESS) {
 		fprintf(stderr, "Failed to initialize FBInk, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
