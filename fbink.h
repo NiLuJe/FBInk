@@ -432,6 +432,7 @@ FBINK_API int fbink_close(int fbfd);
 // CAN safely be called multiple times,
 //     but doing so is only necessary if the framebuffer's state has changed (although fbink_reinit is preferred in this case),
 //     or if you modified one of the FBInkConfig fields that affects its results (listed below).
+// Returns -(ENOSYS) if the device is unsupported (NOTE: Only on reMarkable!)
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
 // fbink_cfg:		Pointer to an FBInkConfig struct.

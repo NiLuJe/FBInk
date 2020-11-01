@@ -3175,6 +3175,15 @@ static int
 		if (ioctl(fbfd, EPDC_GET_UPDATE_STATE, &aw_busy) != -1) {
 			ELOG("Device appears to be running on an AW B288 SoC!");
 		}
+#	elif defined(FBINK_FOR_REMARKABLE)
+		// NOTE: Check if we're running on an rM 2, in which case abort with extreme prejudice,
+		//       because its kernel doesn't ship with an EPDC driver, despite running on an i.MX 7D...
+		if (deviceQuirks.deviceId == 2U) {
+			ELOG("The rM 2 kernel doesn't ship with an EPDC driver, aborting!");
+			// NOTE: Depending on how the fb actually behaves, it could possibly make sense to simply
+			//       downgrade to FBINK_FOR_LINUX behavior instead of nothing?
+			return ERRCODE(ENOSYS);
+		}
 #	endif
 #endif
 

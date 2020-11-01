@@ -988,6 +988,7 @@ static void
 		strncpy(deviceQuirks.deviceName, "reMarkable 2", sizeof(deviceQuirks.deviceName) - 1U);
 		// Flawfinder: ignore
 		strncpy(deviceQuirks.deviceCodename, "Zero Sugar", sizeof(deviceQuirks.deviceCodename) - 1U);
+		deviceQuirks.deviceId = 2U;
 	} else {
 		deviceQuirks.screenDPI   = 226;
 		deviceQuirks.canHWInvert = true;
@@ -999,6 +1000,7 @@ static void
 		strncpy(deviceQuirks.deviceName, "reMarkable", sizeof(deviceQuirks.deviceName) - 1U);
 		// Flawfinder: ignore
 		strncpy(deviceQuirks.deviceCodename, "Zero Gravitas", sizeof(deviceQuirks.deviceCodename) - 1U);
+		deviceQuirks.deviceId = 1U;
 	}
 }
 #	elif defined(FBINK_FOR_POCKETBOOK)
