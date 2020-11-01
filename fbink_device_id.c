@@ -651,7 +651,7 @@ static void
 			deviceQuirks.ntxBootRota  = FB_ROTATE_UR;
 			deviceQuirks.ntxRotaQuirk = NTX_ROTA_ALL_INVERTED;
 			// Canonical -> native rotation mapping: { UR: 1, CW: 0, UD: 3, CCW: 2 }
-			deviceQuirks.screenDPI    = 265U;
+			deviceQuirks.screenDPI = 265U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Aura H2O", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -738,7 +738,7 @@ static void
 			// NOTE: Because Mk.7 and KOBO_HWCFG_DisplayBusWidth (35) is "16Bits_mirror" (3)
 			deviceQuirks.ntxRotaQuirk = NTX_ROTA_ODD_INVERTED;
 			// Canonical -> native rotation mapping: { UR: 3, CW: 2, UD: 1, CCW: 0 }
-			deviceQuirks.screenDPI    = 300U;
+			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Forma", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -956,16 +956,50 @@ static void
 static void
     identify_remarkable(void)
 {
-	deviceQuirks.screenDPI   = 226;
-	deviceQuirks.canHWInvert = true;
-	// NOTE: Not actually an NTX board, but useful nonetheless for fbdepth ;).
-	deviceQuirks.ntxBootRota  = FB_ROTATE_CW;
-	deviceQuirks.ntxRotaQuirk = NTX_ROTA_SANE;
-	deviceQuirks.canRotate    = true;
-	// Flawfinder: ignore
-	strncpy(deviceQuirks.deviceName, "reMarkable", sizeof(deviceQuirks.deviceName) - 1U);
-	// Flawfinder: ignore
-	strncpy(deviceQuirks.deviceCodename, "Zero Gravitas", sizeof(deviceQuirks.deviceCodename) - 1U);
+	// NOTE: Follow the lead of https://github.com/reMarkable/update_engine (utils::GetMachineModel)
+	FILE* fp = fopen("/sys/devices/soc0/machine", "re");
+	// Random buffer size is random!
+	char machine_tag[32U] = { 0 };
+	if (!fp) {
+		ELOG("Couldn't open the sysfs entry for the SoC machine tag!");
+	} else {
+		size_t size = fread(machine_tag, sizeof(*machine_tag), sizeof(machine_tag), fp);
+		if (size > 0) {
+			// NUL terminate
+			machine_tag[size - 1U] = '\0';
+			// Strip trailing LF
+			if (machine_tag[size - 2U] == '\n') {
+				machine_tag[size - 2U] = '\0';
+			}
+		}
+		fclose(fp);
+	}
+
+	if (strcmp(machine_tag, "reMarkable 2.0") == 0) {
+		// NOTE: This is currently a very weird and mostly unsupported beast...
+		//       c.f., https://rmkit.dev/news/rm2-status/
+		deviceQuirks.screenDPI   = 226;
+		deviceQuirks.canHWInvert = false;    // No EPDC :(
+		// NOTE: Not actually an NTX board, but useful nonetheless for fbdepth ;).
+		deviceQuirks.ntxBootRota  = FB_ROTATE_CW;
+		deviceQuirks.ntxRotaQuirk = NTX_ROTA_SANE;
+		deviceQuirks.canRotate    = true;
+		// Flawfinder: ignore
+		strncpy(deviceQuirks.deviceName, "reMarkable 2", sizeof(deviceQuirks.deviceName) - 1U);
+		// Flawfinder: ignore
+		strncpy(deviceQuirks.deviceCodename, "Zero Sugar", sizeof(deviceQuirks.deviceCodename) - 1U);
+	} else {
+		deviceQuirks.screenDPI   = 226;
+		deviceQuirks.canHWInvert = true;
+		// NOTE: Not actually an NTX board, but useful nonetheless for fbdepth ;).
+		deviceQuirks.ntxBootRota  = FB_ROTATE_CW;
+		deviceQuirks.ntxRotaQuirk = NTX_ROTA_SANE;
+		deviceQuirks.canRotate    = true;
+		// Flawfinder: ignore
+		strncpy(deviceQuirks.deviceName, "reMarkable", sizeof(deviceQuirks.deviceName) - 1U);
+		// Flawfinder: ignore
+		strncpy(deviceQuirks.deviceCodename, "Zero Gravitas", sizeof(deviceQuirks.deviceCodename) - 1U);
+	}
 }
 #	elif defined(FBINK_FOR_POCKETBOOK)
 static void
