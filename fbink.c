@@ -3179,10 +3179,20 @@ static int
 		// NOTE: Check if we're running on an rM 2, in which case abort with extreme prejudice,
 		//       because its kernel doesn't ship with an EPDC driver, despite running on an i.MX 7D...
 		if (deviceQuirks.deviceId == 2U) {
-			ELOG("The rM 2 kernel doesn't ship with an EPDC driver, aborting!");
-			// NOTE: Depending on how the fb actually behaves, it could possibly make sense to simply
-			//       downgrade to FBINK_FOR_LINUX behavior instead of nothing?
-			return ERRCODE(ENOSYS);
+			// ... unless we're running under the https://github.com/ddvk/remarkable2-framebuffer shim
+			char* rm2fb = getenv("RM2FB_SHIM");
+			if (rm2fb) {
+				ELOG(
+				    "Running under the rm2fb compatibility shim (version %s), functionality may be limited",
+				    rm2fb);
+			} else {
+				ELOG("The rM 2 kernel doesn't ship with an EPDC driver, aborting!");
+				ELOG(
+				    "For basic functionality, a compatibility shim is available at https://github.com/ddvk/remarkable2-framebuffer");
+				// NOTE: Depending on how the fb actually behaves, it could possibly make sense to simply
+				//       downgrade to FBINK_FOR_LINUX behavior instead of nothing?
+				return ERRCODE(ENOSYS);
+			}
 		}
 #	endif
 #endif
