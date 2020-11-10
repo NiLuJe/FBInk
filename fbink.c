@@ -4290,7 +4290,7 @@ int
 		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
-		WARN("Failed to refresh the screen");
+		PFWARN("Failed to refresh the screen");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -4606,7 +4606,7 @@ static int
 		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    do_clear ? fbink_cfg->no_refresh : false) != EXIT_SUCCESS) {
-		WARN("Failed to refresh the screen");
+		PFWARN("Failed to refresh the screen");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -4659,7 +4659,7 @@ int
 		if (fbink_cfg->is_cleared) {
 			return fbink_cls(fbfd, fbink_cfg, NULL);
 		} else {
-			WARN("Cannot print an empty string");
+			PFWARN("Cannot print an empty string");
 			return ERRCODE(EINVAL);
 		}
 	}
@@ -4668,7 +4668,7 @@ int
 	size_t len       = strlen(string);    // Flawfinder: ignore
 	size_t charcount = u8_strlen2(string);
 	if (charcount == 0) {
-		WARN("Cannot print an invalid UTF-8 sequence");
+		PFWARN("Cannot print an invalid UTF-8 sequence");
 		return ERRCODE(EILSEQ);
 	}
 
@@ -5077,7 +5077,7 @@ int
 		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
-		WARN("Failed to refresh the screen");
+		PFWARN("Failed to refresh the screen");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -5266,7 +5266,7 @@ int
 		if (fbink_cfg->is_cleared) {
 			return fbink_cls(fbfd, fbink_cfg, NULL);
 		} else {
-			WARN("Cannot print an empty string");
+			PFWARN("Cannot print an empty string");
 			return ERRCODE(EINVAL);
 		}
 	}
@@ -5274,7 +5274,7 @@ int
 	// Abort if we were passed an invalid UTF-8 sequence
 	size_t str_len_bytes = strlen(string);    // Flawfinder: ignore
 	if (!u8_isvalid2(string)) {
-		WARN("Cannot print an invalid UTF-8 sequence");
+		PFWARN("Cannot print an invalid UTF-8 sequence");
 		return ERRCODE(EILSEQ);
 	}
 
@@ -7068,7 +7068,7 @@ int
 			   fbink_cfg->is_nightmode,
 			   fbink_cfg->is_flashing,
 			   false)) != EXIT_SUCCESS) {
-		WARN("Failed to refresh the screen");
+		PFWARN("Failed to refresh the screen");
 	}
 
 	if (!keep_fd) {
@@ -7102,7 +7102,7 @@ int
 			marker = lastMarker;
 		} else {
 			// Otherwise, don't even try to wait for an invalid marker!
-			WARN("No previous update found, cannot wait for an invalid update marker");
+			WARN("No previous update found, cannot wait for submission of an invalid update marker");
 			rv = ERRCODE(EINVAL);
 			goto cleanup;
 		}
@@ -7144,7 +7144,7 @@ int
 			marker = lastMarker;
 		} else {
 			// Otherwise, don't even try to wait for an invalid marker!
-			WARN("No previous update found, cannot wait for an invalid update marker");
+			WARN("No previous update found, cannot wait for completion of an invalid update marker");
 			rv = ERRCODE(EINVAL);
 			goto cleanup;
 		}
@@ -7565,7 +7565,7 @@ int
 		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
-		WARN("Failed to refresh the screen");
+		PFWARN("Failed to refresh the screen");
 		return ERRCODE(EXIT_FAILURE);
 	}
 
@@ -8666,7 +8666,7 @@ static int
 		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
-		WARN("Failed to refresh the screen");
+		PFWARN("Failed to refresh the screen");
 	}
 
 	// Cleanup
@@ -8805,21 +8805,21 @@ int
 
 		sdata = qSmoothScaleImage(data, w, h, req_n, fbink_cfg->ignore_alpha, scaled_width, scaled_height);
 		if (sdata == NULL) {
-			WARN("Failed to resize image");
+			PFWARN("Failed to resize image");
 			return ERRCODE(EXIT_FAILURE);
 		}
 
 		// We're drawing the scaled data, at the requested scaled resolution
 		if (draw_image(fbfd, sdata, scaled_width, scaled_height, n, req_n, x_off, y_off, fbink_cfg) !=
 		    EXIT_SUCCESS) {
-			WARN("Failed to display image data on screen");
+			PFWARN("Failed to display image data on screen");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
 	} else {
 		// We're drawing the original unscaled data at its native resolution
 		if (draw_image(fbfd, data, w, h, n, req_n, x_off, y_off, fbink_cfg) != EXIT_SUCCESS) {
-			WARN("Failed to display image data on screen");
+			PFWARN("Failed to display image data on screen");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
@@ -8976,21 +8976,21 @@ int
 
 		sdata = qSmoothScaleImage(imgdata, w, h, req_n, fbink_cfg->ignore_alpha, scaled_width, scaled_height);
 		if (sdata == NULL) {
-			WARN("Failed to resize image");
+			PFWARN("Failed to resize image");
 			return ERRCODE(EXIT_FAILURE);
 		}
 
 		// We're drawing the scaled data, at the requested scaled resolution
 		if (draw_image(fbfd, sdata, scaled_width, scaled_height, n, req_n, x_off, y_off, fbink_cfg) !=
 		    EXIT_SUCCESS) {
-			WARN("Failed to display image data on screen");
+			PFWARN("Failed to display image data on screen");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
 	} else {
 		// We should now be able to draw that on screen, knowing that it probably won't horribly implode ;p
 		if (draw_image(fbfd, imgdata, w, h, n, req_n, x_off, y_off, fbink_cfg) != EXIT_SUCCESS) {
-			WARN("Failed to display image data on screen");
+			PFWARN("Failed to display image data on screen");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
@@ -9529,7 +9529,7 @@ int
 		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
-		WARN("Failed to refresh the screen");
+		PFWARN("Failed to refresh the screen");
 	}
 
 	// Cleanup
