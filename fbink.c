@@ -267,6 +267,7 @@ static void
 }
 
 #	ifdef FBINK_WITH_BUTTON_SCAN
+// NOTE: c.f., https://github.com/llandsmeer/inkvt/pull/14 for another attempt at this...
 static void
     rotate_touch_coordinates(FBInkCoordinates* restrict coords)
 {
