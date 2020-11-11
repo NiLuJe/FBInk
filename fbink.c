@@ -9632,3 +9632,5 @@ FBInkRect
 #endif
 // Contains fbink_button_scan's implementation, Kobo only, and has a bit of Linux MT input thrown in ;).
 #include "fbink_button_scan.c"
+// Contains the Kobo only native/canonical rotation conversion helpers
+#include "fbink_rota_quirks.c"
