@@ -3375,20 +3375,65 @@ static int
 
 	// NOTE: Well, granted, this next part is (hopefully) Kobo-specific ;).
 	// Handle the Kobo viewport trickery for the few devices with hidden rows of pixels...
-	// Things should generally not be broken-by-design on the horizontal axis...
-	// NOTE: This is only accurate in Portrait...
-	viewWidth      = screenWidth;
-	viewHoriOrigin = 0U;
-	// But on the vertical axis, oh my...
-	if (!fbink_cfg->no_viewport && deviceQuirks.koboVertOffset != 0) {
-		viewHeight = screenHeight - (uint32_t) abs(deviceQuirks.koboVertOffset);
-		if (deviceQuirks.koboVertOffset > 0) {
-			// Rows of pixels are hidden at the top
-			viewVertOrigin = (uint8_t) deviceQuirks.koboVertOffset;
-		} else {
-			// Rows of pixels are hidden at the bottom
-			viewVertOrigin = 0U;
+	if (fbink_cfg->no_viewport || deviceQuirks.koboVertOffset == 0) {
+		// Device is not utterly mad, the top-left corner is at (0, 0)!
+		viewWidth      = screenWidth;
+		viewHoriOrigin = 0U;
+		viewHeight     = screenHeight;
+		viewVertOrigin = 0U;
+	} else {
+		// Device has a few rows of pixels hidden behind the bezel, what fun...
+		switch (canonical_rota) {
+			case FB_ROTATE_UR:
+				viewWidth      = screenWidth;
+				viewHoriOrigin = 0U;
+				viewHeight     = screenHeight - (uint32_t) abs(deviceQuirks.koboVertOffset);
+				if (deviceQuirks.koboVertOffset > 0) {
+					// Rows of pixels are hidden at the (physical) top
+					viewVertOrigin = (uint8_t) deviceQuirks.koboVertOffset;
+				} else {
+					// Rows of pixels are hidden at the (physical) bottom
+					viewVertOrigin = 0U;
+				}
+				break;
+			case FB_ROTATE_CW:
+				viewWidth = screenWidth - (uint32_t) abs(deviceQuirks.koboVertOffset);
+				if (deviceQuirks.koboVertOffset > 0) {
+					// Rows of pixels are hidden at the (physical) top
+					viewHoriOrigin = 0U;
+				} else {
+					// Rows of pixels are hidden at the (physical) bottom
+					viewHoriOrigin = (uint8_t) deviceQuirks.koboVertOffset;
+				}
+				viewHeight     = screenHeight;
+				viewVertOrigin = 0U;
+				break;
+			case FB_ROTATE_UD:
+				viewWidth      = screenWidth;
+				viewHoriOrigin = 0U;
+				viewHeight     = screenHeight - (uint32_t) abs(deviceQuirks.koboVertOffset);
+				if (deviceQuirks.koboVertOffset > 0) {
+					// Rows of pixels are hidden at the (physical) top
+					viewVertOrigin = 0U;
+				} else {
+					// Rows of pixels are hidden at the (physical) bottom
+					viewVertOrigin = (uint8_t) deviceQuirks.koboVertOffset;
+				}
+				break;
+			case FB_ROTATE_CCW:
+				viewWidth = screenWidth - (uint32_t) abs(deviceQuirks.koboVertOffset);
+				if (deviceQuirks.koboVertOffset > 0) {
+					// Rows of pixels are hidden at the (physical) top
+					viewHoriOrigin = (uint8_t) deviceQuirks.koboVertOffset;
+				} else {
+					// Rows of pixels are hidden at the (physical) bottom
+					viewHoriOrigin = 0U;
+				}
+				viewHeight     = screenHeight;
+				viewVertOrigin = 0U;
+				break;
 		}
+
 		ELOG("Enabled Kobo viewport insanity (%ux%u -> %ux%u), top-left corner is @ (%hhu, %hhu)",
 		     screenWidth,
 		     screenHeight,
@@ -3396,10 +3441,6 @@ static int
 		     viewHeight,
 		     viewHoriOrigin,
 		     viewVertOrigin);
-	} else {
-		// Device is not utterly mad, the top-left corner is at (0, 0)!
-		viewHeight     = screenHeight;
-		viewVertOrigin = 0U;
 	}
 #elif defined(FBINK_FOR_POCKETBOOK)
 	// NOTE: Some PocketBook devices have their panel mounted sideways, like the NTX boards we handled above...
