@@ -111,3 +111,6 @@ cdecl_func(fbink_get_last_rect)
 
 cdecl_func(fbink_button_scan)
 cdecl_func(fbink_wait_for_usbms_processing)
+
+cdecl_func(fbink_rota_native_to_canonical)
+cdecl_func(fbink_rota_canonical_to_native)
