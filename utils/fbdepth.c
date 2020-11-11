@@ -29,106 +29,6 @@
 // I feel dirty.
 #include "../fbink.c"
 
-#if defined(FBINK_FOR_KOBO)
-// Try to make sense out of the mess that are native Kobo rotations...
-// Vaguely inspired by Plato's implementation,
-// c.f., https://github.com/baskerville/plato/blob/f45c2da65bc556bc22d664b2f9450f95c550dbf5/src/device.rs#L265-L326
-// except not really, because that didn't work at all on my quirky devices ;).
-static uint8_t
-    kobo_native_to_canonical(uint32_t rotate)
-{
-	uint8_t rota = (uint8_t) rotate;
-
-	// First, we'll need to compute the native Portrait rotation
-	uint8_t native_portrait = FB_ROTATE_UR;
-	// NOTE: For *most* devices, Nickel's Portrait orientation should *always* match BootRota + 1
-	//       Thankfully, the Libra appears to be ushering in a new era filled with puppies and rainbows,
-	//       and, hopefully, less insane rotation quirks ;).
-	if (deviceQuirks.ntxRotaQuirk != NTX_ROTA_SANE) {
-		native_portrait = (deviceQuirks.ntxBootRota + 1) & 3;
-	} else {
-		native_portrait = deviceQuirks.ntxBootRota;
-	}
-
-	// Then, if the kernel happens to mangle rotations, we need to account for it, for *both* parties...
-	// In this direction, the second party is the input (native) rotation.
-	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
-		// NOTE: This should cover the H2O and the few other devices suffering from the same quirk...
-		native_portrait ^= 2;
-		rotate ^= 2;
-	} else if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ODD_INVERTED) {
-		// NOTE: This is for the Forma, which only inverts CW & CCW (i.e., odd numbers)...
-		if ((native_portrait & 0x01) == 1) {
-			native_portrait ^= 2;
-		}
-		if ((rotate & 0x01) == 1) {
-			rotate ^= 2;
-		}
-	}
-
-	// Now that we know what the canonical Portrait should look like in native-speak, we should be able to compute the rest...
-	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
-		rota = (native_portrait - rotate) & 3;
-		// NOTE: If we do NOT invert anything, this works, too:
-		//       rota = (4 - (rotate - native_portrait)) & 3;
-	} else {
-		rota = (rotate - native_portrait) & 3;
-	}
-
-	return rota;
-}
-
-// NOTE: As far as NTX_ROTA_ALL_INVERTED is concerned, native->canonical == canonical->native ;).
-//       No, don't ask me to explain why: I don't know. Remember, I'm severely maths-impaired.
-static uint8_t
-    kobo_canonical_to_native(uint32_t rotate)
-{
-	uint8_t rota = (uint8_t) rotate;
-
-	// First, we'll need to compute the native Portrait rotation
-	uint8_t native_portrait = FB_ROTATE_UR;
-	// NOTE: For *most* devices, Nickel's Portrait orientation should *always* match BootRota + 1
-	//       Thankfully, the Libra appears to be ushering in a new era filled with puppies and rainbows,
-	//       and, hopefully, less insane rotation quirks ;).
-	if (deviceQuirks.ntxRotaQuirk != NTX_ROTA_SANE) {
-		native_portrait = (deviceQuirks.ntxBootRota + 1) & 3;
-	} else {
-		native_portrait = deviceQuirks.ntxBootRota;
-	}
-
-	// Then, if the kernel happens to mangle rotations, we need to account for it, for *both* parties...
-	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
-		// NOTE: This should cover the H2O and the few other devices suffering from the same quirk...
-		native_portrait ^= 2;
-	} else if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ODD_INVERTED) {
-		// NOTE: This is for the Forma, which only inverts CW & CCW (i.e., odd numbers)...
-		if ((native_portrait & 0x01) == 1) {
-			native_portrait ^= 2;
-		}
-	}
-
-	// Now that we know what the canonical Portrait should look like in native-speak, we should be able to compute the rest...
-	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
-		rota = (native_portrait - rotate) & 3;
-		// NOTE: If we do NOT invert native_portrait (but do invert the final result), this works, too:
-		//       rota = (4 - (native_portrait + rotate)) & 3;
-	} else {
-		rota = (native_portrait + rotate) & 3;
-	}
-
-	// As mentioned earlier, we have to handle *both* parties, and in this direction, that's the final result.
-	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
-		rota ^= 2;
-	} else if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ODD_INVERTED) {
-		if ((rota & 0x01) == 1) {
-			rota ^= 2;
-		}
-	}
-
-	return rota;
-}
-#endif
-
 // Help message
 static void
     show_helpmsg(void)
@@ -717,10 +617,10 @@ int
 	// If we just wanted to print/return the current canonical rotation, abort early
 	if (print_canonical || return_canonical) {
 		if (print_canonical) {
-			fprintf(stdout, "%hhu", kobo_native_to_canonical(vInfo.rotate));
+			fprintf(stdout, "%hhu", fbink_rota_native_to_canonical(vInfo.rotate));
 		}
 		if (return_canonical) {
-			rv = (int) kobo_native_to_canonical(vInfo.rotate);
+			rv = (int) fbink_rota_native_to_canonical(vInfo.rotate);
 			goto cleanup;
 		} else {
 			goto cleanup;
@@ -860,10 +760,10 @@ int
 #	if defined(FBINK_FOR_KOBO)
 		// If the requested rota was canonical, translate it to a native one *now*
 		if (canonical_rota) {
-			LOG("\nRequested canonical rota %hhd translates to %hhu for this device",
+			LOG("\nRequested canonical rota %hhd translates to %u for this device",
 			    req_rota,
-			    kobo_canonical_to_native((uint32_t) req_rota));
-			req_rota = (int8_t) kobo_canonical_to_native((uint32_t) req_rota);
+			    fbink_rota_canonical_to_native((uint8_t) req_rota));
+			req_rota = (int8_t) fbink_rota_canonical_to_native((uint8_t) req_rota);
 		}
 #	endif
 		if (vInfo.rotate == (uint32_t) req_rota) {
