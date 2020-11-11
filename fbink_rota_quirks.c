@@ -76,11 +76,11 @@ uint8_t
 
 // NOTE: As far as NTX_ROTA_ALL_INVERTED is concerned, native->canonical == canonical->native ;).
 //       No, don't ask me to explain why: I don't know. Remember, I'm severely maths-impaired.
-uint8_t
-    fbink_rota_canonical_to_native(uint32_t rotate)
+uint32_t
+    fbink_rota_canonical_to_native(uint8_t rotate)
 {
 #if defined(FBINK_FOR_KOBO)
-	uint8_t rota = (uint8_t) rotate;
+	uint32_t rota = rotate;
 
 	// First, we'll need to compute the native Portrait rotation
 	uint8_t native_portrait = FB_ROTATE_UR;

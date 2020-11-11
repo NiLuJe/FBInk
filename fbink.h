@@ -1002,8 +1002,8 @@ FBINK_API int fbink_wait_for_usbms_processing(int fbfd, bool force_unplug);
 // (i.e., what's in the fb vinfo), and a "canonical" one, representing how the device is actually physically laid out.
 // KOBO Only! Returns ENOSYS when disabled (!KOBO). Yes, that's ENOSYS, positive, given the function's signature ;).
 // See fbink_rota_quirks.c & utils/fbdepth.c for more details.
-FBINK_API uint8_t fbink_rota_native_to_canonical(uint32_t rotate);
-FBINK_API uint8_t fbink_rota_canonical_to_native(uint32_t rotate);
+FBINK_API uint8_t  fbink_rota_native_to_canonical(uint32_t rotate);
+FBINK_API uint32_t fbink_rota_canonical_to_native(uint8_t rotate);
 
 //
 ///
