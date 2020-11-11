@@ -3365,11 +3365,13 @@ static int
 	// NOTE: If *any* quirky state has been detected, assume the canonical rotation is Portrait,
 	//       as a hardware rotation on top of that is *highly* unlikely (also, a terrible idea).
 	uint8_t canonical_rota = FB_ROTATE_UR;
+#	if defined(FBINK_FOR_KOBO)
 	if (!deviceQuirks.isNTX16bLandscape) {
 		// Otherwise, attempt to untangle it ourselves...
 		canonical_rota = fbink_rota_native_to_canonical(vInfo.rotate);
 		ELOG("Canonical rotation: %hhu (%s)", canonical_rota, fb_rotate_to_string(canonical_rota));
 	}
+#	endif
 
 	// NOTE: Well, granted, this next part is (hopefully) Kobo-specific ;).
 	// Handle the Kobo viewport trickery for the few devices with hidden rows of pixels...
