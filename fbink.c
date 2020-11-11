@@ -3366,6 +3366,8 @@ static int
 	//       as a hardware rotation on top of that is *highly* unlikely (also, a terrible idea).
 	uint8_t canonical_rota = FB_ROTATE_UR;
 #	if defined(FBINK_FOR_KOBO)
+	// NOTE: fbink_rota_native_to_canonical is only implemented/tested on Kobo, so, don't do it on Cervantes.
+	//       They're all in a quirky state anyway ;).
 	if (!deviceQuirks.isNTX16bLandscape) {
 		// Otherwise, attempt to untangle it ourselves...
 		canonical_rota = fbink_rota_native_to_canonical(vInfo.rotate);
