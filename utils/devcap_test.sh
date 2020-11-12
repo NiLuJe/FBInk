@@ -35,6 +35,11 @@ echo "* Starting tests on $(date)" >> "${DEVCAP_LOG}"
 # Start from a blank slate
 fbink -q -c -f -w
 
+# Recap the FW & Kernel versions
+header "Nickel"
+echo "Running FW $(cut -f3 -d',' /mnt/onboard/.kobo/version) on Linux $(uname -r) ($(uname -v))" >> "${DEVCAP_LOG}"
+separator
+
 # Start by dumping the full fb state
 header "FBGrab"
 fbgrab -v /dev/null >> "${DEVCAP_LOG}" 2>&1
