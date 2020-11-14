@@ -26,7 +26,7 @@
 // c.f., https://github.com/baskerville/plato/blob/f45c2da65bc556bc22d664b2f9450f95c550dbf5/src/device.rs#L265-L326
 // except not really, because that didn't work at all on my quirky devices ;).
 uint8_t
-    fbink_rota_native_to_canonical(uint32_t rotate)
+    fbink_rota_native_to_canonical(uint32_t rotate UNUSED_BY_NOTKOBO)
 {
 #if defined(FBINK_FOR_KOBO)
 	uint8_t rota = (uint8_t) rotate;
@@ -77,7 +77,7 @@ uint8_t
 // NOTE: As far as NTX_ROTA_ALL_INVERTED is concerned, native->canonical == canonical->native ;).
 //       No, don't ask me to explain why: I don't know. Remember, I'm severely maths-impaired.
 uint32_t
-    fbink_rota_canonical_to_native(uint8_t rotate)
+    fbink_rota_canonical_to_native(uint8_t rotate UNUSED_BY_NOTKOBO)
 {
 #if defined(FBINK_FOR_KOBO)
 	uint32_t rota = rotate;
