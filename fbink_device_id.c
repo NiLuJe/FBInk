@@ -778,7 +778,7 @@ static void
 			break;
 		case 382U:    // Nia (luna)
 			deviceQuirks.isKoboMk7 = true;
-			// FIXME: ntxBootRota & ntxRotaQuirk TBD! Let's assume it's Clara-ish for now.
+			// NOTE: ntxBootRota & ntxRotaQuirk TBD! Let's assume it's Clara-ish for now.
 			deviceQuirks.screenDPI = 212U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Nia", sizeof(deviceQuirks.deviceName) - 1U);
