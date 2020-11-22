@@ -76,8 +76,8 @@ static const unsigned char*
 		return cozette_block25[0];
 	} else if (codepoint >= 0x2190u && codepoint <= 0x219bu) {
 		return cozette_block26[codepoint - 0x2190u];
-	} else if (codepoint == 0x21b5u) {
-		return cozette_block27[0];
+	} else if (codepoint >= 0x21b0u && codepoint <= 0x21b5u) {
+		return cozette_block27[codepoint - 0x21b0u];
 	} else if (codepoint >= 0x21d0u && codepoint <= 0x21d5u) {
 		return cozette_block28[codepoint - 0x21d0u];
 	} else if (codepoint >= 0x21e0u && codepoint <= 0x21e3u) {
