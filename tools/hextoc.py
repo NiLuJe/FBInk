@@ -145,7 +145,7 @@ elif fontwidth <= 64:
 else:
 	print("Unsupported font width (Must be <= 64)!")
 	exit(-1)
-fmt = re.compile(r"{}:{}".format(pat_cp, pat_rows))
+fmt = re.compile(r"^{}:{}$".format(pat_cp, pat_rows))
 
 with open(fontfile, "r") as f:
 	for line in f:
