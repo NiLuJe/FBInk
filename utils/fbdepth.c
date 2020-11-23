@@ -484,15 +484,15 @@ int
 				return_bpp = true;
 				break;
 			case 'r':
-				if (strcasecmp(optarg, "UR") == 0 || strcasecmp(optarg, "0") == 0) {
+				if (strcasecmp(optarg, "UR") == 0 || strcmp(optarg, "0") == 0) {
 					req_rota = FB_ROTATE_UR;
-				} else if (strcasecmp(optarg, "CW") == 0 || strcasecmp(optarg, "1") == 0) {
+				} else if (strcasecmp(optarg, "CW") == 0 || strcmp(optarg, "1") == 0) {
 					req_rota = FB_ROTATE_CW;
-				} else if (strcasecmp(optarg, "UD") == 0 || strcasecmp(optarg, "2") == 0) {
+				} else if (strcasecmp(optarg, "UD") == 0 || strcmp(optarg, "2") == 0) {
 					req_rota = FB_ROTATE_UD;
-				} else if (strcasecmp(optarg, "CCW") == 0 || strcasecmp(optarg, "3") == 0) {
+				} else if (strcasecmp(optarg, "CCW") == 0 || strcmp(optarg, "3") == 0) {
 					req_rota = FB_ROTATE_CCW;
-				} else if (strcasecmp(optarg, "-1") == 0) {
+				} else if (strcmp(optarg, "-1") == 0) {
 					req_rota = -1;
 				} else {
 					fprintf(stderr, "Invalid rotation '%s'!\n", optarg);
@@ -501,13 +501,13 @@ int
 				break;
 			case 'R':
 #if defined(FBINK_FOR_KOBO)
-				if (strcasecmp(optarg, "UR") == 0 || strcasecmp(optarg, "0") == 0) {
+				if (strcasecmp(optarg, "UR") == 0 || strcmp(optarg, "0") == 0) {
 					req_rota = FB_ROTATE_UR;
-				} else if (strcasecmp(optarg, "CW") == 0 || strcasecmp(optarg, "1") == 0) {
+				} else if (strcasecmp(optarg, "CW") == 0 || strcmp(optarg, "1") == 0) {
 					req_rota = FB_ROTATE_CW;
-				} else if (strcasecmp(optarg, "UD") == 0 || strcasecmp(optarg, "2") == 0) {
+				} else if (strcasecmp(optarg, "UD") == 0 || strcmp(optarg, "2") == 0) {
 					req_rota = FB_ROTATE_UD;
-				} else if (strcasecmp(optarg, "CCW") == 0 || strcasecmp(optarg, "3") == 0) {
+				} else if (strcasecmp(optarg, "CCW") == 0 || strcmp(optarg, "3") == 0) {
 					req_rota = FB_ROTATE_CCW;
 				} else {
 					fprintf(stderr, "Invalid rotation '%s'!\n", optarg);
