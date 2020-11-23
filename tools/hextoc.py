@@ -61,8 +61,8 @@ def hex2f64(v):
 
 # NOTE: Unifont is not really monospaced. We ideally ought to honor per-glyph metrics,
 #       but since we can't really do that, we simply seperate single-wide from double-wide glyphs.
-#       zcat unifont-13.0.01.hex.gz | grep -E '^([[:xdigit:]]{4}:)([[:xdigit:]]{32})$' >| unifont-8x16.hex
-#       zcat unifont-13.0.01.hex.gz | grep -E '^([[:xdigit:]]{4}:)([[:xdigit:]]{64})$' >| unifont-16x16.hex
+#       zcat unifont-*.hex.gz | grep -E '^([[:xdigit:]]{4}:)([[:xdigit:]]{32})$' >| unifont-8x16.hex
+#       zcat unifont-*.hex.gz | grep -E '^([[:xdigit:]]{4}:)([[:xdigit:]]{64})$' >| unifont-16x16.hex
 
 # NOTE: Cozette should be converted to HEX via unibdf2hex, as gbdfed mangles it to oblivion...
 #       The main culprit appears to be the per-glyph advances,
