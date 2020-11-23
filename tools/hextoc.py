@@ -130,7 +130,7 @@ blocknum = 0
 blockcount = 1
 blockcp = 0x0
 cp = 0x0
-prevcp = 0x0
+prevcp = -42
 
 # Cozette actually goes > 0xFFFF, so handle a proper uint32_t range.
 pat_cp = "([0-9a-fA-F]{4,8})"
