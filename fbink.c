@@ -5166,7 +5166,7 @@ cleanup:
 
 #ifdef FBINK_WITH_OPENTYPE
 // An extremely rudimentry "markdown" parser. It would probably be wise to cook up something better at some point...
-// (c.f., https://github.com/mity/md4c for a full-blown implementation of one)
+// (c.f., https://github.com/commonmark/commonmark-spec/wiki/List-of-CommonMark-Implementations for inspiration ^^)
 // This is *italic* text.
 // This is **bold** text.
 // This is ***bold italic*** text.
