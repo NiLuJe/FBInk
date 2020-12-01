@@ -112,7 +112,7 @@ static inline __attribute__((always_inline)) void
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x / 2 as every byte holds 2 pixels
-	size_t pix_offset = (coords->x >> 1U) + (coords->y * fInfo.line_length);
+	const size_t pix_offset = (coords->x >> 1U) + (coords->y * fInfo.line_length);
 
 	// NOTE: Squash 8bpp to 4bpp:
 	// (v >> 4)
@@ -139,7 +139,7 @@ static inline __attribute__((always_inline)) void
     put_pixel_Gray8(const FBInkCoordinates* restrict coords, const FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
-	size_t pix_offset = coords->x + (coords->y * fInfo.line_length);
+	const size_t pix_offset = coords->x + (coords->y * fInfo.line_length);
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	*((unsigned char*) (fbPtr + pix_offset)) = px->gray8;
@@ -150,7 +150,7 @@ static inline __attribute__((always_inline)) void
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 3 as every pixel is 3 consecutive bytes
-	size_t pix_offset = (coords->x * 3U) + (coords->y * fInfo.line_length);
+	const size_t pix_offset = (coords->x * 3U) + (coords->y * fInfo.line_length);
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	// NOTE: Technically legitimate warning. In practice, we always pass RGB32 pixels in 24bpp codepaths.
@@ -168,12 +168,12 @@ static inline __attribute__((always_inline)) void
     put_pixel_RGB32(const FBInkCoordinates* restrict coords, const FBInkPixel* restrict px)
 {
 	// calculate the scanline's byte offset inside the buffer
-	size_t scanline_offset = (uint32_t)(coords->y * fInfo.line_length);
+	const size_t scanline_offset = (coords->y * fInfo.line_length);
 
 	// write the four bytes at once
-	// We rely on pointer arithmetic rules to handle the pixel offset inside the scanline,
-	// i.e., if we add x *after* the cast, that's an addition of x uint32_t elements, meaning 4 bytes,
-	// which is exactly what we want ;).
+	// NOTE: We rely on pointer arithmetic rules to handle the pixel offset inside the scanline,
+	//       i.e., if we add x *after* the cast, that's an addition of x uint32_t elements, meaning x times 4 bytes,
+	//       which is exactly what we want ;).
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
 	*((uint32_t*) (fbPtr + scanline_offset) + coords->x) = px->bgra.p;
@@ -183,15 +183,14 @@ static inline __attribute__((always_inline)) void
 static inline __attribute__((always_inline)) void
     put_pixel_RGB565(const FBInkCoordinates* restrict coords, const FBInkPixel* restrict px)
 {
-	// calculate the pixel's byte offset inside the buffer
-	// note: x * 2 as every pixel is 2 consecutive bytes
-	size_t pix_offset = (uint32_t)(coords->x << 1U) + (coords->y * fInfo.line_length);
+	// calculate the scanline's byte offset inside the buffer
+	const size_t scanline_offset = (coords->y * fInfo.line_length);
 
 	// write the two bytes at once, much to GCC's dismay...
 	// NOTE: Input pixel *has* to be properly packed to RGB565 first (via pack_rgb565, c.f., put_pixel)!
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
-	*((uint16_t*) (fbPtr + pix_offset)) = px->rgb565;
+	*((uint16_t*) (fbPtr + scanline_offset) + coords->x) = px->rgb565;
 #pragma GCC diagnostic pop
 }
 
@@ -449,7 +448,7 @@ static inline __attribute__((always_inline)) void
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x / 2 as every byte holds 2 pixels
-	size_t pix_offset = (coords->x >> 1U) + (coords->y * fInfo.line_length);
+	const size_t pix_offset = (coords->x >> 1U) + (coords->y * fInfo.line_length);
 
 	// NOTE: Expand 4bpp to 8bpp:
 	// (v * 0x11)
@@ -482,7 +481,7 @@ static inline __attribute__((always_inline)) void
     get_pixel_Gray8(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
-	size_t pix_offset = coords->x + (coords->y * fInfo.line_length);
+	const size_t pix_offset = coords->x + (coords->y * fInfo.line_length);
 
 	px->gray8 = *((unsigned char*) (fbPtr + pix_offset));
 }
@@ -492,7 +491,7 @@ static inline __attribute__((always_inline)) void
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 3 as every pixel is 3 consecutive bytes
-	size_t pix_offset = (coords->x * 3U) + (coords->y * fInfo.line_length);
+	const size_t pix_offset = (coords->x * 3U) + (coords->y * fInfo.line_length);
 
 	px->bgra.color.b = *((unsigned char*) (fbPtr + pix_offset));
 	px->bgra.color.g = *((unsigned char*) (fbPtr + pix_offset + 1U));
@@ -503,7 +502,7 @@ static inline __attribute__((always_inline)) void
     get_pixel_RGB32(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
-	size_t scanline_offset = (uint32_t)(coords->y * fInfo.line_length);
+	const size_t scanline_offset = (coords->y * fInfo.line_length);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
@@ -517,14 +516,13 @@ static inline __attribute__((always_inline)) void
     get_pixel_RGB565(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
-	// note: x * 2 as every pixel is 2 consecutive bytes
-	size_t pix_offset = (uint32_t)(coords->x << 1U) + (coords->y * fInfo.line_length);
+	const size_t scanline_offset = (coords->y * fInfo.line_length);
 
 	// NOTE: We're honoring the fb's bitfield offsets here (B: 0, G: >> 5, R: >> 11)
 	// Like put_pixel_RGB565, read those two consecutive bytes at once
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
-	const uint16_t v = *((const uint16_t*) (fbPtr + pix_offset));
+	const uint16_t v = *((const uint16_t*) (fbPtr + scanline_offset) + coords->x);
 #pragma GCC diagnostic pop
 
 	// NOTE: Unpack to RGB32, because we have no use for RGB565, it's terrible.
