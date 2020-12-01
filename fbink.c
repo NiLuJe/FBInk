@@ -8448,12 +8448,12 @@ static int
 
 						// Yeah, I know, GCC...
 						// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
-						size_t pix_offset = (size_t)(((j << 2U) * w) + (i << 2U));
+						const size_t img_scanline_offset = (size_t)((j << 2U) * w);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// First, we gobble the full image pixel (all 4 bytes)
 						// cppcheck-suppress unreadVariable ; false-positive (union)
-						img_px.p = *((const uint32_t*) &data[pix_offset]);
+						img_px.p = *((const uint32_t*) (data + img_scanline_offset) + i);
 #	pragma GCC diagnostic pop
 
 						// Take a shortcut for the most common alpha values (none & full)
@@ -8473,23 +8473,23 @@ static int
 								fb_px.color.b = img_px.color.b;
 							}
 
-							pix_offset =
+							const size_t fb_pix_offset =
 							    (uint32_t)((unsigned short int) (i + x_off) << 2U) +
 							    ((unsigned short int) (j + y_off) * fInfo.line_length);
 							// And we write the full pixel to the fb (all 3 bytes)
-							*((uint24_t*) (fbPtr + pix_offset)) = fb_px.p;
+							*((uint24_t*) (fbPtr + fb_pix_offset)) = fb_px.p;
 						} else if (img_px.color.a == 0) {
 							// Transparent! Keep fb as-is.
 						} else {
 							// Alpha blending...
-							uint8_t ainv = img_px.color.a ^ 0xFFu;
+							const uint8_t ainv = img_px.color.a ^ 0xFFu;
 
-							pix_offset =
+							const size_t fb_pix_offset =
 							    (uint32_t)((unsigned short int) (i + x_off) << 2U) +
 							    ((unsigned short int) (j + y_off) * fInfo.line_length);
 							// Again, read the full pixel from the framebuffer (all 3 bytes)
 							FBInkPixelBGR bg_px;
-							bg_px.p = *((uint24_t*) (fbPtr + pix_offset));
+							bg_px.p = *((uint24_t*) (fbPtr + fb_pix_offset));
 
 							// Don't forget to honor inversion
 							// cppcheck-suppress unreadVariable ; false-positive (union)
@@ -8509,7 +8509,7 @@ static int
 							}
 
 							// And we write the full blended pixel to the fb (all 3 bytes)
-							*((uint24_t*) (fbPtr + pix_offset)) = fb_px.p;
+							*((uint24_t*) (fbPtr + fb_pix_offset)) = fb_px.p;
 						}
 					}
 				}
@@ -8526,10 +8526,10 @@ static int
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
-						size_t pix_offset = (size_t)((j * req_n * w) + (i * req_n));
+						const size_t img_pix_offset = (size_t)((j * req_n * w) + (i * req_n));
 						// Gobble the full image pixel (3 bytes, we don't care about alpha if it's there)
 						FBInkPixelRGB img_px;
-						img_px.p = *((const uint24_t*) &data[pix_offset]);
+						img_px.p = *((const uint24_t*) &data[img_pix_offset]);
 						// NOTE: Given our typedef trickery, this exactly boils down to a 3 bytes memcpy:
 						//memcpy(&img_px.p, &data[pix_offset], 3 * sizeof(uint8_t));
 
@@ -8557,12 +8557,11 @@ static int
 						fb_px.p ^= invert_rgb;
 
 						// NOTE: Again, assume we can safely skip rotation tweaks
-						pix_offset = (uint32_t)((unsigned short int) (i + x_off) << 2U) +
-							     ((unsigned short int) (j + y_off) * fInfo.line_length);
+						const size_t fb_scanline_offset = (uint32_t)((unsigned short int) (j + y_off) * fInfo.line_length);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// Write the full pixel to the fb (all 4 bytes)
-						*((uint32_t*) (fbPtr + pix_offset)) = fb_px.p;
+						*((uint32_t*) (fbPtr + fb_scanline_offset) + (i + x_off)) = fb_px.p;
 #	pragma GCC diagnostic pop
 					}
 				}
@@ -8571,10 +8570,10 @@ static int
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
-						size_t pix_offset = (size_t)((j * req_n * w) + (i * req_n));
+						const size_t img_pix_offset = (size_t)((j * req_n * w) + (i * req_n));
 						// Gobble the full image pixel (3 bytes, we don't care about alpha if it's there)
 						FBInkPixelRGB img_px;
-						img_px.p = *((const uint24_t*) &data[pix_offset]);
+						img_px.p = *((const uint24_t*) &data[img_pix_offset]);
 						// NOTE: Given our typedef trickery, this exactly boils down to a 3 bytes memcpy:
 						//memcpy(&img_px.p, &data[pix_offset], 3 * sizeof(uint8_t));
 
@@ -8591,10 +8590,10 @@ static int
 						}
 
 						// NOTE: Again, assume we can safely skip rotation tweaks
-						pix_offset = (uint32_t)((unsigned short int) (i + x_off) << 2U) +
+						const size_t fb_pix_offset = (uint32_t)((unsigned short int) (i + x_off) << 2U) +
 							     ((unsigned short int) (j + y_off) * fInfo.line_length);
 						// Write the full pixel to the fb (all 3 bytes)
-						*((uint24_t*) (fbPtr + pix_offset)) = fb_px.p;
+						*((uint24_t*) (fbPtr + fb_pix_offset)) = fb_px.p;
 						// NOTE: Again, this should roughly amount to a 3 bytes memcpy,
 						//       although in this instance, GCC generates slightly different code.
 						//memcpy(fbPtr + pix_offset, &fb_px.p, 3 * sizeof(uint8_t));
