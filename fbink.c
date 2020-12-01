@@ -168,7 +168,7 @@ static inline __attribute__((always_inline)) void
     put_pixel_RGB32(const FBInkCoordinates* restrict coords, const FBInkPixel* restrict px)
 {
 	// calculate the scanline's byte offset inside the buffer
-	const size_t scanline_offset = (coords->y * fInfo.line_length);
+	const size_t scanline_offset = coords->y * fInfo.line_length;
 
 	// write the four bytes at once
 	// NOTE: We rely on pointer arithmetic rules to handle the pixel offset inside the scanline,
@@ -184,7 +184,7 @@ static inline __attribute__((always_inline)) void
     put_pixel_RGB565(const FBInkCoordinates* restrict coords, const FBInkPixel* restrict px)
 {
 	// calculate the scanline's byte offset inside the buffer
-	const size_t scanline_offset = (coords->y * fInfo.line_length);
+	const size_t scanline_offset = coords->y * fInfo.line_length;
 
 	// write the two bytes at once, much to GCC's dismay...
 	// NOTE: Input pixel *has* to be properly packed to RGB565 first (via pack_rgb565, c.f., put_pixel)!
@@ -502,7 +502,7 @@ static inline __attribute__((always_inline)) void
     get_pixel_RGB32(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
-	const size_t scanline_offset = (coords->y * fInfo.line_length);
+	const size_t scanline_offset = coords->y * fInfo.line_length;
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
@@ -516,7 +516,7 @@ static inline __attribute__((always_inline)) void
     get_pixel_RGB565(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
-	const size_t scanline_offset = (coords->y * fInfo.line_length);
+	const size_t scanline_offset = coords->y * fInfo.line_length;
 
 	// NOTE: We're honoring the fb's bitfield offsets here (B: 0, G: >> 5, R: >> 11)
 	// Like put_pixel_RGB565, read those two consecutive bytes at once
@@ -738,10 +738,10 @@ static void
 	// And that's a cheap-ass manual memset16, let's hope the compiler can do something fun with that...
 	// That's the exact pattern used by the Linux kernel (c.f., memset16 @ lib/string.c), so, here's hoping ;).
 	for (size_t j = region.top; j < region.top + region.height; j++) {
-		const size_t px_offset = ((fInfo.line_length * j) + (region.left << 1U));
+		const size_t scanline_offset = fInfo.line_length * j;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
-		uint16_t* restrict p = (uint16_t*) (fbPtr + px_offset);
+		uint16_t* restrict p = (uint16_t*) (fbPtr + scanline_offset) + region.left;
 #pragma GCC diagnostic pop
 		size_t px_count = region.width;
 
@@ -854,10 +854,10 @@ static void
 		//       as it's essentially ignored there...
 		//       But otherwise, go with a cheap memset32 so we preserve the alpha value of our input pixel...
 #ifdef FBINK_FOR_LINUX
-		const size_t px_offset = ((fInfo.line_length * j) + (size_t)(x << 2U));
+		const size_t scanline_offset = fInfo.line_length * j;
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
-		uint32_t* p = (uint32_t*) (fbPtr + px_offset);
+		uint32_t* p = (uint32_t*) (fbPtr + scanline_offset) + x;
 #	pragma GCC diagnostic pop
 		size_t px_count = w;
 
