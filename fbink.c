@@ -8283,7 +8283,7 @@ static int
 						get_pixel_Gray4(&coords, &bg_px);
 
 						// NOTE: In this branch, req_n == 2, so we can do << 1 instead of * 2 ;).
-						const size_t img_scanline_offset = (size_t)((j << 1U) * w);
+						const size_t  img_scanline_offset = (size_t)((j << 1U) * w);
 						FBInkPixelG8A img_px;
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
@@ -8392,12 +8392,13 @@ static int
 								fb_px.color.b = img_px.color.b;
 							}
 
-							const size_t fb_scanline_offset = (uint32_t)((unsigned short int) (j + y_off) *
-										     fInfo.line_length);
+							const size_t fb_scanline_offset = (uint32_t)(
+							    (unsigned short int) (j + y_off) * fInfo.line_length);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 							// And we write the full pixel to the fb (all 4 bytes)
-							*((uint32_t*) (fbPtr + fb_scanline_offset) + (i + x_off)) = fb_px.p;
+							*((uint32_t*) (fbPtr + fb_scanline_offset) + (i + x_off)) =
+							    fb_px.p;
 #	pragma GCC diagnostic pop
 						} else if (img_px.color.a == 0) {
 							// Transparent! Keep fb as-is.
@@ -8405,13 +8406,14 @@ static int
 							// Alpha blending...
 							const uint8_t ainv = img_px.color.a ^ 0xFFu;
 
-							const size_t fb_scanline_offset = (uint32_t)((unsigned short int) (j + y_off) *
-										     fInfo.line_length);
+							const size_t fb_scanline_offset = (uint32_t)(
+							    (unsigned short int) (j + y_off) * fInfo.line_length);
 							FBInkPixelBGRA bg_px;
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 							// Again, read the full pixel from the framebuffer (all 4 bytes)
-							bg_px.p = *((uint32_t*) (fbPtr + fb_scanline_offset) + (i + x_off));
+							bg_px.p =
+							    *((uint32_t*) (fbPtr + fb_scanline_offset) + (i + x_off));
 #	pragma GCC diagnostic pop
 
 							// Don't forget to honor inversion
@@ -8434,7 +8436,8 @@ static int
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 							// And we write the full blended pixel to the fb (all 4 bytes)
-							*((uint32_t*) (fbPtr + fb_scanline_offset) + (i + x_off)) = fb_px.p;
+							*((uint32_t*) (fbPtr + fb_scanline_offset) + (i + x_off)) =
+							    fb_px.p;
 #	pragma GCC diagnostic pop
 						}
 					}
@@ -8557,7 +8560,8 @@ static int
 						fb_px.p ^= invert_rgb;
 
 						// NOTE: Again, assume we can safely skip rotation tweaks
-						const size_t fb_scanline_offset = (uint32_t)((unsigned short int) (j + y_off) * fInfo.line_length);
+						const size_t fb_scanline_offset =
+						    (uint32_t)((unsigned short int) (j + y_off) * fInfo.line_length);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// Write the full pixel to the fb (all 4 bytes)
@@ -8590,8 +8594,9 @@ static int
 						}
 
 						// NOTE: Again, assume we can safely skip rotation tweaks
-						const size_t fb_pix_offset = (uint32_t)((unsigned short int) (i + x_off) << 2U) +
-							     ((unsigned short int) (j + y_off) * fInfo.line_length);
+						const size_t fb_pix_offset =
+						    (uint32_t)((unsigned short int) (i + x_off) << 2U) +
+						    ((unsigned short int) (j + y_off) * fInfo.line_length);
 						// Write the full pixel to the fb (all 3 bytes)
 						*((uint24_t*) (fbPtr + fb_pix_offset)) = fb_px.p;
 						// NOTE: Again, this should roughly amount to a 3 bytes memcpy,
@@ -8610,7 +8615,7 @@ static int
 					// NOTE: Same general idea as the fb_is_grayscale case,
 					//       except at this bpp we then have to handle rotation ourselves...
 					// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
-					const size_t img_scanline_offset = (size_t)((j << 2U) * w);
+					const size_t   img_scanline_offset = (size_t)((j << 2U) * w);
 					FBInkPixelRGBA img_px;
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
@@ -8685,9 +8690,12 @@ static int
 					const size_t img_pix_offset = (size_t)((j * req_n * w) + (i * req_n));
 					// SW dithering
 					if (fbink_cfg->sw_dithering) {
-						pixel.bgra.color.r = dither_o8x8(i, j, data[img_pix_offset + 0U] ^ invert);
-						pixel.bgra.color.g = dither_o8x8(i, j, data[img_pix_offset + 1U] ^ invert);
-						pixel.bgra.color.b = dither_o8x8(i, j, data[img_pix_offset + 2U] ^ invert);
+						pixel.bgra.color.r =
+						    dither_o8x8(i, j, data[img_pix_offset + 0U] ^ invert);
+						pixel.bgra.color.g =
+						    dither_o8x8(i, j, data[img_pix_offset + 1U] ^ invert);
+						pixel.bgra.color.b =
+						    dither_o8x8(i, j, data[img_pix_offset + 2U] ^ invert);
 					} else {
 						pixel.bgra.color.r = data[img_pix_offset + 0U] ^ invert;
 						pixel.bgra.color.g = data[img_pix_offset + 1U] ^ invert;
