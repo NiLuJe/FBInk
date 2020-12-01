@@ -8610,12 +8610,12 @@ static int
 					// NOTE: Same general idea as the fb_is_grayscale case,
 					//       except at this bpp we then have to handle rotation ourselves...
 					// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
-					size_t         pix_offset = (size_t)(((j << 2U) * w) + (i << 2U));
+					const size_t img_scanline_offset = (size_t)((j << 2U) * w);
 					FBInkPixelRGBA img_px;
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 					// Gobble the full image pixel (all 4 bytes)
-					img_px.p = *((const uint32_t*) &data[pix_offset]);
+					img_px.p = *((const uint32_t*) (data + img_scanline_offset) + i);
 #	pragma GCC diagnostic pop
 
 					// Take a shortcut for the most common alpha values (none & full)
@@ -8645,7 +8645,7 @@ static int
 						// Transparent! Keep fb as-is.
 					} else {
 						// Alpha blending...
-						uint8_t ainv = img_px.color.a ^ 0xFFu;
+						const uint8_t ainv = img_px.color.a ^ 0xFFu;
 
 						coords.x = (unsigned short int) (i + x_off);
 						coords.y = (unsigned short int) (j + y_off);
@@ -8682,16 +8682,16 @@ static int
 			for (unsigned short int j = img_y_off; j < max_height; j++) {
 				for (unsigned short int i = img_x_off; i < max_width; i++) {
 					// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
-					size_t pix_offset = (size_t)((j * req_n * w) + (i * req_n));
+					const size_t img_pix_offset = (size_t)((j * req_n * w) + (i * req_n));
 					// SW dithering
 					if (fbink_cfg->sw_dithering) {
-						pixel.bgra.color.r = dither_o8x8(i, j, data[pix_offset + 0U] ^ invert);
-						pixel.bgra.color.g = dither_o8x8(i, j, data[pix_offset + 1U] ^ invert);
-						pixel.bgra.color.b = dither_o8x8(i, j, data[pix_offset + 2U] ^ invert);
+						pixel.bgra.color.r = dither_o8x8(i, j, data[img_pix_offset + 0U] ^ invert);
+						pixel.bgra.color.g = dither_o8x8(i, j, data[img_pix_offset + 1U] ^ invert);
+						pixel.bgra.color.b = dither_o8x8(i, j, data[img_pix_offset + 2U] ^ invert);
 					} else {
-						pixel.bgra.color.r = data[pix_offset + 0U] ^ invert;
-						pixel.bgra.color.g = data[pix_offset + 1U] ^ invert;
-						pixel.bgra.color.b = data[pix_offset + 2U] ^ invert;
+						pixel.bgra.color.r = data[img_pix_offset + 0U] ^ invert;
+						pixel.bgra.color.g = data[img_pix_offset + 1U] ^ invert;
+						pixel.bgra.color.b = data[img_pix_offset + 2U] ^ invert;
 					}
 					// Pack it
 					pixel.rgb565 =
