@@ -8207,12 +8207,12 @@ static int
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// NOTE: In this branch, req_n == 2, so we can do << 1 instead of * 2 ;).
-						size_t pix_offset = (size_t)(((j << 1U) * w) + (i << 1U));
+						const size_t img_scanline_offset = (size_t)((j << 1U) * w);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// First, we gobble the full image pixel (all 2 bytes)
 						// cppcheck-suppress unreadVariable ; false-positive (union)
-						img_px.p = *((const uint16_t*) &data[pix_offset]);
+						img_px.p = *((const uint16_t*) (data + img_scanline_offset) + i);
 #	pragma GCC diagnostic pop
 
 						// Take a shortcut for the most common alpha values (none & full)
@@ -8251,7 +8251,7 @@ static int
 							FBInkPixel bg_px;
 							get_pixel_Gray8(&coords, &bg_px);
 
-							uint8_t ainv = img_px.color.a ^ 0xFFu;
+							const uint8_t ainv = img_px.color.a ^ 0xFFu;
 							// Don't forget to honor inversion
 							img_px.color.v ^= invert;
 							// Blend it!
@@ -8283,15 +8283,15 @@ static int
 						get_pixel_Gray4(&coords, &bg_px);
 
 						// NOTE: In this branch, req_n == 2, so we can do << 1 instead of * 2 ;).
-						size_t        pix_offset = (size_t)(((j << 1U) * w) + (i << 1U));
+						const size_t img_scanline_offset = (size_t)((j << 1U) * w);
 						FBInkPixelG8A img_px;
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// We gobble the full image pixel (all 2 bytes)
-						img_px.p = *((const uint16_t*) &data[pix_offset]);
+						img_px.p = *((const uint16_t*) (data + img_scanline_offset) + i);
 #	pragma GCC diagnostic pop
 
-						uint8_t ainv = img_px.color.a ^ 0xFFu;
+						const uint8_t ainv = img_px.color.a ^ 0xFFu;
 						// Don't forget to honor inversion
 						img_px.color.v ^= invert;
 						// Blend it!
