@@ -8368,12 +8368,12 @@ static int
 
 						// Yeah, I know, GCC...
 						// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
-						size_t scanline_offset = (size_t)((j << 2U) * w);
+						const size_t img_scanline_offset = (size_t)((j << 2U) * w);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// First, we gobble the full image pixel (all 4 bytes)
 						// cppcheck-suppress unreadVariable ; false-positive (union)
-						img_px.p = *((const uint32_t*) (data + scanline_offset) + i);
+						img_px.p = *((const uint32_t*) (data + img_scanline_offset) + i);
 #	pragma GCC diagnostic pop
 
 						// Take a shortcut for the most common alpha values (none & full)
@@ -8394,26 +8394,26 @@ static int
 								fb_px.color.b = img_px.color.b;
 							}
 
-							scanline_offset = (uint32_t)((unsigned short int) (j + y_off) *
+							const size_t fb_scanline_offset = (uint32_t)((unsigned short int) (j + y_off) *
 										     fInfo.line_length);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 							// And we write the full pixel to the fb (all 4 bytes)
-							*((uint32_t*) (fbPtr + scanline_offset) + (i + x_off)) = fb_px.p;
+							*((uint32_t*) (fbPtr + fb_scanline_offset) + (i + x_off)) = fb_px.p;
 #	pragma GCC diagnostic pop
 						} else if (img_px.color.a == 0) {
 							// Transparent! Keep fb as-is.
 						} else {
 							// Alpha blending...
-							uint8_t ainv = img_px.color.a ^ 0xFFu;
+							const uint8_t ainv = img_px.color.a ^ 0xFFu;
 
-							scanline_offset = (uint32_t)((unsigned short int) (j + y_off) *
+							const size_t fb_scanline_offset = (uint32_t)((unsigned short int) (j + y_off) *
 										     fInfo.line_length);
 							FBInkPixelBGRA bg_px;
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 							// Again, read the full pixel from the framebuffer (all 4 bytes)
-							bg_px.p = *((uint32_t*) (fbPtr + scanline_offset) + (i + x_off));
+							bg_px.p = *((uint32_t*) (fbPtr + fb_scanline_offset) + (i + x_off));
 #	pragma GCC diagnostic pop
 
 							// Don't forget to honor inversion
@@ -8436,7 +8436,7 @@ static int
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 							// And we write the full blended pixel to the fb (all 4 bytes)
-							*((uint32_t*) (fbPtr + scanline_offset) + (i + x_off)) = fb_px.p;
+							*((uint32_t*) (fbPtr + fb_scanline_offset) + (i + x_off)) = fb_px.p;
 #	pragma GCC diagnostic pop
 						}
 					}
