@@ -8314,16 +8314,16 @@ static int
 				// Scanline by scanline, as we usually have input/output x offsets to honor
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					// NOTE: Again, assume the fb origin is @ (0, 0), which should hold true at that bitdepth.
-					size_t pix_offset = (size_t)((j * w) + img_x_off);
-					size_t fb_offset  = ((uint32_t)(j + y_off) * fInfo.line_length) +
-							   (unsigned int) (img_x_off + x_off);
+					const size_t pix_offset = (size_t)((j * w) + img_x_off);
+					const size_t fb_offset  = ((uint32_t)(j + y_off) * fInfo.line_length) +
+								 (unsigned int) (img_x_off + x_off);
 					memcpy(fbPtr + fb_offset, data + pix_offset, max_width);
 				}
 			} else {
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// NOTE: Here, req_n is either 2, or 1 if ignore_alpha, so, no shift trickery ;)
-						size_t pix_offset = (size_t)((j * req_n * w) + (i * req_n));
+						const size_t pix_offset = (size_t)((j * req_n * w) + (i * req_n));
 						// SW dithering
 						if (fbink_cfg->sw_dithering) {
 							pixel.gray8 = dither_o8x8(i, j, data[pix_offset] ^ invert);
@@ -8687,19 +8687,16 @@ static int
 			for (unsigned short int j = img_y_off; j < max_height; j++) {
 				for (unsigned short int i = img_x_off; i < max_width; i++) {
 					// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
-					const size_t img_pix_offset = (size_t)((j * req_n * w) + (i * req_n));
+					const size_t pix_offset = (size_t)((j * req_n * w) + (i * req_n));
 					// SW dithering
 					if (fbink_cfg->sw_dithering) {
-						pixel.bgra.color.r =
-						    dither_o8x8(i, j, data[img_pix_offset + 0U] ^ invert);
-						pixel.bgra.color.g =
-						    dither_o8x8(i, j, data[img_pix_offset + 1U] ^ invert);
-						pixel.bgra.color.b =
-						    dither_o8x8(i, j, data[img_pix_offset + 2U] ^ invert);
+						pixel.bgra.color.r = dither_o8x8(i, j, data[pix_offset + 0U] ^ invert);
+						pixel.bgra.color.g = dither_o8x8(i, j, data[pix_offset + 1U] ^ invert);
+						pixel.bgra.color.b = dither_o8x8(i, j, data[pix_offset + 2U] ^ invert);
 					} else {
-						pixel.bgra.color.r = data[img_pix_offset + 0U] ^ invert;
-						pixel.bgra.color.g = data[img_pix_offset + 1U] ^ invert;
-						pixel.bgra.color.b = data[img_pix_offset + 2U] ^ invert;
+						pixel.bgra.color.r = data[pix_offset + 0U] ^ invert;
+						pixel.bgra.color.g = data[pix_offset + 1U] ^ invert;
+						pixel.bgra.color.b = data[pix_offset + 2U] ^ invert;
 					}
 					// Pack it
 					pixel.rgb565 =
