@@ -965,11 +965,9 @@ static void
 	} else {
 		size_t size = fread(machine_tag, sizeof(*machine_tag), sizeof(machine_tag), fp);
 		if (size > 0) {
-			// NUL terminate
-			machine_tag[size - 1U] = '\0';
 			// Strip trailing LF
-			if (machine_tag[size - 2U] == '\n') {
-				machine_tag[size - 2U] = '\0';
+			if (machine_tag[size - 1U] == '\n') {
+				machine_tag[size - 1U] = '\0';
 			}
 		}
 		fclose(fp);
