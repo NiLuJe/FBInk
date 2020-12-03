@@ -963,7 +963,7 @@ static void
 	if (!fp) {
 		ELOG("Couldn't open the sysfs entry for the SoC machine tag!");
 	} else {
-		size_t size = fread(machine_tag, sizeof(*machine_tag), sizeof(machine_tag), fp);
+		size_t size = fread(machine_tag, sizeof(*machine_tag), sizeof(machine_tag) - 1U, fp);
 		if (size > 0) {
 			// Strip trailing LF
 			if (machine_tag[size - 1U] == '\n') {
