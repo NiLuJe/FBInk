@@ -168,7 +168,7 @@ static inline __attribute__((always_inline)) void
     put_pixel_RGB32(const FBInkCoordinates* restrict coords, const FBInkPixel* restrict px)
 {
 	// calculate the scanline's byte offset inside the buffer
-	const size_t scanline_offset = coords->y * fInfo.line_length;
+	const size_t scanline_offset = (size_t) coords->y * fInfo.line_length;
 
 	// write the four bytes at once
 	// NOTE: We rely on pointer arithmetic rules to handle the pixel offset inside the scanline,
@@ -184,7 +184,7 @@ static inline __attribute__((always_inline)) void
     put_pixel_RGB565(const FBInkCoordinates* restrict coords, const FBInkPixel* restrict px)
 {
 	// calculate the scanline's byte offset inside the buffer
-	const size_t scanline_offset = coords->y * fInfo.line_length;
+	const size_t scanline_offset = (size_t) coords->y * fInfo.line_length;
 
 	// write the two bytes at once, much to GCC's dismay...
 	// NOTE: Input pixel *has* to be properly packed to RGB565 first (via pack_rgb565, c.f., put_pixel)!
@@ -502,7 +502,7 @@ static inline __attribute__((always_inline)) void
     get_pixel_RGB32(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
-	const size_t scanline_offset = coords->y * fInfo.line_length;
+	const size_t scanline_offset = (size_t) coords->y * fInfo.line_length;
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
@@ -516,7 +516,7 @@ static inline __attribute__((always_inline)) void
     get_pixel_RGB565(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
-	const size_t scanline_offset = coords->y * fInfo.line_length;
+	const size_t scanline_offset = (size_t) coords->y * fInfo.line_length;
 
 	// NOTE: We're honoring the fb's bitfield offsets here (B: 0, G: >> 5, R: >> 11)
 	// Like put_pixel_RGB565, read those two consecutive bytes at once
