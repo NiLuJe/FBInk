@@ -219,7 +219,7 @@ static int*
 
 	if (rv) {
 		for (int i = dw / 2; --i >= 0;) {
-			int tmp       = p[i];
+			const int tmp = p[i];
 			p[i]          = p[dw - i - 1];
 			p[dw - i - 1] = tmp;
 		}
@@ -243,7 +243,7 @@ static int*
 		qint64       val = 0x8000 * s / d - 0x8000;
 		const qint64 inc = (((qint64) s) << 16) / d;
 		for (int i = 0; i < d; i++) {
-			int pos = (int) (val >> 16);
+			const int pos = (int) (val >> 16);
 			if (pos < 0)
 				p[j++] = 0;
 			else if (pos >= (s - 1))
@@ -256,10 +256,10 @@ static int*
 		/* scaling down */
 		qint64       val = 0;
 		const qint64 inc = (((qint64) s) << 16) / d;
-		int          Cp  = (((d << 14) + s - 1) / s);
+		const int    Cp  = (((d << 14) + s - 1) / s);
 		for (int i = 0; i < d; i++) {
-			int ap = (int) (((0x10000 - (val & 0xffff)) * Cp) >> 16);
-			p[j]   = ap | (Cp << 16);
+			const int ap = (int) (((0x10000 - (val & 0xffff)) * Cp) >> 16);
+			p[j]         = ap | (Cp << 16);
 			j++;
 			val += inc;
 		}
