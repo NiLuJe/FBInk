@@ -1168,10 +1168,11 @@ static void
 			strncpy(deviceQuirks.deviceCodename, "PB1040", sizeof(deviceQuirks.deviceCodename) - 1U);
 			deviceQuirks.deviceId = 1040U;
 		} else if (strcmp(model_name, "PocketBook Color Lux") == 0) {
-			deviceQuirks.screenDPI          = 125U;
+			deviceQuirks.screenDPI = 125U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBColorLux", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 'C' + 'L' + 'u' + 'x';
+			deviceQuirks.deviceId =
+			    ('C' << 8U) | ('o' << 8U) | ('l' << 8U) | ('o' << 8U) | ('r' << 8U) | 'L' | 'u' | 'x';
 		} else {
 			WARN("Unidentified PocketBook model: `%s`", model_name);
 			deviceQuirks.screenDPI = 212U;
