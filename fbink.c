@@ -3124,7 +3124,7 @@ static void
 		}
 	}
 
-	if (deviceQuirks.isPB3BytesPerPixel) {
+	if (deviceQuirks.deviceId == 'C' + 'L' + 'u' + 'x') {
 		vInfo.bits_per_pixel = 24U;
 		vInfo.xres           = vInfo.xres / 3U;
 	}
