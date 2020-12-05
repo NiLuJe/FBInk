@@ -44,9 +44,9 @@
 
 static inline __attribute__((always_inline)) __m128i Q_DECL_VECTORCALL
     qt_qimageScaleAARGBA_helper_sse4(const unsigned int* restrict pix,
-				     int                          xyap,
-				     int                          Cxy,
-				     int                          step,
+				     const int                    xyap,
+				     const int                    Cxy,
+				     const int                    step,
 				     const __m128i                vxyap,
 				     const __m128i                vCxy)
 {

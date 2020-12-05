@@ -533,9 +533,9 @@ static void
 #if defined(FBINK_QIS_NO_SIMD) || !(defined(__SSE4_1__) || defined(__ARM_NEON__))
 static inline __attribute__((always_inline)) void
     qt_qimageScaleAARGBA_helper(const unsigned int* restrict pix,
-				int                          xyap,
-				int                          Cxy,
-				int                          step,
+				const int                    xyap,
+				const int                    Cxy,
+				const int                    step,
 				int* restrict                r,
 				int* restrict                g,
 				int* restrict                b,
@@ -748,9 +748,9 @@ static void
 #if defined(FBINK_QIS_NO_SIMD) || !(defined(__SSE4_1__) || defined(__ARM_NEON__))
 static inline __attribute__((always_inline)) void
     qt_qimageScaleAARGB_helper(const unsigned int* restrict pix,
-			       int                          xyap,
-			       int                          Cxy,
-			       int                          step,
+			       const int                    xyap,
+			       const int                    Cxy,
+			       const int                    step,
 			       int* restrict                r,
 			       int* restrict                g,
 			       int* restrict                b)
@@ -892,7 +892,11 @@ static void
 #endif    // FBINK_QIS_NO_SIMD || !(__SSE4_1__ || __ARM_NEON__)
 
 static inline __attribute__((always_inline)) void
-    qt_qimageScaleAAY8_helper(const unsigned char* restrict pix, int xyap, int Cxy, int step, int* restrict v)
+    qt_qimageScaleAAY8_helper(const unsigned char* restrict pix,
+			      const int                     xyap,
+			      const int                     Cxy,
+			      const int                     step,
+			      int* restrict                 v)
 {
 	*v = *pix * xyap;
 	int j;
@@ -1065,9 +1069,9 @@ static void
 
 static inline __attribute__((always_inline)) void
     qt_qimageScaleAAY8A_helper(const unsigned short* restrict pix,
-			       int                            xyap,
-			       int                            Cxy,
-			       int                            step,
+			       const int                      xyap,
+			       const int                      Cxy,
+			       const int                      step,
 			       int* restrict                  v,
 			       int* restrict                  a)
 {
