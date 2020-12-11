@@ -976,7 +976,7 @@ static void
 	if (strcmp(machine_tag, "reMarkable 2.0") == 0) {
 		// NOTE: This is currently a very weird and mostly unsupported beast...
 		//       c.f., https://rmkit.dev/news/rm2-status/
-		deviceQuirks.screenDPI   = 226;
+		deviceQuirks.screenDPI   = 226U;
 		deviceQuirks.canHWInvert = false;    // No EPDC :(
 		// NOTE: Not actually an NTX board, but useful nonetheless for fbdepth ;).
 		deviceQuirks.ntxBootRota  = FB_ROTATE_CW;
@@ -988,7 +988,7 @@ static void
 		strncpy(deviceQuirks.deviceCodename, "Zero Sugar", sizeof(deviceQuirks.deviceCodename) - 1U);
 		deviceQuirks.deviceId = 2U;
 	} else {
-		deviceQuirks.screenDPI   = 226;
+		deviceQuirks.screenDPI   = 226U;
 		deviceQuirks.canHWInvert = true;
 		// NOTE: Not actually an NTX board, but useful nonetheless for fbdepth ;).
 		deviceQuirks.ntxBootRota  = FB_ROTATE_CW;
