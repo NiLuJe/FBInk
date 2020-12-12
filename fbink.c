@@ -200,8 +200,8 @@ static void
     rotate_coordinates_pickel(FBInkCoordinates* restrict coords)
 {
 	// Rotate the coordinates to account for pickel's rotation...
-	unsigned short int rx = coords->y;
-	unsigned short int ry = (unsigned short int) (screenWidth - coords->x - 1);
+	const unsigned short int rx = coords->y;
+	const unsigned short int ry = (unsigned short int) (screenWidth - coords->x - 1);
 
 // NOTE: This codepath is not production ready, it was just an experiment to wrap my head around framebuffer rotation...
 //       In particular, only CW has been actually confirmed to behave properly (to handle the isNTX16bLandscape quirk),
@@ -260,8 +260,8 @@ static void
 	// Rotate the coordinates to account for the native boot rotation...
 	// NOTE: See the note is fbink_init, this is based on a replicated boot modeset,
 	//       which apparently doesn't exactly match the *real* boot modeset... -_-".
-	unsigned short int rx = (unsigned short int) (screenHeight - coords->y - 1);
-	unsigned short int ry = coords->x;
+	const unsigned short int rx = (unsigned short int) (screenHeight - coords->y - 1);
+	const unsigned short int ry = coords->x;
 
 	coords->x = rx;
 	coords->y = ry;
@@ -269,6 +269,7 @@ static void
 
 #	ifdef FBINK_WITH_BUTTON_SCAN
 // NOTE: c.f., https://github.com/llandsmeer/inkvt/pull/14 for another attempt at this...
+//             (Which means, to a certain extent, fbink_rota_quirks.c)
 static void
     rotate_touch_coordinates(FBInkCoordinates* restrict coords)
 {

@@ -121,6 +121,10 @@
 #	endif
 #endif
 
+// Likely/Unlikely branch tagging
+#define likely(x)   __builtin_expect(!!(x), 1)
+#define unlikely(x) __builtin_expect(!!(x), 0)
+
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
