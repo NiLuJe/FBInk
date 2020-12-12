@@ -816,19 +816,22 @@ static void
 	if (!fp) {
 		ELOG("Couldn't find a Kobo version tag (onboard unmounted or not running on a Kobo?)!");
 	} else {
-		// NOTE: I'm not entirely sure this will always have a fixed length, so,
-		//       rely on getline()'s dynamic allocation to be safe...
-		char*   line = NULL;
-		size_t  len  = 0;
-		ssize_t nread;
-		while ((nread = getline(&line, &len, fp)) != -1) {
+		// NOTE: I'm not entirely sure this will always have a fixed length, so, give us a bit of room...
+		//       (The line, and as such, the file, does not contain a trailing LF).
+		char   line[_POSIX_PATH_MAX] = { 0 };
+		size_t size                  = fread(line, sizeof(*line), sizeof(line) - 1U, fp);
+		if (size > 0) {
 			// Thankfully, the device code is always located in the three
 			// final characters, so that's easy enough to extract without
 			// having to worry about the formatting...
-			const unsigned short int kobo_id = (unsigned short int) strtoul(line + (nread - 3), NULL, 10);
+			const unsigned short int kobo_id = (unsigned short int) strtoul(line + (size - 3), NULL, 10);
 			set_kobo_quirks(kobo_id);
+		} else {
+			WARN("Failed to read the Kobo version tag (%zu)", size);
+			// NOTE: Make it clear we failed to identify the device...
+			//       i.e., by passing UINT16_MAX instead of 0U, which we use to flag old !NTX devices.
+			set_kobo_quirks((unsigned short int) -1);
 		}
-		free(line);
 		fclose(fp);
 
 		// Get out now, we're done!

@@ -123,6 +123,7 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <linux/fb.h>
 #include <linux/kd.h>
 #include <stdlib.h>
