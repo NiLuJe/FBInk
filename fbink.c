@@ -2560,7 +2560,7 @@ static int
 	// NOTE: Discard bogus regions, they can cause a softlock on some devices.
 	//       A 0x0 region is a no go on most devices, while a 1x1 region may only upset some Kindle models.
 	//       Some devices even balk at 1xN or Nx1, so, catch that, too.
-	if (region.width <= 1 || region.height <= 1) {
+	if (unlikely(region.width <= 1 || region.height <= 1)) {
 		WARN("Discarding bogus empty region (%ux%u) to avoid a softlock", region.width, region.height);
 		return ERRCODE(EXIT_FAILURE);
 	}
@@ -2604,7 +2604,7 @@ static int
 
 	// NOTE: Make sure update_marker is valid, an invalid marker *may* hang the kernel instead of failing gracefully,
 	//       depending on the device/FW...
-	if (lastMarker == 0U) {
+	if (unlikely(lastMarker == 0U)) {
 		lastMarker = ('F' + 'B' + 'I' + 'n' + 'k');
 		// i.e.,  70  + 66  + 73  + 110 + 107
 	}
@@ -2730,7 +2730,7 @@ static int
 	return EXIT_SUCCESS;
 }
 
-static const char*
+static __attribute__((cold)) const char*
     fb_rotate_to_string(uint32_t rotate)
 {
 	switch (rotate) {
@@ -2749,7 +2749,7 @@ static const char*
 
 #ifdef FBINK_FOR_KINDLE
 // einkfb handles rotation via a custom set of ioctls, with a different mapping than the Linux standard...
-static const char*
+static __attribute__((cold)) const char*
     einkfb_orientation_to_string(orientation_t orientation)
 {
 	switch (orientation) {
@@ -2768,7 +2768,7 @@ static const char*
 #endif
 
 // Used to manually set the pen colors
-static int
+static __attribute__((cold)) int
     set_pen_color(bool is_fg, bool is_y8, bool quantize, bool update, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {
 	int rv = EXIT_SUCCESS;
@@ -2974,7 +2974,7 @@ int
 }
 
 // Update our internal representation of pen colors (i.e., packed into the right pixel format).
-static int
+static __attribute__((cold)) int
     update_pen_colors(const FBInkConfig* restrict fbink_cfg)
 {
 	int rv = EXIT_SUCCESS;
@@ -3051,7 +3051,7 @@ static int
 }
 
 // Update the global logging verbosity flags
-static void
+static __attribute__((cold)) void
     update_verbosity(const FBInkConfig* restrict fbink_cfg)
 {
 	// Update verbosity flag
@@ -3078,27 +3078,27 @@ static void
 // We'll fudge it back into order here.
 // c.f., the similar logic in https://github.com/koreader/koreader-base/blob/50a965c28fd5ea2100257aa9ce2e62c9c301155c/ffi/framebuffer_linux.lua#L119-L189
 #ifdef FBINK_FOR_POCKETBOOK
-static void
+static __attribute__((cold)) void
     pocketbook_fix_fb_info(void)
 {
 	ELOG("Virtual resolution: %ux%u", vInfo.xres_virtual, vInfo.yres_virtual);
 	// Not duplicating all the explanations here, c.f., the KOReader snippet linked earlier ;).
 	if (fInfo.id[0] == '\0') {
-		uint32_t xres_virtual = vInfo.xres_virtual;
+		const uint32_t xres_virtual = vInfo.xres_virtual;
 		if (!IS_ALIGNED(vInfo.xres_virtual, 32)) {
 			vInfo.xres_virtual = ALIGN(vInfo.xres, 32);
 			ELOG("xres_virtual -> %u", vInfo.xres_virtual);
 		}
-		uint32_t yres_virtual = vInfo.yres_virtual;
+		const uint32_t yres_virtual = vInfo.yres_virtual;
 		if (!IS_ALIGNED(vInfo.yres_virtual, 128)) {
 			vInfo.yres_virtual = ALIGN(vInfo.yres, 128);
 			ELOG("yres_virtual -> %u", vInfo.yres_virtual);
 		}
-		uint32_t line_length = fInfo.line_length;
-		fInfo.line_length    = vInfo.xres_virtual * (vInfo.bits_per_pixel >> 3U);
+		const uint32_t line_length = fInfo.line_length;
+		fInfo.line_length          = vInfo.xres_virtual * (vInfo.bits_per_pixel >> 3U);
 		ELOG("line_length -> %u", fInfo.line_length);
 
-		size_t fb_size = fInfo.line_length * vInfo.yres_virtual;
+		const size_t fb_size = fInfo.line_length * vInfo.yres_virtual;
 		if (fb_size > fInfo.smem_len) {
 			if (!IS_ALIGNED(yres_virtual, 32)) {
 				vInfo.yres_virtual = ALIGN(vInfo.yres, 32);
@@ -3135,7 +3135,7 @@ static void
 #endif    // FBINK_FOR_POCKETBOOK
 
 // Get the various fb info & setup global variables
-static int
+static __attribute__((cold)) int
     initialize_fbink(int fbfd, const FBInkConfig* restrict fbink_cfg, bool skip_vinfo)
 {
 	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
@@ -3203,7 +3203,7 @@ static int
 		// Ask the system for its clock tick frequency so we can translate jiffies into human-readable units.
 		// NOTE: This will most likely be 100, even if CONFIG_HZ is > 100
 		//       c.f., sysconf(3)
-		long int rc = sysconf(_SC_CLK_TCK);
+		const long int rc = sysconf(_SC_CLK_TCK);
 		if (rc > 0) {
 			USER_HZ = rc;
 			ELOG("Clock tick frequency appears to be %ld Hz", USER_HZ);
@@ -3321,7 +3321,7 @@ static int
 		//           & https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer.lua#L74-L84
 		// NOTE: See the discussion around p16 of the Plato thread for even more gory details!
 		//       https://www.mobileread.com/forums/showthread.php?t=292914&page=16
-		if (vInfo.bits_per_pixel == 16U) {
+		if (unlikely(vInfo.bits_per_pixel == 16U)) {
 			// Correct screenWidth & screenHeight, so we do all our row/column arithmetics on the right values...
 			screenWidth                    = vInfo.yres;
 			screenHeight                   = vInfo.xres;
@@ -3674,10 +3674,10 @@ static int
 #ifdef FBINK_WITH_FONTS
 		// NOTE: Handle custom fonts, no matter their base glyph size...
 		// We want at least N columns, so, viewWidth / N / glyphWidth gives us the maximum multiplier.
-		uint8_t max_fontmult_width = (uint8_t)(viewWidth / min_maxcols / glyphWidth);
+		const uint8_t max_fontmult_width = (uint8_t)(viewWidth / min_maxcols / glyphWidth);
 		// We want at least 1 row, so, viewHeight / glyphHeight gives us the maximum multiplier.
-		uint8_t max_fontmult_height = (uint8_t)(viewHeight / glyphHeight);
-		max_fontmult                = (uint8_t) MIN(max_fontmult_width, max_fontmult_height);
+		const uint8_t max_fontmult_height = (uint8_t)(viewHeight / glyphHeight);
+		max_fontmult                      = (uint8_t) MIN(max_fontmult_width, max_fontmult_height);
 		if (FONTSIZE_MULT > max_fontmult) {
 			FONTSIZE_MULT = max_fontmult;
 			ELOG("Clamped font size multiplier from %hhu to %hhu", fbink_cfg->fontmult, max_fontmult);
@@ -3704,7 +3704,7 @@ static int
 			// NOTE: Try to differentiate between 6" devices and larger screens,
 			//       because we'll want a smaller scaling factor on 6" devices,
 			//       because column space is sparse there ;).
-			uint32_t actual_height = MAX(vInfo.xres, vInfo.yres);
+			const uint32_t actual_height = MAX(vInfo.xres, vInfo.yres);
 			if (actual_height <= 1448U) {
 				// That should cover everyone (Voyage/Oasis 1/PaperWhite 3 & 4/Glo HD/Clara HD)
 				FONTSIZE_MULT = 3U;    // 24x24
@@ -3833,7 +3833,7 @@ int
 }
 
 #ifdef FBINK_WITH_OPENTYPE
-static const char*
+static __attribute__((cold)) const char*
     font_style_to_string(FONT_STYLE_T style)
 {
 	switch (style) {
@@ -3851,7 +3851,7 @@ static const char*
 }
 
 // Load OT fonts for fbink_add_ot_font & fbink_add_ot_font_v2
-static int
+static __attribute__((cold)) int
     add_ot_font(const char* filename, FONT_STYLE_T style, FBInkOTFonts* restrict ot_fonts)
 {
 #	ifdef FBINK_FOR_KOBO
@@ -3879,7 +3879,7 @@ static int
 		otInit = false;
 		return ERRCODE(EXIT_FAILURE);
 	} else {
-		int         fd = fileno(f);
+		const int   fd = fileno(f);
 		struct stat st;
 		if (fstat(fd, &st) == -1) {
 			PFWARN("fstat: %m");
@@ -3910,7 +3910,7 @@ static int
 		return ERRCODE(EXIT_FAILURE);
 	}
 	// First, check if we can actually find a recognizable font format in the data...
-	int fontcount = stbtt_GetNumberOfFonts(data);
+	const int fontcount = stbtt_GetNumberOfFonts(data);
 	if (fontcount == 0) {
 		free(data);
 		free(font_info);
@@ -3922,7 +3922,7 @@ static int
 		    fontcount);
 	}
 	// Then, get the offset to the first font
-	int fontoffset = stbtt_GetFontOffsetForIndex(data, 0);
+	const int fontoffset = stbtt_GetFontOffsetForIndex(data, 0);
 	if (fontoffset == -1) {
 		free(data);
 		free(font_info);
@@ -4016,7 +4016,7 @@ int
 
 #ifdef FBINK_WITH_OPENTYPE
 // Free an individual OpenType font structure
-static int
+static __attribute__((cold)) int
     free_ot_font(stbtt_fontinfo** restrict font_info)
 {
 	if (*font_info) {
@@ -4032,7 +4032,7 @@ static int
 }
 
 // Free OT fonts for fbink_free_ot_fonts & fbink_free_ot_fonts_v2
-static int
+static __attribute__((cold)) int
     free_ot_fonts(FBInkOTFonts* restrict ot_fonts)
 {
 	if (free_ot_font(&(ot_fonts->otRegular)) == EXIT_SUCCESS) {
@@ -4326,7 +4326,7 @@ int
 		FBInkPixel bgP = penBGPixel;
 		if (fbink_cfg->is_inverted) {
 			// NOTE: And, of course, RGB565 is terrible. Inverting the lossy packed value would be even lossier...
-			if (vInfo.bits_per_pixel == 16U) {
+			if (unlikely(vInfo.bits_per_pixel == 16U)) {
 				const uint8_t bgcolor = penBGColor ^ 0xFFu;
 				bgP.rgb565            = pack_rgb565(bgcolor, bgcolor, bgcolor);
 			} else {

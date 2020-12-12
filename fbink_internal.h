@@ -675,17 +675,17 @@ static int wait_for_complete(int, uint32_t);
 static int open_fb_fd(int* restrict, bool* restrict);
 static int open_fb_fd_nonblock(int* restrict, bool* restrict);
 
-static const char* fb_rotate_to_string(uint32_t);
+static __attribute__((cold)) const char* fb_rotate_to_string(uint32_t);
 #ifdef FBINK_FOR_KINDLE
-static const char* einkfb_orientation_to_string(orientation_t);
+static __attribute__((cold)) const char* einkfb_orientation_to_string(orientation_t);
 #endif
-static int  set_pen_color(bool, bool, bool, bool, uint8_t, uint8_t, uint8_t, uint8_t);
-static int  update_pen_colors(const FBInkConfig* restrict);
-static void update_verbosity(const FBInkConfig* restrict);
+static __attribute__((cold)) int  set_pen_color(bool, bool, bool, bool, uint8_t, uint8_t, uint8_t, uint8_t);
+static __attribute__((cold)) int  update_pen_colors(const FBInkConfig* restrict);
+static __attribute__((cold)) void update_verbosity(const FBInkConfig* restrict);
 #ifdef FBINK_FOR_POCKETBOOK
-static void pocketbook_fix_fb_info(void);
+static __attribute__((cold)) void pocketbook_fix_fb_info(void);
 #endif
-static int initialize_fbink(int, const FBInkConfig* restrict, bool);
+static __attribute__((cold)) int initialize_fbink(int, const FBInkConfig* restrict, bool);
 
 static int memmap_fb(int);
 static int unmap_fb(void);
@@ -723,12 +723,12 @@ static int            draw_image(int,
 #endif
 
 #ifdef FBINK_WITH_OPENTYPE
-static const char* font_style_to_string(FONT_STYLE_T);
-static int         add_ot_font(const char*, FONT_STYLE_T, FBInkOTFonts* restrict);
-static int         free_ot_font(stbtt_fontinfo** restrict);
-static int         free_ot_fonts(FBInkOTFonts* restrict);
-static void        parse_simple_md(const char* restrict, size_t, unsigned char* restrict);
-static const char* glyph_style_to_string(CHARACTER_FONT_T);
+static __attribute__((cold)) const char* font_style_to_string(FONT_STYLE_T);
+static __attribute__((cold)) int         add_ot_font(const char*, FONT_STYLE_T, FBInkOTFonts* restrict);
+static __attribute__((cold)) int         free_ot_font(stbtt_fontinfo** restrict);
+static __attribute__((cold)) int         free_ot_fonts(FBInkOTFonts* restrict);
+static void                              parse_simple_md(const char* restrict, size_t, unsigned char* restrict);
+static __attribute__((cold)) const char* glyph_style_to_string(CHARACTER_FONT_T);
 #endif
 
 static uint32_t    get_wfm_mode(uint8_t);
