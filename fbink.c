@@ -7381,7 +7381,7 @@ int
 	FBInkPixel bgP = penBGPixel;
 	if (fbink_cfg->is_inverted) {
 		// NOTE: And, of course, RGB565 is terrible. Inverting the lossy packed value would be even lossier...
-		if (vInfo.bits_per_pixel == 16U) {
+		if (unlikely(vInfo.bits_per_pixel == 16U)) {
 			fgP.rgb565 = pack_rgb565(fgcolor, fgcolor, fgcolor);
 			bgP.rgb565 = pack_rgb565(bgcolor, bgcolor, bgcolor);
 		} else {
@@ -7422,9 +7422,9 @@ int
 	}
 
 	// We'll begin by painting a blank canvas, just to make sure everything's clean behind us...
-	unsigned short int top_pos =
+	const unsigned short int top_pos =
 	    (unsigned short int) MAX(0 + (viewVertOrigin - viewVertOffset), ((row * FONTH) + voffset + viewVertOrigin));
-	unsigned short int left_pos = 0U + viewHoriOrigin;
+	const unsigned short int left_pos = 0U + viewHoriOrigin;
 
 	// ... unless we were asked to skip background pixels... ;).
 	if (!fbink_cfg->is_bgless) {
@@ -7435,10 +7435,12 @@ int
 	uint8_t emptyC;
 	uint8_t borderC;
 	// Handle devices with an inverted palette properly...
+#ifdef FBINK_FOR_KINDLE
 	if (deviceQuirks.isKindleLegacy) {
 		emptyC  = fbink_cfg->is_inverted ? eInkBGCMap[BG_GRAYB] : eInkFGCMap[BG_GRAYB];
 		borderC = fbink_cfg->is_inverted ? eInkBGCMap[BG_GRAY4] : eInkFGCMap[BG_GRAY4];
 	} else {
+#endif
 		if (fbink_cfg->wfm_mode == WFM_A2) {
 			// NOTE: If we're using A2 refresh mode, we'll be enforcing monochrome anyway...
 			//       Making sure we do that on our end (... at least with default bg/fg colors anyway ;),
@@ -7450,7 +7452,9 @@ int
 			emptyC  = fbink_cfg->is_inverted ? eInkFGCMap[BG_GRAYB] : eInkBGCMap[BG_GRAYB];
 			borderC = fbink_cfg->is_inverted ? eInkFGCMap[BG_GRAY4] : eInkBGCMap[BG_GRAY4];
 		}
+#ifdef FBINK_FOR_KINDLE
 	}
+#endif
 	// Pack that into the right pixel format...
 	FBInkPixel emptyP;
 	FBInkPixel borderP;
