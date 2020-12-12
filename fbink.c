@@ -7492,12 +7492,12 @@ int
 
 		// We'll want 5% of padding on each side,
 		// with rounding to make sure the bar's size is constant across all percentage values...
-		unsigned short int bar_width = (unsigned short int) (((0.90f * (float) viewWidth)) + 0.5f);
-		unsigned short int fill_width =
+		const unsigned short int bar_width = (unsigned short int) (((0.90f * (float) viewWidth)) + 0.5f);
+		const unsigned short int fill_width =
 		    (unsigned short int) (((value / 100.0f) * (0.90f * (float) viewWidth)) + 0.5f);
-		unsigned short int fill_left   = (unsigned short int) (left_pos + (0.05f * (float) viewWidth) + 0.5f);
-		unsigned short int empty_width = (unsigned short int) (bar_width - fill_width);
-		unsigned short int empty_left  = (unsigned short int) (fill_left + fill_width);
+		const unsigned short int fill_left = (unsigned short int) (left_pos + (0.05f * (float) viewWidth) + 0.5f);
+		const unsigned short int empty_width = (unsigned short int) (bar_width - fill_width);
+		const unsigned short int empty_left  = (unsigned short int) (fill_left + fill_width);
 
 		// Draw the border...
 		(*fxpFillRectChecked)(fill_left, top_pos, bar_width, FONTH, &borderP);
@@ -7525,7 +7525,7 @@ int
 		//       to avoid spurious behavior with u8_strlen later on...
 		char percentage_text[8] = { 0 };
 		snprintf(percentage_text, sizeof(percentage_text), "%hhu%%", value);
-		size_t line_len = strlen(percentage_text);    // Flawfinder: ignore
+		const size_t line_len = strlen(percentage_text);    // Flawfinder: ignore
 
 		bool      halfcell_offset = false;
 		short int col             = (short int) ((unsigned short int) (MAXCOLS - line_len) / 2U);
@@ -7555,8 +7555,8 @@ int
 
 		// We'll want 5% of padding on each side,
 		// with rounding to make sure the bar's size is constant across all percentage values...
-		unsigned short int bar_width = (unsigned short int) ((0.90f * (float) viewWidth) + 0.5f);
-		unsigned short int bar_left  = (unsigned short int) (left_pos + (0.05f * (float) viewWidth) + 0.5f);
+		const unsigned short int bar_width = (unsigned short int) ((0.90f * (float) viewWidth) + 0.5f);
+		const unsigned short int bar_left  = (unsigned short int) (left_pos + (0.05f * (float) viewWidth) + 0.5f);
 
 		// Draw the border...
 		(*fxpFillRectChecked)(bar_left, top_pos, (unsigned short int) (bar_width), FONTH, &borderP);
@@ -7568,18 +7568,19 @@ int
 				      &emptyP);
 
 		// We want our thumb to take 20% of the bar's width
-		unsigned short int thumb_width = (unsigned short int) ((0.20f * bar_width) + 0.5f);
+		const unsigned short int thumb_width = (unsigned short int) ((0.20f * bar_width) + 0.5f);
 		// We move the thumb in increment of 5% of the bar's width (i.e., half its width),
 		// with rounding to avoid accumulating drift...
-		unsigned short int thumb_left = (unsigned short int) (bar_left + ((0.05f * bar_width) * value) + 0.5f);
+		const unsigned short int thumb_left =
+		    (unsigned short int) (bar_left + ((0.05f * bar_width) * value) + 0.5f);
 
 		// And finally, draw the thumb, which we want to override the border with!
 		(*fxpFillRectChecked)(thumb_left, top_pos, thumb_width, FONTH, &fgP);
 
 		// Draw an ellipsis in the middle of the thumb...
-		uint8_t ellipsis_size = (uint8_t)(FONTH / 3U);
+		const uint8_t ellipsis_size = (uint8_t)(FONTH / 3U);
 		// Three dots = two spaces, 3 + 2 = 5 ;).
-		unsigned short int ellipsis_left = (unsigned short int) ((thumb_width - (5U * ellipsis_size)) / 2U);
+		const unsigned short int ellipsis_left = (unsigned short int) ((thumb_width - (5U * ellipsis_size)) / 2U);
 		for (uint8_t i = 0U; i < 3U; i++) {
 			(*fxpFillRectChecked)((unsigned short int) (thumb_left + ellipsis_left +
 								    (unsigned short int) (i * 2U * ellipsis_size)),
