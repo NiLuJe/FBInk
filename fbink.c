@@ -4733,8 +4733,8 @@ int
 	}
 
 	// Abort if we were passed an invalid UTF-8 sequence
-	size_t len       = strlen(string);    // Flawfinder: ignore
-	size_t charcount = u8_strlen2(string);
+	const size_t len       = strlen(string);    // Flawfinder: ignore
+	const size_t charcount = u8_strlen2(string);
 	if (charcount == 0) {
 		PFWARN("Cannot print an invalid UTF-8 sequence");
 		return ERRCODE(EILSEQ);
@@ -5201,7 +5201,8 @@ static void
 					break;
 				}
 				// Try to avoid flagging a single underscore in the middle of a word.
-				if (ch == '_' && ci > 0 && string[ci - 1] != ' ' && string[ci + 1] != ' ') {
+				if (ch == '_' && ci > 0 && string[ci - 1] != ' ' && ci + 1 < size &&
+				    string[ci + 1] != ' ') {
 					result[ci] = CH_REGULAR;
 					ci++;
 					break;
