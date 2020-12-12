@@ -65,7 +65,12 @@ static inline __attribute__((always_inline)) __m128i Q_DECL_VECTORCALL
 }
 
 static inline void
-    qt_qimageScaleAARGBA_up_x_down_y_sse4(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
+    qt_qimageScaleAARGBA_up_x_down_y_sse4(QImageScaleInfo*       isi,
+					  unsigned int* restrict dest,
+					  int                    dw,
+					  int                    dh,
+					  int                    dow,
+					  int                    sow)
 {
 	const unsigned int** restrict ypoints  = isi->ypoints;
 	const int* restrict           xpoints  = isi->xpoints;
@@ -108,7 +113,12 @@ static inline void
 }
 
 static inline void
-    qt_qimageScaleAARGB_up_x_down_y_sse4(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
+    qt_qimageScaleAARGB_up_x_down_y_sse4(QImageScaleInfo*       isi,
+					 unsigned int* restrict dest,
+					 int                    dw,
+					 int                    dh,
+					 int                    dow,
+					 int                    sow)
 {
 	const unsigned int** restrict ypoints  = isi->ypoints;
 	const int* restrict           xpoints  = isi->xpoints;
@@ -150,7 +160,12 @@ static inline void
 }
 
 static inline void
-    qt_qimageScaleAARGBA_down_x_up_y_sse4(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
+    qt_qimageScaleAARGBA_down_x_up_y_sse4(QImageScaleInfo*       isi,
+					  unsigned int* restrict dest,
+					  int                    dw,
+					  int                    dh,
+					  int                    dow,
+					  int                    sow)
 {
 	const unsigned int** restrict ypoints  = isi->ypoints;
 	const int* restrict           xpoints  = isi->xpoints;
@@ -193,7 +208,12 @@ static inline void
 }
 
 static inline void
-    qt_qimageScaleAARGB_down_x_up_y_sse4(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
+    qt_qimageScaleAARGB_down_x_up_y_sse4(QImageScaleInfo*       isi,
+					 unsigned int* restrict dest,
+					 int                    dw,
+					 int                    dh,
+					 int                    dow,
+					 int                    sow)
 {
 	const unsigned int** restrict ypoints  = isi->ypoints;
 	const int* restrict           xpoints  = isi->xpoints;
@@ -235,7 +255,7 @@ static inline void
 }
 
 static inline void
-    qt_qimageScaleAARGBA_down_xy_sse4(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
+    qt_qimageScaleAARGBA_down_xy_sse4(QImageScaleInfo* isi, unsigned int* restrict dest, int dw, int dh, int dow, int sow)
 {
 	const unsigned int** restrict ypoints  = isi->ypoints;
 	const int* restrict           xpoints  = isi->xpoints;
@@ -280,7 +300,7 @@ static inline void
 }
 
 static inline void
-    qt_qimageScaleAARGB_down_xy_sse4(QImageScaleInfo* isi, unsigned int* dest, int dw, int dh, int dow, int sow)
+    qt_qimageScaleAARGB_down_xy_sse4(QImageScaleInfo* isi, unsigned int* restrict dest, int dw, int dh, int dow, int sow)
 {
 	const unsigned int** restrict ypoints  = isi->ypoints;
 	const int* restrict           xpoints  = isi->xpoints;

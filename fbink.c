@@ -7746,7 +7746,7 @@ cleanup:
 #ifdef FBINK_WITH_IMAGE
 // Load & decode image data from a file or stdin, via stbi
 static unsigned char*
-    img_load_from_file(const char* filename, int* w, int* h, int* n, int req_n)
+    img_load_from_file(const char* filename, int* restrict w, int* restrict h, int* restrict n, int req_n)
 {
 	unsigned char* restrict data = NULL;
 
@@ -7836,15 +7836,15 @@ static unsigned char*
 // Convert raw image data between various pixel formats
 // NOTE: This is a direct copy of stbi's stbi__convert_format, except that it doesn't free the input buffer.
 static unsigned char*
-    img_convert_px_format(const unsigned char* data, int img_n, int req_comp, int x, int y)
+    img_convert_px_format(const unsigned char* restrict data, int img_n, int req_comp, int x, int y)
 {
-	unsigned char* good = NULL;
+	unsigned char* restrict good = NULL;
 
 	// NOTE: We're already doing that in fbink_print_raw_data ;)
 	//if (req_comp == img_n) return data;
 	STBI_ASSERT(req_comp >= 1 && req_comp <= 4);
 
-	good = (unsigned char*) stbi__malloc_mad3(req_comp, x, y, 0);
+	good = (unsigned char* restrict) stbi__malloc_mad3(req_comp, x, y, 0);
 	if (good == NULL) {
 		//STBI_FREE(data);
 		WARN("Failed to allocate pixel format conversion buffer: %m");
