@@ -1003,7 +1003,7 @@ static const unsigned char*
     font8x8_get_bitmap(uint32_t codepoint)
 {
 	// Get the bitmap for the character mapped to that Unicode codepoint
-	if (codepoint <= 0x7Fu) {
+	if (likely(codepoint <= 0x7Fu)) {
 		return font8x8_basic[codepoint];
 	} else if (codepoint >= 0x80u && codepoint <= 0x9Fu) {    // lgtm [cpp/constant-comparison]
 		return font8x8_control[codepoint - 0x80u];
@@ -1024,7 +1024,7 @@ static const unsigned char*
 	}
 }
 
-static const char*
+static __attribute__((cold)) const char*
     fontname_to_string(uint8_t fontname)
 {
 	switch (fontname) {
@@ -1138,7 +1138,7 @@ static int
 }
 
 // Helper function for drawing
-static struct mxcfb_rect
+static __attribute__((hot)) struct mxcfb_rect
     draw(const char* restrict        text,
 	 unsigned short int          row,
 	 unsigned short int          col,
@@ -1155,7 +1155,7 @@ static struct mxcfb_rect
 	FBInkPixel bgP = penBGPixel;
 	if (fbink_cfg->is_inverted) {
 		// NOTE: And, of course, RGB565 is terrible. Inverting the lossy packed value would be even lossier...
-		if (vInfo.bits_per_pixel == 16U) {
+		if (unlikely(vInfo.bits_per_pixel == 16U)) {
 			const uint8_t fgcolor = penFGColor ^ 0xFFu;
 			const uint8_t bgcolor = penBGColor ^ 0xFFu;
 			fgP.rgb565            = pack_rgb565(fgcolor, fgcolor, fgcolor);
@@ -1174,8 +1174,8 @@ static struct mxcfb_rect
 	//       more space (as in columns, not bytes) than (MAXCOLS - col), the maximum printable length.
 	//       And as we're printing glyphs, we need to iterate over the number of characters/grapheme clusters,
 	//       not bytes.
-	size_t charcount = u8_strlen2(text);
-	size_t txtlength = strlen(text);
+	const size_t charcount = u8_strlen2(text);
+	const size_t txtlength = strlen(text);
 	// Flawfinder: ignore
 	LOG("Character count: %zu (over %zu bytes)", charcount, txtlength);
 
@@ -1372,8 +1372,9 @@ static struct mxcfb_rect
 	//       put_pixel is checked, and will discard off-screen pixels safely.
 	//       Because we store the final position in an unsigned value, this means that, to some extent,
 	//       we rely on wraparound on underflow to still point to (large, but positive) off-screen coordinates.
-	unsigned short int x_base_offs = (unsigned short int) ((col * FONTW) + pixel_offset + hoffset + viewHoriOrigin);
-	unsigned short int y_offs      = (unsigned short int) ((row * FONTH) + voffset + viewVertOrigin);
+	const unsigned short int x_base_offs =
+	    (unsigned short int) ((col * FONTW) + pixel_offset + hoffset + viewHoriOrigin);
+	const unsigned short int y_offs = (unsigned short int) ((row * FONTH) + voffset + viewVertOrigin);
 
 	unsigned short int i;
 	unsigned short int j;
@@ -1405,7 +1406,7 @@ static struct mxcfb_rect
 			    u8_cp_to_utf8(ch));
 
 			// Update the x coordinates for this character
-			unsigned short int x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
+			const unsigned short int x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
 			// Remember the next char's byte offset for next iteration's logging
 			ch_bi = bi;
 
@@ -1591,7 +1592,7 @@ static struct mxcfb_rect
 			    u8_cp_to_utf8(ch));
 
 			// Update the x coordinates for this character
-			unsigned short int x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
+			const unsigned short int x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
 			// Remember the next char's byte offset for next iteration's logging
 			ch_bi = bi;
 
@@ -1626,7 +1627,7 @@ static struct mxcfb_rect
 			    u8_cp_to_utf8(ch));
 
 			// Update the x coordinates for this character
-			unsigned short int x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
+			const unsigned short int x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
 			// Remember the next char's byte offset for next iteration's logging
 			ch_bi = bi;
 
@@ -1662,7 +1663,7 @@ static struct mxcfb_rect
 			    u8_cp_to_utf8(ch));
 
 			// Update the x coordinates for this character
-			unsigned short int x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
+			const unsigned short int x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
 			// Remember the next char's byte offset for next iteration's logging
 			ch_bi = bi;
 
@@ -1702,7 +1703,7 @@ static struct mxcfb_rect
 //       This can be confirmed w/ manual timing via clock_gettime(CLOCK_MONOTONIC) ;).
 // NOTE: Fun fact, waiting for a FULL update is hardly any longer than waiting for a PARTIAL one.
 //       Apparently, the gist of the differences lies in the waveform mode, not the update mode or the region size.
-static long int
+static __attribute__((cold)) long int
     jiffies_to_ms(long int jiffies)
 {
 	// We need the Kernel's clock tick frequency for this, which we stored in USER_HZ during fbink_init ;).

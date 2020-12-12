@@ -627,19 +627,19 @@ static void                      clear_screen(int UNUSED_BY_NOTKINDLE, uint8_t, 
 
 static const unsigned char* font8x8_get_bitmap(uint32_t);
 
-static const char* fontname_to_string(uint8_t);
+static __attribute__((cold)) const char* fontname_to_string(uint8_t);
 
 static int zu_print_length(size_t);
 
-static struct mxcfb_rect draw(const char* restrict,
-			      unsigned short int,
-			      unsigned short int,
-			      unsigned short int,
-			      bool,
-			      const FBInkConfig* restrict);
+static __attribute__((hot)) struct mxcfb_rect draw(const char* restrict,
+						   unsigned short int,
+						   unsigned short int,
+						   unsigned short int,
+						   bool,
+						   const FBInkConfig* restrict);
 
 #ifndef FBINK_FOR_LINUX
-static long int jiffies_to_ms(long int);
+static __attribute__((cold)) long int jiffies_to_ms(long int);
 #	if defined(FBINK_FOR_KINDLE)
 static int refresh_legacy(int, const struct mxcfb_rect, bool);
 static int wait_for_submission_kindle(int, uint32_t);
