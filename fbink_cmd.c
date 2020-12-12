@@ -523,7 +523,7 @@ static void
     compute_lastrect(void)
 {
 	// No need to check for error, it will return {0, 0, 0, 0} on failure anyway ;).
-	FBInkRect                 last_rect = fbink_get_last_rect();
+	const FBInkRect           last_rect = fbink_get_last_rect();
 	static unsigned short int max_y2    = 0U;
 
 	// If that's the first call, simply use last_rect as-is
@@ -531,8 +531,8 @@ static void
 		totalRect = last_rect;
 
 		// Don't forget to keep track of the bottom of our first rectangle, though ;).
-		unsigned short int y2 = (unsigned short int) (last_rect.top + last_rect.height);
-		max_y2                = y2;
+		const unsigned short int y2 = (unsigned short int) (last_rect.top + last_rect.height);
+		max_y2                      = y2;
 	} else {
 		// Otherwise, build a rect that overlaps w/ every previous rects...
 		totalRect.top   = (unsigned short int) MIN(totalRect.top, last_rect.top);
@@ -541,7 +541,7 @@ static void
 		// Height is a wee bit trickier, as we *can* wraparound, so last_rect might be *above* totalRect...
 		// Se we compute the absolute y coordinate of the bottom of both rectangles, keep the largest one,
 		// and re-compute height.
-		unsigned short int y2 =
+		const unsigned short int y2 =
 		    (unsigned short int) MAX(totalRect.top + totalRect.height, last_rect.top + last_rect.height);
 		// Remember the largest y2 we ever encountered so we can compute height properly
 		max_y2           = (unsigned short int) MAX(max_y2, y2);
@@ -563,7 +563,7 @@ static void
     print_lastrect(void)
 {
 	// No need to check for error, it will return {0, 0, 0, 0} on failure anyway ;).
-	FBInkRect last_rect = fbink_get_last_rect();
+	const FBInkRect last_rect = fbink_get_last_rect();
 	printf("lastRect_Left=%hu;lastRect_Top=%hu;lastRect_Width=%hu;lastRect_Height=%hu;",
 	       last_rect.left,
 	       last_rect.top,
