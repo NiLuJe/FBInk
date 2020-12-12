@@ -7977,13 +7977,13 @@ static uint8_t
 	//       and requires a few explicit casts to make GCC happy ;).
 	uint32_t t = DIV255(v * ((15U << 6U) + 1U));
 	// level = t / (D-1);
-	uint32_t l = (t >> 6U);
+	const uint32_t l = (t >> 6U);
 	// t -= l * (D-1);
 	t = (t - (l << 6U));
 
 	// map width & height = 8
 	// c = ClampToQuantum((l+(t >= map[(x % mw) + mw * (y % mh)])) * QuantumRange / (L-1));
-	uint32_t q = ((l + (t >= threshold_map_o8x8[(x & 7U) + 8U * (y & 7U)])) * 17U);
+	const uint32_t q = ((l + (t >= threshold_map_o8x8[(x & 7U) + 8U * (y & 7U)])) * 17U);
 	// NOTE: We're doing unsigned maths, so, clamping is basically MIN(q, UINT8_MAX) ;).
 	//       The only overflow we should ever catch should be for a few white (v = 0xFF) input pixels
 	//       that get shifted to the next step (i.e., q = 272 (0xFF + 17)).
@@ -7991,7 +7991,7 @@ static uint8_t
 }
 
 // Draw image data on screen (we inherit a few of the variable types/names from stbi ;))
-static int
+static __attribute__((hot)) int
     draw_image(int                           fbfd,
 	       const unsigned char* restrict data,
 	       const int                     w,
