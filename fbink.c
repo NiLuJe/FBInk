@@ -8202,10 +8202,10 @@ static __attribute__((hot)) int
 	//       and make use of a few different blitting tweaks depending on the situation...
 	//       And since we can easily do so from here,
 	//       we also entirely avoid trying to plot off-screen pixels (on any sides).
-	if (likely(fb_is_grayscale)) {
+	if (fb_is_grayscale) {
 		// 4bpp & 8bpp
 		if (!fbink_cfg->ignore_alpha && img_has_alpha) {
-			if (likely(!fb_is_legacy)) {
+			if (!fb_is_legacy) {
 				// 8bpp
 				// There's an alpha channel in the image, we'll have to do alpha blending...
 				// c.f., https://en.wikipedia.org/wiki/Alpha_compositing
@@ -8358,11 +8358,11 @@ static __attribute__((hot)) int
 				}
 			}
 		}
-	} else if (likely(fb_is_true_bgr)) {
+	} else if (fb_is_true_bgr) {
 		// 24bpp & 32bpp
 		if (!fbink_cfg->ignore_alpha && img_has_alpha) {
 			FBInkPixelRGBA img_px;
-			if (likely(!fb_is_24bpp)) {
+			if (!fb_is_24bpp) {
 				// 32bpp
 				FBInkPixelBGRA fb_px;
 				// This is essentially a constant in our case... (c.f., put_pixel_RGB32)
@@ -8528,7 +8528,7 @@ static __attribute__((hot)) int
 		} else {
 			// No alpha in image, or ignored
 			// We don't care about image alpha in this branch, so we don't even store it.
-			if (likely(!fb_is_24bpp)) {
+			if (!fb_is_24bpp) {
 				// 32bpp
 				FBInkPixelBGRA fb_px;
 				// This is essentially a constant in our case...
