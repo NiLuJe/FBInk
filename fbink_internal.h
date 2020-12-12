@@ -386,7 +386,7 @@
 // Handle what we send to stdout (i.e., mostly diagnostic stuff, which tends to be verbose, so no FBInk tag)
 #define LOG(fmt, ...)                                                                                                    \
 	({                                                                                                               \
-		if (g_isVerbose) {                                                                                       \
+		if (unlikely(g_isVerbose)) {                                                                             \
 			if (g_toSysLog) {                                                                                \
 				syslog(LOG_INFO, fmt, ##__VA_ARGS__);                                                    \
 			} else {                                                                                         \
