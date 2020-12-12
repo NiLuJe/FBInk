@@ -99,7 +99,7 @@ const char*
 }
 
 // #RGB -> RGB565
-static inline __attribute__((always_inline)) uint16_t
+static inline __attribute__((always_inline, hot)) uint16_t
     pack_rgb565(uint8_t r, uint8_t g, uint8_t b)
 {
 	// ((r / 8) * 2048) + ((g / 4) * 32) + (b / 8);
@@ -107,7 +107,7 @@ static inline __attribute__((always_inline)) uint16_t
 }
 
 // Helper functions to 'plot' a specific pixel in a given color to the framebuffer
-static inline __attribute__((always_inline)) void
+static inline __attribute__((always_inline, hot)) void
     put_pixel_Gray4(const FBInkCoordinates* restrict coords, const FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
@@ -135,7 +135,7 @@ static inline __attribute__((always_inline)) void
 	}
 }
 
-static inline __attribute__((always_inline)) void
+static inline __attribute__((always_inline, hot)) void
     put_pixel_Gray8(const FBInkCoordinates* restrict coords, const FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
@@ -164,7 +164,7 @@ static inline __attribute__((always_inline)) void
 #pragma GCC diagnostic pop
 }
 
-static inline __attribute__((always_inline)) void
+static inline __attribute__((always_inline, hot)) void
     put_pixel_RGB32(const FBInkCoordinates* restrict coords, const FBInkPixel* restrict px)
 {
 	// calculate the scanline's byte offset inside the buffer
@@ -180,7 +180,7 @@ static inline __attribute__((always_inline)) void
 #pragma GCC diagnostic pop
 }
 
-static inline __attribute__((always_inline)) void
+static inline __attribute__((always_inline, hot)) void
     put_pixel_RGB565(const FBInkCoordinates* restrict coords, const FBInkPixel* restrict px)
 {
 	// calculate the scanline's byte offset inside the buffer
@@ -384,7 +384,7 @@ static void
 //       But on modern processors, even on our target HW, branching should eventually take the lead, though,
 //       and in this case (ha!) appears to behave *noticeably* better than switching...
 //       Which is why we now branch via an if ladder, as it should offer marginally better performance on newer devices.
-static inline __attribute__((always_inline)) void
+static inline __attribute__((always_inline, hot)) void
     put_pixel(FBInkCoordinates coords, const FBInkPixel* restrict px, bool is_rgb565)
 {
 	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
@@ -397,7 +397,7 @@ static inline __attribute__((always_inline)) void
 	//       when we're padding and centering, the final whitespace of right-padding will have its last
 	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
 	//       And, of course, anything using hoffset or voffset can happily push stuff OOB ;).
-	if (coords.x >= vInfo.xres || coords.y >= vInfo.yres) {
+	if (unlikely(coords.x >= vInfo.xres || coords.y >= vInfo.yres)) {
 #ifdef DEBUG
 		// NOTE: This is only enabled in Debug builds because it can be pretty verbose,
 		//       and does not necessarily indicate an actual issue, as we've just explained...
@@ -413,7 +413,7 @@ static inline __attribute__((always_inline)) void
 	// NOTE: Hmm, here, an if ladder appears to be ever so *slightly* faster than going through the function pointer...
 	if (vInfo.bits_per_pixel == 4U) {
 		put_pixel_Gray4(&coords, px);
-	} else if (vInfo.bits_per_pixel == 8U) {
+	} else if (likely(vInfo.bits_per_pixel == 8U)) {
 		put_pixel_Gray8(&coords, px);
 	} else if (vInfo.bits_per_pixel == 16U) {
 		// Do we need to pack the pixel, first?
@@ -432,9 +432,9 @@ static inline __attribute__((always_inline)) void
 #pragma GCC diagnostic pop
 			put_pixel_RGB565(&coords, &packed_px);
 		}
-	} else if (vInfo.bits_per_pixel == 24U) {
+	} else if (unlikely(vInfo.bits_per_pixel == 24U)) {
 		put_pixel_RGB24(&coords, px);
-	} else if (vInfo.bits_per_pixel == 32U) {
+	} else if (likely(vInfo.bits_per_pixel == 32U)) {
 		put_pixel_RGB32(&coords, px);
 	}
 }
@@ -444,7 +444,7 @@ static inline __attribute__((always_inline)) void
 //       (http://trac.ak-team.com/trac/browser/niluje/Configs/trunk/Kindle/Misc/FBGrab/fbgrab.c#L402)
 // as well as KOReader's routines
 //       (https://github.com/koreader/koreader-base/blob/b3e72affd0e1ba819d92194b229468452c58836f/ffi/blitbuffer.lua#L292)
-static inline __attribute__((always_inline)) void
+static inline __attribute__((always_inline, hot)) void
     get_pixel_Gray4(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
@@ -478,7 +478,7 @@ static inline __attribute__((always_inline)) void
 	//                          gray4.lo -> bgra.color.g
 }
 
-static inline __attribute__((always_inline)) void
+static inline __attribute__((always_inline, hot)) void
     get_pixel_Gray8(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
@@ -499,7 +499,7 @@ static inline __attribute__((always_inline)) void
 	px->bgra.color.r = *((unsigned char*) (fbPtr + pix_offset + 2U));
 }
 
-static inline __attribute__((always_inline)) void
+static inline __attribute__((always_inline, hot)) void
     get_pixel_RGB32(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
@@ -513,7 +513,7 @@ static inline __attribute__((always_inline)) void
 	//       We *do* pickup the actual alpha value, here, though.
 }
 
-static inline __attribute__((always_inline)) void
+static inline __attribute__((always_inline, hot)) void
     get_pixel_RGB565(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
@@ -541,7 +541,7 @@ static inline __attribute__((always_inline)) void
 }
 
 // Handle a few sanity checks...
-static inline __attribute__((always_inline)) void
+static inline __attribute__((always_inline, hot)) void
     get_pixel(FBInkCoordinates coords, FBInkPixel* restrict px)
 {
 	// Handle rotation now, so we can properly validate if the pixel is off-screen or not ;).
@@ -553,7 +553,7 @@ static inline __attribute__((always_inline)) void
 	//       when we're padding and centering, the final whitespace of right-padding will have its last
 	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
 	//       And, of course, anything using hoffset or voffset can happily push stuff OOB ;).
-	if (coords.x >= vInfo.xres || coords.y >= vInfo.yres) {
+	if (unlikely(coords.x >= vInfo.xres || coords.y >= vInfo.yres)) {
 #ifdef DEBUG
 		// NOTE: This is only enabled in Debug builds because it can be pretty verbose,
 		//       and does not necessarily indicate an actual issue, as we've just explained...
@@ -569,19 +569,19 @@ static inline __attribute__((always_inline)) void
 	// NOTE: Hmm, here, an if ladder appears to be ever so *slightly* faster than going through the function pointer...
 	if (vInfo.bits_per_pixel == 4U) {
 		get_pixel_Gray4(&coords, px);
-	} else if (vInfo.bits_per_pixel == 8U) {
+	} else if (likely(vInfo.bits_per_pixel == 8U)) {
 		get_pixel_Gray8(&coords, px);
 	} else if (vInfo.bits_per_pixel == 16U) {
 		get_pixel_RGB565(&coords, px);
-	} else if (vInfo.bits_per_pixel == 24U) {
+	} else if (unlikely(vInfo.bits_per_pixel == 24U)) {
 		get_pixel_RGB24(&coords, px);
-	} else if (vInfo.bits_per_pixel == 32U) {
+	} else if (likely(vInfo.bits_per_pixel == 32U)) {
 		get_pixel_RGB32(&coords, px);
 	}
 }
 
 // Helper functions to draw a rectangle in a given color
-static void
+static __attribute__((hot)) void
     fill_rect_Gray4(unsigned short int         x,
 		    unsigned short int         y,
 		    unsigned short int         w,
@@ -604,7 +604,7 @@ static void
 #endif
 }
 
-static void
+static __attribute__((hot)) void
     fill_rect_Gray4_checked(unsigned short int         x,
 			    unsigned short int         y,
 			    unsigned short int         w,
@@ -613,13 +613,13 @@ static void
 {
 	// Bounds-checking, to ensure the memset won't do stupid things...
 	// Do signed maths, to account for the fact that x or y might already be OOB!
-	if (x + w > screenWidth) {
+	if (unlikely(x + w > screenWidth)) {
 		w = (unsigned short int) MAX(0, (w - ((x + w) - (int) screenWidth)));
 #ifdef DEBUG
 		LOG("Chopped rectangle width to %hu", w);
 #endif
 	}
-	if (y + h > screenHeight) {
+	if (unlikely(y + h > screenHeight)) {
 		h = (unsigned short int) MAX(0, (h - ((y + h) - (int) screenHeight)));
 #ifdef DEBUG
 		LOG("Chopped rectangle height to %hu", h);
@@ -627,7 +627,7 @@ static void
 	}
 
 	// Abort early if that left us with an empty rectangle ;).
-	if (w == 0U || h == 0U) {
+	if (unlikely(w == 0U || h == 0U)) {
 #ifdef DEBUG
 		LOG("Skipped empty %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
 #endif
@@ -638,7 +638,7 @@ static void
 }
 
 #ifdef FBINK_FOR_POCKETBOOK
-static void
+static __attribute__((hot)) void
     fill_rect_Gray8(unsigned short int         x,
 		    unsigned short int         y,
 		    unsigned short int         w,
@@ -664,7 +664,7 @@ static void
 #	endif
 }
 #else
-static void
+static __attribute__((hot)) void
     fill_rect_Gray8(unsigned short int         x,
 		    unsigned short int         y,
 		    unsigned short int         w,
@@ -683,7 +683,7 @@ static void
 }
 #endif
 
-static void
+static __attribute__((hot)) void
     fill_rect_Gray8_checked(unsigned short int         x,
 			    unsigned short int         y,
 			    unsigned short int         w,
@@ -692,13 +692,13 @@ static void
 {
 	// Bounds-checking, to ensure the memset won't do stupid things...
 	// Do signed maths, to account for the fact that x or y might already be OOB!
-	if (x + w > screenWidth) {
+	if (unlikely(x + w > screenWidth)) {
 		w = (unsigned short int) MAX(0, (w - ((x + w) - (int) screenWidth)));
 #ifdef DEBUG
 		LOG("Chopped rectangle width to %hu", w);
 #endif
 	}
-	if (y + h > screenHeight) {
+	if (unlikely(y + h > screenHeight)) {
 		h = (unsigned short int) MAX(0, (h - ((y + h) - (int) screenHeight)));
 #ifdef DEBUG
 		LOG("Chopped rectangle height to %hu", h);
@@ -706,7 +706,7 @@ static void
 	}
 
 	// Abort early if that left us with an empty rectangle ;).
-	if (w == 0U || h == 0U) {
+	if (unlikely(w == 0U || h == 0U)) {
 #ifdef DEBUG
 		LOG("Skipped empty %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
 #endif
@@ -716,7 +716,7 @@ static void
 	return fill_rect_Gray8(x, y, w, h, px);
 }
 
-static void
+static __attribute__((hot)) void
     fill_rect_RGB565(unsigned short int         x,
 		     unsigned short int         y,
 		     unsigned short int         w,
@@ -756,7 +756,7 @@ static void
 #endif
 }
 
-static void
+static __attribute__((hot)) void
     fill_rect_RGB565_checked(unsigned short int         x,
 			     unsigned short int         y,
 			     unsigned short int         w,
@@ -767,13 +767,13 @@ static void
 	// Do signed maths, to account for the fact that x or y might already be OOB!
 	// NOTE: Unlike put_pixel, we check against screenWidth/screenHeight instead of xres/yres because we're doing this
 	//       *before* fxpRotateRegion!
-	if (x + w > screenWidth) {
+	if (unlikely(x + w > screenWidth)) {
 		w = (unsigned short int) MAX(0, (w - ((x + w) - (int) screenWidth)));
 #ifdef DEBUG
 		LOG("Chopped rectangle width to %hu", w);
 #endif
 	}
-	if (y + h > screenHeight) {
+	if (unlikely(y + h > screenHeight)) {
 		h = (unsigned short int) MAX(0, (h - ((y + h) - (int) screenHeight)));
 #ifdef DEBUG
 		LOG("Chopped rectangle height to %hu", h);
@@ -781,7 +781,7 @@ static void
 	}
 
 	// Abort early if that left us with an empty rectangle ;).
-	if (w == 0U || h == 0U) {
+	if (unlikely(w == 0U || h == 0U)) {
 #ifdef DEBUG
 		LOG("Skipped empty %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
 #endif
@@ -818,13 +818,13 @@ static void
 {
 	// Bounds-checking, to ensure the memset won't do stupid things...
 	// Do signed maths, to account for the fact that x or y might already be OOB!
-	if (x + w > screenWidth) {
+	if (unlikely(x + w > screenWidth)) {
 		w = (unsigned short int) MAX(0, (w - ((x + w) - (int) screenWidth)));
 #ifdef DEBUG
 		LOG("Chopped rectangle width to %hu", w);
 #endif
 	}
-	if (y + h > screenHeight) {
+	if (unlikely(y + h > screenHeight)) {
 		h = (unsigned short int) MAX(0, (h - ((y + h) - (int) screenHeight)));
 #ifdef DEBUG
 		LOG("Chopped rectangle height to %hu", h);
@@ -832,7 +832,7 @@ static void
 	}
 
 	// Abort early if that left us with an empty rectangle ;).
-	if (w == 0U || h == 0U) {
+	if (unlikely(w == 0U || h == 0U)) {
 #ifdef DEBUG
 		LOG("Skipped empty %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
 #endif
@@ -842,7 +842,7 @@ static void
 	return fill_rect_RGB24(x, y, w, h, px);
 }
 
-static void
+static __attribute__((hot)) void
     fill_rect_RGB32(unsigned short int         x,
 		    unsigned short int         y,
 		    unsigned short int         w,
@@ -876,7 +876,7 @@ static void
 #endif
 }
 
-static void
+static __attribute__((hot)) void
     fill_rect_RGB32_checked(unsigned short int         x,
 			    unsigned short int         y,
 			    unsigned short int         w,
@@ -885,13 +885,13 @@ static void
 {
 	// Bounds-checking, to ensure the memset won't do stupid things...
 	// Do signed maths, to account for the fact that x or y might already be OOB!
-	if (x + w > screenWidth) {
+	if (unlikely(x + w > screenWidth)) {
 		w = (unsigned short int) MAX(0, (w - ((x + w) - (int) screenWidth)));
 #ifdef DEBUG
 		LOG("Chopped rectangle width to %hu", w);
 #endif
 	}
-	if (y + h > screenHeight) {
+	if (unlikely(y + h > screenHeight)) {
 		h = (unsigned short int) MAX(0, (h - ((y + h) - (int) screenHeight)));
 #ifdef DEBUG
 		LOG("Chopped rectangle height to %hu", h);
@@ -899,7 +899,7 @@ static void
 	}
 
 	// Abort early if that left us with an empty rectangle ;).
-	if (w == 0U || h == 0U) {
+	if (unlikely(w == 0U || h == 0U)) {
 #ifdef DEBUG
 		LOG("Skipped empty %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
 #endif

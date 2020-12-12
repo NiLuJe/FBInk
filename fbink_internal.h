@@ -518,32 +518,35 @@ static void rotate_touch_coordinates(FBInkCoordinates* restrict);
 static void rotate_coordinates_nop(FBInkCoordinates* restrict __attribute__((unused)));
 
 // NOTE: Making sure all of those are inlined helps fbink_print_ot (c.f., #43).
-static inline __attribute__((always_inline)) uint16_t pack_rgb565(uint8_t, uint8_t, uint8_t);
+static inline __attribute__((always_inline, hot)) uint16_t pack_rgb565(uint8_t, uint8_t, uint8_t);
 
-static inline __attribute__((always_inline)) void put_pixel_Gray4(const FBInkCoordinates* restrict,
-								  const FBInkPixel*       restrict);
-static inline __attribute__((always_inline)) void put_pixel_Gray8(const FBInkCoordinates* restrict,
-								  const FBInkPixel*       restrict);
-static inline __attribute__((always_inline)) void put_pixel_RGB24(const FBInkCoordinates* restrict,
-								  const FBInkPixel*       restrict);
-static inline __attribute__((always_inline)) void put_pixel_RGB32(const FBInkCoordinates* restrict,
-								  const FBInkPixel*       restrict);
-static inline __attribute__((always_inline)) void put_pixel_RGB565(const FBInkCoordinates* restrict,
-								   const FBInkPixel*       restrict);
+static inline __attribute__((always_inline, hot)) void put_pixel_Gray4(const FBInkCoordinates* restrict,
+								       const FBInkPixel*       restrict);
+static inline __attribute__((always_inline, hot)) void put_pixel_Gray8(const FBInkCoordinates* restrict,
+								       const FBInkPixel*       restrict);
+static inline __attribute__((always_inline)) void      put_pixel_RGB24(const FBInkCoordinates* restrict,
+								       const FBInkPixel*       restrict);
+static inline __attribute__((always_inline, hot)) void put_pixel_RGB32(const FBInkCoordinates* restrict,
+								       const FBInkPixel*       restrict);
+static inline __attribute__((always_inline, hot)) void put_pixel_RGB565(const FBInkCoordinates* restrict,
+									const FBInkPixel*       restrict);
 // NOTE: We pass coordinates by value here, because a rotation transformation *may* be applied to them,
 //       and that's a rotation that the caller will *never* care about.
-static inline __attribute__((always_inline)) void put_pixel(FBInkCoordinates, const FBInkPixel* restrict, bool);
+static inline __attribute__((always_inline, hot)) void put_pixel(FBInkCoordinates, const FBInkPixel* restrict, bool);
 // NOTE: On the other hand, if you happen to be calling function pointers directly,
 //       it's left to you to not do anything stupid ;)
 
-static inline __attribute__((always_inline)) void get_pixel_Gray4(const FBInkCoordinates* restrict, FBInkPixel* restrict);
-static inline __attribute__((always_inline)) void get_pixel_Gray8(const FBInkCoordinates* restrict, FBInkPixel* restrict);
+static inline __attribute__((always_inline, hot)) void get_pixel_Gray4(const FBInkCoordinates* restrict,
+								       FBInkPixel*             restrict);
+static inline __attribute__((always_inline, hot)) void get_pixel_Gray8(const FBInkCoordinates* restrict,
+								       FBInkPixel*             restrict);
 static inline __attribute__((always_inline)) void get_pixel_RGB24(const FBInkCoordinates* restrict, FBInkPixel* restrict);
-static inline __attribute__((always_inline)) void get_pixel_RGB32(const FBInkCoordinates* restrict, FBInkPixel* restrict);
-static inline __attribute__((always_inline)) void get_pixel_RGB565(const FBInkCoordinates* restrict,
-								   FBInkPixel*             restrict);
+static inline __attribute__((always_inline, hot)) void get_pixel_RGB32(const FBInkCoordinates* restrict,
+								       FBInkPixel*             restrict);
+static inline __attribute__((always_inline, hot)) void get_pixel_RGB565(const FBInkCoordinates* restrict,
+									FBInkPixel*             restrict);
 // NOTE: Same as put_pixel ;)
-static inline __attribute__((always_inline)) void get_pixel(FBInkCoordinates, FBInkPixel* restrict);
+static inline __attribute__((always_inline, hot)) void get_pixel(FBInkCoordinates, FBInkPixel* restrict);
 
 #if defined(FBINK_WITH_IMAGE) || defined(FBINK_WITH_OPENTYPE)
 // This is only needed for alpha blending in the image or OpenType codepath ;).
@@ -569,57 +572,57 @@ static inline __attribute__((always_inline)) void get_pixel(FBInkCoordinates, FB
 
 // NOTE: Enforced inlining on fill_rect currently doesn't gain us anything, on the other hand.
 //       Which is why we went with a function pointer to bitdepth-specific branchless variants ;).
-static void fill_rect_Gray4(unsigned short int,
-			    unsigned short int,
-			    unsigned short int,
-			    unsigned short int,
-			    const FBInkPixel* restrict);
-static void fill_rect_Gray4_checked(unsigned short int,
-				    unsigned short int,
-				    unsigned short int,
-				    unsigned short int,
-				    const FBInkPixel* restrict);
-static void fill_rect_Gray8(unsigned short int,
-			    unsigned short int,
-			    unsigned short int,
-			    unsigned short int,
-			    const FBInkPixel* restrict);
-static void fill_rect_Gray8_checked(unsigned short int,
-				    unsigned short int,
-				    unsigned short int,
-				    unsigned short int,
-				    const FBInkPixel* restrict);
-static void fill_rect_RGB565(unsigned short int,
-			     unsigned short int,
-			     unsigned short int,
-			     unsigned short int,
-			     const FBInkPixel* restrict);
-static void fill_rect_RGB565_checked(unsigned short int,
-				     unsigned short int,
-				     unsigned short int,
-				     unsigned short int,
-				     const FBInkPixel* restrict);
-static void fill_rect_RGB24(unsigned short int,
-			    unsigned short int,
-			    unsigned short int,
-			    unsigned short int,
-			    const FBInkPixel* restrict);
-static void fill_rect_RGB24_checked(unsigned short int,
-				    unsigned short int,
-				    unsigned short int,
-				    unsigned short int,
-				    const FBInkPixel* restrict);
-static void fill_rect_RGB32(unsigned short int,
-			    unsigned short int,
-			    unsigned short int,
-			    unsigned short int,
-			    const FBInkPixel* restrict);
-static void fill_rect_RGB32_checked(unsigned short int,
-				    unsigned short int,
-				    unsigned short int,
-				    unsigned short int,
-				    const FBInkPixel* restrict);
-static void clear_screen(int UNUSED_BY_NOTKINDLE, uint8_t, bool UNUSED_BY_NOTKINDLE);
+static __attribute__((hot)) void fill_rect_Gray4(unsigned short int,
+						 unsigned short int,
+						 unsigned short int,
+						 unsigned short int,
+						 const FBInkPixel* restrict);
+static __attribute__((hot)) void fill_rect_Gray4_checked(unsigned short int,
+							 unsigned short int,
+							 unsigned short int,
+							 unsigned short int,
+							 const FBInkPixel* restrict);
+static __attribute__((hot)) void fill_rect_Gray8(unsigned short int,
+						 unsigned short int,
+						 unsigned short int,
+						 unsigned short int,
+						 const FBInkPixel* restrict);
+static __attribute__((hot)) void fill_rect_Gray8_checked(unsigned short int,
+							 unsigned short int,
+							 unsigned short int,
+							 unsigned short int,
+							 const FBInkPixel* restrict);
+static __attribute__((hot)) void fill_rect_RGB565(unsigned short int,
+						  unsigned short int,
+						  unsigned short int,
+						  unsigned short int,
+						  const FBInkPixel* restrict);
+static __attribute__((hot)) void fill_rect_RGB565_checked(unsigned short int,
+							  unsigned short int,
+							  unsigned short int,
+							  unsigned short int,
+							  const FBInkPixel* restrict);
+static void                      fill_rect_RGB24(unsigned short int,
+						 unsigned short int,
+						 unsigned short int,
+						 unsigned short int,
+						 const FBInkPixel* restrict);
+static void                      fill_rect_RGB24_checked(unsigned short int,
+							 unsigned short int,
+							 unsigned short int,
+							 unsigned short int,
+							 const FBInkPixel* restrict);
+static __attribute__((hot)) void fill_rect_RGB32(unsigned short int,
+						 unsigned short int,
+						 unsigned short int,
+						 unsigned short int,
+						 const FBInkPixel* restrict);
+static __attribute__((hot)) void fill_rect_RGB32_checked(unsigned short int,
+							 unsigned short int,
+							 unsigned short int,
+							 unsigned short int,
+							 const FBInkPixel* restrict);
+static void                      clear_screen(int UNUSED_BY_NOTKINDLE, uint8_t, bool UNUSED_BY_NOTKINDLE);
 //static void checkerboard_screen(void);
 
 static const unsigned char* font8x8_get_bitmap(uint32_t);
