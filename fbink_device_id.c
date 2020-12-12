@@ -817,10 +817,14 @@ static void
 		ELOG("Couldn't find a Kobo version tag (onboard unmounted or not running on a Kobo?)!");
 	} else {
 		// NOTE: I'm not entirely sure this will always have a fixed length, so, give us a bit of room...
-		//       (The line, and as such, the file, does not contain a trailing LF).
 		char   line[_POSIX_PATH_MAX] = { 0 };
 		size_t size                  = fread(line, sizeof(*line), sizeof(line) - 1U, fp);
 		if (size > 0) {
+			// The line/file should not contain a trailing LF, but, just in case...
+			if (line[size - 1U] == '\n') {
+				line[size - 1U] = '\0';
+			}
+
 			// Thankfully, the device code is always located in the three
 			// final characters, so that's easy enough to extract without
 			// having to worry about the formatting...
