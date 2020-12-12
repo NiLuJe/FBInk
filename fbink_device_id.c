@@ -816,7 +816,7 @@ static void
 	if (!fp) {
 		ELOG("Couldn't find a Kobo version tag (onboard unmounted or not running on a Kobo?)!");
 	} else {
-		// NOTE: I'm not entirely sure this will always have a fixed length, so, give us a bit of room...
+		// NOTE: I'm not entirely sure this will always have a fixed length, so, give ourselves a bit of room...
 		char   line[_POSIX_PATH_MAX] = { 0 };
 		size_t size                  = fread(line, sizeof(*line), sizeof(line) - 1U, fp);
 		if (size > 0) {
