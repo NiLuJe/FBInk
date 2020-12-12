@@ -731,25 +731,25 @@ static void                              parse_simple_md(const char* restrict, s
 static __attribute__((cold)) const char* glyph_style_to_string(CHARACTER_FONT_T);
 #endif
 
-static uint32_t    get_wfm_mode(uint8_t);
-static const char* wfm_to_string(uint8_t);
+static uint32_t                          get_wfm_mode(uint8_t);
+static __attribute__((cold)) const char* wfm_to_string(uint8_t);
 #ifndef FBINK_FOR_LINUX
 #	ifdef FBINK_FOR_KINDLE
-static const char* kindle_wfm_to_string(uint32_t);
-static const char* kindle_zelda_wfm_to_string(uint32_t);
+static __attribute__((cold)) const char* kindle_wfm_to_string(uint32_t);
+static __attribute__((cold)) const char* kindle_zelda_wfm_to_string(uint32_t);
 #	endif
 #	if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
-static const char* ntx_wfm_to_string(uint32_t);
+static __attribute__((cold)) const char* ntx_wfm_to_string(uint32_t);
 #	endif
 #	ifdef FBINK_FOR_REMARKABLE
-static const char* remarkable_wfm_to_string(uint32_t);
+static __attribute__((cold)) const char* remarkable_wfm_to_string(uint32_t);
 #	endif
 #	ifdef FBINK_FOR_POCKETBOOK
-static const char* pocketbook_wfm_to_string(uint32_t);
+static __attribute__((cold)) const char* pocketbook_wfm_to_string(uint32_t);
 #	endif
 #endif
-static int         get_hwd_mode(uint8_t);
-static const char* hwd_to_string(uint8_t);
+static int                               get_hwd_mode(uint8_t);
+static __attribute__((cold)) const char* hwd_to_string(uint8_t);
 
 // For identify_device, which we need outside of fbink_device_id.c ;)
 #ifndef FBINK_FOR_LINUX

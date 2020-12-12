@@ -5228,7 +5228,7 @@ static void
 }
 
 // Small helper for verbose log messages
-static const char*
+static __attribute__((cold)) const char*
     glyph_style_to_string(CHARACTER_FONT_T glyph_style)
 {
 	switch (glyph_style) {
@@ -5341,7 +5341,7 @@ int
 	}
 
 	// Abort if we were passed an invalid UTF-8 sequence
-	size_t str_len_bytes = strlen(string);    // Flawfinder: ignore
+	const size_t str_len_bytes = strlen(string);    // Flawfinder: ignore
 	if (!u8_isvalid2(string)) {
 		PFWARN("Cannot print an invalid UTF-8 sequence");
 		return ERRCODE(EILSEQ);
@@ -5373,8 +5373,8 @@ int
 	FBInkOTLine* restrict   lines      = NULL;
 	char* restrict          brk_buff   = NULL;
 	unsigned char* restrict fmt_buff   = NULL;
-	unsigned char*          line_buff  = NULL;
-	unsigned char*          glyph_buff = NULL;
+	unsigned char* restrict line_buff  = NULL;
+	unsigned char* restrict glyph_buff = NULL;
 	// This also needs to be declared early, as we refresh on cleanup.
 	struct mxcfb_rect region         = { 0U };
 	bool              is_flashing    = false;
@@ -5471,7 +5471,7 @@ int
 			size_pt = 12.0f;
 		}
 		// We should have a fairly accurate idea of what the screen DPI is...
-		unsigned short int ppi = deviceQuirks.screenDPI;
+		const unsigned short int ppi = deviceQuirks.screenDPI;
 		// Given the ppi, convert point height to pixels. Note, 1pt is 1/72th of an inch
 		font_size_px = (unsigned short int) iroundf(ppi / 72.0f * size_pt);
 	}
@@ -5619,9 +5619,8 @@ int
 	}
 
 	// Calculate the maximum number of lines we may have to deal with
-	unsigned int print_height, num_lines;
-	print_height = (unsigned int) (area.br.y - area.tl.y + (viewVertOrigin - viewVertOffset));
-	num_lines    = print_height / (unsigned int) max_row_height;
+	const unsigned int print_height = (unsigned int) (area.br.y - area.tl.y + (viewVertOrigin - viewVertOffset));
+	const unsigned int num_lines    = print_height / (unsigned int) max_row_height;
 
 	// And allocate the memory for it...
 	lines = calloc(num_lines, sizeof(FBInkOTLine));
@@ -5860,7 +5859,7 @@ int
 			break;
 		}
 	}
-	unsigned int computed_lines_amount = line + complete_str;
+	const unsigned int computed_lines_amount = line + complete_str;
 	LOG("%u lines to be printed", computed_lines_amount);
 	if (!complete_str) {
 		LOG("String too long. Truncated to ~%zu characters", c_index);
@@ -6071,8 +6070,8 @@ int
 			if ((gw * gh) > (int) glyph_buffer_dims) {
 				size_t new_buff_size = (size_t) gw * (size_t) gh * 2U * sizeof(*glyph_buff);
 				LOG("Growing glyph buffer size from %zu to %zu", glyph_buffer_dims, new_buff_size);
-				unsigned char* tmp_g_buff = NULL;
-				tmp_g_buff                = realloc(glyph_buff, new_buff_size);
+				unsigned char* restrict tmp_g_buff = NULL;
+				tmp_g_buff                         = realloc(glyph_buff, new_buff_size);
 				if (!tmp_g_buff) {
 					ELOG("Failure resizing glyph buffer");
 					rv = ERRCODE(EXIT_FAILURE);
@@ -6287,7 +6286,7 @@ int
 					paint_point.y++;
 				}
 			} else {
-				uint16_t pmul_bg = (uint16_t)(bgcolor * 0xFFu);
+				const uint16_t pmul_bg = (uint16_t)(bgcolor * 0xFFu);
 				for (int j = 0; j < max_line_height; j++) {
 					for (unsigned int k = 0U; k < lw; k++) {
 						if (lnPtr[k] == 0U) {
@@ -6310,8 +6309,8 @@ int
 				}
 			}
 		} else if (is_fgless) {
-			FBInkPixel fb_px   = { 0U };
-			uint16_t   pmul_bg = (uint16_t)(bgcolor * 0xFFu);
+			FBInkPixel     fb_px   = { 0U };
+			const uint16_t pmul_bg = (uint16_t)(bgcolor * 0xFFu);
 			// NOTE: One more branch needed because 4bpp fbs are terrible...
 			if (vInfo.bits_per_pixel > 4U) {
 				// 8, 16, 24 & 32bpp
@@ -6821,7 +6820,7 @@ static uint32_t
 }
 
 // Convert a WFM_MODE_INDEX_T value to a human readable string
-static const char*
+static __attribute__((cold)) const char*
     wfm_to_string(uint8_t wfm_mode_index)
 {
 	switch (wfm_mode_index) {
@@ -6869,7 +6868,7 @@ static const char*
 #ifndef FBINK_FOR_LINUX
 #	ifdef FBINK_FOR_KINDLE
 // Convert a platform-specifc mxcfb WAVEFORM_MODE value to a human readable string
-static const char*
+static __attribute__((cold)) const char*
     kindle_wfm_to_string(uint32_t wfm_mode)
 {
 	switch (wfm_mode) {
@@ -6905,7 +6904,7 @@ static const char*
 }
 
 // Same, but for Zelda/Rex constants
-static const char*
+static __attribute__((cold)) const char*
     kindle_zelda_wfm_to_string(uint32_t wfm_mode)
 {
 	switch (wfm_mode) {
@@ -6938,7 +6937,7 @@ static const char*
 #	endif    // FBINK_FOR_KINDLE
 
 #	if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
-static const char*
+static __attribute__((cold)) const char*
     ntx_wfm_to_string(uint32_t wfm_mode)
 {
 	switch (wfm_mode) {
@@ -6967,7 +6966,7 @@ static const char*
 #	endif    // FBINK_FOR_KOBO || FBINK_FOR_CERVANTES
 
 #	ifdef FBINK_FOR_REMARKABLE
-static const char*
+static __attribute__((cold)) const char*
     remarkable_wfm_to_string(uint32_t wfm_mode)
 {
 	switch (wfm_mode) {
@@ -6990,7 +6989,7 @@ static const char*
 #	endif    // FBINK_FOR_REMARKABLE
 
 #	ifdef FBINK_FOR_POCKETBOOK
-static const char*
+static __attribute__((cold)) const char*
     pocketbook_wfm_to_string(uint32_t wfm_mode)
 {
 	switch (wfm_mode) {
@@ -7071,7 +7070,7 @@ static int
 }
 
 // Convert a HW_DITHER_INDEX_T value to a human readable string
-static const char*
+static __attribute__((cold)) const char*
     hwd_to_string(uint8_t hw_dither_index)
 {
 	switch (hw_dither_index) {
