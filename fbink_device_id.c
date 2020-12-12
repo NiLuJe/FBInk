@@ -825,7 +825,7 @@ static void
 			// Thankfully, the device code is always located in the three
 			// final characters, so that's easy enough to extract without
 			// having to worry about the formatting...
-			unsigned short int kobo_id = (unsigned short int) strtoul(line + (nread - 3), NULL, 10);
+			const unsigned short int kobo_id = (unsigned short int) strtoul(line + (nread - 3), NULL, 10);
 			set_kobo_quirks(kobo_id);
 		}
 		free(line);
