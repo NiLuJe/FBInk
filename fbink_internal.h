@@ -709,18 +709,18 @@ int draw_progress_bars(int, bool, uint8_t, const FBInkConfig* restrict);
 unsigned char*
     qSmoothScaleImage(const unsigned char* restrict src, int sw, int sh, int sn, bool ignore_alpha, int dw, int dh);
 
-static unsigned char* img_load_from_file(const char*, int* restrict, int* restrict, int* restrict, int);
-static unsigned char* img_convert_px_format(const unsigned char* restrict, int, int, int, int);
-static uint8_t        dither_o8x8(unsigned short int, unsigned short int, uint8_t);
-static int            draw_image(int,
-				 const unsigned char* restrict,
-				 const int,
-				 const int,
-				 const int,
-				 const int,
-				 short int,
-				 short int,
-				 const FBInkConfig* restrict);
+static unsigned char*               img_load_from_file(const char*, int* restrict, int* restrict, int* restrict, int);
+static unsigned char*               img_convert_px_format(const unsigned char* restrict, int, int, int, int);
+static __attribute__((hot)) uint8_t dither_o8x8(unsigned short int, unsigned short int, uint8_t);
+static int                          draw_image(int,
+					       const unsigned char* restrict,
+					       const int,
+					       const int,
+					       const int,
+					       const int,
+					       short int,
+					       short int,
+					       const FBInkConfig* restrict);
 #endif
 
 #ifdef FBINK_WITH_OPENTYPE

@@ -7956,7 +7956,7 @@ static unsigned char*
 // & https://github.com/ImageMagick/ImageMagick/blob/ecfeac404e75f304004f0566557848c53030bad6/MagickCore/threshold.c#L1627
 // NOTE: As the references imply, this is straight from ImageMagick,
 //       with only minor simplifications to enforce Q8 & avoid fp maths.
-static uint8_t
+static __attribute__((hot)) uint8_t
     dither_o8x8(unsigned short int x, unsigned short int y, uint8_t v)
 {
 	// c.f., https://github.com/ImageMagick/ImageMagick/blob/ecfeac404e75f304004f0566557848c53030bad6/config/thresholds.xml#L107
