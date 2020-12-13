@@ -8915,7 +8915,7 @@ cleanup:
 // Draw raw (supposedly image) data on screen
 int
     fbink_print_raw_data(int fbfd                              UNUSED_BY_MINIMAL,
-			 unsigned char* data                   UNUSED_BY_MINIMAL,
+			 unsigned char* restrict data          UNUSED_BY_MINIMAL,
 			 const int w                           UNUSED_BY_MINIMAL,
 			 const int h                           UNUSED_BY_MINIMAL,
 			 const size_t len                      UNUSED_BY_MINIMAL,
@@ -8977,7 +8977,7 @@ int
 
 	// If there's a mismatch between the components in the input data vs. what the fb expects,
 	// re-interleave the data w/ stbi's help...
-	unsigned char* imgdata = NULL;
+	unsigned char* restrict imgdata = NULL;
 	if (req_n != n) {
 		LOG("Converting from %d components to the requested %d", n, req_n);
 		// NOTE: stbi__convert_format will *always* free the input buffer, which we do NOT want here...

@@ -807,7 +807,7 @@ FBINK_API int fbink_print_image(int                         fbfd,
 //       Generally, that'd be RGBA (32bpp) on Kobo (or RGB (24bpp) with ignore_alpha),
 //       and YA (grayscale + alpha) on Kindle (or Y (8bpp) with ignore_alpha).
 FBINK_API int fbink_print_raw_data(int                         fbfd,
-				   unsigned char*              data,
+				   unsigned char* restrict     data,
 				   const int                   w,
 				   const int                   h,
 				   const size_t                len,
