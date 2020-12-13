@@ -1138,7 +1138,7 @@ static int
 }
 
 // Helper function for drawing
-static __attribute__((hot)) struct mxcfb_rect
+static struct mxcfb_rect
     draw(const char* restrict        text,
 	 unsigned short int          row,
 	 unsigned short int          col,
@@ -7991,7 +7991,7 @@ static uint8_t
 }
 
 // Draw image data on screen (we inherit a few of the variable types/names from stbi ;))
-static __attribute__((hot)) int
+static int
     draw_image(int                           fbfd,
 	       const unsigned char* restrict data,
 	       const int                     w,
