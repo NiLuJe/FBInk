@@ -3098,7 +3098,7 @@ static __attribute__((cold)) void
 		fInfo.line_length          = vInfo.xres_virtual * (vInfo.bits_per_pixel >> 3U);
 		ELOG("line_length -> %u", fInfo.line_length);
 
-		const size_t fb_size = fInfo.line_length * vInfo.yres_virtual;
+		size_t fb_size = fInfo.line_length * vInfo.yres_virtual;
 		if (fb_size > fInfo.smem_len) {
 			if (!IS_ALIGNED(yres_virtual, 32)) {
 				vInfo.yres_virtual = ALIGN(vInfo.yres, 32);
