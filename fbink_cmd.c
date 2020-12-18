@@ -772,6 +772,7 @@ int
 	bool        errfnd         = false;
 
 	// NOTE: c.f., https://codegolf.stackexchange.com/q/148228 to sort this mess when I need to find an available letter ;p
+	//       In fact, that's the current tally of alnum entries left: JjKNnQRUu
 	while ((opt = getopt_long(
 		    argc, argv, "y:x:Y:X:hfcmMprs::S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bD::W:HEZzk::wd:G", opts, &opt_index)) !=
 	       -1) {
