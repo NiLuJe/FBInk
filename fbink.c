@@ -748,7 +748,7 @@ static __attribute__((hot)) void
 
 		while (px_count--) {
 			*p++ = px->rgb565;
-		};
+		}
 	}
 
 #ifdef DEBUG
@@ -851,24 +851,18 @@ static __attribute__((hot)) void
 {
 	// NOTE: fxpRotateRegion is never set at 32bpp :).
 	for (size_t j = y; j < y + h; j++) {
-		// NOTE: When targeting an eInk screen, we can afford to write bogus data in the alpha byte,
-		//       as it's essentially ignored there...
-		//       But otherwise, go with a cheap memset32 so we preserve the alpha value of our input pixel...
-#ifdef FBINK_FOR_LINUX
+		// NOTE: Go with a cheap memset32 in order to preserve the alpha value of our input pixel...
+		//       The compiler should be able to turn that into something as fast as a plain memset ;).
 		const size_t scanline_offset = fInfo.line_length * j;
-#	pragma GCC diagnostic push
-#	pragma GCC diagnostic ignored "-Wcast-align"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
 		uint32_t* p = (uint32_t*) (fbPtr + scanline_offset) + x;
-#	pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
 		size_t px_count = w;
 
 		while (px_count--) {
 			*p++ = px->bgra.p;
-		};
-#else
-		uint8_t* p = fbPtr + (fInfo.line_length * j) + (x << 2U);
-		memset(p, px->gray8, (size_t)(w << 2U));
-#endif
+		}
 	}
 
 #ifdef DEBUG
@@ -963,7 +957,18 @@ static void
 		size_t px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
 		while (px_count--) {
 			*p++ = px;
-		};
+		}
+	} else if (vInfo.bits_per_pixel == 32) {
+		// Much like in fill_rect_RGB32, whip up something that'll preserve the alpha byte...
+		const FBInkPixelBGRA px = { .color.b = v, .color.g = v, .color.r = v, .color.a = 0xFF };
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
+		uint32_t* p = (uint32_t*) fbPtr;
+#	pragma GCC diagnostic pop
+		size_t px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
+		while (px_count--) {
+			*p++ = px.p;
+		}
 	} else {
 		// NOTE: fInfo.smem_len should actually match fInfo.line_length * vInfo.yres_virtual on 32bpp ;).
 		//       Which is how things should always be, but, alas, poor Yorick...
