@@ -665,6 +665,7 @@ int
                                               { "wait", no_argument, NULL, 'w' },
                                               { "daemon", required_argument, NULL, 'd' },
                                               { "syslog", no_argument, NULL, 'G' },
+                                              { "help", no_argument, NULL, 'Q' },
                                               { NULL, 0, NULL, 0 } };
 
 	FBInkConfig fbink_cfg = { 0 };
@@ -759,6 +760,7 @@ int
 	bool        is_mimic       = false;
 	bool        is_koreader    = false;
 	bool        is_cls         = false;
+	bool        is_help        = false;
 	const char* pipe_path      = NULL;
 	bool        is_daemon      = false;
 	uint8_t     daemon_lines   = 0U;
@@ -772,9 +774,9 @@ int
 	bool        errfnd         = false;
 
 	// NOTE: c.f., https://codegolf.stackexchange.com/q/148228 to sort this mess when I need to find an available letter ;p
-	//       In fact, that's the current tally of alnum entries left: JjKNnQRUu
+	//       In fact, that's the current tally of alnum entries left: JjKNnRUu
 	while ((opt = getopt_long(
-		    argc, argv, "y:x:Y:X:hfcmMprs::S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bD::W:HEZzk::wd:G", opts, &opt_index)) !=
+		    argc, argv, "y:x:Y:X:hfcmMprs::S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bD::W:HEZzk::wd:GQ", opts, &opt_index)) !=
 	       -1) {
 		switch (opt) {
 			case 'y':
@@ -1804,6 +1806,9 @@ int
 				fbink_cfg.to_syslog = !fbink_cfg.to_syslog;
 				toSysLog            = fbink_cfg.to_syslog;
 				break;
+			case 'Q':
+				is_help = true;
+				break;
 			default:
 				ELOG("?? Unknown option code 0%o ??", (unsigned int) opt);
 				errfnd = true;
@@ -1811,6 +1816,21 @@ int
 		}
 		// Reset opt_index to our sentinel value, so we can lookup the longform's name when the shortform is passed...
 		opt_index = -1;
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+	// Declare it a tiny bit early to make cleanup handling safe
+	// (fbink_close is safe to call with fbfd set to -1 and/or the mmap not actually done).
+	int fbfd = -1;
+	// Same idea for the pipe fd in daemon mode
+	int pipefd = -1;
+
+	// Show the "help" message
+	if (is_help) {
+		show_helpmsg();
+		rv = EXIT_SUCCESS;
+		goto cleanup;
 	}
 
 	// Enforce logging to syslog for is_daemon
@@ -1853,14 +1873,6 @@ int
 		fbink_cfg.is_quiet   = true;
 		fbink_cfg.is_verbose = false;
 	}
-
-	// Assume success, until shit happens ;)
-	int rv = EXIT_SUCCESS;
-	// Declare it a tiny bit early to make cleanup handling safe
-	// (fbink_close is safe to call with fbfd set to -1 and/or the mmap not actually done).
-	int fbfd = -1;
-	// Same idea for the pipe fd in daemon mode
-	int pipefd = -1;
 
 	// Don't abort if we piped something without passing any arguments!
 	if (errfnd || (argc == 1 && isatty(fileno(stdin)))) {
