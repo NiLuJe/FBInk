@@ -946,7 +946,7 @@ static void
 	//       in particular size/psize vs. mapsize
 	//       Anyway, don't clobber that, as it seems to cause softlocks on BQ/Cervantes,
 	//       and be very conservative, using yres instead of yres_virtual, as Qt *may* already rely on that memory region.
-	if (vInfo.bits_per_pixel == 16) {
+	if (unlikely(vInfo.bits_per_pixel == 16U)) {
 		// NOTE: Besides, we can't use a straight memset, since we need pixels to be properly packed for RGB565...
 		//       Se we whip up a quick memset16, like fill_rect() does.
 		const uint16_t px = pack_rgb565(v, v, v);
@@ -958,7 +958,7 @@ static void
 		while (px_count--) {
 			*p++ = px;
 		}
-	} else if (vInfo.bits_per_pixel == 32) {
+	} else if (vInfo.bits_per_pixel == 32U) {
 		// Much like in fill_rect_RGB32, whip up something that'll preserve the alpha byte...
 		const FBInkPixelBGRA px = { .color.b = v, .color.g = v, .color.r = v, .color.a = 0xFF };
 #	pragma GCC diagnostic push
