@@ -1,6 +1,6 @@
 /*
 	FBInk: FrameBuffer eInker, a library to print text & images to an eInk Linux framebuffer
-	Copyright (C) 2018-2020 NiLuJe <ninuje@gmail.com>
+	Copyright (C) 2018-2021 NiLuJe <ninuje@gmail.com>
 	SPDX-License-Identifier: GPL-3.0-or-later
 
 	----

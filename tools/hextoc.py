@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #
-# FBInk related tool, Copyright (C) 2018-2020 NiLuJe <ninuje@gmail.com>
+# FBInk related tool, Copyright (C) 2018-2021 NiLuJe <ninuje@gmail.com>
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # Somewhat naive script to build a C array out of Unifont's hex format.
