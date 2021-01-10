@@ -2117,7 +2117,7 @@ static int
 			// NOTE: Generally much less useful/pleasing than Y1. Then again, GC4 is an odd duck to begin with.
 			update.flags |= EPDC_FLAG_USE_DITHERING_Y4;
 		} else {
-			// NOTE: I have no idea how this looks ;).
+			// NOTE: I have no idea how this looks ;). But given the results on Kobo, I'm going to go with "supbar".
 			update.flags |= EPDC_FLAG_USE_DITHERING_NTX_D8;
 		}
 	}
@@ -2363,6 +2363,8 @@ static int
 			update.flags |= EPDC_FLAG_USE_DITHERING_Y4;
 		} else {
 			// NOTE: I have no idea how this looks, as I don't have a Mk. 6 device ;).
+			//       But apparently, the answer is "bad":
+			//       https://github.com/baskerville/plato/issues/150#issuecomment-757547202
 			update.flags |= EPDC_FLAG_USE_DITHERING_NTX_D8;
 		}
 	}
