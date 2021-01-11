@@ -2117,7 +2117,7 @@ static int
 			// NOTE: Generally much less useful/pleasing than Y1. Then again, GC4 is an odd duck to begin with.
 			update.flags |= EPDC_FLAG_USE_DITHERING_Y4;
 		} else {
-			// NOTE: I have no idea how this looks ;). But given the results on Kobo, I'm going to go with "supbar".
+			// NOTE: I have no idea how this looks ;). But given the results on Kobo, I'm going to go with "subpar".
 			update.flags |= EPDC_FLAG_USE_DITHERING_NTX_D8;
 		}
 	}
