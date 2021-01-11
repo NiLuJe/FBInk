@@ -2351,6 +2351,7 @@ static int
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
 	}
 
+	// NOTE: This requires a Mk. 6 device, the flags are silently ignored on older devices.
 	// NOTE: When dithering is enabled, you generally want to get rid of FORCE_MONOCHROME, because it gets applied *first*...
 	if (dithering_mode == HWD_LEGACY) {
 		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
