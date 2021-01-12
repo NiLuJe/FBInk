@@ -201,26 +201,26 @@ typedef uint8_t BG_COLOR_INDEX_T;
 typedef enum
 {
 	WFM_AUTO = 0U,    // Let the EPDC choose, via histogram analysis of the refresh region.
-			  // May *not* always (or ever) opt to use REAGL on devices where it is otherwise available.
+	//                   May *not* always (or ever) opt to use REAGL on devices where it is otherwise available.
 	// Common
 	WFM_DU,      // From any to B&W, on-screen pixels will be left as-is for new content that is *not* B&W.
 	WFM_GC16,    // From any to any, high fidelity.
-		     // If flashing, will flash and update the full region.
-		     // If not, only changed pixels will update.
-	WFM_GC4,     // From any to B/W/GRAYC/GRAY5. (may be implemented as DU4 on some devices).
-	WFM_A2,      // From B&W to B&W, on-screen pixels will be left as-is for new content that is *not* B&W.
-		     // FBInk will ask the EPDC to enforce quantization to B&W to honor the "to" requirement.
-		     // Will never flash.
-		     // Can to be bracketed between white screens to honor the "from" requirement.
+	//              If flashing, will flash and update the full region.
+	//              If not, only changed pixels will update.
+	WFM_GC4,    // From any to B/W/GRAYC/GRAY5. (may be implemented as DU4 on some devices).
+	WFM_A2,     // From B&W to B&W, on-screen pixels will be left as-is for new content that is *not* B&W.
+	//              FBInk will ask the EPDC to enforce quantization to B&W to honor the "to" requirement.
+	//              Will never flash.
+	//              Can to be bracketed between white screens to honor the "from" requirement.
 	WFM_GL16,    // From white to any. Typically optimized for text on a white background.
 	// Newer generation devices only
-	WFM_REAGL,     // From white to any, with ghosting and flashing reduction. If available, best option for text.
-		       // May enforce timing constraints if in collision with another waveform mode, e.g.,
-		       // it may, to some extent, wait for completion of previous updates to have access to HW resources.
+	WFM_REAGL,    // From white to any, with ghosting and flashing reduction. If available, best option for text.
+	//               May enforce timing constraints if in collision with another waveform mode, e.g.,
+	//               it may, to some extent, wait for completion of previous updates to have access to HW resources.
 	WFM_REAGLD,    // From white to any, with more ghosting reduction, but less flashing reduction.
-		       // Should only be used when flashing, which should yield a less noticeable flash than GC16.
-		       // Rarely used in practice, because still optimized for text or lightly mixed content,
-		       // not pure image content.
+	//                Should only be used when flashing, which should yield a less noticeable flash than GC16.
+	//                Rarely used in practice, because still optimized for text or lightly mixed content,
+	//                not pure image content.
 	// Kindle only
 	WFM_GC16_FAST,    // Better latency at the expense of lower fidelity than GC16.
 	WFM_GL16_FAST,    // Better latency at the expense of lower fidelity than GL16.
