@@ -2431,8 +2431,8 @@ static int
 	//       That, or simply queueing a few updates in a short time...
 	//       The main culprit appears to be FORCE_MONOCHROME here, as I can't break DU without it in this case ;).
 	// NOTE: Speaking of FORCE_MONOCHROME, see the notes below in refresh(). Like on other devices, we enforce it for A2.
-	//       Which means you'll generally only want to be using A2 on *already* mostly B&W content,
-	//       as otherwise things risk going a bit wonky.
+	//       Being A2, you'll want to use it on *already* completely B&W content, otherwise things risk going a bit wonky.
+	//       See the notes about WFM_A2 in <fbink.h> for more details.
 	//       That pretty much leaves button highlights in UIs (which is precisely what nickel uses it for).
 	//       If you need a more reliable alternative, prefer DU (which'll barely be any slower anyway).
 
@@ -2585,19 +2585,16 @@ static int
 	}
 #	endif
 	// NOTE: While the fixed-cell codepath, when rendering in B&W, would be the perfect candidate for using A2 waveform mode,
-	//       it's all kinds of fucked up on Kobos (especially when combined w/ FORCE_MONOCHROME),
-	//       and may lead to disappearing text or weird blending depending on the surrounding fb content...
-	//       It may only show up properly when FULL, which isn't great...
-	// NOTE: On the Forma, the (apparently randomly) broken A2 behavior is exacerbated if the FB is UR @ 8bpp...
-	//       Which is intriguing, because that should make the driver's job easier (except maybe not on latest epdc v2 revs),
-	//       c.f., epdc_submit_work_func @ drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c
-	//       It is *definitely* much worse w/ FORCE_MONOCHROME (since that'll affect the entire region),
-	//       and FULL obviously won't help with that.
+	//       it requires the *on-screen* content to *already* be B&W (which FORCE_MONOCHROME can't do anything about,
+	//       unless you prepend a dummy A2 + FORCE_MONOCHROME full-screen refresh).
+	//       Otherwise, offending pixels are not updated, leading to disappearing text,
+	//       or weird blending/overlay effects depending on the previous screen content...
+	// NOTE: Speaking of FORCE_MONOCHROME, see the notes about the flags stacking bug on Mk. 7 kernels in refresh_kobo_mk7...
 	// NOTE: And while we're on the fun quirks train: FULL never flashes w/ AUTO on (some?) Kobos,
 	//       so request GC16 if we want a flash...
-	// NOTE: FWIW, DU behaves properly when PARTIAL, but doesn't flash when FULL.
+	// NOTE: FWIW, DU behaves properly when PARTIAL, but doesn't flash when FULL (c.f., WFM_DU in <fbink.h>).
 	//       Which somewhat tracks given AUTO's behavior on Kobos, as well as on Kindles.
-	//       (i.e., DU or GC16 is most likely often what AUTO will land on).
+	//       (i.e., DU or GL16/GC16 is most likely often what AUTO will land on).
 
 	// So, handle this common switcheroo here...
 	uint32_t wfm = (is_flashing && waveform_mode == WAVEFORM_MODE_AUTO) ? WAVEFORM_MODE_GC16 : waveform_mode;
