@@ -151,22 +151,22 @@ typedef uint8_t PADDING_INDEX_T;
 // NOTE: This is split in FG & BG to ensure that the default values lead to a sane result (i.e., black on white)
 typedef enum
 {
-	FG_BLACK = 0U,
-	FG_GRAY1,
-	FG_GRAY2,
-	FG_GRAY3,
-	FG_GRAY4,
-	FG_GRAY5,
-	FG_GRAY6,
-	FG_GRAY7,
-	FG_GRAY8,
-	FG_GRAY9,
-	FG_GRAYA,
-	FG_GRAYB,
-	FG_GRAYC,
-	FG_GRAYD,
-	FG_GRAYE,
-	FG_WHITE,
+	FG_BLACK = 0U,     // 0x00
+	FG_GRAY1,          // 0x11
+	FG_GRAY2,          // 0x22
+	FG_GRAY3,          // 0x33
+	FG_GRAY4,          // 0x44
+	FG_GRAY5,          // 0x55
+	FG_GRAY6,          // 0x66
+	FG_GRAY7,          // 0x77
+	FG_GRAY8,          // 0x88
+	FG_GRAY9,          // 0x99
+	FG_GRAYA,          // 0xAA
+	FG_GRAYB,          // 0xBB
+	FG_GRAYC,          // 0xCC
+	FG_GRAYD,          // 0xDD
+	FG_GRAYE,          // 0xEE
+	FG_WHITE,          // 0xFF
 	FG_MAX = 0xFFu,    // uint8_t
 } __attribute__((packed)) FG_COLOR_INDEX_E;
 typedef uint8_t FG_COLOR_INDEX_T;
@@ -202,21 +202,35 @@ typedef enum
 {
 	WFM_AUTO = 0U,    // Let the EPDC choose, via histogram analysis of the refresh region.
 	//                   May *not* always (or ever) opt to use REAGL on devices where it is otherwise available.
+	//                   This is the default.
+	//                   If you request a flashing update w/ AUTO, FBInk automatically uses GC16 instead.
 	// Common
-	WFM_DU,      // From any to B&W, on-screen pixels will be left as-is for new content that is *not* B&W.
+	WFM_DU,      // From any to B&W, fast. On-screen pixels will be left as-is for new content that is *not* B&W.
+	//              Great for UI highlights, or tracing touch/pen input.
+	//              Will never flash.
+	//              DU stands for "Direct Update".
 	WFM_GC16,    // From any to any, high fidelity.
+	//              Ideal for image content.
 	//              If flashing, will flash and update the full region.
 	//              If not, only changed pixels will update.
+	//              GC stands for "Grayscale Clearing"
 	WFM_GC4,    // From any to B/W/GRAYC/GRAY5. (may be implemented as DU4 on some devices).
-	WFM_A2,     // From B&W to B&W, on-screen pixels will be left as-is for new content that is *not* B&W.
-	//             FBInk will ask the EPDC to enforce quantization to B&W to honor the "to" requirement.
+	//             Limited use-cases in practice.
+	WFM_A2,     // From B&W to B&W, fast. On-screen pixels will be left as-is for new content that is *not* B&W.
+	//             FBInk will ask the EPDC to enforce quantization to B&W to honor the "to" requirement,
+	//             (via EPDC_FLAG_FORCE_MONOCHROME).
 	//             Will never flash.
-	//             Can to be bracketed between white screens to honor the "from" requirement.
-	WFM_GL16,    // From white to any. Typically optimized for text on a white background.
+	//             Consider bracketing a series of A2 refreshes between white screens to transition in/out of A2,
+	//             so as to honor the "from" requirement.
+	//             A stands for "Animation"
+	WFM_GL16,    // From white to any.
+	//              Typically optimized for text on a white background.
 	// Newer generation devices only
-	WFM_REAGL,    // From white to any, with ghosting and flashing reduction. If available, best option for text.
+	WFM_REAGL,    // From white to any, with ghosting and flashing reduction.
+	//               When available, best option for text (in place of GL16).
 	//               May enforce timing constraints if in collision with another waveform mode, e.g.,
 	//               it may, to some extent, wait for completion of previous updates to have access to HW resources.
+	//               Marketing term for the feature is "Regal". Technically called 5-bit waveform modes.
 	WFM_REAGLD,    // From white to any, with more ghosting reduction, but less flashing reduction.
 	//                Should only be used when flashing, which should yield a less noticeable flash than GC16.
 	//                Rarely used in practice, because still optimized for text or lightly mixed content,
@@ -318,7 +332,7 @@ typedef struct
 	FONT_INDEX_T fontname;       // Request a specific bundled font
 	bool         is_inverted;    // Invert colors.
 	//				This is *NOT* mutually exclusive with is_nightmode, and is *always* supported.
-	bool             is_flashing;    // Request a black flash on refresh
+	bool             is_flashing;    // Request a black flash on refresh (e.g., UPDATE_MODE_FULL instead of PARTIAL)
 	bool             is_cleared;     // Clear the full screen beforehand (honors bg_color & is_inverted)
 	bool             is_centered;    // Center the text (horizontally)
 	short int        hoffset;        // Horizontal offset (in pixels) for text position
@@ -348,7 +362,7 @@ typedef struct
 	HW_DITHER_INDEX_T dithering_mode;    // Request a specific dithering mode (defaults to PASSTHROUGH)
 	bool              sw_dithering;      // Request (ordered) *software* dithering when printing an image.
 					     // This is *NOT* mutually exclusive with dithering_mode!
-	bool is_nightmode;                   // Request hardware inversion (if supported/safe).
+	bool is_nightmode;                   // Request hardware inversion (via EPDC_FLAG_ENABLE_INVERSION, if supported/safe).
 	//					This is *NOT* mutually exclusive with is_inverted!
 	//					NOTE: If the HW doesn't support inversion, a warning is printed during init.
 	//					      If you're convinced this is in error (i.e., up to date kernel),
