@@ -205,11 +205,11 @@ typedef enum
 	//                   This is the default.
 	//                   If you request a flashing update w/ AUTO, FBInk automatically uses GC16 instead.
 	// Common
-	WFM_DU,      // From any to B&W, fast (~260ms), some light ghosting.
-	//              On-screen pixels will be left as-is for new content that is *not* B&W.
-	//              Great for UI highlights, or tracing touch/pen input.
-	//              Will never flash.
-	//              DU stands for "Direct Update".
+	WFM_DU,    // From any to B&W, fast (~260ms), some light ghosting.
+	//            On-screen pixels will be left as-is for new content that is *not* B&W.
+	//            Great for UI highlights, or tracing touch/pen input.
+	//            Will never flash.
+	//            DU stands for "Direct Update".
 	WFM_GC16,    // From any to any, ~450ms, high fidelity (i.e., lowest risk of ghosting).
 	//              Ideal for image content.
 	//              If flashing, will flash and update the full region.
@@ -218,15 +218,15 @@ typedef enum
 	WFM_GC4,    // From any to B/W/GRAYA/GRAY5, (~290ms), some ghosting. (may be implemented as DU4 on some devices).
 	//             Will *probably* never flash, especially if the device doesn't implement any other 4 color modes.
 	//             Limited use-cases in practice.
-	WFM_A2,     // From B&W to B&W, fast (~120ms), some ghosting.
-	//             On-screen pixels will be left as-is for new content that is *not* B&W.
-	//             FBInk will ask the EPDC to enforce quantization to B&W to honor the "to" requirement,
-	//             (via EPDC_FLAG_FORCE_MONOCHROME).
-	//             Will never flash.
-	//             Consider bracketing a series of A2 refreshes between white screens to transition in and out of A2,
-	//             so as to honor the "from" requirement:
-	//             non-flashing GC16 for the in transition, A2 or GC16 for the out transition.
-	//             A stands for "Animation"
+	WFM_A2,    // From B&W to B&W, fast (~120ms), some ghosting.
+	//            On-screen pixels will be left as-is for new content that is *not* B&W.
+	//            FBInk will ask the EPDC to enforce quantization to B&W to honor the "to" requirement,
+	//            (via EPDC_FLAG_FORCE_MONOCHROME).
+	//            Will never flash.
+	//            Consider bracketing a series of A2 refreshes between white screens to transition in and out of A2,
+	//            so as to honor the "from" requirement:
+	//            non-flashing GC16 for the in transition, A2 or GC16 for the out transition.
+	//            A stands for "Animation"
 	WFM_GL16,    // From white to any, ~450ms, some ghosting.
 	//              Typically optimized for text on a white background.
 	// Newer generation devices only
@@ -366,11 +366,11 @@ typedef struct
 	HW_DITHER_INDEX_T dithering_mode;    // Request a specific dithering mode (defaults to PASSTHROUGH)
 	bool              sw_dithering;      // Request (ordered) *software* dithering when printing an image.
 					     // This is *NOT* mutually exclusive with dithering_mode!
-	bool is_nightmode;                   // Request hardware inversion (via EPDC_FLAG_ENABLE_INVERSION, if supported/safe).
-	//					This is *NOT* mutually exclusive with is_inverted!
-	//					NOTE: If the HW doesn't support inversion, a warning is printed during init.
-	//					      If you're convinced this is in error (i.e., up to date kernel),
-	//					      you can bypass that check by setting FBINK_ALLOW_HW_INVERT in your env.
+	bool is_nightmode;    // Request hardware inversion (via EPDC_FLAG_ENABLE_INVERSION, if supported/safe).
+	//			 This is *NOT* mutually exclusive with is_inverted!
+	//			 NOTE: If the HW doesn't support inversion, a warning is printed during init.
+	//			       If you're convinced this is in error (i.e., up to date kernel),
+	//			       you can bypass that check by setting FBINK_ALLOW_HW_INVERT in your env.
 	bool no_refresh;    // Skip actually refreshing the eInk screen (useful when drawing in batch)
 	bool to_syslog;     // Send messages & errors to the syslog instead of stdout/stderr
 } FBInkConfig;
