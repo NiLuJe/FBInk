@@ -1981,6 +1981,9 @@ int
 		fbink_cfg.is_halfway = true;
 
 		// Start by clearing the bar's region to white, to make sure A2 will behave...
+		// NOTE: Commented out for now, as the chance of hitting the flags bug for this on Mk. 7 is low enough,
+		//       and the quick succesion of GC16 + A2 with no fencing causes a tearing artifact on the first refresh.
+		/*
 		fbink_cfg.wfm_mode = WFM_GC16;
 		// We could use a fbink_grid_clear, but instead duplicate a bit of positioning logic instead for exact results...
 		//fbink_grid_clear(fbfd, (unsigned short int) (fbink_state.max_cols - 1U), 1U, &fbink_cfg);
@@ -2000,6 +2003,7 @@ int
 			.height = fbink_state.font_h,
 		};
 		fbink_cls(fbfd, &fbink_cfg, &region);
+		*/
 
 		// Make it backgroundless, to play nicer with whatever might already be on the edge of the screen
 		fbink_cfg.is_bgless = true;
