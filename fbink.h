@@ -214,7 +214,7 @@ typedef enum
 	//              If flashing, will flash and update the full region.
 	//              If not, only changed pixels will update.
 	//              GC stands for "Grayscale Clearing"
-	WFM_GC4,    // From any to B/W/GRAYC/GRAY5. (may be implemented as DU4 on some devices).
+	WFM_GC4,    // From any to B/W/GRAYA/GRAY5. (may be implemented as DU4 on some devices).
 	//             Limited use-cases in practice.
 	WFM_A2,     // From B&W to B&W, fast. On-screen pixels will be left as-is for new content that is *not* B&W.
 	//             FBInk will ask the EPDC to enforce quantization to B&W to honor the "to" requirement,
@@ -238,8 +238,8 @@ typedef enum
 	// Kindle only
 	WFM_GC16_FAST,    // Better latency at the expense of lower fidelity than GC16.
 	WFM_GL16_FAST,    // Better latency at the expense of lower fidelity than GL16.
-	WFM_DU4,          // From any to B/W/GRAYC/GRAY5. (e.g., GC4).
-	WFM_GL4,          // From white to B/W/GRAYC/GRAY5.
+	WFM_DU4,          // From any to B/W/GRAYA/GRAY5. (e.g., GC4).
+	WFM_GL4,          // From white to B/W/GRAYA/GRAY5.
 	WFM_GL16_INV,     // From black to any. Optimized for text on a black background (e.g., nightmode).
 	WFM_GCK16,        // From black to any. Goes hand-in-hand with GLKW16, should only be used when flashing.
 	WFM_GLKW16,       // From black to any. Newer variant of GL16_INV.
