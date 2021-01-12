@@ -209,9 +209,9 @@ typedef enum
 	//              If not, only changed pixels will update.
 	WFM_GC4,    // From any to B/W/GRAYC/GRAY5. (may be implemented as DU4 on some devices).
 	WFM_A2,     // From B&W to B&W, on-screen pixels will be left as-is for new content that is *not* B&W.
-	//              FBInk will ask the EPDC to enforce quantization to B&W to honor the "to" requirement.
-	//              Will never flash.
-	//              Can to be bracketed between white screens to honor the "from" requirement.
+	//             FBInk will ask the EPDC to enforce quantization to B&W to honor the "to" requirement.
+	//             Will never flash.
+	//             Can to be bracketed between white screens to honor the "from" requirement.
 	WFM_GL16,    // From white to any. Typically optimized for text on a white background.
 	// Newer generation devices only
 	WFM_REAGL,    // From white to any, with ghosting and flashing reduction. If available, best option for text.
