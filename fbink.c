@@ -2431,8 +2431,8 @@ static int
 	//       That, or simply queueing a few updates in a short time...
 	//       The main culprit appears to be FORCE_MONOCHROME here, as I can't break DU without it in this case ;).
 	// NOTE: Speaking of FORCE_MONOCHROME, see the notes below in refresh(). Like on other devices, we enforce it for A2,
-	//       because it *usually* ensures the from/to B&W A2 constraints are met..
-	//       Operative word being "usually", because of the flags bug... So, being A2,
+	//       because it *usually* ensures the from/to B&W A2 constraints are met.
+	//       Operative word being "usually", because of the flags bug... So, given its constraints,
 	//       you'll want to use it on *already* completely B&W content, otherwise things risk going a bit wonky
 	//       if the flags bug gets tripped.
 	//       See the notes about WFM_A2 in <fbink.h> for more details.
@@ -2590,7 +2590,7 @@ static int
 	// NOTE: While the fixed-cell codepath, when rendering in B&W, would be the perfect candidate for using A2 waveform mode,
 	//       it requires the *on-screen* content to *already* be B&W... And, FORCE_MONOCHROME,
 	//       which ought to make sure these constraints are met, is unfortunately unreliable on Kobo Mk. 7 kernels,
-	//       (see the notes about the flags stacking bug on Mk. 7 kernels in refresh_kobo_mk7)...
+	//       (see the notes about the flags stacking bug in refresh_kobo_mk7)...
 	//       Otherwise, offending pixels are not updated, leading to disappearing text,
 	//       or weird blending/overlay effects depending on the previous screen content...
 	// NOTE: And while we're on the fun quirks train: FULL never flashes w/ AUTO on (some?) Kobos,
