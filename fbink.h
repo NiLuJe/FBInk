@@ -224,7 +224,8 @@ typedef enum
 	//            (via EPDC_FLAG_FORCE_MONOCHROME).
 	//            Will never flash.
 	//            Consider bracketing a series of A2 refreshes between white screens to transition in and out of A2,
-	//            so as to honor the "from" requirement:
+	//            so as to honor the "from" requirement,
+	//            (especially given that FORCE_MONOCHROME may not be reliably able to do so, c.f., refresh_kobo_mk7):
 	//            non-flashing GC16 for the in transition, A2 or GC16 for the out transition.
 	//            A stands for "Animation"
 	WFM_GL16,    // From white to any, ~450ms, some ghosting.

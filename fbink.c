@@ -2430,8 +2430,11 @@ static int
 	//       But even with DU, if you pile on a dither_mode or a USE_DITHERING flag on top of that, it may still go haywire.
 	//       That, or simply queueing a few updates in a short time...
 	//       The main culprit appears to be FORCE_MONOCHROME here, as I can't break DU without it in this case ;).
-	// NOTE: Speaking of FORCE_MONOCHROME, see the notes below in refresh(). Like on other devices, we enforce it for A2.
-	//       Being A2, you'll want to use it on *already* completely B&W content, otherwise things risk going a bit wonky.
+	// NOTE: Speaking of FORCE_MONOCHROME, see the notes below in refresh(). Like on other devices, we enforce it for A2,
+	//       because it *usually* ensures the from/to B&W A2 constraints are met..
+	//       Operative word being "usually", because of the flags bug... So, being A2,
+	//       you'll want to use it on *already* completely B&W content, otherwise things risk going a bit wonky
+	//       if the flags bug gets tripped.
 	//       See the notes about WFM_A2 in <fbink.h> for more details.
 	//       That pretty much leaves button highlights in UIs (which is precisely what nickel uses it for).
 	//       If you need a more reliable alternative, prefer DU (which'll barely be any slower anyway).
@@ -2585,11 +2588,11 @@ static int
 	}
 #	endif
 	// NOTE: While the fixed-cell codepath, when rendering in B&W, would be the perfect candidate for using A2 waveform mode,
-	//       it requires the *on-screen* content to *already* be B&W (which FORCE_MONOCHROME can't do anything about,
-	//       unless you prepend a dummy A2 + FORCE_MONOCHROME full-screen refresh).
+	//       it requires the *on-screen* content to *already* be B&W... And, FORCE_MONOCHROME,
+	//       which ought to make sure these constraints are met, is unfortunately unreliable on Kobo Mk. 7 kernels,
+	//       (see the notes about the flags stacking bug on Mk. 7 kernels in refresh_kobo_mk7)...
 	//       Otherwise, offending pixels are not updated, leading to disappearing text,
 	//       or weird blending/overlay effects depending on the previous screen content...
-	// NOTE: Speaking of FORCE_MONOCHROME, see the notes about the flags stacking bug on Mk. 7 kernels in refresh_kobo_mk7...
 	// NOTE: And while we're on the fun quirks train: FULL never flashes w/ AUTO on (some?) Kobos,
 	//       so request GC16 if we want a flash...
 	// NOTE: FWIW, DU behaves properly when PARTIAL, but doesn't flash when FULL (c.f., WFM_DU in <fbink.h>).
