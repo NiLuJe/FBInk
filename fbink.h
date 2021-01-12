@@ -365,7 +365,7 @@ typedef struct
 	WFM_MODE_INDEX_T  wfm_mode;          // Request a specific waveform mode (defaults to AUTO)
 	HW_DITHER_INDEX_T dithering_mode;    // Request a specific dithering mode (defaults to PASSTHROUGH)
 	bool              sw_dithering;      // Request (ordered) *software* dithering when printing an image.
-					     // This is *NOT* mutually exclusive with dithering_mode!
+	//                                      This is *NOT* mutually exclusive with dithering_mode!
 	bool is_nightmode;    // Request hardware inversion (via EPDC_FLAG_ENABLE_INVERSION, if supported/safe).
 	//			 This is *NOT* mutually exclusive with is_inverted!
 	//			 NOTE: If the HW doesn't support inversion, a warning is printed during init.
@@ -401,9 +401,9 @@ typedef struct
 	//                                    consecutive strings on the same line(s).
 	bool is_formatted;    // Is string "formatted"? Bold/Italic support only, markdown like syntax
 	bool compute_only;    // Abort early after the line-break computation pass (no actual rendering).
-	//                                     NOTE: This is early enough that it will *NOT* be able to predict *every*
-	//                                           potential case of truncation.
-	//                                           In particular, broken metrics may yield a late truncation at rendering time.
+	//                       NOTE: This is early enough that it will *NOT* be able to predict *every*
+	//                             potential case of truncation.
+	//                             In particular, broken metrics may yield a late truncation at rendering time.
 	bool no_truncation;    // Abort as early as possible (but not necessarily before the rendering pass),
 			       // if the string cannot fit in the available area at the current font size.
 } FBInkOTConfig;
