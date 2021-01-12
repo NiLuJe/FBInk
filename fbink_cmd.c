@@ -1972,7 +1972,7 @@ int
 		fbink_cfg.is_centered = true;
 		// Double the usual size
 		fbink_cfg.fontmult = (uint8_t)(fbink_state.fontsize_mult << 1U);
-		// Don't forget that fontmult & is_centered requires a reinit...
+		// Don't forget that fontmult & is_centered require a reinit...
 		fbink_init(fbfd, &fbink_cfg);
 		// Refresh the updated state
 		fbink_get_state(&fbink_cfg, &fbink_state);
@@ -1980,9 +1980,26 @@ int
 		// In the middle of the screen
 		fbink_cfg.is_halfway = true;
 
-		// Star by clearing the bar's region to white, to make sure A2 will behave...
+		// Start by clearing the bar's region to white, to make sure A2 will behave...
 		fbink_cfg.wfm_mode = WFM_GC16;
-		fbink_grid_clear(fbfd, (unsigned short int) (fbink_state.max_cols - 1U), 1U, &fbink_cfg);
+		// We could use a fbink_grid_clear, but instead duplicate a bit of positioning logic instead for exact results...
+		//fbink_grid_clear(fbfd, (unsigned short int) (fbink_state.max_cols - 1U), 1U, &fbink_cfg);
+		short int                row = (short int) (fbink_state.max_rows / 2U);
+		const unsigned short int top_pos =
+		    (unsigned short int) MAX(0 + (fbink_state.view_vert_origin - fbink_state.view_vert_offset),
+					     ((row * fbink_state.font_h) + fbink_state.view_vert_origin));
+		const unsigned short int left_pos = fbink_state.view_hori_origin;
+		const unsigned short int bar_width =
+		    (unsigned short int) ((0.90f * (float) fbink_state.view_width) + 0.5f);
+		const unsigned short int bar_left =
+		    (unsigned short int) (left_pos + (0.05f * (float) fbink_state.view_width) + 0.5f);
+		FBInkRect region = {
+			.left   = bar_left,
+			.top    = top_pos,
+			.width  = bar_width,
+			.height = fbink_state.font_h,
+		};
+		fbink_cls(fbfd, &fbink_cfg, &region);
 
 		// Make it backgroundless, to play nicer with whatever might already be on the edge of the screen
 		fbink_cfg.is_bgless = true;
