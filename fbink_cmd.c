@@ -1967,16 +1967,28 @@ int
 		// We'll need to know a few things about the current device...
 		FBInkState fbink_state = { 0 };
 		fbink_get_state(&fbink_cfg, &fbink_state);
-		// Make it backgroundless, to play nicer with whatever might already be on the edge of the screen
-		fbink_cfg.is_bgless = true;
-		// In the middle of the screen
-		fbink_cfg.is_halfway = true;
-		// Fast
-		fbink_cfg.wfm_mode = WFM_A2;
+
+		// We'll want the manual grid clear to be centered, like the bar itself
+		fbink_cfg.is_centered = true;
 		// Double the usual size
 		fbink_cfg.fontmult = (uint8_t)(fbink_state.fontsize_mult << 1U);
-		// Don't forget that fontmult requires a reinit...
+		// Don't forget that fontmult & is_centered requires a reinit...
 		fbink_init(fbfd, &fbink_cfg);
+		// Refresh the updated state
+		fbink_get_state(&fbink_cfg, &fbink_state);
+
+		// In the middle of the screen
+		fbink_cfg.is_halfway = true;
+
+		// Star by clearing the bar's region to white, to make sure A2 will behave...
+		fbink_cfg.wfm_mode = WFM_GC16;
+		fbink_grid_clear(fbfd, (unsigned short int) (fbink_state.max_cols - 1U), 1U, &fbink_cfg);
+
+		// Make it backgroundless, to play nicer with whatever might already be on the edge of the screen
+		fbink_cfg.is_bgless = true;
+		// Fast
+		fbink_cfg.wfm_mode = WFM_A2;
+
 		// Infinite activity bar
 		is_activitybar = true;
 		is_infinite    = true;
