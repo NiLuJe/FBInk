@@ -154,13 +154,13 @@ static inline __attribute__((always_inline)) void
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	// NOTE: Technically legitimate warning. In practice, we always pass RGB32 pixels in 24bpp codepaths.
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#pragma GCC diagnostic   push
+#pragma GCC diagnostic   ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunknown-warning-option"
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-	*((unsigned char*) (fbPtr + pix_offset))      = px->bgra.color.b;
-	*((unsigned char*) (fbPtr + pix_offset + 1U)) = px->bgra.color.g;
-	*((unsigned char*) (fbPtr + pix_offset + 2U)) = px->bgra.color.r;
+#pragma GCC diagnostic   ignored "-Wmaybe-uninitialized"
+        *((unsigned char*) (fbPtr + pix_offset))      = px->bgra.color.b;
+        *((unsigned char*) (fbPtr + pix_offset + 1U)) = px->bgra.color.g;
+        *((unsigned char*) (fbPtr + pix_offset + 2U)) = px->bgra.color.r;
 #pragma GCC diagnostic pop
 }
 
@@ -360,7 +360,7 @@ static void
 	coords->y = ry;
 }
 #	endif    // FBINK_WITH_BUTTON_SCAN
-#endif    // FBINK_FOR_KOBO || FBINK_FOR_CERVANTES
+#endif            // FBINK_FOR_KOBO || FBINK_FOR_CERVANTES
 
 static void
     rotate_coordinates_nop(FBInkCoordinates* restrict coords __attribute__((unused)))
@@ -424,11 +424,11 @@ static inline __attribute__((always_inline, hot)) void
 			// Yep :(
 			FBInkPixel packed_px;
 			// NOTE: Technically legitimate warning. In practice, we always pass RGB32 pixels in 16bpp codepaths.
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#pragma GCC diagnostic   push
+#pragma GCC diagnostic   ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunknown-warning-option"
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-			packed_px.rgb565 = pack_rgb565(px->bgra.color.r, px->bgra.color.g, px->bgra.color.b);
+#pragma GCC diagnostic   ignored "-Wmaybe-uninitialized"
+                        packed_px.rgb565 = pack_rgb565(px->bgra.color.r, px->bgra.color.g, px->bgra.color.b);
 #pragma GCC diagnostic pop
 			put_pixel_RGB565(&coords, &packed_px);
 		}
@@ -949,23 +949,23 @@ static void
 	if (unlikely(vInfo.bits_per_pixel == 16U)) {
 		// NOTE: Besides, we can't use a straight memset, since we need pixels to be properly packed for RGB565...
 		//       Se we whip up a quick memset16, like fill_rect() does.
-		const uint16_t px = pack_rgb565(v, v, v);
+		const uint16_t px       = pack_rgb565(v, v, v);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
-		uint16_t* p = (uint16_t*) fbPtr;
+		uint16_t*      p        = (uint16_t*) fbPtr;
 #	pragma GCC diagnostic pop
-		size_t px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
+		size_t         px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
 		while (px_count--) {
 			*p++ = px;
 		}
 	} else if (vInfo.bits_per_pixel == 32U) {
 		// Much like in fill_rect_RGB32, whip up something that'll preserve the alpha byte...
-		const FBInkPixelBGRA px = { .color.b = v, .color.g = v, .color.r = v, .color.a = 0xFF };
+		const FBInkPixelBGRA px       = { .color.b = v, .color.g = v, .color.r = v, .color.a = 0xFF };
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
-		uint32_t* p = (uint32_t*) fbPtr;
+		uint32_t*            p        = (uint32_t*) fbPtr;
 #	pragma GCC diagnostic pop
-		size_t px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
+		size_t               px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
 		while (px_count--) {
 			*p++ = px.p;
 		}
@@ -2533,7 +2533,7 @@ static int
 	return EXIT_SUCCESS;
 }
 #	endif    // FBINK_FOR_KINDLE
-#endif    // !FBINK_FOR_LINUX
+#endif            // !FBINK_FOR_LINUX
 
 // And finally, dispatch the right refresh request for our HW...
 #ifdef FBINK_FOR_LINUX
@@ -2639,7 +2639,7 @@ static int
 	}
 #	endif    // FBINK_FOR_KINDLE
 }
-#endif    // FBINK_FOR_LINUX
+#endif            // FBINK_FOR_LINUX
 
 // Same thing for WAIT_FOR_UPDATE_SUBMISSION requests...
 #ifndef FBINK_FOR_LINUX
@@ -7034,7 +7034,7 @@ static __attribute__((cold)) const char*
 	}
 }
 #	endif    // FBINK_FOR_POCKETBOOK
-#endif    // !FBINK_FOR_LINUX
+#endif            // !FBINK_FOR_LINUX
 
 // Convert our public HW_DITHER_INDEX_T values to an appropriate mxcfb dithering mode constant
 static int

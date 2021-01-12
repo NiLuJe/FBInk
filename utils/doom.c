@@ -191,7 +191,7 @@ static bool
 	return true;
 }
 #	endif    // !FBINK_FOR_KINDLE
-#endif    // !FBINK_FOR_LINUX
+#endif            // !FBINK_FOR_LINUX
 
 // Shiny DOOM Fire effect
 // c.f., http://fabiensanglard.net/doom_fire_psx/index.html
@@ -840,7 +840,7 @@ int
 		return ERRCODE(ENOSYS);
 	}
 #	endif    // !FBINK_FOR_KINDLE
-#endif    // !FBINK_FOR_LINUX
+#endif            // !FBINK_FOR_LINUX
 
 	// Setup FBInk
 	// NOTE: We pretty much need flashing updates, otherwise the ghosting heavily mangles the effect ;).

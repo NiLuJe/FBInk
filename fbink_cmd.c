@@ -60,7 +60,7 @@ static void
 #		else
 	    "No"
 #		endif    // FBINK_WITH_BUTTON_SCAN
-#	endif    // FBINK_FOR_KOBO
+#	endif            // FBINK_FOR_KOBO
 	    "]"
 #else
 	    "FBInk %s"
@@ -711,10 +711,10 @@ int
 		NOTRUNC_OPT,
 		STYLE_OPT,
 	};
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#pragma GCC diagnostic   push
+#pragma GCC diagnostic   ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunknown-warning-option"
-#pragma GCC diagnostic ignored "-Wdiscarded-qualifiers"
+#pragma GCC diagnostic   ignored "-Wdiscarded-qualifiers"
 #pragma clang diagnostic ignored "-Wincompatible-pointer-types-discards-qualifiers"
 	char* const refresh_token[] = {
 		[TOP_OPT] = "top", [LEFT_OPT] = "left", [WIDTH_OPT] = "width", [HEIGHT_OPT] = "height", NULL

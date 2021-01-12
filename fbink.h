@@ -200,28 +200,45 @@ typedef uint8_t BG_COLOR_INDEX_T;
 // NOTE: See the various mxcfb headers in the eink folder for more details about what's available on your platform.
 typedef enum
 {
-	WFM_AUTO = 0U,
-	WFM_DU,
-	WFM_GC16,
-	WFM_GC4,
-	WFM_A2,
-	WFM_GL16,
-	WFM_REAGL,
-	WFM_REAGLD,
-	WFM_GC16_FAST,
-	WFM_GL16_FAST,
-	WFM_DU4,
-	WFM_GL4,
-	WFM_GL16_INV,
-	WFM_GCK16,
-	WFM_GLKW16,
-	WFM_INIT,
+	WFM_AUTO = 0U,    // Let the EPDC choose, via histogram analysis of the refresh region.
+			  // May *not* always (or ever) opt to use REAGL on devices where it is otherwise available.
+	// Common
+	WFM_DU,      // From any to B&W, on-screen pixels will be left as-is for new content that is *not* B&W.
+	WFM_GC16,    // From any to any, high fidelity.
+		     // If flashing, will flash and update the full region.
+		     // If not, only changed pixels will update.
+	WFM_GC4,     // From any to B/W/GRAYC/GRAY5. (may be implemented as DU4 on some devices).
+	WFM_A2,      // From B&W to B&W, on-screen pixels will be left as-is for new content that is *not* B&W.
+		     // FBInk will ask the EPDC to enforce quantization to B&W to honor the "to" requirement.
+		     // Will never flash.
+		     // Can to be bracketed between white screens to honor the "from" requirement.
+	WFM_GL16,    // From white to any. Typically optimized for text on a white background.
+	// Newer generation devices only
+	WFM_REAGL,     // From white to any, with ghosting and flashing reduction. If available, best option for text.
+		       // May enforce timing constraints if in collision with another waveform mode, e.g.,
+		       // it may, to some extent, wait for completion of previous updates to have access to HW resources.
+	WFM_REAGLD,    // From white to any, with more ghosting reduction, but less flashing reduction.
+		       // Should only be used when flashing, which should yield a less noticeable flash than GC16.
+		       // Rarely used in practice, because still optimized for text or lightly mixed content,
+		       // not pure image content.
+	// Kindle only
+	WFM_GC16_FAST,    // Better latency at the expense of lower fidelity than GC16.
+	WFM_GL16_FAST,    // Better latency at the expense of lower fidelity than GL16.
+	WFM_DU4,          // From any to B/W/GRAYC/GRAY5. (e.g., GC4).
+	WFM_GL4,          // From white to B/W/GRAYC/GRAY5.
+	WFM_GL16_INV,     // From black to any. Optimized for text on a black background (e.g., nightmode).
+	WFM_GCK16,        // From black to any. Goes hand-in-hand with GLKW16, should only be used when flashing.
+	WFM_GLKW16,       // From black to any. Newer variant of GL16_INV.
+	// For documentation purposes
+	WFM_INIT,    // May flash several times to end up with a white screen.
 	WFM_UNKNOWN,
+	// reMarkable only
 	WFM_INIT2,
+	// PocketBook only
 	WFM_A2IN,
 	WFM_A2OUT,
-	WFM_GC16HQ,
-	WFM_GS16,
+	WFM_GC16HQ,         // Only available on i.MX SoCs. Alias for REAGL, or REAGLD when flashing.
+	WFM_GS16,           // Only available on B288 SoCs. Fidelity supposedly somewhere between GL16 and GC16.
 	WFM_MAX = 0xFFu,    // uint8_t
 } __attribute__((packed)) WFM_MODE_INDEX_E;
 typedef uint8_t WFM_MODE_INDEX_T;
@@ -232,7 +249,7 @@ typedef enum
 	HWD_PASSTHROUGH = 0U,
 	HWD_FLOYD_STEINBERG,
 	HWD_ATKINSON,
-	HWD_ORDERED,
+	HWD_ORDERED,    // Generally the only supported HW variant on EPDC v2
 	HWD_QUANT_ONLY,
 	HWD_LEGACY = 0xFFu,    // Use legacy EPDC v1 dithering instead (if available).
 	//                        Note that it is *not* offloaded to the PxP, it's purely software, in-kernel.
