@@ -1982,7 +1982,7 @@ int
 
 		// Start by clearing the bar's region to white, to make sure A2 will behave...
 		// NOTE: Commented out for now, as the chance of hitting the flags bug for this on Mk. 7 is low enough,
-		//       and the quick succesion of GC16 + A2 with no fencing causes a tearing artifact on the first refresh.
+		//       and the quick succession of GC16 + A2 with no fencing causes a tearing artifact on the first refresh.
 		/*
 		fbink_cfg.wfm_mode = WFM_GC16;
 		// We could use a fbink_grid_clear, but instead duplicate a bit of positioning logic instead for exact results...
@@ -1996,7 +1996,7 @@ int
 		    (unsigned short int) ((0.90f * (float) fbink_state.view_width) + 0.5f);
 		const unsigned short int bar_left =
 		    (unsigned short int) (left_pos + (0.05f * (float) fbink_state.view_width) + 0.5f);
-		FBInkRect region = {
+		const FBInkRect region = {
 			.left   = bar_left,
 			.top    = top_pos,
 			.width  = bar_width,
