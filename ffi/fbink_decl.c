@@ -16,28 +16,28 @@ cdecl_const(LAST_MARKER)
 
 // Typedefs
 cdecl_type(FONT_INDEX_E)
-cdecl_type(FONT_INDEX_T)
+cdecl_c99_type(FONT_INDEX_T, uint8_t)
 
 cdecl_type(FONT_STYLE_E)
 cdecl_type(FONT_STYLE_T)
 
 cdecl_type(ALIGN_INDEX_E)
-cdecl_type(ALIGN_INDEX_T)
+cdecl_c99_type(ALIGN_INDEX_T, uint8_t)
 cdecl_type(PADDING_INDEX_E)
-cdecl_type(PADDING_INDEX_T)
+cdecl_c99_type(PADDING_INDEX_T, uint8_t)
 
 cdecl_type(FG_COLOR_INDEX_E)
-cdecl_type(FG_COLOR_INDEX_T)
+cdecl_c99_type(FG_COLOR_INDEX_T, uint8_t)
 cdecl_type(BG_COLOR_INDEX_E)
-cdecl_type(BG_COLOR_INDEX_T)
+cdecl_c99_type(BG_COLOR_INDEX_T, uint8_t)
 
 cdecl_type(WFM_MODE_INDEX_E)
-cdecl_type(WFM_MODE_INDEX_T)
+cdecl_c99_type(WFM_MODE_INDEX_T, uint8_t)
 cdecl_type(HW_DITHER_INDEX_E)
-cdecl_type(HW_DITHER_INDEX_T)
+cdecl_c99_type(HW_DITHER_INDEX_T, uint8_t)
 
 cdecl_type(NTX_ROTA_INDEX_E)
-cdecl_type(NTX_ROTA_INDEX_T)
+cdecl_c99_type(NTX_ROTA_INDEX_T, uint8_t)
 
 // Config structs
 cdecl_type(FBInkState)
