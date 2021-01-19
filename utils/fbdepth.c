@@ -42,27 +42,27 @@ static void
 	    "Tiny tool to set the framebuffer bitdepth and/or rotation on eInk devices.\n"
 	    "\n"
 	    "OPTIONS:\n"
-	    "\t-d, --depth <8|16|24|32>\tSwitch the framebuffer to the supplied bitdepth.\n"
-	    "\t-h, --help\t\t\tShow this help message.\n"
-	    "\t-v, --verbose\t\t\tToggle printing diagnostic messages.\n"
-	    "\t-q, --quiet\t\t\tToggle hiding diagnostic messages.\n"
-	    "\t-g, --get\t\t\tJust output the current bitdepth to stdout.\n"
-	    "\t-G, --getcode\t\t\tJust exit with the current bitdepth as exit code.\n"
+	    "\t-d, --depth <8|16|24|32>\t\tSwitch the framebuffer to the supplied bitdepth.\n"
+	    "\t-h, --help\t\t\t\tShow this help message.\n"
+	    "\t-v, --verbose\t\t\t\tToggle printing diagnostic messages.\n"
+	    "\t-q, --quiet\t\t\t\tToggle hiding diagnostic messages.\n"
+	    "\t-g, --get\t\t\t\tJust output the current bitdepth to stdout.\n"
+	    "\t-G, --getcode\t\t\t\tJust exit with the current bitdepth as exit code.\n"
 #if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 	    "\t-r, --rota <-1|0|1|2|3> \t\tSwitch the framebuffer to the supplied rotation. -1 is a magic value matching the device-specific Portrait orientation.\n"
 #else
 	    "\t-r, --rota <0|1|2|3>\t\tSwitch the framebuffer to the supplied rotation (Linux FB convention).\n"
 #endif
 #if defined(FBINK_FOR_KOBO)
-	    "\t-R, --canonicalrota <UR|CW|UD|CCW>\t\tSwitch the framebuffer to the supplied canonical rotation (Linux FB convention), automagically translating it to the mangled native one. (i.e., requesting UR will ensure the device is actually UR, much like passing -1 to -r, --rota would).\n"
+	    "\t-R, --canonicalrota <UR|CW|UD|CCW>\tSwitch the framebuffer to the supplied canonical rotation (Linux FB convention), automagically translating it to the mangled native one. (i.e., requesting UR will ensure the device is actually UR, much like passing -1 to -r, --rota would).\n"
 #endif
-	    "\t-o, --getrota\t\t\tJust output the current rotation to stdout.\n"
-	    "\t-O, --getrotacode\t\tJust exit with the current rotation as exit code.\n"
+	    "\t-o, --getrota\t\t\t\tJust output the current rotation to stdout.\n"
+	    "\t-O, --getrotacode\t\t\tJust exit with the current rotation as exit code.\n"
 #if defined(FBINK_FOR_KOBO)
 	    "\t-c, --getcanonicalrota\t\t\tJust output the current rotation (converted to its canonical representation) to stdout.\n"
 	    "\t-C, --getcanonicalrotacode\t\tJust exit with the current rotation (converted to its canonical representation) as exit code.\n"
 #endif
-	    "\t-H, --nightmode <on|off|toggle>\tToggle hardware inversion (8bpp only, safely ignored otherwise).\n"
+	    "\t-H, --nightmode <on|off|toggle>\t\tToggle hardware inversion (8bpp only, safely ignored otherwise).\n"
 	    "\n",
 	    fbink_version());
 	return;
