@@ -1235,7 +1235,7 @@ static void
 	     deviceQuirks.devicePlatform);
 #	elif defined(FBINK_FOR_REMARKABLE)
 	identify_remarkable();
-	ELOG("Detected a reMarkable (%s)", deviceQuirks.deviceCodename);
+	ELOG("Detected a %s (%s)", deviceQuirks.deviceName, deviceQuirks.deviceCodename);
 #	elif defined(FBINK_FOR_POCKETBOOK)
 	identify_pocketbook();
 	ELOG("Detected a PocketBook (%s)", deviceQuirks.deviceCodename);
