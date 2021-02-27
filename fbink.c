@@ -2401,8 +2401,13 @@ static int
 		if (rv == 0) {
 			LOG("Update %u has already fully been completed", marker);
 		} else {
-			// NOTE: Timeout is set to 10000ms
-			LOG("Waited %ldms for completion of update %u", (10000 - jiffies_to_ms(rv)), marker);
+			if (strcmp(deviceQuirks.devicePlatform, "Mark 4") <= 0) {
+				// NOTE: Timeout is set to 5000ms on older devices
+				LOG("Waited %ldms for completion of update %u", (5000 - jiffies_to_ms(rv)), marker);
+			} else {
+				// NOTE: Timeout is set to 10000ms
+				LOG("Waited %ldms for completion of update %u", (10000 - jiffies_to_ms(rv)), marker);
+			}
 		}
 	}
 
