@@ -199,7 +199,7 @@ typedef uint8_t BG_COLOR_INDEX_T;
 //       c.f., https://github.com/NiLuJe/FBInk/commit/32acece78f7cc92b06faa4a668feead260b8ce24
 // NOTE: On very old devices (e.g., Kobo Mk. 3 & 4; possibly early PB), only AUTO, DU & GC16 may be relied on.
 //       GC4 will probably behave, but A2 & GL16 are not a given at all:
-//       e.g., it's actively broken on Kobo <= Mk. 4: c.f., https://github.com/baskerville/plato/issues/158#issuecomment-787520759.
+//       e.g., GL16 is actively broken on Kobo <= Mk. 4: c.f., https://github.com/baskerville/plato/issues/158#issuecomment-787520759.
 //       If a waveform mode produces unexpected/broken results, and/or if you start to hit unexpected EPDC timeouts (or even an OOPS),
 //       that's usually a strong hint that you're trying to use something you shouldn't ;).
 // NOTE: See the various mxcfb headers in the eink folder for more details about what's available on your platform.
