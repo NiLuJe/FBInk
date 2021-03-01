@@ -130,7 +130,8 @@ static void
 	    "\t\t\t\tAs well as GC4, REAGL & REAGLD.\n"
 #	endif
 #	if !defined(FBINK_FOR_REMARKABLE)
-	    "\t\t\t\tUnsupported modes should safely downgrade to AUTO. On some devices, REAGL & REAGLD expect to be flashing in order to behave properly.\n"
+	    "\t\t\t\tUnsupported modes *should* safely downgrade to AUTO. Operative word being 'should' ;).\n"
+	    "\t\t\t\tOn some devices, REAGL & REAGLD expect to be flashing in order to behave properly.\n"
 #	endif
 	    "\t-D, --dither\t\tRequest a specific hardware dithering mode from the eInk controller, if supported (mainly useful for images).\n"
 	    "\t\t\t\tAvailable dithering modes: PASSTHROUGH, FLOYD_STEINBERG, ATKINSON, ORDERED, QUANT_ONLY & LEGACY\n"

@@ -105,7 +105,9 @@ struct mxcfb_rect {
 
 /*
  * Those are sneaked in in drivers/video/mxc/mxc_epdc_fb.c
- * Or drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c since Mark 7
+ * Or drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c since Mark 7.
+ * NOTE: They only appeared on Mk. 5, so, on earlier devices,
+ *       I wouldn't rely on anything other than AUTO, DU & GC16...
  */
 #define NTX_WFM_MODE_INIT			0
 #define NTX_WFM_MODE_DU				1
