@@ -2282,6 +2282,12 @@ static int
 		}
 	}
 
+	// NOTE: The MXCFB shim on devices with a B288 SoC does *NOT* support AUTO (and *will* throw an EINVAL).
+	//       Use GC16 instead to be conservative (this appears to be what InkView itself does).
+	if (deviceQuirks.isPBSunxi && waveform_mode == WAVEFORM_MODE_AUTO) {
+		update.waveform_mode = WAVEFORM_MODE_GC16;
+	}
+
 	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE, &update);
 
 	if (rv < 0) {
@@ -3190,6 +3196,7 @@ static __attribute__((cold)) int
 		// Should fail w/ ENOTTY (or EINVAL?) on NXP
 		if (ioctl(fbfd, EPDC_GET_UPDATE_STATE, &aw_busy) != -1) {
 			ELOG("Device appears to be running on an AW B288 SoC!");
+			deviceQuirks.isPBSunxi = true;
 		}
 #	elif defined(FBINK_FOR_REMARKABLE)
 		// NOTE: Check if we're running on an rM 2, in which case abort with extreme prejudice,

@@ -131,6 +131,9 @@ static void
 #	endif
 #	if !defined(FBINK_FOR_REMARKABLE)
 	    "\t\t\t\tUnsupported modes *should* safely downgrade to AUTO. Operative word being 'should' ;).\n"
+#		if defined(FBINK_FOR_POCKETBOOK)
+	    "\t\t\t\tOn devices with a B288 SoC, AUTO is *not* supported. FBInk will silently use GC16 instead!\n"
+#		endif
 	    "\t\t\t\tOn some devices, REAGL & REAGLD expect to be flashing in order to behave properly.\n"
 #	endif
 	    "\t-D, --dither\t\tRequest a specific hardware dithering mode from the eInk controller, if supported (mainly useful for images).\n"

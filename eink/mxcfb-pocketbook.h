@@ -130,7 +130,7 @@ struct mxcfb_rect {
 #define WAVEFORM_MODE_GS16			EPDC_WFTYPE_GS16
 #define WAVEFORM_MODE_GC16HQ			EPDC_WFTYPE_GC16HQ
 
-#define WAVEFORM_MODE_AUTO			257
+#define WAVEFORM_MODE_AUTO			257 // !B288 (Ouch. That one hurts.)
 
 #define TEMP_USE_AMBIENT			0x1000
 

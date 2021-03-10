@@ -41,6 +41,7 @@ typedef struct
 	char               deviceCodename[16];
 	char               devicePlatform[16];
 	bool               isPerfectFit;
+	bool               isPBSunxi;
 	bool               isKindleLegacy;
 	bool               isKindlePearlScreen;
 	bool               isKindleZelda;
