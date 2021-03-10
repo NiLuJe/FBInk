@@ -4117,7 +4117,7 @@ void
 {
 	fprintf(
 	    stdout,
-	    "FBINK_VERSION='%s';viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isKoboNonMT=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;",
+	    "FBINK_VERSION='%s';viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isPBSunxi=%d;isKindleLegacy=%d;isKoboNonMT=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;",
 	    fbink_version(),
 	    viewWidth,
 	    viewHeight,
@@ -4146,12 +4146,15 @@ void
 	    deviceQuirks.deviceId,
 	    deviceQuirks.deviceCodename,
 	    deviceQuirks.devicePlatform,
+	    deviceQuirks.isPBSunxi,
+	    deviceQuirks.isKindleLegacy,
 	    deviceQuirks.isKoboNonMT,
 	    deviceQuirks.ntxBootRota,
 	    deviceQuirks.ntxRotaQuirk,
 	    deviceQuirks.isNTX16bLandscape,
 	    vInfo.rotate,
-	    deviceQuirks.canRotate);
+	    deviceQuirks.canRotate,
+	    deviceQuirks.canHWInvert);
 }
 
 // Dump a few of our internal state variables to the FBInkState struct pointed to by fbink_state
@@ -4186,12 +4189,15 @@ void
 		fbink_state->glyph_width             = glyphWidth;
 		fbink_state->glyph_height            = glyphHeight;
 		fbink_state->is_perfect_fit          = deviceQuirks.isPerfectFit;
+		fbink_state->is_pb_sunxi             = deviceQuirks.isPBSunxi;
+		fbink_state->is_kindle_legacy        = deviceQuirks.isKindleLegacy;
 		fbink_state->is_kobo_non_mt          = deviceQuirks.isKoboNonMT;
 		fbink_state->ntx_boot_rota           = deviceQuirks.ntxBootRota;
 		fbink_state->ntx_rota_quirk          = deviceQuirks.ntxRotaQuirk;
 		fbink_state->is_ntx_quirky_landscape = deviceQuirks.isNTX16bLandscape;
 		fbink_state->current_rota            = (uint8_t) vInfo.rotate;
 		fbink_state->can_rotate              = deviceQuirks.canRotate;
+		fbink_state->can_hw_invert           = deviceQuirks.canHWInvert;
 	} else {
 		WARN("Err, it appears we were passed a NULL fbink_state pointer?");
 	}

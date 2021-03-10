@@ -325,12 +325,15 @@ typedef struct
 	uint8_t glyph_width;         // glyphWidth (native width of a glyph cell, i.e. unscaled)
 	uint8_t glyph_height;        // glyphHeight (native height of a glyph cell, i.e. unscaled)
 	bool    is_perfect_fit;      // deviceQuirks.isPerfectFit (horizontal column balance is perfect over viewWidth)
-	bool    is_kobo_non_mt;      // deviceQuirks.isKoboNonMT (device is a Kobo with no MultiTouch input support)
-	uint8_t ntx_boot_rota;       // deviceQuirks.ntxBootRota (Native rotation at boot)
+	bool    is_pb_sunxi;         // deviceQuirks.isPBSunxi (device is a PocketBook running on an AllWinner SoC)
+	bool is_kindle_legacy;    // deviceQuirks.isKindleLegacy (device is a Kindle using the original einkfb EPDC API)
+	bool is_kobo_non_mt;      // deviceQuirks.isKoboNonMT (device is a Kobo with no MultiTouch input support)
+	uint8_t          ntx_boot_rota;     // deviceQuirks.ntxBootRota (Native rotation at boot)
 	NTX_ROTA_INDEX_T ntx_rota_quirk;    // deviceQuirks.ntxRotaQuirk (c.f., utils/dump.c)
 	bool    is_ntx_quirky_landscape;    // deviceQuirks.isNTX16bLandscape (rotation compensation is in effect)
 	uint8_t current_rota;               // vInfo.rotate (current rotation, c.f., <linux/fb.h>)
 	bool    can_rotate;                 // deviceQuirks.canRotate (device has a gyro)
+	bool    can_hw_invert;              // deviceQuirks.canHWInvert (device can use EPDC inversion)
 } FBInkState;
 
 // What a FBInk config should look like. Perfectly sane when fully zero-initialized.
