@@ -2459,8 +2459,10 @@ static int
 	// NOTE: Specifically on the Kobo Libra, we've also seen multiple reports of the WAIT_FOR_UPDATE_COMPLETE ioctl
 	//       failing with a timeout in bog-standard circumstances where it doesn't really appear to have any reason to fail.
 	//       c.f., https://github.com/koreader/koreader/issues/7340
-	//       The issue *may* be compounded by being UR @ 8bpp...
-	//       (which is a configuration that was also shown to upset the Clara's kernel, FWIW).
+	//       The issue *may* be compounded by being UR @ 8bpp, but was also reproduced in Nickel (e.g., UR @ 32bpp)...
+	//       Unlike other Kobo devices, UR happens to be the native rotation of the Libra.
+	//       This also happens to be a configuration that was shown to fatally upset the Clara's kernel, FWIW...
+	//       c.f., https://github.com/baskerville/plato/issues/129 (for the Clara bit).
 
 	// Did we request legacy dithering?
 	bool use_legacy_dithering = false;
