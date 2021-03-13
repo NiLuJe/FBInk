@@ -2441,6 +2441,8 @@ static int
 	//       But even with DU, if you pile on a dither_mode or a USE_DITHERING flag on top of that, it may still go haywire.
 	//       That, or simply queueing a few updates in a short time...
 	//       The main culprit appears to be FORCE_MONOCHROME here, as I can't break DU without it in this case ;).
+	// NOTE: This may not be limited to NTX boards, other EPDCv2 devices runnings on the same (or similar) SoCs
+	//       and the same kernel series appear to suffer from the same quirk (e.g., Kindle Rex, possibly Zelda, too).
 	// NOTE: Speaking of FORCE_MONOCHROME, see the notes below in refresh(). Like on other devices, we enforce it for A2,
 	//       because it *usually* ensures the from/to B&W A2 constraints are met.
 	//       Operative word being "usually", because of the flags bug... So, given its constraints,
@@ -2449,6 +2451,16 @@ static int
 	//       See the notes about WFM_A2 in <fbink.h> for more details.
 	//       That pretty much leaves button highlights in UIs (which is precisely what nickel uses it for).
 	//       If you need a more reliable alternative, prefer DU (which'll barely be any slower anyway).
+	// NOTE: Another Mk. 7 quirk, that one easier to handle, appears to be some kind of alignment constraint snafu
+	//       when hardware dithering is enabled: the driver ought to be taking care of it, but something goes wrong somewhere,
+	//       leading to non-aligned partial refreshes possibly visibly "moving" the content by a few pixels.
+	//       For more details and a viable workaround, c.f.,
+	//       https://github.com/koreader/koreader-base/blob/0792aeb2a0d4c9e48cee728579fd4a9924971df0/ffi/framebuffer_mxcfb.lua#L256-L276
+	// NOTE: Specifically on the Kobo Libra, we've also seen multiple reports of the WAIT_FOR_UPDATE_COMPLETE ioctl
+	//       failing with a timeout in bog-standard circumstances where it doesn't really appear to have any reason to fail.
+	//       c.f., https://github.com/koreader/koreader/issues/7340
+	//       The issue *may* be compounded by being UR @ 8bpp...
+	//       (which is a configuration that was also shown to upset the Clara's kernel, FWIW).
 
 	// Did we request legacy dithering?
 	bool use_legacy_dithering = false;
