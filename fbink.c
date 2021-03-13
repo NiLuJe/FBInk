@@ -2441,7 +2441,7 @@ static int
 	//       But even with DU, if you pile on a dither_mode or a USE_DITHERING flag on top of that, it may still go haywire.
 	//       That, or simply queueing a few updates in a short time...
 	//       The main culprit appears to be FORCE_MONOCHROME here, as I can't break DU without it in this case ;).
-	// NOTE: This may not be limited to NTX boards, other EPDCv2 devices runnings on the same (or similar) SoCs
+	// NOTE: This may not be limited to NTX boards, other EPDCv2 devices running on the same (or similar) SoCs
 	//       and the same kernel series appear to suffer from the same quirk (e.g., Kindle Rex, possibly Zelda, too).
 	// NOTE: Speaking of FORCE_MONOCHROME, see the notes below in refresh(). Like on other devices, we enforce it for A2,
 	//       because it *usually* ensures the from/to B&W A2 constraints are met.
