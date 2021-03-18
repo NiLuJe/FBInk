@@ -5785,13 +5785,10 @@ int
 			// But these are already scaled
 			stbtt_GetGlyphBitmapBox(curr_font, gi, sf, sf, &x0, &y0, &x1, &y1);
 			gw = x1 - x0;
-			LOG("x0: %d, x1: %d, gw: %d", x0, x1, gw);
 			// Ensure that curr_x never goes negative
 			cx = curr_x;
-			LOG("cx = curr_x: %d", cx);
 			if (cx + x0 < 0) {
 				curr_x += abs(cx + x0);
-				LOG("<0 curr_x: %d", curr_x);
 			}
 			// Handle the situation where the metrics may lie, and the glyph descends below what the metrics say.
 			if (max_baseline + y1 > max_line_height) {
@@ -5825,7 +5822,7 @@ int
 			} else {
 				lw = (unsigned int) curr_x;
 			}
-			LOG("Current Measured LW: %u  Line# %u '%c'", lw, line, string[c_index-1]);
+			LOG("Current Measured LW: %u  Line# %u", lw, line);
 			// Oops, we appear to have advanced too far :)
 			// Better backtrack to see if we can find a suitable break opportunity
 			if (lw > max_lw) {
@@ -5859,7 +5856,7 @@ int
 						// Ensure we'll have a hard-break here if we can't find a better opportunity
 						lines[line].endCharIndex = c_index;
 						lines[line].has_a_break  = true;
-						LOG("Flagging a last-resort break @ #%zu (%c>%c<%c)", c_index, string[c_index-1], string[c_index], string[c_index+1]);
+						LOG("Flagging a last-resort break @ #%zu", c_index);
 						// That u8_dec is safe because startCharIndex will always be >= 0
 						for (tmp_c_index = c_index; tmp_c_index > lines[line].startCharIndex;
 						     u8_dec(string, &tmp_c_index)) {
@@ -5879,7 +5876,6 @@ int
 				}
 			}
 			curr_x += iroundf(sf * (float) adv);
-			LOG("curr_x + adv: %d", curr_x);
 			// Adjust our x position for kerning, because we can :)
 			if (c_index < str_len_bytes) {
 				tmp_c_index   = c_index;
@@ -5887,7 +5883,6 @@ int
 				int      g2i  = stbtt_FindGlyphIndex(curr_font, (int) c2);
 				int      xadv = stbtt_GetGlyphKernAdvance(curr_font, gi, g2i);
 				curr_x += iroundf(sf * (float) xadv);
-				LOG("curr_x + xadv: %d", curr_x);
 			}
 		}
 		// We've run out of string! This is our last line.
@@ -6110,7 +6105,6 @@ int
 			stbtt_GetGlyphHMetrics(curr_font, gi, &adv, &lsb);
 			stbtt_GetGlyphBitmapBox(curr_font, gi, sf, sf, &x0, &y0, &x1, &y1);
 			gw = x1 - x0;
-			LOG("x0: %d, x1: %d, gw: %d", x0, x1, gw);
 			gh = y1 - y0;
 			// Ensure that our glyph size does not exceed the buffer size. Resize the buffer if it does
 			if ((gw * gh) > (int) glyph_buffer_dims) {
@@ -6128,14 +6122,8 @@ int
 			}
 			// Make sure we don't have an underflow/wrap around
 			cx = (int) curr_point.x;
-			LOG("cx = curr_point.x: %d", cx);
 			if (cx + x0 < 0) {
-				unsigned short int hclip = (unsigned short int) abs(cx + x0);
-				LOG("Clipping %hupx off the right of this glpyh", hclip);
-				// Clip it
-				gw -= hclip;
-				// Fudge positioning so we don't underflow
-				x0 += hclip;
+				curr_point.x = (unsigned short int) (curr_point.x + abs(cx + x0));
 			}
 			// Same on the vertical axis, except we'll prefer clipping the top of the glpyh off,
 			// instead of an unsightly vertical shift towards the bottom if we were to tweak the insertion point.
@@ -6149,13 +6137,11 @@ int
 				y0 += vclip;
 			}
 			ins_point.x = (unsigned short int) (curr_point.x + x0);
-			LOG("ins_point.x: %d", ins_point.x);
 			ins_point.y = (unsigned short int) (curr_point.y + y0);
 			// We only increase the lw if the glyph is not a space.
 			// This hopefully prevent trailing spaces from being printed on a line.
 			if (gw != 0) {
 				lw = ins_point.x + (unsigned int) gw;
-				LOG("Increased lw to %u '%c'", lw, string[ci-1]);
 			} else {
 				// NOTE: Slightly hackish attempt at preventing clipping on the final character of a line...
 				if (ci < lines[line].endCharIndex) {
@@ -6244,14 +6230,12 @@ int
 				}
 			}
 			curr_point.x = (unsigned short int) (curr_point.x + iroundf(sf * (float) adv));
-			LOG("curr_point.x + adv: %d", curr_point.x);
 			if (ci < str_len_bytes) {
 				size_t tmp_i = ci;
 				tmp_c        = u8_nextchar2(string, &tmp_i);
 				tmp_gi       = stbtt_FindGlyphIndex(curr_font, (int) tmp_c);
 				int xadv     = stbtt_GetGlyphKernAdvance(curr_font, gi, tmp_gi);
 				curr_point.x = (unsigned short int) (curr_point.x + iroundf(sf * (float) xadv));
-				LOG("curr_point.x + xadv: %d", curr_point.x);
 			}
 		}
 		curr_point.x = 0U;
