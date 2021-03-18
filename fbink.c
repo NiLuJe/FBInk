@@ -677,9 +677,9 @@ static __attribute__((hot)) void
 		memset(p, px->gray8, w);
 	}
 
-//#	ifdef DEBUG
+#	ifdef DEBUG
 	LOG("Filled a #%02hhX %hux%hu rectangle @ (%hu, %hu)", px->gray8, w, h, x, y);
-//#	endif
+#	endif
 }
 #endif
 
@@ -6261,6 +6261,7 @@ int
 			region.width = max_lw;
 			// Unless we're in a backgroundless drawing mode, draw the padding rectangles...
 			if (!is_overlay && !is_bgless) {
+				// NOTE: Line gaps are left alone! Ise full padding if that's an issue.
 				// Left padding (left edge of the drawing area to initial pen position)
 				(*fxpFillRect)((unsigned short int) region.left,
 					       paint_point.y,
