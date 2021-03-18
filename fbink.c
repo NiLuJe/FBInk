@@ -5881,8 +5881,7 @@ int
 			curr_x += iroundf(sf * (float) adv);
 			LOG("curr_x + adv: %d", curr_x);
 			// Adjust our x position for kerning, because we can :)
-			//if (string[c_index + 1] && c_index < lines[line].endCharIndex) {
-			if (string[c_index + 1]) {
+			if (c_index < str_len_bytes) {
 				tmp_c_index   = c_index;
 				uint32_t c2   = u8_nextchar2(string, &tmp_c_index);
 				int      g2i  = stbtt_FindGlyphIndex(curr_font, (int) c2);
@@ -6246,8 +6245,7 @@ int
 			}
 			curr_point.x = (unsigned short int) (curr_point.x + iroundf(sf * (float) adv));
 			LOG("curr_point.x + adv: %d", curr_point.x);
-			//if (ci < lines[line].endCharIndex) {
-			if (string[ci + 1]) {
+			if (ci < str_len_bytes) {
 				size_t tmp_i = ci;
 				tmp_c        = u8_nextchar2(string, &tmp_i);
 				tmp_gi       = stbtt_FindGlyphIndex(curr_font, (int) tmp_c);
