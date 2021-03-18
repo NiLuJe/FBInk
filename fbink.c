@@ -5876,8 +5876,8 @@ int
 				}
 			}
 			curr_x += iroundf(sf * (float) adv);
-			// Adjust our x position for kerning, because we can :)
-			if (string[c_index + 1]) {
+			// Adjust our x position for kerning, because we can (assuming there's a next char, of course) :)
+			if (c_index < str_len_bytes) {
 				tmp_c_index   = c_index;
 				uint32_t c2   = u8_nextchar2(string, &tmp_c_index);
 				int      g2i  = stbtt_FindGlyphIndex(curr_font, (int) c2);
@@ -6230,7 +6230,7 @@ int
 				}
 			}
 			curr_point.x = (unsigned short int) (curr_point.x + iroundf(sf * (float) adv));
-			if (ci < lines[line].endCharIndex) {
+			if (ci < str_len_bytes) {
 				size_t tmp_i = ci;
 				tmp_c        = u8_nextchar2(string, &tmp_i);
 				tmp_gi       = stbtt_FindGlyphIndex(curr_font, (int) tmp_c);
@@ -6261,17 +6261,18 @@ int
 			region.width = max_lw;
 			// Unless we're in a backgroundless drawing mode, draw the padding rectangles...
 			if (!is_overlay && !is_bgless) {
+				// NOTE: Line gaps (if any...) are left alone! Use full padding if that's an issue.
 				// Left padding (left edge of the drawing area to initial pen position)
 				(*fxpFillRect)((unsigned short int) region.left,
 					       paint_point.y,
 					       (unsigned short int) (paint_point.x - region.left),
-					       (unsigned short int) curr_print_height,
+					       (unsigned short int) max_line_height,
 					       &bgP);
 				// Right padding (final pen position to the right edge of the drawing area)
 				(*fxpFillRect)((unsigned short int) (paint_point.x + lw),
 					       paint_point.y,
 					       (unsigned short int) (viewWidth - (paint_point.x + lw)),
-					       (unsigned short int) curr_print_height,
+					       (unsigned short int) max_line_height,
 					       &bgP);
 			}
 		} else if (cfg->padding == VERT_PADDING) {
