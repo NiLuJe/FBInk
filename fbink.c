@@ -5876,7 +5876,7 @@ int
 				}
 			}
 			curr_x += iroundf(sf * (float) adv);
-			// Adjust our x position for kerning, because we can :)
+			// Adjust our x position for kerning, because we can (assuming there's a next char, of course) :)
 			if (c_index < str_len_bytes) {
 				tmp_c_index   = c_index;
 				uint32_t c2   = u8_nextchar2(string, &tmp_c_index);
