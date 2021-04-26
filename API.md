@@ -12,7 +12,7 @@
   fbink [-fcWDHbhxyS] --image file=PATH,x=NUM,y=NUM,halign=ALIGN,valign=ALIGN,w=NUM,h=NUM,dither [--img PATH]
   ```
 
-  Print image on your device's screen. // TODO: verify allowed flags in this usage scenario
+  Print image on your device's screen.
 
 * ```sh
   fbink [-WHf] [-k] --refresh [top=NUM,left=NUM,width=NUM,height=NUM]
