@@ -15,10 +15,10 @@
   Print image on your device's screen. // TODO: verify allowed flags in this usage scenario
 
 * ```sh
-  fbink [-WHf XXXXX] [-k] --refresh [top=NUM,left=NUM,width=NUM,height=NUM]
+  fbink [-WHf] [-k] --refresh [top=NUM,left=NUM,width=NUM,height=NUM]
   ```
 
-  Refresh the screen as per your specification, without touching the framebuffer. // TODO, exhaustively list options that are compatible with `--refresh`.
+  Refresh the screen as per your specification, without touching the framebuffer.
 
 * ```sh
   fbink [-WHf XXXXX] --cls [top=NUM,left=NUM,width=NUM,height=NUM]
