@@ -112,7 +112,7 @@ static void
 	    "\t\t\t\tHonors -B, --background; -h, --invert; -H, --nightmode; -W, --waveform; -D, --dither; -b, --norefresh; -w, --wait.\n"
 	    "\t\t\t\tCan be specified on its own, without any STRING.\n"
 	    "\t\t\t\tNOTE: If your intent is to simply clear the screen and *nothing else*, use -k, --cls instead!\n"
-	    "\t-k, --cls top=NUM,left=NUM,width=NUM,height=NUM\n"
+	    "\t-k, --cls [top=NUM,left=NUM,width=NUM,height=NUM]\n"
 	    "\t\t\t\tClear the screen (or a region of it), and abort early.\n"
 	    "\t\t\t\tHonors -B, --background; -h, --invert; -H, --nightmode; -W, --waveform; -D, --dither; -b, --norefresh; -w, --wait.\n"
 	    "\t\t\t\tThis takes precedence over *everything* and will abort as soon as it's done.\n"
