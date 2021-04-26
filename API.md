@@ -9,16 +9,22 @@
   Print `STRING`s on your device's screen.
 
 * ```sh
-  fbink [-WHf] [-k] --refresh [top=NUM,left=NUM,width=NUM,height=NUM]
+  fbink [-fcWDHbhxyS] --image file=PATH,x=NUM,y=NUM,halign=ALIGN,valign=ALIGN,w=NUM,h=NUM,dither [--img PATH]
   ```
 
-  Refresh the screen as per your specification, without touching the framebuffer.
+  Print image on your device's screen. // TODO: verify allowed flags in this usage scenario
 
 * ```sh
-  fbink [-WHf] --cls [top=NUM,left=NUM,width=NUM,height=NUM]
+  fbink [-WHf XXXXX] [-k] --refresh [top=NUM,left=NUM,width=NUM,height=NUM]
   ```
 
-  Clear the screen (or a region of it).
+  Refresh the screen as per your specification, without touching the framebuffer. // TODO, exhaustively list options that are compatible with `--refresh`.
+
+* ```sh
+  fbink [-WHf XXXXX] --cls [top=NUM,left=NUM,width=NUM,height=NUM]
+  ```
+
+  Clear the screen (or a region of it). // TODO, exhaustively list options that are compatible with `--refresh`.
 
 ## Examples
 
@@ -368,6 +374,84 @@
 
   * Note if compiled with `FBINK_FOR_KOBO`: this means you will NOT be able to use system fonts on Kobo, because they're all obfuscated.
 
+### Options for printing an image (if compiled with `FBINK_WITH_IMAGE`)
+
+* `-g`, `--image` `file=PATH,x=NUM,y=NUM,halign=ALIGN,valign=ALIGN,w=NUM,h=NUM,dither`
+
+  * `PATH` has limitations on allowable values, see the `-i`, `--img` option below.
+  * Supported `ALIGN` values: `NONE` (or `LEFT` for halign, `TOP` for valign), `CENTER` or `MIDDLE`, `EDGE` (or `RIGHT` for halign, `BOTTOM` for valign).
+  * If `dither` is specified, *software* dithering (ordered, 8x8) will be applied to the image, ensuring it'll match the eInk palette exactly.
+    * This is *NOT* mutually exclusive with `-D`, `--dither`!
+  * `w` & `h` *may* be used to request scaling. If one of them is set to 0, aspect ratio will be respected.
+    * Set to -1 to request the viewport's dimension for that side.
+    * If either side is set to something lower than -1, the image will be scaled to the largest possible dimension that fits on screen while honoring the original aspect ratio.
+    * They both default to 0, meaning no scaling will be done.
+
+  This honors `-f`, `--flash`, as well as `-c`, `--clear`; `-W`, `--waveform`; `-D`, `--dither`; `-H`, `--nightmode`; `-b`, `--norefresh` & `-h`, `--invert`.
+
+  This also honors `-x`, `--col` & `-y`, `--row` (taking `-S`, `--size` into account), in addition to the coordinates you specify.
+
+  The aim is to make it easier to align small images to text. And to make pixel-perfect adjustments, you can also specifiy negative values for `x` & `y`.
+
+  Specifying one or more `STRING` takes precedence over this mode.
+
+  `-s`, `--refresh` also takes precedence over this mode.
+
+  Examples:
+
+  * ```sh
+    fbink -g file=hello.png
+    ```
+
+    Displays the image \"hello.png\", starting at the top left of the screen.
+
+  * ```sh
+    fbink -i hello,world.png -g x=-10,y=11 -x 5 -y 8
+    ```
+
+    Displays the image "hello,world.png", starting at the ninth line plus 11px and the sixth column minus 10px.
+
+  * ```sh
+    fbink -g file=hello.png,halign=EDGE,valign=CENTER
+    ```
+
+    Displays the image "hello.png", in the middle of the screen, aligned to the right edge.
+
+  * ```sh
+    fbink -g file=hello.png -W A2
+    ```
+
+    Displays the image "hello.png", in monochrome.
+
+  * ```sh
+    fbink -i wheee.png
+    ```
+
+    Displays the image "wheee.png" with the default settings.
+
+* `-i`, `--img` `PATH`
+
+  This option implies `-g` , `--image` with the `name` flag set to `PATH`.
+
+  This option can be combined with `-g` to set a `PATH` along with other flags. In fact, this the only way to specify file paths which contain a comma (`,`).
+
+* `-a`, `--flatten`
+
+  Ignore the alpha channel.
+
+Notes:
+
+* Supported image formats: JPEG, PNG, TGA, BMP, GIF & PNM
+* In some cases, exotic encoding settings may not be supported.
+* Transparency is supported, but it may be slightly slower (because we may need to do alpha blending).
+  * You can use the `-a`, `--flatten` flag to avoid the potential performance penalty by always ignoring alpha.
+
+
+
+
+
+
+
 ## Notes about multiple string arguments
 
 You can specify multiple `STRING`s in a single invocation of `fbink`, each consecutive one will be printed on the subsequent line.
@@ -376,11 +460,39 @@ Although it's worth mentioning that this will lead to undesirable results when c
 
 If you want to properly print a long string, better do it in a single argument, FBInk will do its best to spread it over multiple lines sanely. It will also honor the linefeed character (and I do mean the actual control character, not the human-readable escape sequence), which comes in handy when passing a few lines of logs straight from tail as an argument.
 
+## Notes for shell script writers
 
+Shell script writers can also use the `-e`, `--eval` flag to have FBInk just spit out a few of its internal state variables to stdout, e.g., `eval $(fbink -e)`.
 
----
+## Daemon mode
 
-/// TODO: add image notes /// blocker https://github.com/NiLuJe/FBInk/issues/58
+For more complex & long-running use-cases involving *text* only (or a progress/activity bar), you can also switch to daemon mode.
 
-/// remaining parts https://github.com/NiLuJe/FBInk/blob/master/fbink_cmd.c#L281-L356
+* `-d`, `--daemon` `NUM_LINES`
 
+  `NUM_LINES` is the amount of lines consecutive prints can occupy before wrapping back to the original coordinates. It it's set to 0, the behavior matches what usually happens when you pass multiple strings to FBInk (i.e., the only wrapping happens at screen egde). While, for example, setting it to 1 will ensure every print will start at the same coordinates.
+
+  In this mode, FBInk will daemonize instantly, and then print its PID to stdout. You should consume stdout, and check the return code:
+
+  * if it's 0, then you have a guarantee that what you've grabbed from stdout is *strictly* a PID.
+  * You can then send a kill -0 to that PID to check for an early abort.
+
+  By default, it will create a named pipe for IPC, check the pipe name `FBINK_PIPE` with `fbink -e`, (if the file already exists, whatever type it may be, FBInk will abort). You can ask for a custom path by setting `FBINK_NAMED_PIPE` to an absolute path in your environment. Creating and removing that FIFO is FBInk's responsibility. Don't create it yourself.
+
+  Make sure you kill FBInk via SIGTERM so it has a chance to remove it itself on exit. (Otherwise, you may want to ensure that it doesn't already exist *before* launching a daemon mode session). 
+
+  Remember that LFs are honored!
+
+  Also, the daemon will NOT abort on FBInk errors, and it redirects stdout & stderr to /dev/null, so errors & bogus input will be silently ignored!
+
+  With the technicalities out of the way, it's then as simple as writing to that pipe for stuff to show up on screen ;).
+
+  It can abort on early setup errors, though, before *or* after having redirected stderr...
+
+  It does enforce logging to the syslog, though, but, again, early commandline parsing errors may still be sent to stderr...
+
+  Example:
+
+  * ```sh
+    echo -n 'Hello World!' > $FBINK_PIPE
+    ```
