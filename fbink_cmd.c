@@ -297,7 +297,7 @@ static void
 	    "\tfbink -g file=hello.png\n"
 	    "\t\tDisplays the image \"hello.png\", starting at the top left of the screen.\n"
 	    "\tfbink -i hello,world.png -g x=-10,y=11 -x 5 -y 8\n"
-	    "\t\tDisplays the image \"hello,world.png\", starting at the ninth line plus 11px and the sixth column minus 10px\n"
+	    "\t\tDisplays the image \"hello,world.png\", starting at the ninth line plus 11px and the sixth column minus 10px.\n"
 	    "\tfbink -g file=hello.png,halign=EDGE,valign=CENTER\n"
 	    "\t\tDisplays the image \"hello.png\", in the middle of the screen, aligned to the right edge.\n"
 	    "\tfbink -g file=hello.png -W A2\n"
