@@ -21,10 +21,10 @@
   Refresh the screen as per your specification, without touching the framebuffer.
 
 * ```sh
-  fbink [-WHf XXXXX] --cls [top=NUM,left=NUM,width=NUM,height=NUM]
+  fbink [-BhHWDbw] --cls [top=NUM,left=NUM,width=NUM,height=NUM]
   ```
 
-  Clear the screen (or a region of it). // TODO, exhaustively list options that are compatible with `--refresh`.
+  Clear the screen (or a region of it).
 
 ## Examples
 
