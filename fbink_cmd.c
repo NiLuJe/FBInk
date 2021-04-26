@@ -119,7 +119,7 @@ static void
 	    "\t\t\t\tIf you just want a full-screen clear (which will honor -f, --flash), don't pass any suboptions,\n"
 	    "\t\t\t\te.g., fbink -k (if you group short options together, it needs to be the last in its group, i.e., -fk and not -kf).\n"
 #ifndef FBINK_FOR_LINUX
-	    "\t-W MODE, --waveform\t\tRequest a specific waveform update mode from the eInk controller, if supported (mainly useful for images).\n"
+	    "\t-W, --waveform MODE\t\tRequest a specific waveform update mode from the eInk controller, if supported (mainly useful for images).\n"
 	    "\t\t\t\tAvailable waveform modes: A2, DU, GL16, GC16 & AUTO\n"
 #	if defined(FBINK_FOR_KINDLE)
 	    "\t\t\t\tAs well as REAGL, REAGLD, GC16_FAST, GL16_FAST, DU4, GL4, GL16_INV, GCK16 & GLKW16 on some Kindles, depending on the model & FW version.\n"
