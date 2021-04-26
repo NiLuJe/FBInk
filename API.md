@@ -60,7 +60,7 @@
 
   Use a negative value to count back from the bottom of the screen.
 
-* `-`, `--hoffset` `NUM`
+* `-X`, `--hoffset` `NUM`
 
   Adjust final text position by `NUM` pixels on the horizontal axis (Default: 0).
 
@@ -189,7 +189,7 @@
   Note if not compiled with `FBINK_WITH_FONTS`: Available font families: `IBM`
 
   Note if compiled with `FBINK_WITH_OPENTYPE`: NOTE: If you're looking for vector font rendering, see the OpenType section a few lines down!
-  
+
 * `-C`, `--color` `NAME`
 
   `-B`, `--background` `NAME`
@@ -227,7 +227,7 @@
 * `-q`, `--quiet`
 
   Toggle hiding hardware setup messages.
-  
+
 * `-G`, `--syslog`
 
   Send output to syslog instead of stdout & stderr.
@@ -375,8 +375,6 @@ You can specify multiple `STRING`s in a single invocation of `fbink`, each conse
 Although it's worth mentioning that this will lead to undesirable results when combined with `--clear`, because the screen is cleared before each `STRING`, meaning you'll only get to see the final one.
 
 If you want to properly print a long string, better do it in a single argument, FBInk will do its best to spread it over multiple lines sanely. It will also honor the linefeed character (and I do mean the actual control character, not the human-readable escape sequence), which comes in handy when passing a few lines of logs straight from tail as an argument.
-
-
 
 
 
