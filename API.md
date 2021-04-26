@@ -44,7 +44,7 @@
 
 ### Options affecting the message's position on screen
 
-* `-x NUM`, `--col NUM`
+* `-x`, `--col` `NUM`
 
   Begin printing `STRING` @ column `NUM` (Default: 0).
 
@@ -52,7 +52,7 @@
 
   Use a negative value to count back from the right edge of the screen.
 
-* `-y NUM`, `--row NUM`
+* `-y`, `--row` `NUM`
 
   Begin printing `STRING` @ row `NUM` (Default: 0).
 
@@ -60,13 +60,13 @@
 
   Use a negative value to count back from the bottom of the screen.
 
-* `-X NUM`, `--hoffset NUM`
+* `-`, `--hoffset` `NUM`
 
   Adjust final text position by `NUM` pixels on the horizontal axis (Default: 0).
 
   Honors negative values, and will let you push stuff off-screen, often without warning.
 
-* `-Y NUM`, `--voffset NUM`
+* `-Y`, `--voffset` `NUM`
 
   Adjust final text position by `NUM` pixels on the vertical axis (Default: 0).
 
@@ -116,7 +116,7 @@
 
   NOTE: If your intent is to simply clear the screen and *nothing else*, use `-k`, `--cls` instead!
 
-* `-W MODE`, `--waveform MODE` (not available if compiled with `FBINK_FOR_LINUX`)
+* `-W`, `--waveform` `MODE` (not available if compiled with `FBINK_FOR_LINUX`)
 
   Request a specific waveform update mode from the eInk controller, if supported (mainly useful for images).
 
@@ -176,7 +176,7 @@
 
   The exact upper value depends on the resolution of your screen.
 
-* `-F NAME`, `--font NAME`
+* `-F`, `--font` `NAME`
 
   Render glyphs from builtin font `NAME` (Default: IBM).
 
@@ -189,10 +189,10 @@
   Note if not compiled with `FBINK_WITH_FONTS`: Available font families: `IBM`
 
   Note if compiled with `FBINK_WITH_OPENTYPE`: NOTE: If you're looking for vector font rendering, see the OpenType section a few lines down!
+  
+* `-C`, `--color` `NAME`
 
-* `-C NAME`, `--color NAME`
-
-  `-B NAME`, `--background NAME`
+  `-B`, `--background` `NAME`
 
   Color of the background the text will be printed on (Default: WHITE).
 
@@ -227,7 +227,7 @@
 * `-q`, `--quiet`
 
   Toggle hiding hardware setup messages.
-
+  
 * `-G`, `--syslog`
 
   Send output to syslog instead of stdout & stderr.
@@ -260,7 +260,7 @@
 
   Given that, you may want to store stdout only in a variable and check the return code for success before running eval on that var!
 
-* `-P NUM`, `--progressbar NUM`
+* `-P`, `--progressbar` `NUM`
 
   Draw a `NUM` full progress bar (full-width).
 
@@ -268,7 +268,7 @@
 
   Ignores `-o`, `--overlay`; `-x`, `--col`; `-X`, `--hoffset`; as well as `-m`, `--centered` & `-p`, `--padded`.
 
-* `-A NUM`, `--activitybar NUM`
+* `-A`, `--activitybar` `NUM`
 
   Draw an activity bar on step `NUM` (full-width). `NUM` must be between 0 and 16. Like other alternative modes, does *NOT* have precedence over text printing.
 
@@ -282,7 +282,7 @@
 
 ### Option for only clearing & refreshing screen
 
-* `-s [top=NUM,left=NUM,width=NUM,height=NUM]` , `--refresh [top=NUM,left=NUM,width=NUM,height=NUM]`
+* `-s` , `--refresh` `[top=NUM,left=NUM,width=NUM,height=NUM]`
 
   Eschew printing a STRING, and simply refresh the screen as per your specification, without touching the framebuffer.
 
@@ -304,7 +304,7 @@
 
     Refreshes a 500x600 rectangle with its top-left corner at coordinates (10, 20) with a GC16 waveform mode and `ORDERED` hardware dithering.
 
-* `-k [top=NUM,left=NUM,width=NUM,height=NUM]`, `--cls [top=NUM,left=NUM,width=NUM,height=NUM]` 
+* `-k`, `--cls` `[top=NUM,left=NUM,width=NUM,height=NUM]` 
 
   Clear the screen (or a region of it), and abort early.
 
@@ -318,7 +318,7 @@
 
 ### Option for OpenType & TrueType font support (if compiled with `FBINK_WITH_OPENTYPE`)
 
-* `-t`, `--truetype regular=FILE,bold=FILE,italic=FILE,bolditalic=FILE,size=NUM,px=NUM,top=NUM,bottom=NUM,left=NUM,right=NUM,padding=PAD,style=STYLE,format,notrunc,compute`
+* `-t`, `--truetype` `regular=FILE,bold=FILE,italic=FILE,bolditalic=FILE,size=NUM,px=NUM,top=NUM,bottom=NUM,left=NUM,right=NUM,padding=PAD,style=STYLE,format,notrunc,compute`
 
   - `regular`, `bold`, `italic` & `bolditalic` should point to the font file matching their respective font style. At least one of them MUST be specified.
 
@@ -375,6 +375,7 @@ You can specify multiple `STRING`s in a single invocation of `fbink`, each conse
 Although it's worth mentioning that this will lead to undesirable results when combined with `--clear`, because the screen is cleared before each `STRING`, meaning you'll only get to see the final one.
 
 If you want to properly print a long string, better do it in a single argument, FBInk will do its best to spread it over multiple lines sanely. It will also honor the linefeed character (and I do mean the actual control character, not the human-readable escape sequence), which comes in handy when passing a few lines of logs straight from tail as an argument.
+
 
 
 
