@@ -100,17 +100,17 @@
 
   Print `STRING` in `BACKGROUND_COLOR` over `FOREGROUND_COLOR` instead of the reverse. (See `-B` and `-C`)
 
-* `-f`, ``--flash`
+* `-f`, `--flash`
 
   Ask the eInk driver to do a black flash when refreshing the area of the screen where `STRING` will be printed.
 
   Note if compiled with `FBINK_FOR_KINDLE`: on legacy einkfb devices, this may not always be honored by the hardware.
 
-* `-c`, ``--clear`
+* `-c`, `--clear`
 
   Clear the full screen before printing.
 
-  Honors `-B`, ``--background`; `-h`, `--invert`; `-H`, `--nightmode`; `-W`, `--waveform`; `-D`, `--dither`; `-b`, `--norefresh`; `-w`, `--wait`
+  Honors `-B`, `--background`; `-h`, `--invert`; `-H`, `--nightmode`; `-W`, `--waveform`; `-D`, `--dither`; `-b`, `--norefresh`; `-w`, `--wait`
 
   Can be specified on its own, without any `STRING`.
 
@@ -142,7 +142,7 @@
 
   Note if compiled with `FBINK_FOR_KINDLE`: True (i.e., not `LEGACY`) hardware dithering is completely untested on Kindle, and, while the Oasis 2, PaperWhite 4 & Oasis 3 *should* support it, they *may* not, or at least not in the way FBInk expects...
 
-* `-H`, ``--nightmode` (not available if compiled with `FBINK_FOR_LINUX`)
+* `-H`, `--nightmode` (not available if compiled with `FBINK_FOR_LINUX`)
 
   Request full hardware inversion from the eInk controller, if supported.
 
@@ -308,7 +308,7 @@
 
   Clear the screen (or a region of it), and abort early.
 
-  Honors `-B`, ``--background`; `-h`, `--invert`; `-H`, `--nightmode`; `-W`, `--waveform`; `-D`, `--dither`; `-b`, `--norefresh`; `-w`, `--wait`
+  Honors `-B`, `--background`; `-h`, `--invert`; `-H`, `--nightmode`; `-W`, `--waveform`; `-D`, `--dither`; `-b`, `--norefresh`; `-w`, `--wait`
 
   This takes precedence over *everything* and will abort as soon as it's done.
 
@@ -375,6 +375,8 @@ You can specify multiple `STRING`s in a single invocation of `fbink`, each conse
 Although it's worth mentioning that this will lead to undesirable results when combined with `--clear`, because the screen is cleared before each `STRING`, meaning you'll only get to see the final one.
 
 If you want to properly print a long string, better do it in a single argument, FBInk will do its best to spread it over multiple lines sanely. It will also honor the linefeed character (and I do mean the actual control character, not the human-readable escape sequence), which comes in handy when passing a few lines of logs straight from tail as an argument.
+
+
 
 
 ---
