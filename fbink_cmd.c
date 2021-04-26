@@ -233,7 +233,7 @@ static void
 	    "\t\tpadding can optionally be set to ensure the drawing area on both sides of the printed content is padded with the background color on one or both axis.\n"
 	    "\t\t\tAvailable padding axis: HORIZONTAL, VERTICAL, or BOTH (Defaults to NONE). Useful to avoid overlaps on consecutive prints at the same coordinates.\n"
 	    "\t\tIf style is specified, it dictates the default font style to use (e.g., REGULAR, BOLD, ITALIC or BOLD_ITALIC). Defaults to REGULAR.\n"
-	    "\t\tIf format is specified, instead of the default style, the underscore/star MarkDown syntax will be honored to set the font style (i.e., *italic*, **bold** & ***bold italic***).\n"
+	    "\t\tIf format is specified, instead of the default style, the underscore/star Markdown syntax will be honored to set the font style (i.e., *italic*, **bold** & ***bold italic***).\n"
 	    "\t\tIf notrunc is specified, truncation will be considered a failure.\n"
 	    "\t\tNOTE: This may not prevent drawing/refreshing the screen if the truncation couldn't be predicted at compute time!\n"
 	    "\t\t      On the CLI, this will prevent you from making use of the returned computation info, as this will chain a CLI abort.\n"
