@@ -262,7 +262,7 @@ static void
 	    "\n"
 	    "\n"
 	    "You can also eschew printing a STRING, and simply refresh the screen as per your specification, without touching the framebuffer:\n"
-	    "\t-s, --refresh top=NUM,left=NUM,width=NUM,height=NUM\n"
+	    "\t-s, --refresh [top=NUM,left=NUM,width=NUM,height=NUM]\n"
 	    "\n"
 	    "EXAMPLES:\n"
 	    "\tfbink -s top=20,left=10,width=500,height=600 -W GC16 -D ORDERED\n"
