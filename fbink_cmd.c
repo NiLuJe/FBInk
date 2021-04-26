@@ -70,7 +70,7 @@ static void
 #endif
 	    "\n"
 	    "\n"
-	    "Usage: fbink [OPTIONS] [STRING]\n"
+	    "Usage: fbink [OPTIONS] [STRING ...]\n"
 	    "\n"
 	    "Print STRING on your device's screen.\n"
 	    "\n"
