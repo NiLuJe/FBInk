@@ -250,7 +250,7 @@ static void
 	    "\t\tWill use NotoSans to print 'Hello world!' at 24pt in a display area starting from 100px down the top of the screen to 500px before the bottom of the screen,\n"
 #	endif
 	    "\t\tfrom 25px of the left edge of the screen until 50px before the right edge.\n"
-	    "\t\tHonoring the MarkDown syntax, 'Hello' will be printed with the Regular font style, while 'world' will use the Bold font style.\n"
+	    "\t\tHonoring the Markdown syntax, 'Hello' will be printed with the Regular font style, while 'world' will use the Bold font style.\n"
 	    "\t\tNOTE: You will NOT be able to use obfuscated or encrypted fonts.\n"
 #	ifdef FBINK_FOR_KOBO
 	    "\t\tPlease note that this means you will NOT be able to use system fonts on Kobo, because they're all obfuscated.\n"
