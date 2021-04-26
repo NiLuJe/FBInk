@@ -354,25 +354,29 @@
 
   Honors `-h`, `--invert`; `-f`, `--flash`; `-c`, `--clear`; `-W`, `--waveform`; `-D`, `--dither`; `-H`, `--nightmode`; `-b`, `--norefresh`; `-m`, `--centered`; `-M`, `--halfway`; `-o`, `--overlay`; `-T`, `--fgless`; `-O`, `--bgless`; `-C`, `--color`; `-B`, `--background`; `-l`, `--linecount`.
 
-  Examples:
+  Example:
 
-  * For Kindle:
-
-    ```sh
-    fbink -t regular=/usr/java/lib/fonts/Caecilia_LT_65_Medium.ttf,bold=/usr/java/lib/fonts/Caecilia_LT_75_Bold.ttf,size=24,top=100,bottom=500,left=25,right=50,format "Hello **world**!"
+  * ```sh
+    fbink -t regular=$RFONT,bold=$BFONT,size=24,top=100,bottom=500,left=25,right=50,format "Hello **world**!"
     ```
 
-    Will use Caecilia to print "Hello world!" at 24pt in a display area starting from 100px down the top of the screen to 500px before the bottom of the screen, from 25px of the left edge of the screen until 50px before the right edge. Honoring the Markdown syntax, "Hello" will be printed with the Regular font style, while "world" will use the Bold font style. You will NOT be able to use obfuscated or encrypted fonts.
+    Will print "Hello world!" at 24pt in a display area starting from 100px down the top of the screen to 500px before the bottom of the screen, from 25px of the left edge of the screen until 50px before the right edge. Honoring the Markdown syntax, "Hello" will be printed with the Regular font style, while "world" will use the Bold font style. You will NOT be able to use obfuscated or encrypted fonts.
 
-  * For other than Kindle:
+    For Kindle try:
 
     ```sh
-    fbink -t regular=/mnt/onboard/fonts/NotoSans-Regular.ttf,bold=/mnt/onboard/fonts/NotoSans-Bold.ttf,size=24,top=100,bottom=500,left=25,right=50,format "Hello **world**!"
+    RFONT=/usr/java/lib/fonts/Caecilia_LT_65_Medium.ttf
+    BFONT=/usr/java/lib/fonts/Caecilia_LT_75_Bold.ttf
     ```
 
-    Will use NotoSans to print "Hello world!" at 24pt in a display area starting from 100px down the top of the screen to 500px before the bottom of the screen, from 25px of the left edge of the screen until 50px before the right edge. Honoring the Markdown syntax, "Hello" will be printed with the Regular font style, while "world" will use the Bold font style. You will NOT be able to use obfuscated or encrypted fonts.
+    And others (other than Kobo):
 
-  * Note for Kobo: this means you will NOT be able to use system fonts on Kobo, because they're all obfuscated.
+    ```sh
+    RFONT=/mnt/onboard/fonts/NotoSans-Regular.ttf
+    BFONT=/mnt/onboard/fonts/NotoSans-Bold.ttf
+    ```
+
+    Note for Kobo: this means you will NOT be able to use system fonts on Kobo, because they're all obfuscated.
 
 ### Options for printing an image (if compiled with `FBINK_WITH_IMAGE`)
 
