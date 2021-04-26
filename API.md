@@ -110,7 +110,7 @@
 
   Ask the eInk driver to do a black flash when refreshing the area of the screen where `STRING` will be printed.
 
-  Note if compiled with `FBINK_FOR_KINDLE`: on legacy einkfb devices, this may not always be honored by the hardware.
+  Note for Kindle: on legacy einkfb devices, this may not always be honored by the hardware.
 
 * `-c`, `--clear`
 
@@ -122,23 +122,23 @@
 
   NOTE: If your intent is to simply clear the screen and *nothing else*, use `-k`, `--cls` instead!
 
-* `-W`, `--waveform` `MODE` (not available if compiled with `FBINK_FOR_LINUX`)
+* `-W`, `--waveform` `MODE` (only available for e-Ink devices)
 
   Request a specific waveform update mode from the eInk controller, if supported (mainly useful for images).
 
   Available waveform modes: `A2`, `DU`, `GL16`, `GC16` &amp; `AUTO`
 
-  Note if compiled with `FBINK_FOR_KINDLE`: as well as `REAGL`, `REAGLD`, `GC16_FAST`, `GL16_FAST`, `DU4`, `GL4`, `GL16_INV`, `GCK16` & `GLKW16` on some Kindles, depending on the model & FW version. Note that specifying a waveform mode is ignored on legacy einkfb devices, because the hardware doesn't expose such capabilities.
+  Note for Kobo and Cervantes: as well as `GC4`, `REAGL` & `REAGLD`.
 
-  Note if compiled with `FBINK_FOR_POCKETBOOK`: as well as `GC4`, `A2IN`, `A2OUT`, `DU4`, `REAGL`, `REAGLD`, `GC16HQ` & `GS16`.
+  Note for Kindle: as well as `REAGL`, `REAGLD`, `GC16_FAST`, `GL16_FAST`, `DU4`, `GL4`, `GL16_INV`, `GCK16` & `GLKW16` on some Kindles, depending on the model & FW version. Note that specifying a waveform mode is ignored on legacy einkfb devices, because the hardware doesn't expose such capabilities.
 
-  Note if compiled with `FBINK_FOR_KOBO` or `FBINK_FOR_CERVANTES`: as well as `GC4`, `REAGL` & `REAGLD`.
+  Note for PocketBook: as well as `GC4`, `A2IN`, `A2OUT`, `DU4`, `REAGL`, `REAGLD`, `GC16HQ` & `GS16`.
 
-  Note if not compiled with `FBINK_FOR_REMARKABLE`: Unsupported modes *should* safely downgrade to `AUTO`. Operative word being "should" ;). On some devices, `REAGL` & `REAGLD` expect to be flashing in order to behave properly.
+  Note for all other than reMarkable: Unsupported modes *should* safely downgrade to `AUTO`. Operative word being "should" ;). On some devices, `REAGL` & `REAGLD` expect to be flashing in order to behave properly.
 
-  Note if compiled with `FBINK_FOR_POCKETBOOK`: On devices with a B288 SoC, `AUTO` is *not* supported. FBInk will silently use `GC16` instead!
+  Note for PocketBook: On devices with a B288 SoC, `AUTO` is *not* supported. FBInk will silently use `GC16` instead!
 
-* `-D`, `--dither` (not available if compiled with `FBINK_FOR_LINUX`)
+* `-D`, `--dither` (only available for e-Ink devices)
 
   Available dithering modes: `PASSTHROUGH`, `FLOYD_STEINBERG`, `ATKINSON`, `ORDERED`, `QUANT_ONLY` & `LEGACY`.
 
@@ -146,23 +146,23 @@
 
   `LEGACY` may be supported on more devices, but what exactly it does in practice (and how well it works) depends on the exact device and/or FW version.
 
-  Note if compiled with `FBINK_FOR_KINDLE`: True (i.e., not `LEGACY`) hardware dithering is completely untested on Kindle, and, while the Oasis 2, PaperWhite 4 & Oasis 3 *should* support it, they *may* not, or at least not in the way FBInk expects...
+  Note for Kindle: True (i.e., not `LEGACY`) hardware dithering is completely untested on Kindle, and, while the Oasis 2, PaperWhite 4 & Oasis 3 *should* support it, they *may* not, or at least not in the way FBInk expects...
 
-* `-H`, `--nightmode` (not available if compiled with `FBINK_FOR_LINUX`)
+* `-H`, `--nightmode` (only available for e-Ink devices)
 
   Request full hardware inversion from the eInk controller, if supported.
 
   Note that this can be used *in combination* with `-h`, `--invert`! One does not exclude the other, which may lead to some confusing behavior ;).
 
-  Note if compiled with `FBINK_FOR_KINDLE`: Note that requesting nightmode is ignored on legacy einkfb devices, because the hardware doesn't (easily) expose such capabilities.
+  Note for Kindle: Note that requesting nightmode is ignored on legacy einkfb devices, because the hardware doesn't (easily) expose such capabilities.
 
   Note that this may be ignored on some specific devices where it is known to be or have been unstable at some point.
 
-* `-b`, `--norefresh` (not available if compiled with `FBINK_FOR_LINUX`)
+* `-b`, `--norefresh` (only available for e-Ink devices)
 
   Only update the framebuffer, but don't actually refresh the eInk screen (useful when drawing in batch).
 
-* `-w`, `--wait` (not available if compiled with `FBINK_FOR_LINUX`)
+* `-w`, `--wait` (only available for e-Ink devices)
 
   Block until the kernel has finished processing the *last* update we sent, if any.
 
@@ -296,7 +296,7 @@
 
   The specified rectangle *must* completely fit on screen, or the ioctl will fail. 
 
-  Note if compiled with `FBINK_FOR_KOBO` or `FBINK_FOR_CERVANTES`: the arguments are passed as-is to the ioctl, no viewport or rotation quirks are applied!
+  Note for Kobo and Cervantes: the arguments are passed as-is to the ioctl, no viewport or rotation quirks are applied!
 
   If you just want a full-screen refresh (which will honor `-f`, `--flash`), don't pass any suboptions, e.g., `fbink -s` (if you group short options together, it needs to be the last in its group, i.e., `-fs` and not `-sf`).
 
@@ -356,7 +356,7 @@
 
   Examples:
 
-  * If compiled with `FBINK_FOR_KINDLE`:
+  * For Kindle:
 
     ```sh
     fbink -t regular=/usr/java/lib/fonts/Caecilia_LT_65_Medium.ttf,bold=/usr/java/lib/fonts/Caecilia_LT_75_Bold.ttf,size=24,top=100,bottom=500,left=25,right=50,format "Hello **world**!"
@@ -364,7 +364,7 @@
 
     Will use Caecilia to print "Hello world!" at 24pt in a display area starting from 100px down the top of the screen to 500px before the bottom of the screen, from 25px of the left edge of the screen until 50px before the right edge. Honoring the Markdown syntax, "Hello" will be printed with the Regular font style, while "world" will use the Bold font style. You will NOT be able to use obfuscated or encrypted fonts.
 
-  * If not compiled with `FBINK_FOR_KINDLE`:
+  * For other than Kindle:
 
     ```sh
     fbink -t regular=/mnt/onboard/fonts/NotoSans-Regular.ttf,bold=/mnt/onboard/fonts/NotoSans-Bold.ttf,size=24,top=100,bottom=500,left=25,right=50,format "Hello **world**!"
@@ -372,7 +372,7 @@
 
     Will use NotoSans to print "Hello world!" at 24pt in a display area starting from 100px down the top of the screen to 500px before the bottom of the screen, from 25px of the left edge of the screen until 50px before the right edge. Honoring the Markdown syntax, "Hello" will be printed with the Regular font style, while "world" will use the Bold font style. You will NOT be able to use obfuscated or encrypted fonts.
 
-  * Note if compiled with `FBINK_FOR_KOBO`: this means you will NOT be able to use system fonts on Kobo, because they're all obfuscated.
+  * Note for Kobo: this means you will NOT be able to use system fonts on Kobo, because they're all obfuscated.
 
 ### Options for printing an image (if compiled with `FBINK_WITH_IMAGE`)
 
@@ -445,12 +445,6 @@ Notes:
 * In some cases, exotic encoding settings may not be supported.
 * Transparency is supported, but it may be slightly slower (because we may need to do alpha blending).
   * You can use the `-a`, `--flatten` flag to avoid the potential performance penalty by always ignoring alpha.
-
-
-
-
-
-
 
 ## Notes about multiple string arguments
 
