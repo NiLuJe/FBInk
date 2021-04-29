@@ -672,6 +672,7 @@ static int wait_for_submission(int, uint32_t);
 static int wait_for_complete(int, uint32_t);
 #endif
 
+static inline __attribute__((always_inline)) const char* get_fbdev_path(void);
 static int open_fb_fd(int* restrict, bool* restrict);
 static int open_fb_fd_nonblock(int* restrict, bool* restrict);
 

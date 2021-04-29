@@ -2711,6 +2711,20 @@ static int
 }
 #endif    // !FBINK_FOR_LINUX
 
+static inline __attribute__((always_inline)) const char*
+    get_fbdev_path(void)
+{
+#ifdef FBINK_FOR_LINUX
+	// NOTE: FBGrab & DirectFB use "FRAMEBUFER", follow suit
+	const char* fbdev = getenv("FRAMEBUFFER");
+	if (fbdev && *fbdev != '\0') {
+		return fbdev;
+	}
+#endif
+
+	return "/dev/fb0";
+}
+
 // Open the framebuffer file & return the opened fd
 int
     fbink_open(void)
@@ -2718,7 +2732,7 @@ int
 	int fbfd = -1;
 
 	// Open the framebuffer file for reading and writing
-	fbfd = open("/dev/fb0", O_RDWR | O_CLOEXEC);
+	fbfd = open(get_fbdev_path(), O_RDWR | O_CLOEXEC);
 	if (fbfd == -1) {
 		PFWARN("Cannot open framebuffer character device: %m");
 		return ERRCODE(EXIT_FAILURE);
@@ -2753,7 +2767,7 @@ static int
 		// If we're opening a fd now, don't keep it around.
 		*keep_fd = false;
 		// We only need an fd for ioctl, hence O_NONBLOCK (as per open(2)).
-		*fbfd = open("/dev/fb0", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+		*fbfd = open(get_fbdev_path(), O_RDONLY | O_NONBLOCK | O_CLOEXEC);
 		if (*fbfd == -1) {
 			PFWARN("Cannot open framebuffer character device (%m), aborting");
 			return ERRCODE(EXIT_FAILURE);
