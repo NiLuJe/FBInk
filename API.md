@@ -15,10 +15,10 @@
   Print image on your device's screen.
 
 * ```sh
-  fbink [-WHf] [-k] --refresh [top=NUM,left=NUM,width=NUM,height=NUM]
+  fbink [-WHf] --refresh [top=NUM,left=NUM,width=NUM,height=NUM]
   ```
 
-  Refresh the screen (or a region of it).
+  Refresh the screen as per your specification, without touching the framebuffer.
 
 * ```sh
   fbink [-BhHWDbw] --cls [top=NUM,left=NUM,width=NUM,height=NUM]
