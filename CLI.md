@@ -369,14 +369,14 @@
     BFONT=/usr/java/lib/fonts/Caecilia_LT_75_Bold.ttf
     ```
 
-    And others (other than Kobo):
+    Or on Kobo:
 
     ```sh
-    RFONT=/mnt/onboard/fonts/NotoSans-Regular.ttf
-    BFONT=/mnt/onboard/fonts/NotoSans-Bold.ttf
+    RFONT=/mnt/onboard/.adds/koreader/fonts/noto/NotoSans-Regular.ttf
+    BFONT=/mnt/onboard/.adds/koreader/fonts/noto/NotoSans-Bold.ttf
     ```
 
-    Note for Kobo: this means you will NOT be able to use system fonts on Kobo, because they're all obfuscated.
+    Note for Kobo: you will NOT be able to use system fonts on Kobo, because they're all obfuscated, hence this example relying on KOReader's fonts.
 
 ### Options for printing an image (if compiled with `FBINK_WITH_IMAGE`)
 
