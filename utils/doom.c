@@ -250,7 +250,7 @@ static void
 	} else {
 		const size_t random                             = (rand() * 3) & 3;
 		const size_t dst                                = offset - random + 1U;
-		*((uint8_t*) (fbPtr + dst - fInfo.line_length)) = (uint8_t)(pixel - (random & 1U));
+		*((uint8_t*) (fbPtr + dst - fInfo.line_length)) = (uint8_t) (pixel - (random & 1U));
 		// Huh, if we go the palette way here, the fire doesn't reach as high...
 		/*
 		const unsigned int pal_idx                      = find_palette_id(pixel);
@@ -262,7 +262,7 @@ static void
 static void
     do_fire_fs(void)
 {
-	const uint32_t vertViewport = (uint32_t)(viewVertOrigin - viewVertOffset);
+	const uint32_t vertViewport = (uint32_t) (viewVertOrigin - viewVertOffset);
 	// Burn baby, burn!
 	// NOTE: Switching the outer loop to the y one leads to different interactions w/ the PXP & the EPDC...
 	//       Also, slightly uglier flames ;p.
@@ -284,7 +284,7 @@ static void
 
 	// Set the bottom line to the final color
 	const FBInkPixel px           = { .gray8 = fire_palette[sizeof(fire_palette) - 1U] };
-	const uint32_t   vertViewport = (uint32_t)(viewVertOrigin - viewVertOffset);
+	const uint32_t   vertViewport = (uint32_t) (viewVertOrigin - viewVertOffset);
 	fill_rect_Gray8(
 	    0U, (unsigned short int) (viewHeight + vertViewport - 1U), (unsigned short int) fInfo.line_length, 1U, &px);
 }
@@ -302,7 +302,7 @@ static void
 	setup_palette();
 
 	// Compute window position (centered)
-	const uint32_t vertViewport = (uint32_t)(viewVertOrigin - viewVertOffset);
+	const uint32_t vertViewport = (uint32_t) (viewVertOrigin - viewVertOffset);
 	fire_y_origin               = (unsigned short int) (viewHeight / 2U - FIRE_HEIGHT / 2U + vertViewport);
 	fire_x_origin               = (unsigned short int) (viewWidth / 2U - FIRE_WIDTH / 2U);
 
@@ -326,14 +326,14 @@ static void
 	if (pixel == fire_palette[0U]) {
 		*((uint8_t*) (fbPtr + offset - fInfo.line_length)) = fire_palette[0U];
 	} else {
-		const size_t random = (rand() * 3) & 3;
+		const size_t       random  = (rand() * 3) & 3;
 		// Make sure we stay within our window...
-		const size_t shift = ((y - fire_y_origin) * FIRE_WIDTH + (x - fire_x_origin)) - random + 1U;
-		const size_t dst_y = shift / FIRE_WIDTH + fire_y_origin;
-		const size_t dst_x = shift % FIRE_WIDTH + fire_x_origin;
-		const size_t dst   = dst_y * fInfo.line_length + dst_x;
+		const size_t       shift   = ((y - fire_y_origin) * FIRE_WIDTH + (x - fire_x_origin)) - random + 1U;
+		const size_t       dst_y   = shift / FIRE_WIDTH + fire_y_origin;
+		const size_t       dst_x   = shift % FIRE_WIDTH + fire_x_origin;
+		const size_t       dst     = dst_y * fInfo.line_length + dst_x;
 		// We'll need the palette id of the current pixel so we can swap it to another *palette* color!
-		const unsigned int pal_idx                      = find_palette_id(pixel);
+		const unsigned int pal_idx = find_palette_id(pixel);
 		*((uint8_t*) (fbPtr + dst - fInfo.line_length)) = fire_palette[(pal_idx - (random & 1U))];
 	}
 }
@@ -367,7 +367,7 @@ static void
 	scaled_Height = scale * FIRE_HEIGHT;
 
 	// Compute window position (centered)
-	const uint32_t vertViewport = (uint32_t)(viewVertOrigin - viewVertOffset);
+	const uint32_t vertViewport = (uint32_t) (viewVertOrigin - viewVertOffset);
 	fire_y_origin               = (unsigned short int) (viewHeight / 2U - scaled_Height / 2U + vertViewport);
 	fire_x_origin               = (unsigned short int) (viewWidth / 2U - scaled_Width / 2U);
 
@@ -397,23 +397,23 @@ static void
 		// Update the source canvas
 		*((uint8_t*) (fire_canvas + offset - FIRE_WIDTH)) = fire_palette[0U];
 		// Update the fb
-		const FBInkPixel px = { .gray8 = fire_palette[0U] };
+		const FBInkPixel px                               = { .gray8 = fire_palette[0U] };
 		fill_rect_Gray8((unsigned short int) (fire_x_origin + (x * scale)),
 				(unsigned short int) (fire_y_origin + ((y * scale) - 1U)),
 				scale,
 				scale,
 				&px);
 	} else {
-		const size_t random = (rand() * 3) & 3;
+		const size_t       random                      = (rand() * 3) & 3;
 		// Update the source canvas
-		const size_t dst = offset - random + 1U;
+		const size_t       dst                         = offset - random + 1U;
 		// We'll need the palette id of the current pixel so we can swap it to another *palette* color!
 		const unsigned int pal_idx                     = find_palette_id(pixel);
 		*((uint8_t*) (fire_canvas + dst - FIRE_WIDTH)) = fire_palette[(pal_idx - (random & 1U))];
 		// Update the fb
-		const size_t     dst_y = dst / FIRE_WIDTH * scale + fire_y_origin;
-		const size_t     dst_x = dst % FIRE_WIDTH * scale + fire_x_origin;
-		const FBInkPixel px    = { .gray8 = fire_palette[(pal_idx - (random & 1U))] };
+		const size_t     dst_y                         = dst / FIRE_WIDTH * scale + fire_y_origin;
+		const size_t     dst_x                         = dst % FIRE_WIDTH * scale + fire_x_origin;
+		const FBInkPixel px                            = { .gray8 = fire_palette[(pal_idx - (random & 1U))] };
 		fill_rect_Gray8((unsigned short int) dst_x, (unsigned short int) (dst_y - 1U), scale, scale, &px);
 	}
 }
@@ -436,13 +436,13 @@ static void
 {
 	uint8_t pixel = *((uint8_t*) (fire_canvas + offset));
 	if (pixel > fire_palette[0U]) {
-		const size_t random = rand() & 3;
+		const size_t       random            = rand() & 3;
 		// We'll need the palette id of the current pixel so we can swap it to another *palette* color!
-		const unsigned int pal_idx = find_palette_id(pixel);
+		const unsigned int pal_idx           = find_palette_id(pixel);
 		// Update the source canvas
 		*((uint8_t*) (fire_canvas + offset)) = fire_palette[(pal_idx - random)];
 		// Update the fb
-		const FBInkPixel px = { .gray8 = fire_palette[(pal_idx - random)] };
+		const FBInkPixel px                  = { .gray8 = fire_palette[(pal_idx - random)] };
 		fill_rect_Gray8((unsigned short int) (fire_x_origin + (x * scale)),
 				(unsigned short int) (fire_y_origin + (y * scale)),
 				scale,
@@ -492,11 +492,11 @@ static void
 		const unsigned int pal_idx = find_palette_id_32(px.bgra.color.r, px.bgra.color.g, px.bgra.color.b);
 		const size_t       idx     = pal_idx - (random & 1U);
 		// cppcheck-suppress unreadVariable ; false-positive (union)
-		px.bgra.color.r = fire_colors[idx][0U];
+		px.bgra.color.r            = fire_colors[idx][0U];
 		// cppcheck-suppress unreadVariable ; false-positive (union)
-		px.bgra.color.g = fire_colors[idx][1U];
+		px.bgra.color.g            = fire_colors[idx][1U];
 		// cppcheck-suppress unreadVariable ; false-positive (union)
-		px.bgra.color.b                                  = fire_colors[idx][2U];
+		px.bgra.color.b            = fire_colors[idx][2U];
 		*((uint32_t*) (fbPtr + dst - fInfo.line_length)) = px.bgra.p;
 	}
 }
@@ -696,7 +696,7 @@ int
 				frame_cap = (uint8_t) strtoul(optarg, NULL, 10);
 				is_capped = true;
 				// Requires frame timing!
-				is_timed = true;
+				is_timed  = true;
 				break;
 			case 'c':
 				iter_cap = (uint16_t) strtoul(optarg, NULL, 10);

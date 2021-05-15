@@ -68,11 +68,11 @@
 static inline __attribute__((always_inline)) uint
     INTERPOLATE_PIXEL_256(uint x, uint a, uint y, uint b)
 {
-	quint64 t = ((((quint64)(x)) | (((quint64)(x)) << 24)) & 0x00ff00ff00ff00ff) * a;
-	t += ((((quint64)(y)) | (((quint64)(y)) << 24)) & 0x00ff00ff00ff00ff) * b;
+	quint64 t = ((((quint64) (x)) | (((quint64) (x)) << 24)) & 0x00ff00ff00ff00ff) * a;
+	t += ((((quint64) (y)) | (((quint64) (y)) << 24)) & 0x00ff00ff00ff00ff) * b;
 	t >>= 8;
 	t &= 0x00ff00ff00ff00ff;
-	return ((uint)(t)) | ((uint)(t >> 24));
+	return ((uint) (t)) | ((uint) (t >> 24));
 }
 
 #else    // 32-bit versions
@@ -98,7 +98,7 @@ static inline __attribute__((always_inline)) uchar
 	uint t = x * a + y * b;
 	t >>= 8;
 
-	uint tx = ((uint)(x >> 8) * a) + ((uint)(y >> 8) * b);
+	uint tx = ((uint) (x >> 8) * a) + ((uint) (y >> 8) * b);
 	tx |= t;
 	return (uchar) tx;
 }
@@ -135,10 +135,10 @@ static inline __attribute__((always_inline)) uint
 	const __m128i vmulx   = _mm_unpacklo_epi16(vidistx, vdistx);
 	vlr                   = _mm_unpacklo_epi16(vlr, _mm_srli_si128(vlr, 8));
 	// vlr now contains the colors of left and right interleaved { la, ra, lr, rr, lg, rg, lb, rb }
-	vlr = _mm_madd_epi16(vlr, vmulx);    // Multiply and horizontal add.
-	vlr = _mm_srli_epi32(vlr, 8);
-	vlr = _mm_packs_epi32(vlr, vlr);
-	vlr = _mm_packus_epi16(vlr, vlr);
+	vlr                   = _mm_madd_epi16(vlr, vmulx);    // Multiply and horizontal add.
+	vlr                   = _mm_srli_epi32(vlr, 8);
+	vlr                   = _mm_packs_epi32(vlr, vlr);
+	vlr                   = _mm_packus_epi16(vlr, vlr);
 	return (uint) _mm_cvtsi128_si32(vlr);
 }
 
@@ -170,12 +170,12 @@ static inline __attribute__((always_inline)) uint
 {
 	uint16x8_t vt16 = vmovl_u8(vreinterpret_u8_u32(vt32));
 	uint16x8_t vb16 = vmovl_u8(vreinterpret_u8_u32(vb32));
-	vt16            = vmulq_n_u16(vt16, (uint16_t)(256 - disty));
+	vt16            = vmulq_n_u16(vt16, (uint16_t) (256 - disty));
 	vt16            = vmlaq_n_u16(vt16, vb16, (uint16_t) disty);
 	vt16            = vshrq_n_u16(vt16, 8);
 	uint16x4_t vl16 = vget_low_u16(vt16);
 	uint16x4_t vr16 = vget_high_u16(vt16);
-	vl16            = vmul_n_u16(vl16, (uint16_t)(256 - distx));
+	vl16            = vmul_n_u16(vl16, (uint16_t) (256 - distx));
 	vl16            = vmla_n_u16(vl16, vr16, (uint16_t) distx);
 	vl16            = vshr_n_u16(vl16, 8);
 	uint8x8_t vr    = vmovn_u16(vcombine_u16(vl16, vl16));

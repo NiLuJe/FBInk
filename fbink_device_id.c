@@ -388,7 +388,7 @@ static char*
 	}
 
 	// safe against most negative integer
-	n = (neg = (num < 0)) ? (uint64_t)(~num) + 1 : (uint64_t) num;
+	n = (neg = (num < 0)) ? (uint64_t) (~num) + 1 : (uint64_t) num;
 
 	do {
 		buf[len++] = tbl[n % base];
@@ -494,7 +494,7 @@ static void
 		}
 
 		// Store the device ID...
-		deviceQuirks.deviceId = config.pcb_id;
+		deviceQuirks.deviceId    = config.pcb_id;
 		// Some devices *may* be based on the same board as the Kobo Aura, so, let's be cautious...
 		deviceQuirks.canHWInvert = false;
 		// NOTE: See the comments in set_kobo_quirks about this.
@@ -541,9 +541,9 @@ static void
     set_kobo_quirks(unsigned short int kobo_id)
 {
 	// Store the device ID...
-	deviceQuirks.deviceId = kobo_id;
+	deviceQuirks.deviceId     = kobo_id;
 	// HW invert should *generally* be safe on Kobo, with a few exceptions...
-	deviceQuirks.canHWInvert = true;
+	deviceQuirks.canHWInvert  = true;
 	// NOTE: Shaky assumption that almost everything follows the same rotation scheme, with:
 	//       Boot rotation is FB_ROTATE_UD, pickel is FB_ROTATE_UR, nickel is FB_ROTATE_CCW
 	//       With the exception of the Aura HD and the H2O.
@@ -554,7 +554,7 @@ static void
 	//       as does nickel in the default Portrait orientation (buttons on the right).
 	//       I *think* the boot rota is FB_ROTATE_UR,
 	//       but detecting it as pickel instead appears to do the right thing right now, so I'm not going to mess with it...
-	deviceQuirks.ntxBootRota = FB_ROTATE_UD;
+	deviceQuirks.ntxBootRota  = FB_ROTATE_UD;
 	// NOTE: Most kernels thankfully don't resort to weird rotation quirks ;).
 	//       c.f., mxc_epdc_fb_check_var @ drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c
 	deviceQuirks.ntxRotaQuirk = NTX_ROTA_STRAIGHT;
@@ -622,8 +622,8 @@ static void
 			// NOTE: The bottom 10 pixels are blacked out by Nickel (behind the bezel)
 			deviceQuirks.koboVertOffset = -10;
 			// NOTE: According to the nightmode hack, the Aura's kernel *may* be crashy w/ PxP inversion...
-			deviceQuirks.canHWInvert = false;
-			deviceQuirks.screenDPI   = 212U;
+			deviceQuirks.canHWInvert    = false;
+			deviceQuirks.screenDPI      = 212U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Aura", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -632,7 +632,7 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 5", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case 350U:    // Aura HD (dragon)
-			deviceQuirks.isKoboNonMT = true;
+			deviceQuirks.isKoboNonMT  = true;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
 			deviceQuirks.ntxBootRota  = FB_ROTATE_UR;
 			deviceQuirks.ntxRotaQuirk = NTX_ROTA_ALL_INVERTED;
@@ -648,10 +648,10 @@ static void
 			// NOTE: The top 11 pixels are blacked out by Nickel (behind the bezel)
 			deviceQuirks.koboVertOffset = 11;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
-			deviceQuirks.ntxBootRota  = FB_ROTATE_UR;
-			deviceQuirks.ntxRotaQuirk = NTX_ROTA_ALL_INVERTED;
+			deviceQuirks.ntxBootRota    = FB_ROTATE_UR;
+			deviceQuirks.ntxRotaQuirk   = NTX_ROTA_ALL_INVERTED;
 			// Canonical -> native rotation mapping: { UR: 1, CW: 0, UD: 3, CCW: 2 }
-			deviceQuirks.screenDPI = 265U;
+			deviceQuirks.screenDPI      = 265U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Aura H2O", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -663,7 +663,7 @@ static void
 			// NOTE: *Might* be UD like the other ROTA_STRAIGHT devices
 			deviceQuirks.ntxBootRota = FB_ROTATE_UR;
 			// NOTE: Is indeed NTX_ROTA_STRAIGHT
-			deviceQuirks.screenDPI = 265U;
+			deviceQuirks.screenDPI   = 265U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Aura H2O²", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -675,7 +675,7 @@ static void
 			deviceQuirks.isKoboMk7   = true;
 			deviceQuirks.ntxBootRota = FB_ROTATE_UR;
 			// NOTE: *Might* be NTX_ROTA_ODD_INVERTED
-			deviceQuirks.screenDPI = 265U;
+			deviceQuirks.screenDPI   = 265U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Aura H2O² r2", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -733,12 +733,12 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case 377U:    // Forma (frost)
-			deviceQuirks.isKoboMk7 = true;
-			deviceQuirks.canRotate = true;
+			deviceQuirks.isKoboMk7    = true;
+			deviceQuirks.canRotate    = true;
 			// NOTE: Because Mk.7 and KOBO_HWCFG_DisplayBusWidth (35) is "16Bits_mirror" (3)
 			deviceQuirks.ntxRotaQuirk = NTX_ROTA_ODD_INVERTED;
 			// Canonical -> native rotation mapping: { UR: 3, CW: 2, UD: 1, CCW: 0 }
-			deviceQuirks.screenDPI = 300U;
+			deviceQuirks.screenDPI    = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Forma", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -747,8 +747,8 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case 380U:    // Forma 32GB (frost)
-			deviceQuirks.isKoboMk7 = true;
-			deviceQuirks.canRotate = true;
+			deviceQuirks.isKoboMk7    = true;
+			deviceQuirks.canRotate    = true;
 			// NOTE: Because Mk.7 and KOBO_HWCFG_DisplayBusWidth (35) is "16Bits_mirror" (3)
 			deviceQuirks.ntxRotaQuirk = NTX_ROTA_ODD_INVERTED;
 			deviceQuirks.screenDPI    = 300U;
@@ -760,11 +760,11 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case 384U:    // Libra H2O (storm)
-			deviceQuirks.isKoboMk7 = true;
+			deviceQuirks.isKoboMk7    = true;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UR, nickel is FB_ROTATE_UR
 			//       And panel is *actually* in Portrait. Finally!
-			deviceQuirks.ntxBootRota = FB_ROTATE_UR;
-			deviceQuirks.canRotate   = true;
+			deviceQuirks.ntxBootRota  = FB_ROTATE_UR;
+			deviceQuirks.canRotate    = true;
 			// NOTE: This one deserves a specific entry, because the H2O² also happens to be UR + STRAIGHT,
 			//       but it is decidedly *NOT* sane ;).
 			deviceQuirks.ntxRotaQuirk = NTX_ROTA_SANE;
@@ -852,10 +852,10 @@ static void
 	} else {
 #		pragma GCC diagnostic push
 #		pragma GCC diagnostic ignored "-Wmissing-braces"
-		NTXHWConfig             config      = { 0 };
+		NTXHWConfig config              = { 0 };
 #		pragma GCC diagnostic pop
-		unsigned char* restrict payload     = NULL;
-		uint64_t                storagesize = 0U;
+		unsigned char* restrict payload = NULL;
+		uint64_t storagesize            = 0U;
 
 		if (fseek(fp, HWCONFIG_OFFSET, SEEK_SET) != 0) {
 			PFWARN("Failed to seek to position 0x%p in `%s`: %m", (void*) HWCONFIG_OFFSET, HWCONFIG_DEVICE);
@@ -964,9 +964,9 @@ static void
     identify_remarkable(void)
 {
 	// NOTE: Follow the lead of https://github.com/reMarkable/update_engine (utils::GetMachineModel)
-	FILE* fp = fopen("/sys/devices/soc0/machine", "re");
+	FILE* fp               = fopen("/sys/devices/soc0/machine", "re");
 	// Random buffer size is random!
-	char machine_tag[32U] = { 0 };
+	char  machine_tag[32U] = { 0 };
 	if (!fp) {
 		ELOG("Couldn't open the sysfs entry for the SoC machine tag!");
 	} else {
@@ -983,8 +983,8 @@ static void
 	if (strcmp(machine_tag, "reMarkable 2.0") == 0) {
 		// NOTE: This is currently a very weird and mostly unsupported beast...
 		//       c.f., https://rmkit.dev/news/rm2-status/
-		deviceQuirks.screenDPI   = 226U;
-		deviceQuirks.canHWInvert = false;    // No EPDC :(
+		deviceQuirks.screenDPI    = 226U;
+		deviceQuirks.canHWInvert  = false;    // No EPDC :(
 		// NOTE: Not actually an NTX board, but useful nonetheless for fbdepth ;).
 		deviceQuirks.ntxBootRota  = FB_ROTATE_CW;
 		deviceQuirks.ntxRotaQuirk = NTX_ROTA_SANE;
@@ -995,8 +995,8 @@ static void
 		strncpy(deviceQuirks.deviceCodename, "Zero Sugar", sizeof(deviceQuirks.deviceCodename) - 1U);
 		deviceQuirks.deviceId = 2U;
 	} else {
-		deviceQuirks.screenDPI   = 226U;
-		deviceQuirks.canHWInvert = true;
+		deviceQuirks.screenDPI    = 226U;
+		deviceQuirks.canHWInvert  = true;
 		// NOTE: Not actually an NTX board, but useful nonetheless for fbdepth ;).
 		deviceQuirks.ntxBootRota  = FB_ROTATE_CW;
 		deviceQuirks.ntxRotaQuirk = NTX_ROTA_SANE;
@@ -1033,7 +1033,7 @@ static void
 				// NOTE: We may be leaking the string here, since I have no idea what InkView does...
 				char* model = (*inkview_GetDeviceModel)();
 				//       Which is why we make a copy, just in case...
-				model_name = strdupa(model);
+				model_name  = strdupa(model);
 			}
 
 			// Bye InkView! Hopefully your crappy dependencies haven't wreaked too much havoc...

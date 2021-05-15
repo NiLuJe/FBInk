@@ -63,17 +63,17 @@ static inline __attribute__((always_inline)) uint32x4_t
 }
 
 static inline void
-    qt_qimageScaleAARGBA_up_x_down_y_neon(QImageScaleInfo*       isi,
+    qt_qimageScaleAARGBA_up_x_down_y_neon(QImageScaleInfo* isi,
 					  unsigned int* restrict dest,
-					  int                    dw,
-					  int                    dh,
-					  int                    dow,
-					  int                    sow)
+					  int dw,
+					  int dh,
+					  int dow,
+					  int sow)
 {
-	const unsigned int** restrict ypoints  = isi->ypoints;
-	const int* restrict           xpoints  = isi->xpoints;
-	const int* restrict           xapoints = isi->xapoints;
-	const int* restrict           yapoints = isi->yapoints;
+	const unsigned int** restrict ypoints = isi->ypoints;
+	const int* restrict xpoints           = isi->xpoints;
+	const int* restrict xapoints          = isi->xapoints;
+	const int* restrict yapoints          = isi->yapoints;
 
 	/* go through every scanline in the output buffer */
 	for (int y = 0; y < dh; y++) {
@@ -83,13 +83,13 @@ static inline void
 		unsigned int* restrict dptr = dest + (y * dow);
 		for (int x = 0; x < dw; x++) {
 			const unsigned int* restrict sptr = ypoints[y] + xpoints[x];
-			uint32x4_t                   vx   = qt_qimageScaleAARGBA_helper_neon(sptr, yap, Cy, sow);
+			uint32x4_t vx                     = qt_qimageScaleAARGBA_helper_neon(sptr, yap, Cy, sow);
 
 			const int xap = xapoints[x];
 			if (xap > 0) {
 				uint32x4_t vr = qt_qimageScaleAARGBA_helper_neon(sptr + 1, yap, Cy, sow);
 
-				vx = vmulq_n_u32(vx, (uint32_t)(256 - xap));
+				vx = vmulq_n_u32(vx, (uint32_t) (256 - xap));
 				vr = vmulq_n_u32(vr, (uint32_t) xap);
 				vx = vaddq_u32(vx, vr);
 				vx = vshrq_n_u32(vx, 8);
@@ -104,17 +104,17 @@ static inline void
 }
 
 static inline void
-    qt_qimageScaleAARGB_up_x_down_y_neon(QImageScaleInfo*       isi,
+    qt_qimageScaleAARGB_up_x_down_y_neon(QImageScaleInfo* isi,
 					 unsigned int* restrict dest,
-					 int                    dw,
-					 int                    dh,
-					 int                    dow,
-					 int                    sow)
+					 int dw,
+					 int dh,
+					 int dow,
+					 int sow)
 {
-	const unsigned int** restrict ypoints  = isi->ypoints;
-	const int* restrict           xpoints  = isi->xpoints;
-	const int* restrict           xapoints = isi->xapoints;
-	const int* restrict           yapoints = isi->yapoints;
+	const unsigned int** restrict ypoints = isi->ypoints;
+	const int* restrict xpoints           = isi->xpoints;
+	const int* restrict xapoints          = isi->xapoints;
+	const int* restrict yapoints          = isi->yapoints;
 
 	/* go through every scanline in the output buffer */
 	for (int y = 0; y < dh; y++) {
@@ -124,13 +124,13 @@ static inline void
 		unsigned int* restrict dptr = dest + (y * dow);
 		for (int x = 0; x < dw; x++) {
 			const unsigned int* restrict sptr = ypoints[y] + xpoints[x];
-			uint32x4_t                   vx   = qt_qimageScaleAARGBA_helper_neon(sptr, yap, Cy, sow);
+			uint32x4_t vx                     = qt_qimageScaleAARGBA_helper_neon(sptr, yap, Cy, sow);
 
 			const int xap = xapoints[x];
 			if (xap > 0) {
 				uint32x4_t vr = qt_qimageScaleAARGBA_helper_neon(sptr + 1, yap, Cy, sow);
 
-				vx = vmulq_n_u32(vx, (uint32_t)(256 - xap));
+				vx = vmulq_n_u32(vx, (uint32_t) (256 - xap));
 				vr = vmulq_n_u32(vr, (uint32_t) xap);
 				vx = vaddq_u32(vx, vr);
 				vx = vshrq_n_u32(vx, 8);
@@ -146,17 +146,17 @@ static inline void
 }
 
 static inline void
-    qt_qimageScaleAARGBA_down_x_up_y_neon(QImageScaleInfo*       isi,
+    qt_qimageScaleAARGBA_down_x_up_y_neon(QImageScaleInfo* isi,
 					  unsigned int* restrict dest,
-					  int                    dw,
-					  int                    dh,
-					  int                    dow,
-					  int                    sow)
+					  int dw,
+					  int dh,
+					  int dow,
+					  int sow)
 {
-	const unsigned int** restrict ypoints  = isi->ypoints;
-	const int* restrict           xpoints  = isi->xpoints;
-	const int* restrict           xapoints = isi->xapoints;
-	const int* restrict           yapoints = isi->yapoints;
+	const unsigned int** restrict ypoints = isi->ypoints;
+	const int* restrict xpoints           = isi->xpoints;
+	const int* restrict xapoints          = isi->xapoints;
+	const int* restrict yapoints          = isi->yapoints;
 
 	/* go through every scanline in the output buffer */
 	for (int y = 0; y < dh; y++) {
@@ -166,13 +166,13 @@ static inline void
 			const int xap = xapoints[x] & 0xffff;
 
 			const unsigned int* restrict sptr = ypoints[y] + xpoints[x];
-			uint32x4_t                   vx   = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
+			uint32x4_t vx                     = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
 
 			const int yap = yapoints[y];
 			if (yap > 0) {
 				uint32x4_t vr = qt_qimageScaleAARGBA_helper_neon(sptr + sow, xap, Cx, 1);
 
-				vx = vmulq_n_u32(vx, (uint32_t)(256 - yap));
+				vx = vmulq_n_u32(vx, (uint32_t) (256 - yap));
 				vr = vmulq_n_u32(vr, (uint32_t) yap);
 				vx = vaddq_u32(vx, vr);
 				vx = vshrq_n_u32(vx, 8);
@@ -187,17 +187,17 @@ static inline void
 }
 
 static inline void
-    qt_qimageScaleAARGB_down_x_up_y_neon(QImageScaleInfo*       isi,
+    qt_qimageScaleAARGB_down_x_up_y_neon(QImageScaleInfo* isi,
 					 unsigned int* restrict dest,
-					 int                    dw,
-					 int                    dh,
-					 int                    dow,
-					 int                    sow)
+					 int dw,
+					 int dh,
+					 int dow,
+					 int sow)
 {
-	const unsigned int** restrict ypoints  = isi->ypoints;
-	const int* restrict           xpoints  = isi->xpoints;
-	const int* restrict           xapoints = isi->xapoints;
-	const int* restrict           yapoints = isi->yapoints;
+	const unsigned int** restrict ypoints = isi->ypoints;
+	const int* restrict xpoints           = isi->xpoints;
+	const int* restrict xapoints          = isi->xapoints;
+	const int* restrict yapoints          = isi->yapoints;
 
 	/* go through every scanline in the output buffer */
 	for (int y = 0; y < dh; y++) {
@@ -207,13 +207,13 @@ static inline void
 			const int xap = xapoints[x] & 0xffff;
 
 			const unsigned int* restrict sptr = ypoints[y] + xpoints[x];
-			uint32x4_t                   vx   = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
+			uint32x4_t vx                     = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
 
 			const int yap = yapoints[y];
 			if (yap > 0) {
 				uint32x4_t vr = qt_qimageScaleAARGBA_helper_neon(sptr + sow, xap, Cx, 1);
 
-				vx = vmulq_n_u32(vx, (uint32_t)(256 - yap));
+				vx = vmulq_n_u32(vx, (uint32_t) (256 - yap));
 				vr = vmulq_n_u32(vr, (uint32_t) yap);
 				vx = vaddq_u32(vx, vr);
 				vx = vshrq_n_u32(vx, 8);
@@ -231,10 +231,10 @@ static inline void
 static inline void
     qt_qimageScaleAARGBA_down_xy_neon(QImageScaleInfo* isi, unsigned int* restrict dest, int dw, int dh, int dow, int sow)
 {
-	const unsigned int** restrict ypoints  = isi->ypoints;
-	const int* restrict           xpoints  = isi->xpoints;
-	const int* restrict           xapoints = isi->xapoints;
-	const int* restrict           yapoints = isi->yapoints;
+	const unsigned int** restrict ypoints = isi->ypoints;
+	const int* restrict xpoints           = isi->xpoints;
+	const int* restrict xapoints          = isi->xapoints;
+	const int* restrict yapoints          = isi->yapoints;
 
 	for (int y = 0; y < dh; y++) {
 		const int Cy  = yapoints[y] >> 16;
@@ -246,7 +246,7 @@ static inline void
 			const int xap = xapoints[x] & 0xffff;
 
 			const unsigned int* restrict sptr = ypoints[y] + xpoints[x];
-			uint32x4_t                   vx   = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
+			uint32x4_t vx                     = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
 			vx                                = vshrq_n_u32(vx, 4);
 			uint32x4_t vr                     = vmulq_n_u32(vx, (uint32_t) yap);
 
@@ -276,10 +276,10 @@ static inline void
 static inline void
     qt_qimageScaleAARGB_down_xy_neon(QImageScaleInfo* isi, unsigned int* restrict dest, int dw, int dh, int dow, int sow)
 {
-	const unsigned int** restrict ypoints  = isi->ypoints;
-	const int* restrict           xpoints  = isi->xpoints;
-	const int* restrict           xapoints = isi->xapoints;
-	const int* restrict           yapoints = isi->yapoints;
+	const unsigned int** restrict ypoints = isi->ypoints;
+	const int* restrict xpoints           = isi->xpoints;
+	const int* restrict xapoints          = isi->xapoints;
+	const int* restrict yapoints          = isi->yapoints;
 
 	for (int y = 0; y < dh; y++) {
 		const int Cy  = yapoints[y] >> 16;
@@ -291,7 +291,7 @@ static inline void
 			const int xap = xapoints[x] & 0xffff;
 
 			const unsigned int* restrict sptr = ypoints[y] + xpoints[x];
-			uint32x4_t                   vx   = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
+			uint32x4_t vx                     = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
 			vx                                = vshrq_n_u32(vx, 4);
 			uint32x4_t vr                     = vmulq_n_u32(vx, (uint32_t) yap);
 

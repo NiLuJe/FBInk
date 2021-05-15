@@ -66,7 +66,7 @@ int
 
 	FBInkConfig fbink_cfg = { 0U };
 	// Default to verbose for now
-	fbink_cfg.is_verbose = true;
+	fbink_cfg.is_verbose  = true;
 
 	bool press_button      = false;
 	bool detect_import     = false;

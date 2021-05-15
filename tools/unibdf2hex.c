@@ -46,7 +46,7 @@
 // NOTE: Actually handling > 8px wide fonts requires more tweaking,
 //       like restoring uint16_t padding & computations...
 //       c.f., the original unibdf2hex version.
-#define BBOX_WIDTH 8
+#define BBOX_WIDTH  8
 
 #define MAXBUF 256
 
@@ -99,7 +99,7 @@ int
 				if (!skip) {
 					fprintf(stdout, "%04X:", thispoint);
 				}
-				rowcnt = 0U;
+				rowcnt   = 0U;
 				/* Print initial blank rows */
 				startrow = descent + bbxyoff + bbxy;
 				// Recap metrics for debugging purposes...

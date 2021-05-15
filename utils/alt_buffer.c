@@ -154,24 +154,24 @@ int
 	//       So our buffer simply starts at yres_virt * line_length!
 	//       It also ought to be exactly halfway through smem_len ;).
 	altPtr  = fbPtr + (vInfo.yres_virtual * fInfo.line_length);
-	altAddr = (uint32_t)(fInfo.smem_start + (vInfo.yres_virtual * fInfo.line_length));
+	altAddr = (uint32_t) (fInfo.smem_start + (vInfo.yres_virtual * fInfo.line_length));
 	// Print raw pointer values...
 	fprintf(stdout, "fbPtr: %p vs. altPtr: %p\n", fbPtr, altPtr);
 	fprintf(stdout,
 		"altAddr: %#x (Bounds: %#zx to %#zx)\n",
 		altAddr,
 		(size_t) fInfo.smem_start,
-		(size_t)(fInfo.smem_start + fInfo.smem_len));
+		(size_t) (fInfo.smem_start + fInfo.smem_len));
 	// Remember which is which, so we can easily flip to a specific draw buffer
 	unsigned char* const front_buffer = fbPtr;
 	unsigned char* const alt_buffer   = altPtr;
 
 	// We start with something simple:
 	// Paint the front buffer white
-	memset(fbPtr, eInkBGCMap[0], (size_t)(fInfo.line_length * vInfo.yres));
+	memset(fbPtr, eInkBGCMap[0], (size_t) (fInfo.line_length * vInfo.yres));
 
 	// Paint the overlay buffer black
-	memset(altPtr, eInkFGCMap[0], (size_t)(fInfo.line_length * vInfo.yres));
+	memset(altPtr, eInkFGCMap[0], (size_t) (fInfo.line_length * vInfo.yres));
 
 	// We'll be sleeping between tests
 	const struct timespec zzz = { 1L, 500000000L };
@@ -204,7 +204,7 @@ int
 	// Now paint the alt buffer dark gray
 	// NOTE: We could also tweak a fill_rect to the right ptr if we needed more control,
 	//       but this is good enough for a PoC ;).
-	memset(altPtr, eInkFGCMap[3], (size_t)(fInfo.line_length * vInfo.yres));
+	memset(altPtr, eInkFGCMap[3], (size_t) (fInfo.line_length * vInfo.yres));
 
 	// And only display the bottom half of it
 	region.top    = vInfo.yres / 2U;
@@ -274,7 +274,7 @@ int
 	//       They should ideally be at least screen-sized ;).
 	fbink_cfg.ignore_alpha = true;
 	// We'll be handling the refreshes, of course... ;)
-	fbink_cfg.no_refresh = true;
+	fbink_cfg.no_refresh   = true;
 
 	// Render "1.png" to the front buffer
 	fprintf(stdout, "[08] Rendering 1.png to front buffer\n");

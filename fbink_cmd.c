@@ -248,7 +248,7 @@ static void
 	    "\t\tNOTE: You will NOT be able to use obfuscated or encrypted fonts.\n"
 #	ifdef FBINK_FOR_KOBO
 	    "\t\tPlease note that this means you will NOT be able to use system fonts, because they're all obfuscated.\n"
-#       else
+#	else
 	    "\t\tAlso note that the path shown here is fairly arbitrary, and Kobo-specific ;).\n"
 #	endif
 	    "\n"
@@ -370,7 +370,7 @@ static void
     cleanup_handler(int signum __attribute__((unused)), siginfo_t* siginfo, void* context __attribute__((unused)))
 {
 	// Our main loop handles EINTR, and will abort cleanly once it sees that flag
-	g_timeToDie = 1;
+	g_timeToDie       = 1;
 	// NOTE: I have no idea how long that pointer is supposed to be safe to use, so, make a copy of the fields we care about.
 	g_sigCaught.signo = siginfo->si_signo;
 	g_sigCaught.pid   = siginfo->si_pid;
@@ -629,7 +629,7 @@ static int
 int
     main(int argc, char* argv[])
 {
-	int opt;
+	int                        opt;
 	// NOTE: getopt_long will only update opt_index when passed a *long* option,
 	//       so we need to do the matching ourselves when we're passed *short* options, hence the sentinel value...
 	int                        opt_index = -1;
@@ -742,8 +742,8 @@ int
 					 [COMPUTE_OPT] = "compute", [NOTRUNC_OPT] = "notrunc",
 					 [STYLE_OPT] = "style",     NULL };
 	// Recycle the refresh enum ;).
-	char* const cls_token[] = {
-		[TOP_OPT] = "top", [LEFT_OPT] = "left", [WIDTH_OPT] = "width", [HEIGHT_OPT] = "height", NULL
+	char* const cls_token[]      = {
+                [TOP_OPT] = "top", [LEFT_OPT] = "left", [WIDTH_OPT] = "width", [HEIGHT_OPT] = "height", NULL
 	};
 #pragma GCC diagnostic pop
 	char*       full_subopts = NULL;
@@ -1830,10 +1830,10 @@ int
 	}
 
 	// Assume success, until shit happens ;)
-	int rv = EXIT_SUCCESS;
+	int rv     = EXIT_SUCCESS;
 	// Declare it a tiny bit early to make cleanup handling safe
 	// (fbink_close is safe to call with fbfd set to -1 and/or the mmap not actually done).
-	int fbfd = -1;
+	int fbfd   = -1;
 	// Same idea for the pipe fd in daemon mode
 	int pipefd = -1;
 
@@ -1982,7 +1982,7 @@ int
 		// We'll want the manual grid clear to be centered, like the bar itself
 		fbink_cfg.is_centered = true;
 		// Double the usual size
-		fbink_cfg.fontmult = (uint8_t)(fbink_state.fontsize_mult << 1U);
+		fbink_cfg.fontmult    = (uint8_t) (fbink_state.fontsize_mult << 1U);
 		// Don't forget that fontmult & is_centered require a reinit...
 		fbink_init(fbfd, &fbink_cfg);
 		// Refresh the updated state
@@ -2019,7 +2019,7 @@ int
 		// Make it backgroundless, to play nicer with whatever might already be on the edge of the screen
 		fbink_cfg.is_bgless = true;
 		// Fast
-		fbink_cfg.wfm_mode = WFM_A2;
+		fbink_cfg.wfm_mode  = WFM_A2;
 
 		// Infinite activity bar
 		is_activitybar = true;

@@ -58,13 +58,13 @@ unsigned char*
 
 typedef struct
 {
-	int* restrict                   xpoints;
-	const unsigned int** restrict   ypoints;
-	const unsigned char** restrict  ypoints_y8;
+	int* restrict xpoints;
+	const unsigned int** restrict ypoints;
+	const unsigned char** restrict ypoints_y8;
 	const unsigned short** restrict ypoints_y8a;
-	int* restrict                   xapoints;
-	int* restrict                   yapoints;
-	int                             xup_yup;
+	int* restrict xapoints;
+	int* restrict yapoints;
+	int xup_yup;
 } QImageScaleInfo;
 
 #endif

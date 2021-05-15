@@ -28,9 +28,9 @@ static bool
     is_onboard_state(bool mounted)
 {
 	// c.f., http://program-nix.blogspot.com/2008/08/c-language-check-filesystem-is-mounted.html
-	FILE* restrict          mtab       = NULL;
-	struct mntent* restrict part       = NULL;
-	bool                    is_mounted = false;
+	FILE* restrict mtab          = NULL;
+	struct mntent* restrict part = NULL;
+	bool is_mounted              = false;
 
 	if ((mtab = setmntent("/proc/mounts", "r")) != NULL) {
 		while ((part = getmntent(mtab)) != NULL) {
@@ -471,7 +471,7 @@ int
 				match_coords.y = (unsigned short int) (j - (button_height / 2U));
 				match_coords.x = (unsigned short int) (match_coords.x - (button_width / 2U));
 				// And we're done!
-				gotcha = true;
+				gotcha         = true;
 				break;
 			}
 		}

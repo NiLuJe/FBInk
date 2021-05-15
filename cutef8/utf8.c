@@ -192,7 +192,7 @@ size_t
 		}
 		i++;
 	}
-	return (size_t)(dest - dest0);
+	return (size_t) (dest - dest0);
 }
 
 // NOTE: See also https://stackoverflow.com/a/38492214
@@ -576,7 +576,7 @@ size_t
 			i0          = i;
 			uint32_t ch = u8_nextchar(src, &i);
 			if (ascii || !iswprint((wint_t) ch)) {
-				buf += u8_escape_wchar(buf, sz - (size_t)(buf - start), ch);
+				buf += u8_escape_wchar(buf, sz - (size_t) (buf - start), ch);
 			} else {
 				i = i0;
 				do {
@@ -587,7 +587,7 @@ size_t
 	}
 	*buf++ = '\0';
 	*pi    = i;
-	return (size_t)(buf - start);
+	return (size_t) (buf - start);
 }
 
 char*
@@ -708,8 +708,8 @@ size_t
 	bool   needfree = false;
 	size_t sz       = 512;
 	// cppcheck-suppress allocaCalled
-	char* buf = (char*) alloca(sz);
-	int   ret = vsnprintf(buf, sz, fmt, ap);
+	char*  buf      = (char*) alloca(sz);
+	int    ret      = vsnprintf(buf, sz, fmt, ap);
 	if (ret < 0) {
 		return 0;
 	} else {

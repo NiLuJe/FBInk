@@ -61,7 +61,7 @@ extern "C" {
 ////
 //
 // Magic number for automatic fbfd handling
-#define FBFD_AUTO -1
+#define FBFD_AUTO   -1
 // As 0 is an invalid marker value, we can coopt it to try to retrieve our own last sent marker
 #define LAST_MARKER 0U
 
@@ -300,10 +300,10 @@ typedef uint8_t NTX_ROTA_INDEX_T;
 // A struct to dump FBInk's internal state into, like fbink_state_dump() would, but in C ;)
 typedef struct
 {
-	long int             user_hz;        // USER_HZ (should pretty much always be 100)
-	const char* restrict font_name;      // fbink_cfg->fontname (c.f., fontname_to_string())
-	uint32_t             view_width;     // viewWidth (MAY be different than screen_width on devices with a viewport)
-	uint32_t             view_height;    // viewHeight (ditto)
+	long int user_hz;                  // USER_HZ (should pretty much always be 100)
+	const char* restrict font_name;    // fbink_cfg->fontname (c.f., fontname_to_string())
+	uint32_t view_width;               // viewWidth (MAY be different than screen_width on devices with a viewport)
+	uint32_t view_height;              // viewHeight (ditto)
 	uint32_t screen_width;       // screenWidth (Effective width, c.f., is_ntx_quirky_landscape & initialize_fbink())
 	uint32_t screen_height;      // screenHeight (ditto)
 	uint32_t bpp;                // vInfo.bits_per_pixel
@@ -339,11 +339,11 @@ typedef struct
 // What a FBInk config should look like. Perfectly sane when fully zero-initialized.
 typedef struct
 {
-	short int    row;            // y axis (i.e., line), counts down from the bottom of the screen if negative
-	short int    col;            // x axis (i.e., column), counts down from the right edge of the screen if negative
-	uint8_t      fontmult;       // Font scaling multiplier (i.e., 4 -> x4), 0 means automatic.
-	FONT_INDEX_T fontname;       // Request a specific bundled font
-	bool         is_inverted;    // Invert colors.
+	short int        row;         // y axis (i.e., line), counts down from the bottom of the screen if negative
+	short int        col;         // x axis (i.e., column), counts down from the right edge of the screen if negative
+	uint8_t          fontmult;    // Font scaling multiplier (i.e., 4 -> x4), 0 means automatic.
+	FONT_INDEX_T     fontname;    // Request a specific bundled font
+	bool             is_inverted;    // Invert colors.
 	//				This is *NOT* mutually exclusive with is_nightmode, and is *always* supported.
 	bool             is_flashing;    // Request a black flash on refresh (e.g., UPDATE_MODE_FULL instead of PARTIAL)
 	bool             is_cleared;     // Clear the full screen beforehand (honors bg_color & is_inverted)
@@ -408,8 +408,8 @@ typedef struct
 	//                                    no matter the chosen axis.
 	//                                    e.g., HORI_PADDING is useful to prevent overlaps when drawing
 	//                                    consecutive strings on the same line(s).
-	bool is_formatted;    // Is string "formatted"? Bold/Italic support only, markdown like syntax
-	bool compute_only;    // Abort early after the line-break computation pass (no actual rendering).
+	bool               is_formatted;    // Is string "formatted"? Bold/Italic support only, markdown like syntax
+	bool               compute_only;    // Abort early after the line-break computation pass (no actual rendering).
 	//                       NOTE: This is early enough that it will *NOT* be able to predict *every*
 	//                             potential case of truncation.
 	//                             In particular, broken metrics may yield a late truncation at rendering time.
@@ -425,7 +425,7 @@ typedef struct
 	unsigned short int rendered_lines;    // Actually rendered amount of lines.
 	//                                       Will stay 0 in case of an early abort (or a compute_only run),
 	//                                       or < computed_lines in case of an unexpected truncation due to broken metrics.
-	bool truncated;    // true if the string was truncated (at computation or rendering time).
+	bool               truncated;    // true if the string was truncated (at computation or rendering time).
 } FBInkOTFit;
 
 // This maps to an mxcfb rectangle, used for fbink_get_last_rect, as well as in FBInkDump
@@ -442,9 +442,9 @@ typedef struct
 typedef struct
 {
 	unsigned char* restrict data;
-	size_t                  stride;
-	size_t                  size;
-	FBInkRect               area;
+	size_t    stride;
+	size_t    size;
+	FBInkRect area;
 	FBInkRect clip;    // Only restore this rectangular area of the screen (has to intersect w/ the dump's area)
 	uint8_t   rota;
 	uint8_t   bpp;
@@ -587,11 +587,11 @@ FBINK_API int fbink_free_ot_fonts_v2(FBInkOTConfig* restrict cfg);
 //				Pass a NULL pointer if unneeded.
 // NOTE: Alignment is relative to the printable area, as defined by the margins.
 //       As such, it only makes sense in the context of a single, specific print call.
-FBINK_API int fbink_print_ot(int                           fbfd,
-			     const char* restrict          string,
+FBINK_API int fbink_print_ot(int fbfd,
+			     const char* restrict string,
 			     const FBInkOTConfig* restrict cfg,
-			     const FBInkConfig* restrict   fbink_cfg,
-			     FBInkOTFit* restrict          fit);
+			     const FBInkConfig* restrict fbink_cfg,
+			     FBInkOTFit* restrict fit);
 
 //
 // Brings printf formatting to fbink_print and fbink_print_ot ;).
@@ -603,10 +603,10 @@ FBINK_API int fbink_print_ot(int                           fbfd,
 //       If cfg is valid, fbink_cfg MAY be NULL (same behavior as fbink_print_ot).
 //       If cfg is NULL, fbink_cfg MUST be valid.
 // NOTE: Meaning at least one of those two pointers MUST be valid!
-FBINK_API int fbink_printf(int                           fbfd,
+FBINK_API int fbink_printf(int fbfd,
 			   const FBInkOTConfig* restrict cfg,
-			   const FBInkConfig* restrict   fbink_cfg,
-			   const char*                   fmt,
+			   const FBInkConfig* restrict fbink_cfg,
+			   const char* fmt,
 			   ...) __attribute__((format(printf, 4, 5)));
 
 //
@@ -630,11 +630,11 @@ FBINK_API int fbink_printf(int                           fbfd,
 //	 On slightly older devices, the EPDC may support some sort of in-kernel software dithering, hence HWD_LEGACY.
 // NOTE: If you do NOT want to request any dithering, set FBInkConfig's dithering_mode field to HWD_PASSTHROUGH (i.e., 0).
 //       This is also the fallback value.
-FBINK_API int fbink_refresh(int                         fbfd,
-			    uint32_t                    region_top,
-			    uint32_t                    region_left,
-			    uint32_t                    region_width,
-			    uint32_t                    region_height,
+FBINK_API int fbink_refresh(int      fbfd,
+			    uint32_t region_top,
+			    uint32_t region_left,
+			    uint32_t region_width,
+			    uint32_t region_height,
 			    const FBInkConfig* restrict fbink_cfg);
 
 // A simple wrapper around the MXCFB_WAIT_FOR_UPDATE_SUBMISSION ioctl, without requiring you to include mxcfb headers.
@@ -821,10 +821,10 @@ FBINK_API int fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkCo
 // NOTE: There's a direct copy fast path in the very specific case of printing a Grayscale image *without* alpha,
 //       inversion or dithering on an 8bpp fb.
 // NOTE: No such luck on 32bpp, because of a mandatory RGB <-> BGR conversion ;).
-FBINK_API int fbink_print_image(int                         fbfd,
-				const char*                 filename,
-				short int                   x_off,
-				short int                   y_off,
+FBINK_API int fbink_print_image(int         fbfd,
+				const char* filename,
+				short int   x_off,
+				short int   y_off,
 				const FBInkConfig* restrict fbink_cfg);
 
 // Print raw scanlines on screen (packed pixels).
@@ -850,13 +850,13 @@ FBINK_API int fbink_print_image(int                         fbfd,
 //       If this is a concern to you, make sure your input buffer is formatted in a manner adapted to your output device:
 //       Generally, that'd be RGBA (32bpp) on Kobo (or RGB (24bpp) with ignore_alpha),
 //       and YA (grayscale + alpha) on Kindle (or Y (8bpp) with ignore_alpha).
-FBINK_API int fbink_print_raw_data(int                         fbfd,
-				   unsigned char* restrict     data,
-				   const int                   w,
-				   const int                   h,
-				   const size_t                len,
-				   short int                   x_off,
-				   short int                   y_off,
+FBINK_API int fbink_print_raw_data(int fbfd,
+				   unsigned char* restrict data,
+				   const int    w,
+				   const int    h,
+				   const size_t len,
+				   short int    x_off,
+				   short int    y_off,
 				   const FBInkConfig* restrict fbink_cfg);
 
 //
@@ -880,9 +880,9 @@ FBINK_API int fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg, const F
 //				wfm_mode, dithering_mode, is_nightmode, is_flashing, no_refresh).
 // cols:		Amount of columns to clear (i.e., width).
 // rows:		Amount of rows to clear (i.e., height).
-FBINK_API int fbink_grid_clear(int                         fbfd,
-			       unsigned short int          cols,
-			       unsigned short int          rows,
+FBINK_API int fbink_grid_clear(int                fbfd,
+			       unsigned short int cols,
+			       unsigned short int rows,
 			       const FBInkConfig* restrict fbink_cfg);
 
 // Like fbink_refresh, but instead of absolute coordinates, rely on grid coordinates like fbink_print.
@@ -895,9 +895,9 @@ FBINK_API int fbink_grid_clear(int                         fbfd,
 // cols:		Amount of columns to refresh (i.e., width).
 // rows:		Amount of rows to refresh (i.e., height).
 // NOTE: This *ignores* no_refresh ;).
-FBINK_API int fbink_grid_refresh(int                         fbfd,
-				 unsigned short int          cols,
-				 unsigned short int          rows,
+FBINK_API int fbink_grid_refresh(int                fbfd,
+				 unsigned short int cols,
+				 unsigned short int rows,
 				 const FBInkConfig* restrict fbink_cfg);
 
 //
@@ -931,13 +931,13 @@ FBINK_API int fbink_dump(int fbfd, FBInkDump* restrict dump);
 // fbink_cfg:		Pointer to an FBInkConfig struct (honors any combination of halign/valign, row/col & x_off/y_off).
 // dump:		Pointer to an FBInkDump struct (will be recycled if already used).
 // NOTE: The same considerations as in fbink_dump should be taken regarding the handling of FBInkDump structs.
-FBINK_API int fbink_region_dump(int                         fbfd,
-				short int                   x_off,
-				short int                   y_off,
-				unsigned short int          w,
-				unsigned short int          h,
+FBINK_API int fbink_region_dump(int                fbfd,
+				short int          x_off,
+				short int          y_off,
+				unsigned short int w,
+				unsigned short int h,
 				const FBInkConfig* restrict fbink_cfg,
-				FBInkDump* restrict         dump);
+				FBInkDump* restrict dump);
 
 // Restore a framebuffer dump made by fbink_dump/fbink_region_dump.
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build).

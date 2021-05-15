@@ -438,7 +438,7 @@ static const uint8_t eInkBGCMap[16] = { 0xFF, 0xEE, 0xDD, 0xCC, 0xBB, 0xAA, 0x99
 //#include "fbink_rgb565.h"
 
 // Global variables to store fb/screen info
-unsigned char* restrict  fbPtr      = NULL;
+unsigned char* restrict fbPtr       = NULL;
 bool                     isFbMapped = false;
 struct fb_var_screeninfo vInfo;
 struct fb_fix_screeninfo fInfo;
@@ -458,18 +458,18 @@ uint8_t                  penFGColor     = 0x00;
 uint8_t                  penBGColor     = 0xFF;
 FBInkPixel               penFGPixel;
 FBInkPixel               penBGPixel;
-uint32_t                 lastMarker = 0U;
+uint32_t                 lastMarker                                         = 0U;
 // Slightly arbitrary-ish fallback values
-unsigned short int MAXROWS = 45U;
-unsigned short int MAXCOLS = 32U;
+unsigned short int       MAXROWS                                            = 45U;
+unsigned short int       MAXCOLS                                            = 32U;
 // Verbose is for diagnostic/debug info in general
-bool g_isVerbose = false;
+bool                     g_isVerbose                                        = false;
 // Quiet is for fbink_init's hardware setup info
-bool g_isQuiet = false;
+bool                     g_isQuiet                                          = false;
 // Whether we log to stdout/stderr or the syslog
-bool g_toSysLog = false;
+bool                     g_toSysLog                                         = false;
 // This should be a pretty accurate fallback...
-long int USER_HZ = 100;
+long int                 USER_HZ                                            = 100;
 // Pointers to the appropriate put_pixel/get_pixel functions for the fb's bpp
 //void (*fxpPutPixel)(const FBInkCoordinates* restrict, const FBInkPixel* restrict) = NULL;
 void (*fxpGetPixel)(const FBInkCoordinates* restrict, FBInkPixel* restrict) = NULL;
@@ -484,10 +484,10 @@ void (*fxpFillRectChecked)(unsigned short int,
 			   unsigned short int,
 			   const FBInkPixel* restrict)                      = NULL;
 // As well as the appropriate coordinates rotation functions...
-void (*fxpRotateCoords)(FBInkCoordinates* restrict)  = NULL;
-void (*fxpRotateRegion)(struct mxcfb_rect* restrict) = NULL;
+void (*fxpRotateCoords)(FBInkCoordinates* restrict)                         = NULL;
+void (*fxpRotateRegion)(struct mxcfb_rect* restrict)                        = NULL;
 // And the font bitmap getter...
-const unsigned char* (*fxpFont8xGetBitmap)(uint32_t) = NULL;
+const unsigned char* (*fxpFont8xGetBitmap)(uint32_t)                        = NULL;
 #ifdef FBINK_WITH_FONTS
 const uint16_t* (*fxpFont16xGetBitmap)(uint32_t) = NULL;
 const uint32_t* (*fxpFont32xGetBitmap)(uint32_t) = NULL;
@@ -521,15 +521,15 @@ static void rotate_coordinates_nop(FBInkCoordinates* restrict __attribute__((unu
 static inline __attribute__((always_inline, hot)) uint16_t pack_rgb565(uint8_t, uint8_t, uint8_t);
 
 static inline __attribute__((always_inline, hot)) void put_pixel_Gray4(const FBInkCoordinates* restrict,
-								       const FBInkPixel*       restrict);
+								       const FBInkPixel* restrict);
 static inline __attribute__((always_inline, hot)) void put_pixel_Gray8(const FBInkCoordinates* restrict,
-								       const FBInkPixel*       restrict);
+								       const FBInkPixel* restrict);
 static inline __attribute__((always_inline)) void      put_pixel_RGB24(const FBInkCoordinates* restrict,
-								       const FBInkPixel*       restrict);
+								       const FBInkPixel* restrict);
 static inline __attribute__((always_inline, hot)) void put_pixel_RGB32(const FBInkCoordinates* restrict,
-								       const FBInkPixel*       restrict);
+								       const FBInkPixel* restrict);
 static inline __attribute__((always_inline, hot)) void put_pixel_RGB565(const FBInkCoordinates* restrict,
-									const FBInkPixel*       restrict);
+									const FBInkPixel* restrict);
 // NOTE: We pass coordinates by value here, because a rotation transformation *may* be applied to them,
 //       and that's a rotation that the caller will *never* care about.
 static inline __attribute__((always_inline, hot)) void put_pixel(FBInkCoordinates, const FBInkPixel* restrict, bool);
@@ -537,14 +537,14 @@ static inline __attribute__((always_inline, hot)) void put_pixel(FBInkCoordinate
 //       it's left to you to not do anything stupid ;)
 
 static inline __attribute__((always_inline, hot)) void get_pixel_Gray4(const FBInkCoordinates* restrict,
-								       FBInkPixel*             restrict);
+								       FBInkPixel* restrict);
 static inline __attribute__((always_inline, hot)) void get_pixel_Gray8(const FBInkCoordinates* restrict,
-								       FBInkPixel*             restrict);
+								       FBInkPixel* restrict);
 static inline __attribute__((always_inline)) void get_pixel_RGB24(const FBInkCoordinates* restrict, FBInkPixel* restrict);
 static inline __attribute__((always_inline, hot)) void get_pixel_RGB32(const FBInkCoordinates* restrict,
-								       FBInkPixel*             restrict);
+								       FBInkPixel* restrict);
 static inline __attribute__((always_inline, hot)) void get_pixel_RGB565(const FBInkCoordinates* restrict,
-									FBInkPixel*             restrict);
+									FBInkPixel* restrict);
 // NOTE: Same as put_pixel ;)
 static inline __attribute__((always_inline, hot)) void get_pixel(FBInkCoordinates, FBInkPixel* restrict);
 
@@ -673,8 +673,8 @@ static int wait_for_complete(int, uint32_t);
 #endif
 
 static inline __attribute__((always_inline)) const char* get_fbdev_path(void);
-static int open_fb_fd(int* restrict, bool* restrict);
-static int open_fb_fd_nonblock(int* restrict, bool* restrict);
+static int                                               open_fb_fd(int* restrict, bool* restrict);
+static int                                               open_fb_fd_nonblock(int* restrict, bool* restrict);
 
 static __attribute__((cold)) const char* fb_rotate_to_string(uint32_t);
 #ifdef FBINK_FOR_KINDLE

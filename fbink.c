@@ -103,7 +103,7 @@ static inline __attribute__((always_inline, hot)) uint16_t
     pack_rgb565(uint8_t r, uint8_t g, uint8_t b)
 {
 	// ((r / 8) * 2048) + ((g / 4) * 32) + (b / 8);
-	return (uint16_t)(((r >> 3U) << 11U) | ((g >> 2U) << 5U) | (b >> 3U));
+	return (uint16_t) (((r >> 3U) << 11U) | ((g >> 2U) << 5U) | (b >> 3U));
 }
 
 // Helper functions to 'plot' a specific pixel in a given color to the framebuffer
@@ -210,9 +210,9 @@ static void
 #	ifdef FBINK_WITH_MATHS_ROTA
 	uint8_t rotation = FB_ROTATE_CW;
 	// i.e., θ (c.f., https://en.wikipedia.org/wiki/Cartesian_coordinate_system#Rotation)
-	double rangle = ((rotation * 90) * M_PI / 180.0);
-	double fxp    = coords->x * cos(rangle) - coords->y * sin(rangle);
-	double fyp    = coords->x * sin(rangle) + coords->y * cos(rangle);
+	double  rangle   = ((rotation * 90) * M_PI / 180.0);
+	double  fxp      = coords->x * cos(rangle) - coords->y * sin(rangle);
+	double  fyp      = coords->x * sin(rangle) + coords->y * cos(rangle);
 	LOG("(fxp, fyp) -> (%f, %f)", fxp, fyp);
 	unsigned short int xp;
 	unsigned short int yp;
@@ -470,7 +470,7 @@ static inline __attribute__((always_inline, hot)) void
 		// or: (uint8_t)((((b) >> 4) & 0x0F) * 0x11);
 	} else {
 		// Odd pixel: low nibble
-		px->gray8 = (uint8_t)((b & 0x0Fu) * 0x11u);
+		px->gray8 = (uint8_t) ((b & 0x0Fu) * 0x11u);
 		// or: pull the low/right nibble, expanded to 8bit
 	}
 	// NOTE: c.f., FBInkPixel typedef in fbink_types.h for details on the union shenanigans...
@@ -531,13 +531,13 @@ static inline __attribute__((always_inline, hot)) void
 	//       I feel that this approach tracks better with what we do in put_pixel_RGB565,
 	//       and I have an easier time following it than the previous approach ported from KOReader.
 	//       Both do exactly the same thing, though ;).
-	const uint8_t r = (uint8_t)((v & 0xF800u) >> 11U);    // 11111000 00000000 = 0xF800
-	const uint8_t g = (v & 0x07E0u) >> 5U;                // 00000111 11100000 = 0x07E0
-	const uint8_t b = (v & 0x001Fu);                      // 00000000 00011111 = 0x001F
+	const uint8_t r = (uint8_t) ((v & 0xF800u) >> 11U);    // 11111000 00000000 = 0xF800
+	const uint8_t g = (v & 0x07E0u) >> 5U;                 // 00000111 11100000 = 0x07E0
+	const uint8_t b = (v & 0x001Fu);                       // 00000000 00011111 = 0x001F
 
-	px->bgra.color.r = (uint8_t)((r << 3U) | (r >> 2U));
-	px->bgra.color.g = (uint8_t)((g << 2U) | (g >> 4U));
-	px->bgra.color.b = (uint8_t)((b << 3U) | (b >> 2U));
+	px->bgra.color.r = (uint8_t) ((r << 3U) | (r >> 2U));
+	px->bgra.color.g = (uint8_t) ((g << 2U) | (g >> 4U));
+	px->bgra.color.b = (uint8_t) ((b << 3U) | (b >> 2U));
 }
 
 // Handle a few sanity checks...
@@ -582,10 +582,10 @@ static inline __attribute__((always_inline, hot)) void
 
 // Helper functions to draw a rectangle in a given color
 static __attribute__((hot)) void
-    fill_rect_Gray4(unsigned short int         x,
-		    unsigned short int         y,
-		    unsigned short int         w,
-		    unsigned short int         h,
+    fill_rect_Gray4(unsigned short int x,
+		    unsigned short int y,
+		    unsigned short int w,
+		    unsigned short int h,
 		    const FBInkPixel* restrict px)
 {
 	// Go with pixel plotting @ 4bpp to keep this simple...
@@ -605,10 +605,10 @@ static __attribute__((hot)) void
 }
 
 static __attribute__((hot)) void
-    fill_rect_Gray4_checked(unsigned short int         x,
-			    unsigned short int         y,
-			    unsigned short int         w,
-			    unsigned short int         h,
+    fill_rect_Gray4_checked(unsigned short int x,
+			    unsigned short int y,
+			    unsigned short int w,
+			    unsigned short int h,
 			    const FBInkPixel* restrict px)
 {
 	// Bounds-checking, to ensure the memset won't do stupid things...
@@ -639,10 +639,10 @@ static __attribute__((hot)) void
 
 #ifdef FBINK_FOR_POCKETBOOK
 static __attribute__((hot)) void
-    fill_rect_Gray8(unsigned short int         x,
-		    unsigned short int         y,
-		    unsigned short int         w,
-		    unsigned short int         h,
+    fill_rect_Gray8(unsigned short int x,
+		    unsigned short int y,
+		    unsigned short int w,
+		    unsigned short int h,
 		    const FBInkPixel* restrict px)
 {
 	// NOTE: We may require fxpRotateRegion on PB :(.
@@ -665,10 +665,10 @@ static __attribute__((hot)) void
 }
 #else
 static __attribute__((hot)) void
-    fill_rect_Gray8(unsigned short int         x,
-		    unsigned short int         y,
-		    unsigned short int         w,
-		    unsigned short int         h,
+    fill_rect_Gray8(unsigned short int x,
+		    unsigned short int y,
+		    unsigned short int w,
+		    unsigned short int h,
 		    const FBInkPixel* restrict px)
 {
 	// NOTE: fxpRotateRegion is never set at 8bpp :).
@@ -684,10 +684,10 @@ static __attribute__((hot)) void
 #endif
 
 static __attribute__((hot)) void
-    fill_rect_Gray8_checked(unsigned short int         x,
-			    unsigned short int         y,
-			    unsigned short int         w,
-			    unsigned short int         h,
+    fill_rect_Gray8_checked(unsigned short int x,
+			    unsigned short int y,
+			    unsigned short int w,
+			    unsigned short int h,
 			    const FBInkPixel* restrict px)
 {
 	// Bounds-checking, to ensure the memset won't do stupid things...
@@ -717,10 +717,10 @@ static __attribute__((hot)) void
 }
 
 static __attribute__((hot)) void
-    fill_rect_RGB565(unsigned short int         x,
-		     unsigned short int         y,
-		     unsigned short int         w,
-		     unsigned short int         h,
+    fill_rect_RGB565(unsigned short int x,
+		     unsigned short int y,
+		     unsigned short int w,
+		     unsigned short int h,
 		     const FBInkPixel* restrict px)
 {
 	// Things are a bit trickier @ 16bpp, because except for black or white, we're not sure the requested color
@@ -757,10 +757,10 @@ static __attribute__((hot)) void
 }
 
 static __attribute__((hot)) void
-    fill_rect_RGB565_checked(unsigned short int         x,
-			     unsigned short int         y,
-			     unsigned short int         w,
-			     unsigned short int         h,
+    fill_rect_RGB565_checked(unsigned short int x,
+			     unsigned short int y,
+			     unsigned short int w,
+			     unsigned short int h,
 			     const FBInkPixel* restrict px)
 {
 	// Bounds-checking, to ensure the memset won't do stupid things...
@@ -792,10 +792,10 @@ static __attribute__((hot)) void
 }
 
 static void
-    fill_rect_RGB24(unsigned short int         x,
-		    unsigned short int         y,
-		    unsigned short int         w,
-		    unsigned short int         h,
+    fill_rect_RGB24(unsigned short int x,
+		    unsigned short int y,
+		    unsigned short int w,
+		    unsigned short int h,
 		    const FBInkPixel* restrict px)
 {
 	// NOTE: fxpRotateRegion is never set at 24bpp :).
@@ -810,10 +810,10 @@ static void
 }
 
 static void
-    fill_rect_RGB24_checked(unsigned short int         x,
-			    unsigned short int         y,
-			    unsigned short int         w,
-			    unsigned short int         h,
+    fill_rect_RGB24_checked(unsigned short int x,
+			    unsigned short int y,
+			    unsigned short int w,
+			    unsigned short int h,
 			    const FBInkPixel* restrict px)
 {
 	// Bounds-checking, to ensure the memset won't do stupid things...
@@ -843,10 +843,10 @@ static void
 }
 
 static __attribute__((hot)) void
-    fill_rect_RGB32(unsigned short int         x,
-		    unsigned short int         y,
-		    unsigned short int         w,
-		    unsigned short int         h,
+    fill_rect_RGB32(unsigned short int x,
+		    unsigned short int y,
+		    unsigned short int w,
+		    unsigned short int h,
 		    const FBInkPixel* restrict px)
 {
 	// NOTE: fxpRotateRegion is never set at 32bpp :).
@@ -871,10 +871,10 @@ static __attribute__((hot)) void
 }
 
 static __attribute__((hot)) void
-    fill_rect_RGB32_checked(unsigned short int         x,
-			    unsigned short int         y,
-			    unsigned short int         w,
-			    unsigned short int         h,
+    fill_rect_RGB32_checked(unsigned short int x,
+			    unsigned short int y,
+			    unsigned short int w,
+			    unsigned short int h,
 			    const FBInkPixel* restrict px)
 {
 	// Bounds-checking, to ensure the memset won't do stupid things...
@@ -1144,11 +1144,11 @@ static int
 
 // Helper function for drawing
 static struct mxcfb_rect
-    draw(const char* restrict        text,
-	 unsigned short int          row,
-	 unsigned short int          col,
-	 unsigned short int          multiline_offset,
-	 bool                        halfcell_offset,
+    draw(const char* restrict text,
+	 unsigned short int row,
+	 unsigned short int col,
+	 unsigned short int multiline_offset,
+	 bool               halfcell_offset,
 	 const FBInkConfig* restrict fbink_cfg)
 {
 	LOG("Printing `%s` @ line offset %hu (meaning row %hu)",
@@ -1219,11 +1219,12 @@ static struct mxcfb_rect
 
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
-		.top    = (uint32_t) MAX(0 + (viewVertOrigin - viewVertOffset),
+		.top  = (uint32_t) MAX(0 + (viewVertOrigin - viewVertOffset),
                                       (((row - multiline_offset) * FONTH) + voffset + viewVertOrigin)),
-		.left   = (uint32_t) MAX(0 + viewHoriOrigin, ((col * FONTW) + hoffset + viewHoriOrigin)),
-		.width  = multiline_offset > 0U ? (screenWidth - (uint32_t)(col * FONTW)) : (uint32_t)(charcount * FONTW),
-		.height = (uint32_t)((multiline_offset + 1U) * FONTH),
+		.left = (uint32_t) MAX(0 + viewHoriOrigin, ((col * FONTW) + hoffset + viewHoriOrigin)),
+		.width =
+		    multiline_offset > 0U ? (screenWidth - (uint32_t) (col * FONTW)) : (uint32_t) (charcount * FONTW),
+		.height = (uint32_t) ((multiline_offset + 1U) * FONTH),
 	};
 
 	// Recap final offset values
@@ -1281,7 +1282,7 @@ static struct mxcfb_rect
 							   ((col * FONTW) + hoffset + viewHoriOrigin + pixel_offset));
 				} else {
 					region.left = (uint32_t) MIN(
-					    (uint32_t)((col * FONTW) + hoffset + viewHoriOrigin + pixel_offset),
+					    (uint32_t) ((col * FONTW) + hoffset + viewHoriOrigin + pixel_offset),
 					    (screenWidth - 1U));
 				}
 				LOG("Updated region.left to %u", region.left);
@@ -1365,12 +1366,12 @@ static struct mxcfb_rect
 	}
 
 	// Loop through all the *characters* in the text string
-	size_t           bi    = 0U;
-	size_t           ch_bi = bi;
-	size_t           ci    = 0U;
-	uint32_t         ch;
-	FBInkCoordinates coords = { 0U };
-	FBInkPixel*      pxP;
+	size_t                   bi    = 0U;
+	size_t                   ch_bi = bi;
+	size_t                   ci    = 0U;
+	uint32_t                 ch;
+	FBInkCoordinates         coords = { 0U };
+	FBInkPixel*              pxP;
 	// NOTE: We don't do much sanity checking on hoffset/voffset,
 	//       because we want to allow pushing part of the string off-screen
 	//       (we basically only make sure it won't screw up the region rectangle too badly).
@@ -1413,7 +1414,7 @@ static struct mxcfb_rect
 			// Update the x coordinates for this character
 			const unsigned short int x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
 			// Remember the next char's byte offset for next iteration's logging
-			ch_bi = bi;
+			ch_bi                           = bi;
 
 			// Crappy macro to avoid repeating myself in each branch...
 			// NOTE: When no special processing is needed, we attempt to speed things up by using fill_rect
@@ -1439,18 +1440,18 @@ static struct mxcfb_rect
 	if (!fbink_cfg->is_overlay && !fbink_cfg->is_bgless && !fbink_cfg->is_fgless) {                                        \
 		for (uint8_t y = 0U; y < glyphHeight; y++) {                                                                   \
 			/* y: input row, j: first output row after scaling */                                                  \
-			j  = (unsigned short int) (y * FONTSIZE_MULT);                                                         \
-			cy = (unsigned short int) (y_offs + j);                                                                \
+			j                         = (unsigned short int) (y * FONTSIZE_MULT);                                  \
+			cy                        = (unsigned short int) (y_offs + j);                                         \
 			/* First column might be fg or bg, but we're precomputing it anyway */                                 \
-			uint8_t px_count = 1U;                                                                                 \
+			uint8_t px_count          = 1U;                                                                        \
 			/* We'll need to remember whether the previous pixel was already using the same color... */            \
 			/* 1 is fg, 0 is bg, first pixel could be either, so, -1 */                                            \
-			int8_t last_px_type = -1;                                                                              \
+			int8_t  last_px_type      = -1;                                                                        \
 			/* We're already pre-computing the first column below, so start with this false */                     \
-			bool initial_stripe_px = false;                                                                        \
+			bool    initial_stripe_px = false;                                                                     \
 			/* Precompute the initial coordinates for the first column of that glyph row */                        \
-			i  = 0U;                                                                                               \
-			cx = x_offs;                                                                                           \
+			i                         = 0U;                                                                        \
+			cx                        = x_offs;                                                                    \
 			for (uint8_t x = 0U; x < glyphWidth; x++) {                                                            \
 				/* Each element encodes a full row, we access a column's bit in that row by shifting. */       \
 				if (bitmap[y] & 1U << x) {                                                                     \
@@ -1494,7 +1495,7 @@ static struct mxcfb_rect
 				/* If we're the first pixel of a new stripe, compute the coordinates of the stripe's start */  \
 				if (initial_stripe_px) {                                                                       \
 					/* x: input column, i: first output column after scaling */                            \
-					i = (unsigned short int) (x * FONTSIZE_MULT);                                          \
+					i  = (unsigned short int) (x * FONTSIZE_MULT);                                         \
 					/* Initial coordinates, before we generate the extra pixels from the scaling factor */ \
 					cx = (unsigned short int) (x_offs + i);                                                \
 				}                                                                                              \
@@ -1599,7 +1600,7 @@ static struct mxcfb_rect
 			// Update the x coordinates for this character
 			const unsigned short int x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
 			// Remember the next char's byte offset for next iteration's logging
-			ch_bi = bi;
+			ch_bi                           = bi;
 
 			// Fast-path through spaces, which are always going to be a FONTWxFONTH bg rectangle.
 			if (ch == 0x20u) {
@@ -1634,7 +1635,7 @@ static struct mxcfb_rect
 			// Update the x coordinates for this character
 			const unsigned short int x_offs = (unsigned short int) (x_base_offs + (ci * FONTW));
 			// Remember the next char's byte offset for next iteration's logging
-			ch_bi = bi;
+			ch_bi                           = bi;
 
 			// Fast-path through spaces, which are always going to be a FONTWxFONTH bg rectangle.
 			if (ch == 0x20u) {
@@ -1913,7 +1914,7 @@ static int
 	bool use_legacy_dithering = false;
 	if (dithering_mode == HWD_LEGACY) {
 		// Make sure we won't setup EPDC v2 dithering
-		dithering_mode = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
+		dithering_mode       = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
 		// And make sure we'll setup EPDC v1 flags later
 		use_legacy_dithering = true;
 	}
@@ -2004,7 +2005,7 @@ static int
 	bool use_legacy_dithering = false;
 	if (dithering_mode == HWD_LEGACY) {
 		// Make sure we won't setup EPDC v2 dithering
-		dithering_mode = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
+		dithering_mode       = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
 		// And make sure we'll setup EPDC v1 flags later
 		use_legacy_dithering = true;
 	}
@@ -2468,7 +2469,7 @@ static int
 	bool use_legacy_dithering = false;
 	if (dithering_mode == HWD_LEGACY) {
 		// Make sure we won't setup EPDC v2 dithering
-		dithering_mode = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
+		dithering_mode       = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
 		// And make sure we'll setup EPDC v1 flags later
 		use_legacy_dithering = true;
 	}
@@ -2767,7 +2768,7 @@ static int
 		// If we're opening a fd now, don't keep it around.
 		*keep_fd = false;
 		// We only need an fd for ioctl, hence O_NONBLOCK (as per open(2)).
-		*fbfd = open(get_fbdev_path(), O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+		*fbfd    = open(get_fbdev_path(), O_RDONLY | O_NONBLOCK | O_CLOEXEC);
 		if (*fbfd == -1) {
 			PFWARN("Cannot open framebuffer character device (%m), aborting");
 			return ERRCODE(EXIT_FAILURE);
@@ -2827,7 +2828,7 @@ static __attribute__((cold)) int
 		y = r;
 	} else {
 		// NOTE: We inline stbi__compute_y to avoid needing to depend on FBINK_WITH_IMAGE
-		y = (uint8_t)(((r * 77U) + (g * 150U) + (29U * b)) >> 8U);
+		y = (uint8_t) (((r * 77U) + (g * 150U) + (29U * b)) >> 8U);
 	}
 
 	// Do we need to match that to the nearest palette color?
@@ -2838,7 +2839,7 @@ static __attribute__((cold)) int
 	//       as well as https://stackoverflow.com/questions/3407012
 	uint8_t v;
 	if (quantize) {
-		v = (uint8_t)(((y + 0x11u / 2U) / 0x11u) * 0x11u);
+		v = (uint8_t) (((y + 0x11u / 2U) / 0x11u) * 0x11u);
 	} else {
 		v = y;
 	}
@@ -3515,10 +3516,10 @@ static __attribute__((cold)) int
 		}
 	}
 
-	viewWidth      = screenWidth;
-	viewHoriOrigin = 0U;
-	viewHeight     = screenHeight;
-	viewVertOrigin = 0U;
+	viewWidth          = screenWidth;
+	viewHoriOrigin     = 0U;
+	viewHeight         = screenHeight;
+	viewVertOrigin     = 0U;
 #else
 	// Other devices are generally never broken-by-design (at least not on that front ;))
 	viewWidth      = screenWidth;
@@ -3634,8 +3635,8 @@ static __attribute__((cold)) int
 			fxpFont8xGetBitmap = &leggie_get_bitmap;
 			break;
 		case BLOCK:
-			glyphWidth  = 32U;
-			glyphHeight = 32U;
+			glyphWidth          = 32U;
+			glyphHeight         = 32U;
 			// An horizontal resolution > 8 means a different data type...
 			fxpFont32xGetBitmap = &block_get_bitmap;
 			break;
@@ -3722,9 +3723,9 @@ static __attribute__((cold)) int
 #ifdef FBINK_WITH_FONTS
 		// NOTE: Handle custom fonts, no matter their base glyph size...
 		// We want at least N columns, so, viewWidth / N / glyphWidth gives us the maximum multiplier.
-		const uint8_t max_fontmult_width = (uint8_t)(viewWidth / min_maxcols / glyphWidth);
+		const uint8_t max_fontmult_width  = (uint8_t) (viewWidth / min_maxcols / glyphWidth);
 		// We want at least 1 row, so, viewHeight / glyphHeight gives us the maximum multiplier.
-		const uint8_t max_fontmult_height = (uint8_t)(viewHeight / glyphHeight);
+		const uint8_t max_fontmult_height = (uint8_t) (viewHeight / glyphHeight);
 		max_fontmult                      = (uint8_t) MIN(max_fontmult_width, max_fontmult_height);
 		if (FONTSIZE_MULT > max_fontmult) {
 			FONTSIZE_MULT = max_fontmult;
@@ -3732,7 +3733,7 @@ static __attribute__((cold)) int
 		}
 #else
 		// The default font's glyphs are 8x8, do the least amount of work possible ;).
-		max_fontmult = (uint8_t)(viewWidth / min_maxcols / 8U);
+		max_fontmult = (uint8_t) (viewWidth / min_maxcols / 8U);
 		if (FONTSIZE_MULT > max_fontmult) {
 			FONTSIZE_MULT = max_fontmult;
 			ELOG("Clamped font size multiplier from %hhu to %hhu", fbink_cfg->fontmult, max_fontmult);
@@ -3791,7 +3792,7 @@ static __attribute__((cold)) int
 	ELOG("Line length: %hu cols, Page size: %hu rows", MAXCOLS, MAXROWS);
 
 	// Mention & remember if we can perfectly fit the final column on screen
-	if ((uint32_t)(FONTW * MAXCOLS) == viewWidth) {
+	if ((uint32_t) (FONTW * MAXCOLS) == viewWidth) {
 		deviceQuirks.isPerfectFit = true;
 		ELOG("Horizontal fit is perfect!");
 	} else {
@@ -3800,12 +3801,12 @@ static __attribute__((cold)) int
 
 	// In a similar fashion, add a vertical offset to make sure rows are vertically "centered",
 	// in case we can't perfectly fit the final row.
-	if ((uint32_t)(FONTH * MAXROWS) == viewHeight) {
+	if ((uint32_t) (FONTH * MAXROWS) == viewHeight) {
 		viewVertOffset = 0U;
 	} else {
 		// NOTE: That should also fall under no_viewport's purview
 		if (!fbink_cfg->no_viewport) {
-			viewVertOffset = (uint8_t)(((float) (viewHeight - (uint32_t)(FONTH * MAXROWS)) / 2.0f) + 0.5f);
+			viewVertOffset = (uint8_t) (((float) (viewHeight - (uint32_t) (FONTH * MAXROWS)) / 2.0f) + 0.5f);
 			ELOG("Vertical fit isn't perfect, shifting rows down by %hhu pixels", viewVertOffset);
 		} else {
 			viewVertOffset = 0U;
@@ -3814,7 +3815,7 @@ static __attribute__((cold)) int
 	}
 	// Bake that into the viewport computations,
 	// we'll special-case the image codepath to ignore it when row is unspecified (i.e., 0) ;).
-	viewVertOrigin = (uint8_t)(viewVertOrigin + viewVertOffset);
+	viewVertOrigin = (uint8_t) (viewVertOrigin + viewVertOffset);
 
 	// Pack the pen colors into the right pixel format...
 	if (update_pen_colors(fbink_cfg) != EXIT_SUCCESS) {
@@ -3920,7 +3921,7 @@ static __attribute__((cold)) int
 	otInit = true;
 
 	// Open font from given path, and load into buffer
-	FILE*                   f    = fopen(filename, "r" STDIO_CLOEXEC);
+	FILE* f                      = fopen(filename, "r" STDIO_CLOEXEC);
 	unsigned char* restrict data = NULL;
 	if (!f) {
 		PFWARN("fopen: %m");
@@ -4302,10 +4303,10 @@ static void
 	// Rotate the region to account for pickel's rotation...
 	struct mxcfb_rect oregion = *region;
 	// NOTE: left = x, top = y
-	region->top    = screenWidth - oregion.left - oregion.width;
-	region->left   = oregion.top;
-	region->width  = oregion.height;
-	region->height = oregion.width;
+	region->top               = screenWidth - oregion.left - oregion.width;
+	region->left              = oregion.top;
+	region->width             = oregion.height;
+	region->height            = oregion.width;
 }
 #endif    // FBINK_FOR_KOBO || FBINK_FOR_CERVANTES || FBINK_FOR_POCKETBOOK
 
@@ -4316,10 +4317,10 @@ static void
 	// Rotate the region to account for the native boot rotation...
 	struct mxcfb_rect oregion = *region;
 	// NOTE: left = x, top = y
-	region->top    = oregion.left;
-	region->left   = screenHeight - oregion.top - oregion.height;
-	region->width  = oregion.height;
-	region->height = oregion.width;
+	region->top               = oregion.left;
+	region->left              = screenHeight - oregion.top - oregion.height;
+	region->width             = oregion.height;
+	region->height            = oregion.width;
 }
 #endif    // FBINK_FOR_KOBO || FBINK_FOR_CERVANTES
 
@@ -4369,7 +4370,7 @@ int
 	if (!rect || (rect->width == 0U || rect->height == 0U)) {
 		// Nope -> full-screen
 		clear_screen(fbfd, fbink_cfg->is_inverted ? penBGColor ^ 0xFFu : penBGColor, fbink_cfg->is_flashing);
-		full_clear = true;
+		full_clear    = true;
 		// Set a region for set_last_rect...
 		region.top    = 0U;
 		region.left   = 0U;
@@ -4431,10 +4432,10 @@ cleanup:
 
 // Handle cls & refresh, but for grid-based coordinates (i.e., like fbink_print()'s draw())
 static int
-    grid_to_region(int                         fbfd,
-		   unsigned short int          cols,
-		   unsigned short int          rows,
-		   bool                        do_clear,
+    grid_to_region(int                fbfd,
+		   unsigned short int cols,
+		   unsigned short int rows,
+		   bool               do_clear,
 		   const FBInkConfig* restrict fbink_cfg)
 {
 	// If we open a fd now, we'll only keep it open for this single call!
@@ -4601,8 +4602,8 @@ static int
 	struct mxcfb_rect region = {
 		.top  = (uint32_t) MAX(0 + (viewVertOrigin - viewVertOffset), ((row * FONTH) + voffset + viewVertOrigin)),
 		.left = (uint32_t) MAX(0 + viewHoriOrigin, ((col * FONTW) + hoffset + viewHoriOrigin)),
-		.width  = (uint32_t)(cols * FONTW),
-		.height = (uint32_t)(rows * FONTH),
+		.width  = (uint32_t) (cols * FONTW),
+		.height = (uint32_t) (rows * FONTH),
 	};
 
 	// Recap final offset values
@@ -4657,7 +4658,7 @@ static int
 							   ((col * FONTW) + hoffset + viewHoriOrigin + pixel_offset));
 				} else {
 					region.left = (uint32_t) MIN(
-					    (uint32_t)((col * FONTW) + hoffset + viewHoriOrigin + pixel_offset),
+					    (uint32_t) ((col * FONTW) + hoffset + viewHoriOrigin + pixel_offset),
 					    (screenWidth - 1U));
 				}
 				LOG("Updated region.left to %u", region.left);
@@ -4802,7 +4803,7 @@ int
 	}
 
 	// Assume success, until shit happens ;)
-	int rv = EXIT_SUCCESS;
+	int rv              = EXIT_SUCCESS;
 	// We need to declare this early (& sentinel it to NULL) to make our cleanup jumps safe
 	char* restrict line = NULL;
 
@@ -4832,7 +4833,7 @@ int
 		LOG("Adjusted row to %hd for vertical centering", row);
 	}
 
-	struct mxcfb_rect region = { 0U };
+	struct mxcfb_rect  region           = { 0U };
 	// We declare that a bit early, because that'll hold our return value on success.
 	unsigned short int multiline_offset = 0U;
 
@@ -5052,7 +5053,7 @@ int
 			col = 0;
 
 			// Compute our padding length
-			unsigned short int left_pad = (unsigned short int) (MAXCOLS - line_len) / 2U;
+			unsigned short int left_pad  = (unsigned short int) (MAXCOLS - line_len) / 2U;
 			// As for the right padding, we basically just have to print 'til the edge of the screen
 			unsigned short int right_pad = (unsigned short int) (MAXCOLS - line_len - left_pad);
 			// Leave a space for the wraparound marker
@@ -5095,7 +5096,7 @@ int
 		} else if (fbink_cfg->is_padded && can_be_padded) {
 			// NOTE: Rely on the field width for padding ;).
 			// Padding character is a space, which is 1 byte, so that's good enough ;).
-			size_t padded_bytes = line_bytes + (size_t)(available_cols - line_len);
+			size_t padded_bytes = line_bytes + (size_t) (available_cols - line_len);
 			// Leave a space for the wraparound marker (can_be_padded ensures we *can* clip a byte here)
 			if (wrapped_line) {
 				padded_bytes -= 1U;
@@ -5111,7 +5112,7 @@ int
 		} else if (fbink_cfg->is_rpadded && can_be_padded) {
 			// NOTE: Rely on the field width for padding ;).
 			// Padding character is a space, which is 1 byte, so that's good enough ;).
-			size_t padded_bytes = line_bytes + (size_t)(available_cols - line_len);
+			size_t padded_bytes = line_bytes + (size_t) (available_cols - line_len);
 			// Leave a space for the wraparound marker (can_be_padded ensures we *can* clip a byte here)
 			if (wrapped_line) {
 				padded_bytes -= 1U;
@@ -5313,10 +5314,10 @@ int
 	// Rely on vsnprintf itself to tell us exactly how many bytes it needs ;).
 	// c.f., vsnprintf(3) && stdarg(3) && https://stackoverflow.com/q/10069597
 	// (especially as far as the va_start/va_end bracketing is concerned)
-	int            ret    = -1;
-	size_t         size   = 0;
+	int    ret            = -1;
+	size_t size           = 0;
 	char* restrict buffer = NULL;
-	va_list        args;
+	va_list args;
 
 	// Initial vsnprintf run on a zero length NULL pointer, just to determine the required buffer size
 	// NOTE: see vsnprintf(3), this is a C99 behavior made canon in POSIX.1-2001, honored since glibc 2.1
@@ -5332,7 +5333,7 @@ int
 	}
 
 	// We need enough space for NULL-termination (which we make 'wide' for u8 reasons) :).
-	size = (size_t)(ret + 4);
+	size   = (size_t) (ret + 4);
 	// NOTE: We use calloc to make sure it'll always be zero-initialized,
 	//       and the OS is smart enough to make it fast if we don't use the full space anyway (CoW zeroing).
 	buffer = calloc(size, sizeof(*buffer));
@@ -5424,19 +5425,19 @@ int
 	int rv = EXIT_SUCCESS;
 
 	// Declare buffers early to make cleanup easier
-	FBInkOTLine* restrict   lines      = NULL;
-	char* restrict          brk_buff   = NULL;
+	FBInkOTLine* restrict lines        = NULL;
+	char* restrict brk_buff            = NULL;
 	unsigned char* restrict fmt_buff   = NULL;
 	unsigned char* restrict line_buff  = NULL;
 	unsigned char* restrict glyph_buff = NULL;
 	// This also needs to be declared early, as we refresh on cleanup.
-	struct mxcfb_rect region         = { 0U };
-	bool              is_flashing    = false;
-	bool              is_cleared     = false;
-	uint8_t           wfm_mode       = WFM_AUTO;
-	uint8_t           dithering_mode = HWD_PASSTHROUGH;
-	bool              is_nightmode   = false;
-	bool              no_refresh     = false;
+	struct mxcfb_rect region           = { 0U };
+	bool              is_flashing      = false;
+	bool              is_cleared       = false;
+	uint8_t           wfm_mode         = WFM_AUTO;
+	uint8_t           dithering_mode   = HWD_PASSTHROUGH;
+	bool              is_nightmode     = false;
+	bool              no_refresh       = false;
 
 	// map fb to user mem
 	// NOTE: If we're keeping the fb's fd open, keep this mmap around, too.
@@ -5508,10 +5509,10 @@ int
 		FBInkCoordinates br;
 	} area = { 0U };
 #	pragma GCC diagnostic pop
-	area.tl.x = left_margin;
-	area.tl.y = (unsigned short int) (top_margin + (viewVertOrigin - viewVertOffset));
-	area.br.x = (unsigned short int) (viewWidth - right_margin);
-	area.br.y = (unsigned short int) (viewHeight - bottom_margin);
+	area.tl.x                       = left_margin;
+	area.tl.y                       = (unsigned short int) (top_margin + (viewVertOrigin - viewVertOffset));
+	area.br.x                       = (unsigned short int) (viewWidth - right_margin);
+	area.br.y                       = (unsigned short int) (viewHeight - bottom_margin);
 	// Font size can be specified in pixels or in points. Pixels take precedence.
 	unsigned short int font_size_px = cfg->size_px;
 	// If it wasn't specified in pixels, then it was specified in points (which is also how the default is handled).
@@ -5527,7 +5528,7 @@ int
 		// We should have a fairly accurate idea of what the screen DPI is...
 		const unsigned short int ppi = deviceQuirks.screenDPI;
 		// Given the ppi, convert point height to pixels. Note, 1pt is 1/72th of an inch
-		font_size_px = (unsigned short int) iroundf(ppi / 72.0f * size_pt);
+		font_size_px                 = (unsigned short int) iroundf(ppi / 72.0f * size_pt);
 	}
 
 	// This is a pointer to whichever font is currently active. It gets updated for every character in the loop, as needed.
@@ -5721,10 +5722,10 @@ int
 	// lsb = left side bearing: The horizontal distance from the origin point to left edge of the glyph
 	// NOTE: We're not doing anything with lsb, we're honoring stbtt_GetGlyphBitmapBox's x0 instead.
 	//       Rounding method aside, they should roughly match.
-	int          adv, lsb, curr_x;
-	bool         complete_str = false;
-	int          x0, y0, x1, y1, gw, gh, cx, cy;
-	unsigned int lw = 0U;
+	int                adv, lsb, curr_x;
+	bool               complete_str = false;
+	int                x0, y0, x1, y1, gw, gh, cx, cy;
+	unsigned int       lw = 0U;
 	for (line = 0U; line < num_lines; line++) {
 		// Every line has a start character index and an end char index.
 		curr_x                     = 0;
@@ -5790,7 +5791,7 @@ int
 				// And we're done processing this line
 				break;
 			}
-			c = u8_nextchar2(string, &c_index);
+			c  = u8_nextchar2(string, &c_index);
 			// Get the glyph index now, instead of having to look it up each time
 			gi = stbtt_FindGlyphIndex(curr_font, (int) c);
 			// Note, these metrics are unscaled,
@@ -5998,7 +5999,7 @@ int
 	// Create a bitmap buffer to render a single line.
 	// We don't render the glyphs directly to the fb here, as we need to do some simple blending,
 	// and it makes it easier to calculate our centering if required.
-	line_buff = calloc(max_lw * (size_t) max_line_height, sizeof(*line_buff));
+	line_buff                = calloc(max_lw * (size_t) max_line_height, sizeof(*line_buff));
 	// We also don't want to be creating a new buffer for every glyph, so make it roomy, just in case...
 	size_t glyph_buffer_dims = font_size_px * (size_t) max_line_height * 2U;
 	glyph_buff               = calloc(glyph_buffer_dims, sizeof(*glyph_buff));
@@ -6021,7 +6022,7 @@ int
 	}
 	// Setup our eink refresh region now. We will call refresh during cleanup.
 	if (is_centered || halign == CENTER) {
-		region.left = area.tl.x + ((uint32_t)(area.br.x - area.tl.x) / 2U);
+		region.left = area.tl.x + ((uint32_t) (area.br.x - area.tl.x) / 2U);
 	} else if (halign == EDGE) {
 		region.left = area.br.x;
 	} else {
@@ -6069,11 +6070,11 @@ int
 		}
 	}
 
-	uint32_t                tmp_c;
-	int                     tmp_gi;
-	unsigned char* restrict lnPtr   = NULL;
-	unsigned char* restrict glPtr   = NULL;
-	unsigned short int      start_x = area.tl.x;
+	uint32_t tmp_c;
+	int      tmp_gi;
+	unsigned char* restrict lnPtr = NULL;
+	unsigned char* restrict glPtr = NULL;
+	unsigned short int start_x    = area.tl.x;
 
 	bool abort_line = false;
 	// Render!
@@ -6341,7 +6342,7 @@ int
 					paint_point.y++;
 				}
 			} else {
-				const uint16_t pmul_bg = (uint16_t)(bgcolor * 0xFFu);
+				const uint16_t pmul_bg = (uint16_t) (bgcolor * 0xFFu);
 				for (int j = 0; j < max_line_height; j++) {
 					for (unsigned int k = 0U; k < lw; k++) {
 						if (lnPtr[k] == 0U) {
@@ -6365,7 +6366,7 @@ int
 			}
 		} else if (is_fgless) {
 			FBInkPixel     fb_px   = { 0U };
-			const uint16_t pmul_bg = (uint16_t)(bgcolor * 0xFFu);
+			const uint16_t pmul_bg = (uint16_t) (bgcolor * 0xFFu);
 			// NOTE: One more branch needed because 4bpp fbs are terrible...
 			if (vInfo.bits_per_pixel > 4U) {
 				// 8, 16, 24 & 32bpp
@@ -6542,7 +6543,7 @@ int
 			(*fxpFillRect)(start_x,
 				       paint_point.y,
 				       (unsigned short int) lw,
-				       (unsigned short int) ((viewHeight + (uint32_t)(viewVertOrigin - viewVertOffset)) -
+				       (unsigned short int) ((viewHeight + (uint32_t) (viewVertOrigin - viewVertOffset)) -
 							     paint_point.y),
 				       &bgP);
 		}
@@ -7633,7 +7634,7 @@ int
 		(*fxpFillRectChecked)(thumb_left, top_pos, thumb_width, FONTH, &fgP);
 
 		// Draw an ellipsis in the middle of the thumb...
-		const uint8_t ellipsis_size = (uint8_t)(FONTH / 3U);
+		const uint8_t            ellipsis_size = (uint8_t) (FONTH / 3U);
 		// Three dots = two spaces, 3 + 2 = 5 ;).
 		const unsigned short int ellipsis_left = (unsigned short int) ((thumb_width - (5U * ellipsis_size)) / 2U);
 		for (uint8_t i = 0U; i < 3U; i++) {
@@ -7732,10 +7733,10 @@ int
 	// and we don't want to mess with the caller's setup (plus, it's const for that very reason anyway).
 	FBInkConfig fbink_cfg = *caller_fbink_cfg;
 	// Namely, we need overlay mode to properly print the percentage text,
-	fbink_cfg.is_overlay = true;
+	fbink_cfg.is_overlay  = true;
 	// and no hoffset, because it makes no sense for a full-width bar,
 	// and we don't want the text to be affected by a stray value...
-	fbink_cfg.hoffset = 0;
+	fbink_cfg.hoffset     = 0;
 	// And we enforce centered text internally, so we'll set col ourselves later...
 
 	// And do the work ;).
@@ -7908,8 +7909,8 @@ static unsigned char*
 
 	// NOTE: Using restricted pointers is enough to make vectorizers happy, no need for ivdep pragmas ;).
 	for (int j = 0; j < y; ++j) {
-		const unsigned char* restrict src  = data + (j * x * img_n);
-		unsigned char* restrict       dest = good + (j * x * req_comp);
+		const unsigned char* restrict src = data + (j * x * img_n);
+		unsigned char* restrict dest      = good + (j * x * req_comp);
 
 #	define STBI__COMBO(a, b) ((a) *8 + (b))
 #	define STBI__CASE(a, b)                                                                                         \
@@ -8030,11 +8031,11 @@ static __attribute__((hot)) uint8_t
 	//       With a Q8 input value, we're at no risk of ever underflowing, so, keep to unsigned maths.
 	//       Technically, an uint16_t would be wide enough, but it gains us nothing,
 	//       and requires a few explicit casts to make GCC happy ;).
-	uint32_t t = DIV255(v * ((15U << 6U) + 1U));
+	uint32_t       t = DIV255(v * ((15U << 6U) + 1U));
 	// level = t / (D-1);
 	const uint32_t l = (t >> 6U);
 	// t -= l * (D-1);
-	t = (t - (l << 6U));
+	t                = (t - (l << 6U));
 
 	// map width & height = 8
 	// c = ClampToQuantum((l+(t >= map[(x % mw) + mw * (y % mh)])) * QuantumRange / (L-1));
@@ -8047,15 +8048,15 @@ static __attribute__((hot)) uint8_t
 
 // Draw image data on screen (we inherit a few of the variable types/names from stbi ;))
 static int
-    draw_image(int                           fbfd,
+    draw_image(int fbfd,
 	       const unsigned char* restrict data,
-	       const int                     w,
-	       const int                     h,
-	       const int                     n,
-	       const int                     req_n,
-	       short int                     x_off,
-	       short int                     y_off,
-	       const FBInkConfig* restrict   fbink_cfg)
+	       const int w,
+	       const int h,
+	       const int n,
+	       const int req_n,
+	       short int x_off,
+	       short int y_off,
+	       const FBInkConfig* restrict fbink_cfg)
 {
 	// Open the framebuffer if need be...
 	// NOTE: As usual, we *expect* to be initialized at this point!
@@ -8191,8 +8192,8 @@ static int
 	unsigned short int max_height = (unsigned short int) region.height;
 	// NOTE: We also need to decide if we start looping at the top left of the image, or if we start later, to
 	//       avoid plotting off-screen pixels when using negative display offsets...
-	unsigned short int img_x_off = 0;
-	unsigned short int img_y_off = 0;
+	unsigned short int img_x_off  = 0;
+	unsigned short int img_y_off  = 0;
 	if (x_off < 0) {
 		// We'll start plotting from the beginning of the *visible* part of the image ;)
 		img_x_off = (unsigned short int) (abs(x_off) + viewHoriOrigin);
@@ -8200,7 +8201,7 @@ static int
 		// Make sure we're not trying to loop past the actual width of the image!
 		max_width = (unsigned short int) MIN(w, max_width);
 		// Only if the visible section of the image's width is smaller than our screen's width...
-		if ((uint32_t)(w - img_x_off) < viewWidth) {
+		if ((uint32_t) (w - img_x_off) < viewWidth) {
 			region.width -= img_x_off;
 		}
 	}
@@ -8215,7 +8216,7 @@ static int
 		// Make sure we're not trying to loop past the actual height of the image!
 		max_height = (unsigned short int) MIN(h, max_height);
 		// Only if the visible section of the image's height is smaller than our screen's height...
-		if ((uint32_t)(h - img_y_off) < viewHeight) {
+		if ((uint32_t) (h - img_y_off) < viewHeight) {
 			region.height -= img_y_off;
 		}
 	}
@@ -8270,7 +8271,7 @@ static int
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// NOTE: In this branch, req_n == 2, so we can do << 1 instead of * 2 ;).
-						const size_t img_scanline_offset = (size_t)((j << 1U) * w);
+						const size_t img_scanline_offset = (size_t) ((j << 1U) * w);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// First, we gobble the full image pixel (all 2 bytes)
@@ -8346,7 +8347,7 @@ static int
 						get_pixel_Gray4(&coords, &bg_px);
 
 						// NOTE: In this branch, req_n == 2, so we can do << 1 instead of * 2 ;).
-						const size_t  img_scanline_offset = (size_t)((j << 1U) * w);
+						const size_t  img_scanline_offset = (size_t) ((j << 1U) * w);
 						FBInkPixelG8A img_px;
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
@@ -8377,8 +8378,8 @@ static int
 				// Scanline by scanline, as we usually have input/output x offsets to honor
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					// NOTE: Again, assume the fb origin is @ (0, 0), which should hold true at that bitdepth.
-					const size_t pix_offset = (size_t)((j * w) + img_x_off);
-					const size_t fb_offset  = ((uint32_t)(j + y_off) * fInfo.line_length) +
+					const size_t pix_offset = (size_t) ((j * w) + img_x_off);
+					const size_t fb_offset  = ((uint32_t) (j + y_off) * fInfo.line_length) +
 								 (unsigned int) (img_x_off + x_off);
 					memcpy(fbPtr + fb_offset, data + pix_offset, max_width);
 				}
@@ -8386,7 +8387,7 @@ static int
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// NOTE: Here, req_n is either 2, or 1 if ignore_alpha, so, no shift trickery ;)
-						const size_t pix_offset = (size_t)((j * req_n * w) + (i * req_n));
+						const size_t pix_offset = (size_t) ((j * req_n * w) + (i * req_n));
 						// SW dithering
 						if (fbink_cfg->sw_dithering) {
 							pixel.gray8 = dither_o8x8(i, j, data[pix_offset] ^ invert);
@@ -8429,7 +8430,7 @@ static int
 
 						// Yeah, I know, GCC...
 						// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
-						const size_t img_scanline_offset = (size_t)((j << 2U) * w);
+						const size_t img_scanline_offset = (size_t) ((j << 2U) * w);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// First, we gobble the full image pixel (all 4 bytes)
@@ -8455,8 +8456,9 @@ static int
 								fb_px.color.b = img_px.color.b;
 							}
 
-							const size_t fb_scanline_offset = (uint32_t)(
-							    (unsigned short int) (j + y_off) * fInfo.line_length);
+							const size_t fb_scanline_offset =
+							    (uint32_t) ((unsigned short int) (j + y_off) *
+									fInfo.line_length);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 							// And we write the full pixel to the fb (all 4 bytes)
@@ -8469,8 +8471,9 @@ static int
 							// Alpha blending...
 							const uint8_t ainv = img_px.color.a ^ 0xFFu;
 
-							const size_t fb_scanline_offset = (uint32_t)(
-							    (unsigned short int) (j + y_off) * fInfo.line_length);
+							const size_t fb_scanline_offset =
+							    (uint32_t) ((unsigned short int) (j + y_off) *
+									fInfo.line_length);
 							FBInkPixelBGRA bg_px;
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
@@ -8514,7 +8517,7 @@ static int
 
 						// Yeah, I know, GCC...
 						// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
-						const size_t img_scanline_offset = (size_t)((j << 2U) * w);
+						const size_t img_scanline_offset = (size_t) ((j << 2U) * w);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// First, we gobble the full image pixel (all 4 bytes)
@@ -8540,7 +8543,7 @@ static int
 							}
 
 							const size_t fb_pix_offset =
-							    (uint32_t)((unsigned short int) (i + x_off) << 2U) +
+							    (uint32_t) ((unsigned short int) (i + x_off) << 2U) +
 							    ((unsigned short int) (j + y_off) * fInfo.line_length);
 							// And we write the full pixel to the fb (all 3 bytes)
 							*((uint24_t*) (fbPtr + fb_pix_offset)) = fb_px.p;
@@ -8551,7 +8554,7 @@ static int
 							const uint8_t ainv = img_px.color.a ^ 0xFFu;
 
 							const size_t fb_pix_offset =
-							    (uint32_t)((unsigned short int) (i + x_off) << 2U) +
+							    (uint32_t) ((unsigned short int) (i + x_off) << 2U) +
 							    ((unsigned short int) (j + y_off) * fInfo.line_length);
 							// Again, read the full pixel from the framebuffer (all 3 bytes)
 							FBInkPixelBGR bg_px;
@@ -8592,7 +8595,7 @@ static int
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
-						const size_t img_pix_offset = (size_t)((j * req_n * w) + (i * req_n));
+						const size_t  img_pix_offset = (size_t) ((j * req_n * w) + (i * req_n));
 						// Gobble the full image pixel (3 bytes, we don't care about alpha if it's there)
 						FBInkPixelRGB img_px;
 						img_px.p = *((const uint24_t*) &data[img_pix_offset]);
@@ -8624,7 +8627,7 @@ static int
 
 						// NOTE: Again, assume we can safely skip rotation tweaks
 						const size_t fb_scanline_offset =
-						    (uint32_t)((unsigned short int) (j + y_off) * fInfo.line_length);
+						    (uint32_t) ((unsigned short int) (j + y_off) * fInfo.line_length);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// Write the full pixel to the fb (all 4 bytes)
@@ -8637,7 +8640,7 @@ static int
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
-						const size_t img_pix_offset = (size_t)((j * req_n * w) + (i * req_n));
+						const size_t  img_pix_offset = (size_t) ((j * req_n * w) + (i * req_n));
 						// Gobble the full image pixel (3 bytes, we don't care about alpha if it's there)
 						FBInkPixelRGB img_px;
 						img_px.p = *((const uint24_t*) &data[img_pix_offset]);
@@ -8658,7 +8661,7 @@ static int
 
 						// NOTE: Again, assume we can safely skip rotation tweaks
 						const size_t fb_pix_offset =
-						    (uint32_t)((unsigned short int) (i + x_off) << 2U) +
+						    (uint32_t) ((unsigned short int) (i + x_off) << 2U) +
 						    ((unsigned short int) (j + y_off) * fInfo.line_length);
 						// Write the full pixel to the fb (all 3 bytes)
 						*((uint24_t*) (fbPtr + fb_pix_offset)) = fb_px.p;
@@ -8678,7 +8681,7 @@ static int
 					// NOTE: Same general idea as the fb_is_grayscale case,
 					//       except at this bpp we then have to handle rotation ourselves...
 					// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
-					const size_t   img_scanline_offset = (size_t)((j << 2U) * w);
+					const size_t   img_scanline_offset = (size_t) ((j << 2U) * w);
 					FBInkPixelRGBA img_px;
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
@@ -8750,7 +8753,7 @@ static int
 			for (unsigned short int j = img_y_off; j < max_height; j++) {
 				for (unsigned short int i = img_x_off; i < max_width; i++) {
 					// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
-					const size_t pix_offset = (size_t)((j * req_n * w) + (i * req_n));
+					const size_t pix_offset = (size_t) ((j * req_n * w) + (i * req_n));
 					// SW dithering
 					if (fbink_cfg->sw_dithering) {
 						pixel.bgra.color.r = dither_o8x8(i, j, data[pix_offset + 0U] ^ invert);
@@ -8868,9 +8871,9 @@ int
 
 	// Decode image via stbi
 	unsigned char* restrict data = NULL;
-	int                     w;
-	int                     h;
-	int                     n;
+	int w;
+	int h;
+	int n;
 	data = img_load_from_file(filename, &w, &h, &n, req_n);
 	if (data == NULL) {
 		WARN("Failed to decode image data from `%s`", filename);
@@ -8906,10 +8909,10 @@ int
 
 		// NOTE: Handle AR if best fit was requested, or if scaling was requested on one side only...
 		if (fbink_cfg->scaled_width < -1 || fbink_cfg->scaled_height < -1) {
-			float aspect = (float) w / (float) h;
+			float aspect                      = (float) w / (float) h;
 			// We want to fit the image *inside* the viewport, so, enforce our starting scaled dimensions...
-			scaled_width  = (unsigned short int) viewWidth;
-			scaled_height = (unsigned short int) viewHeight;
+			scaled_width                      = (unsigned short int) viewWidth;
+			scaled_height                     = (unsigned short int) viewHeight;
 			// NOTE: Loosely based on Qt's QSize boundedTo implementation
 			//       c.f., QSize::scaled @ https://github.com/qt/qtbase/blob/dev/src/corelib/tools/qsize.cpp
 			unsigned short int rescaled_width = (unsigned short int) (scaled_height * aspect + 0.5f);
@@ -9011,8 +9014,8 @@ int
 	LOG("Requested %d color channels, supplied data had %d", req_n, n);
 
 	// Was scaling requested?
-	unsigned char* restrict sdata        = NULL;
-	bool                    want_scaling = false;
+	unsigned char* restrict sdata = NULL;
+	bool want_scaling             = false;
 	if (fbink_cfg->scaled_width != 0 || fbink_cfg->scaled_height != 0) {
 		LOG("Image scaling requested!");
 		want_scaling = true;
@@ -9077,10 +9080,10 @@ int
 
 		// NOTE: Handle AR if best fit was requested, or if scaling was requested on one side only...
 		if (fbink_cfg->scaled_width < -1 || fbink_cfg->scaled_height < -1) {
-			float aspect = (float) w / (float) h;
+			float aspect                      = (float) w / (float) h;
 			// We want to fit the image *inside* the viewport, so, enforce our starting scaled dimensions...
-			scaled_width  = (unsigned short int) viewWidth;
-			scaled_height = (unsigned short int) viewHeight;
+			scaled_width                      = (unsigned short int) viewWidth;
+			scaled_height                     = (unsigned short int) viewHeight;
 			// NOTE: Loosely based on Qt's QSize boundedTo implementation
 			//       c.f., QSize::scaled @ https://github.com/qt/qtbase/blob/dev/src/corelib/tools/qsize.cpp
 			unsigned short int rescaled_width = (unsigned short int) (scaled_height * aspect + 0.5f);
@@ -9175,7 +9178,7 @@ int
 	}
 	// Start by allocating enough memory for a full dump of the visible screen...
 	dump->stride = fInfo.line_length;
-	dump->size   = (size_t)(dump->stride * vInfo.yres);
+	dump->size   = (size_t) (dump->stride * vInfo.yres);
 	dump->data   = calloc(dump->size, sizeof(*dump->data));
 	if (dump->data == NULL) {
 		PFWARN("dump->data %zu bytes calloc: %m", dump->size);
@@ -9326,7 +9329,7 @@ int
 		// We'll start dumping from the beginning of the *visible* part of the region ;)
 		img_x_off = (unsigned short int) (abs(x_off) + viewHoriOrigin);
 		// Only if the visible section of the region's width is smaller than our screen's width...
-		if ((uint32_t)(w - img_x_off) < viewWidth) {
+		if ((uint32_t) (w - img_x_off) < viewWidth) {
 			region.width -= img_x_off;
 		}
 	}
@@ -9338,7 +9341,7 @@ int
 			img_y_off = (unsigned short int) (abs(y_off) + viewVertOrigin);
 		}
 		// Only if the visible section of the region's height is smaller than our screen's height...
-		if ((uint32_t)(h - img_y_off) < viewHeight) {
+		if ((uint32_t) (h - img_y_off) < viewHeight) {
 			region.height -= img_y_off;
 		}
 	}
@@ -9362,7 +9365,7 @@ int
 	}
 	// Start by allocating enough memory for a full dump of the computed region...
 	// We're going to need the amount of bytes taken per pixel...
-	const uint8_t bpp = (uint8_t)(vInfo.bits_per_pixel >> 3U);
+	const uint8_t bpp = (uint8_t) (vInfo.bits_per_pixel >> 3U);
 	// And then to handle 4bpp on its own, because 4/8 == 0 ;).
 	if (vInfo.bits_per_pixel == 4U) {
 		// Align to the nearest byte boundary to make our life easier...
@@ -9377,12 +9380,12 @@ int
 			LOG("Updated region.width to %u because of alignment constraints", region.width);
 		}
 		// Two pixels per byte, and we've just ensured to never end up with a decimal when dividing by two ;).
-		dump->stride = (size_t)(region.width >> 1U);
-		dump->size   = (size_t)(dump->stride * region.height);
+		dump->stride = (size_t) (region.width >> 1U);
+		dump->size   = (size_t) (dump->stride * region.height);
 		dump->data   = calloc(dump->size, sizeof(*dump->data));
 	} else {
-		dump->stride = (size_t)(region.width * bpp);
-		dump->size   = (size_t)(dump->stride * region.height);
+		dump->stride = (size_t) (region.width * bpp);
+		dump->size   = (size_t) (dump->stride * region.height);
 		dump->data   = calloc(dump->size, sizeof(*dump->data));
 	}
 	if (dump->data == NULL) {
@@ -9403,14 +9406,14 @@ int
 	// And finally, the fb data itself, scanline per scanline
 	if (dump->bpp == 4U) {
 		for (unsigned short int j = dump->area.top, l = 0U; l < dump->area.height; j++, l++) {
-			size_t dump_offset = (size_t)(l * dump->stride);
-			size_t fb_offset   = (size_t)(dump->area.left >> 1U) + (j * fInfo.line_length);
+			size_t dump_offset = (size_t) (l * dump->stride);
+			size_t fb_offset   = (size_t) (dump->area.left >> 1U) + (j * fInfo.line_length);
 			memcpy(dump->data + dump_offset, fbPtr + fb_offset, dump->stride);
 		}
 	} else {
 		for (unsigned short int j = dump->area.top, l = 0U; l < dump->area.height; j++, l++) {
-			size_t dump_offset = (size_t)(l * dump->stride);
-			size_t fb_offset   = (size_t)(dump->area.left * bpp) + (j * fInfo.line_length);
+			size_t dump_offset = (size_t) (l * dump->stride);
+			size_t fb_offset   = (size_t) (dump->area.left * bpp) + (j * fInfo.line_length);
 			memcpy(dump->data + dump_offset, fbPtr + fb_offset, dump->stride);
 		}
 	}
@@ -9576,8 +9579,8 @@ int
 			// Region dump, restore line by line
 			if (dump->bpp == 4U) {
 				for (unsigned short int j = dump->area.top, l = 0U; l < dump->area.height; j++, l++) {
-					size_t fb_offset   = (size_t)(dump->area.left >> 1U) + (j * fInfo.line_length);
-					size_t dump_offset = (size_t)(l * dump->stride);
+					size_t fb_offset   = (size_t) (dump->area.left >> 1U) + (j * fInfo.line_length);
+					size_t dump_offset = (size_t) (l * dump->stride);
 					memcpy(
 					    fbPtr + fb_offset, dump->data + dump_offset, (size_t) dump->area.width >> 1U);
 				}
@@ -9585,8 +9588,8 @@ int
 				// We're going to need the amount of bytes taken per pixel...
 				const uint8_t bpp = dump->bpp >> 3U;
 				for (unsigned short int j = dump->area.top, l = 0U; l < dump->area.height; j++, l++) {
-					size_t fb_offset   = (size_t)(dump->area.left * bpp) + (j * fInfo.line_length);
-					size_t dump_offset = (size_t)(l * dump->stride);
+					size_t fb_offset   = (size_t) (dump->area.left * bpp) + (j * fInfo.line_length);
+					size_t dump_offset = (size_t) (l * dump->stride);
 					memcpy(
 					    fbPtr + fb_offset, dump->data + dump_offset, (size_t) dump->area.width * bpp);
 				}
@@ -9603,7 +9606,7 @@ int
 			const unsigned short int x      = (unsigned short int) (dump->area.left + x_skip);
 			const unsigned short int y_skip =
 			    dump->clip.top > dump->area.top ? (unsigned short int) (dump->clip.top - dump->area.top) : 0U;
-			const unsigned short int y = (unsigned short int) (dump->area.top + y_skip);
+			const unsigned short int y  = (unsigned short int) (dump->area.top + y_skip);
 			// NOTE: We only want to display the intersection between the full dump area and the clip rectangle...
 			//       The earlier overlap check should ensure the sanity of the resulting rectangle here.
 			//       c.f., https://stackoverflow.com/q/19753134
@@ -9629,17 +9632,17 @@ int
 			// Region dump, restore line by line
 			if (dump->bpp == 4U) {
 				for (unsigned short int j = y, l = 0U; l < h; j++, l++) {
-					size_t fb_offset   = (size_t)(x >> 1U) + (j * fInfo.line_length);
-					size_t dump_offset = (x_skip >> 1U) + ((size_t)(y_skip + l) * dump->stride);
+					size_t fb_offset   = (size_t) (x >> 1U) + (j * fInfo.line_length);
+					size_t dump_offset = (x_skip >> 1U) + ((size_t) (y_skip + l) * dump->stride);
 					memcpy(fbPtr + fb_offset, dump->data + dump_offset, (size_t) w >> 1U);
 				}
 			} else {
 				// We're going to need the amount of bytes taken per pixel...
 				const uint8_t bpp = dump->bpp >> 3U;
 				for (unsigned short int j = y, l = 0U; l < h; j++, l++) {
-					size_t fb_offset = (size_t)(x * bpp) + (j * fInfo.line_length);
+					size_t fb_offset = (size_t) (x * bpp) + (j * fInfo.line_length);
 					size_t dump_offset =
-					    (size_t)(x_skip * bpp) + ((size_t)(y_skip + l) * dump->stride);
+					    (size_t) (x_skip * bpp) + ((size_t) (y_skip + l) * dump->stride);
 					memcpy(fbPtr + fb_offset, dump->data + dump_offset, (size_t) w * bpp);
 				}
 			}

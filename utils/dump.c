@@ -242,7 +242,7 @@ int
 	dump.clip      = dump.area;
 	dump.clip.left = (unsigned short int) MIN(dump.clip.left + 25U, fbink_state.screen_width);
 	//dump.clip.width -= 25;	// Not strictly necessary, will be computed when building the intersection rectangle
-	dump.clip.top = (unsigned short int) MIN(dump.clip.top + 30U, fbink_state.screen_height);
+	dump.clip.top  = (unsigned short int) MIN(dump.clip.top + 30U, fbink_state.screen_height);
 	//dump.clip.height -= 30;	// Ditto
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
@@ -261,7 +261,7 @@ int
 	dump.clip      = dump.area;
 	dump.clip.left = (unsigned short int) MAX(0, dump.clip.left - 25);
 	//dump.clip.width -= 25;	// Not strictly necessary, will be computed when building the intersection rectangle
-	dump.clip.top = (unsigned short int) MAX(0, dump.clip.top - 30);
+	dump.clip.top  = (unsigned short int) MAX(0, dump.clip.top - 30);
 	//dump.clip.height -= 30;	// Ditto
 	if (fbink_restore(fbfd, &fbink_cfg, &dump) != ERRCODE(EXIT_SUCCESS)) {
 		fprintf(stderr, "Failed to restore fb, aborting . . .\n");
@@ -380,8 +380,8 @@ int
 	//       (left + width) <= screen_width
 	//       (top + height) <= screen_height
 	// So, let's do it...
-	dump.area.left = (unsigned short int) MIN(dump.area.left, fbink_state.screen_width - 1U);
-	dump.area.top  = (unsigned short int) MIN(dump.area.top, fbink_state.screen_height - 1U);
+	dump.area.left   = (unsigned short int) MIN(dump.area.left, fbink_state.screen_width - 1U);
+	dump.area.top    = (unsigned short int) MIN(dump.area.top, fbink_state.screen_height - 1U);
 	if (dump.area.left + dump.area.width > fbink_state.screen_width) {
 		dump.area.width = (unsigned short int) (fbink_state.screen_width - dump.area.left);
 	}
@@ -435,8 +435,8 @@ int
 
 		// Disable H & V centering, so that fbink_print_raw_data honors our dump coordinates as-is,
 		// without re-centering them ;).
-		fbink_cfg.halign = NONE;
-		fbink_cfg.valign = NONE;
+		fbink_cfg.halign      = NONE;
+		fbink_cfg.valign      = NONE;
 		// We need to disable viewport shenanigans, too...
 		fbink_cfg.no_viewport = true;
 		// no_viewport requires a *full* reinit (i.e., init) to be taken into account...
