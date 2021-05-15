@@ -37,7 +37,7 @@ See also the various bindings in other languages, which often include a few exam
 ## How can I tinker with it?
 
 A CLI utility is available, built around the same public API that can be used via a shared or static library for C projects, or via FFI in other languages (beware, though, it's licensed under the GPLv3+, not the LGPL).
-For the CLI utility, see the [API documentation](API.md) or run `fbink --help` for details.
+For the CLI utility, see [its documentation](CLI.md) or run `fbink --help` for details.
 For the library, see the [public header](fbink.h). Don't hesitate to contact me if things appear unclear!  
 
 NOTE: It generally makes *NO* attempt at handling software rotation, because that currently appears to be the right thing to do with both current Kobo FW versions and on Kindle.  
