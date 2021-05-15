@@ -286,7 +286,7 @@ static void
 	    "\n"
 	    "\n"
 	    "You can also eschew printing a STRING, and print an IMAGE at the requested coordinates instead:\n"
-	    "\t-g, --image file=PATH,x=NUM,y=NUM,halign=ALIGN,valign=ALIGN,w=NUM,h=NUM,dither\n"
+	    "\t-g, --image file=PATH,x=NUM,y=NUM,halign=ALIGN,valign=ALIGN,w=NUM,h=NUM,dither [-i, --img PATH]\n"
 	    "\t\tSupported ALIGN values: NONE (or LEFT for halign, TOP for valign), CENTER or MIDDLE, EDGE (or RIGHT for halign, BOTTOM for valign).\n"
 	    "\t\tIf dither is specified, *software* dithering (ordered, 8x8) will be applied to the image, ensuring it'll match the eInk palette exactly.\n"
 	    "\t\tThis is *NOT* mutually exclusive with -D, --dither!\n"
