@@ -32,6 +32,7 @@ There's also a sister thread for Kindle devices [over here](https://www.mobilere
 In practice, most Kindle & Kobo users will in fact get it for free, as it's bundled with most of my [packages](http://www.mobileread.com/forums/showthread.php?t=225030).
 
 As an example of usage in the wild, see [KFMon](https://github.com/NiLuJe/kfmon), where I'm using it to provide visual feedback, or [kobo-rclone](https://github.com/shermp/kobo-rclone), where it's also used for screen scraping. We're also using it in [KOReader](https://github.com/koreader/koreader), to make the OTA update process more user-friendly.  
+A quick GitHub search for code mentioning [fbink](https://github.com/search?q=fbink) should also yield interesting results, e.g., [a DAMAGE-handling shim for X11](https://github.com/schuhumi/fbink-xdamage) or [InkVT, a terminal emulator](https://github.com/llandsmeer/inkvt).
 See also the various bindings in other languages, which often include a few examples.
 
 ## How can I tinker with it?

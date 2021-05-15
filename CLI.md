@@ -496,3 +496,5 @@ For more complex & long-running use-cases involving *text* only (or a progress/a
   * ```sh
     echo -n 'Hello World!' > $FBINK_PIPE
     ```
+    
+  For more complex usage examples, see [MiniClock](https://github.com/NiLuJe/Kobo/blob/5ffc3131fe989afdea7677aedc1b839b80c4b902/MiniClock/usr/local/MiniClock/miniclock.sh#L498) or [KOReader's startup script](https://github.com/koreader/koreader/blob/e6027313e97138c21f014f708b6201bc4a64c350/platform/kobo/koreader.sh#L90).
