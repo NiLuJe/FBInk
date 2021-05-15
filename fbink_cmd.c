@@ -339,7 +339,7 @@ static void
 	    "\n"
 	    "\n"
 	    "NOTES:\n"
-	    "\tFor more complex & long-running use-cases involving *text* only (or a progress/activity bar), you can also switch to daemon mode, via -d, --daemon\n"
+	    "\tFor more complex & long-running use-cases involving *text* only (or a progress/activity bar), you can also switch to daemon mode, via -d, --daemon NUM_LINES\n"
 	    "\tIt expects a single argument: the amount of lines consecutive prints can occupy before wrapping back to the original coordinates.\n"
 	    "\tIt it's set to 0, the behavior matches what usually happens when you pass multiple strings to FBInk (i.e., the only wrapping happens at screen egde).\n"
 	    "\tWhile, for example, setting it to 1 will ensure every print will start at the same coordinates.\n"

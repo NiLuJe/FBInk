@@ -477,7 +477,7 @@ For more complex & long-running use-cases involving *text* only (or a progress/a
   * if it's 0, then you have a guarantee that what you've grabbed from stdout is *strictly* a PID.
   * You can then send a kill -0 to that PID to check for an early abort.
 
-  By default, it will create a named pipe for IPC, check the pipe name `FBINK_PIPE` with `fbink -e`, (if the file already exists, whatever type it may be, FBInk will abort). You can ask for a custom path by setting `FBINK_NAMED_PIPE` to an absolute path in your environment. Creating and removing that FIFO is FBInk's responsibility. Don't create it yourself.
+  By default, it will create a named pipe for IPC: `/tmp/fbink-fifo` (if the file already exists, whatever type it may be, FBInk will abort). You can ask for a custom path by setting `FBINK_NAMED_PIPE` to an absolute path in your environment. Creating and removing that FIFO is FBInk's responsibility. Don't create it yourself.
 
   Make sure you kill FBInk via SIGTERM so it has a chance to remove it itself on exit. (Otherwise, you may want to ensure that it doesn't already exist *before* launching a daemon mode session). 
 
