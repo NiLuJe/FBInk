@@ -321,6 +321,8 @@
   If you just want a full-screen clear (which will honor `-f`, `--flash`), don't pass any suboptions,
 
   e.g., `fbink -k` (if you group short options together, it needs to be the last in its group, i.e., `-fk` and not `-kf`).
+  
+  You can use this to effectively paint arbitrary background colored rectangular shapes.
 
 ### Option for OpenType & TrueType font support (if compiled with `FBINK_WITH_OPENTYPE`)
 
