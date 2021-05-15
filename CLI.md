@@ -376,7 +376,7 @@
     BFONT=/mnt/onboard/.adds/koreader/fonts/noto/NotoSans-Bold.ttf
     ```
 
-    Note for Kobo: you will NOT be able to use system fonts on Kobo, because they're all obfuscated, hence this example relying on KOReader's fonts.
+    Note for Kobo: you will NOT be able to use system fonts, because they're all obfuscated, hence this example relying on KOReader's fonts.
 
 ### Options for printing an image (if compiled with `FBINK_WITH_IMAGE`)
 

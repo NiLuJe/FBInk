@@ -253,7 +253,9 @@ static void
 	    "\t\tHonoring the Markdown syntax, 'Hello' will be printed with the Regular font style, while 'world' will use the Bold font style.\n"
 	    "\t\tNOTE: You will NOT be able to use obfuscated or encrypted fonts.\n"
 #	ifdef FBINK_FOR_KOBO
-	    "\t\tPlease note that this means you will NOT be able to use system fonts on Kobo, because they're all obfuscated.\n"
+	    "\t\tPlease note that this means you will NOT be able to use system fonts, because they're all obfuscated.\n"
+#       else
+	    "\t\tAlso note that the path shown here is fairly arbitrary, and Kobo-specific ;).\n"
 #	endif
 	    "\n"
 #endif
