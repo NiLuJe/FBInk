@@ -206,6 +206,17 @@ ifeq "$(MOAR_WARNIGS)" "1"
 	endif
 endif
 
+# NOTE: When targeting armv7 with GCC > 7, if you *really* want to squeeze the last bit of performance out of the compiler,
+#       especially if you primarily deal with RGBA PNGs, consider enforcing ARM mode instead of Thumb mode,
+#       because there's a bit of a performance regression around PNG decompression in stbi in GCC > 7...
+#ifeq "$(CC_IS_CLANG)" "0"
+#	ifeq (arm-,$(findstring arm-,$(TARGET_ARCH)))
+#		ifeq "$(shell expr $(CC_VERSION) \>= 080000)" "1"
+#			EXTRA_CFLAGS+=-marm
+#		endif
+#	endif
+#endif
+
 # We need to build PIC to support running as/with a shared library
 # NOTE: We should be safe with -fpic instead of -fPIC ;).
 # And we also want to handle symbol visibility sanely...
