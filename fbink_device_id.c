@@ -1164,6 +1164,11 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBInkPad3Pro", sizeof(deviceQuirks.deviceCodename) - 1U);
 			deviceQuirks.deviceId = 742U;
+		} else if (strcmp(model_name, "PB741") == 0) {
+			deviceQuirks.screenDPI = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBInkPadColor", sizeof(deviceQuirks.deviceCodename) - 1U);
+			deviceQuirks.deviceId = 741U;
 		} else if (strcmp(model_name, "PocketBook 840") == 0) {
 			deviceQuirks.screenDPI = 250U;
 			// Flawfinder: ignore
