@@ -61,5 +61,8 @@ with open(data, "r") as f:
 		elif line.startswith("E60U2"):
 			# Nia (luna) [382]
 			print("382,")
+		elif line.startswith("EA0P1"):
+			# Elipsa (europa) [387]
+			print("387,")
 		else:
 			print("0,")
