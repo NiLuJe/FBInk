@@ -3218,6 +3218,9 @@ static __attribute__((cold)) int
 			ELOG("Enabled Kobo w/o Multi-Touch quirks");
 		} else if (deviceQuirks.isKoboMk7) {
 			ELOG("Enabled Kobo Mark 7 quirks");
+		} else if (deviceQuirks.isSunxi) {
+			ELOG("Sunxi chipsets are currently unsupported!");
+			return ERRCODE(ENOSYS);
 		}
 #	elif defined(FBINK_FOR_POCKETBOOK)
 		// Check if the device is running on an AllWinner SoC instead of an NXP one...
