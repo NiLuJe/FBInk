@@ -787,6 +787,17 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
+		case 387U:    // Elipsa (Europa)
+			deviceQuirks.isSunxi   = true;
+			// NOTE: ntxBootRota & ntxRotaQuirk TBD because sunxi!
+			deviceQuirks.screenDPI = 227U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "Elipsa", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Europa", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Mark 8", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
 		case 0U:
 			// Like kobo_config.sh, assume Trilogy as a fallback
 			deviceQuirks.isKoboNonMT = true;

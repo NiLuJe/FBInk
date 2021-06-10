@@ -2285,7 +2285,7 @@ static int
 
 	// NOTE: The MXCFB shim on devices with a B288 SoC does *NOT* support AUTO (and *will* throw an EINVAL).
 	//       Use GC16 instead to be conservative (this appears to be what InkView itself does).
-	if (deviceQuirks.isPBSunxi && waveform_mode == WAVEFORM_MODE_AUTO) {
+	if (deviceQuirks.isSunxi && waveform_mode == WAVEFORM_MODE_AUTO) {
 		update.waveform_mode = WAVEFORM_MODE_GC16;
 	}
 
@@ -3225,7 +3225,7 @@ static __attribute__((cold)) int
 		// Should fail w/ ENOTTY (or EINVAL?) on NXP
 		if (ioctl(fbfd, EPDC_GET_UPDATE_STATE, &aw_busy) != -1) {
 			ELOG("Device appears to be running on an AW B288 SoC!");
-			deviceQuirks.isPBSunxi = true;
+			deviceQuirks.isSunxi = true;
 		}
 #	elif defined(FBINK_FOR_REMARKABLE)
 		// NOTE: Check if we're running on an rM 2, in which case abort with extreme prejudice,
@@ -4146,7 +4146,7 @@ void
 {
 	fprintf(
 	    stdout,
-	    "FBINK_VERSION='%s';viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isPBSunxi=%d;isKindleLegacy=%d;isKoboNonMT=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;",
+	    "FBINK_VERSION='%s';viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isSunxi=%d;isKindleLegacy=%d;isKoboNonMT=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;",
 	    fbink_version(),
 	    viewWidth,
 	    viewHeight,
@@ -4175,7 +4175,7 @@ void
 	    deviceQuirks.deviceId,
 	    deviceQuirks.deviceCodename,
 	    deviceQuirks.devicePlatform,
-	    deviceQuirks.isPBSunxi,
+	    deviceQuirks.isSunxi,
 	    deviceQuirks.isKindleLegacy,
 	    deviceQuirks.isKoboNonMT,
 	    deviceQuirks.ntxBootRota,
@@ -4218,7 +4218,7 @@ void
 		fbink_state->glyph_width             = glyphWidth;
 		fbink_state->glyph_height            = glyphHeight;
 		fbink_state->is_perfect_fit          = deviceQuirks.isPerfectFit;
-		fbink_state->is_pb_sunxi             = deviceQuirks.isPBSunxi;
+		fbink_state->is_sunxi                = deviceQuirks.isSunxi;
 		fbink_state->is_kindle_legacy        = deviceQuirks.isKindleLegacy;
 		fbink_state->is_kobo_non_mt          = deviceQuirks.isKoboNonMT;
 		fbink_state->ntx_boot_rota           = deviceQuirks.ntxBootRota;

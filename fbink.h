@@ -325,7 +325,7 @@ typedef struct
 	uint8_t glyph_width;         // glyphWidth (native width of a glyph cell, i.e. unscaled)
 	uint8_t glyph_height;        // glyphHeight (native height of a glyph cell, i.e. unscaled)
 	bool    is_perfect_fit;      // deviceQuirks.isPerfectFit (horizontal column balance is perfect over viewWidth)
-	bool    is_pb_sunxi;         // deviceQuirks.isPBSunxi (device is a PocketBook running on an AllWinner SoC)
+	bool    is_sunxi;            // deviceQuirks.isSunxi (device is running on an AllWinner SoC)
 	bool is_kindle_legacy;    // deviceQuirks.isKindleLegacy (device is a Kindle using the original einkfb EPDC API)
 	bool is_kobo_non_mt;      // deviceQuirks.isKoboNonMT (device is a Kobo with no MultiTouch input support)
 	uint8_t          ntx_boot_rota;     // deviceQuirks.ntxBootRota (Native rotation at boot)
