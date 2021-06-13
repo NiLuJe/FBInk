@@ -81,8 +81,8 @@
 			({                                                                                               \
 				struct timeval now;                                                                      \
 				gettimeofday(&now, NULL);                                                                \
-				ev.input_event_sec  = now.tv_sec;                                                        \
-				ev.input_event_usec = now.tv_usec;                                                       \
+				ev.input_event_sec  = (unsigned long int) now.tv_sec;                                    \
+				ev.input_event_usec = (unsigned long int) now.tv_usec;                                   \
 				ev.type             = (t);                                                               \
 				ev.code             = (c);                                                               \
 				ev.value            = (v);                                                               \
