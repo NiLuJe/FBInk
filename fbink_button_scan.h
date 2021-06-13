@@ -66,14 +66,29 @@
 #	endif
 
 // c.f., https://github.com/koreader/koreader-base/pull/468/files
-#	define SEND_INPUT_EVENT(t, c, v)                                                                                \
-		({                                                                                                       \
-			gettimeofday(&ev.time, NULL);                                                                    \
-			ev.type  = (t);                                                                                  \
-			ev.code  = (c);                                                                                  \
-			ev.value = (v);                                                                                  \
-			write(ifd, &ev, sizeof(ev));                                                                     \
-		})
+// Also, attempt to deal with 64-bit time keeping on recent 32-bit systems, c.f., #63
+#	if (__BITS_PER_LONG != 32 || !defined(__USE_TIME_BITS64))
+#		define SEND_INPUT_EVENT(t, c, v)                                                                        \
+			({                                                                                               \
+				gettimeofday(&ev.time, NULL);                                                            \
+				ev.type  = (t);                                                                          \
+				ev.code  = (c);                                                                          \
+				ev.value = (v);                                                                          \
+				write(ifd, &ev, sizeof(ev));                                                             \
+			})
+#	else
+#		define SEND_INPUT_EVENT(t, c, v)                                                                        \
+			({                                                                                               \
+				struct timeval now;                                                                      \
+				gettimeofday(&now, NULL);                                                                \
+				ev.input_event_sec  = now.tv_sec;                                                        \
+				ev.input_event_usec = now.tv_usec;                                                       \
+				ev.type             = (t);                                                               \
+				ev.code             = (c);                                                               \
+				ev.value            = (v);                                                               \
+				write(ifd, &ev, sizeof(ev));                                                             \
+			})
+#	endif
 
 static bool is_onboard_state(bool);
 static bool wait_for_onboard_state(bool);
