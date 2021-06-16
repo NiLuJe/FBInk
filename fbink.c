@@ -9714,9 +9714,10 @@ FBInkRect
 			.top = lastRect.top, .left = lastRect.left, .width = lastRect.width, .height = lastRect.height
 		};
 		(*fxpRotateRegion)(&region);
-		FBInkRect rect = {
-			.left = region.left, .top = region.top, .width = region.width, .height = region.height
-		};
+		FBInkRect rect = { .left   = (unsigned short int) region.left,
+				   .top    = (unsigned short int) region.top,
+				   .width  = (unsigned short int) region.width,
+				   .height = (unsigned short int) region.height };
 		return rect;
 	}
 	return lastRect;

@@ -534,7 +534,7 @@ static void
     compute_lastrect(void)
 {
 	// No need to check for error, it will return {0, 0, 0, 0} on failure anyway ;).
-	const FBInkRect           last_rect = fbink_get_last_rect();
+	const FBInkRect           last_rect = fbink_get_last_rect(false);
 	static unsigned short int max_y2    = 0U;
 
 	// If that's the first call, simply use last_rect as-is
@@ -574,7 +574,7 @@ static void
     print_lastrect(void)
 {
 	// No need to check for error, it will return {0, 0, 0, 0} on failure anyway ;).
-	const FBInkRect last_rect = fbink_get_last_rect();
+	const FBInkRect last_rect = fbink_get_last_rect(false);
 	printf("lastRect_Left=%hu;lastRect_Top=%hu;lastRect_Width=%hu;lastRect_Height=%hu;",
 	       last_rect.left,
 	       last_rect.top,
