@@ -983,6 +983,7 @@ FBINK_API int fbink_free_dump_data(FBInkDump* restrict dump);
 //
 // Return the coordinates & dimensions of the last thing that was *drawn*.
 // Returns an empty (i.e., {0, 0, 0, 0}) rectangle if nothing was drawn.
+// rotated:		Returns rotated coordinates if applicable.
 // NOTE: These are unfiltered *framebuffer* coordinates.
 //       If your goal is to use that for input detection, mapping that to input coordinates is your responsibility.
 //       On Kobo, fbink_get_state should contain enough data to help you figure out what kinds of quirks you need to account for.
@@ -991,11 +992,13 @@ FBINK_API int fbink_free_dump_data(FBInkDump* restrict dump);
 //       and will ignore what is_flashing might do to make the refresh region fullscreen.
 //       i.e., it corresponds to what's drawn to the fb, not necessarily to what's refreshed on screen.
 // NOTE: On devices where we may fudge the coordinates to account for broken rotation (i.e., most Kobos @ 16bpp),
-//       these are the *unrotated* coordinates!
+//       these are, by default, the *unrotated* coordinates!
 //       i.e., they will *NOT* match with what we actually send to mxcfb (and where we actually drew on the fb)!
 //       Nothing in our public API actually expects any other kind of coordinates,
 //       so having this return the rotated coordinates would be confusing...
-FBINK_API FBInkRect fbink_get_last_rect(void);
+//       If, for some reason (e.g., comparing against actual ioctl values),
+//       you *do* need the rotated variant, set rotated to true.
+FBINK_API FBInkRect fbink_get_last_rect(bool rotated);
 
 //
 // Scan the screen for Kobo's "Connect" button in the "USB plugged in" popup,

@@ -9706,8 +9706,19 @@ int
 
 // Return a copy of the last drawn rectangle coordinates/dimensions
 FBInkRect
-    fbink_get_last_rect(void)
+    fbink_get_last_rect(bool rotated)
 {
+	if (rotated) {
+		// I'm really glad I went with a different layout in FBInkRect there... >_<".
+		struct mxcfb_rect region = {
+			.top = lastRect.top, .left = lastRect.left, .width = lastRect.width, .height = lastRect.height
+		};
+		(*fxpRotateRegion)(&region);
+		FBInkRect rect = {
+			.left = region.left, .top = region.top, .width = region.width, .height = region.height
+		};
+		return rect;
+	}
 	return lastRect;
 }
 
