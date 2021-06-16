@@ -991,8 +991,10 @@ FBINK_API int fbink_free_dump_data(FBInkDump* restrict dump);
 //       and will ignore what is_flashing might do to make the refresh region fullscreen.
 //       i.e., it corresponds to what's drawn to the fb, not necessarily to what's refreshed on screen.
 // NOTE: On devices where we may fudge the coordinates to account for broken rotation (i.e., most Kobos @ 16bpp),
-//       these are the *rotated* coordinates!
-//       i.e., they *will* match with what we actually send to mxcfb (and where we actually drew on the fb)!
+//       these are the *unrotated* coordinates!
+//       i.e., they will *NOT* match with what we actually send to mxcfb (and where we actually drew on the fb)!
+//       Nothing in our public API actually expects any other kind of coordinates,
+//       so having this return the rotated coordinates would be confusing...
 FBINK_API FBInkRect fbink_get_last_rect(void);
 
 //
