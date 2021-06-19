@@ -4345,7 +4345,7 @@ static void
 
 // Do a full-screen clear, eInk refresh included
 int
-    fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg, const FBInkRect* restrict rect)
+    fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg, const FBInkRect* restrict rect, bool no_rota)
 {
 	// If we open a fd now, we'll only keep it open for this single call!
 	// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
@@ -4363,6 +4363,12 @@ int
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
+	}
+
+	// If we requested to disable rotation tricks, just fudge fxpRotateRegion for the call's duration...
+	void (*actual_region_rotate_fxp)(struct mxcfb_rect* restrict) = fxpRotateRegion;
+	if (no_rota) {
+		fxpRotateRegion = &rotate_region_nop;
 	}
 
 	// We'll need a matching region for the refresh...
@@ -4406,6 +4412,10 @@ int
 	// Fudge the region if we asked for a screen clear, so that we actually refresh the full screen...
 	if (full_clear) {
 		fullscreen_region(&region);
+	}
+
+	if (no_rota) {
+		fxpRotateRegion = actual_region_rotate_fxp;
 	}
 
 	// Refresh screen
