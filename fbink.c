@@ -9536,7 +9536,7 @@ int
 
 	// Restore (if possible)
 	if (!dump->data) {
-		WARN("No dump data to restore!");
+		WARN("No dump data to restore");
 		rv = ERRCODE(EINVAL);
 		goto cleanup;
 	}
