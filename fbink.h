@@ -945,7 +945,15 @@ FBINK_API int fbink_region_dump(int                fbfd,
 				const FBInkConfig* restrict fbink_cfg,
 				FBInkDump* restrict dump);
 
-// Restore a framebuffer dump made by fbink_dump/fbink_region_dump.
+// Like fbink_region_dump, but takes an FBInkRect as input, and uses it *as is* (i.e., no rotation/positioning tricks).
+// Returns -(ENOSYS) when image support is disabled (MINIMAL build).
+// The intended use case is being able to use a rect returned by fbink_get_last_rect
+// without having to think about the potential fallout from positioning or rotation hacks.
+// (c.f., also the "no_rota" flag for fbink_cls).
+// NOTE: The same considerations as in fbink_dump should be taken regarding the handling of FBInkDump structs.
+FBINK_API int fbink_rect_dump(int fbfd, const FBInkRect* restrict rect, FBInkDump* restrict dump);
+
+// Restore a framebuffer dump made by fbink_dump/fbink_region_dump/fbink_rect_dump.
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build).
 // Otherwise, returns a few different things on failure:
 //	-(ENOTSUP)	when the dump cannot be restored because it wasn't taken at the current bitdepth and/or rotation,

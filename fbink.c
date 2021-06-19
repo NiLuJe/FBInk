@@ -9227,6 +9227,75 @@ cleanup:
 #endif    // FBINK_WITH_IMAGE
 }
 
+#ifdef FBINK_WITH_IMAGE
+// Helper for fbink_region_dump & fbink_rect_dump
+static int
+    dump_region(struct mxcfb_rect* region, FBInkDump* restrict dump)
+{
+	// Free current data in case the dump struct is being reused
+	if (dump->data) {
+		LOG("Recycling FBinkDump!");
+		free(dump->data);
+		memset(dump, 0, sizeof(*dump));
+	}
+	// Start by allocating enough memory for a full dump of the computed region...
+	// We're going to need the amount of bytes taken per pixel...
+	const uint8_t bpp = (uint8_t) (vInfo.bits_per_pixel >> 3U);
+	// And then to handle 4bpp on its own, because 4/8 == 0 ;).
+	if (vInfo.bits_per_pixel == 4U) {
+		// Align to the nearest byte boundary to make our life easier...
+		if (region->left & 0x01u) {
+			// x is odd, round *down* to the nearest multiple of two (i.e., align to the start of the current byte)
+			region->left &= ~0x01u;
+			LOG("Updated region.left to %u because of alignment constraints", region->left);
+		}
+		if (region->width & 0x01u) {
+			// w is odd, round *up* to the nearest multiple of two (i.e., align to the end of the current byte)
+			region->width = (region->width + 1U) & ~0x01u;
+			LOG("Updated region.width to %u because of alignment constraints", region->width);
+		}
+		// Two pixels per byte, and we've just ensured to never end up with a decimal when dividing by two ;).
+		dump->stride = (size_t) (region->width >> 1U);
+		dump->size   = (size_t) (dump->stride * region->height);
+		dump->data   = calloc(dump->size, sizeof(*dump->data));
+	} else {
+		dump->stride = (size_t) (region->width * bpp);
+		dump->size   = (size_t) (dump->stride * region->height);
+		dump->data   = calloc(dump->size, sizeof(*dump->data));
+	}
+	if (dump->data == NULL) {
+		PFWARN("dump->data %zu bytes calloc: %m", dump->size);
+		dump->stride = 0U;
+		dump->size   = 0U;
+		return ERRCODE(EXIT_FAILURE);
+	}
+	// Store the current fb state for that dump
+	dump->area.left   = (unsigned short int) region->left;
+	dump->area.top    = (unsigned short int) region->top;
+	dump->area.width  = (unsigned short int) region->width;
+	dump->area.height = (unsigned short int) region->height;
+	dump->rota        = (uint8_t) vInfo.rotate;
+	dump->bpp         = (uint8_t) vInfo.bits_per_pixel;
+	dump->is_full     = false;
+	// And finally, the fb data itself, scanline per scanline
+	if (dump->bpp == 4U) {
+		for (unsigned short int j = dump->area.top, l = 0U; l < dump->area.height; j++, l++) {
+			size_t dump_offset = (size_t) (l * dump->stride);
+			size_t fb_offset   = (size_t) (dump->area.left >> 1U) + (j * fInfo.line_length);
+			memcpy(dump->data + dump_offset, fbPtr + fb_offset, dump->stride);
+		}
+	} else {
+		for (unsigned short int j = dump->area.top, l = 0U; l < dump->area.height; j++, l++) {
+			size_t dump_offset = (size_t) (l * dump->stride);
+			size_t fb_offset   = (size_t) (dump->area.left * bpp) + (j * fInfo.line_length);
+			memcpy(dump->data + dump_offset, fbPtr + fb_offset, dump->stride);
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
+#endif    // FBINK_WITH_IMAGE
+
 // Dump a specific region of the fb
 int
     fbink_region_dump(int fbfd                              UNUSED_BY_MINIMAL,
@@ -9370,66 +9439,53 @@ int
 	// Rotate the region if need be...
 	(*fxpRotateRegion)(&region);
 
-	// Free current data in case the dump struct is being reused
-	if (dump->data) {
-		LOG("Recycling FBinkDump!");
-		free(dump->data);
-		memset(dump, 0, sizeof(*dump));
+	rv = dump_region(&region, dump);
+
+	// Cleanup
+cleanup:
+	if (isFbMapped && !keep_fd) {
+		unmap_fb();
 	}
-	// Start by allocating enough memory for a full dump of the computed region...
-	// We're going to need the amount of bytes taken per pixel...
-	const uint8_t bpp = (uint8_t) (vInfo.bits_per_pixel >> 3U);
-	// And then to handle 4bpp on its own, because 4/8 == 0 ;).
-	if (vInfo.bits_per_pixel == 4U) {
-		// Align to the nearest byte boundary to make our life easier...
-		if (region.left & 0x01u) {
-			// x is odd, round *down* to the nearest multiple of two (i.e., align to the start of the current byte)
-			region.left &= ~0x01u;
-			LOG("Updated region.left to %u because of alignment constraints", region.left);
-		}
-		if (region.width & 0x01u) {
-			// w is odd, round *up* to the nearest multiple of two (i.e., align to the end of the current byte)
-			region.width = (region.width + 1U) & ~0x01u;
-			LOG("Updated region.width to %u because of alignment constraints", region.width);
-		}
-		// Two pixels per byte, and we've just ensured to never end up with a decimal when dividing by two ;).
-		dump->stride = (size_t) (region.width >> 1U);
-		dump->size   = (size_t) (dump->stride * region.height);
-		dump->data   = calloc(dump->size, sizeof(*dump->data));
-	} else {
-		dump->stride = (size_t) (region.width * bpp);
-		dump->size   = (size_t) (dump->stride * region.height);
-		dump->data   = calloc(dump->size, sizeof(*dump->data));
+	if (!keep_fd) {
+		close(fbfd);
 	}
-	if (dump->data == NULL) {
-		PFWARN("dump->data %zu bytes calloc: %m", dump->size);
-		dump->stride = 0U;
-		dump->size   = 0U;
-		rv           = ERRCODE(EXIT_FAILURE);
-		goto cleanup;
+
+	return rv;
+#else
+	WARN("Image support is disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif    // FBINK_WITH_IMAGE
+}
+
+// Dump a specific rect of the fb (as-is)
+int
+    fbink_rect_dump(int fbfd                       UNUSED_BY_MINIMAL,
+		    const FBInkRect* restrict rect UNUSED_BY_MINIMAL,
+		    FBInkDump* restrict dump       UNUSED_BY_MINIMAL)
+{
+#ifdef FBINK_WITH_IMAGE
+	// Open the framebuffer if need be...
+	// NOTE: As usual, we *expect* to be initialized at this point!
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
 	}
-	// Store the current fb state for that dump
-	dump->area.left   = (unsigned short int) region.left;
-	dump->area.top    = (unsigned short int) region.top;
-	dump->area.width  = (unsigned short int) region.width;
-	dump->area.height = (unsigned short int) region.height;
-	dump->rota        = (uint8_t) vInfo.rotate;
-	dump->bpp         = (uint8_t) vInfo.bits_per_pixel;
-	dump->is_full     = false;
-	// And finally, the fb data itself, scanline per scanline
-	if (dump->bpp == 4U) {
-		for (unsigned short int j = dump->area.top, l = 0U; l < dump->area.height; j++, l++) {
-			size_t dump_offset = (size_t) (l * dump->stride);
-			size_t fb_offset   = (size_t) (dump->area.left >> 1U) + (j * fInfo.line_length);
-			memcpy(dump->data + dump_offset, fbPtr + fb_offset, dump->stride);
-		}
-	} else {
-		for (unsigned short int j = dump->area.top, l = 0U; l < dump->area.height; j++, l++) {
-			size_t dump_offset = (size_t) (l * dump->stride);
-			size_t fb_offset   = (size_t) (dump->area.left * bpp) + (j * fInfo.line_length);
-			memcpy(dump->data + dump_offset, fbPtr + fb_offset, dump->stride);
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// mmap the fb if need be...
+	if (!isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
 		}
 	}
+
+	// Plain rect -> region mapping, we don't want any further rotation trickery here.
+	struct mxcfb_rect region = { .top = rect->top, .left = rect->left, .width = rect->width, .height = rect->height };
+
+	rv = dump_region(&region, dump);
 
 	// Cleanup
 cleanup:

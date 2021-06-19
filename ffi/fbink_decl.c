@@ -104,6 +104,7 @@ cdecl_func(fbink_grid_refresh)
 
 cdecl_func(fbink_dump)
 cdecl_func(fbink_region_dump)
+cdecl_func(fbink_rect_dump)
 cdecl_func(fbink_restore)
 cdecl_func(fbink_free_dump_data)
 

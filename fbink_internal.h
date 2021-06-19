@@ -753,6 +753,10 @@ static __attribute__((cold)) const char* pocketbook_wfm_to_string(uint32_t);
 static int                               get_hwd_mode(uint8_t);
 static __attribute__((cold)) const char* hwd_to_string(uint8_t);
 
+#ifdef FBINK_WITH_IMAGE
+static int dump_region(struct mxcfb_rect* region, FBInkDump* restrict dump);
+#endif
+
 // For identify_device, which we need outside of fbink_device_id.c ;)
 #ifndef FBINK_FOR_LINUX
 #	include "fbink_device_id.h"
