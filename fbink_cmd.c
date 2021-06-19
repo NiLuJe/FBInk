@@ -1958,7 +1958,7 @@ int
 		cls_rect.top       = (unsigned short int) region_top;
 		cls_rect.width     = (unsigned short int) region_width;
 		cls_rect.height    = (unsigned short int) region_height;
-		rv                 = fbink_cls(fbfd, &fbink_cfg, &cls_rect);
+		rv                 = fbink_cls(fbfd, &fbink_cfg, &cls_rect, false);
 
 		if (wait_for) {
 #ifdef FBINK_FOR_KINDLE
@@ -2013,7 +2013,7 @@ int
 			.width  = bar_width,
 			.height = fbink_state.font_h,
 		};
-		fbink_cls(fbfd, &fbink_cfg, &region);
+		fbink_cls(fbfd, &fbink_cfg, &region, false);
 		*/
 
 		// Make it backgroundless, to play nicer with whatever might already be on the edge of the screen
@@ -2524,7 +2524,7 @@ int
 		} else if (is_eval) {
 			// Allow doing a clear at the same time
 			if (fbink_cfg.is_cleared) {
-				rv = fbink_cls(fbfd, &fbink_cfg, NULL);
+				rv = fbink_cls(fbfd, &fbink_cfg, NULL, false);
 			}
 			// NOTE: Do not honor wait_for here, as it'd probably be unwanted...
 			fbink_state_dump(&fbink_cfg);
@@ -2572,7 +2572,7 @@ int
 						    "This is a non-interactive SSH session and stdin is *currently* empty, enforcing non-blocking behavior by aborting early");
 						// We're not printing anything, so, do the usual clear or help dance.
 						if (fbink_cfg.is_cleared) {
-							rv = fbink_cls(fbfd, &fbink_cfg, NULL);
+							rv = fbink_cls(fbfd, &fbink_cfg, NULL, false);
 							// NOTE: Same thing here, we'll forgo wait_for in this edge case...
 						} else {
 							show_helpmsg();
@@ -2688,7 +2688,7 @@ int
 				if (linecnt == -1) {
 					// Except that if we asked for a clear, do it!
 					if (fbink_cfg.is_cleared) {
-						rv = fbink_cls(fbfd, &fbink_cfg, NULL);
+						rv = fbink_cls(fbfd, &fbink_cfg, NULL, false);
 
 						if (wait_for) {
 #ifdef FBINK_FOR_KINDLE
@@ -2728,7 +2728,7 @@ int
 				// This is at the bottom rung of the if ladder so as not to mess with anything else,
 				// in particular stdin handling...
 				if (fbink_cfg.is_cleared) {
-					rv = fbink_cls(fbfd, &fbink_cfg, NULL);
+					rv = fbink_cls(fbfd, &fbink_cfg, NULL, false);
 
 					if (wait_for) {
 #ifdef FBINK_FOR_KINDLE

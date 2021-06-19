@@ -869,12 +869,12 @@ FBINK_API int fbink_print_raw_data(int fbfd,
 //				describing the specific region of screen to clear (in absolute coordinates).
 //				If the rectangle is empty (i.e., width or height is zero) or the pointer is NULL,
 //				the full screen will be cleared.
-// no_rota:		Optional, and only useful in very limited cases.
+// no_rota:		Optional, and only useful in very limited cases. When in doubt, set to false.
 //				When passing a rect, this requests *not* applying any further rotation hacks,
 //				(e.g., isNTX16bLandscape).
 //				This is mildly useful if you got a *rotated* rect out of fbink_get_last_rect
 //				on such a quirky framebuffer state,
-//				and just want to re-use it as-is without mangling the rotation twice.
+//				and just want to re-use it as-is without mangling the rotation again.
 FBINK_API int fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg, const FBInkRect* restrict rect, bool no_rota);
 
 // Like fbink_cls, but instead of absolute coordinates, rely on grid coordinates like fbink_print.
