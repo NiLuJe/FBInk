@@ -9470,6 +9470,12 @@ int
 		    FBInkDump* restrict dump       UNUSED_BY_MINIMAL)
 {
 #ifdef FBINK_WITH_IMAGE
+	// If no rect, or an empty rect was passed, fallback to a *full* dump.
+	if (!rect || (rect->width == 0U || rect->height == 0U)) {
+		WARN("Requested to dump an empty rect (or none at all), falling back to a full dump");
+		return fbink_dump(fbfd, dump);
+	}
+
 	// Open the framebuffer if need be...
 	// NOTE: As usual, we *expect* to be initialized at this point!
 	bool keep_fd = true;
@@ -9486,6 +9492,13 @@ int
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
+	}
+
+	// Sanity check...
+	if ((rect->top + rect->height > vInfo.yres) || (rect->left + rect->width > vInfo.xres)) {
+		WARN("Requested to dump an OOB rect");
+		rv = ERRCODE(EINVAL);
+		goto cleanup;
 	}
 
 	// Plain rect -> region mapping, we don't want any further rotation trickery here.

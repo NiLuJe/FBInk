@@ -948,10 +948,11 @@ FBINK_API int fbink_region_dump(int                fbfd,
 
 // Like fbink_region_dump, but takes an FBInkRect as input, and uses it *as is* (i.e., no rotation/positioning tricks).
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build).
-// Returns -(EINVAL) when trying to dump an empty region.
+// Returns -(EINVAL) when trying to dump an OOB region.
 // The intended use case is being able to use a rect returned by fbink_get_last_rect
 // without having to think about the potential fallout from positioning or rotation hacks.
 // (c.f., also the "no_rota" flag for fbink_cls).
+// NOTE: If NULL or an empty rect is passed, a full dump will be made instead.
 // NOTE: The same considerations as in fbink_dump should be taken regarding the handling of FBInkDump structs.
 FBINK_API int fbink_rect_dump(int fbfd, const FBInkRect* restrict rect, FBInkDump* restrict dump);
 
