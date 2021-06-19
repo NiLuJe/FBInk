@@ -928,6 +928,7 @@ FBINK_API int fbink_dump(int fbfd, FBInkDump* restrict dump);
 
 // Dump a specific region of the screen.
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build).
+// Returns -(EINVAL) when trying to dump an empty region.
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
 // x_off:		Dump coordinates, x (honors negative offsets).
@@ -947,6 +948,7 @@ FBINK_API int fbink_region_dump(int                fbfd,
 
 // Like fbink_region_dump, but takes an FBInkRect as input, and uses it *as is* (i.e., no rotation/positioning tricks).
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build).
+// Returns -(EINVAL) when trying to dump an empty region.
 // The intended use case is being able to use a rect returned by fbink_get_last_rect
 // without having to think about the potential fallout from positioning or rotation hacks.
 // (c.f., also the "no_rota" flag for fbink_cls).

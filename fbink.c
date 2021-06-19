@@ -9232,6 +9232,12 @@ cleanup:
 static int
     dump_region(struct mxcfb_rect* region, FBInkDump* restrict dump)
 {
+	// Bail if we were fed an empty region
+	if (region->width == 0U || region->height == 0U) {
+		WARN("Tried to dump an empty region");
+		return ERRCODE(EINVAL);
+	}
+
 	// Free current data in case the dump struct is being reused
 	if (dump->data) {
 		LOG("Recycling FBinkDump!");
