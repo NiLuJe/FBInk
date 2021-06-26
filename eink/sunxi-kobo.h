@@ -14,6 +14,9 @@
 // NOTE: Dealing with sunxi is exhausting, so, let's pull a few different things together,
 //       in order to make the experience slightly less soul crushing...
 
+// Use userland C99 data types instead of kernel data types
+#include <stdint.h>
+
 // From "drivers/video/fbdev/sunxi/disp2/disp/de/include.h"
 struct area_info
 {
@@ -21,6 +24,17 @@ struct area_info
 	unsigned int y_top;
 	unsigned int x_bottom;
 	unsigned int y_bottom;
+};
+
+struct y8_area_info
+{
+	int              y8_fd;
+	bool             enable;
+	struct area_info get_region;
+	unsigned int     width;
+	unsigned int     height;
+	struct dma_buf*  dmabuf;    // FIXME: WTF would this be doing in userspace?
+	char*            vaddr;
 };
 
 enum eink_flash_mode
@@ -469,6 +483,18 @@ struct disp_layer_config2
 	bool                    enable;
 	unsigned int            channel;
 	unsigned int            layer_id;
+};
+
+// From "drivers/video/fbdev/sunxi/disp2/disp/dev_disp.c"
+struct gamma_correction_lut
+{
+	uint32_t lut[256];
+};
+
+struct cfa_enable
+{
+	bool bg_enable;
+	int  is_cfa;
 };
 
 #endif    // _DISP_INCLUDE_H_
