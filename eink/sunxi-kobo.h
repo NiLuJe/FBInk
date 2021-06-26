@@ -517,6 +517,7 @@ struct cfa_enable
 // TODO: Possibly look at the LAYER stuff, if necessary and/or if debugfs doesn't cut it.
 
 // And now, massage the insanity that is the disp's character device ioctl handler into some sort of actually usable API...
+// The whole thing is hilariously *not* 64-bit sane (Linux is LP32/LP64, as such, using longs is just asking for trouble...).
 
 // Things start in a crazy blob of 7 ulongs, no matter the command...
 typedef struct
@@ -544,8 +545,8 @@ typedef struct
 	struct disp_layer_config*
 			  lyr_cfg;    // ubuffer[3] (Must point to the first disp_layer_config out of at least layer_num...) TODO: This is going to be painful.
 	unsigned long int u4;         // ubuffer[4], Unused
-	unsigned long int rotate;     // ubuffer[5] (0, 90, 180, 270)
-	unsigned long int use_cfa;    // ubuffer[6] (0, 1)
+	unsigned long int rotate;     // ubuffer[5] (0, 90, 180, 270; cast to unsigned int)
+	unsigned long int use_cfa;    // ubuffer[6] (0, 1; cast to unsigned int, because bools are for losers, I guess?)
 } sunxi_disp_eink_update;
 
 typedef struct
@@ -556,10 +557,11 @@ typedef struct
 	unsigned long int update_mode;    // ubuffer[2] (bitmask, eink_update_mode)
 	struct disp_layer_config2*
 	    lyr_cfg2;    // ubuffer[3] (Must point to the first disp_layer_config2 out of at least layer_num...) TODO: This is going to be even more painful.
-	unsigned long int
-			  frame_id;    // ubuffer[4], *outarg*, set on success (update_order in the eink buffer/pipeline manager; no idea what relation it has compared to the layer_info's id...).
-	unsigned long int rotate;      // ubuffer[5] (0, 90, 180, 270)
-	unsigned long int use_cfa;     // ubuffer[6] (0, 1)
+	unsigned long int*
+	    frame_id;    // ubuffer[4], *outarg*, set on success (update_order in the eink buffer/pipeline manager; no idea what relation it has compared to the layer_info's id...). Actually an unsigned int.
+	unsigned long int*
+	    rotate;    // ubuffer[5] (0, 90, 180, 270) NOTE: *sigh*, actually used as a pointer to an uint32_t...
+	unsigned long int use_cfa;    // ubuffer[6] (0, 1)
 } sunxi_disp_eink_update2;
 
 #endif    // _DISP_INCLUDE_H_
