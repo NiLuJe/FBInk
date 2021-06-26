@@ -497,4 +497,69 @@ struct cfa_enable
 	int  is_cfa;
 };
 
+// Now, massage stuff into sane structs & ioctl macros, both for our and strace's sake...
+
+// Convert <video/sunxi_display2.h>'s tag_DISP_CMD enum to defines.
+#define DISP_EINK_UPDATE       0x402
+#define DISP_EINK_SET_TEMP     0x403
+#define DISP_EINK_GET_TEMP     0x404
+#define DISP_EINK_OVERLAP_SKIP 0x405
+#define DISP_EINK_UPDATE2      0x406
+#define DISP_EINK_SET_GC_CNT   0x407
+
+#define DISP_EINK_SET_GAMMA                    0x4099
+#define DISP_EINK_SET_BG_SETTING               0x4010
+#define DISP_EINK_SET_BG_ONOFF                 0x4011
+#define DISP_EINK_WAIT_BEFORE_LCD_INT_COMPLETE 0x4012
+#define DISP_EINK_SET_UPDATE_CONTROL           0x4013
+#define DISP_EINK_WAIT_FRAME_SYNC_COMPLETE     0x4014
+#define DISP_EINK_SET_NTX_HANDWRITE_ONOFF      0x4015
+// TODO: Possibly look at the LAYER stuff, if necessary and/or if debugfs doesn't cut it.
+
+// And now, massage the insanity that is the disp's character device ioctl handler into some sort of actually usable API...
+
+// Things start in a crazy blob of 7 ulongs, no matter the command...
+typedef struct
+{
+	unsigned long int u0;    // i.e., ubuffer[0] in disp_ioctl
+	unsigned long int u1;    // etc.
+	unsigned long int u2;
+	unsigned long int u3;
+	unsigned long int u4;
+	unsigned long int u5;
+	unsigned long int u6;
+} sunxi_disp_raw_ioctl;
+
+// Note that, much like on disp v1, for non-eInk commands, u0 is expected to be the screen id.
+// The eInk commands apparently only support being attached to screen 0, so, we're spared this...
+// (The field used to be called sel, you can still find traces of it under that name in the code).
+
+// And the actual layout for the commands we care about...
+typedef struct
+{
+	struct area_info* area;    // ubuffer[0]
+	unsigned long int
+			  layer_num;    // ubuffer[1] (used alternatively as a size_t for the element count of the layer config copy, and an unsigned int for the actual eink_update call. Must be > 0 and <= 16).
+	unsigned long int update_mode;    // ubuffer[2] (bitmask, eink_update_mode)
+	struct disp_layer_config*
+			  lyr_cfg;    // ubuffer[3] (Must point to the first disp_layer_config out of at least layer_num...) TODO: This is going to be painful.
+	unsigned long int u4;         // ubuffer[4], Unused
+	unsigned long int rotate;     // ubuffer[5] (0, 90, 180, 270)
+	unsigned long int use_cfa;    // ubuffer[6] (0, 1)
+} sunxi_disp_eink_update;
+
+typedef struct
+{
+	struct area_info* area;    // ubuffer[0]
+	unsigned long int
+			  layer_num;    // ubuffer[1] (used alternatively as a size_t for the element count of the layer config copy, and an unsigned int for the actual eink_update call. Must be > 0 and <= 16).
+	unsigned long int update_mode;    // ubuffer[2] (bitmask, eink_update_mode)
+	struct disp_layer_config2*
+	    lyr_cfg2;    // ubuffer[3] (Must point to the first disp_layer_config2 out of at least layer_num...) TODO: This is going to be even more painful.
+	unsigned long int
+			  frame_id;    // ubuffer[4], *outarg*, set on success (update_order in the eink buffer/pipeline manager; no idea what relation it has compared to the layer_info's id...).
+	unsigned long int rotate;      // ubuffer[5] (0, 90, 180, 270)
+	unsigned long int use_cfa;     // ubuffer[6] (0, 1)
+} sunxi_disp_eink_update2;
+
 #endif    // _DISP_INCLUDE_H_
