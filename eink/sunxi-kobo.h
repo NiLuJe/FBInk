@@ -557,11 +557,10 @@ typedef struct
 	unsigned long int update_mode;    // ubuffer[2] (bitmask, eink_update_mode)
 	struct disp_layer_config2*
 	    lyr_cfg2;    // ubuffer[3] (Must point to the first disp_layer_config2 out of at least layer_num...) TODO: This is going to be even more painful.
-	unsigned long int*
-	    frame_id;    // ubuffer[4], *outarg*, set on success (update_order in the eink buffer/pipeline manager; no idea what relation it has compared to the layer_info's id...). Actually an unsigned int.
-	unsigned long int*
-	    rotate;    // ubuffer[5] (0, 90, 180, 270) NOTE: *sigh*, actually used as a pointer to an uint32_t...
-	unsigned long int use_cfa;    // ubuffer[6] (0, 1)
+	unsigned int*
+			  frame_id;    // ubuffer[4], *outarg*, set on success (update_order in the eink buffer/pipeline manager; no idea what relation it has compared to the layer_info's id...).
+	uint32_t*         rotate;      // ubuffer[5] (0, 90, 180, 270) NOTE: *sigh*...
+	unsigned long int use_cfa;     // ubuffer[6] (0, 1)
 } sunxi_disp_eink_update2;
 
 #endif    // _DISP_INCLUDE_H_
