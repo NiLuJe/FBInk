@@ -500,12 +500,12 @@ struct cfa_enable
 // Now, massage stuff into sane structs & ioctl macros, both for our and strace's sake...
 
 // Convert <video/sunxi_display2.h>'s tag_DISP_CMD enum to defines.
-#define DISP_EINK_UPDATE       0x402
-#define DISP_EINK_SET_TEMP     0x403
-#define DISP_EINK_GET_TEMP     0x404
-#define DISP_EINK_OVERLAP_SKIP 0x405
-#define DISP_EINK_UPDATE2      0x406
-#define DISP_EINK_SET_GC_CNT   0x407
+#define DISP_EINK_UPDATE       0x0402
+#define DISP_EINK_SET_TEMP     0x0403
+#define DISP_EINK_GET_TEMP     0x0404
+#define DISP_EINK_OVERLAP_SKIP 0x0405
+#define DISP_EINK_UPDATE2      0x0406
+#define DISP_EINK_SET_GC_CNT   0x0407
 
 #define DISP_EINK_SET_GAMMA                    0x4099
 #define DISP_EINK_SET_BG_SETTING               0x4010
