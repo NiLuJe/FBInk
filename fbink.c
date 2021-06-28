@@ -2391,7 +2391,7 @@ static int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
-	LOG("waveform_mode is now %#03x (%s)", update.waveform_mode, ntx_wfm_to_string(update.waveform_mode));
+	// NOTE: Kernel doesn't send the updated data to userland, so, so need to print it.
 
 	return EXIT_SUCCESS;
 }
@@ -2558,6 +2558,8 @@ static int
 			LOG("Waited %ldms for completion of update %u", (5000 - jiffies_to_ms(rv)), marker);
 		}
 	}
+
+	LOG("collision_test is now %u", update_marker.collision_test);
 
 	return EXIT_SUCCESS;
 }
