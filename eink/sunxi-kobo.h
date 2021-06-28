@@ -502,10 +502,10 @@ struct cfa_enable
 // Convert <video/sunxi_display2.h>'s tag_DISP_CMD enum to defines.
 #define DISP_EINK_UPDATE       0x0402
 #define DISP_EINK_SET_TEMP     0x0403
-#define DISP_EINK_GET_TEMP     0x0404
-#define DISP_EINK_OVERLAP_SKIP 0x0405
+#define DISP_EINK_GET_TEMP     0x0404    // No args, temp is the ioctl's return value (C°)
+#define DISP_EINK_OVERLAP_SKIP 0x0405    // NOP on the release kernel (returns -1).
 #define DISP_EINK_UPDATE2      0x0406
-#define DISP_EINK_SET_GC_CNT   0x0407
+#define DISP_EINK_SET_GC_CNT   0x0407    // Defaults to 0 (disabled). Only affects *consecutive* GU16 updates.
 
 #define DISP_EINK_SET_GAMMA                    0x4099
 #define DISP_EINK_SET_BG_SETTING               0x4010
@@ -562,5 +562,21 @@ typedef struct
 	uint32_t*         rotate;      // ubuffer[5] (0, 90, 180, 270) NOTE: *sigh*...
 	unsigned long int use_cfa;     // ubuffer[6] (0, 1)
 } sunxi_disp_eink_update2;
+
+typedef struct
+{
+	unsigned long int
+	    temp;    // ubuffer[0] (Cast to unsigned int, while the get variant returns a value stored in an int32_t...).
+} sunxi_disp_eink_set_temp;
+
+typedef struct
+{
+	unsigned long int skip;    // ubuffer[0] (Cast to unsigned int).
+} sunxi_disp_eink_overlap_skip;
+
+typedef struct
+{
+	unsigned long int count;    // ubuffer[0] (Cast to uint32_t, then to an unsigned int...). Must be <= 20.
+} sunxi_disp_eink_set_gc_count;
 
 #endif    // _DISP_INCLUDE_H_
