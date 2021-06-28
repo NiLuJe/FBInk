@@ -513,8 +513,8 @@ struct cfa_enable
 #define DISP_EINK_WAIT_BEFORE_LCD_INT_COMPLETE 0x4012    // Returns a jiffy count, timeout 1000ms
 #define DISP_EINK_SET_UPDATE_CONTROL           0x4013    // HRTIMER shenanigans :?
 #define DISP_EINK_WAIT_FRAME_SYNC_COMPLETE     0x4014    // Returns a jiffy count, timeout 3000ms
-#define DISP_EINK_SET_NTX_HANDWRITE_ONOFF                                                                                \
-	0x4015    // Affects code flow, I imagine to speed up pen drawing. Also chains a call to EINK_SET_UPDATE_CONTROL.
+// Affects code flow, I imagine to speed up pen drawing. Also chains a call to EINK_SET_UPDATE_CONTROL.
+#define DISP_EINK_SET_NTX_HANDWRITE_ONOFF      0x4015
 // TODO: Possibly look at the LAYER stuff, if necessary and/or if debugfs doesn't cut it.
 
 // And now, massage the insanity that is the disp's character device ioctl handler into some sort of actually usable API...
@@ -539,29 +539,29 @@ typedef struct
 // And the actual layout for the commands we care about...
 typedef struct
 {
-	struct area_info* area;    // ubuffer[0]
-	unsigned long int
-			  layer_num;    // ubuffer[1] (used alternatively as a size_t for the element count of the layer config copy, and an unsigned int for the actual eink_update call. Must be > 0 and <= 16).
-	unsigned long int update_mode;    // ubuffer[2] (bitmask, eink_update_mode)
-	struct disp_layer_config*
-			  lyr_cfg;    // ubuffer[3] (Must point to the first disp_layer_config out of at least layer_num...) TODO: This is going to be painful.
-	unsigned long int u4;         // ubuffer[4], Unused
-	unsigned long int rotate;     // ubuffer[5] (0, 90, 180, 270; cast to unsigned int)
+	struct area_info*         area;    // ubuffer[0]
+	// ubuffer[1] (used alternatively as a size_t for the element count of the layer config copy, and an unsigned int for the actual eink_update call. Must be > 0 and <= 16).
+	unsigned long int         layer_num;
+	unsigned long int         update_mode;    // ubuffer[2] (bitmask, eink_update_mode)
+	// ubuffer[3] (Must point to the first disp_layer_config out of at least layer_num...) TODO: This is going to be painful.
+	struct disp_layer_config* lyr_cfg;
+	unsigned long int         u4;        // ubuffer[4], Unused
+	unsigned long int         rotate;    // ubuffer[5] (0, 90, 180, 270; cast to unsigned int)
 	unsigned long int use_cfa;    // ubuffer[6] (0, 1; cast to unsigned int, because bools are for losers, I guess?)
 } sunxi_disp_eink_update;
 
 typedef struct
 {
-	struct area_info* area;    // ubuffer[0]
-	unsigned long int
-			  layer_num;    // ubuffer[1] (used alternatively as a size_t for the element count of the layer config copy, and an unsigned int for the actual eink_update call. Must be > 0 and <= 16).
-	unsigned long int update_mode;    // ubuffer[2] (bitmask, eink_update_mode)
-	struct disp_layer_config2*
-	    lyr_cfg2;    // ubuffer[3] (Must point to the first disp_layer_config2 out of at least layer_num...) TODO: This is going to be even more painful.
-	unsigned int*
-			  frame_id;    // ubuffer[4], *outarg*, set on success (update_order in the eink buffer/pipeline manager; no idea what relation it has compared to the layer_info's id...).
-	uint32_t*         rotate;      // ubuffer[5] (0, 90, 180, 270) NOTE: *sigh*...
-	unsigned long int use_cfa;     // ubuffer[6] (0, 1)
+	struct area_info*          area;    // ubuffer[0]
+	// ubuffer[1] (used alternatively as a size_t for the element count of the layer config copy, and an unsigned int for the actual eink_update call. Must be > 0 and <= 16).
+	unsigned long int          layer_num;
+	unsigned long int          update_mode;    // ubuffer[2] (bitmask, eink_update_mode)
+	// ubuffer[3] (Must point to the first disp_layer_config2 out of at least layer_num...) TODO: This is going to be even more painful.
+	struct disp_layer_config2* lyr_cfg2;
+	// ubuffer[4], *outarg*, set on success (update_order in the eink buffer/pipeline manager; no idea what relation it has compared to the layer_info's id...).
+	unsigned int*              frame_id;
+	uint32_t*                  rotate;     // ubuffer[5] (0, 90, 180, 270) NOTE: *sigh*...
+	unsigned long int          use_cfa;    // ubuffer[6] (0, 1)
 } sunxi_disp_eink_update2;
 
 typedef struct
