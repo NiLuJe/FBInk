@@ -584,7 +584,7 @@ typedef struct
 //       they're unfortunately still behind the function's prologue that does the nasty 7 ulongs copy...
 typedef struct
 {
-	gamma_correction_lut gamma_lut;    // NOTE: Larger than sunxi_disp_raw_ioctl
+	struct gamma_correction_lut gamma_lut;    // NOTE: Larger than sunxi_disp_raw_ioctl
 } sunxi_disp_eink_set_gamma;
 
 typedef struct
