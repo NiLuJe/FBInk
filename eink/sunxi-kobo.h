@@ -500,7 +500,7 @@ struct cfa_enable
 // Now, massage stuff into sane structs & ioctl macros, both for our and strace's sake...
 
 // Convert <video/sunxi_display2.h>'s tag_DISP_CMD enum to defines.
-#define DISP_EINK_UPDATE       0x0402
+#define DISP_EINK_UPDATE       0x0402    // Return value is a frame_id
 #define DISP_EINK_SET_TEMP     0x0403
 #define DISP_EINK_GET_TEMP     0x0404    // No args, temp is the ioctl's return value (C°)
 #define DISP_EINK_OVERLAP_SKIP 0x0405    // NOP on the release kernel (returns -1).
@@ -510,10 +510,11 @@ struct cfa_enable
 #define DISP_EINK_SET_GAMMA                    0x4099
 #define DISP_EINK_SET_BG_SETTING               0x4010
 #define DISP_EINK_SET_BG_ONOFF                 0x4011
-#define DISP_EINK_WAIT_BEFORE_LCD_INT_COMPLETE 0x4012
-#define DISP_EINK_SET_UPDATE_CONTROL           0x4013
-#define DISP_EINK_WAIT_FRAME_SYNC_COMPLETE     0x4014
-#define DISP_EINK_SET_NTX_HANDWRITE_ONOFF      0x4015
+#define DISP_EINK_WAIT_BEFORE_LCD_INT_COMPLETE 0x4012    // Returns a jiffy count, timeout 1000ms
+#define DISP_EINK_SET_UPDATE_CONTROL           0x4013    // HRTIMER shenanigans :?
+#define DISP_EINK_WAIT_FRAME_SYNC_COMPLETE     0x4014    // Returns a jiffy count, timeout 3000ms
+#define DISP_EINK_SET_NTX_HANDWRITE_ONOFF                                                                                \
+	0x4015    // Affects code flow, I imagine to speed up pen drawing. Also chains a call to EINK_SET_UPDATE_CONTROL.
 // TODO: Possibly look at the LAYER stuff, if necessary and/or if debugfs doesn't cut it.
 
 // And now, massage the insanity that is the disp's character device ioctl handler into some sort of actually usable API...
@@ -578,5 +579,37 @@ typedef struct
 {
 	unsigned long int count;    // ubuffer[0] (Cast to uint32_t, then to an unsigned int...). Must be <= 20.
 } sunxi_disp_eink_set_gc_count;
+
+// NOTE: While the individual command handlers for those started using pointers properly,
+//       they're unfortunately still behind the function's prologue that does the nasty 7 ulongs copy...
+typedef struct
+{
+	gamma_correction_lut gamma_lut;    // NOTE: Larger than sunxi_disp_raw_ioctl
+} sunxi_disp_eink_set_gamma;
+
+typedef struct
+{
+	struct y8_area_info background_area;    // TODO: Check actual size vs. sunxi_disp_raw_ioctl
+} sunxi_disp_eink_set_bg_setting;
+
+typedef struct
+{
+	struct cfa_enable cfa;
+} sunxi_disp_eink_set_bg_onoff;
+
+typedef struct
+{
+	bool enable;
+} sunxi_disp_eink_set_update_control;
+
+typedef struct
+{
+	int32_t frame_id;    // Related to the update_order frame_id returned by DISP_EINK_UPDATE(2)
+} sunxi_disp_eink_wait_frame_sync_complete;
+
+typedef struct
+{
+	bool enable;
+} sunxi_disp_eink_set_ntx_handwrite_onoff;
 
 #endif    // _DISP_INCLUDE_H_
