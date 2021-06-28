@@ -589,7 +589,7 @@ typedef struct
 
 typedef struct
 {
-	struct y8_area_info background_area;    // TODO: Check actual size vs. sunxi_disp_raw_ioctl
+	struct y8_area_info background_area;    // NOTE: Larger than sunxi_disp_raw_ioctl
 } sunxi_disp_eink_set_bg_setting;
 
 typedef struct
@@ -611,5 +611,25 @@ typedef struct
 {
 	bool enable;
 } sunxi_disp_eink_set_ntx_handwrite_onoff;
+
+// Shove everything into an union to ensure we never feed garbage to the ioctl handler for commands that actuall read *less* than the prologue...
+typedef union
+{
+	// Actual memory layout (e.g., our target size).
+	sunxi_disp_raw_ioctl raw;
+
+	// And every subcommand
+	sunxi_disp_eink_update                   update;
+	sunxi_disp_eink_update2                  update2;
+	sunxi_disp_eink_set_temp                 set_temp;
+	sunxi_disp_eink_overlap_skip             op_skip;
+	sunxi_disp_eink_set_gc_count             gc_cnt;
+	//sunxi_disp_eink_set_gamma                set_gamma;
+	//sunxi_disp_eink_set_bg_setting           set_bg;
+	sunxi_disp_eink_set_bg_onoff             toggle_bg;
+	sunxi_disp_eink_set_update_control       upd_ctrl;
+	sunxi_disp_eink_wait_frame_sync_complete wait_for;
+	sunxi_disp_eink_set_ntx_handwrite_onoff  toggle_handw;
+} sunxi_disp_eink_ioctl;
 
 #endif    // _DISP_INCLUDE_H_
