@@ -547,7 +547,7 @@ typedef struct
 	struct disp_layer_config* lyr_cfg;
 	unsigned long int         u4;        // ubuffer[4], Unused
 	unsigned long int         rotate;    // ubuffer[5] (0, 90, 180, 270; cast to unsigned int)
-	unsigned long int use_cfa;    // ubuffer[6] (0, 1; cast to unsigned int, because bools are for losers, I guess?)
+	unsigned long int cfa_use;    // ubuffer[6] (0, 1; cast to unsigned int, because bools are for losers, I guess?)
 } sunxi_disp_eink_update;
 
 typedef struct
@@ -561,7 +561,7 @@ typedef struct
 	// ubuffer[4], *outarg*, set on success (update_order in the eink buffer/pipeline manager; no idea what relation it has compared to the layer_info's id...).
 	unsigned int*              frame_id;
 	uint32_t*                  rotate;     // ubuffer[5] (0, 90, 180, 270) NOTE: *sigh*...
-	unsigned long int          use_cfa;    // ubuffer[6] (0, 1)
+	unsigned long int*         cfa_use;    // ubuffer[6] (0, 1) NOTE: Err, why is this a pointer?
 } sunxi_disp_eink_update2;
 
 typedef struct
