@@ -560,8 +560,9 @@ typedef struct
 	struct disp_layer_config2* lyr_cfg2;
 	// ubuffer[4], *outarg*, set on success (update_order in the eink buffer/pipeline manager; no idea what relation it has compared to the layer_info's id...).
 	unsigned int*              frame_id;
-	uint32_t*                  rotate;     // ubuffer[5] (0, 90, 180, 270) NOTE: *sigh*...
-	unsigned long int*         cfa_use;    // ubuffer[6] (0, 1) NOTE: Err, why is this a pointer?
+	uint32_t*                  rotate;    // ubuffer[5] (0, 90, 180, 270) NOTE: *sigh*...
+	// ubuffer[6] (0, 1) NOTE: Nickel appears to be passing a pointer here. That'd be a bug.
+	unsigned long int          cfa_use;
 } sunxi_disp_eink_update2;
 
 typedef struct
