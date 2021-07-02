@@ -380,6 +380,19 @@ static bool
 		    vInfo.rotate,
 		    expected_rota);
 	}
+
+	// NOTE: On sunxi, warn if bitdepth switch failed (as the minimal fb driver will refuse to switch to 8bpp,
+	//       c.f., var_to_disp_fb @ drivers/video/fbdev/sunxi/disp2/disp/dev_fb.c).
+	//       Thankfully, we don't actually need it to ;).
+	// In the same way, the rotate flag is meaningless, as Nickel never updates it (rotation is purely handled via G2D flags).
+	// But, it *is* saved (as is the grayscale flag).
+	if (deviceQuirks.isSunxi) {
+		if (vInfo.bits_per_pixel != bpp) {
+			LOG("\nCurrent bitdepth (%u) doesn't match the requested one (%u), it's probably unsupported by the minimal disp fb driver.",
+			    vInfo.bits_per_pixel,
+			    bpp);
+		}
+	}
 #endif
 
 #ifdef FBINK_FOR_KINDLE
