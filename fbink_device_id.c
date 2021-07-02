@@ -789,7 +789,10 @@ static void
 			break;
 		case 387U:    // Elipsa (Europa)
 			deviceQuirks.isSunxi   = true;
-			// NOTE: ntxBootRota & ntxRotaQuirk TBD because sunxi!
+			// Has an accelerometer, but Nickel doesn't update the rotate flag, as it's meaningless.
+			// That said, "native" rotation still matches the usual layout,
+			// and Nickel's "Portrait" will indeed set the EINK_UPDATE2 rotate flag to 270 (CCW * 90).
+			deviceQuirks.canRotate = true;
 			deviceQuirks.screenDPI = 227U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Elipsa", sizeof(deviceQuirks.deviceName) - 1U);
