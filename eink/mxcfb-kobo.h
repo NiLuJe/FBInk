@@ -33,7 +33,9 @@
 #ifndef __ASM_ARCH_MXCFB_H__
 #define __ASM_ARCH_MXCFB_H__
 
-//#include <linux/fb.h>
+#include <stdint.h>
+
+#include <linux/fb.h>
 
 #define FB_SYNC_OE_LOW_ACT   0x80000000
 #define FB_SYNC_CLK_LAT_FALL 0x40000000
@@ -61,14 +63,14 @@ struct mxcfb_loc_alpha
 
 struct mxcfb_color_key
 {
-	int   enable;
-	__u32 color_key;
+	int      enable;
+	uint32_t color_key;
 };
 
 struct mxcfb_pos
 {
-	__u16 x;
-	__u16 y;
+	uint16_t x;
+	uint16_t y;
 };
 
 struct mxcfb_gamma
@@ -87,10 +89,10 @@ struct mxcfb_gpu_split_fmt
 
 struct mxcfb_rect
 {
-	__u32 top;
-	__u32 left;
-	__u32 width;
-	__u32 height;
+	uint32_t top;
+	uint32_t left;
+	uint32_t width;
+	uint32_t height;
 };
 
 #define GRAYSCALE_8BIT          0x1
@@ -204,9 +206,9 @@ enum mxcfb_dithering_mode
 struct mxcfb_alt_buffer_data_ntx
 {
 	void*             virt_addr;
-	__u32             phys_addr;
-	__u32             width;             /* width of entire buffer */
-	__u32             height;            /* height of entire buffer */
+	uint32_t          phys_addr;
+	uint32_t          width;             /* width of entire buffer */
+	uint32_t          height;            /* height of entire buffer */
 	struct mxcfb_rect alt_update_region; /* region within buffer to update */
 };
 
@@ -216,9 +218,9 @@ struct mxcfb_alt_buffer_data_ntx
  */
 struct mxcfb_alt_buffer_data
 {
-	__u32             phys_addr;
-	__u32             width;             /* width of entire buffer */
-	__u32             height;            /* height of entire buffer */
+	uint32_t          phys_addr;
+	uint32_t          width;             /* width of entire buffer */
+	uint32_t          height;            /* height of entire buffer */
 	struct mxcfb_rect alt_update_region; /* region within buffer to update */
 };
 
@@ -231,9 +233,9 @@ struct mxcfb_alt_buffer_data
 struct mxcfb_update_data_v1_ntx
 {
 	struct mxcfb_rect                update_region;
-	__u32                            waveform_mode;
-	__u32                            update_mode;
-	__u32                            update_marker;
+	uint32_t                         waveform_mode;
+	uint32_t                         update_mode;
+	uint32_t                         update_marker;
 	int                              temp;
 	unsigned int                     flags;
 	struct mxcfb_alt_buffer_data_ntx alt_buffer_data;
@@ -244,9 +246,9 @@ struct mxcfb_update_data_v1_ntx
 struct mxcfb_update_data_v1
 {
 	struct mxcfb_rect            update_region;
-	__u32                        waveform_mode;
-	__u32                        update_mode;
-	__u32                        update_marker;
+	uint32_t                     waveform_mode;
+	uint32_t                     update_mode;
+	uint32_t                     update_marker;
 	int                          temp;
 	unsigned int                 flags;
 	struct mxcfb_alt_buffer_data alt_buffer_data;
@@ -261,9 +263,9 @@ struct mxcfb_update_data_v1
 struct mxcfb_update_data
 {
 	struct mxcfb_rect            update_region;
-	__u32                        waveform_mode;
-	__u32                        update_mode;
-	__u32                        update_marker;
+	uint32_t                     waveform_mode;
+	uint32_t                     update_mode;
+	uint32_t                     update_marker;
 	int                          temp;
 	unsigned int                 flags;
 	int                          dither_mode;
@@ -274,8 +276,8 @@ struct mxcfb_update_data
 /* Mark 7 */
 struct mxcfb_update_marker_data
 {
-	__u32 update_marker;
-	__u32 collision_test;
+	uint32_t update_marker;
+	uint32_t collision_test;
 };
 
 /* Mark 7 */
@@ -327,18 +329,18 @@ struct mxcfb_csc_matrix
 	int param[5][3];
 };
 
-#define MXCFB_WAIT_FOR_VSYNC  _IOW('F', 0x20, u_int32_t)
+#define MXCFB_WAIT_FOR_VSYNC  _IOW('F', 0x20, uint32_t)
 #define MXCFB_SET_GBL_ALPHA   _IOW('F', 0x21, struct mxcfb_gbl_alpha)
 #define MXCFB_SET_CLR_KEY     _IOW('F', 0x22, struct mxcfb_color_key)
 #define MXCFB_SET_OVERLAY_POS _IOWR('F', 0x24, struct mxcfb_pos)
-#define MXCFB_GET_FB_IPU_CHAN _IOR('F', 0x25, u_int32_t)
+#define MXCFB_GET_FB_IPU_CHAN _IOR('F', 0x25, uint32_t)
 #define MXCFB_SET_LOC_ALPHA   _IOWR('F', 0x26, struct mxcfb_loc_alpha)
 #define MXCFB_SET_LOC_ALP_BUF _IOW('F', 0x27, unsigned long)
 #define MXCFB_SET_GAMMA       _IOW('F', 0x28, struct mxcfb_gamma)
-#define MXCFB_GET_FB_IPU_DI   _IOR('F', 0x29, u_int32_t)
-#define MXCFB_GET_DIFMT       _IOR('F', 0x2A, u_int32_t)
-#define MXCFB_GET_FB_BLANK    _IOR('F', 0x2B, u_int32_t)
-#define MXCFB_SET_DIFMT       _IOW('F', 0x2C, u_int32_t)
+#define MXCFB_GET_FB_IPU_DI   _IOR('F', 0x29, uint32_t)
+#define MXCFB_GET_DIFMT       _IOR('F', 0x2A, uint32_t)
+#define MXCFB_GET_FB_BLANK    _IOR('F', 0x2B, uint32_t)
+#define MXCFB_SET_DIFMT       _IOW('F', 0x2C, uint32_t)
 
 /* Mark 7 */
 #define MXCFB_CSC_UPDATE        _IOW('F', 0x2D, struct mxcfb_csc_matrix)
@@ -353,7 +355,7 @@ struct mxcfb_csc_matrix
 #define MXCFB_SET_WAVEFORM_MODES_NTX _IOW('F', 0x2B, struct mxcfb_waveform_modes_ntx)
 
 #define MXCFB_SET_TEMPERATURE      _IOW('F', 0x2C, int32_t)
-#define MXCFB_SET_AUTO_UPDATE_MODE _IOW('F', 0x2D, __u32)
+#define MXCFB_SET_AUTO_UPDATE_MODE _IOW('F', 0x2D, uint32_t)
 
 /* Mark 7 */
 /* NOTE: Was MXCFB_SEND_UPDATE before Mark 7! Is still that in Nickel's header */
@@ -372,12 +374,12 @@ struct mxcfb_csc_matrix
 #define MXCFB_WAIT_FOR_UPDATE_COMPLETE_V3                                                                                \
 	_IOWR('F', 0x2F, struct mxcfb_update_marker_data)    // mx7d/mx6ull/mx6sll interface .
 /* NOTE: Was MXCFB_WAIT_FOR_UPDATE_COMPLETE before Mark 7! Is still that in Nickel's header */
-#define MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1 _IOW('F', 0x2F, __u32)                               // mx50/NTX interface .
+#define MXCFB_WAIT_FOR_UPDATE_COMPLETE_V1 _IOW('F', 0x2F, uint32_t)                            // mx50/NTX interface .
 #define MXCFB_WAIT_FOR_UPDATE_COMPLETE_V2 _IOWR('F', 0x35, struct mxcfb_update_marker_data)    // mx6sl BSP interface .
 
 #define MXCFB_SET_PWRDOWN_DELAY _IOW('F', 0x30, int32_t)
 #define MXCFB_GET_PWRDOWN_DELAY _IOR('F', 0x31, int32_t)
-#define MXCFB_SET_UPDATE_SCHEME _IOW('F', 0x32, __u32)
+#define MXCFB_SET_UPDATE_SCHEME _IOW('F', 0x32, uint32_t)
 
 /* Went poof w/ Mark 7 */
 #define MXCFB_SET_MERGE_ON_WAVEFORM_MISMATCH _IOW('F', 0x37, int32_t)
@@ -388,35 +390,4 @@ struct mxcfb_csc_matrix
 #define MXCFB_ENABLE_EPDC_ACCESS          _IO('F', 0x36)
 #define MXCFB_SET_TEMP_AUTO_UPDATE_PERIOD _IOW('F', 0x37, int32_t)
 
-#ifdef __KERNEL__
-
-extern struct fb_videomode mxcfb_modedb[];
-extern int                 mxcfb_modedb_sz;
-
-enum
-{
-	MXC_DISP_SPEC_DEV = 0,
-	MXC_DISP_DDC_DEV  = 1,
-};
-
-enum
-{
-	MXCFB_REFRESH_OFF,
-	MXCFB_REFRESH_AUTO,
-	MXCFB_REFRESH_PARTIAL,
-};
-
-int mxcfb_set_refresh_mode(struct fb_info* fbi, int mode, struct mxcfb_rect* update_region);
-
-/* Mark 7 */
-void mxcfb_elcdif_register_mode(const struct fb_videomode* modedb, int num_modes, int dev_mode);
-
-/* Went poof in Mark 7*/
-void mxcfb_register_mode(int disp_port, const struct fb_videomode* modedb, int num_modes, int dev_mode);
-
-/* Went poof in Mark 7*/
-void mxcfb_register_presetup(int disp_port, int (*pre_setup)(struct fb_info* info));
-
-int mxc_elcdif_frame_addr_setup(dma_addr_t phys);
-#endif /* __KERNEL__ */
-#endif
+#endif    // __ASM_ARCH_MXCFB_H__

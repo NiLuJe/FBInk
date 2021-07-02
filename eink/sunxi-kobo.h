@@ -15,9 +15,12 @@
 //       in order to make the experience slightly less soul crushing...
 
 // Use userland C99 data types instead of kernel data types
+#include <stdbool.h>
 #include <stdint.h>
 
+//
 // From "drivers/video/fbdev/sunxi/disp2/disp/de/include.h"
+//
 struct area_info
 {
 	unsigned int x_top;
@@ -113,7 +116,9 @@ typedef enum
 	EINK_FLIP          = 2
 } eink_image_process;
 
+//
 // From "drivers/video/fbdev/sunxi/disp2/disp/de/disp_eink.h"
+//
 enum em_overlap_type
 {
 	OVERLAP_NOT_COLLISION     = 0,
@@ -123,7 +128,9 @@ enum em_overlap_type
 
 #define EINK_RECT_MODE 0x400
 
+//
 // From "<video/sunxi_display2.h>", here comes the nasty stuff.
+//
 struct disp_rectsz
 {
 	unsigned int width;
@@ -485,7 +492,9 @@ struct disp_layer_config2
 	unsigned int            layer_id;
 };
 
+//
 // From "drivers/video/fbdev/sunxi/disp2/disp/dev_disp.c"
+//
 struct gamma_correction_lut
 {
 	uint32_t lut[256];
@@ -497,7 +506,9 @@ struct cfa_enable
 	int  is_cfa;
 };
 
-// Now, massage stuff into sane structs & ioctl macros, both for our and strace's sake...
+//
+// And finally, massage stuff into sane structs & ioctl macros, both for our and strace's sake...
+//
 
 // Convert <video/sunxi_display2.h>'s tag_DISP_CMD enum to defines.
 #define DISP_EINK_UPDATE       0x0402    // Return value is a frame_id

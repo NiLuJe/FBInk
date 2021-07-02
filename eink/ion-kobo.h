@@ -17,8 +17,10 @@
 #ifndef _UAPI_LINUX_ION_H
 #define _UAPI_LINUX_ION_H
 
+#include <stddef.h>
+#include <stdint.h>
+
 #include <linux/ioctl.h>
-#include <linux/types.h>
 
 typedef int ion_user_handle_t;
 
@@ -139,11 +141,11 @@ struct ion_custom_data
  */
 struct ion_heap_query
 {
-	__u32 cnt;       /* Total number of heaps to be copied */
-	__u32 reserved0; /* align to 64bits */
-	__u64 heaps;     /* buffer to be populated */
-	__u32 reserved1;
-	__u32 reserved2;
+	uint32_t cnt;       /* Total number of heaps to be copied */
+	uint32_t reserved0; /* align to 64bits */
+	uint64_t heaps;     /* buffer to be populated */
+	uint32_t reserved1;
+	uint32_t reserved2;
 };
 
 #define ION_IOC_MAGIC 'I'
@@ -219,7 +221,9 @@ struct ion_heap_query
  */
 #define ION_IOC_HEAP_QUERY _IOWR(ION_IOC_MAGIC, 8, struct ion_heap_query)
 
-// And from "drivers/staging/android/ion/sunxi/sunxi_ion.h"
+//
+// From "drivers/staging/android/ion/sunxi/sunxi_ion.h"
+//
 struct sunxi_cache_range
 {
 	long start;
