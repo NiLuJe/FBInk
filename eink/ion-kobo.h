@@ -34,7 +34,8 @@ typedef int ion_user_handle_t;
  *				 is used to identify the heaps, so only 32
  *				 total heap types are supported
  */
-enum ion_heap_type {
+enum ion_heap_type
+{
 	ION_HEAP_TYPE_SYSTEM,
 	ION_HEAP_TYPE_SYSTEM_CONTIG,
 	ION_HEAP_TYPE_CARVEOUT,
@@ -83,11 +84,12 @@ enum ion_heap_type {
  *
  * Provided by userspace as an argument to the ioctl
  */
-struct ion_allocation_data {
-	size_t len;
-	size_t align;
-	unsigned int heap_id_mask;
-	unsigned int flags;
+struct ion_allocation_data
+{
+	size_t            len;
+	size_t            align;
+	unsigned int      heap_id_mask;
+	unsigned int      flags;
 	ion_user_handle_t handle;
 };
 
@@ -101,16 +103,18 @@ struct ion_allocation_data {
  * descriptor to share or map in the fd field.  For ION_IOC_IMPORT, userspace
  * provides the file descriptor and the kernel returns the handle.
  */
-struct ion_fd_data {
+struct ion_fd_data
+{
 	ion_user_handle_t handle;
-	int fd;
+	int               fd;
 };
 
 /**
  * struct ion_handle_data - a handle passed to/from the kernel
  * @handle:	a handle
  */
-struct ion_handle_data {
+struct ion_handle_data
+{
 	ion_user_handle_t handle;
 };
 
@@ -122,8 +126,9 @@ struct ion_handle_data {
  *
  * This works just like the regular cmd and arg fields of an ioctl.
  */
-struct ion_custom_data {
-	unsigned int cmd;
+struct ion_custom_data
+{
+	unsigned int  cmd;
 	unsigned long arg;
 };
 
@@ -132,15 +137,16 @@ struct ion_custom_data {
  * @cnt - total number of heaps to be copied
  * @heaps - buffer to copy heap data
  */
-struct ion_heap_query {
-	__u32 cnt; /* Total number of heaps to be copied */
+struct ion_heap_query
+{
+	__u32 cnt;       /* Total number of heaps to be copied */
 	__u32 reserved0; /* align to 64bits */
-	__u64 heaps; /* buffer to be populated */
+	__u64 heaps;     /* buffer to be populated */
 	__u32 reserved1;
 	__u32 reserved2;
 };
 
-#define ION_IOC_MAGIC		'I'
+#define ION_IOC_MAGIC 'I'
 
 /**
  * DOC: ION_IOC_ALLOC - allocate memory
@@ -148,15 +154,14 @@ struct ion_heap_query {
  * Takes an ion_allocation_data struct and returns it with the handle field
  * populated with the opaque handle for the allocation.
  */
-#define ION_IOC_ALLOC		_IOWR(ION_IOC_MAGIC, 0, \
-				      struct ion_allocation_data)
+#define ION_IOC_ALLOC _IOWR(ION_IOC_MAGIC, 0, struct ion_allocation_data)
 
 /**
  * DOC: ION_IOC_FREE - free memory
  *
  * Takes an ion_handle_data struct and frees the handle.
  */
-#define ION_IOC_FREE		_IOWR(ION_IOC_MAGIC, 1, struct ion_handle_data)
+#define ION_IOC_FREE _IOWR(ION_IOC_MAGIC, 1, struct ion_handle_data)
 
 /**
  * DOC: ION_IOC_MAP - get a file descriptor to mmap
@@ -166,7 +171,7 @@ struct ion_heap_query {
  * descriptor open in the current address space.  This file descriptor
  * can then be used as an argument to mmap.
  */
-#define ION_IOC_MAP		_IOWR(ION_IOC_MAGIC, 2, struct ion_fd_data)
+#define ION_IOC_MAP _IOWR(ION_IOC_MAGIC, 2, struct ion_fd_data)
 
 /**
  * DOC: ION_IOC_SHARE - creates a file descriptor to use to share an allocation
@@ -177,7 +182,7 @@ struct ion_heap_query {
  * can then be passed to another process.  The corresponding opaque handle can
  * be retrieved via ION_IOC_IMPORT.
  */
-#define ION_IOC_SHARE		_IOWR(ION_IOC_MAGIC, 4, struct ion_fd_data)
+#define ION_IOC_SHARE _IOWR(ION_IOC_MAGIC, 4, struct ion_fd_data)
 
 /**
  * DOC: ION_IOC_IMPORT - imports a shared file descriptor
@@ -186,7 +191,7 @@ struct ion_heap_query {
  * descriptor obtained from ION_IOC_SHARE and returns the struct with the handle
  * filed set to the corresponding opaque handle.
  */
-#define ION_IOC_IMPORT		_IOWR(ION_IOC_MAGIC, 5, struct ion_fd_data)
+#define ION_IOC_IMPORT _IOWR(ION_IOC_MAGIC, 5, struct ion_fd_data)
 
 /**
  * DOC: ION_IOC_SYNC - syncs a shared file descriptors to memory
@@ -196,7 +201,7 @@ struct ion_heap_query {
  * If necessary should be used after touching a cached buffer from the cpu,
  * this will make the buffer in memory coherent.
  */
-#define ION_IOC_SYNC		_IOWR(ION_IOC_MAGIC, 7, struct ion_fd_data)
+#define ION_IOC_SYNC _IOWR(ION_IOC_MAGIC, 7, struct ion_fd_data)
 
 /**
  * DOC: ION_IOC_CUSTOM - call architecture specific ion ioctl
@@ -204,7 +209,7 @@ struct ion_heap_query {
  * Takes the argument of the architecture specific ioctl to call and
  * passes appropriate userdata for that ioctl
  */
-#define ION_IOC_CUSTOM		_IOWR(ION_IOC_MAGIC, 6, struct ion_custom_data)
+#define ION_IOC_CUSTOM _IOWR(ION_IOC_MAGIC, 6, struct ion_custom_data)
 
 /**
  * DOC: ION_IOC_HEAP_QUERY - information about available heaps
@@ -212,24 +217,24 @@ struct ion_heap_query {
  * Takes an ion_heap_query structure and populates information about
  * available Ion heaps.
  */
-#define ION_IOC_HEAP_QUERY     _IOWR(ION_IOC_MAGIC, 8, \
-					struct ion_heap_query)
-
+#define ION_IOC_HEAP_QUERY _IOWR(ION_IOC_MAGIC, 8, struct ion_heap_query)
 
 // And from "drivers/staging/android/ion/sunxi/sunxi_ion.h"
-struct sunxi_cache_range {
+struct sunxi_cache_range
+{
 	long start;
 	long end;
 };
 
-typedef struct {
+typedef struct
+{
 	ion_user_handle_t handle;
-	unsigned int phys_addr;
-	unsigned int size;
+	unsigned int      phys_addr;
+	unsigned int      size;
 } sunxi_phys_data;
 
-#define ION_IOC_SUNXI_FLUSH_RANGE           5
-#define ION_IOC_SUNXI_PHYS_ADDR             7
-#define ION_IOC_SUNXI_TEE_ADDR              17
+#define ION_IOC_SUNXI_FLUSH_RANGE 5
+#define ION_IOC_SUNXI_PHYS_ADDR   7
+#define ION_IOC_SUNXI_TEE_ADDR    17
 
-#endif	// _UAPI_LINUX_ION_H
+#endif    // _UAPI_LINUX_ION_H
