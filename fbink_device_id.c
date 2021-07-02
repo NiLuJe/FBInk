@@ -793,7 +793,7 @@ static void
 			// That said, "native" rotation still matches the usual layout,
 			// and Nickel's "Portrait" will indeed set the EINK_UPDATE2 rotate flag to 270,
 			// e.g., rotate is initialized to zero, so: ((rotate ^ ntxBootRota) * 90).
-			deviceQuirks.ntxBootRota  = FB_ROTATE_CCW;
+			deviceQuirks.ntxBootRota  = FB_ROTATE_CCW;    // e.g., fat bezel side UP.
 			deviceQuirks.canRotate    = true;
 			deviceQuirks.ntxRotaQuirk = NTX_ROTA_SUNXI;
 			deviceQuirks.screenDPI    = 227U;
