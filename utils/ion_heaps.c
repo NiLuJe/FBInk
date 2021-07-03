@@ -62,9 +62,10 @@ static int
 static int
     ion_query_get_heaps(int fd, uint32_t cnt, void* buffers)
 {
-	struct ion_heap_query query = { 0 };
-	query.cnt                   = cnt;
-	query.heaps                 = (uint64_t) buffers;
+	struct ion_heap_query query = {
+		.cnt   = cnt,
+		.heaps = (uint64_t) (uintptr_t) buffers,
+	};
 
 	int ret = ioctl(fd, ION_IOC_HEAP_QUERY, &query);
 	if (ret < 0) {
@@ -102,7 +103,7 @@ int
 	}
 
 	// And query it...
-	ret = ion_query_get_heaps(fd, cnt, data);
+	ret = ion_query_get_heaps(fd, cnt, (void*) data);
 	if (ret) {
 		fprintf(stderr, "Failed to query ION heap report: %m\n");
 		goto cleanup;
