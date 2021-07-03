@@ -110,7 +110,7 @@ int
 	ret = ion_query_get_heaps(fd, cnt, (void*) data);
 	// NOTE: There's a fun bug in the Elipsa kernel,
 	//       where ion_query_heaps never actually sets the return value to 0 on success...
-	//       It only does so for bufferless querie :s.
+	//       It only does so for bufferless queries :s.
 	// NOTE: It was only fixed for Linux 4.12,
 	//       which is also the kernel where this all mess became useless because of the new dmabuff API :D
 	//       c.f., https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/drivers/staging/android/ion/ion.c?h=v4.12&id=804ca94a98237e12ad8fabf7cdc566f14b05b7df
