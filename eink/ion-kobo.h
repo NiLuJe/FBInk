@@ -273,4 +273,16 @@ union ion_ioctl_arg
 	struct sunxi_cache_range   range;
 };
 
+// And a custom enum to make the heap_id_mask field less obscure...
+enum ion_heap_mask
+{
+	ION_HEAP_MASK_SYSTEM        = (1 << ION_HEAP_TYPE_SYSTEM),
+	ION_HEAP_MASK_SYSTEM_CONTIG = (1 << ION_HEAP_TYPE_SYSTEM_CONTIG),
+	ION_HEAP_MASK_CARVEOUT      = (1 << ION_HEAP_TYPE_CARVEOUT),
+	ION_HEAP_MASK_CHUNK         = (1 << ION_HEAP_TYPE_CHUNK),
+	ION_HEAP_MASK_DMA           = (1 << ION_HEAP_TYPE_DMA),
+	ION_HEAP_MASK_CUSTOM        = (1 << ION_HEAP_TYPE_CUSTOM),
+	ION_HEAP_MASK_SECURE        = (1 << ION_HEAP_TYPE_SECURE)
+};
+
 #endif    // _UAPI_LINUX_ION_H
