@@ -62,6 +62,10 @@ static int
 static int
     ion_query_get_heaps(int fd, uint32_t cnt, void* buffers)
 {
+	if (!buffers) {
+		return -EINVAL;
+	}
+
 	struct ion_heap_query query = {
 		.cnt   = cnt,
 		.heaps = (uint64_t) (uintptr_t) buffers,
@@ -104,7 +108,10 @@ int
 
 	// And query it...
 	ret = ion_query_get_heaps(fd, cnt, (void*) data);
-	if (ret) {
+	// NOTE: There's a fun bug in the Elipsa kernel,
+	//       where ion_query_heaps never actually sets the return value to 0 on success...
+	//       It only does so for bufferless querie :s.
+	if (ret != EXIT_SUCCESS && ret != -(EINVAL)) {
 		fprintf(stderr, "Failed to query ION heap report: %m\n");
 		goto cleanup;
 	} else {
