@@ -134,6 +134,24 @@ struct ion_custom_data
 	unsigned long arg;
 };
 
+#define MAX_HEAP_NAME 32
+
+/**
+ * struct ion_heap_data - data about a heap
+ * @name - first 32 characters of the heap name
+ * @type - heap type
+ * @heap_id - heap id for the heap
+ */
+struct ion_heap_data
+{
+	char     name[MAX_HEAP_NAME];
+	uint32_t type;
+	uint32_t heap_id;
+	uint32_t reserved0;
+	uint32_t reserved1;
+	uint32_t reserved2;
+};
+
 /**
  * struct ion_heap_query - collection of data about all heaps
  * @cnt - total number of heaps to be copied
@@ -226,8 +244,8 @@ struct ion_heap_query
 //
 struct sunxi_cache_range
 {
-	long start;
-	long end;
+	unsigned long start;
+	unsigned long end;
 };
 
 typedef struct
@@ -240,5 +258,19 @@ typedef struct
 #define ION_IOC_SUNXI_FLUSH_RANGE 5
 #define ION_IOC_SUNXI_PHYS_ADDR   7
 #define ION_IOC_SUNXI_TEE_ADDR    17
+
+//
+// And, much the actual ioctl handler, shove that in an union to make our life easier.
+//
+
+union ion_ioctl_arg
+{
+	struct ion_fd_data         fd;
+	struct ion_allocation_data allocation;
+	struct ion_handle_data     handle;
+	struct ion_custom_data     custom;
+	struct ion_heap_query      query;
+	struct sunxi_cache_range   range;
+};
 
 #endif    // _UAPI_LINUX_ION_H
