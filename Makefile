@@ -572,6 +572,12 @@ alt: | outdir
 	$(STRIP) --strip-unneeded $(OUT_DIR)/alt_buffer
 endif
 
+ifdef KOBO
+sunxi: | outdir
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/ion_heaps utils/ion_heaps.c
+	$(STRIP) --strip-unneeded $(OUT_DIR)/ion_heaps
+endif
+
 dump: static
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/dump utils/dump.c $(LIBS)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/dump
@@ -751,4 +757,4 @@ distclean: clean libunibreakclean
 	rm -rf LibUniBreakBuild
 	rm -rf libunibreak.built
 
-.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean utils alt dump devcap clean distclean
+.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean utils alt sunxi dump devcap clean distclean
