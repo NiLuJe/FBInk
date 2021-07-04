@@ -3273,6 +3273,45 @@ static __attribute__((cold)) void
 }
 #endif    // FBINK_FOR_POCKETBOOK
 
+#ifdef FBINK_FOR_KOBO
+static __attribute__((cold)) void
+    kobo_sunxi_fb_fixup(void)
+{
+	ELOG("Virtual resolution: %ux%u", vInfo.xres_virtual, vInfo.yres_virtual);
+	// FIXME: Check how much stuff blows up if we decide to PUT this for the rotate flag...
+	//        Perhaps we ought to never do that, and just keep fudging our internal state.
+	//        The driver doesn't actually support 8bpp, so the PUT would be somewhat broken anyway...
+
+	// Make it UR...
+	const uint32_t xres         = vInfo.xres;
+	const uint32_t xres_virtual = vInfo.xres_virtual;
+	const uint32_t yres         = vInfo.yres;
+	const uint32_t yres_virtual = vInfo.yres_virtual;
+	vInfo.xres                  = MIN(xres, yres);
+	vInfo.xres_virtual          = MIN(xres_virtual, yres_virtual);
+	vInfo.yres                  = MAX(xres, yres);
+	vInfo.yres_virtual          = MAX(xres_virtual, yres_virtual);
+	ELOG("Enabled sunxi quirks (%ux%u -> %ux%u)", xres, yres, vInfo.xres, vInfo.yres);
+
+	/*
+	vInfo.xres_virtual = ALIGN(vInfo.xres, 32);
+	ELOG("xres_virtual -> %u", vInfo.xres_virtual);
+	vInfo.yres_virtual = ALIGN(vInfo.yres, 128);
+	ELOG("yres_virtual -> %u", vInfo.yres_virtual);
+	*/
+
+	// Make it grayscale
+	vInfo.bits_per_pixel = 8U;
+	vInfo.grayscale      = 1U;
+	ELOG("bits_per_pixel -> %u", vInfo.bits_per_pixel);
+	fInfo.line_length = vInfo.xres_virtual * (vInfo.bits_per_pixel >> 3U);
+	ELOG("line_length -> %u", fInfo.line_length);
+	// Used by clear_screen
+	fInfo.smem_len = fInfo.line_length * vInfo.yres_virtual;
+	ELOG("smem_len -> %u", fInfo.smem_len);
+}
+#endif    // FBINK_FOR_KOBO
+
 // Get the various fb info & setup global variables
 static __attribute__((cold)) int
     initialize_fbink(int fbfd, const FBInkConfig* restrict fbink_cfg, bool skip_vinfo)
@@ -3416,6 +3455,12 @@ static __attribute__((cold)) int
 	// On PocketBook, fix the broken mess that the ioctls returns...
 	pocketbook_fix_fb_info();
 #endif
+#ifdef FBINK_FOR_KOBO
+	// Ditto on Sunxi...
+	if (deviceQuirks.isSunxi) {
+		kobo_sunxi_fb_fixup();
+	}
+#endif
 
 	// NOTE: In most every cases, we assume (0, 0) is at the top left of the screen,
 	//       and (xres, yres) at the bottom right, as we should.
@@ -3532,8 +3577,8 @@ static __attribute__((cold)) int
 		sunxiCtx.layer.info.screen_win.x      = 0;
 		sunxiCtx.layer.info.screen_win.y      = 0;
 		// FIXME: Handle rota
-		sunxiCtx.layer.info.screen_win.width  = MIN(vInfo.xres, vInfo.yres);
-		sunxiCtx.layer.info.screen_win.height = MAX(vInfo.xres, vInfo.yres);
+		sunxiCtx.layer.info.screen_win.width  = vInfo.xres;
+		sunxiCtx.layer.info.screen_win.height = vInfo.yres;
 
 		sunxiCtx.layer.info.b_trd_out    = false;
 		sunxiCtx.layer.info.out_trd_mode = 0;
@@ -3544,10 +3589,10 @@ static __attribute__((cold)) int
 		// disp_rectsz
 		sunxiCtx.layer.info.fb.size[0].width  = sunxiCtx.layer.info.screen_win.width;
 		sunxiCtx.layer.info.fb.size[0].height = sunxiCtx.layer.info.screen_win.height;
-		sunxiCtx.layer.info.fb.size[1].width  = 0U;
-		sunxiCtx.layer.info.fb.size[1].height = 0U;
-		sunxiCtx.layer.info.fb.size[2].width  = 0U;
-		sunxiCtx.layer.info.fb.size[2].height = 0U;
+		sunxiCtx.layer.info.fb.size[1].width  = sunxiCtx.layer.info.screen_win.width;
+		sunxiCtx.layer.info.fb.size[1].height = sunxiCtx.layer.info.screen_win.height;
+		sunxiCtx.layer.info.fb.size[2].width  = sunxiCtx.layer.info.screen_win.width;
+		sunxiCtx.layer.info.fb.size[2].height = sunxiCtx.layer.info.screen_win.height;
 
 		// FIXME: Used to compute the scanline pitch (e.g., pitch = ALIGN(size * compn, align),
 		//        so, technically more like 2 right now.
@@ -3556,7 +3601,7 @@ static __attribute__((cold)) int
 		sunxiCtx.layer.info.fb.align[0]      = 2U;
 		sunxiCtx.layer.info.fb.align[1]      = 2U;
 		sunxiCtx.layer.info.fb.align[2]      = 2U;
-		sunxiCtx.layer.info.fb.format        = DISP_FORMAT_ARGB_8888;
+		sunxiCtx.layer.info.fb.format        = DISP_FORMAT_8BIT_GRAY;
 		sunxiCtx.layer.info.fb.color_space   = DISP_GBR_F;    // Full-range RGB
 		sunxiCtx.layer.info.fb.trd_right_fd  = 0;
 		sunxiCtx.layer.info.fb.pre_multiply  = true;    // FIXME?
@@ -4438,7 +4483,7 @@ static int
 	// Then request a DMA mapping large enough to fit our screen.
 	// NOTE: The CMA *always* returns PAGE_SIZE aligned pointers,
 	//       we're just documenting that explicitly here ;).
-	sunxiCtx.alloc_size              = ALIGN(fInfo.line_length * vInfo.yres, 4096);
+	sunxiCtx.alloc_size              = ALIGN(fInfo.line_length * vInfo.yres_virtual, 4096);
 	struct ion_allocation_data alloc = { .len          = sunxiCtx.alloc_size,
 					     .align        = 4096,
 					     .heap_id_mask = ION_HEAP_MASK_DMA };
@@ -4478,8 +4523,8 @@ static int
 	}
 
 	// And update our layer config to use that dmabuff fd
-	sunxiCtx.layer.info.fb.fd    = sunxiCtx.ion.fd;
-	sunxiCtx.layer.info.fb.y8_fd = 0;
+	sunxiCtx.layer.info.fb.fd    = 0;
+	sunxiCtx.layer.info.fb.y8_fd = sunxiCtx.ion.fd;
 
 	return rv;
 

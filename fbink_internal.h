@@ -693,6 +693,9 @@ static __attribute__((cold)) void update_verbosity(const FBInkConfig* restrict);
 #ifdef FBINK_FOR_POCKETBOOK
 static __attribute__((cold)) void pocketbook_fix_fb_info(void);
 #endif
+#ifdef FBINK_FOR_KOBO
+static __attribute__((cold)) void kobo_sunxi_fb_fixup(void);
+#endif
 static __attribute__((cold)) int initialize_fbink(int, const FBInkConfig* restrict, bool);
 
 static int memmap_fb(int);
