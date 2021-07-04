@@ -3293,14 +3293,14 @@ static __attribute__((cold)) void
 	vInfo.yres_virtual          = MAX(xres_virtual, yres_virtual);
 	ELOG("Enabled sunxi quirks (%ux%u -> %ux%u)", xres, yres, vInfo.xres, vInfo.yres);
 
-	// Make the pitch NEON-friendly (when using a 32bpp fdb)...
+	// Make the pitch NEON-friendly (when using an RGB32 fb fd)...
 	/*
 	vInfo.xres_virtual = ALIGN(vInfo.xres, 32);
 	ELOG("xres_virtual -> %u", vInfo.xres_virtual);
 	vInfo.yres_virtual = ALIGN(vInfo.yres, 128);
 	ELOG("yres_virtual -> %u", vInfo.yres_virtual);
 	*/
-	// But we're actually using Y8 y8_fd, and apparently,
+	// But we're actually using Y8 fb y8_fd, and apparently,
 	// that codepath doesn't support/expect pitch alignment trickeries...
 	vInfo.xres_virtual = vInfo.xres;
 	ELOG("xres_virtual -> %u", vInfo.xres_virtual);
@@ -3601,8 +3601,11 @@ static __attribute__((cold)) int
 		sunxiCtx.layer.info.fb.size[2].width  = sunxiCtx.layer.info.screen_win.width;
 		sunxiCtx.layer.info.fb.size[2].height = sunxiCtx.layer.info.screen_win.height;
 
-		// NOTE: Used to compute the scanline pitch (e.g., pitch = ALIGN(size * compn, align),
+		// NOTE: Used to compute the scanline pitch in bytes (e.g., pitch = ALIGN(pixels * components, align),
 		//       except when using a y8_fd, apparently...
+		// NOTE: Must really *NOT* be set to 0 when using a RGB32 fb fd, though,
+		//       (for *any* of them, even if we only actually have a single buffer),
+		//       c.f., kobo_sunxi_fb_fixup ;).
 		sunxiCtx.layer.info.fb.align[0]      = 0U;
 		sunxiCtx.layer.info.fb.align[1]      = 0U;
 		sunxiCtx.layer.info.fb.align[2]      = 0U;
@@ -3612,6 +3615,7 @@ static __attribute__((cold)) int
 		sunxiCtx.layer.info.fb.pre_multiply  = true;    // Because we're using global alpha, I guess?
 		sunxiCtx.layer.info.fb.crop.x        = 0;
 		sunxiCtx.layer.info.fb.crop.y        = 0;
+		// Don't ask me why this needs to be shifted 32 bits to the left... ¯\_(ツ)_/¯
 		sunxiCtx.layer.info.fb.crop.width    = (uint64_t) sunxiCtx.layer.info.screen_win.width << 32U;
 		sunxiCtx.layer.info.fb.crop.height   = (uint64_t) sunxiCtx.layer.info.screen_win.height << 32U;
 		sunxiCtx.layer.info.fb.flags         = DISP_BF_NORMAL;
