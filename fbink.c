@@ -3293,15 +3293,23 @@ static __attribute__((cold)) void
 	vInfo.yres_virtual          = MAX(xres_virtual, yres_virtual);
 	ELOG("Enabled sunxi quirks (%ux%u -> %ux%u)", xres, yres, vInfo.xres, vInfo.yres);
 
-	// Make the pitch NEON-friendly...
+	// Make the pitch NEON-friendly (when using a 32bpp fdb)...
+	/*
 	vInfo.xres_virtual = ALIGN(vInfo.xres, 32);
 	ELOG("xres_virtual -> %u", vInfo.xres_virtual);
 	vInfo.yres_virtual = ALIGN(vInfo.yres, 128);
 	ELOG("yres_virtual -> %u", vInfo.yres_virtual);
+	*/
+	// But we're actually using Y8 y8_fd, and apparently,
+	// that codepath doesn't support/expect pitch alignment trickeries...
+	vInfo.xres_virtual = vInfo.xres;
+	ELOG("xres_virtual -> %u", vInfo.xres_virtual);
+	vInfo.yres_virtual = vInfo.yres;
+	ELOG("yres_virtual -> %u", vInfo.yres_virtual);
 
-	// Make it grayscale (FIXME)
-	vInfo.bits_per_pixel = 32U;
-	vInfo.grayscale      = 0U;
+	// Make it grayscale...
+	vInfo.bits_per_pixel = 8U;
+	vInfo.grayscale      = 1U;
 	ELOG("bits_per_pixel -> %u", vInfo.bits_per_pixel);
 	fInfo.line_length = vInfo.xres_virtual * (vInfo.bits_per_pixel >> 3U);
 	ELOG("line_length -> %u", fInfo.line_length);
@@ -3593,24 +3601,22 @@ static __attribute__((cold)) int
 		sunxiCtx.layer.info.fb.size[2].width  = sunxiCtx.layer.info.screen_win.width;
 		sunxiCtx.layer.info.fb.size[2].height = sunxiCtx.layer.info.screen_win.height;
 
-		// FIXME: Used to compute the scanline pitch (e.g., pitch = ALIGN(size * compn, align),
-		//        so, technically more like 2 right now.
-		//        Going to see if we can keep scanlines aligned like on mxcfb somehow...
-		//        (Especially since I'm not actually sure we even go through this codepath on eInk).
-		sunxiCtx.layer.info.fb.align[0]      = 32U;
-		sunxiCtx.layer.info.fb.align[1]      = 32U;
-		sunxiCtx.layer.info.fb.align[2]      = 32U;
-		sunxiCtx.layer.info.fb.format        = DISP_FORMAT_ARGB_8888;
+		// NOTE: Used to compute the scanline pitch (e.g., pitch = ALIGN(size * compn, align),
+		//       except when using a y8_fd, apparently...
+		sunxiCtx.layer.info.fb.align[0]      = 0U;
+		sunxiCtx.layer.info.fb.align[1]      = 0U;
+		sunxiCtx.layer.info.fb.align[2]      = 0U;
+		sunxiCtx.layer.info.fb.format        = DISP_FORMAT_8BIT_GRAY;
 		sunxiCtx.layer.info.fb.color_space   = DISP_GBR_F;    // Full-range RGB
 		sunxiCtx.layer.info.fb.trd_right_fd  = 0;
-		sunxiCtx.layer.info.fb.pre_multiply  = true;    // FIXME?
+		sunxiCtx.layer.info.fb.pre_multiply  = true;    // Because we're using global alpha, I guess?
 		sunxiCtx.layer.info.fb.crop.x        = 0;
 		sunxiCtx.layer.info.fb.crop.y        = 0;
 		sunxiCtx.layer.info.fb.crop.width    = (uint64_t) sunxiCtx.layer.info.screen_win.width << 32U;
 		sunxiCtx.layer.info.fb.crop.height   = (uint64_t) sunxiCtx.layer.info.screen_win.height << 32U;
 		sunxiCtx.layer.info.fb.flags         = DISP_BF_NORMAL;
 		sunxiCtx.layer.info.fb.scan          = DISP_SCAN_PROGRESSIVE;
-		sunxiCtx.layer.info.fb.eotf          = DISP_EOTF_GAMMA22;    // FIXME?
+		sunxiCtx.layer.info.fb.eotf          = DISP_EOTF_GAMMA22;
 		sunxiCtx.layer.info.fb.depth         = 0;
 		sunxiCtx.layer.info.fb.fbd_en        = 0U;
 		sunxiCtx.layer.info.fb.metadata_fd   = 0;
@@ -4522,8 +4528,8 @@ static int
 	}
 
 	// And update our layer config to use that dmabuff fd
-	sunxiCtx.layer.info.fb.fd    = sunxiCtx.ion.fd;
-	sunxiCtx.layer.info.fb.y8_fd = 0;
+	sunxiCtx.layer.info.fb.fd    = 0;
+	sunxiCtx.layer.info.fb.y8_fd = sunxiCtx.ion.fd;
 
 	return rv;
 
