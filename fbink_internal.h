@@ -193,6 +193,8 @@
 #	include "eink/mxcfb-cervantes.h"
 #elif defined(FBINK_FOR_KOBO)
 #	include "eink/mxcfb-kobo.h"
+#	include "eink/ion-kobo.h"
+#	include "eink/sunxi-kobo.h"
 #elif defined(FBINK_FOR_REMARKABLE)
 #	include "eink/mxcfb-remarkable.h"
 #elif defined(FBINK_FOR_POCKETBOOK)
@@ -312,7 +314,7 @@
 		(x__ > y__) ? x__ : y__;                                                                                 \
 	})
 
-// We'll need those on PocketBook...
+// We'll need those on PocketBook & with sunxi SoCs...
 // c.f., <linux/kernel.h>
 #define ALIGN(x, a)                                                                                                      \
 	({                                                                                                               \
@@ -438,8 +440,11 @@ static const uint8_t eInkBGCMap[16] = { 0xFF, 0xEE, 0xDD, 0xCC, 0xBB, 0xAA, 0x99
 //#include "fbink_rgb565.h"
 
 // Global variables to store fb/screen info
-unsigned char* restrict fbPtr       = NULL;
-bool                     isFbMapped = false;
+unsigned char* restrict fbPtr = NULL;
+bool isFbMapped               = false;
+#ifdef FBINK_FOR_KOBO
+FBInkKoboSunxi sunxiCtx = { .disp_fd = -1, .ion_fd = -1, .alloc_size = 0U, .ion = { 0 }, .layer = { 0 } };
+#endif
 struct fb_var_screeninfo vInfo;
 struct fb_fix_screeninfo fInfo;
 uint32_t                 viewWidth;
@@ -689,7 +694,13 @@ static __attribute__((cold)) void pocketbook_fix_fb_info(void);
 static __attribute__((cold)) int initialize_fbink(int, const FBInkConfig* restrict, bool);
 
 static int memmap_fb(int);
+#ifdef FBINK_FOR_KOBO
+static int memmap_ion(void);
+#endif
 static int unmap_fb(void);
+#ifdef FBINK_FOR_KOBO
+static int unmap_ion(void);
+#endif
 
 #if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES) || defined(FBINK_FOR_POCKETBOOK)
 static void rotate_region_pickel(struct mxcfb_rect* restrict);

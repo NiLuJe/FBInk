@@ -188,4 +188,16 @@ typedef enum
 typedef uint8_t CHARACTER_FONT_T;
 #endif    // FBINK_WITH_OPENTYPE
 
+#ifdef FBINK_FOR_KOBO
+// Chuck all the sunxi mess in a single place...
+typedef struct
+{
+	int                     disp_fd;
+	int                     ion_fd;
+	size_t                  alloc_size;
+	struct ion_fd_data      ion;
+	struct disp_layer_info2 layer;
+} FBInkKoboSunxi;
+#endif    // FBINK_FOR_KOBO
+
 #endif

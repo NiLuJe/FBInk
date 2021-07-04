@@ -4241,6 +4241,12 @@ void
 static int
     memmap_fb(int fbfd)
 {
+#ifdef FBINK_FOR_KOBO
+	if (deviceQuirks.isSunxi) {
+		return memmap_ion();
+	}
+#endif
+
 	// NOTE: Beware of smem_len on Kobos?
 	//       c.f., https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer_linux.lua#L36
 	//       TL;DR: On 16bpp fbs, it *might* be a bit larger than strictly necessary,
@@ -4259,10 +4265,123 @@ static int
 	return EXIT_SUCCESS;
 }
 
+#ifdef FBINK_FOR_KOBO
+// Do the same, but via ION on sunxi...
+static int
+    memmap_ion(void)
+{
+	int rv = EXIT_SUCCESS;
+
+	// Start by registering as an ION client
+	sunxiCtx.ion_fd = open("/dev/ion", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+	if (sunxiCtx.ion_fd == -1) {
+		PFWARN("open: %m");
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Then request a DMA mapping large enough to fit our screen.
+	// NOTE: The CMA *always* returns PAGE_SIZE aligned pointers,
+	//       we're just documenting that explicitly here ;).
+	sunxiCtx.alloc_size              = ALIGN(fInfo.line_length * vInfo.yres, 4096);
+	struct ion_allocation_data alloc = { .len          = sunxiCtx.alloc_size,
+					     .align        = 4096,
+					     .heap_id_mask = ION_HEAP_MASK_DMA };
+	int                        ret   = ioctl(sunxiCtx.ion_fd, ION_IOC_ALLOC, &alloc);
+	if (ret < 0) {
+		PFWARN("ION_IOC_ALLOC: %m");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// Request a dmabuff handle that we can share & mmap for that alloc
+	sunxiCtx.ion.handle = alloc.handle;
+	ret                 = ioctl(sunxiCtx.ion_fd, ION_IOC_MAP, &sunxiCtx.ion);
+	if (ret < 0) {
+		PFWARN("ION_IOC_MAP: %m");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// Finally, mmap it...
+	fbPtr = (unsigned char*) mmap(NULL, sunxiCtx.alloc_size, PROT_READ | PROT_WRITE, MAP_SHARED, sunxiCtx.ion.fd, 0);
+	if (fbPtr == MAP_FAILED) {
+		PFWARN("mmap: %m");
+		fbPtr = NULL;
+		rv    = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	} else {
+		isFbMapped = true;
+	}
+
+	// And finally, register as a DISP client, too
+	sunxiCtx.disp_fd = open("/dev/disp", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+	if (sunxiCtx.disp_fd == -1) {
+		PFWARN("open: %m");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// And update our layer config to use that dmabuff fd
+	sunxiCtx.layer.fb.fd = sunxiCtx.ion.fd;
+
+	return rv;
+
+cleanup:
+	if (isFbMapped) {
+		if (munmap(fbPtr, sunxiCtx.alloc_size) < 0) {
+			PFWARN("munmap: %m");
+			rv = ERRCODE(EXIT_FAILURE);
+		} else {
+			isFbMapped          = false;
+			fbPtr               = NULL;
+			sunxiCtx.alloc_size = 0U;
+		}
+	}
+
+	if (sunxiCtx.ion.handle != 0) {
+		struct ion_handle_data handle = { .handle = sunxiCtx.ion.handle };
+		ret                           = ioctl(sunxiCtx.ion_fd, ION_IOC_FREE, &handle);
+		if (ret < 0) {
+			PFWARN("ION_IOC_FREE: %m");
+			rv = ERRCODE(EXIT_FAILURE);
+		} else {
+			sunxiCtx.ion.handle = 0;
+			sunxiCtx.ion.fd     = -1;
+		}
+	}
+
+	if (sunxiCtx.ion_fd != -1) {
+		if (close(sunxiCtx.ion_fd) != 0) {
+			PFWARN("close: %m");
+			rv = ERRCODE(EXIT_FAILURE);
+		} else {
+			sunxiCtx.ion_fd = -1;
+		}
+	}
+
+	if (sunxiCtx.disp_fd != -1) {
+		if (close(sunxiCtx.disp_fd) != 0) {
+			PFWARN("close: %m");
+			rv = ERRCODE(EXIT_FAILURE);
+		} else {
+			sunxiCtx.disp_fd = -1;
+		}
+	}
+
+	return rv;
+}
+#endif    // FBINK_FOR_KOBO
+
 // And unmap it
 static int
     unmap_fb(void)
 {
+#ifdef FBINK_FOR_KOBO
+	if (deviceQuirks.isSunxi) {
+		return unmap_ion();
+	}
+#endif
+
 	if (munmap(fbPtr, fInfo.smem_len) < 0) {
 		PFWARN("munmap: %m");
 		return ERRCODE(EXIT_FAILURE);
@@ -4275,6 +4394,51 @@ static int
 
 	return EXIT_SUCCESS;
 }
+
+#ifdef FBINK_FOR_KOBO
+// And the same for ION again...
+static int
+    unmap_ion(void)
+{
+	int rv = EXIT_SUCCESS;
+
+	if (munmap(fbPtr, sunxiCtx.alloc_size) < 0) {
+		PFWARN("munmap: %m");
+		rv = ERRCODE(EXIT_FAILURE);
+	} else {
+		isFbMapped          = false;
+		fbPtr               = NULL;
+		sunxiCtx.alloc_size = 0U;
+	}
+
+	struct ion_handle_data handle = { .handle = sunxiCtx.ion.handle };
+	int                    ret    = ioctl(sunxiCtx.ion_fd, ION_IOC_FREE, &handle);
+	if (ret < 0) {
+		PFWARN("ION_IOC_FREE: %m");
+		rv = ERRCODE(EXIT_FAILURE);
+	} else {
+		sunxiCtx.ion.handle  = 0;
+		sunxiCtx.ion.fd      = -1;
+		sunxiCtx.layer.fb.fd = -1;
+	}
+
+	if (close(sunxiCtx.ion_fd) != 0) {
+		PFWARN("close: %m");
+		rv = ERRCODE(EXIT_FAILURE);
+	} else {
+		sunxiCtx.ion_fd = -1;
+	}
+
+	if (close(sunxiCtx.disp_fd) != 0) {
+		PFWARN("close: %m");
+		rv = ERRCODE(EXIT_FAILURE);
+	} else {
+		sunxiCtx.disp_fd = -1;
+	}
+
+	return rv;
+}
+#endif    // FBINK_FOR_KOBO
 
 // Public helper function that handles unmapping the fb & closing its fd, for applications that want to keep both around,
 // (i.e., those that use fbink_open in the first place).

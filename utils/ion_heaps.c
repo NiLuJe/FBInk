@@ -85,7 +85,7 @@ int
 	int                   ret  = EXIT_SUCCESS;
 	struct ion_heap_data* data = NULL;
 
-	// Get an ION handle
+	// Register as an ION client
 	int fd = open("/dev/ion", O_RDONLY | O_CLOEXEC);
 	if (fd == -1) {
 		perror("open");
