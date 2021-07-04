@@ -13,6 +13,11 @@ if ! grep -q "^tmpfs ${SUNXI_PATH} tmpfs " /proc/mounts ; then
 fi
 
 # Do the thing!
-cat /sys/devices/virtual/disp/disp/waveform/get_working_buffer > /dev/null
+IFS= read -r ret <"/sys/devices/virtual/disp/disp/waveform/get_working_buffer"
+if [ "${ret}" = 0 ]; then
+	echo "Working buffer dumped to ${SUNXI_PATH}/workingbuffer.bmp"
+else
+	echo "Failed to dump the working buffer!"
+fi
 
-echo "Working buffer dumped to ${SUNXI_PATH}/workingbuffer.bmp"
+return "${ret}"
