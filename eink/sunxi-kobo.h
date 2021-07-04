@@ -616,7 +616,7 @@ typedef struct
 
 typedef struct
 {
-	int32_t frame_id;    // Related to the update_order frame_id returned by DISP_EINK_UPDATE(2)
+	uint32_t frame_id;    // Related to the update_order frame_id returned by DISP_EINK_UPDATE(2)
 } sunxi_disp_eink_wait_frame_sync_complete;
 
 typedef struct

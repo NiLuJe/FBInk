@@ -2421,7 +2421,7 @@ static int
 	return EXIT_SUCCESS;
 }
 
-// Kobo Mark 7 devices ([Mk7<->??)
+// Kobo Mark 7 devices ([Mk7])
 static int
     refresh_kobo_mk7(int                     fbfd,
 		     const struct mxcfb_rect region,
@@ -2563,6 +2563,93 @@ static int
 
 	return EXIT_SUCCESS;
 }
+
+// Kobo Mark 8 devices ([Mk8<->??)
+static int
+    refresh_kobo_sunxi(const struct mxcfb_rect region, uint32_t waveform_mode, uint32_t update_mode, int dithering_mode)
+{
+	// Convert our mxcfb_rect into a sunxi area_info
+	struct area_info area = { .x_top    = region.left,
+				  .y_top    = region.top,
+				  .x_bottom = region.width - region.left - 1,
+				  .y_bottom = region.height - region.top - 1 };
+
+	// Devise the required rotation, given the current fb rotate flag
+	// FIXME: Actually update said flag based on the gyro in init.
+	uint32_t rota = ((vInfo.rotate ^ deviceQuirks.ntxBootRota) * 90U);
+
+	sunxi_disp_eink_update2 update = { .area        = &area,
+					   .layer_num   = 1U,
+					   .update_mode = waveform_mode,
+					   .lyr_cfg2    = &sunxiCtx.layer,
+					   .frame_id    = &lastMarker,
+					   .rotate      = &rota,
+					   .cfa_use     = 0U };
+
+	// Update mode shenanigans...
+	if (update_mode == UPDATE_MODE_PARTIAL) {
+		update.update_mode |= EINK_RECT_MODE;
+	}
+	if (update_mode == EINK_GLR16_MODE || update_mode == EINK_GLD16_MODE) {
+		update.update_mode |= EINK_REGAL_MODE;
+	}
+	if (update_mode == EINK_A2_MODE) {
+		update.update_mode |= EINK_MONOCHROME;
+	}
+
+	// And now for the dithering flags. They're all SW only, so, stuff 'em behind LEGACY...
+	if (dithering_mode == HWD_LEGACY) {
+		// As usual, get rid of the MONOCHROME flag when dithering
+		update.update_mode &= ~EINK_MONOCHROME;
+
+		if (waveform_mode == EINK_A2_MODE || waveform_mode == EINK_DU_MODE) {
+			// TODO: Check the other Y1 modes...
+			update.update_mode |= EINK_DITHERING_NTX_Y1;
+		} else {
+			update.update_mode |= EINK_DITHERING_Y4;
+		}
+	}
+
+	int rv = ioctl(sunxiCtx.disp_fd, DISP_EINK_UPDATE2, &update);
+
+	if (rv < 0) {
+		PFWARN("DISP_EINK_UPDATE2: %m");
+		if (errno == EINVAL) {
+			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
+			     region.top,
+			     region.left,
+			     region.width,
+			     region.height);
+		}
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static int
+    wait_for_complete_kobo_sunxi(uint32_t marker)
+{
+	// Use the union to avoid passing garbage to the ioctl handler...
+	sunxi_disp_eink_ioctl cmd = { .wait_for.frame_id = marker };
+
+	int rv = ioctl(sunxiCtx.disp_fd, DISP_EINK_WAIT_FRAME_SYNC_COMPLETE, &cmd);
+
+	if (rv < 0) {
+		PFWARN("DISP_EINK_WAIT_FRAME_SYNC_COMPLETE: %m");
+		return ERRCODE(EXIT_FAILURE);
+	} else {
+		if (rv == 0) {
+			LOG("Update %u has already fully been completed", marker);
+		} else {
+			// NOTE: Timeout is set to 3000ms
+			LOG("Waited %ldms for completion of update %u", (3000 - jiffies_to_ms(rv)), marker);
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
+
 #	endif    // FBINK_FOR_KINDLE
 #endif            // !FBINK_FOR_LINUX
 
@@ -2660,7 +2747,9 @@ static int
 #	elif defined(FBINK_FOR_POCKETBOOK)
 	return refresh_pocketbook(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
 #	elif defined(FBINK_FOR_KOBO)
-	if (deviceQuirks.isKoboMk7) {
+	if (deviceQuirks.isSunxi) {
+		return refresh_kobo_sunxi(region, wfm, upm, dithering_mode);
+	} else if (deviceQuirks.isKoboMk7) {
 		return refresh_kobo_mk7(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
 	} else {
 		return refresh_kobo(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
@@ -2701,7 +2790,9 @@ static int
 #	elif defined(FBINK_FOR_CERVANTES)
 	return wait_for_complete_cervantes(fbfd, marker);
 #	elif defined(FBINK_FOR_KOBO)
-	if (deviceQuirks.isKoboMk7) {
+	if (deviceQuirks.isSunxi) {
+		return wait_for_complete_kobo_sunxi(marker);
+	} else if (deviceQuirks.isKoboMk7) {
 		return wait_for_complete_kobo_mk7(fbfd, marker);
 	} else {
 		return wait_for_complete_kobo(fbfd, marker);
@@ -3460,11 +3551,15 @@ static __attribute__((cold)) int
 		sunxiCtx.layer.info.fb.size[2].width  = 0U;
 		sunxiCtx.layer.info.fb.size[2].height = 0U;
 
-		sunxiCtx.layer.info.fb.align[0]    = 4096;    // FIXME: Scanline pitch, technically more like 0 right now.
-		sunxiCtx.layer.info.fb.align[1]    = 0;
-		sunxiCtx.layer.info.fb.align[2]    = 0;
-		sunxiCtx.layer.info.fb.format      = DISP_FORMAT_ARGB_8888;
-		sunxiCtx.layer.info.fb.color_space = DISP_GBR_F;    // Full-range RGB
+		// FIXME: Used to compute the scanline pitch (e.g., pitch = ALIGN(size * compn, align),
+		//        so, technically more like 2 right now.
+		//        Going to see if we can keep scanlines aligned like on mxcfb somehow...
+		//        (Especially since I'm not actually sure we even go through this codepath on eInk).
+		sunxiCtx.layer.info.fb.align[0]      = 4096;
+		sunxiCtx.layer.info.fb.align[1]      = 0;
+		sunxiCtx.layer.info.fb.align[2]      = 0;
+		sunxiCtx.layer.info.fb.format        = DISP_FORMAT_ARGB_8888;
+		sunxiCtx.layer.info.fb.color_space   = DISP_GBR_F;    // Full-range RGB
 		sunxiCtx.layer.info.fb.trd_right_fd  = 0;
 		sunxiCtx.layer.info.fb.pre_multiply  = true;    // FIXME?
 		sunxiCtx.layer.info.fb.crop.x        = 0;
