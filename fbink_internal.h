@@ -443,7 +443,7 @@ static const uint8_t eInkBGCMap[16] = { 0xFF, 0xEE, 0xDD, 0xCC, 0xBB, 0xAA, 0x99
 unsigned char* restrict fbPtr = NULL;
 bool isFbMapped               = false;
 #ifdef FBINK_FOR_KOBO
-FBInkKoboSunxi sunxiCtx = { .disp_fd = -1, .ion_fd = -1, .alloc_size = 0U, .ion = { 0 }, .layer = { 0 } };
+FBInkKoboSunxi sunxiCtx = { .disp_fd = -1, .ion_fd = -1, .alloc_size = 0U, .ion = { 0 }, .layer = { { 0 } } };
 #endif
 struct fb_var_screeninfo vInfo;
 struct fb_fix_screeninfo fInfo;

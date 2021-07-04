@@ -2600,7 +2600,7 @@ static int
 	// And now for the dithering flags. They're all SW only, so, stuff 'em behind LEGACY...
 	if (dithering_mode == HWD_LEGACY) {
 		// As usual, get rid of the MONOCHROME flag when dithering
-		update.update_mode &= ~EINK_MONOCHROME;
+		update.update_mode &= (unsigned int) ~EINK_MONOCHROME;
 
 		if (waveform_mode == EINK_A2_MODE || waveform_mode == EINK_DU_MODE) {
 			// TODO: Check the other Y1 modes...
