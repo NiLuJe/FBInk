@@ -277,6 +277,8 @@ union ion_ioctl_arg
 // c.f., the ion block in the device tree in case something ever gets the ID wrong,
 // e.g., L233 @ arch/arm/boot/dts/sun8iw15p1-eink_128m.dtsi
 //     & /sys/firmware/devicetree/base/ion/ at runtime.
+// You can also check for the currently active allocations via debugfs,
+// e.g., /sys/kernel/debug/ion/heaps/cma
 enum ion_heap_mask
 {
 	ION_HEAP_MASK_SYSTEM        = (1 << ION_HEAP_TYPE_SYSTEM),
