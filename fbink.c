@@ -7336,11 +7336,33 @@ int
 		  const FBInkConfig* restrict fbink_cfg UNUSED_BY_LINUX)
 {
 #ifndef FBINK_FOR_LINUX
-	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
+	// Assume success, until shit happens ;)
+	int  rv      = EXIT_SUCCESS;
 	bool keep_fd = true;
+#	ifdef FBINK_FOR_KOBO
+	if (deviceQuirks.isSunxi) {
+		// We need the full monty on sunxi...
+		if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+			return ERRCODE(EXIT_FAILURE);
+		}
+
+		if (!isFbMapped) {
+			if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+				rv = ERRCODE(EXIT_FAILURE);
+				goto cleanup;
+			}
+		}
+	} else {
+		if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+			return ERRCODE(EXIT_FAILURE);
+		}
+	}
+#	else
+	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
 	if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
 		return ERRCODE(EXIT_FAILURE);
 	}
+#	endif    // FBINK_FOR_KOBO
 
 	// Same for the dithering mode, if we actually requested dithering...
 	if (fbink_cfg->dithering_mode == HWD_PASSTHROUGH) {
@@ -7363,22 +7385,25 @@ int
 		fullscreen_region(&region);
 	}
 
-	int ret;
-	if ((ret = refresh(fbfd,
-			   region,
-			   get_wfm_mode(fbink_cfg->wfm_mode),
-			   get_hwd_mode(fbink_cfg->dithering_mode),
-			   fbink_cfg->is_nightmode,
-			   fbink_cfg->is_flashing,
-			   false)) != EXIT_SUCCESS) {
+	if ((rv = refresh(fbfd,
+			  region,
+			  get_wfm_mode(fbink_cfg->wfm_mode),
+			  get_hwd_mode(fbink_cfg->dithering_mode),
+			  fbink_cfg->is_nightmode,
+			  fbink_cfg->is_flashing,
+			  false)) != EXIT_SUCCESS) {
 		PFWARN("Failed to refresh the screen");
 	}
 
+cleanup:
+	if (isFbMapped && !keep_fd) {
+		unmap_fb();
+	}
 	if (!keep_fd) {
 		close(fbfd);
 	}
 
-	return ret;
+	return rv;
 #else
 	WARN("e-Ink screen refreshes require an e-Ink device");
 	return ERRCODE(ENOSYS);
@@ -7432,14 +7457,33 @@ int
     fbink_wait_for_complete(int fbfd UNUSED_BY_LINUX, uint32_t marker UNUSED_BY_LINUX)
 {
 #ifndef FBINK_FOR_LINUX
-	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
+	// Assume success, until shit happens ;)
+	int  rv      = EXIT_SUCCESS;
 	bool keep_fd = true;
+#	ifdef FBINK_FOR_KOBO
+	if (deviceQuirks.isSunxi) {
+		// We need the full monty on sunxi...
+		if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+			return ERRCODE(EXIT_FAILURE);
+		}
+
+		if (!isFbMapped) {
+			if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+				rv = ERRCODE(EXIT_FAILURE);
+				goto cleanup;
+			}
+		}
+	} else {
+		if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+			return ERRCODE(EXIT_FAILURE);
+		}
+	}
+#	else
+	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
 	if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
 		return ERRCODE(EXIT_FAILURE);
 	}
-
-	// Assume success, until shit happens ;)
-	int rv = EXIT_SUCCESS;
+#	endif    // FBINK_FOR_KOBO
 
 	// Try to retrieve the last sent marker, if any, if we passed marker 0...
 	if (marker == LAST_MARKER) {
@@ -7458,6 +7502,9 @@ int
 	}
 
 cleanup:
+	if (isFbMapped && !keep_fd) {
+		unmap_fb();
+	}
 	if (!keep_fd) {
 		close(fbfd);
 	}
