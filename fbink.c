@@ -3221,8 +3221,7 @@ static __attribute__((cold)) int
 		} else if (deviceQuirks.isKoboMk7) {
 			ELOG("Enabled Kobo Mark 7 quirks");
 		} else if (deviceQuirks.isSunxi) {
-			ELOG("Sunxi chipsets are currently unsupported!");
-			return ERRCODE(ENOSYS);
+			ELOG("Enabled sunxi quirks");
 		}
 #	elif defined(FBINK_FOR_POCKETBOOK)
 		// Check if the device is running on an AllWinner SoC instead of an NXP one...
@@ -3353,7 +3352,7 @@ static __attribute__((cold)) int
 	//       In fact, if you manage to run *before* pickel (i.e., before on-animator),
 	//       you'll notice that it's in yet another rotation at very early boot (CCW?)...
 	// NOTE: The Libra finally appears to have put a stop to this madness (it boots UR, with an UR panel).
-	if (vInfo.xres > vInfo.yres) {
+	if (!deviceQuirks.isSunxi && vInfo.xres > vInfo.yres) {
 		// NOTE: PW2:
 		//         vInfo.rotate == 2 in Landscape (vs. 3 in Portrait mode), w/ the xres/yres switch in Landscape,
 		//         and (0, 0) is always at the top-left of the viewport, so we're always correct.
@@ -3425,10 +3424,74 @@ static __attribute__((cold)) int
 #	if defined(FBINK_FOR_KOBO)
 	// NOTE: fbink_rota_native_to_canonical is only implemented/tested on Kobo, so, don't do it on Cervantes.
 	//       They're all in a quirky state anyway ;).
-	if (!deviceQuirks.isNTX16bLandscape) {
+	if (!deviceQuirks.isSunxi && !deviceQuirks.isNTX16bLandscape) {
 		// Otherwise, attempt to untangle it ourselves...
 		canonical_rota = fbink_rota_native_to_canonical(vInfo.rotate);
 		ELOG("Canonical rotation: %hhu (%s)", canonical_rota, fb_rotate_to_string(canonical_rota));
+	}
+	// TODO: Actually fix it on Sunxi ;).
+
+	// Setup the disp layer insanity on sunxi...
+	if (deviceQuirks.isSunxi) {
+		// disp_layer_info2
+		sunxiCtx.layer.info.mode        = LAYER_MODE_BUFFER;
+		sunxiCtx.layer.info.zorder      = 0U;
+		sunxiCtx.layer.info.alpha_mode  = 1U;    // Ignore pixel alpha
+		sunxiCtx.layer.info.alpha_value = 0xFFu;
+
+		// disp_rect
+		sunxiCtx.layer.info.screen_win.x      = 0;
+		sunxiCtx.layer.info.screen_win.y      = 0;
+		// FIXME: Handle rota
+		sunxiCtx.layer.info.screen_win.width  = MIN(vInfo.xres, vInfo.yres);
+		sunxiCtx.layer.info.screen_win.height = MAX(vInfo.xres, vInfo.yres);
+
+		sunxiCtx.layer.info.b_trd_out    = false;
+		sunxiCtx.layer.info.out_trd_mode = 0;
+
+		// disp_fb_info2
+		// NOTE: fd & y8_fd are handled in mmap_ion
+
+		// disp_rectsz
+		sunxiCtx.layer.info.fb.size[0].width  = sunxiCtx.layer.info.screen_win.width;
+		sunxiCtx.layer.info.fb.size[0].height = sunxiCtx.layer.info.screen_win.height;
+		sunxiCtx.layer.info.fb.size[1].width  = 0U;
+		sunxiCtx.layer.info.fb.size[1].height = 0U;
+		sunxiCtx.layer.info.fb.size[2].width  = 0U;
+		sunxiCtx.layer.info.fb.size[2].height = 0U;
+
+		sunxiCtx.layer.info.fb.align[0]    = 4096;    // FIXME: Scanline pitch, technically more like 0 right now.
+		sunxiCtx.layer.info.fb.align[1]    = 0;
+		sunxiCtx.layer.info.fb.align[2]    = 0;
+		sunxiCtx.layer.info.fb.format      = DISP_FORMAT_ARGB_8888;
+		sunxiCtx.layer.info.fb.color_space = DISP_GBR_F;    // Full-range RGB
+		sunxiCtx.layer.info.fb.trd_right_fd  = 0;
+		sunxiCtx.layer.info.fb.pre_multiply  = true;    // FIXME?
+		sunxiCtx.layer.info.fb.crop.x        = 0;
+		sunxiCtx.layer.info.fb.crop.y        = 0;
+		sunxiCtx.layer.info.fb.crop.width    = sunxiCtx.layer.info.screen_win.width;
+		sunxiCtx.layer.info.fb.crop.height   = sunxiCtx.layer.info.screen_win.height;
+		sunxiCtx.layer.info.fb.flags         = DISP_BF_NORMAL;
+		sunxiCtx.layer.info.fb.scan          = DISP_SCAN_PROGRESSIVE;
+		sunxiCtx.layer.info.fb.eotf          = DISP_EOTF_GAMMA22;    // FIXME?
+		sunxiCtx.layer.info.fb.depth         = 0;
+		sunxiCtx.layer.info.fb.fbd_en        = 0U;
+		sunxiCtx.layer.info.fb.metadata_fd   = 0;
+		sunxiCtx.layer.info.fb.metadata_size = 0U;
+		sunxiCtx.layer.info.fb.metadata_flag = 0U;
+
+		sunxiCtx.layer.info.id = 0U;
+
+		// disp_atw_info
+		sunxiCtx.layer.info.atw.used   = false;
+		sunxiCtx.layer.info.atw.mode   = 0;
+		sunxiCtx.layer.info.atw.b_row  = 0;
+		sunxiCtx.layer.info.atw.b_col  = 0;
+		sunxiCtx.layer.info.atw.cof_fd = 0;
+
+		sunxiCtx.layer.enable   = true;
+		sunxiCtx.layer.channel  = 0U;
+		sunxiCtx.layer.layer_id = 1U;
 	}
 #	endif
 
@@ -4322,7 +4385,8 @@ static int
 	}
 
 	// And update our layer config to use that dmabuff fd
-	sunxiCtx.layer.fb.fd = sunxiCtx.ion.fd;
+	sunxiCtx.layer.info.fb.fd    = sunxiCtx.ion.fd;
+	sunxiCtx.layer.info.fb.y8_fd = 0;
 
 	return rv;
 
@@ -4417,9 +4481,10 @@ static int
 		PFWARN("ION_IOC_FREE: %m");
 		rv = ERRCODE(EXIT_FAILURE);
 	} else {
-		sunxiCtx.ion.handle  = 0;
-		sunxiCtx.ion.fd      = -1;
-		sunxiCtx.layer.fb.fd = -1;
+		sunxiCtx.ion.handle          = 0;
+		sunxiCtx.ion.fd              = -1;
+		sunxiCtx.layer.info.fb.fd    = 0;
+		sunxiCtx.layer.info.fb.y8_fd = 0;
 	}
 
 	if (close(sunxiCtx.ion_fd) != 0) {
