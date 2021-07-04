@@ -274,6 +274,9 @@ union ion_ioctl_arg
 };
 
 // And a custom enum to make the heap_id_mask field less obscure...
+// c.f., the ion block in the device tree in case something ever gets the ID wrong,
+// e.g., L233 @ arch/arm/boot/dts/sun8iw15p1-eink_128m.dtsi
+//     & /sys/firmware/devicetree/base/ion/ at runtime.
 enum ion_heap_mask
 {
 	ION_HEAP_MASK_SYSTEM        = (1 << ION_HEAP_TYPE_SYSTEM),
