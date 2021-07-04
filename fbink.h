@@ -261,8 +261,16 @@ typedef enum
 	// PocketBook only
 	WFM_A2IN,
 	WFM_A2OUT,
-	WFM_GC16HQ,         // Only available on i.MX SoCs. Alias for REAGL, or REAGLD when flashing.
-	WFM_GS16,           // Only available on B288 SoCs. Fidelity supposedly somewhere between GL16 and GC16.
+	WFM_GC16HQ,    // Only available on i.MX SoCs. Alias for REAGL, or REAGLD when flashing.
+	WFM_GS16,      // Only available on B288 SoCs. Fidelity supposedly somewhere between GL16 and GC16.
+	// Kobo Sunxi only
+	WFM_GU16,    // GL16, but honoring the in-kernel DISP_EINK_SET_GC_CNT
+	//WFM_GCK16,	// GC16, but for white-on-black.
+	WFM_GLK16,    // GL16, but for white-on-black.
+	WFM_CLEAR,    // GC16 local
+	WFM_GC4L,     // GC4 local
+	WFM_GCC16,    // GCC16
+
 	WFM_MAX = 0xFFu,    // uint8_t
 } __attribute__((packed)) WFM_MODE_INDEX_E;
 typedef uint8_t WFM_MODE_INDEX_T;

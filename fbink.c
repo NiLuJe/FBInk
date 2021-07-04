@@ -7173,6 +7173,98 @@ static uint32_t
 			waveform_mode = WAVEFORM_MODE_AUTO;
 			break;
 	}
+#elif defined(FBINK_FOR_KOBO)
+	if (deviceQuirks.isSunxi) {
+		switch (wfm_mode_index) {
+			case WFM_INIT:
+				waveform_mode = EINK_INIT_MODE;
+				break;
+			case WFM_DU:
+				waveform_mode = EINK_DU_MODE;
+				break;
+			case WFM_GC16:
+				waveform_mode = EINK_GC16_MODE;
+				break;
+			case WFM_GC4:
+				waveform_mode = EINK_GC4_MODE;
+				break;
+			case WFM_A2:
+				waveform_mode = EINK_A2_MODE;
+				break;
+			case WFM_GL16:
+				waveform_mode = EINK_GL16_MODE;
+				break;
+			case WFM_REAGL:
+				waveform_mode = EINK_GLR16_MODE;
+				break;
+			case WFM_REAGLD:
+				waveform_mode = EINK_GLD16_MODE;
+				break;
+			case WFM_GU16:
+				waveform_mode = EINK_GU16_MODE;
+				break;
+			case WFM_GCK16:
+				waveform_mode = EINK_GCK16_MODE;
+				break;
+			case WFM_GLK16:
+				waveform_mode = EINK_GLK16_MODE;
+				break;
+			case WFM_CLEAR:
+				waveform_mode = EINK_CLEAR_MODE;
+				break;
+			case WFM_GC4L:
+				waveform_mode = EINK_GC4L_MODE;
+				break;
+			case WFM_GCC16:
+				waveform_mode = EINK_GCC16_MODE;
+				break;
+			case WFM_AUTO:
+				waveform_mode = EINK_AUTO_MODE;
+				break;
+			default:
+				LOG("Unknown (or unsupported) waveform mode '%s' @ index %hhu, defaulting to GL16",
+				    wfm_to_string(wfm_mode_index),
+				    wfm_mode_index);
+				waveform_mode = EINK_GL16_MODE;
+				break;
+		}
+	} else {
+		switch (wfm_mode_index) {
+			case WFM_INIT:
+				waveform_mode = WAVEFORM_MODE_INIT;
+				break;
+			case WFM_AUTO:
+				waveform_mode = WAVEFORM_MODE_AUTO;
+				break;
+			case WFM_DU:
+				waveform_mode = WAVEFORM_MODE_DU;
+				break;
+			case WFM_GC16:
+				waveform_mode = WAVEFORM_MODE_GC16;
+				break;
+			case WFM_GC4:
+				waveform_mode = WAVEFORM_MODE_GC4;
+				break;
+			case WFM_A2:
+				waveform_mode = WAVEFORM_MODE_A2;
+				break;
+			case WFM_GL16:
+				waveform_mode = WAVEFORM_MODE_GL16;
+				break;
+			case WFM_REAGL:
+				waveform_mode = WAVEFORM_MODE_REAGL;
+				break;
+			case WFM_REAGLD:
+				waveform_mode = WAVEFORM_MODE_REAGLD;
+				break;
+			default:
+				LOG("Unknown (or unsupported) waveform mode '%s' @ index %hhu, defaulting to AUTO",
+				    wfm_to_string(wfm_mode_index),
+				    wfm_mode_index);
+				waveform_mode = WAVEFORM_MODE_AUTO;
+				break;
+		}
+	}
 #else
 	switch (wfm_mode_index) {
 		case WFM_INIT:
