@@ -2571,8 +2571,8 @@ static int
 	// Convert our mxcfb_rect into a sunxi area_info
 	struct area_info area = { .x_top    = region.left,
 				  .y_top    = region.top,
-				  .x_bottom = region.width - region.left - 1,
-				  .y_bottom = region.height - region.top - 1 };
+				  .x_bottom = region.left + region.width - 1,
+				  .y_bottom = region.top + region.height - 1 };
 
 	// Devise the required rotation, given the current fb rotate flag
 	// FIXME: Actually update said flag based on the gyro in init.
@@ -2614,13 +2614,11 @@ static int
 
 	if (rv < 0) {
 		PFWARN("DISP_EINK_UPDATE2: %m");
-		if (errno == EINVAL) {
-			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
-			     region.top,
-			     region.left,
-			     region.width,
-			     region.height);
-		}
+		WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
+		     region.top,
+		     region.left,
+		     region.width,
+		     region.height);
 		return ERRCODE(EXIT_FAILURE);
 	}
 
@@ -3555,17 +3553,17 @@ static __attribute__((cold)) int
 		//        so, technically more like 2 right now.
 		//        Going to see if we can keep scanlines aligned like on mxcfb somehow...
 		//        (Especially since I'm not actually sure we even go through this codepath on eInk).
-		sunxiCtx.layer.info.fb.align[0]      = 4096;
-		sunxiCtx.layer.info.fb.align[1]      = 0;
-		sunxiCtx.layer.info.fb.align[2]      = 0;
+		sunxiCtx.layer.info.fb.align[0]      = 2U;
+		sunxiCtx.layer.info.fb.align[1]      = 2U;
+		sunxiCtx.layer.info.fb.align[2]      = 2U;
 		sunxiCtx.layer.info.fb.format        = DISP_FORMAT_ARGB_8888;
 		sunxiCtx.layer.info.fb.color_space   = DISP_GBR_F;    // Full-range RGB
 		sunxiCtx.layer.info.fb.trd_right_fd  = 0;
 		sunxiCtx.layer.info.fb.pre_multiply  = true;    // FIXME?
 		sunxiCtx.layer.info.fb.crop.x        = 0;
 		sunxiCtx.layer.info.fb.crop.y        = 0;
-		sunxiCtx.layer.info.fb.crop.width    = sunxiCtx.layer.info.screen_win.width;
-		sunxiCtx.layer.info.fb.crop.height   = sunxiCtx.layer.info.screen_win.height;
+		sunxiCtx.layer.info.fb.crop.width    = (uint64_t) sunxiCtx.layer.info.screen_win.width << 32U;
+		sunxiCtx.layer.info.fb.crop.height   = (uint64_t) sunxiCtx.layer.info.screen_win.height << 32U;
 		sunxiCtx.layer.info.fb.flags         = DISP_BF_NORMAL;
 		sunxiCtx.layer.info.fb.scan          = DISP_SCAN_PROGRESSIVE;
 		sunxiCtx.layer.info.fb.eotf          = DISP_EOTF_GAMMA22;    // FIXME?
