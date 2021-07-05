@@ -2572,6 +2572,9 @@ static int
 	//       echo 8 >| /proc/sys/kernel/printk
 	//       echo 9 >| /sys/kernel/debug/dispdbg/dgblvl
 	//       And running klogd so you get everything timestamped in the syslog always helps ;).
+	// NOTE: Speaking of debugfs, Nickel periodically (haven't looked at the circumstances in detail)
+	//       wakes up the EPDC via debugfs (e.g., name=lcd0, command=enable, start=1).
+	//       Possibly related to the aggressive standby on idle? (Which I haven't looked into there, either).
 
 	// Convert our mxcfb_rect into a sunxi area_info
 	struct area_info area = { .x_top    = region.left,
