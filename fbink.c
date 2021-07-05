@@ -3385,6 +3385,16 @@ static __attribute__((cold)) int
 			ELOG("Enabled Kobo Mark 7 quirks");
 		} else if (deviceQuirks.isSunxi) {
 			ELOG("Enabled sunxi quirks");
+
+			// Lookup the bus id & address for our accelerometer...
+			if (populate_accelerometer_i2c_info() != EXIT_SUCCESS) {
+				WARN("Unable to handle rotation detection: assuming UR");
+			} else {
+				// The fb fixup requires being able to poke at the accelerometer...
+				if (open_accelerometer_i2c() != EXIT_SUCCESS) {
+					WARN("Unable to handle rotation detection: assuming UR");
+				}
+			}
 		}
 #	elif defined(FBINK_FOR_POCKETBOOK)
 		// Check if the device is running on an AllWinner SoC instead of an NXP one...

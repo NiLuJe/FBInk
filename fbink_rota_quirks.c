@@ -76,9 +76,9 @@ static int
 	return rv;
 }
 
-// Open the right I²C character device for the device's accelerometer...
+// Search for the right accelerometer for the device
 static int
-    open_accelerometer_i2c(void)
+    populate_accelerometer_i2c_info(void)
 {
 	switch (deviceQuirks.deviceId) {
 		case 387U:
@@ -95,6 +95,13 @@ static int
 			break;
 	}
 
+	return EXIT_SUCCESS;
+}
+
+// Open the right I²C character device for the device's accelerometer...
+static int
+    open_accelerometer_i2c(void)
+{
 	int rv = EXIT_SUCCESS;
 
 	// Check if the address looks sane...
