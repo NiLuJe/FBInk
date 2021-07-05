@@ -6,6 +6,9 @@ Kindle/
 # Same, for our vendored libunibreak
 LibUniBreakBuild/
 libunibreak.built
+# And our vendored libi2c
+LibI2CBuild/
+libi2c.built
 # KDevelop
 FBInk.kdev4
 .kdev4/

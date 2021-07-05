@@ -339,6 +339,14 @@ ifdef UNIBREAK
 	LIBS+=-l:libunibreak.a
 endif
 
+# Same for libi2c, on Kobo
+ifdef KOBO
+	EXTRA_CPPFLAGS+=-ILibI2CBuild/include
+	EXTRA_LDFLAGS+=-LLibI2CBuild/lib
+	I2C_LIBS:=-l:libi2c.a
+	LIBS+=$(I2C_LIBS)
+endif
+
 # And with our own rpath for standalone distribution
 ifdef STANDALONE
 	EXTRA_LDFLAGS+=-Wl,-rpath=/usr/local/fbink/lib
@@ -496,11 +504,11 @@ $(BTN_OBJS): | outdir
 all: static
 
 ifdef UNIBREAK
-staticlib: libunibreak.built $(STATICLIB_OBJS)
+staticlib: libunibreak.built libi2c.built $(STATICLIB_OBJS)
 	$(AR) $(FBINK_STATIC_FLAGS) $(OUT_DIR)/$(FBINK_STATIC_NAME) $(STATICLIB_OBJS)
 	$(RANLIB) $(OUT_DIR)/$(FBINK_STATIC_NAME)
 
-sharedlib: libunibreak.built $(SHAREDLIB_OBJS)
+sharedlib: libunibreak.built libi2c.built $(SHAREDLIB_OBJS)
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(SHAREDLIB_OBJS)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME_VER)
@@ -573,10 +581,10 @@ alt: | outdir
 endif
 
 ifdef KOBO
-sunxi: | outdir
+sunxi: | outdir libi2c.built
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/ion_heaps utils/ion_heaps.c
 	$(STRIP) --strip-unneeded $(OUT_DIR)/ion_heaps
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/kx122_i2c utils/kx122_i2c.c
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/kx122_i2c utils/kx122_i2c.c $(I2C_LIBS)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/kx122_i2c
 endif
 
@@ -643,6 +651,15 @@ libunibreak.built:
 	$(MAKE)
 	touch libunibreak.built
 
+libi2c.built:
+	mkdir -p LibI2CBuild
+	$(MAKE) -C i2c-tools \
+	BUILD_DYNAMIC_LIB=0 USE_STATIC_LIB=1 BUILD_STATIC_LIB=1 V=1 \
+	CC=$(CC) AR=$(AR) \
+	PREFIX="/" libdir="/lib" DESTDIR="$(CURDIR)/LibI2CBuild" \
+	lib install-lib install-include
+	touch libi2c.built
+
 armcheck:
 ifeq (,$(findstring arm-,$(CC)))
 	$(error You forgot to setup a cross TC, you dummy!)
@@ -690,6 +707,11 @@ devcap: armcheck
 
 libunibreakclean:
 	cd libunibreak && \
+	git reset --hard
+
+libi2cclean:
+	$(MAKE) -C i2c-tools clean
+	cd i2c-tools && \
 	git reset --hard
 
 clean:
@@ -755,8 +777,10 @@ clean:
 	rm -rf Debug/dump
 	rm -rf Debug/Kobo-DevCap-Test.tar.gz
 
-distclean: clean libunibreakclean
+distclean: clean libunibreakclean libi2cclean
 	rm -rf LibUniBreakBuild
 	rm -rf libunibreak.built
+	rm -rf LibI2CBuild
+	rm -rf libi2c.built
 
-.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean utils alt sunxi dump devcap clean distclean
+.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean utils alt sunxi dump devcap clean distclean

@@ -32,20 +32,19 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
-#include <linux/i2c.h>
 #include <linux/i2c-dev.h>
+#include <linux/i2c.h>
 
 #include <sys/ioctl.h>
 
 // We need i2c-dev ;)
-//#include "../i2c-tools/include/i2c/smbus.h"
-//#include "../i2c-tools/lib/smbus.c"
+#include <i2c/smbus.h>
 // We need the KX122 register constants :).
 #include "../eink/kx122-kobo.h"
 
@@ -62,13 +61,13 @@ static int
 	char sysfs_path[PATH_MAX] = { 0 };
 	snprintf(sysfs_path, sizeof(sysfs_path) - 1U, "/sys/bus/i2c/drivers/%s/", driver);
 
-	DIR *dir = opendir(sysfs_path);
+	DIR* dir = opendir(sysfs_path);
 	if (!dir) {
 		fprintf(stderr, "opendir: %m\n");
 		return -(errno);
 	}
 
-	struct dirent *de;
+	struct dirent* de;
 	while ((de = readdir(dir)) != NULL) {
 		printf("Iterating on `%s`\n", de->d_name);
 		// We're looking for a symlink...
@@ -83,7 +82,7 @@ static int
 		// Parse it...
 		if (sscanf(i2c_sym, "%hu-%hx", &i2c_dev->bus, &i2c_dev->address) != 2) {
 			fprintf(stderr, "sscanf\n");
-			i2c_dev->bus = 0U;
+			i2c_dev->bus     = 0U;
 			i2c_dev->address = 0U;
 			return EXIT_FAILURE;
 		} else {

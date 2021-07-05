@@ -30,9 +30,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // WHO_AM_I
 #define KX122_WHO_AM_I 0x0F
 // current sixfacet posititions
-#define KX122_TSCP 0x10
+#define KX122_TSCP     0x10
 // previous six facet positions
-#define KX122_TSPP 0x11
+#define KX122_TSPP     0x11
 
 /* registers bits */
 // WHO_AM_I -value for KX122
@@ -64,4 +64,4 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // z+faceup
 #define KX122_TSPP_FU (0x01 << 0)
 
-#endif // __KX122_REGISTERS_H__
+#endif    // __KX122_REGISTERS_H__
