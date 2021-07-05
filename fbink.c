@@ -2678,6 +2678,26 @@ static int
 	return EXIT_SUCCESS;
 }
 #else
+
+static inline void
+    compute_update_marker(void)
+{
+	// We'll want to increment the marker on each subsequent calls (for API users)...
+	if (lastMarker == 0U) {
+		// Seed it with our PID
+		lastMarker = (uint32_t) getpid();
+	} else {
+		lastMarker++;
+	}
+
+	// NOTE: Make sure update_marker is valid, an invalid marker *may* hang the kernel instead of failing gracefully,
+	//       depending on the device/FW...
+	if (unlikely(lastMarker == 0U)) {
+		lastMarker = ('F' + 'B' + 'I' + 'n' + 'k');
+		// i.e.,  70  + 66  + 73  + 110 + 107
+	}
+}
+
 static int
     refresh(int                     fbfd,
 	    const struct mxcfb_rect region,
@@ -2727,20 +2747,16 @@ static int
 	// So, handle this common switcheroo here...
 	uint32_t wfm = (is_flashing && waveform_mode == WAVEFORM_MODE_AUTO) ? WAVEFORM_MODE_GC16 : waveform_mode;
 	uint32_t upm = is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
-	// We'll want to increment the marker on each subsequent calls (for API users)...
-	if (lastMarker == 0U) {
-		// Seed it with our PID
-		lastMarker = (uint32_t) getpid();
-	} else {
-		lastMarker++;
-	}
 
-	// NOTE: Make sure update_marker is valid, an invalid marker *may* hang the kernel instead of failing gracefully,
-	//       depending on the device/FW...
-	if (unlikely(lastMarker == 0U)) {
-		lastMarker = ('F' + 'B' + 'I' + 'n' + 'k');
-		// i.e.,  70  + 66  + 73  + 110 + 107
+	// Update our own update marker
+#	ifdef FBINK_FOR_KOBO
+	if (!deviceQuirks.isSunxi) {
+		// NOTE: On Sunxi, it's the *kernel* that updates the marker, not us.
+		compute_update_marker();
 	}
+#	else
+	compute_update_marker();
+#	endif
 
 #	if defined(FBINK_FOR_KINDLE)
 	if (deviceQuirks.isKindleRex) {

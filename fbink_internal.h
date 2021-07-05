@@ -670,7 +670,8 @@ static int wait_for_complete_kobo_mk7(int, uint32_t);
 static int refresh_kobo_sunxi(const struct mxcfb_rect, uint32_t, uint32_t, int);
 static int wait_for_complete_kobo_sunxi(uint32_t);
 #	endif    // FBINK_FOR_KINDLE
-#endif            // !FBINK_FOR_LINUX
+static inline void compute_update_marker(void);
+#endif    // !FBINK_FOR_LINUX
 static int refresh(int, const struct mxcfb_rect, uint32_t, int UNUSED_BY_CERVANTES, bool, bool, bool);
 #ifndef FBINK_FOR_LINUX
 #	if defined(FBINK_FOR_KINDLE)
