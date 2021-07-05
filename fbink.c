@@ -2568,6 +2568,11 @@ static int
 static int
     refresh_kobo_sunxi(const struct mxcfb_rect region, uint32_t waveform_mode, uint32_t update_mode, int dithering_mode)
 {
+	// NOTE: In case of issues, enable full verbosity in the DISP driver:
+	//       echo 8 >| /proc/sys/kernel/printk
+	//       echo 9 >| /sys/kernel/debug/dispdbg/dgblvl
+	//       And running klogd so you get everything timestamped in the syslog always helps ;).
+
 	// Convert our mxcfb_rect into a sunxi area_info
 	struct area_info area = { .x_top    = region.left,
 				  .y_top    = region.top,

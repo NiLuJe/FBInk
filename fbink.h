@@ -267,8 +267,8 @@ typedef enum
 	WFM_GU16,    // GL16, but honoring the in-kernel DISP_EINK_SET_GC_CNT
 	//WFM_GCK16,	// GC16, but for white-on-black.
 	WFM_GLK16,    // GL16, but for white-on-black.
-	WFM_CLEAR,    // GC16 local (FIXME: crashy?!)
-	WFM_GC4L,     // GC4 local (FIXME: crashy?)
+	WFM_CLEAR,    // GC16 local (NOTE: Appears to crash the EPDC... [Elipsa on FW 4.28.17826])
+	WFM_GC4L,     // GC4 local (NOTE: Appears to crash the EPDC... [Elipsa on FW 4.28.17826])
 	WFM_GCC16,    // GCC16
 
 	WFM_MAX = 0xFFu,    // uint8_t

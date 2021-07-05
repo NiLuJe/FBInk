@@ -121,7 +121,7 @@ static void
 #	elif defined(FBINK_FOR_POCKETBOOK)
 	    "\t\t\t\tAs well as GC4, A2IN, A2OUT, DU4, REAGL, REAGLD, GC16HQ & GS16.\n"
 #	elif defined(FBINK_FOR_KOBO)
-	    "\t\t\t\tAs well as GC4, REAGL & REAGLD. And GU16, GCK16, GLK16, CLEAR, GC4L & GCC16 on Mk. 8.\n"
+	    "\t\t\t\tAs well as GC4, REAGL & REAGLD. And GU16, GCK16, GLK16 & GCC16 on Mk. 8.\n"
 #	elif defined(FBINK_FOR_CERVANTES)
 	    "\t\t\t\tAs well as GC4, REAGL & REAGLD.\n"
 #	endif
@@ -1671,10 +1671,13 @@ int
 					fbink_cfg.wfm_mode = WFM_GU16;
 				} else if (strcasecmp(optarg, "GLK16") == 0) {
 					fbink_cfg.wfm_mode = WFM_GLK16;
+					// NOTE: These two currently violently murder the EPDC...
+					/*
 				} else if (strcasecmp(optarg, "CLEAR") == 0) {
 					fbink_cfg.wfm_mode = WFM_CLEAR;
 				} else if (strcasecmp(optarg, "GC4L") == 0) {
 					fbink_cfg.wfm_mode = WFM_GC4L;
+				*/
 				} else if (strcasecmp(optarg, "GCC16") == 0) {
 					fbink_cfg.wfm_mode = WFM_GCC16;
 				} else {
