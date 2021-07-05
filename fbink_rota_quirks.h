@@ -26,4 +26,23 @@
 #include "fbink.h"
 #include "fbink_internal.h"
 
+#ifdef FBINK_FOR_KOBO
+#	include <dirent.h>
+#	include <sys/types.h>
+
+#	include <linux/i2c-dev.h>
+#	include <linux/i2c.h>
+
+#	include <sys/ioctl.h>
+
+// We need i2c-dev ;)
+#	include <i2c/smbus.h>
+// We need the KX122 register constants :).
+#	include "eink/kx122-kobo.h"
+
+static int find_accelerometer(const char* driver);
+static int close_accelerometer_i2c(void);
+static int open_accelerometer_i2c(void);
+#endif    // FBINK_FOR_KOBO
+
 #endif

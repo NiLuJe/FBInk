@@ -21,6 +21,118 @@
 
 #include "fbink_rota_quirks.h"
 
+#if defined(FBINK_FOR_KOBO)
+// Figure out on which bus and at which address is the accelerometer driver registered.
+static int
+    find_accelerometer(const char* driver)
+{
+	char sysfs_path[PATH_MAX] = { 0 };
+	snprintf(sysfs_path, sizeof(sysfs_path) - 1U, "/sys/bus/i2c/drivers/%s/", driver);
+
+	DIR* dir = opendir(sysfs_path);
+	if (!dir) {
+		PFWARN("opendir: %m");
+		return ERRCODE(errno);
+	}
+
+	struct dirent* de;
+	while ((de = readdir(dir)) != NULL) {
+		// We're looking for a symlink...
+		if (de->d_type != DT_LNK) {
+			continue;
+		}
+
+		// Parse it...
+		if (sscanf(de->d_name, "%hu-%hx", &sunxiCtx.i2c_dev.bus, &sunxiCtx.i2c_dev.address) != 2) {
+			PFWARN("Failed to parse `%s` via sscanf: %m", de->d_name);
+			sunxiCtx.i2c_dev.bus     = 0U;
+			sunxiCtx.i2c_dev.address = 0U;
+			return ERRCODE(EXIT_FAILURE);
+		} else {
+			break;
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
+
+// Close the I²C fd if necessary
+static int
+    close_accelerometer_i2c(void)
+{
+	int rv = EXIT_SUCCESS;
+
+	if (sunxiCtx.i2c_fd != -1) {
+		if (close(sunxiCtx.i2c_fd) != 0) {
+			PFWARN("close: %m");
+			rv = ERRCODE(EXIT_FAILURE);
+		} else {
+			sunxiCtx.i2c_fd          = -1;
+			sunxiCtx.i2c_dev.bus     = 0U;
+			sunxiCtx.i2c_dev.address = 0U;
+		}
+	}
+
+	return rv;
+}
+
+// Open the right I²C character device for the device's accelerometer...
+static int
+    open_accelerometer_i2c(void)
+{
+	switch (deviceQuirks.deviceId) {
+		case 387U:
+			// Ellipsa, kx122
+			// NOTE: Could be queried via NTXHWConfig ([11] RSensor).
+			if (find_accelerometer("kx122") != EXIT_SUCCESS) {
+				WARN("Failed to find the I²C bus/address combo for the KX122 accelerometer");
+				return ERRCODE(EXIT_FAILURE);
+			}
+			break;
+		default:
+			WARN("Unknown accelerometer for this device");
+			return ERRCODE(ENOSYS);
+			break;
+	}
+
+	int rv = EXIT_SUCCESS;
+
+	// Check if the address looks sane...
+	if (sunxiCtx.i2c_dev.address < 0x08 || sunxiCtx.i2c_dev.address > 0x77) {
+		WARN("I²C address for the accelerometer looks fishy (%#hx), aborting", sunxiCtx.i2c_dev.address);
+		rv = ERRCODE(ENOTSUP);
+		goto cleanup;
+	}
+
+	// Okay, we've got a bus and an address, now open it :).
+	char dev_path[PATH_MAX] = { 0 };
+	snprintf(dev_path, sizeof(dev_path) - 1U, "/dev/i2c-%hu", sunxiCtx.i2c_dev.bus);
+
+	sunxiCtx.i2c_fd = open(dev_path, O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+	if (sunxiCtx.i2c_fd == -1) {
+		PFWARN("open: %m");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// Poke at the right address (force, because there's already a kernel driver on it).
+	if (ioctl(sunxiCtx.i2c_fd, I2C_SLAVE_FORCE, sunxiCtx.i2c_dev.address) < 0) {
+		PFWARN("I2C_SLAVE_FORCE: %m");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	return EXIT_SUCCESS;
+
+cleanup:
+	if (close_accelerometer_i2c() != EXIT_SUCCESS) {
+		rv = ERRCODE(EXIT_FAILURE);
+	}
+
+	return rv;
+}
+#endif    // FBINK_FOR_KOBO
+
 // Try to make sense out of the mess that are native Kobo rotations...
 // Vaguely inspired by Plato's implementation,
 // c.f., https://github.com/baskerville/plato/blob/f45c2da65bc556bc22d664b2f9450f95c550dbf5/src/device.rs#L265-L326

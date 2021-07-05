@@ -189,10 +189,18 @@ typedef uint8_t CHARACTER_FONT_T;
 #endif    // FBINK_WITH_OPENTYPE
 
 #ifdef FBINK_FOR_KOBO
+typedef struct
+{
+	uint16_t bus;
+	uint16_t address;
+} FBInkI2CDev;
+
 // Chuck all the sunxi mess in a single place...
 typedef struct
 {
 	int                       disp_fd;
+	int                       i2c_fd;
+	FBInkI2CDev               i2c_dev;
 	int                       ion_fd;
 	size_t                    alloc_size;
 	struct ion_fd_data        ion;

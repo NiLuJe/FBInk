@@ -76,11 +76,8 @@ static int
 		}
 		printf("It's a symlink!\n");
 
-		char i2c_sym[NAME_MAX] = { 0 };
-		strncpy(i2c_sym, de->d_name, sizeof(i2c_sym) - 1U);
-
 		// Parse it...
-		if (sscanf(i2c_sym, "%hu-%hx", &i2c_dev->bus, &i2c_dev->address) != 2) {
+		if (sscanf(de->d_name, "%hu-%hx", &i2c_dev->bus, &i2c_dev->address) != 2) {
 			fprintf(stderr, "sscanf\n");
 			i2c_dev->bus     = 0U;
 			i2c_dev->address = 0U;
