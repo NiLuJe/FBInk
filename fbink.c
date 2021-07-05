@@ -3327,6 +3327,8 @@ static __attribute__((cold)) void
 	// NOTE: And because, of course, we can't have nice things, if the current working buffer
 	//       (e.g., Nickel's) is laid out in a different rotation,
 	//       the layer overlap detection and subsequent blending royally screws Nickel's own layer... :(.
+	//       A shitty workaround might be to enable NTX_HANDWRITE and switch to DU,
+	//       because it appears to disable the offending checks...
 
 	// Handle Portrait/Landscape swaps
 	if ((vInfo.rotate & 0x01) == 1) {
