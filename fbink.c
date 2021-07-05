@@ -3582,7 +3582,10 @@ static __attribute__((cold)) int
 		// disp_layer_info2
 		sunxiCtx.layer.info.mode        = LAYER_MODE_BUFFER;
 		sunxiCtx.layer.info.zorder      = 0U;
-		sunxiCtx.layer.info.alpha_mode  = 1U;    // Ignore pixel alpha
+		// NOTE: Ignore pixel alpha.
+		//       We actually *do* handle alpha sanely, so,
+		//       if we were actually using an RGB32 fb, we might want to tweak that & pre_multiply...
+		sunxiCtx.layer.info.alpha_mode  = 1U;
 		sunxiCtx.layer.info.alpha_value = 0xFFu;
 
 		// disp_rect
