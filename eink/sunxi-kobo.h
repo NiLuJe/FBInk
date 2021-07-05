@@ -525,6 +525,7 @@ struct cfa_enable
 #define DISP_EINK_SET_UPDATE_CONTROL           0x4013    // HRTIMER shenanigans :?
 #define DISP_EINK_WAIT_FRAME_SYNC_COMPLETE     0x4014    // Returns a jiffy count, timeout 3000ms
 // Affects code flow, I imagine to speed up pen drawing. Also chains a call to EINK_SET_UPDATE_CONTROL.
+// Either of those mean that we no longer get a frame_id out of DISP_EINK_UPDATE2, FWIW.
 #define DISP_EINK_SET_NTX_HANDWRITE_ONOFF      0x4015
 // TODO: Possibly look at the LAYER stuff, if necessary and/or if debugfs doesn't cut it.
 
