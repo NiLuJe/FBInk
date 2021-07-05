@@ -209,6 +209,9 @@ typedef enum
 	//                   May *not* always (or ever) opt to use REAGL on devices where it is otherwise available.
 	//                   This is the default.
 	//                   If you request a flashing update w/ AUTO, FBInk automatically uses GC16 instead.
+	//                   NOTE: On sunxi SoCs, this analysis is done on CPU, instead of by the PxP.
+	//                         As such, it's going to be slower. Prefer explicitly choosing a mode instead.
+	//                         (When in doubt, GL16 is usually a good middle ground).
 	// Common
 	WFM_DU,    // From any to B&W, fast (~260ms), some light ghosting.
 	//            On-screen pixels will be left as-is for new content that is *not* B&W.
