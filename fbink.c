@@ -3654,6 +3654,7 @@ static __attribute__((cold)) int
 
 		sunxiCtx.layer.enable   = true;
 		sunxiCtx.layer.channel  = 0U;
+		// NOTE: Nickel uses layer 0, pickel layer 1.
 		sunxiCtx.layer.layer_id = 1U;
 	}
 #	endif
