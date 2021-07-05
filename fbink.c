@@ -3324,8 +3324,9 @@ static __attribute__((cold)) void
 	}
 	vInfo.rotate = (uint32_t) rotate;
 	ELOG("Canonical rotation: %u (%s)", vInfo.rotate, fb_rotate_to_string(vInfo.rotate));
-	// NOTE: And because, of course, we can't have nice things, if Nickel is currently
-	//       in a different rotation, the layer blending royally screws Nickel's own layer... :(.
+	// NOTE: And because, of course, we can't have nice things, if the current working buffer
+	//       (e.g., Nickel's) is laid out in a different rotation,
+	//       the layer overlap detection and subsequent blending royally screws Nickel's own layer... :(.
 
 	// Handle Portrait/Landscape swaps
 	if ((vInfo.rotate & 0x01) == 1) {
