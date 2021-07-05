@@ -4739,6 +4739,16 @@ int
 		}
 	}
 
+#if defined(FBINK_FOR_KOBO)
+	if (deviceQuirks.isSunxi) {
+		// Also close the acceleromter I²C handle...
+		if (close_accelerometer_i2c() == EXIT_SUCCESS) {
+			// NOTE: Kludge: reset the "skip device id" flag, so we don't skip re-opening it on next init...
+			deviceQuirks.skipId = false;
+		}
+	}
+#endif
+
 	return EXIT_SUCCESS;
 }
 
