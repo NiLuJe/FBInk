@@ -2590,10 +2590,10 @@ static int
 	if (update_mode == UPDATE_MODE_PARTIAL) {
 		update.update_mode |= EINK_RECT_MODE;
 	}
-	if (update_mode == EINK_GLR16_MODE || update_mode == EINK_GLD16_MODE) {
+	if (waveform_mode == EINK_GLR16_MODE || waveform_mode == EINK_GLD16_MODE) {
 		update.update_mode |= EINK_REGAL_MODE;
 	}
-	if (update_mode == EINK_A2_MODE) {
+	if (waveform_mode == EINK_A2_MODE) {
 		update.update_mode |= EINK_MONOCHROME;
 	}
 
