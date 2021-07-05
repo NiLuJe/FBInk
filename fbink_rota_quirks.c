@@ -188,17 +188,20 @@ static int
 		rota = FB_ROTATE_CCW;
 	}
 
-	// If we got an actionable value (e.g., not FU/FD), translate it accordingly for our device...
-	if (rota >= 0) {
-		switch (deviceQuirks.deviceId) {
-			case 387U:
+	// Translate it accordingly for our device...
+	switch (deviceQuirks.deviceId) {
+		case 387U:
+			if (rota >= 0) {
 				// NOTE: The Ellipsa (PCB index 94) is flagged EBRMAIN_ROTATE_R_180 in the kernel driver
 				rota = (rota + 2) & 3;
-				break;
-			default:
-				WARN("Unsupported KX122 translation for this device");
-				break;
-		}
+			} else {
+				// And defaults to FACE_INVERSE_NONE, which actually means we *do* invert them...
+				rota = rota ^ 3;
+			}
+			break;
+		default:
+			WARN("Unsupported KX122 translation for this device");
+			break;
 	}
 
 	return rota;
