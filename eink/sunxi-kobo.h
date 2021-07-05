@@ -34,10 +34,10 @@ struct y8_area_info
 	int              y8_fd;
 	bool             enable;
 	struct area_info get_region;
-	unsigned int     width;
-	unsigned int     height;
-	struct dma_buf*  dmabuf;    // FIXME: WTF would this be doing in userspace?
-	char*            vaddr;
+	unsigned int     width;     // Set by the kernel based on get_region
+	unsigned int     height;    // Ditto.
+	struct dma_buf*  dmabuf;    // Set by the kernel based on y8_fd
+	char*            vaddr;     // Ditto.
 };
 
 enum eink_flash_mode
