@@ -40,13 +40,20 @@
 // We need the KX122 register constants :).
 #	include "eink/kx122-kobo.h"
 
-static int find_accelerometer(const char* driver);
-static int close_accelerometer_i2c(void);
-static int populate_accelerometer_i2c_info(void);
-static int open_accelerometer_i2c(void);
-static int translate_kx122(uint16_t val);
-static int query_kx122(void);
-static int query_accelerometer(void);
+static int                               find_accelerometer(const char* driver);
+static int                               close_accelerometer_i2c(void);
+static int                               populate_accelerometer_i2c_info(void);
+static int                               open_accelerometer_i2c(void);
+static __attribute__((cold)) const char* gyro_state_to_string(int state);
+static int                               translate_kx122(uint16_t val);
+static int                               query_kx122(void);
+static int                               query_accelerometer(void);
+
+// Custom constants for accelerometer translations
+#	define GYRO_STATE_UNKNOWN   -1
+#	define GYRO_STATE_FACE_UP   -2
+#	define GYRO_STATE_FACE_DOWN -3
+
 #endif    // FBINK_FOR_KOBO
 
 #endif

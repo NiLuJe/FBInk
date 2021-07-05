@@ -139,20 +139,41 @@ cleanup:
 	return rv;
 }
 
+static __attribute__((cold)) const char*
+    gyro_state_to_string(int state)
+{
+	switch (state) {
+		case GYRO_STATE_FACE_UP:
+			return "Face Up";
+		case GYRO_STATE_FACE_DOWN:
+			return "Face Down";
+		case FB_ROTATE_UR:
+			return "Upright, 0°";
+		case FB_ROTATE_CW:
+			return "Clockwise, 90°";
+		case FB_ROTATE_UD:
+			return "Upside Down, 180°";
+		case FB_ROTATE_CCW:
+			return "Counter Clockwise, 270°";
+		default:
+			return "Unknown?!";
+	}
+}
+
 // Make sense of the register constants...
 static int
     translate_kx122(uint16_t val)
 {
-	int rota = -1;
+	int rota = GYRO_STATE_UNKNOWN;
 
 	// c.f., drivers/input/sensor/kx122.c
 	// (NOTE: TSCP & TSPP bits are identical ;)).
 	if (val & KX122_TSCP_FU) {
 		// Face Up, which doesn't tell us much
-		rota = -2;
+		rota = GYRO_STATE_FACE_UP;
 	} else if (val & KX122_TSCP_FD) {
 		// Ditto for Face Down
-		rota = -3;
+		rota = GYRO_STATE_FACE_DOWN;
 	}
 
 	// NOTE: While the driver code would imply that this is a bitmask and we could get FU/FD | U/D/L/R,
@@ -195,7 +216,7 @@ static int
 	}
 
 	int rota = translate_kx122((uint16_t) state);
-	LOG("KX122 says the current rotation is: %d", rota);
+	LOG("KX122 says the current rotation is: %#hx -> %d (%s)", (uint16_t) state, rota, gyro_state_to_string(rota));
 	// If we got an actionable value, we're done!
 	if (rota >= 0) {
 		return rota;
@@ -209,7 +230,7 @@ static int
 	}
 
 	rota = translate_kx122((uint16_t) state);
-	LOG("KX122 says the previous rotation was: %d", rota);
+	LOG("KX122 says the previous rotation was: %#hx -> %d (%s)", (uint16_t) state, rota, gyro_state_to_string(rota));
 	// If we got an actionable value, we're done!
 	if (rota >= 0) {
 		return rota;
