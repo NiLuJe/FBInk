@@ -2610,6 +2610,7 @@ static int
 			update.update_mode |= EINK_DITHERING_NTX_Y1;
 		} else {
 			// NOTE: Results are eerily similar to the Y1 algos... (i.e., we do *much* better).
+			//       That's probably because the bitmask handling in eink_image_process_thread is fishy as hell...
 			update.update_mode |= EINK_DITHERING_Y4;
 		}
 	}
