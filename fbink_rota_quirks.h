@@ -44,6 +44,9 @@ static int find_accelerometer(const char* driver);
 static int close_accelerometer_i2c(void);
 static int populate_accelerometer_i2c_info(void);
 static int open_accelerometer_i2c(void);
+static int translate_kx122(uint16_t val);
+static int query_kx122(void);
+static int query_accelerometer(void);
 #endif    // FBINK_FOR_KOBO
 
 #endif

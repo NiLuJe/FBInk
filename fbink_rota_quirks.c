@@ -138,6 +138,117 @@ cleanup:
 
 	return rv;
 }
+
+// Make sense of the register constants...
+static int
+    translate_kx122(uint16_t val)
+{
+	int rota = -1;
+
+	// c.f., drivers/input/sensor/kx122.c
+	// (NOTE: TSCP & TSPP bits are identical ;)).
+	if (val & KX122_TSCP_FU) {
+		// Face Up, which doesn't tell us much
+		rota = -2;
+	} else if (val & KX122_TSCP_FD) {
+		// Ditto for Face Down
+		rota = -3;
+	}
+
+	// NOTE: While the driver code would imply that this is a bitmask and we could get FU/FD | U/D/L/R,
+	//       it unfortunately isn't so...
+	if (val & KX122_TSCP_UP) {
+		rota = FB_ROTATE_UR;
+	} else if (val & KX122_TSCP_RI) {
+		rota = FB_ROTATE_CW;
+	} else if (val & KX122_TSCP_DO) {
+		rota = FB_ROTATE_UD;
+	} else if (val & KX122_TSCP_LE) {
+		rota = FB_ROTATE_CCW;
+	}
+
+	// If we got an actionable value (e.g., not FU/FD), translate it accordingly for our device...
+	if (rota >= 0) {
+		switch (deviceQuirks.deviceId) {
+			case 387U:
+				// NOTE: The Ellipsa (PCB index 94) is flagged EBRMAIN_ROTATE_R_180 in the kernel driver
+				rota = (rota + 2) & 3;
+				break;
+			default:
+				WARN("Unsupported KX122 translation for this device");
+				break;
+		}
+	}
+
+	return rota;
+}
+
+// Poke at the right registers for a KX122
+static int
+    query_kx122(void)
+{
+	// Start by checking the *current* status
+	int32_t state = i2c_smbus_read_byte_data(sunxiCtx.i2c_fd, KX122_TSCP);
+	if (state < 0) {
+		PFWARN("Failed to read TSCP register: %m");
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	int rota = translate_kx122((uint16_t) state);
+	LOG("KX122 says the current rotation is: %d", rota);
+	// If we got an actionable value, we're done!
+	if (rota >= 0) {
+		return rota;
+	}
+
+	// Otherwise, check the *previous* status...
+	state = i2c_smbus_read_byte_data(sunxiCtx.i2c_fd, KX122_TSPP);
+	if (state < 0) {
+		PFWARN("Failed to read TSPP register: %m");
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	rota = translate_kx122((uint16_t) state);
+	LOG("KX122 says the previous rotation was: %d", rota);
+	// If we got an actionable value, we're done!
+	if (rota >= 0) {
+		return rota;
+	} else {
+		WARN("Could not get actionable data out of the KX122 accelerometer");
+		return ERRCODE(ENODATA);
+	}
+}
+
+// And, finally, get the current rotation, according to the accelerometer...
+static int
+    query_accelerometer(void)
+{
+	// We need an I²C handle
+	if (sunxiCtx.i2c_fd == -1) {
+		WARN("No I²C handle, can't query the accelerometer");
+		return ERRCODE(ENOENT);
+	}
+
+	int rv = FB_ROTATE_UR;
+
+	// We need to know how to handle the accelerometer...
+	switch (deviceQuirks.deviceId) {
+		case 387U:
+			// Ellipsa, kx122
+			rv = query_kx122();
+			if (rv < 0) {
+				WARN("Poking at the KX122 accelerometer over I²C was unfruitful");
+				return rv;
+			}
+			break;
+		default:
+			WARN("Unknown accelerometer for this device");
+			return ERRCODE(ENOSYS);
+			break;
+	}
+
+	return rv;
+}
 #endif    // FBINK_FOR_KOBO
 
 // Try to make sense out of the mess that are native Kobo rotations...

@@ -3311,14 +3311,30 @@ static __attribute__((cold)) void
 	//        The driver doesn't actually support 8bpp, so the PUT would be somewhat broken anyway...
 
 	// Make it UR...
-	const uint32_t xres         = vInfo.xres;
-	const uint32_t xres_virtual = vInfo.xres_virtual;
-	const uint32_t yres         = vInfo.yres;
-	const uint32_t yres_virtual = vInfo.yres_virtual;
-	vInfo.xres                  = MIN(xres, yres);
-	vInfo.xres_virtual          = MIN(xres_virtual, yres_virtual);
-	vInfo.yres                  = MAX(xres, yres);
-	vInfo.yres_virtual          = MAX(xres_virtual, yres_virtual);
+	const uint32_t xres = vInfo.xres;
+	const uint32_t yres = vInfo.yres;
+
+	// Query the accelerometer to check the current rotation...
+	int rotate = query_accelerometer();
+	if (rotate < 0) {
+		// FIXME: Only do this for the *first* init, on subsequent calls, keep the last orientation as-is.
+		//        (Add an arg to discriminate init from reinit?).
+		ELOG("Accelerometer is inconclusive, assuming Upright");
+		rotate = FB_ROTATE_UR;
+	}
+	vInfo.rotate = (uint32_t) rotate;
+	ELOG("Canonical rotation: %u (%s)", vInfo.rotate, fb_rotate_to_string(vInfo.rotate));
+
+	// Handle Portrait/Landscape swaps
+	if ((vInfo.rotate & 0x01) == 1) {
+		// Odd, Landscape
+		vInfo.xres = MAX(xres, yres);
+		vInfo.yres = MIN(xres, yres);
+	} else {
+		// Even, Portrait
+		vInfo.xres = MIN(xres, yres);
+		vInfo.yres = MAX(xres, yres);
+	}
 	ELOG("Enabled sunxi quirks (%ux%u -> %ux%u)", xres, yres, vInfo.xres, vInfo.yres);
 
 	// Make the pitch NEON-friendly (when using an RGB32 fb fd)...
