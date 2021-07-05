@@ -528,7 +528,6 @@ struct cfa_enable
 // Either of those mean that we no longer get a frame_id out of DISP_EINK_UPDATE2, FWIW,
 // and the ioctl itself returns 0 instead of the frame_id.
 #define DISP_EINK_SET_NTX_HANDWRITE_ONOFF      0x4015
-// TODO: Possibly look at the LAYER stuff, if necessary and/or if debugfs doesn't cut it.
 
 // And now, massage the insanity that is the disp's character device ioctl handler into some sort of actually usable API...
 // The whole thing is hilariously *not* 64-bit sane (Linux is LP32/LP64, as such, using longs is just asking for trouble...).
@@ -556,7 +555,7 @@ typedef struct
 	// ubuffer[1] (used alternatively as a size_t for the element count of the layer config copy, and an unsigned int for the actual eink_update call. Must be > 0 and <= 16).
 	unsigned long int         layer_num;
 	unsigned long int         update_mode;    // ubuffer[2] (bitmask, eink_update_mode)
-	// ubuffer[3] (Must point to the first disp_layer_config out of at least layer_num...) TODO: This is going to be painful.
+	// ubuffer[3] (Must point to the first disp_layer_config out of at least layer_num...)
 	struct disp_layer_config* lyr_cfg;
 	unsigned long int         u4;        // ubuffer[4], Unused
 	unsigned long int         rotate;    // ubuffer[5] (0, 90, 180, 270; cast to unsigned int)
@@ -569,7 +568,7 @@ typedef struct
 	// ubuffer[1] (used alternatively as a size_t for the element count of the layer config copy, and an unsigned int for the actual eink_update call. Must be > 0 and <= 16).
 	unsigned long int          layer_num;
 	unsigned long int          update_mode;    // ubuffer[2] (bitmask, eink_update_mode)
-	// ubuffer[3] (Must point to the first disp_layer_config2 out of at least layer_num...) TODO: This is going to be even more painful.
+	// ubuffer[3] (Must point to the first disp_layer_config2 out of at least layer_num...)
 	struct disp_layer_config2* lyr_cfg2;
 	// ubuffer[4], *outarg*, set on success (update_order in the eink buffer/pipeline manager; no idea what relation it has compared to the layer_info's id...).
 	unsigned int*              frame_id;
