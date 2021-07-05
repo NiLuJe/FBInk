@@ -2599,18 +2599,17 @@ static int
 		update.update_mode |= EINK_REGAL_MODE;
 	}
 	if (waveform_mode == EINK_A2_MODE) {
+		// NOTE: Unlike on mxcfb, this isn't HW assisted, this just uses the "simple" Y8->Y1 dither algorithm...
 		update.update_mode |= EINK_MONOCHROME;
 	}
 
 	// And now for the dithering flags. They're all SW only, so, stuff 'em behind LEGACY...
 	if (dithering_mode == HWD_LEGACY) {
-		// As usual, get rid of the MONOCHROME flag when dithering
-		update.update_mode &= (unsigned int) ~EINK_MONOCHROME;
-
-		if (waveform_mode == EINK_A2_MODE || waveform_mode == EINK_DU_MODE) {
-			// TODO: Check the other Y1 modes...
+		if (waveform_mode == EINK_DU_MODE) {
+			// NOTE: A2 is flagged EINK_MONOCHROME, which actually just flags it EINK_DITHERING_SIMPLE...
 			update.update_mode |= EINK_DITHERING_NTX_Y1;
 		} else {
+			// NOTE: Results are eerily similar to the Y1 algos... (i.e., we do *much* better).
 			update.update_mode |= EINK_DITHERING_Y4;
 		}
 	}
