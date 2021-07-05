@@ -576,6 +576,8 @@ ifdef KOBO
 sunxi: | outdir
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/ion_heaps utils/ion_heaps.c
 	$(STRIP) --strip-unneeded $(OUT_DIR)/ion_heaps
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/kx122_i2c utils/kx122_i2c.c
+	$(STRIP) --strip-unneeded $(OUT_DIR)/kx122_i2c
 endif
 
 dump: static
