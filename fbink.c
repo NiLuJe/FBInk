@@ -3305,7 +3305,7 @@ static __attribute__((cold)) void
 	vInfo.yres_virtual = ALIGN(vInfo.yres, 128);
 	ELOG("yres_virtual -> %u", vInfo.yres_virtual);
 	*/
-	// But we're actually using Y8 fb y8_fd, and apparently,
+	// But we're actually using a Y8 fb y8_fd, and apparently,
 	// that codepath doesn't support/expect pitch alignment trickeries...
 	vInfo.xres_virtual = vInfo.xres;
 	ELOG("xres_virtual -> %u", vInfo.xres_virtual);
@@ -3601,13 +3601,15 @@ static __attribute__((cold)) int
 		// disp_rectsz
 		sunxiCtx.layer.info.fb.size[0].width  = sunxiCtx.layer.info.screen_win.width;
 		sunxiCtx.layer.info.fb.size[0].height = sunxiCtx.layer.info.screen_win.height;
-		sunxiCtx.layer.info.fb.size[1].width  = sunxiCtx.layer.info.screen_win.width;
-		sunxiCtx.layer.info.fb.size[1].height = sunxiCtx.layer.info.screen_win.height;
-		sunxiCtx.layer.info.fb.size[2].width  = sunxiCtx.layer.info.screen_win.width;
-		sunxiCtx.layer.info.fb.size[2].height = sunxiCtx.layer.info.screen_win.height;
+		// NOTE: See align below, we don't need those when using a Y8 fb y8_fd,
+		//       but we *probably* do when using an RGB32 fb fd...
+		sunxiCtx.layer.info.fb.size[1].width  = 0U;
+		sunxiCtx.layer.info.fb.size[1].height = 0U;
+		sunxiCtx.layer.info.fb.size[2].width  = 0U;
+		sunxiCtx.layer.info.fb.size[2].height = 0U;
 
 		// NOTE: Used to compute the scanline pitch in bytes (e.g., pitch = ALIGN(pixels * components, align),
-		//       except when using a y8_fd, apparently...
+		//       except when using a Y8 fb y8_fd, apparently...
 		// NOTE: Must really *NOT* be set to 0 when using a RGB32 fb fd, though,
 		//       (for *any* of them, even if we only actually have a single buffer),
 		//       c.f., kobo_sunxi_fb_fixup ;).
