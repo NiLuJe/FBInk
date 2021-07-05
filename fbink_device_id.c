@@ -789,6 +789,10 @@ static void
 			break;
 		case 387U:    // Elipsa (Europa)
 			deviceQuirks.isSunxi      = true;
+			// Sunxi means no HW inversion :'(.
+			// (And the nightmode_test flag toggled via the debugfs nightenable/nightdisable command doesn't count,
+			// it just flips the buffer in C, and forces the *K waveform modes).
+			deviceQuirks.canHWInvert  = false;
 			// Has an accelerometer, but Nickel doesn't update the rotate flag, as it's meaningless.
 			// That said, "native" rotation still matches the usual layout,
 			// and Nickel's "Portrait" will indeed set the EINK_UPDATE2 rotate flag to 270,
