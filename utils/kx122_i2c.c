@@ -38,13 +38,16 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <linux/i2c.h>
+#include <linux/i2c-dev.h>
+
 #include <sys/ioctl.h>
 
 // We need i2c-dev ;)
 //#include "../i2c-tools/include/i2c/smbus.h"
 //#include "../i2c-tools/lib/smbus.c"
 // We need the KX122 register constants :).
-//#include "../eink/kx122-kobo.h"
+#include "../eink/kx122-kobo.h"
 
 typedef struct
 {
@@ -94,10 +97,55 @@ static int
 int
     main(void)
 {
+	int rv = EXIT_SUCCESS;
+
+	// Find where to poke at...
 	FBInkI2CDev i2c_dev = { 0 };
 
-	find_accelerometer("kx122", &i2c_dev);
+	if (find_accelerometer("kx122", &i2c_dev) != EXIT_SUCCESS) {
+		fprintf(stderr, "Failed to find the accelerometer!\n");
+		return EXIT_FAILURE;
+	}
 	printf("KX122 is on bus %hu @ addr %#x\n", i2c_dev.bus, i2c_dev.address);
 
-	return EXIT_SUCCESS;
+	// Open the right I2C character device
+	char dev_path[PATH_MAX] = { 0 };
+	snprintf(dev_path, sizeof(dev_path) - 1U, "/dev/i2c-%hu", i2c_dev.bus);
+
+	int i2c_fd = open(dev_path, O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+	if (i2c_fd == -1) {
+		fprintf(stderr, "open: %m\n");
+		return EXIT_FAILURE;
+	}
+
+	// Poke at the right address (force, because there's already a kernel driver on it).
+	if (ioctl(i2c_fd, I2C_SLAVE_FORCE, i2c_dev.address) < 0) {
+		fprintf(stderr, "I2C_SLAVE_FORCE: %m\n");
+		rv = EXIT_FAILURE;
+		goto cleanup;
+	}
+
+	// And, finally, poke at the registers...
+	int32_t current_state = i2c_smbus_read_byte_data(i2c_fd, KX122_TSCP);
+	if (current_state < 0) {
+		fprintf(stderr, "Failed to read TSCP register!\n");
+		rv = EXIT_FAILURE;
+		goto cleanup;
+	}
+
+	int32_t previous_state = i2c_smbus_read_byte_data(i2c_fd, KX122_TSPP);
+	if (previous_state < 0) {
+		fprintf(stderr, "Failed to read TSPP register!\n");
+		rv = EXIT_FAILURE;
+		goto cleanup;
+	}
+
+	printf("TSCP: %hx // TSPP: %hx\n", (uint16_t) current_state, (uint16_t) previous_state);
+
+cleanup:
+	if (i2c_fd != -1) {
+		close(i2c_fd);
+	}
+
+	return rv;
 }
