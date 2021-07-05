@@ -2611,6 +2611,10 @@ static int
 		} else {
 			// NOTE: Results are eerily similar to the Y1 algos... (i.e., we do *much* better).
 			//       That's probably because the bitmask handling in eink_image_process_thread is fishy as hell...
+			//       (The constants are slightly broken in that *every* EINK_DITHERING_?? flag
+			//       includes the same bit as EINK_DITHERING_Y1,
+			//       and the check starts by checking for... EINK_DITHERING_Y1 >_<").
+			//       TL;DR: No matter what you request, the kernel always uses EINK_DITHERING_Y1 :(.
 			update.update_mode |= EINK_DITHERING_Y4;
 		}
 	}
