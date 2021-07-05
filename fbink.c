@@ -3596,7 +3596,9 @@ static __attribute__((cold)) int
 		sunxiCtx.layer.info.out_trd_mode = 0;
 
 		// disp_fb_info2
-		// NOTE: fd & y8_fd are handled in mmap_ion
+		// NOTE: fd & y8_fd are handled in mmap_ion.
+		//       And they are *explicitly* set to 0 and not -1 when unused,
+		//       because that's what the disp code (mostly) expects (*sigh*).
 
 		// disp_rectsz
 		sunxiCtx.layer.info.fb.size[0].width  = sunxiCtx.layer.info.screen_win.width;
