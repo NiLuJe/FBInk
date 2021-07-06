@@ -35,6 +35,8 @@ static int
 		return ERRCODE(errno);
 	}
 
+	int rv = EXIT_SUCCESS;
+
 	struct dirent* de;
 	while ((de = readdir(dir)) != NULL) {
 		// We're looking for a symlink...
@@ -42,18 +44,22 @@ static int
 			continue;
 		}
 
-		// Parse it...
+		// There should only one, so, just parse it...
 		if (sscanf(de->d_name, "%hu-%hx", &sunxiCtx.i2c_dev.bus, &sunxiCtx.i2c_dev.address) != 2) {
 			PFWARN("Failed to parse `%s` via sscanf: %m", de->d_name);
 			sunxiCtx.i2c_dev.bus     = 0U;
 			sunxiCtx.i2c_dev.address = 0U;
-			return ERRCODE(EXIT_FAILURE);
+			rv                       = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
 		} else {
 			break;
 		}
 	}
 
-	return EXIT_SUCCESS;
+cleanup:
+	closedir(dir);
+
+	return rv;
 }
 
 // Close the I²C fd if necessary

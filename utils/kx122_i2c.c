@@ -67,6 +67,8 @@ static int
 		return -(errno);
 	}
 
+	int rv = EXIT_SUCCESS;
+
 	struct dirent* de;
 	while ((de = readdir(dir)) != NULL) {
 		printf("Iterating on `%s`\n", de->d_name);
@@ -76,18 +78,22 @@ static int
 		}
 		printf("It's a symlink!\n");
 
-		// Parse it...
+		// There should only one, so, just parse it...
 		if (sscanf(de->d_name, "%hu-%hx", &i2c_dev->bus, &i2c_dev->address) != 2) {
 			fprintf(stderr, "sscanf\n");
 			i2c_dev->bus     = 0U;
 			i2c_dev->address = 0U;
-			return EXIT_FAILURE;
+			rv               = -(EXIT_FAILURE);
+			goto cleanup;
 		} else {
 			break;
 		}
 	}
 
-	return EXIT_SUCCESS;
+cleanup:
+	closedir(dir);
+
+	return rv;
 }
 
 int
