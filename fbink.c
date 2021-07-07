@@ -3354,19 +3354,19 @@ static __attribute__((cold)) void
 	}
 
 	// Query the layout of Nickel's layer...
-	struct disp_layer_config2 nickel_layer = {
+	struct disp_layer_config nickel_layer = {
 		.channel  = 0U,
 		.layer_id = 0U,
 	};
 	sunxi_disp_eink_ioctl cmd = { 0 };
-	cmd.get_layer2.screen_id  = 0;
-	cmd.get_layer2.lyr_cfg2   = &nickel_layer;
-	cmd.get_layer2.layer_num  = 1U;
+	cmd.get_layer.screen_id   = 0;
+	cmd.get_layer.lyr_cfg     = &nickel_layer;
+	cmd.get_layer.layer_num   = 1U;
 	if (sunxiCtx.disp_fd == -1) {
 		sunxiCtx.disp_fd = open("/dev/disp", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
 	}
-	if (ioctl(sunxiCtx.disp_fd, DISP_LAYER_GET_CONFIG2, &cmd) < 0) {
-		PFWARN("DISP_LAYER_GET_CONFIG2: %m");
+	if (ioctl(sunxiCtx.disp_fd, DISP_LAYER_GET_CONFIG, &cmd) < 0) {
+		PFWARN("DISP_LAYER_GET_CONFIG: %m");
 		// Just warn, this is not great, but non-fatal ;).
 	} else {
 		ELOG("Nickel layout: %ux%u", nickel_layer.info.screen_win.width, nickel_layer.info.screen_win.height);
@@ -3382,6 +3382,14 @@ static __attribute__((cold)) void
 		ELOG("channel: %u", nickel_layer.channel);
 		ELOG("layer_id: %u", nickel_layer.layer_id);
 	}
+
+	int rv = -4;
+	memset(&cmd, 0, sizeof(cmd));
+	cmd.get.screen_id = 0;
+	rv                = ioctl(sunxiCtx.disp_fd, DISP_GET_SCN_WIDTH, &cmd);
+	ELOG("DISP_GET_SCN_WIDTH: %d", rv);
+	rv = ioctl(sunxiCtx.disp_fd, DISP_GET_SCN_HEIGHT, &cmd);
+	ELOG("DISP_GET_SCN_HEIGHT: %d", rv);
 
 	vInfo.rotate = (uint32_t) rotate;
 	ELOG("Canonical rotation: %u (%s)", vInfo.rotate, fb_rotate_to_string(vInfo.rotate));

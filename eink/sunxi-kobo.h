@@ -532,6 +532,9 @@ struct cfa_enable
 #define DISP_EINK_SET_NTX_HANDWRITE_ONOFF      0x4015
 
 // Not directly e-Ink related, but possibly useful nonetheless
+#define DISP_GET_SCN_WIDTH     0x0007
+#define DISP_GET_SCN_HEIGHT    0x0008
+#define DISP_LAYER_GET_CONFIG  0x00048
 #define DISP_LAYER_GET_CONFIG2 0x004a
 
 // And now, massage the insanity that is the disp's character device ioctl handler into some sort of actually usable API...
@@ -639,6 +642,19 @@ typedef struct
 	unsigned long int          layer_num;    // ubuffer[0]
 } sunxi_disp_layer_get_config2;
 
+typedef struct
+{
+	int                       screen_id;    // ubuffer[0], handled in the prologue
+	// In a different order than EINK_UPDATE* commands...
+	struct disp_layer_config* lyr_cfg;      // ubuffer[1], set channel & layer_id to identify the layer to return
+	unsigned long int         layer_num;    // ubuffer[0]
+} sunxi_disp_layer_get_config;
+
+typedef struct
+{
+	int screen_id;    // ubuffer[0], handled in the prologue
+} sunxi_disp_layer_generic_get;
+
 // Shove everything into an union to ensure we never feed garbage to the ioctl handler for commands that actuall read *less* than the prologue...
 typedef union
 {
@@ -658,7 +674,9 @@ typedef union
 	sunxi_disp_eink_wait_frame_sync_complete wait_for;
 	sunxi_disp_eink_set_ntx_handwrite_onoff  toggle_handw;
 
+	sunxi_disp_layer_get_config  get_layer;
 	sunxi_disp_layer_get_config2 get_layer2;
+	sunxi_disp_layer_generic_get get;
 } sunxi_disp_eink_ioctl;
 
 #endif    // _DISP_INCLUDE_H_
