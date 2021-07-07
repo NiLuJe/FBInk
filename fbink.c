@@ -3316,13 +3316,18 @@ static __attribute__((cold)) void
 	const uint32_t xres = vInfo.xres;
 	const uint32_t yres = vInfo.yres;
 
+	int rotate;
 	// Query the accelerometer to check the current rotation...
-	int rotate = query_accelerometer();
-	if (rotate < 0) {
-		// FIXME: Only do this for the *first* init, on subsequent calls, keep the last orientation as-is.
-		//        (Add an arg to discriminate init from reinit?).
-		ELOG("Accelerometer is inconclusive, assuming Upright");
+	if (sunxiCtx.no_rota) {
 		rotate = FB_ROTATE_UR;
+	} else {
+		rotate = query_accelerometer();
+		if (rotate < 0) {
+			// FIXME: Only do this for the *first* init, on subsequent calls, keep the last orientation as-is.
+			//        (Add an arg to discriminate init from reinit?).
+			ELOG("Accelerometer is inconclusive, assuming Upright");
+			rotate = FB_ROTATE_UR;
+		}
 	}
 	vInfo.rotate = (uint32_t) rotate;
 	ELOG("Canonical rotation: %u (%s)", vInfo.rotate, fb_rotate_to_string(vInfo.rotate));
@@ -3409,13 +3414,21 @@ static __attribute__((cold)) int
 		} else if (deviceQuirks.isSunxi) {
 			ELOG("Enabled sunxi quirks");
 
-			// Lookup the bus id & address for our accelerometer...
-			if (populate_accelerometer_i2c_info() != EXIT_SUCCESS) {
-				WARN("Unable to handle rotation detection: assuming UR");
+			// NOTE: Allow forgoing dealing with the accelerometer.
+			//       That implies that we'll always assume the screen is UR!
+			if (getenv("FBINK_NO_GYRO")) {
+				ELOG(
+				    "Accelerometer handling has been disabled: we'll always consider the screen to be UR!");
+				sunxiCtx.no_rota = true;
 			} else {
-				// The fb fixup requires being able to poke at the accelerometer...
-				if (open_accelerometer_i2c() != EXIT_SUCCESS) {
+				// Lookup the bus id & address for our accelerometer...
+				if (populate_accelerometer_i2c_info() != EXIT_SUCCESS) {
 					WARN("Unable to handle rotation detection: assuming UR");
+				} else {
+					// The fb fixup requires being able to poke at the accelerometer...
+					if (open_accelerometer_i2c() != EXIT_SUCCESS) {
+						WARN("Unable to handle rotation detection: assuming UR");
+					}
 				}
 			}
 		}
@@ -3432,8 +3445,7 @@ static __attribute__((cold)) int
 		//       because its kernel doesn't ship with an EPDC driver, despite running on an i.MX 7D...
 		if (deviceQuirks.deviceId == 2U) {
 			// ... unless we're running under the https://github.com/ddvk/remarkable2-framebuffer shim
-			char* rm2fb = getenv("RM2FB_SHIM");
-			if (rm2fb) {
+			if (getenv("RM2FB_SHIM")) {
 				ELOG(
 				    "Running under the rm2fb compatibility shim (version %s), functionality may be limited",
 				    rm2fb);
