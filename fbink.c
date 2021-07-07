@@ -2726,6 +2726,8 @@ static inline void
 	}
 }
 
+// FIXME: Ideally, we'd just take a pointer to an FBInkConfig* instead of splitting a few things off of it,
+//        but doing it is currently mildly helpful because of fbink_print_ot's FBInkConfig-less feature...
 static int
     refresh(int                     fbfd,
 	    const struct mxcfb_rect region,
@@ -7761,6 +7763,7 @@ static __attribute__((cold)) const char*
 }
 
 // Small public wrapper around refresh(), without the caller having to depend on mxcfb headers
+// FIXME: Create a v2 that takes a pointer to an FBInkRect?
 int
     fbink_refresh(int fbfd                              UNUSED_BY_LINUX,
 		  uint32_t region_top                   UNUSED_BY_LINUX,
