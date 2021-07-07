@@ -2634,6 +2634,36 @@ static int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
+	// Query the layout of our own layer...
+	struct disp_layer_config2 nickel_layer = {
+		.channel  = 0U,
+		.layer_id = 1U,
+	};
+	sunxi_disp_eink_ioctl cmd = { 0 };
+	cmd.get_layer2.screen_id  = 0;
+	cmd.get_layer2.lyr_cfg2   = &nickel_layer;
+	cmd.get_layer2.layer_num  = 1U;
+	if (sunxiCtx.disp_fd == -1) {
+		sunxiCtx.disp_fd = open("/dev/disp", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+	}
+	if (ioctl(sunxiCtx.disp_fd, DISP_LAYER_GET_CONFIG2, &cmd) < 0) {
+		PFWARN("DISP_LAYER_GET_CONFIG2: %m");
+		// Just warn, this is not great, but non-fatal ;).
+	} else {
+		ELOG("FBInk layout: %ux%u", nickel_layer.info.screen_win.width, nickel_layer.info.screen_win.height);
+		ELOG("info_mode: %u", nickel_layer.info.mode);
+		ELOG("alpha_mode: %u", nickel_layer.info.alpha_mode);
+		ELOG("alpha_value: %u", nickel_layer.info.alpha_value);
+		ELOG("size[0].width: %u", nickel_layer.info.fb.size[0].width);
+		ELOG("size[0].height: %u", nickel_layer.info.fb.size[0].height);
+		ELOG("align[0]: %u", nickel_layer.info.fb.align[0]);
+		ELOG("crop.width: %lld", nickel_layer.info.fb.crop.width >> 32);
+		ELOG("crop.height: %lld", nickel_layer.info.fb.crop.height >> 32);
+		ELOG("enable: %d", nickel_layer.enable);
+		ELOG("channel: %u", nickel_layer.channel);
+		ELOG("layer_id: %u", nickel_layer.layer_id);
+	}
+
 	return EXIT_SUCCESS;
 }
 
@@ -3326,17 +3356,31 @@ static __attribute__((cold)) void
 	// Query the layout of Nickel's layer...
 	struct disp_layer_config2 nickel_layer = {
 		.channel  = 0U,
-		.layer_id = 1U,
+		.layer_id = 0U,
 	};
 	sunxi_disp_eink_ioctl cmd = { 0 };
 	cmd.get_layer2.screen_id  = 0;
 	cmd.get_layer2.lyr_cfg2   = &nickel_layer;
 	cmd.get_layer2.layer_num  = 1U;
+	if (sunxiCtx.disp_fd == -1) {
+		sunxiCtx.disp_fd = open("/dev/disp", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+	}
 	if (ioctl(sunxiCtx.disp_fd, DISP_LAYER_GET_CONFIG2, &cmd) < 0) {
 		PFWARN("DISP_LAYER_GET_CONFIG2: %m");
 		// Just warn, this is not great, but non-fatal ;).
 	} else {
 		ELOG("Nickel layout: %ux%u", nickel_layer.info.screen_win.width, nickel_layer.info.screen_win.height);
+		ELOG("info_mode: %u", nickel_layer.info.mode);
+		ELOG("alpha_mode: %u", nickel_layer.info.alpha_mode);
+		ELOG("alpha_value: %u", nickel_layer.info.alpha_value);
+		ELOG("size[0].width: %u", nickel_layer.info.fb.size[0].width);
+		ELOG("size[0].height: %u", nickel_layer.info.fb.size[0].height);
+		ELOG("align[0]: %u", nickel_layer.info.fb.align[0]);
+		ELOG("crop.width: %lld", nickel_layer.info.fb.crop.width >> 32);
+		ELOG("crop.height: %lld", nickel_layer.info.fb.crop.height >> 32);
+		ELOG("enable: %d", nickel_layer.enable);
+		ELOG("channel: %u", nickel_layer.channel);
+		ELOG("layer_id: %u", nickel_layer.layer_id);
 	}
 
 	vInfo.rotate = (uint32_t) rotate;
@@ -4608,7 +4652,9 @@ static int
 	}
 
 	// And finally, register as a DISP client, too
-	sunxiCtx.disp_fd = open("/dev/disp", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+	if (sunxiCtx.disp_fd == -1) {
+		sunxiCtx.disp_fd = open("/dev/disp", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+	}
 	if (sunxiCtx.disp_fd == -1) {
 		PFWARN("open: %m");
 		rv = ERRCODE(EXIT_FAILURE);
