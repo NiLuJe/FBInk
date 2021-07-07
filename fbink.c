@@ -2665,6 +2665,32 @@ static int
 #	endif    // FBINK_FOR_KINDLE
 #endif            // !FBINK_FOR_LINUX
 
+int
+    fbink_toggle_sunxi_ntx_pen_mode(bool toggle UNUSED_BY_NOTKOBO)
+{
+#ifndef FBINK_FOR_KOBO
+	PFWARN("This feature is not supported on your device");
+	return ERRCODE(ENOSYS);
+#else
+	if (!deviceQuirks.isSunxi) {
+		PFWARN("This feature is not supported on your device");
+		return ERRCODE(ENOSYS);
+	}
+
+	// Use the union to avoid passing garbage to the ioctl handler...
+	sunxi_disp_eink_ioctl cmd = { .toggle_handw.enable = toggle };
+
+	int rv = ioctl(sunxiCtx.disp_fd, DISP_EINK_SET_NTX_HANDWRITE_ONOFF, &cmd);
+
+	if (rv < 0) {
+		PFWARN("DISP_EINK_SET_NTX_HANDWRITE_ONOFF: %m");
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	return EXIT_SUCCESS;
+#endif
+}
+
 // And finally, dispatch the right refresh request for our HW...
 #ifdef FBINK_FOR_LINUX
 // NOP when we don't have an eInk screen ;).

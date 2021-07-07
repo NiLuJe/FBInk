@@ -1084,6 +1084,22 @@ FBINK_API uint8_t  fbink_rota_native_to_canonical(uint32_t rotate);
 FBINK_API uint32_t fbink_rota_canonical_to_native(uint8_t rotate);
 
 //
+// The functions below are tied to specific capabilities on Kobo devices with a sunxi SoC (e.g., the Elipsa).
+//
+// Toggle the "pen" refresh mode. c.f., eink/sunxi-kobo.h @ DISP_EINK_SET_NTX_HANDWRITE_ONOFF for more details.
+// Returns -(ENOSYS) on unsupported platforms.
+// the TL;DR being that it's only truly active when using A2 & DU waveform modes.
+// And since, on sunxi, A2's MONOCHROME flag is just *software* dithering, you might actually prefer DU.
+// (And/or we ought to just get rid of EINK_MONOCHROME on this platform, TBD ;)).
+// NOTE: Outside of tracing pen input, it has another interesting side-effect:
+//       since it disables the layer overlap check, it allows you to display stuff in a different layout
+//       than the current working buffer without the (heavy) visual artifacts that would otherwise imply.
+//       c.f., kobo_sunxi_fb_fixup @ fbink.c for more details.
+// NOTE: Another option for "dealing" with these rotation mishaps is to just assume the screen is always Upright.
+//       You can achieve that by making sure FBINK_NO_GYRO is set in your env (*before* initializing FBInk).
+FBINK_API int fbink_toggle_sunxi_ntx_pen_mode(bool toggle);
+
+//
 ///
 //
 // When you intend to keep the framebuffer fd open for the lifecycle of your program:
