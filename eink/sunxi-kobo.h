@@ -531,7 +531,8 @@ struct cfa_enable
 // which might come in handy when dealing with rotation...
 #define DISP_EINK_SET_NTX_HANDWRITE_ONOFF      0x4015
 
-// Not directly e-Ink related, but possibly useful nonetheless
+// Not directly e-Ink related, but possibly useful nonetheless on paper,
+// although in practice, they don't appear to be doing anything useful on eInk devices :/.
 #define DISP_GET_SCN_WIDTH     0x0007
 #define DISP_GET_SCN_HEIGHT    0x0008
 #define DISP_LAYER_GET_CONFIG  0x00048
@@ -639,7 +640,7 @@ typedef struct
 	int                        screen_id;    // ubuffer[0], handled in the prologue
 	// In a different order than EINK_UPDATE* commands...
 	struct disp_layer_config2* lyr_cfg2;     // ubuffer[1], set channel & layer_id to identify the layer to return
-	unsigned long int          layer_num;    // ubuffer[0]
+	unsigned long int          layer_num;    // ubuffer[2]
 } sunxi_disp_layer_get_config2;
 
 typedef struct
@@ -647,7 +648,7 @@ typedef struct
 	int                       screen_id;    // ubuffer[0], handled in the prologue
 	// In a different order than EINK_UPDATE* commands...
 	struct disp_layer_config* lyr_cfg;      // ubuffer[1], set channel & layer_id to identify the layer to return
-	unsigned long int         layer_num;    // ubuffer[0]
+	unsigned long int         layer_num;    // ubuffer[2]
 } sunxi_disp_layer_get_config;
 
 typedef struct
