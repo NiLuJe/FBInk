@@ -2582,8 +2582,9 @@ static int
 				  .x_bottom = region.left + region.width - 1,
 				  .y_bottom = region.top + region.height - 1 };
 
-	// Devise the required rotation, given the current fb rotate flag
-	// FIXME: Actually update said flag based on the gyro in init.
+	// Devise the required rotation, given the current "fb" rotate flag.
+	// This is unfortunately not as nice and easy as usual,
+	// c.f., kobo_sunxi_fb_fixup for all the gory details...
 	uint32_t rota = ((vInfo.rotate ^ deviceQuirks.ntxBootRota) * 90U);
 
 	sunxi_disp_eink_update2 update = { .area        = &area,
@@ -3671,7 +3672,6 @@ static __attribute__((cold)) int
 		canonical_rota = fbink_rota_native_to_canonical(vInfo.rotate);
 		ELOG("Canonical rotation: %hhu (%s)", canonical_rota, fb_rotate_to_string(canonical_rota));
 	}
-	// TODO: Actually fix it on Sunxi ;).
 
 	// Setup the disp layer insanity on sunxi...
 	if (deviceQuirks.isSunxi) {
@@ -3687,7 +3687,6 @@ static __attribute__((cold)) int
 		// disp_rect
 		sunxiCtx.layer.info.screen_win.x      = 0;
 		sunxiCtx.layer.info.screen_win.y      = 0;
-		// FIXME: Handle rota
 		sunxiCtx.layer.info.screen_win.width  = vInfo.xres;
 		sunxiCtx.layer.info.screen_win.height = vInfo.yres;
 
