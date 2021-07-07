@@ -3322,6 +3322,23 @@ static __attribute__((cold)) void
 		ELOG("Accelerometer is inconclusive, assuming Upright");
 		rotate = FB_ROTATE_UR;
 	}
+
+	// Query the layout of Nickel's layer...
+	struct disp_layer_config2 nickel_layer = {
+		.channel  = 0U,
+		.layer_id = 1U,
+	};
+	sunxi_disp_eink_ioctl cmd = { 0 };
+	cmd.get_layer2.screen_id  = 0;
+	cmd.get_layer2.lyr_cfg2   = &nickel_layer;
+	cmd.get_layer2.layer_num  = 1U;
+	if (ioctl(sunxiCtx.disp_fd, DISP_LAYER_GET_CONFIG2, &cmd) < 0) {
+		PFWARN("DISP_LAYER_GET_CONFIG2: %m");
+		// Just warn, this is not great, but non-fatal ;).
+	} else {
+		ELOG("Nickel layout: %ux%u", nickel_layer.info.screen_win.width, nickel_layer.info.screen_win.height);
+	}
+
 	vInfo.rotate = (uint32_t) rotate;
 	ELOG("Canonical rotation: %u (%s)", vInfo.rotate, fb_rotate_to_string(vInfo.rotate));
 	// NOTE: And because, of course, we can't have nice things, if the current working buffer

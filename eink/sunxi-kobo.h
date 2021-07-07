@@ -531,6 +531,9 @@ struct cfa_enable
 // which might come in handy when dealing with rotation...
 #define DISP_EINK_SET_NTX_HANDWRITE_ONOFF      0x4015
 
+// Not directly e-Ink related, but possibly useful nonetheless
+#define DISP_LAYER_GET_CONFIG2 0x004a
+
 // And now, massage the insanity that is the disp's character device ioctl handler into some sort of actually usable API...
 // The whole thing is hilariously *not* 64-bit sane (Linux is LP32/LP64, as such, using longs is just asking for trouble...).
 
@@ -628,6 +631,14 @@ typedef struct
 	bool enable;
 } sunxi_disp_eink_set_ntx_handwrite_onoff;
 
+typedef struct
+{
+	int                        screen_id;    // ubuffer[0], handled in the prologue
+	// In a different order than EINK_UPDATE* commands...
+	struct disp_layer_config2* lyr_cfg2;     // ubuffer[1], set channel & layer_id to identify the layer to return
+	unsigned long int          layer_num;    // ubuffer[0]
+} sunxi_disp_layer_get_config2;
+
 // Shove everything into an union to ensure we never feed garbage to the ioctl handler for commands that actuall read *less* than the prologue...
 typedef union
 {
@@ -646,6 +657,8 @@ typedef union
 	sunxi_disp_eink_set_update_control       upd_ctrl;
 	sunxi_disp_eink_wait_frame_sync_complete wait_for;
 	sunxi_disp_eink_set_ntx_handwrite_onoff  toggle_handw;
+
+	sunxi_disp_layer_get_config2 get_layer2;
 } sunxi_disp_eink_ioctl;
 
 #endif    // _DISP_INCLUDE_H_
