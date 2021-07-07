@@ -678,7 +678,8 @@ static int wait_for_complete_kobo_sunxi(uint32_t);
 #	endif    // FBINK_FOR_KINDLE
 static inline void compute_update_marker(void);
 #endif    // !FBINK_FOR_LINUX
-static int refresh(int, const struct mxcfb_rect, uint32_t, int UNUSED_BY_CERVANTES, bool, bool, bool);
+static int
+    refresh(int, const struct mxcfb_rect, WFM_MODE_INDEX_T, HW_DITHER_INDEX_T UNUSED_BY_CERVANTES, bool, bool, bool);
 #ifndef FBINK_FOR_LINUX
 #	if defined(FBINK_FOR_KINDLE)
 static int wait_for_submission(int, uint32_t);
@@ -756,8 +757,8 @@ static void                              parse_simple_md(const char* restrict, s
 static __attribute__((cold)) const char* glyph_style_to_string(CHARACTER_FONT_T);
 #endif
 
-static uint32_t                          get_wfm_mode(uint8_t);
-static __attribute__((cold)) const char* wfm_to_string(uint8_t);
+static uint32_t                          get_wfm_mode(WFM_MODE_INDEX_T);
+static __attribute__((cold)) const char* wfm_to_string(WFM_MODE_INDEX_T);
 #ifndef FBINK_FOR_LINUX
 #	ifdef FBINK_FOR_KINDLE
 static __attribute__((cold)) const char* kindle_wfm_to_string(uint32_t);
@@ -773,8 +774,8 @@ static __attribute__((cold)) const char* remarkable_wfm_to_string(uint32_t);
 static __attribute__((cold)) const char* pocketbook_wfm_to_string(uint32_t);
 #	endif
 #endif
-static int                               get_hwd_mode(uint8_t);
-static __attribute__((cold)) const char* hwd_to_string(uint8_t);
+static int                               get_hwd_mode(HW_DITHER_INDEX_T);
+static __attribute__((cold)) const char* hwd_to_string(HW_DITHER_INDEX_T);
 
 #ifdef FBINK_WITH_IMAGE
 static int dump_region(struct mxcfb_rect* region, FBInkDump* restrict dump);

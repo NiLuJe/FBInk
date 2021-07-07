@@ -2697,8 +2697,8 @@ int
 static int
     refresh(int                     fbfd __attribute__((unused)),
 	    const struct mxcfb_rect region __attribute__((unused)),
-	    uint32_t                waveform_mode __attribute__((unused)),
-	    int                     dithering_mode __attribute__((unused)),
+	    WFM_MODE_INDEX_T        waveform_mode __attribute__((unused)),
+	    HW_DITHER_INDEX_T       dithering_mode __attribute__((unused)),
 	    bool                    is_nightmode __attribute__((unused)),
 	    bool                    is_flashing __attribute__((unused)),
 	    bool                    no_refresh __attribute__((unused)))
@@ -2729,8 +2729,8 @@ static inline void
 static int
     refresh(int                     fbfd,
 	    const struct mxcfb_rect region,
-	    uint32_t                waveform_mode,
-	    int                     dithering_mode,
+	    WFM_MODE_INDEX_T        waveform_mode,
+	    HW_DITHER_INDEX_T       dithering_mode,
 	    bool                    is_nightmode,
 	    bool                    is_flashing,
 	    bool                    no_refresh)
@@ -2773,7 +2773,7 @@ static int
 	//       (i.e., DU or GL16/GC16 is most likely often what AUTO will land on).
 
 	// So, handle this common switcheroo here...
-	uint32_t wfm = (is_flashing && waveform_mode == WAVEFORM_MODE_AUTO) ? WAVEFORM_MODE_GC16 : waveform_mode;
+	uint32_t wfm = (is_flashing && waveform_mode == WFM_AUTO) ? get_wfm_mode(WFM_GC16) : get_wfm_mode(waveform_mode);
 	uint32_t upm = is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
 
 	// Update our own update marker
@@ -2788,25 +2788,26 @@ static int
 
 #	if defined(FBINK_FOR_KINDLE)
 	if (deviceQuirks.isKindleRex) {
-		return refresh_kindle_rex(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
+		return refresh_kindle_rex(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
 	} else if (deviceQuirks.isKindleZelda) {
-		return refresh_kindle_zelda(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
+		return refresh_kindle_zelda(
+		    fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
 	} else {
-		return refresh_kindle(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
+		return refresh_kindle(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
 	}
 #	elif defined(FBINK_FOR_CERVANTES)
-	return refresh_cervantes(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
+	return refresh_cervantes(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode) is_nightmode, lastMarker);
 #	elif defined(FBINK_FOR_REMARKABLE)
-	return refresh_remarkable(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
+	return refresh_remarkable(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
 #	elif defined(FBINK_FOR_POCKETBOOK)
-	return refresh_pocketbook(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
+	return refresh_pocketbook(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
 #	elif defined(FBINK_FOR_KOBO)
 	if (deviceQuirks.isSunxi) {
-		return refresh_kobo_sunxi(region, wfm, upm, dithering_mode);
+		return refresh_kobo_sunxi(region, wfm, upm, get_hwd_mode(dithering_mode));
 	} else if (deviceQuirks.isKoboMk7) {
-		return refresh_kobo_mk7(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
+		return refresh_kobo_mk7(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
 	} else {
-		return refresh_kobo(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
+		return refresh_kobo(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
 	}
 #	endif    // FBINK_FOR_KINDLE
 }
@@ -4916,8 +4917,8 @@ int
 	// Refresh screen
 	if (refresh(fbfd,
 		    region,
-		    get_wfm_mode(fbink_cfg->wfm_mode),
-		    get_hwd_mode(fbink_cfg->dithering_mode),
+		    fbink_cfg->wfm_mode,
+		    fbink_cfg->dithering_mode,
 		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
@@ -5232,8 +5233,8 @@ static int
 	// Refresh screen
 	if (refresh(fbfd,
 		    region,
-		    get_wfm_mode(fbink_cfg->wfm_mode),
-		    get_hwd_mode(fbink_cfg->dithering_mode),
+		    fbink_cfg->wfm_mode,
+		    fbink_cfg->dithering_mode,
 		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    do_clear ? fbink_cfg->no_refresh : false) != EXIT_SUCCESS) {
@@ -5703,8 +5704,8 @@ int
 	// Refresh screen
 	if (refresh(fbfd,
 		    region,
-		    get_wfm_mode(fbink_cfg->wfm_mode),
-		    get_hwd_mode(fbink_cfg->dithering_mode),
+		    fbink_cfg->wfm_mode,
+		    fbink_cfg->dithering_mode,
 		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
@@ -5942,8 +5943,8 @@ int
 	struct mxcfb_rect region           = { 0U };
 	bool              is_flashing      = false;
 	bool              is_cleared       = false;
-	uint8_t           wfm_mode         = WFM_AUTO;
-	uint8_t           dithering_mode   = HWD_PASSTHROUGH;
+	WFM_MODE_INDEX_T  wfm_mode         = WFM_AUTO;
+	HW_DITHER_INDEX_T dithering_mode   = HWD_PASSTHROUGH;
 	bool              is_nightmode     = false;
 	bool              no_refresh       = false;
 
@@ -7112,13 +7113,7 @@ cleanup:
 		if (is_cleared) {
 			fullscreen_region(&region);
 		}
-		refresh(fbfd,
-			region,
-			get_wfm_mode(wfm_mode),
-			get_hwd_mode(dithering_mode),
-			is_nightmode,
-			is_flashing,
-			no_refresh);
+		refresh(fbfd, region, wfm_mode, dithering_mode, is_nightmode, is_flashing, no_refresh);
 	}
 	free(lines);
 	free(brk_buff);
@@ -7140,7 +7135,7 @@ cleanup:
 
 // Convert our public WFM_MODE_INDEX_T values to an appropriate mxcfb waveform mode constant for the current device
 static uint32_t
-    get_wfm_mode(uint8_t wfm_mode_index)
+    get_wfm_mode(WFM_MODE_INDEX_T wfm_mode_index)
 {
 	uint32_t waveform_mode = WAVEFORM_MODE_AUTO;
 
@@ -7477,7 +7472,7 @@ static uint32_t
 
 // Convert a WFM_MODE_INDEX_T value to a human readable string
 static __attribute__((cold)) const char*
-    wfm_to_string(uint8_t wfm_mode_index)
+    wfm_to_string(WFM_MODE_INDEX_T wfm_mode_index)
 {
 	switch (wfm_mode_index) {
 		case WFM_AUTO:
@@ -7516,6 +7511,24 @@ static __attribute__((cold)) const char*
 			return "UNKNOWN (Highlight?)";
 		case WFM_INIT2:
 			return "INIT2?";
+		case WFM_A2IN:
+			return "A2 IN";
+		case WFM_A2OUT:
+			return "A2 OUT";
+		case WFM_GC16HQ:
+			return "GC16 HQ";
+		case WFM_GS16:
+			return "GS16";
+		case WFM_GU16:
+			return "GU16";
+		case WFM_GLK16:
+			return "GLK16";
+		case WFM_CLEAR:
+			return "CLEAR";
+		case WFM_GC4L:
+			return "GC4L";
+		case WFM_GCC16:
+			return "GCC16";
 		default:
 			return "Unknown";
 	}
@@ -7686,7 +7699,7 @@ static __attribute__((cold)) const char*
 
 // Convert our public HW_DITHER_INDEX_T values to an appropriate mxcfb dithering mode constant
 static int
-    get_hwd_mode(uint8_t hw_dither_index)
+    get_hwd_mode(HW_DITHER_INDEX_T hw_dither_index)
 {
 	// NOTE: This hardware dithering (handled by the PxP) is only supported since EPDC v2!
 	//       AFAICT, most of our eligible target devices only support PASSTHROUGH & ORDERED...
@@ -7727,7 +7740,7 @@ static int
 
 // Convert a HW_DITHER_INDEX_T value to a human readable string
 static __attribute__((cold)) const char*
-    hwd_to_string(uint8_t hw_dither_index)
+    hwd_to_string(HW_DITHER_INDEX_T hw_dither_index)
 {
 	switch (hw_dither_index) {
 		case HWD_PASSTHROUGH:
@@ -7808,8 +7821,8 @@ int
 
 	if ((rv = refresh(fbfd,
 			  region,
-			  get_wfm_mode(fbink_cfg->wfm_mode),
-			  get_hwd_mode(fbink_cfg->dithering_mode),
+			  fbink_cfg->wfm_mode,
+			  fbink_cfg->dithering_mode,
 			  fbink_cfg->is_nightmode,
 			  fbink_cfg->is_flashing,
 			  false)) != EXIT_SUCCESS) {
@@ -8336,8 +8349,8 @@ int
 	//       essentially throttling the bar to the screen's refresh rate).
 	if (refresh(fbfd,
 		    region,
-		    get_wfm_mode(fbink_cfg->wfm_mode),
-		    get_hwd_mode(fbink_cfg->dithering_mode),
+		    fbink_cfg->wfm_mode,
+		    fbink_cfg->dithering_mode,
 		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
@@ -9440,8 +9453,8 @@ static int
 	// Refresh screen
 	if (refresh(fbfd,
 		    region,
-		    get_wfm_mode(fbink_cfg->wfm_mode),
-		    get_hwd_mode(fbink_cfg->dithering_mode),
+		    fbink_cfg->wfm_mode,
+		    fbink_cfg->dithering_mode,
 		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
@@ -10378,8 +10391,8 @@ int
 	// And now, we can refresh the screen
 	if (refresh(fbfd,
 		    region,
-		    get_wfm_mode(fbink_cfg->wfm_mode),
-		    get_hwd_mode(fbink_cfg->dithering_mode),
+		    fbink_cfg->wfm_mode,
+		    fbink_cfg->dithering_mode,
 		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
