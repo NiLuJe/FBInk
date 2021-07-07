@@ -747,6 +747,10 @@ FBINK_API bool fbink_is_fb_quirky(void) __attribute__((pure, deprecated));
 //       This is helpful for callers that need to track FBInk's internal state via fbink_get_state(),
 //       because a reinit *might* affect the screen layout, signaling that their current state copy *may* be stale.
 // NOTE: In turn, this means that a simple EXIT_SUCCESS means that no reinitialization was needed.
+// NOTE: On Kobo devices with a sunxi SoC, OK_BPP_CHANGE will *never* happen,
+//       as the state of the actual framebuffer device is (unfortunately) meaningless there.
+//       On those same devices, if rotation handling is disabled (via FBINK_NO_GYRO),
+//       the whole function becomes a NOP.
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
 // fbink_cfg:		Pointer to an FBInkConfig struct.

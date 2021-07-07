@@ -3334,12 +3334,9 @@ static __attribute__((cold)) void
 
 #ifdef FBINK_FOR_KOBO
 static __attribute__((cold)) void
-    kobo_sunxi_fb_fixup(void)
+    kobo_sunxi_fb_fixup(bool is_reinit)
 {
 	ELOG("Virtual resolution: %ux%u", vInfo.xres_virtual, vInfo.yres_virtual);
-	// FIXME: Check how much stuff blows up if we decide to PUT this for the rotate flag...
-	//        Perhaps we ought to never do that, and just keep fudging our internal state.
-	//        The driver doesn't actually support 8bpp, so the PUT would be somewhat broken anyway...
 
 	// Make it UR...
 	const uint32_t xres = vInfo.xres;
@@ -3352,10 +3349,12 @@ static __attribute__((cold)) void
 	} else {
 		rotate = query_accelerometer();
 		if (rotate < 0) {
-			// FIXME: Only do this for the *first* init, on subsequent calls, keep the last orientation as-is.
-			//        (Add an arg to discriminate init from reinit?).
-			ELOG("Accelerometer is inconclusive, assuming Upright");
-			rotate = FB_ROTATE_UR;
+			if (!is_reinit) {
+				ELOG("Accelerometer is inconclusive, assuming Upright");
+				rotate = FB_ROTATE_UR;
+			} else {
+				ELOG("Accelerometer is inconclusive, keeping current rotation");
+			}
 		}
 	}
 	vInfo.rotate = (uint32_t) rotate;
@@ -3567,7 +3566,7 @@ static __attribute__((cold)) int
 #ifdef FBINK_FOR_KOBO
 	// Ditto on Sunxi...
 	if (deviceQuirks.isSunxi) {
-		kobo_sunxi_fb_fixup();
+		kobo_sunxi_fb_fixup(skip_vinfo);
 	}
 #endif
 
@@ -7974,6 +7973,59 @@ bool
 	return deviceQuirks.isNTX16bLandscape;
 }
 
+#ifdef FBINK_FOR_KOBO
+static int
+    kobo_sunxi_reinit_check(int fbfd, const FBInkConfig* restrict fbink_cfg)
+{
+	if (sunxiCtx.no_rota) {
+		// Nothing to do :)
+		return EXIT_SUCCESS;
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+	// We'll track what triggered the reinit in a bitmask
+	int rf = 0;
+
+	const uint32_t old_rota = vInfo.rotate;
+	int            rotate   = query_accelerometer();
+	if (rotate < 0) {
+		ELOG("Accelerometer is inconclusive, keeping current rotation");
+		rotate = old_rota;
+	}
+
+	if (old_rota != rotate) {
+		ELOG("Detected a change in framebuffer rotation (%u -> %u)", old_rota, rotate);
+		rf |= OK_ROTA_CHANGE;
+
+		// A layout change can only happen after a rotation change ;).
+		if ((rotate & 0x01) != (old_rota & 0x01)) {
+			// Technically an orientation change, but layout is less likely to be confused w/ rotation ;).
+			ELOG("Detected a change in framebuffer layout (%s -> %s)",
+			     ((old_rota & 0x01) == 1) ? "Landscape" : "Portrait",
+			     ((rotate & 0x01) == 1) ? "Landscape" : "Portrait");
+			rf |= OK_LAYOUT_CHANGE;
+		}
+	}
+
+	// If our bitmask is not empty, it means we have a reinit to do.
+	if (rf > 0) {
+		ELOG("Reinitializing...");
+		// It will poke the accelerometer again (via kobo_sunxi_fb_fixup), but, oh, well...
+		// (It will also be responsible for actually updating vInfo.rotate & friends,
+		// which is why we did not do that here).
+		rv = initialize_fbink(fbfd, fbink_cfg, true);
+
+		// If it went fine, make the caller aware of why we did it by returning the bitmask
+		if (rv == EXIT_SUCCESS) {
+			rv = rf;
+		}
+	}
+
+	return rv;
+}
+#endif    // FBINK_FOR_KOBO
+
 // Reinitialize FBInk in case the framebuffer state has changed
 // NOTE: We initially (< 1.10.4) tried to limit this to specific scenarios, specifically:
 //         * the bitdepth switch during boot between pickel & nickel
@@ -7989,6 +8041,13 @@ int
     fbink_reinit(int fbfd UNUSED_BY_KINDLE, const FBInkConfig* restrict fbink_cfg UNUSED_BY_KINDLE)
 {
 #ifndef FBINK_FOR_KINDLE
+#	ifdef FBINK_FOR_KOBO
+	// On sunxi, the framebuffer state is meaningless, so, just do our own thing...
+	if (deviceQuirks.isSunxi) {
+		return kobo_sunxi_reinit_check(fbfd, fbink_cfg);
+	}
+#	endif
+
 	// So, we're concerned with stuff that affects the logical & physical layout, namely, bitdepth & rotation.
 	const uint32_t old_bpp  = vInfo.bits_per_pixel;
 	const uint32_t old_rota = vInfo.rotate;

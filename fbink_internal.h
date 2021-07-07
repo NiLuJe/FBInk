@@ -702,7 +702,7 @@ static __attribute__((cold)) void update_verbosity(const FBInkConfig* restrict);
 static __attribute__((cold)) void pocketbook_fix_fb_info(void);
 #endif
 #ifdef FBINK_FOR_KOBO
-static __attribute__((cold)) void kobo_sunxi_fb_fixup(void);
+static __attribute__((cold)) void kobo_sunxi_fb_fixup(bool);
 #endif
 static __attribute__((cold)) int initialize_fbink(int, const FBInkConfig* restrict, bool);
 
@@ -776,6 +776,10 @@ static __attribute__((cold)) const char* pocketbook_wfm_to_string(uint32_t);
 #endif
 static int                               get_hwd_mode(HW_DITHER_INDEX_T);
 static __attribute__((cold)) const char* hwd_to_string(HW_DITHER_INDEX_T);
+
+#ifdef FBINK_FOR_KOBO
+static int kobo_sunxi_reinit_check(int, const FBInkConfig* restrict);
+#endif
 
 #ifdef FBINK_WITH_IMAGE
 static int dump_region(struct mxcfb_rect* region, FBInkDump* restrict dump);
