@@ -492,10 +492,10 @@ outdir:
 
 # Make absolutely sure we create our output directories first, even with unfortunate // timings!
 # c.f., https://www.gnu.org/software/make/manual/html_node/Prerequisite-Types.html#Prerequisite-Types
-$(SHAREDLIB_OBJS): | outdir
+$(SHAREDLIB_OBJS): libi2c.built | outdir
 $(UB_SHAREDLIB_OBJS): | outdir
 $(QT_SHAREDLIB_OBJS): | outdir
-$(STATICLIB_OBJS): | outdir
+$(STATICLIB_OBJS): libi2c.built | outdir
 $(UB_STATICLIB_OBJS): | outdir
 $(QT_STATICLIB_OBJS): | outdir
 $(CMD_OBJS): | outdir
@@ -504,20 +504,20 @@ $(BTN_OBJS): | outdir
 all: static
 
 ifdef UNIBREAK
-staticlib: $(STATICLIB_OBJS) | libunibreak.built libi2c.built
+staticlib: $(STATICLIB_OBJS) libunibreak.built
 	$(AR) $(FBINK_STATIC_FLAGS) $(OUT_DIR)/$(FBINK_STATIC_NAME) $(STATICLIB_OBJS)
 	$(RANLIB) $(OUT_DIR)/$(FBINK_STATIC_NAME)
 
-sharedlib: $(SHAREDLIB_OBJS) | libunibreak.built libi2c.built
+sharedlib: $(SHAREDLIB_OBJS) libunibreak.built
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(SHAREDLIB_OBJS)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME_VER)
 else
-staticlib: $(STATICLIB_OBJS) $(UB_STATICLIB_OBJS) $(QT_STATICLIB_OBJS) | libi2c.built
+staticlib: $(STATICLIB_OBJS) $(UB_STATICLIB_OBJS) $(QT_STATICLIB_OBJS)
 	$(AR) $(FBINK_STATIC_FLAGS) $(OUT_DIR)/$(FBINK_STATIC_NAME) $(STATICLIB_OBJS) $(UB_STATICLIB_OBJS) $(QT_STATICLIB_OBJS)
 	$(RANLIB) $(OUT_DIR)/$(FBINK_STATIC_NAME)
 
-sharedlib: $(SHAREDLIB_OBJS) $(UB_SHAREDLIB_OBJS) $(QT_SHAREDLIB_OBJS) | libi2c.built
+sharedlib: $(SHAREDLIB_OBJS) $(UB_SHAREDLIB_OBJS) $(QT_SHAREDLIB_OBJS)
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(SHAREDLIB_OBJS) $(UB_SHAREDLIB_OBJS) $(QT_SHAREDLIB_OBJS)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME_VER)
@@ -565,7 +565,7 @@ ifdef LINUX
 utils: | outdir
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(DOOM_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/doom utils/doom.c -lrt
 else
-utils: | outdir libi2c.built
+utils: libi2c.built | outdir
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(TOOLS_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/rota utils/rota.c
 	$(STRIP) --strip-unneeded $(OUT_DIR)/rota
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(TOOLS_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbdepth utils/fbdepth.c $(UTILS_LIBS)
@@ -575,16 +575,16 @@ utils: | outdir libi2c.built
 endif
 
 ifdef KOBO
-alt: | outdir libi2c.built
+alt: libi2c.built | outdir
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(DOOM_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/alt_buffer utils/alt_buffer.c $(I2C_LIBS)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/alt_buffer
 endif
 
 ifdef KOBO
-sunxi: | outdir libi2c.built
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/ion_heaps utils/ion_heaps.c
+sunxi: libi2c.built | outdir
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/ion_heaps utils/ion_heaps.c
 	$(STRIP) --strip-unneeded $(OUT_DIR)/ion_heaps
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/kx122_i2c utils/kx122_i2c.c $(I2C_LIBS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/kx122_i2c utils/kx122_i2c.c $(I2C_LIBS)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/kx122_i2c
 endif
 
@@ -640,7 +640,7 @@ libunibreak.built:
 	env NOCONFIGURE=1 ./autogen.sh
 	cd LibUniBreakBuild && \
 	env CPPFLAGS="$(CPPFLAGS) $(EXTRA_CPPFLAGS)" \
-	CFLAGS="$(CFLAGS) $(EXTRA_CFLAGS) $(UNIBREAK_CFLAGS)" \
+	CFLAGS="$(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(UNIBREAK_CFLAGS)" \
 	LDFLAGS="$(LDFLAGS)" \
 	../libunibreak/configure \
 	$(if $(CROSS_TC),--host=$(CROSS_TC),) \
@@ -656,6 +656,7 @@ libi2c.built:
 	$(MAKE) -C i2c-tools \
 	BUILD_DYNAMIC_LIB=0 USE_STATIC_LIB=1 BUILD_STATIC_LIB=1 V=1 \
 	CC=$(CC) AR=$(AR) \
+	CFLAGS="$(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS)" \
 	PREFIX="/" libdir="/lib" DESTDIR="$(CURDIR)/LibI2CBuild" \
 	lib install-lib install-include
 	touch libi2c.built
