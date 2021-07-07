@@ -115,3 +115,5 @@ cdecl_func(fbink_wait_for_usbms_processing)
 
 cdecl_func(fbink_rota_native_to_canonical)
 cdecl_func(fbink_rota_canonical_to_native)
+
+cdecl_func(fbink_toggle_sunxi_ntx_pen_mode)
