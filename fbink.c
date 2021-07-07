@@ -2595,7 +2595,9 @@ static int
 					   .cfa_use     = 0U };
 
 	// Update mode shenanigans...
-	if (update_mode == UPDATE_MODE_PARTIAL) {
+	if (update_mode == UPDATE_MODE_PARTIAL && waveform_mode != EINK_AUTO_MODE) {
+		// For some reason, AUTO shouldn't specify RECT...
+		// (it trips the unknown mode warning, which falls back to... plain AUTO ;)).
 		update.update_mode |= EINK_RECT_MODE;
 	}
 	if (waveform_mode == EINK_GLR16_MODE || waveform_mode == EINK_GLD16_MODE) {
