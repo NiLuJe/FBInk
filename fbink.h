@@ -1034,7 +1034,7 @@ FBINK_API FBInkRect fbink_get_last_rect(bool rotated);
 //
 // Scan the screen for Kobo's "Connect" button in the "USB plugged in" popup,
 // and optionally generate an input event to press that button.
-// KOBO Only! Returns -(ENOSYS) when disabled (!KOBO, as well as MINIMAL builds).
+// KOBO i.MX Only! Returns -(ENOSYS) when disabled (!KOBO, or Kobo on a sunxi SoC, as well as MINIMAL builds).
 // Otherwise, returns a few different things on failure:
 //	-(EXIT_FAILURE)	when the button was not found.
 //	With press_button:
@@ -1060,7 +1060,7 @@ FBINK_API int fbink_button_scan(int fbfd, bool press_button, bool nosleep);
 //       It will abort early if that's not the case.
 // NOTE: For the duration of this call (which is obviously blocking!), screen updates should be kept to a minimum:
 //       in particular, we expect the middle section of the final line to be untouched!
-// KOBO Only! Returns -(ENOSYS) when disabled (!KOBO, as well as MINIMAL builds).
+// KOBO i.MX Only! Returns -(ENOSYS) when disabled (!KOBO, or Kobo on a sunxi SoC, as well as MINIMAL builds).
 // Otherwise, returns a few different things on failure:
 //	-(EXIT_FAILURE)	when the expected chain of events fails to be detected properly.
 //	-(ENODATA)	when there was no new content to import at the end of the USBMS session.
