@@ -7991,11 +7991,11 @@ static int
 	int            rotate   = query_accelerometer();
 	if (rotate < 0) {
 		ELOG("Accelerometer is inconclusive, keeping current rotation");
-		rotate = old_rota;
+		rotate = (int) old_rota;
 	}
 
-	if (old_rota != rotate) {
-		ELOG("Detected a change in framebuffer rotation (%u -> %u)", old_rota, rotate);
+	if (old_rota != (uint32_t) rotate) {
+		ELOG("Detected a change in framebuffer rotation (%u -> %d)", old_rota, rotate);
 		rf |= OK_ROTA_CHANGE;
 
 		// A layout change can only happen after a rotation change ;).
