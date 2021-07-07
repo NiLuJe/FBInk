@@ -919,8 +919,6 @@ FBINK_API int fbink_grid_refresh(int                fbfd,
 				 const FBInkConfig* restrict fbink_cfg);
 
 //
-// NOTE: On Kobo devices with a sunxi SoC, you will not be able to grab content that you haven't drawn yourself first.
-//       (There's no "shared" framebuffer, each process gets its own private, zero-initialized (i.e., solid black) buffer).
 // Dump the full screen.
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build).
 // fbfd:		Open file descriptor to the framebuffer character device,
@@ -938,6 +936,8 @@ FBINK_API int fbink_grid_refresh(int                fbfd,
 // NOTE: On *most* devices (the exceptions being 4bpp & 16bpp fbs),
 //       the data being dumped is perfectly valid input for fbink_print_raw_data,
 //       in case you'd ever want to do some more exotic things with it...
+// NOTE: On Kobo devices with a sunxi SoC, you will not be able to capture content that you haven't drawn yourself first.
+//       (There's no "shared" framebuffer, each process gets its own private, zero-initialized (i.e., solid black) buffer).
 FBINK_API int fbink_dump(int fbfd, FBInkDump* restrict dump);
 
 // Dump a specific region of the screen.
