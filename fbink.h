@@ -919,6 +919,8 @@ FBINK_API int fbink_grid_refresh(int                fbfd,
 				 const FBInkConfig* restrict fbink_cfg);
 
 //
+// NOTE: On Kobo devices with a sunxi SoC, you will not be able to grab content that you haven't drawn yourself first.
+//       (There's no "shared" framebuffer, each process gets its own private, zero-initialized (i.e., solid black) buffer).
 // Dump the full screen.
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build).
 // fbfd:		Open file descriptor to the framebuffer character device,
