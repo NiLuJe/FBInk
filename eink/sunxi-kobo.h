@@ -570,7 +570,8 @@ typedef struct
 	// ubuffer[1] (used alternatively as a size_t for the element count of the layer config copy, and an unsigned int for the actual eink_update call. Must be > 0 and <= 16).
 	unsigned long int          layer_num;
 	unsigned long int          update_mode;    // ubuffer[2] (bitmask, eink_update_mode)
-	// ubuffer[3] (Must point to the first disp_layer_config2 out of at least layer_num...)
+	// ubuffer[3] (Must point to the first disp_layer_config2 out of at least layer_num...).
+	// (i.e., technically, this a pointer to a contiguous array of layer_num disp_layer_config2 structs).
 	struct disp_layer_config2* lyr_cfg2;
 	// ubuffer[4], *outarg*, set on success (update_order in the eink buffer/pipeline manager; no idea what relation it has compared to the layer_info's id...).
 	unsigned int*              frame_id;
