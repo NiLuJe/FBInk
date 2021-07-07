@@ -475,6 +475,9 @@ UNIBREAK_CFLAGS := -Wno-conversion -Wno-sign-conversion -Wno-suggest-attribute=p
 $(UB_SHAREDLIB_OBJS): QUIET_CFLAGS := $(UNIBREAK_CFLAGS)
 $(UB_STATICLIB_OBJS): QUIET_CFLAGS := $(UNIBREAK_CFLAGS)
 
+# Silence a few warnings when building libi2c
+I2C_CFLAGS := -Wno-sign-conversion
+
 # Shared lib
 $(OUT_DIR)/shared/%.o: %.c
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(QUIET_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) -o $@ -c $<
@@ -656,7 +659,7 @@ libi2c.built:
 	$(MAKE) -C i2c-tools \
 	BUILD_DYNAMIC_LIB=0 USE_STATIC_LIB=1 BUILD_STATIC_LIB=1 V=1 \
 	CC=$(CC) AR=$(AR) \
-	CFLAGS="$(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS)" \
+	CFLAGS="$(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(I2C_CFLAGS)" \
 	PREFIX="/" libdir="/lib" DESTDIR="$(CURDIR)/LibI2CBuild" \
 	lib install-lib install-include
 	touch libi2c.built
