@@ -267,6 +267,8 @@ static int
 		// If multiple contact points are detected (e.g., multi-touch),
 		// each tracking ID is preceded by its slot assignment (e.g., EV_ABS:ABS_MT_SLOT:0 for the first finger).
 		// It's only ellided when there's only a single contact point present/left.
+		// NOTE: The fact that it needlessly *repeats* the ABS_MT_TRACKING_ID
+		//       is upsetting libevdev (trip the "double racking ID" check)...
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TRACKING_ID, 0);    // Increases with each subsequent contact point.
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOOL_TYPE, 0);      // 0 for finger, 1 for pen
 		SEND_INPUT_EVENT(EV_KEY, BTN_TOUCH, 1);
