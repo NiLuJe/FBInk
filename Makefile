@@ -597,8 +597,8 @@ sunxi: libi2c.built | outdir
 endif
 
 ifdef KOBO
-ftrace: libevdev.built | outdir
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(EVDEV_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(EVDEV_LDFLAGS) -o$(OUT_DIR)/finger_trace utils/finger_trace.c $(EVDEV_LIBS)
+ftrace: libevdev.built static | outdir
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(EVDEV_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(EVDEV_LDFLAGS) -o$(OUT_DIR)/finger_trace utils/finger_trace.c $(LIBS) $(EVDEV_LIBS)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/finger_trace
 endif
 
