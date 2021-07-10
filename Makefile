@@ -596,6 +596,13 @@ sunxi: libi2c.built | outdir
 	$(STRIP) --strip-unneeded $(OUT_DIR)/kx122_i2c
 endif
 
+ifdef KOBO
+ftrace: libevdev.built | outdir
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(EVDEV_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(EVDEV_LDFLAGS) -o$(OUT_DIR)/finger_trace utils/finger_trace.c $(EVDEV_LIBS)
+	$(STRIP) --strip-unneeded $(OUT_DIR)/finger_trace
+endif
+
+
 dump: static
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/dump utils/dump.c $(LIBS)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/dump
@@ -725,17 +732,17 @@ devcap: armcheck
 	tar --owner=root --group=root -cvzf Release/Kobo-DevCap-Test.tar.gz -C Kobo .
 
 libunibreakclean:
-	$(MAKE) -C libunibreak clean
+	-$(MAKE) -C libunibreak clean
 	cd libunibreak && \
 	git reset --hard
 
 libi2cclean:
-	$(MAKE) -C i2c-tools clean
+	-$(MAKE) -C i2c-tools clean
 	cd i2c-tools && \
 	git reset --hard
 
 libevdevclean:
-	$(MAKE) -C libevdev clean
+	-$(MAKE) -C libevdev clean
 	cd libevdev && \
 	git reset --hard && \
 	git clean -fxdq
@@ -811,4 +818,4 @@ distclean: clean libunibreakclean libi2cclean libevdevclean
 	rm -rf libevdev-staged
 	rm -rf libevdev.built
 
-.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils alt sunxi dump devcap clean distclean
+.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils alt sunxi ftrace dump devcap clean distclean
