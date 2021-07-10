@@ -39,7 +39,7 @@
 
 #include <libevdev/libevdev.h>
 
-// Pilfer logging macros from fbink_internal.h...
+// Pilfer a few macros from fbink_internal.h...
 #define LOG(fmt, ...) ({ fprintf(stdout, fmt "\n", ##__VA_ARGS__); })
 
 #define ELOG(fmt, ...) ({ fprintf(stderr, "[FTrace] " fmt "\n", ##__VA_ARGS__); })
@@ -50,6 +50,23 @@
 
 // We want to return negative values on failure, always
 #define ERRCODE(e) (-(e))
+
+// MIN/MAX with no side-effects,
+// c.f., https://gcc.gnu.org/onlinedocs/cpp/Duplication-of-Side-Effects.html#Duplication-of-Side-Effects
+//     & https://dustri.org/b/min-and-max-macro-considered-harmful.html
+#define MIN(X, Y)                                                                                                        \
+	({                                                                                                               \
+		__auto_type x_ = (X);                                                                                    \
+		__auto_type y_ = (Y);                                                                                    \
+		(x_ < y_) ? x_ : y_;                                                                                     \
+	})
+
+#define MAX(X, Y)                                                                                                        \
+	({                                                                                                               \
+		__auto_type x__ = (X);                                                                                   \
+		__auto_type y__ = (Y);                                                                                   \
+		(x__ > y__) ? x__ : y__;                                                                                 \
+	})
 
 // Having a static input device number all these years couldn't go on forever...
 #define NXP_TOUCH_DEV   "/dev/input/event1"
@@ -150,6 +167,7 @@ int
 	// Setup FBInk
 	FBInkConfig fbink_cfg = { 0 };
 	fbink_cfg.wfm_mode    = WFM_DU;
+	fbink_cfg.bg_color    = BG_BLACK;
 
 	// Init FBInk
 	// Open framebuffer and keep it around, then setup globals.
@@ -260,16 +278,20 @@ int
 							translated_pos = canonical_pos;
 							break;
 						case FB_ROTATE_CW:
-							translated_pos.x = (int32_t) fbink_state.screen_width - canonical_pos.y;
+							translated_pos.x =
+							    (int32_t) fbink_state.screen_width - canonical_pos.y;
 							translated_pos.y = canonical_pos.x;
 							break;
 						case FB_ROTATE_UD:
-							translated_pos.x = (int32_t) fbink_state.screen_width - canonical_pos.x;
-							translated_pos.y = (int32_t) fbink_state.screen_height - canonical_pos.y;
+							translated_pos.x =
+							    (int32_t) fbink_state.screen_width - canonical_pos.x;
+							translated_pos.y =
+							    (int32_t) fbink_state.screen_height - canonical_pos.y;
 							break;
 						case FB_ROTATE_CCW:
 							translated_pos.x = canonical_pos.y;
-							translated_pos.y = (int32_t) fbink_state.screen_height - canonical_pos.x;
+							translated_pos.y =
+							    (int32_t) fbink_state.screen_height - canonical_pos.x;
 							break;
 						default:
 							translated_pos.x = -1;
@@ -288,7 +310,16 @@ int
 					    translated_pos.x,
 					    translated_pos.y);
 
-					// TODO: Print centered font_mul rect
+					// Display a font_mul sized rectangle around the contact point
+					const FBInkRect rect = {
+						.left = (unsigned short int) MAX(
+						    0, translated_pos.x - (int32_t) fbink_state.fontsize_mult / 2),
+						.top = (unsigned short int) MAX(
+						    0, translated_pos.y - (int32_t) fbink_state.fontsize_mult / 2),
+						.width  = fbink_state.fontsize_mult,
+						.height = fbink_state.fontsize_mult
+					};
+					fbink_cls(fbfd, &fbink_cfg, &rect, false);
 				}
 			}
 		}
