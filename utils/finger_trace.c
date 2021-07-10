@@ -35,6 +35,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <linux/fb.h>
+
 #include <libevdev/libevdev.h>
 
 // Pilfer logging macros from fbink_internal.h...
@@ -192,6 +194,23 @@ int
 	libevdev_grab(dev, LIBEVDEV_UNGRAB);
 	LOG("Initialized libevdev for device `%s`", libevdev_get_name(dev));
 
+	// Deal with NTX touch panels insanity...
+	// On Kobo, the touch panel has a fixed rotation, one that *never* matches the actual rotation.
+	// Handle the initial translation here so that it makes sense @ (canonical) UR...
+	// (This is generally a -90°/+90°, made trickier because there's a layout swap so height/width are swapped).
+	// c.f., rotate_touch_coordinates in FBInk for a different, possibly less compatible approach...
+	// NOTE: We only check this on startup here, this would need to be updated on relevant fbink_reinit returns
+	//       if we cared about runtime rotation handling ;).
+	const uint8_t canonical_rota = fbink_rota_native_to_canonical(fbink_state.current_rota);
+	int32_t       dim_swap;
+	if ((canonical_rota & 1U) == 0U) {
+		// Canonical rotation is even (UR/UD)
+		dim_swap = (int32_t) fbink_state.screen_width;
+	} else {
+		// Canonical rotation is odd (CW/CCW)
+		dim_swap = (int32_t) fbink_state.screen_height;
+	}
+
 	// Main loop
 	struct pollfd pfd = { 0 };
 	pfd.fd            = evfd;
@@ -213,14 +232,63 @@ int
 		if (poll_num > 0) {
 			if (pfd.revents & POLLIN) {
 				if (handle_evdev(dev, &touch)) {
-					LOG("%ld.%.9ld %s @ (%d, %d)",
+					// NOTE: The following was borrowed from my experiments with this in InkVT ;).
+					// Deal with device-specific rotation quirks...
+					FTrace_Coordinates canonical_pos;
+					// c.f., https://github.com/koreader/koreader/blob/master/frontend/device/kobo/device.lua
+					if (fbink_state.device_id == 310U || fbink_state.device_id == 320U) {
+						// Touch A/B & Touch C. This will most likely be wrong for one of those.
+						// touch_mirrored_x
+						canonical_pos.x = dim_swap - touch.pos.x;
+						canonical_pos.y = touch.pos.y;
+					} else if (fbink_state.device_id == 374U) {
+						// Aura H2O²r1
+						// touch_switch_xy
+						canonical_pos.x = touch.pos.y;
+						canonical_pos.y = touch.pos.x;
+					} else {
+						// touch_switch_xy && touch_mirrored_x
+						canonical_pos.x = dim_swap - touch.pos.y;
+						canonical_pos.y = touch.pos.x;
+					}
+
+					// And, finally, handle somewhat standard touch translation given the current rotation
+					// c.f., GestureDetector:adjustGesCoordinate @ https://github.com/koreader/koreader/blob/master/frontend/device/gesturedetector.lua
+					FTrace_Coordinates translated_pos;
+					switch (canonical_rota) {
+						case FB_ROTATE_UR:
+							translated_pos = canonical_pos;
+							break;
+						case FB_ROTATE_CW:
+							translated_pos.x = (int32_t) fbink_state.screen_width - canonical_pos.y;
+							translated_pos.y = canonical_pos.x;
+							break;
+						case FB_ROTATE_UD:
+							translated_pos.x = (int32_t) fbink_state.screen_width - canonical_pos.x;
+							translated_pos.y = (int32_t) fbink_state.screen_height - canonical_pos.y;
+							break;
+						case FB_ROTATE_CCW:
+							translated_pos.x = canonical_pos.y;
+							translated_pos.y = (int32_t) fbink_state.screen_height - canonical_pos.x;
+							break;
+						default:
+							translated_pos.x = -1;
+							translated_pos.y = -1;
+							break;
+					}
+
+					LOG("%ld.%.9ld %s @ (%d, %d) -> (%d, %d) => (%d, %d)",
 					    touch.time.tv_sec,
 					    touch.time.tv_usec,
 					    (touch.state == FINGER_DOWN || touch.state == PEN_DOWN) ? "DOWN" : "UP",
 					    touch.pos.x,
-					    touch.pos.y);
+					    touch.pos.y,
+					    canonical_pos.x,
+					    canonical_pos.y,
+					    translated_pos.x,
+					    translated_pos.y);
 
-					// TODO: Translate & display font_mul rect
+					// TODO: Print centered font_mul rect
 				}
 			}
 		}
