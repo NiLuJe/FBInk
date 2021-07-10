@@ -483,6 +483,11 @@ $(UB_STATICLIB_OBJS): QUIET_CFLAGS := $(UNIBREAK_CFLAGS)
 # Silence a few warnings when building libi2c
 I2C_CFLAGS := -Wno-sign-conversion
 
+# Ditto for libevdev
+EVDEV_CFLAGS := -Wno-conversion -Wno-sign-conversion -Wno-undef -Wno-vla-parameter -Wno-format -Wno-null-dereference -Wno-bad-function-cast -Wno-inline
+# And when *linking* libevdev (w/ LTO)
+EVDEV_LDFLAGS += -Wno-null-dereference
+
 # Shared lib
 $(OUT_DIR)/shared/%.o: %.c
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(QUIET_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) -o $@ -c $<
@@ -679,6 +684,9 @@ libevdev.built:
 	mkdir -p libevdev-staged
 	cd libevdev && \
 	autoreconf -fi && \
+	env CPPFLAGS="$(CPPFLAGS) $(EXTRA_CPPFLAGS)" \
+	CFLAGS="$(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(EVDEV_CFLAGS)" \
+	LDFLAGS="$(LDFLAGS)" \
 	./configure $(if $(CROSS_TC),--host=$(CROSS_TC),) \
 	--prefix="$(CURDIR)/libevdev-staged" \
 	--enable-static \
