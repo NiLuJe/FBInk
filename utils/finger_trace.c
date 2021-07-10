@@ -328,9 +328,7 @@ int
 						.width  = fbink_state.fontsize_mult * 2U,
 						.height = fbink_state.fontsize_mult * 2U
 					};
-					fbink_toggle_sunxi_ntx_pen_mode(fbfd, true);
 					fbink_cls(fbfd, &fbink_cfg, &rect, false);
-					fbink_toggle_sunxi_ntx_pen_mode(fbfd, false);
 				}
 			}
 		}

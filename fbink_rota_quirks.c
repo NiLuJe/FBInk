@@ -286,6 +286,9 @@ static int
 // c.f., https://github.com/baskerville/plato/blob/f45c2da65bc556bc22d664b2f9450f95c550dbf5/src/device.rs#L265-L326
 // except not really, because that didn't work at all on my quirky devices ;).
 // See also rotate_touch_coordinates @ fbink.c for another attempt at this, which may or may not be worse ;p.
+// NOTE: This happens to behave on the Elipsa mostly by chance (because native_portrait == 0 there),
+//       hence the lack of NTX_ROTA_SUNXI branch.
+//       But, if one were to be necessary, it'd be an early init returning the input value anyway...
 uint8_t
     fbink_rota_native_to_canonical(uint32_t rotate UNUSED_BY_NOTKOBO)
 {
