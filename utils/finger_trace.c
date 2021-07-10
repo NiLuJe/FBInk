@@ -66,10 +66,15 @@ typedef enum
 
 typedef struct
 {
-	int32_t        x;
-	int32_t        y;
-	FTrace_State   state;
-	struct timeval time;
+	int32_t x;
+	int32_t y;
+} FTrace_Coordinates;
+
+typedef struct
+{
+	FTrace_Coordinates pos;
+	FTrace_State       state;
+	struct timeval     time;
 } FTrace_Slot;
 
 // Parse an evdev event
@@ -110,11 +115,11 @@ static bool
 						break;
 					case ABS_MT_POSITION_X:
 					case ABS_X:
-						touch->x = ev.value;
+						touch->pos.x = ev.value;
 						break;
 					case ABS_MT_POSITION_Y:
 					case ABS_Y:
-						touch->y = ev.value;
+						touch->pos.y = ev.value;
 						break;
 					default:
 						break;
@@ -208,11 +213,12 @@ int
 		if (poll_num > 0) {
 			if (pfd.revents & POLLIN) {
 				if (handle_evdev(dev, &touch)) {
-					LOG("%ld.%.9ld @ (%d, %d)",
+					LOG("%ld.%.9ld %s @ (%d, %d)",
 					    touch.time.tv_sec,
 					    touch.time.tv_usec,
-					    touch.x,
-					    touch.y);
+					    (touch.state == FINGER_DOWN || touch.state == PEN_DOWN) ? "DOWN" : "UP",
+					    touch.pos.x,
+					    touch.pos.y);
 
 					// TODO: Translate & display font_mul rect
 				}
