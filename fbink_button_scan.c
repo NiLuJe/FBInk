@@ -262,6 +262,31 @@ static int
 		SEND_INPUT_EVENT(EV_KEY, BTN_TOUCH, 0);
 		SEND_INPUT_EVENT(EV_KEY, BTN_TOOL_FINGER, 0);
 		SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
+	} else if (deviceQuirks.isSunxi) {
+		// NOTE: Mostly for documentation's sake, as this feature is unsupported on sunxi SoCs...
+		// If multiple contact points are detected (e.g., multi-touch),
+		// each tracking ID is preceded by its slot assignment (e.g., EV_ABS:ABS_MT_SLOT:0 for the first finger).
+		// It's only ellided when there's only a single contact point present/left.
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TRACKING_ID, 0);    // Increases with each subsequent contact point.
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOOL_TYPE, 0);      // 0 for finger, 1 for pen
+		SEND_INPUT_EVENT(EV_KEY, BTN_TOUCH, 1);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MAJOR, 1632);    // Pen can go higher
+		// Always matches ABS_MT_TOUCH_MAJOR, unless the pen is not touching the screen (e.g., hovering),
+		// in which case it is ellided, and pressure reports 0.
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_PRESSURE, 1632);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_X, match_coords->x);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_Y, match_coords->y);
+		SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
+
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TRACKING_ID, 0);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOOL_TYPE, 0);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MAJOR, 0);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_PRESSURE, 0);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_X, match_coords->x);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_Y, match_coords->y);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TRACKING_ID, -1);
+		SEND_INPUT_EVENT(EV_KEY, BTN_TOUCH, 0);
+		SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
 	} else {
 		// NOTE: Corresponds to what we call the "Phoenix" protocol in KOReader
 		//       (with or without the Alyssum tweaks, which appear irrelevant),
