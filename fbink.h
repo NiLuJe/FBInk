@@ -1103,7 +1103,7 @@ FBINK_API uint32_t fbink_rota_canonical_to_native(uint8_t rotate);
 //       c.f., kobo_sunxi_fb_fixup @ fbink.c for more details.
 // NOTE: Another option for "dealing" with these rotation mishaps is to just assume the screen is always Upright.
 //       You can achieve that by making sure FBINK_NO_GYRO is set in your env (*before* initializing FBInk).
-FBINK_API int fbink_toggle_sunxi_ntx_pen_mode(bool toggle);
+FBINK_API int fbink_toggle_sunxi_ntx_pen_mode(int fbfd, bool toggle);
 
 //
 ///

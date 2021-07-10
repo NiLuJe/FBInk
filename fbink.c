@@ -2667,7 +2667,7 @@ static int
 #endif            // !FBINK_FOR_LINUX
 
 int
-    fbink_toggle_sunxi_ntx_pen_mode(bool toggle UNUSED_BY_NOTKOBO)
+    fbink_toggle_sunxi_ntx_pen_mode(int fbfd, bool toggle UNUSED_BY_NOTKOBO)
 {
 #ifndef FBINK_FOR_KOBO
 	PFWARN("This feature is not supported on your device");
@@ -2678,17 +2678,43 @@ int
 		return ERRCODE(ENOSYS);
 	}
 
-	// Use the union to avoid passing garbage to the ioctl handler...
-	sunxi_disp_eink_ioctl cmd = { .toggle_handw.enable = toggle };
-
-	int rv = ioctl(sunxiCtx.disp_fd, DISP_EINK_SET_NTX_HANDWRITE_ONOFF, &cmd);
-
-	if (rv < 0) {
-		PFWARN("DISP_EINK_SET_NTX_HANDWRITE_ONOFF: %m");
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
 		return ERRCODE(EXIT_FAILURE);
 	}
 
-	return EXIT_SUCCESS;
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// We need a disp fd...
+	if (!isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	}
+
+	// Use the union to avoid passing garbage to the ioctl handler...
+	sunxi_disp_eink_ioctl cmd = { .toggle_handw.enable = toggle };
+
+	rv = ioctl(sunxiCtx.disp_fd, DISP_EINK_SET_NTX_HANDWRITE_ONOFF, &cmd);
+
+	if (rv < 0) {
+		PFWARN("DISP_EINK_SET_NTX_HANDWRITE_ONOFF: %m");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// Cleanup
+cleanup:
+	if (isFbMapped && !keep_fd) {
+		unmap_fb();
+	}
+	if (!keep_fd) {
+		close(fbfd);
+	}
+
+	return rv;
 #endif
 }
 
