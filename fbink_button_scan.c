@@ -272,10 +272,13 @@ static int
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TRACKING_ID, 0);    // Increases with each subsequent contact point.
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOOL_TYPE, 0);      // 0 for finger, 1 for pen
 		SEND_INPUT_EVENT(EV_KEY, BTN_TOUCH, 1);
+		// Plus an EV_KEY:BTN_STYLUS toggle when the *eraser* button is toggled.
+		// And an EV_KEY:BTN_STYLUS2 for the *highlighter* button.
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MAJOR, 1632);    // Pen can go higher
 		// Always matches ABS_MT_TOUCH_MAJOR, unless the pen is not touching the screen (e.g., hovering),
 		// in which case it is ellided, and pressure reports 0.
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_PRESSURE, 1632);
+		// EV_ABS:ABS_MT_DISTANCE for the pen (15 when PRESSURE is 0, 0 otherwise).
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_X, match_coords->x);
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_Y, match_coords->y);
 		SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
