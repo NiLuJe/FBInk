@@ -70,7 +70,7 @@
 
 // Having a static input device number all these years couldn't go on forever...
 #define NXP_TOUCH_DEV   "/dev/input/event1"
-#define SUNXI_TOUCH_DEV "/dev/input/event2"
+#define SUNXI_TOUCH_DEV "/dev/input/by-path/platform-0-0010-event"
 
 // Keep track of a single slot's state...
 // FIXME: We don't actually discriminate between finger & pen ;p.
@@ -187,7 +187,7 @@ int
 	// it doesn't really deal well with refresh storms...
 	// NOTE: We don't bracket the actual refresh themselves,
 	//       because apparently this ioctl is *super* slow...
-	fbink_toggle_sunxi_ntx_pen_mode(true);
+	fbink_toggle_sunxi_ntx_pen_mode(fbfd, true);
 
 	// We'll need the state to pick the right input device...
 	FBInkState fbink_state = { 0 };
@@ -328,7 +328,9 @@ int
 						.width  = fbink_state.fontsize_mult * 2U,
 						.height = fbink_state.fontsize_mult * 2U
 					};
+					fbink_toggle_sunxi_ntx_pen_mode(fbfd, true);
 					fbink_cls(fbfd, &fbink_cfg, &rect, false);
+					fbink_toggle_sunxi_ntx_pen_mode(fbfd, false);
 				}
 			}
 		}
@@ -336,7 +338,7 @@ int
 
 	// Cleanup
 cleanup:
-	fbink_toggle_sunxi_ntx_pen_mode(false);
+	fbink_toggle_sunxi_ntx_pen_mode(fbfd, false);
 
 	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
 		WARN("Failed to close the framebuffer, aborting");
