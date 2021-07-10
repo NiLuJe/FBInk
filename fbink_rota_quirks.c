@@ -286,13 +286,19 @@ static int
 // c.f., https://github.com/baskerville/plato/blob/f45c2da65bc556bc22d664b2f9450f95c550dbf5/src/device.rs#L265-L326
 // except not really, because that didn't work at all on my quirky devices ;).
 // See also rotate_touch_coordinates @ fbink.c for another attempt at this, which may or may not be worse ;p.
-// NOTE: This happens to behave on the Elipsa mostly by chance (because native_portrait == 0 there),
-//       hence the lack of NTX_ROTA_SUNXI branch.
-//       But, if one were to be necessary, it'd be an early init returning the input value anyway...
 uint8_t
     fbink_rota_native_to_canonical(uint32_t rotate UNUSED_BY_NOTKOBO)
 {
 #if defined(FBINK_FOR_KOBO)
+	// NOTE: When we care about rotation at all (e.g., FBINK_NO_GYRO is *NOT* set in the env),
+	//       kobo_sunxi_fb_fixup ensures that the rotate flag returned by fbink_get_state
+	//       is *already* canonical, so we don't have anything to do!
+	//       That said, since on those platforms, native_portrait == 0,
+	//       the whole logic below is still sound.
+	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_SUNXI) {
+		return rotate;
+	}
+
 	uint8_t rota = (uint8_t) rotate;
 
 	// First, we'll need to compute the native Portrait rotation
@@ -344,6 +350,11 @@ uint32_t
     fbink_rota_canonical_to_native(uint8_t rotate UNUSED_BY_NOTKOBO)
 {
 #if defined(FBINK_FOR_KOBO)
+	// Same as above, nothing to do on those devices.
+	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_SUNXI) {
+		return rotate;
+	}
+
 	uint32_t rota = rotate;
 
 	// First, we'll need to compute the native Portrait rotation
