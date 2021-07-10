@@ -186,6 +186,53 @@ static void
 	fbink_cls(ctx->fbfd, fbink_cfg, &rect, false);
 }
 
+// Process an input event
+static bool
+    process_evdev(const struct input_event* ev, const FTrace_Context* ctx)
+{
+	FTrace_Slot* touch = ctx->touch;
+
+	// NOTE: Shitty minimal state machinesque: we don't handle slots, gestures, or whatever ;).
+	if (ev->type == EV_SYN && ev->code == SYN_REPORT) {
+		touch->time = ev->time;
+		// We only do stuff on each REPORT
+		handle_contact(ctx);
+		// Keep draining the queue without going back to poll
+		return true;
+	}
+
+	if (ev->type == EV_ABS) {
+		switch (ev->code) {
+			// NOTE: That should cover everything...
+			//       Mk. 6+ reports EV_KEY:BTN_TOUCH events,
+			//       which would be easier to deal with,
+			//       but redundant here ;).
+			case ABS_MT_TOUCH_MAJOR:
+			case ABS_MT_WIDTH_MAJOR:
+			case ABS_MT_PRESSURE:
+			case ABS_PRESSURE:
+				if (ev->value > 0) {
+					touch->state = FINGER_DOWN;
+				} else {
+					touch->state = FINGER_UP;
+				}
+				break;
+			case ABS_MT_POSITION_X:
+			case ABS_X:
+				touch->pos.x = ev->value;
+				break;
+			case ABS_MT_POSITION_Y:
+			case ABS_Y:
+				touch->pos.y = ev->value;
+				break;
+			default:
+				break;
+		}
+	}
+
+	return false;
+}
+
 // Parse an evdev event
 static bool
     handle_evdev(const FTrace_Context* ctx)
@@ -198,47 +245,15 @@ static bool
 		struct input_event ev;
 		rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
 		if (rc == LIBEVDEV_READ_STATUS_SYNC) {
+			LOG(">>> DROPPED <<<");
 			while (rc == LIBEVDEV_READ_STATUS_SYNC) {
-				// NOTE: We're ignoring the sync delta events here.
+				process_evdev(&ev, ctx);
 				rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
 			}
+			LOG("<<< RE-SYNCED >>>");
 		} else if (rc == LIBEVDEV_READ_STATUS_SUCCESS) {
-			// NOTE: Shitty minimal state machinesque: we don't handle slots, gestures, or whatever ;).
-			if (ev.type == EV_SYN && ev.code == SYN_REPORT) {
-				touch->time = ev.time;
-				// We only do stuff on each REPORT
-				handle_contact(ctx);
-				// Keep draining the queue without going back to poll
+			if (process_evdev(&ev, ctx)) {
 				continue;
-			}
-
-			if (ev.type == EV_ABS) {
-				switch (ev.code) {
-					// NOTE: That should cover everything...
-					//       Mk. 6+ reports EV_KEY:BTN_TOUCH events,
-					//       which would be easier to deal with,
-					//       but redundant here ;).
-					case ABS_MT_TOUCH_MAJOR:
-					case ABS_MT_WIDTH_MAJOR:
-					case ABS_MT_PRESSURE:
-					case ABS_PRESSURE:
-						if (ev.value > 0) {
-							touch->state = FINGER_DOWN;
-						} else {
-							touch->state = FINGER_UP;
-						}
-						break;
-					case ABS_MT_POSITION_X:
-					case ABS_X:
-						touch->pos.x = ev.value;
-						break;
-					case ABS_MT_POSITION_Y:
-					case ABS_Y:
-						touch->pos.y = ev.value;
-						break;
-					default:
-						break;
-				}
 			}
 		}
 	} while (rc == LIBEVDEV_READ_STATUS_SYNC || rc == LIBEVDEV_READ_STATUS_SUCCESS);
