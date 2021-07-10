@@ -296,7 +296,7 @@ uint8_t
 	//       That said, since on those platforms, native_portrait == 0,
 	//       the whole logic below is still sound.
 	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_SUNXI) {
-		return rotate;
+		return (uint8_t) rotate;
 	}
 
 	uint8_t rota = (uint8_t) rotate;
@@ -352,7 +352,7 @@ uint32_t
 #if defined(FBINK_FOR_KOBO)
 	// Same as above, nothing to do on those devices.
 	if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_SUNXI) {
-		return rotate;
+		return (uint32_t) rotate;
 	}
 
 	uint32_t rota = rotate;
