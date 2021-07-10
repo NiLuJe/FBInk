@@ -30,6 +30,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <poll.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -153,6 +154,18 @@ static bool
 	return false;
 }
 
+// Fun helper to make sure we disable pen mode on exit...
+// For our cleanup signal handler....
+volatile sig_atomic_t g_timeToDie = 0;
+static void
+    cleanup_handler(int        signum __attribute__((unused)),
+		    siginfo_t* siginfo __attribute__((unused)),
+		    void*      context __attribute__((unused)))
+{
+	// Our main loop handles EINTR, and will abort cleanly once it sees that flag
+	g_timeToDie = 1;
+}
+
 int
     main(void)
 {
@@ -186,8 +199,29 @@ int
 	// Attempt not to murder the crappy sunxi driver, because as suspected,
 	// it doesn't really deal well with refresh storms...
 	// NOTE: We don't bracket the actual refresh themselves,
-	//       because apparently this ioctl is *super* slow...
+	//       because apparently this made things worse...
 	fbink_toggle_sunxi_ntx_pen_mode(fbfd, true);
+
+	// This means we need a signal handler to make sure this gets reset on quit...
+	struct sigaction new_action = { 0 };
+	new_action.sa_sigaction     = &cleanup_handler;
+	sigemptyset(&new_action.sa_mask);
+	new_action.sa_flags = SA_SIGINFO;
+	if ((rv = sigaction(SIGTERM, &new_action, NULL)) != 0) {
+		PFWARN("sigaction (TERM): %m");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+	if ((rv = sigaction(SIGINT, &new_action, NULL)) != 0) {
+		PFWARN("sigaction (INT): %m");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+	if ((rv = sigaction(SIGQUIT, &new_action, NULL)) != 0) {
+		PFWARN("sigaction (QUIT): %m");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
 
 	// We'll need the state to pick the right input device...
 	FBInkState fbink_state = { 0 };
@@ -243,6 +277,12 @@ int
 
 	FTrace_Slot touch = { 0 };
 	while (true) {
+		// If we caught one of the signals we setup earlier, it's time to die ;).
+		if (g_timeToDie != 0) {
+			ELOG("Caught a cleanup signal, winding down . . .");
+			goto cleanup;
+		}
+
 		int poll_num = poll(&pfd, 1, -1);
 
 		if (poll_num == -1) {
@@ -336,7 +376,9 @@ int
 
 	// Cleanup
 cleanup:
-	fbink_toggle_sunxi_ntx_pen_mode(fbfd, false);
+	if (fbfd != -1) {
+		fbink_toggle_sunxi_ntx_pen_mode(fbfd, false);
+	}
 
 	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
 		WARN("Failed to close the framebuffer, aborting");
