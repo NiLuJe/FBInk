@@ -104,6 +104,7 @@ typedef struct
 	const FBInkState*  fbink_state;
 	struct libevdev*   dev;
 	FTrace_Slot*       touch;
+	FTrace_Slot*       prev_touch;
 	int                fbfd;
 	int32_t            dim_swap;
 	uint8_t            canonical_rota;
@@ -194,9 +195,17 @@ static bool
 
 	// NOTE: Shitty minimal state machinesque: we don't handle slots, gestures, or whatever ;).
 	if (ev->type == EV_SYN && ev->code == SYN_REPORT) {
+		FTrace_Slot* prev_touch = ctx->prev_touch;
+
 		touch->time = ev->time;
-		// We only do stuff on each REPORT
-		handle_contact(ctx);
+		// We only do stuff on each REPORT, iff the finger actually moved
+		if (touch->pos.x != prev_touch->pos.x && touch->pos.y != prev_touch->pos.y) {
+			handle_contact(ctx);
+			*prev_touch = *touch;
+		} else {
+			LOG("%ld.%.9ld No movement", touch->time.tv_sec, touch->time.tv_usec);
+		}
+
 		// Keep draining the queue without going back to poll
 		return true;
 	}
@@ -237,8 +246,7 @@ static bool
 static bool
     handle_evdev(const FTrace_Context* ctx)
 {
-	struct libevdev* dev   = ctx->dev;
-	FTrace_Slot*     touch = ctx->touch;
+	struct libevdev* dev = ctx->dev;
 
 	int rc = 1;
 	do {
@@ -247,6 +255,8 @@ static bool
 		if (rc == LIBEVDEV_READ_STATUS_SYNC) {
 			LOG(">>> DROPPED <<<");
 			while (rc == LIBEVDEV_READ_STATUS_SYNC) {
+				// NOTE: Since we don't actually handle slots & stuff,
+				//       we can probably get away with this...
 				process_evdev(&ev, ctx);
 				rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
 			}
@@ -389,8 +399,10 @@ int
 	pfd.fd            = evfd;
 	pfd.events        = POLLIN;
 
-	FTrace_Slot touch = { 0 };
-	ctx.touch         = &touch;
+	FTrace_Slot touch      = { 0 };
+	ctx.touch              = &touch;
+	FTrace_Slot prev_touch = { 0 };
+	ctx.prev_touch         = &prev_touch;
 	while (true) {
 		// If we caught one of the signals we setup earlier, it's time to die ;).
 		if (g_timeToDie != 0) {
