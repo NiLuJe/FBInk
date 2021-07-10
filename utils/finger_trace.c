@@ -183,6 +183,10 @@ int
 	}
 	LOG("Initialized FBInk %s", fbink_version());
 
+	// Attempt not to murder the crappy sunxi driver, because as suspected,
+	// it doesn't really deal well with refresh storms...
+	fbink_toggle_sunxi_ntx_pen_mode(true);
+
 	// We'll need the state to pick the right input device...
 	FBInkState fbink_state = { 0 };
 	fbink_get_state(&fbink_cfg, &fbink_state);
@@ -322,9 +326,7 @@ int
 						.width  = fbink_state.fontsize_mult * 2U,
 						.height = fbink_state.fontsize_mult * 2U
 					};
-					fbink_toggle_sunxi_ntx_pen_mode(true);
 					fbink_cls(fbfd, &fbink_cfg, &rect, false);
-					fbink_toggle_sunxi_ntx_pen_mode(false);
 				}
 			}
 		}
@@ -332,6 +334,8 @@ int
 
 	// Cleanup
 cleanup:
+	fbink_toggle_sunxi_ntx_pen_mode(false);
+
 	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
 		WARN("Failed to close the framebuffer, aborting");
 		rv = ERRCODE(EXIT_FAILURE);
