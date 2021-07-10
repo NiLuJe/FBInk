@@ -73,7 +73,13 @@
 #define NXP_TOUCH_DEV   "/dev/input/event1"
 #define SUNXI_TOUCH_DEV "/dev/input/by-path/platform-0-0010-event"
 
-// Keep track of a single slot's state...
+typedef struct
+{
+	int32_t x;
+	int32_t y;
+} FTrace_Coordinates;
+
+// Keep tracks of a single slot's state...
 // FIXME: We don't actually discriminate between finger & pen ;p.
 typedef enum
 {
@@ -86,21 +92,107 @@ typedef enum
 
 typedef struct
 {
-	int32_t x;
-	int32_t y;
-} FTrace_Coordinates;
-
-typedef struct
-{
 	FTrace_Coordinates pos;
 	FTrace_State       state;
 	struct timeval     time;
 } FTrace_Slot;
 
+// Shove stuff in a struct to keep the signatures sane-ish
+typedef struct
+{
+	const FBInkConfig* fbink_cfg;
+	const FBInkState*  fbink_state;
+	struct libevdev*   dev;
+	FTrace_Slot*       touch;
+	int                fbfd;
+	int32_t            dim_swap;
+	uint8_t            canonical_rota;
+} FTrace_Context;
+
+static void
+    handle_contact(const FTrace_Context* ctx)
+{
+	const FBInkConfig* fbink_cfg   = ctx->fbink_cfg;
+	const FBInkState*  fbink_state = ctx->fbink_state;
+	FTrace_Slot*       touch       = ctx->touch;
+
+	// NOTE: The following was borrowed from my experiments with this in InkVT ;).
+	// Deal with device-specific rotation quirks...
+	FTrace_Coordinates canonical_pos;
+	// c.f., https://github.com/koreader/koreader/blob/master/frontend/device/kobo/device.lua
+	if (fbink_state->device_id == 310U || fbink_state->device_id == 320U) {
+		// Touch A/B & Touch C. This will most likely be wrong for one of those.
+		// touch_mirrored_x
+		canonical_pos.x = ctx->dim_swap - touch->pos.x;
+		canonical_pos.y = touch->pos.y;
+	} else if (fbink_state->device_id == 374U) {
+		// Aura H2O²r1
+		// touch_switch_xy
+		canonical_pos.x = touch->pos.y;
+		canonical_pos.y = touch->pos.x;
+	} else {
+		// touch_switch_xy && touch_mirrored_x
+		canonical_pos.x = ctx->dim_swap - touch->pos.y;
+		canonical_pos.y = touch->pos.x;
+	}
+
+	// And, finally, handle somewhat standard touch translation given the current rotation
+	// c.f., GestureDetector:adjustGesCoordinate @ https://github.com/koreader/koreader/blob/master/frontend/device/gesturedetector.lua
+	FTrace_Coordinates translated_pos;
+	switch (ctx->canonical_rota) {
+		case FB_ROTATE_UR:
+			translated_pos = canonical_pos;
+			break;
+		case FB_ROTATE_CW:
+			translated_pos.x = (int32_t) fbink_state->screen_width - canonical_pos.y;
+			translated_pos.y = canonical_pos.x;
+			break;
+		case FB_ROTATE_UD:
+			translated_pos.x = (int32_t) fbink_state->screen_width - canonical_pos.x;
+			translated_pos.y = (int32_t) fbink_state->screen_height - canonical_pos.y;
+			break;
+		case FB_ROTATE_CCW:
+			translated_pos.x = canonical_pos.y;
+			translated_pos.y = (int32_t) fbink_state->screen_height - canonical_pos.x;
+			break;
+		default:
+			translated_pos.x = -1;
+			translated_pos.y = -1;
+			break;
+	}
+
+	// Recap the craziness...
+	LOG("%ld.%.9ld %s @ (%d, %d) -> (%d, %d) => (%d, %d)",
+	    touch->time.tv_sec,
+	    touch->time.tv_usec,
+	    (touch->state == FINGER_DOWN || touch->state == PEN_DOWN) ? "DOWN" : "UP",
+	    touch->pos.x,
+	    touch->pos.y,
+	    canonical_pos.x,
+	    canonical_pos.y,
+	    translated_pos.x,
+	    translated_pos.y);
+
+	// Display a font_mul x 2 sized rectangle around the contact point,
+	// e.g., a poor man's pointer trail.
+	const FBInkRect rect = { .left =
+				     (unsigned short int) MAX(0, translated_pos.x - (int32_t) fbink_state->fontsize_mult),
+				 .top =
+				     (unsigned short int) MAX(0, translated_pos.y - (int32_t) fbink_state->fontsize_mult),
+				 .width  = fbink_state->fontsize_mult * 2U,
+				 .height = fbink_state->fontsize_mult * 2U };
+
+	// Ignore FBInk warnings (we may hit temporary refresh failures...)
+	fbink_cls(ctx->fbfd, fbink_cfg, &rect, false);
+}
+
 // Parse an evdev event
 static bool
-    handle_evdev(struct libevdev* dev, FTrace_Slot* touch)
+    handle_evdev(const FTrace_Context* ctx)
 {
+	struct libevdev* dev   = ctx->dev;
+	FTrace_Slot*     touch = ctx->touch;
+
 	int rc = 1;
 	do {
 		struct input_event ev;
@@ -114,7 +206,10 @@ static bool
 			// NOTE: Shitty minimal state machinesque: we don't handle slots, gestures, or whatever ;).
 			if (ev.type == EV_SYN && ev.code == SYN_REPORT) {
 				touch->time = ev.time;
-				return true;
+				// We only do stuff on each REPORT
+				handle_contact(ctx);
+				// Keep draining the queue without going back to poll
+				continue;
 			}
 
 			if (ev.type == EV_ABS) {
@@ -149,9 +244,11 @@ static bool
 	} while (rc == LIBEVDEV_READ_STATUS_SYNC || rc == LIBEVDEV_READ_STATUS_SUCCESS);
 	if (rc != LIBEVDEV_READ_STATUS_SUCCESS && rc != -EAGAIN) {
 		PFWARN("Failed to handle input events: %s", strerror(-rc));
+		return false;
 	}
 
-	return false;
+	// EAGAIN: we've drained the kernel queue, badk to poll :)
+	return true;
 }
 
 // Fun helper to make sure we disable pen mode on exit...
@@ -173,7 +270,7 @@ int
 	int rv = EXIT_SUCCESS;
 
 	// Early declarations for error handling purposes
-	int              fbfd = -1;
+	FTrace_Context   ctx  = { 0 };
 	struct libevdev* dev  = NULL;
 	int              evfd = -1;
 
@@ -184,23 +281,24 @@ int
 
 	// Init FBInk
 	// Open framebuffer and keep it around, then setup globals.
-	if ((fbfd = fbink_open()) == ERRCODE(EXIT_FAILURE)) {
+	if ((ctx.fbfd = fbink_open()) == ERRCODE(EXIT_FAILURE)) {
 		WARN("Failed to open the framebuffer, aborting");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
-	if (fbink_init(fbfd, &fbink_cfg) != EXIT_SUCCESS) {
+	if (fbink_init(ctx.fbfd, &fbink_cfg) != EXIT_SUCCESS) {
 		WARN("Failed to initialize FBInk, aborting");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
 	LOG("Initialized FBInk %s", fbink_version());
+	ctx.fbink_cfg = &fbink_cfg;
 
 	// Attempt not to murder the crappy sunxi driver, because as suspected,
 	// it doesn't really deal well with refresh storms...
 	// NOTE: We don't bracket the actual refresh themselves,
 	//       because apparently this made things worse...
-	fbink_toggle_sunxi_ntx_pen_mode(fbfd, true);
+	fbink_toggle_sunxi_ntx_pen_mode(ctx.fbfd, true);
 
 	// This means we need a signal handler to make sure this gets reset on quit...
 	struct sigaction new_action = { 0 };
@@ -226,6 +324,7 @@ int
 	// We'll need the state to pick the right input device...
 	FBInkState fbink_state = { 0 };
 	fbink_get_state(&fbink_cfg, &fbink_state);
+	ctx.fbink_state = &fbink_state;
 
 	// Setup libevdev
 	evfd = open(fbink_state.is_sunxi ? SUNXI_TOUCH_DEV : NXP_TOUCH_DEV, O_RDONLY | O_CLOEXEC | O_NONBLOCK);
@@ -251,6 +350,7 @@ int
 	// And we ourselves don't need to grab it, so, don't ;).
 	libevdev_grab(dev, LIBEVDEV_UNGRAB);
 	LOG("Initialized libevdev for device `%s`", libevdev_get_name(dev));
+	ctx.dev = dev;
 
 	// Deal with NTX touch panels insanity...
 	// On Kobo, the touch panel has a fixed rotation, one that *never* matches the actual rotation.
@@ -259,15 +359,14 @@ int
 	// c.f., rotate_touch_coordinates in FBInk for a different, possibly less compatible approach...
 	// NOTE: We only check this on startup here, this would need to be updated on relevant fbink_reinit returns
 	//       if we cared about runtime rotation handling ;).
-	const uint8_t canonical_rota = fbink_rota_native_to_canonical(fbink_state.current_rota);
-	LOG("Rotation: %hhu -> %hhu", fbink_state.current_rota, canonical_rota);
-	int32_t dim_swap;
-	if ((canonical_rota & 1U) == 0U) {
+	ctx.canonical_rota = fbink_rota_native_to_canonical(fbink_state.current_rota);
+	LOG("Rotation: %hhu -> %hhu", fbink_state.current_rota, ctx.canonical_rota);
+	if ((ctx.canonical_rota & 1U) == 0U) {
 		// Canonical rotation is even (UR/UD)
-		dim_swap = (int32_t) fbink_state.screen_width;
+		ctx.dim_swap = (int32_t) fbink_state.screen_width;
 	} else {
 		// Canonical rotation is odd (CW/CCW)
-		dim_swap = (int32_t) fbink_state.screen_height;
+		ctx.dim_swap = (int32_t) fbink_state.screen_height;
 	}
 
 	// Main loop
@@ -276,6 +375,7 @@ int
 	pfd.events        = POLLIN;
 
 	FTrace_Slot touch = { 0 };
+	ctx.touch         = &touch;
 	while (true) {
 		// If we caught one of the signals we setup earlier, it's time to die ;).
 		if (g_timeToDie != 0) {
@@ -296,79 +396,9 @@ int
 
 		if (poll_num > 0) {
 			if (pfd.revents & POLLIN) {
-				if (handle_evdev(dev, &touch)) {
-					// NOTE: The following was borrowed from my experiments with this in InkVT ;).
-					// Deal with device-specific rotation quirks...
-					FTrace_Coordinates canonical_pos;
-					// c.f., https://github.com/koreader/koreader/blob/master/frontend/device/kobo/device.lua
-					if (fbink_state.device_id == 310U || fbink_state.device_id == 320U) {
-						// Touch A/B & Touch C. This will most likely be wrong for one of those.
-						// touch_mirrored_x
-						canonical_pos.x = dim_swap - touch.pos.x;
-						canonical_pos.y = touch.pos.y;
-					} else if (fbink_state.device_id == 374U) {
-						// Aura H2O²r1
-						// touch_switch_xy
-						canonical_pos.x = touch.pos.y;
-						canonical_pos.y = touch.pos.x;
-					} else {
-						// touch_switch_xy && touch_mirrored_x
-						canonical_pos.x = dim_swap - touch.pos.y;
-						canonical_pos.y = touch.pos.x;
-					}
-
-					// And, finally, handle somewhat standard touch translation given the current rotation
-					// c.f., GestureDetector:adjustGesCoordinate @ https://github.com/koreader/koreader/blob/master/frontend/device/gesturedetector.lua
-					FTrace_Coordinates translated_pos;
-					switch (canonical_rota) {
-						case FB_ROTATE_UR:
-							translated_pos = canonical_pos;
-							break;
-						case FB_ROTATE_CW:
-							translated_pos.x =
-							    (int32_t) fbink_state.screen_width - canonical_pos.y;
-							translated_pos.y = canonical_pos.x;
-							break;
-						case FB_ROTATE_UD:
-							translated_pos.x =
-							    (int32_t) fbink_state.screen_width - canonical_pos.x;
-							translated_pos.y =
-							    (int32_t) fbink_state.screen_height - canonical_pos.y;
-							break;
-						case FB_ROTATE_CCW:
-							translated_pos.x = canonical_pos.y;
-							translated_pos.y =
-							    (int32_t) fbink_state.screen_height - canonical_pos.x;
-							break;
-						default:
-							translated_pos.x = -1;
-							translated_pos.y = -1;
-							break;
-					}
-
-					// Recap the craziness...
-					LOG("%ld.%.9ld %s @ (%d, %d) -> (%d, %d) => (%d, %d)",
-					    touch.time.tv_sec,
-					    touch.time.tv_usec,
-					    (touch.state == FINGER_DOWN || touch.state == PEN_DOWN) ? "DOWN" : "UP",
-					    touch.pos.x,
-					    touch.pos.y,
-					    canonical_pos.x,
-					    canonical_pos.y,
-					    translated_pos.x,
-					    translated_pos.y);
-
-					// Display a font_mul x 2 sized rectangle around the contact point,
-					// e.g., a poor man's pointer trail.
-					const FBInkRect rect = {
-						.left = (unsigned short int) MAX(
-						    0, translated_pos.x - (int32_t) fbink_state.fontsize_mult),
-						.top = (unsigned short int) MAX(
-						    0, translated_pos.y - (int32_t) fbink_state.fontsize_mult),
-						.width  = fbink_state.fontsize_mult * 2U,
-						.height = fbink_state.fontsize_mult * 2U
-					};
-					fbink_cls(fbfd, &fbink_cfg, &rect, false);
+				if (!handle_evdev(&ctx)) {
+					// Uh ho, something went wrong when reading input events...
+					break;
 				}
 			}
 		}
@@ -376,11 +406,11 @@ int
 
 	// Cleanup
 cleanup:
-	if (fbfd != -1) {
-		fbink_toggle_sunxi_ntx_pen_mode(fbfd, false);
+	if (ctx.fbfd != -1) {
+		fbink_toggle_sunxi_ntx_pen_mode(ctx.fbfd, false);
 	}
 
-	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
+	if (fbink_close(ctx.fbfd) == ERRCODE(EXIT_FAILURE)) {
 		WARN("Failed to close the framebuffer, aborting");
 		rv = ERRCODE(EXIT_FAILURE);
 	}
