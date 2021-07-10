@@ -220,7 +220,8 @@ int
 	// NOTE: We only check this on startup here, this would need to be updated on relevant fbink_reinit returns
 	//       if we cared about runtime rotation handling ;).
 	const uint8_t canonical_rota = fbink_rota_native_to_canonical(fbink_state.current_rota);
-	int32_t       dim_swap;
+	LOG("Rotation: %hhu -> %hhu", fbink_state.current_rota, canonical_rota);
+	int32_t dim_swap;
 	if ((canonical_rota & 1U) == 0U) {
 		// Canonical rotation is even (UR/UD)
 		dim_swap = (int32_t) fbink_state.screen_width;
@@ -321,7 +322,9 @@ int
 						.width  = fbink_state.fontsize_mult * 2U,
 						.height = fbink_state.fontsize_mult * 2U
 					};
+					fbink_toggle_sunxi_ntx_pen_mode(true);
 					fbink_cls(fbfd, &fbink_cfg, &rect, false);
+					fbink_toggle_sunxi_ntx_pen_mode(false);
 				}
 			}
 		}
