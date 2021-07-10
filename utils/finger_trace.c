@@ -299,6 +299,7 @@ int
 							break;
 					}
 
+					// Recap the craziness...
 					LOG("%ld.%.9ld %s @ (%d, %d) -> (%d, %d) => (%d, %d)",
 					    touch.time.tv_sec,
 					    touch.time.tv_usec,
@@ -310,14 +311,15 @@ int
 					    translated_pos.x,
 					    translated_pos.y);
 
-					// Display a font_mul sized rectangle around the contact point
+					// Display a font_mul x 2 sized rectangle around the contact point,
+					// e.g., a poor man's pointer trail.
 					const FBInkRect rect = {
 						.left = (unsigned short int) MAX(
-						    0, translated_pos.x - (int32_t) fbink_state.fontsize_mult / 2),
+						    0, translated_pos.x - (int32_t) fbink_state.fontsize_mult),
 						.top = (unsigned short int) MAX(
-						    0, translated_pos.y - (int32_t) fbink_state.fontsize_mult / 2),
-						.width  = fbink_state.fontsize_mult,
-						.height = fbink_state.fontsize_mult
+						    0, translated_pos.y - (int32_t) fbink_state.fontsize_mult),
+						.width  = fbink_state.fontsize_mult * 2U,
+						.height = fbink_state.fontsize_mult * 2U
 					};
 					fbink_cls(fbfd, &fbink_cfg, &rect, false);
 				}
