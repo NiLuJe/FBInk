@@ -335,17 +335,22 @@ endif
 
 # Pick up our vendored build of libunibreak, if requested
 ifdef UNIBREAK
-	EXTRA_LDFLAGS+=-LLibUniBreakBuild/src/.libs
+	EXTRA_LDFLAGS+=-Llibunibreak-staged/src/.libs
 	LIBS+=-l:libunibreak.a
 endif
 
 # Same for libi2c, on Kobo
 ifdef KOBO
-	EXTRA_CPPFLAGS+=-ILibI2CBuild/include
-	EXTRA_LDFLAGS+=-LLibI2CBuild/lib
+	EXTRA_CPPFLAGS+=-Ilibi2c-staged/include
+	EXTRA_LDFLAGS+=-Llibi2c-staged/lib
 	I2C_LIBS:=-l:libi2c.a
 	LIBS+=$(I2C_LIBS)
 endif
+
+# Pick up our vendored build of libevdev (for the PoC that relies on it)
+EVDEV_CPPFLAGS:=-Ilibevdev-staged/include/libevdev-1.0
+EVDEV_LDFLAGS:=-Llibevdev-staged/lib
+EVDEV_LIBS:=-l:libevdev.a
 
 # And with our own rpath for standalone distribution
 ifdef STANDALONE
@@ -638,10 +643,10 @@ pocketbook:
 	$(MAKE) strip POCKETBOOK=true
 
 libunibreak.built:
-	mkdir -p LibUniBreakBuild
+	mkdir -p libunibreak-staged
 	cd libunibreak && \
 	env NOCONFIGURE=1 ./autogen.sh
-	cd LibUniBreakBuild && \
+	cd libunibreak-staged && \
 	env CPPFLAGS="$(CPPFLAGS) $(EXTRA_CPPFLAGS)" \
 	CFLAGS="$(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(UNIBREAK_CFLAGS)" \
 	LDFLAGS="$(LDFLAGS)" \
@@ -650,19 +655,29 @@ libunibreak.built:
 	--enable-static \
 	--disable-shared \
 	$(if $(SHARED),--with-pic=yes,)
-	cd LibUniBreakBuild && \
-	$(MAKE)
+	$(MAKE) -C libunibreak-staged
 	touch libunibreak.built
 
 libi2c.built:
-	mkdir -p LibI2CBuild
+	mkdir -p libi2c-staged
 	$(MAKE) -C i2c-tools \
 	BUILD_DYNAMIC_LIB=0 USE_STATIC_LIB=1 BUILD_STATIC_LIB=1 V=1 \
 	CC=$(CC) AR=$(AR) \
 	CFLAGS="$(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(I2C_CFLAGS)" \
-	PREFIX="/" libdir="/lib" DESTDIR="$(CURDIR)/LibI2CBuild" \
+	PREFIX="/" libdir="/lib" DESTDIR="$(CURDIR)/libi2c-staged" \
 	lib install-lib install-include
 	touch libi2c.built
+
+libevdev.built:
+	mkdir -p libevdev-staged
+	cd libevdev && \
+	autoreconf -fi && \
+	./configure $(if $(CROSS_TC),--host=$(CROSS_TC),) \
+	--prefix="$(CURDIR)/libevdev-staged" \
+	--enable-static \
+	--disable-shared && \
+	$(MAKE) install
+	touch libevdev.built
 
 armcheck:
 ifeq (,$(findstring arm-,$(CC)))
@@ -710,6 +725,7 @@ devcap: armcheck
 	tar --owner=root --group=root -cvzf Release/Kobo-DevCap-Test.tar.gz -C Kobo .
 
 libunibreakclean:
+	$(MAKE) -C libunibreak clean
 	cd libunibreak && \
 	git reset --hard
 
@@ -717,6 +733,12 @@ libi2cclean:
 	$(MAKE) -C i2c-tools clean
 	cd i2c-tools && \
 	git reset --hard
+
+libevdevclean:
+	$(MAKE) -C libevdev clean
+	cd libevdev && \
+	git reset --hard && \
+	git clean -fxdq
 
 clean:
 	rm -rf Kobo/
@@ -781,10 +803,12 @@ clean:
 	rm -rf Debug/dump
 	rm -rf Debug/Kobo-DevCap-Test.tar.gz
 
-distclean: clean libunibreakclean libi2cclean
-	rm -rf LibUniBreakBuild
+distclean: clean libunibreakclean libi2cclean libevdevclean
+	rm -rf libunibreak-staged
 	rm -rf libunibreak.built
-	rm -rf LibI2CBuild
+	rm -rf libi2c-staged
 	rm -rf libi2c.built
+	rm -rf libevdev-staged
+	rm -rf libevdev.built
 
-.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean utils alt sunxi dump devcap clean distclean
+.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils alt sunxi dump devcap clean distclean
