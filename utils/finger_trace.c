@@ -200,11 +200,11 @@ static bool
 
 		touch->time = ev->time;
 		// We only do stuff on each REPORT,
-		// iff the finger actually moved further than our rectangle dimension in at least one direction.
-		if ((touch->pos.x > prev_touch->pos.x + (int32_t) fbink_state->fontsize_mult * 2 ||
-		     touch->pos.x < prev_touch->pos.x - (int32_t) fbink_state->fontsize_mult * 2) ||
-		    (touch->pos.y > prev_touch->pos.y + (int32_t) fbink_state->fontsize_mult * 2 ||
-		     touch->pos.y < prev_touch->pos.y - (int32_t) fbink_state->fontsize_mult * 2)) {
+		// iff the finger actually moved somewhat significantly...
+		if ((touch->pos.x > prev_touch->pos.x + (int32_t) fbink_state->fontsize_mult ||
+		     touch->pos.x < prev_touch->pos.x - (int32_t) fbink_state->fontsize_mult) ||
+		    (touch->pos.y > prev_touch->pos.y + (int32_t) fbink_state->fontsize_mult ||
+		     touch->pos.y < prev_touch->pos.y - (int32_t) fbink_state->fontsize_mult)) {
 			handle_contact(ctx);
 			*prev_touch = *touch;
 		} else {
