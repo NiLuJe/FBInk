@@ -4630,13 +4630,11 @@ static int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
-	// Then request a DMA mapping large enough to fit our screen.
-	// NOTE: The CMA *always* returns PAGE_SIZE aligned pointers,
-	//       we're just documenting that explicitly here ;).
+	// Then request a page-aligned carveout mapping large enough to fit our screen.
 	sunxiCtx.alloc_size              = ALIGN(fInfo.line_length * vInfo.yres_virtual, 4096);
 	struct ion_allocation_data alloc = { .len          = sunxiCtx.alloc_size,
 					     .align        = 4096,
-					     .heap_id_mask = ION_HEAP_MASK_DMA };
+					     .heap_id_mask = ION_HEAP_MASK_CARVEOUT };
 	int                        ret   = ioctl(sunxiCtx.ion_fd, ION_IOC_ALLOC, &alloc);
 	if (ret < 0) {
 		PFWARN("ION_IOC_ALLOC: %m");
