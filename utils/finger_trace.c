@@ -191,17 +191,20 @@ static void
 static bool
     process_evdev(const struct input_event* ev, const FTrace_Context* ctx)
 {
-	FTrace_Slot* touch = ctx->touch;
+	FTrace_Slot*      touch       = ctx->touch;
+	const FBInkState* fbink_state = ctx->fbink_state;
 
 	// NOTE: Shitty minimal state machinesque: we don't handle slots, gestures, or whatever ;).
 	if (ev->type == EV_SYN && ev->code == SYN_REPORT) {
 		FTrace_Slot* prev_touch = ctx->prev_touch;
 
 		touch->time = ev->time;
-		// We only do stuff on each REPORT, iff the finger actually moved
-		// A serious solution would probably use more aggressive jitter thresholds,
-		// because the pen reports a metric shitton of events ;).
-		if (touch->pos.x != prev_touch->pos.x && touch->pos.y != prev_touch->pos.y) {
+		// We only do stuff on each REPORT,
+		// iff the finger actually moved further than our rectangle dimension in at least one direction.
+		if ((touch->pos.x > prev_touch->pos.x + (int32_t) fbink_state->fontsize_mult * 2 ||
+		     touch->pos.x < prev_touch->pos.x - (int32_t) fbink_state->fontsize_mult * 2) ||
+		    (touch->pos.y > prev_touch->pos.y + (int32_t) fbink_state->fontsize_mult * 2 ||
+		     touch->pos.y < prev_touch->pos.y - (int32_t) fbink_state->fontsize_mult * 2)) {
 			handle_contact(ctx);
 			*prev_touch = *touch;
 		} else {
