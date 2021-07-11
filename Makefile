@@ -86,6 +86,19 @@ CC_IS_CROSS:=0
 ifeq (,$(findstring $(HOST_ARCH),$(TARGET_ARCH)))
 	CC_IS_CROSS:=1
 endif
+# Detect musl because some cross musl TCs are special snowflakes without plugin support,
+# and most of the utils won't build without LTO and linker plugins...
+CC_IS_MUSL:=0
+ifeq (musl,$(findstring musl,$(TARGET_ARCH)))
+	CC_IS_MUSL:=1
+
+	# NOTE: Can't be tab-indented or make thinks it's part of a recipe, for some reason...
+        $(info )
+        $(info /!\)
+        $(warning Detected a musl TC: it *may* be built without linker plugins support, which are a hard dependency of the utils target!)
+        $(info /!\)
+        $(info )
+endif
 
 ifndef DEBUG
 	# Don't hobble GCC just for the sake of being interposable
