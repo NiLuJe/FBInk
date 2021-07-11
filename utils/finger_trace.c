@@ -246,6 +246,8 @@ static bool
 					if (ev->value == -1) {
 						// NOTE: On sunxi, send a !pen refresh on pen up because otherwise the driver softlocks,
 						//       and ultimately trips a reboot watchdog...
+						// NOTE: Nickel also toggles pen mode *off* before doing that, but, so far,
+						//       we appear to get by without resorting to that :).
 						const WFM_MODE_INDEX_T pen_wfm = fbink_cfg->wfm_mode;
 						fbink_cfg->wfm_mode            = WFM_GL16;
 						fbink_refresh(ctx->fbfd, 0, 0, 0, 0, fbink_cfg);
