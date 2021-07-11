@@ -3412,6 +3412,9 @@ static __attribute__((cold)) void
 	ELOG("Enabled sunxi quirks (%ux%u -> %ux%u)", xres, yres, vInfo.xres, vInfo.yres);
 
 	// Make the pitch NEON-friendly (when using an RGB32 fb fd)...
+	// NOTE: This appears to upset Landscape G2D rotations...
+	//       In which case, don't do it, and just set align to 2 in the layer config,
+	//       that works regardless of the rotation...
 	/*
 	vInfo.xres_virtual = ALIGN(vInfo.xres, 32);
 	ELOG("xres_virtual -> %u", vInfo.xres_virtual);
