@@ -199,6 +199,8 @@ static bool
 
 		touch->time = ev->time;
 		// We only do stuff on each REPORT, iff the finger actually moved
+		// A serious solution would probably use more aggressive jitter thresholds,
+		// because the pen reports a metric shitton of events ;).
 		if (touch->pos.x != prev_touch->pos.x && touch->pos.y != prev_touch->pos.y) {
 			handle_contact(ctx);
 			*prev_touch = *touch;
