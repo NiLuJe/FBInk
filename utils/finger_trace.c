@@ -252,6 +252,7 @@ static bool
 						fbink_cfg->wfm_mode = pen_wfm;
 					}
 				}
+				break;
 			default:
 				break;
 		}
