@@ -3397,7 +3397,9 @@ static __attribute__((cold)) void
 	//       (e.g., Nickel's) is laid out in a different rotation,
 	//       the layer overlap detection and subsequent blending royally screws Nickel's own layer... :(.
 	//       A shitty workaround might be to enable NTX_HANDWRITE and switch to DU,
-	//       because it appears to disable the offending checks...
+	//       because it appears to disable the offending checks, but that, in turn,
+	//       will leave the eink image proc kernel thread spinning at 100% CPU
+	//       until the next non pen mode update...
 
 	// Handle Portrait/Landscape swaps
 	if ((vInfo.rotate & 0x01) == 1) {
