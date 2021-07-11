@@ -259,6 +259,7 @@ static bool
 			while (rc == LIBEVDEV_READ_STATUS_SYNC) {
 				// NOTE: Since we don't actually handle slots & stuff,
 				//       we can probably get away with this...
+				//       c.f., https://www.freedesktop.org/software/libevdev/doc/latest/syn_dropped.html
 				process_evdev(&ev, ctx);
 				rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
 			}
