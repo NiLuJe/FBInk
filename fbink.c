@@ -2628,8 +2628,14 @@ static int
 	int rv = ioctl(sunxiCtx.disp_fd, DISP_EINK_UPDATE2, &update);
 
 	if (rv < 0) {
+		// NOTE: The code flow is so funky that you can end up with a wide array of not necessarily
+		//       semantically meaningful errno values...
 		PFWARN("DISP_EINK_UPDATE2: %m");
-		WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
+		WARN("screen_win={x=%d, y=%d, width=%u, height=%u}; update_region={top=%u, left=%u, width=%u, height=%u}",
+		     sunxiCtx.layer.info.screen_win.x,
+		     sunxiCtx.layer.info.screen_win.y,
+		     sunxiCtx.layer.info.screen_win.width,
+		     sunxiCtx.layer.info.screen_win.height,
 		     region.top,
 		     region.left,
 		     region.width,
