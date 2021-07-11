@@ -360,6 +360,21 @@ int
 	fbink_get_state(&fbink_cfg, &fbink_state);
 	ctx.fbink_state = &fbink_state;
 
+	// On sunxi, clear the buffer to *white* first,
+	// because we'll periodically trigger full-screen refreshes to placate the kernel,
+	// and dmabuffs are zero-initialized, so our bg is currently *black*...
+	if (fbink_state.is_sunxi) {
+		const BG_COLOR_INDEX_T pen_color = fbink_cfg.bg_color;
+		const WFM_MODE_INDEX_T pen_wfm   = fbink_cfg.wfm_mode;
+		fbink_cfg.bg_color               = BG_WHITE;
+		fbink_update_pen_colors(&fbink_cfg);
+		fbink_cfg.wfm_mode = WFM_GL16;
+		fbink_cls(ctx.fbfd, &fbink_cfg, NULL, false);
+		fbink_cfg.wfm_mode = pen_wfm;
+		fbink_cfg.bg_color = pen_color;
+		fbink_update_pen_colors(&fbink_cfg);
+	}
+
 	// Setup libevdev
 	evfd = open(fbink_state.is_sunxi ? SUNXI_TOUCH_DEV : NXP_TOUCH_DEV, O_RDONLY | O_CLOEXEC | O_NONBLOCK);
 	if (evfd == -1) {
@@ -437,6 +452,15 @@ int
 					break;
 				}
 			}
+		}
+
+		// NOTE: On sunxi, send a full refresh between polls because otherwise the driver softlocks,
+		//       and ultimately trips a reboot watchdog...
+		if (fbink_state.is_sunxi) {
+			const WFM_MODE_INDEX_T pen_wfm = fbink_cfg.wfm_mode;
+			fbink_cfg.wfm_mode             = WFM_GL16;
+			fbink_refresh(ctx.fbfd, 0, 0, 0, 0, &fbink_cfg);
+			fbink_cfg.wfm_mode = pen_wfm;
 		}
 	}
 
