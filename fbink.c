@@ -3411,21 +3411,10 @@ static __attribute__((cold)) void
 	}
 	ELOG("Enabled sunxi quirks (%ux%u -> %ux%u)", xres, yres, vInfo.xres, vInfo.yres);
 
-	// Make the pitch NEON-friendly (when using an RGB32 fb fd)...
-	// NOTE: This appears to upset Landscape G2D rotations...
-	//       In which case, don't do it, and just set align to 2 in the layer config,
-	//       that works regardless of the rotation...
-	/*
+	// Make the pitch NEON-friendly...
 	vInfo.xres_virtual = ALIGN(vInfo.xres, 32);
 	ELOG("xres_virtual -> %u", vInfo.xres_virtual);
-	vInfo.yres_virtual = ALIGN(vInfo.yres, 128);
-	ELOG("yres_virtual -> %u", vInfo.yres_virtual);
-	*/
-	// But we're actually using a Y8 fb y8_fd, and apparently,
-	// that codepath doesn't support/expect pitch alignment trickeries...
-	vInfo.xres_virtual = vInfo.xres;
-	ELOG("xres_virtual -> %u", vInfo.xres_virtual);
-	vInfo.yres_virtual = vInfo.yres;
+	vInfo.yres_virtual = ALIGN(vInfo.yres, 32);
 	ELOG("yres_virtual -> %u", vInfo.yres_virtual);
 
 	// Make it grayscale...
@@ -3735,8 +3724,8 @@ static __attribute__((cold)) int
 		//       because that's what the disp code (mostly) expects (*sigh*).
 
 		// disp_rectsz
-		sunxiCtx.layer.info.fb.size[0].width  = sunxiCtx.layer.info.screen_win.width;
-		sunxiCtx.layer.info.fb.size[0].height = sunxiCtx.layer.info.screen_win.height;
+		sunxiCtx.layer.info.fb.size[0].width  = vInfo.xres_virtual;
+		sunxiCtx.layer.info.fb.size[0].height = vInfo.yres_virtual;
 		// NOTE: See align below, we don't need those when using a Y8 fb y8_fd,
 		//       but we *probably* do when using an RGB32 fb fd...
 		sunxiCtx.layer.info.fb.size[1].width  = 0U;
@@ -3744,12 +3733,8 @@ static __attribute__((cold)) int
 		sunxiCtx.layer.info.fb.size[2].width  = 0U;
 		sunxiCtx.layer.info.fb.size[2].height = 0U;
 
-		// NOTE: Used to compute the scanline pitch in bytes (e.g., pitch = ALIGN(pixels * components, align),
-		//       except when using a Y8 fb y8_fd, apparently...
-		// NOTE: Must really *NOT* be set to 0 when using a RGB32 fb fd, though,
-		//       (for *any* of them, even if we only actually have a single buffer),
-		//       c.f., kobo_sunxi_fb_fixup ;).
-		sunxiCtx.layer.info.fb.align[0]      = 0U;
+		// NOTE: Used to compute the scanline pitch in bytes (e.g., pitch = ALIGN(scanline_pixels * components, align).
+		sunxiCtx.layer.info.fb.align[0]      = 32U;
 		sunxiCtx.layer.info.fb.align[1]      = 0U;
 		sunxiCtx.layer.info.fb.align[2]      = 0U;
 		sunxiCtx.layer.info.fb.format        = DISP_FORMAT_8BIT_GRAY;
@@ -3759,8 +3744,8 @@ static __attribute__((cold)) int
 		sunxiCtx.layer.info.fb.crop.x        = 0;
 		sunxiCtx.layer.info.fb.crop.y        = 0;
 		// Don't ask me why this needs to be shifted 32 bits to the left... ¯\_(ツ)_/¯
-		sunxiCtx.layer.info.fb.crop.width    = (uint64_t) sunxiCtx.layer.info.screen_win.width << 32U;
-		sunxiCtx.layer.info.fb.crop.height   = (uint64_t) sunxiCtx.layer.info.screen_win.height << 32U;
+		sunxiCtx.layer.info.fb.crop.width    = (uint64_t) vInfo.xres << 32U;
+		sunxiCtx.layer.info.fb.crop.height   = (uint64_t) vInfo.yres << 32U;
 		sunxiCtx.layer.info.fb.flags         = DISP_BF_NORMAL;
 		sunxiCtx.layer.info.fb.scan          = DISP_SCAN_PROGRESSIVE;
 		sunxiCtx.layer.info.fb.eotf          = DISP_EOTF_GAMMA22;
