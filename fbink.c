@@ -3735,16 +3735,17 @@ static __attribute__((cold)) int
 		//       because that's what the disp code (mostly) expects (*sigh*).
 
 		// disp_rectsz
+		// NOTE: Used in conjunction with align below.
+		//       We obviously only have a single buffer, because we're not a 3D display...
 		sunxiCtx.layer.info.fb.size[0].width  = vInfo.xres_virtual;
 		sunxiCtx.layer.info.fb.size[0].height = vInfo.yres_virtual;
-		// NOTE: See align below, we don't need those when using a Y8 fb y8_fd,
-		//       but we *probably* do when using an RGB32 fb fd...
 		sunxiCtx.layer.info.fb.size[1].width  = 0U;
 		sunxiCtx.layer.info.fb.size[1].height = 0U;
 		sunxiCtx.layer.info.fb.size[2].width  = 0U;
 		sunxiCtx.layer.info.fb.size[2].height = 0U;
 
 		// NOTE: Used to compute the scanline pitch in bytes (e.g., pitch = ALIGN(scanline_pixels * components, align).
+		//       This is set to 2 by Nickel, but we appear to go by without it just fine with a Y8 fb fd...
 		sunxiCtx.layer.info.fb.align[0]      = 0U;
 		sunxiCtx.layer.info.fb.align[1]      = 0U;
 		sunxiCtx.layer.info.fb.align[2]      = 0U;
@@ -3759,7 +3760,7 @@ static __attribute__((cold)) int
 		sunxiCtx.layer.info.fb.crop.height   = (uint64_t) vInfo.yres << 32U;
 		sunxiCtx.layer.info.fb.flags         = DISP_BF_NORMAL;
 		sunxiCtx.layer.info.fb.scan          = DISP_SCAN_PROGRESSIVE;
-		sunxiCtx.layer.info.fb.eotf          = DISP_EOTF_GAMMA22;
+		sunxiCtx.layer.info.fb.eotf          = DISP_EOTF_GAMMA22;    // SDR
 		sunxiCtx.layer.info.fb.depth         = 0;
 		sunxiCtx.layer.info.fb.fbd_en        = 0U;
 		sunxiCtx.layer.info.fb.metadata_fd   = 0;
@@ -4671,7 +4672,7 @@ static int
 		goto cleanup;
 	}
 
-	// And update our layer config to use that dmabuff fd
+	// And update our layer config to use that dmabuff fd, as a grayscale buffer.
 	sunxiCtx.layer.info.fb.fd    = 0;
 	sunxiCtx.layer.info.fb.y8_fd = sunxiCtx.ion.fd;
 
@@ -4814,7 +4815,7 @@ int
 
 #if defined(FBINK_FOR_KOBO)
 	if (deviceQuirks.isSunxi) {
-		// Also close the acceleromter I²C handle...
+		// Also close the accelerometer I²C handle...
 		if (close_accelerometer_i2c() == EXIT_SUCCESS) {
 			// NOTE: Kludge: reset the "skip device id" flag, so we don't skip re-opening it on next init...
 			deviceQuirks.skipId = false;
@@ -7863,9 +7864,13 @@ int
 	}
 
 cleanup:
-	if (isFbMapped && !keep_fd) {
-		unmap_fb();
+#	ifdef FBINK_FOR_KOBO
+	if (deviceQuirks.isSunxi) {
+		if (isFbMapped && !keep_fd) {
+			unmap_fb();
+		}
 	}
+#	endif
 	if (!keep_fd) {
 		close(fbfd);
 	}
@@ -7969,9 +7974,13 @@ int
 	}
 
 cleanup:
-	if (isFbMapped && !keep_fd) {
-		unmap_fb();
+#	ifdef FBINK_FOR_KOBO
+	if (deviceQuirks.isSunxi) {
+		if (isFbMapped && !keep_fd) {
+			unmap_fb();
+		}
 	}
+#	endif
 	if (!keep_fd) {
 		close(fbfd);
 	}

@@ -790,7 +790,7 @@ static int dump_region(struct mxcfb_rect* region, FBInkDump* restrict dump);
 #	include "fbink_device_id.h"
 #endif
 
-// For the I²C stuff, which we need on Kobo
+// For the I²C stuff, which we need on Kobo (at least on Mk. 8 ;))
 #ifdef FBINK_FOR_KOBO
 #	include "fbink_rota_quirks.h"
 #endif
