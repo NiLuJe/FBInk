@@ -1093,10 +1093,12 @@ FBINK_API uint32_t fbink_rota_canonical_to_native(uint8_t rotate);
 // The functions below are tied to specific capabilities on Kobo devices with a sunxi SoC (e.g., the Elipsa).
 //
 // Toggle the "pen" refresh mode. c.f., eink/sunxi-kobo.h @ DISP_EINK_SET_NTX_HANDWRITE_ONOFF for more details.
-// Returns -(ENOSYS) on unsupported platforms.
 // the TL;DR being that it's only truly active when using A2 & DU waveform modes.
 // And since, on sunxi, A2's MONOCHROME flag is just *software* dithering, you might actually prefer DU.
 // (And/or we ought to just get rid of EINK_MONOCHROME on this platform, TBD ;)).
+// Returns -(ENOSYS) on unsupported platforms.
+// fbfd:		Open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
 // NOTE: Outside of tracing pen input, it has another interesting side-effect:
 //       since it disables the layer overlap check, it allows you to display stuff in a different layout
 //       than the current working buffer without the (heavy) visual artifacts that would otherwise imply.
