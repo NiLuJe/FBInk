@@ -3412,9 +3412,18 @@ static __attribute__((cold)) void
 	ELOG("Enabled sunxi quirks (%ux%u -> %ux%u)", xres, yres, vInfo.xres, vInfo.yres);
 
 	// Make the pitch NEON-friendly...
+	// NOTE: We don't do it because it can introduce layout change glitches on rotation,
+	//       or even just when layer overlap blending is involved...
+	//       (e.g., it breaks the pen up update in utils/finger_trace).
+	/*
 	vInfo.xres_virtual = ALIGN(vInfo.xres, 32);
 	ELOG("xres_virtual -> %u", vInfo.xres_virtual);
 	vInfo.yres_virtual = ALIGN(vInfo.yres, 32);
+	ELOG("yres_virtual -> %u", vInfo.yres_virtual);
+	*/
+	vInfo.xres_virtual = vInfo.xres;
+	ELOG("xres_virtual -> %u", vInfo.xres_virtual);
+	vInfo.yres_virtual = vInfo.yres;
 	ELOG("yres_virtual -> %u", vInfo.yres_virtual);
 
 	// Make it grayscale...
@@ -3734,7 +3743,7 @@ static __attribute__((cold)) int
 		sunxiCtx.layer.info.fb.size[2].height = 0U;
 
 		// NOTE: Used to compute the scanline pitch in bytes (e.g., pitch = ALIGN(scanline_pixels * components, align).
-		sunxiCtx.layer.info.fb.align[0]      = 32U;
+		sunxiCtx.layer.info.fb.align[0]      = 0U;
 		sunxiCtx.layer.info.fb.align[1]      = 0U;
 		sunxiCtx.layer.info.fb.align[2]      = 0U;
 		sunxiCtx.layer.info.fb.format        = DISP_FORMAT_8BIT_GRAY;
