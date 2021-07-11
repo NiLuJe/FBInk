@@ -349,6 +349,7 @@ int
 	// NOTE: Speaking of, having two of the four cores online help (because the eink threads will spin like mad),
 	//       but more than that is probably overkill, unless you need them yourself.
 	//       (Nickel tends to stick to three cores in the Notebooks).
+	// NOTE: Fun fact: high disp debug levels appear to make everything worse, for some reason...
 	fbink_toggle_sunxi_ntx_pen_mode(ctx.fbfd, true);
 
 	// This means we need a signal handler to make sure this gets reset on quit...
