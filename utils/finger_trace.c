@@ -100,14 +100,14 @@ typedef struct
 // Shove stuff in a struct to keep the signatures sane-ish
 typedef struct
 {
-	const FBInkConfig* fbink_cfg;
-	const FBInkState*  fbink_state;
-	struct libevdev*   dev;
-	FTrace_Slot*       touch;
-	FTrace_Slot*       prev_touch;
-	int                fbfd;
-	int32_t            dim_swap;
-	uint8_t            canonical_rota;
+	FBInkConfig*     fbink_cfg;
+	FBInkState*      fbink_state;
+	struct libevdev* dev;
+	FTrace_Slot*     touch;
+	FTrace_Slot*     prev_touch;
+	int              fbfd;
+	int32_t          dim_swap;
+	uint8_t          canonical_rota;
 } FTrace_Context;
 
 static void
@@ -191,8 +191,9 @@ static void
 static bool
     process_evdev(const struct input_event* ev, const FTrace_Context* ctx)
 {
-	FTrace_Slot*      touch       = ctx->touch;
+	FBInkConfig*      fbink_cfg   = ctx->fbink_cfg;
 	const FBInkState* fbink_state = ctx->fbink_state;
+	FTrace_Slot*      touch       = ctx->touch;
 
 	// NOTE: Shitty minimal state machinesque: we don't handle slots, gestures, or whatever ;).
 	if (ev->type == EV_SYN && ev->code == SYN_REPORT) {
@@ -239,6 +240,17 @@ static bool
 			case ABS_MT_POSITION_Y:
 				touch->pos.y = ev->value;
 				break;
+			case ABS_MT_TRACKING_ID:
+				if (fbink_state->is_sunxi) {
+					if (ev->value == -1) {
+						// NOTE: On sunxi, send a !pen refresh on pen up because otherwise the driver softlocks,
+						//       and ultimately trips a reboot watchdog...
+						const WFM_MODE_INDEX_T pen_wfm = fbink_cfg->wfm_mode;
+						fbink_cfg->wfm_mode            = WFM_GL16;
+						fbink_refresh(ctx->fbfd, 0, 0, 0, 0, fbink_cfg);
+						fbink_cfg->wfm_mode = pen_wfm;
+					}
+				}
 			default:
 				break;
 		}
@@ -332,6 +344,7 @@ int
 	// NOTE: This has a tendancy to kill the kernel regardless
 	//       (e.g., one of the eink kernel threads spinning in the wind hogging a core @ 100%,
 	//       until the next non-pen update (i.e., not A2 or DU, even if the mode is still enabled)...
+	//       Hence the GL16 update we send on pen up...
 	fbink_toggle_sunxi_ntx_pen_mode(ctx.fbfd, true);
 
 	// This means we need a signal handler to make sure this gets reset on quit...
@@ -452,15 +465,6 @@ int
 					break;
 				}
 			}
-		}
-
-		// NOTE: On sunxi, send a full refresh between polls because otherwise the driver softlocks,
-		//       and ultimately trips a reboot watchdog...
-		if (fbink_state.is_sunxi) {
-			const WFM_MODE_INDEX_T pen_wfm = fbink_cfg.wfm_mode;
-			fbink_cfg.wfm_mode             = WFM_GL16;
-			fbink_refresh(ctx.fbfd, 0, 0, 0, 0, &fbink_cfg);
-			fbink_cfg.wfm_mode = pen_wfm;
 		}
 	}
 
