@@ -202,6 +202,7 @@ static bool
 		touch->time = ev->time;
 		// We only do stuff on each REPORT,
 		// iff the finger actually moved somewhat significantly...
+		// NOTE: Should ideally be clamped to between 0 and the relevant screen dimension ;).
 		if ((touch->pos.x > prev_touch->pos.x + (int32_t) fbink_state->fontsize_mult ||
 		     touch->pos.x < prev_touch->pos.x - (int32_t) fbink_state->fontsize_mult) ||
 		    (touch->pos.y > prev_touch->pos.y + (int32_t) fbink_state->fontsize_mult ||
