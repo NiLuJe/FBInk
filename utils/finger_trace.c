@@ -218,22 +218,22 @@ static bool
 			//       Mk. 6+ reports EV_KEY:BTN_TOUCH events,
 			//       which would be easier to deal with,
 			//       but redundant here ;).
-			case ABS_MT_TOUCH_MAJOR:
-			case ABS_MT_WIDTH_MAJOR:
-			case ABS_MT_PRESSURE:
 			case ABS_PRESSURE:
+			case ABS_MT_WIDTH_MAJOR:
+			//case ABS_MT_TOUCH_MAJOR: // Oops, not that one, it's always 0 on Mk.7 :s
+			case ABS_MT_PRESSURE:
 				if (ev->value > 0) {
 					touch->state = FINGER_DOWN;
 				} else {
 					touch->state = FINGER_UP;
 				}
 				break;
-			case ABS_MT_POSITION_X:
 			case ABS_X:
+			case ABS_MT_POSITION_X:
 				touch->pos.x = ev->value;
 				break;
-			case ABS_MT_POSITION_Y:
 			case ABS_Y:
+			case ABS_MT_POSITION_Y:
 				touch->pos.y = ev->value;
 				break;
 			default:
