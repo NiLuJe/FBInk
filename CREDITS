@@ -31,6 +31,12 @@ This project makes use of a number of third-party libraries, which we'll acknowl
 		Licensed under the GNU Library or Lesser General Public License (LGPL 2.1+) (https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html).
 		(https://git.kernel.org/pub/scm/utils/i2c-tools/i2c-tools.git)
 
+	* libevdev (Wrapper library for evdev devices),
+		Copyright © 2013 Red Hat, Inc.,
+		Copyright © 2013 David Herrmann <dh.herrmann@gmail.com>,
+		Released under the MIT license (https://opensource.org/licenses/mit-license.php)
+		(https://gitlab.freedesktop.org/libevdev/libevdev)
+
 It also bundles a few specific routines based on others' work:
 
 	* Some (the 8/16/24/32bpp put_pixel_* variants) Linux framebuffer writing routines based on: fbtestfnt.c & fbtest6.c, from
