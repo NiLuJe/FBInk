@@ -345,6 +345,9 @@ int
 	//       (e.g., one of the eink kernel threads spinning in the wind hogging a core @ 100%,
 	//       until the next non-pen update (i.e., not A2 or DU, even if the mode is still enabled)...
 	//       Hence the GL16 update we send on pen up...
+	// NOTE: Speaking of, having two of the four cores online help (because the eink threads will spin like mad),
+	//       but more than that is probably overkill, unless you need them yourself.
+	//       (Nickel tends to stick to three cores in the Notebooks).
 	fbink_toggle_sunxi_ntx_pen_mode(ctx.fbfd, true);
 
 	// This means we need a signal handler to make sure this gets reset on quit...
