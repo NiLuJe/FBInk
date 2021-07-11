@@ -1101,7 +1101,7 @@ FBINK_API uint32_t fbink_rota_canonical_to_native(uint8_t rotate);
 //       since it disables the layer overlap check, it allows you to display stuff in a different layout
 //       than the current working buffer without the (heavy) visual artifacts that would otherwise imply.
 //       Then again, it also leaves an eink kernel thread spinning at 100% CPU until the next standard update,
-//       so this might not be such a great ide after all...
+//       so this might not be such a great idea after all...
 //       c.f., kobo_sunxi_fb_fixup @ fbink.c for more details.
 // NOTE: Another option for "dealing" with these rotation mishaps is to just assume the screen is always Upright.
 //       You can achieve that by making sure FBINK_NO_GYRO is set in your env (*before* initializing FBInk).
