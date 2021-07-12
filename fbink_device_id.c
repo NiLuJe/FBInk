@@ -960,7 +960,7 @@ static void
 					// Discriminate 32GB variants...
 					// NOTE: We compare against 8GB, but in practice, given storage shenanigans and
 					//       the truncation involved here, we end up with 7 on 8GB devices ;).
-					if ((storagesize / (1024U * 1024U * 1024U)) > 8U) {
+					if ((storagesize >> 10U >> 10U >> 10U) > 8U) {
 						if (kobo_id == 373U) {
 							// Aura ONE (daylight) [373] -> Aura ONE LE (daylight) [381]
 							kobo_id = 381U;
