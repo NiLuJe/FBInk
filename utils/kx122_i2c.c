@@ -142,7 +142,7 @@ int
 		goto cleanup;
 	}
 
-	printf("TSCP: %hx // TSPP: %hx\n", (uint16_t) current_state, (uint16_t) previous_state);
+	printf("TSCP: %#hx // TSPP: %#hx\n", (uint16_t) current_state, (uint16_t) previous_state);
 
 cleanup:
 	if (i2c_fd != -1) {
