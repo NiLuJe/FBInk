@@ -130,14 +130,14 @@ int
 	// And, finally, poke at the registers...
 	int32_t current_state = i2c_smbus_read_byte_data(i2c_fd, KX122_TSCP);
 	if (current_state < 0) {
-		fprintf(stderr, "Failed to read TSCP register!\n");
+		fprintf(stderr, "Failed to read TSCP register: %m!\n");
 		rv = EXIT_FAILURE;
 		goto cleanup;
 	}
 
 	int32_t previous_state = i2c_smbus_read_byte_data(i2c_fd, KX122_TSPP);
 	if (previous_state < 0) {
-		fprintf(stderr, "Failed to read TSPP register!\n");
+		fprintf(stderr, "Failed to read TSPP register: %m!\n");
 		rv = EXIT_FAILURE;
 		goto cleanup;
 	}
