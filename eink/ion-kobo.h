@@ -260,7 +260,7 @@ typedef struct
 #define ION_IOC_SUNXI_TEE_ADDR    17
 
 //
-// And, much the actual ioctl handler, shove that in an union to make our life easier.
+// And, much like the actual ioctl handler, shove that in an union to make our life easier.
 //
 
 union ion_ioctl_arg

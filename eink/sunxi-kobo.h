@@ -535,7 +535,7 @@ struct cfa_enable
 // although in practice, they don't appear to be doing anything useful on eInk devices :/.
 #define DISP_GET_SCN_WIDTH     0x0007
 #define DISP_GET_SCN_HEIGHT    0x0008
-#define DISP_LAYER_GET_CONFIG  0x00048
+#define DISP_LAYER_GET_CONFIG  0x0048
 #define DISP_LAYER_GET_CONFIG2 0x004a
 
 // And now, massage the insanity that is the disp's character device ioctl handler into some sort of actually usable API...
@@ -580,7 +580,7 @@ typedef struct
 	// ubuffer[3] (Must point to the first disp_layer_config2 out of at least layer_num...).
 	// (i.e., technically, this a pointer to a contiguous array of layer_num disp_layer_config2 structs).
 	struct disp_layer_config2* lyr_cfg2;
-	// ubuffer[4], *outarg*, set on success (update_order in the eink buffer/pipeline manager; no idea what relation it has compared to the layer_info's id...).
+	// ubuffer[4], *outarg*, set on success (update_order in the eink buffer/pipeline manager; unrelated to the layer_info's id).
 	unsigned int*              frame_id;
 	uint32_t*                  rotate;    // ubuffer[5] (0, 90, 180, 270) NOTE: *sigh*...
 	// ubuffer[6] (0, 1) NOTE: Nickel appears to be passing a pointer here. That'd be a bug.
@@ -600,7 +600,7 @@ typedef struct
 
 typedef struct
 {
-	unsigned long int count;    // ubuffer[0] (Cast to uint32_t, then to an unsigned int...). Must be <= 20.
+	unsigned long int count;    // ubuffer[0] (Cast to uint32_t, then to an unsigned int). Must be <= 20.
 } sunxi_disp_eink_set_gc_count;
 
 // NOTE: While the individual command handlers for those started using pointers properly,
@@ -627,7 +627,7 @@ typedef struct
 
 typedef struct
 {
-	uint32_t frame_id;    // Related to the update_order frame_id returned by DISP_EINK_UPDATE(2)
+	uint32_t frame_id;    // Matches an update_order/frame_id returned by DISP_EINK_UPDATE(2)
 } sunxi_disp_eink_wait_frame_sync_complete;
 
 typedef struct
@@ -656,7 +656,7 @@ typedef struct
 	int screen_id;    // ubuffer[0], handled in the prologue
 } sunxi_disp_layer_generic_get;
 
-// Shove everything into an union to ensure we never feed garbage to the ioctl handler for commands that actuall read *less* than the prologue...
+// Shove everything into an union to ensure we never feed garbage to the ioctl handler for commands that actually read *less* than the prologue...
 typedef union
 {
 	// Actual memory layout (e.g., our target size).
