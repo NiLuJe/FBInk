@@ -2718,7 +2718,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -2921,6 +2921,10 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
+	// NOTE: This is too early to know whether we need to access the gyro over I²C,
+	//       (we're mostly guranteed to be called before device identification),
+	//       which is why it is handled inside initialize_fbink instead ;).
+
 	return fbfd;
 }
 
@@ -2935,6 +2939,18 @@ static int
 			WARN("Failed to open the framebuffer character device, aborting");
 			return ERRCODE(EXIT_FAILURE);
 		}
+
+#if defined(FBINK_FOR_KOBO)
+		// NOTE: We *might* be called *before* device identification,
+		//       and/or after identification, but also after an explicit open,
+		//       so double-check that we really do need to open it...
+		if (deviceQuirks.isSunxi && !sunxiCtx.no_rota && sunxiCtx.i2c_fd == -1) {
+			if (open_accelerometer_i2c() != EXIT_SUCCESS) {
+				PFWARN("Cannot open accelerometer I²C handle, aborting");
+				return ERRCODE(EXIT_FAILURE);
+			}
+		}
+#endif
 	}
 
 	return EXIT_SUCCESS;
@@ -2955,6 +2971,15 @@ static int
 			PFWARN("Cannot open framebuffer character device (%m), aborting");
 			return ERRCODE(EXIT_FAILURE);
 		}
+
+#if defined(FBINK_FOR_KOBO)
+		if (deviceQuirks.isSunxi && !sunxiCtx.no_rota && sunxiCtx.i2c_fd == -1) {
+			if (open_accelerometer_i2c() != EXIT_SUCCESS) {
+				PFWARN("Cannot open accelerometer I²C handle, aborting");
+				return ERRCODE(EXIT_FAILURE);
+			}
+		}
+#endif
 	}
 
 	return EXIT_SUCCESS;
@@ -4221,7 +4246,7 @@ static __attribute__((cold)) int
 	//       while wanting to avoid a useless open/close/open/close cycle when used as a standalone tool.
 cleanup:
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -4789,6 +4814,20 @@ static int
 }
 #endif    // FBINK_FOR_KOBO
 
+// Handle closing the fb's fd for FBFD_AUTO workflows
+static inline void
+    close_fb(int fbfd)
+{
+	close(fbfd);
+
+#ifdef FBINK_FOR_KOBO
+	if (deviceQuirks.isSunxi) {
+		// Also close the accelerometer I²C handle...
+		close_accelerometer_i2c();
+	}
+#endif
+}
+
 // Public helper function that handles unmapping the fb & closing its fd, for applications that want to keep both around,
 // (i.e., those that use fbink_open in the first place).
 int
@@ -4809,12 +4848,11 @@ int
 		}
 	}
 
-#if defined(FBINK_FOR_KOBO)
+#ifdef FBINK_FOR_KOBO
 	if (deviceQuirks.isSunxi) {
-		// Also close the accelerometer I²C handle...
-		if (close_accelerometer_i2c() == EXIT_SUCCESS) {
-			// NOTE: Kludge: reset the "skip device id" flag, so we don't skip re-opening it on next init...
-			deviceQuirks.skipId = false;
+		if (close_accelerometer_i2c() != EXIT_SUCCESS) {
+			WARN("Failed to close accelerometer I²C handle");
+			return ERRCODE(EXIT_FAILURE);
 		}
 	}
 #endif
@@ -4962,7 +5000,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -5280,7 +5318,7 @@ cleanup:
 		}
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -5753,7 +5791,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -7153,7 +7191,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 	return rv;
 #else
@@ -7867,7 +7905,7 @@ cleanup:
 	}
 #	endif
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -7909,7 +7947,7 @@ int
 
 cleanup:
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -7977,7 +8015,7 @@ cleanup:
 	}
 #	endif
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -8150,7 +8188,7 @@ int
 
 cleanup:
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -8505,7 +8543,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -8550,7 +8588,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -9564,7 +9602,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -9961,7 +9999,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -10197,7 +10235,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -10256,7 +10294,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -10502,7 +10540,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;

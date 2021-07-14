@@ -710,7 +710,8 @@ static int memmap_fb(int);
 #ifdef FBINK_FOR_KOBO
 static int memmap_ion(void);
 #endif
-static int unmap_fb(void);
+static inline void close_fb(int);
+static int         unmap_fb(void);
 #ifdef FBINK_FOR_KOBO
 static int unmap_ion(void);
 #endif

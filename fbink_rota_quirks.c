@@ -73,9 +73,7 @@ static int
 			PFWARN("close: %m");
 			rv = ERRCODE(EXIT_FAILURE);
 		} else {
-			sunxiCtx.i2c_fd          = -1;
-			sunxiCtx.i2c_dev.bus     = 0U;
-			sunxiCtx.i2c_dev.address = 0U;
+			sunxiCtx.i2c_fd = -1;
 		}
 	}
 

@@ -564,7 +564,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -685,7 +685,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
