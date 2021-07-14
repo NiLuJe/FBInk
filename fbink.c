@@ -3408,22 +3408,19 @@ static __attribute__((cold)) void
 	const uint32_t xres = vInfo.xres;
 	const uint32_t yres = vInfo.yres;
 
-	int rotate;
-	// Query the accelerometer to check the current rotation...
+	// If necessary, query the accelerometer to check the current rotation...
 	if (sunxiCtx.no_rota) {
-		rotate = FB_ROTATE_UR;
-	} else {
-		rotate = query_accelerometer();
+		vInfo.rotate = FB_ROTATE_UR;
+	} else if (!is_reinit) {
+		// fbink_reinit already took care of this, so this only affects explicit fbink_init calls.
+		// NOTE: Ideally, we should only affect the *first* fbink_init call, period...
+		int rotate = query_accelerometer();
 		if (rotate < 0) {
-			if (!is_reinit) {
-				ELOG("Accelerometer is inconclusive, assuming Upright");
-				rotate = FB_ROTATE_UR;
-			} else {
-				ELOG("Accelerometer is inconclusive, keeping current rotation");
-			}
+			ELOG("Accelerometer is inconclusive, assuming Upright");
+			rotate = FB_ROTATE_UR;
 		}
+		vInfo.rotate = (uint32_t) rotate;
 	}
-	vInfo.rotate = (uint32_t) rotate;
 	ELOG("Canonical rotation: %u (%s)", vInfo.rotate, fb_rotate_to_string(vInfo.rotate));
 	// NOTE: And because, of course, we can't have nice things, if the current working buffer
 	//       (e.g., Nickel's) is laid out in a different rotation,
@@ -8091,14 +8088,14 @@ static int
 			     ((rotate & 0x01) == 1) ? "Landscape" : "Portrait");
 			rf |= OK_LAYOUT_CHANGE;
 		}
+
+		// Update the vInfo flag now, so we don't have to poke at the gyro again in initialize_fbink
+		vInfo.rotate = (uint32_t) rotate;
 	}
 
 	// If our bitmask is not empty, it means we have a reinit to do.
 	if (rf > 0) {
 		ELOG("Reinitializing...");
-		// It will poke the accelerometer again (via kobo_sunxi_fb_fixup), but, oh, well...
-		// (It will also be responsible for actually updating vInfo.rotate & friends,
-		// which is why we did not do that here).
 		rv = initialize_fbink(fbfd, fbink_cfg, true);
 
 		// If it went fine, make the caller aware of why we did it by returning the bitmask
