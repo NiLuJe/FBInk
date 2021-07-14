@@ -2921,9 +2921,19 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
-	// NOTE: This is too early to know whether we need to access the gyro over I²C,
-	//       (we're mostly guranteed to be called before device identification),
-	//       which is why it is handled inside initialize_fbink instead ;).
+	// NOTE: On the first fbink_open, it's too early to know whether we need to access the gyro over I²C,
+	//       as we're called *before* device identification,
+	//       which is why it is handled inside initialize_fbink instead, for the first fbink_init call only ;).
+	//       But, if we were to chain multiple fbink_open & fbink_close during the lifecycle of a process,
+	//       we still need to handle it here, because fbink_close would have closed it.
+#if defined(FBINK_FOR_KOBO)
+	if (deviceQuirks.isSunxi && !sunxiCtx.no_rota) {
+		if (open_accelerometer_i2c() != EXIT_SUCCESS) {
+			PFWARN("Cannot open accelerometer I²C handle, aborting");
+			return ERRCODE(EXIT_FAILURE);
+		}
+	}
+#endif
 
 	return fbfd;
 }
@@ -2941,10 +2951,9 @@ static int
 		}
 
 #if defined(FBINK_FOR_KOBO)
-		// NOTE: We *might* be called *before* device identification,
-		//       and/or after identification, but also after an explicit open,
-		//       so double-check that we really do need to open it...
-		if (deviceQuirks.isSunxi && !sunxiCtx.no_rota && sunxiCtx.i2c_fd == -1) {
+		// NOTE: In case we're *not* in an FBFD_AUTO workflow,
+		//       the I²C handle opened during the first fbink_init has been kept, too.
+		if (deviceQuirks.isSunxi && !sunxiCtx.no_rota) {
 			if (open_accelerometer_i2c() != EXIT_SUCCESS) {
 				PFWARN("Cannot open accelerometer I²C handle, aborting");
 				return ERRCODE(EXIT_FAILURE);
@@ -2973,7 +2982,7 @@ static int
 		}
 
 #if defined(FBINK_FOR_KOBO)
-		if (deviceQuirks.isSunxi && !sunxiCtx.no_rota && sunxiCtx.i2c_fd == -1) {
+		if (deviceQuirks.isSunxi && !sunxiCtx.no_rota) {
 			if (open_accelerometer_i2c() != EXIT_SUCCESS) {
 				PFWARN("Cannot open accelerometer I²C handle, aborting");
 				return ERRCODE(EXIT_FAILURE);
@@ -3512,10 +3521,13 @@ static __attribute__((cold)) int
 				// Lookup the bus id & address for our accelerometer...
 				if (populate_accelerometer_i2c_info() != EXIT_SUCCESS) {
 					WARN("Unable to handle rotation detection: assuming UR");
+					// Make sure we won't try again
+					sunxiCtx.no_rota = true;
 				} else {
 					// The fb fixup requires being able to poke at the accelerometer...
 					if (open_accelerometer_i2c() != EXIT_SUCCESS) {
 						WARN("Unable to handle rotation detection: assuming UR");
+						sunxiCtx.no_rota = true;
 					}
 				}
 			}
