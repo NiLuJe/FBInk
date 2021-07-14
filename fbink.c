@@ -2924,7 +2924,7 @@ int
 	// NOTE: On the first fbink_open, it's too early to know whether we need to access the gyro over I²C,
 	//       as we're called *before* device identification,
 	//       which is why it is handled inside initialize_fbink instead, for the first fbink_init call only ;).
-	//       But, if we were to chain multiple fbink_open & fbink_close during the lifecycle of a process,
+	//       But, because we can chain multiple fbink_open & fbink_close during the lifetime of a process,
 	//       we still need to handle it here, because fbink_close would have closed it.
 #if defined(FBINK_FOR_KOBO)
 	if (deviceQuirks.isSunxi && !sunxiCtx.no_rota) {
