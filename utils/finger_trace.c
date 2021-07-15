@@ -322,9 +322,10 @@ int
 	int              evfd = -1;
 
 	// Setup FBInk
-	FBInkConfig fbink_cfg = { 0 };
-	fbink_cfg.wfm_mode    = WFM_DU;
-	fbink_cfg.bg_color    = BG_BLACK;
+	FBInkConfig fbink_cfg  = { 0 };
+	fbink_cfg.wfm_mode     = WFM_DU;
+	fbink_cfg.bg_color     = BG_BLACK;
+	FBInkState fbink_state = { 0 };
 
 	// Init FBInk
 	// Open framebuffer and keep it around, then setup globals.
@@ -341,6 +342,10 @@ int
 	LOG("Initialized FBInk %s", fbink_version());
 	ctx.fbink_cfg = &fbink_cfg;
 
+	// We'll need the state for device identification...
+	fbink_get_state(&fbink_cfg, &fbink_state);
+	ctx.fbink_state = &fbink_state;
+
 	// Attempt not to murder the crappy sunxi driver, because as suspected,
 	// it doesn't really deal well with refresh storms...
 	// NOTE: We don't bracket the actual refresh themselves,
@@ -353,7 +358,9 @@ int
 	//       but more than that is probably overkill, unless you need them yourself.
 	//       (Nickel tends to stick to three cores in the Notebooks).
 	// NOTE: Fun fact: high disp debug levels appear to make everything worse, for some reason...
-	fbink_toggle_sunxi_ntx_pen_mode(ctx.fbfd, true);
+	if (fbink_state.is_sunxi) {
+		fbink_toggle_sunxi_ntx_pen_mode(ctx.fbfd, true);
+	}
 
 	// This means we need a signal handler to make sure this gets reset on quit...
 	struct sigaction new_action = { 0 };
@@ -375,11 +382,6 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
-
-	// We'll need the state to pick the right input device...
-	FBInkState fbink_state = { 0 };
-	fbink_get_state(&fbink_cfg, &fbink_state);
-	ctx.fbink_state = &fbink_state;
 
 	// On sunxi, clear the buffer to *white* first,
 	// because we'll periodically trigger full-screen refreshes to placate the kernel,
@@ -479,7 +481,9 @@ int
 	// Cleanup
 cleanup:
 	if (ctx.fbfd != -1) {
-		fbink_toggle_sunxi_ntx_pen_mode(ctx.fbfd, false);
+		if (fbink_state.is_sunxi) {
+			fbink_toggle_sunxi_ntx_pen_mode(ctx.fbfd, false);
+		}
 	}
 
 	if (fbink_close(ctx.fbfd) == ERRCODE(EXIT_FAILURE)) {
