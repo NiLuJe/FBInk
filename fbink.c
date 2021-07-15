@@ -4713,6 +4713,13 @@ cleanup:
 			isFbMapped          = false;
 			fbPtr               = NULL;
 			sunxiCtx.alloc_size = 0U;
+
+			if (close(sunxiCtx.ion.fd) != 0) {
+				PFWARN("close: %m");
+				rv = ERRCODE(EXIT_FAILURE);
+			} else {
+				sunxiCtx.ion.fd = -1;
+			}
 		}
 	}
 
@@ -4724,7 +4731,6 @@ cleanup:
 			rv = ERRCODE(EXIT_FAILURE);
 		} else {
 			sunxiCtx.ion.handle = 0;
-			sunxiCtx.ion.fd     = -1;
 		}
 	}
 
@@ -4787,6 +4793,13 @@ static int
 		isFbMapped          = false;
 		fbPtr               = NULL;
 		sunxiCtx.alloc_size = 0U;
+
+		if (close(sunxiCtx.ion.fd) != 0) {
+			PFWARN("close: %m");
+			rv = ERRCODE(EXIT_FAILURE);
+		} else {
+			sunxiCtx.ion.fd = -1;
+		}
 	}
 
 	struct ion_handle_data handle = { .handle = sunxiCtx.ion.handle };
@@ -4796,7 +4809,6 @@ static int
 		rv = ERRCODE(EXIT_FAILURE);
 	} else {
 		sunxiCtx.ion.handle          = 0;
-		sunxiCtx.ion.fd              = -1;
 		sunxiCtx.layer.info.fb.fd    = 0;
 		sunxiCtx.layer.info.fb.y8_fd = 0;
 	}
