@@ -763,6 +763,7 @@ static void
 			deviceQuirks.isKoboMk7    = true;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UR, nickel is FB_ROTATE_UR
 			//       And panel is *actually* in Portrait. Finally!
+			//       Despite this, the kernel explicitly mangles the touch translation to match the "usual" layout.
 			deviceQuirks.ntxBootRota  = FB_ROTATE_UR;
 			deviceQuirks.canRotate    = true;
 			// NOTE: This one deserves a specific entry, because the H2O² also happens to be UR + STRAIGHT,
@@ -791,12 +792,10 @@ static void
 			deviceQuirks.isSunxi      = true;
 			// Sunxi means no HW inversion :'(.
 			// (And the nightmode_test flag toggled via the debugfs nightenable/nightdisable command doesn't count,
-			// it just flips the buffer in C, and forces the *K waveform modes).
+			// it just flips the buffer in C, and forces the *K waveform modes (dubbed "eclipse" mode)).
 			deviceQuirks.canHWInvert  = false;
 			// Has an accelerometer, but Nickel doesn't update the rotate flag, as it's meaningless.
-			// That said, "native" rotation still matches the usual layout,
-			// and Nickel's "Portrait" will indeed set the EINK_UPDATE2 rotate flag to 270,
-			// e.g., rotate is initialized to zero, so: ((rotate ^ ntxBootRota) * 90).
+			// That said, "native" rotation still matches the usual layout, as does the touch panel translation.
 			deviceQuirks.ntxBootRota  = FB_ROTATE_CCW;    // e.g., fat bezel side UP.
 			deviceQuirks.canRotate    = true;
 			deviceQuirks.ntxRotaQuirk = NTX_ROTA_SUNXI;

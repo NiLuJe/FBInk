@@ -449,7 +449,9 @@ FBInkKoboSunxi sunxiCtx = { .disp_fd    = -1,
 			    .ion_fd     = -1,
 			    .alloc_size = 0U,
 			    .ion        = { 0 },
-			    .layer      = { { 0 } } };
+			    .layer      = { { 0 } },
+			    .rota       = 0U,
+			    .no_rota    = false };
 #endif
 struct fb_var_screeninfo vInfo;
 struct fb_fix_screeninfo fInfo;

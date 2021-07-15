@@ -2669,7 +2669,7 @@ static int
 #endif            // !FBINK_FOR_LINUX
 
 int
-    fbink_toggle_sunxi_ntx_pen_mode(int fbfd, bool toggle UNUSED_BY_NOTKOBO)
+    fbink_toggle_sunxi_ntx_pen_mode(int fbfd UNUSED_BY_NOTKOBO, bool toggle UNUSED_BY_NOTKOBO)
 {
 #ifndef FBINK_FOR_KOBO
 	PFWARN("This feature is not supported on your device");
@@ -3397,12 +3397,6 @@ static __attribute__((cold)) void
 static __attribute__((cold)) void
     kobo_sunxi_fb_fixup(bool is_reinit)
 {
-	ELOG("Virtual resolution: %ux%u", vInfo.xres_virtual, vInfo.yres_virtual);
-
-	// Make it UR...
-	const uint32_t xres = vInfo.xres;
-	const uint32_t yres = vInfo.yres;
-
 	// If necessary, query the accelerometer to check the current rotation...
 	if (sunxiCtx.no_rota) {
 		vInfo.rotate = FB_ROTATE_UR;
@@ -3430,6 +3424,8 @@ static __attribute__((cold)) void
 	sunxiCtx.rota = ((vInfo.rotate ^ deviceQuirks.ntxBootRota) * 90U);
 
 	// Handle Portrait/Landscape swaps
+	const uint32_t xres = vInfo.xres;
+	const uint32_t yres = vInfo.yres;
 	if ((vInfo.rotate & 0x01) == 1) {
 		// Odd, Landscape
 		vInfo.xres = MAX(xres, yres);
@@ -3439,7 +3435,7 @@ static __attribute__((cold)) void
 		vInfo.xres = MIN(xres, yres);
 		vInfo.yres = MAX(xres, yres);
 	}
-	ELOG("Enabled sunxi quirks (%ux%u -> %ux%u)", xres, yres, vInfo.xres, vInfo.yres);
+	ELOG("Screen layout fixup (%ux%u -> %ux%u)", xres, yres, vInfo.xres, vInfo.yres);
 
 	// Make the pitch NEON-friendly...
 	// NOTE: We don't do it because it can introduce layout change glitches on rotation,
@@ -3462,7 +3458,7 @@ static __attribute__((cold)) void
 	ELOG("bits_per_pixel -> %u", vInfo.bits_per_pixel);
 	fInfo.line_length = vInfo.xres_virtual * (vInfo.bits_per_pixel >> 3U);
 	ELOG("line_length -> %u", fInfo.line_length);
-	// Used by clear_screen
+	// Used by clear_screen & memmap_ion
 	fInfo.smem_len = fInfo.line_length * vInfo.yres_virtual;
 	ELOG("smem_len -> %u", fInfo.smem_len);
 }
@@ -4662,7 +4658,7 @@ static int
 	}
 
 	// Then request a page-aligned carveout mapping large enough to fit our screen.
-	sunxiCtx.alloc_size              = ALIGN(fInfo.line_length * vInfo.yres_virtual, 4096);
+	sunxiCtx.alloc_size              = ALIGN(fInfo.smem_len, 4096);
 	struct ion_allocation_data alloc = { .len          = sunxiCtx.alloc_size,
 					     .align        = 4096,
 					     .heap_id_mask = ION_HEAP_MASK_CARVEOUT };

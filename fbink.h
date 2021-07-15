@@ -303,7 +303,7 @@ typedef enum
 	//                            Optionally, bonus points if that's actually UR, and the panel is natively mounted UR,
 	//                            like on the Kobo Libra.
 	//                            Triple whammy if the touch layer rotation matches!
-	NTX_ROTA_SUNXI,          // The rotate flag is technically meaningless, but *may* be set by third-party code.
+	NTX_ROTA_SUNXI,    // The rotate flag is technically meaningless, but *may* be set by third-party code (we don't).
 	NTX_ROTA_MAX = 0xFFu,    // uint8_t
 } __attribute__((packed)) NTX_ROTA_INDEX_E;
 typedef uint8_t NTX_ROTA_INDEX_T;
@@ -642,6 +642,8 @@ FBINK_API int fbink_printf(int fbfd,
 //	 On slightly older devices, the EPDC may support some sort of in-kernel software dithering, hence HWD_LEGACY.
 // NOTE: If you do NOT want to request any dithering, set FBInkConfig's dithering_mode field to HWD_PASSTHROUGH (i.e., 0).
 //       This is also the fallback value.
+// NOTE: On Kobo devices with a sunxi SoC, you will not be able to refresh content that you haven't drawn yourself first.
+//       (There's no "shared" framebuffer, each process gets its own private, zero-initialized (i.e., solid black) buffer).
 FBINK_API int fbink_refresh(int      fbfd,
 			    uint32_t region_top,
 			    uint32_t region_left,
@@ -1093,7 +1095,7 @@ FBINK_API uint32_t fbink_rota_canonical_to_native(uint8_t rotate);
 // The functions below are tied to specific capabilities on Kobo devices with a sunxi SoC (e.g., the Elipsa).
 //
 // Toggle the "pen" refresh mode. c.f., eink/sunxi-kobo.h @ DISP_EINK_SET_NTX_HANDWRITE_ONOFF for more details.
-// the TL;DR being that it's only truly active when using A2 & DU waveform modes.
+// The TL;DR being that it's only truly active when using A2 & DU waveform modes.
 // And since, on sunxi, A2's MONOCHROME flag is just *software* dithering, you might actually prefer DU.
 // (And/or we ought to just get rid of EINK_MONOCHROME on this platform, TBD ;)).
 // Returns -(ENOSYS) on unsupported platforms.
