@@ -2391,7 +2391,7 @@ static int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
-	LOG("waveform_mode is now %#03x (%s)", update.waveform_mode, ntx_wfm_to_string(update.waveform_mode));
+	// NOTE: Kernel doesn't send the updated data to userland, so, so need to print it.
 
 	return EXIT_SUCCESS;
 }
@@ -2421,7 +2421,7 @@ static int
 	return EXIT_SUCCESS;
 }
 
-// Kobo Mark 7 devices ([Mk7<->??)
+// Kobo Mark 7 devices ([Mk7])
 static int
     refresh_kobo_mk7(int                     fbfd,
 		     const struct mxcfb_rect region,
@@ -2559,10 +2559,166 @@ static int
 		}
 	}
 
+	LOG("collision_test is now %u", update_marker.collision_test);
+
 	return EXIT_SUCCESS;
 }
+
+// Kobo Mark 8 devices ([Mk8<->??)
+static int
+    refresh_kobo_sunxi(const struct mxcfb_rect region, uint32_t waveform_mode, uint32_t update_mode, int dithering_mode)
+{
+	// NOTE: In case of issues, enable full verbosity in the DISP driver:
+	//       echo 8 >| /proc/sys/kernel/printk
+	//       echo 9 >| /sys/kernel/debug/dispdbg/dgblvl
+	//       And running klogd so you get everything timestamped in the syslog always helps ;).
+	//       "Small" caveat: it appears to make the driver *that* much buggy and crashy...
+	// NOTE: Speaking of debugfs, Nickel periodically (haven't looked at the circumstances in detail)
+	//       wakes up the EPDC via debugfs (e.g., name=lcd0, command=enable, start=1).
+	//       Possibly related to the aggressive standby on idle? (Which I haven't looked into there, either).
+
+	// Convert our mxcfb_rect into a sunxi area_info
+	struct area_info area = { .x_top    = region.left,
+				  .y_top    = region.top,
+				  .x_bottom = region.left + region.width - 1,
+				  .y_bottom = region.top + region.height - 1 };
+
+	sunxi_disp_eink_update2 update = { .area        = &area,
+					   .layer_num   = 1U,
+					   .update_mode = waveform_mode,
+					   .lyr_cfg2    = &sunxiCtx.layer,
+					   .frame_id    = &lastMarker,
+					   .rotate      = &sunxiCtx.rota,
+					   .cfa_use     = 0U };
+
+	// Update mode shenanigans...
+	if (update_mode == UPDATE_MODE_PARTIAL && waveform_mode != EINK_AUTO_MODE) {
+		// For some reason, AUTO shouldn't specify RECT...
+		// (it trips the unknown mode warning, which falls back to... plain AUTO ;)).
+		update.update_mode |= EINK_RECT_MODE;
+	}
+	if (waveform_mode == EINK_GLR16_MODE || waveform_mode == EINK_GLD16_MODE) {
+		update.update_mode |= EINK_REGAL_MODE;
+	}
+	if (waveform_mode == EINK_A2_MODE) {
+		// NOTE: Unlike on mxcfb, this isn't HW assisted, this just uses the "simple" Y8->Y1 dither algorithm...
+		update.update_mode |= EINK_MONOCHROME;
+	}
+
+	// And now for the dithering flags. They're all SW only, so, stuff 'em behind LEGACY...
+	if (dithering_mode == HWD_LEGACY) {
+		if (waveform_mode == EINK_DU_MODE) {
+			// NOTE: A2 is flagged EINK_MONOCHROME, which actually just flags it EINK_DITHERING_SIMPLE...
+			update.update_mode |= EINK_DITHERING_NTX_Y1;
+		} else {
+			// NOTE: Results are eerily similar to the Y1 algos... (i.e., we do *much* better).
+			//       That's probably because the bitmask handling in eink_image_process_thread is fishy as hell...
+			//       (The constants are slightly broken in that *every* EINK_DITHERING_?? flag
+			//       includes the same bit as EINK_DITHERING_Y1,
+			//       and the check starts by checking for... EINK_DITHERING_Y1 >_<").
+			//       TL;DR: No matter what you request, the kernel always uses EINK_DITHERING_Y1 :(.
+			update.update_mode |= EINK_DITHERING_Y4;
+		}
+	}
+
+	int rv = ioctl(sunxiCtx.disp_fd, DISP_EINK_UPDATE2, &update);
+
+	if (rv < 0) {
+		// NOTE: The code flow is so funky that you can end up with a wide array of not necessarily
+		//       semantically meaningful errno values...
+		PFWARN("DISP_EINK_UPDATE2: %m");
+		WARN("screen_win={x=%d, y=%d, width=%u, height=%u}; update_region={top=%u, left=%u, width=%u, height=%u}",
+		     sunxiCtx.layer.info.screen_win.x,
+		     sunxiCtx.layer.info.screen_win.y,
+		     sunxiCtx.layer.info.screen_win.width,
+		     sunxiCtx.layer.info.screen_win.height,
+		     region.top,
+		     region.left,
+		     region.width,
+		     region.height);
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static int
+    wait_for_complete_kobo_sunxi(uint32_t marker)
+{
+	// Use the union to avoid passing garbage to the ioctl handler...
+	sunxi_disp_eink_ioctl cmd = { .wait_for.frame_id = marker };
+
+	int rv = ioctl(sunxiCtx.disp_fd, DISP_EINK_WAIT_FRAME_SYNC_COMPLETE, &cmd);
+
+	if (rv < 0) {
+		PFWARN("DISP_EINK_WAIT_FRAME_SYNC_COMPLETE: %m");
+		return ERRCODE(EXIT_FAILURE);
+	} else {
+		if (rv == 0) {
+			LOG("Update %u has already fully been completed", marker);
+		} else {
+			// NOTE: Timeout is set to 3000ms
+			LOG("Waited %ldms for completion of update %u", (3000 - jiffies_to_ms(rv)), marker);
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
+
 #	endif    // FBINK_FOR_KINDLE
 #endif            // !FBINK_FOR_LINUX
+
+int
+    fbink_toggle_sunxi_ntx_pen_mode(int fbfd UNUSED_BY_NOTKOBO, bool toggle UNUSED_BY_NOTKOBO)
+{
+#ifndef FBINK_FOR_KOBO
+	PFWARN("This feature is not supported on your device");
+	return ERRCODE(ENOSYS);
+#else
+	if (!deviceQuirks.isSunxi) {
+		PFWARN("This feature is not supported on your device");
+		return ERRCODE(ENOSYS);
+	}
+
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// We need a disp fd...
+	if (!isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	}
+
+	// Use the union to avoid passing garbage to the ioctl handler...
+	sunxi_disp_eink_ioctl cmd = { .toggle_handw.enable = toggle };
+
+	rv = ioctl(sunxiCtx.disp_fd, DISP_EINK_SET_NTX_HANDWRITE_ONOFF, &cmd);
+
+	if (rv < 0) {
+		PFWARN("DISP_EINK_SET_NTX_HANDWRITE_ONOFF: %m");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// Cleanup
+cleanup:
+	if (isFbMapped && !keep_fd) {
+		unmap_fb();
+	}
+	if (!keep_fd) {
+		close_fb(fbfd);
+	}
+
+	return rv;
+#endif
+}
 
 // And finally, dispatch the right refresh request for our HW...
 #ifdef FBINK_FOR_LINUX
@@ -2570,8 +2726,8 @@ static int
 static int
     refresh(int                     fbfd __attribute__((unused)),
 	    const struct mxcfb_rect region __attribute__((unused)),
-	    uint32_t                waveform_mode __attribute__((unused)),
-	    int                     dithering_mode __attribute__((unused)),
+	    WFM_MODE_INDEX_T        waveform_mode __attribute__((unused)),
+	    HW_DITHER_INDEX_T       dithering_mode __attribute__((unused)),
 	    bool                    is_nightmode __attribute__((unused)),
 	    bool                    is_flashing __attribute__((unused)),
 	    bool                    no_refresh __attribute__((unused)))
@@ -2579,11 +2735,31 @@ static int
 	return EXIT_SUCCESS;
 }
 #else
+
+static inline void
+    compute_update_marker(void)
+{
+	// We'll want to increment the marker on each subsequent calls (for API users)...
+	if (lastMarker == 0U) {
+		// Seed it with our PID
+		lastMarker = (uint32_t) getpid();
+	} else {
+		lastMarker++;
+	}
+
+	// NOTE: Make sure update_marker is valid, an invalid marker *may* hang the kernel instead of failing gracefully,
+	//       depending on the device/FW...
+	if (unlikely(lastMarker == 0U)) {
+		lastMarker = ('F' + 'B' + 'I' + 'n' + 'k');
+		// i.e.,  70  + 66  + 73  + 110 + 107
+	}
+}
+
 static int
     refresh(int                     fbfd,
 	    const struct mxcfb_rect region,
-	    uint32_t                waveform_mode,
-	    int                     dithering_mode,
+	    WFM_MODE_INDEX_T        waveform_mode,
+	    HW_DITHER_INDEX_T       dithering_mode,
 	    bool                    is_nightmode,
 	    bool                    is_flashing,
 	    bool                    no_refresh)
@@ -2626,42 +2802,41 @@ static int
 	//       (i.e., DU or GL16/GC16 is most likely often what AUTO will land on).
 
 	// So, handle this common switcheroo here...
-	uint32_t wfm = (is_flashing && waveform_mode == WAVEFORM_MODE_AUTO) ? WAVEFORM_MODE_GC16 : waveform_mode;
+	uint32_t wfm = (is_flashing && waveform_mode == WFM_AUTO) ? get_wfm_mode(WFM_GC16) : get_wfm_mode(waveform_mode);
 	uint32_t upm = is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
-	// We'll want to increment the marker on each subsequent calls (for API users)...
-	if (lastMarker == 0U) {
-		// Seed it with our PID
-		lastMarker = (uint32_t) getpid();
-	} else {
-		lastMarker++;
-	}
 
-	// NOTE: Make sure update_marker is valid, an invalid marker *may* hang the kernel instead of failing gracefully,
-	//       depending on the device/FW...
-	if (unlikely(lastMarker == 0U)) {
-		lastMarker = ('F' + 'B' + 'I' + 'n' + 'k');
-		// i.e.,  70  + 66  + 73  + 110 + 107
+	// Update our own update marker
+#	ifdef FBINK_FOR_KOBO
+	if (!deviceQuirks.isSunxi) {
+		// NOTE: On Sunxi, it's the *kernel* that updates the marker, not us.
+		compute_update_marker();
 	}
+#	else
+	compute_update_marker();
+#	endif
 
 #	if defined(FBINK_FOR_KINDLE)
 	if (deviceQuirks.isKindleRex) {
-		return refresh_kindle_rex(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
+		return refresh_kindle_rex(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
 	} else if (deviceQuirks.isKindleZelda) {
-		return refresh_kindle_zelda(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
+		return refresh_kindle_zelda(
+		    fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
 	} else {
-		return refresh_kindle(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
+		return refresh_kindle(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
 	}
 #	elif defined(FBINK_FOR_CERVANTES)
-	return refresh_cervantes(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
+	return refresh_cervantes(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode) is_nightmode, lastMarker);
 #	elif defined(FBINK_FOR_REMARKABLE)
-	return refresh_remarkable(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
+	return refresh_remarkable(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
 #	elif defined(FBINK_FOR_POCKETBOOK)
-	return refresh_pocketbook(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
+	return refresh_pocketbook(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
 #	elif defined(FBINK_FOR_KOBO)
-	if (deviceQuirks.isKoboMk7) {
-		return refresh_kobo_mk7(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
+	if (deviceQuirks.isSunxi) {
+		return refresh_kobo_sunxi(region, wfm, upm, get_hwd_mode(dithering_mode));
+	} else if (deviceQuirks.isKoboMk7) {
+		return refresh_kobo_mk7(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
 	} else {
-		return refresh_kobo(fbfd, region, wfm, upm, dithering_mode, is_nightmode, lastMarker);
+		return refresh_kobo(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
 	}
 #	endif    // FBINK_FOR_KINDLE
 }
@@ -2699,7 +2874,9 @@ static int
 #	elif defined(FBINK_FOR_CERVANTES)
 	return wait_for_complete_cervantes(fbfd, marker);
 #	elif defined(FBINK_FOR_KOBO)
-	if (deviceQuirks.isKoboMk7) {
+	if (deviceQuirks.isSunxi) {
+		return wait_for_complete_kobo_sunxi(marker);
+	} else if (deviceQuirks.isKoboMk7) {
 		return wait_for_complete_kobo_mk7(fbfd, marker);
 	} else {
 		return wait_for_complete_kobo(fbfd, marker);
@@ -2739,6 +2916,20 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
+	// NOTE: On the first fbink_open, it's too early to know whether we need to access the gyro over I²C,
+	//       as we're called *before* device identification,
+	//       which is why it is handled inside initialize_fbink instead, for the first fbink_init call only ;).
+	//       But, because we can chain multiple fbink_open & fbink_close during the lifetime of a process,
+	//       we still need to handle it here, because fbink_close would have closed it.
+#if defined(FBINK_FOR_KOBO)
+	if (deviceQuirks.isSunxi && !sunxiCtx.no_rota) {
+		if (open_accelerometer_i2c() != EXIT_SUCCESS) {
+			PFWARN("Cannot open accelerometer I²C handle, aborting");
+			return ERRCODE(EXIT_FAILURE);
+		}
+	}
+#endif
+
 	return fbfd;
 }
 
@@ -2753,6 +2944,17 @@ static int
 			WARN("Failed to open the framebuffer character device, aborting");
 			return ERRCODE(EXIT_FAILURE);
 		}
+
+#if defined(FBINK_FOR_KOBO)
+		// NOTE: In case we're *not* in an FBFD_AUTO workflow,
+		//       the I²C handle opened during the first fbink_init has been kept, too.
+		if (deviceQuirks.isSunxi && !sunxiCtx.no_rota) {
+			if (open_accelerometer_i2c() != EXIT_SUCCESS) {
+				PFWARN("Cannot open accelerometer I²C handle, aborting");
+				return ERRCODE(EXIT_FAILURE);
+			}
+		}
+#endif
 	}
 
 	return EXIT_SUCCESS;
@@ -2773,6 +2975,15 @@ static int
 			PFWARN("Cannot open framebuffer character device (%m), aborting");
 			return ERRCODE(EXIT_FAILURE);
 		}
+
+#if defined(FBINK_FOR_KOBO)
+		if (deviceQuirks.isSunxi && !sunxiCtx.no_rota) {
+			if (open_accelerometer_i2c() != EXIT_SUCCESS) {
+				PFWARN("Cannot open accelerometer I²C handle, aborting");
+				return ERRCODE(EXIT_FAILURE);
+			}
+		}
+#endif
 	}
 
 	return EXIT_SUCCESS;
@@ -3182,6 +3393,77 @@ static __attribute__((cold)) void
 }
 #endif    // FBINK_FOR_POCKETBOOK
 
+#ifdef FBINK_FOR_KOBO
+static __attribute__((cold)) void
+    kobo_sunxi_fb_fixup(bool is_reinit)
+{
+	// If necessary, query the accelerometer to check the current rotation...
+	if (sunxiCtx.no_rota) {
+		vInfo.rotate = FB_ROTATE_UR;
+	} else if (!is_reinit) {
+		// fbink_reinit already took care of this, so this only affects explicit fbink_init calls.
+		// NOTE: Ideally, we should only affect the *first* fbink_init call, period...
+		int rotate = query_accelerometer();
+		if (rotate < 0) {
+			ELOG("Accelerometer is inconclusive, assuming Upright");
+			rotate = FB_ROTATE_UR;
+		}
+		vInfo.rotate = (uint32_t) rotate;
+	}
+	ELOG("Canonical rotation: %u (%s)", vInfo.rotate, fb_rotate_to_string(vInfo.rotate));
+	// NOTE: And because, of course, we can't have nice things, if the current working buffer
+	//       (e.g., Nickel's) is laid out in a different rotation,
+	//       the layer overlap detection and subsequent blending royally screws Nickel's own layer... :(.
+	//       A shitty workaround might be to enable NTX_HANDWRITE and switch to DU,
+	//       because it appears to disable the offending checks, but that, in turn,
+	//       will leave the eink image proc kernel thread spinning at 100% CPU
+	//       until the next non pen mode update...
+
+	// Devise the required G2D rotation angle (for UPDATE ioctls), given the current "fb" rotate flag.
+	// This is unfortunately not as nice and easy as usual...
+	sunxiCtx.rota = ((vInfo.rotate ^ deviceQuirks.ntxBootRota) * 90U);
+
+	// Handle Portrait/Landscape swaps
+	const uint32_t xres = vInfo.xres;
+	const uint32_t yres = vInfo.yres;
+	if ((vInfo.rotate & 0x01) == 1) {
+		// Odd, Landscape
+		vInfo.xres = MAX(xres, yres);
+		vInfo.yres = MIN(xres, yres);
+	} else {
+		// Even, Portrait
+		vInfo.xres = MIN(xres, yres);
+		vInfo.yres = MAX(xres, yres);
+	}
+	ELOG("Screen layout fixup (%ux%u -> %ux%u)", xres, yres, vInfo.xres, vInfo.yres);
+
+	// Make the pitch NEON-friendly...
+	// NOTE: We don't do it because it can introduce layout change glitches on rotation,
+	//       or even just when layer overlap blending is involved...
+	//       (e.g., it breaks the pen up update in utils/finger_trace).
+	/*
+	vInfo.xres_virtual = ALIGN(vInfo.xres, 32);
+	ELOG("xres_virtual -> %u", vInfo.xres_virtual);
+	vInfo.yres_virtual = ALIGN(vInfo.yres, 32);
+	ELOG("yres_virtual -> %u", vInfo.yres_virtual);
+	*/
+	vInfo.xres_virtual = vInfo.xres;
+	ELOG("xres_virtual -> %u", vInfo.xres_virtual);
+	vInfo.yres_virtual = vInfo.yres;
+	ELOG("yres_virtual -> %u", vInfo.yres_virtual);
+
+	// Make it grayscale...
+	vInfo.bits_per_pixel = 8U;
+	vInfo.grayscale      = 1U;
+	ELOG("bits_per_pixel -> %u", vInfo.bits_per_pixel);
+	fInfo.line_length = vInfo.xres_virtual * (vInfo.bits_per_pixel >> 3U);
+	ELOG("line_length -> %u", fInfo.line_length);
+	// Used by clear_screen & memmap_ion
+	fInfo.smem_len = fInfo.line_length * vInfo.yres_virtual;
+	ELOG("smem_len -> %u", fInfo.smem_len);
+}
+#endif    // FBINK_FOR_KOBO
+
 // Get the various fb info & setup global variables
 static __attribute__((cold)) int
     initialize_fbink(int fbfd, const FBInkConfig* restrict fbink_cfg, bool skip_vinfo)
@@ -3219,8 +3501,28 @@ static __attribute__((cold)) int
 		} else if (deviceQuirks.isKoboMk7) {
 			ELOG("Enabled Kobo Mark 7 quirks");
 		} else if (deviceQuirks.isSunxi) {
-			ELOG("Sunxi chipsets are currently unsupported!");
-			return ERRCODE(ENOSYS);
+			ELOG("Enabled sunxi quirks");
+
+			// NOTE: Allow forgoing dealing with the accelerometer.
+			//       That implies that we'll always assume the screen is UR!
+			if (getenv("FBINK_NO_GYRO")) {
+				ELOG(
+				    "Accelerometer handling has been disabled: we'll always consider the screen to be UR!");
+				sunxiCtx.no_rota = true;
+			} else {
+				// Lookup the bus id & address for our accelerometer...
+				if (populate_accelerometer_i2c_info() != EXIT_SUCCESS) {
+					WARN("Unable to handle rotation detection: assuming UR");
+					// Make sure we won't try again
+					sunxiCtx.no_rota = true;
+				} else {
+					// The fb fixup requires being able to poke at the accelerometer...
+					if (open_accelerometer_i2c() != EXIT_SUCCESS) {
+						WARN("Unable to handle rotation detection: assuming UR");
+						sunxiCtx.no_rota = true;
+					}
+				}
+			}
 		}
 #	elif defined(FBINK_FOR_POCKETBOOK)
 		// Check if the device is running on an AllWinner SoC instead of an NXP one...
@@ -3235,8 +3537,7 @@ static __attribute__((cold)) int
 		//       because its kernel doesn't ship with an EPDC driver, despite running on an i.MX 7D...
 		if (deviceQuirks.deviceId == 2U) {
 			// ... unless we're running under the https://github.com/ddvk/remarkable2-framebuffer shim
-			char* rm2fb = getenv("RM2FB_SHIM");
-			if (rm2fb) {
+			if (getenv("RM2FB_SHIM")) {
 				ELOG(
 				    "Running under the rm2fb compatibility shim (version %s), functionality may be limited",
 				    rm2fb);
@@ -3326,6 +3627,12 @@ static __attribute__((cold)) int
 	// On PocketBook, fix the broken mess that the ioctls returns...
 	pocketbook_fix_fb_info();
 #endif
+#ifdef FBINK_FOR_KOBO
+	// Ditto on Sunxi...
+	if (deviceQuirks.isSunxi) {
+		kobo_sunxi_fb_fixup(skip_vinfo);
+	}
+#endif
 
 	// NOTE: In most every cases, we assume (0, 0) is at the top left of the screen,
 	//       and (xres, yres) at the bottom right, as we should.
@@ -3351,7 +3658,7 @@ static __attribute__((cold)) int
 	//       In fact, if you manage to run *before* pickel (i.e., before on-animator),
 	//       you'll notice that it's in yet another rotation at very early boot (CCW?)...
 	// NOTE: The Libra finally appears to have put a stop to this madness (it boots UR, with an UR panel).
-	if (vInfo.xres > vInfo.yres) {
+	if (!deviceQuirks.isSunxi && vInfo.xres > vInfo.yres) {
 		// NOTE: PW2:
 		//         vInfo.rotate == 2 in Landscape (vs. 3 in Portrait mode), w/ the xres/yres switch in Landscape,
 		//         and (0, 0) is always at the top-left of the viewport, so we're always correct.
@@ -3423,10 +3730,83 @@ static __attribute__((cold)) int
 #	if defined(FBINK_FOR_KOBO)
 	// NOTE: fbink_rota_native_to_canonical is only implemented/tested on Kobo, so, don't do it on Cervantes.
 	//       They're all in a quirky state anyway ;).
-	if (!deviceQuirks.isNTX16bLandscape) {
+	if (!deviceQuirks.isSunxi && !deviceQuirks.isNTX16bLandscape) {
 		// Otherwise, attempt to untangle it ourselves...
 		canonical_rota = fbink_rota_native_to_canonical(vInfo.rotate);
 		ELOG("Canonical rotation: %hhu (%s)", canonical_rota, fb_rotate_to_string(canonical_rota));
+	}
+
+	// Setup the disp layer insanity on sunxi...
+	if (deviceQuirks.isSunxi) {
+		// disp_layer_info2
+		sunxiCtx.layer.info.mode        = LAYER_MODE_BUFFER;
+		sunxiCtx.layer.info.zorder      = 0U;
+		// NOTE: Ignore pixel alpha.
+		//       We actually *do* handle alpha sanely, so,
+		//       if we were actually using an RGB32 fb, we might want to tweak that & pre_multiply...
+		sunxiCtx.layer.info.alpha_mode  = 1U;
+		sunxiCtx.layer.info.alpha_value = 0xFFu;
+
+		// disp_rect
+		sunxiCtx.layer.info.screen_win.x      = 0;
+		sunxiCtx.layer.info.screen_win.y      = 0;
+		sunxiCtx.layer.info.screen_win.width  = vInfo.xres;
+		sunxiCtx.layer.info.screen_win.height = vInfo.yres;
+
+		sunxiCtx.layer.info.b_trd_out    = false;
+		sunxiCtx.layer.info.out_trd_mode = 0;
+
+		// disp_fb_info2
+		// NOTE: fd & y8_fd are handled in mmap_ion.
+		//       And they are *explicitly* set to 0 and not -1 when unused,
+		//       because that's what the disp code (mostly) expects (*sigh*).
+
+		// disp_rectsz
+		// NOTE: Used in conjunction with align below.
+		//       We obviously only have a single buffer, because we're not a 3D display...
+		sunxiCtx.layer.info.fb.size[0].width  = vInfo.xres_virtual;
+		sunxiCtx.layer.info.fb.size[0].height = vInfo.yres_virtual;
+		sunxiCtx.layer.info.fb.size[1].width  = 0U;
+		sunxiCtx.layer.info.fb.size[1].height = 0U;
+		sunxiCtx.layer.info.fb.size[2].width  = 0U;
+		sunxiCtx.layer.info.fb.size[2].height = 0U;
+
+		// NOTE: Used to compute the scanline pitch in bytes (e.g., pitch = ALIGN(scanline_pixels * components, align).
+		//       This is set to 2 by Nickel, but we appear to go by without it just fine with a Y8 fb fd...
+		sunxiCtx.layer.info.fb.align[0]      = 0U;
+		sunxiCtx.layer.info.fb.align[1]      = 0U;
+		sunxiCtx.layer.info.fb.align[2]      = 0U;
+		sunxiCtx.layer.info.fb.format        = DISP_FORMAT_8BIT_GRAY;
+		sunxiCtx.layer.info.fb.color_space   = DISP_GBR_F;    // Full-range RGB
+		sunxiCtx.layer.info.fb.trd_right_fd  = 0;
+		sunxiCtx.layer.info.fb.pre_multiply  = true;    // Because we're using global alpha, I guess?
+		sunxiCtx.layer.info.fb.crop.x        = 0;
+		sunxiCtx.layer.info.fb.crop.y        = 0;
+		// Don't ask me why this needs to be shifted 32 bits to the left... ¯\_(ツ)_/¯
+		sunxiCtx.layer.info.fb.crop.width    = (uint64_t) vInfo.xres << 32U;
+		sunxiCtx.layer.info.fb.crop.height   = (uint64_t) vInfo.yres << 32U;
+		sunxiCtx.layer.info.fb.flags         = DISP_BF_NORMAL;
+		sunxiCtx.layer.info.fb.scan          = DISP_SCAN_PROGRESSIVE;
+		sunxiCtx.layer.info.fb.eotf          = DISP_EOTF_GAMMA22;    // SDR
+		sunxiCtx.layer.info.fb.depth         = 0;
+		sunxiCtx.layer.info.fb.fbd_en        = 0U;
+		sunxiCtx.layer.info.fb.metadata_fd   = 0;
+		sunxiCtx.layer.info.fb.metadata_size = 0U;
+		sunxiCtx.layer.info.fb.metadata_flag = 0U;
+
+		sunxiCtx.layer.info.id = 0U;
+
+		// disp_atw_info
+		sunxiCtx.layer.info.atw.used   = false;
+		sunxiCtx.layer.info.atw.mode   = 0;
+		sunxiCtx.layer.info.atw.b_row  = 0;
+		sunxiCtx.layer.info.atw.b_col  = 0;
+		sunxiCtx.layer.info.atw.cof_fd = 0;
+
+		sunxiCtx.layer.enable   = true;
+		sunxiCtx.layer.channel  = 0U;
+		// NOTE: Nickel uses layer 0, pickel layer 1.
+		sunxiCtx.layer.layer_id = 1U;
 	}
 #	endif
 
@@ -3870,7 +4250,7 @@ static __attribute__((cold)) int
 	//       while wanting to avoid a useless open/close/open/close cycle when used as a standalone tool.
 cleanup:
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -4239,6 +4619,12 @@ void
 static int
     memmap_fb(int fbfd)
 {
+#ifdef FBINK_FOR_KOBO
+	if (deviceQuirks.isSunxi) {
+		return memmap_ion();
+	}
+#endif
+
 	// NOTE: Beware of smem_len on Kobos?
 	//       c.f., https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer_linux.lua#L36
 	//       TL;DR: On 16bpp fbs, it *might* be a bit larger than strictly necessary,
@@ -4257,10 +4643,122 @@ static int
 	return EXIT_SUCCESS;
 }
 
+#ifdef FBINK_FOR_KOBO
+// Do the same, but via ION on sunxi...
+static int
+    memmap_ion(void)
+{
+	int rv = EXIT_SUCCESS;
+
+	// Start by registering as an ION client
+	sunxiCtx.ion_fd = open("/dev/ion", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+	if (sunxiCtx.ion_fd == -1) {
+		PFWARN("open: %m");
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Then request a page-aligned carveout mapping large enough to fit our screen.
+	sunxiCtx.alloc_size              = ALIGN(fInfo.smem_len, 4096);
+	struct ion_allocation_data alloc = { .len          = sunxiCtx.alloc_size,
+					     .align        = 4096,
+					     .heap_id_mask = ION_HEAP_MASK_CARVEOUT };
+	int                        ret   = ioctl(sunxiCtx.ion_fd, ION_IOC_ALLOC, &alloc);
+	if (ret < 0) {
+		PFWARN("ION_IOC_ALLOC: %m");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// Request a dmabuff handle that we can share & mmap for that alloc
+	sunxiCtx.ion.handle = alloc.handle;
+	ret                 = ioctl(sunxiCtx.ion_fd, ION_IOC_MAP, &sunxiCtx.ion);
+	if (ret < 0) {
+		PFWARN("ION_IOC_MAP: %m");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// Finally, mmap it...
+	fbPtr = (unsigned char*) mmap(NULL, sunxiCtx.alloc_size, PROT_READ | PROT_WRITE, MAP_SHARED, sunxiCtx.ion.fd, 0);
+	if (fbPtr == MAP_FAILED) {
+		PFWARN("mmap: %m");
+		fbPtr = NULL;
+		rv    = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	} else {
+		isFbMapped = true;
+	}
+
+	// And finally, register as a DISP client, too
+	sunxiCtx.disp_fd = open("/dev/disp", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+	if (sunxiCtx.disp_fd == -1) {
+		PFWARN("open: %m");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// And update our layer config to use that dmabuff fd, as a grayscale buffer.
+	sunxiCtx.layer.info.fb.fd    = 0;
+	sunxiCtx.layer.info.fb.y8_fd = sunxiCtx.ion.fd;
+
+	return rv;
+
+cleanup:
+	if (isFbMapped) {
+		if (munmap(fbPtr, sunxiCtx.alloc_size) < 0) {
+			PFWARN("munmap: %m");
+			rv = ERRCODE(EXIT_FAILURE);
+		} else {
+			isFbMapped          = false;
+			fbPtr               = NULL;
+			sunxiCtx.alloc_size = 0U;
+		}
+	}
+
+	if (sunxiCtx.ion.handle != 0) {
+		struct ion_handle_data handle = { .handle = sunxiCtx.ion.handle };
+		ret                           = ioctl(sunxiCtx.ion_fd, ION_IOC_FREE, &handle);
+		if (ret < 0) {
+			PFWARN("ION_IOC_FREE: %m");
+			rv = ERRCODE(EXIT_FAILURE);
+		} else {
+			sunxiCtx.ion.handle = 0;
+			sunxiCtx.ion.fd     = -1;
+		}
+	}
+
+	if (sunxiCtx.ion_fd != -1) {
+		if (close(sunxiCtx.ion_fd) != 0) {
+			PFWARN("close: %m");
+			rv = ERRCODE(EXIT_FAILURE);
+		} else {
+			sunxiCtx.ion_fd = -1;
+		}
+	}
+
+	if (sunxiCtx.disp_fd != -1) {
+		if (close(sunxiCtx.disp_fd) != 0) {
+			PFWARN("close: %m");
+			rv = ERRCODE(EXIT_FAILURE);
+		} else {
+			sunxiCtx.disp_fd = -1;
+		}
+	}
+
+	return rv;
+}
+#endif    // FBINK_FOR_KOBO
+
 // And unmap it
 static int
     unmap_fb(void)
 {
+#ifdef FBINK_FOR_KOBO
+	if (deviceQuirks.isSunxi) {
+		return unmap_ion();
+	}
+#endif
+
 	if (munmap(fbPtr, fInfo.smem_len) < 0) {
 		PFWARN("munmap: %m");
 		return ERRCODE(EXIT_FAILURE);
@@ -4272,6 +4770,66 @@ static int
 	}
 
 	return EXIT_SUCCESS;
+}
+
+#ifdef FBINK_FOR_KOBO
+// And the same for ION again...
+static int
+    unmap_ion(void)
+{
+	int rv = EXIT_SUCCESS;
+
+	if (munmap(fbPtr, sunxiCtx.alloc_size) < 0) {
+		PFWARN("munmap: %m");
+		rv = ERRCODE(EXIT_FAILURE);
+	} else {
+		isFbMapped          = false;
+		fbPtr               = NULL;
+		sunxiCtx.alloc_size = 0U;
+	}
+
+	struct ion_handle_data handle = { .handle = sunxiCtx.ion.handle };
+	int                    ret    = ioctl(sunxiCtx.ion_fd, ION_IOC_FREE, &handle);
+	if (ret < 0) {
+		PFWARN("ION_IOC_FREE: %m");
+		rv = ERRCODE(EXIT_FAILURE);
+	} else {
+		sunxiCtx.ion.handle          = 0;
+		sunxiCtx.ion.fd              = -1;
+		sunxiCtx.layer.info.fb.fd    = 0;
+		sunxiCtx.layer.info.fb.y8_fd = 0;
+	}
+
+	if (close(sunxiCtx.ion_fd) != 0) {
+		PFWARN("close: %m");
+		rv = ERRCODE(EXIT_FAILURE);
+	} else {
+		sunxiCtx.ion_fd = -1;
+	}
+
+	if (close(sunxiCtx.disp_fd) != 0) {
+		PFWARN("close: %m");
+		rv = ERRCODE(EXIT_FAILURE);
+	} else {
+		sunxiCtx.disp_fd = -1;
+	}
+
+	return rv;
+}
+#endif    // FBINK_FOR_KOBO
+
+// Handle closing the fb's fd for FBFD_AUTO workflows
+static inline void
+    close_fb(int fbfd)
+{
+	close(fbfd);
+
+#ifdef FBINK_FOR_KOBO
+	if (deviceQuirks.isSunxi) {
+		// Also close the accelerometer I²C handle...
+		close_accelerometer_i2c();
+	}
+#endif
 }
 
 // Public helper function that handles unmapping the fb & closing its fd, for applications that want to keep both around,
@@ -4293,6 +4851,15 @@ int
 			return ERRCODE(EXIT_FAILURE);
 		}
 	}
+
+#ifdef FBINK_FOR_KOBO
+	if (deviceQuirks.isSunxi) {
+		if (close_accelerometer_i2c() != EXIT_SUCCESS) {
+			WARN("Failed to close accelerometer I²C handle");
+			return ERRCODE(EXIT_FAILURE);
+		}
+	}
+#endif
 
 	return EXIT_SUCCESS;
 }
@@ -4421,8 +4988,8 @@ int
 	// Refresh screen
 	if (refresh(fbfd,
 		    region,
-		    get_wfm_mode(fbink_cfg->wfm_mode),
-		    get_hwd_mode(fbink_cfg->dithering_mode),
+		    fbink_cfg->wfm_mode,
+		    fbink_cfg->dithering_mode,
 		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
@@ -4437,7 +5004,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -4737,8 +5304,8 @@ static int
 	// Refresh screen
 	if (refresh(fbfd,
 		    region,
-		    get_wfm_mode(fbink_cfg->wfm_mode),
-		    get_hwd_mode(fbink_cfg->dithering_mode),
+		    fbink_cfg->wfm_mode,
+		    fbink_cfg->dithering_mode,
 		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    do_clear ? fbink_cfg->no_refresh : false) != EXIT_SUCCESS) {
@@ -4755,7 +5322,7 @@ cleanup:
 		}
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -5208,8 +5775,8 @@ int
 	// Refresh screen
 	if (refresh(fbfd,
 		    region,
-		    get_wfm_mode(fbink_cfg->wfm_mode),
-		    get_hwd_mode(fbink_cfg->dithering_mode),
+		    fbink_cfg->wfm_mode,
+		    fbink_cfg->dithering_mode,
 		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
@@ -5228,7 +5795,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -5447,8 +6014,8 @@ int
 	struct mxcfb_rect region           = { 0U };
 	bool              is_flashing      = false;
 	bool              is_cleared       = false;
-	uint8_t           wfm_mode         = WFM_AUTO;
-	uint8_t           dithering_mode   = HWD_PASSTHROUGH;
+	WFM_MODE_INDEX_T  wfm_mode         = WFM_AUTO;
+	HW_DITHER_INDEX_T dithering_mode   = HWD_PASSTHROUGH;
 	bool              is_nightmode     = false;
 	bool              no_refresh       = false;
 
@@ -6617,13 +7184,7 @@ cleanup:
 		if (is_cleared) {
 			fullscreen_region(&region);
 		}
-		refresh(fbfd,
-			region,
-			get_wfm_mode(wfm_mode),
-			get_hwd_mode(dithering_mode),
-			is_nightmode,
-			is_flashing,
-			no_refresh);
+		refresh(fbfd, region, wfm_mode, dithering_mode, is_nightmode, is_flashing, no_refresh);
 	}
 	free(lines);
 	free(brk_buff);
@@ -6634,7 +7195,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 	return rv;
 #else
@@ -6645,7 +7206,7 @@ cleanup:
 
 // Convert our public WFM_MODE_INDEX_T values to an appropriate mxcfb waveform mode constant for the current device
 static uint32_t
-    get_wfm_mode(uint8_t wfm_mode_index)
+    get_wfm_mode(WFM_MODE_INDEX_T wfm_mode_index)
 {
 	uint32_t waveform_mode = WAVEFORM_MODE_AUTO;
 
@@ -6847,6 +7408,98 @@ static uint32_t
 			waveform_mode = WAVEFORM_MODE_AUTO;
 			break;
 	}
+#elif defined(FBINK_FOR_KOBO)
+	if (deviceQuirks.isSunxi) {
+		switch (wfm_mode_index) {
+			case WFM_INIT:
+				waveform_mode = EINK_INIT_MODE;
+				break;
+			case WFM_DU:
+				waveform_mode = EINK_DU_MODE;
+				break;
+			case WFM_GC16:
+				waveform_mode = EINK_GC16_MODE;
+				break;
+			case WFM_GC4:
+				waveform_mode = EINK_GC4_MODE;
+				break;
+			case WFM_A2:
+				waveform_mode = EINK_A2_MODE;
+				break;
+			case WFM_GL16:
+				waveform_mode = EINK_GL16_MODE;
+				break;
+			case WFM_REAGL:
+				waveform_mode = EINK_GLR16_MODE;
+				break;
+			case WFM_REAGLD:
+				waveform_mode = EINK_GLD16_MODE;
+				break;
+			case WFM_GU16:
+				waveform_mode = EINK_GU16_MODE;
+				break;
+			case WFM_GCK16:
+				waveform_mode = EINK_GCK16_MODE;
+				break;
+			case WFM_GLK16:
+				waveform_mode = EINK_GLK16_MODE;
+				break;
+			case WFM_CLEAR:
+				waveform_mode = EINK_CLEAR_MODE;
+				break;
+			case WFM_GC4L:
+				waveform_mode = EINK_GC4L_MODE;
+				break;
+			case WFM_GCC16:
+				waveform_mode = EINK_GCC16_MODE;
+				break;
+			case WFM_AUTO:
+				waveform_mode = EINK_AUTO_MODE;
+				break;
+			default:
+				LOG("Unknown (or unsupported) waveform mode '%s' @ index %hhu, defaulting to GL16",
+				    wfm_to_string(wfm_mode_index),
+				    wfm_mode_index);
+				waveform_mode = EINK_GL16_MODE;
+				break;
+		}
+	} else {
+		switch (wfm_mode_index) {
+			case WFM_INIT:
+				waveform_mode = WAVEFORM_MODE_INIT;
+				break;
+			case WFM_AUTO:
+				waveform_mode = WAVEFORM_MODE_AUTO;
+				break;
+			case WFM_DU:
+				waveform_mode = WAVEFORM_MODE_DU;
+				break;
+			case WFM_GC16:
+				waveform_mode = WAVEFORM_MODE_GC16;
+				break;
+			case WFM_GC4:
+				waveform_mode = WAVEFORM_MODE_GC4;
+				break;
+			case WFM_A2:
+				waveform_mode = WAVEFORM_MODE_A2;
+				break;
+			case WFM_GL16:
+				waveform_mode = WAVEFORM_MODE_GL16;
+				break;
+			case WFM_REAGL:
+				waveform_mode = WAVEFORM_MODE_REAGL;
+				break;
+			case WFM_REAGLD:
+				waveform_mode = WAVEFORM_MODE_REAGLD;
+				break;
+			default:
+				LOG("Unknown (or unsupported) waveform mode '%s' @ index %hhu, defaulting to AUTO",
+				    wfm_to_string(wfm_mode_index),
+				    wfm_mode_index);
+				waveform_mode = WAVEFORM_MODE_AUTO;
+				break;
+		}
+	}
 #else
 	switch (wfm_mode_index) {
 		case WFM_INIT:
@@ -6890,7 +7543,7 @@ static uint32_t
 
 // Convert a WFM_MODE_INDEX_T value to a human readable string
 static __attribute__((cold)) const char*
-    wfm_to_string(uint8_t wfm_mode_index)
+    wfm_to_string(WFM_MODE_INDEX_T wfm_mode_index)
 {
 	switch (wfm_mode_index) {
 		case WFM_AUTO:
@@ -6929,6 +7582,24 @@ static __attribute__((cold)) const char*
 			return "UNKNOWN (Highlight?)";
 		case WFM_INIT2:
 			return "INIT2?";
+		case WFM_A2IN:
+			return "A2 IN";
+		case WFM_A2OUT:
+			return "A2 OUT";
+		case WFM_GC16HQ:
+			return "GC16 HQ";
+		case WFM_GS16:
+			return "GS16";
+		case WFM_GU16:
+			return "GU16";
+		case WFM_GLK16:
+			return "GLK16";
+		case WFM_CLEAR:
+			return "CLEAR";
+		case WFM_GC4L:
+			return "GC4L";
+		case WFM_GCC16:
+			return "GCC16";
 		default:
 			return "Unknown";
 	}
@@ -7099,7 +7770,7 @@ static __attribute__((cold)) const char*
 
 // Convert our public HW_DITHER_INDEX_T values to an appropriate mxcfb dithering mode constant
 static int
-    get_hwd_mode(uint8_t hw_dither_index)
+    get_hwd_mode(HW_DITHER_INDEX_T hw_dither_index)
 {
 	// NOTE: This hardware dithering (handled by the PxP) is only supported since EPDC v2!
 	//       AFAICT, most of our eligible target devices only support PASSTHROUGH & ORDERED...
@@ -7140,7 +7811,7 @@ static int
 
 // Convert a HW_DITHER_INDEX_T value to a human readable string
 static __attribute__((cold)) const char*
-    hwd_to_string(uint8_t hw_dither_index)
+    hwd_to_string(HW_DITHER_INDEX_T hw_dither_index)
 {
 	switch (hw_dither_index) {
 		case HWD_PASSTHROUGH:
@@ -7170,11 +7841,33 @@ int
 		  const FBInkConfig* restrict fbink_cfg UNUSED_BY_LINUX)
 {
 #ifndef FBINK_FOR_LINUX
-	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
+	// Assume success, until shit happens ;)
+	int  rv      = EXIT_SUCCESS;
 	bool keep_fd = true;
+#	ifdef FBINK_FOR_KOBO
+	if (deviceQuirks.isSunxi) {
+		// We need the full monty on sunxi...
+		if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+			return ERRCODE(EXIT_FAILURE);
+		}
+
+		if (!isFbMapped) {
+			if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+				rv = ERRCODE(EXIT_FAILURE);
+				goto cleanup;
+			}
+		}
+	} else {
+		if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+			return ERRCODE(EXIT_FAILURE);
+		}
+	}
+#	else
+	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
 	if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
 		return ERRCODE(EXIT_FAILURE);
 	}
+#	endif    // FBINK_FOR_KOBO
 
 	// Same for the dithering mode, if we actually requested dithering...
 	if (fbink_cfg->dithering_mode == HWD_PASSTHROUGH) {
@@ -7197,22 +7890,29 @@ int
 		fullscreen_region(&region);
 	}
 
-	int ret;
-	if ((ret = refresh(fbfd,
-			   region,
-			   get_wfm_mode(fbink_cfg->wfm_mode),
-			   get_hwd_mode(fbink_cfg->dithering_mode),
-			   fbink_cfg->is_nightmode,
-			   fbink_cfg->is_flashing,
-			   false)) != EXIT_SUCCESS) {
+	if ((rv = refresh(fbfd,
+			  region,
+			  fbink_cfg->wfm_mode,
+			  fbink_cfg->dithering_mode,
+			  fbink_cfg->is_nightmode,
+			  fbink_cfg->is_flashing,
+			  false)) != EXIT_SUCCESS) {
 		PFWARN("Failed to refresh the screen");
 	}
 
+cleanup:
+#	ifdef FBINK_FOR_KOBO
+	if (deviceQuirks.isSunxi) {
+		if (isFbMapped && !keep_fd) {
+			unmap_fb();
+		}
+	}
+#	endif
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
-	return ret;
+	return rv;
 #else
 	WARN("e-Ink screen refreshes require an e-Ink device");
 	return ERRCODE(ENOSYS);
@@ -7251,7 +7951,7 @@ int
 
 cleanup:
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -7266,14 +7966,33 @@ int
     fbink_wait_for_complete(int fbfd UNUSED_BY_LINUX, uint32_t marker UNUSED_BY_LINUX)
 {
 #ifndef FBINK_FOR_LINUX
-	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
+	// Assume success, until shit happens ;)
+	int  rv      = EXIT_SUCCESS;
 	bool keep_fd = true;
+#	ifdef FBINK_FOR_KOBO
+	if (deviceQuirks.isSunxi) {
+		// We need the full monty on sunxi...
+		if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+			return ERRCODE(EXIT_FAILURE);
+		}
+
+		if (!isFbMapped) {
+			if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+				rv = ERRCODE(EXIT_FAILURE);
+				goto cleanup;
+			}
+		}
+	} else {
+		if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+			return ERRCODE(EXIT_FAILURE);
+		}
+	}
+#	else
+	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
 	if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
 		return ERRCODE(EXIT_FAILURE);
 	}
-
-	// Assume success, until shit happens ;)
-	int rv = EXIT_SUCCESS;
+#	endif    // FBINK_FOR_KOBO
 
 	// Try to retrieve the last sent marker, if any, if we passed marker 0...
 	if (marker == LAST_MARKER) {
@@ -7292,8 +8011,15 @@ int
 	}
 
 cleanup:
+#	ifdef FBINK_FOR_KOBO
+	if (deviceQuirks.isSunxi) {
+		if (isFbMapped && !keep_fd) {
+			unmap_fb();
+		}
+	}
+#	endif
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -7324,6 +8050,59 @@ bool
 	return deviceQuirks.isNTX16bLandscape;
 }
 
+#ifdef FBINK_FOR_KOBO
+static int
+    kobo_sunxi_reinit_check(int fbfd, const FBInkConfig* restrict fbink_cfg)
+{
+	if (sunxiCtx.no_rota) {
+		// Nothing to do :)
+		return EXIT_SUCCESS;
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+	// We'll track what triggered the reinit in a bitmask
+	int rf = 0;
+
+	const uint32_t old_rota = vInfo.rotate;
+	int            rotate   = query_accelerometer();
+	if (rotate < 0) {
+		ELOG("Accelerometer is inconclusive, keeping current rotation");
+		rotate = (int) old_rota;
+	}
+
+	if (old_rota != (uint32_t) rotate) {
+		ELOG("Detected a change in framebuffer rotation (%u -> %d)", old_rota, rotate);
+		rf |= OK_ROTA_CHANGE;
+
+		// A layout change can only happen after a rotation change ;).
+		if ((rotate & 0x01) != (old_rota & 0x01)) {
+			// Technically an orientation change, but layout is less likely to be confused w/ rotation ;).
+			ELOG("Detected a change in framebuffer layout (%s -> %s)",
+			     ((old_rota & 0x01) == 1) ? "Landscape" : "Portrait",
+			     ((rotate & 0x01) == 1) ? "Landscape" : "Portrait");
+			rf |= OK_LAYOUT_CHANGE;
+		}
+
+		// Update the vInfo flag now, so we don't have to poke at the gyro again in initialize_fbink
+		vInfo.rotate = (uint32_t) rotate;
+	}
+
+	// If our bitmask is not empty, it means we have a reinit to do.
+	if (rf > 0) {
+		ELOG("Reinitializing...");
+		rv = initialize_fbink(fbfd, fbink_cfg, true);
+
+		// If it went fine, make the caller aware of why we did it by returning the bitmask
+		if (rv == EXIT_SUCCESS) {
+			rv = rf;
+		}
+	}
+
+	return rv;
+}
+#endif    // FBINK_FOR_KOBO
+
 // Reinitialize FBInk in case the framebuffer state has changed
 // NOTE: We initially (< 1.10.4) tried to limit this to specific scenarios, specifically:
 //         * the bitdepth switch during boot between pickel & nickel
@@ -7339,6 +8118,13 @@ int
     fbink_reinit(int fbfd UNUSED_BY_KINDLE, const FBInkConfig* restrict fbink_cfg UNUSED_BY_KINDLE)
 {
 #ifndef FBINK_FOR_KINDLE
+#	ifdef FBINK_FOR_KOBO
+	// On sunxi, the framebuffer state is meaningless, so, just do our own thing...
+	if (deviceQuirks.isSunxi) {
+		return kobo_sunxi_reinit_check(fbfd, fbink_cfg);
+	}
+#	endif
+
 	// So, we're concerned with stuff that affects the logical & physical layout, namely, bitdepth & rotation.
 	const uint32_t old_bpp  = vInfo.bits_per_pixel;
 	const uint32_t old_rota = vInfo.rotate;
@@ -7406,7 +8192,7 @@ int
 
 cleanup:
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -7702,8 +8488,8 @@ int
 	//       essentially throttling the bar to the screen's refresh rate).
 	if (refresh(fbfd,
 		    region,
-		    get_wfm_mode(fbink_cfg->wfm_mode),
-		    get_hwd_mode(fbink_cfg->dithering_mode),
+		    fbink_cfg->wfm_mode,
+		    fbink_cfg->dithering_mode,
 		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
@@ -7761,7 +8547,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -7806,7 +8592,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -8806,8 +9592,8 @@ static int
 	// Refresh screen
 	if (refresh(fbfd,
 		    region,
-		    get_wfm_mode(fbink_cfg->wfm_mode),
-		    get_hwd_mode(fbink_cfg->dithering_mode),
+		    fbink_cfg->wfm_mode,
+		    fbink_cfg->dithering_mode,
 		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
@@ -8820,7 +9606,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -9217,7 +10003,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -9453,7 +10239,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -9512,7 +10298,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -9744,8 +10530,8 @@ int
 	// And now, we can refresh the screen
 	if (refresh(fbfd,
 		    region,
-		    get_wfm_mode(fbink_cfg->wfm_mode),
-		    get_hwd_mode(fbink_cfg->dithering_mode),
+		    fbink_cfg->wfm_mode,
+		    fbink_cfg->dithering_mode,
 		    fbink_cfg->is_nightmode,
 		    fbink_cfg->is_flashing,
 		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
@@ -9758,7 +10544,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;

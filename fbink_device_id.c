@@ -763,6 +763,7 @@ static void
 			deviceQuirks.isKoboMk7    = true;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UR, nickel is FB_ROTATE_UR
 			//       And panel is *actually* in Portrait. Finally!
+			//       Despite this, the kernel explicitly mangles the touch translation to match the "usual" layout.
 			deviceQuirks.ntxBootRota  = FB_ROTATE_UR;
 			deviceQuirks.canRotate    = true;
 			// NOTE: This one deserves a specific entry, because the H2O² also happens to be UR + STRAIGHT,
@@ -788,9 +789,17 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case 387U:    // Elipsa (Europa)
-			deviceQuirks.isSunxi   = true;
-			// NOTE: ntxBootRota & ntxRotaQuirk TBD because sunxi!
-			deviceQuirks.screenDPI = 227U;
+			deviceQuirks.isSunxi      = true;
+			// Sunxi means no HW inversion :'(.
+			// (And the nightmode_test flag toggled via the debugfs nightenable/nightdisable command doesn't count,
+			// it just flips the buffer in C, and forces the *K waveform modes (dubbed "eclipse" mode)).
+			deviceQuirks.canHWInvert  = false;
+			// Has an accelerometer, but Nickel doesn't update the rotate flag, as it's meaningless.
+			// That said, "native" rotation still matches the usual layout, as does the touch panel translation.
+			deviceQuirks.ntxBootRota  = FB_ROTATE_CCW;    // e.g., fat bezel side UP.
+			deviceQuirks.canRotate    = true;
+			deviceQuirks.ntxRotaQuirk = NTX_ROTA_SUNXI;
+			deviceQuirks.screenDPI    = 227U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Elipsa", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -950,7 +959,7 @@ static void
 					// Discriminate 32GB variants...
 					// NOTE: We compare against 8GB, but in practice, given storage shenanigans and
 					//       the truncation involved here, we end up with 7 on 8GB devices ;).
-					if ((storagesize / (1024U * 1024U * 1024U)) > 8U) {
+					if ((storagesize >> 10U >> 10U >> 10U) > 8U) {
 						if (kobo_id == 373U) {
 							// Aura ONE (daylight) [373] -> Aura ONE LE (daylight) [381]
 							kobo_id = 381U;

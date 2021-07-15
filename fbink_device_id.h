@@ -41,9 +41,9 @@ typedef struct __attribute__((__packed__))
 #			pragma GCC diagnostic push
 #			pragma GCC diagnostic ignored "-Wattributes"
 	char magic[10] __attribute__((nonstring));     // HWCONFIG_MAGIC (i.e., "HW CONFIG ")
-	char version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.3" on Mk.7
+	char version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.3" on Mk.7 & 8
 #			pragma GCC diagnostic pop
-	uint8_t len;    // Length (in bytes) of the full payload, header excluded (up to 72 on v3.3)
+	uint8_t len;    // Length (in bytes) of the full payload, header excluded (up to 74 on v3.3)
 	// Header stops here, actual data follows
 	uint8_t pcb_id;    // First field is the PCB ID, which dictates the device model, the only thing we care about ;)
 } NTXHWConfig;
@@ -56,7 +56,7 @@ typedef struct __attribute__((__packed__))
 #			pragma GCC diagnostic push
 #			pragma GCC diagnostic ignored "-Wattributes"
 	char    magic[10] __attribute__((nonstring));     // HWCONFIG_MAGIC (i.e., "HW CONFIG ")
-	char    version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.3" on Mk.7
+	char    version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.3" on Mk.7 & 8
 #			pragma GCC diagnostic pop
 	uint8_t len;    // Length (in bytes) of the full payload, header excluded (up to 74 on v3.3)
 } NTXHWConfig;
@@ -64,6 +64,8 @@ typedef struct __attribute__((__packed__))
 #			define KOBO_HWCFG_PCB               0
 // NOTE: This one *might* help w/ ntxBootRota, although a direct mapping seems impossible...
 #			define KOBO_HWCFG_DisplayPanel      10
+// NOTE: Accelerometer
+#			define KOBO_HWCFG_RSensor           11
 #			define KOBO_HWCFG_CPU               27
 // NOTE: This one was added in v1.0, while the original NTX Touch was only on v0.7,
 //       which is why we handle this dynamically, instead of relying on a fixed-size struct...
@@ -126,6 +128,10 @@ static const char* kobo_disp_panel[] = { "6\" Left EPD",     "6\" Right EPD",   
 					 "10.3\" Top EPD",   "10.3\" Bottom EPD", "10.3\" Left EPD",   "10.3\" Right EPD",
 					 "8\" Bottom EPD",   "8\" Top EPD",       "8\" Left EPD",      "8\" Right EPD",
 					 "7\" Bottom EPD",   "7\" Top EPD",       "7\" Left EPD",      "7\" Right EPD" };
+*/
+// And the accelerometers...
+/*
+static const char* kobo_gyros[] = { "No", "Rotary Encoder", "G Sensor", "KL25", "MMA8X5X", "NC", "KX122" };
 */
 // And for the various NTX/Kobo CPUs...
 /*

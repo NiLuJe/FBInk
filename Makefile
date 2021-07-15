@@ -86,6 +86,19 @@ CC_IS_CROSS:=0
 ifeq (,$(findstring $(HOST_ARCH),$(TARGET_ARCH)))
 	CC_IS_CROSS:=1
 endif
+# Detect musl because some cross musl TCs are special snowflakes without plugin support,
+# and most of the utils won't build without LTO and linker plugins...
+CC_IS_MUSL:=0
+ifeq (musl,$(findstring musl,$(TARGET_ARCH)))
+	CC_IS_MUSL:=1
+
+	# NOTE: Can't be tab-indented or make thinks it's part of a recipe, for some reason...
+        $(info )
+        $(info /!\)
+        $(warning Detected a musl TC: it *may* be built without linker plugins support, which are a hard dependency of the utils target!)
+        $(info /!\)
+        $(info )
+endif
 
 ifndef DEBUG
 	# Don't hobble GCC just for the sake of being interposable
@@ -335,9 +348,22 @@ endif
 
 # Pick up our vendored build of libunibreak, if requested
 ifdef UNIBREAK
-	EXTRA_LDFLAGS+=-LLibUniBreakBuild/src/.libs
+	EXTRA_LDFLAGS+=-Llibunibreak-staged/src/.libs
 	LIBS+=-l:libunibreak.a
 endif
+
+# Same for libi2c, on Kobo
+ifdef KOBO
+	EXTRA_CPPFLAGS+=-Ilibi2c-staged/include
+	EXTRA_LDFLAGS+=-Llibi2c-staged/lib
+	I2C_LIBS:=-l:libi2c.a
+	LIBS+=$(I2C_LIBS)
+endif
+
+# Pick up our vendored build of libevdev (for the PoC that relies on it)
+EVDEV_CPPFLAGS:=-Ilibevdev-staged/include/libevdev-1.0
+EVDEV_LDFLAGS:=-Llibevdev-staged/lib
+EVDEV_LIBS:=-l:libevdev.a
 
 # And with our own rpath for standalone distribution
 ifdef STANDALONE
@@ -467,6 +493,14 @@ UNIBREAK_CFLAGS := -Wno-conversion -Wno-sign-conversion -Wno-suggest-attribute=p
 $(UB_SHAREDLIB_OBJS): QUIET_CFLAGS := $(UNIBREAK_CFLAGS)
 $(UB_STATICLIB_OBJS): QUIET_CFLAGS := $(UNIBREAK_CFLAGS)
 
+# Silence a few warnings when building libi2c
+I2C_CFLAGS := -Wno-sign-conversion
+
+# Ditto for libevdev
+EVDEV_CFLAGS := -Wno-conversion -Wno-sign-conversion -Wno-undef -Wno-vla-parameter -Wno-format -Wno-null-dereference -Wno-bad-function-cast -Wno-inline
+# And when *linking* libevdev (w/ LTO)
+EVDEV_LDFLAGS += -Wno-null-dereference
+
 # Shared lib
 $(OUT_DIR)/shared/%.o: %.c
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(QUIET_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) -o $@ -c $<
@@ -484,10 +518,10 @@ outdir:
 
 # Make absolutely sure we create our output directories first, even with unfortunate // timings!
 # c.f., https://www.gnu.org/software/make/manual/html_node/Prerequisite-Types.html#Prerequisite-Types
-$(SHAREDLIB_OBJS): | outdir
+$(SHAREDLIB_OBJS): libi2c.built | outdir
 $(UB_SHAREDLIB_OBJS): | outdir
 $(QT_SHAREDLIB_OBJS): | outdir
-$(STATICLIB_OBJS): | outdir
+$(STATICLIB_OBJS): libi2c.built | outdir
 $(UB_STATICLIB_OBJS): | outdir
 $(QT_STATICLIB_OBJS): | outdir
 $(CMD_OBJS): | outdir
@@ -496,11 +530,11 @@ $(BTN_OBJS): | outdir
 all: static
 
 ifdef UNIBREAK
-staticlib: libunibreak.built $(STATICLIB_OBJS)
+staticlib: $(STATICLIB_OBJS) libunibreak.built
 	$(AR) $(FBINK_STATIC_FLAGS) $(OUT_DIR)/$(FBINK_STATIC_NAME) $(STATICLIB_OBJS)
 	$(RANLIB) $(OUT_DIR)/$(FBINK_STATIC_NAME)
 
-sharedlib: libunibreak.built $(SHAREDLIB_OBJS)
+sharedlib: $(SHAREDLIB_OBJS) libunibreak.built
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(SHAREDLIB_OBJS)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME_VER)
@@ -557,20 +591,35 @@ ifdef LINUX
 utils: | outdir
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(DOOM_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/doom utils/doom.c -lrt
 else
-utils: | outdir
+utils: libi2c.built | outdir
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(TOOLS_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/rota utils/rota.c
 	$(STRIP) --strip-unneeded $(OUT_DIR)/rota
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(TOOLS_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbdepth utils/fbdepth.c $(UTILS_LIBS)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/fbdepth
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(DOOM_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/doom utils/doom.c -lrt $(UTILS_LIBS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(DOOM_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/doom utils/doom.c -lrt $(UTILS_LIBS) $(I2C_LIBS)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/doom
 endif
 
 ifdef KOBO
-alt: | outdir
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(DOOM_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/alt_buffer utils/alt_buffer.c
+alt: libi2c.built | outdir
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(DOOM_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/alt_buffer utils/alt_buffer.c $(I2C_LIBS)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/alt_buffer
 endif
+
+ifdef KOBO
+sunxi: libi2c.built | outdir
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/ion_heaps utils/ion_heaps.c
+	$(STRIP) --strip-unneeded $(OUT_DIR)/ion_heaps
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/kx122_i2c utils/kx122_i2c.c $(I2C_LIBS)
+	$(STRIP) --strip-unneeded $(OUT_DIR)/kx122_i2c
+endif
+
+ifdef KOBO
+ftrace: libevdev.built static | outdir
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(EVDEV_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(EVDEV_LDFLAGS) -o$(OUT_DIR)/finger_trace utils/finger_trace.c $(LIBS) $(EVDEV_LIBS)
+	$(STRIP) --strip-unneeded $(OUT_DIR)/finger_trace
+endif
+
 
 dump: static
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/dump utils/dump.c $(LIBS)
@@ -619,21 +668,44 @@ pocketbook:
 	$(MAKE) strip POCKETBOOK=true
 
 libunibreak.built:
-	mkdir -p LibUniBreakBuild
+	mkdir -p libunibreak-staged
 	cd libunibreak && \
 	env NOCONFIGURE=1 ./autogen.sh
-	cd LibUniBreakBuild && \
+	cd libunibreak-staged && \
 	env CPPFLAGS="$(CPPFLAGS) $(EXTRA_CPPFLAGS)" \
-	CFLAGS="$(CFLAGS) $(EXTRA_CFLAGS) $(UNIBREAK_CFLAGS)" \
+	CFLAGS="$(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(UNIBREAK_CFLAGS)" \
 	LDFLAGS="$(LDFLAGS)" \
 	../libunibreak/configure \
 	$(if $(CROSS_TC),--host=$(CROSS_TC),) \
 	--enable-static \
 	--disable-shared \
 	$(if $(SHARED),--with-pic=yes,)
-	cd LibUniBreakBuild && \
-	$(MAKE)
+	$(MAKE) -C libunibreak-staged
 	touch libunibreak.built
+
+libi2c.built:
+	mkdir -p libi2c-staged
+	$(MAKE) -C i2c-tools \
+	BUILD_DYNAMIC_LIB=0 USE_STATIC_LIB=1 BUILD_STATIC_LIB=1 V=1 \
+	CC=$(CC) AR=$(AR) \
+	CFLAGS="$(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(I2C_CFLAGS)" \
+	PREFIX="/" libdir="/lib" DESTDIR="$(CURDIR)/libi2c-staged" \
+	lib install-lib install-include
+	touch libi2c.built
+
+libevdev.built:
+	mkdir -p libevdev-staged
+	cd libevdev && \
+	autoreconf -fi && \
+	env CPPFLAGS="$(CPPFLAGS) $(EXTRA_CPPFLAGS)" \
+	CFLAGS="$(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(EVDEV_CFLAGS)" \
+	LDFLAGS="$(LDFLAGS)" \
+	./configure $(if $(CROSS_TC),--host=$(CROSS_TC),) \
+	--prefix="$(CURDIR)/libevdev-staged" \
+	--enable-static \
+	--disable-shared && \
+	$(MAKE) install
+	touch libevdev.built
 
 armcheck:
 ifeq (,$(findstring arm-,$(CC)))
@@ -681,8 +753,20 @@ devcap: armcheck
 	tar --owner=root --group=root -cvzf Release/Kobo-DevCap-Test.tar.gz -C Kobo .
 
 libunibreakclean:
+	-$(MAKE) -C libunibreak clean
 	cd libunibreak && \
 	git reset --hard
+
+libi2cclean:
+	-$(MAKE) -C i2c-tools clean
+	cd i2c-tools && \
+	git reset --hard
+
+libevdevclean:
+	-$(MAKE) -C libevdev clean
+	cd libevdev && \
+	git reset --hard && \
+	git clean -fxdq
 
 clean:
 	rm -rf Kobo/
@@ -747,8 +831,12 @@ clean:
 	rm -rf Debug/dump
 	rm -rf Debug/Kobo-DevCap-Test.tar.gz
 
-distclean: clean libunibreakclean
-	rm -rf LibUniBreakBuild
+distclean: clean libunibreakclean libi2cclean libevdevclean
+	rm -rf libunibreak-staged
 	rm -rf libunibreak.built
+	rm -rf libi2c-staged
+	rm -rf libi2c.built
+	rm -rf libevdev-staged
+	rm -rf libevdev.built
 
-.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean utils alt dump devcap clean distclean
+.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils alt sunxi ftrace dump devcap clean distclean

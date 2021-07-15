@@ -193,6 +193,8 @@
 #	include "eink/mxcfb-cervantes.h"
 #elif defined(FBINK_FOR_KOBO)
 #	include "eink/mxcfb-kobo.h"
+#	include "eink/ion-kobo.h"
+#	include "eink/sunxi-kobo.h"
 #elif defined(FBINK_FOR_REMARKABLE)
 #	include "eink/mxcfb-remarkable.h"
 #elif defined(FBINK_FOR_POCKETBOOK)
@@ -312,7 +314,7 @@
 		(x__ > y__) ? x__ : y__;                                                                                 \
 	})
 
-// We'll need those on PocketBook...
+// We'll need those on PocketBook & with sunxi SoCs...
 // c.f., <linux/kernel.h>
 #define ALIGN(x, a)                                                                                                      \
 	({                                                                                                               \
@@ -438,8 +440,19 @@ static const uint8_t eInkBGCMap[16] = { 0xFF, 0xEE, 0xDD, 0xCC, 0xBB, 0xAA, 0x99
 //#include "fbink_rgb565.h"
 
 // Global variables to store fb/screen info
-unsigned char* restrict fbPtr       = NULL;
-bool                     isFbMapped = false;
+unsigned char* restrict fbPtr = NULL;
+bool isFbMapped               = false;
+#ifdef FBINK_FOR_KOBO
+FBInkKoboSunxi sunxiCtx = { .disp_fd    = -1,
+			    .i2c_fd     = -1,
+			    .i2c_dev    = { 0 },
+			    .ion_fd     = -1,
+			    .alloc_size = 0U,
+			    .ion        = { 0 },
+			    .layer      = { { 0 } },
+			    .rota       = 0U,
+			    .no_rota    = false };
+#endif
 struct fb_var_screeninfo vInfo;
 struct fb_fix_screeninfo fInfo;
 uint32_t                 viewWidth;
@@ -662,9 +675,13 @@ static int refresh_kobo(int, const struct mxcfb_rect, uint32_t, uint32_t, int, b
 static int wait_for_complete_kobo(int, uint32_t);
 static int refresh_kobo_mk7(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
 static int wait_for_complete_kobo_mk7(int, uint32_t);
+static int refresh_kobo_sunxi(const struct mxcfb_rect, uint32_t, uint32_t, int);
+static int wait_for_complete_kobo_sunxi(uint32_t);
 #	endif    // FBINK_FOR_KINDLE
-#endif            // !FBINK_FOR_LINUX
-static int refresh(int, const struct mxcfb_rect, uint32_t, int UNUSED_BY_CERVANTES, bool, bool, bool);
+static inline void compute_update_marker(void);
+#endif    // !FBINK_FOR_LINUX
+static int
+    refresh(int, const struct mxcfb_rect, WFM_MODE_INDEX_T, HW_DITHER_INDEX_T UNUSED_BY_CERVANTES, bool, bool, bool);
 #ifndef FBINK_FOR_LINUX
 #	if defined(FBINK_FOR_KINDLE)
 static int wait_for_submission(int, uint32_t);
@@ -686,10 +703,20 @@ static __attribute__((cold)) void update_verbosity(const FBInkConfig* restrict);
 #ifdef FBINK_FOR_POCKETBOOK
 static __attribute__((cold)) void pocketbook_fix_fb_info(void);
 #endif
+#ifdef FBINK_FOR_KOBO
+static __attribute__((cold)) void kobo_sunxi_fb_fixup(bool);
+#endif
 static __attribute__((cold)) int initialize_fbink(int, const FBInkConfig* restrict, bool);
 
 static int memmap_fb(int);
-static int unmap_fb(void);
+#ifdef FBINK_FOR_KOBO
+static int memmap_ion(void);
+#endif
+static inline void close_fb(int);
+static int         unmap_fb(void);
+#ifdef FBINK_FOR_KOBO
+static int unmap_ion(void);
+#endif
 
 #if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES) || defined(FBINK_FOR_POCKETBOOK)
 static void rotate_region_pickel(struct mxcfb_rect* restrict);
@@ -733,8 +760,8 @@ static void                              parse_simple_md(const char* restrict, s
 static __attribute__((cold)) const char* glyph_style_to_string(CHARACTER_FONT_T);
 #endif
 
-static uint32_t                          get_wfm_mode(uint8_t);
-static __attribute__((cold)) const char* wfm_to_string(uint8_t);
+static uint32_t                          get_wfm_mode(WFM_MODE_INDEX_T);
+static __attribute__((cold)) const char* wfm_to_string(WFM_MODE_INDEX_T);
 #ifndef FBINK_FOR_LINUX
 #	ifdef FBINK_FOR_KINDLE
 static __attribute__((cold)) const char* kindle_wfm_to_string(uint32_t);
@@ -750,8 +777,12 @@ static __attribute__((cold)) const char* remarkable_wfm_to_string(uint32_t);
 static __attribute__((cold)) const char* pocketbook_wfm_to_string(uint32_t);
 #	endif
 #endif
-static int                               get_hwd_mode(uint8_t);
-static __attribute__((cold)) const char* hwd_to_string(uint8_t);
+static int                               get_hwd_mode(HW_DITHER_INDEX_T);
+static __attribute__((cold)) const char* hwd_to_string(HW_DITHER_INDEX_T);
+
+#ifdef FBINK_FOR_KOBO
+static int kobo_sunxi_reinit_check(int, const FBInkConfig* restrict);
+#endif
 
 #ifdef FBINK_WITH_IMAGE
 static int dump_region(struct mxcfb_rect* region, FBInkDump* restrict dump);
@@ -760,6 +791,11 @@ static int dump_region(struct mxcfb_rect* region, FBInkDump* restrict dump);
 // For identify_device, which we need outside of fbink_device_id.c ;)
 #ifndef FBINK_FOR_LINUX
 #	include "fbink_device_id.h"
+#endif
+
+// For the I²C stuff, which we need on Kobo (at least on Mk. 8 ;))
+#ifdef FBINK_FOR_KOBO
+#	include "fbink_rota_quirks.h"
 #endif
 
 #endif

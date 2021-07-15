@@ -4,8 +4,14 @@ Debug/
 Kobo/
 Kindle/
 # Same, for our vendored libunibreak
-LibUniBreakBuild/
+libunibreak-staged/
 libunibreak.built
+# And our vendored libi2c
+libi2c-staged
+libi2c.built
+# And our vendored libevdev
+libevdev-staged
+libevdev.built
 # KDevelop
 FBInk.kdev4
 .kdev4/

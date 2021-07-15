@@ -209,6 +209,9 @@ typedef enum
 	//                   May *not* always (or ever) opt to use REAGL on devices where it is otherwise available.
 	//                   This is the default.
 	//                   If you request a flashing update w/ AUTO, FBInk automatically uses GC16 instead.
+	//                   NOTE: On sunxi SoCs, this analysis is done on CPU, instead of by the PxP.
+	//                         As such, it's going to be slower. Prefer explicitly choosing a mode instead.
+	//                         (When in doubt, GL16 is usually a good middle ground).
 	// Common
 	WFM_DU,    // From any to B&W, fast (~260ms), some light ghosting.
 	//            On-screen pixels will be left as-is for new content that is *not* B&W.
@@ -261,8 +264,16 @@ typedef enum
 	// PocketBook only
 	WFM_A2IN,
 	WFM_A2OUT,
-	WFM_GC16HQ,         // Only available on i.MX SoCs. Alias for REAGL, or REAGLD when flashing.
-	WFM_GS16,           // Only available on B288 SoCs. Fidelity supposedly somewhere between GL16 and GC16.
+	WFM_GC16HQ,    // Only available on i.MX SoCs. Alias for REAGL, or REAGLD when flashing.
+	WFM_GS16,      // Only available on B288 SoCs. Fidelity supposedly somewhere between GL16 and GC16.
+	// Kobo Sunxi only
+	WFM_GU16,    // GL16, but honoring the in-kernel DISP_EINK_SET_GC_CNT
+	//WFM_GCK16,	// GC16, but for white-on-black.
+	WFM_GLK16,    // GL16, but for white-on-black.
+	WFM_CLEAR,    // GC16 local (NOTE: Appears to crash the EPDC... [Elipsa on FW 4.28.17826])
+	WFM_GC4L,     // GC4 local (NOTE: Appears to crash the EPDC... [Elipsa on FW 4.28.17826])
+	WFM_GCC16,    // GCC16
+
 	WFM_MAX = 0xFFu,    // uint8_t
 } __attribute__((packed)) WFM_MODE_INDEX_E;
 typedef uint8_t WFM_MODE_INDEX_T;
@@ -292,6 +303,7 @@ typedef enum
 	//                            Optionally, bonus points if that's actually UR, and the panel is natively mounted UR,
 	//                            like on the Kobo Libra.
 	//                            Triple whammy if the touch layer rotation matches!
+	NTX_ROTA_SUNXI,    // The rotate flag is technically meaningless, but *may* be set by third-party code (we don't).
 	NTX_ROTA_MAX = 0xFFu,    // uint8_t
 } __attribute__((packed)) NTX_ROTA_INDEX_E;
 typedef uint8_t NTX_ROTA_INDEX_T;
@@ -630,6 +642,8 @@ FBINK_API int fbink_printf(int fbfd,
 //	 On slightly older devices, the EPDC may support some sort of in-kernel software dithering, hence HWD_LEGACY.
 // NOTE: If you do NOT want to request any dithering, set FBInkConfig's dithering_mode field to HWD_PASSTHROUGH (i.e., 0).
 //       This is also the fallback value.
+// NOTE: On Kobo devices with a sunxi SoC, you will not be able to refresh content that you haven't drawn yourself first.
+//       (There's no "shared" framebuffer, each process gets its own private, zero-initialized (i.e., solid black) buffer).
 FBINK_API int fbink_refresh(int      fbfd,
 			    uint32_t region_top,
 			    uint32_t region_left,
@@ -735,6 +749,10 @@ FBINK_API bool fbink_is_fb_quirky(void) __attribute__((pure, deprecated));
 //       This is helpful for callers that need to track FBInk's internal state via fbink_get_state(),
 //       because a reinit *might* affect the screen layout, signaling that their current state copy *may* be stale.
 // NOTE: In turn, this means that a simple EXIT_SUCCESS means that no reinitialization was needed.
+// NOTE: On Kobo devices with a sunxi SoC, OK_BPP_CHANGE will *never* happen,
+//       as the state of the actual framebuffer device is (unfortunately) meaningless there.
+//       On those same devices, if rotation handling is disabled (via FBINK_NO_GYRO),
+//       the whole function becomes a NOP.
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
 // fbink_cfg:		Pointer to an FBInkConfig struct.
@@ -924,6 +942,8 @@ FBINK_API int fbink_grid_refresh(int                fbfd,
 // NOTE: On *most* devices (the exceptions being 4bpp & 16bpp fbs),
 //       the data being dumped is perfectly valid input for fbink_print_raw_data,
 //       in case you'd ever want to do some more exotic things with it...
+// NOTE: On Kobo devices with a sunxi SoC, you will not be able to capture content that you haven't drawn yourself first.
+//       (There's no "shared" framebuffer, each process gets its own private, zero-initialized (i.e., solid black) buffer).
 FBINK_API int fbink_dump(int fbfd, FBInkDump* restrict dump);
 
 // Dump a specific region of the screen.
@@ -1020,7 +1040,7 @@ FBINK_API FBInkRect fbink_get_last_rect(bool rotated);
 //
 // Scan the screen for Kobo's "Connect" button in the "USB plugged in" popup,
 // and optionally generate an input event to press that button.
-// KOBO Only! Returns -(ENOSYS) when disabled (!KOBO, as well as MINIMAL builds).
+// KOBO i.MX Only! Returns -(ENOSYS) when disabled (!KOBO, or Kobo on a sunxi SoC, as well as MINIMAL builds).
 // Otherwise, returns a few different things on failure:
 //	-(EXIT_FAILURE)	when the button was not found.
 //	With press_button:
@@ -1046,7 +1066,7 @@ FBINK_API int fbink_button_scan(int fbfd, bool press_button, bool nosleep);
 //       It will abort early if that's not the case.
 // NOTE: For the duration of this call (which is obviously blocking!), screen updates should be kept to a minimum:
 //       in particular, we expect the middle section of the final line to be untouched!
-// KOBO Only! Returns -(ENOSYS) when disabled (!KOBO, as well as MINIMAL builds).
+// KOBO i.MX Only! Returns -(ENOSYS) when disabled (!KOBO, or Kobo on a sunxi SoC, as well as MINIMAL builds).
 // Otherwise, returns a few different things on failure:
 //	-(EXIT_FAILURE)	when the expected chain of events fails to be detected properly.
 //	-(ENODATA)	when there was no new content to import at the end of the USBMS session.
@@ -1070,6 +1090,26 @@ FBINK_API int fbink_wait_for_usbms_processing(int fbfd, bool force_unplug);
 // See fbink_rota_quirks.c & utils/fbdepth.c for more details.
 FBINK_API uint8_t  fbink_rota_native_to_canonical(uint32_t rotate);
 FBINK_API uint32_t fbink_rota_canonical_to_native(uint8_t rotate);
+
+//
+// The functions below are tied to specific capabilities on Kobo devices with a sunxi SoC (e.g., the Elipsa).
+//
+// Toggle the "pen" refresh mode. c.f., eink/sunxi-kobo.h @ DISP_EINK_SET_NTX_HANDWRITE_ONOFF for more details.
+// The TL;DR being that it's only truly active when using A2 & DU waveform modes.
+// And since, on sunxi, A2's MONOCHROME flag is just *software* dithering, you might actually prefer DU.
+// (And/or we ought to just get rid of EINK_MONOCHROME on this platform, TBD ;)).
+// Returns -(ENOSYS) on unsupported platforms.
+// fbfd:		Open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
+// NOTE: Outside of tracing pen input, it has another interesting side-effect:
+//       since it disables the layer overlap check, it allows you to display stuff in a different layout
+//       than the current working buffer without the (heavy) visual artifacts that would otherwise imply.
+//       Then again, it also leaves an eink kernel thread spinning at 100% CPU until the next standard update,
+//       so this might not be such a great idea after all...
+//       c.f., kobo_sunxi_fb_fixup @ fbink.c for more details.
+// NOTE: Another option for "dealing" with these rotation mishaps is to just assume the screen is always Upright.
+//       You can achieve that by making sure FBINK_NO_GYRO is set in your env (*before* initializing FBInk).
+FBINK_API int fbink_toggle_sunxi_ntx_pen_mode(int fbfd, bool toggle);
 
 //
 ///

@@ -262,6 +262,36 @@ static int
 		SEND_INPUT_EVENT(EV_KEY, BTN_TOUCH, 0);
 		SEND_INPUT_EVENT(EV_KEY, BTN_TOOL_FINGER, 0);
 		SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
+	} else if (deviceQuirks.isSunxi) {
+		// NOTE: Mostly for documentation's sake, as this feature is unsupported on sunxi SoCs...
+		// If multiple contact points are detected (e.g., multi-touch),
+		// each tracking ID is preceded by its slot assignment (e.g., EV_ABS:ABS_MT_SLOT:0 for the first finger).
+		// It's only ellided when there's only a single contact point present/left.
+		// NOTE: The fact that it needlessly *repeats* the ABS_MT_TRACKING_ID (i.e., not changed/released),
+		//       is upsetting libevdev (trips the "double tracking ID" check)...
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TRACKING_ID, 0);    // Increases with each subsequent contact point.
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOOL_TYPE, 0);      // 0 for finger, 1 for pen
+		SEND_INPUT_EVENT(EV_KEY, BTN_TOUCH, 1);
+		// Plus an EV_KEY:BTN_STYLUS toggle when the *eraser* button is toggled.
+		// And an EV_KEY:BTN_STYLUS2 for the *highlighter* button.
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MAJOR, 1632);    // Pen can go higher
+		// Always matches ABS_MT_TOUCH_MAJOR, unless the pen is not touching the screen (e.g., hovering),
+		// in which case it is ellided, and pressure reports 0.
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_PRESSURE, 1632);
+		// EV_ABS:ABS_MT_DISTANCE for the pen (15 when PRESSURE is 0, 0 otherwise).
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_X, match_coords->x);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_Y, match_coords->y);
+		SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
+
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TRACKING_ID, 0);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOOL_TYPE, 0);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MAJOR, 0);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_PRESSURE, 0);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_X, match_coords->x);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_Y, match_coords->y);
+		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TRACKING_ID, -1);
+		SEND_INPUT_EVENT(EV_KEY, BTN_TOUCH, 0);
+		SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
 	} else {
 		// NOTE: Corresponds to what we call the "Phoenix" protocol in KOReader
 		//       (with or without the Alyssum tweaks, which appear irrelevant),
@@ -321,6 +351,11 @@ int
     fbink_button_scan(int fbfd UNUSED_BY_NOBUTTON, bool press_button UNUSED_BY_NOBUTTON, bool nosleep UNUSED_BY_NOBUTTON)
 {
 #ifdef FBINK_WITH_BUTTON_SCAN
+	if (deviceQuirks.isSunxi) {
+		PFWARN("This feature is not supported on your device");
+		return ERRCODE(ENOSYS);
+	}
+
 	// Open the framebuffer if need be...
 	// NOTE: As usual, we *expect* to be initialized at this point!
 	bool keep_fd = true;
@@ -529,7 +564,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;
@@ -544,6 +579,11 @@ int
     fbink_wait_for_usbms_processing(int fbfd UNUSED_BY_NOBUTTON, bool force_unplug UNUSED_BY_NOBUTTON)
 {
 #ifdef FBINK_WITH_BUTTON_SCAN
+	if (deviceQuirks.isSunxi) {
+		PFWARN("This feature is not supported on your device");
+		return ERRCODE(ENOSYS);
+	}
+
 	// Open the framebuffer if need be...
 	// NOTE: As usual, we *expect* to be initialized at this point!
 	bool keep_fd = true;
@@ -645,7 +685,7 @@ cleanup:
 		unmap_fb();
 	}
 	if (!keep_fd) {
-		close(fbfd);
+		close_fb(fbfd);
 	}
 
 	return rv;

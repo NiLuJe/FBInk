@@ -188,4 +188,30 @@ typedef enum
 typedef uint8_t CHARACTER_FONT_T;
 #endif    // FBINK_WITH_OPENTYPE
 
+#ifdef FBINK_FOR_KOBO
+typedef struct
+{
+	uint16_t bus;
+	uint16_t address;
+} FBInkI2CDev;
+
+// Chuck all the sunxi mess in a single place...
+typedef struct
+{
+	int                       disp_fd;
+	int                       i2c_fd;
+	FBInkI2CDev               i2c_dev;
+	int                       ion_fd;
+	size_t                    alloc_size;
+	struct ion_fd_data        ion;
+	struct disp_layer_config2 layer;
+	uint32_t                  rota;
+	// NOTE: If we could actually somehow detect Nickel's actual screen layout,
+	//       this would be tristate: follow gyro; never follow gyro (e.g., UR always); follow gyro if compatible layout.
+	//       In which case, being able to toggle it at runtime would be NTH (we'd have to deal with the i2c fd).
+	//       But, alas, we can't, so, right now, it's a boolean, set at runtime based on the FBINK_NO_GYRO env var...
+	bool                      no_rota;
+} FBInkKoboSunxi;
+#endif    // FBINK_FOR_KOBO
+
 #endif
