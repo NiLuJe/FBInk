@@ -163,10 +163,10 @@ static void
 	}
 
 	// Recap the craziness...
-	LOG("%ld.%.9ld %s @ (%d, %d) -> (%d, %d) => (%d, %d)",
+	LOG("%ld.%.6ld [%s] @ (%4d, %4d) -> (%4d, %4d) => (%4d, %4d)",
 	    touch->time.tv_sec,
 	    touch->time.tv_usec,
-	    (touch->state == FINGER_DOWN || touch->state == PEN_DOWN) ? "DOWN" : "UP",
+	    (touch->state == FINGER_DOWN || touch->state == PEN_DOWN) ? "DOWN" : " UP ",
 	    touch->pos.x,
 	    touch->pos.y,
 	    canonical_pos.x,
@@ -210,7 +210,10 @@ static bool
 			handle_contact(ctx);
 			*prev_touch = *touch;
 		} else {
-			LOG("%ld.%.9ld No movement", touch->time.tv_sec, touch->time.tv_usec);
+			LOG("%ld.%.6ld [%s] @ Similar coordinates",
+			    touch->time.tv_sec,
+			    touch->time.tv_usec,
+			    (touch->state == FINGER_DOWN || touch->state == PEN_DOWN) ? "DOWN" : " UP ");
 		}
 
 		// Keep draining the queue without going back to poll
