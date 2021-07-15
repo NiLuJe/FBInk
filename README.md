@@ -13,7 +13,7 @@ It's especially cruel when moving to a Kobo, after being used to the ubiquity of
 
 In short, it prints messages or images on your screen, handling the low-level tinkering with both the Linux framebuffer interface, and the i.MX EPDC.  
 It's been tested on Kobo, Kindle, BQ Cervantes, reMarkable and PocketBook, but porting it to other Linux, i.MX eInk devices should be trivial (hell, even Sipix support shouldn't be too hard).
-#64 proved that we can even bend sunxi APIs to our will, if you don't care too much about losing your sanity in the process ;).
+[#64](https://github.com/NiLuJe/FBInk/pull/64) proved that we can even bend sunxi APIs to our will, if you don't care too much about losing your sanity in the process ;).
 
 By default, text rendering relies on bundled fixed cell bitmap fonts ([see this post](https://www.mobileread.com/forums/showpost.php?p=3765426&postcount=31) for a small sampling),
 but thanks to [@shermp](https://github.com/shermp)'s contributions ([#20](https://github.com/NiLuJe/FBInk/pull/20)), you can also rely on full-fledged TrueType/OpenType font rendering!
