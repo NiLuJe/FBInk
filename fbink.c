@@ -2825,7 +2825,7 @@ static int
 		return refresh_kindle(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
 	}
 #	elif defined(FBINK_FOR_CERVANTES)
-	return refresh_cervantes(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode) is_nightmode, lastMarker);
+	return refresh_cervantes(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
 #	elif defined(FBINK_FOR_REMARKABLE)
 	return refresh_remarkable(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
 #	elif defined(FBINK_FOR_POCKETBOOK)
@@ -3537,7 +3537,8 @@ static __attribute__((cold)) int
 		//       because its kernel doesn't ship with an EPDC driver, despite running on an i.MX 7D...
 		if (deviceQuirks.deviceId == 2U) {
 			// ... unless we're running under the https://github.com/ddvk/remarkable2-framebuffer shim
-			if (getenv("RM2FB_SHIM")) {
+			const char* rm2fb = getenv("RM2FB_SHIM");
+			if (rm2fb) {
 				ELOG(
 				    "Running under the rm2fb compatibility shim (version %s), functionality may be limited",
 				    rm2fb);
@@ -7900,8 +7901,8 @@ int
 		PFWARN("Failed to refresh the screen");
 	}
 
-cleanup:
 #	ifdef FBINK_FOR_KOBO
+cleanup:
 	if (deviceQuirks.isSunxi) {
 		if (isFbMapped && !keep_fd) {
 			unmap_fb();
