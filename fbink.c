@@ -8065,6 +8065,14 @@ static int
 	// We'll track what triggered the reinit in a bitmask
 	int rf = 0;
 
+	// We're going to need an I²C handle...
+	if (fbfd == FBFD_AUTO) {
+		if (open_accelerometer_i2c() != EXIT_SUCCESS) {
+			PFWARN("Cannot open accelerometer I²C handle, aborting");
+			return ERRCODE(EXIT_FAILURE);
+		}
+	}
+
 	const uint32_t old_rota = vInfo.rotate;
 	int            rotate   = query_accelerometer();
 	if (rotate < 0) {
@@ -8097,6 +8105,14 @@ static int
 		// If it went fine, make the caller aware of why we did it by returning the bitmask
 		if (rv == EXIT_SUCCESS) {
 			rv = rf;
+		}
+	}
+
+	// If we're in an FBFD_AUTO workflow, close the I²C handle
+	if (fbfd == FBFD_AUTO) {
+		if (close_accelerometer_i2c() != EXIT_SUCCESS) {
+			WARN("Failed to close accelerometer I²C handle");
+			return ERRCODE(EXIT_FAILURE);
 		}
 	}
 
