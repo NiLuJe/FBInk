@@ -8092,6 +8092,14 @@ static int
 		rotate = (int) old_rota;
 	}
 
+	// If we're in an FBFD_AUTO workflow, close the I²C handle
+	if (fbfd == FBFD_AUTO) {
+		if (close_accelerometer_i2c() != EXIT_SUCCESS) {
+			WARN("Failed to close accelerometer I²C handle");
+			return ERRCODE(EXIT_FAILURE);
+		}
+	}
+
 	if (old_rota != (uint32_t) rotate) {
 		ELOG("Detected a change in framebuffer rotation (%u -> %d)", old_rota, rotate);
 		rf |= OK_ROTA_CHANGE;
@@ -8117,14 +8125,6 @@ static int
 		// If it went fine, make the caller aware of why we did it by returning the bitmask
 		if (rv == EXIT_SUCCESS) {
 			rv = rf;
-		}
-	}
-
-	// If we're in an FBFD_AUTO workflow, close the I²C handle
-	if (fbfd == FBFD_AUTO) {
-		if (close_accelerometer_i2c() != EXIT_SUCCESS) {
-			WARN("Failed to close accelerometer I²C handle");
-			return ERRCODE(EXIT_FAILURE);
 		}
 	}
 
