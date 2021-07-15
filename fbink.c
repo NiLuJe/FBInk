@@ -2583,17 +2583,12 @@ static int
 				  .x_bottom = region.left + region.width - 1,
 				  .y_bottom = region.top + region.height - 1 };
 
-	// Devise the required rotation, given the current "fb" rotate flag.
-	// This is unfortunately not as nice and easy as usual,
-	// c.f., kobo_sunxi_fb_fixup for all the gory details...
-	uint32_t rota = ((vInfo.rotate ^ deviceQuirks.ntxBootRota) * 90U);
-
 	sunxi_disp_eink_update2 update = { .area        = &area,
 					   .layer_num   = 1U,
 					   .update_mode = waveform_mode,
 					   .lyr_cfg2    = &sunxiCtx.layer,
 					   .frame_id    = &lastMarker,
-					   .rotate      = &rota,
+					   .rotate      = &sunxiCtx.rota,
 					   .cfa_use     = 0U };
 
 	// Update mode shenanigans...
@@ -3429,6 +3424,10 @@ static __attribute__((cold)) void
 	//       because it appears to disable the offending checks, but that, in turn,
 	//       will leave the eink image proc kernel thread spinning at 100% CPU
 	//       until the next non pen mode update...
+
+	// Devise the required G2D rotation angle (for UPDATE ioctls), given the current "fb" rotate flag.
+	// This is unfortunately not as nice and easy as usual...
+	sunxiCtx.rota = ((vInfo.rotate ^ deviceQuirks.ntxBootRota) * 90U);
 
 	// Handle Portrait/Landscape swaps
 	if ((vInfo.rotate & 0x01) == 1) {

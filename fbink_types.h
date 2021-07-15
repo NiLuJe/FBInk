@@ -205,6 +205,7 @@ typedef struct
 	size_t                    alloc_size;
 	struct ion_fd_data        ion;
 	struct disp_layer_config2 layer;
+	uint32_t                  rota;
 	// NOTE: If we could actually somehow detect Nickel's actual screen layout,
 	//       this would be tristate: follow gyro; never follow gyro (e.g., UR always); follow gyro if compatible layout.
 	//       In which case, being able to toggle it at runtime would be NTH (we'd have to deal with the i2c fd).
