@@ -448,7 +448,7 @@ FBInkKoboSunxi sunxiCtx = { .disp_fd    = -1,
 			    .i2c_dev    = { 0 },
 			    .ion_fd     = -1,
 			    .alloc_size = 0U,
-			    .ion        = { 0 },
+			    .ion        = { .handle = 0, .fd = -1 },
 			    .layer      = { { 0 } },
 			    .rota       = 0U,
 			    .no_rota    = false };
