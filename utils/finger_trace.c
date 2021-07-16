@@ -115,7 +115,7 @@ static void
 {
 	const FBInkConfig* fbink_cfg   = ctx->fbink_cfg;
 	const FBInkState*  fbink_state = ctx->fbink_state;
-	FTrace_Slot*       touch       = ctx->touch;
+	const FTrace_Slot* touch       = ctx->touch;
 
 	// NOTE: The following was borrowed from my experiments with this in InkVT ;).
 	// Deal with device-specific rotation quirks...
