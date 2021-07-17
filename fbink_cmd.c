@@ -187,6 +187,10 @@ static void
 	    "\t\t\t\tObviously mutually exclusive with -o, --overlay, because it's simply a subset of what overlay does. If both are enabled, -o, --overlay takes precedence.\n"
 	    "\t-T, --fgless\t\tDon't draw foreground pixels.\n"
 	    "\t\t\t\tMutually exclusive with -o, --overlay or -O, --bgless, and takes precedence over them.\n"
+#if defined(FBINK_FOR_KOBO)
+	    "\n"
+	    "\t\t\t\tNOTE: Due to the way buffers are handled on that platform, -o, --overlay; -O, --bgless and -T, --fgless will not behave as expected on sunxi SoCs!\n"
+#endif
 	    "\n"
 	    "Options affecting the program's verbosity:\n"
 	    "\t-v, --verbose\tToggle printing diagnostic messages.\n"

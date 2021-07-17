@@ -226,6 +226,8 @@
   Don't draw foreground pixels.
 
   Mutually exclusive with `-o`, `--overlay` or `-O`, `--bgless`, and takes precedence over them.
+  
+  Note for Kobo: Due to the way buffers are handled on that platform, `-o`, `--overlay`; `-O`, `--bgless` and `-T`, `--fgless` will not behave as expected on sunxi SoCs!
 
 ### Options affecting the program's verbosity
 
