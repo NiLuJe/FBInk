@@ -3784,6 +3784,7 @@ static __attribute__((cold)) int
 		sunxiCtx.layer.info.fb.crop.x        = 0;
 		sunxiCtx.layer.info.fb.crop.y        = 0;
 		// Don't ask me why this needs to be shifted 32 bits to the left... ¯\_(ツ)_/¯
+		// NOTE: I managed to bork it during the KOReader port and it appeared to behave fine *without* the shift...
 		sunxiCtx.layer.info.fb.crop.width    = (uint64_t) vInfo.xres << 32U;
 		sunxiCtx.layer.info.fb.crop.height   = (uint64_t) vInfo.yres << 32U;
 		sunxiCtx.layer.info.fb.flags         = DISP_BF_NORMAL;
