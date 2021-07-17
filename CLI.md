@@ -162,6 +162,8 @@
 * `-b`, `--norefresh` (only available for e-Ink devices)
 
   Only update the framebuffer, but don't actually refresh the eInk screen (useful when drawing in batch).
+  
+  Note for Kobo: Due to the way buffers are handled on that platform, this will not behave as expected on sunxi SoCs! (Your final refresh will just be solid black).
 
 * `-w`, `--wait` (only available for e-Ink devices)
 
@@ -300,6 +302,9 @@
   Note for Kobo and Cervantes: the arguments are passed as-is to the ioctl, no viewport or rotation quirks are applied!
 
   If you just want a full-screen refresh (which will honor `-f`, `--flash`), don't pass any suboptions, e.g., `fbink -s` (if you group short options together, it needs to be the last in its group, i.e., `-fs` and not `-sf`).
+  
+  Note for Kobo: Due to the way buffers are handled on that platform, this will not behave as expected on sunxi SoCs!
+  You'll just end up with solid black inside your refresh region.
 
   Specifying one or more `STRING` takes precedence over this mode.
 
