@@ -22,6 +22,7 @@
 
 #include <linux/ioctl.h>
 
+// NOTE: Valid handles start at 1, as per the idr_alloc call in ion_handle_add
 typedef int ion_user_handle_t;
 
 /**
