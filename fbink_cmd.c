@@ -147,7 +147,7 @@ static void
 	    "\t\t\t\tNote that this may be ignored on some specific devices where it is known to be or have been unstable at some point.\n"
 	    "\t-b, --norefresh\t\tOnly update the framebuffer, but don't actually refresh the eInk screen (useful when drawing in batch).\n"
 #	if defined(FBINK_FOR_KOBO)
-	    "\t\t\t\tNote that due to the way buffers are handled on that platform, this will not behave as expected on sunxi SoCs!\n"
+	    "\t\t\t\tNOTE: Due to the way buffers are handled on that platform, this will not behave as expected on sunxi SoCs!\n"
 #	endif
 	    "\t-w, --wait\t\tBlock until the kernel has finished processing the *last* update we sent, if any.\n"
 	    "\t\t\t\tThe actual delay depends for the most part on the waveform mode that was used.\n"
@@ -279,8 +279,8 @@ static void
 	    "\te.g., fbink -s (if you group short options together, it needs to be the last in its group, i.e., -fs and not -sf).\n"
 #if defined(FBINK_FOR_KOBO)
 	    "\n"
-	    "\tNote that due to the way buffers are handled on that platform, this will not behave as expected on sunxi SoCs!\n"
-	    "\tYou'll just end up with solid black inside your refresh region."
+	    "\tNOTE: Due to the way buffers are handled on that platform, this will not behave as expected on sunxi SoCs!\n"
+	    "\tYou'll just end up with solid black inside your refresh region.\n"
 #endif
 	    "\n"
 	    "\tSpecifying one or more STRING takes precedence over this mode.\n"
