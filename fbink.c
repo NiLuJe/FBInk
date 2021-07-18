@@ -2598,6 +2598,7 @@ static int
 		update.update_mode |= EINK_RECT_MODE;
 	}
 	if (waveform_mode == EINK_GLR16_MODE || waveform_mode == EINK_GLD16_MODE) {
+		// NOTE: Fun fact: nothing currently checks this flag in the ELipsa kernel... -_-".
 		update.update_mode |= EINK_REGAL_MODE;
 	}
 	if (waveform_mode == EINK_A2_MODE) {
