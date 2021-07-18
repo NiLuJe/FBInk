@@ -80,37 +80,37 @@ extern "C" {
 // List of available fonts
 typedef enum
 {
-	IBM = 0U,            // font8x8
-	UNSCII,              // unscii-8
-	UNSCII_ALT,          // unscii-8-alt
-	UNSCII_THIN,         // unscii-8-thin
-	UNSCII_FANTASY,      // unscii-8-fantasy
-	UNSCII_MCR,          // unscii-8-mcr
-	UNSCII_TALL,         // unscii-16
-	BLOCK,               // block
-	LEGGIE,              // leggie (regular)
-	VEGGIE,              // leggie EGA/VGA/FB
-	KATES,               // kates (nexus)
-	FKP,                 // fkp
-	CTRLD,               // ctrld
-	ORP,                 // orp (regular)
-	ORPB,                // orp (bold)
-	ORPI,                // orp (italic)
-	SCIENTIFICA,         // scientifica (regular)
-	SCIENTIFICAB,        // scientifica (bold)
-	SCIENTIFICAI,        // scientifica (italic)
-	TERMINUS,            // terminus (regular)
-	TERMINUSB,           // terminus (bold)
-	FATTY,               // fatty
-	SPLEEN,              // spleen
-	TEWI,                // tewi (medium)
-	TEWIB,               // tewi (bold)
-	TOPAZ,               // Topaz+ A1200
-	MICROKNIGHT,         // MicroKnight+
-	VGA,                 // IBM VGA 8x16
-	UNIFONT,             // Unifont (single-wide glyphs only)
-	UNIFONTDW,           // Unifont (double-wide glyphs only)
-	COZETTE,             // Cozette
+	IBM = 0U,                // font8x8
+	UNSCII,                  // unscii-8
+	UNSCII_ALT,              // unscii-8-alt
+	UNSCII_THIN,             // unscii-8-thin
+	UNSCII_FANTASY,          // unscii-8-fantasy
+	UNSCII_MCR,              // unscii-8-mcr
+	UNSCII_TALL,             // unscii-16
+	BLOCK,                   // block
+	LEGGIE,                  // leggie (regular)
+	VEGGIE,                  // leggie EGA/VGA/FB
+	KATES,                   // kates (nexus)
+	FKP,                     // fkp
+	CTRLD,                   // ctrld
+	ORP,                     // orp (regular)
+	ORPB,                    // orp (bold)
+	ORPI,                    // orp (italic)
+	SCIENTIFICA,             // scientifica (regular)
+	SCIENTIFICAB,            // scientifica (bold)
+	SCIENTIFICAI,            // scientifica (italic)
+	TERMINUS,                // terminus (regular)
+	TERMINUSB,               // terminus (bold)
+	FATTY,                   // fatty
+	SPLEEN,                  // spleen
+	TEWI,                    // tewi (medium)
+	TEWIB,                   // tewi (bold)
+	TOPAZ,                   // Topaz+ A1200
+	MICROKNIGHT,             // MicroKnight+
+	VGA,                     // IBM VGA 8x16
+	UNIFONT,                 // Unifont (single-wide glyphs only)
+	UNIFONTDW,               // Unifont (double-wide glyphs only)
+	COZETTE,                 // Cozette
 	FONT_MAX = UINT8_MAX,    // uint8_t
 } __attribute__((packed)) FONT_INDEX_E;
 typedef uint8_t FONT_INDEX_T;
@@ -129,9 +129,9 @@ typedef int FONT_STYLE_T;
 // List of available halign/valign values
 typedef enum
 {
-	NONE = 0U,            // i.e., LEFT for halign, TOP for valign
-	CENTER,               //
-	EDGE,                 // i.e., RIGHT for halign, BOTTOM for valign
+	NONE = 0U,                // i.e., LEFT for halign, TOP for valign
+	CENTER,                   //
+	EDGE,                     // i.e., RIGHT for halign, BOTTOM for valign
 	ALIGN_MAX = UINT8_MAX,    // uint8_t
 } __attribute__((packed)) ALIGN_INDEX_E;
 typedef uint8_t ALIGN_INDEX_T;
@@ -151,22 +151,22 @@ typedef uint8_t PADDING_INDEX_T;
 // NOTE: This is split in FG & BG to ensure that the default values lead to a sane result (i.e., black on white)
 typedef enum
 {
-	FG_BLACK = 0U,     // 0x00
-	FG_GRAY1,          // 0x11
-	FG_GRAY2,          // 0x22
-	FG_GRAY3,          // 0x33
-	FG_GRAY4,          // 0x44
-	FG_GRAY5,          // 0x55
-	FG_GRAY6,          // 0x66
-	FG_GRAY7,          // 0x77
-	FG_GRAY8,          // 0x88
-	FG_GRAY9,          // 0x99
-	FG_GRAYA,          // 0xAA
-	FG_GRAYB,          // 0xBB
-	FG_GRAYC,          // 0xCC
-	FG_GRAYD,          // 0xDD
-	FG_GRAYE,          // 0xEE
-	FG_WHITE,          // 0xFF
+	FG_BLACK = 0U,         // 0x00
+	FG_GRAY1,              // 0x11
+	FG_GRAY2,              // 0x22
+	FG_GRAY3,              // 0x33
+	FG_GRAY4,              // 0x44
+	FG_GRAY5,              // 0x55
+	FG_GRAY6,              // 0x66
+	FG_GRAY7,              // 0x77
+	FG_GRAY8,              // 0x88
+	FG_GRAY9,              // 0x99
+	FG_GRAYA,              // 0xAA
+	FG_GRAYB,              // 0xBB
+	FG_GRAYC,              // 0xCC
+	FG_GRAYD,              // 0xDD
+	FG_GRAYE,              // 0xEE
+	FG_WHITE,              // 0xFF
 	FG_MAX = UINT8_MAX,    // uint8_t
 } __attribute__((packed)) FG_COLOR_INDEX_E;
 typedef uint8_t FG_COLOR_INDEX_T;
@@ -196,17 +196,17 @@ typedef uint8_t BG_COLOR_INDEX_T;
 // Available states for fbink_sunxi_ntx_enforce_rota
 typedef enum
 {
-	FORCE_ROTA_CURRENT_ROTA = -5,	// Honor the gyro if it matches the working buffer's rotation (NOTE: Unsupported)
-	FORCE_ROTA_CURRENT_LAYOUT = -4,	// Honor the gyro if it matches the working buffer's layout (NOTE: Unsupported)
-	FORCE_ROTA_PORTRAIT = -3,	// Honor the gyro if it matches a Portrait layout
-	FORCE_ROTA_LANDSCAPE = -2,	// Honor the gyro if it matches a Landscape layout
-	FORCE_ROTA_GYRO = -1,		// Honor the gyro (NOTE: default)
-	FORCE_ROTA_UR = 0,	// FB_ROTATE_UR
-	FORCE_ROTA_CW = 1,	// FB_ROTATE_CW
-	FORCE_ROTA_UD = 2,	// FB_ROTATE_UD
-	FORCE_ROTA_CCW = 3,	// FB_ROTATE_CCW
-	FORCE_ROTA_WORKBUF = 4,	// Match the working buffer's rotation (NOTE: Unsupported)
-	FORCE_ROTA_MAX = INT8_MAX,	// int8_t
+	FORCE_ROTA_CURRENT_ROTA = -5,    // Honor the gyro if it matches the working buffer's rotation (NOTE: Unsupported)
+	FORCE_ROTA_CURRENT_LAYOUT = -4,    // Honor the gyro if it matches the working buffer's layout (NOTE: Unsupported)
+	FORCE_ROTA_PORTRAIT       = -3,    // Honor the gyro if it matches a Portrait layout
+	FORCE_ROTA_LANDSCAPE      = -2,    // Honor the gyro if it matches a Landscape layout
+	FORCE_ROTA_GYRO           = -1,    // Honor the gyro (NOTE: default)
+	FORCE_ROTA_UR             = 0,     // FB_ROTATE_UR
+	FORCE_ROTA_CW             = 1,     // FB_ROTATE_CW
+	FORCE_ROTA_UD             = 2,     // FB_ROTATE_UD
+	FORCE_ROTA_CCW            = 3,     // FB_ROTATE_CCW
+	FORCE_ROTA_WORKBUF        = 4,     // Match the working buffer's rotation (NOTE: Unsupported)
+	FORCE_ROTA_MAX            = INT8_MAX,    // int8_t
 } __attribute__((packed)) SUNXI_FORCE_ROTA_INDEX_E;
 typedef int8_t SUNXI_FORCE_ROTA_INDEX_T;
 
@@ -1137,7 +1137,9 @@ FBINK_API int fbink_toggle_sunxi_ntx_pen_mode(int fbfd, bool toggle);
 // NOTE: See the comments in the SUNXI_FORCE_ROTA_INDEX_E enum.
 //       In particular, the fact that the most interesting modes aren't actually supported because of technical limitations...
 // NOTE: On success, this will reinit the state *now* (returning the exact same values as fbink_reinit).
-FBINK_API int fbink_sunxi_ntx_enforce_rota(int fbfd, SUNXI_FORCE_ROTA_INDEX_T mode, const FBInkConfig* restrict fbink_cfg);
+FBINK_API int fbink_sunxi_ntx_enforce_rota(int                      fbfd,
+					   SUNXI_FORCE_ROTA_INDEX_T mode,
+					   const FBInkConfig* restrict fbink_cfg);
 
 //
 ///

@@ -2718,11 +2718,13 @@ cleanup:
 	}
 
 	return rv;
-#endif  // !FBINK_FOR_KOBO
+#endif    // !FBINK_FOR_KOBO
 }
 
 int
-    fbink_sunxi_ntx_enforce_rota(int fbfd UNUSED_BY_NOTKOBO, SUNXI_FORCE_ROTA_INDEX_T mode UNUSED_BY_NOTKOBO, const FBInkConfig* restrict fbink_cfg UNUSED_BY_NOTKOBO)
+    fbink_sunxi_ntx_enforce_rota(int fbfd                              UNUSED_BY_NOTKOBO,
+				 SUNXI_FORCE_ROTA_INDEX_T mode         UNUSED_BY_NOTKOBO,
+				 const FBInkConfig* restrict fbink_cfg UNUSED_BY_NOTKOBO)
 {
 #ifndef FBINK_FOR_KOBO
 	PFWARN("This feature is not supported on your device");
@@ -2749,13 +2751,17 @@ int
 		case FORCE_ROTA_UD:
 		case FORCE_ROTA_CCW:
 			sunxiCtx.force_rota = mode;
-			LOG("Set custom rotation handling mode to: %hhd (%s)", sunxiCtx.force_rota, sunxi_force_rota_to_string(sunxiCtx.force_rota));
+			LOG("Set custom rotation handling mode to: %hhd (%s)",
+			    sunxiCtx.force_rota,
+			    sunxi_force_rota_to_string(sunxiCtx.force_rota));
 			break;
 		/*
 		case FORCE_ROTA_WORKBUF:
 		*/
 		default:
-			WARN("Invalid mode `%hhd` passed to fbink_sunxi_ntx_enforce_rota, keeping the current one: %hhd", mode, sunxiCtx.force_rota);
+			WARN("Invalid mode `%hhd` passed to fbink_sunxi_ntx_enforce_rota, keeping the current one: %hhd",
+			     mode,
+			     sunxiCtx.force_rota);
 			rv = ERRCODE(EINVAL);
 			goto cleanup;
 	}
@@ -2765,7 +2771,7 @@ int
 
 cleanup:
 	return rv;
-#endif  // !FBINK_FOR_KOBO
+#endif    // !FBINK_FOR_KOBO
 }
 
 // And finally, dispatch the right refresh request for our HW...
@@ -3610,8 +3616,9 @@ static __attribute__((cold)) int
 						sunxiCtx.force_rota = FORCE_ROTA_GYRO;
 						break;
 				}
-				ELOG(
-				    "Requested custom rotation handling: %hhd (%s)", sunxiCtx.force_rota, sunxi_force_rota_to_string(sunxiCtx.force_rota));
+				ELOG("Requested custom rotation handling: %hhd (%s)",
+				     sunxiCtx.force_rota,
+				     sunxi_force_rota_to_string(sunxiCtx.force_rota));
 			} else {
 				// Lookup the bus id & address for our accelerometer...
 				if (populate_accelerometer_i2c_info() != EXIT_SUCCESS) {
@@ -8185,12 +8192,12 @@ static int
 	}
 
 	const uint32_t old_rota = vInfo.rotate;
-	int rotate;
+	int            rotate;
 	if (sunxiCtx.force_rota >= FORCE_ROTA_UR) {
 		// NOTE: Same remark as in kobo_sunxi_fb_fixup about FORCE_ROTA_WORKBUF
 		rotate = sunxiCtx.force_rota;
 	} else {
-		rotate   = query_accelerometer();
+		rotate = query_accelerometer();
 		if (rotate < 0) {
 			ELOG("Accelerometer is inconclusive, keeping current rotation");
 			rotate = (int) old_rota;
