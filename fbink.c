@@ -3621,18 +3621,22 @@ static __attribute__((cold)) int
 				ELOG("Requested custom rotation handling: %hhd (%s)",
 				     sunxiCtx.force_rota,
 				     sunxi_force_rota_to_string(sunxiCtx.force_rota));
-			} else {
-				// Lookup the bus id & address for our accelerometer...
-				if (populate_accelerometer_i2c_info() != EXIT_SUCCESS) {
+			}
+
+			// As the force_rota state may be updated at runtime,
+			// make sure we *always* lookup the accelerometer bus/address...
+			if (populate_accelerometer_i2c_info() != EXIT_SUCCESS) {
+				WARN("Unable to handle rotation detection: assuming UR");
+				// Make sure we won't try again
+				sunxiCtx.force_rota = FORCE_ROTA_UR;
+			}
+
+			// Only open an I²C handle if we're actually going to query the gyro
+			if (sunxiCtx.force_rota < FORCE_ROTA_UR) {
+				// The fb fixup may require being able to poke at the accelerometer...
+				if (open_accelerometer_i2c() != EXIT_SUCCESS) {
 					WARN("Unable to handle rotation detection: assuming UR");
-					// Make sure we won't try again
 					sunxiCtx.force_rota = FORCE_ROTA_UR;
-				} else {
-					// The fb fixup requires being able to poke at the accelerometer...
-					if (open_accelerometer_i2c() != EXIT_SUCCESS) {
-						WARN("Unable to handle rotation detection: assuming UR");
-						sunxiCtx.force_rota = FORCE_ROTA_UR;
-					}
 				}
 			}
 		}

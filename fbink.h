@@ -1130,7 +1130,7 @@ FBINK_API uint32_t fbink_rota_canonical_to_native(uint8_t rotate);
 FBINK_API int fbink_toggle_sunxi_ntx_pen_mode(int fbfd, bool toggle);
 
 // Allows controlling at runtime how fbink_init & fbink_reinit handle rotation,
-// potentially allowing you to bypass and or sleectively override the state returned by the accelerometer.
+// potentially bypassing and/or selectively overriding the state returned by the accelerometer.
 // Returns -(ENOSYS) on unsupported platforms.
 // Otherwise, returns a few different things on failure:
 //	-(EINVAL)	when mode is invalid or unsupported
