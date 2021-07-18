@@ -3463,6 +3463,35 @@ static __attribute__((cold)) void
 	fInfo.smem_len = fInfo.line_length * vInfo.yres_virtual;
 	ELOG("smem_len -> %u", fInfo.smem_len);
 }
+
+static __attribute__((cold)) const char*
+    sunxi_force_rota_to_string(SUNXI_FORCE_ROTA_INDEX_T mode)
+{
+	switch (mode) {
+		case FORCE_ROTA_CURRENT_ROTA:
+			return "Honor gyro if it matches the current rotation";
+		case FORCE_ROTA_CURRENT_LAYOUT:
+			return "Honor gyro if it matches the current layout";
+		case FORCE_ROTA_PORTRAIT:
+			return "Honor gyro if it matches a Portrait layout";
+		case FORCE_ROTA_LANDSCAPE:
+			return "Honor gyro if it matches a Landscape layout";
+		case FORCE_ROTA_GYRO:
+			return "Honor gyro";
+		case FORCE_ROTA_UR:
+			return "Enforce Upright, 0°";
+		case FORCE_ROTA_CW:
+			return "Enforce Clockwise, 90°";
+		case FORCE_ROTA_UD:
+			return "Enforce Upside Down, 180°";
+		case FORCE_ROTA_CCW:
+			return "Enforce Counter Clockwise, 270°";
+		case FORCE_ROTA_WORKBUF:
+			return "Match working buffer";
+		default:
+			return "Unknown?!";
+	}
+}
 #endif    // FBINK_FOR_KOBO
 
 // Get the various fb info & setup global variables
@@ -3508,42 +3537,25 @@ static __attribute__((cold)) int
 			const char* force_rota = getenv("FBINK_FORCE_ROTA");
 			//       That implies that we'll always assume the screen is UR!
 			if (force_rota) {
-				switch (force_rota[0]) {
-					case '-':
-						switch (force_rota[1]) {
-							case '5':
-								if (force_rota[1] == '\0') {
-									sunxiCtx.force_rota = FORCE_ROTA_CURRENT_ROTA;
-								}
-								break;
-						}
-						break;
-					case '0':
-						if (force_rota[1] == '\0') {
-							sunxiCtx.force_rota = FORCE_ROTA_UR;
-						}
-						break;
-					case '1':
-						if (force_rota[1] == '\0') {
-							sunxiCtx.force_rota = FORCE_ROTA_CW;
-						}
-						break;
-					case '2':
-						if (force_rota[1] == '\0') {
-							sunxiCtx.force_rota = FORCE_ROTA_UD;
-						}
-						break;
-					case '3':
-						if (force_rota[1] == '\0') {
-							sunxiCtx.force_rota = FORCE_ROTA_CCW;
-						}
+				// We can forgo the usual fun & games of strtol error checking,
+				// as a 0 on parsing errors suits us just fine here ;).
+				long int val = strtol(force_rota, NULL, 10);
+				switch (val) {
+					/*
+					case FORCE_ROTA_CURRENT_ROTA:
+					case FORCE_ROTA_CURRENT_LAYOUT:
+					*/
+					case FORCE_ROTA_PORTRAIT:
+					case FORCE_ROTA_LANDSCAPE:
+					case FORCE_ROTA_GYRO:
+					case FORCE_ROTA_UR:
+					case FORCE_ROTA_CW:
+					case FORCE_ROTA_UD:
+					case FORCE_ROTA_CCW:
+						sunxiCtx.force_rota = (SUNXI_FORCE_ROTA_INDEX_T) val;
 						break;
 					/*
-					case '4':
-						if (force_rota[1] == '\0') {
-							sunxiCtx.force_rota = FORCE_ROTA_WORKBUF;
-						}
-						break;
+					case FORCE_ROTA_WORKBUF:
 					*/
 					default:
 						WARN("Invalid value `%s` for env var FBINK_FORCE_ROTA", force_rota);
@@ -3551,8 +3563,7 @@ static __attribute__((cold)) int
 						break;
 				}
 				ELOG(
-				    "Accelerometer handling has been disabled: we'll always consider the screen to be UR!");
-				sunxiCtx.no_rota = true;
+				    "Requested custom rotation handling: %hhd (%s)", sunxiCtx.force_rota, sunxi_force_rota_to_string(sunxiCtx.force_rota));
 			} else {
 				// Lookup the bus id & address for our accelerometer...
 				if (populate_accelerometer_i2c_info() != EXIT_SUCCESS) {
