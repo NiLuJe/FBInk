@@ -111,7 +111,7 @@ typedef enum
 	UNIFONT,             // Unifont (single-wide glyphs only)
 	UNIFONTDW,           // Unifont (double-wide glyphs only)
 	COZETTE,             // Cozette
-	FONT_MAX = 0xFFu,    // uint8_t
+	FONT_MAX = UINT8_MAX,    // uint8_t
 } __attribute__((packed)) FONT_INDEX_E;
 typedef uint8_t FONT_INDEX_T;
 
@@ -132,7 +132,7 @@ typedef enum
 	NONE = 0U,            // i.e., LEFT for halign, TOP for valign
 	CENTER,               //
 	EDGE,                 // i.e., RIGHT for halign, BOTTOM for valign
-	ALIGN_MAX = 0xFFu,    // uint8_t
+	ALIGN_MAX = UINT8_MAX,    // uint8_t
 } __attribute__((packed)) ALIGN_INDEX_E;
 typedef uint8_t ALIGN_INDEX_T;
 
@@ -143,7 +143,7 @@ typedef enum
 	HORI_PADDING,
 	VERT_PADDING,
 	FULL_PADDING,
-	MAX_PADDING = 0xFFu,    // uint8_t
+	MAX_PADDING = UINT8_MAX,    // uint8_t
 } __attribute__((packed)) PADDING_INDEX_E;
 typedef uint8_t PADDING_INDEX_T;
 
@@ -167,7 +167,7 @@ typedef enum
 	FG_GRAYD,          // 0xDD
 	FG_GRAYE,          // 0xEE
 	FG_WHITE,          // 0xFF
-	FG_MAX = 0xFFu,    // uint8_t
+	FG_MAX = UINT8_MAX,    // uint8_t
 } __attribute__((packed)) FG_COLOR_INDEX_E;
 typedef uint8_t FG_COLOR_INDEX_T;
 
@@ -189,9 +189,26 @@ typedef enum
 	BG_GRAY2,
 	BG_GRAY1,
 	BG_BLACK,
-	BG_MAX = 0xFFu,    // uint8_t
+	BG_MAX = UINT8_MAX,    // uint8_t
 } __attribute__((packed)) BG_COLOR_INDEX_E;
 typedef uint8_t BG_COLOR_INDEX_T;
+
+// Available states for fbink_sunxi_ntx_enforce_rota
+typedef enum
+{
+	FORCE_ROTA_CURRENT_ROTA = -5,	// Honor the gyro if it matches the working buffer's rotation (NOTE: Unsupported)
+	FORCE_ROTA_CURRENT_LAYOUT = -4,	// Honor the gyro if it matches the working buffer's layout (NOTE: Unsupported)
+	FORCE_ROTA_PORTRAIT = -3,	// Honor the gyro if it matches a Portrait layout
+	FORCE_ROTA_LANDSCAPE = -2,	// Honor the gyro if it matches a Landscape layout
+	FORCE_ROTA_GYRO = -1,		// Honor the gyro (NOTE: default)
+	FORCE_ROTA_UR = 0,	// FB_ROTATE_UR
+	FORCE_ROTA_CW = 1,	// FB_ROTATE_CW
+	FORCE_ROTA_UD = 2,	// FB_ROTATE_UD
+	FORCE_ROTA_CCW = 3,	// FB_ROTATE_CCW
+	FORCE_ROTA_WORKBUF = 4,	// Match the working buffer's rotation (NOTE: Unsupported)
+	FORCE_ROTA_MAX = INT8_MAX,	// int8_t
+} __attribute__((packed)) SUNXI_FORCE_ROTA_INDEX_E;
+typedef int8_t SUNXI_FORCE_ROTA_INDEX_T;
 
 // List of *potentially* available waveform modes.
 // NOTE: On EPDC v1 (as well as all Kindle) devices, REAGL & REAGLD generally expect to *always* be flashing.
@@ -274,7 +291,7 @@ typedef enum
 	WFM_GC4L,     // GC4 local (NOTE: Appears to crash the EPDC... [Elipsa on FW 4.28.17826])
 	WFM_GCC16,    // GCC16
 
-	WFM_MAX = 0xFFu,    // uint8_t
+	WFM_MAX = UINT8_MAX,    // uint8_t
 } __attribute__((packed)) WFM_MODE_INDEX_E;
 typedef uint8_t WFM_MODE_INDEX_T;
 
@@ -286,7 +303,7 @@ typedef enum
 	HWD_ATKINSON,
 	HWD_ORDERED,    // Generally the only supported HW variant on EPDC v2
 	HWD_QUANT_ONLY,
-	HWD_LEGACY = 0xFFu,    // Use legacy EPDC v1 dithering instead (if available).
+	HWD_LEGACY = UINT8_MAX,    // Use legacy EPDC v1 dithering instead (if available).
 	//                        Note that it is *not* offloaded to the PxP, it's purely software, in-kernel.
 	//                        Usually based on Atkinson's algo. The most useful one being the Y8->Y1 one,
 	//                        which we request with A2/DU refreshes.
@@ -304,7 +321,7 @@ typedef enum
 	//                            like on the Kobo Libra.
 	//                            Triple whammy if the touch layer rotation matches!
 	NTX_ROTA_SUNXI,    // The rotate flag is technically meaningless, but *may* be set by third-party code (we don't).
-	NTX_ROTA_MAX = 0xFFu,    // uint8_t
+	NTX_ROTA_MAX = UINT8_MAX,    // uint8_t
 } __attribute__((packed)) NTX_ROTA_INDEX_E;
 typedef uint8_t NTX_ROTA_INDEX_T;
 
@@ -751,7 +768,7 @@ FBINK_API bool fbink_is_fb_quirky(void) __attribute__((pure, deprecated));
 // NOTE: In turn, this means that a simple EXIT_SUCCESS means that no reinitialization was needed.
 // NOTE: On Kobo devices with a sunxi SoC, OK_BPP_CHANGE will *never* happen,
 //       as the state of the actual framebuffer device is (unfortunately) meaningless there.
-//       On those same devices, if rotation handling is disabled (via FBINK_NO_GYRO),
+//       On those same devices, if rotation handling is disabled (via FBINK_FORCE_ROTA),
 //       the whole function becomes a NOP.
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
@@ -1108,8 +1125,15 @@ FBINK_API uint32_t fbink_rota_canonical_to_native(uint8_t rotate);
 //       so this might not be such a great idea after all...
 //       c.f., kobo_sunxi_fb_fixup @ fbink.c for more details.
 // NOTE: Another option for "dealing" with these rotation mishaps is to just assume the screen is always Upright.
-//       You can achieve that by making sure FBINK_NO_GYRO is set in your env (*before* initializing FBInk).
+//       You can achieve that by making sure FBINK_FORCE_ROTA is set properly in your env (*before* initializing FBInk).
+// NOTE: Or, you can also affect how FBInk tries to honor the gyro (or not) at runtime, via fbink_sunxi_ntx_enforce_rota.
 FBINK_API int fbink_toggle_sunxi_ntx_pen_mode(int fbfd, bool toggle);
+
+// Allows controlling at runtime how fbink_init & fbink_reinit handle rotation,
+// potentially allowing you to bypass and or sleectively override the state returned by the accelerometer.
+// NOTE: See the comments in the SUNXI_FORCE_ROTA_INDEX_E enum.
+//       In particular, the fact that the most interesting modes aren't actually supported because of technical limitations...
+FBINK_API int fbink_sunxi_ntx_enforce_rota(SUNXI_FORCE_ROTA_INDEX_T mode);
 
 //
 ///

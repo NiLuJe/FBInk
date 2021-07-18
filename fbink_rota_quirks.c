@@ -288,7 +288,7 @@ uint8_t
     fbink_rota_native_to_canonical(uint32_t rotate UNUSED_BY_NOTKOBO)
 {
 #if defined(FBINK_FOR_KOBO)
-	// NOTE: When we care about rotation at all (e.g., FBINK_NO_GYRO is *NOT* set in the env),
+	// NOTE: When we care about rotation at all,
 	//       kobo_sunxi_fb_fixup ensures that the rotate flag returned by fbink_get_state
 	//       is *already* canonical, so we don't have anything to do!
 	//       That said, since on those platforms, native_portrait == 0,

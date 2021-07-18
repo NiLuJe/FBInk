@@ -3504,9 +3504,52 @@ static __attribute__((cold)) int
 		} else if (deviceQuirks.isSunxi) {
 			ELOG("Enabled sunxi quirks");
 
-			// NOTE: Allow forgoing dealing with the accelerometer.
+			// NOTE: Allow selectively or completely overriding the accelerometer.
+			const char* force_rota = getenv("FBINK_FORCE_ROTA");
 			//       That implies that we'll always assume the screen is UR!
-			if (getenv("FBINK_NO_GYRO")) {
+			if (force_rota) {
+				switch (force_rota[0]) {
+					case '-':
+						switch (force_rota[1]) {
+							case '5':
+								if (force_rota[1] == '\0') {
+									sunxiCtx.force_rota = FORCE_ROTA_CURRENT_ROTA;
+								}
+								break;
+						}
+						break;
+					case '0':
+						if (force_rota[1] == '\0') {
+							sunxiCtx.force_rota = FORCE_ROTA_UR;
+						}
+						break;
+					case '1':
+						if (force_rota[1] == '\0') {
+							sunxiCtx.force_rota = FORCE_ROTA_CW;
+						}
+						break;
+					case '2':
+						if (force_rota[1] == '\0') {
+							sunxiCtx.force_rota = FORCE_ROTA_UD;
+						}
+						break;
+					case '3':
+						if (force_rota[1] == '\0') {
+							sunxiCtx.force_rota = FORCE_ROTA_CCW;
+						}
+						break;
+					/*
+					case '4':
+						if (force_rota[1] == '\0') {
+							sunxiCtx.force_rota = FORCE_ROTA_WORKBUF;
+						}
+						break;
+					*/
+					default:
+						WARN("Invalid value `%s` for env var FBINK_FORCE_ROTA", force_rota);
+						sunxiCtx.force_rota = FORCE_ROTA_GYRO;
+						break;
+				}
 				ELOG(
 				    "Accelerometer handling has been disabled: we'll always consider the screen to be UR!");
 				sunxiCtx.no_rota = true;
@@ -3515,12 +3558,12 @@ static __attribute__((cold)) int
 				if (populate_accelerometer_i2c_info() != EXIT_SUCCESS) {
 					WARN("Unable to handle rotation detection: assuming UR");
 					// Make sure we won't try again
-					sunxiCtx.no_rota = true;
+					sunxiCtx.force_rota = FORCE_ROTA_UR;
 				} else {
 					// The fb fixup requires being able to poke at the accelerometer...
 					if (open_accelerometer_i2c() != EXIT_SUCCESS) {
 						WARN("Unable to handle rotation detection: assuming UR");
-						sunxiCtx.no_rota = true;
+						sunxiCtx.force_rota = FORCE_ROTA_UR;
 					}
 				}
 			}

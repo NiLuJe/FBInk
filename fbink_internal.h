@@ -451,7 +451,7 @@ FBInkKoboSunxi sunxiCtx = { .disp_fd    = -1,
 			    .ion        = { .handle = 0, .fd = -1 },
 			    .layer      = { { 0 } },
 			    .rota       = 0U,
-			    .no_rota    = false };
+			    .force_rota = FORCE_ROTA_GYRO };
 #endif
 struct fb_var_screeninfo vInfo;
 struct fb_fix_screeninfo fInfo;
@@ -467,8 +467,8 @@ uint8_t                  glyphHeight    = 8U;
 unsigned short int       FONTW          = 8U;
 unsigned short int       FONTH          = 8U;
 uint8_t                  FONTSIZE_MULT  = 1U;
-uint8_t                  penFGColor     = 0x00;
-uint8_t                  penBGColor     = 0xFF;
+uint8_t                  penFGColor     = 0x00u;
+uint8_t                  penBGColor     = 0xFFu;
 FBInkPixel               penFGPixel;
 FBInkPixel               penBGPixel;
 uint32_t                 lastMarker                                         = 0U;
