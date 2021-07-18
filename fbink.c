@@ -2923,7 +2923,7 @@ int
 	//       But, because we can chain multiple fbink_open & fbink_close during the lifetime of a process,
 	//       we still need to handle it here, because fbink_close would have closed it.
 #if defined(FBINK_FOR_KOBO)
-	if (deviceQuirks.isSunxi && !sunxiCtx.no_rota) {
+	if (deviceQuirks.isSunxi && sunxiCtx.force_rota < FORCE_ROTA_UR) {
 		if (open_accelerometer_i2c() != EXIT_SUCCESS) {
 			PFWARN("Cannot open accelerometer I²C handle, aborting");
 			return ERRCODE(EXIT_FAILURE);
@@ -2949,7 +2949,7 @@ static int
 #if defined(FBINK_FOR_KOBO)
 		// NOTE: In case we're *not* in an FBFD_AUTO workflow,
 		//       the I²C handle opened during the first fbink_init has been kept, too.
-		if (deviceQuirks.isSunxi && !sunxiCtx.no_rota) {
+		if (deviceQuirks.isSunxi && sunxiCtx.force_rota < FORCE_ROTA_UR) {
 			if (open_accelerometer_i2c() != EXIT_SUCCESS) {
 				PFWARN("Cannot open accelerometer I²C handle, aborting");
 				return ERRCODE(EXIT_FAILURE);
@@ -2978,7 +2978,7 @@ static int
 		}
 
 #if defined(FBINK_FOR_KOBO)
-		if (deviceQuirks.isSunxi && !sunxiCtx.no_rota) {
+		if (deviceQuirks.isSunxi && sunxiCtx.force_rota < FORCE_ROTA_UR) {
 			if (open_accelerometer_i2c() != EXIT_SUCCESS) {
 				PFWARN("Cannot open accelerometer I²C handle, aborting");
 				return ERRCODE(EXIT_FAILURE);
@@ -3399,8 +3399,9 @@ static __attribute__((cold)) void
     kobo_sunxi_fb_fixup(bool is_reinit)
 {
 	// If necessary, query the accelerometer to check the current rotation...
-	if (sunxiCtx.no_rota) {
-		vInfo.rotate = FB_ROTATE_UR;
+	if (sunxiCtx.force_rota >= FORCE_ROTA_UR) {
+		// NOTE: If we ever find a way to handle FORCE_ROTA_WORKBUF, this is where it would need to be handled ;).
+		vInfo.rotate = (uint32_t) sunxiCtx.force_rota;
 	} else if (!is_reinit) {
 		// fbink_reinit already took care of this, so this only affects explicit fbink_init calls.
 		// NOTE: Ideally, we should only affect the *first* fbink_init call, period...
@@ -8123,7 +8124,7 @@ bool
 static int
     kobo_sunxi_reinit_check(int fbfd, const FBInkConfig* restrict fbink_cfg)
 {
-	if (sunxiCtx.no_rota) {
+	if (sunxiCtx.force_rota >= FORCE_ROTA_UR) {
 		// Nothing to do :)
 		return EXIT_SUCCESS;
 	}
