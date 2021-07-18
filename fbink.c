@@ -2759,9 +2759,11 @@ int
 		case FORCE_ROTA_WORKBUF:
 		*/
 		default:
-			WARN("Invalid mode `%hhd` passed to fbink_sunxi_ntx_enforce_rota, keeping the current one: %hhd",
-			     mode,
-			     sunxiCtx.force_rota);
+			WARN(
+			    "Invalid mode `%hhd` passed to fbink_sunxi_ntx_enforce_rota, keeping the current value: %hhd (%s)",
+			    mode,
+			    sunxiCtx.force_rota,
+			    sunxi_force_rota_to_string(sunxiCtx.force_rota));
 			rv = ERRCODE(EINVAL);
 			goto cleanup;
 	}

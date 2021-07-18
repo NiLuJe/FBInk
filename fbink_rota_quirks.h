@@ -50,9 +50,10 @@ static int                               query_kx122(void);
 static int                               query_accelerometer(void);
 
 // Custom constants for accelerometer translations
-#	define GYRO_STATE_UNKNOWN   -1
-#	define GYRO_STATE_FACE_UP   -2
-#	define GYRO_STATE_FACE_DOWN -3
+#	define GYRO_STATE_UNKNOWN             -1
+#	define GYRO_STATE_FACE_UP             -2
+#	define GYRO_STATE_FACE_DOWN           -3
+#	define GYRO_STATE_OUTSIDE_CONSTRAINTS -4
 
 #endif    // FBINK_FOR_KOBO
 

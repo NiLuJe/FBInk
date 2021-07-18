@@ -275,6 +275,21 @@ static int
 			break;
 	}
 
+	// Check if what we got matches the force_rota constraints...
+	if (sunxiCtx.force_rota == FORCE_ROTA_PORTRAIT) {
+		if ((rv & 0x01) == 1) {
+			// Odd, Landscape :(
+			LOG("Gyro state falls outside of the requested constraints (Landscape instead of Portrait), ignoring it");
+			rv = GYRO_STATE_OUTSIDE_CONSTRAINTS;
+		}
+	} else if (sunxiCtx.force_rota == FORCE_ROTA_LANDSCAPE) {
+		if ((rv & 0x01) == 0) {
+			// Even, Portrait :(
+			LOG("Gyro state falls outside of the requested constraints (Portrait instead of Landscape), ignoring it");
+			rv = GYRO_STATE_OUTSIDE_CONSTRAINTS;
+		}
+	}
+
 	return rv;
 }
 #endif    // FBINK_FOR_KOBO
