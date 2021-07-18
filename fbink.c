@@ -2718,7 +2718,54 @@ cleanup:
 	}
 
 	return rv;
-#endif
+#endif  // !FBINK_FOR_KOBO
+}
+
+int
+    fbink_sunxi_ntx_enforce_rota(int fbfd UNUSED_BY_NOTKOBO, SUNXI_FORCE_ROTA_INDEX_T mode UNUSED_BY_NOTKOBO, const FBInkConfig* restrict fbink_cfg UNUSED_BY_NOTKOBO)
+{
+#ifndef FBINK_FOR_KOBO
+	PFWARN("This feature is not supported on your device");
+	return ERRCODE(ENOSYS);
+#else
+	if (!deviceQuirks.isSunxi) {
+		PFWARN("This feature is not supported on your device");
+		return ERRCODE(ENOSYS);
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	switch (mode) {
+		/*
+		case FORCE_ROTA_CURRENT_ROTA:
+		case FORCE_ROTA_CURRENT_LAYOUT:
+		*/
+		case FORCE_ROTA_PORTRAIT:
+		case FORCE_ROTA_LANDSCAPE:
+		case FORCE_ROTA_GYRO:
+		case FORCE_ROTA_UR:
+		case FORCE_ROTA_CW:
+		case FORCE_ROTA_UD:
+		case FORCE_ROTA_CCW:
+			sunxiCtx.force_rota = mode;
+			LOG("Set custom rotation handling mode to: %hhd (%s)", sunxiCtx.force_rota, sunxi_force_rota_to_string(sunxiCtx.force_rota));
+			break;
+		/*
+		case FORCE_ROTA_WORKBUF:
+		*/
+		default:
+			WARN("Invalid mode `%hhd` passed to fbink_sunxi_ntx_enforce_rota, keeping the current one: %hhd", mode, sunxiCtx.force_rota);
+			rv = ERRCODE(EINVAL);
+			goto cleanup;
+	}
+
+	// Chain an fbink_reinit to make sure the new mode takes *immediately*.
+	return kobo_sunxi_reinit_check(fbfd, fbink_cfg);
+
+cleanup:
+	return rv;
+#endif  // !FBINK_FOR_KOBO
 }
 
 // And finally, dispatch the right refresh request for our HW...
@@ -8124,18 +8171,13 @@ bool
 static int
     kobo_sunxi_reinit_check(int fbfd, const FBInkConfig* restrict fbink_cfg)
 {
-	if (sunxiCtx.force_rota >= FORCE_ROTA_UR) {
-		// Nothing to do :)
-		return EXIT_SUCCESS;
-	}
-
 	// Assume success, until shit happens ;)
 	int rv = EXIT_SUCCESS;
 	// We'll track what triggered the reinit in a bitmask
 	int rf = 0;
 
-	// We're going to need an I²C handle...
-	if (fbfd == FBFD_AUTO) {
+	// We may need an I²C handle...
+	if (fbfd == FBFD_AUTO && sunxiCtx.force_rota < FORCE_ROTA_UR) {
 		if (open_accelerometer_i2c() != EXIT_SUCCESS) {
 			PFWARN("Cannot open accelerometer I²C handle, aborting");
 			return ERRCODE(EXIT_FAILURE);
@@ -8143,10 +8185,16 @@ static int
 	}
 
 	const uint32_t old_rota = vInfo.rotate;
-	int            rotate   = query_accelerometer();
-	if (rotate < 0) {
-		ELOG("Accelerometer is inconclusive, keeping current rotation");
-		rotate = (int) old_rota;
+	int rotate;
+	if (sunxiCtx.force_rota >= FORCE_ROTA_UR) {
+		// NOTE: Same remark as in kobo_sunxi_fb_fixup about FORCE_ROTA_WORKBUF
+		rotate = sunxiCtx.force_rota;
+	} else {
+		rotate   = query_accelerometer();
+		if (rotate < 0) {
+			ELOG("Accelerometer is inconclusive, keeping current rotation");
+			rotate = (int) old_rota;
+		}
 	}
 
 	// If we're in an FBFD_AUTO workflow, close the I²C handle

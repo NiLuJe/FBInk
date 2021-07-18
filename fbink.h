@@ -768,7 +768,7 @@ FBINK_API bool fbink_is_fb_quirky(void) __attribute__((pure, deprecated));
 // NOTE: In turn, this means that a simple EXIT_SUCCESS means that no reinitialization was needed.
 // NOTE: On Kobo devices with a sunxi SoC, OK_BPP_CHANGE will *never* happen,
 //       as the state of the actual framebuffer device is (unfortunately) meaningless there.
-//       On those same devices, if rotation handling is disabled (via FBINK_FORCE_ROTA),
+//       On those same devices, if rotation handling via gyro is disabled (via FBINK_FORCE_ROTA),
 //       the whole function becomes a NOP.
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
@@ -1131,9 +1131,13 @@ FBINK_API int fbink_toggle_sunxi_ntx_pen_mode(int fbfd, bool toggle);
 
 // Allows controlling at runtime how fbink_init & fbink_reinit handle rotation,
 // potentially allowing you to bypass and or sleectively override the state returned by the accelerometer.
+// Returns -(ENOSYS) on unsupported platforms.
+// Otherwise, returns a few different things on failure:
+//	-(EINVAL)	when mode is invalid or unsupported
 // NOTE: See the comments in the SUNXI_FORCE_ROTA_INDEX_E enum.
 //       In particular, the fact that the most interesting modes aren't actually supported because of technical limitations...
-FBINK_API int fbink_sunxi_ntx_enforce_rota(SUNXI_FORCE_ROTA_INDEX_T mode);
+// NOTE: On success, this will reinit the state *now* (returning the exact same values as fbink_reinit).
+FBINK_API int fbink_sunxi_ntx_enforce_rota(int fbfd, SUNXI_FORCE_ROTA_INDEX_T mode, const FBInkConfig* restrict fbink_cfg);
 
 //
 ///
