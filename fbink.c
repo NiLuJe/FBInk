@@ -5140,6 +5140,91 @@ cleanup:
 	return rv;
 }
 
+// Do a full-screen invert, eInk refresh included
+int
+    fbink_invert_screen(int fbfd, const FBInkConfig* restrict fbink_cfg)
+{
+	// If we open a fd now, we'll only keep it open for this single call!
+	// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// mmap fb to user mem
+	if (!isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	}
+
+	// Similar in spirit to clear_screen, but closer to KOReader's BB_invert_rect ;).
+	if (unlikely(vInfo.bits_per_pixel == 16U)) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
+		uint16_t* p = (uint16_t*) fbPtr;
+#pragma GCC diagnostic pop
+		size_t px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
+		while (px_count--) {
+			// NOTE: Not actually accurate, but I don't care about RGB565 ;).
+			*p++ ^= 0xFFFFu;
+		}
+	} else if (vInfo.bits_per_pixel == 32U) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
+		uint32_t* p = (uint32_t*) fbPtr;
+#pragma GCC diagnostic pop
+		size_t px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
+		while (px_count--) {
+			*p++ ^= 0x00FFFFFFu;
+		}
+	} else {
+		// Byte per byte should do the trick for the other bitdepths
+		uint8_t* p          = fbPtr;
+		size_t   byte_count = (size_t) fInfo.line_length * vInfo.yres;
+		while (byte_count--) {
+			*p++ ^= 0xFFu;
+		}
+	}
+
+	// We'll need a matching region for the refresh...
+	struct mxcfb_rect region = { 0U };
+	fullscreen_region(&region);
+
+	// Remember the rect...
+	set_last_rect(&region);
+	// Rotate the region if need be...
+	(*fxpRotateRegion)(&region);
+
+	// Refresh screen
+	if (refresh(fbfd,
+		    region,
+		    fbink_cfg->wfm_mode,
+		    fbink_cfg->dithering_mode,
+		    fbink_cfg->is_nightmode,
+		    fbink_cfg->is_flashing,
+		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
+		PFWARN("Failed to refresh the screen");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
+
+	// Cleanup
+cleanup:
+	if (isFbMapped && !keep_fd) {
+		unmap_fb();
+	}
+	if (!keep_fd) {
+		close_fb(fbfd);
+	}
+
+	return rv;
+}
+
 // Handle cls & refresh, but for grid-based coordinates (i.e., like fbink_print()'s draw())
 static int
     grid_to_region(int                fbfd,

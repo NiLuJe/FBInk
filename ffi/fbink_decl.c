@@ -116,6 +116,8 @@ cdecl_func(fbink_wait_for_usbms_processing)
 cdecl_func(fbink_rota_native_to_canonical)
 cdecl_func(fbink_rota_canonical_to_native)
 
+cdecl_func(fbink_invert_screen)
+
 cdecl_func(fbink_toggle_sunxi_ntx_pen_mode)
 cdecl_type(SUNXI_FORCE_ROTA_INDEX_E)
 cdecl_c99_type(SUNXI_FORCE_ROTA_INDEX_T, int8_t)

@@ -1109,6 +1109,15 @@ FBINK_API uint8_t  fbink_rota_native_to_canonical(uint32_t rotate);
 FBINK_API uint32_t fbink_rota_canonical_to_native(uint8_t rotate);
 
 //
+// Inverts the *existing* content of the *full* screen.
+// This is mildly useful on devices with no HW inversion support,
+// to trigger a full "nightmode" swap, without actually having to redraw anything.
+// fbfd:		Open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
+// NOTE: On Kobo devices with a sunxi SoC, you will not be able to affect content that you haven't drawn yourself first.
+FBINK_API int fbink_invert_screen(int fbfd, const FBInkConfig* restrict fbink_cfg);
+
+//
 // The functions below are tied to specific capabilities on Kobo devices with a sunxi SoC (e.g., the Elipsa).
 //
 // Toggle the "pen" refresh mode. c.f., eink/sunxi-kobo.h @ DISP_EINK_SET_NTX_HANDWRITE_ONOFF for more details.
