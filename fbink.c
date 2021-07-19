@@ -3478,7 +3478,7 @@ static __attribute__((cold)) void
 
 	// Devise the required G2D rotation angle (for UPDATE ioctls), given the current "fb" rotate flag.
 	// This is unfortunately not as nice and easy as usual...
-	sunxiCtx.rota = ((vInfo.rotate ^ deviceQuirks.ntxBootRota) * 90U);
+	sunxiCtx.rota = ((deviceQuirks.ntxBootRota - vInfo.rotate) & 3) * 90U;
 
 	// Handle Portrait/Landscape swaps
 	const uint32_t xres = vInfo.xres;
