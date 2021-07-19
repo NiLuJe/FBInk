@@ -119,6 +119,10 @@ If you ever were curious about the whole mxcfb alt_buffer shindig, you can take 
 
 In the same vein, if you're looking into rotation & input shenanigans on Kobo, `make devcap` will build a tarball containing a few binaries and a [devcap_test.sh script](https://github.com/NiLuJe/FBInk/blob/master/utils/devcap_test.sh), that, when run on the target device, will compile quite a bit of info. In particular, if you ever need to report a bug against `fbdepth`, I'll probably ask you to run that and attach the results to the issue ;).
 
+And on the subject of input & rotation on Kobo, `make ftrace` will build a simple [pointer trail](https://github.com/NiLuJe/FBInk/blob/master/utils/doom.c) utility, which leverages [libevdev](https://gitlab.freedesktop.org/libevdev/libevdev) and a few of our funkier API calls to try to make sense of the input translation shenanigans happening on Kobo.  
+If you intend to handle touch input in any way in your code, this should be a good place to look ;).  
+It also demonstrates how to deal effectively with pen input on the Elipsa.
+
 ## NOTES
 
 Kindle support covers the full Kindle lineup, starting from the K2.
