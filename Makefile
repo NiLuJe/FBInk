@@ -489,17 +489,17 @@ BTN_OBJS:=$(addprefix $(OUT_DIR)/, $(BTN_SRCS:.c=.o))
 
 # Silence a few warnings, only when specifically compiling libunibreak...
 # c.f., https://stackoverflow.com/q/1305665
-UNIBREAK_CFLAGS := -Wno-conversion -Wno-sign-conversion -Wno-suggest-attribute=pure
-$(UB_SHAREDLIB_OBJS): QUIET_CFLAGS := $(UNIBREAK_CFLAGS)
-$(UB_STATICLIB_OBJS): QUIET_CFLAGS := $(UNIBREAK_CFLAGS)
+UNIBREAK_CFLAGS:=-Wno-conversion -Wno-sign-conversion -Wno-suggest-attribute=pure
+$(UB_SHAREDLIB_OBJS): QUIET_CFLAGS:=$(UNIBREAK_CFLAGS)
+$(UB_STATICLIB_OBJS): QUIET_CFLAGS:=$(UNIBREAK_CFLAGS)
 
 # Silence a few warnings when building libi2c
-I2C_CFLAGS := -Wno-sign-conversion
+I2C_CFLAGS:=-Wno-sign-conversion
 
 # Ditto for libevdev
-EVDEV_CFLAGS := -Wno-conversion -Wno-sign-conversion -Wno-undef -Wno-vla-parameter -Wno-format -Wno-null-dereference -Wno-bad-function-cast -Wno-inline
+EVDEV_CFLAGS:=-Wno-conversion -Wno-sign-conversion -Wno-undef -Wno-vla-parameter -Wno-format -Wno-null-dereference -Wno-bad-function-cast -Wno-inline
 # And when *linking* libevdev (w/ LTO)
-EVDEV_LDFLAGS += -Wno-null-dereference
+EVDEV_LDFLAGS+=-Wno-null-dereference
 
 # Shared lib
 $(OUT_DIR)/shared/%.o: %.c
