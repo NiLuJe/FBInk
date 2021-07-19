@@ -242,7 +242,7 @@ static int
 	if (rota >= 0) {
 		return rota;
 	} else {
-		WARN("Could not get actionable data out of the KX122 accelerometer");
+		LOG("Could not get actionable data out of the KX122 accelerometer");
 		return ERRCODE(ENODATA);
 	}
 }
@@ -265,7 +265,7 @@ static int
 			// Ellipsa, kx122
 			rv = query_kx122();
 			if (rv < 0) {
-				WARN("Poking at the KX122 accelerometer over I²C was unfruitful");
+				LOG("Poking at the KX122 accelerometer over I²C was unfruitful");
 				return rv;
 			}
 			break;
