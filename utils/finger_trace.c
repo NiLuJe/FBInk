@@ -226,6 +226,8 @@ static bool
 			//       Mk. 6+ reports EV_KEY:BTN_TOUCH events,
 			//       which would be easier to deal with,
 			//       but redundant here ;).
+			// NOTE: When in doubt about what a simple event stream looks like on specific devices,
+			//       check generate_button_press @ fbink_button_scan.c ;).
 			case ABS_PRESSURE:
 			case ABS_MT_WIDTH_MAJOR:
 			//case ABS_MT_TOUCH_MAJOR: // Oops, not that one, it's always 0 on Mk.7 :s
