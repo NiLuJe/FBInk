@@ -3410,7 +3410,7 @@ static __attribute__((cold)) void
 			ELOG("yres_virtual -> %u", vInfo.yres_virtual);
 		}
 		const uint32_t line_length = fInfo.line_length;
-		fInfo.line_length          = vInfo.xres_virtual * (vInfo.bits_per_pixel >> 3U);
+		fInfo.line_length          = (vInfo.xres_virtual * vInfo.bits_per_pixel) >> 3U;
 		ELOG("line_length -> %u", fInfo.line_length);
 
 		size_t fb_size = fInfo.line_length * vInfo.yres_virtual;
@@ -3513,7 +3513,7 @@ static __attribute__((cold)) void
 	vInfo.bits_per_pixel = 8U;
 	vInfo.grayscale      = 1U;
 	ELOG("bits_per_pixel -> %u", vInfo.bits_per_pixel);
-	fInfo.line_length = vInfo.xres_virtual * (vInfo.bits_per_pixel >> 3U);
+	fInfo.line_length = (vInfo.xres_virtual * vInfo.bits_per_pixel) >> 3U;
 	ELOG("line_length -> %u", fInfo.line_length);
 	// Used by clear_screen & memmap_ion
 	fInfo.smem_len = fInfo.line_length * vInfo.yres_virtual;
