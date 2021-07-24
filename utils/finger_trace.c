@@ -246,6 +246,9 @@ static bool
 			case BTN_TOOL_PEN:
 				touch->tool = PEN;
 				// To detect up/down state on "snow" protocol without weird slot shenanigans...
+				// It's out-of-band of MT events, so, it unfortunately means "*all* contacts,
+				// not a specific slot...
+				// (i.e., you won't get an EV_KEY:BTN_TOUCH:0 until *alls* contact points have been lifted).
 				if (ev->value > 0) {
 					touch->state = DOWN;
 				} else {
