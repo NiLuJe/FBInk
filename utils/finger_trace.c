@@ -241,6 +241,7 @@ static bool
 		return true;
 	}
 
+	// Detect tool type & all contacts up on Mk. 7 (and possibly earlier "snow" protocol devices).
 	if (ev->type == EV_KEY) {
 		switch (ev->code) {
 			case BTN_TOOL_PEN:
@@ -269,6 +270,7 @@ static bool
 	if (ev->type == EV_ABS) {
 		switch (ev->code) {
 			case ABS_MT_TOOL_TYPE:
+				// Detect tool type on Mk. 8
 				if (ev->value == 0) {
 					touch->tool = FINGER;
 				} else if (ev->value == 1) {
