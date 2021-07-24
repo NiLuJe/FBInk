@@ -241,6 +241,28 @@ static bool
 		return true;
 	}
 
+	if (ev->type == EV_KEY) {
+		switch (ev->code) {
+			case BTN_TOOL_PEN:
+				touch->tool = PEN;
+				// To detect up/down state on "snow" protocol without weird slot shenanigans...
+				if (ev->value > 0) {
+					touch->state = DOWN;
+				} else {
+					touch->state = UP;
+				}
+				break;
+			case BTN_TOOL_FINGER:
+				touch->tool = FINGER;
+				if (ev->value > 0) {
+					touch->state = DOWN;
+				} else {
+					touch->state = UP;
+				}
+				break;
+		}
+	}
+
 	if (ev->type == EV_ABS) {
 		switch (ev->code) {
 			case ABS_MT_TOOL_TYPE:
