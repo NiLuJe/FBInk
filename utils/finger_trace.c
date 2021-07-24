@@ -80,19 +80,24 @@ typedef struct
 } FTrace_Coordinates;
 
 // Keep tracks of a single slot's state...
-// NOTE: We currently don't actually discriminate between finger & pen ;p.
 typedef enum
 {
-	UNKNOWN,
-	FINGER_DOWN,
-	FINGER_UP,
-	PEN_DOWN,
-	PEN_UP,
+	UNKNOWN_TOOL,
+	FINGER,
+	PEN,
+} FTrace_Tool;
+
+typedef enum
+{
+	UNKNOWN_STATE,
+	DOWN,
+	UP,
 } FTrace_State;
 
 typedef struct
 {
 	FTrace_Coordinates pos;
+	FTrace_Tool        tool;
 	FTrace_State       state;
 	struct timeval     time;
 } FTrace_Slot;
@@ -109,6 +114,20 @@ typedef struct
 	int32_t          dim_swap;
 	uint8_t          canonical_rota;
 } FTrace_Context;
+
+static const char*
+    tool_type_to_str(const FTrace_Tool tool)
+{
+	switch (tool) {
+		case FINGER:
+			return " FINGER ";
+		case PEN:
+			return " STYLUS ";
+		case UNKNOWN_TOOL:
+		default:
+			return "UNKNOWN!";
+	}
+}
 
 static void
     handle_contact(const FTrace_Context* ctx)
@@ -163,10 +182,11 @@ static void
 	}
 
 	// Recap the craziness...
-	LOG("%ld.%.6ld [%s] @ (%4d, %4d) -> (%4d, %4d) => (%4d, %4d)",
+	LOG("%ld.%.6ld [%s] [%s] @ (%4d, %4d) -> (%4d, %4d) => (%4d, %4d)",
 	    touch->time.tv_sec,
 	    touch->time.tv_usec,
-	    (touch->state == FINGER_DOWN || touch->state == PEN_DOWN) ? "DOWN" : " UP ",
+	    tool_type_to_str(touch->tool),
+	    touch->state == DOWN ? "DOWN" : " UP ",
 	    touch->pos.x,
 	    touch->pos.y,
 	    canonical_pos.x,
@@ -210,10 +230,11 @@ static bool
 			handle_contact(ctx);
 			*prev_touch = *touch;
 		} else {
-			LOG("%ld.%.6ld [%s] @ Similar coordinates",
+			LOG("%ld.%.6ld [%s] [%s] @ Similar coordinates",
 			    touch->time.tv_sec,
 			    touch->time.tv_usec,
-			    (touch->state == FINGER_DOWN || touch->state == PEN_DOWN) ? "DOWN" : " UP ");
+			    tool_type_to_str(touch->tool),
+			    touch->state == DOWN ? "DOWN" : " UP ");
 		}
 
 		// Keep draining the queue without going back to poll
@@ -222,6 +243,13 @@ static bool
 
 	if (ev->type == EV_ABS) {
 		switch (ev->code) {
+			case ABS_MT_TOOL_TYPE:
+				if (ev->value == 0) {
+					touch->tool = FINGER;
+				} else if (ev->value == 1) {
+					touch->tool = PEN;
+				}
+				break;
 			// NOTE: That should cover everything...
 			//       Mk. 6+ reports EV_KEY:BTN_TOUCH events,
 			//       which would be easier to deal with,
@@ -233,9 +261,9 @@ static bool
 			//case ABS_MT_TOUCH_MAJOR: // Oops, not that one, it's always 0 on Mk.7 :s
 			case ABS_MT_PRESSURE:
 				if (ev->value > 0) {
-					touch->state = FINGER_DOWN;
+					touch->state = DOWN;
 				} else {
-					touch->state = FINGER_UP;
+					touch->state = UP;
 				}
 				break;
 			case ABS_X:
@@ -455,6 +483,13 @@ int
 	ctx.touch              = &touch;
 	FTrace_Slot prev_touch = { 0 };
 	ctx.prev_touch         = &prev_touch;
+
+	// Check if the device supports tool types...
+	if (!libevdev_has_event_code(dev, EV_ABS, ABS_MT_TOOL_TYPE)) {
+		// Assume finger ;).
+		touch.tool = FINGER;
+	}
+
 	while (true) {
 		// If we caught one of the signals we setup earlier, it's time to die ;).
 		if (g_timeToDie != 0) {
