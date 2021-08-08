@@ -17,8 +17,10 @@
 #ifndef _UAPI_LINUX_ION_H
 #define _UAPI_LINUX_ION_H
 
-#include <stddef.h>
-#include <stdint.h>
+#ifndef __KERNEL__
+#	include <stddef.h>
+#	include <stdint.h>
+#endif
 
 #include <linux/ioctl.h>
 

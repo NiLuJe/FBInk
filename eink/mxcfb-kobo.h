@@ -33,7 +33,9 @@
 #ifndef __ASM_ARCH_MXCFB_H__
 #define __ASM_ARCH_MXCFB_H__
 
-#include <stdint.h>
+#ifndef __KERNEL__
+#	include <stdint.h>
+#endif
 
 #include <linux/fb.h>
 

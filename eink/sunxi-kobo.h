@@ -15,8 +15,10 @@
 //       in order to make the experience slightly less soul crushing...
 
 // Use userland C99 data types instead of kernel data types
-#include <stdbool.h>
-#include <stdint.h>
+#ifndef __KERNEL__
+#	include <stdbool.h>
+#	include <stdint.h>
+#endif
 
 //
 // From "drivers/video/fbdev/sunxi/disp2/disp/de/include.h"
