@@ -292,6 +292,39 @@ static int
 
 	return rv;
 }
+
+// Get the current G2D rotation angle of the working buffer, and translate it to a linuxfb rotation constant
+static int
+    query_fbdamage(void)
+{
+	char g2d_rotate[8] = { 0 };
+
+	// We should never be called without fbdamage support.
+	FILE* f = fopen(FBDAMAGE_ROTATE_SYSFS, "re");
+	if (f) {
+		size_t size = fread(g2d_rotate, sizeof(*g2d_rotate), sizeof(g2d_rotate) - 1U, f);
+		fclose(f);
+		if (size > 0) {
+			// Strip trailing LF
+			if (g2d_rotate[size - 1U] == '\n') {
+				g2d_rotate[size - 1U] = '\0';
+			}
+		} else {
+			PFWARN("Failed to read G2D rotation angle from sysfs");
+			return ERRCODE(EINVAL);
+		}
+	}
+
+	// We should be able to get by with an unchecked strtoul...
+	uint32_t rota_angle = (uint32_t) strtoul(g2d_rotate, NULL, 10);
+
+	// Convert that angle to a linuxfb rotation, according to device quirks...
+	// (kobo_sunxi_fb_fixup does the reverse).
+	uint32_t rota = (deviceQuirks.ntxBootRota - (rota_angle / 90U)) & 3;
+	LOG("FBDamage says the working buffer's rotation is: %u (%s)", rota, fb_rotate_to_string(rota));
+
+	return (int) rota;
+}
 #endif    // FBINK_FOR_KOBO
 
 // Try to make sense out of the mess that are native Kobo rotations...

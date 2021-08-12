@@ -3464,17 +3464,49 @@ static __attribute__((cold)) void
 {
 	// If necessary, query the accelerometer to check the current rotation...
 	if (sunxiCtx.force_rota >= FORCE_ROTA_UR) {
-		// NOTE: If we ever find a way to handle FORCE_ROTA_WORKBUF, this is where it would need to be handled ;).
-		vInfo.rotate = (uint32_t) sunxiCtx.force_rota;
+		if (sunxiCtx.force_rota == FORCE_ROTA_WORKBUF) {
+			// Attempt to match the working buffer...
+			int rotate = query_fbdamage();
+			if (rotate < 0) {
+				ELOG("FBDamage is inconclusive, assuming Upright");
+				rotate = FB_ROTATE_UR;
+			}
+			vInfo.rotate = (uint32_t) rotate;
+		} else {
+			vInfo.rotate = (uint32_t) sunxiCtx.force_rota;
+		}
 	} else if (!is_reinit) {
 		// fbink_reinit already took care of this, so this only affects explicit fbink_init calls.
 		// NOTE: Ideally, we should only affect the *first* fbink_init call, period...
-		int rotate = query_accelerometer();
-		if (rotate < 0) {
+		int gyro_rotate = query_accelerometer();
+		if (gyro_rotate < 0) {
 			ELOG("Accelerometer is inconclusive, assuming Upright");
-			rotate = FB_ROTATE_UR;
+			gyro_rotate = FB_ROTATE_UR;
 		}
-		vInfo.rotate = (uint32_t) rotate;
+
+		if (sunxiCtx.force_rota == FORCE_ROTA_CURRENT_ROTA || sunxiCtx.force_rota == FORCE_ROTA_CURRENT_LAYOUT) {
+			int wb_rotate = query_fbdamage();
+			if (wb_rotate < 0) {
+				ELOG("FBDamage is inconclusive, assuming Upright");
+				wb_rotate = FB_ROTATE_UR;
+			}
+
+			if (sunxiCtx.force_rota == FORCE_ROTA_CURRENT_ROTA) {
+				if (gyro_rotate == wb_rotate) {
+					vInfo.rotate = (uint32_t) gyro_rotate;
+				} else {
+					vInfo.rotate = (uint32_t) wb_rotate;
+				}
+			} else if (sunxiCtx.force_rota == FORCE_ROTA_CURRENT_LAYOUT) {
+				if ((gyro_rotate & 0x01) == (wb_rotate & 0x01)) {
+					vInfo.rotate = (uint32_t) gyro_rotate;
+				} else {
+					vInfo.rotate = (uint32_t) wb_rotate;
+				}
+			}
+		} else {
+			vInfo.rotate = (uint32_t) gyro_rotate;
+		}
 	}
 	ELOG("Canonical rotation: %u (%s)", vInfo.rotate, fb_rotate_to_string(vInfo.rotate));
 	// NOTE: And because, of course, we can't have nice things, if the current working buffer
@@ -3601,7 +3633,9 @@ static __attribute__((cold)) int
 			// NOTE: Check if the fbdamage kernel module is loaded,
 			//       as it'll allow us to actually suss out the current rotation
 			//       according to the working buffer, and not the gyro...
-			if (access("/sys/devices/virtual/fbdamage/fbdamage/rotate", F_OK) == 0) {
+			// NOTE: Only checking this on startup ought to be good enough,
+			//       as the module is only really truly useful when loaded very early during the boot process...
+			if (access(FBDAMAGE_ROTATE_SYSFS, F_OK) == 0) {
 				sunxiCtx.has_fbdamage = true;
 				ELOG("Working buffer rotation sniffing available, thanks to fbdamage");
 			} else {
