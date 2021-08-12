@@ -2738,11 +2738,22 @@ int
 	// Assume success, until shit happens ;)
 	int rv = EXIT_SUCCESS;
 
+	// Check whether we can actually use the fbdamage modes...
+	if (mode == FORCE_ROTA_CURRENT_ROTA || mode == FORCE_ROTA_CURRENT_LAYOUT || mode == FORCE_ROTA_WORKBUF) {
+		if (!sunxiCtx.has_fbdamage) {
+			WARN(
+			    "Unsupported fbdamage mode `%hhd` passed to fbink_sunxi_ntx_enforce_rota, keeping the current value: %hhd (%s)",
+			    mode,
+			    sunxiCtx.force_rota,
+			    sunxi_force_rota_to_string(sunxiCtx.force_rota));
+			rv = ERRCODE(ENOTSUP);
+			goto cleanup;
+		}
+	}
+
 	switch (mode) {
-		/*
 		case FORCE_ROTA_CURRENT_ROTA:
 		case FORCE_ROTA_CURRENT_LAYOUT:
-		*/
 		case FORCE_ROTA_PORTRAIT:
 		case FORCE_ROTA_LANDSCAPE:
 		case FORCE_ROTA_GYRO:
@@ -2750,14 +2761,12 @@ int
 		case FORCE_ROTA_CW:
 		case FORCE_ROTA_UD:
 		case FORCE_ROTA_CCW:
+		case FORCE_ROTA_WORKBUF:
 			sunxiCtx.force_rota = mode;
 			LOG("Set custom rotation handling mode to: %hhd (%s)",
 			    sunxiCtx.force_rota,
 			    sunxi_force_rota_to_string(sunxiCtx.force_rota));
 			break;
-		/*
-		case FORCE_ROTA_WORKBUF:
-		*/
 		default:
 			WARN(
 			    "Invalid mode `%hhd` passed to fbink_sunxi_ntx_enforce_rota, keeping the current value: %hhd (%s)",

@@ -1147,7 +1147,8 @@ FBINK_API int fbink_toggle_sunxi_ntx_pen_mode(int fbfd, bool toggle);
 // potentially bypassing and/or selectively overriding the state returned by the accelerometer.
 // Returns -(ENOSYS) on unsupported platforms.
 // Otherwise, returns a few different things on failure:
-//	-(EINVAL)	when mode is invalid or unsupported
+//	-(EINVAL)	when mode is invalid
+//	-(ENOTSUP)	when mode is unsupported
 // NOTE: See the comments in the SUNXI_FORCE_ROTA_INDEX_E enum.
 //       In particular, the fact that the most interesting modes aren't actually supported because of technical limitations,
 //       unless the custom fbdamage module has been loaded (earlier than the disp client you're trying to match)...
