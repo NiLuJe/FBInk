@@ -247,6 +247,39 @@ static int
 	}
 }
 
+// Get the current G2D rotation angle of the working buffer, and translate it to a linuxfb rotation constant
+static int
+    query_fbdamage(void)
+{
+	char g2d_rotate[8] = { 0 };
+
+	// We should never be called without fbdamage support.
+	FILE* f = fopen(FBDAMAGE_ROTATE_SYSFS, "re");
+	if (f) {
+		size_t size = fread(g2d_rotate, sizeof(*g2d_rotate), sizeof(g2d_rotate) - 1U, f);
+		fclose(f);
+		if (size > 0) {
+			// Strip trailing LF
+			if (g2d_rotate[size - 1U] == '\n') {
+				g2d_rotate[size - 1U] = '\0';
+			}
+		} else {
+			PFWARN("Failed to read G2D rotation angle from sysfs");
+			return ERRCODE(EINVAL);
+		}
+	}
+
+	// We should be able to get by with an unchecked strtoul...
+	uint32_t rota_angle = (uint32_t) strtoul(g2d_rotate, NULL, 10);
+
+	// Convert that angle to a linuxfb rotation, according to device quirks...
+	// (kobo_sunxi_fb_fixup does the reverse).
+	uint32_t rota = (deviceQuirks.ntxBootRota - (rota_angle / 90U)) & 3;
+	LOG("FBDamage says the working buffer's rotation is: %u (%s)", rota, fb_rotate_to_string(rota));
+
+	return (int) rota;
+}
+
 // And, finally, get the current rotation, according to the accelerometer...
 static int
     query_accelerometer(void)
@@ -288,42 +321,27 @@ static int
 			LOG("Gyro state falls outside of the requested constraints (Portrait instead of Landscape), ignoring it");
 			rv = GYRO_STATE_OUTSIDE_CONSTRAINTS;
 		}
-	}
+	} else if (sunxiCtx.force_rota == FORCE_ROTA_CURRENT_ROTA || sunxiCtx.force_rota == FORCE_ROTA_CURRENT_LAYOUT) {
+		int wb_rotate = query_fbdamage();
+		if (wb_rotate < 0) {
+			LOG("FBDamage is inconclusive, assuming Upright");
+			wb_rotate = FB_ROTATE_UR;
+		}
 
-	return rv;
-}
-
-// Get the current G2D rotation angle of the working buffer, and translate it to a linuxfb rotation constant
-static int
-    query_fbdamage(void)
-{
-	char g2d_rotate[8] = { 0 };
-
-	// We should never be called without fbdamage support.
-	FILE* f = fopen(FBDAMAGE_ROTATE_SYSFS, "re");
-	if (f) {
-		size_t size = fread(g2d_rotate, sizeof(*g2d_rotate), sizeof(g2d_rotate) - 1U, f);
-		fclose(f);
-		if (size > 0) {
-			// Strip trailing LF
-			if (g2d_rotate[size - 1U] == '\n') {
-				g2d_rotate[size - 1U] = '\0';
+		if (sunxiCtx.force_rota == FORCE_ROTA_CURRENT_ROTA) {
+			if (rv != wb_rotate) {
+				LOG("Gyro state falls outside of the requested constraints (same rotation as working buffer), honoring working buffer's state instead");
+				rv = wb_rotate;
 			}
-		} else {
-			PFWARN("Failed to read G2D rotation angle from sysfs");
-			return ERRCODE(EINVAL);
+		} else if (sunxiCtx.force_rota == FORCE_ROTA_CURRENT_LAYOUT) {
+			if ((rv & 0x01) != (wb_rotate & 0x01)) {
+				LOG("Gyro state falls outside of the requested constraints (same layout as working buffer), honoring working buffer's state instead");
+				rv = wb_rotate;
+			}
 		}
 	}
 
-	// We should be able to get by with an unchecked strtoul...
-	uint32_t rota_angle = (uint32_t) strtoul(g2d_rotate, NULL, 10);
-
-	// Convert that angle to a linuxfb rotation, according to device quirks...
-	// (kobo_sunxi_fb_fixup does the reverse).
-	uint32_t rota = (deviceQuirks.ntxBootRota - (rota_angle / 90U)) & 3;
-	LOG("FBDamage says the working buffer's rotation is: %u (%s)", rota, fb_rotate_to_string(rota));
-
-	return (int) rota;
+	return rv;
 }
 #endif    // FBINK_FOR_KOBO
 

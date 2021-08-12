@@ -3478,35 +3478,12 @@ static __attribute__((cold)) void
 	} else if (!is_reinit) {
 		// fbink_reinit already took care of this, so this only affects explicit fbink_init calls.
 		// NOTE: Ideally, we should only affect the *first* fbink_init call, period...
-		int gyro_rotate = query_accelerometer();
-		if (gyro_rotate < 0) {
+		int rotate = query_accelerometer();
+		if (rotate < 0) {
 			ELOG("Accelerometer is inconclusive, assuming Upright");
-			gyro_rotate = FB_ROTATE_UR;
+			rotate = FB_ROTATE_UR;
 		}
-
-		if (sunxiCtx.force_rota == FORCE_ROTA_CURRENT_ROTA || sunxiCtx.force_rota == FORCE_ROTA_CURRENT_LAYOUT) {
-			int wb_rotate = query_fbdamage();
-			if (wb_rotate < 0) {
-				ELOG("FBDamage is inconclusive, assuming Upright");
-				wb_rotate = FB_ROTATE_UR;
-			}
-
-			if (sunxiCtx.force_rota == FORCE_ROTA_CURRENT_ROTA) {
-				if (gyro_rotate == wb_rotate) {
-					vInfo.rotate = (uint32_t) gyro_rotate;
-				} else {
-					vInfo.rotate = (uint32_t) wb_rotate;
-				}
-			} else if (sunxiCtx.force_rota == FORCE_ROTA_CURRENT_LAYOUT) {
-				if ((gyro_rotate & 0x01) == (wb_rotate & 0x01)) {
-					vInfo.rotate = (uint32_t) gyro_rotate;
-				} else {
-					vInfo.rotate = (uint32_t) wb_rotate;
-				}
-			}
-		} else {
-			vInfo.rotate = (uint32_t) gyro_rotate;
-		}
+		vInfo.rotate = (uint32_t) rotate;
 	}
 	ELOG("Canonical rotation: %u (%s)", vInfo.rotate, fb_rotate_to_string(vInfo.rotate));
 	// NOTE: And because, of course, we can't have nice things, if the current working buffer

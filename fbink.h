@@ -198,9 +198,9 @@ typedef enum
 {
 	FORCE_ROTA_NOTSUP = INT8_MIN,    // For FBInkState on non-sunxi platforms
 	FORCE_ROTA_CURRENT_ROTA =
-	    -5,    // Honor the gyro if it matches the working buffer's rotation (NOTE: Requires fbdamage)
+	    -5,    // Honor the gyro if it matches the working buffer's rotation; match the wb otherwise (NOTE: Requires fbdamage)
 	FORCE_ROTA_CURRENT_LAYOUT =
-	    -4,    // Honor the gyro if it matches the working buffer's layout (NOTE: Requires fbdamage)
+	    -4,    // Honor the gyro if it matches the working buffer's layout; match the wb otherwise (NOTE: Requires fbdamage)
 	FORCE_ROTA_PORTRAIT  = -3,          // Honor the gyro if it matches a Portrait layout
 	FORCE_ROTA_LANDSCAPE = -2,          // Honor the gyro if it matches a Landscape layout
 	FORCE_ROTA_GYRO      = -1,          // Honor the gyro (NOTE: default)
