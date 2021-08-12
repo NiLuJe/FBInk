@@ -450,8 +450,7 @@ typedef struct
 	uint8_t          ntx_boot_rota;               // deviceQuirks.ntxBootRota (Native rotation at boot)
 	NTX_ROTA_INDEX_T ntx_rota_quirk;              // deviceQuirks.ntxRotaQuirk (c.f., utils/dump.c)
 	bool    is_ntx_quirky_landscape;              // deviceQuirks.isNTX16bLandscape (rotation compensation is in effect)
-    uint8_t current_rota_native;                  // native screen rotaiton; vInfo.rotate (current rotation, c.f., <linux/fb.h>)
-    uint8_t current_rota_canonical;               // canonical screen rotation
+    uint8_t current_rota;                         // native screen rotaiton; vInfo.rotate (current rotation, c.f., <linux/fb.h>)
 	bool    can_rotate;                           // deviceQuirks.canRotate (device has a gyro)
 	bool    can_hw_invert;                        // deviceQuirks.canHWInvert (device can use EPDC inversion)
 } FBInkState;

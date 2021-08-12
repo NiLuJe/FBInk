@@ -4789,8 +4789,7 @@ void
 		fbink_state->ntx_boot_rota           = deviceQuirks.ntxBootRota;
 		fbink_state->ntx_rota_quirk          = deviceQuirks.ntxRotaQuirk;
 		fbink_state->is_ntx_quirky_landscape = deviceQuirks.isNTX16bLandscape;
-        fbink_state->current_rota_native     = (uint8_t) vInfo.rotate;
-        fbink_state->current_rota_canonical  = fbink_rota_native_to_canonical(vInfo.rotate);
+        fbink_state->current_rota            = (uint8_t) vInfo.rotate;
 		fbink_state->can_rotate              = deviceQuirks.canRotate;
 		fbink_state->can_hw_invert           = deviceQuirks.canHWInvert;
 	} else {
