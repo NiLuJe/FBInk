@@ -1259,12 +1259,6 @@ FBINK_API int
     fbink_get_fb_pointer(int fbfd, FBPtrInfo *fbInfo);
 
 
-// Grants direct access to the frame buffer pointer as well as the size of the frame buffer allocation.
-// If the framebuffer is not yet allocated it will do so and return the result of the operation.
-FBINK_API int
-    fbink_get_fb_pointer(int fbfd, FBPtrInfo *fbInfo);
-
-
 // Sets the framebuffer bits per pixel and rotation and invoke a reinit afterwards
 // rota will be the rotation in natve format; use fbink_rota_canonical_to_native to convert it to canonical
 // bpp will remain unchanged if the value is < 8
