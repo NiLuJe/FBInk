@@ -8349,8 +8349,16 @@ static int
 	const uint32_t old_rota = vInfo.rotate;
 	int            rotate;
 	if (sunxiCtx.force_rota >= FORCE_ROTA_UR) {
-		// NOTE: Same remark as in kobo_sunxi_fb_fixup about FORCE_ROTA_WORKBUF
-		rotate = sunxiCtx.force_rota;
+		if (sunxiCtx.force_rota == FORCE_ROTA_WORKBUF) {
+			// Attempt to match the working buffer...
+			rotate = query_fbdamage();
+			if (rotate < 0) {
+				ELOG("FBDamage is inconclusive, keeping current rotation");
+				rotate = (int) old_rota;
+			}
+		} else {
+			rotate = sunxiCtx.force_rota;
+		}
 	} else {
 		rotate = query_accelerometer();
 		if (rotate < 0) {
