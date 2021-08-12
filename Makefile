@@ -498,6 +498,8 @@ I2C_CFLAGS:=-Wno-sign-conversion
 
 # Ditto for libevdev
 EVDEV_CFLAGS:=-Wno-conversion -Wno-sign-conversion -Wno-undef -Wno-vla-parameter -Wno-format -Wno-null-dereference -Wno-bad-function-cast -Wno-inline
+# A random -Werror is injected in Debug builds...
+EVDEV_CFLAGS+=-Wno-suggest-attribute=pure -Wno-suggest-attribute=const -Wno-padded
 # And when *linking* libevdev (w/ LTO)
 EVDEV_LDFLAGS+=-Wno-null-dereference
 
