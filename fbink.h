@@ -213,6 +213,90 @@ typedef enum
 } __attribute__((packed)) SUNXI_FORCE_ROTA_INDEX_E;
 typedef int8_t SUNXI_FORCE_ROTA_INDEX_T;
 
+// List of Cervantes device IDs (HWConfig PCB index)
+typedef enum
+{
+	DEVICE_CERVANTES_TOUCH      = 22U,
+	DEVICE_CERVANTES_TOUCHLIGHT = 23U,
+	DEVICE_CERVANTES_2013       = 33U,
+	DEVICE_CERVANTES_3          = 51U,
+	DEVICE_CERVANTES_4          = 68U,
+	DEVICE_CERVANTES_MAX        = UINT16_MAX,    // uint16_t
+} __attribute__((packed)) CERVANTES_DEVICE_ID_E;
+
+// List of Kobo device IDs
+typedef enum
+{
+	DEVICE_KOBO_TOUCH_AB      = 310U,
+	DEVICE_KOBO_TOUCH_C       = 320U,
+	DEVICE_KOBO_MINI          = 340U,
+	DEVICE_KOBO_GLO           = 330U,
+	DEVICE_KOBO_GLO_HD        = 371U,
+	DEVICE_KOBO_TOUCH_2       = 372U,
+	DEVICE_KOBO_AURA          = 360U,
+	DEVICE_KOBO_AURA_HD       = 350U,
+	DEVICE_KOBO_AURA_H2O      = 370U,
+	DEVICE_KOBO_AURA_H2O_2    = 374U,
+	DEVICE_KOBO_AURA_H2O_2_R2 = 378U,
+	DEVICE_KOBO_AURA_ONE      = 373U,
+	DEVICE_KOBO_AURA_ONE_LE   = 381U,
+	DEVICE_KOBO_AURA_SE       = 375U,
+	DEVICE_KOBO_AURA_SE_R2    = 379U,
+	DEVICE_KOBO_CLARA_HD      = 376U,
+	DEVICE_KOBO_FORMA         = 377U,
+	DEVICE_KOBO_FORMA_32GB    = 380U,
+	DEVICE_KOBO_LIBRA_H2O     = 384U,
+	DEVICE_KOBO_NIA           = 382U,
+	DEVICE_KOBO_ELIPSA        = 387U,
+	DEVICE_KOBO_MAX           = UINT16_MAX,    // uint16_t
+} __attribute__((packed)) KOBO_DEVICE_ID_E;
+
+// List of reMarkable device IDs
+typedef enum
+{
+	DEVICE_REMARKABLE_1   = 1U,
+	DEVICE_REMARKABLE_2   = 2U,
+	DEVICE_REMARKABLE_MAX = UINT16_MAX,    // uint16_t
+} __attribute__((packed)) REMARKABLE_DEVICE_ID_E;
+
+// List of PocketBook device IDs
+typedef enum
+{
+	DEVICE_POCKETBOOK_MINI          = 515U,
+	DEVICE_POCKETBOOK_606           = 606U,
+	DEVICE_POCKETBOOK_611           = 611U,
+	DEVICE_POCKETBOOK_613           = 613U,
+	DEVICE_POCKETBOOK_614           = 614U,
+	DEVICE_POCKETBOOK_615           = 615U,
+	DEVICE_POCKETBOOK_616           = 616U,
+	DEVICE_POCKETBOOK_TOUCH         = 622U,
+	DEVICE_POCKETBOOK_LUX           = 623U,
+	DEVICE_POCKETBOOK_BASIC_TOUCH   = 624U,
+	DEVICE_POCKETBOOK_BASIC_TOUCH_2 = 625U,
+	DEVICE_POCKETBOOK_LUX_3         = 626U,
+	DEVICE_POCKETBOOK_LUX_4         = 627U,
+	DEVICE_POCKETBOOK_LUX_5         = 628U,
+	DEVICE_POCKETBOOK_SENSE         = 630U,
+	DEVICE_POCKETBOOK_TOUCH_HD      = 631U,
+	DEVICE_POCKETBOOK_TOUCH_HD_PLUS = 632U,
+	DEVICE_POCKETBOOK_COLOR         = 633U,
+	DEVICE_POCKETBOOK_AQUA          = 640U,
+	DEVICE_POCKETBOOK_AQUA2         = 641U,
+	DEVICE_POCKETBOOK_ULTRA         = 650U,
+	DEVICE_POCKETBOOK_INKPAD_3      = 740U,
+	DEVICE_POCKETBOOK_INKPAD_3_PRO  = 742U,
+	DEVICE_POCKETBOOK_INKPAD_COLOR  = 741U,
+	DEVICE_POCKETBOOK_INKPAD        = 840U,
+	DEVICE_POCKETBOOK_INKPAD_X      = 1040U,
+	DEVICE_POCKETBOOK_COLOR_LUX =
+	    ('C' << 8U) | ('o' << 8U) | ('l' << 8U) | ('o' << 8U) | ('r' << 8U) | 'L' | 'u' | 'x',
+	DEVICE_POCKETBOOK_MAX = UINT16_MAX,    // uint16_t
+} __attribute__((packed)) POCKETBOOK_DEVICE_ID_E;
+
+// NOTE: There's no enum for Kindles, because there are an insane number of device IDs per model,
+//       so it doesn't really fit into this model. Use the deviceName instead.
+typedef uint16_t DEVICE_ID_T;
+
 // List of *potentially* available waveform modes.
 // NOTE: On EPDC v1 (as well as all Kindle) devices, REAGL & REAGLD generally expect to *always* be flashing.
 //       This is currently left at your own discretion, though.
@@ -334,17 +418,17 @@ typedef struct
 {
 	long int user_hz;                  // USER_HZ (should pretty much always be 100)
 	const char* restrict font_name;    // fbink_cfg->fontname (c.f., fontname_to_string())
-	uint32_t view_width;               // viewWidth (MAY be different than screen_width on devices with a viewport)
-	uint32_t view_height;              // viewHeight (ditto)
-	uint32_t screen_width;       // screenWidth (Effective width, c.f., is_ntx_quirky_landscape & initialize_fbink())
-	uint32_t screen_height;      // screenHeight (ditto)
-	uint32_t bpp;                // vInfo.bits_per_pixel
-	char     device_name[16];    // deviceQuirks.deviceName (short common name, no brand)
-	char     device_codename[16];       // deviceQuirks.deviceCodename
-	char     device_platform[16];       // deviceQuirks.devicePlatform (often a codename, too)
-	unsigned short int device_id;       // deviceQuirks.deviceId (decimal value, c.f., identify_device() on Kindle!)
-	uint8_t            pen_fg_color;    // penFGColor (Actual grayscale value, not FG_COLOR_INDEX_E)
-	uint8_t            pen_bg_color;    // penBGColor (ditto)
+	uint32_t    view_width;            // viewWidth (MAY be different than screen_width on devices with a viewport)
+	uint32_t    view_height;           // viewHeight (ditto)
+	uint32_t    screen_width;     // screenWidth (Effective width, c.f., is_ntx_quirky_landscape & initialize_fbink())
+	uint32_t    screen_height;    // screenHeight (ditto)
+	uint32_t    bpp;              // vInfo.bits_per_pixel
+	char        device_name[16];        // deviceQuirks.deviceName (short common name, no brand)
+	char        device_codename[16];    // deviceQuirks.deviceCodename
+	char        device_platform[16];    // deviceQuirks.devicePlatform (often a codename, too)
+	DEVICE_ID_T device_id;              // deviceQuirks.deviceId (decimal value, c.f., identify_device() on Kindle!)
+	uint8_t     pen_fg_color;           // penFGColor (Actual grayscale value, not FG_COLOR_INDEX_E)
+	uint8_t     pen_bg_color;           // penBGColor (ditto)
 	unsigned short int screen_dpi;      // deviceQuirks.screenDPI
 	unsigned short int font_w;          // FONTW (effective width of a glyph cell, i.e. scaled)
 	unsigned short int font_h;          // FONTH (effective height of a glyph cell, i.e. scaled)

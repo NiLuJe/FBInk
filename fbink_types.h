@@ -36,7 +36,7 @@
 typedef struct
 {
 	unsigned short int screenDPI;
-	unsigned short int deviceId;
+	DEVICE_ID_T        deviceId;
 	char               deviceName[16];
 	char               deviceCodename[16];
 	char               devicePlatform[16];

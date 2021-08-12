@@ -503,27 +503,27 @@ static void
 		// supported devices,
 		// from https://github.com/bq/cervantes/blob/master/bqHAL/Devices/mx508/src/DeviceInfoMx508.cpp#L33-L37
 		switch (config.pcb_id) {
-			case 22U:    // BQ Cervantes Touch - Fnac Touch (2012-2013)
+			case DEVICE_CERVANTES_TOUCH:    // BQ Cervantes Touch - Fnac Touch (2012-2013)
 				deviceQuirks.screenDPI = 167U;
 				// Flawfinder: ignore
 				strncpy(deviceQuirks.deviceName, "Touch", sizeof(deviceQuirks.deviceName) - 1U);
 				break;
-			case 23U:    // BQ Cervantes TouchLight - Fnac Touch Plus (2012-2013)
+			case DEVICE_CERVANTES_TOUCHLIGHT:    // BQ Cervantes TouchLight - Fnac Touch Plus (2012-2013)
 				deviceQuirks.screenDPI = 167U;
 				// Flawfinder: ignore
 				strncpy(deviceQuirks.deviceName, "TouchLight", sizeof(deviceQuirks.deviceName) - 1U);
 				break;
-			case 33U:    // BQ Cervantes 2013 - Fnac Touch Light (2013)
+			case DEVICE_CERVANTES_2013:    // BQ Cervantes 2013 - Fnac Touch Light (2013)
 				deviceQuirks.screenDPI = 212U;
 				// Flawfinder: ignore
 				strncpy(deviceQuirks.deviceName, "2013", sizeof(deviceQuirks.deviceName) - 1U);
 				break;
-			case 51U:    // BQ Cervantes 3 - Fnac Touch Light 2 (2016)
+			case DEVICE_CERVANTES_3:    // BQ Cervantes 3 - Fnac Touch Light 2 (2016)
 				deviceQuirks.screenDPI = 300U;
 				// Flawfinder: ignore
 				strncpy(deviceQuirks.deviceName, "3", sizeof(deviceQuirks.deviceName) - 1U);
 				break;
-			case 68U:    // BQ Cervantes 4
+			case DEVICE_CERVANTES_4:    // BQ Cervantes 4
 				deviceQuirks.screenDPI = 300U;
 				// Flawfinder: ignore
 				strncpy(deviceQuirks.deviceName, "4", sizeof(deviceQuirks.deviceName) - 1U);
@@ -563,7 +563,7 @@ static void
 	//       See also https://github.com/pgaskin/koboutils/pull/1 and the links referenced there
 	//       for all you ever wanted to know about Kobo codenames ;).
 	switch (kobo_id) {
-		case 310U:    // Touch A/B (trilogy)
+		case DEVICE_KOBO_TOUCH_AB:    // Touch A/B (trilogy)
 			deviceQuirks.isKoboNonMT = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Touch A/B", sizeof(deviceQuirks.deviceName) - 1U);
@@ -572,7 +572,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 3", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 320U:    // Touch C (trilogy)
+		case DEVICE_KOBO_TOUCH_C:    // Touch C (trilogy)
 			deviceQuirks.isKoboNonMT = true;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Touch C", sizeof(deviceQuirks.deviceName) - 1U);
@@ -581,7 +581,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 4", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 340U:    // Mini (pixie)
+		case DEVICE_KOBO_MINI:    // Mini (pixie)
 			deviceQuirks.isKoboNonMT = true;
 			deviceQuirks.screenDPI   = 200U;
 			// Flawfinder: ignore
@@ -591,7 +591,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 4", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 330U:    // Glo (kraken)
+		case DEVICE_KOBO_GLO:    // Glo (kraken)
 			deviceQuirks.isKoboNonMT = true;
 			deviceQuirks.screenDPI   = 212U;
 			// Flawfinder: ignore
@@ -601,7 +601,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 4", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 371U:    // Glo HD (alyssum)
+		case DEVICE_KOBO_GLO_HD:    // Glo HD (alyssum)
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Glo HD", sizeof(deviceQuirks.deviceName) - 1U);
@@ -610,7 +610,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 372U:    // Touch 2.0 (pika)
+		case DEVICE_KOBO_TOUCH_2:    // Touch 2.0 (pika)
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Touch 2.0", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -618,7 +618,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 360U:    // Aura (phoenix)
+		case DEVICE_KOBO_AURA:    // Aura (phoenix)
 			// NOTE: The bottom 10 pixels are blacked out by Nickel (behind the bezel)
 			deviceQuirks.koboVertOffset = -10;
 			// NOTE: According to the nightmode hack, the Aura's kernel *may* be crashy w/ PxP inversion...
@@ -631,7 +631,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 5", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 350U:    // Aura HD (dragon)
+		case DEVICE_KOBO_AURA_HD:    // Aura HD (dragon)
 			deviceQuirks.isKoboNonMT  = true;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
 			deviceQuirks.ntxBootRota  = FB_ROTATE_UR;
@@ -644,7 +644,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 4", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 370U:    // Aura H2O (dahlia)
+		case DEVICE_KOBO_AURA_H2O:    // Aura H2O (dahlia)
 			// NOTE: The top 11 pixels are blacked out by Nickel (behind the bezel)
 			deviceQuirks.koboVertOffset = 11;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
@@ -659,7 +659,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 5", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 374U:    // Aura H2O² (snow)
+		case DEVICE_KOBO_AURA_H2O_2:    // Aura H2O² (snow)
 			// NOTE: *Might* be UD like the other ROTA_STRAIGHT devices
 			deviceQuirks.ntxBootRota = FB_ROTATE_UR;
 			// NOTE: Is indeed NTX_ROTA_STRAIGHT
@@ -671,7 +671,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 378U:    // Aura H2O² r2 (snow)
+		case DEVICE_KOBO_AURA_H2O_2_R2:    // Aura H2O² r2 (snow)
 			deviceQuirks.isKoboMk7   = true;
 			deviceQuirks.ntxBootRota = FB_ROTATE_UR;
 			// NOTE: *Might* be NTX_ROTA_ODD_INVERTED
@@ -683,7 +683,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 373U:    // Aura ONE (daylight)
+		case DEVICE_KOBO_AURA_ONE:    // Aura ONE (daylight)
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Aura One", sizeof(deviceQuirks.deviceName) - 1U);
@@ -692,7 +692,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 381U:    // Aura ONE LE (daylight)
+		case DEVICE_KOBO_AURA_ONE_LE:    // Aura ONE LE (daylight)
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Aura One LE", sizeof(deviceQuirks.deviceName) - 1U);
@@ -701,7 +701,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 375U:    // Aura SE (star)
+		case DEVICE_KOBO_AURA_SE:    // Aura SE (star)
 			deviceQuirks.screenDPI = 212U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Aura SE", sizeof(deviceQuirks.deviceName) - 1U);
@@ -710,7 +710,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 379U:    // Aura SE r2 (star)
+		case DEVICE_KOBO_AURA_SE_R2:    // Aura SE r2 (star)
 			deviceQuirks.isKoboMk7 = true;
 			// NOTE: *Might* be NTX_ROTA_ODD_INVERTED
 			deviceQuirks.screenDPI = 212U;
@@ -721,7 +721,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 376U:    // Clara HD (nova)
+		case DEVICE_KOBO_CLARA_HD:    // Clara HD (nova)
 			deviceQuirks.isKoboMk7 = true;
 			// NOTE: Is indeed NTX_ROTA_STRAIGHT
 			deviceQuirks.screenDPI = 300U;
@@ -732,7 +732,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 377U:    // Forma (frost)
+		case DEVICE_KOBO_FORMA:    // Forma (frost)
 			deviceQuirks.isKoboMk7    = true;
 			deviceQuirks.canRotate    = true;
 			// NOTE: Because Mk.7 and KOBO_HWCFG_DisplayBusWidth (35) is "16Bits_mirror" (3)
@@ -746,7 +746,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 380U:    // Forma 32GB (frost)
+		case DEVICE_KOBO_FORMA_32GB:    // Forma 32GB (frost)
 			deviceQuirks.isKoboMk7    = true;
 			deviceQuirks.canRotate    = true;
 			// NOTE: Because Mk.7 and KOBO_HWCFG_DisplayBusWidth (35) is "16Bits_mirror" (3)
@@ -759,7 +759,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 384U:    // Libra H2O (storm)
+		case DEVICE_KOBO_LIBRA_H2O:    // Libra H2O (storm)
 			deviceQuirks.isKoboMk7    = true;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UR, nickel is FB_ROTATE_UR
 			//       And panel is *actually* in Portrait. Finally!
@@ -777,7 +777,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 382U:    // Nia (luna)
+		case DEVICE_KOBO_NIA:    // Nia (luna)
 			deviceQuirks.isKoboMk7 = true;
 			// NOTE: ntxBootRota & ntxRotaQuirk TBD! Let's assume it's Clara-ish for now.
 			deviceQuirks.screenDPI = 212U;
@@ -788,7 +788,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 387U:    // Elipsa (Europa)
+		case DEVICE_KOBO_ELIPSA:    // Elipsa (Europa)
 			deviceQuirks.isSunxi      = true;
 			// Sunxi means no HW inversion :'(.
 			// (And the nightmode_test flag toggled via the debugfs nightenable/nightdisable command doesn't count,
@@ -940,7 +940,7 @@ static void
 				kobo_id = kobo_ids[payload[KOBO_HWCFG_PCB]];
 
 				// And now for the fun part, the few device variants that use the same PCB ID...
-				if (kobo_id == 374U || kobo_id == 375U) {
+				if (kobo_id == DEVICE_KOBO_AURA_H2O_2 || kobo_id == DEVICE_KOBO_AURA_SE) {
 					// Discriminate the Mk.7 version for dual rev models by checking the CPU...
 					// NOTE: kobo_cpus[10] == "mx6sll"
 					if (payload[KOBO_HWCFG_CPU] == 10U) {
@@ -948,24 +948,24 @@ static void
 						// and the Aura SE (375 -> 379) ;)
 						kobo_id = (unsigned short int) (kobo_id + 4U);
 					}
-				} else if (kobo_id == 371U) {
+				} else if (kobo_id == DEVICE_KOBO_GLO_HD) {
 					// Discriminate Alyssum from Pika, by checking the Display Resolution...
 					// NOTE: kobo_disp_res[0] == "800x600"
 					if (payload[KOBO_HWCFG_DisplayResolution] == 0U) {
 						// Glo HD (Alyssum) [371] -> Touch 2.0 (Pika) [372]
-						kobo_id = 372U;
+						kobo_id = DEVICE_KOBO_TOUCH_2;
 					}
-				} else if (kobo_id == 373U || kobo_id == 377U) {
+				} else if (kobo_id == DEVICE_KOBO_AURA_ONE || kobo_id == DEVICE_KOBO_FORMA) {
 					// Discriminate 32GB variants...
 					// NOTE: We compare against 8GB, but in practice, given storage shenanigans and
 					//       the truncation involved here, we end up with 7 on 8GB devices ;).
 					if ((storagesize >> 10U >> 10U >> 10U) > 8U) {
-						if (kobo_id == 373U) {
+						if (kobo_id == DEVICE_KOBO_AURA_ONE) {
 							// Aura ONE (daylight) [373] -> Aura ONE LE (daylight) [381]
-							kobo_id = 381U;
-						} else if (kobo_id == 377U) {
+							kobo_id = DEVICE_KOBO_AURA_ONE_LE;
+						} else if (kobo_id == DEVICE_KOBO_FORMA) {
 							// Forma (frost) [377] -> Forma 32GB (frost) [380]
-							kobo_id = 380U;
+							kobo_id = DEVICE_KOBO_FORMA_32GB;
 						}
 					}
 				}
@@ -1013,7 +1013,7 @@ static void
 		strncpy(deviceQuirks.deviceName, "reMarkable 2", sizeof(deviceQuirks.deviceName) - 1U);
 		// Flawfinder: ignore
 		strncpy(deviceQuirks.deviceCodename, "Zero Sugar", sizeof(deviceQuirks.deviceCodename) - 1U);
-		deviceQuirks.deviceId = 2U;
+		deviceQuirks.deviceId = DEVICE_REMARKABLE_2;
 	} else {
 		deviceQuirks.screenDPI    = 226U;
 		deviceQuirks.canHWInvert  = true;
@@ -1025,7 +1025,7 @@ static void
 		strncpy(deviceQuirks.deviceName, "reMarkable", sizeof(deviceQuirks.deviceName) - 1U);
 		// Flawfinder: ignore
 		strncpy(deviceQuirks.deviceCodename, "Zero Gravitas", sizeof(deviceQuirks.deviceCodename) - 1U);
-		deviceQuirks.deviceId = 1U;
+		deviceQuirks.deviceId = DEVICE_REMARKABLE_1;
 	}
 }
 #	elif defined(FBINK_FOR_POCKETBOOK)
@@ -1069,142 +1069,141 @@ static void
 		if (strcmp(model_name, "PocketBook 515") == 0) {
 			deviceQuirks.screenDPI = 200U;
 			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PB515", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 515U;
+			strncpy(deviceQuirks.deviceCodename, "PBMini", sizeof(deviceQuirks.deviceCodename) - 1U);
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_MINI;
 		} else if (strcmp(model_name, "PB606") == 0 || strcmp(model_name, "PocketBook 606") == 0) {
 			deviceQuirks.screenDPI = 212U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PB606", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 606U;
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_606;
 		} else if (strcmp(model_name, "PocketBook 611") == 0) {
 			deviceQuirks.screenDPI = 167U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PB611", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 611U;
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_611;
 		} else if (strcmp(model_name, "PocketBook 613") == 0) {
 			deviceQuirks.screenDPI = 167U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PB613B", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 613U;
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_613;
 		} else if (strcmp(model_name, "PocketBook 614") == 0 || strcmp(model_name, "PocketBook 614W") == 0) {
 			deviceQuirks.screenDPI = 167U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PB614W", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 614U;
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_614;
 		} else if (strcmp(model_name, "PB615") == 0 || strcmp(model_name, "PB615W") == 0 ||
 			   strcmp(model_name, "PocketBook 615") == 0 || strcmp(model_name, "PocketBook 615W") == 0) {
 			deviceQuirks.screenDPI = 212U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBBLux", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 615U;
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_615;
 		} else if (strcmp(model_name, "PB616") == 0 || strcmp(model_name, "PB616W") == 0 ||
 			   strcmp(model_name, "PocketBook 616") == 0 || strcmp(model_name, "PocketBook 616W") == 0) {
 			deviceQuirks.screenDPI = 212U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBBLux2", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 616U;
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_616;
 		} else if (strcmp(model_name, "PocketBook 622") == 0) {
 			deviceQuirks.screenDPI = 167U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBTouch", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 622U;
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_TOUCH;
 		} else if (strcmp(model_name, "PocketBook 623") == 0) {
 			deviceQuirks.screenDPI = 212U;
 			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBTouchLux", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 623U;
+			strncpy(deviceQuirks.deviceCodename, "PBLux", sizeof(deviceQuirks.deviceCodename) - 1U);
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_LUX;
 		} else if (strcmp(model_name, "PocketBook 624") == 0) {
 			deviceQuirks.screenDPI = 167U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBBTouch", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 624U;
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_BASIC_TOUCH;
 		} else if (strcmp(model_name, "PB625") == 0) {
 			deviceQuirks.screenDPI = 167U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBBTouch2", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 625U;
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_BASIC_TOUCH_2;
 		} else if (strcmp(model_name, "PB626") == 0 || strcmp(model_name, "PB626(2)-TL3") == 0 ||
 			   strcmp(model_name, "PocketBook 626") == 0) {
 			deviceQuirks.screenDPI = 212U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBLux3", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 626U;
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_LUX_3;
 		} else if (strcmp(model_name, "PB627") == 0) {
 			deviceQuirks.screenDPI = 212U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBLux4", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 627U;
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_LUX_4;
 		} else if (strcmp(model_name, "PB628") == 0) {
 			deviceQuirks.screenDPI = 212U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBLux5", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 628U;
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_LUX_5;
 		} else if (strcmp(model_name, "PocketBook 630") == 0) {
 			deviceQuirks.screenDPI = 212U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBSense", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 630U;
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_SENSE;
 		} else if (strcmp(model_name, "PB631") == 0 || strcmp(model_name, "PocketBook 631") == 0) {
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBTouchHD", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 631U;
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_TOUCH_HD;
 		} else if (strcmp(model_name, "PB632") == 0) {
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBTouchHD+", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 632U;
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_TOUCH_HD_PLUS;
 		} else if (strcmp(model_name, "PB633") == 0) {
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBColor", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 633U;
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_COLOR;
 		} else if (strcmp(model_name, "PB640") == 0 || strcmp(model_name, "PocketBook 640") == 0) {
 			deviceQuirks.screenDPI = 167U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBAqua", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 640U;
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_AQUA;
 		} else if (strcmp(model_name, "PB641") == 0) {
 			deviceQuirks.screenDPI = 212U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBAqua2", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 641U;
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_AQUA2;
 		} else if (strcmp(model_name, "PB650") == 0 || strcmp(model_name, "PocketBook 650") == 0) {
 			deviceQuirks.screenDPI = 212U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBUltra", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 650U;
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_ULTRA;
 		} else if (strcmp(model_name, "PB740") == 0) {
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBInkPad3", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 740U;
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD_3;
 		} else if (strcmp(model_name, "PB740-2") == 0) {
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBInkPad3Pro", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 742U;
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD_3_PRO;
 		} else if (strcmp(model_name, "PB741") == 0) {
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBInkPadColor", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 741U;
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD_COLOR;
 		} else if (strcmp(model_name, "PocketBook 840") == 0) {
 			deviceQuirks.screenDPI = 250U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBInkPad", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 840U;
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD;
 		} else if (strcmp(model_name, "PB1040") == 0) {
 			deviceQuirks.screenDPI = 227U;
 			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PB1040", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId = 1040U;
+			strncpy(deviceQuirks.deviceCodename, "PBInkPadX", sizeof(deviceQuirks.deviceCodename) - 1U);
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD_X;
 		} else if (strcmp(model_name, "PocketBook Color Lux") == 0) {
 			deviceQuirks.screenDPI = 125U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBColorLux", sizeof(deviceQuirks.deviceCodename) - 1U);
-			deviceQuirks.deviceId =
-			    ('C' << 8U) | ('o' << 8U) | ('l' << 8U) | ('o' << 8U) | ('r' << 8U) | 'L' | 'u' | 'x';
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_COLOR_LUX;
 		} else {
 			WARN("Unidentified PocketBook model: `%s`", model_name);
 			deviceQuirks.screenDPI = 212U;

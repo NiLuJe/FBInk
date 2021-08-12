@@ -31,6 +31,12 @@ cdecl_c99_type(FG_COLOR_INDEX_T, uint8_t)
 cdecl_type(BG_COLOR_INDEX_E)
 cdecl_c99_type(BG_COLOR_INDEX_T, uint8_t)
 
+cdecl_type(CERVANTES_DEVICE_ID_E)
+cdecl_type(KOBO_DEVICE_ID_E)
+cdecl_type(REMARKABLE_DEVICE_ID_E)
+cdecl_type(POCKETBOOK_DEVICE_ID_E)
+cdecl_c99_type(DEVICE_ID_T, uint16_t)
+
 cdecl_type(WFM_MODE_INDEX_E)
 cdecl_c99_type(WFM_MODE_INDEX_T, uint8_t)
 cdecl_type(HW_DITHER_INDEX_E)

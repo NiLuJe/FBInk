@@ -3450,8 +3450,7 @@ static __attribute__((cold)) void
 		}
 	}
 
-	if (deviceQuirks.deviceId ==
-	    (('C' << 8U) | ('o' << 8U) | ('l' << 8U) | ('o' << 8U) | ('r' << 8U) | 'L' | 'u' | 'x')) {
+	if (deviceQuirks.deviceId == DEVICE_POCKETBOOK_COLOR_LUX) {
 		vInfo.bits_per_pixel = 24U;
 		vInfo.xres           = vInfo.xres / 3U;
 	}
