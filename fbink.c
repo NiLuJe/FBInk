@@ -10826,6 +10826,25 @@ FBInkRect
 	return lastRect;
 }
 
+
+// Grants direct access to the frame buffer pointer as well as the size of the frame buffer allocation
+int
+    fbink_get_fb_pointer(int fbfd, FBPtrInfo* fbInfo)
+{
+    if (!isFbMapped)
+    {
+        if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+            return ERRCODE(EXIT_FAILURE);
+        }
+    }
+
+    fbInfo->fbPtr = fbPtr;
+    fbInfo->allocationSize = deviceQuirks.isSunxi? sunxiCtx.alloc_size : fInfo.smem_len;
+
+    return EXIT_SUCCESS;
+}
+
+
 // And now, we just bundle auxiliary parts of the public or private API,
 // that are implemented in separate source files because they deal with a specific concept,
 // but that still rely heavily on either the public or the private API.

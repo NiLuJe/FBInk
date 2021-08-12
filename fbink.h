@@ -480,6 +480,14 @@ typedef struct
 	bool      is_full;
 } FBInkDump;
 
+// For fbink_get_fb_pointer
+typedef struct
+{
+    unsigned char *fbPtr;
+    unsigned long allocationSize;
+
+} FBPtrInfo;
+
 //
 ////
 //
@@ -1150,6 +1158,13 @@ FBINK_API int fbink_sunxi_ntx_enforce_rota(int                      fbfd,
 					   SUNXI_FORCE_ROTA_INDEX_T mode,
 					   const FBInkConfig* restrict fbink_cfg);
 
+
+// Grants direct access to the frame buffer pointer as well as the size of the frame buffer allocation.
+// If the framebuffer is not yet allocated it will do so and return the result of the operation.
+FBINK_API int
+    fbink_get_fb_pointer(int fbfd, FBPtrInfo *fbInfo);
+
+
 //
 ///
 //
@@ -1166,6 +1181,7 @@ FBINK_API int fbink_sunxi_ntx_enforce_rota(int                      fbfd,
 //
 // See fbink_cmd.c for an example of the former, and KFMon for an example of the latter.
 // NOTE: Although fairly stupid in practice, utils/dump.c is less convoluted than fbink_cmd.c, making it worth a look...
+
 
 #ifdef __cplusplus
 }
