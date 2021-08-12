@@ -196,18 +196,20 @@ typedef uint8_t BG_COLOR_INDEX_T;
 // Available states for fbink_sunxi_ntx_enforce_rota
 typedef enum
 {
-	FORCE_ROTA_NOTSUP       = INT8_MIN,    // For FBInkState on non-sunxi platforms
-	FORCE_ROTA_CURRENT_ROTA = -5,    // Honor the gyro if it matches the working buffer's rotation (NOTE: Unsupported)
-	FORCE_ROTA_CURRENT_LAYOUT = -4,    // Honor the gyro if it matches the working buffer's layout (NOTE: Unsupported)
-	FORCE_ROTA_PORTRAIT       = -3,    // Honor the gyro if it matches a Portrait layout
-	FORCE_ROTA_LANDSCAPE      = -2,    // Honor the gyro if it matches a Landscape layout
-	FORCE_ROTA_GYRO           = -1,    // Honor the gyro (NOTE: default)
-	FORCE_ROTA_UR             = 0,     // FB_ROTATE_UR
-	FORCE_ROTA_CW             = 1,     // FB_ROTATE_CW
-	FORCE_ROTA_UD             = 2,     // FB_ROTATE_UD
-	FORCE_ROTA_CCW            = 3,     // FB_ROTATE_CCW
-	FORCE_ROTA_WORKBUF        = 4,     // Match the working buffer's rotation (NOTE: Unsupported)
-	FORCE_ROTA_MAX            = INT8_MAX,    // int8_t
+	FORCE_ROTA_NOTSUP = INT8_MIN,    // For FBInkState on non-sunxi platforms
+	FORCE_ROTA_CURRENT_ROTA =
+	    -5,    // Honor the gyro if it matches the working buffer's rotation (NOTE: Requires fbdamage)
+	FORCE_ROTA_CURRENT_LAYOUT =
+	    -4,    // Honor the gyro if it matches the working buffer's layout (NOTE: Requires fbdamage)
+	FORCE_ROTA_PORTRAIT  = -3,          // Honor the gyro if it matches a Portrait layout
+	FORCE_ROTA_LANDSCAPE = -2,          // Honor the gyro if it matches a Landscape layout
+	FORCE_ROTA_GYRO      = -1,          // Honor the gyro (NOTE: default)
+	FORCE_ROTA_UR        = 0,           // FB_ROTATE_UR
+	FORCE_ROTA_CW        = 1,           // FB_ROTATE_CW
+	FORCE_ROTA_UD        = 2,           // FB_ROTATE_UD
+	FORCE_ROTA_CCW       = 3,           // FB_ROTATE_CCW
+	FORCE_ROTA_WORKBUF   = 4,           // Match the working buffer's rotation (NOTE: Requires fbdamage)
+	FORCE_ROTA_MAX       = INT8_MAX,    // int8_t
 } __attribute__((packed)) SUNXI_FORCE_ROTA_INDEX_E;
 typedef int8_t SUNXI_FORCE_ROTA_INDEX_T;
 
@@ -771,7 +773,7 @@ FBINK_API bool fbink_is_fb_quirky(void) __attribute__((pure, deprecated));
 // NOTE: In turn, this means that a simple EXIT_SUCCESS means that no reinitialization was needed.
 // NOTE: On Kobo devices with a sunxi SoC, OK_BPP_CHANGE will *never* happen,
 //       as the state of the actual framebuffer device is (unfortunately) meaningless there.
-//       On those same devices, if rotation handling via gyro is disabled (via FBINK_FORCE_ROTA),
+//       On those same devices, if rotation handling via gyro is disabled (via FBINK_FORCE_ROTA or FBINK_FORCE_ROTA_FALLBACK),
 //       the whole function becomes a NOP.
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
@@ -1147,7 +1149,9 @@ FBINK_API int fbink_toggle_sunxi_ntx_pen_mode(int fbfd, bool toggle);
 // Otherwise, returns a few different things on failure:
 //	-(EINVAL)	when mode is invalid or unsupported
 // NOTE: See the comments in the SUNXI_FORCE_ROTA_INDEX_E enum.
-//       In particular, the fact that the most interesting modes aren't actually supported because of technical limitations...
+//       In particular, the fact that the most interesting modes aren't actually supported because of technical limitations,
+//       unless the custom fbdamage module has been loaded (earlier than the disp client you're trying to match)...
+//       c.f., <https://github.com/NiLuJe/mxc_epdc_fb_damage>.
 // NOTE: On success, this will reinit the state *now* (returning the exact same values as fbink_reinit).
 FBINK_API int fbink_sunxi_ntx_enforce_rota(int                      fbfd,
 					   SUNXI_FORCE_ROTA_INDEX_T mode,

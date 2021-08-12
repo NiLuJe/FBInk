@@ -3606,11 +3606,33 @@ static __attribute__((cold)) int
 				// We can forgo the usual fun & games of strtol error checking,
 				// as a 0 on parsing errors suits us just fine here ;).
 				long int val = strtol(force_rota, NULL, 10);
+
+				// If we're attempting to use a mode that requires fbdamage *without* fbdamage,
+				// check and validate the fallback value instead...
+				if (val == FORCE_ROTA_CURRENT_ROTA || val == FORCE_ROTA_CURRENT_LAYOUT ||
+				    val == FORCE_ROTA_WORKBUF) {
+					if (!sunxiCtx.has_fbdamage) {
+						const char* force_rota_fallback = getenv("FBINK_FORCE_ROTA_FALLBACK");
+						if (force_rota_fallback) {
+							val = strtol(force_rota_fallback, NULL, 10);
+							if (val == FORCE_ROTA_CURRENT_ROTA ||
+							    val == FORCE_ROTA_CURRENT_LAYOUT ||
+							    val == FORCE_ROTA_WORKBUF) {
+								WARN(
+								    "Attempted to use a FBINK_FORCE_ROTA_FALLBACK mode that requires fbdamage");
+								val = FORCE_ROTA_NOTSUP;
+							}
+						} else {
+							WARN(
+							    "Attempted to use a FBINK_FORCE_ROTA mode that requires fbdamage without fbdamage being loaded and without a FBINK_FORCE_ROTA_FALLBACK mode set");
+							val = FORCE_ROTA_NOTSUP;
+						}
+					}
+				}
+
 				switch (val) {
-					/*
 					case FORCE_ROTA_CURRENT_ROTA:
 					case FORCE_ROTA_CURRENT_LAYOUT:
-					*/
 					case FORCE_ROTA_PORTRAIT:
 					case FORCE_ROTA_LANDSCAPE:
 					case FORCE_ROTA_GYRO:
@@ -3618,11 +3640,9 @@ static __attribute__((cold)) int
 					case FORCE_ROTA_CW:
 					case FORCE_ROTA_UD:
 					case FORCE_ROTA_CCW:
+					case FORCE_ROTA_WORKBUF:
 						sunxiCtx.force_rota = (SUNXI_FORCE_ROTA_INDEX_T) val;
 						break;
-					/*
-					case FORCE_ROTA_WORKBUF:
-					*/
 					default:
 						WARN("Invalid value `%s` for env var FBINK_FORCE_ROTA", force_rota);
 						sunxiCtx.force_rota = FORCE_ROTA_GYRO;
