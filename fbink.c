@@ -3589,6 +3589,16 @@ static __attribute__((cold)) int
 		} else if (deviceQuirks.isSunxi) {
 			ELOG("Enabled sunxi quirks");
 
+			// NOTE: Check if the fbdamage kernel module is loaded,
+			//       as it'll allow us to actually suss out the current rotation
+			//       according to the working buffer, and not the gyro...
+			if (access("/sys/devices/virtual/fbdamage/fbdamage/rotate", F_OK) == 0) {
+				sunxiCtx.has_fbdamage = true;
+				ELOG("Working buffer rotation sniffing available, thanks to fbdamage");
+			} else {
+				sunxiCtx.has_fbdamage = false;
+			}
+
 			// NOTE: Allow selectively or completely overriding the accelerometer.
 			const char* force_rota = getenv("FBINK_FORCE_ROTA");
 			//       That implies that we'll always assume the screen is UR!
@@ -4647,7 +4657,7 @@ void
 {
 	fprintf(
 	    stdout,
-	    "FBINK_VERSION='%s';viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isSunxi=%d;SunxiForceRota=%d;isKindleLegacy=%d;isKoboNonMT=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;",
+	    "FBINK_VERSION='%s';viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isSunxi=%d;SunxiHasFBDamage=%d;SunxiForceRota=%d;isKindleLegacy=%d;isKoboNonMT=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;",
 	    fbink_version(),
 	    viewWidth,
 	    viewHeight,
@@ -4678,8 +4688,10 @@ void
 	    deviceQuirks.devicePlatform,
 	    deviceQuirks.isSunxi,
 #if defined(FBINK_FOR_KOBO)
+	    sunxiCtx.has_fbdamage,
 	    sunxiCtx.force_rota,
 #else
+	    false,
 	    FORCE_ROTA_NOTSUP,
 #endif
 	    deviceQuirks.isKindleLegacy,
@@ -4726,9 +4738,11 @@ void
 		fbink_state->is_perfect_fit   = deviceQuirks.isPerfectFit;
 		fbink_state->is_sunxi         = deviceQuirks.isSunxi;
 #if defined(FBINK_FOR_KOBO)
-		fbink_state->sunxi_force_rota = sunxiCtx.force_rota;
+		fbink_state->sunxi_has_fbdamage = sunxiCtx.has_fbdamage;
+		fbink_state->sunxi_force_rota   = sunxiCtx.force_rota;
 #else
-		fbink_state->sunxi_force_rota = FORCE_ROTA_NOTSUP;
+		fbink_state->sunxi_has_fbdamage = false;
+		fbink_state->sunxi_force_rota   = FORCE_ROTA_NOTSUP;
 #endif
 		fbink_state->is_kindle_legacy        = deviceQuirks.isKindleLegacy;
 		fbink_state->is_kobo_non_mt          = deviceQuirks.isKoboNonMT;
