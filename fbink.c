@@ -3700,7 +3700,7 @@ static __attribute__((cold)) int
 #	elif defined(FBINK_FOR_REMARKABLE)
 		// NOTE: Check if we're running on an rM 2, in which case abort with extreme prejudice,
 		//       because its kernel doesn't ship with an EPDC driver, despite running on an i.MX 7D...
-		if (deviceQuirks.deviceId == 2U) {
+		if (deviceQuirks.deviceId == DEVICE_REMARKABLE_2) {
 			// ... unless we're running under the https://github.com/ddvk/remarkable2-framebuffer shim
 			const char* rm2fb = getenv("RM2FB_SHIM");
 			if (rm2fb) {

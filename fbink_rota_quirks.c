@@ -85,7 +85,7 @@ static int
     populate_accelerometer_i2c_info(void)
 {
 	switch (deviceQuirks.deviceId) {
-		case 387U:
+		case DEVICE_KOBO_ELIPSA:
 			// Ellipsa, kx122
 			// NOTE: Could be queried via NTXHWConfig ([11] RSensor).
 			if (find_accelerometer("kx122") != EXIT_SUCCESS) {
@@ -194,7 +194,7 @@ static int
 
 	// Translate it accordingly for our device...
 	switch (deviceQuirks.deviceId) {
-		case 387U:
+		case DEVICE_KOBO_ELIPSA:
 			if (rota >= 0) {
 				// NOTE: The Ellipsa (PCB index 94) is flagged EBRMAIN_ROTATE_R_180 in the kernel driver
 				rota = (rota + 2) & 3;
@@ -294,7 +294,7 @@ static int
 
 	// We need to know how to handle the accelerometer...
 	switch (deviceQuirks.deviceId) {
-		case 387U:
+		case DEVICE_KOBO_ELIPSA:
 			// Ellipsa, kx122
 			rv = query_kx122();
 			if (rv < 0) {
