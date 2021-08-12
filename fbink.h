@@ -193,26 +193,6 @@ typedef enum
 } __attribute__((packed)) BG_COLOR_INDEX_E;
 typedef uint8_t BG_COLOR_INDEX_T;
 
-// Available states for fbink_sunxi_ntx_enforce_rota
-typedef enum
-{
-	FORCE_ROTA_NOTSUP = INT8_MIN,    // For FBInkState on non-sunxi platforms
-	FORCE_ROTA_CURRENT_ROTA =
-	    -5,    // Honor the gyro if it matches the working buffer's rotation; match the wb otherwise (NOTE: Requires fbdamage)
-	FORCE_ROTA_CURRENT_LAYOUT =
-	    -4,    // Honor the gyro if it matches the working buffer's layout; match the wb otherwise (NOTE: Requires fbdamage)
-	FORCE_ROTA_PORTRAIT  = -3,          // Honor the gyro if it matches a Portrait layout
-	FORCE_ROTA_LANDSCAPE = -2,          // Honor the gyro if it matches a Landscape layout
-	FORCE_ROTA_GYRO      = -1,          // Honor the gyro (NOTE: default)
-	FORCE_ROTA_UR        = 0,           // FB_ROTATE_UR
-	FORCE_ROTA_CW        = 1,           // FB_ROTATE_CW
-	FORCE_ROTA_UD        = 2,           // FB_ROTATE_UD
-	FORCE_ROTA_CCW       = 3,           // FB_ROTATE_CCW
-	FORCE_ROTA_WORKBUF   = 4,           // Match the working buffer's rotation (NOTE: Requires fbdamage)
-	FORCE_ROTA_MAX       = INT8_MAX,    // int8_t
-} __attribute__((packed)) SUNXI_FORCE_ROTA_INDEX_E;
-typedef int8_t SUNXI_FORCE_ROTA_INDEX_T;
-
 // List of Cervantes device IDs (HWConfig PCB index)
 typedef enum
 {
@@ -411,6 +391,26 @@ typedef enum
 	NTX_ROTA_MAX = UINT8_MAX,    // uint8_t
 } __attribute__((packed)) NTX_ROTA_INDEX_E;
 typedef uint8_t NTX_ROTA_INDEX_T;
+
+// Available states for fbink_sunxi_ntx_enforce_rota
+typedef enum
+{
+	FORCE_ROTA_NOTSUP = INT8_MIN,    // For FBInkState on non-sunxi platforms
+	FORCE_ROTA_CURRENT_ROTA =
+	    -5,    // Honor the gyro if it matches the working buffer's rotation; match the wb otherwise (NOTE: Requires fbdamage)
+	FORCE_ROTA_CURRENT_LAYOUT =
+	    -4,    // Honor the gyro if it matches the working buffer's layout; match the wb otherwise (NOTE: Requires fbdamage)
+	FORCE_ROTA_PORTRAIT  = -3,          // Honor the gyro if it matches a Portrait layout
+	FORCE_ROTA_LANDSCAPE = -2,          // Honor the gyro if it matches a Landscape layout
+	FORCE_ROTA_GYRO      = -1,          // Honor the gyro (NOTE: default)
+	FORCE_ROTA_UR        = 0,           // FB_ROTATE_UR
+	FORCE_ROTA_CW        = 1,           // FB_ROTATE_CW
+	FORCE_ROTA_UD        = 2,           // FB_ROTATE_UD
+	FORCE_ROTA_CCW       = 3,           // FB_ROTATE_CCW
+	FORCE_ROTA_WORKBUF   = 4,           // Match the working buffer's rotation (NOTE: Requires fbdamage)
+	FORCE_ROTA_MAX       = INT8_MAX,    // int8_t
+} __attribute__((packed)) SUNXI_FORCE_ROTA_INDEX_E;
+typedef int8_t SUNXI_FORCE_ROTA_INDEX_T;
 
 //
 // A struct to dump FBInk's internal state into, like fbink_state_dump() would, but in C ;)
