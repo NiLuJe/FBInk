@@ -196,19 +196,106 @@ typedef uint8_t BG_COLOR_INDEX_T;
 // Available states for fbink_sunxi_ntx_enforce_rota
 typedef enum
 {
-	FORCE_ROTA_CURRENT_ROTA = -5,    // Honor the gyro if it matches the working buffer's rotation (NOTE: Unsupported)
-	FORCE_ROTA_CURRENT_LAYOUT = -4,    // Honor the gyro if it matches the working buffer's layout (NOTE: Unsupported)
-	FORCE_ROTA_PORTRAIT       = -3,    // Honor the gyro if it matches a Portrait layout
-	FORCE_ROTA_LANDSCAPE      = -2,    // Honor the gyro if it matches a Landscape layout
-	FORCE_ROTA_GYRO           = -1,    // Honor the gyro (NOTE: default)
-	FORCE_ROTA_UR             = 0,     // FB_ROTATE_UR
-	FORCE_ROTA_CW             = 1,     // FB_ROTATE_CW
-	FORCE_ROTA_UD             = 2,     // FB_ROTATE_UD
-	FORCE_ROTA_CCW            = 3,     // FB_ROTATE_CCW
-	FORCE_ROTA_WORKBUF        = 4,     // Match the working buffer's rotation (NOTE: Unsupported)
-	FORCE_ROTA_MAX            = INT8_MAX,    // int8_t
+	FORCE_ROTA_NOTSUP = INT8_MIN,    // For FBInkState on non-sunxi platforms
+	FORCE_ROTA_CURRENT_ROTA =
+	    -5,    // Honor the gyro if it matches the working buffer's rotation; match the wb otherwise (NOTE: Requires fbdamage)
+	FORCE_ROTA_CURRENT_LAYOUT =
+	    -4,    // Honor the gyro if it matches the working buffer's layout; match the wb otherwise (NOTE: Requires fbdamage)
+	FORCE_ROTA_PORTRAIT  = -3,          // Honor the gyro if it matches a Portrait layout
+	FORCE_ROTA_LANDSCAPE = -2,          // Honor the gyro if it matches a Landscape layout
+	FORCE_ROTA_GYRO      = -1,          // Honor the gyro (NOTE: default)
+	FORCE_ROTA_UR        = 0,           // FB_ROTATE_UR
+	FORCE_ROTA_CW        = 1,           // FB_ROTATE_CW
+	FORCE_ROTA_UD        = 2,           // FB_ROTATE_UD
+	FORCE_ROTA_CCW       = 3,           // FB_ROTATE_CCW
+	FORCE_ROTA_WORKBUF   = 4,           // Match the working buffer's rotation (NOTE: Requires fbdamage)
+	FORCE_ROTA_MAX       = INT8_MAX,    // int8_t
 } __attribute__((packed)) SUNXI_FORCE_ROTA_INDEX_E;
 typedef int8_t SUNXI_FORCE_ROTA_INDEX_T;
+
+// List of Cervantes device IDs (HWConfig PCB index)
+typedef enum
+{
+	DEVICE_CERVANTES_TOUCH      = 22U,
+	DEVICE_CERVANTES_TOUCHLIGHT = 23U,
+	DEVICE_CERVANTES_2013       = 33U,
+	DEVICE_CERVANTES_3          = 51U,
+	DEVICE_CERVANTES_4          = 68U,
+	DEVICE_CERVANTES_MAX        = UINT16_MAX,    // uint16_t
+} __attribute__((packed)) CERVANTES_DEVICE_ID_E;
+
+// List of Kobo device IDs
+typedef enum
+{
+	DEVICE_KOBO_TOUCH_AB      = 310U,
+	DEVICE_KOBO_TOUCH_C       = 320U,
+	DEVICE_KOBO_MINI          = 340U,
+	DEVICE_KOBO_GLO           = 330U,
+	DEVICE_KOBO_GLO_HD        = 371U,
+	DEVICE_KOBO_TOUCH_2       = 372U,
+	DEVICE_KOBO_AURA          = 360U,
+	DEVICE_KOBO_AURA_HD       = 350U,
+	DEVICE_KOBO_AURA_H2O      = 370U,
+	DEVICE_KOBO_AURA_H2O_2    = 374U,
+	DEVICE_KOBO_AURA_H2O_2_R2 = 378U,
+	DEVICE_KOBO_AURA_ONE      = 373U,
+	DEVICE_KOBO_AURA_ONE_LE   = 381U,
+	DEVICE_KOBO_AURA_SE       = 375U,
+	DEVICE_KOBO_AURA_SE_R2    = 379U,
+	DEVICE_KOBO_CLARA_HD      = 376U,
+	DEVICE_KOBO_FORMA         = 377U,
+	DEVICE_KOBO_FORMA_32GB    = 380U,
+	DEVICE_KOBO_LIBRA_H2O     = 384U,
+	DEVICE_KOBO_NIA           = 382U,
+	DEVICE_KOBO_ELIPSA        = 387U,
+	DEVICE_KOBO_MAX           = UINT16_MAX,    // uint16_t
+} __attribute__((packed)) KOBO_DEVICE_ID_E;
+
+// List of reMarkable device IDs
+typedef enum
+{
+	DEVICE_REMARKABLE_1   = 1U,
+	DEVICE_REMARKABLE_2   = 2U,
+	DEVICE_REMARKABLE_MAX = UINT16_MAX,    // uint16_t
+} __attribute__((packed)) REMARKABLE_DEVICE_ID_E;
+
+// List of PocketBook device IDs
+typedef enum
+{
+	DEVICE_POCKETBOOK_MINI          = 515U,
+	DEVICE_POCKETBOOK_606           = 606U,
+	DEVICE_POCKETBOOK_611           = 611U,
+	DEVICE_POCKETBOOK_613           = 613U,
+	DEVICE_POCKETBOOK_614           = 614U,
+	DEVICE_POCKETBOOK_615           = 615U,
+	DEVICE_POCKETBOOK_616           = 616U,
+	DEVICE_POCKETBOOK_TOUCH         = 622U,
+	DEVICE_POCKETBOOK_LUX           = 623U,
+	DEVICE_POCKETBOOK_BASIC_TOUCH   = 624U,
+	DEVICE_POCKETBOOK_BASIC_TOUCH_2 = 625U,
+	DEVICE_POCKETBOOK_LUX_3         = 626U,
+	DEVICE_POCKETBOOK_LUX_4         = 627U,
+	DEVICE_POCKETBOOK_LUX_5         = 628U,
+	DEVICE_POCKETBOOK_SENSE         = 630U,
+	DEVICE_POCKETBOOK_TOUCH_HD      = 631U,
+	DEVICE_POCKETBOOK_TOUCH_HD_PLUS = 632U,
+	DEVICE_POCKETBOOK_COLOR         = 633U,
+	DEVICE_POCKETBOOK_AQUA          = 640U,
+	DEVICE_POCKETBOOK_AQUA2         = 641U,
+	DEVICE_POCKETBOOK_ULTRA         = 650U,
+	DEVICE_POCKETBOOK_INKPAD_3      = 740U,
+	DEVICE_POCKETBOOK_INKPAD_3_PRO  = 742U,
+	DEVICE_POCKETBOOK_INKPAD_COLOR  = 741U,
+	DEVICE_POCKETBOOK_INKPAD        = 840U,
+	DEVICE_POCKETBOOK_INKPAD_X      = 1040U,
+	DEVICE_POCKETBOOK_COLOR_LUX =
+	    ('C' << 8U) | ('o' << 8U) | ('l' << 8U) | ('o' << 8U) | ('r' << 8U) | 'L' | 'u' | 'x',
+	DEVICE_POCKETBOOK_MAX = UINT16_MAX,    // uint16_t
+} __attribute__((packed)) POCKETBOOK_DEVICE_ID_E;
+
+// NOTE: There's no enum for Kindles, because there are an insane number of device IDs per model,
+//       so it doesn't really fit into this model. Use the deviceName instead.
+typedef uint16_t DEVICE_ID_T;
 
 // List of *potentially* available waveform modes.
 // NOTE: On EPDC v1 (as well as all Kindle) devices, REAGL & REAGLD generally expect to *always* be flashing.
@@ -329,42 +416,44 @@ typedef uint8_t NTX_ROTA_INDEX_T;
 // A struct to dump FBInk's internal state into, like fbink_state_dump() would, but in C ;)
 typedef struct
 {
-    long int user_hz;                   // USER_HZ (should pretty much always be 100)
-    const char* restrict font_name;     // fbink_cfg->fontname (c.f., fontname_to_string())
-    uint32_t view_width;                // viewWidth (MAY be different than screen_width on devices with a viewport)
-    uint32_t view_height;               // viewHeight (ditto)
-    uint32_t screen_width;              // screenWidth (Effective width, c.f., is_ntx_quirky_landscape & initialize_fbink())
-    uint32_t screen_height;             // screenHeight (ditto)
-    uint32_t screen_stride;             // screen line length in bytes;
-    uint32_t bpp;                       // vInfo.bits_per_pixel
-    char     device_name[16];           // deviceQuirks.deviceName (short common name, no brand)
-	char     device_codename[16];       // deviceQuirks.deviceCodename
-	char     device_platform[16];       // deviceQuirks.devicePlatform (often a codename, too)
-	unsigned short int device_id;       // deviceQuirks.deviceId (decimal value, c.f., identify_device() on Kindle!)
-	uint8_t            pen_fg_color;    // penFGColor (Actual grayscale value, not FG_COLOR_INDEX_E)
-	uint8_t            pen_bg_color;    // penBGColor (ditto)
-	unsigned short int screen_dpi;      // deviceQuirks.screenDPI
-	unsigned short int font_w;          // FONTW (effective width of a glyph cell, i.e. scaled)
-	unsigned short int font_h;          // FONTH (effective height of a glyph cell, i.e. scaled)
-	unsigned short int max_cols;        // MAXCOLS (at current cell size)
-	unsigned short int max_rows;        // MAXROWS (ditto)
-	uint8_t view_hori_origin;           // viewHoriOrigin (would be non-zero on devices with a horizontal viewport)
-	uint8_t view_vert_origin;           // viewVertOrigin (origin in px of row 0, includes viewport + viewVertOffset)
-    uint8_t view_vert_offset;           // viewVertOffset (shift in px needed to vertically balance rows over viewHeight)
-    uint8_t fontsize_mult;              // FONTSIZE_MULT (current cell scaling multiplier)
-    uint8_t glyph_width;                // glyphWidth (native width of a glyph cell, i.e. unscaled)
-    uint8_t glyph_height;               // glyphHeight (native height of a glyph cell, i.e. unscaled)
-    bool    is_perfect_fit;             // deviceQuirks.isPerfectFit (horizontal column balance is perfect over viewWidth)
-    bool    is_sunxi;                   // deviceQuirks.isSunxi (device is running on an AllWinner SoC)
-    bool is_kindle_legacy;              // deviceQuirks.isKindleLegacy (device is a Kindle using the original einkfb EPDC API)
-    bool is_kobo_non_mt;                // deviceQuirks.isKoboNonMT (device is a Kobo with no MultiTouch input support)
-	uint8_t          ntx_boot_rota;     // deviceQuirks.ntxBootRota (Native rotation at boot)
-	NTX_ROTA_INDEX_T ntx_rota_quirk;    // deviceQuirks.ntxRotaQuirk (c.f., utils/dump.c)
-	bool    is_ntx_quirky_landscape;    // deviceQuirks.isNTX16bLandscape (rotation compensation is in effect)
-    uint8_t current_rota_native;        // native screen rotaiton; vInfo.rotate (current rotation, c.f., <linux/fb.h>)
-    uint8_t current_rota_canonical;     // canonical screen rotation
-	bool    can_rotate;                 // deviceQuirks.canRotate (device has a gyro)
-	bool    can_hw_invert;              // deviceQuirks.canHWInvert (device can use EPDC inversion)
+	long int user_hz;                             // USER_HZ (should pretty much always be 100)
+	const char* restrict font_name;               // fbink_cfg->fontname (c.f., fontname_to_string())
+	uint32_t    view_width;                       // viewWidth (MAY be different than screen_width on devices with a viewport)
+	uint32_t    view_height;                      // viewHeight (ditto)
+	uint32_t    screen_width;                     // screenWidth (Effective width, c.f., is_ntx_quirky_landscape & initialize_fbink())
+	uint32_t    screen_height;                    // screenHeight (ditto)
+    uint32_t    screen_stride;                    // screen line length in bytes;
+	uint32_t    bpp;                              // vInfo.bits_per_pixel
+	char        device_name[16];                  // deviceQuirks.deviceName (short common name, no brand)
+	char        device_codename[16];              // deviceQuirks.deviceCodename
+	char        device_platform[16];              // deviceQuirks.devicePlatform (often a codename, too)
+	DEVICE_ID_T device_id;                        // deviceQuirks.deviceId (decimal value, c.f., identify_device() on Kindle!)
+	uint8_t     pen_fg_color;                     // penFGColor (Actual grayscale value, not FG_COLOR_INDEX_E)
+	uint8_t     pen_bg_color;                     // penBGColor (ditto)
+	unsigned short int screen_dpi;                // deviceQuirks.screenDPI
+	unsigned short int font_w;                    // FONTW (effective width of a glyph cell, i.e. scaled)
+	unsigned short int font_h;                    // FONTH (effective height of a glyph cell, i.e. scaled)
+	unsigned short int max_cols;                  // MAXCOLS (at current cell size)
+	unsigned short int max_rows;                  // MAXROWS (ditto)
+	uint8_t view_hori_origin;                     // viewHoriOrigin (would be non-zero on devices with a horizontal viewport)
+	uint8_t view_vert_origin;                     // viewVertOrigin (origin in px of row 0, includes viewport + viewVertOffset)
+	uint8_t view_vert_offset;                     // viewVertOffset (shift in px needed to vertically balance rows over viewHeight)
+	uint8_t fontsize_mult;                        // FONTSIZE_MULT (current cell scaling multiplier)
+	uint8_t glyph_width;                          // glyphWidth (native width of a glyph cell, i.e. unscaled)
+	uint8_t glyph_height;                         // glyphHeight (native height of a glyph cell, i.e. unscaled)
+	bool    is_perfect_fit;                       // deviceQuirks.isPerfectFit (horizontal column balance is perfect over viewWidth)
+	bool    is_sunxi;                             // deviceQuirks.isSunxi (device is running on an AllWinner SoC)
+	bool    sunxi_has_fbdamage;                   // sunxiCtx.has_fbdamage (true when fbdamage module is loaded)
+	SUNXI_FORCE_ROTA_INDEX_T sunxi_force_rota;    // sunxiCtx.force_rota (current effective value)
+	bool is_kindle_legacy;                        // deviceQuirks.isKindleLegacy (device is a Kindle using the original einkfb EPDC API)
+	bool is_kobo_non_mt;                          // deviceQuirks.isKoboNonMT (device is a Kobo with no MultiTouch input support)
+	uint8_t          ntx_boot_rota;               // deviceQuirks.ntxBootRota (Native rotation at boot)
+	NTX_ROTA_INDEX_T ntx_rota_quirk;              // deviceQuirks.ntxRotaQuirk (c.f., utils/dump.c)
+	bool    is_ntx_quirky_landscape;              // deviceQuirks.isNTX16bLandscape (rotation compensation is in effect)
+    uint8_t current_rota_native;                  // native screen rotaiton; vInfo.rotate (current rotation, c.f., <linux/fb.h>)
+    uint8_t current_rota_canonical;               // canonical screen rotation
+	bool    can_rotate;                           // deviceQuirks.canRotate (device has a gyro)
+	bool    can_hw_invert;                        // deviceQuirks.canHWInvert (device can use EPDC inversion)
 } FBInkState;
 
 // What a FBInk config should look like. Perfectly sane when fully zero-initialized.
@@ -778,7 +867,7 @@ FBINK_API bool fbink_is_fb_quirky(void) __attribute__((pure, deprecated));
 // NOTE: In turn, this means that a simple EXIT_SUCCESS means that no reinitialization was needed.
 // NOTE: On Kobo devices with a sunxi SoC, OK_BPP_CHANGE will *never* happen,
 //       as the state of the actual framebuffer device is (unfortunately) meaningless there.
-//       On those same devices, if rotation handling via gyro is disabled (via FBINK_FORCE_ROTA),
+//       On those same devices, if rotation handling via gyro is disabled (via FBINK_FORCE_ROTA or FBINK_FORCE_ROTA_FALLBACK),
 //       the whole function becomes a NOP.
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
@@ -1152,9 +1241,12 @@ FBINK_API int fbink_toggle_sunxi_ntx_pen_mode(int fbfd, bool toggle);
 // potentially bypassing and/or selectively overriding the state returned by the accelerometer.
 // Returns -(ENOSYS) on unsupported platforms.
 // Otherwise, returns a few different things on failure:
-//	-(EINVAL)	when mode is invalid or unsupported
+//	-(EINVAL)	when mode is invalid
+//	-(ENOTSUP)	when mode is unsupported
 // NOTE: See the comments in the SUNXI_FORCE_ROTA_INDEX_E enum.
-//       In particular, the fact that the most interesting modes aren't actually supported because of technical limitations...
+//       In particular, the fact that the most interesting modes aren't actually supported because of technical limitations,
+//       unless the custom fbdamage module has been loaded (earlier than the disp client you're trying to match)...
+//       c.f., <https://github.com/NiLuJe/mxc_epdc_fb_damage>.
 // NOTE: On success, this will reinit the state *now* (returning the exact same values as fbink_reinit).
 FBINK_API int fbink_sunxi_ntx_enforce_rota(int fbfd,
 					   SUNXI_FORCE_ROTA_INDEX_T mode,

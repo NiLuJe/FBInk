@@ -2738,11 +2738,22 @@ int
 	// Assume success, until shit happens ;)
 	int rv = EXIT_SUCCESS;
 
+	// Check whether we can actually use the fbdamage modes...
+	if (mode == FORCE_ROTA_CURRENT_ROTA || mode == FORCE_ROTA_CURRENT_LAYOUT || mode == FORCE_ROTA_WORKBUF) {
+		if (!sunxiCtx.has_fbdamage) {
+			WARN(
+			    "Unsupported fbdamage mode `%hhd` passed to fbink_sunxi_ntx_enforce_rota, keeping the current value: %hhd (%s)",
+			    mode,
+			    sunxiCtx.force_rota,
+			    sunxi_force_rota_to_string(sunxiCtx.force_rota));
+			rv = ERRCODE(ENOTSUP);
+			goto cleanup;
+		}
+	}
+
 	switch (mode) {
-		/*
 		case FORCE_ROTA_CURRENT_ROTA:
 		case FORCE_ROTA_CURRENT_LAYOUT:
-		*/
 		case FORCE_ROTA_PORTRAIT:
 		case FORCE_ROTA_LANDSCAPE:
 		case FORCE_ROTA_GYRO:
@@ -2750,14 +2761,12 @@ int
 		case FORCE_ROTA_CW:
 		case FORCE_ROTA_UD:
 		case FORCE_ROTA_CCW:
+		case FORCE_ROTA_WORKBUF:
 			sunxiCtx.force_rota = mode;
 			LOG("Set custom rotation handling mode to: %hhd (%s)",
 			    sunxiCtx.force_rota,
 			    sunxi_force_rota_to_string(sunxiCtx.force_rota));
 			break;
-		/*
-		case FORCE_ROTA_WORKBUF:
-		*/
 		default:
 			WARN(
 			    "Invalid mode `%hhd` passed to fbink_sunxi_ntx_enforce_rota, keeping the current value: %hhd (%s)",
@@ -3441,8 +3450,7 @@ static __attribute__((cold)) void
 		}
 	}
 
-	if (deviceQuirks.deviceId ==
-	    (('C' << 8U) | ('o' << 8U) | ('l' << 8U) | ('o' << 8U) | ('r' << 8U) | 'L' | 'u' | 'x')) {
+	if (deviceQuirks.deviceId == DEVICE_POCKETBOOK_COLOR_LUX) {
 		vInfo.bits_per_pixel = 24U;
 		vInfo.xres           = vInfo.xres / 3U;
 	}
@@ -3455,8 +3463,17 @@ static __attribute__((cold)) void
 {
 	// If necessary, query the accelerometer to check the current rotation...
 	if (sunxiCtx.force_rota >= FORCE_ROTA_UR) {
-		// NOTE: If we ever find a way to handle FORCE_ROTA_WORKBUF, this is where it would need to be handled ;).
-		vInfo.rotate = (uint32_t) sunxiCtx.force_rota;
+		if (sunxiCtx.force_rota == FORCE_ROTA_WORKBUF) {
+			// Attempt to match the working buffer...
+			int rotate = query_fbdamage();
+			if (rotate < 0) {
+				ELOG("FBDamage is inconclusive, assuming Upright");
+				rotate = FB_ROTATE_UR;
+			}
+			vInfo.rotate = (uint32_t) rotate;
+		} else {
+			vInfo.rotate = (uint32_t) sunxiCtx.force_rota;
+		}
 	} else if (!is_reinit) {
 		// fbink_reinit already took care of this, so this only affects explicit fbink_init calls.
 		// NOTE: Ideally, we should only affect the *first* fbink_init call, period...
@@ -3589,6 +3606,18 @@ static __attribute__((cold)) int
 		} else if (deviceQuirks.isSunxi) {
 			ELOG("Enabled sunxi quirks");
 
+			// NOTE: Check if the fbdamage kernel module is loaded,
+			//       as it'll allow us to actually suss out the current rotation
+			//       according to the working buffer, and not the gyro...
+			// NOTE: Only checking this on startup ought to be good enough,
+			//       as the module is only really truly useful when loaded very early during the boot process...
+			if (access(FBDAMAGE_ROTATE_SYSFS, F_OK) == 0) {
+				sunxiCtx.has_fbdamage = true;
+				ELOG("Working buffer rotation sniffing available, thanks to fbdamage");
+			} else {
+				sunxiCtx.has_fbdamage = false;
+			}
+
 			// NOTE: Allow selectively or completely overriding the accelerometer.
 			const char* force_rota = getenv("FBINK_FORCE_ROTA");
 			//       That implies that we'll always assume the screen is UR!
@@ -3596,11 +3625,33 @@ static __attribute__((cold)) int
 				// We can forgo the usual fun & games of strtol error checking,
 				// as a 0 on parsing errors suits us just fine here ;).
 				long int val = strtol(force_rota, NULL, 10);
+
+				// If we're attempting to use a mode that requires fbdamage *without* fbdamage,
+				// check and validate the fallback value instead...
+				if (val == FORCE_ROTA_CURRENT_ROTA || val == FORCE_ROTA_CURRENT_LAYOUT ||
+				    val == FORCE_ROTA_WORKBUF) {
+					if (!sunxiCtx.has_fbdamage) {
+						const char* force_rota_fallback = getenv("FBINK_FORCE_ROTA_FALLBACK");
+						if (force_rota_fallback) {
+							val = strtol(force_rota_fallback, NULL, 10);
+							if (val == FORCE_ROTA_CURRENT_ROTA ||
+							    val == FORCE_ROTA_CURRENT_LAYOUT ||
+							    val == FORCE_ROTA_WORKBUF) {
+								WARN(
+								    "Attempted to use a FBINK_FORCE_ROTA_FALLBACK mode that requires fbdamage");
+								val = FORCE_ROTA_NOTSUP;
+							}
+						} else {
+							WARN(
+							    "Attempted to use a FBINK_FORCE_ROTA mode that requires fbdamage without fbdamage being loaded and without a FBINK_FORCE_ROTA_FALLBACK mode set");
+							val = FORCE_ROTA_NOTSUP;
+						}
+					}
+				}
+
 				switch (val) {
-					/*
 					case FORCE_ROTA_CURRENT_ROTA:
 					case FORCE_ROTA_CURRENT_LAYOUT:
-					*/
 					case FORCE_ROTA_PORTRAIT:
 					case FORCE_ROTA_LANDSCAPE:
 					case FORCE_ROTA_GYRO:
@@ -3608,11 +3659,9 @@ static __attribute__((cold)) int
 					case FORCE_ROTA_CW:
 					case FORCE_ROTA_UD:
 					case FORCE_ROTA_CCW:
+					case FORCE_ROTA_WORKBUF:
 						sunxiCtx.force_rota = (SUNXI_FORCE_ROTA_INDEX_T) val;
 						break;
-					/*
-					case FORCE_ROTA_WORKBUF:
-					*/
 					default:
 						WARN("Invalid value `%s` for env var FBINK_FORCE_ROTA", force_rota);
 						sunxiCtx.force_rota = FORCE_ROTA_GYRO;
@@ -3651,7 +3700,7 @@ static __attribute__((cold)) int
 #	elif defined(FBINK_FOR_REMARKABLE)
 		// NOTE: Check if we're running on an rM 2, in which case abort with extreme prejudice,
 		//       because its kernel doesn't ship with an EPDC driver, despite running on an i.MX 7D...
-		if (deviceQuirks.deviceId == 2U) {
+		if (deviceQuirks.deviceId == DEVICE_REMARKABLE_2) {
 			// ... unless we're running under the https://github.com/ddvk/remarkable2-framebuffer shim
 			const char* rm2fb = getenv("RM2FB_SHIM");
 			if (rm2fb) {
@@ -4647,7 +4696,7 @@ void
 {
 	fprintf(
 	    stdout,
-	    "FBINK_VERSION='%s';viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isSunxi=%d;isKindleLegacy=%d;isKoboNonMT=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;",
+	    "FBINK_VERSION='%s';viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isSunxi=%d;SunxiHasFBDamage=%d;SunxiForceRota=%d;isKindleLegacy=%d;isKoboNonMT=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;",
 	    fbink_version(),
 	    viewWidth,
 	    viewHeight,
@@ -4677,6 +4726,13 @@ void
 	    deviceQuirks.deviceCodename,
 	    deviceQuirks.devicePlatform,
 	    deviceQuirks.isSunxi,
+#if defined(FBINK_FOR_KOBO)
+	    sunxiCtx.has_fbdamage,
+	    sunxiCtx.force_rota,
+#else
+	    false,
+	    FORCE_ROTA_NOTSUP,
+#endif
 	    deviceQuirks.isKindleLegacy,
 	    deviceQuirks.isKoboNonMT,
 	    deviceQuirks.ntxBootRota,
@@ -4705,22 +4761,29 @@ void
 		    fbink_state->device_codename, deviceQuirks.deviceCodename, sizeof(fbink_state->device_codename) - 1U);
 		strncpy(
 		    fbink_state->device_platform, deviceQuirks.devicePlatform, sizeof(fbink_state->device_platform) - 1U);
-		fbink_state->device_id               = deviceQuirks.deviceId;
-		fbink_state->pen_fg_color            = penFGColor;
-		fbink_state->pen_bg_color            = penBGColor;
-		fbink_state->screen_dpi              = deviceQuirks.screenDPI;
-		fbink_state->font_w                  = FONTW;
-		fbink_state->font_h                  = FONTH;
-		fbink_state->max_cols                = MAXCOLS;
-		fbink_state->max_rows                = MAXROWS;
-		fbink_state->view_hori_origin        = viewHoriOrigin;
-		fbink_state->view_vert_origin        = viewVertOrigin;
-		fbink_state->view_vert_offset        = viewVertOffset;
-		fbink_state->fontsize_mult           = FONTSIZE_MULT;
-		fbink_state->glyph_width             = glyphWidth;
-		fbink_state->glyph_height            = glyphHeight;
-		fbink_state->is_perfect_fit          = deviceQuirks.isPerfectFit;
-		fbink_state->is_sunxi                = deviceQuirks.isSunxi;
+		fbink_state->device_id        = deviceQuirks.deviceId;
+		fbink_state->pen_fg_color     = penFGColor;
+		fbink_state->pen_bg_color     = penBGColor;
+		fbink_state->screen_dpi       = deviceQuirks.screenDPI;
+		fbink_state->font_w           = FONTW;
+		fbink_state->font_h           = FONTH;
+		fbink_state->max_cols         = MAXCOLS;
+		fbink_state->max_rows         = MAXROWS;
+		fbink_state->view_hori_origin = viewHoriOrigin;
+		fbink_state->view_vert_origin = viewVertOrigin;
+		fbink_state->view_vert_offset = viewVertOffset;
+		fbink_state->fontsize_mult    = FONTSIZE_MULT;
+		fbink_state->glyph_width      = glyphWidth;
+		fbink_state->glyph_height     = glyphHeight;
+		fbink_state->is_perfect_fit   = deviceQuirks.isPerfectFit;
+		fbink_state->is_sunxi         = deviceQuirks.isSunxi;
+#if defined(FBINK_FOR_KOBO)
+		fbink_state->sunxi_has_fbdamage = sunxiCtx.has_fbdamage;
+		fbink_state->sunxi_force_rota   = sunxiCtx.force_rota;
+#else
+		fbink_state->sunxi_has_fbdamage = false;
+		fbink_state->sunxi_force_rota   = FORCE_ROTA_NOTSUP;
+#endif
 		fbink_state->is_kindle_legacy        = deviceQuirks.isKindleLegacy;
 		fbink_state->is_kobo_non_mt          = deviceQuirks.isKoboNonMT;
 		fbink_state->ntx_boot_rota           = deviceQuirks.ntxBootRota;
@@ -8287,8 +8350,16 @@ static int
 	const uint32_t old_rota = vInfo.rotate;
 	int            rotate;
 	if (sunxiCtx.force_rota >= FORCE_ROTA_UR) {
-		// NOTE: Same remark as in kobo_sunxi_fb_fixup about FORCE_ROTA_WORKBUF
-		rotate = sunxiCtx.force_rota;
+		if (sunxiCtx.force_rota == FORCE_ROTA_WORKBUF) {
+			// Attempt to match the working buffer...
+			rotate = query_fbdamage();
+			if (rotate < 0) {
+				ELOG("FBDamage is inconclusive, keeping current rotation");
+				rotate = (int) old_rota;
+			}
+		} else {
+			rotate = sunxiCtx.force_rota;
+		}
 	} else {
 		rotate = query_accelerometer();
 		if (rotate < 0) {

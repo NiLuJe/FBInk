@@ -36,7 +36,7 @@
 typedef struct
 {
 	unsigned short int screenDPI;
-	unsigned short int deviceId;
+	DEVICE_ID_T        deviceId;
 	char               deviceName[16];
 	char               deviceCodename[16];
 	char               devicePlatform[16];
@@ -209,6 +209,7 @@ typedef struct
 	// NOTE: If we could actually somehow detect Nickel's (and/or the working buffer's) actual screen layout/rotation,
 	//       this would be even more useful, because right now it's just a weird kludge...
 	SUNXI_FORCE_ROTA_INDEX_T  force_rota;
+	bool                      has_fbdamage;
 } FBInkKoboSunxi;
 #endif    // FBINK_FOR_KOBO
 

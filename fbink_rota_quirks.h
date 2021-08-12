@@ -48,6 +48,7 @@ static __attribute__((cold)) const char* gyro_state_to_string(int state);
 static int                               translate_kx122(uint16_t val);
 static int                               query_kx122(void);
 static int                               query_accelerometer(void);
+static int                               query_fbdamage(void);
 
 // Custom constants for accelerometer translations
 #	define GYRO_STATE_UNKNOWN             -1

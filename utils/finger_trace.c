@@ -140,12 +140,12 @@ static void
 	// Deal with device-specific rotation quirks...
 	FTrace_Coordinates canonical_pos;
 	// c.f., https://github.com/koreader/koreader/blob/master/frontend/device/kobo/device.lua
-	if (fbink_state->device_id == 310U || fbink_state->device_id == 320U) {
+	if (fbink_state->device_id == DEVICE_KOBO_TOUCH_AB || fbink_state->device_id == DEVICE_KOBO_TOUCH_C) {
 		// Touch A/B & Touch C. This will most likely be wrong for one of those.
 		// touch_mirrored_x
 		canonical_pos.x = ctx->dim_swap - touch->pos.x;
 		canonical_pos.y = touch->pos.y;
-	} else if (fbink_state->device_id == 374U) {
+	} else if (fbink_state->device_id == DEVICE_KOBO_AURA_H2O_2) {
 		// Aura H2O²r1
 		// touch_switch_xy
 		canonical_pos.x = touch->pos.y;

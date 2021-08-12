@@ -452,6 +452,8 @@ FBInkKoboSunxi sunxiCtx = { .disp_fd    = -1,
 			    .layer      = { { 0 } },
 			    .rota       = 0U,
 			    .force_rota = FORCE_ROTA_GYRO };
+// Provided by <https://github.com/NiLuJe/mxc_epdc_fb_damage>
+#	define FBDAMAGE_ROTATE_SYSFS "/sys/devices/virtual/fbdamage/fbdamage/rotate"
 #endif
 struct fb_var_screeninfo vInfo;
 struct fb_fix_screeninfo fInfo;
