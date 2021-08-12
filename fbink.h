@@ -329,14 +329,15 @@ typedef uint8_t NTX_ROTA_INDEX_T;
 // A struct to dump FBInk's internal state into, like fbink_state_dump() would, but in C ;)
 typedef struct
 {
-	long int user_hz;                  // USER_HZ (should pretty much always be 100)
-	const char* restrict font_name;    // fbink_cfg->fontname (c.f., fontname_to_string())
-	uint32_t view_width;               // viewWidth (MAY be different than screen_width on devices with a viewport)
-	uint32_t view_height;              // viewHeight (ditto)
-	uint32_t screen_width;       // screenWidth (Effective width, c.f., is_ntx_quirky_landscape & initialize_fbink())
-	uint32_t screen_height;      // screenHeight (ditto)
-	uint32_t bpp;                // vInfo.bits_per_pixel
-	char     device_name[16];    // deviceQuirks.deviceName (short common name, no brand)
+    long int user_hz;                   // USER_HZ (should pretty much always be 100)
+    const char* restrict font_name;     // fbink_cfg->fontname (c.f., fontname_to_string())
+    uint32_t view_width;                // viewWidth (MAY be different than screen_width on devices with a viewport)
+    uint32_t view_height;               // viewHeight (ditto)
+    uint32_t screen_width;              // screenWidth (Effective width, c.f., is_ntx_quirky_landscape & initialize_fbink())
+    uint32_t screen_height;             // screenHeight (ditto)
+    uint32_t screen_stride;             // screen line length in bytes;
+    uint32_t bpp;                       // vInfo.bits_per_pixel
+    char     device_name[16];           // deviceQuirks.deviceName (short common name, no brand)
 	char     device_codename[16];       // deviceQuirks.deviceCodename
 	char     device_platform[16];       // deviceQuirks.devicePlatform (often a codename, too)
 	unsigned short int device_id;       // deviceQuirks.deviceId (decimal value, c.f., identify_device() on Kindle!)
@@ -349,18 +350,19 @@ typedef struct
 	unsigned short int max_rows;        // MAXROWS (ditto)
 	uint8_t view_hori_origin;           // viewHoriOrigin (would be non-zero on devices with a horizontal viewport)
 	uint8_t view_vert_origin;           // viewVertOrigin (origin in px of row 0, includes viewport + viewVertOffset)
-	uint8_t view_vert_offset;    // viewVertOffset (shift in px needed to vertically balance rows over viewHeight)
-	uint8_t fontsize_mult;       // FONTSIZE_MULT (current cell scaling multiplier)
-	uint8_t glyph_width;         // glyphWidth (native width of a glyph cell, i.e. unscaled)
-	uint8_t glyph_height;        // glyphHeight (native height of a glyph cell, i.e. unscaled)
-	bool    is_perfect_fit;      // deviceQuirks.isPerfectFit (horizontal column balance is perfect over viewWidth)
-	bool    is_sunxi;            // deviceQuirks.isSunxi (device is running on an AllWinner SoC)
-	bool is_kindle_legacy;    // deviceQuirks.isKindleLegacy (device is a Kindle using the original einkfb EPDC API)
-	bool is_kobo_non_mt;      // deviceQuirks.isKoboNonMT (device is a Kobo with no MultiTouch input support)
+    uint8_t view_vert_offset;           // viewVertOffset (shift in px needed to vertically balance rows over viewHeight)
+    uint8_t fontsize_mult;              // FONTSIZE_MULT (current cell scaling multiplier)
+    uint8_t glyph_width;                // glyphWidth (native width of a glyph cell, i.e. unscaled)
+    uint8_t glyph_height;               // glyphHeight (native height of a glyph cell, i.e. unscaled)
+    bool    is_perfect_fit;             // deviceQuirks.isPerfectFit (horizontal column balance is perfect over viewWidth)
+    bool    is_sunxi;                   // deviceQuirks.isSunxi (device is running on an AllWinner SoC)
+    bool is_kindle_legacy;              // deviceQuirks.isKindleLegacy (device is a Kindle using the original einkfb EPDC API)
+    bool is_kobo_non_mt;                // deviceQuirks.isKoboNonMT (device is a Kobo with no MultiTouch input support)
 	uint8_t          ntx_boot_rota;     // deviceQuirks.ntxBootRota (Native rotation at boot)
 	NTX_ROTA_INDEX_T ntx_rota_quirk;    // deviceQuirks.ntxRotaQuirk (c.f., utils/dump.c)
 	bool    is_ntx_quirky_landscape;    // deviceQuirks.isNTX16bLandscape (rotation compensation is in effect)
-	uint8_t current_rota;               // vInfo.rotate (current rotation, c.f., <linux/fb.h>)
+    uint8_t current_rota_native;        // native screen rotaiton; vInfo.rotate (current rotation, c.f., <linux/fb.h>)
+    uint8_t current_rota_canonical;     // canonical screen rotation
 	bool    can_rotate;                 // deviceQuirks.canRotate (device has a gyro)
 	bool    can_hw_invert;              // deviceQuirks.canHWInvert (device can use EPDC inversion)
 } FBInkState;
