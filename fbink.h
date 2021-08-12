@@ -196,6 +196,7 @@ typedef uint8_t BG_COLOR_INDEX_T;
 // Available states for fbink_sunxi_ntx_enforce_rota
 typedef enum
 {
+	FORCE_ROTA_NOTSUP       = INT8_MIN,    // For FBInkState on non-sunxi platforms
 	FORCE_ROTA_CURRENT_ROTA = -5,    // Honor the gyro if it matches the working buffer's rotation (NOTE: Unsupported)
 	FORCE_ROTA_CURRENT_LAYOUT = -4,    // Honor the gyro if it matches the working buffer's layout (NOTE: Unsupported)
 	FORCE_ROTA_PORTRAIT       = -3,    // Honor the gyro if it matches a Portrait layout
@@ -355,6 +356,7 @@ typedef struct
 	uint8_t glyph_height;        // glyphHeight (native height of a glyph cell, i.e. unscaled)
 	bool    is_perfect_fit;      // deviceQuirks.isPerfectFit (horizontal column balance is perfect over viewWidth)
 	bool    is_sunxi;            // deviceQuirks.isSunxi (device is running on an AllWinner SoC)
+	SUNXI_FORCE_ROTA_INDEX_T sunxi_force_rota;    // sunxiCtx.force_rota (current effective value)
 	bool is_kindle_legacy;    // deviceQuirks.isKindleLegacy (device is a Kindle using the original einkfb EPDC API)
 	bool is_kobo_non_mt;      // deviceQuirks.isKoboNonMT (device is a Kobo with no MultiTouch input support)
 	uint8_t          ntx_boot_rota;     // deviceQuirks.ntxBootRota (Native rotation at boot)

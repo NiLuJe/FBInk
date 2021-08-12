@@ -4647,7 +4647,7 @@ void
 {
 	fprintf(
 	    stdout,
-	    "FBINK_VERSION='%s';viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isSunxi=%d;isKindleLegacy=%d;isKoboNonMT=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;",
+	    "FBINK_VERSION='%s';viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isSunxi=%d;SunxiForceRota=%d;isKindleLegacy=%d;isKoboNonMT=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;",
 	    fbink_version(),
 	    viewWidth,
 	    viewHeight,
@@ -4677,6 +4677,11 @@ void
 	    deviceQuirks.deviceCodename,
 	    deviceQuirks.devicePlatform,
 	    deviceQuirks.isSunxi,
+#if defined(FBINK_FOR_KOBO)
+	    sunxiCtx.force_rota,
+#else
+	    FORCE_ROTA_NOTSUP,
+#endif
 	    deviceQuirks.isKindleLegacy,
 	    deviceQuirks.isKoboNonMT,
 	    deviceQuirks.ntxBootRota,
@@ -4704,22 +4709,27 @@ void
 		    fbink_state->device_codename, deviceQuirks.deviceCodename, sizeof(fbink_state->device_codename) - 1U);
 		strncpy(
 		    fbink_state->device_platform, deviceQuirks.devicePlatform, sizeof(fbink_state->device_platform) - 1U);
-		fbink_state->device_id               = deviceQuirks.deviceId;
-		fbink_state->pen_fg_color            = penFGColor;
-		fbink_state->pen_bg_color            = penBGColor;
-		fbink_state->screen_dpi              = deviceQuirks.screenDPI;
-		fbink_state->font_w                  = FONTW;
-		fbink_state->font_h                  = FONTH;
-		fbink_state->max_cols                = MAXCOLS;
-		fbink_state->max_rows                = MAXROWS;
-		fbink_state->view_hori_origin        = viewHoriOrigin;
-		fbink_state->view_vert_origin        = viewVertOrigin;
-		fbink_state->view_vert_offset        = viewVertOffset;
-		fbink_state->fontsize_mult           = FONTSIZE_MULT;
-		fbink_state->glyph_width             = glyphWidth;
-		fbink_state->glyph_height            = glyphHeight;
-		fbink_state->is_perfect_fit          = deviceQuirks.isPerfectFit;
-		fbink_state->is_sunxi                = deviceQuirks.isSunxi;
+		fbink_state->device_id        = deviceQuirks.deviceId;
+		fbink_state->pen_fg_color     = penFGColor;
+		fbink_state->pen_bg_color     = penBGColor;
+		fbink_state->screen_dpi       = deviceQuirks.screenDPI;
+		fbink_state->font_w           = FONTW;
+		fbink_state->font_h           = FONTH;
+		fbink_state->max_cols         = MAXCOLS;
+		fbink_state->max_rows         = MAXROWS;
+		fbink_state->view_hori_origin = viewHoriOrigin;
+		fbink_state->view_vert_origin = viewVertOrigin;
+		fbink_state->view_vert_offset = viewVertOffset;
+		fbink_state->fontsize_mult    = FONTSIZE_MULT;
+		fbink_state->glyph_width      = glyphWidth;
+		fbink_state->glyph_height     = glyphHeight;
+		fbink_state->is_perfect_fit   = deviceQuirks.isPerfectFit;
+		fbink_state->is_sunxi         = deviceQuirks.isSunxi;
+#if defined(FBINK_FOR_KOBO)
+		fbink_state->sunxi_force_rota = sunxiCtx.force_rota;
+#else
+		fbink_state->sunxi_force_rota = FORCE_ROTA_NOTSUP;
+#endif
 		fbink_state->is_kindle_legacy        = deviceQuirks.isKindleLegacy;
 		fbink_state->is_kobo_non_mt          = deviceQuirks.isKoboNonMT;
 		fbink_state->ntx_boot_rota           = deviceQuirks.ntxBootRota;
