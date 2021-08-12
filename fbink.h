@@ -1156,7 +1156,7 @@ FBINK_API int fbink_toggle_sunxi_ntx_pen_mode(int fbfd, bool toggle);
 // NOTE: See the comments in the SUNXI_FORCE_ROTA_INDEX_E enum.
 //       In particular, the fact that the most interesting modes aren't actually supported because of technical limitations...
 // NOTE: On success, this will reinit the state *now* (returning the exact same values as fbink_reinit).
-FBINK_API int fbink_sunxi_ntx_enforce_rota(int                      fbfd,
+FBINK_API int fbink_sunxi_ntx_enforce_rota(int fbfd,
 					   SUNXI_FORCE_ROTA_INDEX_T mode,
 					   const FBInkConfig* restrict fbink_cfg);
 
@@ -1165,6 +1165,22 @@ FBINK_API int fbink_sunxi_ntx_enforce_rota(int                      fbfd,
 // If the framebuffer is not yet allocated it will do so and return the result of the operation.
 FBINK_API int
     fbink_get_fb_pointer(int fbfd, FBPtrInfo *fbInfo);
+
+
+// Grants direct access to the frame buffer pointer as well as the size of the frame buffer allocation.
+// If the framebuffer is not yet allocated it will do so and return the result of the operation.
+FBINK_API int
+    fbink_get_fb_pointer(int fbfd, FBPtrInfo *fbInfo);
+
+
+// Sets the framebuffer bits per pixel and rotation and inwoke a reinit afterwards
+// bpp will remain unchanged if the value is < 8
+// req_gray will remain unchanged if the value is < 0
+// on sunxi devices it will inwoke fbink_sunxi_ntx_enforce_rota
+FBINK_API int
+    fbink_set_fb_info(int fbFd, int32_t bpp, int8_t rota, int32_t req_gray,
+               const FBInkConfig* restrict fbink_cfg);
+
 
 
 //

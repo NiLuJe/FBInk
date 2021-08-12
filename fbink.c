@@ -10847,6 +10847,199 @@ int
 }
 
 
+#ifdef FBINK_FOR_KINDLE
+static orientation_t
+    linuxfb_rotate_to_einkfb_orientation(uint32_t rotate)
+{
+    switch (rotate) {
+        case FB_ROTATE_UR:
+            return orientation_portrait;
+        case FB_ROTATE_CW:
+            return orientation_landscape;
+        case FB_ROTATE_UD:
+            return orientation_portrait_upside_down;
+        case FB_ROTATE_CCW:
+            return orientation_landscape_upside_down;
+        default:
+            // Should never happen.
+            return orientation_portrait;
+    }
+}
+
+static uint32_t
+    einkfb_orientation_to_linuxfb_rotate(orientation_t orientation)
+{
+    switch (orientation) {
+        case orientation_portrait:
+            return FB_ROTATE_UR;
+        case orientation_portrait_upside_down:
+            return FB_ROTATE_UD;
+        case orientation_landscape:
+            return FB_ROTATE_CW;
+        case orientation_landscape_upside_down:
+            return FB_ROTATE_CCW;
+        default:
+            // Should never happen.
+            return FB_ROTATE_UR;
+    }
+}
+#endif
+
+int
+    fbink_set_fb_info(int fbfd, int32_t bpp, int8_t rota, int32_t req_gray,
+               const FBInkConfig* restrict fbink_cfg)
+{
+    // Set variable fb info
+    // Bitdepth; leave unchanged if < 8
+    if (bpp >= 8) {
+        vInfo.bits_per_pixel = (uint32_t)bpp;
+        LOG("Setting bitdepth to %ubpp", vInfo.bits_per_pixel);
+    }
+
+    // Grayscale flag
+    // Bitdepth; leave unchanged if < 0
+    if (bpp >= 0) {
+        vInfo.grayscale = (uint32_t)req_gray;
+        LOG("Setting grayscale to %u", vInfo.grayscale);
+    }
+
+    if (deviceQuirks.isSunxi) {
+        int rv = fbink_sunxi_ntx_enforce_rota(fbfd, rota, fbink_cfg);
+        return rv;
+    }
+
+
+    // NOTE: We have to counteract the rotation shenanigans the Kernel might be enforcing...
+    //       c.f., mxc_epdc_fb_check_var @ drivers/video/mxc/mxc_epdc_fb.c OR drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c
+    //       The goal being to end up in the *same* effective rotation as before.
+    // First, remember the current rotation as the expected one...
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES) || defined(FBINK_FOR_KINDLE)
+    uint32_t expected_rota = vInfo.rotate;
+#endif
+    // Then, set the requested rotation, if there was one...
+    if (rota != -1) {
+        vInfo.rotate = (uint32_t) rota;
+        LOG("Setting rotate to %u (%s)", vInfo.rotate, fb_rotate_to_string(vInfo.rotate));
+        // And flag it as the expected rota for the sanity checks
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES) || defined(FBINK_FOR_KINDLE)
+        expected_rota = (uint32_t) rota;
+#endif
+    }
+
+    if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
+        perror("ioctl PUT_V");
+        return ERRCODE(EXIT_FAILURE);
+    }
+
+#ifdef FBINK_FOR_KINDLE
+    // Deal once again with einkfb properly...
+    if (deviceQuirks.isKindleLegacy) {
+        orientation_t orientation = linuxfb_rotate_to_einkfb_orientation(expected_rota);
+        if (ioctl(fbfd, FBIO_EINK_SET_DISPLAY_ORIENTATION, orientation)) {
+            perror("ioctl FBIO_EINK_SET_DISPLAY_ORIENTATION");
+            return ERRCODE(EXIT_FAILURE);
+        }
+
+        LOG("Setting actual einkfb orientation to %u (%s)",
+            orientation,
+            einkfb_orientation_to_string(orientation));
+    }
+#endif
+
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
+    // NOTE: Double-check that we weren't bit by rotation quirks...
+    if (vInfo.rotate != expected_rota) {
+        LOG("\nCurrent rotation (%u) doesn't match the expected rotation (%u), attempting to fix it . . .",
+            vInfo.rotate,
+            expected_rota);
+
+        // Brute-force it until it matches...
+        for (uint32_t i = vInfo.rotate, j = FB_ROTATE_UR; j <= FB_ROTATE_CCW; i = (i + 1U) & 3U, j++) {
+            // If we finally got the right orientation, break the loop
+            if (vInfo.rotate == expected_rota) {
+                break;
+            }
+            // Do the i -> i + 1 -> i dance to be extra sure...
+            // (This is useful on devices where the kernel *always* switches to the invert orientation, c.f., rota.c)
+            vInfo.rotate = i;
+            if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
+                perror("ioctl PUT_V");
+                return ERRCODE(EXIT_FAILURE);
+            }
+            LOG("Kernel rotation quirk recovery: %u -> %u", i, vInfo.rotate);
+
+            // Don't do anything extra if that was enough...
+            if (vInfo.rotate == expected_rota) {
+                continue;
+            }
+            // Now for i + 1 w/ wraparound, since the valid rotation range is [0..3] (FB_ROTATE_UR to FB_ROTATE_CCW).
+            // (i.e., a Portrait/Landscape swap to counteract potential side-effects of a kernel-side mandatory invert)
+            uint32_t n   = (i + 1U) & 3U;
+            vInfo.rotate = n;
+            if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
+                perror("ioctl PUT_V");
+                return ERRCODE(EXIT_FAILURE);
+            }
+            LOG("Kernel rotation quirk recovery (intermediary @ %u): %u -> %u", i, n, vInfo.rotate);
+
+            // And back to i, if need be...
+            if (vInfo.rotate == expected_rota) {
+                continue;
+            }
+            vInfo.rotate = i;
+            if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
+                perror("ioctl PUT_V");
+                return ERRCODE(EXIT_FAILURE);
+            }
+            LOG("Kernel rotation quirk recovery: %u -> %u", i, vInfo.rotate);
+        }
+    }
+
+    // Finally, warn if things *still* look FUBAR...
+    if (vInfo.rotate != expected_rota) {
+        LOG("\nCurrent rotation (%u) doesn't match the expected rotation (%u), here be dragons!",
+            vInfo.rotate,
+            expected_rota);
+    }
+
+    // NOTE: On sunxi, warn if bitdepth switch failed (as the minimal fb driver will refuse to switch to 8bpp,
+    //       c.f., var_to_disp_fb @ drivers/video/fbdev/sunxi/disp2/disp/dev_fb.c).
+    //       Thankfully, we don't actually need it to ;).
+    // In the same way, the rotate flag is meaningless, as Nickel never updates it (rotation is purely handled via G2D flags).
+    // But, it *is* saved (as is the grayscale flag).
+    if (deviceQuirks.isSunxi) {
+        if (vInfo.bits_per_pixel != bpp) {
+            LOG("\nCurrent bitdepth (%u) doesn't match the requested one (%d), it's probably unsupported by the minimal disp fb driver.",
+                vInfo.bits_per_pixel,
+                bpp);
+        }
+    }
+#endif
+
+#ifdef FBINK_FOR_KINDLE
+    // And, again, einkfb is a special snowflake...
+    if (deviceQuirks.isKindleLegacy) {
+        orientation_t orientation = orientation_portrait;
+        if (ioctl(fbfd, FBIO_EINK_GET_DISPLAY_ORIENTATION, &orientation)) {
+            perror("ioctl FBIO_EINK_GET_DISPLAY_ORIENTATION");
+            return ERRCODE(EXIT_FAILURE);
+        }
+
+        LOG("Actual einkfb orientation is now %u (%s)", orientation, einkfb_orientation_to_string(orientation));
+    }
+#endif
+    LOG("Bitdepth is now %ubpp (grayscale: %u) @ rotate: %u (%s)\n",
+        vInfo.bits_per_pixel,
+        vInfo.grayscale,
+        vInfo.rotate,
+        fb_rotate_to_string(vInfo.rotate));
+
+    int rv = fbink_reinit(fbfd, fbink_cfg);
+
+    return rv;
+}
+
+
 // And now, we just bundle auxiliary parts of the public or private API,
 // that are implemented in separate source files because they deal with a specific concept,
 // but that still rely heavily on either the public or the private API.
