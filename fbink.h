@@ -1265,10 +1265,11 @@ FBINK_API int
     fbink_get_fb_pointer(int fbfd, FBPtrInfo *fbInfo);
 
 
-// Sets the framebuffer bits per pixel and rotation and inwoke a reinit afterwards
+// Sets the framebuffer bits per pixel and rotation and invoke a reinit afterwards
+// rota will be the rotation in natve format; use fbink_rota_canonical_to_native to convert it to canonical
 // bpp will remain unchanged if the value is < 8
 // req_gray will remain unchanged if the value is < 0
-// on sunxi devices it will inwoke fbink_sunxi_ntx_enforce_rota
+// on sunxi devices it will invoke fbink_sunxi_ntx_enforce_rota
 FBINK_API int
     fbink_set_fb_info(int fbFd, int32_t bpp, int8_t rota, int32_t req_gray,
                const FBInkConfig* restrict fbink_cfg);
