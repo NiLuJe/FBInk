@@ -45,6 +45,9 @@ cdecl_c99_type(HW_DITHER_INDEX_T, uint8_t)
 cdecl_type(NTX_ROTA_INDEX_E)
 cdecl_c99_type(NTX_ROTA_INDEX_T, uint8_t)
 
+cdecl_type(SUNXI_FORCE_ROTA_INDEX_E)
+cdecl_c99_type(SUNXI_FORCE_ROTA_INDEX_T, int8_t)
+
 // Config structs
 cdecl_type(FBInkState)
 
@@ -125,6 +128,4 @@ cdecl_func(fbink_rota_canonical_to_native)
 cdecl_func(fbink_invert_screen)
 
 cdecl_func(fbink_toggle_sunxi_ntx_pen_mode)
-cdecl_type(SUNXI_FORCE_ROTA_INDEX_E)
-cdecl_c99_type(SUNXI_FORCE_ROTA_INDEX_T, int8_t)
 cdecl_func(fbink_sunxi_ntx_enforce_rota)
