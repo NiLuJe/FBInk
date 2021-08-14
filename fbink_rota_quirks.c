@@ -523,6 +523,7 @@ int
 		case 16U:
 		case 24U:    // Technically supported here, but often hilariously broken in practice.
 		case 32U:
+		case KEEP_CURRENT_BITDEPTH:
 			// NOP
 			break;
 		default:
@@ -534,6 +535,7 @@ int
 		case 0U:
 		case GRAYSCALE_8BIT:
 		case GRAYSCALE_8BIT_INVERTED:
+		case KEEP_CURRENT_GRAYSCALE:
 			// NOP
 			break;
 		default:
