@@ -513,7 +513,7 @@ int
 
 	// We have our own private buffer on sunxi, so we can only deal with rotation...
 	if (deviceQuirks.isSunxi) {
-		return fbink_sunxi_ntx_enforce_rota(fbfd, rota, fbink_cfg);
+		return fbink_sunxi_ntx_enforce_rota(fbfd, (SUNXI_FORCE_ROTA_INDEX_T) rota, fbink_cfg);
 	}
 
 	// Validate the rest...
