@@ -570,14 +570,6 @@ typedef struct
 	bool      is_full;
 } FBInkDump;
 
-// For fbink_get_fb_pointer
-typedef struct
-{
-	unsigned char* fbPtr;
-	unsigned long  allocationSize;
-
-} FBPtrInfo;
-
 //
 ////
 //
@@ -599,7 +591,7 @@ FBINK_API int fbink_open(void);
 FBINK_API int fbink_close(int fbfd);
 
 // Initialize internal variables keeping track of the framebuffer's configuration and state, as well as the device's hardware.
-// MUST be called at least *once* before any fbink_print* or fbink_dump/restore functions.
+// MUST be called at least *once* before any fbink_print*, fbink_dump/restore, fbink_cls or fbink_grid* functions.
 // CAN safely be called multiple times,
 //     but doing so is only necessary if the framebuffer's state has changed (although fbink_reinit is preferred in this case),
 //     or if you modified one of the FBInkConfig fields that affects its results (listed below).
@@ -1216,6 +1208,32 @@ FBINK_API uint32_t fbink_rota_canonical_to_native(uint8_t rotate);
 FBINK_API int fbink_invert_screen(int fbfd, const FBInkConfig* restrict fbink_cfg);
 
 //
+// The functions below are much lower level than the rest of the API:
+// outside of GUI toolkit implementations and very specific workflows, you shouldn't need to rely on them.
+//
+// Grants direct access to the backing buffer's base pointer, as well as its size (in bytes; e.g., smem_len).
+// MUST NOT be called before fbink_init
+// MUST NOT be called with an FBFD_AUTO fbfd
+// MAY be called before before any fbink_print*, fbink_dump/restore, fbink_cls or fbink_grid* functions.
+//     (i.e., it'll implicitly setup the backing buffer if necessary).
+// Returns NULL on failure (in which case, *buffer_size is set to 0).
+// fbfd:		Open file descriptor to the framebuffer character device,
+//				cannot be set to FBFD_AUTO!
+// buffer_size:		Out parameter. On success, will be set to the buffer's size, in bytes.
+FBINK_API unsigned char* fbink_get_fb_pointer(int fbfd, size_t* buffer_size);
+
+// Sets the framebuffer bits per pixel and rotation and invoke a reinit afterwards
+// rota will be the rotation in natve format; use fbink_rota_canonical_to_native to convert it to canonical
+// bpp will remain unchanged if the value is < 8
+// req_gray will remain unchanged if the value is < 0
+// on sunxi devices it will invoke fbink_sunxi_ntx_enforce_rota
+FBINK_API int fbink_set_fb_info(int     fbFd,
+				int32_t bpp,
+				int8_t  rota,
+				int32_t req_gray,
+				const FBInkConfig* restrict fbink_cfg);
+
+//
 // The functions below are tied to specific capabilities on Kobo devices with a sunxi SoC (e.g., the Elipsa).
 //
 // Toggle the "pen" refresh mode. c.f., eink/sunxi-kobo.h @ DISP_EINK_SET_NTX_HANDWRITE_ONOFF for more details.
@@ -1250,21 +1268,6 @@ FBINK_API int fbink_toggle_sunxi_ntx_pen_mode(int fbfd, bool toggle);
 FBINK_API int fbink_sunxi_ntx_enforce_rota(int                      fbfd,
 					   SUNXI_FORCE_ROTA_INDEX_T mode,
 					   const FBInkConfig* restrict fbink_cfg);
-
-// Grants direct access to the frame buffer pointer as well as the size of the frame buffer allocation.
-// If the framebuffer is not yet allocated it will do so and return the result of the operation.
-FBINK_API int fbink_get_fb_pointer(int fbfd, FBPtrInfo* fbInfo);
-
-// Sets the framebuffer bits per pixel and rotation and invoke a reinit afterwards
-// rota will be the rotation in natve format; use fbink_rota_canonical_to_native to convert it to canonical
-// bpp will remain unchanged if the value is < 8
-// req_gray will remain unchanged if the value is < 0
-// on sunxi devices it will invoke fbink_sunxi_ntx_enforce_rota
-FBINK_API int fbink_set_fb_info(int     fbFd,
-				int32_t bpp,
-				int8_t  rota,
-				int32_t req_gray,
-				const FBInkConfig* restrict fbink_cfg);
 
 //
 ///

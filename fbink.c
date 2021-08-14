@@ -10899,19 +10899,31 @@ FBInkRect
 }
 
 // Grants direct access to the frame buffer pointer as well as the size of the frame buffer allocation
-int
-    fbink_get_fb_pointer(int fbfd, FBPtrInfo* fbInfo)
+unsigned char*
+    fbink_get_fb_pointer(int fbfd, size_t* buffer_size)
 {
+	if (!deviceQuirks.skipId) {
+		PFWARN("FBInk hasn't been initialized yet");
+		goto failure;
+	}
+
+	if (fbfd == FBFD_AUTO) {
+		PFWARN("Requires a persistent backing buffer");
+		goto failure;
+	}
+
 	if (!isFbMapped) {
 		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
-			return ERRCODE(EXIT_FAILURE);
+			goto failure;
 		}
 	}
 
-	fbInfo->fbPtr          = fbPtr;
-	fbInfo->allocationSize = deviceQuirks.isSunxi ? sunxiCtx.alloc_size : fInfo.smem_len;
+	*buffer_size = deviceQuirks.isSunxi ? sunxiCtx.alloc_size : fInfo.smem_len;
+	return fbPtr;
 
-	return EXIT_SUCCESS;
+failure:
+	*buffer_size = 0U;
+	return NULL;
 }
 
 // And now, we just bundle auxiliary parts of the public or private API,
