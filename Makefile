@@ -692,7 +692,7 @@ libi2c.built:
 	CC=$(CC) AR=$(AR) \
 	CFLAGS="$(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(I2C_CFLAGS)" \
 	PREFIX="/" libdir="/lib" DESTDIR="$(CURDIR)/libi2c-staged" \
-	lib install-lib install-include
+	install-lib install-include
 	touch libi2c.built
 
 libevdev.built:
