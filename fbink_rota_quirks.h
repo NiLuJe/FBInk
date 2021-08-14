@@ -50,6 +50,11 @@ static int                               query_kx122(void);
 static int                               query_accelerometer(void);
 static int                               query_fbdamage(void);
 
+#	ifdef FBINK_FOR_KINDLE
+static orientation_t linuxfb_rotate_to_einkfb_orientation(uint32_t);
+static uint32_t      einkfb_orientation_to_linuxfb_rotate(orientation_t);
+#        endif
+
 // Custom constants for accelerometer translations
 #	define GYRO_STATE_UNKNOWN             -1
 #	define GYRO_STATE_FACE_UP             -2
