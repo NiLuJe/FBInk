@@ -1204,6 +1204,7 @@ FBINK_API uint32_t fbink_rota_canonical_to_native(uint8_t rotate);
 // to trigger a full "nightmode" swap, without actually having to redraw anything.
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
+// fbink_cfg:		Pointer to an FBInkConfig struct.
 // NOTE: On Kobo devices with a sunxi SoC, you will not be able to affect content that you haven't drawn yourself first.
 FBINK_API int fbink_invert_screen(int fbfd, const FBInkConfig* restrict fbink_cfg);
 
@@ -1222,15 +1223,39 @@ FBINK_API int fbink_invert_screen(int fbfd, const FBInkConfig* restrict fbink_cf
 // buffer_size:		Out parameter. On success, will be set to the buffer's size, in bytes.
 FBINK_API unsigned char* fbink_get_fb_pointer(int fbfd, size_t* buffer_size);
 
-// Sets the framebuffer bits per pixel and rotation and invoke a reinit afterwards
-// rota will be the rotation in natve format; use fbink_rota_canonical_to_native to convert it to canonical
-// bpp will remain unchanged if the value is < 8
-// req_gray will remain unchanged if the value is < 0
-// on sunxi devices it will invoke fbink_sunxi_ntx_enforce_rota
-FBINK_API int fbink_set_fb_info(int     fbFd,
-				int32_t bpp,
-				int8_t  rota,
-				int32_t req_gray,
+// Magic constants for fbink_set_fb_info (> INT8_MAX to steer clear of legitimate values)
+#define KEEP_CURRENT_ROTATE    (1 << 7)
+#define KEEP_CURRENT_BITDEPTH  (1 << 7)
+#define KEEP_CURRENT_GRAYSCALE (1 << 7)
+// Sets the framebuffer's bitdepth and/or native rotation.
+// MUST NOT be called before fbink_init
+// Only tested on Kobo & Kindle, here be dragons on other platforms!
+// Returns a few different things on failure:
+//	-(ENODEV)	if called before fbink_init
+//	-(EINVAL)	when one of rota/bpp/grayscale is invalid
+// NOTE: On sunxi, only the rotation can be controlled: i.e., this will simply invoke fbink_sunxi_ntx_enforce_rota,
+//       except we only accept values matching linuxfb rotation constants.
+//       Prefer using fbink_sunxi_ntx_enforce_rota directly yourself.
+// NOTE: On success, this will reinit the state *now* (returning the exact same values as fbink_reinit).
+// fbfd:		Open file descriptor to the framebuffer character device.
+//				if set to FBFD_AUTO, the fb is opened for the duration of this call.
+// rota:		*native* linuxfb rotation value (c.f., fbink_rota_canonical_to_native).
+//				Untouched if set to KEEP_CURRENT_ROTATE
+// bpp:			bitdepth value (in bits).
+//				Supported values: 4, 8, 16, 32
+//				Untouched if set to KEEP_CURRENT_BITDEPTH
+// grayscale:		grayscale value.
+//				(enforced to 0 if bpp != 8).
+//				If bpp == 8, only meaningful on mxcfb:
+//				Generally set to GRAYSCALE_8BIT (1),
+//				setting it to GRAYSCALE_8BIT_INVERTED (2)
+//				will automagically enforce HW inversion via EPDC_FLAG_ENABLE_INVERSION
+//				Untouched if set to KEEP_CURRENT_GRAYSCALE
+// fbink_cfg:		Pointer to an FBInkConfig struct.
+FBINK_API int fbink_set_fb_info(int      fbfd,
+				uint32_t rota,
+				uint8_t  bpp,
+				uint8_t  grayscale,
 				const FBInkConfig* restrict fbink_cfg);
 
 //
