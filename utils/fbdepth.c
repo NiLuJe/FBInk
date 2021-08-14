@@ -285,7 +285,7 @@ static bool
 #endif
 	}
 #if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
-	// When we do a canonical rotation conversion, this has *already* been taken care of by kobo_rotation_conversion!
+	// When we do a canonical rotation conversion, this has *already* been taken care of by fbink_rota_canonical_to_native!
 	if (!canonical_rota) {
 		if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
 			// NOTE: This should cover the H2O and the few other devices suffering from the same quirk...
