@@ -416,42 +416,43 @@ typedef int8_t SUNXI_FORCE_ROTA_INDEX_T;
 // A struct to dump FBInk's internal state into, like fbink_state_dump() would, but in C ;)
 typedef struct
 {
-	long int user_hz;                  // USER_HZ (should pretty much always be 100)
-	const char* restrict font_name;    // fbink_cfg->fontname (c.f., fontname_to_string())
-	uint32_t    view_width;            // viewWidth (MAY be different than screen_width on devices with a viewport)
-	uint32_t    view_height;           // viewHeight (ditto)
-	uint32_t    screen_width;     // screenWidth (Effective width, c.f., is_ntx_quirky_landscape & initialize_fbink())
-	uint32_t    screen_height;    // screenHeight (ditto)
-	uint32_t    bpp;              // vInfo.bits_per_pixel
-	char        device_name[16];        // deviceQuirks.deviceName (short common name, no brand)
-	char        device_codename[16];    // deviceQuirks.deviceCodename
-	char        device_platform[16];    // deviceQuirks.devicePlatform (often a codename, too)
-	DEVICE_ID_T device_id;              // deviceQuirks.deviceId (decimal value, c.f., identify_device() on Kindle!)
-	uint8_t     pen_fg_color;           // penFGColor (Actual grayscale value, not FG_COLOR_INDEX_E)
-	uint8_t     pen_bg_color;           // penBGColor (ditto)
-	unsigned short int screen_dpi;      // deviceQuirks.screenDPI
-	unsigned short int font_w;          // FONTW (effective width of a glyph cell, i.e. scaled)
-	unsigned short int font_h;          // FONTH (effective height of a glyph cell, i.e. scaled)
-	unsigned short int max_cols;        // MAXCOLS (at current cell size)
-	unsigned short int max_rows;        // MAXROWS (ditto)
-	uint8_t view_hori_origin;           // viewHoriOrigin (would be non-zero on devices with a horizontal viewport)
-	uint8_t view_vert_origin;           // viewVertOrigin (origin in px of row 0, includes viewport + viewVertOffset)
-	uint8_t view_vert_offset;      // viewVertOffset (shift in px needed to vertically balance rows over viewHeight)
-	uint8_t fontsize_mult;         // FONTSIZE_MULT (current cell scaling multiplier)
-	uint8_t glyph_width;           // glyphWidth (native width of a glyph cell, i.e. unscaled)
-	uint8_t glyph_height;          // glyphHeight (native height of a glyph cell, i.e. unscaled)
-	bool    is_perfect_fit;        // deviceQuirks.isPerfectFit (horizontal column balance is perfect over viewWidth)
-	bool    is_sunxi;              // deviceQuirks.isSunxi (device is running on an AllWinner SoC)
-	bool    sunxi_has_fbdamage;    // sunxiCtx.has_fbdamage (true when fbdamage module is loaded)
+	long int user_hz;                             // USER_HZ (should pretty much always be 100)
+	const char* restrict font_name;               // fbink_cfg->fontname (c.f., fontname_to_string())
+	uint32_t    view_width;                       // viewWidth (MAY be different than screen_width on devices with a viewport)
+	uint32_t    view_height;                      // viewHeight (ditto)
+	uint32_t    screen_width;                     // screenWidth (Effective width, c.f., is_ntx_quirky_landscape & initialize_fbink())
+	uint32_t    screen_height;                    // screenHeight (ditto)
+    uint32_t    screen_stride;                    // screen line length in bytes;
+	uint32_t    bpp;                              // vInfo.bits_per_pixel
+	char        device_name[16];                  // deviceQuirks.deviceName (short common name, no brand)
+	char        device_codename[16];              // deviceQuirks.deviceCodename
+	char        device_platform[16];              // deviceQuirks.devicePlatform (often a codename, too)
+	DEVICE_ID_T device_id;                        // deviceQuirks.deviceId (decimal value, c.f., identify_device() on Kindle!)
+	uint8_t     pen_fg_color;                     // penFGColor (Actual grayscale value, not FG_COLOR_INDEX_E)
+	uint8_t     pen_bg_color;                     // penBGColor (ditto)
+	unsigned short int screen_dpi;                // deviceQuirks.screenDPI
+	unsigned short int font_w;                    // FONTW (effective width of a glyph cell, i.e. scaled)
+	unsigned short int font_h;                    // FONTH (effective height of a glyph cell, i.e. scaled)
+	unsigned short int max_cols;                  // MAXCOLS (at current cell size)
+	unsigned short int max_rows;                  // MAXROWS (ditto)
+	uint8_t view_hori_origin;                     // viewHoriOrigin (would be non-zero on devices with a horizontal viewport)
+	uint8_t view_vert_origin;                     // viewVertOrigin (origin in px of row 0, includes viewport + viewVertOffset)
+	uint8_t view_vert_offset;                     // viewVertOffset (shift in px needed to vertically balance rows over viewHeight)
+	uint8_t fontsize_mult;                        // FONTSIZE_MULT (current cell scaling multiplier)
+	uint8_t glyph_width;                          // glyphWidth (native width of a glyph cell, i.e. unscaled)
+	uint8_t glyph_height;                         // glyphHeight (native height of a glyph cell, i.e. unscaled)
+	bool    is_perfect_fit;                       // deviceQuirks.isPerfectFit (horizontal column balance is perfect over viewWidth)
+	bool    is_sunxi;                             // deviceQuirks.isSunxi (device is running on an AllWinner SoC)
+	bool    sunxi_has_fbdamage;                   // sunxiCtx.has_fbdamage (true when fbdamage module is loaded)
 	SUNXI_FORCE_ROTA_INDEX_T sunxi_force_rota;    // sunxiCtx.force_rota (current effective value)
-	bool is_kindle_legacy;    // deviceQuirks.isKindleLegacy (device is a Kindle using the original einkfb EPDC API)
-	bool is_kobo_non_mt;      // deviceQuirks.isKoboNonMT (device is a Kobo with no MultiTouch input support)
-	uint8_t          ntx_boot_rota;     // deviceQuirks.ntxBootRota (Native rotation at boot)
-	NTX_ROTA_INDEX_T ntx_rota_quirk;    // deviceQuirks.ntxRotaQuirk (c.f., utils/dump.c)
-	bool    is_ntx_quirky_landscape;    // deviceQuirks.isNTX16bLandscape (rotation compensation is in effect)
-	uint8_t current_rota;               // vInfo.rotate (current rotation, c.f., <linux/fb.h>)
-	bool    can_rotate;                 // deviceQuirks.canRotate (device has a gyro)
-	bool    can_hw_invert;              // deviceQuirks.canHWInvert (device can use EPDC inversion)
+	bool is_kindle_legacy;                        // deviceQuirks.isKindleLegacy (device is a Kindle using the original einkfb EPDC API)
+	bool is_kobo_non_mt;                          // deviceQuirks.isKoboNonMT (device is a Kobo with no MultiTouch input support)
+	uint8_t          ntx_boot_rota;               // deviceQuirks.ntxBootRota (Native rotation at boot)
+	NTX_ROTA_INDEX_T ntx_rota_quirk;              // deviceQuirks.ntxRotaQuirk (c.f., utils/dump.c)
+	bool    is_ntx_quirky_landscape;              // deviceQuirks.isNTX16bLandscape (rotation compensation is in effect)
+    uint8_t current_rota;                         // native screen rotaiton; vInfo.rotate (current rotation, c.f., <linux/fb.h>)
+	bool    can_rotate;                           // deviceQuirks.canRotate (device has a gyro)
+	bool    can_hw_invert;                        // deviceQuirks.canHWInvert (device can use EPDC inversion)
 } FBInkState;
 
 // What a FBInk config should look like. Perfectly sane when fully zero-initialized.
@@ -568,6 +569,14 @@ typedef struct
 	uint8_t   bpp;
 	bool      is_full;
 } FBInkDump;
+
+// For fbink_get_fb_pointer
+typedef struct
+{
+    unsigned char *fbPtr;
+    unsigned long allocationSize;
+
+} FBPtrInfo;
 
 //
 ////
@@ -1238,9 +1247,27 @@ FBINK_API int fbink_toggle_sunxi_ntx_pen_mode(int fbfd, bool toggle);
 //       unless the custom fbdamage module has been loaded (earlier than the disp client you're trying to match)...
 //       c.f., <https://github.com/NiLuJe/mxc_epdc_fb_damage>.
 // NOTE: On success, this will reinit the state *now* (returning the exact same values as fbink_reinit).
-FBINK_API int fbink_sunxi_ntx_enforce_rota(int                      fbfd,
+FBINK_API int fbink_sunxi_ntx_enforce_rota(int fbfd,
 					   SUNXI_FORCE_ROTA_INDEX_T mode,
 					   const FBInkConfig* restrict fbink_cfg);
+
+
+// Grants direct access to the frame buffer pointer as well as the size of the frame buffer allocation.
+// If the framebuffer is not yet allocated it will do so and return the result of the operation.
+FBINK_API int
+    fbink_get_fb_pointer(int fbfd, FBPtrInfo *fbInfo);
+
+
+// Sets the framebuffer bits per pixel and rotation and invoke a reinit afterwards
+// rota will be the rotation in natve format; use fbink_rota_canonical_to_native to convert it to canonical
+// bpp will remain unchanged if the value is < 8
+// req_gray will remain unchanged if the value is < 0
+// on sunxi devices it will invoke fbink_sunxi_ntx_enforce_rota
+FBINK_API int
+    fbink_set_fb_info(int fbFd, int32_t bpp, int8_t rota, int32_t req_gray,
+               const FBInkConfig* restrict fbink_cfg);
+
+
 
 //
 ///
@@ -1258,6 +1285,7 @@ FBINK_API int fbink_sunxi_ntx_enforce_rota(int                      fbfd,
 //
 // See fbink_cmd.c for an example of the former, and KFMon for an example of the latter.
 // NOTE: Although fairly stupid in practice, utils/dump.c is less convoluted than fbink_cmd.c, making it worth a look...
+
 
 #ifdef __cplusplus
 }
