@@ -4748,14 +4748,14 @@ void
     fbink_get_state(const FBInkConfig* restrict fbink_cfg, FBInkState* restrict fbink_state)
 {
 	if (fbink_state) {
-		fbink_state->user_hz       = USER_HZ;
-		fbink_state->font_name     = fontname_to_string(fbink_cfg->fontname);
-		fbink_state->view_width    = viewWidth;
-		fbink_state->view_height   = viewHeight;
-		fbink_state->screen_width  = screenWidth;
-		fbink_state->screen_height = screenHeight;
-		fbink_state->screen_stride = fInfo.line_length;
-		fbink_state->bpp           = vInfo.bits_per_pixel;
+		fbink_state->user_hz         = USER_HZ;
+		fbink_state->font_name       = fontname_to_string(fbink_cfg->fontname);
+		fbink_state->view_width      = viewWidth;
+		fbink_state->view_height     = viewHeight;
+		fbink_state->screen_width    = screenWidth;
+		fbink_state->screen_height   = screenHeight;
+		fbink_state->scanline_stride = fInfo.line_length;
+		fbink_state->bpp             = vInfo.bits_per_pixel;
 		strncpy(fbink_state->device_name, deviceQuirks.deviceName, sizeof(fbink_state->device_name) - 1U);
 		strncpy(
 		    fbink_state->device_codename, deviceQuirks.deviceCodename, sizeof(fbink_state->device_codename) - 1U);

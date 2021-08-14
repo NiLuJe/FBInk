@@ -422,8 +422,8 @@ typedef struct
 	uint32_t    view_height;           // viewHeight (ditto)
 	uint32_t    screen_width;     // screenWidth (Effective width, c.f., is_ntx_quirky_landscape & initialize_fbink())
 	uint32_t    screen_height;    // screenHeight (ditto)
-	uint32_t    screen_stride;    // screen line length in bytes;
-	uint32_t    bpp;              // vInfo.bits_per_pixel
+	uint32_t    scanline_stride;        // fInfo.line_length (scanline length in bytes, padding included)
+	uint32_t    bpp;                    // vInfo.bits_per_pixel
 	char        device_name[16];        // deviceQuirks.deviceName (short common name, no brand)
 	char        device_codename[16];    // deviceQuirks.deviceCodename
 	char        device_platform[16];    // deviceQuirks.devicePlatform (often a codename, too)
