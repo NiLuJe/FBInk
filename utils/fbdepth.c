@@ -50,9 +50,9 @@ bool isVerbose = true;
 	({                                                                                                               \
 		if (unlikely(isVerbose)) {                                                                               \
 			if (toSysLog) {                                                                                  \
-				syslog(LOG_INFO, fmt, ##__VA_ARGS__);                                                    \
+				syslog(LOG_INFO, "[FBDepth] " fmt, ##__VA_ARGS__);                                       \
 			} else {                                                                                         \
-				fprintf(stdout, fmt "\n", ##__VA_ARGS__);                                                \
+				fprintf(stdout, "[FBDepth] " fmt "\n", ##__VA_ARGS__);                                   \
 			}                                                                                                \
 		}                                                                                                        \
 	})
@@ -247,24 +247,6 @@ static orientation_t
 }
 #endif
 
-// Duplicated from FBInk itself
-static __attribute__((cold)) const char*
-    fb_rotate_to_string(uint32_t rotate)
-{
-	switch (rotate) {
-		case FB_ROTATE_UR:
-			return "Upright, 0°";
-		case FB_ROTATE_CW:
-			return "Clockwise, 90°";
-		case FB_ROTATE_UD:
-			return "Upside Down, 180°";
-		case FB_ROTATE_CCW:
-			return "Counter Clockwise, 270°";
-		default:
-			return "Unknown?!";
-	}
-}
-
 static void
     get_fb_info(int                       fbfd,
 		FBInkConfig*              fbink_cfg,
@@ -279,28 +261,14 @@ static void
 	fbink_get_fb_info(var_info, fix_info);
 
 	// Print initial status
-	LOG("FBInk state: Screen is %ux%u (%ux%zu), %ubpp @ rotation: %u (%s); buffer size is %zu bytes with a scanline stride of %u bytes",
+	LOG("Screen is %ux%u (%ux%zu addressable, fb says %ux%u)",
 	    fbink_state->screen_width,
 	    fbink_state->screen_height,
 	    (fbink_state->scanline_stride << 3U) / fbink_state->bpp,
 	    buffer_size / fbink_state->scanline_stride,
-	    fbink_state->bpp,
-	    fbink_state->current_rota,
-	    fb_rotate_to_string(fbink_state->current_rota),
-	    buffer_size,
-	    fbink_state->scanline_stride);
-	LOG("Variable fb info: %ux%u (%ux%u), %ubpp @ rotation: %u (%s)",
-	    var_info->xres,
-	    var_info->yres,
 	    var_info->xres_virtual,
-	    var_info->yres_virtual,
-	    var_info->bits_per_pixel,
-	    var_info->rotate,
-	    fb_rotate_to_string(var_info->rotate));
-	LOG("Fixed fb info: ID is \"%s\", length of fb mem: %u bytes & line length: %u bytes",
-	    fix_info->id,
-	    fix_info->smem_len,
-	    fix_info->line_length);
+	    var_info->yres_virtual);
+	LOG("Actual mapping is %zu bytes with a scanline stride of %u bytes", buffer_size, fbink_state->scanline_stride);
 
 #ifdef FBINK_FOR_KINDLE
 	// NOTE: einkfb devices (even the K4, which only uses it as a shim over mxcfb HW)
@@ -565,9 +533,7 @@ int
 		} else {
 			req_rota = fbink_state.ntx_boot_rota;
 		}
-		LOG("Device's expected Portrait orientation should be: %u (%s)!",
-		    req_rota,
-		    fb_rotate_to_string(req_rota));
+		LOG("Device's expected Portrait orientation should be: %u!", req_rota);
 	}
 #endif
 
