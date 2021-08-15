@@ -1250,6 +1250,10 @@ FBINK_API unsigned char* fbink_get_fb_pointer(int fbfd, size_t* buffer_size);
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
 // rota:		*native* linuxfb rotation value (c.f., fbink_rota_canonical_to_native).
 //				Untouched if set to KEEP_CURRENT_ROTATE
+// apply_rota_quirks:	Only meaningful on Kobo & Cervantes.
+//				Tell FBInk to honor the device's rotation quirks.
+//				Should be set to *false* if rota is set to the result of fbink_rota_canonical_to_native,
+//				as it already takes care of these quirks!
 // bpp:			bitdepth value (in bits).
 //				Supported values: 4, 8, 16, 32
 //				Untouched if set to KEEP_CURRENT_BITDEPTH
@@ -1263,6 +1267,7 @@ FBINK_API unsigned char* fbink_get_fb_pointer(int fbfd, size_t* buffer_size);
 // fbink_cfg:		Pointer to an FBInkConfig struct.
 FBINK_API int fbink_set_fb_info(int      fbfd,
 				uint32_t rota,
+				bool     apply_rota_quirks,
 				uint8_t  bpp,
 				uint8_t  grayscale,
 				const FBInkConfig* restrict fbink_cfg) __attribute__((warn_unused_result));

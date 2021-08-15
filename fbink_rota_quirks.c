@@ -490,7 +490,12 @@ static orientation_t
 
 // See utils/fbdepth.c for all the gory details ;).
 int
-    fbink_set_fb_info(int fbfd, uint32_t rota, uint8_t bpp, uint8_t grayscale, const FBInkConfig* restrict fbink_cfg)
+    fbink_set_fb_info(int      fbfd,
+		      uint32_t rota,
+		      bool     apply_rota_quirks,
+		      uint8_t  bpp,
+		      uint8_t  grayscale,
+		      const FBInkConfig* restrict fbink_cfg)
 {
 	if (!deviceQuirks.skipId) {
 		PFWARN("FBInk hasn't been initialized yet");
@@ -592,6 +597,27 @@ int
 	// First, remember the current rotation as the expected one...
 #if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES) || defined(FBINK_FOR_KINDLE)
 	uint32_t expected_rota = new_vinfo.rotate;
+#endif
+
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
+	// When we do a canonical rotation conversion, this has *already* been taken care of by fbink_rota_canonical_to_native!
+	if (apply_rota_quirks) {
+		if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
+			// NOTE: This should cover the H2O and the few other devices suffering from the same quirk...
+			new_vinfo.rotate ^= 2;
+			LOG("Mangling rotate to %u (%s) to account for kernel rotation quirks",
+			    new_vinfo.rotate,
+			    fb_rotate_to_string(new_vinfo.rotate));
+		} else if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ODD_INVERTED) {
+			// NOTE: This is for the Forma, which only inverts CW & CCW (i.e., odd numbers)...
+			if ((new_vinfo.rotate & 0x01) == 1) {
+				new_vinfo.rotate ^= 2;
+				LOG("Mangling rotate to %u (%s) to account for kernel rotation quirks",
+				    new_vinfo.rotate,
+				    fb_rotate_to_string(new_vinfo.rotate));
+			}
+		}
+	}
 #endif
 
 	if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &new_vinfo)) {
