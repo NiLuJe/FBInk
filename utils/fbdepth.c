@@ -574,7 +574,7 @@ int
 		if (req_gray == KEEP_CURRENT_GRAYSCALE &&
 		    ((fbink_state.bpp == 8U && (var_info.grayscale == 0U || var_info.grayscale > 2U)) ||
 		     (fbink_state.bpp > 8U && var_info.grayscale != 0U))) {
-			LOG("Current bitdepth is already %ubpp, but the grayscale flag is bogus!", req_bpp);
+			LOG("Current bitdepth is already %ubpp, but the grayscale flag is bogus!", fbink_state.bpp);
 			// Continue, we'll need to flip the grayscale flag properly
 			is_change_needed = true;
 
@@ -585,7 +585,7 @@ int
 				req_gray = 0U;
 			}
 		} else {
-			LOG("Current bitdepth is already %ubpp!", req_bpp);
+			LOG("Current bitdepth is already %ubpp!", fbink_state.bpp);
 			// No change needed as far as bitdepth is concerned...
 		}
 	} else {
@@ -631,7 +631,7 @@ int
 		}
 #	endif
 		if (fbink_state.current_rota == req_rota) {
-			LOG("Current rotation is already %u!", req_rota);
+			LOG("Current rotation is already %u!", fbink_state.current_rota);
 			// No change needed as far as rotation is concerned...
 		} else {
 			is_change_needed = true;
