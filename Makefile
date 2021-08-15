@@ -436,7 +436,7 @@ ifdef MINIMAL
 		FEATURES_CPPFLAGS+=-DFBINK_WITH_DRAW
 	endif
 
-	# Support tweaking a MINIMAL build to still include the basic bitmap font
+	# Support tweaking a MINIMAL build to still include fixed-cell font rendering
 	ifdef VGA
 		# Make sure we actually have drawing support
 		ifndef DRAW
