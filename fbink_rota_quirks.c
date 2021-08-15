@@ -543,24 +543,27 @@ int
 			return ERRCODE(EINVAL);
 	}
 
+	// Work on copy to avoid breaking fbink_reinit...
+	struct fb_var_screeninfo new_vinfo = vInfo;
+
 	// Start with the easy stuff...
 	if (bpp == KEEP_CURRENT_BITDEPTH) {
 		LOG("Keeping current bitdepth (%ubpp)", vInfo.bits_per_pixel);
 	} else {
 		LOG("Updating bitdepth from %ubpp to %hhubpp", vInfo.bits_per_pixel, bpp);
-		vInfo.bits_per_pixel = (uint32_t) bpp;
+		new_vinfo.bits_per_pixel = (uint32_t) bpp;
 	}
 
-	if (vInfo.bits_per_pixel == 8U) {
+	if (new_vinfo.bits_per_pixel == 8U) {
 		if (grayscale == KEEP_CURRENT_GRAYSCALE) {
 			LOG("Keeping current grayscale value (%u)", vInfo.grayscale);
 		} else {
 			LOG("Updating grayscale value from %u to %hhu", vInfo.grayscale, grayscale);
-			vInfo.grayscale = (uint32_t) grayscale;
+			new_vinfo.grayscale = (uint32_t) grayscale;
 		}
 	} else {
 		LOG("Not @ 8bpp, sanitizing grayscale flag");
-		vInfo.grayscale = 0U;
+		new_vinfo.grayscale = 0U;
 	}
 
 	if (rota == KEEP_CURRENT_ROTATE) {
@@ -571,7 +574,7 @@ int
 		    fb_rotate_to_string(vInfo.rotate),
 		    rota,
 		    fb_rotate_to_string(rota));
-		vInfo.rotate = rota;
+		new_vinfo.rotate = rota;
 	}
 
 	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
@@ -588,10 +591,10 @@ int
 	//       The goal being to end up in the *same* effective rotation as before.
 	// First, remember the current rotation as the expected one...
 #if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES) || defined(FBINK_FOR_KINDLE)
-	uint32_t expected_rota = vInfo.rotate;
+	uint32_t expected_rota = new_vinfo.rotate;
 #endif
 
-	if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
+	if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &new_vinfo)) {
 		PFWARN("FBIOPUT_VSCREENINFO: %m");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
@@ -615,60 +618,60 @@ int
 
 #if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 	// NOTE: Double-check that we weren't bit by rotation quirks...
-	if (vInfo.rotate != expected_rota) {
+	if (new_vinfo.rotate != expected_rota) {
 		LOG("Current rotation (%u) doesn't match the expected rotation (%u), attempting to fix it . . .",
-		    vInfo.rotate,
+		    new_vinfo.rotate,
 		    expected_rota);
 
 		// Brute-force it until it matches...
-		for (uint32_t i = vInfo.rotate, j = FB_ROTATE_UR; j <= FB_ROTATE_CCW; i = (i + 1U) & 3U, j++) {
+		for (uint32_t i = new_vinfo.rotate, j = FB_ROTATE_UR; j <= FB_ROTATE_CCW; i = (i + 1U) & 3U, j++) {
 			// If we finally got the right orientation, break the loop
-			if (vInfo.rotate == expected_rota) {
+			if (new_vinfo.rotate == expected_rota) {
 				break;
 			}
 			// Do the i -> i + 1 -> i dance to be extra sure...
 			// (This is useful on devices where the kernel *always* switches to the invert orientation, c.f., rota.c)
-			vInfo.rotate = i;
-			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
+			new_vinfo.rotate = i;
+			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &new_vinfo)) {
 				PFWARN("FBIOPUT_VSCREENINFO: %m");
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
 			}
-			LOG("Kernel rotation quirk recovery: %u -> %u", i, vInfo.rotate);
+			LOG("Kernel rotation quirk recovery: %u -> %u", i, new_vinfo.rotate);
 
 			// Don't do anything extra if that was enough...
-			if (vInfo.rotate == expected_rota) {
+			if (new_vinfo.rotate == expected_rota) {
 				continue;
 			}
 			// Now for i + 1 w/ wraparound, since the valid rotation range is [0..3] (FB_ROTATE_UR to FB_ROTATE_CCW).
 			// (i.e., a Portrait/Landscape swap to counteract potential side-effects of a kernel-side mandatory invert)
-			uint32_t n   = (i + 1U) & 3U;
-			vInfo.rotate = n;
-			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
+			uint32_t n       = (i + 1U) & 3U;
+			new_vinfo.rotate = n;
+			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &new_vinfo)) {
 				PFWARN("FBIOPUT_VSCREENINFO: %m");
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
 			}
-			LOG("Kernel rotation quirk recovery (intermediary @ %u): %u -> %u", i, n, vInfo.rotate);
+			LOG("Kernel rotation quirk recovery (intermediary @ %u): %u -> %u", i, n, new_vinfo.rotate);
 
 			// And back to i, if need be...
-			if (vInfo.rotate == expected_rota) {
+			if (new_vinfo.rotate == expected_rota) {
 				continue;
 			}
-			vInfo.rotate = i;
-			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vInfo)) {
+			new_vinfo.rotate = i;
+			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &new_vinfo)) {
 				PFWARN("FBIOPUT_VSCREENINFO: %m");
 				rv = ERRCODE(EXIT_FAILURE);
 				goto cleanup;
 			}
-			LOG("Kernel rotation quirk recovery: %u -> %u", i, vInfo.rotate);
+			LOG("Kernel rotation quirk recovery: %u -> %u", i, new_vinfo.rotate);
 		}
 	}
 
 	// Finally, warn if things *still* look FUBAR...
-	if (vInfo.rotate != expected_rota) {
+	if (new_vinfo.rotate != expected_rota) {
 		LOG("Current rotation (%u) doesn't match the expected rotation (%u), here be dragons!",
-		    vInfo.rotate,
+		    new_vinfo.rotate,
 		    expected_rota);
 	}
 #endif
@@ -689,10 +692,10 @@ int
 
 	// Recap
 	LOG("Bitdepth is now %ubpp (grayscale: %u) @ rotate: %u (%s)",
-	    vInfo.bits_per_pixel,
-	    vInfo.grayscale,
-	    vInfo.rotate,
-	    fb_rotate_to_string(vInfo.rotate));
+	    new_vinfo.bits_per_pixel,
+	    new_vinfo.grayscale,
+	    new_vinfo.rotate,
+	    fb_rotate_to_string(new_vinfo.rotate));
 
 	rv = fbink_reinit(fbfd, fbink_cfg);
 
