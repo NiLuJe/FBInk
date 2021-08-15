@@ -656,11 +656,9 @@ ftrace: libevdev.built tiny | outdir
 	$(STRIP) --strip-unneeded $(OUT_DIR)/finger_trace
 endif
 
-ifndef LINUX
 fbdepth: tinier
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbdepth utils/fbdepth.c $(LIBS)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/fbdepth
-endif
 
 dump: static
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/dump utils/dump.c $(LIBS)
