@@ -636,7 +636,7 @@ ftrace: libevdev.built tiny | outdir
 endif
 
 ifndef LINUX
-fbdepth: tiny
+fbdepth: tinier
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbdepth utils/fbdepth.c $(LIBS)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/fbdepth
 endif
@@ -656,6 +656,9 @@ static:
 	$(MAKE) staticbin
 
 tiny:
+	$(MAKE) staticlib MINIMAL=true DRAW=true
+
+tinier:
 	$(MAKE) staticlib MINIMAL=true
 
 # NOTE: This one may be a bit counter-intuitive... It's to build a static library built like if it were shared (i.e., PIC),
@@ -862,4 +865,4 @@ distclean: clean libunibreakclean libi2cclean libevdevclean
 	rm -rf libevdev-staged
 	rm -rf libevdev.built
 
-.PHONY: default outdir all staticlib sharedlib static tiny shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils alt sunxi ftrace fbdepth dump devcap clean distclean
+.PHONY: default outdir all staticlib sharedlib static tiny tinier shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils alt sunxi ftrace fbdepth dump devcap clean distclean
