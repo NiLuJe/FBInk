@@ -414,6 +414,7 @@ BTN_SRCS:=button_scan_cmd.c
 ifdef MINIMAL
 	FEATURES_CPPFLAGS+=-DFBINK_MINIMAL
 else
+	FEATURES_CPPFLAGS+=-DFBINK_WITH_VGA
 	FEATURES_CPPFLAGS+=-DFBINK_WITH_FONTS
 	FEATURES_CPPFLAGS+=-DFBINK_WITH_IMAGE
 	FEATURES_CPPFLAGS+=-DFBINK_WITH_OPENTYPE
@@ -430,8 +431,17 @@ endif
 
 # Manage modular MINIMAL builds...
 ifdef MINIMAL
+	# Support tweaking a MINIMAL build to still include the basic bitmap font
+	ifdef VGA
+		FEATURES_CPPFLAGS+=-DFBINK_WITH_VGA
+	endif
+
 	# Support tweaking a MINIMAL build to still include extra bitmap fonts
 	ifdef FONTS
+		# Make sure we actually have fixed-cell support
+		ifndef VGA
+			FEATURES_CPPFLAGS+=-DFBINK_WITH_VGA
+		endif
 		FEATURES_CPPFLAGS+=-DFBINK_WITH_FONTS
 		# As well as, optionally, the full Unifont...
 		ifdef UNIFONT
@@ -615,13 +625,13 @@ sunxi: libi2c.built | outdir
 endif
 
 ifdef KOBO
-ftrace: libevdev.built static | outdir
+ftrace: libevdev.built tiny | outdir
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(EVDEV_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(EVDEV_LDFLAGS) -o$(OUT_DIR)/finger_trace utils/finger_trace.c $(LIBS) $(EVDEV_LIBS)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/finger_trace
 endif
 
 ifndef LINUX
-fbdepth: static
+fbdepth: tiny
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbdepth utils/fbdepth.c $(LIBS)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/fbdepth
 endif
@@ -639,6 +649,9 @@ debug:
 static:
 	$(MAKE) staticlib
 	$(MAKE) staticbin
+
+tiny:
+	$(MAKE) staticlib MINIMAL=true
 
 # NOTE: This one may be a bit counter-intuitive... It's to build a static library built like if it were shared (i.e., PIC),
 #       because apparently that's a requirement for FFI in some high-level languages (i.e., Go; c.f., #7)
@@ -844,4 +857,4 @@ distclean: clean libunibreakclean libi2cclean libevdevclean
 	rm -rf libevdev-staged
 	rm -rf libevdev.built
 
-.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils alt sunxi ftrace fbdepth dump devcap clean distclean
+.PHONY: default outdir all staticlib sharedlib static tiny shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils alt sunxi ftrace fbdepth dump devcap clean distclean

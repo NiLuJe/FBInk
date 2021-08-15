@@ -40,6 +40,9 @@
 
 // No extra fonts, no image support, and no OpenType support in minimal builds
 #ifndef FBINK_MINIMAL
+#	ifndef FBINK_WITH_VGA
+#		define FBINK_WITH_VGA
+#	endif
 #	ifndef FBINK_WITH_FONTS
 #		define FBINK_WITH_FONTS
 #	endif
@@ -216,13 +219,15 @@
 //       that can yield you a choice of a few different fonts ;).
 //       And with potentially a tiny bit of additional work, can work with Hex files exported from BDF
 //       or other bitmap fonts by gbdfed (with maybe an initial FontForge conversion to BDF if need be) ;).
-#include "font8x8/font8x8_basic.h"
-#include "font8x8/font8x8_block.h"
-#include "font8x8/font8x8_box.h"
-#include "font8x8/font8x8_control.h"
-#include "font8x8/font8x8_ext_latin.h"
-#include "font8x8/font8x8_greek.h"
-#include "font8x8/font8x8_hiragana.h"
+#ifdef FBINK_WITH_VGA
+#	include "font8x8/font8x8_basic.h"
+#	include "font8x8/font8x8_block.h"
+#	include "font8x8/font8x8_box.h"
+#	include "font8x8/font8x8_control.h"
+#	include "font8x8/font8x8_ext_latin.h"
+#	include "font8x8/font8x8_greek.h"
+#	include "font8x8/font8x8_hiragana.h"
+#endif
 // NOTE: See https://github.com/ansilove/BlockZone for an awesome vector version of the 8x16 VGA variant of this IBM font ;).
 // NOTE: As well as https://int10h.org/oldschool-pc-fonts for both vector & bitmap versions of most IBM fonts!
 // NOTE: And https://farsil.github.io/ibmfonts for BDF conversions, in case gbdfed wasn't enough ;).'
@@ -336,6 +341,13 @@
 #else
 #	define UNUSED_BY_NOTMINIMAL __attribute__((unused))
 #	define UNUSED_BY_MINIMAL
+#endif
+#ifdef FBINK_WITH_VGA
+#	define UNUSED_BY_NOVGA
+#	define UNUSED_BY_VGA __attribute__((unused))
+#else
+#	define UNUSED_BY_NOVGA __attribute__((unused))
+#	define UNUSED_BY_VGA
 #endif
 #ifndef FBINK_WITH_BUTTON_SCAN
 #	define UNUSED_BY_NOBUTTON __attribute__((unused))
@@ -640,10 +652,13 @@ static __attribute__((hot)) void fill_rect_RGB32_checked(unsigned short int,
 static void                      clear_screen(int UNUSED_BY_NOTKINDLE, uint8_t, bool UNUSED_BY_NOTKINDLE);
 //static void checkerboard_screen(void);
 
+#ifdef FBINK_WITH_VGA
 static const unsigned char* font8x8_get_bitmap(uint32_t);
+#endif
 
 static __attribute__((cold)) const char* fontname_to_string(uint8_t);
 
+#ifdef FBINK_WITH_VGA
 static int zu_print_length(size_t);
 
 static struct mxcfb_rect draw(const char* restrict,
@@ -652,6 +667,7 @@ static struct mxcfb_rect draw(const char* restrict,
 			      unsigned short int,
 			      bool,
 			      const FBInkConfig* restrict);
+#endif
 
 #ifndef FBINK_FOR_LINUX
 static __attribute__((cold)) long int jiffies_to_ms(long int);
@@ -734,7 +750,9 @@ static int grid_to_region(int, unsigned short int, unsigned short int, bool, con
 
 static void set_last_rect(const struct mxcfb_rect* restrict);
 
+#ifdef FBINK_WITH_VGA
 int draw_progress_bars(int, bool, uint8_t, const FBInkConfig* restrict);
+#endif
 
 #ifdef FBINK_WITH_IMAGE
 unsigned char*

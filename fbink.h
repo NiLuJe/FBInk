@@ -640,6 +640,7 @@ FBINK_API void fbink_get_state(const FBInkConfig* restrict fbink_cfg, FBInkState
 // Returns the amount of lines printed on success (helpful when you keep track of which row you're printing to).
 // Returns -(EINVAL) if string is empty.
 // Returns -(EILSEQ) if string is not a valid UTF-8 sequence.
+// Returns -(ENOSYS) when fixed-cell font support is disabled (MINIMAL build w/o VGA).
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
 // string:		UTF-8 encoded string to print.
@@ -681,7 +682,7 @@ FBINK_API int fbink_free_ot_fonts_v2(FBInkOTConfig* restrict cfg);
 // Returns a new top margin for use in subsequent calls, if the return value is positive.
 // NOTE: A zero return value indicates there is no room left to print another row of text at the current margins or font size.
 // Returns -(ERANGE) if the provided margins are out of range, or sum to < view height or width.
-// Returns -(ENOSYS) when OT support is disabled (MINIMAL build).
+// Returns -(ENOSYS) when OT support is disabled (MINIMAL build w/o OPENTYPE).
 // Returns -(ENODATA) if fbink_add_ot_font() hasn't been called yet.
 // Returns -(EINVAL) if string is empty.
 // Returns -(EILSEQ) if string is not a valid UTF-8 sequence.
@@ -906,6 +907,7 @@ FBINK_API int fbink_set_bg_pen_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a, 
 
 //
 // Print a full-width progress bar on screen.
+// Returns -(ENOSYS) when fixed-cell font support is disabled (MINIMAL build w/o VGA).
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
 // percentage:		0-100 value to set the progress bar's progression.
@@ -914,6 +916,7 @@ FBINK_API int fbink_set_bg_pen_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a, 
 FBINK_API int fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInkConfig* restrict fbink_cfg);
 
 // Print a full-width activity bar on screen (i.e., an infinite progress bar).
+// Returns -(ENOSYS) when fixed-cell font support is disabled (MINIMAL build w/o VGA).
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
 // progress:		0-16 value to set the progress thumb's position in the bar.
@@ -923,7 +926,7 @@ FBINK_API int fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkCo
 
 //
 // Print an image on screen.
-// Returns -(ENOSYS) when image support is disabled (MINIMAL build).
+// Returns -(ENOSYS) when image support is disabled (MINIMAL build w/o IMAGE).
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
 // filename:		Path to the image file (Supported formats: JPEG, PNG, TGA, BMP, GIF & PNM).
@@ -956,7 +959,7 @@ FBINK_API int fbink_print_image(int         fbfd,
 				const FBInkConfig* restrict fbink_cfg);
 
 // Print raw scanlines on screen (packed pixels).
-// Returns -(ENOSYS) when image support is disabled (MINIMAL build).
+// Returns -(ENOSYS) when image support is disabled (MINIMAL build w/o IMAGE).
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
 // data:		Pointer to a buffer holding the image data (Supported pixel formats: Y/YA/RGB/RGBA,
@@ -1036,7 +1039,7 @@ FBINK_API int fbink_grid_refresh(int                fbfd,
 
 //
 // Dump the full screen.
-// Returns -(ENOSYS) when image support is disabled (MINIMAL build).
+// Returns -(ENOSYS) when image support is disabled (MINIMAL build w/o IMAGE).
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
 // dump:		Pointer to an FBInkDump struct (will be recycled if already used).
@@ -1057,7 +1060,7 @@ FBINK_API int fbink_grid_refresh(int                fbfd,
 FBINK_API int fbink_dump(int fbfd, FBInkDump* restrict dump);
 
 // Dump a specific region of the screen.
-// Returns -(ENOSYS) when image support is disabled (MINIMAL build).
+// Returns -(ENOSYS) when image support is disabled (MINIMAL build w/o IMAGE).
 // Returns -(EINVAL) when trying to dump an empty region.
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
@@ -1077,7 +1080,7 @@ FBINK_API int fbink_region_dump(int                fbfd,
 				FBInkDump* restrict dump);
 
 // Like fbink_region_dump, but takes an FBInkRect as input, and uses it *as is* (i.e., no rotation/positioning tricks).
-// Returns -(ENOSYS) when image support is disabled (MINIMAL build).
+// Returns -(ENOSYS) when image support is disabled (MINIMAL build w/o IMAGE).
 // Returns -(EINVAL) when trying to dump an OOB region.
 // The intended use case is being able to use a rect returned by fbink_get_last_rect
 // without having to think about the potential fallout from positioning or rotation hacks.
@@ -1087,7 +1090,7 @@ FBINK_API int fbink_region_dump(int                fbfd,
 FBINK_API int fbink_rect_dump(int fbfd, const FBInkRect* restrict rect, FBInkDump* restrict dump);
 
 // Restore a framebuffer dump made by fbink_dump/fbink_region_dump/fbink_rect_dump.
-// Returns -(ENOSYS) when image support is disabled (MINIMAL build).
+// Returns -(ENOSYS) when image support is disabled (MINIMAL build w/o IMAGE).
 // Otherwise, returns a few different things on failure:
 //	-(ENOTSUP)	when the dump cannot be restored because it wasn't taken at the current bitdepth and/or rotation,
 //			or because it's wider/taller/larger than the current framebuffer, or if the crop is invalid (OOB).
@@ -1118,7 +1121,7 @@ FBINK_API int fbink_rect_dump(int fbfd, const FBInkRect* restrict rect, FBInkDum
 FBINK_API int fbink_restore(int fbfd, const FBInkConfig* restrict fbink_cfg, const FBInkDump* restrict dump);
 
 // Free the data allocated by a previous fbink_dump() or fbink_region_dump() call.
-// Returns -(ENOSYS) when image support is disabled (MINIMAL build).
+// Returns -(ENOSYS) when image support is disabled (MINIMAL build w/o IMAGE).
 // Otherwise, returns a few different things on failure:
 //	-(EINVAL)	when the dump has already been freed.
 // dump:		Pointer to an FBInkDump struct.
@@ -1150,7 +1153,7 @@ FBINK_API FBInkRect fbink_get_last_rect(bool rotated);
 //
 // Scan the screen for Kobo's "Connect" button in the "USB plugged in" popup,
 // and optionally generate an input event to press that button.
-// KOBO i.MX Only! Returns -(ENOSYS) when disabled (!KOBO, or Kobo on a sunxi SoC, as well as MINIMAL builds).
+// KOBO i.MX Only! Returns -(ENOSYS) when disabled (!KOBO, or Kobo on a sunxi SoC, as well as MINIMAL builds w/o BUTTON_SCAN).
 // Otherwise, returns a few different things on failure:
 //	-(EXIT_FAILURE)	when the button was not found.
 //	With press_button:
@@ -1176,7 +1179,7 @@ FBINK_API int fbink_button_scan(int fbfd, bool press_button, bool nosleep);
 //       It will abort early if that's not the case.
 // NOTE: For the duration of this call (which is obviously blocking!), screen updates should be kept to a minimum:
 //       in particular, we expect the middle section of the final line to be untouched!
-// KOBO i.MX Only! Returns -(ENOSYS) when disabled (!KOBO, or Kobo on a sunxi SoC, as well as MINIMAL builds).
+// KOBO i.MX Only! Returns -(ENOSYS) when disabled (!KOBO, or Kobo on a sunxi SoC, as well as MINIMAL builds w/o BUTTON_SCAN).
 // Otherwise, returns a few different things on failure:
 //	-(EXIT_FAILURE)	when the expected chain of events fails to be detected properly.
 //	-(ENODATA)	when there was no new content to import at the end of the USBMS session.

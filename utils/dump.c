@@ -27,6 +27,17 @@
 #	define _GNU_SOURCE
 #endif
 
+// NOTE: We need image support & basic font support.
+//       A MINIMAL + VGA + IMAGE build is still recommended, because otherwise fbink_init() has to pull all the extra fonts in...
+#ifdef FBINK_MINIMAL
+#	ifndef FBINK_WITH_VGA
+#		error Cannot build this tool without basic font support!
+#	endif
+#	ifndef FBINK_WITH_IMAGE
+#		error Cannot build this tool without Image support!
+#	endif
+#endif
+
 #include <errno.h>
 #include <linux/fb.h>
 #include <stdio.h>
