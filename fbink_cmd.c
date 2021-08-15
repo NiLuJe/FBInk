@@ -19,6 +19,12 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#ifdef FBINK_MINIMAL
+#	ifndef FBINK_WITH_VGA
+#		error Cannot build this tool without basic font support!
+#	endif
+#endif
+
 #include "fbink_cmd.h"
 
 // Help message
