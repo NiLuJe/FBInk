@@ -561,7 +561,9 @@ int
 
 		// Start by checking that the grayscale flag is flipped properly
 		if (req_gray == KEEP_CURRENT_GRAYSCALE || var_info.grayscale == req_gray) {
-			LOG("Current grayscale flag is already %u!", var_info.grayscale);
+			if (req_gray != KEEP_CURRENT_GRAYSCALE) {
+				LOG("Current grayscale flag is already %u!", var_info.grayscale);
+			}
 			// No change needed as far as grayscale is concerned...
 		} else {
 			is_change_needed = true;
@@ -585,7 +587,9 @@ int
 				req_gray = 0U;
 			}
 		} else {
-			LOG("Current bitdepth is already %ubpp!", fbink_state.bpp);
+			if (req_bpp != KEEP_CURRENT_BITDEPTH) {
+				LOG("Current bitdepth is already %ubpp!", fbink_state.bpp);
+			}
 			// No change needed as far as bitdepth is concerned...
 		}
 	} else {
