@@ -70,90 +70,6 @@
 #define likely(x)   __builtin_expect(!!(x), 1)
 #define unlikely(x) __builtin_expect(!!(x), 0)
 
-// "Small" helper for bitdepth switch... (c.f., fbdepth.c)
-#ifndef FBINK_FOR_LINUX
-static bool
-    set_bpp(int fbfd, uint32_t bpp, const FBInkState* restrict fbink_state)
-{
-	struct fb_var_screeninfo fb_vinfo;
-	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &fb_vinfo)) {
-		perror("ioctl GET_V");
-		return false;
-	}
-	struct fb_fix_screeninfo fb_finfo;
-	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &fb_finfo)) {
-		perror("ioctl GET_F");
-		return false;
-	}
-
-	uint32_t expected_rota = fb_vinfo.rotate;
-
-	fb_vinfo.bits_per_pixel = (uint32_t) bpp;
-	if (bpp == 8U) {
-		fb_vinfo.grayscale = (uint32_t) 1U;
-	} else {
-		fb_vinfo.grayscale = (uint32_t) 0U;
-	}
-
-	if (fbink_state->ntx_rota_quirk == NTX_ROTA_ALL_INVERTED) {
-		// NOTE: This should cover the H2O and the few other devices suffering from the same quirk...
-		fb_vinfo.rotate ^= 2;
-	} else if (fbink_state->ntx_rota_quirk == NTX_ROTA_ODD_INVERTED) {
-		// NOTE: This is for the Forma, which only inverts CW & CCW (i.e., odd numbers)...
-		if ((fb_vinfo.rotate & 0x01) == 1) {
-			fb_vinfo.rotate ^= 2;
-		}
-	}
-
-	if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &fb_vinfo)) {
-		perror("ioctl PUT_V");
-		return false;
-	}
-
-	if (fb_vinfo.rotate != expected_rota) {
-		// Brute-force it until it matches...
-		for (uint32_t i = fb_vinfo.rotate, j = FB_ROTATE_UR; j <= FB_ROTATE_CCW; i = (i + 1U) & 3U, j++) {
-			// If we finally got the right orientation, break the loop
-			if (fb_vinfo.rotate == expected_rota) {
-				break;
-			}
-			// Do the i -> i + 1 -> i dance to be extra sure...
-			// (This is useful on devices where the kernel *always* switches to the invert orientation, c.f., rota.c)
-			fb_vinfo.rotate = i;
-			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &fb_vinfo)) {
-				perror("ioctl PUT_V");
-				return false;
-			}
-
-			// Don't do anything extra if that was enough...
-			if (fb_vinfo.rotate == expected_rota) {
-				continue;
-			}
-			// Now for i + 1 w/ wraparound, since the valid rotation range is [0..3] (FB_ROTATE_UR to FB_ROTATE_CCW).
-			// (i.e., a Portrait/Landscape swap to counteract potential side-effects of a kernel-side mandatory invert)
-			uint32_t n      = (i + 1U) & 3U;
-			fb_vinfo.rotate = n;
-			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &fb_vinfo)) {
-				perror("ioctl PUT_V");
-				return false;
-			}
-
-			// And back to i, if need be...
-			if (fb_vinfo.rotate == expected_rota) {
-				continue;
-			}
-			fb_vinfo.rotate = i;
-			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &fb_vinfo)) {
-				perror("ioctl PUT_V");
-				return false;
-			}
-		}
-	}
-
-	return true;
-}
-#endif    // !FBINK_FOR_LINUX
-
 int
     main(int argc, char* argv[] __attribute__((unused)))
 {
@@ -421,7 +337,7 @@ int
 	if (fbink_state.bpp == 32U) {
 		// Switch to 8bpp (c.f., fbdepth.c)
 		fprintf(stdout, "[07] SWITCH TO 8BPP\n");
-		if (!set_bpp(fbfd, 8U, &fbink_state)) {
+		if (fbink_set_fb_info(fbfd, KEEP_CURRENT_ROTATE, true, 8U, KEEP_CURRENT_GRAYSCALE, &fbink_cfg) < 0) {
 			fprintf(stderr, "Failed to swap bitdepth, aborting . . .\n");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
@@ -503,7 +419,7 @@ int
 
 		// Switch back to 32bpp
 		fprintf(stdout, "[14] SWITCH TO 32BPP\n");
-		if (!set_bpp(fbfd, 32U, &fbink_state)) {
+		if (fbink_set_fb_info(fbfd, KEEP_CURRENT_ROTATE, true, 32U, KEEP_CURRENT_GRAYSCALE, &fbink_cfg) < 0) {
 			fprintf(stderr, "Failed to swap bitdepth, aborting . . .\n");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
