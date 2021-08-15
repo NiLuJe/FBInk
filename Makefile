@@ -438,11 +438,19 @@ ifdef MINIMAL
 
 	# Support tweaking a MINIMAL build to still include the basic bitmap font
 	ifdef VGA
+		# Make sure we actually have drawing support
+		ifndef DRAW
+			FEATURES_CPPFLAGS+=-DFBINK_WITH_DRAW
+		endif
 		FEATURES_CPPFLAGS+=-DFBINK_WITH_VGA
 	endif
 
 	# Support tweaking a MINIMAL build to still include extra bitmap fonts
 	ifdef FONTS
+		# Make sure we actually have drawing support
+		ifndef DRAW
+			FEATURES_CPPFLAGS+=-DFBINK_WITH_DRAW
+		endif
 		# Make sure we actually have fixed-cell support
 		ifndef VGA
 			FEATURES_CPPFLAGS+=-DFBINK_WITH_VGA
@@ -456,11 +464,19 @@ ifdef MINIMAL
 
 	# Support tweaking a MINIMAL build to still include image support
 	ifdef IMAGE
+		# Make sure we actually have drawing support
+		ifndef DRAW
+			FEATURES_CPPFLAGS+=-DFBINK_WITH_DRAW
+		endif
 		FEATURES_CPPFLAGS+=-DFBINK_WITH_IMAGE
 	endif
 
 	# Support tweaking a MINIMAL build to still include OpenType support
 	ifdef OPENTYPE
+		# Make sure we actually have drawing support
+		ifndef DRAW
+			FEATURES_CPPFLAGS+=-DFBINK_WITH_DRAW
+		endif
 		FEATURES_CPPFLAGS+=-DFBINK_WITH_OPENTYPE
 		ifdef STATIC_LIBM
 			LIBS+=-l:libm.a
@@ -471,6 +487,10 @@ ifdef MINIMAL
 
 	# Support tweaking a MINIMAL build to still include button scan support
 	ifdef BUTTON_SCAN
+		# Make sure we actually have drawing support
+		ifndef DRAW
+			FEATURES_CPPFLAGS+=-DFBINK_WITH_DRAW
+		endif
 		WITH_BUTTON_SCAN:=True
 		FEATURES_CPPFLAGS+=-DFBINK_WITH_BUTTON_SCAN
 	endif
