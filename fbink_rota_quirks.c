@@ -606,7 +606,7 @@ int
 		orientation_t orientation = linuxfb_rotate_to_einkfb_orientation(expected_rota);
 		if (ioctl(fbfd, FBIO_EINK_SET_DISPLAY_ORIENTATION, orientation)) {
 			PFWARN("FBIO_EINK_SET_DISPLAY_ORIENTATION: %m");
-			rv = ERRCODE(EXIT_FAILURE);
+			rv = ERRCODE(ECANCELED);
 			goto cleanup;
 		}
 
@@ -634,7 +634,7 @@ int
 			new_vinfo.rotate = i;
 			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &new_vinfo)) {
 				PFWARN("FBIOPUT_VSCREENINFO: %m");
-				rv = ERRCODE(EXIT_FAILURE);
+				rv = ERRCODE(ECANCELED);
 				goto cleanup;
 			}
 			LOG("Kernel rotation quirk recovery: %u -> %u", i, new_vinfo.rotate);
@@ -649,7 +649,7 @@ int
 			new_vinfo.rotate = n;
 			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &new_vinfo)) {
 				PFWARN("FBIOPUT_VSCREENINFO: %m");
-				rv = ERRCODE(EXIT_FAILURE);
+				rv = ERRCODE(ECANCELED);
 				goto cleanup;
 			}
 			LOG("Kernel rotation quirk recovery (intermediary @ %u): %u -> %u", i, n, new_vinfo.rotate);
@@ -661,7 +661,7 @@ int
 			new_vinfo.rotate = i;
 			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &new_vinfo)) {
 				PFWARN("FBIOPUT_VSCREENINFO: %m");
-				rv = ERRCODE(EXIT_FAILURE);
+				rv = ERRCODE(ECANCELED);
 				goto cleanup;
 			}
 			LOG("Kernel rotation quirk recovery: %u -> %u", i, new_vinfo.rotate);
@@ -682,7 +682,7 @@ int
 		orientation_t orientation = orientation_portrait;
 		if (ioctl(fbfd, FBIO_EINK_GET_DISPLAY_ORIENTATION, &orientation)) {
 			PFWARN("FBIO_EINK_GET_DISPLAY_ORIENTATION: %m");
-			rv = ERRCODE(EXIT_FAILURE);
+			rv = ERRCODE(ECANCELED);
 			goto cleanup;
 		}
 

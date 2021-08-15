@@ -1235,6 +1235,10 @@ FBINK_API unsigned char* fbink_get_fb_pointer(int fbfd, size_t* buffer_size);
 // Returns a few different things on failure:
 //	-(ENODEV)	if called before fbink_init
 //	-(EINVAL)	when one of rota/bpp/grayscale is invalid
+//	-(ECANCELED)	if an ioctl failed *after* having modified the state at least once.
+//			This is *extremely* unlikely, but, if it happens,
+//			checking the sanity of the fb state is the caller's responsibilty!
+//			(i.e., you'll have to fbink_reinit yourself).
 // NOTE: On sunxi, only the rotation can be controlled: i.e., this will simply invoke fbink_sunxi_ntx_enforce_rota,
 //       except we only accept values matching linuxfb rotation constants.
 //       Prefer using fbink_sunxi_ntx_enforce_rota directly yourself.
