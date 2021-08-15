@@ -127,5 +127,11 @@ cdecl_func(fbink_rota_canonical_to_native)
 
 cdecl_func(fbink_invert_screen)
 
+cdecl_func(fbink_get_fb_pointer)
+cdecl_const(KEEP_CURRENT_ROTATE)
+cdecl_const(KEEP_CURRENT_BITDEPTH)
+cdecl_const(KEEP_CURRENT_GRAYSCALE)
+cdecl_func(fbink_set_fb_info)
+
 cdecl_func(fbink_toggle_sunxi_ntx_pen_mode)
 cdecl_func(fbink_sunxi_ntx_enforce_rota)
