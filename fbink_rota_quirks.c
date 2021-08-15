@@ -596,7 +596,7 @@ int
 
 	if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &new_vinfo)) {
 		PFWARN("FBIOPUT_VSCREENINFO: %m");
-		rv = ERRCODE(EXIT_FAILURE);
+		rv = ERRCODE(ECANCELED);
 		goto cleanup;
 	}
 
