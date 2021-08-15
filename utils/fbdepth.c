@@ -44,7 +44,7 @@
 
 bool toSysLog  = false;
 bool isQuiet   = false;
-bool isVerbose = false;
+bool isVerbose = true;
 // Handle what we send to stdout (i.e., mostly diagnostic stuff, which tends to be verbose, so no FBInk tag)
 #define LOG(fmt, ...)                                                                                                    \
 	({                                                                                                               \
@@ -710,7 +710,7 @@ int
 	} else {
 		LOG("Switching fb to %ubpp%s . . .", req_bpp, (req_bpp == fbink_state.bpp) ? " (current bitdepth)" : "");
 	}
-	if (fbink_set_fb_info(fbfd, req_rota, !canonical_rota, req_bpp, req_gray, &fbink_cfg) < 0) {
+	if (fbink_set_fb_info(fbfd, req_rota, req_bpp, req_gray, &fbink_cfg) < 0) {
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
