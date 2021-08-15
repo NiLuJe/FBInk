@@ -565,8 +565,8 @@ int
 		}
 
 		// Start by checking that the grayscale flag is flipped properly
-		if (var_info.grayscale == req_gray) {
-			LOG("Current grayscale flag is already %u!", req_gray);
+		if (req_gray == KEEP_CURRENT_GRAYSCALE || var_info.grayscale == req_gray) {
+			LOG("Current grayscale flag is already %u!", var_info.grayscale);
 			// No change needed as far as grayscale is concerned...
 		} else {
 			is_change_needed = true;
