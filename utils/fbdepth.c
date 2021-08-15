@@ -34,6 +34,11 @@
 
 #include "../fbink.h"
 
+#if defined(FBINK_FOR_KINDLE)
+#	include <sys/ioctl.h>
+#	include "../eink/einkfb.h"
+#endif
+
 // Pilfer our usual macros from FBInk...
 // We want to return negative values on failure, always
 #define ERRCODE(e) (-(e))
@@ -82,6 +87,26 @@ bool isVerbose = true;
 
 // Same, but with __PRETTY_FUNCTION__ right before fmt
 #define PFWARN(fmt, ...) ({ WARN("[%s] " fmt, __PRETTY_FUNCTION__, ##__VA_ARGS__); })
+
+#ifdef FBINK_FOR_KINDLE
+static uint32_t
+    einkfb_orientation_to_linuxfb_rotate(orientation_t orientation)
+{
+	switch (orientation) {
+		case orientation_portrait:
+			return FB_ROTATE_UR;
+		case orientation_portrait_upside_down:
+			return FB_ROTATE_UD;
+		case orientation_landscape:
+			return FB_ROTATE_CW;
+		case orientation_landscape_upside_down:
+			return FB_ROTATE_CCW;
+		default:
+			// Should never happen.
+			return FB_ROTATE_UR;
+	}
+}
+#endif
 
 // Help message
 static void
@@ -227,27 +252,7 @@ static int
 	return ERRCODE(EINVAL);
 }
 
-#ifdef FBINK_FOR_KINDLE
-static orientation_t
-    linuxfb_rotate_to_einkfb_orientation(uint32_t rotate)
-{
-	switch (rotate) {
-		case FB_ROTATE_UR:
-			return orientation_portrait;
-		case FB_ROTATE_CW:
-			return orientation_landscape;
-		case FB_ROTATE_UD:
-			return orientation_portrait_upside_down;
-		case FB_ROTATE_CCW:
-			return orientation_landscape_upside_down;
-		default:
-			// Should never happen.
-			return orientation_portrait;
-	}
-}
-#endif
-
-static void
+static int
     get_fb_info(int                       fbfd,
 		FBInkConfig*              fbink_cfg,
 		FBInkState*               fbink_state,
@@ -272,21 +277,7 @@ static void
 	    buffer_size,
 	    fbink_state->scanline_stride);
 
-#ifdef FBINK_FOR_KINDLE
-	// NOTE: einkfb devices (even the K4, which only uses it as a shim over mxcfb HW)
-	//       don't actually honor the standard Linux fb rotation, and instead rely on a set of custom ioctls...
-	if (fbink_state->is_kindle_legacy) {
-		orientation_t orientation = orientation_portrait;
-		if (ioctl(fbfd, FBIO_EINK_GET_DISPLAY_ORIENTATION, &orientation)) {
-			WARN("FBIO_EINK_GET_DISPLAY_ORIENTATION: %m");
-			rv = ERRCODE(EXIT_FAILURE);
-			goto cleanup;
-		}
-
-		// Because everything is terrible, it's actually not the same mapping as the Linux fb rotate field...
-		LOG("Actual einkfb orientation: %u (%s)", orientation, einkfb_orientation_to_string(orientation));
-	}
-#endif
+	return EXIT_SUCCESS;
 }
 
 int
@@ -319,7 +310,9 @@ int
 	bool     return_rota      = false;
 	bool     print_canonical  = false;
 	bool     return_canonical = false;
-	bool     canonical_rota   = false;
+#if defined(FBINK_FOR_KOBO)
+	bool canonical_rota = false;
+#endif
 
 	while ((opt = getopt_long(argc, argv, "d:hvqgGr:R:oOcCH:", opts, &opt_index)) != -1) {
 		switch (opt) {
@@ -476,7 +469,10 @@ int
 	struct fb_var_screeninfo var_info    = { 0 };
 	struct fb_fix_screeninfo fix_info    = { 0 };
 	// Print initial status
-	get_fb_info(fbfd, &fbink_cfg, &fbink_state, &var_info, &fix_info);
+	if (get_fb_info(fbfd, &fbink_cfg, &fbink_state, &var_info, &fix_info) != EXIT_SUCCESS) {
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
 
 	// If we just wanted to print/return the current bitdepth, abort early
 	if (print_bpp || return_bpp) {
@@ -612,15 +608,15 @@ int
 
 			uint32_t rotate = einkfb_orientation_to_linuxfb_rotate(orientation);
 			if (rotate == req_rota) {
-				LOG("Current rotation is already %hhd!", req_rota);
+				LOG("Current rotation is already %u!", fbink_state.current_rota);
 				// No change needed as far as rotation is concerned...
 			} else {
 				is_change_needed = true;
 			}
 		} else {
 			// On mxcfb, everything's peachy
-			if (vInfo.rotate == req_rota) {
-				LOG("Current rotation is already %hhd!", req_rota);
+			if (fbink_state.current_rota == req_rota) {
+				LOG("Current rotation is already %u!", fbink_state.current_rota);
 				// No change needed as far as rotation is concerned...
 			} else {
 				is_change_needed = true;
@@ -667,7 +663,10 @@ int
 		goto cleanup;
 	}
 	// Recap
-	get_fb_info(fbfd, &fbink_cfg, &fbink_state, &var_info, &fix_info);
+	if (get_fb_info(fbfd, &fbink_cfg, &fbink_state, &var_info, &fix_info) != EXIT_SUCCESS) {
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
+	}
 
 cleanup:
 	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
