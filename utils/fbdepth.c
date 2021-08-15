@@ -406,17 +406,7 @@ int
 					// If the automagic Portrait rotation was requested, compute it
 #if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 				} else if (strcmp(optarg, "-1") == 0) {
-					// NOTE: For *most* devices, Nickel's Portrait orientation should *always* match BootRota + 1
-					//       Thankfully, the Libra appears to be ushering in a new era filled with puppies and rainbows,
-					//       and, hopefully, less insane rotation quirks ;).
-					if (fbink_state.ntx_rota_quirk != NTX_ROTA_SANE) {
-						req_rota = (fbink_state.ntx_boot_rota + 1) & 3;
-					} else {
-						req_rota = (int8_t) fbink_state.ntx_boot_rota;
-					}
-					LOG("Device's expected Portrait orientation should be: %hhd (%s)!",
-					    req_rota,
-					    fb_rotate_to_string((uint32_t) req_rota));
+					req_rota = 42U;
 #endif
 				} else {
 					WARN("Invalid rotation '%s'", optarg);
@@ -563,6 +553,23 @@ int
 	if (req_bpp == KEEP_CURRENT_BITDEPTH) {
 		req_bpp = fbink_state.bpp;
 	}
+
+// If the automagic Portrait rotation was requested, compute it
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
+	if (req_rota == 42U) {
+		// NOTE: For *most* devices, Nickel's Portrait orientation should *always* match BootRota + 1
+		//       Thankfully, the Libra appears to be ushering in a new era filled with puppies and rainbows,
+		//       and, hopefully, less insane rotation quirks ;).
+		if (fbink_state.ntx_rota_quirk != NTX_ROTA_SANE) {
+			req_rota = (fbink_state.ntx_boot_rota + 1) & 3;
+		} else {
+			req_rota = (int8_t) fbink_state.ntx_boot_rota;
+		}
+		LOG("Device's expected Portrait orientation should be: %hhd (%s)!",
+		    req_rota,
+		    fb_rotate_to_string((uint32_t) req_rota));
+	}
+#endif
 
 	// Ensure the requested rotation is sane (if all is well, this should never be tripped)
 	if (req_rota != KEEP_CURRENT_ROTATE && req_rota > FB_ROTATE_CCW) {
