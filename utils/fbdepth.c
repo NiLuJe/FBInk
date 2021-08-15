@@ -582,6 +582,13 @@ int
 			LOG("Current bitdepth is already %ubpp, but the grayscale flag is bogus!", req_bpp);
 			// Continue, we'll need to flip the grayscale flag properly
 			is_change_needed = true;
+
+			// And don't leave it set to KEEP_CURRENT_GRAYSCALE, since it's currently bogus...
+			if (fbink_state.bpp == 8U) {
+				req_gray = 1U;
+			} else {
+				req_gray = 0U;
+			}
 		} else {
 			LOG("Current bitdepth is already %ubpp!", req_bpp);
 			// No change needed as far as bitdepth is concerned...
