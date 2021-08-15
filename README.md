@@ -107,9 +107,11 @@ If you *really* need *extreme* Unicode coverage in the fixed-cell codepath, you 
 Be warned that this'll add almost 2MB to the binary size, and that the font is actually split in two (double-wide glyphs are punted off to a specific font), which may dampen its usefulness in practice...  
 For obvious reasons, this is *never* enabled by default.
 
-Along the way, a few auxiliary tools may crop up in the `utils` folder. `make utils` will do a static build of these (which is the recommended way to do it, as they rather crudely piggyback on FBInk's *internal* API). Currently, these consist of a diagnostic tool regarding rotation behavior, and a tool to properly manipulate the bitdepth on eInk devices.  
+Along the way, a few auxiliary tools may crop up in the `utils` folder. `make utils` will do a static build of these (which is the recommended way to do it, as they rather crudely piggyback on FBInk's *internal* API). Currently, these consist of a diagnostic tool regarding rotation behavior, and the doom stress-test mentioned below.  
 Most of these have *only* been tested on Kobo, and should probably be left alone unless you know what you're doing ;).  
-The main exception would be ([`fbdepth`](https://github.com/NiLuJe/FBInk/blob/master/utils/fbdepth.c)), which is used by [KOReader](https://github.com/koreader/koreader) on Kobo & reMarkable to enforce a sane rotation and switch to a more efficient bitdepth.
+
+A tool to properly manipulate the bitdepth on eInk devices is also available, and can be built for e-Ink targets with `make fbdepth`.  
+Its uninspired name is [`fbdepth`](https://github.com/NiLuJe/FBInk/blob/master/utils/fbdepth.c), and it's used by [KOReader](https://github.com/koreader/koreader) on Kobo & reMarkable to enforce a sane rotation and switch to a more efficient bitdepth.
 It has also been tested on Kindle, where rotation handling, at the very least, should be behaving properly. Do note that on FW 5.x, the stock GUI runs under X, and X will *not* like you rotating the fb from under its feet ;).
 
 There's also a fairly stupid [example](https://github.com/NiLuJe/FBInk/blob/master/utils/dump.c) showcasing the dump/restore API that can be built via `make dump`.  

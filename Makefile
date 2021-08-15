@@ -596,8 +596,6 @@ else
 utils: libi2c.built | outdir
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(TOOLS_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/rota utils/rota.c
 	$(STRIP) --strip-unneeded $(OUT_DIR)/rota
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(TOOLS_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbdepth utils/fbdepth.c $(UTILS_LIBS)
-	$(STRIP) --strip-unneeded $(OUT_DIR)/fbdepth
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(DOOM_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/doom utils/doom.c -lrt $(UTILS_LIBS) $(I2C_LIBS)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/doom
 endif
@@ -622,6 +620,11 @@ ftrace: libevdev.built static | outdir
 	$(STRIP) --strip-unneeded $(OUT_DIR)/finger_trace
 endif
 
+ifndef LINUX
+fbdepth: static
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbdepth utils/fbdepth.c $(LIBS)
+	$(STRIP) --strip-unneeded $(OUT_DIR)/fbdepth
+endif
 
 dump: static
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/dump utils/dump.c $(LIBS)
@@ -740,7 +743,7 @@ kobo: armcheck
 	mv -v Release/FBInk-$(FBINK_VERSION).zip Kobo/
 
 devcap: armcheck
-	$(MAKE) strip utils KOBO=true
+	$(MAKE) strip fbdepth utils KOBO=true
 	mkdir -p Kobo
 	cp -av $(CURDIR)/utils/devcap_test.sh Kobo
 	cp -av $(CURDIR)/Release/fbink Kobo
@@ -841,4 +844,4 @@ distclean: clean libunibreakclean libi2cclean libevdevclean
 	rm -rf libevdev-staged
 	rm -rf libevdev.built
 
-.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils alt sunxi ftrace dump devcap clean distclean
+.PHONY: default outdir all staticlib sharedlib static shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils alt sunxi ftrace fbdepth dump devcap clean distclean
