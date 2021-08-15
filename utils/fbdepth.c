@@ -551,7 +551,7 @@ int
 
 	// If no bitdepth was requested, set to the current one, we'll be double-checking if changes are actually needed.
 	if (req_bpp == KEEP_CURRENT_BITDEPTH) {
-		req_bpp = fbink_state.bpp;
+		req_bpp = (uint8_t) fbink_state.bpp;
 	}
 
 // If the automagic Portrait rotation was requested, compute it
@@ -563,11 +563,11 @@ int
 		if (fbink_state.ntx_rota_quirk != NTX_ROTA_SANE) {
 			req_rota = (fbink_state.ntx_boot_rota + 1) & 3;
 		} else {
-			req_rota = (int8_t) fbink_state.ntx_boot_rota;
+			req_rota = fbink_state.ntx_boot_rota;
 		}
-		LOG("Device's expected Portrait orientation should be: %hhd (%s)!",
+		LOG("Device's expected Portrait orientation should be: %u (%s)!",
 		    req_rota,
-		    fb_rotate_to_string((uint32_t) req_rota));
+		    fb_rotate_to_string(req_rota));
 	}
 #endif
 
@@ -681,10 +681,10 @@ int
 #	if defined(FBINK_FOR_KOBO)
 		// If the requested rota was canonical, translate it to a native one *now*
 		if (canonical_rota) {
-			LOG("Requested canonical rota %hhd translates to %u for this device",
+			LOG("Requested canonical rota %u translates to %u for this device",
 			    req_rota,
 			    fbink_rota_canonical_to_native((uint8_t) req_rota));
-			req_rota = (int8_t) fbink_rota_canonical_to_native((uint8_t) req_rota);
+			req_rota = fbink_rota_canonical_to_native((uint8_t) req_rota);
 		}
 #	endif
 		if (fbink_state.current_rota == req_rota) {
