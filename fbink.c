@@ -6238,13 +6238,8 @@ int
 	// Okay, now that we've got a formatted buffer...
 	// Did we get a valid FBInkOTConfig pointer?
 	if (cfg) {
-#ifdef FBINK_WITH_OPENTYPE
 		// Then feed our formatted string to fbink_print_ot
 		rv = fbink_print_ot(fbfd, buffer, cfg, fbink_cfg, NULL);
-#else
-		WARN("OpenType support is disabled in this FBInk build");
-		rv = ERRCODE(ENOSYS);
-#endif
 	} else {
 		// Otherwise, feed it to fbink_print instead
 		rv = fbink_print(fbfd, buffer, fbink_cfg);
