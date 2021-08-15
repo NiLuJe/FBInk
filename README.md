@@ -115,7 +115,8 @@ Most of these have *only* been tested on Kobo, and should probably be left alone
 
 A tool to properly manipulate the bitdepth on eInk devices is also available, and can be built for e-Ink targets with `make fbdepth`.  
 Its uninspired name is [`fbdepth`](https://github.com/NiLuJe/FBInk/blob/master/utils/fbdepth.c), and it's used by [KOReader](https://github.com/koreader/koreader) on Kobo & reMarkable to enforce a sane rotation and switch to a more efficient bitdepth.
-It has also been tested on Kindle, where rotation handling, at the very least, should be behaving properly. Do note that on FW 5.x, the stock GUI runs under X, and X will *not* like you rotating the fb from under its feet ;).
+It has also been tested on Kindle, where rotation handling, at the very least, should be behaving properly. Do note that on FW 5.x, the stock GUI runs under X, and X will *not* like you rotating the fb from under its feet ;).  
+If you want the smallest binary possible, make sure you build it alone, from a pristine source tree.
 
 There's also a fairly stupid [example](https://github.com/NiLuJe/FBInk/blob/master/utils/dump.c) showcasing the dump/restore API that can be built via `make dump`.  
 Another stupid [demo](https://github.com/NiLuJe/FBInk/blob/master/utils/doom.c) based on the PSX Doom fire effect was implemented, to stress-test the EPDC in a mildly interesting manner.  
