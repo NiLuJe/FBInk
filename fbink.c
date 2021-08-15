@@ -1710,7 +1710,7 @@ static struct mxcfb_rect
 		}
 	*/
 	}
-#	endif
+#	endif    // FBINK_WITH_FONTS
 
 	return region;
 }
