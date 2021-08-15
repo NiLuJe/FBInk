@@ -864,7 +864,7 @@ FBINK_API bool fbink_is_fb_quirky(void) __attribute__((pure, deprecated));
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
 // fbink_cfg:		Pointer to an FBInkConfig struct.
-FBINK_API int fbink_reinit(int fbfd, const FBInkConfig* restrict fbink_cfg);
+FBINK_API int fbink_reinit(int fbfd, const FBInkConfig* restrict fbink_cfg) __attribute__((warn_unused_result));
 
 // Update FBInk's internal verbosity flags
 // As mentioned in fbink_init(), the is_verbose, is_quiet & to_syslog fields in an FBInkConfig
@@ -1261,7 +1261,7 @@ FBINK_API int fbink_set_fb_info(int      fbfd,
 				uint32_t rota,
 				uint8_t  bpp,
 				uint8_t  grayscale,
-				const FBInkConfig* restrict fbink_cfg);
+				const FBInkConfig* restrict fbink_cfg) __attribute__((warn_unused_result));
 
 //
 // The functions below are tied to specific capabilities on Kobo devices with a sunxi SoC (e.g., the Elipsa).
