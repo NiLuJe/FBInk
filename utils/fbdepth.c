@@ -577,7 +577,7 @@ int
 	if (fbink_state.bpp == req_bpp) {
 		// Also check that the grayscale flag is sane
 		if (req_gray == KEEP_CURRENT_GRAYSCALE &&
-		    ((fbink_state.bpp == 8U && (var_info.grayscale != 1U && var_info.grayscale != 2U)) ||
+		    ((fbink_state.bpp == 8U && (var_info.grayscale == 0U || var_info.grayscale > 2U)) ||
 		     (fbink_state.bpp > 8U && var_info.grayscale != 0U))) {
 			LOG("Current bitdepth is already %ubpp, but the grayscale flag is bogus!", req_bpp);
 			// Continue, we'll need to flip the grayscale flag properly
