@@ -27,12 +27,13 @@
 #	define _GNU_SOURCE
 #endif
 
-#include "../fbink.h"
 #include <errno.h>
 #include <linux/fb.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/ioctl.h>
+
+#include "../fbink.h"
 
 // We want to return negative values on failure, always
 #define ERRCODE(e) (-(e))

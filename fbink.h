@@ -1229,6 +1229,7 @@ FBINK_API unsigned char* fbink_get_fb_pointer(int fbfd, size_t* buffer_size);
 #define KEEP_CURRENT_ROTATE    (1 << 7)
 #define KEEP_CURRENT_BITDEPTH  (1 << 7)
 #define KEEP_CURRENT_GRAYSCALE (1 << 7)
+#define TOGGLE_GRAYSCALE (1 << 6)
 // Sets the framebuffer's bitdepth and/or native rotation.
 // MUST NOT be called before fbink_init
 // Only tested on Kobo & Kindle, here be dragons on other platforms!
@@ -1264,6 +1265,7 @@ FBINK_API unsigned char* fbink_get_fb_pointer(int fbfd, size_t* buffer_size);
 //				setting it to GRAYSCALE_8BIT_INVERTED (2)
 //				will automagically enforce HW inversion via EPDC_FLAG_ENABLE_INVERSION
 //				Untouched if set to KEEP_CURRENT_GRAYSCALE
+//				If set to TOGGLE_GRAYSCALE, will toggle between INVERTED & not @ 8bpp
 // fbink_cfg:		Pointer to an FBInkConfig struct.
 FBINK_API int fbink_set_fb_info(int      fbfd,
 				uint32_t rota,

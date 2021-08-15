@@ -541,6 +541,7 @@ int
 		case GRAYSCALE_8BIT:
 		case GRAYSCALE_8BIT_INVERTED:
 		case KEEP_CURRENT_GRAYSCALE:
+		case TOGGLE_GRAYSCALE:
 			// NOP
 			break;
 		default:
@@ -563,6 +564,13 @@ int
 		if (grayscale == KEEP_CURRENT_GRAYSCALE) {
 			LOG("Keeping current grayscale value (%u)", vInfo.grayscale);
 		} else {
+			if (grayscale == TOGGLE_GRAYSCALE) {
+				if (vInfo.grayscale == GRAYSCALE_8BIT) {
+					grayscale = GRAYSCALE_8BIT_INVERTED;
+				} else {
+					grayscale = GRAYSCALE_8BIT;
+				}
+			}
 			LOG("Updating grayscale value from %u to %hhu", vInfo.grayscale, grayscale);
 			new_vinfo.grayscale = (uint32_t) grayscale;
 		}

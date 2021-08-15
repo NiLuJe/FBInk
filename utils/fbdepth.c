@@ -24,10 +24,64 @@
 #	define _GNU_SOURCE
 #endif
 
+#include <errno.h>
 #include <getopt.h>
 #include <stdio.h>
-// I feel dirty.
-#include "../fbink.c"
+#include <stdlib.h>
+#include <string.h>
+#include <syslog.h>
+#include <linux/fb.h>
+
+#include "../fbink.h"
+
+// Pilfer our usual macros from FBInk...
+// We want to return negative values on failure, always
+#define ERRCODE(e) (-(e))
+
+// Likely/Unlikely branch tagging
+#define likely(x)   __builtin_expect(!!(x), 1)
+#define unlikely(x) __builtin_expect(!!(x), 0)
+
+bool toSysLog = false;
+bool isQuiet = false;
+bool isVerbose = false;
+// Handle what we send to stdout (i.e., mostly diagnostic stuff, which tends to be verbose, so no FBInk tag)
+#define LOG(fmt, ...)                                                                                                    \
+	({                                                                                                               \
+		if (unlikely(isVerbose)) {                                                                             \
+			if (toSysLog) {                                                                                \
+				syslog(LOG_INFO, fmt, ##__VA_ARGS__);                                                    \
+			} else {                                                                                         \
+				fprintf(stdout, fmt "\n", ##__VA_ARGS__);                                                \
+			}                                                                                                \
+		}                                                                                                        \
+	})
+
+// And then what we send to stderr (mostly fbink_init stuff, add an FBInk tag to make it clear where it comes from for API users)
+#define ELOG(fmt, ...)                                                                                                   \
+	({                                                                                                               \
+		if (!isQuiet) {                                                                                        \
+			if (toSysLog) {                                                                                \
+				syslog(LOG_NOTICE, "[FBDepth] " fmt, ##__VA_ARGS__);                                       \
+			} else {                                                                                         \
+				fprintf(stderr, "[FBDepth] " fmt "\n", ##__VA_ARGS__);                                     \
+			}                                                                                                \
+		}                                                                                                        \
+	})
+
+// And a simple wrapper for actual warnings on error codepaths. Should only be used for warnings before a return/exit.
+// Always shown, always tagged, and always ends with a bang.
+#define WARN(fmt, ...)                                                                                                   \
+	({                                                                                                               \
+		if (toSysLog) {                                                                                        \
+			syslog(LOG_ERR, "[FBDepth] " fmt "!", ##__VA_ARGS__);                                              \
+		} else {                                                                                                 \
+			fprintf(stderr, "[FBDepth] " fmt "!\n", ##__VA_ARGS__);                                            \
+		}                                                                                                        \
+	})
+
+// Same, but with __PRETTY_FUNCTION__ right before fmt
+#define PFWARN(fmt, ...) ({ WARN("[%s] " fmt, __PRETTY_FUNCTION__, ##__VA_ARGS__); })
 
 // Help message
 static void
@@ -74,7 +128,7 @@ static int
 {
 	if (!str) {
 		WARN("Passed an empty value to a key expecting a tri-state value");
-		return -EINVAL;
+		return ERRCODE(EINVAL);
 	}
 
 	switch (str[0]) {
@@ -170,7 +224,7 @@ static int
 	}
 
 	WARN("Assigned an invalid or malformed value (%s) to a flag expecting a tri-state value", str);
-	return -EINVAL;
+	return ERRCODE(EINVAL);
 }
 
 #ifdef FBINK_FOR_KINDLE
@@ -191,238 +245,67 @@ static orientation_t
 			return orientation_portrait;
 	}
 }
-
-static uint32_t
-    einkfb_orientation_to_linuxfb_rotate(orientation_t orientation)
-{
-	switch (orientation) {
-		case orientation_portrait:
-			return FB_ROTATE_UR;
-		case orientation_portrait_upside_down:
-			return FB_ROTATE_UD;
-		case orientation_landscape:
-			return FB_ROTATE_CW;
-		case orientation_landscape_upside_down:
-			return FB_ROTATE_CCW;
-		default:
-			// Should never happen.
-			return FB_ROTATE_UR;
-	}
-}
 #endif
 
-int fbFd = -1;
-
-static bool
-    get_fbinfo(void)
+// Duplicated from FBInk itself
+static __attribute__((cold)) const char*
+    fb_rotate_to_string(uint32_t rotate)
 {
-	// Get variable fb info
-	if (ioctl(fbFd, FBIOGET_VSCREENINFO, &vInfo)) {
-		perror("ioctl GET_V");
-		return false;
+	switch (rotate) {
+		case FB_ROTATE_UR:
+			return "Upright, 0°";
+		case FB_ROTATE_CW:
+			return "Clockwise, 90°";
+		case FB_ROTATE_UD:
+			return "Upside Down, 180°";
+		case FB_ROTATE_CCW:
+			return "Counter Clockwise, 270°";
+		default:
+			return "Unknown?!";
 	}
-	LOG("Variable fb info: %ux%u (%ux%u), %ubpp @ rotation: %u (%s)",
-	    vInfo.xres,
-	    vInfo.yres,
-	    vInfo.xres_virtual,
-	    vInfo.yres_virtual,
-	    vInfo.bits_per_pixel,
-	    vInfo.rotate,
-	    fb_rotate_to_string(vInfo.rotate));
-	// Get fixed fb information
-	if (ioctl(fbFd, FBIOGET_FSCREENINFO, &fInfo)) {
-		perror("ioctl GET_F");
-		return false;
-	}
-	LOG("Fixed fb info: ID is \"%s\", length of fb mem: %u bytes & line length: %u bytes",
-	    fInfo.id,
-	    fInfo.smem_len,
-	    fInfo.line_length);
+}
+
+static void
+    get_fb_info(int fbfd, FBInkConfig* fbink_cfg, FBInkState* fbink_state)
+{
+	// We're also going to need to current state to check what we actually need to do
+	fbink_get_state(fbink_cfg, fbink_state);
+	size_t buffer_size = 0U;
+	fbink_get_fb_pointer(fbfd, &buffer_size);
+
+	// Print initial status
+	LOG("Variable fb info: %ux%u (%ux%zu), %ubpp @ rotation: %u (%s)",
+	    fbink_state->screen_width,
+	    fbink_state->screen_height,
+	    (fbink_state->scanline_stride << 3U) / fbink_state->bpp,
+	    buffer_size / fbink_state.scanline_stride,
+	    fbink_state->bpp,
+	    fbink_state->current_rota,
+	    fb_rotate_to_string(fbink_state->current_rota));
+	LOG("Fixed fb info: length of fb mem: %zu bytes & line length: %u bytes",
+	    buffer_size,
+	    fbink_state->scanline_stride);
 
 #ifdef FBINK_FOR_KINDLE
 	// NOTE: einkfb devices (even the K4, which only uses it as a shim over mxcfb HW)
 	//       don't actually honor the standard Linux fb rotation, and instead rely on a set of custom ioctls...
-	if (deviceQuirks.isKindleLegacy) {
+	if (fbink_state->is_kindle_legacy) {
 		orientation_t orientation = orientation_portrait;
-		if (ioctl(fbFd, FBIO_EINK_GET_DISPLAY_ORIENTATION, &orientation)) {
-			perror("ioctl FBIO_EINK_GET_DISPLAY_ORIENTATION");
-			return false;
+		if (ioctl(fbfd, FBIO_EINK_GET_DISPLAY_ORIENTATION, &orientation)) {
+			WARN("FBIO_EINK_GET_DISPLAY_ORIENTATION: %m");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
 		}
 
 		// Because everything is terrible, it's actually not the same mapping as the Linux fb rotate field...
 		LOG("Actual einkfb orientation: %u (%s)", orientation, einkfb_orientation_to_string(orientation));
 	}
 #endif
-
-	return true;
-}
-
-static bool
-    set_fbinfo(uint32_t bpp, int8_t rota, bool canonical_rota UNUSED_BY_NOTKOBO, uint32_t req_gray)
-{
-	// Set variable fb info
-	// Bitdepth
-	vInfo.bits_per_pixel = bpp;
-	LOG("Setting bitdepth to %ubpp", vInfo.bits_per_pixel);
-	// Grayscale flag
-	vInfo.grayscale = req_gray;
-	LOG("Setting grayscale to %u", vInfo.grayscale);
-
-	// NOTE: We have to counteract the rotation shenanigans the Kernel might be enforcing...
-	//       c.f., mxc_epdc_fb_check_var @ drivers/video/mxc/mxc_epdc_fb.c OR drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c
-	//       The goal being to end up in the *same* effective rotation as before.
-	// First, remember the current rotation as the expected one...
-#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES) || defined(FBINK_FOR_KINDLE)
-	uint32_t expected_rota = vInfo.rotate;
-#endif
-	// Then, set the requested rotation, if there was one...
-	if (rota != -1) {
-		vInfo.rotate = (uint32_t) rota;
-		LOG("Setting rotate to %u (%s)", vInfo.rotate, fb_rotate_to_string(vInfo.rotate));
-		// And flag it as the expected rota for the sanity checks
-#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES) || defined(FBINK_FOR_KINDLE)
-		expected_rota = (uint32_t) rota;
-#endif
-	}
-#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
-	// When we do a canonical rotation conversion, this has *already* been taken care of by fbink_rota_canonical_to_native!
-	if (!canonical_rota) {
-		if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
-			// NOTE: This should cover the H2O and the few other devices suffering from the same quirk...
-			vInfo.rotate ^= 2;
-			LOG("Setting rotate to %u (%s) to account for kernel rotation quirks",
-			    vInfo.rotate,
-			    fb_rotate_to_string(vInfo.rotate));
-		} else if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ODD_INVERTED) {
-			// NOTE: This is for the Forma, which only inverts CW & CCW (i.e., odd numbers)...
-			if ((vInfo.rotate & 0x01) == 1) {
-				vInfo.rotate ^= 2;
-				LOG("Setting rotate to %u (%s) to account for kernel rotation quirks",
-				    vInfo.rotate,
-				    fb_rotate_to_string(vInfo.rotate));
-			}
-		}
-	}
-#endif
-
-	if (ioctl(fbFd, FBIOPUT_VSCREENINFO, &vInfo)) {
-		perror("ioctl PUT_V");
-		return false;
-	}
-
-#ifdef FBINK_FOR_KINDLE
-	// Deal once again with einkfb properly...
-	if (deviceQuirks.isKindleLegacy) {
-		orientation_t orientation = linuxfb_rotate_to_einkfb_orientation(expected_rota);
-		if (ioctl(fbFd, FBIO_EINK_SET_DISPLAY_ORIENTATION, orientation)) {
-			perror("ioctl FBIO_EINK_SET_DISPLAY_ORIENTATION");
-			return false;
-		}
-
-		LOG("Setting actual einkfb orientation to %u (%s)",
-		    orientation,
-		    einkfb_orientation_to_string(orientation));
-	}
-#endif
-
-#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
-	// NOTE: Double-check that we weren't bit by rotation quirks...
-	if (vInfo.rotate != expected_rota) {
-		LOG("\nCurrent rotation (%u) doesn't match the expected rotation (%u), attempting to fix it . . .",
-		    vInfo.rotate,
-		    expected_rota);
-
-		// Brute-force it until it matches...
-		for (uint32_t i = vInfo.rotate, j = FB_ROTATE_UR; j <= FB_ROTATE_CCW; i = (i + 1U) & 3U, j++) {
-			// If we finally got the right orientation, break the loop
-			if (vInfo.rotate == expected_rota) {
-				break;
-			}
-			// Do the i -> i + 1 -> i dance to be extra sure...
-			// (This is useful on devices where the kernel *always* switches to the invert orientation, c.f., rota.c)
-			vInfo.rotate = i;
-			if (ioctl(fbFd, FBIOPUT_VSCREENINFO, &vInfo)) {
-				perror("ioctl PUT_V");
-				return false;
-			}
-			LOG("Kernel rotation quirk recovery: %u -> %u", i, vInfo.rotate);
-
-			// Don't do anything extra if that was enough...
-			if (vInfo.rotate == expected_rota) {
-				continue;
-			}
-			// Now for i + 1 w/ wraparound, since the valid rotation range is [0..3] (FB_ROTATE_UR to FB_ROTATE_CCW).
-			// (i.e., a Portrait/Landscape swap to counteract potential side-effects of a kernel-side mandatory invert)
-			uint32_t n   = (i + 1U) & 3U;
-			vInfo.rotate = n;
-			if (ioctl(fbFd, FBIOPUT_VSCREENINFO, &vInfo)) {
-				perror("ioctl PUT_V");
-				return false;
-			}
-			LOG("Kernel rotation quirk recovery (intermediary @ %u): %u -> %u", i, n, vInfo.rotate);
-
-			// And back to i, if need be...
-			if (vInfo.rotate == expected_rota) {
-				continue;
-			}
-			vInfo.rotate = i;
-			if (ioctl(fbFd, FBIOPUT_VSCREENINFO, &vInfo)) {
-				perror("ioctl PUT_V");
-				return false;
-			}
-			LOG("Kernel rotation quirk recovery: %u -> %u", i, vInfo.rotate);
-		}
-	}
-
-	// Finally, warn if things *still* look FUBAR...
-	if (vInfo.rotate != expected_rota) {
-		LOG("\nCurrent rotation (%u) doesn't match the expected rotation (%u), here be dragons!",
-		    vInfo.rotate,
-		    expected_rota);
-	}
-
-	// NOTE: On sunxi, warn if bitdepth switch failed (as the minimal fb driver will refuse to switch to 8bpp,
-	//       c.f., var_to_disp_fb @ drivers/video/fbdev/sunxi/disp2/disp/dev_fb.c).
-	//       Thankfully, we don't actually need it to ;).
-	// In the same way, the rotate flag is meaningless, as Nickel never updates it (rotation is purely handled via G2D flags).
-	// But, it *is* saved (as is the grayscale flag).
-	if (deviceQuirks.isSunxi) {
-		if (vInfo.bits_per_pixel != bpp) {
-			LOG("\nCurrent bitdepth (%u) doesn't match the requested one (%u), it's probably unsupported by the minimal disp fb driver.",
-			    vInfo.bits_per_pixel,
-			    bpp);
-		}
-	}
-#endif
-
-#ifdef FBINK_FOR_KINDLE
-	// And, again, einkfb is a special snowflake...
-	if (deviceQuirks.isKindleLegacy) {
-		orientation_t orientation = orientation_portrait;
-		if (ioctl(fbFd, FBIO_EINK_GET_DISPLAY_ORIENTATION, &orientation)) {
-			perror("ioctl FBIO_EINK_GET_DISPLAY_ORIENTATION");
-			return false;
-		}
-
-		LOG("Actual einkfb orientation is now %u (%s)", orientation, einkfb_orientation_to_string(orientation));
-	}
-#endif
-	LOG("Bitdepth is now %ubpp (grayscale: %u) @ rotate: %u (%s)\n",
-	    vInfo.bits_per_pixel,
-	    vInfo.grayscale,
-	    vInfo.rotate,
-	    fb_rotate_to_string(vInfo.rotate));
-
-	return true;
 }
 
 int
     main(int argc, char* argv[])
 {
-	// For the LOG & ELOG macros
-	g_isQuiet   = false;
-	g_isVerbose = true;
-
 	int                        opt;
 	int                        opt_index;
 	static const struct option opts[] = { { "depth", required_argument, NULL, 'd' },
@@ -479,12 +362,12 @@ int
 				}
 				break;
 			case 'v':
-				g_isQuiet   = false;
-				g_isVerbose = true;
+				isQuiet   = false;
+				isVerbose = true;
 				break;
 			case 'q':
-				g_isQuiet   = true;
-				g_isVerbose = false;
+				isQuiet   = true;
+				isVerbose = false;
 				break;
 			case 'h':
 				show_helpmsg();
@@ -577,36 +460,42 @@ int
 
 	// Enforce quiet w/ print_*
 	if (print_bpp || print_rota || print_canonical) {
-		g_isQuiet   = true;
-		g_isVerbose = false;
+		isQuiet   = true;
+		isVerbose = false;
 	}
 
 	// Assume success, until shit happens ;)
 	int rv = EXIT_SUCCESS;
 
-	// NOTE: We're going to need to identify the device, to handle rotation quirks...
-	identify_device();
-
-	// NOTE: We only need this for ioctl, hence O_NONBLOCK (as per open(2)).
-	fbFd = open("/dev/fb0", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
-	if (fbFd == -1) {
-		perror("open");
-		return ERRCODE(EXIT_FAILURE);
+	// Init FBInk
+	FBInkConfig fbink_cfg = { 0 };
+	fbink_cfg.is_verbose  = isVerbose;
+	fbink_cfg.is_quiet  = isQuiet;
+	int fbfd = -1;
+	// Open framebuffer and keep it around, then setup globals.
+	if ((fbfd = fbink_open()) == ERRCODE(EXIT_FAILURE)) {
+		fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
+		rv = ERRCODE(EXIT_FAILURE);
+		goto cleanup;
 	}
-
-	// Print initial status, and store current vInfo
-	if (!get_fbinfo()) {
+	if (fbink_init(fbfd, &fbink_cfg) != EXIT_SUCCESS) {
+		fprintf(stderr, "Failed to initialize FBInk, aborting . . .\n");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
 
+	// We're also going to need to current state to check what we actually need to do
+	FBInkState fbink_state = { 0 };
+	// Print initial status
+	get_fb_info(fbfd, &fbink_cfg, &fbink_state);
+
 	// If we just wanted to print/return the current bitdepth, abort early
 	if (print_bpp || return_bpp) {
 		if (print_bpp) {
-			fprintf(stdout, "%u", vInfo.bits_per_pixel);
+			fprintf(stdout, "%u", fbink_state.bpp);
 		}
 		if (return_bpp) {
-			rv = (int) vInfo.bits_per_pixel;
+			rv = (int) fbink_state.bpp;
 			goto cleanup;
 		} else {
 			goto cleanup;
@@ -616,10 +505,10 @@ int
 	// If we just wanted to print/return the current rotation, abort early
 	if (print_rota || return_rota) {
 		if (print_rota) {
-			fprintf(stdout, "%u", vInfo.rotate);
+			fprintf(stdout, "%u", fbink_state.current_rota);
 		}
 		if (return_rota) {
-			rv = (int) vInfo.rotate;
+			rv = (int) fbink_state.current_rota;
 			goto cleanup;
 		} else {
 			goto cleanup;
@@ -630,10 +519,10 @@ int
 	// If we just wanted to print/return the current canonical rotation, abort early
 	if (print_canonical || return_canonical) {
 		if (print_canonical) {
-			fprintf(stdout, "%hhu", fbink_rota_native_to_canonical(vInfo.rotate));
+			fprintf(stdout, "%hhu", fbink_rota_native_to_canonical(fbink_state.current_rota));
 		}
 		if (return_canonical) {
-			rv = (int) fbink_rota_native_to_canonical(vInfo.rotate);
+			rv = (int) fbink_rota_native_to_canonical(fbink_state.current_rota);
 			goto cleanup;
 		} else {
 			goto cleanup;
@@ -643,7 +532,7 @@ int
 
 	// If no bitdepth was requested, set to the current one, we'll be double-checking if changes are actually needed.
 	if (req_bpp == 0U) {
-		req_bpp = vInfo.bits_per_pixel;
+		req_bpp = fbink_state.bpp;
 	}
 
 	// If the automagic Portrait rotation was requested, compute it
@@ -652,10 +541,10 @@ int
 		// NOTE: For *most* devices, Nickel's Portrait orientation should *always* match BootRota + 1
 		//       Thankfully, the Libra appears to be ushering in a new era filled with puppies and rainbows,
 		//       and, hopefully, less insane rotation quirks ;).
-		if (deviceQuirks.ntxRotaQuirk != NTX_ROTA_SANE) {
-			req_rota = (deviceQuirks.ntxBootRota + 1) & 3;
+		if (fbink_state.ntx_rota_quirk != NTX_ROTA_SANE) {
+			req_rota = (fbink_state.ntx_boot_rota + 1) & 3;
 		} else {
-			req_rota = (int8_t) deviceQuirks.ntxBootRota;
+			req_rota = (int8_t) fbink_state.ntx_boot_rota;
 		}
 		LOG("Device's expected Portrait orientation should be: %hhd (%s)!",
 		    req_rota,
@@ -682,35 +571,25 @@ int
 	// so we only play with this @ 8bpp ;).
 	// NOTE: While we technically don't allow switching to 4bpp, make sure we leave it alone,
 	//       because there are dedicated GRAYSCALE_4BIT & GRAYSCALE_4BIT_INVERTED constants...
-	uint32_t req_gray = vInfo.grayscale;
+	uint32_t req_gray = KEEP_CURRENT_GRAYSCALE;
 	if (want_nm == true) {
 		if (req_bpp == 8U) {
-			req_gray = GRAYSCALE_8BIT_INVERTED;
+			req_gray = 2U; // GRAYSCALE_8BIT_INVERTED
 		} else if (req_bpp > 8U) {
 			req_gray = 0U;
 		}
 	} else if (want_nm == false) {
 		if (req_bpp == 8U) {
-			req_gray = GRAYSCALE_8BIT;
+			req_gray = 1U; // GRAYSCALE_8BIT
 		} else if (req_bpp > 8U) {
 			req_gray = 0U;
 		}
 	} else if (want_nm == -1) {
-		// Toggle...
-		if (req_bpp == 8U) {
-			// NOTE: We check for 0 in case the current bitdepth is not already 8bpp...
-			if (vInfo.grayscale == GRAYSCALE_8BIT || vInfo.grayscale == 0U) {
-				req_gray = GRAYSCALE_8BIT_INVERTED;
-			} else {
-				req_gray = GRAYSCALE_8BIT;
-			}
-		} else if (req_bpp > 8U) {
-			req_gray = 0U;
-		}
+		req_gray = TOGGLE_GRAYSCALE;
 	} else {
 		// Otherwise, make sure we default to sane values for a non-inverted palette...
 		if (req_bpp == 8U) {
-			req_gray = GRAYSCALE_8BIT;
+			req_gray = 1U; // GRAYSCALE_8BIT
 		} else if (req_bpp > 8U) {
 			req_gray = 0U;
 		}
@@ -719,6 +598,8 @@ int
 	// If a change was requested, do it, but check if it's necessary first
 	bool is_change_needed = false;
 
+	// FIXME!
+	/*
 	// Start by checking that the grayscale flag is flipped properly
 	if (vInfo.grayscale == req_gray) {
 		LOG("\nCurrent grayscale flag is already %u!", req_gray);
@@ -726,9 +607,10 @@ int
 	} else {
 		is_change_needed = true;
 	}
+	*/
 
 	// Then bitdepth...
-	if (vInfo.bits_per_pixel == req_bpp) {
+	if (fbink_state.bpp == req_bpp) {
 		// Also check that the grayscale flag is flipped properly (again)
 		if (vInfo.grayscale != req_gray) {
 			LOG("\nCurrent bitdepth is already %ubpp, but the grayscale flag is bogus!", req_bpp);
@@ -745,12 +627,13 @@ int
 	// Same for rotation, if we requested one...
 	if (req_rota != -1) {
 #ifdef FBINK_FOR_KINDLE
-		if (deviceQuirks.isKindleLegacy) {
+		if (fbink_state.is_kindle_legacy) {
 			// We need to check the effective orientation on einkfb...
 			orientation_t orientation = orientation_portrait;
-			if (ioctl(fbFd, FBIO_EINK_GET_DISPLAY_ORIENTATION, &orientation)) {
-				perror("ioctl FBIO_EINK_GET_DISPLAY_ORIENTATION");
-				return false;
+			if (ioctl(fbfd, FBIO_EINK_GET_DISPLAY_ORIENTATION, &orientation)) {
+				WARN("FBIO_EINK_GET_DISPLAY_ORIENTATION: %m");
+				rv = ERRCODE(EXIT_FAILURE);
+				goto cleanup;
 			}
 
 			uint32_t rotate = einkfb_orientation_to_linuxfb_rotate(orientation);
@@ -779,7 +662,7 @@ int
 			req_rota = (int8_t) fbink_rota_canonical_to_native((uint8_t) req_rota);
 		}
 #	endif
-		if (vInfo.rotate == (uint32_t) req_rota) {
+		if (fbink_state.current_rota == (uint32_t) req_rota) {
 			LOG("\nCurrent rotation is already %hhd!", req_rota);
 			// No change needed as far as rotation is concerned...
 		} else {
@@ -797,26 +680,23 @@ int
 	if (req_rota != -1) {
 		LOG("\nSwitching fb to %ubpp%s @ rotation %hhd . . .",
 		    req_bpp,
-		    (req_bpp == vInfo.bits_per_pixel) ? " (current bitdepth)" : "",
+		    (req_bpp == fbink_state.bpp) ? " (current bitdepth)" : "",
 		    req_rota);
 	} else {
 		LOG("\nSwitching fb to %ubpp%s . . .",
 		    req_bpp,
-		    (req_bpp == vInfo.bits_per_pixel) ? " (current bitdepth)" : "");
+		    (req_bpp == fbink_state.bpp) ? " (current bitdepth)" : "");
 	}
-	if (!set_fbinfo(req_bpp, req_rota, canonical_rota, req_gray)) {
+	if (fbink_set_fb_info(fbfd, req_rota, !canonical_rota, req_bpp, req_gray, &fbink_cfg) < 0) {
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
 	// Recap
-	if (!get_fbinfo()) {
-		rv = ERRCODE(EXIT_FAILURE);
-		goto cleanup;
-	}
+	get_fb_info(fbfd, &fbink_cfg, &fbink_state);
 
 cleanup:
-	if (close(fbFd) != 0) {
-		perror("close");
+	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
+		WARN("Failed to close the framebuffer, aborting");
 		rv = ERRCODE(EXIT_FAILURE);
 	}
 
