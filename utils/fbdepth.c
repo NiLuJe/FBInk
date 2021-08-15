@@ -266,25 +266,41 @@ static __attribute__((cold)) const char*
 }
 
 static void
-    get_fb_info(int fbfd, FBInkConfig* fbink_cfg, FBInkState* fbink_state)
+    get_fb_info(int                       fbfd,
+		FBInkConfig*              fbink_cfg,
+		FBInkState*               fbink_state,
+		struct fb_var_screeninfo* var_info,
+		struct fb_fix_screeninfo* fix_info)
 {
-	// We're also going to need to current state to check what we actually need to do
+	// We're going to need to current state to check what we actually need to do
 	fbink_get_state(fbink_cfg, fbink_state);
 	size_t buffer_size = 0U;
 	fbink_get_fb_pointer(fbfd, &buffer_size);
+	fbink_get_fb_info(var_info, fix_info);
 
 	// Print initial status
-	LOG("Variable fb info: %ux%u (%ux%zu), %ubpp @ rotation: %u (%s)",
+	LOG("FBInk state: Screen is %ux%u (%ux%zu), %ubpp @ rotation: %u (%s); buffer size is %zu bytes with a scanline stride of %u bytes",
 	    fbink_state->screen_width,
 	    fbink_state->screen_height,
 	    (fbink_state->scanline_stride << 3U) / fbink_state->bpp,
-	    buffer_size / fbink_state.scanline_stride,
+	    buffer_size / fbink_state->scanline_stride,
 	    fbink_state->bpp,
 	    fbink_state->current_rota,
-	    fb_rotate_to_string(fbink_state->current_rota));
-	LOG("Fixed fb info: length of fb mem: %zu bytes & line length: %u bytes",
+	    fb_rotate_to_string(fbink_state->current_rota),
 	    buffer_size,
 	    fbink_state->scanline_stride);
+	LOG("Variable fb info: %ux%u (%ux%u), %ubpp @ rotation: %u (%s)",
+	    var_info->xres,
+	    var_info->yres,
+	    var_info->xres_virtual,
+	    var_info->yres_virtual,
+	    var_info->bits_per_pixel,
+	    var_info->rotate,
+	    fb_rotate_to_string(var_info->rotate));
+	LOG("Fixed fb info: ID is \"%s\", length of fb mem: %u bytes & line length: %u bytes",
+	    fix_info->id,
+	    fix_info->smem_len,
+	    fix_info->line_length);
 
 #ifdef FBINK_FOR_KINDLE
 	// NOTE: einkfb devices (even the K4, which only uses it as a shim over mxcfb HW)
@@ -485,9 +501,11 @@ int
 	}
 
 	// We're also going to need to current state to check what we actually need to do
-	FBInkState fbink_state = { 0 };
+	FBInkState               fbink_state = { 0 };
+	struct fb_var_screeninfo var_info    = { 0 };
+	struct fb_fix_screeninfo fix_info    = { 0 };
 	// Print initial status
-	get_fb_info(fbfd, &fbink_cfg, &fbink_state);
+	get_fb_info(fbfd, &fbink_cfg, &fbink_state, &var_info, &fix_info);
 
 	// If we just wanted to print/return the current bitdepth, abort early
 	if (print_bpp || return_bpp) {
@@ -598,21 +616,18 @@ int
 	// If a change was requested, do it, but check if it's necessary first
 	bool is_change_needed = false;
 
-	// FIXME!
-	/*
 	// Start by checking that the grayscale flag is flipped properly
-	if (vInfo.grayscale == req_gray) {
+	if (var_info.grayscale == req_gray) {
 		LOG("\nCurrent grayscale flag is already %u!", req_gray);
 		// No change needed as far as grayscale is concerned...
 	} else {
 		is_change_needed = true;
 	}
-	*/
 
 	// Then bitdepth...
 	if (fbink_state.bpp == req_bpp) {
 		// Also check that the grayscale flag is flipped properly (again)
-		if (vInfo.grayscale != req_gray) {
+		if (var_info.grayscale != req_gray) {
 			LOG("\nCurrent bitdepth is already %ubpp, but the grayscale flag is bogus!", req_bpp);
 			// Continue, we'll need to flip the grayscale flag properly
 			is_change_needed = true;
@@ -692,7 +707,7 @@ int
 		goto cleanup;
 	}
 	// Recap
-	get_fb_info(fbfd, &fbink_cfg, &fbink_state);
+	get_fb_info(fbfd, &fbink_cfg, &fbink_state, &var_info, &fix_info);
 
 cleanup:
 	if (fbink_close(fbfd) == ERRCODE(EXIT_FAILURE)) {
