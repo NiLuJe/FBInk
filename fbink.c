@@ -11005,7 +11005,11 @@ unsigned char*
 		}
 	}
 
+#ifdef FBINK_FOR_KOBO
 	*buffer_size = deviceQuirks.isSunxi ? sunxiCtx.alloc_size : fInfo.smem_len;
+#else
+	*buffer_size = fInfo.smem_len;
+#endif
 	return fbPtr;
 
 failure:
