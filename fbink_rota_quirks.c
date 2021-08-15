@@ -559,7 +559,12 @@ int
 
 	if (new_vinfo.bits_per_pixel == 8U) {
 		if (grayscale == KEEP_CURRENT_GRAYSCALE) {
-			LOG("Keeping current grayscale value: %u", vInfo.grayscale);
+			if (bpp == KEEP_CURRENT_BITDEPTH) {
+				LOG("Keeping current grayscale value: %u", vInfo.grayscale);
+			} else {
+				LOG("Sanitizing grayscale flag for 8bpp");
+				new_vinfo.grayscale = GRAYSCALE_8BIT;
+			}
 		} else {
 			if (grayscale == TOGGLE_GRAYSCALE) {
 				if (vInfo.grayscale == GRAYSCALE_8BIT) {
@@ -574,6 +579,12 @@ int
 	} else if (new_vinfo.bits_per_pixel == 4U) {
 		if (grayscale == KEEP_CURRENT_GRAYSCALE) {
 			LOG("Keeping current grayscale value: %u", vInfo.grayscale);
+			if (bpp == KEEP_CURRENT_BITDEPTH) {
+				LOG("Keeping current grayscale value: %u", vInfo.grayscale);
+			} else {
+				LOG("Sanitizing grayscale flag for 4bpp");
+				new_vinfo.grayscale = GRAYSCALE_4BIT;
+			}
 		} else {
 			if (grayscale == TOGGLE_GRAYSCALE) {
 				if (vInfo.grayscale == GRAYSCALE_4BIT) {
@@ -586,7 +597,7 @@ int
 			new_vinfo.grayscale = (uint32_t) grayscale;
 		}
 	} else {
-		LOG("Bitdepth > 8bpp, sanitizing grayscale flag");
+		LOG("Sanitizing grayscale flag for bitdepths > 8bpp");
 		new_vinfo.grayscale = 0U;
 	}
 
