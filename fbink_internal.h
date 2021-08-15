@@ -40,6 +40,9 @@
 
 // No extra fonts, no image support, and no OpenType support in minimal builds
 #ifndef FBINK_MINIMAL
+#	ifndef FBINK_WITH_DRAW
+#		define FBINK_WITH_DRAW
+#	endif
 #	ifndef FBINK_WITH_VGA
 #		define FBINK_WITH_VGA
 #	endif
@@ -342,6 +345,13 @@
 #	define UNUSED_BY_NOTMINIMAL __attribute__((unused))
 #	define UNUSED_BY_MINIMAL
 #endif
+#ifdef FBINK_WITH_DRAW
+#	define UNUSED_BY_NODRAW
+#	define UNUSED_BY_DRAW __attribute__((unused))
+#else
+#	define UNUSED_BY_NODRAW __attribute__((unused))
+#	define UNUSED_BY_DRAW
+#endif
 #ifdef FBINK_WITH_VGA
 #	define UNUSED_BY_NOVGA
 #	define UNUSED_BY_VGA __attribute__((unused))
@@ -545,6 +555,7 @@ static void rotate_touch_coordinates(FBInkCoordinates* restrict);
 static void rotate_coordinates_nop(FBInkCoordinates* restrict __attribute__((unused)));
 
 // NOTE: Making sure all of those are inlined helps fbink_print_ot (c.f., #43).
+#ifdef FBINK_WITH_DRAW
 static inline __attribute__((always_inline, hot)) uint16_t pack_rgb565(uint8_t, uint8_t, uint8_t);
 
 static inline __attribute__((always_inline, hot)) void put_pixel_Gray4(const FBInkCoordinates* restrict,
@@ -574,6 +585,7 @@ static inline __attribute__((always_inline, hot)) void get_pixel_RGB565(const FB
 									FBInkPixel* restrict);
 // NOTE: Same as put_pixel ;)
 static inline __attribute__((always_inline, hot)) void get_pixel(FBInkCoordinates, FBInkPixel* restrict);
+#endif    // FBINK_WITH_DRAW
 
 #if defined(FBINK_WITH_IMAGE) || defined(FBINK_WITH_OPENTYPE)
 // This is only needed for alpha blending in the image or OpenType codepath ;).
@@ -597,6 +609,7 @@ static inline __attribute__((always_inline, hot)) void get_pixel(FBInkCoordinate
 		})
 #endif
 
+#ifdef FBINK_WITH_DRAW
 // NOTE: Enforced inlining on fill_rect currently doesn't gain us anything, on the other hand.
 //       Which is why we went with a function pointer to bitdepth-specific branchless variants ;).
 static __attribute__((hot)) void fill_rect_Gray4(unsigned short int,
@@ -651,6 +664,7 @@ static __attribute__((hot)) void fill_rect_RGB32_checked(unsigned short int,
 							 const FBInkPixel* restrict);
 static void                      clear_screen(int UNUSED_BY_NOTKINDLE, uint8_t, bool UNUSED_BY_NOTKINDLE);
 //static void checkerboard_screen(void);
+#endif    // FBINK_WITH_DRAW
 
 #ifdef FBINK_WITH_VGA
 static const unsigned char* font8x8_get_bitmap(uint32_t);
@@ -715,8 +729,10 @@ static __attribute__((cold)) const char* fb_rotate_to_string(uint32_t);
 #ifdef FBINK_FOR_KINDLE
 static __attribute__((cold)) const char* einkfb_orientation_to_string(orientation_t);
 #endif
-static __attribute__((cold)) int  set_pen_color(bool, bool, bool, bool, uint8_t, uint8_t, uint8_t, uint8_t);
-static __attribute__((cold)) int  update_pen_colors(const FBInkConfig* restrict);
+#ifdef FBINK_WITH_DRAW
+static __attribute__((cold)) int set_pen_color(bool, bool, bool, bool, uint8_t, uint8_t, uint8_t, uint8_t);
+static __attribute__((cold)) int update_pen_colors(const FBInkConfig* restrict);
+#endif
 static __attribute__((cold)) void update_verbosity(const FBInkConfig* restrict);
 #ifdef FBINK_FOR_POCKETBOOK
 static __attribute__((cold)) void pocketbook_fix_fb_info(void);

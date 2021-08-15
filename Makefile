@@ -431,6 +431,11 @@ endif
 
 # Manage modular MINIMAL builds...
 ifdef MINIMAL
+	# Support tweaking a MINIMAL build to still include drawing primitives
+	ifdef DRAW
+		FEATURES_CPPFLAGS+=-DFBINK_WITH_DRAW
+	endif
+
 	# Support tweaking a MINIMAL build to still include the basic bitmap font
 	ifdef VGA
 		FEATURES_CPPFLAGS+=-DFBINK_WITH_VGA

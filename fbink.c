@@ -98,6 +98,7 @@ const char*
 	return FBINK_VERSION;
 }
 
+#ifdef FBINK_WITH_DRAW
 // #RGB -> RGB565
 static inline __attribute__((always_inline, hot)) uint16_t
     pack_rgb565(uint8_t r, uint8_t g, uint8_t b)
@@ -154,14 +155,14 @@ static inline __attribute__((always_inline)) void
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	// NOTE: Technically legitimate warning. In practice, we always pass RGB32 pixels in 24bpp codepaths.
-#pragma GCC diagnostic   push
-#pragma GCC diagnostic   ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunknown-warning-option"
-#pragma GCC diagnostic   ignored "-Wmaybe-uninitialized"
-        *((unsigned char*) (fbPtr + pix_offset))      = px->bgra.color.b;
-        *((unsigned char*) (fbPtr + pix_offset + 1U)) = px->bgra.color.g;
-        *((unsigned char*) (fbPtr + pix_offset + 2U)) = px->bgra.color.r;
-#pragma GCC diagnostic pop
+#	pragma GCC diagnostic   push
+#	pragma GCC diagnostic   ignored "-Wunknown-pragmas"
+#	pragma clang diagnostic ignored "-Wunknown-warning-option"
+#	pragma GCC diagnostic   ignored "-Wmaybe-uninitialized"
+	*((unsigned char*) (fbPtr + pix_offset))      = px->bgra.color.b;
+	*((unsigned char*) (fbPtr + pix_offset + 1U)) = px->bgra.color.g;
+	*((unsigned char*) (fbPtr + pix_offset + 2U)) = px->bgra.color.r;
+#	pragma GCC diagnostic pop
 }
 
 static inline __attribute__((always_inline, hot)) void
@@ -174,10 +175,10 @@ static inline __attribute__((always_inline, hot)) void
 	// NOTE: We rely on pointer arithmetic rules to handle the pixel offset inside the scanline,
 	//       i.e., if we add x *after* the cast, that's an addition of x uint32_t elements, meaning x times 4 bytes,
 	//       which is exactly what we want ;).
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-align"
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
 	*((uint32_t*) (fbPtr + scanline_offset) + coords->x) = px->bgra.p;
-#pragma GCC diagnostic pop
+#	pragma GCC diagnostic pop
 }
 
 static inline __attribute__((always_inline, hot)) void
@@ -188,11 +189,12 @@ static inline __attribute__((always_inline, hot)) void
 
 	// write the two bytes at once, much to GCC's dismay...
 	// NOTE: Input pixel *has* to be properly packed to RGB565 first (via pack_rgb565, c.f., put_pixel)!
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-align"
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
 	*((uint16_t*) (fbPtr + scanline_offset) + coords->x) = px->rgb565;
-#pragma GCC diagnostic pop
+#	pragma GCC diagnostic pop
 }
+#endif    // FBINK_WITH_DRAW
 
 #if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES) || defined(FBINK_FOR_POCKETBOOK)
 // Handle rotation quirks...
@@ -374,6 +376,7 @@ static void
 	// https://github.com/NiLuJe/FBInk/commit/75407d4a44d7bfc7705665ad4ec9ecad0d03a368).
 }
 
+#ifdef FBINK_WITH_DRAW
 // Handle a few sanity checks...
 // NOTE: If you can, prefer using the right put_pixel_* function directly.
 //       While the bounds checking is generally rather cheap,
@@ -398,7 +401,7 @@ static inline __attribute__((always_inline, hot)) void
 	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
 	//       And, of course, anything using hoffset or voffset can happily push stuff OOB ;).
 	if (unlikely(coords.x >= vInfo.xres || coords.y >= vInfo.yres)) {
-#ifdef DEBUG
+#	ifdef DEBUG
 		// NOTE: This is only enabled in Debug builds because it can be pretty verbose,
 		//       and does not necessarily indicate an actual issue, as we've just explained...
 		LOG("Put: discarding off-screen pixel @ (%hu, %hu) (out of %ux%u bounds)",
@@ -406,7 +409,7 @@ static inline __attribute__((always_inline, hot)) void
 		    coords.y,
 		    vInfo.xres,
 		    vInfo.yres);
-#endif
+#	endif
 		return;
 	}
 
@@ -424,12 +427,12 @@ static inline __attribute__((always_inline, hot)) void
 			// Yep :(
 			FBInkPixel packed_px;
 			// NOTE: Technically legitimate warning. In practice, we always pass RGB32 pixels in 16bpp codepaths.
-#pragma GCC diagnostic   push
-#pragma GCC diagnostic   ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunknown-warning-option"
-#pragma GCC diagnostic   ignored "-Wmaybe-uninitialized"
+#	pragma GCC diagnostic   push
+#	pragma GCC diagnostic   ignored "-Wunknown-pragmas"
+#	pragma clang diagnostic ignored "-Wunknown-warning-option"
+#	pragma GCC diagnostic   ignored "-Wmaybe-uninitialized"
                         packed_px.rgb565 = pack_rgb565(px->bgra.color.r, px->bgra.color.g, px->bgra.color.b);
-#pragma GCC diagnostic pop
+#	pragma GCC diagnostic pop
 			put_pixel_RGB565(&coords, &packed_px);
 		}
 	} else if (unlikely(vInfo.bits_per_pixel == 24U)) {
@@ -505,10 +508,10 @@ static inline __attribute__((always_inline, hot)) void
 	// calculate the pixel's byte offset inside the buffer
 	const size_t scanline_offset = (size_t) coords->y * fInfo.line_length;
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-align"
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
 	px->bgra.p = *((uint32_t*) (fbPtr + scanline_offset) + coords->x);
-#pragma GCC diagnostic pop
+#	pragma GCC diagnostic pop
 	// NOTE: We generally don't care about alpha, we always assume it's opaque, as that's how it behaves.
 	//       We *do* pickup the actual alpha value, here, though.
 }
@@ -521,10 +524,10 @@ static inline __attribute__((always_inline, hot)) void
 
 	// NOTE: We're honoring the fb's bitfield offsets here (B: 0, G: >> 5, R: >> 11)
 	// Like put_pixel_RGB565, read those two consecutive bytes at once
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-align"
-	const uint16_t v = *((const uint16_t*) (fbPtr + scanline_offset) + coords->x);
-#pragma GCC diagnostic pop
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
+	const uint16_t         v = *((const uint16_t*) (fbPtr + scanline_offset) + coords->x);
+#	pragma GCC diagnostic pop
 
 	// NOTE: Unpack to RGB32, because we have no use for RGB565, it's terrible.
 	// NOTE: c.f., https://stackoverflow.com/q/2442576
@@ -554,7 +557,7 @@ static inline __attribute__((always_inline, hot)) void
 	//       few pixels (the exact amount being half of the dead zone width) pushed off-screen...
 	//       And, of course, anything using hoffset or voffset can happily push stuff OOB ;).
 	if (unlikely(coords.x >= vInfo.xres || coords.y >= vInfo.yres)) {
-#ifdef DEBUG
+#	ifdef DEBUG
 		// NOTE: This is only enabled in Debug builds because it can be pretty verbose,
 		//       and does not necessarily indicate an actual issue, as we've just explained...
 		LOG("Put: discarding off-screen pixel @ (%hu, %hu) (out of %ux%u bounds)",
@@ -562,7 +565,7 @@ static inline __attribute__((always_inline, hot)) void
 		    coords.y,
 		    vInfo.xres,
 		    vInfo.yres);
-#endif
+#	endif
 		return;
 	}
 
@@ -599,9 +602,9 @@ static __attribute__((hot)) void
 		}
 	}
 
-#ifdef DEBUG
+#	ifdef DEBUG
 	LOG("Filled a #%02hhX %hux%hu rectangle @ (%hu, %hu)", px->gray8, w, h, x, y);
-#endif
+#	endif
 }
 
 static __attribute__((hot)) void
@@ -615,29 +618,29 @@ static __attribute__((hot)) void
 	// Do signed maths, to account for the fact that x or y might already be OOB!
 	if (unlikely(x + w > screenWidth)) {
 		w = (unsigned short int) MAX(0, (w - ((x + w) - (int) screenWidth)));
-#ifdef DEBUG
+#	ifdef DEBUG
 		LOG("Chopped rectangle width to %hu", w);
-#endif
+#	endif
 	}
 	if (unlikely(y + h > screenHeight)) {
 		h = (unsigned short int) MAX(0, (h - ((y + h) - (int) screenHeight)));
-#ifdef DEBUG
+#	ifdef DEBUG
 		LOG("Chopped rectangle height to %hu", h);
-#endif
+#	endif
 	}
 
 	// Abort early if that left us with an empty rectangle ;).
 	if (unlikely(w == 0U || h == 0U)) {
-#ifdef DEBUG
+#	ifdef DEBUG
 		LOG("Skipped empty %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
-#endif
+#	endif
 		return;
 	}
 
 	return fill_rect_Gray4(x, y, w, h, px);
 }
 
-#ifdef FBINK_FOR_POCKETBOOK
+#	ifdef FBINK_FOR_POCKETBOOK
 static __attribute__((hot)) void
     fill_rect_Gray8(unsigned short int x,
 		    unsigned short int y,
@@ -659,11 +662,11 @@ static __attribute__((hot)) void
 		memset(p, px->gray8, region.width);
 	}
 
-#	ifdef DEBUG
+#		ifdef DEBUG
 	LOG("Filled a #%02hhX %hux%hu rectangle @ (%hu, %hu)", px->gray8, w, h, x, y);
-#	endif
+#		endif
 }
-#else
+#	else
 static __attribute__((hot)) void
     fill_rect_Gray8(unsigned short int x,
 		    unsigned short int y,
@@ -677,11 +680,11 @@ static __attribute__((hot)) void
 		memset(p, px->gray8, w);
 	}
 
-#	ifdef DEBUG
+#		ifdef DEBUG
 	LOG("Filled a #%02hhX %hux%hu rectangle @ (%hu, %hu)", px->gray8, w, h, x, y);
-#	endif
+#		endif
 }
-#endif
+#	endif
 
 static __attribute__((hot)) void
     fill_rect_Gray8_checked(unsigned short int x,
@@ -694,22 +697,22 @@ static __attribute__((hot)) void
 	// Do signed maths, to account for the fact that x or y might already be OOB!
 	if (unlikely(x + w > screenWidth)) {
 		w = (unsigned short int) MAX(0, (w - ((x + w) - (int) screenWidth)));
-#ifdef DEBUG
+#	ifdef DEBUG
 		LOG("Chopped rectangle width to %hu", w);
-#endif
+#	endif
 	}
 	if (unlikely(y + h > screenHeight)) {
 		h = (unsigned short int) MAX(0, (h - ((y + h) - (int) screenHeight)));
-#ifdef DEBUG
+#	ifdef DEBUG
 		LOG("Chopped rectangle height to %hu", h);
-#endif
+#	endif
 	}
 
 	// Abort early if that left us with an empty rectangle ;).
 	if (unlikely(w == 0U || h == 0U)) {
-#ifdef DEBUG
+#	ifdef DEBUG
 		LOG("Skipped empty %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
-#endif
+#	endif
 		return;
 	}
 
@@ -740,10 +743,10 @@ static __attribute__((hot)) void
 	// That's the exact pattern used by the Linux kernel (c.f., memset16 @ lib/string.c), so, here's hoping ;).
 	for (size_t j = region.top; j < region.top + region.height; j++) {
 		const size_t scanline_offset = fInfo.line_length * j;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-align"
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
 		uint16_t* restrict p = (uint16_t*) (fbPtr + scanline_offset) + region.left;
-#pragma GCC diagnostic pop
+#	pragma GCC diagnostic pop
 		size_t px_count = region.width;
 
 		while (px_count--) {
@@ -751,9 +754,9 @@ static __attribute__((hot)) void
 		}
 	}
 
-#ifdef DEBUG
+#	ifdef DEBUG
 	LOG("Filled a #%02hhX %hux%hu rectangle @ (%hu, %hu)", px->gray8, w, h, x, y);
-#endif
+#	endif
 }
 
 static __attribute__((hot)) void
@@ -769,22 +772,22 @@ static __attribute__((hot)) void
 	//       *before* fxpRotateRegion!
 	if (unlikely(x + w > screenWidth)) {
 		w = (unsigned short int) MAX(0, (w - ((x + w) - (int) screenWidth)));
-#ifdef DEBUG
+#	ifdef DEBUG
 		LOG("Chopped rectangle width to %hu", w);
-#endif
+#	endif
 	}
 	if (unlikely(y + h > screenHeight)) {
 		h = (unsigned short int) MAX(0, (h - ((y + h) - (int) screenHeight)));
-#ifdef DEBUG
+#	ifdef DEBUG
 		LOG("Chopped rectangle height to %hu", h);
-#endif
+#	endif
 	}
 
 	// Abort early if that left us with an empty rectangle ;).
 	if (unlikely(w == 0U || h == 0U)) {
-#ifdef DEBUG
+#	ifdef DEBUG
 		LOG("Skipped empty %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
-#endif
+#	endif
 		return;
 	}
 
@@ -804,9 +807,9 @@ static void
 		memset(p, px->gray8, w * 3U);
 	}
 
-#ifdef DEBUG
+#	ifdef DEBUG
 	LOG("Filled a #%02hhX %hux%hu rectangle @ (%hu, %hu)", px->gray8, w, h, x, y);
-#endif
+#	endif
 }
 
 static void
@@ -820,22 +823,22 @@ static void
 	// Do signed maths, to account for the fact that x or y might already be OOB!
 	if (unlikely(x + w > screenWidth)) {
 		w = (unsigned short int) MAX(0, (w - ((x + w) - (int) screenWidth)));
-#ifdef DEBUG
+#	ifdef DEBUG
 		LOG("Chopped rectangle width to %hu", w);
-#endif
+#	endif
 	}
 	if (unlikely(y + h > screenHeight)) {
 		h = (unsigned short int) MAX(0, (h - ((y + h) - (int) screenHeight)));
-#ifdef DEBUG
+#	ifdef DEBUG
 		LOG("Chopped rectangle height to %hu", h);
-#endif
+#	endif
 	}
 
 	// Abort early if that left us with an empty rectangle ;).
 	if (unlikely(w == 0U || h == 0U)) {
-#ifdef DEBUG
+#	ifdef DEBUG
 		LOG("Skipped empty %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
-#endif
+#	endif
 		return;
 	}
 
@@ -854,10 +857,10 @@ static __attribute__((hot)) void
 		// NOTE: Go with a cheap memset32 in order to preserve the alpha value of our input pixel...
 		//       The compiler should be able to turn that into something as fast as a plain memset ;).
 		const size_t scanline_offset = fInfo.line_length * j;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-align"
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
 		uint32_t* p = (uint32_t*) (fbPtr + scanline_offset) + x;
-#pragma GCC diagnostic pop
+#	pragma GCC diagnostic pop
 		size_t px_count = w;
 
 		while (px_count--) {
@@ -865,9 +868,9 @@ static __attribute__((hot)) void
 		}
 	}
 
-#ifdef DEBUG
+#	ifdef DEBUG
 	LOG("Filled a #%02hhX %hux%hu rectangle @ (%hu, %hu)", px->gray8, w, h, x, y);
-#endif
+#	endif
 }
 
 static __attribute__((hot)) void
@@ -881,22 +884,22 @@ static __attribute__((hot)) void
 	// Do signed maths, to account for the fact that x or y might already be OOB!
 	if (unlikely(x + w > screenWidth)) {
 		w = (unsigned short int) MAX(0, (w - ((x + w) - (int) screenWidth)));
-#ifdef DEBUG
+#	ifdef DEBUG
 		LOG("Chopped rectangle width to %hu", w);
-#endif
+#	endif
 	}
 	if (unlikely(y + h > screenHeight)) {
 		h = (unsigned short int) MAX(0, (h - ((y + h) - (int) screenHeight)));
-#ifdef DEBUG
+#	ifdef DEBUG
 		LOG("Chopped rectangle height to %hu", h);
-#endif
+#	endif
 	}
 
 	// Abort early if that left us with an empty rectangle ;).
 	if (unlikely(w == 0U || h == 0U)) {
-#ifdef DEBUG
+#	ifdef DEBUG
 		LOG("Skipped empty %hux%hu rectangle @ (%hu, %hu)", w, h, x, y);
-#endif
+#	endif
 		return;
 	}
 
@@ -907,7 +910,7 @@ static __attribute__((hot)) void
 static void
     clear_screen(int fbfd UNUSED_BY_NOTKINDLE, uint8_t v, bool is_flashing UNUSED_BY_NOTKINDLE)
 {
-#ifdef FBINK_FOR_KINDLE
+#	ifdef FBINK_FOR_KINDLE
 	// NOTE: einkfb has a dedicated ioctl, so, use that, when it's not doing more harm than good...
 	if (deviceQuirks.isKindleLegacy) {
 		// NOTE: The ioctl only does white, though, and it has a tendency to enforce a flash,
@@ -938,7 +941,7 @@ static void
 	} else {
 		memset(fbPtr, v, fInfo.smem_len);
 	}
-#else
+#	else
 	// NOTE: Apparently, some NTX devices do not appreciate a memset of the full smem_len when they're in a 16bpp mode...
 	//       In this mode, smem_len is twice as large as it needs to be,
 	//       and Cervantes' Qt driver takes this opportunity to use the offscreen memory region to do some... stuff.
@@ -949,23 +952,23 @@ static void
 	if (unlikely(vInfo.bits_per_pixel == 16U)) {
 		// NOTE: Besides, we can't use a straight memset, since we need pixels to be properly packed for RGB565...
 		//       Se we whip up a quick memset16, like fill_rect() does.
-		const uint16_t px       = pack_rgb565(v, v, v);
-#	pragma GCC diagnostic push
-#	pragma GCC diagnostic ignored "-Wcast-align"
-		uint16_t*      p        = (uint16_t*) fbPtr;
-#	pragma GCC diagnostic pop
-		size_t         px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
+		const uint16_t px = pack_rgb565(v, v, v);
+#		pragma GCC diagnostic push
+#		pragma GCC diagnostic ignored "-Wcast-align"
+		uint16_t* p = (uint16_t*) fbPtr;
+#		pragma GCC diagnostic pop
+		size_t px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
 		while (px_count--) {
 			*p++ = px;
 		}
 	} else if (vInfo.bits_per_pixel == 32U) {
 		// Much like in fill_rect_RGB32, whip up something that'll preserve the alpha byte...
-		const FBInkPixelBGRA px       = { .color.b = v, .color.g = v, .color.r = v, .color.a = 0xFF };
-#	pragma GCC diagnostic push
-#	pragma GCC diagnostic ignored "-Wcast-align"
-		uint32_t*            p        = (uint32_t*) fbPtr;
-#	pragma GCC diagnostic pop
-		size_t               px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
+		const FBInkPixelBGRA px = { .color.b = v, .color.g = v, .color.r = v, .color.a = 0xFF };
+#		pragma GCC diagnostic push
+#		pragma GCC diagnostic ignored "-Wcast-align"
+		uint32_t* p = (uint32_t*) fbPtr;
+#		pragma GCC diagnostic pop
+		size_t px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
 		while (px_count--) {
 			*p++ = px.p;
 		}
@@ -974,7 +977,7 @@ static void
 		//       Which is how things should always be, but, alas, poor Yorick...
 		memset(fbPtr, v, fInfo.smem_len);
 	}
-#endif
+#	endif
 }
 
 /*
@@ -1002,6 +1005,7 @@ static void
 	}
 }
 */
+#endif    // FBINK_WITH_DRAW
 
 #ifdef FBINK_WITH_VGA
 // Return the font8x8 bitmap for a specific Unicode codepoint
@@ -2835,13 +2839,13 @@ static inline void
 }
 
 static int
-    refresh(int                     fbfd,
+    refresh(int fbfd,
 	    const struct mxcfb_rect region,
-	    WFM_MODE_INDEX_T        waveform_mode,
-	    HW_DITHER_INDEX_T       dithering_mode,
-	    bool                    is_nightmode,
-	    bool                    is_flashing,
-	    bool                    no_refresh)
+	    WFM_MODE_INDEX_T waveform_mode,
+	    HW_DITHER_INDEX_T dithering_mode,
+	    bool is_nightmode,
+	    bool is_flashing,
+	    bool no_refresh)
 {
 	// Were we asked to skip refreshes?
 	if (no_refresh) {
@@ -3105,6 +3109,7 @@ static __attribute__((cold)) const char*
 }
 #endif
 
+#ifdef FBINK_WITH_DRAW
 // Used to manually set the pen colors
 static __attribute__((cold)) int
     set_pen_color(bool is_fg, bool is_y8, bool quantize, bool update, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
@@ -3157,7 +3162,7 @@ static __attribute__((cold)) int
 
 	// NOTE: We're using ELOG here to be consistent w/ fbink_init, and because this affects an internal global state.
 	// NOTE: We need to take into account the inverted cmap on Legacy Kindles...
-#ifdef FBINK_FOR_KINDLE
+#	ifdef FBINK_FOR_KINDLE
 	if (deviceQuirks.isKindleLegacy) {
 		if (is_fg) {
 			penFGColor = v ^ 0xFFu;
@@ -3167,7 +3172,7 @@ static __attribute__((cold)) int
 			ELOG("Background pen color set to #%02X -> #%02X", v, penBGColor);
 		}
 	} else {
-#endif
+#	endif
 		// NOTE: penFGColor/penBGColor are designed to be grayscale only,
 		//       but if we passed an RGBA value, we'll actually honor it for penFGPixel & penBGPixel!
 		if (is_fg) {
@@ -3195,9 +3200,9 @@ static __attribute__((cold)) int
 				     penBGColor);
 			}
 		}
-#ifdef FBINK_FOR_KINDLE
+#	ifdef FBINK_FOR_KINDLE
 	}
-#endif
+#	endif
 
 	// Pack the pen colors into the appropriate pixel format...
 	switch (vInfo.bits_per_pixel) {
@@ -3285,32 +3290,64 @@ static __attribute__((cold)) int
 
 	return rv;
 }
+#endif    // FBINK_WITH_DRAW
 
 // Public wrappers around set_pen_color
 int
-    fbink_set_fg_pen_gray(uint8_t y, bool quantize, bool update)
+    fbink_set_fg_pen_gray(uint8_t y UNUSED_BY_NODRAW, bool quantize UNUSED_BY_NODRAW, bool update UNUSED_BY_NODRAW)
 {
+#ifdef FBINK_WITH_DRAW
 	return set_pen_color(true, true, quantize, update, y, y, y, 0xFFu);
+#else
+	WARN("Drawing primitives are disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif
 }
 
 int
-    fbink_set_fg_pen_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a, bool quantize, bool update)
+    fbink_set_fg_pen_rgba(uint8_t r     UNUSED_BY_NODRAW,
+			  uint8_t g     UNUSED_BY_NODRAW,
+			  uint8_t b     UNUSED_BY_NODRAW,
+			  uint8_t a     UNUSED_BY_NODRAW,
+			  bool quantize UNUSED_BY_NODRAW,
+			  bool update   UNUSED_BY_NODRAW)
 {
+#ifdef FBINK_WITH_DRAW
 	return set_pen_color(true, false, quantize, update, r, g, b, a);
+#else
+	WARN("Drawing primitives are disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif
 }
 
 int
-    fbink_set_bg_pen_gray(uint8_t y, bool quantize, bool update)
+    fbink_set_bg_pen_gray(uint8_t y UNUSED_BY_NODRAW, bool quantize UNUSED_BY_NODRAW, bool update UNUSED_BY_NODRAW)
 {
+#ifdef FBINK_WITH_DRAW
 	return set_pen_color(false, true, quantize, update, y, y, y, 0xFFu);
+#else
+	WARN("Drawing primitives are disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif
 }
 
 int
-    fbink_set_bg_pen_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a, bool quantize, bool update)
+    fbink_set_bg_pen_rgba(uint8_t r     UNUSED_BY_NODRAW,
+			  uint8_t g     UNUSED_BY_NODRAW,
+			  uint8_t b     UNUSED_BY_NODRAW,
+			  uint8_t a     UNUSED_BY_NODRAW,
+			  bool quantize UNUSED_BY_NODRAW,
+			  bool update   UNUSED_BY_NODRAW)
 {
+#ifdef FBINK_WITH_DRAW
 	return set_pen_color(false, false, quantize, update, r, g, b, a);
+#else
+	WARN("Drawing primitives are disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif
 }
 
+#ifdef FBINK_WITH_DRAW
 // Update our internal representation of pen colors (i.e., packed into the right pixel format).
 static __attribute__((cold)) int
     update_pen_colors(const FBInkConfig* restrict fbink_cfg)
@@ -3319,7 +3356,7 @@ static __attribute__((cold)) int
 
 	// NOTE: Now that we know which device we're running on, setup pen colors,
 	//       taking into account the inverted cmap on legacy Kindles...
-#ifdef FBINK_FOR_KINDLE
+#	ifdef FBINK_FOR_KINDLE
 	if (deviceQuirks.isKindleLegacy) {
 		penFGColor = eInkBGCMap[fbink_cfg->fg_color];
 		penBGColor = eInkFGCMap[fbink_cfg->bg_color];
@@ -3339,7 +3376,7 @@ static __attribute__((cold)) int
 		    penBGColor,
 		    penBGColor);
 	} else {
-#endif
+#	endif
 		penFGColor = eInkFGCMap[fbink_cfg->fg_color];
 		penBGColor = eInkBGCMap[fbink_cfg->bg_color];
 
@@ -3350,9 +3387,9 @@ static __attribute__((cold)) int
 		     penBGColor,
 		     penBGColor,
 		     penBGColor);
-#ifdef FBINK_FOR_KINDLE
+#	ifdef FBINK_FOR_KINDLE
 	}
-#endif
+#	endif
 
 	// Pack the pen colors into the appropriate pixel format...
 	switch (vInfo.bits_per_pixel) {
@@ -3387,6 +3424,7 @@ static __attribute__((cold)) int
 
 	return rv;
 }
+#endif    // FBINK_WITH_DRAW
 
 // Update the global logging verbosity flags
 static __attribute__((cold)) void
@@ -4068,8 +4106,8 @@ static __attribute__((cold)) int
 	//       sanely, but for now, we only want to deal with the default rotation properly...
 	if (!getenv("FBINK_NO_SW_ROTA")) {
 		if (vInfo.xres > vInfo.yres) {
-			screenWidth     = vInfo.yres;
-			screenHeight    = vInfo.xres;
+			screenWidth = vInfo.yres;
+			screenHeight = vInfo.xres;
 			fxpRotateCoords = &rotate_coordinates_pickel;
 			fxpRotateRegion = &rotate_region_pickel;
 			ELOG("Enabled PocketBook rotation quirks (%ux%u -> %ux%u)",
@@ -4080,10 +4118,10 @@ static __attribute__((cold)) int
 		}
 	}
 
-	viewWidth          = screenWidth;
-	viewHoriOrigin     = 0U;
-	viewHeight         = screenHeight;
-	viewVertOrigin     = 0U;
+	viewWidth = screenWidth;
+	viewHoriOrigin = 0U;
+	viewHeight = screenHeight;
+	viewVertOrigin = 0U;
 #else
 	// Other devices are generally never broken-by-design (at least not on that front ;))
 	viewWidth      = screenWidth;
@@ -4092,10 +4130,11 @@ static __attribute__((cold)) int
 	viewVertOrigin = 0U;
 #endif
 
+#ifdef FBINK_WITH_VGA
 	// NOTE: Set (& reset) original font resolution, in case we're re-init'ing,
 	//       since we're relying on the default value to calculate the scaled value,
 	//       and we're using this value to set MAXCOLS & MAXROWS, which we *need* to be sane.
-#ifdef FBINK_WITH_FONTS
+#	ifdef FBINK_WITH_FONTS
 	// Setup custom fonts (glyph size, render fx, bitmap fx)
 	switch (fbink_cfg->fontname) {
 		case VGA:
@@ -4234,7 +4273,7 @@ static __attribute__((cold)) int
 			glyphHeight        = 8U;
 			fxpFont8xGetBitmap = &unscii_get_bitmap;
 			break;
-#	ifdef FBINK_WITH_UNIFONT
+#		ifdef FBINK_WITH_UNIFONT
 		case UNIFONT:
 			glyphWidth         = 8U;
 			glyphHeight        = 16U;
@@ -4245,7 +4284,7 @@ static __attribute__((cold)) int
 			glyphHeight         = 16U;
 			fxpFont16xGetBitmap = &unifontdw_get_bitmap;
 			break;
-#	endif
+#		endif
 		case COZETTE:
 			glyphWidth         = 8U;
 			glyphHeight        = 13U;
@@ -4258,16 +4297,16 @@ static __attribute__((cold)) int
 			fxpFont8xGetBitmap = &font8x8_get_bitmap;
 			break;
 	}
-#elif defined(FBINK_WITH_VGA)
+#	else
 	// Default font is IBM
-	glyphWidth         = 8U;
-	glyphHeight        = 8U;
+	glyphWidth = 8U;
+	glyphHeight = 8U;
 	fxpFont8xGetBitmap = &font8x8_get_bitmap;
 
 	if (fbink_cfg->fontname != IBM) {
 		ELOG("Custom fonts are not supported in this FBInk build, using IBM instead.");
 	}
-#endif
+#	endif    // FBINK_WITH_FONTS
 
 	// Obey user-specified font scaling multiplier
 	if (fbink_cfg->fontmult > 0) {
@@ -4284,7 +4323,7 @@ static __attribute__((cold)) int
 			// NOTE: If that weren't a circular dependency, we'd take care of the isPerfectFit case here,
 			//       but we can't, so instead that corner-case is handled in fbink_print...
 		}
-#ifdef FBINK_WITH_FONTS
+#	ifdef FBINK_WITH_FONTS
 		// NOTE: Handle custom fonts, no matter their base glyph size...
 		// We want at least N columns, so, viewWidth / N / glyphWidth gives us the maximum multiplier.
 		const uint8_t max_fontmult_width  = (uint8_t) (viewWidth / min_maxcols / glyphWidth);
@@ -4295,14 +4334,14 @@ static __attribute__((cold)) int
 			FONTSIZE_MULT = max_fontmult;
 			ELOG("Clamped font size multiplier from %hhu to %hhu", fbink_cfg->fontmult, max_fontmult);
 		}
-#else
+#	else
 		// The default font's glyphs are 8x8, do the least amount of work possible ;).
 		max_fontmult = (uint8_t) (viewWidth / min_maxcols / 8U);
 		if (FONTSIZE_MULT > max_fontmult) {
 			FONTSIZE_MULT = max_fontmult;
 			ELOG("Clamped font size multiplier from %hhu to %hhu", fbink_cfg->fontmult, max_fontmult);
 		}
-#endif
+#	endif
 	} else {
 		// Set font-size based on screen DPI
 		// (roughly matches: Linux (96), Pearl (167), Carta (212), 6.8" Carta (265), 6/7/8" Carta HD (300))
@@ -4326,19 +4365,19 @@ static __attribute__((cold)) int
 				FONTSIZE_MULT = 4U;    // 32x32
 			}
 		}
-#ifdef FBINK_WITH_FONTS
+#	ifdef FBINK_WITH_FONTS
 		if (fbink_cfg->fontname == BLOCK) {
 			// Block is roughly 4 times wider than other fonts, compensate for that...
 			FONTSIZE_MULT = (uint8_t) MAX(1U, FONTSIZE_MULT / 4U);
-#	ifdef FBINK_WITH_UNIFONT
+#		ifdef FBINK_WITH_UNIFONT
 		} else if (fbink_cfg->fontname == SPLEEN || fbink_cfg->fontname == UNIFONTDW) {
-#	else
+#		else
 		} else if (fbink_cfg->fontname == SPLEEN) {
-#	endif
+#		endif
 			// Spleen & Unifont DW are roughly twice as wide as other fonts, compensate for that...
 			FONTSIZE_MULT = (uint8_t) MAX(1U, FONTSIZE_MULT / 2U);
 		}
-#endif
+#	endif
 	}
 	// Go!
 	FONTW = (unsigned short int) (glyphWidth * FONTSIZE_MULT);
@@ -4380,7 +4419,9 @@ static __attribute__((cold)) int
 	// Bake that into the viewport computations,
 	// we'll special-case the image codepath to ignore it when row is unspecified (i.e., 0) ;).
 	viewVertOrigin = (uint8_t) (viewVertOrigin + viewVertOffset);
+#endif    // FBINK_WITH_VGA
 
+#ifdef FBINK_WITH_DRAW
 	// Pack the pen colors into the right pixel format...
 	if (update_pen_colors(fbink_cfg) != EXIT_SUCCESS) {
 		goto cleanup;
@@ -4425,6 +4466,7 @@ static __attribute__((cold)) int
 			goto cleanup;
 			break;
 	}
+#endif    // FBINK_WITH_DRAW
 
 	// NOTE: Do we want to keep the fb0 fd open, or simply close it for now?
 	//       Useful because we probably want to close it to keep open fds to a minimum when used as a library,
@@ -4796,7 +4838,7 @@ void
 		fbink_state->sunxi_force_rota   = sunxiCtx.force_rota;
 #else
 		fbink_state->sunxi_has_fbdamage = false;
-		fbink_state->sunxi_force_rota   = FORCE_ROTA_NOTSUP;
+		fbink_state->sunxi_force_rota = FORCE_ROTA_NOTSUP;
 #endif
 		fbink_state->is_kindle_legacy        = deviceQuirks.isKindleLegacy;
 		fbink_state->is_kobo_non_mt          = deviceQuirks.isKoboNonMT;
@@ -5120,8 +5162,12 @@ static void
 
 // Do a full-screen clear, eInk refresh included
 int
-    fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg, const FBInkRect* restrict rect, bool no_rota)
+    fbink_cls(int fbfd                              UNUSED_BY_NODRAW,
+	      const FBInkConfig* restrict fbink_cfg UNUSED_BY_NODRAW,
+	      const FBInkRect* restrict rect        UNUSED_BY_NODRAW,
+	      bool no_rota                          UNUSED_BY_NODRAW)
 {
+#ifdef FBINK_WITH_DRAW
 	// If we open a fd now, we'll only keep it open for this single call!
 	// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
 	bool keep_fd = true;
@@ -5216,6 +5262,10 @@ cleanup:
 	}
 
 	return rv;
+#else
+	WARN("Drawing primitives are disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif
 }
 
 // Do a full-screen invert, eInk refresh included
@@ -8526,9 +8576,14 @@ cleanup:
 
 // Public wrapper around update_pen_colors
 int
-    fbink_update_pen_colors(const FBInkConfig* restrict fbink_cfg)
+    fbink_update_pen_colors(const FBInkConfig* restrict fbink_cfg UNUSED_BY_NODRAW)
 {
+#ifdef FBINK_WITH_DRAW
 	return update_pen_colors(fbink_cfg);
+#else
+	WARN("Drawing primitives are disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif
 }
 
 // Public wrapper around update_verbosity

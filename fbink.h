@@ -881,6 +881,7 @@ FBINK_API void fbink_update_verbosity(const FBInkConfig* restrict fbink_cfg);
 // This is because they're not used as-is (because they're not actually colors, just a custom palette index),
 // they're just used to pack the matching palette color value into the right pixel format for the target framebuffer.
 // This function allows doing *just* that, without having to go through a more costly full (re)-init.
+// Returns -(ENOSYS) when drawing primitives are disabled (MINIMAL build w/o DRAW).
 // fbink_cfg:		Pointer to an FBInkConfig struct (honors fg_color & bg_color).
 FBINK_API int fbink_update_pen_colors(const FBInkConfig* restrict fbink_cfg);
 
@@ -890,6 +891,7 @@ FBINK_API int fbink_update_pen_colors(const FBInkConfig* restrict fbink_cfg);
 // This is mostly of interest if you want to use color values you're getting from somewhere outside FBInk.
 // You will *NOT* have to call fbink_update_pen_colors() when using these, they'll take care of updating the internal state.
 // NOTE: The *optional* quantization pass *should* match what the EPDC itself will do anyway (i.e., it's redundant).
+// Returns -(ENOSYS) when drawing primitives are disabled (MINIMAL build w/o DRAW).
 // y:			8-bit luminance value
 // quantize:		If true, round to the nearest eInk palette color.
 // update:		If true, abort early and return OK_ALREADY_SAME if that's already the current color.
@@ -992,6 +994,7 @@ FBINK_API int fbink_print_raw_data(int fbfd,
 
 //
 // Just clear the screen (or a region of it), eInk refresh included (or not ;)).
+// Returns -(ENOSYS) when drawing primitives are disabled (MINIMAL build w/o DRAW).
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
 // fbink_cfg:		Pointer to an FBInkConfig struct (honors is_inverted, wfm_mode, dithering_mode, is_nightmode, is_flashing,
