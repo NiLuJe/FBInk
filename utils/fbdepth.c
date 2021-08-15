@@ -365,14 +365,13 @@ int
 						//       I'm not quite sure who's to blame: this tool, FBInk, or the Kernel,
 						//       but I've never ended up in a useful state on my Kobos.
 						//       And I don't have a genuine 24bpp fb device to compare to...
-						fprintf(
-						    stderr,
-						    "Warning! 24bpp handling appears to be broken *somewhere*, you probably don't want to use it!\n\n");
+						WARN(
+						    "Warning! 24bpp handling appears to be broken *somewhere*, you probably don't want to use it");
 						break;
 					case 32:
 						break;
 					default:
-						fprintf(stderr, "Unsupported bitdepth '%s'!\n", optarg);
+						WARN("Unsupported bitdepth '%s'", optarg);
 						errfnd = true;
 						break;
 				}
@@ -407,7 +406,7 @@ int
 				} else if (strcmp(optarg, "-1") == 0) {
 					req_rota = -1;
 				} else {
-					fprintf(stderr, "Invalid rotation '%s'!\n", optarg);
+					WARN("Invalid rotation '%s'", optarg);
 					errfnd = true;
 				}
 				break;
@@ -422,12 +421,12 @@ int
 				} else if (strcasecmp(optarg, "CCW") == 0 || strcmp(optarg, "3") == 0) {
 					req_rota = FB_ROTATE_CCW;
 				} else {
-					fprintf(stderr, "Invalid rotation '%s'!\n", optarg);
+					WARN("Invalid rotation '%s'", optarg);
 					errfnd = true;
 				}
 				canonical_rota = true;
 #else
-				fprintf(stderr, "This option (-R, --canonicalrota) is not supported on your device!\n");
+				WARN("This option (-R, --canonicalrota) is not supported on your device");
 				errfnd = true;
 #endif
 				break;
@@ -441,8 +440,7 @@ int
 #if defined(FBINK_FOR_KOBO)
 				print_canonical = true;
 #else
-				fprintf(stderr,
-					"This option (-c, --getcanonicalrota) is not supported on your device!\n");
+				WARN("This option (-c, --getcanonicalrota) is not supported on your device");
 				errfnd = true;
 #endif
 				break;
@@ -450,19 +448,18 @@ int
 #if defined(FBINK_FOR_KOBO)
 				return_canonical = true;
 #else
-				fprintf(stderr,
-					"This option (-C, --getcanonicalrotacode) is not supported on your device!\n");
+				WARN("This option (-C, --getcanonicalrotacode) is not supported on your device");
 				errfnd = true;
 #endif
 				break;
 			case 'H':
 				if (strtotristate(optarg, &want_nm) < 0) {
-					fprintf(stderr, "Invalid nightmode state '%s'!\n", optarg);
+					WARN("Invalid nightmode state '%s'", optarg);
 					errfnd = true;
 				}
 				break;
 			default:
-				fprintf(stderr, "?? Unknown option code 0%o ??\n", (unsigned int) opt);
+				WARN("?? Unknown option code 0%o ??", (unsigned int) opt);
 				errfnd = true;
 				break;
 		}
@@ -490,12 +487,12 @@ int
 	int fbfd              = -1;
 	// Open framebuffer and keep it around, then setup globals.
 	if ((fbfd = fbink_open()) == ERRCODE(EXIT_FAILURE)) {
-		fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
+		WARN("Failed to open the framebuffer, aborting");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
 	if (fbink_init(fbfd, &fbink_cfg) != EXIT_SUCCESS) {
-		fprintf(stderr, "Failed to initialize FBInk, aborting . . .\n");
+		WARN("Failed to initialize FBInk, aborting");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
@@ -577,7 +574,7 @@ int
 
 	// Ensure the requested rotation is sane (if all is well, this should never be tripped)
 	if (req_rota < -1 || req_rota > FB_ROTATE_CCW) {
-		LOG("Requested rotation (%hhd) is bogus, discarding it!\n", req_rota);
+		LOG("Requested rotation (%hhd) is bogus, discarding it!", req_rota);
 		req_rota = -1;
 	}
 
@@ -618,7 +615,7 @@ int
 
 	// Start by checking that the grayscale flag is flipped properly
 	if (var_info.grayscale == req_gray) {
-		LOG("\nCurrent grayscale flag is already %u!", req_gray);
+		LOG("Current grayscale flag is already %u!", req_gray);
 		// No change needed as far as grayscale is concerned...
 	} else {
 		is_change_needed = true;
@@ -628,11 +625,11 @@ int
 	if (fbink_state.bpp == req_bpp) {
 		// Also check that the grayscale flag is flipped properly (again)
 		if (var_info.grayscale != req_gray) {
-			LOG("\nCurrent bitdepth is already %ubpp, but the grayscale flag is bogus!", req_bpp);
+			LOG("Current bitdepth is already %ubpp, but the grayscale flag is bogus!", req_bpp);
 			// Continue, we'll need to flip the grayscale flag properly
 			is_change_needed = true;
 		} else {
-			LOG("\nCurrent bitdepth is already %ubpp!", req_bpp);
+			LOG("Current bitdepth is already %ubpp!", req_bpp);
 			// No change needed as far as bitdepth is concerned...
 		}
 	} else {
@@ -653,7 +650,7 @@ int
 
 			uint32_t rotate = einkfb_orientation_to_linuxfb_rotate(orientation);
 			if (rotate == (uint32_t) req_rota) {
-				LOG("\nCurrent rotation is already %hhd!", req_rota);
+				LOG("Current rotation is already %hhd!", req_rota);
 				// No change needed as far as rotation is concerned...
 			} else {
 				is_change_needed = true;
@@ -661,7 +658,7 @@ int
 		} else {
 			// On mxcfb, everything's peachy
 			if (vInfo.rotate == (uint32_t) req_rota) {
-				LOG("\nCurrent rotation is already %hhd!", req_rota);
+				LOG("Current rotation is already %hhd!", req_rota);
 				// No change needed as far as rotation is concerned...
 			} else {
 				is_change_needed = true;
@@ -671,14 +668,14 @@ int
 #	if defined(FBINK_FOR_KOBO)
 		// If the requested rota was canonical, translate it to a native one *now*
 		if (canonical_rota) {
-			LOG("\nRequested canonical rota %hhd translates to %u for this device",
+			LOG("Requested canonical rota %hhd translates to %u for this device",
 			    req_rota,
 			    fbink_rota_canonical_to_native((uint8_t) req_rota));
 			req_rota = (int8_t) fbink_rota_canonical_to_native((uint8_t) req_rota);
 		}
 #	endif
 		if (fbink_state.current_rota == (uint32_t) req_rota) {
-			LOG("\nCurrent rotation is already %hhd!", req_rota);
+			LOG("Current rotation is already %hhd!", req_rota);
 			// No change needed as far as rotation is concerned...
 		} else {
 			is_change_needed = true;
@@ -693,14 +690,12 @@ int
 
 	// If we're here, we really want to change the bitdepth and/or rota ;)
 	if (req_rota != -1) {
-		LOG("\nSwitching fb to %ubpp%s @ rotation %hhd . . .",
+		LOG("Switching fb to %ubpp%s @ rotation %hhd . . .",
 		    req_bpp,
 		    (req_bpp == fbink_state.bpp) ? " (current bitdepth)" : "",
 		    req_rota);
 	} else {
-		LOG("\nSwitching fb to %ubpp%s . . .",
-		    req_bpp,
-		    (req_bpp == fbink_state.bpp) ? " (current bitdepth)" : "");
+		LOG("Switching fb to %ubpp%s . . .", req_bpp, (req_bpp == fbink_state.bpp) ? " (current bitdepth)" : "");
 	}
 	if (fbink_set_fb_info(fbfd, req_rota, !canonical_rota, req_bpp, req_gray, &fbink_cfg) < 0) {
 		rv = ERRCODE(EXIT_FAILURE);
