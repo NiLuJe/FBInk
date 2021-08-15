@@ -94,10 +94,12 @@ The choice of target platform is handled via a simple variable:
 -   Pass `POCKETBOOK=1` to make for a PocketBook build (`make pocketbook` does that on a stripped static build).
 
 The same logic is used to allow for a bit of tailoring:
--   Pass `MINIMAL=1` to make for a build with limited functionality (only fixed cell font rendering, no image rendering, no extra fonts, no OpenType), which yields a much smaller application & library.
+-   Pass `MINIMAL=1` to make for a build with *very* limited functionality (no drawing primitives, no fixed-cell font rendering, no image rendering, no extra fonts, no OpenType), which yields a much smaller application & library.
 -   Pass `DEBUG=1` to make for a Debug build, and pass `DEBUG=1 DEBUGFLAGS=1` to make for a Debug build with enforced debug CFLAGS.
 
 You can also *append* features one by one to a `MINIMAL` build:
+-   Pass `DRAW=1` to add support for drawing primitives.
+-   Pass `VGA=1` to add support for fixed-cell font rendering.
 -   Pass `FONTS=1` to add support for the extra bundled fixed-cell fonts.
 -   Pass `IMAGE=1` to add image support.
 -   Pass `OPENTYPE=1` to add OTF/TTF font rendering support.
@@ -105,7 +107,8 @@ You can also *append* features one by one to a `MINIMAL` build:
 
 If you *really* need *extreme* Unicode coverage in the fixed-cell codepath, you can also choose to embed GNU Unifont, by passing `UNIFONT=1`.  
 Be warned that this'll add almost 2MB to the binary size, and that the font is actually split in two (double-wide glyphs are punted off to a specific font), which may dampen its usefulness in practice...  
-For obvious reasons, this is *never* enabled by default.
+For obvious reasons, this is *never* enabled by default.__
+Unless you're doing *very* specific things, you generally want *at least* `DRAW` & `VGA` enabled in a `MINIMAL` build...
 
 Along the way, a few auxiliary tools may crop up in the `utils` folder. `make utils` will do a static build of these (which is the recommended way to do it, as they rather crudely piggyback on FBInk's *internal* API). Currently, these consist of a diagnostic tool regarding rotation behavior, and the doom stress-test mentioned below.  
 Most of these have *only* been tested on Kobo, and should probably be left alone unless you know what you're doing ;).  
