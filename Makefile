@@ -414,7 +414,8 @@ BTN_SRCS:=button_scan_cmd.c
 ifdef MINIMAL
 	FEATURES_CPPFLAGS+=-DFBINK_MINIMAL
 else
-	FEATURES_CPPFLAGS+=-DFBINK_WITH_VGA
+	FEATURES_CPPFLAGS+=-DFBINK_WITH_DRAW
+	FEATURES_CPPFLAGS+=-DFBINK_WITH_BITMAP
 	FEATURES_CPPFLAGS+=-DFBINK_WITH_FONTS
 	FEATURES_CPPFLAGS+=-DFBINK_WITH_IMAGE
 	FEATURES_CPPFLAGS+=-DFBINK_WITH_OPENTYPE
@@ -437,12 +438,12 @@ ifdef MINIMAL
 	endif
 
 	# Support tweaking a MINIMAL build to still include fixed-cell font rendering
-	ifdef VGA
+	ifdef BITMAP
 		# Make sure we actually have drawing support
 		ifndef DRAW
 			FEATURES_CPPFLAGS+=-DFBINK_WITH_DRAW
 		endif
-		FEATURES_CPPFLAGS+=-DFBINK_WITH_VGA
+		FEATURES_CPPFLAGS+=-DFBINK_WITH_BITMAP
 	endif
 
 	# Support tweaking a MINIMAL build to still include extra bitmap fonts
@@ -452,8 +453,8 @@ ifdef MINIMAL
 			FEATURES_CPPFLAGS+=-DFBINK_WITH_DRAW
 		endif
 		# Make sure we actually have fixed-cell support
-		ifndef VGA
-			FEATURES_CPPFLAGS+=-DFBINK_WITH_VGA
+		ifndef BITMAP
+			FEATURES_CPPFLAGS+=-DFBINK_WITH_BITMAP
 		endif
 		FEATURES_CPPFLAGS+=-DFBINK_WITH_FONTS
 		# As well as, optionally, the full Unifont...

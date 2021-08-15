@@ -20,8 +20,8 @@
 */
 
 #ifdef FBINK_MINIMAL
-#	ifndef FBINK_WITH_VGA
-#		error Cannot build this tool without basic font support!
+#	ifndef FBINK_WITH_BITMAP
+#		error Cannot build this tool without fixed-cell font rendering support!
 #	endif
 #endif
 

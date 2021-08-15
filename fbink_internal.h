@@ -43,8 +43,8 @@
 #	ifndef FBINK_WITH_DRAW
 #		define FBINK_WITH_DRAW
 #	endif
-#	ifndef FBINK_WITH_VGA
-#		define FBINK_WITH_VGA
+#	ifndef FBINK_WITH_BITMAP
+#		define FBINK_WITH_BITMAP
 #	endif
 #	ifndef FBINK_WITH_FONTS
 #		define FBINK_WITH_FONTS
@@ -222,7 +222,7 @@
 //       that can yield you a choice of a few different fonts ;).
 //       And with potentially a tiny bit of additional work, can work with Hex files exported from BDF
 //       or other bitmap fonts by gbdfed (with maybe an initial FontForge conversion to BDF if need be) ;).
-#ifdef FBINK_WITH_VGA
+#ifdef FBINK_WITH_BITMAP
 #	include "font8x8/font8x8_basic.h"
 #	include "font8x8/font8x8_block.h"
 #	include "font8x8/font8x8_box.h"
@@ -352,12 +352,12 @@
 #	define UNUSED_BY_NODRAW __attribute__((unused))
 #	define UNUSED_BY_DRAW
 #endif
-#ifdef FBINK_WITH_VGA
-#	define UNUSED_BY_NOVGA
-#	define UNUSED_BY_VGA __attribute__((unused))
+#ifdef FBINK_WITH_BITMAP
+#	define UNUSED_BY_NOBITMAP
+#	define UNUSED_BY_BITMAP __attribute__((unused))
 #else
-#	define UNUSED_BY_NOVGA __attribute__((unused))
-#	define UNUSED_BY_VGA
+#	define UNUSED_BY_NOBITMAP __attribute__((unused))
+#	define UNUSED_BY_BITMAP
 #endif
 #ifndef FBINK_WITH_BUTTON_SCAN
 #	define UNUSED_BY_NOBUTTON __attribute__((unused))
@@ -666,13 +666,13 @@ static void                      clear_screen(int UNUSED_BY_NOTKINDLE, uint8_t, 
 //static void checkerboard_screen(void);
 #endif    // FBINK_WITH_DRAW
 
-#ifdef FBINK_WITH_VGA
+#ifdef FBINK_WITH_BITMAP
 static const unsigned char* font8x8_get_bitmap(uint32_t);
 #endif
 
 static __attribute__((cold)) const char* fontname_to_string(uint8_t);
 
-#ifdef FBINK_WITH_VGA
+#ifdef FBINK_WITH_BITMAP
 static int zu_print_length(size_t);
 
 static struct mxcfb_rect draw(const char* restrict,
@@ -766,7 +766,7 @@ static int grid_to_region(int, unsigned short int, unsigned short int, bool, con
 
 static void set_last_rect(const struct mxcfb_rect* restrict);
 
-#ifdef FBINK_WITH_VGA
+#ifdef FBINK_WITH_BITMAP
 int draw_progress_bars(int, bool, uint8_t, const FBInkConfig* restrict);
 #endif
 

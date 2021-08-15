@@ -640,7 +640,7 @@ FBINK_API void fbink_get_state(const FBInkConfig* restrict fbink_cfg, FBInkState
 // Returns the amount of lines printed on success (helpful when you keep track of which row you're printing to).
 // Returns -(EINVAL) if string is empty.
 // Returns -(EILSEQ) if string is not a valid UTF-8 sequence.
-// Returns -(ENOSYS) when fixed-cell font support is disabled (MINIMAL build w/o VGA).
+// Returns -(ENOSYS) when fixed-cell font support is disabled (MINIMAL build w/o BITMAP).
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
 // string:		UTF-8 encoded string to print.
@@ -909,7 +909,7 @@ FBINK_API int fbink_set_bg_pen_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a, 
 
 //
 // Print a full-width progress bar on screen.
-// Returns -(ENOSYS) when fixed-cell font support is disabled (MINIMAL build w/o VGA).
+// Returns -(ENOSYS) when fixed-cell font support is disabled (MINIMAL build w/o BITMAP).
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
 // percentage:		0-100 value to set the progress bar's progression.
@@ -918,7 +918,7 @@ FBINK_API int fbink_set_bg_pen_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a, 
 FBINK_API int fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInkConfig* restrict fbink_cfg);
 
 // Print a full-width activity bar on screen (i.e., an infinite progress bar).
-// Returns -(ENOSYS) when fixed-cell font support is disabled (MINIMAL build w/o VGA).
+// Returns -(ENOSYS) when fixed-cell font support is disabled (MINIMAL build w/o BITMAP).
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
 // progress:		0-16 value to set the progress thumb's position in the bar.

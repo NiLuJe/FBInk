@@ -28,10 +28,10 @@
 #endif
 
 // NOTE: We need image support & basic font support.
-//       A MINIMAL + VGA + IMAGE build is still recommended, because otherwise fbink_init() has to pull all the extra fonts in...
+//       A MINIMAL + BITMAP + IMAGE build is still recommended, because otherwise fbink_init() has to pull all the extra fonts in...
 #ifdef FBINK_MINIMAL
-#	ifndef FBINK_WITH_VGA
-#		error Cannot build this tool without basic font support!
+#	ifndef FBINK_WITH_BITMAP
+#		error Cannot build this tool without fixed-cell font rendering support!
 #	endif
 #	ifndef FBINK_WITH_IMAGE
 #		error Cannot build this tool without Image support!

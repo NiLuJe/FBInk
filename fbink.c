@@ -1007,7 +1007,7 @@ static void
 */
 #endif    // FBINK_WITH_DRAW
 
-#ifdef FBINK_WITH_VGA
+#ifdef FBINK_WITH_BITMAP
 // Return the font8x8 bitmap for a specific Unicode codepoint
 static const unsigned char*
     font8x8_get_bitmap(uint32_t codepoint)
@@ -1033,13 +1033,13 @@ static const unsigned char*
 		return font8x8_basic[0];
 	}
 }
-#endif    // FBINK_WITH_VGA
+#endif    // FBINK_WITH_BITMAP
 
 static __attribute__((cold)) const char*
     fontname_to_string(uint8_t fontname)
 {
 	switch (fontname) {
-#ifdef FBINK_WITH_VGA
+#ifdef FBINK_WITH_BITMAP
 		case IBM:
 			return "IBM";
 #endif
@@ -1112,7 +1112,7 @@ static __attribute__((cold)) const char*
 	}
 }
 
-#ifdef FBINK_WITH_VGA
+#ifdef FBINK_WITH_BITMAP
 // KISS helper function to count the amount of digits in an integer (for dynamic padding purposes in printf calls)
 // c.f., https://stackoverflow.com/a/3069580
 static int
@@ -1714,7 +1714,7 @@ static struct mxcfb_rect
 
 	return region;
 }
-#endif    // FBINK_WITH_VGA
+#endif    // FBINK_WITH_BITMAP
 
 #ifndef FBINK_FOR_LINUX
 // NOTE: Small helper function to aid with logging the exact amount of time MXCFB_WAIT_FOR_UPDATE_COMPLETE blocked...
@@ -4130,7 +4130,7 @@ static __attribute__((cold)) int
 	viewVertOrigin = 0U;
 #endif
 
-#ifdef FBINK_WITH_VGA
+#ifdef FBINK_WITH_BITMAP
 	// NOTE: Set (& reset) original font resolution, in case we're re-init'ing,
 	//       since we're relying on the default value to calculate the scaled value,
 	//       and we're using this value to set MAXCOLS & MAXROWS, which we *need* to be sane.
@@ -4419,7 +4419,7 @@ static __attribute__((cold)) int
 	// Bake that into the viewport computations,
 	// we'll special-case the image codepath to ignore it when row is unspecified (i.e., 0) ;).
 	viewVertOrigin = (uint8_t) (viewVertOrigin + viewVertOffset);
-#endif    // FBINK_WITH_VGA
+#endif    // FBINK_WITH_BITMAP
 
 #ifdef FBINK_WITH_DRAW
 	// Pack the pen colors into the right pixel format...
@@ -5697,11 +5697,11 @@ static void
 
 // Magic happens here!
 int
-    fbink_print(int fbfd                     UNUSED_BY_NOVGA,
-		const char* restrict string  UNUSED_BY_NOVGA,
-		const FBInkConfig* fbink_cfg UNUSED_BY_NOVGA)
+    fbink_print(int fbfd                     UNUSED_BY_NOBITMAP,
+		const char* restrict string  UNUSED_BY_NOBITMAP,
+		const FBInkConfig* fbink_cfg UNUSED_BY_NOBITMAP)
 {
-#ifdef FBINK_WITH_VGA
+#ifdef FBINK_WITH_BITMAP
 	// Abort if we were passed an empty string
 	if (!*string) {
 		// Unless we just want a clear, in which case, bypass everything and just do that.
@@ -6148,7 +6148,7 @@ cleanup:
 #else
 	WARN("Fixed cell font support is disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
-#endif    // FBINK_WITH_VGA
+#endif    // FBINK_WITH_BITMAP
 }
 
 #ifdef FBINK_WITH_OPENTYPE
@@ -8593,7 +8593,7 @@ void
 	return update_verbosity(fbink_cfg);
 }
 
-#ifdef FBINK_WITH_VGA
+#ifdef FBINK_WITH_BITMAP
 // Handle drawing both types of progress bars
 int
     draw_progress_bars(int fbfd, bool is_infinite, uint8_t value, const FBInkConfig* restrict fbink_cfg)
@@ -8875,15 +8875,15 @@ int
 
 	return EXIT_SUCCESS;
 }
-#endif    // FBINK_WITH_VGA
+#endif    // FBINK_WITH_BITMAP
 
 // Draw a full-width progress bar
 int
-    fbink_print_progress_bar(int fbfd                                     UNUSED_BY_NOVGA,
-			     uint8_t percentage                           UNUSED_BY_NOVGA,
-			     const FBInkConfig* restrict caller_fbink_cfg UNUSED_BY_NOVGA)
+    fbink_print_progress_bar(int fbfd                                     UNUSED_BY_NOBITMAP,
+			     uint8_t percentage                           UNUSED_BY_NOBITMAP,
+			     const FBInkConfig* restrict caller_fbink_cfg UNUSED_BY_NOBITMAP)
 {
-#ifdef FBINK_WITH_VGA
+#ifdef FBINK_WITH_BITMAP
 	// Open the framebuffer if need be...
 	// NOTE: As usual, we *expect* to be initialized at this point!
 	bool keep_fd = true;
@@ -8934,16 +8934,16 @@ cleanup:
 #else
 	WARN("Fixed cell font support is disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
-#endif    // FBINK_WITH_VGA
+#endif    // FBINK_WITH_BITMAP
 }
 
 // Draw a full-width activity bar
 int
-    fbink_print_activity_bar(int fbfd                                     UNUSED_BY_NOVGA,
-			     uint8_t progress                             UNUSED_BY_NOVGA,
-			     const FBInkConfig* restrict caller_fbink_cfg UNUSED_BY_NOVGA)
+    fbink_print_activity_bar(int fbfd                                     UNUSED_BY_NOBITMAP,
+			     uint8_t progress                             UNUSED_BY_NOBITMAP,
+			     const FBInkConfig* restrict caller_fbink_cfg UNUSED_BY_NOBITMAP)
 {
-#ifdef FBINK_WITH_VGA
+#ifdef FBINK_WITH_BITMAP
 	// Open the framebuffer if need be...
 	// NOTE: As usual, we *expect* to be initialized at this point!
 	bool keep_fd = true;
@@ -8986,7 +8986,7 @@ cleanup:
 #else
 	WARN("Fixed cell font support is disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
-#endif    // FBINK_WITH_VGA
+#endif    // FBINK_WITH_BITMAP
 }
 
 #ifdef FBINK_WITH_IMAGE
