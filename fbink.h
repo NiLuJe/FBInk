@@ -1250,7 +1250,7 @@ FBINK_API unsigned char* fbink_get_fb_pointer(int fbfd, size_t* buffer_size);
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
 // rota:		*native* linuxfb rotation value (c.f., fbink_rota_canonical_to_native).
 //				Untouched if set to KEEP_CURRENT_ROTATE
-// apply_rota_quirks:	Only meaningful on Kobo & Cervantes.
+// apply_rota_quirks:	Only meaningful on Kobo.
 //				Tell FBInk to honor the device's rotation quirks.
 //				Should be set to *false* if rota is set to the result of fbink_rota_canonical_to_native,
 //				as it already takes care of these quirks!

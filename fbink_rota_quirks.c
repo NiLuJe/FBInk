@@ -490,11 +490,11 @@ static orientation_t
 
 // See utils/fbdepth.c for all the gory details ;).
 int
-    fbink_set_fb_info(int      fbfd,
-		      uint32_t rota,
-		      bool     apply_rota_quirks,
-		      uint8_t  bpp,
-		      uint8_t  grayscale,
+    fbink_set_fb_info(int                    fbfd,
+		      uint32_t               rota,
+		      bool apply_rota_quirks UNUSED_BY_NOTKOBO,
+		      uint8_t                bpp,
+		      uint8_t                grayscale,
 		      const FBInkConfig* restrict fbink_cfg)
 {
 	if (!deviceQuirks.skipId) {
@@ -599,7 +599,7 @@ int
 	uint32_t expected_rota = new_vinfo.rotate;
 #endif
 
-#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
+#if defined(FBINK_FOR_KOBO)
 	// When we do a canonical rotation conversion, this has *already* been taken care of by fbink_rota_canonical_to_native!
 	if (apply_rota_quirks) {
 		if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_ALL_INVERTED) {
