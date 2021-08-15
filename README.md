@@ -107,7 +107,7 @@ You can also *append* features one by one to a `MINIMAL` build:
 
 If you *really* need *extreme* Unicode coverage in the fixed-cell codepath, you can also choose to embed GNU Unifont, by passing `UNIFONT=1`.  
 Be warned that this'll add almost 2MB to the binary size, and that the font is actually split in two (double-wide glyphs are punted off to a specific font), which may dampen its usefulness in practice...  
-For obvious reasons, this is *never* enabled by default.__
+For obvious reasons, this is *never* enabled by default.  
 Unless you're doing *very* specific things, you generally want *at least* `DRAW` & `BITMAP` enabled in a `MINIMAL` build...
 
 Along the way, a few auxiliary tools may crop up in the `utils` folder. `make utils` will do a static build of these (which is the recommended way to do it, as they rather crudely piggyback on FBInk's *internal* API). Currently, these consist of a diagnostic tool regarding rotation behavior, and the doom stress-test mentioned below.  
