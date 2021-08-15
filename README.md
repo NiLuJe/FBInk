@@ -99,11 +99,11 @@ The same logic is used to allow for a bit of tailoring:
 
 You can also *append* features one by one to a `MINIMAL` build:
 -   Pass `DRAW=1` to add support for drawing primitives.
--   Pass `BITMAP=1` to add support for fixed-cell font rendering.
--   Pass `FONTS=1` to add support for the extra bundled fixed-cell fonts.
--   Pass `IMAGE=1` to add image support.
--   Pass `OPENTYPE=1` to add OTF/TTF font rendering support.
--   Pass `BUTTON_SCAN=1` to add support for the Kobo-specific button scan stuff.
+-   Pass `BITMAP=1` to add support for fixed-cell font rendering. (Implies `DRAW`)
+-   Pass `FONTS=1` to add support for the extra bundled fixed-cell fonts. (Implies `BITMAP`)
+-   Pass `IMAGE=1` to add image support. (Implies `DRAW`)
+-   Pass `OPENTYPE=1` to add OTF/TTF font rendering support. (Implies `DRAW`)
+-   Pass `BUTTON_SCAN=1` to add support for the Kobo-specific button scan stuff. (Implies `DRAW`)
 
 If you *really* need *extreme* Unicode coverage in the fixed-cell codepath, you can also choose to embed GNU Unifont, by passing `UNIFONT=1`.  
 Be warned that this'll add almost 2MB to the binary size, and that the font is actually split in two (double-wide glyphs are punted off to a specific font), which may dampen its usefulness in practice...  
