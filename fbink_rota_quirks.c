@@ -549,7 +549,7 @@ int
 
 	// Start with the easy stuff...
 	if (bpp == KEEP_CURRENT_BITDEPTH) {
-		LOG("Keeping current bitdepth (%ubpp)", vInfo.bits_per_pixel);
+		LOG("Keeping current bitdepth: %ubpp", vInfo.bits_per_pixel);
 	} else {
 		LOG("Updating bitdepth from %ubpp to %hhubpp", vInfo.bits_per_pixel, bpp);
 		new_vinfo.bits_per_pixel = (uint32_t) bpp;
@@ -557,7 +557,7 @@ int
 
 	if (new_vinfo.bits_per_pixel == 8U) {
 		if (grayscale == KEEP_CURRENT_GRAYSCALE) {
-			LOG("Keeping current grayscale value (%u)", vInfo.grayscale);
+			LOG("Keeping current grayscale value: %u", vInfo.grayscale);
 		} else {
 			if (grayscale == TOGGLE_GRAYSCALE) {
 				if (vInfo.grayscale == GRAYSCALE_8BIT) {
@@ -575,7 +575,7 @@ int
 	}
 
 	if (rota == KEEP_CURRENT_ROTATE) {
-		LOG("Keeping current rotation (%u [%s])", vInfo.rotate, fb_rotate_to_string(vInfo.rotate));
+		LOG("Keeping current rotation: %u (%s)", vInfo.rotate, fb_rotate_to_string(vInfo.rotate));
 	} else {
 		LOG("Updating rotation from %u (%s) to %u (%s)",
 		    vInfo.rotate,
