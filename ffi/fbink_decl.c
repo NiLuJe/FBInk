@@ -128,6 +128,7 @@ cdecl_func(fbink_rota_canonical_to_native)
 cdecl_func(fbink_invert_screen)
 
 cdecl_func(fbink_get_fb_pointer)
+cdecl_func(fbink_get_fb_info)
 cdecl_const(KEEP_CURRENT_ROTATE)
 cdecl_const(KEEP_CURRENT_BITDEPTH)
 cdecl_const(KEEP_CURRENT_GRAYSCALE)

@@ -26,11 +26,11 @@
 
 #include <errno.h>
 #include <getopt.h>
+#include <linux/fb.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <syslog.h>
-#include <linux/fb.h>
 
 #include "../fbink.h"
 
@@ -42,14 +42,14 @@
 #define likely(x)   __builtin_expect(!!(x), 1)
 #define unlikely(x) __builtin_expect(!!(x), 0)
 
-bool toSysLog = false;
-bool isQuiet = false;
+bool toSysLog  = false;
+bool isQuiet   = false;
 bool isVerbose = false;
 // Handle what we send to stdout (i.e., mostly diagnostic stuff, which tends to be verbose, so no FBInk tag)
 #define LOG(fmt, ...)                                                                                                    \
 	({                                                                                                               \
-		if (unlikely(isVerbose)) {                                                                             \
-			if (toSysLog) {                                                                                \
+		if (unlikely(isVerbose)) {                                                                               \
+			if (toSysLog) {                                                                                  \
 				syslog(LOG_INFO, fmt, ##__VA_ARGS__);                                                    \
 			} else {                                                                                         \
 				fprintf(stdout, fmt "\n", ##__VA_ARGS__);                                                \
@@ -60,11 +60,11 @@ bool isVerbose = false;
 // And then what we send to stderr (mostly fbink_init stuff, add an FBInk tag to make it clear where it comes from for API users)
 #define ELOG(fmt, ...)                                                                                                   \
 	({                                                                                                               \
-		if (!isQuiet) {                                                                                        \
-			if (toSysLog) {                                                                                \
-				syslog(LOG_NOTICE, "[FBDepth] " fmt, ##__VA_ARGS__);                                       \
+		if (!isQuiet) {                                                                                          \
+			if (toSysLog) {                                                                                  \
+				syslog(LOG_NOTICE, "[FBDepth] " fmt, ##__VA_ARGS__);                                     \
 			} else {                                                                                         \
-				fprintf(stderr, "[FBDepth] " fmt "\n", ##__VA_ARGS__);                                     \
+				fprintf(stderr, "[FBDepth] " fmt "\n", ##__VA_ARGS__);                                   \
 			}                                                                                                \
 		}                                                                                                        \
 	})
@@ -73,10 +73,10 @@ bool isVerbose = false;
 // Always shown, always tagged, and always ends with a bang.
 #define WARN(fmt, ...)                                                                                                   \
 	({                                                                                                               \
-		if (toSysLog) {                                                                                        \
-			syslog(LOG_ERR, "[FBDepth] " fmt "!", ##__VA_ARGS__);                                              \
+		if (toSysLog) {                                                                                          \
+			syslog(LOG_ERR, "[FBDepth] " fmt "!", ##__VA_ARGS__);                                            \
 		} else {                                                                                                 \
-			fprintf(stderr, "[FBDepth] " fmt "!\n", ##__VA_ARGS__);                                            \
+			fprintf(stderr, "[FBDepth] " fmt "!\n", ##__VA_ARGS__);                                          \
 		}                                                                                                        \
 	})
 
@@ -470,8 +470,8 @@ int
 	// Init FBInk
 	FBInkConfig fbink_cfg = { 0 };
 	fbink_cfg.is_verbose  = isVerbose;
-	fbink_cfg.is_quiet  = isQuiet;
-	int fbfd = -1;
+	fbink_cfg.is_quiet    = isQuiet;
+	int fbfd              = -1;
 	// Open framebuffer and keep it around, then setup globals.
 	if ((fbfd = fbink_open()) == ERRCODE(EXIT_FAILURE)) {
 		fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
@@ -574,13 +574,13 @@ int
 	uint32_t req_gray = KEEP_CURRENT_GRAYSCALE;
 	if (want_nm == true) {
 		if (req_bpp == 8U) {
-			req_gray = 2U; // GRAYSCALE_8BIT_INVERTED
+			req_gray = 2U;    // GRAYSCALE_8BIT_INVERTED
 		} else if (req_bpp > 8U) {
 			req_gray = 0U;
 		}
 	} else if (want_nm == false) {
 		if (req_bpp == 8U) {
-			req_gray = 1U; // GRAYSCALE_8BIT
+			req_gray = 1U;    // GRAYSCALE_8BIT
 		} else if (req_bpp > 8U) {
 			req_gray = 0U;
 		}
@@ -589,7 +589,7 @@ int
 	} else {
 		// Otherwise, make sure we default to sane values for a non-inverted palette...
 		if (req_bpp == 8U) {
-			req_gray = 1U; // GRAYSCALE_8BIT
+			req_gray = 1U;    // GRAYSCALE_8BIT
 		} else if (req_bpp > 8U) {
 			req_gray = 0U;
 		}

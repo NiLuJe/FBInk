@@ -10898,7 +10898,7 @@ FBInkRect
 	return lastRect;
 }
 
-// Grants direct access to the frame buffer pointer as well as the size of the frame buffer allocation
+// Grants direct access to the backing buffer's pointer & size
 unsigned char*
     fbink_get_fb_pointer(int fbfd, size_t* buffer_size)
 {
@@ -10924,6 +10924,14 @@ unsigned char*
 failure:
 	*buffer_size = 0U;
 	return NULL;
+}
+
+// Returns a *full* copy of our internal framebuffer structs
+void
+    fbink_get_fb_info(struct fb_var_screeninfo* var_info, struct fb_fix_screeninfo* fix_info)
+{
+	*var_info = vInfo;
+	*fix_info = fInfo;
 }
 
 // And now, we just bundle auxiliary parts of the public or private API,

@@ -32,6 +32,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include <linux/fb.h>
+
 // Be friendly with C++ compilers (both GCC & Clang support __restrict__).
 #ifdef __cplusplus
 #	define restrict __restrict__
@@ -1225,11 +1227,15 @@ FBINK_API int fbink_invert_screen(int fbfd, const FBInkConfig* restrict fbink_cf
 // buffer_size:		Out parameter. On success, will be set to the buffer's size, in bytes.
 FBINK_API unsigned char* fbink_get_fb_pointer(int fbfd, size_t* buffer_size);
 
+// For when you *really* need a mostly-untouched copy of the full linuxfb structs...
+// NOTE: Prefer fbink_get_state, unless you *really* have no other choices...
+FBINK_API void fbink_get_fb_info(struct fb_var_screeninfo* var_info, struct fb_fix_screeninfo* fix_info);
+
 // Magic constants for fbink_set_fb_info (> INT8_MAX to steer clear of legitimate values)
 #define KEEP_CURRENT_ROTATE    (1 << 7)
 #define KEEP_CURRENT_BITDEPTH  (1 << 7)
 #define KEEP_CURRENT_GRAYSCALE (1 << 7)
-#define TOGGLE_GRAYSCALE (1 << 6)
+#define TOGGLE_GRAYSCALE       (1 << 6)
 // Sets the framebuffer's bitdepth and/or native rotation.
 // MUST NOT be called before fbink_init
 // Only tested on Kobo & Kindle, here be dragons on other platforms!
