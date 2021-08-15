@@ -543,6 +543,9 @@ int
 		req_rota = KEEP_CURRENT_ROTATE;
 	}
 
+	// If a change was requested, do it, but check if it's necessary first
+	bool is_change_needed = false;
+
 	// Compute the proper grayscale flag given the current bitdepth and whether we want to enable nightmode or not...
 	// We rely on the EPDC feature that *toggles* HW inversion, no matter the bitdepth
 	// (by essentially *flipping* the EPDC_FLAG_ENABLE_INVERSION flag, on the kernel side).
@@ -552,58 +555,30 @@ int
 	// NOTE: While we technically don't allow switching to 4bpp, make sure we leave it alone,
 	//       because there are dedicated GRAYSCALE_4BIT & GRAYSCALE_4BIT_INVERTED constants...
 	uint8_t req_gray = KEEP_CURRENT_GRAYSCALE;
-	if (want_nm == true) {
-		if (req_bpp == 8U) {
+	if (req_bpp == 8U) {
+		if (want_nm == true) {
 			req_gray = 2U;    // GRAYSCALE_8BIT_INVERTED
-		} else if (req_bpp > 8U) {
-			req_gray = 0U;
-		}
-	} else if (want_nm == false) {
-		if (req_bpp == 8U) {
+		} else if (want_nm == false) {
 			req_gray = 1U;    // GRAYSCALE_8BIT
-		} else if (req_bpp > 8U) {
-			req_gray = 0U;
+		} else if (want_nm == TOGGLE_GRAYSCALE) {
+			req_gray = TOGGLE_GRAYSCALE;
 		}
-	} else if (want_nm == TOGGLE_GRAYSCALE) {
-		// Toggle...
-		if (req_bpp == 8U) {
-			// NOTE: We check for 0 in case the current bitdepth is not already 8bpp...
-			if (var_info.grayscale == 1U || var_info.grayscale == 0U) {
-				req_gray = 2U;    // GRAYSCALE_8BIT_INVERTED
-			} else {
-				req_gray = 1U;    // GRAYSCALE_8BIT
-			}
-		} else if (req_bpp > 8U) {
-			req_gray = 0U;
-		} else {
-			req_gray = KEEP_CURRENT_GRAYSCALE;
-		}
-	} else {
-		// Otherwise, make sure we default to sane values for a non-inverted palette...
-		if (req_bpp == 8U) {
-			req_gray = 1U;    // GRAYSCALE_8BIT
-		} else if (req_bpp > 8U) {
-			req_gray = 0U;
-		} else {
-			req_gray = KEEP_CURRENT_GRAYSCALE;
-		}
-	}
 
-	// If a change was requested, do it, but check if it's necessary first
-	bool is_change_needed = false;
-
-	// Start by checking that the grayscale flag is flipped properly
-	if (var_info.grayscale == req_gray) {
-		LOG("Current grayscale flag is already %u!", req_gray);
-		// No change needed as far as grayscale is concerned...
-	} else {
-		is_change_needed = true;
+		// Start by checking that the grayscale flag is flipped properly
+		if (var_info.grayscale == req_gray) {
+			LOG("Current grayscale flag is already %u!", req_gray);
+			// No change needed as far as grayscale is concerned...
+		} else {
+			is_change_needed = true;
+		}
 	}
 
 	// Then bitdepth...
 	if (fbink_state.bpp == req_bpp) {
-		// Also check that the grayscale flag is flipped properly (again)
-		if (var_info.grayscale != req_gray) {
+		// Also check that the grayscale flag is sane
+		if (req_gray == KEEP_CURRENT_GRAYSCALE &&
+		    ((fbink_state.bpp == 8U && (var_info.grayscale != 1U && var_info.grayscale != 2U)) ||
+		     (fbink_state.bpp > 8U && var_info.grayscale != 0U))) {
 			LOG("Current bitdepth is already %ubpp, but the grayscale flag is bogus!", req_bpp);
 			// Continue, we'll need to flip the grayscale flag properly
 			is_change_needed = true;
