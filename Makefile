@@ -683,7 +683,7 @@ tinier:
 # NOTE: This one may be a bit counter-intuitive... It's to build a static library built like if it were shared (i.e., PIC),
 #       because apparently that's a requirement for FFI in some high-level languages (i.e., Go; c.f., #7)
 pic:
-	$(MAKE) static SHARED=true
+	$(MAKE) staticlib SHARED=true
 
 shared:
 	$(MAKE) sharedlib SHARED=true
