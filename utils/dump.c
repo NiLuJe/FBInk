@@ -54,6 +54,10 @@
 		(x__ > y__) ? x__ : y__;                                                                                 \
 	})
 
+// Likely/Unlikely branch tagging
+#define likely(x)   __builtin_expect(!!(x), 1)
+#define unlikely(x) __builtin_expect(!!(x), 0)
+
 // "Small" helper for bitdepth switch... (c.f., fbdepth.c)
 #ifndef FBINK_FOR_LINUX
 static bool
@@ -413,7 +417,12 @@ int
 
 		// Re-init fbink so it registers the bitdepth switch
 		fprintf(stdout, "[08] REINIT\n");
-		fbink_reinit(fbfd, &fbink_cfg);
+		if (unlikely(fbink_reinit(fbfd, &fbink_cfg) < 0)) {
+			// We don't track state, so we only need to handle plain failures.
+			fprintf(stderr, "fbink_reinit failed!\n");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
 
 		// Print random crap, once more
 		fprintf(stdout, "[09] PRINT\n");
