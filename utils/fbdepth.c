@@ -517,11 +517,6 @@ int
 	}
 #endif
 
-	// If no bitdepth was requested, set to the current one, we'll be double-checking if changes are actually needed.
-	if (req_bpp == KEEP_CURRENT_BITDEPTH) {
-		req_bpp = (uint8_t) fbink_state.bpp;
-	}
-
 // If the automagic Portrait rotation was requested, compute it
 #if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 	if (req_rota == 42U) {
@@ -574,7 +569,7 @@ int
 	}
 
 	// Then bitdepth...
-	if (fbink_state.bpp == req_bpp) {
+	if (req_bpp == KEEP_CURRENT_BITDEPTH || fbink_state.bpp == req_bpp) {
 		// Also check that the grayscale flag is sane
 		if (req_gray == KEEP_CURRENT_GRAYSCALE &&
 		    ((fbink_state.bpp == 8U && (var_info.grayscale == 0U || var_info.grayscale > 2U)) ||
@@ -651,12 +646,15 @@ int
 
 	// If we're here, we really want to change the bitdepth and/or rota ;)
 	if (req_rota != KEEP_CURRENT_ROTATE) {
-		LOG("Switching fb to %ubpp%s @ rotation %u . . .",
-		    req_bpp,
-		    (req_bpp == fbink_state.bpp) ? " (current bitdepth)" : "",
-		    req_rota);
+		if (req_bpp == KEEP_CURRENT_BITDEPTH) {
+			LOG("Switching fb to rotation %u . . .", req_rota);
+		} else {
+			LOG("Switching fb to %ubpp @ rotation %u . . .", req_bpp, req_rota);
+		}
 	} else {
-		LOG("Switching fb to %ubpp%s . . .", req_bpp, (req_bpp == fbink_state.bpp) ? " (current bitdepth)" : "");
+		if (req_bpp != KEEP_CURRENT_BITDEPTH) {
+			LOG("Switching fb to %ubpp . . .", req_bpp);
+		}
 	}
 	if (fbink_set_fb_info(fbfd, req_rota, req_bpp, req_gray, &fbink_cfg) < 0) {
 		rv = ERRCODE(EXIT_FAILURE);
