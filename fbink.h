@@ -853,8 +853,9 @@ FBINK_API bool fbink_is_fb_quirky(void) __attribute__((pure, deprecated));
 //     If *only* OK_ROTA_CHANGE is set, it means the rotation change was a simple inversion of the current orientation,
 //     (i.e., Portrait <-> Inverted Portrait or Landscape <-> Inverted Landscape).
 // NOTE: This means that it may return a *positive* non-zero value on *success*.
-//       This is helpful for callers that need to track FBInk's internal state via fbink_get_state(),
+//       This is helpful for callers that need to track FBInk's internal state via fbink_get_state or fbink_get_fb_pointer,
 //       because a reinit *might* affect the screen layout, signaling that their current state copy *may* be stale.
+//       TL;DR: Assume that *any* OK_*_CHANGE return value means that you need to refresh your state tracking.
 // NOTE: In turn, this means that a simple EXIT_SUCCESS means that no reinitialization was needed.
 // NOTE: On Kobo devices with a sunxi SoC, OK_BPP_CHANGE will *never* happen,
 //       as the state of the actual framebuffer device is (unfortunately) meaningless there.
@@ -1218,6 +1219,7 @@ FBINK_API int fbink_invert_screen(int fbfd, const FBInkConfig* restrict fbink_cf
 // MAY be called before before any fbink_print*, fbink_dump/restore, fbink_cls or fbink_grid* functions.
 //     (i.e., it'll implicitly setup the backing buffer if necessary).
 // Returns NULL on failure (in which case, *buffer_size is set to 0).
+// NOTE: This *may* need to be refreshed after a framebuffer state change, c.f., fbink_reinit!
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				cannot be set to FBFD_AUTO!
 // buffer_size:		Out parameter. On success, will be set to the buffer's size, in bytes.
@@ -1237,6 +1239,9 @@ FBINK_API unsigned char* fbink_get_fb_pointer(int fbfd, size_t* buffer_size);
 //       except we only accept values matching linuxfb rotation constants.
 //       Prefer using fbink_sunxi_ntx_enforce_rota directly yourself.
 // NOTE: On success, this will reinit the state *now* (returning the exact same values as fbink_reinit).
+//       In particular, if you're using fbink_get_state and/or fbink_get_fb_pointer,
+//       check and handle that return value properly (as you would an actual fbink_reinit call),
+//       or you may be left with stale state data if you don't refresh it when necessary :).
 // fbfd:		Open file descriptor to the framebuffer character device.
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
 // rota:		*native* linuxfb rotation value (c.f., fbink_rota_canonical_to_native).
