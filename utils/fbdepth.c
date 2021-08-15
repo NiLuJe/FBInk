@@ -124,7 +124,7 @@ static void
 
 // Pilfered from KFMon, with some minor tweaks to make it tri-state...
 static int
-    strtotristate(const char* restrict str, int8_t* restrict result)
+    strtotristate(const char* restrict str, uint8_t* restrict result)
 {
 	if (!str) {
 		WARN("Passed an empty value to a key expecting a tri-state value");
@@ -138,7 +138,7 @@ static int
 				*result = true;
 				return EXIT_SUCCESS;
 			} else if (strcasecmp(str, "toggle") == 0) {
-				*result = -1;
+				*result = TOGGLE_GRAYSCALE;
 				return EXIT_SUCCESS;
 			}
 			break;
@@ -213,7 +213,7 @@ static int
 		case '-':
 			if (str[1] == '1') {
 				if (str[2] == '\0') {
-					*result = -1;
+					*result = TOGGLE_GRAYSCALE;
 					return EXIT_SUCCESS;
 				}
 			}
@@ -339,9 +339,9 @@ int
 					      { "nightmode", required_argument, NULL, 'H' },
 					      { NULL, 0, NULL, 0 } };
 
-	uint32_t req_bpp          = 0U;
-	int8_t   req_rota         = 42;
-	int8_t   want_nm          = 42;
+	uint8_t  req_bpp          = KEEP_CURRENT_BITDEPTH;
+	uint32_t req_rota         = KEEP_CURRENT_ROTATE;
+	uint8_t  want_nm          = KEEP_CURRENT_GRAYSCALE;
 	bool     errfnd           = false;
 	bool     print_bpp        = false;
 	bool     return_bpp       = false;
@@ -354,7 +354,7 @@ int
 	while ((opt = getopt_long(argc, argv, "d:hvqgGr:R:oOcCH:", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'd':
-				req_bpp = (uint32_t) strtoul(optarg, NULL, 10);
+				req_bpp = (uint8_t) strtoul(optarg, NULL, 10);
 				// Cheap-ass sanity check
 				switch (req_bpp) {
 					case 8:
@@ -403,8 +403,21 @@ int
 					req_rota = FB_ROTATE_UD;
 				} else if (strcasecmp(optarg, "CCW") == 0 || strcmp(optarg, "3") == 0) {
 					req_rota = FB_ROTATE_CCW;
+					// If the automagic Portrait rotation was requested, compute it
+#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 				} else if (strcmp(optarg, "-1") == 0) {
-					req_rota = -1;
+					// NOTE: For *most* devices, Nickel's Portrait orientation should *always* match BootRota + 1
+					//       Thankfully, the Libra appears to be ushering in a new era filled with puppies and rainbows,
+					//       and, hopefully, less insane rotation quirks ;).
+					if (fbink_state.ntx_rota_quirk != NTX_ROTA_SANE) {
+						req_rota = (fbink_state.ntx_boot_rota + 1) & 3;
+					} else {
+						req_rota = (int8_t) fbink_state.ntx_boot_rota;
+					}
+					LOG("Device's expected Portrait orientation should be: %hhd (%s)!",
+					    req_rota,
+					    fb_rotate_to_string((uint32_t) req_rota));
+#endif
 				} else {
 					WARN("Invalid rotation '%s'", optarg);
 					errfnd = true;
@@ -465,8 +478,9 @@ int
 		}
 	}
 
-	if (errfnd || ((req_bpp == 0U && req_rota == 42 && want_nm == 42) &&
-		       !(print_bpp || return_bpp || print_rota || return_rota || print_canonical || return_canonical))) {
+	if (errfnd ||
+	    ((req_bpp == KEEP_CURRENT_BITDEPTH && req_rota == KEEP_CURRENT_ROTATE && want_nm == KEEP_CURRENT_GRAYSCALE) &&
+	     !(print_bpp || return_bpp || print_rota || return_rota || print_canonical || return_canonical))) {
 		show_helpmsg();
 		return ERRCODE(EXIT_FAILURE);
 	}
@@ -546,36 +560,14 @@ int
 #endif
 
 	// If no bitdepth was requested, set to the current one, we'll be double-checking if changes are actually needed.
-	if (req_bpp == 0U) {
+	if (req_bpp == KEEP_CURRENT_BITDEPTH) {
 		req_bpp = fbink_state.bpp;
 	}
 
-	// If the automagic Portrait rotation was requested, compute it
-#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
-	if (req_rota == -1) {
-		// NOTE: For *most* devices, Nickel's Portrait orientation should *always* match BootRota + 1
-		//       Thankfully, the Libra appears to be ushering in a new era filled with puppies and rainbows,
-		//       and, hopefully, less insane rotation quirks ;).
-		if (fbink_state.ntx_rota_quirk != NTX_ROTA_SANE) {
-			req_rota = (fbink_state.ntx_boot_rota + 1) & 3;
-		} else {
-			req_rota = (int8_t) fbink_state.ntx_boot_rota;
-		}
-		LOG("Device's expected Portrait orientation should be: %hhd (%s)!",
-		    req_rota,
-		    fb_rotate_to_string((uint32_t) req_rota));
-	}
-#endif
-
-	// If no rotation was requested, reset req_rota to our expected sentinel value
-	if (req_rota == 42) {
-		req_rota = -1;
-	}
-
 	// Ensure the requested rotation is sane (if all is well, this should never be tripped)
-	if (req_rota < -1 || req_rota > FB_ROTATE_CCW) {
-		LOG("Requested rotation (%hhd) is bogus, discarding it!", req_rota);
-		req_rota = -1;
+	if (req_rota != KEEP_CURRENT_ROTATE && req_rota > FB_ROTATE_CCW) {
+		LOG("Requested rotation (%u) is bogus, discarding it!", req_rota);
+		req_rota = KEEP_CURRENT_ROTATE;
 	}
 
 	// Compute the proper grayscale flag given the current bitdepth and whether we want to enable nightmode or not...
@@ -586,7 +578,7 @@ int
 	// so we only play with this @ 8bpp ;).
 	// NOTE: While we technically don't allow switching to 4bpp, make sure we leave it alone,
 	//       because there are dedicated GRAYSCALE_4BIT & GRAYSCALE_4BIT_INVERTED constants...
-	uint32_t req_gray = KEEP_CURRENT_GRAYSCALE;
+	uint8_t req_gray = KEEP_CURRENT_GRAYSCALE;
 	if (want_nm == true) {
 		if (req_bpp == 8U) {
 			req_gray = 2U;    // GRAYSCALE_8BIT_INVERTED
@@ -599,14 +591,28 @@ int
 		} else if (req_bpp > 8U) {
 			req_gray = 0U;
 		}
-	} else if (want_nm == -1) {
-		req_gray = TOGGLE_GRAYSCALE;
+	} else if (want_nm == TOGGLE_GRAYSCALE) {
+		// Toggle...
+		if (req_bpp == 8U) {
+			// NOTE: We check for 0 in case the current bitdepth is not already 8bpp...
+			if (var_info.grayscale == 1U || var_info.grayscale == 0U) {
+				req_gray = 2U;    // GRAYSCALE_8BIT_INVERTED
+			} else {
+				req_gray = 1U;    // GRAYSCALE_8BIT
+			}
+		} else if (req_bpp > 8U) {
+			req_gray = 0U;
+		} else {
+			req_gray = KEEP_CURRENT_GRAYSCALE;
+		}
 	} else {
 		// Otherwise, make sure we default to sane values for a non-inverted palette...
 		if (req_bpp == 8U) {
 			req_gray = 1U;    // GRAYSCALE_8BIT
 		} else if (req_bpp > 8U) {
 			req_gray = 0U;
+		} else {
+			req_gray = KEEP_CURRENT_GRAYSCALE;
 		}
 	}
 
@@ -637,7 +643,7 @@ int
 	}
 
 	// Same for rotation, if we requested one...
-	if (req_rota != -1) {
+	if (req_rota != KEEP_CURRENT_ROTATE) {
 #ifdef FBINK_FOR_KINDLE
 		if (fbink_state.is_kindle_legacy) {
 			// We need to check the effective orientation on einkfb...
@@ -649,7 +655,7 @@ int
 			}
 
 			uint32_t rotate = einkfb_orientation_to_linuxfb_rotate(orientation);
-			if (rotate == (uint32_t) req_rota) {
+			if (rotate == req_rota) {
 				LOG("Current rotation is already %hhd!", req_rota);
 				// No change needed as far as rotation is concerned...
 			} else {
@@ -657,7 +663,7 @@ int
 			}
 		} else {
 			// On mxcfb, everything's peachy
-			if (vInfo.rotate == (uint32_t) req_rota) {
+			if (vInfo.rotate == req_rota) {
 				LOG("Current rotation is already %hhd!", req_rota);
 				// No change needed as far as rotation is concerned...
 			} else {
@@ -674,8 +680,8 @@ int
 			req_rota = (int8_t) fbink_rota_canonical_to_native((uint8_t) req_rota);
 		}
 #	endif
-		if (fbink_state.current_rota == (uint32_t) req_rota) {
-			LOG("Current rotation is already %hhd!", req_rota);
+		if (fbink_state.current_rota == req_rota) {
+			LOG("Current rotation is already %u!", req_rota);
 			// No change needed as far as rotation is concerned...
 		} else {
 			is_change_needed = true;
@@ -689,8 +695,8 @@ int
 	}
 
 	// If we're here, we really want to change the bitdepth and/or rota ;)
-	if (req_rota != -1) {
-		LOG("Switching fb to %ubpp%s @ rotation %hhd . . .",
+	if (req_rota != KEEP_CURRENT_ROTATE) {
+		LOG("Switching fb to %ubpp%s @ rotation %u . . .",
 		    req_bpp,
 		    (req_bpp == fbink_state.bpp) ? " (current bitdepth)" : "",
 		    req_rota);
