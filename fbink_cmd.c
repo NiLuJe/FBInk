@@ -2173,7 +2173,12 @@ int
 					}
 
 					// First things first, do an explicit reinit, as we might have been running for a while.
-					fbink_reinit(fbfd, &fbink_cfg);
+					if (unlikely(fbink_reinit(fbfd, &fbink_cfg) < 0)) {
+						// We don't track state, so we only need to handle plain failures.
+						PFWARN("fbink_reinit");
+						rv = ERRCODE(EXIT_FAILURE);
+						goto cleanup;
+					}
 
 					// NOTE: In every case, we *ignore* errors in order not to silently die on bogus input...
 					// If we're drawing a bar, make sure we were fed vaguely valid input...

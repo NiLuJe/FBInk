@@ -104,6 +104,10 @@ bool toSysLog = false;
 // Same, but with __PRETTY_FUNCTION__ right before fmt
 #define PFWARN(fmt, ...) ({ WARN("[%s] " fmt, __PRETTY_FUNCTION__, ##__VA_ARGS__); })
 
+// Likely/Unlikely branch tagging
+#define likely(x)   __builtin_expect(!!(x), 1)
+#define unlikely(x) __builtin_expect(!!(x), 0)
+
 static void show_helpmsg(void);
 
 // For our cleanup signal handler....
