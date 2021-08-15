@@ -7549,6 +7549,7 @@ cleanup:
 #endif    // FBINK_WITH_OPENTYPE
 }
 
+#ifndef FBINK_FOR_LINUX
 // Convert our public WFM_MODE_INDEX_T values to an appropriate mxcfb waveform mode constant for the current device
 static uint32_t
     get_wfm_mode(WFM_MODE_INDEX_T wfm_mode_index)
@@ -7556,7 +7557,7 @@ static uint32_t
 	uint32_t waveform_mode = WAVEFORM_MODE_AUTO;
 
 	// Parse waveform mode...
-#if defined(FBINK_FOR_KINDLE)
+#	if defined(FBINK_FOR_KINDLE)
 	// Is this a Zelda or a Rex with new waveforms?
 	bool has_new_wfm = false;
 	if (deviceQuirks.isKindleZelda || deviceQuirks.isKindleRex) {
@@ -7651,7 +7652,7 @@ static uint32_t
 			waveform_mode = WAVEFORM_MODE_AUTO;
 			break;
 	}
-#elif defined(FBINK_FOR_REMARKABLE)
+#	elif defined(FBINK_FOR_REMARKABLE)
 	// NOTE: Let's go with a dedicated switch for the reMarkable,
 	//       because we don't actually have sane constant names in the upstream kernel,
 	//       and some of what's detailed in the SDK's <epframebuffer.h> looks slightly weird...
@@ -7701,7 +7702,7 @@ static uint32_t
 			waveform_mode = WAVEFORM_MODE_AUTO;
 			break;
 	}
-#elif defined(FBINK_FOR_POCKETBOOK)
+#	elif defined(FBINK_FOR_POCKETBOOK)
 	// NOTE: PB has a few extra weird waveform modes, so, go with a dedicated branch...
 	switch (wfm_mode_index) {
 		case WFM_INIT:
@@ -7753,7 +7754,7 @@ static uint32_t
 			waveform_mode = WAVEFORM_MODE_AUTO;
 			break;
 	}
-#elif defined(FBINK_FOR_KOBO)
+#	elif defined(FBINK_FOR_KOBO)
 	if (deviceQuirks.isSunxi) {
 		switch (wfm_mode_index) {
 			case WFM_INIT:
@@ -7845,7 +7846,7 @@ static uint32_t
 				break;
 		}
 	}
-#else
+#	else
 	switch (wfm_mode_index) {
 		case WFM_INIT:
 			waveform_mode = WAVEFORM_MODE_INIT;
@@ -7881,7 +7882,7 @@ static uint32_t
 			waveform_mode = WAVEFORM_MODE_AUTO;
 			break;
 	}
-#endif    // FBINK_FOR_KINDLE
+#	endif    // FBINK_FOR_KINDLE
 
 	return waveform_mode;
 }
@@ -7950,7 +7951,6 @@ static __attribute__((cold)) const char*
 	}
 }
 
-#ifndef FBINK_FOR_LINUX
 #	ifdef FBINK_FOR_KINDLE
 // Convert a platform-specifc mxcfb WAVEFORM_MODE value to a human readable string
 static __attribute__((cold)) const char*
@@ -8111,7 +8111,6 @@ static __attribute__((cold)) const char*
 	}
 }
 #	endif    // FBINK_FOR_POCKETBOOK
-#endif            // !FBINK_FOR_LINUX
 
 // Convert our public HW_DITHER_INDEX_T values to an appropriate mxcfb dithering mode constant
 static int
@@ -8175,6 +8174,7 @@ static __attribute__((cold)) const char*
 			return "Unknown";
 	}
 }
+#endif    // !FBINK_FOR_LINUX
 
 // Small public wrapper around refresh(), without the caller having to depend on mxcfb headers
 int

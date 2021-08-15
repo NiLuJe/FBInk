@@ -797,9 +797,9 @@ static void                              parse_simple_md(const char* restrict, s
 static __attribute__((cold)) const char* glyph_style_to_string(CHARACTER_FONT_T);
 #endif
 
+#ifndef FBINK_FOR_LINUX
 static uint32_t                          get_wfm_mode(WFM_MODE_INDEX_T);
 static __attribute__((cold)) const char* wfm_to_string(WFM_MODE_INDEX_T);
-#ifndef FBINK_FOR_LINUX
 #	ifdef FBINK_FOR_KINDLE
 static __attribute__((cold)) const char* kindle_wfm_to_string(uint32_t);
 static __attribute__((cold)) const char* kindle_zelda_wfm_to_string(uint32_t);
@@ -813,9 +813,9 @@ static __attribute__((cold)) const char* remarkable_wfm_to_string(uint32_t);
 #	ifdef FBINK_FOR_POCKETBOOK
 static __attribute__((cold)) const char* pocketbook_wfm_to_string(uint32_t);
 #	endif
-#endif
 static int                               get_hwd_mode(HW_DITHER_INDEX_T);
 static __attribute__((cold)) const char* hwd_to_string(HW_DITHER_INDEX_T);
+#endif
 
 #ifdef FBINK_FOR_KOBO
 static int kobo_sunxi_reinit_check(int, const FBInkConfig* restrict);
