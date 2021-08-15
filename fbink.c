@@ -8215,8 +8215,8 @@ int
 #	endif    // FBINK_FOR_KOBO
 
 	// Same for the dithering mode, if we actually requested dithering...
-	if (fbink_cfg->dithering_mode == HWD_PASSTHROUGH) {
-		LOG("No hardware dithering requested");
+	if (fbink_cfg->dithering_mode == HWD_ORDERED) {
+		LOG("Hardware dithering requested");
 	} else if (fbink_cfg->dithering_mode == HWD_LEGACY) {
 		LOG("Legacy in-kernel software dithering requested");
 	}
