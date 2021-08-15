@@ -481,7 +481,7 @@ endif
 TOOLS_CPPFLAGS+=-DFBINK_MINIMAL
 # Except for doom, because it needs Image support...
 DOOM_CPPFLAGS:=$(TOOLS_CPPFLAGS)
-DOOM_CPPFLAGS+=-DFBINK_WITH_IMAGE
+DOOM_CPPFLAGS+=-DFBINK_WITH_DRAW -DFBINK_WITH_IMAGE
 
 # How we handle our library creation
 FBINK_SHARED_FLAGS:=-shared -Wl,-soname,libfbink.so.1
