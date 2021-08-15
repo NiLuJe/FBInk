@@ -268,7 +268,7 @@ static void
 	    buffer_size / fbink_state->scanline_stride,
 	    var_info->xres_virtual,
 	    var_info->yres_virtual);
-	LOG("Actual mapping is %zu bytes with a scanline stride of %u bytes", buffer_size, fbink_state->scanline_stride);
+	LOG("Buffer is mapped for %zu bytes with a scanline stride of %u bytes", buffer_size, fbink_state->scanline_stride);
 
 #ifdef FBINK_FOR_KINDLE
 	// NOTE: einkfb devices (even the K4, which only uses it as a shim over mxcfb HW)
