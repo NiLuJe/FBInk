@@ -569,8 +569,22 @@ int
 			LOG("Updating grayscale value from %u to %hhu", vInfo.grayscale, grayscale);
 			new_vinfo.grayscale = (uint32_t) grayscale;
 		}
+	} else if (new_vinfo.bits_per_pixel == 4U) {
+		if (grayscale == KEEP_CURRENT_GRAYSCALE) {
+			LOG("Keeping current grayscale value: %u", vInfo.grayscale);
+		} else {
+			if (grayscale == TOGGLE_GRAYSCALE) {
+				if (vInfo.grayscale == GRAYSCALE_4BIT) {
+					grayscale = GRAYSCALE_4BIT_INVERTED;
+				} else {
+					grayscale = GRAYSCALE_4BIT;
+				}
+			}
+			LOG("Updating grayscale value from %u to %hhu", vInfo.grayscale, grayscale);
+			new_vinfo.grayscale = (uint32_t) grayscale;
+		}
 	} else {
-		LOG("Not @ 8bpp, sanitizing grayscale flag");
+		LOG("Bitdepth > 8bpp, sanitizing grayscale flag");
 		new_vinfo.grayscale = 0U;
 	}
 
