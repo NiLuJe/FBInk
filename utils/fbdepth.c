@@ -658,7 +658,8 @@ int
 			LOG("Switching fb to %ubpp . . .", req_bpp);
 		}
 	}
-	if (fbink_set_fb_info(fbfd, req_rota, req_bpp, req_gray, &fbink_cfg) < 0) {
+	int ret = fbink_set_fb_info(fbfd, req_rota, req_bpp, req_gray, &fbink_cfg);
+	if (ret < 0 && ret != ERRCODE(ENOSYS)) {
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
