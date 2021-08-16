@@ -548,7 +548,7 @@ int
 	// NOTE: While we technically don't allow switching to 4bpp, make sure we leave it alone,
 	//       because there are dedicated GRAYSCALE_4BIT & GRAYSCALE_4BIT_INVERTED constants...
 	uint8_t req_gray = KEEP_CURRENT_GRAYSCALE;
-	if (req_bpp == 8U) {
+	if ((req_bpp == KEEP_CURRENT_BITDEPTH && fbink_state.bpp == 8U) || req_bpp == 8U) {
 		if (want_nm == true) {
 			req_gray = 2U;    // GRAYSCALE_8BIT_INVERTED
 		} else if (want_nm == false) {
