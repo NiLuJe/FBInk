@@ -237,7 +237,7 @@ ifdef SHARED
 	SHARED_CFLAGS+=-fpic
 	# The symbol visibility shenanigans only make sense for shared builds.
 	# (Unless you *really* want that main symbol to be local in fbink_cmd in static builds ;)).
-	LIB_CFLAGS+=-fvisibility=hidden
+	SHARED_CFLAGS+=-fvisibility=hidden
 	# And this ensures that only what needs to be public in the library will actually be.
 	LIB_CFLAGS+=-DFBINK_SHAREDLIB
 endif
