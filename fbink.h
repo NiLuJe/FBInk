@@ -1313,9 +1313,8 @@ FBINK_API int fbink_toggle_sunxi_ntx_pen_mode(int fbfd, bool toggle);
 //       unless the custom fbdamage module has been loaded (earlier than the disp client you're trying to match)...
 //       c.f., <https://github.com/NiLuJe/mxc_epdc_fb_damage>.
 // NOTE: On success, this will reinit the state *now* (returning the exact same values as fbink_reinit).
-FBINK_API int fbink_sunxi_ntx_enforce_rota(int                      fbfd,
-					   SUNXI_FORCE_ROTA_INDEX_T mode,
-					   const FBInkConfig* restrict fbink_cfg);
+FBINK_API int fbink_sunxi_ntx_enforce_rota(int fbfd, SUNXI_FORCE_ROTA_INDEX_T mode, const FBInkConfig* restrict fbink_cfg)
+    __attribute__((warn_unused_result));
 
 //
 ///
