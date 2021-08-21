@@ -350,6 +350,7 @@ endif
 ifdef UNIBREAK
 	EXTRA_LDFLAGS+=-Llibunibreak-staged/src/.libs
 	LIBS+=-l:libunibreak.a
+	SHARED_LIBS+=-l:libunibreak.a
 endif
 
 # Same for libi2c, on Kobo
@@ -358,6 +359,7 @@ ifdef KOBO
 	EXTRA_LDFLAGS+=-Llibi2c-staged/lib
 	I2C_LIBS:=-l:libi2c.a
 	LIBS+=$(I2C_LIBS)
+	SHARED_LIBS+=$(I2C_LIBS)
 endif
 
 # Pick up our vendored build of libevdev (for the PoC that relies on it)
@@ -378,8 +380,10 @@ ifndef MINIMAL
 	# NOTE: Here be dragons! Static linking bits of the glibc is usually considered a fairly terrible idea.
 	ifdef STATIC_LIBM
 		LIBS+=-l:libm.a
+		SHARED_LIBS+=-l:libm.a
 	else
 		LIBS+=-lm
+		SHARED_LIBS+=-lm
 	endif
 	# NOTE: We can optionally forcibly disable the NEON/SSE4 codepaths in QImageScale!
 	#       Although, generally, the SIMD variants are a bit faster ;).
@@ -389,6 +393,7 @@ endif
 # We need libdl on PocketBook in order to dlopen InkView...
 ifdef POCKETBOOK
 	LIBS+=-ldl
+	SHARED_LIBS+=-ldl
 	UTILS_LIBS+=-ldl
 endif
 
@@ -481,8 +486,10 @@ ifdef MINIMAL
 		FEATURES_CPPFLAGS+=-DFBINK_WITH_OPENTYPE
 		ifdef STATIC_LIBM
 			LIBS+=-l:libm.a
+			SHARED_LIBS+=-l:libm.a
 		else
 			LIBS+=-lm
+			SHARED_LIBS+=-lm
 		endif
 	endif
 
@@ -582,7 +589,7 @@ staticlib: $(STATICLIB_OBJS) $(UB_STATICLIB_OBJS) $(QT_STATICLIB_OBJS)
 	$(RANLIB) $(OUT_DIR)/$(FBINK_STATIC_NAME)
 
 sharedlib: $(SHAREDLIB_OBJS) $(UB_SHAREDLIB_OBJS) $(QT_SHAREDLIB_OBJS)
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(SHAREDLIB_OBJS) $(UB_SHAREDLIB_OBJS) $(QT_SHAREDLIB_OBJS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(SHAREDLIB_OBJS) $(UB_SHAREDLIB_OBJS) $(QT_SHAREDLIB_OBJS) $(SHARED_LIBS)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME_VER)
 endif
