@@ -3514,27 +3514,29 @@ static __attribute__((cold)) void
     kobo_sunxi_fb_fixup(bool is_reinit)
 {
 	// If necessary, query the accelerometer to check the current rotation...
-	if (sunxiCtx.force_rota >= FORCE_ROTA_UR) {
-		if (sunxiCtx.force_rota == FORCE_ROTA_WORKBUF) {
-			// Attempt to match the working buffer...
-			int rotate = query_fbdamage();
+	if (!is_reinit) {
+		// fbink_reinit already took care of this, so this only affects explicit fbink_init calls.
+		// NOTE: Ideally, we should only affect the *first* fbink_init call, period...
+		if (sunxiCtx.force_rota >= FORCE_ROTA_UR) {
+			if (sunxiCtx.force_rota == FORCE_ROTA_WORKBUF) {
+				// Attempt to match the working buffer...
+				int rotate = query_fbdamage();
+				if (rotate < 0) {
+					ELOG("FBDamage is inconclusive, assuming Upright");
+					rotate = FB_ROTATE_UR;
+				}
+				vInfo.rotate = (uint32_t) rotate;
+			} else {
+				vInfo.rotate = (uint32_t) sunxiCtx.force_rota;
+			}
+		} else {
+			int rotate = query_accelerometer();
 			if (rotate < 0) {
-				ELOG("FBDamage is inconclusive, assuming Upright");
+				ELOG("Accelerometer is inconclusive, assuming Upright");
 				rotate = FB_ROTATE_UR;
 			}
 			vInfo.rotate = (uint32_t) rotate;
-		} else {
-			vInfo.rotate = (uint32_t) sunxiCtx.force_rota;
 		}
-	} else if (!is_reinit) {
-		// fbink_reinit already took care of this, so this only affects explicit fbink_init calls.
-		// NOTE: Ideally, we should only affect the *first* fbink_init call, period...
-		int rotate = query_accelerometer();
-		if (rotate < 0) {
-			ELOG("Accelerometer is inconclusive, assuming Upright");
-			rotate = FB_ROTATE_UR;
-		}
-		vInfo.rotate = (uint32_t) rotate;
 	}
 	ELOG("Canonical rotation: %u (%s)", vInfo.rotate, fb_rotate_to_string(vInfo.rotate));
 	// NOTE: And because, of course, we can't have nice things, if the current working buffer
