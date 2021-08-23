@@ -267,6 +267,9 @@ static int
 			PFWARN("Failed to read G2D rotation angle from sysfs");
 			return ERRCODE(EINVAL);
 		}
+	} else {
+		PFWARN("Failed to open G2D rotation angle sysfs entry");
+		return ERRCODE(ENOENT);
 	}
 
 	// We should be able to get by with an unchecked strtoul...
