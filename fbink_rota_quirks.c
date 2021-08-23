@@ -268,7 +268,7 @@ static int
 			return ERRCODE(EINVAL);
 		}
 	} else {
-		PFWARN("Failed to open G2D rotation angle sysfs entry");
+		PFWARN("fopen: %m");
 		return ERRCODE(ENOENT);
 	}
 

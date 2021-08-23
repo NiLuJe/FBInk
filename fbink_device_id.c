@@ -839,6 +839,7 @@ static void
 		// NOTE: I'm not entirely sure this will always have a fixed length, so, give ourselves a bit of room...
 		char   line[_POSIX_PATH_MAX] = { 0 };
 		size_t size                  = fread(line, sizeof(*line), sizeof(line) - 1U, fp);
+		fclose(fp);
 		if (size > 0) {
 			// The line/file should not contain a trailing LF, but, just in case...
 			if (line[size - 1U] == '\n') {
@@ -856,7 +857,6 @@ static void
 			//       i.e., by passing UINT16_MAX instead of 0U, which we use to flag old !NTX devices.
 			set_kobo_quirks((unsigned short int) -1);
 		}
-		fclose(fp);
 
 		// Get out now, we're done!
 		return;
@@ -991,13 +991,13 @@ static void
 		ELOG("Couldn't open the sysfs entry for the SoC machine tag!");
 	} else {
 		size_t size = fread(machine_tag, sizeof(*machine_tag), sizeof(machine_tag) - 1U, fp);
+		fclose(fp);
 		if (size > 0) {
 			// Strip trailing LF
 			if (machine_tag[size - 1U] == '\n') {
 				machine_tag[size - 1U] = '\0';
 			}
 		}
-		fclose(fp);
 	}
 
 	if (strcmp(machine_tag, "reMarkable 2.0") == 0) {
