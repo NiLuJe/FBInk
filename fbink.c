@@ -4309,6 +4309,7 @@ static __attribute__((cold)) int
 		ELOG("Custom fonts are not supported in this FBInk build, using IBM instead.");
 	}
 #	endif    // FBINK_WITH_FONTS
+#endif            // FBINK_WITH_BITMAP
 
 	// Obey user-specified font scaling multiplier
 	if (fbink_cfg->fontmult > 0) {
@@ -4325,7 +4326,7 @@ static __attribute__((cold)) int
 			// NOTE: If that weren't a circular dependency, we'd take care of the isPerfectFit case here,
 			//       but we can't, so instead that corner-case is handled in fbink_print...
 		}
-#	ifdef FBINK_WITH_FONTS
+#ifdef FBINK_WITH_FONTS
 		// NOTE: Handle custom fonts, no matter their base glyph size...
 		// We want at least N columns, so, viewWidth / N / glyphWidth gives us the maximum multiplier.
 		const uint8_t max_fontmult_width  = (uint8_t) (viewWidth / min_maxcols / glyphWidth);
@@ -4336,14 +4337,14 @@ static __attribute__((cold)) int
 			FONTSIZE_MULT = max_fontmult;
 			ELOG("Clamped font size multiplier from %hhu to %hhu", fbink_cfg->fontmult, max_fontmult);
 		}
-#	else
+#else
 		// The default font's glyphs are 8x8, do the least amount of work possible ;).
 		max_fontmult = (uint8_t) (viewWidth / min_maxcols / 8U);
 		if (FONTSIZE_MULT > max_fontmult) {
 			FONTSIZE_MULT = max_fontmult;
 			ELOG("Clamped font size multiplier from %hhu to %hhu", fbink_cfg->fontmult, max_fontmult);
 		}
-#	endif
+#endif
 	} else {
 		// Set font-size based on screen DPI
 		// (roughly matches: Linux (96), Pearl (167), Carta (212), 6.8" Carta (265), 6/7/8" Carta HD (300))
@@ -4367,19 +4368,19 @@ static __attribute__((cold)) int
 				FONTSIZE_MULT = 4U;    // 32x32
 			}
 		}
-#	ifdef FBINK_WITH_FONTS
+#ifdef FBINK_WITH_FONTS
 		if (fbink_cfg->fontname == BLOCK) {
 			// Block is roughly 4 times wider than other fonts, compensate for that...
 			FONTSIZE_MULT = (uint8_t) MAX(1U, FONTSIZE_MULT / 4U);
-#		ifdef FBINK_WITH_UNIFONT
+#	ifdef FBINK_WITH_UNIFONT
 		} else if (fbink_cfg->fontname == SPLEEN || fbink_cfg->fontname == UNIFONTDW) {
-#		else
+#	else
 		} else if (fbink_cfg->fontname == SPLEEN) {
-#		endif
+#	endif
 			// Spleen & Unifont DW are roughly twice as wide as other fonts, compensate for that...
 			FONTSIZE_MULT = (uint8_t) MAX(1U, FONTSIZE_MULT / 2U);
 		}
-#	endif
+#endif
 	}
 	// Go!
 	FONTW = (unsigned short int) (glyphWidth * FONTSIZE_MULT);
@@ -4421,7 +4422,6 @@ static __attribute__((cold)) int
 	// Bake that into the viewport computations,
 	// we'll special-case the image codepath to ignore it when row is unspecified (i.e., 0) ;).
 	viewVertOrigin = (uint8_t) (viewVertOrigin + viewVertOffset);
-#endif    // FBINK_WITH_BITMAP
 
 #ifdef FBINK_WITH_DRAW
 	// Pack the pen colors into the right pixel format...
