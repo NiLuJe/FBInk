@@ -337,7 +337,7 @@ int
 	if (fbink_state.bpp == 32U) {
 		// Switch to 8bpp (c.f., fbdepth.c)
 		fprintf(stdout, "[07] SWITCH TO 8BPP\n");
-		if (fbink_set_fb_info(fbfd, KEEP_CURRENT_ROTATE, true, 8U, KEEP_CURRENT_GRAYSCALE, &fbink_cfg) < 0) {
+		if (fbink_set_fb_info(fbfd, KEEP_CURRENT_ROTATE, 8U, KEEP_CURRENT_GRAYSCALE, &fbink_cfg) < 0) {
 			fprintf(stderr, "Failed to swap bitdepth, aborting . . .\n");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
@@ -419,7 +419,7 @@ int
 
 		// Switch back to 32bpp
 		fprintf(stdout, "[14] SWITCH TO 32BPP\n");
-		if (fbink_set_fb_info(fbfd, KEEP_CURRENT_ROTATE, true, 32U, KEEP_CURRENT_GRAYSCALE, &fbink_cfg) < 0) {
+		if (fbink_set_fb_info(fbfd, KEEP_CURRENT_ROTATE, 32U, KEEP_CURRENT_GRAYSCALE, &fbink_cfg) < 0) {
 			fprintf(stderr, "Failed to swap bitdepth, aborting . . .\n");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
