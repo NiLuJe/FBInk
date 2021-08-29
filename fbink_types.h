@@ -206,8 +206,6 @@ typedef struct
 	struct ion_fd_data        ion;
 	struct disp_layer_config2 layer;
 	uint32_t                  rota;
-	// NOTE: If we could actually somehow detect Nickel's (and/or the working buffer's) actual screen layout/rotation,
-	//       this would be even more useful, because right now it's just a weird kludge...
 	SUNXI_FORCE_ROTA_INDEX_T  force_rota;
 	bool                      has_fbdamage;
 } FBInkKoboSunxi;
