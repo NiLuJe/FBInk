@@ -790,7 +790,10 @@ kobo: armcheck
 	mv -v Release/FBInk-$(FBINK_VERSION).zip Kobo/
 
 devcap: armcheck
-	$(MAKE) strip fbdepth utils KOBO=true
+	$(MAKE) distclean
+	$(MAKE) fbdepth KOBO=true
+	$(MAKE) distclean
+	$(MAKE) strip utils KOBO=true
 	mkdir -p Kobo
 	cp -av $(CURDIR)/utils/devcap_test.sh Kobo
 	cp -av $(CURDIR)/Release/fbink Kobo
