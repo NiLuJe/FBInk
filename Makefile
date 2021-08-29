@@ -903,7 +903,7 @@ distclean: clean libunibreakclean libi2cclean libevdevclean
 	rm -rf libi2c.built
 	rm -rf libevdev-staged
 	rm -rf libevdev.built
-	rm -rf VERSION
+	[[ -d .git ]] && rm -rf VERSION
 
 dist: distclean
 	echo $(FBINK_VERSION) > VERSION
