@@ -1,10 +1,10 @@
 # Ignore build output directories
-Release/
-Debug/
-Kobo/
-Kindle/
+Release
+Debug
+Kobo
+Kindle
 # Same, for our vendored libunibreak
-libunibreak-staged/
+libunibreak-staged
 libunibreak.built
 # And our vendored libi2c
 libi2c-staged
@@ -14,7 +14,7 @@ libevdev-staged
 libevdev.built
 # KDevelop
 FBInk.kdev4
-.kdev4/
+.kdev4
 # Uncompressed & split Unifont
 fonts/unifont-8x16.hex
 fonts/unifont-16x16.hex

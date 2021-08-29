@@ -297,8 +297,8 @@ EXTRA_CPPFLAGS+=$(TARGET_CPPFLAGS)
 
 # A version tag...
 # NOTE: Don't redirect stderr, so we can get an idea of what happened when things go wrong...
-FBINK_VERSION:=$(shell git describe)
-# Only use it if we got something useful out of git describe...
+FBINK_VERSION:=$(shell git describe || cat VERSION)
+# Only use it if we got something useful...
 ifdef FBINK_VERSION
 	ifdef KINDLE
 		LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kindle"'
@@ -328,7 +328,7 @@ ifdef FBINK_VERSION
 	endif
 else
 	# Just so we don't use an empty var down the line...
-	FBINK_VERSION:=git
+	FBINK_VERSION:=dev
 endif
 
 # NOTE: Always use as-needed to avoid unecessary DT_NEEDED entries :)
@@ -809,17 +809,19 @@ devcap: armcheck distclean
 	tar --owner=root --group=root -cvzf Release/Kobo-DevCap-Test.tar.gz -C Kobo .
 
 libunibreakclean:
-	-$(MAKE) -C libunibreak clean
+	-$(MAKE) -C libunibreak distclean
 	cd libunibreak && \
-	git reset --hard
+	git reset --hard && \
+	git clean -fxdq
 
 libi2cclean:
 	-$(MAKE) -C i2c-tools clean
 	cd i2c-tools && \
-	git reset --hard
+	git reset --hard && \
+	git clean -fxdq
 
 libevdevclean:
-	-$(MAKE) -C libevdev clean
+	-$(MAKE) -C libevdev distclean
 	cd libevdev && \
 	git reset --hard && \
 	git clean -fxdq
@@ -856,6 +858,10 @@ clean:
 	rm -rf Release/doom
 	rm -rf Release/dump
 	rm -rf Release/Kobo-DevCap-Test.tar.gz
+	rm -rf Release/kx122_i2c
+	rm -rf Release/ion_heaps
+	rm -rf Release/finger_trace
+	rm -rf Release/FBInk-*.tar.xz
 	rm -rf Debug/*.a
 	rm -rf Debug/*.so*
 	rm -rf Debug/shared/*.o
@@ -886,6 +892,9 @@ clean:
 	rm -rf Debug/doom
 	rm -rf Debug/dump
 	rm -rf Debug/Kobo-DevCap-Test.tar.gz
+	rm -rf Debug/kx122_i2c
+	rm -rf Debug/ion_heaps
+	rm -rf Debug/finger_trace
 
 distclean: clean libunibreakclean libi2cclean libevdevclean
 	rm -rf libunibreak-staged
@@ -894,8 +903,13 @@ distclean: clean libunibreakclean libi2cclean libevdevclean
 	rm -rf libi2c.built
 	rm -rf libevdev-staged
 	rm -rf libevdev.built
+	rm -rf VERSION
 
 dist: distclean
-	#TODO
+	echo $(FBINK_VERSION) > VERSION
+	mkdir -p Release
+	tar --exclude-vcs --exclude-vcs-ignores -cvJf Release/FBInk-$(FBINK_VERSION).tar.xz .
+
+
 
 .PHONY: default outdir all staticlib sharedlib static tiny tinier shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils alt sunxi ftrace fbdepth dump devcap clean distclean dist
