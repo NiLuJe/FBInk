@@ -789,15 +789,16 @@ kobo: armcheck
 	cd Kobo && zip -r ../Release/FBInk-$(FBINK_VERSION).zip .
 	mv -v Release/FBInk-$(FBINK_VERSION).zip Kobo/
 
-devcap: armcheck
-	$(MAKE) distclean
+devcap: armcheck distclean
 	$(MAKE) fbdepth KOBO=true
+	mv -v $(CURDIR)/Release/fbdepth $(CURDIR)/fbdepth
 	$(MAKE) clean
-	$(MAKE) strip utils KOBO=true
+	$(MAKE) strip KOBO=true
+	$(MAKE) utils KOBO=true
 	mkdir -p Kobo
 	cp -av $(CURDIR)/utils/devcap_test.sh Kobo
 	cp -av $(CURDIR)/Release/fbink Kobo
-	cp -av $(CURDIR)/Release/fbdepth Kobo
+	mv -v $(CURDIR)/fbdepth Kobo
 	cp -av $(CURDIR)/Release/rota Kobo
 	wget "https://svn.ak-team.com/svn/Configs/trunk/Kindle/Kobo_Hacks/USBNetwork/src/usbnet/bin/evtest" -O Kobo/evtest
 	chmod -cvR a+x Kobo/evtest
@@ -894,4 +895,7 @@ distclean: clean libunibreakclean libi2cclean libevdevclean
 	rm -rf libevdev-staged
 	rm -rf libevdev.built
 
-.PHONY: default outdir all staticlib sharedlib static tiny tinier shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils alt sunxi ftrace fbdepth dump devcap clean distclean
+dist: distclean
+	#TODO
+
+.PHONY: default outdir all staticlib sharedlib static tiny tinier shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils alt sunxi ftrace fbdepth dump devcap clean distclean dist
