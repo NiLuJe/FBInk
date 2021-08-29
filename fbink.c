@@ -2616,7 +2616,7 @@ static int
 		update.update_mode |= EINK_RECT_MODE;
 	}
 	if (waveform_mode == EINK_GLR16_MODE || waveform_mode == EINK_GLD16_MODE) {
-		// NOTE: Fun fact: nothing currently checks this flag in the ELipsa kernel... -_-".
+		// NOTE: Fun fact: nothing currently checks this flag in the Elipsa kernel... -_-".
 		update.update_mode |= EINK_REGAL_MODE;
 	}
 	if (waveform_mode == EINK_A2_MODE) {
@@ -2834,7 +2834,7 @@ static inline void
 	//       depending on the device/FW...
 	if (unlikely(lastMarker == 0U)) {
 		lastMarker = ('F' + 'B' + 'I' + 'n' + 'k');
-		// i.e.,  70  + 66  + 73  + 110 + 107
+		// i.e.,      70  + 66  + 73  + 110 + 107
 	}
 }
 
@@ -3674,7 +3674,6 @@ static __attribute__((cold)) int
 
 			// NOTE: Allow selectively or completely overriding the accelerometer.
 			const char* force_rota = getenv("FBINK_FORCE_ROTA");
-			//       That implies that we'll always assume the screen is UR!
 			if (force_rota) {
 				// We can forgo the usual fun & games of strtol error checking,
 				// as a 0 on parsing errors suits us just fine here ;).
