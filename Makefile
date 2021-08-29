@@ -913,7 +913,7 @@ dist: distclean
 	--exclude=libevdev/doc --exclude=libevdev/test \
 	--exclude=.github --exclude=.gitlab-ci --exclude=.travis.yml \
 	--exclude=tools/unibdf2hex \
-	--exclude=fonts/*.hex --exclude=fonts/*.bdf --exclude=fonts/*.gz --exclude=fonts/*.fon --exclude=fonts/*.ttf \
+	--exclude=fonts/*.hex --exclude=fonts/*.bdf --exclude=fonts/*.gz --exclude=fonts/*.fon --exclude=fonts/*.ttf --exclude=fonts/*.txt \
 	--exclude=resources/*.png \
 	-P --transform="s,$(CURDIR),FBInk-$(FBINK_VERSION),xS" --show-transformed-names \
 	-cvJf Release/FBInk-$(FBINK_VERSION).tar.xz $(CURDIR)
