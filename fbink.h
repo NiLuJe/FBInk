@@ -862,8 +862,6 @@ FBINK_API bool fbink_is_fb_quirky(void) __attribute__((pure, deprecated));
 // NOTE: In turn, this means that a simple EXIT_SUCCESS means that no reinitialization was needed.
 // NOTE: On Kobo devices with a sunxi SoC, OK_BPP_CHANGE will *never* happen,
 //       as the state of the actual framebuffer device is (unfortunately) meaningless there.
-//       On those same devices, if rotation handling via gyro is disabled (via FBINK_FORCE_ROTA or FBINK_FORCE_ROTA_FALLBACK),
-//       the whole function becomes a NOP.
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
 // fbink_cfg:		Pointer to an FBInkConfig struct.
@@ -1228,6 +1226,8 @@ FBINK_API int fbink_invert_screen(int fbfd, const FBInkConfig* restrict fbink_cf
 //     (i.e., it'll implicitly setup the backing buffer if necessary).
 // Returns NULL on failure (in which case, *buffer_size is set to 0).
 // NOTE: This *may* need to be refreshed after a framebuffer state change, c.f., fbink_reinit!
+//       (In practice, though, the pointer itself is stable;
+//        only the buffer/mapping size may change on some quirky platforms (usually, PB)).
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				cannot be set to FBFD_AUTO!
 // buffer_size:		Out parameter. On success, will be set to the buffer's size, in bytes.
