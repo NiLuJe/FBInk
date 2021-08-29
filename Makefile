@@ -810,19 +810,19 @@ devcap: armcheck distclean
 
 libunibreakclean:
 	-$(MAKE) -C libunibreak distclean
-	cd libunibreak && \
+	-cd libunibreak && \
 	git reset --hard && \
 	git clean -fxdq
 
 libi2cclean:
 	-$(MAKE) -C i2c-tools clean
-	cd i2c-tools && \
+	-cd i2c-tools && \
 	git reset --hard && \
 	git clean -fxdq
 
 libevdevclean:
 	-$(MAKE) -C libevdev distclean
-	cd libevdev && \
+	-cd libevdev && \
 	git reset --hard && \
 	git clean -fxdq
 
