@@ -49,17 +49,18 @@ static int                               translate_kx122(uint16_t val);
 static int                               query_kx122(void);
 static int                               query_accelerometer(void);
 static int                               query_fbdamage(void);
+#endif    // FBINK_FOR_KOBO
 
-#	ifdef FBINK_FOR_KINDLE
+#ifdef FBINK_FOR_KINDLE
 static orientation_t linuxfb_rotate_to_einkfb_orientation(uint32_t);
-#	endif
+#endif
 
+#ifdef FBINK_FOR_KOBO
 // Custom constants for accelerometer translations
 #	define GYRO_STATE_UNKNOWN             -1
 #	define GYRO_STATE_FACE_UP             -2
 #	define GYRO_STATE_FACE_DOWN           -3
 #	define GYRO_STATE_OUTSIDE_CONSTRAINTS -4
-
 #endif    // FBINK_FOR_KOBO
 
 #endif
