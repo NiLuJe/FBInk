@@ -908,7 +908,7 @@ distclean: clean libunibreakclean libi2cclean libevdevclean
 dist: distclean
 	echo $(FBINK_VERSION) > VERSION
 	mkdir -p Release
-	tar --exclude-vcs --exclude-vcs-ignores --transform="s,.*?/FBInk/,FBInk-$(FBINK_VERSION)/,xS" --show-transformed-names -cvJf Release/FBInk-$(FBINK_VERSION).tar.xz $(CURDIR)
+	tar --exclude-vcs --exclude-vcs-ignores -P --transform="s,$(CURDIR),FBInk-$(FBINK_VERSION),xS" --show-transformed-names -cvJf Release/FBInk-$(FBINK_VERSION).tar.xz $(CURDIR)
 
 
 
