@@ -658,7 +658,7 @@ typedef struct
 	int screen_id;    // ubuffer[0], handled in the prologue
 } sunxi_disp_layer_generic_get;
 
-// Shove everything into an union to ensure we never feed garbage to the ioctl handler for commands that actually read *less* than the prologue...
+// Shove everything into a union to ensure we never feed garbage to the ioctl handler for commands that actually read *less* than the prologue...
 typedef union
 {
 	// Actual memory layout (e.g., our target size).
