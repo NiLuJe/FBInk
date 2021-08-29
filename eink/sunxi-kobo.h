@@ -56,6 +56,8 @@ enum eink_flash_mode
 * bit 30 ~ bit 16 : reserved
 * bit 15 ~ bit 0  : update mode
 ************************************/
+// NOTE: Some of these constants are currently somewhat problematic,
+//       c.f., https://github.com/NiLuJe/FBInk/pull/64#issuecomment-877842842
 enum eink_update_mode
 {
 	EINK_INIT_MODE        = 0x01,
