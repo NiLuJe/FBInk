@@ -792,7 +792,7 @@ kobo: armcheck
 devcap: armcheck
 	$(MAKE) distclean
 	$(MAKE) fbdepth KOBO=true
-	$(MAKE) distclean
+	$(MAKE) clean
 	$(MAKE) strip utils KOBO=true
 	mkdir -p Kobo
 	cp -av $(CURDIR)/utils/devcap_test.sh Kobo
