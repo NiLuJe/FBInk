@@ -275,10 +275,11 @@ static int
 		// Plus an EV_KEY:BTN_STYLUS toggle when the *eraser* button is toggled.
 		// And an EV_KEY:BTN_STYLUS2 for the *highlighter* button.
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MAJOR, 1632);    // Pen can go higher
-		// Always matches ABS_MT_TOUCH_MAJOR, unless the pen is not touching the screen (e.g., hovering),
-		// in which case it is ellided, and pressure reports 0.
+		// ABS_MT_PRESSURE always matches ABS_MT_TOUCH_MAJOR,
+		// unless the pen is not touching the screen (e.g., hovering),
+		// in which case ABS_MT_TOUCH_MAJOR is elided, and ABS_MT_PRESSURE reports 0.
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_PRESSURE, 1632);
-		// EV_ABS:ABS_MT_DISTANCE for the pen (15 when PRESSURE is 0, 0 otherwise).
+		// EV_ABS:ABS_MT_DISTANCE for the pen (15 when PRESSURE is 0 (i.e., pen is hovering), 0 otherwise).
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_X, match_coords->x);
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_Y, match_coords->y);
 		SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
