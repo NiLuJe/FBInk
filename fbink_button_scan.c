@@ -245,6 +245,8 @@ static int
 		// NOTE: Of the four following codes,
 		//       which ones are actually set to non-zero values on real events depends on the hardware...
 		//       c.f., https://www.mobileread.com/forums/showpost.php?p=4152920&postcount=718 for an example on a Forma.
+		//       The lowest common denominator appears to be ABS_MT_PRESSURE,
+		//       which is why it's the only event we're setting to a meaningful value here.
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_PRESSURE, 20);
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MAJOR, 0);
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MINOR, 0);
