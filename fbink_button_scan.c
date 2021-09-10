@@ -242,6 +242,8 @@ static int
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_DISTANCE, 0);
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_X, match_coords->x);
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_Y, match_coords->y);
+		// NOTE: Of the four following codes, which ones are actually set on real events depend on the hardware...
+		//       c.f., https://www.mobileread.com/forums/showpost.php?p=4152920&postcount=718 for an example on a Forma.
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_PRESSURE, 20);
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MAJOR, 0);
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MINOR, 0);
@@ -253,6 +255,8 @@ static int
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_DISTANCE, 0);
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_X, match_coords->x);
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_POSITION_Y, match_coords->y);
+		// NOTE: Much like above, you can't rely on any of those actually being set to 0 to detect a contact lift...
+		//       c.f., process_evdev @ utils/finger_trace.c
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_PRESSURE, 0);
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MAJOR, 0);
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MINOR, 0);
