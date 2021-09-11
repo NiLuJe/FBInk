@@ -285,7 +285,7 @@ static bool
 			//       check generate_button_press @ fbink_button_scan.c ;).
 			case ABS_PRESSURE:
 			case ABS_MT_WIDTH_MAJOR:
-			//case ABS_MT_TOUCH_MAJOR: // Oops, not that one, it's always 0 on Mk.7 :s
+			//case ABS_MT_TOUCH_MAJOR: // Oops, not that one, it's always 0 on early Mk.7 devices :s
 			case ABS_MT_PRESSURE:
 				if (ev->value > 0) {
 					touch->state = DOWN;

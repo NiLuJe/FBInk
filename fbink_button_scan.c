@@ -215,9 +215,10 @@ static int
 	// NOTE: Kobo devices use a wide range of weird & quirky variations on the touch input protocol,
 	//       depending on the exact device, so do our best to handle that properly...
 	// NOTE: Double-check on your device w/ hexdump -x /dev/input/event1 (or -d if you prefer decimal).
+	//       Or evemu-record or evtest if you've got KoboStuff installed ;).
 	if (deviceQuirks.isKoboNonMT) {
-		// NOTE: Should match what Kobo does on devices who don't hanve a Multi-Touch aware driver...
-		//       Should cover the Touch A/B/C, Mini, Glo, Aura HD
+		// NOTE: Should match what Kobo does on devices who don't have a Multi-Touch aware driver...
+		//       Should cover the Touch A/B/C, Mini, Glo & Aura HD
 		// NOTE: The original Touch is known to come in multiple variants,
 		//       some of which might handle things slightly differently.
 		//       Trying to guess which is which seems to be a lost cause, so don't try too hard...
@@ -234,7 +235,7 @@ static int
 		SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
 	} else if (deviceQuirks.isKoboMk7) {
 		// NOTE: Roughly corresponds to what we call the "Snow" protocol in KOReader.
-		//       Should handle the H2O²r2, (Aura SEr2?), Clara HD, Forma
+		//       Should handle the H2O²r2, (Aura SEr2?), Clara HD, Forma & Nia
 		//       And possibly the H2O²r1, although this one will need a dedicated quirk to compute the proper x/y coords.
 		SEND_INPUT_EVENT(EV_KEY, BTN_TOOL_FINGER, 1);
 		SEND_INPUT_EVENT(EV_KEY, BTN_TOUCH, 1);
@@ -273,7 +274,7 @@ static int
 		// NOTE: Mostly for documentation's sake, as this feature is unsupported on sunxi SoCs...
 		// If multiple contact points are detected (e.g., multi-touch),
 		// each tracking ID is preceded by its slot assignment (e.g., EV_ABS:ABS_MT_SLOT:0 for the first finger).
-		// It's only ellided when there's only a single contact point present/left.
+		// It's only elided when there's only a single contact point present/left.
 		// NOTE: The fact that it needlessly *repeats* the ABS_MT_TRACKING_ID (i.e., not changed/released),
 		//       is upsetting libevdev (trips the "double tracking ID" check)...
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TRACKING_ID, 0);    // Increases with each subsequent contact point.
@@ -302,7 +303,7 @@ static int
 		SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
 	} else {
 		// NOTE: Corresponds to what we call the "Phoenix" protocol in KOReader.
-		//       Which means we should cover the: KA1, H2O, Aura, Aura SEr1, (Aura SEr2?), Glo HD, Touch 2.0
+		//       Which means we should cover the: KA1, H2O, Aura, Aura SEr1, (Aura SEr2?), Glo HD & Touch 2.0
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TRACKING_ID, 1);
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MAJOR, 1);
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_WIDTH_MAJOR, 1);
