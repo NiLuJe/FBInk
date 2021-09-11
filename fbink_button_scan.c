@@ -301,9 +301,7 @@ static int
 		SEND_INPUT_EVENT(EV_KEY, BTN_TOUCH, 0);
 		SEND_INPUT_EVENT(EV_SYN, SYN_REPORT, 0);
 	} else {
-		// NOTE: Corresponds to what we call the "Phoenix" protocol in KOReader
-		//       (with or without the Alyssum tweaks, which appear irrelevant),
-		//       (and with or without the ev_epoch_time tweaks, which shouldn't matter for us).
+		// NOTE: Corresponds to what we call the "Phoenix" protocol in KOReader.
 		//       Which means we should cover the: KA1, H2O, Aura, Aura SEr1, (Aura SEr2?), Glo HD, Touch 2.0
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TRACKING_ID, 1);
 		SEND_INPUT_EVENT(EV_ABS, ABS_MT_TOUCH_MAJOR, 1);
