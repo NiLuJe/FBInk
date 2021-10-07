@@ -342,8 +342,12 @@ typedef enum
 	WFM_DU4,          // From any to B/W/GRAYA/GRAY5. (e.g., GC4. Will never flash).
 	WFM_GL4,          // From white to B/W/GRAYA/GRAY5.
 	WFM_GL16_INV,     // From black to any. Optimized for text on a black background (e.g., nightmode).
-	WFM_GCK16,        // From black to any. Goes hand-in-hand with GLKW16, should only be used when flashing.
-	WFM_GLKW16,       // From black to any. Newer variant of GL16_INV.
+	// "Nightmode" waveform modes (dubbed "eclipse" in Kobo-land).
+	// Only available on some devices (Zelda on Kindle, Mk. 8 & Libra 2 on Kobo).
+	// If you need to check at runtime whether it's actually supported, on an i.MX board,
+	// check if /sys/class/graphics/fb0/waveform_mode_gck16 exists ;).
+	WFM_GCK16,     // From black to any. Goes hand-in-hand with GLKW16, should only be used when flashing.
+	WFM_GLKW16,    // From black to any. Newer variant of GL16_INV.
 	// For documentation purposes
 	WFM_INIT,    // May flash several times to end up with a white screen, slow (~2000ms).
 	WFM_UNKNOWN,
