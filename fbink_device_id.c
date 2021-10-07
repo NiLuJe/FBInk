@@ -807,6 +807,35 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 8", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
+		case DEVICE_KOBO_LIBRA_2:    // Libra 2 (??)
+			// FIXME: TBD (currently a carbon-copy of the Libra)
+			deviceQuirks.isKoboMk7    = true;
+			deviceQuirks.ntxBootRota  = FB_ROTATE_UR;
+			deviceQuirks.canRotate    = true;
+			deviceQuirks.ntxRotaQuirk = NTX_ROTA_SANE;
+			deviceQuirks.screenDPI    = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "Libra 2", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "??", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
+		case DEVICE_KOBO_SAGE:    // Sage (??)
+			// FIXME: TBD (currently based on the Elipsa)
+			deviceQuirks.isSunxi      = true;
+			deviceQuirks.canHWInvert  = false;
+			deviceQuirks.ntxBootRota  = FB_ROTATE_CCW;    // e.g., fat bezel side UP.
+			deviceQuirks.canRotate    = true;
+			deviceQuirks.ntxRotaQuirk = NTX_ROTA_SUNXI;
+			deviceQuirks.screenDPI    = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "Sage", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "??", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Mark 8", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
 		case 0U:
 			// Like kobo_config.sh, assume Trilogy as a fallback
 			deviceQuirks.isKoboNonMT = true;

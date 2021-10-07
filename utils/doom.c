@@ -524,8 +524,8 @@ static void
 	// Set the bottom line to the final color
 	const size_t     idx = sizeof(fire_colors) / sizeof(*fire_colors) - 1U;
 	const FBInkPixel px  = { .bgra.color.r = fire_colors[idx][0U],
-                                .bgra.color.g = fire_colors[idx][1U],
-                                .bgra.color.b = fire_colors[idx][2U] };
+				 .bgra.color.g = fire_colors[idx][1U],
+				 .bgra.color.b = fire_colors[idx][2U] };
 	fill_rect_RGB32(0U, (unsigned short int) (viewHeight - 1U), (unsigned short int) viewWidth, 1U, &px);
 }
 #endif    // !FBINK_FOR_LINUX
