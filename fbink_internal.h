@@ -465,16 +465,18 @@ static const uint8_t eInkBGCMap[16] = { 0xFF, 0xEE, 0xDD, 0xCC, 0xBB, 0xAA, 0x99
 unsigned char* restrict fbPtr = NULL;
 bool isFbMapped               = false;
 #ifdef FBINK_FOR_KOBO
-FBInkKoboSunxi sunxiCtx = { .disp_fd      = -1,
-			    .i2c_fd       = -1,
-			    .i2c_dev      = { 0 },
-			    .ion_fd       = -1,
-			    .alloc_size   = 0U,
-			    .ion          = { .handle = 0, .fd = -1 },
-			    .layer        = { { 0 } },
-			    .rota         = 0U,
-			    .force_rota   = FORCE_ROTA_GYRO,
-			    .has_fbdamage = false };
+FBInkKoboSunxi sunxiCtx = {
+	.disp_fd      = -1,
+	.i2c_fd       = -1,
+	.i2c_dev      = {          0},
+	.ion_fd       = -1,
+	.alloc_size   = 0U,
+	.ion          = {.handle = 0,.fd = -1 },
+	.layer        = {      { 0 }         },
+	.rota         = 0U,
+	.force_rota   = FORCE_ROTA_GYRO,
+	.has_fbdamage = false
+};
 // Provided by <https://github.com/NiLuJe/mxc_epdc_fb_damage>
 #	define FBDAMAGE_ROTATE_SYSFS "/sys/devices/virtual/fbdamage/fbdamage/rotate"
 #endif
