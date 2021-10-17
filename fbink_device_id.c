@@ -1233,6 +1233,11 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBColorLux", sizeof(deviceQuirks.deviceCodename) - 1U);
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_COLOR_LUX;
+		} else if (strcmp(model_name, "PB970") == 0) {
+			deviceQuirks.screenDPI = 150U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBInkPadLite", sizeof(deviceQuirks.deviceCodename) - 1U);
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD_LITE;
 		} else {
 			WARN("Unidentified PocketBook model: `%s`", model_name);
 			deviceQuirks.screenDPI = 212U;

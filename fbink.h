@@ -274,7 +274,8 @@ typedef enum
 	DEVICE_POCKETBOOK_INKPAD_X      = 1040U,
 	DEVICE_POCKETBOOK_COLOR_LUX =
 	    ('C' << 8U) | ('o' << 8U) | ('l' << 8U) | ('o' << 8U) | ('r' << 8U) | 'L' | 'u' | 'x',
-	DEVICE_POCKETBOOK_MAX = UINT16_MAX,    // uint16_t
+	DEVICE_POCKETBOOK_INKPAD_LITE = 970U,
+	DEVICE_POCKETBOOK_MAX         = UINT16_MAX,    // uint16_t
 } __attribute__((packed)) POCKETBOOK_DEVICE_ID_E;
 
 // NOTE: There's no enum for Kindles, because there are an insane number of device IDs per model,
