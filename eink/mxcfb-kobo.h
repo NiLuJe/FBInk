@@ -128,7 +128,11 @@ struct mxcfb_rect
 #define NTX_WFM_MODE_GL16    5
 #define NTX_WFM_MODE_GLR16   6
 #define NTX_WFM_MODE_GLD16   7
-#define NTX_WFM_MODE_TOTAL   8
+/* Mark 9 */
+#define NTX_WFM_MODE_DU4     8
+#define NTX_WFM_MODE_GCK16   9
+#define NTX_WFM_MODE_GLKW16  10
+#define NTX_WFM_MODE_TOTAL   11
 /* Match 'em to the Kindle ones, for sanity's sake... */
 #define WAVEFORM_MODE_INIT   NTX_WFM_MODE_INIT
 #define WAVEFORM_MODE_DU     NTX_WFM_MODE_DU
@@ -151,12 +155,17 @@ struct mxcfb_rect
 */
 
 /* Nickel */
-//#define WAVEFORM_MODE_GL16			5
-#define WAVEFORM_MODE_GLR32 6
+//#define WAVEFORM_MODE_GL16			NTX_WFM_MODE_GL16
+#define WAVEFORM_MODE_GLR32 NTX_WFM_MODE_GLR16
 
 /* Mark 7 */
-#define WAVEFORM_MODE_GLR16 6
-#define WAVEFORM_MODE_GLD16 7
+#define WAVEFORM_MODE_GLR16 NTX_WFM_MODE_GLR16
+#define WAVEFORM_MODE_GLD16 NTX_WFM_MODE_GLD16
+
+/* Mark 9 */
+#define WAVEFORM_MODE_DU4    NTX_WFM_MODE_DU4
+#define WAVEFORM_MODE_GCK16  NTX_WFM_MODE_GCK16
+#define WAVEFORM_MODE_GLKW16 NTX_WFM_MODE_GLKW16
 
 #define WAVEFORM_MODE_AUTO 257
 
@@ -308,6 +317,11 @@ struct mxcfb_waveform_modes_ntx
 
 	int mode_aa;
 	int mode_aad;
+
+	/* Mark 9 */
+	int mode_du4;
+	int mode_gck16;
+	int mode_glkw16;
 };
 
 /* Mark 7 */
