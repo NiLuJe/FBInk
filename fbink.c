@@ -2502,10 +2502,10 @@ static int
 				   : (waveform_mode == WAVEFORM_MODE_A2)  ? EPDC_FLAG_FORCE_MONOCHROME
 									  : 0U,
 		.dither_mode     = dithering_mode,
-		.quant_bit       = (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)                    ? 0
-				   : (waveform_mode == WAVEFORM_MODE_A2 || waveform_mode == WAVEFORM_MODE_DU) ? 1
-				   : (waveform_mode == WAVEFORM_MODE_GC4)                                     ? 3
-													      : 7,
+		.quant_bit       = (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)                      ? 0
+				   : (waveform_mode == WAVEFORM_MODE_A2 || waveform_mode == WAVEFORM_MODE_DU)   ? 1
+				   : (waveform_mode == WAVEFORM_MODE_GC4 || waveform_mode == WAVEFORM_MODE_DU4) ? 3
+														: 7,
 		.alt_buffer_data = { 0U },
 	};
 
@@ -7839,6 +7839,16 @@ static uint32_t
 			case WFM_REAGLD:
 				waveform_mode = WAVEFORM_MODE_REAGLD;
 				break;
+			// FIXME: Only available on Mk. 9, allow callers to shoot themselves in the foot for now.
+			case WFM_DU4:
+				waveform_mode = WAVEFORM_MODE_DU4;
+				break;
+			case WFM_GCK16:
+				waveform_mode = WAVEFORM_MODE_GCK16;
+				break;
+			case WFM_GLKW16:
+				waveform_mode = WAVEFORM_MODE_GLKW16;
+				break;
 			default:
 				LOG("Unknown (or unsupported) waveform mode '%s' @ index %hhu, defaulting to AUTO",
 				    wfm_to_string(wfm_mode_index),
@@ -8043,6 +8053,12 @@ static __attribute__((cold)) const char*
 			return "REAGL";
 		case WAVEFORM_MODE_REAGLD:
 			return "REAGLD";
+		case WAVEFORM_MODE_DU4:
+			return "DU4";
+		case WAVEFORM_MODE_GCK16:
+			return "GCK16";
+		case WAVEFORM_MODE_GLKW16:
+			return "GLKW16";
 		case WAVEFORM_MODE_AUTO:
 			return "AUTO";
 		default:

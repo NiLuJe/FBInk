@@ -337,10 +337,10 @@ typedef enum
 	//                Should only be used when flashing, which should yield a less noticeable flash than GC16.
 	//                Rarely used in practice, because still optimized for text or lightly mixed content,
 	//                not pure image content.
-	// Kindle only
+	// (Mostly) Kindle only
 	WFM_GC16_FAST,    // Better latency at the expense of lower fidelity than GC16.
 	WFM_GL16_FAST,    // Better latency at the expense of lower fidelity than GL16.
-	WFM_DU4,          // From any to B/W/GRAYA/GRAY5. (e.g., GC4. Will never flash).
+	WFM_DU4,          // From any to B/W/GRAYA/GRAY5. (e.g., GC4. Will never flash. Also available on Kobo Mk. 9).
 	WFM_GL4,          // From white to B/W/GRAYA/GRAY5.
 	WFM_GL16_INV,     // From black to any. Optimized for text on a black background (e.g., nightmode).
 	// "Nightmode" waveform modes (dubbed "eclipse" in Kobo-land).
@@ -348,7 +348,7 @@ typedef enum
 	// If you need to check at runtime whether it's actually supported, on an i.MX board,
 	// check if /sys/class/graphics/fb0/waveform_mode_gck16 exists ;).
 	WFM_GCK16,     // From black to any. Goes hand-in-hand with GLKW16, should only be used when flashing.
-	WFM_GLKW16,    // From black to any. Newer variant of GL16_INV.
+	WFM_GLKW16,    // From black to any. Newer variant of GL16_INV. (On Kobo, Mk. 9 only. It's GLK16 on sunxi).
 	// For documentation purposes
 	WFM_INIT,    // May flash several times to end up with a white screen, slow (~2000ms).
 	WFM_UNKNOWN,
