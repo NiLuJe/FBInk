@@ -64,5 +64,11 @@ with open(data, "r") as f:
 		elif line.startswith("EA0P1"):
 			# Elipsa (europa) [387]
 			print("387,")
+		elif line.startswith("E70K1"):
+			# Libra 2 (io) [388]
+			print("388,")
+		elif line.startswith("E80P0"):
+			# Sage (cadmus) [383]
+			print("383,")
 		else:
 			print("0,")
