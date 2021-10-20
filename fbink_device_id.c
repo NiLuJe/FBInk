@@ -824,6 +824,8 @@ static void
 		case DEVICE_KOBO_SAGE:    // Sage (Cadmus)
 			// FIXME: TBD (currently based on the Elipsa)
 			deviceQuirks.isSunxi      = true;
+			// NOTE: The EINK_NEGATIVE_MODE flag just does a software inversion
+			//       (pixel by pixel, in plain C, in the eink_image_process kthread).
 			deviceQuirks.canHWInvert  = false;
 			deviceQuirks.ntxBootRota  = FB_ROTATE_CCW;    // TBD
 			deviceQuirks.canRotate    = true;
