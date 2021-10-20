@@ -809,7 +809,7 @@ static void
 			break;
 		case DEVICE_KOBO_LIBRA_2:    // Libra 2 (Io)
 			// FIXME: TBD (currently a carbon-copy of the Libra)
-			deviceQuirks.isKoboMk7    = true;
+			deviceQuirks.isKoboMk7    = true;    // Same MXCFB API ;).
 			deviceQuirks.ntxBootRota  = FB_ROTATE_UR;
 			deviceQuirks.canRotate    = true;
 			deviceQuirks.ntxRotaQuirk = NTX_ROTA_SANE;
