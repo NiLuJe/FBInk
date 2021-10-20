@@ -75,11 +75,13 @@ enum eink_update_mode
 	EINK_CLEAR_MODE       = 0b00000000000000000000000010001000,    // 0x88 :(
 	EINK_GC4L_MODE        = 0b00000000000000000000000010001100,    // 0x8C :(
 	EINK_GCC16_MODE       = 0b00000000000000000000000010100000,    // 0xA0 :(
-	// Update mode (defaults to flashing/full, RECT is partial)
-	EINK_RECT_MODE        = 0b00000000000000000000010000000000,    // 0x400
+	// Update mode (defaults to flashing/full)
+	EINK_PARTIAL_MODE     = 0b00000000000000000000010000000000,    // 0x400
 	// AUTO MODE: Runtime selectiion done by the e-Ink driver
 	EINK_AUTO_MODE        = 0b00000000000000001000000000000000,    // 0x8000
 	// Update flags                           ################
+	// Simple software inversion in C
+	EINK_NEGATIVE_MODE    = 0b00000000000000010000000000000000,    // 0x10000
 	// REGAL MODE: Enable regal algorithms (in theory, ignored in practice).
 	EINK_REGAL_MODE       = 0b00000000000010000000000000000000,    // 0x80000
 	EINK_GAMMA_CORRECT    = 0b00000000001000000000000000000000,    // 0x200000
@@ -93,12 +95,12 @@ enum eink_update_mode
 	EINK_NO_MERGE         = 0b10000000000000000000000000000000    // 0x80000000
 };
 
-#define GET_UPDATE_MODE(mode) ((mode) &0x0000ffff)
-#define GET_UPDATE_INFO(mode) ((mode) &0xffff0000)
-#define IS_NO_MERGE(mode)     ((mode) &EINK_NO_MERGE)
-#define IS_RECT_UPDATE(mode)  ((mode) &EINK_RECT_MODE)
-#define IS_AUTO_MODE(mode)    ((mode) &EINK_AUTO_MODE)
-#define IS_REGAL_MODE(mode)   ((mode) &EINK_REGAL_MODE)
+#define GET_UPDATE_MODE(mode)   ((mode) &0x0000ffff)
+#define GET_UPDATE_INFO(mode)   ((mode) &0xffff0000)
+#define IS_NO_MERGE(mode)       ((mode) &EINK_NO_MERGE)
+#define IS_PARTIAL_UPDATE(mode) ((mode) &EINK_PARTIAL_MODE)
+#define IS_AUTO_MODE(mode)      ((mode) &EINK_AUTO_MODE)
+#define IS_REGAL_MODE(mode)     ((mode) &EINK_REGAL_MODE)
 
 typedef enum eink_update_strategy
 {
@@ -537,6 +539,7 @@ struct cfa_enable
 // On the upside, it appears to completely disable overlap checks and/or blending with the existing working buffer,
 // which might come in handy when dealing with rotation...
 #define DISP_EINK_SET_NTX_HANDWRITE_ONOFF      0x4015
+#define DISP_EINK_SET_WAIT_MODE_ONOFF          0x4016
 
 // Not directly e-Ink related, but possibly useful nonetheless on paper,
 // although in practice, they don't appear to be doing anything useful on eInk devices :/.
@@ -644,6 +647,11 @@ typedef struct
 
 typedef struct
 {
+	bool enable;
+} sunxi_disp_eink_set_wait_mode_onoff;
+
+typedef struct
+{
 	int                        screen_id;    // ubuffer[0], handled in the prologue
 	// In a different order than EINK_UPDATE* commands...
 	struct disp_layer_config2* lyr_cfg2;     // ubuffer[1], set channel & layer_id to identify the layer to return
@@ -681,6 +689,7 @@ typedef union
 	sunxi_disp_eink_set_update_control       upd_ctrl;
 	sunxi_disp_eink_wait_frame_sync_complete wait_for;
 	sunxi_disp_eink_set_ntx_handwrite_onoff  toggle_handw;
+	sunxi_disp_eink_set_wait_mode_onoff      toggle_wait;
 
 	sunxi_disp_layer_get_config  get_layer;
 	sunxi_disp_layer_get_config2 get_layer2;
