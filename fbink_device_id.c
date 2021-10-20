@@ -807,7 +807,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 8", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case DEVICE_KOBO_LIBRA_2:    // Libra 2 (??)
+		case DEVICE_KOBO_LIBRA_2:    // Libra 2 (Io)
 			// FIXME: TBD (currently a carbon-copy of the Libra)
 			deviceQuirks.isKoboMk7    = true;
 			deviceQuirks.ntxBootRota  = FB_ROTATE_UR;
@@ -817,11 +817,11 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Libra 2", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "??", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strncpy(deviceQuirks.deviceCodename, "Io", sizeof(deviceQuirks.deviceCodename) - 1U);
 			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strncpy(deviceQuirks.devicePlatform, "Mark 9", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case DEVICE_KOBO_SAGE:    // Sage (??)
+		case DEVICE_KOBO_SAGE:    // Sage (Cadmus)
 			// FIXME: TBD (currently based on the Elipsa)
 			deviceQuirks.isSunxi      = true;
 			deviceQuirks.canHWInvert  = false;
@@ -832,7 +832,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Sage", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "??", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strncpy(deviceQuirks.deviceCodename, "Cadmus", sizeof(deviceQuirks.deviceCodename) - 1U);
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 8", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
