@@ -825,7 +825,7 @@ static void
 			// FIXME: TBD (currently based on the Elipsa)
 			deviceQuirks.isSunxi      = true;
 			deviceQuirks.canHWInvert  = false;
-			deviceQuirks.ntxBootRota  = FB_ROTATE_CCW;    // e.g., fat bezel side UP.
+			deviceQuirks.ntxBootRota  = FB_ROTATE_CCW;    // TBD
 			deviceQuirks.canRotate    = true;
 			deviceQuirks.ntxRotaQuirk = NTX_ROTA_SUNXI;
 			deviceQuirks.screenDPI    = 300U;

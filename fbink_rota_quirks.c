@@ -196,7 +196,6 @@ static int
 	// Translate it accordingly for our device...
 	switch (deviceQuirks.deviceId) {
 		case DEVICE_KOBO_ELIPSA:
-		case DEVICE_KOBO_SAGE:
 			if (rota >= 0) {
 				// NOTE: The Elipsa (PCB index 94) is flagged EBRMAIN_ROTATE_R_180 in the kernel driver
 				rota = (rota + 2) & 3;
@@ -204,6 +203,9 @@ static int
 				// And defaults to FACE_INVERSE_NONE, which actually means we *do* invert them...
 				rota = rota ^ 3;
 			}
+			break;
+		case DEVICE_KOBO_SAGE:
+			// FIXME: TBD, but it appears that on the Sage (PCB index 98), this is left at EBRMAIN_ROTATE_R_0...
 			break;
 		default:
 			WARN("Unsupported KX122 translation for this device");
