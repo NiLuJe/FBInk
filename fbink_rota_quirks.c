@@ -86,7 +86,8 @@ static int
 {
 	switch (deviceQuirks.deviceId) {
 		case DEVICE_KOBO_ELIPSA:
-			// Elipsa, kx122
+		case DEVICE_KOBO_SAGE:
+			// kx122
 			// NOTE: Could be queried via NTXHWConfig ([11] RSensor).
 			if (find_accelerometer("kx122") != EXIT_SUCCESS) {
 				WARN("Failed to find the I²C bus/address combo for the KX122 accelerometer");
@@ -195,6 +196,7 @@ static int
 	// Translate it accordingly for our device...
 	switch (deviceQuirks.deviceId) {
 		case DEVICE_KOBO_ELIPSA:
+		case DEVICE_KOBO_SAGE:
 			if (rota >= 0) {
 				// NOTE: The Elipsa (PCB index 94) is flagged EBRMAIN_ROTATE_R_180 in the kernel driver
 				rota = (rota + 2) & 3;
@@ -298,7 +300,8 @@ static int
 	// We need to know how to handle the accelerometer...
 	switch (deviceQuirks.deviceId) {
 		case DEVICE_KOBO_ELIPSA:
-			// Elipsa, kx122
+		case DEVICE_KOBO_SAGE:
+			// kx122
 			rv = query_kx122();
 			if (rv < 0) {
 				LOG("Poking at the KX122 accelerometer over I²C was unfruitful");
