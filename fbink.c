@@ -2611,9 +2611,9 @@ static int
 
 	// Update mode shenanigans...
 	if (update_mode == UPDATE_MODE_PARTIAL && waveform_mode != EINK_AUTO_MODE) {
-		// For some reason, AUTO shouldn't specify RECT...
+		// For some reason, AUTO shouldn't specify PARTIAL...
 		// (it trips the unknown mode warning, which falls back to... plain AUTO ;)).
-		update.update_mode |= EINK_RECT_MODE;
+		update.update_mode |= EINK_PARTIAL_MODE;
 	}
 	if (waveform_mode == EINK_GLR16_MODE || waveform_mode == EINK_GLD16_MODE) {
 		// NOTE: Fun fact: nothing currently checks this flag in the Elipsa kernel... -_-".

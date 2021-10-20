@@ -135,7 +135,7 @@ enum em_overlap_type
 	OVERLAP_PARTIAL_COLLISION = 2
 };
 
-//#define EINK_RECT_MODE 0x400
+//#define EINK_PARTIAL_MODE 0x400
 
 //
 // From "<video/sunxi_display2.h>", here comes the nasty stuff.
