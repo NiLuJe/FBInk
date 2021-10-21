@@ -7642,10 +7642,22 @@ static uint32_t
 			}
 			break;
 		case WFM_GCK16:
-			waveform_mode = WAVEFORM_MODE_ZELDA_GCK16;
+			if (deviceQuirks.hasEclipseWfm) {
+				waveform_mode = WAVEFORM_MODE_ZELDA_GCK16;
+			} else {
+				waveform_mode = WAVEFORM_MODE_GC16;
+			}
 			break;
 		case WFM_GLKW16:
-			waveform_mode = WAVEFORM_MODE_ZELDA_GLKW16;
+			if (deviceQuirks.hasEclipseWfm) {
+				waveform_mode = WAVEFORM_MODE_ZELDA_GLKW16;
+			} else {
+				if (has_new_wfm) {
+					waveform_mode = WAVEFORM_MODE_ZELDA_GL16;
+				} else {
+					waveform_mode = WAVEFORM_MODE_GL16;
+				}
+			}
 			break;
 		default:
 			LOG("Unknown (or unsupported) waveform mode '%s' @ index %hhu, defaulting to AUTO",
@@ -7840,15 +7852,28 @@ static uint32_t
 			case WFM_REAGLD:
 				waveform_mode = WAVEFORM_MODE_REAGLD;
 				break;
-			// FIXME: Only available on Mk. 9, allow callers to shoot themselves in the foot for now.
 			case WFM_DU4:
-				waveform_mode = WAVEFORM_MODE_DU4;
+				if (deviceQuirks.hasEclipseWfm) {
+					// NOTE: Not *technically* related to eclipse waveform modes,
+					//       but actually introduced on Kobo at the same time (i.e., Mk. 9).
+					waveform_mode = WAVEFORM_MODE_DU4;
+				} else {
+					waveform_mode = WAVEFORM_MODE_GC4;
+				}
 				break;
 			case WFM_GCK16:
-				waveform_mode = WAVEFORM_MODE_GCK16;
+				if (deviceQuirks.hasEclipseWfm) {
+					waveform_mode = WAVEFORM_MODE_GCK16;
+				} else {
+					waveform_mode = WAVEFORM_MODE_GC16;
+				}
 				break;
 			case WFM_GLKW16:
-				waveform_mode = WAVEFORM_MODE_GLKW16;
+				if (deviceQuirks.hasEclipseWfm) {
+					waveform_mode = WAVEFORM_MODE_GLKW16;
+				} else {
+					waveform_mode = WAVEFORM_MODE_GL16;
+				}
 				break;
 			default:
 				LOG("Unknown (or unsupported) waveform mode '%s' @ index %hhu, defaulting to AUTO",
