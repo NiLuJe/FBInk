@@ -347,6 +347,7 @@ typedef enum
 	// Only available on some devices (Zelda on Kindle, Mk. 8+ on Kobo).
 	// If you need to check at runtime whether it's actually supported, on an i.MX board,
 	// check if /sys/class/graphics/fb0/waveform_mode_gck16 exists ;).
+	// Otherwise, refer to the hasEclipseWfm deviceQuirks.
 	WFM_GCK16,     // From black to any. Goes hand-in-hand with GLKW16, should only be used when flashing.
 	WFM_GLKW16,    // From black to any. Newer variant of GL16_INV. (On Kobo, Mk. 9 only. It's GLK16 on sunxi).
 	// For documentation purposes
@@ -462,6 +463,7 @@ typedef struct
 	uint8_t current_rota;               // vInfo.rotate (current native rotation, c.f., <linux/fb.h>)
 	bool    can_rotate;                 // deviceQuirks.canRotate (device has a gyro)
 	bool    can_hw_invert;              // deviceQuirks.canHWInvert (device can use EPDC inversion)
+	bool    has_eclipse_wfm;            // deviceQuirks.hasEclipseWfm (device can use nightmode waveform modes)
 } FBInkState;
 
 // What a FBInk config should look like. Perfectly sane when fully zero-initialized.

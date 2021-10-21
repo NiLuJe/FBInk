@@ -260,6 +260,7 @@ static bool
 		case 0x347u:
 		case 0x34Au:
 			deviceQuirks.isKindleZelda = true;
+			deviceQuirks.hasEclipseWfm = true;
 			deviceQuirks.screenDPI     = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Oasis 2", sizeof(deviceQuirks.deviceName) - 1U);
@@ -319,6 +320,7 @@ static bool
 		case 0x3D5u:
 		case 0x3D4u:
 			deviceQuirks.isKindleZelda = true;
+			deviceQuirks.hasEclipseWfm = true;
 			deviceQuirks.screenDPI     = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Oasis 3", sizeof(deviceQuirks.deviceName) - 1U);
@@ -789,17 +791,18 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case DEVICE_KOBO_ELIPSA:    // Elipsa (Europa)
-			deviceQuirks.isSunxi      = true;
+			deviceQuirks.isSunxi       = true;
+			deviceQuirks.hasEclipseWfm = true;
 			// Sunxi means no HW inversion :'(.
 			// (And the nightmode_test flag toggled via the debugfs nightenable/nightdisable command doesn't count,
 			// it just flips the buffer in C, and forces the *K waveform modes (dubbed "eclipse" mode)).
-			deviceQuirks.canHWInvert  = false;
+			deviceQuirks.canHWInvert   = false;
 			// Has an accelerometer, but Nickel doesn't update the rotate flag, as it's meaningless.
 			// That said, "native" rotation still matches the usual layout, as does the touch panel translation.
-			deviceQuirks.ntxBootRota  = FB_ROTATE_CCW;    // e.g., fat bezel side UP.
-			deviceQuirks.canRotate    = true;
-			deviceQuirks.ntxRotaQuirk = NTX_ROTA_SUNXI;
-			deviceQuirks.screenDPI    = 227U;
+			deviceQuirks.ntxBootRota   = FB_ROTATE_CCW;    // e.g., fat bezel side UP.
+			deviceQuirks.canRotate     = true;
+			deviceQuirks.ntxRotaQuirk  = NTX_ROTA_SUNXI;
+			deviceQuirks.screenDPI     = 227U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Elipsa", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -809,11 +812,12 @@ static void
 			break;
 		case DEVICE_KOBO_LIBRA_2:    // Libra 2 (Io)
 			// FIXME: TBD (currently a carbon-copy of the Libra)
-			deviceQuirks.isKoboMk7    = true;    // Same MXCFB API ;).
-			deviceQuirks.ntxBootRota  = FB_ROTATE_UR;
-			deviceQuirks.canRotate    = true;
-			deviceQuirks.ntxRotaQuirk = NTX_ROTA_SANE;
-			deviceQuirks.screenDPI    = 300U;
+			deviceQuirks.hasEclipseWfm = true;
+			deviceQuirks.isKoboMk7     = true;    // Same MXCFB API ;).
+			deviceQuirks.ntxBootRota   = FB_ROTATE_UR;
+			deviceQuirks.canRotate     = true;
+			deviceQuirks.ntxRotaQuirk  = NTX_ROTA_SANE;
+			deviceQuirks.screenDPI     = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Libra 2", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -823,14 +827,15 @@ static void
 			break;
 		case DEVICE_KOBO_SAGE:    // Sage (Cadmus)
 			// FIXME: TBD (currently based on the Elipsa)
-			deviceQuirks.isSunxi      = true;
+			deviceQuirks.isSunxi       = true;
+			deviceQuirks.hasEclipseWfm = true;
 			// NOTE: The EINK_NEGATIVE_MODE flag just does a software inversion
 			//       (pixel by pixel, in plain C, in the eink_image_process kthread).
-			deviceQuirks.canHWInvert  = false;
-			deviceQuirks.ntxBootRota  = FB_ROTATE_CCW;    // TBD
-			deviceQuirks.canRotate    = true;
-			deviceQuirks.ntxRotaQuirk = NTX_ROTA_SUNXI;
-			deviceQuirks.screenDPI    = 300U;
+			deviceQuirks.canHWInvert   = false;
+			deviceQuirks.ntxBootRota   = FB_ROTATE_CCW;    // TBD
+			deviceQuirks.canRotate     = true;
+			deviceQuirks.ntxRotaQuirk  = NTX_ROTA_SUNXI;
+			deviceQuirks.screenDPI     = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Sage", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore

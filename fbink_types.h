@@ -54,6 +54,7 @@ typedef struct
 	NTX_ROTA_INDEX_T   ntxRotaQuirk;
 	bool               canRotate;
 	bool               canHWInvert;
+	bool               hasEclipseWfm;
 	bool               skipId;
 } FBInkDeviceQuirks;
 

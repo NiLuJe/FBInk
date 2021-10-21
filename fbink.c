@@ -4753,7 +4753,7 @@ void
 {
 	fprintf(
 	    stdout,
-	    "FBINK_VERSION='%s';viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isSunxi=%d;SunxiHasFBDamage=%d;SunxiForceRota=%d;isKindleLegacy=%d;isKoboNonMT=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;",
+	    "FBINK_VERSION='%s';viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isSunxi=%d;SunxiHasFBDamage=%d;SunxiForceRota=%d;isKindleLegacy=%d;isKoboNonMT=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;hasEclipseWfm=%d;",
 	    fbink_version(),
 	    viewWidth,
 	    viewHeight,
@@ -4797,7 +4797,8 @@ void
 	    deviceQuirks.isNTX16bLandscape,
 	    vInfo.rotate,
 	    deviceQuirks.canRotate,
-	    deviceQuirks.canHWInvert);
+	    deviceQuirks.canHWInvert,
+	    deviceQuirks.hasEclipseWfm);
 }
 
 // Dump a few of our internal state variables to the FBInkState struct pointed to by fbink_state
