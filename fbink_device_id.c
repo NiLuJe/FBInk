@@ -816,6 +816,7 @@ static void
 			deviceQuirks.isKoboMk7     = true;    // Same MXCFB API ;).
 			deviceQuirks.ntxBootRota   = FB_ROTATE_CW;
 			deviceQuirks.canRotate     = true;
+			// NOTE: KOBO_HWCFG_DisplayBusWidth (35) is "16Bits" (1)
 			deviceQuirks.ntxRotaQuirk  = NTX_ROTA_SANE;
 			deviceQuirks.screenDPI     = 300U;
 			// Flawfinder: ignore
