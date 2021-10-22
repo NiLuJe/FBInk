@@ -814,7 +814,7 @@ static void
 			// FIXME: TBD (currently a carbon-copy of the Libra)
 			deviceQuirks.hasEclipseWfm = true;
 			deviceQuirks.isKoboMk7     = true;    // Same MXCFB API ;).
-			deviceQuirks.ntxBootRota   = FB_ROTATE_UR;
+			deviceQuirks.ntxBootRota   = FB_ROTATE_CW;
 			deviceQuirks.canRotate     = true;
 			deviceQuirks.ntxRotaQuirk  = NTX_ROTA_SANE;
 			deviceQuirks.screenDPI     = 300U;
