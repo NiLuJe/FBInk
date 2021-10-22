@@ -847,7 +847,11 @@ static void
 			// Like kobo_config.sh, assume Trilogy as a fallback
 			deviceQuirks.isKoboNonMT = true;
 			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Trilogy?", sizeof(deviceQuirks.deviceName) - 1U);
+			strncpy(deviceQuirks.deviceName, "Touch?", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Trilogy?", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Mark 3?", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		default:
 			// Print something slightly different if we completely failed to even compute a kobo_id...
@@ -858,6 +862,10 @@ static void
 			}
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Unknown!", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "??", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Mark ?", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 	}
 }
