@@ -69,22 +69,22 @@ separator
 header "Canonical rotation mapping"
 echo "UpRight" >> "${DEVCAP_LOG}"
 fbdepth -R UR >> "${DEVCAP_LOG}" 2>&1
-fbink -v -w -m -y -1 -F tewi "↥ UR (@ $(./fbdepth -o)) ↥" >> "${DEVCAP_LOG}" 2>&1
+fbink -v -w -m -y -1 -F tewi "↥ UR (@ $(fbdepth -o)) ↥" >> "${DEVCAP_LOG}" 2>&1
 fbdepth -c >> "${DEVCAP_LOG}" 2>&1
 echo -e "\n" >> "${DEVCAP_LOG}"
 echo "ClockWise" >> "${DEVCAP_LOG}"
 fbdepth -R CW >> "${DEVCAP_LOG}" 2>&1
-fbink -v -w -m -y -1 -F tewi "↥ CW (@ $(./fbdepth -o)) ↥" >> "${DEVCAP_LOG}" 2>&1
+fbink -v -w -m -y -1 -F tewi "↥ CW (@ $(fbdepth -o)) ↥" >> "${DEVCAP_LOG}" 2>&1
 fbdepth -c >> "${DEVCAP_LOG}" 2>&1
 echo -e "\n" >> "${DEVCAP_LOG}"
 echo "UpsideDown" >> "${DEVCAP_LOG}"
 fbdepth -R UD >> "${DEVCAP_LOG}" 2>&1
-fbink -v -w -m -y -1 -F tewi "↥ UD (@ $(./fbdepth -o)) ↥" >> "${DEVCAP_LOG}" 2>&1
+fbink -v -w -m -y -1 -F tewi "↥ UD (@ $(fbdepth -o)) ↥" >> "${DEVCAP_LOG}" 2>&1
 fbdepth -c >> "${DEVCAP_LOG}" 2>&1
 echo -e "\n" >> "${DEVCAP_LOG}"
 echo "CounterClockWise" >> "${DEVCAP_LOG}"
 fbdepth -R CCW >> "${DEVCAP_LOG}" 2>&1
-fbink -v -w -m -y -1 -F tewi "↥ CCW (@ $(./fbdepth -o)) ↥" >> "${DEVCAP_LOG}" 2>&1
+fbink -v -w -m -y -1 -F tewi "↥ CCW (@ $(fbdepth -o)) ↥" >> "${DEVCAP_LOG}" 2>&1
 fbdepth -c >> "${DEVCAP_LOG}" 2>&1
 echo -e "\n" >> "${DEVCAP_LOG}"
 separator
