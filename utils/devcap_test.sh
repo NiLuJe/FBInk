@@ -40,6 +40,11 @@ header "Nickel"
 echo "Running FW $(cut -f3 -d',' /mnt/onboard/.kobo/version) on Linux $(uname -r) ($(uname -v))" >> "${DEVCAP_LOG}"
 separator
 
+# Dump the NTX HWConfig block
+header "HWConfig"
+ntx_hwconfig -s /dev/mmcblk0 >> "${DEVCAP_LOG}" 2>/dev/null
+separator
+
 # Start by dumping the full fb state
 header "FBGrab"
 fbgrab -v /dev/null >> "${DEVCAP_LOG}" 2>&1
