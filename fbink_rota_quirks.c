@@ -205,7 +205,7 @@ static int
 			}
 			break;
 		case DEVICE_KOBO_SAGE:
-			// FIXME: TBD, but it appears that on the Sage (PCB index 98), this is left at EBRMAIN_ROTATE_R_0...
+			// NOTE: On the Sage (PCB index 98), this is left at EBRMAIN_ROTATE_R_0.
 			break;
 		default:
 			WARN("Unsupported KX122 translation for this device");
