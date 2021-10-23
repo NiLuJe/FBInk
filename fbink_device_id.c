@@ -828,7 +828,6 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 9", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case DEVICE_KOBO_SAGE:    // Sage (Cadmus)
-			// FIXME: TBD (currently based on the Elipsa)
 			deviceQuirks.isSunxi       = true;
 			deviceQuirks.hasEclipseWfm = true;
 			// NOTE: The EINK_NEGATIVE_MODE flag just does a software inversion
