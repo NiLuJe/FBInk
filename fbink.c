@@ -2625,7 +2625,7 @@ static int
 	}
 	if (update_mode == UPDATE_MODE_FULL) {
 		// Bypass dubious driver optimizations to ensure we will actually flash, even when redrawing the same content...
-		// NOTE: New in the Sage kernel on FW 4.9,
+		// NOTE: New in the Sage kernel on FW 4.29,
 		//       c.f., the memcmp check in eink_pixel_process_thread in a !IS_NO_MERGE branch...
 		update.update_mode |= EINK_NO_MERGE;
 	}
