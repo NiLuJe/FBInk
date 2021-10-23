@@ -833,7 +833,7 @@ static void
 			// NOTE: The EINK_NEGATIVE_MODE flag just does a software inversion
 			//       (pixel by pixel, in plain C, in the eink_image_process kthread).
 			deviceQuirks.canHWInvert   = false;
-			deviceQuirks.ntxBootRota   = FB_ROTATE_CW;
+			deviceQuirks.ntxBootRota   = FB_ROTATE_CW;    // e.g., fat bezel side DOWN.
 			deviceQuirks.canRotate     = true;
 			deviceQuirks.ntxRotaQuirk  = NTX_ROTA_SUNXI;
 			deviceQuirks.screenDPI     = 300U;
