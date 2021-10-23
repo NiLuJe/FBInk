@@ -814,10 +814,11 @@ static void
 			// FIXME: TBD (currently a carbon-copy of the Libra)
 			deviceQuirks.hasEclipseWfm = true;
 			deviceQuirks.isKoboMk7     = true;    // Same MXCFB API ;).
-			deviceQuirks.ntxBootRota   = FB_ROTATE_CW;
+			// Both pickel & nickel then jump to FB_ROTATE_CW...
+			deviceQuirks.ntxBootRota   = FB_ROTATE_UR;
+			// ...KOBO_HWCFG_DisplayBusWidth (35) is "16Bits" (1),
+			// meaning it is indeed NTX_ROTA_STRAIGHT ;).
 			deviceQuirks.canRotate     = true;
-			// NOTE: KOBO_HWCFG_DisplayBusWidth (35) is "16Bits" (1)
-			deviceQuirks.ntxRotaQuirk  = NTX_ROTA_SANE;
 			deviceQuirks.screenDPI     = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Libra 2", sizeof(deviceQuirks.deviceName) - 1U);
