@@ -811,7 +811,6 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 8", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case DEVICE_KOBO_LIBRA_2:    // Libra 2 (Io)
-			// FIXME: TBD (currently a carbon-copy of the Libra)
 			deviceQuirks.hasEclipseWfm = true;
 			deviceQuirks.isKoboMk7     = true;    // Same MXCFB API ;).
 			// Both pickel & nickel then jump to FB_ROTATE_CW...
