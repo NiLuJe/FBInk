@@ -145,8 +145,8 @@ static void
 		// touch_mirrored_x
 		canonical_pos.x = ctx->dim_swap - touch->pos.x;
 		canonical_pos.y = touch->pos.y;
-	} else if (fbink_state->device_id == DEVICE_KOBO_AURA_H2O_2) {
-		// Aura H2O²r1
+	} else if (fbink_state->device_id == DEVICE_KOBO_AURA_H2O_2 || fbink_state->device_id == DEVICE_KOBO_LIBRA_2) {
+		// Aura H2O²r1 & Libra 2
 		// touch_switch_xy
 		canonical_pos.x = touch->pos.y;
 		canonical_pos.y = touch->pos.x;
