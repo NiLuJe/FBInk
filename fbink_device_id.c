@@ -818,8 +818,6 @@ static void
 			deviceQuirks.ntxBootRota   = FB_ROTATE_UR;
 			// ...KOBO_HWCFG_DisplayBusWidth (35) is "16Bits" (1),
 			// meaning it is indeed NTX_ROTA_STRAIGHT ;).
-			// NOTE: Touch panel seems to have forgone the usual translation, though,
-			//       opting instead for its native orientation (CW, i.e., origin on the bottom-left corner).
 			deviceQuirks.canRotate     = true;
 			deviceQuirks.screenDPI     = 300U;
 			// Flawfinder: ignore
