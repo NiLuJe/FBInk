@@ -796,12 +796,16 @@ devcap: armcheck distclean
 	$(MAKE) fbdepth KOBO=true
 	mv -v $(CURDIR)/Release/fbdepth $(CURDIR)/fbdepth
 	$(MAKE) clean
+	$(MAKE) ftrace KOBO=true
+	mv -v $(CURDIR)/Release/finger_trace $(CURDIR)/finger_trace
+	$(MAKE) clean
 	$(MAKE) strip KOBO=true
 	$(MAKE) utils KOBO=true
 	mkdir -p Kobo
 	cp -av $(CURDIR)/utils/devcap_test.sh Kobo
 	cp -av $(CURDIR)/Release/fbink Kobo
 	mv -v $(CURDIR)/fbdepth Kobo
+	mv -v $(CURDIR)/finger_trace Kobo
 	cp -av $(CURDIR)/Release/rota Kobo
 	wget "https://svn.ak-team.com/svn/Configs/trunk/Kindle/Kobo_Hacks/USBNetwork/src/usbnet/bin/evtest" -O Kobo/evtest
 	chmod -cvR a+x Kobo/evtest
