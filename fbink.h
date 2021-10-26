@@ -398,6 +398,7 @@ typedef enum
 	//                            like on the Kobo Libra.
 	//                            Triple whammy if the touch layer rotation matches!
 	NTX_ROTA_SUNXI,    // The rotate flag is technically meaningless, but *may* be set by third-party code (we don't).
+	NTX_ROTA_CW_TOUCH,    // No kernel shenanigans, and Touch panel mounted in the invert of the usual rotation.
 	NTX_ROTA_MAX = UINT8_MAX,    // uint8_t
 } __attribute__((packed)) NTX_ROTA_INDEX_E;
 typedef uint8_t NTX_ROTA_INDEX_T;

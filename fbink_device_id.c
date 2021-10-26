@@ -819,6 +819,7 @@ static void
 			// meaning it is indeed NTX_ROTA_STRAIGHT ;).
 			// NOTE: Touch panel seems to have forgone the usual translation, though,
 			//       opting instead for its native orientation (CW, i.e., origin on the bottom-left corner).
+			// Canonical -> native rotation mapping: { UR: 1, CW: 0, UD: 3, CCW: 2 }
 			deviceQuirks.canRotate     = true;
 			deviceQuirks.screenDPI     = 300U;
 			// Flawfinder: ignore

@@ -405,6 +405,10 @@ uint8_t
 		rota = (native_portrait - rotate) & 3;
 		// NOTE: If we do NOT invert anything, this works, too:
 		//       rota = (4 - (rotate - native_portrait)) & 3;
+	} else if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_CW_TOUCH) {
+		// NOTE: For the Libra 2, whose Touch panel is mounted in the invert of the usual rotation (CW instead of CCW),
+		//       which makes for a native -> canonical mapping of "1 -> UR (0); 2 -> CCW (3); 3 -> UD (2); 0 -> CW (1)".
+		rota = (native_portrait ^ rotate) & 3;
 	} else {
 		rota = (rotate - native_portrait) & 3;
 	}
@@ -456,6 +460,9 @@ uint32_t
 		rota = (native_portrait - rotate) & 3;
 		// NOTE: If we do NOT invert native_portrait (but do invert the final result), this works, too:
 		//       rota = (4 - (native_portrait + rotate)) & 3;
+	} else if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_CW_TOUCH) {
+		// NOTE: native->canonical == canonical->native
+		rota = (native_portrait ^ rotate) & 3;
 	} else {
 		rota = (native_portrait + rotate) & 3;
 	}
