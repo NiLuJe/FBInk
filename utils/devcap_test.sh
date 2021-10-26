@@ -30,7 +30,7 @@ separator() {
 }
 
 # We'll need the FBInk version
-eval $(fbink -e)
+eval "$(fbink -e)"
 
 # Here we go...
 echo "* Starting tests on $(date) using FBInk ${FBINK_VERSION}" >> "${DEVCAP_LOG}"
