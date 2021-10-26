@@ -29,8 +29,11 @@ separator() {
 	echo "" >> "${DEVCAP_LOG}"
 }
 
+# We'll need the FBInk version
+eval $(fbink -e)
+
 # Here we go...
-echo "* Starting tests on $(date)" >> "${DEVCAP_LOG}"
+echo "* Starting tests on $(date) using FBInk ${FBINK_VERSION}" >> "${DEVCAP_LOG}"
 
 # Start from a blank slate
 fbink -q -c -f -w
