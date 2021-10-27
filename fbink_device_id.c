@@ -820,8 +820,8 @@ static void
 			// NOTE: Touch panel seems to have forgone the usual translation, though,
 			//       opting instead for its native orientation (CW, i.e., origin on the bottom-left corner).
 			// Canonical -> native rotation mapping: { UR: 1, CW: 0, UD: 3, CCW: 2 }
-			deviceQuirks.canHWInvert   = NTX_ROTA_CW_TOUCH;
 			deviceQuirks.canRotate     = true;
+			deviceQuirks.ntxRotaQuirk  = NTX_ROTA_CW_TOUCH;
 			deviceQuirks.screenDPI     = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Libra 2", sizeof(deviceQuirks.deviceName) - 1U);
