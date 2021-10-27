@@ -58,6 +58,11 @@ header "FBInk"
 fbink -v -w -f -Mm "Hello World" >> "${DEVCAP_LOG}" 2>&1
 separator
 
+# Then say hello
+header "FBInk state"
+fbink -e | tr ';' '\n' >> "${DEVCAP_LOG}" 2>&1
+separator
+
 # The rotation madness...
 header "Rotation quirks"
 rota >> "${DEVCAP_LOG}" 2>&1
