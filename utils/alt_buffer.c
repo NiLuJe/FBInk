@@ -44,9 +44,9 @@
 unsigned char* altPtr  = NULL;
 uint32_t       altAddr = 0U;
 
-// NOTE: Wrapper around refresh_kobo with its old signature
+// NOTE: Wrapper around refresh_kobo to ease around API changes...
 static int
-    refresh_kobo_compat(int fbfd, const struct mxcfb_rect region, uint32_t waveform_mode, uint32_t update_mode)
+    refresh_kobo_compat(int fbfd, const struct mxcfb_rect region, WFM_MODE_INDEX_T waveform_mode, bool is_flashing)
 {
 	// Increase the marker, because we're bypassing FBInk's refresh
 	++lastMarker;
@@ -54,7 +54,7 @@ static int
 	FBInkConfig cfg = { 0 };
 
 	cfg.wfm_mode    = waveform_mode;
-	cfg.is_flashing = update_mode == UPDATE_MODE_FULL;
+	cfg.is_flashing = is_flashing;
 
 	int ret = refresh_kobo(fbfd, region, &cfg);
 	return ret;
@@ -193,7 +193,7 @@ int
 	struct mxcfb_rect region = { 0U };
 	fullscreen_region(&region);
 	fprintf(stdout, "[01] White front buffer\n");
-	refresh_kobo_compat(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL);
+	refresh_kobo_compat(fbfd, region, WFM_GC16, true);
 	fbink_wait_for_complete(fbfd, lastMarker);
 	nanosleep(&zzz, NULL);
 
@@ -205,7 +205,7 @@ int
 
 	// Back to the front buffer
 	fprintf(stdout, "[03] White front buffer\n");
-	refresh_kobo_compat(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL);
+	refresh_kobo_compat(fbfd, region, WFM_GC16, true);
 	fbink_wait_for_complete(fbfd, lastMarker);
 	nanosleep(&zzz, NULL);
 
@@ -226,7 +226,7 @@ int
 	// we have to get slightly more creative, since region & alt_region must match...
 	// Start by restoring the front buffer in the region we've just refreshed from the alt...
 	fprintf(stdout, "[05] Bottom quarter gray overlay buffer (ioctl x 2)\n");
-	refresh_kobo_compat(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL);
+	refresh_kobo_compat(fbfd, region, WFM_GC16, true);
 	// Then refresh a smaller bit of the alt buffer...
 	region.top    = vInfo.yres / 4U * 3U;
 	region.height = vInfo.yres / 4U;
@@ -257,7 +257,7 @@ int
 
 	// Run the double ioctl variant again, to double-check...
 	fprintf(stdout, "[07] Bottom quarter gray overlay buffer (ioctl x 2)\n");
-	refresh_kobo_compat(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL);
+	refresh_kobo_compat(fbfd, region, WFM_GC16, true);
 	// Then refresh a smaller bit of the alt buffer...
 	region.top    = vInfo.yres / 4U * 3U;
 	region.height = vInfo.yres / 4U;
@@ -295,7 +295,7 @@ int
 	// Refresh w/ the front buffer
 	fullscreen_region(&region);
 	fprintf(stdout, "[10] Full front buffer\n");
-	refresh_kobo_compat(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL);
+	refresh_kobo_compat(fbfd, region, WFM_GC16, true);
 	fbink_wait_for_complete(fbfd, lastMarker);
 	nanosleep(&zzz, NULL);
 
@@ -307,7 +307,7 @@ int
 
 	// Back to the front buffer
 	fprintf(stdout, "[12] Full front buffer\n");
-	refresh_kobo_compat(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL);
+	refresh_kobo_compat(fbfd, region, WFM_GC16, true);
 	fbink_wait_for_complete(fbfd, lastMarker);
 	nanosleep(&zzz, NULL);
 
@@ -326,7 +326,7 @@ int
 
 	// Bottom quarter of the overlay buffer, on top of the full front buffer
 	fprintf(stdout, "[15] Bottom quarter overlay buffer (ioctl x 2)\n");
-	refresh_kobo_compat(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL);
+	refresh_kobo_compat(fbfd, region, WFM_GC16, true);
 	// Then refresh a smaller bit of the alt buffer...
 	region.top    = vInfo.yres / 4U * 3U;
 	region.height = vInfo.yres / 4U;
@@ -354,7 +354,7 @@ int
 
 	// Run the double ioctl variant again, to double-check...
 	fprintf(stdout, "[17] Bottom quarter overlay buffer (ioctl x 2)\n");
-	refresh_kobo_compat(fbfd, region, get_wfm_mode(WFM_GC16), UPDATE_MODE_FULL);
+	refresh_kobo_compat(fbfd, region, WFM_GC16, true);
 	// Then refresh a smaller bit of the alt buffer...
 	region.top    = vInfo.yres / 4U * 3U;
 	region.height = vInfo.yres / 4U;
