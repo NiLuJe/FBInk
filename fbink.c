@@ -1942,7 +1942,7 @@ static int
 		.update_region   = region,
 		.waveform_mode   = waveform_mode,
 		.update_mode     = update_mode,
-		.update_marker   = marker,
+		.update_marker   = lastMarker,
 		.temp            = TEMP_USE_AMBIENT,
 		.flags           = (waveform_mode == WAVEFORM_MODE_ZELDA_GLD16) ? EPDC_FLAG_USE_ZELDA_REGAL
 				   : (waveform_mode == WAVEFORM_MODE_ZELDA_A2)  ? EPDC_FLAG_FORCE_MONOCHROME
@@ -2917,7 +2917,7 @@ static int
 	} else if (deviceQuirks.isKindleZelda) {
 		return refresh_kindle_zelda(fbfd, region, fbink_cfg);
 	} else {
-		return refresh_kindle(fbfd, region fbink_cfg);
+		return refresh_kindle(fbfd, region, fbink_cfg);
 	}
 #	elif defined(FBINK_FOR_CERVANTES)
 	return refresh_cervantes(fbfd, region, fbink_cfg);
