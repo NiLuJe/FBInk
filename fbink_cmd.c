@@ -1840,7 +1840,7 @@ int
 				break;
 			}
 			case 'w':
-				wait_for = true;
+				wait_for           = true;
 				// Also disable merging on sunxi
 				fbink_cfg.no_merge = true;
 				break;
