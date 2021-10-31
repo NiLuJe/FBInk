@@ -1802,10 +1802,12 @@ static int
 static int
     refresh_kindle(int                     fbfd,
 		   const struct mxcfb_rect region,
-		   uint32_t                waveform_mode,
-		   uint32_t                update_mode,
 		   const FBInkConfig* fbink_cfg)
 {
+	// Handle the common waveform_mode/update_mode switcheroo...
+	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO) ? get_wfm_mode(WFM_GC16) : get_wfm_mode(fbink_cfg->wfm_mode);
+	const uint32_t update_mode = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
+
 	// NOTE: The hist_* fields are probably used to color the final decision AUTO will take,
 	//       hence our conservative choices...
 	struct mxcfb_update_data update = {
@@ -1920,10 +1922,12 @@ static int
 static int
     refresh_kindle_zelda(int                     fbfd,
 			 const struct mxcfb_rect region,
-			 uint32_t                waveform_mode,
-			 uint32_t                update_mode,
 			 const FBInkConfig* fbink_cfg)
 {
+	// Handle the common waveform_mode/update_mode switcheroo...
+	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO) ? get_wfm_mode(WFM_GC16) : get_wfm_mode(fbink_cfg->wfm_mode);
+	const uint32_t update_mode = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
+
 	// Did we request legacy dithering?
 	int dithering_mode = get_hwd_mode(fbink_cfg->dithering_mode);
 	bool use_legacy_dithering = false;
@@ -2010,10 +2014,12 @@ static int
 static int
     refresh_kindle_rex(int                     fbfd,
 		       const struct mxcfb_rect region,
-		       uint32_t                waveform_mode,
-		       uint32_t                update_mode,
 		       const FBInkConfig* fbink_cfg)
 {
+	// Handle the common waveform_mode/update_mode switcheroo...
+	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO) ? get_wfm_mode(WFM_GC16) : get_wfm_mode(fbink_cfg->wfm_mode);
+	const uint32_t update_mode = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
+
 	// Did we request legacy dithering?
 	int dithering_mode = get_hwd_mode(fbink_cfg->dithering_mode);
 	bool use_legacy_dithering = false;
@@ -2099,10 +2105,12 @@ static int
 static int
     refresh_cervantes(int fbfd,
 		      const struct mxcfb_rect region,
-		      uint32_t waveform_mode,
-		      uint32_t update_mode,
 		      const FBInkConfig* fbink_cfg)
 {
+	// Handle the common waveform_mode/update_mode switcheroo...
+	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO) ? get_wfm_mode(WFM_GC16) : get_wfm_mode(fbink_cfg->wfm_mode);
+	const uint32_t update_mode = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
+
 	struct mxcfb_update_data update = {
 		.update_region = region,
 		.waveform_mode = waveform_mode,
@@ -2179,10 +2187,12 @@ static int
 static int
     refresh_remarkable(int                     fbfd,
 		       const struct mxcfb_rect region,
-		       uint32_t                waveform_mode,
-		       uint32_t                update_mode,
 		       const FBInkConfig* fbink_cfg)
 {
+	// Handle the common waveform_mode/update_mode switcheroo...
+	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO) ? get_wfm_mode(WFM_GC16) : get_wfm_mode(fbink_cfg->wfm_mode);
+	const uint32_t update_mode = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
+
 	// NOTE: Actually uses the V1 epdc driver, hence dither_mode & quant_bit being unused.
 	struct mxcfb_update_data update = {
 		.update_region   = region,
@@ -2256,10 +2266,12 @@ static int
 static int
     refresh_pocketbook(int                     fbfd,
 		       const struct mxcfb_rect region,
-		       uint32_t                waveform_mode,
-		       uint32_t                update_mode,
 		       const FBInkConfig* fbink_cfg)
 {
+	// Handle the common waveform_mode/update_mode switcheroo...
+	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO) ? get_wfm_mode(WFM_GC16) : get_wfm_mode(fbink_cfg->wfm_mode);
+	const uint32_t update_mode = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
+
 	// NOTE: Apparently benefits from the same trick as on rM of enforcing the 24°C table for DU
 	struct mxcfb_update_data update = { .update_region = region,
 					    .waveform_mode = waveform_mode,
@@ -2344,10 +2356,12 @@ static int
 static int
     refresh_kobo(int                     fbfd,
 		 const struct mxcfb_rect region,
-		 uint32_t                waveform_mode,
-		 uint32_t                update_mode,
 		 const FBInkConfig* fbink_cfg)
 {
+	// Handle the common waveform_mode/update_mode switcheroo...
+	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO) ? get_wfm_mode(WFM_GC16) : get_wfm_mode(fbink_cfg->wfm_mode);
+	const uint32_t update_mode = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
+
 	struct mxcfb_update_data_v1_ntx update = {
 		.update_region   = region,
 		.waveform_mode   = waveform_mode,
@@ -2431,8 +2445,6 @@ static int
 static int
     refresh_kobo_mk7(int                     fbfd,
 		     const struct mxcfb_rect region,
-		     uint32_t                waveform_mode,
-		     uint32_t                update_mode,
 		     const FBInkConfig* fbink_cfg)
 {
 	// NOTE: On Mk. 7 devices, for reasons that are unclear (and under circumstances which are equally unclear),
@@ -2468,6 +2480,10 @@ static int
 	//       Unlike other Kobo devices, UR happens to be the native rotation of the Libra.
 	//       This also happens to be a configuration that was shown to fatally upset the Clara's kernel, FWIW...
 	//       c.f., https://github.com/baskerville/plato/issues/129 (for the Clara bit).
+
+	// Handle the common waveform_mode/update_mode switcheroo...
+	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO) ? get_wfm_mode(WFM_GC16) : get_wfm_mode(fbink_cfg->wfm_mode);
+	const uint32_t update_mode = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
 
 	// Did we request legacy dithering?
 	int dithering_mode = get_hwd_mode(fbink_cfg->dithering_mode);
@@ -2571,7 +2587,7 @@ static int
 
 // Kobo Mark 8 devices ([Mk8<->??)
 static int
-    refresh_kobo_sunxi(const struct mxcfb_rect region, uint32_t waveform_mode, uint32_t update_mode, const FBInkConfig* fbink_cfg)
+    refresh_kobo_sunxi(const struct mxcfb_rect region, const FBInkConfig* fbink_cfg)
 {
 	// NOTE: In case of issues, enable full verbosity in the DISP driver:
 	//       echo 8 >| /proc/sys/kernel/printk
@@ -2588,6 +2604,9 @@ static int
 				  .x_bottom = region.left + region.width - 1,
 				  .y_bottom = region.top + region.height - 1 };
 
+	// Handle the common waveform_mode/update_mode switcheroo...
+	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO) ? get_wfm_mode(WFM_GC16) : get_wfm_mode(fbink_cfg->wfm_mode);
+
 	sunxi_disp_eink_update2 update = { .area        = &area,
 					   .layer_num   = 1U,
 					   .update_mode = waveform_mode,
@@ -2597,7 +2616,7 @@ static int
 					   .cfa_use     = 0U };
 
 	// Update mode shenanigans...
-	if (update_mode == UPDATE_MODE_PARTIAL && waveform_mode != EINK_AUTO_MODE) {
+	if (!fbink_cfg->is_flashing && waveform_mode != EINK_AUTO_MODE) {
 		// For some reason, AUTO shouldn't specify PARTIAL...
 		// (it trips the unknown mode warning, which falls back to... plain AUTO ;)).
 		update.update_mode |= EINK_PARTIAL_MODE;
@@ -2869,10 +2888,6 @@ static int
 	//       Which somewhat tracks given AUTO's behavior on Kobos, as well as on Kindles.
 	//       (i.e., DU or GL16/GC16 is most likely often what AUTO will land on).
 
-	// So, handle this common switcheroo here...
-	uint32_t wfm = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO) ? get_wfm_mode(WFM_GC16) : get_wfm_mode(fbink_cfg->wfm_mode);
-	uint32_t upm = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
-
 	// Update our own update marker
 #	ifdef FBINK_FOR_KOBO
 	if (!deviceQuirks.isSunxi) {
@@ -2885,26 +2900,25 @@ static int
 
 #	if defined(FBINK_FOR_KINDLE)
 	if (deviceQuirks.isKindleRex) {
-		return refresh_kindle_rex(fbfd, region, wfm, upm, fbink_cfg);
+		return refresh_kindle_rex(fbfd, region, fbink_cfg);
 	} else if (deviceQuirks.isKindleZelda) {
-		return refresh_kindle_zelda(
-		    fbfd, region, wfm, upm, fbink_cfg);
+		return refresh_kindle_zelda(fbfd, region, fbink_cfg);
 	} else {
-		return refresh_kindle(fbfd, region, wfm, upm, fbink_cfg);
+		return refresh_kindle(fbfd, region fbink_cfg);
 	}
 #	elif defined(FBINK_FOR_CERVANTES)
-	return refresh_cervantes(fbfd, region, wfm, upm, fbink_cfg);
+	return refresh_cervantes(fbfd, region, fbink_cfg);
 #	elif defined(FBINK_FOR_REMARKABLE)
-	return refresh_remarkable(fbfd, region, wfm, upm, fbink_cfg);
+	return refresh_remarkable(fbfd, region, fbink_cfg);
 #	elif defined(FBINK_FOR_POCKETBOOK)
-	return refresh_pocketbook(fbfd, region, wfm, upm, fbink_cfg);
+	return refresh_pocketbook(fbfd, region, fbink_cfg);
 #	elif defined(FBINK_FOR_KOBO)
 	if (deviceQuirks.isSunxi) {
-		return refresh_kobo_sunxi(region, wfm, upm, fbink_cfg);
+		return refresh_kobo_sunxi(region, fbink_cfg);
 	} else if (deviceQuirks.isKoboMk7) {
-		return refresh_kobo_mk7(fbfd, region, wfm, upm, fbink_cfg);
+		return refresh_kobo_mk7(fbfd, region, fbink_cfg);
 	} else {
-		return refresh_kobo(fbfd, region, wfm, upm, fbink_cfg);
+		return refresh_kobo(fbfd, region, fbink_cfg);
 	}
 #	endif    // FBINK_FOR_KINDLE
 }
