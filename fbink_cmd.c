@@ -1841,6 +1841,8 @@ int
 			}
 			case 'w':
 				wait_for = true;
+				// Also disable merging on sunxi
+				fbink_cfg.no_merge = true;
 				break;
 			case 'd':
 				if (strtoul_hhu(opt, NULL, optarg, &daemon_lines) < 0) {
