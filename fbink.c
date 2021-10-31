@@ -2823,20 +2823,20 @@ cleanup:
 static int
     refresh(int                     fbfd __attribute__((unused)),
 	    const struct mxcfb_rect region __attribute__((unused)),
-	    const FBInkConfig* fbink_cfg __attribute__((unused))
+	    const FBInkConfig*      fbink_cfg __attribute__((unused)))
 {
 	return EXIT_SUCCESS;
 }
 
 static int
-    refresh_compat(int fbfd __attribute__((unused),
-        const struct mxcfb_rect region __attribute__((unused),
-        WFM_MODE_INDEX_T waveform_mode __attribute__((unused),
-        HW_DITHER_INDEX_T dithering_mode __attribute__((unused),
-        bool is_nightmode __attribute__((unused),
-        bool is_flashing __attribute__((unused),
-        bool no_refresh __attribute__((unused),
-        const FBInkConfig* fbink_cfg __attribute__((unused))
+    refresh_compat(int                     fbfd __attribute__((unused)),
+		   const struct mxcfb_rect region __attribute__((unused)),
+		   WFM_MODE_INDEX_T        waveform_mode __attribute__((unused)),
+		   HW_DITHER_INDEX_T       dithering_mode __attribute__((unused)),
+		   bool                    is_nightmode __attribute__((unused)),
+		   bool                    is_flashing __attribute__((unused)),
+		   bool                    no_refresh __attribute__((unused)),
+		   const FBInkConfig*      fbink_cfg __attribute__((unused)))
 {
 	return EXIT_SUCCESS;
 }
