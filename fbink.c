@@ -2835,7 +2835,8 @@ static int
 		   HW_DITHER_INDEX_T       dithering_mode __attribute__((unused)),
 		   bool                    is_nightmode __attribute__((unused)),
 		   bool                    is_flashing __attribute__((unused)),
-		   bool                    no_refresh __attribute__((unused)))
+		   bool                    no_refresh __attribute__((unused)),
+		   bool                    no_merge __attribute__((unused)))
 {
 	return EXIT_SUCCESS;
 }
@@ -2944,7 +2945,8 @@ static int
 		   HW_DITHER_INDEX_T dithering_mode,
 		   bool is_nightmode,
 		   bool is_flashing,
-		   bool no_refresh)
+		   bool no_refresh,
+		   bool no_merge)
 {
 	if (no_refresh) {
 		LOG("Skipping eInk refresh, as requested.");
@@ -2957,6 +2959,7 @@ static int
 	cfg.is_nightmode = is_nightmode;
 	cfg.is_flashing = is_flashing;
 	cfg.no_refresh = no_refresh;
+	cfg.no_merge = no_merge;
 
 	int ret = refresh(fbfd, region, &cfg);
 	return ret;
@@ -5679,7 +5682,8 @@ static int
 			   fbink_cfg->dithering_mode,
 			   fbink_cfg->is_nightmode,
 			   fbink_cfg->is_flashing,
-			   do_clear ? fbink_cfg->no_refresh : false) != EXIT_SUCCESS) {
+			   do_clear ? fbink_cfg->no_refresh : false,
+			   fbink_cfg->no_merge) != EXIT_SUCCESS) {
 		PFWARN("Failed to refresh the screen");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
@@ -6385,6 +6389,7 @@ int
 	HW_DITHER_INDEX_T dithering_mode   = HWD_PASSTHROUGH;
 	bool              is_nightmode     = false;
 	bool              no_refresh       = false;
+	bool              no_merge         = false;
 
 	// map fb to user mem
 	// NOTE: If we're keeping the fb's fd open, keep this mmap around, too.
@@ -6937,6 +6942,7 @@ int
 		dithering_mode = fbink_cfg->dithering_mode;
 		is_nightmode   = fbink_cfg->is_nightmode;
 		no_refresh     = fbink_cfg->no_refresh;
+		no_merge       = fbink_cfg->no_merge;
 	} else {
 		is_centered = cfg->is_centered;
 	}
@@ -7551,7 +7557,7 @@ cleanup:
 		if (is_cleared) {
 			fullscreen_region(&region);
 		}
-		refresh_compat(fbfd, region, wfm_mode, dithering_mode, is_nightmode, is_flashing, no_refresh);
+		refresh_compat(fbfd, region, wfm_mode, dithering_mode, is_nightmode, is_flashing, no_refresh, no_merge);
 	}
 	free(lines);
 	free(brk_buff);
@@ -8335,7 +8341,8 @@ int
 				 fbink_cfg->dithering_mode,
 				 fbink_cfg->is_nightmode,
 				 fbink_cfg->is_flashing,
-				 false)) != EXIT_SUCCESS) {
+				 false,
+				 fbink_cfg->no_merge)) != EXIT_SUCCESS) {
 		PFWARN("Failed to refresh the screen");
 	}
 
