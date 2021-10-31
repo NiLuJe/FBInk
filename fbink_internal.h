@@ -823,7 +823,7 @@ static __attribute__((cold)) const char* remarkable_wfm_to_string(uint32_t);
 #	ifdef FBINK_FOR_POCKETBOOK
 static __attribute__((cold)) const char* pocketbook_wfm_to_string(uint32_t);
 #	endif
-#	ifndef FBINK_FOR_CERVANTES
+#	if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_KINDLE)
 static int                               get_hwd_mode(HW_DITHER_INDEX_T);
 static __attribute__((cold)) const char* hwd_to_string(HW_DITHER_INDEX_T);
 #	endif

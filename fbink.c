@@ -8212,7 +8212,7 @@ static __attribute__((cold)) const char*
 }
 #	endif    // FBINK_FOR_POCKETBOOK
 
-#	ifndef FBINK_FOR_CERVANTES
+#	if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_KINDLE)
 // Convert our public HW_DITHER_INDEX_T values to an appropriate mxcfb dithering mode constant
 static int
     get_hwd_mode(HW_DITHER_INDEX_T hw_dither_index)
@@ -8275,7 +8275,7 @@ static __attribute__((cold)) const char*
 			return "Unknown";
 	}
 }
-#	endif    // !FBINK_FOR_CERVANTES
+#	endif    // FBINK_FOR_KOBO || FBINK_FOR_KINDLE
 #endif            // !FBINK_FOR_LINUX
 
 // Small public wrapper around refresh(), without the caller having to depend on mxcfb headers
