@@ -512,6 +512,7 @@ typedef struct
 	//			       If you're convinced this is in error (i.e., up to date kernel),
 	//			       you can bypass that check by setting FBINK_ALLOW_HW_INVERT in your env.
 	bool no_refresh;    // Skip actually refreshing the eInk screen (useful when drawing in batch)
+	bool no_merge;      // Set the EINK_NO_MERGE flag (Kobo sunxi only)
 	bool to_syslog;     // Send messages & errors to the syslog instead of stdout/stderr
 } FBInkConfig;
 
