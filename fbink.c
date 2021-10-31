@@ -2831,12 +2831,8 @@ static int
 static int
     refresh_compat(int                     fbfd __attribute__((unused)),
 		   const struct mxcfb_rect region __attribute__((unused)),
-		   WFM_MODE_INDEX_T        waveform_mode __attribute__((unused)),
-		   HW_DITHER_INDEX_T       dithering_mode __attribute__((unused)),
-		   bool                    is_nightmode __attribute__((unused)),
-		   bool                    is_flashing __attribute__((unused)),
 		   bool                    no_refresh __attribute__((unused)),
-		   bool                    no_merge __attribute__((unused)))
+		   const FBInkConfig*      fbink_cfg __attribute__((unused)))
 {
 	return EXIT_SUCCESS;
 }
@@ -2939,14 +2935,7 @@ static int
 // Compat variant for functions that support not using an FBInkConfig, or want to tweak the settings internally,
 // on a per call basis...
 static int
-    refresh_compat(int fbfd,
-		   const struct mxcfb_rect region,
-		   WFM_MODE_INDEX_T waveform_mode,
-		   HW_DITHER_INDEX_T dithering_mode,
-		   bool is_nightmode,
-		   bool is_flashing,
-		   bool no_refresh,
-		   bool no_merge)
+    refresh_compat(int fbfd, const struct mxcfb_rect region, bool no_refresh, const FBInkConfig* fbink_cfg)
 {
 	if (no_refresh) {
 		LOG("Skipping eInk refresh, as requested.");
@@ -2954,12 +2943,14 @@ static int
 	}
 
 	FBInkConfig cfg = { 0 };
-	cfg.wfm_mode = waveform_mode;
-	cfg.dithering_mode = dithering_mode;
-	cfg.is_nightmode = is_nightmode;
-	cfg.is_flashing = is_flashing;
+
+	// If we have an FBInkConfig, use it as a seed
+	if (fbink_cfg) {
+		cfg = *fbink_cfg;
+	}
+
+	// And then enforce the per-call overrides
 	cfg.no_refresh = no_refresh;
-	cfg.no_merge = no_merge;
 
 	int ret = refresh(fbfd, region, &cfg);
 	return ret;
@@ -5676,14 +5667,7 @@ static int
 	(*fxpRotateRegion)(&region);
 
 	// Refresh screen
-	if (refresh_compat(fbfd,
-			   region,
-			   fbink_cfg->wfm_mode,
-			   fbink_cfg->dithering_mode,
-			   fbink_cfg->is_nightmode,
-			   fbink_cfg->is_flashing,
-			   do_clear ? fbink_cfg->no_refresh : false,
-			   fbink_cfg->no_merge) != EXIT_SUCCESS) {
+	if (refresh_compat(fbfd, region, do_clear ? fbink_cfg->no_refresh : false, fbink_cfg) != EXIT_SUCCESS) {
 		PFWARN("Failed to refresh the screen");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
@@ -6385,11 +6369,6 @@ int
 	struct mxcfb_rect region           = { 0U };
 	bool              is_flashing      = false;
 	bool              is_cleared       = false;
-	WFM_MODE_INDEX_T  wfm_mode         = WFM_AUTO;
-	HW_DITHER_INDEX_T dithering_mode   = HWD_PASSTHROUGH;
-	bool              is_nightmode     = false;
-	bool              no_refresh       = false;
-	bool              no_merge         = false;
 
 	// map fb to user mem
 	// NOTE: If we're keeping the fb's fd open, keep this mmap around, too.
@@ -6928,21 +6907,16 @@ int
 	bool    is_centered = false;
 	bool    is_halfway  = false;
 	if (fbink_cfg) {
-		valign         = fbink_cfg->valign;
-		halign         = fbink_cfg->halign;
-		is_inverted    = fbink_cfg->is_inverted;
-		is_overlay     = fbink_cfg->is_overlay;
-		is_bgless      = fbink_cfg->is_bgless;
-		is_fgless      = fbink_cfg->is_fgless;
-		is_flashing    = fbink_cfg->is_flashing;
-		is_cleared     = fbink_cfg->is_cleared;
-		is_centered    = fbink_cfg->is_centered;
-		is_halfway     = fbink_cfg->is_halfway;
-		wfm_mode       = fbink_cfg->wfm_mode;
-		dithering_mode = fbink_cfg->dithering_mode;
-		is_nightmode   = fbink_cfg->is_nightmode;
-		no_refresh     = fbink_cfg->no_refresh;
-		no_merge       = fbink_cfg->no_merge;
+		valign      = fbink_cfg->valign;
+		halign      = fbink_cfg->halign;
+		is_inverted = fbink_cfg->is_inverted;
+		is_overlay  = fbink_cfg->is_overlay;
+		is_bgless   = fbink_cfg->is_bgless;
+		is_fgless   = fbink_cfg->is_fgless;
+		is_flashing = fbink_cfg->is_flashing;
+		is_cleared  = fbink_cfg->is_cleared;
+		is_centered = fbink_cfg->is_centered;
+		is_halfway  = fbink_cfg->is_halfway;
 	} else {
 		is_centered = cfg->is_centered;
 	}
@@ -7557,7 +7531,7 @@ cleanup:
 		if (is_cleared) {
 			fullscreen_region(&region);
 		}
-		refresh_compat(fbfd, region, wfm_mode, dithering_mode, is_nightmode, is_flashing, no_refresh, no_merge);
+		refresh_compat(fbfd, region, fbink_cfg ? fbink_cfg->no_refresh : false, fbink_cfg);
 	}
 	free(lines);
 	free(brk_buff);
@@ -8335,14 +8309,7 @@ int
 		fullscreen_region(&region);
 	}
 
-	if ((rv = refresh_compat(fbfd,
-				 region,
-				 fbink_cfg->wfm_mode,
-				 fbink_cfg->dithering_mode,
-				 fbink_cfg->is_nightmode,
-				 fbink_cfg->is_flashing,
-				 false,
-				 fbink_cfg->no_merge)) != EXIT_SUCCESS) {
+	if ((rv = refresh_compat(fbfd, region, false, fbink_cfg)) != EXIT_SUCCESS) {
 		PFWARN("Failed to refresh the screen");
 	}
 
