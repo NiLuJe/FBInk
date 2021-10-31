@@ -8086,7 +8086,7 @@ static __attribute__((cold)) const char*
 }
 #	endif    // FBINK_FOR_KINDLE
 
-#	if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
+#	if defined(FBINK_FOR_KOBO)
 static __attribute__((cold)) const char*
     ntx_wfm_to_string(uint32_t wfm_mode)
 {
@@ -8119,7 +8119,36 @@ static __attribute__((cold)) const char*
 			return "Unknown";
 	}
 }
-#	endif    // FBINK_FOR_KOBO || FBINK_FOR_CERVANTES
+#	endif    // FBINK_FOR_KOBO
+
+#	if defined(FBINK_FOR_CERVANTES)
+static __attribute__((cold)) const char*
+    ntx_wfm_to_string(uint32_t wfm_mode)
+{
+	switch (wfm_mode) {
+		case WAVEFORM_MODE_INIT:
+			return "INIT";
+		case WAVEFORM_MODE_DU:
+			return "DU";
+		case WAVEFORM_MODE_GC16:
+			return "GC16";
+		case WAVEFORM_MODE_GC4:
+			return "GC4";
+		case WAVEFORM_MODE_A2:
+			return "A2";
+		case WAVEFORM_MODE_GL16:
+			return "GL16";
+		case WAVEFORM_MODE_REAGL:
+			return "REAGL";
+		case WAVEFORM_MODE_REAGLD:
+			return "REAGLD";
+		case WAVEFORM_MODE_AUTO:
+			return "AUTO";
+		default:
+			return "Unknown";
+	}
+}
+#	endif    // FBINK_FOR_CERVANTES
 
 #	ifdef FBINK_FOR_REMARKABLE
 static __attribute__((cold)) const char*
@@ -8183,6 +8212,7 @@ static __attribute__((cold)) const char*
 }
 #	endif    // FBINK_FOR_POCKETBOOK
 
+#	ifndef FBINK_FOR_CERVANTES
 // Convert our public HW_DITHER_INDEX_T values to an appropriate mxcfb dithering mode constant
 static int
     get_hwd_mode(HW_DITHER_INDEX_T hw_dither_index)
@@ -8245,7 +8275,8 @@ static __attribute__((cold)) const char*
 			return "Unknown";
 	}
 }
-#endif    // !FBINK_FOR_LINUX
+#	endif    // !FBINK_FOR_CERVANTES
+#endif            // !FBINK_FOR_LINUX
 
 // Small public wrapper around refresh(), without the caller having to depend on mxcfb headers
 int
