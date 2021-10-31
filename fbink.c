@@ -1800,13 +1800,13 @@ static int
 
 // Touch Kindle devices ([K5<->]KOA2)
 static int
-    refresh_kindle(int                     fbfd,
-		   const struct mxcfb_rect region,
-		   const FBInkConfig* fbink_cfg)
+    refresh_kindle(int fbfd, const struct mxcfb_rect region, const FBInkConfig* fbink_cfg)
 {
 	// Handle the common waveform_mode/update_mode switcheroo...
-	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO) ? get_wfm_mode(WFM_GC16) : get_wfm_mode(fbink_cfg->wfm_mode);
-	const uint32_t update_mode = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
+	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO)
+					   ? get_wfm_mode(WFM_GC16)
+					   : get_wfm_mode(fbink_cfg->wfm_mode);
+	const uint32_t update_mode   = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
 
 	// NOTE: The hist_* fields are probably used to color the final decision AUTO will take,
 	//       hence our conservative choices...
@@ -1920,16 +1920,16 @@ static int
 
 // Kindle Oasis 2 & Oasis 3 ([KOA2<->??)
 static int
-    refresh_kindle_zelda(int                     fbfd,
-			 const struct mxcfb_rect region,
-			 const FBInkConfig* fbink_cfg)
+    refresh_kindle_zelda(int fbfd, const struct mxcfb_rect region, const FBInkConfig* fbink_cfg)
 {
 	// Handle the common waveform_mode/update_mode switcheroo...
-	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO) ? get_wfm_mode(WFM_GC16) : get_wfm_mode(fbink_cfg->wfm_mode);
-	const uint32_t update_mode = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
+	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO)
+					   ? get_wfm_mode(WFM_GC16)
+					   : get_wfm_mode(fbink_cfg->wfm_mode);
+	const uint32_t update_mode   = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
 
 	// Did we request legacy dithering?
-	int dithering_mode = get_hwd_mode(fbink_cfg->dithering_mode);
+	int  dithering_mode       = get_hwd_mode(fbink_cfg->dithering_mode);
 	bool use_legacy_dithering = false;
 	if (dithering_mode == HWD_LEGACY) {
 		// Make sure we won't setup EPDC v2 dithering
@@ -2012,16 +2012,16 @@ static int
 
 // Kindle PaperWhite 4 & Basic 3 ([PW4<->??)
 static int
-    refresh_kindle_rex(int                     fbfd,
-		       const struct mxcfb_rect region,
-		       const FBInkConfig* fbink_cfg)
+    refresh_kindle_rex(int fbfd, const struct mxcfb_rect region, const FBInkConfig* fbink_cfg)
 {
 	// Handle the common waveform_mode/update_mode switcheroo...
-	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO) ? get_wfm_mode(WFM_GC16) : get_wfm_mode(fbink_cfg->wfm_mode);
-	const uint32_t update_mode = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
+	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO)
+					   ? get_wfm_mode(WFM_GC16)
+					   : get_wfm_mode(fbink_cfg->wfm_mode);
+	const uint32_t update_mode   = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
 
 	// Did we request legacy dithering?
-	int dithering_mode = get_hwd_mode(fbink_cfg->dithering_mode);
+	int  dithering_mode       = get_hwd_mode(fbink_cfg->dithering_mode);
 	bool use_legacy_dithering = false;
 	if (dithering_mode == HWD_LEGACY) {
 		// Make sure we won't setup EPDC v2 dithering
@@ -2103,12 +2103,12 @@ static int
 // Cervantes devices
 // All of them support MX50 "compat" ioctls, much like Kobos.
 static int
-    refresh_cervantes(int fbfd,
-		      const struct mxcfb_rect region,
-		      const FBInkConfig* fbink_cfg)
+    refresh_cervantes(int fbfd, const struct mxcfb_rect region, const FBInkConfig* fbink_cfg)
 {
 	// Handle the common waveform_mode/update_mode switcheroo...
-	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO) ? get_wfm_mode(WFM_GC16) : get_wfm_mode(fbink_cfg->wfm_mode);
+	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO)
+					   ? get_wfm_mode(WFM_GC16)
+					   : get_wfm_mode(fbink_cfg->wfm_mode);
 	const uint32_t update_mode = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
 
 	struct mxcfb_update_data update = {
@@ -2185,13 +2185,13 @@ static int
 }
 #	elif defined(FBINK_FOR_REMARKABLE)
 static int
-    refresh_remarkable(int                     fbfd,
-		       const struct mxcfb_rect region,
-		       const FBInkConfig* fbink_cfg)
+    refresh_remarkable(int fbfd, const struct mxcfb_rect region, const FBInkConfig* fbink_cfg)
 {
 	// Handle the common waveform_mode/update_mode switcheroo...
-	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO) ? get_wfm_mode(WFM_GC16) : get_wfm_mode(fbink_cfg->wfm_mode);
-	const uint32_t update_mode = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
+	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO)
+					   ? get_wfm_mode(WFM_GC16)
+					   : get_wfm_mode(fbink_cfg->wfm_mode);
+	const uint32_t update_mode   = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
 
 	// NOTE: Actually uses the V1 epdc driver, hence dither_mode & quant_bit being unused.
 	struct mxcfb_update_data update = {
@@ -2264,13 +2264,13 @@ static int
 }
 #	elif defined(FBINK_FOR_POCKETBOOK)
 static int
-    refresh_pocketbook(int                     fbfd,
-		       const struct mxcfb_rect region,
-		       const FBInkConfig* fbink_cfg)
+    refresh_pocketbook(int fbfd, const struct mxcfb_rect region, const FBInkConfig* fbink_cfg)
 {
 	// Handle the common waveform_mode/update_mode switcheroo...
-	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO) ? get_wfm_mode(WFM_GC16) : get_wfm_mode(fbink_cfg->wfm_mode);
-	const uint32_t update_mode = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
+	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO)
+					   ? get_wfm_mode(WFM_GC16)
+					   : get_wfm_mode(fbink_cfg->wfm_mode);
+	const uint32_t update_mode   = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
 
 	// NOTE: Apparently benefits from the same trick as on rM of enforcing the 24°C table for DU
 	struct mxcfb_update_data update = { .update_region = region,
@@ -2354,13 +2354,13 @@ static int
 #	elif defined(FBINK_FOR_KOBO)
 // Kobo devices ([Mk3<->Mk6])
 static int
-    refresh_kobo(int                     fbfd,
-		 const struct mxcfb_rect region,
-		 const FBInkConfig* fbink_cfg)
+    refresh_kobo(int fbfd, const struct mxcfb_rect region, const FBInkConfig* fbink_cfg)
 {
 	// Handle the common waveform_mode/update_mode switcheroo...
-	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO) ? get_wfm_mode(WFM_GC16) : get_wfm_mode(fbink_cfg->wfm_mode);
-	const uint32_t update_mode = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
+	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO)
+					   ? get_wfm_mode(WFM_GC16)
+					   : get_wfm_mode(fbink_cfg->wfm_mode);
+	const uint32_t update_mode   = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
 
 	struct mxcfb_update_data_v1_ntx update = {
 		.update_region   = region,
@@ -2443,9 +2443,7 @@ static int
 
 // Kobo Mark 7 devices (Mk7, Mk9)
 static int
-    refresh_kobo_mk7(int                     fbfd,
-		     const struct mxcfb_rect region,
-		     const FBInkConfig* fbink_cfg)
+    refresh_kobo_mk7(int fbfd, const struct mxcfb_rect region, const FBInkConfig* fbink_cfg)
 {
 	// NOTE: On Mk. 7 devices, for reasons that are unclear (and under circumstances which are equally unclear),
 	//       the EPDC may repeatedly ignore the requested flags and/or dither_mode...
@@ -2482,11 +2480,13 @@ static int
 	//       c.f., https://github.com/baskerville/plato/issues/129 (for the Clara bit).
 
 	// Handle the common waveform_mode/update_mode switcheroo...
-	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO) ? get_wfm_mode(WFM_GC16) : get_wfm_mode(fbink_cfg->wfm_mode);
-	const uint32_t update_mode = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
+	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO)
+					   ? get_wfm_mode(WFM_GC16)
+					   : get_wfm_mode(fbink_cfg->wfm_mode);
+	const uint32_t update_mode   = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
 
 	// Did we request legacy dithering?
-	int dithering_mode = get_hwd_mode(fbink_cfg->dithering_mode);
+	int  dithering_mode       = get_hwd_mode(fbink_cfg->dithering_mode);
 	bool use_legacy_dithering = false;
 	if (dithering_mode == HWD_LEGACY) {
 		// Make sure we won't setup EPDC v2 dithering
@@ -2605,7 +2605,9 @@ static int
 				  .y_bottom = region.top + region.height - 1 };
 
 	// Handle the common waveform_mode/update_mode switcheroo...
-	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO) ? get_wfm_mode(WFM_GC16) : get_wfm_mode(fbink_cfg->wfm_mode);
+	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO)
+					   ? get_wfm_mode(WFM_GC16)
+					   : get_wfm_mode(fbink_cfg->wfm_mode);
 
 	sunxi_disp_eink_update2 update = { .area        = &area,
 					   .layer_num   = 1U,
@@ -2825,6 +2827,19 @@ static int
 {
 	return EXIT_SUCCESS;
 }
+
+static int
+    refresh_compat(int fbfd __attribute__((unused),
+        const struct mxcfb_rect region __attribute__((unused),
+        WFM_MODE_INDEX_T waveform_mode __attribute__((unused),
+        HW_DITHER_INDEX_T dithering_mode __attribute__((unused),
+        bool is_nightmode __attribute__((unused),
+        bool is_flashing __attribute__((unused),
+        bool no_refresh __attribute__((unused),
+        const FBInkConfig* fbink_cfg __attribute__((unused))
+{
+	return EXIT_SUCCESS;
+}
 #else
 
 static inline void
@@ -2847,9 +2862,7 @@ static inline void
 }
 
 static int
-    refresh(int fbfd,
-	    const struct mxcfb_rect region,
-	    const FBInkConfig* fbink_cfg)
+    refresh(int fbfd, const struct mxcfb_rect region, const FBInkConfig* fbink_cfg)
 {
 	// Were we asked to skip refreshes?
 	if (fbink_cfg->no_refresh) {
@@ -2921,6 +2934,34 @@ static int
 		return refresh_kobo(fbfd, region, fbink_cfg);
 	}
 #	endif    // FBINK_FOR_KINDLE
+}
+
+// Compat variant for functions that support not using an FBInkConfig, or want to tweak the settings internally,
+// on a per call basis...
+static int
+    refresh_compat(int fbfd,
+		   const struct mxcfb_rect region,
+		   WFM_MODE_INDEX_T waveform_mode,
+		   HW_DITHER_INDEX_T dithering_mode,
+		   bool is_nightmode,
+		   bool is_flashing,
+		   bool no_refresh,
+		   const FBInkConfig* fbink_cfg)
+{
+	FBInkConfig cfg = { 0 };
+	// If we actually passed an FBInkConfig, use it as a seed
+	if (fbink_cfg) {
+		cfg = *fbink_cfg;
+	}
+
+	cfg.wfm_mode = waveform_mode;
+	cfg.dithering_mode = dithering_mode;
+	cfg.is_nightmode = is_nightmode;
+	cfg.is_flashing = is_flashing;
+	cfg.no_refresh = no_refresh;
+
+	int ret = refresh(fbfd, region, &cfg);
+	return ret;
 }
 #endif            // FBINK_FOR_LINUX
 
@@ -5241,13 +5282,7 @@ int
 	}
 
 	// Refresh screen
-	if (refresh(fbfd,
-		    region,
-		    fbink_cfg->wfm_mode,
-		    fbink_cfg->dithering_mode,
-		    fbink_cfg->is_nightmode,
-		    fbink_cfg->is_flashing,
-		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
+	if (refresh(fbfd, region, fbink_cfg) != EXIT_SUCCESS) {
 		PFWARN("Failed to refresh the screen");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
@@ -5330,13 +5365,7 @@ int
 	(*fxpRotateRegion)(&region);
 
 	// Refresh screen
-	if (refresh(fbfd,
-		    region,
-		    fbink_cfg->wfm_mode,
-		    fbink_cfg->dithering_mode,
-		    fbink_cfg->is_nightmode,
-		    fbink_cfg->is_flashing,
-		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
+	if (refresh(fbfd, region, fbink_cfg) != EXIT_SUCCESS) {
 		PFWARN("Failed to refresh the screen");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
@@ -5646,13 +5675,14 @@ static int
 	(*fxpRotateRegion)(&region);
 
 	// Refresh screen
-	if (refresh(fbfd,
-		    region,
-		    fbink_cfg->wfm_mode,
-		    fbink_cfg->dithering_mode,
-		    fbink_cfg->is_nightmode,
-		    fbink_cfg->is_flashing,
-		    do_clear ? fbink_cfg->no_refresh : false) != EXIT_SUCCESS) {
+	if (refresh_compat(fbfd,
+			   region,
+			   fbink_cfg->wfm_mode,
+			   fbink_cfg->dithering_mode,
+			   fbink_cfg->is_nightmode,
+			   fbink_cfg->is_flashing,
+			   do_clear ? fbink_cfg->no_refresh : false,
+			   fbink_cfg) != EXIT_SUCCESS) {
 		PFWARN("Failed to refresh the screen");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
@@ -6120,13 +6150,7 @@ int
 	}
 
 	// Refresh screen
-	if (refresh(fbfd,
-		    region,
-		    fbink_cfg->wfm_mode,
-		    fbink_cfg->dithering_mode,
-		    fbink_cfg->is_nightmode,
-		    fbink_cfg->is_flashing,
-		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
+	if (refresh(fbfd, region, fbink_cfg) != EXIT_SUCCESS) {
 		PFWARN("Failed to refresh the screen");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
@@ -7530,7 +7554,7 @@ cleanup:
 		if (is_cleared) {
 			fullscreen_region(&region);
 		}
-		refresh(fbfd, region, wfm_mode, dithering_mode, is_nightmode, is_flashing, no_refresh);
+		refresh_compat(fbfd, region, wfm_mode, dithering_mode, is_nightmode, is_flashing, no_refresh, NULL);
 	}
 	free(lines);
 	free(brk_buff);
@@ -8277,13 +8301,14 @@ int
 		fullscreen_region(&region);
 	}
 
-	if ((rv = refresh(fbfd,
-			  region,
-			  fbink_cfg->wfm_mode,
-			  fbink_cfg->dithering_mode,
-			  fbink_cfg->is_nightmode,
-			  fbink_cfg->is_flashing,
-			  false)) != EXIT_SUCCESS) {
+	if ((rv = refresh_compat(fbfd,
+				 region,
+				 fbink_cfg->wfm_mode,
+				 fbink_cfg->dithering_mode,
+				 fbink_cfg->is_nightmode,
+				 fbink_cfg->is_flashing,
+				 false,
+				 fbink_cfg)) != EXIT_SUCCESS) {
 		PFWARN("Failed to refresh the screen");
 	}
 
@@ -8904,13 +8929,7 @@ int
 	//       It has the added benefit of increasing the framerate limit after which the eInk controller risks getting
 	//       confused (unless is_flashing is enabled, since that'll block,
 	//       essentially throttling the bar to the screen's refresh rate).
-	if (refresh(fbfd,
-		    region,
-		    fbink_cfg->wfm_mode,
-		    fbink_cfg->dithering_mode,
-		    fbink_cfg->is_nightmode,
-		    fbink_cfg->is_flashing,
-		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
+	if (refresh(fbfd, region, fbink_cfg) != EXIT_SUCCESS) {
 		PFWARN("Failed to refresh the screen");
 		return ERRCODE(EXIT_FAILURE);
 	}
@@ -10023,13 +10042,7 @@ static int
 	}
 
 	// Refresh screen
-	if (refresh(fbfd,
-		    region,
-		    fbink_cfg->wfm_mode,
-		    fbink_cfg->dithering_mode,
-		    fbink_cfg->is_nightmode,
-		    fbink_cfg->is_flashing,
-		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
+	if (refresh(fbfd, region, fbink_cfg) != EXIT_SUCCESS) {
 		PFWARN("Failed to refresh the screen");
 	}
 
@@ -10961,13 +10974,7 @@ int
 	}
 
 	// And now, we can refresh the screen
-	if (refresh(fbfd,
-		    region,
-		    fbink_cfg->wfm_mode,
-		    fbink_cfg->dithering_mode,
-		    fbink_cfg->is_nightmode,
-		    fbink_cfg->is_flashing,
-		    fbink_cfg->no_refresh) != EXIT_SUCCESS) {
+	if (refresh(fbfd, region, fbink_cfg) != EXIT_SUCCESS) {
 		PFWARN("Failed to refresh the screen");
 	}
 
