@@ -2948,6 +2948,11 @@ static int
 		   bool no_refresh,
 		   const FBInkConfig* fbink_cfg)
 {
+	if (no_refresh) {
+		LOG("Skipping eInk refresh, as requested.");
+		return EXIT_SUCCESS;
+	}
+
 	FBInkConfig cfg = { 0 };
 	// If we actually passed an FBInkConfig, use it as a seed
 	if (fbink_cfg) {
