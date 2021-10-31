@@ -1804,9 +1804,7 @@ static int
 		   const struct mxcfb_rect region,
 		   uint32_t                waveform_mode,
 		   uint32_t                update_mode,
-		   int                     dithering_mode,
-		   bool                    is_nightmode,
-		   uint32_t                marker)
+		   const FBInkConfig* fbink_cfg)
 {
 	// NOTE: The hist_* fields are probably used to color the final decision AUTO will take,
 	//       hence our conservative choices...
@@ -1814,7 +1812,7 @@ static int
 		.update_region         = region,
 		.waveform_mode         = waveform_mode,
 		.update_mode           = update_mode,
-		.update_marker         = marker,
+		.update_marker         = lastMarker,
 		.hist_bw_waveform_mode = (waveform_mode == WAVEFORM_MODE_REAGL) ? WAVEFORM_MODE_REAGL : WAVEFORM_MODE_DU,
 		.hist_gray_waveform_mode =
 		    (waveform_mode == WAVEFORM_MODE_REAGL) ? WAVEFORM_MODE_REAGL : WAVEFORM_MODE_GC16_FAST,
@@ -1825,12 +1823,12 @@ static int
 		.alt_buffer_data = { 0U },
 	};
 
-	if (is_nightmode && deviceQuirks.canHWInvert) {
+	if (fbink_cfg->is_nightmode && deviceQuirks.canHWInvert) {
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
 	}
 
 	// NOTE: When dithering is enabled, you generally want to get rid of FORCE_MONOCHROME, because it gets applied *first*...
-	if (dithering_mode == HWD_LEGACY) {
+	if (fbink_cfg->dithering_mode == HWD_LEGACY) {
 		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
 
 		// And now we can deal with the algo selection :).
@@ -1924,11 +1922,10 @@ static int
 			 const struct mxcfb_rect region,
 			 uint32_t                waveform_mode,
 			 uint32_t                update_mode,
-			 int                     dithering_mode,
-			 bool                    is_nightmode,
-			 uint32_t                marker)
+			 const FBInkConfig* fbink_cfg)
 {
 	// Did we request legacy dithering?
+	int dithering_mode = get_hwd_mode(fbink_cfg->dithering_mode);
 	bool use_legacy_dithering = false;
 	if (dithering_mode == HWD_LEGACY) {
 		// Make sure we won't setup EPDC v2 dithering
@@ -1960,7 +1957,7 @@ static int
 		.ts_epdc = 0U,
 	};
 
-	if (is_nightmode && deviceQuirks.canHWInvert) {
+	if (fbink_cfg->is_nightmode && deviceQuirks.canHWInvert) {
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
 	}
 
@@ -2015,11 +2012,10 @@ static int
 		       const struct mxcfb_rect region,
 		       uint32_t                waveform_mode,
 		       uint32_t                update_mode,
-		       int                     dithering_mode,
-		       bool                    is_nightmode,
-		       uint32_t                marker)
+		       const FBInkConfig* fbink_cfg)
 {
 	// Did we request legacy dithering?
+	int dithering_mode = get_hwd_mode(fbink_cfg->dithering_mode);
 	bool use_legacy_dithering = false;
 	if (dithering_mode == HWD_LEGACY) {
 		// Make sure we won't setup EPDC v2 dithering
@@ -2033,7 +2029,7 @@ static int
 		.update_region   = region,
 		.waveform_mode   = waveform_mode,
 		.update_mode     = update_mode,
-		.update_marker   = marker,
+		.update_marker   = lastMarker,
 		.temp            = TEMP_USE_AMBIENT,
 		.flags           = (waveform_mode == WAVEFORM_MODE_ZELDA_GLD16) ? EPDC_FLAG_USE_ZELDA_REGAL
 				   : (waveform_mode == WAVEFORM_MODE_ZELDA_A2)  ? EPDC_FLAG_FORCE_MONOCHROME
@@ -2050,7 +2046,7 @@ static int
 		    (waveform_mode == WAVEFORM_MODE_ZELDA_REAGL) ? WAVEFORM_MODE_ZELDA_REAGL : WAVEFORM_MODE_GC16,
 	};
 
-	if (is_nightmode && deviceQuirks.canHWInvert) {
+	if (fbink_cfg->is_nightmode && deviceQuirks.canHWInvert) {
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
 	}
 
@@ -2105,15 +2101,13 @@ static int
 		      const struct mxcfb_rect region,
 		      uint32_t waveform_mode,
 		      uint32_t update_mode,
-		      int dithering_mode,
-		      bool is_nightmode,
-		      uint32_t marker)
+		      const FBInkConfig* fbink_cfg)
 {
 	struct mxcfb_update_data update = {
 		.update_region = region,
 		.waveform_mode = waveform_mode,
 		.update_mode = update_mode,
-		.update_marker = marker,
+		.update_marker = lastMarker,
 		.temp = TEMP_USE_AMBIENT,
 		.flags = (waveform_mode == WAVEFORM_MODE_REAGLD) ? EPDC_FLAG_USE_AAD
 			 : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME
@@ -2121,12 +2115,12 @@ static int
 		.alt_buffer_data = { 0U },
 	};
 
-	if (is_nightmode && deviceQuirks.canHWInvert) {
+	if (fbink_cfg->is_nightmode && deviceQuirks.canHWInvert) {
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
 	}
 
 	// NOTE: When dithering is enabled, you generally want to get rid of FORCE_MONOCHROME, because it gets applied *first*...
-	if (dithering_mode == HWD_LEGACY) {
+	if (fbink_cfg->dithering_mode == HWD_LEGACY) {
 		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
 
 		// And now we can deal with the algo selection :).
@@ -2187,16 +2181,14 @@ static int
 		       const struct mxcfb_rect region,
 		       uint32_t                waveform_mode,
 		       uint32_t                update_mode,
-		       int                     dithering_mode,
-		       bool                    is_nightmode,
-		       uint32_t                marker)
+		       const FBInkConfig* fbink_cfg)
 {
 	// NOTE: Actually uses the V1 epdc driver, hence dither_mode & quant_bit being unused.
 	struct mxcfb_update_data update = {
 		.update_region   = region,
 		.waveform_mode   = waveform_mode,
 		.update_mode     = update_mode,
-		.update_marker   = marker,
+		.update_marker   = lastMarker,
 		.temp            = (waveform_mode == WAVEFORM_MODE_DU) ? TEMP_USE_REMARKABLE : TEMP_USE_AMBIENT,
 		.flags           = (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
 		.dither_mode     = 0,
@@ -2204,12 +2196,12 @@ static int
 		.alt_buffer_data = { 0U }
 	};
 
-	if (is_nightmode && deviceQuirks.canHWInvert) {
+	if (fbink_cfg->is_nightmode && deviceQuirks.canHWInvert) {
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
 	}
 
 	// NOTE: When dithering is enabled, you generally want to get rid of FORCE_MONOCHROME, because it gets applied *first*...
-	if (dithering_mode == HWD_LEGACY) {
+	if (fbink_cfg->dithering_mode == HWD_LEGACY) {
 		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
 
 		// And now we can deal with the algo selection :).
@@ -2266,27 +2258,25 @@ static int
 		       const struct mxcfb_rect region,
 		       uint32_t                waveform_mode,
 		       uint32_t                update_mode,
-		       int                     dithering_mode,
-		       bool                    is_nightmode,
-		       uint32_t                marker)
+		       const FBInkConfig* fbink_cfg)
 {
 	// NOTE: Apparently benefits from the same trick as on rM of enforcing the 24°C table for DU
 	struct mxcfb_update_data update = { .update_region = region,
 					    .waveform_mode = waveform_mode,
 					    .update_mode   = update_mode,
-					    .update_marker = marker,
+					    .update_marker = lastMarker,
 					    .temp          = (waveform_mode == WAVEFORM_MODE_DU) ? 24 : TEMP_USE_AMBIENT,
 					    .flags         = (waveform_mode == WAVEFORM_MODE_REAGLD) ? EPDC_FLAG_USE_AAD
 							     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME
 												   : 0U,
 					    .alt_buffer_data = { 0U } };
 
-	if (is_nightmode && deviceQuirks.canHWInvert) {
+	if (fbink_cfg->is_nightmode && deviceQuirks.canHWInvert) {
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
 	}
 
 	// NOTE: When dithering is enabled, you generally want to get rid of FORCE_MONOCHROME, because it gets applied *first*...
-	if (dithering_mode == HWD_LEGACY) {
+	if (fbink_cfg->dithering_mode == HWD_LEGACY) {
 		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
 
 		// And now we can deal with the algo selection :).
@@ -2356,15 +2346,13 @@ static int
 		 const struct mxcfb_rect region,
 		 uint32_t                waveform_mode,
 		 uint32_t                update_mode,
-		 int                     dithering_mode,
-		 bool                    is_nightmode,
-		 uint32_t                marker)
+		 const FBInkConfig* fbink_cfg)
 {
 	struct mxcfb_update_data_v1_ntx update = {
 		.update_region   = region,
 		.waveform_mode   = waveform_mode,
 		.update_mode     = update_mode,
-		.update_marker   = marker,
+		.update_marker   = lastMarker,
 		.temp            = TEMP_USE_AMBIENT,
 		.flags           = (waveform_mode == WAVEFORM_MODE_REAGLD) ? EPDC_FLAG_USE_AAD
 				   : (waveform_mode == WAVEFORM_MODE_A2)   ? EPDC_FLAG_FORCE_MONOCHROME
@@ -2372,13 +2360,13 @@ static int
 		.alt_buffer_data = { 0U },
 	};
 
-	if (is_nightmode && deviceQuirks.canHWInvert) {
+	if (fbink_cfg->is_nightmode && deviceQuirks.canHWInvert) {
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
 	}
 
 	// NOTE: This requires a Mk. 6 device, the flags are silently ignored on older devices.
 	// NOTE: When dithering is enabled, you generally want to get rid of FORCE_MONOCHROME, because it gets applied *first*...
-	if (dithering_mode == HWD_LEGACY) {
+	if (fbink_cfg->dithering_mode == HWD_LEGACY) {
 		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
 
 		// And now we can deal with the algo selection :).
@@ -2445,9 +2433,7 @@ static int
 		     const struct mxcfb_rect region,
 		     uint32_t                waveform_mode,
 		     uint32_t                update_mode,
-		     int                     dithering_mode,
-		     bool                    is_nightmode,
-		     uint32_t                marker)
+		     const FBInkConfig* fbink_cfg)
 {
 	// NOTE: On Mk. 7 devices, for reasons that are unclear (and under circumstances which are equally unclear),
 	//       the EPDC may repeatedly ignore the requested flags and/or dither_mode...
@@ -2484,6 +2470,7 @@ static int
 	//       c.f., https://github.com/baskerville/plato/issues/129 (for the Clara bit).
 
 	// Did we request legacy dithering?
+	int dithering_mode = get_hwd_mode(fbink_cfg->dithering_mode);
 	bool use_legacy_dithering = false;
 	if (dithering_mode == HWD_LEGACY) {
 		// Make sure we won't setup EPDC v2 dithering
@@ -2496,7 +2483,7 @@ static int
 		.update_region   = region,
 		.waveform_mode   = waveform_mode,
 		.update_mode     = update_mode,
-		.update_marker   = marker,
+		.update_marker   = lastMarker,
 		.temp            = TEMP_USE_AMBIENT,
 		.flags           = (waveform_mode == WAVEFORM_MODE_GLD16) ? EPDC_FLAG_USE_REGAL
 				   : (waveform_mode == WAVEFORM_MODE_A2)  ? EPDC_FLAG_FORCE_MONOCHROME
@@ -2509,7 +2496,7 @@ static int
 		.alt_buffer_data = { 0U },
 	};
 
-	if (is_nightmode && deviceQuirks.canHWInvert) {
+	if (fbink_cfg->is_nightmode && deviceQuirks.canHWInvert) {
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
 	}
 
@@ -2584,7 +2571,7 @@ static int
 
 // Kobo Mark 8 devices ([Mk8<->??)
 static int
-    refresh_kobo_sunxi(const struct mxcfb_rect region, uint32_t waveform_mode, uint32_t update_mode, int dithering_mode)
+    refresh_kobo_sunxi(const struct mxcfb_rect region, uint32_t waveform_mode, uint32_t update_mode, const FBInkConfig* fbink_cfg)
 {
 	// NOTE: In case of issues, enable full verbosity in the DISP driver:
 	//       echo 8 >| /proc/sys/kernel/printk
@@ -2623,7 +2610,7 @@ static int
 		// NOTE: Unlike on mxcfb, this isn't HW assisted, this just uses the "simple" Y8->Y1 dither algorithm...
 		update.update_mode |= EINK_MONOCHROME;
 	}
-	if (update_mode == UPDATE_MODE_FULL) {
+	if (fbink_cfg->no_merge) {
 		// Bypass dubious driver optimizations to ensure we will actually flash, even when submitting identical content...
 		// NOTE: New in the Sage kernel on FW 4.29,
 		//       c.f., the memcmp check in eink_pixel_process_thread in a !IS_NO_MERGE branch...
@@ -2631,7 +2618,7 @@ static int
 	}
 
 	// And now for the dithering flags. They're all SW only, so, stuff 'em behind LEGACY...
-	if (dithering_mode == HWD_LEGACY) {
+	if (fbink_cfg->dithering_mode == HWD_LEGACY) {
 		if (waveform_mode == EINK_DU_MODE) {
 			// NOTE: A2 is flagged EINK_MONOCHROME, which actually just flags it EINK_DITHERING_SIMPLE...
 			update.update_mode |= EINK_DITHERING_NTX_Y1;
@@ -2815,11 +2802,7 @@ cleanup:
 static int
     refresh(int                     fbfd __attribute__((unused)),
 	    const struct mxcfb_rect region __attribute__((unused)),
-	    WFM_MODE_INDEX_T        waveform_mode __attribute__((unused)),
-	    HW_DITHER_INDEX_T       dithering_mode __attribute__((unused)),
-	    bool                    is_nightmode __attribute__((unused)),
-	    bool                    is_flashing __attribute__((unused)),
-	    bool                    no_refresh __attribute__((unused)))
+	    const FBInkConfig* fbink_cfg __attribute__((unused))
 {
 	return EXIT_SUCCESS;
 }
@@ -2847,14 +2830,10 @@ static inline void
 static int
     refresh(int fbfd,
 	    const struct mxcfb_rect region,
-	    WFM_MODE_INDEX_T waveform_mode,
-	    HW_DITHER_INDEX_T dithering_mode,
-	    bool is_nightmode,
-	    bool is_flashing,
-	    bool no_refresh)
+	    const FBInkConfig* fbink_cfg)
 {
 	// Were we asked to skip refreshes?
-	if (no_refresh) {
+	if (fbink_cfg->no_refresh) {
 		LOG("Skipping eInk refresh, as requested.");
 		return EXIT_SUCCESS;
 	}
@@ -2875,7 +2854,7 @@ static int
 
 #	ifdef FBINK_FOR_KINDLE
 	if (deviceQuirks.isKindleLegacy) {
-		return refresh_legacy(fbfd, region, is_flashing);
+		return refresh_legacy(fbfd, region, fbink_cfg->is_flashing);
 	}
 #	endif
 	// NOTE: While the fixed-cell codepath, when rendering in B&W, would be the perfect candidate for using A2 waveform mode,
@@ -2891,8 +2870,8 @@ static int
 	//       (i.e., DU or GL16/GC16 is most likely often what AUTO will land on).
 
 	// So, handle this common switcheroo here...
-	uint32_t wfm = (is_flashing && waveform_mode == WFM_AUTO) ? get_wfm_mode(WFM_GC16) : get_wfm_mode(waveform_mode);
-	uint32_t upm = is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
+	uint32_t wfm = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO) ? get_wfm_mode(WFM_GC16) : get_wfm_mode(fbink_cfg->wfm_mode);
+	uint32_t upm = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
 
 	// Update our own update marker
 #	ifdef FBINK_FOR_KOBO
@@ -2906,26 +2885,26 @@ static int
 
 #	if defined(FBINK_FOR_KINDLE)
 	if (deviceQuirks.isKindleRex) {
-		return refresh_kindle_rex(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
+		return refresh_kindle_rex(fbfd, region, wfm, upm, fbink_cfg);
 	} else if (deviceQuirks.isKindleZelda) {
 		return refresh_kindle_zelda(
-		    fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
+		    fbfd, region, wfm, upm, fbink_cfg);
 	} else {
-		return refresh_kindle(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
+		return refresh_kindle(fbfd, region, wfm, upm, fbink_cfg);
 	}
 #	elif defined(FBINK_FOR_CERVANTES)
-	return refresh_cervantes(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
+	return refresh_cervantes(fbfd, region, wfm, upm, fbink_cfg);
 #	elif defined(FBINK_FOR_REMARKABLE)
-	return refresh_remarkable(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
+	return refresh_remarkable(fbfd, region, wfm, upm, fbink_cfg);
 #	elif defined(FBINK_FOR_POCKETBOOK)
-	return refresh_pocketbook(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
+	return refresh_pocketbook(fbfd, region, wfm, upm, fbink_cfg);
 #	elif defined(FBINK_FOR_KOBO)
 	if (deviceQuirks.isSunxi) {
-		return refresh_kobo_sunxi(region, wfm, upm, get_hwd_mode(dithering_mode));
+		return refresh_kobo_sunxi(region, wfm, upm, fbink_cfg);
 	} else if (deviceQuirks.isKoboMk7) {
-		return refresh_kobo_mk7(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
+		return refresh_kobo_mk7(fbfd, region, wfm, upm, fbink_cfg);
 	} else {
-		return refresh_kobo(fbfd, region, wfm, upm, get_hwd_mode(dithering_mode), is_nightmode, lastMarker);
+		return refresh_kobo(fbfd, region, wfm, upm, fbink_cfg);
 	}
 #	endif    // FBINK_FOR_KINDLE
 }

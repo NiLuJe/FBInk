@@ -691,32 +691,32 @@ static __attribute__((cold)) long int jiffies_to_ms(long int);
 #	if defined(FBINK_FOR_KINDLE)
 static int refresh_legacy(int, const struct mxcfb_rect, bool);
 static int wait_for_submission_kindle(int, uint32_t);
-static int refresh_kindle(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
+static int refresh_kindle(int, const struct mxcfb_rect, uint32_t, uint32_t, const FBInkConfig*);
 static int wait_for_complete_kindle_pearl(int, uint32_t);
 static int wait_for_complete_kindle(int, uint32_t);
-static int refresh_kindle_zelda(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
-static int refresh_kindle_rex(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
+static int refresh_kindle_zelda(int, const struct mxcfb_rect, uint32_t, uint32_t, const FBInkConfig*);
+static int refresh_kindle_rex(int, const struct mxcfb_rect, uint32_t, uint32_t, const FBInkConfig*);
 #	elif defined(FBINK_FOR_CERVANTES)
-static int refresh_cervantes(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
+static int refresh_cervantes(int, const struct mxcfb_rect, uint32_t, uint32_t, const FBInkConfig*);
 static int wait_for_complete_cervantes(int, uint32_t);
 #	elif defined(FBINK_FOR_REMARKABLE)
-static int refresh_remarkable(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
+static int refresh_remarkable(int, const struct mxcfb_rect, uint32_t, uint32_t, const FBInkConfig*);
 static int wait_for_complete_remarkable(int, uint32_t);
 #	elif defined(FBINK_FOR_POCKETBOOK)
-static int refresh_pocketbook(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
+static int refresh_pocketbook(int, const struct mxcfb_rect, uint32_t, uint32_t, const FBInkConfig*);
 static int wait_for_complete_pocketbook(int, uint32_t);
 #	elif defined(FBINK_FOR_KOBO)
-static int refresh_kobo(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
+static int refresh_kobo(int, const struct mxcfb_rect, uint32_t, uint32_t, const FBInkConfig*);
 static int wait_for_complete_kobo(int, uint32_t);
-static int refresh_kobo_mk7(int, const struct mxcfb_rect, uint32_t, uint32_t, int, bool, uint32_t);
+static int refresh_kobo_mk7(int, const struct mxcfb_rect, uint32_t, uint32_t, const FBInkConfig*);
 static int wait_for_complete_kobo_mk7(int, uint32_t);
-static int refresh_kobo_sunxi(const struct mxcfb_rect, uint32_t, uint32_t, int);
+static int refresh_kobo_sunxi(const struct mxcfb_rect, uint32_t, uint32_t, const FBInkConfig*);
 static int wait_for_complete_kobo_sunxi(uint32_t);
 #	endif    // FBINK_FOR_KINDLE
 static inline void compute_update_marker(void);
 #endif    // !FBINK_FOR_LINUX
 static int
-    refresh(int, const struct mxcfb_rect, WFM_MODE_INDEX_T, HW_DITHER_INDEX_T UNUSED_BY_CERVANTES, bool, bool, bool);
+    refresh(int, const struct mxcfb_rect, const FBInkConfig*);
 #ifndef FBINK_FOR_LINUX
 #	if defined(FBINK_FOR_KINDLE)
 static int wait_for_submission(int, uint32_t);
