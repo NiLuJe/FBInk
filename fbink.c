@@ -2835,8 +2835,7 @@ static int
 		   HW_DITHER_INDEX_T       dithering_mode __attribute__((unused)),
 		   bool                    is_nightmode __attribute__((unused)),
 		   bool                    is_flashing __attribute__((unused)),
-		   bool                    no_refresh __attribute__((unused)),
-		   const FBInkConfig*      fbink_cfg __attribute__((unused)))
+		   bool                    no_refresh __attribute__((unused)))
 {
 	return EXIT_SUCCESS;
 }
@@ -2945,8 +2944,7 @@ static int
 		   HW_DITHER_INDEX_T dithering_mode,
 		   bool is_nightmode,
 		   bool is_flashing,
-		   bool no_refresh,
-		   const FBInkConfig* fbink_cfg)
+		   bool no_refresh)
 {
 	if (no_refresh) {
 		LOG("Skipping eInk refresh, as requested.");
@@ -2954,11 +2952,6 @@ static int
 	}
 
 	FBInkConfig cfg = { 0 };
-	// If we actually passed an FBInkConfig, use it as a seed
-	if (fbink_cfg) {
-		cfg = *fbink_cfg;
-	}
-
 	cfg.wfm_mode = waveform_mode;
 	cfg.dithering_mode = dithering_mode;
 	cfg.is_nightmode = is_nightmode;
@@ -5686,8 +5679,7 @@ static int
 			   fbink_cfg->dithering_mode,
 			   fbink_cfg->is_nightmode,
 			   fbink_cfg->is_flashing,
-			   do_clear ? fbink_cfg->no_refresh : false,
-			   fbink_cfg) != EXIT_SUCCESS) {
+			   do_clear ? fbink_cfg->no_refresh : false) != EXIT_SUCCESS) {
 		PFWARN("Failed to refresh the screen");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
@@ -7559,7 +7551,7 @@ cleanup:
 		if (is_cleared) {
 			fullscreen_region(&region);
 		}
-		refresh_compat(fbfd, region, wfm_mode, dithering_mode, is_nightmode, is_flashing, no_refresh, NULL);
+		refresh_compat(fbfd, region, wfm_mode, dithering_mode, is_nightmode, is_flashing, no_refresh);
 	}
 	free(lines);
 	free(brk_buff);
@@ -8343,8 +8335,7 @@ int
 				 fbink_cfg->dithering_mode,
 				 fbink_cfg->is_nightmode,
 				 fbink_cfg->is_flashing,
-				 false,
-				 fbink_cfg)) != EXIT_SUCCESS) {
+				 false)) != EXIT_SUCCESS) {
 		PFWARN("Failed to refresh the screen");
 	}
 

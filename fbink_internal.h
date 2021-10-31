@@ -715,14 +715,7 @@ static int wait_for_complete_kobo_sunxi(uint32_t);
 #	endif    // FBINK_FOR_KINDLE
 static inline void compute_update_marker(void);
 #endif    // !FBINK_FOR_LINUX
-static int refresh_compat(int,
-			  const struct mxcfb_rect,
-			  WFM_MODE_INDEX_T,
-			  HW_DITHER_INDEX_T,
-			  bool,
-			  bool,
-			  bool,
-			  const FBInkConfig*);
+static int refresh_compat(int, const struct mxcfb_rect, WFM_MODE_INDEX_T, HW_DITHER_INDEX_T, bool, bool, bool);
 static int refresh(int, const struct mxcfb_rect, const FBInkConfig*);
 #ifndef FBINK_FOR_LINUX
 #	if defined(FBINK_FOR_KINDLE)
