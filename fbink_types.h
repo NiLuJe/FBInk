@@ -46,6 +46,7 @@ typedef struct
 	bool               isKindlePearlScreen;
 	bool               isKindleZelda;
 	bool               isKindleRex;
+	bool               isKindleMTK;
 	bool               isKoboNonMT;
 	bool               isNTX16bLandscape;
 	bool               isKoboMk7;

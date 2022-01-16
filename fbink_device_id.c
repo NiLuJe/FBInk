@@ -329,6 +329,22 @@ static bool
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Zelda", sizeof(deviceQuirks.devicePlatform) - 1U);
 			return true;
+		case 0x690u:    // PW5
+		case 0x700u:
+		case 0x6FFu:
+		case 0x7ADu:
+		case 0x829u:
+		case 0x82Au:
+			deviceQuirks.isKindleMTK   = true;
+			deviceQuirks.hasEclipseWfm = true;
+			deviceQuirks.screenDPI     = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "PaperWhite 5", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Malbec", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Bellatrix", sizeof(deviceQuirks.devicePlatform) - 1U);
+			return true;
 		default:
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Unknown!", sizeof(deviceQuirks.deviceName) - 1U);

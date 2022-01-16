@@ -3801,6 +3801,12 @@ static __attribute__((cold)) int
 				return ERRCODE(ENOSYS);
 			}
 		}
+#	elif defined(FBINK_FOR_KINDLE)
+		// NOTE: Abort early on a PW5, as the MTK API is currently unsupported.
+		if (deviceQuirks.isKindleMTK) {
+			ELOG("The MTK ioctls introduced with the Bellatrix platform are currently unsupported");
+			return ERRCODE(ENOSYS);
+		}
 #	endif
 #endif
 
