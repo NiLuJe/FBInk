@@ -4968,11 +4968,19 @@ static int
 	}
 
 	// And finally, register as a DISP client, too
-	sunxiCtx.disp_fd = open("/dev/disp", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
-	if (sunxiCtx.disp_fd == -1) {
-		PFWARN("disp open: %m");
-		rv = ERRCODE(EXIT_FAILURE);
-		goto cleanup;
+	// NOTE: Since FW 4.31.19086, this appears to be race-y, most notably during early boot,
+	//       at which point it can reliably throw an ENODEV for some mysterious reason...
+	size_t disp_retry = 0U;
+	while ((sunxiCtx.disp_fd = open("/dev/disp", O_RDONLY | O_NONBLOCK | O_CLOEXEC)) == -1) {
+		// Retry a few times...
+		disp_retry++;
+		PFWARN("disp open (attempt %zu): %m", disp_retry);
+		// Give up.
+		if (disp_retry >= 10) {
+			PFWARN("Giving up on disp open");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
 	}
 
 	// And update our layer config to use that dmabuff fd, as a grayscale buffer.
