@@ -4931,7 +4931,7 @@ static int
 	// Start by registering as an ION client
 	sunxiCtx.ion_fd = open("/dev/ion", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
 	if (sunxiCtx.ion_fd == -1) {
-		PFWARN("open: %m");
+		PFWARN("ion open: %m");
 		return ERRCODE(EXIT_FAILURE);
 	}
 
@@ -4970,7 +4970,7 @@ static int
 	// And finally, register as a DISP client, too
 	sunxiCtx.disp_fd = open("/dev/disp", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
 	if (sunxiCtx.disp_fd == -1) {
-		PFWARN("open: %m");
+		PFWARN("disp open: %m");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
