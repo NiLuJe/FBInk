@@ -8579,15 +8579,14 @@ static int
 //           (e.g., Plato relies on HW rotation, and KOReader may change the bitdepth).
 //       TL;DR: We now monitor *any* change in bitdepth and/or rotation.
 int
-    fbink_reinit(int fbfd UNUSED_BY_KINDLE, const FBInkConfig* restrict fbink_cfg UNUSED_BY_KINDLE)
+    fbink_reinit(int fbfd, const FBInkConfig* restrict fbink_cfg)
 {
-#ifndef FBINK_FOR_KINDLE
-#	ifdef FBINK_FOR_KOBO
+#ifdef FBINK_FOR_KOBO
 	// On sunxi, the framebuffer state is meaningless, so, just do our own thing...
 	if (deviceQuirks.isSunxi) {
 		return kobo_sunxi_reinit_check(fbfd, fbink_cfg);
 	}
-#	endif
+#endif
 
 	// So, we're concerned with stuff that affects the logical & physical layout, namely, bitdepth & rotation.
 	const uint32_t old_bpp  = vInfo.bits_per_pixel;
@@ -8614,10 +8613,10 @@ int
 		goto cleanup;
 	}
 
-#	ifdef FBINK_FOR_POCKETBOOK
+#ifdef FBINK_FOR_POCKETBOOK
 	// On PocketBook, fix the broken mess that the ioctls returns...
 	pocketbook_fix_fb_info();
-#	endif
+#endif
 
 	// We want to flag each trigger independently
 	if (old_bpp != vInfo.bits_per_pixel) {
@@ -8660,12 +8659,6 @@ cleanup:
 	}
 
 	return rv;
-#else
-	// NOTE: I currently haven't found the need for any shenanigans like that on Kindle, so, make this a NOP there ;).
-	// NOTE: That said, we technically could make use of the canRotate quirk if we had an API user on Kindle that cared...
-	WARN("Reinitilization is not needed on Kindle devices :)");
-	return ERRCODE(ENOSYS);
-#endif    // !FBINK_FOR_KINDLE
 }
 
 // Public wrapper around update_pen_colors
