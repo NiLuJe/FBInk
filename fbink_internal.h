@@ -143,6 +143,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <syslog.h>
+#include <time.h>
 #include <unistd.h>
 
 // NOTE: This is from https://www.cprogramming.com/tutorial/unicode.html
