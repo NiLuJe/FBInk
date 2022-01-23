@@ -858,7 +858,6 @@ FBINK_API bool fbink_is_fb_quirky(void) __attribute__((pure, deprecated));
 //       and it can avoid running the same ioctl twice when an ioctl already done by init is needed to detect a state change.
 // NOTE: Using fbink_reinit does NOT lift the requirement of having to run fbink_init at least ONCE,
 //       i.e., you cannot replace the initial fbink_init call by fbink_reinit!
-// Returns -(ENOSYS) on Kindle, where this is not needed.
 // If reinitialization was *successful*, returns a bitmask with one or more of these flags set:
 // bit OK_BPP_CHANGE is set if there was a bitdepth change.
 // bit OK_ROTA_CHANGE is set if there was a rotation change.
