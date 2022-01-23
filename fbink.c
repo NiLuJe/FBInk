@@ -4922,6 +4922,15 @@ static int
 }
 
 #ifdef FBINK_FOR_KOBO
+
+// I'm wary of inlined nanosleep calls, c.f., do_infinite_progress_bar @ fbink_cmd.c
+static void
+    yield_to_sunxi_disp(void)
+{
+	const struct timespec zzz = { 0L, 50000000L };
+	nanosleep(&zzz, NULL);
+}
+
 // Do the same, but via ION on sunxi...
 static int
     memmap_ion(void)
@@ -4974,8 +4983,7 @@ static int
 	size_t disp_retry = 0U;
 	while ((sunxiCtx.disp_fd = open("/dev/disp", O_RDONLY | O_NONBLOCK | O_CLOEXEC)) == -1) {
 		// Retry a few times, waiting for a few ticks between each attempt...
-		const struct timespec zzz = { 0L, 50000000L };
-		nanosleep(&zzz, NULL);
+		yield_to_sunxi_disp();
 		disp_retry++;
 		PFWARN("disp open (attempt %zu): %m", disp_retry);
 		// Give up after a second.

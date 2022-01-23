@@ -749,7 +749,8 @@ static __attribute__((cold)) int initialize_fbink(int, const FBInkConfig* restri
 
 static int memmap_fb(int);
 #ifdef FBINK_FOR_KOBO
-static int memmap_ion(void);
+static void yield_to_sunxi_disp(void);
+static int  memmap_ion(void);
 #endif
 static inline void close_fb(int);
 static int         unmap_fb(void);
