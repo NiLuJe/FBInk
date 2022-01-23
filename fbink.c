@@ -5013,7 +5013,7 @@ cleanup:
 
 	if (sunxiCtx.ion_fd != -1) {
 		if (close(sunxiCtx.ion_fd) != 0) {
-			PFWARN("close: %m");
+			PFWARN("ion close: %m");
 			rv = ERRCODE(EXIT_FAILURE);
 		} else {
 			sunxiCtx.ion_fd = -1;
@@ -5022,7 +5022,7 @@ cleanup:
 
 	if (sunxiCtx.disp_fd != -1) {
 		if (close(sunxiCtx.disp_fd) != 0) {
-			PFWARN("close: %m");
+			PFWARN("disp close: %m");
 			rv = ERRCODE(EXIT_FAILURE);
 		} else {
 			sunxiCtx.disp_fd = -1;
