@@ -90,8 +90,8 @@ static void identify_cervantes(void);
 // Can thankfully be populated from /bin/ntx_hwconfig with the help of strings -n2 and a bit of sed, i.e.,
 // sed -re 's/(^)(.*?)($)/"\2",/g' Kobo_PCB_IDs.txt
 // Double-check w/ ntx_hwconfig -l -s /dev/mmcblk0
-// NOTE: Last updated on 06/10/21, from FW 4.28.17623 (NTX HwConfig v3.5.6.31.281-20210423)
-//       Last checked on 10/20/21 against 4.29.18730
+// NOTE: Last updated on 01/23/22, from FW 4.31.19086 (NTX HwConfig v3.5.6.32.286-20211013)
+//       Last checked on 01/23/22 against 4.31.19086
 /*
 static const char* kobo_pcbs[] = {
 	"E60800", "E60810", "E60820",  "E90800", "E90810", "E60830", "E60850", "E50800", "E50810", "E60860",  "E60MT2",
@@ -103,17 +103,17 @@ static const char* kobo_pcbs[] = {
 	"E60U00", "E70Q10", "E60QP0",  "E60QQ0", "E70Q20", "T05R00", "M31Q00", "E60U10", "E60K00", "E80K00",  "E70Q30",
 	"EA0Q00", "E60QR0", "ED0R00",  "E60QU0", "E60U20", "M35QE0", "E60QT0", "E70Q50", "T60U00", "E60QV0",  "E70K00",
 	"T60P00", "TA0P00", "MXXQ4X",  "E60P20", "T60P10", "E60K10", "EA0P10", "E60P40", "E70P10", "E70P20",  "E80P00",
-	"E70P20", "E60P50", "E70K10"
+	"E70P20", "E60P50", "E70K10",  "E70P50", "E60K20", "E60P60"
 };
 */
 // And match (more or less accurately, for some devices) that to what we've come to know as a device code,
 // because that's what we actually care about...
 // c.f., tools/pcb_to_ids.py
 static const unsigned short int kobo_ids[] = {
-	0, 0,   0,   0,   0, 0, 0, 0,   0,   0,   0, 0,   310, 0, 0,   0,   0,   0, 0, 0, 310, 320, 0,   0,   330, 0,
-	0, 340, 350, 0,   0, 0, 0, 0,   360, 360, 0, 330, 0,   0, 0,   370, 0,   0, 0, 0, 371, 0,   0,   0,   0,   0,
-	0, 0,   0,   373, 0, 0, 0, 375, 374, 0,   0, 375, 0,   0, 375, 0,   0,   0, 0, 0, 0,   376, 376, 377, 0,   0,
-	0, 0,   0,   382, 0, 0, 0, 0,   0,   384, 0, 0,   0,   0, 0,   0,   387, 0, 0, 0, 383, 0,   0,   388,
+	0,   0,   0, 0, 0, 0,   0,   0,   0,   0,   0,   0, 310, 0,   0,   0, 0, 0,   0, 0,   310, 320, 0, 0, 330, 0, 0,
+	340, 350, 0, 0, 0, 0,   0,   360, 360, 0,   330, 0, 0,   0,   370, 0, 0, 0,   0, 371, 0,   0,   0, 0, 0,   0, 0,
+	0,   373, 0, 0, 0, 375, 374, 0,   0,   375, 0,   0, 375, 0,   0,   0, 0, 0,   0, 376, 376, 377, 0, 0, 0,   0, 0,
+	382, 0,   0, 0, 0, 0,   384, 0,   0,   0,   0,   0, 0,   387, 0,   0, 0, 383, 0, 0,   388, 0,   0, 0
 };
 
 // Same idea, but for the various NTX/Kobo Display Panels...
