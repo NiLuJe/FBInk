@@ -4924,6 +4924,7 @@ static int
 #ifdef FBINK_FOR_KOBO
 
 // I'm wary of inlined nanosleep calls, c.f., do_infinite_progress_bar @ fbink_cmd.c
+// NOTE: Mark me __attribute__((noinline, cold)) if necessary...
 static void
     yield_to_sunxi_disp(void)
 {
