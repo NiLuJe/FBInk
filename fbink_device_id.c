@@ -1167,7 +1167,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBBLux2", sizeof(deviceQuirks.deviceCodename) - 1U);
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_616;
-		} else if (strcmp(model_name, "PB617") == 0 strcmp(model_name, "PocketBook 617") == 0) {
+		} else if (strcmp(model_name, "PB617") == 0 || strcmp(model_name, "PocketBook 617") == 0) {
 			deviceQuirks.screenDPI = 212U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBBLux3", sizeof(deviceQuirks.deviceCodename) - 1U);
