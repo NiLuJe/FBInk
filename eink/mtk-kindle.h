@@ -40,16 +40,16 @@
 #include <linux/types.h>
 
 /* EPDC_FLAG_xx */
-#define EPDC_FLAG_ENABLE_INVERSION 0x01
-#define EPDC_FLAG_FORCE_MONOCHROME 0x02
-#define EPDC_FLAG_USE_CMAP         0x04
-#define EPDC_FLAG_USE_ALT_BUFFER   0x100
-#define EPDC_FLAG_TEST_COLLISION   0x200
-#define EPDC_FLAG_GROUP_UPDATE     0x400
-#define EPDC_FLAG_USE_DITHERING_Y1 0x2000
-#define EPDC_FLAG_USE_DITHERING_Y4 0x4000
-#define EPDC_FLAG_USE_REGAL        0x8000
-#define EPDC_FLAG_ENABLE_SWIPE     0x10000
+#define EPDC_FLAG_ENABLE_INVERSION     0x01
+#define EPDC_FLAG_FORCE_MONOCHROME     0x02
+#define EPDC_FLAG_USE_CMAP             0x04
+#define EPDC_FLAG_USE_ALT_BUFFER       0x100
+#define EPDC_FLAG_TEST_COLLISION       0x200
+#define EPDC_FLAG_GROUP_UPDATE         0x400
+#define MTK_EPDC_FLAG_USE_DITHERING_Y1 0x2000
+#define MTK_EPDC_FLAG_USE_DITHERING_Y4 0x4000
+#define EPDC_FLAG_USE_REGAL            0x8000
+#define MTK_EPDC_FLAG_ENABLE_SWIPE     0x10000
 
 /* temperature use sensor. */
 #define TEMP_USE_AMBIENT 0x1000
@@ -67,30 +67,30 @@
 #define GRAYSCALE_4BIT          0x3
 #define GRAYSCALE_4BIT_INVERTED 0x4
 
-enum WAVEFORM_MODE_ENUM
+enum MTK_WAVEFORM_MODE_ENUM
 {
-	WAVEFORM_MODE_INIT          = 0,
-	WAVEFORM_MODE_DU            = 1,
-	WAVEFORM_MODE_GC16          = 2,
-	WAVEFORM_MODE_GC16_FAST     = 2,
-	WAVEFORM_MODE_GL16          = 3,
-	WAVEFORM_MODE_GL16_FAST     = 3,
-	WAVEFORM_MODE_GL4           = 3,
-	WAVEFORM_MODE_GL16_INV      = 3,
-	WAVEFORM_MODE_GLR16         = 4,
-	WAVEFORM_MODE_REAGL         = 4,
-	WAVEFORM_MODE_GLD16         = 5,
-	WAVEFORM_MODE_REAGLD        = 5,
-	WAVEFORM_MODE_A2            = 6,
-	WAVEFORM_MODE_DU4           = 7,
-	WAVEFORM_MODE_LAST          = 7,
-	WAVEFORM_MODE_GCK16         = 8,
-	WAVEFORM_MODE_GLKW16        = 9,
-	WAVEFORM_MODE_GC16_PARTIAL  = 10,
-	WAVEFORM_MODE_GCK16_PARTIAL = 11,
-	WAVEFORM_MODE_DUNM          = 12,
-	WAVEFORM_MODE_P2SW          = 13,
-	WAVEFORM_MODE_AUTO          = 257,
+	MTK_WAVEFORM_MODE_INIT          = 0,
+	MTK_WAVEFORM_MODE_DU            = 1,
+	MTK_WAVEFORM_MODE_GC16          = 2,
+	MTK_WAVEFORM_MODE_GC16_FAST     = 2,
+	MTK_WAVEFORM_MODE_GL16          = 3,
+	MTK_WAVEFORM_MODE_GL16_FAST     = 3,
+	MTK_WAVEFORM_MODE_GL4           = 3,
+	MTK_WAVEFORM_MODE_GL16_INV      = 3,
+	MTK_WAVEFORM_MODE_GLR16         = 4,
+	MTK_WAVEFORM_MODE_REAGL         = 4,
+	MTK_WAVEFORM_MODE_GLD16         = 5,
+	MTK_WAVEFORM_MODE_REAGLD        = 5,
+	MTK_WAVEFORM_MODE_A2            = 6,
+	MTK_WAVEFORM_MODE_DU4           = 7,
+	MTK_WAVEFORM_MODE_LAST          = 7,
+	MTK_WAVEFORM_MODE_GCK16         = 8,
+	MTK_WAVEFORM_MODE_GLKW16        = 9,
+	MTK_WAVEFORM_MODE_GC16_PARTIAL  = 10,
+	MTK_WAVEFORM_MODE_GCK16_PARTIAL = 11,
+	MTK_WAVEFORM_MODE_DUNM          = 12,
+	MTK_WAVEFORM_MODE_P2SW          = 13,
+	WAVEFORM_MODE_AUTO              = 257,
 };
 
 enum hwtcon_update_scheme
@@ -124,6 +124,7 @@ struct mxcfb_swipe_data
 	__u32 steps;     /* number of swipe steps */
 };
 
+// Matches !Zelda
 struct mxcfb_waveform_modes
 {
 	/* waveform mode index for WAVEFORM_MODE_INIT */
@@ -181,7 +182,7 @@ struct mxcfb_alt_buffer_data
 	struct mxcfb_rect alt_update_region;
 };
 
-struct mxcfb_update_data
+struct mxcfb_update_data_mtk
 {
 	struct mxcfb_rect            update_region;
 	/* which waveform to use for the update, du, gc4, gc8 gc16 etc */
@@ -235,16 +236,16 @@ struct mxcfb_panel_info
 #define HWTCON_IOCTL_MAGIC_NUMBER 'F'
 
 /* Set the mapping between waveform types and waveform mode index */
-#define MXCFB_SET_WAVEFORM_MODES _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x2B, struct mxcfb_waveform_modes)
+#define MXCFB_SET_WAVEFORM_MODES_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x2B, struct mxcfb_waveform_modes)
 
 /* Set the temperature for screen updates.
  * If temperature specified is TEMP_USE_AMBIENT,
  * use the temperature read from the temperature sensor.
  * Otherwise use the temperature specified
  */
-#define MXCFB_SET_TEMPERATURE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x2C, int32_t)
+#define MXCFB_SET_TEMPERATURE_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x2C, int32_t)
 
-#define MXCFB_SET_AUTO_UPDATE_MODE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x2D, __u32)
+#define MXCFB_SET_AUTO_UPDATE_MODE_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x2D, __u32)
 
 /* Get the temperature currently used for screen updates.
  * If the temperature set by command FB_SET_TEMPERATURE
@@ -252,10 +253,10 @@ struct mxcfb_panel_info
  * return that temperature value.
  * Otherwise, return the temperature read from the temperature sensor
  */
-#define MXCFB_GET_TEMPERATURE _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x38, int32_t)
+#define MXCFB_GET_TEMPERATURE_MTK _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x38, int32_t)
 
 /* Send update info to update the Eink panel display */
-#define MXCFB_SEND_UPDATE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x2E, struct mxcfb_update_data)
+#define MXCFB_SEND_UPDATE_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x2E, struct mxcfb_update_data_mtk)
 
 /* Set the scheme that the FB driver should use in handling the FB_SEND_UPDATE.
  * If the scheme is set to UPDATE_SCHEME_QUEUE,
@@ -265,34 +266,34 @@ struct mxcfb_panel_info
  * the driver should try to merge as many as possible
  * those requests before sending them
  * to IMGSYS or MMSYS
- * if the flags in the mxcfb_update_data
+ * if the flags in the mxcfb_update_data_mtk
  * structure of those requests are identical.
  */
-#define MXCFB_SET_UPDATE_SCHEME _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x32, __u32)
+#define MXCFB_SET_UPDATE_SCHEME_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x32, __u32)
 
 /* Wait until the specified send_update request
  * (specified by mxcfb_update_marker_data) is
  * submitted to HWTCON to display or timeout (5 seconds)
  */
-#define MXCFB_WAIT_FOR_UPDATE_SUBMISSION _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x37, __u32)
+#define MXCFB_WAIT_FOR_UPDATE_SUBMISSION_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x37, __u32)
 
 /* Wait until the specified send_update request
  * (specified by mxcfb_update_marker_data) is
  * already completed (Eink panel updated) or timeout (5 seconds)
  */
-#define MXCFB_WAIT_FOR_UPDATE_COMPLETE _IOWR(HWTCON_IOCTL_MAGIC_NUMBER, 0x2F, struct mxcfb_update_marker_data)
+#define MXCFB_WAIT_FOR_UPDATE_COMPLETE_MTK _IOWR(HWTCON_IOCTL_MAGIC_NUMBER, 0x2F, struct mxcfb_update_marker_data)
 
 /* Copy the content of the working buffer to user space */
-#define MXCFB_GET_WORK_BUFFER _IOWR(HWTCON_IOCTL_MAGIC_NUMBER, 0x34, unsigned long)
+#define MXCFB_GET_WORK_BUFFER_MTK _IOWR(HWTCON_IOCTL_MAGIC_NUMBER, 0x34, unsigned long)
 
 /* Check if the waveform supports advanced algorithms.
  * If yes, return WAVEFORM_TYPE_5BIT
  * Otherwise WAVEFORM_TYPE_4BIT
  */
-#define MXCFB_GET_WAVEFORM_TYPE _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x39, __u32)
+#define MXCFB_GET_WAVEFORM_TYPE_MTK _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x39, __u32)
 
 /* get EPD material type from dts */
-#define MXCFB_GET_MATERIAL_TYPE _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x3A, __u32)
+#define MXCFB_GET_MATERIAL_TYPE_MTK _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x3A, __u32)
 
 /* Set the front light control data for night mode.
  * For each screen update in night mode,
@@ -301,30 +302,30 @@ struct mxcfb_panel_info
  * and then raised back to the "current_level" gradually
  * with increment of "stride" every milli second.
  */
-#define MXCFB_SET_NIGHTMODE _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x4A, struct mxcfb_nightmode_ctrl)
+#define MXCFB_SET_NIGHTMODE_MTK _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x4A, struct mxcfb_nightmode_ctrl)
 
 /* Set the power down delay so the driver won't shut down the HWTCON immediately
  * after all the updates are done.
  * Instead it will wait until the "DELAY" time has elapsed to skip the
  * powerdown and powerup sequences if an update comes before that.
  */
-#define MXCFB_SET_PWRDOWN_DELAY _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x30, int32_t)
+#define MXCFB_SET_PWRDOWN_DELAY_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x30, int32_t)
 
 /* Get the power down delay set in MXCFB_SET_PWRDOWN_DELAY command */
-#define MXCFB_GET_PWRDOWN_DELAY _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x31, int32_t)
+#define MXCFB_GET_PWRDOWN_DELAY_MTK _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x31, int32_t)
 
 /* Pause updating the screen.
  * Any MXCFB_SEND_UPDATE request will be discarded.
  */
-#define MXCFB_SET_PAUSE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x33, __u32)
+#define MXCFB_SET_PAUSE_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x33, __u32)
 
 /* Resume updating the screen. */
-#define MXCFB_SET_RESUME _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x35, __u32)
+#define MXCFB_SET_RESUME_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x35, __u32)
 
 /* Get the screen updating flag set by MXCFB_SET_PAUSE or MXCFB_SET_RESUME */
-#define MXCFB_GET_PAUSE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x34, __u32)
+#define MXCFB_GET_PAUSE_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x34, __u32)
 
-#define MXCFB_GET_PANEL_INFO _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x130, struct mxcfb_panel_info)
+#define MXCFB_GET_PANEL_INFO_MTK _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x130, struct mxcfb_panel_info)
 
 /* Lightbox (aka halftone pattern) feature */
 #define MXCFB_SET_HALFTONE  _IOW('F', 0x4B, struct mxcfb_halftone_data)
@@ -355,8 +356,8 @@ struct mxcfb_halftone_data
 #define REAGL_FEATURE_0 0x00
 #define REAGL_FEATURE_1 0x01
 
-#define MXCFB_SET_UPDATE_FLAGS _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x3B, __u32)
-#define MXCFB_GET_UPDATE_FLAGS _IOWR(HWTCON_IOCTL_MAGIC_NUMBER, 0x3C, __u32)
+#define MXCFB_SET_UPDATE_FLAGS_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x3B, __u32)
+#define MXCFB_GET_UPDATE_FLAGS_MTK _IOWR(HWTCON_IOCTL_MAGIC_NUMBER, 0x3C, __u32)
 
 /* fast mode flags */
 #define UPDATE_FLAGS_MASK_PARAM (0xFF << 24)
