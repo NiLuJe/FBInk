@@ -7700,12 +7700,7 @@ static uint32_t
 			waveform_mode = WAVEFORM_MODE_GC16;
 			break;
 		case WFM_GC4:
-			if (has_mtk_wfm) {
-				// Like on Zelda, there's no GC4, so, alias to GC16
-				waveform_mode = WAVEFORM_MODE_GC16;
-			} else {
-				waveform_mode = WAVEFORM_MODE_GC4;
-			}
+			waveform_mode = WAVEFORM_MODE_GC4;
 			break;
 		case WFM_A2:
 			if (has_new_wfm) {
