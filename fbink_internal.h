@@ -194,6 +194,8 @@
 // NOTE: We always neeed one of those, because we rely on mxcfb_rect in a number of places
 #if defined(FBINK_FOR_KINDLE)
 #	include "eink/mxcfb-kindle.h"
+// Bellatrix MTK driver
+#	include "eink/mtk-kindle.h"
 // Legacy einkfb driver
 #	include "eink/einkfb.h"
 #elif defined(FBINK_FOR_CERVANTES)
