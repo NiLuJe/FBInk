@@ -2099,6 +2099,99 @@ static int
 
 	return EXIT_SUCCESS;
 }
+
+// Kindle PaperWhite 5 ([PW5<->??)
+static int
+    refresh_kindle_mtk(int fbfd, const struct mxcfb_rect region, const FBInkConfig* fbink_cfg)
+{
+	// Handle the common waveform_mode/update_mode switcheroo...
+	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO)
+					   ? get_wfm_mode(WFM_GC16)
+					   : get_wfm_mode(fbink_cfg->wfm_mode);
+	const uint32_t update_mode   = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
+
+	// Did we request legacy dithering?
+	int  dithering_mode       = get_hwd_mode(fbink_cfg->dithering_mode);
+	bool use_legacy_dithering = false;
+	if (dithering_mode == HWD_LEGACY) {
+		// Make sure we won't setup EPDC v2 dithering
+		dithering_mode       = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
+		// And make sure we'll setup EPDC v1 flags later
+		// FIXME: Actually check if EPDC v2 dithering works ;).
+		use_legacy_dithering = true;
+	}
+
+	struct mxcfb_update_data_mtk update = {
+		.update_region   = region,
+		.waveform_mode   = waveform_mode,
+		.update_mode     = update_mode,
+		.update_marker   = lastMarker,
+		.temp            = TEMP_USE_AMBIENT,
+		.flags           = (waveform_mode == MTK_WAVEFORM_MODE_REAGLD) ? MTK_EPDC_FLAG_USE_REGAL
+				   : (waveform_mode == MTK_WAVEFORM_MODE_A2)   ? EPDC_FLAG_FORCE_MONOCHROME
+									       : 0U,
+		.dither_mode     = dithering_mode,
+		.quant_bit       = (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)                            ? 0
+				   : (waveform_mode == MTK_WAVEFORM_MODE_A2 || waveform_mode == MTK_WAVEFORM_MODE_DU) ? 1
+				   : (waveform_mode == MTK_WAVEFORM_MODE_GL4 || waveform_mode == MTK_WAVEFORM_MODE_DU4) ? 3
+															: 7,
+		.alt_buffer_data = { 0U },
+		.hist_bw_waveform_mode =
+		    (waveform_mode == MTK_WAVEFORM_MODE_REAGL) ? MTK_WAVEFORM_MODE_REAGL : MTK_WAVEFORM_MODE_DU,
+		.hist_gray_waveform_mode =
+		    (waveform_mode == MTK_WAVEFORM_MODE_REAGL) ? MTK_WAVEFORM_MODE_REAGL : MTK_WAVEFORM_MODE_GC16,
+		.ts_pxp  = 0U,
+		.ts_epdc = 0U,
+	};
+
+	if (fbink_cfg->is_nightmode && deviceQuirks.canHWInvert) {
+		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
+	}
+
+	// NOTE: When dithering is enabled, you generally want to get rid of FORCE_MONOCHROME, because it gets applied *first*...
+	//       That'd render EPDC v1 dithering useless, and as for EPDC v2, this only yields B&W with severe patterning.
+	//       It does help hide the vectorization? artefacts (i.e., the 4 visible horizontal "bands" of processing), though.
+	if (use_legacy_dithering || dithering_mode != EPDC_FLAG_USE_DITHERING_PASSTHROUGH) {
+		// EPDC v2 here, where we prefer the newer PxP alternatives, so no need to mess with the old dithering flags.
+		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
+	}
+
+	// And setup EPDC v1 dithering
+	if (use_legacy_dithering) {
+		if (waveform_mode == MTK_WAVEFORM_MODE_A2 || waveform_mode == MTK_WAVEFORM_MODE_DU) {
+			update.flags |= MTK_EPDC_FLAG_USE_DITHERING_Y1;
+		} else {
+			// NOTE: Generally much less useful/pleasing than Y1.
+			//       Then again, it's not any better with EPDC v2 dithering @ q3, either ;).
+			update.flags |= MTK_EPDC_FLAG_USE_DITHERING_Y4;
+		}
+		// NOTE: No EPDC_FLAG_USE_DITHERING_Y2 is gone on Bellatrix.
+	}
+
+	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE_MTK, &update);
+
+	if (rv < 0) {
+		PFWARN("MXCFB_SEND_UPDATE_MTK: %m");
+		if (errno == EINVAL) {
+			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
+			     region.top,
+			     region.left,
+			     region.width,
+			     region.height);
+		}
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	LOG("hist_bw_waveform_mode is now %#03x (%s)",
+	    update.hist_bw_waveform_mode,
+	    kindle_mtk_wfm_to_string(update.hist_bw_waveform_mode));
+	LOG("hist_gray_waveform_mode is now %#03x (%s)",
+	    update.hist_gray_waveform_mode,
+	    kindle_mtk_wfm_to_string(update.hist_gray_waveform_mode));
+	LOG("waveform_mode is now %#03x (%s)", update.waveform_mode, kindle_mtk_wfm_to_string(update.waveform_mode));
+
+	return EXIT_SUCCESS;
+}
 #	elif defined(FBINK_FOR_CERVANTES)
 // Cervantes devices
 // All of them support MX50 "compat" ioctls, much like Kobos.
@@ -2908,7 +3001,9 @@ static int
 #	endif
 
 #	if defined(FBINK_FOR_KINDLE)
-	if (deviceQuirks.isKindleRex) {
+	if (deviceQuirks.isKindleMTK) {
+		return refresh_kindle_mtk(fbfd, region, fbink_cfg);
+	} else if (deviceQuirks.isKindleRex) {
 		return refresh_kindle_rex(fbfd, region, fbink_cfg);
 	} else if (deviceQuirks.isKindleZelda) {
 		return refresh_kindle_zelda(fbfd, region, fbink_cfg);
@@ -7587,10 +7682,9 @@ static uint32_t
 	// Parse waveform mode...
 #	if defined(FBINK_FOR_KINDLE)
 	// Is this a Zelda or a Rex with new waveforms?
-	bool has_new_wfm = false;
-	if (deviceQuirks.isKindleZelda || deviceQuirks.isKindleRex) {
-		has_new_wfm = true;
-	}
+	const bool has_new_wfm = (deviceQuirks.isKindleZelda || deviceQuirks.isKindleRex);
+	// Is this device running on a MTK SoC?
+	const bool has_mtk_wfm = deviceQuirks.isKindleMTK;
 
 	switch (wfm_mode_index) {
 		case WFM_INIT:
@@ -7606,7 +7700,12 @@ static uint32_t
 			waveform_mode = WAVEFORM_MODE_GC16;
 			break;
 		case WFM_GC4:
-			waveform_mode = WAVEFORM_MODE_GC4;
+			if (has_mtk_wfm) {
+				// Like on Zelda, there's no GC4, so, alias to GC16
+				waveform_mode = WAVEFORM_MODE_GC16;
+			} else {
+				waveform_mode = WAVEFORM_MODE_GC4;
+			}
 			break;
 		case WFM_A2:
 			if (has_new_wfm) {
@@ -7616,35 +7715,35 @@ static uint32_t
 			}
 			break;
 		case WFM_GL16:
-			if (has_new_wfm) {
+			if (has_new_wfm || has_mtk_wfm) {
 				waveform_mode = WAVEFORM_MODE_ZELDA_GL16;
 			} else {
 				waveform_mode = WAVEFORM_MODE_GL16;
 			}
 			break;
 		case WFM_REAGL:
-			if (has_new_wfm) {
+			if (has_new_wfm || has_mtk_wfm) {
 				waveform_mode = WAVEFORM_MODE_ZELDA_REAGL;
 			} else {
 				waveform_mode = WAVEFORM_MODE_REAGL;
 			}
 			break;
 		case WFM_REAGLD:
-			if (has_new_wfm) {
+			if (has_new_wfm || has_mtk_wfm) {
 				waveform_mode = WAVEFORM_MODE_ZELDA_REAGLD;
 			} else {
 				waveform_mode = WAVEFORM_MODE_REAGLD;
 			}
 			break;
 		case WFM_GC16_FAST:
-			if (has_new_wfm) {
+			if (has_new_wfm || has_mtk_wfm) {
 				waveform_mode = WAVEFORM_MODE_ZELDA_GC16_FAST;
 			} else {
 				waveform_mode = WAVEFORM_MODE_GC16_FAST;
 			}
 			break;
 		case WFM_GL16_FAST:
-			if (has_new_wfm) {
+			if (has_new_wfm || has_mtk_wfm) {
 				waveform_mode = WAVEFORM_MODE_ZELDA_GL16_FAST;
 			} else {
 				waveform_mode = WAVEFORM_MODE_GL16_FAST;
@@ -7654,14 +7753,14 @@ static uint32_t
 			waveform_mode = WAVEFORM_MODE_DU4;
 			break;
 		case WFM_GL4:
-			if (has_new_wfm) {
+			if (has_new_wfm || has_mtk_wfm) {
 				waveform_mode = WAVEFORM_MODE_ZELDA_GL4;
 			} else {
 				waveform_mode = WAVEFORM_MODE_GL4;
 			}
 			break;
 		case WFM_GL16_INV:
-			if (has_new_wfm) {
+			if (has_new_wfm || has_mtk_wfm) {
 				waveform_mode = WAVEFORM_MODE_ZELDA_GL16_INV;
 			} else {
 				waveform_mode = WAVEFORM_MODE_GL16_INV;
@@ -7683,6 +7782,38 @@ static uint32_t
 				} else {
 					waveform_mode = WAVEFORM_MODE_GL16;
 				}
+			}
+			break;
+		case WFM_GC16_PARTIAL:
+			if (has_mtk_wfm) {
+				waveform_mode = MTK_WAVEFORM_MODE_GC16_PARTIAL;
+			} else {
+				waveform_mode = WAVEFORM_MODE_GC16;
+			}
+			break;
+		case WFM_GCK16_PARTIAL:
+			if (has_mtk_wfm) {
+				waveform_mode = MTK_WAVEFORM_MODE_GCK16_PARTIAL;
+			} else {
+				if (deviceQuirks.hasEclipseWfm) {
+					waveform_mode = WAVEFORM_MODE_ZELDA_GCK16;
+				} else {
+					waveform_mode = WAVEFORM_MODE_GC16;
+				}
+			}
+			break;
+		case WFM_DUNM:
+			if (has_mtk_wfm) {
+				waveform_mode = MTK_WAVEFORM_MODE_DUNM;
+			} else {
+				waveform_mode = WAVEFORM_MODE_AUTO;
+			}
+			break;
+		case WFM_P2SW:
+			if (has_mtk_wfm) {
+				waveform_mode = MTK_WAVEFORM_MODE_P2SW;
+			} else {
+				waveform_mode = WAVEFORM_MODE_AUTO;
 			}
 			break;
 		default:
@@ -8077,6 +8208,53 @@ static __attribute__((cold)) const char*
 		case WAVEFORM_MODE_ZELDA_GLKW16:
 			return "GLKW16";
 		case WAVEFORM_MODE_AUTO:
+			return "AUTO";
+		default:
+			return "Unknown";
+	}
+}
+
+// Same, but for MTK constants
+static __attribute__((cold)) const char*
+    kindle_mtk_wfm_to_string(uint32_t wfm_mode)
+{
+	switch (wfm_mode) {
+		case MTK_WAVEFORM_MODE_INIT:
+			return "INIT";
+		case MTK_WAVEFORM_MODE_DU:
+			return "DU";
+		case MTK_WAVEFORM_MODE_GC16:
+			// Also GC16_FAST
+			return "GC16";
+		case MTK_WAVEFORM_MODE_GL16:
+			// Also GL16_FAST
+			// Also GL4
+			// Also GL16_INV
+			return "GL16";
+		case MTK_WAVEFORM_MODE_REAGL:
+			// Alias of GLR16
+			return "REAGL";
+		case MTK_WAVEFORM_MODE_REAGLD:
+			// Alias of GLD16
+			return "REAGLD";
+		case MTK_WAVEFORM_MODE_A2:
+			return "A2";
+		case MTK_WAVEFORM_MODE_DU4:
+			// Alias of LAST
+			return "DU4";
+		case MTK_WAVEFORM_MODE_GCK16:
+			return "GCK16";
+		case MTK_WAVEFORM_MODE_GLKW16:
+			return "GLKW16";
+		case MTK_WAVEFORM_MODE_GC16_PARTIAL:
+			return "GC16_PARTIAL";
+		case MTK_WAVEFORM_MODE_GCK16_PARTIAL:
+			return "GCK16_PARTIAL";
+		case MTK_WAVEFORM_MODE_DUNM:
+			return "DUNM";
+		case MTK_WAVEFORM_MODE_P2SW:
+			return "P2SW";
+		case MTK_WAVEFORM_MODE_AUTO:
 			return "AUTO";
 		default:
 			return "Unknown";
