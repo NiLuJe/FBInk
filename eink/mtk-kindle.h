@@ -305,12 +305,14 @@ struct mxcfb_panel_info
  * (specified by mxcfb_update_marker_data) is
  * submitted to HWTCON to display or timeout (5 seconds)
  */
+// Matches MXCFB
 #define MXCFB_WAIT_FOR_UPDATE_SUBMISSION_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x37, __u32)
 
 /* Wait until the specified send_update request
  * (specified by mxcfb_update_marker_data) is
  * already completed (Eink panel updated) or timeout (5 seconds)
  */
+// Matches MXCFB
 #define MXCFB_WAIT_FOR_UPDATE_COMPLETE_MTK _IOWR(HWTCON_IOCTL_MAGIC_NUMBER, 0x2F, struct mxcfb_update_marker_data)
 
 /* Copy the content of the working buffer to user space */
