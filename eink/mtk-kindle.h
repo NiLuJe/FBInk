@@ -39,33 +39,47 @@
 
 #include <linux/types.h>
 
+// Pull in the mxcfb stuff, as a lot of stuff hasn't actually changed (kudos, lab126!)
+#include "mxcfb-kindle.h"
+
 /* EPDC_FLAG_xx */
+// What's not new matches Zelda
+/*
 #define EPDC_FLAG_ENABLE_INVERSION     0x01
 #define EPDC_FLAG_FORCE_MONOCHROME     0x02
 #define EPDC_FLAG_USE_CMAP             0x04
 #define EPDC_FLAG_USE_ALT_BUFFER       0x100
 #define EPDC_FLAG_TEST_COLLISION       0x200
 #define EPDC_FLAG_GROUP_UPDATE         0x400
+*/
 #define MTK_EPDC_FLAG_USE_DITHERING_Y1 0x2000
 #define MTK_EPDC_FLAG_USE_DITHERING_Y4 0x4000
-#define EPDC_FLAG_USE_REGAL            0x8000
+#define MTK_EPDC_FLAG_USE_REGAL        0x8000
 #define MTK_EPDC_FLAG_ENABLE_SWIPE     0x10000
 
 /* temperature use sensor. */
+/*
 #define TEMP_USE_AMBIENT 0x1000
 #define TEMP_USE_AUTO    TEMP_USE_AMBIENT
+*/
 
+/*
 #define UPDATE_MODE_PARTIAL 0x0
 #define UPDATE_MODE_FULL    0x1
+*/
 
+/*
 #define AUTO_UPDATE_MODE_REGION_MODE    0
 #define AUTO_UPDATE_MODE_AUTOMATIC_MODE 1
+*/
 
 /* gray scale */
+/*
 #define GRAYSCALE_8BIT          0x1
 #define GRAYSCALE_8BIT_INVERTED 0x2
 #define GRAYSCALE_4BIT          0x3
 #define GRAYSCALE_4BIT_INVERTED 0x4
+*/
 
 enum MTK_WAVEFORM_MODE_ENUM
 {
@@ -90,18 +104,23 @@ enum MTK_WAVEFORM_MODE_ENUM
 	MTK_WAVEFORM_MODE_GCK16_PARTIAL = 11,
 	MTK_WAVEFORM_MODE_DUNM          = 12,
 	MTK_WAVEFORM_MODE_P2SW          = 13,
-	WAVEFORM_MODE_AUTO              = 257,
+	// Matches MXCFB
+	MTK_WAVEFORM_MODE_AUTO          = 257,
 };
 
+// Matches MXCFB
 enum hwtcon_update_scheme
 {
-	UPDATE_SCHEME_QUEUE           = 1,
-	UPDATE_SCHEME_QUEUE_AND_MERGE = 2,
+	MTK_UPDATE_SCHEME_QUEUE           = 1,
+	MTK_UPDATE_SCHEME_QUEUE_AND_MERGE = 2,
 };
 
+/*
 #define WAVEFORM_TYPE_4BIT 0x1
 #define WAVEFORM_TYPE_5BIT (WAVEFORM_TYPE_4BIT << 1)
+*/
 
+/*
 enum mxcfb_dithering_mode
 {
 	EPDC_FLAG_USE_DITHERING_PASSTHROUGH = 0x0,
@@ -111,6 +130,7 @@ enum mxcfb_dithering_mode
 	EPDC_FLAG_USE_DITHERING_QUANT_ONLY,
 	EPDC_FLAG_USE_DITHERING_MAX,
 };
+*/
 
 /*
  * SWIPE_DOWN = 0,
@@ -125,40 +145,43 @@ struct mxcfb_swipe_data
 };
 
 // Matches !Zelda
+/*
 struct mxcfb_waveform_modes
 {
-	/* waveform mode index for WAVEFORM_MODE_INIT */
+	// waveform mode index for WAVEFORM_MODE_INIT
 	int mode_init;
-	/* waveform mode index for WAVEFORM_MODE_DU */
+	// waveform mode index for WAVEFORM_MODE_DU
 	int mode_du;
-	/* waveform mode index for WAVEFORM_MODE_GC4 */
+	// waveform mode index for WAVEFORM_MODE_GC4
 	int mode_gc4;
-	/* waveform mode index for WAVEFORM_MODE_GC8 */
+	// waveform mode index for WAVEFORM_MODE_GC8
 	int mode_gc8;
-	/* waveform mode index for WAVEFORM_MODE_GC16 */
+	// waveform mode index for WAVEFORM_MODE_GC16
 	int mode_gc16;
-	/* waveform mode index for WAVEFORM_MODE_GC16_FAST */
+	// waveform mode index for WAVEFORM_MODE_GC16_FAST
 	int mode_gc16_fast;
-	/* waveform mode index for WAVEFORM_MODE_GC32 */
+	// waveform mode index for WAVEFORM_MODE_GC32
 	int mode_gc32;
-	/* waveform mode index for WAVEFORM_MODE_GL16 */
+	// waveform mode index for WAVEFORM_MODE_GL16
 	int mode_gl16;
-	/* waveform mode index for WAVEFORM_MODE_GL16_FAST */
+	// waveform mode index for WAVEFORM_MODE_GL16_FAST
 	int mode_gl16_fast;
-	/* waveform mode index for WAVEFORM_MODE_A2 */
+	// waveform mode index for WAVEFORM_MODE_A2
 	int mode_a2;
-	/* waveform mode index for WAVEFORM_MODE_DU4 */
+	// waveform mode index for WAVEFORM_MODE_DU4
 	int mode_du4;
-	/* waveform mode index for WAVEFORM_MODE_REAGL */
+	// waveform mode index for WAVEFORM_MODE_REAGL
 	int mode_reagl;
-	/* waveform mode index for WAVEFORM_MODE_REAGLD */
+	// waveform mode index for WAVEFORM_MODE_REAGLD
 	int mode_reagld;
-	/* waveform mode index for WAVEFORM_MODE_GL16_INV */
+	// waveform mode index for WAVEFORM_MODE_GL16_INV
 	int mode_gl16_inv;
-	/* waveform mode index for WAVEFORM_MODE_GL4 */
+	// waveform mode index for WAVEFORM_MODE_GL4
 	int mode_gl4;
 };
+*/
 
+/*
 struct mxcfb_rect
 {
 	__u32 top;
@@ -166,21 +189,26 @@ struct mxcfb_rect
 	__u32 width;
 	__u32 height;
 };
+*/
 
+/*
 struct mxcfb_update_marker_data
 {
 	__u32 update_marker;
 	__u32 collision_test;
 };
+*/
 
+/*
 struct mxcfb_alt_buffer_data
 {
 	__u32             phys_addr;
-	__u32             width;  /* width of entire buffer */
-	__u32             height; /* height of entire buffer */
-	/* region within buffer to update */
+	__u32             width;  // width of entire buffer
+	__u32             height; // height of entire buffer
+	// region within buffer to update
 	struct mxcfb_rect alt_update_region;
 };
+*/
 
 struct mxcfb_update_data_mtk
 {
@@ -214,13 +242,15 @@ struct mxcfb_update_data_mtk
 #endif
 };
 
+/*
 struct mxcfb_nightmode_ctrl
 {
-	int disable;       /*1: disable; 0, enable */
-	int start;         /* reduced to level for gck16 */
-	int stride;        /* back to original level gradually: default */
-	int current_level; /* current brighness setting */
+	int disable;       // 1: disable; 0, enable
+	int start;         // reduced to level for gck16
+	int stride;        // back to original level gradually: default
+	int current_level; // current brighness setting
 };
+*/
 
 struct mxcfb_panel_info
 {
@@ -328,8 +358,8 @@ struct mxcfb_panel_info
 #define MXCFB_GET_PANEL_INFO_MTK _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x130, struct mxcfb_panel_info)
 
 /* Lightbox (aka halftone pattern) feature */
-#define MXCFB_SET_HALFTONE  _IOW('F', 0x4B, struct mxcfb_halftone_data)
-#define MAX_HALFTONE_REGION 2
+#define MXCFB_SET_HALFTONE_MTK _IOW('F', 0x4B, struct mxcfb_halftone_data)
+#define MAX_HALFTONE_REGION    2
 struct mxcfb_halftone_data
 {
 	struct mxcfb_rect region[MAX_HALFTONE_REGION];
@@ -339,8 +369,8 @@ struct mxcfb_halftone_data
 	int               halftone_mode;
 };
 /* Lightbox (aka halftone pattern) feature */
-#define MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE _IOWR(HWTCON_IOCTL_MAGIC_NUMBER, 0x37, __u32)
-#define MAX_NUM_PENDING_UPDATES            64
+#define MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE_MTK _IOWR(HWTCON_IOCTL_MAGIC_NUMBER, 0x37, __u32)
+#define MAX_NUM_PENDING_UPDATES                64
 
 /* Flag used in MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE. Caller of ioctl MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE
     can set the first element of the u32 array to this value to query if the command is supported by the FB

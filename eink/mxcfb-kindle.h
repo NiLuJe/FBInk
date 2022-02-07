@@ -453,7 +453,7 @@ struct mxcfb_csc_matrix {
 /* PW4 */
 #define NIGHTMODE_STRIDE_DEFAULT_REX 138  /*default*/
 struct mxcfb_nightmode_ctrl {
-	int disable; /*1: disable; 0, enable */
+	int disable; /* 1: disable; 0, enable */
 	int start; /* reduced to level for gck16 */
 	int stride; /* back to original level gradually: default */
 	int current_level; /* current brighness setting */
