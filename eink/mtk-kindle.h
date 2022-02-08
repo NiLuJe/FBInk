@@ -111,11 +111,13 @@ enum MTK_WAVEFORM_MODE_ENUM
 };
 
 // Matches MXCFB
+/*
 enum hwtcon_update_scheme
 {
 	MTK_UPDATE_SCHEME_QUEUE           = 1,
 	MTK_UPDATE_SCHEME_QUEUE_AND_MERGE = 2,
 };
+*/
 
 /*
 #define WAVEFORM_TYPE_4BIT 0x1
@@ -268,6 +270,7 @@ struct mxcfb_panel_info
 #define HWTCON_IOCTL_MAGIC_NUMBER 'F'
 
 /* Set the mapping between waveform types and waveform mode index */
+// Matches !Zelda
 #define MXCFB_SET_WAVEFORM_MODES_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x2B, struct mxcfb_waveform_modes)
 
 /* Set the temperature for screen updates.
@@ -275,9 +278,13 @@ struct mxcfb_panel_info
  * use the temperature read from the temperature sensor.
  * Otherwise use the temperature specified
  */
-#define MXCFB_SET_TEMPERATURE_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x2C, int32_t)
+/*
+#define MXCFB_SET_TEMPERATURE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x2C, int32_t)
+*/
 
-#define MXCFB_SET_AUTO_UPDATE_MODE_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x2D, __u32)
+/*
+#define MXCFB_SET_AUTO_UPDATE_MODE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x2D, __u32)
+*/
 
 /* Get the temperature currently used for screen updates.
  * If the temperature set by command FB_SET_TEMPERATURE
@@ -285,7 +292,9 @@ struct mxcfb_panel_info
  * return that temperature value.
  * Otherwise, return the temperature read from the temperature sensor
  */
-#define MXCFB_GET_TEMPERATURE_MTK _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x38, int32_t)
+/*
+#define MXCFB_GET_TEMPERATURE _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x38, int32_t)
+*/
 
 /* Send update info to update the Eink panel display */
 #define MXCFB_SEND_UPDATE_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x2E, struct mxcfb_update_data_mtk)
@@ -301,33 +310,42 @@ struct mxcfb_panel_info
  * if the flags in the mxcfb_update_data_mtk
  * structure of those requests are identical.
  */
-#define MXCFB_SET_UPDATE_SCHEME_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x32, __u32)
+/*
+#define MXCFB_SET_UPDATE_SCHEME _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x32, __u32)
+*/
 
 /* Wait until the specified send_update request
  * (specified by mxcfb_update_marker_data) is
  * submitted to HWTCON to display or timeout (5 seconds)
  */
-// Matches MXCFB
-#define MXCFB_WAIT_FOR_UPDATE_SUBMISSION_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x37, __u32)
+/*
+#define MXCFB_WAIT_FOR_UPDATE_SUBMISSION _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x37, __u32)
+*/
 
 /* Wait until the specified send_update request
  * (specified by mxcfb_update_marker_data) is
  * already completed (Eink panel updated) or timeout (5 seconds)
  */
-// Matches MXCFB
-#define MXCFB_WAIT_FOR_UPDATE_COMPLETE_MTK _IOWR(HWTCON_IOCTL_MAGIC_NUMBER, 0x2F, struct mxcfb_update_marker_data)
+/*
+#define MXCFB_WAIT_FOR_UPDATE_COMPLETE _IOWR(HWTCON_IOCTL_MAGIC_NUMBER, 0x2F, struct mxcfb_update_marker_data)
+*/
 
 /* Copy the content of the working buffer to user space */
+// Matches Zelda
 #define MXCFB_GET_WORK_BUFFER_MTK _IOWR(HWTCON_IOCTL_MAGIC_NUMBER, 0x34, unsigned long)
 
 /* Check if the waveform supports advanced algorithms.
  * If yes, return WAVEFORM_TYPE_5BIT
  * Otherwise WAVEFORM_TYPE_4BIT
  */
-#define MXCFB_GET_WAVEFORM_TYPE_MTK _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x39, __u32)
+/*
+#define MXCFB_GET_WAVEFORM_TYPE _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x39, __u32)
+*/
 
 /* get EPD material type from dts */
-#define MXCFB_GET_MATERIAL_TYPE_MTK _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x3A, __u32)
+/*
+#define MXCFB_GET_MATERIAL_TYPE _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x3A, __u32)
+*/
 
 /* Set the front light control data for night mode.
  * For each screen update in night mode,
@@ -343,21 +361,29 @@ struct mxcfb_panel_info
  * Instead it will wait until the "DELAY" time has elapsed to skip the
  * powerdown and powerup sequences if an update comes before that.
  */
+// Matches pre-KOA2
 #define MXCFB_SET_PWRDOWN_DELAY_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x30, int32_t)
 
 /* Get the power down delay set in MXCFB_SET_PWRDOWN_DELAY command */
+// Matches pre-KOA2
 #define MXCFB_GET_PWRDOWN_DELAY_MTK _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x31, int32_t)
 
 /* Pause updating the screen.
  * Any MXCFB_SEND_UPDATE request will be discarded.
  */
-#define MXCFB_SET_PAUSE_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x33, __u32)
+/*
+#define MXCFB_SET_PAUSE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x33, __u32)
+*/
 
 /* Resume updating the screen. */
-#define MXCFB_SET_RESUME_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x35, __u32)
+/*
+#define MXCFB_SET_RESUME _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x35, __u32)
+*/
 
 /* Get the screen updating flag set by MXCFB_SET_PAUSE or MXCFB_SET_RESUME */
-#define MXCFB_GET_PAUSE_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x34, __u32)
+/*
+#define MXCFB_GET_PAUSE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x34, __u32)
+*/
 
 #define MXCFB_GET_PANEL_INFO_MTK _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x130, struct mxcfb_panel_info)
 
