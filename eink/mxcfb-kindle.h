@@ -58,7 +58,11 @@
 #ifndef __ASM_ARCH_MXCFB_H__
 #define __ASM_ARCH_MXCFB_H__
 
-//#include <linux/fb.h>
+#ifndef __KERNEL__
+#	include <stdint.h>
+#endif
+
+#include <linux/fb.h>
 
 #define FB_SYNC_OE_LOW_ACT	0x80000000
 #define FB_SYNC_CLK_LAT_FALL	0x40000000
@@ -84,12 +88,12 @@ struct mxcfb_loc_alpha {
 
 struct mxcfb_color_key {
 	int enable;
-	__u32 color_key;
+	uint32_t color_key;
 };
 
 struct mxcfb_pos {
-	__u16 x;
-	__u16 y;
+	uint16_t x;
+	uint16_t y;
 };
 
 struct mxcfb_gamma {
@@ -105,10 +109,10 @@ struct mxcfb_gpu_split_fmt {
 };
 
 struct mxcfb_rect {
-	__u32 top;
-	__u32 left;
-	__u32 width;
-	__u32 height;
+	uint32_t top;
+	uint32_t left;
+	uint32_t width;
+	uint32_t height;
 };
 
 #define GRAYSCALE_8BIT				0x1
@@ -248,19 +252,19 @@ enum mxcfb_dithering_mode {
 #define FB_POWERDOWN_DELAY_MIN_MS		0
 
 struct mxcfb_alt_buffer_data {
-	__u32 phys_addr;
-	__u32 width;	/* width of entire buffer */
-	__u32 height;	/* height of entire buffer */
+	uint32_t phys_addr;
+	uint32_t width;	/* width of entire buffer */
+	uint32_t height;	/* height of entire buffer */
 	struct mxcfb_rect alt_update_region;	/* region within buffer to update */
 };
 
 struct mxcfb_update_data {
 	struct mxcfb_rect update_region;
-	__u32 waveform_mode;
-	__u32 update_mode;
-	__u32 update_marker;
-	__u32 hist_bw_waveform_mode;    /*Lab126: Def bw waveform for hist analysis*/
-	__u32 hist_gray_waveform_mode;  /*Lab126: Def gray waveform for hist analysis*/
+	uint32_t waveform_mode;
+	uint32_t update_mode;
+	uint32_t update_marker;
+	uint32_t hist_bw_waveform_mode;    /*Lab126: Def bw waveform for hist analysis*/
+	uint32_t hist_gray_waveform_mode;  /*Lab126: Def gray waveform for hist analysis*/
 	int temp;
 	unsigned int flags;
 	struct mxcfb_alt_buffer_data alt_buffer_data;
@@ -269,43 +273,43 @@ struct mxcfb_update_data {
 /* KOA2... Once again breaking backward compat. */
 struct mxcfb_update_data_zelda {
 	struct mxcfb_rect update_region;
-	__u32 waveform_mode;
-	__u32 update_mode;
-	__u32 update_marker;
+	uint32_t waveform_mode;
+	uint32_t update_mode;
+	uint32_t update_marker;
 	int temp;
 	unsigned int flags;
 	int dither_mode;
 	int quant_bit;
 	struct mxcfb_alt_buffer_data alt_buffer_data;
 	/* start: lab126 added for backward compatible */
-	__u32 hist_bw_waveform_mode;    /*Lab126: Def bw waveform for hist analysis*/
-	__u32 hist_gray_waveform_mode;  /*Lab126: Def gray waveform for hist analysis*/
-	__u32 ts_pxp;   /*debugging purpose: pxp starting time*/
-	__u32 ts_epdc;  /*debugging purpose: EPDC starting time*/
+	uint32_t hist_bw_waveform_mode;    /*Lab126: Def bw waveform for hist analysis*/
+	uint32_t hist_gray_waveform_mode;  /*Lab126: Def gray waveform for hist analysis*/
+	uint32_t ts_pxp;   /*debugging purpose: pxp starting time*/
+	uint32_t ts_epdc;  /*debugging purpose: EPDC starting time*/
 	/* end: lab126 added */
 };
 
 /* PW4... Guess what? :D */
 struct mxcfb_update_data_rex {
 	struct mxcfb_rect update_region;
-	__u32 waveform_mode;
-	__u32 update_mode;
-	__u32 update_marker;
+	uint32_t waveform_mode;
+	uint32_t update_mode;
+	uint32_t update_marker;
 	int temp;
 	unsigned int flags;
 	int dither_mode;
 	int quant_bit;
 	struct mxcfb_alt_buffer_data alt_buffer_data;
 	/* start: lab126 added for backward compatible */
-	__u32 hist_bw_waveform_mode;    /*Lab126: Def bw waveform for hist analysis*/
-	__u32 hist_gray_waveform_mode;  /*Lab126: Def gray waveform for hist analysis*/
+	uint32_t hist_bw_waveform_mode;    /*Lab126: Def bw waveform for hist analysis*/
+	uint32_t hist_gray_waveform_mode;  /*Lab126: Def gray waveform for hist analysis*/
 	/* end: lab126 added */
 };
 
 /* PW2 */
 struct mxcfb_update_marker_data {
-	__u32 update_marker;
-	__u32 collision_test;
+	uint32_t update_marker;
+	uint32_t collision_test;
 };
 
 /* This is only used in kindle firmware 5.0, later version (5.1) has changed
@@ -313,9 +317,9 @@ struct mxcfb_update_marker_data {
  * We don't actually support this, it's just kept here for shit'n giggles ;) */
 struct mxcfb_update_data_50x {
 	struct mxcfb_rect update_region;
-	__u32 waveform_mode;
-	__u32 update_mode;
-	__u32 update_marker;
+	uint32_t waveform_mode;
+	uint32_t update_mode;
+	uint32_t update_marker;
 	int temp;
 	unsigned int flags;
 	struct mxcfb_alt_buffer_data alt_buffer_data;
@@ -372,18 +376,18 @@ struct mxcfb_csc_matrix {
 	int param[5][3];
 };
 
-#define MXCFB_WAIT_FOR_VSYNC			_IOW('F', 0x20, u_int32_t)
+#define MXCFB_WAIT_FOR_VSYNC			_IOW('F', 0x20, uint32_t)
 #define MXCFB_SET_GBL_ALPHA			_IOW('F', 0x21, struct mxcfb_gbl_alpha)
 #define MXCFB_SET_CLR_KEY			_IOW('F', 0x22, struct mxcfb_color_key)
 #define MXCFB_SET_OVERLAY_POS			_IOWR('F', 0x24, struct mxcfb_pos)
-#define MXCFB_GET_FB_IPU_CHAN			_IOR('F', 0x25, u_int32_t)
+#define MXCFB_GET_FB_IPU_CHAN			_IOR('F', 0x25, uint32_t)
 #define MXCFB_SET_LOC_ALPHA			_IOWR('F', 0x26, struct mxcfb_loc_alpha)
 #define MXCFB_SET_LOC_ALP_BUF			_IOW('F', 0x27, unsigned long)
 #define MXCFB_SET_GAMMA				_IOW('F', 0x28, struct mxcfb_gamma)
-#define MXCFB_GET_FB_IPU_DI			_IOR('F', 0x29, u_int32_t)
-#define MXCFB_GET_DIFMT				_IOR('F', 0x2A, u_int32_t)
-#define MXCFB_GET_FB_BLANK			_IOR('F', 0x2B, u_int32_t)
-#define MXCFB_SET_DIFMT				_IOW('F', 0x2C, u_int32_t)
+#define MXCFB_GET_FB_IPU_DI			_IOR('F', 0x29, uint32_t)
+#define MXCFB_GET_DIFMT				_IOR('F', 0x2A, uint32_t)
+#define MXCFB_GET_FB_BLANK			_IOR('F', 0x2B, uint32_t)
+#define MXCFB_SET_DIFMT				_IOW('F', 0x2C, uint32_t)
 
 /* PW2 */
 #define MXCFB_CSC_UPDATE			_IOW('F', 0x2D, struct mxcfb_csc_matrix)
@@ -396,7 +400,7 @@ struct mxcfb_csc_matrix {
 /* IOCTLs for E-ink panel updates */
 #define MXCFB_SET_WAVEFORM_MODES		_IOW('F', 0x2B, struct mxcfb_waveform_modes)
 #define MXCFB_SET_TEMPERATURE			_IOW('F', 0x2C, int32_t)
-#define MXCFB_SET_AUTO_UPDATE_MODE		_IOW('F', 0x2D, __u32)
+#define MXCFB_SET_AUTO_UPDATE_MODE		_IOW('F', 0x2D, uint32_t)
 #define MXCFB_SEND_UPDATE			_IOW('F', 0x2E, struct mxcfb_update_data)
 
 /* KOA2, because backward compat went kablooey */
@@ -408,16 +412,16 @@ struct mxcfb_csc_matrix {
 
 
 /* This evolved on the PW2... Rename the Touch/PW1 constant to differentiate the two. */
-#define MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL	_IOW('F', 0x2F, __u32)
+#define MXCFB_WAIT_FOR_UPDATE_COMPLETE_PEARL	_IOW('F', 0x2F, uint32_t)
 /* PW2 */
 #define MXCFB_WAIT_FOR_UPDATE_COMPLETE		_IOWR('F', 0x2F, struct mxcfb_update_marker_data)
 
 #define MXCFB_SET_PWRDOWN_DELAY			_IOW('F', 0x30, int32_t)
 #define MXCFB_GET_PWRDOWN_DELAY			_IOR('F', 0x31, int32_t)
-#define MXCFB_SET_UPDATE_SCHEME			_IOW('F', 0x32, __u32)
-#define MXCFB_SET_PAUSE				_IOW('F', 0x33, __u32)
-#define MXCFB_GET_PAUSE				_IOW('F', 0x34, __u32)
-#define MXCFB_SET_RESUME			_IOW('F', 0x35, __u32)
+#define MXCFB_SET_UPDATE_SCHEME			_IOW('F', 0x32, uint32_t)
+#define MXCFB_SET_PAUSE				_IOW('F', 0x33, uint32_t)
+#define MXCFB_GET_PAUSE				_IOW('F', 0x34, uint32_t)
+#define MXCFB_SET_RESUME			_IOW('F', 0x35, uint32_t)
 
 /* KOA2 */
 #define MXCFB_GET_WORK_BUFFER_ZELDA		_IOWR('F', 0x34, unsigned long)
@@ -425,20 +429,20 @@ struct mxcfb_csc_matrix {
 #define MXCFB_ENABLE_EPDC_ACCESS		_IO('F', 0x36)
 
 /* Touch/PW1 */
-#define MXCFB_CLEAR_UPDATE_QUEUE		_IOW('F', 0x36, __u32)
+#define MXCFB_CLEAR_UPDATE_QUEUE		_IOW('F', 0x36, uint32_t)
 /* PW2 */
 #define MXCFB_GET_WORK_BUFFER			_IOWR('F', 0x36, unsigned long)
 
-#define MXCFB_WAIT_FOR_UPDATE_SUBMISSION	_IOW('F', 0x37, __u32)
+#define MXCFB_WAIT_FOR_UPDATE_SUBMISSION	_IOW('F', 0x37, uint32_t)
 
 /* FW >= 5.3 */
 #define MXCFB_GET_TEMPERATURE			_IOR('F', 0x38, int32_t)
 
 /* PW2 */
-#define MXCFB_GET_WAVEFORM_TYPE			_IOR('F', 0x39, __u32)
+#define MXCFB_GET_WAVEFORM_TYPE			_IOR('F', 0x39, uint32_t)
 
 /* KT2/KV */
-#define MXCFB_GET_MATERIAL_TYPE			_IOR('F', 0x3A, __u32)
+#define MXCFB_GET_MATERIAL_TYPE			_IOR('F', 0x3A, uint32_t)
 
 /* Deprecated IOCTL for E-ink panel updates, kindle firmware version == 5.0 */
 #define MXCFB_SEND_UPDATE_50X			_IOW('F', 0x2E, struct mxcfb_update_data_50x)
@@ -459,7 +463,7 @@ struct mxcfb_nightmode_ctrl {
 	int current_level; /* current brighness setting */
 };
 
-#define MXCFB_SET_NIGHTMODE			_IOR('F', 0x4A, __u32)
+#define MXCFB_SET_NIGHTMODE			_IOR('F', 0x4A, uint32_t)
 
 
 #ifdef __KERNEL__
