@@ -7677,7 +7677,8 @@ static uint32_t
 	// Parse waveform mode...
 #	if defined(FBINK_FOR_KINDLE)
 	// Is this a Zelda or a Rex with new waveforms?
-	const bool has_new_wfm = (deviceQuirks.isKindleZelda || deviceQuirks.isKindleRex);
+	// (MTK also supports those with matching constants).
+	const bool has_new_wfm = (deviceQuirks.isKindleZelda || deviceQuirks.isKindleRex || deviceQuirks.isKindleMTK);
 	// Is this device running on a MTK SoC?
 	const bool has_mtk_wfm = deviceQuirks.isKindleMTK;
 
@@ -7705,35 +7706,35 @@ static uint32_t
 			}
 			break;
 		case WFM_GL16:
-			if (has_new_wfm || has_mtk_wfm) {
+			if (has_new_wfm) {
 				waveform_mode = WAVEFORM_MODE_ZELDA_GL16;
 			} else {
 				waveform_mode = WAVEFORM_MODE_GL16;
 			}
 			break;
 		case WFM_REAGL:
-			if (has_new_wfm || has_mtk_wfm) {
+			if (has_new_wfm) {
 				waveform_mode = WAVEFORM_MODE_ZELDA_REAGL;
 			} else {
 				waveform_mode = WAVEFORM_MODE_REAGL;
 			}
 			break;
 		case WFM_REAGLD:
-			if (has_new_wfm || has_mtk_wfm) {
+			if (has_new_wfm) {
 				waveform_mode = WAVEFORM_MODE_ZELDA_REAGLD;
 			} else {
 				waveform_mode = WAVEFORM_MODE_REAGLD;
 			}
 			break;
 		case WFM_GC16_FAST:
-			if (has_new_wfm || has_mtk_wfm) {
+			if (has_new_wfm) {
 				waveform_mode = WAVEFORM_MODE_ZELDA_GC16_FAST;
 			} else {
 				waveform_mode = WAVEFORM_MODE_GC16_FAST;
 			}
 			break;
 		case WFM_GL16_FAST:
-			if (has_new_wfm || has_mtk_wfm) {
+			if (has_new_wfm) {
 				waveform_mode = WAVEFORM_MODE_ZELDA_GL16_FAST;
 			} else {
 				waveform_mode = WAVEFORM_MODE_GL16_FAST;
@@ -7743,14 +7744,14 @@ static uint32_t
 			waveform_mode = WAVEFORM_MODE_DU4;
 			break;
 		case WFM_GL4:
-			if (has_new_wfm || has_mtk_wfm) {
+			if (has_new_wfm) {
 				waveform_mode = WAVEFORM_MODE_ZELDA_GL4;
 			} else {
 				waveform_mode = WAVEFORM_MODE_GL4;
 			}
 			break;
 		case WFM_GL16_INV:
-			if (has_new_wfm || has_mtk_wfm) {
+			if (has_new_wfm) {
 				waveform_mode = WAVEFORM_MODE_ZELDA_GL16_INV;
 			} else {
 				waveform_mode = WAVEFORM_MODE_GL16_INV;
