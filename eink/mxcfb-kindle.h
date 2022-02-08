@@ -329,9 +329,59 @@ struct mxcfb_update_data_50x {
  * Structure used to define waveform modes for driver
  * Needed for driver to perform auto-waveform selection
  */
-/* NOTE: Trimmed down w/ KOA2, see next block */
+/* NOTE: Trimmed down w/ KOA2, see the _zelda struct */
 /* NOTE: PW4 got 'em back by default... */
+/* Was mxcfb_waveform_modes, we've split it into each variant for strace's benefit. */
 struct mxcfb_waveform_modes {
+	int mode_init;
+	int mode_du;
+	int mode_gc4;
+	int mode_gc8;
+	int mode_gc16;
+	int mode_gc16_fast;
+	int mode_gc32;
+	int mode_gl16;
+	int mode_gl16_fast;
+	int mode_a2;
+};
+
+struct mxcfb_waveform_modes_fw53 {
+	int mode_init;
+	int mode_du;
+	int mode_gc4;
+	int mode_gc8;
+	int mode_gc16;
+	int mode_gc16_fast;
+	int mode_gc32;
+	int mode_gl16;
+	int mode_gl16_fast;
+	int mode_a2;
+
+	int mode_du4;
+};
+
+struct mxcfb_waveform_modes_fw54 {
+	int mode_init;
+	int mode_du;
+	int mode_gc4;
+	int mode_gc8;
+	int mode_gc16;
+	int mode_gc16_fast;
+	int mode_gc32;
+	int mode_gl16;
+	int mode_gl16_fast;
+	int mode_a2;
+
+	int mode_du4;
+
+	/*
+	 * reagl_flow
+	 */
+	int mode_reagl;
+	int mode_reagld;
+};
+
+struct mxcfb_waveform_modes_fw55 {
 	int mode_init;
 	int mode_du;
 	int mode_gc4;
@@ -346,9 +396,6 @@ struct mxcfb_waveform_modes {
 	int mode_du4;
 
 	/* PW2 */
-	/*
-	 * reagl_flow
-	 */
 	int mode_reagl;
 	int mode_reagld;
 
@@ -399,12 +446,16 @@ struct mxcfb_csc_matrix {
 
 /* IOCTLs for E-ink panel updates */
 #define MXCFB_SET_WAVEFORM_MODES		_IOW('F', 0x2B, struct mxcfb_waveform_modes)
+#define MXCFB_SET_WAVEFORM_MODES_FW53		_IOW('F', 0x2B, struct mxcfb_waveform_modes_fw53)
+#define MXCFB_SET_WAVEFORM_MODES_FW54		_IOW('F', 0x2B, struct mxcfb_waveform_modes_fw54)
+#define MXCFB_SET_WAVEFORM_MODES_FW55		_IOW('F', 0x2B, struct mxcfb_waveform_modes_fw55)
+#define MXCFB_SET_WAVEFORM_MODES_ZELDA		_IOW('F', 0x2B, struct mxcfb_waveform_modes_zelda)
+
 #define MXCFB_SET_TEMPERATURE			_IOW('F', 0x2C, int32_t)
 #define MXCFB_SET_AUTO_UPDATE_MODE		_IOW('F', 0x2D, uint32_t)
 #define MXCFB_SEND_UPDATE			_IOW('F', 0x2E, struct mxcfb_update_data)
 
 /* KOA2, because backward compat went kablooey */
-#define MXCFB_SET_WAVEFORM_MODES_ZELDA		_IOW('F', 0x2B, struct mxcfb_waveform_modes_zelda)
 #define MXCFB_SEND_UPDATE_ZELDA			_IOW('F', 0x2E, struct mxcfb_update_data_zelda)
 
 /* PW4, same dealio... */
