@@ -301,30 +301,9 @@ struct mxcfb_update_marker_data
  */
 /*
  * NOTE: Once again, Mark 7 renamed some stuff
- *       Was mxcfb_waveform_modes
+ *       Was mxcfb_waveform_modes,
+ *       we've split it into each variant for strace's benefit.
  */
-struct mxcfb_waveform_modes_ntx
-{
-	int mode_init;
-	int mode_du;
-	int mode_gc4;
-	int mode_gc8;
-	int mode_gc16;
-	int mode_gc32;
-	/* Aura */
-	int mode_gl16;
-	int mode_a2;
-
-	int mode_aa;
-	int mode_aad;
-
-	/* Mark 9 */
-	int mode_du4;
-	int mode_gck16;
-	int mode_glkw16;
-};
-
-/* Mark 7 */
 struct mxcfb_waveform_modes
 {
 	int mode_init;
@@ -333,6 +312,57 @@ struct mxcfb_waveform_modes
 	int mode_gc8;
 	int mode_gc16;
 	int mode_gc32;
+};
+
+struct mxcfb_waveform_modes_mk5
+{
+	int mode_init;
+	int mode_du;
+	int mode_gc4;
+	int mode_gc8;
+	int mode_gc16;
+	int mode_gc32;
+
+	int mode_a2;
+	int mode_gl16;
+	/*
+         * reagl_flow
+         */
+	int mode_aa;
+	int mode_aad;
+};
+
+struct mxcfb_waveform_modes_mk7
+{
+	int mode_init;
+	int mode_du;
+	int mode_gc4;
+	int mode_gc8;
+	int mode_gc16;
+	int mode_gc32;
+	int mode_gl16;
+	int mode_a2;
+
+	int mode_aa;
+	int mode_aad;
+};
+
+struct mxcfb_waveform_modes_mk9
+{
+	int mode_init;
+	int mode_du;
+	int mode_gc4;
+	int mode_gc8;
+	int mode_gc16;
+	int mode_gc32;
+	int mode_gl16;
+	int mode_a2;
+
+	int mode_aa;
+	int mode_aad;
+	int mode_du4;
+	int mode_gck16;
+	int mode_glkw16;
 };
 
 /* Mark 7 */
@@ -365,10 +395,10 @@ struct mxcfb_csc_matrix
 #define MXCFB_GET_PREFETCH      _IOR('F', 0x31, int)
 
 /* IOCTLs for E-ink panel updates */
-#define MXCFB_SET_WAVEFORM_MODES _IOW('F', 0x2B, struct mxcfb_waveform_modes)
-
-/* Mark 7 */
-#define MXCFB_SET_WAVEFORM_MODES_NTX _IOW('F', 0x2B, struct mxcfb_waveform_modes_ntx)
+#define MXCFB_SET_WAVEFORM_MODES     _IOW('F', 0x2B, struct mxcfb_waveform_modes)
+#define MXCFB_SET_WAVEFORM_MODES_MK5 _IOW('F', 0x2B, struct mxcfb_waveform_modes_mk5)
+#define MXCFB_SET_WAVEFORM_MODES_MK7 _IOW('F', 0x2B, struct mxcfb_waveform_modes_mk7)
+#define MXCFB_SET_WAVEFORM_MODES_MK9 _IOW('F', 0x2B, struct mxcfb_waveform_modes_mk9)
 
 #define MXCFB_SET_TEMPERATURE      _IOW('F', 0x2C, int32_t)
 #define MXCFB_SET_AUTO_UPDATE_MODE _IOW('F', 0x2D, uint32_t)
