@@ -332,6 +332,8 @@ struct mxcfb_waveform_modes_mk5
 	int mode_aad;
 };
 
+// NOTE: Same total size as the mk5 variant,
+//       but gl16 & a2 are inverted... -_-".
 struct mxcfb_waveform_modes_mk7
 {
 	int mode_init;
