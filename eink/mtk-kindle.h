@@ -37,7 +37,9 @@
 #ifndef __HWTCON_IOCTL_CMD_H__
 #define __HWTCON_IOCTL_CMD_H__
 
-#include <linux/types.h>
+#ifndef __KERNEL__
+#	include <stdint.h>
+#endif
 
 // Pull in the mxcfb stuff, as a lot of stuff hasn't actually changed (kudos, lab126!)
 #include "mxcfb-kindle.h"
@@ -144,8 +146,8 @@ enum mxcfb_dithering_mode
 */
 struct mxcfb_swipe_data
 {
-	__u32 direction; /* UP, DOWN, LEFT or RIGHT */
-	__u32 steps;     /* number of swipe steps */
+	uint32_t direction; /* UP, DOWN, LEFT or RIGHT */
+	uint32_t steps;     /* number of swipe steps */
 };
 
 // Matches !Zelda
@@ -188,27 +190,27 @@ struct mxcfb_waveform_modes
 /*
 struct mxcfb_rect
 {
-	__u32 top;
-	__u32 left;
-	__u32 width;
-	__u32 height;
+	uint32_t top;
+	uint32_t left;
+	uint32_t width;
+	uint32_t height;
 };
 */
 
 /*
 struct mxcfb_update_marker_data
 {
-	__u32 update_marker;
-	__u32 collision_test;
+	uint32_t update_marker;
+	uint32_t collision_test;
 };
 */
 
 /*
 struct mxcfb_alt_buffer_data
 {
-	__u32             phys_addr;
-	__u32             width;  // width of entire buffer
-	__u32             height; // height of entire buffer
+	uint32_t             phys_addr;
+	uint32_t             width;  // width of entire buffer
+	uint32_t             height; // height of entire buffer
 	// region within buffer to update
 	struct mxcfb_rect alt_update_region;
 };
@@ -218,12 +220,12 @@ struct mxcfb_update_data_mtk
 {
 	struct mxcfb_rect            update_region;
 	/* which waveform to use for the update, du, gc4, gc8 gc16 etc */
-	__u32                        waveform_mode;
-	__u32                        update_mode; /* full update or partial update */
+	uint32_t                     waveform_mode;
+	uint32_t                     update_mode; /* full update or partial update */
 	/* Unique number used by both application
 	 * and driver to identify an update
 	 */
-	__u32                        update_marker;
+	uint32_t                     update_marker;
 	int                          temp;        /* For testing only, currently not use */
 	unsigned int                 flags;       /* one or more EPDC_FLAGs defined above */
 	int                          dither_mode; /* one of the dither modes defined above */
@@ -237,12 +239,12 @@ struct mxcfb_update_data_mtk
 #if 1
 	/* start: lab126 added for backward compatible */
 	/*Lab126: Def bw waveform for hist analysis*/
-	__u32 hist_bw_waveform_mode;
+	uint32_t hist_bw_waveform_mode;
 	/*Lab126: Def gray waveform for hist analysis*/
-	__u32 hist_gray_waveform_mode;
-	__u32 ts_pxp;  /*debugging purpose: pxp starting time*/
-	__u32 ts_epdc; /*debugging purpose: EPDC starting time*/
-		       /* end: lab126 added */
+	uint32_t hist_gray_waveform_mode;
+	uint32_t ts_pxp;  /*debugging purpose: pxp starting time*/
+	uint32_t ts_epdc; /*debugging purpose: EPDC starting time*/
+			  /* end: lab126 added */
 #endif
 };
 
@@ -283,7 +285,7 @@ struct mxcfb_panel_info
 */
 
 /*
-#define MXCFB_SET_AUTO_UPDATE_MODE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x2D, __u32)
+#define MXCFB_SET_AUTO_UPDATE_MODE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x2D, uint32_t)
 */
 
 /* Get the temperature currently used for screen updates.
@@ -311,7 +313,7 @@ struct mxcfb_panel_info
  * structure of those requests are identical.
  */
 /*
-#define MXCFB_SET_UPDATE_SCHEME _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x32, __u32)
+#define MXCFB_SET_UPDATE_SCHEME _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x32, uint32_t)
 */
 
 /* Wait until the specified send_update request
@@ -319,7 +321,7 @@ struct mxcfb_panel_info
  * submitted to HWTCON to display or timeout (5 seconds)
  */
 /*
-#define MXCFB_WAIT_FOR_UPDATE_SUBMISSION _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x37, __u32)
+#define MXCFB_WAIT_FOR_UPDATE_SUBMISSION _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x37, uint32_t)
 */
 
 /* Wait until the specified send_update request
@@ -339,12 +341,12 @@ struct mxcfb_panel_info
  * Otherwise WAVEFORM_TYPE_4BIT
  */
 /*
-#define MXCFB_GET_WAVEFORM_TYPE _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x39, __u32)
+#define MXCFB_GET_WAVEFORM_TYPE _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x39, uint32_t)
 */
 
 /* get EPD material type from dts */
 /*
-#define MXCFB_GET_MATERIAL_TYPE _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x3A, __u32)
+#define MXCFB_GET_MATERIAL_TYPE _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x3A, uint32_t)
 */
 
 /* Set the front light control data for night mode.
@@ -372,17 +374,17 @@ struct mxcfb_panel_info
  * Any MXCFB_SEND_UPDATE request will be discarded.
  */
 /*
-#define MXCFB_SET_PAUSE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x33, __u32)
+#define MXCFB_SET_PAUSE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x33, uint32_t)
 */
 
 /* Resume updating the screen. */
 /*
-#define MXCFB_SET_RESUME _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x35, __u32)
+#define MXCFB_SET_RESUME _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x35, uint32_t)
 */
 
 /* Get the screen updating flag set by MXCFB_SET_PAUSE or MXCFB_SET_RESUME */
 /*
-#define MXCFB_GET_PAUSE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x34, __u32)
+#define MXCFB_GET_PAUSE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x34, uint32_t)
 */
 
 #define MXCFB_GET_PANEL_INFO_MTK _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x130, struct mxcfb_panel_info)
@@ -399,7 +401,7 @@ struct mxcfb_halftone_data
 	int               halftone_mode;
 };
 /* Lightbox (aka halftone pattern) feature */
-#define MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE_MTK _IOWR(HWTCON_IOCTL_MAGIC_NUMBER, 0x37, __u32)
+#define MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE_MTK _IOWR(HWTCON_IOCTL_MAGIC_NUMBER, 0x37, uint32_t)
 #define MAX_NUM_PENDING_UPDATES                64
 
 /* Flag used in MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE. Caller of ioctl MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE
@@ -416,8 +418,8 @@ struct mxcfb_halftone_data
 #define REAGL_FEATURE_0 0x00
 #define REAGL_FEATURE_1 0x01
 
-#define MXCFB_SET_UPDATE_FLAGS_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x3B, __u32)
-#define MXCFB_GET_UPDATE_FLAGS_MTK _IOWR(HWTCON_IOCTL_MAGIC_NUMBER, 0x3C, __u32)
+#define MXCFB_SET_UPDATE_FLAGS_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x3B, uint32_t)
+#define MXCFB_GET_UPDATE_FLAGS_MTK _IOWR(HWTCON_IOCTL_MAGIC_NUMBER, 0x3C, uint32_t)
 
 /* fast mode flags */
 #define UPDATE_FLAGS_MASK_PARAM (0xFF << 24)
