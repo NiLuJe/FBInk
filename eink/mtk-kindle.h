@@ -370,6 +370,7 @@ struct mxcfb_panel_info
  * and then raised back to the "current_level" gradually
  * with increment of "stride" every milli second.
  */
+// NOTE: Currently a NOP on MTK (and, indeed, unused by the framework).
 #define MXCFB_SET_NIGHTMODE_MTK _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x4A, struct mxcfb_nightmode_ctrl)
 
 /* Set the power down delay so the driver won't shut down the HWTCON immediately
