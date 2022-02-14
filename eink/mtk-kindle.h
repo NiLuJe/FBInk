@@ -446,7 +446,13 @@ struct mxcfb_halftone_data
 /* fast mode flags */
 #define UPDATE_FLAGS_MASK_PARAM (0xFF << 24)
 
-#define UPDATE_FLAGS_FAST_MODE           (0x80 << 24)
+// NOTE: This allows bypassing a waveform mode selection heuristic that will try to switch
+//       large enough DU/GL16/GC16_PARTIAL to REAGL.
+//       c.f., auto_waveform_replacement @ drivers/misc/mediatek/hwtcon_v2/hwtcon_extra_feature.c
+
+// This appears to be the default, and it *allows* the REAGL upgrades.
+#define UPDATE_FLAGS_FAST_MODE (0x80 << 24)
+
 #define UPDATE_FLAGS_FAST_MODE_PARAM     (0xFF)
 #define UPDATE_FLAGS_MODE_FAST_FLAG      1                                  /*< 0b0000000000000001 */
 #define UPDATE_FLAGS_MODE_FAST_FLAG_INIT (UPDATE_FLAGS_MODE_FAST_FLAG << 1) /*< 0b0000000000000010 */
