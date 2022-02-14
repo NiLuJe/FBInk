@@ -434,6 +434,7 @@ struct mxcfb_halftone_data
           return 3, indicate REAGL_FEATURE_1 is supported, Number 3 also means 3rd generation platform, Bellatrix, which can do REAGL with collision ,
           otherwise, -EINVAL
   */
+#define FLAG_NONE       0x00
 #define FLAG_CHECK      0xffffffff
 #define REAGL_FEATURE_0 0x00
 #define REAGL_FEATURE_1 0x01
