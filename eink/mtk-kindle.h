@@ -426,6 +426,8 @@ struct mxcfb_halftone_data
 
 // NOTE: May write up to MAX_NUM_PENDING_UPDATES uint32_t starting at the address passed as the ioctl arg!
 //       On success, the return value is the amount of *bytes* actually written.
+//       i.e., pass it an uint32_t array of MAX_NUM_PENDING_UPDATES elements,
+//       and use the first element for the feature check if necessary ;).
 #define MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE_MTK _IOWR(HWTCON_IOCTL_MAGIC_NUMBER, 0x37, uint32_t)
 #define MAX_NUM_PENDING_UPDATES                64
 
