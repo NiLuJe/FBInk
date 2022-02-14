@@ -46,6 +46,8 @@
 
 /* EPDC_FLAG_xx */
 // What's not new matches Zelda
+// NOTE: Night mode relies on switching to GRAYSCALE_8BIT_INVERTED instead of the flag,
+//       as it allows various other in-kernel tidbits to easily detect it ;).
 /*
 #define EPDC_FLAG_ENABLE_INVERSION     0x01
 #define EPDC_FLAG_FORCE_MONOCHROME     0x02
@@ -409,6 +411,8 @@ struct mxcfb_panel_info
 #define MXCFB_GET_PANEL_INFO_MTK _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x130, struct mxcfb_panel_info)
 
 /* Lightbox (aka halftone pattern) feature */
+// NOTE: Both of the regions control which parts of the screen will *not* be checkered!
+//       (i.e., for a top or bottom menu, you only need to set the first one).
 #define MXCFB_SET_HALFTONE_MTK _IOW('F', 0x4B, struct mxcfb_halftone_data)
 #define MAX_HALFTONE_REGION    2
 struct mxcfb_halftone_data
@@ -419,7 +423,7 @@ struct mxcfb_halftone_data
 	/* Others: Custom, checker size = mode - 1 */
 	int               halftone_mode;
 };
-/* Lightbox (aka halftone pattern) feature */
+
 // NOTE: May write up to MAX_NUM_PENDING_UPDATES uint32_t starting at the address passed as the ioctl arg!
 //       On success, the return value is the amount of *bytes* actually written.
 #define MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE_MTK _IOWR(HWTCON_IOCTL_MAGIC_NUMBER, 0x37, uint32_t)
