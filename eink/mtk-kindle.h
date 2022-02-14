@@ -420,6 +420,7 @@ struct mxcfb_halftone_data
 };
 /* Lightbox (aka halftone pattern) feature */
 // NOTE: May write up to MAX_NUM_PENDING_UPDATES uint32_t starting at the address passed as the ioctl arg!
+//       On success, the return value is the amount of *bytes* actually written.
 #define MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE_MTK _IOWR(HWTCON_IOCTL_MAGIC_NUMBER, 0x37, uint32_t)
 #define MAX_NUM_PENDING_UPDATES                64
 
