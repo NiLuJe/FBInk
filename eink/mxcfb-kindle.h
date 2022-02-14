@@ -514,6 +514,7 @@ struct mxcfb_nightmode_ctrl {
 	int current_level; /* current brighness setting */
 };
 
+// NOTE: Should most likely be a pointer to an mxcfb_nightmode_ctrl struct, like on MTK...
 #define MXCFB_SET_NIGHTMODE			_IOR('F', 0x4A, uint32_t)
 
 
