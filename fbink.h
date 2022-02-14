@@ -371,7 +371,7 @@ typedef enum
 	// Kindle MTK only
 	WFM_GC16_PARTIAL,
 	WFM_GCK16_PARTIAL,
-	WFM_DUNM,
+	WFM_DUNM,    // DU, but for white-on-black (may only be meaningful on *some* devices).
 	WFM_P2SW,
 
 	WFM_MAX = UINT8_MAX,    // uint8_t
