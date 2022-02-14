@@ -2136,6 +2136,7 @@ static int
 				   : (waveform_mode == MTK_WAVEFORM_MODE_GL4 || waveform_mode == MTK_WAVEFORM_MODE_DU4) ? 3
 															: 7,
 		.alt_buffer_data = { 0U },
+		// NOTE: This is probably for the fancy animated page swipes, will have to play with this later ;).
 		.swipe_data      = { 0U },
 		.hist_bw_waveform_mode =
 		    (waveform_mode == MTK_WAVEFORM_MODE_REAGL) ? MTK_WAVEFORM_MODE_REAGL : MTK_WAVEFORM_MODE_DU,
