@@ -138,6 +138,16 @@ enum mxcfb_dithering_mode
 };
 */
 
+// From "drivers/misc/mediatek/hwtcon_v2/hal/hwtcon_pipeline_config.h"
+enum MTK_SWIPE_DIRECTION_ENUM
+{
+	MTK_SWIPE_DOWN  = 0,
+	MTK_SWIPE_UP    = 1,
+	MTK_SWIPE_LEFT  = 2,
+	MTK_SWIPE_RIGHT = 3,
+	MTK_SWIPE_MAX,
+};
+
 /*
  * SWIPE_DOWN = 0,
  * SWIPE_UP = 1,
@@ -272,8 +282,10 @@ struct mxcfb_panel_info
 #define HWTCON_IOCTL_MAGIC_NUMBER 'F'
 
 /* Set the mapping between waveform types and waveform mode index */
-// Matches !Zelda
-#define MXCFB_SET_WAVEFORM_MODES_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x2B, struct mxcfb_waveform_modes)
+// Matches !Zelda w/ FW >= 5.5
+/*
+#define MXCFB_SET_WAVEFORM_MODES _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x2B, struct mxcfb_waveform_modes)
+*/
 
 /* Set the temperature for screen updates.
  * If temperature specified is TEMP_USE_AMBIENT,
@@ -334,7 +346,9 @@ struct mxcfb_panel_info
 
 /* Copy the content of the working buffer to user space */
 // Matches Zelda
-#define MXCFB_GET_WORK_BUFFER_MTK _IOWR(HWTCON_IOCTL_MAGIC_NUMBER, 0x34, unsigned long)
+/*
+#define MXCFB_GET_WORK_BUFFER _IOWR(HWTCON_IOCTL_MAGIC_NUMBER, 0x34, unsigned long)
+*/
 
 /* Check if the waveform supports advanced algorithms.
  * If yes, return WAVEFORM_TYPE_5BIT
@@ -364,11 +378,15 @@ struct mxcfb_panel_info
  * powerdown and powerup sequences if an update comes before that.
  */
 // Matches pre-KOA2
-#define MXCFB_SET_PWRDOWN_DELAY_MTK _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x30, int32_t)
+/*
+#define MXCFB_SET_PWRDOWN_DELAY _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x30, int32_t)
+*/
 
 /* Get the power down delay set in MXCFB_SET_PWRDOWN_DELAY command */
 // Matches pre-KOA2
-#define MXCFB_GET_PWRDOWN_DELAY_MTK _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x31, int32_t)
+/*
+#define MXCFB_GET_PWRDOWN_DELAY _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x31, int32_t)
+*/
 
 /* Pause updating the screen.
  * Any MXCFB_SEND_UPDATE request will be discarded.
@@ -401,6 +419,7 @@ struct mxcfb_halftone_data
 	int               halftone_mode;
 };
 /* Lightbox (aka halftone pattern) feature */
+// NOTE: May write up to MAX_NUM_PENDING_UPDATES uint32_t starting at the address passed as the ioctl arg!
 #define MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE_MTK _IOWR(HWTCON_IOCTL_MAGIC_NUMBER, 0x37, uint32_t)
 #define MAX_NUM_PENDING_UPDATES                64
 
