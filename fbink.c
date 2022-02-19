@@ -2117,7 +2117,6 @@ static int
 		// Make sure we won't setup EPDC v2 dithering
 		dithering_mode       = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
 		// And make sure we'll setup EPDC v1 flags later
-		// FIXME: Actually check if EPDC v2 dithering works ;).
 		use_legacy_dithering = true;
 	}
 
@@ -2159,6 +2158,7 @@ static int
 	}
 
 	// And setup EPDC v1 dithering
+	// FIXME: Only Y4 is currently implemented.
 	if (use_legacy_dithering) {
 		if (waveform_mode == MTK_WAVEFORM_MODE_A2 || waveform_mode == MTK_WAVEFORM_MODE_DU) {
 			update.flags |= MTK_EPDC_FLAG_USE_DITHERING_Y1;
