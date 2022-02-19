@@ -1968,7 +1968,7 @@ static int
 	// NOTE: When dithering is enabled, you generally want to get rid of FORCE_MONOCHROME, because it gets applied *first*...
 	//       That'd render EPDC v1 dithering useless, and as for EPDC v2, this only yields B&W with severe patterning.
 	//       It does help hide the vectorization? artefacts (i.e., the 4 visible horizontal "bands" of processing), though.
-	if (use_legacy_dithering || dithering_mode != EPDC_FLAG_USE_DITHERING_PASSTHROUGH) {
+	if (dithering_mode != EPDC_FLAG_USE_DITHERING_PASSTHROUGH) {
 		// EPDC v2 here, where we prefer the newer PxP alternatives, so no need to mess with the old dithering flags.
 		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
 	}
@@ -2059,7 +2059,7 @@ static int
 	// NOTE: When dithering is enabled, you generally want to get rid of FORCE_MONOCHROME, because it gets applied *first*...
 	//       That'd render EPDC v1 dithering useless, and as for EPDC v2, this only yields B&W with severe patterning.
 	//       It does help hide the vectorization? artefacts (i.e., the 4 visible horizontal "bands" of processing), though.
-	if (use_legacy_dithering || dithering_mode != EPDC_FLAG_USE_DITHERING_PASSTHROUGH) {
+	if (dithering_mode != EPDC_FLAG_USE_DITHERING_PASSTHROUGH) {
 		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
 	}
 
@@ -2130,8 +2130,10 @@ static int
 				   : (waveform_mode == MTK_WAVEFORM_MODE_A2)   ? EPDC_FLAG_FORCE_MONOCHROME
 									       : 0U,
 		.dither_mode     = dithering_mode,
-		.quant_bit       = (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH)                            ? 0
-				   : (waveform_mode == MTK_WAVEFORM_MODE_A2 || waveform_mode == MTK_WAVEFORM_MODE_DU) ? 1
+		.quant_bit       = (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH) ? 0
+				   : (waveform_mode == MTK_WAVEFORM_MODE_A2 || waveform_mode == MTK_WAVEFORM_MODE_DU ||
+                                waveform_mode == MTK_WAVEFORM_MODE_DUNM)
+				       ? 1
 				   : (waveform_mode == MTK_WAVEFORM_MODE_GL4 || waveform_mode == MTK_WAVEFORM_MODE_DU4) ? 3
 															: 7,
 		.alt_buffer_data = { 0U },
@@ -2152,22 +2154,16 @@ static int
 	// NOTE: When dithering is enabled, you generally want to get rid of FORCE_MONOCHROME, because it gets applied *first*...
 	//       That'd render EPDC v1 dithering useless, and as for EPDC v2, this only yields B&W with severe patterning.
 	//       It does help hide the vectorization? artefacts (i.e., the 4 visible horizontal "bands" of processing), though.
-	if (use_legacy_dithering || dithering_mode != EPDC_FLAG_USE_DITHERING_PASSTHROUGH) {
+	if (dithering_mode != EPDC_FLAG_USE_DITHERING_PASSTHROUGH) {
 		// EPDC v2 here, where we prefer the newer PxP alternatives, so no need to mess with the old dithering flags.
 		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
 	}
 
 	// And setup EPDC v1 dithering
-	// FIXME: Only Y4 is currently implemented.
 	if (use_legacy_dithering) {
-		if (waveform_mode == MTK_WAVEFORM_MODE_A2 || waveform_mode == MTK_WAVEFORM_MODE_DU) {
-			update.flags |= MTK_EPDC_FLAG_USE_DITHERING_Y1;
-		} else {
-			// NOTE: Generally much less useful/pleasing than Y1.
-			//       Then again, it's not any better with EPDC v2 dithering @ q3, either ;).
-			update.flags |= MTK_EPDC_FLAG_USE_DITHERING_Y4;
-		}
-		// NOTE: No EPDC_FLAG_USE_DITHERING_Y2 is gone on Bellatrix.
+		update.flags |= MTK_EPDC_FLAG_USE_DITHERING_Y4;
+		// NOTE: This is the only flag currently honored.
+		//       Dithering is handled as part of the image processing pass by the MDP.
 	}
 
 	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE_MTK, &update);
@@ -2616,7 +2612,7 @@ static int
 	//       It does help hide the vectorization? artefacts (i.e., the 4 visible horizontal "bands" of processing), though.
 	//       Fun fact: I don't see those bands @ UR (provided I manage to get the kernel to honor the flags/dither_mode...).
 	//       Unfortunately, that's not the native Portrait orientation on the Forma... (it is on the Libra, though).
-	if (use_legacy_dithering || dithering_mode != EPDC_FLAG_USE_DITHERING_PASSTHROUGH) {
+	if (dithering_mode != EPDC_FLAG_USE_DITHERING_PASSTHROUGH) {
 		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
 	}
 
@@ -8385,9 +8381,12 @@ static __attribute__((cold)) const char*
 static int
     get_hwd_mode(HW_DITHER_INDEX_T hw_dither_index)
 {
-	// NOTE: This hardware dithering (handled by the PxP) is only supported since EPDC v2!
+	// NOTE: This hardware dithering (handled by the PxP on i.MX) is only supported since EPDC v2!
 	//       AFAICT, most of our eligible target devices only support PASSTHROUGH & ORDERED...
 	//       (c.f., drivers/dma/pxp/pxp_dma_v3.c)
+	// NOTE: On newer platforms (sunxi or mtk), if dithering support there is,
+	//       it's either implemented in C, or shuffled off to the media processing unit.
+	//       Generally, those platforms prefer using "legacy" flags.
 	int dither_algo = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
 
 	// Parse dithering algo...
