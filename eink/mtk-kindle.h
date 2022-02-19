@@ -431,6 +431,13 @@ struct mxcfb_halftone_data
 #define MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE_MTK _IOWR(HWTCON_IOCTL_MAGIC_NUMBER, 0x37, uint32_t)
 #define MAX_NUM_PENDING_UPDATES                64
 
+// So, create a custom union to make usage less confusing ;).
+typedef union
+{
+	uint32_t flag;
+	uint32_t markers[MAX_NUM_PENDING_UPDATES];
+} mxcfb_markers_data;
+
 /* Flag used in MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE. Caller of ioctl MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE
     can set the first element of the u32 array to this value to query if the command is supported by the FB
    driver. If supported, the return value will be 0, otherwise, -EINVAL */
