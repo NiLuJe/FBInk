@@ -2110,16 +2110,8 @@ static int
 					   : get_wfm_mode(fbink_cfg->wfm_mode);
 	const uint32_t update_mode   = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
 
-	// Did we request legacy dithering?
-	int  dithering_mode       = get_hwd_mode(fbink_cfg->dithering_mode);
-	bool use_legacy_dithering = false;
-	if (dithering_mode == HWD_LEGACY) {
-		// Make sure we won't setup EPDC v2 dithering
-		dithering_mode       = EPDC_FLAG_USE_DITHERING_PASSTHROUGH;
-		// And make sure we'll setup EPDC v1 flags later
-		use_legacy_dithering = true;
-	}
-
+	// NOTE: Despite the struct layout, the EPDC v2 style of dithering setup is unused,
+	//       so we leave it alone here.
 	struct mxcfb_update_data_mtk update = {
 		.update_region   = region,
 		.waveform_mode   = waveform_mode,
@@ -2129,13 +2121,8 @@ static int
 		.flags           = (waveform_mode == MTK_WAVEFORM_MODE_REAGLD) ? MTK_EPDC_FLAG_USE_REGAL
 				   : (waveform_mode == MTK_WAVEFORM_MODE_A2)   ? EPDC_FLAG_FORCE_MONOCHROME
 									       : 0U,
-		.dither_mode     = dithering_mode,
-		.quant_bit       = (dithering_mode == EPDC_FLAG_USE_DITHERING_PASSTHROUGH) ? 0
-				   : (waveform_mode == MTK_WAVEFORM_MODE_A2 || waveform_mode == MTK_WAVEFORM_MODE_DU ||
-                                waveform_mode == MTK_WAVEFORM_MODE_DUNM)
-				       ? 1
-				   : (waveform_mode == MTK_WAVEFORM_MODE_GL4 || waveform_mode == MTK_WAVEFORM_MODE_DU4) ? 3
-															: 7,
+		.dither_mode     = EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+		.quant_bit       = 0,
 		.alt_buffer_data = { 0U },
 		// NOTE: This is used by the fancy swipe animation (AUTO, 12 steps).
 		.swipe_data      = { 0U },
@@ -2154,13 +2141,14 @@ static int
 	// NOTE: When dithering is enabled, you generally want to get rid of FORCE_MONOCHROME, because it gets applied *first*...
 	//       That'd render EPDC v1 dithering useless, and as for EPDC v2, this only yields B&W with severe patterning.
 	//       It does help hide the vectorization? artefacts (i.e., the 4 visible horizontal "bands" of processing), though.
-	if (dithering_mode != EPDC_FLAG_USE_DITHERING_PASSTHROUGH) {
+	if (fbink_cfg->dithering_mode != HWD_PASSTHROUGH) {
 		// EPDC v2 here, where we prefer the newer PxP alternatives, so no need to mess with the old dithering flags.
 		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
 	}
 
-	// And setup EPDC v1 dithering
-	if (use_legacy_dithering) {
+	// Not much variety left for dithering setup ;).
+	// FIXME: It's handled by the MDP (with a Floyd Steinberg algo?), so consider making the check laxer.
+	if (fbink_cfg->dithering_mode == HWD_LEGACY) {
 		update.flags |= MTK_EPDC_FLAG_USE_DITHERING_Y4;
 		// NOTE: This is the only flag currently honored.
 		//       Dithering is handled as part of the image processing pass by the MDP.
