@@ -533,6 +533,7 @@ struct mxcfb_nightmode_ctrl
 };
 
 // NOTE: Should most likely be a pointer to an mxcfb_nightmode_ctrl struct, like on MTK...
+//       I don't *think* anything uses this in practice, though...
 #define MXCFB_SET_NIGHTMODE _IOR('F', 0x4A, uint32_t)
 
 #ifdef __KERNEL__
