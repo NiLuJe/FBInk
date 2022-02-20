@@ -2112,15 +2112,14 @@ static int
 
 	// NOTE: Despite the struct layout, the EPDC v2 style of dithering setup is unused,
 	//       so we leave it alone here.
+	// NOTE: EPDC_FLAG_USE_REGAL is also unused.
 	struct mxcfb_update_data_mtk update = {
 		.update_region   = region,
 		.waveform_mode   = waveform_mode,
 		.update_mode     = update_mode,
 		.update_marker   = lastMarker,
 		.temp            = TEMP_USE_AMBIENT,
-		.flags           = (waveform_mode == MTK_WAVEFORM_MODE_REAGLD) ? MTK_EPDC_FLAG_USE_REGAL
-				   : (waveform_mode == MTK_WAVEFORM_MODE_A2)   ? EPDC_FLAG_FORCE_MONOCHROME
-									       : 0U,
+		.flags           = (waveform_mode == MTK_WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME : 0U,
 		.dither_mode     = EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
 		.quant_bit       = 0,
 		.alt_buffer_data = { 0U },
