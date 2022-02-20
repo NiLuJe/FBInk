@@ -8207,53 +8207,6 @@ static __attribute__((cold)) const char*
 			return "Unknown";
 	}
 }
-
-// Same, but for MTK constants
-static __attribute__((cold)) const char*
-    kindle_mtk_wfm_to_string(uint32_t wfm_mode)
-{
-	switch (wfm_mode) {
-		case MTK_WAVEFORM_MODE_INIT:
-			return "INIT";
-		case MTK_WAVEFORM_MODE_DU:
-			return "DU";
-		case MTK_WAVEFORM_MODE_GC16:
-			// Also GC16_FAST
-			return "GC16";
-		case MTK_WAVEFORM_MODE_GL16:
-			// Also GL16_FAST
-			// Also GL4
-			// Also GL16_INV
-			return "GL16";
-		case MTK_WAVEFORM_MODE_REAGL:
-			// Alias of GLR16
-			return "REAGL";
-		case MTK_WAVEFORM_MODE_REAGLD:
-			// Alias of GLD16
-			return "REAGLD";
-		case MTK_WAVEFORM_MODE_A2:
-			return "A2";
-		case MTK_WAVEFORM_MODE_DU4:
-			// Alias of LAST
-			return "DU4";
-		case MTK_WAVEFORM_MODE_GCK16:
-			return "GCK16";
-		case MTK_WAVEFORM_MODE_GLKW16:
-			return "GLKW16";
-		case MTK_WAVEFORM_MODE_GC16_PARTIAL:
-			return "GC16_PARTIAL";
-		case MTK_WAVEFORM_MODE_GCK16_PARTIAL:
-			return "GCK16_PARTIAL";
-		case MTK_WAVEFORM_MODE_DUNM:
-			return "DUNM";
-		case MTK_WAVEFORM_MODE_P2SW:
-			return "P2SW";
-		case MTK_WAVEFORM_MODE_AUTO:
-			return "AUTO";
-		default:
-			return "Unknown";
-	}
-}
 #	endif    // FBINK_FOR_KINDLE
 
 #	if defined(FBINK_FOR_KOBO)
