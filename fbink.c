@@ -2113,7 +2113,7 @@ static int
 	// NOTE: Despite the struct layout, the EPDC v2 style of dithering setup is unused,
 	//       so we leave it alone here.
 	// NOTE: EPDC_FLAG_USE_REGAL is also unused.
-	// FIXME: The hist_ fields are also unused, we should probably leave 'em alone and/or just plain match waveform_mode ;).
+	// NOTE: The hist_ fields are also unused, we're just setting them for old time's sake ;).
 	struct mxcfb_update_data_mtk update = {
 		.update_region   = region,
 		.waveform_mode   = waveform_mode,
