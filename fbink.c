@@ -2141,7 +2141,7 @@ static int
 	//       That'd render EPDC v1 dithering useless, and as for EPDC v2, this only yields B&W with severe patterning.
 	//       It does help hide the vectorization? artefacts (i.e., the 4 visible horizontal "bands" of processing), though.
 	if (fbink_cfg->dithering_mode != HWD_PASSTHROUGH) {
-		// EPDC v2 here, where we prefer the newer PxP alternatives, so no need to mess with the old dithering flags.
+		// FIXME: MONOCHROME + DITHER might actually be viable on MTK, check what happens.
 		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
 
 		// NOTE: Not much variety left, this is the only flag currently honored.
