@@ -440,6 +440,15 @@ typedef enum
 } __attribute__((packed)) MTK_SWIPE_DIRECTION_INDEX_E;
 typedef uint8_t MTK_SWIPE_DIRECTION_INDEX_T;
 
+// List of halftone pattern modes for fbink_mtk_set_halftone
+typedef enum
+{
+	MTK_HALFTONE_DISABLED             = 0,
+	MTK_HALFTONE_DEFAULT_CHECKER_SIZE = 1,
+	MTK_HALFTONE_MAX_CHECKER_SIZE     = INT32_MAX,    // int
+} __attribute__((packed)) MTK_HALFTONE_MODE_INDEX_E;
+typedef int32_t MTK_HALFTONE_MODE_INDEX_T;
+
 //
 // A struct to dump FBInk's internal state into, like fbink_state_dump() would, but in C ;)
 typedef struct
@@ -1355,6 +1364,16 @@ FBINK_API int fbink_mtk_set_swipe_data(MTK_SWIPE_DIRECTION_INDEX_T direction, ui
 // Wait (up to 2s) for *every* pending refresh!
 // Returns -(ENOSYS) on unsupported platforms.
 FBINK_API int fbink_wait_for_any_complete(int fbfd);
+
+// Setup the screen regions to gray out with a checkered pattern.
+// Returns -(ENOSYS) on unsupported platforms.
+// NOTE: Both of the regions are the *excluded* regions (i.e., the regions that will *NOT* be checkered).
+//       You *MAY* only set a single exclude region, in which case, use the first array member.
+// NOTE: Setting the first region to an empty rectangle will disable the feature (as will setting size to MTK_HALFTONE_DISABLED).
+// NOTE: For non-default sizes, the actual size is in pixel, and equal to size - 1
+// NOTE: This does *NOT* refresh the screen, it just sets things up for subsequent refreshes.
+// NOTE: This will *NOT* apply to EPDC_FLAG_USE_ALT_BUFFER updates.
+FBINK_API int fbink_mtk_set_halftone(int fbfd, const FBInkRect exclude_regions[2], MTK_HALFTONE_MODE_INDEX_T size);
 
 //
 ///
