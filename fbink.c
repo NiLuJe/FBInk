@@ -2144,14 +2144,11 @@ static int
 	if (fbink_cfg->dithering_mode != HWD_PASSTHROUGH) {
 		// EPDC v2 here, where we prefer the newer PxP alternatives, so no need to mess with the old dithering flags.
 		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
-	}
 
-	// Not much variety left for dithering setup ;).
-	// FIXME: It's handled by the MDP (with a Floyd Steinberg algo?), so consider making the check laxer.
-	if (fbink_cfg->dithering_mode == HWD_LEGACY) {
-		update.flags |= MTK_EPDC_FLAG_USE_DITHERING_Y4;
-		// NOTE: This is the only flag currently honored.
+		// NOTE: Not much variety left, this is the only flag currently honored.
 		//       Dithering is handled as part of the image processing pass by the MDP.
+		//       It's probably using a Floyd-Steinberg algorithm.
+		update.flags |= MTK_EPDC_FLAG_USE_DITHERING_Y4;
 	}
 
 	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE_MTK, &update);
