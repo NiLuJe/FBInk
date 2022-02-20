@@ -2113,6 +2113,7 @@ static int
 	// NOTE: Despite the struct layout, the EPDC v2 style of dithering setup is unused,
 	//       so we leave it alone here.
 	// NOTE: EPDC_FLAG_USE_REGAL is also unused.
+	// FIXME: The hist_ fields are also unused, we should probably leave 'em alone and/or just plain match waveform_mode ;).
 	struct mxcfb_update_data_mtk update = {
 		.update_region   = region,
 		.waveform_mode   = waveform_mode,
@@ -2163,14 +2164,6 @@ static int
 		}
 		return ERRCODE(EXIT_FAILURE);
 	}
-
-	LOG("hist_bw_waveform_mode is now %#03x (%s)",
-	    update.hist_bw_waveform_mode,
-	    kindle_mtk_wfm_to_string(update.hist_bw_waveform_mode));
-	LOG("hist_gray_waveform_mode is now %#03x (%s)",
-	    update.hist_gray_waveform_mode,
-	    kindle_mtk_wfm_to_string(update.hist_gray_waveform_mode));
-	LOG("waveform_mode is now %#03x (%s)", update.waveform_mode, kindle_mtk_wfm_to_string(update.waveform_mode));
 
 	return EXIT_SUCCESS;
 }
