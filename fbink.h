@@ -463,6 +463,7 @@ typedef struct
 	bool    sunxi_has_fbdamage;    // sunxiCtx.has_fbdamage (true when fbdamage module is loaded)
 	SUNXI_FORCE_ROTA_INDEX_T sunxi_force_rota;    // sunxiCtx.force_rota (current effective value)
 	bool is_kindle_legacy;    // deviceQuirks.isKindleLegacy (device is a Kindle using the original einkfb EPDC API)
+	bool is_kindle_mtk;       // deviceQuirks.isKindleMTK (device is a Kindle running on a MediatTek SoC)
 	bool is_kobo_non_mt;      // deviceQuirks.isKoboNonMT (device is a Kobo with no MultiTouch input support)
 	uint8_t          ntx_boot_rota;     // deviceQuirks.ntxBootRota (Native rotation at boot)
 	NTX_ROTA_INDEX_T ntx_rota_quirk;    // deviceQuirks.ntxRotaQuirk (c.f., utils/dump.c)
