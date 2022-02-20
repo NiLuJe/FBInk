@@ -483,8 +483,11 @@ FBInkKoboSunxi sunxiCtx = {
 // Provided by <https://github.com/NiLuJe/mxc_epdc_fb_damage>
 #	define FBDAMAGE_ROTATE_SYSFS "/sys/devices/virtual/fbdamage/fbdamage/rotate"
 #endif
-struct fb_var_screeninfo vInfo;
-struct fb_fix_screeninfo fInfo;
+#ifdef FBINK_FOR_KINDLE
+struct mxcfb_swipe_data mtkSwipeData = { 0 };
+#endif
+struct fb_var_screeninfo vInfo = { 0 };
+struct fb_fix_screeninfo fInfo = { 0 };
 uint32_t                 viewWidth;
 uint32_t                 viewHeight;
 uint32_t                 screenWidth;
