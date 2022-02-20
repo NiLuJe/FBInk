@@ -814,7 +814,6 @@ static __attribute__((cold)) const char* wfm_to_string(WFM_MODE_INDEX_T);
 #	ifdef FBINK_FOR_KINDLE
 static __attribute__((cold)) const char* kindle_wfm_to_string(uint32_t);
 static __attribute__((cold)) const char* kindle_zelda_wfm_to_string(uint32_t);
-static __attribute__((cold)) const char* kindle_mtk_wfm_to_string(uint32_t);
 #	endif
 #	if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 static __attribute__((cold)) const char* ntx_wfm_to_string(uint32_t);
