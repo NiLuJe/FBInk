@@ -2962,6 +2962,53 @@ int
 #endif    // !FBINK_FOR_KINDLE
 }
 
+int
+    fbink_mtk_set_halftone(int fbfd                       UNUSED_BY_NOTKINDLE,
+			   const FBInkRect                exclude_regions[2] UNUSED_BY_NOTKINDLE,
+			   MTK_HALFTONE_MODE_INDEX_T size UNUSED_BY_NOTKINDLE)
+{
+#ifndef FBINK_FOR_KINDLE
+	PFWARN("This feature is not supported on your device");
+	return ERRCODE(ENOSYS);
+#else
+	if (!deviceQuirks.isKindleMTK) {
+		PFWARN("This feature is not supported on your device");
+		return ERRCODE(ENOSYS);
+	}
+
+	bool keep_fd = true;
+	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
+	if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Massage things into the proper data layout...
+	struct mxcfb_halftone_data halftone_data = {
+		.region[0].top = (uint32_t) exclude_regions[0].top,
+		.region[0].left = (uint32_t) exclude_regions[0].left,
+		.region[0].width = (uint32_t) exclude_regions[0].width,
+		.region[0].height = (uint32_t) exclude_regions[0].height,
+		.region[1].top = (uint32_t) exclude_regions[1].top,
+		.region[1].left = (uint32_t) exclude_regions[1].left,
+		.region[1].width = (uint32_t) exclude_regions[1].width,
+		.region[1].height = (uint32_t) exclude_regions[1].height,
+		.halftone_mode = size,
+	};
+	int rv = ioctl(MXCFB_SET_HALFTONE_MTK, &halftone_data);
+
+	if (rv < 0) {
+		PFWARN("MXCFB_SET_HALFTONE_MTK: %m");
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	if (!keep_fd) {
+		close_fb(fbfd);
+	}
+
+	return rv;
+#endif    // !FBINK_FOR_KINDLE
+}
+
 // And finally, dispatch the right refresh request for our HW...
 #ifdef FBINK_FOR_LINUX
 // NOP when we don't have an eInk screen ;).
