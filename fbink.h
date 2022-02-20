@@ -1352,6 +1352,10 @@ FBINK_API int fbink_sunxi_ntx_enforce_rota(int fbfd, SUNXI_FORCE_ROTA_INDEX_T mo
 // Returns -(ENOSYS) on unsupported platforms.
 FBINK_API int fbink_mtk_set_swipe_data(MTK_SWIPE_DIRECTION_INDEX_T direction, uint8_t steps);
 
+// Wait (up to 2s) for *every* pending refresh!
+// Returns -(ENOSYS) on unsupported platforms.
+FBINK_API int fbink_wait_for_any_complete(int fbfd);
+
 //
 ///
 //

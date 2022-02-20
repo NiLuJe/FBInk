@@ -2140,6 +2140,7 @@ static int
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
 	}
 
+	// If requested, enable the refresh animation, as setup by fbink_mtk_set_swipe_data.
 	if (fbink_cfg->is_animated) {
 		update.swipe_data    = mtkSwipeData;
 		// Leave waveform_mode on AUTO, the kernel will internally switch to REAGL & P2SW as-needed.
@@ -2909,6 +2910,55 @@ int
 	mtkSwipeData.steps = (uint32_t) steps;
 
 	return EXIT_SUCCESS;
+#endif    // !FBINK_FOR_KINDLE
+}
+
+int
+    fbink_wait_for_any_complete(int fbfd UNUSED_BY_NOTKINDLE)
+{
+#ifndef FBINK_FOR_KINDLE
+	PFWARN("This feature is not supported on your device");
+	return ERRCODE(ENOSYS);
+#else
+	if (!deviceQuirks.isKindleMTK) {
+		PFWARN("This feature is not supported on your device");
+		return ERRCODE(ENOSYS);
+	}
+
+	bool keep_fd = true;
+	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
+	if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// We don't care about the feature check, so just leave everything empty.
+	mxcfb_markers_data markers_data = { 0U };
+	int rv = ioctl(MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE_MTK, &markers_data);
+
+	if (rv < 0) {
+		PFWARN("MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE_MTK: %m");
+		return ERRCODE(EXIT_FAILURE);
+	} else {
+		if (rv == 0) {
+			// NOTE: Timeout is set to 2000ms
+			LOG("There weren't any pending updates");
+		} else {
+			// Return value is the amount of *bytes* written (a marker is an uint32_t)
+			const size_t marker_count = rv / sizeof(*markers_data.markers);
+			for (size_t i = 0U; i < marker_count; i++) {
+				LOG("Waited for completion of update %u (%zu of %zu)",
+				    markers_data.markers[i],
+				    i + 1U,
+				    marker_count);
+			}
+		}
+	}
+
+	if (!keep_fd) {
+		close_fb(fbfd);
+	}
+
+	return rv;
 #endif    // !FBINK_FOR_KINDLE
 }
 
