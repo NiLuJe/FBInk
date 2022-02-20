@@ -2933,7 +2933,7 @@ int
 
 	// We don't care about the feature check, so just leave everything empty.
 	mxcfb_markers_data markers_data = { 0U };
-	int rv = ioctl(MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE_MTK, &markers_data);
+	int rv = ioctl(fbfd, MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE_MTK, &markers_data);
 
 	if (rv < 0) {
 		PFWARN("MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE_MTK: %m");
@@ -2944,7 +2944,7 @@ int
 			LOG("There weren't any pending updates");
 		} else {
 			// Return value is the amount of *bytes* written (a marker is an uint32_t)
-			const size_t marker_count = rv / sizeof(*markers_data.markers);
+			const size_t marker_count = (size_t) rv / sizeof(*markers_data.markers);
 			for (size_t i = 0U; i < marker_count; i++) {
 				LOG("Waited for completion of update %u (%zu of %zu)",
 				    markers_data.markers[i],
@@ -2984,17 +2984,21 @@ int
 
 	// Massage things into the proper data layout...
 	struct mxcfb_halftone_data halftone_data = {
-		.region[0].top = (uint32_t) exclude_regions[0].top,
-		.region[0].left = (uint32_t) exclude_regions[0].left,
-		.region[0].width = (uint32_t) exclude_regions[0].width,
-		.region[0].height = (uint32_t) exclude_regions[0].height,
-		.region[1].top = (uint32_t) exclude_regions[1].top,
-		.region[1].left = (uint32_t) exclude_regions[1].left,
-		.region[1].width = (uint32_t) exclude_regions[1].width,
-		.region[1].height = (uint32_t) exclude_regions[1].height,
+		.region[0] = {
+			.top = (uint32_t) exclude_regions[0].top,
+			.left = (uint32_t) exclude_regions[0].left,
+			.width = (uint32_t) exclude_regions[0].width,
+			.height = (uint32_t) exclude_regions[0].height,
+		},
+		.region[1] = {
+			.top = (uint32_t) exclude_regions[1].top,
+			.left = (uint32_t) exclude_regions[1].left,
+			.width = (uint32_t) exclude_regions[1].width,
+			.height = (uint32_t) exclude_regions[1].height,
+		},
 		.halftone_mode = size,
 	};
-	int rv = ioctl(MXCFB_SET_HALFTONE_MTK, &halftone_data);
+	int rv = ioctl(fbfd, MXCFB_SET_HALFTONE_MTK, &halftone_data);
 
 	if (rv < 0) {
 		PFWARN("MXCFB_SET_HALFTONE_MTK: %m");
@@ -3029,13 +3033,13 @@ int
 
 	// c.f., auto_waveform_replacement @ drivers/misc/mediatek/hwtcon_v2/hwtcon_extra_feature.c,
 	// this must *always* be set, and represents the default, allowing REAGL upgrades.
-	uint32_t flags = UPDATE_FLAGS_FAST_MODE;
+	uint32_t flags = (uint32_t) UPDATE_FLAGS_FAST_MODE;
 	if (!toggle) {
 		// NOTE: Leave the other low bits alone, they're meaningless for the kernel,
 		//       just interesting to set the userland "source" of the request.
 		flags |= UPDATE_FLAGS_MODE_FAST_FLAG;
 	}
-	int rv = ioctl(MXCFB_SET_UPDATE_FLAGS_MTK, &flags);
+	int rv = ioctl(fbfd, MXCFB_SET_UPDATE_FLAGS_MTK, &flags);
 
 	if (rv < 0) {
 		PFWARN("MXCFB_SET_UPDATE_FLAGS_MTK: %m");
