@@ -529,11 +529,10 @@ typedef struct
 	//			 NOTE: If the HW doesn't support inversion, a warning is printed during init.
 	//			       If you're convinced this is in error (i.e., up to date kernel),
 	//			       you can bypass that check by setting FBINK_ALLOW_HW_INVERT in your env.
-	bool no_refresh;    // Skip actually refreshing the eInk screen (useful when drawing in batch)
-	bool no_merge;      // Set the EINK_NO_MERGE flag (Kobo sunxi only)
-	bool
-	    is_animated;    // Enable animated refreshes, using the data set via fbink_mtk_set_swipe_data (Kindle MTK only)
-	bool to_syslog;     // Send messages & errors to the syslog instead of stdout/stderr
+	bool no_refresh;     // Skip actually refreshing the eInk screen (useful when drawing in batch)
+	bool no_merge;       // Set the EINK_NO_MERGE flag (Kobo sunxi only)
+	bool is_animated;    // Enable refresh animation, following fbink_mtk_set_swipe_data (Kindle MTK only)
+	bool to_syslog;      // Send messages & errors to the syslog instead of stdout/stderr
 } FBInkConfig;
 
 // Same, but for OT/TTF specific stuff. MUST be zero-initialized.

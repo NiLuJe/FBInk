@@ -2133,9 +2133,10 @@ static int
 		.ts_epdc = 0U,
 	};
 
-	// NOTE: The kernel prefers the fb state being set to GRAYSCALE_8BIT_INVERTED,
+	// NOTE: If the intent is a true night mode (rather than a one off),
+	//       the kernel prefers the fb state being set to GRAYSCALE_8BIT_INVERTED,
 	//       as it's used to handle a few nightmode shenanigans...
-	if (fbink_cfg->is_nightmode && deviceQuirks.canHWInvert) {
+	if (fbink_cfg->is_nightmode) {
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
 	}
 
