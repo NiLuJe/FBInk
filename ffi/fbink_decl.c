@@ -48,6 +48,11 @@ cdecl_c99_type(NTX_ROTA_INDEX_T, uint8_t)
 cdecl_type(SUNXI_FORCE_ROTA_INDEX_E)
 cdecl_c99_type(SUNXI_FORCE_ROTA_INDEX_T, int8_t)
 
+cdecl_type(MTK_SWIPE_DIRECTION_INDEX_E)
+cdecl_c99_type(MTK_SWIPE_DIRECTION_INDEX_T, uint8_t)
+cdecl_type(MTK_HALFTONE_MODE_INDEX_E)
+cdecl_c99_type(MTK_HALFTONE_MODE_INDEX_T, uint8_t)
+
 // Config structs
 cdecl_type(FBInkState)
 
@@ -137,3 +142,8 @@ cdecl_func(fbink_set_fb_info)
 
 cdecl_func(fbink_toggle_sunxi_ntx_pen_mode)
 cdecl_func(fbink_sunxi_ntx_enforce_rota)
+
+cdecl_func(fbink_mtk_set_swipe_data)
+cdecl_func(fbink_wait_for_any_complete)
+cdecl_func(fbink_mtk_set_halftone)
+cdecl_func(fbink_mtk_toggle_auto_reagl)
