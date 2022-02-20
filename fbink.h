@@ -1375,6 +1375,13 @@ FBINK_API int fbink_wait_for_any_complete(int fbfd);
 // NOTE: This will *NOT* apply to EPDC_FLAG_USE_ALT_BUFFER updates.
 FBINK_API int fbink_mtk_set_halftone(int fbfd, const FBInkRect exclude_regions[2], MTK_HALFTONE_MODE_INDEX_T size);
 
+// Toggle whether large enough refresh regions will automatically be upgraded to REAGL.
+// NOTE: Only applies to DU, GL16 & GC16 PARTIAL updates.
+// NOTE: Only applies in day mode (e.g., GRAYSCALE_8BIT, not GRAYSCALE_8BIT_INVERTED).
+// NOTE: Currently applies to regions both over a third of the screen's width and a fourth of the screen's height.
+// Returns -(ENOSYS) on unsupported platforms.
+FBINK_API int fbink_mtk_toggle_auto_reagl(int fbfd, bool toggle);
+
 //
 ///
 //

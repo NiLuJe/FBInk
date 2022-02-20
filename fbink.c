@@ -3009,6 +3009,47 @@ int
 #endif    // !FBINK_FOR_KINDLE
 }
 
+int
+    fbink_mtk_toggle_auto_reagl(int fbfd UNUSED_BY_NOTKINDLE, bool toggle UNUSED_BY_NOTKINDLE)
+{
+#ifndef FBINK_FOR_KINDLE
+	PFWARN("This feature is not supported on your device");
+	return ERRCODE(ENOSYS);
+#else
+	if (!deviceQuirks.isKindleMTK) {
+		PFWARN("This feature is not supported on your device");
+		return ERRCODE(ENOSYS);
+	}
+
+	bool keep_fd = true;
+	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
+	if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// c.f., auto_waveform_replacement @ drivers/misc/mediatek/hwtcon_v2/hwtcon_extra_feature.c,
+	// this must *always* be set, and represents the default, allowing REAGL upgrades.
+	uint32_t flags = UPDATE_FLAGS_FAST_MODE;
+	if (!toggle) {
+		// NOTE: Leave the other low bits alone, they're meaningless for the kernel,
+		//       just interesting to set the userland "source" of the request.
+		flags |= UPDATE_FLAGS_MODE_FAST_FLAG;
+	}
+	int rv = ioctl(MXCFB_SET_UPDATE_FLAGS_MTK, &flags);
+
+	if (rv < 0) {
+		PFWARN("MXCFB_SET_UPDATE_FLAGS_MTK: %m");
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	if (!keep_fd) {
+		close_fb(fbfd);
+	}
+
+	return rv;
+#endif    // !FBINK_FOR_KINDLE
+}
+
 // And finally, dispatch the right refresh request for our HW...
 #ifdef FBINK_FOR_LINUX
 // NOP when we don't have an eInk screen ;).
