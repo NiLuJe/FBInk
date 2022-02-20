@@ -369,10 +369,10 @@ typedef enum
 	WFM_GC4L,     // GC4 local (NOTE: Appears to crash the EPDC... [Elipsa on FW 4.28.17826])
 	WFM_GCC16,    // GCC16
 	// Kindle MTK only
-	WFM_GC16_PARTIAL,
-	WFM_GCK16_PARTIAL,
-	WFM_DUNM,    // DU, but for white-on-black.
-	WFM_P2SW,    // Internal use only, used by the swipe animation.
+	WFM_GC16_PARTIAL,     // Internal use only, GC16 + PARTIAL
+	WFM_GCK16_PARTIAL,    // Internal use only, GCK16 + PARTIAL
+	WFM_DUNM,             // DU, but for white-on-black.
+	WFM_P2SW,             // Internal use only, used by the swipe animation.
 
 	WFM_MAX = UINT8_MAX,    // uint8_t
 } __attribute__((packed)) WFM_MODE_INDEX_E;
