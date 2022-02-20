@@ -429,6 +429,17 @@ typedef enum
 } __attribute__((packed)) SUNXI_FORCE_ROTA_INDEX_E;
 typedef int8_t SUNXI_FORCE_ROTA_INDEX_T;
 
+// List of swipe directions for fbink_mtk_set_swipe_data
+typedef enum
+{
+	MTK_SWIPE_DIR_DOWN  = 0,
+	MTK_SWIPE_DIR_UP    = 1,
+	MTK_SWIPE_DIR_LEFT  = 2,
+	MTK_SWIPE_DIR_RIGHT = 3,
+	MTK_SWIPE_DIR_MAX   = UINT8_MAX,    // uint8_t
+} __attribute__((packed)) MTK_SWIPE_DIRECTION_INDEX_E;
+typedef uint8_t MTK_SWIPE_DIRECTION_INDEX_T;
+
 //
 // A struct to dump FBInk's internal state into, like fbink_state_dump() would, but in C ;)
 typedef struct
@@ -520,6 +531,8 @@ typedef struct
 	//			       you can bypass that check by setting FBINK_ALLOW_HW_INVERT in your env.
 	bool no_refresh;    // Skip actually refreshing the eInk screen (useful when drawing in batch)
 	bool no_merge;      // Set the EINK_NO_MERGE flag (Kobo sunxi only)
+	bool
+	    is_animated;    // Enable animated refreshes, using the data set via fbink_mtk_set_swipe_data (Kindle MTK only)
 	bool to_syslog;     // Send messages & errors to the syslog instead of stdout/stderr
 } FBInkConfig;
 
@@ -1299,7 +1312,7 @@ FBINK_API int fbink_set_fb_info(int      fbfd,
 				const FBInkConfig* restrict fbink_cfg) __attribute__((warn_unused_result));
 
 //
-// The functions below are tied to specific capabilities on Kobo devices with a sunxi SoC (e.g., the Elipsa).
+// The functions below are tied to specific capabilities on Kobo devices with a sunxi SoC (e.g., the Elipsa & Sage).
 //
 // Toggle the "pen" refresh mode. c.f., eink/sunxi-kobo.h @ DISP_EINK_SET_NTX_HANDWRITE_ONOFF for more details.
 // The TL;DR being that it's only truly active when using A2 & DU waveform modes.
@@ -1332,6 +1345,13 @@ FBINK_API int fbink_toggle_sunxi_ntx_pen_mode(int fbfd, bool toggle);
 // NOTE: On success, this will reinit the state *now* (returning the exact same values as fbink_reinit).
 FBINK_API int fbink_sunxi_ntx_enforce_rota(int fbfd, SUNXI_FORCE_ROTA_INDEX_T mode, const FBInkConfig* restrict fbink_cfg)
     __attribute__((warn_unused_result));
+
+//
+// The functions below are tied to specific capabilities on Kindle devices with a MediaTek SoC (e.g., the PW5).
+//
+// Setup the swipe animation direction & duration used by every refresh when is_animated is set in FBInkConfig struct.
+// Returns -(ENOSYS) on unsupported platforms.
+FBINK_API int fbink_mtk_set_swipe_data(MTK_SWIPE_DIRECTION_INDEX_T direction, uint8_t steps);
 
 //
 ///

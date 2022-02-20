@@ -2124,7 +2124,6 @@ static int
 		.dither_mode     = EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
 		.quant_bit       = 0,
 		.alt_buffer_data = { 0U },
-		// NOTE: This is used by the fancy swipe animation (AUTO, 12 steps).
 		.swipe_data      = { 0U },
 		.hist_bw_waveform_mode =
 		    (waveform_mode == MTK_WAVEFORM_MODE_REAGL) ? MTK_WAVEFORM_MODE_REAGL : MTK_WAVEFORM_MODE_DU,
@@ -2134,8 +2133,16 @@ static int
 		.ts_epdc = 0U,
 	};
 
+	// NOTE: The kernel prefers the fb state being set to GRAYSCALE_8BIT_INVERTED,
+	//       as it's used to handle a few nightmode shenanigans...
 	if (fbink_cfg->is_nightmode && deviceQuirks.canHWInvert) {
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
+	}
+
+	if (fbink_cfg->is_animated) {
+		update.swipe_data    = mtkSwipeData;
+		// Leave waveform_mode on AUTO, the kernel will internally switch to REAGL & P2SW as-needed.
+		update.waveform_mode = WAVEFORM_MODE_AUTO;
 	}
 
 	// NOTE: When dithering is enabled, you generally want to get rid of FORCE_MONOCHROME, because it gets applied *first*...
@@ -2883,6 +2890,25 @@ int
 cleanup:
 	return rv;
 #endif    // !FBINK_FOR_KOBO
+}
+
+int
+    fbink_mtk_set_swipe_data(MTK_SWIPE_DIRECTION_INDEX_T direction UNUSED_BY_NOTKINDLE, uint8_t steps UNUSED_BY_NOTKINDLE)
+{
+#ifndef FBINK_FOR_KINDLE
+	PFWARN("This feature is not supported on your device");
+	return ERRCODE(ENOSYS);
+#else
+	if (!deviceQuirks.isKindleMTK) {
+		PFWARN("This feature is not supported on your device");
+		return ERRCODE(ENOSYS);
+	}
+
+	mtkSwipeData.direction = (uint32_t) direction;
+	mtkSwipeData.steps = (uint32_t) steps;
+
+	return EXIT_SUCCESS;
+#endif    // !FBINK_FOR_KINDLE
 }
 
 // And finally, dispatch the right refresh request for our HW...
