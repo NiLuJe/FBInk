@@ -1360,6 +1360,7 @@ FBINK_API int fbink_sunxi_ntx_enforce_rota(int fbfd, SUNXI_FORCE_ROTA_INDEX_T mo
 // Setup the swipe animation direction & duration used by every refresh when is_animated is set in FBInkConfig struct.
 // Returns -(ENOSYS) on unsupported platforms.
 // NOTE: Maximum value for steps is 60 on Bellatrix.
+// NOTE: Malbec currrently uses 12 in the Reader.
 FBINK_API int fbink_mtk_set_swipe_data(MTK_SWIPE_DIRECTION_INDEX_T direction, uint8_t steps);
 
 // Wait (up to 2s) for *every* pending refresh!
