@@ -2150,11 +2150,13 @@ static int
 		update.flags |= MTK_EPDC_FLAG_ENABLE_SWIPE;
 	}
 
+	// NOTE: Despite what hwtcon_mdp_convert @ drivers/misc/mediatek/hwtcon_v2/hwtcon_mdp.c does,
+	//       dithering doesn't seem to actually *do* anything...
 	// NOTE: When dithering is enabled, you generally want to get rid of FORCE_MONOCHROME, because it gets applied *first*...
 	//       That'd render EPDC v1 dithering useless, and as for EPDC v2, this only yields B&W with severe patterning.
 	//       It does help hide the vectorization? artefacts (i.e., the 4 visible horizontal "bands" of processing), though.
 	if (fbink_cfg->dithering_mode != HWD_PASSTHROUGH) {
-		// FIXME: MONOCHROME + DITHER might actually be viable on MTK, check what happens.
+		// NOTE: If dither actually worked, MONOCHROME + DITHER might actually have been viable...
 		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
 
 		// NOTE: Not much variety left, this is the only flag currently honored.
