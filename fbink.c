@@ -2145,6 +2145,9 @@ static int
 		update.swipe_data    = mtkSwipeData;
 		// Leave waveform_mode on AUTO, the kernel will internally switch to REAGL & P2SW as-needed.
 		update.waveform_mode = WAVEFORM_MODE_AUTO;
+		update.update_mode   = UPDATE_MODE_PARTIAL;
+
+		update.flags |= MTK_EPDC_FLAG_ENABLE_SWIPE;
 	}
 
 	// NOTE: When dithering is enabled, you generally want to get rid of FORCE_MONOCHROME, because it gets applied *first*...
