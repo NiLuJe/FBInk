@@ -11,7 +11,7 @@ Housed [here on GitHub](https://github.com/NiLuJe/FBInk).
 This is intended to fill the void felt by Kobo developers and tinkerers when they realize they do not have a builtin way to print stuff on the device's screen!  
 It's especially cruel when moving to a Kobo, after being used to the ubiquity of `eips` on Kindle...
 
-In short, it prints messages or images on your screen, handling the low-level tinkering with both the Linux framebuffer interface, and the i.MX EPDC.  
+In short, it prints messages or images on your screen, handling the low-level tinkering with both the Linux framebuffer interface, and the i.MX EPDC (as well as the MTK one on Kindle, and the sunxi one on Kobo).  
 It's been tested on Kobo, Kindle, BQ Cervantes, reMarkable and PocketBook, but porting it to other Linux, i.MX eInk devices should be trivial (hell, even Sipix support shouldn't be too hard).
 [#64](https://github.com/NiLuJe/FBInk/pull/64) proved that we can even bend sunxi APIs to our will, if you don't care too much about losing your sanity in the process ;).
 
