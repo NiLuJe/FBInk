@@ -131,7 +131,7 @@
   Note for Kobo and Cervantes: as well as `GC4`, `REAGL` & `REAGLD`.
   And GU16, GCK16, GLK16 & GCC16 on Kobo Mk. 8.
 
-  Note for Kindle: as well as `REAGL`, `REAGLD`, `GC16_FAST`, `GL16_FAST`, `DU4`, `GL4`, `GL16_INV`, `GCK16` & `GLKW16` on some Kindles, depending on the model & FW version. Note that specifying a waveform mode is ignored on legacy einkfb devices, because the hardware doesn't expose such capabilities.
+  Note for Kindle: as well as `REAGL`, `REAGLD`, `GC16_FAST`, `GL16_FAST`, `DU4`, `GL4`, `GL16_INV`, `GCK16`, `GLKW16` & `DUNM` on some Kindles, depending on the model & FW version. Note that specifying a waveform mode is ignored on legacy einkfb devices, because the hardware doesn't expose such capabilities.
 
   Note for PocketBook: as well as `GC4`, `A2IN`, `A2OUT`, `DU4`, `REAGL`, `REAGLD`, `GC16HQ` & `GS16`.
 
