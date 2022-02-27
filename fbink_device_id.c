@@ -1248,7 +1248,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBInkPad3", sizeof(deviceQuirks.deviceCodename) - 1U);
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD_3;
-		} else if (strcmp(model_name, "PB740-2") == 0) {
+		} else if (strcmp(model_name, "PB740-2") == 0 || strcmp(model_name, "PB740-3") == 0)  {
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBInkPad3Pro", sizeof(deviceQuirks.deviceCodename) - 1U);
