@@ -538,7 +538,7 @@ typedef struct
 	//			 NOTE: If the HW doesn't support inversion, a warning is printed during init.
 	//			       If you're convinced this is in error (i.e., up to date kernel),
 	//			       you can bypass that check by setting FBINK_ALLOW_HW_INVERT in your env.
-	bool no_refresh;     // Skip actually refreshing the eInk screen (useful when drawing in batch)
+	bool no_refresh;     // Skip actually refreshing the eInk screen (useful when drawing in batches)
 	bool no_merge;       // Set the EINK_NO_MERGE flag (Kobo sunxi only)
 	bool is_animated;    // Enable refresh animation, following fbink_mtk_set_swipe_data (Kindle MTK only)
 	bool to_syslog;      // Send messages & errors to the syslog instead of stdout/stderr
@@ -1357,7 +1357,7 @@ FBINK_API int fbink_sunxi_ntx_enforce_rota(int fbfd, SUNXI_FORCE_ROTA_INDEX_T mo
 //
 // The functions below are tied to specific capabilities on Kindle devices with a MediaTek SoC (e.g., the PW5).
 //
-// Setup the swipe animation direction & duration used by every refresh when is_animated is set in FBInkConfig struct.
+// Setup the swipe animation direction & duration used by every refresh when is_animated is set in the FBInkConfig struct.
 // Returns -(ENOSYS) on unsupported platforms.
 // NOTE: Maximum value for steps is 60 on Bellatrix.
 // NOTE: Malbec currrently uses 12 in the Reader.
