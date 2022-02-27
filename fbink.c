@@ -2158,7 +2158,7 @@ static int
 
 		// NOTE: Not much variety left, this is the only flag currently honored.
 		//       Dithering is handled as part of the image processing pass by the MDP.
-		//       It's probably using a Floyd-Steinberg algorithm.
+		// NOTE: As mentioned above, it doesn't currently appear to do anything, though...
 		update.flags |= MTK_EPDC_FLAG_USE_DITHERING_Y4;
 	}
 
