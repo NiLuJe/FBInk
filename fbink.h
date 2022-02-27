@@ -1338,7 +1338,7 @@ FBINK_API int fbink_set_fb_info(int      fbfd,
 // NOTE: Another option for "dealing" with these rotation mishaps is to just assume the screen is always Upright.
 //       You can achieve that by making sure FBINK_FORCE_ROTA is set properly in your env (*before* initializing FBInk).
 // NOTE: Or, you can also affect how FBInk tries to honor the gyro (or not) at runtime, via fbink_sunxi_ntx_enforce_rota.
-FBINK_API int fbink_toggle_sunxi_ntx_pen_mode(int fbfd, bool toggle);
+FBINK_API int fbink_sunxi_toggle_ntx_pen_mode(int fbfd, bool toggle);
 
 // Allows controlling at runtime how fbink_init & fbink_reinit handle rotation,
 // potentially bypassing and/or selectively overriding the state returned by the accelerometer.

@@ -311,14 +311,14 @@ static bool
 						//       one way or another otherwise...
 						// NOTE: That means that any other competing refresh is potentially dangerous:
 						//       make sure only pen refreshes are sent while in pen mode!
-						fbink_toggle_sunxi_ntx_pen_mode(ctx->fbfd, false);
+						fbink_sunxi_toggle_ntx_pen_mode(ctx->fbfd, false);
 
 						const WFM_MODE_INDEX_T pen_wfm = fbink_cfg->wfm_mode;
 						fbink_cfg->wfm_mode            = WFM_GL16;
 						fbink_refresh(ctx->fbfd, 0, 0, 0, 0, fbink_cfg);
 						fbink_cfg->wfm_mode = pen_wfm;
 
-						fbink_toggle_sunxi_ntx_pen_mode(ctx->fbfd, true);
+						fbink_sunxi_toggle_ntx_pen_mode(ctx->fbfd, true);
 					}
 				}
 				break;
@@ -426,7 +426,7 @@ int
 	//       (Nickel tends to stick to three cores in the Notebooks).
 	// NOTE: Fun fact: high disp debug levels appear to make everything worse, for some reason...
 	if (fbink_state.is_sunxi) {
-		fbink_toggle_sunxi_ntx_pen_mode(ctx.fbfd, true);
+		fbink_sunxi_toggle_ntx_pen_mode(ctx.fbfd, true);
 	}
 
 	// This means we need a signal handler to make sure this gets reset on quit...
@@ -556,7 +556,7 @@ int
 cleanup:
 	if (ctx.fbfd != -1) {
 		if (fbink_state.is_sunxi) {
-			fbink_toggle_sunxi_ntx_pen_mode(ctx.fbfd, false);
+			fbink_sunxi_toggle_ntx_pen_mode(ctx.fbfd, false);
 		}
 	}
 

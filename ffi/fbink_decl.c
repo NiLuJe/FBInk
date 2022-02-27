@@ -140,7 +140,7 @@ cdecl_const(KEEP_CURRENT_GRAYSCALE)
 cdecl_const(TOGGLE_GRAYSCALE)
 cdecl_func(fbink_set_fb_info)
 
-cdecl_func(fbink_toggle_sunxi_ntx_pen_mode)
+cdecl_func(fbink_sunxi_toggle_ntx_pen_mode)
 cdecl_func(fbink_sunxi_ntx_enforce_rota)
 
 cdecl_func(fbink_mtk_set_swipe_data)

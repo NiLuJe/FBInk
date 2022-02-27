@@ -2781,7 +2781,7 @@ static int
 #endif            // !FBINK_FOR_LINUX
 
 int
-    fbink_toggle_sunxi_ntx_pen_mode(int fbfd UNUSED_BY_NOTKOBO, bool toggle UNUSED_BY_NOTKOBO)
+    fbink_sunxi_toggle_ntx_pen_mode(int fbfd UNUSED_BY_NOTKOBO, bool toggle UNUSED_BY_NOTKOBO)
 {
 #ifndef FBINK_FOR_KOBO
 	PFWARN("This feature is not supported on your device");
