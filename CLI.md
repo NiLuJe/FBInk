@@ -158,6 +158,12 @@
   Note for Kindle: Note that requesting nightmode is ignored on legacy einkfb devices, because the hardware doesn't (easily) expose such capabilities.
 
   Note that this may be ignored on some specific devices where it is known to be or have been unstable at some point.
+  
+* `-K` , `--animate` `direction=DIR,steps=NUM` (only available on Kindle e-Ink devices running on a MTK SoC)
+
+  Available directions: DOWN, UP, LEFT & RIGHT.
+  
+  The highest step count currently supported is 60.
 
 * `-b`, `--norefresh` (only available for e-Ink devices)
 

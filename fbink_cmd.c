@@ -151,6 +151,12 @@ static void
 	    "\t\t\t\tNote that requesting nightmode is ignored on legacy einkfb devices, because the hardware doesn't (easily) expose such capabilities.\n"
 #	endif
 	    "\t\t\t\tNote that this may be ignored on some specific devices where it is known to be or have been unstable at some point.\n"
+#	ifdef FBINK_FOR_KINDLE
+	    "\t-K, --animate direction=DIR,steps=NUM\t\tRequest animated refreshes from the driver, if supported.\n"
+	    "\t\t\t\tAvailable directions: DOWN, UP, LEFT & RIGHT\n"
+	    "\t\t\t\tThe highest step count currently supported is 60.\n"
+	    "\t\t\t\tThis is only supported on devices running on a MTK SoC.\n"
+#	endif
 	    "\t-b, --norefresh\t\tOnly update the framebuffer, but don't actually refresh the eInk screen (useful when drawing in batch).\n"
 #	if defined(FBINK_FOR_KOBO)
 	    "\t\t\t\tNOTE: Due to the way buffers are handled on that platform, this will not behave as expected on sunxi SoCs!\n"
