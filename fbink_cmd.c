@@ -775,43 +775,46 @@ int
 	};
 	char* const anim_token[] = { [DIRECTION_OPT] = "direction", [STEPS_OPT] = "steps", NULL };
 #pragma GCC diagnostic pop
-	char*       full_subopts = NULL;
-	char*       subopts;
-	char*       value          = NULL;
-	uint32_t    region_top     = 0;
-	uint32_t    region_left    = 0;
-	uint32_t    region_width   = 0;
-	uint32_t    region_height  = 0;
-	char*       hwd_name       = NULL;
-	char*       wfm_name       = NULL;
-	bool        is_refresh     = false;
-	char*       image_file     = NULL;
-	short int   image_x_offset = 0;
-	short int   image_y_offset = 0;
-	bool        is_image       = false;
-	bool        is_eval        = false;
-	bool        is_interactive = false;
-	bool        want_linecode  = false;
-	bool        want_linecount = false;
-	bool        want_lastrect  = false;
-	bool        is_progressbar = false;
-	bool        is_activitybar = false;
-	bool        is_infinite    = false;
-	bool        is_mimic       = false;
-	bool        is_koreader    = false;
-	bool        is_cls         = false;
-	bool        is_help        = false;
-	const char* pipe_path      = NULL;
-	bool        is_daemon      = false;
-	uint8_t     daemon_lines   = 0U;
-	bool        wait_for       = false;
-	uint8_t     progress       = 0;
-	bool        is_truetype    = false;
-	char*       reg_ot_file    = NULL;
-	char*       bd_ot_file     = NULL;
-	char*       it_ot_file     = NULL;
-	char*       bdit_ot_file   = NULL;
-	bool        errfnd         = false;
+	char*                       full_subopts = NULL;
+	char*                       subopts;
+	char*                       value          = NULL;
+	uint32_t                    region_top     = 0;
+	uint32_t                    region_left    = 0;
+	uint32_t                    region_width   = 0;
+	uint32_t                    region_height  = 0;
+	char*                       hwd_name       = NULL;
+	char*                       wfm_name       = NULL;
+	bool                        is_refresh     = false;
+	char*                       image_file     = NULL;
+	short int                   image_x_offset = 0;
+	short int                   image_y_offset = 0;
+	bool                        is_image       = false;
+	bool                        is_eval        = false;
+	bool                        is_interactive = false;
+	bool                        want_linecode  = false;
+	bool                        want_linecount = false;
+	bool                        want_lastrect  = false;
+	bool                        is_progressbar = false;
+	bool                        is_activitybar = false;
+	bool                        is_infinite    = false;
+	bool                        is_mimic       = false;
+	bool                        is_koreader    = false;
+	bool                        is_cls         = false;
+	bool                        is_help        = false;
+	const char*                 pipe_path      = NULL;
+	bool                        is_daemon      = false;
+	uint8_t                     daemon_lines   = 0U;
+	bool                        wait_for       = false;
+	uint8_t                     progress       = 0;
+	bool                        is_truetype    = false;
+	char*                       reg_ot_file    = NULL;
+	char*                       bd_ot_file     = NULL;
+	char*                       it_ot_file     = NULL;
+	char*                       bdit_ot_file   = NULL;
+	// Default to a 12 steps right-to-left swipe, àla Malbec.
+	MTK_SWIPE_DIRECTION_INDEX_T direction      = MTK_SWIPE_DIR_LEFT;
+	uint8_t                     steps          = 12U;
+	bool                        errfnd         = false;
 
 	// NOTE: c.f., https://codegolf.stackexchange.com/q/148228 to sort this mess when I need to find an available letter ;p
 	//       In fact, that's the current tally of alnum entries left: JjNnRUu
@@ -1875,10 +1878,6 @@ int
 					}
 				}
 
-				// Default to a 12 steps right-to-left swipe, àla Malbec.
-				MTK_SWIPE_DIRECTION_INDEX_T direction = MTK_SWIPE_DIR_LEFT;
-				uint8_t                     steps     = 12U;
-
 				while (subopts && *subopts != '\0' && !errfnd) {
 					switch (getsubopt(&subopts, anim_token, &value)) {
 						case DIRECTION_OPT:
@@ -1936,9 +1935,7 @@ int
 					full_subopts = NULL;
 
 					// We've got everything we need, do the thing!
-					if (fbink_mtk_set_swipe_data(direction, steps) == EXIT_SUCCESS) {
-						fbink_cfg.is_animated = true;
-					}
+					fbink_cfg.is_animated = true;
 				}
 				break;
 			}
@@ -2089,6 +2086,13 @@ int
 		ELOG("Failed to initialize FBInk, aborting . . .");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
+	}
+
+	// Did we request an animated refresh?
+	if (fbink_cfg.is_animated) {
+		if (fbink_mtk_set_swipe_data(direction, steps) != EXIT_SUCCESS) {
+			fbink_cfg.is_animated = false;
+		}
 	}
 
 	// If we're asking for a simple clear screen *only*, do it now, and then abort early.
