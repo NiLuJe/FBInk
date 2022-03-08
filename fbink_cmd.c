@@ -152,7 +152,8 @@ static void
 #	endif
 	    "\t\t\t\tNote that this may be ignored on some specific devices where it is known to be or have been unstable at some point.\n"
 #	ifdef FBINK_FOR_KINDLE
-	    "\t-K, --animate direction=DIR,steps=NUM\t\tRequest animated refreshes from the driver, if supported.\n"
+	    "\t-K, --animate direction=DIR,steps=NUM\n"
+	    "\t\t\t\t\t\tRequest animated refreshes from the driver, if supported.\n"
 	    "\t\t\t\tAvailable directions: DOWN, UP, LEFT & RIGHT\n"
 	    "\t\t\t\tThe highest step count currently supported is 60.\n"
 	    "\t\t\t\tThis is only supported on devices running on a MTK SoC.\n"
