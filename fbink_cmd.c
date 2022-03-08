@@ -694,6 +694,7 @@ int
                 {        "mimic",       no_argument, NULL, 'Z'},
                 {     "koreader",       no_argument, NULL, 'z'},
                 {          "cls", optional_argument, NULL, 'k'},
+                {      "animate", required_argument, NULL, 'K'},
                 {         "wait",       no_argument, NULL, 'w'},
                 {       "daemon", required_argument, NULL, 'd'},
                 {       "syslog",       no_argument, NULL, 'G'},
@@ -744,6 +745,11 @@ int
 		NOTRUNC_OPT,
 		STYLE_OPT,
 	};
+	enum
+	{
+		DIRECTION_OPT = 0,
+		STEPS_OPT,
+	};
 #pragma GCC diagnostic   push
 #pragma GCC diagnostic   ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunknown-warning-option"
@@ -767,6 +773,7 @@ int
 	char* const cls_token[]      = {
                 [TOP_OPT] = "top", [LEFT_OPT] = "left", [WIDTH_OPT] = "width", [HEIGHT_OPT] = "height", NULL
 	};
+	char* const anim_token[] = { [DIRECTION_OPT] = "direction", [STEPS_OPT] = "steps", NULL };
 #pragma GCC diagnostic pop
 	char*       full_subopts = NULL;
 	char*       subopts;
@@ -807,10 +814,11 @@ int
 	bool        errfnd         = false;
 
 	// NOTE: c.f., https://codegolf.stackexchange.com/q/148228 to sort this mess when I need to find an available letter ;p
-	//       In fact, that's the current tally of alnum entries left: JjKNnRUu
-	while ((opt = getopt_long(
-		    argc, argv, "y:x:Y:X:hfcmMprs::S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bD::W:HEZzk::wd:GQ", opts, &opt_index)) !=
-	       -1) {
+	//       In fact, that's the current tally of alnum entries left: JjNnRUu
+	while (
+	    (opt = getopt_long(
+		 argc, argv, "y:x:Y:X:hfcmMprs::S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bD::W:HEZzk::wd:GQK:", opts, &opt_index)) !=
+	    -1) {
 		switch (opt) {
 			case 'y':
 				if (strtol_hi(opt, NULL, optarg, &fbink_cfg.row) < 0) {
@@ -1838,6 +1846,99 @@ int
 				// Only remember this if there was a parsing error.
 				if (!errfnd) {
 					full_subopts = NULL;
+				}
+				break;
+			}
+			case 'K': {
+				// We'll want our longform name for diagnostic messages...
+				const char* opt_longname = NULL;
+				// Look it up if we were passed the short form...
+				if (opt_index == -1) {
+					// Loop until we hit the final NULL entry
+					for (opt_index = 0; opts[opt_index].name; opt_index++) {
+						if (opts[opt_index].val == opt) {
+							opt_longname = opts[opt_index].name;
+							break;
+						}
+					}
+				} else {
+					opt_longname = opts[opt_index].name;
+				}
+
+				subopts = optarg;
+				// NOTE: We'll need to remember the original, full suboption string for diagnostic messages,
+				//       because getsubopt will rewrite it during processing...
+				if (subopts && *subopts != '\0') {
+					// Only remember the first offending suboption list...
+					if (!errfnd) {
+						full_subopts = strdupa(subopts);    // lgtm [cpp/alloca-in-loop]
+					}
+				}
+
+				// Default to a 12 steps right-to-left swipe, àla Malbec.
+				MTK_SWIPE_DIRECTION_INDEX_T direction = MTK_SWIPE_DIR_LEFT;
+				uint8_t                     steps     = 12U;
+
+				while (subopts && *subopts != '\0' && !errfnd) {
+					switch (getsubopt(&subopts, anim_token, &value)) {
+						case DIRECTION_OPT:
+							if (value == NULL) {
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     anim_token[DIRECTION_OPT],
+								     opt,
+								     opt_longname);
+								errfnd = true;
+								break;
+							}
+							if (strcasecmp(value, "DOWN") == 0) {
+								direction = MTK_SWIPE_DIR_DOWN;
+							} else if (strcasecmp(value, "UP") == 0) {
+								direction = MTK_SWIPE_DIR_UP;
+							} else if (strcasecmp(value, "LEFT") == 0) {
+								direction = MTK_SWIPE_DIR_LEFT;
+							} else if (strcasecmp(value, "RIGHT") == 0) {
+								direction = MTK_SWIPE_DIR_RIGHT;
+							} else {
+								ELOG(
+								    "Unknown direction '%s' for suboption '%s' of -%c, --%s",
+								    value,
+								    anim_token[STEPS_OPT],
+								    opt,
+								    opt_longname);
+								errfnd = true;
+							}
+							break;
+						case STEPS_OPT:
+							if (value == NULL) {
+								ELOG("Missing value for suboption '%s' of -%c, --%s",
+								     anim_token[STEPS_OPT],
+								     opt,
+								     opt_longname);
+								errfnd = true;
+								break;
+							}
+							if (strtoul_hhu(opt, anim_token[STEPS_OPT], value, &steps) < 0) {
+								errfnd = true;
+							}
+							break;
+						default:
+							ELOG("No match found for token: /%s/ for -%c, --%s",
+							     value,
+							     opt,
+							     opt_longname);
+							errfnd = true;
+							break;
+					}
+				}
+
+				// Only remember this if there was a parsing error.
+				if (!errfnd) {
+					full_subopts = NULL;
+
+					// We've got everything we need, do the thing!
+					if (fbink_mtk_set_swipe_data(direction, steps) == EXIT_SUCCESS) {
+						fbink_cfg.is_animated = true;
+					}
 				}
 				break;
 			}
