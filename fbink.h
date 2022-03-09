@@ -1365,6 +1365,9 @@ FBINK_API int fbink_mtk_set_swipe_data(MTK_SWIPE_DIRECTION_INDEX_T direction, ui
 
 // Wait (up to 2s) for *every* pending refresh!
 // Returns -(ENOSYS) on unsupported platforms.
+// NOTE: When "fast mode" is enabled (c.f., fbink_mtk_toggle_auto_reagl below),
+//       no updates are able to be collected, meaning this will *always* timeout!
+//       TL;DR: Don't mix with fbink_mtk_toggle_auto_reagl(false)!
 FBINK_API int fbink_wait_for_any_complete(int fbfd);
 
 // Setup the screen regions to gray out with a checkered pattern.
@@ -1381,6 +1384,8 @@ FBINK_API int fbink_mtk_set_halftone(int fbfd, const FBInkRect exclude_regions[2
 // NOTE: Only applies to DU, GL16 & GC16 PARTIAL updates.
 // NOTE: Only applies in day mode (e.g., GRAYSCALE_8BIT, not GRAYSCALE_8BIT_INVERTED).
 // NOTE: Currently applies to regions both over a third of the screen's width and a fourth of the screen's height.
+// NOTE: When this is *disabled* (i.e., the so-called "fast mode" is enabled),
+//       updates will *NOT* be collected by the WAIIT_FOR_ANY_UPDATE_COMPLETE ioctl!
 // Returns -(ENOSYS) on unsupported platforms.
 FBINK_API int fbink_mtk_toggle_auto_reagl(int fbfd, bool toggle);
 
