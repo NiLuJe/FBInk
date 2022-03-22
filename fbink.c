@@ -8914,7 +8914,7 @@ int
 	}
 	// The grayscale flip is only meaningful at 8bpp
 	if (old_bpp == 8U && vInfo.bits_per_pixel == 8U && old_grayscale != vInfo.grayscale) {
-		ELOG("Detected a change in grayscale state  (%u -> %u)", old_grayscale, vInfo.grayscale);
+		ELOG("Detected a change in grayscale state (%u -> %u)", old_grayscale, vInfo.grayscale);
 		rf |= OK_GRAYSCALE_CHANGE;
 	}
 
