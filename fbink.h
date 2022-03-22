@@ -901,6 +901,8 @@ FBINK_API bool fbink_is_fb_quirky(void) __attribute__((pure, deprecated));
 //       This is helpful for callers that need to track FBInk's internal state via fbink_get_state or fbink_get_fb_pointer,
 //       because a reinit *might* affect the screen layout, signaling that their current state copy *may* be stale.
 //       TL;DR: Assume that *any* OK_*_CHANGE return value means that you need to refresh your state tracking.
+// NOTE: You'll probably want to take action (changing pen colors or enabling inversion) after an OK_GRAYSCALE_CHANGE,
+//       especially if it's unexpected.
 // NOTE: In turn, this means that a simple EXIT_SUCCESS means that no reinitialization was needed.
 // NOTE: On Kobo devices with a sunxi SoC, OK_BPP_CHANGE will *never* happen,
 //       as the state of the actual framebuffer device is (unfortunately) meaningless there.

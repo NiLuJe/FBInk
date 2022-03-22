@@ -8919,6 +8919,7 @@ int
 	}
 
 	// If our bitmask is not empty, it means we have a reinit to do, one where we'll skip the vinfo ioctl we just did.
+	// NOTE: OK_GRAYSCALE_CHANGE doesn't technically require a reinit, but we do it anyway for simplicity's sake.
 	if (rf > 0) {
 		ELOG("Reinitializing...");
 		rv = initialize_fbink(fbfd, fbink_cfg, true);
