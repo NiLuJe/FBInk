@@ -5026,7 +5026,7 @@ void
 {
 	fprintf(
 	    stdout,
-	    "FBINK_VERSION='%s';viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isSunxi=%d;SunxiHasFBDamage=%d;SunxiForceRota=%d;isKindleLegacy=%d;isKindleMTK=%d;isKoboNonMT=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;hasEclipseWfm=%d;",
+	    "FBINK_VERSION='%s';viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;invertedGrayscale=%d;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isSunxi=%d;SunxiHasFBDamage=%d;SunxiForceRota=%d;isKindleLegacy=%d;isKindleMTK=%d;isKoboNonMT=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;hasEclipseWfm=%d;",
 	    fbink_version(),
 	    viewWidth,
 	    viewHeight,
@@ -5038,6 +5038,7 @@ void
 	    deviceQuirks.screenDPI,
 	    vInfo.bits_per_pixel,
 	    fInfo.line_length,
+	    !!(vInfo.bits_per_pixel == 8U && vInfo.grayscale == GRAYSCALE_8BIT_INVERTED),
 	    FONTW,
 	    FONTH,
 	    FONTSIZE_MULT,
@@ -5088,6 +5089,8 @@ void
 		fbink_state->screen_height   = screenHeight;
 		fbink_state->scanline_stride = fInfo.line_length;
 		fbink_state->bpp             = vInfo.bits_per_pixel;
+		fbink_state->inverted_grayscale =
+		    !!(vInfo.bits_per_pixel == 8U && vInfo.grayscale == GRAYSCALE_8BIT_INVERTED);
 		strncpy(fbink_state->device_name, deviceQuirks.deviceName, sizeof(fbink_state->device_name) - 1U);
 		strncpy(
 		    fbink_state->device_codename, deviceQuirks.deviceCodename, sizeof(fbink_state->device_codename) - 1U);

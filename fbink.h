@@ -461,6 +461,7 @@ typedef struct
 	uint32_t    screen_height;    // screenHeight (ditto)
 	uint32_t    scanline_stride;        // fInfo.line_length (scanline length in bytes, padding included)
 	uint32_t    bpp;                    // vInfo.bits_per_pixel
+	bool        inverted_grayscale;     // true if vInfo.grayscale is set to GRAYSCALE_8BIT_INVERTED (@ 8bpp)
 	char        device_name[16];        // deviceQuirks.deviceName (short common name, no brand)
 	char        device_codename[16];    // deviceQuirks.deviceCodename
 	char        device_platform[16];    // deviceQuirks.devicePlatform (often a codename, too)
