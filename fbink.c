@@ -8861,11 +8861,13 @@ int
 #endif
 
 	// So, we're concerned with stuff that affects the logical & physical layout, namely, bitdepth & rotation.
-	const uint32_t old_bpp  = vInfo.bits_per_pixel;
-	const uint32_t old_rota = vInfo.rotate;
+	const uint32_t old_bpp       = vInfo.bits_per_pixel;
+	const uint32_t old_rota      = vInfo.rotate;
 	// As well as xres & yres to catch layout changes
-	const uint32_t old_xres = vInfo.xres;
-	const uint32_t old_yres = vInfo.yres;
+	const uint32_t old_xres      = vInfo.xres;
+	const uint32_t old_yres      = vInfo.yres;
+	// We also want to keep track of the grayscale flag to detect global nightmode swaps
+	const uint32_t old_grayscale = vInfo.grayscale;
 
 	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
 	bool keep_fd = true;
@@ -8909,6 +8911,11 @@ int
 			     vInfo.yres);
 			rf |= OK_LAYOUT_CHANGE;
 		}
+	}
+	// The grayscale flip is only meaningful at 8bpp
+	if (old_bpp == 8U && vInfo.bits_per_pixel == 8U && old_grayscale != vInfo.grayscale) {
+		ELOG("Detected a change in grayscale state  (%u -> %u)", old_grayscale, vInfo.grayscale);
+		rf |= OK_GRAYSCALE_CHANGE;
 	}
 
 	// If our bitmask is not empty, it means we have a reinit to do, one where we'll skip the vinfo ioctl we just did.

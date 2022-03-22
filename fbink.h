@@ -871,9 +871,10 @@ FBINK_API uint32_t fbink_get_last_marker(void);
 FBINK_API bool fbink_is_fb_quirky(void) __attribute__((pure, deprecated));
 
 // We'll need those for fbink_reinit (start > 256 to stay clear of errno values)
-#define OK_BPP_CHANGE    (1 << 9)
-#define OK_ROTA_CHANGE   (1 << 10)
-#define OK_LAYOUT_CHANGE (1 << 11)
+#define OK_BPP_CHANGE       (1 << 9)
+#define OK_ROTA_CHANGE      (1 << 10)
+#define OK_LAYOUT_CHANGE    (1 << 11)
+#define OK_GRAYSCALE_CHANGE (1 << 12)
 // Attempt to detect changes in framebuffer states (between this call and the last time fbink_init/fbink_reinit was called),
 // doing a reinit (i.e., calling fbink_init again) if needed, while doing the least amount of work possible in the process.
 // NOTE: The intended use-case is for long running apps which may trigger prints across different framebuffer states,
@@ -893,6 +894,9 @@ FBINK_API bool fbink_is_fb_quirky(void) __attribute__((pure, deprecated));
 //     this obviously implies OK_ROTA_CHANGE.
 //     If *only* OK_ROTA_CHANGE is set, it means the rotation change was a simple inversion of the current orientation,
 //     (i.e., Portrait <-> Inverted Portrait or Landscape <-> Inverted Landscape).
+// bit OK_GRAYSCALE_CHANGE is set if there was a grayscale flag change.
+//     This is only set if the current & last known bitdepth is 8bpp.
+//     On mxcfb-like platforms, this flag is used by the epdc driver to toggle global HW inversion (a.k.a., night mode).
 // NOTE: This means that it may return a *positive* non-zero value on *success*.
 //       This is helpful for callers that need to track FBInk's internal state via fbink_get_state or fbink_get_fb_pointer,
 //       because a reinit *might* affect the screen layout, signaling that their current state copy *may* be stale.
