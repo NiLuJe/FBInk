@@ -794,6 +794,8 @@ FBINK_API int fbink_printf(int fbfd,
 //       This is also the fallback value.
 // NOTE: On Kobo devices with a sunxi SoC, you will not be able to refresh content that you haven't drawn yourself first.
 //       (There's no "shared" framebuffer, each process gets its own private, zero-initialized (i.e., solid black) buffer).
+// NOTE: In case of ioctl failure, errno *should* be preserved,
+//       allowing the caller to possibly handle some very specific edge-cases.
 FBINK_API int fbink_refresh(int      fbfd,
 			    uint32_t region_top,
 			    uint32_t region_left,
