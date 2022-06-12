@@ -66,40 +66,44 @@ static const unsigned char*
 		return ctrld_block4[codepoint - 0x2190u];
 	} else if (codepoint == 0x21b5u) {
 		return ctrld_block5[0];
+	} else if (codepoint >= 0x21e0u && codepoint <= 0x21e3u) {
+		return ctrld_block6[codepoint - 0x21e0u];
 	} else if (codepoint == 0x25a0u) {
-		return ctrld_block6[0];
-	} else if (codepoint == 0x25aau) {
 		return ctrld_block7[0];
-	} else if (codepoint == 0x25b4u) {
+	} else if (codepoint == 0x25aau) {
 		return ctrld_block8[0];
-	} else if (codepoint == 0x25b8u) {
+	} else if (codepoint == 0x25b4u) {
 		return ctrld_block9[0];
-	} else if (codepoint == 0x25beu) {
+	} else if (codepoint == 0x25b8u) {
 		return ctrld_block10[0];
-	} else if (codepoint == 0x25c2u) {
+	} else if (codepoint == 0x25beu) {
 		return ctrld_block11[0];
-	} else if (codepoint == 0x25c6u) {
+	} else if (codepoint == 0x25c2u) {
 		return ctrld_block12[0];
-	} else if (codepoint == 0x2713u) {
+	} else if (codepoint == 0x25c6u) {
 		return ctrld_block13[0];
-	} else if (codepoint == 0x2717u) {
+	} else if (codepoint == 0x2713u) {
 		return ctrld_block14[0];
+	} else if (codepoint == 0x2717u) {
+		return ctrld_block15[0];
+	} else if (codepoint >= 0x276eu && codepoint <= 0x276fu) {
+		return ctrld_block16[codepoint - 0x276eu];
 	} else if (codepoint >= 0xe0a0u && codepoint <= 0xe0a2u) {
-		return ctrld_block15[codepoint - 0xe0a0u];
+		return ctrld_block17[codepoint - 0xe0a0u];
 	} else if (codepoint >= 0xe0b0u && codepoint <= 0xe0b3u) {
-		return ctrld_block16[codepoint - 0xe0b0u];
+		return ctrld_block18[codepoint - 0xe0b0u];
 	} else if (codepoint >= 0xee00u && codepoint <= 0xee03u) {
-		return ctrld_block17[codepoint - 0xee00u];
+		return ctrld_block19[codepoint - 0xee00u];
 	} else if (codepoint >= 0xee10u && codepoint <= 0xee13u) {
-		return ctrld_block18[codepoint - 0xee10u];
+		return ctrld_block20[codepoint - 0xee10u];
 	} else if (codepoint >= 0xee20u && codepoint <= 0xee23u) {
-		return ctrld_block19[codepoint - 0xee20u];
+		return ctrld_block21[codepoint - 0xee20u];
 	} else if (codepoint >= 0xee30u && codepoint <= 0xee37u) {
-		return ctrld_block20[codepoint - 0xee30u];
+		return ctrld_block22[codepoint - 0xee30u];
 	} else if (codepoint >= 0xee40u && codepoint <= 0xee43u) {
-		return ctrld_block21[codepoint - 0xee40u];
+		return ctrld_block23[codepoint - 0xee40u];
 	} else if (codepoint >= 0xeef0u && codepoint <= 0xeef9u) {
-		return ctrld_block22[codepoint - 0xeef0u];
+		return ctrld_block24[codepoint - 0xeef0u];
 	} else {
 		WARN("Codepoint U+%04X (%s) is not covered by this font", codepoint, u8_cp_to_utf8(codepoint));
 		return ctrld_block1[0];
