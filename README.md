@@ -133,7 +133,7 @@ It also demonstrates how to deal effectively with pen input & drawing on the Eli
 
 Kindle support covers the full Kindle lineup, starting from the K2.
 
-Kobo support covers the full Kobo lineup, starting from the Kobo Touch A/B/C.
+Kobo support covers the full Kobo lineup, starting from the Kobo Touch A/B/C (NOTE: some features are unavailable on sunxi SoCs, c.f., API docs).
 
 BQ Cervantes support has been contributed by [@pazos](https://github.com/pazos) ([#17](https://github.com/NiLuJe/FBInk/pull/17)), and should handle the current lineup.
 
@@ -141,7 +141,8 @@ reMarkable support has been contributed by [@tcrs](https://github.com/tcrs) ([#4
 
 PocketBook support was tested by [@ezdiy](https://github.com/ezdiy) ([#47](https://github.com/NiLuJe/FBInk/pull/47)), and should support the same set of devices as KOReader.
 
-If, instead of *writing* to the framebuffer, you want to *grab* a PNG snapshot of it (which can come in handy), I have a heavily modified version of [FBGrab](http://trac.ak-team.com/trac/browser/niluje/Configs/trunk/Kindle/Misc/FBGrab) that should sanely deal with the various quirks of eInk framebuffers ;).
+If, instead of *writing* to the framebuffer, you want to *grab* a PNG snapshot of it (which can come in handy), I have a heavily modified version of [FBGrab](https://svn.ak-team.com/svn/Configs/trunk/Kindle/Misc/FBGrab) that should sanely deal with the various quirks of eInk framebuffers ;).
+If you don't actually need a PNG file and just want to play with in-memory fb dumps, look into the whole `fbink_dump` & `fbink_restore` API calls.
 
 ## Bindings in other languages
 
