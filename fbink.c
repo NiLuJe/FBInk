@@ -2142,12 +2142,18 @@ static int
 
 	// If requested, enable the refresh animation, as setup by fbink_mtk_set_swipe_data.
 	if (fbink_cfg->is_animated) {
-		update.swipe_data    = mtkSwipeData;
-		// Leave waveform_mode on AUTO, the kernel will internally switch to REAGL & P2SW as-needed.
-		update.waveform_mode = WAVEFORM_MODE_AUTO;
-		update.update_mode   = UPDATE_MODE_PARTIAL;
+		// The MTK Driver will crash if given a area smaller than the number of steps.
+		// If direction is L/R and w is smaller or if it is U/D and h is smaller
+		// Being as one genneraly will only want animations on a larger area, and I am too
+		// lazy to test for direction, disable animations when w or h is less than steps.
+		if (region.width >= mtkSwipeData.steps && region.height >= mtkSwipeData.steps) {
+			update.swipe_data    = mtkSwipeData;
+			// Leave waveform_mode on AUTO, the kernel will internally switch to REAGL & P2SW as-needed.
+			update.waveform_mode = WAVEFORM_MODE_AUTO;
+			update.update_mode   = UPDATE_MODE_PARTIAL;
 
-		update.flags |= MTK_EPDC_FLAG_ENABLE_SWIPE;
+			update.flags |= MTK_EPDC_FLAG_ENABLE_SWIPE;
+		}
 	}
 
 	// NOTE: Despite what hwtcon_mdp_convert @ drivers/misc/mediatek/hwtcon_v2/hwtcon_mdp.c does,
