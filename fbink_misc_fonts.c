@@ -111,4 +111,3 @@ static const unsigned char*
 		return ctrld_block1[0];
 	}
 }
-

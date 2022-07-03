@@ -661,52 +661,52 @@ int
 	//       so we need to do the matching ourselves when we're passed *short* options, hence the sentinel value...
 	int                        opt_index = -1;
 	static const struct option opts[]    = {
-                {          "row", required_argument, NULL, 'y'},
-                {          "col", required_argument, NULL, 'x'},
-                {      "voffset", required_argument, NULL, 'Y'},
-                {      "hoffset", required_argument, NULL, 'X'},
-                {       "invert",       no_argument, NULL, 'h'},
-                {        "flash",       no_argument, NULL, 'f'},
-                {        "clear",       no_argument, NULL, 'c'},
-                {     "centered",       no_argument, NULL, 'm'},
-                {      "halfway",       no_argument, NULL, 'M'},
-                {       "padded",       no_argument, NULL, 'p'},
-                {      "rpadded",       no_argument, NULL, 'r'},
-                {      "refresh", optional_argument, NULL, 's'},
-                {         "size", required_argument, NULL, 'S'},
-                {         "font", required_argument, NULL, 'F'},
-                {      "verbose",       no_argument, NULL, 'v'},
-                {        "quiet",       no_argument, NULL, 'q'},
-                {        "image", required_argument, NULL, 'g'},
-                {          "img", required_argument, NULL, 'i'},
-                {      "flatten",       no_argument, NULL, 'a'},
-                {         "eval",       no_argument, NULL, 'e'},
-                {  "interactive",       no_argument, NULL, 'I'},
-                {        "color", required_argument, NULL, 'C'},
-                {   "background", required_argument, NULL, 'B'},
-                {"linecountcode",       no_argument, NULL, 'L'},
-                {    "linecount",       no_argument, NULL, 'l'},
-                {  "progressbar", required_argument, NULL, 'P'},
-                {  "activitybar", required_argument, NULL, 'A'},
-                {   "noviewport",       no_argument, NULL, 'V'},
-                {      "overlay",       no_argument, NULL, 'o'},
-                {       "bgless",       no_argument, NULL, 'O'},
-                {       "fgless",       no_argument, NULL, 'T'},
-                {     "truetype", required_argument, NULL, 't'},
-                {    "norefresh",       no_argument, NULL, 'b'},
-                {       "dither", optional_argument, NULL, 'D'},
-                {     "waveform", required_argument, NULL, 'W'},
-                {    "nightmode",       no_argument, NULL, 'H'},
-                {  "coordinates",       no_argument, NULL, 'E'},
-                {        "mimic",       no_argument, NULL, 'Z'},
-                {     "koreader",       no_argument, NULL, 'z'},
-                {          "cls", optional_argument, NULL, 'k'},
-                {      "animate", required_argument, NULL, 'K'},
-                {         "wait",       no_argument, NULL, 'w'},
-                {       "daemon", required_argument, NULL, 'd'},
-                {       "syslog",       no_argument, NULL, 'G'},
-                {         "help",       no_argument, NULL, 'Q'},
-                {           NULL,                 0, NULL,   0}
+		   {          "row", required_argument, NULL, 'y'},
+		   {          "col", required_argument, NULL, 'x'},
+		   {      "voffset", required_argument, NULL, 'Y'},
+		   {      "hoffset", required_argument, NULL, 'X'},
+		   {       "invert",       no_argument, NULL, 'h'},
+		   {        "flash",       no_argument, NULL, 'f'},
+		   {        "clear",       no_argument, NULL, 'c'},
+		   {     "centered",       no_argument, NULL, 'm'},
+		   {      "halfway",       no_argument, NULL, 'M'},
+		   {       "padded",       no_argument, NULL, 'p'},
+		   {      "rpadded",       no_argument, NULL, 'r'},
+		   {      "refresh", optional_argument, NULL, 's'},
+		   {         "size", required_argument, NULL, 'S'},
+		   {         "font", required_argument, NULL, 'F'},
+		   {      "verbose",       no_argument, NULL, 'v'},
+		   {        "quiet",       no_argument, NULL, 'q'},
+		   {        "image", required_argument, NULL, 'g'},
+		   {          "img", required_argument, NULL, 'i'},
+		   {      "flatten",       no_argument, NULL, 'a'},
+		   {         "eval",       no_argument, NULL, 'e'},
+		   {  "interactive",       no_argument, NULL, 'I'},
+		   {        "color", required_argument, NULL, 'C'},
+		   {   "background", required_argument, NULL, 'B'},
+		   {"linecountcode",       no_argument, NULL, 'L'},
+		   {    "linecount",       no_argument, NULL, 'l'},
+		   {  "progressbar", required_argument, NULL, 'P'},
+		   {  "activitybar", required_argument, NULL, 'A'},
+		   {   "noviewport",       no_argument, NULL, 'V'},
+		   {      "overlay",       no_argument, NULL, 'o'},
+		   {       "bgless",       no_argument, NULL, 'O'},
+		   {       "fgless",       no_argument, NULL, 'T'},
+		   {     "truetype", required_argument, NULL, 't'},
+		   {    "norefresh",       no_argument, NULL, 'b'},
+		   {       "dither", optional_argument, NULL, 'D'},
+		   {     "waveform", required_argument, NULL, 'W'},
+		   {    "nightmode",       no_argument, NULL, 'H'},
+		   {  "coordinates",       no_argument, NULL, 'E'},
+		   {        "mimic",       no_argument, NULL, 'Z'},
+		   {     "koreader",       no_argument, NULL, 'z'},
+		   {          "cls", optional_argument, NULL, 'k'},
+		   {      "animate", required_argument, NULL, 'K'},
+		   {         "wait",       no_argument, NULL, 'w'},
+		   {       "daemon", required_argument, NULL, 'd'},
+		   {       "syslog",       no_argument, NULL, 'G'},
+		   {         "help",       no_argument, NULL, 'Q'},
+		   {           NULL,                 0, NULL,   0}
 	};
 
 	FBInkConfig fbink_cfg = { 0 };
@@ -766,8 +766,8 @@ int
 		[TOP_OPT] = "top", [LEFT_OPT] = "left", [WIDTH_OPT] = "width", [HEIGHT_OPT] = "height", NULL
 	};
 	char* const image_token[]    = { [FILE_OPT] = "file",       [XOFF_OPT] = "x",           [YOFF_OPT] = "y",
-                                      [HALIGN_OPT] = "halign",   [VALIGN_OPT] = "valign",    [SCALED_WIDTH_OPT] = "w",
-                                      [SCALED_HEIGHT_OPT] = "h", [SW_DITHER_OPT] = "dither", NULL };
+					 [HALIGN_OPT] = "halign",   [VALIGN_OPT] = "valign",    [SCALED_WIDTH_OPT] = "w",
+					 [SCALED_HEIGHT_OPT] = "h", [SW_DITHER_OPT] = "dither", NULL };
 	char* const truetype_token[] = { [REGULAR_OPT] = "regular", [BOLD_OPT] = "bold",
 					 [ITALIC_OPT] = "italic",   [BOLDITALIC_OPT] = "bolditalic",
 					 [SIZE_OPT] = "size",       [PX_OPT] = "px",
@@ -778,7 +778,7 @@ int
 					 [STYLE_OPT] = "style",     NULL };
 	// Recycle the refresh enum ;).
 	char* const cls_token[]      = {
-                [TOP_OPT] = "top", [LEFT_OPT] = "left", [WIDTH_OPT] = "width", [HEIGHT_OPT] = "height", NULL
+		     [TOP_OPT] = "top", [LEFT_OPT] = "left", [WIDTH_OPT] = "width", [HEIGHT_OPT] = "height", NULL
 	};
 	char* const anim_token[] = { [DIRECTION_OPT] = "direction", [STEPS_OPT] = "steps", NULL };
 #pragma GCC diagnostic pop
