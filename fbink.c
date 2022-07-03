@@ -2142,11 +2142,27 @@ static int
 
 	// If requested, enable the refresh animation, as setup by fbink_mtk_set_swipe_data.
 	if (fbink_cfg->is_animated) {
-		// The MTK Driver will crash if given a area smaller than the number of steps.
-		// If direction is L/R and w is smaller or if it is U/D and h is smaller
-		// Being as one genneraly will only want animations on a larger area, and I am too
-		// lazy to test for direction, disable animations when w or h is less than steps.
-		if (region.width >= mtkSwipeData.steps && region.height >= mtkSwipeData.steps) {
+		// NOTE: The MTK Driver will crash if given an area smaller than the number of steps:
+		//       i.e., if direction is L/R and w is smaller or if it is U/D and h is smaller.
+		bool sane_stride = false;
+		switch (mtkSwipeData.direction) {
+			case MTK_SWIPE_DOWN:
+			case MTK_SWIPE_UP:
+				if (region.height >= mtkSwipeData.steps) {
+					sane_stride = true;
+				}
+				break;
+			case MTK_SWIPE_LEFT:
+			case MTK_SWIPE_RIGHT:
+				if (region.width >= mtkSwipeData.steps) {
+					sane_stride = true;
+				}
+				break;
+			default:
+				break;
+		}
+
+		if (sane_stride) {
 			update.swipe_data    = mtkSwipeData;
 			// Leave waveform_mode on AUTO, the kernel will internally switch to REAGL & P2SW as-needed.
 			update.waveform_mode = WAVEFORM_MODE_AUTO;
