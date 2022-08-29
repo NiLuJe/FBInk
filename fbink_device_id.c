@@ -873,6 +873,27 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 3?", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
+		case DEVICE_MAINLINE_GENERIC_IMX5:
+			// Generic fallback for i.MX5 devices on mainline kernels
+			deviceQuirks.screenDPI = 212U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "i.MX5", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Mark <= 5", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
+		case DEVICE_MAINLINE_GENERIC_IMX6:
+			// Generic fallback for i.MX6 devices on mainline kernels
+			deviceQuirks.isKoboMk7 = true;
+			deviceQuirks.screenDPI = 212U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "i.MX6", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Mark >= 6", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
 		default:
 			// Print something slightly different if we completely failed to even compute a kobo_id...
 			if (kobo_id == (unsigned short int) -1) {
@@ -898,7 +919,7 @@ static void
 	// Get the model from Nickel's version tag file...
 	FILE* fp = fopen("/mnt/onboard/.kobo/version", "re");
 	if (!fp) {
-		ELOG("Couldn't find a Kobo version tag (onboard unmounted or not running on a Kobo?)!");
+		ELOG("Couldn't find a Kobo version tag (onboard unmounted or not using Nickel?)!");
 	} else {
 		// NOTE: I'm not entirely sure this will always have a fixed length, so, give ourselves a bit of room...
 		char   line[_POSIX_PATH_MAX] = { 0 };
@@ -932,7 +953,8 @@ static void
 	//       So try to do it the hard way, via the NTXHWConfig tag...
 	fp = fopen(HWCONFIG_DEVICE, "re");
 	if (!fp) {
-		PFWARN("Couldn't read from `%s` (%m), unable to identify the Kobo model", HWCONFIG_DEVICE);
+		PFWARN("Couldn't read from `%s` (%m), unable to identify the Kobo model via its NTX board info",
+		       HWCONFIG_DEVICE);
 	} else {
 #		pragma GCC diagnostic push
 #		pragma GCC diagnostic ignored "-Wmissing-braces"
@@ -950,7 +972,9 @@ static void
 				// NOTE: Make it clear we failed to identify the device...
 				//       i.e., by passing UINT16_MAX instead of 0U, which we use to flag old !NTX devices.
 				set_kobo_quirks((unsigned short int) -1);
-				return;
+
+				// Do try a last stand with the mainline device id codepath...
+				return identify_mainline();
 			}
 
 			// NOTE: These are NOT NULL-terminated, so we use the size of the storage array,
@@ -1041,8 +1065,72 @@ static void
 		}
 		// And now we can do this, as accurately as if onboard were mounted ;).
 		set_kobo_quirks(kobo_id);
+
+		// Get out now, we're done!
+		return;
 	}
+
+	// NOTE: And if we went this far, it means onboard isn't mounted/Nickel never ran,
+	//       *and* either we're not on an NTX board, or mmcblk0 is unmounted.
+	//       That usually points to a device running a mainline kernel, so let's poke at the DTB...
+	return identify_mainline();
 }
+
+static void
+    identify_mainline(void)
+{
+	// This is aimed at mainline kernels, c.f., https://github.com/NiLuJe/FBInk/issues/70
+
+	// Default to an identification failure
+	unsigned short int kobo_id = (unsigned short int) -1U;
+	FILE*              fp      = fopen(MAINLINE_DEVICE_ID_SYSFS, "re");
+	if (!fp) {
+		ELOG("Couldn't find a DTB sysfs entry!");
+	} else {
+		char*   line = NULL;
+		size_t  len  = 0;
+		ssize_t nread;
+		while ((nread = getdelim(&line, &len, '\0', fp)) != -1) {
+			// Keep this in the same order as Documentation/devicetree/bindings/arm/fsl.yaml to ease updates
+			if (strcmp(line, "kobo,aura") == 0) {
+				kobo_id = DEVICE_KOBO_AURA;
+				break;
+			} else if (strcmp(line, "kobo,tolino-shine2hd") == 0) {
+				kobo_id = DEVICE_KOBO_GLO_HD;
+				break;
+			} else if (strcmp(line, "kobo,tolino-shine3") == 0) {
+				kobo_id = DEVICE_KOBO_CLARA_HD;
+				break;
+			} else if (strcmp(line, "kobo,tolino-vision5") == 0) {
+				kobo_id = DEVICE_KOBO_LIBRA_H2O;
+				break;
+			} else if (strcmp(line, "kobo,clarahd") == 0) {
+				kobo_id = DEVICE_KOBO_CLARA_HD;
+				break;
+			} else if (strcmp(line, "kobo,librah2o") == 0) {
+				kobo_id = DEVICE_KOBO_LIBRA_H2O;
+				break;
+			} else if (strcmp(line, "fsl,imx6sl") == 0) {
+				kobo_id = DEVICE_MAINLINE_GENERIC_IMX6;
+				break;
+			} else if (strcmp(line, "fsl,imx6sll") == 0) {
+				kobo_id = DEVICE_MAINLINE_GENERIC_IMX6;
+				break;
+			} else if (strcmp(line, "fsl,imx6ull") == 0) {
+				kobo_id = DEVICE_MAINLINE_GENERIC_IMX6;
+				break;
+			} else if (strcmp(line, "fsl,imx50") == 0) {
+				kobo_id = DEVICE_MAINLINE_GENERIC_IMX6;
+				break;
+			}
+		}
+		free(line);
+		fclose(fp);
+	}
+
+	set_kobo_quirks(kobo_id);
+}
+
 #	elif defined(FBINK_FOR_REMARKABLE)
 static void
     identify_remarkable(void)

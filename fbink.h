@@ -235,6 +235,14 @@ typedef enum
 	DEVICE_KOBO_MAX           = UINT16_MAX,    // uint16_t
 } __attribute__((packed)) KOBO_DEVICE_ID_E;
 
+// List of i.MX device IDs for mainline kernels
+typedef enum
+{
+	DEVICE_MAINLINE_GENERIC_IMX5 = ('i' << 8U) | ('.' << 8U) | 'M' | 'X' | '5',
+	DEVICE_MAINLINE_GENERIC_IMX6 = ('i' << 8U) | ('.' << 8U) | 'M' | 'X' | '6',
+	DEVICE_MAINLINE_MAX          = UINT16_MAX,    // uint16_t
+} __attribute__((packed)) MAINLINE_DEVICE_ID_E;
+
 // List of reMarkable device IDs
 typedef enum
 {

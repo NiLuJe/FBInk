@@ -149,8 +149,12 @@ static const char* kobo_disp_res[] = { "800x600",    "1024x758",    "1024x768", 
 static const char* kobo_disp_busw[] = { "8Bits", "16Bits", "8Bits_mirror", "16Bits_mirror", "NC" };
 */
 
+// And for mainline kernels, this is where we poke for device identification
+#                define MAINLINE_DEVICE_ID_SYSFS "/sys/firmware/devicetree/base/compatible"
+
 static void set_kobo_quirks(unsigned short int);
 static void identify_kobo(void);
+static void identify_mainline(void);
 #        elif defined(FBINK_FOR_REMARKABLE)
 static void identify_remarkable(void);
 #        elif defined(FBINK_FOR_POCKETBOOK)
