@@ -1120,7 +1120,7 @@ static void
 				kobo_id = DEVICE_MAINLINE_GENERIC_IMX6;
 				break;
 			} else if (strcmp(line, "fsl,imx50") == 0) {
-				kobo_id = DEVICE_MAINLINE_GENERIC_IMX6;
+				kobo_id = DEVICE_MAINLINE_GENERIC_IMX5;
 				break;
 			}
 		}
