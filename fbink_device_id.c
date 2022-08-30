@@ -894,6 +894,22 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark >= 6", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
+		case DEVICE_MAINLINE_GENERIC_SUNXI_B300:
+			// Generic fallback for sunxi B300 devices
+			deviceQuirks.isSunxi       = true;
+			deviceQuirks.hasEclipseWfm = true;
+			deviceQuirks.canHWInvert   = false;
+			deviceQuirks.ntxBootRota   = FB_ROTATE_UR;    // Assume nothing
+			deviceQuirks.canRotate     = true;
+			deviceQuirks.ntxRotaQuirk  = NTX_ROTA_SUNXI;
+			deviceQuirks.screenDPI     = 227U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "B300", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "??", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Mark 8", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
 		default:
 			// Print something slightly different if we completely failed to even compute a kobo_id...
 			if (kobo_id == (unsigned short int) -1) {
@@ -1121,6 +1137,9 @@ static void
 				break;
 			} else if (strcmp(line, "fsl,imx50") == 0) {
 				kobo_id = DEVICE_MAINLINE_GENERIC_IMX5;
+				break;
+			} else if (strcmp(line, "allwinner,sun8iw15p1") == 0) {
+				kobo_id = DEVICE_MAINLINE_GENERIC_SUNXI_B300;
 				break;
 			}
 		}

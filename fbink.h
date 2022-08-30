@@ -238,9 +238,10 @@ typedef enum
 // List of i.MX device IDs for mainline kernels
 typedef enum
 {
-	DEVICE_MAINLINE_GENERIC_IMX5 = ('i' << 8U) | ('.' << 8U) | 'M' | 'X' | '5',
-	DEVICE_MAINLINE_GENERIC_IMX6 = ('i' << 8U) | ('.' << 8U) | 'M' | 'X' | '6',
-	DEVICE_MAINLINE_MAX          = UINT16_MAX,    // uint16_t
+	DEVICE_MAINLINE_GENERIC_IMX5       = ('i' << 8U) | ('.' << 8U) | 'M' | 'X' | '5',
+	DEVICE_MAINLINE_GENERIC_IMX6       = ('i' << 8U) | ('.' << 8U) | 'M' | 'X' | '6',
+	DEVICE_MAINLINE_GENERIC_SUNXI_B300 = ('A' << 8U) | ('W' << 8U) | 'B' | '3' | '0' | '0',
+	DEVICE_MAINLINE_MAX                = UINT16_MAX,    // uint16_t
 } __attribute__((packed)) MAINLINE_DEVICE_ID_E;
 
 // List of reMarkable device IDs
