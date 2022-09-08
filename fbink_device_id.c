@@ -1148,6 +1148,11 @@ static void
 	}
 
 	set_kobo_quirks(kobo_id);
+	
+	// Mainline kernels expect to use the same set of ioctls as on Mk. 7+, even on older devices.
+	if (kobo_id != (unsigned short int) -1U) {
+		deviceQuirks.isKoboMk7 = true;
+	}
 }
 
 #	elif defined(FBINK_FOR_REMARKABLE)
