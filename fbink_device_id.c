@@ -988,6 +988,8 @@ static void
 				fclose(fp);
 
 				// Do try a last stand with the mainline device id codepath...
+				// We don't call set_kobo_quirks w/ DEVICE_INVALID as we don't want an early warning...
+				// (It's only ever used when we return early without falling back to another detection mechanism).
 				return identify_mainline();
 			}
 
@@ -999,7 +1001,6 @@ static void
 				     HWCONFIG_DEVICE);
 				fclose(fp);
 
-				// Don't call set_kobo_quirks w/ DEVICE_INVALID as we don't want an early warning...
 				return identify_mainline();
 			}
 
