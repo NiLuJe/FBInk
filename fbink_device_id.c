@@ -987,7 +987,6 @@ static void
 				WARN("Failed to read the NTX HWConfig entry on `%s`", HWCONFIG_DEVICE);
 				fclose(fp);
 
-				set_kobo_quirks(DEVICE_INVALID);
 				// Do try a last stand with the mainline device id codepath...
 				return identify_mainline();
 			}
