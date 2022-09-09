@@ -1074,7 +1074,7 @@ static void
 				     (sizeof(kobo_ids) / sizeof(*kobo_ids)));
 			} else {
 				// As per /bin/kobo_config.sh, match PCB IDs to Product IDs via a LUT...
-				// NOTE: Some Tolinos *will* end up with a Kobo ID, here, because of lax matches:
+				// NOTE: Some Tolinos *will* end up with a Kobo ID here, because of lax matches:
 				//       e.g., the Shine 3 will be matched as a Clara HD, and the Vision 5 as a Libra.
 				unsigned short int kobo_id = kobo_ids[payload[KOBO_HWCFG_PCB]];
 
