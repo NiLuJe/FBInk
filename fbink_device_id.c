@@ -863,7 +863,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 8", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 0U:
+		case DEVICE_UNKNOWN:
 			// Like kobo_config.sh, assume Trilogy as a fallback
 			deviceQuirks.isKoboNonMT = true;
 			// Flawfinder: ignore
@@ -960,6 +960,7 @@ static void
 		}
 
 		// Get out now, we're done!
+		// NOTE: The nickel tag has been found, no need to fall back to DTB identification, it's definitely not mainline.
 		return;
 	}
 
@@ -985,11 +986,8 @@ static void
 			if (fread(&config, sizeof(config), 1, fp) < 1 || ferror(fp) != 0) {
 				WARN("Failed to read the NTX HWConfig entry on `%s`", HWCONFIG_DEVICE);
 				fclose(fp);
-				// NOTE: Make it clear we failed to identify the device...
-				//       i.e., by passing DEVICE_INVALID instead of DEVICE_UNKNOWN,
-				//       which we use to flag old !NTX devices.
-				set_kobo_quirks(DEVICE_INVALID);
 
+				set_kobo_quirks(DEVICE_INVALID);
 				// Do try a last stand with the mainline device id codepath...
 				return identify_mainline();
 			}
@@ -1001,9 +999,9 @@ static void
 				WARN("Block device `%s` does not appear to contain an NTX HWConfig entry",
 				     HWCONFIG_DEVICE);
 				fclose(fp);
-				// NOTE: Like rcS, assume it's an old Freescale Trilogy if we can't find an NTX HW tag
-				set_kobo_quirks(0U);
-				return;
+
+				set_kobo_quirks(DEVICE_INVALID);
+				return identify_mainline();
 			}
 
 			// We'll read the full payload, whose size varies depending on the exact kernel being used...
@@ -1013,6 +1011,7 @@ static void
 			if (fread(payload, sizeof(*payload), config.len, fp) < config.len || ferror(fp) != 0) {
 				WARN("Error reading NTX HWConfig payload (unexpected length)");
 				fclose(fp);
+
 				// NOTE: Make it clear we failed to identify the device...
 				set_kobo_quirks(DEVICE_INVALID);
 				return;
@@ -1151,6 +1150,11 @@ static void
 		}
 		free(line);
 		fclose(fp);
+	}
+
+	// NOTE: Like rcS, if all else fails, assume it's an old Freescale Trilogy...
+	if (kobo_id == DEVICE_INVALID) {
+		kobo_id = DEVICE_UNKNOWN;
 	}
 
 	set_kobo_quirks(kobo_id);
