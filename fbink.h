@@ -236,8 +236,12 @@ typedef enum
 } __attribute__((packed)) KOBO_DEVICE_ID_E;
 
 // List of i.MX device IDs for mainline kernels
+// c.f., https://github.com/NiLuJe/FBInk/issues/70#issuecomment-1242274710 for Tolinos
 typedef enum
 {
+	DEVICE_MAINLINE_TOLINO_SHINE_2HD   = ('T' << 8U) | ('o' << 8U) | ('l' << 8U) | DEVICE_KOBO_GLO_HD,
+	DEVICE_MAINLINE_TOLINO_SHINE_3     = ('T' << 8U) | ('o' << 8U) | ('l' << 8U) | DEVICE_KOBO_CLARA_HD,
+	DEVICE_MAINLINE_TOLINO_VISION_5    = ('T' << 8U) | ('o' << 8U) | ('l' << 8U) | DEVICE_KOBO_LIBRA_H2O,
 	DEVICE_MAINLINE_GENERIC_IMX5       = ('i' << 8U) | ('.' << 8U) | 'M' | 'X' | '5',
 	DEVICE_MAINLINE_GENERIC_IMX6       = ('i' << 8U) | ('.' << 8U) | 'M' | 'X' | '6',
 	DEVICE_MAINLINE_GENERIC_SUNXI_B300 = ('A' << 8U) | ('W' << 8U) | 'B' | '3' | '0' | '0',

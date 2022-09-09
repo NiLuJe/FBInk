@@ -1074,7 +1074,8 @@ static void
 				}
 
 				// Assuming we actually *know* about this PCB ID...
-				// NOTE: Wanted: PCB IDs for the Tolinos ;).
+				// NOTE: Some Tolinos *will* end up with a Kobo IDs, here, because of lax matches:
+				//       e.g., the Shine 3 will be matched as a Clara HD, and the Vision 5 as a Libra.
 				if (kobo_id != DEVICE_UNKNOWN) {
 					// ...we can do this, as accurately as if onboard were mounted ;).
 					set_kobo_quirks(kobo_id);
@@ -1082,9 +1083,10 @@ static void
 					// Get out now, we're done!
 					return;
 				}
+			}
 		} else {
-			// Should hopefully never happen, since there's a good chance we'd have caught a SIGSEGV before that,
-			// if alloca failed ;).
+			// Should hopefully never happen,
+			// since there's a good chance we'd have caught a SIGSEGV before that if alloca failed ;).
 			WARN("Empty NTX HWConfig payload?");
 		}
 	}

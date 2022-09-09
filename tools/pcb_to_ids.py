@@ -10,7 +10,20 @@ data = "./Kobo_PCB_IDs.txt"
 
 with open(data, "r") as f:
 	for line in f:
-		if line.startswith("E60610D"):
+		# NOTE: Start with the Tolinos, as we have a complete PCB ID for them,
+		#       c.f., https://github.com/NiLuJe/FBInk/issues/70#issuecomment-1242274710
+		if line.startswith("E60QF0"):
+			# Tolino Shine 2HD
+			print("32627,")
+#		elif line.startswith("E60K00"):
+#			# NOTE: Caught by the Clara HD match
+#			# Tolino Shine 3
+#			print("32632,")
+		elif line.startswith("E70K0M"):
+			# NOTE: Its actual DTB says E70K0M, but at the same index as E70K00, which is the Libra...
+			# Tolino Vision 5
+			print("32640,")
+		elif line.startswith("E60610D"):
 			# NOTE: This is an educated guess. kobo_config puts every E60610* in the "trilogy" basket...
 			# Touch C (trilogy) [320]
 			print("320,")
