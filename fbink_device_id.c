@@ -1027,7 +1027,7 @@ static void
 		fclose(fp);
 
 		// As per /bin/kobo_config.sh, match PCB IDs to Product IDs via a LUT...
-		unsigned short int kobo_id = DEVICE_UNKNOWN;
+		unsigned short int kobo_id = DEVICE_INVALID;
 		// Mainly to make GCC happy, because if alloca failed, we're screwed anyway.
 		if (payload) {
 			/*
@@ -1080,15 +1080,20 @@ static void
 			// if alloca failed ;).
 			WARN("Empty NTX HWConfig payload?");
 		}
-		// And now we can do this, as accurately as if onboard were mounted ;).
-		set_kobo_quirks(kobo_id);
+		// Assuming we actually *know* about this PCB ID...
+		// NOTE: Wanted: PCB IDs for the Tolinos ;).
+		if (kobo_id != DEVICE_INVALID && kobo_id != DEVICE_UNKNOWN) {
+			// ...we can do this, as accurately as if onboard were mounted ;).
+			set_kobo_quirks(kobo_id);
 
-		// Get out now, we're done!
-		return;
+			// Get out now, we're done!
+			return;
+		}
 	}
 
 	// NOTE: And if we went this far, it means onboard isn't mounted/Nickel never ran,
-	//       *and* either we're not on an NTX board, or mmcblk0 is unmounted.
+	//       *and* either we're not on an NTX board, or mmcblk0 is unmounted;
+	//       or we failed to detect a device with either of those two methods.
 	//       That usually points to a device running a mainline kernel, so let's poke at the DTB...
 	return identify_mainline();
 }
