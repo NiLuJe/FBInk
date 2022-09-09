@@ -1000,7 +1000,7 @@ static void
 				     HWCONFIG_DEVICE);
 				fclose(fp);
 
-				set_kobo_quirks(DEVICE_INVALID);
+				// Don't call set_kobo_quirks w/ DEVICE_INVALID as we don't want an early warning...
 				return identify_mainline();
 			}
 
