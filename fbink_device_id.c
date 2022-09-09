@@ -1025,8 +1025,6 @@ static void
 		}
 		fclose(fp);
 
-		// As per /bin/kobo_config.sh, match PCB IDs to Product IDs via a LUT...
-		unsigned short int kobo_id = DEVICE_INVALID;
 		// Mainly to make GCC happy, because if alloca failed, we're screwed anyway.
 		if (payload) {
 			/*
@@ -1041,7 +1039,8 @@ static void
 				     payload[KOBO_HWCFG_PCB],
 				     (sizeof(kobo_ids) / sizeof(*kobo_ids)));
 			} else {
-				kobo_id = kobo_ids[payload[KOBO_HWCFG_PCB]];
+				// As per /bin/kobo_config.sh, match PCB IDs to Product IDs via a LUT...
+				const unsigned short int kobo_id = kobo_ids[payload[KOBO_HWCFG_PCB]];
 
 				// And now for the fun part, the few device variants that use the same PCB ID...
 				if (kobo_id == DEVICE_KOBO_AURA_H2O_2 || kobo_id == DEVICE_KOBO_AURA_SE) {
@@ -1073,20 +1072,20 @@ static void
 						}
 					}
 				}
-			}
+
+				// Assuming we actually *know* about this PCB ID...
+				// NOTE: Wanted: PCB IDs for the Tolinos ;).
+				if (kobo_id != DEVICE_UNKNOWN) {
+					// ...we can do this, as accurately as if onboard were mounted ;).
+					set_kobo_quirks(kobo_id);
+
+					// Get out now, we're done!
+					return;
+				}
 		} else {
 			// Should hopefully never happen, since there's a good chance we'd have caught a SIGSEGV before that,
 			// if alloca failed ;).
 			WARN("Empty NTX HWConfig payload?");
-		}
-		// Assuming we actually *know* about this PCB ID...
-		// NOTE: Wanted: PCB IDs for the Tolinos ;).
-		if (kobo_id != DEVICE_INVALID && kobo_id != DEVICE_UNKNOWN) {
-			// ...we can do this, as accurately as if onboard were mounted ;).
-			set_kobo_quirks(kobo_id);
-
-			// Get out now, we're done!
-			return;
 		}
 	}
 
