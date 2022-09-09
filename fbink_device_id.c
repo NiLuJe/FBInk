@@ -873,6 +873,40 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 3?", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
+		case DEVICE_MAINLINE_TOLINO_SHINE_2HD:    // Tolino Shine 2HD (Glo HD-ish)
+			// Mainline kernels expect to use the same set of ioctls as on Mk. 7+, even on older devices.
+			deviceQuirks.isKoboMk7 = true;
+			deviceQuirks.screenDPI = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "Shine 2HD", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Tolino", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
+		case DEVICE_MAINLINE_TOLINO_SHINE_3:    // Tolino Shine 3 (Clara HD-ish)
+			deviceQuirks.isKoboMk7 = true;
+			deviceQuirks.screenDPI = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "Shine 3", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Tolino", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
+		case DEVICE_MAINLINE_TOLINO_VISION_5:    // Tolino Vision 5 (Libra H2O-ish)
+			deviceQuirks.isKoboMk7    = true;
+			deviceQuirks.ntxBootRota  = FB_ROTATE_UR;
+			deviceQuirks.canRotate    = true;
+			deviceQuirks.ntxRotaQuirk = NTX_ROTA_SANE;
+			deviceQuirks.screenDPI    = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "Vision 5", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Tolino", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
 		case DEVICE_MAINLINE_GENERIC_IMX5:
 			// Generic fallback for i.MX5 devices on mainline kernels
 			deviceQuirks.screenDPI = 212U;
@@ -1116,25 +1150,15 @@ static void
 			// Keep this in the same order as Documentation/devicetree/bindings/arm/fsl.yaml to ease updates
 			if (strcmp(line, "kobo,aura") == 0) {
 				kobo_id = DEVICE_KOBO_AURA;
-				set_kobo_quirks(kobo_id);
 				break;
 			} else if (strcmp(line, "kobo,tolino-shine2hd") == 0) {
-				kobo_id = DEVICE_KOBO_GLO_HD;
-				set_kobo_quirks(kobo_id);
-				// Mainline kernels expect to use the same set of ioctls as on Mk. 7+, even on older devices.
-				deviceQuirks.isKoboMk7 = true;
-				// Flawfinder: ignore
-				strncpy(deviceQuirks.deviceName, "Shine 2 HD", sizeof(deviceQuirks.deviceName) - 1U);
-				// Flawfinder: ignore
-				strncpy(deviceQuirks.deviceCodename, "??", sizeof(deviceQuirks.deviceCodename) - 1U);
-				// Flawfinder: ignore
-				strncpy(deviceQuirks.devicePlatform, "Tolino", sizeof(deviceQuirks.devicePlatform) - 1U);
+				kobo_id = DEVICE_MAINLINE_TOLINO_SHINE_2HD;
 				break;
 			} else if (strcmp(line, "kobo,tolino-shine3") == 0) {
-				kobo_id = DEVICE_KOBO_CLARA_HD;
+				kobo_id = DEVICE_MAINLINE_TOLINO_SHINE_3;
 				break;
 			} else if (strcmp(line, "kobo,tolino-vision5") == 0) {
-				kobo_id = DEVICE_KOBO_LIBRA_H2O;
+				kobo_id = DEVICE_MAINLINE_TOLINO_VISION_5;
 				break;
 			} else if (strcmp(line, "kobo,clarahd") == 0) {
 				kobo_id = DEVICE_KOBO_CLARA_HD;
@@ -1165,8 +1189,9 @@ static void
 
 	// NOTE: Like rcS, if all else fails, assume it's an old Freescale Trilogy...
 	if (kobo_id == DEVICE_INVALID) {
-		set_kobo_quirks(DEVICE_UNKNOWN);
+		kobo_id = DEVICE_UNKNOWN;
 	}
+	set_kobo_quirks(kobo_id);
 }
 
 #	elif defined(FBINK_FOR_REMARKABLE)
