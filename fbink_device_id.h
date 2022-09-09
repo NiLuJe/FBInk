@@ -28,6 +28,9 @@
 
 #include <linux/fs.h>
 
+// Used as a sentinel value during device detection
+#define DEVICE_INVALID UINT16_MAX
+
 #ifndef FBINK_FOR_LINUX
 #	if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 // NOTE: This is NTX's homegrown hardware tagging, c.f., arch/arm/mach-imx/ntx_hwconfig.h in a Kobo kernel, for instance

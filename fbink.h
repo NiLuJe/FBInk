@@ -288,6 +288,9 @@ typedef enum
 	DEVICE_POCKETBOOK_MAX         = UINT16_MAX,    // uint16_t
 } __attribute__((packed)) POCKETBOOK_DEVICE_ID_E;
 
+// If device detection failed...
+#define DEVICE_UNKNOWN 0U
+
 // NOTE: There's no enum for Kindles, because there are an insane number of device IDs per model,
 //       so it doesn't really fit into this model. Use the deviceName instead.
 typedef uint16_t DEVICE_ID_T;

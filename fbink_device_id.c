@@ -912,7 +912,7 @@ static void
 			break;
 		default:
 			// Print something slightly different if we completely failed to even compute a kobo_id...
-			if (kobo_id == (unsigned short int) -1) {
+			if (kobo_id == DEVICE_INVALID) {
 				WARN("Failed to compute a Kobo device code");
 			} else {
 				WARN("Unidentified Kobo device code (%hu)", kobo_id);
@@ -955,8 +955,8 @@ static void
 		} else {
 			WARN("Failed to read the Kobo version tag (%zu)", size);
 			// NOTE: Make it clear we failed to identify the device...
-			//       i.e., by passing UINT16_MAX instead of 0U, which we use to flag old !NTX devices.
-			set_kobo_quirks((unsigned short int) -1);
+			//       i.e., by passing DEVICE_INVALID instead of DEVICE_UNKNOWN, which we use to flag old !NTX devices.
+			set_kobo_quirks(DEVICE_INVALID);
 		}
 
 		// Get out now, we're done!
@@ -986,8 +986,9 @@ static void
 				WARN("Failed to read the NTX HWConfig entry on `%s`", HWCONFIG_DEVICE);
 				fclose(fp);
 				// NOTE: Make it clear we failed to identify the device...
-				//       i.e., by passing UINT16_MAX instead of 0U, which we use to flag old !NTX devices.
-				set_kobo_quirks((unsigned short int) -1);
+				//       i.e., by passing DEVICE_INVALID instead of DEVICE_UNKNOWN,
+				//       which we use to flag old !NTX devices.
+				set_kobo_quirks(DEVICE_INVALID);
 
 				// Do try a last stand with the mainline device id codepath...
 				return identify_mainline();
@@ -1013,7 +1014,7 @@ static void
 				WARN("Error reading NTX HWConfig payload (unexpected length)");
 				fclose(fp);
 				// NOTE: Make it clear we failed to identify the device...
-				set_kobo_quirks((unsigned short int) -1);
+				set_kobo_quirks(DEVICE_INVALID);
 				return;
 			}
 
@@ -1026,7 +1027,7 @@ static void
 		fclose(fp);
 
 		// As per /bin/kobo_config.sh, match PCB IDs to Product IDs via a LUT...
-		unsigned short int kobo_id = 0U;
+		unsigned short int kobo_id = DEVICE_UNKNOWN;
 		// Mainly to make GCC happy, because if alloca failed, we're screwed anyway.
 		if (payload) {
 			/*
@@ -1098,7 +1099,7 @@ static void
 	// This is aimed at mainline kernels, c.f., https://github.com/NiLuJe/FBInk/issues/70
 
 	// Default to an identification failure
-	unsigned short int kobo_id = (unsigned short int) -1U;
+	unsigned short int kobo_id = DEVICE_INVALID;
 	FILE*              fp      = fopen(MAINLINE_DEVICE_ID_SYSFS, "re");
 	if (!fp) {
 		ELOG("Couldn't find a DTB sysfs entry!");
@@ -1148,9 +1149,9 @@ static void
 	}
 
 	set_kobo_quirks(kobo_id);
-	
+
 	// Mainline kernels expect to use the same set of ioctls as on Mk. 7+, even on older devices.
-	if (kobo_id != (unsigned short int) -1U) {
+	if (kobo_id != DEVICE_INVALID) {
 		deviceQuirks.isKoboMk7 = true;
 	}
 }
