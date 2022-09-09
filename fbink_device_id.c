@@ -940,7 +940,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "B300", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "??", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strncpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename) - 1U);
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 8", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
@@ -1074,6 +1074,8 @@ static void
 				     (sizeof(kobo_ids) / sizeof(*kobo_ids)));
 			} else {
 				// As per /bin/kobo_config.sh, match PCB IDs to Product IDs via a LUT...
+				// NOTE: Some Tolinos *will* end up with a Kobo ID, here, because of lax matches:
+				//       e.g., the Shine 3 will be matched as a Clara HD, and the Vision 5 as a Libra.
 				const unsigned short int kobo_id = kobo_ids[payload[KOBO_HWCFG_PCB]];
 
 				// And now for the fun part, the few device variants that use the same PCB ID...
@@ -1108,8 +1110,6 @@ static void
 				}
 
 				// Assuming we actually *know* about this PCB ID...
-				// NOTE: Some Tolinos *will* end up with a Kobo IDs, here, because of lax matches:
-				//       e.g., the Shine 3 will be matched as a Clara HD, and the Vision 5 as a Libra.
 				if (kobo_id != DEVICE_UNKNOWN) {
 					// ...we can do this, as accurately as if onboard were mounted ;).
 					set_kobo_quirks(kobo_id);
@@ -1136,8 +1136,6 @@ static void
     identify_mainline(void)
 {
 	// This is aimed at mainline kernels, c.f., https://github.com/NiLuJe/FBInk/issues/70
-
-	// Default to an identification failure
 	unsigned short int kobo_id = DEVICE_INVALID;
 	FILE*              fp      = fopen(MAINLINE_DEVICE_ID_SYSFS, "re");
 	if (!fp) {

@@ -235,7 +235,7 @@ typedef enum
 	DEVICE_KOBO_MAX           = UINT16_MAX,    // uint16_t
 } __attribute__((packed)) KOBO_DEVICE_ID_E;
 
-// List of i.MX device IDs for mainline kernels
+// List of device IDs for mainline kernels
 // c.f., https://github.com/NiLuJe/FBInk/issues/70#issuecomment-1242274710 for Tolinos
 typedef enum
 {
