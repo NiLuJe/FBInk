@@ -245,12 +245,13 @@ static int*
 		const qint64 inc = (((qint64) s) << 16) / d;
 		for (int i = 0; i < d; i++) {
 			const int pos = (int) (val >> 16);
-			if (pos < 0)
+			if (pos < 0) {
 				p[j++] = 0;
-			else if (pos >= (s - 1))
+			} else if (pos >= (s - 1)) {
 				p[j++] = 0;
-			else
+			} else {
 				p[j++] = (int) ((val >> 8) - ((val >> 8) & 0xffffff00));
+			}
 			val += inc;
 		}
 	} else {
@@ -297,14 +298,16 @@ static QImageScaleInfo*
 	int sch = dh;
 
 	QImageScaleInfo* isi = calloc(1U, sizeof(QImageScaleInfo));
-	if (!isi)
+	if (!isi) {
 		return NULL;
+	}
 
 	isi->xup_yup = (qAbs(dw) >= sw) + ((qAbs(dh) >= sh) << 1);
 
 	isi->xpoints = qimageCalcXPoints(sw, scw);
-	if (!isi->xpoints)
+	if (!isi->xpoints) {
 		return qimageFreeScaleInfo(isi);
+	}
 	// NOTE: We use sw directly as a simplification. Technically, it's img bytes-per-lines / bytes-per-pixel
 	//       (i.e., img's width (sw) * number of color components (sn) / sizeof(*img) for unpadded packed pixels).
 	//       This explains the casts and the need for different functions according to pointer width.
@@ -315,8 +318,9 @@ static QImageScaleInfo*
 #pragma GCC diagnostic ignored "-Wcast-align"
 			isi->ypoints = qimageCalcYPoints((const unsigned int* restrict) img, sw, sh, sch);
 #pragma GCC diagnostic pop
-			if (!isi->ypoints)
+			if (!isi->ypoints) {
 				return qimageFreeScaleInfo(isi);
+			}
 			break;
 		case 2:
 			// sn is 2, as is sizeof(unsigned short), hence using width directly ;).
@@ -324,14 +328,16 @@ static QImageScaleInfo*
 #pragma GCC diagnostic ignored "-Wcast-align"
 			isi->ypoints_y8a = qimageCalcYPointsY8A((const unsigned short* restrict) img, sw, sh, sch);
 #pragma GCC diagnostic pop
-			if (!isi->ypoints_y8a)
+			if (!isi->ypoints_y8a) {
 				return qimageFreeScaleInfo(isi);
+			}
 			break;
 		case 1:
 			// sn is 1, as is sizeof(unsigned char), hence using width directly ;).
 			isi->ypoints_y8 = qimageCalcYPointsY8((const unsigned char* restrict) img, sw, sh, sch);
-			if (!isi->ypoints_y8)
+			if (!isi->ypoints_y8) {
 				return qimageFreeScaleInfo(isi);
+			}
 			break;
 		default:
 			return qimageFreeScaleInfo(isi);
@@ -339,11 +345,13 @@ static QImageScaleInfo*
 	}
 	if (aa) {
 		isi->xapoints = qimageCalcApoints(sw, scw, isi->xup_yup & 1);
-		if (!isi->xapoints)
+		if (!isi->xapoints) {
 			return qimageFreeScaleInfo(isi);
+		}
 		isi->yapoints = qimageCalcApoints(sh, sch, isi->xup_yup & 2);
-		if (!isi->yapoints)
+		if (!isi->yapoints) {
 			return qimageFreeScaleInfo(isi);
+		}
 	}
 	return isi;
 }
@@ -471,23 +479,25 @@ static void
 			for (int x = 0; x < dw; x++) {
 				const unsigned int* restrict pix = sptr + xpoints[x];
 				const int xap                    = xapoints[x];
-				if (xap > 0)
+				if (xap > 0) {
 					*dptr = interpolate_4_pixels_arr(
 					    pix, pix + sow, (unsigned int) xap, (unsigned int) yap);
-				else
+				} else {
 					*dptr = INTERPOLATE_PIXEL_256(
 					    pix[0], (unsigned int) (256 - yap), pix[sow], (unsigned int) yap);
+				}
 				dptr++;
 			}
 		} else {
 			for (int x = 0; x < dw; x++) {
 				const unsigned int* restrict pix = sptr + xpoints[x];
 				const int xap                    = xapoints[x];
-				if (xap > 0)
+				if (xap > 0) {
 					*dptr = INTERPOLATE_PIXEL_256(
 					    pix[0], (unsigned int) (256 - xap), pix[1], (unsigned int) xap);
-				else
+				} else {
 					*dptr = pix[0];
+				}
 				dptr++;
 			}
 		}
@@ -957,23 +967,25 @@ static void
 			for (int x = 0; x < dw; x++) {
 				const unsigned char* restrict pix = sptr + xpoints[x];
 				const int xap                     = xapoints[x];
-				if (xap > 0)
+				if (xap > 0) {
 					*dptr = interpolate_4_8bpp_pixels_arr(
 					    pix, pix + sow, (unsigned int) xap, (unsigned int) yap);
-				else
+				} else {
 					*dptr = INTERPOLATE_8BPP_PIXEL_256(
 					    pix[0], (unsigned int) (256 - yap), pix[sow], (unsigned int) yap);
+				}
 				dptr++;
 			}
 		} else {
 			for (int x = 0; x < dw; x++) {
 				const unsigned char* restrict pix = sptr + xpoints[x];
 				const int xap                     = xapoints[x];
-				if (xap > 0)
+				if (xap > 0) {
 					*dptr = INTERPOLATE_8BPP_PIXEL_256(
 					    pix[0], (unsigned int) (256 - xap), pix[1], (unsigned int) xap);
-				else
+				} else {
 					*dptr = pix[0];
+				}
 				dptr++;
 			}
 		}
@@ -1088,14 +1100,15 @@ static void
 static void
     qt_qimageScaleAAY8(QImageScaleInfo* isi, unsigned char* restrict dest, int dw, int dh, int dow, int sow)
 {
-	if (isi->xup_yup == 3)
+	if (isi->xup_yup == 3) {
 		qt_qimageScaleAAY8_up_xy(isi, dest, dw, dh, dow, sow);
-	else if (isi->xup_yup == 1)
+	} else if (isi->xup_yup == 1) {
 		qt_qimageScaleAAY8_up_x_down_y(isi, dest, dw, dh, dow, sow);
-	else if (isi->xup_yup == 2)
+	} else if (isi->xup_yup == 2) {
 		qt_qimageScaleAAY8_down_x_up_y(isi, dest, dw, dh, dow, sow);
-	else
+	} else {
 		qt_qimageScaleAAY8_down_xy(isi, dest, dw, dh, dow, sow);
+	}
 }
 
 static inline __attribute__((always_inline)) void
@@ -1137,23 +1150,25 @@ static void
 			for (int x = 0; x < dw; x++) {
 				const unsigned short* restrict pix = sptr + xpoints[x];
 				const int xap                      = xapoints[x];
-				if (xap > 0)
+				if (xap > 0) {
 					*dptr = interpolate_4_16bpp_pixels_arr(
 					    pix, pix + sow, (unsigned int) xap, (unsigned int) yap);
-				else
+				} else {
 					*dptr = INTERPOLATE_16BPP_PIXEL_256(
 					    pix[0], (unsigned int) (256 - yap), pix[sow], (unsigned int) yap);
+				}
 				dptr++;
 			}
 		} else {
 			for (int x = 0; x < dw; x++) {
 				const unsigned short* restrict pix = sptr + xpoints[x];
 				const int xap                      = xapoints[x];
-				if (xap > 0)
+				if (xap > 0) {
 					*dptr = INTERPOLATE_16BPP_PIXEL_256(
 					    pix[0], (unsigned int) (256 - xap), pix[1], (unsigned int) xap);
-				else
+				} else {
 					*dptr = pix[0];
+				}
 				dptr++;
 			}
 		}
@@ -1278,26 +1293,29 @@ static void
 static void
     qt_qimageScaleAAY8A(QImageScaleInfo* isi, unsigned short* restrict dest, int dw, int dh, int dow, int sow)
 {
-	if (isi->xup_yup == 3)
+	if (isi->xup_yup == 3) {
 		qt_qimageScaleAAY8A_up_xy(isi, dest, dw, dh, dow, sow);
-	else if (isi->xup_yup == 1)
+	} else if (isi->xup_yup == 1) {
 		qt_qimageScaleAAY8A_up_x_down_y(isi, dest, dw, dh, dow, sow);
-	else if (isi->xup_yup == 2)
+	} else if (isi->xup_yup == 2) {
 		qt_qimageScaleAAY8A_down_x_up_y(isi, dest, dw, dh, dow, sow);
-	else
+	} else {
 		qt_qimageScaleAAY8A_down_xy(isi, dest, dw, dh, dow, sow);
+	}
 }
 
 unsigned char*
     qSmoothScaleImage(const unsigned char* restrict src, int sw, int sh, int sn, bool ignore_alpha, int dw, int dh)
 {
 	unsigned char* restrict buffer = NULL;
-	if (src == NULL || dw <= 0 || dh <= 0)
+	if (src == NULL || dw <= 0 || dh <= 0) {
 		return buffer;
+	}
 
 	QImageScaleInfo* scaleinfo = qimageCalcScaleInfo(src, sw, sh, sn, dw, dh, true);
-	if (!scaleinfo)
+	if (!scaleinfo) {
 		return buffer;
+	}
 
 	// NOTE: For RGB/RGBA input, output format is always RGBA!
 	//       In case our input was RGB, we've already ensured that our input buffer is already 32bpp,

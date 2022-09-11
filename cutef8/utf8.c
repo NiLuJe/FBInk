@@ -770,8 +770,9 @@ u8_isvalid(const char* str, size_t len)
 	pend = (const unsigned char*) str + len;
 	// First scan for non-ASCII characters as fast as possible
 	do {
-		if (*pnt++ & 0x80)
+		if (*pnt++ & 0x80) {
 			goto chkutf8;
+		}
 	} while (pnt < pend);
 	return CUTEF8_IS_ASCII;
 
