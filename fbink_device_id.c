@@ -1136,7 +1136,8 @@ static void
     identify_mainline(void)
 {
 	// This is aimed at mainline kernels, c.f., https://github.com/NiLuJe/FBInk/issues/70
-	unsigned short int kobo_id = DEVICE_INVALID;
+	// NOTE: Like rcS, if all else fails, assume it's an old Freescale Trilogy...
+	unsigned short int kobo_id = DEVICE_UNKNOWN;
 	FILE*              fp      = fopen(MAINLINE_DEVICE_ID_SYSFS, "re");
 	if (!fp) {
 		ELOG("Couldn't find a DTB sysfs entry!");
@@ -1185,10 +1186,6 @@ static void
 		fclose(fp);
 	}
 
-	// NOTE: Like rcS, if all else fails, assume it's an old Freescale Trilogy...
-	if (kobo_id == DEVICE_INVALID) {
-		kobo_id = DEVICE_UNKNOWN;
-	}
 	set_kobo_quirks(kobo_id);
 }
 
