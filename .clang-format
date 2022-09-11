@@ -12,7 +12,6 @@ AlignEscapedNewlines: Right
 AlignOperands: Align
 AlignTrailingComments: true
 AllowAllArgumentsOnNextLine: true
-AllowAllConstructorInitializersOnNextLine: true
 AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortBlocksOnASingleLine: Empty
 AllowShortCaseLabelsOnASingleLine: false
@@ -29,6 +28,7 @@ AttributeMacros: ['__unused']
 BinPackArguments: false
 BinPackParameters: false
 BitFieldColonSpacing: Both
+BreakBeforeBraces: Custom
 BraceWrapping:
   AfterCaseLabel:  false
   AfterClass:      true
@@ -50,9 +50,8 @@ BraceWrapping:
   SplitEmptyNamespace: true
 BreakAfterJavaFieldAnnotations: false
 BreakBeforeBinaryOperators: None
-BreakBeforeBraces: Custom
 BreakBeforeInheritanceComma: false
-BreakBeforeConceptDeclarations: true
+BreakBeforeConceptDeclarations: Allowed
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializersBeforeComma: false
 BreakConstructorInitializers: AfterColon
@@ -61,7 +60,6 @@ BreakStringLiterals: false
 ColumnLimit:     122
 CommentPragmas:  '^ IWYU pragma:'
 CompactNamespaces: false
-ConstructorInitializerAllOnOneLineOrOnePerLine: false
 ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 4
 Cpp11BracedListStyle: false
@@ -96,9 +94,11 @@ IndentCaseLabels: true
 IndentExternBlock: NoIndent
 IndentGotoLabels: false
 IndentPPDirectives: AfterHash
-IndentRequires: true
+IndentRequiresClause: true
 IndentWidth:     8
 IndentWrappedFunctionNames: true
+# NOTE: New as of Clang 15, may still misbehave
+InsertBraces: true
 InsertTrailingCommas: None
 #JavaImportGroups: ['com.example', 'com', 'org']
 JavaScriptQuotes: Double
@@ -116,19 +116,29 @@ ObjCBreakBeforeNestedBlockParam: true
 ObjCSpaceAfterProperty: true
 ObjCSpaceBeforeProtocolList: false
 PPIndentWidth: -1
+PackConstructorInitializers: NextLine
 PenaltyBreakAssignment: 2
 PenaltyBreakBeforeFirstCallParameter: 19
 PenaltyBreakComment: 300
 PenaltyBreakFirstLessLess: 120
+#PenaltyBreakOpenParenthesis:
 PenaltyBreakString: 1000
 PenaltyBreakTemplateDeclaration: 10
 PenaltyExcessCharacter: 1000000
 PenaltyIndentedWhitespace: 0
 PenaltyReturnTypeOnItsOwnLine: 200
 PointerAlignment: Left
+# NOTE: New as of Clang 14, may still misbehave (also currently takes an inordinate amount of time)
+#QualifierAlignment: Left
+# NOTE: Err, not actually in 15.0.0 :?
+#QualifierOrder: ['inline', 'static', 'volatile', 'constexpr', 'const', 'type', 'restrict']
 #RawStringFormats:
 ReferenceAlignment: Pointer
 ReflowComments:  false
+RemoveBracesLLVM: false
+RequiresClausePosition: WithPreceding
+# NOTE: Nice in theory, but there can be exceptions in practice ;).
+SeparateDefinitionBlocks: Leave
 ShortNamespaceLines: 1
 SortIncludes: CaseSensitive
 SortJavaStaticImport: Before
