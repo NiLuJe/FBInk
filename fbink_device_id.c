@@ -863,7 +863,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 8", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
-		case 0U:
+		case DEVICE_UNKNOWN:
 			// Like kobo_config.sh, assume Trilogy as a fallback
 			deviceQuirks.isKoboNonMT = true;
 			// Flawfinder: ignore
@@ -873,9 +873,80 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 3?", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
+		case DEVICE_MAINLINE_TOLINO_SHINE_2HD:    // Tolino Shine 2HD (Glo HD-ish)
+			// Mainline kernels expect to use the same set of ioctls as on Mk. 7+, even on older devices.
+			deviceQuirks.isKoboMk7 = true;
+			deviceQuirks.screenDPI = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "Shine 2HD", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Tolino", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
+		case DEVICE_MAINLINE_TOLINO_SHINE_3:    // Tolino Shine 3 (Clara HD-ish)
+			deviceQuirks.isKoboMk7 = true;
+			deviceQuirks.screenDPI = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "Shine 3", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Tolino", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
+		case DEVICE_MAINLINE_TOLINO_VISION_5:    // Tolino Vision 5 (Libra H2O-ish)
+			deviceQuirks.isKoboMk7    = true;
+			deviceQuirks.ntxBootRota  = FB_ROTATE_UR;
+			deviceQuirks.canRotate    = true;
+			deviceQuirks.ntxRotaQuirk = NTX_ROTA_SANE;
+			deviceQuirks.screenDPI    = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "Vision 5", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Tolino", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
+		case DEVICE_MAINLINE_GENERIC_IMX5:
+			// Generic fallback for i.MX5 devices on mainline kernels
+			deviceQuirks.screenDPI = 212U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "i.MX5", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Mark <= 5", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
+		case DEVICE_MAINLINE_GENERIC_IMX6:
+			// Generic fallback for i.MX6 devices on mainline kernels
+			deviceQuirks.isKoboMk7 = true;
+			deviceQuirks.screenDPI = 212U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "i.MX6", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Mark >= 6", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
+		case DEVICE_MAINLINE_GENERIC_SUNXI_B300:
+			// Generic fallback for sunxi B300 devices
+			deviceQuirks.isSunxi       = true;
+			deviceQuirks.hasEclipseWfm = true;
+			deviceQuirks.canHWInvert   = false;
+			deviceQuirks.ntxBootRota   = FB_ROTATE_UR;    // Assume nothing
+			deviceQuirks.canRotate     = true;
+			deviceQuirks.ntxRotaQuirk  = NTX_ROTA_SUNXI;
+			deviceQuirks.screenDPI     = 227U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "B300", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Mark 8", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
 		default:
 			// Print something slightly different if we completely failed to even compute a kobo_id...
-			if (kobo_id == (unsigned short int) -1) {
+			if (kobo_id == DEVICE_INVALID) {
 				WARN("Failed to compute a Kobo device code");
 			} else {
 				WARN("Unidentified Kobo device code (%hu)", kobo_id);
@@ -898,7 +969,7 @@ static void
 	// Get the model from Nickel's version tag file...
 	FILE* fp = fopen("/mnt/onboard/.kobo/version", "re");
 	if (!fp) {
-		ELOG("Couldn't find a Kobo version tag (onboard unmounted or not running on a Kobo?)!");
+		ELOG("Couldn't find a Kobo version tag (onboard unmounted or not using Nickel?)!");
 	} else {
 		// NOTE: I'm not entirely sure this will always have a fixed length, so, give ourselves a bit of room...
 		char   line[_POSIX_PATH_MAX] = { 0 };
@@ -918,11 +989,12 @@ static void
 		} else {
 			WARN("Failed to read the Kobo version tag (%zu)", size);
 			// NOTE: Make it clear we failed to identify the device...
-			//       i.e., by passing UINT16_MAX instead of 0U, which we use to flag old !NTX devices.
-			set_kobo_quirks((unsigned short int) -1);
+			//       i.e., by passing DEVICE_INVALID instead of DEVICE_UNKNOWN, which we use to flag old !NTX devices.
+			set_kobo_quirks(DEVICE_INVALID);
 		}
 
 		// Get out now, we're done!
+		// NOTE: The nickel tag has been found, no need to fall back to DTB identification, it's definitely not mainline.
 		return;
 	}
 
@@ -932,7 +1004,8 @@ static void
 	//       So try to do it the hard way, via the NTXHWConfig tag...
 	fp = fopen(HWCONFIG_DEVICE, "re");
 	if (!fp) {
-		PFWARN("Couldn't read from `%s` (%m), unable to identify the Kobo model", HWCONFIG_DEVICE);
+		PFWARN("Couldn't read from `%s` (%m), unable to identify the Kobo model via its NTX board info",
+		       HWCONFIG_DEVICE);
 	} else {
 #		pragma GCC diagnostic push
 #		pragma GCC diagnostic ignored "-Wmissing-braces"
@@ -947,10 +1020,11 @@ static void
 			if (fread(&config, sizeof(config), 1, fp) < 1 || ferror(fp) != 0) {
 				WARN("Failed to read the NTX HWConfig entry on `%s`", HWCONFIG_DEVICE);
 				fclose(fp);
-				// NOTE: Make it clear we failed to identify the device...
-				//       i.e., by passing UINT16_MAX instead of 0U, which we use to flag old !NTX devices.
-				set_kobo_quirks((unsigned short int) -1);
-				return;
+
+				// Do try a last stand with the mainline device id codepath...
+				// We don't call set_kobo_quirks w/ DEVICE_INVALID as we don't want an early warning...
+				// (It's only ever used when we return early without falling back to another detection mechanism).
+				return identify_mainline();
 			}
 
 			// NOTE: These are NOT NULL-terminated, so we use the size of the storage array,
@@ -960,9 +1034,8 @@ static void
 				WARN("Block device `%s` does not appear to contain an NTX HWConfig entry",
 				     HWCONFIG_DEVICE);
 				fclose(fp);
-				// NOTE: Like rcS, assume it's an old Freescale Trilogy if we can't find an NTX HW tag
-				set_kobo_quirks(0U);
-				return;
+
+				return identify_mainline();
 			}
 
 			// We'll read the full payload, whose size varies depending on the exact kernel being used...
@@ -972,8 +1045,9 @@ static void
 			if (fread(payload, sizeof(*payload), config.len, fp) < config.len || ferror(fp) != 0) {
 				WARN("Error reading NTX HWConfig payload (unexpected length)");
 				fclose(fp);
+
 				// NOTE: Make it clear we failed to identify the device...
-				set_kobo_quirks((unsigned short int) -1);
+				set_kobo_quirks(DEVICE_INVALID);
 				return;
 			}
 
@@ -985,8 +1059,6 @@ static void
 		}
 		fclose(fp);
 
-		// As per /bin/kobo_config.sh, match PCB IDs to Product IDs via a LUT...
-		unsigned short int kobo_id = 0U;
 		// Mainly to make GCC happy, because if alloca failed, we're screwed anyway.
 		if (payload) {
 			/*
@@ -1001,7 +1073,10 @@ static void
 				     payload[KOBO_HWCFG_PCB],
 				     (sizeof(kobo_ids) / sizeof(*kobo_ids)));
 			} else {
-				kobo_id = kobo_ids[payload[KOBO_HWCFG_PCB]];
+				// As per /bin/kobo_config.sh, match PCB IDs to Product IDs via a LUT...
+				// NOTE: Some Tolinos *will* end up with a Kobo ID here, because of lax matches:
+				//       e.g., the Shine 3 will be matched as a Clara HD, and the Vision 5 as a Libra.
+				unsigned short int kobo_id = kobo_ids[payload[KOBO_HWCFG_PCB]];
 
 				// And now for the fun part, the few device variants that use the same PCB ID...
 				if (kobo_id == DEVICE_KOBO_AURA_H2O_2 || kobo_id == DEVICE_KOBO_AURA_SE) {
@@ -1033,16 +1108,90 @@ static void
 						}
 					}
 				}
+
+				// Assuming we actually *know* about this PCB ID...
+				if (kobo_id != DEVICE_UNKNOWN) {
+					// ...we can do this, as accurately as if onboard were mounted ;).
+					set_kobo_quirks(kobo_id);
+
+					// Get out now, we're done!
+					return;
+				}
 			}
 		} else {
-			// Should hopefully never happen, since there's a good chance we'd have caught a SIGSEGV before that,
-			// if alloca failed ;).
+			// Should hopefully never happen,
+			// since there's a good chance we'd have caught a SIGSEGV before that if alloca failed ;).
 			WARN("Empty NTX HWConfig payload?");
 		}
-		// And now we can do this, as accurately as if onboard were mounted ;).
-		set_kobo_quirks(kobo_id);
 	}
+
+	// NOTE: And if we went this far, it means onboard isn't mounted/Nickel never ran,
+	//       *and* either we're not on an NTX board, or mmcblk0 is unmounted;
+	//       or we failed to detect a device with either of those two methods.
+	//       That usually points to a device running a mainline kernel, so let's poke at the DTB...
+	return identify_mainline();
 }
+
+static void
+    identify_mainline(void)
+{
+	// This is aimed at mainline kernels, c.f., https://github.com/NiLuJe/FBInk/issues/70
+	unsigned short int kobo_id = DEVICE_INVALID;
+	FILE*              fp      = fopen(MAINLINE_DEVICE_ID_SYSFS, "re");
+	if (!fp) {
+		ELOG("Couldn't find a DTB sysfs entry!");
+	} else {
+		char*   line = NULL;
+		size_t  len  = 0;
+		ssize_t nread;
+		while ((nread = getdelim(&line, &len, '\0', fp)) != -1) {
+			// Keep this in the same order as Documentation/devicetree/bindings/arm/fsl.yaml to ease updates
+			if (strcmp(line, "kobo,aura") == 0) {
+				kobo_id = DEVICE_KOBO_AURA;
+				break;
+			} else if (strcmp(line, "kobo,tolino-shine2hd") == 0) {
+				kobo_id = DEVICE_MAINLINE_TOLINO_SHINE_2HD;
+				break;
+			} else if (strcmp(line, "kobo,tolino-shine3") == 0) {
+				kobo_id = DEVICE_MAINLINE_TOLINO_SHINE_3;
+				break;
+			} else if (strcmp(line, "kobo,tolino-vision5") == 0) {
+				kobo_id = DEVICE_MAINLINE_TOLINO_VISION_5;
+				break;
+			} else if (strcmp(line, "kobo,clarahd") == 0) {
+				kobo_id = DEVICE_KOBO_CLARA_HD;
+				break;
+			} else if (strcmp(line, "kobo,librah2o") == 0) {
+				kobo_id = DEVICE_KOBO_LIBRA_H2O;
+				break;
+			} else if (strcmp(line, "fsl,imx6sl") == 0) {
+				kobo_id = DEVICE_MAINLINE_GENERIC_IMX6;
+				break;
+			} else if (strcmp(line, "fsl,imx6sll") == 0) {
+				kobo_id = DEVICE_MAINLINE_GENERIC_IMX6;
+				break;
+			} else if (strcmp(line, "fsl,imx6ull") == 0) {
+				kobo_id = DEVICE_MAINLINE_GENERIC_IMX6;
+				break;
+			} else if (strcmp(line, "fsl,imx50") == 0) {
+				kobo_id = DEVICE_MAINLINE_GENERIC_IMX5;
+				break;
+			} else if (strcmp(line, "allwinner,sun8iw15p1") == 0) {
+				kobo_id = DEVICE_MAINLINE_GENERIC_SUNXI_B300;
+				break;
+			}
+		}
+		free(line);
+		fclose(fp);
+	}
+
+	// NOTE: Like rcS, if all else fails, assume it's an old Freescale Trilogy...
+	if (kobo_id == DEVICE_INVALID) {
+		kobo_id = DEVICE_UNKNOWN;
+	}
+	set_kobo_quirks(kobo_id);
+}
+
 #	elif defined(FBINK_FOR_REMARKABLE)
 static void
     identify_remarkable(void)

@@ -28,6 +28,9 @@
 
 #include <linux/fs.h>
 
+// Used as a sentinel value during device detection
+#define DEVICE_INVALID UINT16_MAX
+
 #ifndef FBINK_FOR_LINUX
 #	if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 // NOTE: This is NTX's homegrown hardware tagging, c.f., arch/arm/mach-imx/ntx_hwconfig.h in a Kobo kernel, for instance
@@ -109,12 +112,13 @@ static const char* kobo_pcbs[] = {
 // And match (more or less accurately, for some devices) that to what we've come to know as a device code,
 // because that's what we actually care about...
 // c.f., tools/pcb_to_ids.py
-static const unsigned short int kobo_ids[] = {
-	0,   0,   0, 0, 0, 0,   0,   0,   0,   0,   0,   0, 310, 0,   0,   0, 0, 0,   0, 0,   310, 320, 0, 0, 330, 0, 0,
-	340, 350, 0, 0, 0, 0,   0,   360, 360, 0,   330, 0, 0,   0,   370, 0, 0, 0,   0, 371, 0,   0,   0, 0, 0,   0, 0,
-	0,   373, 0, 0, 0, 375, 374, 0,   0,   375, 0,   0, 375, 0,   0,   0, 0, 0,   0, 376, 376, 377, 0, 0, 0,   0, 0,
-	382, 0,   0, 0, 0, 0,   384, 0,   0,   0,   0,   0, 0,   387, 0,   0, 0, 383, 0, 0,   388, 0,   0, 0
-};
+static const unsigned short int kobo_ids[] = { 0,   0,   0, 0,   0,   0,     0,   0,   0,   0,   0,   0,   310, 0,   0,
+					       0,   0,   0, 0,   0,   310,   320, 0,   0,   330, 0,   0,   340, 350, 0,
+					       0,   0,   0, 0,   360, 360,   0,   330, 0,   0,   0,   370, 0,   0,   0,
+					       0,   371, 0, 0,   0,   32627, 0,   0,   0,   0,   373, 0,   0,   0,   375,
+					       374, 0,   0, 375, 0,   0,     375, 0,   0,   0,   0,   0,   0,   376, 376,
+					       377, 0,   0, 0,   0,   0,     382, 0,   0,   0,   0,   0,   384, 0,   0,
+					       0,   0,   0, 0,   387, 0,     0,   0,   383, 0,   0,   388, 0,   0,   0 };
 
 // Same idea, but for the various NTX/Kobo Display Panels...
 /*
@@ -149,8 +153,12 @@ static const char* kobo_disp_res[] = { "800x600",    "1024x758",    "1024x768", 
 static const char* kobo_disp_busw[] = { "8Bits", "16Bits", "8Bits_mirror", "16Bits_mirror", "NC" };
 */
 
+// And for mainline kernels, this is where we poke for device identification
+#                define MAINLINE_DEVICE_ID_SYSFS "/sys/firmware/devicetree/base/compatible"
+
 static void set_kobo_quirks(unsigned short int);
 static void identify_kobo(void);
+static void identify_mainline(void);
 #        elif defined(FBINK_FOR_REMARKABLE)
 static void identify_remarkable(void);
 #        elif defined(FBINK_FOR_POCKETBOOK)

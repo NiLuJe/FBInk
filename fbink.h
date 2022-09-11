@@ -235,6 +235,19 @@ typedef enum
 	DEVICE_KOBO_MAX           = UINT16_MAX,    // uint16_t
 } __attribute__((packed)) KOBO_DEVICE_ID_E;
 
+// List of device IDs for mainline kernels
+// c.f., https://github.com/NiLuJe/FBInk/issues/70#issuecomment-1242274710 for Tolinos
+typedef enum
+{
+	DEVICE_MAINLINE_TOLINO_SHINE_2HD   = ('T' << 8U) | ('o' << 8U) | ('l' << 8U) | DEVICE_KOBO_GLO_HD,
+	DEVICE_MAINLINE_TOLINO_SHINE_3     = ('T' << 8U) | ('o' << 8U) | ('l' << 8U) | DEVICE_KOBO_CLARA_HD,
+	DEVICE_MAINLINE_TOLINO_VISION_5    = ('T' << 8U) | ('o' << 8U) | ('l' << 8U) | DEVICE_KOBO_LIBRA_H2O,
+	DEVICE_MAINLINE_GENERIC_IMX5       = ('i' << 8U) | ('.' << 8U) | 'M' | 'X' | '5',
+	DEVICE_MAINLINE_GENERIC_IMX6       = ('i' << 8U) | ('.' << 8U) | 'M' | 'X' | '6',
+	DEVICE_MAINLINE_GENERIC_SUNXI_B300 = ('A' << 8U) | ('W' << 8U) | 'B' | '3' | '0' | '0',
+	DEVICE_MAINLINE_MAX                = UINT16_MAX,    // uint16_t
+} __attribute__((packed)) MAINLINE_DEVICE_ID_E;
+
 // List of reMarkable device IDs
 typedef enum
 {
@@ -278,6 +291,9 @@ typedef enum
 	DEVICE_POCKETBOOK_INKPAD_LITE = 970U,
 	DEVICE_POCKETBOOK_MAX         = UINT16_MAX,    // uint16_t
 } __attribute__((packed)) POCKETBOOK_DEVICE_ID_E;
+
+// If device detection failed...
+#define DEVICE_UNKNOWN 0U
 
 // NOTE: There's no enum for Kindles, because there are an insane number of device IDs per model,
 //       so it doesn't really fit into this model. Use the deviceName instead.
