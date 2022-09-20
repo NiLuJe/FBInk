@@ -83,5 +83,8 @@ with open(data, "r") as f:
 		elif line.startswith("E80P0"):
 			# Sage (cadmus) [383]
 			print("383,")
+		elif line.startswith("E60K2"):
+			# Clara 2E (goldfinch) [386]
+			print("386,")
 		else:
 			print("0,")

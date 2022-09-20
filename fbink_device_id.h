@@ -44,9 +44,9 @@ typedef struct __attribute__((__packed__))
 #			pragma GCC diagnostic push
 #			pragma GCC diagnostic ignored "-Wattributes"
 	char magic[10] __attribute__((nonstring));     // HWCONFIG_MAGIC (i.e., "HW CONFIG ")
-	char version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.3" on Mk.7 & 8
+	char version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.3" on Mk.7+
 #			pragma GCC diagnostic pop
-	uint8_t len;    // Length (in bytes) of the full payload, header excluded (up to 74 on v3.3)
+	uint8_t len;    // Length (in bytes) of the full payload, header excluded (up to 76 on v3.3)
 	// Header stops here, actual data follows
 	uint8_t pcb_id;    // First field is the PCB ID, which dictates the device model, the only thing we care about ;)
 } NTXHWConfig;
@@ -59,9 +59,9 @@ typedef struct __attribute__((__packed__))
 #			pragma GCC diagnostic push
 #			pragma GCC diagnostic ignored "-Wattributes"
 	char    magic[10] __attribute__((nonstring));     // HWCONFIG_MAGIC (i.e., "HW CONFIG ")
-	char    version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.3" on Mk.7 & 8
+	char    version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.3" on Mk.7+
 #			pragma GCC diagnostic pop
-	uint8_t len;    // Length (in bytes) of the full payload, header excluded (up to 74 on v3.3)
+	uint8_t len;    // Length (in bytes) of the full payload, header excluded (up to 76 on v3.3)
 } NTXHWConfig;
 // Index of the few fields we're interested in inside the payload...
 #			define KOBO_HWCFG_PCB               0
@@ -93,8 +93,8 @@ static void identify_cervantes(void);
 // Can thankfully be populated from /bin/ntx_hwconfig with the help of strings -n2 and a bit of sed, i.e.,
 // sed -re 's/(^)(.*?)($)/"\2",/g' Kobo_PCB_IDs.txt
 // Double-check w/ ntx_hwconfig -l -s /dev/mmcblk0
-// NOTE: Last updated on 01/23/22, from FW 4.31.19086 (NTX HwConfig v3.5.6.32.286-20211013)
-//       Last checked on 01/23/22 against 4.31.19086
+// NOTE: Last updated on 09/21/22, from FW 4.34.20097 (NTX HwConfig v3.7.6.33.296-20220803)
+//       Last checked on 09/21/22 against 4.34.20097
 /*
 static const char* kobo_pcbs[] = {
 	"E60800", "E60810", "E60820",  "E90800", "E90810", "E60830", "E60850", "E50800", "E50810", "E60860",  "E60MT2",
@@ -106,7 +106,7 @@ static const char* kobo_pcbs[] = {
 	"E60U00", "E70Q10", "E60QP0",  "E60QQ0", "E70Q20", "T05R00", "M31Q00", "E60U10", "E60K00", "E80K00",  "E70Q30",
 	"EA0Q00", "E60QR0", "ED0R00",  "E60QU0", "E60U20", "M35QE0", "E60QT0", "E70Q50", "T60U00", "E60QV0",  "E70K00",
 	"T60P00", "TA0P00", "MXXQ4X",  "E60P20", "T60P10", "E60K10", "EA0P10", "E60P40", "E70P10", "E70P20",  "E80P00",
-	"E70P20", "E60P50", "E70K10",  "E70P50", "E60K20", "E60P60"
+	"E70P20", "E60P50", "E70K10",  "E70P50", "E60K20", "E60P60", "EA0P00", "E60P70", "U13Q50", "EA0T00"
 };
 */
 // And match (more or less accurately, for some devices) that to what we've come to know as a device code,
@@ -135,12 +135,13 @@ static const char* kobo_disp_panel[] = { "6\" Left EPD",     "6\" Right EPD",   
 */
 // And the accelerometers...
 /*
-static const char* kobo_gyros[] = { "No", "Rotary Encoder", "G Sensor", "KL25", "MMA8X5X", "NC", "KX122" };
+static const char* kobo_gyros[] = { "No", "Rotary Encoder", "G Sensor", "KL25",   "MMA8X5X",
+				    "NC", "KX122",          "KXTJ3",    "STK8331" };
 */
 // And for the various NTX/Kobo CPUs...
 /*
-static const char* kobo_cpus[] = { "mx35", "m166e",  "mx50",   "x86",   "mx6",    "mx6sl",  "it8951", "i386",
-				   "mx7d", "mx6ull", "mx6sll", "mx6dl", "rk3368", "rk3288", "b300",   "b810" };
+static const char* kobo_cpus[] = { "mx35",   "m166e",  "mx50",  "x86",    "mx6",    "mx6sl", "it8951", "i386",   "mx7d",
+				   "mx6ull", "mx6sll", "mx6dl", "rk3368", "rk3288", "b300",  "b810",   "mt8113t" };
 */
 // And for the various NTX/Kobo Display Resolutions...
 /*
