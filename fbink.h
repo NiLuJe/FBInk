@@ -232,6 +232,7 @@ typedef enum
 	DEVICE_KOBO_ELIPSA        = 387U,
 	DEVICE_KOBO_LIBRA_2       = 388U,
 	DEVICE_KOBO_SAGE          = 383U,
+	DEVICE_KOBO_CLARA_2E      = 386U,
 	DEVICE_KOBO_MAX           = UINT16_MAX,    // uint16_t
 } __attribute__((packed)) KOBO_DEVICE_ID_E;
 

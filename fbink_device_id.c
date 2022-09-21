@@ -863,6 +863,18 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 8", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
+		case DEVICE_KOBO_CLARA_2E:    // Clara 2E (Goldfinch)
+			deviceQuirks.hasEclipseWfm = true;
+			deviceQuirks.isKoboMk7     = true;    // Same MXCFB API ;).
+			// TBD: Rotation stuff, assume it matches the Clara HD for now.
+			deviceQuirks.screenDPI     = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "Clara 2E", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Goldfinch", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Mark 10", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
 		case DEVICE_UNKNOWN:
 			// Like kobo_config.sh, assume Trilogy as a fallback
 			deviceQuirks.isKoboNonMT = true;
