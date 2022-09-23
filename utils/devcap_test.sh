@@ -48,6 +48,25 @@ header "HWConfig"
 ntx_hwconfig -s /dev/mmcblk0 >> "${DEVCAP_LOG}" 2>/dev/null
 separator
 
+# List input devices
+header "Input devices"
+ls -lash /dev/input/by-path >> "${DEVCAP_LOG}" 2>/dev/null
+separator
+
+# List backlights
+header "Backlights"
+ls -lash /sys/class/backlight >> "${DEVCAP_LOG}" 2>/dev/null
+separator
+
+# List LEDs
+header "LEDs"
+ls -lash /sys/class/leds >> "${DEVCAP_LOG}" 2>/dev/null
+separator
+
+header "Power"
+ls -lash /sys/class/power_supply >> "${DEVCAP_LOG}" 2>/dev/null
+separator
+
 # Start by dumping the full fb state
 header "FBGrab"
 fbgrab -v /dev/null >> "${DEVCAP_LOG}" 2>&1
