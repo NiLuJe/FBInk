@@ -100,25 +100,25 @@ echo "UpRight" >> "${DEVCAP_LOG}"
 fbdepth -R UR >> "${DEVCAP_LOG}" 2>&1
 fbink -v -w -m -y -1 -F tewi "↥ UR (@ $(fbdepth -o)) ↥" >> "${DEVCAP_LOG}" 2>&1
 fbdepth -c >> "${DEVCAP_LOG}" 2>&1
-fbgrab "UR.png" >/dev/null 2>&1
+fbgrab "devcap_UR.png" >/dev/null 2>&1
 echo -e "\n" >> "${DEVCAP_LOG}"
 echo "ClockWise" >> "${DEVCAP_LOG}"
 fbdepth -R CW >> "${DEVCAP_LOG}" 2>&1
 fbink -v -w -m -y -1 -F tewi "↥ CW (@ $(fbdepth -o)) ↥" >> "${DEVCAP_LOG}" 2>&1
 fbdepth -c >> "${DEVCAP_LOG}" 2>&1
-fbgrab "CW.png" >/dev/null 2>&1
+fbgrab "devcap_CW.png" >/dev/null 2>&1
 echo -e "\n" >> "${DEVCAP_LOG}"
 echo "UpsideDown" >> "${DEVCAP_LOG}"
 fbdepth -R UD >> "${DEVCAP_LOG}" 2>&1
 fbink -v -w -m -y -1 -F tewi "↥ UD (@ $(fbdepth -o)) ↥" >> "${DEVCAP_LOG}" 2>&1
 fbdepth -c >> "${DEVCAP_LOG}" 2>&1
-fbgrab "UD.png" >/dev/null 2>&1
+fbgrab "devcap_UD.png" >/dev/null 2>&1
 echo -e "\n" >> "${DEVCAP_LOG}"
 echo "CounterClockWise" >> "${DEVCAP_LOG}"
 fbdepth -R CCW >> "${DEVCAP_LOG}" 2>&1
 fbink -v -w -m -y -1 -F tewi "↥ CCW (@ $(fbdepth -o)) ↥" >> "${DEVCAP_LOG}" 2>&1
 fbdepth -c >> "${DEVCAP_LOG}" 2>&1
-fbgrab "CCW.png" >/dev/null 2>&1
+fbgrab "devcap_CCW.png" >/dev/null 2>&1
 echo -e "\n" >> "${DEVCAP_LOG}"
 separator
 
@@ -133,10 +133,6 @@ separator
 header "Uptime"
 cat /proc/uptime >> "${DEVCAP_LOG}" 2>&1
 separator
-
-# Take a screengrab before the tap, as it might trigger a refresh.
-fbgrab "${DEVCAP_PIC}" >/dev/null 2>&1
-echo "Screengrab saved to ${DEVCAP_PIC}"
 
 # Then ask the user to tap the top-left corner of the screen...
 fbink -q -w -Mm -F tewi "⇱ Please tap the top-left corner of the screen ⇱"
@@ -163,7 +159,9 @@ echo "" >> "${DEVCAP_LOG}"
 
 # Final recap
 echo "Results compiled in ${DEVCAP_LOG}"
+fbgrab "${DEVCAP_PIC}" >/dev/null 2>&1
+echo "Screengrab saved to ${DEVCAP_PIC}"
 
 # Tar it up in the PWD, too
-tar -C /mnt/onboard -cvzf ${PWD}/Kobo-DevCap-Results.tar.gz "${DEVCAP_LOG##*/}" "${DEVCAP_PIC##*/}"
+tar -C /mnt/onboard -cvzf ${PWD}/Kobo-DevCap-Results.tar.gz "${DEVCAP_LOG##*/}" "${DEVCAP_PIC##*/}" devcap_*.png
 echo "Results compiled in Kobo-DevCap-Results.tar.gz"
