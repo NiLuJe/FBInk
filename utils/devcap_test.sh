@@ -162,8 +162,6 @@ echo "" >> "${DEVCAP_LOG}"
 
 # Final recap
 echo "Results compiled in ${DEVCAP_LOG}"
-fbgrab "${DEVCAP_PIC}" >/dev/null 2>&1
-echo "Screengrab saved to ${DEVCAP_PIC}"
 
 # Tar it up in the PWD, too
 tar -cvzf "${PWD}"/Kobo-DevCap-Results.tar.gz "${DEVCAP_LOG}" devcap_*.png
