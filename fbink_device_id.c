@@ -866,7 +866,9 @@ static void
 		case DEVICE_KOBO_CLARA_2E:    // Clara 2E (Goldfinch)
 			deviceQuirks.hasEclipseWfm = true;
 			deviceQuirks.isKoboMk7     = true;    // Same MXCFB API ;).
-			// TBD: Rotation stuff, assume it matches the Clara HD for now.
+			// NOTE: Nickel is UR @ 3, rota ioctls are straightforward (DisplayBusWidth is 8Bits).
+			//       Touch panel's native orientation is CCW, i.e., origin on the top-right corner.
+			deviceQuirks.canRotate     = true;
 			deviceQuirks.screenDPI     = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Clara 2E", sizeof(deviceQuirks.deviceName) - 1U);
