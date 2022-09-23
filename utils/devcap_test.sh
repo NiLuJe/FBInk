@@ -52,6 +52,8 @@ separator
 header "Input devices"
 ls -lash /dev/input/by-path >> "${DEVCAP_LOG}" 2>/dev/null
 separator
+ls -lash /dev/input >> "${DEVCAP_LOG}" 2>/dev/null
+separator
 
 # List backlights
 header "Backlights"
