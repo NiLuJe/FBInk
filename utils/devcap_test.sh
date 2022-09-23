@@ -134,6 +134,10 @@ header "Uptime"
 cat /proc/uptime >> "${DEVCAP_LOG}" 2>&1
 separator
 
+# Take a screengrab before the tap, as it might trigger a refresh.
+fbgrab "${DEVCAP_PIC}" >/dev/null 2>&1
+echo "Screengrab saved to ${DEVCAP_PIC}"
+
 # Then ask the user to tap the top-left corner of the screen...
 fbink -q -w -Mm -F tewi "⇱ Please tap the top-left corner of the screen ⇱"
 header "EvTest"
@@ -159,8 +163,6 @@ echo "" >> "${DEVCAP_LOG}"
 
 # Final recap
 echo "Results compiled in ${DEVCAP_LOG}"
-fbgrab "${DEVCAP_PIC}" >/dev/null 2>&1
-echo "Screengrab saved to ${DEVCAP_PIC}"
 
 # Tar it up in the PWD, too
 tar -C /mnt/onboard -cvzf ${PWD}/Kobo-DevCap-Results.tar.gz "${DEVCAP_LOG##*/}" "${DEVCAP_PIC##*/}"
