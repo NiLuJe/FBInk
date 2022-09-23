@@ -125,10 +125,6 @@ separator
 # Quietly reset to UpRight
 fbdepth -q -r -1
 
-# Take a screengrab before the input test, as the tap might trigger a refresh.
-fbgrab "${DEVCAP_PIC}" >/dev/null 2>&1
-echo "Screengrab saved to ${DEVCAP_PIC}"
-
 # Check uptime vs. epoch for input timestamps
 header "Epoch"
 date +%s >> "${DEVCAP_LOG}" 2>&1
@@ -140,6 +136,9 @@ separator
 
 # Then ask the user to tap the top-left corner of the screen...
 fbink -q -w -Mm -F tewi "⇱ Please tap the top-left corner of the screen ⇱"
+# Take a screengrab before the input test, as the tap might trigger a refresh.
+fbgrab "${DEVCAP_PIC}" >/dev/null 2>&1
+echo "Screengrab saved to ${DEVCAP_PIC}"
 header "EvTest"
 echo "Please tap the top-left corner of the screen in the next 10s!"
 (
