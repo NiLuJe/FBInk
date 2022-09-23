@@ -163,5 +163,5 @@ fbgrab "${DEVCAP_PIC}" >/dev/null 2>&1
 echo "Screengrab saved to ${DEVCAP_PIC}"
 
 # Tar it up in the PWD, too
-tar -C /mnt/onboard -cvzf ${PWD}/Kobo-DevCap-Results.tar.gz "${DEVCAP_LOG##*/}" "${DEVCAP_PIC##*/}" devcap_*.png
+tar -C /mnt/onboard -cvzf "${PWD}"/Kobo-DevCap-Results.tar.gz "${DEVCAP_LOG##*/}" "${DEVCAP_PIC##*/}" "${PWD}"/devcap_*.png
 echo "Results compiled in Kobo-DevCap-Results.tar.gz"
