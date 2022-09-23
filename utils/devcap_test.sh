@@ -118,7 +118,13 @@ fbink -q -w -Mm -F tewi "⇱ Please tap the top-left corner of the screen ⇱"
 header "EvTest"
 echo "Please tap the top-left corner of the screen in the next 10s!"
 (
-	evtest /dev/input/event1 >> "${DEVCAP_LOG}" 2>&1
+	if [ -e "/dev/input/by-path/platform-1-0010-event" ] ; then
+		evtest "/dev/input/by-path/platform-1-0010-event" >> "${DEVCAP_LOG}" 2>&1
+	elif [ -e "/dev/input/by-path/platform-0-0010-event" ] ; then
+		evtest "/dev/input/by-path/platform-0-0010-event" >> "${DEVCAP_LOG}" 2>&1
+	else
+		evtest "/dev/input/event1" >> "${DEVCAP_LOG}" 2>&1
+	fi
 ) &
 # Kill it after 10s
 sleep 10
