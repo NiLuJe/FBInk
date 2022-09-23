@@ -159,3 +159,7 @@ echo "" >> "${DEVCAP_LOG}"
 echo "Results compiled in ${DEVCAP_LOG}"
 fbgrab "${DEVCAP_PIC}" >/dev/null 2>&1
 echo "Screengrab saved to ${DEVCAP_PIC}"
+
+# Tar it up in the PWD, too
+tar -cvzf Kobo-DevCap-Results.tar.gz "${DEVCAP_LOG}" "${DEVCAP_PIC}"
+echo "Results compiled in Kobo-DevCap-Results.tar.gz"
