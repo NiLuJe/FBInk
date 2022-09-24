@@ -866,8 +866,7 @@ static void
 		case DEVICE_KOBO_CLARA_2E:    // Clara 2E (Goldfinch)
 			deviceQuirks.hasEclipseWfm = true;
 			deviceQuirks.isKoboMk7     = true;    // Same MXCFB API ;).
-			// NOTE: Nickel is UR @ 3, rota ioctls are straightforward (DisplayBusWidth is 8Bits).
-			//       Touch panel's native orientation is CCW, i.e., origin on the top-right corner.
+			// NOTE: Touch panel's native orientation is CCW, i.e., origin on the top-right corner.
 			// NOTE: NTXHWConfig says there ought to be a KX122 gyro, but apparently not?
 			// NOTE: ioctls are straightforward (DisplayBusWidth is 8Bits),
 			//       but it appears that landscape orientations are inverted nonetheless?
