@@ -868,7 +868,8 @@ static void
 			deviceQuirks.isKoboMk7     = true;    // Same MXCFB API ;).
 			// NOTE: Nickel is UR @ 3, rota ioctls are straightforward (DisplayBusWidth is 8Bits).
 			//       Touch panel's native orientation is CCW, i.e., origin on the top-right corner.
-			deviceQuirks.canRotate     = true;
+			// Canonical -> native rotation mapping: { UR: 3, CW: 2, UD: 1, CCW: 0 }
+			// NOTE: NTXHWConfig says there ought to be a KX122 gyro, but apparently not?
 			deviceQuirks.screenDPI     = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Clara 2E", sizeof(deviceQuirks.deviceName) - 1U);
