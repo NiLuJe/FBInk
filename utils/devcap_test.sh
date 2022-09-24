@@ -124,7 +124,7 @@ separator
 
 # Reset to UpRight
 header "Reset to UR"
-fbdepth -r -1
+fbdepth -r -1 >> "${DEVCAP_LOG}" 2>&1
 separator
 
 # Check uptime vs. epoch for input timestamps
