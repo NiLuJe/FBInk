@@ -139,6 +139,7 @@ fbink -q -w -Mm -F tewi "⇱ Please tap the top-left corner of the screen ⇱"
 # Take a screengrab before the input test, as the tap might trigger a refresh.
 fbgrab "${DEVCAP_PIC}" >/dev/null 2>&1
 echo "Screengrab saved to ${DEVCAP_PIC}"
+echo "See https://github.com/NiLuJe/FBInk/blob/master/utils/devcap_expected_results.png for the expected *on-screen* result".
 header "EvTest"
 echo "Please tap the top-left corner of the screen in the next 10s!"
 (
@@ -165,4 +166,4 @@ echo "Results compiled in ${DEVCAP_LOG}"
 
 # Tar it up in the PWD, too
 tar -cvzf "${PWD}"/Kobo-DevCap-Results.tar.gz "${DEVCAP_LOG}" devcap_*.png
-echo "Results compiled in Kobo-DevCap-Results.tar.gz"
+echo "Results archived in Kobo-DevCap-Results.tar.gz"
