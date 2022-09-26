@@ -236,24 +236,24 @@ static const unsigned char*
 		return cozette_block105[codepoint - 0x2217u];
 	} else if (codepoint == 0x221eu) {
 		return cozette_block106[0];
-	} else if (codepoint >= 0x2225u && codepoint <= 0x2226u) {
+	} else if (codepoint >= 0x2225u && codepoint <= 0x222cu) {
 		return cozette_block107[codepoint - 0x2225u];
-	} else if (codepoint >= 0x222bu && codepoint <= 0x222cu) {
-		return cozette_block108[codepoint - 0x222bu];
 	} else if (codepoint >= 0x2248u && codepoint <= 0x2249u) {
-		return cozette_block109[codepoint - 0x2248u];
+		return cozette_block108[codepoint - 0x2248u];
 	} else if (codepoint >= 0x2260u && codepoint <= 0x2261u) {
-		return cozette_block110[codepoint - 0x2260u];
+		return cozette_block109[codepoint - 0x2260u];
 	} else if (codepoint >= 0x2264u && codepoint <= 0x2265u) {
-		return cozette_block111[codepoint - 0x2264u];
+		return cozette_block110[codepoint - 0x2264u];
+	} else if (codepoint >= 0x2282u && codepoint <= 0x228bu) {
+		return cozette_block111[codepoint - 0x2282u];
 	} else if (codepoint >= 0x229du && codepoint <= 0x229fu) {
 		return cozette_block112[codepoint - 0x229du];
 	} else if (codepoint == 0x22a1u) {
 		return cozette_block113[0];
 	} else if (codepoint >= 0x22b2u && codepoint <= 0x22b5u) {
 		return cozette_block114[codepoint - 0x22b2u];
-	} else if (codepoint >= 0x22c4u && codepoint <= 0x22c6u) {
-		return cozette_block115[codepoint - 0x22c4u];
+	} else if (codepoint >= 0x22c0u && codepoint <= 0x22c6u) {
+		return cozette_block115[codepoint - 0x22c0u];
 	} else if (codepoint >= 0x22eeu && codepoint <= 0x22f1u) {
 		return cozette_block116[codepoint - 0x22eeu];
 	} else if (codepoint == 0x2300u) {
