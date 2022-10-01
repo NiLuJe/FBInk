@@ -335,6 +335,9 @@ static bool
 		case 0x7ADu:
 		case 0x829u:
 		case 0x82Au:
+		case 0x971u:
+		case 0x972u:
+		case 0x9B3u:
 			deviceQuirks.isKindleMTK   = true;
 			deviceQuirks.hasEclipseWfm = true;
 			deviceQuirks.screenDPI     = 300U;
