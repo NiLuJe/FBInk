@@ -1918,7 +1918,7 @@ static int
 	return EXIT_SUCCESS;
 }
 
-// Kindle Oasis 2 & Oasis 3 ([KOA2<->??)
+// Kindle Oasis 2 & Oasis 3 ([KOA2<->KOA3])
 static int
     refresh_kindle_zelda(int fbfd, const struct mxcfb_rect region, const FBInkConfig* fbink_cfg)
 {
@@ -2010,7 +2010,7 @@ static int
 	return EXIT_SUCCESS;
 }
 
-// Kindle PaperWhite 4 & Basic 3 ([PW4<->??)
+// Kindle PaperWhite 4 & Basic 3 ([PW4<->KT4])
 static int
     refresh_kindle_rex(int fbfd, const struct mxcfb_rect region, const FBInkConfig* fbink_cfg)
 {
@@ -2100,7 +2100,7 @@ static int
 	return EXIT_SUCCESS;
 }
 
-// Kindle PaperWhite 5 ([PW5<->??)
+// Kindle PaperWhite 5 & Scribe ([PW5<->??)
 static int
     refresh_kindle_mtk(int fbfd, const struct mxcfb_rect region, const FBInkConfig* fbink_cfg)
 {
