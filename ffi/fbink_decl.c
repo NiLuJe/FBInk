@@ -33,9 +33,11 @@ cdecl_c99_type(BG_COLOR_INDEX_T, uint8_t)
 
 cdecl_type(CERVANTES_DEVICE_ID_E)
 cdecl_type(KOBO_DEVICE_ID_E)
+cdecl_type(MAINLINE_DEVICE_ID_E)
 cdecl_type(REMARKABLE_DEVICE_ID_E)
 cdecl_type(POCKETBOOK_DEVICE_ID_E)
 cdecl_c99_type(DEVICE_ID_T, uint16_t)
+cdecl_const(DEVICE_UNKNOWN)
 
 cdecl_type(WFM_MODE_INDEX_E)
 cdecl_c99_type(WFM_MODE_INDEX_T, uint8_t)
@@ -51,7 +53,7 @@ cdecl_c99_type(SUNXI_FORCE_ROTA_INDEX_T, int8_t)
 cdecl_type(MTK_SWIPE_DIRECTION_INDEX_E)
 cdecl_c99_type(MTK_SWIPE_DIRECTION_INDEX_T, uint8_t)
 cdecl_type(MTK_HALFTONE_MODE_INDEX_E)
-cdecl_c99_type(MTK_HALFTONE_MODE_INDEX_T, uint8_t)
+cdecl_c99_type(MTK_HALFTONE_MODE_INDEX_T, int32_t)
 
 // Config structs
 cdecl_type(FBInkState)
@@ -94,6 +96,7 @@ cdecl_func(fbink_get_last_marker)
 cdecl_const(OK_BPP_CHANGE)
 cdecl_const(OK_ROTA_CHANGE)
 cdecl_const(OK_LAYOUT_CHANGE)
+cdecl_const(OK_GRAYSCALE_CHANGE)
 cdecl_func(fbink_reinit)
 
 cdecl_func(fbink_update_verbosity)
