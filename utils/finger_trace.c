@@ -140,14 +140,15 @@ static void
 	// Deal with device-specific rotation quirks...
 	FTrace_Coordinates canonical_pos;
 	// c.f., https://github.com/koreader/koreader/blob/master/frontend/device/kobo/device.lua
-	if (fbink_state->device_id == DEVICE_KOBO_TOUCH_AB || fbink_state->device_id == DEVICE_KOBO_TOUCH_C) {
-		// Touch A/B & Touch C. This will most likely be wrong for one of those.
-		// touch_mirrored_x
-		canonical_pos.x = ctx->dim_swap - touch->pos.x;
+	if (fbink_state->device_id == DEVICE_KOBO_TOUCH_AB && touch->state == UP) {
+		// The Touch A/B does something... weird.
+		// The frame that reports a contact lift does the coordinates transform for us...
+		// That makes this a NOP for this frame only...
+		canonical_pos.x = touch->pos.x;
 		canonical_pos.y = touch->pos.y;
 	} else if (fbink_state->device_id == DEVICE_KOBO_AURA_H2O_2 || fbink_state->device_id == DEVICE_KOBO_LIBRA_2) {
 		// Aura H2O²r1 & Libra 2
-		// touch_switch_xy
+		// !touch_mirrored_x
 		canonical_pos.x = touch->pos.y;
 		canonical_pos.y = touch->pos.x;
 	} else {
