@@ -2542,7 +2542,7 @@ static int
 	return EXIT_SUCCESS;
 }
 
-// Kobo Mark 7 devices (Mk7, Mk9)
+// Kobo Mark 7+ devices on i.MX SoCs (Mk7, Mk9, Mk10)
 static int
     refresh_kobo_mk7(int fbfd, const struct mxcfb_rect region, const FBInkConfig* fbink_cfg)
 {
