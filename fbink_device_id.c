@@ -348,7 +348,7 @@ static bool
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Bellatrix", sizeof(deviceQuirks.devicePlatform) - 1U);
 			return true;
-		case 0x84Du:    // Scribe
+		case 0x84Du:    // KT5
 		case 0x8BBu:
 		case 0x86Au:
 		case 0x958u:
@@ -359,7 +359,7 @@ static bool
 			deviceQuirks.hasEclipseWfm = true;
 			deviceQuirks.screenDPI     = 300U;
 			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Scribe", sizeof(deviceQuirks.deviceName) - 1U);
+			strncpy(deviceQuirks.deviceName, "Basic 4", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "Cava", sizeof(deviceQuirks.deviceCodename) - 1U);
 			// Flawfinder: ignore
