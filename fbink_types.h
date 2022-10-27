@@ -53,6 +53,7 @@ typedef struct
 	int8_t             koboVertOffset;
 	uint8_t            ntxBootRota;
 	NTX_ROTA_INDEX_T   ntxRotaQuirk;
+	bool               unreliableWaitFor;
 	bool               canRotate;
 	bool               canHWInvert;
 	bool               hasEclipseWfm;

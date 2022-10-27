@@ -798,16 +798,22 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case DEVICE_KOBO_LIBRA_H2O:    // Libra H2O (storm)
-			deviceQuirks.isKoboMk7    = true;
+			deviceQuirks.isKoboMk7         = true;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UR, nickel is FB_ROTATE_UR
 			//       And panel is *actually* in Portrait. Finally!
 			//       Despite this, the kernel explicitly mangles the touch translation to match the "usual" layout.
-			deviceQuirks.ntxBootRota  = FB_ROTATE_UR;
-			deviceQuirks.canRotate    = true;
+			deviceQuirks.ntxBootRota       = FB_ROTATE_UR;
+			deviceQuirks.canRotate         = true;
 			// NOTE: This one deserves a specific entry, because the H2O² also happens to be UR + STRAIGHT,
 			//       but it is decidedly *NOT* sane ;).
-			deviceQuirks.ntxRotaQuirk = NTX_ROTA_SANE;
-			deviceQuirks.screenDPI    = 300U;
+			deviceQuirks.ntxRotaQuirk      = NTX_ROTA_SANE;
+			// NOTE: The Libra was the first device to exhibit weirdly broken MXCFB_WAIT_FOR_UPDATE_COMPLETE behavior,
+			//       where the ioctl would apparently randomly timeout after the full 5s for no reason...
+			//       I don't have any of the affected devices to investigate further, so...
+			//       In KOReader, we just sleep for 1ms instead, c.f.,
+			//       https://github.com/koreader/koreader-base/blob/21f4b974c7ab64a149075adc32318f87bf71dcdc/ffi/framebuffer_mxcfb.lua#L230-L235
+			deviceQuirks.unreliableWaitFor = true;
+			deviceQuirks.screenDPI         = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Libra H2O", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -816,9 +822,11 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case DEVICE_KOBO_NIA:    // Nia (luna)
-			deviceQuirks.isKoboMk7 = true;
+			deviceQuirks.isKoboMk7         = true;
 			// NOTE: ntxBootRota & ntxRotaQuirk TBD! Let's assume it's Clara-ish for now.
-			deviceQuirks.screenDPI = 212U;
+			// The board is similar to the Libra 2, so assume it suffers from the same quirks.
+			deviceQuirks.unreliableWaitFor = true;
+			deviceQuirks.screenDPI         = 212U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Nia", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -847,18 +855,20 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 8", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case DEVICE_KOBO_LIBRA_2:    // Libra 2 (Io)
-			deviceQuirks.hasEclipseWfm = true;
-			deviceQuirks.isKoboMk7     = true;    // Same MXCFB API ;).
+			deviceQuirks.hasEclipseWfm     = true;
+			deviceQuirks.isKoboMk7         = true;    // Same MXCFB API ;).
 			// Both pickel & nickel then jump to FB_ROTATE_CW...
-			deviceQuirks.ntxBootRota   = FB_ROTATE_UR;
+			deviceQuirks.ntxBootRota       = FB_ROTATE_UR;
 			// ...KOBO_HWCFG_DisplayBusWidth (35) is "16Bits" (1),
 			// meaning it is indeed NTX_ROTA_STRAIGHT (-ish) ;).
 			// NOTE: Touch panel seems to have forgone the usual translation, though,
 			//       opting instead for its native orientation (CW, i.e., origin on the bottom-left corner).
 			// Canonical -> native rotation mapping: { UR: 1, CW: 0, UD: 3, CCW: 2 }
-			deviceQuirks.canRotate     = true;
-			deviceQuirks.ntxRotaQuirk  = NTX_ROTA_CW_TOUCH;
-			deviceQuirks.screenDPI     = 300U;
+			deviceQuirks.canRotate         = true;
+			deviceQuirks.ntxRotaQuirk      = NTX_ROTA_CW_TOUCH;
+			// It apparently inherited its ancestor's issues...
+			deviceQuirks.unreliableWaitFor = true;
+			deviceQuirks.screenDPI         = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Libra 2", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -884,8 +894,8 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 8", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case DEVICE_KOBO_CLARA_2E:    // Clara 2E (Goldfinch)
-			deviceQuirks.hasEclipseWfm = true;
-			deviceQuirks.isKoboMk7     = true;    // Same MXCFB API ;).
+			deviceQuirks.hasEclipseWfm     = true;
+			deviceQuirks.isKoboMk7         = true;    // Same MXCFB API ;).
 			// NOTE: Touch panel's native orientation is CCW, i.e., origin on the top-right corner.
 			// NOTE: NTXHWConfig says there ought to be a KX122 gyro, but apparently not?
 			// NOTE: ioctls are straightforward (DisplayBusWidth is 8Bits),
@@ -893,8 +903,10 @@ static void
 			//       Either NTX_ROTA_ODD_INVERTED or NTX_ROTA_CW_TOUCH would behave,
 			//       but their description doesn't actually match what's happening...
 			// Canonical -> native rotation mapping: { UR: 3, CW: 2, UD: 1, CCW: 0 }
-			deviceQuirks.ntxRotaQuirk  = NTX_ROTA_CCW_TOUCH;
-			deviceQuirks.screenDPI     = 300U;
+			deviceQuirks.ntxRotaQuirk      = NTX_ROTA_CCW_TOUCH;
+			// The board is nearly identical to the Libra 2, and as such, exhibits the same quirks...
+			deviceQuirks.unreliableWaitFor = true;
+			deviceQuirks.screenDPI         = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Clara 2E", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore

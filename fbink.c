@@ -5048,7 +5048,7 @@ void
 {
 	fprintf(
 	    stdout,
-	    "FBINK_VERSION='%s';viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;invertedGrayscale=%d;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isSunxi=%d;SunxiHasFBDamage=%d;SunxiForceRota=%d;isKindleLegacy=%d;isKindleMTK=%d;isKoboNonMT=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;hasEclipseWfm=%d;",
+	    "FBINK_VERSION='%s';viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;invertedGrayscale=%d;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isSunxi=%d;SunxiHasFBDamage=%d;SunxiForceRota=%d;isKindleLegacy=%d;isKindleMTK=%d;isKoboNonMT=%d;unreliableWaitFor=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;hasEclipseWfm=%d;",
 	    fbink_version(),
 	    viewWidth,
 	    viewHeight,
@@ -5089,6 +5089,7 @@ void
 	    deviceQuirks.isKindleLegacy,
 	    deviceQuirks.isKindleMTK,
 	    deviceQuirks.isKoboNonMT,
+	    deviceQuirks.unreliableWaitFor,
 	    deviceQuirks.ntxBootRota,
 	    deviceQuirks.ntxRotaQuirk,
 	    deviceQuirks.isNTX16bLandscape,
@@ -5144,6 +5145,7 @@ void
 		fbink_state->is_kindle_legacy        = deviceQuirks.isKindleLegacy;
 		fbink_state->is_kindle_mtk           = deviceQuirks.isKindleMTK;
 		fbink_state->is_kobo_non_mt          = deviceQuirks.isKoboNonMT;
+		fbink_state->unreliable_wait_for     = deviceQuirks.unreliableWaitFor;
 		fbink_state->ntx_boot_rota           = deviceQuirks.ntxBootRota;
 		fbink_state->ntx_rota_quirk          = deviceQuirks.ntxRotaQuirk;
 		fbink_state->is_ntx_quirky_landscape = deviceQuirks.isNTX16bLandscape;

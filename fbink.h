@@ -504,6 +504,7 @@ typedef struct
 	bool is_kindle_legacy;    // deviceQuirks.isKindleLegacy (device is a Kindle using the original einkfb EPDC API)
 	bool is_kindle_mtk;       // deviceQuirks.isKindleMTK (device is a Kindle running on a MediatTek SoC)
 	bool is_kobo_non_mt;      // deviceQuirks.isKoboNonMT (device is a Kobo with no MultiTouch input support)
+	bool unreliable_wait_for;           // deviceQuirks.unreliableWaitFor (MXCFB_WAIT_FOR_UPDATE_COMPLETE may timeout)
 	uint8_t          ntx_boot_rota;     // deviceQuirks.ntxBootRota (Native rotation at boot)
 	NTX_ROTA_INDEX_T ntx_rota_quirk;    // deviceQuirks.ntxRotaQuirk (c.f., utils/dump.c)
 	bool    is_ntx_quirky_landscape;    // deviceQuirks.isNTX16bLandscape (rotation compensation is in effect)
@@ -871,6 +872,8 @@ FBINK_API int fbink_wait_for_complete(int fbfd, uint32_t marker);
 //       in order to avoid an ioctl on the next refresh that might end up hurting reactivity...
 //       Incidentally, as all of this depends on specific use-cases, this is why it is entirely left to the user,
 //       and why there's no compatibility flag in FBInkConfig to restore the FBInk < 1.20 behavior ;).
+// NOTE: Beware that on a few NTX boards, this ioctl appears to be buggy, and *may* randomly timeout.
+//       c.f., devices flagged as deviceQuirks.unreliableWaitFor in fbink_device_id.c
 
 // Return the update marker from the last *refresh* (explicit or implicit) done in this FBInk session.
 // NOTE: Returns LAST_MARKER (0U) if there wasn't any, or on non-eInk devices (i.e., pure Linux builds).
