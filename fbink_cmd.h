@@ -193,7 +193,7 @@ static void print_lastrect(void);
 		errno                 = 0; /* To distinguish success/failure after call */                               \
 		unsigned long int val = strtoul(str, &endptr, 10);                                                       \
                                                                                                                          \
-		if ((errno == ERANGE && val == ULONG_MAX) || (errno != 0 && val == 0)) {                                 \
+		if (errno != 0) {                                                                                        \
 			PFWARN("strtoul: %m");                                                                           \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
@@ -250,7 +250,7 @@ static void print_lastrect(void);
 		errno        = 0; /* To distinguish success/failure after call */                                        \
 		long int val = strtol(str, &endptr, 10);                                                                 \
                                                                                                                          \
-		if ((errno == ERANGE && (val == LONG_MAX || val == LONG_MIN)) || (errno != 0 && val == 0)) {             \
+		if (errno != 0) {                                                                                        \
 			PFWARN("strtol: %m");                                                                            \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
@@ -330,7 +330,7 @@ static void print_lastrect(void);
                                                                                                                          \
 		freelocale(c_loc);                                                                                       \
                                                                                                                          \
-		if ((errno == ERANGE && (val == HUGE_VALF || val == -HUGE_VALF)) || (errno != 0 && val == 0)) {          \
+		if (errno != 0) {                                                                                        \
 			PFWARN("strtof: %m");                                                                            \
 			return ERRCODE(EINVAL);                                                                          \
 		}                                                                                                        \
