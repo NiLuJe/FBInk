@@ -578,6 +578,52 @@ static void
 static void
     set_kobo_quirks(unsigned short int kobo_id)
 {
+	// Attempt to discriminate between the Touch A & B variants...
+	// NOTE: This will only happen if we actually found a Nickel version tag,
+	//       the other detection methods will simply report DEVICE_UNKNOWN on a A.
+	if (kobo_id == DEVICE_KOBO_TOUCH_B) {
+		const char* platform = getenv("PLATFORM");
+		if (platform) {
+			// The A is *not* an NTX board
+			if (strcmp(platform, "freescale") == 0) {
+				kobo_id = DEVICE_KOBO_TOUCH_A;
+			}
+		} else {
+			// If our env doesn't provide PLATFORM, check for the NTX HWConfig block ourselves,
+			// with a bit of code duplication from identify_kobo...
+			FILE* fp = fopen(HWCONFIG_DEVICE, "re");
+			if (!fp) {
+				PFWARN("Couldn't read from `%s` (%m)", HWCONFIG_DEVICE);
+				kobo_id = DEVICE_UNKNOWN;
+			} else {
+#		pragma GCC diagnostic push
+#		pragma GCC diagnostic ignored "-Wmissing-braces"
+				NTXHWConfig config = { 0 };
+#		pragma GCC diagnostic pop
+
+				if (fseek(fp, HWCONFIG_OFFSET, SEEK_SET) != 0) {
+					PFWARN("Failed to seek to position 0x%p in `%s`: %m",
+					       (void*) HWCONFIG_OFFSET,
+					       HWCONFIG_DEVICE);
+					kobo_id = DEVICE_UNKNOWN;
+				} else {
+					if (fread(&config, sizeof(config), 1, fp) < 1 || ferror(fp) != 0) {
+						WARN("Failed to read the NTX HWConfig entry on `%s`", HWCONFIG_DEVICE);
+						kobo_id = DEVICE_UNKNOWN;
+					}
+
+					if (memcmp(config.magic, HWCONFIG_MAGIC, sizeof(config.magic)) != 0) {
+						WARN("Block device `%s` does not appear to contain an NTX HWConfig entry",
+						     HWCONFIG_DEVICE);
+						// Not an NTX board, it's a A :)
+						kobo_id = DEVICE_KOBO_TOUCH_A;
+					}
+				}
+				fclose(fp);
+			}
+		}
+	}
+
 	// Store the device ID...
 	deviceQuirks.deviceId     = kobo_id;
 	// HW invert should *generally* be safe on Kobo, with a few exceptions...
@@ -601,10 +647,19 @@ static void
 	//       See also https://github.com/pgaskin/koboutils/pull/1 and the links referenced there
 	//       for all you ever wanted to know about Kobo codenames ;).
 	switch (kobo_id) {
-		case DEVICE_KOBO_TOUCH_AB:    // Touch A/B (trilogy)
+		case DEVICE_KOBO_TOUCH_A:    // Touch A (trilogy, freescale)
 			deviceQuirks.isKoboNonMT = true;
 			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Touch A/B", sizeof(deviceQuirks.deviceName) - 1U);
+			strncpy(deviceQuirks.deviceName, "Touch A", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Trilogy", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Mark 3", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
+		case DEVICE_KOBO_TOUCH_B:    // Touch B (trilogy)
+			deviceQuirks.isKoboNonMT = true;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "Touch B", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "Trilogy", sizeof(deviceQuirks.deviceCodename) - 1U);
 			// Flawfinder: ignore
@@ -918,7 +973,7 @@ static void
 			// Like kobo_config.sh, assume Trilogy as a fallback
 			deviceQuirks.isKoboNonMT = true;
 			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Touch?", sizeof(deviceQuirks.deviceName) - 1U);
+			strncpy(deviceQuirks.deviceName, "Touch A?", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "Trilogy?", sizeof(deviceQuirks.deviceCodename) - 1U);
 			// Flawfinder: ignore

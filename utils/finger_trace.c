@@ -140,8 +140,8 @@ static void
 	// Deal with device-specific rotation quirks...
 	FTrace_Coordinates canonical_pos;
 	// c.f., https://github.com/koreader/koreader/blob/master/frontend/device/kobo/device.lua
-	if (fbink_state->device_id == DEVICE_KOBO_TOUCH_AB && touch->state == UP) {
-		// The Touch A/B does something... weird.
+	if (fbink_state->device_id == DEVICE_KOBO_TOUCH_B && touch->state == UP) {
+		// The Touch B does something... weird.
 		// The frame that reports a contact lift does the coordinates transform for us...
 		// That makes this a NOP for this frame only...
 		canonical_pos.x = touch->pos.x;

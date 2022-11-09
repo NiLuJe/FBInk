@@ -209,7 +209,8 @@ typedef enum
 // List of Kobo device IDs
 typedef enum
 {
-	DEVICE_KOBO_TOUCH_AB      = 310U,
+	DEVICE_KOBO_TOUCH_A       = 300U,    // Not an actual Kobo ID, Nickel bundles it with the B
+	DEVICE_KOBO_TOUCH_B       = 310U,
 	DEVICE_KOBO_TOUCH_C       = 320U,
 	DEVICE_KOBO_MINI          = 340U,
 	DEVICE_KOBO_GLO           = 330U,
