@@ -1423,6 +1423,16 @@ FBINK_API int fbink_mtk_set_halftone(int fbfd, const FBInkRect exclude_regions[2
 // Returns -(ENOSYS) on unsupported platforms.
 FBINK_API int fbink_mtk_toggle_auto_reagl(int fbfd, bool toggle);
 
+// Toggle the "pen" refresh mode (Bellatrix3 only).
+// Returns -(ENOSYS) on unsupported platforms (NOTE: We currently *allow* this on Bellatrix, where it will fail).
+// fbfd:		Open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
+// NOTE: Among other things, this enforces similar behavior as in "fast" mode re: automatic REAGL upgrades.
+// NOTE: There is a *strong* "no collision with standard mode" constraint that is left to *userland* to enforce (i.e., you).
+//       Pen mode updates *must* use DU (or DUNM iff in nightmode (e.g., GRAYSCALE_8BIT_INVERTED)),
+//       failing to do so will temporarily disable pen mode.
+FBINK_API int fbink_mtk_toggle_pen_mode(int fbfd, bool toggle);
+
 //
 ///
 //

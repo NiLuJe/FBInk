@@ -3080,6 +3080,41 @@ int
 #endif    // !FBINK_FOR_KINDLE
 }
 
+int
+    fbink_mtk_toggle_pen_mode(int fbfd UNUSED_BY_NOTKINDLE, bool toggle UNUSED_BY_NOTKINDLE)
+{
+#ifndef FBINK_FOR_KINDLE
+	PFWARN("This feature is not supported on your device");
+	return ERRCODE(ENOSYS);
+#else
+	// NOTE: Technically requires a Bellatrix3, will return HWTCON_STATUS_INVALID_IOCTL_CMD (-4) otherwise.
+	if (!deviceQuirks.isKindleMTK) {
+		PFWARN("This feature is not supported on your device");
+		return ERRCODE(ENOSYS);
+	}
+
+	bool keep_fd = true;
+	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
+	if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	uint32_t mode = toggle ? (uint32_t) EPDC_STYLUS_MODE_WITH_NO_TPS : (uint32_t) EPDC_STYLUS_MODE_DISABLED;
+	int rv = ioctl(fbfd, MXCFB_SET_STYLUS_MODE, &mode);
+
+	if (rv < 0) {
+		PFWARN("MXCFB_SET_STYLUS_MODE: %m");
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	if (!keep_fd) {
+		close_fb(fbfd);
+	}
+
+	return rv;
+#endif    // !FBINK_FOR_KINDLE
+}
+
 // And finally, dispatch the right refresh request for our HW...
 #ifdef FBINK_FOR_LINUX
 // NOP when we don't have an eInk screen ;).
