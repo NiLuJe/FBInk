@@ -2174,6 +2174,8 @@ static int
 
 	// NOTE: Despite what hwtcon_mdp_convert @ drivers/misc/mediatek/hwtcon_v2/hwtcon_mdp.c does,
 	//       dithering doesn't seem to actually *do* anything...
+	// NOTE: This *might* be fixed on Bellatrix3, with the caveat that MDP is bypassed in some cases in pen mode
+	//       (mostly DU/DNM updates of < MIN_MDP_SIZE (6000) pixels regions at 90 or 270° rotations).
 	if (fbink_cfg->dithering_mode != HWD_PASSTHROUGH) {
 		// NOTE: If dither actually worked, MONOCHROME + DITHER might actually have been viable...
 		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;

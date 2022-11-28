@@ -476,4 +476,17 @@ typedef union
 
 #define MXC_UPDATE_FAST_MODE_FLAG 0x1
 
+// NOTE: Stylus mode stuff was added in Bellatrix3
+// NOTE: As properly documented (unlike on sunxi...), pen mode updates must *not* coexist with standard updates.
+//       This no-collision constraint *has* to be enforced by userland!
+#define MXCFB_SET_STYLUS_MODE           _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x4C, uint32_t)
+#define EPDC_STYLUS_MODE_DISABLED       0x0
+#define EPDC_STYLUS_MODE_WITH_NO_TPS    0x01
+// NOTE: The following are unsupported on Barolo
+#define EPDC_STYLUS_MODE_WITH_BLACK_TPS 0x02
+#define EPDC_STYLUS_MODE_WITH_WHITE_TPS 0x03
+
+// See also eink/stylus-kindle.h for a couple of ioctls that will lock/unlock the stylus (whatever that actually means :D).
+// (c.f., drivers/misc/eink_stylus.c, which also handles pen detection (lift/contact) events).
+
 #endif /* __HWTCON_IOCTL_CMD_H__ */
