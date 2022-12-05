@@ -3,7 +3,7 @@
  *
  * ----
  *
- * This is <linux/frontlight.h>, last updated from the KS kernel for FW 5.16.1
+ * This is <linux/lab126_stylus.h>, last updated from the KS kernel for FW 5.16.1
  *
  * NOTE: Upstream kernels available here: https://www.amazon.com/gp/help/customer/display.html?nodeId=200203720
  *
