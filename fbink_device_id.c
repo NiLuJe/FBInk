@@ -599,7 +599,7 @@ static void
 	// Attempt to discriminate between the Touch A & B variants...
 	// NOTE: This will only happen if we actually found a Nickel version tag,
 	//       the other detection methods will simply report DEVICE_UNKNOWN on a A.
-	if (kobo_id == DEVICE_KOBO_TOUCH_B) {
+	if (unlikely(kobo_id == DEVICE_KOBO_TOUCH_B)) {
 		const char* platform = getenv("PLATFORM");
 		if (platform) {
 			// The A is *not* an NTX board
