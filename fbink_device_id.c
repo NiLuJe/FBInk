@@ -601,7 +601,7 @@ static void
 	//       the other detection methods will simply report DEVICE_UNKNOWN on a A.
 	if (unlikely(kobo_id == DEVICE_KOBO_TOUCH_B)) {
 		const char* platform = getenv("PLATFORM");
-		if (platform) {
+		if (likely(platform)) {
 			// The A is *not* an NTX board
 			if (strcmp(platform, "freescale") == 0) {
 				kobo_id = DEVICE_KOBO_TOUCH_A;
