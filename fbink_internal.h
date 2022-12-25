@@ -475,7 +475,7 @@ FBInkKoboSunxi sunxiCtx = {
 	.ion_fd       = -1,
 	.alloc_size   = 0U,
 	.ion          = { .handle = 0, .fd = -1 },
-	.layer        = { { 0 } },
+	.layer        = { },
 	.rota         = 0U,
 	.force_rota   = FORCE_ROTA_GYRO,
 	.has_fbdamage = false
