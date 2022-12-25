@@ -759,11 +759,14 @@ libevdev.built:
 	$(MAKE) install
 	touch libevdev.built
 
+ifeq "$(CC_IS_CLANG)" "1"
 armcheck:
-ifeq "$(CC_IS_CLANG)" "0"
-	ifeq (,$(findstring arm-,$(CC)))
-		$(error You forgot to setup a cross TC, you dummy!)
-	endif
+	$(warning Using a Clang TC, assuming it's setup properly for cross-compilation)
+else
+armcheck:
+ifeq (,$(findstring arm-,$(CC)))
+	$(error You forgot to setup a cross TC, you dummy!)
+endif
 endif
 
 kobo: armcheck
