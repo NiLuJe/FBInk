@@ -760,8 +760,10 @@ libevdev.built:
 	touch libevdev.built
 
 armcheck:
-ifeq (,$(findstring arm-,$(CC)))
-	$(error You forgot to setup a cross TC, you dummy!)
+ifeq "$(CC_IS_CLANG)" "0"
+	ifeq (,$(findstring arm-,$(CC)))
+		$(error You forgot to setup a cross TC, you dummy!)
+	endif
 endif
 
 kobo: armcheck
