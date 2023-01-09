@@ -70,8 +70,9 @@
 	})
 
 // Having a static input device number all these years couldn't go on forever...
-#define NXP_TOUCH_DEV   "/dev/input/event1"
-#define SUNXI_TOUCH_DEV "/dev/input/by-path/platform-0-0010-event"
+#define NXP_TOUCH_DEV             "/dev/input/event1"
+#define SUNXI_ELAN_TOUCHPAD_EVDEV "/dev/input/by-path/platform-0-0010-event"
+#define NXP_ELAN_TOUCHPAD_EVDEV   "/dev/input/by-path/platform-1-0010-event"
 
 typedef struct
 {
@@ -466,8 +467,17 @@ int
 		fbink_update_pen_colors(&fbink_cfg);
 	}
 
-	// Setup libevdev
-	evfd = open(fbink_state.is_sunxi ? SUNXI_TOUCH_DEV : NXP_TOUCH_DEV, O_RDONLY | O_CLOEXEC | O_NONBLOCK);
+	// Setup libevdev, poking at the right input device...
+	if (fbink_state.is_sunxi) {
+		evfd = open(SUNXI_ELAN_TOUCHPAD_EVDEV, O_RDONLY | O_CLOEXEC | O_NONBLOCK);
+	} else {
+		if (access(NXP_ELAN_TOUCHPAD_EVDEV, F_OK) == 0) {
+			// e.g., the Libra 2
+			evfd = open(NXP_ELAN_TOUCHPAD_EVDEV, O_RDONLY | O_CLOEXEC | O_NONBLOCK);
+		} else {
+			evfd = open(NXP_TOUCH_DEV, O_RDONLY | O_CLOEXEC | O_NONBLOCK);
+		}
+	}
 	if (evfd == -1) {
 		PFWARN("open: %m");
 		rv = ERRCODE(EXIT_FAILURE);
