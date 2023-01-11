@@ -44,9 +44,9 @@ typedef struct __attribute__((__packed__))
 #			pragma GCC diagnostic push
 #			pragma GCC diagnostic ignored "-Wattributes"
 	char magic[10] __attribute__((nonstring));     // HWCONFIG_MAGIC (i.e., "HW CONFIG ")
-	char version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.3" on Mk.7+
+	char version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.5" on Mk.9+
 #			pragma GCC diagnostic pop
-	uint8_t len;    // Length (in bytes) of the full payload, header excluded (up to 76 on v3.3)
+	uint8_t len;    // Length (in bytes) of the full payload, header excluded (up to 76 on v3.5)
 	// Header stops here, actual data follows
 	uint8_t pcb_id;    // First field is the PCB ID, which dictates the device model, the only thing we care about ;)
 } NTXHWConfig;
@@ -59,9 +59,9 @@ typedef struct __attribute__((__packed__))
 #			pragma GCC diagnostic push
 #			pragma GCC diagnostic ignored "-Wattributes"
 	char    magic[10] __attribute__((nonstring));     // HWCONFIG_MAGIC (i.e., "HW CONFIG ")
-	char    version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.3" on Mk.7+
+	char    version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.5" on Mk.9+
 #			pragma GCC diagnostic pop
-	uint8_t len;    // Length (in bytes) of the full payload, header excluded (up to 76 on v3.3)
+	uint8_t len;    // Length (in bytes) of the full payload, header excluded (up to 76 on v3.5)
 } NTXHWConfig;
 // Index of the few fields we're interested in inside the payload...
 #			define KOBO_HWCFG_PCB               0
