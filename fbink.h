@@ -610,7 +610,7 @@ typedef struct
 	{
 		unsigned short int width;
 		unsigned short int height;
-	} bbox;            // Bounding box of the rendered string (padding excluded)
+	} bbox;            // Bounding box of the string (at computation time, padding excluded).
 	bool truncated;    // true if the string was truncated (at computation or rendering time).
 } FBInkOTFit;
 

@@ -6707,7 +6707,7 @@ int
 	}
 
 	// Make sure we return accurate data in case the fit struct is being recycled...
-	if (fit) {
+	if (unlikely(fit)) {
 		fit->computed_lines = 0U;
 		fit->rendered_lines = 0U;
 		fit->truncated      = false;
@@ -7159,7 +7159,7 @@ int
 			}
 		}
 		// Remember the widest line
-		if (fit) {
+		if (unlikely(fit)) {
 			fit->bbox.width = (unsigned short int) MAX(fit->bbox.width, lw);
 		}
 		// We've run out of string! This is our last line.
@@ -7209,7 +7209,7 @@ int
 	LOG("Actual print height is %u", curr_print_height);
 
 	// Remember that in fit if it's a valid pointer...
-	if (fit) {
+	if (unlikely(fit)) {
 		fit->computed_lines = (unsigned short int) computed_lines_amount;
 		fit->bbox.height    = (unsigned short int) curr_print_height;
 		fit->truncated      = !complete_str;
@@ -7824,7 +7824,7 @@ int
 	LOG("Printed %u visible lines", line);
 
 	// Remember that in fit if it's a valid pointer...
-	if (fit) {
+	if (unlikely(fit)) {
 		fit->rendered_lines = (unsigned short int) line;
 	}
 
@@ -7835,7 +7835,7 @@ int
 		    computed_lines_amount);
 
 		// Remember that in fit if it's a valid pointer...
-		if (fit) {
+		if (unlikely(fit)) {
 			fit->truncated = true;
 		}
 
