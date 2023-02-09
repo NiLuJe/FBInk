@@ -7158,6 +7158,10 @@ int
 				curr_x += iroundf(sf * (float) xadv);
 			}
 		}
+		// Remember the widest line
+		if (fit) {
+			fit->bbox.width = (unsigned short int) MAX(fit->bbox.width, lw);
+		}
 		// We've run out of string! This is our last line.
 		if (c_index >= str_len_bytes) {
 			// Don't clobber an existing legitimate break...
@@ -7207,6 +7211,7 @@ int
 	// Remember that in fit if it's a valid pointer...
 	if (fit) {
 		fit->computed_lines = (unsigned short int) computed_lines_amount;
+		fit->bbox.height    = (unsigned short int) curr_print_height;
 		fit->truncated      = !complete_str;
 	}
 

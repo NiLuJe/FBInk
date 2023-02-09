@@ -606,7 +606,12 @@ typedef struct
 	unsigned short int rendered_lines;    // Actually rendered amount of lines.
 	//                                       Will stay 0 in case of an early abort (or a compute_only run),
 	//                                       or < computed_lines in case of an unexpected truncation due to broken metrics.
-	bool               truncated;    // true if the string was truncated (at computation or rendering time).
+	struct
+	{
+		unsigned short int width;
+		unsigned short int height;
+	} bbox;            // Bounding box of the rendered string (padding excluded)
+	bool truncated;    // true if the string was truncated (at computation or rendering time).
 } FBInkOTFit;
 
 // This maps to an mxcfb rectangle, used for fbink_get_last_rect, as well as in FBInkDump

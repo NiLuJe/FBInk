@@ -2512,11 +2512,14 @@ int
 			if (is_truetype) {
 				// OT has a more detailed feedback, with the line-breaking computation results,
 				// so it's in an eval friendly format instead...
-				printf("next_top=%hu;computed_lines=%hu;rendered_lines=%hu;truncated=%d;",
-				       total_lines,
-				       ot_fit.computed_lines,
-				       ot_fit.rendered_lines,
-				       ot_fit.truncated);
+				printf(
+				    "next_top=%hu;computed_lines=%hu;rendered_lines=%hu;bbox_width=%hu;bbox_height=%hu;truncated=%d;",
+				    total_lines,
+				    ot_fit.computed_lines,
+				    ot_fit.rendered_lines,
+				    ot_fit.bbox.width,
+				    ot_fit.bbox.height,
+				    ot_fit.truncated);
 			} else {
 				printf("%hu", total_lines);
 			}
@@ -2868,10 +2871,12 @@ int
 					if (want_linecount) {
 						if (is_truetype) {
 							printf(
-							    "next_top=%hu;computed_lines=%hu;rendered_lines=%hu;truncated=%d;",
+							    "next_top=%hu;computed_lines=%hu;rendered_lines=%hu;bbox_width=%hu;bbox_height=%hu;truncated=%d;",
 							    totallines,
 							    ot_fit.computed_lines,
 							    ot_fit.rendered_lines,
+							    ot_fit.bbox.width,
+							    ot_fit.bbox.height,
 							    ot_fit.truncated);
 						} else {
 							printf("%hu", totallines);
