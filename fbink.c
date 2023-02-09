@@ -7223,7 +7223,7 @@ int
 	}
 
 	// If we only asked for a computation pass, abort now (successfully).
-	if (cfg->compute_only) {
+	if (unlikely(cfg->compute_only)) {
 		LOG("Requested early abort after computation pass");
 		rv = EXIT_SUCCESS;
 		goto cleanup;
