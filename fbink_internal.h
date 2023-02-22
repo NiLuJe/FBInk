@@ -128,8 +128,14 @@
 #endif
 
 // Likely/Unlikely branch tagging
-#define likely(x)   __builtin_expect(!!(x), 1)
-#define unlikely(x) __builtin_expect(!!(x), 0)
+#if defined(__cplusplus)
+// c.f., https://stackoverflow.com/a/43870188/1067003
+#	define likely(x)   __builtin_expect(static_cast<bool>((x)), 1)
+#	define unlikely(x) __builtin_expect(static_cast<bool>((x)), 0)
+#else
+#	define likely(x)   __builtin_expect(!!(x), 1)
+#	define unlikely(x) __builtin_expect(!!(x), 0)
+#endif
 
 #include <errno.h>
 #include <fcntl.h>
