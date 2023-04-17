@@ -348,7 +348,7 @@ static const unsigned char*
 		return cozette_block161[0];
 	} else if (codepoint == 0x2744u) {
 		return cozette_block162[0];
-	} else if (codepoint == 0x274eu) {
+	} else if (codepoint == 0x274cu) {
 		return cozette_block163[0];
 	} else if (codepoint == 0x2753u) {
 		return cozette_block164[0];
@@ -837,3 +837,4 @@ static const unsigned char*
 		return cozette_block1[0];
 	}
 }
+
