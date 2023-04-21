@@ -86,5 +86,8 @@ with open(data, "r") as f:
 		elif line.startswith("E60K2"):
 			# Clara 2E (goldfinch) [386]
 			print("386,")
+		elif line.startswith("EA0T0"):
+			# Elipsa 2E (condor) [389]
+			print("389,")
 		else:
 			print("0,")

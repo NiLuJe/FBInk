@@ -987,6 +987,19 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 10", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
+		case DEVICE_KOBO_ELIPSA_2E:    // Elipsa 2E (Condor)
+			//deviceQuirks.isKoboMTK     = true;
+			// TBD!
+			deviceQuirks.hasEclipseWfm = true;
+			deviceQuirks.canRotate     = true;
+			deviceQuirks.screenDPI     = 227U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "Elipsa 2E", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Condor", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Mark 11", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
 		case DEVICE_UNKNOWN:
 			// Like kobo_config.sh, assume Trilogy as a fallback
 			deviceQuirks.isKoboNonMT = true;
