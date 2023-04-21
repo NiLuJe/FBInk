@@ -952,23 +952,23 @@ static void
 	if (unlikely(vInfo.bits_per_pixel == 16U)) {
 		// NOTE: Besides, we can't use a straight memset, since we need pixels to be properly packed for RGB565...
 		//       Se we whip up a quick memset16, like fill_rect() does.
-		const uint16_t px = pack_rgb565(v, v, v);
+		const uint16_t px       = pack_rgb565(v, v, v);
 #		pragma GCC diagnostic push
 #		pragma GCC diagnostic ignored "-Wcast-align"
-		uint16_t* p = (uint16_t*) fbPtr;
+		uint16_t*      p        = (uint16_t*) fbPtr;
 #		pragma GCC diagnostic pop
-		size_t px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
+		size_t         px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
 		while (px_count--) {
 			*p++ = px;
 		}
 	} else if (vInfo.bits_per_pixel == 32U) {
 		// Much like in fill_rect_RGB32, whip up something that'll preserve the alpha byte...
-		const FBInkPixelBGRA px = { .color.b = v, .color.g = v, .color.r = v, .color.a = 0xFF };
+		const FBInkPixelBGRA px       = { .color.b = v, .color.g = v, .color.r = v, .color.a = 0xFF };
 #		pragma GCC diagnostic push
 #		pragma GCC diagnostic ignored "-Wcast-align"
-		uint32_t* p = (uint32_t*) fbPtr;
+		uint32_t*            p        = (uint32_t*) fbPtr;
 #		pragma GCC diagnostic pop
-		size_t px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
+		size_t               px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
 		while (px_count--) {
 			*p++ = px.p;
 		}
@@ -2212,17 +2212,17 @@ static int
 	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO)
 					   ? get_wfm_mode(WFM_GC16)
 					   : get_wfm_mode(fbink_cfg->wfm_mode);
-	const uint32_t update_mode = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
+	const uint32_t update_mode   = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
 
 	struct mxcfb_update_data update = {
-		.update_region = region,
-		.waveform_mode = waveform_mode,
-		.update_mode = update_mode,
-		.update_marker = lastMarker,
-		.temp = TEMP_USE_AMBIENT,
-		.flags = (waveform_mode == WAVEFORM_MODE_REAGLD) ? EPDC_FLAG_USE_AAD
-			 : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME
-							       : 0U,
+		.update_region   = region,
+		.waveform_mode   = waveform_mode,
+		.update_mode     = update_mode,
+		.update_marker   = lastMarker,
+		.temp            = TEMP_USE_AMBIENT,
+		.flags           = (waveform_mode == WAVEFORM_MODE_REAGLD) ? EPDC_FLAG_USE_AAD
+				   : (waveform_mode == WAVEFORM_MODE_A2)   ? EPDC_FLAG_FORCE_MONOCHROME
+									   : 0U,
 		.alt_buffer_data = { 0U },
 	};
 
@@ -2933,7 +2933,7 @@ int
 	}
 
 	mtkSwipeData.direction = (uint32_t) direction;
-	mtkSwipeData.steps = (uint32_t) steps;
+	mtkSwipeData.steps     = (uint32_t) steps;
 
 	return EXIT_SUCCESS;
 #endif    // !FBINK_FOR_KINDLE
@@ -2959,7 +2959,7 @@ int
 
 	// We don't care about the feature check, so just leave everything empty.
 	mxcfb_markers_data markers_data = { 0U };
-	int rv = ioctl(fbfd, MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE_MTK, &markers_data);
+	int                rv           = ioctl(fbfd, MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE_MTK, &markers_data);
 
 	if (rv < 0) {
 		PFWARN("MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE_MTK: %m");
@@ -3100,7 +3100,7 @@ int
 	}
 
 	uint32_t mode = toggle ? (uint32_t) EPDC_STYLUS_MODE_WITH_NO_TPS : (uint32_t) EPDC_STYLUS_MODE_DISABLED;
-	int rv = ioctl(fbfd, MXCFB_SET_STYLUS_MODE, &mode);
+	int      rv   = ioctl(fbfd, MXCFB_SET_STYLUS_MODE, &mode);
 
 	if (rv < 0) {
 		PFWARN("MXCFB_SET_STYLUS_MODE: %m");
@@ -4439,8 +4439,8 @@ static __attribute__((cold)) int
 	//       sanely, but for now, we only want to deal with the default rotation properly...
 	if (!getenv("FBINK_NO_SW_ROTA")) {
 		if (vInfo.xres > vInfo.yres) {
-			screenWidth = vInfo.yres;
-			screenHeight = vInfo.xres;
+			screenWidth     = vInfo.yres;
+			screenHeight    = vInfo.xres;
 			fxpRotateCoords = &rotate_coordinates_pickel;
 			fxpRotateRegion = &rotate_region_pickel;
 			ELOG("Enabled PocketBook rotation quirks (%ux%u -> %ux%u)",
@@ -4451,9 +4451,9 @@ static __attribute__((cold)) int
 		}
 	}
 
-	viewWidth = screenWidth;
+	viewWidth      = screenWidth;
 	viewHoriOrigin = 0U;
-	viewHeight = screenHeight;
+	viewHeight     = screenHeight;
 	viewVertOrigin = 0U;
 #else
 	// Other devices are generally never broken-by-design (at least not on that front ;))
@@ -4632,8 +4632,8 @@ static __attribute__((cold)) int
 	}
 #	else
 	// Default font is IBM
-	glyphWidth = 8U;
-	glyphHeight = 8U;
+	glyphWidth         = 8U;
+	glyphHeight        = 8U;
 	fxpFont8xGetBitmap = &font8x8_get_bitmap;
 
 	if (fbink_cfg->fontname != IBM) {
@@ -5177,7 +5177,7 @@ void
 		fbink_state->sunxi_force_rota   = sunxiCtx.force_rota;
 #else
 		fbink_state->sunxi_has_fbdamage = false;
-		fbink_state->sunxi_force_rota = FORCE_ROTA_NOTSUP;
+		fbink_state->sunxi_force_rota   = FORCE_ROTA_NOTSUP;
 #endif
 		fbink_state->is_kindle_legacy        = deviceQuirks.isKindleLegacy;
 		fbink_state->is_kindle_mtk           = deviceQuirks.isKindleMTK;
