@@ -30,16 +30,13 @@
 
 // Used as a sentinel value during device detection
 #define DEVICE_INVALID UINT16_MAX
-
 #ifndef FBINK_FOR_LINUX
 #	if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 // NOTE: This is NTX's homegrown hardware tagging, c.f., arch/arm/mach-imx/ntx_hwconfig.h in a Kobo kernel, for instance
-#		define HWCONFIG_DEVICE     "/dev/mmcblk0"
-#		define HWCONFIG_OFFSET     (1024 * 512)
-// NOTE: The data block moved to a dedicated partition on boards with an MTK SoC
-#		define HWCONFIG_MTK_DEVICE "/dev/mmcblk0p6"
-#		define HWCONFIG_MTK_OFFSET (1 * 512)
-#		define HWCONFIG_MAGIC      "HW CONFIG"
+#		define HWCONFIG_DEVICE "/dev/mmcblk0"
+#		define HWCONFIG_OFFSET (1024 * 512)
+#		define HWCONFIG_MAGIC  "HW CONFIG"
+
 #		if defined(FBINK_FOR_CERVANTES)
 // Keep it to the minimum on Cervantes
 typedef struct __attribute__((__packed__))
@@ -78,6 +75,17 @@ typedef struct __attribute__((__packed__))
 #			define KOBO_HWCFG_DisplayResolution 31
 // NOTE: This one tells us a bit about the potential rotation trickeries on some models (ntxRotaQuirk)...
 #			define KOBO_HWCFG_DisplayBusWidth   35
+
+// Another thing to deal with is the fact that the data block moved to a dedicated partition on boards with an MTK SoC...
+typedef struct
+{
+	const char* const device;
+	off_t             offset;
+} HWConfigBlockDev;
+static const HWConfigBlockDev HWCONFIG_BLOCKS[] = {
+	{ HWCONFIG_DEVICE, HWCONFIG_OFFSET},
+	{"/dev/mmcblk0p6",       (1 * 512)},
+};
 #		endif    // FBINK_FOR_CERVANTES
 #	endif            // FBINK_FOR_KOBO || FBINK_FOR_CERVANTES
 

@@ -629,7 +629,7 @@ static void
 						kobo_id = DEVICE_UNKNOWN;
 					}
 
-					if (memcmp(config.magic, HWCONFIG_MAGIC, sizeof(config.magic)) != 0) {
+					if (memcmp(config.magic, HWCONFIG_MAGIC, sizeof(HWCONFIG_MAGIC) - 1U) != 0) {
 						WARN("Block device `%s` does not appear to contain an NTX HWConfig entry",
 						     HWCONFIG_DEVICE);
 						// Not an NTX board, it's a A :)
@@ -1138,39 +1138,49 @@ static void
 	//       which, provided we're really running on a Kobo, can legitimately happen,
 	//       if we were launched in the middle of an USBMS session, in which case onboard is obviously not available ;).
 	//       So try to do it the hard way, via the NTXHWConfig tag...
-	fp = fopen(HWCONFIG_DEVICE, "re");
-	if (!fp) {
-		PFWARN("Couldn't read from `%s` (%m), unable to identify the Kobo model via its NTX board info",
-		       HWCONFIG_DEVICE);
-	} else {
 #		pragma GCC diagnostic push
 #		pragma GCC diagnostic ignored "-Wmissing-braces"
-		NTXHWConfig config              = { 0 };
+	NTXHWConfig config              = { 0 };
 #		pragma GCC diagnostic pop
-		unsigned char* restrict payload = NULL;
-		uint64_t storagesize            = 0U;
+	unsigned char* restrict payload = NULL;
+	uint64_t storagesize            = 0U;
 
-		if (fseek(fp, HWCONFIG_OFFSET, SEEK_SET) != 0) {
-			PFWARN("Failed to seek to position 0x%p in `%s`: %m", (void*) HWCONFIG_OFFSET, HWCONFIG_DEVICE);
+	// We have a couple of locations to check...
+	for (size_t i = 0U; i < ARRAY_SIZE(HWCONFIG_BLOCKS); i++) {
+		const HWConfigBlockDev hwconfig = HWCONFIG_BLOCKS[i];
+
+		// We want a semi-silent "does it even exist?" check before the actual open w/ read rights check
+		if (access(hwconfig.device, F_OK) != 0) {
+			PFLOG("Block device `%s` is unavailable, can't look for an NTX HWConfig entry there",
+			      hwconfig.device);
+			continue;
+		}
+
+		fp = fopen(hwconfig.device, "re");
+		if (!fp) {
+			PFWARN("Couldn't read from `%s` (%m), unable to identify the Kobo model via its NTX board info",
+			       hwconfig.device);
+			continue;
+		}
+
+		if (fseek(fp, hwconfig.offset, SEEK_SET) != 0) {
+			PFWARN("Failed to seek to position 0x%p in `%s`: %m", (void*) hwconfig.offset, hwconfig.device);
 		} else {
 			if (fread(&config, sizeof(config), 1, fp) < 1 || ferror(fp) != 0) {
-				WARN("Failed to read the NTX HWConfig entry on `%s`", HWCONFIG_DEVICE);
+				WARN("Failed to read the NTX HWConfig entry on `%s`", hwconfig.device);
 				fclose(fp);
 
-				// Do try a last stand with the mainline device id codepath...
-				// We don't call set_kobo_quirks w/ DEVICE_INVALID as we don't want an early warning...
-				// (It's only ever used when we return early without falling back to another detection mechanism).
-				return identify_mainline();
+				// Let us try the next location, and mainline device identification after that...
+				continue;
 			}
 
 			// NOTE: This slice will NOT be NULL-terminated,
 			//       so we have to chop the terminating NULL from the string literal's size.
 			if (memcmp(config.magic, HWCONFIG_MAGIC, sizeof(HWCONFIG_MAGIC) - 1U) != 0) {
 				WARN("Block device `%s` does not appear to contain an NTX HWConfig entry",
-				     HWCONFIG_DEVICE);
+				     hwconfig.device);
 				fclose(fp);
-
-				return identify_mainline();
+				continue;
 			}
 
 			// We'll read the full payload, whose size varies depending on the exact kernel being used...
@@ -1181,87 +1191,87 @@ static void
 				WARN("Error reading NTX HWConfig payload (unexpected length)");
 				fclose(fp);
 
-				// NOTE: Make it clear we failed to identify the device...
+				// NOTE: This is "fatal", stop there, and make it clear we failed to identify the device...
 				set_kobo_quirks(DEVICE_INVALID);
 				return;
 			}
 
 			// We'll also need the total storage space to discriminate 32GB devices...
-			if (ioctl(fileno(fp), BLKGETSIZE64, &storagesize)) {
-				// Make that non-fatal, as the distinction is purely cosmetic for our purposes
-				PFWARN("Error requesting block device size: %m");
+			if (strcmp(hwconfig.device, HWCONFIG_DEVICE) == 0) {
+				// NOTE: This is only meaningful for HWCONFIG_DEVICE
+				//       (and only matters for devices where it's the location of the payload anyway).
+				if (ioctl(fileno(fp), BLKGETSIZE64, &storagesize)) {
+					// Make that non-fatal, as the distinction is purely cosmetic for our purposes
+					PFWARN("Error requesting block device size: %m");
+				}
 			}
 		}
 		fclose(fp);
+	}
 
-		// Mainly to make GCC happy, because if alloca failed, we're screwed anyway.
-		if (payload) {
-			/*
-			// NOTE: Dump the full payload, for science!
-			for (uint8_t i = 0; i < config.len; i++) {
-				ELOG("NTXHWConfig[%hhu] -> %hhu", i, payload[i]);
-			}
-			*/
+	// If we successfully got a HWConfig payload, examine it now
+	if (payload) {
+		/*
+		// NOTE: Dump the full payload, for science!
+		for (uint8_t i = 0; i < config.len; i++) {
+			ELOG("NTXHWConfig[%hhu] -> %hhu", i, payload[i]);
+		}
+		*/
 
-			if (payload[KOBO_HWCFG_PCB] >= (sizeof(kobo_ids) / sizeof(*kobo_ids))) {
-				WARN("Unknown Kobo PCB ID index (%hhu >= %zu)",
-				     payload[KOBO_HWCFG_PCB],
-				     (sizeof(kobo_ids) / sizeof(*kobo_ids)));
-			} else {
-				// As per /bin/kobo_config.sh, match PCB IDs to Product IDs via a LUT...
-				// NOTE: Some Tolinos *will* end up with a Kobo ID here, because of lax matches:
-				//       e.g., the Shine 3 will be matched as a Clara HD, and the Vision 5 as a Libra.
-				unsigned short int kobo_id = kobo_ids[payload[KOBO_HWCFG_PCB]];
-
-				// And now for the fun part, the few device variants that use the same PCB ID...
-				if (kobo_id == DEVICE_KOBO_AURA_H2O_2 || kobo_id == DEVICE_KOBO_AURA_SE) {
-					// Discriminate the Mk.7 version for dual rev models by checking the CPU...
-					// NOTE: kobo_cpus[10] == "mx6sll"
-					if (payload[KOBO_HWCFG_CPU] == 10U) {
-						// Thankfully, that works for both the H2O² (374 -> 378),
-						// and the Aura SE (375 -> 379) ;)
-						kobo_id = (unsigned short int) (kobo_id + 4U);
-					}
-				} else if (kobo_id == DEVICE_KOBO_GLO_HD) {
-					// Discriminate Alyssum from Pika, by checking the Display Resolution...
-					// NOTE: kobo_disp_res[0] == "800x600"
-					if (payload[KOBO_HWCFG_DisplayResolution] == 0U) {
-						// Glo HD (Alyssum) [371] -> Touch 2.0 (Pika) [372]
-						kobo_id = DEVICE_KOBO_TOUCH_2;
-					}
-				} else if (kobo_id == DEVICE_KOBO_AURA_ONE || kobo_id == DEVICE_KOBO_FORMA) {
-					// Discriminate 32GB variants...
-					// NOTE: We compare against 8GB, but in practice, given storage shenanigans and
-					//       the truncation involved here, we end up with 7 on 8GB devices ;).
-					if ((storagesize >> 10U >> 10U >> 10U) > 8U) {
-						if (kobo_id == DEVICE_KOBO_AURA_ONE) {
-							// Aura ONE (daylight) [373] -> Aura ONE LE (daylight) [381]
-							kobo_id = DEVICE_KOBO_AURA_ONE_LE;
-						} else if (kobo_id == DEVICE_KOBO_FORMA) {
-							// Forma (frost) [377] -> Forma 32GB (frost) [380]
-							kobo_id = DEVICE_KOBO_FORMA_32GB;
-						}
-					}
-				}
-
-				// Assuming we actually *know* about this PCB ID...
-				if (kobo_id != DEVICE_UNKNOWN) {
-					// ...we can do this, as accurately as if onboard were mounted ;).
-					set_kobo_quirks(kobo_id);
-
-					// Get out now, we're done!
-					return;
-				}
-			}
+		if (payload[KOBO_HWCFG_PCB] >= (sizeof(kobo_ids) / sizeof(*kobo_ids))) {
+			WARN("Unknown Kobo PCB ID index (%hhu >= %zu)",
+			     payload[KOBO_HWCFG_PCB],
+			     (sizeof(kobo_ids) / sizeof(*kobo_ids)));
 		} else {
-			// Should hopefully never happen,
-			// since there's a good chance we'd have caught a SIGSEGV before that if alloca failed ;).
-			WARN("Empty NTX HWConfig payload?");
+			// As per /bin/kobo_config.sh, match PCB IDs to Product IDs via a LUT...
+			// NOTE: Some Tolinos *will* end up with a Kobo ID here, because of lax matches:
+			//       e.g., the Shine 3 will be matched as a Clara HD, and the Vision 5 as a Libra.
+			unsigned short int kobo_id = kobo_ids[payload[KOBO_HWCFG_PCB]];
+
+			// And now for the fun part, the few device variants that use the same PCB ID...
+			if (kobo_id == DEVICE_KOBO_AURA_H2O_2 || kobo_id == DEVICE_KOBO_AURA_SE) {
+				// Discriminate the Mk.7 version for dual rev models by checking the CPU...
+				// NOTE: kobo_cpus[10] == "mx6sll"
+				if (payload[KOBO_HWCFG_CPU] == 10U) {
+					// Thankfully, that works for both the H2O² (374 -> 378),
+					// and the Aura SE (375 -> 379) ;)
+					kobo_id = (unsigned short int) (kobo_id + 4U);
+				}
+			} else if (kobo_id == DEVICE_KOBO_GLO_HD) {
+				// Discriminate Alyssum from Pika, by checking the Display Resolution...
+				// NOTE: kobo_disp_res[0] == "800x600"
+				if (payload[KOBO_HWCFG_DisplayResolution] == 0U) {
+					// Glo HD (Alyssum) [371] -> Touch 2.0 (Pika) [372]
+					kobo_id = DEVICE_KOBO_TOUCH_2;
+				}
+			} else if (kobo_id == DEVICE_KOBO_AURA_ONE || kobo_id == DEVICE_KOBO_FORMA) {
+				// Discriminate 32GB variants...
+				// NOTE: We compare against 8GB, but in practice, given storage shenanigans and
+				//       the truncation involved here, we end up with 7 on 8GB devices ;).
+				if ((storagesize >> 10U >> 10U >> 10U) > 8U) {
+					if (kobo_id == DEVICE_KOBO_AURA_ONE) {
+						// Aura ONE (daylight) [373] -> Aura ONE LE (daylight) [381]
+						kobo_id = DEVICE_KOBO_AURA_ONE_LE;
+					} else if (kobo_id == DEVICE_KOBO_FORMA) {
+						// Forma (frost) [377] -> Forma 32GB (frost) [380]
+						kobo_id = DEVICE_KOBO_FORMA_32GB;
+					}
+				}
+			}
+
+			// Assuming we actually *know* about this PCB ID...
+			if (kobo_id != DEVICE_UNKNOWN) {
+				// ...we can do this, as accurately as if onboard were mounted ;).
+				set_kobo_quirks(kobo_id);
+
+				// Get out now, we're done!
+				return;
+			}
 		}
 	}
 
 	// NOTE: And if we went this far, it means onboard isn't mounted/Nickel never ran,
-	//       *and* either we're not on an NTX board, or mmcblk0 is unmounted;
+	//       *and* either we're not on an NTX board, or the NTXHWConfig block device is unavailable;
 	//       or we failed to detect a device with either of those two methods.
 	//       That usually points to a device running a mainline kernel, so let's poke at the DTB...
 	return identify_mainline();
