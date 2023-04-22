@@ -1205,11 +1205,15 @@ static void
 					PFWARN("Error requesting block device size: %m");
 				}
 			}
+
+			// We've got a valid-looking payload, we're done!
+			fclose(fp);
+			break;
 		}
 		fclose(fp);
 	}
 
-	// If we successfully got a HWConfig payload, examine it now
+	// If we successfully got a HWConfig payload in the previous loop, examine it now
 	if (payload) {
 		/*
 		// NOTE: Dump the full payload, for science!
