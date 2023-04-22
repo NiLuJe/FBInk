@@ -44,9 +44,19 @@ echo "Running FW $(cut -f3 -d',' /mnt/onboard/.kobo/version) on Linux $(uname -r
 separator
 
 # Dump the NTX HWConfig block
-header "HWConfig"
-ntx_hwconfig -s /dev/mmcblk0 >> "${DEVCAP_LOG}" 2>/dev/null
-separator
+if [ "$(dd if=/dev/mmcblk0 bs=512 skip=1024 count=1 | grep -c "HW CONFIG")" == "1" ] ; then
+	header "HWConfig (NXP/Sunxi)"
+	ntx_hwconfig -s /dev/mmcblk0 >> "${DEVCAP_LOG}" 2>/dev/null
+	separator
+elif [ -e "/dev/mmcblk0p6" ] && [ "$(dd if=/dev/mmcblk0p6 bs=512 skip=1 count=1 | grep -c "HW CONFIG")" == "1" ] ; then
+	# MTK variant
+	header "HWConfig (MTK)"
+	ntx_hwconfig ntx_hwconfig -S 1 -p /dev/mmcblk0p6 >> "${DEVCAP_LOG}" 2>/dev/null
+	separator
+else
+	header "Couldn't find a HWConfig tag?!"
+	separator
+fi
 
 # List input devices
 header "Input devices"
