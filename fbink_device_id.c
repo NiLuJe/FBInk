@@ -541,10 +541,9 @@ static void
 		}
 		fclose(fp);
 
-		// NOTE: These are NOT NULL-terminated, so we use the size of the storage array,
-		//       and not of the string literal (where sizeof would have appended space for a terminating NULL).
-		//       (i.e., here, sizeof(config.magic) == 10 == strlen(HWCONFIG_MAGIC) while sizeof(HWCONFIG_MAGIC) == 11)
-		if (memcmp(config.magic, HWCONFIG_MAGIC, sizeof(config.magic)) != 0) {
+		// NOTE: This slice will NOT be NULL-terminated,
+		//       so we have to chop the terminating NULL from the string literal's size.
+		if (memcmp(config.magic, HWCONFIG_MAGIC, sizeof(HWCONFIG_MAGIC) - 1U) != 0) {
 			WARN("Block device `%s` does not appear to contain an NTX HWConfig entry", HWCONFIG_DEVICE);
 			return;
 		}
@@ -1164,10 +1163,9 @@ static void
 				return identify_mainline();
 			}
 
-			// NOTE: These are NOT NULL-terminated, so we use the size of the storage array,
-			//       and not of the string literal (where sizeof would have appended space for a terminating NULL).
-			//       (i.e., here, sizeof(config.magic) == 10 == strlen(HWCONFIG_MAGIC) while sizeof(HWCONFIG_MAGIC) == 11)
-			if (memcmp(config.magic, HWCONFIG_MAGIC, sizeof(config.magic)) != 0) {
+			// NOTE: This slice will NOT be NULL-terminated,
+			//       so we have to chop the terminating NULL from the string literal's size.
+			if (memcmp(config.magic, HWCONFIG_MAGIC, sizeof(HWCONFIG_MAGIC) - 1U) != 0) {
 				WARN("Block device `%s` does not appear to contain an NTX HWConfig entry",
 				     HWCONFIG_DEVICE);
 				fclose(fp);

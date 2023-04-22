@@ -34,17 +34,20 @@
 #ifndef FBINK_FOR_LINUX
 #	if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
 // NOTE: This is NTX's homegrown hardware tagging, c.f., arch/arm/mach-imx/ntx_hwconfig.h in a Kobo kernel, for instance
-#		define HWCONFIG_DEVICE "/dev/mmcblk0"
-#		define HWCONFIG_OFFSET (1024 * 512)
-#		define HWCONFIG_MAGIC  "HW CONFIG "
+#		define HWCONFIG_DEVICE     "/dev/mmcblk0"
+#		define HWCONFIG_OFFSET     (1024 * 512)
+// NOTE: The data block moved to a dedicated partition on boards with an MTK SoC
+#		define HWCONFIG_MTK_DEVICE "/dev/mmcblk0p6"
+#		define HWCONFIG_MTK_OFFSET (1 * 512)
+#		define HWCONFIG_MAGIC      "HW CONFIG"
 #		if defined(FBINK_FOR_CERVANTES)
 // Keep it to the minimum on Cervantes
 typedef struct __attribute__((__packed__))
 {
 #			pragma GCC diagnostic push
 #			pragma GCC diagnostic ignored "-Wattributes"
-	char magic[10] __attribute__((nonstring));     // HWCONFIG_MAGIC (i.e., "HW CONFIG ")
-	char version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.5" on Mk.9+
+	char magic[15];    // HWCONFIG_MAGIC followed by the payload version, NULL-terminated
+			   // (e.g., "HW CONFIG vx.y", up to v3.5 on Mk.9+)
 #			pragma GCC diagnostic pop
 	uint8_t len;    // Length (in bytes) of the full payload, header excluded (up to 76 on v3.5)
 	// Header stops here, actual data follows
@@ -58,10 +61,10 @@ typedef struct __attribute__((__packed__))
 {
 #			pragma GCC diagnostic push
 #			pragma GCC diagnostic ignored "-Wattributes"
-	char    magic[10] __attribute__((nonstring));     // HWCONFIG_MAGIC (i.e., "HW CONFIG ")
-	char    version[5] __attribute__((nonstring));    // In Kobo-land, up to "v3.5" on Mk.9+
+	char    magic[15];    // HWCONFIG_MAGIC followed by the payload version, NULL-terminated
+			      // (e.g., "HW CONFIG vx.y", up to v3.5 on Mk.9+)
 #			pragma GCC diagnostic pop
-	uint8_t len;    // Length (in bytes) of the full payload, header excluded (up to 76 on v3.5)
+	uint8_t len;          // Length (in bytes) of the full payload, header excluded (up to 76 on v3.5)
 } NTXHWConfig;
 // Index of the few fields we're interested in inside the payload...
 #			define KOBO_HWCFG_PCB               0
