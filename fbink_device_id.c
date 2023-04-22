@@ -1206,7 +1206,7 @@ static void
 				}
 			}
 
-			// We've got a valid-looking payload, we're done!
+			// We've got a valid-looking payload (*and* we've allocated stack space for it), we're done!
 			fclose(fp);
 			break;
 		}
