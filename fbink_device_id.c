@@ -1218,10 +1218,8 @@ static void
 		}
 		*/
 
-		if (payload[KOBO_HWCFG_PCB] >= (sizeof(kobo_ids) / sizeof(*kobo_ids))) {
-			WARN("Unknown Kobo PCB ID index (%hhu >= %zu)",
-			     payload[KOBO_HWCFG_PCB],
-			     (sizeof(kobo_ids) / sizeof(*kobo_ids)));
+		if (payload[KOBO_HWCFG_PCB] >= ARRAY_SIZE(kobo_ids)) {
+			WARN("Unknown Kobo PCB ID index (%hhu >= %zu)", payload[KOBO_HWCFG_PCB], ARRAY_SIZE(kobo_ids));
 		} else {
 			// As per /bin/kobo_config.sh, match PCB IDs to Product IDs via a LUT...
 			// NOTE: Some Tolinos *will* end up with a Kobo ID here, because of lax matches:

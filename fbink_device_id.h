@@ -58,10 +58,9 @@ typedef struct __attribute__((__packed__))
 {
 #			pragma GCC diagnostic push
 #			pragma GCC diagnostic ignored "-Wattributes"
-	char    magic[15];    // HWCONFIG_MAGIC followed by the payload version, NULL-terminated
-			      // (e.g., "HW CONFIG vx.y", up to v3.5 on Mk.9+)
+	char    magic[15];
 #			pragma GCC diagnostic pop
-	uint8_t len;          // Length (in bytes) of the full payload, header excluded (up to 76 on v3.5)
+	uint8_t len;
 } NTXHWConfig;
 // Index of the few fields we're interested in inside the payload...
 #			define KOBO_HWCFG_PCB               0
