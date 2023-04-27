@@ -930,6 +930,8 @@ dist: distclean
 	-P --transform="s,$(CURDIR),FBInk-$(FBINK_VERSION),xS" --show-transformed-names \
 	-cvJf Release/FBInk-$(FBINK_VERSION).tar.xz $(CURDIR)
 
+format:
+	clang-format -style=file -i *.c *.h cutef8/*.c cutef8/*.h utils/*.c qimagescale/*.c qimagescale/*.h tools/*.c eink/*-kobo.h eink/*-kindle.h eink/einkfb.h
 
 
-.PHONY: default outdir all staticlib sharedlib static tiny tinier shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils alt sunxi ftrace fbdepth dump devcap clean distclean dist
+.PHONY: default outdir all staticlib sharedlib static tiny tinier shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils alt sunxi ftrace fbdepth dump devcap clean distclean dist format
