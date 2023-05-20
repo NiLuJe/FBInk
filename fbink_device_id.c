@@ -1536,6 +1536,11 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBUltra", sizeof(deviceQuirks.deviceCodename) - 1U);
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_ULTRA;
+		} else if (strcmp(model_name, "PB700") == 0 || strcmp(model_name, "PocketBook 700") == 0) {
+			deviceQuirks.screenDPI = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBEra", sizeof(deviceQuirks.deviceCodename) - 1U);
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_ERA;
 		} else if (strcmp(model_name, "PB740") == 0) {
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
