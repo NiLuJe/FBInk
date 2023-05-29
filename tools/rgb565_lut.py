@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #
-# FBInk related tool, Copyright (C) 2018-2022 NiLuJe <ninuje@gmail.com>
+# FBInk related tool, Copyright (C) 2018-2023 NiLuJe <ninuje@gmail.com>
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # Y8 to RGB565 LUT
