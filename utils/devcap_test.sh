@@ -35,6 +35,9 @@ eval "$(fbink -e)"
 # Here we go...
 echo "* Starting tests on $(date) using FBInk ${FBINK_VERSION}" >> "${DEVCAP_LOG}"
 
+# SIGSTOP GUI stuff
+killall -q -STOP nickel plato reader.lua
+
 # Start from a blank slate
 fbink -q -c -f -w
 
@@ -179,3 +182,6 @@ echo "Results compiled in ${DEVCAP_LOG}"
 # Tar it up in the PWD, too
 tar -cvzf "${PWD}"/Kobo-DevCap-Results.tar.gz "${DEVCAP_LOG}" devcap_*.png
 echo "Results archived in Kobo-DevCap-Results.tar.gz"
+
+# Resume GUI stuff
+killall -q -CONT nickel plato reader.lua
