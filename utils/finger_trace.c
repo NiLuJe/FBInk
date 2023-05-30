@@ -314,7 +314,7 @@ static bool
 				break;
 			case ABS_MT_TRACKING_ID:
 				if (ev->value == -1) {
-					touch->state = DOWN;
+					touch->state = UP;
 
 					if (fbink_state->is_sunxi) {
 						// NOTE: On sunxi, send a !pen refresh on pen up because otherwise the driver softlocks,
