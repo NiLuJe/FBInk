@@ -292,6 +292,8 @@ static bool
 				if (ev->value > 0) {
 					touch->state = DOWN;
 				} else {
+					// NOTE: Actually getting a 0-pressure event on lift is *not* a guarantee...
+					//       (Especially on some Elan panels/drivers...)
 					touch->state = UP;
 				}
 				break;
@@ -304,8 +306,10 @@ static bool
 				touch->pos.y = ev->value;
 				break;
 			case ABS_MT_TRACKING_ID:
-				if (fbink_state->is_sunxi) {
-					if (ev->value == -1) {
+				if (ev->value == -1) {
+					touch->state = DOWN;
+
+					if (fbink_state->is_sunxi) {
 						// NOTE: On sunxi, send a !pen refresh on pen up because otherwise the driver softlocks,
 						//       and ultimately trips a reboot watchdog...
 						// NOTE: Nickel also toggles pen mode *off* before doing that...

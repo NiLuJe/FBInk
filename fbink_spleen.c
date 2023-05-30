@@ -165,4 +165,3 @@ static const uint16_t*
 		return spleen_block1[0];
 	}
 }
-
