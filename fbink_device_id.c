@@ -1556,7 +1556,7 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBInkPadColor", sizeof(deviceQuirks.deviceCodename) - 1U);
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD_COLOR;
-		} else if (strcmp(model_name, "PocketBook 840") == 0) {
+		} else if (strcmp(model_name, "PocketBook 840") == 0 || strcmp(model_name, "Reader InkPad") == 0) {
 			deviceQuirks.screenDPI = 250U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBInkPad", sizeof(deviceQuirks.deviceCodename) - 1U);
