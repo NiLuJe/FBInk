@@ -1571,7 +1571,8 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBColorLux", sizeof(deviceQuirks.deviceCodename) - 1U);
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_COLOR_LUX;
-		} else if (strcmp(model_name, "PB743G") == 0 || strcmp(model_name, "PocketBook 743G") == 0) {
+		} else if (strcmp(model_name, "PB743G") == 0 || strcmp(model_name, "PB743g") == 0 ||
+			   strcmp(model_name, "PocketBook 743G") == 0 || strcmp(model_name, "PocketBook 743g") == 0) {
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBInkPad4", sizeof(deviceQuirks.deviceCodename) - 1U);
