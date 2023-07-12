@@ -108,28 +108,28 @@ struct hwtcon_waveform_modes
 
 struct hwtcon_rect
 {
-	__u32 top;
-	__u32 left;
-	__u32 width;
-	__u32 height;
+	uint32_t top;
+	uint32_t left;
+	uint32_t width;
+	uint32_t height;
 };
 
 struct hwtcon_update_marker_data
 {
-	__u32 update_marker;
-	__u32 collision_test;
+	uint32_t update_marker;
+	uint32_t collision_test;
 };
 
 struct hwtcon_update_data
 {
 	struct hwtcon_rect update_region;
 	/* which waveform to use for the update, du, gc4, gc8 gc16 etc */
-	__u32              waveform_mode;
-	__u32              update_mode; /* full update or partial update */
+	uint32_t           waveform_mode;
+	uint32_t           update_mode; /* full update or partial update */
 	/* Unique number used by both application
 	 * and driver to identify an update
 	 */
-	__u32              update_marker;
+	uint32_t           update_marker;
 	unsigned int       flags;       /* one or more HWTCON_FLAGs defined above */
 	int                dither_mode; /* one of the dither modes defined above */
 };
@@ -159,7 +159,7 @@ struct hwtcon_panel_info
  */
 #define HWTCON_SET_TEMPERATURE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x2C, int32_t)
 
-#define HWTCON_SET_AUTO_UPDATE_MODE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x2D, __u32)
+#define HWTCON_SET_AUTO_UPDATE_MODE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x2D, uint32_t)
 
 /* Get the temperature currently used for screen updates.
  * If the temperature set by command FB_SET_TEMPERATURE
@@ -176,7 +176,7 @@ struct hwtcon_panel_info
  * (specified by hwtcon_update_marker_data) is
  * submitted to HWTCON to display or timeout (5 seconds)
  */
-#define HWTCON_WAIT_FOR_UPDATE_SUBMISSION _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x37, __u32)
+#define HWTCON_WAIT_FOR_UPDATE_SUBMISSION _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x37, uint32_t)
 
 /* Wait until the specified send_update request
  * (specified by hwtcon_update_marker_data) is
@@ -200,13 +200,13 @@ struct hwtcon_panel_info
 /* Pause updating the screen.
  * Any HWTCON_SEND_UPDATE request will be discarded.
  */
-#define HWTCON_SET_PAUSE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x33, __u32)
+#define HWTCON_SET_PAUSE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x33, uint32_t)
 
 /* Resume updating the screen. */
-#define HWTCON_SET_RESUME _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x35, __u32)
+#define HWTCON_SET_RESUME _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x35, uint32_t)
 
 /* Get the screen updating flag set by HWTCON_SET_PAUSE or HWTCON_SET_RESUME */
-#define HWTCON_GET_PAUSE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x34, __u32)
+#define HWTCON_GET_PAUSE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x34, uint32_t)
 
 #define HWTCON_GET_PANEL_INFO _IOR(HWTCON_IOCTL_MAGIC_NUMBER, 0x130, struct hwtcon_panel_info)
 
