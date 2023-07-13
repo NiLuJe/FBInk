@@ -49,11 +49,9 @@
 /* temperature use sensor. */
 #define TEMP_USE_SENSOR 0x100000
 
-/*
 // Matches MXCFB
 #define UPDATE_MODE_PARTIAL 0x0
 #define UPDATE_MODE_FULL    0x1
-*/
 
 enum HWTCON_WAVEFORM_MODE_ENUM
 {
