@@ -987,8 +987,7 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 10", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case DEVICE_KOBO_ELIPSA_2E:    // Elipsa 2E (Condor)
-			//deviceQuirks.isKoboMTK     = true;
-			// TBD!
+			deviceQuirks.isMTK         = true;
 			deviceQuirks.hasEclipseWfm = true;
 			deviceQuirks.canRotate     = true;
 			deviceQuirks.screenDPI     = 227U;
