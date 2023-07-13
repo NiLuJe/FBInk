@@ -338,7 +338,7 @@ static bool
 		case 0x971u:
 		case 0x972u:
 		case 0x9B3u:
-			deviceQuirks.isKindleMTK   = true;
+			deviceQuirks.isMTK         = true;
 			deviceQuirks.hasEclipseWfm = true;
 			deviceQuirks.screenDPI     = 300U;
 			// Flawfinder: ignore
@@ -355,7 +355,7 @@ static bool
 		case 0x957u:
 		case 0x7F1u:
 		case 0x84Cu:
-			deviceQuirks.isKindleMTK   = true;
+			deviceQuirks.isMTK         = true;
 			deviceQuirks.hasEclipseWfm = true;
 			deviceQuirks.screenDPI     = 300U;
 			// Flawfinder: ignore
@@ -373,7 +373,7 @@ static bool
 		case 0x874u:
 		case 0x875u:
 		case 0x8E0u:
-			deviceQuirks.isKindleMTK   = true;
+			deviceQuirks.isMTK         = true;
 			deviceQuirks.hasEclipseWfm = true;
 			deviceQuirks.screenDPI     = 300U;
 			// Flawfinder: ignore

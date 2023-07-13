@@ -41,12 +41,12 @@ typedef struct
 	char               deviceCodename[16];
 	char               devicePlatform[16];
 	bool               isPerfectFit;
+	bool               isMTK;
 	bool               isSunxi;
 	bool               isKindleLegacy;
 	bool               isKindlePearlScreen;
 	bool               isKindleZelda;
 	bool               isKindleRex;
-	bool               isKindleMTK;
 	bool               isKoboNonMT;
 	bool               isNTX16bLandscape;
 	bool               isKoboMk7;

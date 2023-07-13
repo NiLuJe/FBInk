@@ -2927,7 +2927,7 @@ int
 	PFWARN("This feature is not supported on your device");
 	return ERRCODE(ENOSYS);
 #else
-	if (!deviceQuirks.isKindleMTK) {
+	if (!deviceQuirks.isMTK) {
 		PFWARN("This feature is not supported on your device");
 		return ERRCODE(ENOSYS);
 	}
@@ -2946,7 +2946,7 @@ int
 	PFWARN("This feature is not supported on your device");
 	return ERRCODE(ENOSYS);
 #else
-	if (!deviceQuirks.isKindleMTK) {
+	if (!deviceQuirks.isMTK) {
 		PFWARN("This feature is not supported on your device");
 		return ERRCODE(ENOSYS);
 	}
@@ -2997,7 +2997,7 @@ int
 	PFWARN("This feature is not supported on your device");
 	return ERRCODE(ENOSYS);
 #else
-	if (!deviceQuirks.isKindleMTK) {
+	if (!deviceQuirks.isMTK) {
 		PFWARN("This feature is not supported on your device");
 		return ERRCODE(ENOSYS);
 	}
@@ -3046,7 +3046,7 @@ int
 	PFWARN("This feature is not supported on your device");
 	return ERRCODE(ENOSYS);
 #else
-	if (!deviceQuirks.isKindleMTK) {
+	if (!deviceQuirks.isMTK) {
 		PFWARN("This feature is not supported on your device");
 		return ERRCODE(ENOSYS);
 	}
@@ -3088,7 +3088,7 @@ int
 	return ERRCODE(ENOSYS);
 #else
 	// NOTE: Technically requires a Bellatrix3, will return HWTCON_STATUS_INVALID_IOCTL_CMD (-4) otherwise.
-	if (!deviceQuirks.isKindleMTK) {
+	if (!deviceQuirks.isMTK) {
 		PFWARN("This feature is not supported on your device");
 		return ERRCODE(ENOSYS);
 	}
@@ -3206,7 +3206,7 @@ static int
 #	endif
 
 #	if defined(FBINK_FOR_KINDLE)
-	if (deviceQuirks.isKindleMTK) {
+	if (deviceQuirks.isMTK) {
 		return refresh_kindle_mtk(fbfd, region, fbink_cfg);
 	} else if (deviceQuirks.isKindleRex) {
 		return refresh_kindle_rex(fbfd, region, fbink_cfg);
@@ -5085,7 +5085,7 @@ void
 {
 	fprintf(
 	    stdout,
-	    "FBINK_VERSION='%s';viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;invertedGrayscale=%d;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isSunxi=%d;SunxiHasFBDamage=%d;SunxiForceRota=%d;isKindleLegacy=%d;isKindleMTK=%d;isKoboNonMT=%d;unreliableWaitFor=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;hasEclipseWfm=%d;",
+	    "FBINK_VERSION='%s';viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;invertedGrayscale=%d;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isMTK=%d;isSunxi=%d;SunxiHasFBDamage=%d;SunxiForceRota=%d;isKindleLegacy=%d;isKoboNonMT=%d;unreliableWaitFor=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;hasEclipseWfm=%d;",
 	    fbink_version(),
 	    viewWidth,
 	    viewHeight,
@@ -5115,6 +5115,7 @@ void
 	    deviceQuirks.deviceId,
 	    deviceQuirks.deviceCodename,
 	    deviceQuirks.devicePlatform,
+	    deviceQuirks.isMTK,
 	    deviceQuirks.isSunxi,
 #if defined(FBINK_FOR_KOBO)
 	    sunxiCtx.has_fbdamage,
@@ -5124,7 +5125,6 @@ void
 	    FORCE_ROTA_NOTSUP,
 #endif
 	    deviceQuirks.isKindleLegacy,
-	    deviceQuirks.isKindleMTK,
 	    deviceQuirks.isKoboNonMT,
 	    deviceQuirks.unreliableWaitFor,
 	    deviceQuirks.ntxBootRota,
@@ -5171,6 +5171,7 @@ void
 		fbink_state->glyph_width      = glyphWidth;
 		fbink_state->glyph_height     = glyphHeight;
 		fbink_state->is_perfect_fit   = deviceQuirks.isPerfectFit;
+		fbink_state->is_mtk           = deviceQuirks.isMTK;
 		fbink_state->is_sunxi         = deviceQuirks.isSunxi;
 #if defined(FBINK_FOR_KOBO)
 		fbink_state->sunxi_has_fbdamage = sunxiCtx.has_fbdamage;
@@ -5180,7 +5181,6 @@ void
 		fbink_state->sunxi_force_rota   = FORCE_ROTA_NOTSUP;
 #endif
 		fbink_state->is_kindle_legacy        = deviceQuirks.isKindleLegacy;
-		fbink_state->is_kindle_mtk           = deviceQuirks.isKindleMTK;
 		fbink_state->is_kobo_non_mt          = deviceQuirks.isKoboNonMT;
 		fbink_state->unreliable_wait_for     = deviceQuirks.unreliableWaitFor;
 		fbink_state->ntx_boot_rota           = deviceQuirks.ntxBootRota;
@@ -7894,9 +7894,9 @@ static uint32_t
 #	if defined(FBINK_FOR_KINDLE)
 	// Is this a Zelda or a Rex with new waveforms?
 	// (MTK also supports those with matching constants).
-	const bool has_new_wfm = (deviceQuirks.isKindleZelda || deviceQuirks.isKindleRex || deviceQuirks.isKindleMTK);
+	const bool has_new_wfm = (deviceQuirks.isKindleZelda || deviceQuirks.isKindleRex || deviceQuirks.isMTK);
 	// Is this device running on a MTK SoC?
-	const bool has_mtk_wfm = deviceQuirks.isKindleMTK;
+	const bool has_mtk_wfm = deviceQuirks.isMTK;
 
 	switch (wfm_mode_index) {
 		case WFM_INIT:
