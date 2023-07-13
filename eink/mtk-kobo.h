@@ -53,16 +53,17 @@
 #define UPDATE_MODE_PARTIAL 0x0
 #define UPDATE_MODE_FULL    0x1
 
+// NOTE: Yes, I *am* confused by the default NM mappings...
 enum HWTCON_WAVEFORM_MODE_ENUM
 {
 	// Matches MXCFB
 	HWTCON_WAVEFORM_MODE_INIT   = 0,
 	HWTCON_WAVEFORM_MODE_DU     = 1,
-	HWTCON_WAVEFORM_MODE_GC16   = 2,
+	HWTCON_WAVEFORM_MODE_GC16   = 2, // => GL16 if PARTIAL; => GCK16 if PARTIAL in NM & => GLKW16 if FULL in NM
 	// Doesn't match MXCFB
-	HWTCON_WAVEFORM_MODE_GL16   = 3,
-	HWTCON_WAVEFORM_MODE_GLR16  = 4,
-	HWTCON_WAVEFORM_MODE_REAGL  = 4,
+	HWTCON_WAVEFORM_MODE_GL16   = 3, // => GCK16 in NM
+	HWTCON_WAVEFORM_MODE_GLR16  = 4, // => GCK16 in NM
+	HWTCON_WAVEFORM_MODE_REAGL  = 4, // => GCK16 in NM
 	HWTCON_WAVEFORM_MODE_A2     = 6,
 	HWTCON_WAVEFORM_MODE_GCK16  = 8,
 	HWTCON_WAVEFORM_MODE_GLKW16 = 9,
@@ -154,6 +155,8 @@ struct hwtcon_panel_info
 /* ioctl commds */
 #define HWTCON_IOCTL_MAGIC_NUMBER 'F'
 
+// Flips the nightmode flag, prevents GCK16 & GLKW16 from automatically enabling nightmode, and inverts the fb.
+// NOTE: Except you can't reset the enable_night_mode_by_wfm & invert_fb flags without resorting to debugfs?
 #define HWTCON_SET_NIGHTMODE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x26, int32_t)
 
 /* Set the mapping between waveform types and waveform mode index */
