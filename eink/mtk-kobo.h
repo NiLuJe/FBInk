@@ -158,6 +158,7 @@ struct hwtcon_panel_info
 
 // Flips the nightmode flag, prevents GCK16 & GLKW16 from automatically enabling nightmode, and inverts the fb.
 // NOTE: Except you can't reset the enable_night_mode_by_wfm & invert_fb flags without resorting to debugfs?
+//       c.f., debug_enable_nightmode @ drivers/misc/mediatek/hwtcon/hwtcon_debug.c
 #define HWTCON_SET_NIGHTMODE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x26, int32_t)
 
 /* Set the mapping between waveform types and waveform mode index */
