@@ -210,6 +210,7 @@
 #	include "eink/mxcfb-kobo.h"
 #	include "eink/ion-kobo.h"
 #	include "eink/sunxi-kobo.h"
+#	include "eink/mtk-kobo.h"
 #elif defined(FBINK_FOR_REMARKABLE)
 #	include "eink/mxcfb-remarkable.h"
 #elif defined(FBINK_FOR_POCKETBOOK)

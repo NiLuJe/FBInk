@@ -49,21 +49,26 @@
 /* temperature use sensor. */
 #define TEMP_USE_SENSOR 0x100000
 
+/*
 #define UPDATE_MODE_PARTIAL 0x0
 #define UPDATE_MODE_FULL    0x1
+*/
 
-enum WAVEFORM_MODE_ENUM
+enum HWTCON_WAVEFORM_MODE_ENUM
 {
-	WAVEFORM_MODE_INIT   = 0,
-	WAVEFORM_MODE_DU     = 1,
-	WAVEFORM_MODE_GC16   = 2,
-	WAVEFORM_MODE_GL16   = 3,
-	WAVEFORM_MODE_GLR16  = 4,
-	WAVEFORM_MODE_REAGL  = 4,
-	WAVEFORM_MODE_A2     = 6,
-	WAVEFORM_MODE_GCK16  = 8,
-	WAVEFORM_MODE_GLKW16 = 9,
-	WAVEFORM_MODE_AUTO   = 257,
+	// Matches MXCFB
+	HWTCON_WAVEFORM_MODE_INIT   = 0,
+	HWTCON_WAVEFORM_MODE_DU     = 1,
+	HWTCON_WAVEFORM_MODE_GC16   = 2,
+	// Doesn't match MXCFB'
+	HWTCON_WAVEFORM_MODE_GL16   = 3,
+	HWTCON_WAVEFORM_MODE_GLR16  = 4,
+	HWTCON_WAVEFORM_MODE_REAGL  = 4,
+	HWTCON_WAVEFORM_MODE_A2     = 6,
+	HWTCON_WAVEFORM_MODE_GCK16  = 8,
+	HWTCON_WAVEFORM_MODE_GLKW16 = 9,
+	// Matches MXCFB
+	HWTCON_WAVEFORM_MODE_AUTO   = 257,
 };
 
 #define WAVEFORM_TYPE_4BIT 0x1
@@ -71,7 +76,7 @@ enum WAVEFORM_MODE_ENUM
 
 enum hwtcon_dithering_mode
 {
-	// Quantize?
+	// Quantize only?
 	HWTCON_FLAG_USE_DITHERING_Y8_Y4_Q = 0x100,
 	HWTCON_FLAG_USE_DITHERING_Y8_Y2_Q = 0x200,
 	HWTCON_FLAG_USE_DITHERING_Y8_Y1_Q = 0x300,
@@ -86,7 +91,7 @@ enum hwtcon_dithering_mode
 	HWTCON_FLAG_USE_DITHERING_Y4_Y1_B = 0x10301,
 
 	// Floyd-Steinberg?
-	HWTCON_FLAG_USE_DITHERING_Y8_Y4_S = 0x102,
+	HWTCON_FLAG_USE_DITHERING_Y8_Y4_S = 0x102,    // Default
 	HWTCON_FLAG_USE_DITHERING_Y8_Y2_S = 0x202,
 	HWTCON_FLAG_USE_DITHERING_Y8_Y1_S = 0x302,
 	HWTCON_FLAG_USE_DITHERING_Y4_Y2_S = 0x10202,
@@ -95,17 +100,17 @@ enum hwtcon_dithering_mode
 
 struct hwtcon_waveform_modes
 {
-	/* waveform mode index for WAVEFORM_MODE_INIT */
+	/* waveform mode index for HWTCON_WAVEFORM_MODE_INIT */
 	int mode_init;
-	/* waveform mode index for WAVEFORM_MODE_DU */
+	/* waveform mode index for HWTCON_WAVEFORM_MODE_DU */
 	int mode_du;
-	/* waveform mode index for WAVEFORM_MODE_GC16 */
+	/* waveform mode index for HWTCON_WAVEFORM_MODE_GC16 */
 	int mode_gc16;
-	/* waveform mode index for WAVEFORM_MODE_GL16 */
+	/* waveform mode index for HWTCON_WAVEFORM_MODE_GL16 */
 	int mode_gl16;
-	/* waveform mode index for WAVEFORM_MODE_A2 */
+	/* waveform mode index for HWTCON_WAVEFORM_MODE_A2 */
 	int mode_a2;
-	/* waveform mode index for WAVEFORM_MODE_REAGL */
+	/* waveform mode index for HWTCON_WAVEFORM_MODE_REAGL */
 	int mode_reagl;
 };
 
