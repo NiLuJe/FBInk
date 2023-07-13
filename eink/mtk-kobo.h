@@ -126,7 +126,7 @@ struct hwtcon_rect
 struct hwtcon_update_marker_data
 {
 	uint32_t update_marker;
-	uint32_t collision_test;
+	uint32_t collision_test;    // Unimplemented
 };
 
 struct hwtcon_update_data
