@@ -53,20 +53,21 @@
 #define UPDATE_MODE_PARTIAL 0x0
 #define UPDATE_MODE_FULL    0x1
 
-// NOTE: Yes, I *am* confused by the default NM mappings...
+// NOTE: That confusing NM mapping is never actually used, unless you enable it via debugfs.
+//       FWIW, lab126 does GC16 => GCK16 & GLR16 => GLKW16...
 enum HWTCON_WAVEFORM_MODE_ENUM
 {
 	// Matches MXCFB
 	HWTCON_WAVEFORM_MODE_INIT   = 0,
 	HWTCON_WAVEFORM_MODE_DU     = 1,
-	HWTCON_WAVEFORM_MODE_GC16   = 2, // => GL16 if PARTIAL; => GCK16 if PARTIAL in NM & => GLKW16 if FULL in NM
+	HWTCON_WAVEFORM_MODE_GC16   = 2,    // => GL16 if PARTIAL; => GCK16 if PARTIAL in NM & => GLKW16 if FULL in NM
 	// Doesn't match MXCFB
-	HWTCON_WAVEFORM_MODE_GL16   = 3, // => GCK16 in NM
-	HWTCON_WAVEFORM_MODE_GLR16  = 4, // => GCK16 in NM
-	HWTCON_WAVEFORM_MODE_REAGL  = 4, // => GCK16 in NM
+	HWTCON_WAVEFORM_MODE_GL16   = 3,    // => GCK16 in NM
+	HWTCON_WAVEFORM_MODE_GLR16  = 4,    // => GCK16 in NM
+	HWTCON_WAVEFORM_MODE_REAGL  = 4,    // => GCK16 in NM
 	HWTCON_WAVEFORM_MODE_A2     = 6,
 	HWTCON_WAVEFORM_MODE_GCK16  = 8,
-	HWTCON_WAVEFORM_MODE_GLKW16 = 9, // AKA. GCKW16
+	HWTCON_WAVEFORM_MODE_GLKW16 = 9,    // AKA. GCKW16; REAGL DARK
 	// Matches MXCFB
 	HWTCON_WAVEFORM_MODE_AUTO   = 257,
 };
