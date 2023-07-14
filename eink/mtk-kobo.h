@@ -161,6 +161,8 @@ struct hwtcon_panel_info
 //       because the ioctl handler is one-way for those two...
 //       c.f., hwtcon_fb_ioctl @ drivers/misc/mediatek/hwtcon/hwtcon_fb.c
 //       c.f., debug_enable_nightmode @ drivers/misc/mediatek/hwtcon/hwtcon_debug.c
+// NOTE: Speaking of, the invert_fb flag can onyl be toggled on its own via debugfs:
+//       echo "night_mode 4" > /proc/hwtcon/cmd for on, 0 for off.
 #define HWTCON_SET_NIGHTMODE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x26, int32_t)
 
 /* Set the mapping between waveform types and waveform mode index */
