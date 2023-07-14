@@ -92,7 +92,7 @@ enum hwtcon_dithering_mode
 	HWTCON_FLAG_USE_DITHERING_Y4_Y1_B = 0x10301,
 
 	// Floyd-Steinberg?
-	HWTCON_FLAG_USE_DITHERING_Y8_Y4_S = 0x102,    // Default
+	HWTCON_FLAG_USE_DITHERING_Y8_Y4_S = 0x102,    // Default, matches Kindle (where it... doesn't do anything :D)
 	HWTCON_FLAG_USE_DITHERING_Y8_Y2_S = 0x202,
 	HWTCON_FLAG_USE_DITHERING_Y8_Y1_S = 0x302,
 	HWTCON_FLAG_USE_DITHERING_Y4_Y2_S = 0x10202,
