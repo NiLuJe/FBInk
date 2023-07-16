@@ -3410,7 +3410,9 @@ static int
 #	elif defined(FBINK_FOR_CERVANTES)
 	return wait_for_complete_cervantes(fbfd, marker);
 #	elif defined(FBINK_FOR_KOBO)
-	if (deviceQuirks.isSunxi) {
+	if (deviceQuirks.isMTK) {
+		return wait_for_complete_kobo_mtk(fbfd, marker);
+	} else if (deviceQuirks.isSunxi) {
 		return wait_for_complete_kobo_sunxi(marker);
 	} else if (deviceQuirks.isKoboMk7) {
 		return wait_for_complete_kobo_mk7(fbfd, marker);
