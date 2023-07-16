@@ -42,9 +42,10 @@
 
 /* HWTCON_FLAG_xx */
 #define HWTCON_FLAG_USE_DITHERING         0x1
-#define HWTCON_FLAG_FORCE_A2_OUTPUT       0x10
-#define HWTCON_FLAG_FORCE_A2_OUTPUT_WHITE 0x20
-#define HWTCON_FLAG_FORCE_A2_OUTPUT_BLACK 0x40
+#define HWTCON_FLAG_FORCE_A2_OUTPUT       0x10    // Mainly used for pen updates, requires HWTCON_WAVEFORM_MODE_A2
+#define HWTCON_FLAG_FORCE_A2_OUTPUT_WHITE 0x20    // Black pen, requires HWTCON_FLAG_FORCE_A2_OUTPUT
+#define HWTCON_FLAG_FORCE_A2_OUTPUT_BLACK 0x40    // White pen, requires HWTCON_FLAG_FORCE_A2_OUTPUT
+// Pen color is auto-detected if only HWTCON_FLAG_FORCE_A2_OUTPUT is provided
 
 /* temperature use sensor. */
 // NOTE: No longer set request-by-request, but globally via HWTCON_SET_TEMPERATURE

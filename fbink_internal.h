@@ -755,6 +755,9 @@ static int refresh_kobo_mk7(int, const struct mxcfb_rect, const FBInkConfig*);
 static int wait_for_complete_kobo_mk7(int, uint32_t);
 static int refresh_kobo_sunxi(const struct mxcfb_rect, const FBInkConfig*);
 static int wait_for_complete_kobo_sunxi(uint32_t);
+static int refresh_kobo_mtk(int, const struct hwtcon_rect, const FBInkConfig*);
+static int wait_for_submission_kobo_mtk(int, uint32_t);
+static int wait_for_complete_kobo_mtk(int, uint32_t);
 #	endif    // FBINK_FOR_KINDLE
 static inline void compute_update_marker(void);
 #endif    // !FBINK_FOR_LINUX

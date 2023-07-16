@@ -2801,6 +2801,122 @@ static int
 	return EXIT_SUCCESS;
 }
 
+// Kobo Mark 11 devices on MTK SoCs
+static int
+    refresh_kobo_mtk(int fbfd, const struct hwtcon_rect region, const FBInkConfig* fbink_cfg)
+{
+	// Handle the common waveform_mode/update_mode switcheroo...
+	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO)
+					   ? get_wfm_mode(WFM_GC16)
+					   : get_wfm_mode(fbink_cfg->wfm_mode);
+	const uint32_t update_mode   = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
+
+	struct hwtcon_update_data update = {
+		.update_region = region,
+		.waveform_mode = waveform_mode,
+		.update_mode   = update_mode,
+		.update_marker = lastMarker,
+		// FIXME: Check if HWTCON_FLAG_FORCE_A2_OUTPUT makes sense outside of pen strokes...
+		.flags         = 0U,
+		.dither_mode   = 0
+	};
+
+	// NOTE: There isn't a per-update concept, fb inversion is global, and can only be requested via a debugfs knob.
+	//       The kernel makes a distinction between `enable_night_mode`/`night_mode`, which affects low-level timing and power shenanigans,
+	//       and is (by default, unless you use the broken HWTCON_SET_NIGHTMODE ioctl) automatically enabled for updates
+	//       using an Eclipse waveform mode (i.e., GCK16 & GLKW16) and `invert_fb`.
+	/*
+	if (fbink_cfg->is_nightmode) {
+		// FIXME: c.f., NOTES around HWTCON_SET_NIGHTMODE in eink/mtk-kobo.h for the debugfs knob.
+		//        We might not be able to handle this sanely on a per-update basis,
+		//        a new, global API call might be warranted here...
+		// FIXME: In the same vein, handling pen mode might require clunky APIs,
+		//        as it involves A2 + HWTCON_FLAG_FORCE_A2_OUTPUT +/- HWTCON_FLAG_FORCE_A2_OUTPUT_(WHITE|BLACK)...
+	}
+	*/
+
+	// FIXME: Test if any of thse actually work...
+	// Dithering is handled as part of the image processing pass by the MDP.
+	if (fbink_cfg->dithering_mode != HWD_PASSTHROUGH) {
+		// FIXME: That combination might actually be viable here...
+		update.flags &= (unsigned int) ~HWTCON_FLAG_FORCE_A2_OUTPUT;
+		update.flags |= HWTCON_FLAG_USE_DITHERING;
+
+		switch (fbink_cfg->dithering_mode) {
+			case HWD_QUANT_ONLY:
+				update.dither_mode = HWTCON_FLAG_USE_DITHERING_Y8_Y4_Q;
+				break;
+			case HWD_ORDERED:
+				update.dither_mode = HWTCON_FLAG_USE_DITHERING_Y8_Y4_B;
+				break;
+			case HWD_FLOYD_STEINBERG:
+			default:
+				update.dither_mode = HWTCON_FLAG_USE_DITHERING_Y8_Y4_S;
+				break;
+		}
+
+		// It's easy enough to swap from Y4 targets to Y1 targets: just add 0x200 ;).
+		if (waveform_mode == HWTCON_WAVEFORM_MODE_A2 || waveform_mode == HWTCON_WAVEFORM_MODE_DU) {
+			update.dither_mode += 0x200;
+		}
+	}
+
+	int rv = ioctl(fbfd, HWTCON_SEND_UPDATE, &update);
+
+	if (rv < 0) {
+		PFWARN("HWTCON_SEND_UPDATE: %m");
+		if (errno == EINVAL) {
+			WARN("update_region={top=%u, left=%u, width=%u, height=%u}",
+			     region.top,
+			     region.left,
+			     region.width,
+			     region.height);
+		}
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static int
+    wait_for_submission_kobo_mtk(int fbfd, uint32_t marker)
+{
+	int rv = ioctl(fbfd, HWTCON_WAIT_FOR_UPDATE_SUBMISSION, &marker);
+
+	if (rv < 0) {
+		PFWARN("HWTCON_WAIT_FOR_UPDATE_SUBMISSION: %m");
+		return ERRCODE(EXIT_FAILURE);
+	} else {
+		if (rv == 0) {
+			LOG("Update %u has already fully been submitted", marker);
+		} else {
+			// NOTE: Timeout is set to 5000ms
+			LOG("Waited %ldms for submission of update %u", (5000 - jiffies_to_ms(rv)), marker);
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static int
+    wait_for_complete_kobo_mtk(int fbfd, uint32_t marker)
+{
+	int rv = ioctl(fbfd, HWTCON_WAIT_FOR_UPDATE_COMPLETE, &marker);
+
+	if (rv < 0) {
+		PFWARN("HWTCON_WAIT_FOR_UPDATE_COMPLETE: %m");
+		return ERRCODE(EXIT_FAILURE);
+	} else {
+		if (rv == 0) {
+			LOG("Update %u has already fully been completed", marker);
+		} else {
+			// NOTE: Timeout is set to 5000ms
+			LOG("Waited %ldms for completion of update %u", (5000 - jiffies_to_ms(rv)), marker);
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
 #	endif    // FBINK_FOR_KINDLE
 #endif            // !FBINK_FOR_LINUX
 
@@ -3222,7 +3338,9 @@ static int
 #	elif defined(FBINK_FOR_POCKETBOOK)
 	return refresh_pocketbook(fbfd, region, fbink_cfg);
 #	elif defined(FBINK_FOR_KOBO)
-	if (deviceQuirks.isSunxi) {
+	if (deviceQuirks.isMTK) {
+		return refresh_kobo_mtk(fbfd, region, fbink_cfg);
+	} else if (deviceQuirks.isSunxi) {
 		return refresh_kobo_sunxi(region, fbink_cfg);
 	} else if (deviceQuirks.isKoboMk7) {
 		return refresh_kobo_mk7(fbfd, region, fbink_cfg);
@@ -8133,7 +8251,43 @@ static uint32_t
 			break;
 	}
 #	elif defined(FBINK_FOR_KOBO)
-	if (deviceQuirks.isSunxi) {
+	if (deviceQuirks.isMTK) {
+		switch (wfm_mode_index) {
+			case WFM_INIT:
+				waveform_mode = HWTCON_WAVEFORM_MODE_INIT;
+				break;
+			case WFM_DU:
+				waveform_mode = HWTCON_WAVEFORM_MODE_DU;
+				break;
+			case WFM_GC16:
+				waveform_mode = HWTCON_WAVEFORM_MODE_GC16;
+				break;
+			case WFM_GL16:
+				waveform_mode = HWTCON_WAVEFORM_MODE_GL16;
+				break;
+			case WFM_REAGL:
+				waveform_mode = HWTCON_WAVEFORM_MODE_GLR16;
+				break;
+			case WFM_A2:
+				waveform_mode = HWTCON_WAVEFORM_MODE_A2;
+				break;
+			case WFM_GCK16:
+				waveform_mode = HWTCON_WAVEFORM_MODE_GCK16;
+				break;
+			case WFM_GLKW16:
+				waveform_mode = HWTCON_WAVEFORM_MODE_GLKW16;
+				break;
+			case WFM_AUTO:
+				waveform_mode = HWTCON_WAVEFORM_MODE_AUTO;
+				break;
+			default:
+				LOG("Unknown (or unsupported) waveform mode '%s' @ index %hhu, defaulting to GL16",
+				    wfm_to_string(wfm_mode_index),
+				    wfm_mode_index);
+				waveform_mode = HWTCON_WAVEFORM_MODE_GL16;
+				break;
+		}
+	} else if (deviceQuirks.isSunxi) {
 		switch (wfm_mode_index) {
 			case WFM_INIT:
 				waveform_mode = EINK_INIT_MODE;
@@ -8455,6 +8609,36 @@ static __attribute__((cold)) const char*
 			return "Unknown";
 	}
 }
+
+// NOTE: Currently unnecessary, the ioctl don't update the userland data
+/*
+static __attribute__((cold)) const char*
+    mtk_wfm_to_string(uint32_t wfm_mode)
+{
+	switch (wfm_mode) {
+		case HWTCON_WAVEFORM_MODE_INIT:
+			return "INIT";
+		case HWTCON_WAVEFORM_MODE_DU:
+			return "DU";
+		case HWTCON_WAVEFORM_MODE_GC16:
+			return "GC16";
+		case HWTCON_WAVEFORM_MODE_GL16:
+			return "GL16";
+		case HWTCON_WAVEFORM_MODE_REAGL:
+			return "REAGL";
+		case HWTCON_WAVEFORM_MODE_A2:
+			return "A2";
+		case HWTCON_WAVEFORM_MODE_GCK16:
+			return "GCK16";
+		case HWTCON_WAVEFORM_MODE_GLKW16:
+			return "GLKW16";
+		case HWTCON_WAVEFORM_MODE_AUTO:
+			return "AUTO";
+		default:
+			return "Unknown";
+	}
+}
+*/
 #	endif    // FBINK_FOR_KOBO
 
 #	if defined(FBINK_FOR_CERVANTES)
