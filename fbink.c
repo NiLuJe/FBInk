@@ -8631,7 +8631,7 @@ static __attribute__((cold)) const char*
 	}
 }
 
-// NOTE: Currently unnecessary, the ioctl don't update the userland data
+// NOTE: Currently unnecessary, the ioctl doesn't update the userland data
 /*
 static __attribute__((cold)) const char*
     mtk_wfm_to_string(uint32_t wfm_mode)
