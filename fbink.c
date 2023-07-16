@@ -4104,8 +4104,12 @@ static __attribute__((cold)) int
 		// Identify the device's specific model...
 		identify_device();
 #	if defined(FBINK_FOR_KINDLE)
+		// Most kindle support the WAIT_FOR_UPDATE_SUBMISSION ioctl...
+		deviceQuirks.canWaitForSubmission = true;
 		if (deviceQuirks.isKindleLegacy) {
 			ELOG("Enabled Legacy einkfb Kindle quirks");
+			// ... as long as they're not really old devices ;).
+			deviceQuirks.canWaitForSubmission = false;
 		} else if (deviceQuirks.isKindlePearlScreen) {
 			ELOG("Enabled Kindle with Pearl screen quirks");
 		} else if (deviceQuirks.isKindleZelda) {
@@ -4202,6 +4206,9 @@ static __attribute__((cold)) int
 					sunxiCtx.force_rota = FORCE_ROTA_UR;
 				}
 			}
+		} else if (deviceQuirks.isMTK) {
+			ELOG("Enabled MediaTek quirks");
+			deviceQuirks.canWaitForSubmission = true;
 		}
 #	elif defined(FBINK_FOR_POCKETBOOK)
 		// Check if the device is running on an AllWinner SoC instead of an NXP one...
@@ -8899,6 +8906,12 @@ int
     fbink_wait_for_submission(int fbfd UNUSED_BY_NOTKINDLE, uint32_t marker UNUSED_BY_NOTKINDLE)
 {
 #if defined(FBINK_FOR_KINDLE) || defined(FBINK_FOR_KOBO)
+	// Abort early on unsupported devices
+	if (!deviceQuirks.canWaitForSubmission) {
+		WARN("Waiting for update submission is not supported on your device");
+		return ERRCODE(ENOSYS);
+	}
+
 	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
 	bool keep_fd = true;
 	if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {

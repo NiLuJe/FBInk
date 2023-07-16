@@ -57,6 +57,7 @@ typedef struct
 	bool               canRotate;
 	bool               canHWInvert;
 	bool               hasEclipseWfm;
+	bool               canWaitForSubmission;
 	bool               skipId;
 } FBInkDeviceQuirks;
 
