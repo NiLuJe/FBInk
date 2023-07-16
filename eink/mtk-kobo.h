@@ -47,6 +47,7 @@
 #define HWTCON_FLAG_FORCE_A2_OUTPUT_BLACK 0x40
 
 /* temperature use sensor. */
+// NOTE: No longer set request-by-request, but globally via HWTCON_SET_TEMPERATURE
 #define TEMP_USE_SENSOR 0x100000
 
 // Matches MXCFB
@@ -123,6 +124,7 @@ struct hwtcon_rect
 	uint32_t height;
 };
 
+// NOTE: Unused
 struct hwtcon_update_marker_data
 {
 	uint32_t update_marker;
@@ -175,6 +177,7 @@ struct hwtcon_panel_info
  */
 #define HWTCON_SET_TEMPERATURE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x2C, int32_t)
 
+// NOTE: Unimplemented
 #define HWTCON_SET_AUTO_UPDATE_MODE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x2D, uint32_t)
 
 /* Get the temperature currently used for screen updates.
@@ -210,6 +213,7 @@ struct hwtcon_panel_info
  * Instead it will wait until the "DELAY" time has elapsed to skip the
  * powerdown and powerup sequences if an update comes before that.
  */
+// NOTE: Default is 500ms, -1 means never power down.
 #define HWTCON_SET_PWRDOWN_DELAY _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x30, int32_t)
 
 /* Get the power down delay set in HWTCON_SET_PWRDOWN_DELAY command */
@@ -218,9 +222,11 @@ struct hwtcon_panel_info
 /* Pause updating the screen.
  * Any HWTCON_SEND_UPDATE request will be discarded.
  */
+// NOTE: Argument is irrelevant
 #define HWTCON_SET_PAUSE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x33, uint32_t)
 
 /* Resume updating the screen. */
+// NOTE: Argument is irrelevant
 #define HWTCON_SET_RESUME _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x35, uint32_t)
 
 /* Get the screen updating flag set by HWTCON_SET_PAUSE or HWTCON_SET_RESUME */
