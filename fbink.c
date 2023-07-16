@@ -2803,7 +2803,7 @@ static int
 
 // Kobo Mark 11 devices on MTK SoCs
 static int
-    refresh_kobo_mtk(int fbfd, const struct hwtcon_rect region, const FBInkConfig* fbink_cfg)
+    refresh_kobo_mtk(int fbfd, const struct mxcfb_rect region, const FBInkConfig* fbink_cfg)
 {
 	// Handle the common waveform_mode/update_mode switcheroo...
 	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO)
@@ -2811,14 +2811,17 @@ static int
 					   : get_wfm_mode(fbink_cfg->wfm_mode);
 	const uint32_t update_mode   = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
 
+	// NOTE: hwtcon_rect and mxcfb_rect are perfectly interhcnageable
 	struct hwtcon_update_data update = {
-		.update_region = region,
+		.update_region = {.top    = region.top,
+                                  .left   = region.left,
+                                  .width  = region.width,
+                                  .height = region.height},
 		.waveform_mode = waveform_mode,
 		.update_mode   = update_mode,
 		.update_marker = lastMarker,
-		// FIXME: Check if HWTCON_FLAG_FORCE_A2_OUTPUT makes sense outside of pen strokes...
-		.flags         = 0U,
-		.dither_mode   = 0
+		.flags       = 0U, // FIXME: Check if HWTCON_FLAG_FORCE_A2_OUTPUT makes sense outside of pen strokes...
+		.dither_mode = 0
 	};
 
 	// NOTE: There isn't a per-update concept, fb inversion is global, and can only be requested via a debugfs knob.
@@ -2835,7 +2838,7 @@ static int
 	}
 	*/
 
-	// FIXME: Test if any of thse actually work...
+	// FIXME: Test if any of these actually work...
 	// Dithering is handled as part of the image processing pass by the MDP.
 	if (fbink_cfg->dithering_mode != HWD_PASSTHROUGH) {
 		// FIXME: That combination might actually be viable here...
