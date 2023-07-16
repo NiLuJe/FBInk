@@ -517,6 +517,7 @@ typedef struct
 	bool    can_rotate;                 // deviceQuirks.canRotate (device has a gyro)
 	bool    can_hw_invert;              // deviceQuirks.canHWInvert (device can use EPDC inversion)
 	bool    has_eclipse_wfm;            // deviceQuirks.hasEclipseWfm (device can use nightmode waveform modes)
+	bool can_wait_for_submission;    // deviceQuirks.canWaitForSubmission (devices supports fbink_wait_for_submission)
 } FBInkState;
 
 // What a FBInk config should look like. Perfectly sane when fully zero-initialized.

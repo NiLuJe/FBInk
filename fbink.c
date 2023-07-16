@@ -5221,7 +5221,7 @@ void
 {
 	fprintf(
 	    stdout,
-	    "FBINK_VERSION='%s';viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;invertedGrayscale=%d;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isMTK=%d;isSunxi=%d;SunxiHasFBDamage=%d;SunxiForceRota=%d;isKindleLegacy=%d;isKoboNonMT=%d;unreliableWaitFor=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;hasEclipseWfm=%d;",
+	    "FBINK_VERSION='%s';viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;invertedGrayscale=%d;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isMTK=%d;isSunxi=%d;SunxiHasFBDamage=%d;SunxiForceRota=%d;isKindleLegacy=%d;isKoboNonMT=%d;unreliableWaitFor=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;hasEclipseWfm=%d;canWaitForSubmission=%d;",
 	    fbink_version(),
 	    viewWidth,
 	    viewHeight,
@@ -5269,7 +5269,8 @@ void
 	    vInfo.rotate,
 	    deviceQuirks.canRotate,
 	    deviceQuirks.canHWInvert,
-	    deviceQuirks.hasEclipseWfm);
+	    deviceQuirks.hasEclipseWfm,
+	    deviceQuirks.canWaitForSubmission);
 }
 
 // Dump a few of our internal state variables to the FBInkState struct pointed to by fbink_state
@@ -5325,6 +5326,8 @@ void
 		fbink_state->current_rota            = (uint8_t) vInfo.rotate;
 		fbink_state->can_rotate              = deviceQuirks.canRotate;
 		fbink_state->can_hw_invert           = deviceQuirks.canHWInvert;
+		fbink_state->has_eclipse_wfm         = deviceQuirks.hasEclipseWfm;
+		fbink_state->can_wait_for_submission = deviceQuirks.canWaitForSubmission;
 	} else {
 		WARN("Err, it appears we were passed a NULL fbink_state pointer?");
 	}
