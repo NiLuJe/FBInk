@@ -835,7 +835,7 @@ FBINK_API int fbink_refresh(int      fbfd,
 // A simple wrapper around the MXCFB_WAIT_FOR_UPDATE_SUBMISSION ioctl, without requiring you to include mxcfb headers.
 // Returns -(EINVAL) when the update marker is invalid.
 // Returns -(ENOSYS) on devices where this ioctl is unsupported.
-// NOTE: It is only implemented by Kindle kernels (K5+)!
+// NOTE: It is only implemented by Kindle kernels (K5+), and Kobo kernels for MTK SoCs (Mk. 11)!
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
 // marker:		The update marker you want to wait for.

@@ -3380,19 +3380,25 @@ static int
 
 // Same thing for WAIT_FOR_UPDATE_SUBMISSION requests...
 #ifndef FBINK_FOR_LINUX
-#	if defined(FBINK_FOR_KINDLE)
-// This is only implemented on Kindle kernels...
 static int
     wait_for_submission(int fbfd, uint32_t marker)
 {
+#	if defined(FBINK_FOR_KINDLE)
 	// Only implemented for mxcfb Kindles...
 	if (deviceQuirks.isKindleLegacy) {
-		return EXIT_SUCCESS;
+		return ERRCODE(ENOSYS);
 	} else {
 		return wait_for_submission_kindle(fbfd, marker);
 	}
+#	elif defined(FBINK_FOR_KOBO)
+	// Only implemented on MTK
+	if (deviceQuirks.isMTK) {
+		return wait_for_submission_kobo_mtk(fbfd, marker);
+	} else {
+		return ERRCODE(ENOSYS);
+	}
+#	endif
 }
-#	endif    // FBINK_FOR_KINDLE
 
 // Same thing for WAIT_FOR_UPDATE_COMPLETE requests...
 static int
@@ -8892,7 +8898,7 @@ cleanup:
 int
     fbink_wait_for_submission(int fbfd UNUSED_BY_NOTKINDLE, uint32_t marker UNUSED_BY_NOTKINDLE)
 {
-#ifdef FBINK_FOR_KINDLE
+#if defined(FBINK_FOR_KINDLE) || defined(FBINK_FOR_KOBO)
 	// Open the framebuffer if need be (nonblock, we'll only do ioctls)...
 	bool keep_fd = true;
 	if (open_fb_fd_nonblock(&fbfd, &keep_fd) != EXIT_SUCCESS) {
@@ -8925,9 +8931,9 @@ cleanup:
 
 	return rv;
 #else
-	WARN("Waiting for update submission is only supported on Kindle");
+	WARN("Waiting for update submission is not supported on your device");
 	return ERRCODE(ENOSYS);
-#endif    // FBINK_FOR_KINDLE
+#endif    // FBINK_FOR_KINDLE || FBINK_FOR_KOBO
 }
 
 // Small public wrapper around wait_for_complete(), without the caller having to depend on mxcfb headers
