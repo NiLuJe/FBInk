@@ -126,7 +126,7 @@ struct hwtcon_rect
 struct hwtcon_update_marker_data
 {
 	uint32_t update_marker;
-	uint32_t collision_test;    // Unimplemented
+	uint32_t collision_test;    // Unimplemented, for good reason, see HWTCON_WAIT_FOR_UPDATE_COMPLETE handler
 };
 
 struct hwtcon_update_data
@@ -192,12 +192,14 @@ struct hwtcon_panel_info
  * (specified by hwtcon_update_marker_data) is
  * submitted to HWTCON to display or timeout (5 seconds)
  */
+// NOTE: Backend support may not be entirely implemented (MARKER_V2_ENABLE appears to be unset)
 #define HWTCON_WAIT_FOR_UPDATE_SUBMISSION _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x37, uint32_t)
 
 /* Wait until the specified send_update request
  * (specified by hwtcon_update_marker_data) is
  * already completed (Eink panel updated) or timeout (5 seconds)
  */
+// NOTE: Handler actually takes a pointer to a simple uint32_t!
 #define HWTCON_WAIT_FOR_UPDATE_COMPLETE _IOWR(HWTCON_IOCTL_MAGIC_NUMBER, 0x2F, struct hwtcon_update_marker_data)
 
 /* Copy the content of the working buffer to user space */
