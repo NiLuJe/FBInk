@@ -989,7 +989,8 @@ static void
 		case DEVICE_KOBO_ELIPSA_2E:    // Elipsa 2E (Condor)
 			deviceQuirks.isMTK         = true;
 			deviceQuirks.hasEclipseWfm = true;
-			// FIXME: It technically can, but only via a debugfs knob.
+			// NOTE: It technically can, but not via update flags, it's a global state.
+			//       You can toggle it via fbink_set_fb_info if need be.
 			deviceQuirks.canHWInvert   = false;
 			deviceQuirks.canRotate     = true;
 			deviceQuirks.screenDPI     = 227U;

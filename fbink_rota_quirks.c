@@ -631,20 +631,20 @@ int
 	}
 
 #if defined(FBINK_FOR_KOBO)
-	// On MTK, flip the invert_fb flag accordingly, as the driver doesn't do that for us.
+	// On MTK, flip the `invert_fb` flag accordingly, as the driver doesn't do that for us.
 	// NOTE: So far, the driver itself doesn't seem to care all that much about the state of the grayscale flag itself,
 	//       so we're free to actually modify it like if we were on mxcfb.
-	//       That allows us to handle a toggle sanely, as we don't actually have a getter for the invert_fb flag...
+	//       That allows us to handle a toggle sanely, as we don't actually have a getter for the `invert_fb` flag...
 	if (deviceQuirks.isMTK && new_vinfo.grayscale != vInfo.grayscale) {
 		if (new_vinfo.grayscale == GRAYSCALE_8BIT_INVERTED) {
-			// Inverted grayscale, flip invert_fb to *on*
+			// Inverted grayscale, flip `invert_fb` to *on*
 			// NOTE: Technically, we could actually very much have it enabled at 16bpp or 32bpp,
 			//       but for simplicity's sake, we follow our usual "Y8 only" API.
 			if (kobo_mtk_invert_fb(true) == EXIT_SUCCESS) {
 				LOG("Enabled the MTK invert_fb flag");
 			}
 		} else {
-			// Color or standard grayscale, flip invert_fb to *off*
+			// Color or standard grayscale, flip `invert_fb` to *off*
 			if (kobo_mtk_invert_fb(false) == EXIT_SUCCESS) {
 				LOG("Disabled the MTK invert_fb flag");
 			}

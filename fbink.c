@@ -2824,15 +2824,14 @@ static int
 		.dither_mode = 0
 	};
 
-	// NOTE: There isn't a per-update concept, fb inversion is global, and can only be requested via a debugfs knob.
+	// NOTE: There isn't a per-update concept, fb inversion is global.
 	//       The kernel makes a distinction between `enable_night_mode`/`night_mode`, which affects low-level timing and power shenanigans,
 	//       and is (by default, unless you use the broken HWTCON_SET_NIGHTMODE ioctl) automatically enabled for updates
 	//       using an Eclipse waveform mode (i.e., GCK16 & GLKW16) and `invert_fb`.
+	//       You can use fbink_set_fb_info to poke at that internal `invert_fb` flag on its own.
 	/*
 	if (fbink_cfg->is_nightmode && deviceQuirks.canHWInvert) {
-		// FIXME: c.f., NOTES around HWTCON_SET_NIGHTMODE in eink/mtk-kobo.h for the debugfs knob.
-		//        We might not be able to handle this sanely on a per-update basis,
-		//        a new, global API call might be warranted here...
+		// FIXME: See how well toggling invert_fb here to fake a per-update flag would work?
 		// FIXME: In the same vein, handling pen mode might require clunky APIs,
 		//        as it involves A2 + HWTCON_FLAG_FORCE_A2_OUTPUT +/- HWTCON_FLAG_FORCE_A2_OUTPUT_(WHITE|BLACK)...
 	}
