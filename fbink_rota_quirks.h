@@ -56,6 +56,7 @@ static orientation_t linuxfb_rotate_to_einkfb_orientation(uint32_t);
 #endif
 
 #ifdef FBINK_FOR_KOBO
+static int kobo_mtk_invert_fb(bool);
 // Custom constants for accelerometer translations
 #	define GYRO_STATE_UNKNOWN             -1
 #	define GYRO_STATE_FACE_UP             -2

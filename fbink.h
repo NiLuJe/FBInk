@@ -1350,7 +1350,7 @@ FBINK_API void fbink_get_fb_info(struct fb_var_screeninfo* var_info, struct fb_f
 //				If bpp == 8, only meaningful on mxcfb:
 //				Generally set to GRAYSCALE_8BIT (1),
 //				setting it to GRAYSCALE_8BIT_INVERTED (2)
-//				will automagically enforce HW inversion via EPDC_FLAG_ENABLE_INVERSION
+//				will automagically enforce HW inversion via EPDC_FLAG_ENABLE_INVERSION (or similar).
 //				Untouched if set to KEEP_CURRENT_GRAYSCALE
 //				If set to TOGGLE_GRAYSCALE, will toggle between INVERTED & not @ 8bpp
 // fbink_cfg:		Pointer to an FBInkConfig struct.

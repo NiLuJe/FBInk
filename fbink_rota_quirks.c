@@ -505,6 +505,35 @@ static orientation_t
 }
 #endif
 
+#if defined(FBINK_FOR_KOBO)
+static int
+    kobo_mtk_invert_fb(bool toggle)
+{
+	int fd = open("/proc/hwtcon/cmd", O_WRONLY | O_NONBLOCK | O_CLOEXEC);
+	if (fd == -1) {
+		PFWARN("Unable to open hwtcon/cmd procfs knob: %m");
+		return EXIT_FAILURE;
+	}
+
+	ssize_t wlen;
+	if (toggle) {
+		const unsigned char cmd[] = "night_mode 4";
+		wlen                      = write(fd, cmd, sizeof(cmd));
+	} else {
+		const unsigned char cmd[] = "night_mode 0";
+		wlen                      = write(fd, cmd, sizeof(cmd));
+	}
+	int rv = EXIT_SUCCESS;
+	if (wlen < 0) {
+		PFWARN("Failed to write to hwtcon/cmd procfs knob: %m");
+		rv = EXIT_FAILURE;
+	}
+
+	close(fd);
+	return rv;
+}
+#endif
+
 // See utils/fbdepth.c for all the gory details ;).
 int
     fbink_set_fb_info(int fbfd, uint32_t rota, uint8_t bpp, uint8_t grayscale, const FBInkConfig* restrict fbink_cfg)
@@ -600,6 +629,28 @@ int
 		LOG("Sanitizing grayscale flag for bitdepths > 8bpp");
 		new_vinfo.grayscale = 0U;
 	}
+
+#if defined(FBINK_FOR_KOBO)
+	// On MTK, flip the invert_fb flag accordingly, as the driver doesn't do that for us.
+	// NOTE: So far, the driver itself doesn't seem to care all that much about the state of the grayscale flag itself,
+	//       so we're free to actually modify it like if we were on mxcfb.
+	//       That allows us to handle a toggle sanely, as we don't actually have a getter for the invert_fb flag...
+	if (deviceQuirks.isMTK && new_vinfo.grayscale != vInfo.grayscale) {
+		if (new_vinfo.grayscale == GRAYSCALE_8BIT_INVERTED) {
+			// Inverted grayscale, flip invert_fb to *on*
+			// NOTE: Technically, we could actually very much have it enabled at 16bpp or 32bpp,
+			//       but for simplicity's sake, we follow our usual "Y8 only" API.
+			if (kobo_mtk_invert_fb(true) == EXIT_SUCCESS) {
+				LOG("Enabled the MTK invert_fb flag");
+			}
+		} else {
+			// Color or standard grayscale, flip invert_fb to *off*
+			if (kobo_mtk_invert_fb(false) == EXIT_SUCCESS) {
+				LOG("Disabled the MTK invert_fb flag");
+			}
+		}
+	}
+#endif
 
 	if (rota == KEEP_CURRENT_ROTATE) {
 		LOG("Keeping current rotation: %u (%s)", vInfo.rotate, fb_rotate_to_string(vInfo.rotate));

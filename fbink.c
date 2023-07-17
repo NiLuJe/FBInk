@@ -2829,7 +2829,7 @@ static int
 	//       and is (by default, unless you use the broken HWTCON_SET_NIGHTMODE ioctl) automatically enabled for updates
 	//       using an Eclipse waveform mode (i.e., GCK16 & GLKW16) and `invert_fb`.
 	/*
-	if (fbink_cfg->is_nightmode) {
+	if (fbink_cfg->is_nightmode && deviceQuirks.canHWInvert) {
 		// FIXME: c.f., NOTES around HWTCON_SET_NIGHTMODE in eink/mtk-kobo.h for the debugfs knob.
 		//        We might not be able to handle this sanely on a per-update basis,
 		//        a new, global API call might be warranted here...
