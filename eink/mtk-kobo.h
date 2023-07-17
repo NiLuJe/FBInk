@@ -55,7 +55,7 @@
 #define UPDATE_MODE_PARTIAL 0x0
 #define UPDATE_MODE_FULL    0x1
 
-// NOTE: That confusing NM mapping is never actually used, unless you enable it via debugfs.
+// NOTE: That confusing NM mapping is never actually used, unless you enable it via the debug procfs knob.
 //       FWIW, lab126 does GC16 => GCK16 & GLR16 => GLKW16...
 enum HWTCON_WAVEFORM_MODE_ENUM
 {
@@ -160,11 +160,11 @@ struct hwtcon_panel_info
 #define HWTCON_IOCTL_MAGIC_NUMBER 'F'
 
 // Flips the nightmode flag, prevents GCK16 & GLKW16 from automatically enabling nightmode, and inverts the fb.
-// NOTE: Except you can't reset the enable_night_mode_by_wfm & invert_fb flags without resorting to debugfs,
+// NOTE: Except you can't reset the enable_night_mode_by_wfm & invert_fb flags without resorting to the debug procfs knob,
 //       because the ioctl handler is one-way for those two...
 //       c.f., hwtcon_fb_ioctl @ drivers/misc/mediatek/hwtcon/hwtcon_fb.c
 //       c.f., debug_enable_nightmode @ drivers/misc/mediatek/hwtcon/hwtcon_debug.c
-// NOTE: Speaking of, the invert_fb flag can onyl be toggled on its own via debugfs:
+// NOTE: Speaking of, the invert_fb flag can only be toggled on its own via procfs:
 //       echo "night_mode 4" > /proc/hwtcon/cmd for on, 0 for off.
 #define HWTCON_SET_NIGHTMODE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x26, int32_t)
 
