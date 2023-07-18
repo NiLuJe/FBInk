@@ -73,6 +73,7 @@
 #define NXP_TOUCH_DEV             "/dev/input/event1"
 #define SUNXI_ELAN_TOUCHPAD_EVDEV "/dev/input/by-path/platform-0-0010-event"
 #define NXP_ELAN_TOUCHPAD_EVDEV   "/dev/input/by-path/platform-1-0010-event"
+#define MTK_ELAN_TOUCHPAD_EVDEV   "/dev/input/by-path/platform-2-0010-event"
 
 typedef struct
 {
@@ -479,7 +480,9 @@ int
 	}
 
 	// Setup libevdev, poking at the right input device...
-	if (fbink_state.is_sunxi) {
+	if (fbink_state.is_mtk) {
+		evfd = open(MTK_ELAN_TOUCHPAD_EVDEV, O_RDONLY | O_CLOEXEC | O_NONBLOCK);
+	} else if (fbink_state.is_sunxi) {
 		evfd = open(SUNXI_ELAN_TOUCHPAD_EVDEV, O_RDONLY | O_CLOEXEC | O_NONBLOCK);
 	} else {
 		if (access(NXP_ELAN_TOUCHPAD_EVDEV, F_OK) == 0) {

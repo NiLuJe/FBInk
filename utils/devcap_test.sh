@@ -158,7 +158,9 @@ echo "See https://github.com/NiLuJe/FBInk/blob/master/utils/devcap_expected_resu
 header "EvTest"
 echo "Please tap the top-left corner of the screen in the next 10s!"
 (
-	if [ -e "/dev/input/by-path/platform-1-0010-event" ] ; then
+	if [ -e "/dev/input/by-path/platform-2-0010-event" ] ; then
+		evtest "/dev/input/by-path/platform-2-0010-event" >> "${DEVCAP_LOG}" 2>&1
+	elif [ -e "/dev/input/by-path/platform-1-0010-event" ] ; then
 		evtest "/dev/input/by-path/platform-1-0010-event" >> "${DEVCAP_LOG}" 2>&1
 	elif [ -e "/dev/input/by-path/platform-0-0010-event" ] ; then
 		evtest "/dev/input/by-path/platform-0-0010-event" >> "${DEVCAP_LOG}" 2>&1
