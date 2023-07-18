@@ -992,7 +992,13 @@ static void
 			// NOTE: It technically can, but not via update flags, it's a global state.
 			//       You can toggle it via fbink_set_fb_info if need be.
 			deviceQuirks.canHWInvert   = false;
+			// TBD: Confirm all that with actual bootup logs, but this should at least behave in Nickel,
+			//      as the mapping seems identical to a Libra 2...
+			// Both pickel & nickel then jump to FB_ROTATE_CW...
+			deviceQuirks.ntxBootRota   = FB_ROTATE_UR;
+			// Canonical -> native rotation mapping: { UR: 1, CW: 0, UD: 3, CCW: 2 }
 			deviceQuirks.canRotate     = true;
+			deviceQuirks.ntxRotaQuirk  = NTX_ROTA_CW_TOUCH;
 			deviceQuirks.screenDPI     = 227U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Elipsa 2E", sizeof(deviceQuirks.deviceName) - 1U);
