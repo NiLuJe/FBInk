@@ -78,6 +78,7 @@ header "LEDs"
 ls -lash /sys/class/leds >> "${DEVCAP_LOG}" 2>/dev/null
 separator
 
+# List battery & ac sysfs entries
 header "Power"
 ls -lash /sys/class/power_supply >> "${DEVCAP_LOG}" 2>/dev/null
 separator
@@ -92,7 +93,7 @@ header "FBInk"
 fbink -v -w -f -Mm "Hello World" >> "${DEVCAP_LOG}" 2>&1
 separator
 
-# Then say hello
+# Dump the FBInk state
 header "FBInk state"
 fbink -e | tr ';' '\n' >> "${DEVCAP_LOG}" 2>&1
 separator
