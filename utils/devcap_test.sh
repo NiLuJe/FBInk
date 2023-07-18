@@ -54,7 +54,7 @@ if [ "$(dd if=/dev/mmcblk0 bs=512 skip=1024 count=1 2>/dev/null | head -c 9)" = 
 elif [ -e "/dev/mmcblk0p6" ] && [ "$(dd if=/dev/mmcblk0p6 bs=512 skip=1 count=1 2>/dev/null | head -c 9)" = "HW CONFIG" ] ; then
 	# MTK variant
 	header "HWConfig (MTK)"
-	ntx_hwconfig ntx_hwconfig -S 1 -p /dev/mmcblk0p6 >> "${DEVCAP_LOG}" 2>/dev/null
+	ntx_hwconfig -S 1 -p /dev/mmcblk0p6 >> "${DEVCAP_LOG}" 2>/dev/null
 	separator
 else
 	header "Couldn't find a HWConfig tag?!"
