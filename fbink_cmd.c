@@ -454,8 +454,8 @@ static int
 	fflush(stdout);
 
 	// Redirect stdin, stdout & stderr to /dev/null
-	int fd = -1;
-	if ((fd = open("/dev/null", O_RDWR)) != -1) {
+	int fd = open("/dev/null", O_RDWR);
+	if (fd != -1) {
 		dup2(fd, fileno(stdin));
 		dup2(fd, fileno(stdout));
 		dup2(fd, fileno(stderr));

@@ -3450,10 +3450,8 @@ static inline __attribute__((always_inline)) const char*
 int
     fbink_open(void)
 {
-	int fbfd = -1;
-
 	// Open the framebuffer file for reading and writing
-	fbfd = open(get_fbdev_path(), O_RDWR | O_CLOEXEC);
+	int fbfd = open(get_fbdev_path(), O_RDWR | O_CLOEXEC);
 	if (fbfd == -1) {
 		PFWARN("Cannot open framebuffer character device: %m");
 		return ERRCODE(EXIT_FAILURE);

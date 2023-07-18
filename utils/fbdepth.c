@@ -453,9 +453,9 @@ int
 	FBInkConfig fbink_cfg = { 0 };
 	fbink_cfg.is_verbose  = isVerbose;
 	fbink_cfg.is_quiet    = isQuiet;
-	int fbfd              = -1;
+	int fbfd              = fbink_open();
 	// Open framebuffer and keep it around, then setup globals.
-	if ((fbfd = fbink_open()) == ERRCODE(EXIT_FAILURE)) {
+	if (fbfd == ERRCODE(EXIT_FAILURE)) {
 		WARN("Failed to open the framebuffer, aborting");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;

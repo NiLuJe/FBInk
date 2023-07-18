@@ -120,8 +120,8 @@ int
 	int rv = EXIT_SUCCESS;
 
 	// Open framebuffer and keep it around, then setup globals.
-	int fbfd = -1;
-	if (ERRCODE(EXIT_FAILURE) == (fbfd = fbink_open())) {
+	int fbfd = fbink_open();
+	if (fbfd == ERRCODE(EXIT_FAILURE)) {
 		fprintf(stderr, "Failed to open the framebuffer, aborting . . .\n");
 		return ERRCODE(EXIT_FAILURE);
 	}
