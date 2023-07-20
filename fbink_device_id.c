@@ -992,6 +992,10 @@ static void
 			// NOTE: It technically can, but not via update flags, it's a global state.
 			//       You can toggle it via fbink_set_fb_info if need be.
 			deviceQuirks.canHWInvert   = false;
+			// Unlike the Libra 2, KOBO_HWCFG_DisplayBusWidth (35) is "16Bits_mirror" (3),
+			// but the touch-screen appears to behave similary, and its native orientation is also CW.
+			// (Unlike on Mk.7+ mxcfb, hwtcon_fb_check_var doesn't do any kind of rotate trickery,
+			// so KOBO_HWCFG_DisplayBusWidth doesn't affect our rota quirks).
 			// TBD: Confirm all that with actual bootup logs, but this should at least behave in Nickel,
 			//      as the mapping seems identical to a Libra 2...
 			// Both pickel & nickel then jump to FB_ROTATE_CW...
