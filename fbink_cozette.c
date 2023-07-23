@@ -320,10 +320,10 @@ static const unsigned char*
 		return cozette_block147[codepoint - 0x23f3u];
 	} else if (codepoint == 0x2400u) {
 		return cozette_block148[0];
-	} else if (codepoint == 0x2408u) {
-		return cozette_block149[0];
-	} else if (codepoint >= 0x240au && codepoint <= 0x240eu) {
-		return cozette_block150[codepoint - 0x240au];
+	} else if (codepoint >= 0x2408u && codepoint <= 0x240fu) {
+		return cozette_block149[codepoint - 0x2408u];
+	} else if (codepoint >= 0x241cu && codepoint <= 0x2420u) {
+		return cozette_block150[codepoint - 0x241cu];
 	} else if (codepoint == 0x2424u) {
 		return cozette_block151[0];
 	} else if (codepoint >= 0x2500u && codepoint <= 0x2594u) {
@@ -360,528 +360,540 @@ static const unsigned char*
 		return cozette_block167[codepoint - 0x2630u];
 	} else if (codepoint >= 0x263au && codepoint <= 0x263bu) {
 		return cozette_block168[codepoint - 0x263au];
-	} else if (codepoint == 0x263fu) {
-		return cozette_block169[0];
+	} else if (codepoint >= 0x263fu && codepoint <= 0x2642u) {
+		return cozette_block169[codepoint - 0x263fu];
 	} else if (codepoint >= 0x2660u && codepoint <= 0x2667u) {
 		return cozette_block170[codepoint - 0x2660u];
 	} else if (codepoint >= 0x2669u && codepoint <= 0x266fu) {
 		return cozette_block171[codepoint - 0x2669u];
+	} else if (codepoint >= 0x2680u && codepoint <= 0x2685u) {
+		return cozette_block172[codepoint - 0x2680u];
 	} else if (codepoint == 0x2687u) {
-		return cozette_block172[0];
+		return cozette_block173[0];
 	} else if (codepoint >= 0x2690u && codepoint <= 0x2691u) {
-		return cozette_block173[codepoint - 0x2690u];
+		return cozette_block174[codepoint - 0x2690u];
 	} else if (codepoint == 0x2699u) {
-		return cozette_block174[0];
-	} else if (codepoint >= 0x26a0u && codepoint <= 0x26a1u) {
-		return cozette_block175[codepoint - 0x26a0u];
-	} else if (codepoint == 0x26b8u) {
-		return cozette_block176[0];
-	} else if (codepoint >= 0x2713u && codepoint <= 0x271cu) {
-		return cozette_block177[codepoint - 0x2713u];
-	} else if (codepoint == 0x2726u) {
+		return cozette_block175[0];
+	} else if (codepoint >= 0x26a0u && codepoint <= 0x26a3u) {
+		return cozette_block176[codepoint - 0x26a0u];
+	} else if (codepoint >= 0x26a5u && codepoint <= 0x26a6u) {
+		return cozette_block177[codepoint - 0x26a5u];
+	} else if (codepoint == 0x26a8u) {
 		return cozette_block178[0];
-	} else if (codepoint >= 0x272du && codepoint <= 0x272eu) {
-		return cozette_block179[codepoint - 0x272du];
-	} else if (codepoint == 0x2739u) {
+	} else if (codepoint >= 0x26b2u && codepoint <= 0x26b5u) {
+		return cozette_block179[codepoint - 0x26b2u];
+	} else if (codepoint == 0x26b8u) {
 		return cozette_block180[0];
-	} else if (codepoint == 0x2744u) {
-		return cozette_block181[0];
-	} else if (codepoint == 0x274cu) {
+	} else if (codepoint >= 0x2713u && codepoint <= 0x271cu) {
+		return cozette_block181[codepoint - 0x2713u];
+	} else if (codepoint == 0x2726u) {
 		return cozette_block182[0];
-	} else if (codepoint == 0x2753u) {
-		return cozette_block183[0];
-	} else if (codepoint >= 0x276cu && codepoint <= 0x276fu) {
-		return cozette_block184[codepoint - 0x276cu];
-	} else if (codepoint == 0x279cu) {
+	} else if (codepoint >= 0x272du && codepoint <= 0x272eu) {
+		return cozette_block183[codepoint - 0x272du];
+	} else if (codepoint == 0x2739u) {
+		return cozette_block184[0];
+	} else if (codepoint == 0x2744u) {
 		return cozette_block185[0];
-	} else if (codepoint == 0x27dcu) {
+	} else if (codepoint == 0x274cu) {
 		return cozette_block186[0];
-	} else if (codepoint >= 0x27e6u && codepoint <= 0x27ebu) {
-		return cozette_block187[codepoint - 0x27e6u];
-	} else if (codepoint >= 0x2801u && codepoint <= 0x28ffu) {
-		return cozette_block188[codepoint - 0x2801u];
-	} else if (codepoint == 0x294au) {
+	} else if (codepoint == 0x2753u) {
+		return cozette_block187[0];
+	} else if (codepoint >= 0x276cu && codepoint <= 0x276fu) {
+		return cozette_block188[codepoint - 0x276cu];
+	} else if (codepoint == 0x279cu) {
 		return cozette_block189[0];
-	} else if (codepoint == 0x2b22u) {
+	} else if (codepoint == 0x27dcu) {
 		return cozette_block190[0];
-	} else if (codepoint == 0x2b50u) {
-		return cozette_block191[0];
-	} else if (codepoint >= 0x2b60u && codepoint <= 0x2b69u) {
-		return cozette_block192[codepoint - 0x2b60u];
-	} else if (codepoint >= 0x2b80u && codepoint <= 0x2b83u) {
-		return cozette_block193[codepoint - 0x2b80u];
-	} else if (codepoint == 0x2e3du) {
+	} else if (codepoint >= 0x27e6u && codepoint <= 0x27ebu) {
+		return cozette_block191[codepoint - 0x27e6u];
+	} else if (codepoint >= 0x2801u && codepoint <= 0x28ffu) {
+		return cozette_block192[codepoint - 0x2801u];
+	} else if (codepoint == 0x294au) {
+		return cozette_block193[0];
+	} else if (codepoint == 0x2b22u) {
 		return cozette_block194[0];
-	} else if (codepoint == 0x33d1u) {
+	} else if (codepoint == 0x2b50u) {
 		return cozette_block195[0];
+	} else if (codepoint >= 0x2b60u && codepoint <= 0x2b69u) {
+		return cozette_block196[codepoint - 0x2b60u];
+	} else if (codepoint >= 0x2b80u && codepoint <= 0x2b83u) {
+		return cozette_block197[codepoint - 0x2b80u];
+	} else if (codepoint == 0x2e3du) {
+		return cozette_block198[0];
+	} else if (codepoint == 0x33d1u) {
+		return cozette_block199[0];
 	} else if (codepoint == 0xa7a8u) {
-		return cozette_block196[0];
-	} else if (codepoint >= 0xe000u && codepoint <= 0xe00au) {
-		return cozette_block197[codepoint - 0xe000u];
-	} else if (codepoint >= 0xe0a0u && codepoint <= 0xe0a3u) {
-		return cozette_block198[codepoint - 0xe0a0u];
-	} else if (codepoint >= 0xe0b0u && codepoint <= 0xe0bfu) {
-		return cozette_block199[codepoint - 0xe0b0u];
-	} else if (codepoint == 0xe0d2u) {
 		return cozette_block200[0];
-	} else if (codepoint == 0xe0d4u) {
-		return cozette_block201[0];
-	} else if (codepoint == 0xe204u) {
-		return cozette_block202[0];
-	} else if (codepoint >= 0xe20au && codepoint <= 0xe20cu) {
-		return cozette_block203[codepoint - 0xe20au];
-	} else if (codepoint == 0xe21eu) {
+	} else if (codepoint >= 0xe000u && codepoint <= 0xe00au) {
+		return cozette_block201[codepoint - 0xe000u];
+	} else if (codepoint >= 0xe0a0u && codepoint <= 0xe0a3u) {
+		return cozette_block202[codepoint - 0xe0a0u];
+	} else if (codepoint >= 0xe0b0u && codepoint <= 0xe0bfu) {
+		return cozette_block203[codepoint - 0xe0b0u];
+	} else if (codepoint == 0xe0d2u) {
 		return cozette_block204[0];
-	} else if (codepoint == 0xe235u) {
+	} else if (codepoint == 0xe0d4u) {
 		return cozette_block205[0];
-	} else if (codepoint == 0xe244u) {
+	} else if (codepoint == 0xe204u) {
 		return cozette_block206[0];
-	} else if (codepoint == 0xe256u) {
-		return cozette_block207[0];
-	} else if (codepoint == 0xe271u) {
+	} else if (codepoint >= 0xe20au && codepoint <= 0xe20cu) {
+		return cozette_block207[codepoint - 0xe20au];
+	} else if (codepoint == 0xe21eu) {
 		return cozette_block208[0];
+	} else if (codepoint == 0xe235u) {
+		return cozette_block209[0];
+	} else if (codepoint == 0xe244u) {
+		return cozette_block210[0];
+	} else if (codepoint == 0xe256u) {
+		return cozette_block211[0];
+	} else if (codepoint == 0xe271u) {
+		return cozette_block212[0];
 	} else if (codepoint >= 0xe28au && codepoint <= 0xe28bu) {
-		return cozette_block209[codepoint - 0xe28au];
+		return cozette_block213[codepoint - 0xe28au];
 	} else if (codepoint >= 0xe5fbu && codepoint <= 0xe5fcu) {
-		return cozette_block210[codepoint - 0xe5fbu];
+		return cozette_block214[codepoint - 0xe5fbu];
 	} else if (codepoint >= 0xe5feu && codepoint <= 0xe628u) {
-		return cozette_block211[codepoint - 0xe5feu];
+		return cozette_block215[codepoint - 0xe5feu];
 	} else if (codepoint >= 0xe62au && codepoint <= 0xe62du) {
-		return cozette_block212[codepoint - 0xe62au];
+		return cozette_block216[codepoint - 0xe62au];
 	} else if (codepoint == 0xe64eu) {
-		return cozette_block213[0];
-	} else if (codepoint == 0xe681u) {
-		return cozette_block214[0];
-	} else if (codepoint >= 0xe702u && codepoint <= 0xe703u) {
-		return cozette_block215[codepoint - 0xe702u];
-	} else if (codepoint >= 0xe706u && codepoint <= 0xe707u) {
-		return cozette_block216[codepoint - 0xe706u];
-	} else if (codepoint == 0xe70cu) {
 		return cozette_block217[0];
-	} else if (codepoint >= 0xe70eu && codepoint <= 0xe70fu) {
-		return cozette_block218[codepoint - 0xe70eu];
-	} else if (codepoint >= 0xe711u && codepoint <= 0xe712u) {
-		return cozette_block219[codepoint - 0xe711u];
-	} else if (codepoint == 0xe716u) {
-		return cozette_block220[0];
-	} else if (codepoint == 0xe718u) {
+	} else if (codepoint == 0xe681u) {
+		return cozette_block218[0];
+	} else if (codepoint >= 0xe702u && codepoint <= 0xe703u) {
+		return cozette_block219[codepoint - 0xe702u];
+	} else if (codepoint >= 0xe706u && codepoint <= 0xe707u) {
+		return cozette_block220[codepoint - 0xe706u];
+	} else if (codepoint == 0xe70cu) {
 		return cozette_block221[0];
-	} else if (codepoint == 0xe71eu) {
-		return cozette_block222[0];
-	} else if (codepoint >= 0xe725u && codepoint <= 0xe729u) {
-		return cozette_block223[codepoint - 0xe725u];
-	} else if (codepoint == 0xe72du) {
+	} else if (codepoint >= 0xe70eu && codepoint <= 0xe70fu) {
+		return cozette_block222[codepoint - 0xe70eu];
+	} else if (codepoint >= 0xe711u && codepoint <= 0xe712u) {
+		return cozette_block223[codepoint - 0xe711u];
+	} else if (codepoint == 0xe716u) {
 		return cozette_block224[0];
-	} else if (codepoint >= 0xe737u && codepoint <= 0xe73fu) {
-		return cozette_block225[codepoint - 0xe737u];
-	} else if (codepoint == 0xe743u) {
+	} else if (codepoint == 0xe718u) {
+		return cozette_block225[0];
+	} else if (codepoint == 0xe71eu) {
 		return cozette_block226[0];
+	} else if (codepoint >= 0xe725u && codepoint <= 0xe729u) {
+		return cozette_block227[codepoint - 0xe725u];
+	} else if (codepoint == 0xe72du) {
+		return cozette_block228[0];
+	} else if (codepoint >= 0xe737u && codepoint <= 0xe73fu) {
+		return cozette_block229[codepoint - 0xe737u];
+	} else if (codepoint == 0xe743u) {
+		return cozette_block230[0];
 	} else if (codepoint >= 0xe745u && codepoint <= 0xe746u) {
-		return cozette_block227[codepoint - 0xe745u];
+		return cozette_block231[codepoint - 0xe745u];
 	} else if (codepoint >= 0xe749u && codepoint <= 0xe74au) {
-		return cozette_block228[codepoint - 0xe749u];
+		return cozette_block232[codepoint - 0xe749u];
 	} else if (codepoint == 0xe74eu) {
-		return cozette_block229[0];
-	} else if (codepoint >= 0xe755u && codepoint <= 0xe759u) {
-		return cozette_block230[codepoint - 0xe755u];
-	} else if (codepoint >= 0xe768u && codepoint <= 0xe76au) {
-		return cozette_block231[codepoint - 0xe768u];
-	} else if (codepoint == 0xe76eu) {
-		return cozette_block232[0];
-	} else if (codepoint == 0xe777u) {
 		return cozette_block233[0];
-	} else if (codepoint == 0xe77bu) {
-		return cozette_block234[0];
-	} else if (codepoint == 0xe77fu) {
-		return cozette_block235[0];
-	} else if (codepoint == 0xe781u) {
+	} else if (codepoint >= 0xe755u && codepoint <= 0xe759u) {
+		return cozette_block234[codepoint - 0xe755u];
+	} else if (codepoint >= 0xe768u && codepoint <= 0xe76au) {
+		return cozette_block235[codepoint - 0xe768u];
+	} else if (codepoint == 0xe76eu) {
 		return cozette_block236[0];
-	} else if (codepoint == 0xe791u) {
+	} else if (codepoint == 0xe777u) {
 		return cozette_block237[0];
-	} else if (codepoint >= 0xe795u && codepoint <= 0xe796u) {
-		return cozette_block238[codepoint - 0xe795u];
-	} else if (codepoint == 0xe798u) {
+	} else if (codepoint == 0xe77bu) {
+		return cozette_block238[0];
+	} else if (codepoint == 0xe77fu) {
 		return cozette_block239[0];
-	} else if (codepoint >= 0xe7a2u && codepoint <= 0xe7a3u) {
-		return cozette_block240[codepoint - 0xe7a2u];
-	} else if (codepoint >= 0xe7a7u && codepoint <= 0xe7a8u) {
-		return cozette_block241[codepoint - 0xe7a7u];
-	} else if (codepoint == 0xe7aau) {
-		return cozette_block242[0];
-	} else if (codepoint == 0xe7afu) {
+	} else if (codepoint == 0xe781u) {
+		return cozette_block240[0];
+	} else if (codepoint == 0xe791u) {
+		return cozette_block241[0];
+	} else if (codepoint >= 0xe795u && codepoint <= 0xe796u) {
+		return cozette_block242[codepoint - 0xe795u];
+	} else if (codepoint == 0xe798u) {
 		return cozette_block243[0];
-	} else if (codepoint == 0xe7b1u) {
-		return cozette_block244[0];
-	} else if (codepoint >= 0xe7b4u && codepoint <= 0xe7b5u) {
-		return cozette_block245[codepoint - 0xe7b4u];
-	} else if (codepoint == 0xe7b8u) {
+	} else if (codepoint >= 0xe7a2u && codepoint <= 0xe7a3u) {
+		return cozette_block244[codepoint - 0xe7a2u];
+	} else if (codepoint >= 0xe7a7u && codepoint <= 0xe7a8u) {
+		return cozette_block245[codepoint - 0xe7a7u];
+	} else if (codepoint == 0xe7aau) {
 		return cozette_block246[0];
-	} else if (codepoint == 0xe7bau) {
+	} else if (codepoint == 0xe7afu) {
 		return cozette_block247[0];
-	} else if (codepoint >= 0xe7c4u && codepoint <= 0xe7c5u) {
-		return cozette_block248[codepoint - 0xe7c4u];
-	} else if (codepoint >= 0xeffau && codepoint <= 0xeffdu) {
-		return cozette_block249[codepoint - 0xeffau];
-	} else if (codepoint == 0xf001u) {
+	} else if (codepoint == 0xe7b1u) {
+		return cozette_block248[0];
+	} else if (codepoint >= 0xe7b4u && codepoint <= 0xe7b5u) {
+		return cozette_block249[codepoint - 0xe7b4u];
+	} else if (codepoint == 0xe7b8u) {
 		return cozette_block250[0];
-	} else if (codepoint == 0xf008u) {
+	} else if (codepoint == 0xe7bau) {
 		return cozette_block251[0];
-	} else if (codepoint >= 0xf00bu && codepoint <= 0xf00du) {
-		return cozette_block252[codepoint - 0xf00bu];
-	} else if (codepoint >= 0xf013u && codepoint <= 0xf017u) {
-		return cozette_block253[codepoint - 0xf013u];
-	} else if (codepoint >= 0xf01au && codepoint <= 0xf01cu) {
-		return cozette_block254[codepoint - 0xf01au];
-	} else if (codepoint == 0xf023u) {
+	} else if (codepoint >= 0xe7c4u && codepoint <= 0xe7c5u) {
+		return cozette_block252[codepoint - 0xe7c4u];
+	} else if (codepoint >= 0xeffau && codepoint <= 0xeffdu) {
+		return cozette_block253[codepoint - 0xeffau];
+	} else if (codepoint == 0xf001u) {
+		return cozette_block254[0];
+	} else if (codepoint == 0xf008u) {
 		return cozette_block255[0];
+	} else if (codepoint >= 0xf00bu && codepoint <= 0xf00du) {
+		return cozette_block256[codepoint - 0xf00bu];
+	} else if (codepoint >= 0xf013u && codepoint <= 0xf017u) {
+		return cozette_block257[codepoint - 0xf013u];
+	} else if (codepoint >= 0xf01au && codepoint <= 0xf01cu) {
+		return cozette_block258[codepoint - 0xf01au];
+	} else if (codepoint == 0xf023u) {
+		return cozette_block259[0];
 	} else if (codepoint >= 0xf025u && codepoint <= 0xf028u) {
-		return cozette_block256[codepoint - 0xf025u];
+		return cozette_block260[codepoint - 0xf025u];
 	} else if (codepoint == 0xf02bu) {
-		return cozette_block257[0];
-	} else if (codepoint == 0xf02du) {
-		return cozette_block258[0];
-	} else if (codepoint >= 0xf031u && codepoint <= 0xf035u) {
-		return cozette_block259[codepoint - 0xf031u];
-	} else if (codepoint == 0xf03du) {
-		return cozette_block260[0];
-	} else if (codepoint == 0xf040u) {
 		return cozette_block261[0];
-	} else if (codepoint >= 0xf048u && codepoint <= 0xf04eu) {
-		return cozette_block262[codepoint - 0xf048u];
-	} else if (codepoint >= 0xf050u && codepoint <= 0xf05au) {
-		return cozette_block263[codepoint - 0xf050u];
-	} else if (codepoint >= 0xf067u && codepoint <= 0xf06au) {
-		return cozette_block264[codepoint - 0xf067u];
-	} else if (codepoint == 0xf071u) {
+	} else if (codepoint == 0xf02du) {
+		return cozette_block262[0];
+	} else if (codepoint >= 0xf031u && codepoint <= 0xf035u) {
+		return cozette_block263[codepoint - 0xf031u];
+	} else if (codepoint == 0xf03du) {
+		return cozette_block264[0];
+	} else if (codepoint == 0xf040u) {
 		return cozette_block265[0];
-	} else if (codepoint == 0xf073u) {
-		return cozette_block266[0];
-	} else if (codepoint == 0xf075u) {
-		return cozette_block267[0];
-	} else if (codepoint >= 0xf07bu && codepoint <= 0xf07cu) {
-		return cozette_block268[codepoint - 0xf07bu];
-	} else if (codepoint == 0xf080u) {
+	} else if (codepoint >= 0xf048u && codepoint <= 0xf04eu) {
+		return cozette_block266[codepoint - 0xf048u];
+	} else if (codepoint >= 0xf050u && codepoint <= 0xf05au) {
+		return cozette_block267[codepoint - 0xf050u];
+	} else if (codepoint >= 0xf067u && codepoint <= 0xf06au) {
+		return cozette_block268[codepoint - 0xf067u];
+	} else if (codepoint == 0xf071u) {
 		return cozette_block269[0];
-	} else if (codepoint == 0xf084u) {
+	} else if (codepoint == 0xf073u) {
 		return cozette_block270[0];
-	} else if (codepoint == 0xf09cu) {
+	} else if (codepoint == 0xf075u) {
 		return cozette_block271[0];
-	} else if (codepoint == 0xf09eu) {
-		return cozette_block272[0];
-	} else if (codepoint == 0xf0a0u) {
+	} else if (codepoint >= 0xf07bu && codepoint <= 0xf07cu) {
+		return cozette_block272[codepoint - 0xf07bu];
+	} else if (codepoint == 0xf080u) {
 		return cozette_block273[0];
-	} else if (codepoint == 0xf0a2u) {
+	} else if (codepoint == 0xf084u) {
 		return cozette_block274[0];
-	} else if (codepoint == 0xf0acu) {
+	} else if (codepoint == 0xf09cu) {
 		return cozette_block275[0];
-	} else if (codepoint == 0xf0aeu) {
+	} else if (codepoint == 0xf09eu) {
 		return cozette_block276[0];
-	} else if (codepoint == 0xf0b0u) {
+	} else if (codepoint == 0xf0a0u) {
 		return cozette_block277[0];
-	} else if (codepoint >= 0xf0c3u && codepoint <= 0xf0c5u) {
-		return cozette_block278[codepoint - 0xf0c3u];
-	} else if (codepoint == 0xf0e4u) {
+	} else if (codepoint == 0xf0a2u) {
+		return cozette_block278[0];
+	} else if (codepoint == 0xf0acu) {
 		return cozette_block279[0];
-	} else if (codepoint == 0xf0e7u) {
+	} else if (codepoint == 0xf0aeu) {
 		return cozette_block280[0];
-	} else if (codepoint == 0xf0f3u) {
+	} else if (codepoint == 0xf0b0u) {
 		return cozette_block281[0];
-	} else if (codepoint == 0xf0fdu) {
-		return cozette_block282[0];
-	} else if (codepoint == 0xf108u) {
+	} else if (codepoint >= 0xf0c3u && codepoint <= 0xf0c5u) {
+		return cozette_block282[codepoint - 0xf0c3u];
+	} else if (codepoint == 0xf0e4u) {
 		return cozette_block283[0];
-	} else if (codepoint == 0xf111u) {
+	} else if (codepoint == 0xf0e7u) {
 		return cozette_block284[0];
-	} else if (codepoint >= 0xf113u && codepoint <= 0xf115u) {
-		return cozette_block285[codepoint - 0xf113u];
-	} else if (codepoint >= 0xf120u && codepoint <= 0xf121u) {
-		return cozette_block286[codepoint - 0xf120u];
-	} else if (codepoint == 0xf126u) {
+	} else if (codepoint == 0xf0f3u) {
+		return cozette_block285[0];
+	} else if (codepoint == 0xf0fdu) {
+		return cozette_block286[0];
+	} else if (codepoint == 0xf108u) {
 		return cozette_block287[0];
-	} else if (codepoint >= 0xf130u && codepoint <= 0xf131u) {
-		return cozette_block288[codepoint - 0xf130u];
-	} else if (codepoint == 0xf133u) {
-		return cozette_block289[0];
-	} else if (codepoint == 0xf13eu) {
-		return cozette_block290[0];
-	} else if (codepoint == 0xf144u) {
+	} else if (codepoint == 0xf111u) {
+		return cozette_block288[0];
+	} else if (codepoint >= 0xf113u && codepoint <= 0xf115u) {
+		return cozette_block289[codepoint - 0xf113u];
+	} else if (codepoint >= 0xf120u && codepoint <= 0xf121u) {
+		return cozette_block290[codepoint - 0xf120u];
+	} else if (codepoint == 0xf126u) {
 		return cozette_block291[0];
-	} else if (codepoint == 0xf155u) {
-		return cozette_block292[0];
-	} else if (codepoint >= 0xf15bu && codepoint <= 0xf15eu) {
-		return cozette_block293[codepoint - 0xf15bu];
-	} else if (codepoint == 0xf16bu) {
+	} else if (codepoint >= 0xf130u && codepoint <= 0xf131u) {
+		return cozette_block292[codepoint - 0xf130u];
+	} else if (codepoint == 0xf133u) {
+		return cozette_block293[0];
+	} else if (codepoint == 0xf13eu) {
 		return cozette_block294[0];
-	} else if (codepoint >= 0xf179u && codepoint <= 0xf17cu) {
-		return cozette_block295[codepoint - 0xf179u];
-	} else if (codepoint == 0xf185u) {
+	} else if (codepoint == 0xf144u) {
+		return cozette_block295[0];
+	} else if (codepoint == 0xf155u) {
 		return cozette_block296[0];
-	} else if (codepoint >= 0xf187u && codepoint <= 0xf188u) {
-		return cozette_block297[codepoint - 0xf187u];
-	} else if (codepoint == 0xf198u) {
+	} else if (codepoint >= 0xf15bu && codepoint <= 0xf15eu) {
+		return cozette_block297[codepoint - 0xf15bu];
+	} else if (codepoint == 0xf16bu) {
 		return cozette_block298[0];
-	} else if (codepoint >= 0xf1b6u && codepoint <= 0xf1b7u) {
-		return cozette_block299[codepoint - 0xf1b6u];
-	} else if (codepoint == 0xf1bbu) {
+	} else if (codepoint >= 0xf179u && codepoint <= 0xf17cu) {
+		return cozette_block299[codepoint - 0xf179u];
+	} else if (codepoint == 0xf185u) {
 		return cozette_block300[0];
+	} else if (codepoint >= 0xf187u && codepoint <= 0xf188u) {
+		return cozette_block301[codepoint - 0xf187u];
+	} else if (codepoint == 0xf198u) {
+		return cozette_block302[0];
+	} else if (codepoint >= 0xf1b6u && codepoint <= 0xf1b7u) {
+		return cozette_block303[codepoint - 0xf1b6u];
+	} else if (codepoint == 0xf1bbu) {
+		return cozette_block304[0];
 	} else if (codepoint == 0xf1bdu) {
-		return cozette_block301[0];
+		return cozette_block305[0];
 	} else if (codepoint >= 0xf1c0u && codepoint <= 0xf1c6u) {
-		return cozette_block302[codepoint - 0xf1c0u];
+		return cozette_block306[codepoint - 0xf1c0u];
 	} else if (codepoint == 0xf1d3u) {
-		return cozette_block303[0];
+		return cozette_block307[0];
 	} else if (codepoint >= 0xf1eau && codepoint <= 0xf1ebu) {
-		return cozette_block304[codepoint - 0xf1eau];
+		return cozette_block308[codepoint - 0xf1eau];
 	} else if (codepoint >= 0xf1f6u && codepoint <= 0xf1f8u) {
-		return cozette_block305[codepoint - 0xf1f6u];
+		return cozette_block309[codepoint - 0xf1f6u];
 	} else if (codepoint == 0xf1feu) {
-		return cozette_block306[0];
+		return cozette_block310[0];
 	} else if (codepoint >= 0xf200u && codepoint <= 0xf201u) {
-		return cozette_block307[codepoint - 0xf200u];
+		return cozette_block311[codepoint - 0xf200u];
 	} else if (codepoint == 0xf219u) {
-		return cozette_block308[0];
+		return cozette_block312[0];
 	} else if (codepoint >= 0xf240u && codepoint <= 0xf244u) {
-		return cozette_block309[codepoint - 0xf240u];
+		return cozette_block313[codepoint - 0xf240u];
 	} else if (codepoint >= 0xf250u && codepoint <= 0xf254u) {
-		return cozette_block310[codepoint - 0xf250u];
+		return cozette_block314[codepoint - 0xf250u];
 	} else if (codepoint == 0xf260u) {
-		return cozette_block311[0];
-	} else if (codepoint >= 0xf268u && codepoint <= 0xf26au) {
-		return cozette_block312[codepoint - 0xf268u];
-	} else if (codepoint == 0xf270u) {
-		return cozette_block313[0];
-	} else if (codepoint >= 0xf293u && codepoint <= 0xf294u) {
-		return cozette_block314[codepoint - 0xf293u];
-	} else if (codepoint == 0xf296u) {
 		return cozette_block315[0];
+	} else if (codepoint >= 0xf268u && codepoint <= 0xf26au) {
+		return cozette_block316[codepoint - 0xf268u];
+	} else if (codepoint == 0xf270u) {
+		return cozette_block317[0];
+	} else if (codepoint >= 0xf293u && codepoint <= 0xf294u) {
+		return cozette_block318[codepoint - 0xf293u];
+	} else if (codepoint == 0xf296u) {
+		return cozette_block319[0];
 	} else if (codepoint == 0xf298u) {
-		return cozette_block316[0];
+		return cozette_block320[0];
 	} else if (codepoint >= 0xf2c7u && codepoint <= 0xf2cbu) {
-		return cozette_block317[codepoint - 0xf2c7u];
+		return cozette_block321[codepoint - 0xf2c7u];
 	} else if (codepoint == 0xf2dbu) {
-		return cozette_block318[0];
-	} else if (codepoint >= 0xf300u && codepoint <= 0xf301u) {
-		return cozette_block319[codepoint - 0xf300u];
-	} else if (codepoint >= 0xf303u && codepoint <= 0xf30au) {
-		return cozette_block320[codepoint - 0xf303u];
-	} else if (codepoint >= 0xf30cu && codepoint <= 0xf30eu) {
-		return cozette_block321[codepoint - 0xf30cu];
-	} else if (codepoint == 0xf310u) {
 		return cozette_block322[0];
-	} else if (codepoint >= 0xf312u && codepoint <= 0xf314u) {
-		return cozette_block323[codepoint - 0xf312u];
-	} else if (codepoint >= 0xf317u && codepoint <= 0xf319u) {
-		return cozette_block324[codepoint - 0xf317u];
-	} else if (codepoint >= 0xf31bu && codepoint <= 0xf31cu) {
-		return cozette_block325[codepoint - 0xf31bu];
-	} else if (codepoint == 0xf401u) {
+	} else if (codepoint >= 0xf300u && codepoint <= 0xf301u) {
+		return cozette_block323[codepoint - 0xf300u];
+	} else if (codepoint >= 0xf303u && codepoint <= 0xf30au) {
+		return cozette_block324[codepoint - 0xf303u];
+	} else if (codepoint >= 0xf30cu && codepoint <= 0xf30eu) {
+		return cozette_block325[codepoint - 0xf30cu];
+	} else if (codepoint == 0xf310u) {
 		return cozette_block326[0];
-	} else if (codepoint == 0xf408u) {
-		return cozette_block327[0];
-	} else if (codepoint >= 0xf40eu && codepoint <= 0xf411u) {
-		return cozette_block328[codepoint - 0xf40eu];
-	} else if (codepoint == 0xf413u) {
-		return cozette_block329[0];
-	} else if (codepoint == 0xf423u) {
+	} else if (codepoint >= 0xf312u && codepoint <= 0xf314u) {
+		return cozette_block327[codepoint - 0xf312u];
+	} else if (codepoint >= 0xf317u && codepoint <= 0xf319u) {
+		return cozette_block328[codepoint - 0xf317u];
+	} else if (codepoint >= 0xf31bu && codepoint <= 0xf31cu) {
+		return cozette_block329[codepoint - 0xf31bu];
+	} else if (codepoint == 0xf401u) {
 		return cozette_block330[0];
-	} else if (codepoint == 0xf425u) {
+	} else if (codepoint == 0xf408u) {
 		return cozette_block331[0];
-	} else if (codepoint == 0xf42bu) {
-		return cozette_block332[0];
-	} else if (codepoint >= 0xf431u && codepoint <= 0xf434u) {
-		return cozette_block333[codepoint - 0xf431u];
-	} else if (codepoint == 0xf440u) {
+	} else if (codepoint >= 0xf40eu && codepoint <= 0xf411u) {
+		return cozette_block332[codepoint - 0xf40eu];
+	} else if (codepoint == 0xf413u) {
+		return cozette_block333[0];
+	} else if (codepoint == 0xf423u) {
 		return cozette_block334[0];
-	} else if (codepoint == 0xf447u) {
+	} else if (codepoint == 0xf425u) {
 		return cozette_block335[0];
-	} else if (codepoint >= 0xf449u && codepoint <= 0xf44bu) {
-		return cozette_block336[codepoint - 0xf449u];
-	} else if (codepoint >= 0xf461u && codepoint <= 0xf462u) {
-		return cozette_block337[codepoint - 0xf461u];
-	} else if (codepoint == 0xf464u) {
+	} else if (codepoint == 0xf42bu) {
+		return cozette_block336[0];
+	} else if (codepoint >= 0xf431u && codepoint <= 0xf434u) {
+		return cozette_block337[codepoint - 0xf431u];
+	} else if (codepoint == 0xf440u) {
 		return cozette_block338[0];
-	} else if (codepoint == 0xf475u) {
+	} else if (codepoint == 0xf447u) {
 		return cozette_block339[0];
-	} else if (codepoint >= 0xf481u && codepoint <= 0xf482u) {
-		return cozette_block340[codepoint - 0xf481u];
-	} else if (codepoint >= 0xf489u && codepoint <= 0xf48au) {
-		return cozette_block341[codepoint - 0xf489u];
-	} else if (codepoint == 0xf48eu) {
+	} else if (codepoint >= 0xf449u && codepoint <= 0xf44bu) {
+		return cozette_block340[codepoint - 0xf449u];
+	} else if (codepoint >= 0xf461u && codepoint <= 0xf462u) {
+		return cozette_block341[codepoint - 0xf461u];
+	} else if (codepoint == 0xf464u) {
 		return cozette_block342[0];
-	} else if (codepoint >= 0xf498u && codepoint <= 0xf499u) {
-		return cozette_block343[codepoint - 0xf498u];
-	} else if (codepoint == 0xf49bu) {
-		return cozette_block344[0];
-	} else if (codepoint == 0xf49eu) {
-		return cozette_block345[0];
-	} else if (codepoint == 0xf4a0u) {
+	} else if (codepoint == 0xf475u) {
+		return cozette_block343[0];
+	} else if (codepoint >= 0xf481u && codepoint <= 0xf482u) {
+		return cozette_block344[codepoint - 0xf481u];
+	} else if (codepoint >= 0xf489u && codepoint <= 0xf48au) {
+		return cozette_block345[codepoint - 0xf489u];
+	} else if (codepoint == 0xf48eu) {
 		return cozette_block346[0];
-	} else if (codepoint == 0xf4a5u) {
-		return cozette_block347[0];
-	} else if (codepoint == 0xf529u) {
+	} else if (codepoint >= 0xf498u && codepoint <= 0xf499u) {
+		return cozette_block347[codepoint - 0xf498u];
+	} else if (codepoint == 0xf49bu) {
 		return cozette_block348[0];
-	} else if (codepoint == 0xf53bu) {
+	} else if (codepoint == 0xf49eu) {
 		return cozette_block349[0];
-	} else if (codepoint >= 0xf541u && codepoint <= 0xf544u) {
-		return cozette_block350[codepoint - 0xf541u];
-	} else if (codepoint >= 0xf54bu && codepoint <= 0xf54cu) {
-		return cozette_block351[codepoint - 0xf54bu];
-	} else if (codepoint == 0xf553u) {
+	} else if (codepoint == 0xf4a0u) {
+		return cozette_block350[0];
+	} else if (codepoint == 0xf4a5u) {
+		return cozette_block351[0];
+	} else if (codepoint == 0xf529u) {
 		return cozette_block352[0];
+	} else if (codepoint == 0xf53bu) {
+		return cozette_block353[0];
+	} else if (codepoint >= 0xf541u && codepoint <= 0xf544u) {
+		return cozette_block354[codepoint - 0xf541u];
+	} else if (codepoint >= 0xf54bu && codepoint <= 0xf54cu) {
+		return cozette_block355[codepoint - 0xf54bu];
+	} else if (codepoint == 0xf553u) {
+		return cozette_block356[0];
 	} else if (codepoint >= 0xf55au && codepoint <= 0xf55cu) {
-		return cozette_block353[codepoint - 0xf55au];
+		return cozette_block357[codepoint - 0xf55au];
 	} else if (codepoint >= 0xf578u && codepoint <= 0xf590u) {
-		return cozette_block354[codepoint - 0xf578u];
+		return cozette_block358[codepoint - 0xf578u];
 	} else if (codepoint >= 0xf5aeu && codepoint <= 0xf5afu) {
-		return cozette_block355[codepoint - 0xf5aeu];
+		return cozette_block359[codepoint - 0xf5aeu];
 	} else if (codepoint >= 0xf5b1u && codepoint <= 0xf5b2u) {
-		return cozette_block356[codepoint - 0xf5b1u];
+		return cozette_block360[codepoint - 0xf5b1u];
 	} else if (codepoint >= 0xf5bcu && codepoint <= 0xf5bdu) {
-		return cozette_block357[codepoint - 0xf5bcu];
+		return cozette_block361[codepoint - 0xf5bcu];
 	} else if (codepoint == 0xf5ebu) {
-		return cozette_block358[0];
-	} else if (codepoint >= 0xf631u && codepoint <= 0xf632u) {
-		return cozette_block359[codepoint - 0xf631u];
-	} else if (codepoint >= 0xf658u && codepoint <= 0xf659u) {
-		return cozette_block360[codepoint - 0xf658u];
-	} else if (codepoint == 0xf668u) {
-		return cozette_block361[0];
-	} else if (codepoint == 0xf68cu) {
 		return cozette_block362[0];
-	} else if (codepoint == 0xf6a6u) {
-		return cozette_block363[0];
-	} else if (codepoint >= 0xf6b7u && codepoint <= 0xf6b9u) {
-		return cozette_block364[codepoint - 0xf6b7u];
-	} else if (codepoint == 0xf6ffu) {
+	} else if (codepoint >= 0xf631u && codepoint <= 0xf632u) {
+		return cozette_block363[codepoint - 0xf631u];
+	} else if (codepoint >= 0xf658u && codepoint <= 0xf659u) {
+		return cozette_block364[codepoint - 0xf658u];
+	} else if (codepoint == 0xf668u) {
 		return cozette_block365[0];
-	} else if (codepoint == 0xf713u) {
+	} else if (codepoint == 0xf68cu) {
 		return cozette_block366[0];
-	} else if (codepoint == 0xf718u) {
+	} else if (codepoint == 0xf6a6u) {
 		return cozette_block367[0];
-	} else if (codepoint == 0xf71au) {
-		return cozette_block368[0];
-	} else if (codepoint == 0xf71cu) {
+	} else if (codepoint >= 0xf6b7u && codepoint <= 0xf6b9u) {
+		return cozette_block368[codepoint - 0xf6b7u];
+	} else if (codepoint == 0xf6ffu) {
 		return cozette_block369[0];
-	} else if (codepoint == 0xf71eu) {
+	} else if (codepoint == 0xf713u) {
 		return cozette_block370[0];
-	} else if (codepoint == 0xf722u) {
+	} else if (codepoint == 0xf718u) {
 		return cozette_block371[0];
-	} else if (codepoint == 0xf724u) {
+	} else if (codepoint == 0xf71au) {
 		return cozette_block372[0];
-	} else if (codepoint >= 0xf72au && codepoint <= 0xf72bu) {
-		return cozette_block373[codepoint - 0xf72au];
-	} else if (codepoint == 0xf72du) {
+	} else if (codepoint == 0xf71cu) {
+		return cozette_block373[0];
+	} else if (codepoint == 0xf71eu) {
 		return cozette_block374[0];
-	} else if (codepoint == 0xf74au) {
+	} else if (codepoint == 0xf722u) {
 		return cozette_block375[0];
-	} else if (codepoint == 0xf783u) {
+	} else if (codepoint == 0xf724u) {
 		return cozette_block376[0];
-	} else if (codepoint == 0xf794u) {
-		return cozette_block377[0];
-	} else if (codepoint == 0xf7b7u) {
+	} else if (codepoint >= 0xf72au && codepoint <= 0xf72bu) {
+		return cozette_block377[codepoint - 0xf72au];
+	} else if (codepoint == 0xf72du) {
 		return cozette_block378[0];
-	} else if (codepoint >= 0xf7cau && codepoint <= 0xf7cdu) {
-		return cozette_block379[codepoint - 0xf7cau];
-	} else if (codepoint == 0xf7cfu) {
+	} else if (codepoint == 0xf74au) {
+		return cozette_block379[0];
+	} else if (codepoint == 0xf783u) {
 		return cozette_block380[0];
-	} else if (codepoint == 0xf7d9u) {
+	} else if (codepoint == 0xf794u) {
 		return cozette_block381[0];
-	} else if (codepoint == 0xf7fbu) {
+	} else if (codepoint == 0xf7b7u) {
 		return cozette_block382[0];
-	} else if (codepoint == 0xf80au) {
-		return cozette_block383[0];
-	} else if (codepoint == 0xf816u) {
+	} else if (codepoint >= 0xf7cau && codepoint <= 0xf7cdu) {
+		return cozette_block383[codepoint - 0xf7cau];
+	} else if (codepoint == 0xf7cfu) {
 		return cozette_block384[0];
-	} else if (codepoint == 0xf81au) {
+	} else if (codepoint == 0xf7d9u) {
 		return cozette_block385[0];
-	} else if (codepoint >= 0xf81fu && codepoint <= 0xf820u) {
-		return cozette_block386[codepoint - 0xf81fu];
-	} else if (codepoint >= 0xf831u && codepoint <= 0xf837u) {
-		return cozette_block387[codepoint - 0xf831u];
-	} else if (codepoint == 0xf83cu) {
+	} else if (codepoint == 0xf7fbu) {
+		return cozette_block386[0];
+	} else if (codepoint == 0xf80au) {
+		return cozette_block387[0];
+	} else if (codepoint == 0xf816u) {
 		return cozette_block388[0];
-	} else if (codepoint == 0xf886u) {
+	} else if (codepoint == 0xf81au) {
 		return cozette_block389[0];
-	} else if (codepoint == 0xf89fu) {
-		return cozette_block390[0];
-	} else if (codepoint == 0xf8d7u) {
-		return cozette_block391[0];
-	} else if (codepoint == 0xf8feu) {
+	} else if (codepoint >= 0xf81fu && codepoint <= 0xf820u) {
+		return cozette_block390[codepoint - 0xf81fu];
+	} else if (codepoint >= 0xf831u && codepoint <= 0xf837u) {
+		return cozette_block391[codepoint - 0xf831u];
+	} else if (codepoint == 0xf83cu) {
 		return cozette_block392[0];
-	} else if (codepoint >= 0xfa7du && codepoint <= 0xfa80u) {
-		return cozette_block393[codepoint - 0xfa7du];
-	} else if (codepoint >= 0xfaa8u && codepoint <= 0xfaa9u) {
-		return cozette_block394[codepoint - 0xfaa8u];
-	} else if (codepoint == 0xfab6u) {
+	} else if (codepoint == 0xf886u) {
+		return cozette_block393[0];
+	} else if (codepoint == 0xf89fu) {
+		return cozette_block394[0];
+	} else if (codepoint == 0xf8d7u) {
 		return cozette_block395[0];
-	} else if (codepoint == 0xfabfu) {
+	} else if (codepoint == 0xf8feu) {
 		return cozette_block396[0];
-	} else if (codepoint == 0xfb68u) {
-		return cozette_block397[0];
-	} else if (codepoint == 0xfbf1u) {
-		return cozette_block398[0];
-	} else if (codepoint == 0xfc2eu) {
+	} else if (codepoint >= 0xfa7du && codepoint <= 0xfa80u) {
+		return cozette_block397[codepoint - 0xfa7du];
+	} else if (codepoint >= 0xfaa8u && codepoint <= 0xfaa9u) {
+		return cozette_block398[codepoint - 0xfaa8u];
+	} else if (codepoint == 0xfab6u) {
 		return cozette_block399[0];
-	} else if (codepoint >= 0xfc5bu && codepoint <= 0xfc5du) {
-		return cozette_block400[codepoint - 0xfc5bu];
-	} else if (codepoint == 0xfcccu) {
+	} else if (codepoint == 0xfabfu) {
+		return cozette_block400[0];
+	} else if (codepoint == 0xfb68u) {
 		return cozette_block401[0];
-	} else if (codepoint == 0xfce4u) {
+	} else if (codepoint == 0xfbf1u) {
 		return cozette_block402[0];
-	} else if (codepoint == 0xfd03u) {
+	} else if (codepoint == 0xfc2eu) {
 		return cozette_block403[0];
-	} else if (codepoint >= 0xfd05u && codepoint <= 0xfd10u) {
-		return cozette_block404[codepoint - 0xfd05u];
-	} else if (codepoint == 0xfd32u) {
+	} else if (codepoint >= 0xfc5bu && codepoint <= 0xfc5du) {
+		return cozette_block404[codepoint - 0xfc5bu];
+	} else if (codepoint == 0xfcccu) {
 		return cozette_block405[0];
-	} else if (codepoint == 0xfd42u) {
+	} else if (codepoint == 0xfce4u) {
 		return cozette_block406[0];
-	} else if (codepoint >= 0xfe54u && codepoint <= 0xfe66u) {
-		return cozette_block407[codepoint - 0xfe54u];
-	} else if (codepoint >= 0xfe68u && codepoint <= 0xfe6bu) {
-		return cozette_block408[codepoint - 0xfe68u];
-	} else if (codepoint >= 0x1d53du && codepoint <= 0x1d53eu) {
-		return cozette_block409[codepoint - 0x1d53du];
-	} else if (codepoint == 0x1d54au) {
+	} else if (codepoint == 0xfd03u) {
+		return cozette_block407[0];
+	} else if (codepoint >= 0xfd05u && codepoint <= 0xfd10u) {
+		return cozette_block408[codepoint - 0xfd05u];
+	} else if (codepoint == 0xfd32u) {
+		return cozette_block409[0];
+	} else if (codepoint == 0xfd42u) {
 		return cozette_block410[0];
+	} else if (codepoint >= 0xfe54u && codepoint <= 0xfe66u) {
+		return cozette_block411[codepoint - 0xfe54u];
+	} else if (codepoint >= 0xfe68u && codepoint <= 0xfe6bu) {
+		return cozette_block412[codepoint - 0xfe68u];
+	} else if (codepoint >= 0x1d53du && codepoint <= 0x1d53eu) {
+		return cozette_block413[codepoint - 0x1d53du];
+	} else if (codepoint == 0x1d54au) {
+		return cozette_block414[0];
 	} else if (codepoint >= 0x1d54eu && codepoint <= 0x1d54fu) {
-		return cozette_block411[codepoint - 0x1d54eu];
+		return cozette_block415[codepoint - 0x1d54eu];
 	} else if (codepoint >= 0x1d557u && codepoint <= 0x1d558u) {
-		return cozette_block412[codepoint - 0x1d557u];
+		return cozette_block416[codepoint - 0x1d557u];
 	} else if (codepoint >= 0x1d563u && codepoint <= 0x1d564u) {
-		return cozette_block413[codepoint - 0x1d563u];
+		return cozette_block417[codepoint - 0x1d563u];
 	} else if (codepoint >= 0x1d568u && codepoint <= 0x1d569u) {
-		return cozette_block414[codepoint - 0x1d568u];
+		return cozette_block418[codepoint - 0x1d568u];
 	} else if (codepoint == 0x1f31eu) {
-		return cozette_block415[0];
-	} else if (codepoint == 0x1f331u) {
-		return cozette_block416[0];
-	} else if (codepoint == 0x1f333u) {
-		return cozette_block417[0];
-	} else if (codepoint == 0x1f379u) {
-		return cozette_block418[0];
-	} else if (codepoint == 0x1f40fu) {
 		return cozette_block419[0];
-	} else if (codepoint == 0x1f418u) {
+	} else if (codepoint == 0x1f331u) {
 		return cozette_block420[0];
-	} else if (codepoint >= 0x1f447u && codepoint <= 0x1f448u) {
-		return cozette_block421[codepoint - 0x1f447u];
-	} else if (codepoint == 0x1f48eu) {
+	} else if (codepoint == 0x1f333u) {
+		return cozette_block421[0];
+	} else if (codepoint == 0x1f379u) {
 		return cozette_block422[0];
-	} else if (codepoint >= 0x1f4a0u && codepoint <= 0x1f4a1u) {
-		return cozette_block423[codepoint - 0x1f4a0u];
-	} else if (codepoint == 0x1f4e6u) {
+	} else if (codepoint == 0x1f40fu) {
+		return cozette_block423[0];
+	} else if (codepoint == 0x1f418u) {
 		return cozette_block424[0];
-	} else if (codepoint == 0x1f50bu) {
-		return cozette_block425[0];
-	} else if (codepoint == 0x1f512u) {
+	} else if (codepoint >= 0x1f447u && codepoint <= 0x1f448u) {
+		return cozette_block425[codepoint - 0x1f447u];
+	} else if (codepoint == 0x1f48eu) {
 		return cozette_block426[0];
-	} else if (codepoint == 0x1f52eu) {
-		return cozette_block427[0];
-	} else if (codepoint == 0x1f608u) {
+	} else if (codepoint >= 0x1f4a0u && codepoint <= 0x1f4a1u) {
+		return cozette_block427[codepoint - 0x1f4a0u];
+	} else if (codepoint == 0x1f4e6u) {
 		return cozette_block428[0];
-	} else if (codepoint == 0x1f6e1u) {
+	} else if (codepoint == 0x1f50bu) {
 		return cozette_block429[0];
+	} else if (codepoint == 0x1f512u) {
+		return cozette_block430[0];
+	} else if (codepoint == 0x1f52eu) {
+		return cozette_block431[0];
+	} else if (codepoint == 0x1f608u) {
+		return cozette_block432[0];
+	} else if (codepoint == 0x1f6e1u) {
+		return cozette_block433[0];
+	} else if (codepoint == 0xf02d1u) {
+		return cozette_block434[0];
+	} else if (codepoint == 0xf02d4u) {
+		return cozette_block435[0];
 	} else {
 		WARN("Codepoint U+%04X (%s) is not covered by this font", codepoint, u8_cp_to_utf8(codepoint));
 		return cozette_block1[0];
