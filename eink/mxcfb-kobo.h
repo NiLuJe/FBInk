@@ -389,14 +389,14 @@ struct mxcfb_csc_matrix
 #define MXCFB_GET_DIFMT       _IOR('F', 0x2A, uint32_t)
 #define MXCFB_GET_FB_BLANK    _IOR('F', 0x2B, uint32_t)
 // NOTE: Not actually implemented for EPDCs, clashes w/ MXCFB_SET_TEMPERATURE, which *is* implemented.
-#define MXCFB_SET_DIFMT       _IOW('F', 0x2C, uint32_t)
+//#define MXCFB_SET_DIFMT       _IOW('F', 0x2C, uint32_t)
 
 /* Mark 7 */
 #define MXCFB_CSC_UPDATE        _IOW('F', 0x2D, struct mxcfb_csc_matrix)
 #define MXCFB_SET_GPU_SPLIT_FMT _IOW('F', 0x2F, struct mxcfb_gpu_split_fmt)
 // NOTE: Not actually implemented for EPDCs, these clash w/ the PWRDOWN_DELAY ones, which *are* implemented.
-#define MXCFB_SET_PREFETCH      _IOW('F', 0x30, int)
-#define MXCFB_GET_PREFETCH      _IOR('F', 0x31, int)
+//#define MXCFB_SET_PREFETCH      _IOW('F', 0x30, int)
+//#define MXCFB_GET_PREFETCH      _IOR('F', 0x31, int)
 
 /* IOCTLs for E-ink panel updates */
 #define MXCFB_SET_WAVEFORM_MODES     _IOW('F', 0x2B, struct mxcfb_waveform_modes)
