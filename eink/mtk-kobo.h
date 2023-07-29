@@ -55,7 +55,7 @@
 #define UPDATE_MODE_PARTIAL 0x0
 #define UPDATE_MODE_FULL    0x1
 
-// NOTE: That confusing NM mapping is never actually used, unless you enable it via the debug procfs knob.
+// NOTE: That confusing `enable_night_mode_by_wfm` mapping is never actually used, unless you enable it via the debug procfs knob.
 //       FWIW, lab126 does GC16 => GCK16 & GLR16 => GLKW16...
 enum HWTCON_WAVEFORM_MODE_ENUM
 {
