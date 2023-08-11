@@ -113,7 +113,8 @@ typedef struct
 	FTrace_Slot*     touch;
 	FTrace_Slot*     prev_touch;
 	int              fbfd;
-	int32_t          dim_swap;
+	int32_t          dim_mirror_x;
+	int32_t          dim_mirror_y;
 	uint8_t          canonical_rota;
 } FTrace_Context;
 
@@ -148,15 +149,18 @@ static void
 		// That makes this a NOP for this frame only...
 		canonical_pos.x = touch->pos.x;
 		canonical_pos.y = touch->pos.y;
-	} else if (fbink_state->device_id == DEVICE_KOBO_AURA_H2O_2 || fbink_state->device_id == DEVICE_KOBO_LIBRA_2 ||
-		   fbink_state->device_id == DEVICE_KOBO_ELIPSA_2E) {
+	} else if (fbink_state->device_id == DEVICE_KOBO_AURA_H2O_2 || fbink_state->device_id == DEVICE_KOBO_LIBRA_2) {
 		// Aura H2O²r1, Libra 2 & Elipsa 2E
 		// !touch_mirrored_x
 		canonical_pos.x = touch->pos.y;
 		canonical_pos.y = touch->pos.x;
+	} else if (fbink_state->device_id == DEVICE_KOBO_ELIPSA_2E) {
+		// touch_switch_xy && touch_mirrored_y
+		canonical_pos.x = touch->pos.y;
+		canonical_pos.y = ctx->dim_mirror_y - touch->pos.x;
 	} else {
 		// touch_switch_xy && touch_mirrored_x
-		canonical_pos.x = ctx->dim_swap - touch->pos.y;
+		canonical_pos.x = ctx->dim_mirror_x - touch->pos.y;
 		canonical_pos.y = touch->pos.x;
 	}
 
@@ -528,10 +532,12 @@ int
 	LOG("Rotation: %hhu -> %hhu", fbink_state.current_rota, ctx.canonical_rota);
 	if ((ctx.canonical_rota & 1U) == 0U) {
 		// Canonical rotation is even (UR/UD)
-		ctx.dim_swap = (int32_t) fbink_state.screen_width;
+		ctx.dim_mirror_x = (int32_t) fbink_state.screen_width;
+		ctx.dim_mirror_y = (int32_t) fbink_state.screen_height;
 	} else {
 		// Canonical rotation is odd (CW/CCW)
-		ctx.dim_swap = (int32_t) fbink_state.screen_height;
+		ctx.dim_mirror_x = (int32_t) fbink_state.screen_height;
+		ctx.dim_mirror_y = (int32_t) fbink_state.screen_width;
 	}
 
 	// Main loop
