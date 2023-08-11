@@ -532,12 +532,12 @@ int
 	LOG("Rotation: %hhu -> %hhu", fbink_state.current_rota, ctx.canonical_rota);
 	if ((ctx.canonical_rota & 1U) == 0U) {
 		// Canonical rotation is even (UR/UD)
-		ctx.dim_mirror_x = (int32_t) fbink_state.screen_width;
-		ctx.dim_mirror_y = (int32_t) fbink_state.screen_height;
+		ctx.dim_mirror_x = (int32_t) fbink_state.screen_width - 1;
+		ctx.dim_mirror_y = (int32_t) fbink_state.screen_height - 1;
 	} else {
 		// Canonical rotation is odd (CW/CCW)
-		ctx.dim_mirror_x = (int32_t) fbink_state.screen_height;
-		ctx.dim_mirror_y = (int32_t) fbink_state.screen_width;
+		ctx.dim_mirror_x = (int32_t) fbink_state.screen_height - 1;
+		ctx.dim_mirror_y = (int32_t) fbink_state.screen_width - 1;
 	}
 
 	// Main loop
