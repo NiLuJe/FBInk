@@ -576,6 +576,11 @@ const uint32_t* (*fxpFont32xGetBitmap)(uint32_t) = NULL;
 //const uint64_t* (*fxpFont64xGetBitmap)(uint32_t) = NULL;
 #endif
 
+#ifdef FBINK_FOR_KOBO
+// And the epdc wakeup one...
+int (*fxpWakeupEpdc)(void) = NULL;
+#endif
+
 // Where we track device/screen-specific quirks
 FBInkDeviceQuirks deviceQuirks = { 0 };
 
@@ -766,6 +771,12 @@ static int refresh(int, const struct mxcfb_rect, const FBInkConfig*);
 #ifndef FBINK_FOR_LINUX
 static int wait_for_submission(int, uint32_t);
 static int wait_for_complete(int, uint32_t);
+#endif
+#ifdef FBINK_FOR_KOBO
+#	define NTX_NXP_EPDC_POWER "/sys/class/graphics/fb0/power_state"
+static int wakeup_epdc_kobo_nxp(void);
+static int wakeup_epdc_kobo_sunxi(void);
+static int wakeup_epdc_kobo_mtk(void);
 #endif
 
 static inline __attribute__((always_inline)) const char* get_fbdev_path(void);

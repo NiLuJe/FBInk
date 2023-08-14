@@ -3432,6 +3432,84 @@ static int
 }
 #endif    // !FBINK_FOR_LINUX
 
+#ifdef FBINK_FOR_KOBO
+// Implementations of the various ways one can poke at the EPDC
+// on NTX kernels in order to wake it up immediately instead of relying on the driver's own PM...
+// TODO: Depending on how https://github.com/koreader/koreader/pull/10771 goes, see if we need deeper integration of this, e.g.:
+//       * A FBInkConfig flag to run this before every refresh (possibly enforced by default (w/ log message) on unreliableWaitFor Mk7+ boards)
+//       * Another one to run this before waits?
+//       * Sunxi pen mode will *probably* need to ignore this for performance reasons, though...
+//       * Document the quirks and the reasoning in the API doc
+//       * Also document Nickel's own usage of this (e.g., the 1.5s debounced on *touch* input thing), c.f., PRs
+static int
+    wakeup_epdc_nop(void)
+{
+	return ERRCODE(ENOSYS);
+}
+
+// We know we'll only ever pass string literals to this,
+// and we want to be able to use sizeof to compute the length of the string,
+// so we have to go through a macro instead of an inline function...
+#	define WRITE_TO_SYSFS(value, path)                                                                              \
+		({                                                                                                       \
+			int fd = open(path, O_WRONLY | O_CLOEXEC);                                                       \
+			if (fd == -1) {                                                                                  \
+				PFWARN("open(%s): %m", path);                                                            \
+				return ERRCODE(EXIT_FAILURE);                                                            \
+			}                                                                                                \
+			size_t  bytes = sizeof(value);                                                                   \
+			ssize_t nw    = write(fd, value, bytes);                                                         \
+			if (nw == -1) {                                                                                  \
+				PFWARN("write: %m");                                                                     \
+				return ERRCODE(EXIT_FAILURE);                                                            \
+			}                                                                                                \
+			close(fd);                                                                                       \
+                                                                                                                         \
+			if ((size_t) nw == bytes) {                                                                      \
+				return EXIT_SUCCESS;                                                                     \
+			} else {                                                                                         \
+				return ERRCODE(EXIT_FAILURE);                                                            \
+			}                                                                                                \
+		})
+
+static int
+    wakeup_epdc_kobo_nxp(void)
+{
+	// c.f., power_state_write @ drivers/video/fbdev/mxc/mxc_epdc_fake_s1d13522.c
+	WRITE_TO_SYSFS("1,0", NTX_NXP_EPDC_POWER);
+}
+
+static int
+    wakeup_epdc_kobo_sunxi(void)
+{
+	// c.f., dispdbg_process @ drivers/video/fbdev/sunxi/disp2/disp/dev_disp_debugfs.c
+	WRITE_TO_SYSFS("lcd0", "/sys/kernel/debug/dispdbg/name");
+	WRITE_TO_SYSFS("enable", "/sys/kernel/debug/dispdbg/command");
+	WRITE_TO_SYSFS("1", "/sys/kernel/debug/dispdbg/start");
+}
+
+static int
+    wakeup_epdc_kobo_mtk(void)
+{
+	// c.f., debug_fiti_power_control @ drivers/misc/mediatek/hwtcon/hwtcon_debug.c
+	WRITE_TO_SYSFS("fiti_power 1", "/proc/hwtcon/cmd");
+}
+#endif    // FBINK_FOR_KOBO
+
+// And the public API call for that mess
+int
+    fbink_wakeup_epdc(void)
+{
+#ifndef FBINK_FOR_KOBO
+	// Abort silently, this thing is niche enough already...
+	return ERRCODE(ENOSYS);
+#else
+	// We go through a function pointer instead of an if ladder because the NXP implementation is only available on the latest devices,
+	// so to keep things simple, we want to handle that check during fbink_init...
+	return (*fxpWakeupEpdc)();
+#endif
+}
+
 static inline __attribute__((always_inline)) const char*
     get_fbdev_path(void)
 {
@@ -4115,10 +4193,18 @@ static __attribute__((cold)) int
 			ELOG("Enabled Kindle Rex platform quirks");
 		}
 #	elif defined(FBINK_FOR_KOBO)
+		// Being able to poke at the EPDC PM is roughly a Mk.8+ thing...
+		fxpWakeupEpdc = &wakeup_epdc_nop;
+
 		if (deviceQuirks.isKoboNonMT) {
 			ELOG("Enabled Kobo w/o Multi-Touch quirks");
 		} else if (deviceQuirks.isKoboMk7) {
 			ELOG("Enabled Kobo Mark 7 quirks");
+
+			// This is only available on the latest boards (ca. Mk.8 and up)
+			if (access(NTX_NXP_EPDC_POWER, F_OK) == 0) {
+				fxpWakeupEpdc = &wakeup_epdc_kobo_nxp;
+			}
 		} else if (deviceQuirks.isSunxi) {
 			ELOG("Enabled sunxi quirks");
 
@@ -4203,9 +4289,13 @@ static __attribute__((cold)) int
 					sunxiCtx.force_rota = FORCE_ROTA_UR;
 				}
 			}
+
+			fxpWakeupEpdc = &wakeup_epdc_kobo_sunxi;
 		} else if (deviceQuirks.isMTK) {
 			ELOG("Enabled MediaTek quirks");
+
 			deviceQuirks.canWaitForSubmission = true;
+			fxpWakeupEpdc                     = &wakeup_epdc_kobo_mtk;
 		}
 #	elif defined(FBINK_FOR_POCKETBOOK)
 		// Check if the device is running on an AllWinner SoC instead of an NXP one...

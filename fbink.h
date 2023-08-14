@@ -1360,6 +1360,10 @@ FBINK_API int fbink_set_fb_info(int      fbfd,
 				uint8_t  grayscale,
 				const FBInkConfig* restrict fbink_cfg) __attribute__((warn_unused_result));
 
+// Forcefully wakeup the EPDC
+// Returns -(ENOSYS) on unsupported platforms.
+FBINK_API int fbink_wakeup_epdc(void);
+
 //
 // The functions below are tied to specific capabilities on Kobo devices with a sunxi SoC (e.g., the Elipsa & Sage).
 //
