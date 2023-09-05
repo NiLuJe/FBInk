@@ -5309,7 +5309,7 @@ void
 {
 	fprintf(
 	    stdout,
-	    "FBINK_VERSION='%s';viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;invertedGrayscale=%d;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isMTK=%d;isSunxi=%d;SunxiHasFBDamage=%d;SunxiForceRota=%d;isKindleLegacy=%d;isKoboNonMT=%d;unreliableWaitFor=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;hasEclipseWfm=%d;canWaitForSubmission=%d;",
+	    "FBINK_VERSION='%s';viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;invertedGrayscale=%d;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isMTK=%d;isSunxi=%d;SunxiHasFBDamage=%d;SunxiForceRota=%d;isKindleLegacy=%d;isKoboNonMT=%d;unreliableWaitFor=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;rotationMap={ %hhu, %hhu, %hhu, %hhu};touchSwapAxes=%d;touchMirrorX=%d;touchMirrorY=%d;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;hasEclipseWfm=%d;canWaitForSubmission=%d;",
 	    fbink_version(),
 	    viewWidth,
 	    viewHeight,
@@ -5353,6 +5353,13 @@ void
 	    deviceQuirks.unreliableWaitFor,
 	    deviceQuirks.ntxBootRota,
 	    deviceQuirks.ntxRotaQuirk,
+	    deviceQuirks.rotationMap[FB_ROTATE_UR],
+	    deviceQuirks.rotationMap[FB_ROTATE_CW],
+	    deviceQuirks.rotationMap[FB_ROTATE_UD],
+	    deviceQuirks.rotationMap[FB_ROTATE_CCW],
+	    deviceQuirks.touchSwapAxes,
+	    deviceQuirks.touchMirrorX,
+	    deviceQuirks.touchMirrorY,
 	    deviceQuirks.isNTX16bLandscape,
 	    vInfo.rotate,
 	    deviceQuirks.canRotate,
@@ -5405,11 +5412,15 @@ void
 		fbink_state->sunxi_has_fbdamage = false;
 		fbink_state->sunxi_force_rota   = FORCE_ROTA_NOTSUP;
 #endif
-		fbink_state->is_kindle_legacy        = deviceQuirks.isKindleLegacy;
-		fbink_state->is_kobo_non_mt          = deviceQuirks.isKoboNonMT;
-		fbink_state->unreliable_wait_for     = deviceQuirks.unreliableWaitFor;
-		fbink_state->ntx_boot_rota           = deviceQuirks.ntxBootRota;
-		fbink_state->ntx_rota_quirk          = deviceQuirks.ntxRotaQuirk;
+		fbink_state->is_kindle_legacy    = deviceQuirks.isKindleLegacy;
+		fbink_state->is_kobo_non_mt      = deviceQuirks.isKoboNonMT;
+		fbink_state->unreliable_wait_for = deviceQuirks.unreliableWaitFor;
+		fbink_state->ntx_boot_rota       = deviceQuirks.ntxBootRota;
+		fbink_state->ntx_rota_quirk      = deviceQuirks.ntxRotaQuirk;
+		memcpy(fbink_state->rotation_map, deviceQuirks.rotationMap, sizeof(deviceQuirks.rotationMap));
+		fbink_state->touch_swap_axes         = deviceQuirks.touchSwapAxes;
+		fbink_state->touch_mirror_x          = deviceQuirks.touchMirrorX;
+		fbink_state->touch_mirror_y          = deviceQuirks.touchMirrorY;
 		fbink_state->is_ntx_quirky_landscape = deviceQuirks.isNTX16bLandscape;
 		fbink_state->current_rota            = (uint8_t) vInfo.rotate;
 		fbink_state->can_rotate              = deviceQuirks.canRotate;
