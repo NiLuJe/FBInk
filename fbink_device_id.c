@@ -996,8 +996,8 @@ static void
 			deviceQuirks.ntxBootRota   = FB_ROTATE_UR;
 			// ...KOBO_HWCFG_DisplayBusWidth (35) is "16Bits" (1),
 			// meaning it is indeed NTX_ROTA_STRAIGHT (-ish) ;).
-			// NOTE: Touch panel seems to have forgone the usual translation, though,
-			//       it's UR-ish (x & y swapped).
+			// NOTE: Touch panel seems to have forgone part of the usual translation, though,
+			//       it's UR-ish (x & y swapped as usual, but no mirroring at all).
 			deviceQuirks.canRotate     = true;
 			// Canonical -> native rotation mapping: { UR: 1, CW: 0, UD: 3, CCW: 2 }
 			deviceQuirks.ntxRotaQuirk  = NTX_ROTA_CW_TOUCH;    // c.f., above, don't trust the name
