@@ -549,12 +549,19 @@ static void
 		}
 
 		// Store the device ID...
-		deviceQuirks.deviceId    = config.pcb_id;
+		deviceQuirks.deviceId                   = config.pcb_id;
 		// Some devices *may* be based on the same board as the Kobo Aura, so, let's be cautious...
-		deviceQuirks.canHWInvert = false;
+		deviceQuirks.canHWInvert                = false;
 		// NOTE: See the comments in set_kobo_quirks about this.
 		//       I'm hoping there aren't any special snowflakes in the lineup...
-		deviceQuirks.ntxBootRota = FB_ROTATE_UD;
+		deviceQuirks.ntxBootRota                = FB_ROTATE_UD;
+		deviceQuirks.ntxRotaQuirk               = NTX_ROTA_STRAIGHT;
+		deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CW;
+		deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UD;
+		deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CCW;
+		deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
+		deviceQuirks.touchSwapAxes              = true;
+		deviceQuirks.touchMirrorX               = true;
 		// supported devices,
 		// from https://github.com/bq/cervantes/blob/master/bqHAL/Devices/mx508/src/DeviceInfoMx508.cpp#L33-L37
 		switch (config.pcb_id) {
@@ -659,7 +666,7 @@ static void
 	// NOTE: Most kernels thankfully don't resort to weird rotation quirks ;).
 	//       c.f., mxc_epdc_fb_check_var @ drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c
 	deviceQuirks.ntxRotaQuirk               = NTX_ROTA_STRAIGHT;
-	// NOTE: ntxBootRota & ntxRotaQuirk should be considered *deprecated*,
+	// NOTE: As far as handling touch coordinates translation, ntxBootRota & ntxRotaQuirk should be considered *deprecated*,
 	//       rotationMap, paired with touchSwapAxes & touchMirrorX/touchMirrorY all paint a much clearer picture...
 	// Most common native -> canonical rotation is {1, 2, 3, 0}
 	// (index is native, value is canonical)
