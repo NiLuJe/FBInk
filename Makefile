@@ -643,6 +643,12 @@ utils: libi2c.built | outdir
 	$(STRIP) --strip-unneeded $(OUT_DIR)/doom
 endif
 
+# NOTE: That's a dumb little tool that was used to ease the migration to less convoluted rotation quirks handling...
+#       As such, it's native, but tailored to a Kobo target...
+rota_map: libi2c.built | outdir
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) -DFBINK_MINIMAL -DFBINK_FOR_KOBO $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/rota_map tools/rota_map.c
+	$(STRIP) --strip-unneeded $(OUT_DIR)/rota_map
+
 ifdef KOBO
 alt: libi2c.built | outdir
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(DOOM_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/alt_buffer utils/alt_buffer.c $(I2C_LIBS)
@@ -934,4 +940,4 @@ format:
 	clang-format -style=file -i *.c *.h cutef8/*.c cutef8/*.h utils/*.c qimagescale/*.c qimagescale/*.h tools/*.c eink/*-kobo.h eink/*-kindle.h eink/einkfb.h
 
 
-.PHONY: default outdir all staticlib sharedlib static tiny tinier shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils alt sunxi ftrace fbdepth dump devcap clean distclean dist format
+.PHONY: default outdir all staticlib sharedlib static tiny tinier shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils rota_map alt sunxi ftrace fbdepth dump devcap clean distclean dist format
