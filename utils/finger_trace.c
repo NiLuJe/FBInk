@@ -113,8 +113,6 @@ typedef struct
 	FTrace_Slot*     touch;
 	FTrace_Slot*     prev_touch;
 	int              fbfd;
-	int32_t          dim_mirror_x;
-	int32_t          dim_mirror_y;
 	uint8_t          canonical_rota;
 } FTrace_Context;
 
@@ -529,24 +527,11 @@ int
 	LOG("Initialized libevdev for device `%s`", libevdev_get_name(dev));
 	ctx.dev = dev;
 
-	// Deal with NTX touch panels insanity...
-	// On Kobo, the touch panel has a fixed rotation, one that *never* matches the actual rotation.
-	// Handle the initial translation here so that it makes sense @ (canonical) UR...
-	// (This is generally a -90°/+90°, made trickier because there's a layout swap so height/width are swapped).
-	// c.f., rotate_touch_coordinates in FBInk for a different, possibly less compatible approach...
+	// We'll need to know the canonical rotation to deal with coordinates translations later on...
 	// NOTE: We only check this on startup here, this would need to be updated on relevant fbink_reinit returns
 	//       if we cared about runtime rotation handling ;).
 	ctx.canonical_rota = fbink_rota_native_to_canonical(fbink_state.current_rota);
 	LOG("Rotation: %hhu -> %hhu", fbink_state.current_rota, ctx.canonical_rota);
-	if ((ctx.canonical_rota & 1U) == 0U) {
-		// Canonical rotation is even (UR/UD)
-		ctx.dim_mirror_x = (int32_t) fbink_state.screen_width - 1;
-		ctx.dim_mirror_y = (int32_t) fbink_state.screen_height - 1;
-	} else {
-		// Canonical rotation is odd (CW/CCW)
-		ctx.dim_mirror_x = (int32_t) fbink_state.screen_height - 1;
-		ctx.dim_mirror_y = (int32_t) fbink_state.screen_width - 1;
-	}
 
 	// Main loop
 	struct pollfd pfd = { 0 };
