@@ -151,7 +151,7 @@ static void
 		canonical_pos.y = touch->pos.y;
 	} else if (fbink_state->device_id == DEVICE_KOBO_AURA_H2O_2 || fbink_state->device_id == DEVICE_KOBO_LIBRA_2) {
 		// Aura H2O²r1 & Libra 2
-		// !touch_mirrored_x
+		// touch_switch_xy && !touch_mirrored_x
 		canonical_pos.x = touch->pos.y;
 		canonical_pos.y = touch->pos.x;
 	} else if (fbink_state->device_id == DEVICE_KOBO_ELIPSA_2E) {

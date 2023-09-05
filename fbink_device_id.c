@@ -669,12 +669,12 @@ static void
 	// NOTE: As far as handling touch coordinates translation, ntxBootRota & ntxRotaQuirk should be considered *deprecated*,
 	//       rotationMap, paired with touchSwapAxes & touchMirrorX/touchMirrorY all paint a much clearer picture...
 	// Most common native -> canonical rotation is {1, 2, 3, 0}
-	// (index is native, value is canonical)
+	// (index is native, value is canonical; beware of that because most custom maps are actually identical both ways!)
 	deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CW;
 	deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UD;
 	deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CCW;
 	deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
-	// Most common touch panel setup
+	// Most common touch panel setup (the swap is a constant, the mirroring varies)
 	deviceQuirks.touchSwapAxes              = true;
 	deviceQuirks.touchMirrorX               = true;
 	// NOTE: Device code list pilfered from
@@ -806,6 +806,8 @@ static void
 			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UR;
 			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CW;
 			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UD;
+			// Beware, this touch panel quirk *only* applies to r1 devices!
+			deviceQuirks.touchMirrorX               = false;
 			deviceQuirks.screenDPI                  = 265U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Aura H2O²", sizeof(deviceQuirks.deviceName) - 1U);
@@ -932,6 +934,8 @@ static void
 			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_CW;
 			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_UD;
 			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_CCW;
+			// Same touch panel quirk as the H2O²r1
+			deviceQuirks.touchMirrorX               = false;
 			// NOTE: The Libra was the first device to exhibit weirdly broken MXCFB_WAIT_FOR_UPDATE_COMPLETE behavior,
 			//       where the ioctl would apparently randomly timeout after the full 5s for no reason...
 			//       I don't have any of the affected devices to investigate further, so...
@@ -1081,6 +1085,9 @@ static void
 			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UR;
 			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CCW;
 			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UD;
+			// Mirrors the *other* axis compared to (most) other NTX boards...
+			deviceQuirks.touchMirrorX               = false;
+			deviceQuirks.touchMirrorY               = true;
 			deviceQuirks.screenDPI                  = 227U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Elipsa 2E", sizeof(deviceQuirks.deviceName) - 1U);

@@ -421,7 +421,9 @@ typedef enum
 	NTX_ROTA_STRAIGHT = 0U,    // No shenanigans (at least as far as ioctls are concerned)
 	NTX_ROTA_ALL_INVERTED,     // Every rotation is inverted by the kernel
 	NTX_ROTA_ODD_INVERTED,     // Only Landscape (odd) rotations are inverted by the kernel
-	NTX_ROTA_SANE,             // NTX_ROTA_STRAIGHT, and ntxBootRota is the native Portrait orientation.
+	// NOTE: Everything below should be considered mostly deprecated, as those were attempts to piggyback on this flag
+	//       to handle input translations. That was a mistake, we've since switched to dedicated flags for touch input quirks.
+	NTX_ROTA_SANE,    // NTX_ROTA_STRAIGHT, and ntxBootRota is the native Portrait orientation.
 	//                            Optionally, bonus points if that's actually UR, and the panel is natively mounted UR,
 	//                            like on the Kobo Libra.
 	//                            Triple whammy if the touch layer rotation matches!
