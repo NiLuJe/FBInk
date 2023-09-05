@@ -161,7 +161,7 @@ static void
 	switch (ctx->canonical_rota) {
 		case FB_ROTATE_CW:
 			swap_axes = !swap_axes;
-			mirror_x  = !mirror_x;
+			mirror_y  = !mirror_y;
 			break;
 		case FB_ROTATE_UD:
 			mirror_x = !mirror_x;
@@ -169,7 +169,7 @@ static void
 			break;
 		case FB_ROTATE_CCW:
 			swap_axes = !swap_axes;
-			mirror_y  = !mirror_y;
+			mirror_x  = !mirror_x;
 			break;
 		default:
 			// NOP
