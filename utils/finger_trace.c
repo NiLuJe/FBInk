@@ -139,66 +139,67 @@ static void
 	const FBInkState*  fbink_state = ctx->fbink_state;
 	const FTrace_Slot* touch       = ctx->touch;
 
-	// NOTE: The following was borrowed from my experiments with this in InkVT ;).
 	// Deal with device-specific rotation quirks...
-	FTrace_Coordinates canonical_pos;
+	// Grab the device-specific panel translation quirks: we end up with flags similar to what is used in KOReader,
 	// c.f., https://github.com/koreader/koreader/blob/master/frontend/device/kobo/device.lua
+	bool swap_axes = fbink_state->touch_swap_axes;
+	bool mirror_x  = fbink_state->touch_mirror_x;
+	bool mirror_y  = fbink_state->touch_mirror_y;
+
+	// The Touch B does something... weird.
 	if (fbink_state->device_id == DEVICE_KOBO_TOUCH_B && touch->state == UP) {
-		// The Touch B does something... weird.
 		// The frame that reports a contact lift does the coordinates transform for us...
 		// That makes this a NOP for this frame only...
-		canonical_pos.x = touch->pos.x;
-		canonical_pos.y = touch->pos.y;
-	} else if (fbink_state->device_id == DEVICE_KOBO_AURA_H2O_2 || fbink_state->device_id == DEVICE_KOBO_LIBRA_2) {
-		// Aura H2O²r1 & Libra 2
-		// touch_switch_xy && !touch_mirrored_x
-		canonical_pos.x = touch->pos.y;
-		canonical_pos.y = touch->pos.x;
-	} else if (fbink_state->device_id == DEVICE_KOBO_ELIPSA_2E) {
-		// touch_switch_xy && touch_mirrored_y
-		canonical_pos.x = touch->pos.y;
-		canonical_pos.y = ctx->dim_mirror_y - touch->pos.x;
-	} else {
-		// touch_switch_xy && touch_mirrored_x
-		canonical_pos.x = ctx->dim_mirror_x - touch->pos.y;
-		canonical_pos.y = touch->pos.x;
+		swap_axes = false;
+		mirror_x  = false;
+		// (mirror_y is already false on those devices)
 	}
 
-	// And, finally, handle somewhat standard touch translation given the current rotation
-	// c.f., GestureDetector:adjustGesCoordinate @ https://github.com/koreader/koreader/blob/master/frontend/device/gesturedetector.lua
-	FTrace_Coordinates translated_pos;
+	// Then, we can handle standard touch translation given the current rotation.
+	// We'll deal with this by flipping the swap/mirror flags, to do everything at once.
+	// c.f., set_rotation @ https://github.com/rmkit-dev/rmkit/blob/master/src/rmkit/input/events.cpy
 	switch (ctx->canonical_rota) {
-		case FB_ROTATE_UR:
-			translated_pos = canonical_pos;
-			break;
 		case FB_ROTATE_CW:
-			translated_pos.x = (int32_t) fbink_state->screen_width - canonical_pos.y;
-			translated_pos.y = canonical_pos.x;
+			swap_axes = !swap_axes;
+			mirror_x  = !mirror_x;
 			break;
 		case FB_ROTATE_UD:
-			translated_pos.x = (int32_t) fbink_state->screen_width - canonical_pos.x;
-			translated_pos.y = (int32_t) fbink_state->screen_height - canonical_pos.y;
+			mirror_x = !mirror_x;
+			mirror_y = !mirror_y;
 			break;
 		case FB_ROTATE_CCW:
-			translated_pos.x = canonical_pos.y;
-			translated_pos.y = (int32_t) fbink_state->screen_height - canonical_pos.x;
+			swap_axes = !swap_axes;
+			mirror_y  = !mirror_y;
 			break;
 		default:
-			translated_pos.x = -1;
-			translated_pos.y = -1;
+			// NOP
 			break;
+	}
+
+	// And we can finally apply all of that
+	FTrace_Coordinates translated_pos;
+	if (swap_axes) {
+		translated_pos.x = touch->pos.y;
+		translated_pos.y = touch->pos.x;
+	} else {
+		translated_pos.x = touch->pos.x;
+		translated_pos.y = touch->pos.y;
+	}
+	if (mirror_x) {
+		translated_pos.x = (int32_t) fbink_state->screen_width - 1 - translated_pos.x;
+	}
+	if (mirror_y) {
+		translated_pos.y = (int32_t) fbink_state->screen_height - 1 - translated_pos.y;
 	}
 
 	// Recap the craziness...
-	LOG("%ld.%.6ld [%s] [%s] @ (%4d, %4d) -> (%4d, %4d) => (%4d, %4d)",
+	LOG("%ld.%.6ld [%s] [%s] @ (%4d, %4d) => (%4d, %4d)",
 	    touch->time.tv_sec,
 	    touch->time.tv_usec,
 	    tool_type_to_str(touch->tool),
 	    touch->state == DOWN ? "DOWN" : " UP ",
 	    touch->pos.x,
 	    touch->pos.y,
-	    canonical_pos.x,
-	    canonical_pos.y,
 	    translated_pos.x,
 	    translated_pos.y);
 
@@ -431,6 +432,13 @@ int
 	// We'll need the state for device identification...
 	fbink_get_state(&fbink_cfg, &fbink_state);
 	ctx.fbink_state = &fbink_state;
+
+	// Dump the rotation map
+	LOG("Rotation map: {%hhu, %hhu, %hhu, %hhu}",
+	    fbink_state.rotation_map[FB_ROTATE_UR],
+	    fbink_state.rotation_map[FB_ROTATE_CW],
+	    fbink_state.rotation_map[FB_ROTATE_UD],
+	    fbink_state.rotation_map[FB_ROTATE_CCW]);
 
 	// Attempt not to murder the crappy sunxi driver, because as suspected,
 	// it doesn't really deal well with refresh storms...
