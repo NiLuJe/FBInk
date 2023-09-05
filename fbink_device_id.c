@@ -662,10 +662,11 @@ static void
 	// NOTE: ntxBootRota & ntxRotaQuirk should be considered *deprecated*,
 	//       rotationMap, paired with touchSwapAxes & touchMirrorX/touchMirrorY all paint a much clearer picture...
 	// Most common native -> canonical rotation is {1, 2, 3, 0}
-	deviceQuirks.rotationMap[FB_ROTATE_UR]  = 1U;
-	deviceQuirks.rotationMap[FB_ROTATE_CW]  = 2U;
-	deviceQuirks.rotationMap[FB_ROTATE_UD]  = 3U;
-	deviceQuirks.rotationMap[FB_ROTATE_CCW] = 0U;
+	// (index is native, value is canonical)
+	deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CW;
+	deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UD;
+	deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CCW;
+	deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
 	// Most common touch panel setup
 	deviceQuirks.touchSwapAxes              = true;
 	deviceQuirks.touchMirrorX               = true;
@@ -752,11 +753,16 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 5", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case DEVICE_KOBO_AURA_HD:    // Aura HD (dragon)
-			deviceQuirks.isKoboNonMT  = true;
+			deviceQuirks.isKoboNonMT                = true;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
-			deviceQuirks.ntxBootRota  = FB_ROTATE_UR;
-			deviceQuirks.ntxRotaQuirk = NTX_ROTA_ALL_INVERTED;
-			deviceQuirks.screenDPI    = 265U;
+			deviceQuirks.ntxBootRota                = FB_ROTATE_UR;
+			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_ALL_INVERTED;
+			// {1, 0, 3, 2}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UR;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CCW;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UD;
+			deviceQuirks.screenDPI                  = 265U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Aura HD", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -766,12 +772,17 @@ static void
 			break;
 		case DEVICE_KOBO_AURA_H2O:    // Aura H2O (dahlia)
 			// NOTE: The top 11 pixels are blacked out by Nickel (behind the bezel)
-			deviceQuirks.koboVertOffset = 11;
+			deviceQuirks.koboVertOffset             = 11;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UD, nickel is FB_ROTATE_CW
-			deviceQuirks.ntxBootRota    = FB_ROTATE_UR;
-			deviceQuirks.ntxRotaQuirk   = NTX_ROTA_ALL_INVERTED;
+			deviceQuirks.ntxBootRota                = FB_ROTATE_UR;
 			// Canonical -> native rotation mapping: { UR: 1, CW: 0, UD: 3, CCW: 2 }
-			deviceQuirks.screenDPI      = 265U;
+			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_ALL_INVERTED;
+			// {1, 0, 3, 2}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UR;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CCW;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UD;
+			deviceQuirks.screenDPI                  = 265U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Aura H2O", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -781,9 +792,14 @@ static void
 			break;
 		case DEVICE_KOBO_AURA_H2O_2:    // Aura H2O² (snow)
 			// NOTE: *Might* be UD like the other ROTA_STRAIGHT devices
-			deviceQuirks.ntxBootRota = FB_ROTATE_UR;
+			deviceQuirks.ntxBootRota                = FB_ROTATE_UR;
 			// NOTE: Is indeed NTX_ROTA_STRAIGHT
-			deviceQuirks.screenDPI   = 265U;
+			// {3, 0, 1, 2}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CCW;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UR;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UD;
+			deviceQuirks.screenDPI                  = 265U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Aura H2O²", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -792,10 +808,15 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case DEVICE_KOBO_AURA_H2O_2_R2:    // Aura H2O² r2 (snow)
-			deviceQuirks.isKoboMk7   = true;
-			deviceQuirks.ntxBootRota = FB_ROTATE_UR;
+			deviceQuirks.isKoboMk7                  = true;
+			deviceQuirks.ntxBootRota                = FB_ROTATE_UR;
 			// NOTE: *Might* be NTX_ROTA_ODD_INVERTED
-			deviceQuirks.screenDPI   = 265U;
+			// {3, 0, 1, 2}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CCW;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UR;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UD;
+			deviceQuirks.screenDPI                  = 265U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Aura H2O² r2", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -853,12 +874,17 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case DEVICE_KOBO_FORMA:    // Forma (frost)
-			deviceQuirks.isKoboMk7    = true;
-			deviceQuirks.canRotate    = true;
+			deviceQuirks.isKoboMk7                  = true;
+			deviceQuirks.canRotate                  = true;
 			// NOTE: Because Mk.7 and KOBO_HWCFG_DisplayBusWidth (35) is "16Bits_mirror" (3)
-			deviceQuirks.ntxRotaQuirk = NTX_ROTA_ODD_INVERTED;
 			// Canonical -> native rotation mapping: { UR: 3, CW: 2, UD: 1, CCW: 0 }
-			deviceQuirks.screenDPI    = 300U;
+			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_ODD_INVERTED;
+			// {3, 2, 1, 0}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CCW;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UD;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
+			deviceQuirks.screenDPI                  = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Forma", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -867,11 +893,16 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case DEVICE_KOBO_FORMA_32GB:    // Forma 32GB (frost)
-			deviceQuirks.isKoboMk7    = true;
-			deviceQuirks.canRotate    = true;
+			deviceQuirks.isKoboMk7                  = true;
+			deviceQuirks.canRotate                  = true;
 			// NOTE: Because Mk.7 and KOBO_HWCFG_DisplayBusWidth (35) is "16Bits_mirror" (3)
-			deviceQuirks.ntxRotaQuirk = NTX_ROTA_ODD_INVERTED;
-			deviceQuirks.screenDPI    = 300U;
+			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_ODD_INVERTED;
+			// {3, 2, 1, 0}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CCW;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UD;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
+			deviceQuirks.screenDPI                  = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Forma 32GB", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -880,22 +911,27 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case DEVICE_KOBO_LIBRA_H2O:    // Libra H2O (storm)
-			deviceQuirks.isKoboMk7         = true;
+			deviceQuirks.isKoboMk7                  = true;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UR, nickel is FB_ROTATE_UR
 			//       And panel is *actually* in Portrait. Finally!
 			//       Despite this, the kernel explicitly mangles the touch translation to match the "usual" layout.
-			deviceQuirks.ntxBootRota       = FB_ROTATE_UR;
-			deviceQuirks.canRotate         = true;
+			deviceQuirks.ntxBootRota                = FB_ROTATE_UR;
+			deviceQuirks.canRotate                  = true;
 			// NOTE: This one deserves a specific entry, because the H2O² also happens to be UR + STRAIGHT,
 			//       but it is decidedly *NOT* sane ;).
-			deviceQuirks.ntxRotaQuirk      = NTX_ROTA_SANE;
+			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_SANE;
+			// {0, 1, 2, 3}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_UR;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_UD;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_CCW;
 			// NOTE: The Libra was the first device to exhibit weirdly broken MXCFB_WAIT_FOR_UPDATE_COMPLETE behavior,
 			//       where the ioctl would apparently randomly timeout after the full 5s for no reason...
 			//       I don't have any of the affected devices to investigate further, so...
 			//       In KOReader, we just sleep for 1ms instead, c.f.,
 			//       https://github.com/koreader/koreader-base/blob/21f4b974c7ab64a149075adc32318f87bf71dcdc/ffi/framebuffer_mxcfb.lua#L230-L235
-			deviceQuirks.unreliableWaitFor = true;
-			deviceQuirks.screenDPI         = 300U;
+			deviceQuirks.unreliableWaitFor          = true;
+			deviceQuirks.screenDPI                  = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Libra H2O", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -917,18 +953,23 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case DEVICE_KOBO_ELIPSA:    // Elipsa (Europa)
-			deviceQuirks.isSunxi       = true;
-			deviceQuirks.hasEclipseWfm = true;
+			deviceQuirks.isSunxi                    = true;
+			deviceQuirks.hasEclipseWfm              = true;
 			// Sunxi means no HW inversion :'(.
 			// (And the nightmode_test flag toggled via the debugfs nightenable/nightdisable command doesn't count,
 			// it just flips the buffer in C, and forces the *K waveform modes (dubbed "eclipse" mode)).
-			deviceQuirks.canHWInvert   = false;
+			deviceQuirks.canHWInvert                = false;
 			// Has an accelerometer, but Nickel doesn't update the rotate flag, as it's meaningless.
 			// That said, "native" rotation still matches the usual layout, as does the touch panel translation.
-			deviceQuirks.ntxBootRota   = FB_ROTATE_CCW;    // e.g., fat bezel side UP.
-			deviceQuirks.canRotate     = true;
-			deviceQuirks.ntxRotaQuirk  = NTX_ROTA_SUNXI;
-			deviceQuirks.screenDPI     = 227U;
+			deviceQuirks.ntxBootRota                = FB_ROTATE_CCW;    // e.g., fat bezel side UP.
+			deviceQuirks.canRotate                  = true;
+			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_SUNXI;
+			// There's no real linuxfb rotation support, so, {0, 1, 2, 3}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_UR;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_UD;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_CCW;
+			deviceQuirks.screenDPI                  = 227U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Elipsa", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -937,20 +978,25 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 8", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case DEVICE_KOBO_LIBRA_2:    // Libra 2 (Io)
-			deviceQuirks.hasEclipseWfm     = true;
-			deviceQuirks.isKoboMk7         = true;    // Same MXCFB API ;).
+			deviceQuirks.hasEclipseWfm = true;
+			deviceQuirks.isKoboMk7     = true;    // Same MXCFB API ;).
 			// Both pickel & nickel then jump to FB_ROTATE_CW...
-			deviceQuirks.ntxBootRota       = FB_ROTATE_UR;
+			deviceQuirks.ntxBootRota   = FB_ROTATE_UR;
 			// ...KOBO_HWCFG_DisplayBusWidth (35) is "16Bits" (1),
 			// meaning it is indeed NTX_ROTA_STRAIGHT (-ish) ;).
 			// NOTE: Touch panel seems to have forgone the usual translation, though,
 			//       it's UR-ish (x & y swapped).
+			deviceQuirks.canRotate     = true;
 			// Canonical -> native rotation mapping: { UR: 1, CW: 0, UD: 3, CCW: 2 }
-			deviceQuirks.canRotate         = true;
-			deviceQuirks.ntxRotaQuirk      = NTX_ROTA_CW_TOUCH;
+			deviceQuirks.ntxRotaQuirk  = NTX_ROTA_CW_TOUCH;    // c.f., above, don't trust the name
+			// {1, 0, 3, 2}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UR;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CCW;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UD;
 			// It apparently inherited its ancestor's issues...
-			deviceQuirks.unreliableWaitFor = true;
-			deviceQuirks.screenDPI         = 300U;
+			deviceQuirks.unreliableWaitFor          = true;
+			deviceQuirks.screenDPI                  = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Libra 2", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -959,15 +1005,20 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 9", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case DEVICE_KOBO_SAGE:    // Sage (Cadmus)
-			deviceQuirks.isSunxi       = true;
-			deviceQuirks.hasEclipseWfm = true;
+			deviceQuirks.isSunxi                    = true;
+			deviceQuirks.hasEclipseWfm              = true;
 			// NOTE: The EINK_NEGATIVE_MODE flag just does a software inversion
 			//       (pixel by pixel, in plain C, in the eink_image_process kthread).
-			deviceQuirks.canHWInvert   = false;
-			deviceQuirks.ntxBootRota   = FB_ROTATE_CW;    // e.g., fat bezel side DOWN.
-			deviceQuirks.canRotate     = true;
-			deviceQuirks.ntxRotaQuirk  = NTX_ROTA_SUNXI;
-			deviceQuirks.screenDPI     = 300U;
+			deviceQuirks.canHWInvert                = false;
+			deviceQuirks.ntxBootRota                = FB_ROTATE_CW;    // e.g., fat bezel side DOWN.
+			deviceQuirks.canRotate                  = true;
+			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_SUNXI;
+			// There's no real linuxfb rotation support, so, {0, 1, 2, 3}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_UR;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_UD;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_CCW;
+			deviceQuirks.screenDPI                  = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Sage", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -976,8 +1027,8 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 8", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case DEVICE_KOBO_CLARA_2E:    // Clara 2E (Goldfinch)
-			deviceQuirks.hasEclipseWfm     = true;
-			deviceQuirks.isKoboMk7         = true;    // Same MXCFB API ;).
+			deviceQuirks.hasEclipseWfm              = true;
+			deviceQuirks.isKoboMk7                  = true;    // Same MXCFB API ;).
 			// NOTE: Touch panel's native orientation is CCW, i.e., origin on the top-right corner.
 			// NOTE: NTXHWConfig says there ought to be a KX122 gyro, but apparently not?
 			// NOTE: ioctls are straightforward (DisplayBusWidth is 8Bits),
@@ -985,10 +1036,15 @@ static void
 			//       Either NTX_ROTA_ODD_INVERTED or NTX_ROTA_CW_TOUCH would behave,
 			//       but their description doesn't actually match what's happening...
 			// Canonical -> native rotation mapping: { UR: 3, CW: 2, UD: 1, CCW: 0 }
-			deviceQuirks.ntxRotaQuirk      = NTX_ROTA_CCW_TOUCH;
+			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_CCW_TOUCH;
+			// {3, 2, 1, 0}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CCW;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UD;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
 			// The board is nearly identical to the Libra 2, and as such, exhibits the same quirks...
-			deviceQuirks.unreliableWaitFor = true;
-			deviceQuirks.screenDPI         = 300U;
+			deviceQuirks.unreliableWaitFor          = true;
+			deviceQuirks.screenDPI                  = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Clara 2E", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore
@@ -997,11 +1053,11 @@ static void
 			strncpy(deviceQuirks.devicePlatform, "Mark 10", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
 		case DEVICE_KOBO_ELIPSA_2E:    // Elipsa 2E (Condor)
-			deviceQuirks.isMTK         = true;
-			deviceQuirks.hasEclipseWfm = true;
+			deviceQuirks.isMTK                      = true;
+			deviceQuirks.hasEclipseWfm              = true;
 			// NOTE: It technically can, but not via update flags, it's a global state.
 			//       You can toggle it via fbink_set_fb_info if need be.
-			deviceQuirks.canHWInvert   = false;
+			deviceQuirks.canHWInvert                = false;
 			// Unlike the Libra 2, KOBO_HWCFG_DisplayBusWidth (35) is "16Bits_mirror" (3),
 			// but the touch-screen appears to behave similary, and its native orientation is also CW.
 			// (Unlike on Mk.7+ mxcfb, hwtcon_fb_check_var doesn't do any kind of rotate trickery,
@@ -1009,11 +1065,16 @@ static void
 			// TBD: Confirm all that with actual bootup logs, but this should at least behave in Nickel,
 			//      as the mapping seems identical to a Libra 2...
 			// Both pickel & nickel then jump to FB_ROTATE_CW...
-			deviceQuirks.ntxBootRota   = FB_ROTATE_UR;
+			deviceQuirks.ntxBootRota                = FB_ROTATE_UR;
+			deviceQuirks.canRotate                  = true;
 			// Canonical -> native rotation mapping: { UR: 1, CW: 0, UD: 3, CCW: 2 }
-			deviceQuirks.canRotate     = true;
-			deviceQuirks.ntxRotaQuirk  = NTX_ROTA_CW_TOUCH;
-			deviceQuirks.screenDPI     = 227U;
+			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_CW_TOUCH;
+			// {1, 0, 3, 2}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UR;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CCW;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UD;
+			deviceQuirks.screenDPI                  = 227U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Elipsa 2E", sizeof(deviceQuirks.deviceName) - 1U);
 			// Flawfinder: ignore

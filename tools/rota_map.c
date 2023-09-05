@@ -33,6 +33,23 @@
 // I feel dirty.
 #include "../fbink.c"
 
+static const char*
+    linuxfb_rotate_to_string(uint32_t rotate)
+{
+	switch (rotate) {
+		case FB_ROTATE_UR:
+			return "FB_ROTATE_UR";
+		case FB_ROTATE_CW:
+			return "FB_ROTATE_CW";
+		case FB_ROTATE_UD:
+			return "FB_ROTATE_UD";
+		case FB_ROTATE_CCW:
+			return "FB_ROTATE_CCW";
+		default:
+			return "Unknown?!";
+	}
+}
+
 int
     main(void)
 {
@@ -75,6 +92,16 @@ int
 					}
 				}
 				fprintf(stdout, "}\n");
+
+				// And in terms of code
+				fprintf(stdout, "\n");
+				for (uint32_t rota = FB_ROTATE_UR; rota <= FB_ROTATE_CCW; rota++) {
+					fprintf(stdout,
+						"deviceQuirks.rotationMap[%s]  = %s;\n",
+						linuxfb_rotate_to_string(rota),
+						linuxfb_rotate_to_string(fbink_rota_native_to_canonical(rota)));
+				}
+				fprintf(stdout, "\n");
 			default:
 				// NOP
 				break;
