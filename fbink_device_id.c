@@ -935,8 +935,6 @@ static void
 			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_CW;
 			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_UD;
 			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_CCW;
-			// Same touch panel quirk as the H2O²r1
-			deviceQuirks.touchMirrorX               = false;
 			// NOTE: The Libra was the first device to exhibit weirdly broken MXCFB_WAIT_FOR_UPDATE_COMPLETE behavior,
 			//       where the ioctl would apparently randomly timeout after the full 5s for no reason...
 			//       This can be reproduced in Nickel.
@@ -1008,6 +1006,8 @@ static void
 			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UR;
 			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CCW;
 			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UD;
+			// Same touch panel quirk as the H2O²r1
+			deviceQuirks.touchMirrorX               = false;
 			// It apparently inherited its ancestor's issues...
 			deviceQuirks.unreliableWaitFor          = true;
 			deviceQuirks.screenDPI                  = 300U;
