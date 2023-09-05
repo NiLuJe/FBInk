@@ -642,9 +642,9 @@ static void
 	}
 
 	// Store the device ID...
-	deviceQuirks.deviceId     = kobo_id;
+	deviceQuirks.deviceId                   = kobo_id;
 	// HW invert should *generally* be safe on Kobo, with a few exceptions...
-	deviceQuirks.canHWInvert  = true;
+	deviceQuirks.canHWInvert                = true;
 	// NOTE: Shaky assumption that almost everything follows the same rotation scheme, with:
 	//       Boot rotation is FB_ROTATE_UD, pickel is FB_ROTATE_UR, nickel is FB_ROTATE_CCW
 	//       With the exception of the Aura HD and the H2O.
@@ -655,10 +655,20 @@ static void
 	//       as does nickel in the default Portrait orientation (buttons on the right).
 	//       I *think* the boot rota is FB_ROTATE_UR,
 	//       but detecting it as pickel instead appears to do the right thing right now, so I'm not going to mess with it...
-	deviceQuirks.ntxBootRota  = FB_ROTATE_UD;
+	deviceQuirks.ntxBootRota                = FB_ROTATE_UD;
 	// NOTE: Most kernels thankfully don't resort to weird rotation quirks ;).
 	//       c.f., mxc_epdc_fb_check_var @ drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c
-	deviceQuirks.ntxRotaQuirk = NTX_ROTA_STRAIGHT;
+	deviceQuirks.ntxRotaQuirk               = NTX_ROTA_STRAIGHT;
+	// NOTE: ntxBootRota & ntxRotaQuirk should be considered *deprecated*,
+	//       rotationMap, paired with touchSwapAxes & touchMirrorX/touchMirrorY all paint a much clearer picture...
+	// Most common native -> canonical rotation is {1, 2, 3, 0}
+	deviceQuirks.rotationMap[FB_ROTATE_UR]  = 1U;
+	deviceQuirks.rotationMap[FB_ROTATE_CW]  = 2U;
+	deviceQuirks.rotationMap[FB_ROTATE_UD]  = 3U;
+	deviceQuirks.rotationMap[FB_ROTATE_CCW] = 0U;
+	// Most common touch panel setup
+	deviceQuirks.touchSwapAxes              = true;
+	deviceQuirks.touchMirrorX               = true;
 	// NOTE: Device code list pilfered from
 	//       https://github.com/pgaskin/KoboStuff/blob/gh-pages/kobofirmware.js#L11
 	//       See also https://github.com/pgaskin/koboutils/pull/1 and the links referenced there

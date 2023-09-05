@@ -53,6 +53,10 @@ typedef struct
 	int8_t             koboVertOffset;
 	uint8_t            ntxBootRota;
 	NTX_ROTA_INDEX_T   ntxRotaQuirk;
+	uint8_t            rotationMap[4];    // Index is canonical, value is native
+	bool               touchSwapAxes;
+	bool               touchMirrorX;
+	bool               touchMirrorY;
 	bool               unreliableWaitFor;
 	bool               canRotate;
 	bool               canHWInvert;
