@@ -555,6 +555,7 @@ static void
 		// NOTE: See the comments in set_kobo_quirks about this.
 		//       I'm hoping there aren't any special snowflakes in the lineup...
 		deviceQuirks.ntxBootRota                = FB_ROTATE_UD;
+		// Standard NTX rotation quirks...
 		deviceQuirks.ntxRotaQuirk               = NTX_ROTA_STRAIGHT;
 		deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CW;
 		deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UD;
@@ -562,8 +563,8 @@ static void
 		deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
 		deviceQuirks.touchSwapAxes              = true;
 		deviceQuirks.touchMirrorX               = true;
-		// supported devices,
-		// from https://github.com/bq/cervantes/blob/master/bqHAL/Devices/mx508/src/DeviceInfoMx508.cpp#L33-L37
+		// List of supported devices,
+		// c.f., https://github.com/bq/cervantes/blob/master/bqHAL/Devices/mx508/src/DeviceInfoMx508.cpp#L33-L37
 		switch (config.pcb_id) {
 			case DEVICE_CERVANTES_TOUCH:    // BQ Cervantes Touch - Fnac Touch (2012-2013)
 				deviceQuirks.screenDPI = 167U;
@@ -668,8 +669,8 @@ static void
 	deviceQuirks.ntxRotaQuirk               = NTX_ROTA_STRAIGHT;
 	// NOTE: As far as handling touch coordinates translation, ntxBootRota & ntxRotaQuirk should be considered *deprecated*,
 	//       rotationMap, paired with touchSwapAxes & touchMirrorX/touchMirrorY all paint a much clearer picture...
-	// Most common native -> canonical rotation is {1, 2, 3, 0}
-	// (index is native, value is canonical; beware of that because most custom maps are actually identical both ways!)
+	// Most common native -> canonical rotation mapping; {1, 2, 3, 0}
+	// (index is native, value is canonical; beware of that because most custom maps happen to match both ways!)
 	deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CW;
 	deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UD;
 	deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CCW;
@@ -938,8 +939,8 @@ static void
 			deviceQuirks.touchMirrorX               = false;
 			// NOTE: The Libra was the first device to exhibit weirdly broken MXCFB_WAIT_FOR_UPDATE_COMPLETE behavior,
 			//       where the ioctl would apparently randomly timeout after the full 5s for no reason...
-			//       I don't have any of the affected devices to investigate further, so...
-			//       In KOReader, we just sleep for 1ms instead, c.f.,
+			//       This can be reproduced in Nickel.
+			//       In KOReader, we just sleep for a few ms instead as a workaround, c.f.,
 			//       https://github.com/koreader/koreader-base/blob/21f4b974c7ab64a149075adc32318f87bf71dcdc/ffi/framebuffer_mxcfb.lua#L230-L235
 			deviceQuirks.unreliableWaitFor          = true;
 			deviceQuirks.screenDPI                  = 300U;

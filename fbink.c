@@ -270,9 +270,9 @@ static void
 }
 
 #	ifdef FBINK_WITH_BUTTON_SCAN
-// NOTE: c.f., https://github.com/llandsmeer/inkvt/pull/14 for another attempt at this...
-//             (Which means, to a certain extent, fbink_rota_quirks.c)
 // NOTE: Do *not* trust this to do the right thing, see utils/finger_trace.c instead!
+//       This is basically left as-is for archeological purposes only,
+//       the only caller is in button_scan, which was kind of a crazy experiment to begin with ;).
 static void
     rotate_touch_coordinates(FBInkCoordinates* restrict coords)
 {

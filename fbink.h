@@ -421,8 +421,9 @@ typedef enum
 	NTX_ROTA_STRAIGHT = 0U,    // No shenanigans (at least as far as ioctls are concerned)
 	NTX_ROTA_ALL_INVERTED,     // Every rotation is inverted by the kernel
 	NTX_ROTA_ODD_INVERTED,     // Only Landscape (odd) rotations are inverted by the kernel
-	// NOTE: Everything below should be considered mostly deprecated, as those were attempts to piggyback on this flag
+	// NOTE: Everything below this line should be considered mostly deprecated, as those were attempts to piggyback on this flag
 	//       to handle input translations. That was a mistake, we've since switched to dedicated flags for touch input quirks.
+	//       As the comment above implies, this is only meant to deal with the kernel screwing with us when setting the fb rotation.
 	NTX_ROTA_SANE,    // NTX_ROTA_STRAIGHT, and ntxBootRota is the native Portrait orientation.
 	//                            Optionally, bonus points if that's actually UR, and the panel is natively mounted UR,
 	//                            like on the Kobo Libra.
@@ -519,10 +520,10 @@ typedef struct
 	bool             touch_mirror_x;     // deviceQuirks.touchMirrorX (panel reports inverted x coordinates)
 	bool             touch_mirror_y;     // deviceQuirks.touchMirrorY (panel reports inverted y coordinates)
 	bool    is_ntx_quirky_landscape;     // deviceQuirks.isNTX16bLandscape (rotation compensation is in effect)
-	uint8_t current_rota;                // vInfo.rotate (current native rotation, c.f., <linux/fb.h>)
-	bool    can_rotate;                  // deviceQuirks.canRotate (device has a gyro)
-	bool    can_hw_invert;               // deviceQuirks.canHWInvert (device can use EPDC inversion)
-	bool    has_eclipse_wfm;             // deviceQuirks.hasEclipseWfm (device can use nightmode waveform modes)
+	uint8_t current_rota;       // vInfo.rotate (current native rotation, <linux/fb.h>; Device rotation, not buffer!)
+	bool    can_rotate;         // deviceQuirks.canRotate (device has a gyro)
+	bool    can_hw_invert;      // deviceQuirks.canHWInvert (device can use EPDC inversion)
+	bool    has_eclipse_wfm;    // deviceQuirks.hasEclipseWfm (device can use nightmode waveform modes)
 	bool can_wait_for_submission;    // deviceQuirks.canWaitForSubmission (devices supports fbink_wait_for_submission)
 } FBInkState;
 

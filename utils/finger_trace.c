@@ -137,7 +137,6 @@ static void
 	const FBInkState*  fbink_state = ctx->fbink_state;
 	const FTrace_Slot* touch       = ctx->touch;
 
-	// Deal with device-specific rotation quirks...
 	// Grab the device-specific panel translation quirks: we end up with flags similar to what is used in KOReader,
 	// c.f., https://github.com/koreader/koreader/blob/master/frontend/device/kobo/device.lua
 	bool swap_axes = fbink_state->touch_swap_axes;
@@ -527,9 +526,9 @@ int
 	LOG("Initialized libevdev for device `%s`", libevdev_get_name(dev));
 	ctx.dev = dev;
 
-	// We'll need to know the canonical rotation to deal with coordinates translations later on...
-	// NOTE: We only check this on startup here, this would need to be updated on relevant fbink_reinit returns
-	//       if we cared about runtime rotation handling ;).
+	// We'll need to know the canonical rotation to deal with coordinates translation later on...
+	// NOTE: We only check this on startup here,
+	//       this would need to be updated on relevant fbink_reinit returns if we cared about runtime rotation handling ;).
 	ctx.canonical_rota = fbink_rota_native_to_canonical(fbink_state.current_rota);
 	LOG("Rotation: %hhu -> %hhu", fbink_state.current_rota, ctx.canonical_rota);
 
