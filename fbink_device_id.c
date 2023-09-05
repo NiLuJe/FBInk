@@ -675,7 +675,10 @@ static void
 	deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UD;
 	deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CCW;
 	deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
-	// Most common touch panel setup (the swap is a constant, the mirroring varies)
+	// Most common touch panel setup (while the swap is currently a constant, the mirroring varies on a few devices).
+	// NOTE: This one *happens* to match a sane orientation (touch panel is oriented CCW, i.e., origin at the top-right corner),
+	//       but this isn't always the case!
+	//       This is why we break it down in terms of swap & mirror flags, instead of a simple "touch-to-UR" offset in units of 90° rotations.
 	deviceQuirks.touchSwapAxes              = true;
 	deviceQuirks.touchMirrorX               = true;
 	// NOTE: Device code list pilfered from
@@ -1043,7 +1046,7 @@ static void
 		case DEVICE_KOBO_CLARA_2E:    // Clara 2E (Goldfinch)
 			deviceQuirks.hasEclipseWfm              = true;
 			deviceQuirks.isKoboMk7                  = true;    // Same MXCFB API ;).
-			// NOTE: Touch panel's native orientation is CCW, i.e., origin on the top-right corner.
+			// NOTE: Touch panel's native orientation is the usual CCW, i.e., origin on the top-right corner.
 			// NOTE: NTXHWConfig says there ought to be a KX122 gyro, but apparently not?
 			// NOTE: ioctls are straightforward (DisplayBusWidth is 8Bits),
 			//       but it appears that landscape orientations are inverted nonetheless?
