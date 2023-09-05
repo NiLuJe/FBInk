@@ -364,6 +364,11 @@ uint8_t
     fbink_rota_native_to_canonical(uint32_t rotate UNUSED_BY_NOTKOBO)
 {
 #if defined(FBINK_FOR_KOBO)
+	// Safety net for bogus input
+	if (rotate > FB_ROTATE_CCW) {
+		return ERANGE;
+	}
+
 	return deviceQuirks.rotationMap[rotate];
 #else
 	WARN("Rotation quirks are only handled on Kobo");
@@ -382,7 +387,7 @@ uint32_t
 		}
 	}
 
-	// Unreachable
+	// No match means input was out of range
 	return ERANGE;
 #else
 	WARN("Rotation quirks are only handled on Kobo");
