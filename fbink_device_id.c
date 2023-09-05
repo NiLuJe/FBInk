@@ -976,6 +976,8 @@ static void
 			deviceQuirks.canRotate                  = true;
 			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_SUNXI;
 			// There's no real linuxfb rotation support, so, {0, 1, 2, 3}
+			// In practice, kobo_sunxi_fb_fixup ensures that the rotate flag returned by fbink_get_state is canonical,
+			// despite what the actual, unused/unsupported by the driver value is...
 			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_UR;
 			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_CW;
 			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_UD;
