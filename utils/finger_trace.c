@@ -141,9 +141,9 @@ static void
 
 	// We'll need a copy of our precomputed rotation + panel coordinates transforms...
 	// (If it weren't for the Touch B quirk below, we wouldn't need a copy at all :/).
-	bool swap_axes = ctx->swap_axes;
-	bool mirror_x  = ctx->mirror_x;
-	bool mirror_y  = ctx->mirror_y;
+	bool       swap_axes = ctx->swap_axes;
+	bool       mirror_x  = ctx->mirror_x;
+	const bool mirror_y  = ctx->mirror_y;
 
 	// The Touch B does something... weird.
 	if (fbink_state->device_id == DEVICE_KOBO_TOUCH_B && touch->state == UP) {
