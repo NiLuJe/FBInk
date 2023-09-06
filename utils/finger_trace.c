@@ -113,7 +113,9 @@ typedef struct
 	FTrace_Slot*     touch;
 	FTrace_Slot*     prev_touch;
 	int              fbfd;
-	uint8_t          canonical_rota;
+	bool             swap_axes;
+	bool             mirror_x;
+	bool             mirror_y;
 } FTrace_Context;
 
 static const char*
@@ -137,43 +139,21 @@ static void
 	const FBInkState*  fbink_state = ctx->fbink_state;
 	const FTrace_Slot* touch       = ctx->touch;
 
-	// Grab the device-specific panel translation quirks: we end up with flags similar to what is used in KOReader,
-	// c.f., https://github.com/koreader/koreader/blob/master/frontend/device/kobo/device.lua
-	bool swap_axes = fbink_state->touch_swap_axes;
-	bool mirror_x  = fbink_state->touch_mirror_x;
-	bool mirror_y  = fbink_state->touch_mirror_y;
+	// We'll need a copy of our precomputed rotation + device-specific panel quirks...
+	// (If it weren't for the Touch B quirk below, we wouldn't need a copy at all :/).
+	bool swap_axes = ctx->swap_axes;
+	bool mirror_x  = ctx->mirror_x;
+	bool mirror_y  = ctx->mirror_y;
 
 	// The Touch B does something... weird.
 	if (fbink_state->device_id == DEVICE_KOBO_TOUCH_B && touch->state == UP) {
-		// The frame that reports a contact lift does the coordinates transform for us...
-		// That makes this a NOP for this frame only...
-		swap_axes = false;
-		mirror_x  = false;
-		// (mirror_y is already false on those devices)
+		// The frame that reports a contact lift does the panel-specific coordinates transform for us...
+		// That means we need to flip it back...
+		swap_axes = !swap_axes;
+		mirror_x  = !mirror_x;
 	}
 
-	// Then, we can handle standard touch translation given the current rotation.
-	// We'll deal with this by flipping the swap/mirror flags, to do everything at once.
-	// c.f., set_rotation @ https://github.com/rmkit-dev/rmkit/blob/master/src/rmkit/input/events.cpy
-	switch (ctx->canonical_rota) {
-		case FB_ROTATE_CW:
-			swap_axes = !swap_axes;
-			mirror_y  = !mirror_y;
-			break;
-		case FB_ROTATE_UD:
-			mirror_x = !mirror_x;
-			mirror_y = !mirror_y;
-			break;
-		case FB_ROTATE_CCW:
-			swap_axes = !swap_axes;
-			mirror_x  = !mirror_x;
-			break;
-		default:
-			// NOP
-			break;
-	}
-
-	// And we can finally apply all of that
+	// Apply the final translation
 	FTrace_Coordinates translated_pos;
 	if (swap_axes) {
 		translated_pos.x = touch->pos.y;
@@ -526,11 +506,39 @@ int
 	LOG("Initialized libevdev for device `%s`", libevdev_get_name(dev));
 	ctx.dev = dev;
 
-	// We'll need to know the canonical rotation to deal with coordinates translation later on...
-	// NOTE: We only check this on startup here,
+	// We need to know the canonical rotation to deal with coordinates translation...
+	// NOTE: We only check this and compute the matching swap/mirror flags on startup here,
 	//       this would need to be updated on relevant fbink_reinit returns if we cared about runtime rotation handling ;).
-	ctx.canonical_rota = fbink_rota_native_to_canonical(fbink_state.current_rota);
-	LOG("Rotation: %hhu -> %hhu", fbink_state.current_rota, ctx.canonical_rota);
+	const uint8_t canonical_rota = fbink_rota_native_to_canonical(fbink_state.current_rota);
+	LOG("Rotation: %hhu -> %hhu", fbink_state.current_rota, canonical_rota);
+
+	// Grab the device-specific panel translation quirks: we end up with flags similar to what is used in KOReader,
+	// c.f., https://github.com/koreader/koreader/blob/master/frontend/device/kobo/device.lua
+	ctx.swap_axes = fbink_state.touch_swap_axes;
+	ctx.mirror_x  = fbink_state.touch_mirror_x;
+	ctx.mirror_y  = fbink_state.touch_mirror_y;
+
+	// Then, we can handle standard touch translation given the current rotation.
+	// We'll deal with this by flipping the swap/mirror flags,
+	// which will allow us to handle everything at once when processing an input frame.
+	// c.f., set_rotation @ https://github.com/rmkit-dev/rmkit/blob/master/src/rmkit/input/events.cpy
+	switch (canonical_rota) {
+		case FB_ROTATE_CW:
+			ctx.swap_axes = !ctx.swap_axes;
+			ctx.mirror_y  = !ctx.mirror_y;
+			break;
+		case FB_ROTATE_UD:
+			ctx.mirror_x = !ctx.mirror_x;
+			ctx.mirror_y = !ctx.mirror_y;
+			break;
+		case FB_ROTATE_CCW:
+			ctx.swap_axes = !ctx.swap_axes;
+			ctx.mirror_x  = !ctx.mirror_x;
+			break;
+		default:
+			// NOP
+			break;
+	}
 
 	// Main loop
 	struct pollfd pfd = { 0 };
