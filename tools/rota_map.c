@@ -182,6 +182,7 @@ int
     main(void)
 {
 	// Loop over every device... Enum is sparse, so, DIY...
+	// NOTE: Make sure the upper bound is actually the highest *value*, because that's not necessarily the *latest* device ;).
 	for (uint16_t id = DEVICE_KOBO_TOUCH_A; id <= DEVICE_KOBO_ELIPSA_2E; id++) {
 		switch (id) {
 			case DEVICE_KOBO_TOUCH_A:

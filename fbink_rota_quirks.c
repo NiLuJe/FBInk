@@ -355,11 +355,11 @@ static int
 
 // This tries to abstract the mess away by using a simple LUT for the rotation mapping,
 // which can then be paired with simple swap & invert flags for touch input translations,
-// much like what is done in KOReader or rmkit.
+// much like what is done in KOReader or rmkit (c.f., utils/finger_trace.c for a practical example).
 // For other approaches, you can look at Plato:
 // https://github.com/baskerville/plato/blob/f45c2da65bc556bc22d664b2f9450f95c550dbf5/src/device.rs#L265-L326
 // See also rotate_touch_coordinates @ fbink.c for an earlier and gnarlier attempt at this.
-// And if you liked that one, you can look at the old implementations, which are archived in utils/rota_map.c ;).
+// And if you liked that one, you can look at the old implementations, which are archived in tools/rota_map.c ;).
 uint8_t
     fbink_rota_native_to_canonical(uint32_t rotate UNUSED_BY_NOTKOBO)
 {
