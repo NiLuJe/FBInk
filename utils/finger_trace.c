@@ -501,8 +501,8 @@ int
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
-	// And we ourselves don't need to grab it, so, don't ;).
-	libevdev_grab(dev, LIBEVDEV_UNGRAB);
+	// We'l keep it grabbed, to prevent interaction with whatever may currently be running.
+	//libevdev_grab(dev, LIBEVDEV_UNGRAB);
 	LOG("Initialized libevdev for device `%s`", libevdev_get_name(dev));
 	ctx.dev = dev;
 
