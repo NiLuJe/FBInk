@@ -1077,7 +1077,7 @@ FBINK_API int fbink_print_raw_data(int fbfd,
 				   const FBInkConfig* restrict fbink_cfg);
 
 //
-// Just clear the screen (or a region of it), eInk refresh included (or not ;)).
+// Just clear the screen (or a region of it), using the background pen color, eInk refresh included (or not ;)).
 // Returns -(ENOSYS) when drawing primitives are disabled (MINIMAL build w/o DRAW).
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
@@ -1093,6 +1093,7 @@ FBINK_API int fbink_print_raw_data(int fbfd,
 //				This is mildly useful if you got a *rotated* rect out of fbink_get_last_rect
 //				on such a quirky framebuffer state,
 //				and just want to re-use it as-is without mangling the rotation again.
+// NOTE: This can be used to draw arbitrary filled rectangles (using the bg pen color).
 FBINK_API int fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg, const FBInkRect* restrict rect, bool no_rota);
 
 // Like fbink_cls, but instead of absolute coordinates, rely on grid coordinates like fbink_print.
