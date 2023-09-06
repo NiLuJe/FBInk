@@ -194,7 +194,7 @@ static void
 }
 
 // Process an input event
-static bool
+static void
     process_evdev(const struct input_event* ev, const FTrace_Context* ctx)
 {
 	FBInkConfig*      fbink_cfg   = ctx->fbink_cfg;
@@ -223,8 +223,10 @@ static bool
 			    touch->state == DOWN ? "DOWN" : " UP ");
 		}
 
-		// Keep draining the queue without going back to poll
-		return true;
+		// We're done with this frame, back to the libevdev read loop!
+		// (Which will likely return to poll, unless we're markedly late and the kernel queue has had time to fill up again.
+		// But if all goes well, we should be polling only once per input frame).
+		return;
 	}
 
 	// Detect tool type & all contacts up on Mk. 7 (and possibly earlier "snow" protocol devices).
@@ -323,8 +325,6 @@ static bool
 				break;
 		}
 	}
-
-	return false;
 }
 
 // Parse an evdev event
@@ -348,9 +348,7 @@ static bool
 			}
 			LOG("<<< RE-SYNCED >>>");
 		} else if (rc == LIBEVDEV_READ_STATUS_SUCCESS) {
-			if (process_evdev(&ev, ctx)) {
-				continue;
-			}
+			process_evdev(&ev, ctx);
 		}
 	} while (rc == LIBEVDEV_READ_STATUS_SYNC || rc == LIBEVDEV_READ_STATUS_SUCCESS);
 	if (rc != LIBEVDEV_READ_STATUS_SUCCESS && rc != -EAGAIN) {
@@ -358,7 +356,7 @@ static bool
 		return false;
 	}
 
-	// EAGAIN: we've drained the kernel queue, badk to poll :)
+	// EAGAIN: we've drained the kernel queue, back to poll :)
 	return true;
 }
 
