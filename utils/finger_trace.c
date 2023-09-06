@@ -139,7 +139,7 @@ static void
 	const FBInkState*  fbink_state = ctx->fbink_state;
 	const FTrace_Slot* touch       = ctx->touch;
 
-	// We'll need a copy of our precomputed rotation + device-specific panel quirks...
+	// We'll need a copy of our precomputed rotation + panel coordinates transforms...
 	// (If it weren't for the Touch B quirk below, we wouldn't need a copy at all :/).
 	bool swap_axes = ctx->swap_axes;
 	bool mirror_x  = ctx->mirror_x;
@@ -153,7 +153,7 @@ static void
 		mirror_x  = !mirror_x;
 	}
 
-	// Apply the final translation
+	// Apply the final transformations
 	FTrace_Coordinates translated_pos;
 	if (swap_axes) {
 		translated_pos.x = touch->pos.y;
@@ -518,7 +518,7 @@ int
 	ctx.mirror_x  = fbink_state.touch_mirror_x;
 	ctx.mirror_y  = fbink_state.touch_mirror_y;
 
-	// Then, we can handle standard touch translation given the current rotation.
+	// Then, we can handle standard coordinates translation given the current rotation.
 	// We'll deal with this by flipping the swap/mirror flags,
 	// which will allow us to handle everything at once when processing an input frame.
 	// c.f., set_rotation @ https://github.com/rmkit-dev/rmkit/blob/master/src/rmkit/input/events.cpy
