@@ -360,9 +360,11 @@ endif
 
 # Same for libi2c, on Kobo
 ifdef KOBO
-	LIB_CPPFLAGS+=-Ilibi2c-staged/include
-	LIB_LDFLAGS+=-Llibi2c-staged/lib
+	I2C_CPPFLAGS+=-Ilibi2c-staged/include
+	I2C_LDFLAGS+=-Llibi2c-staged/lib
 	I2C_LIBS:=-l:libi2c.a
+	LIB_CPPFLAGS+=$(I2C_CPPFLAGS)
+	LIB_LDFLAGS+=$(I2C_LDFLAGS)
 	SHARED_LIBS+=$(I2C_LIBS)
 	STATIC_LIBS+=libi2c-staged/lib/libi2c.a
 endif
@@ -512,6 +514,8 @@ endif
 # On the other hand, we want to enforce MINIMAL features for the tools that don't link against FBInk,
 # but instead piggyback on the internal API via fbink.c + LTO...
 TOOLS_CPPFLAGS+=-DFBINK_MINIMAL
+# On Kobo, fbink_rota_quirks.h needs access to the i2c-tools headers
+TOOLS_CPPFLAGS+=$(I2C_CPPFLAGS)
 # Except for doom, because it needs Image support...
 DOOM_CPPFLAGS:=$(TOOLS_CPPFLAGS)
 DOOM_CPPFLAGS+=-DFBINK_WITH_DRAW -DFBINK_WITH_IMAGE
@@ -659,7 +663,7 @@ else
 utils: libi2c.built | outdir
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(TOOLS_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/rota utils/rota.c
 	$(STRIP) --strip-unneeded $(OUT_DIR)/rota
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(DOOM_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/doom utils/doom.c -lrt $(UTILS_LIBS) $(I2C_LIBS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(DOOM_CPPFLAGS) $(I2C_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(I2C_LDFLAGS) -o$(OUT_DIR)/doom utils/doom.c -lrt $(UTILS_LIBS) $(I2C_LIBS)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/doom
 endif
 
@@ -671,7 +675,7 @@ rota_map: libi2c.built | outdir
 
 ifdef KOBO
 alt: libi2c.built | outdir
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(DOOM_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/alt_buffer utils/alt_buffer.c $(I2C_LIBS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(DOOM_CPPFLAGS) $(I2C_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(I2C_LDFLAGS) -o$(OUT_DIR)/alt_buffer utils/alt_buffer.c $(I2C_LIBS)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/alt_buffer
 endif
 
@@ -679,7 +683,7 @@ ifdef KOBO
 sunxi: libi2c.built | outdir
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/ion_heaps utils/ion_heaps.c
 	$(STRIP) --strip-unneeded $(OUT_DIR)/ion_heaps
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/kx122_i2c utils/kx122_i2c.c $(I2C_LIBS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(I2C_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(I2C_LDFLAGS) -o$(OUT_DIR)/kx122_i2c utils/kx122_i2c.c $(I2C_LIBS)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/kx122_i2c
 endif
 
