@@ -618,6 +618,7 @@ sharedlib: $(SHAREDLIB_OBJS) $(UB_SHAREDLIB_OBJS) $(QT_SHAREDLIB_OBJS)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME_VER)
 endif
 
+# NOTE: We keep FEATURES_CPPFLAGS solely to handle ifdeffery crap ;)
 ifdef WITH_BUTTON_SCAN
 staticbin: $(OUT_DIR)/$(FBINK_STATIC_NAME) $(CMD_OBJS) $(BTN_OBJS)
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbink $(CMD_OBJS) $(LIBS)
@@ -693,7 +694,7 @@ ftrace: libevdev.built tiny | outdir
 	$(STRIP) --strip-unneeded $(OUT_DIR)/finger_trace
 endif
 
-# NOTE: We keep FEATURES_CPPFLAGS because there's still a fair amount of ifdeffery left ;).
+# NOTE: Same as the CLI tool, we keep FEATURES_CPPFLAGS for ifdef handling
 fbdepth: tinier
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbdepth utils/fbdepth.c $(LIBS)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/fbdepth
