@@ -670,7 +670,7 @@ endif
 # NOTE: That's a dumb little tool that was used to ease the migration to less convoluted rotation quirks handling...
 #       As such, it's native, but tailored to a Kobo target...
 rota_map: libi2c.built | outdir
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) -DFBINK_MINIMAL -DFBINK_FOR_KOBO $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/rota_map tools/rota_map.c
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(I2C_CPPFLAGS) -DFBINK_MINIMAL -DFBINK_FOR_KOBO $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/rota_map tools/rota_map.c
 	$(STRIP) --strip-unneeded $(OUT_DIR)/rota_map
 
 ifdef KOBO
