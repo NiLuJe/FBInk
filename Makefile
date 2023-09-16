@@ -349,8 +349,13 @@ endif
 # Pick up our vendored build of libunibreak, if requested
 ifdef UNIBREAK
 	EXTRA_LDFLAGS+=-Llibunibreak-staged/src/.libs
-	LIBS+=-l:libunibreak.a
-	SHARED_LIBS+=-l:libunibreak.a
+	UNIBREAK_LIBS:=-l:libunibreak.a
+	# And also vendor it inside our shared library.
+	# I'm not necessarily a fan of this approach in principle, but it ensures stuff Just Works for library users.
+	# Plus, the default build already does that by picking up the object files manually...
+	SHARED_LIBS+=$(UNIBREAK_LIBS)
+	# NOTE: We do the same for static builds, but the magic happens via partial linking in the staticlib target...
+	STATIC_LIBS+=libunibreak-staged/src/.libs/libunibreak.a
 endif
 
 # Same for libi2c, on Kobo
@@ -358,8 +363,8 @@ ifdef KOBO
 	EXTRA_CPPFLAGS+=-Ilibi2c-staged/include
 	EXTRA_LDFLAGS+=-Llibi2c-staged/lib
 	I2C_LIBS:=-l:libi2c.a
-	LIBS+=$(I2C_LIBS)
 	SHARED_LIBS+=$(I2C_LIBS)
+	STATIC_LIBS+=libi2c-staged/lib/libi2c.a
 endif
 
 # Pick up our vendored build of libevdev (for the PoC that relies on it)
@@ -512,12 +517,15 @@ DOOM_CPPFLAGS:=$(TOOLS_CPPFLAGS)
 DOOM_CPPFLAGS+=-DFBINK_WITH_DRAW -DFBINK_WITH_IMAGE
 
 # How we handle our library creation
-FBINK_SHARED_FLAGS:=-shared -Wl,-soname,libfbink.so.1
+FBINK_SHARED_LDFLAGS:=-shared -Wl,-soname,libfbink.so.1
 FBINK_SHARED_NAME_FILE:=libfbink.so.1.0.0
 FBINK_SHARED_NAME:=libfbink.so
 FBINK_SHARED_NAME_VER:=libfbink.so.1
-FBINK_STATIC_FLAGS:=rc
+FBINK_STATIC_AR_OPTS:=rc
 FBINK_STATIC_NAME:=libfbink.a
+FBINK_PARTIAL_GCC_OPTS:=-r
+FBINK_PARTIAL_NAME:=libfbink.o
+FBINK_PARTIAL_LDFLAGS:=-Wl,--whole-archive
 
 default: all
 
@@ -575,21 +583,33 @@ $(BTN_OBJS): | outdir
 all: static
 
 ifdef UNIBREAK
-staticlib: $(STATICLIB_OBJS) libunibreak.built
-	$(AR) $(FBINK_STATIC_FLAGS) $(OUT_DIR)/$(FBINK_STATIC_NAME) $(STATICLIB_OBJS)
+staticlib: $(STATICLIB_OBJS) $(QT_STATICLIB_OBJS) libunibreak.built
+	# FBInk
+	$(AR) $(FBINK_STATIC_AR_OPTS) $(OUT_DIR)/$(FBINK_STATIC_NAME) $(STATICLIB_OBJS) $(QT_STATICLIB_OBJS)
+	# Vendor in our dependencies
+	$(CC) $(FBINK_PARTIAL_GCC_OPTS) -o $(OUT_DIR)/$(FBINK_PARTIAL_NAME) $(FBINK_PARTIAL_LDFLAGS) $(OUT_DIR)/$(FBINK_STATIC_NAME) $(STATIC_LIBS)
+	rm -f $(OUT_DIR)/$(FBINK_STATIC_NAME)
+	$(AR) $(FBINK_STATIC_AR_OPTS) $(OUT_DIR)/$(FBINK_STATIC_NAME) $(OUT_DIR)/$(FBINK_PARTIAL_NAME)
+	# Finalize
 	$(RANLIB) $(OUT_DIR)/$(FBINK_STATIC_NAME)
 
-sharedlib: $(SHAREDLIB_OBJS) libunibreak.built
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(SHAREDLIB_OBJS)
+sharedlib: $(SHAREDLIB_OBJS) $(QT_SHAREDLIB_OBJS) libunibreak.built
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_LDFLAGS) -o$(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(SHAREDLIB_OBJS) $(QT_SHAREDLIB_OBJS) $(SHARED_LIBS)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME_VER)
 else
 staticlib: $(STATICLIB_OBJS) $(UB_STATICLIB_OBJS) $(QT_STATICLIB_OBJS)
-	$(AR) $(FBINK_STATIC_FLAGS) $(OUT_DIR)/$(FBINK_STATIC_NAME) $(STATICLIB_OBJS) $(UB_STATICLIB_OBJS) $(QT_STATICLIB_OBJS)
+	# FBInk
+	$(AR) $(FBINK_STATIC_AR_OPTS) $(OUT_DIR)/$(FBINK_STATIC_NAME) $(STATICLIB_OBJS) $(UB_STATICLIB_OBJS) $(QT_STATICLIB_OBJS)
+	# Vendor in our dependencies
+	$(CC) $(FBINK_PARTIAL_GCC_OPTS) -o $(OUT_DIR)/$(FBINK_PARTIAL_NAME) $(FBINK_PARTIAL_LDFLAGS) $(OUT_DIR)/$(FBINK_STATIC_NAME) $(STATIC_LIBS)
+	rm -f $(OUT_DIR)/$(FBINK_STATIC_NAME)
+	$(AR) $(FBINK_STATIC_AR_OPTS) $(OUT_DIR)/$(FBINK_STATIC_NAME) $(OUT_DIR)/$(FBINK_PARTIAL_NAME)
+	# Finalize
 	$(RANLIB) $(OUT_DIR)/$(FBINK_STATIC_NAME)
 
 sharedlib: $(SHAREDLIB_OBJS) $(UB_SHAREDLIB_OBJS) $(QT_SHAREDLIB_OBJS)
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_FLAGS) -o$(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(SHAREDLIB_OBJS) $(UB_SHAREDLIB_OBJS) $(QT_SHAREDLIB_OBJS) $(SHARED_LIBS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_LDFLAGS) -o$(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(SHAREDLIB_OBJS) $(UB_SHAREDLIB_OBJS) $(QT_SHAREDLIB_OBJS) $(SHARED_LIBS)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME_VER)
 endif
