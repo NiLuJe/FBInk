@@ -560,11 +560,11 @@ EVDEV_LDFLAGS+=-Wno-null-dereference
 
 # Shared lib
 $(OUT_DIR)/shared/%.o: %.c
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(LIB_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(QUIET_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) -o $@ -c $<
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(LIB_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(QUIET_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) -o $@ -c $<
 
 # Static lib
 $(OUT_DIR)/static/%.o: %.c
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(LIB_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(QUIET_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) -o $@ -c $<
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(LIB_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(QUIET_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) -o $@ -c $<
 
 # CLI front-end
 $(OUT_DIR)/%.o: %.c
@@ -670,7 +670,7 @@ endif
 # NOTE: That's a dumb little tool that was used to ease the migration to less convoluted rotation quirks handling...
 #       As such, it's native, but tailored to a Kobo target...
 rota_map: libi2c.built | outdir
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(I2C_CPPFLAGS) -DFBINK_MINIMAL -DFBINK_FOR_KOBO $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/rota_map tools/rota_map.c
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) -DFBINK_MINIMAL -DFBINK_FOR_KOBO $(I2C_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(LTO_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/rota_map tools/rota_map.c
 	$(STRIP) --strip-unneeded $(OUT_DIR)/rota_map
 
 ifdef KOBO
