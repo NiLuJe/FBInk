@@ -622,22 +622,35 @@ staticlib: $(OUT_DIR)/$(FBINK_STATIC_NAME)
 sharedlib: $(OUT_DIR)/$($(FBINK_SHARED_NAME_FILE))
 
 # NOTE: We keep FEATURES_CPPFLAGS solely to handle ifdeffery crap ;)
-ifdef WITH_BUTTON_SCAN
-staticbin: $(OUT_DIR)/$(FBINK_STATIC_NAME) $(CMD_OBJS) $(BTN_OBJS)
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbink $(CMD_OBJS) $(LIBS)
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/button_scan $(BTN_OBJS) $(LIBS)
-else
-staticbin: $(OUT_DIR)/$(FBINK_STATIC_NAME) $(CMD_OBJS)
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbink $(CMD_OBJS) $(LIBS)
-endif
+$(OUT_DIR)/static/fbink: $(OUT_DIR)/$(FBINK_STATIC_NAME) $(CMD_OBJS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o $@ $(CMD_OBJS) $(LIBS)
+
+$(OUT_DIR)/static/button_scan: $(OUT_DIR)/$(FBINK_STATIC_NAME) $(BTN_OBJS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o $@ $(BTN_OBJS) $(LIBS)
 
 ifdef WITH_BUTTON_SCAN
-sharedbin: $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(CMD_OBJS) $(BTN_OBJS)
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbink $(CMD_OBJS) $(LIBS)
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/button_scan $(BTN_OBJS) $(LIBS)
+staticbin: $(OUT_DIR)/static/fbink $(OUT_DIR)/static/button_scan
+	ln -f $(OUT_DIR)/static/fbink $(OUT_DIR)/fbink
+	ln -f $(OUT_DIR)/static/button_scan $(OUT_DIR)/button_scan
 else
-sharedbin: $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(CMD_OBJS)
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbink $(CMD_OBJS) $(LIBS)
+staticbin: $(OUT_DIR)/static/fbink
+	ln -f $(OUT_DIR)/static/fbink $(OUT_DIR)/fbink
+endif
+
+# NOTE: Ditto
+$(OUT_DIR)/shared/fbink: $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(CMD_OBJS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o $@ $(CMD_OBJS) $(LIBS)
+
+$(OUT_DIR)/shared/button_scan: $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE) $(BTN_OBJS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o $@ $(BTN_OBJS) $(LIBS)
+
+ifdef WITH_BUTTON_SCAN
+sharedbin: $(OUT_DIR)/shared/fbink $(OUT_DIR)/shared/button_scan
+	ln -f $(OUT_DIR)/shared/fbink $(OUT_DIR)/fbink
+	ln -f $(OUT_DIR)/shared/button_scan $(OUT_DIR)/button_scan
+else
+sharedbin: $(OUT_DIR)/shared/fbink
+	ln -f $(OUT_DIR)/shared/fbink $(OUT_DIR)/fbink
 endif
 
 striplib: $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE)
