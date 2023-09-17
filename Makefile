@@ -913,7 +913,11 @@ clean:
 	rm -rf Release/static/utf8
 	rm -rf Release/*.o
 	rm -rf Release/*.opt.yaml
+	rm -rf Release/shared/fbink
+	rm -rf Release/static/fbink
 	rm -rf Release/fbink
+	rm -rf Release/shared/button_scan
+	rm -rf Release/static/button_scan
 	rm -rf Release/button_scan
 	rm -rf Release/rota
 	rm -rf Release/fbdepth
@@ -924,6 +928,7 @@ clean:
 	rm -rf Release/kx122_i2c
 	rm -rf Release/ion_heaps
 	rm -rf Release/finger_trace
+	rm -rf Release/rota_map
 	rm -rf Release/FBInk-*.tar.xz
 	rm -rf Debug/*.a
 	rm -rf Debug/*.so*
@@ -947,7 +952,11 @@ clean:
 	rm -rf Debug/static/utf8
 	rm -rf Debug/*.o
 	rm -rf Debug/*.opt.yaml
+	rm -rf Debug/shared/fbink
+	rm -rf Debug/static/fbink
 	rm -rf Debug/fbink
+	rm -rf Debug/shared/button_scan
+	rm -rf Debug/static/button_scan
 	rm -rf Debug/button_scan
 	rm -rf Debug/rota
 	rm -rf Debug/fbdepth
@@ -958,6 +967,7 @@ clean:
 	rm -rf Debug/kx122_i2c
 	rm -rf Debug/ion_heaps
 	rm -rf Debug/finger_trace
+	rm -rf Debug/rota_map
 
 distclean: clean libunibreakclean libi2cclean libevdevclean
 	rm -rf libunibreak-staged
