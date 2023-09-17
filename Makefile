@@ -557,6 +557,11 @@ EVDEV_CFLAGS+=-Wno-suggest-attribute=pure -Wno-suggest-attribute=const -Wno-padd
 # And when *linking* libevdev (w/ LTO)
 EVDEV_LDFLAGS+=-Wno-null-dereference
 
+# Don't pollute our own exported symbols with vendored libraries'
+UNIBREAK_CFLAGS+=-fvisibility=hidden
+I2C_CFLAGS+=-fvisibility=hidden
+EVDEV_CFLAGS+=-fvisibility=hidden
+
 # Shared lib
 $(OUT_DIR)/shared/%.o: %.c
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(LIB_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(QUIET_CFLAGS) $(SHARED_CFLAGS) $(LIB_CFLAGS) $(SHARED_LIB_CFLAGS) -o $@ -c $<
@@ -617,7 +622,7 @@ $(OUT_DIR)/$(FBINK_SHARED_NAME): $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $@
 
 staticlib: $(OUT_DIR)/$(FBINK_STATIC_NAME)
-sharedlib: $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE)
+sharedlib: $(OUT_DIR)/$(FBINK_SHARED_NAME_VER) $(OUT_DIR)/$(FBINK_SHARED_NAME)
 
 # NOTE: We keep FEATURES_CPPFLAGS solely to handle ifdeffery crap ;)
 $(OUT_DIR)/static/fbink: $(OUT_DIR)/$(FBINK_STATIC_NAME) $(CMD_OBJS)
