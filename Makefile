@@ -708,15 +708,19 @@ sunxi: libi2c.built | outdir
 endif
 
 ifdef KOBO
-ftrace: libevdev.built tiny | outdir
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(EVDEV_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(EVDEV_LDFLAGS) -o$(OUT_DIR)/finger_trace utils/finger_trace.c $(LIBS) $(LIBS_FOR_STATIC) $(EVDEV_LIBS)
-	$(STRIP) --strip-unneeded $(OUT_DIR)/finger_trace
+$(OUT_DIR)/finger_trace: libevdev.built tiny.built | outdir
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(EVDEV_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(EVDEV_LDFLAGS) -o $@ utils/finger_trace.c $(LIBS) $(LIBS_FOR_STATIC) $(EVDEV_LIBS)
+	$(STRIP) --strip-unneeded $@
+
+ftrace: $(OUT_DIR)/finger_trace
 endif
 
 # NOTE: Same as the CLI tool, we keep FEATURES_CPPFLAGS for ifdef handling
-fbdepth: tinier
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/fbdepth utils/fbdepth.c $(LIBS) $(LIBS_FOR_STATIC)
-	$(STRIP) --strip-unneeded $(OUT_DIR)/fbdepth
+$(OUT_DIR)/fbdepth: tinier.built | outdir
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o $@ utils/fbdepth.c $(LIBS) $(LIBS_FOR_STATIC)
+	$(STRIP) --strip-unneeded $@
+
+fbdepth: $(OUT_DIR)/fbdepth
 
 dump: static
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/dump utils/dump.c $(LIBS) $(LIBS_FOR_STATIC)
@@ -733,10 +737,16 @@ static:
 	$(MAKE) staticbin
 
 tiny:
+tiny.built:
+	$(MAKE) clean
 	$(MAKE) staticlib MINIMAL=true DRAW=true
+	touch tiny.built
 
 tinier:
+tinier.built:
+	$(MAKE) clean
 	$(MAKE) staticlib MINIMAL=true
+	touch tinier.built
 
 # NOTE: This one may be a bit counter-intuitive... It's to build a static library built like if it were shared (i.e., PIC),
 #       because apparently that's a requirement for FFI in some high-level languages (i.e., Go; c.f., #7)
@@ -968,6 +978,8 @@ clean:
 	rm -rf Debug/ion_heaps
 	rm -rf Debug/finger_trace
 	rm -rf Debug/rota_map
+	rm -rf tiny.built
+	rm -rf tinier.built
 
 distclean: clean libunibreakclean libi2cclean libevdevclean
 	rm -rf libunibreak-staged
