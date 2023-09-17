@@ -897,7 +897,7 @@ libevdevclean:
 
 cleanlib:
 	rm -rf Release/*.a
-	rm -rf Release/static/libfbink.o
+	rm -rf Release/static/$(FBINK_PARTIAL_NAME)
 	rm -rf Release/static/*.a
 	rm -rf Release/*.so*
 	rm -rf Release/shared/*.o
@@ -919,7 +919,7 @@ cleanlib:
 	rm -rf Release/static/qimagescale/*.opt.yaml
 	rm -rf Release/static/utf8
 	rm -rf Debug/*.a
-	rm -rf Debug/static/libfbink.o
+	rm -rf Debug/static/$(FBINK_PARTIAL_NAME)
 	rm -rf Debug/static/*.a
 	rm -rf Debug/*.so*
 	rm -rf Debug/shared/*.o
