@@ -742,19 +742,19 @@ static:
 
 tinier:
 tinier.built:
-	$(MAKE) cleanlib
+	$(MAKE) cleanstaticlib
 	$(MAKE) staticlib MINIMAL=true
 	touch tinier.built
 
 tiny:
 tiny.built:
-	$(MAKE) cleanlib
+	$(MAKE) cleanstaticlib
 	$(MAKE) staticlib MINIMAL=true DRAW=true
 	touch tiny.built
 
 small:
 small.built:
-	$(MAKE) cleanlib
+	$(MAKE) cleanstaticlib
 	$(MAKE) staticlib MINIMAL=true BITMAP=true IMAGE=true
 	touch small.built
 
@@ -909,10 +909,7 @@ libevdevclean:
 	git reset --hard && \
 	git clean -fxdq
 
-cleanlib:
-	rm -rf Release/*.a
-	rm -rf Release/static/$(FBINK_PARTIAL_NAME)
-	rm -rf Release/static/*.a
+cleansharedlib:
 	rm -rf Release/*.so*
 	rm -rf Release/shared/*.o
 	rm -rf Release/shared/*.opt.yaml
@@ -923,6 +920,21 @@ cleanlib:
 	rm -rf Release/shared/qimagescale/*.o
 	rm -rf Release/shared/qimagescale/*.opt.yaml
 	rm -rf Release/shared/utf8
+	rm -rf Debug/*.so*
+	rm -rf Debug/shared/*.o
+	rm -rf Debug/shared/*.opt.yaml
+	rm -rf Debug/shared/cutef8/*.o
+	rm -rf Debug/shared/cutef8/*.opt.yaml
+	rm -rf Debug/shared/libunibreak/src/*.o
+	rm -rf Debug/shared/libunibreak/src/*.opt.yaml
+	rm -rf Debug/shared/qimagescale/*.o
+	rm -rf Debug/shared/qimagescale/*.opt.yaml
+	rm -rf Debug/shared/utf8
+
+cleanstaticlib:
+	rm -rf Release/*.a
+	rm -rf Release/static/$(FBINK_PARTIAL_NAME)
+	rm -rf Release/static/*.a
 	rm -rf Release/static/*.o
 	rm -rf Release/static/*.opt.yaml
 	rm -rf Release/static/cutef8/*.o
@@ -935,16 +947,6 @@ cleanlib:
 	rm -rf Debug/*.a
 	rm -rf Debug/static/$(FBINK_PARTIAL_NAME)
 	rm -rf Debug/static/*.a
-	rm -rf Debug/*.so*
-	rm -rf Debug/shared/*.o
-	rm -rf Debug/shared/*.opt.yaml
-	rm -rf Debug/shared/cutef8/*.o
-	rm -rf Debug/shared/cutef8/*.opt.yaml
-	rm -rf Debug/shared/libunibreak/src/*.o
-	rm -rf Debug/shared/libunibreak/src/*.opt.yaml
-	rm -rf Debug/shared/qimagescale/*.o
-	rm -rf Debug/shared/qimagescale/*.opt.yaml
-	rm -rf Debug/shared/utf8
 	rm -rf Debug/static/*.o
 	rm -rf Debug/static/*.opt.yaml
 	rm -rf Debug/static/cutef8/*.o
@@ -957,6 +959,8 @@ cleanlib:
 	rm -rf small.built
 	rm -rf tiny.built
 	rm -rf tinier.built
+
+cleanlib: cleansharedlib cleanstaticlib
 
 clean: cleanlib
 	rm -rf Kobo/
@@ -1024,4 +1028,4 @@ format:
 	clang-format -style=file -i *.c *.h cutef8/*.c cutef8/*.h utils/*.c qimagescale/*.c qimagescale/*.h tools/*.c eink/*-kobo.h eink/*-kindle.h eink/einkfb.h
 
 
-.PHONY: default outdir all staticlib sharedlib static small tiny tinier shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils rota_map alt sunxi ftrace fbdepth dump devcap clean cleanlib distclean dist format
+.PHONY: default outdir all staticlib sharedlib static small tiny tinier shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils rota_map alt sunxi ftrace fbdepth dump devcap clean cleansharedlib cleanstaticlib cleanlib distclean dist format
