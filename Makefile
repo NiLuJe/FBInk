@@ -710,7 +710,7 @@ sunxi: libi2c.built | outdir
 endif
 
 ifdef KOBO
-$(OUT_DIR)/finger_trace: libevdev.built tiny.built | outdir
+$(OUT_DIR)/finger_trace: libevdev.built tiny.built
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(EVDEV_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(EVDEV_LDFLAGS) -o $@ utils/finger_trace.c $(LIBS) $(LIBS_FOR_STATIC) $(EVDEV_LIBS)
 	$(STRIP) --strip-unneeded $@
 
@@ -718,13 +718,13 @@ ftrace: $(OUT_DIR)/finger_trace
 endif
 
 # NOTE: Same as the CLI tool, we keep FEATURES_CPPFLAGS (via *_FEATURES) for ifdef handling
-$(OUT_DIR)/fbdepth: tinier.built | outdir
+$(OUT_DIR)/fbdepth: tinier.built
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(TINIER_FEATURES) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o $@ utils/fbdepth.c $(LIBS) $(LIBS_FOR_STATIC)
 	$(STRIP) --strip-unneeded $@
 
 fbdepth: $(OUT_DIR)/fbdepth
 
-$(OUT_DIR)/dump: small.built | outdir
+$(OUT_DIR)/dump: small.built
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(SMALL_FEATURES) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o $@ utils/dump.c $(LIBS) $(LIBS_FOR_STATIC)
 	$(STRIP) --strip-unneeded $@
 
