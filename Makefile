@@ -442,29 +442,15 @@ endif
 
 # Manage modular MINIMAL builds...
 ifdef MINIMAL
-	# Support tweaking a MINIMAL build to still include drawing primitives
-	ifdef DRAW
-		FEATURES_CPPFLAGS+=-DFBINK_WITH_DRAW
-	endif
-
-	# Support tweaking a MINIMAL build to still include fixed-cell font rendering
-	ifdef BITMAP
-		# Make sure we actually have drawing support
-		ifndef DRAW
-			FEATURES_CPPFLAGS+=-DFBINK_WITH_DRAW
-		endif
-		FEATURES_CPPFLAGS+=-DFBINK_WITH_BITMAP
-	endif
-
 	# Support tweaking a MINIMAL build to still include extra bitmap fonts
 	ifdef FONTS
 		# Make sure we actually have drawing support
 		ifndef DRAW
-			FEATURES_CPPFLAGS+=-DFBINK_WITH_DRAW
+			DRAW:=1
 		endif
 		# Make sure we actually have fixed-cell support
 		ifndef BITMAP
-			FEATURES_CPPFLAGS+=-DFBINK_WITH_BITMAP
+			BITMAP:=1
 		endif
 		FEATURES_CPPFLAGS+=-DFBINK_WITH_FONTS
 		# As well as, optionally, the full Unifont...
@@ -473,11 +459,20 @@ ifdef MINIMAL
 		endif
 	endif
 
+	# Support tweaking a MINIMAL build to still include fixed-cell font rendering
+	ifdef BITMAP
+		# Make sure we actually have drawing support
+		ifndef DRAW
+			DRAW:=1
+		endif
+		FEATURES_CPPFLAGS+=-DFBINK_WITH_BITMAP
+	endif
+
 	# Support tweaking a MINIMAL build to still include image support
 	ifdef IMAGE
 		# Make sure we actually have drawing support
 		ifndef DRAW
-			FEATURES_CPPFLAGS+=-DFBINK_WITH_DRAW
+			DRAW:=1
 		endif
 		FEATURES_CPPFLAGS+=-DFBINK_WITH_IMAGE
 	endif
@@ -486,7 +481,7 @@ ifdef MINIMAL
 	ifdef OPENTYPE
 		# Make sure we actually have drawing support
 		ifndef DRAW
-			FEATURES_CPPFLAGS+=-DFBINK_WITH_DRAW
+			DRAW:=1
 		endif
 		FEATURES_CPPFLAGS+=-DFBINK_WITH_OPENTYPE
 		ifdef STATIC_LIBM
@@ -502,10 +497,15 @@ ifdef MINIMAL
 	ifdef BUTTON_SCAN
 		# Make sure we actually have drawing support
 		ifndef DRAW
-			FEATURES_CPPFLAGS+=-DFBINK_WITH_DRAW
+			DRAW:=1
 		endif
 		WITH_BUTTON_SCAN:=True
 		FEATURES_CPPFLAGS+=-DFBINK_WITH_BUTTON_SCAN
+	endif
+
+	# Support tweaking a MINIMAL build to still include drawing primitives
+	ifdef DRAW
+		FEATURES_CPPFLAGS+=-DFBINK_WITH_DRAW
 	endif
 endif
 
