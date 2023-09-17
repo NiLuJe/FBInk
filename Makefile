@@ -738,13 +738,13 @@ static:
 
 tiny:
 tiny.built:
-	$(MAKE) clean
+	$(MAKE) cleanlib
 	$(MAKE) staticlib MINIMAL=true DRAW=true
 	touch tiny.built
 
 tinier:
 tinier.built:
-	$(MAKE) clean
+	$(MAKE) cleanlib
 	$(MAKE) staticlib MINIMAL=true
 	touch tinier.built
 
@@ -899,9 +899,9 @@ libevdevclean:
 	git reset --hard && \
 	git clean -fxdq
 
-clean:
-	rm -rf Kobo/
+cleanlib:
 	rm -rf Release/*.a
+	rm -rf Release/libfbink.o
 	rm -rf Release/*.so*
 	rm -rf Release/shared/*.o
 	rm -rf Release/shared/*.opt.yaml
@@ -921,26 +921,8 @@ clean:
 	rm -rf Release/static/qimagescale/*.o
 	rm -rf Release/static/qimagescale/*.opt.yaml
 	rm -rf Release/static/utf8
-	rm -rf Release/*.o
-	rm -rf Release/*.opt.yaml
-	rm -rf Release/shared/fbink
-	rm -rf Release/static/fbink
-	rm -rf Release/fbink
-	rm -rf Release/shared/button_scan
-	rm -rf Release/static/button_scan
-	rm -rf Release/button_scan
-	rm -rf Release/rota
-	rm -rf Release/fbdepth
-	rm -rf Release/alt_buffer
-	rm -rf Release/doom
-	rm -rf Release/dump
-	rm -rf Release/Kobo-DevCap-Test.tar.gz
-	rm -rf Release/kx122_i2c
-	rm -rf Release/ion_heaps
-	rm -rf Release/finger_trace
-	rm -rf Release/rota_map
-	rm -rf Release/FBInk-*.tar.xz
 	rm -rf Debug/*.a
+	rm -rf Debug/libfbink.o
 	rm -rf Debug/*.so*
 	rm -rf Debug/shared/*.o
 	rm -rf Debug/shared/*.opt.yaml
@@ -960,6 +942,30 @@ clean:
 	rm -rf Debug/static/qimagescale/*.o
 	rm -rf Debug/static/qimagescale/*.opt.yaml
 	rm -rf Debug/static/utf8
+	rm -rf tiny.built
+	rm -rf tinier.built
+
+clean: cleanlib
+	rm -rf Kobo/
+	rm -rf Release/*.o
+	rm -rf Release/*.opt.yaml
+	rm -rf Release/shared/fbink
+	rm -rf Release/static/fbink
+	rm -rf Release/fbink
+	rm -rf Release/shared/button_scan
+	rm -rf Release/static/button_scan
+	rm -rf Release/button_scan
+	rm -rf Release/rota
+	rm -rf Release/fbdepth
+	rm -rf Release/alt_buffer
+	rm -rf Release/doom
+	rm -rf Release/dump
+	rm -rf Release/Kobo-DevCap-Test.tar.gz
+	rm -rf Release/kx122_i2c
+	rm -rf Release/ion_heaps
+	rm -rf Release/finger_trace
+	rm -rf Release/rota_map
+	rm -rf Release/FBInk-*.tar.xz
 	rm -rf Debug/*.o
 	rm -rf Debug/*.opt.yaml
 	rm -rf Debug/shared/fbink
@@ -978,8 +984,6 @@ clean:
 	rm -rf Debug/ion_heaps
 	rm -rf Debug/finger_trace
 	rm -rf Debug/rota_map
-	rm -rf tiny.built
-	rm -rf tinier.built
 
 distclean: clean libunibreakclean libi2cclean libevdevclean
 	rm -rf libunibreak-staged
@@ -1007,4 +1011,4 @@ format:
 	clang-format -style=file -i *.c *.h cutef8/*.c cutef8/*.h utils/*.c qimagescale/*.c qimagescale/*.h tools/*.c eink/*-kobo.h eink/*-kindle.h eink/einkfb.h
 
 
-.PHONY: default outdir all staticlib sharedlib static tiny tinier shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils rota_map alt sunxi ftrace fbdepth dump devcap clean distclean dist format
+.PHONY: default outdir all staticlib sharedlib static tiny tinier shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils rota_map alt sunxi ftrace fbdepth dump devcap clean cleanlib distclean dist format
