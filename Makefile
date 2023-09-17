@@ -518,6 +518,11 @@ TOOLS_CPPFLAGS+=$(I2C_CPPFLAGS)
 DOOM_CPPFLAGS:=$(TOOLS_CPPFLAGS)
 DOOM_CPPFLAGS+=-DFBINK_WITH_DRAW -DFBINK_WITH_IMAGE
 
+# We also want matching feature sets for our frozen minimal builds for the tools that *do* link against such a static lib
+TINIER_FEATURES:=-DFBINK_MINIMAL
+TINY_FEATURES:=-DFBINK_MINIMAL -DFBINK_WITH_DRAW
+SMALL_FEATURES:=-DFBINK_MINIMAL -DFBINK_WITH_DRAW -DFBINK_WITH_BITMAP -DFBINK_WITH_IMAGE
+
 # How we handle our library creation
 FBINK_SHARED_LDFLAGS:=-shared -Wl,-soname,libfbink.so.1
 FBINK_SHARED_NAME_FILE:=libfbink.so.1.0.0
@@ -712,16 +717,18 @@ $(OUT_DIR)/finger_trace: libevdev.built tiny.built | outdir
 ftrace: $(OUT_DIR)/finger_trace
 endif
 
-# NOTE: Same as the CLI tool, we keep FEATURES_CPPFLAGS for ifdef handling
+# NOTE: Same as the CLI tool, we keep FEATURES_CPPFLAGS (via *_FEATURES) for ifdef handling
 $(OUT_DIR)/fbdepth: tinier.built | outdir
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o $@ utils/fbdepth.c $(LIBS) $(LIBS_FOR_STATIC)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(TINIER_FEATURES) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o $@ utils/fbdepth.c $(LIBS) $(LIBS_FOR_STATIC)
 	$(STRIP) --strip-unneeded $@
 
 fbdepth: $(OUT_DIR)/fbdepth
 
-dump: static
-	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o$(OUT_DIR)/dump utils/dump.c $(LIBS) $(LIBS_FOR_STATIC)
-	$(STRIP) --strip-unneeded $(OUT_DIR)/dump
+$(OUT_DIR)/dump: small.built | outdir
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(SMALL_FEATURES) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o $@ utils/dump.c $(LIBS) $(LIBS_FOR_STATIC)
+	$(STRIP) --strip-unneeded $@
+
+dump: $(OUT_DIR)/dump
 
 strip: static
 	$(MAKE) stripbin
@@ -733,17 +740,23 @@ static:
 	$(MAKE) staticlib
 	$(MAKE) staticbin
 
+tinier:
+tinier.built:
+	$(MAKE) cleanlib
+	$(MAKE) staticlib MINIMAL=true
+	touch tinier.built
+
 tiny:
 tiny.built:
 	$(MAKE) cleanlib
 	$(MAKE) staticlib MINIMAL=true DRAW=true
 	touch tiny.built
 
-tinier:
-tinier.built:
+small:
+small.built:
 	$(MAKE) cleanlib
-	$(MAKE) staticlib MINIMAL=true
-	touch tinier.built
+	$(MAKE) staticlib MINIMAL=true BITMAP=true IMAGE=true
+	touch small.built
 
 # NOTE: This one may be a bit counter-intuitive... It's to build a static library built like if it were shared (i.e., PIC),
 #       because apparently that's a requirement for FFI in some high-level languages (i.e., Go; c.f., #7)
@@ -941,6 +954,7 @@ cleanlib:
 	rm -rf Debug/static/qimagescale/*.o
 	rm -rf Debug/static/qimagescale/*.opt.yaml
 	rm -rf Debug/static/utf8
+	rm -rf small.built
 	rm -rf tiny.built
 	rm -rf tinier.built
 
@@ -1010,4 +1024,4 @@ format:
 	clang-format -style=file -i *.c *.h cutef8/*.c cutef8/*.h utils/*.c qimagescale/*.c qimagescale/*.h tools/*.c eink/*-kobo.h eink/*-kindle.h eink/einkfb.h
 
 
-.PHONY: default outdir all staticlib sharedlib static tiny tinier shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils rota_map alt sunxi ftrace fbdepth dump devcap clean cleanlib distclean dist format
+.PHONY: default outdir all staticlib sharedlib static small tiny tinier shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils rota_map alt sunxi ftrace fbdepth dump devcap clean cleanlib distclean dist format

@@ -13,6 +13,7 @@ libi2c.built
 libevdev-staged
 libevdev.built
 # And our specific minimal library builds
+small.built
 tiny.built
 tinier.built
 # KDevelop
