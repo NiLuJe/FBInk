@@ -634,7 +634,7 @@ staticbin: $(OUT_DIR)/static/fbink $(OUT_DIR)/static/button_scan
 	ln -f $(OUT_DIR)/static/button_scan $(OUT_DIR)/button_scan
 else
 staticbin: $(OUT_DIR)/static/fbink
-	ln -f $(OUT_DIR)/static/fbink $(OUT_DIR)/fbink
+	ln -f $< $(OUT_DIR)/fbink
 endif
 
 # NOTE: Ditto
@@ -650,7 +650,7 @@ sharedbin: $(OUT_DIR)/shared/fbink $(OUT_DIR)/shared/button_scan
 	ln -f $(OUT_DIR)/shared/button_scan $(OUT_DIR)/button_scan
 else
 sharedbin: $(OUT_DIR)/shared/fbink
-	ln -f $(OUT_DIR)/shared/fbink $(OUT_DIR)/fbink
+	ln -f $< $(OUT_DIR)/fbink
 endif
 
 striplib: $(OUT_DIR)/$(FBINK_SHARED_NAME) $(OUT_DIR)/$(FBINK_SHARED_NAME_VER)
