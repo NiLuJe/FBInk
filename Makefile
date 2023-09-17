@@ -103,9 +103,8 @@ endif
 ifndef DEBUG
 	# Don't hobble GCC just for the sake of being interposable
 	ifeq "$(CC_IS_CLANG)" "0"
-		# Applies when building a shared library as well as just PIC in general.
 		# Fun fact: apparently the default on Clang ;).
-		SHARED_CFLAGS+=-fno-semantic-interposition
+		EXTRA_CFLAGS+=-fno-semantic-interposition
 	endif
 	# Enable loop unrolling & vectorization in the hope it'll do something smart with our pixel loops
 	EXTRA_CFLAGS+=-ftree-vectorize
