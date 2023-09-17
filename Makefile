@@ -586,14 +586,17 @@ $(BTN_OBJS): | outdir
 all: static
 
 ifdef UNIBREAK
-$(OUT_DIR)/$(FBINK_STATIC_NAME): $(STATICLIB_OBJS) $(QT_STATICLIB_OBJS) libunibreak.built
-	# FBInk
+# FBInk
+$(OUT_DIR)/static/$(FBINK_STATIC_NAME): $(STATICLIB_OBJS) $(QT_STATICLIB_OBJS) libunibreak.built
 	$(AR) $(FBINK_STATIC_AR_OPTS) $@ $(STATICLIB_OBJS) $(QT_STATICLIB_OBJS)
-	# Vendor in our dependencies
-	$(CC) $(FBINK_PARTIAL_GCC_OPTS) -o $(OUT_DIR)/$(FBINK_PARTIAL_NAME) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(FBINK_PARTIAL_LDFLAGS) $@ $(STATIC_LIBS)
-	rm -f $@
-	$(AR) $(FBINK_STATIC_AR_OPTS) $@ $(OUT_DIR)/$(FBINK_PARTIAL_NAME)
-	# Finalize
+
+# Vendor in our dependencies
+$(OUT_DIR)/static/$(FBINK_PARTIAL_NAME): $(OUT_DIR)/static/$(FBINK_STATIC_NAME)
+	$(CC) $(FBINK_PARTIAL_GCC_OPTS) -o $@ $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(FBINK_PARTIAL_LDFLAGS) $< $(STATIC_LIBS)
+
+# Final static archive
+$(OUT_DIR)/$(FBINK_STATIC_NAME): $(OUT_DIR)/static/$(FBINK_PARTIAL_NAME)
+	$(AR) $(FBINK_STATIC_AR_OPTS) $@ $<
 	$(RANLIB) $@
 
 $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE): $(SHAREDLIB_OBJS) $(QT_SHAREDLIB_OBJS) libunibreak.built
@@ -601,14 +604,17 @@ $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE): $(SHAREDLIB_OBJS) $(QT_SHAREDLIB_OBJS) lib
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $(OUT_DIR)/$(FBINK_SHARED_NAME_VER)
 else
-$(OUT_DIR)/$(FBINK_STATIC_NAME): $(STATICLIB_OBJS) $(UB_STATICLIB_OBJS) $(QT_STATICLIB_OBJS)
-	# FBInk
-	$(AR) $(FBINK_STATIC_AR_OPTS) $@ $(STATICLIB_OBJS) $(UB_STATICLIB_OBJS) $(QT_STATICLIB_OBJS)
-	# Vendor in our dependencies
-	$(CC) $(FBINK_PARTIAL_GCC_OPTS) -o $(OUT_DIR)/$(FBINK_PARTIAL_NAME) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(FBINK_PARTIAL_LDFLAGS) $@ $(STATIC_LIBS)
-	rm -f $@
-	$(AR) $(FBINK_STATIC_AR_OPTS) $@ $(OUT_DIR)/$(FBINK_PARTIAL_NAME)
-	# Finalize
+# FBInk
+$(OUT_DIR)/static/$(FBINK_STATIC_NAME): $(STATICLIB_OBJS) $(UB_STATICLIB_OBJS) $(QT_STATICLIB_OBJS)
+	$(AR) $(FBINK_STATIC_AR_OPTS) $@ $<
+
+# Vendor in our dependencies
+$(OUT_DIR)/static/$(FBINK_PARTIAL_NAME): $(OUT_DIR)/static/$(FBINK_STATIC_NAME)
+	$(CC) $(FBINK_PARTIAL_GCC_OPTS) -o $@ $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(FBINK_PARTIAL_LDFLAGS) $< $(STATIC_LIBS)
+
+# Final static archive
+$(OUT_DIR)/$(FBINK_STATIC_NAME): $(OUT_DIR)/static/$(FBINK_PARTIAL_NAME)
+	$(AR) $(FBINK_STATIC_AR_OPTS) $@ $<
 	$(RANLIB) $@
 
 $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE): $(SHAREDLIB_OBJS) $(UB_SHAREDLIB_OBJS) $(QT_SHAREDLIB_OBJS)
@@ -901,7 +907,8 @@ libevdevclean:
 
 cleanlib:
 	rm -rf Release/*.a
-	rm -rf Release/libfbink.o
+	rm -rf Release/static/libfbink.o
+	rm -rf Release/static/*.a
 	rm -rf Release/*.so*
 	rm -rf Release/shared/*.o
 	rm -rf Release/shared/*.opt.yaml
@@ -922,7 +929,8 @@ cleanlib:
 	rm -rf Release/static/qimagescale/*.opt.yaml
 	rm -rf Release/static/utf8
 	rm -rf Debug/*.a
-	rm -rf Debug/libfbink.o
+	rm -rf Debug/static/libfbink.o
+	rm -rf Debug/static/*.a
 	rm -rf Debug/*.so*
 	rm -rf Debug/shared/*.o
 	rm -rf Debug/shared/*.opt.yaml
