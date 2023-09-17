@@ -665,8 +665,7 @@ striparchive: $(OUT_DIR)/$(FBINK_STATIC_NAME)
 	$(RANLIB) $(OUT_DIR)/$(FBINK_STATIC_NAME)
 
 ifdef WITH_BUTTON_SCAN
-# NOTE: Not a real make dependency, don't call this on its own!
-stripbin: $(OUT_DIR)/fbink $(OUT_DIR)/button_scan
+stripbin:
 	$(STRIP) --strip-unneeded $(OUT_DIR)/fbink
 	$(STRIP) --strip-unneeded $(OUT_DIR)/button_scan
 else
