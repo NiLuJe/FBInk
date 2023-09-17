@@ -621,7 +621,7 @@ $(OUT_DIR)/$(FBINK_SHARED_NAME): $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $@
 
 staticlib: $(OUT_DIR)/$(FBINK_STATIC_NAME)
-sharedlib: $(OUT_DIR)/$($(FBINK_SHARED_NAME_FILE))
+sharedlib: $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE)
 
 # NOTE: We keep FEATURES_CPPFLAGS solely to handle ifdeffery crap ;)
 $(OUT_DIR)/static/fbink: $(OUT_DIR)/$(FBINK_STATIC_NAME) $(CMD_OBJS)
