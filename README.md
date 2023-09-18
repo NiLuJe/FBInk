@@ -110,6 +110,8 @@ Be warned that this'll add almost 2MB to the binary size, and that the font is a
 For obvious reasons, this is *never* enabled by default.  
 Unless you're doing *very* specific things, you generally want *at least* `DRAW` & `BITMAP` enabled in a `MINIMAL` build...
 
+Don't forget to run at the very least a `make cleanlib` when changing target platforms or feature flags, otherwise the latest matching library build will be kept, because it'll fullfill the make dependencies ;).
+
 Along the way, a few auxiliary tools may crop up in the `utils` folder. `make utils` will do a static build of these (which is the recommended way to do it, as they rather crudely piggyback on FBInk's *internal* API). Currently, these consist of a diagnostic tool regarding rotation behavior, and the doom stress-test mentioned below.  
 Most of these have *only* been tested on Kobo, and should probably be left alone unless you know what you're doing ;).  
 
