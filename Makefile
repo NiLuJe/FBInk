@@ -295,32 +295,7 @@ EXTRA_CPPFLAGS+=$(TARGET_CPPFLAGS)
 FBINK_VERSION:=$(shell git describe || cat VERSION)
 # Only use it if we got something useful...
 ifdef FBINK_VERSION
-	ifdef KINDLE
-		LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kindle"'
-	else
-		ifdef CERVANTES
-			LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Cervantes"'
-		else
-			ifdef LINUX
-				LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Linux"'
-			else
-				ifdef KOBO
-					LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for Kobo"'
-				else
-					ifdef REMARKABLE
-						LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for reMarkable"'
-					else
-						ifdef POCKETBOOK
-							LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION) for PocketBook"'
-						else
-							# NOTE: Should never happen!
-							LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION)"'
-						endif
-					endif
-				endif
-			endif
-		endif
-	endif
+	LIB_CFLAGS+=-DFBINK_VERSION='"$(FBINK_VERSION)"'
 else
 	# Just so we don't use an empty var down the line...
 	FBINK_VERSION:=dev

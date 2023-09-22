@@ -114,8 +114,8 @@ static bool
 	// without falling into any "might be behind the bezel" quirk,
 	// which would cause it to potentially already be black (or transparent) in Nickel...
 	FBInkCoordinates coords = { (unsigned short int) (viewWidth / 2U), (unsigned short int) (viewHeight - 1) };
-	(*fxpRotateCoords)(&coords);
-	FBInkPixel pixel = { 0U };
+			 (*fxpRotateCoords)(&coords);
+	FBInkPixel       pixel = { 0U };
 
 	// We loop for <timeout> seconds at most, waking up every <granularity> ms...
 	unsigned short int iterations;

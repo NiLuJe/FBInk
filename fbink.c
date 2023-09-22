@@ -98,6 +98,63 @@ const char*
 	return FBINK_VERSION;
 }
 
+// Return the target platform of the current library build
+FBINK_TARGET_T
+fbink_target(void)
+{
+#if defined(FBINK_FOR_LINUX)
+	return FBINK_TARGET_LINUX;
+#elif defined(FBINK_FOR_KOBO)
+	return FBINK_TARGET_KOBO;
+#elif defined(FBINK_FOR_KINDLE)
+	return FBINK_TARGET_KINDLE;
+#elif defined(FBINK_FOR_LEGACY)
+	return FBINK_TARGET_KINDLE_LEGACY;
+#elif defined(FBINK_FOR_CERVANTES)
+	return FBINK_TARGET_CERVANTES;
+#elif defined(FBINK_FOR_REMARKABLE)
+	return FBINK_TARGET_REMARKABLE;
+#elif defined(FBINK_FOR_POCKETBOOK)
+	return FBINK_TARGET_POCKETBOOK;
+#else
+	// Unreachable
+	return FBINK_TARGET_MAX;
+#endif
+}
+
+// Return the feature set of the current library build
+int32_t
+    fbink_features(void)
+{
+#ifndef FBINK_MINIMAL
+	int32_t features = FBINK_FEATURE_FULL;
+#else
+	int32_t features = FBINK_FEATURE_MINIMAL;
+#	ifdef FBINK_WITH_DRAW
+	features |= FBINK_FEATURE_DRAW;
+#	endif
+#	ifdef FBINK_WITH_BITMAP
+	features |= FBINK_FEATURE_BITMAP;
+#	endif
+#	ifdef FBINK_WITH_FONTS
+	features |= FBINK_FEATURE_FONTS;
+#	endif
+#	ifdef FBINK_WITH_UNIFONT
+	features |= FBINK_FEATURE_UNIFONT;
+#	endif
+#	ifdef FBINK_WITH_OPENTYPE
+	features |= FBINK_FEATURE_OPENTYPE;
+#	endif
+#	ifdef FBINK_WITH_IMAGE
+	features |= FBINK_FEATURE_IMAGE;
+#	endif
+#endif    // !FBINK_MINIMAL
+#ifdef FBINK_WITH_BUTTON_SCAN
+	features |= FBINK_FEATURE_BUTTON_SCAN;
+#endif
+	return features;
+}
+
 #ifdef FBINK_WITH_DRAW
 // #RGB -> RGB565
 static inline __attribute__((always_inline, hot)) uint16_t
@@ -9842,7 +9899,7 @@ static unsigned char*
 		const unsigned char* restrict src = data + (j * x * img_n);
 		unsigned char* restrict dest      = good + (j * x * req_comp);
 
-#	define STBI__COMBO(a, b) ((a) *8 + (b))
+#	define STBI__COMBO(a, b) ((a) * 8 + (b))
 #	define STBI__CASE(a, b)                                                                                         \
 		case STBI__COMBO(a, b):                                                                                  \
 			for (int i = x - 1; i >= 0; --i, src += a, dest += b)
@@ -10650,7 +10707,7 @@ static int
 
 						coords.x = (unsigned short int) (i + x_off);
 						coords.y = (unsigned short int) (j + y_off);
-						(*fxpRotateCoords)(&coords);
+							   (*fxpRotateCoords)(&coords);
 						FBInkPixel bg_px;
 						get_pixel_RGB565(&coords, &bg_px);
 
@@ -11703,7 +11760,7 @@ FBInkRect
 		struct mxcfb_rect region = {
 			.top = lastRect.top, .left = lastRect.left, .width = lastRect.width, .height = lastRect.height
 		};
-		(*fxpRotateRegion)(&region);
+			  (*fxpRotateRegion)(&region);
 		FBInkRect rect = { .left   = (unsigned short int) region.left,
 				   .top    = (unsigned short int) region.top,
 				   .width  = (unsigned short int) region.width,

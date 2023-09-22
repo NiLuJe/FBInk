@@ -79,6 +79,33 @@ extern "C" {
 //       and this makes bindings happy because they'll have an explicit typedef to rely on.
 //       Fun fact: this is essentially what the Go bindings were already doing ;).
 //
+// Supported targets
+typedef enum
+{
+	FBINK_TARGET_LINUX = 0U,
+	FBINK_TARGET_KOBO,
+	FBINK_TARGET_KINDLE,
+	FBINK_TARGET_KINDLE_LEGACY,
+	FBINK_TARGET_CERVANTES,
+	FBINK_TARGET_REMARKABLE,
+	FBINK_TARGET_POCKETBOOK,
+	FBINK_TARGET_MAX = UINT8_MAX,
+} __attribute__((packed)) FBINK_TARGET_E;
+typedef uint8_t FBINK_TARGET_T;
+
+// Supported feature flags
+#define FBINK_FEATURE_MINIMAL     0
+#define FBINK_FEATURE_DRAW        (1 << 0)    // Basic draw primitives
+#define FBINK_FEATURE_BITMAP      (1 << 1)    // Fixed-cell font rendering, plus the base IBM font
+#define FBINK_FEATURE_FONTS       (1 << 2)    // The full set of fixed-cell fonts
+#define FBINK_FEATURE_UNIFONT     (1 << 3)    // Unifont for the fixed-cell font rendering
+#define FBINK_FEATURE_OPENTYPE    (1 << 4)    // TrueType/OpenType front rendering
+#define FBINK_FEATURE_IMAGE       (1 << 5)    // Image support
+#define FBINK_FEATURE_BUTTON_SCAN (1 << 6)    // Button scan support (Kobo only, deprecated)
+#define FBINK_FEATURE_FULL                                                                                               \
+	(FBINK_FEATURE_DRAW | FBINK_FEATURE_BITMAP | FBINK_FEATURE_FONTS | FBINK_FEATURE_OPENTYPE |                      \
+	 FBINK_FEATURE_IMAGE | FBINK_FEATURE_BUTTON_SCAN)
+
 // List of available fonts
 typedef enum
 {
@@ -657,6 +684,14 @@ typedef struct
 
 // Returns the version of the currently loaded FBInk library.
 FBINK_API const char* fbink_version(void) __attribute__((const));
+
+// Returns the target platform of the currently loaded FBInk library.
+// c.f., FBINK_TARGET_E enum
+FBINK_API FBINK_TARGET_T fbink_target(void);
+
+// Returns a bitmask of the features available in the currently loaded FBInk library.
+// c.f., FBINK_FEATURE_ defines
+FBINK_API int32_t fbink_features(void);
 
 //
 // Open the framebuffer character device,

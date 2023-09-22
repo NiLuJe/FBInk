@@ -95,12 +95,12 @@ enum eink_update_mode
 	EINK_NO_MERGE         = 0b10000000000000000000000000000000    // 0x80000000
 };
 
-#define GET_UPDATE_MODE(mode)   ((mode) &0x0000ffff)
-#define GET_UPDATE_INFO(mode)   ((mode) &0xffff0000)
-#define IS_NO_MERGE(mode)       ((mode) &EINK_NO_MERGE)
-#define IS_PARTIAL_UPDATE(mode) ((mode) &EINK_PARTIAL_MODE)
-#define IS_AUTO_MODE(mode)      ((mode) &EINK_AUTO_MODE)
-#define IS_REGAL_MODE(mode)     ((mode) &EINK_REGAL_MODE)
+#define GET_UPDATE_MODE(mode)   ((mode) & 0x0000ffff)
+#define GET_UPDATE_INFO(mode)   ((mode) & 0xffff0000)
+#define IS_NO_MERGE(mode)       ((mode) & EINK_NO_MERGE)
+#define IS_PARTIAL_UPDATE(mode) ((mode) & EINK_PARTIAL_MODE)
+#define IS_AUTO_MODE(mode)      ((mode) & EINK_AUTO_MODE)
+#define IS_REGAL_MODE(mode)     ((mode) & EINK_REGAL_MODE)
 
 typedef enum eink_update_strategy
 {
