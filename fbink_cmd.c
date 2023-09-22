@@ -27,53 +27,59 @@
 
 #include "fbink_cmd.h"
 
+static const char*
+    has_feature(const uint32_t mask, uint32_t flag)
+{
+	if (mask & flag) {
+		return "Yes";
+	} else {
+		return "No";
+	}
+}
 // Help message
 static void
     show_helpmsg(void)
 {
-	printf(
-	    "\n"
-#ifdef FBINK_MINIMAL
-	    "FBInk %s [Modular build:"
-	    " Fonts="
-#	ifdef FBINK_WITH_FONTS
-	    "Yes"
-#	else
-	    "No"
-#	endif    // FBINK_WITH_FONTS
-	    " Unifont="
-#	ifdef FBINK_WITH_UNIFONT
-	    "Yes"
-#	else
-	    "No"
-#	endif    // FBINK_WITH_UNIFONT
-	    " Image="
-#	ifdef FBINK_WITH_IMAGE
-	    "Yes"
-#	else
-	    "No"
-#	endif    // FBINK_WITH_IMAGE
-	    " OpenType="
-#	ifdef FBINK_WITH_OPENTYPE
-	    "Yes"
-#	else
-	    "No"
-#	endif    // FBINK_WITH_OPENTYPE
-#	if defined(FBINK_FOR_KOBO)
-	    " ButtonScan="
-#		ifdef FBINK_WITH_BUTTON_SCAN
-	    "Yes"
-#		else
-	    "No"
-#		endif    // FBINK_WITH_BUTTON_SCAN
-#	endif            // FBINK_FOR_KOBO
-	    "]"
-#else
-	    "FBInk %s"
-#endif    // FBINK_MINIMAL
+	printf("\nFBInk %s", fbink_version());
+	// Display the target platform
+	const FBINK_TARGET_T platform = fbink_target();
+	switch (platform) {
+		case FBINK_TARGET_LINUX:
+			printf(" for Linux");
+			break;
+		case FBINK_TARGET_KOBO:
+			printf(" for Kobo");
+			break;
+		case FBINK_TARGET_KINDLE:
+			printf(" for Kindle");
+			break;
+		case FBINK_TARGET_KINDLE_LEGACY:
+			printf(" for Legacy Kindle");
+			break;
+		case FBINK_TARGET_CERVANTES:
+			printf(" for Cervantes");
+			break;
+		case FBINK_TARGET_REMARKABLE:
+			printf(" for reMarkable");
+			break;
+		case FBINK_TARGET_POCKETBOOK:
+			printf(" for PocketBook");
+			break;
+	}
+	// Recap the build features
+	const uint32_t features = fbink_features();
+	printf(" [Draw=%s, Bitmap=%s, Fonts=%s, Unifont=%s, OpenType=%s, Image=%s, ButtonScan=%s]",
+	       has_feature(features, FBINK_FEATURE_DRAW),
+	       has_feature(features, FBINK_FEATURE_BITMAP),
+	       has_feature(features, FBINK_FEATURE_FONTS),
+	       has_feature(features, FBINK_FEATURE_UNIFONT),
+	       has_feature(features, FBINK_FEATURE_OPENTYPE),
+	       has_feature(features, FBINK_FEATURE_IMAGE),
+	       has_feature(features, FBINK_FEATURE_BUTTON_SCAN));
 #ifdef DEBUG
-	    " [DEBUG]"
+	printf(" [DEBUG]");
 #endif
+	printf(
 	    "\n"
 	    "\n"
 	    "Usage: fbink [OPTIONS] [STRING ...]\n"
@@ -386,8 +392,7 @@ static void
 	    "\tAlso, the daemon will NOT abort on FBInk errors, and it redirects stdout & stderr to /dev/null, so errors & bogus input will be silently ignored!\n"
 	    "\tIt can abort on early setup errors, though, before *or* after having redirected stderr...\n"
 	    "\tIt does enforce logging to the syslog, though, but, again, early commandline parsing errors may still be sent to stderr...\n"
-	    "\n",
-	    fbink_version());
+	    "\n");
 
 	return;
 }
