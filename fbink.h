@@ -103,8 +103,7 @@ typedef uint8_t FBINK_TARGET_T;
 #define FBINK_FEATURE_IMAGE       (1 << 5)    // Image support
 #define FBINK_FEATURE_BUTTON_SCAN (1 << 6)    // Button scan support (Kobo only, deprecated)
 #define FBINK_FEATURE_FULL                                                                                               \
-	(FBINK_FEATURE_DRAW | FBINK_FEATURE_BITMAP | FBINK_FEATURE_FONTS | FBINK_FEATURE_OPENTYPE |                      \
-	 FBINK_FEATURE_IMAGE | FBINK_FEATURE_BUTTON_SCAN)
+	(FBINK_FEATURE_DRAW | FBINK_FEATURE_BITMAP | FBINK_FEATURE_FONTS | FBINK_FEATURE_OPENTYPE | FBINK_FEATURE_IMAGE)
 
 // List of available fonts
 typedef enum
