@@ -123,13 +123,13 @@ fbink_target(void)
 }
 
 // Return the feature set of the current library build
-int32_t
+uint32_t
     fbink_features(void)
 {
 #ifndef FBINK_MINIMAL
-	int32_t features = FBINK_FEATURE_FULL;
+	uint32_t features = FBINK_FEATURE_FULL;
 #else
-	int32_t features = FBINK_FEATURE_MINIMAL;
+	uint32_t features = FBINK_FEATURE_MINIMAL;
 #	ifdef FBINK_WITH_DRAW
 	features |= FBINK_FEATURE_DRAW;
 #	endif
@@ -5366,9 +5366,10 @@ void
 {
 	fprintf(
 	    stdout,
-	    "FBINK_VERSION='%s';FBINK_TARGET=%hhu;viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;invertedGrayscale=%d;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isMTK=%d;isSunxi=%d;SunxiHasFBDamage=%d;SunxiForceRota=%d;isKindleLegacy=%d;isKoboNonMT=%d;unreliableWaitFor=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;rotationMap={ %hhu, %hhu, %hhu, %hhu};touchSwapAxes=%d;touchMirrorX=%d;touchMirrorY=%d;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;hasEclipseWfm=%d;canWaitForSubmission=%d;",
+	    "FBINK_VERSION='%s';FBINK_TARGET=%hhu;FBINK_FEATURES=%#x;viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;invertedGrayscale=%d;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isMTK=%d;isSunxi=%d;SunxiHasFBDamage=%d;SunxiForceRota=%d;isKindleLegacy=%d;isKoboNonMT=%d;unreliableWaitFor=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;rotationMap={ %hhu, %hhu, %hhu, %hhu};touchSwapAxes=%d;touchMirrorX=%d;touchMirrorY=%d;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;hasEclipseWfm=%d;canWaitForSubmission=%d;",
 	    fbink_version(),
 	    fbink_target(),
+	    fbink_features(),
 	    viewWidth,
 	    viewHeight,
 	    screenWidth,

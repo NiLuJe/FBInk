@@ -691,7 +691,7 @@ FBINK_API FBINK_TARGET_T fbink_target(void);
 
 // Returns a bitmask of the features available in the currently loaded FBInk library.
 // c.f., FBINK_FEATURE_ defines
-FBINK_API int32_t fbink_features(void);
+FBINK_API uint32_t fbink_features(void);
 
 //
 // Open the framebuffer character device,
