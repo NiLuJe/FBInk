@@ -715,20 +715,17 @@ static:
 	$(MAKE) staticlib
 	$(MAKE) staticbin
 
-tinier:
-tinier.built:
+tinier tinier.built:
 	$(MAKE) cleanstaticlib
 	$(MAKE) staticlib MINIMAL=true
 	touch tinier.built
 
-tiny:
-tiny.built:
+tiny tiny.built:
 	$(MAKE) cleanstaticlib
 	$(MAKE) staticlib MINIMAL=true DRAW=true
 	touch tiny.built
 
-small:
-small.built:
+small small.built:
 	$(MAKE) cleanstaticlib
 	$(MAKE) staticlib MINIMAL=true BITMAP=true IMAGE=true
 	touch small.built
