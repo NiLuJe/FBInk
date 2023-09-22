@@ -404,11 +404,6 @@ else
 	FEATURES_CPPFLAGS+=-DFBINK_WITH_FONTS
 	FEATURES_CPPFLAGS+=-DFBINK_WITH_IMAGE
 	FEATURES_CPPFLAGS+=-DFBINK_WITH_OPENTYPE
-	# Connect button scanning is Kobo specific
-	ifdef KOBO
-		WITH_BUTTON_SCAN:=True
-		FEATURES_CPPFLAGS+=-DFBINK_WITH_BUTTON_SCAN
-	endif
 	# Unifont is *always* optional, because it'll add almost 2MB to the binary size!
 	ifdef UNIFONT
 		FEATURES_CPPFLAGS+=-DFBINK_WITH_UNIFONT

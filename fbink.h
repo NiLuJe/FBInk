@@ -99,7 +99,7 @@ typedef uint8_t FBINK_TARGET_T;
 #define FBINK_FEATURE_BITMAP      (1 << 1)    // Fixed-cell font rendering, plus the base IBM font
 #define FBINK_FEATURE_FONTS       (1 << 2)    // The full set of fixed-cell fonts
 #define FBINK_FEATURE_UNIFONT     (1 << 3)    // Unifont for the fixed-cell font rendering
-#define FBINK_FEATURE_OPENTYPE    (1 << 4)    // TrueType/OpenType front rendering
+#define FBINK_FEATURE_OPENTYPE    (1 << 4)    // TrueType/OpenType font rendering
 #define FBINK_FEATURE_IMAGE       (1 << 5)    // Image support
 #define FBINK_FEATURE_BUTTON_SCAN (1 << 6)    // Button scan support (Kobo only, deprecated)
 #define FBINK_FEATURE_FULL                                                                                               \
@@ -1276,6 +1276,8 @@ FBINK_API FBInkRect fbink_get_last_rect(bool rotated);
 //
 // Scan the screen for Kobo's "Connect" button in the "USB plugged in" popup,
 // and optionally generate an input event to press that button.
+// NOTE: This is deprecated, and no longer built by default on Kobo.
+//       NickelMenu and/or NickelDBus provide far more robust solutions for this.
 // KOBO i.MX Only! Returns -(ENOSYS) when disabled (!KOBO, or Kobo on a sunxi SoC, as well as MINIMAL builds w/o BUTTON_SCAN).
 // Otherwise, returns a few different things on failure:
 //	-(EXIT_FAILURE)	when the button was not found.
@@ -1295,7 +1297,7 @@ FBINK_API FBInkRect fbink_get_last_rect(bool rotated);
 //				avoiding the nanosleep() calls that would incur...
 // NOTE: Thread-safety obviously goes out the window with press_button enabled,
 //       since you can then only reasonably expect to be able to concurrently run a single instance of that function ;).
-FBINK_API int fbink_button_scan(int fbfd, bool press_button, bool nosleep);
+FBINK_API int fbink_button_scan(int fbfd, bool press_button, bool nosleep) __attribute__((deprecated));
 
 // Wait for the end of a Kobo USBMS session, trying to detect a successful content import in the process.
 // NOTE: Expects to be called while in the "Connected" state (like after a successful fbink_button_scan() call w/ press_buton)!
