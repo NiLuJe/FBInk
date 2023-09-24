@@ -3436,7 +3436,7 @@ static int
 #endif            // FBINK_FOR_LINUX
 
 // Same thing for WAIT_FOR_UPDATE_SUBMISSION requests...
-#ifndef FBINK_FOR_LINUX
+#if defined(FBINK_FOR_KINDLE) || defined(FBINK_FOR_KOBO)
 static int
     wait_for_submission(int fbfd, uint32_t marker)
 {
@@ -3456,8 +3456,10 @@ static int
 	}
 #	endif
 }
+#endif    // FBINK_FOR_KINDLE || FBINK_FOR_KOBO
 
 // Same thing for WAIT_FOR_UPDATE_COMPLETE requests...
+#ifndef FBINK_FOR_LINUX
 static int
     wait_for_complete(int fbfd, uint32_t marker)
 {

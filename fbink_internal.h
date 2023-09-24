@@ -743,8 +743,10 @@ static inline void compute_update_marker(void);
 #endif    // !FBINK_FOR_LINUX
 static int refresh_compat(int, const struct mxcfb_rect, bool, const FBInkConfig*);
 static int refresh(int, const struct mxcfb_rect, const FBInkConfig*);
-#ifndef FBINK_FOR_LINUX
+#if defined(FBINK_FOR_KINDLE) || defined(FBINK_FOR_KOBO)
 static int wait_for_submission(int, uint32_t);
+#endif
+#ifndef FBINK_FOR_LINUX
 static int wait_for_complete(int, uint32_t);
 #endif
 #ifdef FBINK_FOR_KOBO
