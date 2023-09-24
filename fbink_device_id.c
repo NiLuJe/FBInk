@@ -1568,6 +1568,11 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBBLux3", sizeof(deviceQuirks.deviceCodename) - 1U);
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_617;
+		} else if (strcmp(model_name, "PB618") == 0 || strcmp(model_name, "PocketBook 618") == 0) {
+			deviceQuirks.screenDPI = 212U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBBLux4", sizeof(deviceQuirks.deviceCodename) - 1U);
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_618;
 		} else if (strcmp(model_name, "PocketBook 622") == 0) {
 			deviceQuirks.screenDPI = 167U;
 			// Flawfinder: ignore
@@ -1604,6 +1609,11 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBLux5", sizeof(deviceQuirks.deviceCodename) - 1U);
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_LUX_5;
+		} else if (strcmp(model_name, "PB629") == 0) {
+			deviceQuirks.screenDPI = 212U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBVerse", sizeof(deviceQuirks.deviceCodename) - 1U);
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_VERSE;
 		} else if (strcmp(model_name, "PocketBook 630") == 0) {
 			deviceQuirks.screenDPI = 212U;
 			// Flawfinder: ignore
@@ -1624,6 +1634,11 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBColor", sizeof(deviceQuirks.deviceCodename) - 1U);
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_COLOR;
+		} else if (strcmp(model_name, "PB634") == 0) {
+			deviceQuirks.screenDPI = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBVersePro", sizeof(deviceQuirks.deviceCodename) - 1U);
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_VERSE_PRO;
 		} else if (strcmp(model_name, "PB640") == 0 || strcmp(model_name, "PocketBook 640") == 0) {
 			deviceQuirks.screenDPI = 167U;
 			// Flawfinder: ignore
