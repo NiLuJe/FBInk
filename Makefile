@@ -815,8 +815,7 @@ kobo: armcheck
 	mkdir -p Kobo/usr/local/fbink/bin Kobo/usr/bin Kobo/usr/local/fbink/lib Kobo/usr/local/fbink/include
 	cp -av $(CURDIR)/Release/fbink Kobo/usr/local/fbink/bin
 	ln -sf /usr/local/fbink/bin/fbink Kobo/usr/bin/fbink
-	cp -av $(CURDIR)/Release/button_scan Kobo/usr/local/fbink/bin
-	ln -sf /usr/local/fbink/bin/button_scan Kobo/usr/bin/button_scan
+	-cp -av $(CURDIR)/Release/button_scan Kobo/usr/local/fbink/bin && ln -sf /usr/local/fbink/bin/button_scan Kobo/usr/bin/button_scan
 	mv -v $(CURDIR)/fbdepth  Kobo/usr/local/fbink/bin
 	cp -av $(CURDIR)/Release/doom Kobo/usr/local/fbink/bin
 	cp -av $(CURDIR)/Release/$(FBINK_SHARED_NAME_FILE) Kobo/usr/local/fbink/lib
