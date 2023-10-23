@@ -563,7 +563,7 @@ typedef struct
 	short int        col;         // x axis (i.e., column), counts down from the right edge of the screen if negative
 	uint8_t          fontmult;    // Font scaling multiplier (i.e., 4 -> x4), 0 means automatic.
 	FONT_INDEX_T     fontname;    // Request a specific bundled font
-	bool             is_inverted;    // Invert colors.
+	bool             is_inverted;    // Invert colors when *drawing* stuff (e.g., text, clear & images).
 	//				This is *NOT* mutually exclusive with is_nightmode, and is *always* supported.
 	bool             is_flashing;    // Request a black flash on refresh (e.g., UPDATE_MODE_FULL instead of PARTIAL)
 	bool             is_cleared;     // Clear the full screen beforehand (honors bg_color & is_inverted)
