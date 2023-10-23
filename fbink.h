@@ -870,12 +870,19 @@ FBINK_API int fbink_printf(int fbfd,
 //       (There's no "shared" framebuffer, each process gets its own private, zero-initialized (i.e., solid black) buffer).
 // NOTE: In case of ioctl failure, errno *should* be preserved,
 //       allowing the caller to possibly handle some very specific edge-cases.
+// NOTE: The confusing coordinates order is inherited from the layout of an mxcfb_rect struct.
+//       See fbink_refresh_rect below for a variant that takes an FBInkRect instead.
 FBINK_API int fbink_refresh(int      fbfd,
 			    uint32_t region_top,
 			    uint32_t region_left,
 			    uint32_t region_width,
 			    uint32_t region_height,
 			    const FBInkConfig* restrict fbink_cfg);
+
+//
+// Variant of fbink_refresh that takes an FBInkRect instead of broken out coordinates.
+// Completely identical behavior.
+FBINK_API int fbink_refresh_rect(int fbfd, const FBInkRect* restrict rect, const FBInkConfig* restrict fbink_cfg);
 
 // A simple wrapper around the MXCFB_WAIT_FOR_UPDATE_SUBMISSION ioctl, without requiring you to include mxcfb headers.
 // Returns -(EINVAL) when the update marker is invalid.

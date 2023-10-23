@@ -9218,6 +9218,20 @@ cleanup:
 #endif    // !FBINK_FOR_LINUX
 }
 
+// Because I just couldn't be arsed to deal with broken out rectangles anymore ;p.
+int
+    fbink_refresh_rect(int fbfd                              UNUSED_BY_LINUX,
+		       const FBInkRect* restrict rect        UNUSED_BY_LINUX,
+		       const FBInkConfig* restrict fbink_cfg UNUSED_BY_LINUX)
+{
+#ifndef FBINK_FOR_LINUX
+	return fbink_refresh(fbfd, rect->top, rect->left, rect->width, rect->height, fbink_cfg);
+#else
+	WARN("e-Ink screen refreshes require an e-Ink device");
+	return ERRCODE(ENOSYS);
+#endif    // !FBINK_FOR_LINUX
+}
+
 // Small public wrapper around wait_for_submission(), without the caller having to depend on mxcfb headers
 int
     fbink_wait_for_submission(int fbfd UNUSED_BY_NOTKINDLE, uint32_t marker UNUSED_BY_NOTKINDLE)
