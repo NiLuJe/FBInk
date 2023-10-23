@@ -6103,11 +6103,7 @@ int
 					};
 					FBInkPixel px = { 0 };
 					get_pixel_Gray4(&coords, &px);
-					if ((coords.x & 0x01u) == 0U) {
-						px.gray4.hi ^= 0xFFu;
-					} else {
-						px.gray4.lo ^= 0xFFu;
-					}
+					px.gray8 ^= 0xFFu;
 					put_pixel_Gray4(&coords, &px);
 				}
 			}
