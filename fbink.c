@@ -6001,6 +6001,164 @@ cleanup:
 	return rv;
 }
 
+// Inverts a region of the framebuffer. Can be used to help implement nightmode on devices without HW inversion support.
+// NOTE: Unlike fbink_invert_screen, this does *not* trigger a refresh.
+int
+    fbink_invert_rect(int fbfd                       UNUSED_BY_NODRAW,
+		      const FBInkRect* restrict rect UNUSED_BY_NODRAW,
+		      bool no_rota                   UNUSED_BY_NODRAW)
+{
+#ifdef FBINK_WITH_DRAW
+	// If we open a fd now, we'll only keep it open for this single call!
+	// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// mmap fb to user mem
+	if (!isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	}
+
+	// We'll need a matching region...
+	struct mxcfb_rect region = { 0U };
+
+	// Did we actually request a rect?
+	bool full_clear = false;
+	if (!rect || (rect->width == 0U || rect->height == 0U)) {
+		full_clear = true;
+		fullscreen_region(&region);
+	} else {
+		region.top    = rect->top;
+		region.left   = rect->left;
+		region.width  = rect->width;
+		region.height = rect->height;
+	}
+
+	// Rotate the region if need be...
+	if (!no_rota) {
+		(*fxpRotateRegion)(&region);
+	}
+
+	// Do the thing...
+	if (full_clear) {
+		// Basically, fbink_invert_screen but without a refresh
+		if (unlikely(vInfo.bits_per_pixel == 16U)) {
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
+			uint16_t* p = (uint16_t*) fbPtr;
+#	pragma GCC diagnostic pop
+			size_t px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
+			while (px_count--) {
+				// NOTE: Not actually accurate, but I don't care about RGB565 ;).
+				*p++ ^= 0xFFFFu;
+			}
+		} else if (vInfo.bits_per_pixel == 32U) {
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
+			uint32_t* p = (uint32_t*) fbPtr;
+#	pragma GCC diagnostic pop
+			size_t px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
+			while (px_count--) {
+				*p++ ^= 0x00FFFFFFu;
+			}
+		} else {
+			// Byte per byte should do the trick for the other bitdepths
+			uint8_t* p          = fbPtr;
+			size_t   byte_count = (size_t) fInfo.line_length * vInfo.yres;
+			while (byte_count--) {
+				*p++ ^= 0xFFu;
+			}
+		}
+	} else {
+		// Based on their fill_rect counterparts
+		if (unlikely(vInfo.bits_per_pixel == 16U)) {
+			for (size_t j = region.top; j < region.top + region.height; j++) {
+				const size_t scanline_offset = fInfo.line_length * j;
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
+				uint16_t* restrict p = (uint16_t*) (fbPtr + scanline_offset) + region.left;
+#	pragma GCC diagnostic pop
+				size_t px_count = region.width;
+
+				while (px_count--) {
+					// NOTE: Not actually accurate, but I don't care about RGB565 ;).
+					*p++ ^= 0xFFFFu;
+				}
+			}
+		} else if (unlikely(vInfo.bits_per_pixel == 4U)) {
+			// I don't particularly care about doing this in a smarter way either...
+			for (unsigned short int cy = 0U; cy < region.height; cy++) {
+				for (unsigned short int cx = 0U; cx < region.width; cx++) {
+					const FBInkCoordinates coords = {
+						.x = (unsigned short int) (region.left + cx),
+						.y = (unsigned short int) (region.top + cy),
+					};
+					FBInkPixel px = { 0 };
+					get_pixel_Gray4(&coords, &px);
+					if ((coords.x & 0x01u) == 0U) {
+						px.gray4.hi ^= 0xFFu;
+					} else {
+						px.gray4.lo ^= 0xFFu;
+					}
+					put_pixel_Gray4(&coords, &px);
+				}
+			}
+		} else if (vInfo.bits_per_pixel == 32U) {
+			for (size_t j = region.top; j < region.top + region.height; j++) {
+				const size_t scanline_offset = fInfo.line_length * j;
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
+				uint32_t* p = (uint32_t*) (fbPtr + scanline_offset) + region.left;
+#	pragma GCC diagnostic pop
+				size_t px_count = region.width;
+
+				while (px_count--) {
+					*p++ ^= 0x00FFFFFFu;
+				}
+			}
+		} else {
+			// Byte per byte should do the trick for the other bitdepths
+			for (size_t j = region.top; j < region.top + region.height; j++) {
+				// NOTE: Go with a cheap memset32 in order to preserve the alpha value of our input pixel...
+				//       The compiler should be able to turn that into something as fast as a plain memset ;).
+				const size_t scanline_offset = fInfo.line_length * j;
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
+				uint8_t* p = (uint8_t*) (fbPtr + scanline_offset) + region.left;
+#	pragma GCC diagnostic pop
+				size_t px_count = region.width;
+
+				while (px_count--) {
+					*p++ ^= 0xFFu;
+				}
+			}
+		}
+	}
+
+	// Cleanup
+cleanup:
+	if (isFbMapped && !keep_fd) {
+		unmap_fb();
+	}
+	if (!keep_fd) {
+		close_fb(fbfd);
+	}
+
+	return rv;
+#else
+	WARN("Drawing primitives are disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif
+}
+
 // Handle cls & refresh, but for grid-based coordinates (i.e., like fbink_print()'s draw())
 static int
     grid_to_region(int                fbfd,

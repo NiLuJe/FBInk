@@ -1340,7 +1340,29 @@ FBINK_API uint32_t fbink_rota_canonical_to_native(uint8_t rotate);
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
 // fbink_cfg:		Pointer to an FBInkConfig struct.
 // NOTE: On Kobo devices with a sunxi SoC, you will not be able to affect content that you haven't drawn yourself first.
+//       i.e., this will only apply to stuff drawn via FBInk's own framebuffer pointer (be it by FBInk or yourself).
 FBINK_API int fbink_invert_screen(int fbfd, const FBInkConfig* restrict fbink_cfg);
+
+//
+// Inverts the *existing* content of a specific *region* of the screen.
+// This is mildly useful on devices with no HW inversion support,
+// to implement inversion after the fact when you don't necessarily control the drawing.
+// NOTE: Unlike fbink_invert_screen, this does *NOT* trigger a refresh!
+// fbfd:		Open file descriptor to the framebuffer character device,
+//				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
+// rect:		Optional pointer to an FBInkRect rectangle (as, say, returned by fbink_get_last_rect),
+//				describing the specific region of screen to invert (in absolute coordinates).
+//				If the rectangle is empty (i.e., width or height is zero) or the pointer is NULL,
+//				the full screen will be inverted.
+// no_rota:		Optional, and only useful in very limited cases. When in doubt, set to false.
+//				When passing a rect, this requests *not* applying any further rotation hacks,
+//				(e.g., isNTX16bLandscape).
+//				This is mildly useful if you got a *rotated* rect out of fbink_get_last_rect
+//				on such a quirky framebuffer state,
+//				and just want to re-use it as-is without mangling the rotation again.
+// NOTE: On Kobo devices with a sunxi SoC, you will not be able to affect content that you haven't drawn yourself first.
+//       i.e., this will only apply to stuff drawn via FBInk's own framebuffer pointer (be it by FBInk or yourself).
+FBINK_API int fbink_invert_rect(int fbfd, const FBInkRect* restrict rect, bool no_rota);
 
 //
 // The functions below are much lower level than the rest of the API:
