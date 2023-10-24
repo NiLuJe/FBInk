@@ -408,6 +408,13 @@ else
 	ifdef UNIFONT
 		FEATURES_CPPFLAGS+=-DFBINK_WITH_UNIFONT
 	endif
+	# button_scan has been deprecated, so it's now optional
+	ifdef KOBO
+		ifdef BUTTON_SCAN
+			WITH_BUTTON_SCAN:=True
+			FEATURES_CPPFLAGS+=-DFBINK_WITH_BUTTON_SCAN
+		endif
+	endif
 endif
 
 # Manage modular MINIMAL builds...
@@ -464,13 +471,15 @@ ifdef MINIMAL
 	endif
 
 	# Support tweaking a MINIMAL build to still include button scan support
-	ifdef BUTTON_SCAN
-		# Make sure we actually have drawing support
-		ifndef DRAW
-			DRAW:=1
+	ifdef KOBO
+		ifdef BUTTON_SCAN
+			# Make sure we actually have drawing support
+			ifndef DRAW
+				DRAW:=1
+			endif
+			WITH_BUTTON_SCAN:=True
+			FEATURES_CPPFLAGS+=-DFBINK_WITH_BUTTON_SCAN
 		endif
-		WITH_BUTTON_SCAN:=True
-		FEATURES_CPPFLAGS+=-DFBINK_WITH_BUTTON_SCAN
 	endif
 
 	# Support tweaking a MINIMAL build to still include drawing primitives
