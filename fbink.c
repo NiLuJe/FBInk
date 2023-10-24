@@ -6042,6 +6042,8 @@ int
 		region.height = rect->height;
 	}
 
+	// Remember the rect...
+	set_last_rect(&region);
 	// Rotate the region if need be...
 	if (!no_rota) {
 		(*fxpRotateRegion)(&region);
