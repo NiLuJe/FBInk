@@ -428,15 +428,16 @@ static uint32_t
 //       c.f., https://github.com/NiLuJe/KindleTool/blob/master/KindleTool/convert.c#L51
 // Pilfered from http://rosettacode.org/wiki/Non-decimal_radices/Convert#C
 static char*
-    to_base(int64_t num, uint8_t base)
+    to_base(int64_t num, uint8_t base, size_t min_output_columns)
 {
 	// NOTE: Crockford's Base32, but with the "L" & "U" re-added in?
 	const char tbl[]   = "0123456789ABCDEFGHJKLMNPQRSTUVWX";
 	char       buf[66] = { 0 };
 	char*      out     = NULL;
 	uint64_t   n;
-	uint32_t   len = 0U;
-	bool       neg = false;
+	size_t     len     = 0U;
+	size_t     padding = 0U;
+	bool       neg     = false;
 
 	if (base >= sizeof(tbl)) {
 		WARN("base %hhu is unsupported (too large).", base);
@@ -450,13 +451,20 @@ static char*
 		buf[len++] = tbl[n % base];
 	} while (n /= base);
 
-	out = calloc(len + neg + 1U, sizeof(*out));
+	// Ensure we pad with at least min_output_columns zeroes
+	if (len < min_output_columns) {
+		padding = min_output_columns - len;
+	}
+	out = calloc(len + padding + neg + 1U, sizeof(*out));
 	if (out == NULL) {
 		PFWARN("Error allocating base32 output string buffer: %m");
 		return NULL;
 	}
-	for (uint32_t i = neg; len > 0U; i++) {
+	for (size_t i = neg + padding; len > 0U; i++) {
 		out[i] = buf[--len];
+	}
+	while (padding) {
+		out[neg + --padding] = '0';
 	}
 	if (neg) {
 		out[0] = '-';
@@ -1727,15 +1735,9 @@ static void
 #	if defined(FBINK_FOR_KINDLE)
 	identify_kindle();
 	if (deviceQuirks.deviceId > 0xFFu) {
-		char* restrict dev_id    = NULL;
-		dev_id                   = to_base(deviceQuirks.deviceId, 32U);
-		const char* restrict pad = "000";
-		ELOG("Detected a Kindle %s (%.*s%s -> 0x%03X => %s on %s)",
+		char* restrict dev_id = to_base(deviceQuirks.deviceId, 32U, 3U);
+		ELOG("Detected a Kindle %s (%s -> 0x%03X => %s on %s)",
 		     deviceQuirks.deviceName,
-		     ((int) strlen(pad) < (int) strlen(dev_id))    // Flawfinder: ignore
-			 ? 0
-			 : (int) strlen(pad) - (int) strlen(dev_id),    // Flawfinder: ignore
-		     pad,
 		     dev_id,
 		     deviceQuirks.deviceId,
 		     deviceQuirks.deviceCodename,

@@ -515,36 +515,36 @@ uint8_t                  penFGColor     = 0x00u;
 uint8_t                  penBGColor     = 0xFFu;
 FBInkPixel               penFGPixel;
 FBInkPixel               penBGPixel;
-uint32_t                 lastMarker                                                             = 0U;
+uint32_t                 lastMarker                                         = 0U;
 // Slightly arbitrary-ish fallback values
-unsigned short int       MAXROWS                                                                = 45U;
-unsigned short int       MAXCOLS                                                                = 32U;
+unsigned short int       MAXROWS                                            = 45U;
+unsigned short int       MAXCOLS                                            = 32U;
 // Verbose is for diagnostic/debug info in general
-bool                     g_isVerbose                                                            = false;
+bool                     g_isVerbose                                        = false;
 // Quiet is for fbink_init's hardware setup info
-bool                     g_isQuiet                                                              = false;
+bool                     g_isQuiet                                          = false;
 // Whether we log to stdout/stderr or the syslog
-bool                     g_toSysLog                                                             = false;
+bool                     g_toSysLog                                         = false;
 // This should be a pretty accurate fallback...
-long int                 USER_HZ                                                                = 100;
+long int                 USER_HZ                                            = 100;
 // Pointers to the appropriate put_pixel/get_pixel functions for the fb's bpp
 //void (*fxpPutPixel)(const FBInkCoordinates* restrict, const FBInkPixel* restrict) = NULL;
-void                     (*fxpGetPixel)(const FBInkCoordinates* restrict, FBInkPixel* restrict) = NULL;
-void                     (*fxpFillRect)(unsigned short int,
-                    unsigned short int,
-                    unsigned short int,
-                    unsigned short int,
-                    const FBInkPixel* restrict)                             = NULL;
-void                     (*fxpFillRectChecked)(unsigned short int,
-                           unsigned short int,
-                           unsigned short int,
-                           unsigned short int,
-                           const FBInkPixel* restrict)                      = NULL;
+void (*fxpGetPixel)(const FBInkCoordinates* restrict, FBInkPixel* restrict) = NULL;
+void (*fxpFillRect)(unsigned short int,
+		    unsigned short int,
+		    unsigned short int,
+		    unsigned short int,
+		    const FBInkPixel* restrict)                             = NULL;
+void (*fxpFillRectChecked)(unsigned short int,
+			   unsigned short int,
+			   unsigned short int,
+			   unsigned short int,
+			   const FBInkPixel* restrict)                      = NULL;
 // As well as the appropriate coordinates rotation functions...
-void                     (*fxpRotateCoords)(FBInkCoordinates* restrict)                         = NULL;
-void                     (*fxpRotateRegion)(struct mxcfb_rect* restrict)                        = NULL;
+void (*fxpRotateCoords)(FBInkCoordinates* restrict)                         = NULL;
+void (*fxpRotateRegion)(struct mxcfb_rect* restrict)                        = NULL;
 // And the font bitmap getter...
-const unsigned char*     (*fxpFont8xGetBitmap)(uint32_t)                                        = NULL;
+const unsigned char* (*fxpFont8xGetBitmap)(uint32_t)                        = NULL;
 #ifdef FBINK_WITH_FONTS
 const uint16_t* (*fxpFont16xGetBitmap)(uint32_t) = NULL;
 const uint32_t* (*fxpFont32xGetBitmap)(uint32_t) = NULL;

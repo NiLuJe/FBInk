@@ -93,7 +93,7 @@ static const HWConfigBlockDev HWCONFIG_BLOCKS[] = {
 static bool     is_kindle_device(uint32_t);
 static bool     is_kindle_device_new(uint32_t);
 static uint32_t from_base(const char*, uint8_t);
-static char*    to_base(int64_t, uint8_t);
+static char*    to_base(int64_t, uint8_t, size_t);
 static void     identify_kindle(void);
 #        elif defined(FBINK_FOR_CERVANTES)
 static void identify_cervantes(void);

@@ -10881,7 +10881,7 @@ static int
 
 						coords.x = (unsigned short int) (i + x_off);
 						coords.y = (unsigned short int) (j + y_off);
-							   (*fxpRotateCoords)(&coords);
+						(*fxpRotateCoords)(&coords);
 						FBInkPixel bg_px;
 						get_pixel_RGB565(&coords, &bg_px);
 
@@ -11934,7 +11934,7 @@ FBInkRect
 		struct mxcfb_rect region = {
 			.top = lastRect.top, .left = lastRect.left, .width = lastRect.width, .height = lastRect.height
 		};
-			  (*fxpRotateRegion)(&region);
+		(*fxpRotateRegion)(&region);
 		FBInkRect rect = { .left   = (unsigned short int) region.left,
 				   .top    = (unsigned short int) region.top,
 				   .width  = (unsigned short int) region.width,
