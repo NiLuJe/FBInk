@@ -24,8 +24,8 @@
 static const uint16_t*
     spleen_get_bitmap(uint32_t codepoint)
 {
-	if (codepoint <= 0x7fu) {
-		return spleen_block1[codepoint];
+	if (codepoint >= 0x20u && codepoint <= 0x7fu) {
+		return spleen_block1[codepoint - 0x20u];
 	} else if (codepoint >= 0xa0u && codepoint <= 0x17fu) {
 		return spleen_block2[codepoint - 0xa0u];
 	} else if (codepoint == 0x192u) {
