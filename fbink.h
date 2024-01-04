@@ -743,7 +743,7 @@ FBINK_API void fbink_state_dump(const FBInkConfig* restrict fbink_cfg) __attribu
 // NOTE: This includes quite a few useful things related to device identification, c.f., the FBInkState struct ;).
 //       You can also peek at the output of fbink -e to get a hint of what the data actually looks like.
 FBINK_API void fbink_get_state(const FBInkConfig* restrict fbink_cfg, FBInkState* restrict fbink_state)
-    __attribute__((nonnull(1)));
+    __attribute__((nonnull));
 
 //
 // Print a string on screen.

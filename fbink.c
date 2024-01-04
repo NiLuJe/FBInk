@@ -5433,64 +5433,57 @@ void
 void
     fbink_get_state(const FBInkConfig* restrict fbink_cfg, FBInkState* restrict fbink_state)
 {
-	if (fbink_state) {
-		fbink_state->user_hz         = USER_HZ;
-		fbink_state->font_name       = fontname_to_string(fbink_cfg->fontname);
-		fbink_state->view_width      = viewWidth;
-		fbink_state->view_height     = viewHeight;
-		fbink_state->screen_width    = screenWidth;
-		fbink_state->screen_height   = screenHeight;
-		fbink_state->scanline_stride = fInfo.line_length;
-		fbink_state->bpp             = vInfo.bits_per_pixel;
-		fbink_state->inverted_grayscale =
-		    !!(vInfo.bits_per_pixel == 8U && vInfo.grayscale == GRAYSCALE_8BIT_INVERTED);
-		strncpy(fbink_state->device_name, deviceQuirks.deviceName, sizeof(fbink_state->device_name) - 1U);
-		strncpy(
-		    fbink_state->device_codename, deviceQuirks.deviceCodename, sizeof(fbink_state->device_codename) - 1U);
-		strncpy(
-		    fbink_state->device_platform, deviceQuirks.devicePlatform, sizeof(fbink_state->device_platform) - 1U);
-		fbink_state->device_id        = deviceQuirks.deviceId;
-		fbink_state->pen_fg_color     = penFGColor;
-		fbink_state->pen_bg_color     = penBGColor;
-		fbink_state->screen_dpi       = deviceQuirks.screenDPI;
-		fbink_state->font_w           = FONTW;
-		fbink_state->font_h           = FONTH;
-		fbink_state->max_cols         = MAXCOLS;
-		fbink_state->max_rows         = MAXROWS;
-		fbink_state->view_hori_origin = viewHoriOrigin;
-		fbink_state->view_vert_origin = viewVertOrigin;
-		fbink_state->view_vert_offset = viewVertOffset;
-		fbink_state->fontsize_mult    = FONTSIZE_MULT;
-		fbink_state->glyph_width      = glyphWidth;
-		fbink_state->glyph_height     = glyphHeight;
-		fbink_state->is_perfect_fit   = deviceQuirks.isPerfectFit;
-		fbink_state->is_mtk           = deviceQuirks.isMTK;
-		fbink_state->is_sunxi         = deviceQuirks.isSunxi;
+	fbink_state->user_hz            = USER_HZ;
+	fbink_state->font_name          = fontname_to_string(fbink_cfg->fontname);
+	fbink_state->view_width         = viewWidth;
+	fbink_state->view_height        = viewHeight;
+	fbink_state->screen_width       = screenWidth;
+	fbink_state->screen_height      = screenHeight;
+	fbink_state->scanline_stride    = fInfo.line_length;
+	fbink_state->bpp                = vInfo.bits_per_pixel;
+	fbink_state->inverted_grayscale = !!(vInfo.bits_per_pixel == 8U && vInfo.grayscale == GRAYSCALE_8BIT_INVERTED);
+	strncpy(fbink_state->device_name, deviceQuirks.deviceName, sizeof(fbink_state->device_name) - 1U);
+	strncpy(fbink_state->device_codename, deviceQuirks.deviceCodename, sizeof(fbink_state->device_codename) - 1U);
+	strncpy(fbink_state->device_platform, deviceQuirks.devicePlatform, sizeof(fbink_state->device_platform) - 1U);
+	fbink_state->device_id        = deviceQuirks.deviceId;
+	fbink_state->pen_fg_color     = penFGColor;
+	fbink_state->pen_bg_color     = penBGColor;
+	fbink_state->screen_dpi       = deviceQuirks.screenDPI;
+	fbink_state->font_w           = FONTW;
+	fbink_state->font_h           = FONTH;
+	fbink_state->max_cols         = MAXCOLS;
+	fbink_state->max_rows         = MAXROWS;
+	fbink_state->view_hori_origin = viewHoriOrigin;
+	fbink_state->view_vert_origin = viewVertOrigin;
+	fbink_state->view_vert_offset = viewVertOffset;
+	fbink_state->fontsize_mult    = FONTSIZE_MULT;
+	fbink_state->glyph_width      = glyphWidth;
+	fbink_state->glyph_height     = glyphHeight;
+	fbink_state->is_perfect_fit   = deviceQuirks.isPerfectFit;
+	fbink_state->is_mtk           = deviceQuirks.isMTK;
+	fbink_state->is_sunxi         = deviceQuirks.isSunxi;
 #if defined(FBINK_FOR_KOBO)
-		fbink_state->sunxi_has_fbdamage = sunxiCtx.has_fbdamage;
-		fbink_state->sunxi_force_rota   = sunxiCtx.force_rota;
+	fbink_state->sunxi_has_fbdamage = sunxiCtx.has_fbdamage;
+	fbink_state->sunxi_force_rota   = sunxiCtx.force_rota;
 #else
-		fbink_state->sunxi_has_fbdamage = false;
-		fbink_state->sunxi_force_rota   = FORCE_ROTA_NOTSUP;
+	fbink_state->sunxi_has_fbdamage = false;
+	fbink_state->sunxi_force_rota   = FORCE_ROTA_NOTSUP;
 #endif
-		fbink_state->is_kindle_legacy    = deviceQuirks.isKindleLegacy;
-		fbink_state->is_kobo_non_mt      = deviceQuirks.isKoboNonMT;
-		fbink_state->unreliable_wait_for = deviceQuirks.unreliableWaitFor;
-		fbink_state->ntx_boot_rota       = deviceQuirks.ntxBootRota;
-		fbink_state->ntx_rota_quirk      = deviceQuirks.ntxRotaQuirk;
-		memcpy(fbink_state->rotation_map, deviceQuirks.rotationMap, sizeof(deviceQuirks.rotationMap));
-		fbink_state->touch_swap_axes         = deviceQuirks.touchSwapAxes;
-		fbink_state->touch_mirror_x          = deviceQuirks.touchMirrorX;
-		fbink_state->touch_mirror_y          = deviceQuirks.touchMirrorY;
-		fbink_state->is_ntx_quirky_landscape = deviceQuirks.isNTX16bLandscape;
-		fbink_state->current_rota            = (uint8_t) vInfo.rotate;
-		fbink_state->can_rotate              = deviceQuirks.canRotate;
-		fbink_state->can_hw_invert           = deviceQuirks.canHWInvert;
-		fbink_state->has_eclipse_wfm         = deviceQuirks.hasEclipseWfm;
-		fbink_state->can_wait_for_submission = deviceQuirks.canWaitForSubmission;
-	} else {
-		WARN("Err, it appears we were passed a NULL fbink_state pointer?");
-	}
+	fbink_state->is_kindle_legacy    = deviceQuirks.isKindleLegacy;
+	fbink_state->is_kobo_non_mt      = deviceQuirks.isKoboNonMT;
+	fbink_state->unreliable_wait_for = deviceQuirks.unreliableWaitFor;
+	fbink_state->ntx_boot_rota       = deviceQuirks.ntxBootRota;
+	fbink_state->ntx_rota_quirk      = deviceQuirks.ntxRotaQuirk;
+	memcpy(fbink_state->rotation_map, deviceQuirks.rotationMap, sizeof(deviceQuirks.rotationMap));
+	fbink_state->touch_swap_axes         = deviceQuirks.touchSwapAxes;
+	fbink_state->touch_mirror_x          = deviceQuirks.touchMirrorX;
+	fbink_state->touch_mirror_y          = deviceQuirks.touchMirrorY;
+	fbink_state->is_ntx_quirky_landscape = deviceQuirks.isNTX16bLandscape;
+	fbink_state->current_rota            = (uint8_t) vInfo.rotate;
+	fbink_state->can_rotate              = deviceQuirks.canRotate;
+	fbink_state->can_hw_invert           = deviceQuirks.canHWInvert;
+	fbink_state->has_eclipse_wfm         = deviceQuirks.hasEclipseWfm;
+	fbink_state->can_wait_for_submission = deviceQuirks.canWaitForSubmission;
 }
 
 // Memory map the framebuffer
