@@ -733,16 +733,17 @@ FBINK_API int fbink_close(int fbfd);
 // NOTE: You can perfectly well keep a few different FBInkConfig structs around, instead of modifying the same one over and over.
 //       Just remember that some fields *require* an fbink_init() call to be taken into account (see above),
 //       but if the only fields that differ don't fall into that category, you do *NOT* need an fbink_init() per FBInkConfig...
-FBINK_API int fbink_init(int fbfd, const FBInkConfig* restrict fbink_cfg);
+FBINK_API int fbink_init(int fbfd, const FBInkConfig* restrict fbink_cfg) __attribute__((nonnull));
 
 //
 // Dump a few of our internal state variables to stdout, in a format easily consumable by a shell (i.e., eval).
-FBINK_API void fbink_state_dump(const FBInkConfig* restrict fbink_cfg);
+FBINK_API void fbink_state_dump(const FBInkConfig* restrict fbink_cfg) __attribute__((nonnull));
 
 // Dump a few of our internal state variables to the FBInkState struct pointed to by fbink_state.
 // NOTE: This includes quite a few useful things related to device identification, c.f., the FBInkState struct ;).
 //       You can also peek at the output of fbink -e to get a hint of what the data actually looks like.
-FBINK_API void fbink_get_state(const FBInkConfig* restrict fbink_cfg, FBInkState* restrict fbink_state);
+FBINK_API void fbink_get_state(const FBInkConfig* restrict fbink_cfg, FBInkState* restrict fbink_state)
+    __attribute__((nonnull(1)));
 
 //
 // Print a string on screen.
@@ -760,7 +761,8 @@ FBINK_API void fbink_get_state(const FBInkConfig* restrict fbink_cfg, FBInkState
 // string:		UTF-8 encoded string to print.
 // fbink_cfg:		Pointer to an FBInkConfig struct.
 //				Honors every field not specifically related to image/dump support.
-FBINK_API int fbink_print(int fbfd, const char* restrict string, const FBInkConfig* restrict fbink_cfg);
+FBINK_API int fbink_print(int fbfd, const char* restrict string, const FBInkConfig* restrict fbink_cfg)
+    __attribute__((nonnull));
 
 //
 // Add an OpenType font to FBInk.
@@ -774,21 +776,22 @@ FBINK_API int fbink_print(int fbfd, const char* restrict string, const FBInkConf
 //       but you can't use the Kobo ones because they're obfuscated...
 //       Which leads me to a final, critical warning:
 // NOTE: Don't try to pass non-font files or encrypted/obfuscated font files, because it *will* horribly segfault!
-FBINK_API int fbink_add_ot_font(const char* filename, FONT_STYLE_T style);
+FBINK_API int fbink_add_ot_font(const char* filename, FONT_STYLE_T style) __attribute__((nonnull));
 // Same API and behavior, except that the set of fonts being loaded is tied to this specific FBInkOTConfig instance,
 // instead of being global.
 // In which case, resources MUST be released via fbink_free_ot_fonts_v2()!
 // NOTE: You can mix & match the v2 and legacy API, but for every fbink_add_ot_font() there must be an fbink_free_ot_fonts(),
 //       and for every fbink_add_ot_font_v2(), there must be an fbink_free_ot_fonts_v2()
 //       (for each matching FBInkOTConfig instance).
-FBINK_API int fbink_add_ot_font_v2(const char* filename, FONT_STYLE_T style, FBInkOTConfig* restrict cfg);
+FBINK_API int fbink_add_ot_font_v2(const char* filename, FONT_STYLE_T style, FBInkOTConfig* restrict cfg)
+    __attribute__((nonnull));
 
 // Free all loaded OpenType fonts. You MUST call this when you have finished all OT printing.
 // NOTE: Safe to call even if no fonts were actually loaded.
 FBINK_API int fbink_free_ot_fonts(void);
 // Same, but for a specific FBInkOTConfig instance if fbink_add_ot_font_v2 was used.
 // NOTE: Safe to call even if no fonts were actually loaded, in which case it'll return -(EINVAL)!
-FBINK_API int fbink_free_ot_fonts_v2(FBInkOTConfig* restrict cfg);
+FBINK_API int fbink_free_ot_fonts_v2(FBInkOTConfig* restrict cfg) __attribute__((nonnull));
 
 // Print a string using an OpenType font.
 // NOTE: The caller MUST have loaded at least one font via fbink_add_ot_font() FIRST.
@@ -827,7 +830,7 @@ FBINK_API int fbink_print_ot(int fbfd,
 			     const char* restrict string,
 			     const FBInkOTConfig* restrict cfg,
 			     const FBInkConfig* restrict fbink_cfg,
-			     FBInkOTFit* restrict fit);
+			     FBInkOTFit* restrict fit) __attribute__((nonnull(2)));
 
 //
 // Brings printf formatting to fbink_print and fbink_print_ot ;).
@@ -877,12 +880,13 @@ FBINK_API int fbink_refresh(int      fbfd,
 			    uint32_t region_left,
 			    uint32_t region_width,
 			    uint32_t region_height,
-			    const FBInkConfig* restrict fbink_cfg);
+			    const FBInkConfig* restrict fbink_cfg) __attribute__((nonnull));
 
 //
 // Variant of fbink_refresh that takes an FBInkRect instead of broken out coordinates.
 // Completely identical behavior.
-FBINK_API int fbink_refresh_rect(int fbfd, const FBInkRect* restrict rect, const FBInkConfig* restrict fbink_cfg);
+FBINK_API int fbink_refresh_rect(int fbfd, const FBInkRect* restrict rect, const FBInkConfig* restrict fbink_cfg)
+    __attribute__((nonnull));
 
 // A simple wrapper around the MXCFB_WAIT_FOR_UPDATE_SUBMISSION ioctl, without requiring you to include mxcfb headers.
 // Returns -(EINVAL) when the update marker is invalid.
@@ -995,14 +999,14 @@ FBINK_API bool fbink_is_fb_quirky(void) __attribute__((pure, deprecated));
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened for the duration of this call.
 // fbink_cfg:		Pointer to an FBInkConfig struct.
-FBINK_API int fbink_reinit(int fbfd, const FBInkConfig* restrict fbink_cfg) __attribute__((warn_unused_result));
+FBINK_API int fbink_reinit(int fbfd, const FBInkConfig* restrict fbink_cfg) __attribute__((warn_unused_result, nonnull));
 
 // Update FBInk's internal verbosity flags
 // As mentioned in fbink_init(), the is_verbose, is_quiet & to_syslog fields in an FBInkConfig
 // are only processed at initialization time.
 // This function allows doing *just* that, without having to go through a more costly full (re)-init.
 // fbink_cfg:		Pointer to an FBInkConfig struct (is_verbose, is_quiet & to_syslog).
-FBINK_API void fbink_update_verbosity(const FBInkConfig* restrict fbink_cfg);
+FBINK_API void fbink_update_verbosity(const FBInkConfig* restrict fbink_cfg) __attribute__((nonnull));
 
 // Update FBInk's internal representation of pen colors
 // As mentioned in fbink_init(), the fg_color & bg_color fields in an FBInkConfig are only processed at initialization time.
@@ -1011,7 +1015,7 @@ FBINK_API void fbink_update_verbosity(const FBInkConfig* restrict fbink_cfg);
 // This function allows doing *just* that, without having to go through a more costly full (re)-init.
 // Returns -(ENOSYS) when drawing primitives are disabled (MINIMAL build w/o DRAW).
 // fbink_cfg:		Pointer to an FBInkConfig struct (honors fg_color & bg_color).
-FBINK_API int fbink_update_pen_colors(const FBInkConfig* restrict fbink_cfg);
+FBINK_API int fbink_update_pen_colors(const FBInkConfig* restrict fbink_cfg) __attribute__((nonnull));
 
 // We'll need those for fbink_set_*_pen_* (start > 256 to stay clear of errno values)
 #define OK_ALREADY_SAME (1 << 9)
@@ -1043,7 +1047,8 @@ FBINK_API int fbink_set_bg_pen_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a, 
 // percentage:		0-100 value to set the progress bar's progression.
 // fbink_cfg:		Pointer to an FBInkConfig struct (ignores is_overlay, col & hoffset;
 //				as well as is_centered & is_padded).
-FBINK_API int fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInkConfig* restrict fbink_cfg);
+FBINK_API int fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInkConfig* restrict fbink_cfg)
+    __attribute__((nonnull));
 
 // Print a full-width activity bar on screen (i.e., an infinite progress bar).
 // Returns -(ENOSYS) when fixed-cell font support is disabled (MINIMAL build w/o BITMAP).
@@ -1052,7 +1057,8 @@ FBINK_API int fbink_print_progress_bar(int fbfd, uint8_t percentage, const FBInk
 // progress:		0-16 value to set the progress thumb's position in the bar.
 // fbink_cfg:		Pointer to an FBInkConfig struct (ignores is_overlay, is_fgless, col & hoffset;
 //				as well as is_centered & is_padded).
-FBINK_API int fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkConfig* restrict fbink_cfg);
+FBINK_API int fbink_print_activity_bar(int fbfd, uint8_t progress, const FBInkConfig* restrict fbink_cfg)
+    __attribute__((nonnull));
 
 //
 // Print an image on screen.
@@ -1086,7 +1092,7 @@ FBINK_API int fbink_print_image(int         fbfd,
 				const char* filename,
 				short int   x_off,
 				short int   y_off,
-				const FBInkConfig* restrict fbink_cfg);
+				const FBInkConfig* restrict fbink_cfg) __attribute__((nonnull));
 
 // Print raw scanlines on screen (packed pixels).
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build w/o IMAGE).
@@ -1118,7 +1124,7 @@ FBINK_API int fbink_print_raw_data(int fbfd,
 				   const size_t len,
 				   short int    x_off,
 				   short int    y_off,
-				   const FBInkConfig* restrict fbink_cfg);
+				   const FBInkConfig* restrict fbink_cfg) __attribute__((nonnull));
 
 //
 // Just clear the screen (or a region of it), using the background pen color, eInk refresh included (or not ;)).
@@ -1138,7 +1144,8 @@ FBINK_API int fbink_print_raw_data(int fbfd,
 //				on such a quirky framebuffer state,
 //				and just want to re-use it as-is without mangling the rotation again.
 // NOTE: This can be used to draw arbitrary filled rectangles (using the bg pen color).
-FBINK_API int fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg, const FBInkRect* restrict rect, bool no_rota);
+FBINK_API int fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg, const FBInkRect* restrict rect, bool no_rota)
+    __attribute__((nonnull(2)));
 
 // Like fbink_cls, but instead of absolute coordinates, rely on grid coordinates like fbink_print.
 // Honors all the same positioning trickery than fbink_print (i.e., row/col mixed w/ hoffset/voffset).
@@ -1152,7 +1159,7 @@ FBINK_API int fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg, const F
 FBINK_API int fbink_grid_clear(int                fbfd,
 			       unsigned short int cols,
 			       unsigned short int rows,
-			       const FBInkConfig* restrict fbink_cfg);
+			       const FBInkConfig* restrict fbink_cfg) __attribute__((nonnull));
 
 // Like fbink_refresh, but instead of absolute coordinates, rely on grid coordinates like fbink_print.
 // Honors all the same positioning trickery than fbink_print (i.e., row/col mixed w/ hoffset/voffset).
@@ -1167,7 +1174,7 @@ FBINK_API int fbink_grid_clear(int                fbfd,
 FBINK_API int fbink_grid_refresh(int                fbfd,
 				 unsigned short int cols,
 				 unsigned short int rows,
-				 const FBInkConfig* restrict fbink_cfg);
+				 const FBInkConfig* restrict fbink_cfg) __attribute__((nonnull));
 
 //
 // Dump the full screen.
@@ -1189,7 +1196,7 @@ FBINK_API int fbink_grid_refresh(int                fbfd,
 //       in case you'd ever want to do some more exotic things with it...
 // NOTE: On Kobo devices with a sunxi SoC, you will not be able to capture content that you haven't drawn yourself first.
 //       (There's no "shared" framebuffer, each process gets its own private, zero-initialized (i.e., solid black) buffer).
-FBINK_API int fbink_dump(int fbfd, FBInkDump* restrict dump);
+FBINK_API int fbink_dump(int fbfd, FBInkDump* restrict dump) __attribute__((nonnull));
 
 // Dump a specific region of the screen.
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build w/o IMAGE).
@@ -1209,7 +1216,7 @@ FBINK_API int fbink_region_dump(int                fbfd,
 				unsigned short int w,
 				unsigned short int h,
 				const FBInkConfig* restrict fbink_cfg,
-				FBInkDump* restrict dump);
+				FBInkDump* restrict dump) __attribute__((nonnull));
 
 // Like fbink_region_dump, but takes an FBInkRect as input, and uses it *as is* (i.e., no rotation/positioning tricks).
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build w/o IMAGE).
@@ -1219,7 +1226,8 @@ FBINK_API int fbink_region_dump(int                fbfd,
 // (c.f., also the "no_rota" flag for fbink_cls).
 // NOTE: If NULL or an empty rect is passed, a full dump will be made instead.
 // NOTE: The same considerations as in fbink_dump should be taken regarding the handling of FBInkDump structs.
-FBINK_API int fbink_rect_dump(int fbfd, const FBInkRect* restrict rect, FBInkDump* restrict dump);
+FBINK_API int fbink_rect_dump(int fbfd, const FBInkRect* restrict rect, FBInkDump* restrict dump)
+    __attribute__((nonnull(3)));
 
 // Restore a framebuffer dump made by fbink_dump/fbink_region_dump/fbink_rect_dump.
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build w/o IMAGE).
@@ -1250,7 +1258,8 @@ FBINK_API int fbink_rect_dump(int fbfd, const FBInkRect* restrict rect, FBInkDum
 //       Of course, only the intersection of this rectangle with the dump's area will be restored.
 //       Be aware that you'll also need to flip the is_full field yourself first if you ever need to crop a full dump.
 // NOTE: This does *NOT* free data.dump!
-FBINK_API int fbink_restore(int fbfd, const FBInkConfig* restrict fbink_cfg, const FBInkDump* restrict dump);
+FBINK_API int fbink_restore(int fbfd, const FBInkConfig* restrict fbink_cfg, const FBInkDump* restrict dump)
+    __attribute__((nonnull));
 
 // Free the data allocated by a previous fbink_dump() or fbink_region_dump() call.
 // Returns -(ENOSYS) when image support is disabled (MINIMAL build w/o IMAGE).
@@ -1260,7 +1269,7 @@ FBINK_API int fbink_restore(int fbfd, const FBInkConfig* restrict fbink_cfg, con
 // NOTE: You MUST call this when you have no further use for this specific data.
 // NOTE: But, you MAY re-use a single FBInkDump struct across different dump() calls *without* calling this in between,
 //       as dump() will implicitly free a dirty struct in order to recycle it.
-FBINK_API int fbink_free_dump_data(FBInkDump* restrict dump);
+FBINK_API int fbink_free_dump_data(FBInkDump* restrict dump) __attribute__((nonnull));
 
 //
 // Return the coordinates & dimensions of the last thing that was *drawn*.
@@ -1348,7 +1357,7 @@ FBINK_API uint32_t fbink_rota_canonical_to_native(uint8_t rotate);
 // fbink_cfg:		Pointer to an FBInkConfig struct.
 // NOTE: On Kobo devices with a sunxi SoC, you will not be able to affect content that you haven't drawn yourself first.
 //       i.e., this will only apply to stuff drawn via FBInk's own framebuffer pointer (be it by FBInk or yourself).
-FBINK_API int fbink_invert_screen(int fbfd, const FBInkConfig* restrict fbink_cfg);
+FBINK_API int fbink_invert_screen(int fbfd, const FBInkConfig* restrict fbink_cfg) __attribute__((nonnull));
 
 //
 // Inverts the *existing* content of a specific *region* of the screen.
@@ -1387,11 +1396,12 @@ FBINK_API int fbink_invert_rect(int fbfd, const FBInkRect* restrict rect, bool n
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				cannot be set to FBFD_AUTO!
 // buffer_size:		Out parameter. On success, will be set to the buffer's size, in bytes.
-FBINK_API unsigned char* fbink_get_fb_pointer(int fbfd, size_t* buffer_size);
+FBINK_API unsigned char* fbink_get_fb_pointer(int fbfd, size_t* buffer_size) __attribute__((nonnull));
 
 // For when you *really* need a mostly untouched copy of the full linuxfb structs...
 // NOTE: Prefer fbink_get_state, unless you *really* have no other choices...
-FBINK_API void fbink_get_fb_info(struct fb_var_screeninfo* var_info, struct fb_fix_screeninfo* fix_info);
+FBINK_API void fbink_get_fb_info(struct fb_var_screeninfo* var_info, struct fb_fix_screeninfo* fix_info)
+    __attribute__((nonnull));
 
 // Magic constants for fbink_set_fb_info (> INT8_MAX to steer clear of legitimate values)
 #define KEEP_CURRENT_ROTATE    (1 << 7)
@@ -1435,7 +1445,7 @@ FBINK_API int fbink_set_fb_info(int      fbfd,
 				uint32_t rota,
 				uint8_t  bpp,
 				uint8_t  grayscale,
-				const FBInkConfig* restrict fbink_cfg) __attribute__((warn_unused_result));
+				const FBInkConfig* restrict fbink_cfg) __attribute__((warn_unused_result, nonnull));
 
 // Forcefully wakeup the EPDC
 // Returns -(ENOSYS) on unsupported platforms.
@@ -1474,7 +1484,7 @@ FBINK_API int fbink_sunxi_toggle_ntx_pen_mode(int fbfd, bool toggle);
 //       c.f., <https://github.com/NiLuJe/mxc_epdc_fb_damage>.
 // NOTE: On success, this will reinit the state *now* (returning the exact same values as fbink_reinit).
 FBINK_API int fbink_sunxi_ntx_enforce_rota(int fbfd, SUNXI_FORCE_ROTA_INDEX_T mode, const FBInkConfig* restrict fbink_cfg)
-    __attribute__((warn_unused_result));
+    __attribute__((warn_unused_result, nonnull));
 
 //
 // The functions below are tied to specific capabilities on Kindle devices with a MediaTek SoC (e.g., the PW5).
