@@ -53,7 +53,8 @@ for my_tc in K3 K5 PW2 ; do
 done
 
 # Package it...
-FBINK_VERSION="$(git describe)"
+FALLBACK_VERSION="$(grep 'define FBINK_VERSION' fbink_internal.h | cut -f2 -d\")"
+FBINK_VERSION="$(git describe || echo ${FALLBACK_VERSION})"
 echo "Here: https://github.com/NiLuJe/FBInk" > "./WHERE_ARE_THE_SOURCES.txt"
 
 mkdir -p ./Kindle

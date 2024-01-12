@@ -20,7 +20,7 @@ CONTROL="${DEB_PATH}/control"
 
 # Get version from git if posible. Fallback to defined FBINK_VERSION
 # Note: version string must start with a number
-FALLBACK_VERSION="$(grep 'define FBINK_FALLBACK_VERSION' fbink_internal.h | cut -f2 -d\")"
+FALLBACK_VERSION="$(grep 'define FBINK_VERSION' fbink_internal.h | cut -f2 -d\")"
 VERSION="$(git describe || echo ${FALLBACK_VERSION})"
 # NOTE: Make sure version string starts with a number by stripping the initial v
 VERSION="${VERSION:1}"
