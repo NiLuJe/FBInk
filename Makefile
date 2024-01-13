@@ -305,11 +305,7 @@ endif
 LDFLAGS?=-Wl,--as-needed
 
 # And we want to link against our own library ;).
-ifdef DEBUG
-	EXTRA_LDFLAGS+=-L./Debug
-else
-	EXTRA_LDFLAGS+=-L./Release
-endif
+EXTRA_LDFLAGS+=-L$(OUT_DIR)
 
 LIBS_FOR_SHARED+=-lfbink
 LIBS_FOR_STATIC+=-l:libfbink.a
@@ -557,8 +553,10 @@ $(OUT_DIR)/static/%.o: %.c
 $(OUT_DIR)/%.o: %.c
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -o $@ -c $<
 
-outdir:
-	mkdir -p $(OUT_DIR)/shared/cutef8 $(OUT_DIR)/static/cutef8 $(OUT_DIR)/shared/libunibreak/src $(OUT_DIR)/static/libunibreak/src $(OUT_DIR)/shared/qimagescale $(OUT_DIR)/static/qimagescale
+outdir: $(OUT_DIR)/shared/cutef8/ $(OUT_DIR)/static/cutef8/ $(OUT_DIR)/shared/libunibreak/src/ $(OUT_DIR)/static/libunibreak/src/ $(OUT_DIR)/shared/qimagescale/ $(OUT_DIR)/static/qimagescale/
+
+$(OUT_DIR)/%/:
+	mkdir -p "$@"
 
 # Make absolutely sure we create our output directories first, even with unfortunate // timings!
 # c.f., https://www.gnu.org/software/make/manual/html_node/Prerequisite-Types.html#Prerequisite-Types
@@ -774,13 +772,13 @@ libunibreak.built:
 	env CPPFLAGS='$(CPPFLAGS) $(EXTRA_CPPFLAGS)' \
 	CFLAGS='$(CFLAGS) $(EXTRA_CFLAGS) $(UNIBREAK_CFLAGS)' \
 	LDFLAGS='$(LDFLAGS)' \
-	../libunibreak/configure \
+	"$$OLDPWD/libunibreak/configure" \
 	$(if $(CROSS_TC),--host=$(CROSS_TC),) \
 	--enable-static \
 	--disable-shared \
 	$(if $(PIC),--with-pic=yes,)
 	$(MAKE) -C libunibreak-staged
-	touch libunibreak.built
+	touch "$@"
 
 libi2c.built:
 	mkdir -p libi2c-staged
@@ -790,7 +788,7 @@ libi2c.built:
 	CFLAGS='$(CFLAGS) $(EXTRA_CFLAGS) $(I2C_CFLAGS)' \
 	PREFIX="/" libdir="/lib" DESTDIR='$(CURDIR)/libi2c-staged' \
 	install-lib install-include
-	touch libi2c.built
+	touch "$@"
 
 libevdev.built:
 	mkdir -p libevdev-staged
@@ -804,7 +802,7 @@ libevdev.built:
 	--enable-static \
 	--disable-shared && \
 	$(MAKE) install
-	touch libevdev.built
+	touch "$@"
 
 ifeq "$(CC_IS_CLANG)" "1"
 armcheck:
@@ -885,52 +883,30 @@ libevdevclean:
 	git clean -fxdq
 
 cleansharedlib:
-	rm -rf Release/*.so*
-	rm -rf Release/shared/*.o
-	rm -rf Release/shared/*.opt.yaml
-	rm -rf Release/shared/cutef8/*.o
-	rm -rf Release/shared/cutef8/*.opt.yaml
-	rm -rf Release/shared/libunibreak/src/*.o
-	rm -rf Release/shared/libunibreak/src/*.opt.yaml
-	rm -rf Release/shared/qimagescale/*.o
-	rm -rf Release/shared/qimagescale/*.opt.yaml
-	rm -rf Release/shared/utf8
-	rm -rf Debug/*.so*
-	rm -rf Debug/shared/*.o
-	rm -rf Debug/shared/*.opt.yaml
-	rm -rf Debug/shared/cutef8/*.o
-	rm -rf Debug/shared/cutef8/*.opt.yaml
-	rm -rf Debug/shared/libunibreak/src/*.o
-	rm -rf Debug/shared/libunibreak/src/*.opt.yaml
-	rm -rf Debug/shared/qimagescale/*.o
-	rm -rf Debug/shared/qimagescale/*.opt.yaml
-	rm -rf Debug/shared/utf8
+	rm -rf $(OUT_DIR)/*.so*
+	rm -rf $(OUT_DIR)/shared/*.o
+	rm -rf $(OUT_DIR)/shared/*.opt.yaml
+	rm -rf $(OUT_DIR)/shared/cutef8/*.o
+	rm -rf $(OUT_DIR)/shared/cutef8/*.opt.yaml
+	rm -rf $(OUT_DIR)/shared/libunibreak/src/*.o
+	rm -rf $(OUT_DIR)/shared/libunibreak/src/*.opt.yaml
+	rm -rf $(OUT_DIR)/shared/qimagescale/*.o
+	rm -rf $(OUT_DIR)/shared/qimagescale/*.opt.yaml
+	rm -rf $(OUT_DIR)/shared/utf8
 
 cleanstaticlib:
-	rm -rf Release/*.a
-	rm -rf Release/static/$(FBINK_PARTIAL_NAME)
-	rm -rf Release/static/*.a
-	rm -rf Release/static/*.o
-	rm -rf Release/static/*.opt.yaml
-	rm -rf Release/static/cutef8/*.o
-	rm -rf Release/static/cutef8/*.opt.yaml
-	rm -rf Release/static/libunibreak/src/*.o
-	rm -rf Release/static/libunibreak/src/*.opt.yaml
-	rm -rf Release/static/qimagescale/*.o
-	rm -rf Release/static/qimagescale/*.opt.yaml
-	rm -rf Release/static/utf8
-	rm -rf Debug/*.a
-	rm -rf Debug/static/$(FBINK_PARTIAL_NAME)
-	rm -rf Debug/static/*.a
-	rm -rf Debug/static/*.o
-	rm -rf Debug/static/*.opt.yaml
-	rm -rf Debug/static/cutef8/*.o
-	rm -rf Debug/static/cutef8/*.opt.yaml
-	rm -rf Debug/static/libunibreak/src/*.o
-	rm -rf Debug/static/libunibreak/src/*.opt.yaml
-	rm -rf Debug/static/qimagescale/*.o
-	rm -rf Debug/static/qimagescale/*.opt.yaml
-	rm -rf Debug/static/utf8
+	rm -rf $(OUT_DIR)/*.a
+	rm -rf $(OUT_DIR)/static/$(FBINK_PARTIAL_NAME)
+	rm -rf $(OUT_DIR)/static/*.a
+	rm -rf $(OUT_DIR)/static/*.o
+	rm -rf $(OUT_DIR)/static/*.opt.yaml
+	rm -rf $(OUT_DIR)/static/cutef8/*.o
+	rm -rf $(OUT_DIR)/static/cutef8/*.opt.yaml
+	rm -rf $(OUT_DIR)/static/libunibreak/src/*.o
+	rm -rf $(OUT_DIR)/static/libunibreak/src/*.opt.yaml
+	rm -rf $(OUT_DIR)/static/qimagescale/*.o
+	rm -rf $(OUT_DIR)/static/qimagescale/*.opt.yaml
+	rm -rf $(OUT_DIR)/static/utf8
 	rm -rf small.built
 	rm -rf tiny.built
 	rm -rf tinier.built
@@ -939,43 +915,25 @@ cleanlib: cleansharedlib cleanstaticlib
 
 clean: cleanlib
 	rm -rf Kobo/
-	rm -rf Release/*.o
-	rm -rf Release/*.opt.yaml
-	rm -rf Release/shared/fbink
-	rm -rf Release/static/fbink
-	rm -rf Release/fbink
-	rm -rf Release/shared/button_scan
-	rm -rf Release/static/button_scan
-	rm -rf Release/button_scan
-	rm -rf Release/rota
-	rm -rf Release/fbdepth
-	rm -rf Release/alt_buffer
-	rm -rf Release/doom
-	rm -rf Release/dump
-	rm -rf Release/Kobo-DevCap-Test.tar.gz
-	rm -rf Release/kx122_i2c
-	rm -rf Release/ion_heaps
-	rm -rf Release/finger_trace
-	rm -rf Release/rota_map
-	rm -rf Release/FBInk-*.tar.xz
-	rm -rf Debug/*.o
-	rm -rf Debug/*.opt.yaml
-	rm -rf Debug/shared/fbink
-	rm -rf Debug/static/fbink
-	rm -rf Debug/fbink
-	rm -rf Debug/shared/button_scan
-	rm -rf Debug/static/button_scan
-	rm -rf Debug/button_scan
-	rm -rf Debug/rota
-	rm -rf Debug/fbdepth
-	rm -rf Debug/alt_buffer
-	rm -rf Debug/doom
-	rm -rf Debug/dump
-	rm -rf Debug/Kobo-DevCap-Test.tar.gz
-	rm -rf Debug/kx122_i2c
-	rm -rf Debug/ion_heaps
-	rm -rf Debug/finger_trace
-	rm -rf Debug/rota_map
+	rm -rf $(OUT_DIR)/*.o
+	rm -rf $(OUT_DIR)/*.opt.yaml
+	rm -rf $(OUT_DIR)/shared/fbink
+	rm -rf $(OUT_DIR)/static/fbink
+	rm -rf $(OUT_DIR)/fbink
+	rm -rf $(OUT_DIR)/shared/button_scan
+	rm -rf $(OUT_DIR)/static/button_scan
+	rm -rf $(OUT_DIR)/button_scan
+	rm -rf $(OUT_DIR)/rota
+	rm -rf $(OUT_DIR)/fbdepth
+	rm -rf $(OUT_DIR)/alt_buffer
+	rm -rf $(OUT_DIR)/doom
+	rm -rf $(OUT_DIR)/dump
+	rm -rf $(OUT_DIR)/Kobo-DevCap-Test.tar.gz
+	rm -rf $(OUT_DIR)/kx122_i2c
+	rm -rf $(OUT_DIR)/ion_heaps
+	rm -rf $(OUT_DIR)/finger_trace
+	rm -rf $(OUT_DIR)/rota_map
+	rm -rf $(OUT_DIR)/FBInk-*.tar.xz
 
 distclean: clean libunibreakclean libi2cclean libevdevclean
 	rm -rf libunibreak-staged
