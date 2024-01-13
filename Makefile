@@ -511,7 +511,7 @@ FBINK_STATIC_AR_OPTS:=rc
 FBINK_STATIC_NAME:=libfbink.a
 FBINK_PARTIAL_GCC_OPTS:=-r
 FBINK_PARTIAL_NAME:=libfbink.o
-FBINK_PARTIAL_LDFLAGS:=-Wl,--whole-archive
+FBINK_PARTIAL_LDFLAGS:=-Wl,--whole-archive -nostdlib
 
 default: all
 
