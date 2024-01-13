@@ -54,6 +54,13 @@ ifdef DEBUGFLAGS
 	CFLAGS:=$(DEBUG_CFLAGS)
 endif
 
+# Try to use sane defaults for DESTDIR, while still playing nice with PMS
+DESTDIR?=/usr/local
+INCDIR:=$(DESTDIR)/include/fbink
+BINDIR:=$(DESTDIR)/bin
+LIBDIR:=$(DESTDIR)/lib
+DOCDIR:=$(DESTDIR)/share/doc/fbink
+
 # Detect GCC version because reasons...
 # (namely, GCC emitting an error instead of a warning on unknown -W options)
 MOAR_WARNIGS:=0
@@ -597,8 +604,8 @@ $(OUT_DIR)/$(FBINK_STATIC_NAME): $(OUT_DIR)/static/$(FBINK_PARTIAL_NAME)
 
 $(OUT_DIR)/$(FBINK_SHARED_NAME_VER): $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE)
 	ln -sf $(FBINK_SHARED_NAME_FILE) $@
-$(OUT_DIR)/$(FBINK_SHARED_NAME): $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE)
-	ln -sf $(FBINK_SHARED_NAME_FILE) $@
+$(OUT_DIR)/$(FBINK_SHARED_NAME): $(OUT_DIR)/$(FBINK_SHARED_NAME_VER)
+	ln -sf $(FBINK_SHARED_NAME_VER) $@
 
 staticlib: $(OUT_DIR)/$(FBINK_STATIC_NAME)
 sharedlib: $(OUT_DIR)/$(FBINK_SHARED_NAME_VER) $(OUT_DIR)/$(FBINK_SHARED_NAME)
@@ -957,8 +964,23 @@ dist: distclean
 	-P --transform="s,$(CURDIR),FBInk-$(FBINK_VERSION),xS" --show-transformed-names \
 	-cvJf Release/FBInk-$(FBINK_VERSION).tar.xz $(CURDIR)
 
+# No deps, so just try to install all the things
+install:
+	install -d -m 755 $(INCDIR)
+	install -m 644 '$(CURDIR)/fbink.h' $(INCDIR)
+	install -d -m 755 $(DOCDIR)
+	install -m 644 CLI.md $(DOCDIR)
+	install -d -m 755 $(LIBDIR)
+	-install '$(OUT_DIR)/$(FBINK_SHARED_NAME_FILE)' $(LIBDIR)
+	-ln -sf $(FBINK_SHARED_NAME_FILE) '$(LIBDIR)/$(FBINK_SHARED_NAME_VER)'
+	-ln -sf $(FBINK_SHARED_NAME_VER) '$(LIBDIR)/$(FBINK_SHARED_NAME)'
+	-install '$(OUT_DIR)/$(FBINK_STATIC_NAME)' $(LIBDIR)
+	install -d -m 755 $(BINDIR)
+	-install '$(OUT_DIR)/fbink' $(BINDIR)
+	-install '$(OUT_DIR)/fbdepth' $(BINDIR)
+
 format:
 	clang-format -style=file -i *.c *.h cutef8/*.c cutef8/*.h utils/*.c qimagescale/*.c qimagescale/*.h tools/*.c eink/*-kobo.h eink/*-kindle.h eink/einkfb.h
 
 
-.PHONY: default outdir all staticlib sharedlib static small tiny tinier shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils rota_map alt sunxi ftrace fbdepth dump devcap clean cleansharedlib cleanstaticlib cleanlib distclean dist format
+.PHONY: default outdir all staticlib sharedlib static small tiny tinier shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils rota_map alt sunxi ftrace fbdepth dump devcap clean cleansharedlib cleanstaticlib cleanlib distclean dist install format
