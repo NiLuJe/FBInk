@@ -771,9 +771,9 @@ libunibreak.built:
 	cd libunibreak && \
 	env NOCONFIGURE=1 ./autogen.sh
 	cd libunibreak-staged && \
-	env CPPFLAGS="$(CPPFLAGS) $(EXTRA_CPPFLAGS)" \
-	CFLAGS="$(CFLAGS) $(EXTRA_CFLAGS) $(UNIBREAK_CFLAGS)" \
-	LDFLAGS="$(LDFLAGS)" \
+	env CPPFLAGS='$(CPPFLAGS) $(EXTRA_CPPFLAGS)' \
+	CFLAGS='$(CFLAGS) $(EXTRA_CFLAGS) $(UNIBREAK_CFLAGS)' \
+	LDFLAGS='$(LDFLAGS)' \
 	../libunibreak/configure \
 	$(if $(CROSS_TC),--host=$(CROSS_TC),) \
 	--enable-static \
@@ -786,9 +786,9 @@ libi2c.built:
 	mkdir -p libi2c-staged
 	$(MAKE) -C i2c-tools \
 	BUILD_DYNAMIC_LIB=0 USE_STATIC_LIB=1 BUILD_STATIC_LIB=1 V=1 \
-	CC=$(CC) AR=$(AR) \
-	CFLAGS="$(CFLAGS) $(EXTRA_CFLAGS) $(I2C_CFLAGS)" \
-	PREFIX="/" libdir="/lib" DESTDIR="$(CURDIR)/libi2c-staged" \
+	CC='$(CC)' AR='$(AR)' \
+	CFLAGS='$(CFLAGS) $(EXTRA_CFLAGS) $(I2C_CFLAGS)' \
+	PREFIX="/" libdir="/lib" DESTDIR='$(CURDIR)/libi2c-staged' \
 	install-lib install-include
 	touch libi2c.built
 
@@ -796,11 +796,11 @@ libevdev.built:
 	mkdir -p libevdev-staged
 	cd libevdev && \
 	autoreconf -fi && \
-	env CPPFLAGS="$(CPPFLAGS) $(EXTRA_CPPFLAGS)" \
-	CFLAGS="$(CFLAGS) $(EXTRA_CFLAGS) $(EVDEV_CFLAGS)" \
-	LDFLAGS="$(LDFLAGS)" \
+	env CPPFLAGS='$(CPPFLAGS) $(EXTRA_CPPFLAGS)' \
+	CFLAGS='$(CFLAGS) $(EXTRA_CFLAGS) $(EVDEV_CFLAGS)' \
+	LDFLAGS='$(LDFLAGS)' \
 	./configure $(if $(CROSS_TC),--host=$(CROSS_TC),) \
-	--prefix="$(CURDIR)/libevdev-staged" \
+	--prefix='$(CURDIR)/libevdev-staged' \
 	--enable-static \
 	--disable-shared && \
 	$(MAKE) install
