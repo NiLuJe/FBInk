@@ -11,7 +11,7 @@
 	url = https://github.com/adah1972/libunibreak
 [submodule "i2c-tools"]
 	path = i2c-tools
-	url = https://git.kernel.org/pub/scm/utils/i2c-tools/i2c-tools.git
+	url = https://kernel.googlesource.com/pub/scm/utils/i2c-tools/i2c-tools.git
 [submodule "libevdev"]
 	path = libevdev
 	url = https://gitlab.freedesktop.org/libevdev/libevdev.git
