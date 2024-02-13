@@ -150,6 +150,8 @@ If you don't actually need a PNG file and just want to play with in-memory fb du
 
 So that everyone gets to have fun, even if you can't stand C!
 
+[Rust](https://www.rust-lang.org/): [fbink-sys](https://github.com/Szybet/fbink-sys) by [@Szybet](https://github.com/Szybet)
+
 [Go](https://golang.org/): [go-fbink](https://github.com/shermp/go-fbink) and its successor [go-fbink-v2](https://github.com/shermp/go-fbink-v2) by [@shermp](https://github.com/shermp)
 
 [LuaJIT](https://luajit.org/): [lua-fbink](https://github.com/NiLuJe/lua-fbink) by [@NiLuJe](https://github.com/NiLuJe)
