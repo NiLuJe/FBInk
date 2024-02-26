@@ -619,42 +619,49 @@ static void
 static int
     strtoul_u(int opt, const char* subopt, const char* str, uint32_t* result)
 {
-	strtoul_chk(opt, subopt, str, result);
+	strtoul_chk(opt, subopt, str, result, true);
 }
 
 // Input validation via strtoul, for an uint16_t
 static int
     strtoul_hu(int opt, const char* subopt, const char* str, uint16_t* result)
 {
-	strtoul_chk(opt, subopt, str, result);
+	strtoul_chk(opt, subopt, str, result, true);
 }
 
 // Input validation via strtoul, for an uint8_t
 static int
     strtoul_hhu(int opt, const char* subopt, const char* str, uint8_t* result)
 {
-	strtoul_chk(opt, subopt, str, result);
+	strtoul_chk(opt, subopt, str, result, true);
+}
+
+// Input validation via strtoul, for an uint8_t (accept trailing garbage, e.g., LFs)
+static int
+    strtoul_hhu_lax(int opt, const char* subopt, const char* str, uint8_t* result)
+{
+	strtoul_chk(opt, subopt, str, result, false);
 }
 
 // Input validation via strtol, for a short int
 static int
     strtol_hi(int opt, const char* subopt, const char* str, short int* result)
 {
-	strtol_chk(opt, subopt, str, result);
+	strtol_chk(opt, subopt, str, result, true);
 }
 
 // Input validation via strtol, for an int8_t
 static int
     strtol_hhi(int opt, const char* subopt, const char* str, int8_t* result)
 {
-	strtol_chk(opt, subopt, str, result);
+	strtol_chk(opt, subopt, str, result, true);
 }
 
 // In the same vein, but with strtof, for a *positive* float
 static int
     strtof_pos(int opt, const char* subopt, const char* str, float* result)
 {
-	strtof_chk(opt, subopt, str, result);
+	strtof_chk(opt, subopt, str, result, true);
 }
 
 // Application entry point
@@ -2329,7 +2336,8 @@ int
 						// If we're drawing a bar, make sure we were fed vaguely valid input...
 						if (is_progressbar || is_activitybar) {
 							uint8_t bar_val = 0U;
-							if (strtoul_hhu('d', NULL, line, &bar_val) == 0) {
+							// NOTE: Don't balk on trailing garbage here, mainly for pv's sake, which adds a trailing LF
+							if (strtoul_hhu_lax('d', NULL, line, &bar_val) == 0) {
 								// It's a number, let the API deal with OOB values.
 								if (is_progressbar) {
 									fbink_print_progress_bar(

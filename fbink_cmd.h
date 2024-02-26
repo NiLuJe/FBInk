@@ -180,7 +180,7 @@ static void print_lastrect(void);
 	    default: 42)
 
 // And now we can implement generic, checked strtoul/strtol macros!
-#define strtoul_chk(opt, subopt, str, result)                                                                            \
+#define strtoul_chk(opt, subopt, str, result, strict)                                                                    \
 	({                                                                                                               \
 		/* NOTE: We want to *reject* negative values (which strtoul does not)! */                                \
 		if (strchr(str, '-')) {                                                                                  \
@@ -214,8 +214,8 @@ static void print_lastrect(void);
 		}                                                                                                        \
                                                                                                                          \
 		/* If we got here, strtoul() successfully parsed at least part of a number. */                           \
-		/* But we do want to enforce the fact that the input really was *only* an integer value. */              \
-		if (*endptr != '\0') {                                                                                   \
+		/* But we (by default) do want to enforce the fact that the input really was *only* an integer value. */ \
+		if (strict && *endptr != '\0') {                                                                         \
 			ELOG(                                                                                            \
 			    "Found trailing characters (%s) behind value '%lu' assigned from string '%s' "               \
 			    "to an option (%c%s%s) expecting an %s.",                                                    \
@@ -248,7 +248,7 @@ static void print_lastrect(void);
 		return EXIT_SUCCESS;                                                                                     \
 	})
 
-#define strtol_chk(opt, subopt, str, result)                                                                             \
+#define strtol_chk(opt, subopt, str, result, strict)                                                                     \
 	({                                                                                                               \
 		/* Go on with strtol... */                                                                               \
 		char* endptr;                                                                                            \
@@ -271,8 +271,8 @@ static void print_lastrect(void);
 		}                                                                                                        \
                                                                                                                          \
 		/* If we got here, strtol() successfully parsed at least part of a number. */                            \
-		/* But we do want to enforce the fact that the input really was *only* an integer value. */              \
-		if (*endptr != '\0') {                                                                                   \
+		/* But we (by default) do want to enforce the fact that the input really was *only* an integer value. */ \
+		if (strict && *endptr != '\0') {                                                                         \
 			ELOG(                                                                                            \
 			    "Found trailing characters (%s) behind value '%ld' assigned from string '%s' "               \
 			    "to an option (%c%s%s) expecting a %s.",                                                     \
@@ -305,7 +305,7 @@ static void print_lastrect(void);
 		return EXIT_SUCCESS;                                                                                     \
 	})
 
-#define strtof_chk(opt, subopt, str, result)                                                                             \
+#define strtof_chk(opt, subopt, str, result, strict)                                                                     \
 	({                                                                                                               \
 		/* NOTE: We want to *reject* negative values */                                                          \
 		if (strchr(str, '-')) {                                                                                  \
@@ -351,8 +351,8 @@ static void print_lastrect(void);
 		}                                                                                                        \
                                                                                                                          \
 		/* If we got here, strtof() successfully parsed at least part of a number. */                            \
-		/* But we do want to enforce the fact that the input really was *only* a decimal value. */               \
-		if (*endptr != '\0') {                                                                                   \
+		/* But we (by default) do want to enforce the fact that the input really was *only* a decimal value. */  \
+		if (strict && *endptr != '\0') {                                                                         \
 			ELOG(                                                                                            \
 			    "Found trailing characters (%s) behind value '%f' assigned from string '%s' "                \
 			    "to an option (%c%s%s) expecting a %s.",                                                     \
@@ -401,6 +401,7 @@ static void print_lastrect(void);
 static int strtoul_u(int, const char*, const char*, uint32_t*);
 static int strtoul_hu(int, const char*, const char*, uint16_t*);
 static int strtoul_hhu(int, const char*, const char*, uint8_t*);
+static int strtoul_hhu_lax(int, const char*, const char*, uint8_t*);
 static int strtol_hi(int, const char*, const char*, short int*);
 static int strtol_hhi(int, const char*, const char*, int8_t*);
 static int strtof_pos(int, const char*, const char*, float*);
