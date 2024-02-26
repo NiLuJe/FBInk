@@ -2309,45 +2309,67 @@ int
 						goto cleanup;
 					}
 
-					// NOTE: In every case, we *ignore* errors in order not to silently die on bogus input...
-					// If we're drawing a bar, make sure we were fed vaguely valid input...
-					if (is_progressbar || is_activitybar) {
-						uint8_t bar_val = 0U;
-						if (strtoul_hhu('d', NULL, buf, &bar_val) == 0) {
-							// It's a number, let the API deal with OOB values.
-							if (is_progressbar) {
-								fbink_print_progress_bar(fbfd, bar_val, &fbink_cfg);
-							} else {
-								fbink_print_activity_bar(fbfd, bar_val, &fbink_cfg);
+					// In case we were fed explicit LFs, split our input into multiple parts,
+					// so as to be able to honor daemon_lines properly...
+					// NOTE: Due to how strtok behaves, consecutive LFs (in a single read) will be coalesced into a single LF!
+					// NOTE: This also implies that we no longer feed *any* LF to fbink_print
+					//       (which, for information, are *rendered* as a single cell space!)
+					// NOTE: This also means that, if you want to effectively skip a line,
+					//       you'll have to pad with blanks yourself as necessary, e.g.,
+					//       echo "1\n \n \n \n5" > /tmp/fbink-fifo
+					char* saveptr = NULL;
+					for (char* str = buf;; str = NULL) {
+						char* line = strtok_r(str, "\n", &saveptr);
+						if (!line) {
+							break;
+						}
+
+						// NOTE: In every case, we *ignore* errors in order not to silently die on bogus input...
+						// If we're drawing a bar, make sure we were fed vaguely valid input...
+						if (is_progressbar || is_activitybar) {
+							uint8_t bar_val = 0U;
+							if (strtoul_hhu('d', NULL, line, &bar_val) == 0) {
+								// It's a number, let the API deal with OOB values.
+								if (is_progressbar) {
+									fbink_print_progress_bar(
+									    fbfd, bar_val, &fbink_cfg);
+								} else {
+									fbink_print_activity_bar(
+									    fbfd, bar_val, &fbink_cfg);
+								}
 							}
-						}
-					} else if (is_truetype) {
-						linecount = fbink_print_ot(fbfd, buf, &ot_config, &fbink_cfg, &ot_fit);
+						} else if (is_truetype) {
+							linecount =
+							    fbink_print_ot(fbfd, line, &ot_config, &fbink_cfg, &ot_fit);
 
-						// Move to the next line, unless it'd make us blow past daemon_lines...
-						total_lines = (unsigned short int) (total_lines + ot_fit.rendered_lines);
-						// NOTE: A return value of 0 means not enough space for a new line...
-						if ((daemon_lines == 0U || total_lines < daemon_lines) && linecount > 0) {
-							ot_config.margins.top = (short int) linecount;
+							// Move to the next line, unless it'd make us blow past daemon_lines...
+							total_lines =
+							    (unsigned short int) (total_lines + ot_fit.rendered_lines);
+							// NOTE: A return value of 0 means not enough space for a new line...
+							if ((daemon_lines == 0U || total_lines < daemon_lines) &&
+							    linecount > 0) {
+								ot_config.margins.top = (short int) linecount;
+							} else {
+								// Reset to original settings...
+								total_lines           = 0U;
+								ot_config.margins.top = (short int) initial_top;
+							}
 						} else {
-							// Reset to original settings...
-							total_lines           = 0U;
-							ot_config.margins.top = (short int) initial_top;
-						}
-					} else {
-						linecount = fbink_print(fbfd, buf, &fbink_cfg);
+							linecount = fbink_print(fbfd, line, &fbink_cfg);
 
-						// Move to the next line, unless it'd make us blow past daemon_lines...
-						if (linecount > 0) {
-							total_lines = (unsigned short int) (total_lines + linecount);
-						}
-						if ((daemon_lines == 0U || total_lines < daemon_lines) &&
-						    linecount >= 0) {
-							fbink_cfg.row = (short int) (fbink_cfg.row + linecount);
-						} else {
-							// Reset to original settings...
-							total_lines   = 0U;
-							fbink_cfg.row = initial_row;
+							// Move to the next line, unless it'd make us blow past daemon_lines...
+							if (linecount > 0) {
+								total_lines =
+								    (unsigned short int) (total_lines + linecount);
+							}
+							if ((daemon_lines == 0U || total_lines < daemon_lines) &&
+							    linecount >= 0) {
+								fbink_cfg.row = (short int) (fbink_cfg.row + linecount);
+							} else {
+								// Reset to original settings...
+								total_lines   = 0U;
+								fbink_cfg.row = initial_row;
+							}
 						}
 					}
 				}
