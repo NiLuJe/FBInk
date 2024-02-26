@@ -2317,6 +2317,7 @@ int
 					// NOTE: This also means that, if you want to effectively skip a line,
 					//       you'll have to pad with blanks yourself as necessary, e.g.,
 					//       echo "1\n \n \n \n5" > /tmp/fbink-fifo
+					// NOTE: This new behavior was originally implemented in 33203a1
 					char* saveptr = NULL;
 					for (char* str = buf;; str = NULL) {
 						char* line = strtok_r(str, "\n", &saveptr);
