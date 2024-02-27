@@ -100,13 +100,13 @@ size_t u8_escape(char* buf, size_t sz, const char* src, size_t* pi, size_t end, 
 
 /* return a pointer to the first occurrence of ch in s, or NULL if not
    found. character index of found character returned in *charn. */
-char* u8_strchr(const char* s, uint32_t ch, size_t* charn);
+char* u8_strchr(const char* s, uint32_t ch, size_t* charn) __attribute__((pure));
 
 /* same as the above, but searches a buffer of a given size instead of
    a NUL-terminated string. */
-char* u8_memchr(const char* s, uint32_t ch, size_t sz, size_t* charn);
+char* u8_memchr(const char* s, uint32_t ch, size_t sz, size_t* charn) __attribute__((pure));
 
-char* u8_memrchr(const char* s, uint32_t ch, size_t sz);
+char* u8_memrchr(const char* s, uint32_t ch, size_t sz) __attribute__((pure));
 
 bool u8_is_locale_utf8(const char* locale) __attribute__((pure));
 

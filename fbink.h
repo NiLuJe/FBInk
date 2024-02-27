@@ -689,11 +689,11 @@ FBINK_API const char* fbink_version(void) __attribute__((const));
 
 // Returns the target platform of the currently loaded FBInk library.
 // c.f., FBINK_TARGET_E enum
-FBINK_API FBINK_TARGET_T fbink_target(void);
+FBINK_API FBINK_TARGET_T fbink_target(void) __attribute__((const));
 
 // Returns a bitmask of the features available in the currently loaded FBInk library.
 // c.f., FBINK_FEATURE_ defines
-FBINK_API uint32_t fbink_features(void);
+FBINK_API uint32_t fbink_features(void) __attribute__((const));
 
 //
 // Open the framebuffer character device,
