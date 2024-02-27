@@ -148,6 +148,8 @@ Keep in mind that PocketBook is a... complicated platform to deal with, and that
 * Speaking of InkView, by default, it's dlopen'ed on init to help with device identification. This can be problematic, because InkView pulls a metric crapton of old libraries via DT_NEEDED... *and* initializes some of them on load, which is a perfect recipe for disaster if you happen to you, yourself, use those same libraries, especially if you're using different versions of them. In order to avoid this mess, you can ask FBInk to *never* touch InkView, by setting the `FBINK_NO_INKVIEW` variable in your environment. Currently, the only downside will be impaired device identification: specifically, no device name, and inaccurate DPI (we'll default to 212, and there's currently no way to change that. Patches welcome ;)).
 * And on the subject of rotation, by default, if the device *looks* like its native orientiation is a landscape one (which happens to be true on most of the lineup), FBInk enforces a software rotation in order to actually print stuff in Portrait (mostly to aid interoperability with KOReader). You can disable this behavior by setting the `FBINK_NO_SW_ROTA` variable in your environment, in which case we'll always draw in the native fb layout.
 
+## Related projects
+
 If, instead of *writing* to the framebuffer, you want to *grab* a PNG snapshot of it (which can come in handy), I have a heavily modified version of [FBGrab](https://svn.ak-team.com/svn/Configs/trunk/Kindle/Misc/FBGrab) that should sanely deal with the various quirks of eInk framebuffers ;).
 If you don't actually need a PNG file and just want to play with in-memory fb dumps, look into the whole `fbink_dump` & `fbink_restore` API calls.
 
