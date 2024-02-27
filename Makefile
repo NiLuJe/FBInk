@@ -384,7 +384,7 @@ endif
 # Now that we're done fiddling with flags, let's build stuff!
 LIB_SRCS:=fbink.c cutef8/utf8.c cutef8/dfa.c
 # Jump through a few hoops to set a few libunibreak-specific CFLAGS to silence some warnings...
-LIB_UB_SRCS:=libunibreak/src/linebreak.c libunibreak/src/linebreakdata.c libunibreak/src/unibreakdef.c libunibreak/src/linebreakdef.c
+LIB_UB_SRCS:=libunibreak/src/linebreak.c libunibreak/src/linebreakdata.c libunibreak/src/unibreakdef.c libunibreak/src/linebreakdef.c libunibreak/src/eastasianwidthdef.c
 LIB_QT_SRCS:=qimagescale/qimagescale.c
 # We don't need any of that in MINIMAL builds
 ifdef MINIMAL
@@ -529,7 +529,7 @@ BTN_OBJS:=$(addprefix $(OUT_DIR)/, $(BTN_SRCS:.c=.o))
 
 # Silence a few warnings, only when specifically compiling libunibreak...
 # c.f., https://stackoverflow.com/q/1305665
-UNIBREAK_CFLAGS:=-Wno-conversion -Wno-sign-conversion -Wno-suggest-attribute=pure
+UNIBREAK_CFLAGS:=-Wno-conversion -Wno-cast-align -Wno-suggest-attribute=pure
 $(UB_SHAREDLIB_OBJS): QUIET_CFLAGS:=$(UNIBREAK_CFLAGS)
 $(UB_STATICLIB_OBJS): QUIET_CFLAGS:=$(UNIBREAK_CFLAGS)
 
