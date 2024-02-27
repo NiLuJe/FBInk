@@ -4398,6 +4398,11 @@ static __attribute__((cold)) int
 			ELOG("Unable to query clock tick frequency, assuming %ld Hz", USER_HZ);
 		}
 
+		// Support user override, could come in handy on platforms with potentially shakey device identification (e.g., no InkView PB).
+		const char* dpi_override = getenv("FBINK_FORCE_DPI");
+		if (dpi_override) {
+			deviceQuirks.screenDPI = (unsigned short) strtoul(dpi_override, NULL, 10);
+		}
 		// Much like KOReader, assume a baseline DPI for devices where we don't specify a value in device_id
 		if (deviceQuirks.screenDPI == 0U) {
 #ifdef FBINK_FOR_LINUX
@@ -4408,7 +4413,7 @@ static __attribute__((cold)) int
 			deviceQuirks.screenDPI = 167U;
 #endif
 		}
-		ELOG("Screen density set to %hu dpi", deviceQuirks.screenDPI);
+		ELOG("Screen density set to %hu dpi%s", deviceQuirks.screenDPI, dpi_override ? " (override)" : "");
 
 		// And make sure we won't do that again ;).
 		deviceQuirks.skipId = true;
