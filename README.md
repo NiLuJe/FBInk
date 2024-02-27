@@ -139,7 +139,7 @@ Kobo support covers the full Kobo lineup, starting from the Kobo Touch A/B/C (NO
 
 BQ Cervantes support has been contributed by [@pazos](https://github.com/pazos) ([#17](https://github.com/NiLuJe/FBInk/pull/17)), and should handle the current lineup.
 
-reMarkable support has been contributed by [@tcrs](https://github.com/tcrs) ([#41](https://github.com/NiLuJe/FBInk/pull/41)).
+reMarkable support has been contributed by [@tcrs](https://github.com/tcrs) ([#41](https://github.com/NiLuJe/FBInk/pull/41)), and supports the rM2 when paired with one of the various rm2fb shim implementations.
 
 PocketBook support was tested by [@ezdiy](https://github.com/ezdiy) ([#47](https://github.com/NiLuJe/FBInk/pull/47)), and should support the same set of devices as KOReader.
 Keep in mind that PocketBook is a... complicated platform to deal with, and that I don't have access to it myself. Meaning there are quite a few quirks involved:
