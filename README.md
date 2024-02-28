@@ -150,7 +150,9 @@ If you don't actually need a PNG file and just want to play with in-memory fb du
 
 So that everyone gets to have fun, even if you can't stand C!
 
-[Rust](https://www.rust-lang.org/): [fbink-sys](https://github.com/Szybet/fbink-sys) by [@Szybet](https://github.com/Szybet)
+[Rust](https://www.rust-lang.org/): 
+- [fbink-sys](https://github.com/Szybet/fbink-sys) by [@Szybet](https://github.com/Szybet) (Bare bindgen bindings)
+- [fbink-rs](https://github.com/sublipri/fbink-rs) by [@sublipri](https://github.com/sublipri) (Bare bindgen bindings, some safe wrappers, dependent on [cross](https://github.com/cross-rs/cross))
 
 [Go](https://golang.org/): [go-fbink](https://github.com/shermp/go-fbink) and its successor [go-fbink-v2](https://github.com/shermp/go-fbink-v2) by [@shermp](https://github.com/shermp)
 
