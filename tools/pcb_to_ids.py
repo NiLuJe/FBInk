@@ -19,6 +19,9 @@ with open(data, "r") as f:
 #			# NOTE: Caught by the Clara HD match
 #			# Tolino Shine 3
 #			print("32632,")
+		elif line.startswith("E60Q30"):
+			# Tolino Vision
+			print("32631,")
 		elif line.startswith("E70K0M"):
 			# NOTE: Its actual DTB says E70K0M, but at the same index as E70K00, which is the Libra...
 			# Tolino Vision 5

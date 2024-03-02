@@ -1141,6 +1141,15 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Tolino", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
+		case DEVICE_MAINLINE_TOLINO_VISION:    // Tolino Vision (Aura SE-ish, maybe?)
+			deviceQuirks.screenDPI = 212U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "Vision", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Tolino", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
 		case DEVICE_MAINLINE_TOLINO_VISION_5:    // Tolino Vision 5 (Libra H2O-ish)
 			deviceQuirks.isKoboMk7    = true;
 			deviceQuirks.ntxBootRota  = FB_ROTATE_UR;
@@ -1409,7 +1418,6 @@ static void
 				kobo_id = DEVICE_KOBO_AURA;
 				break;
 			} else if (strcmp(line, "kobo,aura2") == 0) {
-				// FIXME: Might actually be the H2O?
 				kobo_id = DEVICE_KOBO_AURA_SE;
 				break;
 			} else if (strcmp(line, "kobo,tolino-shine2hd") == 0) {
@@ -1417,6 +1425,9 @@ static void
 				break;
 			} else if (strcmp(line, "kobo,tolino-shine3") == 0) {
 				kobo_id = DEVICE_MAINLINE_TOLINO_SHINE_3;
+				break;
+			} else if (strcmp(line, "kobo,tolino-vision") == 0) {
+				kobo_id = DEVICE_MAINLINE_TOLINO_VISION;
 				break;
 			} else if (strcmp(line, "kobo,tolino-vision5") == 0) {
 				kobo_id = DEVICE_MAINLINE_TOLINO_VISION_5;
@@ -1449,9 +1460,14 @@ static void
 	}
 
 	set_kobo_quirks(kobo_id);
-	// NOTE: We might want to enforce NTX_ROTA_STRAIGHT on all the mxcfb devices here, as Andrea's kernels all behave sanely on that front...
-	//       This is currently not a problem, because none of the supported devices are quirky...
+
+	// NOTE: We enforce NTX_ROTA_STRAIGHT on all the mxcfb devices here, as Andrea's kernels all behave sanely on that front...
 	//       c.f., https://github.com/akemnade/linux/blob/c240ea6209ebea7d577db3f54abaa1658fd5f15c/drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c#L2654
+	if (deviceQuirks.isSunxi == false && deviceQuirks.ntxRotaQuirk != NTX_ROTA_SANE) {
+		// NOTE: The Libra is flagged NTX_ROTA_SANE, and there *are* a few deprecated codepaths that will make use of this,
+		//       so we leave it alone, given that it doesn't really affect the ioctl behavior.
+		deviceQuirks.ntxRotaQuirk = NTX_ROTA_STRAIGHT;
+	}
 }
 
 #	elif defined(FBINK_FOR_REMARKABLE)

@@ -270,6 +270,7 @@ typedef enum
 {
 	DEVICE_MAINLINE_TOLINO_SHINE_2HD   = ('T' << 8U) | ('o' << 8U) | ('l' << 8U) | DEVICE_KOBO_GLO_HD,
 	DEVICE_MAINLINE_TOLINO_SHINE_3     = ('T' << 8U) | ('o' << 8U) | ('l' << 8U) | DEVICE_KOBO_CLARA_HD,
+	DEVICE_MAINLINE_TOLINO_VISION      = ('T' << 8U) | ('o' << 8U) | ('l' << 8U) | DEVICE_KOBO_AURA_SE,
 	DEVICE_MAINLINE_TOLINO_VISION_5    = ('T' << 8U) | ('o' << 8U) | ('l' << 8U) | DEVICE_KOBO_LIBRA_H2O,
 	DEVICE_MAINLINE_GENERIC_IMX5       = ('i' << 8U) | ('.' << 8U) | 'M' | 'X' | '5',
 	DEVICE_MAINLINE_GENERIC_IMX6       = ('i' << 8U) | ('.' << 8U) | 'M' | 'X' | '6',
