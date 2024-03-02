@@ -1438,6 +1438,9 @@ static void
 			} else if (strcmp(line, "kobo,librah2o") == 0) {
 				kobo_id = DEVICE_KOBO_LIBRA_H2O;
 				break;
+			} else if (strcmp(line, "kobo,nia") == 0) {
+				kobo_id = DEVICE_KOBO_NIA;
+				break;
 			} else if (strcmp(line, "fsl,imx6sl") == 0) {
 				kobo_id = DEVICE_MAINLINE_GENERIC_IMX6;
 				break;
