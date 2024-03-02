@@ -1445,6 +1445,9 @@ static void
 	}
 
 	set_kobo_quirks(kobo_id);
+	// NOTE: We might want to enforce NTX_ROTA_STRAIGHT on all the mxcfb devices here, as Andrea's kernels all behave sanely on that front...
+	//       This is currently not a problem, because none of the supported devices are quirky...
+	//       c.f., https://github.com/akemnade/linux/blob/c240ea6209ebea7d577db3f54abaa1658fd5f15c/drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c#L2654
 }
 
 #	elif defined(FBINK_FOR_REMARKABLE)
