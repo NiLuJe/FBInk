@@ -1408,6 +1408,10 @@ static void
 			if (strcmp(line, "kobo,aura") == 0) {
 				kobo_id = DEVICE_KOBO_AURA;
 				break;
+			} else if (strcmp(line, "kobo,aura2") == 0) {
+				// FIXME: Might actually be the H2O?
+				kobo_id = DEVICE_KOBO_AURA_SE;
+				break;
 			} else if (strcmp(line, "kobo,tolino-shine2hd") == 0) {
 				kobo_id = DEVICE_MAINLINE_TOLINO_SHINE_2HD;
 				break;
