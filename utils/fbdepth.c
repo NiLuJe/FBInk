@@ -523,6 +523,8 @@ int
 		// NOTE: For *most* devices, Nickel's Portrait orientation should *always* match BootRota + 1
 		//       Thankfully, the Libra appears to be ushering in a new era filled with puppies and rainbows,
 		//       and, hopefully, less insane rotation quirks ;).
+		// NOTE: Consider this computation deprecated, prefer using fbink_rota_native_to_canonical(0)
+		//       (i.e., what happens with -R UR instead of this, -r -1).
 		if (fbink_state.ntx_rota_quirk != NTX_ROTA_SANE) {
 			req_rota = (fbink_state.ntx_boot_rota + 1) & 3;
 		} else {
