@@ -311,12 +311,12 @@
 // c.f., <linux/kernel.h>
 #define ALIGN(x, a)                                                                                                      \
 	({                                                                                                               \
-		__auto_type mask__ = (a) -1U;                                                                            \
+		__auto_type mask__ = (a) - 1U;                                                                           \
 		(((x) + (mask__)) & ~(mask__));                                                                          \
 	})
 #define IS_ALIGNED(x, a)                                                                                                 \
 	({                                                                                                               \
-		__auto_type mask__ = (a) -1U;                                                                            \
+		__auto_type mask__ = (a) - 1U;                                                                           \
 		((x) & (mask__)) == 0 ? true : false;                                                                    \
 	})
 

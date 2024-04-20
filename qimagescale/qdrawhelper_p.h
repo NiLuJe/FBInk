@@ -155,11 +155,11 @@ static inline uint
 {
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
-	__m128i                vt = _mm_loadl_epi64((const __m128i*) t);
+	__m128i vt = _mm_loadl_epi64((const __m128i*) t);
 #	pragma GCC diagnostic pop
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
-	__m128i                vb = _mm_loadl_epi64((const __m128i*) b);
+	__m128i vb = _mm_loadl_epi64((const __m128i*) b);
 #	pragma GCC diagnostic pop
 	return interpolate_4_pixels_sse2(vt, vb, distx, disty);
 }

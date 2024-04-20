@@ -58,18 +58,18 @@
 // Prevent attempting to decode ginormous images
 #	define STBI_MAX_DIMENSIONS (1 << 13)
 // Disable a bunch of very verbose but mostly harmless warnings
-#	pragma GCC diagnostic   push
-#	pragma GCC diagnostic   ignored "-Wunknown-pragmas"
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #	pragma clang diagnostic ignored "-Wunknown-warning-option"
-#	pragma GCC diagnostic   ignored "-Wcast-qual"
-#	pragma GCC diagnostic   ignored "-Wcast-align"
-#	pragma GCC diagnostic   ignored "-Wconversion"
-#	pragma GCC diagnostic   ignored "-Wsign-conversion"
-#	pragma GCC diagnostic   ignored "-Wduplicated-branches"
-#	pragma GCC diagnostic   ignored "-Wunused-function"
-#	pragma GCC diagnostic   ignored "-Wsign-compare"
-#	pragma GCC diagnostic   ignored "-Wunused-but-set-variable"
-#	pragma GCC diagnostic   ignored "-Wsuggest-attribute=pure"
+#	pragma GCC diagnostic ignored "-Wcast-qual"
+#	pragma GCC diagnostic ignored "-Wcast-align"
+#	pragma GCC diagnostic ignored "-Wconversion"
+#	pragma GCC diagnostic ignored "-Wsign-conversion"
+#	pragma GCC diagnostic ignored "-Wduplicated-branches"
+#	pragma GCC diagnostic ignored "-Wunused-function"
+#	pragma GCC diagnostic ignored "-Wsign-compare"
+#	pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#	pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"
 #	include "stb/stb_image.h"
 #	pragma GCC diagnostic pop
 #endif
@@ -79,14 +79,14 @@
 // Make it private, we don't need it anywhere else
 #	define STBTT_STATIC
 // stb_truetype is.... noisy
-#	pragma GCC diagnostic   push
-#	pragma GCC diagnostic   ignored "-Wunknown-pragmas"
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #	pragma clang diagnostic ignored "-Wunknown-warning-option"
-#	pragma GCC diagnostic   ignored "-Wcast-qual"
-#	pragma GCC diagnostic   ignored "-Wconversion"
-#	pragma GCC diagnostic   ignored "-Wsign-conversion"
-#	pragma GCC diagnostic   ignored "-Wunused-function"
-#	pragma GCC diagnostic   ignored "-Wsuggest-attribute=pure"
+#	pragma GCC diagnostic ignored "-Wcast-qual"
+#	pragma GCC diagnostic ignored "-Wconversion"
+#	pragma GCC diagnostic ignored "-Wsign-conversion"
+#	pragma GCC diagnostic ignored "-Wunused-function"
+#	pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"
 #	include "stb/stb_truetype.h"
 #	pragma GCC diagnostic pop
 #endif
@@ -212,10 +212,10 @@ static inline __attribute__((always_inline)) void
 
 	// now this is about the same as 'fbp[pix_offset] = value'
 	// NOTE: Technically legitimate warning. In practice, we always pass RGB32 pixels in 24bpp codepaths.
-#	pragma GCC diagnostic   push
-#	pragma GCC diagnostic   ignored "-Wunknown-pragmas"
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #	pragma clang diagnostic ignored "-Wunknown-warning-option"
-#	pragma GCC diagnostic   ignored "-Wmaybe-uninitialized"
+#	pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 	*((unsigned char*) (fbPtr + pix_offset))      = px->bgra.color.b;
 	*((unsigned char*) (fbPtr + pix_offset + 1U)) = px->bgra.color.g;
 	*((unsigned char*) (fbPtr + pix_offset + 2U)) = px->bgra.color.r;
@@ -485,11 +485,11 @@ static inline __attribute__((always_inline, hot)) void
 			// Yep :(
 			FBInkPixel packed_px;
 			// NOTE: Technically legitimate warning. In practice, we always pass RGB32 pixels in 16bpp codepaths.
-#	pragma GCC diagnostic   push
-#	pragma GCC diagnostic   ignored "-Wunknown-pragmas"
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #	pragma clang diagnostic ignored "-Wunknown-warning-option"
-#	pragma GCC diagnostic   ignored "-Wmaybe-uninitialized"
-                        packed_px.rgb565 = pack_rgb565(px->bgra.color.r, px->bgra.color.g, px->bgra.color.b);
+#	pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+			packed_px.rgb565 = pack_rgb565(px->bgra.color.r, px->bgra.color.g, px->bgra.color.b);
 #	pragma GCC diagnostic pop
 			put_pixel_RGB565(&coords, &packed_px);
 		}
@@ -584,7 +584,7 @@ static inline __attribute__((always_inline, hot)) void
 	// Like put_pixel_RGB565, read those two consecutive bytes at once
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
-	const uint16_t         v = *((const uint16_t*) (fbPtr + scanline_offset) + coords->x);
+	const uint16_t v = *((const uint16_t*) (fbPtr + scanline_offset) + coords->x);
 #	pragma GCC diagnostic pop
 
 	// NOTE: Unpack to RGB32, because we have no use for RGB565, it's terrible.
@@ -2871,10 +2871,10 @@ static int
 
 	// NOTE: hwtcon_rect and mxcfb_rect are perfectly interhcnageable
 	struct hwtcon_update_data update = {
-		.update_region = {.top    = region.top,
+		.update_region = { .top    = region.top,
                                   .left   = region.left,
                                   .width  = region.width,
-                                  .height = region.height},
+                                  .height = region.height },
 		.waveform_mode = waveform_mode,
 		.update_mode   = update_mode,
 		.update_marker = lastMarker,

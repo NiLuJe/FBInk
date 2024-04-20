@@ -55,15 +55,15 @@ int
 	int                        opt;
 	int                        opt_index;
 	static const struct option opts[] = {
-		{  "press", no_argument, NULL, 'p'},
-		{   "wait", no_argument, NULL, 'w'},
-		{ "unplug", no_argument, NULL, 'u'},
-		{   "both", no_argument, NULL, 'b'},
-		{   "help", no_argument, NULL, 'h'},
-		{"verbose", no_argument, NULL, 'v'},
-		{  "quiet", no_argument, NULL, 'q'},
-		{ "syslog", no_argument, NULL, 'G'},
-		{     NULL,           0, NULL,   0}
+		{   "press", no_argument, NULL, 'p' },
+		{    "wait", no_argument, NULL, 'w' },
+		{  "unplug", no_argument, NULL, 'u' },
+		{    "both", no_argument, NULL, 'b' },
+		{    "help", no_argument, NULL, 'h' },
+		{ "verbose", no_argument, NULL, 'v' },
+		{   "quiet", no_argument, NULL, 'q' },
+		{  "syslog", no_argument, NULL, 'G' },
+		{      NULL,           0, NULL,   0 }
 	};
 
 	FBInkConfig fbink_cfg = { 0U };

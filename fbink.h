@@ -91,7 +91,7 @@ typedef enum
 	FBINK_TARGET_POCKETBOOK,
 	FBINK_TARGET_MAX = UINT8_MAX,
 } __attribute__((packed)) FBINK_TARGET_E;
-typedef uint8_t FBINK_TARGET_T;
+typedef uint8_t           FBINK_TARGET_T;
 
 // Supported feature flags
 #define FBINK_FEATURE_MINIMAL     0
@@ -141,7 +141,7 @@ typedef enum
 	COZETTE,                 // Cozette
 	FONT_MAX = UINT8_MAX,    // uint8_t
 } __attribute__((packed)) FONT_INDEX_E;
-typedef uint8_t FONT_INDEX_T;
+typedef uint8_t           FONT_INDEX_T;
 
 // List of supported font styles
 typedef enum
@@ -162,7 +162,7 @@ typedef enum
 	EDGE,                     // i.e., RIGHT for halign, BOTTOM for valign
 	ALIGN_MAX = UINT8_MAX,    // uint8_t
 } __attribute__((packed)) ALIGN_INDEX_E;
-typedef uint8_t ALIGN_INDEX_T;
+typedef uint8_t           ALIGN_INDEX_T;
 
 // List of available padding values
 typedef enum
@@ -173,7 +173,7 @@ typedef enum
 	FULL_PADDING,
 	MAX_PADDING = UINT8_MAX,    // uint8_t
 } __attribute__((packed)) PADDING_INDEX_E;
-typedef uint8_t PADDING_INDEX_T;
+typedef uint8_t           PADDING_INDEX_T;
 
 // List of available colors in the eInk color map
 // NOTE: This is split in FG & BG to ensure that the default values lead to a sane result (i.e., black on white)
@@ -197,7 +197,7 @@ typedef enum
 	FG_WHITE,              // 0xFF
 	FG_MAX = UINT8_MAX,    // uint8_t
 } __attribute__((packed)) FG_COLOR_INDEX_E;
-typedef uint8_t FG_COLOR_INDEX_T;
+typedef uint8_t           FG_COLOR_INDEX_T;
 
 typedef enum
 {
@@ -219,7 +219,7 @@ typedef enum
 	BG_BLACK,
 	BG_MAX = UINT8_MAX,    // uint8_t
 } __attribute__((packed)) BG_COLOR_INDEX_E;
-typedef uint8_t BG_COLOR_INDEX_T;
+typedef uint8_t           BG_COLOR_INDEX_T;
 
 // List of Cervantes device IDs (HWConfig PCB index)
 typedef enum
@@ -428,7 +428,7 @@ typedef enum
 
 	WFM_MAX = UINT8_MAX,    // uint8_t
 } __attribute__((packed)) WFM_MODE_INDEX_E;
-typedef uint8_t WFM_MODE_INDEX_T;
+typedef uint8_t           WFM_MODE_INDEX_T;
 
 // List of *potentially* available HW dithering modes
 typedef enum
@@ -443,7 +443,7 @@ typedef enum
 	//                        Usually based on Atkinson's algo. The most useful one being the Y8->Y1 one,
 	//                        which we request with A2/DU refreshes.
 } __attribute__((packed)) HW_DITHER_INDEX_E;
-typedef uint8_t HW_DITHER_INDEX_T;
+typedef uint8_t           HW_DITHER_INDEX_T;
 
 // List of NTX rotation quirk types (c.f., mxc_epdc_fb_check_var @ drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c)...
 typedef enum
@@ -463,7 +463,7 @@ typedef enum
 	NTX_ROTA_CCW_TOUCH,    // No kernel shenanigans, and Touch panel mounted in the usual rotation.
 	NTX_ROTA_MAX = UINT8_MAX,    // uint8_t
 } __attribute__((packed)) NTX_ROTA_INDEX_E;
-typedef uint8_t NTX_ROTA_INDEX_T;
+typedef uint8_t           NTX_ROTA_INDEX_T;
 
 // Available states for fbink_sunxi_ntx_enforce_rota
 typedef enum
@@ -483,7 +483,7 @@ typedef enum
 	FORCE_ROTA_WORKBUF   = 4,           // Match the working buffer's rotation (NOTE: Requires fbdamage)
 	FORCE_ROTA_MAX       = INT8_MAX,    // int8_t
 } __attribute__((packed)) SUNXI_FORCE_ROTA_INDEX_E;
-typedef int8_t SUNXI_FORCE_ROTA_INDEX_T;
+typedef int8_t            SUNXI_FORCE_ROTA_INDEX_T;
 
 // List of swipe directions for fbink_mtk_set_swipe_data
 typedef enum
@@ -494,7 +494,7 @@ typedef enum
 	MTK_SWIPE_DIR_RIGHT = 3,
 	MTK_SWIPE_DIR_MAX   = UINT8_MAX,    // uint8_t
 } __attribute__((packed)) MTK_SWIPE_DIRECTION_INDEX_E;
-typedef uint8_t MTK_SWIPE_DIRECTION_INDEX_T;
+typedef uint8_t           MTK_SWIPE_DIRECTION_INDEX_T;
 
 // List of halftone pattern modes for fbink_mtk_set_halftone
 typedef enum
@@ -503,7 +503,7 @@ typedef enum
 	MTK_HALFTONE_DEFAULT_CHECKER_SIZE = 1,
 	MTK_HALFTONE_MAX_CHECKER_SIZE     = INT32_MAX,    // int
 } __attribute__((packed)) MTK_HALFTONE_MODE_INDEX_E;
-typedef int32_t MTK_HALFTONE_MODE_INDEX_T;
+typedef int32_t           MTK_HALFTONE_MODE_INDEX_T;
 
 //
 // A struct to dump FBInk's internal state into, like fbink_state_dump() would, but in C ;)

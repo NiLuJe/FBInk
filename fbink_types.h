@@ -193,7 +193,7 @@ typedef enum
 	CH_BOLD_ITALIC,
 	CH_MAX = 0xFFu,    // uint8_t
 } __attribute__((packed)) CHARACTER_FONT_E;
-typedef uint8_t CHARACTER_FONT_T;
+typedef uint8_t           CHARACTER_FONT_T;
 #endif    // FBINK_WITH_OPENTYPE
 
 #ifdef FBINK_FOR_KOBO

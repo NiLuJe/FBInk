@@ -82,8 +82,8 @@ typedef struct
 	off_t             offset;
 } HWConfigBlockDev;
 static const HWConfigBlockDev HWCONFIG_BLOCKS[] = {
-	{ HWCONFIG_DEVICE, HWCONFIG_OFFSET},
-	{"/dev/mmcblk0p6",       (1 * 512)},
+	{  HWCONFIG_DEVICE, HWCONFIG_OFFSET },
+	{ "/dev/mmcblk0p6",       (1 * 512) },
 };
 #		endif    // FBINK_FOR_CERVANTES
 #	endif            // FBINK_FOR_KOBO || FBINK_FOR_CERVANTES

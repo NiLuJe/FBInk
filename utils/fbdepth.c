@@ -286,20 +286,20 @@ int
 	int                        opt;
 	int                        opt_index;
 	static const struct option opts[] = {
-		{               "depth", required_argument, NULL, 'd'},
-		{                "help",       no_argument, NULL, 'h'},
-		{             "verbose",       no_argument, NULL, 'v'},
-		{               "quiet",       no_argument, NULL, 'q'},
-		{                 "get",       no_argument, NULL, 'g'},
-		{             "getcode",       no_argument, NULL, 'G'},
-		{                "rota", required_argument, NULL, 'r'},
-		{       "canonicalrota", required_argument, NULL, 'R'},
-		{             "getrota",       no_argument, NULL, 'o'},
-		{         "getrotacode",       no_argument, NULL, 'O'},
-		{    "getcanonicalrota",       no_argument, NULL, 'c'},
-		{"getcanonicalrotacode",       no_argument, NULL, 'C'},
-		{           "nightmode", required_argument, NULL, 'H'},
-		{		  NULL,                 0, NULL,   0}
+		{                "depth", required_argument, NULL, 'd' },
+		{                 "help",       no_argument, NULL, 'h' },
+		{              "verbose",       no_argument, NULL, 'v' },
+		{                "quiet",       no_argument, NULL, 'q' },
+		{		  "get",       no_argument, NULL, 'g' },
+		{              "getcode",       no_argument, NULL, 'G' },
+		{                 "rota", required_argument, NULL, 'r' },
+		{        "canonicalrota", required_argument, NULL, 'R' },
+		{              "getrota",       no_argument, NULL, 'o' },
+		{          "getrotacode",       no_argument, NULL, 'O' },
+		{     "getcanonicalrota",       no_argument, NULL, 'c' },
+		{ "getcanonicalrotacode",       no_argument, NULL, 'C' },
+		{            "nightmode", required_argument, NULL, 'H' },
+		{		   NULL,                 0, NULL,   0 }
 	};
 
 	uint8_t  req_bpp          = KEEP_CURRENT_BITDEPTH;
