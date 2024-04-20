@@ -46,7 +46,7 @@ typedef struct __attribute__((__packed__))
 	char magic[15];    // HWCONFIG_MAGIC followed by the payload version, NULL-terminated
 			   // (e.g., "HW CONFIG vx.y", up to v3.5 on Mk.9+)
 #			pragma GCC diagnostic pop
-	uint8_t len;    // Length (in bytes) of the full payload, header excluded (up to 76 on v3.5)
+	uint8_t len;    // Length (in bytes) of the full payload, header excluded (up to 76 on v3.5+)
 	// Header stops here, actual data follows
 	uint8_t pcb_id;    // First field is the PCB ID, which dictates the device model, the only thing we care about ;)
 } NTXHWConfig;
@@ -68,12 +68,16 @@ typedef struct __attribute__((__packed__))
 #			define KOBO_HWCFG_DisplayPanel      10
 // NOTE: Accelerometer
 #			define KOBO_HWCFG_RSensor           11
+// NOTE: Used to discriminate Tolino (0x21) from Kobo (0x09)
+#			define KOBO_HWCFG_Customer          13
 #			define KOBO_HWCFG_CPU               27
 // NOTE: This one was added in v1.0, while the original NTX Touch was only on v0.7,
 //       which is why we handle this dynamically, instead of relying on a fixed-size struct...
 #			define KOBO_HWCFG_DisplayResolution 31
 // NOTE: This one tells us a bit about the potential rotation trickeries on some models (ntxRotaQuirk)...
 #			define KOBO_HWCFG_DisplayBusWidth   35
+// NOTE: To identify color panels, we only care about the CFA bit in there, ought to be the fourth one (TODO)
+#			define KOBO_HWCFG_EPD_Flags         64
 
 // Another thing to deal with is the fact that the data block moved to a dedicated partition on boards with an MTK SoC...
 typedef struct
@@ -103,8 +107,8 @@ static void identify_cervantes(void);
 // Can thankfully be populated from /bin/ntx_hwconfig with the help of strings -n2 and a bit of sed, i.e.,
 // sed -re 's/(^)(.*?)($)/"\2",/g' Kobo_PCB_IDs.txt
 // Double-check w/ ntx_hwconfig -l -s /dev/mmcblk0
-// NOTE: Last updated on 04/22/23, from FW 4.36.21095 (NTX HwConfig v3.7.6.34.302-20230131)
-//       Last checked on 06/23/23 against 4.37.21533
+// NOTE: Last updated on 04/21/24, from FW 4.39.22801 (NTX HwConfig v3.8.6.35.307-20230828)
+//       Last checked on 04/21/24 against 4.39.22801
 /*
 static const char* kobo_pcbs[] = {
 	"E60800", "E60810", "E60820",  "E90800", "E90810", "E60830", "E60850", "E50800", "E50810", "E60860",  "E60MT2",
@@ -117,7 +121,7 @@ static const char* kobo_pcbs[] = {
 	"EA0Q00", "E60QR0", "ED0R00",  "E60QU0", "E60U20", "M35QE0", "E60QT0", "E70Q50", "T60U00", "E60QV0",  "E70K00",
 	"T60P00", "TA0P00", "MXXQ4X",  "E60P20", "T60P10", "E60K10", "EA0P10", "E60P40", "E70P10", "E70P20",  "E80P00",
 	"E70P20", "E60P50", "E70K10",  "E70P50", "E60K20", "E60P60", "EA0P00", "E60P70", "U13Q50", "EA0T00",  "E70P60",
-	"E70P70", "E70T00", "T80P00"
+	"E70P70", "E70T00", "T80P00",  "E60T00", "T80T00"
 };
 */
 // And match (more or less accurately, for some devices) that to what we've come to know as a device code,
@@ -156,9 +160,9 @@ static const char* kobo_cpus[] = { "mx35",   "m166e",  "mx50",  "x86",    "mx6",
 */
 // And for the various NTX/Kobo Display Resolutions...
 /*
-static const char* kobo_disp_res[] = { "800x600",    "1024x758",    "1024x768",  "1440x1080", "1366x768", "1448x1072",
-				       "1600x1200",  "400x375x2",   "1872x1404", "960x540",   "NC",       "2200x1650",
-				       "1440x640x4", "1600x1200x4", "1920x1440", "1264x1680", "1680x1264" };
+static const char* kobo_disp_res[] = { "800x600",    "1024x758",    "1024x768",  "1440x1080", "1366x768",  "1448x1072",
+				       "1600x1200",  "400x375x2",   "1872x1404", "960x540",   "NC",        "2200x1650",
+				       "1440x640x4", "1600x1200x4", "1920x1440", "1264x1680", "1680x1264", "1920x1440" };
 */
 // And for the various NTX/Kobo Display Bus Widths...
 /*
