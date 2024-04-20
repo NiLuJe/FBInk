@@ -62,6 +62,7 @@ typedef struct
 	bool               canHWInvert;
 	bool               hasEclipseWfm;
 	bool               canWaitForSubmission;
+	bool               hasColorPanel;
 	bool               skipId;
 } FBInkDeviceQuirks;
 

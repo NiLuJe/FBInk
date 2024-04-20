@@ -1110,6 +1110,173 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.devicePlatform, "Mark 11", sizeof(deviceQuirks.devicePlatform) - 1U);
 			break;
+		case DEVICE_KOBO_LIBRA_COLOUR:    // Libra Colour (Monza)
+			deviceQuirks.hasColorPanel              = true;
+			deviceQuirks.isMTK                      = true;
+			deviceQuirks.hasEclipseWfm              = true;
+			// NOTE: It technically can, but not via update flags, it's a global state.
+			//       You can toggle it via fbink_set_fb_info if need be.
+			deviceQuirks.canHWInvert                = false;
+			// FIXME: Assume condor-like for now...
+			deviceQuirks.ntxBootRota                = FB_ROTATE_UR;
+			deviceQuirks.canRotate                  = true;
+			// Canonical -> native rotation mapping: { UR: 1, CW: 0, UD: 3, CCW: 2 }
+			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_CW_TOUCH;
+			// {1, 0, 3, 2}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UR;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CCW;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UD;
+			// Mirrors the *other* axis compared to (most) other NTX boards...
+			deviceQuirks.touchMirrorX               = false;
+			deviceQuirks.touchMirrorY               = true;
+			deviceQuirks.screenDPI                  = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "Libra Colour", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Monza", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Mark 11", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
+		case DEVICE_TOLINO_VISION_COLOR:    // Tolino Vision Color (Monza Tolino)
+			deviceQuirks.hasColorPanel              = true;
+			deviceQuirks.isMTK                      = true;
+			deviceQuirks.hasEclipseWfm              = true;
+			// NOTE: It technically can, but not via update flags, it's a global state.
+			//       You can toggle it via fbink_set_fb_info if need be.
+			deviceQuirks.canHWInvert                = false;
+			// FIXME: Assume condor-like for now...
+			deviceQuirks.ntxBootRota                = FB_ROTATE_UR;
+			deviceQuirks.canRotate                  = true;
+			// Canonical -> native rotation mapping: { UR: 1, CW: 0, UD: 3, CCW: 2 }
+			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_CW_TOUCH;
+			// {1, 0, 3, 2}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UR;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CCW;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UD;
+			// Mirrors the *other* axis compared to (most) other NTX boards...
+			deviceQuirks.touchMirrorX               = false;
+			deviceQuirks.touchMirrorY               = true;
+			deviceQuirks.screenDPI                  = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "Vision Color", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Monza Tolino", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Mark 11", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
+		case DEVICE_KOBO_CLARA_BW:    // Clara B&W (Spa BW)
+			deviceQuirks.isMTK                      = true;
+			deviceQuirks.hasEclipseWfm              = true;
+			// NOTE: It technically can, but not via update flags, it's a global state.
+			//       You can toggle it via fbink_set_fb_info if need be.
+			deviceQuirks.canHWInvert                = false;
+			// FIXME: Assume condor-like for now...
+			deviceQuirks.ntxBootRota                = FB_ROTATE_UR;
+			deviceQuirks.canRotate                  = true;
+			// Canonical -> native rotation mapping: { UR: 1, CW: 0, UD: 3, CCW: 2 }
+			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_CW_TOUCH;
+			// {1, 0, 3, 2}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UR;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CCW;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UD;
+			// Mirrors the *other* axis compared to (most) other NTX boards...
+			deviceQuirks.touchMirrorX               = false;
+			deviceQuirks.touchMirrorY               = true;
+			deviceQuirks.screenDPI                  = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "Clara B&W", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Spa BW", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Mark 12", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
+		case DEVICE_TOLINO_SHINE_BW:    // Tolino Shine B&W (Spa Tolino BW)
+			deviceQuirks.isMTK                      = true;
+			deviceQuirks.hasEclipseWfm              = true;
+			// NOTE: It technically can, but not via update flags, it's a global state.
+			//       You can toggle it via fbink_set_fb_info if need be.
+			deviceQuirks.canHWInvert                = false;
+			// FIXME: Assume condor-like for now...
+			deviceQuirks.ntxBootRota                = FB_ROTATE_UR;
+			deviceQuirks.canRotate                  = true;
+			// Canonical -> native rotation mapping: { UR: 1, CW: 0, UD: 3, CCW: 2 }
+			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_CW_TOUCH;
+			// {1, 0, 3, 2}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UR;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CCW;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UD;
+			// Mirrors the *other* axis compared to (most) other NTX boards...
+			deviceQuirks.touchMirrorX               = false;
+			deviceQuirks.touchMirrorY               = true;
+			deviceQuirks.screenDPI                  = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "Shine B&W", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Spa Tolino BW", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Mark 12", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
+		case DEVICE_KOBO_CLARA_COLOUR:    // Clara Colour (Spa Colour)
+			deviceQuirks.hasColorPanel              = true;
+			deviceQuirks.isMTK                      = true;
+			deviceQuirks.hasEclipseWfm              = true;
+			// NOTE: It technically can, but not via update flags, it's a global state.
+			//       You can toggle it via fbink_set_fb_info if need be.
+			deviceQuirks.canHWInvert                = false;
+			// FIXME: Assume condor-like for now...
+			deviceQuirks.ntxBootRota                = FB_ROTATE_UR;
+			deviceQuirks.canRotate                  = true;
+			// Canonical -> native rotation mapping: { UR: 1, CW: 0, UD: 3, CCW: 2 }
+			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_CW_TOUCH;
+			// {1, 0, 3, 2}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UR;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CCW;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UD;
+			// Mirrors the *other* axis compared to (most) other NTX boards...
+			deviceQuirks.touchMirrorX               = false;
+			deviceQuirks.touchMirrorY               = true;
+			deviceQuirks.screenDPI                  = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "Clara Colour", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "Spa Colour", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Mark 12", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
+		case DEVICE_TOLINO_SHINE_COLOR:    // Tolino Shine Color (Spa Tolino Colour)
+			deviceQuirks.hasColorPanel              = true;
+			deviceQuirks.isMTK                      = true;
+			deviceQuirks.hasEclipseWfm              = true;
+			// NOTE: It technically can, but not via update flags, it's a global state.
+			//       You can toggle it via fbink_set_fb_info if need be.
+			deviceQuirks.canHWInvert                = false;
+			// FIXME: Assume condor-like for now...
+			deviceQuirks.ntxBootRota                = FB_ROTATE_UR;
+			deviceQuirks.canRotate                  = true;
+			// Canonical -> native rotation mapping: { UR: 1, CW: 0, UD: 3, CCW: 2 }
+			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_CW_TOUCH;
+			// {1, 0, 3, 2}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UR;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CCW;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UD;
+			// Mirrors the *other* axis compared to (most) other NTX boards...
+			deviceQuirks.touchMirrorX               = false;
+			deviceQuirks.touchMirrorY               = true;
+			deviceQuirks.screenDPI                  = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceName, "Shine Color", sizeof(deviceQuirks.deviceName) - 1U);
+			// Flawfinder: ignore
+			strncpy(
+			    deviceQuirks.deviceCodename, "Spa Tolino Colour", sizeof(deviceQuirks.deviceCodename) - 1U);
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.devicePlatform, "Mark 12", sizeof(deviceQuirks.devicePlatform) - 1U);
+			break;
 		case DEVICE_UNKNOWN:
 			// Like kobo_config.sh, assume Trilogy as a fallback
 			deviceQuirks.isKoboNonMT = true;

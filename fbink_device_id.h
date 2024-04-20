@@ -63,21 +63,23 @@ typedef struct __attribute__((__packed__))
 	uint8_t len;
 } NTXHWConfig;
 // Index of the few fields we're interested in inside the payload...
-#			define KOBO_HWCFG_PCB               0
+#			define KOBO_HWCFG_PCB                0
 // NOTE: This one *might* help w/ ntxBootRota, although a direct mapping seems impossible...
-#			define KOBO_HWCFG_DisplayPanel      10
+#			define KOBO_HWCFG_DisplayPanel       10
 // NOTE: Accelerometer
-#			define KOBO_HWCFG_RSensor           11
+#			define KOBO_HWCFG_RSensor            11
 // NOTE: Used to discriminate Tolino (0x21) from Kobo (0x09)
-#			define KOBO_HWCFG_Customer          13
-#			define KOBO_HWCFG_CPU               27
+#			define KOBO_HWCFG_Customer           13
+#			define KOBO_HWCFG_CPU                27
 // NOTE: This one was added in v1.0, while the original NTX Touch was only on v0.7,
 //       which is why we handle this dynamically, instead of relying on a fixed-size struct...
-#			define KOBO_HWCFG_DisplayResolution 31
+#			define KOBO_HWCFG_DisplayResolution  31
 // NOTE: This one tells us a bit about the potential rotation trickeries on some models (ntxRotaQuirk)...
-#			define KOBO_HWCFG_DisplayBusWidth   35
-// NOTE: To identify color panels, we only care about the CFA bit in there, ought to be the fourth one (TODO)
-#			define KOBO_HWCFG_EPD_Flags         64
+#			define KOBO_HWCFG_DisplayBusWidth    35
+// NOTE: To identify color panels, we only care about the CFA bit in there
+#			define KOBO_HWCFG_EPD_Flags          64
+// NOTE: Ought to be the fourth bit. Possibly 0x08 instead, depending on how this is actually laid out... (FIXME)
+#			define KOBO_HWCFG_EPD_Flags_CFA_MASK (1 << 4)
 
 // Another thing to deal with is the fact that the data block moved to a dedicated partition on boards with an MTK SoC...
 typedef struct
