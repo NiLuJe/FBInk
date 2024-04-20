@@ -92,5 +92,15 @@ with open(data, "r") as f:
 		elif line.startswith("EA0T0"):
 			# Elipsa 2E (condor) [389]
 			print("389,")
+		elif line.startswith("E70T0"):
+			# Libra Colour (monza) [390]
+			# Tolino Vision Color (monzaTolino) [690] (if Customer == 0x21)
+			print("390,")
+		elif line.startswith("E60T0"):
+			# Clara BW (spaBW) [391]
+			# Tolino Shine BW (spaTolinoBW) [691] (if Customer == 0x21)
+			# Clara Colour (spaColour) [393] (if EPD_Flags.CFA == ON)
+			# Tolino Shine Color (spaTolinoColour) [693] (if Customer == 0x21 && EPD_Flags.CFA == ON)
+			print("391,")
 		else:
 			print("0,")
