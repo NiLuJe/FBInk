@@ -1849,6 +1849,7 @@ static void
 			strncpy(deviceQuirks.deviceCodename, "PBTouchHD+", sizeof(deviceQuirks.deviceCodename) - 1U);
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_TOUCH_HD_PLUS;
 		} else if (strcmp(model_name, "PB633") == 0) {
+			deviceQuirks.hasColorPanel = true;
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBColor", sizeof(deviceQuirks.deviceCodename) - 1U);
@@ -1889,11 +1890,13 @@ static void
 			strncpy(deviceQuirks.deviceCodename, "PBInkPad3Pro", sizeof(deviceQuirks.deviceCodename) - 1U);
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD_3_PRO;
 		} else if (strcmp(model_name, "PB741") == 0) {
+			deviceQuirks.hasColorPanel = true;
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBInkPadColor", sizeof(deviceQuirks.deviceCodename) - 1U);
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD_COLOR;
 		} else if (strcmp(model_name, "PB743C") == 0) {
+			deviceQuirks.hasColorPanel = true;
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBInkPadColor2", sizeof(deviceQuirks.deviceCodename) - 1U);
@@ -1909,6 +1912,7 @@ static void
 			strncpy(deviceQuirks.deviceCodename, "PBInkPadX", sizeof(deviceQuirks.deviceCodename) - 1U);
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD_X;
 		} else if (strcmp(model_name, "PocketBook Color Lux") == 0) {
+			deviceQuirks.hasColorPanel = true;
 			deviceQuirks.screenDPI = 125U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBColorLux", sizeof(deviceQuirks.deviceCodename) - 1U);
