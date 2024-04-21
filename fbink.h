@@ -524,9 +524,9 @@ typedef struct
 	uint32_t    scanline_stride;        // fInfo.line_length (scanline length in bytes, padding included)
 	uint32_t    bpp;                    // vInfo.bits_per_pixel
 	bool        inverted_grayscale;     // true if vInfo.grayscale is set to GRAYSCALE_8BIT_INVERTED (@ 8bpp)
-	char        device_name[16];        // deviceQuirks.deviceName (short common name, no brand)
-	char        device_codename[16];    // deviceQuirks.deviceCodename
-	char        device_platform[16];    // deviceQuirks.devicePlatform (often a codename, too)
+	char        device_name[32];        // deviceQuirks.deviceName (short common name, no brand)
+	char        device_codename[32];    // deviceQuirks.deviceCodename
+	char        device_platform[32];    // deviceQuirks.devicePlatform (often a codename, too)
 	DEVICE_ID_T device_id;              // deviceQuirks.deviceId (decimal value, c.f., identify_device() on Kindle!)
 	uint8_t     pen_fg_color;           // penFGColor (Actual grayscale value, not FG_COLOR_INDEX_E)
 	uint8_t     pen_bg_color;           // penBGColor (ditto)

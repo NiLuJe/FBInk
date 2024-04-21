@@ -37,9 +37,9 @@ typedef struct
 {
 	unsigned short int screenDPI;
 	DEVICE_ID_T        deviceId;
-	char               deviceName[16];
-	char               deviceCodename[16];
-	char               devicePlatform[16];
+	char               deviceName[32];
+	char               deviceCodename[32];
+	char               devicePlatform[32];
 	bool               isPerfectFit;
 	bool               isMTK;
 	bool               isSunxi;
