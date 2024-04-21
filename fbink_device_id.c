@@ -1879,6 +1879,12 @@ static void
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBEra", sizeof(deviceQuirks.deviceCodename) - 1U);
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_ERA;
+		} else if (strcmp(model_name, "PB700K3") == 0 || strcmp(model_name, "PocketBook 700K3") == 0) {
+			deviceQuirks.hasColorPanel = true;
+			deviceQuirks.screenDPI     = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBEraColor", sizeof(deviceQuirks.deviceCodename) - 1U);
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_ERA_COLOR;
 		} else if (strcmp(model_name, "PB740") == 0) {
 			deviceQuirks.screenDPI = 300U;
 			// Flawfinder: ignore
