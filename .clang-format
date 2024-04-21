@@ -4,9 +4,16 @@ Language:        Cpp
 AccessModifierOffset: -4
 AlignAfterOpenBracket: Align
 AlignArrayOfStructures: Right
-AlignConsecutiveAssignments: AcrossComments
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossComments: true
+  AlignCompound: true
+  PadOperators: false
 AlignConsecutiveBitFields: AcrossComments
-AlignConsecutiveDeclarations: AcrossComments
+AlignConsecutiveDeclarations:
+  Enabled: true
+  AcrossComments: true
+  AlignFunctionPointers: false
 AlignConsecutiveMacros: AcrossComments
 AlignEscapedNewlines: Right
 AlignOperands: Align
@@ -15,8 +22,10 @@ AlignTrailingComments:
   OverEmptyLines: 0
 AllowAllArgumentsOnNextLine: true
 AllowAllParametersOfDeclarationOnNextLine: false
+AllowBreakBeforeNoexceptSpecifier: OnlyWithParen
 AllowShortBlocksOnASingleLine: Empty
 AllowShortCaseLabelsOnASingleLine: false
+AllowShortCompoundRequirementOnASingleLine: true
 AllowShortEnumsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: Never
@@ -51,6 +60,7 @@ BraceWrapping:
   SplitEmptyRecord: false
   SplitEmptyNamespace: true
 BracedInitializerIndentWidth: 4
+BreakAdjacentStringLiterals: true
 BreakAfterAttributes: Never
 BreakAfterJavaFieldAnnotations: false
 BreakArrays: false
@@ -126,6 +136,7 @@ NamespaceIndentation: All
 ObjCBinPackProtocolList: Auto
 ObjCBlockIndentWidth: 8
 ObjCBreakBeforeNestedBlockParam: true
+#ObjCPropertyAttributeOrder
 ObjCSpaceAfterProperty: true
 ObjCSpaceBeforeProtocolList: false
 PPIndentWidth: -1
@@ -135,6 +146,7 @@ PenaltyBreakBeforeFirstCallParameter: 19
 PenaltyBreakComment: 300
 PenaltyBreakFirstLessLess: 120
 #PenaltyBreakOpenParenthesis:
+#PenaltyBreakScopeResolution:
 PenaltyBreakString: 1000
 PenaltyBreakTemplateDeclaration: 10
 PenaltyExcessCharacter: 1000000
@@ -157,6 +169,7 @@ RequiresExpressionIndentation: OuterScope
 # NOTE: Nice in theory, but there can be exceptions in practice ;).
 SeparateDefinitionBlocks: Leave
 ShortNamespaceLines: 1
+SkipMacroDefinitionBody: false
 SortIncludes: CaseSensitive
 SortJavaStaticImport: Before
 SortUsingDeclarations: LexicographicNumeric

@@ -69,9 +69,9 @@ static inline __attribute__((always_inline)) uint
     INTERPOLATE_PIXEL_256(uint x, uint a, uint y, uint b)
 {
 	quint64 t = ((((quint64) (x)) | (((quint64) (x)) << 24)) & 0x00ff00ff00ff00ff) * a;
-	t += ((((quint64) (y)) | (((quint64) (y)) << 24)) & 0x00ff00ff00ff00ff) * b;
-	t >>= 8;
-	t &= 0x00ff00ff00ff00ff;
+	t        += ((((quint64) (y)) | (((quint64) (y)) << 24)) & 0x00ff00ff00ff00ff) * b;
+	t       >>= 8;
+	t        &= 0x00ff00ff00ff00ff;
 	return ((uint) (t)) | ((uint) (t >> 24));
 }
 
@@ -81,10 +81,10 @@ static inline __attribute__((always_inline)) uint
     INTERPOLATE_PIXEL_256(uint x, uint a, uint y, uint b)
 {
 	uint t = (x & 0xff00ff) * a + (y & 0xff00ff) * b;
-	t >>= 8;
-	t &= 0xff00ff;
+	t    >>= 8;
+	t     &= 0xff00ff;
 
-	x = ((x >> 8) & 0xff00ff) * a + ((y >> 8) & 0xff00ff) * b;
+	x  = ((x >> 8) & 0xff00ff) * a + ((y >> 8) & 0xff00ff) * b;
 	x &= 0xff00ff00;
 	x |= t;
 	return x;
@@ -96,10 +96,10 @@ static inline __attribute__((always_inline)) uchar
     INTERPOLATE_8BPP_PIXEL_256(uchar x, uint a, uchar y, uint b)
 {
 	uint t = x * a + y * b;
-	t >>= 8;
+	t    >>= 8;
 
 	uint tx = ((uint) (x >> 8) * a) + ((uint) (y >> 8) * b);
-	tx |= t;
+	tx     |= t;
 	return (uchar) tx;
 }
 
@@ -107,12 +107,12 @@ static inline __attribute__((always_inline)) ushort
     INTERPOLATE_16BPP_PIXEL_256(ushort x, uint a, ushort y, uint b)
 {
 	uint t = (x & 0xff) * a + (y & 0xff) * b;
-	t >>= 8;
-	t &= 0xff;
+	t    >>= 8;
+	t     &= 0xff;
 
 	uint tx = ((x >> 8) & 0xff) * a + ((y >> 8) & 0xff) * b;
-	tx &= 0xff00;
-	tx |= t;
+	tx     &= 0xff00;
+	tx     |= t;
 	return (ushort) tx;
 }
 

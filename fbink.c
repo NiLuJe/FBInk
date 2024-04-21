@@ -1619,7 +1619,7 @@ static struct mxcfb_rect
 								if (fbink_cfg->is_overlay) {                                           \
 									get_pixel(coords, &fbP);                                       \
 									fbP.bgra.p ^= 0x00FFFFFFu;                                     \
-									pxP = &fbP;                                                    \
+									pxP         = &fbP;                                            \
 									put_pixel(coords, pxP, false);                                 \
 								} else {                                                               \
 									put_pixel(coords, pxP, true);                                  \
@@ -6705,12 +6705,12 @@ int
 		// Compute the amount of characters left to print...
 		chars_left -= line_len;
 		// And use it to compute the amount of characters to print on *this* line
-		line_len = (size_t) MIN(chars_left, available_cols);
+		line_len    = (size_t) MIN(chars_left, available_cols);
 		LOG("Characters to print: %zu out of the %zu remaining ones", line_len, chars_left);
 
 		// NOTE: Now we just have to switch from characters to bytes, both for line_len & chars_left...
 		// First, get the byte offset of this section of our string (i.e., this line)...
-		line_offset += line_bytes;
+		line_offset       += line_bytes;
 		// ... then compute how many bytes we'll need to store it.
 		line_bytes         = 0U;
 		size_t   cn        = 0U;
@@ -6973,13 +6973,13 @@ static void
 						result[ci]     = CH_IGNORE;
 						result[ci + 1] = CH_IGNORE;
 						result[ci + 2] = CH_IGNORE;
-						ci += 3;
+						ci            += 3;
 						break;
 					}
 					is_bold        = !is_bold;
 					result[ci]     = CH_IGNORE;
 					result[ci + 1] = CH_IGNORE;
-					ci += 2;
+					ci            += 2;
 					break;
 				}
 				// Try to avoid flagging a single underscore in the middle of a word.
@@ -7545,7 +7545,7 @@ int
 				}
 				max_line_height += height_diff;
 				// We have to bump the baseline, too, to make sure this glyph's baseline is aligned with others...
-				max_baseline += height_diff;
+				max_baseline    += height_diff;
 			}
 			// stb_truetype does not appear to create a bounding box for space characters,
 			// so we need to handle this situation.
@@ -7615,7 +7615,7 @@ int
 				uint32_t c2   = u8_nextchar2(string, &tmp_c_index);
 				int      g2i  = stbtt_FindGlyphIndex(curr_font, (int) c2);
 				int      xadv = stbtt_GetGlyphKernAdvance(curr_font, gi, g2i);
-				curr_x += iroundf(sf * (float) xadv);
+				curr_x       += iroundf(sf * (float) xadv);
 			}
 		}
 		// Remember the widest line
@@ -8056,7 +8056,7 @@ int
 						put_pixel(paint_point, &pixel, false);
 						paint_point.x++;
 					}
-					lnPtr += max_lw;
+					lnPtr        += max_lw;
 					paint_point.x = start_x;
 					paint_point.y++;
 				}
@@ -8078,7 +8078,7 @@ int
 						}
 						paint_point.x++;
 					}
-					lnPtr += max_lw;
+					lnPtr        += max_lw;
 					paint_point.x = start_x;
 					paint_point.y++;
 				}
@@ -8108,7 +8108,7 @@ int
 						}
 						paint_point.x++;
 					}
-					lnPtr += max_lw;
+					lnPtr        += max_lw;
 					paint_point.x = start_x;
 					paint_point.y++;
 				}
@@ -8123,7 +8123,7 @@ int
 						put_pixel(paint_point, &pixel, false);
 						paint_point.x++;
 					}
-					lnPtr += max_lw;
+					lnPtr        += max_lw;
 					paint_point.x = start_x;
 					paint_point.y++;
 				}
@@ -8161,7 +8161,7 @@ int
 						}
 						paint_point.x++;
 					}
-					lnPtr += max_lw;
+					lnPtr        += max_lw;
 					paint_point.x = start_x;
 					paint_point.y++;
 				}
@@ -8178,7 +8178,7 @@ int
 						put_pixel(paint_point, &pixel, false);
 						paint_point.x++;
 					}
-					lnPtr += max_lw;
+					lnPtr        += max_lw;
 					paint_point.x = start_x;
 					paint_point.y++;
 				}
@@ -8209,7 +8209,7 @@ int
 						}
 						paint_point.x++;
 					}
-					lnPtr += max_lw;
+					lnPtr        += max_lw;
 					paint_point.x = start_x;
 					paint_point.y++;
 				}
@@ -8224,7 +8224,7 @@ int
 						put_pixel(paint_point, &pixel, false);
 						paint_point.x++;
 					}
-					lnPtr += max_lw;
+					lnPtr        += max_lw;
 					paint_point.x = start_x;
 					paint_point.y++;
 				}
@@ -8270,7 +8270,7 @@ int
 	if (paint_point.y + max_line_height > area.br.y) {
 		rv = 0;    // Inform the caller there is no room left to print another row.
 	} else {
-		rv = paint_point.y;    // inform the caller what their next top margin should be to follow on
+		rv  = paint_point.y;    // inform the caller what their next top margin should be to follow on
 		// NOTE: Don't forget to subtract the hardware viewport shenanigans, to avoid applying the viewport twice,
 		//       since the next print_ot call will add this to top_margin again...
 		rv -= (viewVertOrigin - viewVertOffset);
@@ -10483,10 +10483,10 @@ static int
 
 							const uint8_t ainv = img_px.color.a ^ 0xFFu;
 							// Don't forget to honor inversion
-							img_px.color.v ^= invert;
+							img_px.color.v    ^= invert;
 							// Blend it!
-							pixel.gray8 = (uint8_t) DIV255(
-							    ((img_px.color.v * img_px.color.a) + (bg_px.gray8 * ainv)));
+							pixel.gray8        = (uint8_t) DIV255(
+                                                            ((img_px.color.v * img_px.color.a) + (bg_px.gray8 * ainv)));
 							// SW dithering
 							if (fbink_cfg->sw_dithering) {
 								pixel.gray8 = dither_o8x8(i, j, pixel.gray8);
@@ -10523,10 +10523,10 @@ static int
 
 						const uint8_t ainv = img_px.color.a ^ 0xFFu;
 						// Don't forget to honor inversion
-						img_px.color.v ^= invert;
+						img_px.color.v    ^= invert;
 						// Blend it!
-						pixel.gray8 = (uint8_t) DIV255(
-						    ((img_px.color.v * img_px.color.a) + (bg_px.gray8 * ainv)));
+						pixel.gray8        = (uint8_t) DIV255(
+                                                    ((img_px.color.v * img_px.color.a) + (bg_px.gray8 * ainv)));
 						// SW dithering
 						if (fbink_cfg->sw_dithering) {
 							pixel.gray8 = dither_o8x8(i, j, pixel.gray8);
@@ -10650,7 +10650,7 @@ static int
 
 							// Don't forget to honor inversion
 							// cppcheck-suppress unreadVariable ; false-positive (union)
-							img_px.p ^= invert_rgb;
+							img_px.p     ^= invert_rgb;
 							// Blend it, we get our BGR swap in the process ;).
 							fb_px.color.r = (uint8_t) DIV255(
 							    ((img_px.color.r * img_px.color.a) + (bg_px.color.r * ainv)));
@@ -10728,7 +10728,7 @@ static int
 
 							// Don't forget to honor inversion
 							// cppcheck-suppress unreadVariable ; false-positive (union)
-							img_px.p ^= invert_rgb;
+							img_px.p     ^= invert_rgb;
 							// Blend it, we get our BGR swap in the process ;).
 							fb_px.color.r = (uint8_t) DIV255(
 							    ((img_px.color.r * img_px.color.a) + (bg_px.color.r * ainv)));
@@ -10891,7 +10891,7 @@ static int
 						get_pixel_RGB565(&coords, &bg_px);
 
 						// Don't forget to honor inversion
-						img_px.p ^= invert_rgb;
+						img_px.p          ^= invert_rgb;
 						// Blend it, we get our BGR swap in the process ;).
 						pixel.bgra.color.r = (uint8_t) DIV255(
 						    ((img_px.color.r * img_px.color.a) + (bg_px.bgra.color.r * ainv)));

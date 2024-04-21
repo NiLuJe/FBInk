@@ -50,12 +50,12 @@ static inline __attribute__((always_inline)) uint32x4_t
 	uint32x4_t vx     = vmull_n_u16(vpix16, (uint16_t) xyap);
 	int        i;
 	for (i = (1 << 14) - xyap; i > Cxy; i -= Cxy) {
-		pix += step;
+		pix   += step;
 		vpix32 = vmov_n_u32(*pix);
 		vpix16 = vget_low_u16(vmovl_u8(vreinterpret_u8_u32(vpix32)));
 		vx     = vaddq_u32(vx, vmull_n_u16(vpix16, (uint16_t) Cxy));
 	}
-	pix += step;
+	pix   += step;
 	vpix32 = vmov_n_u32(*pix);
 	vpix16 = vget_low_u16(vmovl_u8(vreinterpret_u8_u32(vpix32)));
 	vx     = vaddq_u32(vx, vmull_n_u16(vpix16, (uint16_t) i));
@@ -139,7 +139,7 @@ static inline void
 			const uint16x4_t vx16 = vmovn_u32(vx);
 			const uint8x8_t  vx8  = vmovn_u16(vcombine_u16(vx16, vx16));
 			*dptr                 = vget_lane_u32(vreinterpret_u32_u8(vx8), 0);
-			*dptr |= 0xff000000;
+			*dptr                |= 0xff000000;
 			dptr++;
 		}
 	}
@@ -222,7 +222,7 @@ static inline void
 			const uint16x4_t vx16 = vmovn_u32(vx);
 			const uint8x8_t  vx8  = vmovn_u16(vcombine_u16(vx16, vx16));
 			*dptr                 = vget_lane_u32(vreinterpret_u32_u8(vx8), 0);
-			*dptr |= 0xff000000;
+			*dptr                |= 0xff000000;
 			dptr++;
 		}
 	}
@@ -253,16 +253,16 @@ static inline void
 			int j;
 			for (j = (1 << 14) - yap; j > Cy; j -= Cy) {
 				sptr += sow;
-				vx = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
-				vx = vshrq_n_u32(vx, 4);
-				vx = vmulq_n_u32(vx, (uint32_t) Cy);
-				vr = vaddq_u32(vr, vx);
+				vx    = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
+				vx    = vshrq_n_u32(vx, 4);
+				vx    = vmulq_n_u32(vx, (uint32_t) Cy);
+				vr    = vaddq_u32(vr, vx);
 			}
 			sptr += sow;
-			vx = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
-			vx = vshrq_n_u32(vx, 4);
-			vx = vmulq_n_u32(vx, (uint32_t) j);
-			vr = vaddq_u32(vr, vx);
+			vx    = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
+			vx    = vshrq_n_u32(vx, 4);
+			vx    = vmulq_n_u32(vx, (uint32_t) j);
+			vr    = vaddq_u32(vr, vx);
 
 			vx                    = vshrq_n_u32(vr, 24);
 			const uint16x4_t vx16 = vmovn_u32(vx);
@@ -298,22 +298,22 @@ static inline void
 			int j;
 			for (j = (1 << 14) - yap; j > Cy; j -= Cy) {
 				sptr += sow;
-				vx = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
-				vx = vshrq_n_u32(vx, 4);
-				vx = vmulq_n_u32(vx, (uint32_t) Cy);
-				vr = vaddq_u32(vr, vx);
+				vx    = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
+				vx    = vshrq_n_u32(vx, 4);
+				vx    = vmulq_n_u32(vx, (uint32_t) Cy);
+				vr    = vaddq_u32(vr, vx);
 			}
 			sptr += sow;
-			vx = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
-			vx = vshrq_n_u32(vx, 4);
-			vx = vmulq_n_u32(vx, (uint32_t) j);
-			vr = vaddq_u32(vr, vx);
+			vx    = qt_qimageScaleAARGBA_helper_neon(sptr, xap, Cx, 1);
+			vx    = vshrq_n_u32(vx, 4);
+			vx    = vmulq_n_u32(vx, (uint32_t) j);
+			vr    = vaddq_u32(vr, vx);
 
 			vx                    = vshrq_n_u32(vr, 24);
 			const uint16x4_t vx16 = vmovn_u32(vx);
 			const uint8x8_t  vx8  = vmovn_u16(vcombine_u16(vx16, vx16));
 			*dptr                 = vget_lane_u32(vreinterpret_u32_u8(vx8), 0);
-			*dptr |= 0xff000000;
+			*dptr                |= 0xff000000;
 			dptr++;
 		}
 	}

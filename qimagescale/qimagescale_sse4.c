@@ -102,10 +102,10 @@ static inline void
 				vx = _mm_add_epi32(vx, vr);
 				vx = _mm_srli_epi32(vx, 8);
 			}
-			vx    = _mm_srli_epi32(vx, 14);
-			vx    = _mm_packus_epi32(vx, _mm_setzero_si128());
-			vx    = _mm_packus_epi16(vx, _mm_setzero_si128());
-			*dptr = (unsigned int) _mm_cvtsi128_si32(vx);
+			vx     = _mm_srli_epi32(vx, 14);
+			vx     = _mm_packus_epi32(vx, _mm_setzero_si128());
+			vx     = _mm_packus_epi16(vx, _mm_setzero_si128());
+			*dptr  = (unsigned int) _mm_cvtsi128_si32(vx);
 			*dptr |= 0xff000000;
 			dptr++;
 		}
@@ -197,10 +197,10 @@ static inline void
 				vx = _mm_add_epi32(vx, vr);
 				vx = _mm_srli_epi32(vx, 8);
 			}
-			vx    = _mm_srli_epi32(vx, 14);
-			vx    = _mm_packus_epi32(vx, _mm_setzero_si128());
-			vx    = _mm_packus_epi16(vx, _mm_setzero_si128());
-			*dptr = (unsigned int) _mm_cvtsi128_si32(vx);
+			vx     = _mm_srli_epi32(vx, 14);
+			vx     = _mm_packus_epi32(vx, _mm_setzero_si128());
+			vx     = _mm_packus_epi16(vx, _mm_setzero_si128());
+			*dptr  = (unsigned int) _mm_cvtsi128_si32(vx);
 			*dptr |= 0xff000000;
 			dptr++;
 		}
@@ -282,17 +282,17 @@ static inline void
 			int j;
 			for (j = (1 << 14) - yap; j > Cy; j -= Cy) {
 				sptr += sow;
-				vx = qt_qimageScaleAARGBA_helper_sse4(sptr, xap, Cx, 1, vxap, vCx);
-				vr = _mm_add_epi32(vr, _mm_mullo_epi32(_mm_srli_epi32(vx, 4), vCy));
+				vx    = qt_qimageScaleAARGBA_helper_sse4(sptr, xap, Cx, 1, vxap, vCx);
+				vr    = _mm_add_epi32(vr, _mm_mullo_epi32(_mm_srli_epi32(vx, 4), vCy));
 			}
 			sptr += sow;
-			vx = qt_qimageScaleAARGBA_helper_sse4(sptr, xap, Cx, 1, vxap, vCx);
-			vr = _mm_add_epi32(vr, _mm_mullo_epi32(_mm_srli_epi32(vx, 4), _mm_set1_epi32(j)));
+			vx    = qt_qimageScaleAARGBA_helper_sse4(sptr, xap, Cx, 1, vxap, vCx);
+			vr    = _mm_add_epi32(vr, _mm_mullo_epi32(_mm_srli_epi32(vx, 4), _mm_set1_epi32(j)));
 
-			vr    = _mm_srli_epi32(vr, 24);
-			vr    = _mm_packus_epi32(vr, _mm_setzero_si128());
-			vr    = _mm_packus_epi16(vr, _mm_setzero_si128());
-			*dptr = (unsigned int) _mm_cvtsi128_si32(vr);
+			vr     = _mm_srli_epi32(vr, 24);
+			vr     = _mm_packus_epi32(vr, _mm_setzero_si128());
+			vr     = _mm_packus_epi16(vr, _mm_setzero_si128());
+			*dptr  = (unsigned int) _mm_cvtsi128_si32(vr);
 			*dptr |= 0xff000000;
 			dptr++;
 		}
@@ -327,12 +327,12 @@ static inline void
 			int j;
 			for (j = (1 << 14) - yap; j > Cy; j -= Cy) {
 				sptr += sow;
-				vx = qt_qimageScaleAARGBA_helper_sse4(sptr, xap, Cx, 1, vxap, vCx);
-				vr = _mm_add_epi32(vr, _mm_mullo_epi32(_mm_srli_epi32(vx, 4), vCy));
+				vx    = qt_qimageScaleAARGBA_helper_sse4(sptr, xap, Cx, 1, vxap, vCx);
+				vr    = _mm_add_epi32(vr, _mm_mullo_epi32(_mm_srli_epi32(vx, 4), vCy));
 			}
 			sptr += sow;
-			vx = qt_qimageScaleAARGBA_helper_sse4(sptr, xap, Cx, 1, vxap, vCx);
-			vr = _mm_add_epi32(vr, _mm_mullo_epi32(_mm_srli_epi32(vx, 4), _mm_set1_epi32(j)));
+			vx    = qt_qimageScaleAARGBA_helper_sse4(sptr, xap, Cx, 1, vxap, vCx);
+			vr    = _mm_add_epi32(vr, _mm_mullo_epi32(_mm_srli_epi32(vx, 4), _mm_set1_epi32(j)));
 
 			vr    = _mm_srli_epi32(vr, 24);
 			vr    = _mm_packus_epi32(vr, _mm_setzero_si128());

@@ -131,7 +131,7 @@ static const unsigned int**
 	const qint64 inc = (((qint64) sh) << 16) / dh;
 	for (int i = 0; i < dh; i++) {
 		p[j++] = src + qMax(0LL, val >> 16) * sw;
-		val += inc;
+		val   += inc;
 	}
 	if (rv) {
 		for (int i = dh / 2; --i >= 0;) {
@@ -159,7 +159,7 @@ static const unsigned char**
 	const qint64 inc = (((qint64) sh) << 16) / dh;
 	for (int i = 0; i < dh; i++) {
 		p[j++] = src + qMax(0LL, val >> 16) * sw;
-		val += inc;
+		val   += inc;
 	}
 	if (rv) {
 		for (int i = dh / 2; --i >= 0;) {
@@ -187,7 +187,7 @@ static const unsigned short**
 	const qint64 inc = (((qint64) sh) << 16) / dh;
 	for (int i = 0; i < dh; i++) {
 		p[j++] = src + qMax(0LL, val >> 16) * sw;
-		val += inc;
+		val   += inc;
 	}
 	if (rv) {
 		for (int i = dh / 2; --i >= 0;) {
@@ -215,7 +215,7 @@ static int*
 	const qint64 inc = (((qint64) sw) << 16) / dw;
 	for (int i = 0; i < dw; i++) {
 		p[j++] = (int) qMax(0LL, val >> 16);
-		val += inc;
+		val   += inc;
 	}
 
 	if (rv) {
@@ -574,16 +574,16 @@ static inline __attribute__((always_inline)) void
 	int j;
 	for (j = (1 << 14) - xyap; j > Cxy; j -= Cxy) {
 		pix += step;
-		*r += (int) qRed(*pix) * Cxy;
-		*g += (int) qGreen(*pix) * Cxy;
-		*b += (int) qBlue(*pix) * Cxy;
-		*a += (int) qAlpha(*pix) * Cxy;
+		*r  += (int) qRed(*pix) * Cxy;
+		*g  += (int) qGreen(*pix) * Cxy;
+		*b  += (int) qBlue(*pix) * Cxy;
+		*a  += (int) qAlpha(*pix) * Cxy;
 	}
 	pix += step;
-	*r += (int) qRed(*pix) * j;
-	*g += (int) qGreen(*pix) * j;
-	*b += (int) qBlue(*pix) * j;
-	*a += (int) qAlpha(*pix) * j;
+	*r  += (int) qRed(*pix) * j;
+	*g  += (int) qGreen(*pix) * j;
+	*b  += (int) qBlue(*pix) * j;
+	*a  += (int) qAlpha(*pix) * j;
 }
 
 static void
@@ -802,14 +802,14 @@ static inline __attribute__((always_inline)) void
 	int j;
 	for (j = (1 << 14) - xyap; j > Cxy; j -= Cxy) {
 		pix += step;
-		*r += (int) qRed(*pix) * Cxy;
-		*g += (int) qGreen(*pix) * Cxy;
-		*b += (int) qBlue(*pix) * Cxy;
+		*r  += (int) qRed(*pix) * Cxy;
+		*g  += (int) qGreen(*pix) * Cxy;
+		*b  += (int) qBlue(*pix) * Cxy;
 	}
 	pix += step;
-	*r += (int) qRed(*pix) * j;
-	*g += (int) qGreen(*pix) * j;
-	*b += (int) qBlue(*pix) * j;
+	*r  += (int) qRed(*pix) * j;
+	*g  += (int) qGreen(*pix) * j;
+	*b  += (int) qBlue(*pix) * j;
 }
 
 static void
@@ -943,10 +943,10 @@ static inline __attribute__((always_inline)) void
 	int j;
 	for (j = (1 << 14) - xyap; j > Cxy; j -= Cxy) {
 		pix += step;
-		*v += *pix * Cxy;
+		*v  += *pix * Cxy;
 	}
 	pix += step;
-	*v += *pix * j;
+	*v  += *pix * j;
 }
 
 static void
@@ -1124,12 +1124,12 @@ static inline __attribute__((always_inline)) void
 	int j;
 	for (j = (1 << 14) - xyap; j > Cxy; j -= Cxy) {
 		pix += step;
-		*v += qY(*pix) * Cxy;
-		*a += qA(*pix) * Cxy;
+		*v  += qY(*pix) * Cxy;
+		*a  += qA(*pix) * Cxy;
 	}
 	pix += step;
-	*v += qY(*pix) * j;
-	*a += qA(*pix) * j;
+	*v  += qY(*pix) * j;
+	*a  += qA(*pix) * j;
 }
 
 static void
@@ -1278,11 +1278,11 @@ static void
 			qt_qimageScaleAAY8A_helper(sptr, xap, Cx, 1, &vx, &ax);
 
 			v += ((vx >> 6) * j);
-			v = DIV255(v >> 14);
-			v = v > 0xFF ? 0xFF : v < 0 ? 0 : v;
+			v  = DIV255(v >> 14);
+			v  = v > 0xFF ? 0xFF : v < 0 ? 0 : v;
 			a += ((ax >> 6) * j);
-			a = DIV255(a >> 14);
-			a = a > 0xFF ? 0xFF : a < 0 ? 0 : a;
+			a  = DIV255(a >> 14);
+			a  = a > 0xFF ? 0xFF : a < 0 ? 0 : a;
 
 			*dptr = (unsigned short int) qY8A(v, a);
 			dptr++;
