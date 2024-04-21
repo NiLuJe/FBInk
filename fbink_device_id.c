@@ -1966,7 +1966,8 @@ static void
 	ELOG("Detected a BQ Cervantes %s (%hu)", deviceQuirks.deviceName, deviceQuirks.deviceId);
 #	elif defined(FBINK_FOR_KOBO)
 	identify_kobo();
-	ELOG("Detected a Kobo %s (%hu => %s @ %s)",
+	ELOG("Detected a %s %s (%hu => %s @ %s)",
+	     deviceQuirks.deviceId >= (TOLINO_DEVICE_ID_OFFSET * 2) ? "Tolino" : "Kobo",
 	     deviceQuirks.deviceName,
 	     deviceQuirks.deviceId,
 	     deviceQuirks.deviceCodename,
