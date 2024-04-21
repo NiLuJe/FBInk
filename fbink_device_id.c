@@ -1524,7 +1524,7 @@ static void
 				if (payload[KOBO_HWCFG_CPU] == 10U) {
 					// Thankfully, that works for both the H2O² (374 -> 378),
 					// and the Aura SE (375 -> 379) ;)
-					kobo_id = (unsigned short int) (kobo_id + 4U);
+					kobo_id += 4U;
 				}
 			} else if (kobo_id == DEVICE_KOBO_GLO_HD) {
 				// Discriminate Alyssum from Pika, by checking the Display Resolution...
@@ -1545,6 +1545,24 @@ static void
 						// Forma (frost) [377] -> Forma 32GB (frost) [380]
 						kobo_id = DEVICE_KOBO_FORMA_32GB;
 					}
+				}
+			} else if (kobo_id == DEVICE_KOBO_LIBRA_COLOUR) {
+				// Discriminate the Kobo Libra Colour from the Tolino Vision Color
+				if (payload[KOBO_HWCFG_Customer] == TOLINO_CUSTOMER_ID) {
+					// Libra Colour (monza) [390] -> Tolino Vision Color (monza Tolino) [690]
+					kobo_id += TOLINO_DEVICE_ID_OFFSET;
+				}
+			} else if (kobo_id == DEVICE_KOBO_CLARA_BW) {
+				// Discriminate the Kobo Clara from the Tolino Shine
+				if (payload[KOBO_HWCFG_Customer] == TOLINO_CUSTOMER_ID) {
+					// Clara B&W (spa BW) [391] -> Tolino Shine BW (spa Tolino BW) [691]
+					kobo_id += TOLINO_DEVICE_ID_OFFSET;
+				}
+				// Discriminate between the B&W & Color variants
+				if (payload[KOBO_HWCFG_EPD_Flags] & KOBO_HWCFG_EPD_Flags_CFA_MASK) {
+					// Clara B&W (spa BW) [391] -> Clara Colour (spa Colour) [393]
+					// Tolino Shine BW (spa Tolino BW) [691] -> Tolino Shine Color (spa Tolino Colour) [693]
+					kobo_id += 2U;
 				}
 			}
 

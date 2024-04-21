@@ -68,8 +68,12 @@ typedef struct __attribute__((__packed__))
 #			define KOBO_HWCFG_DisplayPanel       10
 // NOTE: Accelerometer
 #			define KOBO_HWCFG_RSensor            11
-// NOTE: Used to discriminate Tolino (0x21) from Kobo (0x09)
+// NOTE: Used to discriminate Tolino from Kobo
 #			define KOBO_HWCFG_Customer           13
+#			define KOBO_CUSTOMER_ID              0x09
+#			define TOLINO_CUSTOMER_ID            0x21
+// NOTE: Since the Nickel migration, Tolino device IDs, have, so far, always been Kobo ID + 300
+#			define TOLINO_DEVICE_ID_OFFSET       300U
 #			define KOBO_HWCFG_CPU                27
 // NOTE: This one was added in v1.0, while the original NTX Touch was only on v0.7,
 //       which is why we handle this dynamically, instead of relying on a fixed-size struct...
