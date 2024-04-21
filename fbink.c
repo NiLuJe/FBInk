@@ -4098,9 +4098,14 @@ static __attribute__((cold)) void
 		}
 	}
 
-	if (deviceQuirks.deviceId == DEVICE_POCKETBOOK_COLOR_LUX) {
+	if (deviceQuirks.hasColorPanel) {
+		// They all use a 24bpp RGB framebuffer, despite potentially reporting it as 8bpp...
 		vInfo.bits_per_pixel = 24U;
-		vInfo.xres           = vInfo.xres / 3U;
+	}
+
+	// In addition to the above, the first color device was extra quirky...
+	if (deviceQuirks.deviceId == DEVICE_POCKETBOOK_COLOR_LUX) {
+		vInfo.xres = vInfo.xres / 3U;
 	}
 }
 #endif    // FBINK_FOR_POCKETBOOK
