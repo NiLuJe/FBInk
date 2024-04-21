@@ -1850,7 +1850,7 @@ static void
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_TOUCH_HD_PLUS;
 		} else if (strcmp(model_name, "PB633") == 0) {
 			deviceQuirks.hasColorPanel = true;
-			deviceQuirks.screenDPI = 300U;
+			deviceQuirks.screenDPI     = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBColor", sizeof(deviceQuirks.deviceCodename) - 1U);
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_COLOR;
@@ -1891,16 +1891,22 @@ static void
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD_3_PRO;
 		} else if (strcmp(model_name, "PB741") == 0) {
 			deviceQuirks.hasColorPanel = true;
-			deviceQuirks.screenDPI = 300U;
+			deviceQuirks.screenDPI     = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBInkPadColor", sizeof(deviceQuirks.deviceCodename) - 1U);
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD_COLOR;
 		} else if (strcmp(model_name, "PB743C") == 0) {
 			deviceQuirks.hasColorPanel = true;
-			deviceQuirks.screenDPI = 300U;
+			deviceQuirks.screenDPI     = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBInkPadColor2", sizeof(deviceQuirks.deviceCodename) - 1U);
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD_COLOR_2;
+		} else if (strcmp(model_name, "PB743K") == 0) {
+			deviceQuirks.hasColorPanel = true;
+			deviceQuirks.screenDPI     = 300U;
+			// Flawfinder: ignore
+			strncpy(deviceQuirks.deviceCodename, "PBInkPadColor3", sizeof(deviceQuirks.deviceCodename) - 1U);
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD_COLOR_3;
 		} else if (strcmp(model_name, "PocketBook 840") == 0 || strcmp(model_name, "Reader InkPad") == 0) {
 			deviceQuirks.screenDPI = 250U;
 			// Flawfinder: ignore
@@ -1913,7 +1919,7 @@ static void
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD_X;
 		} else if (strcmp(model_name, "PocketBook Color Lux") == 0) {
 			deviceQuirks.hasColorPanel = true;
-			deviceQuirks.screenDPI = 125U;
+			deviceQuirks.screenDPI     = 125U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceCodename, "PBColorLux", sizeof(deviceQuirks.deviceCodename) - 1U);
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_COLOR_LUX;
