@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #
-# FBInk related tool, Copyright (C) 2018-2023 NiLuJe <ninuje@gmail.com>
+# FBInk related tool, Copyright (C) 2018-2024 NiLuJe <ninuje@gmail.com>
 # Quick'n dirty script to convert an ASCII-art grid into Unifont's hex format
 # Assumes a 32x32 grid
 #
