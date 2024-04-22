@@ -63,29 +63,29 @@ typedef struct __attribute__((__packed__))
 	uint8_t len;
 } NTXHWConfig;
 // Index of the few fields we're interested in inside the payload...
-#			define KOBO_HWCFG_PCB                   0
+#			define KOBO_HWCFG_PCB                   0U
 // NOTE: This one *might* help w/ ntxBootRota, although a direct mapping seems impossible...
-#			define KOBO_HWCFG_DisplayPanel          10
+#			define KOBO_HWCFG_DisplayPanel          10U
 // NOTE: Accelerometer
-#			define KOBO_HWCFG_RSensor               11
+#			define KOBO_HWCFG_RSensor               11U
 // NOTE: Used to discriminate Tolino from Kobo
-#			define KOBO_HWCFG_Customer              13
-#			define HWCFG_CUSTOMER_KOBO              0x09
-#			define HWCFG_CUSTOMER_TOLINO            0x21
+#			define KOBO_HWCFG_Customer              13U
+#			define HWCFG_CUSTOMER_KOBO              0x09u
+#			define HWCFG_CUSTOMER_TOLINO            0x21u
 // NOTE: Since the Nickel migration, Tolino device IDs, have, so far, always been Kobo ID + 300
 #			define TOLINO_DEVICE_ID_OFFSET          300U
-#			define KOBO_HWCFG_CPU                   27
+#			define KOBO_HWCFG_CPU                   27U
 // c.f., kobo_cpus below
 #			define HWCFG_CPU_MX6SLL                 10U
 // NOTE: This one was added in v1.0, while the original NTX Touch was only on v0.7,
 //       which is why we handle this dynamically, instead of relying on a fixed-size struct...
-#			define KOBO_HWCFG_DisplayResolution     31
+#			define KOBO_HWCFG_DisplayResolution     31U
 // c.f., kobo_disp_res below
 #			define HWCFG_DISPLAY_RESOLUTION_800_600 0U
 // NOTE: This one tells us a bit about the potential rotation trickeries on some models (ntxRotaQuirk)...
-#			define KOBO_HWCFG_DisplayBusWidth       35
+#			define KOBO_HWCFG_DisplayBusWidth       35U
 // NOTE: To identify color panels, we only care about the CFA bit in there
-#			define KOBO_HWCFG_EPD_Flags             64
+#			define KOBO_HWCFG_EPD_Flags             64U
 // NOTE: Ought to be the fourth bit. Possibly 0x08 instead, depending on how this is actually laid out... (FIXME)
 #			define HWCFG_EPD_FLAGS_CFA              (1 << 4)
 
