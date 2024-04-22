@@ -1520,16 +1520,14 @@ static void
 			// And now for the fun part, the few device variants that use the same PCB ID...
 			if (kobo_id == DEVICE_KOBO_AURA_H2O_2 || kobo_id == DEVICE_KOBO_AURA_SE) {
 				// Discriminate the Mk.7 version for dual rev models by checking the CPU...
-				// NOTE: kobo_cpus[10] == "mx6sll"
-				if (payload[KOBO_HWCFG_CPU] == 10U) {
+				if (payload[KOBO_HWCFG_CPU] == HWCFG_CPU_MX6SLL) {
 					// Thankfully, that works for both the H2O² (374 -> 378),
 					// and the Aura SE (375 -> 379) ;)
 					kobo_id += 4U;
 				}
 			} else if (kobo_id == DEVICE_KOBO_GLO_HD) {
 				// Discriminate Alyssum from Pika, by checking the Display Resolution...
-				// NOTE: kobo_disp_res[0] == "800x600"
-				if (payload[KOBO_HWCFG_DisplayResolution] == 0U) {
+				if (payload[KOBO_HWCFG_DisplayResolution] == HWCFG_DISPLAY_RESOLUTION_800_600) {
 					// Glo HD (Alyssum) [371] -> Touch 2.0 (Pika) [372]
 					kobo_id = DEVICE_KOBO_TOUCH_2;
 				}
@@ -1548,18 +1546,18 @@ static void
 				}
 			} else if (kobo_id == DEVICE_KOBO_LIBRA_COLOUR) {
 				// Discriminate the Kobo Libra Colour from the Tolino Vision Color
-				if (payload[KOBO_HWCFG_Customer] == TOLINO_CUSTOMER_ID) {
+				if (payload[KOBO_HWCFG_Customer] == HWCFG_CUSTOMER_TOLINO) {
 					// Libra Colour (monza) [390] -> Tolino Vision Color (monza Tolino) [690]
 					kobo_id += TOLINO_DEVICE_ID_OFFSET;
 				}
 			} else if (kobo_id == DEVICE_KOBO_CLARA_BW) {
 				// Discriminate the Kobo Clara from the Tolino Shine
-				if (payload[KOBO_HWCFG_Customer] == TOLINO_CUSTOMER_ID) {
+				if (payload[KOBO_HWCFG_Customer] == HWCFG_CUSTOMER_TOLINO) {
 					// Clara B&W (spa BW) [391] -> Tolino Shine BW (spa Tolino BW) [691]
 					kobo_id += TOLINO_DEVICE_ID_OFFSET;
 				}
 				// Discriminate between the B&W & Color variants
-				if (payload[KOBO_HWCFG_EPD_Flags] & KOBO_HWCFG_EPD_Flags_CFA_MASK) {
+				if (payload[KOBO_HWCFG_EPD_Flags] & HWCFG_EPD_FLAGS_CFA) {
 					// Clara B&W (spa BW) [391] -> Clara Colour (spa Colour) [393]
 					// Tolino Shine BW (spa Tolino BW) [691] -> Tolino Shine Color (spa Tolino Colour) [693]
 					kobo_id += 2U;
