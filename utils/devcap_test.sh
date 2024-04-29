@@ -138,9 +138,9 @@ fbgrab "devcap_CCW.png" >/dev/null 2>&1
 echo -e "\n" >> "${DEVCAP_LOG}"
 separator
 
-# Reset to UpRight
+# Reset to UpRight (via -R UR, instead of the (deprecated) -r -1 used above)
 header "Reset to UR"
-fbdepth -r -1 >> "${DEVCAP_LOG}" 2>&1
+fbdepth -R UR >> "${DEVCAP_LOG}" 2>&1
 separator
 
 # Check uptime vs. epoch for input timestamps
