@@ -316,6 +316,10 @@ int
 	bool canonical_rota = false;
 #endif
 
+	// NOTE: Enforce line-buffering, to make I/O redirections less confusing (e.g., in DevCap logs),
+	//       as we often mix stdout with stderr, and unlike stdout, stderr is always unbuffered (c.f., setvbuf(3)).
+	setlinebuf(stdout);
+
 	while ((opt = getopt_long(argc, argv, "d:hvqgGr:R:oOcCH:", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'd':
