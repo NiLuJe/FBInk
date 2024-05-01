@@ -207,6 +207,17 @@ static int
 		case DEVICE_KOBO_SAGE:
 			// NOTE: On the Sage (PCB index 98), this is left at EBRMAIN_ROTATE_R_0.
 			break;
+		case DEVICE_KOBO_ELIPSA_2E:
+		case DEVICE_KOBO_LIBRA_COLOUR:
+			// NOTE: On MTK, stuff appears to be inverted (and hard-coded that way),
+			//       exactly like on devices that would previously have been flagged EBRMAIN_ROTATE_R_180...
+			// NOTE: We currently don't actually ever call this on MTK, but hey, it works regardless ;).
+			if (rota >= 0) {
+				rota = rota ^ 2;
+			} else {
+				rota = rota ^ 3;
+			}
+			break;
 		default:
 			WARN("Unsupported KX122 translation for this device");
 			break;
@@ -303,6 +314,8 @@ static int
 	switch (deviceQuirks.deviceId) {
 		case DEVICE_KOBO_ELIPSA:
 		case DEVICE_KOBO_SAGE:
+		case DEVICE_KOBO_ELIPSA_2E:
+		case DEVICE_KOBO_LIBRA_COLOUR:
 			// kx122
 			rv = query_kx122();
 			if (rv < 0) {
