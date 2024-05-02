@@ -11133,7 +11133,7 @@ cleanup:
 // Draw raw (supposedly image) data on screen
 int
     fbink_print_raw_data(int fbfd                              UNUSED_BY_MINIMAL,
-			 unsigned char* restrict data          UNUSED_BY_MINIMAL,
+			 const unsigned char* restrict data    UNUSED_BY_MINIMAL,
 			 const int w                           UNUSED_BY_MINIMAL,
 			 const int h                           UNUSED_BY_MINIMAL,
 			 const size_t len                      UNUSED_BY_MINIMAL,
@@ -11173,9 +11173,12 @@ int
 
 	LOG("Requested %d color channels, supplied data had %d", req_n, n);
 
+	// Local pointer we'll end up passing to draw_image, as we may need to process the input data...
+	const unsigned char* restrict img_data = NULL;
+
 	// Was scaling requested?
-	unsigned char* restrict sdata = NULL;
-	bool want_scaling             = false;
+	unsigned char* restrict scaled_data = NULL;
+	bool want_scaling                   = false;
 	if (fbink_cfg->scaled_width != 0 || fbink_cfg->scaled_height != 0) {
 		LOG("Image scaling requested!");
 		want_scaling = true;
@@ -11195,21 +11198,22 @@ int
 
 	// If there's a mismatch between the components in the input data vs. what the fb expects,
 	// re-interleave the data w/ stbi's help...
-	unsigned char* restrict imgdata = NULL;
+	unsigned char* restrict converted_data = NULL;
 	if (req_n != n) {
 		LOG("Converting from %d components to the requested %d", n, req_n);
 		// NOTE: stbi__convert_format will *always* free the input buffer, which we do NOT want here...
 		//       Which is why we're using a tweaked internal copy, which does not free ;).
-		imgdata = img_convert_px_format(data, n, req_n, w, h);
-		if (imgdata == NULL) {
+		converted_data = img_convert_px_format(data, n, req_n, w, h);
+		if (converted_data == NULL) {
 			WARN("Failed to re-interleave input data in a suitable format");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 		}
+		img_data = converted_data;
 	} else {
 		// We can use the input buffer as-is :)
 		LOG("No conversion needed, using the input buffer directly");
-		imgdata = data;
+		img_data = data;
 	}
 
 	// Scale it w/ QImageScale, if requested
@@ -11266,14 +11270,15 @@ int
 
 		LOG("Scaling image data from %dx%d to %hux%hu . . .", w, h, scaled_width, scaled_height);
 
-		sdata = qSmoothScaleImage(imgdata, w, h, req_n, fbink_cfg->ignore_alpha, scaled_width, scaled_height);
-		if (sdata == NULL) {
+		scaled_data =
+		    qSmoothScaleImage(img_data, w, h, req_n, fbink_cfg->ignore_alpha, scaled_width, scaled_height);
+		if (scaled_data == NULL) {
 			PFWARN("Failed to resize image");
 			return ERRCODE(EXIT_FAILURE);
 		}
 
 		// We're drawing the scaled data, at the requested scaled resolution
-		if (draw_image(fbfd, sdata, scaled_width, scaled_height, n, req_n, x_off, y_off, fbink_cfg) !=
+		if (draw_image(fbfd, scaled_data, scaled_width, scaled_height, n, req_n, x_off, y_off, fbink_cfg) !=
 		    EXIT_SUCCESS) {
 			PFWARN("Failed to display image data on screen");
 			rv = ERRCODE(EXIT_FAILURE);
@@ -11281,7 +11286,7 @@ int
 		}
 	} else {
 		// We should now be able to draw that on screen, knowing that it probably won't horribly implode ;p
-		if (draw_image(fbfd, imgdata, w, h, n, req_n, x_off, y_off, fbink_cfg) != EXIT_SUCCESS) {
+		if (draw_image(fbfd, img_data, w, h, n, req_n, x_off, y_off, fbink_cfg) != EXIT_SUCCESS) {
 			PFWARN("Failed to display image data on screen");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
@@ -11291,11 +11296,9 @@ int
 	// Cleanup
 cleanup:
 	// If we created an intermediary buffer ourselves, free it.
-	if (req_n != n) {
-		stbi_image_free(imgdata);
-	}
+	free(converted_data);
 	// And the scaled buffer
-	free(sdata);
+	free(scaled_data);
 
 	return rv;
 #else
