@@ -1223,12 +1223,10 @@ static struct mxcfb_rect
 	FBInkPixel fgP = penFGPixel;
 	FBInkPixel bgP = penBGPixel;
 	if (fbink_cfg->is_inverted) {
-		// NOTE: And, of course, RGB565 is terrible. Inverting the lossy packed value would be even lossier...
+		// NOTE: And, of course, RGB565 is terrible.
 		if (unlikely(vInfo.bits_per_pixel == 16U)) {
-			const uint8_t fgcolor = penFGColor ^ 0xFFu;
-			const uint8_t bgcolor = penBGColor ^ 0xFFu;
-			fgP.rgb565            = pack_rgb565(fgcolor, fgcolor, fgcolor);
-			bgP.rgb565            = pack_rgb565(bgcolor, bgcolor, bgcolor);
+			fgP.rgb565 ^= 0xFFFFu;
+			bgP.rgb565 ^= 0xFFFFu;
 		} else {
 			fgP.bgra.p ^= 0x00FFFFFFu;
 			bgP.bgra.p ^= 0x00FFFFFFu;
@@ -5861,8 +5859,12 @@ static int
 	// Handle inversion, if necessary...
 	FBInkPixel px = *c;
 	if (fbink_cfg->is_inverted) {
-		// NOTE: Will be lossy for RGB565, but, oh, well.
-		px.bgra.p ^= 0x00FFFFFFu;
+		// NOTE: And, of course, RGB565 is terrible.
+		if (unlikely(vInfo.bits_per_pixel == 16U)) {
+			px.rgb565 ^= 0xFFFFu;
+		} else {
+			px.bgra.p ^= 0x00FFFFFFu;
+		}
 	}
 
 	// Did we request a regional clear?
@@ -6575,9 +6577,9 @@ int
 	if (fbink_cfg->is_cleared) {
 		FBInkPixel bgP = penBGPixel;
 		if (fbink_cfg->is_inverted) {
-			// NOTE: And, of course, RGB565 is terrible. Inverting the lossy packed value would be even lossier...
-			if (vInfo.bits_per_pixel == 16U) {
-				bgP.rgb565 = pack_rgb565(penBGColor, penBGColor, penBGColor);
+			// NOTE: And, of course, RGB565 is terrible.
+			if (unlikely(vInfo.bits_per_pixel == 16U)) {
+				bgP.rgb565 ^= 0xFFFFu;
 			} else {
 				bgP.bgra.p ^= 0x00FFFFFFu;
 			}
@@ -7770,10 +7772,10 @@ int
 	FBInkPixel      fgP        = penFGPixel;
 	FBInkPixel      bgP        = penBGPixel;
 	if (is_inverted) {
-		// NOTE: And, of course, RGB565 is terrible. Inverting the lossy packed value would be even lossier...
-		if (vInfo.bits_per_pixel == 16U) {
-			fgP.rgb565 = pack_rgb565(fgcolor, fgcolor, fgcolor);
-			bgP.rgb565 = pack_rgb565(bgcolor, bgcolor, bgcolor);
+		// NOTE: And, of course, RGB565 is terrible.
+		if (unlikely(vInfo.bits_per_pixel == 16U)) {
+			fgP.rgb565 ^= 0xFFFFu;
+			bgP.rgb565 ^= 0xFFFFu;
 		} else {
 			fgP.bgra.p ^= 0x00FFFFFFu;
 			bgP.bgra.p ^= 0x00FFFFFFu;
@@ -9602,10 +9604,10 @@ int
 	FBInkPixel fgP = penFGPixel;
 	FBInkPixel bgP = penBGPixel;
 	if (fbink_cfg->is_inverted) {
-		// NOTE: And, of course, RGB565 is terrible. Inverting the lossy packed value would be even lossier...
+		// NOTE: And, of course, RGB565 is terrible.
 		if (unlikely(vInfo.bits_per_pixel == 16U)) {
-			fgP.rgb565 = pack_rgb565(fgcolor, fgcolor, fgcolor);
-			bgP.rgb565 = pack_rgb565(bgcolor, bgcolor, bgcolor);
+			fgP.rgb565 ^= 0xFFFFu;
+			bgP.rgb565 ^= 0xFFFFu;
 		} else {
 			fgP.bgra.p ^= 0x00FFFFFFu;
 			bgP.bgra.p ^= 0x00FFFFFFu;
@@ -10260,9 +10262,9 @@ static int
 	if (fbink_cfg->is_cleared) {
 		FBInkPixel bgP = penBGPixel;
 		if (fbink_cfg->is_inverted) {
-			// NOTE: And, of course, RGB565 is terrible. Inverting the lossy packed value would be even lossier...
-			if (vInfo.bits_per_pixel == 16U) {
-				bgP.rgb565 = pack_rgb565(penBGColor, penBGColor, penBGColor);
+			// NOTE: And, of course, RGB565 is terrible.
+			if (unlikely(vInfo.bits_per_pixel == 16U)) {
+				bgP.rgb565 ^= 0xFFFFu;
 			} else {
 				bgP.bgra.p ^= 0x00FFFFFFu;
 			}
