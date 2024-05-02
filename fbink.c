@@ -10219,6 +10219,7 @@ static int
 	       const int w,
 	       const int h,
 	       const int n,
+	       const int req_n,
 	       short int x_off,
 	       short int y_off,
 	       const FBInkConfig* restrict fbink_cfg)
@@ -10435,7 +10436,7 @@ static int
 				FBInkPixelG8A    img_px;
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
-						// NOTE: In this branch, n == 2, so we can do << 1 instead of * 2 ;).
+						// NOTE: In this branch, req_n == 2, so we can do << 1 instead of * 2 ;).
 						const size_t img_scanline_offset = (size_t) ((j << 1U) * w);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
@@ -10511,7 +10512,7 @@ static int
 						//       and we don't care about the rotation checks at this bpp :).
 						get_pixel_Gray4(&coords, &bg_px);
 
-						// NOTE: In this branch, n == 2, so we can do << 1 instead of * 2 ;).
+						// NOTE: In this branch, req_n == 2, so we can do << 1 instead of * 2 ;).
 						const size_t  img_scanline_offset = (size_t) ((j << 1U) * w);
 						FBInkPixelG8A img_px;
 #	pragma GCC diagnostic push
@@ -10539,7 +10540,7 @@ static int
 			// No alpha in image, or ignored
 			// We can do a simple copy if the target is 8bpp, the source is 8bpp (no alpha), we don't invert,
 			// and we don't dither.
-			if (!fb_is_legacy && n == 1 && invert == 0U && !fbink_cfg->sw_dithering) {
+			if (!fb_is_legacy && req_n == 1 && invert == 0U && !fbink_cfg->sw_dithering) {
 				// Scanline by scanline, as we usually have input/output x offsets to honor
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					// NOTE: Again, assume the fb origin is @ (0, 0), which should hold true at that bitdepth.
@@ -10551,8 +10552,8 @@ static int
 			} else {
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
-						// NOTE: Here, n is either 2, or 1 if ignore_alpha, so, no shift trickery ;)
-						const size_t pix_offset = (size_t) ((j * n * w) + (i * n));
+						// NOTE: Here, req_n is either 2, or 1 if ignore_alpha, so, no shift trickery ;)
+						const size_t pix_offset = (size_t) ((j * req_n * w) + (i * req_n));
 						// SW dithering
 						if (fbink_cfg->sw_dithering) {
 							pixel.gray8 = dither_o8x8(i, j, data[pix_offset] ^ invert);
@@ -10594,7 +10595,7 @@ static int
 						// NOTE: We should be able to skip rotation hacks at this bpp...
 
 						// Yeah, I know, GCC...
-						// NOTE: In this branch, n == 4, so we can do << 2 instead of * 4 ;).
+						// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
 						const size_t img_scanline_offset = (size_t) ((j << 2U) * w);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
@@ -10681,7 +10682,7 @@ static int
 						// NOTE: We should be able to skip rotation hacks at this bpp...
 
 						// Yeah, I know, GCC...
-						// NOTE: In this branch, n == 4, so we can do << 2 instead of * 4 ;).
+						// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
 						const size_t img_scanline_offset = (size_t) ((j << 2U) * w);
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
@@ -10759,8 +10760,8 @@ static int
 				fb_px.color.a = 0xFFu;
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
-						// NOTE: Here, n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
-						const size_t  img_pix_offset = (size_t) ((j * n * w) + (i * n));
+						// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
+						const size_t  img_pix_offset = (size_t) ((j * req_n * w) + (i * req_n));
 						// Gobble the full image pixel (3 bytes, we don't care about alpha if it's there)
 						FBInkPixelRGB img_px;
 						img_px.p = *((const uint24_t*) &data[img_pix_offset]);
@@ -10804,8 +10805,8 @@ static int
 				// 24bpp
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
-						// NOTE: Here, n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
-						const size_t  img_pix_offset = (size_t) ((j * n * w) + (i * n));
+						// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
+						const size_t  img_pix_offset = (size_t) ((j * req_n * w) + (i * req_n));
 						// Gobble the full image pixel (3 bytes, we don't care about alpha if it's there)
 						FBInkPixelRGB img_px;
 						img_px.p = *((const uint24_t*) &data[img_pix_offset]);
@@ -10845,7 +10846,7 @@ static int
 				for (unsigned short int i = img_x_off; i < max_width; i++) {
 					// NOTE: Same general idea as the fb_is_grayscale case,
 					//       except at this bpp we then have to handle rotation ourselves...
-					// NOTE: In this branch, n == 4, so we can do << 2 instead of * 4 ;).
+					// NOTE: In this branch, req_n == 4, so we can do << 2 instead of * 4 ;).
 					const size_t   img_scanline_offset = (size_t) ((j << 2U) * w);
 					FBInkPixelRGBA img_px;
 #	pragma GCC diagnostic push
@@ -10917,8 +10918,8 @@ static int
 			// NOTE: For some reason, reading the image 3 or 4 bytes at once doesn't win us anything, here...
 			for (unsigned short int j = img_y_off; j < max_height; j++) {
 				for (unsigned short int i = img_x_off; i < max_width; i++) {
-					// NOTE: Here, n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
-					const size_t pix_offset = (size_t) ((j * n * w) + (i * n));
+					// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
+					const size_t pix_offset = (size_t) ((j * req_n * w) + (i * req_n));
 					// SW dithering
 					if (fbink_cfg->sw_dithering) {
 						pixel.bgra.color.r = dither_o8x8(i, j, data[pix_offset + 0U] ^ invert);
@@ -11101,7 +11102,7 @@ int
 		}
 
 		// We're drawing the scaled data, at the requested scaled resolution
-		if (draw_image(fbfd, sdata, scaled_width, scaled_height, req_n, x_off, y_off, fbink_cfg) !=
+		if (draw_image(fbfd, sdata, scaled_width, scaled_height, n, req_n, x_off, y_off, fbink_cfg) !=
 		    EXIT_SUCCESS) {
 			PFWARN("Failed to display image data on screen");
 			rv = ERRCODE(EXIT_FAILURE);
@@ -11109,7 +11110,7 @@ int
 		}
 	} else {
 		// We're drawing the original unscaled data at its native resolution
-		if (draw_image(fbfd, data, w, h, req_n, x_off, y_off, fbink_cfg) != EXIT_SUCCESS) {
+		if (draw_image(fbfd, data, w, h, n, req_n, x_off, y_off, fbink_cfg) != EXIT_SUCCESS) {
 			PFWARN("Failed to display image data on screen");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
@@ -11277,7 +11278,7 @@ int
 		}
 
 		// We're drawing the scaled data, at the requested scaled resolution
-		if (draw_image(fbfd, scaled_data, scaled_width, scaled_height, req_n, x_off, y_off, fbink_cfg) !=
+		if (draw_image(fbfd, scaled_data, scaled_width, scaled_height, n, req_n, x_off, y_off, fbink_cfg) !=
 		    EXIT_SUCCESS) {
 			PFWARN("Failed to display image data on screen");
 			rv = ERRCODE(EXIT_FAILURE);
@@ -11285,7 +11286,7 @@ int
 		}
 	} else {
 		// We should now be able to draw that on screen, knowing that it probably won't horribly implode ;p
-		if (draw_image(fbfd, img_data, w, h, req_n, x_off, y_off, fbink_cfg) != EXIT_SUCCESS) {
+		if (draw_image(fbfd, img_data, w, h, n, req_n, x_off, y_off, fbink_cfg) != EXIT_SUCCESS) {
 			PFWARN("Failed to display image data on screen");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
