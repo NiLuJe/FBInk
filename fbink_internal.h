@@ -895,7 +895,7 @@ static ssize_t
 	if (trunc) {
 		errno = E2BIG;
 	}
-	return trunc ? -1 : slen;
+	return trunc ? -1 : (ssize_t) slen;
 }
 
 // Based on Linux's strscpy_pad
