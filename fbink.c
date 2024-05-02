@@ -5453,9 +5453,9 @@ void
 	fbink_state->scanline_stride    = fInfo.line_length;
 	fbink_state->bpp                = vInfo.bits_per_pixel;
 	fbink_state->inverted_grayscale = !!(vInfo.bits_per_pixel == 8U && vInfo.grayscale == GRAYSCALE_8BIT_INVERTED);
-	strncpy(fbink_state->device_name, deviceQuirks.deviceName, sizeof(fbink_state->device_name) - 1U);
-	strncpy(fbink_state->device_codename, deviceQuirks.deviceCodename, sizeof(fbink_state->device_codename) - 1U);
-	strncpy(fbink_state->device_platform, deviceQuirks.devicePlatform, sizeof(fbink_state->device_platform) - 1U);
+	strcpy(fbink_state->device_name, deviceQuirks.deviceName);
+	strcpy(fbink_state->device_codename, deviceQuirks.deviceCodename);
+	strcpy(fbink_state->device_platform, deviceQuirks.devicePlatform);
 	fbink_state->device_id        = deviceQuirks.deviceId;
 	fbink_state->pen_fg_color     = penFGColor;
 	fbink_state->pen_bg_color     = penBGColor;
