@@ -155,6 +155,7 @@ typedef union
 // (We need a single data type because of our function pointers shenanigans...)
 typedef union
 {
+	uint32_t       p;
 	FBInkPixelBGRA bgra;
 	uint16_t       rgb565;
 	uint8_t        gray8;    // Will point to bgra.color.b

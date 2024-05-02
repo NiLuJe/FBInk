@@ -687,7 +687,7 @@ static __attribute__((hot)) void fill_rect_RGB32_checked(unsigned short int,
 							 unsigned short int,
 							 unsigned short int,
 							 const FBInkPixel* restrict);
-static void                      clear_screen(int UNUSED_BY_NOTKINDLE, uint8_t, bool UNUSED_BY_NOTKINDLE);
+static void                      clear_screen(int UNUSED_BY_NOTKINDLE, FBInkPixel*, bool UNUSED_BY_NOTKINDLE);
 //static void checkerboard_screen(void);
 #endif    // FBINK_WITH_DRAW
 

@@ -966,7 +966,7 @@ static __attribute__((hot)) void
 
 // Helper function to clear the screen - fill whole screen with given color
 static void
-    clear_screen(int fbfd UNUSED_BY_NOTKINDLE, uint8_t v, bool is_flashing UNUSED_BY_NOTKINDLE)
+    clear_screen(int fbfd UNUSED_BY_NOTKINDLE, FBInkPixel* px, bool is_flashing UNUSED_BY_NOTKINDLE)
 {
 #	ifdef FBINK_FOR_KINDLE
 	// NOTE: einkfb has a dedicated ioctl, so, use that, when it's not doing more harm than good...
@@ -995,9 +995,9 @@ static void
 		//       If we memset the full smem_len, that trips this check, because we probably overwrite both buffers...
 		//       Do a slightly more targeted memset instead (line_length * yres_virtual),
 		//       which should cover the active & visible buffer only...
-		memset(fbPtr, v, fInfo.line_length * vInfo.yres_virtual);
+		memset(fbPtr, px->gray8, fInfo.line_length * vInfo.yres_virtual);
 	} else {
-		memset(fbPtr, v, fInfo.smem_len);
+		memset(fbPtr, px->gray8, fInfo.smem_len);
 	}
 #	else
 	// NOTE: Apparently, some NTX devices do not appreciate a memset of the full smem_len when they're in a 16bpp mode...
@@ -1008,32 +1008,29 @@ static void
 	//       Anyway, don't clobber that, as it seems to cause softlocks on BQ/Cervantes,
 	//       and be very conservative, using yres instead of yres_virtual, as Qt *may* already rely on that memory region.
 	if (unlikely(vInfo.bits_per_pixel == 16U)) {
-		// NOTE: Besides, we can't use a straight memset, since we need pixels to be properly packed for RGB565...
-		//       Se we whip up a quick memset16, like fill_rect() does.
-		const uint16_t px       = pack_rgb565(v, v, v);
+		// We whip up a quick memset16, like fill_rect_RGB565. Input pixel is guarnteed to be packed properly already.
 #		pragma GCC diagnostic push
 #		pragma GCC diagnostic ignored "-Wcast-align"
-		uint16_t*      p        = (uint16_t*) fbPtr;
+		uint16_t* p        = (uint16_t*) fbPtr;
 #		pragma GCC diagnostic pop
-		size_t         px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
+		size_t    px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
 		while (px_count--) {
-			*p++ = px;
+			*p++ = px->rgb565;
 		}
 	} else if (vInfo.bits_per_pixel == 32U) {
-		// Much like in fill_rect_RGB32, whip up something that'll preserve the alpha byte...
-		const FBInkPixelBGRA px       = { .color.b = v, .color.g = v, .color.r = v, .color.a = 0xFF };
+		// Much like in fill_rect_RGB32, do this in a way that'll preserve the alpha byte...
 #		pragma GCC diagnostic push
 #		pragma GCC diagnostic ignored "-Wcast-align"
-		uint32_t*            p        = (uint32_t*) fbPtr;
+		uint32_t* p        = (uint32_t*) fbPtr;
 #		pragma GCC diagnostic pop
-		size_t               px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
+		size_t    px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
 		while (px_count--) {
-			*p++ = px.p;
+			*p++ = px->p;
 		}
 	} else {
 		// NOTE: fInfo.smem_len should actually match fInfo.line_length * vInfo.yres_virtual on 32bpp ;).
 		//       Which is how things should always be, but, alas, poor Yorick...
-		memset(fbPtr, v, fInfo.smem_len);
+		memset(fbPtr, px->gray8, fInfo.smem_len);
 	}
 #	endif
 }
@@ -5825,11 +5822,12 @@ static void
 	region->height = vInfo.yres;
 }
 
-// Do a full-screen clear, eInk refresh included
-int
-    fbink_cls(int fbfd                              UNUSED_BY_NODRAW,
+// Helper function to allow exporting fxpFillRectChecked as a public API in slightly less convoluted ways than simply via fbink_cls ;).
+static int
+    fill_rect(int fbfd                              UNUSED_BY_NODRAW,
 	      const FBInkConfig* restrict fbink_cfg UNUSED_BY_NODRAW,
 	      const FBInkRect* restrict rect        UNUSED_BY_NODRAW,
+	      const FBInkPixel* restrict c          UNUSED_BY_NODRAW,
 	      bool no_rota                          UNUSED_BY_NODRAW)
 {
 #ifdef FBINK_WITH_DRAW
@@ -5860,11 +5858,18 @@ int
 	// We'll need a matching region for the refresh...
 	struct mxcfb_rect region = { 0U };
 
+	// Handle inversion, if necessary...
+	FBInkPixel px = *c;
+	if (fbink_cfg->is_inverted) {
+		// NOTE: Will be lossy for RGB565, but, oh, well.
+		px.bgra.p ^= 0x00FFFFFFu;
+	}
+
 	// Did we request a regional clear?
 	bool full_clear = false;
 	if (!rect || (rect->width == 0U || rect->height == 0U)) {
-		// Nope -> full-screen
-		clear_screen(fbfd, fbink_cfg->is_inverted ? penBGColor ^ 0xFFu : penBGColor, fbink_cfg->is_flashing);
+		// Nope -> full-screen.
+		clear_screen(fbfd, &px, fbink_cfg->is_flashing);
 		full_clear    = true;
 		// Set a region for set_last_rect...
 		region.top    = 0U;
@@ -5872,18 +5877,8 @@ int
 		region.width  = screenWidth;
 		region.height = screenHeight;
 	} else {
-		// Yes -> simply fill a rectangle w/ the bg color
-		FBInkPixel bgP = penBGPixel;
-		if (fbink_cfg->is_inverted) {
-			// NOTE: And, of course, RGB565 is terrible. Inverting the lossy packed value would be even lossier...
-			if (unlikely(vInfo.bits_per_pixel == 16U)) {
-				const uint8_t bgcolor = penBGColor ^ 0xFFu;
-				bgP.rgb565            = pack_rgb565(bgcolor, bgcolor, bgcolor);
-			} else {
-				bgP.bgra.p ^= 0x00FFFFFFu;
-			}
-		}
-		(*fxpFillRectChecked)(rect->left, rect->top, rect->width, rect->height, &bgP);
+		// Yes -> simply fill a rectangle w/ the requested color
+		(*fxpFillRectChecked)(rect->left, rect->top, rect->width, rect->height, &px);
 		// And update the region...
 		region.top    = rect->top;
 		region.left   = rect->left;
@@ -5925,6 +5920,16 @@ cleanup:
 	WARN("Drawing primitives are disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
 #endif
+}
+
+// Do a full-screen clear, eInk refresh included
+int
+    fbink_cls(int fbfd                              UNUSED_BY_NODRAW,
+	      const FBInkConfig* restrict fbink_cfg UNUSED_BY_NODRAW,
+	      const FBInkRect* restrict rect        UNUSED_BY_NODRAW,
+	      bool no_rota                          UNUSED_BY_NODRAW)
+{
+	return fill_rect(fbfd, fbink_cfg, rect, &penBGPixel, no_rota);
 }
 
 // Do a full-screen invert, eInk refresh included
@@ -6568,7 +6573,16 @@ int
 
 	// Clear screen?
 	if (fbink_cfg->is_cleared) {
-		clear_screen(fbfd, fbink_cfg->is_inverted ? penBGColor ^ 0xFFu : penBGColor, fbink_cfg->is_flashing);
+		FBInkPixel bgP = penBGPixel;
+		if (fbink_cfg->is_inverted) {
+			// NOTE: And, of course, RGB565 is terrible. Inverting the lossy packed value would be even lossier...
+			if (vInfo.bits_per_pixel == 16U) {
+				bgP.rgb565 = pack_rgb565(penBGColor, penBGColor, penBGColor);
+			} else {
+				bgP.bgra.p ^= 0x00FFFFFFu;
+			}
+		}
+		clear_screen(fbfd, &bgP, fbink_cfg->is_flashing);
 	}
 
 	// See if want to position our text relative to the edge of the screen, and not the beginning
@@ -7768,7 +7782,7 @@ int
 
 	// Do we need to clear the screen?
 	if (is_cleared) {
-		clear_screen(fbfd, bgcolor, is_flashing);
+		clear_screen(fbfd, &bgP, is_flashing);
 	}
 
 	// Handle padding related region tweaks
@@ -9584,11 +9598,6 @@ int
 	const uint8_t fgcolor = penFGColor ^ invert;
 	const uint8_t bgcolor = penBGColor ^ invert;
 
-	// Clear screen?
-	if (fbink_cfg->is_cleared) {
-		clear_screen(fbfd, bgcolor, fbink_cfg->is_flashing);
-	}
-
 	// Let's go! Start by pilfering some computations from draw...
 	FBInkPixel fgP = penFGPixel;
 	FBInkPixel bgP = penBGPixel;
@@ -9601,6 +9610,11 @@ int
 			fgP.bgra.p ^= 0x00FFFFFFu;
 			bgP.bgra.p ^= 0x00FFFFFFu;
 		}
+	}
+
+	// Clear screen?
+	if (fbink_cfg->is_cleared) {
+		clear_screen(fbfd, &bgP, fbink_cfg->is_flashing);
 	}
 
 	// Clamp v offset to safe values
@@ -10244,7 +10258,16 @@ static int
 
 	// Clear screen?
 	if (fbink_cfg->is_cleared) {
-		clear_screen(fbfd, fbink_cfg->is_inverted ? penBGColor ^ 0xFFu : penBGColor, fbink_cfg->is_flashing);
+		FBInkPixel bgP = penBGPixel;
+		if (fbink_cfg->is_inverted) {
+			// NOTE: And, of course, RGB565 is terrible. Inverting the lossy packed value would be even lossier...
+			if (vInfo.bits_per_pixel == 16U) {
+				bgP.rgb565 = pack_rgb565(penBGColor, penBGColor, penBGColor);
+			} else {
+				bgP.bgra.p ^= 0x00FFFFFFu;
+			}
+		}
+		clear_screen(fbfd, &bgP, fbink_cfg->is_flashing);
 	}
 
 	// NOTE: We compute initial offsets from row/col, to help aligning images with text.
