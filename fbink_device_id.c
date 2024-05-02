@@ -1202,9 +1202,6 @@ static void
 			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UD;
 			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CW;
 			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
-			// Mirrors the *other* axis compared to (most) other NTX boards...
-			deviceQuirks.touchMirrorX               = false;
-			deviceQuirks.touchMirrorY               = true;
 			deviceQuirks.screenDPI                  = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Shine B&W", sizeof(deviceQuirks.deviceName) - 1U);
@@ -1228,9 +1225,6 @@ static void
 			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UD;
 			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CW;
 			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
-			// Mirrors the *other* axis compared to (most) other NTX boards...
-			deviceQuirks.touchMirrorX               = false;
-			deviceQuirks.touchMirrorY               = true;
 			deviceQuirks.screenDPI                  = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Clara Colour", sizeof(deviceQuirks.deviceName) - 1U);
@@ -1254,9 +1248,6 @@ static void
 			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UD;
 			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CW;
 			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
-			// Mirrors the *other* axis compared to (most) other NTX boards...
-			deviceQuirks.touchMirrorX               = false;
-			deviceQuirks.touchMirrorY               = true;
 			deviceQuirks.screenDPI                  = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Shine Color", sizeof(deviceQuirks.deviceName) - 1U);
