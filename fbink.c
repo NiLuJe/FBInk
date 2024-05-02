@@ -10395,6 +10395,10 @@ static int
 	    w,
 	    h);
 	// Warn if there's an alpha channel, because it's usually a bit more expensive to handle...
+	// NOTE: We look at the *original* pixel format, not whatever we ended up passing to draw_image,
+	//       because we know that when we had to add an alpha layer for compatibility with the framebuffer
+	//       pixel format (i.e., a 24bpp RGB image to a 32bpp RGBA fb), it's actually fully opaque,
+	//       so we don't actually care about that component, it's just essentially padding for addressing purposes.
 	if (n == 2 || n == 4) {
 		img_has_alpha = true;
 		if (fbink_cfg->ignore_alpha) {
