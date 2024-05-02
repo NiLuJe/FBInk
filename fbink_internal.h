@@ -818,7 +818,6 @@ static int                          draw_image(int,
 					       const int,
 					       const int,
 					       const int,
-					       const int,
 					       short int,
 					       short int,
 					       const FBInkConfig* restrict);
