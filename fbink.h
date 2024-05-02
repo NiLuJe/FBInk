@@ -1515,7 +1515,7 @@ FBINK_API int fbink_mtk_set_swipe_data(MTK_SWIPE_DIRECTION_INDEX_T direction, ui
 //       TL;DR: Don't mix with fbink_mtk_toggle_auto_reagl(false)!
 FBINK_API int fbink_wait_for_any_complete(int fbfd);
 
-// Setup the screen regions to gray out with a checkered pattern.
+// Setup the screen regions to gray out with a checkered pattern (Kindle only).
 // Returns -(ENOSYS) on unsupported platforms.
 // NOTE: Both of the regions are the *excluded* regions (i.e., the regions that will *NOT* be checkered).
 //       You *MAY* only set a single exclude region, in which case, use the first array member.
@@ -1525,7 +1525,7 @@ FBINK_API int fbink_wait_for_any_complete(int fbfd);
 // NOTE: This will *NOT* apply to EPDC_FLAG_USE_ALT_BUFFER updates.
 FBINK_API int fbink_mtk_set_halftone(int fbfd, const FBInkRect exclude_regions[2], MTK_HALFTONE_MODE_INDEX_T size);
 
-// Toggle whether large enough refresh regions will automatically be upgraded to REAGL.
+// Toggle whether large enough refresh regions will automatically be upgraded to REAGL (Kindle only).
 // NOTE: Only applies to DU, GL16 & GC16 PARTIAL updates.
 // NOTE: Only applies in day mode (e.g., GRAYSCALE_8BIT, not GRAYSCALE_8BIT_INVERTED).
 // NOTE: Currently applies to regions both over a third of the screen's width and a fourth of the screen's height.
@@ -1534,7 +1534,7 @@ FBINK_API int fbink_mtk_set_halftone(int fbfd, const FBInkRect exclude_regions[2
 // Returns -(ENOSYS) on unsupported platforms.
 FBINK_API int fbink_mtk_toggle_auto_reagl(int fbfd, bool toggle);
 
-// Toggle the "pen" refresh mode (Bellatrix3 only).
+// Toggle the "pen" refresh mode (Kindle on Bellatrix3 only).
 // Returns -(ENOSYS) on unsupported platforms (NOTE: We currently *allow* this on Bellatrix, where it will fail).
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
