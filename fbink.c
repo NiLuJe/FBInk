@@ -5925,6 +5925,32 @@ int
 	return fill_rect(fbfd, fbink_cfg, rect, &penBGPixel, no_rota);
 }
 
+// Same, but with user-specified colors
+int
+    fbink_fill_rect_gray(int fbfd,
+			 const FBInkConfig* restrict fbink_cfg,
+			 const FBInkRect* restrict rect,
+			 bool    no_rota,
+			 uint8_t y)
+{
+	const FBInkPixel px = { .gray8 = y };
+	return fill_rect(fbfd, fbink_cfg, rect, &px, no_rota);
+}
+
+int
+    fbink_fill_rect_rgba(int fbfd,
+			 const FBInkConfig* restrict fbink_cfg,
+			 const FBInkRect* restrict rect,
+			 bool    no_rota,
+			 uint8_t r,
+			 uint8_t g,
+			 uint8_t b,
+			 uint8_t a)
+{
+	const FBInkPixel px = { .bgra.color.r = r, .bgra.color.g = g, .bgra.color.b = b, .bgra.color.a = a };
+	return fill_rect(fbfd, fbink_cfg, rect, &px, no_rota);
+}
+
 // Do a full-screen invert, eInk refresh included
 int
     fbink_invert_screen(int fbfd, const FBInkConfig* restrict fbink_cfg)
