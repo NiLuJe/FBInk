@@ -1172,19 +1172,14 @@ static void
 			// NOTE: It technically can, but not via update flags, it's a global state.
 			//       You can toggle it via fbink_set_fb_info if need be.
 			deviceQuirks.canHWInvert                = false;
-			// FIXME: Assume condor-like for now...
-			deviceQuirks.ntxBootRota                = FB_ROTATE_UR;
-			deviceQuirks.canRotate                  = true;
-			// Canonical -> native rotation mapping: { UR: 1, CW: 0, UD: 3, CCW: 2 }
-			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_CW_TOUCH;
-			// {1, 0, 3, 2}
-			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CW;
-			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UR;
-			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CCW;
-			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UD;
-			// Mirrors the *other* axis compared to (most) other NTX boards...
-			deviceQuirks.touchMirrorX               = false;
-			deviceQuirks.touchMirrorY               = true;
+			// NOTE: Assume goldfinch-like for now...
+			// Canonical -> native rotation mapping: { UR: 3, CW: 2, UD: 1, CCW: 0 }
+			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_CCW_TOUCH;
+			// {3, 2, 1, 0}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CCW;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UD;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
 			deviceQuirks.screenDPI                  = 300U;
 			// Flawfinder: ignore
 			strncpy(deviceQuirks.deviceName, "Clara B&W", sizeof(deviceQuirks.deviceName) - 1U);
@@ -1199,16 +1194,14 @@ static void
 			// NOTE: It technically can, but not via update flags, it's a global state.
 			//       You can toggle it via fbink_set_fb_info if need be.
 			deviceQuirks.canHWInvert                = false;
-			// FIXME: Assume condor-like for now...
-			deviceQuirks.ntxBootRota                = FB_ROTATE_UR;
-			deviceQuirks.canRotate                  = true;
-			// Canonical -> native rotation mapping: { UR: 1, CW: 0, UD: 3, CCW: 2 }
-			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_CW_TOUCH;
-			// {1, 0, 3, 2}
-			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CW;
-			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UR;
-			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CCW;
-			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UD;
+			// NOTE: Assume goldfinch-like for now...
+			// Canonical -> native rotation mapping: { UR: 3, CW: 2, UD: 1, CCW: 0 }
+			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_CCW_TOUCH;
+			// {3, 2, 1, 0}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CCW;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UD;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
 			// Mirrors the *other* axis compared to (most) other NTX boards...
 			deviceQuirks.touchMirrorX               = false;
 			deviceQuirks.touchMirrorY               = true;
@@ -1227,16 +1220,14 @@ static void
 			// NOTE: It technically can, but not via update flags, it's a global state.
 			//       You can toggle it via fbink_set_fb_info if need be.
 			deviceQuirks.canHWInvert                = false;
-			// FIXME: Assume condor-like for now...
-			deviceQuirks.ntxBootRota                = FB_ROTATE_UR;
-			deviceQuirks.canRotate                  = true;
-			// Canonical -> native rotation mapping: { UR: 1, CW: 0, UD: 3, CCW: 2 }
-			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_CW_TOUCH;
-			// {1, 0, 3, 2}
-			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CW;
-			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UR;
-			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CCW;
-			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UD;
+			// NOTE: Assume goldfinch-like for now...
+			// Canonical -> native rotation mapping: { UR: 3, CW: 2, UD: 1, CCW: 0 }
+			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_CCW_TOUCH;
+			// {3, 2, 1, 0}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CCW;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UD;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
 			// Mirrors the *other* axis compared to (most) other NTX boards...
 			deviceQuirks.touchMirrorX               = false;
 			deviceQuirks.touchMirrorY               = true;
@@ -1255,16 +1246,14 @@ static void
 			// NOTE: It technically can, but not via update flags, it's a global state.
 			//       You can toggle it via fbink_set_fb_info if need be.
 			deviceQuirks.canHWInvert                = false;
-			// FIXME: Assume condor-like for now...
-			deviceQuirks.ntxBootRota                = FB_ROTATE_UR;
-			deviceQuirks.canRotate                  = true;
-			// Canonical -> native rotation mapping: { UR: 1, CW: 0, UD: 3, CCW: 2 }
-			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_CW_TOUCH;
-			// {1, 0, 3, 2}
-			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CW;
-			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UR;
-			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CCW;
-			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UD;
+			// NOTE: Assume goldfinch-like for now...
+			// Canonical -> native rotation mapping: { UR: 3, CW: 2, UD: 1, CCW: 0 }
+			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_CCW_TOUCH;
+			// {3, 2, 1, 0}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CCW;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UD;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
 			// Mirrors the *other* axis compared to (most) other NTX boards...
 			deviceQuirks.touchMirrorX               = false;
 			deviceQuirks.touchMirrorY               = true;
