@@ -31,78 +31,57 @@ static bool
 	switch (dev) {
 		case 0x01u:    // K1
 			deviceQuirks.isKindleLegacy = true;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "1", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Fiona", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceName, "1", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Fiona", sizeof(deviceQuirks.deviceCodename));
 			// NOTE: Possibly Fiona, too, as ADS was a proto.
 			//       But later models have shown than a proto's board name often ends up naming the platform...
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "ADS", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.devicePlatform, "ADS", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		case 0x02u:    // K2
 		case 0x03u:
 			deviceQuirks.isKindleLegacy = true;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "2", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Turing", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mario", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "2", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Turing", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mario", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		case 0x04u:    // KDX
 		case 0x05u:
 		case 0x09u:
 			deviceQuirks.isKindleLegacy = true;
 			deviceQuirks.screenDPI      = 150U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "DX", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Nell", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceName, "DX", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Nell", sizeof(deviceQuirks.deviceCodename));
 			// NOTE: Possibly Banjo? Never figured out if that platform ever saw the light of day...
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mario", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.devicePlatform, "Mario", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		case 0x08u:    // K3
 		case 0x06u:
 		case 0x0Au:
 			deviceQuirks.isKindleLegacy = true;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "3", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Shasta", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Luigi", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "3", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Shasta", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Luigi", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		case 0x0Eu:    // K4
 			deviceQuirks.isKindleLegacy = true;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "4", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Tequila", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Yoshi", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "4", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Tequila", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Yoshi", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		case 0x0Fu:    // K5
 		case 0x11u:
 		case 0x10u:
 		case 0x12u:
 			deviceQuirks.isKindlePearlScreen = true;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Touch", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Whitney", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Yoshi", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Touch", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Whitney", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Yoshi", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		case 0x23u:    // K4b
 			deviceQuirks.isKindleLegacy = true;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "4", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Sauza", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Yoshi", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "4", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Sauza", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Yoshi", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		case 0x24u:    // PW1
 		case 0x1Bu:
@@ -112,13 +91,10 @@ static bool
 		case 0x20u:
 			deviceQuirks.isKindlePearlScreen = true;
 			deviceQuirks.screenDPI           = 212U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "PaperWhite", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Celeste", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceName, "PaperWhite", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Celeste", sizeof(deviceQuirks.deviceCodename));
 			// NOTE: AKA Yoshime3
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Yoshime", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.devicePlatform, "Yoshime", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		case 0xD4u:    // PW2
 		case 0x5Au:
@@ -135,29 +111,20 @@ static bool
 		case 0x61u:
 		case 0x5Fu:
 			deviceQuirks.screenDPI = 212U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "PaperWhite 2", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Pinot", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Wario", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "PaperWhite 2", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Pinot", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Wario", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		case 0xC6u:    // KT2
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Basic", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Bourbon", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Wario", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Basic", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Bourbon", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Wario", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		case 0x13u:    // KV
 			deviceQuirks.screenDPI = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Voyage", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Icewine", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Wario", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Voyage", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Icewine", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Wario", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		case 0x16u:    // ??
 		case 0x21u:
@@ -168,12 +135,9 @@ static bool
 		case 0x52u:
 		case 0x53u:
 			deviceQuirks.screenDPI = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Voyage", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Icewine", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Wario", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Voyage", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Icewine", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Wario", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		case 0x07u:    // ??
 		case 0x0Bu:
@@ -182,12 +146,9 @@ static bool
 		case 0x99u:
 			return true;
 		case 0xDDu:    // KT2 AUS
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Basic", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Bourbon", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Wario", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Basic", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Bourbon", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Wario", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		default:
 			return false;
@@ -213,12 +174,9 @@ static bool
 		case 0x293u:
 		case 0x294u:
 			deviceQuirks.screenDPI = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "PaperWhite 3", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Muscat", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Wario", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "PaperWhite 3", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Muscat", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Wario", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		case 0x20Cu:    // KOA
 		case 0x20Du:
@@ -227,22 +185,16 @@ static bool
 		case 0x21Bu:
 		case 0x21Cu:
 			deviceQuirks.screenDPI = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Oasis", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Whisky", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Duet", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Oasis", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Whisky", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Duet", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		case 0x1BCu:    // KT3
 		case 0x269u:
 		case 0x26Au:
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Basic 2", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Eanab", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Heisenberg", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Basic 2", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Eanab", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Heisenberg", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		case 0x295u:    // KOA2
 		case 0x296u:
@@ -262,12 +214,9 @@ static bool
 			deviceQuirks.isKindleZelda = true;
 			deviceQuirks.hasEclipseWfm = true;
 			deviceQuirks.screenDPI     = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Oasis 2", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Cognac", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Zelda", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Oasis 2", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Cognac", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Zelda", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		case 0x2F7u:    // PW4
 		case 0x361u:
@@ -292,12 +241,9 @@ static bool
 		case 0x4DDu:
 			deviceQuirks.isKindleRex = true;
 			deviceQuirks.screenDPI   = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "PaperWhite 4", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Moonshine", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Rex", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "PaperWhite 4", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Moonshine", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Rex", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		case 0x414u:    // KT4
 		case 0x3CFu:
@@ -306,12 +252,9 @@ static bool
 		case 0x3D2u:
 		case 0x3ABu:
 			deviceQuirks.isKindleRex = true;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Basic 3", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Jaeger", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Rex", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Basic 3", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Jaeger", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Rex", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		case 0x434u:    // KOA3
 		case 0x3D8u:
@@ -322,12 +265,9 @@ static bool
 			deviceQuirks.isKindleZelda = true;
 			deviceQuirks.hasEclipseWfm = true;
 			deviceQuirks.screenDPI     = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Oasis 3", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Stinger", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Zelda", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Oasis 3", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Stinger", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Zelda", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		case 0x690u:    // PW5
 		case 0x700u:
@@ -341,12 +281,9 @@ static bool
 			deviceQuirks.isMTK         = true;
 			deviceQuirks.hasEclipseWfm = true;
 			deviceQuirks.screenDPI     = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "PaperWhite 5", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Malbec", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Bellatrix", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "PaperWhite 5", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Malbec", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Bellatrix", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		case 0x84Du:    // KT5
 		case 0x8BBu:
@@ -358,12 +295,9 @@ static bool
 			deviceQuirks.isMTK         = true;
 			deviceQuirks.hasEclipseWfm = true;
 			deviceQuirks.screenDPI     = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Basic 4", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Cava", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Bellatrix", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Basic 4", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Cava", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Bellatrix", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		case 0x8F2u:
 		case 0x974u:
@@ -376,16 +310,12 @@ static bool
 			deviceQuirks.isMTK         = true;
 			deviceQuirks.hasEclipseWfm = true;
 			deviceQuirks.screenDPI     = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Scribe", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Barolo", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Bellatrix3", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Scribe", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Barolo", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Bellatrix3", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		default:
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Unknown!", sizeof(deviceQuirks.deviceName) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Unknown!", sizeof(deviceQuirks.deviceName));
 			return false;
 	}
 }
@@ -576,33 +506,27 @@ static void
 		switch (config.pcb_id) {
 			case DEVICE_CERVANTES_TOUCH:    // BQ Cervantes Touch - Fnac Touch (2012-2013)
 				deviceQuirks.screenDPI = 167U;
-				// Flawfinder: ignore
-				strncpy(deviceQuirks.deviceName, "Touch", sizeof(deviceQuirks.deviceName) - 1U);
+				strtcpy(deviceQuirks.deviceName, "Touch", sizeof(deviceQuirks.deviceName));
 				break;
 			case DEVICE_CERVANTES_TOUCHLIGHT:    // BQ Cervantes TouchLight - Fnac Touch Plus (2012-2013)
 				deviceQuirks.screenDPI = 167U;
-				// Flawfinder: ignore
-				strncpy(deviceQuirks.deviceName, "TouchLight", sizeof(deviceQuirks.deviceName) - 1U);
+				strtcpy(deviceQuirks.deviceName, "TouchLight", sizeof(deviceQuirks.deviceName));
 				break;
 			case DEVICE_CERVANTES_2013:    // BQ Cervantes 2013 - Fnac Touch Light (2013)
 				deviceQuirks.screenDPI = 212U;
-				// Flawfinder: ignore
-				strncpy(deviceQuirks.deviceName, "2013", sizeof(deviceQuirks.deviceName) - 1U);
+				strtcpy(deviceQuirks.deviceName, "2013", sizeof(deviceQuirks.deviceName));
 				break;
 			case DEVICE_CERVANTES_3:    // BQ Cervantes 3 - Fnac Touch Light 2 (2016)
 				deviceQuirks.screenDPI = 300U;
-				// Flawfinder: ignore
-				strncpy(deviceQuirks.deviceName, "3", sizeof(deviceQuirks.deviceName) - 1U);
+				strtcpy(deviceQuirks.deviceName, "3", sizeof(deviceQuirks.deviceName));
 				break;
 			case DEVICE_CERVANTES_4:    // BQ Cervantes 4
 				deviceQuirks.screenDPI = 300U;
-				// Flawfinder: ignore
-				strncpy(deviceQuirks.deviceName, "4", sizeof(deviceQuirks.deviceName) - 1U);
+				strtcpy(deviceQuirks.deviceName, "4", sizeof(deviceQuirks.deviceName));
 				break;
 			default:
 				WARN("Unidentified Cervantes device (%hhu)", config.pcb_id);
-				// Flawfinder: ignore
-				strncpy(deviceQuirks.deviceName, "Unknown!", sizeof(deviceQuirks.deviceName) - 1U);
+				strtcpy(deviceQuirks.deviceName, "Unknown!", sizeof(deviceQuirks.deviceName));
 				break;
 		}
 	}
@@ -696,67 +620,46 @@ static void
 	switch (kobo_id) {
 		case DEVICE_KOBO_TOUCH_A:    // Touch A (trilogy, freescale)
 			deviceQuirks.isKoboNonMT = true;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Touch A", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Trilogy", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 3", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Touch A", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.deviceCodename, "Trilogy", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 3", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_TOUCH_B:    // Touch B (trilogy)
 			deviceQuirks.isKoboNonMT = true;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Touch B", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Trilogy", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 3", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Touch B", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Trilogy", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 3", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_TOUCH_C:    // Touch C (trilogy)
 			deviceQuirks.isKoboNonMT = true;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Touch C", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Trilogy", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 4", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Touch C", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Trilogy", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 4", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_MINI:    // Mini (pixie)
 			deviceQuirks.isKoboNonMT = true;
 			deviceQuirks.screenDPI   = 200U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Mini", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Pixie", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 4", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Mini", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Pixie", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 4", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_GLO:    // Glo (kraken)
 			deviceQuirks.isKoboNonMT = true;
 			deviceQuirks.screenDPI   = 212U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Glo", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Kraken", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 4", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Glo", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Kraken", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 4", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_GLO_HD:    // Glo HD (alyssum)
 			deviceQuirks.screenDPI = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Glo HD", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Alyssum", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Glo HD", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Alyssum", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_TOUCH_2:    // Touch 2.0 (pika)
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Touch 2.0", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Pika", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Touch 2.0", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Pika", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_AURA:    // Aura (phoenix)
 			// NOTE: The bottom 10 pixels are blacked out by Nickel (behind the bezel)
@@ -764,12 +667,9 @@ static void
 			// NOTE: According to the nightmode hack, the Aura's kernel *may* be crashy w/ PxP inversion...
 			deviceQuirks.canHWInvert    = false;
 			deviceQuirks.screenDPI      = 212U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Aura", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Phoenix", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 5", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Aura", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Phoenix", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 5", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_AURA_HD:    // Aura HD (dragon)
 			deviceQuirks.isKoboNonMT                = true;
@@ -782,12 +682,9 @@ static void
 			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CCW;
 			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UD;
 			deviceQuirks.screenDPI                  = 265U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Aura HD", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Dragon", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 4", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Aura HD", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Dragon", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 4", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_AURA_H2O:    // Aura H2O (dahlia)
 			// NOTE: The top 11 pixels are blacked out by Nickel (behind the bezel)
@@ -802,12 +699,9 @@ static void
 			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CCW;
 			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UD;
 			deviceQuirks.screenDPI                  = 265U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Aura H2O", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Dahlia", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 5", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Aura H2O", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Dahlia", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 5", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_AURA_H2O_2:    // Aura H2O² (snow)
 			// NOTE: *Might* be UD like the other ROTA_STRAIGHT devices
@@ -821,12 +715,9 @@ static void
 			// Beware, this touch panel quirk *only* applies to r1 devices!
 			deviceQuirks.touchMirrorX               = false;
 			deviceQuirks.screenDPI                  = 265U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Aura H2O²", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Snow", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Aura H2O²", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Snow", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_AURA_H2O_2_R2:    // Aura H2O² r2 (snow)
 			deviceQuirks.isKoboMk7                  = true;
@@ -838,61 +729,43 @@ static void
 			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CW;
 			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UD;
 			deviceQuirks.screenDPI                  = 265U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Aura H2O² r2", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Snow", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Aura H2O² r2", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Snow", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_AURA_ONE:    // Aura ONE (daylight)
 			deviceQuirks.screenDPI = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Aura One", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Daylight", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Aura One", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Daylight", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_AURA_ONE_LE:    // Aura ONE LE (daylight)
 			deviceQuirks.screenDPI = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Aura One LE", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Daylight", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Aura One LE", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Daylight", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_AURA_SE:    // Aura SE (star)
 			deviceQuirks.screenDPI = 212U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Aura SE", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Star", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Aura SE", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Star", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_AURA_SE_R2:    // Aura SE r2 (star)
 			deviceQuirks.isKoboMk7 = true;
 			// NOTE: *Might* be NTX_ROTA_ODD_INVERTED
 			deviceQuirks.screenDPI = 212U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Aura SE r2", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Star", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Aura SE r2", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Star", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_CLARA_HD:    // Clara HD (nova)
 			deviceQuirks.isKoboMk7 = true;
 			// NOTE: Is indeed NTX_ROTA_STRAIGHT
 			deviceQuirks.screenDPI = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Clara HD", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Nova", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Clara HD", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Nova", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_FORMA:    // Forma (frost)
 			deviceQuirks.isKoboMk7                  = true;
@@ -906,12 +779,9 @@ static void
 			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CW;
 			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
 			deviceQuirks.screenDPI                  = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Forma", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Frost", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Forma", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Frost", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_FORMA_32GB:    // Forma 32GB (frost)
 			deviceQuirks.isKoboMk7                  = true;
@@ -924,12 +794,9 @@ static void
 			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CW;
 			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
 			deviceQuirks.screenDPI                  = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Forma 32GB", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Frost", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Forma 32GB", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Frost", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_LIBRA_H2O:    // Libra H2O (storm)
 			deviceQuirks.isKoboMk7                  = true;
@@ -953,12 +820,9 @@ static void
 			//       https://github.com/koreader/koreader-base/blob/21f4b974c7ab64a149075adc32318f87bf71dcdc/ffi/framebuffer_mxcfb.lua#L230-L235
 			deviceQuirks.unreliableWaitFor          = true;
 			deviceQuirks.screenDPI                  = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Libra H2O", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Storm", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Libra H2O", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Storm", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_NIA:    // Nia (luna)
 			deviceQuirks.isKoboMk7         = true;
@@ -966,12 +830,9 @@ static void
 			// The board is similar to the Libra 2, so assume it suffers from the same quirks.
 			deviceQuirks.unreliableWaitFor = true;
 			deviceQuirks.screenDPI         = 212U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Nia", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Luna", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Nia", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Luna", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_ELIPSA:    // Elipsa (Europa)
 			deviceQuirks.isSunxi                    = true;
@@ -993,12 +854,9 @@ static void
 			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_UD;
 			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_CCW;
 			deviceQuirks.screenDPI                  = 227U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Elipsa", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Europa", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 8", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Elipsa", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Europa", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 8", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_LIBRA_2:    // Libra 2 (Io)
 			deviceQuirks.hasEclipseWfm = true;
@@ -1022,12 +880,9 @@ static void
 			// It apparently inherited its ancestor's issues...
 			deviceQuirks.unreliableWaitFor          = true;
 			deviceQuirks.screenDPI                  = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Libra 2", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Io", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 9", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Libra 2", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Io", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 9", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_SAGE:    // Sage (Cadmus)
 			deviceQuirks.isSunxi                    = true;
@@ -1044,12 +899,9 @@ static void
 			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_UD;
 			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_CCW;
 			deviceQuirks.screenDPI                  = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Sage", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Cadmus", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 8", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Sage", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Cadmus", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 8", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_CLARA_2E:    // Clara 2E (Goldfinch)
 			deviceQuirks.hasEclipseWfm              = true;
@@ -1070,12 +922,9 @@ static void
 			// The board is nearly identical to the Libra 2, and as such, exhibits the same quirks...
 			deviceQuirks.unreliableWaitFor          = true;
 			deviceQuirks.screenDPI                  = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Clara 2E", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Goldfinch", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 10", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Clara 2E", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Goldfinch", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 10", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_ELIPSA_2E:    // Elipsa 2E (Condor)
 			deviceQuirks.isMTK                      = true;
@@ -1103,12 +952,9 @@ static void
 			deviceQuirks.touchMirrorX               = false;
 			deviceQuirks.touchMirrorY               = true;
 			deviceQuirks.screenDPI                  = 227U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Elipsa 2E", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Condor", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 11", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Elipsa 2E", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Condor", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 11", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_LIBRA_COLOUR:    // Libra Colour (Monza)
 			deviceQuirks.hasColorPanel              = true;
@@ -1131,12 +977,9 @@ static void
 			deviceQuirks.touchMirrorX               = false;
 			deviceQuirks.touchMirrorY               = true;
 			deviceQuirks.screenDPI                  = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Libra Colour", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Monza", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 11", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Libra Colour", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Monza", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 11", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_TOLINO_VISION_COLOR:    // Tolino Vision Color (Monza Tolino)
 			deviceQuirks.hasColorPanel              = true;
@@ -1159,12 +1002,9 @@ static void
 			deviceQuirks.touchMirrorX               = false;
 			deviceQuirks.touchMirrorY               = true;
 			deviceQuirks.screenDPI                  = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Vision Color", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Monza Tolino", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 11", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Vision Color", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Monza Tolino", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 11", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_CLARA_BW:    // Clara B&W (Spa BW)
 			deviceQuirks.isMTK                      = true;
@@ -1181,12 +1021,9 @@ static void
 			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CW;
 			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
 			deviceQuirks.screenDPI                  = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Clara B&W", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Spa BW", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 12", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Clara B&W", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Spa BW", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 12", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_TOLINO_SHINE_BW:    // Tolino Shine B&W (Spa Tolino BW)
 			deviceQuirks.isMTK                      = true;
@@ -1203,12 +1040,9 @@ static void
 			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CW;
 			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
 			deviceQuirks.screenDPI                  = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Shine B&W", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Spa Tolino BW", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 12", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Shine B&W", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Spa Tolino BW", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 12", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_CLARA_COLOUR:    // Clara Colour (Spa Colour)
 			deviceQuirks.hasColorPanel              = true;
@@ -1226,12 +1060,9 @@ static void
 			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CW;
 			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
 			deviceQuirks.screenDPI                  = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Clara Colour", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Spa Colour", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 12", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Clara Colour", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Spa Colour", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 12", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_TOLINO_SHINE_COLOR:    // Tolino Shine Color (Spa Tolino Colour)
 			deviceQuirks.hasColorPanel              = true;
@@ -1249,53 +1080,37 @@ static void
 			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CW;
 			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
 			deviceQuirks.screenDPI                  = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Shine Color", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(
-			    deviceQuirks.deviceCodename, "Spa Tolino Colour", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 12", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Shine Color", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Spa Tolino Colour", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 12", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_UNKNOWN:
 			// Like kobo_config.sh, assume Trilogy as a fallback
 			deviceQuirks.isKoboNonMT = true;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Touch A?", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Trilogy?", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 3?", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Touch A?", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Trilogy?", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 3?", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_MAINLINE_TOLINO_SHINE_2HD:    // Tolino Shine 2HD (Glo HD-ish)
 			// Mainline kernels expect to use the same set of ioctls as on Mk. 7+, even on older devices.
 			deviceQuirks.isKoboMk7 = true;
 			deviceQuirks.screenDPI = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Shine 2HD", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Tolino", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Shine 2HD", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Tolino", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_MAINLINE_TOLINO_SHINE_3:    // Tolino Shine 3 (Clara HD-ish)
 			deviceQuirks.isKoboMk7 = true;
 			deviceQuirks.screenDPI = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Shine 3", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Tolino", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Shine 3", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Tolino", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_MAINLINE_TOLINO_VISION:    // Tolino Vision (Aura SE-ish, maybe?)
 			deviceQuirks.screenDPI = 212U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Vision", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Tolino", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Vision", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Tolino", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_MAINLINE_TOLINO_VISION_5:    // Tolino Vision 5 (Libra H2O-ish)
 			deviceQuirks.isKoboMk7    = true;
@@ -1303,33 +1118,24 @@ static void
 			deviceQuirks.canRotate    = true;
 			deviceQuirks.ntxRotaQuirk = NTX_ROTA_SANE;
 			deviceQuirks.screenDPI    = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Vision 5", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Tolino", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Vision 5", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Tolino", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_MAINLINE_GENERIC_IMX5:
 			// Generic fallback for i.MX5 devices on mainline kernels
 			deviceQuirks.screenDPI = 212U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "i.MX5", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark <= 5", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "i.MX5", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark <= 5", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_MAINLINE_GENERIC_IMX6:
 			// Generic fallback for i.MX6 devices on mainline kernels
 			deviceQuirks.isKoboMk7 = true;
 			deviceQuirks.screenDPI = 212U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "i.MX6", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark >= 6", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "i.MX6", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark >= 6", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_MAINLINE_GENERIC_SUNXI_B300:
 			// Generic fallback for sunxi B300 devices
@@ -1340,12 +1146,9 @@ static void
 			deviceQuirks.canRotate     = true;
 			deviceQuirks.ntxRotaQuirk  = NTX_ROTA_SUNXI;
 			deviceQuirks.screenDPI     = 227U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "B300", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark 8", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "B300", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 8", sizeof(deviceQuirks.devicePlatform));
 			break;
 		default:
 			// Print something slightly different if we completely failed to even compute a kobo_id...
@@ -1354,12 +1157,9 @@ static void
 			} else {
 				WARN("Unidentified Kobo device code (%hu)", kobo_id);
 			}
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceName, "Unknown!", sizeof(deviceQuirks.deviceName) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "??", sizeof(deviceQuirks.deviceCodename) - 1U);
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.devicePlatform, "Mark ?", sizeof(deviceQuirks.devicePlatform) - 1U);
+			strtcpy(deviceQuirks.deviceName, "Unknown!", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "??", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark ?", sizeof(deviceQuirks.devicePlatform));
 			break;
 	}
 }
@@ -1666,10 +1466,8 @@ static void
 		deviceQuirks.ntxBootRota  = FB_ROTATE_CW;
 		deviceQuirks.ntxRotaQuirk = NTX_ROTA_SANE;
 		deviceQuirks.canRotate    = true;
-		// Flawfinder: ignore
-		strncpy(deviceQuirks.deviceName, "reMarkable 2", sizeof(deviceQuirks.deviceName) - 1U);
-		// Flawfinder: ignore
-		strncpy(deviceQuirks.deviceCodename, "Zero Sugar", sizeof(deviceQuirks.deviceCodename) - 1U);
+		strtcpy(deviceQuirks.deviceName, "reMarkable 2", sizeof(deviceQuirks.deviceName));
+		strtcpy(deviceQuirks.deviceCodename, "Zero Sugar", sizeof(deviceQuirks.deviceCodename));
 		deviceQuirks.deviceId = DEVICE_REMARKABLE_2;
 	} else {
 		deviceQuirks.screenDPI    = 226U;
@@ -1678,10 +1476,8 @@ static void
 		deviceQuirks.ntxBootRota  = FB_ROTATE_CW;
 		deviceQuirks.ntxRotaQuirk = NTX_ROTA_SANE;
 		deviceQuirks.canRotate    = true;
-		// Flawfinder: ignore
-		strncpy(deviceQuirks.deviceName, "reMarkable", sizeof(deviceQuirks.deviceName) - 1U);
-		// Flawfinder: ignore
-		strncpy(deviceQuirks.deviceCodename, "Zero Gravitas", sizeof(deviceQuirks.deviceCodename) - 1U);
+		strtcpy(deviceQuirks.deviceName, "reMarkable", sizeof(deviceQuirks.deviceName));
+		strtcpy(deviceQuirks.deviceCodename, "Zero Gravitas", sizeof(deviceQuirks.deviceCodename));
 		deviceQuirks.deviceId = DEVICE_REMARKABLE_1;
 	}
 }
@@ -1732,207 +1528,168 @@ static void
 		// Keep the model name dance in the same order as KOReader...
 		if (PB_CODENAME_MATCH("515")) {
 			deviceQuirks.screenDPI = 200U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBMini", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBMini", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_MINI;
 		} else if (PB_CODENAME_MATCH("606")) {
 			deviceQuirks.screenDPI = 212U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PB606", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PB606", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_606;
 		} else if (PB_CODENAME_MATCH("611")) {
 			deviceQuirks.screenDPI = 167U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PB611", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PB611", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_611;
 		} else if (PB_CODENAME_MATCH("613")) {
 			deviceQuirks.screenDPI = 167U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PB613B", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PB613B", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_613;
 		} else if (PB_CODENAME_MATCH("614") || PB_CODENAME_MATCH("614W")) {
 			deviceQuirks.screenDPI = 167U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PB614W", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PB614W", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_614;
 		} else if (PB_CODENAME_MATCH("615") || PB_CODENAME_MATCH("615W")) {
 			deviceQuirks.screenDPI = 212U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBBLux", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBBLux", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_615;
 		} else if (PB_CODENAME_MATCH("616") || PB_CODENAME_MATCH("616W")) {
 			deviceQuirks.screenDPI = 212U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBBLux2", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBBLux2", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_616;
 		} else if (PB_CODENAME_MATCH("617")) {
 			deviceQuirks.screenDPI = 212U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBBLux3", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBBLux3", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_617;
 		} else if (PB_CODENAME_MATCH("618")) {
 			deviceQuirks.screenDPI = 212U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBBLux4", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBBLux4", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_618;
 		} else if (PB_CODENAME_MATCH("622")) {
 			deviceQuirks.screenDPI = 167U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBTouch", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBTouch", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_TOUCH;
 		} else if (PB_CODENAME_MATCH("623")) {
 			deviceQuirks.screenDPI = 212U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBLux", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBLux", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_LUX;
 		} else if (PB_CODENAME_MATCH("624")) {
 			deviceQuirks.screenDPI = 167U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBBTouch", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBBTouch", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_BASIC_TOUCH;
 		} else if (PB_CODENAME_MATCH("625")) {
 			deviceQuirks.screenDPI = 167U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBBTouch2", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBBTouch2", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_BASIC_TOUCH_2;
 		} else if (PB_CODENAME_MATCH("626") || PB_CODENAME_MATCH("626(2)-TL3")) {
 			deviceQuirks.screenDPI = 212U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBLux3", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBLux3", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_LUX_3;
 		} else if (PB_CODENAME_MATCH("627")) {
 			deviceQuirks.screenDPI = 212U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBLux4", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBLux4", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_LUX_4;
 		} else if (PB_CODENAME_MATCH("628")) {
 			deviceQuirks.screenDPI = 212U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBLux5", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBLux5", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_LUX_5;
 		} else if (PB_CODENAME_MATCH("629")) {
 			deviceQuirks.screenDPI = 212U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBVerse", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBVerse", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_VERSE;
 		} else if (PB_CODENAME_MATCH("630")) {
 			deviceQuirks.screenDPI = 212U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBSense", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBSense", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_SENSE;
 		} else if (PB_CODENAME_MATCH("631")) {
 			deviceQuirks.screenDPI = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBTouchHD", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBTouchHD", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_TOUCH_HD;
 		} else if (PB_CODENAME_MATCH("632")) {
 			deviceQuirks.screenDPI = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBTouchHD+", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBTouchHD+", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_TOUCH_HD_PLUS;
 		} else if (PB_CODENAME_MATCH("633")) {
 			deviceQuirks.hasColorPanel = true;
 			deviceQuirks.screenDPI     = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBColor", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBColor", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_COLOR;
 		} else if (PB_CODENAME_MATCH("634")) {
 			deviceQuirks.screenDPI = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBVersePro", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBVersePro", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_VERSE_PRO;
 		} else if (PB_CODENAME_MATCH("640")) {
 			deviceQuirks.screenDPI = 167U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBAqua", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBAqua", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_AQUA;
 		} else if (PB_CODENAME_MATCH("641")) {
 			deviceQuirks.screenDPI = 212U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBAqua2", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBAqua2", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_AQUA2;
 		} else if (PB_CODENAME_MATCH("650")) {
 			deviceQuirks.screenDPI = 212U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBUltra", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBUltra", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_ULTRA;
 		} else if (PB_CODENAME_MATCH("700")) {
 			deviceQuirks.screenDPI = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBEra", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBEra", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_ERA;
 		} else if (PB_CODENAME_MATCH("700K3")) {
 			deviceQuirks.hasColorPanel = true;
 			deviceQuirks.screenDPI     = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBEraColor", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBEraColor", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_ERA_COLOR;
 		} else if (PB_CODENAME_MATCH("740")) {
 			deviceQuirks.screenDPI = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBInkPad3", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBInkPad3", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD_3;
 		} else if (PB_CODENAME_MATCH("740-2") || PB_CODENAME_MATCH("740-3")) {
 			deviceQuirks.screenDPI = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBInkPad3Pro", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBInkPad3Pro", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD_3_PRO;
 		} else if (PB_CODENAME_MATCH("741")) {
 			deviceQuirks.hasColorPanel = true;
 			deviceQuirks.screenDPI     = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBInkPadColor", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBInkPadColor", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD_COLOR;
 		} else if (PB_CODENAME_MATCH("743C")) {
 			deviceQuirks.hasColorPanel = true;
 			deviceQuirks.screenDPI     = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBInkPadColor2", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBInkPadColor2", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD_COLOR_2;
 		} else if (PB_CODENAME_MATCH("743K")) {
 			deviceQuirks.hasColorPanel = true;
 			deviceQuirks.screenDPI     = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBInkPadColor3", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBInkPadColor3", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD_COLOR_3;
 		} else if (PB_CODENAME_MATCH("743G") || PB_CODENAME_MATCH("743g")) {
 			deviceQuirks.screenDPI = 300U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBInkPad4", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBInkPad4", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD_4;
 		} else if (PB_CODENAME_MATCH("840") || strcmp(model_name, "Reader InkPad") == 0) {
 			deviceQuirks.screenDPI = 250U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBInkPad", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBInkPad", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD;
 		} else if (PB_CODENAME_MATCH("970")) {
 			deviceQuirks.screenDPI = 150U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBInkPadLite", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBInkPadLite", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD_LITE;
 		} else if (PB_CODENAME_MATCH("1040")) {
 			deviceQuirks.screenDPI = 227U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBInkPadX", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBInkPadX", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_INKPAD_X;
 		} else if (PB_CODENAME_MATCH("Color Lux")) {
 			deviceQuirks.hasColorPanel = true;
 			deviceQuirks.screenDPI     = 125U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "PBColorLux", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "PBColorLux", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_COLOR_LUX;
 		} else {
 			WARN("Unidentified PocketBook model: `%s`", model_name);
 			deviceQuirks.screenDPI = 212U;
-			// Flawfinder: ignore
-			strncpy(deviceQuirks.deviceCodename, "Unidentified", sizeof(deviceQuirks.deviceCodename) - 1U);
+			strtcpy(deviceQuirks.deviceCodename, "Unidentified", sizeof(deviceQuirks.deviceCodename));
 		}
 	} else {
 		// NOTE: Failed to query DeviceModel via InkView, so, fake something...
 		WARN("Couldn't query PocketBook model name via InkView");
 		deviceQuirks.screenDPI = 212U;
-		// Flawfinder: ignore
-		strncpy(deviceQuirks.deviceCodename, "Unknown", sizeof(deviceQuirks.deviceCodename) - 1U);
+		strtcpy(deviceQuirks.deviceCodename, "Unknown", sizeof(deviceQuirks.deviceCodename));
 	}
 }
 #	endif    // FBINK_FOR_KINDLE

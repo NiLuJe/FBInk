@@ -179,13 +179,6 @@ ifeq "$(MOAR_WARNIGS)" "1"
 	EXTRA_CFLAGS+=-Wformat-signedness
 	# NOTE: -Wformat-truncation=2 is still a tad too aggressive w/ GCC 9, so, tone it down to avoid false-positives...
 	EXTRA_CFLAGS+=-Wformat-truncation=1
-	# NOTE: This doesn't really play nice w/ FORTIFY, leading to an assload of false-positives, unless LTO is enabled
-	ifeq (,$(findstring flto,$(CFLAGS)))
-		# NOTE: GCC 9 is more verbose, so nerf that, too, when building w/o LTO on native systems...
-		ifeq "$(CC_IS_CROSS)" "0"
-			EXTRA_CFLAGS+=-Wno-stringop-truncation
-		endif
-	endif
 	EXTRA_CFLAGS+=-Wnull-dereference
 	EXTRA_CFLAGS+=-Wuninitialized
 	ifeq (flto,$(findstring flto,$(CFLAGS)))
