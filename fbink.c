@@ -1223,14 +1223,10 @@ static struct mxcfb_rect
 	FBInkPixel fgP = penFGPixel;
 	FBInkPixel bgP = penBGPixel;
 	if (fbink_cfg->is_inverted) {
-		// NOTE: And, of course, RGB565 is terrible.
-		if (unlikely(vInfo.bits_per_pixel == 16U)) {
-			fgP.rgb565 ^= 0xFFFFu;
-			bgP.rgb565 ^= 0xFFFFu;
-		} else {
-			fgP.bgra.p ^= 0x00FFFFFFu;
-			bgP.bgra.p ^= 0x00FFFFFFu;
-		}
+		// NOTE: As far as RGB565 is concerned, our fill/put methods will only ever use the .rgb565 field,
+		//       so we don't actually care about flipping one extra byte here, nothing will ever read it ;).
+		fgP.bgra.p ^= 0x00FFFFFFu;
+		bgP.bgra.p ^= 0x00FFFFFFu;
 	}
 
 	// Adjust row in case we're a continuation of a multi-line print...
@@ -5859,12 +5855,7 @@ static int
 	// Handle inversion, if necessary...
 	FBInkPixel px = *c;
 	if (fbink_cfg->is_inverted) {
-		// NOTE: And, of course, RGB565 is terrible.
-		if (unlikely(vInfo.bits_per_pixel == 16U)) {
-			px.rgb565 ^= 0xFFFFu;
-		} else {
-			px.bgra.p ^= 0x00FFFFFFu;
-		}
+		px.bgra.p ^= 0x00FFFFFFu;
 	}
 
 	// Did we request a regional clear?
@@ -6577,12 +6568,7 @@ int
 	if (fbink_cfg->is_cleared) {
 		FBInkPixel bgP = penBGPixel;
 		if (fbink_cfg->is_inverted) {
-			// NOTE: And, of course, RGB565 is terrible.
-			if (unlikely(vInfo.bits_per_pixel == 16U)) {
-				bgP.rgb565 ^= 0xFFFFu;
-			} else {
-				bgP.bgra.p ^= 0x00FFFFFFu;
-			}
+			bgP.bgra.p ^= 0x00FFFFFFu;
 		}
 		clear_screen(fbfd, &bgP, fbink_cfg->is_flashing);
 	}
@@ -7772,14 +7758,8 @@ int
 	FBInkPixel      fgP        = penFGPixel;
 	FBInkPixel      bgP        = penBGPixel;
 	if (is_inverted) {
-		// NOTE: And, of course, RGB565 is terrible.
-		if (unlikely(vInfo.bits_per_pixel == 16U)) {
-			fgP.rgb565 ^= 0xFFFFu;
-			bgP.rgb565 ^= 0xFFFFu;
-		} else {
-			fgP.bgra.p ^= 0x00FFFFFFu;
-			bgP.bgra.p ^= 0x00FFFFFFu;
-		}
+		fgP.bgra.p ^= 0x00FFFFFFu;
+		bgP.bgra.p ^= 0x00FFFFFFu;
 	}
 
 	// Do we need to clear the screen?
@@ -9604,14 +9584,8 @@ int
 	FBInkPixel fgP = penFGPixel;
 	FBInkPixel bgP = penBGPixel;
 	if (fbink_cfg->is_inverted) {
-		// NOTE: And, of course, RGB565 is terrible.
-		if (unlikely(vInfo.bits_per_pixel == 16U)) {
-			fgP.rgb565 ^= 0xFFFFu;
-			bgP.rgb565 ^= 0xFFFFu;
-		} else {
-			fgP.bgra.p ^= 0x00FFFFFFu;
-			bgP.bgra.p ^= 0x00FFFFFFu;
-		}
+		fgP.bgra.p ^= 0x00FFFFFFu;
+		bgP.bgra.p ^= 0x00FFFFFFu;
 	}
 
 	// Clear screen?
@@ -10262,12 +10236,7 @@ static int
 	if (fbink_cfg->is_cleared) {
 		FBInkPixel bgP = penBGPixel;
 		if (fbink_cfg->is_inverted) {
-			// NOTE: And, of course, RGB565 is terrible.
-			if (unlikely(vInfo.bits_per_pixel == 16U)) {
-				bgP.rgb565 ^= 0xFFFFu;
-			} else {
-				bgP.bgra.p ^= 0x00FFFFFFu;
-			}
+			bgP.bgra.p ^= 0x00FFFFFFu;
 		}
 		clear_screen(fbfd, &bgP, fbink_cfg->is_flashing);
 	}
