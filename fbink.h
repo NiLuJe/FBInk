@@ -1154,7 +1154,7 @@ FBINK_API int fbink_print_raw_data(int fbfd,
 //				on such a quirky framebuffer state,
 //				and just want to re-use it as-is without mangling the rotation again.
 // NOTE: This can be used to draw arbitrary filled rectangles (using the bg pen color),
-//       but, for convenience, int fbink_fill_rect_gray & int fbink_fill_rect_rgba are also available.
+//       but, for convenience, fbink_fill_rect_gray & fbink_fill_rect_rgba are also available.
 FBINK_API int fbink_cls(int fbfd, const FBInkConfig* restrict fbink_cfg, const FBInkRect* restrict rect, bool no_rota)
     __attribute__((nonnull(2)));
 
@@ -1459,7 +1459,8 @@ FBINK_API int fbink_set_fb_info(int      fbfd,
 				const FBInkConfig* restrict fbink_cfg) __attribute__((warn_unused_result, nonnull));
 
 // These behave exactly like fbink_cls, but allow you to choose a color directly, instead of relying on the pen's bg color.
-// Mostly useful for GUI toolkit backends, but depending on how it's actually used, remember that this honors `no_refresh`!
+// Mostly useful for GUI toolkit backends, but depending on how it's actually used,
+// remember that this honors `no_refresh` & `is_inverted`!
 // Returns -(ENOSYS) when drawing primitives are disabled (MINIMAL build w/o DRAW).
 // c.f., `fbink_cls` for documentation of the initial parameters they share.
 // y:			8-bit luminance value
