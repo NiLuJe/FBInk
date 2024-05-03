@@ -724,7 +724,6 @@ int
 
 #if defined(FBINK_FOR_KOBO)
 			// Attempt to restore a meaningful invert status, too...
-			// FIXME: See if we need to restrict this to specific bitdepths to begin with...
 			if (deviceQuirks.isMTK) {
 				if (new_vinfo.grayscale == GRAYSCALE_8BIT_INVERTED) {
 					if (kobo_mtk_invert_fb(true) == EXIT_SUCCESS) {
