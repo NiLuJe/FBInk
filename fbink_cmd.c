@@ -2158,7 +2158,9 @@ int
 
 		// Start by clearing the bar's region to white, to make sure A2 will behave...
 		// NOTE: Only used on MTK devices, as the chance of hitting the flags bug for this on Mk. 7 is low enough,
-		//       and the quick succession of GC16 + A2 with no fencing causes a tearing artifact on the first refresh.
+		//       and in its initial implementation,
+		//       the quick succession of GC16 + A2 with no fencing causes a tearing artifact on the first refresh.
+		//       (We did end up using a fully fenced GC16 + FULL for the final implementation).
 		if (fbink_state.is_mtk) {
 			fbink_cfg.wfm_mode = WFM_GC16;
 			fbink_cfg.is_flashing = true;
