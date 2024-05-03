@@ -2886,7 +2886,6 @@ static int
 	}
 	*/
 
-	// FIXME: Test if any of these actually work...
 	// Dithering is handled as part of the image processing pass by the MDP.
 	if (fbink_cfg->dithering_mode != HWD_PASSTHROUGH) {
 		// FIXME: That combination might actually be viable here...
