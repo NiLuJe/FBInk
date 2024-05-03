@@ -2927,7 +2927,7 @@ static int
 					   : get_wfm_mode(fbink_cfg->wfm_mode);
 	const uint32_t update_mode   = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
 
-	// NOTE: hwtcon_rect and mxcfb_rect are perfectly interhcnageable
+	// NOTE: hwtcon_rect and mxcfb_rect are perfectly interchangeable
 	struct hwtcon_update_data update = {
 		.update_region = { .top    = region.top,
                                   .left   = region.left,
@@ -2936,9 +2936,15 @@ static int
 		.waveform_mode = waveform_mode,
 		.update_mode   = update_mode,
 		.update_marker = lastMarker,
-		.flags       = 0U, // FIXME: Check if HWTCON_FLAG_FORCE_A2_OUTPUT makes sense outside of pen strokes...
-		.dither_mode = 0
+		.flags         = 0U,
+		.dither_mode   = 0
 	};
+	// NOTE: We'll leave A2 alone by default, see the musings about HWTCON_FLAG_FORCE_A2_OUTPUT for pen shenanigans below;
+	//       but for general purposes, it doesn't appear to make sense.
+	//       What *does* is dithering, which appears to be the only form of HW dithering Nickel seems to use for now,
+	//       for *some* of its A2 updates (e.g., mainly small UI highlights). It uses AUTO for larger UI highlights,
+	//       and undithered A2 for virtual keyboard highlights *and* unhighlights (and DU for the text field).
+	//       (In the context of the virtual keyboard, another specificity is that no wait_for ioctls are used *at all*).
 
 	// NOTE: There isn't a per-update concept, fb inversion is global.
 	//       The kernel makes a distinction between `enable_night_mode`/`night_mode`, which affects low-level timing and power shenanigans,
