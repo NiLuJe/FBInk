@@ -5050,6 +5050,7 @@ static __attribute__((cold)) int
 
 #ifdef FBINK_WITH_DRAW
 	// Pack the pen colors into the right pixel format...
+	// NOTE: This *will* enforce grayscale, unlike fbink_set_fg/bg_pen_*!
 	if (update_pen_colors(fbink_cfg) != EXIT_SUCCESS) {
 		goto cleanup;
 	}

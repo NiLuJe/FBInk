@@ -1060,6 +1060,8 @@ FBINK_API int fbink_update_pen_colors(const FBInkConfig* restrict fbink_cfg) __a
 // update:		If true, abort early and return OK_ALREADY_SAME if that's already the current color.
 FBINK_API int fbink_set_fg_pen_gray(uint8_t y, bool quantize, bool update);
 FBINK_API int fbink_set_bg_pen_gray(uint8_t y, bool quantize, bool update);
+// NOTE: You should be aware that subsequent fbink_init calls (and fbink_reinit when it leads to a reinit) *will*
+//       reset the pen colors to a grayscale representation of whatever RGB values you set this way!
 // r:			8-bit red component value
 // g:			8-bit green component value
 // b:			8-bit blue component value
