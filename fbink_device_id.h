@@ -86,8 +86,8 @@ typedef struct __attribute__((__packed__))
 #			define KOBO_HWCFG_DisplayBusWidth       35U
 // NOTE: To identify color panels, we only care about the CFA bit in there
 #			define KOBO_HWCFG_EPD_Flags             64U
-// NOTE: Ought to be the fourth bit. Possibly 0x08 instead, depending on how this is actually laid out... (FIXME)
-#			define HWCFG_EPD_FLAGS_CFA              (1 << 4)
+// NOTE: Ought to be the fourth bit.
+#			define HWCFG_EPD_FLAGS_CFA              (1 << 3)
 
 // Another thing to deal with is the fact that the data block moved to a dedicated partition on boards with an MTK SoC...
 typedef struct
