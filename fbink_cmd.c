@@ -1732,6 +1732,8 @@ int
 					fbink_cfg.wfm_mode = WFM_GCC16;
 				} else if (strcasecmp(optarg, "DUNM") == 0) {
 					fbink_cfg.wfm_mode = WFM_DUNM;
+				} else if (strcasecmp(optarg, "COLOR") == 0) {
+					fbink_cfg.wfm_mode = WFM_COLOR;
 				} else {
 					ELOG("Unknown waveform update mode '%s'.", optarg);
 					errfnd = true;
