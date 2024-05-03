@@ -875,46 +875,8 @@ static int dump_region(struct mxcfb_rect* region, FBInkDump* restrict dump);
 #endif
 
 // String utilities, to avoid using strncpy (c.f., string_copying(7)).
-// NOTE: We could mostly use strcpy instead in fbink_device_id,
-//       but for some reason -Wstringop-overflow warnings disappear as soon as optimization is involved...
-static ssize_t
-    strtcpy(char* restrict dst, const char* restrict src, size_t dsize)
-{
-	bool   trunc;
-	size_t dlen, slen;
-
-	if (dsize == 0) {
-		errno = ENOBUFS;
-		return -1;
-	}
-
-	slen  = strnlen(src, dsize);
-	trunc = (slen == dsize);
-	dlen  = slen - trunc;
-
-	stpcpy(mempcpy(dst, src, dlen), "");
-	if (trunc) {
-		errno = E2BIG;
-	}
-	return trunc ? -1 : (ssize_t) slen;
-}
-
-// Based on Linux's strscpy_pad
-/*
-static ssize_t
-    strtcpy_pad(char* restrict dst, const char* restrict src, size_t dsize)
-{
-	ssize_t written;
-
-	written = strtcpy(dst, src, dsize);
-	if (written < 0 || written == dsize - 1) {
-		return written;
-	}
-
-	memset(dst + written + 1, 0, dsize - written - 1);
-
-	return written;
-}
-*/
+#ifndef FBINK_FOR_LINUX
+#	include "fbink_string_utils.h"
+#endif
 
 #endif
