@@ -5048,34 +5048,15 @@ static __attribute__((cold)) int
 	// we'll special-case the image codepath to ignore it when row is unspecified (i.e., 0) ;).
 	viewVertOrigin = (uint8_t) (viewVertOrigin + viewVertOffset);
 
-#ifdef FBINK_WITH_DRAW
-	// Pack the pen colors into the right pixel format...
-	// NOTE: This *will* enforce grayscale, unlike fbink_set_fg/bg_pen_*!
-	if (update_pen_colors(fbink_cfg) != EXIT_SUCCESS) {
-		goto cleanup;
-	}
-
-	// Use the appropriate get/put pixel functions...
+	// Compute the pixel format
 	switch (vInfo.bits_per_pixel) {
 		case 4U:
-			//fxpPutPixel = &put_pixel_Gray4;
-			fxpGetPixel              = &get_pixel_Gray4;
-			fxpFillRect              = &fill_rect_Gray4;
-			fxpFillRectChecked       = &fill_rect_Gray4_checked;
 			deviceQuirks.pixelFormat = FBINK_PXFMT_Y4;
 			break;
 		case 8U:
-			//fxpPutPixel = &put_pixel_Gray8;
-			fxpGetPixel              = &get_pixel_Gray8;
-			fxpFillRect              = &fill_rect_Gray8;
-			fxpFillRectChecked       = &fill_rect_Gray8_checked;
 			deviceQuirks.pixelFormat = FBINK_PXFMT_Y8;
 			break;
 		case 16U:
-			//fxpPutPixel = &put_pixel_RGB565;
-			fxpGetPixel        = &get_pixel_RGB565;
-			fxpFillRect        = &fill_rect_RGB565;
-			fxpFillRectChecked = &fill_rect_RGB565_checked;
 			if (vInfo.red.offset == 0U) {
 				deviceQuirks.pixelFormat = FBINK_PXFMT_RGB565;
 			} else {
@@ -5083,10 +5064,6 @@ static __attribute__((cold)) int
 			}
 			break;
 		case 24U:
-			//fxpPutPixel = &put_pixel_RGB24;
-			fxpGetPixel        = &get_pixel_RGB24;
-			fxpFillRect        = &fill_rect_RGB24;
-			fxpFillRectChecked = &fill_rect_RGB24_checked;
 			if (vInfo.red.offset == 0U) {
 				deviceQuirks.pixelFormat = FBINK_PXFMT_RGB24;
 			} else {
@@ -5094,10 +5071,6 @@ static __attribute__((cold)) int
 			}
 			break;
 		case 32U:
-			//fxpPutPixel = &put_pixel_RGB32;
-			fxpGetPixel        = &get_pixel_RGB32;
-			fxpFillRect        = &fill_rect_RGB32;
-			fxpFillRectChecked = &fill_rect_RGB32_checked;
 			if (vInfo.transp.length == 0U) {
 				if (vInfo.red.offset == 0U) {
 					deviceQuirks.pixelFormat = FBINK_PXFMT_RGB32;
@@ -5114,12 +5087,64 @@ static __attribute__((cold)) int
 			break;
 		default:
 			// Huh oh... Should never happen!
-			WARN("Unsupported framebuffer bpp");
+			WARN("Unsupported framebuffer bitdepth");
 			rv = ERRCODE(EXIT_FAILURE);
 			goto cleanup;
 			break;
 	}
 	ELOG("Framebuffer pixel format: %s", fb_pixfmt_to_string(deviceQuirks.pixelFormat));
+
+#ifdef FBINK_WITH_DRAW
+	// Use the appropriate get/put pixel functions...
+	switch (deviceQuirks.pixelFormat) {
+		case FBINK_PXFMT_Y4:
+			//fxpPutPixel = &put_pixel_Gray4;
+			fxpGetPixel        = &get_pixel_Gray4;
+			fxpFillRect        = &fill_rect_Gray4;
+			fxpFillRectChecked = &fill_rect_Gray4_checked;
+			break;
+		case FBINK_PXFMT_Y8:
+			//fxpPutPixel = &put_pixel_Gray8;
+			fxpGetPixel        = &get_pixel_Gray8;
+			fxpFillRect        = &fill_rect_Gray8;
+			fxpFillRectChecked = &fill_rect_Gray8_checked;
+			break;
+		case FBINK_PXFMT_RGB565:
+		case FBINK_PXFMT_BGR565:
+			//fxpPutPixel = &put_pixel_RGB565;
+			fxpGetPixel        = &get_pixel_RGB565;
+			fxpFillRect        = &fill_rect_RGB565;
+			fxpFillRectChecked = &fill_rect_RGB565_checked;
+			break;
+		case FBINK_PXFMT_RGB24:
+		case FBINK_PXFMT_BGR24:
+			//fxpPutPixel = &put_pixel_RGB24;
+			fxpGetPixel        = &get_pixel_RGB24;
+			fxpFillRect        = &fill_rect_RGB24;
+			fxpFillRectChecked = &fill_rect_RGB24_checked;
+			break;
+		case FBINK_PXFMT_RGB32:
+		case FBINK_PXFMT_BGR32:
+		case FBINK_PXFMT_RGBA:
+		case FBINK_PXFMT_BGRA:
+			//fxpPutPixel = &put_pixel_RGB32;
+			fxpGetPixel        = &get_pixel_RGB32;
+			fxpFillRect        = &fill_rect_RGB32;
+			fxpFillRectChecked = &fill_rect_RGB32_checked;
+			break;
+		default:
+			// Huh oh... Should never happen!
+			WARN("Unsupported framebuffer pixel format");
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+			break;
+	}
+
+	// Pack the pen colors into the right pixel format...
+	// NOTE: This *will* enforce grayscale, unlike fbink_set_fg/bg_pen_*!
+	if (update_pen_colors(fbink_cfg) != EXIT_SUCCESS) {
+		goto cleanup;
+	}
 #endif    // FBINK_WITH_DRAW
 
 	// NOTE: Do we want to keep the fb0 fd open, or simply close it for now?
