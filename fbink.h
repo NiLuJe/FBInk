@@ -433,6 +433,8 @@ typedef enum
 	WFM_GCK16_PARTIAL,    // Internal use only, GCK16 + PARTIAL
 	WFM_DUNM,             // DU, but for white-on-black.
 	WFM_P2SW,             // Internal use only, used by the swipe animation.
+	// Kobo MTK only
+	WFM_COLOR,    // FIXME: Rename properly once we have kernel sources
 
 	WFM_MAX = UINT8_MAX,    // uint8_t
 } __attribute__((packed)) WFM_MODE_INDEX_E;

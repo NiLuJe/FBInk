@@ -70,6 +70,8 @@ enum HWTCON_WAVEFORM_MODE_ENUM
 	HWTCON_WAVEFORM_MODE_A2     = 6,
 	HWTCON_WAVEFORM_MODE_GCK16  = 8,
 	HWTCON_WAVEFORM_MODE_GLKW16 = 9,    // AKA. GCKW16; REAGL DARK
+	// Introduced with Kaleido devices
+	HWTCON_WAVEFORM_MODE_COLOR  = 10,    // FIXME: Actual name TBC, probably a GC something, as it pairs with FULL.
 	// Matches MXCFB
 	HWTCON_WAVEFORM_MODE_AUTO   = 257,
 };

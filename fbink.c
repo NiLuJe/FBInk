@@ -8709,6 +8709,9 @@ static uint32_t
 			case WFM_GLKW16:
 				waveform_mode = HWTCON_WAVEFORM_MODE_GLKW16;
 				break;
+			case WFM_COLOR:
+				waveform_mode = HWTCON_WAVEFORM_MODE_COLOR;
+				break;
 			case WFM_AUTO:
 				waveform_mode = HWTCON_WAVEFORM_MODE_AUTO;
 				break;
@@ -9064,6 +9067,8 @@ static __attribute__((cold)) const char*
 			return "GCK16";
 		case HWTCON_WAVEFORM_MODE_GLKW16:
 			return "GLKW16";
+		case HWTCON_WAVEFORM_MODE_COLOR:
+			return "COLOR";
 		case HWTCON_WAVEFORM_MODE_AUTO:
 			return "AUTO";
 		default:
