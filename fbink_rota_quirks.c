@@ -575,6 +575,10 @@ int
 	}
 #endif
 
+	// We'll want to confirm that a potential bitdepth switch took, as some drivers only support specific bitdepths.
+	// (e.g., except for the Clara 2E, MTK on Kobo no longer lets you switch to 8bpp...)
+	uint32_t expected_bpp = new_vinfo.bits_per_pixel;
+
 	if (rota == KEEP_CURRENT_ROTATE) {
 		LOG("Keeping current rotation: %u (%s)", vInfo.rotate, fb_rotate_to_string(vInfo.rotate));
 	} else {
@@ -702,6 +706,39 @@ int
 		    expected_rota);
 	}
 #endif
+
+	// Warn if the driver refused to change bitdepth
+	if (new_vinfo.bits_per_pixel != expected_bpp) {
+		LOG("Current bitdepth (%ubpp) doesn't match the expected bitdepth (%ubpp). It might be unsupported by the driver?",
+		    new_vinfo.bits_per_pixel,
+		    expected_bpp);
+
+		if (new_vinfo.grayscale != vInfo.grayscale) {
+			LOG("Restoring the original grayscale flag");
+			new_vinfo.grayscale = vInfo.grayscale;
+			if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &new_vinfo)) {
+				PFWARN("FBIOPUT_VSCREENINFO: %m");
+				rv = ERRCODE(ECANCELED);
+				goto cleanup;
+			}
+
+#if defined(FBINK_FOR_KOBO)
+			// Attempt to restore a meaningful invert status, too...
+			// FIXME: See if we need to restrict this to specific bitdepths to begin with...
+			if (deviceQuirks.isMTK) {
+				if (new_vinfo.grayscale == GRAYSCALE_8BIT_INVERTED) {
+					if (kobo_mtk_invert_fb(true) == EXIT_SUCCESS) {
+						LOG("Enabled the MTK invert_fb flag");
+					}
+				} else {
+					if (kobo_mtk_invert_fb(false) == EXIT_SUCCESS) {
+						LOG("Disabled the MTK invert_fb flag");
+					}
+				}
+			}
+#endif
+		}
+	}
 
 #ifdef FBINK_FOR_KINDLE
 	// And, again, einkfb is a special snowflake...
