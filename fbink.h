@@ -409,8 +409,8 @@ typedef enum
 	// If you need to check at runtime whether it's actually supported, on an i.MX board,
 	// check if /sys/class/graphics/fb0/waveform_mode_gck16 exists ;).
 	// Otherwise, refer to the hasEclipseWfm deviceQuirks.
-	WFM_GCK16,     // From black to any. Goes hand-in-hand with GLKW16, should only be used when flashing.
-	WFM_GLKW16,    // From black to any. Newer variant of GL16_INV. (On Kobo, Mk. 9 only. It's GLK16 on sunxi).
+	WFM_GCK16,    // From black to any. Goes hand-in-hand with GLKW16, should only be used when flashing.
+	WFM_GLKW16,    // From black to any. Newer variant of GL16_INV. (On Kobo, Mk. 9, 11 & 12 only. It's GLK16 on sunxi).
 	// For documentation purposes
 	WFM_INIT,    // May flash several times to end up with a white screen, slow (~2000ms).
 	WFM_UNKNOWN,
@@ -427,14 +427,13 @@ typedef enum
 	WFM_GLK16,    // GL16, but for white-on-black.
 	WFM_CLEAR,    // GC16 local (NOTE: Appears to crash the EPDC... [Elipsa on FW 4.28.17826])
 	WFM_GC4L,     // GC4 local (NOTE: Appears to crash the EPDC... [Elipsa on FW 4.28.17826])
-	WFM_GCC16,    // GCC16
+	// Kobo Sunxi & MTK only
+	WFM_GCC16,    // GCC16, for color content on Kaleido panels.
 	// Kindle MTK only
 	WFM_GC16_PARTIAL,     // Internal use only, GC16 + PARTIAL
 	WFM_GCK16_PARTIAL,    // Internal use only, GCK16 + PARTIAL
 	WFM_DUNM,             // DU, but for white-on-black.
 	WFM_P2SW,             // Internal use only, used by the swipe animation.
-	// Kobo MTK only
-	WFM_COLOR,    // FIXME: Rename properly once we have kernel sources
 
 	WFM_MAX = UINT8_MAX,    // uint8_t
 } __attribute__((packed)) WFM_MODE_INDEX_E;
