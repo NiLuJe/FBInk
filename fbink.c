@@ -157,11 +157,78 @@ uint32_t
 
 #ifdef FBINK_WITH_DRAW
 // #RGB -> RGB565
-static inline __attribute__((always_inline, hot)) uint16_t
+static inline __attribute__((const, always_inline, hot)) uint16_t
     pack_rgb565(uint8_t r, uint8_t g, uint8_t b)
 {
 	// ((r / 8) * 2048) + ((g / 4) * 32) + (b / 8);
 	return (uint16_t) (((r >> 3U) << 11U) | ((g >> 2U) << 5U) | (b >> 3U));
+}
+
+// Pack an FBInkPixel accordingly for the target pixel format
+static __attribute__((pure)) FBInkPixel
+    pack_pixel_from_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+{
+	FBInkPixel px;
+	switch (deviceQuirks.pixelFormat) {
+		case FBINK_PXFMT_Y4:
+		case FBINK_PXFMT_Y8:
+			// NOTE: We inline stbi__compute_y to avoid needing to depend on FBINK_WITH_IMAGE
+			px.gray8 = (uint8_t) (((r * 77U) + (g * 150U) + (29U * b)) >> 8U);
+			break;
+		case FBINK_PXFMT_RGB565:
+			px.rgb565 = pack_rgb565(r, g, b);
+			break;
+		case FBINK_PXFMT_BGR565:
+			px.rgb565 = pack_rgb565(b, g, r);
+			break;
+		case FBINK_PXFMT_BGR24:
+		case FBINK_PXFMT_BGRA:
+		case FBINK_PXFMT_BGR32:
+			px.bgra.color.b = b;
+			px.bgra.color.g = g;
+			px.bgra.color.r = r;
+			px.bgra.color.a = a;
+			break;
+		case FBINK_PXFMT_RGB24:
+		case FBINK_PXFMT_RGBA:
+		case FBINK_PXFMT_RGB32:
+			px.rgba.color.r = r;
+			px.rgba.color.g = g;
+			px.rgba.color.b = b;
+			px.rgba.color.a = a;
+			break;
+	}
+
+	return px;
+}
+
+static __attribute__((pure)) FBInkPixel
+    pack_pixel_from_y8(uint8_t v)
+{
+	FBInkPixel px;
+	switch (deviceQuirks.pixelFormat) {
+		case FBINK_PXFMT_Y4:
+		case FBINK_PXFMT_Y8:
+			px.gray8 = v;
+			break;
+		case FBINK_PXFMT_RGB565:
+		case FBINK_PXFMT_BGR565:
+			px.rgb565 = pack_rgb565(v, v, v);
+			break;
+		case FBINK_PXFMT_BGR24:
+		case FBINK_PXFMT_BGRA:
+		case FBINK_PXFMT_BGR32:
+		case FBINK_PXFMT_RGB24:
+		case FBINK_PXFMT_RGBA:
+		case FBINK_PXFMT_RGB32:
+			px.bgra.color.b = v;
+			px.bgra.color.g = v;
+			px.bgra.color.r = v;
+			px.bgra.color.a = 0xFFu;
+			break;
+	}
+
+	return px;
 }
 
 // Helper functions to 'plot' a specific pixel in a given color to the framebuffer
@@ -6000,7 +6067,7 @@ int
 			 bool    no_rota,
 			 uint8_t y)
 {
-	const FBInkPixel px = { .gray8 = y };
+	const FBInkPixel px = pack_pixel_from_y8(y);
 	return fill_rect(fbfd, fbink_cfg, rect, &px, no_rota);
 }
 
@@ -6014,7 +6081,7 @@ int
 			 uint8_t b,
 			 uint8_t a)
 {
-	const FBInkPixel px = { .bgra.color.r = r, .bgra.color.g = g, .bgra.color.b = b, .bgra.color.a = a };
+	const FBInkPixel px = pack_pixel_from_rgba(r, g, b, a);
 	return fill_rect(fbfd, fbink_cfg, rect, &px, no_rota);
 }
 

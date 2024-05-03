@@ -2162,19 +2162,19 @@ int
 		//       the quick succession of GC16 + A2 with no fencing causes a tearing artifact on the first refresh.
 		//       (We did end up using a fully fenced GC16 + FULL for the final implementation).
 		if (fbink_state.is_mtk) {
-			fbink_cfg.wfm_mode = WFM_GC16;
-			fbink_cfg.is_flashing = true;
+			fbink_cfg.wfm_mode           = WFM_GC16;
+			fbink_cfg.is_flashing        = true;
 			// We could use a fbink_grid_clear, but instead duplicate a bit of positioning logic instead for exact results...
 			//fbink_grid_clear(fbfd, (unsigned short int) (fbink_state.max_cols - 1U), 1U, &fbink_cfg);
 			short int                row = (short int) (fbink_state.max_rows / 2U);
 			const unsigned short int top_pos =
-			(unsigned short int) MAX(0 + (fbink_state.view_vert_origin - fbink_state.view_vert_offset),
-						((row * fbink_state.font_h) + fbink_state.view_vert_origin));
+			    (unsigned short int) MAX(0 + (fbink_state.view_vert_origin - fbink_state.view_vert_offset),
+						     ((row * fbink_state.font_h) + fbink_state.view_vert_origin));
 			const unsigned short int left_pos = fbink_state.view_hori_origin;
 			const unsigned short int bar_width =
-			(unsigned short int) ((0.90f * (float) fbink_state.view_width) + 0.5f);
+			    (unsigned short int) ((0.90f * (float) fbink_state.view_width) + 0.5f);
 			const unsigned short int bar_left =
-			(unsigned short int) (left_pos + (0.05f * (float) fbink_state.view_width) + 0.5f);
+			    (unsigned short int) (left_pos + (0.05f * (float) fbink_state.view_width) + 0.5f);
 			const FBInkRect region = {
 				.left   = bar_left,
 				.top    = top_pos,
