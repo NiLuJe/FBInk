@@ -3889,87 +3889,18 @@ static __attribute__((cold)) int
 #	endif
 
 	// Pack the pen colors into the appropriate pixel format...
-	switch (vInfo.bits_per_pixel) {
-		case 4U:
-			if (is_fg) {
-				penFGPixel.gray8 = penFGColor;
-			} else {
-				penBGPixel.gray8 = penBGColor;
-			}
-			break;
-		case 8U:
-			if (is_fg) {
-				penFGPixel.gray8 = penFGColor;
-			} else {
-				penBGPixel.gray8 = penBGColor;
-			}
-			break;
-		case 16U:
-			if (is_fg) {
-				if (is_y8) {
-					penFGPixel.rgb565 = pack_rgb565(penFGColor, penFGColor, penFGColor);
-				} else {
-					penFGPixel.rgb565 = pack_rgb565(r, g, b);
-				}
-			} else {
-				if (is_y8) {
-					penBGPixel.rgb565 = pack_rgb565(penBGColor, penBGColor, penBGColor);
-				} else {
-					penBGPixel.rgb565 = pack_rgb565(r, g, b);
-				}
-			}
-			break;
-		case 24U:
-			if (is_fg) {
-				if (is_y8) {
-					penFGPixel.bgra.color.r = penFGPixel.bgra.color.g = penFGPixel.bgra.color.b =
-					    penFGColor;
-				} else {
-					penFGPixel.bgra.color.r = r;
-					penFGPixel.bgra.color.g = g;
-					penFGPixel.bgra.color.b = b;
-				}
-			} else {
-				if (is_y8) {
-					penBGPixel.bgra.color.r = penBGPixel.bgra.color.g = penBGPixel.bgra.color.b =
-					    penBGColor;
-				} else {
-					penBGPixel.bgra.color.r = r;
-					penBGPixel.bgra.color.g = g;
-					penBGPixel.bgra.color.b = b;
-				}
-			}
-			break;
-		case 32U:
-			if (is_fg) {
-				if (is_y8) {
-					penFGPixel.bgra.color.a = 0xFFu;
-					penFGPixel.bgra.color.r = penFGPixel.bgra.color.g = penFGPixel.bgra.color.b =
-					    penFGColor;
-				} else {
-					penFGPixel.bgra.color.r = r;
-					penFGPixel.bgra.color.g = g;
-					penFGPixel.bgra.color.b = b;
-					penFGPixel.bgra.color.a = a;
-				}
-			} else {
-				if (is_y8) {
-					penBGPixel.bgra.color.a = 0xFFu;
-					penBGPixel.bgra.color.r = penBGPixel.bgra.color.g = penBGPixel.bgra.color.b =
-					    penBGColor;
-				} else {
-					penBGPixel.bgra.color.r = r;
-					penBGPixel.bgra.color.g = g;
-					penBGPixel.bgra.color.b = b;
-					penBGPixel.bgra.color.a = a;
-				}
-			}
-			break;
-		default:
-			// Huh oh... Should never happen!
-			WARN("Unsupported framebuffer bpp");
-			rv = ERRCODE(EXIT_FAILURE);
-			break;
+	if (is_y8) {
+		if (is_fg) {
+			penFGPixel = pack_pixel_from_y8(penFGColor);
+		} else {
+			penBGPixel = pack_pixel_from_y8(penBGColor);
+		}
+	} else {
+		if (is_fg) {
+			penFGPixel = pack_pixel_from_rgba(r, g, b, a);
+		} else {
+			penBGPixel = pack_pixel_from_rgba(r, g, b, a);
+		}
 	}
 
 	return rv;
@@ -4076,35 +4007,8 @@ static __attribute__((cold)) int
 #	endif
 
 	// Pack the pen colors into the appropriate pixel format...
-	switch (vInfo.bits_per_pixel) {
-		case 4U:
-			penFGPixel.gray8 = penFGColor;
-			penBGPixel.gray8 = penBGColor;
-			break;
-		case 8U:
-			penFGPixel.gray8 = penFGColor;
-			penBGPixel.gray8 = penBGColor;
-			break;
-		case 16U:
-			penFGPixel.rgb565 = pack_rgb565(penFGColor, penFGColor, penFGColor);
-			penBGPixel.rgb565 = pack_rgb565(penBGColor, penBGColor, penBGColor);
-			break;
-		case 24U:
-			penFGPixel.bgra.color.r = penFGPixel.bgra.color.g = penFGPixel.bgra.color.b = penFGColor;
-			penBGPixel.bgra.color.r = penBGPixel.bgra.color.g = penBGPixel.bgra.color.b = penBGColor;
-			break;
-		case 32U:
-			penFGPixel.bgra.color.a = 0xFFu;
-			penFGPixel.bgra.color.r = penFGPixel.bgra.color.g = penFGPixel.bgra.color.b = penFGColor;
-			penBGPixel.bgra.color.a                                                     = 0xFFu;
-			penBGPixel.bgra.color.r = penBGPixel.bgra.color.g = penBGPixel.bgra.color.b = penBGColor;
-			break;
-		default:
-			// Huh oh... Should never happen!
-			WARN("Unsupported framebuffer bpp");
-			rv = ERRCODE(EXIT_FAILURE);
-			break;
-	}
+	penFGPixel = pack_pixel_from_y8(penFGColor);
+	penBGPixel = pack_pixel_from_y8(penBGColor);
 
 	return rv;
 }
