@@ -35,35 +35,36 @@
 // List of flags for device or screen-specific quirks...
 typedef struct
 {
-	unsigned short int screenDPI;
-	DEVICE_ID_T        deviceId;
-	char               deviceName[32];
-	char               deviceCodename[32];
-	char               devicePlatform[32];
-	bool               isPerfectFit;
-	bool               isMTK;
-	bool               isSunxi;
-	bool               isKindleLegacy;
-	bool               isKindlePearlScreen;
-	bool               isKindleZelda;
-	bool               isKindleRex;
-	bool               isKoboNonMT;
-	bool               isNTX16bLandscape;
-	bool               isKoboMk7;
-	int8_t             koboVertOffset;
-	uint8_t            ntxBootRota;
-	NTX_ROTA_INDEX_T   ntxRotaQuirk;
-	uint8_t            rotationMap[4];    // Index is native, value is canonical
-	bool               touchSwapAxes;
-	bool               touchMirrorX;
-	bool               touchMirrorY;
-	bool               unreliableWaitFor;
-	bool               canRotate;
-	bool               canHWInvert;
-	bool               hasEclipseWfm;
-	bool               canWaitForSubmission;
-	bool               hasColorPanel;
-	bool               skipId;
+	unsigned short int  screenDPI;
+	DEVICE_ID_T         deviceId;
+	char                deviceName[32];
+	char                deviceCodename[32];
+	char                devicePlatform[32];
+	bool                isPerfectFit;
+	bool                isMTK;
+	bool                isSunxi;
+	bool                isKindleLegacy;
+	bool                isKindlePearlScreen;
+	bool                isKindleZelda;
+	bool                isKindleRex;
+	bool                isKoboNonMT;
+	bool                isNTX16bLandscape;
+	bool                isKoboMk7;
+	int8_t              koboVertOffset;
+	uint8_t             ntxBootRota;
+	NTX_ROTA_INDEX_T    ntxRotaQuirk;
+	uint8_t             rotationMap[4];    // Index is native, value is canonical
+	bool                touchSwapAxes;
+	bool                touchMirrorX;
+	bool                touchMirrorY;
+	bool                unreliableWaitFor;
+	bool                canRotate;
+	bool                canHWInvert;
+	bool                hasEclipseWfm;
+	bool                canWaitForSubmission;
+	bool                hasColorPanel;
+	FBINK_PXFMT_INDEX_T pixelFormat;
+	bool                skipId;
 } FBInkDeviceQuirks;
 
 // An (x, y) coordinates tuple

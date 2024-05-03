@@ -761,6 +761,7 @@ static int                                               open_fb_fd(int* restric
 static int                                               open_fb_fd_nonblock(int* restrict, bool* restrict);
 
 static __attribute__((cold)) const char* fb_rotate_to_string(uint32_t);
+static __attribute__((cold)) const char* fb_pixfmt_to_string(FBINK_PXFMT_INDEX_T);
 #ifdef FBINK_FOR_KINDLE
 static __attribute__((cold)) const char* einkfb_orientation_to_string(orientation_t);
 #endif

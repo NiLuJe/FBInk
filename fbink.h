@@ -513,6 +513,24 @@ typedef enum
 } __attribute__((packed)) MTK_HALFTONE_MODE_INDEX_E;
 typedef int32_t           MTK_HALFTONE_MODE_INDEX_T;
 
+// List of supported pixel formats
+typedef enum
+{
+	FBINK_PXFMT_UNKNOWN = 0,
+	FBINK_PXFMT_Y4      = 4,
+	FBINK_PXFMT_Y8      = 8,
+	FBINK_PXFMT_RGB565  = 16,
+	FBINK_PXFMT_BGR565,
+	FBINK_PXFMT_BGR24 = 24,
+	FBINK_PXFMT_RGB24,
+	FBINK_PXFMT_BGRA = 32,
+	FBINK_PXFMT_RGBA,
+	FBINK_PXFMT_BGR32,
+	FBINK_PXFMT_RGB32,
+	FBINK_PXFMT_MAX = UINT8_MAX,    // uint8_t
+} __attribute__((packed)) FBINK_PXFMT_INDEX_E;
+typedef uint8_t           FBINK_PXFMT_INDEX_T;
+
 //
 // A struct to dump FBInk's internal state into, like fbink_state_dump() would, but in C ;)
 typedef struct
@@ -563,6 +581,7 @@ typedef struct
 	bool    can_hw_invert;      // deviceQuirks.canHWInvert (device can use EPDC inversion)
 	bool    has_eclipse_wfm;    // deviceQuirks.hasEclipseWfm (device can use nightmode waveform modes)
 	bool    has_color_panel;    // deviceQuirks.hasColorPanel (device features a Kaleido/CFA color panel)
+	FBINK_PXFMT_INDEX_T pixel_format;    // deviceQuirks.pixelFormat
 	bool can_wait_for_submission;    // deviceQuirks.canWaitForSubmission (devices supports fbink_wait_for_submission)
 } FBInkState;
 

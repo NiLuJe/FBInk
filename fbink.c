@@ -3676,6 +3676,37 @@ static __attribute__((cold)) const char*
 	}
 }
 
+static __attribute__((cold)) const char*
+    fb_pixfmt_to_string(FBINK_PXFMT_INDEX_T fmt)
+{
+	switch (fmt) {
+		case FBINK_PXFMT_UNKNOWN:
+			return "Unknown";
+		case FBINK_PXFMT_Y4:
+			return "Y4";
+		case FBINK_PXFMT_Y8:
+			return "Y8";
+		case FBINK_PXFMT_RGB565:
+			return "RGB565";
+		case FBINK_PXFMT_BGR565:
+			return "BGR565";
+		case FBINK_PXFMT_BGR24:
+			return "BGR24";
+		case FBINK_PXFMT_RGB24:
+			return "RGB24";
+		case FBINK_PXFMT_BGRA:
+			return "BGRA";
+		case FBINK_PXFMT_RGBA:
+			return "RGBA";
+		case FBINK_PXFMT_BGR32:
+			return "BGR32";
+		case FBINK_PXFMT_RGB32:
+			return "RGB32";
+		default:
+			return "Unknown?!";
+	}
+}
+
 #ifdef FBINK_FOR_KINDLE
 // einkfb handles rotation via a custom set of ioctls, with a different mapping than the Linux standard...
 static __attribute__((cold)) const char*
@@ -5057,33 +5088,58 @@ static __attribute__((cold)) int
 	switch (vInfo.bits_per_pixel) {
 		case 4U:
 			//fxpPutPixel = &put_pixel_Gray4;
-			fxpGetPixel        = &get_pixel_Gray4;
-			fxpFillRect        = &fill_rect_Gray4;
-			fxpFillRectChecked = &fill_rect_Gray4_checked;
+			fxpGetPixel              = &get_pixel_Gray4;
+			fxpFillRect              = &fill_rect_Gray4;
+			fxpFillRectChecked       = &fill_rect_Gray4_checked;
+			deviceQuirks.pixelFormat = FBINK_PXFMT_Y4;
 			break;
 		case 8U:
 			//fxpPutPixel = &put_pixel_Gray8;
-			fxpGetPixel        = &get_pixel_Gray8;
-			fxpFillRect        = &fill_rect_Gray8;
-			fxpFillRectChecked = &fill_rect_Gray8_checked;
+			fxpGetPixel              = &get_pixel_Gray8;
+			fxpFillRect              = &fill_rect_Gray8;
+			fxpFillRectChecked       = &fill_rect_Gray8_checked;
+			deviceQuirks.pixelFormat = FBINK_PXFMT_Y8;
 			break;
 		case 16U:
 			//fxpPutPixel = &put_pixel_RGB565;
 			fxpGetPixel        = &get_pixel_RGB565;
 			fxpFillRect        = &fill_rect_RGB565;
 			fxpFillRectChecked = &fill_rect_RGB565_checked;
+			if (vInfo.red.offset == 0U) {
+				deviceQuirks.pixelFormat = FBINK_PXFMT_RGB565;
+			} else {
+				deviceQuirks.pixelFormat = FBINK_PXFMT_BGR565;
+			}
 			break;
 		case 24U:
 			//fxpPutPixel = &put_pixel_RGB24;
 			fxpGetPixel        = &get_pixel_RGB24;
 			fxpFillRect        = &fill_rect_RGB24;
 			fxpFillRectChecked = &fill_rect_RGB24_checked;
+			if (vInfo.red.offset == 0U) {
+				deviceQuirks.pixelFormat = FBINK_PXFMT_RGB24;
+			} else {
+				deviceQuirks.pixelFormat = FBINK_PXFMT_BGR24;
+			}
 			break;
 		case 32U:
 			//fxpPutPixel = &put_pixel_RGB32;
 			fxpGetPixel        = &get_pixel_RGB32;
 			fxpFillRect        = &fill_rect_RGB32;
 			fxpFillRectChecked = &fill_rect_RGB32_checked;
+			if (vInfo.transp.length == 0U) {
+				if (vInfo.red.offset == 0U) {
+					deviceQuirks.pixelFormat = FBINK_PXFMT_RGB32;
+				} else {
+					deviceQuirks.pixelFormat = FBINK_PXFMT_BGR32;
+				}
+			} else {
+				if (vInfo.red.offset == 0U) {
+					deviceQuirks.pixelFormat = FBINK_PXFMT_RGBA;
+				} else {
+					deviceQuirks.pixelFormat = FBINK_PXFMT_BGRA;
+				}
+			}
 			break;
 		default:
 			// Huh oh... Should never happen!
@@ -5092,6 +5148,7 @@ static __attribute__((cold)) int
 			goto cleanup;
 			break;
 	}
+	ELOG("Framebuffer pixel format: %s", fb_pixfmt_to_string(deviceQuirks.pixelFormat));
 #endif    // FBINK_WITH_DRAW
 
 	// NOTE: Do we want to keep the fb0 fd open, or simply close it for now?
@@ -5378,7 +5435,7 @@ void
 {
 	fprintf(
 	    stdout,
-	    "FBINK_VERSION='%s';FBINK_TARGET=%hhu;FBINK_FEATURES=%#x;viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;invertedGrayscale=%d;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isMTK=%d;isSunxi=%d;SunxiHasFBDamage=%d;SunxiForceRota=%d;isKindleLegacy=%d;isKoboNonMT=%d;unreliableWaitFor=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;rotationMap='{ %hhu, %hhu, %hhu, %hhu }';touchSwapAxes=%d;touchMirrorX=%d;touchMirrorY=%d;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;hasEclipseWfm=%d;hasColorPanel=%d;canWaitForSubmission=%d;",
+	    "FBINK_VERSION='%s';FBINK_TARGET=%hhu;FBINK_FEATURES=%#x;viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;invertedGrayscale=%d;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isMTK=%d;isSunxi=%d;SunxiHasFBDamage=%d;SunxiForceRota=%d;isKindleLegacy=%d;isKoboNonMT=%d;unreliableWaitFor=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;rotationMap='{ %hhu, %hhu, %hhu, %hhu }';touchSwapAxes=%d;touchMirrorX=%d;touchMirrorY=%d;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;hasEclipseWfm=%d;hasColorPanel=%d;pixelFormat='%s';canWaitForSubmission=%d;",
 	    fbink_version(),
 	    fbink_target(),
 	    fbink_features(),
@@ -5437,6 +5494,7 @@ void
 	    deviceQuirks.canHWInvert,
 	    deviceQuirks.hasEclipseWfm,
 	    deviceQuirks.hasColorPanel,
+	    fb_pixfmt_to_string(deviceQuirks.pixelFormat),
 	    deviceQuirks.canWaitForSubmission);
 }
 
@@ -5495,6 +5553,7 @@ void
 	fbink_state->can_hw_invert           = deviceQuirks.canHWInvert;
 	fbink_state->has_eclipse_wfm         = deviceQuirks.hasEclipseWfm;
 	fbink_state->has_color_panel         = deviceQuirks.hasColorPanel;
+	fbink_state->pixel_format            = deviceQuirks.pixelFormat;
 	fbink_state->can_wait_for_submission = deviceQuirks.canWaitForSubmission;
 }
 
