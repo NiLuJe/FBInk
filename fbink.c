@@ -4092,6 +4092,15 @@ static __attribute__((cold)) void
 	if (deviceQuirks.hasColorPanel) {
 		// They all use a 24bpp RGB framebuffer, despite potentially reporting it as 8bpp...
 		vInfo.bits_per_pixel = 24U;
+		// Enforce RGB24
+		vInfo.red.offset     = 0U << 3U;
+		vInfo.red.length     = 8U;
+		vInfo.green.offset   = 1U << 3U;
+		vInfo.green.length   = 8U;
+		vInfo.blue.offset    = 2U << 3U;
+		vInfo.blue.length    = 8U;
+		vInfo.transp.offset  = 0U;
+		vInfo.transp.length  = 0U;
 	}
 
 	// In addition to the above, the first color device was extra quirky...
