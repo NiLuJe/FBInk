@@ -576,7 +576,7 @@ int
 #endif
 
 	// We'll want to confirm that a potential bitdepth switch took, as some drivers only support specific bitdepths.
-	// (e.g., except for the Clara 2E, MTK on Kobo no longer lets you switch to 8bpp...)
+	// (e.g., except for the Clara 2E, MTK on Kobo no longer lets you switch to 8bpp, even on B&W devices...)
 	uint32_t expected_bpp = new_vinfo.bits_per_pixel;
 
 	if (rota == KEEP_CURRENT_ROTATE) {
