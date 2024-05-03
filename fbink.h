@@ -651,7 +651,8 @@ typedef struct
 		short int bottom;    // Bottom margin in pixels (supports negative values, too)
 		short int left;      // Left margin in pixels (if negative, counts backwards from the right edge)
 		short int right;     // Right margin in pixels (supports negative values, too)
-	} margins;
+	} margins;    // Margins are to the top-left edge of the bounding box, e.g., assuming no alignment/centering,
+		      // zero margins will lead to a bounding box flush with the top-left corner of the screen.
 	FONT_STYLE_T       style;          // Default font style to use when !is_formatted (defaults to Regular)
 	float              size_pt;        // Size of text in points. If not set (0.0f), defaults to 12pt
 	unsigned short int size_px;        // Size of text in pixels. Optional, but takes precedence over size_pt.
