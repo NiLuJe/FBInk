@@ -1211,32 +1211,12 @@ static void
 // Public convenience wrapper around put/get pixels.
 // Performance is *not* a priority for these, avoid them if at all possible!
 void
-    fbink_put_pixel_rgba(unsigned short int x, unsigned short int y, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+    fbink_put_pixel_gray(uint16_t x, uint16_t y, uint8_t v)
 {
 #ifdef FBINK_WITH_DRAW
 	const FBInkCoordinates coords = { .x = x, .y = y };
-	FBInkPixel             px;
-	if (deviceQuirks.isRGB) {
-		px.rgba.color.r = r;
-		px.rgba.color.g = g;
-		px.rgba.color.b = b;
-		if (vInfo.bits_per_pixel == 32U) {
-			px.rgba.color.a = a;
-		} else {
-			px.rgba.color.a = 0xFFu;
-		}
-	} else {
-		px.bgra.color.r = r;
-		px.bgra.color.g = g;
-		px.bgra.color.b = b;
-		if (vInfo.bits_per_pixel == 32U) {
-			px.bgra.color.a = a;
-		} else {
-			px.bgra.color.a = 0xFFu;
-		}
-	}
-
-	put_pixel(coords, &px, false);
+	FBInkPixel             px     = pack_pixel_from_y8(v);
+	put_pixel(coords, &px, true);
 #else
 	WARN("Drawing primitives are disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
@@ -1244,13 +1224,27 @@ void
 }
 
 void
-    fbink_get_pixel(unsigned short int x, unsigned short int y, uint8_t* r, uint8_t* g, uint8_t* b, uint8_t* a)
+    fbink_put_pixel_rgba(uint16_t x, uint16_t y, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+{
+#ifdef FBINK_WITH_DRAW
+	const FBInkCoordinates coords = { .x = x, .y = y };
+	FBInkPixel             px     = pack_pixel_from_rgba(r, g, b, a);
+	put_pixel(coords, &px, true);
+#else
+	WARN("Drawing primitives are disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif
+}
+
+void
+    fbink_get_pixel(uint16_t x, uint16_t y, uint8_t* r, uint8_t* g, uint8_t* b, uint8_t* a)
 {
 #ifdef FBINK_WITH_DRAW
 	const FBInkCoordinates coords = { .x = x, .y = y };
 	FBInkPixel             px;
 	get_pixel(coords, &px);
 
+	// Unpack the pixel for public consumption
 	if (deviceQuirks.pixelFormat == FBINK_PXFMT_Y4 || deviceQuirks.pixelFormat == FBINK_PXFMT_Y8) {
 		*r = px.gray8;
 		*g = px.gray8;

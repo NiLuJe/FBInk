@@ -1505,19 +1505,27 @@ FBINK_API int fbink_fill_rect_rgba(int fbfd,
 				   uint8_t b,
 				   uint8_t a) __attribute__((nonnull(2)));
 
+// Convenience public wrappers for a per-pixel put/get.
+// These are designed with *convenience* in mind, *not* performance.
+// I'd highly recommend handling drawing yourself if you can ;).
 // Returns -(ENOSYS) when drawing primitives are disabled (MINIMAL build w/o DRAW).
-FBINK_API void fbink_put_pixel_rgba(unsigned short int x,
-				    unsigned short int y,
-				    uint8_t            r,
-				    uint8_t            g,
-				    uint8_t            b,
-				    uint8_t            a);
-FBINK_API void fbink_get_pixel(unsigned short int x,
-			       unsigned short int y,
-			       uint8_t*           r,
-			       uint8_t*           g,
-			       uint8_t*           b,
-			       uint8_t*           a);
+// x:                   x coordinates
+// y:                   y coordinates
+// v:			8-bit luminance value
+FBINK_API void fbink_put_pixel_gray(uint16_t x, uint16_t y, uint8_t v);
+// r:			8-bit red component value
+// g:			8-bit green component value
+// b:			8-bit blue component value
+// a:			8-bit alpha component value (opaque is 0xFFu).
+FBINK_API void fbink_put_pixel_rgba(uint16_t x, uint16_t y, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+// *r:			out pointer, 8-bit red component value
+// *g:			out pointer, 8-bit green component value
+// *b:			out pointer, 8-bit blue component value
+// *a:			out pointer, 8-bit alpha component value (opaque is 0xFFu).
+// NOTE: If pixelformat is grayscale, r = g = b and a = 0xFF
+// NOTE: Red always means red, if there's a BGR swap involved, it's handled for you.
+//       Similarly, BGR565/RBG565 is unpacked to RGB32.
+FBINK_API void fbink_get_pixel(uint16_t x, uint16_t y, uint8_t* r, uint8_t* g, uint8_t* b, uint8_t* a);
 
 // Forcefully wakeup the EPDC (Kobo Mk.8+ only)
 // We've found this to be helpful on a few otherwise crashy devices,
