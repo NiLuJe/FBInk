@@ -5140,6 +5140,7 @@ static __attribute__((cold)) int
 		case 16U:
 			if (vInfo.red.offset == 0U) {
 				deviceQuirks.pixelFormat = FBINK_PXFMT_RGB565;
+				deviceQuirks.isRGB       = true;
 			} else {
 				deviceQuirks.pixelFormat = FBINK_PXFMT_BGR565;
 			}
@@ -5147,6 +5148,7 @@ static __attribute__((cold)) int
 		case 24U:
 			if (vInfo.red.offset == 0U) {
 				deviceQuirks.pixelFormat = FBINK_PXFMT_RGB24;
+				deviceQuirks.isRGB       = true;
 			} else {
 				deviceQuirks.pixelFormat = FBINK_PXFMT_BGR24;
 			}
@@ -5155,12 +5157,14 @@ static __attribute__((cold)) int
 			if (vInfo.transp.length == 0U) {
 				if (vInfo.red.offset == 0U) {
 					deviceQuirks.pixelFormat = FBINK_PXFMT_RGB32;
+					deviceQuirks.isRGB       = true;
 				} else {
 					deviceQuirks.pixelFormat = FBINK_PXFMT_BGR32;
 				}
 			} else {
 				if (vInfo.red.offset == 0U) {
 					deviceQuirks.pixelFormat = FBINK_PXFMT_RGBA;
+					deviceQuirks.isRGB       = true;
 				} else {
 					deviceQuirks.pixelFormat = FBINK_PXFMT_BGRA;
 				}
@@ -6243,7 +6247,6 @@ int
 #	pragma GCC diagnostic pop
 			size_t px_count = (size_t) vInfo.xres_virtual * vInfo.yres;
 			while (px_count--) {
-				// NOTE: Not actually accurate, but I don't care about RGB565 ;).
 				*p++ ^= 0xFFFFu;
 			}
 		} else if (vInfo.bits_per_pixel == 32U) {
@@ -6275,7 +6278,6 @@ int
 				size_t px_count = region.width;
 
 				while (px_count--) {
-					// NOTE: Not actually accurate, but I don't care about RGB565 ;).
 					*p++ ^= 0xFFFFu;
 				}
 			}
@@ -8275,12 +8277,27 @@ int
 							// AA, blend it using the coverage mask as alpha,
 							// and the underlying pixel as fg
 							get_pixel(paint_point, &fb_px);
-							pixel.bgra.color.r = (uint8_t) DIV255(
-							    (pmul_bg + ((fb_px.bgra.color.r - bgcolor) * lnPtr[k])));
-							pixel.bgra.color.g = (uint8_t) DIV255(
-							    (pmul_bg + ((fb_px.bgra.color.g - bgcolor) * lnPtr[k])));
-							pixel.bgra.color.b = (uint8_t) DIV255(
-							    (pmul_bg + ((fb_px.bgra.color.b - bgcolor) * lnPtr[k])));
+							if (unlikely(deviceQuirks.isRGB)) {
+								pixel.rgba.color.r = (uint8_t) DIV255(
+								    (pmul_bg +
+								     ((fb_px.rgba.color.r - bgcolor) * lnPtr[k])));
+								pixel.rgba.color.g = (uint8_t) DIV255(
+								    (pmul_bg +
+								     ((fb_px.rgba.color.g - bgcolor) * lnPtr[k])));
+								pixel.rgba.color.b = (uint8_t) DIV255(
+								    (pmul_bg +
+								     ((fb_px.rgba.color.b - bgcolor) * lnPtr[k])));
+							} else {
+								pixel.bgra.color.r = (uint8_t) DIV255(
+								    (pmul_bg +
+								     ((fb_px.bgra.color.r - bgcolor) * lnPtr[k])));
+								pixel.bgra.color.g = (uint8_t) DIV255(
+								    (pmul_bg +
+								     ((fb_px.bgra.color.g - bgcolor) * lnPtr[k])));
+								pixel.bgra.color.b = (uint8_t) DIV255(
+								    (pmul_bg +
+								     ((fb_px.bgra.color.b - bgcolor) * lnPtr[k])));
+							}
 							put_pixel(paint_point, &pixel, false);
 						}
 						paint_point.x++;
@@ -8322,18 +8339,33 @@ int
 							// and the underlying pixel as bg
 							// Without forgetting our foreground color trickery...
 							get_pixel(paint_point, &fb_px);
-							pixel.bgra.color.r = (uint8_t) DIV255(
-							    (MUL255(fb_px.bgra.color.r) +
-							     (((fb_px.bgra.color.r ^ 0xFF) - fb_px.bgra.color.r) *
-							      lnPtr[k])));
-							pixel.bgra.color.g = (uint8_t) DIV255(
-							    (MUL255(fb_px.bgra.color.g) +
-							     (((fb_px.bgra.color.g ^ 0xFF) - fb_px.bgra.color.g) *
-							      lnPtr[k])));
-							pixel.bgra.color.b = (uint8_t) DIV255(
-							    (MUL255(fb_px.bgra.color.b) +
-							     (((fb_px.bgra.color.b ^ 0xFF) - fb_px.bgra.color.b) *
-							      lnPtr[k])));
+							if (unlikely(deviceQuirks.isRGB)) {
+								pixel.rgba.color.r = (uint8_t) DIV255(
+								    (MUL255(fb_px.rgba.color.r) +
+								     (((fb_px.rgba.color.r ^ 0xFF) - fb_px.rgba.color.r) *
+								      lnPtr[k])));
+								pixel.rgba.color.g = (uint8_t) DIV255(
+								    (MUL255(fb_px.rgba.color.g) +
+								     (((fb_px.rgba.color.g ^ 0xFF) - fb_px.rgba.color.g) *
+								      lnPtr[k])));
+								pixel.rgba.color.b = (uint8_t) DIV255(
+								    (MUL255(fb_px.rgba.color.b) +
+								     (((fb_px.rgba.color.b ^ 0xFF) - fb_px.rgba.color.b) *
+								      lnPtr[k])));
+							} else {
+								pixel.bgra.color.r = (uint8_t) DIV255(
+								    (MUL255(fb_px.bgra.color.r) +
+								     (((fb_px.bgra.color.r ^ 0xFF) - fb_px.bgra.color.r) *
+								      lnPtr[k])));
+								pixel.bgra.color.g = (uint8_t) DIV255(
+								    (MUL255(fb_px.bgra.color.g) +
+								     (((fb_px.bgra.color.g ^ 0xFF) - fb_px.bgra.color.g) *
+								      lnPtr[k])));
+								pixel.bgra.color.b = (uint8_t) DIV255(
+								    (MUL255(fb_px.bgra.color.b) +
+								     (((fb_px.bgra.color.b ^ 0xFF) - fb_px.bgra.color.b) *
+								      lnPtr[k])));
+							}
 							put_pixel(paint_point, &pixel, false);
 						}
 						paint_point.x++;
@@ -8373,15 +8405,27 @@ int
 							// AA, blend it using the coverage mask as alpha,
 							// and the underlying pixel as bg
 							get_pixel(paint_point, &fb_px);
-							pixel.bgra.color.r = (uint8_t) DIV255(
-							    (MUL255(fb_px.bgra.color.r) +
-							     ((fgcolor - fb_px.bgra.color.r) * lnPtr[k])));
-							pixel.bgra.color.g = (uint8_t) DIV255(
-							    (MUL255(fb_px.bgra.color.g) +
-							     ((fgcolor - fb_px.bgra.color.g) * lnPtr[k])));
-							pixel.bgra.color.b = (uint8_t) DIV255(
-							    (MUL255(fb_px.bgra.color.b) +
-							     ((fgcolor - fb_px.bgra.color.b) * lnPtr[k])));
+							if (unlikely(deviceQuirks.isRGB)) {
+								pixel.rgba.color.r = (uint8_t) DIV255(
+								    (MUL255(fb_px.rgba.color.r) +
+								     ((fgcolor - fb_px.rgba.color.r) * lnPtr[k])));
+								pixel.rgba.color.g = (uint8_t) DIV255(
+								    (MUL255(fb_px.rgba.color.g) +
+								     ((fgcolor - fb_px.rgba.color.g) * lnPtr[k])));
+								pixel.rgba.color.b = (uint8_t) DIV255(
+								    (MUL255(fb_px.rgba.color.b) +
+								     ((fgcolor - fb_px.rgba.color.b) * lnPtr[k])));
+							} else {
+								pixel.bgra.color.r = (uint8_t) DIV255(
+								    (MUL255(fb_px.bgra.color.r) +
+								     ((fgcolor - fb_px.bgra.color.r) * lnPtr[k])));
+								pixel.bgra.color.g = (uint8_t) DIV255(
+								    (MUL255(fb_px.bgra.color.g) +
+								     ((fgcolor - fb_px.bgra.color.g) * lnPtr[k])));
+								pixel.bgra.color.b = (uint8_t) DIV255(
+								    (MUL255(fb_px.bgra.color.b) +
+								     ((fgcolor - fb_px.bgra.color.b) * lnPtr[k])));
+							}
 							put_pixel(paint_point, &pixel, false);
 						}
 						paint_point.x++;

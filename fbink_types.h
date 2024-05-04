@@ -64,7 +64,8 @@ typedef struct
 	bool                canWaitForSubmission;
 	bool                hasColorPanel;
 	FBINK_PXFMT_INDEX_T pixelFormat;
-	bool                skipId;
+	bool isRGB;    // i.e., RGB565, RGB24, RGBA or RGB32. Allows us to simplify internal checks for RGB order.
+	bool skipId;
 } FBInkDeviceQuirks;
 
 // An (x, y) coordinates tuple
