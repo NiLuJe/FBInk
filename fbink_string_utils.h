@@ -53,6 +53,7 @@ static ssize_t
 }
 
 // Based on Linux's strscpy_pad
+// NOTE: We don't actually have a use for it right now, but I like it and my brain is a sieve, so, in it goes.
 /*
 static ssize_t
     strtcpy_pad(char* restrict dst, const char* restrict src, size_t dsize)
