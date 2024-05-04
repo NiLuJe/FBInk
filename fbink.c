@@ -10501,33 +10501,6 @@ static int
 	    fbink_cfg->col,
 	    fbink_cfg->row);
 
-	bool       fb_is_grayscale = false;
-	bool       fb_is_legacy    = false;
-	bool       fb_is_24bpp     = false;
-	bool       fb_is_true_bgr  = false;
-	bool       img_has_alpha   = false;
-	FBInkPixel pixel           = { 0U };
-	// Use boolean flags to make the mess of branching slightly more human-readable later...
-	switch (vInfo.bits_per_pixel) {
-		case 4U:
-			fb_is_grayscale = true;
-			fb_is_legacy    = true;
-			break;
-		case 8U:
-			fb_is_grayscale = true;
-			break;
-		case 16U:
-			break;
-		case 24U:
-			fb_is_24bpp    = true;
-			fb_is_true_bgr = true;
-			break;
-		case 32U:
-		default:
-			fb_is_true_bgr = true;
-			break;
-	}
-
 	// Handle horizontal alignment...
 	switch (fbink_cfg->halign) {
 		case CENTER:
@@ -10623,6 +10596,7 @@ static int
 	//       because we know that when we had to add an alpha layer for compatibility with the framebuffer
 	//       pixel format (i.e., a 24bpp RGB image to a 32bpp RGBA fb), it's actually fully opaque,
 	//       so we don't actually care about that component, it's just essentially padding for addressing purposes.
+	bool img_has_alpha   = false;
 	if (n == 2 || n == 4) {
 		img_has_alpha = true;
 		if (fbink_cfg->ignore_alpha) {
@@ -10652,10 +10626,11 @@ static int
 	//       and make use of a few different blitting tweaks depending on the situation...
 	//       And since we can easily do so from here,
 	//       we also entirely avoid trying to plot off-screen pixels (on any sides).
-	if (likely(fb_is_grayscale)) {
+	FBInkPixel pixel           = { 0U };
+	if (deviceQuirks.pixelFormat == FBINK_PXFMT_Y4 || likely(deviceQuirks.pixelFormat == FBINK_PXFMT_Y8)) {
 		// 4bpp & 8bpp
 		if (!fbink_cfg->ignore_alpha && img_has_alpha) {
-			if (likely(!fb_is_legacy)) {
+			if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_Y8)) {
 				// 8bpp
 				// There's an alpha channel in the image, we'll have to do alpha blending...
 				// c.f., https://en.wikipedia.org/wiki/Alpha_compositing
@@ -10768,7 +10743,7 @@ static int
 			// No alpha in image, or ignored
 			// We can do a simple copy if the target is 8bpp, the source is 8bpp (no alpha), we don't invert,
 			// and we don't dither.
-			if (!fb_is_legacy && req_n == 1 && invert == 0U && !fbink_cfg->sw_dithering) {
+			if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_Y8) && req_n == 1 && invert == 0U && !fbink_cfg->sw_dithering) {
 				// Scanline by scanline, as we usually have input/output x offsets to honor
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					// NOTE: Again, assume the fb origin is @ (0, 0), which should hold true at that bitdepth.
@@ -10796,7 +10771,7 @@ static int
 						// NOTE: Again, use the pixel functions directly, to skip redundant OOB checks,
 						//       as well as unneeded rotation checks (can't happen at this bpp).
 						// NOTE: GCC appears to be smart enough to hoist that branch out of the loop ;).
-						if (!fb_is_legacy) {
+						if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_Y8)) {
 #	ifdef FBINK_FOR_POCKETBOOK
 							(*fxpRotateCoords)(&coords);
 #	endif
@@ -10808,16 +10783,16 @@ static int
 				}
 			}
 		}
-	} else if (likely(fb_is_true_bgr)) {
+	} else if (unlikely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR24) || unlikely(deviceQuirks.pixelFormat == FBINK_PXFMT_RGB24) || likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGRA) || deviceQuirks.pixelFormat == FBINK_PXFMT_RGBA || likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR32) || deviceQuirks.pixelFormat == FBINK_PXFMT_RGB32) {
 		// 24bpp & 32bpp
 		if (!fbink_cfg->ignore_alpha && img_has_alpha) {
 			FBInkPixelRGBA img_px;
-			if (likely(!fb_is_24bpp)) {
+			if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGRA) || deviceQuirks.pixelFormat == FBINK_PXFMT_RGBA || likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR32) || deviceQuirks.pixelFormat == FBINK_PXFMT_RGB32) {
 				// 32bpp
-				FBInkPixelBGRA fb_px;
+				FBInkPixel fb_px;
 				// This is essentially a constant in our case... (c.f., put_pixel_RGB32)
 				// cppcheck-suppress unreadVariable ; false-positive (union)
-				fb_px.color.a = 0xFFu;
+				fb_px.bgra.color.a = 0xFFu;
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// NOTE: We should be able to skip rotation hacks at this bpp...
@@ -10840,14 +10815,28 @@ static int
 							img_px.p ^= invert_rgb;
 							// And software dithering... Not a fan of the extra branching,
 							// but that's probably the best we can do.
-							if (fbink_cfg->sw_dithering) {
-								fb_px.color.r = dither_o8x8(i, j, img_px.color.r);
-								fb_px.color.g = dither_o8x8(i, j, img_px.color.g);
-								fb_px.color.b = dither_o8x8(i, j, img_px.color.b);
+							// Hopefully the RGB vs. BGR branching will be hoisted up by the compiler...
+							// NOTE: This is why we use the full explicit list instead of isRGB: it matches the outer if.
+							if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGRA) || likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR32)) {
+								if (fbink_cfg->sw_dithering) {
+									fb_px.bgra.color.r = dither_o8x8(i, j, img_px.color.r);
+									fb_px.bgra.color.g = dither_o8x8(i, j, img_px.color.g);
+									fb_px.bgra.color.b = dither_o8x8(i, j, img_px.color.b);
+								} else {
+									fb_px.bgra.color.r = img_px.color.r;
+									fb_px.bgra.color.g = img_px.color.g;
+									fb_px.bgra.color.b = img_px.color.b;
+								}
 							} else {
-								fb_px.color.r = img_px.color.r;
-								fb_px.color.g = img_px.color.g;
-								fb_px.color.b = img_px.color.b;
+								if (fbink_cfg->sw_dithering) {
+									fb_px.rgba.color.r = dither_o8x8(i, j, img_px.color.r);
+									fb_px.rgba.color.g = dither_o8x8(i, j, img_px.color.g);
+									fb_px.rgba.color.b = dither_o8x8(i, j, img_px.color.b);
+								} else {
+									fb_px.rgba.color.r = img_px.color.r;
+									fb_px.rgba.color.g = img_px.color.g;
+									fb_px.rgba.color.b = img_px.color.b;
+								}
 							}
 
 							const size_t fb_scanline_offset =
@@ -10868,7 +10857,7 @@ static int
 							const size_t fb_scanline_offset =
 							    (uint32_t) ((unsigned short int) (j + y_off) *
 									fInfo.line_length);
-							FBInkPixelBGRA bg_px;
+							FBInkPixel bg_px;
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 							// Again, read the full pixel from the framebuffer (all 4 bytes)
@@ -10879,18 +10868,33 @@ static int
 							// Don't forget to honor inversion
 							// cppcheck-suppress unreadVariable ; false-positive (union)
 							img_px.p     ^= invert_rgb;
-							// Blend it, we get our BGR swap in the process ;).
-							fb_px.color.r = (uint8_t) DIV255(
-							    ((img_px.color.r * img_px.color.a) + (bg_px.color.r * ainv)));
-							fb_px.color.g = (uint8_t) DIV255(
-							    ((img_px.color.g * img_px.color.a) + (bg_px.color.g * ainv)));
-							fb_px.color.b = (uint8_t) DIV255(
-							    ((img_px.color.b * img_px.color.a) + (bg_px.color.b * ainv)));
-							// SW dithering
-							if (fbink_cfg->sw_dithering) {
-								fb_px.color.r = dither_o8x8(i, j, fb_px.color.r);
-								fb_px.color.g = dither_o8x8(i, j, fb_px.color.g);
-								fb_px.color.b = dither_o8x8(i, j, fb_px.color.b);
+							// Blend it, honoring pixel order (BGR vs. RGB) in the process ;).
+							if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGRA) || likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR32)) {
+								fb_px.bgra.color.r = (uint8_t) DIV255(
+								((img_px.color.r * img_px.color.a) + (bg_px.bgra.color.r * ainv)));
+								fb_px.bgra.color.g = (uint8_t) DIV255(
+								((img_px.color.g * img_px.color.a) + (bg_px.bgra.color.g * ainv)));
+								fb_px.bgra.color.b = (uint8_t) DIV255(
+								((img_px.color.b * img_px.color.a) + (bg_px.bgra.color.b * ainv)));
+								// SW dithering
+								if (fbink_cfg->sw_dithering) {
+									fb_px.bgra.color.r = dither_o8x8(i, j, fb_px.bgra.color.r);
+									fb_px.bgra.color.g = dither_o8x8(i, j, fb_px.bgra.color.g);
+									fb_px.bgra.color.b = dither_o8x8(i, j, fb_px.bgra.color.b);
+								}
+							} else {
+								fb_px.rgba.color.r = (uint8_t) DIV255(
+								((img_px.color.r * img_px.color.a) + (bg_px.rgba.color.r * ainv)));
+								fb_px.rgba.color.g = (uint8_t) DIV255(
+								((img_px.color.g * img_px.color.a) + (bg_px.rgba.color.g * ainv)));
+								fb_px.rgba.color.b = (uint8_t) DIV255(
+								((img_px.color.b * img_px.color.a) + (bg_px.rgba.color.b * ainv)));
+								// SW dithering
+								if (fbink_cfg->sw_dithering) {
+									fb_px.rgba.color.r = dither_o8x8(i, j, fb_px.rgba.color.r);
+									fb_px.rgba.color.g = dither_o8x8(i, j, fb_px.rgba.color.g);
+									fb_px.rgba.color.b = dither_o8x8(i, j, fb_px.rgba.color.b);
+								}
 							}
 
 #	pragma GCC diagnostic push
