@@ -826,7 +826,6 @@ static void
 			break;
 		case DEVICE_KOBO_NIA:    // Nia (luna)
 			deviceQuirks.isKoboMk7         = true;
-			// NOTE: ntxBootRota & ntxRotaQuirk TBD! Let's assume it's Clara-ish for now.
 			// The board is similar to the Libra 2, so assume it suffers from the same quirks.
 			deviceQuirks.unreliableWaitFor = true;
 			deviceQuirks.screenDPI         = 212U;
