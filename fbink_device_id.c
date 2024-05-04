@@ -935,9 +935,12 @@ static void
 			// but the touch-screen appears to behave similary, and its native orientation is also CW.
 			// (Unlike on Mk.7+ mxcfb, hwtcon_fb_check_var doesn't do any kind of rotate trickery,
 			// so KOBO_HWCFG_DisplayBusWidth doesn't affect our rota quirks).
-			// TBD: Confirm all that with actual bootup logs, but this should at least behave in Nickel,
-			//      as the mapping seems identical to a Libra 2...
-			// Both pickel & nickel then jump to FB_ROTATE_CW...
+			// NOTE: I'm assuming it behaves like later MTK devices,
+			//       and is actually *always* at CW (pickel & nickel certainly are),
+			//       but since, unlike its later brethren, this device *can* switch bitdepth,
+			//       that might actually differ...
+			//       In any case, for our purposes, that works out well enough.
+			//       (c.f., the Libra Colour comment around its onw ntxBootRota assignment)
 			deviceQuirks.ntxBootRota                = FB_ROTATE_UR;
 			deviceQuirks.canRotate                  = true;
 			// Canonical -> native rotation mapping: { UR: 1, CW: 0, UD: 3, CCW: 2 }
