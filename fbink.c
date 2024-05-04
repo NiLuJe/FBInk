@@ -2926,6 +2926,8 @@ static int
 	}
 	if (waveform_mode == EINK_A2_MODE) {
 		// NOTE: Unlike on mxcfb, this isn't HW assisted, this just uses the "simple" Y8->Y1 dither algorithm...
+		// NOTE: That might be a strike against it when used for pen mode, jury's still out on that front...
+		//       (FWIW, MTK *does* do something similar for its own A2 pen mode... but it's HW-assisted by the MDP there).
 		update.update_mode |= EINK_MONOCHROME;
 	}
 	if (fbink_cfg->no_merge) {

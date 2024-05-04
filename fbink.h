@@ -1522,7 +1522,6 @@ FBINK_API int fbink_wakeup_epdc(void);
 // Toggle the "pen" refresh mode. c.f., eink/sunxi-kobo.h @ DISP_EINK_SET_NTX_HANDWRITE_ONOFF for more details.
 // The TL;DR being that it's only truly active when using A2 & DU waveform modes.
 // And since, on sunxi, A2's MONOCHROME flag is just *software* dithering, you might actually prefer DU.
-// (And/or we ought to just get rid of EINK_MONOCHROME on this platform, TBD ;)).
 // Returns -(ENOSYS) on unsupported platforms.
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
