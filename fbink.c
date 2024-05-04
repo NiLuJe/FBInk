@@ -451,7 +451,8 @@ static void
 		// On *some* devices with a 6.8" panel, *every* orientation is inverted...
 		rotation ^= 2U;
 	} else if (deviceQuirks.ntxRotaQuirk == NTX_ROTA_SANE) {
-		// TODO: This is for the Libra, double-check that it holds up...
+		// NOTE: This is for the Libra, but I don't have access to that device to double-check...
+		//       And I probably never will, see the deprecation comment above this function ;).
 		// The reasoning being to try to match the Forma's behavior:
 		// UR -> 3 ^ 2 -> CW / CW -> 2 -> UD / UD -> 1 ^ 2 -> CCW / CCW -> 0 -> UR
 		// The format being: *effective* orientation (i.e., user-facing) -> actual fb rotate value -> input transform
