@@ -590,6 +590,8 @@ static inline __attribute__((always_inline, hot)) void put_pixel_Gray4(const FBI
 								       const FBInkPixel* restrict);
 static inline __attribute__((always_inline, hot)) void put_pixel_Gray8(const FBInkCoordinates* restrict,
 								       const FBInkPixel* restrict);
+static inline __attribute__((always_inline)) void      put_pixel_BGR24(const FBInkCoordinates* restrict,
+								       const FBInkPixel* restrict);
 static inline __attribute__((always_inline)) void      put_pixel_RGB24(const FBInkCoordinates* restrict,
 								       const FBInkPixel* restrict);
 static inline __attribute__((always_inline, hot)) void put_pixel_RGB32(const FBInkCoordinates* restrict,
