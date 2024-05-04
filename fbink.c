@@ -6283,8 +6283,8 @@ int
 			}
 		} else if (unlikely(vInfo.bits_per_pixel == 4U)) {
 			// I don't particularly care about doing this in a smarter way either...
-			for (unsigned short int cy = 0U; cy < region.height; cy++) {
-				for (unsigned short int cx = 0U; cx < region.width; cx++) {
+			for (uint32_t cy = 0U; cy < region.height; cy++) {
+				for (uint32_t cx = 0U; cx < region.width; cx++) {
 					const FBInkCoordinates coords = {
 						.x = (unsigned short int) (region.left + cx),
 						.y = (unsigned short int) (region.top + cy),
