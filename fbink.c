@@ -3828,10 +3828,10 @@ static __attribute__((cold)) const char*
 			return "Y4";
 		case FBINK_PXFMT_Y8:
 			return "Y8";
-		case FBINK_PXFMT_RGB565:
-			return "RGB565";
 		case FBINK_PXFMT_BGR565:
 			return "BGR565";
+		case FBINK_PXFMT_RGB565:
+			return "RGB565";
 		case FBINK_PXFMT_BGR24:
 			return "BGR24";
 		case FBINK_PXFMT_RGB24:
@@ -5190,24 +5190,34 @@ static __attribute__((cold)) int
 			fxpFillRect        = &fill_rect_Gray8;
 			fxpFillRectChecked = &fill_rect_Gray8_checked;
 			break;
-		case FBINK_PXFMT_RGB565:
 		case FBINK_PXFMT_BGR565:
+			//fxpPutPixel = &put_pixel_RGB565;
+			fxpGetPixel        = &get_pixel_BGR565;
+			fxpFillRect        = &fill_rect_RGB565;
+			fxpFillRectChecked = &fill_rect_RGB565_checked;
+			break;
+		case FBINK_PXFMT_RGB565:
 			//fxpPutPixel = &put_pixel_RGB565;
 			fxpGetPixel        = &get_pixel_RGB565;
 			fxpFillRect        = &fill_rect_RGB565;
 			fxpFillRectChecked = &fill_rect_RGB565_checked;
 			break;
-		case FBINK_PXFMT_RGB24:
 		case FBINK_PXFMT_BGR24:
+			//fxpPutPixel = &put_pixel_BGR24;
+			fxpGetPixel        = &get_pixel_BGR24;
+			fxpFillRect        = &fill_rect_RGB24;
+			fxpFillRectChecked = &fill_rect_RGB24_checked;
+			break;
+		case FBINK_PXFMT_RGB24:
 			//fxpPutPixel = &put_pixel_RGB24;
 			fxpGetPixel        = &get_pixel_RGB24;
 			fxpFillRect        = &fill_rect_RGB24;
 			fxpFillRectChecked = &fill_rect_RGB24_checked;
 			break;
-		case FBINK_PXFMT_RGB32:
-		case FBINK_PXFMT_BGR32:
-		case FBINK_PXFMT_RGBA:
 		case FBINK_PXFMT_BGRA:
+		case FBINK_PXFMT_RGBA:
+		case FBINK_PXFMT_BGR32:
+		case FBINK_PXFMT_RGB32:
 			//fxpPutPixel = &put_pixel_RGB32;
 			fxpGetPixel        = &get_pixel_RGB32;
 			fxpFillRect        = &fill_rect_RGB32;
