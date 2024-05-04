@@ -10848,9 +10848,8 @@ static int
 									fb_px.rgba.color.b =
 									    dither_o8x8(i, j, img_px.color.b);
 								} else {
-									fb_px.rgba.color.r = img_px.color.r;
-									fb_px.rgba.color.g = img_px.color.g;
-									fb_px.rgba.color.b = img_px.color.b;
+									// Same pixel order
+									fb_px.p = img_px.p;
 								}
 							}
 
@@ -10981,9 +10980,8 @@ static int
 									fb_px.rgb.color.b =
 									    dither_o8x8(i, j, img_px.color.b);
 								} else {
-									fb_px.rgb.color.r = img_px.color.r;
-									fb_px.rgb.color.g = img_px.color.g;
-									fb_px.rgb.color.b = img_px.color.b;
+									// Same pixel order
+									fb_px.p = img_px.p;
 								}
 							}
 
@@ -11111,7 +11109,7 @@ static int
 								// cppcheck-suppress unreadVariable ; false-positive (union)
 								fb_px.rgba.color.b = dither_o8x8(i, j, img_px.color.b);
 							} else {
-								// Same pixel order (RGB)
+								// Same pixel order
 								fb_px.p = img_px.p;
 							}
 						}
@@ -11157,7 +11155,7 @@ static int
 								fb_px.rgb.color.g = dither_o8x8(i, j, img_px.color.g);
 								fb_px.rgb.color.b = dither_o8x8(i, j, img_px.color.b);
 							} else {
-								// Same pixel order (RGB)
+								// Same pixel order
 								fb_px.rgb24 = img_px.p;
 							}
 						}
