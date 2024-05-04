@@ -591,12 +591,10 @@ static inline __attribute__((always_inline, hot)) void
 #	pragma GCC diagnostic pop
 			put_pixel_RGB565(&coords, &packed_px);
 		}
-	} else if (unlikely(vInfo.bits_per_pixel == 24U)) {
-		if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR24)) {
-			put_pixel_BGR24(&coords, px);
-		} else {
-			put_pixel_RGB24(&coords, px);
-		}
+	} else if (unlikely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR24)) {
+		put_pixel_BGR24(&coords, px);
+	} else if (unlikely(deviceQuirks.pixelFormat == FBINK_PXFMT_RGB24)) {
+		put_pixel_RGB24(&coords, px);
 	} else if (likely(vInfo.bits_per_pixel == 32U)) {
 		put_pixel_RGB32(&coords, px);
 	}
