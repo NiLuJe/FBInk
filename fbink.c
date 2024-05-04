@@ -1210,6 +1210,7 @@ static void
 
 // Public convenience wrappers around our internal put/get pixel functions.
 // Performance is *not* a priority for these, avoid them if at all possible!
+// (The main overhead lies in the packing/unpacking of pixels, because our internal pixel data type is... fairly gnarly).
 int
     fbink_put_pixel_gray(uint16_t x UNUSED_BY_NODRAW, uint16_t y UNUSED_BY_NODRAW, uint8_t v UNUSED_BY_NODRAW)
 {
