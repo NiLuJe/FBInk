@@ -11146,17 +11146,21 @@ static int
 						img_px.p ^= invert_32b;
 						// SW dithering
 						if (fbink_cfg->sw_dithering) {
-							pixel.bgra.color.r = dither_o8x8(i, j, img_px.color.r);
-							pixel.bgra.color.g = dither_o8x8(i, j, img_px.color.g);
-							pixel.bgra.color.b = dither_o8x8(i, j, img_px.color.b);
+							pixel.rgba.color.r = dither_o8x8(i, j, img_px.color.r);
+							pixel.rgba.color.g = dither_o8x8(i, j, img_px.color.g);
+							pixel.rgba.color.b = dither_o8x8(i, j, img_px.color.b);
 						} else {
-							pixel.bgra.color.r = img_px.color.r;
-							pixel.bgra.color.g = img_px.color.g;
-							pixel.bgra.color.b = img_px.color.b;
+							// Same pixel order
+							pixel.p = img_px.p;
 						}
-						// Pack it
-						pixel.rgb565 = pack_rgb565(
-						    pixel.bgra.color.r, pixel.bgra.color.g, pixel.bgra.color.b);
+						// Pack it in the right pixel order
+						if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR565)) {
+							pixel.rgb565 = pack_bgr565(
+							pixel.rgba.color.r, pixel.rgba.color.g, pixel.rgba.color.b);
+						} else {
+							pixel.rgb565 = pack_rgb565(
+							pixel.rgba.color.r, pixel.rgba.color.g, pixel.rgba.color.b);
+						}
 
 						coords.x = (unsigned short int) (i + x_off);
 						coords.y = (unsigned short int) (j + y_off);
@@ -11167,31 +11171,54 @@ static int
 					} else {
 						// Alpha blending...
 						const uint8_t ainv = img_px.color.a ^ 0xFFu;
+						// Don't forget to honor inversion
+						img_px.p          ^= invert_32b;
 
 						coords.x = (unsigned short int) (i + x_off);
 						coords.y = (unsigned short int) (j + y_off);
 						(*fxpRotateCoords)(&coords);
 						FBInkPixel bg_px;
-						get_pixel_RGB565(&coords, &bg_px);
 
-						// Don't forget to honor inversion
-						img_px.p          ^= invert_32b;
-						// Blend it, we get our BGR swap in the process ;).
-						pixel.bgra.color.r = (uint8_t) DIV255(
-						    ((img_px.color.r * img_px.color.a) + (bg_px.bgra.color.r * ainv)));
-						pixel.bgra.color.g = (uint8_t) DIV255(
-						    ((img_px.color.g * img_px.color.a) + (bg_px.bgra.color.g * ainv)));
-						pixel.bgra.color.b = (uint8_t) DIV255(
-						    ((img_px.color.b * img_px.color.a) + (bg_px.bgra.color.b * ainv)));
-						// SW dithering
-						if (fbink_cfg->sw_dithering) {
-							pixel.bgra.color.r = dither_o8x8(i, j, pixel.bgra.color.r);
-							pixel.bgra.color.g = dither_o8x8(i, j, pixel.bgra.color.g);
-							pixel.bgra.color.b = dither_o8x8(i, j, pixel.bgra.color.b);
+						// Deal with pixel order
+						if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR565)) {
+							get_pixel_BGR565(&coords, &bg_px);
+
+							// Blend it ;).
+							pixel.bgra.color.r = (uint8_t) DIV255(
+							((img_px.color.r * img_px.color.a) + (bg_px.bgra.color.r * ainv)));
+							pixel.bgra.color.g = (uint8_t) DIV255(
+							((img_px.color.g * img_px.color.a) + (bg_px.bgra.color.g * ainv)));
+							pixel.bgra.color.b = (uint8_t) DIV255(
+							((img_px.color.b * img_px.color.a) + (bg_px.bgra.color.b * ainv)));
+							// SW dithering
+							if (fbink_cfg->sw_dithering) {
+								pixel.bgra.color.r = dither_o8x8(i, j, pixel.bgra.color.r);
+								pixel.bgra.color.g = dither_o8x8(i, j, pixel.bgra.color.g);
+								pixel.bgra.color.b = dither_o8x8(i, j, pixel.bgra.color.b);
+							}
+							// Pack it
+							pixel.rgb565 = pack_bgr565(
+							pixel.bgra.color.r, pixel.bgra.color.g, pixel.bgra.color.b);
+						} else {
+							get_pixel_RGB565(&coords, &bg_px);
+
+							// Blend it ;).
+							pixel.rgba.color.r = (uint8_t) DIV255(
+							((img_px.color.r * img_px.color.a) + (bg_px.rgba.color.r * ainv)));
+							pixel.rgba.color.g = (uint8_t) DIV255(
+							((img_px.color.g * img_px.color.a) + (bg_px.rgba.color.g * ainv)));
+							pixel.rgba.color.b = (uint8_t) DIV255(
+							((img_px.color.b * img_px.color.a) + (bg_px.rgba.color.b * ainv)));
+							// SW dithering
+							if (fbink_cfg->sw_dithering) {
+								pixel.rgba.color.r = dither_o8x8(i, j, pixel.rgba.color.r);
+								pixel.rgba.color.g = dither_o8x8(i, j, pixel.rgba.color.g);
+								pixel.rgba.color.b = dither_o8x8(i, j, pixel.rgba.color.b);
+							}
+							// Pack it
+							pixel.rgb565 = pack_rgb565(
+							pixel.rgba.color.r, pixel.rgba.color.g, pixel.rgba.color.b);
 						}
-						// Pack it
-						pixel.rgb565 = pack_rgb565(
-						    pixel.bgra.color.r, pixel.bgra.color.g, pixel.bgra.color.b);
 
 						put_pixel_RGB565(&coords, &pixel);
 					}
@@ -11206,17 +11233,22 @@ static int
 					const size_t pix_offset = (size_t) ((j * req_n * w) + (i * req_n));
 					// SW dithering
 					if (fbink_cfg->sw_dithering) {
-						pixel.bgra.color.r = dither_o8x8(i, j, data[pix_offset + 0U] ^ invert);
-						pixel.bgra.color.g = dither_o8x8(i, j, data[pix_offset + 1U] ^ invert);
-						pixel.bgra.color.b = dither_o8x8(i, j, data[pix_offset + 2U] ^ invert);
+						pixel.rgba.color.r = dither_o8x8(i, j, data[pix_offset + 0U] ^ invert);
+						pixel.rgba.color.g = dither_o8x8(i, j, data[pix_offset + 1U] ^ invert);
+						pixel.rgba.color.b = dither_o8x8(i, j, data[pix_offset + 2U] ^ invert);
 					} else {
-						pixel.bgra.color.r = data[pix_offset + 0U] ^ invert;
-						pixel.bgra.color.g = data[pix_offset + 1U] ^ invert;
-						pixel.bgra.color.b = data[pix_offset + 2U] ^ invert;
+						pixel.rgba.color.r = data[pix_offset + 0U] ^ invert;
+						pixel.rgba.color.g = data[pix_offset + 1U] ^ invert;
+						pixel.rgba.color.b = data[pix_offset + 2U] ^ invert;
 					}
-					// Pack it
-					pixel.rgb565 =
-					    pack_rgb565(pixel.bgra.color.r, pixel.bgra.color.g, pixel.bgra.color.b);
+					// Pack it in the right pixel order
+					if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR565)) {
+						pixel.rgb565 = pack_bgr565(
+						pixel.rgba.color.r, pixel.rgba.color.g, pixel.rgba.color.b);
+					} else {
+						pixel.rgb565 = pack_rgb565(
+						pixel.rgba.color.r, pixel.rgba.color.g, pixel.rgba.color.b);
+					}
 
 					FBInkCoordinates coords;
 					coords.x = (unsigned short int) (i + x_off);
