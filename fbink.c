@@ -172,6 +172,7 @@ static inline __attribute__((const, always_inline, hot)) uint16_t
 	return (uint16_t) (((b >> 3U) << 11U) | ((g >> 2U) << 5U) | (r >> 3U));
 }
 
+#	ifdef FBINK_WITH_DRAW
 // Pack an FBInkPixel accordingly for the target pixel format
 static __attribute__((pure)) FBInkPixel
     pack_pixel_from_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
@@ -238,6 +239,7 @@ static __attribute__((pure)) FBInkPixel
 
 	return px;
 }
+#	endif    // FBINK_WITH_DRAW
 
 // Helper functions to 'plot' a specific pixel in a given color to the framebuffer
 static inline __attribute__((always_inline, hot)) void
@@ -5975,15 +5977,15 @@ static void
 	region->height = vInfo.yres;
 }
 
+#ifdef FBINK_WITH_DRAW
 // Helper function to allow exporting fxpFillRectChecked as a public API in slightly less convoluted ways than simply via fbink_cls ;).
 static int
-    fill_rect(int fbfd                              UNUSED_BY_NODRAW,
-	      const FBInkConfig* restrict fbink_cfg UNUSED_BY_NODRAW,
-	      const FBInkRect* restrict rect        UNUSED_BY_NODRAW,
-	      const FBInkPixel* restrict c          UNUSED_BY_NODRAW,
-	      bool no_rota                          UNUSED_BY_NODRAW)
+    fill_rect(int fbfd,
+	      const FBInkConfig* restrict fbink_cfg,
+	      const FBInkRect* restrict rect,
+	      const FBInkPixel* restrict c,
+	      bool no_rota)
 {
-#ifdef FBINK_WITH_DRAW
 	// If we open a fd now, we'll only keep it open for this single call!
 	// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
 	bool keep_fd = true;
@@ -6068,11 +6070,8 @@ cleanup:
 	}
 
 	return rv;
-#else
-	WARN("Drawing primitives are disabled in this FBInk build");
-	return ERRCODE(ENOSYS);
-#endif
 }
+#endif    // FBINK_WITH_DRAW
 
 // Do a full-screen clear, eInk refresh included
 int
@@ -6081,33 +6080,48 @@ int
 	      const FBInkRect* restrict rect        UNUSED_BY_NODRAW,
 	      bool no_rota                          UNUSED_BY_NODRAW)
 {
+#ifdef FBINK_WITH_DRAW
 	return fill_rect(fbfd, fbink_cfg, rect, &penBGPixel, no_rota);
+#else
+	WARN("Drawing primitives are disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif
 }
 
 // Same, but with user-specified colors
 int
-    fbink_fill_rect_gray(int fbfd,
-			 const FBInkConfig* restrict fbink_cfg,
-			 const FBInkRect* restrict rect,
-			 bool    no_rota,
-			 uint8_t y)
+    fbink_fill_rect_gray(int fbfd                              UNUSED_BY_NODRAW,
+			 const FBInkConfig* restrict fbink_cfg UNUSED_BY_NODRAW,
+			 const FBInkRect* restrict rect        UNUSED_BY_NODRAW,
+			 bool no_rota                          UNUSED_BY_NODRAW,
+			 uint8_t y                             UNUSED_BY_NODRAW)
 {
+#ifdef FBINK_WITH_DRAW
 	const FBInkPixel px = pack_pixel_from_y8(y);
 	return fill_rect(fbfd, fbink_cfg, rect, &px, no_rota);
+#else
+	WARN("Drawing primitives are disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif
 }
 
 int
-    fbink_fill_rect_rgba(int fbfd,
-			 const FBInkConfig* restrict fbink_cfg,
-			 const FBInkRect* restrict rect,
-			 bool    no_rota,
-			 uint8_t r,
-			 uint8_t g,
-			 uint8_t b,
-			 uint8_t a)
+    fbink_fill_rect_rgba(int fbfd                              UNUSED_BY_NODRAW,
+			 const FBInkConfig* restrict fbink_cfg UNUSED_BY_NODRAW,
+			 const FBInkRect* restrict rect        UNUSED_BY_NODRAW,
+			 bool no_rota                          UNUSED_BY_NODRAW,
+			 uint8_t r                             UNUSED_BY_NODRAW,
+			 uint8_t g                             UNUSED_BY_NODRAW,
+			 uint8_t b                             UNUSED_BY_NODRAW,
+			 uint8_t a                             UNUSED_BY_NODRAW)
 {
+#ifdef FBINK_WITH_DRAW
 	const FBInkPixel px = pack_pixel_from_rgba(r, g, b, a);
 	return fill_rect(fbfd, fbink_cfg, rect, &px, no_rota);
+#else
+	WARN("Drawing primitives are disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif
 }
 
 // Do a full-screen invert, eInk refresh included
