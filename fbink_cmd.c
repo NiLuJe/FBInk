@@ -802,7 +802,7 @@ int
 	uint32_t                    region_width   = 0;
 	uint32_t                    region_height  = 0;
 	const char*                 hwd_name       = "None";
-	char*                       wfm_name       = NULL;
+	const char*                 wfm_name       = "AUTO";
 	bool                        is_refresh     = false;
 	char*                       image_file     = NULL;
 	short int                   image_x_offset = 0;
@@ -2442,7 +2442,7 @@ int
 					    fbink_cfg.is_halfway ? "Y" : "N",
 					    fbink_cfg.valign,
 					    fbink_cfg.is_cleared ? "Y" : "N",
-					    wfm_name ? wfm_name : "AUTO",
+					    wfm_name,
 					    hwd_name,
 					    fbink_cfg.is_nightmode ? "Y" : "N",
 					    fbink_cfg.no_refresh ? "Y" : "N");
@@ -2500,7 +2500,7 @@ int
 					    fbink_cfg.is_padded ? "Y" : "N",
 					    fbink_cfg.is_rpadded ? "Y" : "N",
 					    fbink_cfg.is_cleared ? "Y" : "N",
-					    wfm_name ? wfm_name : "AUTO",
+					    wfm_name,
 					    hwd_name,
 					    fbink_cfg.is_nightmode ? "Y" : "N",
 					    fbink_cfg.no_refresh ? "Y" : "N",
@@ -2575,7 +2575,7 @@ int
 				    region_width,
 				    region_height,
 				    fbink_cfg.is_flashing ? "a flashing " : "",
-				    wfm_name ? wfm_name : "AUTO",
+				    wfm_name,
 				    hwd_name,
 				    fbink_cfg.is_nightmode ? "Y" : "N");
 			}
@@ -2606,7 +2606,7 @@ int
 				    fbink_cfg.valign,
 				    fbink_cfg.is_inverted ? "Y" : "N",
 				    fbink_cfg.ignore_alpha ? "Y" : "N",
-				    wfm_name ? wfm_name : "AUTO",
+				    wfm_name,
 				    hwd_name,
 				    fbink_cfg.sw_dithering ? "Y" : "N",
 				    fbink_cfg.is_nightmode ? "Y" : "N",
@@ -2641,7 +2641,7 @@ int
 				    fbink_cfg.is_flashing ? "Y" : "N",
 				    fbink_cfg.is_halfway ? "Y" : "N",
 				    fbink_cfg.is_cleared ? "Y" : "N",
-				    wfm_name ? wfm_name : "AUTO",
+				    wfm_name,
 				    hwd_name,
 				    fbink_cfg.is_nightmode ? "Y" : "N",
 				    fbink_cfg.no_refresh ? "Y" : "N",
@@ -2676,7 +2676,7 @@ int
 					    fbink_cfg.is_flashing ? "Y" : "N",
 					    fbink_cfg.is_halfway ? "Y" : "N",
 					    fbink_cfg.is_cleared ? "Y" : "N",
-					    wfm_name ? wfm_name : "AUTO",
+					    wfm_name,
 					    hwd_name,
 					    fbink_cfg.is_nightmode ? "Y" : "N",
 					    fbink_cfg.no_refresh ? "Y" : "N");
@@ -2700,7 +2700,7 @@ int
 					    fbink_cfg.is_flashing ? "Y" : "N",
 					    fbink_cfg.is_halfway ? "Y" : "N",
 					    fbink_cfg.is_cleared ? "Y" : "N",
-					    wfm_name ? wfm_name : "AUTO",
+					    wfm_name,
 					    hwd_name,
 					    fbink_cfg.is_nightmode ? "Y" : "N",
 					    fbink_cfg.no_refresh ? "Y" : "N");
