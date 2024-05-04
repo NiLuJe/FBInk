@@ -989,7 +989,8 @@ static void
 			// NOTE: It technically can, but not via update flags, it's a global state.
 			//       You can toggle it via fbink_set_fb_info if need be.
 			deviceQuirks.canHWInvert                = false;
-			// FIXME: Assume condor-like for now...
+			// NOTE: Appears to actually already match its final form (CW @ 32bpp) at boot,
+			//       but this keeps the deprecated fbdepth -r -1 logic accurate...
 			deviceQuirks.ntxBootRota                = FB_ROTATE_UR;
 			deviceQuirks.canRotate                  = true;
 			// Canonical -> native rotation mapping: { UR: 1, CW: 0, UD: 3, CCW: 2 }
