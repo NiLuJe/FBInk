@@ -511,10 +511,10 @@ static void
     spread_fire_32(size_t offset)
 {
 	FBInkPixel px;
-	px.bgra.p = *((uint32_t*) (fbPtr + offset));
+	px.p = *((uint32_t*) (fbPtr + offset));
 	if (px.bgra.color.r == fire_colors[0U][0U] && px.bgra.color.g == fire_colors[0U][1U] &&
 	    px.bgra.color.b == fire_colors[0U][2U]) {
-		*((uint32_t*) (fbPtr + offset - fInfo.line_length)) = px.bgra.p;
+		*((uint32_t*) (fbPtr + offset - fInfo.line_length)) = px.p;
 	} else {
 		const size_t       random  = (rand() * 3) & 3;
 		const size_t       dst     = offset - random + 1U;
@@ -526,7 +526,7 @@ static void
 		px.bgra.color.g            = fire_colors[idx][1U];
 		// cppcheck-suppress unreadVariable ; false-positive (union)
 		px.bgra.color.b            = fire_colors[idx][2U];
-		*((uint32_t*) (fbPtr + dst - fInfo.line_length)) = px.bgra.p;
+		*((uint32_t*) (fbPtr + dst - fInfo.line_length)) = px.p;
 	}
 }
 

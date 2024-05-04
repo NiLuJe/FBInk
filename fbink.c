@@ -1065,7 +1065,7 @@ static __attribute__((hot)) void
 		size_t px_count = w;
 
 		while (px_count--) {
-			*p++ = px->bgra.p;
+			*p++ = px->p;
 		}
 	}
 
@@ -1368,8 +1368,8 @@ static struct mxcfb_rect
 	if (fbink_cfg->is_inverted) {
 		// NOTE: As far as RGB565 is concerned, our fill/put methods will only ever use the .rgb565 field,
 		//       so we don't actually care about flipping one extra byte here, nothing will ever read it ;).
-		fgP.bgra.p ^= 0x00FFFFFFu;
-		bgP.bgra.p ^= 0x00FFFFFFu;
+		fgP.p ^= 0x00FFFFFFu;
+		bgP.p ^= 0x00FFFFFFu;
 	}
 
 	// Adjust row in case we're a continuation of a multi-line print...
@@ -1752,8 +1752,8 @@ static struct mxcfb_rect
 							if (is_fgpx && !fbink_cfg->is_fgless) {                                        \
 								if (fbink_cfg->is_overlay) {                                           \
 									get_pixel(coords, &fbP);                                       \
-									fbP.bgra.p ^= 0x00FFFFFFu;                                     \
-									pxP         = &fbP;                                            \
+									fbP.p ^= 0x00FFFFFFu;                                          \
+									pxP    = &fbP;                                                 \
 									put_pixel(coords, pxP, false);                                 \
 								} else {                                                               \
 									put_pixel(coords, pxP, true);                                  \
@@ -6000,7 +6000,7 @@ static int
 	// Handle inversion, if necessary...
 	FBInkPixel px = *c;
 	if (fbink_cfg->is_inverted) {
-		px.bgra.p ^= 0x00FFFFFFu;
+		px.p ^= 0x00FFFFFFu;
 	}
 
 	// Did we request a regional clear?
@@ -6739,7 +6739,7 @@ int
 	if (fbink_cfg->is_cleared) {
 		FBInkPixel bgP = penBGPixel;
 		if (fbink_cfg->is_inverted) {
-			bgP.bgra.p ^= 0x00FFFFFFu;
+			bgP.p ^= 0x00FFFFFFu;
 		}
 		clear_screen(fbfd, &bgP, fbink_cfg->is_flashing);
 	}
@@ -7929,8 +7929,8 @@ int
 	FBInkPixel      fgP        = penFGPixel;
 	FBInkPixel      bgP        = penBGPixel;
 	if (is_inverted) {
-		fgP.bgra.p ^= 0x00FFFFFFu;
-		bgP.bgra.p ^= 0x00FFFFFFu;
+		fgP.p ^= 0x00FFFFFFu;
+		bgP.p ^= 0x00FFFFFFu;
 	}
 
 	// Do we need to clear the screen?
@@ -8305,7 +8305,7 @@ int
 							// Full coverage (opaque) -> foreground
 							get_pixel(paint_point, &fb_px);
 							// We want our foreground to be the inverse of the underlying pixel...
-							pixel.bgra.p = fb_px.bgra.p ^ 0x00FFFFFFu;
+							pixel.p = fb_px.p ^ 0x00FFFFFFu;
 							put_pixel(paint_point, &pixel, false);
 						} else if (lnPtr[k] != 0U) {
 							// AA, blend it using the coverage mask as alpha,
@@ -9760,8 +9760,8 @@ int
 	FBInkPixel fgP = penFGPixel;
 	FBInkPixel bgP = penBGPixel;
 	if (fbink_cfg->is_inverted) {
-		fgP.bgra.p ^= 0x00FFFFFFu;
-		bgP.bgra.p ^= 0x00FFFFFFu;
+		fgP.p ^= 0x00FFFFFFu;
+		bgP.p ^= 0x00FFFFFFu;
 	}
 
 	// Clear screen?
@@ -10412,7 +10412,7 @@ static int
 	if (fbink_cfg->is_cleared) {
 		FBInkPixel bgP = penBGPixel;
 		if (fbink_cfg->is_inverted) {
-			bgP.bgra.p ^= 0x00FFFFFFu;
+			bgP.p ^= 0x00FFFFFFu;
 		}
 		clear_screen(fbfd, &bgP, fbink_cfg->is_flashing);
 	}
