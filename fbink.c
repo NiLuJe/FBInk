@@ -10609,7 +10609,7 @@ static int
 	// Handle inversion if requested, in a way that avoids branching in the loop ;).
 	// And, as an added bonus, plays well with the fact that legacy devices have an inverted color map...
 	uint8_t  inv     = 0U;
-	uint24_t inv_rgb = 0U;
+	uint24_t inv_rgb = { 0U };
 	uint32_t inv_rgba = 0U;
 #	ifdef FBINK_FOR_KINDLE
 	if ((deviceQuirks.isKindleLegacy && !fbink_cfg->is_inverted) ||
@@ -10618,7 +10618,7 @@ static int
 	if (fbink_cfg->is_inverted) {
 #	endif
 		inv     = 0xFFu;
-		inv_rga  = 0xFFFFFFu;
+		inv_rgb.u24  = 0xFFFFFFu;
 		inv_rgba = 0x00FFFFFFu;
 	}
 	// And we'll make 'em constants to eke out a tiny bit of performance...
@@ -11028,7 +11028,7 @@ static int
 						//memcpy(&img_px.p, &data[pix_offset], 3 * sizeof(uint8_t));
 
 						// Handle inversion, BGR swap & SW dithering
-						img_px.p ^= invert_24b;
+						img_px.p.u24 ^= invert_24b.u24;
 						if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGRA) || likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR32)) {
 							if (fbink_cfg->sw_dithering) {
 								// cppcheck-suppress unreadVariable ; false-positive (union)
@@ -11087,7 +11087,7 @@ static int
 
 						FBInkPixel fb_px;
 						// Handle inversion, BGR & SW dithering
-						img_px.p ^= invert_24b;
+						img_px.p.u24 ^= invert_24b.u24;
 						if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR24)) {
 							if (fbink_cfg->sw_dithering) {
 								fb_px.bgr.color.r = dither_o8x8(i, j, img_px.color.r);
