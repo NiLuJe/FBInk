@@ -4369,6 +4369,11 @@ static __attribute__((cold)) int
 			deviceQuirks.canWaitForSubmission = true;
 			fxpWakeupEpdc                     = &wakeup_epdc_kobo_mtk;
 		}
+
+		// Make it obvious if the feature isn't available (this should pretty much *exactly* match anything < Mk. 8)
+		if (fxpWakeupEpdc == &wakeup_epdc_nop) {
+			ELOG("Explicit EPDC wakeup isn't supported on this device");
+		}
 #	elif defined(FBINK_FOR_POCKETBOOK)
 		// Check if the device is running on an AllWinner SoC instead of an NXP one...
 		uint32_t aw_busy = 0U;
