@@ -1208,7 +1208,7 @@ static void
 */
 #endif    // FBINK_WITH_DRAW
 
-// Public convenience wrapper around put/get pixels.
+// Public convenience wrappers around our internal put/get pixel functions.
 // Performance is *not* a priority for these, avoid them if at all possible!
 int
     fbink_put_pixel_gray(uint16_t x UNUSED_BY_NODRAW, uint16_t y UNUSED_BY_NODRAW, uint8_t v UNUSED_BY_NODRAW)
