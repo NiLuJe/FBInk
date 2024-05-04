@@ -801,7 +801,7 @@ int
 	uint32_t                    region_left    = 0;
 	uint32_t                    region_width   = 0;
 	uint32_t                    region_height  = 0;
-	char*                       hwd_name       = NULL;
+	const char*                 hwd_name       = "None";
 	char*                       wfm_name       = NULL;
 	bool                        is_refresh     = false;
 	char*                       image_file     = NULL;
@@ -1650,25 +1650,26 @@ int
 					// If no specific mode was passed, assume ORDERED
 					fbink_cfg.dithering_mode = HWD_ORDERED;
 				} else {
-					if (strcasecmp(optarg, "PASSTHROUGH") == 0) {
+					if (optarg[0] == 'P' || optarg[0] == 'p') {
 						fbink_cfg.dithering_mode = HWD_PASSTHROUGH;
-					} else if (strcasecmp(optarg, "FLOYD_STEINBERG") == 0) {
+					} else if (optarg[0] == 'F' || optarg[0] == 'f') {
 						fbink_cfg.dithering_mode = HWD_FLOYD_STEINBERG;
-					} else if (strcasecmp(optarg, "ATKINSON") == 0) {
+						hwd_name                 = "Floyd-Steinberg";
+					} else if (optarg[0] == 'A' || optarg[0] == 'a') {
 						fbink_cfg.dithering_mode = HWD_ATKINSON;
-					} else if (strcasecmp(optarg, "ORDERED") == 0) {
+						hwd_name                 = "Atkinson";
+					} else if (optarg[0] == 'O' || optarg[0] == 'o') {
 						fbink_cfg.dithering_mode = HWD_ORDERED;
-					} else if (strcasecmp(optarg, "QUANT_ONLY") == 0) {
+						hwd_name                 = "Ordered";
+					} else if (optarg[0] == 'Q' || optarg[0] == 'q') {
 						fbink_cfg.dithering_mode = HWD_QUANT_ONLY;
-					} else if (strcasecmp(optarg, "LEGACY") == 0) {
+						hwd_name                 = "Quantize";
+					} else if (optarg[0] == 'L' || optarg[0] == 'l') {
 						fbink_cfg.dithering_mode = HWD_LEGACY;
+						hwd_name                 = "Legacy";
 					} else {
 						ELOG("Unknown hardware dithering algorithm '%s'.", optarg);
 						errfnd = true;
-					}
-					// Remember non-default values in a human-readable format...
-					if (fbink_cfg.dithering_mode != HWD_PASSTHROUGH) {
-						hwd_name = optarg;
 					}
 				}
 				break;
@@ -2442,7 +2443,7 @@ int
 					    fbink_cfg.valign,
 					    fbink_cfg.is_cleared ? "Y" : "N",
 					    wfm_name ? wfm_name : "AUTO",
-					    hwd_name ? hwd_name : "PASSTHROUGH",
+					    hwd_name,
 					    fbink_cfg.is_nightmode ? "Y" : "N",
 					    fbink_cfg.no_refresh ? "Y" : "N");
 				}
@@ -2500,7 +2501,7 @@ int
 					    fbink_cfg.is_rpadded ? "Y" : "N",
 					    fbink_cfg.is_cleared ? "Y" : "N",
 					    wfm_name ? wfm_name : "AUTO",
-					    hwd_name ? hwd_name : "PASSTHROUGH",
+					    hwd_name,
 					    fbink_cfg.is_nightmode ? "Y" : "N",
 					    fbink_cfg.no_refresh ? "Y" : "N",
 					    fbink_cfg.fontname,
@@ -2575,7 +2576,7 @@ int
 				    region_height,
 				    fbink_cfg.is_flashing ? "a flashing " : "",
 				    wfm_name ? wfm_name : "AUTO",
-				    hwd_name ? hwd_name : "PASSTHROUGH",
+				    hwd_name,
 				    fbink_cfg.is_nightmode ? "Y" : "N");
 			}
 			if (fbink_refresh(fbfd, region_top, region_left, region_width, region_height, &fbink_cfg) !=
@@ -2606,7 +2607,7 @@ int
 				    fbink_cfg.is_inverted ? "Y" : "N",
 				    fbink_cfg.ignore_alpha ? "Y" : "N",
 				    wfm_name ? wfm_name : "AUTO",
-				    hwd_name ? hwd_name : "PASSTHROUGH",
+				    hwd_name,
 				    fbink_cfg.sw_dithering ? "Y" : "N",
 				    fbink_cfg.is_nightmode ? "Y" : "N",
 				    fbink_cfg.no_refresh ? "Y" : "N");
@@ -2641,7 +2642,7 @@ int
 				    fbink_cfg.is_halfway ? "Y" : "N",
 				    fbink_cfg.is_cleared ? "Y" : "N",
 				    wfm_name ? wfm_name : "AUTO",
-				    hwd_name ? hwd_name : "PASSTHROUGH",
+				    hwd_name,
 				    fbink_cfg.is_nightmode ? "Y" : "N",
 				    fbink_cfg.no_refresh ? "Y" : "N",
 				    fbink_cfg.fontname,
@@ -2676,7 +2677,7 @@ int
 					    fbink_cfg.is_halfway ? "Y" : "N",
 					    fbink_cfg.is_cleared ? "Y" : "N",
 					    wfm_name ? wfm_name : "AUTO",
-					    hwd_name ? hwd_name : "PASSTHROUGH",
+					    hwd_name,
 					    fbink_cfg.is_nightmode ? "Y" : "N",
 					    fbink_cfg.no_refresh ? "Y" : "N");
 				}
@@ -2700,7 +2701,7 @@ int
 					    fbink_cfg.is_halfway ? "Y" : "N",
 					    fbink_cfg.is_cleared ? "Y" : "N",
 					    wfm_name ? wfm_name : "AUTO",
-					    hwd_name ? hwd_name : "PASSTHROUGH",
+					    hwd_name,
 					    fbink_cfg.is_nightmode ? "Y" : "N",
 					    fbink_cfg.no_refresh ? "Y" : "N");
 				}
