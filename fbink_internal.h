@@ -581,6 +581,7 @@ static void rotate_coordinates_nop(FBInkCoordinates* restrict __attribute__((unu
 
 // NOTE: Making sure most of those are inlined helps fbink_print_ot (c.f., #43).
 #ifdef FBINK_WITH_DRAW
+static inline __attribute__((const, always_inline, hot)) uint16_t pack_bgr565(uint8_t, uint8_t, uint8_t);
 static inline __attribute__((const, always_inline, hot)) uint16_t pack_rgb565(uint8_t, uint8_t, uint8_t);
 
 static __attribute__((pure)) FBInkPixel pack_pixel_from_rgba(uint8_t, uint8_t, uint8_t, uint8_t);
@@ -608,9 +609,12 @@ static inline __attribute__((always_inline, hot)) void get_pixel_Gray4(const FBI
 								       FBInkPixel* restrict);
 static inline __attribute__((always_inline, hot)) void get_pixel_Gray8(const FBInkCoordinates* restrict,
 								       FBInkPixel* restrict);
+static inline __attribute__((always_inline)) void get_pixel_BGR24(const FBInkCoordinates* restrict, FBInkPixel* restrict);
 static inline __attribute__((always_inline)) void get_pixel_RGB24(const FBInkCoordinates* restrict, FBInkPixel* restrict);
 static inline __attribute__((always_inline, hot)) void get_pixel_RGB32(const FBInkCoordinates* restrict,
 								       FBInkPixel* restrict);
+static inline __attribute__((always_inline, hot)) void get_pixel_BGR565(const FBInkCoordinates* restrict,
+									FBInkPixel* restrict);
 static inline __attribute__((always_inline, hot)) void get_pixel_RGB565(const FBInkCoordinates* restrict,
 									FBInkPixel* restrict);
 // NOTE: Same as put_pixel ;)

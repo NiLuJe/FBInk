@@ -156,12 +156,20 @@ uint32_t
 }
 
 #ifdef FBINK_WITH_DRAW
+// #RGB -> BGR565
+static inline __attribute__((const, always_inline, hot)) uint16_t
+    pack_bgr565(uint8_t r, uint8_t g, uint8_t b)
+{
+	// ((r / 8) * 2048) + ((g / 4) * 32) + (b / 8);
+	return (uint16_t) (((r >> 3U) << 11U) | ((g >> 2U) << 5U) | (b >> 3U));
+}
+
 // #RGB -> RGB565
 static inline __attribute__((const, always_inline, hot)) uint16_t
     pack_rgb565(uint8_t r, uint8_t g, uint8_t b)
 {
-	// ((r / 8) * 2048) + ((g / 4) * 32) + (b / 8);
-	return (uint16_t) (((r >> 3U) << 11U) | ((g >> 2U) << 5U) | (b >> 3U));
+	// ((b / 8) * 2048) + ((g / 4) * 32) + (r / 8);
+	return (uint16_t) (((b >> 3U) << 11U) | ((g >> 2U) << 5U) | (r >> 3U));
 }
 
 // Pack an FBInkPixel accordingly for the target pixel format
@@ -176,7 +184,7 @@ static __attribute__((pure)) FBInkPixel
 			px.gray8 = (uint8_t) (((r * 77U) + (g * 150U) + (29U * b)) >> 8U);
 			break;
 		case FBINK_PXFMT_BGR565:
-			px.rgb565 = pack_rgb565(b, g, r);
+			px.rgb565 = pack_bgr565(r, g, b);
 			break;
 		case FBINK_PXFMT_RGB565:
 			px.rgb565 = pack_rgb565(r, g, b);
@@ -331,7 +339,7 @@ static inline __attribute__((always_inline, hot)) void
 	const size_t scanline_offset = (size_t) coords->y * fInfo.line_length;
 
 	// write the two bytes at once, much to GCC's dismay...
-	// NOTE: Input pixel *has* to be properly packed to RGB565 first (via pack_rgb565, c.f., put_pixel)!
+	// NOTE: Input pixel *has* to be properly packed to BGR565/RGB565 first (via pack_bgr565/pack_rgb565, c.f., put_pixel)!
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 	*((uint16_t*) (fbPtr + scanline_offset) + coords->x) = px->rgb565;
@@ -575,10 +583,10 @@ static inline __attribute__((always_inline, hot)) void
 #	pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #	pragma clang diagnostic ignored "-Wunknown-warning-option"
 #	pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-			if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_RGB565)) {
-				packed_px.rgb565 = pack_rgb565(px->rgba.color.r, px->rgba.color.g, px->rgba.color.b);
+			if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR565)) {
+				packed_px.rgb565 = pack_bgr565(px->bgra.color.r, px->bgra.color.g, px->bgra.color.b);
 			} else {
-				packed_px.rgb565 = pack_rgb565(px->bgra.color.r, px->bgra.color.g, px->bgra.color.b);
+				packed_px.rgb565 = pack_rgb565(px->rgba.color.r, px->rgba.color.g, px->rgba.color.b);
 			}
 #	pragma GCC diagnostic pop
 			put_pixel_RGB565(&coords, &packed_px);
@@ -643,7 +651,7 @@ static inline __attribute__((always_inline, hot)) void
 }
 
 static inline __attribute__((always_inline)) void
-    get_pixel_RGB24(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
+    get_pixel_BGR24(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
 	// note: x * 3 as every pixel is 3 consecutive bytes
@@ -654,6 +662,18 @@ static inline __attribute__((always_inline)) void
 	px->bgra.color.r = *((unsigned char*) (fbPtr + pix_offset + 2U));
 }
 
+static inline __attribute__((always_inline)) void
+    get_pixel_RGB24(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
+{
+	// calculate the pixel's byte offset inside the buffer
+	// note: x * 3 as every pixel is 3 consecutive bytes
+	const size_t pix_offset = (coords->x * 3U) + (coords->y * fInfo.line_length);
+
+	px->rgba.color.r = *((unsigned char*) (fbPtr + pix_offset));
+	px->rgba.color.g = *((unsigned char*) (fbPtr + pix_offset + 1U));
+	px->rgba.color.b = *((unsigned char*) (fbPtr + pix_offset + 2U));
+}
+
 static inline __attribute__((always_inline, hot)) void
     get_pixel_RGB32(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
@@ -662,14 +682,14 @@ static inline __attribute__((always_inline, hot)) void
 
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
-	px->bgra.p = *((uint32_t*) (fbPtr + scanline_offset) + coords->x);
+	px->p = *((uint32_t*) (fbPtr + scanline_offset) + coords->x);
 #	pragma GCC diagnostic pop
 	// NOTE: We generally don't care about alpha, we always assume it's opaque, as that's how it behaves.
 	//       We *do* pickup the actual alpha value, here, though.
 }
 
 static inline __attribute__((always_inline, hot)) void
-    get_pixel_RGB565(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
+    get_pixel_BGR565(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
 {
 	// calculate the pixel's byte offset inside the buffer
 	const size_t scanline_offset = (size_t) coords->y * fInfo.line_length;
@@ -681,9 +701,9 @@ static inline __attribute__((always_inline, hot)) void
 	const uint16_t v = *((const uint16_t*) (fbPtr + scanline_offset) + coords->x);
 #	pragma GCC diagnostic pop
 
-	// NOTE: Unpack to RGB32, because we have no use for RGB565, it's terrible.
+	// NOTE: Unpack to RGB32, because we have no use for BGR565, it's terrible.
 	// NOTE: c.f., https://stackoverflow.com/q/2442576
-	//       I feel that this approach tracks better with what we do in put_pixel_RGB565,
+	//       I feel that this approach tracks better with what we do in pack_bgr565,
 	//       and I have an easier time following it than the previous approach ported from KOReader.
 	//       Both do exactly the same thing, though ;).
 	const uint8_t r = (uint8_t) ((v & 0xF800u) >> 11U);    // 11111000 00000000 = 0xF800
@@ -693,6 +713,33 @@ static inline __attribute__((always_inline, hot)) void
 	px->bgra.color.r = (uint8_t) ((r << 3U) | (r >> 2U));
 	px->bgra.color.g = (uint8_t) ((g << 2U) | (g >> 4U));
 	px->bgra.color.b = (uint8_t) ((b << 3U) | (b >> 2U));
+}
+
+static inline __attribute__((always_inline, hot)) void
+    get_pixel_RGB565(const FBInkCoordinates* restrict coords, FBInkPixel* restrict px)
+{
+	// calculate the pixel's byte offset inside the buffer
+	const size_t scanline_offset = (size_t) coords->y * fInfo.line_length;
+
+	// NOTE: We're honoring the fb's bitfield offsets here (R: 0, G: >> 5, B: >> 11)
+	// Like put_pixel_RGB565, read those two consecutive bytes at once
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
+	const uint16_t v = *((const uint16_t*) (fbPtr + scanline_offset) + coords->x);
+#	pragma GCC diagnostic pop
+
+	// NOTE: Unpack to RGB32, because we have no use for RGB565, it's terrible.
+	// NOTE: c.f., https://stackoverflow.com/q/2442576
+	//       I feel that this approach tracks better with what we do in pack_rgb565,
+	//       and I have an easier time following it than the previous approach ported from KOReader.
+	//       Both do exactly the same thing, though ;).
+	const uint8_t b = (uint8_t) ((v & 0xF800u) >> 11U);    // 11111000 00000000 = 0xF800
+	const uint8_t g = (v & 0x07E0u) >> 5U;                 // 00000111 11100000 = 0x07E0
+	const uint8_t r = (v & 0x001Fu);                       // 00000000 00011111 = 0x001F
+
+	px->rgba.color.r = (uint8_t) ((r << 3U) | (r >> 2U));
+	px->rgba.color.g = (uint8_t) ((g << 2U) | (g >> 4U));
+	px->rgba.color.b = (uint8_t) ((b << 3U) | (b >> 2U));
 }
 
 // Handle a few sanity checks...
@@ -722,13 +769,17 @@ static inline __attribute__((always_inline, hot)) void
 	}
 
 	// NOTE: Hmm, here, an if ladder appears to be ever so *slightly* faster than going through the function pointer...
-	if (vInfo.bits_per_pixel == 4U) {
+	if (deviceQuirks.pixelFormat == FBINK_PXFMT_Y4) {
 		get_pixel_Gray4(&coords, px);
-	} else if (likely(vInfo.bits_per_pixel == 8U)) {
+	} else if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_Y8)) {
 		get_pixel_Gray8(&coords, px);
-	} else if (vInfo.bits_per_pixel == 16U) {
+	} else if (deviceQuirks.pixelFormat == FBINK_PXFMT_BGR565) {
+		get_pixel_BGR565(&coords, px);
+	} else if (unlikely(deviceQuirks.pixelFormat == FBINK_PXFMT_RGB565)) {
 		get_pixel_RGB565(&coords, px);
-	} else if (unlikely(vInfo.bits_per_pixel == 24U)) {
+	} else if (unlikely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR24)) {
+		get_pixel_BGR24(&coords, px);
+	} else if (unlikely(deviceQuirks.pixelFormat == FBINK_PXFMT_RGB24)) {
 		get_pixel_RGB24(&coords, px);
 	} else if (likely(vInfo.bits_per_pixel == 32U)) {
 		get_pixel_RGB32(&coords, px);
@@ -5092,20 +5143,7 @@ static __attribute__((cold)) int
 			if (vInfo.red.offset == 0U) {
 				deviceQuirks.pixelFormat = FBINK_PXFMT_RGB565;
 			} else {
-#if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_CERVANTES)
-				// NOTE: This (BGR565) is what NTX boards report at 16bpp.
-				//       It's unclear whether anybody actually ever used this properly,
-				//       we might all mistakenly have assumed RGB565,
-				//       as the results once grayscaled are often fairly similar between the two,
-				//       and even more so once they've been quantized down to the eInk palette...
-				//       (A good testcase is a PARTIAL + GC16 update:
-				//       if the content haven't actually changed, it won't trigger a refresh).
-				// As such, do as we always did, and assume RGB565...
-				ELOG("Assuming BGR565 framebuffer is actually RGB565...")
-				deviceQuirks.pixelFormat = FBINK_PXFMT_RGB565;
-#else
 				deviceQuirks.pixelFormat = FBINK_PXFMT_BGR565;
-#endif
 			}
 			break;
 		case 24U:
