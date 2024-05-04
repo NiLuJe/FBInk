@@ -10623,8 +10623,8 @@ static int
 	}
 	// And we'll make 'em constants to eke out a tiny bit of performance...
 	const uint8_t  invert     = inv;
-	const uint24_t invert_rgb = inv_rgb;
-	const uint32_t invert_rgba = inv_rgba;
+	const uint24_t invert_24b = inv_rgb;
+	const uint32_t invert_32b = inv_rgba;
 	// NOTE: The *slight* duplication is on purpose, to move the branching outside the loop,
 	//       and make use of a few different blitting tweaks depending on the situation...
 	//       And since we can easily do so from here,
@@ -10811,7 +10811,7 @@ static int
 							// Fully opaque, we can blit the image (almost) directly.
 							// We do need to handle BGR and honor inversion ;).
 							// cppcheck-suppress unreadVariable ; false-positive (union)
-							img_px.p ^= invert_rgba;
+							img_px.p ^= invert_32b;
 							// And software dithering... Not a fan of the extra branching,
 							// but that's probably the best we can do.
 							// Hopefully the RGB vs. BGR branching will be hoisted up by the compiler...
@@ -10866,7 +10866,7 @@ static int
 
 							// Don't forget to honor inversion
 							// cppcheck-suppress unreadVariable ; false-positive (union)
-							img_px.p     ^= invert_rgba;
+							img_px.p     ^= invert_32b;
 							// Blend it, honoring pixel order (BGR vs. RGB) in the process ;).
 							if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGRA) || likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR32)) {
 								fb_px.bgra.color.r = (uint8_t) DIV255(
@@ -10926,7 +10926,7 @@ static int
 						if (img_px.color.a == 0xFFu) {
 							// Fully opaque, we can blit the image (almost) directly.
 							// cppcheck-suppress unreadVariable ; false-positive (union)
-							img_px.p ^= invert_rgba;
+							img_px.p ^= invert_32b;
 							// We do need to handle BGR and honor inversion ;).
 							if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR24)) {
 								// SW dithering
@@ -10972,7 +10972,7 @@ static int
 
 							// Don't forget to honor inversion
 							// cppcheck-suppress unreadVariable ; false-positive (union)
-							img_px.p     ^= invert_rgba;
+							img_px.p     ^= invert_32b;
 							// Blend it, we get our BGR swap in the process ;).
 							if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR24)) {
 								fb_px.bgr.color.r = (uint8_t) DIV255(
@@ -11028,7 +11028,7 @@ static int
 						//memcpy(&img_px.p, &data[pix_offset], 3 * sizeof(uint8_t));
 
 						// Handle inversion, BGR swap & SW dithering
-						img_px.p ^= invert_rgb;
+						img_px.p ^= invert_24b;
 						if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGRA) || likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR32)) {
 							if (fbink_cfg->sw_dithering) {
 								// cppcheck-suppress unreadVariable ; false-positive (union)
@@ -11087,7 +11087,7 @@ static int
 
 						FBInkPixel fb_px;
 						// Handle inversion, BGR & SW dithering
-						img_px.p ^= invert_rgb;
+						img_px.p ^= invert_24b;
 						if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR24)) {
 							if (fbink_cfg->sw_dithering) {
 								fb_px.bgr.color.r = dither_o8x8(i, j, img_px.color.r);
@@ -11143,7 +11143,7 @@ static int
 					if (img_px.color.a == 0xFFu) {
 						// Fully opaque, we can blit the image (almost) directly.
 						// We do need to handle BGR and honor inversion ;).
-						img_px.p ^= invert_rgba;
+						img_px.p ^= invert_32b;
 						// SW dithering
 						if (fbink_cfg->sw_dithering) {
 							pixel.bgra.color.r = dither_o8x8(i, j, img_px.color.r);
@@ -11175,7 +11175,7 @@ static int
 						get_pixel_RGB565(&coords, &bg_px);
 
 						// Don't forget to honor inversion
-						img_px.p          ^= invert_rgba;
+						img_px.p          ^= invert_32b;
 						// Blend it, we get our BGR swap in the process ;).
 						pixel.bgra.color.r = (uint8_t) DIV255(
 						    ((img_px.color.r * img_px.color.a) + (bg_px.bgra.color.r * ainv)));
