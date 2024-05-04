@@ -1505,6 +1505,20 @@ FBINK_API int fbink_fill_rect_rgba(int fbfd,
 				   uint8_t b,
 				   uint8_t a) __attribute__((nonnull(2)));
 
+// Returns -(ENOSYS) when drawing primitives are disabled (MINIMAL build w/o DRAW).
+FBINK_API void fbink_put_pixel_rgba(unsigned short int x,
+				    unsigned short int y,
+				    uint8_t            r,
+				    uint8_t            g,
+				    uint8_t            b,
+				    uint8_t            a);
+FBINK_API void fbink_get_pixel(unsigned short int x,
+			       unsigned short int y,
+			       uint8_t*           r,
+			       uint8_t*           g,
+			       uint8_t*           b,
+			       uint8_t*           a);
+
 // Forcefully wakeup the EPDC (Kobo Mk.8+ only)
 // We've found this to be helpful on a few otherwise crashy devices,
 // c.f., https://github.com/koreader/koreader-base/pull/1645 & https://github.com/koreader/koreader/pull/10771

@@ -1208,6 +1208,79 @@ static void
 */
 #endif    // FBINK_WITH_DRAW
 
+// Public convenience wrapper around put/get pixels.
+// Performance is *not* a priority for these, avoid them if at all possible!
+void
+    fbink_put_pixel_rgba(unsigned short int x, unsigned short int y, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+{
+#ifdef FBINK_WITH_DRAW
+	const FBInkCoordinates coords = { .x = x, .y = y };
+	FBInkPixel             px;
+	if (deviceQuirks.isRGB) {
+		px.rgba.color.r = r;
+		px.rgba.color.g = g;
+		px.rgba.color.b = b;
+		if (vInfo.bits_per_pixel == 32U) {
+			px.rgba.color.a = a;
+		} else {
+			px.rgba.color.a = 0xFFu;
+		}
+	} else {
+		px.bgra.color.r = r;
+		px.bgra.color.g = g;
+		px.bgra.color.b = b;
+		if (vInfo.bits_per_pixel == 32U) {
+			px.bgra.color.a = a;
+		} else {
+			px.bgra.color.a = 0xFFu;
+		}
+	}
+
+	put_pixel(coords, &px, false);
+#else
+	WARN("Drawing primitives are disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif
+}
+
+void
+    fbink_get_pixel(unsigned short int x, unsigned short int y, uint8_t* r, uint8_t* g, uint8_t* b, uint8_t* a)
+{
+#ifdef FBINK_WITH_DRAW
+	const FBInkCoordinates coords = { .x = x, .y = y };
+	FBInkPixel             px;
+	get_pixel(coords, &px);
+
+	if (deviceQuirks.pixelFormat == FBINK_PXFMT_Y4 || deviceQuirks.pixelFormat == FBINK_PXFMT_Y8) {
+		*r = px.gray8;
+		*g = px.gray8;
+		*b = px.gray8;
+		*a = 0xFFu;
+	} else if (deviceQuirks.isRGB) {
+		*r = px.rgba.color.r;
+		*g = px.rgba.color.g;
+		*b = px.rgba.color.b;
+		if (vInfo.bits_per_pixel == 32U) {
+			*a = px.rgba.color.a;
+		} else {
+			*a = 0xFFu;
+		}
+	} else {
+		*r = px.bgra.color.r;
+		*g = px.bgra.color.g;
+		*b = px.bgra.color.b;
+		if (vInfo.bits_per_pixel == 32U) {
+			*a = px.bgra.color.a;
+		} else {
+			*a = 0xFFu;
+		}
+	}
+#else
+	WARN("Drawing primitives are disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif
+}
+
 #ifdef FBINK_WITH_BITMAP
 // Return the font8x8 bitmap for a specific Unicode codepoint
 static const unsigned char*
