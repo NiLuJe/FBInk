@@ -10908,7 +10908,7 @@ static int
 				}
 			} else {
 				// 24bpp
-				FBInkPixelBGR fb_px;
+				FBInkPixel fb_px;
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// NOTE: We should be able to skip rotation hacks at this bpp...
@@ -10926,25 +10926,38 @@ static int
 						// Take a shortcut for the most common alpha values (none & full)
 						if (img_px.color.a == 0xFFu) {
 							// Fully opaque, we can blit the image (almost) directly.
-							// We do need to handle BGR and honor inversion ;).
 							// cppcheck-suppress unreadVariable ; false-positive (union)
 							img_px.p ^= invert_rgb;
-							// SW dithering
-							if (fbink_cfg->sw_dithering) {
-								fb_px.color.r = dither_o8x8(i, j, img_px.color.r);
-								fb_px.color.g = dither_o8x8(i, j, img_px.color.g);
-								fb_px.color.b = dither_o8x8(i, j, img_px.color.b);
+							// We do need to handle BGR and honor inversion ;).
+							if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR24)) {
+								// SW dithering
+								if (fbink_cfg->sw_dithering) {
+									fb_px.bgr.color.r = dither_o8x8(i, j, img_px.color.r);
+									fb_px.bgr.color.g = dither_o8x8(i, j, img_px.color.g);
+									fb_px.bgr.color.b = dither_o8x8(i, j, img_px.color.b);
+								} else {
+									fb_px.bgr.color.r = img_px.color.r;
+									fb_px.bgr.color.g = img_px.color.g;
+									fb_px.bgr.color.b = img_px.color.b;
+								}
 							} else {
-								fb_px.color.r = img_px.color.r;
-								fb_px.color.g = img_px.color.g;
-								fb_px.color.b = img_px.color.b;
+								// SW dithering
+								if (fbink_cfg->sw_dithering) {
+									fb_px.rgb.color.r = dither_o8x8(i, j, img_px.color.r);
+									fb_px.rgb.color.g = dither_o8x8(i, j, img_px.color.g);
+									fb_px.rgb.color.b = dither_o8x8(i, j, img_px.color.b);
+								} else {
+									fb_px.rgb.color.r = img_px.color.r;
+									fb_px.rgb.color.g = img_px.color.g;
+									fb_px.rgb.color.b = img_px.color.b;
+								}
 							}
 
 							const size_t fb_pix_offset =
 							    (uint32_t) ((unsigned short int) (i + x_off) << 2U) +
 							    ((unsigned short int) (j + y_off) * fInfo.line_length);
 							// And we write the full pixel to the fb (all 3 bytes)
-							*((uint24_t*) (fbPtr + fb_pix_offset)) = fb_px.p;
+							*((uint24_t*) (fbPtr + fb_pix_offset)) = fb_px.rgb24;
 						} else if (img_px.color.a == 0) {
 							// Transparent! Keep fb as-is.
 						} else {
@@ -10955,28 +10968,43 @@ static int
 							    (uint32_t) ((unsigned short int) (i + x_off) << 2U) +
 							    ((unsigned short int) (j + y_off) * fInfo.line_length);
 							// Again, read the full pixel from the framebuffer (all 3 bytes)
-							FBInkPixelBGR bg_px;
-							bg_px.p = *((uint24_t*) (fbPtr + fb_pix_offset));
+							FBInkPixel bg_px;
+							bg_px.rgb24 = *((uint24_t*) (fbPtr + fb_pix_offset));
 
 							// Don't forget to honor inversion
 							// cppcheck-suppress unreadVariable ; false-positive (union)
 							img_px.p     ^= invert_rgb;
 							// Blend it, we get our BGR swap in the process ;).
-							fb_px.color.r = (uint8_t) DIV255(
-							    ((img_px.color.r * img_px.color.a) + (bg_px.color.r * ainv)));
-							fb_px.color.g = (uint8_t) DIV255(
-							    ((img_px.color.g * img_px.color.a) + (bg_px.color.g * ainv)));
-							fb_px.color.b = (uint8_t) DIV255(
-							    ((img_px.color.b * img_px.color.a) + (bg_px.color.b * ainv)));
-							// SW dithering
-							if (fbink_cfg->sw_dithering) {
-								fb_px.color.r = dither_o8x8(i, j, fb_px.color.r);
-								fb_px.color.g = dither_o8x8(i, j, fb_px.color.g);
-								fb_px.color.b = dither_o8x8(i, j, fb_px.color.b);
+							if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR24)) {
+								fb_px.bgr.color.r = (uint8_t) DIV255(
+								((img_px.color.r * img_px.color.a) + (bg_px.bgr.color.r * ainv)));
+								fb_px.bgr.color.g = (uint8_t) DIV255(
+								((img_px.color.g * img_px.color.a) + (bg_px.bgr.color.g * ainv)));
+								fb_px.bgr.color.b = (uint8_t) DIV255(
+								((img_px.color.b * img_px.color.a) + (bg_px.bgr.color.b * ainv)));
+								// SW dithering
+								if (fbink_cfg->sw_dithering) {
+									fb_px.bgr.color.r = dither_o8x8(i, j, fb_px.bgr.color.r);
+									fb_px.bgr.color.g = dither_o8x8(i, j, fb_px.bgr.color.g);
+									fb_px.bgr.color.b = dither_o8x8(i, j, fb_px.bgr.color.b);
+								}
+							} else {
+								fb_px.rgb.color.r = (uint8_t) DIV255(
+								((img_px.color.r * img_px.color.a) + (bg_px.rgb.color.r * ainv)));
+								fb_px.rgb.color.g = (uint8_t) DIV255(
+								((img_px.color.g * img_px.color.a) + (bg_px.rgb.color.g * ainv)));
+								fb_px.rgb.color.b = (uint8_t) DIV255(
+								((img_px.color.b * img_px.color.a) + (bg_px.rgb.color.b * ainv)));
+								// SW dithering
+								if (fbink_cfg->sw_dithering) {
+									fb_px.rgb.color.r = dither_o8x8(i, j, fb_px.rgb.color.r);
+									fb_px.rgb.color.g = dither_o8x8(i, j, fb_px.rgb.color.g);
+									fb_px.rgb.color.b = dither_o8x8(i, j, fb_px.rgb.color.b);
+								}
 							}
 
 							// And we write the full blended pixel to the fb (all 3 bytes)
-							*((uint24_t*) (fbPtr + fb_pix_offset)) = fb_px.p;
+							*((uint24_t*) (fbPtr + fb_pix_offset)) = fb_px.rgb24;
 						}
 					}
 				}
@@ -10984,12 +11012,12 @@ static int
 		} else {
 			// No alpha in image, or ignored
 			// We don't care about image alpha in this branch, so we don't even store it.
-			if (likely(!fb_is_24bpp)) {
+			if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGRA) || deviceQuirks.pixelFormat == FBINK_PXFMT_RGBA || likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR32) || deviceQuirks.pixelFormat == FBINK_PXFMT_RGB32) {
 				// 32bpp
-				FBInkPixelBGRA fb_px;
+				FBInkPixel fb_px;
 				// This is essentially a constant in our case...
 				// cppcheck-suppress unreadVariable ; false-positive (union)
-				fb_px.color.a = 0xFFu;
+				fb_px.bgra.color.a = 0xFFu;
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
@@ -11001,25 +11029,39 @@ static int
 						//memcpy(&img_px.p, &data[pix_offset], 3 * sizeof(uint8_t));
 
 						// Handle BGR, inversion & SW dithering
-						if (fbink_cfg->sw_dithering) {
-							// cppcheck-suppress unreadVariable ; false-positive (union)
-							fb_px.color.r = dither_o8x8(i, j, img_px.color.r);
-							// cppcheck-suppress unreadVariable ; false-positive (union)
-							fb_px.color.g = dither_o8x8(i, j, img_px.color.g);
-							// cppcheck-suppress unreadVariable ; false-positive (union)
-							fb_px.color.b = dither_o8x8(i, j, img_px.color.b);
+						if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGRA) || likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR32)) {
+							if (fbink_cfg->sw_dithering) {
+								// cppcheck-suppress unreadVariable ; false-positive (union)
+								fb_px.bgra.color.r = dither_o8x8(i, j, img_px.color.r);
+								// cppcheck-suppress unreadVariable ; false-positive (union)
+								fb_px.bgra.color.g = dither_o8x8(i, j, img_px.color.g);
+								// cppcheck-suppress unreadVariable ; false-positive (union)
+								fb_px.bgra.color.b = dither_o8x8(i, j, img_px.color.b);
+							} else {
+								// cppcheck-suppress unreadVariable ; false-positive (union)
+								fb_px.bgra.color.r = img_px.color.r;
+								// cppcheck-suppress unreadVariable ; false-positive (union)
+								fb_px.bgra.color.g = img_px.color.g;
+								// cppcheck-suppress unreadVariable ; false-positive (union)
+								fb_px.bgra.color.b = img_px.color.b;
+							}
+							// NOTE: The RGB -> BGR dance precludes us from simply doing a 3 bytes memcpy,
+							//       and our union trickery appears to be faster than packing the pixel
+							//       ourselves with something like:
+							//       fb_px.p = 0xFF<<24U | img_px.color.r<<16U | img_px.color.g<<8U | img_px.color.b;
 						} else {
-							// cppcheck-suppress unreadVariable ; false-positive (union)
-							fb_px.color.r = img_px.color.r;
-							// cppcheck-suppress unreadVariable ; false-positive (union)
-							fb_px.color.g = img_px.color.g;
-							// cppcheck-suppress unreadVariable ; false-positive (union)
-							fb_px.color.b = img_px.color.b;
+							if (fbink_cfg->sw_dithering) {
+								// cppcheck-suppress unreadVariable ; false-positive (union)
+								fb_px.rgba.color.r = dither_o8x8(i, j, img_px.color.r);
+								// cppcheck-suppress unreadVariable ; false-positive (union)
+								fb_px.rgba.color.g = dither_o8x8(i, j, img_px.color.g);
+								// cppcheck-suppress unreadVariable ; false-positive (union)
+								fb_px.rgba.color.b = dither_o8x8(i, j, img_px.color.b);
+							} else {
+								// Same pixel order (RGB)
+								fb_px.rgb24 = img_px.p;
+							}
 						}
-						// NOTE: The RGB -> BGR dance precludes us from simply doing a 3 bytes memcpy,
-						//       and our union trickery appears to be faster than packing the pixel
-						//       ourselves with something like:
-						//       fb_px.p = 0xFF<<24U | img_px.color.r<<16U | img_px.color.g<<8U | img_px.color.b;
 						// We *can* do the inversion on the full pixel, though ;).
 						fb_px.p ^= invert_rgb;
 
@@ -11045,24 +11087,36 @@ static int
 						// NOTE: Given our typedef trickery, this exactly boils down to a 3 bytes memcpy:
 						//memcpy(&img_px.p, &data[pix_offset], 3 * sizeof(uint8_t));
 
+						FBInkPixel fb_px;
 						// Handle BGR, inversion & SW dithering
-						FBInkPixelBGR fb_px;
-						if (fbink_cfg->sw_dithering) {
-							fb_px.color.r = dither_o8x8(i, j, img_px.color.r ^ invert);
-							fb_px.color.g = dither_o8x8(i, j, img_px.color.g ^ invert);
-							fb_px.color.b = dither_o8x8(i, j, img_px.color.b ^ invert);
+						if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR24)) {
+							if (fbink_cfg->sw_dithering) {
+								fb_px.bgr.color.r = dither_o8x8(i, j, img_px.color.r);
+								fb_px.bgr.color.g = dither_o8x8(i, j, img_px.color.g);
+								fb_px.bgr.color.b = dither_o8x8(i, j, img_px.color.b);
+							} else {
+								fb_px.bgr.color.r = img_px.color.r;
+								fb_px.bgr.color.g = img_px.color.g;
+								fb_px.bgr.color.b = img_px.color.b;
+							}
 						} else {
-							fb_px.color.r = img_px.color.r ^ invert;
-							fb_px.color.g = img_px.color.g ^ invert;
-							fb_px.color.b = img_px.color.b ^ invert;
+							if (fbink_cfg->sw_dithering) {
+								fb_px.rgb.color.r = dither_o8x8(i, j, img_px.color.r);
+								fb_px.rgb.color.g = dither_o8x8(i, j, img_px.color.g);
+								fb_px.rgb.color.b = dither_o8x8(i, j, img_px.color.b);
+							} else {
+								// Same pixel order (RGB)
+								fb_px.rgb24 = img_px.p;
+							}
 						}
+						fb_px.rgb24 ^= 0xFFFFFF;
 
 						// NOTE: Again, assume we can safely skip rotation tweaks
 						const size_t fb_pix_offset =
 						    (uint32_t) ((unsigned short int) (i + x_off) << 2U) +
 						    ((unsigned short int) (j + y_off) * fInfo.line_length);
 						// Write the full pixel to the fb (all 3 bytes)
-						*((uint24_t*) (fbPtr + fb_pix_offset)) = fb_px.p;
+						*((uint24_t*) (fbPtr + fb_pix_offset)) = fb_px.rgb24;
 						// NOTE: Again, this should roughly amount to a 3 bytes memcpy,
 						//       although in this instance, GCC generates slightly different code.
 						//memcpy(fbPtr + pix_offset, &fb_px.p, 3 * sizeof(uint8_t));

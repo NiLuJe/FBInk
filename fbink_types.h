@@ -160,6 +160,9 @@ typedef union
 	uint32_t       p;
 	FBInkPixelBGRA bgra;
 	FBInkPixelRGBA rgba;
+	uint24_t       rgb24;
+	FBInkPixelBGR bgr;
+	FBInkPixelRGB rgb;
 	uint16_t       rgb565;
 	uint8_t        gray8;    // Will point to bgra.color.b
 	struct
