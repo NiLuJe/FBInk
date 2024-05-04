@@ -11070,15 +11070,17 @@ static int
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
 						// NOTE: Here, req_n is either 4, or 3 if ignore_alpha, so, no shift trickery ;)
-						const size_t  img_pix_offset = (size_t) ((j * req_n * w) + (i * req_n));
-						// Gobble the full image pixel (3 bytes, we don't care about alpha if it's there)
-						FBInkPixelRGB img_px;
-						img_px.p = *((const uint24_t*) &data[img_pix_offset]);
-						// NOTE: Given our typedef trickery, this exactly boils down to a 3 bytes memcpy:
-						//memcpy(&img_px.p, &data[pix_offset], 3 * sizeof(uint8_t));
-
+						const size_t   img_pix_offset = (size_t) ((j * req_n * w) + (i * req_n));
+						// Gobble the full image pixel (we don't care about alpha if it's there)
+						FBInkPixelRGBA img_px;
+						// NOTE: Overread in an RGB32 pixel because it's ever so slightly faster than a 3 bytes memcpy.
+						//       Yes, this can overread 1 byte over the data buffer for the final pixel if req_n == 3.
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wcast-align"
+						img_px.p = *((const uint32_t*) (data + img_pix_offset));
+#	pragma GCC diagnostic pop
 						// Handle inversion, BGR swap & SW dithering
-						img_px.p.u24 ^= invert_24b.u24;
+						img_px.p ^= invert_32b;
 						if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGRA) ||
 						    likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR32)) {
 							if (fbink_cfg->sw_dithering) {
@@ -11110,7 +11112,7 @@ static int
 								fb_px.rgba.color.b = dither_o8x8(i, j, img_px.color.b);
 							} else {
 								// Same pixel order (RGB)
-								fb_px.rgb24 = img_px.p;
+								fb_px.p = img_px.p;
 							}
 						}
 
