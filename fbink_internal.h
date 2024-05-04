@@ -579,13 +579,14 @@ static void rotate_touch_coordinates(FBInkCoordinates* restrict);
 #endif
 static void rotate_coordinates_nop(FBInkCoordinates* restrict __attribute__((unused)));
 
+// We *technically* need those outside of DRAW builds because of the public fill_rect APIs...
+static __attribute__((pure)) FBInkPixel pack_pixel_from_rgba(uint8_t, uint8_t, uint8_t, uint8_t);
+static __attribute__((pure)) FBInkPixel pack_pixel_from_y8(uint8_t);
+
 // NOTE: Making sure most of those are inlined helps fbink_print_ot (c.f., #43).
 #ifdef FBINK_WITH_DRAW
 static inline __attribute__((const, always_inline, hot)) uint16_t pack_bgr565(uint8_t, uint8_t, uint8_t);
 static inline __attribute__((const, always_inline, hot)) uint16_t pack_rgb565(uint8_t, uint8_t, uint8_t);
-
-static __attribute__((pure)) FBInkPixel pack_pixel_from_rgba(uint8_t, uint8_t, uint8_t, uint8_t);
-static __attribute__((pure)) FBInkPixel pack_pixel_from_y8(uint8_t);
 
 static inline __attribute__((always_inline, hot)) void put_pixel_Gray4(const FBInkCoordinates* restrict,
 								       const FBInkPixel* restrict);
