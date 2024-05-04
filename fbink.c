@@ -3558,12 +3558,6 @@ static int
 #ifdef FBINK_FOR_KOBO
 // Implementations of the various ways one can poke at the EPDC
 // on NTX kernels in order to wake it up immediately instead of relying on the driver's own PM...
-// TODO: Depending on how https://github.com/koreader/koreader/pull/10771 goes, see if we need deeper integration of this, e.g.:
-//       * A FBInkConfig flag to run this before every refresh (possibly enforced by default (w/ log message) on unreliableWaitFor Mk7+ boards)
-//       * Another one to run this before waits?
-//       * Sunxi pen mode will *probably* need to ignore this for performance reasons, though...
-//       * Document the quirks and the reasoning in the API doc
-//       * Also document Nickel's own usage of this (e.g., the 1.5s debounced on *touch* input thing), c.f., PRs
 static int
     wakeup_epdc_nop(void)
 {

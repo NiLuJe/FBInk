@@ -1507,9 +1507,12 @@ FBINK_API int fbink_fill_rect_rgba(int fbfd,
 
 // Forcefully wakeup the EPDC (Kobo Mk.8+ only)
 // We've found this to be helpful on a few otherwise crashy devices,
-// c.f., https://github.com/koreader/koreader-base/pull/1645
-// NOTE: Nickel fires this off from its input handler, debounced at roughly 4s intervals,
+// c.f., https://github.com/koreader/koreader-base/pull/1645 & https://github.com/koreader/koreader/pull/10771
+// Keep in mind that a few Mk. 7 devices can also be mildly temperamental in some circumstances,
+// and that this feature isn't supported on those, c.f., https://github.com/koreader/koreader/issues/11511
+// NOTE: Nickel fires this off from its input handler, debounced at roughly 1.5s or 4s intervals,
 //       which sounds like a slightly more elegant approach than the one I opted for in KOReader ;).
+//       (As a fun quirk, it only does this after *touch* inputs, not *key* inputs).
 // Returns -(ENOSYS) on unsupported platforms.
 FBINK_API int fbink_wakeup_epdc(void);
 
