@@ -2154,6 +2154,9 @@ int
 
 		// In the middle of the screen
 		fbink_cfg.is_halfway = true;
+		// Make it backgroundless, to play nicer with whatever might already be on the edge of the screen.
+		// It also ensures we only get the bar's width instead of the screen's in our get_last_rect trick below.
+		fbink_cfg.is_bgless  = true;
 
 		// Start by clearing the bar's region to white, to make sure A2 will behave...
 		// NOTE: Only used on MTK devices, as the chance of hitting the flags bug for this on Mk. 7 is low enough,
@@ -2163,13 +2166,11 @@ int
 		if (fbink_state.is_mtk) {
 			// Draw a dummy bar without a refresh just so we can get its exact dimensions
 			fbink_cfg.no_refresh = true;
-			fbink_cfg.is_bgless  = true;    // Otherwise width is set to the screen's width
 			fbink_print_activity_bar(fbfd, 0, &fbink_cfg);
 			FBInkRect region     = fbink_get_last_rect(false);
 			fbink_cfg.no_refresh = false;
-			fbink_cfg.is_bgless  = false;
 
-			// Then flash that region to white to pave the way
+			// Then flash that region to white to pave the way for A2
 			fbink_cfg.wfm_mode    = WFM_GC16;
 			fbink_cfg.is_flashing = true;
 			fbink_cls(fbfd, &fbink_cfg, &region, false);
@@ -2177,10 +2178,8 @@ int
 			fbink_cfg.is_flashing = false;
 		}
 
-		// Make it backgroundless, to play nicer with whatever might already be on the edge of the screen
-		fbink_cfg.is_bgless = true;
 		// Fast
-		fbink_cfg.wfm_mode  = WFM_A2;
+		fbink_cfg.wfm_mode = WFM_A2;
 
 		// Infinite activity bar
 		is_activitybar = true;
