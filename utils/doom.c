@@ -520,11 +520,8 @@ static void
 		const size_t       dst     = offset - random + 1U;
 		const unsigned int pal_idx = find_palette_id_32(px.bgra.color.r, px.bgra.color.g, px.bgra.color.b);
 		const size_t       idx     = pal_idx - (random & 1U);
-		// cppcheck-suppress unreadVariable ; false-positive (union)
 		px.bgra.color.r            = fire_colors[idx][0U];
-		// cppcheck-suppress unreadVariable ; false-positive (union)
 		px.bgra.color.g            = fire_colors[idx][1U];
-		// cppcheck-suppress unreadVariable ; false-positive (union)
 		px.bgra.color.b            = fire_colors[idx][2U];
 		*((uint32_t*) (fbPtr + dst - fInfo.line_length)) = px.p;
 	}
@@ -790,7 +787,6 @@ int
 #ifndef FBINK_FOR_LINUX
 #	ifndef FBINK_FOR_KINDLE
 	// If the automagic Portrait rotation was requested, compute it
-	// cppcheck-suppress knownConditionTrueFalse ; true, kept to mirror fbdepth
 	if (req_rota == -1) {
 		// NOTE: For *most* devices, Nickel's Portrait orientation should *always* match BootRota + 1
 		//       Thankfully, the Libra appears to be ushering in a new era filled with puppies and rainbows,

@@ -10395,7 +10395,6 @@ static unsigned char*
 				temp    = NULL;
 			}
 
-			// cppcheck-suppress nullPointerArithmetic ; imgdata can't be NULL
 			size_t nread = fread(imgdata + used, 1U, CHUNK, stdin);
 			if (nread == 0U) {
 				break;
@@ -10812,7 +10811,6 @@ static int
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// First, we gobble the full image pixel (all 2 bytes)
-						// cppcheck-suppress unreadVariable ; false-positive (union)
 						img_px.p = *((const uint16_t*) (data + img_scanline_offset) + i);
 #	pragma GCC diagnostic pop
 
@@ -10964,7 +10962,6 @@ static int
 				// 32bpp
 				FBInkPixel fb_px;
 				// This is essentially a constant in our case... (c.f., put_pixel_RGB32)
-				// cppcheck-suppress unreadVariable ; false-positive (union)
 				fb_px.bgra.color.a = 0xFFu;
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
@@ -10976,7 +10973,6 @@ static int
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// First, we gobble the full image pixel (all 4 bytes)
-						// cppcheck-suppress unreadVariable ; false-positive (union)
 						img_px.p = *((const uint32_t*) (data + img_scanline_offset) + i);
 #	pragma GCC diagnostic pop
 
@@ -10984,7 +10980,6 @@ static int
 						if (img_px.color.a == 0xFFu) {
 							// Fully opaque, we can blit the image (almost) directly.
 							// We do need to handle BGR and honor inversion ;).
-							// cppcheck-suppress unreadVariable ; false-positive (union)
 							img_px.p ^= invert_32b;
 							// And software dithering... Not a fan of the extra branching,
 							// but that's probably the best we can do.
@@ -11045,7 +11040,6 @@ static int
 #	pragma GCC diagnostic pop
 
 							// Don't forget to honor inversion
-							// cppcheck-suppress unreadVariable ; false-positive (union)
 							img_px.p ^= invert_32b;
 							// Blend it, honoring pixel order (BGR vs. RGB) in the process ;).
 							if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGRA) ||
@@ -11111,14 +11105,12 @@ static int
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						// First, we gobble the full image pixel (all 4 bytes)
-						// cppcheck-suppress unreadVariable ; false-positive (union)
 						img_px.p = *((const uint32_t*) (data + img_scanline_offset) + i);
 #	pragma GCC diagnostic pop
 
 						// Take a shortcut for the most common alpha values (none & full)
 						if (img_px.color.a == 0xFFu) {
 							// Fully opaque, we can blit the image (almost) directly.
-							// cppcheck-suppress unreadVariable ; false-positive (union)
 							img_px.p ^= invert_32b;
 							// We do need to handle BGR and honor inversion ;).
 							if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR24)) {
@@ -11169,7 +11161,6 @@ static int
 							bg_px.rgb24 = *((uint24_t*) (fbPtr + fb_pix_offset));
 
 							// Don't forget to honor inversion
-							// cppcheck-suppress unreadVariable ; false-positive (union)
 							img_px.p ^= invert_32b;
 							// Blend it, we get our BGR swap in the process ;).
 							if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR24)) {
@@ -11228,7 +11219,6 @@ static int
 				// 32bpp
 				FBInkPixel fb_px;
 				// This is essentially a constant in our case...
-				// cppcheck-suppress unreadVariable ; false-positive (union)
 				fb_px.bgra.color.a = 0xFFu;
 				for (unsigned short int j = img_y_off; j < max_height; j++) {
 					for (unsigned short int i = img_x_off; i < max_width; i++) {
@@ -11247,18 +11237,12 @@ static int
 						if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGRA) ||
 						    likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGR32)) {
 							if (fbink_cfg->sw_dithering) {
-								// cppcheck-suppress unreadVariable ; false-positive (union)
 								fb_px.bgra.color.r = dither_o8x8(i, j, img_px.color.r);
-								// cppcheck-suppress unreadVariable ; false-positive (union)
 								fb_px.bgra.color.g = dither_o8x8(i, j, img_px.color.g);
-								// cppcheck-suppress unreadVariable ; false-positive (union)
 								fb_px.bgra.color.b = dither_o8x8(i, j, img_px.color.b);
 							} else {
-								// cppcheck-suppress unreadVariable ; false-positive (union)
 								fb_px.bgra.color.r = img_px.color.r;
-								// cppcheck-suppress unreadVariable ; false-positive (union)
 								fb_px.bgra.color.g = img_px.color.g;
-								// cppcheck-suppress unreadVariable ; false-positive (union)
 								fb_px.bgra.color.b = img_px.color.b;
 							}
 							// NOTE: The RGB -> BGR dance precludes us from simply doing a 3 bytes memcpy,
@@ -11267,11 +11251,8 @@ static int
 							//       fb_px.p = 0xFF<<24U | img_px.color.r<<16U | img_px.color.g<<8U | img_px.color.b;
 						} else {
 							if (fbink_cfg->sw_dithering) {
-								// cppcheck-suppress unreadVariable ; false-positive (union)
 								fb_px.rgba.color.r = dither_o8x8(i, j, img_px.color.r);
-								// cppcheck-suppress unreadVariable ; false-positive (union)
 								fb_px.rgba.color.g = dither_o8x8(i, j, img_px.color.g);
-								// cppcheck-suppress unreadVariable ; false-positive (union)
 								fb_px.rgba.color.b = dither_o8x8(i, j, img_px.color.b);
 							} else {
 								// Same pixel order
