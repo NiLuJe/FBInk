@@ -2161,25 +2161,17 @@ int
 		//       the quick succession of GC16 + A2 with no fencing causes a tearing artifact on the first refresh.
 		//       (We did end up using a fully fenced GC16 + FULL for the final implementation).
 		if (fbink_state.is_mtk) {
-			fbink_cfg.wfm_mode           = WFM_GC16;
-			fbink_cfg.is_flashing        = true;
-			// We could use a fbink_grid_clear, but instead duplicate a bit of positioning logic instead for exact results...
-			//fbink_grid_clear(fbfd, (unsigned short int) (fbink_state.max_cols - 1U), 1U, &fbink_cfg);
-			short int                row = (short int) (fbink_state.max_rows / 2U);
-			const unsigned short int top_pos =
-			    (unsigned short int) MAX(0 + (fbink_state.view_vert_origin - fbink_state.view_vert_offset),
-						     ((row * fbink_state.font_h) + fbink_state.view_vert_origin));
-			const unsigned short int left_pos = fbink_state.view_hori_origin;
-			const unsigned short int bar_width =
-			    (unsigned short int) ((0.90f * (float) fbink_state.view_width) + 0.5f);
-			const unsigned short int bar_left =
-			    (unsigned short int) (left_pos + (0.05f * (float) fbink_state.view_width) + 0.5f);
-			const FBInkRect region = {
-				.left   = bar_left,
-				.top    = top_pos,
-				.width  = bar_width,
-				.height = fbink_state.font_h,
-			};
+			// Draw a dummy bar without a refresh just so we can get its exact dimensions
+			fbink_cfg.no_refresh = true;
+			fbink_cfg.is_bgless  = true;    // Otherwise width is set to the screen's width
+			fbink_print_activity_bar(fbfd, 0, &fbink_cfg);
+			FBInkRect region     = fbink_get_last_rect(false);
+			fbink_cfg.no_refresh = false;
+			fbink_cfg.is_bgless  = false;
+
+			// Then flash that region to white to pave the way
+			fbink_cfg.wfm_mode    = WFM_GC16;
+			fbink_cfg.is_flashing = true;
 			fbink_cls(fbfd, &fbink_cfg, &region, false);
 			fbink_wait_for_complete(fbfd, LAST_MARKER);
 			fbink_cfg.is_flashing = false;
