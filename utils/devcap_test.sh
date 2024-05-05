@@ -74,6 +74,8 @@ separator
 header "Backlights"
 ls -lash /sys/class/backlight >> "${DEVCAP_LOG}" 2>/dev/null
 separator
+ls -lashL /sys/class/backlight/* >> "${DEVCAP_LOG}" 2>/dev/null
+separator
 
 # List LEDs
 header "LEDs"
@@ -83,6 +85,8 @@ separator
 # List battery & ac sysfs entries
 header "Power"
 ls -lash /sys/class/power_supply >> "${DEVCAP_LOG}" 2>/dev/null
+separator
+ls -lashL /sys/class/power_supply/*/* >> "${DEVCAP_LOG}" 2>/dev/null
 separator
 
 # Start by dumping the full fb state
