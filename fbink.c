@@ -1348,15 +1348,15 @@ static const unsigned char*
 	// Get the bitmap for the character mapped to that Unicode codepoint
 	if (likely(codepoint <= 0x7Fu)) {
 		return font8x8_basic[codepoint];
-	} else if (codepoint >= 0x80u && codepoint <= 0x9Fu) {    // lgtm [cpp/constant-comparison]
+	} else if (codepoint >= 0x80u && codepoint <= 0x9Fu) {
 		return font8x8_control[codepoint - 0x80u];
-	} else if (codepoint >= 0xA0u && codepoint <= 0xFFu) {    // lgtm [cpp/constant-comparison]
+	} else if (codepoint >= 0xA0u && codepoint <= 0xFFu) {
 		return font8x8_ext_latin[codepoint - 0xA0u];
 	} else if (codepoint >= 0x390u && codepoint <= 0x3C9u) {
 		return font8x8_greek[codepoint - 0x390u];
 	} else if (codepoint >= 0x2500u && codepoint <= 0x257Fu) {
 		return font8x8_box[codepoint - 0x2500u];
-	} else if (codepoint >= 0x2580u && codepoint <= 0x259Fu) {    // lgtm [cpp/constant-comparison]
+	} else if (codepoint >= 0x2580u && codepoint <= 0x259Fu) {
 		return font8x8_block[codepoint - 0x2580u];
 	} else if (codepoint >= 0x3040u && codepoint <= 0x309Fu) {
 		return font8x8_hiragana[codepoint - 0x3040u];

@@ -1256,7 +1256,7 @@ static void
 
 			// We'll read the full payload, whose size varies depending on the exact kernel being used...
 			// Since it's only a couple dozen bytes, do that on the stack to make our life easier.
-			payload = alloca(config.len);    // lgtm [cpp/uncontrolled-allocation-size]
+			payload = alloca(config.len);
 			if (fread(payload, sizeof(*payload), config.len, fp) < config.len || ferror(fp) != 0) {
 				WARN("Error reading NTX HWConfig payload (unexpected length)");
 				fclose(fp);

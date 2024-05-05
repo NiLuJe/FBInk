@@ -57,10 +57,7 @@ struct image_t
 };
 typedef struct image_t image_t;
 
-#define INIT_IMAGE_T()                                                                                                   \
-	{                                                                                                                \
-		0, 0, 0, 0, NULL                                                                                         \
-	}
+#define INIT_IMAGE_T() { 0, 0, 0, 0, NULL }
 
 enum splash_screen_type
 {
@@ -192,10 +189,7 @@ struct rect_t
 };
 typedef struct rect_t rect_t;
 
-#define INIT_RECT_T()                                                                                                    \
-	{                                                                                                                \
-		0, 0, 0, 0                                                                                               \
-	}
+#define INIT_RECT_T()     { 0, 0, 0, 0 }
 #define MAX_EXCLUDE_RECTS 8
 
 struct fx_t
@@ -232,10 +226,7 @@ struct update_area_t
 };
 typedef struct update_area_t update_area_t;
 
-#define INIT_UPDATE_AREA_T()                                                                                             \
-	{                                                                                                                \
-		0, 0, 0, 0, fx_none, NULL                                                                                \
-	}
+#define INIT_UPDATE_AREA_T() { 0, 0, 0, 0, fx_none, NULL }
 
 struct progressbar_xy_t
 {

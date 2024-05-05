@@ -914,7 +914,7 @@ int
 				if (subopts && *subopts != '\0') {
 					// Only remember the first offending suboption list...
 					if (!errfnd) {
-						full_subopts = strdupa(subopts);    // lgtm [cpp/alloca-in-loop]
+						full_subopts = strdupa(subopts);
 					}
 				}
 
@@ -1107,7 +1107,7 @@ int
 				if (subopts && *subopts != '\0') {
 					// Only remember the first offending suboption list...
 					if (!errfnd) {
-						full_subopts = strdupa(subopts);    // lgtm [cpp/alloca-in-loop]
+						full_subopts = strdupa(subopts);
 					}
 				}
 				// NOTE: I'm not terribly fond of getsubopt in general, especially here with the comma limitation
@@ -1404,7 +1404,7 @@ int
 				if (subopts && *subopts != '\0') {
 					// Only remember the first offending suboption list...
 					if (!errfnd) {
-						full_subopts = strdupa(subopts);    // lgtm [cpp/alloca-in-loop]
+						full_subopts = strdupa(subopts);
 					}
 				}
 				while (subopts && *subopts != '\0' && !errfnd) {
@@ -1782,7 +1782,7 @@ int
 				if (subopts && *subopts != '\0') {
 					// Only remember the first offending suboption list...
 					if (!errfnd) {
-						full_subopts = strdupa(subopts);    // lgtm [cpp/alloca-in-loop]
+						full_subopts = strdupa(subopts);
 					}
 				}
 
@@ -1894,7 +1894,7 @@ int
 				if (subopts && *subopts != '\0') {
 					// Only remember the first offending suboption list...
 					if (!errfnd) {
-						full_subopts = strdupa(subopts);    // lgtm [cpp/alloca-in-loop]
+						full_subopts = strdupa(subopts);
 					}
 				}
 
