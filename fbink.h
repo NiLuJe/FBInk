@@ -1507,6 +1507,7 @@ FBINK_API int fbink_fill_rect_rgba(int fbfd,
 
 // Convenience public wrappers for a per-pixel put/get.
 // These are designed with *convenience* in mind, *not* performance.
+// (In particular, a pixel needs to be packed on *each* call).
 // I'd highly recommend handling drawing yourself if you can ;).
 // Returns -(ENOSYS) when drawing primitives are disabled (MINIMAL build w/o DRAW).
 // x:                   x coordinates
@@ -1526,6 +1527,27 @@ FBINK_API int fbink_put_pixel_rgba(uint16_t x, uint16_t y, uint8_t r, uint8_t g,
 // NOTE: Red always means red, if there's a BGR swap involved, it's handled for you.
 //       Similarly, BGR565/RBG565 is unpacked to RGB32.
 FBINK_API int fbink_get_pixel(uint16_t x, uint16_t y, uint8_t* r, uint8_t* g, uint8_t* b, uint8_t* a);
+
+// As a means to alleviate *some* of the pixel packing overhead mentioned above,
+// the following set of functions allow you to actually *save* a packed pixel,
+// and pass it to dedicated variants of put_pixel & fill_rect.
+// This is helpful if you often reuse the same color.
+// NOTE: The packing is only accurate for the *current* pixel format,
+//       consider re-packing after a potential bitdepth change!
+//       (e.g., when handling an fbink_reinit call).
+// Returns -(ENOSYS) when drawing primitives are disabled (MINIMAL build w/o DRAW).
+FBINK_API int fbink_pack_pixel_gray(uint8_t y, uint32_t* px);
+FBINK_API int fbink_pack_pixel_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint32_t* px);
+// c.f., `fbink_put_pixel_*` for documentation of the initial parameters they share.
+// px:                   out pointer, packed pixel in the *current* framebuffer pixel format
+FBINK_API int fbink_put_pixel(uint16_t x, uint16_t y, void* px);
+FBINK_API int fbink_fill_rect(int fbfd,
+			      const FBInkConfig* restrict fbink_cfg,
+			      const FBInkRect* restrict rect,
+			      bool  no_rota,
+			      void* px) __attribute__((nonnull(2)));
+// c.f., `fbink_put_pixel_*` & `fbink_fill_rect_*` for documentation of the initial parameters they share.
+// px:                   pointer to a packed pixel, as provided by the fbink_pack_pixel_* family of functions.
 
 // Forcefully wakeup the EPDC (Kobo Mk.8+ only)
 // We've found this to be helpful on a few otherwise crashy devices,

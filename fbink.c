@@ -1246,6 +1246,54 @@ int
 #endif
 }
 
+// To avoid the overhead of repeatedly packing the same color,
+// expose variants of the above that allow the API user to store such a packed pixel,
+// and pass it to specific variants (fbink_put_pixel & fbink_fill_rect).
+int
+    fbink_pack_pixel_gray(uint8_t y UNUSED_BY_NODRAW, uint32_t* px UNUSED_BY_NODRAW)
+{
+#ifdef FBINK_WITH_DRAW
+	FBInkPixel p = pack_pixel_from_y8(y);
+	*px          = p.p;
+
+	return EXIT_SUCCESS;
+#else
+	WARN("Drawing primitives are disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif
+}
+
+int
+    fbink_pack_pixel_rgba(uint8_t r    UNUSED_BY_NODRAW,
+			  uint8_t g    UNUSED_BY_NODRAW,
+			  uint8_t b    UNUSED_BY_NODRAW,
+			  uint8_t a    UNUSED_BY_NODRAW,
+			  uint32_t* px UNUSED_BY_NODRAW)
+{
+#ifdef FBINK_WITH_DRAW
+	FBInkPixel p = pack_pixel_from_rgba(r, g, b, a);
+	*px          = p.p;
+
+	return EXIT_SUCCESS;
+#else
+	WARN("Drawing primitives are disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif
+}
+
+int
+    fbink_put_pixel(uint16_t x UNUSED_BY_NODRAW, uint16_t y UNUSED_BY_NODRAW, void* px UNUSED_BY_NODRAW)
+{
+#ifdef FBINK_WITH_DRAW
+	const FBInkCoordinates coords = { .x = x, .y = y };
+	put_pixel(coords, px, true);
+	return EXIT_SUCCESS;
+#else
+	WARN("Drawing primitives are disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif
+}
+
 int
     fbink_get_pixel(uint16_t x UNUSED_BY_NODRAW,
 		    uint16_t y UNUSED_BY_NODRAW,
@@ -6205,6 +6253,22 @@ int
 #ifdef FBINK_WITH_DRAW
 	const FBInkPixel px = pack_pixel_from_rgba(r, g, b, a);
 	return fill_rect(fbfd, fbink_cfg, rect, &px, no_rota);
+#else
+	WARN("Drawing primitives are disabled in this FBInk build");
+	return ERRCODE(ENOSYS);
+#endif
+}
+
+// Takes a pointer to a pixel packed via fbink_pack_pixel_gray/rgba
+int
+    fbink_fill_rect(int fbfd                              UNUSED_BY_NODRAW,
+		    const FBInkConfig* restrict fbink_cfg UNUSED_BY_NODRAW,
+		    const FBInkRect* restrict rect        UNUSED_BY_NODRAW,
+		    bool no_rota                          UNUSED_BY_NODRAW,
+		    void* px                              UNUSED_BY_NODRAW)
+{
+#ifdef FBINK_WITH_DRAW
+	return fill_rect(fbfd, fbink_cfg, rect, px, no_rota);
 #else
 	WARN("Drawing primitives are disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
