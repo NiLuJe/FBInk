@@ -1514,12 +1514,12 @@ FBINK_API int fbink_fill_rect_rgba(int fbfd,
 // x:                   x coordinates
 // y:                   y coordinates
 // v:			8-bit luminance value
-FBINK_API int fbink_put_pixel_gray(uint16_t x, uint16_t y, uint8_t v);
+FBINK_API int fbink_put_pixel_gray(int fbfd, uint16_t x, uint16_t y, uint8_t v);
 // r:			8-bit red component value
 // g:			8-bit green component value
 // b:			8-bit blue component value
 // a:			8-bit alpha component value (opaque is 0xFFu).
-FBINK_API int fbink_put_pixel_rgba(uint16_t x, uint16_t y, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+FBINK_API int fbink_put_pixel_rgba(int fbfd, uint16_t x, uint16_t y, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 // *r:			out pointer, 8-bit red component value
 // *g:			out pointer, 8-bit green component value
 // *b:			out pointer, 8-bit blue component value
@@ -1527,7 +1527,7 @@ FBINK_API int fbink_put_pixel_rgba(uint16_t x, uint16_t y, uint8_t r, uint8_t g,
 // NOTE: If pixelformat is grayscale, r = g = b and a = 0xFF
 // NOTE: Red always means red, if there's a BGR swap involved, it's handled for you.
 //       Similarly, BGR565/RBG565 is unpacked to RGB32.
-FBINK_API int fbink_get_pixel(uint16_t x, uint16_t y, uint8_t* r, uint8_t* g, uint8_t* b, uint8_t* a);
+FBINK_API int fbink_get_pixel(int fbfd, uint16_t x, uint16_t y, uint8_t* r, uint8_t* g, uint8_t* b, uint8_t* a);
 
 // As a means to alleviate *some* of the pixel packing overhead mentioned above,
 // the following set of functions allow you to actually *save* a packed pixel,
@@ -1541,7 +1541,7 @@ FBINK_API int fbink_pack_pixel_gray(uint8_t y, uint32_t* px);
 FBINK_API int fbink_pack_pixel_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint32_t* px);
 // c.f., `fbink_put_pixel_*` for documentation of the initial parameters they share.
 // px:                   out pointer, packed pixel in the *current* framebuffer pixel format
-FBINK_API int fbink_put_pixel(uint16_t x, uint16_t y, void* px);
+FBINK_API int fbink_put_pixel(int fbfd, uint16_t x, uint16_t y, void* px);
 FBINK_API int fbink_fill_rect(int fbfd,
 			      const FBInkConfig* restrict fbink_cfg,
 			      const FBInkRect* restrict rect,

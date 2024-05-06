@@ -1212,14 +1212,44 @@ static void
 // Performance is *not* a priority for these, avoid them if at all possible!
 // (The main overhead lies in the packing/unpacking of pixels, because our internal pixel data type is... fairly gnarly).
 int
-    fbink_put_pixel_gray(uint16_t x UNUSED_BY_NODRAW, uint16_t y UNUSED_BY_NODRAW, uint8_t v UNUSED_BY_NODRAW)
+    fbink_put_pixel_gray(int fbfd   UNUSED_BY_NODRAW,
+			 uint16_t x UNUSED_BY_NODRAW,
+			 uint16_t y UNUSED_BY_NODRAW,
+			 uint8_t v  UNUSED_BY_NODRAW)
 {
 #ifdef FBINK_WITH_DRAW
+	// If we open a fd now, we'll only keep it open for this single call!
+	// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// mmap fb to user mem
+	if (!isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	}
+
 	const FBInkCoordinates coords = { .x = x, .y = y };
 	FBInkPixel             px     = pack_pixel_from_y8(v);
 	put_pixel(coords, &px, true);
 
-	return EXIT_SUCCESS;
+	// Cleanup
+cleanup:
+	if (isFbMapped && !keep_fd) {
+		unmap_fb();
+	}
+	if (!keep_fd) {
+		close_fb(fbfd);
+	}
+
+	return rv;
 #else
 	WARN("Drawing primitives are disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
@@ -1227,7 +1257,8 @@ int
 }
 
 int
-    fbink_put_pixel_rgba(uint16_t x UNUSED_BY_NODRAW,
+    fbink_put_pixel_rgba(int fbfd   UNUSED_BY_NODRAW,
+			 uint16_t x UNUSED_BY_NODRAW,
 			 uint16_t y UNUSED_BY_NODRAW,
 			 uint8_t r  UNUSED_BY_NODRAW,
 			 uint8_t g  UNUSED_BY_NODRAW,
@@ -1235,11 +1266,38 @@ int
 			 uint8_t a  UNUSED_BY_NODRAW)
 {
 #ifdef FBINK_WITH_DRAW
+	// If we open a fd now, we'll only keep it open for this single call!
+	// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// mmap fb to user mem
+	if (!isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	}
+
 	const FBInkCoordinates coords = { .x = x, .y = y };
 	FBInkPixel             px     = pack_pixel_from_rgba(r, g, b, a);
 	put_pixel(coords, &px, true);
 
-	return EXIT_SUCCESS;
+	// Cleanup
+cleanup:
+	if (isFbMapped && !keep_fd) {
+		unmap_fb();
+	}
+	if (!keep_fd) {
+		close_fb(fbfd);
+	}
+
+	return rv;
 #else
 	WARN("Drawing primitives are disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
@@ -1282,12 +1340,43 @@ int
 }
 
 int
-    fbink_put_pixel(uint16_t x UNUSED_BY_NODRAW, uint16_t y UNUSED_BY_NODRAW, void* px UNUSED_BY_NODRAW)
+    fbink_put_pixel(int fbfd   UNUSED_BY_NODRAW,
+		    uint16_t x UNUSED_BY_NODRAW,
+		    uint16_t y UNUSED_BY_NODRAW,
+		    void* px   UNUSED_BY_NODRAW)
 {
 #ifdef FBINK_WITH_DRAW
+	// If we open a fd now, we'll only keep it open for this single call!
+	// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// mmap fb to user mem
+	if (!isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	}
+
 	const FBInkCoordinates coords = { .x = x, .y = y };
 	put_pixel(coords, px, true);
-	return EXIT_SUCCESS;
+
+	// Cleanup
+cleanup:
+	if (isFbMapped && !keep_fd) {
+		unmap_fb();
+	}
+	if (!keep_fd) {
+		close_fb(fbfd);
+	}
+
+	return rv;
 #else
 	WARN("Drawing primitives are disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
@@ -1295,7 +1384,8 @@ int
 }
 
 int
-    fbink_get_pixel(uint16_t x UNUSED_BY_NODRAW,
+    fbink_get_pixel(int fbfd   UNUSED_BY_NODRAW,
+		    uint16_t x UNUSED_BY_NODRAW,
 		    uint16_t y UNUSED_BY_NODRAW,
 		    uint8_t* r UNUSED_BY_NODRAW,
 		    uint8_t* g UNUSED_BY_NODRAW,
@@ -1303,6 +1393,24 @@ int
 		    uint8_t* a UNUSED_BY_NODRAW)
 {
 #ifdef FBINK_WITH_DRAW
+	// If we open a fd now, we'll only keep it open for this single call!
+	// NOTE: We *expect* to be initialized at this point, though, but that's on the caller's hands!
+	bool keep_fd = true;
+	if (open_fb_fd(&fbfd, &keep_fd) != EXIT_SUCCESS) {
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	// Assume success, until shit happens ;)
+	int rv = EXIT_SUCCESS;
+
+	// mmap fb to user mem
+	if (!isFbMapped) {
+		if (memmap_fb(fbfd) != EXIT_SUCCESS) {
+			rv = ERRCODE(EXIT_FAILURE);
+			goto cleanup;
+		}
+	}
+
 	const FBInkCoordinates coords = { .x = x, .y = y };
 	FBInkPixel             px;
 	get_pixel(coords, &px);
@@ -1333,7 +1441,16 @@ int
 		}
 	}
 
-	return EXIT_SUCCESS;
+	// Cleanup
+cleanup:
+	if (isFbMapped && !keep_fd) {
+		unmap_fb();
+	}
+	if (!keep_fd) {
+		close_fb(fbfd);
+	}
+
+	return rv;
 #else
 	WARN("Drawing primitives are disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
