@@ -1127,7 +1127,7 @@ static void
 		// NOTE: We're calling clear_screen to handle is_cleared,
 		//       which means we're probably refreshing twice in these cases...
 		//       Oh, well...
-		if (is_flashing && v == eInkFGCMap[BG_WHITE]) {
+		if (is_flashing && px->gray8 == eInkFGCMap[BG_WHITE]) {
 			if (ioctl(fbfd, FBIO_EINK_CLEAR_SCREEN, EINK_CLEAR_SCREEN) < 0) {
 				PFWARN("FBIO_EINK_CLEAR_SCREEN: %m");
 				// Just warn, this is non-fatal ;).
