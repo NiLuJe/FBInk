@@ -2900,7 +2900,7 @@ static int
 	//       when hardware dithering is enabled: the driver ought to be taking care of it, but something goes wrong somewhere,
 	//       leading to non-aligned partial refreshes possibly visibly "moving" the content by a few pixels.
 	//       For more details and a viable workaround, c.f.,
-	//       https://github.com/koreader/koreader-base/blob/0792aeb2a0d4c9e48cee728579fd4a9924971df0/ffi/framebuffer_mxcfb.lua#L256-L276
+	//       https://github.com/koreader/koreader-base/blob/9a90ea881201ae64f188150b4e3c02daeb3901bc/ffi/blitbuffer.lua#L1058-L1123
 	// NOTE: Specifically on the Kobo Libra, we've also seen multiple reports of the WAIT_FOR_UPDATE_COMPLETE ioctl
 	//       failing with a timeout in bog-standard circumstances where it doesn't really appear to have any reason to fail.
 	//       c.f., https://github.com/koreader/koreader/issues/7340
@@ -3134,6 +3134,11 @@ static int
 static int
     refresh_kobo_mtk(int fbfd, const struct mxcfb_rect region, const FBInkConfig* fbink_cfg)
 {
+	// NOTE: There appears to be a slightly different issue with refresh regions than what happened on Mk. 7 with dithering:
+	//       despite a perfectly sized & positioned region, the effective refresh *may*,
+	//       under circumstances I haven't really identified yet, be cut off 1 pixel short.
+	//       That obviously smells like an off-by-one somewhere in the driver, so, yeah, if you ever encounter that,
+	//       consider enforcing aligning refresh coordinates & dimensions to multiples of 8 as described above...
 	// Handle the common waveform_mode/update_mode switcheroo...
 	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO)
 					   ? get_wfm_mode(WFM_GC16)
