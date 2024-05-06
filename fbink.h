@@ -428,7 +428,8 @@ typedef enum
 	WFM_CLEAR,    // GC16 local (NOTE: Appears to crash the EPDC... [Elipsa on FW 4.28.17826])
 	WFM_GC4L,     // GC4 local (NOTE: Appears to crash the EPDC... [Elipsa on FW 4.28.17826])
 	// Kobo Sunxi & MTK only
-	WFM_GCC16,    // GCC16, for color content on Kaleido panels.
+	WFM_GCC16,     // GCC16, for color image content on Kaleido panels.
+	WFM_GLRC16,    // GLRC16, for color highlights on text on Kaleido panels.
 	// Kindle MTK only
 	WFM_GC16_PARTIAL,     // Internal use only, GC16 + PARTIAL
 	WFM_GCK16_PARTIAL,    // Internal use only, GCK16 + PARTIAL

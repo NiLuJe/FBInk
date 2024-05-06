@@ -57,6 +57,9 @@
 
 // NOTE: That confusing `enable_night_mode_by_wfm` mapping is never actually used, unless you enable it via the debug procfs knob.
 //       FWIW, lab126 does GC16 => GCK16 & GLR16 => GLKW16...
+// NOTE: Like it's always been the case on lab126 devices, on newer devices (i.e., not the Elipsa 2E),
+//       anything involving REAGL (i.e., GLR16, GLKW16 & GLRC16) is *always* paired with FULL.
+//       Likewise, stuff tweaked for Kaleido (GCC16 & GLRC16) is also *always* paired with FULL.
 enum HWTCON_WAVEFORM_MODE_ENUM
 {
 	// Matches MXCFB
@@ -71,7 +74,8 @@ enum HWTCON_WAVEFORM_MODE_ENUM
 	HWTCON_WAVEFORM_MODE_GCK16  = 8,
 	HWTCON_WAVEFORM_MODE_GLKW16 = 9,    // AKA. GCKW16; REAGL DARK
 	// Introduced with Kaleido devices
-	HWTCON_WAVEFORM_MODE_GCC16  = 10,    // Used for images on color panels, paired with FULL.
+	HWTCON_WAVEFORM_MODE_GCC16  = 10,    // Used for images on color panels.
+	HWTCON_WAVEFORM_MODE_GLRC16 = 11,    // Used for color highlights on text. (GLKW16 in dark mode).
 	// Matches MXCFB
 	HWTCON_WAVEFORM_MODE_AUTO   = 257,
 };
