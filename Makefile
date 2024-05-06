@@ -32,6 +32,9 @@ else
 	RANLIB?=gcc-ranlib
 endif
 
+# For use in recursive calls we don't want `make -n` to follow through.
+SUBMAKE = $(MAKE)
+
 DEBUG_CFLAGS:=-Og -fno-omit-frame-pointer -pipe -g
 # Fallback CFLAGS, we honor the env first and foremost!
 OPT_CFLAGS:=-O2 -fomit-frame-pointer -pipe
@@ -777,7 +780,7 @@ libunibreak.built:
 	--enable-static \
 	--disable-shared \
 	$(if $(PIC),--with-pic=yes,)
-	$(MAKE) -C libunibreak-staged
+	$(SUBMAKE) -C libunibreak-staged
 	touch "$@"
 
 libi2c.built:
@@ -801,7 +804,7 @@ libevdev.built:
 	--prefix='$(CURDIR)/libevdev-staged' \
 	--enable-static \
 	--disable-shared && \
-	$(MAKE) install
+	$(SUBMAKE) install
 	touch "$@"
 
 ifeq "$(CC_IS_CLANG)" "1"
