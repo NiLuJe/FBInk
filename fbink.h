@@ -1510,6 +1510,9 @@ FBINK_API int fbink_fill_rect_rgba(int fbfd,
 // These are designed with *convenience* in mind, *not* performance.
 // (In particular, a pixel needs to be packed on *each* call).
 // I'd highly recommend handling drawing yourself if you can ;).
+// NOTE: Unlike the fbink_fill_rect family of functions,
+//       the fbink_put_pixel family will *never* trigger a refresh.
+//       (Which explains why they don't need to take an FBInkConfig pointer).
 // Returns -(ENOSYS) when drawing primitives are disabled (MINIMAL build w/o DRAW).
 // x:                   x coordinates
 // y:                   y coordinates
