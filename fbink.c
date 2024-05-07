@@ -10730,6 +10730,13 @@ static __attribute__((hot)) uint8_t
 	return (q > UINT8_MAX ? UINT8_MAX : (uint8_t) q);
 }
 
+static uint8_t
+    hhuclampf(float d, float min, float max)
+{
+	const float t = d < min ? min : d;
+	return t > max ? (uint8_t) max : (uint8_t) t;
+}
+
 static __attribute__((hot)) void
     saturation_boost_hsp(FBInkPixelRGBA* restrict px, const float change)
 {
@@ -10750,9 +10757,9 @@ static __attribute__((hot)) void
 	G = P + (G - P) * change;
 	B = P + (B - P) * change;
 
-	px->color.r = (R > UINT8_MAX ? UINT8_MAX : (uint8_t) R);
-	px->color.g = (G > UINT8_MAX ? UINT8_MAX : (uint8_t) G);
-	px->color.b = (B > UINT8_MAX ? UINT8_MAX : (uint8_t) B);
+	px->color.r = hhuclampf(R, 0, UINT8_MAX);
+	px->color.g = hhuclampf(G, 0, UINT8_MAX);
+	px->color.b = hhuclampf(B, 0, UINT8_MAX);
 }
 
 // Draw image data on screen (we inherit a few of the variable types/names from stbi ;))
