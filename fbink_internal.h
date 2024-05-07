@@ -827,6 +827,7 @@ unsigned char*
 static unsigned char*               img_load_from_file(const char*, int* restrict, int* restrict, int* restrict, int);
 static unsigned char*               img_convert_px_format(const unsigned char* restrict, int, int, int, int);
 static __attribute__((hot)) uint8_t dither_o8x8(unsigned short int, unsigned short int, uint8_t);
+static __attribute__((hot)) void    saturation_boost_hsp(FBInkPixelRGBA* restrict px, const double);
 static int                          draw_image(int,
 					       const unsigned char* restrict,
 					       const int,

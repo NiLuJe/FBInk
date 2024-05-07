@@ -10723,6 +10723,30 @@ static __attribute__((hot)) uint8_t
 	return (q > UINT8_MAX ? UINT8_MAX : (uint8_t) q);
 }
 
+static __attribute__((hot)) void
+    saturation_boost_hsp(FBInkPixelRGBA* restrict px, const double change)
+{
+	// This is Darel Rex Finley's HSP changeSaturation function.
+	// c.f., https://alienryderflex.com/saturation.html
+#	define Pr 0.299
+#	define Pg 0.587
+#	define Pb 0.114
+
+	double R = px->color.r;
+	double G = px->color.g;
+	double B = px->color.b;
+
+	double P = sqrt(R * R * Pr + G * G * Pg + B * B * Pb);
+
+	R = P + (R - P) * change;
+	G = P + (G - P) * change;
+	B = P + (B - P) * change;
+
+	px->color.r = (R > UINT8_MAX ? UINT8_MAX : (uint8_t) R);
+	px->color.g = (G > UINT8_MAX ? UINT8_MAX : (uint8_t) G);
+	px->color.b = (B > UINT8_MAX ? UINT8_MAX : (uint8_t) B);
+}
+
 // Draw image data on screen (we inherit a few of the variable types/names from stbi ;))
 static int
     draw_image(int fbfd,
@@ -10896,6 +10920,9 @@ static int
 			LOG("Image has an alpha channel, we'll have to do alpha blending.");
 		}
 	}
+
+	// Pre-compute the saturation boost factor, if any
+	const double sat_boost = 1.0 + (fbink_cfg->saturation_boost / 100.0);
 
 	// Handle inversion if requested, in a way that avoids branching in the loop ;).
 	// And, as an added bonus, plays well with the fact that legacy devices have an inverted color map...
@@ -11106,6 +11133,10 @@ static int
 						// Take a shortcut for the most common alpha values (none & full)
 						if (img_px.color.a == 0xFFu) {
 							// Fully opaque, we can blit the image (almost) directly.
+							// Do we want a saturation boost?
+							if (fbink_cfg->saturation_boost != 0U) {
+								saturation_boost_hsp(&img_px, sat_boost);
+							}
 							// We do need to handle BGR and honor inversion ;).
 							img_px.p ^= invert_32b;
 							// And software dithering... Not a fan of the extra branching,
@@ -11166,6 +11197,10 @@ static int
 							    *((uint32_t*) (fbPtr + fb_scanline_offset) + (i + x_off));
 #	pragma GCC diagnostic pop
 
+							// Saturation boost
+							if (fbink_cfg->saturation_boost != 0U) {
+								saturation_boost_hsp(&img_px, sat_boost);
+							}
 							// Don't forget to honor inversion
 							img_px.p ^= invert_32b;
 							// Blend it, honoring pixel order (BGR vs. RGB) in the process ;).
@@ -11359,6 +11394,11 @@ static int
 #	pragma GCC diagnostic ignored "-Wcast-align"
 						img_px.p = *((const uint32_t*) (data + img_pix_offset));
 #	pragma GCC diagnostic pop
+						// Saturation boost
+						if (fbink_cfg->saturation_boost != 0U) {
+							saturation_boost_hsp(&img_px, sat_boost);
+						}
+
 						// Handle inversion, BGR swap & SW dithering
 						img_px.p ^= invert_32b;
 						if (likely(deviceQuirks.pixelFormat == FBINK_PXFMT_BGRA) ||

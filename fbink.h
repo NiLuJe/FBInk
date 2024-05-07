@@ -626,15 +626,16 @@ typedef struct
 	HW_DITHER_INDEX_T dithering_mode;    // Request a specific dithering mode (defaults to PASSTHROUGH)
 	bool              sw_dithering;      // Request (ordered) *software* dithering when printing an image.
 	//                                      This is *NOT* mutually exclusive with dithering_mode!
-	bool is_nightmode;    // Request hardware inversion (via EPDC_FLAG_ENABLE_INVERSION, if supported/safe).
+	bool    is_nightmode;    // Request hardware inversion (via EPDC_FLAG_ENABLE_INVERSION, if supported/safe).
 	//			 This is *NOT* mutually exclusive with is_inverted!
 	//			 NOTE: If the HW doesn't support inversion, a warning is printed during init.
 	//			       If you're convinced this is in error (i.e., up to date kernel),
 	//			       you can bypass that check by setting FBINK_ALLOW_HW_INVERT in your env.
-	bool no_refresh;     // Skip actually refreshing the eInk screen (useful when drawing in batches)
-	bool no_merge;       // Set the EINK_NO_MERGE flag (Kobo sunxi only)
-	bool is_animated;    // Enable refresh animation, following fbink_mtk_set_swipe_data (Kindle MTK only)
-	bool to_syslog;      // Send messages & errors to the syslog instead of stdout/stderr
+	bool    no_refresh;          // Skip actually refreshing the eInk screen (useful when drawing in batches)
+	bool    no_merge;            // Set the EINK_NO_MERGE flag (Kobo sunxi only)
+	bool    is_animated;         // Enable refresh animation, following fbink_mtk_set_swipe_data (Kindle MTK only)
+	uint8_t saturation_boost;    // Boost image saturation, in %. Useful on Kaleido panels. Only affects 32bpp.
+	bool    to_syslog;           // Send messages & errors to the syslog instead of stdout/stderr
 } FBInkConfig;
 
 // Same, but for OT/TTF specific stuff. MUST be zero-initialized.
