@@ -193,6 +193,7 @@ static __attribute__((pure)) FBInkPixel
 		case FBINK_PXFMT_BGR24:
 		case FBINK_PXFMT_BGRA:
 		case FBINK_PXFMT_BGR32:
+		default:
 			px.bgra.color.b = b;
 			px.bgra.color.g = g;
 			px.bgra.color.r = r;
@@ -230,6 +231,7 @@ static __attribute__((pure)) FBInkPixel
 		case FBINK_PXFMT_RGB24:
 		case FBINK_PXFMT_RGBA:
 		case FBINK_PXFMT_RGB32:
+		default:
 			px.bgra.color.b = v;
 			px.bgra.color.g = v;
 			px.bgra.color.r = v;
@@ -1412,7 +1414,12 @@ int
 	}
 
 	const FBInkCoordinates coords = { .x = x, .y = y };
-	FBInkPixel             px;
+	// The only wait for get_pixel not to write to px would be to be poking at an unsupported pixel format.
+	// Which means we're *not* running at all ;D (c.f., initialize_fbink). So this is a non-issue.
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+	FBInkPixel px;
+#	pragma GCC diagnostic push
 	get_pixel(coords, &px);
 
 	// Unpack the pixel for public consumption
