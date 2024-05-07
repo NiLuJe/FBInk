@@ -347,6 +347,7 @@ static void
 	    "\n"
 	    "Options affecting the image's appearance:\n"
 	    "\t-a, --flatten\tIgnore the alpha channel.\n"
+	    "\t-J, --saturation\tBoost color saturation (in percent). Aimed at Kaleido panels. 32bpp only.\n"
 	    "\n"
 	    "NOTES:\n"
 	    "\tSupported image formats: JPEG, PNG, TGA, BMP, GIF & PNM\n"
