@@ -691,6 +691,7 @@ int
                 {         "quiet",       no_argument, NULL, 'q' },
                 {         "image", required_argument, NULL, 'g' },
                 {           "img", required_argument, NULL, 'i' },
+                {    "saturation", required_argument, NULL, 'J' },
                 {       "flatten",       no_argument, NULL, 'a' },
                 {          "eval",       no_argument, NULL, 'e' },
                 {   "interactive",       no_argument, NULL, 'I' },
@@ -836,11 +837,12 @@ int
 	bool                        errfnd         = false;
 
 	// NOTE: c.f., https://codegolf.stackexchange.com/q/148228 to sort this mess when I need to find an available letter ;p
-	//       In fact, that's the current tally of alnum entries left: JjNnRUu
-	while (
-	    (opt = getopt_long(
-		 argc, argv, "y:x:Y:X:hfcmMprs::S:F:vqg:i:aeIC:B:LlP:A:oOTVt:bD::W:HEZzk::wd:GQK:", opts, &opt_index)) !=
-	    -1) {
+	//       In fact, that's the current tally of alnum entries left: jNnRUu
+	while ((opt = getopt_long(argc,
+				  argv,
+				  "y:x:Y:X:hfcmMprs::S:F:vqg:i:J:aeIC:B:LlP:A:oOTVt:bD::W:HEZzk::wd:GQK:",
+				  opts,
+				  &opt_index)) != -1) {
 		switch (opt) {
 			case 'y':
 				if (strtol_hi(opt, NULL, optarg, &fbink_cfg.row) < 0) {
@@ -1257,6 +1259,12 @@ int
 			case 'i':
 				image_file = optarg;
 				is_image   = true;
+				break;
+			case 'J':
+				// We might want to clamp to [0, 100]?
+				if (strtoul_hhu(opt, NULL, optarg, &fbink_cfg.saturation_boost) < 0) {
+					errfnd = true;
+				}
 				break;
 			case 'a':
 				fbink_cfg.ignore_alpha = true;
