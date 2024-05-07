@@ -10724,19 +10724,20 @@ static __attribute__((hot)) uint8_t
 }
 
 static __attribute__((hot)) void
-    saturation_boost_hsp(FBInkPixelRGBA* restrict px, const double change)
+    saturation_boost_hsp(FBInkPixelRGBA* restrict px, const float change)
 {
 	// This is Darel Rex Finley's HSP changeSaturation function.
 	// c.f., https://alienryderflex.com/saturation.html
-#	define Pr 0.299
-#	define Pg 0.587
-#	define Pb 0.114
+	// We lowered precision from double to floats for performance concerns.
+#	define Pr 0.299f
+#	define Pg 0.587f
+#	define Pb 0.114f
 
-	double R = px->color.r;
-	double G = px->color.g;
-	double B = px->color.b;
+	float R = px->color.r;
+	float G = px->color.g;
+	float B = px->color.b;
 
-	double P = sqrt(R * R * Pr + G * G * Pg + B * B * Pb);
+	float P = sqrtf(R * R * Pr + G * G * Pg + B * B * Pb);
 
 	R = P + (R - P) * change;
 	G = P + (G - P) * change;
@@ -10922,7 +10923,7 @@ static int
 	}
 
 	// Pre-compute the saturation boost factor, if any
-	const double sat_boost = 1.0 + (fbink_cfg->saturation_boost / 100.0);
+	const float sat_boost = 1.0f + (fbink_cfg->saturation_boost / 100.0f);
 
 	// Handle inversion if requested, in a way that avoids branching in the loop ;).
 	// And, as an added bonus, plays well with the fact that legacy devices have an inverted color map...
