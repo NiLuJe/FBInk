@@ -14,18 +14,51 @@ with open(data, "r") as f:
 		#       c.f., https://github.com/NiLuJe/FBInk/issues/70#issuecomment-1242274710
 		if line.startswith("E60QF0"):
 			# Tolino Shine 2HD
-			print("32627,")
+			print("671,")
 #		elif line.startswith("E60K00"):
 #			# NOTE: Caught by the Clara HD match
-#			# Tolino Shine 3
-#			print("32632,")
+#			# Tolino Shine 3 (loki)
+#			print("676,")
 		elif line.startswith("E60Q30"):
 			# Tolino Vision
-			print("32631,")
+			print("675,")
 		elif line.startswith("E70K0M"):
 			# NOTE: Its actual DTB says E70K0M, but at the same index as E70K00, which is the Libra...
 			# Tolino Vision 5
-			print("32640,")
+			print("684,")
+#		elif line.startswith("E606H"):
+#			# Tolino Shine
+#			print("6xx,")
+#		elif line.startswith("E60Q5"):
+#			# Tolino Vision 2 @ 1024x758 || Vision 3/4
+#			print("6xx,")
+#		elif line.startswith("E60QJ"):
+#			# Tolino Page
+#			print("6xx,")
+#		elif line.startswith("E70Q2"):
+#			# Tolino Epos
+#			print("6xx,")
+#		elif line.startswith("E70K0"):
+#			# NOTE: Caught by the Libra match
+#			# Tolino Vision 5 (arya)
+#			print("684,")
+#		elif line.startswith("E80K0"):
+#			# NOTE: Caught by the Forma match
+#			# Tolino Epos 2 (freya)
+#			print("677,")
+#		elif line.startswith("E60QV"):
+#			# Tolino (stella)
+#			print("6xx,")
+#		elif line.startswith("E70P1"):
+#			# Tolino (altair)
+#			print("6xx,")
+#		elif line.startswith("E80P0"):
+#			# NOTE: Caught by the Sage match
+#			# Tolino Epos 3 (rigel)
+#			print("683,")
+#		elif line.startswith("E60P7"):
+#			# Tolino (vega)
+#			print("6xx,")
 		elif line.startswith("E60610D"):
 			# NOTE: This is an educated guess. kobo_config puts every E60610* in the "trilogy" basket...
 			# Touch C (trilogy) [320]

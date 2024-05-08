@@ -656,6 +656,12 @@ static void
 			strtcpy(deviceQuirks.deviceCodename, "Alyssum", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform));
 			break;
+		case DEVICE_TOLINO_SHINE_2HD:    // Tolino Shine 2HD (shine2) (~ Glo HD)
+			deviceQuirks.screenDPI = 300U;
+			strtcpy(deviceQuirks.deviceName, "Shine 2HD", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Shine2", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform));
+			break;
 		case DEVICE_KOBO_TOUCH_2:    // Touch 2.0 (pika)
 			strtcpy(deviceQuirks.deviceName, "Touch 2.0", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Pika", sizeof(deviceQuirks.deviceCodename));
@@ -751,6 +757,12 @@ static void
 			strtcpy(deviceQuirks.deviceCodename, "Star", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform));
 			break;
+		case DEVICE_TOLINO_VISION:    // Tolino Vision (vision) (~ Aura SE)
+			deviceQuirks.screenDPI = 212U;
+			strtcpy(deviceQuirks.deviceName, "Tolino Vision", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Vision", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform));
+			break;
 		case DEVICE_KOBO_AURA_SE_R2:    // Aura SE r2 (star)
 			deviceQuirks.isKoboMk7 = true;
 			// NOTE: *Might* be NTX_ROTA_ODD_INVERTED
@@ -765,6 +777,13 @@ static void
 			deviceQuirks.screenDPI = 300U;
 			strtcpy(deviceQuirks.deviceName, "Clara HD", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Nova", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform));
+			break;
+		case DEVICE_TOLINO_SHINE_3:    // Shine 3 (loki) (~ Clara HD)
+			deviceQuirks.isKoboMk7 = true;
+			deviceQuirks.screenDPI = 300U;
+			strtcpy(deviceQuirks.deviceName, "Shine 3", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Loki", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_FORMA:    // Forma (frost)
@@ -798,6 +817,20 @@ static void
 			strtcpy(deviceQuirks.deviceCodename, "Frost", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform));
 			break;
+		case DEVICE_TOLINO_EPOS_2:    // Epos 2 (freya) (~ Forma @ 16GB)
+			deviceQuirks.isKoboMk7                  = true;
+			deviceQuirks.canRotate                  = true;
+			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_ODD_INVERTED;
+			// {3, 2, 1, 0}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CCW;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UD;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
+			deviceQuirks.screenDPI                  = 300U;
+			strtcpy(deviceQuirks.deviceName, "Epos 2", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Freya", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform));
+			break;
 		case DEVICE_KOBO_LIBRA_H2O:    // Libra H2O (storm)
 			deviceQuirks.isKoboMk7                  = true;
 			// NOTE: Boot rotation is FB_ROTATE_UR, pickel is FB_ROTATE_UR, nickel is FB_ROTATE_UR
@@ -822,6 +855,22 @@ static void
 			deviceQuirks.screenDPI                  = 300U;
 			strtcpy(deviceQuirks.deviceName, "Libra H2O", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Storm", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform));
+			break;
+		case DEVICE_TOLINO_VISION_5:    // Tolino Vision 5 (arya) (~ Libra H2O)
+			deviceQuirks.isKoboMk7                  = true;
+			deviceQuirks.ntxBootRota                = FB_ROTATE_UR;
+			deviceQuirks.canRotate                  = true;
+			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_SANE;
+			// {0, 1, 2, 3}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_UR;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_UD;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_CCW;
+			deviceQuirks.unreliableWaitFor          = true;
+			deviceQuirks.screenDPI                  = 300U;
+			strtcpy(deviceQuirks.deviceName, "Vision 5", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Arya", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_NIA:    // Nia (luna)
@@ -900,6 +949,23 @@ static void
 			deviceQuirks.screenDPI                  = 300U;
 			strtcpy(deviceQuirks.deviceName, "Sage", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Cadmus", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 8", sizeof(deviceQuirks.devicePlatform));
+			break;
+		case DEVICE_TOLINO_EPOS_3:    // Epos 3 (rigel) (~ Sage)
+			deviceQuirks.isSunxi                    = true;
+			deviceQuirks.hasEclipseWfm              = true;
+			deviceQuirks.canHWInvert                = false;
+			deviceQuirks.ntxBootRota                = FB_ROTATE_CW;    // e.g., fat bezel side DOWN.
+			deviceQuirks.canRotate                  = true;
+			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_SUNXI;
+			// There's no real linuxfb rotation support, so, {0, 1, 2, 3}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_UR;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_UD;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_CCW;
+			deviceQuirks.screenDPI                  = 300U;
+			strtcpy(deviceQuirks.deviceName, "Epos 3", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Rigel", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Mark 8", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_CLARA_2E:    // Clara 2E (Goldfinch)
@@ -1325,7 +1391,20 @@ static void
 					} else if (kobo_id == DEVICE_KOBO_FORMA) {
 						// Forma (frost) [377] -> Forma 32GB (frost) [380]
 						kobo_id = DEVICE_KOBO_FORMA_32GB;
+
+						if (payload[KOBO_HWCFG_Customer] == HWCFG_CUSTOMER_TOLINO) {
+							// Forma (frost) [377] -> Tolino Epos 2 16GB (freya) [677]
+							kobo_id += TOLINO_DEVICE_ID_OFFSET;
+						}
 					}
+				}
+			} else if (kobo_id == DEVICE_KOBO_CLARA_HD || kobo_id == DEVICE_KOBO_LIBRA_H2O ||
+				   kobo_id == DEVICE_KOBO_SAGE) {
+				if (payload[KOBO_HWCFG_Customer] == HWCFG_CUSTOMER_TOLINO) {
+					// Clara HD (nova) [376] -> Tolino Shine 3 (loki) [676]
+					// Libra H2O (storm) [384] -> Tolino Vision 5 (arya) [684]
+					// Sage (cadmus) [383] -> Tolino Epos 3 (rigel) [683]
+					kobo_id += TOLINO_DEVICE_ID_OFFSET;
 				}
 			} else if (kobo_id == DEVICE_KOBO_LIBRA_COLOUR) {
 				// Discriminate the Kobo Libra Colour from the Tolino Vision Color
