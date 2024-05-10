@@ -49,6 +49,9 @@ FBInkInputDevice*
 	if (!devices) {
 		PFWARN("calloc: %m");
 		*dev_count = 0U;
+		for (int i = 0; i < ndev; i++) {
+			free(namelist[i]);
+		}
 		return NULL;
 	}
 
