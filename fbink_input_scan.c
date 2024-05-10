@@ -57,9 +57,7 @@ FBInkInputDevice*
 
 	for (int i = 0; i < ndev; i++) {
 		FBInkInputDevice* dev = devices + i;
-		dev->type             = INPUT_UNKNOWN;
 		dev->fd               = -1;
-		strcpy(dev->name, "???");
 		snprintf(dev->path, sizeof(dev->path), "%s/%s", DEV_INPUT_EVENT, namelist[i]->d_name);
 
 		// Default to NONBLOCK

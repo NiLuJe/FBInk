@@ -1658,14 +1658,14 @@ FBINK_API int fbink_mtk_toggle_pen_mode(int fbfd, bool toggle);
 //
 typedef enum
 {
-	INPUT_UNKNOWN       = 1U << 0U,
-	INPUT_POINTINGSTICK = 1U << 1U,
-	INPUT_MOUSE         = 1U << 2U,
-	INPUT_TOUCHPAD      = 1U << 3U,
-	INPUT_TOUCHSCREEN   = 1U << 4U,
-	INPUT_JOYSTICK      = 1U << 5U,
-	INPUT_TABLET        = 1U << 6U,
-	INPUT_KEY           = 1U << 7U,
+	INPUT_UNKNOWN       = 0U,
+	INPUT_POINTINGSTICK = 1U << 0U,
+	INPUT_MOUSE         = 1U << 1U,
+	INPUT_TOUCHPAD      = 1U << 2U,
+	INPUT_TOUCHSCREEN   = 1U << 3U,
+	INPUT_JOYSTICK      = 1U << 4U,
+	INPUT_TABLET        = 1U << 5U,
+	INPUT_KEY           = 1U << 6U,
 
 	OPEN_BLOCKING = 1U << 30U,
 	SCAN_ONLY     = 1U << 31U,
