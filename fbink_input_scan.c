@@ -76,6 +76,7 @@ FBInkInputDevice*
 		ioctl(dev->fd, EVIOCGNAME(sizeof(dev->name)), dev->name);
 
 		// TODO: Also close if !requested types
+		// TODO: Set matched if requested types
 		if (req_types & SCAN_ONLY) {
 			close(dev->fd);
 			dev->fd = -1;

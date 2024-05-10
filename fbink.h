@@ -1676,6 +1676,7 @@ typedef struct
 {
 	INPUT_DEVICE_TYPE_T type;
 	int                 fd;
+	bool                matched;
 	char                name[256];
 	char                path[4096];
 } FBInkInputDevice;
