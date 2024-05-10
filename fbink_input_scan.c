@@ -42,6 +42,7 @@ FBInkInputDevice*
 	struct dirent** namelist;
 	int             ndev = scandir(DEV_INPUT_EVENT, &namelist, is_event_device, sort_fn);
 	if (ndev <= 0) {
+		PFWARN("scandir: %m");
 		return NULL;
 	}
 
@@ -54,6 +55,7 @@ FBInkInputDevice*
 		if (!p) {
 			free(devices);
 			*dev_count = 0U;
+			PFWARN("realloc of `%zu` bytes: %m", size);
 			return NULL;
 		}
 		devices = p;
