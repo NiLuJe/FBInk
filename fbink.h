@@ -1654,6 +1654,35 @@ FBINK_API int fbink_mtk_toggle_auto_reagl(int fbfd, bool toggle);
 FBINK_API int fbink_mtk_toggle_pen_mode(int fbfd, bool toggle);
 
 //
+// Input stuff
+//
+typedef enum
+{
+	INPUT_UNKNOWN       = 1 << 0,
+	INPUT_POINTINGSTICK = 1 << 1,
+	INPUT_MOUSE         = 1 << 2,
+	INPUT_TOUCHPAD      = 1 << 3,
+	INPUT_TOUCHSCREEN   = 1 << 4,
+	INPUT_JOYSTICK      = 1 << 5,
+	INPUT_TABLET        = 1 << 6,
+	INPUT_KEY           = 1 << 7,
+
+	OPEN_BLOCKING = 1 << 29,
+	SCAN_ONLY     = 1 << 30,
+} __attribute__((packed)) INPUT_DEVICE_TYPE_E;
+typedef int32_t           INPUT_DEVICE_TYPE_T;
+
+typedef struct
+{
+	INPUT_DEVICE_TYPE_T type;
+	int                 fd;
+	char                name[256];
+	char                path[4096];
+} FBInkInputDevice;
+
+FBINK_API FBInkInputDevice* fbink_input_scan(INPUT_DEVICE_TYPE_T req_types, size_t* dev_count);
+
+//
 ///
 //
 // When you intend to keep the framebuffer fd open for the lifecycle of your program:

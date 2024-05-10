@@ -704,6 +704,12 @@ $(OUT_DIR)/fbdepth: tinier.built
 
 fbdepth: $(OUT_DIR)/fbdepth
 
+$(OUT_DIR)/input_scan: tinier.built
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(TINIER_FEATURES) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o $@ utils/input_scan.c $(LIBS_FOR_STATIC) $(LIBS)
+	$(STRIP) --strip-unneeded $@
+
+input_scan: $(OUT_DIR)/input_scan
+
 $(OUT_DIR)/dump: small.built
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(SMALL_FEATURES) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o $@ utils/dump.c $(LIBS_FOR_STATIC) $(LIBS)
 	$(STRIP) --strip-unneeded $@
@@ -928,6 +934,7 @@ clean: cleanlib
 	rm -rf $(OUT_DIR)/button_scan
 	rm -rf $(OUT_DIR)/rota
 	rm -rf $(OUT_DIR)/fbdepth
+	rm -rf $(OUT_DIR)/input_scan
 	rm -rf $(OUT_DIR)/alt_buffer
 	rm -rf $(OUT_DIR)/doom
 	rm -rf $(OUT_DIR)/dump
@@ -979,4 +986,4 @@ format:
 	clang-format -style=file -i *.c *.h cutef8/*.c cutef8/*.h utils/*.c qimagescale/*.c qimagescale/*.h tools/*.c eink/*-kobo.h eink/*-kindle.h eink/einkfb.h
 
 
-.PHONY: default outdir all staticlib sharedlib static small tiny tinier shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils rota_map alt sunxi ftrace fbdepth dump devcap clean cleansharedlib cleanstaticlib cleanlib distclean dist install format
+.PHONY: default outdir all staticlib sharedlib static small tiny tinier shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils rota_map alt sunxi ftrace fbdepth input_scan dump devcap clean cleansharedlib cleanstaticlib cleanlib distclean dist install format
