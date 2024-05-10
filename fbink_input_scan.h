@@ -56,4 +56,35 @@ static int
 	return strncmp(EVENT_DEV_NAME, dir->d_name, 5) == 0;
 }
 
+// Each of our target platforms tend to settle on some specific,
+// sometimes barely related, keycodes for common functions...
+#if defined(FBINK_FOR_KOBO)
+#	define PLATFORM_KEY_POWER      KEY_POWER
+#	define PLATFORM_KEY_SLEEP      KEY_H     // PowerCover, since the Elipsa
+#	define PLATFORM_KEY_WAKEUP     KEY_F1    // PowerCover, before the Elipsa
+#	define PLATFORM_KEY_PGPREV     KEY_F23
+#	define PLATFORM_KEY_PGNEXT     KEY_F24
+#	define PLATFORM_KEY_HOME       KEY_HOME
+#	define PLATFORM_KEY_FRONTLIGHT KEY_KATAKANA
+#	define PLATFORM_KEY_MENU       0
+#elif defined(FBINK_FOR_KINDLE)
+#	define PLATFORM_KEY_POWER      KEY_POWER    // Generally handled by powerd
+#	define PLATFORM_KEY_SLEEP      0            // :?
+#	define PLATFORM_KEY_WAKEUP     0            // :?
+#	define PLATFORM_KEY_PGPREV     KEY_PAGEUP
+#	define PLATFORM_KEY_PGNEXT     KEY_PAGEDOWN
+#	define PLATFORM_KEY_HOME       KEY_HOME
+#	define PLATFORM_KEY_FRONTLIGHT 0
+#	define PLATFORM_KEY_MENU       KEY_MENU
+#else
+#	define PLATFORM_KEY_POWER      KEY_POWER
+#	define PLATFORM_KEY_SLEEP      KEY_SLEEP
+#	define PLATFORM_KEY_WAKEUP     KEY_WAKEUP
+#	define PLATFORM_KEY_PGPREV     KEY_BACK
+#	define PLATFORM_KEY_PGNEXT     KEY_FORWARD
+#	define PLATFORM_KEY_HOME       KEY_HOMEPAGE
+#	define PLATFORM_KEY_FRONTLIGHT KEY_BRIGHTNESS_CYCLE
+#	define PLATFORM_KEY_MENU       KEY_MENU
+#endif
+
 #endif
