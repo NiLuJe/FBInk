@@ -158,7 +158,7 @@ int
 	// FIXME: Debug
 	LOG("Devices: %p (count: %zu)", devices, dev_count);
 	if (devices) {
-		for (FBInkInputDevice* device = devices; dev_count != 0U; device++, dev_count--) {
+		for (FBInkInputDevice* device = devices; device < devices + dev_count; device++) {
 			LOG("Device %s @ %s is of type %d", device->name, device->path, device->type);
 		}
 		free(devices);

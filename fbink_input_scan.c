@@ -53,11 +53,12 @@ FBInkInputDevice*
 		void* p = realloc(devices, size);
 		if (!p) {
 			free(devices);
+			*dev_count = 0U;
 			return NULL;
 		}
 		devices = p;
 
-		FBInkInputDevice* dev = devices + (*dev_count - 1U);
+		FBInkInputDevice* dev = devices + i;
 		dev->type             = INPUT_UNKNOWN;
 		dev->fd               = -1;
 		strcpy(dev->name, "???");
@@ -76,7 +77,7 @@ FBInkInputDevice*
 
 		ioctl(dev->fd, EVIOCGNAME(sizeof(dev->name)), dev->name);
 
-		// TODO: Or !requested types
+		// TODO: Also close if !requested types
 		if (req_types & SCAN_ONLY) {
 			close(dev->fd);
 			dev->fd = -1;
