@@ -36,30 +36,23 @@
 FBInkInputDevice*
     fbink_input_scan(INPUT_DEVICE_TYPE_T req_types, size_t* dev_count)
 {
-	FBInkInputDevice* devices = NULL;
-	*dev_count                = 0U;
-
 	struct dirent** namelist;
 	int             ndev = scandir(DEV_INPUT_EVENT, &namelist, is_event_device, sort_fn);
 	if (ndev <= 0) {
 		PFWARN("scandir: %m");
+		*dev_count = 0U;
+		return NULL;
+	}
+
+	*dev_count                = (size_t) ndev;
+	FBInkInputDevice* devices = calloc((size_t) ndev, sizeof(*devices));
+	if (!devices) {
+		PFWARN("calloc: %m");
+		*dev_count = 0U;
 		return NULL;
 	}
 
 	for (int i = 0; i < ndev; i++) {
-		*dev_count += 1;
-		size_t size = *dev_count * sizeof(FBInkInputDevice);
-		// FIXME: Debug
-		PFLOG("Realloc of %zu bytes for %zu devices", size, *dev_count);
-		void* p = realloc(devices, size);
-		if (!p) {
-			free(devices);
-			*dev_count = 0U;
-			PFWARN("realloc of `%zu` bytes: %m", size);
-			return NULL;
-		}
-		devices = p;
-
 		FBInkInputDevice* dev = devices + i;
 		dev->type             = INPUT_UNKNOWN;
 		dev->fd               = -1;
