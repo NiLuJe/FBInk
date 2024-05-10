@@ -38,8 +38,9 @@
 #include <unistd.h>
 
 #ifdef __GLIBC__
-// versionsort sorts the device names in proper numerical order (e.g. so that
-// event10 is listed after event9, not event1), but is only available in glibc.
+// versionsort sorts the device names in proper numerical order
+// (e.g. so that event10 is listed after event9, not event1),
+// but is only available in glibc.
 static int (*sort_fn)(const struct dirent**, const struct dirent**) = versionsort;
 #else
 // Fall back to basic alphabetical sorting for other libc implementations.
