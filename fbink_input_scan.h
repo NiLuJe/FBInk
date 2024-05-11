@@ -106,8 +106,8 @@ static __attribute__((cold)) void        concat_type_recap(INPUT_DEVICE_TYPE_T t
 // sometimes barely related, keycodes for common functions...
 #	if defined(FBINK_FOR_KOBO)
 #		define PLATFORM_KEY_POWER      KEY_POWER
-#		define PLATFORM_KEY_SLEEP      KEY_H     // PowerCover, since the Elipsa
-#		define PLATFORM_KEY_WAKEUP     KEY_F1    // PowerCover, before the Elipsa
+#		define PLATFORM_KEY_SLEEP      KEY_H     // PowerCover
+#		define PLATFORM_KEY_WAKEUP     KEY_F1    // Also PowerCover, depending on the device...
 #		define PLATFORM_KEY_PGPREV     KEY_F23
 #		define PLATFORM_KEY_PGNEXT     KEY_F24
 #		define PLATFORM_KEY_HOME       KEY_HOME
