@@ -166,14 +166,13 @@ echo "Screengrab saved to ${DEVCAP_PIC}"
 echo "See https://github.com/NiLuJe/FBInk/blob/master/utils/devcap_expected_results.png for the expected *on-screen* result".
 header "EvTest"
 echo "Please tap the top-left corner of the screen in the next 10s!"
+TOUCH_DEV="$(input_scan -m touchscreen 2>/dev/null | grep '(matched: 1)' | grep -o '/dev/input/event[[:digit:]]\+')"
 (
-	if [ -e "/dev/input/by-path/platform-2-0010-event" ] ; then
-		evtest "/dev/input/by-path/platform-2-0010-event" >> "${DEVCAP_LOG}" 2>&1
-	elif [ -e "/dev/input/by-path/platform-1-0010-event" ] ; then
-		evtest "/dev/input/by-path/platform-1-0010-event" >> "${DEVCAP_LOG}" 2>&1
-	elif [ -e "/dev/input/by-path/platform-0-0010-event" ] ; then
-		evtest "/dev/input/by-path/platform-0-0010-event" >> "${DEVCAP_LOG}" 2>&1
+	if [ -e "${TOUCH_DEV}" ] ; then
+		evtest "${TOUCH_DEV}" >> "${DEVCAP_LOG}" 2>&1
 	else
+		echo "Failed to auto-detect input device, falling back to /dev/input/event1" >> "${DEVCAP_LOG}"
+		echo "" >> "${DEVCAP_LOG}"
 		evtest "/dev/input/event1" >> "${DEVCAP_LOG}" 2>&1
 	fi
 ) &
