@@ -113,7 +113,7 @@ static __attribute__((cold)) void        concat_type_recap(INPUT_DEVICE_TYPE_T t
 #		define PLATFORM_KEY_HOME       KEY_HOME
 #		define PLATFORM_KEY_FRONTLIGHT KEY_KATAKANA
 #		define PLATFORM_KEY_MENU       0
-#		define PLATFORM_KEY_DPAD       KEY_UP
+#		define PLATFORM_KEY_DPAD       0
 #	elif defined(FBINK_FOR_KINDLE)
 #		define PLATFORM_KEY_POWER      KEY_POWER    // Generally handled by powerd
 #		define PLATFORM_KEY_SLEEP      0            // :?
@@ -133,7 +133,7 @@ static __attribute__((cold)) void        concat_type_recap(INPUT_DEVICE_TYPE_T t
 #		define PLATFORM_KEY_HOME       KEY_HOMEPAGE
 #		define PLATFORM_KEY_FRONTLIGHT KEY_BRIGHTNESS_CYCLE
 #		define PLATFORM_KEY_MENU       KEY_MENU
-#		define PLATFORM_KEY_DPAD       KEY_UP
+#		define PLATFORM_KEY_DPAD       0
 #	endif
 
 #endif    // FBINK_WITH_INPUT

@@ -216,6 +216,9 @@ static void
 	if (PLATFORM_KEY_DPAD && test_bit(PLATFORM_KEY_DPAD, bitmask_key)) {
 		dev->type |= INPUT_DPAD;
 	}
+	if (test_bit(KEY_UP, bitmask_key)) {
+		dev->type |= INPUT_DPAD;
+	}
 }
 
 static int
