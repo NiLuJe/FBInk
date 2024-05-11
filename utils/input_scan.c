@@ -43,7 +43,7 @@
 
 bool toSysLog  = false;
 bool isQuiet   = false;
-bool isVerbose = true;
+bool isVerbose = false;
 // Handle what we send to stdout (i.e., mostly diagnostic stuff, which tends to be verbose, so no FBInk tag)
 #define LOG(fmt, ...)                                                                                                    \
 	({                                                                                                               \
@@ -144,7 +144,8 @@ int
 		return ERRCODE(EXIT_FAILURE);
 	}
 
-	// We don't actually need to init FBInk, we just need to update its verbosity state
+	// We don't actually need to init FBInk, but we can update its verbosity state,
+	// in order to potentially see the verbose logging from test_key.
 	FBInkConfig fbink_cfg = { 0 };
 	fbink_cfg.is_verbose  = isVerbose;
 	fbink_cfg.is_quiet    = isQuiet;
