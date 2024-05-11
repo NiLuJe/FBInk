@@ -420,12 +420,8 @@ FBInkInputDevice*
 		concat_type_recap(dev->type, recap, sizeof(recap));
 		ELOG("%s: `%s`%s", dev->path, dev->name, recap);
 
-		// If the classification matches our request, flag it as such
-		dev->matched = !!(dev->type & match_types);
-		// But if a match also matches the exclude mask, drop it
-		if (dev->matched && dev->type & exclude_types) {
-			dev->matched = false;
-		}
+		// If the classification matches our request and not our exclude, flag it as such
+		dev->matched = !!((dev->type & match_types) && !(dev->type & exclude_types));
 
 		// If this was a dry-run, or if the device wasn't a match, close the fd
 		if (match_types & SCAN_ONLY || !dev->matched) {
