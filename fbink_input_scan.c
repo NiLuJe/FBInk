@@ -33,6 +33,7 @@
 // Copyright (C) 2013 Red Hat, Inc
 // c.f., https://cgit.freedesktop.org/evemu/tree/tools/find_event_devices.c
 
+#ifdef FBINK_WITH_INPUT
 /* pointer devices */
 static bool
     test_pointers(FBInkInputDevice*    dev,
@@ -376,10 +377,12 @@ static __attribute__((cold)) void
 		}
 	}
 }
+#endif    // FBINK_WITH_INPUT
 
 FBInkInputDevice*
-    fbink_input_scan(INPUT_DEVICE_TYPE_T req_types, size_t* dev_count)
+    fbink_input_scan(INPUT_DEVICE_TYPE_T req_types UNUSED_BY_NOINPUT, size_t* dev_count UNUSED_BY_NOINPUT)
 {
+#ifdef FBINK_WITH_INPUT
 	struct dirent** namelist;
 	int             ndev = scandir(DEV_INPUT_EVENT, &namelist, is_event_device, sort_fn);
 	if (ndev <= 0) {
@@ -438,4 +441,8 @@ FBInkInputDevice*
 	}
 
 	return devices;
+#else
+	WARN("Input utilities are disabled in this FBInk build");
+	return NULL;
+#endif    // FBINK_WITH_INPUT
 }

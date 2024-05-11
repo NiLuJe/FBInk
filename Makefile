@@ -403,6 +403,7 @@ else
 	FEATURES_CPPFLAGS+=-DFBINK_WITH_FONTS
 	FEATURES_CPPFLAGS+=-DFBINK_WITH_IMAGE
 	FEATURES_CPPFLAGS+=-DFBINK_WITH_OPENTYPE
+	FEATURES_CPPFLAGS+=-DFBINK_WITH_INPUT
 	# Unifont is *always* optional, because it'll add almost 2MB to the binary size!
 	ifdef UNIFONT
 		FEATURES_CPPFLAGS+=-DFBINK_WITH_UNIFONT
@@ -485,6 +486,11 @@ ifdef MINIMAL
 	ifdef DRAW
 		FEATURES_CPPFLAGS+=-DFBINK_WITH_DRAW
 	endif
+
+	# Support tweaking a MINIMAL build to still include input utilities
+	ifdef INPUT
+		FEATURES_CPPFLAGS+=-DFBINK_WITH_INPUT
+	endif
 endif
 
 # On the other hand, we want to enforce MINIMAL features for the tools that don't link against FBInk,
@@ -498,7 +504,7 @@ DOOM_CPPFLAGS+=-DFBINK_WITH_DRAW -DFBINK_WITH_IMAGE
 
 # We also want matching feature sets for our frozen minimal builds for the tools that *do* link against such a static lib
 TINIER_FEATURES:=-DFBINK_MINIMAL
-TINY_FEATURES:=-DFBINK_MINIMAL -DFBINK_WITH_DRAW
+TINY_FEATURES:=-DFBINK_MINIMAL -DFBINK_WITH_DRAW -DFBINK_WITH_INPUT
 SMALL_FEATURES:=-DFBINK_MINIMAL -DFBINK_WITH_DRAW -DFBINK_WITH_BITMAP -DFBINK_WITH_IMAGE
 
 # How we handle our library creation
@@ -733,7 +739,7 @@ tinier tinier.built:
 
 tiny tiny.built:
 	$(MAKE) cleanstaticlib
-	$(MAKE) staticlib MINIMAL=true DRAW=true
+	$(MAKE) staticlib MINIMAL=true DRAW=true INPUT=true
 	touch tiny.built
 
 small small.built:

@@ -61,6 +61,9 @@
 #			define FBINK_WITH_BUTTON_SCAN
 #		endif
 #	endif
+#	ifndef FBINK_WITH_INPUT
+#		define FBINK_WITH_INPUT
+#	endif
 #endif
 // Bundling Unifont, on the other hand, is *always* optional.
 
@@ -374,6 +377,11 @@ char (&ARRAY_SIZE_HELPER(T (&array)[N]))[N];
 #	define UNUSED_BY_NOBUTTON __attribute__((unused))
 #else
 #	define UNUSED_BY_NOBUTTON
+#endif
+#ifndef FBINK_WITH_INPUT
+#	define UNUSED_BY_NOINPUT __attribute__((unused))
+#else
+#	define UNUSED_BY_NOINPUT
 #endif
 #ifdef FBINK_FOR_KINDLE
 #	define UNUSED_BY_NOTKINDLE

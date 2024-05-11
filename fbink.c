@@ -151,6 +151,9 @@ uint32_t
 #	ifdef FBINK_WITH_BUTTON_SCAN
 	features |= FBINK_FEATURE_BUTTON_SCAN;
 #	endif
+#	ifdef FBINK_WITH_INPUT
+	features |= FBINK_FEATURE_INPUT;
+#	endif
 #endif    // !FBINK_MINIMAL
 	return features;
 }

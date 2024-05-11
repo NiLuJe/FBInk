@@ -102,8 +102,10 @@ typedef uint8_t           FBINK_TARGET_T;
 #define FBINK_FEATURE_OPENTYPE    (1 << 4)    // TrueType/OpenType font rendering
 #define FBINK_FEATURE_IMAGE       (1 << 5)    // Image support
 #define FBINK_FEATURE_BUTTON_SCAN (1 << 6)    // Button scan support (Kobo only, deprecated)
+#define FBINK_FEATURE_INPUT       (1 << 7)    // Input utilities (e.g., fbink_input_scan)
 #define FBINK_FEATURE_FULL                                                                                               \
-	(FBINK_FEATURE_DRAW | FBINK_FEATURE_BITMAP | FBINK_FEATURE_FONTS | FBINK_FEATURE_OPENTYPE | FBINK_FEATURE_IMAGE)
+	(FBINK_FEATURE_DRAW | FBINK_FEATURE_BITMAP | FBINK_FEATURE_FONTS | FBINK_FEATURE_OPENTYPE |                      \
+	 FBINK_FEATURE_IMAGE | FBINK_FEATURE_INPUT)
 
 // List of available fonts
 typedef enum
@@ -1697,7 +1699,7 @@ typedef struct
 // The `matched` field will be set to true if that device matches *any* of the bits in `req_types`,
 // meaning you can throw out a fairly wide net, and still catch everything you care about.
 // You *MUST* free the returned pointer after use.
-// Returns NULL on failure.
+// Returns NULL on failure (no input devices can be read, or MINIMAL build w/o INPUT).
 // req_types:		Bitmask used to filter the type of input devices you want to open.
 //				if the OPEN_BLOCKING bit is set, fds will be opened in *blocking* mode.
 //					Otherwise, the default open flags are O_RDONLY|O_NONBLOCK|O_CLOEXEC
