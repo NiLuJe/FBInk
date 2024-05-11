@@ -71,6 +71,7 @@ static bool test_pointers(FBInkInputDevice*    dev,
 			  const unsigned long* bitmask_rel,
 			  const unsigned long* bitmask_props);
 static bool test_key(FBInkInputDevice* dev, const unsigned long* bitmask_ev, const unsigned long* bitmask_key);
+static void test_platform_keys(FBInkInputDevice* dev, const unsigned long* bitmask_key);
 static int  check_device_cap(FBInkInputDevice* dev);
 
 // Old kernels need a hand...

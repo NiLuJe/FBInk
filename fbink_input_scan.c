@@ -178,6 +178,32 @@ static bool
 	return ret;
 }
 
+// Look for specific (and often platform specific) keys
+static void
+    test_platform_keys(FBInkInputDevice* dev, const unsigned long* bitmask_key)
+{
+	if (PLATFORM_KEY_POWER && test_bit(PLATFORM_KEY_POWER, bitmask_key)) {
+		dev->type |= INPUT_POWER_BUTTON;
+	}
+	if ((PLATFORM_KEY_SLEEP && test_bit(PLATFORM_KEY_SLEEP, bitmask_key)) ||
+	    (PLATFORM_KEY_WAKEUP && test_bit(PLATFORM_KEY_WAKEUP, bitmask_key))) {
+		dev->type |= INPUT_SLEEP_COVER;
+	}
+	if ((PLATFORM_KEY_PGPREV && test_bit(PLATFORM_KEY_PGPREV, bitmask_key)) &&
+	    (PLATFORM_KEY_PGNEXT && test_bit(PLATFORM_KEY_PGNEXT, bitmask_key))) {
+		dev->type |= INPUT_PAGINATION_BUTTONS;
+	}
+	if (PLATFORM_KEY_HOME && test_bit(PLATFORM_KEY_HOME, bitmask_key)) {
+		dev->type |= INPUT_HOME_BUTTON;
+	}
+	if (PLATFORM_KEY_FRONTLIGHT && test_bit(PLATFORM_KEY_FRONTLIGHT, bitmask_key)) {
+		dev->type |= INPUT_LIGHT_BUTTON;
+	}
+	if (PLATFORM_KEY_MENU && test_bit(PLATFORM_KEY_MENU, bitmask_key)) {
+		dev->type |= INPUT_MENU_BUTTON;
+	}
+}
+
 static int
     check_device_cap(FBInkInputDevice* dev)
 {
@@ -201,6 +227,11 @@ static int
 		dev->type |= INPUT_KEY;
 	}
 
+	// And then check for more fine-grained stuff on real is_key devices for our own use-cases
+	if (is_key) {
+		test_platform_keys(dev, bitmask_key);
+	}
+
 	return EXIT_SUCCESS;
 }
 
@@ -208,6 +239,7 @@ static __attribute__((cold)) void
     input_type_to_str(INPUT_DEVICE_TYPE_E type, char* string)
 {
 	bool first = true;
+	// Udev
 	if (type & INPUT_UNKNOWN) {
 		if (first) {
 			strcat(string, " = UNKNOWN");
@@ -286,6 +318,55 @@ static __attribute__((cold)) void
 			first = false;
 		} else {
 			strcat(string, " | ACCELEROMETER");
+		}
+	}
+	// Platform-specific
+	if (type & INPUT_POWER_BUTTON) {
+		if (first) {
+			strcat(string, " = POWER_BUTTON");
+			first = false;
+		} else {
+			strcat(string, " | POWER_BUTTON");
+		}
+	}
+	if (type & INPUT_SLEEP_COVER) {
+		if (first) {
+			strcat(string, " = SLEEP_COVER");
+			first = false;
+		} else {
+			strcat(string, " | SLEEP_COVER");
+		}
+	}
+	if (type & INPUT_PAGINATION_BUTTONS) {
+		if (first) {
+			strcat(string, " = PAGINATION_BUTTONS");
+			first = false;
+		} else {
+			strcat(string, " | PAGINATION_BUTTONS");
+		}
+	}
+	if (type & INPUT_HOME_BUTTON) {
+		if (first) {
+			strcat(string, " = HOME_BUTTON");
+			first = false;
+		} else {
+			strcat(string, " | HOME_BUTTON");
+		}
+	}
+	if (type & INPUT_LIGHT_BUTTON) {
+		if (first) {
+			strcat(string, " = LIGHT_BUTTON");
+			first = false;
+		} else {
+			strcat(string, " | LIGHT_BUTTON");
+		}
+	}
+	if (type & INPUT_MENU_BUTTON) {
+		if (first) {
+			strcat(string, " = MENU_BUTTON");
+			first = false;
+		} else {
+			strcat(string, " | MENU_BUTTON");
 		}
 	}
 }
