@@ -1681,7 +1681,7 @@ typedef enum
 	INPUT_LIGHT_BUTTON       = 1U << 20U,    // e.g., the frontlight toggle button on some early Kobos
 	INPUT_MENU_BUTTON        = 1U << 21U,
 	INPUT_DPAD               = 1U << 22U,
-	INPUT_ROTATION_EVENT     = 1U << 23U,    // Where "device was rotated" events are sent (gyro or not)
+	INPUT_ROTATION_EVENT     = 1U << 23U,    // Where "device was rotated" events *may* be sent (gyro or not)
 	// Auxiliary flags controlling the behavior of the function
 	OPEN_BLOCKING            = 1U << 30U,    // Do *NOT* open fd's with O_NONBLOCK
 	SCAN_ONLY                = 1U << 31U,    // Do *NOT* leave any fd's open'ed
