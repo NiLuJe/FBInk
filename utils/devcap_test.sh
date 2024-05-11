@@ -166,7 +166,7 @@ echo "Screengrab saved to ${DEVCAP_PIC}"
 echo "See https://github.com/NiLuJe/FBInk/blob/master/utils/devcap_expected_results.png for the expected *on-screen* result".
 header "EvTest"
 echo "Please tap the top-left corner of the screen in the next 10s!"
-TOUCH_DEV="$(input_scan -m touchscreen 2>/dev/null | grep '(matched: 1)' | grep -o '/dev/input/event[[:digit:]]\+')"
+TOUCH_DEV="$(input_scan -p -m touchscreen | cut -f1 -d',')"
 (
 	if [ -e "${TOUCH_DEV}" ] ; then
 		evtest "${TOUCH_DEV}" >> "${DEVCAP_LOG}" 2>&1
