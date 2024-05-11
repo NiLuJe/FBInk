@@ -58,7 +58,7 @@ static char*
 		return NULL;
 	}
 
-	ssize_t dlen = strtcpy(dst, src, (uintptr_t) (end - dst));
+	ssize_t dlen = strtcpy(dst, src, (size_t) (end - dst));
 	return (dlen == -1) ? NULL : dst + dlen;
 }
 #endif
