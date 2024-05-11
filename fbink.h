@@ -1658,6 +1658,8 @@ FBINK_API int fbink_mtk_toggle_pen_mode(int fbfd, bool toggle);
 //
 // The functions below are small utilities to make working with input devices slightly less painful.
 //
+
+// Input device classification
 typedef enum
 {
 	INPUT_UNKNOWN            = 0U,
@@ -1678,6 +1680,7 @@ typedef enum
 	INPUT_HOME_BUTTON        = 1U << 19U,
 	INPUT_LIGHT_BUTTON       = 1U << 20U,
 	INPUT_MENU_BUTTON        = 1U << 21U,
+	INPUT_DPAD               = 1U << 22U,
 	// Auxiliary flags controlling the behavior of the function
 	OPEN_BLOCKING            = 1U << 30U,    // Do *NOT* open fd's with O_NONBLOCK
 	SCAN_ONLY                = 1U << 31U,    // Do *NOT* leave any fd's open'ed

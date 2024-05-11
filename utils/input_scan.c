@@ -102,7 +102,7 @@ static void
 	    "\t-m, --match <type,type,type,...>\n"
 	    "\t\t\t\t\t\tSimulate a match on specific input device types.\n"
 	    "\t\t\t\tSupported types: unknown, pointingstick, mouse, touchpad, touchscreen, joystick, tablet, key, keyboard, accelerometer,\n"
-	    "\t\t\t\t                 power, sleep, pagination, home, light, menu\n"
+	    "\t\t\t\t                 power, sleep, pagination, home, light, menu, dpad\n"
 	    "\n"
 	    "EXAMPLES:\n"
 	    "\tinput_scan -m touchscreen,power,pagination\n"
@@ -145,6 +145,7 @@ int
 		OPT_INPUT_HOME_BUTTON,
 		OPT_INPUT_LIGHT_BUTTON,
 		OPT_INPUT_MENU_BUTTON,
+		OPT_INPUT_DPAD,
 	};
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
@@ -167,6 +168,7 @@ int
 				      [OPT_INPUT_HOME_BUTTON]        = "home",
 				      [OPT_INPUT_LIGHT_BUTTON]       = "light",
 				      [OPT_INPUT_MENU_BUTTON]        = "menu",
+				      [OPT_INPUT_DPAD]               = "dpad",
 				      NULL };
 #pragma GCC diagnostic pop
 	char*               full_subopts = NULL;
@@ -268,6 +270,9 @@ int
 							break;
 						case OPT_INPUT_MENU_BUTTON:
 							scan_mask |= INPUT_MENU_BUTTON;
+							break;
+						case OPT_INPUT_DPAD:
+							scan_mask |= INPUT_DPAD;
 							break;
 						default:
 							ELOG("No match found for token: /%s/ for -%c, --%s",

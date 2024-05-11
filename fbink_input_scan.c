@@ -212,6 +212,10 @@ static void
 	if (PLATFORM_KEY_MENU && test_bit(PLATFORM_KEY_MENU, bitmask_key)) {
 		dev->type |= INPUT_MENU_BUTTON;
 	}
+
+	if (PLATFORM_KEY_DPAD && test_bit(PLATFORM_KEY_DPAD, bitmask_key)) {
+		dev->type |= INPUT_DPAD;
+	}
 }
 
 static int
@@ -287,6 +291,8 @@ static __attribute__((cold)) const char*
 			return "LIGHT_BUTTON";
 		case INPUT_MENU_BUTTON:
 			return "MENU_BUTTON";
+		case INPUT_DPAD:
+			return "DPAD";
 		case OPEN_BLOCKING:
 		case SCAN_ONLY:
 		default:
