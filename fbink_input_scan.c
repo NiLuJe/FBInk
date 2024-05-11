@@ -295,7 +295,7 @@ static __attribute__((cold)) const char*
 }
 
 static __attribute__((cold)) void
-    concat_type_recap(INPUT_DEVICE_TYPE_E type, char* string)
+    concat_type_recap(INPUT_DEVICE_TYPE_T type, char* string)
 {
 	if (type == INPUT_UNKNOWN) {
 		strcat(string, " = UNKNOWN");
