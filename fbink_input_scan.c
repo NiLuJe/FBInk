@@ -368,7 +368,9 @@ static __attribute__((cold)) void
 #endif    // FBINK_WITH_INPUT
 
 FBInkInputDevice*
-    fbink_input_scan(INPUT_DEVICE_TYPE_T req_types UNUSED_BY_NOINPUT, size_t* dev_count UNUSED_BY_NOINPUT)
+    fbink_input_scan(INPUT_DEVICE_TYPE_T match_types   UNUSED_BY_NOINPUT,
+		     INPUT_DEVICE_TYPE_T exclude_types UNUSED_BY_NOINPUT,
+		     size_t* dev_count                 UNUSED_BY_NOINPUT)
 {
 #ifdef FBINK_WITH_INPUT
 	struct dirent** namelist;
@@ -392,7 +394,7 @@ FBInkInputDevice*
 
 	// Default to NONBLOCK
 	int o_flags = O_RDONLY | O_CLOEXEC;
-	if ((req_types & OPEN_BLOCKING) == 0) {
+	if ((match_types & OPEN_BLOCKING) == 0) {
 		o_flags |= O_NONBLOCK;
 	}
 
@@ -419,10 +421,14 @@ FBInkInputDevice*
 		ELOG("%s: `%s`%s", dev->path, dev->name, recap);
 
 		// If the classification matches our request, flag it as such
-		dev->matched = !!(dev->type & req_types);
+		dev->matched = !!(dev->type & match_types);
+		// But if a match also matches the exclude mask, drop it
+		if (dev->matched && dev->type & exclude_types) {
+			dev->matched = false;
+		}
 
 		// If this was a dry-run, or if the device wasn't a match, close the fd
-		if (req_types & SCAN_ONLY || !dev->matched) {
+		if (match_types & SCAN_ONLY || !dev->matched) {
 			close(dev->fd);
 			dev->fd = -1;
 		}

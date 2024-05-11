@@ -391,7 +391,7 @@ int
 
 	LOG("Requested total scan mask: %#.8x & ~%#.8x", scan_mask & ~SCAN_ONLY, exclude_mask);
 	size_t            dev_count;
-	FBInkInputDevice* devices = fbink_input_scan(scan_mask, &dev_count);
+	FBInkInputDevice* devices = fbink_input_scan(scan_mask, exclude_mask, &dev_count);
 	LOG("Found %zu readable input devices", dev_count);
 	if (devices) {
 		for (FBInkInputDevice* device = devices; device < devices + dev_count; device++) {

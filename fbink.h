@@ -1692,7 +1692,7 @@ typedef struct
 {
 	INPUT_DEVICE_TYPE_T type;          // bitmask
 	int                 fd;            // Set to -1 when not open
-	bool                matched;       // true if type has one or more matching bits with req_types
+	bool                matched;       // true if type matches the match/exclude combo
 	char                name[256];     // As reported by EVIOCGNAME
 	char                path[4096];    // e.g., /dev/input/event%d
 } FBInkInputDevice;
@@ -1700,17 +1700,21 @@ typedef struct
 // Scan & classify input devices into actionable categories.
 // Returns a pointer to the first element of an array of FBInkInputDevice structs, containing `dev_count` elements.
 // Regardless of the filter you request, this will always contain *all* the device's input devices.
-// The `matched` field will be set to true if that device matches *any* of the bits in `req_types`,
-// meaning you can cast a fairly wide net, and still catch everything you care about.
+// The `matched` field will be set to true if that device matches *any* of the bits in `match_types`
+// and *none* of the bits in `exclude_types`, meaning you can either cast a fairly wide net,
+// and still catch everything you care about; or tackle an exclude mask on top for more fine-grained filtering.
 // You *MUST* free the returned pointer after use (it's heap allocated).
 // Returns NULL on failure (no input devices can be read, or MINIMAL build w/o INPUT).
-// req_types:		Bitmask used to filter the type of input devices you want to open.
+// match_types:		Bitmask used to filter the type of input devices you want to open.
 //				if the OPEN_BLOCKING bit is set, fds will be opened in *blocking* mode.
 //					Otherwise, the default open flags are O_RDONLY|O_NONBLOCK|O_CLOEXEC
 //				if the SCAN_ONLY bit is set, *no* fds will be returned, regardless of the filter.
+// exclude_types:	Bitmask used to filter *out* some input device types from results that matched match_types.
 // dev_count:		out pointer, will be set to the amount of array elements in the returned data.
 // NOTE: This does *NOT* require fbink to be initialized, but *does* honor its internal verbosity state.
-FBINK_API FBInkInputDevice* fbink_input_scan(INPUT_DEVICE_TYPE_T req_types, size_t* dev_count);
+FBINK_API FBInkInputDevice* fbink_input_scan(INPUT_DEVICE_TYPE_T match_types,
+					     INPUT_DEVICE_TYPE_T exclude_types,
+					     size_t*             dev_count);
 
 //
 ///
