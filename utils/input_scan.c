@@ -119,9 +119,10 @@ int
 	//       so we need to do the matching ourselves when we're passed *short* options, hence the sentinel value...
 	int                        opt_index = -1;
 	static const struct option opts[]    = {
-                {  "help",       no_argument, NULL, 'h' },
-                { "match", required_argument, NULL, 'm' },
-                {    NULL,                 0, NULL,   0 }
+                {   "help",       no_argument, NULL, 'h' },
+                { "devcap",       no_argument, NULL, 'd' },
+                {  "match", required_argument, NULL, 'm' },
+                {     NULL,                 0, NULL,   0 }
 	};
 	enum
 	{
@@ -169,15 +170,16 @@ int
 #pragma GCC diagnostic pop
 	char*               full_subopts = NULL;
 	char*               subopts;
-	char*               value     = NULL;
-	INPUT_DEVICE_TYPE_T scan_mask = SCAN_ONLY;
-	bool                errfnd    = false;
+	char*               value      = NULL;
+	bool                for_devcap = false;
+	INPUT_DEVICE_TYPE_T scan_mask  = SCAN_ONLY;
+	bool                errfnd     = false;
 
 	// NOTE: Enforce line-buffering, to make I/O redirections less confusing (e.g., in DevCap logs),
 	//       as we often mix stdout with stderr, and unlike stdout, stderr is always unbuffered (c.f., setvbuf(3)).
 	setlinebuf(stdout);
 
-	while ((opt = getopt_long(argc, argv, "vqm:h", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "vqdm:h", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'v':
 				isQuiet   = false;
@@ -186,6 +188,13 @@ int
 			case 'q':
 				isQuiet   = true;
 				isVerbose = false;
+				break;
+			case 'd':
+				// Mangle something together for the very particular use-case of the DevCap test script
+				isQuiet    = true;
+				isVerbose  = false;
+				for_devcap = true;
+				scan_mask  = SCAN_ONLY | INPUT_TOUCHSCREEN;
 				break;
 			case 'm': {
 				// We'll want our longform name for diagnostic messages...
@@ -361,6 +370,10 @@ int
 			    device->path,
 			    device->type,
 			    device->matched);
+
+			if (for_devcap && device->matched) {
+				fprintf(stdout, "%s\n", device->path);
+			}
 		}
 		free(devices);
 	}
