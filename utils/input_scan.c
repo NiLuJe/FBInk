@@ -115,9 +115,11 @@ int
     main(int argc, char* argv[])
 {
 	int                        opt;
-	int                        opt_index;
-	static const struct option opts[] = {
-		{  "help",       no_argument, NULL, 'h' },
+	// NOTE: getopt_long will only update opt_index when passed a *long* option,
+	//       so we need to do the matching ourselves when we're passed *short* options, hence the sentinel value...
+	int                        opt_index = -1;
+	static const struct option opts[]    = {
+                {  "help",       no_argument, NULL, 'h' },
                 { "match", required_argument, NULL, 'm' },
                 {    NULL,                 0, NULL,   0 }
 	};
