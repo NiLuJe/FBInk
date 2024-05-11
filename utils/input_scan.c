@@ -160,7 +160,11 @@ int
 	LOG("Devices: %p (count: %zu)", devices, dev_count);
 	if (devices) {
 		for (FBInkInputDevice* device = devices; device < devices + dev_count; device++) {
-			LOG("Device %s @ %s is of type %u", device->name, device->path, device->type);
+			LOG("Device %s @ %s is of type %u (matched: %d)",
+			    device->name,
+			    device->path,
+			    device->type,
+			    device->matched);
 		}
 		free(devices);
 	}

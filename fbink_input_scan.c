@@ -419,9 +419,11 @@ FBInkInputDevice*
 		input_type_to_str(dev->type, recap);
 		ELOG("%s: `%s`%s", dev->path, dev->name, recap);
 
-		// TODO: Also close if !requested types
-		// TODO: Set matched if requested types
-		if (req_types & SCAN_ONLY) {
+		// If the classification matches our request, flag it as such
+		dev->matched = !!(dev->type & req_types);
+
+		// If this was a dry-run, or if the device wasn't a match, close the fd
+		if (req_types & SCAN_ONLY || !dev->matched) {
 			close(dev->fd);
 			dev->fd = -1;
 		}
