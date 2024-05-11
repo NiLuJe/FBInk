@@ -69,7 +69,7 @@ ls -lash /dev/input >> "${DEVCAP_LOG}" 2>/dev/null
 separator
 cat /proc/bus/input/devices >> "${DEVCAP_LOG}" 2>/dev/null
 separator
-input_scan >> "${DEVCAP_LOG}" 2>/dev/null
+input_scan >> "${DEVCAP_LOG}" 2>&1
 separator
 
 # List backlights
