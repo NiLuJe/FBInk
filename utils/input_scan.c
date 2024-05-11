@@ -98,7 +98,7 @@ static void
 	    "\t-h, --help\t\t\t\tShow this help message.\n"
 	    "\t-v, --verbose\t\t\t\tToggle printing diagnostic messages.\n"
 	    "\t-q, --quiet\t\t\t\tToggle hiding diagnostic messages.\n"
-	    "\t-p, --print\t\t\t\tJust print the path of any matches as CSV.\n"
+	    "\t-p, --print\t\t\t\tJust print the path of any matches as CSV to stdout.\n"
 	    "\t-m, --match <type,type,type,...>\n"
 	    "\t\t\t\t\t\tSimulate a match on specific input device types.\n"
 	    "\t\t\t\tSupported types: unknown, pointingstick, mouse, touchpad, touchscreen, joystick, tablet, key, keyboard, accelerometer,\n"
@@ -191,9 +191,6 @@ int
 				isVerbose = false;
 				break;
 			case 'p':
-				// Enforce quiet
-				isQuiet    = true;
-				isVerbose  = false;
 				print_only = true;
 				break;
 			case 'm': {
@@ -347,6 +344,12 @@ int
 			}
 		}
 		return ERRCODE(EXIT_FAILURE);
+	}
+
+	if (print_only) {
+		// We need to enforce quiet for this to "work" ;).
+		isQuiet   = true;
+		isVerbose = false;
 	}
 
 	// We don't actually need to init FBInk, but we can update its verbosity state,
