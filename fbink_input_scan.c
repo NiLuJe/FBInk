@@ -186,20 +186,29 @@ static void
 	if (PLATFORM_KEY_POWER && test_bit(PLATFORM_KEY_POWER, bitmask_key)) {
 		dev->type |= INPUT_POWER_BUTTON;
 	}
-	if ((PLATFORM_KEY_SLEEP && test_bit(PLATFORM_KEY_SLEEP, bitmask_key)) ||
-	    (PLATFORM_KEY_WAKEUP && test_bit(PLATFORM_KEY_WAKEUP, bitmask_key))) {
+
+	// Kobo has used two different keycodes for the SleepCover over the years...
+	// Devices can support one or both of these.
+	if (PLATFORM_KEY_SLEEP && test_bit(PLATFORM_KEY_SLEEP, bitmask_key)) {
 		dev->type |= INPUT_SLEEP_COVER;
 	}
+	if (PLATFORM_KEY_WAKEUP && test_bit(PLATFORM_KEY_WAKEUP, bitmask_key)) {
+		dev->type |= INPUT_SLEEP_COVER;
+	}
+
 	if ((PLATFORM_KEY_PGPREV && test_bit(PLATFORM_KEY_PGPREV, bitmask_key)) &&
 	    (PLATFORM_KEY_PGNEXT && test_bit(PLATFORM_KEY_PGNEXT, bitmask_key))) {
 		dev->type |= INPUT_PAGINATION_BUTTONS;
 	}
+
 	if (PLATFORM_KEY_HOME && test_bit(PLATFORM_KEY_HOME, bitmask_key)) {
 		dev->type |= INPUT_HOME_BUTTON;
 	}
+
 	if (PLATFORM_KEY_FRONTLIGHT && test_bit(PLATFORM_KEY_FRONTLIGHT, bitmask_key)) {
 		dev->type |= INPUT_LIGHT_BUTTON;
 	}
+
 	if (PLATFORM_KEY_MENU && test_bit(PLATFORM_KEY_MENU, bitmask_key)) {
 		dev->type |= INPUT_MENU_BUTTON;
 	}
