@@ -712,7 +712,7 @@ static void                      clear_screen(int UNUSED_BY_NOTKINDLE, FBInkPixe
 static const unsigned char* font8x8_get_bitmap(uint32_t);
 #endif
 
-static __attribute__((cold)) const char* fontname_to_string(uint8_t);
+static __attribute__((cold)) const char* fontname_to_string(FONT_INDEX_E);
 
 #ifdef FBINK_WITH_BITMAP
 static int zu_print_length(size_t);
@@ -778,7 +778,7 @@ static int                                               open_fb_fd(int* restric
 static int                                               open_fb_fd_nonblock(int* restrict, bool* restrict);
 
 static __attribute__((cold)) const char* fb_rotate_to_string(uint32_t);
-static __attribute__((cold)) const char* fb_pixfmt_to_string(FBINK_PXFMT_INDEX_T);
+static __attribute__((cold)) const char* fb_pixfmt_to_string(FBINK_PXFMT_INDEX_E);
 #ifdef FBINK_FOR_KINDLE
 static __attribute__((cold)) const char* einkfb_orientation_to_string(orientation_t);
 #endif
@@ -792,7 +792,7 @@ static __attribute__((cold)) void pocketbook_fix_fb_info(void);
 #endif
 #ifdef FBINK_FOR_KOBO
 static __attribute__((cold)) void        kobo_sunxi_fb_fixup(bool);
-static __attribute__((cold)) const char* sunxi_force_rota_to_string(SUNXI_FORCE_ROTA_INDEX_T);
+static __attribute__((cold)) const char* sunxi_force_rota_to_string(SUNXI_FORCE_ROTA_INDEX_E);
 #endif
 static __attribute__((cold)) int initialize_fbink(int, const FBInkConfig* restrict, bool);
 
@@ -849,17 +849,17 @@ static int                          draw_image(int,
 #endif
 
 #ifdef FBINK_WITH_OPENTYPE
-static __attribute__((cold)) const char* font_style_to_string(FONT_STYLE_T);
+static __attribute__((cold)) const char* font_style_to_string(FONT_STYLE_E);
 static __attribute__((cold)) int         add_ot_font(const char*, FONT_STYLE_T, FBInkOTFonts* restrict);
 static __attribute__((cold)) int         free_ot_font(stbtt_fontinfo** restrict);
 static __attribute__((cold)) int         free_ot_fonts(FBInkOTFonts* restrict);
 static void                              parse_simple_md(const char* restrict, size_t, unsigned char* restrict);
-static __attribute__((cold)) const char* glyph_style_to_string(CHARACTER_FONT_T);
+static __attribute__((cold)) const char* glyph_style_to_string(CHARACTER_FONT_E);
 #endif
 
 #ifndef FBINK_FOR_LINUX
 static uint32_t                          get_wfm_mode(WFM_MODE_INDEX_T);
-static __attribute__((cold)) const char* wfm_to_string(WFM_MODE_INDEX_T);
+static __attribute__((cold)) const char* wfm_to_string(WFM_MODE_INDEX_E);
 #	ifdef FBINK_FOR_KINDLE
 static __attribute__((cold)) const char* kindle_wfm_to_string(uint32_t);
 static __attribute__((cold)) const char* kindle_zelda_wfm_to_string(uint32_t);
@@ -874,8 +874,8 @@ static __attribute__((cold)) const char* remarkable_wfm_to_string(uint32_t);
 static __attribute__((cold)) const char* pocketbook_wfm_to_string(uint32_t);
 #	endif
 #	if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_KINDLE)
-static int                               get_hwd_mode(HW_DITHER_INDEX_T);
-static __attribute__((cold)) const char* hwd_to_string(HW_DITHER_INDEX_T);
+static int                               get_hwd_mode(HW_DITHER_INDEX_E);
+static __attribute__((cold)) const char* hwd_to_string(HW_DITHER_INDEX_E);
 #	endif
 #endif
 

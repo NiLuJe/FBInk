@@ -1496,7 +1496,7 @@ static const unsigned char*
 #endif    // FBINK_WITH_BITMAP
 
 static __attribute__((cold)) const char*
-    fontname_to_string(uint8_t fontname)
+    fontname_to_string(FONT_INDEX_E fontname)
 {
 	switch (fontname) {
 #ifdef FBINK_WITH_BITMAP
@@ -4088,7 +4088,7 @@ static __attribute__((cold)) const char*
 }
 
 static __attribute__((cold)) const char*
-    fb_pixfmt_to_string(FBINK_PXFMT_INDEX_T fmt)
+    fb_pixfmt_to_string(FBINK_PXFMT_INDEX_E fmt)
 {
 	switch (fmt) {
 		case FBINK_PXFMT_UNKNOWN:
@@ -4539,7 +4539,7 @@ static __attribute__((cold)) void
 }
 
 static __attribute__((cold)) const char*
-    sunxi_force_rota_to_string(SUNXI_FORCE_ROTA_INDEX_T mode)
+    sunxi_force_rota_to_string(SUNXI_FORCE_ROTA_INDEX_E mode)
 {
 	switch (mode) {
 		case FORCE_ROTA_CURRENT_ROTA:
@@ -5532,7 +5532,7 @@ int
 
 #ifdef FBINK_WITH_OPENTYPE
 static __attribute__((cold)) const char*
-    font_style_to_string(FONT_STYLE_T style)
+    font_style_to_string(FONT_STYLE_E style)
 {
 	switch (style) {
 		case FNT_REGULAR:
@@ -7493,7 +7493,7 @@ static void
 
 // Small helper for verbose log messages
 static __attribute__((cold)) const char*
-    glyph_style_to_string(CHARACTER_FONT_T glyph_style)
+    glyph_style_to_string(CHARACTER_FONT_E glyph_style)
 {
 	switch (glyph_style) {
 		case CH_IGNORE:
@@ -9310,7 +9310,7 @@ static uint32_t
 
 // Convert a WFM_MODE_INDEX_T value to a human readable string
 static __attribute__((cold)) const char*
-    wfm_to_string(WFM_MODE_INDEX_T wfm_mode_index)
+    wfm_to_string(WFM_MODE_INDEX_E wfm_mode_index)
 {
 	switch (wfm_mode_index) {
 		case WFM_AUTO:
@@ -9605,7 +9605,7 @@ static __attribute__((cold)) const char*
 #	if defined(FBINK_FOR_KOBO) || defined(FBINK_FOR_KINDLE)
 // Convert our public HW_DITHER_INDEX_T values to an appropriate mxcfb dithering mode constant
 static int
-    get_hwd_mode(HW_DITHER_INDEX_T hw_dither_index)
+    get_hwd_mode(HW_DITHER_INDEX_E hw_dither_index)
 {
 	// NOTE: This hardware dithering (handled by the PxP on i.MX) is only supported since EPDC v2!
 	//       AFAICT, most of our eligible target devices only support PASSTHROUGH & ORDERED...
@@ -9649,7 +9649,7 @@ static int
 
 // Convert a HW_DITHER_INDEX_T value to a human readable string
 static __attribute__((cold)) const char*
-    hwd_to_string(HW_DITHER_INDEX_T hw_dither_index)
+    hwd_to_string(HW_DITHER_INDEX_E hw_dither_index)
 {
 	switch (hw_dither_index) {
 		case HWD_PASSTHROUGH:
