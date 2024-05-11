@@ -1665,8 +1665,8 @@ typedef enum
 	INPUT_TOUCHPAD           = 1U << 2U,
 	INPUT_TOUCHSCREEN        = 1U << 3U,
 	INPUT_JOYSTICK           = 1U << 4U,
-	INPUT_TABLET             = 1U << 5U,
-	INPUT_KEY                = 1U << 6U,
+	INPUT_TABLET             = 1U << 5U,    // Includes touchscreens w/ stylus support
+	INPUT_KEY                = 1U << 6U,    // Supports at least *1* EV_KEY keycode
 	INPUT_KEYBOARD           = 1U << 7U,
 	INPUT_ACCELEROMETER      = 1U << 8U,
 	// Custom classification, tailored for our use-cases

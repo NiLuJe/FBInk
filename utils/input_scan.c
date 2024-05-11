@@ -109,16 +109,65 @@ int
 	int                        opt;
 	int                        opt_index;
 	static const struct option opts[] = {
-		{ "help", no_argument, NULL, 'h' },
-                {   NULL,           0, NULL,   0 }
+		{  "help",       no_argument, NULL, 'h' },
+                { "match", required_argument, NULL, 'm' },
+                {    NULL,                 0, NULL,   0 }
 	};
-	bool errfnd = false;
+	enum
+	{
+		OPT_INPUT_UNKNOWN = 0,
+		// Standard udev classification
+		OPT_INPUT_POINTINGSTICK,
+		OPT_INPUT_MOUSE,
+		OPT_INPUT_TOUCHPAD,
+		OPT_INPUT_TOUCHSCREEN,
+		OPT_INPUT_JOYSTICK,
+		OPT_INPUT_TABLET,
+		OPT_INPUT_KEY,
+		OPT_INPUT_KEYBOARD,
+		OPT_INPUT_ACCELEROMETER,
+		// Custom classification, tailored for our use-cases
+		OPT_INPUT_POWER_BUTTON,
+		OPT_INPUT_SLEEP_COVER,
+		OPT_INPUT_PAGINATION_BUTTONS,
+		OPT_INPUT_HOME_BUTTON,
+		OPT_INPUT_LIGHT_BUTTON,
+		OPT_INPUT_MENU_BUTTON,
+	};
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#pragma clang diagnostic ignored "-Wunknown-warning-option"
+#pragma GCC diagnostic ignored "-Wdiscarded-qualifiers"
+#pragma clang diagnostic ignored "-Wincompatible-pointer-types-discards-qualifiers"
+	char* const match_token[] = { [OPT_INPUT_UNKNOWN]            = "unknown",
+				      [OPT_INPUT_POINTINGSTICK]      = "pointingstick",
+				      [OPT_INPUT_MOUSE]              = "mouse",
+				      [OPT_INPUT_TOUCHPAD]           = "touchpad",
+				      [OPT_INPUT_TOUCHSCREEN]        = "touchscreen",
+				      [OPT_INPUT_JOYSTICK]           = "joystick",
+				      [OPT_INPUT_TABLET]             = "tablet",
+				      [OPT_INPUT_KEY]                = "key",
+				      [OPT_INPUT_KEYBOARD]           = "keyboard",
+				      [OPT_INPUT_ACCELEROMETER]      = "accelerometer",
+				      [OPT_INPUT_POWER_BUTTON]       = "power",
+				      [OPT_INPUT_SLEEP_COVER]        = "sleep",
+				      [OPT_INPUT_PAGINATION_BUTTONS] = "pagination",
+				      [OPT_INPUT_HOME_BUTTON]        = "home",
+				      [OPT_INPUT_LIGHT_BUTTON]       = "light",
+				      [OPT_INPUT_MENU_BUTTON]        = "menu",
+				      NULL };
+#pragma GCC diagnostic pop
+	char*               full_subopts = NULL;
+	char*               subopts;
+	char*               value     = NULL;
+	INPUT_DEVICE_TYPE_T scan_mask = SCAN_ONLY;
+	bool                errfnd    = false;
 
 	// NOTE: Enforce line-buffering, to make I/O redirections less confusing (e.g., in DevCap logs),
 	//       as we often mix stdout with stderr, and unlike stdout, stderr is always unbuffered (c.f., setvbuf(3)).
 	setlinebuf(stdout);
 
-	while ((opt = getopt_long(argc, argv, "hvq", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "vqm:h", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'v':
 				isQuiet   = false;
@@ -128,6 +177,101 @@ int
 				isQuiet   = true;
 				isVerbose = false;
 				break;
+			case 'm': {
+				// We'll want our longform name for diagnostic messages...
+				const char* opt_longname = NULL;
+				// Look it up if we were passed the short form...
+				if (opt_index == -1) {
+					// Loop until we hit the final NULL entry
+					for (opt_index = 0; opts[opt_index].name; opt_index++) {
+						if (opts[opt_index].val == opt) {
+							opt_longname = opts[opt_index].name;
+							break;
+						}
+					}
+				} else {
+					opt_longname = opts[opt_index].name;
+				}
+
+				subopts = optarg;
+				// NOTE: We'll need to remember the original, full suboption string for diagnostic messages,
+				//       because getsubopt will rewrite it during processing...
+				if (subopts && *subopts != '\0') {
+					// Only remember the first offending suboption list...
+					if (!errfnd) {
+						full_subopts = strdupa(subopts);
+					}
+				}
+
+				while (subopts && *subopts != '\0' && !errfnd) {
+					switch (getsubopt(&subopts, match_token, &value)) {
+						case OPT_INPUT_UNKNOWN:
+							scan_mask |= INPUT_UNKNOWN;
+							break;
+						case OPT_INPUT_POINTINGSTICK:
+							scan_mask |= INPUT_POINTINGSTICK;
+							break;
+						case OPT_INPUT_MOUSE:
+							scan_mask |= INPUT_MOUSE;
+							break;
+						case OPT_INPUT_TOUCHPAD:
+							scan_mask |= INPUT_TOUCHPAD;
+							break;
+						case OPT_INPUT_TOUCHSCREEN:
+							scan_mask |= INPUT_TOUCHSCREEN;
+							break;
+						case OPT_INPUT_JOYSTICK:
+							scan_mask |= INPUT_JOYSTICK;
+							break;
+						case OPT_INPUT_TABLET:
+							scan_mask |= INPUT_TABLET;
+							break;
+						case OPT_INPUT_KEY:
+							scan_mask |= INPUT_KEY;
+							break;
+						case OPT_INPUT_KEYBOARD:
+							scan_mask |= INPUT_KEYBOARD;
+							break;
+						case OPT_INPUT_ACCELEROMETER:
+							scan_mask |= INPUT_ACCELEROMETER;
+							break;
+						case OPT_INPUT_POWER_BUTTON:
+							scan_mask |= INPUT_POWER_BUTTON;
+							break;
+						case OPT_INPUT_SLEEP_COVER:
+							scan_mask |= INPUT_SLEEP_COVER;
+							break;
+						case OPT_INPUT_PAGINATION_BUTTONS:
+							scan_mask |= INPUT_PAGINATION_BUTTONS;
+							break;
+						case OPT_INPUT_HOME_BUTTON:
+							scan_mask |= INPUT_HOME_BUTTON;
+							break;
+						case OPT_INPUT_LIGHT_BUTTON:
+							scan_mask |= INPUT_LIGHT_BUTTON;
+							break;
+						case OPT_INPUT_MENU_BUTTON:
+							scan_mask |= INPUT_MENU_BUTTON;
+							break;
+						default:
+							ELOG("No match found for token: /%s/ for -%c, --%s",
+							     value,
+							     opt,
+							     opt_longname);
+							errfnd = true;
+							break;
+					}
+				}
+
+				// Only remember this if there was a parsing error.
+				if (!errfnd) {
+					full_subopts = NULL;
+
+					// We'll want to enable verbose mode to see our own recap
+					isVerbose = true;
+				}
+				break;
+			}
 			case 'h':
 				show_helpmsg();
 				return EXIT_SUCCESS;
@@ -141,6 +285,48 @@ int
 
 	if (errfnd) {
 		show_helpmsg();
+		// NOTE: Having the actual error message printed *above* the seven billion lines of the help message
+		//       pretty much ensures no one will ever notice it, so remind the user that there's also
+		//       an actual error message to read much higher in their terminal backlog ;p
+		if (errfnd) {
+			if (!toSysLog) {
+				fprintf(stderr, "\n****\t****\t****\t****\n\n");
+			}
+			WARN("Encountered a parsing error, see the top of the output for details");
+			// Recap the exact invocation, as seen by getopt,
+			// (note that it will reorder argv so that non-option arguments end up at the end).
+			if (!toSysLog) {
+				fprintf(stderr, "\n");
+			}
+			// NOTE: Almost, because getsubopt rewrites argv (it replaces commas with NULLs),
+			//       which means we don't have access to the original string anymore...
+			ELOG("This was the (almost) exact invocation that triggered this error:\n");
+			if (!toSysLog) {
+				for (int i = 0; i < argc; i++) {
+					fprintf(stderr, "%s%s", argv[i], i == argc - 1 ? "\n" : " ");
+				}
+				// Then detail it...
+				fprintf(stderr, "\n");
+				ELOG("Broken down argument per argument:\n");
+			}
+			for (int i = 0; i < optind; i++) {
+				ELOG("argv[%d]: `%s`", i, argv[i]);
+			}
+			// If there was a subopt parsing error, print the original offending suboption list
+			if (full_subopts) {
+				ELOG("Complete offending suboption string: %s\n", full_subopts);
+			}
+			// And then non-option arguments
+			if (optind < argc) {
+				if (!toSysLog) {
+					fprintf(stderr, "\n");
+				}
+				ELOG("And the following non-option arguments:\n");
+				for (int i = optind; i < argc; i++) {
+					ELOG("argv[%d]: `%s`", i, argv[i]);
+				}
+			}
+		}
 		return ERRCODE(EXIT_FAILURE);
 	}
 
@@ -155,9 +341,8 @@ int
 	int rv = EXIT_SUCCESS;
 
 	size_t            dev_count;
-	FBInkInputDevice* devices = fbink_input_scan(SCAN_ONLY, &dev_count);
-	// FIXME: Debug
-	LOG("Devices: %p (count: %zu)", devices, dev_count);
+	FBInkInputDevice* devices = fbink_input_scan(scan_mask, &dev_count);
+	LOG("Found %zu readable input devices", dev_count);
 	if (devices) {
 		for (FBInkInputDevice* device = devices; device < devices + dev_count; device++) {
 			LOG("Device %s @ %s is of type %u (matched: %d)",
