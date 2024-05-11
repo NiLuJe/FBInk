@@ -137,7 +137,7 @@ static bool
 
 	/* do we have any KEY_* capability? */
 	if (!test_bit(EV_KEY, bitmask_ev)) {
-		PFLOG("no EV_KEY capability");
+		PFLOG("[%s] no EV_KEY capability", dev->name);
 		return false;
 	}
 
@@ -145,13 +145,16 @@ static bool
 	unsigned long found = 0;
 	for (unsigned i = 0; i < BTN_MISC / BITS_PER_LONG; ++i) {
 		found |= bitmask_key[i];
-		PFLOG("checking bit block %lu for any keys; found=%i", (unsigned long) i * BITS_PER_LONG, found > 0);
+		PFLOG("[%s] checking bit block %lu for any keys; found=%i",
+		      dev->name,
+		      (unsigned long) i * BITS_PER_LONG,
+		      found > 0);
 	}
 	/* If there are no keys in the lower block, check the higher block */
 	if (!found) {
 		for (unsigned i = KEY_OK; i < BTN_TRIGGER_HAPPY; ++i) {
 			if (test_bit(i, bitmask_key)) {
-				PFLOG("Found key %x in high block", i);
+				PFLOG("[%s] Found key %x in high block", dev->name, i);
 				found = 1;
 				break;
 			}
@@ -201,6 +204,92 @@ static int
 	return EXIT_SUCCESS;
 }
 
+static __attribute__((cold)) void
+    input_type_to_str(INPUT_DEVICE_TYPE_E type, char* string)
+{
+	bool first = true;
+	if (type & INPUT_UNKNOWN) {
+		if (first) {
+			strcat(string, " = UNKNOWN");
+			first = false;
+		} else {
+			strcat(string, " | UNKNOWN");
+		}
+	}
+	if (type & INPUT_POINTINGSTICK) {
+		if (first) {
+			strcat(string, " = POINTING_STICK");
+			first = false;
+		} else {
+			strcat(string, " | POINTING_STICK");
+		}
+	}
+	if (type & INPUT_MOUSE) {
+		if (first) {
+			strcat(string, " = MOUSE");
+			first = false;
+		} else {
+			strcat(string, " | MOUSE");
+		}
+	}
+	if (type & INPUT_TOUCHPAD) {
+		if (first) {
+			strcat(string, " = TOUCHPAD");
+			first = false;
+		} else {
+			strcat(string, " | TOUCHPAD");
+		}
+	}
+	if (type & INPUT_TOUCHSCREEN) {
+		if (first) {
+			strcat(string, " = TOUCHSCREEN");
+			first = false;
+		} else {
+			strcat(string, " | TOUCHSCREEN");
+		}
+	}
+	if (type & INPUT_JOYSTICK) {
+		if (first) {
+			strcat(string, " = JOYSTICK");
+			first = false;
+		} else {
+			strcat(string, " | JOYSTICK");
+		}
+	}
+	if (type & INPUT_TABLET) {
+		if (first) {
+			strcat(string, " = TABLET");
+			first = false;
+		} else {
+			strcat(string, " | TABLET");
+		}
+	}
+	if (type & INPUT_KEY) {
+		if (first) {
+			strcat(string, " = KEY");
+			first = false;
+		} else {
+			strcat(string, " | KEY");
+		}
+	}
+	if (type & INPUT_KEYBOARD) {
+		if (first) {
+			strcat(string, " = KEYBOARD");
+			first = false;
+		} else {
+			strcat(string, " | KEYBOARD");
+		}
+	}
+	if (type & INPUT_ACCELEROMETER) {
+		if (first) {
+			strcat(string, " = ACCELEROMETER");
+			first = false;
+		} else {
+			strcat(string, " | ACCELEROMETER");
+		}
+	}
+}
+
 FBInkInputDevice*
     fbink_input_scan(INPUT_DEVICE_TYPE_T req_types, size_t* dev_count)
 {
@@ -243,6 +332,11 @@ FBInkInputDevice*
 
 		// Let udev's builtin input_id logic do its thing!
 		check_device_cap(dev);
+
+		// Recap the device's capabilities
+		char recap[4096] = { 0 };
+		input_type_to_str(dev->type, recap);
+		ELOG("%s: `%s`%s", dev->path, dev->name, recap);
 
 		// TODO: Also close if !requested types
 		// TODO: Set matched if requested types
