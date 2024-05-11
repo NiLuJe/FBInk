@@ -1656,7 +1656,7 @@ FBINK_API int fbink_mtk_toggle_auto_reagl(int fbfd, bool toggle);
 FBINK_API int fbink_mtk_toggle_pen_mode(int fbfd, bool toggle);
 
 //
-// The functions below are small utilities to make working with input devicesslightly less painful.
+// The functions below are small utilities to make working with input devices slightly less painful.
 //
 typedef enum
 {
@@ -1698,13 +1698,13 @@ typedef struct
 // Regardless of the filter you request, this will always contain *all* the device's input devices.
 // The `matched` field will be set to true if that device matches *any* of the bits in `req_types`,
 // meaning you can throw out a fairly wide net, and still catch everything you care about.
-// You *MUST* free the returned pointer after use.
+// You *MUST* free the returned pointer after use (it's heap allocated).
 // Returns NULL on failure (no input devices can be read, or MINIMAL build w/o INPUT).
 // req_types:		Bitmask used to filter the type of input devices you want to open.
 //				if the OPEN_BLOCKING bit is set, fds will be opened in *blocking* mode.
 //					Otherwise, the default open flags are O_RDONLY|O_NONBLOCK|O_CLOEXEC
 //				if the SCAN_ONLY bit is set, *no* fds will be returned, regardless of the filter.
-// dev_count:		out pointer, will be set to the amount of array elements.
+// dev_count:		out pointer, will be set to the amount of array elements in the returned data.
 // NOTE: This does *NOT* require fbink to be initialized, but *does* honor its internal verbosity state.
 FBINK_API FBInkInputDevice* fbink_input_scan(INPUT_DEVICE_TYPE_T req_types, size_t* dev_count);
 

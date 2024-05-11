@@ -256,13 +256,8 @@ static __attribute__((cold)) void
 {
 	bool first = true;
 	// Udev
-	if (type & INPUT_UNKNOWN) {
-		if (first) {
-			strcat(string, " = UNKNOWN");
-			first = false;
-		} else {
-			strcat(string, " | UNKNOWN");
-		}
+	if (type == INPUT_UNKNOWN) {
+		strcat(string, " = UNKNOWN");
 	}
 	if (type & INPUT_POINTINGSTICK) {
 		if (first) {
@@ -411,19 +406,21 @@ FBInkInputDevice*
 		return NULL;
 	}
 
+	// Default to NONBLOCK
+	int o_flags = O_RDONLY | O_CLOEXEC;
+	if ((req_types & OPEN_BLOCKING) == 0) {
+		o_flags |= O_NONBLOCK;
+	}
+
 	for (int i = 0; i < ndev; i++) {
 		FBInkInputDevice* dev = devices + i;
 		dev->fd               = -1;
 		snprintf(dev->path, sizeof(dev->path), "%s/%s", DEV_INPUT_EVENT, namelist[i]->d_name);
 
-		// Default to NONBLOCK
-		int o_flags = O_RDONLY | O_CLOEXEC;
-		if ((req_types & OPEN_BLOCKING) == 0) {
-			o_flags |= O_NONBLOCK;
-		}
 		dev->fd = open(dev->path, o_flags);
 		if (dev->fd < 0) {
 			PFWARN("open `%s`: %m", dev->path);
+			free(namelist[i]);
 			continue;
 		}
 

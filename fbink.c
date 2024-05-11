@@ -12750,5 +12750,4 @@ void
 // Contains the Kobo only native/canonical rotation conversion helpers
 #include "fbink_rota_quirks.c"
 // Contains the input device scanner & classifier
-// FIXME: Only w/ FBINK_WITH_INPUT
 #include "fbink_input_scan.c"

@@ -90,7 +90,7 @@ static void
 	    "\n"
 	    "Input Scan (via FBInk %s)\n"
 	    "\n"
-	    "Usage: input_scan\n"
+	    "Usage: input_scan [-m] <type...> [-p]\n"
 	    "\n"
 	    "Scan & classify input devices.\n"
 	    "\n"
