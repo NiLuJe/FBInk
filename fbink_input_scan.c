@@ -373,7 +373,7 @@ FBInkInputDevice*
 
 		// Recap the device's capabilities
 		char recap[4096] = { 0 };
-		concat_recap_type(dev->type, recap);
+		concat_type_recap(dev->type, recap);
 		ELOG("%s: `%s`%s", dev->path, dev->name, recap);
 
 		// If the classification matches our request, flag it as such
