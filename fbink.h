@@ -1654,7 +1654,7 @@ FBINK_API int fbink_mtk_toggle_auto_reagl(int fbfd, bool toggle);
 FBINK_API int fbink_mtk_toggle_pen_mode(int fbfd, bool toggle);
 
 //
-// Input stuff
+// The functions below are small utilities to make working with input devicesslightly less painful.
 //
 typedef enum
 {
@@ -1684,13 +1684,26 @@ typedef uint32_t          INPUT_DEVICE_TYPE_T;
 
 typedef struct
 {
-	INPUT_DEVICE_TYPE_T type;
-	int                 fd;
-	bool                matched;
-	char                name[256];
-	char                path[4096];
+	INPUT_DEVICE_TYPE_T type;          // bitmask
+	int                 fd;            // Set to -1 when not open
+	bool                matched;       // true if type has one or more matching bits with req_types
+	char                name[256];     // As reported by EVIOCGNAME
+	char                path[4096];    // e.g., /dev/input/event%d
 } FBInkInputDevice;
 
+// Scan & classify input devices into actionable categories.
+// Returns a pointer to the first element of an array of FBInkInputDevice structs, containing `dev_count` elements.
+// Regardless of the filter you request, this will always contain *all* the device's input devices.
+// The `matched` field will be set to true if that device matches *any* of the bits in `req_types`,
+// meaning you can throw out a fairly wide net, and still catch everything you care about.
+// You *MUST* free the returned pointer after use.
+// Returns NULL on failure.
+// req_types:		Bitmask used to filter the type of input devices you want to open.
+//				if the OPEN_BLOCKING bit is set, fds will be opened in *blocking* mode.
+//					Otherwise, the default open flags are O_RDONLY|O_NONBLOCK|O_CLOEXEC
+//				if the SCAN_ONLY bit is set, *no* fds will be returned, regardless of the filter.
+// dev_count:		out pointer, will be set to the amount of array elements.
+// NOTE: This does *NOT* require fbink to be initialized, but *does* honor its internal verbosity state.
 FBINK_API FBInkInputDevice* fbink_input_scan(INPUT_DEVICE_TYPE_T req_types, size_t* dev_count);
 
 //
