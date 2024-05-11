@@ -49,6 +49,7 @@ static ssize_t
 	return trunc ? -1 : (ssize_t) slen;
 }
 
+#ifdef FBINK_WITH_INPUT
 // c.f., string_copying(7)
 static char*
     stpecpy(char* dst, char end[0], const char* restrict src)
@@ -60,6 +61,7 @@ static char*
 	ssize_t dlen = strtcpy(dst, src, (uintptr_t) (end - dst));
 	return (dlen == -1) ? NULL : dst + dlen;
 }
+#endif
 
 // Based on Linux's strscpy_pad
 // NOTE: We don't actually have a use for it right now, but I like it and my brain is a sieve, so, in it goes.
