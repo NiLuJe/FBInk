@@ -213,11 +213,17 @@ static int
 	unsigned long bitmask_rel[NBITS(REL_MAX)]          = { 0U };
 	unsigned long bitmask_props[NBITS(INPUT_PROP_MAX)] = { 0U };
 
+	// These... really shouldn't ever fail.
 	ioctl(dev->fd, EVIOCGBIT(0, sizeof(bitmask_ev)), bitmask_ev);
 	ioctl(dev->fd, EVIOCGBIT(EV_ABS, sizeof(bitmask_abs)), bitmask_abs);
 	ioctl(dev->fd, EVIOCGBIT(EV_REL, sizeof(bitmask_rel)), bitmask_rel);
 	ioctl(dev->fd, EVIOCGBIT(EV_KEY, sizeof(bitmask_key)), bitmask_key);
-	ioctl(dev->fd, EVIOCGPROP(sizeof(bitmask_props)), bitmask_props);
+	// But this may not be supported on older kernels, warn about it.
+	int rc = ioctl(dev->fd, EVIOCGPROP(sizeof(bitmask_props)), bitmask_props);
+	if (rc < 0 && errno == EINVAL) {
+		PFLOG(
+		    "EVIOCGPROP is unsupported on this device (kernel is too old). Accelerometer & touchpad/touchscreen discrimination may be less accurate.");
+	}
 
 	bool is_pointer = test_pointers(dev, bitmask_ev, bitmask_abs, bitmask_key, bitmask_rel, bitmask_props);
 	bool is_key     = test_key(dev, bitmask_ev, bitmask_key);
