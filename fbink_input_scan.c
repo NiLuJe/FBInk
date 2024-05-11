@@ -229,12 +229,22 @@ static int
 	unsigned long bitmask_key[NBITS(KEY_MAX)]          = { 0U };
 	unsigned long bitmask_rel[NBITS(REL_MAX)]          = { 0U };
 	unsigned long bitmask_props[NBITS(INPUT_PROP_MAX)] = { 0U };
+	unsigned long bitmask_msc[NBITS(MSC_MAX)]          = { 0U };
 
 	// These... really shouldn't ever fail.
 	ioctl(dev->fd, EVIOCGBIT(0, sizeof(bitmask_ev)), bitmask_ev);
-	ioctl(dev->fd, EVIOCGBIT(EV_ABS, sizeof(bitmask_abs)), bitmask_abs);
-	ioctl(dev->fd, EVIOCGBIT(EV_REL, sizeof(bitmask_rel)), bitmask_rel);
-	ioctl(dev->fd, EVIOCGBIT(EV_KEY, sizeof(bitmask_key)), bitmask_key);
+	if (test_bit(EV_ABS, bitmask_ev)) {
+		ioctl(dev->fd, EVIOCGBIT(EV_ABS, sizeof(bitmask_abs)), bitmask_abs);
+	}
+	if (test_bit(EV_REL, bitmask_ev)) {
+		ioctl(dev->fd, EVIOCGBIT(EV_REL, sizeof(bitmask_rel)), bitmask_rel);
+	}
+	if (test_bit(EV_KEY, bitmask_ev)) {
+		ioctl(dev->fd, EVIOCGBIT(EV_KEY, sizeof(bitmask_key)), bitmask_key);
+	}
+	if (test_bit(EV_MSC, bitmask_ev)) {
+		ioctl(dev->fd, EVIOCGBIT(EV_MSC, sizeof(bitmask_msc)), bitmask_msc);
+	}
 	// But this may not be supported on older kernels, warn about it.
 	int rc = ioctl(dev->fd, EVIOCGPROP(sizeof(bitmask_props)), bitmask_props);
 	if (rc < 0 && errno == EINVAL) {
@@ -253,6 +263,22 @@ static int
 	// And then check for more fine-grained stuff on real is_key devices for our own use-cases
 	if (is_key) {
 		test_platform_keys(dev, bitmask_key);
+	}
+	// We also want to check where the "device was rotated" events end up...
+	switch (PLATFORM_ROTATION_EV_TYPE) {
+		case EV_ABS:
+			if (test_bit(PLATFORM_ROTATION_EV_CODE, bitmask_abs)) {
+				dev->type |= INPUT_ROTATION_EVENT;
+			}
+			break;
+		case EV_MSC:
+			if (test_bit(PLATFORM_ROTATION_EV_CODE, bitmask_msc)) {
+				dev->type |= INPUT_ROTATION_EVENT;
+			}
+			break;
+		default:
+			// NOP
+			break;
 	}
 
 	return EXIT_SUCCESS;
@@ -296,6 +322,8 @@ static __attribute__((cold)) const char*
 			return "MENU_BUTTON";
 		case INPUT_DPAD:
 			return "DPAD";
+		case INPUT_ROTATION_EVENT:
+			return "ROTATION_EVENT";
 		case OPEN_BLOCKING:
 		case SCAN_ONLY:
 		default:

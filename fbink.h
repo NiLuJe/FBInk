@@ -1670,7 +1670,7 @@ typedef enum
 	INPUT_TOUCHSCREEN        = 1U << 3U,
 	INPUT_JOYSTICK           = 1U << 4U,
 	INPUT_TABLET             = 1U << 5U,    // Includes touchscreens w/ stylus support
-	INPUT_KEY                = 1U << 6U,    // Supports at least *1* EV_KEY keycode
+	INPUT_KEY                = 1U << 6U,    // Supports at least *1* EV_KEY keycode (may include touchscreens)
 	INPUT_KEYBOARD           = 1U << 7U,
 	INPUT_ACCELEROMETER      = 1U << 8U,
 	// Custom classification, tailored for our use-cases
@@ -1678,9 +1678,10 @@ typedef enum
 	INPUT_SLEEP_COVER        = 1U << 17U,
 	INPUT_PAGINATION_BUTTONS = 1U << 18U,
 	INPUT_HOME_BUTTON        = 1U << 19U,
-	INPUT_LIGHT_BUTTON       = 1U << 20U,
+	INPUT_LIGHT_BUTTON       = 1U << 20U,    // e.g., the frontlight toggle button on some early Kobos
 	INPUT_MENU_BUTTON        = 1U << 21U,
 	INPUT_DPAD               = 1U << 22U,
+	INPUT_ROTATION_EVENT     = 1U << 23U,    // Where "device was rotated" events are sent (gyro or not)
 	// Auxiliary flags controlling the behavior of the function
 	OPEN_BLOCKING            = 1U << 30U,    // Do *NOT* open fd's with O_NONBLOCK
 	SCAN_ONLY                = 1U << 31U,    // Do *NOT* leave any fd's open'ed

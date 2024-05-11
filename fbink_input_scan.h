@@ -105,35 +105,41 @@ static __attribute__((cold)) void        concat_type_recap(INPUT_DEVICE_TYPE_T t
 // Each of our target platforms tend to settle on some specific,
 // sometimes barely related, keycodes for common functions...
 #	if defined(FBINK_FOR_KOBO)
-#		define PLATFORM_KEY_POWER      KEY_POWER
-#		define PLATFORM_KEY_SLEEP      KEY_H     // PowerCover
-#		define PLATFORM_KEY_WAKEUP     KEY_F1    // Also PowerCover, depending on the device...
-#		define PLATFORM_KEY_PGPREV     KEY_F23
-#		define PLATFORM_KEY_PGNEXT     KEY_F24
-#		define PLATFORM_KEY_HOME       KEY_HOME
-#		define PLATFORM_KEY_FRONTLIGHT KEY_KATAKANA
-#		define PLATFORM_KEY_MENU       0
-#		define PLATFORM_KEY_DPAD       0
+#		define PLATFORM_KEY_POWER        KEY_POWER
+#		define PLATFORM_KEY_SLEEP        KEY_H     // PowerCover
+#		define PLATFORM_KEY_WAKEUP       KEY_F1    // Also PowerCover, depending on the device...
+#		define PLATFORM_KEY_PGPREV       KEY_F23
+#		define PLATFORM_KEY_PGNEXT       KEY_F24
+#		define PLATFORM_KEY_HOME         KEY_HOME
+#		define PLATFORM_KEY_FRONTLIGHT   KEY_KATAKANA
+#		define PLATFORM_KEY_MENU         0
+#		define PLATFORM_KEY_DPAD         0
+#		define PLATFORM_ROTATION_EV_TYPE EV_MSC
+#		define PLATFORM_ROTATION_EV_CODE MSC_RAW
 #	elif defined(FBINK_FOR_KINDLE)
-#		define PLATFORM_KEY_POWER      KEY_POWER    // Generally handled by powerd
-#		define PLATFORM_KEY_SLEEP      0            // :?
-#		define PLATFORM_KEY_WAKEUP     0            // :?
-#		define PLATFORM_KEY_PGPREV     KEY_PAGEUP
-#		define PLATFORM_KEY_PGNEXT     KEY_PAGEDOWN
-#		define PLATFORM_KEY_HOME       KEY_HOME
-#		define PLATFORM_KEY_FRONTLIGHT 0
-#		define PLATFORM_KEY_MENU       KEY_MENU
-#		define PLATFORM_KEY_DPAD       BTN_DPAD_UP
+#		define PLATFORM_KEY_POWER        KEY_POWER    // Generally handled by powerd
+#		define PLATFORM_KEY_SLEEP        0            // :?
+#		define PLATFORM_KEY_WAKEUP       0            // :?
+#		define PLATFORM_KEY_PGPREV       KEY_PAGEUP
+#		define PLATFORM_KEY_PGNEXT       KEY_PAGEDOWN
+#		define PLATFORM_KEY_HOME         KEY_HOME
+#		define PLATFORM_KEY_FRONTLIGHT   0
+#		define PLATFORM_KEY_MENU         KEY_MENU
+#		define PLATFORM_KEY_DPAD         BTN_DPAD_UP
+#		define PLATFORM_ROTATION_EV_TYPE EV_ABS
+#		define PLATFORM_ROTATION_EV_CODE ABS_PRESSURE    // Yeah, don't ask me...
 #	else
-#		define PLATFORM_KEY_POWER      KEY_POWER
-#		define PLATFORM_KEY_SLEEP      KEY_SLEEP
-#		define PLATFORM_KEY_WAKEUP     KEY_WAKEUP
-#		define PLATFORM_KEY_PGPREV     KEY_BACK
-#		define PLATFORM_KEY_PGNEXT     KEY_FORWARD
-#		define PLATFORM_KEY_HOME       KEY_HOMEPAGE
-#		define PLATFORM_KEY_FRONTLIGHT KEY_BRIGHTNESS_CYCLE
-#		define PLATFORM_KEY_MENU       KEY_MENU
-#		define PLATFORM_KEY_DPAD       0
+#		define PLATFORM_KEY_POWER        KEY_POWER
+#		define PLATFORM_KEY_SLEEP        KEY_SLEEP
+#		define PLATFORM_KEY_WAKEUP       KEY_WAKEUP
+#		define PLATFORM_KEY_PGPREV       KEY_BACK
+#		define PLATFORM_KEY_PGNEXT       KEY_FORWARD
+#		define PLATFORM_KEY_HOME         KEY_HOMEPAGE
+#		define PLATFORM_KEY_FRONTLIGHT   KEY_BRIGHTNESS_CYCLE
+#		define PLATFORM_KEY_MENU         KEY_MENU
+#		define PLATFORM_KEY_DPAD         0
+#		define PLATFORM_ROTATION_EV_TYPE 0
+#		define PLATFORM_ROTATION_EV_CODE 0
 #	endif
 
 #endif    // FBINK_WITH_INPUT
