@@ -103,10 +103,14 @@ static void
 	    "\t\t\t\t\t\tSimulate a match on specific input device types.\n"
 	    "\t\t\t\tSupported types: unknown, pointingstick, mouse, touchpad, touchscreen, joystick, tablet, key, keyboard, accelerometer,\n"
 	    "\t\t\t\t                 power, sleep, pagination, home, light, menu, dpad, rotation\n"
+	    "\t-x, --exclude <type,type,type,...>\n"
+	    "\t\t\t\t\t\tExclude input device types from your match request.\n"
 	    "\n"
 	    "EXAMPLES:\n"
 	    "\tinput_scan -m touchscreen,power,pagination\n"
 	    "\t\tWill simulate a match on *all* input devices that match *any* of the requested input types (here, a touchscreen, a power button, and pagination buttons)\n"
+	    "\tinput_scan -m power -x touchscreen\n"
+	    "\t\tWill simulate a match on input devices that provide a power button *and* that aren't also a touchscreen (because, yes, some touchscreens have weird caps)\n"
 	    "\n",
 	    fbink_version());
 	return;
@@ -120,10 +124,11 @@ int
 	//       so we need to do the matching ourselves when we're passed *short* options, hence the sentinel value...
 	int                        opt_index = -1;
 	static const struct option opts[]    = {
-                {  "help",       no_argument, NULL, 'h' },
-                { "print",       no_argument, NULL, 'p' },
-                { "match", required_argument, NULL, 'm' },
-                {    NULL,                 0, NULL,   0 }
+                {    "help",       no_argument, NULL, 'h' },
+                {   "print",       no_argument, NULL, 'p' },
+                {   "match", required_argument, NULL, 'm' },
+                { "exclude", required_argument, NULL, 'x' },
+                {      NULL,                 0, NULL,   0 }
 	};
 	enum
 	{
@@ -175,16 +180,17 @@ int
 #pragma GCC diagnostic pop
 	char*               full_subopts = NULL;
 	char*               subopts;
-	char*               value      = NULL;
-	bool                print_only = false;
-	INPUT_DEVICE_TYPE_T scan_mask  = SCAN_ONLY;
-	bool                errfnd     = false;
+	char*               value        = NULL;
+	bool                print_only   = false;
+	INPUT_DEVICE_TYPE_T scan_mask    = SCAN_ONLY;
+	INPUT_DEVICE_TYPE_T exclude_mask = 0U;
+	bool                errfnd       = false;
 
 	// NOTE: Enforce line-buffering, to make I/O redirections less confusing (e.g., in DevCap logs),
 	//       as we often mix stdout with stderr, and unlike stdout, stderr is always unbuffered (c.f., setvbuf(3)).
 	setlinebuf(stdout);
 
-	while ((opt = getopt_long(argc, argv, "vqpm:h", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "vqpm:x:h", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'v':
 				isQuiet   = false;
@@ -197,7 +203,8 @@ int
 			case 'p':
 				print_only = true;
 				break;
-			case 'm': {
+			case 'm':
+			case 'x': {
 				// We'll want our longform name for diagnostic messages...
 				const char* opt_longname = NULL;
 				// Look it up if we were passed the short form...
@@ -209,6 +216,8 @@ int
 							break;
 						}
 					}
+					// Reset when we're done
+					opt_index = -1;
 				} else {
 					opt_longname = opts[opt_index].name;
 				}
@@ -223,61 +232,69 @@ int
 					}
 				}
 
+				// Choose the right mask depending on whether we're in match or exclude
+				INPUT_DEVICE_TYPE_T* mask;
+				if (opt == 'm') {
+					mask = &scan_mask;
+				} else {
+					mask = &exclude_mask;
+				}
+
 				while (subopts && *subopts != '\0' && !errfnd) {
 					switch (getsubopt(&subopts, match_token, &value)) {
 						case OPT_INPUT_UNKNOWN:
-							scan_mask |= INPUT_UNKNOWN;
+							*mask |= INPUT_UNKNOWN;
 							break;
 						case OPT_INPUT_POINTINGSTICK:
-							scan_mask |= INPUT_POINTINGSTICK;
+							*mask |= INPUT_POINTINGSTICK;
 							break;
 						case OPT_INPUT_MOUSE:
-							scan_mask |= INPUT_MOUSE;
+							*mask |= INPUT_MOUSE;
 							break;
 						case OPT_INPUT_TOUCHPAD:
-							scan_mask |= INPUT_TOUCHPAD;
+							*mask |= INPUT_TOUCHPAD;
 							break;
 						case OPT_INPUT_TOUCHSCREEN:
-							scan_mask |= INPUT_TOUCHSCREEN;
+							*mask |= INPUT_TOUCHSCREEN;
 							break;
 						case OPT_INPUT_JOYSTICK:
-							scan_mask |= INPUT_JOYSTICK;
+							*mask |= INPUT_JOYSTICK;
 							break;
 						case OPT_INPUT_TABLET:
-							scan_mask |= INPUT_TABLET;
+							*mask |= INPUT_TABLET;
 							break;
 						case OPT_INPUT_KEY:
-							scan_mask |= INPUT_KEY;
+							*mask |= INPUT_KEY;
 							break;
 						case OPT_INPUT_KEYBOARD:
-							scan_mask |= INPUT_KEYBOARD;
+							*mask |= INPUT_KEYBOARD;
 							break;
 						case OPT_INPUT_ACCELEROMETER:
-							scan_mask |= INPUT_ACCELEROMETER;
+							*mask |= INPUT_ACCELEROMETER;
 							break;
 						case OPT_INPUT_POWER_BUTTON:
-							scan_mask |= INPUT_POWER_BUTTON;
+							*mask |= INPUT_POWER_BUTTON;
 							break;
 						case OPT_INPUT_SLEEP_COVER:
-							scan_mask |= INPUT_SLEEP_COVER;
+							*mask |= INPUT_SLEEP_COVER;
 							break;
 						case OPT_INPUT_PAGINATION_BUTTONS:
-							scan_mask |= INPUT_PAGINATION_BUTTONS;
+							*mask |= INPUT_PAGINATION_BUTTONS;
 							break;
 						case OPT_INPUT_HOME_BUTTON:
-							scan_mask |= INPUT_HOME_BUTTON;
+							*mask |= INPUT_HOME_BUTTON;
 							break;
 						case OPT_INPUT_LIGHT_BUTTON:
-							scan_mask |= INPUT_LIGHT_BUTTON;
+							*mask |= INPUT_LIGHT_BUTTON;
 							break;
 						case OPT_INPUT_MENU_BUTTON:
-							scan_mask |= INPUT_MENU_BUTTON;
+							*mask |= INPUT_MENU_BUTTON;
 							break;
 						case OPT_INPUT_DPAD:
-							scan_mask |= INPUT_DPAD;
+							*mask |= INPUT_DPAD;
 							break;
 						case OPT_INPUT_ROTATION_EVENT:
-							scan_mask |= INPUT_ROTATION_EVENT;
+							*mask |= INPUT_ROTATION_EVENT;
 							break;
 						default:
 							ELOG("No match found for token: /%s/ for -%c, --%s",
@@ -372,7 +389,7 @@ int
 	// Assume success, until shit happens ;)
 	int rv = EXIT_SUCCESS;
 
-	LOG("Requested total scan mask: %#.8x", scan_mask & ~SCAN_ONLY);
+	LOG("Requested total scan mask: %#.8x & ~%#.8x", scan_mask & ~SCAN_ONLY, exclude_mask);
 	size_t            dev_count;
 	FBInkInputDevice* devices = fbink_input_scan(scan_mask, &dev_count);
 	LOG("Found %zu readable input devices", dev_count);
