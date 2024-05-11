@@ -15,6 +15,7 @@ libevdev.built
 # And our specific minimal library builds
 small.built
 tiny.built
+tinyish.built
 tinier.built
 # KDevelop
 FBInk.kdev4
