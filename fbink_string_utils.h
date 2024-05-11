@@ -33,23 +33,32 @@
 static ssize_t
     strtcpy(char* restrict dst, const char* restrict src, size_t dsize)
 {
-	bool   trunc;
-	size_t dlen, slen;
-
-	if (dsize == 0) {
+	if (dsize == 0U) {
 		errno = ENOBUFS;
 		return -1;
 	}
 
-	slen  = strnlen(src, dsize);
-	trunc = (slen == dsize);
-	dlen  = slen - trunc;
+	size_t slen  = strnlen(src, dsize);
+	bool   trunc = (slen == dsize);
+	size_t dlen  = slen - trunc;
 
 	stpcpy(mempcpy(dst, src, dlen), "");
 	if (trunc) {
 		errno = E2BIG;
 	}
 	return trunc ? -1 : (ssize_t) slen;
+}
+
+// c.f., string_copying(7)
+static char*
+    stpecpy(char* dst, char end[0], const char* restrict src)
+{
+	if (dst == NULL) {
+		return NULL;
+	}
+
+	ssize_t dlen = strtcpy(dst, src, (uintptr_t) (end - dst));
+	return (dlen == -1) ? NULL : dst + dlen;
 }
 
 // Based on Linux's strscpy_pad

@@ -295,10 +295,13 @@ static __attribute__((cold)) const char*
 }
 
 static __attribute__((cold)) void
-    concat_type_recap(INPUT_DEVICE_TYPE_T type, char* string)
+    concat_type_recap(INPUT_DEVICE_TYPE_T type, char* string, size_t dsize)
 {
+	char* p   = string;
+	char* end = string + dsize;
+
 	if (type == INPUT_UNKNOWN) {
-		strcat(string, " = UNKNOWN");
+		p = stpecpy(p, end, " = UNKNOWN");
 		return;
 	}
 
@@ -316,12 +319,12 @@ static __attribute__((cold)) void
 
 		if (type & v) {
 			if (first) {
-				strcat(string, " = ");
+				p     = stpecpy(p, end, " = ");
 				first = false;
 			} else {
-				strcat(string, " | ");
+				p = stpecpy(p, end, " | ");
 			}
-			strcat(string, type_name);
+			p = stpecpy(p, end, type_name);
 		}
 	}
 }
@@ -375,7 +378,7 @@ FBInkInputDevice*
 
 		// Recap the device's capabilities
 		char recap[4096] = { 0 };
-		concat_type_recap(dev->type, recap);
+		concat_type_recap(dev->type, recap, sizeof(recap));
 		ELOG("%s: `%s`%s", dev->path, dev->name, recap);
 
 		// If the classification matches our request, flag it as such
