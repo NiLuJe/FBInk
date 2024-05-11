@@ -304,8 +304,10 @@ static __attribute__((cold)) void
 
 	bool first = true;
 	// Since we can't actually iterate over an enum's values in C,
-	// fake it by computing them at run-time, since  we know it's a simple bitmask.
-	for (INPUT_DEVICE_TYPE_T i = 0, v = (1U << 0U); i < 32U; i++, v = (1U << i)) {
+	// fake it by computing them at run-time, since we know it's a simple bitmask.
+	// Basically, we just loop for the amount of bits in an INPUT_DEVICE_TYPE_T, i.e., 32 times,
+	// computing the value of that specific bit on each iteration.
+	for (INPUT_DEVICE_TYPE_T i = 0, v = (1U << 0U); i < (sizeof(v) * 8U); i++, v = (1U << i)) {
 		const char* type_name = input_type_to_string(v);
 		if (!type_name) {
 			// That bit doesn't actually map to a valid value in our enum, next!
