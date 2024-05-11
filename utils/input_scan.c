@@ -340,12 +340,13 @@ int
 	// Assume success, until shit happens ;)
 	int rv = EXIT_SUCCESS;
 
+	LOG("Requested total scan mask: %#.8x", scan_mask & ~SCAN_ONLY);
 	size_t            dev_count;
 	FBInkInputDevice* devices = fbink_input_scan(scan_mask, &dev_count);
 	LOG("Found %zu readable input devices", dev_count);
 	if (devices) {
 		for (FBInkInputDevice* device = devices; device < devices + dev_count; device++) {
-			LOG("Device %s @ %s is of type %u (matched: %d)",
+			LOG("Device %s @ %s is classified as %#.8x (matched: %d)",
 			    device->name,
 			    device->path,
 			    device->type,
