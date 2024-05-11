@@ -69,12 +69,6 @@
 		(x__ > y__) ? x__ : y__;                                                                                 \
 	})
 
-// Having a static input device number all these years couldn't go on forever...
-#define NXP_TOUCH_DEV             "/dev/input/event1"
-#define SUNXI_ELAN_TOUCHPAD_EVDEV "/dev/input/by-path/platform-0-0010-event"
-#define NXP_ELAN_TOUCHPAD_EVDEV   "/dev/input/by-path/platform-1-0010-event"
-#define MTK_ELAN_TOUCHPAD_EVDEV   "/dev/input/by-path/platform-2-0010-event"
-
 typedef struct
 {
 	int32_t x;
@@ -467,25 +461,26 @@ int
 		fbink_update_pen_colors(&fbink_cfg);
 	}
 
-	// Setup libevdev, poking at the right input device...
-	if (fbink_state.is_mtk) {
-		evfd = open(MTK_ELAN_TOUCHPAD_EVDEV, O_RDONLY | O_CLOEXEC | O_NONBLOCK);
-	} else if (fbink_state.is_sunxi) {
-		evfd = open(SUNXI_ELAN_TOUCHPAD_EVDEV, O_RDONLY | O_CLOEXEC | O_NONBLOCK);
-	} else {
-		if (access(NXP_ELAN_TOUCHPAD_EVDEV, F_OK) == 0) {
-			// e.g., the Libra 2
-			evfd = open(NXP_ELAN_TOUCHPAD_EVDEV, O_RDONLY | O_CLOEXEC | O_NONBLOCK);
-		} else {
-			evfd = open(NXP_TOUCH_DEV, O_RDONLY | O_CLOEXEC | O_NONBLOCK);
+	// Autodetect the right input device
+	size_t            dev_count;
+	FBInkInputDevice* devices = fbink_input_scan(INPUT_TOUCHSCREEN, &dev_count);
+	if (devices) {
+		for (FBInkInputDevice* device = devices; device < devices + dev_count; device++) {
+			// YOLO, assume there's only one touchscreen
+			if (device->matched) {
+				evfd = device->fd;
+			}
 		}
+		free(devices);
 	}
+
 	if (evfd == -1) {
 		PFWARN("open: %m");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
 	}
 
+	// Setup libevdev, poking at the right input device...
 	dev    = libevdev_new();
 	int rc = libevdev_set_fd(dev, evfd);
 	if (rc < 0) {
