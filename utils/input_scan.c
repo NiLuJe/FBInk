@@ -98,6 +98,14 @@ static void
 	    "\t-h, --help\t\t\t\tShow this help message.\n"
 	    "\t-v, --verbose\t\t\t\tToggle printing diagnostic messages.\n"
 	    "\t-q, --quiet\t\t\t\tToggle hiding diagnostic messages.\n"
+	    "\t-m, --match <type,type,type,...>\n"
+	    "\t\t\t\t\t\tSimulate a match on specific input device types.\n"
+	    "\t\t\t\tSupported types: unknown, pointingstick, mouse, touchpad, touchscreen, joystick, tablet, key, keyboard, accelerometer,\n"
+	    "\t\t\t\t                 power, sleep, pagination, home, light, menu\n"
+	    "\n"
+	    "EXAMPLES:\n"
+	    "\tinput_scan -m touchscreen,power,pagination\n"
+	    "\t\tWill simulate a match on *all* input devices that match *any* of the requested input types (here, a touchscreen, a power button, and pagination buttons)\n"
 	    "\n",
 	    fbink_version());
 	return;
