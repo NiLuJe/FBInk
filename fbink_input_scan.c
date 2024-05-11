@@ -33,6 +33,174 @@
 // Copyright (C) 2013 Red Hat, Inc
 // c.f., https://cgit.freedesktop.org/evemu/tree/tools/find_event_devices.c
 
+/* pointer devices */
+static bool
+    test_pointers(FBInkInputDevice*    dev,
+		  const unsigned long* bitmask_ev,
+		  const unsigned long* bitmask_abs,
+		  const unsigned long* bitmask_key,
+		  const unsigned long* bitmask_rel,
+		  const unsigned long* bitmask_props)
+{
+	bool has_keys            = test_bit(EV_KEY, bitmask_ev);
+	bool has_abs_coordinates = test_bit(ABS_X, bitmask_abs) && test_bit(ABS_Y, bitmask_abs);
+	bool has_3d_coordinates  = has_abs_coordinates && test_bit(ABS_Z, bitmask_abs);
+	bool is_accelerometer    = test_bit(INPUT_PROP_ACCELEROMETER, bitmask_props);
+
+	if (!has_keys && has_3d_coordinates) {
+		is_accelerometer = true;
+	}
+
+	if (is_accelerometer) {
+		dev->type |= INPUT_ACCELEROMETER;
+		return true;
+	}
+
+	bool is_pointing_stick = test_bit(INPUT_PROP_POINTING_STICK, bitmask_props);
+	bool stylus_or_pen     = test_bit(BTN_STYLUS, bitmask_key) || test_bit(BTN_TOOL_PEN, bitmask_key);
+	bool finger_but_no_pen = test_bit(BTN_TOOL_FINGER, bitmask_key) && !test_bit(BTN_TOOL_PEN, bitmask_key);
+	bool has_mouse_button  = test_bit(BTN_LEFT, bitmask_key);
+	bool has_rel_coordinates =
+	    test_bit(EV_REL, bitmask_ev) && test_bit(REL_X, bitmask_rel) && test_bit(REL_Y, bitmask_rel);
+	bool has_mt_coordinates = test_bit(ABS_MT_POSITION_X, bitmask_abs) && test_bit(ABS_MT_POSITION_Y, bitmask_abs);
+
+	/* unset has_mt_coordinates if device claims to have all ABS axes */
+	if (has_mt_coordinates && test_bit(ABS_MT_SLOT, bitmask_abs) && test_bit(ABS_MT_SLOT - 1, bitmask_abs)) {
+		has_mt_coordinates = false;
+	}
+	bool is_direct = test_bit(INPUT_PROP_DIRECT, bitmask_props);
+	bool has_touch = test_bit(BTN_TOUCH, bitmask_key);
+	/* joysticks don't necessarily have buttons;
+	 * e. g. rudders/pedals are joystick-like, but buttonless;
+	 * they have other fancy axes */
+	bool has_joystick_axes_or_buttons =
+	    test_bit(BTN_TRIGGER, bitmask_key) || test_bit(BTN_A, bitmask_key) || test_bit(BTN_1, bitmask_key) ||
+	    test_bit(ABS_RX, bitmask_abs) || test_bit(ABS_RY, bitmask_abs) || test_bit(ABS_RZ, bitmask_abs) ||
+	    test_bit(ABS_THROTTLE, bitmask_abs) || test_bit(ABS_RUDDER, bitmask_abs) ||
+	    test_bit(ABS_WHEEL, bitmask_abs) || test_bit(ABS_GAS, bitmask_abs) || test_bit(ABS_BRAKE, bitmask_abs);
+
+	bool is_tablet      = false;
+	bool is_touchpad    = false;
+	bool is_mouse       = false;
+	bool is_touchscreen = false;
+	bool is_joystick    = false;
+	if (has_abs_coordinates) {
+		if (stylus_or_pen) {
+			is_tablet = true;
+		} else if (finger_but_no_pen && !is_direct) {
+			is_touchpad = true;
+		} else if (has_mouse_button) {
+			/* This path is taken by VMware's USB mouse,
+			 * which has absolute axes, but no touch/pressure button. */
+			is_mouse = true;
+		} else if (has_touch) {
+			is_touchscreen = true;
+		} else if (has_joystick_axes_or_buttons) {
+			is_joystick = true;
+		}
+	}
+	if (has_mt_coordinates && is_direct) {
+		is_touchscreen = true;
+	}
+
+	if (has_rel_coordinates && has_mouse_button) {
+		is_mouse = true;
+	}
+
+	if (is_pointing_stick) {
+		dev->type |= INPUT_POINTINGSTICK;
+	}
+	if (is_mouse) {
+		dev->type |= INPUT_MOUSE;
+	}
+	if (is_touchpad) {
+		dev->type |= INPUT_TOUCHPAD;
+	}
+	if (is_touchscreen) {
+		dev->type |= INPUT_TOUCHSCREEN;
+	}
+	if (is_joystick) {
+		dev->type |= INPUT_JOYSTICK;
+	}
+	if (is_tablet) {
+		dev->type |= INPUT_TABLET;
+	}
+
+	return is_tablet || is_mouse || is_touchpad || is_touchscreen || is_joystick || is_pointing_stick;
+}
+
+/* key like devices */
+static bool
+    test_key(FBInkInputDevice* dev, const unsigned long* bitmask_ev, const unsigned long* bitmask_key)
+{
+	bool ret = false;
+
+	/* do we have any KEY_* capability? */
+	if (!test_bit(EV_KEY, bitmask_ev)) {
+		PFLOG("no EV_KEY capability");
+		return false;
+	}
+
+	/* only consider KEY_* here, not BTN_* */
+	unsigned long found = 0;
+	for (unsigned i = 0; i < BTN_MISC / BITS_PER_LONG; ++i) {
+		found |= bitmask_key[i];
+		PFLOG("checking bit block %lu for any keys; found=%i", (unsigned long) i * BITS_PER_LONG, found > 0);
+	}
+	/* If there are no keys in the lower block, check the higher block */
+	if (!found) {
+		for (unsigned i = KEY_OK; i < BTN_TRIGGER_HAPPY; ++i) {
+			if (test_bit(i, bitmask_key)) {
+				PFLOG("Found key %x in high block", i);
+				found = 1;
+				break;
+			}
+		}
+	}
+
+	if (found > 0) {
+		dev->type |= INPUT_KEY;
+		ret        = true;
+	}
+
+	/* the first 32 bits are ESC, numbers, and Q to D;
+	 * if we have all of those, consider it a full keyboard;
+	 * do not test KEY_RESERVED, though */
+	unsigned long mask = 0xFFFFFFFE;
+	if ((bitmask_key[0] & mask) == mask) {
+		dev->type |= INPUT_KEYBOARD;
+		ret        = true;
+	}
+
+	return ret;
+}
+
+static int
+    check_device_cap(FBInkInputDevice* dev)
+{
+	unsigned long bitmask_ev[NBITS(EV_MAX)]            = { 0U };
+	unsigned long bitmask_abs[NBITS(ABS_MAX)]          = { 0U };
+	unsigned long bitmask_key[NBITS(KEY_MAX)]          = { 0U };
+	unsigned long bitmask_rel[NBITS(REL_MAX)]          = { 0U };
+	unsigned long bitmask_props[NBITS(INPUT_PROP_MAX)] = { 0U };
+
+	ioctl(dev->fd, EVIOCGBIT(0, sizeof(bitmask_ev)), bitmask_ev);
+	ioctl(dev->fd, EVIOCGBIT(EV_ABS, sizeof(bitmask_abs)), bitmask_abs);
+	ioctl(dev->fd, EVIOCGBIT(EV_REL, sizeof(bitmask_rel)), bitmask_rel);
+	ioctl(dev->fd, EVIOCGBIT(EV_KEY, sizeof(bitmask_key)), bitmask_key);
+	ioctl(dev->fd, EVIOCGPROP(sizeof(bitmask_props)), bitmask_props);
+
+	bool is_pointer = test_pointers(dev, bitmask_ev, bitmask_abs, bitmask_key, bitmask_rel, bitmask_props);
+	bool is_key     = test_key(dev, bitmask_ev, bitmask_key);
+	/* Some devices only have a scrollwheel */
+	if (!is_pointer && !is_key && test_bit(EV_REL, bitmask_ev) &&
+	    (test_bit(REL_WHEEL, bitmask_rel) || test_bit(REL_HWHEEL, bitmask_rel))) {
+		dev->type |= INPUT_KEY;
+	}
+
+	return EXIT_SUCCESS;
+}
+
 FBInkInputDevice*
     fbink_input_scan(INPUT_DEVICE_TYPE_T req_types, size_t* dev_count)
 {
@@ -72,6 +240,9 @@ FBInkInputDevice*
 		}
 
 		ioctl(dev->fd, EVIOCGNAME(sizeof(dev->name)), dev->name);
+
+		// Let udev's builtin input_id logic do its thing!
+		check_device_cap(dev);
 
 		// TODO: Also close if !requested types
 		// TODO: Set matched if requested types

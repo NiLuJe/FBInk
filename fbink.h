@@ -1666,6 +1666,8 @@ typedef enum
 	INPUT_JOYSTICK      = 1U << 4U,
 	INPUT_TABLET        = 1U << 5U,
 	INPUT_KEY           = 1U << 6U,
+	INPUT_KEYBOARD      = 1U << 7U,
+	INPUT_ACCELEROMETER = 1U << 8U,
 
 	OPEN_BLOCKING = 1U << 30U,
 	SCAN_ONLY     = 1U << 31U,

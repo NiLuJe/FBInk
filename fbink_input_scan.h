@@ -56,6 +56,46 @@ static int
 	return strncmp(EVENT_DEV_NAME, dir->d_name, 5) == 0;
 }
 
+// This needs to be kernel-compatible
+#define BITS_PER_LONG        (sizeof(unsigned long) * 8)
+#define NBITS(x)             ((((x) - 1) / BITS_PER_LONG) + 1)
+#define OFF(x)               ((x) % BITS_PER_LONG)
+#define BIT(x)               (1UL << OFF(x))
+#define LONG(x)              ((x) / BITS_PER_LONG)
+#define test_bit(bit, array) ((array[LONG(bit)] >> OFF(bit)) & 1)
+
+static bool test_pointers(FBInkInputDevice*    dev,
+			  const unsigned long* bitmask_ev,
+			  const unsigned long* bitmask_abs,
+			  const unsigned long* bitmask_key,
+			  const unsigned long* bitmask_rel,
+			  const unsigned long* bitmask_props);
+static bool test_key(FBInkInputDevice* dev, const unsigned long* bitmask_ev, const unsigned long* bitmask_key);
+static int  check_device_cap(FBInkInputDevice* dev);
+
+// Old kernels need a hand...
+#ifndef EVIOCGPROP
+#	define EVIOCGPROP(len) _IOC(_IOC_READ, 'E', 0x09, len)
+#endif
+#ifndef INPUT_PROP_DIRECT
+#	define INPUT_PROP_DIRECT 0x01
+#endif
+#ifndef INPUT_PROP_POINTING_STICK
+#	define INPUT_PROP_POINTING_STICK 0x05
+#endif
+#ifndef INPUT_PROP_ACCELEROMETER
+#	define INPUT_PROP_ACCELEROMETER 0x06
+#endif
+#ifndef INPUT_PROP_MAX
+#	define INPUT_PROP_MAX 0x1f
+#endif
+#ifndef ABS_MT_SLOT
+#	define ABS_MT_SLOT 0x2f
+#endif
+#ifndef BTN_TRIGGER_HAPPY
+#	define BTN_TRIGGER_HAPPY 0x2c0
+#endif
+
 // Each of our target platforms tend to settle on some specific,
 // sometimes barely related, keycodes for common functions...
 #if defined(FBINK_FOR_KOBO)
