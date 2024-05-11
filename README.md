@@ -132,6 +132,8 @@ And on the subject of input & rotation on Kobo, `make ftrace` will build a simpl
 If you intend to handle touch input in any way in your code, this should be a good place to look ;).  
 It also demonstrates how to deal effectively with pen input & drawing on the Elipsa.
 
+As for `make input_scan`, it will build a small CLI tool around the `fbink_input_scan` API, which helps make sense of which input device does what (a.k.a., "where's that damn touchscreen?" ;)).
+
 ## NOTES
 
 Kindle support covers the full Kindle lineup, starting from the K2.
