@@ -1697,7 +1697,7 @@ typedef struct
 // Returns a pointer to the first element of an array of FBInkInputDevice structs, containing `dev_count` elements.
 // Regardless of the filter you request, this will always contain *all* the device's input devices.
 // The `matched` field will be set to true if that device matches *any* of the bits in `req_types`,
-// meaning you can throw out a fairly wide net, and still catch everything you care about.
+// meaning you can cast a fairly wide net, and still catch everything you care about.
 // You *MUST* free the returned pointer after use (it's heap allocated).
 // Returns NULL on failure (no input devices can be read, or MINIMAL build w/o INPUT).
 // req_types:		Bitmask used to filter the type of input devices you want to open.

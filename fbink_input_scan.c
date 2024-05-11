@@ -251,133 +251,75 @@ static int
 	return EXIT_SUCCESS;
 }
 
-static __attribute__((cold)) void
-    input_type_to_str(INPUT_DEVICE_TYPE_E type, char* string)
+static __attribute__((cold)) const char*
+    input_type_to_string(INPUT_DEVICE_TYPE_E type)
 {
-	bool first = true;
-	// Udev
+	switch (type) {
+		case INPUT_UNKNOWN:
+			return "UNKNOWN";
+		case INPUT_POINTINGSTICK:
+			return "POINTING_STICK";
+		case INPUT_MOUSE:
+			return "MOUSE";
+		case INPUT_TOUCHPAD:
+			return "TOUCHPAD";
+		case INPUT_TOUCHSCREEN:
+			return "TOUCHSCREEN";
+		case INPUT_JOYSTICK:
+			return "JOYSTICK";
+		case INPUT_TABLET:
+			return "TABLET";
+		case INPUT_KEY:
+			return "KEY";
+		case INPUT_KEYBOARD:
+			return "KEYBOARD";
+		case INPUT_ACCELEROMETER:
+			return "ACCELEROMETER";
+		case INPUT_POWER_BUTTON:
+			return "POWER_BUTTON";
+		case INPUT_SLEEP_COVER:
+			return "SLEEP_COVER";
+		case INPUT_PAGINATION_BUTTONS:
+			return "PAGINATION_BUTTONS";
+		case INPUT_HOME_BUTTON:
+			return "HOME_BUTTON";
+		case INPUT_LIGHT_BUTTON:
+			return "LIGHT_BUTTON";
+		case INPUT_MENU_BUTTON:
+			return "MENU_BUTTON";
+		case OPEN_BLOCKING:
+		case SCAN_ONLY:
+		default:
+			return NULL;
+	}
+}
+
+static __attribute__((cold)) void
+    concat_type_recap(INPUT_DEVICE_TYPE_E type, char* string)
+{
 	if (type == INPUT_UNKNOWN) {
 		strcat(string, " = UNKNOWN");
+		return;
 	}
-	if (type & INPUT_POINTINGSTICK) {
-		if (first) {
-			strcat(string, " = POINTING_STICK");
-			first = false;
-		} else {
-			strcat(string, " | POINTING_STICK");
+
+	bool first = true;
+	// Since we can't actually iterate over an enum's values in C,
+	// fake it by computing them at run-time, since  we know it's a simple bitmask.
+	for (INPUT_DEVICE_TYPE_T i = 0, v = (1U << 0U); i < 32U; i++, v = (1U << i)) {
+		const char* type_name = input_type_to_string(v);
+		if (!type_name) {
+			// That bit doesn't actually map to a valid value in our enum, next!
+			continue;
 		}
-	}
-	if (type & INPUT_MOUSE) {
-		if (first) {
-			strcat(string, " = MOUSE");
-			first = false;
-		} else {
-			strcat(string, " | MOUSE");
-		}
-	}
-	if (type & INPUT_TOUCHPAD) {
-		if (first) {
-			strcat(string, " = TOUCHPAD");
-			first = false;
-		} else {
-			strcat(string, " | TOUCHPAD");
-		}
-	}
-	if (type & INPUT_TOUCHSCREEN) {
-		if (first) {
-			strcat(string, " = TOUCHSCREEN");
-			first = false;
-		} else {
-			strcat(string, " | TOUCHSCREEN");
-		}
-	}
-	if (type & INPUT_JOYSTICK) {
-		if (first) {
-			strcat(string, " = JOYSTICK");
-			first = false;
-		} else {
-			strcat(string, " | JOYSTICK");
-		}
-	}
-	if (type & INPUT_TABLET) {
-		if (first) {
-			strcat(string, " = TABLET");
-			first = false;
-		} else {
-			strcat(string, " | TABLET");
-		}
-	}
-	if (type & INPUT_KEY) {
-		if (first) {
-			strcat(string, " = KEY");
-			first = false;
-		} else {
-			strcat(string, " | KEY");
-		}
-	}
-	if (type & INPUT_KEYBOARD) {
-		if (first) {
-			strcat(string, " = KEYBOARD");
-			first = false;
-		} else {
-			strcat(string, " | KEYBOARD");
-		}
-	}
-	if (type & INPUT_ACCELEROMETER) {
-		if (first) {
-			strcat(string, " = ACCELEROMETER");
-			first = false;
-		} else {
-			strcat(string, " | ACCELEROMETER");
-		}
-	}
-	// Platform-specific
-	if (type & INPUT_POWER_BUTTON) {
-		if (first) {
-			strcat(string, " = POWER_BUTTON");
-			first = false;
-		} else {
-			strcat(string, " | POWER_BUTTON");
-		}
-	}
-	if (type & INPUT_SLEEP_COVER) {
-		if (first) {
-			strcat(string, " = SLEEP_COVER");
-			first = false;
-		} else {
-			strcat(string, " | SLEEP_COVER");
-		}
-	}
-	if (type & INPUT_PAGINATION_BUTTONS) {
-		if (first) {
-			strcat(string, " = PAGINATION_BUTTONS");
-			first = false;
-		} else {
-			strcat(string, " | PAGINATION_BUTTONS");
-		}
-	}
-	if (type & INPUT_HOME_BUTTON) {
-		if (first) {
-			strcat(string, " = HOME_BUTTON");
-			first = false;
-		} else {
-			strcat(string, " | HOME_BUTTON");
-		}
-	}
-	if (type & INPUT_LIGHT_BUTTON) {
-		if (first) {
-			strcat(string, " = LIGHT_BUTTON");
-			first = false;
-		} else {
-			strcat(string, " | LIGHT_BUTTON");
-		}
-	}
-	if (type & INPUT_MENU_BUTTON) {
-		if (first) {
-			strcat(string, " = MENU_BUTTON");
-			first = false;
-		} else {
-			strcat(string, " | MENU_BUTTON");
+
+		if (type & v) {
+			if (first) {
+				strcat(string, " = ");
+				first = false;
+			} else {
+				strcat(string, " | ");
+			}
+			strcat(string, type_name);
 		}
 	}
 }
@@ -431,7 +373,7 @@ FBInkInputDevice*
 
 		// Recap the device's capabilities
 		char recap[4096] = { 0 };
-		input_type_to_str(dev->type, recap);
+		concat_recap_type(dev->type, recap);
 		ELOG("%s: `%s`%s", dev->path, dev->name, recap);
 
 		// If the classification matches our request, flag it as such

@@ -76,6 +76,9 @@ static bool test_key(FBInkInputDevice* dev, const unsigned long* bitmask_ev, con
 static void test_platform_keys(FBInkInputDevice* dev, const unsigned long* bitmask_key);
 static int  check_device_cap(FBInkInputDevice* dev);
 
+static __attribute__((cold)) const char* input_type_to_string(INPUT_DEVICE_TYPE_E type);
+static __attribute__((cold)) void        concat_type_recap(INPUT_DEVICE_TYPE_E type, char* string);
+
 // Old kernels need a hand...
 #	ifndef EVIOCGPROP
 #		define EVIOCGPROP(len) _IOC(_IOC_READ, 'E', 0x09, len)
