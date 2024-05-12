@@ -359,6 +359,8 @@ static __attribute__((cold)) const char*
 			return "DPAD";
 		case INPUT_ROTATION_EVENT:
 			return "ROTATION_EVENT";
+		case INPUT_SCALED_TABLET:
+			return "SCALED_TABLET";
 		default:
 			return NULL;
 	}
