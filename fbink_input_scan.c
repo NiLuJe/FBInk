@@ -221,6 +221,22 @@ static void
 	}
 }
 
+// When building in standalone lib mode, we don't have access to these core functions...
+#	ifdef FBINK_INPUT_LIB
+static int
+    open_fb_fd_nonblock(int* restrict fbfd, bool* restrict keep_fd __attribute__((unused)))
+{
+	// We only need an fd for ioctl, hence O_NONBLOCK (as per open(2)).
+	*fbfd = open("/dev/fb0", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+	if (*fbfd == -1) {
+		PFWARN("Cannot open framebuffer character device (%m), aborting");
+		return ERRCODE(EXIT_FAILURE);
+	}
+
+	return EXIT_SUCCESS;
+}
+#	endif    // FBINK_INPUT_LIB
+
 static int
     check_device_cap(FBInkInputDevice* dev)
 {
@@ -299,7 +315,7 @@ static int
 					// Too bad, we'll go on anyway
 				}
 				// And we're done with that
-				close_fb(fbfd);
+				close(fbfd);
 			}
 		}
 
