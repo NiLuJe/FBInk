@@ -400,8 +400,16 @@ int
 	// Assume success, until shit happens ;)
 	int rv = EXIT_SUCCESS;
 
-	LOG("Requested match mask (%s): %#.8x", (settings_flags & MATCH_ALL) ? "all" : "any", scan_mask);
-	LOG("Requested exclude mask (%s): %#.8x", (settings_flags & EXCLUDE_ALL) ? "all" : "any", exclude_mask);
+	if (scan_mask) {
+		LOG("Requested match mask (%s): %#.8x", (settings_flags & MATCH_ALL) ? "all" : "any", scan_mask);
+	} else {
+		LOG("No match mask requested, no devices will be flagged as matches.");
+	}
+	if (exclude_mask) {
+		LOG("Requested exclusion mask (%s): %#.8x", (settings_flags & EXCLUDE_ALL) ? "all" : "any", exclude_mask);
+	} else {
+		LOG("No exclusion mask requested.");
+	}
 	size_t            dev_count;
 	FBInkInputDevice* devices = fbink_input_scan(scan_mask, exclude_mask, settings_flags, &dev_count);
 	LOG("Found %zu readable input devices", dev_count);
