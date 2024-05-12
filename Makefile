@@ -249,6 +249,8 @@ EXTRA_CPPFLAGS+=-D_GNU_SOURCE
 INPUT_LIB_CFLAGS:=-DFBINK_INPUT_LIB
 # We also need to silence a whole load of -Wunused-function warnings because of that...
 INPUT_LIB_CFLAGS+=-Wno-unused-function
+# We also want LTO enabled for better DCE...
+INPUT_LIB_CFLAGS+=$(LTO_CFLAGS)
 
 # Backward compatibility shenanigan: before FBINK_FOR_KOBO was implemented, we assumed KOBO was the default/fallback platform.
 # Keep honoring that.
