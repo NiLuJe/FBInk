@@ -366,8 +366,49 @@ static __attribute__((cold)) void
 		}
 	}
 }
+
+// We've got an open fd, check the device's caps and apply the match filters
+static void
+    check_device(FBInkInputDevice*   dev,
+		 INPUT_DEVICE_TYPE_T match_types,
+		 INPUT_DEVICE_TYPE_T exclude_types,
+		 INPUT_DEVICE_TYPE_T settings)
+{
+	// Path was already set by the caller, and fd is open; now get the device's name
+	ioctl(dev->fd, EVIOCGNAME(sizeof(dev->name)), dev->name);
+
+	// Let udev's builtin input_id logic do its thing!
+	check_device_cap(dev);
+
+	// Recap the device's capabilities
+	char recap[4096] = { 0 };
+	concat_type_recap(dev->type, recap, sizeof(recap));
+	ELOG("%s: `%s`%s", dev->path, dev->name, recap);
+
+	// Do we want to match on *all* or *any* of the match bits?
+	if (settings & MATCH_ALL) {
+		dev->matched = !!((dev->type & match_types) == match_types);
+	} else {
+		dev->matched = !!(dev->type & match_types);
+	}
+	// Do we want to exclude on *all* or *any* of the exclude bits?
+	if (dev->matched && exclude_types) {
+		if (settings & EXCLUDE_ALL) {
+			dev->matched = !((dev->type & exclude_types) == exclude_types);
+		} else {
+			dev->matched = !(dev->type & exclude_types);
+		}
+	}
+
+	// If this was a dry-run, or if the device wasn't a match, close the fd
+	if (settings & SCAN_ONLY || !dev->matched) {
+		close(dev->fd);
+		dev->fd = -1;
+	}
+}
 #endif    // FBINK_WITH_INPUT
 
+// Scan /dev/input/event* for input devices, and classify/filter them
 FBInkInputDevice*
     fbink_input_scan(INPUT_DEVICE_TYPE_T match_types   UNUSED_BY_NOINPUT,
 		     INPUT_DEVICE_TYPE_T exclude_types UNUSED_BY_NOINPUT,
@@ -412,41 +453,50 @@ FBInkInputDevice*
 			continue;
 		}
 
-		ioctl(dev->fd, EVIOCGNAME(sizeof(dev->name)), dev->name);
-
-		// Let udev's builtin input_id logic do its thing!
-		check_device_cap(dev);
-
-		// Recap the device's capabilities
-		char recap[4096] = { 0 };
-		concat_type_recap(dev->type, recap, sizeof(recap));
-		ELOG("%s: `%s`%s", dev->path, dev->name, recap);
-
-		// Do we want to match on *all* or *any* of the match bits?
-		if (settings & MATCH_ALL) {
-			dev->matched = !!((dev->type & match_types) == match_types);
-		} else {
-			dev->matched = !!(dev->type & match_types);
-		}
-		// Do we want to exclude on *all* or *any* of the exclude bits?
-		if (dev->matched && exclude_types) {
-			if (settings & EXCLUDE_ALL) {
-				dev->matched = !((dev->type & exclude_types) == exclude_types);
-			} else {
-				dev->matched = !(dev->type & exclude_types);
-			}
-		}
-
-		// If this was a dry-run, or if the device wasn't a match, close the fd
-		if (settings & SCAN_ONLY || !dev->matched) {
-			close(dev->fd);
-			dev->fd = -1;
-		}
+		check_device(dev, match_types, exclude_types, settings);
 
 		free(namelist[i]);
 	}
 
 	return devices;
+#else
+	WARN("Input utilities are disabled in this FBInk build");
+	return NULL;
+#endif    // FBINK_WITH_INPUT
+}
+
+// Variant that takes a path instead of scanning /dev/input/event*
+FBInkInputDevice*
+    fbink_input_check(const char*                       filepath,
+		      INPUT_DEVICE_TYPE_T match_types   UNUSED_BY_NOINPUT,
+		      INPUT_DEVICE_TYPE_T exclude_types UNUSED_BY_NOINPUT,
+		      INPUT_DEVICE_TYPE_T settings      UNUSED_BY_NOINPUT)
+{
+#ifdef FBINK_WITH_INPUT
+	// Default to NONBLOCK
+	int o_flags = O_RDONLY | O_CLOEXEC;
+	if ((settings & OPEN_BLOCKING) == 0) {
+		o_flags |= O_NONBLOCK;
+	}
+
+	int fd = open(filepath, o_flags);
+	if (fd < 0) {
+		PFWARN("open `%s`: %m", filepath);
+		return NULL;
+	}
+
+	FBInkInputDevice* dev = calloc(1, sizeof(*dev));
+	if (!dev) {
+		PFWARN("calloc: %m");
+		close(fd);
+		return NULL;
+	}
+
+	dev->fd = fd;
+	strtcpy(dev->path, filepath, sizeof(dev->path));
+	check_device(dev, match_types, exclude_types, settings);
+
+	return dev;
 #else
 	WARN("Input utilities are disabled in this FBInk build");
 	return NULL;
