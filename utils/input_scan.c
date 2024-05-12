@@ -88,7 +88,35 @@ static void
 {
 	printf(
 	    "\n"
-	    "Input Scan (via FBInk %s)\n"
+	    "Input Scan ");
+	printf("(via FBInk %s", fbink_version());
+	// Display the target platform
+	const FBINK_TARGET_T platform = fbink_target();
+	switch (platform) {
+		case FBINK_TARGET_LINUX:
+			printf(" for Linux");
+			break;
+		case FBINK_TARGET_KOBO:
+			printf(" for Kobo");
+			break;
+		case FBINK_TARGET_KINDLE:
+			printf(" for Kindle");
+			break;
+		case FBINK_TARGET_KINDLE_LEGACY:
+			printf(" for Legacy Kindle");
+			break;
+		case FBINK_TARGET_CERVANTES:
+			printf(" for Cervantes");
+			break;
+		case FBINK_TARGET_REMARKABLE:
+			printf(" for reMarkable");
+			break;
+		case FBINK_TARGET_POCKETBOOK:
+			printf(" for PocketBook");
+			break;
+	}
+	printf(
+	    ")\n"
 	    "\n"
 	    "Usage: input_scan [-m] <type...> [-p]\n"
 	    "\n"
@@ -113,8 +141,7 @@ static void
 	    "\t\tWill simulate a match on *all* input devices that match *any* of the requested input types (here, a touchscreen, a power button, and pagination buttons)\n"
 	    "\tinput_scan -m power -x touchscreen\n"
 	    "\t\tWill simulate a match on input devices that provide a power button *and* that aren't also a touchscreen (because, yes, some touchscreens have weird caps)\n"
-	    "\n",
-	    fbink_version());
+	    "\n");
 	return;
 }
 
