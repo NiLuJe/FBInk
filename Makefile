@@ -245,6 +245,9 @@ EXTRA_CPPFLAGS+=-D_REENTRANT=1
 # We're Linux-bound anyway...
 EXTRA_CPPFLAGS+=-D_GNU_SOURCE
 
+# That target is a bit of a hack, so silence a whole load of -Wunused-function warnings...
+INPUT_LIB_CFLAGS:=-Wno-unused-function
+
 # Backward compatibility shenanigan: before FBINK_FOR_KOBO was implemented, we assumed KOBO was the default/fallback platform.
 # Keep honoring that.
 ifndef LINUX
@@ -379,6 +382,7 @@ endif
 ##
 # Now that we're done fiddling with flags, let's build stuff!
 LIB_SRCS:=fbink.c cutef8/utf8.c cutef8/dfa.c
+LIB_INPUT_SRCS:=fbink_input_scan.c
 # Jump through a few hoops to set a few libunibreak-specific CFLAGS to silence some warnings...
 LIB_UB_SRCS:=libunibreak/src/linebreak.c libunibreak/src/linebreakdata.c libunibreak/src/unibreakdef.c libunibreak/src/linebreakdef.c libunibreak/src/eastasianwidthdef.c
 LIB_QT_SRCS:=qimagescale/qimagescale.c
@@ -518,13 +522,21 @@ FBINK_STATIC_NAME:=libfbink.a
 FBINK_PARTIAL_GCC_OPTS:=-r
 FBINK_PARTIAL_NAME:=libfbink.o
 FBINK_PARTIAL_LDFLAGS:=-Wl,--whole-archive -nostdlib
+# For the standalone libfbink_input variant
+FBINK_INPUT_SHARED_LDFLAGS:=-shared -Wl,-soname,libfbink_input.so.1
+FBINK_INPUT_SHARED_NAME_FILE:=libfbink_input.so.1.0.0
+FBINK_INPUT_SHARED_NAME:=libfbink_input.so
+FBINK_INPUT_SHARED_NAME_VER:=libfbink_input.so.1
+FBINK_INPUT_STATIC_NAME:=libfbink_input.a
 
 default: all
 
 SHAREDLIB_OBJS:=$(addprefix $(OUT_DIR)/shared/, $(LIB_SRCS:.c=.o))
+INPUT_SHAREDLIB_OBJS:=$(addprefix $(OUT_DIR)/shared/, $(LIB_INPUT_SRCS:.c=.o))
 UB_SHAREDLIB_OBJS:=$(addprefix $(OUT_DIR)/shared/, $(LIB_UB_SRCS:.c=.o))
 QT_SHAREDLIB_OBJS:=$(addprefix $(OUT_DIR)/shared/, $(LIB_QT_SRCS:.c=.o))
 STATICLIB_OBJS:=$(addprefix $(OUT_DIR)/static/, $(LIB_SRCS:.c=.o))
+INPUT_STATICLIB_OBJS:=$(addprefix $(OUT_DIR)/static/, $(LIB_INPUT_SRCS:.c=.o))
 UB_STATICLIB_OBJS:=$(addprefix $(OUT_DIR)/static/, $(LIB_UB_SRCS:.c=.o))
 QT_STATICLIB_OBJS:=$(addprefix $(OUT_DIR)/static/, $(LIB_QT_SRCS:.c=.o))
 CMD_OBJS:=$(addprefix $(OUT_DIR)/, $(CMD_SRCS:.c=.o))
@@ -535,6 +547,10 @@ BTN_OBJS:=$(addprefix $(OUT_DIR)/, $(BTN_SRCS:.c=.o))
 UNIBREAK_CFLAGS:=-Wno-conversion -Wno-cast-align -Wno-suggest-attribute=pure
 $(UB_SHAREDLIB_OBJS): QUIET_CFLAGS:=$(UNIBREAK_CFLAGS)
 $(UB_STATICLIB_OBJS): QUIET_CFLAGS:=$(UNIBREAK_CFLAGS)
+
+# And when building libfbink_input standalone
+$(INPUT_SHAREDLIB_OBJS): QUIET_CFLAGS:=$(INPUT_LIB_CFLAGS)
+$(INPUT_STATICLIB_OBJS): QUIET_CFLAGS:=$(INPUT_LIB_CFLAGS)
 
 # Silence a few warnings when building libi2c
 I2C_CFLAGS:=-Wno-sign-conversion
@@ -571,9 +587,11 @@ $(OUT_DIR)/%/:
 # Make absolutely sure we create our output directories first, even with unfortunate // timings!
 # c.f., https://www.gnu.org/software/make/manual/html_node/Prerequisite-Types.html#Prerequisite-Types
 $(SHAREDLIB_OBJS): libi2c.built | outdir
+$(INPUT_SHAREDLIB_OBJS): libi2c.built | outdir
 $(UB_SHAREDLIB_OBJS): | outdir
 $(QT_SHAREDLIB_OBJS): | outdir
 $(STATICLIB_OBJS): libi2c.built | outdir
+$(INPUT_STATICLIB_OBJS): libi2c.built | outdir
 $(UB_STATICLIB_OBJS): | outdir
 $(QT_STATICLIB_OBJS): | outdir
 $(CMD_OBJS): | outdir
@@ -597,6 +615,14 @@ $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE): $(SHAREDLIB_OBJS) $(UB_SHAREDLIB_OBJS) $(Q
 	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(SHARED_LIB_CFLAGS) $(LIB_CFLAGS) $(LDFLAGS) $(LIB_LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_SHARED_LDFLAGS) -o $@ $^ $(SHARED_LIBS)
 endif
 
+# No partial linking necessary here
+$(OUT_DIR)/$(FBINK_INPUT_STATIC_NAME): $(INPUT_STATICLIB_OBJS)
+	$(AR) $(FBINK_STATIC_AR_OPTS) $@ $^
+	$(RANLIB) $@
+
+$(OUT_DIR)/$(FBINK_INPUT_SHARED_NAME_FILE): $(INPUT_SHAREDLIB_OBJS)
+	$(CC) $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(FEATURES_CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(SHARED_CFLAGS) $(SHARED_LIB_CFLAGS) $(LIB_CFLAGS) $(LDFLAGS) $(LIB_LDFLAGS) $(EXTRA_LDFLAGS) $(FBINK_INPUT_SHARED_LDFLAGS) -o $@ $^ $(SHARED_LIBS)
+
 # Vendor in our dependencies
 $(OUT_DIR)/static/$(FBINK_PARTIAL_NAME): $(OUT_DIR)/static/$(FBINK_STATIC_NAME)
 	$(CC) $(FBINK_PARTIAL_GCC_OPTS) -o $@ $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) $(FBINK_PARTIAL_LDFLAGS) $< $(STATIC_LIBS)
@@ -610,8 +636,16 @@ $(OUT_DIR)/$(FBINK_SHARED_NAME_VER): $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE)
 $(OUT_DIR)/$(FBINK_SHARED_NAME): $(OUT_DIR)/$(FBINK_SHARED_NAME_VER)
 	ln -sf $(FBINK_SHARED_NAME_VER) $@
 
+$(OUT_DIR)/$(FBINK_INPUT_SHARED_NAME_VER): $(OUT_DIR)/$(FBINK_INPUT_SHARED_NAME_FILE)
+	ln -sf $(FBINK_INPUT_SHARED_NAME_FILE) $@
+$(OUT_DIR)/$(FBINK_INPUT_SHARED_NAME): $(OUT_DIR)/$(FBINK_INPUT_SHARED_NAME_VER)
+	ln -sf $(FBINK_INPUT_SHARED_NAME_VER) $@
+
 staticlib: $(OUT_DIR)/$(FBINK_STATIC_NAME)
 sharedlib: $(OUT_DIR)/$(FBINK_SHARED_NAME_VER) $(OUT_DIR)/$(FBINK_SHARED_NAME)
+
+staticinputlib: $(OUT_DIR)/$(FBINK_INPUT_STATIC_NAME)
+sharedinputlib: $(OUT_DIR)/$(FBINK_INPUT_SHARED_NAME_VER) $(OUT_DIR)/$(FBINK_INPUT_SHARED_NAME)
 
 # NOTE: We keep FEATURES_CPPFLAGS solely to handle ifdeffery crap ;)
 $(OUT_DIR)/static/fbink: $(OUT_DIR)/$(FBINK_STATIC_NAME) $(CMD_OBJS)
@@ -647,6 +681,9 @@ endif
 
 striplib: $(OUT_DIR)/$(FBINK_SHARED_NAME) $(OUT_DIR)/$(FBINK_SHARED_NAME_VER)
 	$(STRIP) --strip-unneeded $(OUT_DIR)/$(FBINK_SHARED_NAME_FILE)
+
+stripinputlib: $(OUT_DIR)/$(FBINK_INPUT_SHARED_NAME) $(OUT_DIR)/$(FBINK_INPUT_SHARED_NAME_VER)
+	$(STRIP) --strip-unneeded $(OUT_DIR)/$(FBINK_INPUT_SHARED_NAME_FILE)
 
 # NOTE: Unless you *really* need to, I don't recommend stripping LTO archives,
 #       strip a binary linked against the untouched archive instead.
@@ -765,6 +802,11 @@ shared:
 release: shared
 	$(MAKE) striplib
 	$(MAKE) stripbin
+
+inputlib:
+	$(MAKE) cleansharedlib
+	$(MAKE) sharedinputlib MINIMAL=true INPUT=true
+	$(MAKE) stripinputlib
 
 kindle:
 	$(MAKE) strip KINDLE=true
@@ -1003,4 +1045,4 @@ format:
 	clang-format -style=file -i *.c *.h cutef8/*.c cutef8/*.h utils/*.c qimagescale/*.c qimagescale/*.h tools/*.c eink/*-kobo.h eink/*-kindle.h eink/einkfb.h
 
 
-.PHONY: default outdir all staticlib sharedlib static small tiny tinyish tinier shared striplib striparchive stripbin strip debug static pic shared release kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils rota_map alt sunxi ftrace fbdepth input_scan dump devcap clean cleansharedlib cleanstaticlib cleanlib distclean dist install format
+.PHONY: default outdir all staticlib sharedlib staticinputlib sharedinputlib static small tiny tinyish tinier shared striplib stripinputlib striparchive stripbin strip debug static pic shared release inputlib kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils rota_map alt sunxi ftrace fbdepth input_scan dump devcap clean cleansharedlib cleanstaticlib cleanlib distclean dist install format
