@@ -265,6 +265,9 @@ static int
 		test_platform_keys(dev, bitmask_key);
 	}
 	// We also want to check where the "device was rotated" events end up...
+	// ... potentially. There's a rather large potential for false-positives:
+	// the Kobo variant is fairly generic (EV_MSC:MSC_RAW),
+	// and the Kindle variant is *extremely* generic *and* nonsensical (EV_ABS:ABS_PRESSURE ?!)...
 	switch (PLATFORM_ROTATION_EV_TYPE) {
 		case EV_ABS:
 			if (test_bit(PLATFORM_ROTATION_EV_CODE, bitmask_abs)) {

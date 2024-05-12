@@ -1715,7 +1715,7 @@ typedef struct
 // match_types:		Bitmask used to filter the type of input devices you want to open.
 // exclude_types:	Bitmask used to filter *out* some input device types from results that matched match_types.
 //			Set to 0 to forgo an exclude mask.
-// settings:		Bitmask that control some of the scan's behavior.
+// settings:		Bitmask that controls some of the scan's behavior.
 //				if the OPEN_BLOCKING bit is set, fds will be opened in *blocking* mode.
 //					Otherwise, the default open flags are O_RDONLY|O_NONBLOCK|O_CLOEXEC
 //				if the SCAN_ONLY bit is set, *no* fds will be returned, regardless of the filter.
@@ -1724,7 +1724,8 @@ typedef struct
 //					Otherwise, any of each individal bit will be enough.
 //				if the EXCLUDE_ALL bit is set,
 //				a device must *not* feature *all* of the bits in exclude_types to be considered a match.
-//					Otherwise, any of each individal bit will be enough.
+//					Otherwise, any of each individal bit will be enough to warrant an exclusion.
+//			Set to 0 for default settings.
 // dev_count:		out pointer, will be set to the amount of array elements in the returned data.
 // NOTE: This does *NOT* require fbink to be initialized, but *does* honor its internal verbosity state.
 FBINK_API FBInkInputDevice* fbink_input_scan(INPUT_DEVICE_TYPE_T   match_types,
