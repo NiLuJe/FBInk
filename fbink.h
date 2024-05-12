@@ -1693,6 +1693,7 @@ typedef enum
 	OPEN_BLOCKING = 1U << 1U,    // Do *NOT* open fd's with O_NONBLOCK
 	MATCH_ALL     = 1U << 2U,    // Match on *all* the match_types bits instead of *any*
 	EXCLUDE_ALL   = 1U << 3U,    // Exclude on *all* the exclude_types bits instead of *any*
+	NO_RECAP      = 1U << 4U,    // Do *NOT* print a recap of the results of input device classification
 } __attribute__((packed)) INPUT_SETTINGS_TYPE_E;
 typedef uint32_t          INPUT_SETTINGS_TYPE_T;
 

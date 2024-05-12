@@ -415,10 +415,12 @@ static void
 	// Let udev's builtin input_id logic do its thing!
 	check_device_cap(dev);
 
-	// Recap the device's capabilities
-	char recap[4096] = { 0 };
-	concat_type_recap(dev->type, recap, sizeof(recap));
-	ELOG("%s: `%s`%s", dev->path, dev->name, recap);
+	// Recap the device's capabilities, unless requested otherwise.
+	if (!(settings & NO_RECAP)) {
+		char recap[4096] = { 0 };
+		concat_type_recap(dev->type, recap, sizeof(recap));
+		ELOG("%s: `%s`%s", dev->path, dev->name, recap);
+	}
 
 	// Do we want to match on *all* or *any* of the match bits?
 	if (settings & MATCH_ALL) {
