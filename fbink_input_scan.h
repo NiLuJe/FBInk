@@ -105,6 +105,9 @@ static __attribute__((cold)) void        concat_type_recap(INPUT_DEVICE_TYPE_T t
 #	ifndef BTN_TRIGGER_HAPPY
 #		define BTN_TRIGGER_HAPPY 0x2c0
 #	endif
+#	ifndef BTN_DPAD_UP
+#		define BTN_DPAD_UP 0x220
+#	endif
 
 // Each of our target platforms tend to settle on some specific,
 // sometimes barely related, keycodes for common functions...
