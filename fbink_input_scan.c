@@ -380,6 +380,40 @@ static void
 	// Let udev's builtin input_id logic do its thing!
 	check_device_cap(dev);
 
+	// If we specifically wanted to match on *scaled* tablet devices,
+	// we'll need to compare the max ABS_X/ABS_Y values with our framebuffer's resolution...
+	if ((dev->type & INPUT_TABLET) &&
+	    ((match_types & INPUT_SCALED_TABLET) || (exclude_types & INPUT_SCALED_TABLET))) {
+		// This is easy enough if we're running as part of FBInk proper, and we run post-init,
+		// but we'll have to do some more work otherwise (e.g., in standalone input lib builds)...
+		if (vInfo.xres == 0U && vInfo.yres == 0U) {
+			int  fbfd    = FBFD_AUTO;
+			// Open the framebuffer...
+			bool keep_fd = false;
+			if (open_fb_fd_nonblock(&fbfd, &keep_fd) == EXIT_SUCCESS) {
+				// Request the info we need
+				if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
+					PFWARN("Error reading variable fb information: %m");
+					// Too bad, we'll go on anyway
+				}
+				// And we're done with that
+				close_fb(fbfd);
+			}
+		}
+
+		// Okay, *now* we can check our stuff...
+		struct input_absinfo abs_info = { 0U };
+		ioctl(dev->fd, EVIOCGABS(ABS_X), &abs_info);
+		uint32_t max_x = (uint32_t) abs_info.maximum;
+		ioctl(dev->fd, EVIOCGABS(ABS_Y), &abs_info);
+		uint32_t max_y = (uint32_t) abs_info.maximum;
+
+		// Check both dimensions to account for rotation shenanigans...
+		if ((max_x == vInfo.xres || max_x == vInfo.yres) && (max_y == vInfo.xres || max_y == vInfo.yres)) {
+			dev->type |= INPUT_SCALED_TABLET;
+		}
+	}
+
 	// Recap the device's capabilities
 	char recap[4096] = { 0 };
 	concat_type_recap(dev->type, recap, sizeof(recap));
