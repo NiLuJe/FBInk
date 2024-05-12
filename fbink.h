@@ -1735,6 +1735,9 @@ FBINK_API FBInkInputDevice* fbink_input_scan(INPUT_DEVICE_TYPE_T   match_types,
 
 // Variant of the above that takes a filepath instead of scanning /dev/input/event*
 // This is useful to handle hotplug events, for instance.
+// Returns a pointer to an FBInkInputDevice struct.
+// You *MUST* free the returned pointer after use (it's heap allocated).
+// Returns NULL on failure (filepath cannot be read, or MINIMAL build w/o INPUT).
 FBINK_API FBInkInputDevice* fbink_input_check(const char*           filepath,
 					      INPUT_DEVICE_TYPE_T   match_types,
 					      INPUT_DEVICE_TYPE_T   exclude_types,
