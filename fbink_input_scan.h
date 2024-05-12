@@ -102,6 +102,12 @@ static __attribute__((cold)) void        concat_type_recap(INPUT_DEVICE_TYPE_T t
 #	ifndef ABS_MT_SLOT
 #		define ABS_MT_SLOT 0x2f
 #	endif
+#	ifndef ABS_MT_POSITION_X
+#		define ABS_MT_POSITION_X 0x35
+#	endif
+#	ifndef ABS_MT_POSITION_Y
+#		define ABS_MT_POSITION_Y 0x36
+#	endif
 #	ifndef BTN_TRIGGER_HAPPY
 #		define BTN_TRIGGER_HAPPY 0x2c0
 #	endif
