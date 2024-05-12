@@ -504,7 +504,7 @@ FBInkInputDevice*
 
 // Variant that takes a path instead of scanning /dev/input/event*
 FBInkInputDevice*
-    fbink_input_check(const char*                       filepath,
+    fbink_input_check(const char* filepath              UNUSED_BY_NOINPUT,
 		      INPUT_DEVICE_TYPE_T match_types   UNUSED_BY_NOINPUT,
 		      INPUT_DEVICE_TYPE_T exclude_types UNUSED_BY_NOINPUT,
 		      INPUT_DEVICE_TYPE_T settings      UNUSED_BY_NOINPUT)
