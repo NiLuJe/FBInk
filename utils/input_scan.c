@@ -105,6 +105,8 @@ static void
 	    "\t\t\t\t                 power, sleep, pagination, home, light, menu, dpad, rotation\n"
 	    "\t-x, --exclude <type,type,type,...>\n"
 	    "\t\t\t\t\t\tExclude input device types from your match request.\n"
+	    "\t-M, --matchall\t\t\t\tMatch on *all* of the specified bits, instead of *any*.\n"
+	    "\t-X, --excludeall\t\t\t\tExclude on *all* of the specified bits, instead of *any*.\n"
 	    "\n"
 	    "EXAMPLES:\n"
 	    "\tinput_scan -m touchscreen,power,pagination\n"
@@ -124,11 +126,13 @@ int
 	//       so we need to do the matching ourselves when we're passed *short* options, hence the sentinel value...
 	int                        opt_index = -1;
 	static const struct option opts[]    = {
-                {    "help",       no_argument, NULL, 'h' },
-                {   "print",       no_argument, NULL, 'p' },
-                {   "match", required_argument, NULL, 'm' },
-                { "exclude", required_argument, NULL, 'x' },
-                {      NULL,                 0, NULL,   0 }
+                {       "help",       no_argument, NULL, 'h' },
+                {      "print",       no_argument, NULL, 'p' },
+                {      "match", required_argument, NULL, 'm' },
+                {   "matchall",       no_argument, NULL, 'M' },
+                {    "exclude", required_argument, NULL, 'x' },
+                { "excludeall",       no_argument, NULL, 'X' },
+                {         NULL,                 0, NULL,   0 }
 	};
 	enum
 	{
@@ -178,13 +182,14 @@ int
 				      [OPT_INPUT_ROTATION_EVENT]     = "rotation",
 				      NULL };
 #pragma GCC diagnostic pop
-	char*               full_subopts = NULL;
-	char*               subopts;
-	char*               value        = NULL;
-	bool                print_only   = false;
-	INPUT_DEVICE_TYPE_T scan_mask    = 0U;
-	INPUT_DEVICE_TYPE_T exclude_mask = 0U;
-	bool                errfnd       = false;
+	char*                 full_subopts = NULL;
+	char*                 subopts;
+	char*                 value          = NULL;
+	bool                  print_only     = false;
+	INPUT_DEVICE_TYPE_T   scan_mask      = 0U;
+	INPUT_DEVICE_TYPE_T   exclude_mask   = 0U;
+	INPUT_SETTINGS_TYPE_T settings_flags = SCAN_ONLY;
+	bool                  errfnd         = false;
 
 	// NOTE: Enforce line-buffering, to make I/O redirections less confusing (e.g., in DevCap logs),
 	//       as we often mix stdout with stderr, and unlike stdout, stderr is always unbuffered (c.f., setvbuf(3)).
@@ -202,6 +207,12 @@ int
 				break;
 			case 'p':
 				print_only = true;
+				break;
+			case 'M':
+				settings_flags |= MATCH_ALL;
+				break;
+			case 'X':
+				settings_flags |= EXCLUDE_ALL;
 				break;
 			case 'm':
 			case 'x': {
@@ -389,10 +400,10 @@ int
 	// Assume success, until shit happens ;)
 	int rv = EXIT_SUCCESS;
 
-	LOG("Requested match mask: %#.8x", scan_mask);
-	LOG("Requested exclude mask: %#.8x", exclude_mask);
+	LOG("Requested match mask (%s): %#.8x", (settings_flags & MATCH_ALL) ? "all" : "any", scan_mask);
+	LOG("Requested exclude mask (%s): %#.8x", (settings_flags & EXCLUDE_ALL) ? "all" : "any", exclude_mask);
 	size_t            dev_count;
-	FBInkInputDevice* devices = fbink_input_scan(scan_mask, exclude_mask, SCAN_ONLY, &dev_count);
+	FBInkInputDevice* devices = fbink_input_scan(scan_mask, exclude_mask, settings_flags, &dev_count);
 	LOG("Found %zu readable input devices", dev_count);
 	if (devices) {
 		for (FBInkInputDevice* device = devices; device < devices + dev_count; device++) {
