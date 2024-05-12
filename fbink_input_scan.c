@@ -221,22 +221,6 @@ static void
 	}
 }
 
-// When building in standalone lib mode, we don't have access to these core functions...
-#	ifdef FBINK_INPUT_LIB
-static int
-    open_fb_fd_nonblock(int* restrict fbfd, bool* restrict keep_fd __attribute__((unused)))
-{
-	// We only need an fd for ioctl, hence O_NONBLOCK (as per open(2)).
-	*fbfd = open("/dev/fb0", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
-	if (*fbfd == -1) {
-		PFWARN("Cannot open framebuffer character device (%m), aborting");
-		return ERRCODE(EXIT_FAILURE);
-	}
-
-	return EXIT_SUCCESS;
-}
-#	endif    // FBINK_INPUT_LIB
-
 static int
     check_device_cap(FBInkInputDevice* dev)
 {
@@ -305,10 +289,11 @@ static int
 		// This is easy enough if we're running as part of FBInk proper, and we run post-init,
 		// but we'll have to do some more work otherwise (e.g., in standalone input lib builds)...
 		if (vInfo.xres == 0U && vInfo.yres == 0U) {
-			int  fbfd    = FBFD_AUTO;
 			// Open the framebuffer...
-			bool keep_fd = false;
-			if (open_fb_fd_nonblock(&fbfd, &keep_fd) == EXIT_SUCCESS) {
+			int fbfd = open("/dev/fb0", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+			if (fbfd == -1) {
+				PFWARN("Cannot open framebuffer character device (%m)");
+			} else {
 				// Request the info we need
 				if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vInfo)) {
 					PFWARN("Error reading variable fb information: %m");
