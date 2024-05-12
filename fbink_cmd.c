@@ -68,13 +68,14 @@ static void
 	}
 	// Recap the build features
 	const uint32_t features = fbink_features();
-	printf(" [Draw=%s, Bitmap=%s, Fonts=%s, Unifont=%s, OpenType=%s, Image=%s, ButtonScan=%s]",
+	printf(" [Draw=%s, Bitmap=%s, Fonts=%s, Unifont=%s, OpenType=%s, Image=%s, Input=%s, ButtonScan=%s]",
 	       has_feature(features, FBINK_FEATURE_DRAW),
 	       has_feature(features, FBINK_FEATURE_BITMAP),
 	       has_feature(features, FBINK_FEATURE_FONTS),
 	       has_feature(features, FBINK_FEATURE_UNIFONT),
 	       has_feature(features, FBINK_FEATURE_OPENTYPE),
 	       has_feature(features, FBINK_FEATURE_IMAGE),
+	       has_feature(features, FBINK_FEATURE_INPUT),
 	       has_feature(features, FBINK_FEATURE_BUTTON_SCAN));
 #ifdef DEBUG
 	printf(" [DEBUG]");
