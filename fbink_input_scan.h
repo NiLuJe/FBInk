@@ -43,7 +43,12 @@
 // versionsort sorts the device names in proper numerical order
 // (e.g. so that event10 is listed after event9, not event1),
 // but is only available in glibc.
+// NOTE: The signature of versionsort changed to match POSIX.1-2008 in glibc 2.10 (c.f., scandir(3))...
+#		if ((__GLIBC__ > 2) || ((__GLIBC__ == 2) && (__GLIBC_MINOR__ >= 10)))
 static int (*sort_fn)(const struct dirent**, const struct dirent**) = versionsort;
+#		else
+static int (*sort_fn)(const void*, const void*) = versionsort;
+#		endif
 #	else
 // Fall back to basic alphabetical sorting for other libc implementations.
 static int (*sort_fn)(const struct dirent**, const struct dirent**) = alphasort;
