@@ -195,7 +195,7 @@ int
 	//       as we often mix stdout with stderr, and unlike stdout, stderr is always unbuffered (c.f., setvbuf(3)).
 	setlinebuf(stdout);
 
-	while ((opt = getopt_long(argc, argv, "vqpm:x:h", opts, &opt_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "vqpMXm:x:h", opts, &opt_index)) != -1) {
 		switch (opt) {
 			case 'v':
 				isQuiet   = false;
