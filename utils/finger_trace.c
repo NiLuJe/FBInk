@@ -463,7 +463,7 @@ int
 
 	// Autodetect the right input device
 	size_t            dev_count;
-	FBInkInputDevice* devices = fbink_input_scan(INPUT_TOUCHSCREEN, 0U, &dev_count);
+	FBInkInputDevice* devices = fbink_input_scan(INPUT_TOUCHSCREEN, 0U, 0U, &dev_count);
 	if (devices) {
 		for (FBInkInputDevice* device = devices; device < devices + dev_count; device++) {
 			// YOLO, assume there's only one touchscreen

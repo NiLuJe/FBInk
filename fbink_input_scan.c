@@ -324,8 +324,6 @@ static __attribute__((cold)) const char*
 			return "DPAD";
 		case INPUT_ROTATION_EVENT:
 			return "ROTATION_EVENT";
-		case OPEN_BLOCKING:
-		case SCAN_ONLY:
 		default:
 			return NULL;
 	}
@@ -370,6 +368,7 @@ static __attribute__((cold)) void
 FBInkInputDevice*
     fbink_input_scan(INPUT_DEVICE_TYPE_T match_types   UNUSED_BY_NOINPUT,
 		     INPUT_DEVICE_TYPE_T exclude_types UNUSED_BY_NOINPUT,
+		     INPUT_DEVICE_TYPE_T settings      UNUSED_BY_NOINPUT,
 		     size_t* dev_count                 UNUSED_BY_NOINPUT)
 {
 #ifdef FBINK_WITH_INPUT
@@ -394,7 +393,7 @@ FBInkInputDevice*
 
 	// Default to NONBLOCK
 	int o_flags = O_RDONLY | O_CLOEXEC;
-	if ((match_types & OPEN_BLOCKING) == 0) {
+	if ((settings & OPEN_BLOCKING) == 0) {
 		o_flags |= O_NONBLOCK;
 	}
 
@@ -420,11 +419,23 @@ FBInkInputDevice*
 		concat_type_recap(dev->type, recap, sizeof(recap));
 		ELOG("%s: `%s`%s", dev->path, dev->name, recap);
 
-		// If the classification matches our request and not our exclude, flag it as such
-		dev->matched = !!((dev->type & match_types) && !(dev->type & exclude_types));
+		// Do we want to match on *all* or *any* of the match bits?
+		if (settings & MATCH_ALL) {
+			dev->matched = !!((dev->type & match_types) == match_types);
+		} else {
+			dev->matched = !!(dev->type & match_types);
+		}
+		// Do we want to exclude on *all* or *any* of the exclude bits?
+		if (dev->matched && exclude_types) {
+			if (settings & EXCLUDE_ALL) {
+				dev->matched = !((dev->type & exclude_types) == exclude_types);
+			} else {
+				dev->matched = !(dev->type & exclude_types);
+			}
+		}
 
 		// If this was a dry-run, or if the device wasn't a match, close the fd
-		if (match_types & SCAN_ONLY || !dev->matched) {
+		if (settings & SCAN_ONLY || !dev->matched) {
 			close(dev->fd);
 			dev->fd = -1;
 		}

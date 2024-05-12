@@ -182,7 +182,7 @@ int
 	char*               subopts;
 	char*               value        = NULL;
 	bool                print_only   = false;
-	INPUT_DEVICE_TYPE_T scan_mask    = SCAN_ONLY;
+	INPUT_DEVICE_TYPE_T scan_mask    = 0U;
 	INPUT_DEVICE_TYPE_T exclude_mask = 0U;
 	bool                errfnd       = false;
 
@@ -389,9 +389,10 @@ int
 	// Assume success, until shit happens ;)
 	int rv = EXIT_SUCCESS;
 
-	LOG("Requested total scan mask: %#.8x & ~%#.8x", scan_mask & ~SCAN_ONLY, exclude_mask);
+	LOG("Requested match mask: %#.8x", scan_mask);
+	LOG("Requested exclude mask: %#.8x", exclude_mask);
 	size_t            dev_count;
-	FBInkInputDevice* devices = fbink_input_scan(scan_mask, exclude_mask, &dev_count);
+	FBInkInputDevice* devices = fbink_input_scan(scan_mask, exclude_mask, SCAN_ONLY, &dev_count);
 	LOG("Found %zu readable input devices", dev_count);
 	if (devices) {
 		for (FBInkInputDevice* device = devices; device < devices + dev_count; device++) {

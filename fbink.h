@@ -1682,11 +1682,18 @@ typedef enum
 	INPUT_MENU_BUTTON        = 1U << 21U,
 	INPUT_DPAD               = 1U << 22U,
 	INPUT_ROTATION_EVENT     = 1U << 23U,    // Where "device was rotated" events *may* be sent (gyro or not)
-	// Auxiliary flags controlling the behavior of the function
-	OPEN_BLOCKING            = 1U << 30U,    // Do *NOT* open fd's with O_NONBLOCK
-	SCAN_ONLY                = 1U << 31U,    // Do *NOT* leave any fd's open'ed
 } __attribute__((packed)) INPUT_DEVICE_TYPE_E;
 typedef uint32_t          INPUT_DEVICE_TYPE_T;
+
+// Input classification settings
+typedef enum
+{
+	SCAN_ONLY     = 1U << 0U,    // Do *NOT* leave any fd's open'ed
+	OPEN_BLOCKING = 1U << 1U,    // Do *NOT* open fd's with O_NONBLOCK
+	MATCH_ALL     = 1U << 2U,    // Match on *all* the match_types bits instead of *any*
+	EXCLUDE_ALL   = 1U << 3U,    // Exclude on *all* the exclude_types bits instead of *any*
+} __attribute__((packed)) INPUT_SETTINGS_TYPE_E;
+typedef uint32_t          INPUT_SETTINGS_TYPE_T;
 
 typedef struct
 {
@@ -1700,21 +1707,30 @@ typedef struct
 // Scan & classify input devices into actionable categories.
 // Returns a pointer to the first element of an array of FBInkInputDevice structs, containing `dev_count` elements.
 // Regardless of the filter you request, this will always contain *all* the device's input devices.
-// The `matched` field will be set to true if that device matches *any* of the bits in `match_types`
-// and *none* of the bits in `exclude_types`, meaning you can either cast a fairly wide net,
+// The `matched` field will be set to true if that device matches *any/all* (depending on `MATCH_ALL`) of the bits in `match_types`
+// and *not* *any/all* (depending on `EXCLUDE_ALL`) of the bits in `exclude_types`, meaning you can either cast a fairly wide net,
 // and still catch everything you care about; or tackle an exclude mask on top for more fine-grained filtering.
 // You *MUST* free the returned pointer after use (it's heap allocated).
 // Returns NULL on failure (no input devices can be read, or MINIMAL build w/o INPUT).
 // match_types:		Bitmask used to filter the type of input devices you want to open.
+// exclude_types:	Bitmask used to filter *out* some input device types from results that matched match_types.
+//			Set to 0 to forgo an exclude mask.
+// settings:		Bitmask that control some of the scan's behavior.
 //				if the OPEN_BLOCKING bit is set, fds will be opened in *blocking* mode.
 //					Otherwise, the default open flags are O_RDONLY|O_NONBLOCK|O_CLOEXEC
 //				if the SCAN_ONLY bit is set, *no* fds will be returned, regardless of the filter.
-// exclude_types:	Bitmask used to filter *out* some input device types from results that matched match_types.
+//				if the MATCH_ALL bit is set,
+//				a device must feature *all* of the bits in match_types to be considered a match.
+//					Otherwise, any of each individal bit will be enough.
+//				if the EXCLUDE_ALL bit is set,
+//				a device must *not* feature *all* of the bits in exclude_types to be considered a match.
+//					Otherwise, any of each individal bit will be enough.
 // dev_count:		out pointer, will be set to the amount of array elements in the returned data.
 // NOTE: This does *NOT* require fbink to be initialized, but *does* honor its internal verbosity state.
-FBINK_API FBInkInputDevice* fbink_input_scan(INPUT_DEVICE_TYPE_T match_types,
-					     INPUT_DEVICE_TYPE_T exclude_types,
-					     size_t*             dev_count);
+FBINK_API FBInkInputDevice* fbink_input_scan(INPUT_DEVICE_TYPE_T   match_types,
+					     INPUT_DEVICE_TYPE_T   exclude_types,
+					     INPUT_SETTINGS_TYPE_T settings,
+					     size_t*               dev_count);
 
 //
 ///
