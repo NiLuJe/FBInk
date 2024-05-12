@@ -47,13 +47,18 @@ echo "Running FW $(cut -f3 -d',' /mnt/onboard/.kobo/version) on Linux $(uname -r
 separator
 
 # Dump the NTX HWConfig block
-if [ "$(dd if=/dev/mmcblk0 bs=512 skip=1024 count=1 2>/dev/null | head -c 9)" = "HW CONFIG" ] ; then
-	header "HWConfig (NXP/Sunxi)"
+if [ -e "/dev/disk/by-partlabel/hwcfg" ] && [ "$(dd if=/dev/disk/by-partlabel/hwcfg bs=512 skip=1 count=1 2>/dev/null | head -c 9)" = "HW CONFIG" ] ; then
+	# Modern variant
+	header "HWConfig (partlabel)"
+	ntx_hwconfig -S 1 /dev/disk/by-partlabel/hwcfg >> "${DEVCAP_LOG}" 2>/dev/null
+	separator
+elif [ "$(dd if=/dev/mmcblk0 bs=512 skip=1024 count=1 2>/dev/null | head -c 9)" = "HW CONFIG" ] ; then
+	header "HWConfig (Legacy)"
 	ntx_hwconfig -s /dev/mmcblk0 >> "${DEVCAP_LOG}" 2>/dev/null
 	separator
 elif [ -e "/dev/mmcblk0p6" ] && [ "$(dd if=/dev/mmcblk0p6 bs=512 skip=1 count=1 2>/dev/null | head -c 9)" = "HW CONFIG" ] ; then
 	# MTK variant
-	header "HWConfig (MTK)"
+	header "HWConfig (p6)"
 	ntx_hwconfig -S 1 /dev/mmcblk0p6 >> "${DEVCAP_LOG}" 2>/dev/null
 	separator
 else
