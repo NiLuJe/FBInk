@@ -89,7 +89,7 @@ static bool
 	if (has_abs_coordinates) {
 		if (stylus_or_pen) {
 			is_tablet = true;
-		} else if (finger_but_no_pen && ((bitmask_props && !is_direct) || !bitmask_props)) {
+		} else if (finger_but_no_pen && (bitmask_props && !is_direct)) {
 			is_touchpad = true;
 		} else if (has_mouse_button) {
 			/* This path is taken by VMware's USB mouse,
