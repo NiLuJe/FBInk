@@ -109,9 +109,7 @@ static bool
 		if (!is_touchscreen && !is_tablet && !is_touchpad) {
 			// c.f., /usr/src/linux/Documentation/input/event-codes.rst
 			// for reference about legacy BTN_TOUCH expectations...
-			if (finger_but_no_pen && ((bitmask_props && !is_direct) || !bitmask_props)) {
-				is_touchpad = true;
-			} else if (has_touch) {
+			if (has_touch) {
 				is_touchscreen = true;
 			} else if (!bitmask_props) {
 				is_touchscreen = true;
