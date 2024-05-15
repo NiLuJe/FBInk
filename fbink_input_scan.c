@@ -90,6 +90,9 @@ static bool
 		if (stylus_or_pen) {
 			is_tablet = true;
 		} else if (finger_but_no_pen && (bitmask_props && !is_direct)) {
+			// NOTE: The original udev logic assumes no prop support *also* means !is_direct.
+			//       We've tweaked that a bit because we target a fair number of devices without EVIOCGPROP support,
+			//       and we'd rather stuff be misidentified as a touchscreen rather than a touchpad.
 			is_touchpad = true;
 		} else if (has_mouse_button) {
 			/* This path is taken by VMware's USB mouse,
