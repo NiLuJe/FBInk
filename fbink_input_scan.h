@@ -123,17 +123,17 @@ static __attribute__((cold)) void        concat_type_recap(INPUT_DEVICE_TYPE_T t
 // Each of our target platforms tend to settle on some specific,
 // sometimes barely related, keycodes for common functions...
 #	if defined(FBINK_FOR_KOBO)
-#		define PLATFORM_KEY_POWER              KEY_POWER
-#		define PLATFORM_KEY_SLEEP              KEY_H     // PowerCover
-#		define PLATFORM_KEY_WAKEUP             KEY_F1    // Also PowerCover, depending on the device...
-#		define PLATFORM_KEY_PGPREV             KEY_F23
-#		define PLATFORM_KEY_PGNEXT             KEY_F24
-#		define PLATFORM_KEY_HOME               KEY_HOME
-#		define PLATFORM_KEY_FRONTLIGHT         KEY_KATAKANA
-#		define PLATFORM_KEY_MENU               0
-#		define PLATFORM_KEY_DPAD               0
-#		define PLATFORM_ROTATION_EV_TYPE       EV_MSC
-#		define PLATFORM_ROTATION_EV_CODE       MSC_RAW
+#		define PLATFORM_KEY_POWER        KEY_POWER
+#		define PLATFORM_KEY_SLEEP        KEY_H     // PowerCover
+#		define PLATFORM_KEY_WAKEUP       KEY_F1    // Also PowerCover, depending on the device...
+#		define PLATFORM_KEY_PGPREV       KEY_F23
+#		define PLATFORM_KEY_PGNEXT       KEY_F24
+#		define PLATFORM_KEY_HOME         KEY_HOME
+#		define PLATFORM_KEY_FRONTLIGHT   KEY_KATAKANA
+#		define PLATFORM_KEY_MENU         0
+#		define PLATFORM_KEY_DPAD         0
+#		define PLATFORM_ROTATION_EV_TYPE EV_MSC
+#		define PLATFORM_ROTATION_EV_CODE MSC_RAW
 // For reference, custom NTX input-event-codes we might care about:
 // Pen stuff
 /*

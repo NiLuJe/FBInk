@@ -43,10 +43,11 @@ static bool
 		  const unsigned long* bitmask_rel,
 		  const unsigned long* bitmask_props)
 {
+	// NOTE: bitmask_props may be NULL if EVIOCGPROP is unsupported!
 	bool has_keys            = test_bit(EV_KEY, bitmask_ev);
 	bool has_abs_coordinates = test_bit(ABS_X, bitmask_abs) && test_bit(ABS_Y, bitmask_abs);
 	bool has_3d_coordinates  = has_abs_coordinates && test_bit(ABS_Z, bitmask_abs);
-	bool is_accelerometer    = test_bit(INPUT_PROP_ACCELEROMETER, bitmask_props);
+	bool is_accelerometer    = bitmask_props && test_bit(INPUT_PROP_ACCELEROMETER, bitmask_props);
 
 	if (!has_keys && has_3d_coordinates) {
 		is_accelerometer = true;
@@ -57,7 +58,7 @@ static bool
 		return true;
 	}
 
-	bool is_pointing_stick = test_bit(INPUT_PROP_POINTING_STICK, bitmask_props);
+	bool is_pointing_stick = bitmask_props && test_bit(INPUT_PROP_POINTING_STICK, bitmask_props);
 	bool stylus_or_pen     = test_bit(BTN_STYLUS, bitmask_key) || test_bit(BTN_TOOL_PEN, bitmask_key);
 	bool finger_but_no_pen = test_bit(BTN_TOOL_FINGER, bitmask_key) && !test_bit(BTN_TOOL_PEN, bitmask_key);
 	bool has_mouse_button  = test_bit(BTN_LEFT, bitmask_key);
@@ -69,7 +70,7 @@ static bool
 	if (has_mt_coordinates && test_bit(ABS_MT_SLOT, bitmask_abs) && test_bit(ABS_MT_SLOT - 1, bitmask_abs)) {
 		has_mt_coordinates = false;
 	}
-	bool is_direct = test_bit(INPUT_PROP_DIRECT, bitmask_props);
+	bool is_direct = bitmask_props && test_bit(INPUT_PROP_DIRECT, bitmask_props);
 	bool has_touch = test_bit(BTN_TOUCH, bitmask_key);
 	/* joysticks don't necessarily have buttons;
 	 * e. g. rudders/pedals are joystick-like, but buttonless;
@@ -88,7 +89,7 @@ static bool
 	if (has_abs_coordinates) {
 		if (stylus_or_pen) {
 			is_tablet = true;
-		} else if (finger_but_no_pen && !is_direct) {
+		} else if (finger_but_no_pen && ((bitmask_props && !is_direct) || !bitmask_props)) {
 			is_touchpad = true;
 		} else if (has_mouse_button) {
 			/* This path is taken by VMware's USB mouse,
@@ -100,7 +101,7 @@ static bool
 			is_joystick = true;
 		}
 	}
-	if (has_mt_coordinates && is_direct) {
+	if (has_mt_coordinates && (is_direct || !bitmask_props)) {
 		is_touchscreen = true;
 	}
 
@@ -224,12 +225,13 @@ static void
 static int
     check_device_cap(FBInkInputDevice* dev)
 {
-	unsigned long bitmask_ev[NBITS(EV_MAX)]            = { 0U };
-	unsigned long bitmask_abs[NBITS(ABS_MAX)]          = { 0U };
-	unsigned long bitmask_key[NBITS(KEY_MAX)]          = { 0U };
-	unsigned long bitmask_rel[NBITS(REL_MAX)]          = { 0U };
-	unsigned long bitmask_props[NBITS(INPUT_PROP_MAX)] = { 0U };
-	unsigned long bitmask_msc[NBITS(MSC_MAX)]          = { 0U };
+	unsigned long  bitmask_ev[NBITS(EV_MAX)]            = { 0U };
+	unsigned long  bitmask_abs[NBITS(ABS_MAX)]          = { 0U };
+	unsigned long  bitmask_key[NBITS(KEY_MAX)]          = { 0U };
+	unsigned long  bitmask_rel[NBITS(REL_MAX)]          = { 0U };
+	unsigned long  bitmask_props[NBITS(INPUT_PROP_MAX)] = { 0U };
+	unsigned long* bitmask_props_p                      = bitmask_props;
+	unsigned long  bitmask_msc[NBITS(MSC_MAX)]          = { 0U };
 
 	// These... really shouldn't ever fail.
 	ioctl(dev->fd, EVIOCGBIT(0, sizeof(bitmask_ev)), bitmask_ev);
@@ -250,9 +252,11 @@ static int
 	if (rc < 0 && errno == EINVAL) {
 		PFLOG(
 		    "EVIOCGPROP is unsupported on this device (kernel is too old). Accelerometer & touchpad/touchscreen discrimination may be less accurate.");
+		// Let test_pointers know that this is unsupported, so it can relax some of its heuristics...
+		bitmask_props_p = NULL;
 	}
 
-	bool is_pointer = test_pointers(dev, bitmask_ev, bitmask_abs, bitmask_key, bitmask_rel, bitmask_props);
+	bool is_pointer = test_pointers(dev, bitmask_ev, bitmask_abs, bitmask_key, bitmask_rel, bitmask_props_p);
 	bool is_key     = test_key(dev, bitmask_ev, bitmask_key);
 	/* Some devices only have a scrollwheel */
 	if (!is_pointer && !is_key && test_bit(EV_REL, bitmask_ev) &&
