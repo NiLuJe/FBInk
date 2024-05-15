@@ -101,8 +101,15 @@ static bool
 			is_joystick = true;
 		}
 	}
-	if (has_mt_coordinates && (is_direct || !bitmask_props)) {
-		is_touchscreen = true;
+	if (has_mt_coordinates) {
+		if (is_direct || !bitmask_props) {
+			is_touchscreen = true;
+		}
+		if (has_touch) {
+			is_touchscreen = true;
+		}
+		// NOTE: Qt's QDeviceDiscovery *unconditionally* assumes is_touchscreen here.
+		//       That might not be such a terrible idea...
 	}
 
 	if (has_rel_coordinates && has_mouse_button) {
