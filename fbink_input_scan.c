@@ -102,13 +102,23 @@ static bool
 		}
 	}
 	if (has_mt_coordinates) {
-		if (is_direct || !bitmask_props) {
+		if (is_direct) {
 			is_touchscreen = true;
 		}
-		if (has_touch) {
-			is_touchscreen = true;
+		// If we haven't got a match yet, try relaxed heuristics for old/broken drivers...
+		if (!is_touchscreen && !is_tablet && !is_touchpad) {
+			// c.f., /usr/src/linux/Documentation/input/event-codes.rst
+			// for reference about legacy BTN_TOUCH expectations...
+			if (finger_but_no_pen && ((bitmask_props && !is_direct) || !bitmask_props)) {
+				is_touchpad = true;
+			} else if (has_touch) {
+				is_touchscreen = true;
+			} else if (!bitmask_props) {
+				is_touchscreen = true;
+			}
 		}
-		// NOTE: Qt's QDeviceDiscovery *unconditionally* assumes is_touchscreen here.
+
+		// NOTE: Qt's QDeviceDiscovery *unconditionally* assumes is_touchscreen if has_mt_coordinates.
 		//       That might not be such a terrible idea...
 	}
 
