@@ -93,6 +93,8 @@ static bool
 			// NOTE: The original udev logic assumes no prop support *also* means !is_direct.
 			//       We've tweaked that a bit because we target a fair number of devices without EVIOCGPROP support,
 			//       and we'd rather stuff be misidentified as a touchscreen rather than a touchpad.
+			//       And, more importantly, that touchscreens that happen to report BTN_TOOL_FINGER,
+			//       as Parade panels do, be properly identified as touchscreens on devices w/o prop support.
 			is_touchpad = true;
 		} else if (has_mouse_button) {
 			/* This path is taken by VMware's USB mouse,
