@@ -71,16 +71,18 @@ static int
 #	define LONG(x)              ((x) / BITS_PER_LONG)
 #	define test_bit(bit, array) ((array[LONG(bit)] >> OFF(bit)) & 1)
 
-static bool test_pointers(FBInkInputDevice*    dev,
-			  const unsigned long* bitmask_ev,
-			  const unsigned long* bitmask_abs,
-			  const unsigned long* bitmask_key,
-			  const unsigned long* bitmask_rel,
-			  const unsigned long* bitmask_props);
-static bool test_key(FBInkInputDevice* dev, const unsigned long* bitmask_ev, const unsigned long* bitmask_key);
-static void test_platform_keys(FBInkInputDevice* dev, const unsigned long* bitmask_key);
-static int  check_device_cap(FBInkInputDevice* dev);
-static void check_device(FBInkInputDevice*   dev,
+static bool test_pointers(FBInkInputDevice* restrict dev,
+			  const unsigned long* restrict bitmask_ev,
+			  const unsigned long* restrict bitmask_abs,
+			  const unsigned long* restrict bitmask_key,
+			  const unsigned long* restrict bitmask_rel,
+			  const unsigned long* restrict bitmask_props);
+static bool test_key(FBInkInputDevice* restrict dev,
+		     const unsigned long* restrict bitmask_ev,
+		     const unsigned long* restrict bitmask_key);
+static void test_platform_keys(FBInkInputDevice* restrict dev, const unsigned long* restrict bitmask_key);
+static int  check_device_cap(FBInkInputDevice* restrict dev);
+static void check_device(FBInkInputDevice* restrict dev,
 			 INPUT_DEVICE_TYPE_T match_types,
 			 INPUT_DEVICE_TYPE_T exclude_types,
 			 INPUT_DEVICE_TYPE_T settings);

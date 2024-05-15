@@ -36,12 +36,12 @@
 #ifdef FBINK_WITH_INPUT
 /* pointer devices */
 static bool
-    test_pointers(FBInkInputDevice*    dev,
-		  const unsigned long* bitmask_ev,
-		  const unsigned long* bitmask_abs,
-		  const unsigned long* bitmask_key,
-		  const unsigned long* bitmask_rel,
-		  const unsigned long* bitmask_props)
+    test_pointers(FBInkInputDevice* restrict dev,
+		  const unsigned long* restrict bitmask_ev,
+		  const unsigned long* restrict bitmask_abs,
+		  const unsigned long* restrict bitmask_key,
+		  const unsigned long* restrict bitmask_rel,
+		  const unsigned long* restrict bitmask_props)
 {
 	// NOTE: bitmask_props may be NULL if EVIOCGPROP is unsupported!
 	bool has_keys            = test_bit(EV_KEY, bitmask_ev);
@@ -133,7 +133,9 @@ static bool
 
 /* key like devices */
 static bool
-    test_key(FBInkInputDevice* dev, const unsigned long* bitmask_ev, const unsigned long* bitmask_key)
+    test_key(FBInkInputDevice* restrict dev,
+	     const unsigned long* restrict bitmask_ev,
+	     const unsigned long* restrict bitmask_key)
 {
 	bool ret = false;
 
@@ -182,7 +184,7 @@ static bool
 
 // Look for specific (and often platform specific) keys
 static void
-    test_platform_keys(FBInkInputDevice* dev, const unsigned long* bitmask_key)
+    test_platform_keys(FBInkInputDevice* restrict dev, const unsigned long* restrict bitmask_key)
 {
 	if (PLATFORM_KEY_POWER && test_bit(PLATFORM_KEY_POWER, bitmask_key)) {
 		dev->type |= INPUT_POWER_BUTTON;
@@ -223,7 +225,7 @@ static void
 }
 
 static int
-    check_device_cap(FBInkInputDevice* dev)
+    check_device_cap(FBInkInputDevice* restrict dev)
 {
 	unsigned long  bitmask_ev[NBITS(EV_MAX)]            = { 0U };
 	unsigned long  bitmask_abs[NBITS(ABS_MAX)]          = { 0U };
@@ -408,7 +410,7 @@ static __attribute__((cold)) void
 
 // We've got an open fd, check the device's caps and apply the match filters
 static void
-    check_device(FBInkInputDevice*   dev,
+    check_device(FBInkInputDevice* restrict dev,
 		 INPUT_DEVICE_TYPE_T match_types,
 		 INPUT_DEVICE_TYPE_T exclude_types,
 		 INPUT_DEVICE_TYPE_T settings)
