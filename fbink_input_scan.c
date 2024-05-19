@@ -466,7 +466,17 @@ static void
 
 	// If this was a dry-run, or if the device wasn't a match, close the fd
 	if (settings & SCAN_ONLY || !dev->matched) {
-		close(dev->fd);
+		if (strcmp(dev->name, "zForce-ir-touch") == 0) {
+			// NOTE: Some zForce panels have a weird race condition around Active/Deactivate commands,
+			//       which can potentially lead to no reports being generated if the Active command fumbles.
+			//       Since open/close do an active/deactivate, sleep 500ms on each side to try to tame the beast...
+			const struct timespec zzz = { 0L, 500 * 1e+6 };
+			nanosleep(&zzz, NULL);
+			close(dev->fd);
+			nanosleep(&zzz, NULL);
+		} else {
+			close(dev->fd);
+		}
 		dev->fd = -1;
 	}
 }
