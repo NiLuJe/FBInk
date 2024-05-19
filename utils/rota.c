@@ -73,7 +73,7 @@ static void
 static void
     do_eet(int rota)
 {
-	const struct timespec zzz = { 0L, 250000000L };
+	const struct timespec zzz = { 0L, 250 * 1e+6 };
 
 	set_fbinfo(rota);
 	nanosleep(&zzz, NULL);

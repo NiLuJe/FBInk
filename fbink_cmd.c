@@ -486,7 +486,7 @@ static int
 {
 	int rv = EXIT_SUCCESS;
 
-	const struct timespec zzz = { 0L, 750000000L };
+	const struct timespec zzz = { 0L, 750 * 1e+6 };
 	for (;;) {
 		for (uint8_t i = 0; i < 16; i++) {
 			rv = fbink_print_activity_bar(fbfd, i, fbink_cfg);

@@ -184,7 +184,7 @@ int
 	memset(altPtr, eInkFGCMap[0], (size_t) (fInfo.line_length * vInfo.yres));
 
 	// We'll be sleeping between tests
-	const struct timespec zzz = { 1L, 500000000L };
+	const struct timespec zzz = { 1L, 500 * 1e+6 };
 
 	// Our shiny marker
 	lastMarker = 41U;

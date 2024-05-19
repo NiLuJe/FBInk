@@ -125,7 +125,7 @@ static bool
 	} else {
 		iterations = 1U;
 	}
-	const struct timespec zzz = { 0L, (long int) (granularity * 1000000L) };
+	const struct timespec zzz = { 0L, (long int) (granularity * 1e+6) };
 	for (unsigned short int i = 1U; i <= iterations; i++) {
 		// Wait <granularity> ms . . .
 		nanosleep(&zzz, NULL);

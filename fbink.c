@@ -5952,7 +5952,7 @@ static int
 static void
     yield_to_sunxi_disp(void)
 {
-	const struct timespec zzz = { 0L, 50000000L };    // 50ms
+	const struct timespec zzz = { 0L, 50 * 1e+6 };    // 50ms
 	nanosleep(&zzz, NULL);
 }
 
