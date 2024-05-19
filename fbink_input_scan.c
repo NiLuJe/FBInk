@@ -469,8 +469,9 @@ static void
 		if (strcmp(dev->name, "zForce-ir-touch") == 0) {
 			// NOTE: Some zForce panels have a weird race condition around Active/Deactivate commands,
 			//       which can potentially lead to no reports being generated if the Active command fumbles.
-			//       Since open/close do an active/deactivate, sleep 500ms on each side to try to tame the beast...
-			const struct timespec zzz = { 0L, 500 * 1e+6 };
+			//       Since open/close do an active/deactivate, sleep 50ms on each side to try to tame the beast...
+			//       A better bet is to avoid using SCAN_ONLY and keep the fd around if you actually need it.
+			const struct timespec zzz = { 0L, 50 * 1e+6 };
 			nanosleep(&zzz, NULL);
 			close(dev->fd);
 			nanosleep(&zzz, NULL);
