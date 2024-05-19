@@ -527,6 +527,11 @@ FBInkInputDevice*
 			free(namelist[i]);
 			continue;
 		}
+#	ifdef FBINK_FOR_LEGACY
+		// Enforce CLOEXEC the hard way on legacy devices with kernels too old to support it via open flags.
+		int fdflags = fcntl(dev->fd, F_GETFD);
+		fcntl(dev->fd, F_SETFD, fdflags | FD_CLOEXEC);
+#	endif
 
 		check_device(dev, match_types, exclude_types, settings);
 
