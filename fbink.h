@@ -352,15 +352,21 @@ typedef enum
 typedef uint16_t DEVICE_ID_T;
 
 // List of *potentially* available waveform modes.
-// NOTE: On EPDC v1 (as well as all Kindle) devices, REAGL & REAGLD generally expect to *always* be flashing.
+// NOTE: On mxcfb EPDC v1 (as well as all Kindle) & most MTK devices, REAGL & REAGLD generally expect to *always* be flashing.
+//       The same is also true for Kaleido-specific modes (GCC16 & GLRC16).
 //       This is currently left at your own discretion, though.
 //       c.f., https://github.com/NiLuJe/FBInk/commit/32acece78f7cc92b06faa4a668feead260b8ce24
+//       See also the comments around the relevant refresh_* functions in fbink.c
 // NOTE: On very old devices (e.g., Kobo Mk. 3 & 4; possibly early PB), only AUTO, DU & GC16 may be relied on.
 //       GC4 will probably behave, but A2 & GL16 are not a given at all:
 //       e.g., GL16 is actively broken on Kobo <= Mk. 4: c.f., https://github.com/baskerville/plato/issues/158#issuecomment-787520759.
 //       If a waveform mode produces unexpected/broken results, and/or if you start to hit unexpected EPDC timeouts (or even an OOPS),
 //       that's usually a strong hint that you're trying to use something you shouldn't ;).
 // NOTE: See the various mxcfb headers in the eink folder for more details about what's available on your platform.
+//       Platform-specific quirks, if any, are also commented upon in the relevant refresh_* functions in fbink.c
+// NOTE: If you're curious about how to deal with all this stuff in practice for real world use-cases,
+//       I'd recommend looking at my various comments in the KOReader backends for some more context,
+//       c.f., https://github.com/koreader/koreader-base/blob/master/ffi/framebuffer_mxcfb.lua
 typedef enum
 {
 	WFM_AUTO = 0U,    // Let the EPDC choose, via histogram analysis of the refresh region.

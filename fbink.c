@@ -2380,6 +2380,8 @@ static int
 	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO)
 					   ? get_wfm_mode(WFM_GC16)
 					   : get_wfm_mode(fbink_cfg->wfm_mode);
+	// NOTE: The caller is responsible for honoring the expected wfm + mode pairings, if any.
+	//       e.g., REAGL should always be paired with FULL.
 	const uint32_t update_mode   = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
 
 	// Did we request legacy dithering?
@@ -2472,6 +2474,8 @@ static int
 	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO)
 					   ? get_wfm_mode(WFM_GC16)
 					   : get_wfm_mode(fbink_cfg->wfm_mode);
+	// NOTE: The caller is responsible for honoring the expected wfm + mode pairings, if any.
+	//       e.g., REAGL should always be paired with FULL.
 	const uint32_t update_mode   = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
 
 	// Did we request legacy dithering?
@@ -2562,6 +2566,8 @@ static int
 	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO)
 					   ? get_wfm_mode(WFM_GC16)
 					   : get_wfm_mode(fbink_cfg->wfm_mode);
+	// NOTE: The caller is responsible for honoring the expected wfm + mode pairings, if any.
+	//       e.g., REAGL should always be paired with FULL.
 	const uint32_t update_mode   = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
 
 	// NOTE: Despite the struct layout, the EPDC v2 style of dithering setup is unused,
@@ -2917,6 +2923,9 @@ static int
 	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO)
 					   ? get_wfm_mode(WFM_GC16)
 					   : get_wfm_mode(fbink_cfg->wfm_mode);
+	// NOTE: The caller is responsible for honoring the expected wfm + mode pairings, if any.
+	//       e.g., REAGLD, which is only ever used and implemented "properly" on the original Aura,
+	//       should always be paired with FULL.
 	const uint32_t update_mode   = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
 
 	struct mxcfb_update_data_v1_ntx update = {
@@ -3040,6 +3049,9 @@ static int
 	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO)
 					   ? get_wfm_mode(WFM_GC16)
 					   : get_wfm_mode(fbink_cfg->wfm_mode);
+	// NOTE: The caller is responsible for honoring the expected wfm + mode pairings, if any.
+	//       e.g., REAGL should always be paired with *PARTIAL*.
+	//       This is in stark contrast with most other REAGL implementations!
 	const uint32_t update_mode   = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
 
 	// Did we request legacy dithering?
@@ -3175,6 +3187,9 @@ static int
 					   .cfa_use     = 0U };
 
 	// Update mode shenanigans...
+	// NOTE: The caller is responsible for honoring the expected wfm + mode pairings, if any.
+	//       e.g., REAGL should always be paired with *PARTIAL*.
+	//       This is in stark contrast with most other REAGL implementations!
 	if (!fbink_cfg->is_flashing && waveform_mode != EINK_AUTO_MODE) {
 		// For some reason, AUTO shouldn't specify PARTIAL...
 		// (it trips the unknown mode warning, which falls back to... plain AUTO ;)).
@@ -3270,6 +3285,12 @@ static int
 	const uint32_t waveform_mode = (fbink_cfg->is_flashing && fbink_cfg->wfm_mode == WFM_AUTO)
 					   ? get_wfm_mode(WFM_GC16)
 					   : get_wfm_mode(fbink_cfg->wfm_mode);
+	// NOTE: The caller is responsible for honoring the expected wfm + mode pairings, if any.
+	//       e.g., REAGL, GLRC16 & GCC16 should always be paired with FULL...
+	//       Except on the Elipsa 2E, which behaves like older Kobo devices, and expects PARTIAL...
+	// NOTE: Speaking of the Elipsa 2E, eclipse waveform modes (GLKW16 & GCK16)
+	//       appear to be utterly broken unless the framebuffer is setup @ 32bpp...
+	//       Hard to say if later devices are also affected, as they no longer support anything else than 32bpp ;).
 	const uint32_t update_mode   = fbink_cfg->is_flashing ? UPDATE_MODE_FULL : UPDATE_MODE_PARTIAL;
 
 	// NOTE: hwtcon_rect and mxcfb_rect are perfectly interchangeable
