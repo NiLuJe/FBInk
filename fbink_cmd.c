@@ -348,7 +348,9 @@ static void
 	    "\n"
 	    "Options affecting the image's appearance:\n"
 	    "\t-a, --flatten\tIgnore the alpha channel.\n"
-	    "\t-J, --saturation\tBoost color saturation (in percent). Aimed at Kaleido panels. 32bpp only.\n"
+	    "\t-j, --saturation\tBoost color saturation (in percent). Aimed at Kaleido panels. 32bpp only.\n"
+	    "\t-J, --cfa MODE\tRequest a specific CFA post-process mode from the eInk controller, if supported (Kaleido panels, 32bpp, with GCC16 or GLRC16).\n"
+	    "\t\t\t\tAvailable CFA modes: S4, S7, S9, G0, G1 & G2\n"
 	    "\n"
 	    "NOTES:\n"
 	    "\tSupported image formats: JPEG, PNG, TGA, BMP, GIF & PNM\n"
@@ -693,7 +695,8 @@ int
                 {         "quiet",       no_argument, NULL, 'q' },
                 {         "image", required_argument, NULL, 'g' },
                 {           "img", required_argument, NULL, 'i' },
-                {    "saturation", required_argument, NULL, 'J' },
+                {    "saturation", required_argument, NULL, 'j' },
+                {           "cfa", required_argument, NULL, 'J' },
                 {       "flatten",       no_argument, NULL, 'a' },
                 {          "eval",       no_argument, NULL, 'e' },
                 {   "interactive",       no_argument, NULL, 'I' },
@@ -839,10 +842,10 @@ int
 	bool                        errfnd         = false;
 
 	// NOTE: c.f., https://codegolf.stackexchange.com/q/148228 to sort this mess when I need to find an available letter ;p
-	//       In fact, that's the current tally of alnum entries left: jNnRUu
+	//       In fact, that's the current tally of alnum entries left: NnRUu
 	while ((opt = getopt_long(argc,
 				  argv,
-				  "y:x:Y:X:hfcmMprs::S:F:vqg:i:J:aeIC:B:LlP:A:oOTVt:bD::W:HEZzk::wd:GQK:",
+				  "y:x:Y:X:hfcmMprs::S:F:vqg:i:j:J:aeIC:B:LlP:A:oOTVt:bD::W:HEZzk::wd:GQK:",
 				  opts,
 				  &opt_index)) != -1) {
 		switch (opt) {
@@ -1262,9 +1265,27 @@ int
 				image_file = optarg;
 				is_image   = true;
 				break;
-			case 'J':
+			case 'j':
 				// We might want to clamp to [0, 100]?
 				if (strtoul_hhu(opt, NULL, optarg, &fbink_cfg.saturation_boost) < 0) {
+					errfnd = true;
+				}
+				break;
+			case 'J':
+				if (strcasecmp(optarg, "S4") == 0) {
+					fbink_cfg.cfa_mode = CFA_S4;
+				} else if (strcasecmp(optarg, "S7") == 0) {
+					fbink_cfg.cfa_mode = CFA_S7;
+				} else if (strcasecmp(optarg, "S9") == 0) {
+					fbink_cfg.cfa_mode = CFA_S9;
+				} else if (strcasecmp(optarg, "G0") == 0) {
+					fbink_cfg.cfa_mode = CFA_G0;
+				} else if (strcasecmp(optarg, "G1") == 0) {
+					fbink_cfg.cfa_mode = CFA_G1;
+				} else if (strcasecmp(optarg, "G2") == 0) {
+					fbink_cfg.cfa_mode = CFA_G2;
+				} else {
+					ELOG("Unknown CFA mode '%s'.", optarg);
 					errfnd = true;
 				}
 				break;
