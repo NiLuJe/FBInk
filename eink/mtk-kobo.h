@@ -47,6 +47,15 @@
 #define HWTCON_FLAG_FORCE_A2_OUTPUT_BLACK 0x40    // White pen, requires HWTCON_FLAG_FORCE_A2_OUTPUT
 // Pen color is auto-detected if only HWTCON_FLAG_FORCE_A2_OUTPUT is provided
 
+// Introduced with Kaleido devices
+#define HWTCON_FLAG_CFA_MODE_S4   0x200
+#define HWTCON_FLAG_CFA_MODE_S7   0x300
+#define HWTCON_FLAG_CFA_MODE_S9   0x400    // Tends to create polarization banding
+#define HWTCON_FLAG_CFA_MODE_G0   0x500
+#define HWTCON_FLAG_CFA_MODE_G1   0x100      // Supposedly the standard behavior...
+#define HWTCON_FLAG_CFA_MODE_G2   0x600      // Boosts saturation without being too destructive
+#define HWTCON_FLAG_CFA_MODE_SKIP 0x80000    // Does what it says on the tin, you'll get a blank screen :D
+
 /* temperature use sensor. */
 // NOTE: No longer set request-by-request, but globally via HWTCON_SET_TEMPERATURE
 #define TEMP_USE_SENSOR 0x100000
