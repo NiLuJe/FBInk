@@ -48,7 +48,7 @@
 // Pen color is auto-detected if only HWTCON_FLAG_FORCE_A2_OUTPUT is provided
 
 // Introduced with Kaleido devices
-// NOTE: The 'S' variants appear to affect more things that plain saturation
+// NOTE: The 'S' variants appear to affect more things than plain saturation
 //       (contrast? intensity? levels in general?), hence the polarization & clipping effects.
 //       They... rarely look good, but they *do* technically lead to the most vibrant colors.
 //       The strength of the filters go crescendo, so banding may not be immediately visible at S4,
