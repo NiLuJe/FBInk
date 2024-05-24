@@ -58,7 +58,7 @@
 #define HWTCON_FLAG_CFA_MODE_S4   0x200
 #define HWTCON_FLAG_CFA_MODE_S7   0x300
 #define HWTCON_FLAG_CFA_MODE_S9   0x400
-#define HWTCON_FLAG_CFA_MODE_G0   0x500      // Desaturize
+#define HWTCON_FLAG_CFA_MODE_G0   0x500      // Desaturate
 #define HWTCON_FLAG_CFA_MODE_G1   0x100      // Standard behavior (e.g., same results as no flags)
 #define HWTCON_FLAG_CFA_MODE_G2   0x600      // Boosts saturation without being too destructive
 #define HWTCON_FLAG_CFA_MODE_SKIP 0x80000    // Does what it says on the tin: you'll get a blank screen :D
