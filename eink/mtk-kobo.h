@@ -48,11 +48,18 @@
 // Pen color is auto-detected if only HWTCON_FLAG_FORCE_A2_OUTPUT is provided
 
 // Introduced with Kaleido devices
+// NOTE: The 'S' variants appear to affect more things that plain saturation
+//       (contrast? intensity? levels in general?), hence the polarization & clipping effects.
+//       They... rarely look good, but they *do* technically lead to the most vibrant colors.
+//       The strength of the filters go crescendo, so banding may not be immediately visible at S4,
+//       depending on the content being displayed.
+// NOTE: Generally speaking you'll want to keep to the defaults and implement a saturation boost yourself,
+//       or play with G2, as it's the least destructive option, and roughly matches a 50% HSP sat boost.
 #define HWTCON_FLAG_CFA_MODE_S4   0x200
 #define HWTCON_FLAG_CFA_MODE_S7   0x300
-#define HWTCON_FLAG_CFA_MODE_S9   0x400    // Tends to create polarization banding
-#define HWTCON_FLAG_CFA_MODE_G0   0x500
-#define HWTCON_FLAG_CFA_MODE_G1   0x100      // Supposedly the standard behavior...
+#define HWTCON_FLAG_CFA_MODE_S9   0x400
+#define HWTCON_FLAG_CFA_MODE_G0   0x500      // Desaturize
+#define HWTCON_FLAG_CFA_MODE_G1   0x100      // Standard behavior (e.g., same results as no flags)
 #define HWTCON_FLAG_CFA_MODE_G2   0x600      // Boosts saturation without being too destructive
 #define HWTCON_FLAG_CFA_MODE_SKIP 0x80000    // Does what it says on the tin: you'll get a blank screen :D
 
