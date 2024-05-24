@@ -54,7 +54,7 @@
 #define HWTCON_FLAG_CFA_MODE_G0   0x500
 #define HWTCON_FLAG_CFA_MODE_G1   0x100      // Supposedly the standard behavior...
 #define HWTCON_FLAG_CFA_MODE_G2   0x600      // Boosts saturation without being too destructive
-#define HWTCON_FLAG_CFA_MODE_SKIP 0x80000    // Does what it says on the tin, you'll get a blank screen :D
+#define HWTCON_FLAG_CFA_MODE_SKIP 0x80000    // Does what it says on the tin: you'll get a blank screen :D
 
 /* temperature use sensor. */
 // NOTE: No longer set request-by-request, but globally via HWTCON_SET_TEMPERATURE

@@ -469,6 +469,21 @@ typedef enum
 } __attribute__((packed)) HW_DITHER_INDEX_E;
 typedef uint8_t           HW_DITHER_INDEX_T;
 
+// List of *potentially* available CFA post-process modes
+// FIXME: Find better names for those... (oh, kernel sources, wherefore art thou?)
+typedef enum
+{
+	CFA_NONE = 0U,
+	CFA_S4,
+	CFA_S7,
+	CFA_S9,
+	CFA_G0,
+	CFA_G1,
+	CFA_G2,
+	CFA_MAX = UINT8_MAX,
+} __attribute__((packed)) CFA_MODE_INDEX_E;
+typedef uint8_t           CFA_MODE_INDEX_T;
+
 // List of NTX rotation quirk types (c.f., mxc_epdc_fb_check_var @ drivers/video/fbdev/mxc/mxc_epdc_v2_fb.c)...
 typedef enum
 {
@@ -640,7 +655,8 @@ typedef struct
 	HW_DITHER_INDEX_T dithering_mode;    // Request a specific dithering mode (defaults to PASSTHROUGH)
 	bool              sw_dithering;      // Request (ordered) *software* dithering when printing an image.
 	//                                      This is *NOT* mutually exclusive with dithering_mode!
-	bool    is_nightmode;    // Request hardware inversion (via EPDC_FLAG_ENABLE_INVERSION, if supported/safe).
+	CFA_MODE_INDEX_T  cfa_mode;    // Request a specific CFA post-process mode (defaults to NONE, relevant wfm only).
+	bool    is_nightmode;          // Request hardware inversion (via EPDC_FLAG_ENABLE_INVERSION, if supported/safe).
 	//			 This is *NOT* mutually exclusive with is_inverted!
 	//			 NOTE: If the HW doesn't support inversion, a warning is printed during init.
 	//			       If you're convinced this is in error (i.e., up to date kernel),

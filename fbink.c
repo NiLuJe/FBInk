@@ -3350,6 +3350,33 @@ static int
 		}
 	}
 
+	// Setup the CFA mode flags (if any, and if the waveform mode makes sense for that)
+	if (fbink_cfg->cfa_mode != CFA_NONE && (fbink_cfg->wfm_mode == WFM_GCC16 || fbink_cfg->wfm_mode == WFM_GLRC16)) {
+		switch (fbink_cfg->cfa_mode) {
+			case CFA_S4:
+				update.flags |= HWTCON_FLAG_CFA_MODE_S4;
+				break;
+			case CFA_S7:
+				update.flags |= HWTCON_FLAG_CFA_MODE_S7;
+				break;
+			case CFA_S9:
+				update.flags |= HWTCON_FLAG_CFA_MODE_S9;
+				break;
+			case CFA_G0:
+				update.flags |= HWTCON_FLAG_CFA_MODE_G0;
+				break;
+			case CFA_G1:
+				update.flags |= HWTCON_FLAG_CFA_MODE_G1;
+				break;
+			case CFA_G2:
+				update.flags |= HWTCON_FLAG_CFA_MODE_G2;
+				break;
+			default:
+				// NOP, but supposedly matches G1...
+				break;
+		}
+	}
+
 	int rv = ioctl(fbfd, HWTCON_SEND_UPDATE, &update);
 
 	if (rv < 0) {
