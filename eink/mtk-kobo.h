@@ -76,6 +76,11 @@
 // NOTE: Like it's always been the case on lab126 devices, on newer devices (i.e., not the Elipsa 2E),
 //       anything involving REAGL (i.e., GLR16, GLKW16 & GLRC16) is *always* paired with FULL.
 //       Likewise, stuff tweaked for Kaleido (GCC16 & GLRC16) is also *always* paired with FULL.
+// NOTE: GLRC16 *might* just be REAGL + honoring CFA_MODE flags for post-processing.
+//       There *might* be a slightly different reagl algo on highlights, or it might just be an artifact of the CFA post-processing.
+//       It's much more clear-cut for GCC16, where it indeed really, really looks like it's just GC16 + CFA_MODE ;).
+//       TL;DR: If the actual waveforms are indeed identical,
+//       I have no idea why this isn't implemented via a HWTCON_FLAG_USE_CFA flag instead...
 enum HWTCON_WAVEFORM_MODE_ENUM
 {
 	// Matches MXCFB

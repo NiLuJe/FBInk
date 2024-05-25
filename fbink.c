@@ -3351,6 +3351,7 @@ static int
 	}
 
 	// Setup the CFA mode flags (if any, and if the waveform mode makes sense for that)
+	// NOTE: The kernel ignores that for non-CFA waveform modes anyway.
 	if (fbink_cfg->cfa_mode != CFA_NONE && (fbink_cfg->wfm_mode == WFM_GCC16 || fbink_cfg->wfm_mode == WFM_GLRC16)) {
 		switch (fbink_cfg->cfa_mode) {
 			case CFA_S4:
