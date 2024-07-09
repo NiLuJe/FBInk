@@ -4761,6 +4761,9 @@ static __attribute__((cold)) int
 		// Make it obvious if the feature isn't available (this should pretty much *exactly* match anything < Mk. 8)
 		if (fxpWakeupEpdc == &wakeup_epdc_nop) {
 			ELOG("Explicit EPDC wakeup isn't supported on this device");
+			deviceQuirks.canWakeEPDC = false;
+		} else {
+			deviceQuirks.canWakeEPDC = true;
 		}
 #	elif defined(FBINK_FOR_POCKETBOOK)
 		// Check if the device is running on an AllWinner SoC instead of an NXP one...
@@ -5844,7 +5847,7 @@ void
 {
 	fprintf(
 	    stdout,
-	    "FBINK_VERSION='%s';FBINK_TARGET=%hhu;FBINK_FEATURES=%#x;viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;invertedGrayscale=%d;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isMTK=%d;isSunxi=%d;SunxiHasFBDamage=%d;SunxiForceRota=%d;isKindleLegacy=%d;isKoboNonMT=%d;unreliableWaitFor=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;rotationMap='{ %hhu, %hhu, %hhu, %hhu }';touchSwapAxes=%d;touchMirrorX=%d;touchMirrorY=%d;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;hasEclipseWfm=%d;hasColorPanel=%d;pixelFormat='%s';canWaitForSubmission=%d;",
+	    "FBINK_VERSION='%s';FBINK_TARGET=%hhu;FBINK_FEATURES=%#x;viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;invertedGrayscale=%d;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isMTK=%d;isSunxi=%d;SunxiHasFBDamage=%d;SunxiForceRota=%d;isKindleLegacy=%d;isKoboNonMT=%d;unreliableWaitFor=%d;canWakeEPDC=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;rotationMap='{ %hhu, %hhu, %hhu, %hhu }';touchSwapAxes=%d;touchMirrorX=%d;touchMirrorY=%d;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;hasEclipseWfm=%d;hasColorPanel=%d;pixelFormat='%s';canWaitForSubmission=%d;",
 	    fbink_version(),
 	    fbink_target(),
 	    fbink_features(),
@@ -5888,6 +5891,7 @@ void
 	    deviceQuirks.isKindleLegacy,
 	    deviceQuirks.isKoboNonMT,
 	    deviceQuirks.unreliableWaitFor,
+	    deviceQuirks.canWakeEPDC,
 	    deviceQuirks.ntxBootRota,
 	    deviceQuirks.ntxRotaQuirk,
 	    deviceQuirks.rotationMap[FB_ROTATE_UR],
@@ -5950,6 +5954,7 @@ void
 	fbink_state->is_kindle_legacy    = deviceQuirks.isKindleLegacy;
 	fbink_state->is_kobo_non_mt      = deviceQuirks.isKoboNonMT;
 	fbink_state->unreliable_wait_for = deviceQuirks.unreliableWaitFor;
+	fbink_state->can_wake_epdc       = deviceQuirks.canWakeEPDC;
 	fbink_state->ntx_boot_rota       = deviceQuirks.ntxBootRota;
 	fbink_state->ntx_rota_quirk      = deviceQuirks.ntxRotaQuirk;
 	memcpy(fbink_state->rotation_map, deviceQuirks.rotationMap, sizeof(deviceQuirks.rotationMap));

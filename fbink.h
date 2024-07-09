@@ -600,6 +600,7 @@ typedef struct
 	bool is_kindle_legacy;    // deviceQuirks.isKindleLegacy (device is a Kindle using the original einkfb EPDC API)
 	bool is_kobo_non_mt;      // deviceQuirks.isKoboNonMT (device is a Kobo with no MultiTouch input support)
 	bool unreliable_wait_for;           // deviceQuirks.unreliableWaitFor (MXCFB_WAIT_FOR_UPDATE_COMPLETE may timeout)
+	bool can_wake_epdc;                 // deviceQuirks.canWakeEPDC (i.e., fbink_wakeup_epdc is *NOT* a NOP)
 	uint8_t          ntx_boot_rota;     // deviceQuirks.ntxBootRota (Native rotation at boot)
 	NTX_ROTA_INDEX_T ntx_rota_quirk;    // deviceQuirks.ntxRotaQuirk (c.f., tools/rota_map.c)
 	uint8_t          rotation_map[4];    // deviceQuirks.rotationMap (index is native, value is canonical)

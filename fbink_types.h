@@ -58,6 +58,7 @@ typedef struct
 	bool                touchMirrorX;
 	bool                touchMirrorY;
 	bool                unreliableWaitFor;
+	bool                canWakeEPDC;
 	bool                canRotate;
 	bool                canHWInvert;
 	bool                hasEclipseWfm;
