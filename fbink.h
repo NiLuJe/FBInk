@@ -900,17 +900,20 @@ FBINK_API int fbink_print_ot(int fbfd,
 // Brings printf formatting to fbink_print and fbink_print_ot ;).
 // fbfd:		Open file descriptor to the framebuffer character device,
 //				if set to FBFD_AUTO, the fb is opened & mmap'ed for the duration of this call.
-// cfg:			Optional pointer to an FBInkOTConfig struct.
+// ot_cfg:		Optional pointer to an FBInkOTConfig struct.
 // fbink_cfg:		Optional pointer to an FBInkConfig struct.
-// NOTE: If cfg is NULL, will call fbink_print, otherwise, fbink_print_ot!
-//       If cfg is valid, fbink_cfg MAY be NULL (same behavior as fbink_print_ot).
-//       If cfg is NULL, fbink_cfg MUST be valid.
-// NOTE: Meaning at least one of those two pointers MUST be valid!
+// ot_fit:		Optional pointer to an FBInkOTFit struct.
+// NOTE: If ot_cfg is NULL, will call fbink_print, otherwise, fbink_print_ot!
+//       If ot_cfg is valid, fbink_cfg MAY be NULL (same behavior as fbink_print_ot).
+//       If ot_cfg is NULL, fbink_cfg MUST be valid.
+// NOTE: Meaning you MUST at least pass either an fbink_cfg or an ot_cfg pointer!
+// NOTE: ot_fit behaves like in fbink_print_ot (i.e., it's only relevant if you pass an ot_cfg pointer, but it may be NULL).
 FBINK_API int fbink_printf(int fbfd,
-			   const FBInkOTConfig* restrict cfg,
+			   const FBInkOTConfig* restrict ot_cfg,
 			   const FBInkConfig* restrict fbink_cfg,
+			   FBInkOTFit* restrict ot_fit,
 			   const char* fmt,
-			   ...) __attribute__((format(printf, 4, 5)));
+			   ...) __attribute__((format(printf, 5, 6)));
 
 //
 // A simple wrapper around the internal screen refresh handling, without requiring you to include einkfb/mxcfb headers.

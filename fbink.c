@@ -7568,7 +7568,12 @@ static __attribute__((cold)) const char*
 
 // printf-like wrapper around fbink_print & fbink_print_ot ;).
 int
-    fbink_printf(int fbfd, const FBInkOTConfig* restrict cfg, const FBInkConfig* restrict fbink_cfg, const char* fmt, ...)
+    fbink_printf(int fbfd,
+		 const FBInkOTConfig* restrict ot_cfg,
+		 const FBInkConfig* restrict fbink_cfg,
+		 FBInkOTFit* restrict ot_fit,
+		 const char* fmt,
+		 ...)
 {
 	// Assume success, until shit happens ;)
 	int rv = EXIT_SUCCESS;
@@ -7620,9 +7625,9 @@ int
 
 	// Okay, now that we've got a formatted buffer...
 	// Did we get a valid FBInkOTConfig pointer?
-	if (cfg) {
+	if (ot_cfg) {
 		// Then feed our formatted string to fbink_print_ot
-		rv = fbink_print_ot(fbfd, buffer, cfg, fbink_cfg, NULL);
+		rv = fbink_print_ot(fbfd, buffer, ot_cfg, fbink_cfg, ot_fit);
 	} else {
 		// Otherwise, feed it to fbink_print instead
 		rv = fbink_print(fbfd, buffer, fbink_cfg);
