@@ -1048,7 +1048,8 @@ static void
 			deviceQuirks.screenDPI                  = 300U;
 			strtcpy(deviceQuirks.deviceName, "Libra Colour", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Monza", sizeof(deviceQuirks.deviceCodename));
-			strtcpy(deviceQuirks.devicePlatform, "Mark 11", sizeof(deviceQuirks.devicePlatform));
+			// NOTE: Initial FW were flagged Mk. 11 before someone realized that was weird, and they fixed it in 4.39.23027
+			strtcpy(deviceQuirks.devicePlatform, "Mark 13", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_TOLINO_VISION_COLOR:    // Tolino Vision Color (Monza Tolino)
 			deviceQuirks.hasColorPanel              = true;
@@ -1074,7 +1075,7 @@ static void
 			deviceQuirks.screenDPI                  = 300U;
 			strtcpy(deviceQuirks.deviceName, "Vision Color", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Monza Tolino", sizeof(deviceQuirks.deviceCodename));
-			strtcpy(deviceQuirks.devicePlatform, "Mark 11", sizeof(deviceQuirks.devicePlatform));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 13", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_CLARA_BW:    // Clara B&W (Spa BW)
 			deviceQuirks.isMTK                      = true;
