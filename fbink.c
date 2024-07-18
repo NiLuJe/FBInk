@@ -8290,12 +8290,11 @@ int
 	}
 	region.top = paint_point.y;
 
-	const uint8_t   invert     = is_inverted ? 0xFFu : 0U;
-	const uint8_t   fgcolor    = penFGColor ^ invert;
-	const uint8_t   bgcolor    = penBGColor ^ invert;
-	const short int layer_diff = (short int) (fgcolor - bgcolor);
-	FBInkPixel      fgP        = penFGPixel;
-	FBInkPixel      bgP        = penBGPixel;
+	const uint8_t invert  = is_inverted ? 0xFFu : 0U;
+	const uint8_t fgcolor = penFGColor ^ invert;
+	const uint8_t bgcolor = penBGColor ^ invert;
+	FBInkPixel    fgP     = penFGPixel;
+	FBInkPixel    bgP     = penBGPixel;
 	if (is_inverted) {
 		fgP.p ^= 0x00FFFFFFu;
 		bgP.p ^= 0x00FFFFFFu;
@@ -8572,6 +8571,7 @@ int
 		// What we get from stbtt is an alpha coverage mask, hence the need for alpha-blending for anti-aliasing.
 		// As it's obviously expensive, we try to avoid it if possible (on fully opaque & fully transparent pixels).
 		if (!is_overlay && !is_fgless && !is_bgless) {
+			const short int layer_diff = (short int) (fgcolor - bgcolor);
 			if (abs(layer_diff) == 0xFFu) {
 				// If we're painting in B&W, use the mask as-is, it's already B&W ;).
 				// We just need to invert it ;).
