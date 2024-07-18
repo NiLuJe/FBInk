@@ -1336,8 +1336,17 @@ int
 				} else if (strcasecmp(optarg, "WHITE") == 0) {
 					*pen = fg ? FG_WHITE : BG_WHITE;
 				} else {
-					ELOG("Unknown color name '%s'.", optarg);
-					errfnd = true;
+					uint8_t r, g, b, a = 0xFFu;
+					if (sscanf(optarg, "#%2hhx%2hhx%2hhx%2hhx", &r, &g, &b, &a) < 3) {
+						ELOG("Unknown color name '%s'.", optarg);
+						errfnd = true;
+					} else {
+						if (fg) {
+							fbink_set_fg_pen_rgba(r, g, b, a, false, false);
+						} else {
+							fbink_set_bg_pen_rgba(r, g, b, a, false, false);
+						}
+					}
 				}
 				break;
 			}
