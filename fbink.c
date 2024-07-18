@@ -8596,26 +8596,75 @@ int
 					paint_point.y++;
 				}
 			} else {
-				const uint16_t pmul_bg = (uint16_t) (bgcolor * 0xFFu);
-				for (int j = 0; j < max_line_height; j++) {
-					for (unsigned int k = 0U; k < lw; k++) {
-						if (lnPtr[k] == 0U) {
-							// No coverage (transparent) -> background
-							put_pixel(paint_point, &bgP, true);
-						} else if (lnPtr[k] == 0xFFu) {
-							// Full coverage (opaque) -> foreground
-							put_pixel(paint_point, &fgP, true);
-						} else {
-							// AA, blend it using the coverage mask as alpha
-							pixel.bgra.color.r = pixel.bgra.color.g = pixel.bgra.color.b =
-							    (uint8_t) DIV255((pmul_bg + (layer_diff * lnPtr[k])));
-							put_pixel(paint_point, &pixel, false);
+				if (deviceQuirks.pixelFormat == FBINK_PXFMT_Y4 || likely(deviceQuirks.pixelFormat == FBINK_PXFMT_Y8)) {
+					// Grayscale, we can use fgcolor/bgcolor & co directly
+					const uint16_t pmul_bg = (uint16_t) (bgcolor * 0xFFu);
+					for (int j = 0; j < max_line_height; j++) {
+						for (unsigned int k = 0U; k < lw; k++) {
+							if (lnPtr[k] == 0U) {
+								// No coverage (transparent) -> background
+								put_pixel(paint_point, &bgP, true);
+							} else if (lnPtr[k] == 0xFFu) {
+								// Full coverage (opaque) -> foreground
+								put_pixel(paint_point, &fgP, true);
+							} else {
+								// AA, blend it using the coverage mask as alpha
+								pixel.bgra.color.r = pixel.bgra.color.g = pixel.bgra.color.b =
+								(uint8_t) DIV255((pmul_bg + (layer_diff * lnPtr[k])));
+								put_pixel(paint_point, &pixel, false);
+							}
+							paint_point.x++;
 						}
-						paint_point.x++;
+						lnPtr        += max_lw;
+						paint_point.x = start_x;
+						paint_point.y++;
 					}
-					lnPtr        += max_lw;
-					paint_point.x = start_x;
-					paint_point.y++;
+				} else {
+					// Color, we need to handle each component separately...
+					uint16_t pmul_bg_r, pmul_bg_g, pmul_bg_b;
+					short int layer_diff_r, layer_diff_g, layer_diff_b;
+					if (unlikely(deviceQuirks.isRGB)) {
+						pmul_bg_r = (uint16_t) (bgP.rgba.color.r * 0xFFu);
+						layer_diff_r = (short int) (fgP.rgba.color.r - bgP.rgba.color.r);
+						pmul_bg_g = (uint16_t) (bgP.rgba.color.g * 0xFFu);
+						layer_diff_g = (short int) fgP.rgba.color.g - bgP.rgba.color.g;
+						pmul_bg_b = (uint16_t) (bgP.rgba.color.b * 0xFFu);
+						layer_diff_b = (short int) fgP.rgba.color.b - bgP.rgba.color.b;
+					} else {
+						pmul_bg_r = (uint16_t) (bgP.bgra.color.r * 0xFFu);
+						layer_diff_r = (short int) (fgP.bgra.color.r - bgP.bgra.color.r);
+						pmul_bg_g = (uint16_t) (bgP.bgra.color.g * 0xFFu);
+						layer_diff_g = (short int) fgP.bgra.color.g - bgP.bgra.color.g;
+						pmul_bg_b = (uint16_t) (bgP.bgra.color.b * 0xFFu);
+						layer_diff_b = (short int) fgP.bgra.color.b - bgP.bgra.color.b;
+					}
+					for (int j = 0; j < max_line_height; j++) {
+						for (unsigned int k = 0U; k < lw; k++) {
+							if (lnPtr[k] == 0U) {
+								// No coverage (transparent) -> background
+								put_pixel(paint_point, &bgP, true);
+							} else if (lnPtr[k] == 0xFFu) {
+								// Full coverage (opaque) -> foreground
+								put_pixel(paint_point, &fgP, true);
+							} else {
+								// AA, blend it using the coverage mask as alpha
+								if (unlikely(deviceQuirks.isRGB)) {
+									pixel.rgba.color.r = (uint8_t) DIV255((pmul_bg_r + (layer_diff_r * lnPtr[k])));
+									pixel.rgba.color.g = (uint8_t) DIV255((pmul_bg_g + (layer_diff_g * lnPtr[k])));
+									pixel.rgba.color.b = (uint8_t) DIV255((pmul_bg_b + (layer_diff_b * lnPtr[k])));
+								} else {
+									pixel.bgra.color.r = (uint8_t) DIV255((pmul_bg_r + (layer_diff_r * lnPtr[k])));
+									pixel.bgra.color.g = (uint8_t) DIV255((pmul_bg_g + (layer_diff_g * lnPtr[k])));
+									pixel.bgra.color.b = (uint8_t) DIV255((pmul_bg_b + (layer_diff_b * lnPtr[k])));
+								}
+								put_pixel(paint_point, &pixel, false);
+							}
+							paint_point.x++;
+						}
+						lnPtr        += max_lw;
+						paint_point.x = start_x;
+						paint_point.y++;
+					}
 				}
 			}
 		} else if (is_fgless) {
