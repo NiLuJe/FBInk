@@ -1,0 +1,23 @@
+name: Build
+on: [push, pull_request]
+
+jobs:
+  build_fbink:
+    name: fbink
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download toolchain
+      run: wget -q https://github.com/koreader/koxtoolchain/releases/latest/download/kobo.zip && unzip -p kobo.zip | tar -C ~ -xz
+    - name: Export toolchain
+      run: echo ~/x-tools/arm-kobo-linux-gnueabihf/bin >> $GITHUB_PATH
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - name: Build
+      run: make distclean && make ci
+    - name: Upload release archive
+      uses: actions/upload-artifact@v3
+      with:
+        name: FBInk
+        path: FBInk-*.tar.gz
