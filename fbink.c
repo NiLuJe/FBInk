@@ -8714,6 +8714,7 @@ int
 				}
 			} else {
 				// 4bpp... We'll have to alpha-blend *everything* to avoid clobbering pixels...
+				const uint16_t pmul_bg = (uint16_t) (bgcolor * 0xFFu);
 				for (int j = 0; j < max_line_height; j++) {
 					for (unsigned int k = 0U; k < lw; k++) {
 						// AA, blend it using the coverage mask as alpha, and the underlying pixel as fg
