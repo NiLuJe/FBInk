@@ -15,7 +15,7 @@ jobs:
       with:
         submodules: recursive
     - name: Build
-      run: make distclean && make ci
+      run: make distclean && make ci CROSS_TC=arm-kobo-linux-gnueabihf
     - name: Upload release archive
       uses: actions/upload-artifact@v3
       with:
