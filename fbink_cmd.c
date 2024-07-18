@@ -816,6 +816,8 @@ int
 	bool                        is_image       = false;
 	bool                        is_eval        = false;
 	bool                        is_interactive = false;
+	PenColor*                   fg_pen         = NULL;
+	PenColor*                   bg_pen         = NULL;
 	bool                        want_linecode  = false;
 	bool                        want_linecount = false;
 	bool                        want_lastrect  = false;
@@ -1342,9 +1344,17 @@ int
 						errfnd = true;
 					} else {
 						if (fg) {
-							fbink_set_fg_pen_rgba(r, g, b, a, false, false);
+							fg_pen    = alloca(sizeof(*fg_pen));
+							fg_pen->r = r;
+							fg_pen->g = g;
+							fg_pen->b = b;
+							fg_pen->a = a;
 						} else {
-							fbink_set_bg_pen_rgba(r, g, b, a, false, false);
+							bg_pen    = alloca(sizeof(*bg_pen));
+							bg_pen->r = r;
+							bg_pen->g = g;
+							bg_pen->b = b;
+							bg_pen->a = a;
 						}
 					}
 				}
@@ -2115,6 +2125,14 @@ int
 		ELOG("Failed to initialize FBInk, aborting . . .");
 		rv = ERRCODE(EXIT_FAILURE);
 		goto cleanup;
+	}
+
+	// Set custom pen colors, if any
+	if (fg_pen) {
+		fbink_set_fg_pen_rgba(fg_pen->r, fg_pen->g, fg_pen->b, fg_pen->a, false, false);
+	}
+	if (bg_pen) {
+		fbink_set_bg_pen_rgba(bg_pen->r, bg_pen->g, bg_pen->b, bg_pen->a, false, false);
 	}
 
 	// Did we request an animated refresh?

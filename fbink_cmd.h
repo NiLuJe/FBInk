@@ -132,6 +132,15 @@ static void compute_lastrect(void);
 static void recap_lastrect(void);
 static void print_lastrect(void);
 
+// FBInkPixel-like
+typedef struct
+{
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
+	uint8_t a;
+} PenColor;
+
 // Sprinkle a bit of C11 in there...
 // c.f., http://www.robertgamble.net/2012/01/c11-generic-selections.html
 #define TYPENAME(x)                                                                                                      \
