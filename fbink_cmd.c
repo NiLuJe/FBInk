@@ -1299,81 +1299,48 @@ int
 				is_interactive = true;
 				break;
 			case 'C':
+			case 'B': {
+				const bool fg  = opt == 'C';
+				uint8_t*   pen = fg ? &fbink_cfg.fg_color : &fbink_cfg.bg_color;
+
 				if (strcasecmp(optarg, "BLACK") == 0) {
-					fbink_cfg.fg_color = FG_BLACK;
+					*pen = fg ? FG_BLACK : BG_BLACK;
 				} else if (strcasecmp(optarg, "GRAY1") == 0) {
-					fbink_cfg.fg_color = FG_GRAY1;
+					*pen = fg ? FG_GRAY1 : BG_GRAY1;
 				} else if (strcasecmp(optarg, "GRAY2") == 0) {
-					fbink_cfg.fg_color = FG_GRAY2;
+					*pen = fg ? FG_GRAY2 : BG_GRAY2;
 				} else if (strcasecmp(optarg, "GRAY3") == 0) {
-					fbink_cfg.fg_color = FG_GRAY3;
+					*pen = fg ? FG_GRAY3 : BG_GRAY3;
 				} else if (strcasecmp(optarg, "GRAY4") == 0) {
-					fbink_cfg.fg_color = FG_GRAY4;
+					*pen = fg ? FG_GRAY4 : BG_GRAY4;
 				} else if (strcasecmp(optarg, "GRAY5") == 0) {
-					fbink_cfg.fg_color = FG_GRAY5;
+					*pen = fg ? FG_GRAY5 : BG_GRAY5;
 				} else if (strcasecmp(optarg, "GRAY6") == 0) {
-					fbink_cfg.fg_color = FG_GRAY6;
+					*pen = fg ? FG_GRAY6 : BG_GRAY6;
 				} else if (strcasecmp(optarg, "GRAY7") == 0) {
-					fbink_cfg.fg_color = FG_GRAY7;
+					*pen = fg ? FG_GRAY7 : BG_GRAY7;
 				} else if (strcasecmp(optarg, "GRAY8") == 0) {
-					fbink_cfg.fg_color = FG_GRAY8;
+					*pen = fg ? FG_GRAY8 : BG_GRAY8;
 				} else if (strcasecmp(optarg, "GRAY9") == 0) {
-					fbink_cfg.fg_color = FG_GRAY9;
+					*pen = fg ? FG_GRAY9 : BG_GRAY9;
 				} else if (strcasecmp(optarg, "GRAYA") == 0) {
-					fbink_cfg.fg_color = FG_GRAYA;
+					*pen = fg ? FG_GRAYA : BG_GRAYA;
 				} else if (strcasecmp(optarg, "GRAYB") == 0) {
-					fbink_cfg.fg_color = FG_GRAYB;
+					*pen = fg ? FG_GRAYB : BG_GRAYB;
 				} else if (strcasecmp(optarg, "GRAYC") == 0) {
-					fbink_cfg.fg_color = FG_GRAYC;
+					*pen = fg ? FG_GRAYC : BG_GRAYC;
 				} else if (strcasecmp(optarg, "GRAYD") == 0) {
-					fbink_cfg.fg_color = FG_GRAYD;
+					*pen = fg ? FG_GRAYD : BG_GRAYD;
 				} else if (strcasecmp(optarg, "GRAYE") == 0) {
-					fbink_cfg.fg_color = FG_GRAYE;
+					*pen = fg ? FG_GRAYE : BG_GRAYE;
 				} else if (strcasecmp(optarg, "WHITE") == 0) {
-					fbink_cfg.fg_color = FG_WHITE;
+					*pen = fg ? FG_WHITE : BG_WHITE;
 				} else {
 					ELOG("Unknown color name '%s'.", optarg);
 					errfnd = true;
 				}
 				break;
-			case 'B':
-				if (strcasecmp(optarg, "BLACK") == 0) {
-					fbink_cfg.bg_color = BG_BLACK;
-				} else if (strcasecmp(optarg, "GRAY1") == 0) {
-					fbink_cfg.bg_color = BG_GRAY1;
-				} else if (strcasecmp(optarg, "GRAY2") == 0) {
-					fbink_cfg.bg_color = BG_GRAY2;
-				} else if (strcasecmp(optarg, "GRAY3") == 0) {
-					fbink_cfg.bg_color = BG_GRAY3;
-				} else if (strcasecmp(optarg, "GRAY4") == 0) {
-					fbink_cfg.bg_color = BG_GRAY4;
-				} else if (strcasecmp(optarg, "GRAY5") == 0) {
-					fbink_cfg.bg_color = BG_GRAY5;
-				} else if (strcasecmp(optarg, "GRAY6") == 0) {
-					fbink_cfg.bg_color = BG_GRAY6;
-				} else if (strcasecmp(optarg, "GRAY7") == 0) {
-					fbink_cfg.bg_color = BG_GRAY7;
-				} else if (strcasecmp(optarg, "GRAY8") == 0) {
-					fbink_cfg.bg_color = BG_GRAY8;
-				} else if (strcasecmp(optarg, "GRAY9") == 0) {
-					fbink_cfg.bg_color = BG_GRAY9;
-				} else if (strcasecmp(optarg, "GRAYA") == 0) {
-					fbink_cfg.bg_color = BG_GRAYA;
-				} else if (strcasecmp(optarg, "GRAYB") == 0) {
-					fbink_cfg.bg_color = BG_GRAYB;
-				} else if (strcasecmp(optarg, "GRAYC") == 0) {
-					fbink_cfg.bg_color = BG_GRAYC;
-				} else if (strcasecmp(optarg, "GRAYD") == 0) {
-					fbink_cfg.bg_color = BG_GRAYD;
-				} else if (strcasecmp(optarg, "GRAYE") == 0) {
-					fbink_cfg.bg_color = BG_GRAYE;
-				} else if (strcasecmp(optarg, "WHITE") == 0) {
-					fbink_cfg.bg_color = BG_WHITE;
-				} else {
-					ELOG("Unknown color name '%s'.", optarg);
-					errfnd = true;
-				}
-				break;
+			}
 			case 'L':
 				want_linecode = true;
 				break;
