@@ -163,7 +163,7 @@ static __attribute__((cold)) void        concat_type_recap(INPUT_DEVICE_TYPE_T t
 #		define PLATFORM_KEY_HOME         KEY_HOME
 #		define PLATFORM_KEY_FRONTLIGHT   0
 #		define PLATFORM_KEY_MENU         KEY_MENU
-#		define PLATFORM_KEY_DPAD         BTN_DPAD_UP
+#		define PLATFORM_KEY_DPAD         KEY_LEFT    // Because FW 2.x uses KEY_HANGEUL for Up for some reason...
 #		define PLATFORM_ROTATION_EV_TYPE EV_ABS
 #		define PLATFORM_ROTATION_EV_CODE ABS_PRESSURE    // Yeah, don't ask me...
 #	else
