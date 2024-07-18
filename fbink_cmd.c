@@ -134,7 +134,7 @@ static void
 #	elif defined(FBINK_FOR_POCKETBOOK)
 	    "\t\t\t\tAs well as GC4, A2IN, A2OUT, DU4, REAGL, REAGLD, GC16HQ & GS16.\n"
 #	elif defined(FBINK_FOR_KOBO)
-	    "\t\t\t\tAs well as GC4, REAGL & REAGLD. And GU16, GCK16, GLK16 & GCC16 on Mk. 8. And DU4, GCK16 & GLKW16 on Mk. 9. And GCK16, GLKW16, GCC16 & GLRC16 on Mk. 11 & 12\n"
+	    "\t\t\t\tAs well as GC4, REAGL & REAGLD. And GU16, GCK16, GLK16 & GCC16 on Mk. 8. And DU4, GCK16 & GLKW16 on Mk. 9 & 10. And GCK16, GLKW16, GCC16 & GLRC16 on Mk. 11, 12 & 13\n"
 #	elif defined(FBINK_FOR_CERVANTES)
 	    "\t\t\t\tAs well as GC4, REAGL & REAGLD.\n"
 #	endif

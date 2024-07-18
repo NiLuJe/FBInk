@@ -126,10 +126,14 @@
 
   Request a specific waveform update mode from the eInk controller, if supported (mainly useful for images).
 
-  Available waveform modes: `A2`, `DU`, `GL16`, `GC16` &amp; `AUTO`
+  Available waveform modes: `A2`, `DU`, `GL16`, `GC16` & `AUTO`
 
-  Note for Kobo and Cervantes: as well as `GC4`, `REAGL` & `REAGLD`.
-  And GU16, GCK16, GLK16 & GCC16 on Kobo Mk. 8.
+  Note for Kobo: as well as `GC4`, `REAGL` & `REAGLD`.
+  And `GU16`, `GCK16`, `GLK16` & `GCC16` on Mk. 8.
+  And `DU4`, `GCK16` & `GLKW16` on Mk. 9 & 10.
+  And `GCK16`, `GLKW16`, `GCC16` & `GLRC16` on Mk. 11, 12 & 13
+
+  Note for Cervantes: as well as `GC4`, `REAGL` & `REAGLD`.
 
   Note for Kindle: as well as `REAGL`, `REAGLD`, `GC16_FAST`, `GL16_FAST`, `DU4`, `GL4`, `GL16_INV`, `GCK16`, `GLKW16` & `DUNM` on some Kindles, depending on the model & FW version. Note that specifying a waveform mode is ignored on legacy einkfb devices, because the hardware doesn't expose such capabilities.
 
@@ -214,6 +218,8 @@
   Color the text will be printed in (Default: BLACK).
 
   Available colors: `BLACK`, `GRAY1`, `GRAY2`, `GRAY3`, `GRAY4`, `GRAY5`, `GRAY6`, `GRAY7`, `GRAY8`, `GRAY9`, `GRAYA`, `GRAYB`, `GRAYC`, `GRAYD`, `GRAYE`, `WHITE`.
+
+  You can also pass an exact hexadecimal color code in the `#RRGGBB` or `#RRGGBBAA` format, e.g., `#FF0000` for red, `#00FF00` for green, `#0000FF` for blue.
 
 * `-o`, `--overlay`
 
@@ -458,6 +464,16 @@
 * `-a`, `--flatten`
 
   Ignore the alpha channel.
+
+* `-j`, `--saturation`
+
+  Boost color saturation (in percent). Aimed at Kaleido panels. 32bpp only.
+
+* `-J`, `--cfa` `MODE`
+
+  Request a specific CFA post-process mode from the eInk controller, if supported (Kaleido panels, 32bpp, with GCC16 or GLRC16).
+
+  Available CFA modes: `S4`, `S7`, `S9`, `G0`, `G1` & `G2`.
 
 Notes:
 
