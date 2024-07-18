@@ -200,6 +200,8 @@ static void
 	    "\t-B, --background NAME\tColor of the background the text will be printed on (Default: WHITE).\n"
 	    "\t\t\t\tAvailable colors: BLACK, GRAY1, GRAY2, GRAY3, GRAY4, GRAY5, GRAY6, GRAY7,\n"
 	    "\t\t\t\t\t\tGRAY8, GRAY9, GRAYA, GRAYB, GRAYC, GRAYD, GRAYE, WHITE\n"
+	    "\t\t\t\tYou can also pass an exact hexadecimal color code in the #RRGGBB or #RRGGBBAA format, e.g.,\n"
+	    "\t\t\t\t\t\t#FF0000 for red, #00FF00 for green, #0000FF for blue.\n"
 	    "\t-o, --overlay\t\tDon't draw background pixels, and compute foreground pixel color based on the inverse of the underlying framebufer pixel.\n"
 	    "\t\t\t\tObviously ignores -h, --invert & -C, --color *as far as glyphs are concerned*.\n"
 	    "\t\t\t\t-B, --background is still honored if you combine this with -c, --clear\n"
