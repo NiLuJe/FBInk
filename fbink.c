@@ -8660,8 +8660,17 @@ int
 				}
 			}
 		} else if (is_fgless) {
-			FBInkPixel     fb_px   = { 0U };
-			const uint16_t pmul_bg = (uint16_t) (bgcolor * 0xFFu);
+			FBInkPixel fb_px = { 0U };
+			uint16_t   pmul_bg_r, pmul_bg_g, pmul_bg_b;
+			if (unlikely(deviceQuirks.isRGB)) {
+				pmul_bg_r = (uint16_t) (bgP.rgba.color.r * 0xFFu);
+				pmul_bg_g = (uint16_t) (bgP.rgba.color.g * 0xFFu);
+				pmul_bg_b = (uint16_t) (bgP.rgba.color.b * 0xFFu);
+			} else {
+				pmul_bg_r = (uint16_t) (bgP.bgra.color.r * 0xFFu);
+				pmul_bg_g = (uint16_t) (bgP.bgra.color.g * 0xFFu);
+				pmul_bg_b = (uint16_t) (bgP.bgra.color.b * 0xFFu);
+			}
 			// NOTE: One more branch needed because 4bpp fbs are terrible...
 			if (vInfo.bits_per_pixel > 4U) {
 				// 8, 16, 24 & 32bpp
@@ -8675,25 +8684,25 @@ int
 							// and the underlying pixel as fg
 							get_pixel(paint_point, &fb_px);
 							if (unlikely(deviceQuirks.isRGB)) {
-								pixel.rgba.color.r = (uint8_t) DIV255(
-								    (pmul_bg +
-								     ((fb_px.rgba.color.r - bgcolor) * lnPtr[k])));
-								pixel.rgba.color.g = (uint8_t) DIV255(
-								    (pmul_bg +
-								     ((fb_px.rgba.color.g - bgcolor) * lnPtr[k])));
-								pixel.rgba.color.b = (uint8_t) DIV255(
-								    (pmul_bg +
-								     ((fb_px.rgba.color.b - bgcolor) * lnPtr[k])));
+								pixel.rgba.color.r = (uint8_t) DIV255((
+								    pmul_bg_r + ((fb_px.rgba.color.r - bgP.rgba.color.r) *
+										 lnPtr[k])));
+								pixel.rgba.color.g = (uint8_t) DIV255((
+								    pmul_bg_g + ((fb_px.rgba.color.g - bgP.rgba.color.g) *
+										 lnPtr[k])));
+								pixel.rgba.color.b = (uint8_t) DIV255((
+								    pmul_bg_b + ((fb_px.rgba.color.b - bgP.rgba.color.b) *
+										 lnPtr[k])));
 							} else {
-								pixel.bgra.color.r = (uint8_t) DIV255(
-								    (pmul_bg +
-								     ((fb_px.bgra.color.r - bgcolor) * lnPtr[k])));
-								pixel.bgra.color.g = (uint8_t) DIV255(
-								    (pmul_bg +
-								     ((fb_px.bgra.color.g - bgcolor) * lnPtr[k])));
-								pixel.bgra.color.b = (uint8_t) DIV255(
-								    (pmul_bg +
-								     ((fb_px.bgra.color.b - bgcolor) * lnPtr[k])));
+								pixel.bgra.color.r = (uint8_t) DIV255((
+								    pmul_bg_r + ((fb_px.bgra.color.r - bgP.bgra.color.r) *
+										 lnPtr[k])));
+								pixel.bgra.color.g = (uint8_t) DIV255((
+								    pmul_bg_g + ((fb_px.bgra.color.g - bgP.bgra.color.g) *
+										 lnPtr[k])));
+								pixel.bgra.color.b = (uint8_t) DIV255((
+								    pmul_bg_b + ((fb_px.bgra.color.b - bgP.bgra.color.b) *
+										 lnPtr[k])));
 							}
 							put_pixel(paint_point, &pixel, false);
 						}
