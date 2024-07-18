@@ -8814,23 +8814,29 @@ int
 							if (unlikely(deviceQuirks.isRGB)) {
 								pixel.rgba.color.r = (uint8_t) DIV255(
 								    (MUL255(fb_px.rgba.color.r) +
-								     ((fgcolor - fb_px.rgba.color.r) * lnPtr[k])));
+								     ((fgP.rgba.color.r - fb_px.rgba.color.r) *
+								      lnPtr[k])));
 								pixel.rgba.color.g = (uint8_t) DIV255(
 								    (MUL255(fb_px.rgba.color.g) +
-								     ((fgcolor - fb_px.rgba.color.g) * lnPtr[k])));
+								     ((fgP.rgba.color.g - fb_px.rgba.color.g) *
+								      lnPtr[k])));
 								pixel.rgba.color.b = (uint8_t) DIV255(
 								    (MUL255(fb_px.rgba.color.b) +
-								     ((fgcolor - fb_px.rgba.color.b) * lnPtr[k])));
+								     ((fgP.rgba.color.b - fb_px.rgba.color.b) *
+								      lnPtr[k])));
 							} else {
 								pixel.bgra.color.r = (uint8_t) DIV255(
 								    (MUL255(fb_px.bgra.color.r) +
-								     ((fgcolor - fb_px.bgra.color.r) * lnPtr[k])));
+								     ((fgP.bgra.color.r - fb_px.bgra.color.r) *
+								      lnPtr[k])));
 								pixel.bgra.color.g = (uint8_t) DIV255(
 								    (MUL255(fb_px.bgra.color.g) +
-								     ((fgcolor - fb_px.bgra.color.g) * lnPtr[k])));
+								     ((fgP.bgra.color.g - fb_px.bgra.color.g) *
+								      lnPtr[k])));
 								pixel.bgra.color.b = (uint8_t) DIV255(
 								    (MUL255(fb_px.bgra.color.b) +
-								     ((fgcolor - fb_px.bgra.color.b) * lnPtr[k])));
+								     ((fgP.bgra.color.b - fb_px.bgra.color.b) *
+								      lnPtr[k])));
 							}
 							put_pixel(paint_point, &pixel, false);
 						}
