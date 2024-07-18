@@ -935,6 +935,27 @@ devcap: armcheck distclean
 	wget "https://svn.ak-team.com/svn/Configs/trunk/Kindle/Kobo_Hacks/USBNetwork/src/usbnet/lib/libz.so.1" -O Kobo/libz.so.1
 	tar --owner=root --group=root -cvzf Release/Kobo-DevCap-Test.tar.gz -C Kobo .
 
+ci: armcheck distclean
+	$(MAKE) fbdepth KOBO=true
+	mv -v $(CURDIR)/Release/fbdepth $(CURDIR)/fbdepth
+	$(MAKE) clean
+	$(MAKE) input_scan KOBO=true
+	mv -v $(CURDIR)/Release/input_scan $(CURDIR)/input_scan
+	$(MAKE) clean
+	$(MAKE) ftrace KOBO=true
+	mv -v $(CURDIR)/Release/finger_trace $(CURDIR)/finger_trace
+	$(MAKE) clean
+	$(MAKE) strip KOBO=true
+	mkdir -p Kobo
+	cp -av $(CURDIR)/Release/fbink Kobo
+	mv -v $(CURDIR)/fbdepth Kobo
+	mv -v $(CURDIR)/input_scan Kobo
+	mv -v $(CURDIR)/finger_trace Kobo
+	cp -av $(CURDIR)/README.md Kobo/README.md
+	cp -av $(CURDIR)/LICENSE Kobo/LICENSE
+	cp -av $(CURDIR)/CREDITS Kobo/CREDITS
+	tar --owner=root --group=root -cvzf Release/FBInk-Kobo-$(FBINK_VERSION).tar.gz -C Kobo .
+
 libunibreakclean:
 	-$(MAKE) -C libunibreak distclean
 	-cd libunibreak && \
@@ -1006,7 +1027,7 @@ clean: cleanlib
 	rm -rf $(OUT_DIR)/ion_heaps
 	rm -rf $(OUT_DIR)/finger_trace
 	rm -rf $(OUT_DIR)/rota_map
-	rm -rf $(OUT_DIR)/FBInk-*.tar.xz
+	rm -rf $(OUT_DIR)/FBInk-*.tar.*z
 
 distclean: clean libunibreakclean libi2cclean libevdevclean
 	rm -rf libunibreak-staged
@@ -1049,4 +1070,4 @@ format:
 	clang-format -style=file -i *.c *.h cutef8/*.c cutef8/*.h utils/*.c qimagescale/*.c qimagescale/*.h tools/*.c eink/*-kobo.h eink/*-kindle.h eink/einkfb.h
 
 
-.PHONY: default outdir all staticlib sharedlib staticinputlib sharedinputlib static small tiny tinyish tinier shared striplib stripinputlib striparchive stripbin strip debug static pic shared release inputlib kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils rota_map alt sunxi ftrace fbdepth input_scan dump devcap clean cleansharedlib cleanstaticlib cleanlib distclean dist install format
+.PHONY: default outdir all staticlib sharedlib staticinputlib sharedinputlib static small tiny tinyish tinier shared striplib stripinputlib striparchive stripbin strip debug static pic shared release inputlib kindle legacy cervantes linux armcheck kobo remarkable pocketbook libunibreakclean libi2cclean libevdevclean utils rota_map alt sunxi ftrace fbdepth input_scan dump devcap ci clean cleansharedlib cleanstaticlib cleanlib distclean dist install format
