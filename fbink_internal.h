@@ -76,9 +76,11 @@
 //       GCC should mostly have handled this right on its own, we're just giving it a nudge ;).
 //       The original idea was to see if we could actually completely avoid libm, but we really can't since,
 //       if need be, GCC builtins *may* emit library calls. Which is the case here ;).
-#ifdef FBINK_WITH_OPENTYPE
+#if defined(FBINK_WITH_OPENTYPE) || defined(FBINK_WITH_IMAGE)
 // Since we can't avoid libm, include the standard header, so everyones gets the right declarations
 #	include <math.h>
+#endif
+#ifdef FBINK_WITH_OPENTYPE
 #	ifdef __clang__
 #		if __has_builtin(__builtin_ceilf)
 #			define iceilf(x)      ((int) (__builtin_ceilf(x)))
