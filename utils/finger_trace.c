@@ -149,6 +149,8 @@ static void
 
 	// Apply the final transformations
 	FTrace_Coordinates translated_pos;
+	// NOTE: Mostly for historical reasons, we follow KOReader's naming scheme and logic flow here,
+	//       so swapping the axes *has* to come first!
 	if (swap_axes) {
 		translated_pos.x = touch->pos.y;
 		translated_pos.y = touch->pos.x;
