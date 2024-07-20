@@ -604,7 +604,7 @@ typedef struct
 	uint8_t          ntx_boot_rota;     // deviceQuirks.ntxBootRota (Native rotation at boot)
 	NTX_ROTA_INDEX_T ntx_rota_quirk;    // deviceQuirks.ntxRotaQuirk (c.f., tools/rota_map.c)
 	uint8_t          rotation_map[4];    // deviceQuirks.rotationMap (index is native, value is canonical)
-	bool touch_swap_axes;    // deviceQuirks.touchSwapAxes (panel reports swapped coordinates axes; apply this first)
+	bool touch_swap_axes;    // deviceQuirks.touchSwapAxes (panel reports swapped coordinates axes; handle this first)
 	bool touch_mirror_x;     // deviceQuirks.touchMirrorX (post-swap, panel reports inverted x coordinates)
 	bool touch_mirror_y;     // deviceQuirks.touchMirrorY (post-swap, panel reports inverted y coordinates)
 	bool is_ntx_quirky_landscape;    // deviceQuirks.isNTX16bLandscape (rotation compensation is in effect)
