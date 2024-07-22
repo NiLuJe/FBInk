@@ -644,8 +644,14 @@ static void
 			strtcpy(deviceQuirks.devicePlatform, "Mark 4", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_KOBO_GLO:    // Glo (kraken)
-			deviceQuirks.isKoboNonMT = true;
-			deviceQuirks.screenDPI   = 212U;
+			deviceQuirks.isKoboNonMT                = true;
+			// {3, 2, 1, 0}, but no ioctl quirks
+			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_CCW_TOUCH;
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CCW;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UD;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
+			deviceQuirks.screenDPI                  = 212U;
 			strtcpy(deviceQuirks.deviceName, "Glo", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Kraken", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Mark 4", sizeof(deviceQuirks.devicePlatform));
