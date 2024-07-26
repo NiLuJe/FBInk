@@ -708,6 +708,12 @@ int
 #endif
 
 	// Warn if the driver refused to change bitdepth
+	// NOTE: On MTK, it's because hwtcon_fb_check_var, which calls hwtcon_fb_check_rotate,
+	//       stomps on the live bits_per_pixel field based on hwtcon_device_info()->color_format,
+	//       which defaults to ARGB32 (via hwtcon_driver_init_device_info @ hwtcon_driver.c)...
+	//       You'd need to change mdp_src_format (which defaults to ABGR32) via its sysfs entry,
+	//       because mdp_src_format_write will update color_format accordingly...
+	//       e.g., echo Y8 > /sys/devices/platform/14000000.hwtcon/mdp_src_format
 	if (new_vinfo.bits_per_pixel != expected_bpp) {
 		LOG("Current bitdepth (%ubpp) doesn't match the expected bitdepth (%ubpp). It might be unsupported by the driver?",
 		    new_vinfo.bits_per_pixel,
