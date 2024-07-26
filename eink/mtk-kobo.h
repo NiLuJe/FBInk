@@ -70,7 +70,7 @@
 #define HWTCON_FLAG_CFA_EINK_NTX    0x00000a00
 #define HWTCON_FLAG_CFA_EINK_NTX_SF 0x00000b00
 // NOTE: Does what it says on the tin: you'll get a blank screen :D.
-//       (Supposed to disable CFA processing, leading to B&W rendering... Possibly buggy?)
+//       (Supposed to disable CFA processing, leading to B&W rendering, i.e., HWTCON_CFA_MODE_NONE... Possibly buggy?)
 #define HWTCON_FLAG_CFA_SKIP        0x00008000
 
 /* temperature use sensor. */
@@ -282,6 +282,8 @@ struct hwtcon_panel_info
 
 /* Get the current default CFA mode */
 // NOTE: Arg is a pointer to an uint32_t
+// NOTE: This is the CFA_MODE that is used when you do *NOT* set an HWTCON_FLAG_CFA_* flag in the update request.
+//       Defaults to EINK_NORMAL.
 #define HWTCON_SET_CFA_MODE _IOW(HWTCON_IOCTL_MAGIC_NUMBER, 0x50, uint32_t)
 /* Set the current default CFA mode */
 // NOTE: Arg is a pointer to an uint32_t
