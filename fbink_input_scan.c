@@ -507,6 +507,7 @@ FBInkInputDevice*
 		for (int i = 0; i < ndev; i++) {
 			free(namelist[i]);
 		}
+		free(namelist);
 		return NULL;
 	}
 
@@ -537,6 +538,7 @@ FBInkInputDevice*
 
 		free(namelist[i]);
 	}
+	free(namelist);
 
 	return devices;
 #else
