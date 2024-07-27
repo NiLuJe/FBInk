@@ -624,7 +624,8 @@ int
 		}
 	}
 
-	// On newer MTK devices, we first need to update the MDP src format to convince the fbdev driver to witch bitdepth...
+	// On newer MTK devices, we first need to update the MDP src format to convince the fbdev driver to switch bitdepth...
+	// (c.f., comments around the bitdepth sanity check below for more details).
 	if (deviceQuirks.isMTK && deviceQuirks.deviceId != DEVICE_KOBO_ELIPSA_2E) {
 		LOG("Target device needs help to switch bitdepth...");
 		if (new_vinfo.bits_per_pixel == 8 || new_vinfo.bits_per_pixel == 32) {
@@ -751,13 +752,14 @@ int
 #endif
 
 	// Warn if the driver refused to change bitdepth
-	// NOTE: On MTK, it's because hwtcon_fb_check_var, which calls hwtcon_fb_check_rotate,
+	// NOTE: On MTK, hwtcon_fb_check_var, which calls hwtcon_fb_check_rotate,
 	//       stomps on the live bits_per_pixel field based on hwtcon_device_info()->color_format,
 	//       which defaults to ARGB32 (via hwtcon_driver_init_device_info @ hwtcon_driver.c)...
-	//       You'd need to change mdp_src_format (which defaults to ABGR32 on newer devices) via its sysfs entry,
-	//       because mdp_src_format_write will update color_format accordingly...
+	//       You need to change mdp_src_format (which defaults to ABGR32 on newer devices) via its sysfs entry,
+	//       because mdp_src_format_write will then update color_format (and the fb pixel format) accordingly...
 	//       e.g., echo Y8 > /sys/devices/platform/14000000.hwtcon/mdp_src_format
-	// NOTE: Unfortunately, that fun interaction doesn't appear to be supported on the Elipsa 2E...
+	// NOTE: Unfortunately, that fun interaction doesn't appear to be supported on the Elipsa 2E,
+	//       but on newer affected devices, we implement that right before the FBIOPUT_VSCREENINFO ioctl.
 	if (new_vinfo.bits_per_pixel != expected_bpp) {
 		LOG("Current bitdepth (%ubpp) doesn't match the expected bitdepth (%ubpp). It might be unsupported by the driver?",
 		    new_vinfo.bits_per_pixel,
