@@ -623,6 +623,49 @@ int
 			    fb_rotate_to_string(new_vinfo.rotate));
 		}
 	}
+
+	// On newer MTK devices, we first need to update the MDP src format to convince the fbdev driver to witch bitdepth...
+	if (deviceQuirks.isMTK && deviceQuirks.deviceId != DEVICE_KOBO_ELIPSA_2E) {
+		LOG("Target device needs help to switch bitdepth...");
+		if (new_vinfo.bits_per_pixel == 8 || new_vinfo.bits_per_pixel == 32) {
+			// The current kernels only expose Y8, ARGB32 & ABGR32 in the gtMDP_SRC_FMTA array,
+			// despite mdp_src_format_write (and, supposedly, the rest of the driver) supporting RGB565...
+			// Since RGB565 is the worst, we won't make a fuss about that ;).
+
+			// Find the hwtcon folder in sysfs...
+			struct dirent** namelist;
+			int             n = scandir("/sys/devices/platform", &namelist, is_hwtcon, alphasort);
+			if (n <= 0) {
+				PFWARN("scandir: %m");
+			} else {
+				for (int i = 0; i < n; i++) {
+					char sysfs_path[PATH_MAX] = { 0 };
+					snprintf(sysfs_path,
+						 sizeof(sysfs_path),
+						 "/sys/devices/platform/%s/mdp_src_format",
+						 namelist[i]->d_name);
+					free(namelist[i]);
+					LOG("...updating MDP source pixel format via `%s`", sysfs_path);
+
+					int sysfs_fd = open(sysfs_path, O_WRONLY | O_CLOEXEC);
+					if (sysfs_fd != -1) {
+						if (new_vinfo.bits_per_pixel == 8) {
+							const char px_fmt[] = "Y8";
+							write(sysfs_fd, px_fmt, sizeof(px_fmt));
+						} else {
+							// NOTE: ARGB32 is also supported (i.e., BGRA32).
+							const char px_fmt[] = "ABGR32";
+							write(sysfs_fd, px_fmt, sizeof(px_fmt));
+						}
+						close(sysfs_fd);
+					}
+				}
+				free(namelist);
+			}
+		} else {
+			LOG("...but the target bitdepth is unsupported, we'll fail gracefully");
+		}
+	}
 #endif
 
 	if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &new_vinfo)) {
@@ -711,9 +754,10 @@ int
 	// NOTE: On MTK, it's because hwtcon_fb_check_var, which calls hwtcon_fb_check_rotate,
 	//       stomps on the live bits_per_pixel field based on hwtcon_device_info()->color_format,
 	//       which defaults to ARGB32 (via hwtcon_driver_init_device_info @ hwtcon_driver.c)...
-	//       You'd need to change mdp_src_format (which defaults to ABGR32) via its sysfs entry,
+	//       You'd need to change mdp_src_format (which defaults to ABGR32 on newer devices) via its sysfs entry,
 	//       because mdp_src_format_write will update color_format accordingly...
 	//       e.g., echo Y8 > /sys/devices/platform/14000000.hwtcon/mdp_src_format
+	// NOTE: Unfortunately, that fun interaction doesn't appear to be supported on the Elipsa 2E...
 	if (new_vinfo.bits_per_pixel != expected_bpp) {
 		LOG("Current bitdepth (%ubpp) doesn't match the expected bitdepth (%ubpp). It might be unsupported by the driver?",
 		    new_vinfo.bits_per_pixel,

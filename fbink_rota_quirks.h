@@ -64,4 +64,19 @@ static int kobo_mtk_invert_fb(bool);
 #	define GYRO_STATE_OUTSIDE_CONSTRAINTS -4
 #endif    // FBINK_FOR_KOBO
 
+static int
+    str_ends_with(const char* str, const char* suffix)
+{
+	size_t len        = strlen(str);
+	size_t suffix_len = strlen(suffix);
+
+	return len >= suffix_len && !memcmp(str + len - suffix_len, suffix, suffix_len);
+}
+
+static int
+    is_hwtcon(const struct dirent* dir)
+{
+	return str_ends_with(dir->d_name, "hwtcon");
+}
+
 #endif
