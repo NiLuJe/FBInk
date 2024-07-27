@@ -62,7 +62,6 @@ static int kobo_mtk_invert_fb(bool);
 #	define GYRO_STATE_FACE_UP             -2
 #	define GYRO_STATE_FACE_DOWN           -3
 #	define GYRO_STATE_OUTSIDE_CONSTRAINTS -4
-#endif    // FBINK_FOR_KOBO
 
 static int
     str_ends_with(const char* str, const char* suffix)
@@ -78,5 +77,6 @@ static int
 {
 	return str_ends_with(dir->d_name, "hwtcon");
 }
+#endif    // FBINK_FOR_KOBO
 
 #endif
