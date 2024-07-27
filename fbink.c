@@ -3351,7 +3351,7 @@ static int
 	}
 
 	// Setup the CFA mode flags (if any, and if the waveform mode makes sense for that)
-	// NOTE: You can technically apply this to *any* waveform mode, and, in fact,
+	// NOTE: You can technically apply this to *any* waveform mode, and, in fact, on a color panel @ 32bpp,
 	//       unless you explicitly request CFA_SKIP, *every* refresh implies CFA processing.
 	//       But if you really don't want color, we have a much better solution: just switch to 8bpp ;).
 	//       (On that note, if the two CPU cores are online, the CFA processing is spread across two kernel threads,

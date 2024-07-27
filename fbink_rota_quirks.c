@@ -649,7 +649,9 @@ int
 					LOG("...updating MDP source pixel format via `%s`", sysfs_path);
 
 					int sysfs_fd = open(sysfs_path, O_WRONLY | O_CLOEXEC);
-					if (sysfs_fd != -1) {
+					if (sysfs_fd == -1) {
+						PFWARN("open(`%s`): %m", sysfs_path);
+					} else {
 						if (new_vinfo.bits_per_pixel == 8) {
 							const char px_fmt[] = "Y8";
 							write(sysfs_fd, px_fmt, sizeof(px_fmt));
