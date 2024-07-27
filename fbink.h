@@ -470,16 +470,18 @@ typedef enum
 typedef uint8_t           HW_DITHER_INDEX_T;
 
 // List of *potentially* available CFA post-process modes
-// FIXME: Find better names for those... (oh, kernel sources, wherefore art thou?)
 typedef enum
 {
-	CFA_NONE = 0U,
-	CFA_S4,
-	CFA_S7,
-	CFA_S9,
+	CFA_DEFAULT = 0U,
+	CFA_AIE_S4,
+	CFA_AIE_S7,
+	CFA_AIE_S9,
 	CFA_G0,
 	CFA_G1,
 	CFA_G2,
+	CFA_NTX,
+	CFA_NTX_SF,
+	CFA_SKIP,
 	CFA_MAX = UINT8_MAX,
 } __attribute__((packed)) CFA_MODE_INDEX_E;
 typedef uint8_t           CFA_MODE_INDEX_T;

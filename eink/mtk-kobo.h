@@ -67,10 +67,10 @@
 #define HWTCON_FLAG_CFA_EINK_G1     0x00000100    // Standard behavior (e.g., same results as no flags)
 #define HWTCON_FLAG_CFA_EINK_NORMAL HWTCON_FLAG_CFA_EINK_G1
 #define HWTCON_FLAG_CFA_EINK_G2     0x00000600    // Boosts saturation without being too destructive
+// NOTE: Those two look like test implementations by NTX (as opposed to stuff from eInk's libEink_Kaleido binary blob).
 #define HWTCON_FLAG_CFA_EINK_NTX    0x00000a00
 #define HWTCON_FLAG_CFA_EINK_NTX_SF 0x00000b00
-// NOTE: Does what it says on the tin: you'll get a blank screen :D.
-//       (Supposed to disable CFA processing, leading to B&W rendering, i.e., HWTCON_CFA_MODE_NONE... Possibly buggy?)
+// NOTE: Disables CFA processing, leading to B&W rendering (i.e., HWTCON_CFA_MODE_NONE).
 #define HWTCON_FLAG_CFA_SKIP        0x00008000
 
 /* temperature use sensor. */

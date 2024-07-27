@@ -352,7 +352,7 @@ static void
 	    "\t-a, --flatten\tIgnore the alpha channel.\n"
 	    "\t-j, --saturation\tBoost color saturation (in percent). Aimed at Kaleido panels. 32bpp only.\n"
 	    "\t-J, --cfa MODE\tRequest a specific CFA post-process mode from the eInk controller, if supported (Kaleido panels, 32bpp, with GCC16 or GLRC16).\n"
-	    "\t\t\t\tAvailable CFA modes: S4, S7, S9, G0, G1 & G2\n"
+	    "\t\t\t\tAvailable CFA modes: S4, S7, S9, G0, G1, G2, NTX, SF & SKIP\n"
 	    "\n"
 	    "NOTES:\n"
 	    "\tSupported image formats: JPEG, PNG, TGA, BMP, GIF & PNM\n"
@@ -1277,17 +1277,23 @@ int
 				break;
 			case 'J':
 				if (strcasecmp(optarg, "S4") == 0) {
-					fbink_cfg.cfa_mode = CFA_S4;
+					fbink_cfg.cfa_mode = CFA_AIE_S4;
 				} else if (strcasecmp(optarg, "S7") == 0) {
-					fbink_cfg.cfa_mode = CFA_S7;
+					fbink_cfg.cfa_mode = CFA_AIE_S7;
 				} else if (strcasecmp(optarg, "S9") == 0) {
-					fbink_cfg.cfa_mode = CFA_S9;
+					fbink_cfg.cfa_mode = CFA_AIE_S9;
 				} else if (strcasecmp(optarg, "G0") == 0) {
 					fbink_cfg.cfa_mode = CFA_G0;
 				} else if (strcasecmp(optarg, "G1") == 0) {
 					fbink_cfg.cfa_mode = CFA_G1;
 				} else if (strcasecmp(optarg, "G2") == 0) {
 					fbink_cfg.cfa_mode = CFA_G2;
+				} else if (strcasecmp(optarg, "NTX") == 0) {
+					fbink_cfg.cfa_mode = CFA_NTX;
+				} else if (strcasecmp(optarg, "SF") == 0) {
+					fbink_cfg.cfa_mode = CFA_NTX_SF;
+				} else if (strcasecmp(optarg, "SKIP") == 0) {
+					fbink_cfg.cfa_mode = CFA_SKIP;
 				} else {
 					ELOG("Unknown CFA mode '%s'.", optarg);
 					errfnd = true;

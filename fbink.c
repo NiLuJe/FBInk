@@ -3351,16 +3351,20 @@ static int
 	}
 
 	// Setup the CFA mode flags (if any, and if the waveform mode makes sense for that)
-	// NOTE: The kernel ignores that for non-CFA waveform modes anyway.
-	if (fbink_cfg->cfa_mode != CFA_NONE && (fbink_cfg->wfm_mode == WFM_GCC16 || fbink_cfg->wfm_mode == WFM_GLRC16)) {
+	// NOTE: You can technically apply this to *any* waveform mode, and, in fact,
+	//       unless you explicitly request CFA_SKIP, *every* refresh implies CFA processing.
+	//       But if you really don't want color, we have a much better solution: just switch to 8bpp ;).
+	//       (On that note, if the two CPU cores are online, the CFA processing is spread across two kernel threads,
+	//       but the performance impact is hard to measure with the naked eye).
+	if (fbink_cfg->wfm_mode == WFM_GCC16 || fbink_cfg->wfm_mode == WFM_GLRC16) {
 		switch (fbink_cfg->cfa_mode) {
-			case CFA_S4:
+			case CFA_AIE_S4:
 				update.flags |= HWTCON_FLAG_CFA_EINK_AIE_S4;
 				break;
-			case CFA_S7:
+			case CFA_AIE_S7:
 				update.flags |= HWTCON_FLAG_CFA_EINK_AIE_S7;
 				break;
-			case CFA_S9:
+			case CFA_AIE_S9:
 				update.flags |= HWTCON_FLAG_CFA_EINK_AIE_S9;
 				break;
 			case CFA_G0:
@@ -3372,8 +3376,17 @@ static int
 			case CFA_G2:
 				update.flags |= HWTCON_FLAG_CFA_EINK_G2;
 				break;
+			case CFA_NTX:
+				update.flags |= HWTCON_FLAG_CFA_EINK_NTX;
+				break;
+			case CFA_NTX_SF:
+				update.flags |= HWTCON_FLAG_CFA_EINK_NTX_SF;
+				break;
+			case CFA_SKIP:
+				update.flags |= HWTCON_FLAG_CFA_SKIP;
+				break;
 			default:
-				// NOP, but supposedly matches G1...
+				// NOP, matches G1 (or whatever was set via HWTCON_SET_CFA_MODE)...
 				break;
 		}
 	}

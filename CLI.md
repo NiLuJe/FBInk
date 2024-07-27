@@ -473,7 +473,7 @@
 
   Request a specific CFA post-process mode from the eInk controller, if supported (Kaleido panels, 32bpp, with GCC16 or GLRC16).
 
-  Available CFA modes: `S4`, `S7`, `S9`, `G0`, `G1` & `G2`.
+  Available CFA modes: `S4`, `S7`, `S9`, `G0`, `G1`, `G2`, `NTX`, `SF` & `SKIP`.
 
 Notes:
 
