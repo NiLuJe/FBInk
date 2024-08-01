@@ -220,8 +220,10 @@ static void
 		dev->type |= INPUT_SLEEP_COVER;
 	}
 
-	if ((PLATFORM_KEY_PGPREV && test_bit(PLATFORM_KEY_PGPREV, bitmask_key)) &&
-	    (PLATFORM_KEY_PGNEXT && test_bit(PLATFORM_KEY_PGNEXT, bitmask_key))) {
+	if (((PLATFORM_KEY_PGPREV && test_bit(PLATFORM_KEY_PGPREV, bitmask_key)) ||
+	     (PLATFORM_KEY_PGPREV_ALT && test_bit(PLATFORM_KEY_PGPREV_ALT, bitmask_key))) &&
+	    ((PLATFORM_KEY_PGNEXT && test_bit(PLATFORM_KEY_PGNEXT, bitmask_key)) ||
+	     (PLATFORM_KEY_PGNEXT_ALT && test_bit(PLATFORM_KEY_PGNEXT_ALT, bitmask_key)))) {
 		dev->type |= INPUT_PAGINATION_BUTTONS;
 	}
 

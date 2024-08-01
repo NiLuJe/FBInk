@@ -129,7 +129,9 @@ static __attribute__((cold)) void        concat_type_recap(INPUT_DEVICE_TYPE_T t
 #		define PLATFORM_KEY_SLEEP        KEY_H     // PowerCover
 #		define PLATFORM_KEY_WAKEUP       KEY_F1    // Also PowerCover, depending on the device...
 #		define PLATFORM_KEY_PGPREV       KEY_F23
+#		define PLATFORM_KEY_PGPREV_ALT   0
 #		define PLATFORM_KEY_PGNEXT       KEY_F24
+#		define PLATFORM_KEY_PGNEXT_ALT   0
 #		define PLATFORM_KEY_HOME         KEY_HOME
 #		define PLATFORM_KEY_FRONTLIGHT   KEY_KATAKANA
 #		define PLATFORM_KEY_MENU         0
@@ -159,7 +161,9 @@ static __attribute__((cold)) void        concat_type_recap(INPUT_DEVICE_TYPE_T t
 #		define PLATFORM_KEY_SLEEP        0            // :?
 #		define PLATFORM_KEY_WAKEUP       0            // :?
 #		define PLATFORM_KEY_PGPREV       KEY_PAGEUP
+#		define PLATFORM_KEY_PGPREV_ALT   KEY_F23
 #		define PLATFORM_KEY_PGNEXT       KEY_PAGEDOWN
+#		define PLATFORM_KEY_PGNEXT_ALT   KEY_YEN
 #		define PLATFORM_KEY_HOME         KEY_HOME
 #		define PLATFORM_KEY_FRONTLIGHT   0
 #		define PLATFORM_KEY_MENU         KEY_MENU
@@ -171,7 +175,9 @@ static __attribute__((cold)) void        concat_type_recap(INPUT_DEVICE_TYPE_T t
 #		define PLATFORM_KEY_SLEEP        KEY_SLEEP
 #		define PLATFORM_KEY_WAKEUP       KEY_WAKEUP
 #		define PLATFORM_KEY_PGPREV       KEY_BACK
+#		define PLATFORM_KEY_PGPREV_ALT   KEY_PAGEUP
 #		define PLATFORM_KEY_PGNEXT       KEY_FORWARD
+#		define PLATFORM_KEY_PGNEXT_ALT   KEY_PAGEDOWN
 #		define PLATFORM_KEY_HOME         KEY_HOMEPAGE
 #		define PLATFORM_KEY_FRONTLIGHT   KEY_BRIGHTNESS_CYCLE
 #		define PLATFORM_KEY_MENU         KEY_MENU
