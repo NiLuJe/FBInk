@@ -222,7 +222,7 @@ static void
 	}
 
 #	ifdef FBINK_FOR_KINDLE
-	// There are so many possible combinations, so just match on any *single* relevant key...
+	// There are so many possible combinations, so just match on any *single* relevant key, àla DPAD...
 	if (test_bit(PLATFORM_KEY_PGPREV, bitmask_key) || test_bit(PLATFORM_KEY_PGPREV_ALT, bitmask_key) ||
 	    test_bit(PLATFORM_KEY_PGNEXT, bitmask_key) || test_bit(PLATFORM_KEY_PGNEXT_ALT, bitmask_key)) {
 		dev->type |= INPUT_PAGINATION_BUTTONS;
