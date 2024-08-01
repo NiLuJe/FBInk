@@ -194,6 +194,7 @@ static bool
 	/* the first 32 bits are ESC, numbers, and Q to D;
 	 * if we have all of those, consider it a full keyboard;
 	 * do not test KEY_RESERVED, though */
+	// NOTE: This will *not* match on any of the "keyboard" Kindles!
 	unsigned long mask = 0xFFFFFFFE;
 	if ((bitmask_key[0] & mask) == mask) {
 		dev->type |= INPUT_KEYBOARD;
@@ -220,12 +221,18 @@ static void
 		dev->type |= INPUT_SLEEP_COVER;
 	}
 
-	if (((PLATFORM_KEY_PGPREV && test_bit(PLATFORM_KEY_PGPREV, bitmask_key)) ||
-	     (PLATFORM_KEY_PGPREV_ALT && test_bit(PLATFORM_KEY_PGPREV_ALT, bitmask_key))) &&
-	    ((PLATFORM_KEY_PGNEXT && test_bit(PLATFORM_KEY_PGNEXT, bitmask_key)) ||
-	     (PLATFORM_KEY_PGNEXT_ALT && test_bit(PLATFORM_KEY_PGNEXT_ALT, bitmask_key)))) {
+#	ifdef FBINK_FOR_KINDLE
+	// There are so many possible combinations, so just match on any *single* relevant key...
+	if (test_bit(PLATFORM_KEY_PGPREV, bitmask_key) || test_bit(PLATFORM_KEY_PGPREV_ALT, bitmask_key) ||
+	    test_bit(PLATFORM_KEY_PGNEXT, bitmask_key) || test_bit(PLATFORM_KEY_PGNEXT_ALT, bitmask_key)) {
 		dev->type |= INPUT_PAGINATION_BUTTONS;
 	}
+#	else
+	if ((PLATFORM_KEY_PGPREV && test_bit(PLATFORM_KEY_PGPREV, bitmask_key)) &&
+	    (PLATFORM_KEY_PGNEXT && test_bit(PLATFORM_KEY_PGNEXT, bitmask_key))) {
+		dev->type |= INPUT_PAGINATION_BUTTONS;
+	}
+#	endif
 
 	if (PLATFORM_KEY_HOME && test_bit(PLATFORM_KEY_HOME, bitmask_key)) {
 		dev->type |= INPUT_HOME_BUTTON;
