@@ -637,7 +637,7 @@ int
 			struct dirent** namelist;
 			int             n = scandir("/sys/devices/platform", &namelist, is_hwtcon, alphasort);
 			if (n <= 0) {
-				PFWARN("scandir: %m");
+				PFLOG("scandir: %m");
 			} else {
 				for (int i = 0; i < n; i++) {
 					char sysfs_path[PATH_MAX] = { 0 };
@@ -650,15 +650,19 @@ int
 
 					int sysfs_fd = open(sysfs_path, O_WRONLY | O_CLOEXEC);
 					if (sysfs_fd == -1) {
-						PFWARN("open(`%s`): %m", sysfs_path);
+						PFLOG("open(`%s`): %m", sysfs_path);
 					} else {
 						if (new_vinfo.bits_per_pixel == 8) {
 							const char px_fmt[] = "Y8";
-							write(sysfs_fd, px_fmt, sizeof(px_fmt));
+							if (write(sysfs_fd, px_fmt, sizeof(px_fmt)) < 0) {
+								PFLOG("mdp_src_format write: %m");
+							}
 						} else {
 							// NOTE: ARGB32 is also supported (i.e., BGRA32).
 							const char px_fmt[] = "ABGR32";
-							write(sysfs_fd, px_fmt, sizeof(px_fmt));
+							if (write(sysfs_fd, px_fmt, sizeof(px_fmt)) < 0) {
+								PFLOG("mdp_src_format write: %m");
+							}
 						}
 						close(sysfs_fd);
 					}
