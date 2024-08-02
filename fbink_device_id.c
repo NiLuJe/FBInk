@@ -1266,19 +1266,20 @@ static void
 			// having to worry about the formatting...
 			const unsigned short int kobo_id = (unsigned short int) strtoul(line + (size - 3), NULL, 10);
 			set_kobo_quirks(kobo_id);
+
+			// Get out now, we're done!
+			// NOTE: The nickel tag has been found and *successfully* read,
+			//       no need to fall back to DTB identification, it's definitely not mainline.
+			return;
 		} else {
 			WARN("Failed to read the Kobo version tag (%zu)", size);
 			// NOTE: Make it clear we failed to identify the device...
 			//       i.e., by passing DEVICE_INVALID instead of DEVICE_UNKNOWN, which we use to flag old !NTX devices.
 			// NOTE: This codepath can genuinely be reached if you're unlucky enough that a crash
 			//       leads to zapping the file to 0 bytes (e.g., after an fsck),
-			//       so we... might want to *not* return here?
+			//       which is why we don't abort now, and instead go on to try to read the HWConfig block.
 			set_kobo_quirks(DEVICE_INVALID);
 		}
-
-		// Get out now, we're done!
-		// NOTE: The nickel tag has been found, no need to fall back to DTB identification, it's definitely not mainline.
-		return;
 	}
 
 	// NOTE: Okay, if we got this far, we failed to open /mnt/onboard/.kobo/version,
