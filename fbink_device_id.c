@@ -1270,6 +1270,9 @@ static void
 			WARN("Failed to read the Kobo version tag (%zu)", size);
 			// NOTE: Make it clear we failed to identify the device...
 			//       i.e., by passing DEVICE_INVALID instead of DEVICE_UNKNOWN, which we use to flag old !NTX devices.
+			// NOTE: This codepath can genuinely be reached if you're unlucky enough that a crash
+			//       leads to zapping the file to 0 bytes (e.g., after an fsck),
+			//       so we... might want to *not* return here?
 			set_kobo_quirks(DEVICE_INVALID);
 		}
 
