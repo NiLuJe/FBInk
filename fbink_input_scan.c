@@ -500,8 +500,8 @@ FBInkInputDevice*
 		     size_t* dev_count                 UNUSED_BY_NOINPUT)
 {
 #ifdef FBINK_WITH_INPUT
-	struct dirent** namelist;
-	int             ndev = scandir(DEV_INPUT_EVENT, &namelist, is_event_device, sort_fn);
+	struct dirent** namelist = NULL;
+	int             ndev     = scandir(DEV_INPUT_EVENT, &namelist, is_event_device, sort_fn);
 	if (ndev <= 0) {
 		PFWARN("scandir: %m");
 		*dev_count = 0U;

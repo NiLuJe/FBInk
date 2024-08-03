@@ -634,8 +634,8 @@ int
 			// Since RGB565 is the worst, we won't make a fuss about that ;).
 
 			// Find the hwtcon folder in sysfs...
-			struct dirent** namelist;
-			int             n = scandir("/sys/devices/platform", &namelist, is_hwtcon, alphasort);
+			struct dirent** namelist = NULL;
+			int             n        = scandir("/sys/devices/platform", &namelist, is_hwtcon, alphasort);
 			if (n <= 0) {
 				PFLOG("scandir: %m");
 			} else {
