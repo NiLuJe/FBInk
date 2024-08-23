@@ -1708,6 +1708,11 @@ static void
 			deviceQuirks.screenDPI = 300U;
 			strtcpy(deviceQuirks.deviceCodename, "PBVersePro", sizeof(deviceQuirks.deviceCodename));
 			deviceQuirks.deviceId = DEVICE_POCKETBOOK_VERSE_PRO;
+		} else if (PB_CODENAME_MATCH("634K3")) {
+			deviceQuirks.hasColorPanel = true;
+			deviceQuirks.screenDPI     = 300U;
+			strtcpy(deviceQuirks.deviceCodename, "PBVerseProColor", sizeof(deviceQuirks.deviceCodename));
+			deviceQuirks.deviceId = DEVICE_POCKETBOOK_VERSE_PRO_COLOR;
 		} else if (PB_CODENAME_MATCH("640")) {
 			deviceQuirks.screenDPI = 167U;
 			strtcpy(deviceQuirks.deviceCodename, "PBAqua", sizeof(deviceQuirks.deviceCodename));
