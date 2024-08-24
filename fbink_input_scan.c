@@ -252,6 +252,10 @@ static void
 	if (test_bit(KEY_UP, bitmask_key)) {
 		dev->type |= INPUT_DPAD;
 	}
+
+	if (test_bit(KEY_VOLUMEUP, bitmask_key) && test_bit(KEY_VOLUMEDOWN, bitmask_key)) {
+		dev->type |= INPUT_VOLUME_BUTTONS;
+	}
 }
 
 static int
@@ -398,6 +402,8 @@ static __attribute__((cold)) const char*
 			return "ROTATION_EVENT";
 		case INPUT_SCALED_TABLET:
 			return "SCALED_TABLET";
+		case INPUT_VOLUME_BUTTONS:
+			return "VOLUME_BUTTONS";
 		default:
 			return NULL;
 	}

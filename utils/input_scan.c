@@ -130,7 +130,7 @@ static void
 	    "\t-m, --match <type,type,type,...>\n"
 	    "\t\t\t\t\t\tSimulate a match on specific input device types.\n"
 	    "\t\t\t\tSupported types: unknown, pointingstick, mouse, touchpad, touchscreen, joystick, tablet, key, keyboard, accelerometer,\n"
-	    "\t\t\t\t                 power, sleep, pagination, home, light, menu, dpad, rotation, scaled_tablet\n"
+	    "\t\t\t\t                 power, sleep, pagination, home, light, menu, dpad, rotation, scaled_tablet, volume\n"
 	    "\t-x, --exclude <type,type,type,...>\n"
 	    "\t\t\t\t\t\tExclude input device types from your match request.\n"
 	    "\t-M, --matchall\t\t\t\tMatch on *all* of the specified bits, instead of *any*.\n"
@@ -184,6 +184,7 @@ int
 		OPT_INPUT_DPAD,
 		OPT_INPUT_ROTATION_EVENT,
 		OPT_INPUT_SCALED_TABLET,
+		OPT_INPUT_VOLUME_BUTTONS,
 	};
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
@@ -209,6 +210,7 @@ int
 				      [OPT_INPUT_DPAD]               = "dpad",
 				      [OPT_INPUT_ROTATION_EVENT]     = "rotation",
 				      [OPT_INPUT_SCALED_TABLET]      = "scaled_tablet",
+				      [OPT_INPUT_VOLUME_BUTTONS]     = "volume",
 				      NULL };
 #pragma GCC diagnostic pop
 	char*                 full_subopts = NULL;
@@ -338,6 +340,9 @@ int
 							break;
 						case OPT_INPUT_SCALED_TABLET:
 							*mask |= INPUT_SCALED_TABLET;
+							break;
+						case OPT_INPUT_VOLUME_BUTTONS:
+							*mask |= INPUT_VOLUME_BUTTONS;
 							break;
 						default:
 							ELOG("No match found for token: /%s/ for -%c, --%s",

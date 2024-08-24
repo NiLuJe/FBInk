@@ -1712,6 +1712,7 @@ typedef enum
 	INPUT_DPAD               = 1U << 22U,
 	INPUT_ROTATION_EVENT     = 1U << 23U,    // Where "device was rotated" events *may* be sent (gyro or not)
 	INPUT_SCALED_TABLET      = 1U << 24U,    // INPUT_TABLET, with max ABS_X/ABS_Y that match the fb's resolution
+	INPUT_VOLUME_BUTTONS     = 1U << 25U,
 } __attribute__((packed)) INPUT_DEVICE_TYPE_E;
 typedef uint32_t          INPUT_DEVICE_TYPE_T;
 
