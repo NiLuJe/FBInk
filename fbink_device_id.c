@@ -1117,6 +1117,8 @@ static void
 			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CW;
 			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
 			deviceQuirks.screenDPI                  = 300U;
+			// NOTE: Marketed as Tolino Shine, sometimes with a (5. Gen) appended,
+			//       which approaches Kindle levels of impractical device names...
 			strtcpy(deviceQuirks.deviceName, "Shine B&W", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Spa Tolino BW", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Mark 12", sizeof(deviceQuirks.devicePlatform));
