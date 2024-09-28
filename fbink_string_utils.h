@@ -51,6 +51,8 @@ static ssize_t
 
 #ifdef FBINK_WITH_INPUT
 // c.f., string_copying(7)
+// NOTE: The zero-length array *may* confuse `-Wstringop-overflow` at some optimization levels (e.g., < O3),
+//       likely because sizeof returns 0 for those (c.f., https://gcc.gnu.org/onlinedocs/gcc/Zero-Length.html)
 static char*
     stpecpy(char* dst, char end[0], const char* restrict src)
 {
