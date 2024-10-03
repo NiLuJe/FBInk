@@ -7,9 +7,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Download toolchain
-      run: wget -q https://github.com/koreader/koxtoolchain/releases/latest/download/kobo.tar.gz | tar -C ~ -xz -
+      run: |
+        wget -q https://github.com/koreader/koxtoolchain/releases/latest/download/kobo.tar.gz -O - | tar -xzf - -C ~
+        wget -q https://github.com/koreader/koxtoolchain/raw/refs/heads/master/refs/x-compile.sh -O ~/x-compile.sh
     - name: Export toolchain
-      run: echo ~/x-tools/arm-kobo-linux-gnueabihf/bin >> $GITHUB_PATH
+      run: |
+        source ~/x-compile.sh kobo env bare
+        echo ~/x-tools/arm-kobo-linux-gnueabihf/bin >> $GITHUB_PATH
     - name: Checkout
       uses: actions/checkout@v4
       with:
