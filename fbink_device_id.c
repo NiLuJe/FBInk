@@ -299,7 +299,7 @@ static bool
 			strtcpy(deviceQuirks.deviceCodename, "Cava", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Bellatrix", sizeof(deviceQuirks.devicePlatform));
 			return true;
-		case 0x8F2u:
+		case 0x8F2u:    // KS
 		case 0x974u:
 		case 0x8C3u:
 		case 0x847u:
@@ -313,6 +313,55 @@ static bool
 			strtcpy(deviceQuirks.deviceName, "Scribe", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Barolo", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Bellatrix3", sizeof(deviceQuirks.devicePlatform));
+			return true;
+		case 0xE85u:    // KT6
+		case 0xE86u:
+		case 0xE84u:
+		case 0xE83u:
+		case 0x2909u:
+		case 0xE82u:
+		case 0xE75u:
+			deviceQuirks.isMTK         = true;
+			deviceQuirks.hasEclipseWfm = true;
+			deviceQuirks.screenDPI     = 300U;
+			strtcpy(deviceQuirks.deviceName, "Basic 5", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Rossini", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Bellatrix", sizeof(deviceQuirks.devicePlatform));
+			return true;
+		case 0xC89u:    // PW6
+		case 0xC86u:
+		case 0xC7Fu:
+		case 0xC7Eu:
+		case 0xE2Au:
+		case 0xE25u:
+		case 0xE23u:
+		case 0xE28u:
+		case 0xE45u:
+		case 0xE5Au:
+			deviceQuirks.isMTK         = true;
+			deviceQuirks.hasEclipseWfm = true;
+			deviceQuirks.screenDPI     = 300U;
+			strtcpy(deviceQuirks.deviceName, "PaperWhite 5", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Sangria", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Bellatrix4", sizeof(deviceQuirks.devicePlatform));
+			return true;
+		case 0xE29u:    // CS
+		case 0xE24u:
+		case 0xE2Bu:
+		case 0xE26u:
+		case 0xE22u:
+		case 0xC9Fu:
+		case 0xE27u:
+		case 0xE5Bu:
+		case 0xE46u:
+		case 0x10A6u:
+			deviceQuirks.isMTK         = true;
+			deviceQuirks.hasEclipseWfm = true;
+			deviceQuirks.screenDPI     = 300U;
+			deviceQuirks.hasColorPanel = true;
+			strtcpy(deviceQuirks.deviceName, "ColorSoft", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "SeaBreeze", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Bellatrix4", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		default:
 			strtcpy(deviceQuirks.deviceName, "Unknown!", sizeof(deviceQuirks.deviceName));

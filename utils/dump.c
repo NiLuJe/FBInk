@@ -185,7 +185,7 @@ int
 		fbink_wait_for_complete(fbfd, LAST_MARKER);
 	}
 	// Forget about the crop for the other tests
-	dump.clip = (const FBInkRect){ 0U };
+	dump.clip = (const FBInkRect) { 0U };
 
 	// Restore, this time with a negative L + T crop
 	fprintf(stdout, "[06b-] RESTORE w/ (-) L+T CROP\n");
@@ -203,7 +203,7 @@ int
 		fbink_wait_for_complete(fbfd, LAST_MARKER);
 	}
 	// Forget about the crop for the other tests
-	dump.clip = (const FBInkRect){ 0U };
+	dump.clip = (const FBInkRect) { 0U };
 
 	// Restore, this time with a positive R + B crop
 	dump.clip        = dump.area;
@@ -219,7 +219,7 @@ int
 		fbink_wait_for_complete(fbfd, LAST_MARKER);
 	}
 	// Forget about the crop for the other tests
-	dump.clip = (const FBInkRect){ 0U };
+	dump.clip = (const FBInkRect) { 0U };
 
 	// Restore, this time with a negative R + B crop (i.e., the overlap will match the full dump area)
 	dump.clip        = dump.area;
@@ -235,7 +235,7 @@ int
 		fbink_wait_for_complete(fbfd, LAST_MARKER);
 	}
 	// Forget about the crop for the other tests
-	dump.clip = (const FBInkRect){ 0U };
+	dump.clip = (const FBInkRect) { 0U };
 
 	// Restore, this time with a crop on all sides
 	dump.clip        = dump.area;
@@ -255,7 +255,7 @@ int
 		fbink_wait_for_complete(fbfd, LAST_MARKER);
 	}
 	// Forget about the crop for the other tests
-	dump.clip = (const FBInkRect){ 0U };
+	dump.clip = (const FBInkRect) { 0U };
 
 	// This should fail to restore (no overlap)
 	dump.clip = dump.area;
@@ -270,7 +270,7 @@ int
 		goto cleanup;
 	}
 	// Forget about the crop for the other tests
-	dump.clip = (const FBInkRect){ 0U };
+	dump.clip = (const FBInkRect) { 0U };
 
 	// Now, for something slightly crazy, which I don't necessarily recommend relying on,
 	// restore, but at a different position.

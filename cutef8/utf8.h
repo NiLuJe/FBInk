@@ -20,7 +20,7 @@
 /* is c the start of a utf8 sequence? */
 #define isutf(c) (((c) & 0xC0) != 0x80)
 
-#define UEOF ((uint32_t) - 1)
+#define UEOF ((uint32_t) -1)
 
 /* returns length of next utf-8 sequence */
 size_t u8_seqlen(const char* restrict s) __attribute__((pure));

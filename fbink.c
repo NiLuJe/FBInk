@@ -12176,7 +12176,7 @@ int
 		free(dump->data);
 		dump->data = NULL;
 		// Reset the crop settings
-		dump->clip = (const FBInkRect){ 0U };
+		dump->clip = (const FBInkRect) { 0U };
 	}
 	// Start by allocating enough memory for a full dump of the visible screen...
 	dump->stride = fInfo.line_length;
