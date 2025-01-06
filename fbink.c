@@ -9535,6 +9535,20 @@ static __attribute__((cold)) const char*
 			return "GC4L";
 		case WFM_GCC16:
 			return "GCC16";
+		case WFM_GLRC16:
+			return "GLRC16";
+		case WFM_GC16_PARTIAL:
+			return "GC16_PARTIAL";
+		case WFM_GCK16_PARTIAL:
+			return "GCK16_PARTIAL";
+		case WFM_DUNM:
+			return "DUNM";
+		case WFM_P2SW:
+			return "P2SW";
+		case WFM_GCCK16:
+			return "GCCK16";
+		case WFM_GLRCK16:
+			return "GLRCK16";
 		default:
 			return "Unknown";
 	}

@@ -129,7 +129,7 @@ static void
 	    "\t-W, --waveform MODE\tRequest a specific waveform update mode from the eInk controller, if supported (mainly useful for images).\n"
 	    "\t\t\t\tAvailable waveform modes: A2, DU, GL16, GC16 & AUTO\n"
 #	if defined(FBINK_FOR_KINDLE)
-	    "\t\t\t\tAs well as REAGL, REAGLD, GC16_FAST, GL16_FAST, DU4, GL4, GL16_INV, GCK16, GLKW16 & DUNM on some Kindles, depending on the model & FW version.\n"
+	    "\t\t\t\tAs well as REAGL, REAGLD, GC16_FAST, GL16_FAST, DU4, GL4, GL16_INV, GCK16, GLKW16, DUNM, GCC16, GLRC16, GCCK16 & GLRCK16 on some Kindles, depending on the model & FW version.\n"
 	    "\t\t\t\tNote that specifying a waveform mode is ignored on legacy einkfb devices, because the hardware doesn't expose such capabilities.\n"
 #	elif defined(FBINK_FOR_POCKETBOOK)
 	    "\t\t\t\tAs well as GC4, A2IN, A2OUT, DU4, REAGL, REAGLD, GC16HQ & GS16.\n"
@@ -1760,6 +1760,10 @@ int
 					fbink_cfg.wfm_mode = WFM_GLRC16;
 				} else if (strcasecmp(optarg, "DUNM") == 0) {
 					fbink_cfg.wfm_mode = WFM_DUNM;
+				} else if (strcasecmp(optarg, "GCCK16") == 0) {
+					fbink_cfg.wfm_mode = WFM_GCCK16;
+				} else if (strcasecmp(optarg, "GLRCK16") == 0) {
+					fbink_cfg.wfm_mode = WFM_GLRCK16;
 				} else {
 					ELOG("Unknown waveform update mode '%s'.", optarg);
 					errfnd = true;
