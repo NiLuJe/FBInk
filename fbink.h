@@ -442,7 +442,7 @@ typedef enum
 	WFM_GLK16,    // GL16, but for white-on-black.
 	WFM_CLEAR,    // GC16 local (NOTE: Appears to crash the EPDC... [Elipsa on FW 4.28.17826])
 	WFM_GC4L,     // GC4 local (NOTE: Appears to crash the EPDC... [Elipsa on FW 4.28.17826])
-	// Kobo Sunxi & MTK only
+	// Kobo Sunxi; MTK only
 	WFM_GCC16,     // GCC16, for color image content on Kaleido panels.
 	WFM_GLRC16,    // GLRC16, for color highlights on text on Kaleido panels.
 	// Kindle MTK only
@@ -450,6 +450,9 @@ typedef enum
 	WFM_GCK16_PARTIAL,    // Internal use only, GCK16 + PARTIAL
 	WFM_DUNM,             // DU, but for white-on-black.
 	WFM_P2SW,             // Internal use only, used by the swipe animation.
+	// Kindle MTK + CFA only
+	WFM_GCCK16,     // Nightmode GCC16
+	WFM_GLRCK16,    // Nightmode GLRC16
 
 	WFM_MAX = UINT8_MAX,    // uint8_t
 } __attribute__((packed)) WFM_MODE_INDEX_E;

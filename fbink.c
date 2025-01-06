@@ -9141,6 +9141,34 @@ static uint32_t
 				waveform_mode = WAVEFORM_MODE_AUTO;
 			}
 			break;
+		case WFM_GCC16:
+			if (has_mtk_wfm) {
+				waveform_mode = MTK_WAVEFORM_MODE_GCC16;
+			} else {
+				waveform_mode = WAVEFORM_MODE_AUTO;
+			}
+			break;
+		case WFM_GLRC16:
+			if (has_mtk_wfm) {
+				waveform_mode = MTK_WAVEFORM_MODE_GLRC16;
+			} else {
+				waveform_mode = WAVEFORM_MODE_AUTO;
+			}
+			break;
+		case WFM_GCCK16:
+			if (has_mtk_wfm) {
+				waveform_mode = MTK_WAVEFORM_MODE_GCCK16;
+			} else {
+				waveform_mode = WAVEFORM_MODE_AUTO;
+			}
+			break;
+		case WFM_GLRCK16:
+			if (has_mtk_wfm) {
+				waveform_mode = MTK_WAVEFORM_MODE_GLRCK16;
+			} else {
+				waveform_mode = WAVEFORM_MODE_AUTO;
+			}
+			break;
 		default:
 			LOG("Unknown (or unsupported) waveform mode '%s' @ index %hhu, defaulting to AUTO",
 			    wfm_to_string(wfm_mode_index),
