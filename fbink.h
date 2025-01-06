@@ -1514,7 +1514,7 @@ FBINK_API void fbink_get_fb_info(struct fb_var_screeninfo* var_info, struct fb_f
 //				Generally set to GRAYSCALE_8BIT (1),
 //				setting it to GRAYSCALE_8BIT_INVERTED (2)
 //				will automagically enforce HW inversion via EPDC_FLAG_ENABLE_INVERSION (or similar).
-//				On Kindle MTK+Bellatrix4, GRAYSCALE_COLOR (0) and GRAYSCALE_COLOR_NIGHTMODE (3) are also supported.
+//				On Kindle MTK+Bellatrix4+CFA, GRAYSCALE_COLOR (0) and GRAYSCALE_COLOR_NIGHTMODE (3) are also supported.
 //				Untouched if set to KEEP_CURRENT_GRAYSCALE
 //				If set to TOGGLE_GRAYSCALE, will toggle between INVERTED & not @ 8bpp
 // fbink_cfg:		Pointer to an FBInkConfig struct.

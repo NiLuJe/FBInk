@@ -2598,7 +2598,7 @@ static int
 	//       as it's used to handle a few nightmode shenanigans...
 	if (fbink_cfg->is_nightmode) {
 		// FIXME: On Bellatrix4, might not be compatible w/ CFA (i.e., needs MTK_EPDC_FLAG_SKIP_CFA),
-		//        so you shuld *really* prefer the grayscale flag approach...
+		//        so you should *really* prefer the grayscale flag approach...
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
 	}
 
@@ -2645,9 +2645,9 @@ static int
 		if (deviceQuirks.isKindleBellatrix4) {
 			// Should work properly on Bellatrix4, where we also have proper Y1 support
 			if (waveform_mode == MTK_WAVEFORM_MODE_A2 || waveform_mode == MTK_WAVEFORM_MODE_DU) {
-				update.flags |= EPDC_FLAG_USE_DITHERING_Y1;    // maps to MDP_DITHER_ALGO_Y8_Y1_S
+				update.flags |= EPDC_FLAG_USE_DITHERING_Y1;    // Maps to MDP_DITHER_ALGO_Y8_Y1_S
 			} else {
-				update.flags |= MTK_EPDC_FLAG_USE_DITHERING_Y4;    // maps to MDP_DITHER_ALGO_Y8_Y4_S
+				update.flags |= MTK_EPDC_FLAG_USE_DITHERING_Y4;    // Maps to MDP_DITHER_ALGO_Y8_Y4_S
 			}
 		} else {
 			// NOTE: Not much variety left, this is the only flag currently honored.
