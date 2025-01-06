@@ -338,9 +338,10 @@ static bool
 		case 0xE28u:
 		case 0xE45u:
 		case 0xE5Au:
-			deviceQuirks.isMTK         = true;
-			deviceQuirks.hasEclipseWfm = true;
-			deviceQuirks.screenDPI     = 300U;
+			deviceQuirks.isMTK              = true;
+			deviceQuirks.isKindleBellatrix4 = true;
+			deviceQuirks.hasEclipseWfm      = true;
+			deviceQuirks.screenDPI          = 300U;
 			strtcpy(deviceQuirks.deviceName, "PaperWhite 5", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Sangria", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Bellatrix4", sizeof(deviceQuirks.devicePlatform));
@@ -355,10 +356,11 @@ static bool
 		case 0xE5Bu:
 		case 0xE46u:
 		case 0x10A6u:
-			deviceQuirks.isMTK         = true;
-			deviceQuirks.hasEclipseWfm = true;
-			deviceQuirks.screenDPI     = 300U;
-			deviceQuirks.hasColorPanel = true;
+			deviceQuirks.isMTK              = true;
+			deviceQuirks.isKindleBellatrix4 = true;
+			deviceQuirks.hasEclipseWfm      = true;
+			deviceQuirks.screenDPI          = 300U;
+			deviceQuirks.hasColorPanel      = true;
 			strtcpy(deviceQuirks.deviceName, "ColorSoft", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "SeaBreeze", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Bellatrix4", sizeof(deviceQuirks.devicePlatform));

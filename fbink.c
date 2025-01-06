@@ -2594,9 +2594,11 @@ static int
 	};
 
 	// NOTE: If the intent is a true night mode (rather than a one off),
-	//       the kernel prefers the fb state being set to GRAYSCALE_8BIT_INVERTED,
+	//       the kernel prefers the fb state being set to GRAYSCALE_8BIT_INVERTED (or GRAYSCALE_COLOR_NIGHTMODE for CFA),
 	//       as it's used to handle a few nightmode shenanigans...
 	if (fbink_cfg->is_nightmode) {
+		// FIXME: On Bellatrix4, might not be compatible w/ CFA (i.e., needs MTK_EPDC_FLAG_SKIP_CFA),
+		//        so you shuld *really* prefer the grayscale flag approach...
 		update.flags |= EPDC_FLAG_ENABLE_INVERSION;
 	}
 
@@ -2633,20 +2635,28 @@ static int
 	}
 
 	// NOTE: Despite what hwtcon_mdp_convert @ drivers/misc/mediatek/hwtcon_v2/hwtcon_mdp.c does,
-	//       dithering doesn't seem to actually *do* anything...
+	//       dithering doesn't seem to actually *do* anything on the initial Bellatrix boards...
 	// NOTE: This *might* be fixed on Bellatrix3, with the caveat that the MDP is bypassed in some cases in pen mode
 	//       (mostly DU/DUNM updates of < MIN_MDP_SIZE (6000) pixels regions at 90 or 270° rotations).
-	// NOTE: On Bellatrix4, things also look much more sensible:
-	//       MTK_EPDC_FLAG_USE_DITHERING_Y4 maps to MDP_DITHER_ALGO_Y8_Y4_S
-	//       MTK_EPDC_FLAG_USE_DITHERING_Y1 maps to MDP_DITHER_ALGO_Y8_Y1_S
 	if (fbink_cfg->dithering_mode != HWD_PASSTHROUGH) {
-		// NOTE: If dither actually worked, MONOCHROME + DITHER might actually have been viable...
+		// FIXME: When dither actually works, MONOCHROME + DITHER might actually be a viable combination...
 		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;
 
-		// NOTE: Not much variety left, this is the only flag currently honored.
-		//       Dithering is handled as part of the image processing pass by the MDP.
-		// NOTE: As mentioned above, it doesn't currently appear to do anything, though...
-		update.flags |= MTK_EPDC_FLAG_USE_DITHERING_Y4;
+		if (deviceQuirks.isKindleBellatrix4) {
+			// NOTE: On Bellatrix4, things also look much more sensible:
+			//       MTK_EPDC_FLAG_USE_DITHERING_Y4 maps to MDP_DITHER_ALGO_Y8_Y4_S
+			//       MTK_EPDC_FLAG_USE_DITHERING_Y1 maps to MDP_DITHER_ALGO_Y8_Y1_S
+			if (waveform_mode == MTK_WAVEFORM_MODE_A2 || waveform_mode == MTK_WAVEFORM_MODE_DU) {
+				update.flags |= MTK_EPDC_FLAG_USE_DITHERING_Y1;
+			} else {
+				update.flags |= MTK_EPDC_FLAG_USE_DITHERING_Y4;
+			}
+		} else {
+			// NOTE: Not much variety left, this is the only flag currently honored.
+			//       Dithering is handled as part of the image processing pass by the MDP.
+			// NOTE: As mentioned above, it doesn't currently appear to do anything, though...
+			update.flags |= MTK_EPDC_FLAG_USE_DITHERING_Y4;
+		}
 	}
 
 	int rv = ioctl(fbfd, MXCFB_SEND_UPDATE_MTK, &update);
