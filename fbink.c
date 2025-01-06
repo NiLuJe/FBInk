@@ -2636,6 +2636,9 @@ static int
 	//       dithering doesn't seem to actually *do* anything...
 	// NOTE: This *might* be fixed on Bellatrix3, with the caveat that the MDP is bypassed in some cases in pen mode
 	//       (mostly DU/DUNM updates of < MIN_MDP_SIZE (6000) pixels regions at 90 or 270° rotations).
+	// NOTE: On Bellatrix4, things also look much more sensible:
+	//       MTK_EPDC_FLAG_USE_DITHERING_Y4 maps to MDP_DITHER_ALGO_Y8_Y4_S
+	//       MTK_EPDC_FLAG_USE_DITHERING_Y1 maps to MDP_DITHER_ALGO_Y8_Y1_S
 	if (fbink_cfg->dithering_mode != HWD_PASSTHROUGH) {
 		// NOTE: If dither actually worked, MONOCHROME + DITHER might actually have been viable...
 		update.flags &= (unsigned int) ~EPDC_FLAG_FORCE_MONOCHROME;

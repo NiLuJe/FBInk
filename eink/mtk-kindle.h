@@ -49,7 +49,7 @@
 // NOTE: Night mode relies on switching to GRAYSCALE_8BIT_INVERTED instead of the flag,
 //       as it allows various other in-kernel tidbits to easily detect it ;).
 /*
-#define EPDC_FLAG_ENABLE_INVERSION     0x01
+#define EPDC_FLAG_ENABLE_INVERSION     0x01	// NOTE (Bellatrix4): Incompatible w/ CFA?
 #define EPDC_FLAG_FORCE_MONOCHROME     0x02
 #define EPDC_FLAG_USE_CMAP             0x04
 #define EPDC_FLAG_USE_ALT_BUFFER       0x100
