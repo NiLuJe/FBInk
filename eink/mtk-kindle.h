@@ -3,7 +3,7 @@
  *
  * ----
  *
- * This is <linux/hwtcon_ioctl_cmd.h>, last updated from the PW5 kernel for FW 5.14.1.1
+ * This is <linux/hwtcon_ioctl_cmd.h>, last updated from the PW6 kernel for FW 5.17.1.0.4
  *
  * NOTE: Upstream kernels available here: https://www.amazon.com/gp/help/customer/display.html?nodeId=200203720
  *
@@ -57,9 +57,19 @@
 #define EPDC_FLAG_GROUP_UPDATE         0x400
 #define EPDC_FLAG_USE_DITHERING_Y1     0x2000
 */
+// NOTE: Added in Bellatrix4
+#define MTK_EPDC_FLAG_SKIP_CFA          0x10
+#define MTK_EPDC_FLAG_SCRLL_MASK        0x60 /* mask for scrolling */
+#define MTK_EPDC_FLAG_SCRLL_START_FRAME 0x60 /* 1st frame */
+#define MTK_EPDC_FLAG_SCRLL_MID_FRAME   0x20 /* middle frames */
+#define MTK_EPDC_FLAG_SCRLL_END_FRAME   0x40 /* last frame */
+
 #define MTK_EPDC_FLAG_USE_DITHERING_Y4 0x4000
 #define MTK_EPDC_FLAG_USE_REGAL        0x8000
 #define MTK_EPDC_FLAG_ENABLE_SWIPE     0x10000
+
+// NOTE: Added in Bellatrix4
+#define MTK_EPDC_FLAG_COLOR_NON_REGAL 0x20000
 
 /* temperature use sensor. */
 /*
@@ -84,6 +94,9 @@
 #define GRAYSCALE_4BIT          0x3
 #define GRAYSCALE_4BIT_INVERTED 0x4
 */
+// NOTE: Added in Bellatrix4
+#define GRAYSCALE_COLOR           0x0
+#define GRAYSCALE_COLOR_NIGHTMODE 0x3
 
 enum MTK_WAVEFORM_MODE_ENUM
 {
@@ -110,6 +123,11 @@ enum MTK_WAVEFORM_MODE_ENUM
 	MTK_WAVEFORM_MODE_GCK16_PARTIAL = 11,
 	MTK_WAVEFORM_MODE_DUNM          = 12,
 	MTK_WAVEFORM_MODE_P2SW          = 13,
+	// New with Bellatrix4
+	MTK_WAVEFORM_MODE_GCC16         = 14,
+	MTK_WAVEFORM_MODE_GLRC16        = 15,
+	MTK_WAVEFORM_MODE_GCCK16        = 16,
+	MTK_WAVEFORM_MODE_GLRCK16       = 17,
 	// Matches MXCFB
 	MTK_WAVEFORM_MODE_AUTO          = 257,
 };
@@ -139,6 +157,28 @@ enum mxcfb_dithering_mode
 	EPDC_FLAG_USE_DITHERING_MAX,
 };
 */
+
+// NOTE: New with Bellatrix4
+enum MDP_REAL_DITHER_ALGO
+{
+	MDP_DITHER_ALGO_Y8_Y4_Q = 0x100,
+	MDP_DITHER_ALGO_Y8_Y2_Q = 0x200,
+	MDP_DITHER_ALGO_Y8_Y1_Q = 0x300,
+	MDP_DITHER_ALGO_Y4_Y2_Q = 0x10200,
+	MDP_DITHER_ALGO_Y4_Y1_Q = 0x10300,
+
+	MDP_DITHER_ALGO_Y8_Y4_B = 0x101,
+	MDP_DITHER_ALGO_Y8_Y2_B = 0x201,
+	MDP_DITHER_ALGO_Y8_Y1_B = 0x301,
+	MDP_DITHER_ALGO_Y4_Y2_B = 0x10201,
+	MDP_DITHER_ALGO_Y4_Y1_B = 0x10301,
+
+	MDP_DITHER_ALGO_Y8_Y4_S = 0x102,
+	MDP_DITHER_ALGO_Y8_Y2_S = 0x202,
+	MDP_DITHER_ALGO_Y8_Y1_S = 0x302,
+	MDP_DITHER_ALGO_Y4_Y2_S = 0x10202,
+	MDP_DITHER_ALGO_Y4_Y1_S = 0x10302,
+};
 
 // From "drivers/misc/mediatek/hwtcon_v2/hal/hwtcon_pipeline_config.h"
 enum MTK_SWIPE_DIRECTION_ENUM
@@ -248,16 +288,14 @@ struct mxcfb_update_data_mtk
 	 */
 	struct mxcfb_alt_buffer_data alt_buffer_data;
 	struct mxcfb_swipe_data      swipe_data;
-#if 1
 	/* start: lab126 added for backward compatible */
 	/*Lab126: Def bw waveform for hist analysis*/
-	uint32_t hist_bw_waveform_mode;
+	uint32_t                     hist_bw_waveform_mode;
 	/*Lab126: Def gray waveform for hist analysis*/
-	uint32_t hist_gray_waveform_mode;
-	uint32_t ts_pxp;  /*debugging purpose: pxp starting time*/
-	uint32_t ts_epdc; /*debugging purpose: EPDC starting time*/
-			  /* end: lab126 added */
-#endif
+	uint32_t                     hist_gray_waveform_mode;
+	uint32_t                     ts_pxp;  /*debugging purpose: pxp starting time*/
+	uint32_t                     ts_epdc; /*debugging purpose: EPDC starting time*/
+					      /* end: lab126 added */
 };
 
 /*
@@ -438,16 +476,19 @@ typedef union
 	uint32_t markers[MAX_NUM_PENDING_UPDATES];
 } mxcfb_markers_data;
 
-/* Flag used in MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE. Caller of ioctl MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE
-    can set the first element of the u32 array to this value to query if the command is supported by the FB
-   driver. If supported, the return value will be 0, otherwise, -EINVAL */
+/* Flag used in MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE.
+ * Caller of ioctl MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE
+ * can set the first element of the u32 array to this value to query if the command is supported by the FB driver.
+ * If supported, the return value will be 0, otherwise, -EINVAL
+ */
 
-/*  Expand definition:
-          Return 0 to indicate REAGL_FEATURE_0 is supported
-          MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE is supported and and engne can apply REAGL waveform in case of collision,
-          return 3, indicate REAGL_FEATURE_1 is supported, Number 3 also means 3rd generation platform, Bellatrix, which can do REAGL with collision ,
-          otherwise, -EINVAL
-  */
+/* Expand definition:
+ * - Return 0 to indicate REAGL_FEATURE_0 is supported
+ *   MXCFB_WAIT_FOR_ANY_UPDATE_COMPLETE is supported and and engine can apply REAGL waveform in case of collision,
+ * - Return 3 to indicate REAGL_FEATURE_1 is supported,
+ *   Also means 3rd generation platform, Bellatrix, which can do REAGL with collision,
+ * - Otherwise, -EINVAL
+ */
 #define FLAG_NONE       0x00
 #define FLAG_CHECK      0xffffffff
 #define REAGL_FEATURE_0 0x00
