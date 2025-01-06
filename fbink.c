@@ -2645,7 +2645,7 @@ static int
 		if (deviceQuirks.isKindleBellatrix4) {
 			// Should work properly on Bellatrix4, where we also have proper Y1 support
 			if (waveform_mode == MTK_WAVEFORM_MODE_A2 || waveform_mode == MTK_WAVEFORM_MODE_DU) {
-				update.flags |= MTK_EPDC_FLAG_USE_DITHERING_Y1;    // maps to MDP_DITHER_ALGO_Y8_Y1_S
+				update.flags |= EPDC_FLAG_USE_DITHERING_Y1;    // maps to MDP_DITHER_ALGO_Y8_Y1_S
 			} else {
 				update.flags |= MTK_EPDC_FLAG_USE_DITHERING_Y4;    // maps to MDP_DITHER_ALGO_Y8_Y4_S
 			}
