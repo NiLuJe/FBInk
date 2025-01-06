@@ -559,8 +559,22 @@ int
 	if ((req_bpp == KEEP_CURRENT_BITDEPTH && fbink_state.bpp == 8U) || req_bpp == 8U) {
 		if (want_nm == true) {
 			req_gray = 2U;    // GRAYSCALE_8BIT_INVERTED
+#ifdef FBINK_FOR_KINDLE
+			if (fbink_state.is_mtk && fbink_state.has_color_panel) {
+				if (var_info.grayscale == GRAYSCALE_COLOR) {
+					req_gray = GRAYSCALE_COLOR_NIGHTMODE;
+				}
+			}
+#endif
 		} else if (want_nm == false) {
 			req_gray = 1U;    // GRAYSCALE_8BIT
+#ifdef FBINK_FOR_KINDLE
+			if (fbink_state.is_mtk && fbink_state.has_color_panel) {
+				if (var_info.grayscale == GRAYSCALE_COLOR_NIGHTMODE) {
+					req_gray = GRAYSCALE_COLOR;
+				}
+			}
+#endif
 		} else if (want_nm == TOGGLE_GRAYSCALE) {
 			req_gray = TOGGLE_GRAYSCALE;
 		}
