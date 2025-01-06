@@ -160,6 +160,10 @@ enum mxcfb_dithering_mode
 */
 
 // NOTE: New with Bellatrix4
+// NOTE: MDP_DITHER_ALGO_Y8_Y1_Q, MDP_DITHER_ALGO_Y8_Y1_B & MDP_DITHER_ALGO_Y8_Y1_S
+//       can be used as values for mxcfb_update_data_mtk's dither_mode field,
+//       but dithering is still only toggled via the legacy EPDC_FLAG_USE_DITHERING_Y1 & MTK_EPDC_FLAG_USE_DITHERING_Y4 flags,
+//       and they both default to the appropriate _S variant (i.e., FS), so we have little incentive to play with these manually.
 enum MDP_REAL_DITHER_ALGO
 {
 	MDP_DITHER_ALGO_Y8_Y4_Q = 0x100,
