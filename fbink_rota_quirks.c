@@ -541,6 +541,22 @@ int
 				} else {
 					grayscale = GRAYSCALE_8BIT;
 				}
+#if defined(FBINK_FOR_KINDLE)
+				// Handle CFA properly...
+				if (deviceQuirks.isKindleBellatrix4) {
+					if (vInfo.grayscale == GRAYSCALE_8BIT) {
+						grayscale = GRAYSCALE_8BIT_INVERTED;
+					} else if (vInfo.grayscale == GRAYSCALE_8BIT_INVERTED) {
+						grayscale = GRAYSCALE_8BIT;
+					} else if (vInfo.grayscale == GRAYSCALE_COLOR) {
+						grayscale = GRAYSCALE_COLOR_NIGHTMODE;
+					} else if (vInfo.grayscale == GRAYSCALE_COLOR_NIGHTMODE) {
+						grayscale = GRAYSCALE_COLOR;
+					} else {
+						grayscale = GRAYSCALE_8BIT;
+					}
+				}
+#endif
 			}
 			LOG("Updating grayscale value from %u to %hhu", vInfo.grayscale, grayscale);
 			new_vinfo.grayscale = (uint32_t) grayscale;
