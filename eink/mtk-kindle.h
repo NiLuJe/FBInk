@@ -95,6 +95,7 @@
 #define GRAYSCALE_4BIT_INVERTED 0x4
 */
 // NOTE: Added in Bellatrix4
+// NOTE: See also cfa_gain debug command, defaults to true (i.e., G2)
 #define GRAYSCALE_COLOR           0x0
 #define GRAYSCALE_COLOR_NIGHTMODE 0x3
 
