@@ -2558,7 +2558,7 @@ static int
 	return EXIT_SUCCESS;
 }
 
-// Kindle PaperWhite 5, Basic 4 & Scribe ([PW5<->??)
+// Kindle PaperWhite 5, Basic 4, Scribe, Basic 5, PaperWhite 6, ColorSoft, Scribe 2 ([PW5<->??)
 static int
     refresh_kindle_mtk(int fbfd, const struct mxcfb_rect region, const FBInkConfig* fbink_cfg)
 {
