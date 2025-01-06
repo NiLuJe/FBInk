@@ -561,8 +561,8 @@ int
 			req_gray = 2U;    // GRAYSCALE_8BIT_INVERTED
 #ifdef FBINK_FOR_KINDLE
 			if (fbink_state.is_mtk && fbink_state.has_color_panel) {
-				if (var_info.grayscale == GRAYSCALE_COLOR) {
-					req_gray = GRAYSCALE_COLOR_NIGHTMODE;
+				if (var_info.grayscale == 0U /* GRAYSCALE_COLOR */) {
+					req_gray = 3U;    // GRAYSCALE_COLOR_NIGHTMODE
 				}
 			}
 #endif
@@ -570,8 +570,8 @@ int
 			req_gray = 1U;    // GRAYSCALE_8BIT
 #ifdef FBINK_FOR_KINDLE
 			if (fbink_state.is_mtk && fbink_state.has_color_panel) {
-				if (var_info.grayscale == GRAYSCALE_COLOR_NIGHTMODE) {
-					req_gray = GRAYSCALE_COLOR;
+				if (var_info.grayscale == 3U /* GRAYSCALE_COLOR_NIGHTMODE */) {
+					req_gray = 0U;    // GRAYSCALE_COLOR
 				}
 			}
 #endif
@@ -593,8 +593,17 @@ int
 	// Then bitdepth...
 	if (req_bpp == KEEP_CURRENT_BITDEPTH || fbink_state.bpp == req_bpp) {
 		// Also check that the grayscale flag is sane
+#ifdef FBINK_FOR_KINDLE
+		uint8_t max_sane_8bpp_grayscale = 2U;    // GRAYSCALE_8BIT_INVERTED
+		if (fbink_state.is_mtk && fbink_state.has_color_panel) {
+			max_sane_8bpp_grayscale = 3U;    // GRAYSCALE_COLOR_NIGHTMODE
+		}
+#else
+		const uint8_t max_sane_8bpp_grayscale = 2U;    // GRAYSCALE_8BIT_INVERTED
+#endif
 		if (req_gray == KEEP_CURRENT_GRAYSCALE &&
-		    ((fbink_state.bpp == 8U && (var_info.grayscale == 0U || var_info.grayscale > 2U)) ||
+		    ((fbink_state.bpp == 8U &&
+		      (var_info.grayscale == 0U || var_info.grayscale > max_sane_8bpp_grayscale)) ||
 		     (fbink_state.bpp > 8U && var_info.grayscale != 0U))) {
 			LOG("Current bitdepth is already %ubpp, but the grayscale flag is bogus!", fbink_state.bpp);
 			// Continue, we'll need to flip the grayscale flag properly
