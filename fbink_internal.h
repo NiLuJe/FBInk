@@ -900,7 +900,7 @@ static int dump_region(struct mxcfb_rect* region, FBInkDump* restrict dump);
 #endif
 
 // String utilities, to avoid using strncpy (c.f., string_copying(7)).
-#ifndef FBINK_FOR_LINUX
+#ifdef FBINK_WITH_INPUT
 #	include "fbink_string_utils.h"
 #endif
 
