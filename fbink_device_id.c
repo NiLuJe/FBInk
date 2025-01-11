@@ -355,12 +355,11 @@ static bool
 		case 0X102Eu:
 		case 0X102Du:
 			deviceQuirks.isMTK         = true;
-			deviceQuirks.isKindleBellatrix4 = true;
 			deviceQuirks.hasEclipseWfm = true;
 			deviceQuirks.screenDPI     = 300U;
 			strtcpy(deviceQuirks.deviceName, "Scribe2", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Pisco", sizeof(deviceQuirks.deviceCodename));
-			strtcpy(deviceQuirks.devicePlatform, "Bellatrix4", sizeof(deviceQuirks.devicePlatform));
+			strtcpy(deviceQuirks.devicePlatform, "Bellatrix3", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		case 0xE29u:    // CS
 		case 0xE24u:
