@@ -357,7 +357,7 @@ static bool
 			deviceQuirks.isMTK         = true;
 			deviceQuirks.hasEclipseWfm = true;
 			deviceQuirks.screenDPI     = 300U;
-			strtcpy(deviceQuirks.deviceName, "Scribe2", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceName, "Scribe 2", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Pisco", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Bellatrix3", sizeof(deviceQuirks.devicePlatform));
 			return true;
