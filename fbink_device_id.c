@@ -346,6 +346,21 @@ static bool
 			strtcpy(deviceQuirks.deviceCodename, "Sangria", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Bellatrix4", sizeof(deviceQuirks.devicePlatform));
 			return true;
+		case 0xFA0u:    // KS2
+		case 0xFA1u:
+		case 0xFE5u:
+		case 0xF9Du:
+		case 0xFE4u:
+		case 0xFE3u:
+		case 0x102Eu:
+		case 0x102Du:
+			deviceQuirks.isMTK         = true;
+			deviceQuirks.hasEclipseWfm = true;
+			deviceQuirks.screenDPI     = 300U;
+			strtcpy(deviceQuirks.deviceName, "Scribe 2", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Pisco", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Bellatrix3", sizeof(deviceQuirks.devicePlatform));
+			return true;
 		case 0xE29u:    // CS
 		case 0xE24u:
 		case 0xE2Bu:
