@@ -847,6 +847,11 @@ FBINK_API int fbink_print(int fbfd, const char* restrict string, const FBInkConf
 //       Which leads me to a final, critical warning:
 // NOTE: Don't try to pass non-font files or encrypted/obfuscated font files, because it *will* horribly segfault!
 FBINK_API int fbink_add_ot_font(const char* filename, FONT_STYLE_T style) __attribute__((nonnull));
+
+// Same as fbink_add_ot_font, but loads the font from memory instead of a file.
+// data:		Pointer to the font data in memory.
+FBINK_API int fbink_add_ot_font_from_memory(const unsigned char* data, FONT_STYLE_T style) __attribute__((nonnull));
+
 // Same API and behavior, except that the set of fonts being loaded is tied to this specific FBInkOTConfig instance,
 // instead of being global.
 // In which case, resources MUST be released via fbink_free_ot_fonts_v2()!
@@ -854,6 +859,11 @@ FBINK_API int fbink_add_ot_font(const char* filename, FONT_STYLE_T style) __attr
 //       and for every fbink_add_ot_font_v2(), there must be an fbink_free_ot_fonts_v2()
 //       (for each matching FBInkOTConfig instance).
 FBINK_API int fbink_add_ot_font_v2(const char* filename, FONT_STYLE_T style, FBInkOTConfig* restrict cfg)
+    __attribute__((nonnull));
+
+// Same as fbink_add_ot_font_v2, but loads the font from memory instead of a file.
+// data:		Pointer to the font data in memory.
+FBINK_API int fbink_add_ot_font_from_memory_v2(const unsigned char* data, FONT_STYLE_T style, FBInkOTConfig* restrict cfg)
     __attribute__((nonnull));
 
 // Free all loaded OpenType fonts. You MUST call this when you have finished all OT printing.
