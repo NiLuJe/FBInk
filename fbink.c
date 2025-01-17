@@ -5771,7 +5771,7 @@ int
 #endif    // FBINK_WITH_OPENTYPE
 }
 
-// Load fron from memory. Up to four font styles may be used by FBInk at any given time.
+// Load font from memory. Up to four font styles may be used by FBInk at any given time.
 int
     fbink_add_ot_font_from_memory(const unsigned char* data UNUSED_BY_MINIMAL, FONT_STYLE_T style UNUSED_BY_MINIMAL)
 {
