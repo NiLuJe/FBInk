@@ -5809,7 +5809,7 @@ int
 #endif    // FBINK_WITH_OPENTYPE
 }
 
-// Load font fron from memory. Up to four font styles may be used per FBInkOTConfig instance.
+// Load font from memory. Up to four font styles may be used per FBInkOTConfig instance.
 int fbink_add_ot_font_from_memory_v2(const unsigned char* data UNUSED_BY_MINIMAL, FONT_STYLE_T style UNUSED_BY_MINIMAL, FBInkOTConfig *restrict cfg UNUSED_BY_MINIMAL) {
 #ifdef FBINK_WITH_OPENTYPE
     // Start by allocating an FBInkOTFonts struct, if need be...
