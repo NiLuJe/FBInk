@@ -5626,8 +5626,16 @@ static __attribute__((cold)) const char*
 
 // Load OT fonts fot add_ot_font
 static __attribute__((cold)) int
-    add_ot_font_data(const unsigned char* data, FONT_STYLE_T style, FBInkOTFonts* restrict ot_fonts)
+    	add_ot_font_data(const unsigned char* data, FONT_STYLE_T style, FBInkOTFonts* restrict ot_fonts)
 {
+
+	// Init libunibreak the first time we're called
+	if (!otInit) {
+		init_linebreak();
+		LOG("Initialized libunibreak");
+	}
+	otInit = true;
+
     stbtt_fontinfo* font_info = calloc(1U, sizeof(stbtt_fontinfo));
 	if (!font_info) {
 		PFWARN("Error allocating stbtt_fontinfo struct: %m");
@@ -5710,12 +5718,6 @@ static __attribute__((cold)) int
 	}
 #	endif
 
-	// Init libunibreak the first time we're called
-	if (!otInit) {
-		init_linebreak();
-		LOG("Initialized libunibreak");
-	}
-	otInit = true;
 
 	// Open font from given path, and load into buffer
 	FILE* f                      = fopen(filename, "r" STDIO_CLOEXEC);
