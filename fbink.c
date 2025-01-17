@@ -5624,7 +5624,7 @@ static __attribute__((cold)) const char*
 	}
 }
 
-// Load OT fonts fot add_ot_font
+// Load OT fonts for add_ot_font
 static __attribute__((cold)) int
     	add_ot_font_data(const unsigned char* data, FONT_STYLE_T style, FBInkOTFonts* restrict ot_fonts)
 {
