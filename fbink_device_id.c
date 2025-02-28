@@ -342,7 +342,7 @@ static bool
 			deviceQuirks.isKindleBellatrix4 = true;
 			deviceQuirks.hasEclipseWfm      = true;
 			deviceQuirks.screenDPI          = 300U;
-			strtcpy(deviceQuirks.deviceName, "PaperWhite 5", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceName, "PaperWhite 6", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Sangria", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Bellatrix4", sizeof(deviceQuirks.devicePlatform));
 			return true;
