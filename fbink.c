@@ -5624,7 +5624,87 @@ static __attribute__((cold)) const char*
 	}
 }
 
-// Load OT fonts for fbink_add_ot_font & fbink_add_ot_font_v2
+// Load OT fonts for add_ot_font
+static __attribute__((cold)) int
+    	add_ot_font_data(const unsigned char* data, FONT_STYLE_T style, FBInkOTFonts* restrict ot_fonts)
+{
+
+	// Init libunibreak the first time we're called
+	if (!otInit) {
+		init_linebreak();
+		LOG("Initialized libunibreak");
+	}
+	otInit = true;
+
+    stbtt_fontinfo* font_info = calloc(1U, sizeof(stbtt_fontinfo));
+	if (!font_info) {
+		PFWARN("Error allocating stbtt_fontinfo struct: %m");
+		return ERRCODE(EXIT_FAILURE);
+	}
+	// First, check if we can actually find a recognizable font format in the data...
+	const int fontcount = stbtt_GetNumberOfFonts(data);
+	if (fontcount == 0) {
+		free(font_info);
+		WARN("File doesn't appear to be a valid or supported font");
+		return ERRCODE(EXIT_FAILURE);
+	} else if (fontcount > 1) {
+		LOG("Font file appears to be a font collection containing %d fonts, but we'll only use the first one!",
+		    fontcount);
+	}
+	// Then, get the offset to the first font
+	const int fontoffset = stbtt_GetFontOffsetForIndex(data, 0);
+	if (fontoffset == -1) {
+		free(font_info);
+		WARN("File doesn't appear to contain valid font data at offset %d", fontoffset);
+		return ERRCODE(EXIT_FAILURE);
+	}
+	// And finally, initialize that font
+	// NOTE: We took the long way 'round to try to avoid crashes on invalid data...
+	if (!stbtt_InitFont(font_info, data, fontoffset)) {
+		free(font_info->data);
+		free(font_info);
+		WARN("Error initialising font.");
+		return ERRCODE(EXIT_FAILURE);
+	}
+	// Assign the current font to its appropriate FBInkOTFonts struct member, depending on the style specified by the caller.
+	// NOTE: We make sure we free any previous allocation first!
+	switch (style) {
+		case FNT_REGULAR:
+			if (free_ot_font(&(ot_fonts->otRegular)) == EXIT_SUCCESS) {
+				LOG("Replacing an existing Regular font style!");
+			}
+			ot_fonts->otRegular = font_info;
+			break;
+		case FNT_ITALIC:
+			if (free_ot_font(&(ot_fonts->otItalic)) == EXIT_SUCCESS) {
+				LOG("Replacing an existing Italic font style!");
+			}
+			ot_fonts->otItalic = font_info;
+			break;
+		case FNT_BOLD:
+			if (free_ot_font(&(ot_fonts->otBold)) == EXIT_SUCCESS) {
+				LOG("Replacing an existing Bold font style!");
+			}
+			ot_fonts->otBold = font_info;
+			break;
+		case FNT_BOLD_ITALIC:
+			if (free_ot_font(&(ot_fonts->otBoldItalic)) == EXIT_SUCCESS) {
+				LOG("Replacing an existing Bold Italic font style!");
+			}
+			ot_fonts->otBoldItalic = font_info;
+			break;
+		default:
+			free(font_info->data);
+			free(font_info);
+			WARN("Cannot load font: requested style (%d) is invalid!", style);
+			return ERRCODE(EXIT_FAILURE);
+	}
+
+	ELOG("Font loaded for style '%s'", font_style_to_string(style));
+	return EXIT_SUCCESS;
+}
+
+// Load OT fonts from a file for fbink_add_ot_font & fbink_add_ot_font_v2
 static __attribute__((cold)) int
     add_ot_font(const char* filename, FONT_STYLE_T style, FBInkOTFonts* restrict ot_fonts)
 {
@@ -5638,12 +5718,6 @@ static __attribute__((cold)) int
 	}
 #	endif
 
-	// Init libunibreak the first time we're called
-	if (!otInit) {
-		init_linebreak();
-		LOG("Initialized libunibreak");
-	}
-	otInit = true;
 
 	// Open font from given path, and load into buffer
 	FILE* f                      = fopen(filename, "r" STDIO_CLOEXEC);
@@ -5677,76 +5751,9 @@ static __attribute__((cold)) int
 		}
 		fclose(f);
 	}
-	stbtt_fontinfo* font_info = calloc(1U, sizeof(stbtt_fontinfo));
-	if (!font_info) {
-		PFWARN("Error allocating stbtt_fontinfo struct: %m");
-		free(data);
-		return ERRCODE(EXIT_FAILURE);
-	}
-	// First, check if we can actually find a recognizable font format in the data...
-	const int fontcount = stbtt_GetNumberOfFonts(data);
-	if (fontcount == 0) {
-		free(data);
-		free(font_info);
-		WARN("File `%s` doesn't appear to be a valid or supported font", filename);
-		return ERRCODE(EXIT_FAILURE);
-	} else if (fontcount > 1) {
-		LOG("Font file `%s` appears to be a font collection containing %d fonts, but we'll only use the first one!",
-		    filename,
-		    fontcount);
-	}
-	// Then, get the offset to the first font
-	const int fontoffset = stbtt_GetFontOffsetForIndex(data, 0);
-	if (fontoffset == -1) {
-		free(data);
-		free(font_info);
-		WARN("File `%s` doesn't appear to contain valid font data at offset %d", filename, fontoffset);
-		return ERRCODE(EXIT_FAILURE);
-	}
-	// And finally, initialize that font
-	// NOTE: We took the long way 'round to try to avoid crashes on invalid data...
-	if (!stbtt_InitFont(font_info, data, fontoffset)) {
-		free(font_info->data);
-		free(font_info);
-		WARN("Error initialising font `%s`", filename);
-		return ERRCODE(EXIT_FAILURE);
-	}
-	// Assign the current font to its appropriate FBInkOTFonts struct member, depending on the style specified by the caller.
-	// NOTE: We make sure we free any previous allocation first!
-	switch (style) {
-		case FNT_REGULAR:
-			if (free_ot_font(&(ot_fonts->otRegular)) == EXIT_SUCCESS) {
-				LOG("Replacing an existing Regular font style!");
-			}
-			ot_fonts->otRegular = font_info;
-			break;
-		case FNT_ITALIC:
-			if (free_ot_font(&(ot_fonts->otItalic)) == EXIT_SUCCESS) {
-				LOG("Replacing an existing Italic font style!");
-			}
-			ot_fonts->otItalic = font_info;
-			break;
-		case FNT_BOLD:
-			if (free_ot_font(&(ot_fonts->otBold)) == EXIT_SUCCESS) {
-				LOG("Replacing an existing Bold font style!");
-			}
-			ot_fonts->otBold = font_info;
-			break;
-		case FNT_BOLD_ITALIC:
-			if (free_ot_font(&(ot_fonts->otBoldItalic)) == EXIT_SUCCESS) {
-				LOG("Replacing an existing Bold Italic font style!");
-			}
-			ot_fonts->otBoldItalic = font_info;
-			break;
-		default:
-			free(font_info->data);
-			free(font_info);
-			WARN("Cannot load font `%s`: requested style (%d) is invalid!", filename, style);
-			return ERRCODE(EXIT_FAILURE);
-	}
-
-	ELOG("Font `%s` loaded for style '%s'", filename, font_style_to_string(style));
-	return EXIT_SUCCESS;
+	int result = add_ot_font_data(data, style, ot_fonts);
+	free(data);
+	return result;
 }
 #endif    // FBINK_WITH_OPENTYPE
 
@@ -5761,6 +5768,20 @@ int
 #else
 	WARN("OpenType support is disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
+#endif    // FBINK_WITH_OPENTYPE
+}
+
+// Load font from memory. Up to four font styles may be used by FBInk at any given time.
+int
+    fbink_add_ot_font_from_memory(const unsigned char* data UNUSED_BY_MINIMAL, FONT_STYLE_T style UNUSED_BY_MINIMAL)
+{
+#ifdef FBINK_WITH_OPENTYPE
+    // Legacy variant, using the global otFonts
+    LOG("Loading font data in the global font pool . . .");
+    return add_ot_font_data(data, style, &otFonts);
+#else
+    WARN("OpenType support is disabled in this FBInk build");
+    return ERRCODE(ENOSYS);
 #endif    // FBINK_WITH_OPENTYPE
 }
 
@@ -5785,6 +5806,26 @@ int
 #else
 	WARN("OpenType support is disabled in this FBInk build");
 	return ERRCODE(ENOSYS);
+#endif    // FBINK_WITH_OPENTYPE
+}
+
+// Load font from memory. Up to four font styles may be used per FBInkOTConfig instance.
+int fbink_add_ot_font_from_memory_v2(const unsigned char* data UNUSED_BY_MINIMAL, FONT_STYLE_T style UNUSED_BY_MINIMAL, FBInkOTConfig *restrict cfg UNUSED_BY_MINIMAL) {
+#ifdef FBINK_WITH_OPENTYPE
+    // Start by allocating an FBInkOTFonts struct, if need be...
+    if (!cfg->font) {
+        cfg->font = calloc(1U, sizeof(FBInkOTFonts));
+        if (!cfg->font) {
+            PFWARN("Error allocating FBInkOTFonts struct: %m");
+            return ERRCODE(EXIT_FAILURE);
+        }
+    }
+    // New variant, using a per-FBInkOTConfig instance
+    LOG("Loading font data in a local FBInkOTFonts instance (%p) . . .", cfg->font);
+    return add_ot_font_data(data, style, (FBInkOTFonts*) cfg->font);
+#else
+    WARN("OpenType support is disabled in this FBInk build");
+    return ERRCODE(ENOSYS);
 #endif    // FBINK_WITH_OPENTYPE
 }
 
