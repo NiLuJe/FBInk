@@ -119,7 +119,7 @@ static void identify_cervantes(void);
 // sed -re 's/(^)(.*?)($)/"\2",/g' Kobo_PCB_IDs.txt
 // Double-check w/ ntx_hwconfig -l -s /dev/mmcblk0
 // NOTE: Last updated on 04/21/24, from FW 4.39.22801 (NTX HwConfig v3.8.6.35.307-20230828)
-//       Last checked on 04/21/24 against 4.39.22801
+//       Last checked on 04/21/25 against 4.38.23171 & 4.41.23145
 /*
 static const char* kobo_pcbs[] = {
 	"E60800", "E60810", "E60820",  "E90800", "E90810", "E60830", "E60850", "E50800", "E50810", "E60860",  "E60MT2",
