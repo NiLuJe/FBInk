@@ -526,7 +526,7 @@ FBINK_STATIC_AR_OPTS:=rc
 FBINK_STATIC_NAME:=libfbink.a
 FBINK_PARTIAL_GCC_OPTS:=-r
 FBINK_PARTIAL_NAME:=libfbink.o
-FBINK_PARTIAL_LDFLAGS:=-Wl,--whole-archive -nostdlib
+FBINK_PARTIAL_LDFLAGS:=-Wl,--whole-archive,--no-gc-sections -nostdlib
 # For the standalone libfbink_input variant
 FBINK_INPUT_SHARED_LDFLAGS:=-shared -Wl,-soname,libfbink_input.so.1
 FBINK_INPUT_SHARED_NAME_FILE:=libfbink_input.so.1.0.0
