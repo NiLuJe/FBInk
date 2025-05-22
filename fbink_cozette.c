@@ -1221,4 +1221,3 @@ static const unsigned char*
 		return cozette_block1[0];
 	}
 }
-
