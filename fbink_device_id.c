@@ -342,7 +342,7 @@ static bool
 			deviceQuirks.isKindleBellatrix4 = true;
 			deviceQuirks.hasEclipseWfm      = true;
 			deviceQuirks.screenDPI          = 300U;
-			strtcpy(deviceQuirks.deviceName, "PaperWhite 5", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceName, "PaperWhite 6", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Sangria", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Bellatrix4", sizeof(deviceQuirks.devicePlatform));
 			return true;
@@ -1229,6 +1229,25 @@ static void
 			deviceQuirks.screenDPI                  = 300U;
 			strtcpy(deviceQuirks.deviceName, "Shine Color", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Spa Tolino Colour", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Mark 12", sizeof(deviceQuirks.devicePlatform));
+			break;
+		case DEVICE_KOBO_CLARA_BW_TPV:    // Clara B&W (Spa BW TPV)
+			deviceQuirks.isMTK                      = true;
+			deviceQuirks.hasEclipseWfm              = true;
+			// NOTE: It technically can, but not via update flags, it's a global state.
+			//       You can toggle it via fbink_set_fb_info if need be.
+			deviceQuirks.canHWInvert                = false;
+			// NOTE: Assume it matches the other Clara B&W boards...
+			// Canonical -> native rotation mapping: { UR: 3, CW: 2, UD: 1, CCW: 0 }
+			deviceQuirks.ntxRotaQuirk               = NTX_ROTA_CCW_TOUCH;
+			// {3, 2, 1, 0}
+			deviceQuirks.rotationMap[FB_ROTATE_UR]  = FB_ROTATE_CCW;
+			deviceQuirks.rotationMap[FB_ROTATE_CW]  = FB_ROTATE_UD;
+			deviceQuirks.rotationMap[FB_ROTATE_UD]  = FB_ROTATE_CW;
+			deviceQuirks.rotationMap[FB_ROTATE_CCW] = FB_ROTATE_UR;
+			deviceQuirks.screenDPI                  = 300U;
+			strtcpy(deviceQuirks.deviceName, "Clara B&W", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Spa BW TPV", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Mark 12", sizeof(deviceQuirks.devicePlatform));
 			break;
 		case DEVICE_UNKNOWN:

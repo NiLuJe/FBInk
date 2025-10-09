@@ -135,5 +135,8 @@ with open(data, "r") as f:
 			# Clara Colour (spaColour) [393] (if EPD_Flags.CFA == ON)
 			# Tolino Shine Color (spaTolinoColour) [693] (if Customer == 0x21 && EPD_Flags.CFA == ON)
 			print("391,")
+		elif line.startswith("E60V00"):
+			# Clara BW TPV (spaBWTPV) [395]
+			print("395,")
 		else:
 			print("0,")
