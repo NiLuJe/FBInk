@@ -371,6 +371,8 @@ static bool
 		case 0xE5Bu:
 		case 0xE46u:
 		case 0x10A6u:
+		case 0x10A5u:
+		case 0x11D7u:
 			deviceQuirks.isMTK              = true;
 			deviceQuirks.isKindleBellatrix4 = true;
 			deviceQuirks.hasEclipseWfm      = true;
