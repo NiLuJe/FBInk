@@ -256,6 +256,15 @@ static void
 	if (test_bit(KEY_VOLUMEUP, bitmask_key) && test_bit(KEY_VOLUMEDOWN, bitmask_key)) {
 		dev->type |= INPUT_VOLUME_BUTTONS;
 	}
+
+	// Check for the fancy Kindle "gesture_tap" thingy, which only reports a couple of keys (F6, F7 & F8).
+	// Since those keycodes are horrendously generic, we'll just resort to checking the name...
+	// c.f., https://github.com/koreader/koreader/issues/14461#issuecomment-3408244649)
+	if (dev->type == INPUT_KEY && test_bit(KEY_F7, bitmask_key)) {
+		if (strcmp(dev->name, "gesture_tap") == 0) {
+			dev->type |= INPUT_KINDLE_FRAME_TAP;
+		}
+	}
 }
 
 static int
