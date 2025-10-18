@@ -415,6 +415,8 @@ static __attribute__((cold)) const char*
 			return "SCALED_TABLET";
 		case INPUT_VOLUME_BUTTONS:
 			return "VOLUME_BUTTONS";
+		case INPUT_KINDLE_FRAME_TAP:
+			return "KINDLE_FRAME_TAP";
 		default:
 			return NULL;
 	}
