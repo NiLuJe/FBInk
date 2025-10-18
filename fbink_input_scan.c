@@ -257,6 +257,7 @@ static void
 		dev->type |= INPUT_VOLUME_BUTTONS;
 	}
 
+#	ifdef FBINK_FOR_KINDLE
 	// Check for the fancy Kindle "gesture_tap" thingy, which only reports a couple of keys (F6, F7 & F8).
 	// Since those keycodes are horrendously generic, we'll just resort to checking the name...
 	// c.f., https://github.com/koreader/koreader/issues/14461#issuecomment-3408244649)
@@ -265,6 +266,7 @@ static void
 			dev->type |= INPUT_KINDLE_FRAME_TAP;
 		}
 	}
+#	endif
 }
 
 static int
