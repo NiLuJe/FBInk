@@ -385,6 +385,36 @@ static bool
 			strtcpy(deviceQuirks.deviceCodename, "SeaBreeze", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Bellatrix4", sizeof(deviceQuirks.devicePlatform));
 			return true;
+		case 0x12F0u:    // KS3
+		case 0x12EEu:
+		case 0x12F4u:
+		case 0x11E8u:
+		case 0x11EAu:
+		case 0x10A4u:
+			// TODO: Double-check this!
+			deviceQuirks.isMTK         = true;
+			deviceQuirks.hasEclipseWfm = true;
+			deviceQuirks.screenDPI     = 300U;
+			strtcpy(deviceQuirks.deviceName, "Scribe 3", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Paloma", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Platpa6", sizeof(deviceQuirks.devicePlatform));
+			return true;
+		case 0x13BFu:    // KS CS
+		case 0x12EFu:
+		case 0x12F1u:
+		case 0x11E9u:
+		case 0x11EBu:
+		case 0x10D7u:
+			// TODO: Double-check this!
+			deviceQuirks.isMTK              = true;
+			deviceQuirks.isKindleBellatrix4 = true;
+			deviceQuirks.hasEclipseWfm      = true;
+			deviceQuirks.screenDPI          = 300U;
+			deviceQuirks.hasColorPanel      = true;
+			strtcpy(deviceQuirks.deviceName, "Scribe ColorSoft", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Calvados", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Platcs8", sizeof(deviceQuirks.devicePlatform));
+			return true;
 		case 0x146Cu:    // ??
 		case 0x4FB9u:
 			strtcpy(deviceQuirks.deviceName, "Unknown!", sizeof(deviceQuirks.deviceName));
