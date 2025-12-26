@@ -128,6 +128,7 @@ static bool
 			return true;
 		case 0x16u:    // ??
 		case 0x21u:
+			strtcpy(deviceQuirks.deviceName, "Unknown!", sizeof(deviceQuirks.deviceName));
 			return true;
 		case 0x54u:    // KV
 		case 0x2Au:
@@ -144,6 +145,7 @@ static bool
 		case 0x0Cu:
 		case 0x0Du:
 		case 0x99u:
+			strtcpy(deviceQuirks.deviceName, "Unknown!", sizeof(deviceQuirks.deviceName));
 			return true;
 		case 0xDDu:    // KT2 AUS
 			strtcpy(deviceQuirks.deviceName, "Basic", sizeof(deviceQuirks.deviceName));
@@ -151,6 +153,7 @@ static bool
 			strtcpy(deviceQuirks.devicePlatform, "Wario", sizeof(deviceQuirks.devicePlatform));
 			return true;
 		default:
+			strtcpy(deviceQuirks.deviceName, "Unidentified!", sizeof(deviceQuirks.deviceName));
 			return false;
 	}
 }
@@ -382,8 +385,12 @@ static bool
 			strtcpy(deviceQuirks.deviceCodename, "SeaBreeze", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Bellatrix4", sizeof(deviceQuirks.devicePlatform));
 			return true;
-		default:
+		case 0x146Cu:    // ??
+		case 0x4FB9u:
 			strtcpy(deviceQuirks.deviceName, "Unknown!", sizeof(deviceQuirks.deviceName));
+			return true;
+		default:
+			strtcpy(deviceQuirks.deviceName, "Unidentified!", sizeof(deviceQuirks.deviceName));
 			return false;
 	}
 }
