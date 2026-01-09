@@ -5871,7 +5871,7 @@ void
 {
 	fprintf(
 	    stdout,
-	    "FBINK_VERSION='%s';FBINK_TARGET=%hhu;FBINK_FEATURES=%#x;viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;invertedGrayscale=%d;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isMTK=%d;isSunxi=%d;SunxiHasFBDamage=%d;SunxiForceRota=%d;isKindleLegacy=%d;isKoboNonMT=%d;unreliableWaitFor=%d;canWakeEPDC=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;rotationMap='{ %hhu, %hhu, %hhu, %hhu }';touchSwapAxes=%d;touchMirrorX=%d;touchMirrorY=%d;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;hasEclipseWfm=%d;hasColorPanel=%d;pixelFormat='%s';canWaitForSubmission=%d;",
+	    "FBINK_VERSION='%s';FBINK_TARGET=%hhu;FBINK_FEATURES=%#x;viewWidth=%u;viewHeight=%u;screenWidth=%u;screenHeight=%u;viewHoriOrigin=%hhu;viewVertOrigin=%hhu;viewVertOffset=%hhu;DPI=%hu;BPP=%u;lineLength=%u;invertedGrayscale=%d;FONTW=%hu;FONTH=%hu;FONTSIZE_MULT=%hhu;FONTNAME='%s';glyphWidth=%hhu;glyphHeight=%hhu;MAXCOLS=%hu;MAXROWS=%hu;isPerfectFit=%d;FBID='%s';USER_HZ=%ld;penFGColor=%hhu;penBGColor=%hhu;deviceName='%s';deviceId=%hu;deviceCodename='%s';devicePlatform='%s';isMTK=%d;isSunxi=%d;isTolino=%d;SunxiHasFBDamage=%d;SunxiForceRota=%d;isKindleLegacy=%d;isKoboNonMT=%d;unreliableWaitFor=%d;canWakeEPDC=%d;ntxBootRota=%hhu;ntxRotaQuirk=%hhu;rotationMap='{ %hhu, %hhu, %hhu, %hhu }';touchSwapAxes=%d;touchMirrorX=%d;touchMirrorY=%d;isNTX16bLandscape=%d;currentRota=%u;canRotate=%d;canHWInvert=%d;hasEclipseWfm=%d;hasColorPanel=%d;pixelFormat='%s';canWaitForSubmission=%d;",
 	    fbink_version(),
 	    fbink_target(),
 	    fbink_features(),
@@ -5906,6 +5906,7 @@ void
 	    deviceQuirks.isMTK,
 	    deviceQuirks.isSunxi,
 #if defined(FBINK_FOR_KOBO)
+	    deviceQuirks.isTolino,
 	    sunxiCtx.has_fbdamage,
 	    sunxiCtx.force_rota,
 #else
@@ -5969,6 +5970,7 @@ void
 	fbink_state->is_mtk           = deviceQuirks.isMTK;
 	fbink_state->is_sunxi         = deviceQuirks.isSunxi;
 #if defined(FBINK_FOR_KOBO)
+	fbink_state->is_tolino          = deviceQuirks.isTolino;
 	fbink_state->sunxi_has_fbdamage = sunxiCtx.has_fbdamage;
 	fbink_state->sunxi_force_rota   = sunxiCtx.force_rota;
 #else

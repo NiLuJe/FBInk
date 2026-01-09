@@ -43,6 +43,7 @@ typedef struct
 	bool                isPerfectFit;
 	bool                isMTK;
 	bool                isSunxi;
+	bool                isTolino;
 	bool                isKindleLegacy;
 	bool                isKindlePearlScreen;
 	bool                isKindleZelda;

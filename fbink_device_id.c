@@ -688,6 +688,8 @@ static void
 
 	// Store the device ID...
 	deviceQuirks.deviceId                   = kobo_id;
+	// We're a Kobo unless proven otherwise ;)
+	deviceQuirks.isTolino                   = false;
 	// HW invert should *generally* be safe on Kobo, with a few exceptions...
 	deviceQuirks.canHWInvert                = true;
 	// NOTE: Shaky assumption that almost everything follows the same rotation scheme, with:
@@ -772,6 +774,7 @@ static void
 			strtcpy(deviceQuirks.deviceName, "Shine 2HD", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Shine2", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform));
+			deviceQuirks.isTolino = true;
 			break;
 		case DEVICE_KOBO_TOUCH_2:    // Touch 2.0 (pika)
 			strtcpy(deviceQuirks.deviceName, "Touch 2.0", sizeof(deviceQuirks.deviceName));
@@ -873,6 +876,7 @@ static void
 			strtcpy(deviceQuirks.deviceName, "Tolino Vision", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Vision", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Mark 6", sizeof(deviceQuirks.devicePlatform));
+			deviceQuirks.isTolino = true;
 			break;
 		case DEVICE_KOBO_AURA_SE_R2:    // Aura SE r2 (star)
 			deviceQuirks.isKoboMk7 = true;
@@ -983,6 +987,7 @@ static void
 			strtcpy(deviceQuirks.deviceName, "Vision 5", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Arya", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Mark 7", sizeof(deviceQuirks.devicePlatform));
+			deviceQuirks.isTolino = true;
 			break;
 		case DEVICE_KOBO_NIA:    // Nia (luna)
 			deviceQuirks.isKoboMk7         = true;
@@ -1187,6 +1192,7 @@ static void
 			strtcpy(deviceQuirks.deviceName, "Vision Color", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Monza Tolino", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Mark 13", sizeof(deviceQuirks.devicePlatform));
+			deviceQuirks.isTolino = true;
 			break;
 		case DEVICE_KOBO_CLARA_BW:    // Clara B&W (Spa BW)
 			deviceQuirks.isMTK                      = true;
@@ -1227,6 +1233,7 @@ static void
 			strtcpy(deviceQuirks.deviceName, "Shine B&W", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Spa Tolino BW", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Mark 12", sizeof(deviceQuirks.devicePlatform));
+			deviceQuirks.isTolino = true;
 			break;
 		case DEVICE_KOBO_CLARA_COLOUR:    // Clara Colour (Spa Colour)
 			deviceQuirks.hasColorPanel              = true;
@@ -1267,6 +1274,7 @@ static void
 			strtcpy(deviceQuirks.deviceName, "Shine Color", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Spa Tolino Colour", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Mark 12", sizeof(deviceQuirks.devicePlatform));
+			deviceQuirks.isTolino = true;
 			break;
 		case DEVICE_KOBO_CLARA_BW_TPV:    // Clara B&W (Spa BW TPV)
 			deviceQuirks.isMTK                      = true;
@@ -1301,6 +1309,7 @@ static void
 			strtcpy(deviceQuirks.deviceName, "Shine 2HD", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Tolino", sizeof(deviceQuirks.devicePlatform));
+			deviceQuirks.isTolino = true;
 			break;
 		case DEVICE_MAINLINE_TOLINO_SHINE_3:    // Tolino Shine 3 (Clara HD-ish)
 			deviceQuirks.isKoboMk7 = true;
@@ -1308,12 +1317,14 @@ static void
 			strtcpy(deviceQuirks.deviceName, "Shine 3", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Tolino", sizeof(deviceQuirks.devicePlatform));
+			deviceQuirks.isTolino = true;
 			break;
 		case DEVICE_MAINLINE_TOLINO_VISION:    // Tolino Vision (Aura SE-ish, maybe?)
 			deviceQuirks.screenDPI = 212U;
 			strtcpy(deviceQuirks.deviceName, "Vision", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Tolino", sizeof(deviceQuirks.devicePlatform));
+			deviceQuirks.isTolino = true;
 			break;
 		case DEVICE_MAINLINE_TOLINO_VISION_5:    // Tolino Vision 5 (Libra H2O-ish)
 			deviceQuirks.isKoboMk7    = true;
@@ -1324,6 +1335,7 @@ static void
 			strtcpy(deviceQuirks.deviceName, "Vision 5", sizeof(deviceQuirks.deviceName));
 			strtcpy(deviceQuirks.deviceCodename, "Mainline", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Tolino", sizeof(deviceQuirks.devicePlatform));
+			deviceQuirks.isTolino = true;
 			break;
 		case DEVICE_MAINLINE_GENERIC_IMX5:
 			// Generic fallback for i.MX5 devices on mainline kernels
