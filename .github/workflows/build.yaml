@@ -1,23 +1,102 @@
-name: Build
-on: [push, pull_request]
+name: Build & Release
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  release:
+    types: [created]
+
+permissions:
+  contents: write
 
 jobs:
-  build_fbink:
-    name: fbink
+  build:
+    name: ${{ matrix.platform }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: Kobo
+            toolchain: kobo.tar.gz
+          - platform: Kindle
+            toolchain: kindlepw2.tar.gz
+            make_flags: KINDLE=true
+          - platform: Kindle-HF
+            toolchain: kindlehf.tar.gz
+            make_flags: KINDLE=true
+          - platform: Kindle5
+            toolchain: kindle5.tar.gz
+            make_flags: KINDLE=true
+          - platform: Kindle-Legacy
+            toolchain: kindle.tar.gz
+            make_flags: "KINDLE=true LEGACY=true"
+          - platform: Cervantes
+            toolchain: cervantes.tar.gz
+            make_flags: CERVANTES=true
+          - platform: reMarkable
+            toolchain: remarkable.tar.gz
+            make_flags: REMARKABLE=true
+          - platform: reMarkable-aarch64
+            toolchain: remarkable-aarch64.tar.gz
+            make_flags: REMARKABLE=true
+          - platform: PocketBook
+            toolchain: pocketbook.tar.gz
+            make_flags: POCKETBOOK=true
+          - platform: Linux-x86_64
+            toolchain: ""
+            make_flags: LINUX=true
+
     steps:
-    - name: Download toolchain
-      run: wget -q https://github.com/koreader/koxtoolchain/releases/latest/download/kobo.tar.gz -O - | tar -xzf - -C ~
-    - name: Export toolchain
-      run: echo ~/x-tools/arm-kobo-linux-gnueabihf/bin >> $GITHUB_PATH
-    - name: Checkout
-      uses: actions/checkout@v6
-      with:
-        submodules: recursive
-    - name: Build
-      run: make distclean && make ci CROSS_TC=arm-kobo-linux-gnueabihf
-    - name: Upload release archive
-      uses: actions/upload-artifact@v5
-      with:
-        name: FBInk
-        path: Release/FBInk-*.tar.gz
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Download toolchain
+        if: matrix.toolchain != ''
+        run: |
+          wget -q "https://github.com/koreader/koxtoolchain/releases/latest/download/${{ matrix.toolchain }}" -O - | tar -xzf - -C ~
+          TC_DIR=$(ls "$HOME/x-tools/")
+          echo "$HOME/x-tools/$TC_DIR/bin" >> "$GITHUB_PATH"
+          echo "CROSS_TC=$TC_DIR" >> "$GITHUB_ENV"
+
+      - name: Build (Kobo)
+        if: matrix.platform == 'Kobo'
+        run: make ci CROSS_TC="$CROSS_TC"
+
+      - name: Build
+        if: matrix.platform != 'Kobo'
+        run: |
+          MAKE_ARGS="${{ matrix.make_flags }}"
+          if [ -n "$CROSS_TC" ]; then
+            MAKE_ARGS="$MAKE_ARGS CROSS_TC=$CROSS_TC"
+          fi
+
+          make distclean
+          make fbdepth $MAKE_ARGS
+          mv Release/fbdepth ./fbdepth-bin
+          make clean
+          make strip $MAKE_ARGS
+
+          VERSION=$(git describe 2>/dev/null || git rev-parse --short HEAD)
+          mkdir -p pkg
+          cp Release/fbink pkg/
+          mv fbdepth-bin pkg/fbdepth
+          cp README.md LICENSE CREDITS pkg/
+          mkdir -p Release
+          tar --owner=root --group=root -czf "Release/FBInk-${{ matrix.platform }}-${VERSION}.tar.gz" -C pkg .
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FBInk-${{ matrix.platform }}
+          path: Release/FBInk-*.tar.gz
+
+      - name: Attach to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
+        with:
+          files: Release/FBInk-*.tar.gz
