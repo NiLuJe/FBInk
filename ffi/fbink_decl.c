@@ -16,44 +16,44 @@ cdecl_const(LAST_MARKER)
 
 // Typedefs
 cdecl_type(FONT_INDEX_E)
-cdecl_c99_type(FONT_INDEX_T, uint8_t)
+cdecl_type(FONT_INDEX_T)
 
 cdecl_type(FONT_STYLE_E)
 cdecl_type(FONT_STYLE_T)
 
 cdecl_type(ALIGN_INDEX_E)
-cdecl_c99_type(ALIGN_INDEX_T, uint8_t)
+cdecl_type(ALIGN_INDEX_T)
 cdecl_type(PADDING_INDEX_E)
-cdecl_c99_type(PADDING_INDEX_T, uint8_t)
+cdecl_type(PADDING_INDEX_T)
 
 cdecl_type(FG_COLOR_INDEX_E)
-cdecl_c99_type(FG_COLOR_INDEX_T, uint8_t)
+cdecl_type(FG_COLOR_INDEX_T)
 cdecl_type(BG_COLOR_INDEX_E)
-cdecl_c99_type(BG_COLOR_INDEX_T, uint8_t)
+cdecl_type(BG_COLOR_INDEX_T)
 
 cdecl_type(CERVANTES_DEVICE_ID_E)
 cdecl_type(KOBO_DEVICE_ID_E)
 cdecl_type(MAINLINE_DEVICE_ID_E)
 cdecl_type(REMARKABLE_DEVICE_ID_E)
 cdecl_type(POCKETBOOK_DEVICE_ID_E)
-cdecl_c99_type(DEVICE_ID_T, uint16_t)
+cdecl_type(DEVICE_ID_T)
 cdecl_const(DEVICE_UNKNOWN)
 
 cdecl_type(WFM_MODE_INDEX_E)
-cdecl_c99_type(WFM_MODE_INDEX_T, uint8_t)
+cdecl_type(WFM_MODE_INDEX_T)
 cdecl_type(HW_DITHER_INDEX_E)
-cdecl_c99_type(HW_DITHER_INDEX_T, uint8_t)
+cdecl_type(HW_DITHER_INDEX_T)
 
 cdecl_type(NTX_ROTA_INDEX_E)
-cdecl_c99_type(NTX_ROTA_INDEX_T, uint8_t)
+cdecl_type(NTX_ROTA_INDEX_T)
 
 cdecl_type(SUNXI_FORCE_ROTA_INDEX_E)
-cdecl_c99_type(SUNXI_FORCE_ROTA_INDEX_T, int8_t)
+cdecl_type(SUNXI_FORCE_ROTA_INDEX_T)
 
 cdecl_type(MTK_SWIPE_DIRECTION_INDEX_E)
-cdecl_c99_type(MTK_SWIPE_DIRECTION_INDEX_T, uint8_t)
+cdecl_type(MTK_SWIPE_DIRECTION_INDEX_T)
 cdecl_type(MTK_HALFTONE_MODE_INDEX_E)
-cdecl_c99_type(MTK_HALFTONE_MODE_INDEX_T, int32_t)
+cdecl_type(MTK_HALFTONE_MODE_INDEX_T)
 
 // Config structs
 cdecl_type(FBInkState)

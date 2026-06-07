@@ -14,9 +14,9 @@
 
 // Typedefs
 cdecl_type(INPUT_DEVICE_TYPE_E)
-cdecl_c99_type(INPUT_DEVICE_TYPE_T, uint32_t)
+cdecl_type(INPUT_DEVICE_TYPE_T)
 cdecl_type(INPUT_SETTINGS_TYPE_E)
-cdecl_c99_type(INPUT_SETTINGS_TYPE_T, uint32_t)
+cdecl_type(INPUT_SETTINGS_TYPE_T)
 
 
 // Config structs
