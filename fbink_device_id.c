@@ -1387,13 +1387,16 @@ static void
 	// Get the model from Nickel's version tag file...
 	FILE* fp = fopen("/mnt/onboard/.kobo/version", "re");
 	if (!fp) {
+		// Do log the actual error, in case it's something weird...
+		PFELOG("fopen: %m");
 		ELOG("Couldn't find a Kobo version tag (onboard unmounted or not using Nickel?)!");
 	} else {
 		// NOTE: I'm not entirely sure this will always have a fixed length, so, give ourselves a bit of room...
 		char   line[_POSIX_PATH_MAX] = { 0 };
 		size_t size                  = fread(line, sizeof(*line), sizeof(line) - 1U, fp);
-		fclose(fp);
 		if (size > 0) {
+			fclose(fp);
+
 			// The line/file should not contain a trailing LF, but, just in case...
 			if (line[size - 1U] == '\n') {
 				line[size - 1U] = '\0';
@@ -1410,7 +1413,12 @@ static void
 			//       no need to fall back to DTB identification, it's definitely not mainline.
 			return;
 		} else {
-			WARN("Failed to read the Kobo version tag (%zu)", size);
+			WARN("Failed to read the Kobo version tag (fread: %zu -> error? %s eof? %s)",
+			     size,
+			     ferror(fp) ? "Y" : "N",
+			     feof(fp) ? "Y" : "N");
+			fclose(fp);
+
 			// NOTE: Make it clear we failed to identify the device...
 			//       i.e., by passing DEVICE_INVALID instead of DEVICE_UNKNOWN, which we use to flag old !NTX devices.
 			// NOTE: This codepath can genuinely be reached if you're unlucky enough that a crash

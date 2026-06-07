@@ -110,9 +110,9 @@ static bool     is_kindle_device_new(uint32_t);
 static uint32_t from_base(const char*, uint8_t);
 static char*    to_base(int64_t, uint8_t, size_t);
 static void     identify_kindle(void);
-#        elif defined(FBINK_FOR_CERVANTES)
+#	elif defined(FBINK_FOR_CERVANTES)
 static void identify_cervantes(void);
-#        elif defined(FBINK_FOR_KOBO)
+#	elif defined(FBINK_FOR_KOBO)
 // List of NTX/Kobo PCB IDs... For a given device,
 // what we get in the NTXHWConfig payload @ index KOBO_HWCFG_CPU corresponds to an index in this array.
 // Can thankfully be populated from /bin/ntx_hwconfig with the help of strings -n2 and a bit of sed, i.e.,
@@ -187,16 +187,16 @@ static const char* kobo_disp_busw[] = { "8Bits", "16Bits", "8Bits_mirror", "16Bi
 */
 
 // And for mainline kernels, this is where we poke for device identification
-#                define MAINLINE_DEVICE_ID_SYSFS "/sys/firmware/devicetree/base/compatible"
+#		define MAINLINE_DEVICE_ID_SYSFS "/sys/firmware/devicetree/base/compatible"
 
 static void set_kobo_quirks(unsigned short int);
 static void identify_kobo(void);
 static void identify_mainline(void);
-#        elif defined(FBINK_FOR_REMARKABLE)
+#	elif defined(FBINK_FOR_REMARKABLE)
 static void identify_remarkable(void);
-#        elif defined(FBINK_FOR_POCKETBOOK)
+#	elif defined(FBINK_FOR_POCKETBOOK)
 static void identify_pocketbook(void);
-#        endif    // FBINK_FOR_KINDLE
+#	endif    // FBINK_FOR_KINDLE
 
 static void identify_device(void);
 #endif    // !FBINK_FOR_LINUX

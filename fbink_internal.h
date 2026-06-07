@@ -455,6 +455,9 @@ char (&ARRAY_SIZE_HELPER(T (&array)[N]))[N];
 		}                                                                                                        \
 	})
 
+// Same, but with __PRETTY_FUNCTION__ right before fmt
+#define PFELOG(fmt, ...) ({ ELOG("[%s] " fmt, __PRETTY_FUNCTION__, ##__VA_ARGS__); })
+
 // And a simple wrapper for actual warnings on error codepaths. Should only be used for warnings before a return/exit.
 // Always shown, always tagged, and always ends with a bang.
 #define WARN(fmt, ...)                                                                                                   \

@@ -1683,7 +1683,7 @@ static struct mxcfb_rect
 	// Compute the dimension of the screen region we'll paint to (taking multi-line into account)
 	struct mxcfb_rect region = {
 		.top  = (uint32_t) MAX(0 + (viewVertOrigin - viewVertOffset),
-                                      (((row - multiline_offset) * FONTH) + voffset + viewVertOrigin)),
+				       (((row - multiline_offset) * FONTH) + voffset + viewVertOrigin)),
 		.left = (uint32_t) MAX(0 + viewHoriOrigin, ((col * FONTW) + hoffset + viewHoriOrigin)),
 		.width =
 		    multiline_offset > 0U ? (screenWidth - (uint32_t) (col * FONTW)) : (uint32_t) (charcount * FONTW),
@@ -2852,9 +2852,9 @@ static int
 					    .update_mode   = update_mode,
 					    .update_marker = lastMarker,
 					    .temp          = (waveform_mode == WAVEFORM_MODE_DU) ? 24 : TEMP_USE_AMBIENT,
-					    .flags         = (waveform_mode == WAVEFORM_MODE_REAGLD) ? EPDC_FLAG_USE_AAD
-							     : (waveform_mode == WAVEFORM_MODE_A2) ? EPDC_FLAG_FORCE_MONOCHROME
-												   : 0U,
+					    .flags = (waveform_mode == WAVEFORM_MODE_REAGLD) ? EPDC_FLAG_USE_AAD
+						     : (waveform_mode == WAVEFORM_MODE_A2)   ? EPDC_FLAG_FORCE_MONOCHROME
+											     : 0U,
 					    .alt_buffer_data = { 0U } };
 
 	if (fbink_cfg->is_nightmode && deviceQuirks.canHWInvert) {
@@ -11209,8 +11209,8 @@ static int
 							const uint8_t ainv = img_px.color.a ^ 0xFFu;
 							// Blend it!
 							pixel.gray8        = (uint8_t) DIV255(
-                                                            (((img_px.color.v ^ invert) * img_px.color.a) +
-                                                             (bg_px.gray8 * ainv)));
+							    (((img_px.color.v ^ invert) * img_px.color.a) +
+							     (bg_px.gray8 * ainv)));
 							// SW dithering
 							if (fbink_cfg->sw_dithering) {
 								pixel.gray8 = dither_o8x8(i, j, pixel.gray8);
@@ -11248,7 +11248,7 @@ static int
 						const uint8_t ainv = img_px.color.a ^ 0xFFu;
 						// Blend it!
 						pixel.gray8        = (uint8_t) DIV255((
-                                                    ((img_px.color.v ^ invert) * img_px.color.a) + (bg_px.gray8 * ainv)));
+						    ((img_px.color.v ^ invert) * img_px.color.a) + (bg_px.gray8 * ainv)));
 						// SW dithering
 						if (fbink_cfg->sw_dithering) {
 							pixel.gray8 = dither_o8x8(i, j, pixel.gray8);
@@ -11269,7 +11269,7 @@ static int
 					// NOTE: Again, assume the fb origin is @ (0, 0), which should hold true at that bitdepth.
 					const size_t pix_offset = (size_t) ((j * w) + img_x_off);
 					const size_t fb_offset  = ((uint32_t) (j + y_off) * fInfo.line_length) +
-								 (unsigned int) (img_x_off + x_off);
+								  (unsigned int) (img_x_off + x_off);
 					memcpy(fbPtr + fb_offset, data + pix_offset, max_width);
 				}
 			} else {

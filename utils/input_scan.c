@@ -153,13 +153,13 @@ int
 	//       so we need to do the matching ourselves when we're passed *short* options, hence the sentinel value...
 	int                        opt_index = -1;
 	static const struct option opts[]    = {
-                {       "help",       no_argument, NULL, 'h' },
-                {      "print",       no_argument, NULL, 'p' },
-                {      "match", required_argument, NULL, 'm' },
-                {   "matchall",       no_argument, NULL, 'M' },
-                {    "exclude", required_argument, NULL, 'x' },
-                { "excludeall",       no_argument, NULL, 'X' },
-                {         NULL,                 0, NULL,   0 }
+		{       "help",       no_argument, NULL, 'h' },
+		{      "print",       no_argument, NULL, 'p' },
+		{      "match", required_argument, NULL, 'm' },
+		{   "matchall",       no_argument, NULL, 'M' },
+		{    "exclude", required_argument, NULL, 'x' },
+		{ "excludeall",       no_argument, NULL, 'X' },
+		{         NULL,                 0, NULL,   0 }
 	};
 	enum
 	{
