@@ -1,8 +1,6 @@
 // For use with https://github.com/koreader/ffi-cdecl to re-generate up-to-date FFI declarations ;)
 #include <fbink.h>
 
-#include "ffi-cdecl.h"
-
 // Keep this in the same order as fbink.h
 // Mostly to make it easier to update, but also because Lua can be finicky with the order in which stuff is declared.
 // NOTE: Python's cFFI cdef() function doesn't support attributes (c.f., https://cffi.readthedocs.io/en/latest/cdef.html#ffi-cdef-limitations).
@@ -44,6 +42,9 @@ cdecl_type(WFM_MODE_INDEX_T)
 cdecl_type(HW_DITHER_INDEX_E)
 cdecl_type(HW_DITHER_INDEX_T)
 
+cdecl_type(CFA_MODE_INDEX_E)
+cdecl_type(CFA_MODE_INDEX_T)
+
 cdecl_type(NTX_ROTA_INDEX_E)
 cdecl_type(NTX_ROTA_INDEX_T)
 
@@ -54,6 +55,9 @@ cdecl_type(MTK_SWIPE_DIRECTION_INDEX_E)
 cdecl_type(MTK_SWIPE_DIRECTION_INDEX_T)
 cdecl_type(MTK_HALFTONE_MODE_INDEX_E)
 cdecl_type(MTK_HALFTONE_MODE_INDEX_T)
+
+cdecl_type(FBINK_PXFMT_INDEX_E)
+cdecl_type(FBINK_PXFMT_INDEX_T)
 
 // Config structs
 cdecl_type(FBInkState)
