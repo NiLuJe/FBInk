@@ -44,6 +44,9 @@ cdecl_type(WFM_MODE_INDEX_T)
 cdecl_type(HW_DITHER_INDEX_E)
 cdecl_type(HW_DITHER_INDEX_T)
 
+cdecl_type(CFA_MODE_INDEX_E)
+cdecl_type(CFA_MODE_INDEX_T)
+
 cdecl_type(NTX_ROTA_INDEX_E)
 cdecl_type(NTX_ROTA_INDEX_T)
 
@@ -54,6 +57,9 @@ cdecl_type(MTK_SWIPE_DIRECTION_INDEX_E)
 cdecl_type(MTK_SWIPE_DIRECTION_INDEX_T)
 cdecl_type(MTK_HALFTONE_MODE_INDEX_E)
 cdecl_type(MTK_HALFTONE_MODE_INDEX_T)
+
+cdecl_type(FBINK_PXFMT_INDEX_E)
+cdecl_type(FBINK_PXFMT_INDEX_T)
 
 // Config structs
 cdecl_type(FBInkState)
