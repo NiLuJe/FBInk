@@ -1,8 +1,6 @@
 // For use with https://github.com/koreader/ffi-cdecl to re-generate up-to-date FFI declarations ;)
 #include <fbink.h>
 
-#include "ffi-cdecl.h"
-
 // Keep this in the same order as fbink.h
 // Mostly to make it easier to update, but also because Lua can be finicky with the order in which stuff is declared.
 // NOTE: Python's cFFI cdef() function doesn't support attributes (c.f., https://cffi.readthedocs.io/en/latest/cdef.html#ffi-cdef-limitations).
