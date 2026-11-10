@@ -415,6 +415,24 @@ static bool
 			strtcpy(deviceQuirks.deviceCodename, "Calvados", sizeof(deviceQuirks.deviceCodename));
 			strtcpy(deviceQuirks.devicePlatform, "Platcs8", sizeof(deviceQuirks.devicePlatform));
 			return true;
+		case 0x1726u:    // ColorSoft 2
+		case 0x1727u:
+		case 0x1728u:
+		case 0x1729u:
+		case 0x172Au:
+		case 0x172Bu:
+		case 0x18B9u:
+		case 0x18BAu:
+		case 0x18BBu:
+			deviceQuirks.isMTK              = true;
+			deviceQuirks.isKindleBellatrix4 = true;
+			deviceQuirks.hasEclipseWfm      = true;
+			deviceQuirks.screenDPI          = 300U;
+			deviceQuirks.hasColorPanel      = true;
+			strtcpy(deviceQuirks.deviceName, "ColorSoft 2", sizeof(deviceQuirks.deviceName));
+			strtcpy(deviceQuirks.deviceCodename, "Julep", sizeof(deviceQuirks.deviceCodename));
+			strtcpy(deviceQuirks.devicePlatform, "Platjp5", sizeof(deviceQuirks.devicePlatform));
+			return true;
 		case 0x146Cu:    // ??
 		case 0x4FB9u:
 			strtcpy(deviceQuirks.deviceName, "Unknown!", sizeof(deviceQuirks.deviceName));
