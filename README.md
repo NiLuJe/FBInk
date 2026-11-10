@@ -137,6 +137,7 @@ As for `make input_scan`, it will build a small CLI tool around the `fbink_input
 ## NOTES
 
 Kindle support covers the full Kindle lineup, starting from the K2.
+The 2026 ColorSoft 2 (Platjp5) variants use the MediaTek color refresh path and are detected as 300 DPI color panels.
 
 Kobo support covers the full Kobo lineup, starting from the Kobo Touch A/B/C (NOTE: some features are unavailable on sunxi SoCs, c.f., API docs).
 
