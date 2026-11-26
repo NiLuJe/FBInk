@@ -5913,6 +5913,7 @@ void
 	    sunxiCtx.force_rota,
 #else
 	    false,
+	    false,
 	    FORCE_ROTA_NOTSUP,
 #endif
 	    deviceQuirks.isKindleLegacy,
